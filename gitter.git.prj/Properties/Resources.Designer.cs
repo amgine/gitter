@@ -1800,6 +1800,13 @@ namespace gitter.Git.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap ImgMarkAsResolved {
+            get {
+                object obj = ResourceManager.GetObject("ImgMarkAsResolved", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap ImgMerge {
             get {
                 object obj = ResourceManager.GetObject("ImgMerge", resourceCulture);
@@ -4288,6 +4295,15 @@ namespace gitter.Git.Properties {
         internal static string StrManualStage {
             get {
                 return ResourceManager.GetString("StrManualStage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark as Resolved.
+        /// </summary>
+        internal static string StrMarkAsResolved {
+            get {
+                return ResourceManager.GetString("StrMarkAsResolved", resourceCulture);
             }
         }
         

@@ -56,6 +56,7 @@
 					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.DeleteFile));
 					break;
 				default:
+					Items.Add(GuiItemFactory.GetMarkAsResolvedItem<ToolStripMenuItem>(_file));
 					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.UseOurs));
 					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.UseTheirs));
 					break;

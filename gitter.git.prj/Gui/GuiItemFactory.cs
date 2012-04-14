@@ -2300,6 +2300,22 @@
 
 		#region Working Tree Items
 
+		public static T GetMarkAsResolvedItem<T>(TreeItem treeItem)
+			where T : ToolStripItem, new()
+		{
+			if(treeItem == null) throw new ArgumentNullException("treeItem");
+			if(treeItem.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Working tree item"), "treeItem");
+
+			var item = new T()
+			{
+				Image = CachedResources.Bitmaps["ImgMarkAsResolved"],
+				Text = Resources.StrMarkAsResolved,
+				Tag = treeItem,
+			};
+			item.Click += OnStageClick;
+			return item;
+		}
+
 		public static T GetStageItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
