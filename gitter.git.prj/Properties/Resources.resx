@@ -1896,7 +1896,7 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   </data>
   <data name="TipOrphan" xml:space="preserve">
     <value>The first commit made on this new branch will have no parents and it will be the root of
-a new history totally disconnectedfrom all the other branches and commits.</value>
+a new history totally disconnected from all the other branches and commits.</value>
   </data>
   <data name="StrfVersionRequired" xml:space="preserve">
     <value>v.{0} is required</value>

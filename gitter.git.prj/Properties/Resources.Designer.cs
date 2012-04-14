@@ -6796,7 +6796,7 @@ namespace gitter.Git.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to The first commit made on this new branch will have no parents and it will be the root of
-        ///a new history totally disconnectedfrom all the other branches and commits..
+        ///a new history totally disconnected from all the other branches and commits..
         /// </summary>
         internal static string TipOrphan {
             get {
