@@ -26,7 +26,7 @@
 			_pnlUpdates.Visible = Utility.CheckIfCanLaunchUpdater();
 			_btnUpdate.ShowUACShield();
 
-			_updateChannel = new gitter.Git.GitRepositoryUpdateChannel("git@github.com:amgine/gitter.git");
+			_updateChannel = new gitter.Git.GitRepositoryUpdateChannel("git://github.com/amgine/gitter.git");
 
 			Margin = new Padding(0, 0, 0, 0);
 		}
