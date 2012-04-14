@@ -12,7 +12,7 @@
 
 	public partial class ExceptionDialog : DialogBase
 	{
-		private const string ReportUrl = @"http://sproj.imit.ru:3000/projects/gitter/issues/new";
+		private const string ReportUrl = @"https://github.com/amgine/gitter/issues/new";
 
 		private Exception _exception;
 		private DateTime _date;
