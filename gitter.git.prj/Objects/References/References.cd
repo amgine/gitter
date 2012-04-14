@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="gitter.Git.Reference" Collapsed="true">
+    <Position X="4.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAKIAGAQAAIAAKIAAAAEAkGABAgIAAYAAACAGAAA=</HashCode>
+      <FileName>Objects\References\Reference.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="gitter.Git.Branch" Collapsed="true">
+    <Position X="3.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABARIgAAAAAAAAQIAEAAAAAAQAIAEAAAAA=</HashCode>
+      <FileName>Objects\References\Branch.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gitter.Git.Head" Collapsed="true">
+    <Position X="7.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AiBAAIEAAABgBAAAAIAGAAAAggQAAQIAAAAAAAAAAAA=</HashCode>
+      <FileName>Objects\References\Head.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gitter.Git.Reflog" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="10" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACACAASAAABAABgBCAAAMAQAAAgAAABAAAQAAEAAAAA=</HashCode>
+      <FileName>Objects\References\Reflog.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="gitter.Git.ReflogRecord" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="10" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAQASACAQAAIAEAAAgACAAEEAAAAAEEQEAIAAABCI=</HashCode>
+      <FileName>Objects\References\ReflogRecord.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="gitter.Git.RefsCollection" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="8.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAgAAAAgBBABAAAAAAAAABAACAAFAAAAoAAAgFAAA=</HashCode>
+      <FileName>Objects\References\RefsCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="gitter.Git.RefsHeadsCollection" Collapsed="true">
+    <Position X="0.5" Y="7" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAABAAAgAEAIAQAAAAAEAAECIAAEBAACAgAA=</HashCode>
+      <FileName>Objects\References\RefsHeadsCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gitter.Git.RefsRemotesCollection" Collapsed="true">
+    <Position X="4.25" Y="7" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAABAAAAAAAAAAAAAAAEAAACIAAEAAACAAAA=</HashCode>
+      <FileName>Objects\References\RefsRemotesCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gitter.Git.RefsTagsCollection" Collapsed="true">
+    <Position X="8" Y="7" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAABAAAAAAAAAAAAAAAEAAECIAAAAAAAAAAA=</HashCode>
+      <FileName>Objects\References\RefsTagsCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gitter.Git.RemoteBranch" Collapsed="true">
+    <Position X="1" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAQIAAAAAAAAAAAAEAAAAAAQAIAAAAAAA=</HashCode>
+      <FileName>Objects\References\RemoteBranch.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gitter.Git.Tag" Collapsed="true">
+    <Position X="5.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAIQAAIAAAAAAAAEAAAIAEQAAIAAAAAA=</HashCode>
+      <FileName>Objects\References\Tag.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gitter.Git.GitObjectCollection&lt;TObject, TEventArgs&gt;" Collapsed="true">
+    <Position X="4.25" Y="5.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>ACBAgDFAQAAAAFAACACBkAQABAAAIAQIAABAAAAQAAA=</HashCode>
+      <FileName>Objects\GitObjectCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="gitter.Git.BranchBase" Collapsed="true">
+    <Position X="2.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAQIAAAAAAAEAAAAEAAAIAAQAIAAAAAAA=</HashCode>
+      <FileName>Objects\References\BranchBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="gitter.Git.TagType" Collapsed="true">
+    <Position X="5.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Objects\References\TagType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="gitter.Git.ReferenceType" Collapsed="true">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAECgAAAwAAAAEAAAAAAAAAAAAAhAAIAAQAEAAAA=</HashCode>
+      <FileName>Objects\References\ReferenceType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,15 @@
+
+*.cache
+bin
+obj
+*.suo
+*.user
+*.ncb
+*.sdf
+*.opensdf
+_ReSharper.*
+
+install/*.target.nsi
+install/*.exe
+
+*.prj/*.xml

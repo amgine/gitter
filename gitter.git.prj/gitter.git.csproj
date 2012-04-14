@@ -1,0 +1,1589 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>gitter.Git</RootNamespace>
+    <AssemblyName>gitter.git</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>false</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="AccessLayer\CLI\Commands\Ancillary\Interrogation\blame.cs" />
+    <Compile Include="AccessLayer\CLI\UTF8DefaultAnsiCodepageFallback.cs" />
+    <Compile Include="AccessLayer\Data\SymbolicReferenceData.cs" />
+    <Compile Include="AccessLayer\Parameters\ApplyPatchTo.cs" />
+    <Compile Include="AccessLayer\Parameters\ApplyPatchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Notes\AppendNoteParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryBlameParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\QuerySymbolicReferenceParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Submodule\AddSubmoduleParameters.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Interrogation\cat-file.cs" />
+    <Compile Include="AccessLayer\CLI\GitCommandExecutor.cs" />
+    <Compile Include="AccessLayer\CLI\GitConfigHelper.cs" />
+    <Compile Include="AccessLayer\CLI\GlobalCLI_config.cs" />
+    <Compile Include="AccessLayer\CLI\ICommandExecutor.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCommandExecutor.cs" />
+    <Compile Include="AccessLayer\IGitAccessor.cs" />
+    <Compile Include="AccessLayer\Parameters\Tree\QueryBlobBytesParameters.cs" />
+    <Compile Include="AccessLayer\Data\BranchesData.cs" />
+    <Compile Include="AccessLayer\Data\ReflogRecordData.cs" />
+    <Compile Include="AccessLayer\Data\ReferencesData.cs" />
+    <Compile Include="AccessLayer\Data\RemoteBranchData.cs" />
+    <Compile Include="AccessLayer\Parameters\CloneRepositoryParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\InitRepositoryParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\BaseQueryDiffParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\DereferenceParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\DescribeParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\FormatMergeMessageParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\GarbageCollectParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\MergeParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\CherryPickParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\CheckoutParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryReferencesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryReflogParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\FetchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\AddRemoteParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\AddFilesMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\AddFilesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\CleanFilesMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\CleanFilesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\CommitParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Tag\CreateTagParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Tag\DeleteTagParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\AddConfigValueParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\DeleteConfigSectionParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\BaseConfigParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\DeleteBranchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\CreateBranchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\BranchTrackingMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Tree\CheckoutFileMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Tree\CheckoutFilesParameters.cs" />
+    <Compile Include="AccessLayer\CLI\GitParser.cs" />
+    <Compile Include="AccessLayer\CLI\GitProgress.cs" />
+    <Compile Include="AccessLayer\CLI\GlobalCLI.cs" />
+    <Compile Include="AccessLayer\CLI\BlameParser.cs" />
+    <Compile Include="AccessLayer\CLI\Process\GitAsync.cs" />
+    <Compile Include="AccessLayer\CLI\Process\GitInput.cs" />
+    <Compile Include="AccessLayer\CLI\Process\GitInteractive.cs" />
+    <Compile Include="AccessLayer\CLI\Process\GitOutput.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_errors.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_submodules.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_tree.cs" />
+    <Compile Include="AccessLayer\IIndexAccessor.cs" />
+    <Compile Include="AccessLayer\INotesAccessor.cs" />
+    <Compile Include="AccessLayer\IRemoteAccessor.cs" />
+    <Compile Include="AccessLayer\IBranchAccessor.cs" />
+    <Compile Include="AccessLayer\IConfigAccessor.cs" />
+    <Compile Include="AccessLayer\IStashAccessor.cs" />
+    <Compile Include="AccessLayer\ISubmoduleAccessor.cs" />
+    <Compile Include="AccessLayer\ITagAccessor.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_branch.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_config.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_index.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_notes.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_remote.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_revision.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_stash.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI_tag.cs" />
+    <Compile Include="AccessLayer\ITreeAccessor.cs" />
+    <Compile Include="AccessLayer\CLI\DiffParser.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\QueryBranchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\QueryBranchRestriction.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\BranchQueryMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\QueryBranchesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\RenameBranchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Branch\ResetBranchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\QueryConfigParameterParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\QueryConfigParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\RenameConfigSectionParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\SetConfigValueParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Config\UnsetConfigValueParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Tag\QueryTagParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Tag\QueryTagsParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Tag\VerifyTagsParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\QueryStatusParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\RemoveFilesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\ResetFilesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\RunMergeToolParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\StatusIgnoreSubmodulesMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Index\StatusUntrackedFilesMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Notes\QueryNotesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Tree\QueryTreeContentParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\QueryRemoteParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\QueryRemotesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\RenameRemoteParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\RemoveRemoteParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\QueryRemoteReferencesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\PruneRemoteParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\PullParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\PushMode.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\PushParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Remote\RemoveRemoteReferencesParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\QueryStashTopParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\QueryStashParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\StashApplyParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\StashClearParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\StashDropParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\StashPopParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\StashSaveParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Stash\StashToBranchParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Submodule\SubmoduleUpdateParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\Submodule\SubmoduleUpdateMode.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryRevisionsParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\RevisionQueryOrder.cs" />
+    <Compile Include="AccessLayer\Parameters\RevisionMergesQueryMode.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryRevisionParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryObjectsParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\RevertParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryDiffParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryRevisionDiffParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\ResetParameters.cs" />
+    <Compile Include="AccessLayer\Parameters\RebaseControl.cs" />
+    <Compile Include="AccessLayer\Parameters\RebaseParameters.cs" />
+    <Compile Include="AccessLayer\StandardTools.cs" />
+    <Compile Include="Blame\BaseBlameSource.cs" />
+    <Compile Include="Blame\BlameCommit.cs" />
+    <Compile Include="Blame\BlameFile.cs" />
+    <Compile Include="Blame\BlameHunk.cs" />
+    <Compile Include="Blame\BlameLine.cs" />
+    <Compile Include="Blame\BlameOptions.cs" />
+    <Compile Include="Blame\RevisionFileBlameSource.cs" />
+    <Compile Include="Blame\IBlameSource.cs" />
+    <Compile Include="GitEnvironment.cs" />
+    <Compile Include="GitRepositoryUpdateChannel.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\TreeListBoxMode.cs" />
+    <Compile Include="Gui\Controls\Menus\ConfigurationMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\ReferencesMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\RemotesMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\StashMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Notifications\FetchNotification.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Notifications\FetchNotification.Designer.cs">
+      <DependentUpon>FetchNotification.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\RepositoryExplorer\RepositoryUsersListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryCommitListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryHistoryListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryConfigurationListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerItemBase.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryStashListItem.cs" />
+    <Compile Include="Properties\CachedResources.cs" />
+    <Compile Include="Diff\BaseDiffSource.cs" />
+    <Compile Include="Diff\DiffColumnAction.cs" />
+    <Compile Include="Diff\DiffColumnHeader.cs" />
+    <Compile Include="Diff\DiffSourceType.cs" />
+    <Compile Include="Diff\RevisionChangesDiffSource.cs" />
+    <Compile Include="Diff\RevisionCompareDiffSource.cs" />
+    <Compile Include="Diff\DiffOptions.cs" />
+    <Compile Include="Diff\DiffStats.cs" />
+    <Compile Include="Diff\IndexChangesDiffSource.cs" />
+    <Compile Include="Gui\Controls\BlameViewer\BlameFilePanel.cs" />
+    <Compile Include="Gui\Controls\BlameViewer\BlameViewer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\DiffViewer\DiffFileContextMenuRequestedEventArgs.cs" />
+    <Compile Include="Gui\Controls\FilePanel.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\DateColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\PatchSourceListItem.cs" />
+    <Compile Include="Gui\Controls\Menus\BranchDragDropMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\ConflictedFileMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\DiffFileMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\SubmodulesMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ApplyPatchesDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ApplyPatchesDialog.Designer.cs">
+      <DependentUpon>ApplyPatchesDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ConflictResolutionDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ConflictResolutionDialog.Designer.cs">
+      <DependentUpon>ConflictResolutionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\BlameView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\BlameView.Designer.cs">
+      <DependentUpon>BlameView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\DiffViewer\UntrackedFilesPanel.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\BaseListBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\BoundItemActivatedEventArgs.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\BranchListBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\TreeBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\TagListBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\RemoteBranchListBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\TreeDirectoriesBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\UserListBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\SubmoduleListBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\ReferenceTreeBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Bindings\RemoteListBinding.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\MessageColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\ReferenceListItemBase.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\ReflogRecordListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\RemoteBranchListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\TreeDirectoryListItemType.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\ReflogListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\ReflogRecordMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\RepositoryMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CleanDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CleanDialog.Designer.cs">
+      <DependentUpon>CleanDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\FileListToolTip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\FileStatusIcons.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorer.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryReferencesListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryRemotesListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryRootItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositorySubmodulesListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryWorkingDirectoryListItem.cs" />
+    <Compile Include="Gui\StatusToolTip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\ConfigToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\ReferencesToolbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\HistoryFilterDropDown.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\HistoryFilterDropDown.Designer.cs">
+      <DependentUpon>HistoryFilterDropDown.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\StashToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\DiffToolbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\RemotesToolbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\SubmodulesToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\ReferencesSearchToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\HistorySearchToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\HistoryToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\CommitToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\DiffView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\DiffView.Designer.cs">
+      <DependentUpon>DiffView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\Factories.cs" />
+    <Compile Include="Gui\Views\Guids.cs" />
+    <Compile Include="Gui\Views\HistorySearchOptions.cs" />
+    <Compile Include="Gui\Views\ISearchableView.cs" />
+    <Compile Include="Gui\Views\ReferencesSearchOptions.cs" />
+    <Compile Include="Gui\Views\ReflogView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ReflogView.Designer.cs">
+      <DependentUpon>ReflogView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\SearchOptions.cs" />
+    <Compile Include="Gui\Views\ViewToolBars\SearchToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\TreeToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Log\BaseLogSource.cs" />
+    <Compile Include="Log\LogOptions.cs" />
+    <Compile Include="Log\LogReferenceFilter.cs" />
+    <Compile Include="Log\RepositoryLogSource.cs" />
+    <Compile Include="Log\RevisionLog.cs" />
+    <Compile Include="MsysGitDownloader.cs" />
+    <Compile Include="Objects\ConflictResolution.cs" />
+    <Compile Include="Objects\ConflictType.cs" />
+    <Compile Include="Objects\MergeSide.cs" />
+    <Compile Include="Objects\MergeStrategy.cs" />
+    <Compile Include="Objects\References\BranchBase.cs" />
+    <Compile Include="Objects\References\Head.cs" />
+    <Compile Include="Objects\References\Reference.cs" />
+    <Compile Include="Objects\References\Reflog.cs" />
+    <Compile Include="Objects\References\ReflogRecord.cs" />
+    <Compile Include="Objects\References\RemoteBranch.cs" />
+    <Compile Include="Objects\Features\GitFeature.cs" />
+    <Compile Include="Objects\Features\GitFeatures.cs" />
+    <Compile Include="Gui\Controls\DiffViewer\ChangedFilesPanel.cs" />
+    <Compile Include="Gui\Controls\DiffViewer\DiffViewer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\DiffViewer\FileDiffPanel.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\PathColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\IWorktreeListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\SubmoduleListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\SubmodulesListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\SubmoduleMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddNoteDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddNoteDialog.Designer.cs">
+      <DependentUpon>AddNoteDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddParameterDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddParameterDialog.Designer.cs">
+      <DependentUpon>AddParameterDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\BranchPropertiesDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\BranchPropertiesDialog.Designer.cs">
+      <DependentUpon>BranchPropertiesDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CommitDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CommitDialog.Designer.cs">
+      <DependentUpon>CommitDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ConflictsDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ConflictsDialog.Designer.cs">
+      <DependentUpon>ConflictsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\GitDialogBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CherryPickDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CherryPickDialog.Designer.cs">
+      <DependentUpon>CherryPickDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddSubmoduleDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddSubmoduleDialog.Designer.cs">
+      <DependentUpon>AddSubmoduleDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CloneDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CloneDialog.Designer.cs">
+      <DependentUpon>CloneDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddRemoteDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\AddRemoteDialog.Designer.cs">
+      <DependentUpon>AddRemoteDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\MergeToolDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\MergeToolDialog.Designer.cs">
+      <DependentUpon>MergeToolDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RemotePropertiesDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RemotePropertiesDialog.Designer.cs">
+      <DependentUpon>RemotePropertiesDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RemoveRemoteBranchDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RemoveRemoteBranchDialog.Designer.cs">
+      <DependentUpon>RemoveRemoteBranchDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\StageDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\StageDialog.Designer.cs">
+      <DependentUpon>StageDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\StashSaveDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\StashSaveDialog.Designer.cs">
+      <DependentUpon>StashSaveDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\UserIdentificationDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\UserIdentificationDialog.Designer.cs">
+      <DependentUpon>UserIdentificationDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\VersionCheckDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\VersionCheckDialog.Designer.cs">
+      <DependentUpon>VersionCheckDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\DiffViewer\RevisionHeaderPanel.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\FetchUrlColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\HashColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\ConfigParameterValueColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\EmailColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\PushUrlColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\TreeHashColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\UrlColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\UserColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\DateColumnExtender.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\DateColumnExtender.Designer.cs">
+      <DependentUpon>DateColumnExtender.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\GraphColumnExtender.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\GraphColumnExtender.Designer.cs">
+      <DependentUpon>GraphColumnExtender.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\HashColumnExtender.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\HashColumnExtender.Designer.cs">
+      <DependentUpon>HashColumnExtender.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\SubjectColumnExtender.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\SubjectColumnExtender.Designer.cs">
+      <DependentUpon>SubjectColumnExtender.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\UserColumnExtender.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Extenders\UserColumnExtender.Designer.cs">
+      <DependentUpon>UserColumnExtender.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Items\RevisionPointerListItemBase.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\ComboFileStatusItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\FakeRevisionListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\HookListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\IRevisionGraphListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\IRevisionPointerListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\RemoteReferenceListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\AuthorDateColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\CommitDateColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\ConfigListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Items\ConfigParameterListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\StashedStateListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\RemoteReferencesListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\StashListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\ConfigParameterMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\RemoteBranchMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\RemoteTagMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\RevisionsMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\StagedChangesMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\StagedItemMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\StashedStateMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\UnstagedChangesMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\UnstagedItemMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ComboBoxes\RemotePicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ComboBoxes\RevisionPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Objects\Monitor\RepositoryNotifications.cs" />
+    <Compile Include="Objects\RevisionCache.cs" />
+    <Compile Include="Patch\PatchFromFile.cs" />
+    <Compile Include="Patch\IPatchFile.cs" />
+    <Compile Include="Patch\IPatchSource.cs" />
+    <Compile Include="Patch\PatchFromString.cs" />
+    <Compile Include="RevisionGraph\GraphElementId.cs" />
+    <Compile Include="RevisionGraph\RevisionGraphItemType.cs" />
+    <Compile Include="Gui\Views\ConfigView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ConfigView.Designer.cs">
+      <DependentUpon>ConfigView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\FetchDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\FetchDialog.Designer.cs">
+      <DependentUpon>FetchDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RenameBranchDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RenameBranchDialog.Designer.cs">
+      <DependentUpon>RenameBranchDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CheckoutDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CheckoutDialog.Designer.cs">
+      <DependentUpon>CheckoutDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CreateBranchDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CreateBranchDialog.Designer.cs">
+      <DependentUpon>CreateBranchDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CreateTagDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\CreateTagDialog.Designer.cs">
+      <DependentUpon>CreateTagDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\MergeDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\MergeDialog.Designer.cs">
+      <DependentUpon>MergeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\PushDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\PushDialog.Designer.cs">
+      <DependentUpon>PushDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\Columns\AuthorEmailColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\NameColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\AuthorColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\CommitterColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\CommitterEmailColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\GraphColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Columns\SubjectColumn.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\BranchListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\UserListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\ReferenceGroupListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\RemoteListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\RevisionListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\TagListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\TreeFileListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\TreeDirectoryListItem.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\TreeItemListItem.cs" />
+    <Compile Include="Gui\Views\SubmodulesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\SubmodulesView.Designer.cs">
+      <DependentUpon>SubmodulesView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Diff\Diff.cs" />
+    <Compile Include="Diff\DiffFile.cs" />
+    <Compile Include="Diff\DiffHunk.cs" />
+    <Compile Include="Diff\DiffLine.cs" />
+    <Compile Include="Diff\DiffState.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Ancillary\Interrogation\rev-parse.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Ancillary\Manipulation\mergetool.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Interrogation\ls-remote.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Manipulation\update-index.cs" />
+    <Compile Include="Gui\Views\MaintenanceView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\MaintenanceView.Designer.cs">
+      <DependentUpon>MaintenanceView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\InitDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\InitDialog.Designer.cs">
+      <DependentUpon>InitDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AccessLayer\CLI\Commands\Main\notes.cs" />
+    <Compile Include="GitExceptions.cs" />
+    <Compile Include="AccessLayer\IRepositoryAccessor.cs" />
+    <Compile Include="Integration\Gravatar.cs" />
+    <Compile Include="Integration\IntegrationFeature.cs" />
+    <Compile Include="Integration\IntegrationFeatures.cs" />
+    <Compile Include="Objects\Configuration\ConfigurationFile.cs" />
+    <Compile Include="Objects\Configuration\KnownConfigParameter.cs" />
+    <Compile Include="Objects\Features\VersionFeature.cs" />
+    <Compile Include="Objects\Hooks\Hook.cs" />
+    <Compile Include="Objects\Hooks\HooksCollection.cs" />
+    <Compile Include="Diff\IDiffSource.cs" />
+    <Compile Include="Objects\MergeTool.cs" />
+    <Compile Include="Objects\Notes\Note.cs" />
+    <Compile Include="Objects\Notes\NotesCollection.cs" />
+    <Compile Include="AccessLayer\Data\NoteData.cs" />
+    <Compile Include="Objects\References\RefsCollection.cs" />
+    <Compile Include="Objects\References\RefsHeadsCollection.cs" />
+    <Compile Include="Objects\References\RefsRemotesCollection.cs" />
+    <Compile Include="Objects\References\ReferenceType.cs" />
+    <Compile Include="Objects\Remotes\BaseRemoteReference.cs" />
+    <Compile Include="Objects\Remotes\IRemoteReference.cs" />
+    <Compile Include="AccessLayer\Data\PushResult.cs" />
+    <Compile Include="AccessLayer\Data\PushResultType.cs" />
+    <Compile Include="Objects\Remotes\RemoteRepositoryBranch.cs" />
+    <Compile Include="Objects\Remotes\RemoteReferenceEventArgs.cs" />
+    <Compile Include="AccessLayer\Data\RemoteReferenceData.cs" />
+    <Compile Include="Objects\Remotes\RemoteReferencesCollection.cs" />
+    <Compile Include="Objects\Remotes\RemoteRepositoryTag.cs" />
+    <Compile Include="AccessLayer\Data\RevisionField.cs" />
+    <Compile Include="Objects\GitObjectCollection.cs" />
+    <Compile Include="Objects\RepositoryState.cs" />
+    <Compile Include="Objects\ResetMode.cs" />
+    <Compile Include="Objects\Revision\DynamicRevisionPointer.cs" />
+    <Compile Include="AccessLayer\Parameters\QueryUsersParameters.cs" />
+    <Compile Include="Log\ILogSource.cs" />
+    <Compile Include="Objects\Revision\NowherePointer.cs" />
+    <Compile Include="Objects\References\TagType.cs" />
+    <Compile Include="Objects\Tree\ITreeSource.cs" />
+    <Compile Include="Objects\Tree\TreeItemType.cs" />
+    <Compile Include="Objects\Monitor\Notifications.cs" />
+    <Compile Include="Objects\Monitor\RepositoryMonitor.cs" />
+    <Compile Include="AccessLayer\Data\BlobData.cs" />
+    <Compile Include="AccessLayer\Data\StatusData.cs" />
+    <Compile Include="AccessLayer\Data\TreeContentData.cs" />
+    <Compile Include="Objects\Tree\TreeContentType.cs" />
+    <Compile Include="AccessLayer\Data\TreeData.cs" />
+    <Compile Include="AccessLayer\Data\TreeFileData.cs" />
+    <Compile Include="AccessLayer\Data\TreeDirectoryData.cs" />
+    <Compile Include="AccessLayer\Data\TreeItemData.cs" />
+    <Compile Include="Options\ConfigurationPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\ConfigurationPage.Designer.cs">
+      <DependentUpon>ConfigurationPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\GitOptionsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\GitOptionsPage.Designer.cs">
+      <DependentUpon>GitOptionsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GitUtility.cs" />
+    <Compile Include="Gui\GuiItemTemplate.cs" />
+    <Compile Include="AccessLayer\Data\BranchData.cs" />
+    <Compile Include="AccessLayer\Data\UserData.cs" />
+    <Compile Include="Objects\Users\UsersCollection.cs" />
+    <Compile Include="Objects\Configuration\ConfigParameter.cs" />
+    <Compile Include="AccessLayer\Data\ConfigParameterData.cs" />
+    <Compile Include="Objects\Configuration\ConfigParametersCollection.cs" />
+    <Compile Include="AccessLayer\CLI\RepositoryCLI.cs" />
+    <Compile Include="GitConstants.cs" />
+    <Compile Include="AccessLayer\Data\RemoteData.cs" />
+    <Compile Include="Objects\Remotes\RemotesCollection.cs" />
+    <Compile Include="Objects\Revision\RevisionPointerExtensions.cs" />
+    <Compile Include="AccessLayer\Data\RevisionData.cs" />
+    <Compile Include="Objects\Stash\StashedStatesCollection.cs" />
+    <Compile Include="Gui\Dialogs\RemoteReferencesDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RemoteReferencesDialog.Designer.cs">
+      <DependentUpon>RemoteReferencesDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RenameRemoteDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RenameRemoteDialog.Designer.cs">
+      <DependentUpon>RenameRemoteDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AccessLayer\Data\StashedStateData.cs" />
+    <Compile Include="Objects\Submodules\Submodule.cs" />
+    <Compile Include="AccessLayer\Data\SubmoduleData.cs" />
+    <Compile Include="Objects\Submodules\SubmodulesCollection.cs" />
+    <Compile Include="AccessLayer\Data\TagData.cs" />
+    <Compile Include="Objects\References\RefsTagsCollection.cs" />
+    <Compile Include="Objects\Tree\TreeFile.cs" />
+    <Compile Include="Objects\Tree\TreeDirectory.cs" />
+    <Compile Include="Objects\Tree\TreeItem.cs" />
+    <Compile Include="Options\IntegrationOptionsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\IntegrationOptionsPage.Designer.cs">
+      <DependentUpon>IntegrationOptionsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RepositoryProvider.cs" />
+    <Compile Include="Gui\ColorScheme.cs" />
+    <Compile Include="Gui\GlobalBehavior.cs" />
+    <Compile Include="Gui\GuiItemFactory.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\ColumnId.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\UsersListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\ReferencesListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\RemoteListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\RevisionListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\ListBoxes\TreeListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\BranchMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\UserMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\RemoteMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\RevisionMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Controls\Menus\TagMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\UsersView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\UsersView.Designer.cs">
+      <DependentUpon>UsersView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\CommitView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\CommitView.Designer.cs">
+      <DependentUpon>CommitView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\GitViewBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\HistoryView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\HistoryView.Designer.cs">
+      <DependentUpon>HistoryView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\ReferencesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ReferencesView.Designer.cs">
+      <DependentUpon>ReferencesView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\RemotesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\RemotesView.Designer.cs">
+      <DependentUpon>RemotesView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\TreeView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\TreeView.Designer.cs">
+      <DependentUpon>TreeView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AccessLayer\CLI\Process\GitProcess.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Ancillary\Manipulation\config.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Ancillary\Manipulation\prune.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Ancillary\Manipulation\remote.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Command.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\CommandArgument.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Interrogation\diff-index.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Interrogation\ls-files.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Interrogation\ls-tree.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Interrogation\show-ref.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Low-Level\Manipulation\apply.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\add.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\am.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\archive.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\bisect.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\branch.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\bundle.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\checkout.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\cherry-pick.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\clean.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\clone.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\commit.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\describe.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\diff.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\fetch.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\format-patch.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\gc.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\grep.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\init.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\log.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\merge.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\mv.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\pull.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\push.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\rebase.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\reset.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\revert.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\rm.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\shortlog.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\show.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\stash.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\status.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\submodule.cs" />
+    <Compile Include="AccessLayer\CLI\Commands\Main\tag.cs" />
+    <Compile Include="Gui\Views\GitView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\GitView.Designer.cs">
+      <DependentUpon>GitView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\GuiProvider.cs" />
+    <Compile Include="Gui\Menus.cs" />
+    <Compile Include="Gui\ViewFactoriesCollection.cs" />
+    <Compile Include="Gui\Statusbar.cs" />
+    <Compile Include="Gui\MainToolbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Objects\BaseObjects.cs" />
+    <Compile Include="Objects\References\Branch.cs" />
+    <Compile Include="Objects\Users\User.cs" />
+    <Compile Include="Objects\Enums.cs" />
+    <Compile Include="Objects\EventArgs.cs" />
+    <Compile Include="Objects\IRevisionPointer.cs" />
+    <Compile Include="Objects\Revision\StaticRevisionPointer.cs" />
+    <Compile Include="Objects\Stash\StashedState.cs" />
+    <Compile Include="Gui\Dialogs\SelectResetModeDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\SelectResetModeDialog.Designer.cs">
+      <DependentUpon>SelectResetModeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ResolveCheckoutDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\ResolveCheckoutDialog.Designer.cs">
+      <DependentUpon>ResolveCheckoutDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Objects\Tree\Status.cs" />
+    <Compile Include="Gui\Dialogs\RevertDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RevertDialog.Designer.cs">
+      <DependentUpon>RevertDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RebaseDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\RebaseDialog.Designer.cs">
+      <DependentUpon>RebaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\PullDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\PullDialog.Designer.cs">
+      <DependentUpon>PullDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Objects\Remotes\Remote.cs" />
+    <Compile Include="Objects\Repository.cs" />
+    <Compile Include="Objects\Revision\Revision.cs" />
+    <Compile Include="Objects\References\Tag.cs" />
+    <Compile Include="Objects\Tree\Tree.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RevisionGraph\DefaultGraphBuilder.cs" />
+    <Compile Include="RevisionGraph\DefaultGraphStyle.cs" />
+    <Compile Include="RevisionGraph\GraphAtom.cs" />
+    <Compile Include="RevisionGraph\GraphColorProvider.cs" />
+    <Compile Include="RevisionGraph\GraphColors.cs" />
+    <Compile Include="RevisionGraph\GraphElement.cs" />
+    <Compile Include="RevisionGraph\IGraphBuilder.cs" />
+    <Compile Include="RevisionGraph\IGraphColorProvider.cs" />
+    <Compile Include="RevisionGraph\IGraphStyle.cs" />
+    <Compile Include="Gui\Views\StashView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\StashView.Designer.cs">
+      <DependentUpon>StashView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Dialogs\StashToBranchDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Dialogs\StashToBranchDialog.Designer.cs">
+      <DependentUpon>StashToBranchDialog.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Gui\Dialogs\AddNoteDialog.resx">
+      <DependentUpon>AddNoteDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\AddParameterDialog.resx">
+      <DependentUpon>AddParameterDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\AddRemoteDialog.resx">
+      <DependentUpon>AddRemoteDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\AddSubmoduleDialog.resx">
+      <DependentUpon>AddSubmoduleDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\ApplyPatchesDialog.resx">
+      <DependentUpon>ApplyPatchesDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\CheckoutDialog.resx">
+      <DependentUpon>CheckoutDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\CherryPickDialog.resx">
+      <DependentUpon>CherryPickDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\CloneDialog.resx">
+      <DependentUpon>CloneDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\CommitDialog.resx">
+      <DependentUpon>CommitDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\ConflictResolutionDialog.resx">
+      <DependentUpon>ConflictResolutionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\ConflictsDialog.resx">
+      <DependentUpon>ConflictsDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\CleanDialog.resx">
+      <DependentUpon>CleanDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\CreateBranchDialog.resx">
+      <DependentUpon>CreateBranchDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\CreateTagDialog.resx">
+      <DependentUpon>CreateTagDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\FetchDialog.resx">
+      <DependentUpon>FetchDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\InitDialog.resx">
+      <DependentUpon>InitDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\MergeDialog.resx">
+      <DependentUpon>MergeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\MergeToolDialog.resx">
+      <DependentUpon>MergeToolDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\PushDialog.resx">
+      <DependentUpon>PushDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\RemotePropertiesDialog.resx">
+      <DependentUpon>RemotePropertiesDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\RemoteReferencesDialog.resx">
+      <DependentUpon>RemoteReferencesDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\RemoveRemoteBranchDialog.resx">
+      <DependentUpon>RemoveRemoteBranchDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\RenameBranchDialog.resx">
+      <DependentUpon>RenameBranchDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\RenameRemoteDialog.resx">
+      <DependentUpon>RenameRemoteDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\ResolveCheckoutDialog.resx">
+      <DependentUpon>ResolveCheckoutDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\RevertDialog.resx">
+      <DependentUpon>RevertDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\SelectResetModeDialog.resx">
+      <DependentUpon>SelectResetModeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\StageDialog.resx">
+      <DependentUpon>StageDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\StashSaveDialog.resx">
+      <DependentUpon>StashSaveDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\StashToBranchDialog.resx">
+      <DependentUpon>StashToBranchDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\UserIdentificationDialog.resx">
+      <DependentUpon>UserIdentificationDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Dialogs\VersionCheckDialog.resx">
+      <DependentUpon>VersionCheckDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Controls\ListBoxes\Extenders\DateColumnExtender.resx">
+      <DependentUpon>DateColumnExtender.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Controls\ListBoxes\Extenders\GraphColumnExtender.resx">
+      <DependentUpon>GraphColumnExtender.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Controls\ListBoxes\Extenders\HashColumnExtender.resx">
+      <DependentUpon>HashColumnExtender.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Controls\ListBoxes\Extenders\SubjectColumnExtender.resx">
+      <DependentUpon>SubjectColumnExtender.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Controls\ListBoxes\Extenders\UserColumnExtender.resx">
+      <DependentUpon>UserColumnExtender.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Notifications\FetchNotification.resx">
+      <DependentUpon>FetchNotification.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\BlameView.resx">
+      <DependentUpon>BlameView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\DiffView.resx">
+      <DependentUpon>DiffView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\ReflogView.resx">
+      <DependentUpon>ReflogView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\SubmodulesView.resx">
+      <DependentUpon>SubmodulesView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\ViewToolBars\HistoryFilterDropDown.resx">
+      <DependentUpon>HistoryFilterDropDown.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\UsersView.resx">
+      <DependentUpon>UsersView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\CommitView.resx">
+      <DependentUpon>CommitView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\ConfigView.resx">
+      <DependentUpon>ConfigView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\GitView.resx">
+      <DependentUpon>GitView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\HistoryView.resx">
+      <DependentUpon>HistoryView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\ReferencesView.resx">
+      <DependentUpon>ReferencesView.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\RemotesView.resx">
+      <DependentUpon>RemotesView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\StashView.resx">
+      <DependentUpon>StashView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\TreeView.resx">
+      <DependentUpon>TreeView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\ConfigurationPage.resx">
+      <DependentUpon>ConfigurationPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\GitOptionsPage.resx">
+      <DependentUpon>GitOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\IntegrationOptionsPage.resx">
+      <DependentUpon>IntegrationOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\common\key.snk">
+      <Link>Properties\key.snk</Link>
+    </None>
+    <None Include="AccessLayer\AccessLayer.cd" />
+    <None Include="Objects\References\References.cd" />
+    <None Include="Resources\branch.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\branchremote.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fetch.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\git.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\history.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_cancel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_conflict.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_del.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_ok.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pull.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\push.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tag.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tagadd.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tagdel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\users.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\clean.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\compress.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\graph.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\graph-children.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\lines-added.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\lines-removed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\merge.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\module.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\module-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stash.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stash-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stash-remove.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\terminal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\commit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\revert.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\repository-clone.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\remote.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\checkout.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\reset.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\module-del.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\branch-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\branch-del.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\branchremote-del.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\align-to-graph.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mail.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cherry-pick.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ui-split-panel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ui-split-panel-vertical.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\minus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\plus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\diff.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\binary.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ui-panel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\branch-rename.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\exclamation-shield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stage-all.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\unstage-all.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\less-context.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\more-context.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\remote-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\remote-remove.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-tree.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\user.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\config.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\config-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\config-edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\config-remove.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\clipboard-sign.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\file-delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\file-revert.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\file-stage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\file-unstage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-stage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-unstage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\unstage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\remote-rename.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\overlay-add-staged.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\overlay-del-staged.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\overlay-edit-staged.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stash-apply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stash-pop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\document.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\branch-properties.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\remote-properties.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ImgWarning48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ImgInfo48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sticky-note.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sticky-note--minus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sticky-note--pencil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sticky-note--plus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\repository-init.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\patch-apply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\patch-save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tag-annotated.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\gravatar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\vew-reflog-remote.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\view-reflog-local.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refs-heads.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refs-remotes.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refs-tags.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\submodules.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\remotes.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\configuration.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\search-next.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\search-prevous.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\search-close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder_up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\clear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stash-save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stash-clear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tick-circle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mail-send.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\rebase-abort.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\rebase-continue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\rebase-skip.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\gc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_rename.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ovl_chmod.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\blame.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sort-date.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\node.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\funnel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\patch.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,484 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StrApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="StrCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="StrOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ImgIntermediate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\intermediate.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgMinus" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\minus.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgMinusHovered" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\minus_hovered.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgPlus" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\plus.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgPlusHovered" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\plus_hovered.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgChecked" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\checked.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgUnchecked" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\unchecked.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgCheckedHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\checked_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgIntermediateHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\intermediate_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgUncheckedHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\unchecked_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgAction" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\action.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgActionHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\action_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgColumnExtender" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\column_extender.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgChevronCollapse" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\chevron.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgChevronCollapseHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\chevron-hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgChevronExpand" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\chevron-expand.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgChevronExpandHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\chevron-expand-hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoApplication" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\application.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoApplicationTerminal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\application-terminal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocument" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentAccess" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-access.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentBinary" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-binary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-code.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentExcel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-excel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentExcelCsv" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-excel-csv.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentFilm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-film.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentFlashMovie" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-flash-movie.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentGlobe" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-globe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentImage" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentMusic" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-music.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentOffice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-office.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentOutlook" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-outlook.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentPdf" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-pdf.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentPhotoshop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-photoshop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentPhp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-php.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentPowerpoint" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-powerpoint.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentText" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-text.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentVisualStudio" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-visual-studio.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentWord" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-word.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoDocumentXaml" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\document-xaml.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="StrOptions" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="StrAddColon" xml:space="preserve">
+    <value>{0}:</value>
+  </data>
+  <data name="StrAddComma" xml:space="preserve">
+    <value>{0},</value>
+  </data>
+  <data name="StrAddEllipsis" xml:space="preserve">
+    <value>{0}...</value>
+  </data>
+  <data name="StrAddPeriod" xml:space="preserve">
+    <value>{0}.</value>
+  </data>
+  <data name="StrSurroundWithDoubleQuotes" xml:space="preserve">
+    <value>"{0}"</value>
+  </data>
+  <data name="StrSurroundWithSingleQuotes" xml:space="preserve">
+    <value>'{0}'</value>
+  </data>
+  <data name="StrAbort" xml:space="preserve">
+    <value>Abort</value>
+  </data>
+  <data name="StrIgnore" xml:space="preserve">
+    <value>Ignore</value>
+  </data>
+  <data name="StrNo" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="StrYes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="StrRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="StrFonts" xml:space="preserve">
+    <value>Fonts</value>
+  </data>
+  <data name="StrAntiAlias" xml:space="preserve">
+    <value>AntiAlias</value>
+  </data>
+  <data name="StrClearType" xml:space="preserve">
+    <value>ClearType</value>
+  </data>
+  <data name="StrContrast" xml:space="preserve">
+    <value>Contrast</value>
+  </data>
+  <data name="StrFamily" xml:space="preserve">
+    <value>Family</value>
+  </data>
+  <data name="StrInputFont" xml:space="preserve">
+    <value>Input Font</value>
+  </data>
+  <data name="StrRenderingOptions" xml:space="preserve">
+    <value>Rendering Options</value>
+  </data>
+  <data name="StrRenderingQuality" xml:space="preserve">
+    <value>Rendering Quality</value>
+  </data>
+  <data name="StrSample" xml:space="preserve">
+    <value>Sample</value>
+  </data>
+  <data name="StrSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="StrSystemDefault" xml:space="preserve">
+    <value>System Default</value>
+  </data>
+  <data name="StrUIFont" xml:space="preserve">
+    <value>UI Font</value>
+  </data>
+  <data name="StrViewerFont" xml:space="preserve">
+    <value>Text Viewer Font</value>
+  </data>
+  <data name="StrAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="StrColors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="StrFont" xml:space="preserve">
+    <value>Font</value>
+  </data>
+  <data name="StrBold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="StrItalic" xml:space="preserve">
+    <value>Italic</value>
+  </data>
+  <data name="StrStrikeout" xml:space="preserve">
+    <value>Strikeout</value>
+  </data>
+  <data name="StrStyle" xml:space="preserve">
+    <value>Style</value>
+  </data>
+  <data name="StrUnderline" xml:space="preserve">
+    <value>Underline</value>
+  </data>
+  <data name="StrColumns" xml:space="preserve">
+    <value>Columns</value>
+  </data>
+  <data name="StrDown" xml:space="preserve">
+    <value>Down</value>
+  </data>
+  <data name="StrHide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="StrShow" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="StrUp" xml:space="preserve">
+    <value>Up</value>
+  </data>
+  <data name="StrVisibleColumns" xml:space="preserve">
+    <value>Visible Columns</value>
+  </data>
+  <data name="StrCopyToClipboard" xml:space="preserve">
+    <value>Copy to Clipboard</value>
+  </data>
+  <data name="StrSendBugreport" xml:space="preserve">
+    <value>Send Bugreport</value>
+  </data>
+  <data name="StrStack" xml:space="preserve">
+    <value>Stack</value>
+  </data>
+  <data name="StrClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="StrError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="StrBehavior" xml:space="preserve">
+    <value>Behavior</value>
+  </data>
+  <data name="ErrFailedToRunElevatedProcess" xml:space="preserve">
+    <value>Unable to execute some actions</value>
+  </data>
+  <data name="ErrSomeOptionsCouldNotBeApplied" xml:space="preserve">
+    <value>Some options could not be applied because gitter was uable to start an elevated process.</value>
+  </data>
+  <data name="StrSpelling" xml:space="preserve">
+    <value>Spell Checking</value>
+  </data>
+  <data name="ImgToolHostClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cross-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgToolHostMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\arrow-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgToolHostPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pin-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgTabMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\tab-menu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgTabMenuExtends" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\tab-menu-extends.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgTabScrollLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\tab-scroll-left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgTabScrollRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\tab-scroll-right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrException" xml:space="preserve">
+    <value>Exception</value>
+  </data>
+  <data name="StrLog" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="StrMessage" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="StrTimestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="StrType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="ImgLog" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\log.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgLogDebug" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\system-monitor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgLogError" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cross-circle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgLogInfo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\information-frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgLogWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\exclamation--frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrSource" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="ImgMaximize" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\maximize.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgNormalize" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\normalize.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgMenuCheck" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ImgMenuCheck.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgWebBrowser" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\globe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrWebBrowser" xml:space="preserve">
+    <value>Web Browser</value>
+  </data>
+  <data name="StrBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="StrForward" xml:space="preserve">
+    <value>Forward</value>
+  </data>
+  <data name="StrRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="StrStop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="ImgGoBack" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\arrow-curve-180-left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgGoForward" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\arrow-curve-000-left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+</root>

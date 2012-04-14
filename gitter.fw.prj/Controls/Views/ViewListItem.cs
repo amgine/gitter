@@ -1,0 +1,47 @@
+﻿namespace gitter.Framework.Controls
+{
+	using System;
+	using System.Drawing;
+	using System.Windows.Forms;
+
+	public class ViewListItem : CustomListBoxItem<IViewFactory>
+	{
+		#region .ctor
+
+		/// <summary>Initializes a new instance of the <see cref="ViewListItem"/> class.</summary>
+		/// <param name="toolFactory">The tool factory.</param>
+		public ViewListItem(IViewFactory toolFactory)
+			: base(toolFactory)
+		{
+			if(toolFactory == null) throw new ArgumentNullException("toolFactory");
+		}
+
+		#endregion
+
+		/// <summary>Measures part of this item.</summary>
+		/// <param name="measureEventArgs">Measure event args.</param>
+		/// <returns>Subitem size.</returns>
+		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		{
+			switch(measureEventArgs.SubItemId)
+			{
+				case 0:
+					return measureEventArgs.MeasureImageAndText(Data.Image, Data.Name);
+				default:
+					return Size.Empty;
+			}
+		}
+
+		/// <summary>Paints part of this item.</summary>
+		/// <param name="paintEventArgs">Paint event args.</param>
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+			switch(paintEventArgs.SubItemId)
+			{
+				case 0:
+					paintEventArgs.PaintImageAndText(Data.Image, Data.Name);
+					break;
+			}
+		}
+	}
+}

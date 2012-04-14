@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5E2FBE20-2DB0-4713-94B3-FD8E4020C33D}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>gitter</RootNamespace>
+    <AssemblyName>gitter</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>false</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>gitter.Program</StartupObject>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj">
+      <Project>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</Project>
+      <Name>gitter.git</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\gitter.redmine.prj\gitter.redmine.csproj">
+      <Project>{122AA8B0-795B-4DD8-8650-11675D946F3E}</Project>
+      <Name>gitter.redmine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Controls\Dialogs\AddIssueTrackerDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Dialogs\AddIssueTrackerDialog.Designer.cs">
+      <DependentUpon>AddIssueTrackerDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ComboBoxes\IssueTrackerPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ListBoxes\IssueTrackerListItem.cs" />
+    <Compile Include="Properties\CachedResources.cs" />
+    <Compile Include="Controls\Dialogs\AboutDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Dialogs\AboutDialog.Designer.cs">
+      <DependentUpon>AboutDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Dialogs\AddRepositoryDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Dialogs\AddRepositoryDialog.Designer.cs">
+      <DependentUpon>AddRepositoryDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\LinkButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\LinkButton.Designer.cs">
+      <DependentUpon>LinkButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ListBoxes\RecentRepositoriesListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ListBoxes\LocalRepositoriesListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ListBoxes\RepositoryListItem.cs" />
+    <Compile Include="Controls\ListBoxes\RepositoryExplorerListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ListBoxes\RepositoryRootItem.cs" />
+    <Compile Include="Controls\Views\Factories.cs" />
+    <Compile Include="Controls\Views\Guids.cs" />
+    <Compile Include="Controls\Views\StartPageView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Views\StartPageView.Designer.cs">
+      <DependentUpon>StartPageView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Views\RepositoryExplorerView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Views\RepositoryExplorerView.Designer.cs">
+      <DependentUpon>RepositoryExplorerView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GuiItemFactory.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controls\ListBoxes\RepositoryMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="Controls\Dialogs\AddIssueTrackerDialog.resx">
+      <DependentUpon>AddIssueTrackerDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Dialogs\AboutDialog.resx">
+      <DependentUpon>AboutDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Dialogs\AddRepositoryDialog.resx">
+      <DependentUpon>AddRepositoryDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\LinkButton.resx">
+      <DependentUpon>LinkButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Views\StartPageView.resx">
+      <DependentUpon>StartPageView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Views\RepositoryExplorerView.resx">
+      <DependentUpon>RepositoryExplorerView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\common\key.snk">
+      <Link>Properties\key.snk</Link>
+    </None>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="postbuild.cmd" />
+    <None Include="app.ico" />
+    <None Include="Resources\repositories.png" />
+    <None Include="Resources\repository-go1.png" />
+    <None Include="Resources\repository-remove.png" />
+    <None Include="Resources\repository-add.png" />
+    <None Include="Resources\repository.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\application--arrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\repository-explorer.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\database.png" />
+    <None Include="Resources\repo-scan.png" />
+    <None Include="Resources\repo-init.png" />
+    <None Include="Resources\repo-clone.png" />
+    <None Include="Resources\repo-add.png" />
+    <None Include="Resources\start-page-logo-gradient.png" />
+    <None Include="Resources\start-page-logo.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>..\..\postbuild.cmd $(ConfigurationName)</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

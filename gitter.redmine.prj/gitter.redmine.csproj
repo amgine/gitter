@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{122AA8B0-795B-4DD8-8650-11675D946F3E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>gitter.Redmine</RootNamespace>
+    <AssemblyName>gitter.redmine</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Attachment.cs" />
+    <Compile Include="Collections\AttachmentsCollection.cs" />
+    <Compile Include="Collections\CustomFieldsCollection.cs" />
+    <Compile Include="Collections\UserRolesCollection.cs" />
+    <Compile Include="Collections\ProjectVersionsCollection.cs" />
+    <Compile Include="Collections\QueriesCollection.cs" />
+    <Compile Include="Collections\IssueRelationsCollection.cs" />
+    <Compile Include="Collections\UsersCollection.cs" />
+    <Compile Include="Collections\IssueStatusesCollection.cs" />
+    <Compile Include="Collections\IssuePrioritiesCollection.cs" />
+    <Compile Include="Collections\IssueCategoriesCollection.cs" />
+    <Compile Include="Collections\IssueTrackersCollection.cs" />
+    <Compile Include="Collections\NewsCollection.cs" />
+    <Compile Include="CustomFieldsDefinition.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\VersionUpdatedOnColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\VersionStatusColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueCustomFieldColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueProjectColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueDueDateColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueStartDateColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\VersionDueDateColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\VersionCreatedOnColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\VersionDescriptionColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\VersionIdColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\VersionNameColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\NewsAuthorColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\NewsCreatedOnColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\NewsTitleColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\NewsIdColumn.cs" />
+    <Compile Include="Gui\ListBoxes\VersionsListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\ListBoxes\Items\VersionListItem.cs" />
+    <Compile Include="Gui\ListBoxes\NewsListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\ListBoxes\Items\NewsListItem.cs" />
+    <Compile Include="Gui\Menus\VersionMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Menus\NewsMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerVersionsListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerNewsListItem.cs" />
+    <Compile Include="Gui\Views\VersionsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\VersionsView.Designer.cs">
+      <DependentUpon>VersionsView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\VersionsSearchOptions.cs" />
+    <Compile Include="Gui\Views\NewsSearchOptions.cs" />
+    <Compile Include="Gui\Views\NewsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\NewsView.Designer.cs">
+      <DependentUpon>NewsView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\VersionsSearchToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\VersionsToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\NewsSearchToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\NewsToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="IssueCreation.cs" />
+    <Compile Include="IssueModification.cs" />
+    <Compile Include="RedmineObjectCreation.cs" />
+    <Compile Include="RedmineObjectDefinition.cs" />
+    <Compile Include="RedmineObjectModification.cs" />
+    <Compile Include="Collections\RedmineObjectsCacheBase.cs" />
+    <Compile Include="Collections\NamedRedmineObjectsCache.cs" />
+    <Compile Include="Gui\GuiItemFactory.cs" />
+    <Compile Include="Gui\Menus\IssueMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\ProviderSetupControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\ProviderSetupControl.Designer.cs">
+      <DependentUpon>ProviderSetupControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerIssuesListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerItemBase.cs" />
+    <Compile Include="Gui\Views\IssuesSearchOptions.cs" />
+    <Compile Include="Gui\Views\ISearchableView.cs" />
+    <Compile Include="Gui\Views\SearchOptions.cs" />
+    <Compile Include="Gui\Views\ViewToolBars\IssuesSearchToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\IssuesToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\SearchToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Properties\CachedResources.cs" />
+    <Compile Include="CustomField.cs" />
+    <Compile Include="CustomFieldEventArgs.cs" />
+    <Compile Include="CustomFields.cs" />
+    <Compile Include="CustomFieldValue.cs" />
+    <Compile Include="Gui\RedmineGuiProvider.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorer.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerRootListItem.cs" />
+    <Compile Include="IssueRelation.cs" />
+    <Compile Include="IssueRelationType.cs" />
+    <Compile Include="Collections\RedmineObjectsCache.cs" />
+    <Compile Include="RedmineServiceEndpoint.cs" />
+    <Compile Include="RedmineServiceProvider.cs" />
+    <Compile Include="News.cs" />
+    <Compile Include="Query.cs" />
+    <Compile Include="UserMembership.cs" />
+    <Compile Include="UserRole.cs" />
+    <Compile Include="Collections\ProjectsCollection.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\DescriptionColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\ProjectIdentifierColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueCreatedOnColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueUpdatedOnColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\DateColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\NameColumn.cs" />
+    <Compile Include="Gui\ListBoxes\ProjectsListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\ListBoxes\Items\ProjectListItem.cs" />
+    <Compile Include="Gui\Views\Factories.cs" />
+    <Compile Include="Gui\Views\Guids.cs" />
+    <Compile Include="Gui\Views\IssuesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\IssuesView.Designer.cs">
+      <DependentUpon>IssuesView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\ListBoxes\ColumnId.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueDoneRatioColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueIdColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueCategoryColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssuePriorityColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueStatusColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueTrackerColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueAssignedToColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueAuthorColumn.cs" />
+    <Compile Include="Gui\ListBoxes\Columns\IssueSubjectColumn.cs" />
+    <Compile Include="Gui\ListBoxes\IssuesListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\ListBoxes\Items\IssueListItem.cs" />
+    <Compile Include="Gui\Views\RedmineViewBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Issue.cs" />
+    <Compile Include="IssueCategory.cs" />
+    <Compile Include="Collections\IssuesCollection.cs" />
+    <Compile Include="RedmineObjectProperty.cs" />
+    <Compile Include="IssuePriority.cs" />
+    <Compile Include="RedmineObjectPropertyChangedEventArgs.cs" />
+    <Compile Include="IssueStatus.cs" />
+    <Compile Include="IssueTracker.cs" />
+    <Compile Include="ProjectVersion.cs" />
+    <Compile Include="NamedRedmineObject.cs" />
+    <Compile Include="Project.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RedmineObject.cs" />
+    <Compile Include="RedmineServiceContext.cs" />
+    <Compile Include="User.cs" />
+    <Compile Include="RedmineUtility.cs" />
+    <Compile Include="VersionSharing.cs" />
+    <Compile Include="VersionStatus.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Gui\ProviderSetupControl.resx">
+      <DependentUpon>ProviderSetupControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\VersionsView.resx">
+      <DependentUpon>VersionsView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\NewsView.resx">
+      <DependentUpon>NewsView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\IssuesView.resx">
+      <DependentUpon>IssuesView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\redmine.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\common\key.snk">
+      <Link>Properties\key.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bug.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\chart-up-color.png" />
+    <Content Include="Resources\clipboard-sign.png" />
+    <Content Include="Resources\newspaper.png" />
+    <Content Include="Resources\search-close.png" />
+    <Content Include="Resources\search-next.png" />
+    <Content Include="Resources\search-prevous.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
