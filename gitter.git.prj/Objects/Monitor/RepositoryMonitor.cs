@@ -326,7 +326,7 @@ namespace gitter.Git
 
 		private GitSubdirectory GetSubdirectory(string path)
 		{
-			if(path.Length == 0)
+			if(path.IndexOf(Path.DirectorySeparatorChar) == -1)
 			{
 				return GitSubdirectory.Root;
 			}
@@ -494,7 +494,7 @@ namespace gitter.Git
 					break;
 				case GitSubdirectory.Root:
 					{
-						if(e.Name.Length <= 5)
+						if(e.Name.Length == 0)
 						{
 #if TRACE_FS_EVENTS
 							lock(_sw)
@@ -508,8 +508,7 @@ namespace gitter.Git
 						}
 						else
 						{
-							var name = e.Name.Substring(5);
-							switch(name)
+							switch(e.Name)
 							{
 								case GitConstants.HEAD + GitConstants.LockPostfix:
 #if TRACE_FS_EVENTS
