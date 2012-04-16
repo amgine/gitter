@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Gitter : git local repository management tool for Windows" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Gitter</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/amgine/gitter">Fork Me on GitHub</a>
+
+          <h1 id="project_title">Gitter</h1>
+          <h2 id="project_tagline">git local repository management tool for Windows</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/amgine/gitter/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/amgine/gitter/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Gitter was originally developed as a standalone repository management tool for Windows with powerful GUI.</p>
+
+<p>It is written completely in C# and targets .NET FW 4.0 Client Profile.</p>
+
+<p>Application is mainly tested on Win7, but should work on Vista/XP without any problems.</p>
+
+<h2>Repository access options</h2>
+
+<p>Currently, gitter supports interaction with repository through comand-line interface only, so you'll need git installation to work with gitter.
+Gitter was tested with MSysGit installations.</p>
+
+<p>Get MSysGit: <a href="http://code.google.com/p/msysgit/downloads/list">http://code.google.com/p/msysgit/downloads/list</a></p>
+
+<p>Minimum supported git version: 1.7.0.2</p>
+
+<h2>Prerequisites required to build and run gitter</h2>
+
+<p>The only thing you need is .NET FW 4.0 Full or Client-Profile:</p>
+
+<p>Get .NET FW 4.0 Client-Profile: <a href="http://www.microsoft.com/download/en/details.aspx?id=24872">http://www.microsoft.com/download/en/details.aspx?id=24872</a></p>
+
+<h2>How to build gitter</h2>
+
+<p>If you don't have MS Visual Studio 2010:</p>
+
+<ol>
+<li>Ensure that you have .NET FW 4.0 installed (full or client-profile)</li>
+<li>Clone gitter repository</li>
+<li>Run 'build.cmd'</li>
+<li>Binaries can be found in 'output/Release' directory</li>
+</ol><p>If you have MSVS2010 installed, you can also open 'gitter.sln' solution file and build it.</p>
+
+<h2>Features</h2>
+
+<p>Gitter supports most fetures that you can expect from git GUI application:</p>
+
+<h3>History browser</h3>
+
+<ul>
+<li>Applies topological sort or sorts by commit date</li>
+<li>Can limit displayed commit number</li>
+<li>Can filter displayed references</li>
+</ul><h3>Commit tool</h3>
+
+<ul>
+<li>Allows staging/unstaging files and directories</li>
+<li>Can launch merge tool for conflicted files</li>
+<li>Supports --amend</li>
+</ul><h3>Branches</h3>
+
+<p>Can show, create, rename, delete (including remote tracking branches), checkout</p>
+
+<h3>Tags</h3>
+
+<p>Can show, create and delete (annotated, lightweight and signed)</p>
+
+<h3>Synchronization with remotes</h3>
+
+<ul>
+<li>Fetch</li>
+<li>Pull</li>
+<li>Push: knows about --force flag, allows to push multiple branches at once</li>
+<li>Can add, remove and rename remotes</li>
+<li>Shows references for selected remote and allows to remove them</li>
+</ul><h3>Submodules</h3>
+
+<ul>
+<li>Can show list of submodules</li>
+<li>Allows some basic operations: add and update</li>
+</ul><h3>Other git operations</h3>
+
+<ul>
+<li>Merge: one or multiple branches, knows about --squash, --no-ff and --no-commit options, allows custom merge commit message</li>
+<li>Rebase: detects state, allows to continue, skip or abort conflicting commit</li>
+<li>Revert</li>
+<li>Cherry-pick</li>
+</ul><h3>Other features</h3>
+
+<ul>
+<li>Spellchecker included (commit messages, tag messages)</li>
+<li>Can download and show avatars from gravatar.com</li>
+<li>Real-time tracking changes in repository made by other processes (detects all kinds of working directory changes and some basic changes of git directory, like creating/removing branches, tags and remotes, changing configuration, etc)</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Gitter maintained by <a href="https://github.com/amgine">amgine</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
