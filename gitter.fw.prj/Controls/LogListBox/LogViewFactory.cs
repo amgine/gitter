@@ -5,14 +5,15 @@
 
 	using Resources = gitter.Framework.Properties.Resources;
 
-	public class WebBrowserViewFactory : ViewFactoryBase
+	public sealed class LogViewFactory : ViewFactoryBase
 	{
-		public static readonly new Guid Guid = new Guid("BF80569F-4544-4B0F-8C5B-213215E053AA");
+		public static readonly new Guid Guid = new Guid("216F243F-0E79-4739-A88F-C2342E5975B6");
 
-		public WebBrowserViewFactory()
-			: base(Guid, Resources.StrWebBrowser, Resources.ImgWebBrowser, true)
+		/// <summary>Initializes a new instance of the <see cref="LogViewFactory"/> class.</summary>
+		public LogViewFactory()
+			: base(Guid, Resources.StrLog, Resources.ImgLog, true)
 		{
-			this.DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
+			DefaultViewPosition = ViewPosition.Float;
 		}
 
 		/// <summary>Create new view with specified parameters.</summary>
@@ -21,7 +22,7 @@
 		/// <returns>Created view.</returns>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			return new WebBrowserView(Guid, environment, parameters);
+			return new LogView(environment, parameters);
 		}
 	}
 }

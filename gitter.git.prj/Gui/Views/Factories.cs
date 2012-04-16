@@ -10,7 +10,7 @@
 
 	using Resources = gitter.Git.Properties.Resources;
 
-	sealed class CommitViewFactory : ViewFactory
+	sealed class CommitViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -21,13 +21,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new CommitView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class ConfigViewFactory : ViewFactory
+	sealed class ConfigViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -38,13 +38,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new ConfigView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class GitViewFactory : ViewFactory
+	sealed class GitViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -55,13 +55,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new GitView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class HistoryViewFactory : ViewFactory
+	sealed class HistoryViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -72,13 +72,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new HistoryView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class ReflogViewFactory : ViewFactory
+	sealed class ReflogViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -89,13 +89,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new ReflogView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class MaintenanceToolFactory : ViewFactory
+	sealed class MaintenanceToolFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -106,13 +106,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new MaintenanceView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class ReferencesViewFactory : ViewFactory
+	sealed class ReferencesViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -124,13 +124,13 @@
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new ReferencesView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class RemotesViewFactory : ViewFactory
+	sealed class RemotesViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -142,13 +142,13 @@
 			DefaultViewPosition = ViewPosition.BottomAutoHideTool;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new RemotesView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class StashViewFactory : ViewFactory
+	sealed class StashViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -160,13 +160,13 @@
 			DefaultViewPosition = ViewPosition.BottomAutoHideTool;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new StashView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class SubmodulesViewFactory : ViewFactory
+	sealed class SubmodulesViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -178,13 +178,13 @@
 			DefaultViewPosition = ViewPosition.BottomAutoHideTool;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new SubmodulesView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class UsersViewFactory : ViewFactory
+	sealed class UsersViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -195,13 +195,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new UsersView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class TreeViewFactory : ViewFactory
+	sealed class TreeViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -212,13 +212,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new TreeView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class DiffViewFactory : ViewFactory
+	sealed class DiffViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -229,13 +229,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new DiffView(Guids.DiffViewGuid, parameters, _guiProvider);
 		}
 	}
 
-	sealed class BlameViewFactory : ViewFactory
+	sealed class BlameViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -246,13 +246,13 @@
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new BlameView(parameters, _guiProvider);
 		}
 	}
 
-	sealed class ContextualDiffViewFactory : ViewFactory
+	sealed class ContextualDiffViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
@@ -264,7 +264,7 @@
 			DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
 			return new DiffView(Guids.ContextualDiffViewGuid, parameters, _guiProvider);
 		}

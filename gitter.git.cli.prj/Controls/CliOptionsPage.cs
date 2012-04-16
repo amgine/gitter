@@ -22,7 +22,7 @@
 		public static readonly new Guid Guid = new Guid("EF9DFCAC-FDD1-4B69-AD0E-3783035FA13C");
 		private string _versionPath;
 
-		private MsysGitDownloader _downloader;
+		private MSysGitDownloader _downloader;
 		private readonly GitCLI _gitCLI;
 
 		public CliOptionsPage(IGitAccessor gitAccessor)
@@ -96,9 +96,9 @@
 			_btnDownload.Enabled = false;
 			_btnRefreshLatestVersion.Enabled = false;
 			_lblLatestVersionValue.Text = Resources.StrsSearching.AddEllipsis();
-			MsysGitDownloader.BeginCreate((ar) =>
+			MSysGitDownloader.BeginCreate((ar) =>
 				{
-					_downloader = MsysGitDownloader.EndCreate(ar);
+					_downloader = MSysGitDownloader.EndCreate(ar);
 					if(!Disposing && !IsDisposed)
 					{
 						try

@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Text;
 
+	/// <summary>Represents a commit, referenced by a blame output line.</summary>
 	public sealed class BlameCommit
 	{
 		#region Data

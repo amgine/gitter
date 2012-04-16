@@ -14,43 +14,48 @@ namespace gitter.Git.Gui.Views
 	{
 		#region Data
 
-		private readonly StashView _stashTool;
+		private readonly StashView _stashView;
 
-		private readonly ToolStripButton _save;
+		private readonly ToolStripButton _saveButton;
 
 		#endregion
 
 		/// <summary>Initializes a new instance of the <see cref="StashToolbar"/> class.</summary>
-		/// <param name="stashTool">Host tool.</param>
-		public StashToolbar(StashView stashTool)
+		/// <param name="stashView">Stash view.</param>
+		public StashToolbar(StashView stashView)
 		{
-			if(stashTool == null) throw new ArgumentNullException("stashTool");
-			_stashTool = stashTool;
+			if(stashView == null) throw new ArgumentNullException("stashView");
+			_stashView = stashView;
 
-			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) =>
-				{
-					_stashTool.RefreshContent();
-				})
-				{
-					DisplayStyle = ToolStripItemDisplayStyle.Image,
-				});
+			Items.Add(
+				new ToolStripButton(
+					Resources.StrRefresh,
+					CachedResources.Bitmaps["ImgRefresh"],
+					OnRefreshButtonClick)
+					{
+						DisplayStyle = ToolStripItemDisplayStyle.Image,
+					});
+
 			Items.Add(new ToolStripSeparator());
-			Items.Add(_save = new ToolStripButton(Resources.StrSave, CachedResources.Bitmaps["ImgStashSave"],
-				(sender, e) =>
-				{
-					_stashTool.Gui.StartStashSaveDialog();
-				})
-			{
-				ToolTipText = Resources.TipStashSave,
-			});
-			//Items.Add(_clear = new ToolStripButton(Resources.StrClear, CachedResources.Bitmaps["ImgStashClear"],
-			//    (sender, e) =>
-			//    {
-			//        _stashTool.Gui.StartStashSaveDialog();
-			//    })
-			//{
-			//});
+
+			Items.Add(_saveButton =
+				new ToolStripButton(
+					Resources.StrSave,
+					CachedResources.Bitmaps["ImgStashSave"],
+					OnStashSaveButtonClick)
+					{
+						ToolTipText = Resources.TipStashSave,
+					});
+		}
+
+		private void OnRefreshButtonClick(object sender, EventArgs e)
+		{
+			_stashView.RefreshContent();
+		}
+
+		private void OnStashSaveButtonClick(object sender, EventArgs e)
+		{
+			_stashView.Gui.StartStashSaveDialog();
 		}
 	}
 }

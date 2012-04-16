@@ -508,8 +508,8 @@
 		private void UpdateUserIdentity(bool raiseEvent)
 		{
 			User userIdentity;
-			var name = _configuration.TryGetParameterValue(GitConstants.UserNameParameter);
-			var email = _configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
+			var name	= _configuration.TryGetParameterValue(GitConstants.UserNameParameter);
+			var email	= _configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 			if(name == null || email == null)
 			{
 				userIdentity = null;

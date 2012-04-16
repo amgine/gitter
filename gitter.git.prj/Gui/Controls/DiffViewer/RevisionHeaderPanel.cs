@@ -445,7 +445,7 @@
 			{
 				var menu = new ContextMenuStrip();
 				menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
-					GitUtility.FormatDate(revision.CommitDate, _dateFormat)));
+					Utility.FormatDate(revision.CommitDate, _dateFormat)));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
@@ -463,7 +463,7 @@
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
-				return Measure(graphics, DateColumn.Font, GitUtility.FormatDate(revision.CommitDate, _dateFormat), width);
+				return Measure(graphics, DateColumn.Font, Utility.FormatDate(revision.CommitDate, _dateFormat), width);
 			}
 
 			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
@@ -472,7 +472,7 @@
 					graphics,
 					DateColumn.Font,
 					Resources.StrDate.AddColon(),
-					GitUtility.FormatDate(revision.CommitDate, _dateFormat),
+					Utility.FormatDate(revision.CommitDate, _dateFormat),
 					rect);
 			}
 		}

@@ -18,50 +18,50 @@
 
 	public static class GlobalOptions
 	{
-		private static readonly Dictionary<Guid, PropertyPageDescription> _propertyPages;
+		private static readonly Dictionary<Guid, PropertyPageFactory> _propertyPages;
 		private static readonly Dictionary<string, SelectableColorCategory> _colorCategories;
 		private static readonly Dictionary<string, SelectableColor> _colors;
 
 		static GlobalOptions()
 		{
-			_propertyPages = new Dictionary<Guid, PropertyPageDescription>();
+			_propertyPages = new Dictionary<Guid, PropertyPageFactory>();
 			_colorCategories = new Dictionary<string, SelectableColorCategory>();
 			_colors = new Dictionary<string, SelectableColor>();
 
-			RegisterPropertyPage(new PropertyPageDescription(
+			RegisterPropertyPageFactory(new PropertyPageFactory(
 				BehaviorPage.Guid,
 				Resources.StrBehavior,
 				null,
-				PropertyPageDescription.RootGroupGuid,
-				() => new BehaviorPage()));
+				PropertyPageFactory.RootGroupGuid,
+				env => new BehaviorPage()));
 
-			RegisterPropertyPage(new PropertyPageDescription(
+			RegisterPropertyPageFactory(new PropertyPageFactory(
 				SpellingPage.Guid,
 				Resources.StrSpelling,
 				null,
-				PropertyPageDescription.RootGroupGuid,
-				() => new SpellingPage()));
+				PropertyPageFactory.RootGroupGuid,
+				env => new SpellingPage()));
 
-			RegisterPropertyPage(new PropertyPageDescription(
-				PropertyPageDescription.AppearanceGroupGuid,
+			RegisterPropertyPageFactory(new PropertyPageFactory(
+				PropertyPageFactory.AppearanceGroupGuid,
 				Resources.StrAppearance,
 				null,
-				PropertyPageDescription.RootGroupGuid,
-				() => new AppearancePage()));
+				PropertyPageFactory.RootGroupGuid,
+				env => new AppearancePage()));
 
-			RegisterPropertyPage(new PropertyPageDescription(
+			RegisterPropertyPageFactory(new PropertyPageFactory(
 				FontsPage.Guid,
 				Resources.StrFonts,
 				null,
-				PropertyPageDescription.AppearanceGroupGuid,
-				() => new FontsPage()));
+				PropertyPageFactory.AppearanceGroupGuid,
+				env => new FontsPage()));
 
-			RegisterPropertyPage(new PropertyPageDescription(
+			RegisterPropertyPageFactory(new PropertyPageFactory(
 				ColorsPage.Guid,
 				Resources.StrColors,
 				null,
-				PropertyPageDescription.AppearanceGroupGuid,
-				() => new ColorsPage()));
+				PropertyPageFactory.AppearanceGroupGuid,
+				env => new ColorsPage()));
 		}
 
 		public static void RegisterSelectableColor(SelectableColor color)
@@ -78,7 +78,7 @@
 			_colorCategories.Add(category.Id, category);
 		}
 
-		public static void RegisterPropertyPage(PropertyPageDescription description)
+		public static void RegisterPropertyPageFactory(PropertyPageFactory description)
 		{
 			if(description == null) throw new ArgumentNullException("description");
 			_propertyPages.Add(description.Guid, description);
@@ -92,7 +92,7 @@
 			{
 				var item = new PropertyPageItem(kvp.Value);
 				dic.Add(kvp.Key, item);
-				if(kvp.Value.GroupGuid != PropertyPageDescription.RootGroupGuid)
+				if(kvp.Value.GroupGuid != PropertyPageFactory.RootGroupGuid)
 					list.Add(item);
 			}
 			foreach(var item in list)

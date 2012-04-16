@@ -16,6 +16,7 @@
 		#region Data
 
 		private readonly Guid _guid;
+		private readonly IWorkingEnvironment _environment;
 		private IDictionary<string, object> _parameters;
 		private ViewHost _host;
 		private INotificationService _notificationService;
@@ -54,14 +55,22 @@
 		}
 
 		/// <summary>Create <see cref="ViewBase"/>.</summary>
-		public ViewBase(Guid guid, IDictionary<string, object> parameters)
+		public ViewBase(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
 			: this()
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
 			_guid = guid;
+			_environment = environment;
 			_parameters = parameters;
 		}
 
 		#endregion
+
+		protected IWorkingEnvironment WorkingEnvironment
+		{
+			get { return _environment; }
+		}
 
 		protected INotificationService NotificationService
 		{

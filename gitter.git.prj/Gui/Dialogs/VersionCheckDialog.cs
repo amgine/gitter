@@ -12,13 +12,18 @@
 	internal partial class VersionCheckDialog : GitDialogBase
 	{
 		private const string _downloadUrl = @"http://code.google.com/p/msysgit/downloads/list";
-		private readonly Version _requiredVersion;
-		private Version _installedVersion;
-		private MsysGitDownloader _downloader;
 
-		public VersionCheckDialog(Version requiredVersion, Version installedVersion)
+		private readonly IWorkingEnvironment _environment;
+		private Version _requiredVersion;
+		private Version _installedVersion;
+		private MSysGitDownloader _downloader;
+
+		public VersionCheckDialog(IWorkingEnvironment environment, Version requiredVersion, Version installedVersion)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
 			if(requiredVersion == null) throw new ArgumentNullException("requiredVersion");
+
+			_environment = environment;
 			_requiredVersion = requiredVersion;
 			_installedVersion = installedVersion;
 
@@ -58,27 +63,29 @@
 			_lnkRefreshLatestVersion.Visible = false;
 			_lnkDownload.Visible = false;
 			_lblLatestVersionValue.Text = Resources.StrsSearching.AddEllipsis();
-			MsysGitDownloader.BeginCreate((ar) =>
-			{
-				_downloader = MsysGitDownloader.EndCreate(ar);
-				if(!Disposing && !IsDisposed)
+			MSysGitDownloader.BeginCreate(
+				ar =>
 				{
-					try
+					_downloader = MSysGitDownloader.EndCreate(ar);
+					if(!Disposing && !IsDisposed)
 					{
-						BeginInvoke(new MethodInvoker(UpdateLatestVersion));
+						try
+						{
+							BeginInvoke(new MethodInvoker(UpdateLatestVersion));
+						}
+						catch
+						{
+						}
 					}
-					catch
-					{
-					}
-				}
-			});
+				});
 		}
 
 		private void UpdateLatestVersion()
 		{
 			if(_downloader != null && _downloader.IsAvailable)
 			{
-				_lnkDownload.Visible = (RepositoryProvider.Git.GitVersion == null) ||
+				_lnkDownload.Visible =
+					(RepositoryProvider.Git.GitVersion == null) ||
 					(_downloader.LatestVersion > RepositoryProvider.Git.GitVersion);
 				_lblLatestVersionValue.Text = _downloader.LatestVersion.ToString();
 			}
@@ -165,7 +172,7 @@
 
 		private void OnConfigureClick(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			using(var dlg = new GitOptionsPage())
+			using(var dlg = new GitOptionsPage(_environment))
 			{
 				if(dlg.Run(this) == DialogResult.OK)
 				{

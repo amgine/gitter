@@ -61,7 +61,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.XML" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
@@ -137,10 +137,10 @@
     </Compile>
     <Compile Include="Controls\LogListBox\LogListBoxColumnId.cs" />
     <Compile Include="Controls\LogListBox\LogListBoxTypeColumn.cs" />
-    <Compile Include="Controls\LogListBox\LogTool.cs">
+    <Compile Include="Controls\LogListBox\LogView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\LogListBox\LogToolFactory.cs" />
+    <Compile Include="Controls\LogListBox\LogViewFactory.cs" />
     <Compile Include="Controls\NotifyCollectionEventArgs.cs" />
     <Compile Include="Controls\NotifyEvent.cs" />
     <Compile Include="Controls\NotifySortedCollection.cs" />
@@ -182,7 +182,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Controls\Views\ViewDockService.cs" />
-    <Compile Include="Controls\Views\ViewFactory.cs" />
+    <Compile Include="Controls\Views\ViewFactoryBase.cs" />
     <Compile Include="Controls\Views\FloatingViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -451,7 +451,7 @@
     <Compile Include="Options\PropertyPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Options\PropertyPageDescription.cs" />
+    <Compile Include="Options\PropertyPageFactory.cs" />
     <Compile Include="Options\PropertyPageItem.cs" />
     <Compile Include="Options\SelectableColor.cs" />
     <Compile Include="Options\SelectableFont.cs" />
@@ -472,6 +472,7 @@
     <Compile Include="Utility.cs" />
     <Compile Include="Win7Support\VistaPickFolderDialog.cs" />
     <Compile Include="Win7Support\ITaskbarList3.cs" />
+    <Compile Include="WindowsMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\CustomListBox\ColumnsDialog.resx">

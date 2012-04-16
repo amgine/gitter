@@ -104,6 +104,7 @@
     <Compile Include="IBranchAccessor.cs" />
     <Compile Include="IConfigAccessor.cs" />
     <Compile Include="IGitAccessor.cs" />
+    <Compile Include="IGitAccessorProvider.cs" />
     <Compile Include="IGitRepository.cs" />
     <Compile Include="IIndexAccessor.cs" />
     <Compile Include="INotesAccessor.cs" />

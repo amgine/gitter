@@ -76,12 +76,12 @@
 
 		private IntPtr ListBoxWndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
 		{
-			switch(msg)
+			switch((WindowsMessage)msg)
 			{
-				case NativeMethods.WM_MOUSEMOVE:
+				case WindowsMessage.WM_MOUSEMOVE:
 					NativeMethods.ReleaseCapture();
 					break;
-				case NativeMethods.WM_CAPTURECHANGED:
+				case WindowsMessage.WM_CAPTURECHANGED:
 					return IntPtr.Zero;
 			}
 			return NativeMethods.CallWindowProc(_listBoxDefaultWndProc, hWnd, msg, wParam, lParam);
@@ -91,7 +91,7 @@
 		{
 			switch(m.Msg)
 			{
-				case (NativeMethods.WM_COMMAND + NativeMethods.WM_REFLECT):
+				case ((int)WindowsMessage.WM_COMMAND + (int)WindowsMessage.WM_REFLECT):
 					{
 						switch(NativeMethods.HIWORD(m.WParam))
 						{

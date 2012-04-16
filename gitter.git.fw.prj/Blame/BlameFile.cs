@@ -11,15 +11,16 @@
 
 		public BlameFile(string fileName, List<BlameHunk> hunks)
 		{
-			if(fileName == null)
-				throw new ArgumentNullException("fileName");
-			if(hunks == null)
-				throw new ArgumentNullException("hunks");
+			if(fileName == null) throw new ArgumentNullException("fileName");
+			if(hunks == null) throw new ArgumentNullException("hunks");
 
 			_fileName = fileName;
 			_hunks = hunks;
 
-			foreach(var hunk in _hunks) _lineCount += hunk.Count;
+			foreach(var hunk in _hunks)
+			{
+				_lineCount += hunk.Count;
+			}
 		}
 
 		public string Name

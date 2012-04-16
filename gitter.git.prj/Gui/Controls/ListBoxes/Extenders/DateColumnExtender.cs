@@ -38,11 +38,11 @@
 			_radISO8601.Text = Resources.StrISO8601;
 
 			var date = DateTime.Now;
-			_lblUnixTimestamp.Text = GitUtility.FormatDate(date, DateFormat.UnixTimestamp);
-			_lblRelative.Text = GitUtility.FormatDate(date, DateFormat.Relative);
-			_lblSystemDefault.Text = GitUtility.FormatDate(date, DateFormat.SystemDefault);
-			_lblRFC2822.Text = GitUtility.FormatDate(date, DateFormat.RFC2822);
-			_lblISO8601.Text = GitUtility.FormatDate(date, DateFormat.ISO8601);
+			_lblUnixTimestamp.Text	= Utility.FormatDate(date, DateFormat.UnixTimestamp);
+			_lblRelative.Text		= Utility.FormatDate(date, DateFormat.Relative);
+			_lblSystemDefault.Text	= Utility.FormatDate(date, DateFormat.SystemDefault);
+			_lblRFC2822.Text		= Utility.FormatDate(date, DateFormat.RFC2822);
+			_lblISO8601.Text		= Utility.FormatDate(date, DateFormat.ISO8601);
 
 			DateFormat = column.DateFormat;
 

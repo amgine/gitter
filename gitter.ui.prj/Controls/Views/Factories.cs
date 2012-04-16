@@ -10,16 +10,15 @@
 
 	using Resources = gitter.Properties.Resources;
 
-	sealed class RepositoryExplorerViewFactory : ViewFactory
+	sealed class RepositoryExplorerViewFactory : ViewFactoryBase
 	{
-		private readonly IWorkingEnvironment _environment;
 		private readonly RepositoryRootItem _rootItem;
 
 		public RepositoryExplorerViewFactory(IWorkingEnvironment environment)
 			: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, CachedResources.Bitmaps["ImgRepositoryExplorer"], true)
 		{
 			if(environment == null) throw new ArgumentNullException("environment");
-			_environment = environment;
+
 			_rootItem = new RepositoryRootItem(environment, null);
 			DefaultViewPosition = ViewPosition.LeftTool;
 		}
@@ -40,30 +39,34 @@
 			_rootItem.Items.Remove(item);
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		/// <summary>Create new view with specified parameters.</summary>
+		/// <param name="environment">Application working environment.</param>
+		/// <param name="parameters">Creation parameters.</param>
+		/// <returns>Created view.</returns>
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			var tool = new RepositoryExplorerView(parameters, _environment);
-			tool.AddItem(_rootItem);
-			return tool;
+			var view = new RepositoryExplorerView(environment, parameters);
+			view.AddItem(_rootItem);
+			return view;
 		}
 	}
 
-	sealed class StartPageViewFactory : ViewFactory
+	sealed class StartPageViewFactory : ViewFactoryBase
 	{
-		private readonly IWorkingEnvironment _environment;
-
-		public StartPageViewFactory(IWorkingEnvironment environment)
+		public StartPageViewFactory()
 			: base(Guids.StartPageView, Resources.StrStartPage, CachedResources.Bitmaps["ImgStartPage"], true)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
-			_environment = environment;
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
 			ShowOnStartup = true;
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		/// <summary>Create new view with specified parameters.</summary>
+		/// <param name="environment">Application working environment.</param>
+		/// <param name="parameters">Creation parameters.</param>
+		/// <returns>Created view.</returns>
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			return new StartPageView(parameters, _environment, this);
+			return new StartPageView(environment, parameters, this);
 		}
 
 		public bool CloseAfterRepositoryLoad

@@ -134,14 +134,16 @@
 		protected override void WndProc(ref Message m)
 		{
 			bool processed = false;
-			switch(m.Msg)
+			switch((WindowsMessage)m.Msg)
 			{
-				case NativeMethods.WM_NCHITTEST:
+				case WindowsMessage.WM_NCHITTEST:
 					processed = OnNcHitTest(ref m);
 					break;
 			}
 			if(!processed)
+			{
 				base.WndProc(ref m);
+			}
 		}
 
 		private bool OnNcHitTest(ref Message m)

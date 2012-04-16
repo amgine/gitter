@@ -22,12 +22,16 @@
 
 		private CliOptionsPage _cliOptions;
 
-		public GitOptionsPage()
+		public GitOptionsPage(IWorkingEnvironment environment)
 			: base(Guid)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
 			InitializeComponent();
 
 			Text = Resources.StrGit;
+
+			var provider = environment.GetRepositoryProvider<RepositoryProvider>();
 
 			_cliOptions = new CliOptionsPage(RepositoryProvider.Git);
 			_cliOptions.Parent = this;

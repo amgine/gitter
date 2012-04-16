@@ -3,46 +3,59 @@
 	using System;
 	using System.Collections.Generic;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Redmine.Properties.Resources;
 
-	sealed class IssuesViewFactory : ViewFactory
+	sealed class IssuesViewFactory : ViewFactoryBase
 	{
 		public IssuesViewFactory()
 			: base(Guids.IssuesViewGuid, Resources.StrIssues, CachedResources.Bitmaps["ImgBug"])
 		{
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		/// <summary>Create new view with specified parameters.</summary>
+		/// <param name="environment">Application working environment.</param>
+		/// <param name="parameters">Creation parameters.</param>
+		/// <returns>Created view.</returns>
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			return new IssuesView(parameters);
+			return new IssuesView(environment, parameters);
 		}
 	}
 
-	sealed class NewsViewFactory : ViewFactory
+	sealed class NewsViewFactory : ViewFactoryBase
 	{
 		public NewsViewFactory()
 			: base(Guids.NewsViewGuid, Resources.StrNews, CachedResources.Bitmaps["ImgNews"])
 		{
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		/// <summary>Create new view with specified parameters.</summary>
+		/// <param name="environment">Application working environment.</param>
+		/// <param name="parameters">Creation parameters.</param>
+		/// <returns>Created view.</returns>
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			return new NewsView(parameters);
+			return new NewsView(environment, parameters);
 		}
 	}
 
-	sealed class VersionsViewFactory : ViewFactory
+	sealed class VersionsViewFactory : ViewFactoryBase
 	{
 		public VersionsViewFactory()
 			: base(Guids.VersionsViewGuid, Resources.StrVersions, CachedResources.Bitmaps["ImgVersion"])
 		{
 		}
 
-		protected override ViewBase CreateViewCore(IDictionary<string, object> parameters)
+		/// <summary>Create new view with specified parameters.</summary>
+		/// <param name="environment">Application working environment.</param>
+		/// <param name="parameters">Creation parameters.</param>
+		/// <returns>Created view.</returns>
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			return new VersionsView(parameters);
+			return new VersionsView(environment, parameters);
 		}
 	}
 }

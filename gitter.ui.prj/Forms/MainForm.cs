@@ -40,7 +40,7 @@
 
 		private readonly RepositoryExplorerViewFactory _repositoryExplorerFactory;
 		private readonly StartPageViewFactory _startPageFactory;
-		private readonly LogToolFactory _logFactory;
+		private readonly LogViewFactory _logFactory;
 
 		private readonly ConfigurationService _configurationService;
 
@@ -61,13 +61,13 @@
 
 			_configurationService = GitterApplication.ConfigurationService;
 
-			_viewDockService = new ViewDockService(_toolDockGrid, _configurationService.ToolsSection);
+			_viewDockService = new ViewDockService(this, _toolDockGrid, _configurationService.ToolsSection);
 			_viewDockService.RegisterFactory(
-				_startPageFactory = new StartPageViewFactory(this));
+				_startPageFactory = new StartPageViewFactory());
 			_viewDockService.RegisterFactory(
 				_repositoryExplorerFactory = new RepositoryExplorerViewFactory(this));
 			_viewDockService.RegisterFactory(
-				_logFactory = new LogToolFactory());
+				_logFactory = new LogViewFactory());
 
 			LoadOptions();
 			LoadRecentRepositories();
@@ -112,6 +112,16 @@
 		public IEnumerable<IRepositoryProvider> RepositoryProviders
 		{
 			get { return _repositoryProviders.Values; }
+		}
+
+		public T GetRepositoryProvider<T>() where T : class, IRepositoryProvider
+		{
+			foreach(var prov in RepositoryProviders)
+			{
+				var p = prov as T;
+				if(p != null) return p;
+			}
+			return default(T);
 		}
 
 		public IEnumerable<IIssueTrackerProvider> IssueTrackerProviders
@@ -262,7 +272,7 @@
 
 		private void StartOptionsDialog()
 		{
-			using(var d = new OptionsDialog())
+			using(var d = new OptionsDialog(this))
 			{
 				d.Run(this);
 			}
@@ -454,12 +464,17 @@
 			get { return _viewDockService; }
 		}
 
+		public IRepositoryProvider ActiveRepositoryProvider
+		{
+			get { return _currentProvider; }
+		}
+
 		public IRepository ActiveRepository
 		{
 			get { return _repository; }
 		}
 
-		public IRepositoryProvider FindProvider(string workingDirectory)
+		public IRepositoryProvider FindProviderForDirectory(string workingDirectory)
 		{
 			foreach(var prov in _repositoryProviders.Values)
 			{
@@ -542,7 +557,7 @@
 			{
 				_recentRepositoryPath = string.Empty;
 			}
-			var prov = FindProvider(path);
+			var prov = FindProviderForDirectory(path);
 			if(prov == null && allowRecursiveSearch)
 			{
 				var di = new DirectoryInfo(path);
@@ -551,7 +566,7 @@
 					while(di.Parent != null)
 					{
 						di = di.Parent;
-						prov = FindProvider(di.FullName);
+						prov = FindProviderForDirectory(di.FullName);
 						if(prov != null)
 						{
 							path = di.FullName;

@@ -20,7 +20,7 @@
 		private StashToolbar _toolBar;
 
 		public StashView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.StashViewGuid, parameters, gui)
+			: base(Guids.StashViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

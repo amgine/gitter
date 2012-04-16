@@ -2,10 +2,8 @@
 {
 	using System;
 	using System.Windows.Forms;
-	using System.Xml;
 
 	using gitter.Framework;
-	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
 	using gitter.Git.Gui.Views;
@@ -130,12 +128,10 @@
 				startingRevision = GitConstants.HEAD;
 				defaultName = string.Empty;
 			}
-			using(var dlg = new CreateBranchDialog(_repository)
+			using(var dlg = new CreateBranchDialog(_repository))
 			{
-				StartingRevision = startingRevision,
-				BranchName = defaultName,
-			})
-			{
+				dlg.StartingRevision = startingRevision;
+				dlg.BranchName = defaultName;
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -158,7 +154,9 @@
 			using(var dlg = new CheckoutDialog(_repository))
 			{
 				if(rev != null)
+				{
 					dlg.Revision = rev.Pointer;
+				}
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -167,7 +165,10 @@
 		{
 			using(var dlg = new MergeDialog(_repository))
 			{
-				if(multiMerge) dlg.EnableMultipleBrunchesMerge();
+				if(multiMerge)
+				{
+					dlg.EnableMultipleBrunchesMerge();
+				}
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -193,10 +194,7 @@
 			var rev = GetFocusedRevisionPointer();
 			using(var dlg = new CreateTagDialog(_repository))
 			{
-				if(rev != null)
-					dlg.Revision = rev.Pointer;
-				else
-					dlg.Revision = GitConstants.HEAD;
+				dlg.Revision = rev != null ? rev.Pointer : GitConstants.HEAD;
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -206,10 +204,7 @@
 			var rev = GetFocusedRevisionPointer();
 			using(var dlg = new AddNoteDialog(_repository))
 			{
-				if(rev != null)
-					dlg.Revision = rev.Pointer;
-				else
-					dlg.Revision = GitConstants.HEAD;
+				dlg.Revision = rev != null ? rev.Pointer : GitConstants.HEAD;
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -278,9 +273,13 @@
 			env.ProvideRepositoryExplorerItem(_explorer.RootItem);
 			env.ProvideToolbar(_mainToolbar);
 			for(int i = 0; i < _statusbar.LeftAlignedItems.Length; ++i)
+			{
 				env.ProvideStatusBarObject(_statusbar.LeftAlignedItems[i], true);
+			}
 			for(int i = 0; i < _statusbar.RightAlignedItems.Length; ++i)
+			{
 				env.ProvideStatusBarObject(_statusbar.RightAlignedItems[i], false);
+			}
 			foreach(var menu in _menus.Menus)
 			{
 				env.ProvideMainMenuItem(menu);
@@ -305,9 +304,13 @@
 			env.RemoveRepositoryExplorerItem(_explorer.RootItem);
 			env.RemoveToolbar(_mainToolbar);
 			for(int i = 0; i < _statusbar.LeftAlignedItems.Length; ++i)
+			{
 				env.RemoveStatusBarObject(_statusbar.LeftAlignedItems[i]);
+			}
 			for(int i = 0; i < _statusbar.RightAlignedItems.Length; ++i)
+			{
 				env.RemoveStatusBarObject(_statusbar.RightAlignedItems[i]);
+			}
 			foreach(var menu in _menus.Menus)
 			{
 				env.RemoveMainMenuItem(menu);

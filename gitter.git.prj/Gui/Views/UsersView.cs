@@ -18,7 +18,7 @@
 	partial class UsersView : GitViewBase
 	{
 		public UsersView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.UsersViewGuid, parameters, gui)
+			: base(Guids.UsersViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

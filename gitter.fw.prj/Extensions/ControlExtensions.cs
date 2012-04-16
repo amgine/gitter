@@ -12,7 +12,7 @@
 		{
 			if(control == null) throw new ArgumentNullException("control");
 
-			NativeMethods.SendMessage(control.Handle, NativeMethods.WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
+			NativeMethods.SendMessage(control.Handle, WindowsMessage.WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
 		}
 
 		/// <summary>Enables control redrawing.</summary>
@@ -21,7 +21,7 @@
 		{
 			if(control == null) throw new ArgumentNullException("control");
 
-			NativeMethods.SendMessage(control.Handle, NativeMethods.WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
+			NativeMethods.SendMessage(control.Handle, WindowsMessage.WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
 		}
 
 		/// <summary>Forces control redraw.</summary>

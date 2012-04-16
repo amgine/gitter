@@ -21,7 +21,7 @@
 		private ReferencesSearchToolBar _searchToolbar;
 
 		public ReferencesView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.ReferencesViewGuid, parameters, gui)
+			: base(Guids.ReferencesViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 			_lstReferences.Columns.ShowAll((c) => c.Id != (int)ColumnId.TreeHash);

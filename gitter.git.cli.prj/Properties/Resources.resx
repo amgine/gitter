@@ -165,4 +165,7 @@
   <data name="StrsUnknown" xml:space="preserve">
     <value>uknown</value>
   </data>
+  <data name="StrProviderName" xml:space="preserve">
+    <value>MSysGit command line interface</value>
+  </data>
 </root>

@@ -11,32 +11,43 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class ConfigToolBar : ToolStrip
 	{
-		private readonly ConfigView _configTool;
+		private readonly ConfigView _configView;
 
-		public ConfigToolBar(ConfigView configTool)
+		public ConfigToolBar(ConfigView configView)
 		{
-			if(configTool == null) throw new ArgumentNullException("configTool");
-			_configTool = configTool;
+			if(configView == null) throw new ArgumentNullException("configView");
 
-			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) =>
-				{
-					_configTool.RefreshContent();
-				})
-			{
-				DisplayStyle = ToolStripItemDisplayStyle.Image,
-			});
+			_configView = configView;
+
+			Items.Add(
+				new ToolStripButton(
+					Resources.StrRefresh,
+					CachedResources.Bitmaps["ImgRefresh"],
+					OnRefreshButtonClick)
+					{
+						DisplayStyle = ToolStripItemDisplayStyle.Image,
+					});
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(new ToolStripButton(Resources.StrAddParameter, CachedResources.Bitmaps["ImgConfigAdd"],
-				(sender, e) =>
-				{
-					using(var dlg = new AddParameterDialog(_configTool.Repository))
-					{
-						dlg.Run(_configTool);
-					}
-				}));
+			Items.Add(
+				new ToolStripButton(
+					Resources.StrAddParameter,
+					CachedResources.Bitmaps["ImgConfigAdd"],
+					OnAddParameterButtonClick));
+		}
+
+		private void OnRefreshButtonClick(object sender, EventArgs e)
+		{
+			_configView.RefreshContent();
+		}
+
+		private void OnAddParameterButtonClick(object sender, EventArgs e)
+		{
+			using(var dlg = new AddParameterDialog(_configView.Repository))
+			{
+				dlg.Run(_configView);
+			}
 		}
 	}
 }

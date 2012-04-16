@@ -55,16 +55,14 @@
 		/// <param name="m">The Windows <see cref="T:System.Windows.Forms.Message"/> to process.</param>
 		protected override void WndProc(ref Message m)
 		{
-			const int WM_MOUSEACTIVATE = 0x21;
-
 			bool processed = false;
-			switch(m.Msg)
+			switch((WindowsMessage)m.Msg)
 			{
-				case NativeMethods.WM_NCHITTEST:
+				case WindowsMessage.WM_NCHITTEST:
 					m.Result = (IntPtr)1;
 					processed = true;
 					break;
-				case WM_MOUSEACTIVATE:
+				case WindowsMessage.WM_MOUSEACTIVATE:
 					m.Result = (IntPtr)4;
 					processed = true;
 					return;

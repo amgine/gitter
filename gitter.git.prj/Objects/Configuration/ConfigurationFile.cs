@@ -12,15 +12,17 @@
 		#region Static
 
 		/// <summary>Open config file with system-wide settings.</summary>
-		public static ConfigurationFile OpenSystemFile()
+		/// <param name="configAccessor">Configuration file accessor.</param>
+		public static ConfigurationFile OpenSystemFile(IConfigAccessor configAccessor)
 		{
-			return new ConfigurationFile(ConfigFile.System, true);
+			return new ConfigurationFile(configAccessor, ConfigFile.System, true);
 		}
 
 		/// <summary>Open config file with user-specific settings.</summary>
-		public static ConfigurationFile OpenCurrentUserFile()
+		/// <param name="configAccessor">Configuration file accessor.</param>
+		public static ConfigurationFile OpenCurrentUserFile(IConfigAccessor configAccessor)
 		{
-			return new ConfigurationFile(ConfigFile.User, true);
+			return new ConfigurationFile(configAccessor, ConfigFile.User, true);
 		}
 
 		#endregion
@@ -56,6 +58,7 @@
 
 		#region Data
 
+		private readonly IConfigAccessor _configAccessor;
 		private readonly Repository _repository;
 		private readonly string _fileName;
 		private readonly ConfigFile _configFile;
@@ -67,6 +70,7 @@
 
 		private ConfigurationFile(Repository repository, bool load)
 		{
+			_configAccessor = repository.Accessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
 			_repository = repository;
 			_configFile = ConfigFile.Repository;
@@ -75,6 +79,9 @@
 
 		public ConfigurationFile(Repository repository, string fileName, bool load)
 		{
+			if(repository == null) throw new ArgumentNullException("repository");
+
+			_configAccessor = repository.Accessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
 			_repository = repository;
 			_configFile = ConfigFile.Other;
@@ -82,8 +89,11 @@
 			if(load) Refresh();
 		}
 
-		private ConfigurationFile(ConfigFile configFile, bool load)
+		private ConfigurationFile(IConfigAccessor configAccessor, ConfigFile configFile, bool load)
 		{
+			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
+
+			_configAccessor = configAccessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
 			_configFile = configFile;
 			if(load) Refresh();
@@ -91,16 +101,19 @@
 
 		/// <summary>Create <see cref="ConfigurationFile"/>.</summary>
 		/// <param name="fileName">Name of config file.</param>
-		public ConfigurationFile(string fileName)
-			: this(fileName, true)
+		public ConfigurationFile(IConfigAccessor configAccessor, string fileName)
+			: this(configAccessor, fileName, true)
 		{
 		}
 
 		/// <summary>Create <see cref="ConfigurationFile"/>.</summary>
 		/// <param name="fileName">Name of config file.</param>
 		/// <param name="load">Immediately load file contents.</param>
-		public ConfigurationFile(string fileName, bool load)
+		public ConfigurationFile(IConfigAccessor configAccessor, string fileName, bool load)
 		{
+			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
+
+			_configAccessor = configAccessor;
 			_fileName = fileName;
 			_parameters = new Dictionary<string, ConfigParameter>();
 			_configFile = ConfigFile.Other;
@@ -161,7 +174,8 @@
 		{
 			if(name == null) throw new ArgumentNullException("name");
 			if(value == null) throw new ArgumentNullException("value");
-			ConfigParameter p;
+
+			ConfigParameter configParameter;
 			lock(_parameters)
 			{
 				if(!_parameters.ContainsKey(name))
@@ -169,80 +183,70 @@
 					switch(_configFile)
 					{
 						case ConfigFile.Other:
-							if(_repository == null)
-								RepositoryProvider.Git.SetConfigValue(new SetConfigValueParameters(name, value)
-								{
-									ConfigFile = _configFile,
-									FileName = _fileName,
-								});
-							else
-								_repository.Accessor.SetConfigValue(new SetConfigValueParameters(name, value)
-									{
-										ConfigFile = _configFile,
-										FileName = _fileName,
-									});
+							_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
+							{
+								ConfigFile = _configFile,
+								FileName = _fileName,
+							});
 							break;
 						case ConfigFile.System:
 						case ConfigFile.User:
-							RepositoryProvider.Git.SetConfigValue(new SetConfigValueParameters(name, value)
+							_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
 							{
 								ConfigFile = _configFile,
 							});
 							break;
 						case ConfigFile.Repository:
-							_repository.Accessor.SetConfigValue(new SetConfigValueParameters(name, value));
+							_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value));
 							break;
 					}
-					p = new ConfigParameter(_fileName, name, value);
-					_parameters.Add(name, p);
-					InvokeCreated(p);
+					configParameter = _repository != null ?
+						new ConfigParameter(_repository, _configFile, name, value) :
+						new ConfigParameter(_configAccessor, _fileName, name, value);
+					_parameters.Add(name, configParameter);
+					InvokeCreated(configParameter);
 				}
 				else
 				{
 					throw new ArgumentException("Parameter already exists.", "name");
 				}
 			}
-			return p;
+			return configParameter;
 		}
 
 		internal void Unset(ConfigParameter parameter)
 		{
 			if(parameter == null) throw new ArgumentNullException("parameter");
+
 			switch(_configFile)
 			{
 				case ConfigFile.Other:
-					if(_repository == null)
-						RepositoryProvider.Git.UnsetConfigValue(
-							new UnsetConfigValueParameters(parameter.Name)
-							{
-								FileName = _fileName,
-								ConfigFile = ConfigFile.Other,
-							});
-					else
-						_repository.Accessor.UnsetConfigValue(
-							new UnsetConfigValueParameters(parameter.Name)
-							{
-								FileName = _fileName,
-								ConfigFile = _configFile,
-							});
+					_configAccessor.UnsetConfigValue(
+						new UnsetConfigValueParameters(parameter.Name)
+						{
+							FileName = _fileName,
+							ConfigFile = ConfigFile.Other,
+						});
 					break;
 				case ConfigFile.System:
 				case ConfigFile.User:
-					RepositoryProvider.Git.UnsetConfigValue(
+					_configAccessor.UnsetConfigValue(
 						new UnsetConfigValueParameters(parameter.Name)
 						{
 							ConfigFile = _configFile,
 						});
 					break;
 				case ConfigFile.Repository:
-					_repository.Accessor.UnsetConfigValue(
+					_configAccessor.UnsetConfigValue(
 						new UnsetConfigValueParameters(parameter.Name));
 					break;
 			}
 			lock(_parameters)
 			{
-				_parameters.Remove(parameter.Name);
-				InvokeDeleted(parameter);
+				if(_parameters.Remove(parameter.Name))
+				{
+					InvokeDeleted(parameter);
+				}
 			}
 		}
 
@@ -260,7 +264,9 @@
 			lock(_parameters)
 			{
 				if(_parameters.TryGetValue(name, out parameter))
+				{
 					return parameter;
+				}
 			}
 			return null;
 		}
@@ -271,9 +277,13 @@
 			lock(_parameters)
 			{
 				if(_parameters.TryGetValue(name, out p))
+				{
 					p.Value = value;
+				}
 				else
+				{
 					p = CreateParameter(name, value);
+				}
 			}
 			return p;
 		}
@@ -287,20 +297,16 @@
 			switch(_configFile)
 			{
 				case ConfigFile.Other:
-					if(_repository == null)
-						config = RepositoryProvider.Git.QueryConfig(
-							new QueryConfigParameters(_fileName));
-					else
-						config = _repository.Accessor.QueryConfig(
-							new QueryConfigParameters(_fileName));
+					config = _configAccessor.QueryConfig(
+						new QueryConfigParameters(_fileName));
 					break;
 				case ConfigFile.Repository:
-					config = _repository.Accessor.QueryConfig(
+					config = _configAccessor.QueryConfig(
 						new QueryConfigParameters());
 					break;
 				case ConfigFile.System:
 				case ConfigFile.User:
-					config = RepositoryProvider.Git.QueryConfig(
+					config = _configAccessor.QueryConfig(
 						new QueryConfigParameters(_configFile));
 					break;
 				default:
@@ -309,16 +315,32 @@
 
 			lock(_parameters)
 			{
-				CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
-					_parameters,
-					null,
-					null,
-					config,
-					configParameterData => ObjectFactories.CreateConfigParameter(_repository, configParameterData),
-					ObjectFactories.UpdateConfigParameter,
-					InvokeCreated,
-					InvokeDeleted,
-					true);
+				if(_repository != null)
+				{
+					CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
+						_parameters,
+						null,
+						null,
+						config,
+						configParameterData => ObjectFactories.CreateConfigParameter(_repository, configParameterData),
+						ObjectFactories.UpdateConfigParameter,
+						InvokeCreated,
+						InvokeDeleted,
+						true);
+				}
+				else
+				{
+					CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
+						_parameters,
+						null,
+						null,
+						config,
+						configParameterData => ObjectFactories.CreateConfigParameter(_configAccessor, configParameterData),
+						ObjectFactories.UpdateConfigParameter,
+						InvokeCreated,
+						InvokeDeleted,
+						true);
+				}
 			}
 		}
 

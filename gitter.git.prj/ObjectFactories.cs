@@ -175,8 +175,9 @@
 
 		}
 
-		public static ConfigParameter CreateConfigParameter(ConfigParameterData configParameterData)
+		public static ConfigParameter CreateConfigParameter(IConfigAccessor configAccessor, ConfigParameterData configParameterData)
 		{
+			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
 			if(configParameterData == null) throw new ArgumentNullException("configParameterData");
 
 			switch(configParameterData.ConfigFile)
@@ -185,11 +186,13 @@
 					throw new ArgumentException();
 				case ConfigFile.Other:
 					return new ConfigParameter(
+						configAccessor,
 						configParameterData.SpecifiedFile,
 						configParameterData.Name,
 						configParameterData.Value);
 				default:
 					return new ConfigParameter(
+						configAccessor,
 						configParameterData.ConfigFile,
 						configParameterData.Name,
 						configParameterData.Value);
@@ -203,20 +206,14 @@
 
 		public static ConfigParameter CreateConfigParameter(Repository repository, ConfigParameterData configParameterData)
 		{
+			if(repository == null) throw new ArgumentNullException("repository");
 			if(configParameterData == null) throw new ArgumentNullException("configParameterData");
 
-			if(repository == null)
-			{
-				return CreateConfigParameter(configParameterData);
-			}
-			else
-			{
-				return new ConfigParameter(
-					repository,
-					configParameterData.ConfigFile,
-					configParameterData.Name,
-					configParameterData.Value);
-			}
+			return new ConfigParameter(
+				repository,
+				configParameterData.ConfigFile,
+				configParameterData.Name,
+				configParameterData.Value);
 		}
 
 		public static void UpdateReflogRecord(ReflogRecord reflogRecord, ReflogRecordData reflogRecordData)

@@ -15,10 +15,15 @@
 	public partial class OptionsDialog : DialogBase, IExecutableDialog, IElevatedExecutableDialog
 	{
 		private readonly Dictionary<Guid, PropertyPage> _propertyPages;
+		private readonly IWorkingEnvironment _environment;
 		private PropertyPage _activePage;
 
-		public OptionsDialog()
+		public OptionsDialog(IWorkingEnvironment environment)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
+
 			InitializeComponent();
 
 			Text = Resources.StrOptions;
@@ -51,7 +56,7 @@
 			}
 			if(!_propertyPages.TryGetValue(desc.Guid, out page))
 			{
-				page = desc.CreatePropertyPage();
+				page = desc.CreatePropertyPage(_environment);
 				bool raiseElevatedChanged = false;
 				if(page != null)
 				{
@@ -60,12 +65,16 @@
 					{
 						elevated.RequireElevationChanged += OnRequireElevationChanged;
 						if(!RequireElevation && elevated.RequireElevation)
+						{
 							raiseElevatedChanged = true;
+						}
 					}
 				}
 				_propertyPages.Add(desc.Guid, page);
 				if(raiseElevatedChanged)
+				{
 					RequireElevationChanged.Raise(this);
+				}
 			}
 			if(page != null)
 			{
@@ -74,7 +83,9 @@
 				page.InvokeOnShown();
 			}
 			if(_activePage != null)
+			{
 				_activePage.Parent = null;
+			}
 			_activePage = page;
 		}
 

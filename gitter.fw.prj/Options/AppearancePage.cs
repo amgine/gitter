@@ -13,7 +13,7 @@
 	public partial class AppearancePage : PropertyPage, IExecutableDialog
 	{
 		public AppearancePage()
-			: base(PropertyPageDescription.AppearanceGroupGuid)
+			: base(PropertyPageFactory.AppearanceGroupGuid)
 		{
 			InitializeComponent();
 

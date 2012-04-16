@@ -15,7 +15,7 @@
 	internal partial class BlameView : GitViewBase
 	{
 		public BlameView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.BlameViewGuid, parameters, gui)
+			: base(Guids.BlameViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

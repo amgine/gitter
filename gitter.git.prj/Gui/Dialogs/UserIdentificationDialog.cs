@@ -37,14 +37,22 @@
 			{
 				var userName = repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
 				if(userName != null)
+				{
 					_txtUsername.Text = _oldUserName = userName.Value;
+				}
 				else
+				{
 					_txtUsername.Text = Environment.UserName;
+				}
 				var userEmail = repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
 				if(userEmail != null)
+				{
 					_txtEmail.Text = _oldUserEmail = userEmail.Value;
+				}
 				else
+				{
 					_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
+				}
 			}
 			else
 			{
@@ -72,11 +80,15 @@
 			set
 			{
 				if(value)
+				{
 					_radSetUserGlobally.Checked = true;
+				}
 				else
 				{
 					if(!_radSetUserForRepositoryOnly.Enabled)
+					{
 						throw new InvalidOperationException();
+					}
 					_radSetUserForRepositoryOnly.Checked = true;
 				}
 			}
@@ -155,8 +167,12 @@
 				}
 				else
 				{
-					_repository.Configuration.SetValue(GitConstants.UserNameParameter, userName);
-					_repository.Configuration.SetValue(GitConstants.UserEmailParameter, userEmail);
+					using(_repository.Monitor.BlockNotifications(
+						RepositoryNotifications.ConfigUpdatedNotification))
+					{
+						_repository.Configuration.SetValue(GitConstants.UserNameParameter, userName);
+						_repository.Configuration.SetValue(GitConstants.UserEmailParameter, userEmail);
+					}
 				}
 				if(_repository != null)
 				{

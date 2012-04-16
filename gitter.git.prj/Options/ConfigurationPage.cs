@@ -18,6 +18,9 @@
 	{
 		public static readonly new Guid Guid = new Guid("AE583E68-3D3E-4A89-AE92-7A89527EDAA3");
 
+		private readonly ConfigurationFile _systemCfg;
+		private readonly ConfigurationFile _userCfg;
+
 		public ConfigurationPage()
 			: base(Guid)
 		{
@@ -29,8 +32,10 @@
 			_btnAddUserParameter.Text = Resources.StrAddParameter;
 			_btnAddSystemParameter.Text = Resources.StrAddParameter;
 
-			_lstUserConfig.LoadData(ConfigFile.User);
-			_lstSystemConfig.LoadData(ConfigFile.System);
+			_userCfg	= ConfigurationFile.OpenCurrentUserFile(RepositoryProvider.Git);
+			_systemCfg	= ConfigurationFile.OpenSystemFile(RepositoryProvider.Git);
+			_lstUserConfig.LoadData(_userCfg);
+			_lstSystemConfig.LoadData(_systemCfg);
 		}
 
 		private void _addUserParameter_Click(object sender, EventArgs e)
@@ -39,7 +44,7 @@
 			{
 				if(dlg.Run(this) == DialogResult.OK)
 				{
-					_lstUserConfig.LoadData(ConfigFile.User);
+					_userCfg.Refresh();
 				}
 			}
 		}
@@ -50,7 +55,7 @@
 			{
 				if(dlg.Run(this) == DialogResult.OK)
 				{
-					_lstSystemConfig.LoadData(ConfigFile.System);
+					_systemCfg.Refresh();
 				}
 			}
 		}

@@ -20,17 +20,18 @@
 		{
 		}
 
-		public GitViewBase(Guid guid, IDictionary<string, object> parameters, GuiProvider gui)
-			: base(guid, parameters)
+		public GitViewBase(Guid guid, GuiProvider guiProvider, IDictionary<string, object> parameters)
+			: base(guid, guiProvider.Environment, parameters)
 		{
-			if(gui == null) throw new ArgumentNullException("gui");
-			_gui = gui;
-			_repository = gui.Repository;
+			if(guiProvider == null) throw new ArgumentNullException("gui");
+
+			_gui = guiProvider;
+			_repository = guiProvider.Repository;
 		}
 
 		protected void ShowDiffTool(IDiffSource diffSource)
 		{
-			Gui.Environment.ViewDockService.ShowView(Guids.DiffViewGuid,
+			WorkingEnvironment.ViewDockService.ShowView(Guids.DiffViewGuid,
 				new Dictionary<string, object>()
 				{
 					{ "source", diffSource }
@@ -39,7 +40,7 @@
 
 		protected void ShowContextualDiffTool(IDiffSource diffSource)
 		{
-			Gui.Environment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid,
+			WorkingEnvironment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid,
 				new Dictionary<string, object>()
 				{
 					{ "source", diffSource }

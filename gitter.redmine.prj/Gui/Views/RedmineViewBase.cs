@@ -5,6 +5,7 @@
 	using System.Linq;
 	using System.Text;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	public class RedmineViewBase : ViewBase
@@ -17,8 +18,8 @@
 		}
 
 		/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
-		public RedmineViewBase(Guid guid, IDictionary<string, object> parameters)
-			: base(guid, parameters)
+		public RedmineViewBase(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
+			: base(guid, environment, parameters)
 		{
 		}
 

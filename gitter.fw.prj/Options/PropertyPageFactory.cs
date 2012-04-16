@@ -1,11 +1,9 @@
 ﻿namespace gitter.Framework.Options
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 
-	public sealed class PropertyPageDescription
+	public sealed class PropertyPageFactory
 	{
 		#region Static Data
 
@@ -19,14 +17,14 @@
 		private readonly Guid _guid;
 		private readonly Guid _groupGuid;
 		private readonly string _name;
-		private Func<PropertyPage> _getPropertyPage;
+		private Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
 		private Bitmap _icon;
 
 		#endregion
 
 		#region .ctor
 
-		public PropertyPageDescription(Guid guid, string name, Bitmap icon, Guid groupGuid, Func<PropertyPage> getPropertyPage)
+		public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, Func<IWorkingEnvironment, PropertyPage> getPropertyPage)
 		{
 			_guid = guid;
 			_name = name;
@@ -63,10 +61,18 @@
 
 		#region Methods
 
-		public PropertyPage CreatePropertyPage()
+		public PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
 		{
-			if(_getPropertyPage != null) return _getPropertyPage();
-			return null;
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			if(_getPropertyPage != null)
+			{
+				return _getPropertyPage(environment);
+			}
+			else
+			{
+				return null;
+			}
 		}
 
 		#endregion

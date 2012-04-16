@@ -20,8 +20,8 @@
 		private IssuesSearchToolBar _searchToolbar;
 		private volatile AsyncFunc<RedmineServiceContext, LinkedList<Issue>> _currentLookup;
 
-		public IssuesView(IDictionary<string, object> parameters)
-			: base(Guids.IssuesViewGuid, parameters)
+		public IssuesView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+			: base(Guids.IssuesViewGuid, environment, parameters)
 		{
 			InitializeComponent();
 

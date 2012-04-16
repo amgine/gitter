@@ -14,14 +14,9 @@
 
 	public partial class RepositoryExplorerView : ViewBase
 	{
-		private readonly IWorkingEnvironment _environment;
-
-		public RepositoryExplorerView(IDictionary<string, object> parameters, IWorkingEnvironment environment)
-			: base(Guids.RepositoryExplorerView, parameters)
+		public RepositoryExplorerView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+			: base(Guids.RepositoryExplorerView, environment, parameters)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
-			_environment = environment;
-
 			InitializeComponent();
 
 			Text = Resources.StrRepositoryExplorer;
@@ -35,7 +30,10 @@
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
 			var item = e.Item as ViewListItem;
-			if(item != null) _environment.ViewDockService.ShowView(item.Data.Guid);
+			if(item != null)
+			{
+				WorkingEnvironment.ViewDockService.ShowView(item.Data.Guid);
+			}
 		}
 
 		public void AddItem(CustomListBoxItem item)

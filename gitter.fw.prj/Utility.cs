@@ -18,6 +18,8 @@
 
 		private static readonly Image _dummyImage = new Bitmap(1, 1, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 		private static readonly Graphics _measurementGraphics = Graphics.FromImage(_dummyImage);
+		/// <summary>1 Jan 1970</summary>
+		private static readonly DateTime UnixEraStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 		public static Graphics MeasurementGraphics
 		{
@@ -50,6 +52,80 @@
 			}
 			if(sizeId >= SizePostfix.Length) return size.ToString();
 			return ((int)(s + .5)).ToString() + " " + SizePostfix[sizeId];
+		}
+
+		public static string FormatDate(DateTime date, DateFormat format)
+		{
+			switch(format)
+			{
+				case DateFormat.SystemDefault:
+					return date.ToString("dd.MM.yyyy HH:mm:ss");
+				case DateFormat.UnixTimestamp:
+					return ((int)(date - UnixEraStart).TotalSeconds).ToString();
+				case DateFormat.Relative:
+					{
+						var span = DateTime.Now - date;
+						if(span.TotalDays >= 365)
+						{
+							var years = (int)(span.TotalDays / 365);
+							if(years == 1)
+								return "1 year ago";
+							else
+								return years.ToString() + " years ago";
+						}
+						if(span.TotalDays >= 30)
+						{
+							var months = (int)(span.TotalDays / 30);
+							if(months == 1)
+								return "1 month ago";
+							else
+								return months.ToString() + " months ago";
+						}
+						if(span.TotalDays >= 7)
+						{
+							var weeks = (int)(span.TotalDays / 7);
+							if(weeks == 1)
+								return "1 week ago";
+							else
+								return weeks.ToString() + " weeks ago";
+						}
+						if(span.TotalDays >= 1)
+						{
+							var days = (int)span.TotalDays;
+							if(days == 1)
+								return "1 day ago";
+							else
+								return days.ToString() + " days ago";
+						}
+						if(span.TotalHours >= 1)
+						{
+							var hours = (int)span.TotalHours;
+							if(hours == 1)
+								return "1 hour ago";
+							else
+								return hours.ToString() + " hours ago";
+						}
+						if(span.TotalMinutes >= 1)
+						{
+							var minutes = (int)span.TotalMinutes;
+							if(minutes == 1)
+								return "1 minute ago";
+							else
+								return minutes.ToString() + " minutes ago";
+						}
+						var seconds = (int)span.TotalSeconds;
+						if(seconds == 1)
+							return "1 second ago";
+						else
+							return seconds.ToString() + " seconds ago";
+					}
+				case DateFormat.ISO8601:
+					return date.FormatISO8601();
+				case DateFormat.RFC2822:
+					return date.FormatRFC2822();
+				default:
+					throw new ArgumentException("format");
+			}
 		}
 
 		public static Bitmap QueryIcon(string fileName)

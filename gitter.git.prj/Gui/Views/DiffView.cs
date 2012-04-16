@@ -25,7 +25,7 @@
 		#endregion
 
 		public DiffView(Guid guid, IDictionary<string, object> parameters, GuiProvider gui)
-			: base(guid, parameters, gui)
+			: base(guid, gui, parameters)
 		{
 			InitializeComponent();
 

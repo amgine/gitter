@@ -142,6 +142,15 @@ namespace gitter.Git.AccessLayer.CLI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MSysGit command line interface.
+        /// </summary>
+        internal static string StrProviderName {
+            get {
+                return ResourceManager.GetString("StrProviderName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Refresh.
         /// </summary>
         internal static string StrRefresh {

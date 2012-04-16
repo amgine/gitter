@@ -19,17 +19,13 @@
 
 	internal partial class StartPageView : ViewBase
 	{
-		private readonly IWorkingEnvironment _environment;
 		private readonly StartPageViewFactory _factory;
 
-		public StartPageView(IDictionary<string, object> parameters, IWorkingEnvironment environment, StartPageViewFactory factory)
-			: base(Guids.StartPageView, parameters)
+		public StartPageView(IWorkingEnvironment environment, IDictionary<string, object> parameters, StartPageViewFactory factory)
+			: base(Guids.StartPageView, environment, parameters)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
 			if(factory == null) throw new ArgumentNullException("factory");
 			
-			_environment = environment;
-
 			InitializeComponent();
 
 			_factory = factory;
@@ -45,7 +41,7 @@
 			_lstLocalRepositories.DragEnter += OnLocalRepositoriesDragEnter;
 			_lstLocalRepositories.DragDrop += OnLocalRepositoriesDragDrop;
 
-			foreach(var repo in Environment.RecentRepositories)
+			foreach(var repo in WorkingEnvironment.RecentRepositories)
 			{
 				_lstRecentRepositories.Items.Add(new RepositoryListItem(new RepositoryLink(repo, "")));
 			}
@@ -89,7 +85,7 @@
 							}
 							if(!duplicateEntry)
 							{
-								var provider = Environment.FindProvider(data[i]);
+								var provider = WorkingEnvironment.FindProviderForDirectory(data[i]);
 								if(provider != null)
 								{
 									var link = new RepositoryLink(path, provider.Name);
@@ -124,7 +120,7 @@
 			var item = e.Item as RepositoryListItem;
 			if(item != null)
 			{
-				if(_environment.OpenRepository(item.Data.Path))
+				if(WorkingEnvironment.OpenRepository(item.Data.Path))
 				{
 					if(_factory.CloseAfterRepositoryLoad)
 					{
@@ -177,11 +173,6 @@
 			}
 		}
 
-		public IWorkingEnvironment Environment
-		{
-			get { return _environment; }
-		}
-
 		public LocalRepositoriesListBox Repositories
 		{
 			get { return _lstLocalRepositories; }
@@ -189,7 +180,7 @@
 
 		private void _btnAddLocalRepo_LinkClicked(object sender, EventArgs e)
 		{
-			using(var dlg = new AddRepositoryDialog(Environment, Repositories))
+			using(var dlg = new AddRepositoryDialog(WorkingEnvironment, Repositories))
 			{
 				dlg.Run(this);
 			}
@@ -197,12 +188,12 @@
 
 		private void _btnInitLocalRepo_LinkClicked(object sender, EventArgs e)
 		{
-			gitter.Git.RepositoryProvider.RunInitDialog(Environment);
+			gitter.Git.RepositoryProvider.RunInitDialog(WorkingEnvironment);
 		}
 
 		private void _btnCloneRemoteRepo_LinkClicked(object sender, EventArgs e)
 		{
-			gitter.Git.RepositoryProvider.RunCloneDialog(Environment);
+			gitter.Git.RepositoryProvider.RunCloneDialog(WorkingEnvironment);
 		}
 
 		private void _chkClosePageAfterRepositoryLoad_CheckedChanged(object sender, EventArgs e)

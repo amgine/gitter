@@ -39,7 +39,6 @@
 			if(repository == null) throw new ArgumentNullException("repository");
 			_repository = repository;
 			_configFile = ConfigFile.Repository;
-
 		}
 
 		/// <summary>Create <see cref="AddParameterDialog"/>.</summary>
@@ -47,7 +46,11 @@
 		public AddParameterDialog(ConfigFile configFile)
 			: this()
 		{
-			if(configFile != ConfigFile.System && configFile != ConfigFile.User) throw new ArgumentNullException("configFile");
+			if(configFile != ConfigFile.System && configFile != ConfigFile.User)
+			{
+				throw new ArgumentNullException("configFile");
+			}
+
 			_configFile = configFile;
 		}
 

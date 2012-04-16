@@ -8,7 +8,7 @@
 	using gitter.Framework.Configuration;
 
 	/// <summary>Performs repository-independent git operations.</summary>
-	public sealed partial class GitCLI : IGitAccessor
+	internal sealed partial class GitCLI : IGitAccessor
 	{
 		private static readonly LoggingService Log = new LoggingService("Global CLI");
 		private static readonly Version _minVersion = new Version(1, 7, 0, 2);

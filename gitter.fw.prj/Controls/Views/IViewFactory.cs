@@ -13,7 +13,7 @@
 		/// <summary>View name.</summary>
 		string Name { get; }
 
-		/// <summary>Tool icon.</summary>
+		/// <summary>View icon.</summary>
 		Image Image { get; }
 
 		/// <summary>Only one instance of view should be maintained.</summary>
@@ -26,13 +26,15 @@
 		void CloseAllViews();
 
 		/// <summary>Create new view with default parameters.</summary>
-		/// <returns>Created tool.</returns>
-		ViewBase CreateView();
+		/// <param name="environment">Application working environment.</param>
+		/// <returns>Created view.</returns>
+		ViewBase CreateView(IWorkingEnvironment environment);
 
 		/// <summary>Create new view with specified parameters.</summary>
+		/// <param name="environment">Application working environment.</param>
 		/// <param name="parameters">Creation parameters.</param>
 		/// <returns>Created view.</returns>
-		ViewBase CreateView(IDictionary<string, object> parameters);
+		ViewBase CreateView(IWorkingEnvironment environment, IDictionary<string, object> parameters);
 
 		/// <summary>Default view position.</summary>
 		ViewPosition DefaultViewPosition { get; }

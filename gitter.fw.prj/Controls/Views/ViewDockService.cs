@@ -13,6 +13,7 @@
 		#region Data
 
 		private readonly Dictionary<Guid, IViewFactory> _factories;
+		private readonly IWorkingEnvironment _environment;
 		private readonly ViewDockGrid _grid;
 		private readonly Section _section;
 
@@ -28,11 +29,13 @@
 			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
-		public ViewDockService(ViewDockGrid grid, Section section)
+		public ViewDockService(IWorkingEnvironment environment, ViewDockGrid grid, Section section)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
 			if(grid == null) throw new ArgumentNullException("grid");
 			if(section == null) throw new ArgumentNullException("section");
 
+			_environment = environment;
 			_grid = grid;
 			_section = section;
 			_factories = new Dictionary<Guid, IViewFactory>();
@@ -254,7 +257,7 @@
 				}
 				if(existing == null)
 				{
-					existing = factory.CreateView();
+					existing = factory.CreateView(_environment);
 					var section = _section.TryGetSection(GetViewConfigId(existing));
 					if(section != null)
 						existing.LoadViewFrom(section);
@@ -281,7 +284,7 @@
 				}
 				if(existing == null)
 				{
-					existing = factory.CreateView();
+					existing = factory.CreateView(_environment);
 					var section = _section.TryGetSection(GetViewConfigId(existing));
 					if(section != null)
 						existing.LoadViewFrom(section);
@@ -316,7 +319,7 @@
 				}
 				if(existing == null)
 				{
-					existing = factory.CreateView(parameters);
+					existing = factory.CreateView(_environment, parameters);
 					existing.Closing += OnViewClosing;
 					ShowNewView(factory, existing, activate);
 				}
@@ -340,7 +343,7 @@
 				}
 				if(existing == null)
 				{
-					existing = factory.CreateView(parameters);
+					existing = factory.CreateView(_environment, parameters);
 					existing.Closing += OnViewClosing;
 					ShowNewView(factory, existing, activate);
 				}

@@ -14,7 +14,7 @@
 	internal partial class ReflogView : GitViewBase
 	{
 		public ReflogView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.ReflogViewGuid, parameters, gui)
+			: base(Guids.ReflogViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

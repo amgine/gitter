@@ -112,7 +112,8 @@
     <Compile Include="GitCLI_config.cs" />
     <Compile Include="GitRepositoryUpdateChannel.cs" />
     <Compile Include="ICommandExecutor.cs" />
-    <Compile Include="MsysGitDownloader.cs" />
+    <Compile Include="MSysGitAccessorProvider.cs" />
+    <Compile Include="MSysGitDownloader.cs" />
     <Compile Include="Process\GitAsync.cs" />
     <Compile Include="Process\GitInput.cs" />
     <Compile Include="Process\GitInteractive.cs" />

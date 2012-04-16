@@ -20,8 +20,8 @@
 		private NewsSearchToolBar _searchToolbar;
 		private volatile AsyncFunc<RedmineServiceContext, LinkedList<News>> _currentLookup;
 
-		public NewsView(IDictionary<string, object> parameters)
-			: base(Guids.NewsViewGuid, parameters)
+		public NewsView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+			: base(Guids.NewsViewGuid, environment, parameters)
 		{
 			InitializeComponent();
 

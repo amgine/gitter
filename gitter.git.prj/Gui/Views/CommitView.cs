@@ -25,7 +25,7 @@
 		private bool _suppressDiffUpdate;
 
 		public CommitView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.CommitViewGuid, parameters, gui)
+			: base(Guids.CommitViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

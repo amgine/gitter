@@ -13,7 +13,7 @@
 	partial class GitView : GitViewBase
 	{
 		public GitView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.GitViewGuid, parameters, gui)
+			: base(Guids.GitViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

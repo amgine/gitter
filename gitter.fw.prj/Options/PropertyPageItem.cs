@@ -6,9 +6,9 @@
 
 	using gitter.Framework.Controls;
 
-	public sealed class PropertyPageItem : CustomListBoxItem<PropertyPageDescription>
+	public sealed class PropertyPageItem : CustomListBoxItem<PropertyPageFactory>
 	{
-		public PropertyPageItem(PropertyPageDescription description)
+		public PropertyPageItem(PropertyPageFactory description)
 			: base(description)
 		{
 			if(description == null) throw new ArgumentNullException("description");

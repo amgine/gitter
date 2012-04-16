@@ -37,7 +37,7 @@
 		#endregion
 
 		public HistoryView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.HistoryViewGuid, parameters, gui)
+			: base(Guids.HistoryViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

@@ -18,8 +18,8 @@
 			InitializeComponent();
 		}
 
-		public WebBrowserView(Guid guid, IDictionary<string, object> parameters)
-			: base(guid, parameters)
+		public WebBrowserView(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
+			: base(guid, environment, parameters)
 		{
 			InitializeComponent();
 

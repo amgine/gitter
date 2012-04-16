@@ -65,7 +65,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.XML" />
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
@@ -602,7 +601,6 @@
     <Compile Include="Options\GitOptionsPage.Designer.cs">
       <DependentUpon>GitOptionsPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="GitUtility.cs" />
     <Compile Include="Gui\GuiItemTemplate.cs" />
     <Compile Include="Objects\Users\UsersCollection.cs" />
     <Compile Include="Objects\Configuration\ConfigParameter.cs" />

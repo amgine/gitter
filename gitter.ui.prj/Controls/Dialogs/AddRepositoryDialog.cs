@@ -77,7 +77,7 @@
 					Resources.ErrPathCannotBeEmpty);
 				return false;
 			}
-			var prov = _environment.FindProvider(path);
+			var prov = _environment.FindProviderForDirectory(path);
 			if(prov == null)
 			{
 				NotificationService.NotifyInputError(_txtPath,

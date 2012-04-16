@@ -407,21 +407,25 @@
 
 		private bool InternalProcessResizing(ref Message m, bool contentControl)
 		{
-			if(m.Msg == NativeMethods.WM_NCACTIVATE && m.WParam != IntPtr.Zero && _childPopup != null && _childPopup.Visible)
+			switch((WindowsMessage)m.Msg)
 			{
-				_childPopup.Hide();
+				case WindowsMessage.WM_NCACTIVATE:
+					if(m.WParam != IntPtr.Zero && _childPopup != null && _childPopup.Visible)
+					{
+						_childPopup.Hide();
+					}
+					break;
 			}
 			if(!Resizable)
 			{
 				return false;
 			}
-			if(m.Msg == NativeMethods.WM_NCHITTEST)
+			switch((WindowsMessage)m.Msg)
 			{
-				return OnNcHitTest(ref m, contentControl);
-			}
-			else if(m.Msg == NativeMethods.WM_GETMINMAXINFO)
-			{
-				return OnGetMinMaxInfo(ref m);
+				case WindowsMessage.WM_NCHITTEST:
+					return OnNcHitTest(ref m, contentControl);
+				case WindowsMessage.WM_GETMINMAXINFO:
+					return OnGetMinMaxInfo(ref m);
 			}
 			return false;
 		}

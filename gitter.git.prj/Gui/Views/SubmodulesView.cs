@@ -23,7 +23,7 @@
 		#region .ctor
 
 		public SubmodulesView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.SubmodulesViewGuid, parameters, gui)
+			: base(Guids.SubmodulesViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

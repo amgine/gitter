@@ -75,7 +75,7 @@
 			{
 				format = DateColumn.DefaultDateFormat;
 			}
-			var strDate = GitUtility.FormatDate(date, format);
+			var strDate = Utility.FormatDate(date, format);
 			return measureEventArgs.MeasureText(strDate, DateColumn.Font);
 		}
 
@@ -91,7 +91,7 @@
 			{
 				format = DateColumn.DefaultDateFormat;
 			}
-			var strdate = GitUtility.FormatDate(date, format);
+			var strdate = Utility.FormatDate(date, format);
 			paintEventArgs.PaintText(strdate, DateColumn.Font);
 		}
 

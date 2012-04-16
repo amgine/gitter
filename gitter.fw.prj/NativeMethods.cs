@@ -110,20 +110,6 @@
 			int uFlags
 		);
 
-		public const int WM_NCHITTEST = 0x0084;
-		public const int WM_NCACTIVATE = 0x0086;
-		public const int WM_PRINT = 0x0317;
-		public const int WM_USER = 0x0400;
-		public const int WM_REFLECT = WM_USER + 0x1C00;
-		public const int WM_COMMAND = 0x0111;
-		public const int WM_GETMINMAXINFO = 0x0024;
-		public const int WM_KILLFOCUS = 0x0008;
-		public const int WM_SHOWWINDOW = 0x0018;
-		public const int WM_MOUSEMOVE = 0x0200;
-		public const int WM_CAPTURECHANGED = 0x0215;
-		public const int WM_SYSCOMMAND = 0x0112;
-		public const int WM_SETREDRAW = 0xB;
-
 		public const int WS_EX_NOACTIVATE = 0x08000000;
 		public const int HTTRANSPARENT = -1;
 
@@ -197,11 +183,18 @@
 		public static extern bool ReleaseCapture();
 
 		[DllImport("user32.dll")]
-		public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+		public static extern IntPtr SendMessage(IntPtr hWnd, WindowsMessage msg, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+		public static extern bool PostMessage(IntPtr hWnd, WindowsMessage msg, IntPtr wParam, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
 		[DllImport("user32.dll")]
 		public static extern bool ShowWindow(IntPtr handle, int flags);

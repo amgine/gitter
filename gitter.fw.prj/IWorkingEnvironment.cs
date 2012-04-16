@@ -20,6 +20,8 @@
 
 		IEnumerable<IRepositoryProvider> RepositoryProviders { get; }
 
+		T GetRepositoryProvider<T>() where T : class, IRepositoryProvider;
+
 		IEnumerable<IIssueTrackerProvider> IssueTrackerProviders { get; }
 
 		IEnumerable<IIssueTrackerProvider> ActiveIssueTrackerProviders { get; }
@@ -32,7 +34,9 @@
 		INotificationService NotificationService { get; }
 
 
-		IRepositoryProvider FindProvider(string workingDirectory);
+		IRepositoryProvider FindProviderForDirectory(string workingDirectory);
+
+		IRepositoryProvider ActiveRepositoryProvider { get; }
 
 		IRepository ActiveRepository { get; }
 

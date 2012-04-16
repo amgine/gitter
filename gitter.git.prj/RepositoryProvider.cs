@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Windows.Forms;
-	using System.Xml;
 
 	using gitter.Framework;
 	using gitter.Framework.Options;
@@ -14,7 +13,6 @@
 	using gitter.Git.Gui.Dialogs;
 	using gitter.Git.Integration;
 	using gitter.Git.AccessLayer;
-	using gitter.Git.AccessLayer.CLI;
 
 	using Resources = gitter.Git.Properties.Resources;
 
@@ -23,11 +21,14 @@
 	{
 		#region Static Data
 
+		private static readonly IGitAccessorProvider[] _gitProviders = new[]
+			{
+				new gitter.Git.AccessLayer.CLI.MSysGitAccessorProvider(),
+			};
+
 		private static readonly Version _minVersion = new Version(1,7,0,2);
-		private static bool _autodetectGitExePath;
-		private static string _gitExePath;
-		private static readonly IGitAccessor _git = new GitCLI();
-		private static readonly IntegrationFeatures _integrationFeatures = new IntegrationFeatures();
+		private static readonly IGitAccessor _git;
+		private static readonly IntegrationFeatures _integrationFeatures;
 		private static IWorkingEnvironment _environment;
 
 		internal static IWorkingEnvironment Environment
@@ -37,20 +38,21 @@
 
 		#endregion
 
+		/// <summary>Initializes the <see cref="RepositoryProvider"/> class.</summary>
 		static RepositoryProvider()
 		{
-			_autodetectGitExePath = true;
+			_integrationFeatures = new IntegrationFeatures();
+			_git = _gitProviders[0].CreateAccessor();
+		}
+
+		public IEnumerable<IGitAccessorProvider> AccessorProviders
+		{
+			get { return _gitProviders; }
 		}
 
 		/// <summary>Create <see cref="RepositoryProvider"/>.</summary>
 		public RepositoryProvider()
 		{
-		}
-
-		public static bool LogCLICalls
-		{
-			get;
-			set;
 		}
 
 		internal static IGitAccessor Git
@@ -66,18 +68,6 @@
 		public static Version MinimumRequiredGitVersion
 		{
 			get { return _minVersion; }
-		}
-
-		public static bool AutodetectGitExePath
-		{
-			get { return _autodetectGitExePath; }
-			set { _autodetectGitExePath = value; }
-		}
-
-		public static string ManualGitExePath
-		{
-			get { return _gitExePath; }
-			set { _gitExePath = value; }
 		}
 
 		public string Name
@@ -107,7 +97,7 @@
 			}
 			if(gitVersion == null || gitVersion < _minVersion)
 			{
-				using(var dlg = new VersionCheckDialog(_minVersion, gitVersion))
+				using(var dlg = new VersionCheckDialog(environment, _minVersion, gitVersion))
 				{
 					dlg.Run(environment.MainForm);
 					gitVersion = dlg.InstalledVersion;
@@ -125,24 +115,27 @@
 					_integrationFeatures.LoadFrom(integrationNode);
 				}
 			}
-			GlobalOptions.RegisterPropertyPage(new PropertyPageDescription(
-				GitOptionsPage.Guid,
-				Resources.StrGit,
-				null,
-				PropertyPageDescription.RootGroupGuid,
-				() => new GitOptionsPage()));
-			GlobalOptions.RegisterPropertyPage(new PropertyPageDescription(
-				IntegrationOptionsPage.Guid,
-				Resources.StrIntegration,
-				null,
-				GitOptionsPage.Guid,
-				() => new IntegrationOptionsPage()));
-			GlobalOptions.RegisterPropertyPage(new PropertyPageDescription(
-				ConfigurationPage.Guid,
-				Resources.StrConfig,
-				null,
-				GitOptionsPage.Guid,
-				() => new ConfigurationPage()));
+			GlobalOptions.RegisterPropertyPageFactory(
+				new PropertyPageFactory(
+					GitOptionsPage.Guid,
+					Resources.StrGit,
+					null,
+					PropertyPageFactory.RootGroupGuid,
+					env => new GitOptionsPage(env)));
+			GlobalOptions.RegisterPropertyPageFactory(
+				new PropertyPageFactory(
+					IntegrationOptionsPage.Guid,
+					Resources.StrIntegration,
+					null,
+					GitOptionsPage.Guid,
+					env => new IntegrationOptionsPage()));
+			GlobalOptions.RegisterPropertyPageFactory(
+				new PropertyPageFactory(
+					ConfigurationPage.Guid,
+					Resources.StrConfig,
+					null,
+					GitOptionsPage.Guid,
+					env => new ConfigurationPage()));
 			_environment = environment;
 			return true;
 		}
@@ -193,14 +186,14 @@
 
 		public void CloseRepository(IRepository repository)
 		{
-			var repo = (Repository)repository;
-			repo.Monitor.Shutdown();
+			var gitRepository = (Repository)repository;
+			gitRepository.Monitor.Shutdown();
 			try
 			{
-				var cfgFileName = Path.Combine(repo.GitDirectory, "gitter-config");
+				var cfgFileName = Path.Combine(gitRepository.GitDirectory, "gitter-config");
 				using(var fs = new FileStream(cfgFileName, FileMode.Create, FileAccess.Write, FileShare.None))
 				{
-					repo.ConfigurationManager.Save(new XmlAdapter(fs));
+					gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
 				}
 			}
 			catch
@@ -213,22 +206,6 @@
 			return new GuiProvider((Repository)repository);
 		}
 
-		public void InitRepository(IWin32Window parent)
-		{
-			using(var dlg = new InitDialog())
-			{
-				dlg.Run(parent);
-			}
-		}
-
-		public void CloneRepository(IWin32Window parent)
-		{
-			using(var dlg = new CloneDialog())
-			{
-				dlg.Run(parent);
-			}
-		}
-
 		public static DialogResult RunInitDialog()
 		{
 			return RunInitDialog(_environment);
@@ -238,14 +215,14 @@
 		{
 			DialogResult res;
 			string path = "";
-			using(var dlg = new InitDialog()
-				{
-					RepositoryPath = environment.RecentRepositoryPath,
-				})
+			using(var dlg = new InitDialog())
 			{
+				dlg.RepositoryPath = environment.RecentRepositoryPath;
 				res = dlg.Run(environment.MainForm);
 				if(res == DialogResult.OK)
+				{
 					path = Path.GetFullPath(dlg.RepositoryPath.Trim());
+				}
 			}
 			if(res == DialogResult.OK)
 			{
@@ -263,14 +240,14 @@
 		{
 			DialogResult res;
 			string path = "";
-			using(var dlg = new CloneDialog()
-				{
-					RepositoryPath = environment.RecentRepositoryPath,
-				})
+			using(var dlg = new CloneDialog())
 			{
+				dlg.RepositoryPath = environment.RecentRepositoryPath;
 				res = dlg.Run(environment.MainForm);
 				if(res == DialogResult.OK)
+				{
 					path = Path.GetFullPath(dlg.TargetPath.Trim());
+				}
 			}
 			if(res == DialogResult.OK)
 			{
@@ -281,13 +258,16 @@
 
 		public IEnumerable<StaticRepositoryAction> GetStaticActions()
 		{
-			return new[]
-			{
-				new StaticRepositoryAction("init", Resources.StrInit.AddEllipsis(), CachedResources.Bitmaps["ImgInit"],
-					env => RunInitDialog(env)),
-				new StaticRepositoryAction("clone", Resources.StrClone.AddEllipsis(), CachedResources.Bitmaps["ImgClone"],
-					env => RunCloneDialog(env)),
-			};
+			yield return new StaticRepositoryAction(
+				"init",
+				Resources.StrInit.AddEllipsis(),
+				CachedResources.Bitmaps["ImgInit"],
+				env => RunInitDialog(env));
+			yield return new StaticRepositoryAction(
+				"clone",
+				Resources.StrClone.AddEllipsis(),
+				CachedResources.Bitmaps["ImgClone"],
+				env => RunCloneDialog(env));
 		}
 	}
 }

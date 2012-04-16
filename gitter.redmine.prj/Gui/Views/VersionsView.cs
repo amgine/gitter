@@ -20,8 +20,8 @@
 		private VersionsSearchToolBar _searchToolbar;
 		private volatile AsyncFunc<RedmineServiceContext, LinkedList<ProjectVersion>> _currentLookup;
 
-		public VersionsView(IDictionary<string, object> parameters)
-			: base(Guids.VersionsViewGuid, parameters)
+		public VersionsView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+			: base(Guids.VersionsViewGuid, environment, parameters)
 		{
 			InitializeComponent();
 

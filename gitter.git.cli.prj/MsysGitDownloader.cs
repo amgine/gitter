@@ -8,7 +8,7 @@
 
 	using gitter.Git.AccessLayer.CLI;
 
-	public sealed class MsysGitDownloader
+	public sealed class MSysGitDownloader
 	{
 		private Version _latestVersion;
 		private bool _isAvailable;
@@ -17,24 +17,24 @@
 		private const string MsysgitFeedUrl = @"http://code.google.com/feeds/p/msysgit/downloads/basic";
 		private const string DownloadURL = @"http://msysgit.googlecode.com/files/";
 
-		public static MsysGitDownloader Create()
+		public static MSysGitDownloader Create()
 		{
-			return new MsysGitDownloader();
+			return new MSysGitDownloader();
 		}
 
 		public static IAsyncResult BeginCreate(AsyncCallback callback)
 		{
-			var func = new Func<MsysGitDownloader>(Create);
+			var func = new Func<MSysGitDownloader>(Create);
 			return func.BeginInvoke(callback, func);
 		}
 
-		public static MsysGitDownloader EndCreate(IAsyncResult ar)
+		public static MSysGitDownloader EndCreate(IAsyncResult ar)
 		{
-			var func = (Func<MsysGitDownloader>)ar.AsyncState;
+			var func = (Func<MSysGitDownloader>)ar.AsyncState;
 			return func.EndInvoke(ar);
 		}
 
-		private MsysGitDownloader()
+		private MSysGitDownloader()
 		{
 			var feed = DownloadFeed();
 			if(feed != null)

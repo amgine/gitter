@@ -41,7 +41,7 @@
 		}
 
 		public TreeView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.TreeViewGuid, parameters, gui)
+			: base(Guids.TreeViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

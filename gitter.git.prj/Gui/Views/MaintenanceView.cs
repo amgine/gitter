@@ -16,7 +16,7 @@
 	partial class MaintenanceView : GitViewBase
 	{
 		public MaintenanceView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.MaintenanceViewGuid, parameters, gui)
+			: base(Guids.MaintenanceViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

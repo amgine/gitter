@@ -22,7 +22,7 @@
 		private readonly ConfigToolBar _toolBar;
 
 		public ConfigView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.ConfigViewGuid, parameters, gui)
+			: base(Guids.ConfigViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 
@@ -45,7 +45,7 @@
 
 		protected override void DetachFromRepository(Repository repository)
 		{
-			_lstConfig.LoadData(null);
+			_lstConfig.Clear();
 		}
 
 		public override Image Image

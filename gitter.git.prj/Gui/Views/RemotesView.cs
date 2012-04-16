@@ -21,7 +21,7 @@
 		private RemotesToolbar _toolbar;
 
 		public RemotesView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.RemotesViewGuid, parameters, gui)
+			: base(Guids.RemotesViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 

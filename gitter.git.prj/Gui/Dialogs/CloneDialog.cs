@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git.Gui.Dialogs
 {
 	using System;
+	using System.IO;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
@@ -123,7 +124,7 @@
 			{
 				try
 				{
-					path = System.IO.Path.Combine(path, GitUtility.GetHumanishName(url));
+					path = Path.Combine(path, GitUtils.GetHumanishName(url));
 				}
 				catch { }
 			}
@@ -218,16 +219,30 @@
 		{
 			var url = _txtUrl.Text.Trim();
 			var path = _txtPath.Text.Trim();
-			if(!ValidateUrl(url, _txtUrl)) return false;
-			if(!ValidatePath(path, _txtPath)) return false;
+			if(!ValidateUrl(url, _txtUrl))
+			{
+				return false;
+			}
+			if(!ValidatePath(path, _txtPath))
+			{
+				return false;
+			}
 			if(_chkAppendRepositoryNameFromUrl.Checked)
+			{
 				path = AppendUrlToPath(path, url);
+			}
 			var remoteName = _txtRemoteName.Text.Trim();
-			if(!ValidateRemoteName(remoteName, _txtRemoteName)) return false;
+			if(!ValidateRemoteName(remoteName, _txtRemoteName))
+			{
+				return false;
+			}
 			bool shallow = _chkShallowClone.Checked;
 			int depth = shallow ? (int)_numDepth.Value : -1;
 			string template = _chkUseTemplate.Checked ? _txtTemplate.Text.Trim() : null;
-			if(template != null && !ValidatePath(template, _txtTemplate)) return false;
+			if(template != null && !ValidatePath(template, _txtTemplate))
+			{
+				return false;
+			}
 			bool bare = _chkBare.Checked;
 			bool mirror = bare && _chkMirror.Checked;
 			bool noCheckout = _chkNoCheckout.Checked;

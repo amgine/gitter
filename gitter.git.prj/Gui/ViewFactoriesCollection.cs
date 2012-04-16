@@ -83,9 +83,13 @@
 				if(_repository != value)
 				{
 					if(_repository != null)
+					{
 						DetachFromRepository(_repository);
+					}
 					if(value != null)
+					{
 						AttachToRepository(value);
+					}
 				}
 			}
 		}
