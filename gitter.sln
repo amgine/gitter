@@ -26,6 +26,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.updater", "gitter.up
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.askpass", "gitter.askpass.prj\gitter.askpass.csproj", "{BAF35255-1B7E-4599-BC31-D9A25FD9F1AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git.cli", "gitter.git.cli.prj\gitter.git.cli.csproj", "{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git.fw", "gitter.git.fw.prj\gitter.git.fw.csproj", "{C2307D21-25F9-47F8-901E-99B07AB66C39}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = gitter.vsmdi
@@ -121,6 +125,26 @@ Global
 		{BAF35255-1B7E-4599-BC31-D9A25FD9F1AB}.Release|Mixed Platforms.Build.0 = Release|x86
 		{BAF35255-1B7E-4599-BC31-D9A25FD9F1AB}.Release|x86.ActiveCfg = Release|x86
 		{BAF35255-1B7E-4599-BC31-D9A25FD9F1AB}.Release|x86.Build.0 = Release|x86
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}.Release|x86.ActiveCfg = Release|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

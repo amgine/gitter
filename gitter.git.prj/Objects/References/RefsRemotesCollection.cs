@@ -61,16 +61,36 @@
 
 		/// <summary>Updates remote branch cache.</summary>
 		/// <param name="branches">Actual remote branch data.</param>
-		private void RefreshInternal(IEnumerable<IObjectData<RemoteBranch>> branches)
+		private void RefreshInternal(IEnumerable<BranchData> branches)
 		{
 			lock(SyncRoot)
 			{
-				CacheUpdater.UpdateObjectDictionary(
-					Repository,
+				CacheUpdater.UpdateObjectDictionary<RemoteBranch, BranchData>(
+					ObjectStorage,
+					null,
+					branchData => branchData.IsRemote,
+					branches,
+					remoteBranchData => ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData),
+					ObjectFactories.UpdateRemoteBranch,
+					InvokeObjectAdded,
+					InvokeObjectRemoved,
+					true);
+			}
+		}
+
+		/// <summary>Updates remote branch cache.</summary>
+		/// <param name="branches">Actual remote branch data.</param>
+		private void RefreshInternal(IEnumerable<RemoteBranchData> branches)
+		{
+			lock(SyncRoot)
+			{
+				CacheUpdater.UpdateObjectDictionary<RemoteBranch, RemoteBranchData>(
 					ObjectStorage,
 					null,
 					null,
 					branches,
+					remoteBranchData => ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData),
+					ObjectFactories.UpdateRemoteBranch,
 					InvokeObjectAdded,
 					InvokeObjectRemoved,
 					true);
@@ -87,7 +107,15 @@
 
 		/// <summary>Refreshes the specified branches.</summary>
 		/// <param name="branches">Actual remote branch data.</param>
-		internal void Refresh(IEnumerable<IObjectData<RemoteBranch>> branches)
+		internal void Refresh(IEnumerable<RemoteBranchData> branches)
+		{
+			if(branches == null) throw new ArgumentNullException("branches");
+			RefreshInternal(branches);
+		}
+
+		/// <summary>Refreshes the specified branches.</summary>
+		/// <param name="branches">Actual remote branch data.</param>
+		internal void Refresh(IEnumerable<BranchData> branches)
 		{
 			if(branches == null) throw new ArgumentNullException("branches");
 			RefreshInternal(branches);
@@ -99,11 +127,11 @@
 		{
 			ValidateObject(branch, "branch");
 
-			var info = Repository.Accessor.QueryBranch(
+			var remoteBranchData = Repository.Accessor.QueryBranch(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
-			if(info != null)
+			if(remoteBranchData != null)
 			{
-				((IObjectData<RemoteBranch>)info).Update(branch);
+				ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
 			}
 			else
 			{
@@ -189,6 +217,66 @@
 				}
 			}
 			return res;
+		}
+
+		#endregion
+
+		#region Load()
+
+		/// <summary>Perform initial load of remote branches.</summary>
+		/// <param name="branchDataList">List of remote branch data containers.</param>
+		internal void Load(IEnumerable<RemoteBranchData> branchDataList)
+		{
+			if(branchDataList == null) throw new ArgumentNullException("branchDataList");
+
+			ObjectStorage.Clear();
+			if(branchDataList != null)
+			{
+				foreach(var remoteBranchData in branchDataList)
+				{
+					AddObject(ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData));
+				}
+			}
+		}
+
+		/// <summary>Perform initial load of remote branches.</summary>
+		/// <param name="branchDataList">List of remote branch data containers.</param>
+		internal void Load(IEnumerable<BranchData> branchDataList)
+		{
+			if(branchDataList == null) throw new ArgumentNullException("branchDataList");
+
+			ObjectStorage.Clear();
+			if(branchDataList != null)
+			{
+				foreach(var remoteBranchData in branchDataList)
+				{
+					AddObject(ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData));
+				}
+			}
+		}
+
+		#endregion
+
+		#region Notify()
+
+		/// <summary>Notifies that remote branch was created externally.</summary>
+		/// <param name="remoteBranchData">Created remote branch data.</param>
+		/// <returns>Created remote branch.</returns>
+		internal RemoteBranch NotifyCreated(RemoteBranchData remoteBranchData)
+		{
+			var branch = ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData);
+			AddObject(branch);
+			return branch;
+		}
+
+		/// <summary>Notifies that remote branch was created externally.</summary>
+		/// <param name="branchData">Created remote branch data.</param>
+		/// <returns>Created remote branch.</returns>
+		internal RemoteBranch NotifyCreated(BranchData branchData)
+		{
+			var branch = ObjectFactories.CreateRemoteBranch(Repository, branchData);
+			AddObject(branch);
+			return branch;
 		}
 
 		#endregion

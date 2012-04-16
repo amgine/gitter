@@ -51,12 +51,12 @@
 			base.Dispose(disposing);
 		}
 
-		internal void InvokeOnShown()
+		public void InvokeOnShown()
 		{
 			OnShown();
 		}
 
-		internal void InvokeOnClosed(DialogResult result)
+		public void InvokeOnClosed(DialogResult result)
 		{
 			OnClosed(result);
 		}

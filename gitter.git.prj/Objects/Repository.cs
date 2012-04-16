@@ -12,7 +12,7 @@
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>git repository.</summary>
-	public sealed class Repository : IRepository
+	public sealed class Repository : IGitRepository
 	{
 		#region Data
 
@@ -88,17 +88,6 @@
 		#endregion
 
 		#region Static
-
-		public static bool ValidateSHA(string hash)
-		{
-			if(hash == null) return false;
-			if(hash.Length != 40) return false;
-			for(int i = 0; i < 40; ++i)
-			{
-				if(!hash[i].IsHexDigit()) return false;
-			}
-			return true;
-		}
 
 		private static void SetProgress(IAsyncProgressMonitor monitor, int val, string action)
 		{
@@ -257,7 +246,7 @@
 			{
 				return _head;
 			}
-			if(ValidateSHA(revisionExpression))
+			if(GitUtils.IsValidSHA1(revisionExpression))
 			{
 				var revision = _revisionCache.TryGetRevision(revisionExpression);
 				if(revision != null) return revision;

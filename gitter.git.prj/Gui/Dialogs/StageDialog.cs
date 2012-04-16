@@ -86,9 +86,9 @@
 						});
 					}
 					var result = new List<TreeFile>(files.Count);
-					foreach(var file in files)
+					foreach(var treeFileData in files)
 					{
-						result.Add(file.Construct(data.Item1));
+						result.Add(ObjectFactories.CreateTreeFile(repository, treeFileData));
 					}
 					return (IList<TreeFile>)result;
 				},

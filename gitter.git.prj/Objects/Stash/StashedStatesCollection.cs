@@ -357,18 +357,18 @@
 						_stash.Clear();
 						foreach(var ssinfo in stash)
 						{
-							StashedState ss;
-							if(!d.TryGetValue(ssinfo.Revision.SHA1, out ss))
+							StashedState stashedState;
+							if(!d.TryGetValue(ssinfo.Revision.SHA1, out stashedState))
 							{
-								ss = ssinfo.Construct(Repository);
-								_stash.Add(ss);
-								InvokeStashedStateCreated(ss);
+								stashedState = ObjectFactories.CreateStashedState(Repository, ssinfo);
+								_stash.Add(stashedState);
+								InvokeStashedStateCreated(stashedState);
 							}
 							else
 							{
-								ssinfo.Update(ss);
+								ObjectFactories.UpdateStashedState(stashedState, ssinfo);
 								d.Remove(ssinfo.Revision.SHA1);
-								_stash.Add(ss);
+								_stash.Add(stashedState);
 							}
 						}
 						if(d.Count != 0)
@@ -384,11 +384,11 @@
 				{
 					if(stash.Count != 0)
 					{
-						foreach(var s in stash)
+						foreach(var stashedStateData in stash)
 						{
-							var state = s.Construct(Repository);
-							_stash.Add(state);
-							InvokeStashedStateCreated(state);
+							var stashedState = ObjectFactories.CreateStashedState(Repository, stashedStateData);
+							_stash.Add(stashedState);
+							InvokeStashedStateCreated(stashedState);
 						}
 					}
 				}
@@ -664,7 +664,7 @@
 				Revision revision;
 				lock(Repository.Revisions.SyncRoot)
 				{
-					revision = stashTopData.Construct(Repository);
+					revision = ObjectFactories.CreateRevision(Repository, stashTopData);
 				}
 				var res = new StashedState(Repository, 0, revision);
 

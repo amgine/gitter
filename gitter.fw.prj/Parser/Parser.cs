@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Text;
+	using System.Globalization;
 
 	/// <summary>Parser helper object.</summary>
 	public class Parser
@@ -512,6 +513,56 @@
 		{
 			if(_positions == null || _positions.Count == 0) throw new InvalidOperationException();
 			_position = _positions.Pop();
+		}
+
+		public Version ReadVersion()
+		{
+			while(!IsAtEndOfLine && !char.IsDigit(CurrentChar))
+			{
+				Skip();
+			}
+			PushPosition();
+			Skip();
+			int parts = 0;
+			int[] values = new int[4];
+			while(!IsAtEndOfLine && parts < 4)
+			{
+				if(CheckValue('.'))
+				{
+					var pos = Position;
+					PopPosition();
+					values[parts++] = int.Parse(
+						ReadStringUpTo(pos, 1),
+						NumberStyles.None,
+						CultureInfo.InvariantCulture);
+					PushPosition();
+				}
+				else
+				{
+					if(!char.IsNumber(CurrentChar))
+					{
+						var pos = Position;
+						PopPosition();
+						if(pos != Position)
+						{
+							values[parts++] = int.Parse(
+								ReadStringUpTo(pos, 0),
+								NumberStyles.None,
+								CultureInfo.InvariantCulture);
+						}
+						break;
+					}
+					else
+					{
+						Skip();
+					}
+				}
+			}
+			if(parts > 2)
+			{
+				return new Version(values[0], values[1], values[2], values[3]);
+			}
+			throw new Exception("Unable to read version.");
 		}
 
 		public override string ToString()

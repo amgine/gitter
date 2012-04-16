@@ -178,12 +178,13 @@
 				}
 				for(int i = 0; i < _reflog.Count; ++i)
 				{
-					reflog[i].Update(_reflog[i]);
+					ObjectFactories.UpdateReflogRecord(_reflog[i], reflog[i]);
 				}
 				for(int i = _reflog.Count; i < reflog.Count; ++i)
 				{
-					_reflog.Add(reflog[i].Construct(Repository, this));
-					InvokeRecordAdded(_reflog[i]);
+					var reflogRecord = ObjectFactories.CreateReflogRecord(Repository, this, reflog[i]);
+					_reflog.Add(reflogRecord);
+					InvokeRecordAdded(reflogRecord);
 				}
 			}
 		}
@@ -204,7 +205,7 @@
 					if(record.Revision.SHA1 == _reflog[0].Revision.Name)
 						return;
 				}
-				var item = record.Construct(Repository, this);
+				var item = ObjectFactories.CreateReflogRecord(Repository, this, record);
 				_reflog.Insert(0, item);
 				for(int i = 1; i < _reflog.Count; ++i)
 				{

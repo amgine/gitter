@@ -353,7 +353,7 @@
 			{
 				if(!matched[i])
 				{
-					var directory = sourceDirectory.Directories[i].Construct(Repository);
+					var directory = ObjectFactories.CreateTreeDirectory(Repository, sourceDirectory.Directories[i]);
 					targetDirectory.AddDirectory(directory);
 					InvokeAddedDirectory(directory);
 				}
@@ -396,9 +396,9 @@
 			{
 				if(!matched[i])
 				{
-					var f = sourceDirectory.Files[i].Construct(Repository);
-					targetDirectory.AddFile(f);
-					InvokeNewFile(f);
+					var treeFile = ObjectFactories.CreateTreeFile(Repository, sourceDirectory.Files[i]);
+					targetDirectory.AddFile(treeFile);
+					InvokeNewFile(treeFile);
 				}
 			}
 
@@ -418,7 +418,7 @@
 				if(newPlainList.TryGetValue(oldFileKvp.Key, out file))
 				{
 					newPlainList.Remove(oldFileKvp.Key);
-					file.Update(oldFileKvp.Value);
+					ObjectFactories.UpdateTreeFile(oldFileKvp.Value, file);
 				}
 				else
 				{
@@ -437,7 +437,7 @@
 				res = true;
 				foreach(var newFileKvp in newPlainList)
 				{
-					oldPlainList.Add(newFileKvp.Key, newFileKvp.Value.Construct(Repository));
+					oldPlainList.Add(newFileKvp.Key, ObjectFactories.CreateTreeFile(Repository, newFileKvp.Value));
 				}
 			}
 

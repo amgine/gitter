@@ -7,17 +7,17 @@
 	public static class CacheUpdater
 	{
 		public static void UpdateObjectDictionary<TObject, TInfo>(
-			IRepository repository,
 			IDictionary<string, TObject> dictionary,
 			Predicate<TObject> validateObject,
 			Predicate<TInfo> validateInfo,
 			IEnumerable<TInfo> actualList,
+			Func<TInfo, TObject> factory,
+			Action<TObject, TInfo> updater,
 			Action<TObject> objectCreated,
 			Action<TObject> objectDeleted,
-			bool callUpdate
-			)
+			bool callUpdate)
 			where TObject : INamedObject
-			where TInfo : INamedObject, IObjectData<TObject>
+			where TInfo : INamedObject
 		{
 			HashSet<TObject> hset = null;
 			if(dictionary.Count != 0)
@@ -39,7 +39,7 @@
 					TObject obj;
 					if(!dictionary.TryGetValue(info.Name, out obj))
 					{
-						obj = info.Construct(repository);
+						obj = factory(info);
 						dictionary.Add(obj.Name, obj);
 						if(objectCreated != null)
 							objectCreated(obj);
@@ -47,9 +47,13 @@
 					else
 					{
 						if(callUpdate)
-							info.Update(obj);
+						{
+							updater(obj, info);
+						}
 						if(hset != null)
+						{
 							hset.Remove(obj);
+						}
 					}
 				}
 			}
@@ -60,7 +64,74 @@
 				{
 					dictionary.Remove(obj.Name);
 					if(objectDeleted != null)
+					{
 						objectDeleted(obj);
+					}
+				}
+			}
+		}
+
+		public static void UpdateObjectDictionary<TObject, TInfo>(
+			IDictionary<string, TObject> dictionary,
+			Predicate<TObject> validateObject,
+			Predicate<TInfo> validateInfo,
+			IDictionary<string, TInfo> actualDictinary,
+			Func<TInfo, TObject> factory,
+			Action<TObject, TInfo> updater,
+			Action<TObject> objectCreated,
+			Action<TObject> objectDeleted,
+			bool callUpdate)
+			where TObject : INamedObject
+			where TInfo : INamedObject
+		{
+			HashSet<TObject> hset = null;
+			if(dictionary.Count != 0)
+			{
+				hset = new HashSet<TObject>();
+				foreach(var kvp in dictionary)
+				{
+					if(validateObject == null || validateObject(kvp.Value))
+					{
+						hset.Add(kvp.Value);
+					}
+				}
+			}
+
+			foreach(var info in actualDictinary.Values)
+			{
+				if(validateInfo == null || validateInfo(info))
+				{
+					TObject obj;
+					if(!dictionary.TryGetValue(info.Name, out obj))
+					{
+						obj = factory(info);
+						dictionary.Add(obj.Name, obj);
+						if(objectCreated != null)
+							objectCreated(obj);
+					}
+					else
+					{
+						if(callUpdate)
+						{
+							updater(obj, info);
+						}
+						if(hset != null)
+						{
+							hset.Remove(obj);
+						}
+					}
+				}
+			}
+
+			if(hset != null && hset.Count != 0)
+			{
+				foreach(var obj in hset)
+				{
+					dictionary.Remove(obj.Name);
+					if(objectDeleted != null)
+					{
+						objectDeleted(obj);
+					}
 				}
 			}
 		}

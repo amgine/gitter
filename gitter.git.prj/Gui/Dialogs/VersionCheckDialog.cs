@@ -78,8 +78,8 @@
 		{
 			if(_downloader != null && _downloader.IsAvailable)
 			{
-				_lnkDownload.Visible = (RepositoryProvider.GitVersion == null) ||
-					(_downloader.LatestVersion > RepositoryProvider.GitVersion);
+				_lnkDownload.Visible = (RepositoryProvider.Git.GitVersion == null) ||
+					(_downloader.LatestVersion > RepositoryProvider.Git.GitVersion);
 				_lblLatestVersionValue.Text = _downloader.LatestVersion.ToString();
 			}
 			else
@@ -139,15 +139,17 @@
 
 		private void RefreshVersion()
 		{
-			Version v = null;
+			Version gitVersion;
 			try
 			{
-				v = RepositoryProvider.Git.QueryVersion();
+				RepositoryProvider.Git.RefreshGitVersion();
+				gitVersion = RepositoryProvider.Git.GitVersion;
 			}
 			catch
 			{
+				gitVersion = null;
 			}
-			_installedVersion = v;
+			_installedVersion = gitVersion;
 			UpdateStatus();
 		}
 
@@ -180,7 +182,9 @@
 		private void OnDownloadClick(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			if(_downloader != null && _downloader.IsAvailable)
+			{
 				_downloader.Download();
+			}
 		}
 	}
 }

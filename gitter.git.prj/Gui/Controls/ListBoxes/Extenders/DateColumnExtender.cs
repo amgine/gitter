@@ -7,6 +7,7 @@
 	using System.Text;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Properties.Resources;

@@ -165,7 +165,7 @@
 						{
 							try
 							{
-								Utility.ExecuteWithAdministartorRights(action);
+								HelperExecutables.ExecuteWithAdministartorRights(action);
 							}
 							catch
 							{

@@ -23,7 +23,7 @@
 			this.Text = Resources.StrAbout;
 			this.labelVersion.Text = String.Format("v{0}", AssemblyVersion);
 
-			_pnlUpdates.Visible = Utility.CheckIfCanLaunchUpdater();
+			_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
 			_btnUpdate.ShowUACShield();
 
 			_updateChannel = new gitter.Git.GitRepositoryUpdateChannel("git://github.com/amgine/gitter.git");
@@ -176,7 +176,7 @@
 
 		private void OnUpdateClick(object sender, EventArgs e)
 		{
-			if(!Utility.CheckIfUpdaterIsRunning())
+			if(!HelperExecutables.CheckIfUpdaterIsRunning())
 			{
 				try
 				{

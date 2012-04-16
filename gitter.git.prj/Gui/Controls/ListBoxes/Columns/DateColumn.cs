@@ -7,6 +7,7 @@
 	using System.Drawing;
 	using System.Xml;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 

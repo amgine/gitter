@@ -105,11 +105,12 @@
 
 			public Revision Dereference()
 			{
-				return _reference.Repository.Accessor.Dereference(
+				var revisionData = _reference.Repository.Accessor.Dereference(
 					new DereferenceParameters(FullName)
 					{
 						LoadRevisionData = true,
-					}).Construct(_reference.Repository);
+					});
+				return ObjectFactories.CreateRevision(_reference.Repository, revisionData);
 			}
 
 			public bool IsDeleted

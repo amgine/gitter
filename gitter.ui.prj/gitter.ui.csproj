@@ -69,6 +69,14 @@
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
     </ProjectReference>
+    <ProjectReference Include="..\gitter.git.cli.prj\gitter.git.cli.csproj">
+      <Project>{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}</Project>
+      <Name>gitter.git.cli</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
+      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
+      <Name>gitter.git.fw</Name>
+    </ProjectReference>
     <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj">
       <Project>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</Project>
       <Name>gitter.git</Name>

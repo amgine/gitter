@@ -64,9 +64,9 @@
 
 		internal void Load()
 		{
-			var rev = Repository.Accessor.QueryRevision(
+			var revisionData = Repository.Accessor.QueryRevision(
 				new QueryRevisionParameters(Name));
-			rev.Update(this);
+			ObjectFactories.UpdateRevision(this, revisionData);
 		}
 
 		internal bool IsLoaded

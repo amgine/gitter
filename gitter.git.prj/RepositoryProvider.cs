@@ -24,10 +24,9 @@
 		#region Static Data
 
 		private static readonly Version _minVersion = new Version(1,7,0,2);
-		private static Version _gitVersion;
 		private static bool _autodetectGitExePath;
 		private static string _gitExePath;
-		private static readonly IGitAccessor _git = new GlobalCLI();
+		private static readonly IGitAccessor _git = new GitCLI();
 		private static readonly IntegrationFeatures _integrationFeatures = new IntegrationFeatures();
 		private static IWorkingEnvironment _environment;
 
@@ -48,31 +47,10 @@
 		{
 		}
 
-		public static Version GitVersion
-		{
-			get
-			{
-				if(_gitVersion == null)
-				{
-					try
-					{
-						_gitVersion = _git.QueryVersion();
-					}
-					catch { }
-				}
-				return _gitVersion;
-			}
-		}
-
 		public static bool LogCLICalls
 		{
 			get;
 			set;
-		}
-
-		public static Version MinimumRequiredGitVersion
-		{
-			get { return _minVersion; }
 		}
 
 		internal static IGitAccessor Git
@@ -83,6 +61,11 @@
 		public static IntegrationFeatures Integration
 		{
 			get { return _integrationFeatures; }
+		}
+
+		public static Version MinimumRequiredGitVersion
+		{
+			get { return _minVersion; }
 		}
 
 		public static bool AutodetectGitExePath
@@ -110,41 +93,42 @@
 				var msysgitNode = section.TryGetSection("MSysGit");
 				if(msysgitNode != null)
 				{
-					AutodetectGitExePath = msysgitNode.GetValue("Autodetect", true);
-					ManualGitExePath = msysgitNode.GetValue("Path", string.Empty);
-					LogCLICalls = msysgitNode.GetValue("LogCLICalls", false);
-					GitProcess.EnableAnsiCodepageFallback = msysgitNode.GetValue("EnableAnsiCodepageFallback", false);
+					_git.LoadFrom(msysgitNode);
 				}
 			}
-			GitProcess.UpdateGitExePath();
+			Version gitVersion;
 			try
 			{
-				_gitVersion = _git.QueryVersion();
+				gitVersion = _git.GitVersion;
 			}
 			catch
 			{
-				_gitVersion = null;
+				gitVersion = null;
 			}
-			if(_gitVersion == null || _gitVersion < _minVersion)
+			if(gitVersion == null || gitVersion < _minVersion)
 			{
-				using(var dlg = new VersionCheckDialog(_minVersion, _gitVersion))
+				using(var dlg = new VersionCheckDialog(_minVersion, gitVersion))
 				{
 					dlg.Run(environment.MainForm);
-					_gitVersion = dlg.InstalledVersion;
-					if(_gitVersion == null || _gitVersion < _minVersion)
+					gitVersion = dlg.InstalledVersion;
+					if(gitVersion == null || gitVersion < _minVersion)
+					{
 						return false;
+					}
 				}
 			}
 			if(section != null)
 			{
 				var integrationNode = section.TryGetSection("Integration");
 				if(integrationNode != null)
+				{
 					_integrationFeatures.LoadFrom(integrationNode);
+				}
 			}
 			GlobalOptions.RegisterPropertyPage(new PropertyPageDescription(
 				GitOptionsPage.Guid,
 				Resources.StrGit,
-				null, /*Gui.Bitmaps["ImgGit"],*/
+				null,
 				PropertyPageDescription.RootGroupGuid,
 				() => new GitOptionsPage()));
 			GlobalOptions.RegisterPropertyPage(new PropertyPageDescription(
@@ -163,13 +147,14 @@
 			return true;
 		}
 
+		/// <summary>Save configuration to <paramref name="section"/>.</summary>
+		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
 		public void SaveTo(Section section)
 		{
+			if(section == null) throw new ArgumentNullException("section");
+
 			var msysgitNode = section.GetCreateSection("MSysGit");
-			msysgitNode.SetValue("Autodetect", AutodetectGitExePath);
-			msysgitNode.SetValue("Path", ManualGitExePath);
-			msysgitNode.SetValue("LogCLICalls", LogCLICalls);
-			msysgitNode.SetValue("EnableAnsiCodepageFallback", GitProcess.EnableAnsiCodepageFallback);
+			_git.SaveTo(msysgitNode);
 
 			var integrationNode = section.GetCreateSection("Integration");
 			_integrationFeatures.SaveTo(integrationNode);

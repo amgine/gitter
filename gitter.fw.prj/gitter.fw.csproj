@@ -93,6 +93,8 @@
     <Compile Include="Controls\Views\ViewHeaderMenu.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DateFormat.cs" />
+    <Compile Include="HelperExecutables.cs" />
     <Compile Include="IGuiProvider.cs" />
     <Compile Include="Properties\CachedResources.cs" />
     <Compile Include="Cache\Cache.cs" />

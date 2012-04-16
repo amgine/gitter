@@ -183,7 +183,7 @@
 				}
 				else
 				{
-					p.Update(this);
+					ObjectFactories.UpdateConfigParameter(this, p);
 				}
 			}
 		}

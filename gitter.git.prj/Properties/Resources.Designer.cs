@@ -1156,60 +1156,6 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatic cherry-pick failed; fix conflicts and then commit the result..
-        /// </summary>
-        internal static string ExcAutomaticCherryPickFailed {
-            get {
-                return ResourceManager.GetString("ExcAutomaticCherryPickFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Automatic merge failed; fix conflicts and then commit the result..
-        /// </summary>
-        internal static string ExcAutomaticMergeFailed {
-            get {
-                return ResourceManager.GetString("ExcAutomaticMergeFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Branch &apos;{0}&apos; already exists..
-        /// </summary>
-        internal static string ExcBranchAlreadyExists {
-            get {
-                return ResourceManager.GetString("ExcBranchAlreadyExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Branch &apos;{0}&apos; is not fully merged..
-        /// </summary>
-        internal static string ExcBranchIsNotFullyMerged {
-            get {
-                return ResourceManager.GetString("ExcBranchIsNotFullyMerged", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Branch &apos;{0}&apos; not found..
-        /// </summary>
-        internal static string ExcBranchNotFound {
-            get {
-                return ResourceManager.GetString("ExcBranchNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Cannot write to the config file..
-        /// </summary>
-        internal static string ExcCannotWriteConfigFile {
-            get {
-                return ResourceManager.GetString("ExcCannotWriteConfigFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t {0} on detached HEAD..
         /// </summary>
         internal static string ExcCantDoOnDetachedHead {
@@ -1242,96 +1188,6 @@ namespace gitter.Git.Properties {
         internal static string ExcCollectionMustNotContainNullElements {
             get {
                 return ResourceManager.GetString("ExcCollectionMustNotContainNullElements", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Commit is a merge..
-        /// </summary>
-        internal static string ExcCommitIsMerge {
-            get {
-                return ResourceManager.GetString("ExcCommitIsMerge", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Config parameter does not exist..
-        /// </summary>
-        internal static string ExcConfigParameterDoesNotExist {
-            get {
-                return ResourceManager.GetString("ExcConfigParameterDoesNotExist", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to establish connection to remote repository..
-        /// </summary>
-        internal static string ExcConnectionFailure {
-            get {
-                return ResourceManager.GetString("ExcConnectionFailure", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation cannot be executed on dirty working directory..
-        /// </summary>
-        internal static string ExcDirtyWorkingDirectory {
-            get {
-                return ResourceManager.GetString("ExcDirtyWorkingDirectory", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You have unresolved conflicts..
-        /// </summary>
-        internal static string ExcHaveConflicts {
-            get {
-                return ResourceManager.GetString("ExcHaveConflicts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid branch name..
-        /// </summary>
-        internal static string ExcInvalidBranchName {
-            get {
-                return ResourceManager.GetString("ExcInvalidBranchName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid config file..
-        /// </summary>
-        internal static string ExcInvalidConfigFile {
-            get {
-                return ResourceManager.GetString("ExcInvalidConfigFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Section or key is invalid..
-        /// </summary>
-        internal static string ExcInvalidSectionOrKey {
-            get {
-                return ResourceManager.GetString("ExcInvalidSectionOrKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid tag name..
-        /// </summary>
-        internal static string ExcInvalidTagName {
-            get {
-                return ResourceManager.GetString("ExcInvalidTagName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No section was provided..
-        /// </summary>
-        internal static string ExcNoSectionProvided {
-            get {
-                return ResourceManager.GetString("ExcNoSectionProvided", resourceCulture);
             }
         }
         
@@ -1395,51 +1251,6 @@ namespace gitter.Git.Properties {
         internal static string ExcSuppliedRevisionIsNotHandledByThisRepository {
             get {
                 return ResourceManager.GetString("ExcSuppliedRevisionIsNotHandledByThisRepository", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tag &apos;{0}&apos; already exists..
-        /// </summary>
-        internal static string ExcTagAlreadyExists {
-            get {
-                return ResourceManager.GetString("ExcTagAlreadyExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tag &apos;{0}&apos; not found..
-        /// </summary>
-        internal static string ExcTagNotFound {
-            get {
-                return ResourceManager.GetString("ExcTagNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unknown revision: &apos;{0}&apos;..
-        /// </summary>
-        internal static string ExcUnknownRevision {
-            get {
-                return ResourceManager.GetString("ExcUnknownRevision", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Untracked file &apos;{0}&apos; would be overwritten..
-        /// </summary>
-        internal static string ExcUntrackedFileWouldBeOverwrittenException {
-            get {
-                return ResourceManager.GetString("ExcUntrackedFileWouldBeOverwrittenException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You have local changes to &apos;{0}&apos;..
-        /// </summary>
-        internal static string ExcYouHaveLocalChanges {
-            get {
-                return ResourceManager.GetString("ExcYouHaveLocalChanges", resourceCulture);
             }
         }
         
@@ -5480,15 +5291,6 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Fallback to ANSI codepage if UTF-8 fails to decode characters.
-        /// </summary>
-        internal static string StrsFallbackToAnsi {
-            get {
-                return ResourceManager.GetString("StrsFallbackToAnsi", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Fetching tree.
         /// </summary>
         internal static string StrsFetchingTree {
@@ -5710,15 +5512,6 @@ namespace gitter.Git.Properties {
         internal static string StrSkipFetchAll {
             get {
                 return ResourceManager.GetString("StrSkipFetchAll", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Log command line interface calls.
-        /// </summary>
-        internal static string StrsLogCLICalls {
-            get {
-                return ResourceManager.GetString("StrsLogCLICalls", resourceCulture);
             }
         }
         

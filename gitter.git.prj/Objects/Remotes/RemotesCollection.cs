@@ -169,11 +169,12 @@
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<Remote, RemoteData>(
-					Repository,
 					ObjectStorage,
 					null,
 					null,
 					remotes,
+					remoteData => ObjectFactories.CreateRemote(Repository, remoteData),
+					ObjectFactories.UpdateRemote,
 					InvokeObjectAdded,
 					InvokeObjectRemoved,
 					true);

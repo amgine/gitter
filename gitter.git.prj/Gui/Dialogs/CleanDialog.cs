@@ -62,7 +62,7 @@
 			_lstFilesToClear.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
 			_lstFilesToClear.ShowTreeLines = false;
 
-			if(!GitFeatures.CleanExcludeOption.IsAvailable)
+			if(!GitFeatures.CleanExcludeOption.IsAvailableFor(RepositoryProvider.Git))
 			{
 				_lblExcludePattern.Enabled = false;
 				_txtExclude.Enabled = false;

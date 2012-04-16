@@ -310,11 +310,12 @@
 			lock(_parameters)
 			{
 				CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
-					_repository,
 					_parameters,
 					null,
 					null,
 					config,
+					configParameterData => ObjectFactories.CreateConfigParameter(_repository, configParameterData),
+					ObjectFactories.UpdateConfigParameter,
 					InvokeCreated,
 					InvokeDeleted,
 					true);

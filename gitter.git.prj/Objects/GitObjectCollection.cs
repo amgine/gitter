@@ -136,20 +136,6 @@
 			}
 		}
 
-		/// <summary>Perform initial load of objects.</summary>
-		/// <param name="objectDataList">List of object data containers.</param>
-		internal void Load(IEnumerable<IObjectData<TObject>> objectDataList)
-		{
-			_dictionary.Clear();
-			if(objectDataList != null)
-			{
-				foreach(var data in objectDataList)
-				{
-					AddObject(data.Construct(Repository));
-				}
-			}
-		}
-
 		/// <summary>Returns non-ambiguous object name.</summary>
 		/// <param name="name">Object name.</param>
 		/// <returns>Non-ambiguous object name.</returns>
@@ -232,17 +218,6 @@
 		}
 
 		#region Notify()
-
-		/// <summary>Notifies that object was created externally.</summary>
-		/// <param name="data">Created object data.</param>
-		/// <returns>Created object.</returns>
-		internal TObject NotifyCreated(IObjectData<TObject> data)
-		{
-			if(data == null) throw new ArgumentNullException("data");
-			var tag = data.Construct(Repository);
-			AddObject(tag);
-			return tag;
-		}
 
 		/// <summary>Notifies that object was removed externally.</summary>
 		/// <param name="item">Removed object.</param>

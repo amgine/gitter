@@ -528,7 +528,7 @@
 					{
 						_statusRepositoryState.Image = ImgMergeInProcess;
 						var mergeHead = _repository.GetMergeHead();
-						if(Repository.ValidateSHA(mergeHead))
+						if(GitUtils.IsValidSHA1(mergeHead))
 						{
 							mergeHead = mergeHead.Substring(0, 7);
 						}
@@ -543,7 +543,7 @@
 					{
 						_statusRepositoryState.Image = ImgCherryPickInProcess;
 						var cherryPickHead = _repository.GetCherryPickHead();
-						if(Repository.ValidateSHA(cherryPickHead))
+						if(GitUtils.IsValidSHA1(cherryPickHead))
 						{
 							cherryPickHead = cherryPickHead.Substring(0, 7);
 						}
@@ -558,7 +558,7 @@
 					{
 						_statusRepositoryState.Image = ImgRebaseInProcess;
 						var rebaseHead = _repository.GetRebaseHead();
-						if(Repository.ValidateSHA(rebaseHead))
+						if(GitUtils.IsValidSHA1(rebaseHead))
 						{
 							rebaseHead = rebaseHead.Substring(0, 7);
 						}

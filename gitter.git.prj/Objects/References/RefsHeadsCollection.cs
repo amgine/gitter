@@ -290,16 +290,17 @@
 
 		/// <summary>Updates branch cache.</summary>
 		/// <param name="branches">Actual branch data.</param>
-		private void RefreshInternal(IEnumerable<IObjectData<Branch>> branches)
+		private void RefreshInternal(IEnumerable<BranchData> branches)
 		{
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary(
-					Repository,
 					ObjectStorage,
 					null,
 					null,
 					branches,
+					branchData => ObjectFactories.CreateBranch(Repository, branchData),
+					ObjectFactories.UpdateBranch,
 					InvokeObjectAdded,
 					InvokeObjectRemoved,
 					true);
@@ -315,9 +316,10 @@
 		}
 
 		/// <summary>Refresh local branches.</summary>
-		internal void Refresh(IEnumerable<IObjectData<Branch>> branches)
+		internal void Refresh(IEnumerable<BranchData> branches)
 		{
 			if(branches == null) throw new ArgumentNullException("branches");
+
 			RefreshInternal(branches);
 		}
 
@@ -327,11 +329,11 @@
 		{
 			ValidateObject(branch, "branch");
 
-			var info = Repository.Accessor.QueryBranch(
+			var branchData = Repository.Accessor.QueryBranch(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
-			if(info != null)
+			if(branchData != null)
 			{
-				((IObjectData<Branch>)info).Update(branch);
+				ObjectFactories.UpdateBranch(branch, branchData);
 			}
 			else
 			{
@@ -418,6 +420,40 @@
 				}
 			}
 			return res;
+		}
+
+		#endregion
+
+		#region Load()
+
+		/// <summary>Perform initial load of branches.</summary>
+		/// <param name="branchDataList">List of branch data containers.</param>
+		internal void Load(IEnumerable<BranchData> branchDataList)
+		{
+			if(branchDataList == null) throw new ArgumentNullException("branchDataList");
+
+			ObjectStorage.Clear();
+			if(branchDataList != null)
+			{
+				foreach(var branchData in branchDataList)
+				{
+					AddObject(ObjectFactories.CreateBranch(Repository, branchData));
+				}
+			}
+		}
+
+		#endregion
+
+		#region Notify()
+
+		/// <summary>Notifies that branch was created externally.</summary>
+		/// <param name="branchData">Created branch data.</param>
+		/// <returns>Created branch.</returns>
+		internal Branch NotifyCreated(BranchData branchData)
+		{
+			var branch = ObjectFactories.CreateBranch(Repository, branchData);
+			AddObject(branch);
+			return branch;
 		}
 
 		#endregion

@@ -265,11 +265,12 @@
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
-					Repository,
 					_parameters,
 					null,
 					null,
 					config,
+					configParameterData => ObjectFactories.CreateConfigParameter(Repository, configParameterData),
+					ObjectFactories.UpdateConfigParameter,
 					InvokeParameterCreated,
 					InvokeParameterDeleted,
 					true);
@@ -281,9 +282,9 @@
 			if(configParameter == null) throw new ArgumentNullException("configFile");
 
 			string name = configParameter.Name;
-			var p = Repository.Accessor.QueryConfigParameter(
+			var configParameterData = Repository.Accessor.QueryConfigParameter(
 				new QueryConfigParameterParameters(configParameter.Name));
-			if(p == null)
+			if(configParameterData == null)
 			{
 				lock(SyncRoot)
 				{
@@ -293,7 +294,10 @@
 			}
 			else
 			{
-				p.Update(configParameter);
+				lock(SyncRoot)
+				{
+					ObjectFactories.UpdateConfigParameter(configParameter, configParameterData);
+				}
 			}
 		}
 

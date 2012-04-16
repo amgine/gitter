@@ -100,11 +100,12 @@
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<Note, NoteData>(
-					Repository,
 					_notes,
 					null,
 					null,
 					notes,
+					noteData => ObjectFactories.CreateNote(Repository, noteData),
+					ObjectFactories.UpdateNode,
 					InvokeCreated,
 					InvokeDeleted,
 					true);

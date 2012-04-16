@@ -189,16 +189,17 @@
 
 		#region Refresh()
 
-		private void RefreshInternal(IEnumerable<IObjectData<Tag>> tagDataList)
+		private void RefreshInternal(IEnumerable<TagData> tagDataList)
 		{
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary(
-					Repository,
 					ObjectStorage,
 					null,
 					null,
 					tagDataList,
+					tagData => ObjectFactories.CreateTag(Repository, tagData),
+					ObjectFactories.UpdateTag,
 					InvokeObjectAdded,
 					InvokeObjectRemoved,
 					true);
@@ -213,7 +214,7 @@
 			RefreshInternal(tags);
 		}
 
-		internal void Refresh(IEnumerable<IObjectData<Tag>> tagDataList)
+		internal void Refresh(IEnumerable<TagData> tagDataList)
 		{
 			if(tagDataList == null) throw new ArgumentNullException("tagDataList");
 			RefreshInternal(tagDataList);
@@ -225,16 +226,50 @@
 		{
 			ValidateObject(tag, "tag");
 
-			var info = Repository.Accessor.QueryTag(
+			var tagData = Repository.Accessor.QueryTag(
 				new QueryTagParameters(tag.Name));
-			if(info != null)
+			if(tagData != null)
 			{
-				info.Update(tag);
+				ObjectFactories.UpdateTag(tag, tagData);
 			}
 			else
 			{
 				RemoveObject(tag);
 			}
+		}
+
+		#endregion
+
+		#region Load()
+
+		/// <summary>Perform initial load of tags.</summary>
+		/// <param name="tagDataList">List of tag data containers.</param>
+		internal void Load(IEnumerable<TagData> tagDataList)
+		{
+			if(tagDataList == null) throw new ArgumentNullException("tagDataList");
+
+			ObjectStorage.Clear();
+			if(tagDataList != null)
+			{
+				foreach(var tagData in tagDataList)
+				{
+					AddObject(ObjectFactories.CreateTag(Repository, tagData));
+				}
+			}
+		}
+
+		#endregion
+
+		#region Notify()
+
+		/// <summary>Notifies that tag was created externally.</summary>
+		/// <param name="tagData">Created tag data.</param>
+		/// <returns>Created tag.</returns>
+		internal Tag NotifyCreated(TagData tagData)
+		{
+			var tag = ObjectFactories.CreateTag(Repository, tagData);
+			AddObject(tag);
+			return tag;
 		}
 
 		#endregion

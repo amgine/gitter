@@ -73,11 +73,12 @@
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<User, UserData>(
-					Repository,
 					ObjectStorage,
 					null,
 					null,
 					users,
+					userData => ObjectFactories.CreateUser(Repository, userData),
+					ObjectFactories.UpdateUser,
 					InvokeObjectAdded,
 					InvokeObjectRemoved,
 					true);

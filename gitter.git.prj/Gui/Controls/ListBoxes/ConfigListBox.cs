@@ -38,9 +38,13 @@
 		public void LoadData(ConfigFile configFile)
 		{
 			if(configFile != ConfigFile.System && configFile != ConfigFile.User)
+			{
 				throw new ArgumentException("configFile");
+			}
 			if(_repository != null)
+			{
 				DetachFromRepository();
+			}
 			_repository = null;
 			BeginUpdate();
 			Items.Clear();
@@ -48,7 +52,7 @@
 				new AccessLayer.QueryConfigParameters(configFile));
 			foreach(var p in config)
 			{
-				Items.Add(new ConfigParameterListItem(p.Construct()));
+				Items.Add(new ConfigParameterListItem(ObjectFactories.CreateConfigParameter(p)));
 			}
 			EndUpdate();
 		}

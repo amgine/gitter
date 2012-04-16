@@ -58,9 +58,9 @@
 					}
 					else
 					{
-						var revInfo = Repository.Accessor.QueryRevision(
+						var revisionData = Repository.Accessor.QueryRevision(
 							new AccessLayer.QueryRevisionParameters(sha1));
-						revision = revInfo.Construct(Repository);
+						revision = ObjectFactories.CreateRevision(Repository, revisionData);
 					}
 					return revision;
 				}
@@ -85,17 +85,17 @@
 				}
 				else
 				{
-					RevisionData revInfo = null;
+					RevisionData revisionData = null;
 					try
 					{
-						revInfo = Repository.Accessor.QueryRevision(
+						revisionData = Repository.Accessor.QueryRevision(
 							new QueryRevisionParameters(sha1));
 					}
 					catch(GitException)
 					{
 						return null;
 					}
-					revision = revInfo.Construct(Repository);
+					revision = ObjectFactories.CreateRevision(Repository, revisionData);
 				}
 				return revision;
 			}
@@ -160,19 +160,19 @@
 			{
 				for(int i = 0; i < data.Count; ++i)
 				{
-					var revData = data[i];
-					Revision rev;
-					if(_revisions.TryGetValue(revData.SHA1, out rev))
+					var revisionData = data[i];
+					Revision revision;
+					if(_revisions.TryGetValue(revisionData.SHA1, out revision))
 					{
-						if(!rev.IsLoaded)
+						if(!revision.IsLoaded)
 						{
-							revData.Update(rev);
+							ObjectFactories.UpdateRevision(revision, revisionData);
 						}
-						res[i] = rev;
+						res[i] = revision;
 					}
 					else
 					{
-						res[i] = revData.Construct(Repository);
+						res[i] = ObjectFactories.CreateRevision(Repository, revisionData);
 					}
 				}
 			}

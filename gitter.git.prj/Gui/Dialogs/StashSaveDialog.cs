@@ -35,7 +35,7 @@
 			_lblMessage.Text = Resources.StrOptionalMessage.AddColon();
 			_chkKeepIndex.Text = Resources.StrKeepIndex;
 			_chkIncludeUntrackedFiles.Text = Resources.StrsIncludeUntrackedFiles;
-			if(!GitFeatures.StashIncludeUntrackedOption.IsAvailable)
+			if(!GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(RepositoryProvider.Git))
 			{
 				_chkIncludeUntrackedFiles.Enabled = false;
 				_chkIncludeUntrackedFiles.Text += " " +
@@ -86,7 +86,7 @@
 		{
 			bool keepIndex = KeepIndex;
 			bool includeUntracked =
-				GitFeatures.StashIncludeUntrackedOption.IsAvailable &&
+				GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(RepositoryProvider.Git) &&
 				IncludeUntrackedFiles;
 			var message = Message;
 			message = message == null ? string.Empty : message.Trim();

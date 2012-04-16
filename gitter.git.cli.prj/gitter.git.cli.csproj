@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>gitter.Git.AccessLayer.CLI</RootNamespace>
+    <AssemblyName>gitter.git.cli</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="BlameParser.cs" />
+    <Compile Include="Commands\Ancillary\Interrogation\blame.cs" />
+    <Compile Include="Commands\Ancillary\Interrogation\rev-parse.cs" />
+    <Compile Include="Commands\Ancillary\Manipulation\config.cs" />
+    <Compile Include="Commands\Ancillary\Manipulation\mergetool.cs" />
+    <Compile Include="Commands\Ancillary\Manipulation\prune.cs" />
+    <Compile Include="Commands\Ancillary\Manipulation\remote.cs" />
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\CommandArgument.cs" />
+    <Compile Include="Commands\Low-Level\Interrogation\cat-file.cs" />
+    <Compile Include="Commands\Low-Level\Interrogation\diff-index.cs" />
+    <Compile Include="Commands\Low-Level\Interrogation\ls-files.cs" />
+    <Compile Include="Commands\Low-Level\Interrogation\ls-remote.cs" />
+    <Compile Include="Commands\Low-Level\Interrogation\ls-tree.cs" />
+    <Compile Include="Commands\Low-Level\Interrogation\show-ref.cs" />
+    <Compile Include="Commands\Low-Level\Manipulation\apply.cs" />
+    <Compile Include="Commands\Low-Level\Manipulation\update-index.cs" />
+    <Compile Include="Commands\Main\add.cs" />
+    <Compile Include="Commands\Main\am.cs" />
+    <Compile Include="Commands\Main\archive.cs" />
+    <Compile Include="Commands\Main\bisect.cs" />
+    <Compile Include="Commands\Main\branch.cs" />
+    <Compile Include="Commands\Main\bundle.cs" />
+    <Compile Include="Commands\Main\checkout.cs" />
+    <Compile Include="Commands\Main\cherry-pick.cs" />
+    <Compile Include="Commands\Main\clean.cs" />
+    <Compile Include="Commands\Main\clone.cs" />
+    <Compile Include="Commands\Main\commit.cs" />
+    <Compile Include="Commands\Main\describe.cs" />
+    <Compile Include="Commands\Main\diff.cs" />
+    <Compile Include="Commands\Main\fetch.cs" />
+    <Compile Include="Commands\Main\format-patch.cs" />
+    <Compile Include="Commands\Main\gc.cs" />
+    <Compile Include="Commands\Main\grep.cs" />
+    <Compile Include="Commands\Main\init.cs" />
+    <Compile Include="Commands\Main\log.cs" />
+    <Compile Include="Commands\Main\merge.cs" />
+    <Compile Include="Commands\Main\mv.cs" />
+    <Compile Include="Commands\Main\notes.cs" />
+    <Compile Include="Commands\Main\pull.cs" />
+    <Compile Include="Commands\Main\push.cs" />
+    <Compile Include="Commands\Main\rebase.cs" />
+    <Compile Include="Commands\Main\reset.cs" />
+    <Compile Include="Commands\Main\revert.cs" />
+    <Compile Include="Commands\Main\rm.cs" />
+    <Compile Include="Commands\Main\shortlog.cs" />
+    <Compile Include="Commands\Main\show.cs" />
+    <Compile Include="Commands\Main\stash.cs" />
+    <Compile Include="Commands\Main\status.cs" />
+    <Compile Include="Commands\Main\submodule.cs" />
+    <Compile Include="Commands\Main\tag.cs" />
+    <Compile Include="Controls\CliOptionsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\CliOptionsPage.Designer.cs">
+      <DependentUpon>CliOptionsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DiffParser.cs" />
+    <Compile Include="GitCommandExecutor.cs" />
+    <Compile Include="GitConfigHelper.cs" />
+    <Compile Include="GitParser.cs" />
+    <Compile Include="GitProgress.cs" />
+    <Compile Include="GitCLI.cs" />
+    <Compile Include="GitCLI_config.cs" />
+    <Compile Include="GitRepositoryUpdateChannel.cs" />
+    <Compile Include="ICommandExecutor.cs" />
+    <Compile Include="MsysGitDownloader.cs" />
+    <Compile Include="Process\GitAsync.cs" />
+    <Compile Include="Process\GitInput.cs" />
+    <Compile Include="Process\GitInteractive.cs" />
+    <Compile Include="Process\GitOutput.cs" />
+    <Compile Include="Process\GitProcess.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RepositoryCLI.cs" />
+    <Compile Include="RepositoryCLI_branch.cs" />
+    <Compile Include="RepositoryCLI_config.cs" />
+    <Compile Include="RepositoryCLI_errors.cs" />
+    <Compile Include="RepositoryCLI_index.cs" />
+    <Compile Include="RepositoryCLI_notes.cs" />
+    <Compile Include="RepositoryCLI_remote.cs" />
+    <Compile Include="RepositoryCLI_revision.cs" />
+    <Compile Include="RepositoryCLI_stash.cs" />
+    <Compile Include="RepositoryCLI_submodules.cs" />
+    <Compile Include="RepositoryCLI_tag.cs" />
+    <Compile Include="RepositoryCLI_tree.cs" />
+    <Compile Include="RepositoryCommandExecutor.cs" />
+    <Compile Include="StandardTools.cs" />
+    <Compile Include="UTF8DefaultAnsiCodepageFallback.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\common\key.snk">
+      <Link>Properties\key.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
+      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
+      <Name>gitter.git.fw</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Controls\CliOptionsPage.resx">
+      <DependentUpon>CliOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

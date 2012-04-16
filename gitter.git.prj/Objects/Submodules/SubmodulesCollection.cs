@@ -251,11 +251,12 @@
 				lock(SyncRoot)
 				{
 					CacheUpdater.UpdateObjectDictionary<Submodule, SubmoduleData>(
-						Repository,
 						ObjectStorage,
 						null,
 						null,
 						submodules,
+						submoduleData => ObjectFactories.CreateSubmodue(Repository, submoduleData),
+						ObjectFactories.UpdateSubmodule,
 						InvokeObjectAdded,
 						InvokeObjectRemoved,
 						true);
