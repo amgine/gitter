@@ -67,7 +67,7 @@
 
 		#endregion
 
-		protected IWorkingEnvironment WorkingEnvironment
+		public IWorkingEnvironment WorkingEnvironment
 		{
 			get { return _environment; }
 		}

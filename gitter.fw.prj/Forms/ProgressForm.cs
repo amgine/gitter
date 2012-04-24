@@ -60,12 +60,12 @@
 			{
 				if(_progressBar.Style == ProgressBarStyle.Marquee)
 				{
-					form.SetProgressState(TbpFlag.Indeterminate);
+					form.SetTaskbarProgressState(TbpFlag.Indeterminate);
 				}
 				else
 				{
-					form.SetProgressState(TbpFlag.Normal);
-					form.SetProgressValue(
+					form.SetTaskbarProgressState(TbpFlag.Normal);
+					form.SetTaskbarProgressValue(
 						(long)(_progressBar.Value - _progressBar.Minimum),
 						(long)(_progressBar.Maximum - _progressBar.Minimum));
 				}
@@ -77,7 +77,7 @@
 			var form = GitterApplication.MainForm;
 			if(form != null && !form.IsDisposed)
 			{
-				form.SetProgressState(TbpFlag.NoProgress);
+				form.SetTaskbarProgressState(TbpFlag.NoProgress);
 			}
 		}
 

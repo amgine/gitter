@@ -16,15 +16,20 @@
 
 	sealed class RepositoryStashListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryStashListItem()
+		private readonly IWorkingEnvironment _environment;
+
+		public RepositoryStashListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgStash"], Resources.StrStash)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			RepositoryProvider.Environment.ViewDockService.ShowView(Guids.StashViewGuid);
+			_environment.ViewDockService.ShowView(Guids.StashViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)

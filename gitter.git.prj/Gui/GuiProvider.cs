@@ -19,9 +19,9 @@
 
 		private readonly MainToolbar _mainToolbar;
 		private readonly ViewFactoriesCollection _viewFactories;
-		private readonly RepositoryExplorer _explorer;
 		private readonly Statusbar _statusbar;
 		private readonly MainGitMenus _menus;
+		private RepositoryExplorer _explorer;
 
 		#endregion
 
@@ -34,7 +34,6 @@
 
 			_mainToolbar = new MainToolbar(this);
 			_viewFactories = new ViewFactoriesCollection(this);
-			_explorer = new RepositoryExplorer(this);
 			_statusbar = new Statusbar(this);
 			_menus = new MainGitMenus(this);
 		}
@@ -243,9 +242,9 @@
 
 		public void StartUserIdentificationDialog()
 		{
-			using(var dlg = new UserIdentificationDialog(_repository))
+			using(var dlg = new UserIdentificationDialog(Environment, Repository))
 			{
-				if(dlg.Run(_environment.MainForm) == DialogResult.OK)
+				if(dlg.Run(Environment.MainForm) == DialogResult.OK)
 				{
 					_statusbar.UpdateUserIdentity();
 				}
@@ -264,6 +263,10 @@
 		{
 			if(env == null) throw new ArgumentNullException("env");
 			if(_environment != null) throw new InvalidOperationException();
+
+			_environment = env;
+
+			_explorer = new RepositoryExplorer(this);
 
 			foreach(var factory in _viewFactories)
 			{
@@ -284,8 +287,6 @@
 			{
 				env.ProvideMainMenuItem(menu);
 			}
-
-			_environment = env;
 
 			ActivateDefaultTool();
 		}
@@ -316,6 +317,7 @@
 				env.RemoveMainMenuItem(menu);
 			}
 
+			_explorer = null;
 			_environment = null;
 		}
 

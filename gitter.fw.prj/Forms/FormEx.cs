@@ -16,15 +16,18 @@
 		public FormEx()
 		{
 			SuspendLayout();
-			AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-			AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-			ClientSize = new System.Drawing.Size(624, 435);
+			AutoScaleDimensions = new SizeF(96F, 96F);
+			AutoScaleMode = AutoScaleMode.Dpi;
+			ClientSize = new Size(624, 435);
 			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+			{
 				Font = GitterApplication.FontManager.UIFont;
+			}
 			else
+			{
 				Font = SystemFonts.MessageBoxFont;
+			}
 			Name = "FormEx";
-			Text = "FormEx";
 			ResumeLayout(false);
 		}
 
@@ -40,16 +43,53 @@
 			base.WndProc(ref m);
 		}
 
-		public void SetProgressState(TbpFlag state)
+		protected bool CanUseWin7Api
 		{
-			if(_canUseWin7Api)
+			get { return _canUseWin7Api; }
+		}
+
+		public void SetTaskbarOverlayIcon(Icon icon, string description)
+		{
+			if(icon == null) throw new ArgumentNullException("icon");
+
+			if(CanUseWin7Api)
 			{
 				if(InvokeRequired)
 				{
-					BeginInvoke(new Action<TbpFlag>((flag) =>
-						{
-							Utility.TaskBarList.SetProgressState(Handle, flag);
-						}), state);
+					BeginInvoke(new MethodInvoker(
+						() => Utility.TaskBarList.SetOverlayIcon(Handle, icon.Handle, description)));
+				}
+				else
+				{
+					Utility.TaskBarList.SetOverlayIcon(Handle, icon.Handle, description);
+				}
+			}
+		}
+
+		public void RemoveTaskbarOverlayIcon()
+		{
+			if(CanUseWin7Api)
+			{
+				if(InvokeRequired)
+				{
+					BeginInvoke(new MethodInvoker(
+						() => Utility.TaskBarList.SetOverlayIcon(Handle, IntPtr.Zero, null)));
+				}
+				else
+				{
+					Utility.TaskBarList.SetOverlayIcon(Handle, IntPtr.Zero, null);
+				}
+			}
+		}
+
+		public void SetTaskbarProgressState(TbpFlag state)
+		{
+			if(CanUseWin7Api)
+			{
+				if(InvokeRequired)
+				{
+					BeginInvoke(new MethodInvoker(
+						() => Utility.TaskBarList.SetProgressState(Handle, state)));
 				}
 				else
 				{
@@ -58,16 +98,14 @@
 			}
 		}
 
-		public void SetProgressValue(long current, long total)
+		public void SetTaskbarProgressValue(long current, long total)
 		{
-			if(_canUseWin7Api)
+			if(CanUseWin7Api)
 			{
 				if(InvokeRequired)
 				{
-					BeginInvoke(new Action<ulong, ulong>((cur, tot) =>
-						{
-							Utility.TaskBarList.SetProgressValue(Handle, cur, tot);
-						}), (ulong)current, (ulong)total);
+					BeginInvoke(new MethodInvoker(
+						() => Utility.TaskBarList.SetProgressValue(Handle, (ulong)current, (ulong)total)));
 				}
 				else
 				{

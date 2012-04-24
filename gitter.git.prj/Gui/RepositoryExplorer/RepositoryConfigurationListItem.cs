@@ -13,15 +13,20 @@
 
 	sealed class RepositoryConfigurationListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryConfigurationListItem()
+		private readonly IWorkingEnvironment _environment;
+
+		public RepositoryConfigurationListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgConfiguration"], Resources.StrConfig)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			RepositoryProvider.Environment.ViewDockService.ShowView(Guids.ConfigViewGuid);
+			_environment.ViewDockService.ShowView(Guids.ConfigViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)

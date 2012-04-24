@@ -16,15 +16,20 @@
 
 	sealed class RepositoryCommitListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryCommitListItem()
+		private readonly IWorkingEnvironment _environment;
+
+		public RepositoryCommitListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgCommit"], Resources.StrCommit)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			RepositoryProvider.Environment.ViewDockService.ShowView(Guids.CommitViewGuid);
+			_environment.ViewDockService.ShowView(Guids.CommitViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)

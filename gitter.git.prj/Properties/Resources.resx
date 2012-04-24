@@ -2473,4 +2473,34 @@ Proceed?</value>
   <data name="ExcStashIsEmpty" xml:space="preserve">
     <value>Stash is empty.</value>
   </data>
+  <data name="IcoStatusGreen1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-1.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-2.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-3.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-4.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-5.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-6.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen7" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-7.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen8" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-8.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen9" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-9.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoStatusGreen9p" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\status-green-9p.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

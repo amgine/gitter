@@ -87,12 +87,12 @@
 			{
 				if(_marquee)
 				{
-					form.SetProgressState(TbpFlag.Indeterminate);
+					form.SetTaskbarProgressState(TbpFlag.Indeterminate);
 				}
 				else
 				{
-					form.SetProgressState(TbpFlag.Normal);
-					form.SetProgressValue(
+					form.SetTaskbarProgressState(TbpFlag.Normal);
+					form.SetTaskbarProgressValue(
 						(long)(_value - _min),
 						(long)(_max - _min));
 				}
@@ -102,7 +102,7 @@
 		private static void StopWin7ProgressBar()
 		{
 			var form = GitterApplication.MainForm;
-			if(form != null && !form.IsDisposed) form.SetProgressState(TbpFlag.NoProgress);
+			if(form != null && !form.IsDisposed) form.SetTaskbarProgressState(TbpFlag.NoProgress);
 		}
 
 		private static Color ColorLERP(Color c1, Color c2, double position)

@@ -1348,7 +1348,36 @@
   <ItemGroup>
     <None Include="Resources\mark-as-resolved.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\status-green-1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-2.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-3.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-4.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-5.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-6.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-7.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-8.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-9.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\status-green-9p.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

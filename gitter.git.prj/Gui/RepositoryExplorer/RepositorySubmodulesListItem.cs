@@ -1,9 +1,6 @@
 ﻿namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -16,17 +13,21 @@
 
 	sealed class RepositorySubmodulesListItem : RepositoryExplorerItemBase
 	{
+		private readonly IWorkingEnvironment _environment;
 		private SubmoduleListBinding _binding;
 
-		public RepositorySubmodulesListItem()
+		public RepositorySubmodulesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgSubmodules"], Resources.StrSubmodules)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			RepositoryProvider.Environment.ViewDockService.ShowView(Guids.SubmodulesViewGuid);
+			_environment.ViewDockService.ShowView(Guids.SubmodulesViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)

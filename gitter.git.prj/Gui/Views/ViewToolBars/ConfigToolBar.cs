@@ -44,7 +44,7 @@ namespace gitter.Git.Gui.Views
 
 		private void OnAddParameterButtonClick(object sender, EventArgs e)
 		{
-			using(var dlg = new AddParameterDialog(_configView.Repository))
+			using(var dlg = new AddParameterDialog(_configView.WorkingEnvironment, _configView.Repository))
 			{
 				dlg.Run(_configView);
 			}

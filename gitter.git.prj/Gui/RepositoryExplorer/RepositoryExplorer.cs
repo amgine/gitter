@@ -9,22 +9,22 @@
 		#region Data
 
 		private readonly GuiProvider _gui;
-		private Repository _repository;
-
 		private readonly RepositoryRootItem _rootItem;
+		private Repository _repository;
 
 		#endregion
 
 		public RepositoryExplorer(GuiProvider gui)
 		{
 			if(gui == null) throw new ArgumentNullException("gui");
+
 			_gui = gui;
+			_rootItem = new RepositoryRootItem(_gui.Environment)
+				{
+					Repository = gui.Repository,
+				};
 			_repository = gui.Repository;
 
-			_rootItem = new RepositoryRootItem()
-				{
-					Repository = _repository,
-				};
 			_rootItem.IsExpanded = true;
 		}
 

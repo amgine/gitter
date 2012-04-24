@@ -16,15 +16,20 @@
 
 	sealed class RepositoryUsersListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryUsersListItem()
+		private readonly IWorkingEnvironment _environment;
+
+		public RepositoryUsersListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgUsers"], Resources.StrUsers)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			RepositoryProvider.Environment.ViewDockService.ShowView(Guids.UsersViewGuid);
+			_environment.ViewDockService.ShowView(Guids.UsersViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)

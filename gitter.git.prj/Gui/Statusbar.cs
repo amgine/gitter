@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Drawing;
+	using System.Globalization;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -343,6 +344,7 @@
 			repository.Status.Changed -= OnStatusChanged;
 			repository.StateChanged -= OnStateChanged;
 			repository.UserIdentityChanged -= OnUserIdentityChanged;
+			GitterApplication.MainForm.RemoveTaskbarOverlayIcon();
 			_repository = null;
 		}
 
@@ -441,6 +443,8 @@
 				_statusUnstagedUntracked.Available = false;
 				_statusUnstagedRemoved.Available = false;
 				_statusUnstagedModified.Available = false;
+
+				GitterApplication.MainForm.RemoveTaskbarOverlayIcon();
 			}
 			else
 			{
@@ -448,7 +452,7 @@
 
 				if(status.UnmergedCount != 0)
 				{
-					_statusUnmerged.Text = status.UnmergedCount.ToString();
+					_statusUnmerged.Text = status.UnmergedCount.ToString(CultureInfo.CurrentCulture);
 					_statusUnmerged.Available = true;
 				}
 				else
@@ -457,7 +461,7 @@
 				}
 				if(status.StagedAddedCount != 0)
 				{
-					_statusStagedAdded.Text = status.StagedAddedCount.ToString();
+					_statusStagedAdded.Text = status.StagedAddedCount.ToString(CultureInfo.CurrentCulture);
 					_statusStagedAdded.Available = true;
 				}
 				else
@@ -466,7 +470,7 @@
 				}
 				if(status.StagedModifiedCount != 0)
 				{
-					_statusStagedModified.Text = status.StagedModifiedCount.ToString();
+					_statusStagedModified.Text = status.StagedModifiedCount.ToString(CultureInfo.CurrentCulture);
 					_statusStagedModified.Available = true;
 				}
 				else
@@ -475,7 +479,7 @@
 				}
 				if(status.StagedRemovedCount != 0)
 				{
-					_statusStagedRemoved.Text = status.StagedRemovedCount.ToString();
+					_statusStagedRemoved.Text = status.StagedRemovedCount.ToString(CultureInfo.CurrentCulture);
 					_statusStagedRemoved.Available = true;
 				}
 				else
@@ -484,7 +488,7 @@
 				}
 				if(status.UnstagedUntrackedCount != 0)
 				{
-					_statusUnstagedUntracked.Text = status.UnstagedUntrackedCount.ToString();
+					_statusUnstagedUntracked.Text = status.UnstagedUntrackedCount.ToString(CultureInfo.CurrentCulture);
 					_statusUnstagedUntracked.Available = true;
 				}
 				else
@@ -493,7 +497,7 @@
 				}
 				if(status.UnstagedModifiedCount != 0)
 				{
-					_statusUnstagedModified.Text = status.UnstagedModifiedCount.ToString();
+					_statusUnstagedModified.Text = status.UnstagedModifiedCount.ToString(CultureInfo.CurrentCulture);
 					_statusUnstagedModified.Available = true;
 				}
 				else
@@ -502,12 +506,40 @@
 				}
 				if(status.UnstagedRemovedCount != 0)
 				{
-					_statusUnstagedRemoved.Text = status.UnstagedRemovedCount.ToString();
+					_statusUnstagedRemoved.Text = status.UnstagedRemovedCount.ToString(CultureInfo.CurrentCulture);
 					_statusUnstagedRemoved.Available = true;
 				}
 				else
 				{
 					_statusUnstagedRemoved.Available = false;
+				}
+
+				int count =
+					status.StagedAddedCount +
+					status.StagedModifiedCount +
+					status.StagedRemovedCount +
+					status.UnmergedCount +
+					status.UnstagedModifiedCount +
+					status.UnstagedRemovedCount +
+					status.UnstagedUntrackedCount;
+				string resName;
+				if(count < 1)
+				{
+					resName = null;
+				}
+				else if(count > 9)
+				{
+					resName = "9p";
+				}
+				else
+				{
+					resName = count.ToString(CultureInfo.InvariantCulture);
+				}
+				if(resName != null)
+				{
+					GitterApplication.MainForm.SetTaskbarOverlayIcon(
+						CachedResources.Icons["IcoStatusGreen" + resName],
+						string.Format("{0} modifications", count));
 				}
 			}
 			UpdateState();

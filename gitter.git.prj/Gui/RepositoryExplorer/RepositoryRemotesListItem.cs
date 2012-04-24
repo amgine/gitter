@@ -13,17 +13,21 @@
 
 	sealed class RepositoryRemotesListItem : RepositoryExplorerItemBase
 	{
+		private readonly IWorkingEnvironment _environment;
 		private RemoteListBinding _binding;
 
-		public RepositoryRemotesListItem()
+		public RepositoryRemotesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgRemotes"], Resources.StrRemotes)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			RepositoryProvider.Environment.ViewDockService.ShowView(Guids.RemotesViewGuid);
+			_environment.ViewDockService.ShowView(Guids.RemotesViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)

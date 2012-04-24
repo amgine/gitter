@@ -1254,6 +1254,76 @@ namespace gitter.Git.Properties {
             }
         }
         
+        internal static System.Drawing.Icon IcoStatusGreen1 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen1", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen2 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen2", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen3 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen3", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen4 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen4", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen5 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen5", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen6 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen6", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen7 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen7", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen8 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen8", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen9 {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen9", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon IcoStatusGreen9p {
+            get {
+                object obj = ResourceManager.GetObject("IcoStatusGreen9p", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap ImgAlignToGraph {
             get {
                 object obj = ResourceManager.GetObject("ImgAlignToGraph", resourceCulture);

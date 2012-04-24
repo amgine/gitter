@@ -15,12 +15,16 @@
 	[ToolboxItem(false)]
 	public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 	{
+		private readonly IWorkingEnvironment _environment;
 		private Repository _repository;
 		private string _oldUserName;
 		private string _oldUserEmail;
 
-		public UserIdentificationDialog(Repository repository)
+		public UserIdentificationDialog(IWorkingEnvironment environment, Repository repository)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 			_repository = repository;
 
 			InitializeComponent();

@@ -135,7 +135,7 @@
 					Resources.StrConfig,
 					null,
 					GitOptionsPage.Guid,
-					env => new ConfigurationPage()));
+					env => new ConfigurationPage(env)));
 			_environment = environment;
 			return true;
 		}
@@ -177,7 +177,7 @@
 
 			if(!gitRepository.Configuration.Exists(GitConstants.UserNameParameter))
 			{
-				using(var dlg = new UserIdentificationDialog(gitRepository))
+				using(var dlg = new UserIdentificationDialog(environment, gitRepository))
 				{
 					dlg.Run(environment.MainForm);
 				}
@@ -213,6 +213,8 @@
 
 		public static DialogResult RunInitDialog(IWorkingEnvironment environment)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
 			DialogResult res;
 			string path = "";
 			using(var dlg = new InitDialog())
@@ -238,6 +240,8 @@
 
 		public static DialogResult RunCloneDialog(IWorkingEnvironment environment)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
 			DialogResult res;
 			string path = "";
 			using(var dlg = new CloneDialog())

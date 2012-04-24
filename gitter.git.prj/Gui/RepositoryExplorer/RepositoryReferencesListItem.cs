@@ -13,17 +13,21 @@
 
 	sealed class RepositoryReferencesListItem : RepositoryExplorerItemBase
 	{
+		private readonly IWorkingEnvironment _environment;
 		private ReferenceTreeBinding _refsBinding;
 
-		public RepositoryReferencesListItem()
+		public RepositoryReferencesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgBranch"], Resources.StrReferences)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			RepositoryProvider.Environment.ViewDockService.ShowView(Guids.ReferencesViewGuid);
+			_environment.ViewDockService.ShowView(Guids.ReferencesViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)
@@ -48,7 +52,7 @@
 		private void OnReferenceItemActivated(object sender, RevisionPointerEventArgs e)
 		{
 			var rev = e.Object;
-			var view = (HistoryView)RepositoryProvider.Environment.ViewDockService.ShowView(Guids.HistoryViewGuid, false);
+			var view = (HistoryView)_environment.ViewDockService.ShowView(Guids.HistoryViewGuid, false);
 			view.SelectRevision(rev);
 		}
 

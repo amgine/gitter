@@ -2,31 +2,29 @@
 {
 	using System;
 	using System.Linq;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using gitter.Git.Gui.Controls;
-	using gitter.Git.Gui.Views;
-
 	using Resources = gitter.Git.Properties.Resources;
 
 	sealed class RepositoryRootItem : RepositoryExplorerItemBase
 	{
-		public RepositoryRootItem()
+		public RepositoryRootItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgGit"], Resources.StrGit)
 		{
-			Items.Add(new RepositoryHistoryListItem());
-			Items.Add(new RepositoryCommitListItem());
-			Items.Add(new RepositoryStashListItem());
-			Items.Add(new RepositoryReferencesListItem());
-			Items.Add(new RepositoryRemotesListItem());
-			Items.Add(new RepositorySubmodulesListItem());
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			Items.Add(new RepositoryHistoryListItem(environment));
+			Items.Add(new RepositoryCommitListItem(environment));
+			Items.Add(new RepositoryStashListItem(environment));
+			Items.Add(new RepositoryReferencesListItem(environment));
+			Items.Add(new RepositoryRemotesListItem(environment));
+			Items.Add(new RepositorySubmodulesListItem(environment));
 			Items.Add(new RepositoryWorkingDirectoryListItem());
-			Items.Add(new RepositoryConfigurationListItem());
-			Items.Add(new RepositoryUsersListItem());
+			Items.Add(new RepositoryConfigurationListItem(environment));
+			Items.Add(new RepositoryUsersListItem(environment));
 		}
 
 		protected override void AttachToRepository()

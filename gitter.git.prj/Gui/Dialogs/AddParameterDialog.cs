@@ -15,12 +15,22 @@
 	[ToolboxItem(false)]
 	public partial class AddParameterDialog : GitDialogBase, IExecutableDialog
 	{
+		#region Data
+
+		private readonly IWorkingEnvironment _environment;
 		private Repository _repository;
 		private ConfigFile _configFile;
 
+		#endregion
+
 		/// <summary>Create <see cref="AddParameterDialog"/>.</summary>
-		private AddParameterDialog()
+		/// <param name="environment">Application environment.</param>
+		private AddParameterDialog(IWorkingEnvironment environment)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
+			_environment = environment;
+
 			InitializeComponent();
 
 			Text = Resources.StrAddParameter;
@@ -32,9 +42,10 @@
 		}
 
 		/// <summary>Create <see cref="AddParameterDialog"/>.</summary>
+		/// <param name="environment">Application environment.</param>
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
-		public AddParameterDialog(Repository repository)
-			: this()
+		public AddParameterDialog(IWorkingEnvironment environment, Repository repository)
+			: this(environment)
 		{
 			if(repository == null) throw new ArgumentNullException("repository");
 			_repository = repository;
@@ -42,9 +53,10 @@
 		}
 
 		/// <summary>Create <see cref="AddParameterDialog"/>.</summary>
+		/// <param name="environment">Application environment.</param>
 		/// <param name="configFile">Config file to use.</param>
-		public AddParameterDialog(ConfigFile configFile)
-			: this()
+		public AddParameterDialog(IWorkingEnvironment environment, ConfigFile configFile)
+			: this(environment)
 		{
 			if(configFile != ConfigFile.System && configFile != ConfigFile.User)
 			{
