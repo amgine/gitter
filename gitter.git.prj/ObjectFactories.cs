@@ -490,7 +490,7 @@
 			if(repository == null) throw new ArgumentNullException("repository");
 			if(userData == null) throw new ArgumentNullException("userData");
 
-			return new User(repository, userData.Name, userData.Email, userData.Commits);
+			return new User(repository, userData.UserName, userData.Email, userData.Commits);
 		}
 
 		public static void UpdateUser(User user, UserData userData)

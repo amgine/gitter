@@ -380,6 +380,16 @@
 			return _string.IndexOf(value, _position, limit);
 		}
 
+		public int FindNoAdvance(char value)
+		{
+			return _string.IndexOf(value, _position);
+		}
+
+		public int FindNoAdvance(char value, int limit)
+		{
+			return _string.IndexOf(value, _position, limit);
+		}
+
 		public int FindSeparatingEmptyLine(int limit, out int part2Start)
 		{
 			bool prevN = false;

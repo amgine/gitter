@@ -722,21 +722,6 @@
 
 		#region committers
 
-		private static UserData ParseCommitter(string strCommitter, ref int pos)
-		{
-			var l = strCommitter.Length;
-			int pos2 = strCommitter.IndexOf('\t', pos);
-			int n = int.Parse(strCommitter.Substring(pos, pos2 - pos).Trim(), NumberStyles.None, CultureInfo.InvariantCulture);
-			pos = pos2 + 1;
-			pos2 = strCommitter.IndexOf((char)10, pos2);
-			int d = strCommitter.LastIndexOf(' ', pos2 - 1);
-			string name = strCommitter.Substring(pos, d - pos);
-			string email = strCommitter.Substring(d + 2, pos2 - d - 3);
-			var c = new UserData(name, email, n);
-			pos = pos2 + 1;
-			return c;
-		}
-
 		/// <summary>Get user list.</summary>
 		/// <param name="parameters"><see cref="QueryUsersParameters"/>.</param>
 		/// <returns>List of committers and authors.</returns>
@@ -752,13 +737,21 @@
 				ShortLogCommand.Email());
 			var output = _executor.ExecCommand(cmd);
 			output.ThrowOnBadReturnCode();
-			var committers = output.Output;
-			int pos = 0;
-			int l = committers.Length;
+
 			var res = new List<UserData>();
-			while(pos < l)
+			var parser = new GitParser(output.Output);
+			while(!parser.IsAtEndOfString)
 			{
-				res.Add(ParseCommitter(committers, ref pos));
+				var tab = parser.FindNoAdvance('\t');
+				string commitsCountStr = parser.ReadStringUpTo(tab, 1);
+				int commitsCount = int.Parse(commitsCountStr, NumberStyles.Integer, CultureInfo.InvariantCulture);
+				string ending;
+				var eol = parser.FindLineEnding(out ending);
+				var emailSeparator = parser.String.LastIndexOf(" <", eol - 1, eol - tab - 1);
+				string name = parser.ReadStringUpTo(emailSeparator, 2);
+				string email = parser.ReadStringUpTo(eol - 1, ending.Length + 1);
+				var userData = new UserData(name, email, commitsCount);
+				res.Add(userData);
 			}
 			return res;
 		}
