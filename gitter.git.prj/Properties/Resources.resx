@@ -1833,7 +1833,7 @@ a new history totally disconnected from all the other branches and commits.</val
     <value>Manage</value>
   </data>
   <data name="StrRefreshingReferences" xml:space="preserve">
-    <value>Refreshing References</value>
+    <value>Refreshing references</value>
   </data>
   <data name="StrViewReflog" xml:space="preserve">
     <value>View Reflog</value>
@@ -2127,7 +2127,7 @@ a new history totally disconnected from all the other branches and commits.</val
     <value>Housekeeping</value>
   </data>
   <data name="StrOptimizingRepository" xml:space="preserve">
-    <value>Optimizing Repository</value>
+    <value>Optimizing repository</value>
   </data>
   <data name="ErrFailedToCompressRepository" xml:space="preserve">
     <value>Unable to compress repository</value>
@@ -2502,5 +2502,8 @@ Proceed?</value>
   </data>
   <data name="IcoStatusGreen9p" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\status-green-9p.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrChangeIdentity" xml:space="preserve">
+    <value>Change Identity</value>
   </data>
 </root>

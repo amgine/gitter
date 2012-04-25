@@ -2641,6 +2641,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Change Identity.
+        /// </summary>
+        internal static string StrChangeIdentity {
+            get {
+                return ResourceManager.GetString("StrChangeIdentity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Checkout.
         /// </summary>
         internal static string StrCheckout {
@@ -4513,7 +4522,7 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Optimizing Repository.
+        ///   Looks up a localized string similar to Optimizing repository.
         /// </summary>
         internal static string StrOptimizingRepository {
             get {
@@ -4846,7 +4855,7 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Refreshing References.
+        ///   Looks up a localized string similar to Refreshing references.
         /// </summary>
         internal static string StrRefreshingReferences {
             get {
