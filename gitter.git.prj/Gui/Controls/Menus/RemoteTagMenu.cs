@@ -21,6 +21,18 @@
 			_remoteTag = remoteTag;
 
 			Items.Add(GuiItemFactory.GetRemoveRemoteTagItem<ToolStripMenuItem>(_remoteTag, "{0}"));
+
+
+			var copyToClipboardItem = new ToolStripMenuItem(Resources.StrCopyToClipboard);
+
+			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
+				Resources.StrName, _remoteTag.Name));
+			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
+				Resources.StrFullName, _remoteTag.FullName));
+			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(
+				Resources.StrPosition, _remoteTag.Hash));
+
+			Items.Add(copyToClipboardItem);
 		}
 
 		/// <summary>Remote tag, for which menu is generated.</summary>

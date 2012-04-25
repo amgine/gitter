@@ -65,13 +65,22 @@
 			}
 			catch(GitException exc)
 			{
-				if(_lstRemotes.IsHandleCreated)
+				if(!_lstRemotes.IsDisposed)
 				{
 					try
 					{
-					_lstRemotes.Invoke(new Action<string>((msg) => _lstRemotes.Text = msg), exc.Message);
+						_lstRemotes.BeginInvoke(new Action<string>(
+							msg =>
+							{
+								if(!_lstRemotes.IsDisposed)
+								{
+									_lstRemotes.Text = msg;
+								}
+							}), exc.Message);
 					}
-					catch { }
+					catch
+					{
+					}
 				}
 			}
 		}

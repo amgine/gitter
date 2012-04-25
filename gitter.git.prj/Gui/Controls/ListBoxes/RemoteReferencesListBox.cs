@@ -59,10 +59,14 @@
 		{
 			if(_remote == remote) return;
 			if(_remote != null)
+			{
 				DetachFromRemote();
+			}
 			_remote = remote;
 			if(_remote != null)
+			{
 				AttachToRemote();
+			}
 		}
 
 		private void DetachFromRemote()
@@ -84,9 +88,13 @@
 		{
 			_refs.Refresh();
 			if(_grpBranches.ListBox == null)
+			{
 				Items.AddSafe(_grpBranches);
+			}
 			if(_grpTags.ListBox == null)
+			{
 				Items.AddSafe(_grpTags);
+			}
 		}
 
 		private void OnBranchCreated(object sender, RemoteReferenceEventArgs e)

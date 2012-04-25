@@ -21,6 +21,17 @@
 			_remoteBranch = remoteBranch;
 
 			Items.Add(GuiItemFactory.GetRemoveRemoteBranchItem<ToolStripMenuItem>(_remoteBranch, "{0}"));
+
+			var copyToClipboardItem = new ToolStripMenuItem(Resources.StrCopyToClipboard);
+
+			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
+				Resources.StrName, _remoteBranch.Name));
+			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
+				Resources.StrFullName, _remoteBranch.FullName));
+			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(
+				Resources.StrPosition, _remoteBranch.Hash));
+
+			Items.Add(copyToClipboardItem);
 		}
 
 		/// <summary>Remote branch, for which menu is generated.</summary>
