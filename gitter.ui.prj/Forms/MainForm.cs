@@ -657,6 +657,16 @@
 			_menuStrip.Items.Insert(_menuStrip.Items.IndexOf(_mnuTools), item);
 		}
 
+		public void ProvideViewMenuItem(ToolStripMenuItem item)
+		{
+			if(item == null) throw new ArgumentNullException("item");
+			_mnuView.DropDownItems.Insert(_mnuView.DropDownItems.Count - 4, item);
+			if(_mnuView.DropDownItems.Count == 7)
+			{
+				_mnuView.DropDownItems.Insert(2, new ToolStripSeparator());
+			}
+		}
+
 		public void ProvideRepositoryExplorerItem(CustomListBoxItem item)
 		{
 			if(item == null) throw new ArgumentNullException("item");
@@ -704,6 +714,15 @@
 		{
 			if(item == null) throw new ArgumentNullException("item");
 			_menuStrip.Items.Remove(item);
+		}
+
+		public void RemoveViewMenuItem(ToolStripMenuItem item)
+		{
+			_mnuView.DropDownItems.Remove(item);
+			if(_mnuView.DropDownItems.Count == 8)
+			{
+				_mnuView.DropDownItems.RemoveAt(2);
+			}
 		}
 
 		public void RemoveRepositoryExplorerItem(CustomListBoxItem item)

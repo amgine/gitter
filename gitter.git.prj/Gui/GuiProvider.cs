@@ -251,6 +251,14 @@
 			}
 		}
 
+		public void StartAddRemoteDialog()
+		{
+			using(var dlg = new AddRemoteDialog(Repository))
+			{
+				dlg.Run(Environment.MainForm);
+			}
+		}
+
 		public void SaveTo(Section section)
 		{
 		}
@@ -287,6 +295,10 @@
 			{
 				env.ProvideMainMenuItem(menu);
 			}
+			foreach(var item in _menus.ViewMenuItems)
+			{
+				env.ProvideViewMenuItem(item);
+			}
 
 			ActivateDefaultTool();
 		}
@@ -315,6 +327,10 @@
 			foreach(var menu in _menus.Menus)
 			{
 				env.RemoveMainMenuItem(menu);
+			}
+			foreach(var item in _menus.ViewMenuItems)
+			{
+				env.RemoveViewMenuItem(item);
 			}
 
 			_explorer = null;

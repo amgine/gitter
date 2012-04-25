@@ -3384,7 +3384,6 @@
 		{
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgReferences"],
 				Text = Resources.StrManage,
 				Tag = Views.Guids.ReferencesViewGuid,
 			};

@@ -47,6 +47,8 @@
 
 		void ProvideMainMenuItem(ToolStripMenuItem item);
 
+		void ProvideViewMenuItem(ToolStripMenuItem item);
+
 		void ProvideRepositoryExplorerItem(CustomListBoxItem item);
 
 		void ProvideToolbar(ToolStrip toolStrip);
@@ -55,6 +57,8 @@
 
 
 		void RemoveMainMenuItem(ToolStripMenuItem item);
+
+		void RemoveViewMenuItem(ToolStripMenuItem item);
 
 		void RemoveRepositoryExplorerItem(CustomListBoxItem item);
 

@@ -189,7 +189,7 @@
 		private readonly GuiProvider _guiProvider;
 
 		public UsersViewFactory(GuiProvider guiProvider)
-			: base(Guids.UsersViewGuid, Resources.StrUsers, CachedResources.Bitmaps["ImgUsers"])
+			: base(Guids.UsersViewGuid, Resources.StrUsers, CachedResources.Bitmaps["ImgUsers"], true)
 		{
 			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
 			_guiProvider = guiProvider;

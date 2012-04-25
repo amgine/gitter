@@ -15,6 +15,7 @@
 		private Repository _repository;
 		private ToolStripMenuItem[] _menus;
 		private ToolStripMenuItem _gitMenu;
+		private List<ToolStripMenuItem> _viewMenuItems;
 
 		public MainGitMenus(GuiProvider gui)
 		{
@@ -29,12 +30,15 @@
 					Resources.StrGit),
 			};
 
+			//_gitMenu.DropDownItems.Add(new ToolStripMenuItem(
+			//    Resources.StrCheckout.AddEllipsis(), CachedResources.Bitmaps["ImgCheckout"], OnCheckoutClick));
+			//_gitMenu.DropDownItems.Add(new ToolStripMenuItem(
+			//    Resources.StrAddRemote.AddEllipsis(), CachedResources.Bitmaps["ImgRemoteAdd"], OnAddRemoteClick));
 			_gitMenu.DropDownItems.Add(new ToolStripMenuItem(
 				Resources.StrCreateBranch.AddEllipsis(), CachedResources.Bitmaps["ImgBranchAdd"], OnCreateBranchClick)
 				{
 					ShortcutKeys = Keys.Control | Keys.B,
 				});
-
 			_gitMenu.DropDownItems.Add(new ToolStripMenuItem(
 				Resources.StrCreateTag.AddEllipsis(), CachedResources.Bitmaps["ImgTagAdd"], OnCreateTagClick)
 				{
@@ -50,8 +54,20 @@
 			_gitMenu.DropDownItems.Add(
 				new ToolStripMenuItem(Resources.StrlBash, CachedResources.Bitmaps["ImgTerminal"], OnGitBashClick));
 
+			_viewMenuItems = new List<ToolStripMenuItem>();
+			foreach(var factory in Gui.ViewFactories)
+			{
+				if(factory.Singleton)
+				{
+					var item = new ToolStripMenuItem(factory.Name, factory.Image, OnShowViewItemClick) { Tag = factory.Guid };
+					_viewMenuItems.Add(item);
+				}
+			}
+
 			if(repository != null)
+			{
 				AttachToRepository(repository);
+			}
 		}
 
 		public IEnumerable<ToolStripMenuItem> Menus
@@ -59,10 +75,20 @@
 			get { return _menus; }
 		}
 
+		public IEnumerable<ToolStripMenuItem> ViewMenuItems
+		{
+			get { return _viewMenuItems; }
+		}
+
 		public GuiProvider Gui
 		{
 			get { return _gui; }
 		}
+
+		//private void OnCheckoutClick(object sender, EventArgs e)
+		//{
+		//    _gui.StartCheckoutDialog();
+		//}
 
 		private void OnCreateBranchClick(object sender, EventArgs e)
 		{
@@ -73,6 +99,11 @@
 		{
 			_gui.StartCreateTagDialog();
 		}
+
+		//private void OnAddRemoteClick(object sender, EventArgs e)
+		//{
+		//    _gui.StartAddRemoteDialog();
+		//}
 
 		private void OnGitGuiClick(object sender, EventArgs e)
 		{
@@ -89,6 +120,12 @@
 			StandardTools.StartBash(_repository);
 		}
 
+		private void OnShowViewItemClick(object sender, EventArgs e)
+		{
+			var guid = (Guid)((ToolStripMenuItem)sender).Tag;
+			Gui.Environment.ViewDockService.ShowView(guid);
+		}
+
 		public Repository Repository
 		{
 			get { return _repository; }
@@ -97,9 +134,13 @@
 				if(_repository != value)
 				{
 					if(_repository != null)
+					{
 						DetachFromRepository(_repository);
+					}
 					if(value != null)
+					{
 						AttachToRepository(value);
+					}
 				}
 			}
 		}
