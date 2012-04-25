@@ -26,7 +26,7 @@
 		private bool _alwaysShowHScrollBar;
 		private bool _needVScroll;
 		private bool _needHScroll;
-		private bool _mouseHovered;
+		private bool _isMouseOver;
 		private int _updateCount;
 
 		/// <summary>Area for content rendering and scrolling.</summary>
@@ -240,31 +240,42 @@
 		public void ScrollToTop()
 		{
 			if(_vScrollPos != 0)
+			{
 				_vScrollBar.Value = 0;
+			}
 		}
 
 		public void ScrollToBottom()
 		{
 			if(_vScrollPos != _maxVScrollPos)
+			{
 				_vScrollBar.Value = _maxVScrollPos;
+			}
 		}
 
 		public void ScrollToTopLeft()
 		{
 			if(_vScrollPos != 0)
+			{
 				_vScrollBar.Value = 0;
+			}
 			if(_hScrollPos != 0)
+			{
 				_hScrollBar.Value = 0;
+			}
 		}
 
 		public void ScrollToBottomLeft()
 		{
 			if(_vScrollPos != _maxVScrollPos)
+			{
 				_vScrollBar.Value = _maxVScrollPos;
+			}
 			if(_hScrollPos != 0)
+			{
 				_hScrollBar.Value = 0;
+			}
 		}
-
 
 		/// <summary>Disable control redraw events.</summary>
 		public void BeginUpdate()
@@ -280,8 +291,8 @@
 		/// <param name="redraw">Repaint control.</param>
 		protected virtual void EndUpdate(bool redraw)
 		{
-			if(_updateCount == 0)
-				throw new InvalidOperationException();
+			if(_updateCount == 0) throw new InvalidOperationException();
+
 			--_updateCount;
 			if(_updateCount == 0)
 			{
@@ -306,9 +317,9 @@
 			get { return _updateCount; }
 		}
 
-		protected bool MouseHovered
+		protected bool IsMouseOver
 		{
-			get { return _mouseHovered; }
+			get { return _isMouseOver; }
 		}
 
 		private Rectangle GetClientArea()
@@ -330,9 +341,13 @@
 				scrollbarOffset = 1;
 			}
 			if(vScrollBar)
+			{
 				client.Width -= _vScrollBar.Width - scrollbarOffset;
+			}
 			if(hScrollBar)
+			{
 				client.Height -= _hScrollBar.Height - scrollbarOffset;
+			}
 			return client;
 		}
 
@@ -460,12 +475,12 @@
 
 		protected virtual int GetVScrollSmallChange()
 		{
-			return 1;
+			return 10;
 		}
 
 		protected virtual int GetHScrollSmallChange()
 		{
-			return 1;
+			return 10;
 		}
 
 		protected bool SetScrollBars()
@@ -496,7 +511,9 @@
 			int offset = _borderStyle == BorderStyle.None ? 0 : 2;
 			var bounds = new Rectangle(Width - _vScrollBar.Width - offset, offset, _vScrollBar.Width, Height - offset * 2);
 			if(_needHScroll || _alwaysShowHScrollBar)
+			{
 				bounds.Height -= _hScrollBar.Height;
+			}
 			return bounds;
 		}
 
@@ -505,7 +522,9 @@
 			int offset = _borderStyle == BorderStyle.None ? 0 : 2;
 			var bounds = new Rectangle(offset, Height - _hScrollBar.Height - offset, Width - offset * 2, _hScrollBar.Height);
 			if(_needVScroll || _alwaysShowVScrollBar)
+			{
 				bounds.Width -= _vScrollBar.Width;
+			}
 			return bounds;
 		}
 
@@ -575,7 +594,9 @@
 				{
 					var b = GetVScrollBounds();
 					if(_vScrollBar.Bounds != b)
+					{
 						_vScrollBar.Bounds = b;
+					}
 					if(_maxVScrollPos != 0)
 					{
 						_maxVScrollPos = 0;
@@ -661,7 +682,9 @@
 				{
 					var b = GetHScrollBounds();
 					if(_hScrollBar.Bounds != b)
+					{
 						_hScrollBar.Bounds = b;
+					}
 					if(_maxHScrollPos != 0)
 					{
 						_maxHScrollPos = 0;
@@ -756,13 +779,13 @@
 			NativeMethods.RECT scroll, clip;
 			if(HScrollAffectsClientArea)
 			{
-				scroll = new NativeMethods.RECT(_clientArea);
-				clip = new NativeMethods.RECT(_clientArea);
+				scroll	= new NativeMethods.RECT(_clientArea);
+				clip	= new NativeMethods.RECT(_clientArea);
 			}
 			else
 			{
-				scroll = new NativeMethods.RECT(_contentArea);
-				clip = new NativeMethods.RECT(_contentArea);
+				scroll	= new NativeMethods.RECT(_contentArea);
+				clip	= new NativeMethods.RECT(_contentArea);
 			}
 			NativeMethods.RECT invalid;
 			NativeMethods.ScrollDC(hdc, dx, 0, ref scroll, ref clip, IntPtr.Zero, out invalid);
@@ -770,38 +793,47 @@
 			Invalidate(Rectangle.FromLTRB(invalid.left, invalid.top, invalid.right, invalid.bottom));
 		}
 
+		private static int ClampScrollPosition(int position, int maxPosition)
+		{
+			if(position < 0) return 0;
+			if(position > maxPosition) return maxPosition;
+			return position;
+		}
+
 		protected void DoVScroll(int newPosition)
 		{
-			if(newPosition < 0) newPosition = 0;
-			else if(newPosition > _maxVScrollPos) newPosition = _maxVScrollPos;
+			newPosition = ClampScrollPosition(newPosition, _maxVScrollPos);
 			newPosition = TransformVScrollPos(newPosition);
-			if(newPosition == _vScrollPos) return;
+			if(newPosition != _vScrollPos)
+			{
+				int dy = _vScrollPos - newPosition;
+				_vScrollPos = newPosition;
 
-			int dy = _vScrollPos - newPosition;
-			_vScrollPos = newPosition;
+				OnVScroll(dy);
 
-			OnVScroll(dy);
-
-			if(_blockScrollRedraw) return;
-
-			ScrollY(dy);
+				if(!_blockScrollRedraw)
+				{
+					ScrollY(dy);
+				}
+			}
 		}
 
 		private void DoHScroll(int newPosition)
 		{
-			if(newPosition < 0) newPosition = 0;
-			else if(newPosition > _maxHScrollPos) newPosition = _maxHScrollPos;
+			newPosition = ClampScrollPosition(newPosition, _maxHScrollPos);
 			newPosition = TransformHScrollPos(newPosition);
-			if(newPosition == _hScrollPos) return;
+			if(newPosition != _hScrollPos)
+			{
+				int dx = _hScrollPos - newPosition;
+				_hScrollPos = newPosition;
 
-			int dx = _hScrollPos - newPosition;
-			_hScrollPos = newPosition;
+				OnHScroll(dx);
 
-			OnHScroll(dx);
-
-			if(_blockScrollRedraw) return;
-
-			ScrollX(dx);
+				if(!_blockScrollRedraw)
+				{
+					ScrollX(dx);
+				}
+			}
 		}
 
 		protected void StartScrollTimer(int vDirection)
@@ -918,7 +950,9 @@
 				}
 			}
 			if(_hScrollDirection == 0 && _vScrollDirection == 0)
+			{
 				StopScrollTimer();
+			}
 		}
 
 		#endregion
@@ -1007,13 +1041,13 @@
 
 		protected override void OnMouseEnter(EventArgs e)
 		{
-			_mouseHovered = true;
+			_isMouseOver = true;
 			base.OnMouseEnter(e);
 		}
 
 		protected override void OnMouseLeave(EventArgs e)
 		{
-			_mouseHovered = false;
+			_isMouseOver = false;
 			base.OnMouseLeave(e);
 		}
 
@@ -1039,11 +1073,8 @@
 				{
 					scrollpos -= GetVScrollSmallChange() * Math.Sign(e.Delta) * lines;
 				}
+				scrollpos = ClampScrollPosition(scrollpos, MaxVScrollPos);
 				scrollpos = TransformVScrollPos(scrollpos);
-				if(scrollpos < 0)
-					scrollpos = 0;
-				else if(scrollpos > MaxVScrollPos)
-					scrollpos = MaxVScrollPos;
 				_vScrollBar.Value = scrollpos;
 
 				UpdateHover(e.X, e.Y);
