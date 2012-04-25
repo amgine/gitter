@@ -113,10 +113,13 @@
 				_remoteLabel = new ToolStripStatusLabel(string.Empty, CachedResources.Bitmaps["ImgRemote"]),
 			};
 
+			_userLabel.MouseDown += OnUserLabelMouseDown;
 			_remoteLabel.MouseDown += OnRemoteLabelMouseDown;
 
 			if(gui.Repository != null)
+			{
 				AttachToRepository(gui.Repository);
+			}
 
 			_statusToolTip = new StatusToolTip();
 
@@ -211,6 +214,26 @@
 				ShowToolTip(_statusUnstagedModifiedToolTip, (ToolStripStatusLabel)sender, false, FileStatus.Modified);
 			_statusUnstagedModified.MouseLeave += (sender, e) =>
 				_statusUnstagedModifiedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
+		}
+
+		private void OnUserLabelMouseDown(object sender, MouseEventArgs e)
+		{
+			if(e.Button == MouseButtons.Right)
+			{
+				if(_repository != null)
+				{
+					var item = (ToolStripItem)sender;
+					var menu = new ContextMenuStrip();
+					menu.Items.Add(new ToolStripMenuItem(
+						Resources.StrChangeIdentity.AddEllipsis(), null,
+						(s, eargs) => _gui.StartUserIdentificationDialog()));
+					Utility.MarkDropDownForAutoDispose(menu);
+					var parent = Utility.GetParentControl(item);
+					var x = item.Bounds.X + e.X;
+					var y = item.Bounds.Y + e.Y;
+					menu.Show(parent, x, y);
+				}
+			}
 		}
 
 		private static void OnRemoteLabelMouseDown(object sender, MouseEventArgs e)
