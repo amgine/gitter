@@ -2192,6 +2192,13 @@ namespace gitter.Git.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap ImgUserUnknown {
+            get {
+                object obj = ResourceManager.GetObject("ImgUserUnknown", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap ImgViewReflog {
             get {
                 object obj = ResourceManager.GetObject("ImgViewReflog", resourceCulture);
@@ -4131,6 +4138,15 @@ namespace gitter.Git.Properties {
         internal static string StrlUpdate {
             get {
                 return ResourceManager.GetString("StrlUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to user identity is not configured.
+        /// </summary>
+        internal static string StrlUserIdentityNotConfigured {
+            get {
+                return ResourceManager.GetString("StrlUserIdentityNotConfigured", resourceCulture);
             }
         }
         

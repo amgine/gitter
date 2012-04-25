@@ -109,7 +109,7 @@
 
 			_rightAlignedItems = new[]
 			{
-				_userLabel = new ToolStripStatusLabel(string.Empty, CachedResources.Bitmaps["ImgUser"]),
+				_userLabel = new ToolStripStatusLabel(string.Empty, null),
 				_remoteLabel = new ToolStripStatusLabel(string.Empty, CachedResources.Bitmaps["ImgRemote"]),
 			};
 
@@ -335,7 +335,7 @@
 		private void AttachToRepository(Repository repository)
 		{
 			_repository = repository;
-			UpdateCurrentBranch();
+			UpdateCurrentBranchLabel();
 			if(repository.Remotes.Count != 0)
 			{
 				foreach(var remote in repository.Remotes)
@@ -352,7 +352,7 @@
 				_remoteLabel.Tag = null;
 			}
 			UpdateStatus();
-			UpdateUserIdentity();
+			UpdateUserIdentityLabel();
 			repository.Head.PointerChanged += OnHeadChanged;
 			repository.Refs.Heads.BranchRenamed += OnBranchRenamed;
 			repository.Status.Changed += OnStatusChanged;
@@ -375,11 +375,11 @@
 		{
 			if(_gui.Environment.InvokeRequired)
 			{
-				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranch), null);
+				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
 			}
 			else
 			{
-				UpdateCurrentBranch();
+				UpdateCurrentBranchLabel();
 			}
 		}
 
@@ -387,11 +387,11 @@
 		{
 			if(_gui.Environment.InvokeRequired)
 			{
-				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateUserIdentity), null);
+				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateUserIdentityLabel), null);
 			}
 			else
 			{
-				UpdateUserIdentity();
+				UpdateUserIdentityLabel();
 			}
 		}
 
@@ -401,11 +401,11 @@
 			{
 				if(_gui.Environment.InvokeRequired)
 				{
-					_gui.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranch), null);
+					_gui.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
 				}
 				else
 				{
-					UpdateCurrentBranch();
+					UpdateCurrentBranchLabel();
 				}
 			}
 		}
@@ -639,7 +639,7 @@
 			}
 		}
 
-		public void UpdateCurrentBranch()
+		public void UpdateCurrentBranchLabel()
 		{
 			if(_repository.Head.IsEmpty)
 			{
@@ -662,18 +662,18 @@
 			}
 		}
 
-		public void UpdateUserIdentity()
+		public void UpdateUserIdentityLabel()
 		{
 			var user = _repository.UserIdentity;
 			if(user == null)
 			{
-				_userLabel.Available = false;
-				_userLabel.Text = "";
+				_userLabel.Image = CachedResources.Bitmaps["ImgUserUnknown"];
+				_userLabel.Text = Resources.StrlUserIdentityNotConfigured.SurroundWith('<', '>');
 			}
 			else
 			{
+				_userLabel.Image = CachedResources.Bitmaps["ImgUser"];
 				_userLabel.Text = user.Name + " <" + user.Email + ">";
-				_userLabel.Available = true;
 			}
 		}
 

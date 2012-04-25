@@ -2503,7 +2503,13 @@ Proceed?</value>
   <data name="IcoStatusGreen9p" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\status-green-9p.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ImgUserUnknown" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\user-silhouette-question.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="StrChangeIdentity" xml:space="preserve">
     <value>Change Identity</value>
+  </data>
+  <data name="StrlUserIdentityNotConfigured" xml:space="preserve">
+    <value>user identity is not configured</value>
   </data>
 </root>

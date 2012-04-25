@@ -246,7 +246,7 @@
 			{
 				if(dlg.Run(Environment.MainForm) == DialogResult.OK)
 				{
-					_statusbar.UpdateUserIdentity();
+					_statusbar.UpdateUserIdentityLabel();
 				}
 			}
 		}

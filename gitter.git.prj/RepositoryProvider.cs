@@ -175,7 +175,7 @@
 			var gitRepository = repository as Repository;
 			if(gitRepository == null) throw new ArgumentException("repository");
 
-			if(!gitRepository.Configuration.Exists(GitConstants.UserNameParameter))
+			if(gitRepository.UserIdentity == null)
 			{
 				using(var dlg = new UserIdentificationDialog(environment, gitRepository))
 				{

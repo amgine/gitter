@@ -1378,6 +1378,9 @@
   <ItemGroup>
     <None Include="Resources\status-green-9p.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\user-silhouette-question.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
