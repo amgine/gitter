@@ -20,6 +20,11 @@
 			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
+		public abstract Repository Repository
+		{
+			get;
+		}
+
 		public virtual IEnumerable<FlowPanel> GetInformationPanels()
 		{
 			return null;

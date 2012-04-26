@@ -2,16 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
 
-	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using gitter.Git.Gui.Controls;
 	using gitter.Git.Gui.Views;
-
-	using Resources = gitter.Git.Properties.Resources;
 
 	internal sealed class ViewFactoriesCollection : IEnumerable<IViewFactory>
 	{
@@ -20,6 +14,7 @@
 		private readonly IViewFactory[] _viewFactories;
 		private readonly IViewFactory _viewGit;
 		private readonly IViewFactory _viewHistory;
+		private readonly IViewFactory _viewPathHistory;
 		private readonly IViewFactory _viewReferences;
 		private readonly IViewFactory _viewCommit;
 		private readonly IViewFactory _viewStash;
@@ -48,6 +43,7 @@
 			{
 				_viewGit =				new GitViewFactory(gui),
 				_viewHistory =			new HistoryViewFactory(gui),
+				_viewPathHistory =		new PathHistoryViewFactory(gui),
 				_viewReferences =		new ReferencesViewFactory(gui),
 				_viewCommit =			new CommitViewFactory(gui),
 				_viewStash =			new StashViewFactory(gui),
@@ -135,6 +131,11 @@
 		public IViewFactory HistoryViewFactory
 		{
 			get { return _viewHistory; }
+		}
+
+		public IViewFactory PathHistoryViewFactory
+		{
+			get { return _viewPathHistory; }
 		}
 
 		public IViewFactory ReferencesViewFactory

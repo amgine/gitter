@@ -78,6 +78,23 @@
 		}
 	}
 
+	sealed class PathHistoryViewFactory : ViewFactoryBase
+	{
+		private readonly GuiProvider _guiProvider;
+
+		public PathHistoryViewFactory(GuiProvider guiProvider)
+			: base(Guids.PathHistoryViewGuid, Resources.StrHistory, CachedResources.Bitmaps["ImgFileHistory"], false)
+		{
+			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			_guiProvider = guiProvider;
+		}
+
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		{
+			return new PathHistoryView(parameters, _guiProvider);
+		}
+	}
+
 	sealed class ReflogViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;

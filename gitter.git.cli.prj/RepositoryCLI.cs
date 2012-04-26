@@ -367,7 +367,7 @@
 			if(parameters == null) throw new ArgumentNullException("parameters");
 
 			var args = new List<CommandArgument>();
-			InsertDiffParameters(args, parameters);
+			InsertDiffParameters1(args, parameters);
 
 			bool comparison = false;
 			if(!string.IsNullOrEmpty(parameters.Revision1))
@@ -396,20 +396,23 @@
 					type = DiffType.UnstagedChanges;
 				}
 			}
+			InsertDiffParameters2(args, parameters);
 
 			var cmd = new DiffCommand(args);
 			var output = _executor.ExecCommand(cmd);
 			if(output.ExitCode != 0)
 			{
 				if(parameters.Cached && IsNoHEADCommitToCompareWithError(output.Error))
+				{
 					throw new RepositoryIsEmptyException(output.Error);
+				}
 				output.Throw();
 			}
 			var parser = new DiffParser(output.Output);
 			return parser.ReadDiff(type);
 		}
 
-		private static void InsertDiffParameters(IList<CommandArgument> args, BaseQueryDiffParameters parameters)
+		private static void InsertDiffParameters1(IList<CommandArgument> args, BaseQueryDiffParameters parameters)
 		{
 			args.Add(DiffCommand.Patch());
 			args.Add(DiffCommand.FullIndex());
@@ -442,6 +445,10 @@
 			{
 				args.Add(DiffCommand.IgnoreSpaceChange());
 			}
+		}
+
+		private static void InsertDiffParameters2(IList<CommandArgument> args, BaseQueryDiffParameters parameters)
+		{
 			if(parameters.Paths != null && parameters.Paths.Count != 0)
 			{
 				args.Add(DiffCommand.NoMoreOptions());

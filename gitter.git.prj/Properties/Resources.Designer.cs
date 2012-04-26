@@ -1527,6 +1527,13 @@ namespace gitter.Git.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap ImgFileHistory {
+            get {
+                object obj = ResourceManager.GetObject("ImgFileHistory", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap ImgFileRevert {
             get {
                 object obj = ResourceManager.GetObject("ImgFileRevert", resourceCulture);
@@ -1558,6 +1565,13 @@ namespace gitter.Git.Properties {
         internal static System.Drawing.Bitmap ImgFolder {
             get {
                 object obj = ResourceManager.GetObject("ImgFolder", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap ImgFolderHistory {
+            get {
+                object obj = ResourceManager.GetObject("ImgFolderHistory", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

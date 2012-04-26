@@ -65,6 +65,15 @@
 
 		#region Methods
 
+		public CustomListBoxColumn GetById(int columnId)
+		{
+			for(int i = 0; i < Items.Count; ++i)
+			{
+				if(Items[i].Id == columnId) return Items[i];
+			}
+			return null;
+		}
+
 		public void ShowAll()
 		{
 			foreach(var c in this)

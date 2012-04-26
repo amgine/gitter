@@ -38,12 +38,22 @@
 			return _revision == ds._revision && _fileName == ds._fileName;
 		}
 
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
 		public override string ToString()
 		{
 			if(_revision is Revision)
+			{
 				return _fileName + " @ " + _revision.Pointer.Substring(0, 7);
+			}
 			else
+			{
 				return _fileName + " @ " + _revision.Pointer;
+			}
 		}
 
 		protected override BlameFile GetBlameCore(BlameOptions options)

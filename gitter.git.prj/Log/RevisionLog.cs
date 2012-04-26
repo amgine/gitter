@@ -13,21 +13,31 @@ namespace gitter.Git
 
 	public sealed class RevisionLog
 	{
-		public static readonly RevisionLog Empty = new RevisionLog(new Revision[0]);
-
+		private readonly Repository _repository;
 		private readonly IList<Revision> _revisions;
 
-		public RevisionLog(IList<Revision> revisions)
+		public RevisionLog(Repository repository, IList<Revision> revisions)
 		{
-			if(revisions == null)
-				throw new ArgumentNullException("revisions");
+			if(repository == null) throw new ArgumentNullException("repository");
+			if(revisions == null) throw new ArgumentNullException("revisions");
 
+			_repository = repository;
 			_revisions = revisions;
+		}
+
+		public Repository Repository
+		{
+			get { return _repository; }
 		}
 
 		public IList<Revision> Revisions
 		{
 			get { return _revisions; }
+		}
+
+		public int RevisionsCount
+		{
+			get { return _revisions.Count; }
 		}
 	}
 }

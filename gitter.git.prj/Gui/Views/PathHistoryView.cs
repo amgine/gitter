@@ -14,16 +14,14 @@
 
 	using Resources = gitter.Git.Properties.Resources;
 
-	/// <summary>Tool for displaying a sequence of revisions with graph support.</summary>
 	[ToolboxItem(false)]
-	partial class HistoryView : GitViewBase, ISearchableView<HistorySearchOptions>
+	partial class PathHistoryView : GitViewBase, ISearchableView<HistorySearchOptions>
 	{
 		#region Data
 
-		private ILogSource _logSource;
-		private RevisionLog _log;
+		private PathLogSource _logSource;
+		private RevisionLog _revisionLog;
 		private LogOptions _options;
-		private readonly HistoryToolbar _toolbar;
 		private HistorySearchToolBar _searchToolbar;
 		private bool _autoShowDiff;
 		private AsyncLogRequest _pendingRequest;
@@ -36,15 +34,21 @@
 
 		#endregion
 
-		public HistoryView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.HistoryViewGuid, gui, parameters)
+		public PathHistoryView(IDictionary<string, object> parameters, GuiProvider gui)
+			: base(Guids.PathHistoryViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 
 			_autoShowDiff = true;
 
-			Text = Resources.StrHistory;
-
+			for(int i = 0; i < _lstRevisions.Columns.Count; ++i)
+			{
+				if(_lstRevisions.Columns[i].Id == (int)ColumnId.Graph)
+				{
+					_lstRevisions.Columns.RemoveAt(i);
+					break;
+				}
+			}
 			_lstRevisions.Text = Resources.StrNoCommitsToDisplay;
 			_lstRevisions.Multiselect = true;
 			_lstRevisions.SelectionChanged += (sender, e) =>
@@ -58,16 +62,29 @@
 			_lstRevisions.PreviewKeyDown += OnKeyDown;
 			_options = new LogOptions();
 			_options.Changed += OnLogOptionsChanged;
-
-			AddTopToolStrip(_toolbar = new HistoryToolbar(this));
+			ApplyParameters(parameters);
 		}
 
-		/// <summary>
-		/// Gets a value indicating whether this instance is document.
-		/// </summary>
-		/// <value>
-		/// 	<c>true</c> if this instance is document; otherwise, <c>false</c>.
-		/// </value>
+		public override void ApplyParameters(IDictionary<string, object> parameters)
+		{
+			base.ApplyParameters(parameters);
+			_logSource = (PathLogSource)parameters["source"];
+			if(_logSource != null)
+			{
+				Text = Resources.StrHistory + ": " + _logSource.ToString();
+				var request = new AsyncLogRequest(Repository, _logSource.GetLogAsync(_options));
+				_pendingRequest = request;
+				request.Query.BeginInvoke(this, _lstRevisions.ProgressMonitor, OnHistoryLoaded, request);
+			}
+			else
+			{
+				Text = Resources.StrHistory;
+				_lstRevisions.Clear();
+			}
+		}
+
+		/// <summary>Returns a value indicating whether this instance is a document.</summary>
+		/// <value><c>true</c> if this instance is a document; otherwise, <c>false</c>.</value>
 		public override bool IsDocument
 		{
 			get { return true; }
@@ -95,7 +112,7 @@
 			var revItem = e.Item as RevisionListItem;
 			if(revItem != null)
 			{
-				ShowDiffTool(new RevisionChangesDiffSource(revItem.Data));
+				ShowDiffTool(new RevisionChangesDiffSource(revItem.Data, new[] { _logSource.Path }));
 				return;
 			}
 			var fakeItem = e.Item as FakeRevisionListItem;
@@ -104,21 +121,29 @@
 				switch(fakeItem.Type)
 				{
 					case FakeRevisionItemType.StagedChanges:
-						ShowDiffTool(new IndexChangesDiffSource(Repository, true));
+						ShowDiffTool(new IndexChangesDiffSource(Repository, true, new[] { _logSource.Path }));
 						break;
 					case FakeRevisionItemType.UnstagedChanges:
-						ShowDiffTool(new IndexChangesDiffSource(Repository, false));
+						ShowDiffTool(new IndexChangesDiffSource(Repository, false, new[] { _logSource.Path }));
 						break;
 				}
 				return;
 			}
 		}
 
-		/// <summary>Gets view image.</summary>
-		/// <value>This view image.</value>
 		public override Image Image
 		{
-			get { return CachedResources.Bitmaps["ImgHistory"]; }
+			get
+			{
+				if(_logSource != null)
+				{
+					if(_logSource.Path.EndsWith('/'))
+					{
+						return CachedResources.Bitmaps["ImgFolderHistory"];
+					}
+				}
+				return CachedResources.Bitmaps["ImgFileHistory"];
+			}
 		}
 
 		public void SelectRevision(IRevisionPointer revision)
@@ -171,16 +196,6 @@
 			}
 		}
 
-		protected override void AttachToRepository(Repository repository)
-		{
-			base.AttachToRepository(repository);
-			_logSource = new RepositoryLogSource(repository);
-
-			var request = new AsyncLogRequest(repository, _logSource.GetLogAsync(_options));
-			_pendingRequest = request;
-			request.Query.BeginInvoke(this, _lstRevisions.ProgressMonitor, OnHistoryLoaded, request);
-		}
-
 		private void OnHistoryLoaded(IAsyncResult ar)
 		{
 			if(!IsDisposed)
@@ -199,9 +214,6 @@
 								{
 									_pendingRequest = null;
 									_lstRevisions.SetLog(log);
-									request.Repository.CommitCreated += OnCommitCreated;
-									request.Repository.Updated += OnRepositoryUpdated;
-									request.Repository.Stash.StashedStateDeleted += OnStashDeleted;
 									if(_lstRevisions.UnstagedItem != null)
 									{
 										_lstRevisions.UnstagedItem.FocusAndSelect();
@@ -228,48 +240,14 @@
 		{
 			base.DetachFromRepository(repository);
 
-			repository.CommitCreated -= OnCommitCreated;
-			repository.Updated -= OnRepositoryUpdated;
-			repository.Stash.StashedStateDeleted -= OnStashDeleted;
-	
 			_lstRevisions.Clear();
 			_logSource = null;
-			_log = null;
+			_revisionLog = null;
 			_options.Changed -= OnLogOptionsChanged;
 			_options.Reset();
 			_options.Changed += OnLogOptionsChanged;
 			_pendingRequest = null;
 			LogOptionsChanged.Raise(this);
-		}
-
-		protected override void LoadRepositoryConfig(Section section)
-		{
-			base.LoadRepositoryConfig(section);
-			var logOptionsNode = section.TryGetSection("LogOptions");
-			if(logOptionsNode != null)
-			{
-				_options.Changed -= OnLogOptionsChanged;
-				_options.LoadFrom(logOptionsNode);
-				_options.Changed += OnLogOptionsChanged;
-				LogOptionsChanged.Raise(this);
-			}
-		}
-
-		protected override void SaveRepositoryConfig(Section section)
-		{
-			base.SaveRepositoryConfig(section);
-			var logOptionsNode = section.GetCreateSection("LogOptions");
-			_options.SaveTo(logOptionsNode);
-		}
-
-		private void OnCommitCreated(object sender, RevisionEventArgs e)
-		{
-			RefreshContent();
-		}
-
-		private void OnRepositoryUpdated(object sender, EventArgs e)
-		{
-			RefreshContent();
 		}
 
 		private void OnStashDeleted(object sender, StashedStateEventArgs e)
@@ -304,10 +282,9 @@
 				{
 					Cursor = Cursors.WaitCursor;
 					_lstRevisions.BeginUpdate();
-					Repository.Status.Refresh();
-					_log = _logSource.GetLog(_options);
+					_revisionLog = _logSource.GetLog(_options);
 					var state = _lstRevisions.GetState();
-					_lstRevisions.SetLog(_log);
+					_lstRevisions.SetLog(_revisionLog);
 					_lstRevisions.SetState(state);
 					_lstRevisions.EndUpdate();
 					Cursor = Cursors.Default;
@@ -325,7 +302,7 @@
 						var revisionItem = item as RevisionListItem;
 						if(revisionItem != null)
 						{
-							ShowContextualDiffTool(new RevisionChangesDiffSource(revisionItem.Data));
+							ShowContextualDiffTool(new RevisionChangesDiffSource(revisionItem.Data, new[] { _logSource.Path }));
 							return;
 						}
 						var fakeItem = item as FakeRevisionListItem;
@@ -335,10 +312,10 @@
 							switch(fakeItem.Type)
 							{
 								case FakeRevisionItemType.StagedChanges:
-									diff = new IndexChangesDiffSource(Repository, true);
+									diff = new IndexChangesDiffSource(Repository, true, new[] { _logSource.Path });
 									break;
 								case FakeRevisionItemType.UnstagedChanges:
-									diff = new IndexChangesDiffSource(Repository, false);
+									diff = new IndexChangesDiffSource(Repository, false, new[] { _logSource.Path });
 									break;
 							}
 							if(diff != null)
@@ -357,7 +334,7 @@
 						var revisionItem2 = item2 as RevisionListItem;
 						if(revisionItem2 == null) return;
 						ShowContextualDiffTool(new RevisionCompareDiffSource(
-							revisionItem1.Data, revisionItem2.Data));
+							revisionItem1.Data, revisionItem2.Data, new[] { _logSource.Path }));
 					}
 					break;
 				default:
@@ -497,11 +474,11 @@
 
 		private void ShowSearchToolBar()
 		{
-			if(_searchToolbar == null)
-			{
-				AddBottomToolStrip(_searchToolbar = new HistorySearchToolBar(this));
-			}
-			_searchToolbar.FocusSearchTextBox();
+			//if(_searchToolbar == null)
+			//{
+			//    AddBottomToolStrip(_searchToolbar = new HistorySearchToolBar(this));
+			//}
+			//_searchToolbar.FocusSearchTextBox();
 		}
 
 		private void HideSearchToolBar()
@@ -552,7 +529,7 @@
 			var layoutNode = section.TryGetSection("Layout");
 			if(layoutNode != null)
 			{
-				_toolbar.ShowDiffButton.Checked = ShowDetails = layoutNode.GetValue("ShowDetails", ShowDetails);
+				//_toolbar.ShowDiffButton.Checked = ShowDetails = layoutNode.GetValue("ShowDetails", ShowDetails);
 			}
 			var listNode = section.TryGetSection("RevisionList");
 			if(listNode != null)

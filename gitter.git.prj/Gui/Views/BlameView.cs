@@ -39,7 +39,7 @@
 
 			var blame = (IBlameSource)parameters["blame"];
 
-			Text = Resources.StrlBlame + ": " + blame.ToString();
+			Text = Resources.StrBlame + ": " + blame.ToString();
 
 			_blamePanel.Panels.Clear();
 			_blamePanel.Panels.Add(new BlameFilePanel(blame.GetBlame()));

@@ -288,9 +288,10 @@
 
 			var args = new List<CommandArgument>();
 			args.Add(LogCommand.MaxCount(1));
-			InsertDiffParameters(args, parameters);
+			InsertDiffParameters1(args, parameters);
 			args.Add(new CommandArgument("-c"));
 			args.Add(new CommandArgument(parameters.Revision));
+			InsertDiffParameters2(args, parameters);
 
 			var cmd = new LogCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -308,9 +309,10 @@
 
 			var args = new List<CommandArgument>();
 			args.Add(LogCommand.MaxCount(1));
-			InsertDiffParameters(args, parameters);
+			InsertDiffParameters1(args, parameters);
 			args.Add(new CommandArgument("-c"));
 			args.Add(new CommandArgument(parameters.Revision));
+			InsertDiffParameters2(args, parameters);
 
 			var cmd = new LogCommand(args);
 			var output = _executor.ExecCommand(cmd);

@@ -35,6 +35,11 @@
 			get { return _revision; }
 		}
 
+		public override Repository Repository
+		{
+			get { return _revision.Repository; }
+		}
+
 		public override int GetHashCode()
 		{
 			return _revision.GetHashCode();
@@ -67,9 +72,13 @@
 		public override string ToString()
 		{
 			if(_revision is Revision)
+			{
 				return "log -p " + _revision.Pointer.Substring(0, 7);
+			}
 			else
+			{
 				return "log -p " + _revision.Pointer;
+			}
 		}
 	}
 }

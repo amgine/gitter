@@ -113,6 +113,7 @@
 					menu.Items.Add(c);
 					menu.Items.Add(new ToolStripSeparator());
 					menu.Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath));
+					menu.Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath));
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
 				}
@@ -127,6 +128,8 @@
 						menu.Items.Add(GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(e.Item));
 						menu.Items.Add(GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(e.Item));
 					}
+					menu.Items.Add(new ToolStripSeparator());
+					menu.Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath + "/"));
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
 				}

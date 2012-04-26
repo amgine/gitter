@@ -546,7 +546,7 @@
 				}
 				res[id] = graphLine;
 
-				while(lineCount != 0 && line[lineCount] != null)
+				while(lineCount != 0 && (lineCount >= line.Length || line[lineCount] != null))
 				{
 					--lineCount;
 				}

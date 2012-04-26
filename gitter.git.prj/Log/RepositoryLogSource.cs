@@ -20,11 +20,16 @@
 
 		protected override RevisionLog GetLogCore(LogOptions options)
 		{
-			if(_repository.IsEmpty) return RevisionLog.Empty;
-
-			var log = Repository.Accessor.QueryRevisions(options.GetLogParameters());
-			var res = _repository.Revisions.Resolve(log);
-			return new RevisionLog(res);
+			if(Repository.IsEmpty)
+			{
+				return new RevisionLog(Repository, new Revision[0]);
+			}
+			else
+			{
+				var log = Repository.Accessor.QueryRevisions(options.GetLogParameters());
+				var res = Repository.Revisions.Resolve(log);
+				return new RevisionLog(Repository, res);
+			}
 		}
 	}
 }

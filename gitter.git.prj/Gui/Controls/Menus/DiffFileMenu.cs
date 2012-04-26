@@ -35,6 +35,8 @@
 					Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
 						indexDiff.Repository.Head, diffFile.TargetFile));
 				}
+				Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
+					indexDiff.Repository.Head, diffFile.TargetFile));
 			}
 			else
 			{
@@ -46,6 +48,8 @@
 						Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
 							revisionDiff.Revision, diffFile.TargetFile));
 					}
+					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
+						revisionDiff.Revision, diffFile.TargetFile));
 				}
 			}
 		}

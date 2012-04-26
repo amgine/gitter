@@ -2617,15 +2617,46 @@
 			return item;
 		}
 
+		public static T GetPathHistoryItem<T>(IRevisionPointer revision, string path)
+			where T : ToolStripItem, new()
+		{
+			if(revision == null) throw new ArgumentNullException("revision");
+			if(path == null) throw new ArgumentNullException("path");
+
+			var item = new T()
+			{
+				Image = CachedResources.Bitmaps[path.EndsWith('/') ? "ImgFolderHistory" : "ImgFileHistory"],
+				Text = Resources.StrHistory,
+				Tag = new PathLogSource(revision, path),
+			};
+			item.Click += OnPathHistoryClick;
+			return item;
+		}
+
 		private static void OnBlameClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
 			var data = (IBlameSource)item.Tag;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(Views.Guids.BlameViewGuid, new Dictionary<string, object>()
-			{
-				{ "blame", data }
-			});
+			RepositoryProvider.Environment.ViewDockService.ShowView(
+				Views.Guids.BlameViewGuid,
+				new Dictionary<string, object>()
+				{
+					{ "blame", data }
+				});
+		}
+
+		private static void OnPathHistoryClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var data = (ILogSource)item.Tag;
+
+			RepositoryProvider.Environment.ViewDockService.ShowView(
+				Views.Guids.PathHistoryViewGuid,
+				new Dictionary<string, object>()
+				{
+					{ "source", data }
+				});
 		}
 
 		private static void OnResolveConflictItemClick(object sender, EventArgs e)

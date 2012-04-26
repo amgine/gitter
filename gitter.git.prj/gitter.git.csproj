@@ -78,6 +78,13 @@
     <Compile Include="Blame\BlameOptions.cs" />
     <Compile Include="Blame\RevisionFileBlameSource.cs" />
     <Compile Include="Blame\IBlameSource.cs" />
+    <Compile Include="Gui\Views\PathHistoryView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\PathHistoryView.Designer.cs">
+      <DependentUpon>PathHistoryView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Log\PathLogSource.cs" />
     <Compile Include="Objects\Configuration\ConfigurationFile.cs" />
     <Compile Include="Gui\Controls\ListBoxes\TreeListBoxMode.cs" />
     <Compile Include="Gui\Controls\Menus\ConfigurationMenu.cs">
@@ -908,6 +915,9 @@
     <EmbeddedResource Include="Gui\Views\BlameView.resx">
       <DependentUpon>BlameView.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Views\PathHistoryView.resx">
+      <DependentUpon>PathHistoryView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Gui\Views\DiffView.resx">
       <DependentUpon>DiffView.cs</DependentUpon>
     </EmbeddedResource>
@@ -1380,6 +1390,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\user-silhouette-question.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\file-history.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-history.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

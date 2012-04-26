@@ -14,6 +14,12 @@
 
 		#endregion
 
+		#region Properties
+
+		Repository Repository { get; }
+
+		#endregion
+
 		#region Methods
 
 		IEnumerable<FlowPanel> GetInformationPanels();

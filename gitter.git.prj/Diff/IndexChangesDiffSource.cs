@@ -42,7 +42,7 @@
 
 		#region Properties
 
-		public Repository Repository
+		public override Repository Repository
 		{
 			get { return _repository; }
 		}

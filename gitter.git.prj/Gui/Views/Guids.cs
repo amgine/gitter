@@ -13,6 +13,8 @@
 			= new Guid("B3215F6C-C3E4-47C4-98D8-D4CB48A5AB70");
 		public static readonly Guid HistoryViewGuid
 			= new Guid("44ABB5D8-6802-46A3-BDDD-3516926B46C4");
+		public static readonly Guid PathHistoryViewGuid
+			= new Guid("C94719C0-9126-470A-BC7F-2110B56B07A6");
 		public static readonly Guid ReflogViewGuid
 			= new Guid("FEF6E622-186F-46E2-B070-B191FD051525");
 		public static readonly Guid MaintenanceViewGuid

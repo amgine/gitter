@@ -16,20 +16,9 @@
 	/// <summary><see cref="CustomListBox"/> for displaying <see cref="RevisionListItem"/>.</summary>
 	public class RevisionListBox : CustomListBox
 	{
-		private readonly CustomListBoxColumn _colHash;
-		private readonly CustomListBoxColumn _colTreeHash;
-		private readonly CustomListBoxColumn _colGraph;
-		private readonly CustomListBoxColumn _colSubject;
-		private readonly CustomListBoxColumn _colCommitDate;
-		private readonly CustomListBoxColumn _colCommitter;
-		private readonly CustomListBoxColumn _colCommitterEmail;
-		private readonly CustomListBoxColumn _colAuthorDate;
-		private readonly CustomListBoxColumn _colAuthor;
-		private readonly CustomListBoxColumn _colAuthorEmail;
-
 		private Repository _repository;
 		private RevisionListItem _currentRevisionItem;
-		private IList<Revision> _log;
+		private RevisionLog _log;
 		private Dictionary<Revision, RevisionListItem> _itemLookupTable;
 		private int _currentIndex;
 		private Branch _currentBranch;
@@ -53,22 +42,27 @@
 		/// <summary>Create <see cref="RevisionListBox"/>.</summary>
 		public RevisionListBox()
 		{
-			Columns.AddRange(new[]
+			Columns.AddRange(new CustomListBoxColumn[]
 				{
-					_colHash			= new HashColumn(),
-					_colTreeHash		= new TreeHashColumn(),
-					_colCommitDate		= new CommitDateColumn(),
-					_colGraph			= new GraphColumn(),
-					_colSubject			= new SubjectColumn(),
-					_colCommitter		= new CommitterColumn(),
-					_colCommitterEmail	= new CommitterEmailColumn(),
-					_colAuthorDate		= new AuthorDateColumn(),
-					_colAuthor			= new AuthorColumn(),
-					_colAuthorEmail		= new AuthorEmailColumn(),
+					new HashColumn(),
+					new TreeHashColumn(),
+					new CommitDateColumn(),
+					new GraphColumn(),
+					new SubjectColumn(),
+					new CommitterColumn(),
+					new CommitterEmailColumn(),
+					new AuthorDateColumn(),
+					new AuthorColumn(),
+					new AuthorEmailColumn(),
 				});
 			AllowDrop = true;
 			_currentIndex = -1;
 			_showStatusItems = true;
+		}
+
+		private CustomListBoxColumn GraphColumn
+		{
+			get { return Columns.GetById((int)ColumnId.Graph); }
 		}
 
 		private void DetachFromRepository()
@@ -76,7 +70,9 @@
 			_repository.Head.PointerChanged -= OnHeadChanged;
 			_repository.Status.Changed -= OnStatusUpdated;
 			if(_currentBranch != null)
+			{
 				_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
+			}
 			_currentBranch = null;
 			_currentRevisionItem = null;
 			_itemLookupTable = null;
@@ -89,7 +85,9 @@
 			_repository.Status.Changed += OnStatusUpdated;
 			_currentBranch = _repository.Head.CurrentBranch;
 			if(_currentBranch != null)
+			{
 				_currentBranch.PositionChanged += OnCurrentBranchPositionChanged;
+			}
 		}
 
 		public State GetState()
@@ -153,18 +151,19 @@
 			}
 		}
 
-		public void SetLog(Repository repository, IList<Revision> revisions)
+		public void SetLog(RevisionLog revisionLog)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			if(revisionLog == null) throw new ArgumentNullException("revisionLog");
 
 			if(_repository != null)
+			{
 				DetachFromRepository();
+			}
 
-			_repository = repository;
+			_repository = revisionLog.Repository;
 
-			_log = revisions;
-			_itemLookupTable = new Dictionary<Revision, RevisionListItem>(revisions.Count);
+			_log = revisionLog;
+			_itemLookupTable = new Dictionary<Revision, RevisionListItem>(revisionLog.RevisionsCount);
 
 			if(_currentBranch != null)
 			{
@@ -174,43 +173,66 @@
 
 			var head = _repository.Head.Revision;
 
-			var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
-			var graph = builder.BuildGraph(revisions, rev => rev.Parents);
-
 			BeginUpdate();
 			Items.Clear();
-			int itemId = 0;
-			int graphSize = 0;
-			int currentIndex = -1;
-			RevisionListItem currentRevisionItem = null;
-			_stagedItem = null;
-			_unstagedItem = null;
-			foreach(var rev in revisions)
+			var graphColumn = GraphColumn;
+			if(graphColumn != null)
 			{
-				var item = new RevisionListItem(rev);
-				_itemLookupTable.Add(rev, item);
-				if(graph[itemId].Length > graphSize)
-					graphSize = graph[itemId].Length;
-				item.Graph = graph[itemId];
-				if(item.Data == head)
+				var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
+				var graph = builder.BuildGraph(revisionLog.Revisions, rev => rev.Parents);
+
+				int graphSize = 0;
+				int currentIndex = -1;
+				RevisionListItem currentRevisionItem = null;
+				_stagedItem = null;
+				_unstagedItem = null;
+				for(int i = 0; i < revisionLog.RevisionsCount; ++i)
 				{
-					currentRevisionItem = item;
-					currentIndex = itemId;
+					var revision = revisionLog.Revisions[i];
+					var revisionListItem = new RevisionListItem(revision);
+					_itemLookupTable.Add(revision, revisionListItem);
+					if(graph[i].Length > graphSize)
+					{
+						graphSize = graph[i].Length;
+					}
+					revisionListItem.Graph = graph[i];
+					if(revisionListItem.Data == head)
+					{
+						currentRevisionItem = revisionListItem;
+						currentIndex = i;
+					}
+					Items.Add(revisionListItem);
 				}
-				Items.Add(item);
-				++itemId;
+				_currentIndex = currentIndex;
+				_currentRevisionItem = currentRevisionItem;
+				graphColumn.Width = 21 * graphSize;
+				lock(_repository.Status.SyncRoot)
+				{
+					CheckNeedOfFakeItems();
+					ReinsertFakeItems(builder);
+					AttachToRepository();
+				}
 			}
-
-			_currentIndex = currentIndex;
-			_currentRevisionItem = currentRevisionItem;
-
-			_colGraph.Width = 21 * graphSize;
-
-			lock(repository.Status.SyncRoot)
+			else
 			{
-				CheckNeedOfFakeItems();
-				ReinsertFakeItems(builder);
-				AttachToRepository();
+				int currentIndex = -1;
+				RevisionListItem currentRevisionItem = null;
+				_stagedItem = null;
+				_unstagedItem = null;
+				for(int i = 0; i < revisionLog.RevisionsCount; ++i)
+				{
+					var revision = revisionLog.Revisions[i];
+					var revisionListItem = new RevisionListItem(revision);
+					_itemLookupTable.Add(revision, revisionListItem);
+					if(revisionListItem.Data == head)
+					{
+						currentRevisionItem = revisionListItem;
+						currentIndex = i;
+					}
+					Items.Add(revisionListItem);
+				}
+				_currentIndex = currentIndex;
+				_currentRevisionItem = currentRevisionItem;
 			}
 			RecomputeHeaderSizes();
 			EndUpdate();
@@ -408,10 +430,18 @@
 			if(fakeItems != 0)
 			{
 				graphLength *= 21;
-				if(_colGraph.Width < graphLength)
-					_colGraph.Width = graphLength;
-				else
-					_colGraph.AutoSize();
+				var graphColumn = GraphColumn;
+				if(graphColumn != null)
+				{
+					if(graphColumn.Width < graphLength)
+					{
+						graphColumn.Width = graphLength;
+					}
+					else
+					{
+						graphColumn.AutoSize();
+					}
+				}
 			}
 		}
 
@@ -508,7 +538,9 @@
 			RefreshCurrentRevisionItem(revision);
 			ReinsertFakeItems(builder);
 			if(_currentRevisionItem != null)
+			{
 				_currentRevisionItem.InvalidateSafe();
+			}
 			EndUpdate();
 		}
 
@@ -521,21 +553,31 @@
 			{
 				var headRev = repository.Head.Revision;
 				if(_currentRevisionItem != null)
+				{
 					_currentRevisionItem.InvalidateSafe();
+				}
 				if(_currentBranch != null)
+				{
 					_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
+				}
 				_currentBranch = _repository.Head.Pointer as Branch;
 				if(_currentBranch != null)
+				{
 					_currentBranch.PositionChanged += OnCurrentBranchPositionChanged;
+				}
 				RefreshCurrentRevisionItem(headRev);
 				ReinsertFakeItems(builder);
 			}
 			else
 			{
 				if(_currentRevisionItem != null)
+				{
 					_currentRevisionItem.InvalidateSafe();
+				}
 				if(_currentBranch != null)
+				{
 					_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
+				}
 				_currentBranch = null;
 				_currentRevisionItem = null;
 				_currentIndex = -1;
@@ -616,7 +658,9 @@
 								_unstagedItem.Remove();
 								_unstagedItem = null;
 								if(_currentIndex != -1)
+								{
 									--_currentIndex;
+								}
 							}
 						}
 					}
@@ -627,7 +671,9 @@
 							_stagedItem.Remove();
 							_stagedItem = null;
 							if(_currentIndex != -1)
+							{
 								--_currentIndex;
+							}
 						}
 						if(showUnstaged)
 						{
@@ -652,7 +698,9 @@
 								_unstagedItem.Remove();
 								_unstagedItem = null;
 								if(_currentIndex != -1)
+								{
 									--_currentIndex;
+								}
 							}
 						}
 					}
@@ -677,15 +725,23 @@
 						_stagedItem.Graph = builder.AddGraphLineToTop(
 							_currentRevisionItem == null ? null : _currentRevisionItem.Graph);
 						if(_unstagedItem != null)
+						{
 							_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
+						}
 					}
 					else
 					{
 						if(_unstagedItem != null)
+						{
 							_unstagedItem.Graph = builder.AddGraphLineToTop(
 								_currentRevisionItem == null ? null : _currentRevisionItem.Graph);
+						}
 					}
-					_colGraph.AutoSize();
+					var graphColumn = GraphColumn;
+					if(graphColumn != null)
+					{
+						graphColumn.AutoSize();
+					}
 					EndUpdate();
 				}
 			}
@@ -699,7 +755,9 @@
 			{
 				var revItem = item as RevisionListItem;
 				if(revItem != null)
+				{
 					revisions.Add(revItem.Data);
+				}
 			}
 			if(revisions.Count == 2)
 			{
@@ -864,55 +922,75 @@
 			if(_itemLookupTable == null) return null;
 			RevisionListItem item;
 			if(_itemLookupTable.TryGetValue(revision, out item))
+			{
 				return item;
+			}
 			return null;
 		}
 
 		public void RebuildGraph()
 		{
-			var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
-			int graphLen = 0;
-			if(_itemLookupTable.Count != 0)
+			var graphColumn = GraphColumn;
+			if(graphColumn != null)
 			{
-				var graph = builder.BuildGraph(_log, rev => rev.Parents);
-				int id = 0;
-				foreach(IRevisionGraphListItem item in Items)
+				var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
+				int graphLen = 0;
+				if(_itemLookupTable.Count != 0)
 				{
-					if(graph[id].Length > graphLen)
-						graphLen = graph[id].Length;
-					item.Graph = graph[id++];
+					var graph = builder.BuildGraph(_log.Revisions, rev => rev.Parents);
+					int id = 0;
+					foreach(IRevisionGraphListItem item in Items)
+					{
+						if(graph[id].Length > graphLen)
+						{
+							graphLen = graph[id].Length;
+						}
+						item.Graph = graph[id++];
+					}
 				}
-			}
-			if(_showStatusItems)
-			{
-				if(_stagedItem != null)
-				{
-					if(_currentRevisionItem != null)
-						_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
-					else
-						_stagedItem.Graph = builder.AddGraphLineToTop(null);
-					if(_stagedItem.Graph.Length > graphLen)
-						graphLen = _stagedItem.Graph.Length;
-				}
-				if(_unstagedItem != null)
+				if(_showStatusItems)
 				{
 					if(_stagedItem != null)
 					{
-						_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
-					}
-					else
-					{
 						if(_currentRevisionItem != null)
-							_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
+						{
+							_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
+						}
 						else
-							_unstagedItem.Graph = builder.AddGraphLineToTop(null);
+						{
+							_stagedItem.Graph = builder.AddGraphLineToTop(null);
+						}
+						if(_stagedItem.Graph.Length > graphLen)
+						{
+							graphLen = _stagedItem.Graph.Length;
+						}
 					}
-					if(_unstagedItem.Graph.Length > graphLen)
-						graphLen = _unstagedItem.Graph.Length;
+					if(_unstagedItem != null)
+					{
+						if(_stagedItem != null)
+						{
+							_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
+						}
+						else
+						{
+							if(_currentRevisionItem != null)
+							{
+								_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
+							}
+							else
+							{
+								_unstagedItem.Graph = builder.AddGraphLineToTop(null);
+							}
+						}
+						if(_unstagedItem.Graph.Length > graphLen)
+						{
+							graphLen = _unstagedItem.Graph.Length;
+						}
+					}
 				}
+				graphColumn.Width = 21 * graphLen;
+				Invalidate();
 			}
-			_colGraph.Width = 21 * graphLen;
-			Invalidate();
 		}
 	}
 }
