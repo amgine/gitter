@@ -122,6 +122,17 @@
 			return _string.Length;
 		}
 
+		/// <summary>Find next \n line ending.</summary>
+		/// <returns>Character position or string length if it was not found.</returns>
+		public int FindLfLineEnding()
+		{
+			for(int i = _position; i < _string.Length; ++i)
+			{
+				if(_string[i] == '\n') return i;
+			}
+			return _string.Length;
+		}
+
 		/// <summary>Find next space character.</summary>
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindSpace()

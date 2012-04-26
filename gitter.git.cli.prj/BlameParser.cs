@@ -139,8 +139,17 @@
 				Skip();
 				if(IsAtEndOfString) break;
 
+				int eol = FindLfLineEnding();
 				string ending;
-				int eol = FindLineEnding(out ending);
+				if(String[eol - 1] == '\r')
+				{
+					--eol;
+					ending = LineEnding.CrLf;
+				}
+				else
+				{
+					ending = LineEnding.Lf;
+				}
 				var line = new BlameLine(commit, lineN++, ReadStringUpTo(eol, ending.Length), ending);
 
 				if(commit != prev)
