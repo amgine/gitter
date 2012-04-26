@@ -5989,6 +5989,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Switch Branch.
+        /// </summary>
+        internal static string StrSwitchBranch {
+            get {
+                return ResourceManager.GetString("StrSwitchBranch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Working directory.
         /// </summary>
         internal static string StrsWorkingDirectory {

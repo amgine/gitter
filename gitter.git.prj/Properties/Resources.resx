@@ -2512,4 +2512,7 @@ Proceed?</value>
   <data name="StrlUserIdentityNotConfigured" xml:space="preserve">
     <value>user identity is not configured</value>
   </data>
+  <data name="StrSwitchBranch" xml:space="preserve">
+    <value>Switch Branch</value>
+  </data>
 </root>

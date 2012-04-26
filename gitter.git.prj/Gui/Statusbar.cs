@@ -134,7 +134,8 @@
 			SetToolTips();
 
 			_headLabel.DoubleClickEnabled = true;
-			_headLabel.DoubleClick += OnHeadDoubleClick;
+			_headLabel.DoubleClick += OnHeadLabelDoubleClick;
+			_headLabel.MouseDown += OnHeadLabelMouseDown;
 
 			_userLabel.DoubleClickEnabled = true;
 			_userLabel.DoubleClick += OnUserDoubleClick;
@@ -287,7 +288,24 @@
 			InvokeRebaseControl(RebaseControl.Abort);
 		}
 
-		private void OnHeadDoubleClick(object sender, EventArgs e)
+		private void OnHeadLabelMouseDown(object sender, MouseEventArgs e)
+		{
+			if(e.Button == MouseButtons.Right)
+			{
+				var item = (ToolStripItem)sender;
+				var menu = new ContextMenuStrip();
+				menu.Items.Add(new ToolStripMenuItem(
+					Resources.StrSwitchBranch.AddEllipsis(), CachedResources.Bitmaps["ImgCheckout"],
+					(s, eargs) => _gui.StartCheckoutDialog()));
+				Utility.MarkDropDownForAutoDispose(menu);
+				var parent = Utility.GetParentControl(item);
+				var x = item.Bounds.X + e.X;
+				var y = item.Bounds.Y + e.Y;
+				menu.Show(parent, x, y);
+			}
+		}
+
+		private void OnHeadLabelDoubleClick(object sender, EventArgs e)
 		{
 			if(_repository != null)
 			{
