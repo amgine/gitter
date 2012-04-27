@@ -204,7 +204,7 @@
 
 		ReferenceType IRevisionPointer.Type
 		{
-			get { return ReferenceType.Revision; }
+			get { return ReferenceType.Stash; }
 		}
 
 		string IRevisionPointer.Pointer

@@ -18,6 +18,18 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		IList<StashedStateData> QueryStash(QueryStashParameters parameters);
 
+		/// <summary>Get patch representing stashed changes.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
+		/// <returns>Patch, representing specified stashed changes.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		string QueryStashPatch(QueryRevisionDiffParameters parameters);
+
+		/// <summary>Get patch representing stashed changes.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
+		/// <returns><see cref="Diff"/>, representing specified stashed changes.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Diff QueryStashDiff(QueryRevisionDiffParameters parameters);
+
 		/// <summary>Stash changes in working directory.</summary>
 		/// <param name="parameters"><see cref="StashSaveParameters"/>.</param>
 		/// <returns>true if something was stashed, false otherwise.</returns>

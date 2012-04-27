@@ -598,11 +598,22 @@
 			ValidateRevisionPointer(revision);
 
 			var repository = revision.Repository;
-			return repository.Accessor.QueryRevisionPatch(
-				new QueryRevisionDiffParameters(revision.Pointer)
-				{
-					Binary = true
-				});
+			if(revision.Type == ReferenceType.Stash)
+			{
+				return repository.Accessor.QueryStashPatch(
+					new QueryRevisionDiffParameters(revision.Pointer)
+					{
+						Binary = true
+					});
+			}
+			else
+			{
+				return repository.Accessor.QueryRevisionPatch(
+					new QueryRevisionDiffParameters(revision.Pointer)
+					{
+						Binary = true
+					});
+			};
 		}
 
 		/// <summary>Get diff for this revision.</summary>

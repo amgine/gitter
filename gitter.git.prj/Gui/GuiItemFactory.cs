@@ -448,7 +448,7 @@
 			var revision = (IRevisionPointer)item.Tag;
 			var repository = revision.Repository;
 			var parent = Utility.GetParentControl(item);
-			string fileName = revision.Pointer;
+			string fileName = revision.Dereference().Name;
 
 			SavePatch(parent, fileName, revision.FormatPatch);
 		}
@@ -3673,7 +3673,9 @@
 			var item = (ToolStripItem)sender;
 			var email = (string)item.Tag;
 			if(!email.StartsWith(@"mailto://"))
+			{
 				email = @"mailto://" + email;
+			}
 			Utility.OpenUrl(email);
 		}
 
@@ -3682,7 +3684,8 @@
 			var item = (ToolStripItem)sender;
 			var diffSource = (IDiffSource)item.Tag;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(Views.Guids.DiffViewGuid,
+			RepositoryProvider.Environment.ViewDockService.ShowView(
+				Views.Guids.DiffViewGuid,
 				new Dictionary<string, object>()
 				{
 					{ "source", diffSource }
@@ -3694,7 +3697,8 @@
 			var item = (ToolStripItem)sender;
 			var revPtr = (IRevisionPointer)item.Tag;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(Views.Guids.TreeViewGuid,
+			RepositoryProvider.Environment.ViewDockService.ShowView(
+				Views.Guids.TreeViewGuid,
 				new Dictionary<string, object>()
 				{
 					{ "tree", new RevisionTreeSource(revPtr) }

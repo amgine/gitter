@@ -76,7 +76,7 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Name);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Name);
 				case ColumnId.Name:
 				case ColumnId.Subject:
 					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Subject);
@@ -104,7 +104,7 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Name);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Name);
 					break;
 				case ColumnId.Name:
 				case ColumnId.Subject:

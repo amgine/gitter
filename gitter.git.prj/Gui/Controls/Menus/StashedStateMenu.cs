@@ -16,23 +16,27 @@
 			if(stashedState == null) throw new ArgumentNullException("stashedState");
 			_stashedState = stashedState;
 
-			Items.Add(GuiItemFactory.GetStashPopItem<ToolStripMenuItem>(_stashedState));
-			Items.Add(GuiItemFactory.GetStashApplyItem<ToolStripMenuItem>(_stashedState));
-			Items.Add(GuiItemFactory.GetStashDropItem<ToolStripMenuItem>(_stashedState));
-
-			Items.Add(new ToolStripSeparator());
-
-			Items.Add(GuiItemFactory.GetStashToBranchItem<ToolStripMenuItem>(_stashedState));
-
-			Items.Add(new ToolStripSeparator());
-			var copyItem = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			copyItem.DropDownItems.Add(
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ((IRevisionPointer)_stashedState).Pointer));
-			copyItem.DropDownItems.Add(
-				GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, _stashedState.Revision.Name));
-			copyItem.DropDownItems.Add(
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, _stashedState.Revision.Subject));
-			Items.Add(copyItem);
+			Items.AddRange(
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(new StashedChangesDiffSource(StashedState)),
+					GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(StashedState),
+					GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(StashedState),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetStashPopItem<ToolStripMenuItem>(StashedState),
+					GuiItemFactory.GetStashApplyItem<ToolStripMenuItem>(StashedState),
+					GuiItemFactory.GetStashDropItem<ToolStripMenuItem>(StashedState),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetStashToBranchItem<ToolStripMenuItem>(StashedState),
+					new ToolStripSeparator(),
+					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ((IRevisionPointer)StashedState).Pointer),
+							GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, StashedState.Revision.Name),
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, StashedState.Revision.Subject),
+						}),
+				});
 		}
 
 		public StashedState StashedState

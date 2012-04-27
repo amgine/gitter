@@ -322,7 +322,7 @@
 
 		/// <summary>Get patch representing changes made by specified commit.</summary>
 		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
-		/// <returns><see cref="Diff"/>, representing changes made by specified commit.</returns>
+		/// <returns>Patch, representing changes made by specified commit.</returns>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public string QueryRevisionPatch(QueryRevisionDiffParameters parameters)
 		{

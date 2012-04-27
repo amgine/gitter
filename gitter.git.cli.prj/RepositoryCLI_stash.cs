@@ -80,6 +80,47 @@
 			return res;
 		}
 
+		/// <summary>Get patch representing stashed changes.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
+		/// <returns>Patch, representing specified stashed changes.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		public string QueryStashPatch(QueryRevisionDiffParameters parameters)
+		{
+			if(parameters == null) throw new ArgumentNullException("parameters");
+
+			var args = new List<CommandArgument>();
+			args.Add(StashCommand.Show());
+			InsertDiffParameters1(args, parameters);
+			args.Add(new CommandArgument(parameters.Revision));
+			InsertDiffParameters2(args, parameters);
+
+			var cmd = new StashCommand(args);
+			var output = _executor.ExecCommand(cmd);
+			output.ThrowOnBadReturnCode();
+			return output.Output;
+		}
+
+		/// <summary>Get patch representing stashed changes.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
+		/// <returns><see cref="Diff"/>, representing specified stashed changes.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		public Diff QueryStashDiff(QueryRevisionDiffParameters parameters)
+		{
+			if(parameters == null) throw new ArgumentNullException("parameters");
+
+			var args = new List<CommandArgument>();
+			args.Add(StashCommand.Show());
+			InsertDiffParameters1(args, parameters);
+			args.Add(new CommandArgument(parameters.Revision));
+			InsertDiffParameters2(args, parameters);
+
+			var cmd = new StashCommand(args);
+			var output = _executor.ExecCommand(cmd);
+			output.ThrowOnBadReturnCode();
+			var parser = new DiffParser(output.Output);
+			return parser.ReadDiff(DiffType.CommitCompare);
+		}
+
 		/// <summary>Stash changes in working directory.</summary>
 		/// <param name="parameters"><see cref="StashSaveParameters"/>.</param>
 		/// <returns>true if something was stashed, false otherwise.</returns>
