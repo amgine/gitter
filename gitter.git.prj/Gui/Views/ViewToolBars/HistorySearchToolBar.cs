@@ -3,11 +3,14 @@ namespace gitter.Git.Gui.Views
 	using System;
 	using System.ComponentModel;
 
+	using gitter.Framework.Controls;
+
 	[ToolboxItem(false)]
-	internal sealed class HistorySearchToolBar : SearchToolBar<HistoryView, HistorySearchOptions>
+	internal sealed class HistorySearchToolBar<T> : SearchToolBar<T, HistorySearchOptions>
+		where T : GitViewBase, ISearchableView<HistorySearchOptions>
 	{
-		public HistorySearchToolBar(HistoryView tool)
-			: base(tool)
+		public HistorySearchToolBar(T view)
+			: base(view)
 		{
 		}
 

@@ -43,8 +43,8 @@
 			if(Status != FileStatus.Unmerged) throw new InvalidOperationException();
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				switch(resolution)
 				{
@@ -93,8 +93,8 @@
 			try
 			{
 				using(Repository.Monitor.BlockNotifications(
-					RepositoryNotifications.IndexUpdatedNotification,
-					RepositoryNotifications.WorktreeUpdatedNotification))
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated))
 				{
 					Repository.Accessor.RunMergeTool(
 						new RunMergeToolParameters(RelativePath)

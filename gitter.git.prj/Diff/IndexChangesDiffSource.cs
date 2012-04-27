@@ -11,7 +11,7 @@
 	using gitter.Git.AccessLayer;
 	using gitter.Git.Gui.Controls;
 
-	sealed class IndexChangesDiffSource : BaseDiffSource
+	sealed class IndexChangesDiffSource : DiffSourceBase
 	{
 		#region Data
 
@@ -129,9 +129,13 @@
 		public override string ToString()
 		{
 			if(_cached)
+			{
 				return "diff --cached";
+			}
 			else
+			{
 				return "diff";
+			}
 		}
 
 		#endregion

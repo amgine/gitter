@@ -47,7 +47,7 @@
 
 			var name = branch.Name;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.DeleteBranch(
 					new DeleteBranchParameters(name, true, force));

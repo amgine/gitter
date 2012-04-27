@@ -98,9 +98,9 @@
 
 			var oldName = remote.Name;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.RemoteRemovedNotification,
-				RepositoryNotifications.RemoteCreatedNotification,
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.RemoteRemoved,
+				RepositoryNotifications.RemoteCreated,
+				RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.RenameRemote(
 					new RenameRemoteParameters(oldName, name));
@@ -147,8 +147,8 @@
 
 			var name = remote.Name;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.RemoteRemovedNotification,
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.RemoteRemoved,
+				RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.RemoveRemote(
 					new RemoveRemoteParameters(name));
@@ -190,8 +190,8 @@
 			if(Count == 0) throw new InvalidOperationException();
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.TagChangedNotification))
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.Fetch(
 					new FetchParameters());
@@ -209,8 +209,8 @@
 				(repository, monitor) =>
 				{
 					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChangedNotification,
-						RepositoryNotifications.TagChangedNotification))
+						RepositoryNotifications.BranchChanged,
+						RepositoryNotifications.TagChanged))
 					{
 						if(repository.Accessor.Fetch(
 							new FetchParameters()
@@ -238,8 +238,8 @@
 			if(Count == 0) throw new InvalidOperationException();
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.TagChangedNotification))
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.TagChanged))
 			{
 				try
 				{
@@ -263,8 +263,8 @@
 				(repository, monitor) =>
 				{
 					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChangedNotification,
-						RepositoryNotifications.TagChangedNotification))
+						RepositoryNotifications.BranchChanged,
+						RepositoryNotifications.TagChanged))
 					{
 						try
 						{
@@ -337,7 +337,7 @@
 
 			IList<ReferencePushResult> res;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.BranchChanged))
 			{
 				res = Repository.Accessor.Push(
 					new PushParameters(url, sendTags ? PushMode.Tags : PushMode.Default, branchNames)
@@ -412,7 +412,7 @@
 					var repository = data.Repository;
 					IList<ReferencePushResult> res;
 					using(repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChangedNotification))
+						RepositoryNotifications.BranchChanged))
 					{
 						res = repository.Accessor.Push(
 							new PushParameters(data.Url, data.SendTags ? PushMode.Tags : PushMode.Default, data.BranchNames)

@@ -31,12 +31,18 @@
 
 		private sealed class TreeMenu : ContextMenuStrip
 		{
-			public TreeMenu(TreeDirectoryListItem item)
+			public TreeMenu(ITreeSource treeSource, TreeDirectoryListItem item)
 			{
 				if(item == null) throw new ArgumentNullException("item");
 
 				Items.Add(GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(item));
 				Items.Add(GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(item));
+
+				if(treeSource != null)
+				{
+					Items.Add(new ToolStripSeparator());
+					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(treeSource.Revision, item.Data));
+				}
 			}
 		}
 
@@ -51,9 +57,10 @@
 			_treeContent.Columns[0].SizeMode = ColumnSizeMode.Auto;
 
 			_directoryTree.SelectionChanged += OnDirectoryTreeSelectionChanged;
-			_directoryTree.ItemContextMenuRequested += (sender, e) =>
+			_directoryTree.ItemContextMenuRequested +=
+				(sender, e) =>
 				{
-					var menu = new TreeMenu((TreeDirectoryListItem)e.Item);
+					var menu = new TreeMenu(Parameters["tree"] as ITreeSource, (TreeDirectoryListItem)e.Item);
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
 					e.OverrideDefaultMenu = true;
@@ -89,28 +96,51 @@
 
 		private void OnContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
 		{
-			var rts = Parameters["tree"] as RevisionTreeSource;
+			var rts = Parameters["tree"] as ITreeSource;
 			if(rts != null)
 			{
 				var file = ((ITreeItemListItem)e.Item).TreeItem as TreeFile;
 				if(file != null)
 				{
 					var menu = new ContextMenuStrip();
-					menu.Items.Add(GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(_wTree, file.RelativePath));
-					menu.Items.Add(GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(_wTree, file.RelativePath));
-					menu.Items.Add(new ToolStripSeparator());
-					var c = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-					c.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name));
-					c.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath));
-					c.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath));
-					menu.Items.Add(c);
-					menu.Items.Add(new ToolStripSeparator());
-					menu.Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(rts.Revision, file));
-					menu.Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, file.RelativePath));
-					menu.Items.Add(GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, file.RelativePath));
+					menu.Items.AddRange(
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(_wTree, file.RelativePath),
+							GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(_wTree, file.RelativePath),
+							new ToolStripSeparator(),
+							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+								new ToolStripItem[]
+								{
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
+								}),
+							new ToolStripSeparator(),
+							GuiItemFactory.GetBlameItem<ToolStripMenuItem>(rts.Revision, file),
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, file),
+							new ToolStripSeparator(),
+							GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, file),
+						});
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
 					e.OverrideDefaultMenu = true;
+					return;
+				}
+				var directory = ((ITreeItemListItem)e.Item).TreeItem as TreeDirectory;
+				if(directory != null)
+				{
+					var menu = new ContextMenuStrip();
+					menu.Items.AddRange(
+						new ToolStripItem[]
+						{
+							new ToolStripMenuItem(Resources.StrOpen, null, (s, args) => e.Item.Activate()),
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, directory),
+						});
+					Utility.MarkDropDownForAutoDispose(menu);
+					e.ContextMenu = menu;
+					e.OverrideDefaultMenu = true;
+					return;
 				}
 			}
 		}
@@ -200,9 +230,13 @@
 					if(directoryEntry != null)
 					{
 						if(directoryEntry.IsSelected)
+						{
 							_treeContent.SetTree(folderItem.Data, TreeListBoxMode.ShowDirectoryContent);
+						}
 						else
+						{
 							directoryEntry.FocusAndSelect();
+						}
 					}
 					else
 					{
@@ -264,7 +298,9 @@
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("TreeList");
 			if(listNode != null)
+			{
 				_treeContent.LoadViewFrom(listNode);
+			}
 		}
 	}
 }

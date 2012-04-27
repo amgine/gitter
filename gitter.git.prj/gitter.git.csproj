@@ -62,19 +62,19 @@
       <Name>gitter.git.fw</Name>
     </ProjectReference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
     </ProjectReference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Blame\BaseBlameSource.cs" />
+    <Compile Include="Blame\BlameSourceBase.cs" />
     <Compile Include="Blame\BlameOptions.cs" />
     <Compile Include="Blame\RevisionFileBlameSource.cs" />
     <Compile Include="Blame\IBlameSource.cs" />
@@ -83,6 +83,9 @@
     </Compile>
     <Compile Include="Gui\Views\PathHistoryView.Designer.cs">
       <DependentUpon>PathHistoryView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\PathHistoryToolBar.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Log\PathLogSource.cs" />
     <Compile Include="Objects\Configuration\ConfigurationFile.cs" />
@@ -112,8 +115,10 @@
     <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerItemBase.cs" />
     <Compile Include="Gui\RepositoryExplorer\RepositoryStashListItem.cs" />
     <Compile Include="ObjectFactories.cs" />
+    <Compile Include="Objects\Tree\RevisionTreeSource.cs" />
+    <Compile Include="Objects\Tree\TreeSourceBase.cs" />
     <Compile Include="Properties\CachedResources.cs" />
-    <Compile Include="Diff\BaseDiffSource.cs" />
+    <Compile Include="Diff\DiffSourceBase.cs" />
     <Compile Include="Diff\RevisionChangesDiffSource.cs" />
     <Compile Include="Diff\RevisionCompareDiffSource.cs" />
     <Compile Include="Diff\DiffOptions.cs" />
@@ -261,7 +266,7 @@
     <Compile Include="Gui\Views\ViewToolBars\TreeToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Log\BaseLogSource.cs" />
+    <Compile Include="Log\LogSourceBase.cs" />
     <Compile Include="Log\LogOptions.cs" />
     <Compile Include="Log\LogReferenceFilter.cs" />
     <Compile Include="Log\RepositoryLogSource.cs" />

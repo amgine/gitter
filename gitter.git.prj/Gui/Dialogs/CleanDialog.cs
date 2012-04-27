@@ -174,7 +174,7 @@
 				{
 					IList<string> items;
 					using(data.Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.IndexUpdatedNotification))
+						RepositoryNotifications.IndexUpdated))
 					{
 						items = data.Repository.Accessor.QueryFilesToClean(
 							new CleanFilesParameters(data.IncludePattern)

@@ -173,7 +173,7 @@
 			#endregion
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				Repository.Accessor.RemoveFiles(
 					new RemoveFilesParameters(RelativePath)
@@ -188,7 +188,7 @@
 		public void RemoveFromWorkingTree()
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				System.IO.File.Delete(FullPath);
 			}
@@ -234,7 +234,7 @@
 		private void RevertCore()
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				Repository.Accessor.CheckoutFiles(
 					new CheckoutFilesParameters(RelativePath)

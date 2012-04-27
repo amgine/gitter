@@ -5,7 +5,7 @@
 
 	using gitter.Git.AccessLayer;
 
-	sealed class RevisionCompareDiffSource : BaseDiffSource
+	sealed class RevisionCompareDiffSource : DiffSourceBase
 	{
 		#region Data
 

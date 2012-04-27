@@ -11,7 +11,7 @@ namespace gitter.Git
 	
 	using Resources = gitter.Git.Properties.Resources;
 	
-	public abstract class BaseLogSource : ILogSource
+	public abstract class LogSourceBase : ILogSource
 	{
 		protected internal static void ApplyCommonDiffOptions(QueryRevisionsParameters queryParameters, LogOptions options)
 		{

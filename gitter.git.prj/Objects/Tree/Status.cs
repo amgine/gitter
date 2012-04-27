@@ -249,8 +249,8 @@
 			if(Repository.Monitor != null)
 			{
 				using(Repository.Monitor.BlockNotifications(
-					RepositoryNotifications.IndexUpdatedNotification,
-					RepositoryNotifications.WorktreeUpdatedNotification))
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated))
 				{
 					status = Repository.Accessor.QueryStatus(parameters);
 				}
@@ -492,7 +492,7 @@
 			#endregion
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				Repository.Accessor.AddFiles(
 					new AddFilesParameters(mode, item.RelativePath));
@@ -520,7 +520,7 @@
 			}
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				Repository.Accessor.AddFiles(
 					new AddFilesParameters(AddFilesMode.All, patterns));
@@ -532,7 +532,7 @@
 		public void StageAll()
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				Repository.Accessor.AddFiles(
 					new AddFilesParameters(AddFilesMode.All, "."));
@@ -544,7 +544,7 @@
 		public void StageUpdated()
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				Repository.Accessor.AddFiles(
 					new AddFilesParameters(AddFilesMode.Update, "."));
@@ -560,7 +560,7 @@
 		public void UnstageAll()
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				if(!Repository.IsEmpty)
 				{
@@ -595,7 +595,7 @@
 			#endregion
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				if(!Repository.IsEmpty)
 				{
@@ -643,7 +643,7 @@
 			#endregion
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.IndexUpdated))
 			{
 				if(!Repository.Head.IsEmpty)
 				{
@@ -674,8 +674,8 @@
 		public void Reset(ResetMode mode)
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				Repository.Accessor.Reset(
 					new ResetParameters(mode));
@@ -691,8 +691,8 @@
 		public void Clean(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				Repository.Accessor.CleanFiles(
 					new CleanFilesParameters(includePattern)
@@ -720,8 +720,8 @@
 			if(patchSource == null) throw new ArgumentNullException("patchSource");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				using(var patch = patchSource.PreparePatchFile())
 				{
@@ -747,8 +747,8 @@
 
 			var files = new List<IPatchFile>();
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				try
 				{
@@ -808,9 +808,9 @@
 			var currentBranch = Repository.Head.Pointer as Branch;
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.CheckoutNotification))
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout))
 			{
 				var fileName = Path.Combine(
 					Repository.GitDirectory,

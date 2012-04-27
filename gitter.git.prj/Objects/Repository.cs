@@ -674,10 +674,10 @@
 		public void Rebase(RebaseControl control)
 		{
 			using(Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.CheckoutNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated))
 			{
 				try
 				{

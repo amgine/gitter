@@ -220,11 +220,11 @@
 			var currentBranch = Pointer as Branch;
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.CheckoutNotification,
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.SubmodulesChangedNotification))
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.SubmodulesChanged))
 			{
 				Repository.Accessor.Reset(
 					new ResetParameters(rev.Name, mode));
@@ -357,10 +357,10 @@
 			var currentBranch = CurrentBranch;
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.CheckoutNotification,
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.BranchChanged))
 			{
 				try
 				{
@@ -462,10 +462,10 @@
 			#endregion
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.CheckoutNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.BranchChanged))
 			{
 				try
 				{

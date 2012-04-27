@@ -22,7 +22,8 @@
 		private PathLogSource _logSource;
 		private RevisionLog _revisionLog;
 		private LogOptions _options;
-		private HistorySearchToolBar _searchToolbar;
+		private PathHistoryToolbar _toolBar;
+		private HistorySearchToolBar<PathHistoryView> _searchToolbar;
 		private bool _autoShowDiff;
 		private AsyncLogRequest _pendingRequest;
 
@@ -62,6 +63,7 @@
 			_lstRevisions.PreviewKeyDown += OnKeyDown;
 			_options = new LogOptions();
 			_options.Changed += OnLogOptionsChanged;
+			AddTopToolStrip(_toolBar = new PathHistoryToolbar(this));
 			ApplyParameters(parameters);
 		}
 
@@ -474,11 +476,11 @@
 
 		private void ShowSearchToolBar()
 		{
-			//if(_searchToolbar == null)
-			//{
-			//    AddBottomToolStrip(_searchToolbar = new HistorySearchToolBar(this));
-			//}
-			//_searchToolbar.FocusSearchTextBox();
+			if(_searchToolbar == null)
+			{
+				AddBottomToolStrip(_searchToolbar = new HistorySearchToolBar<PathHistoryView>(this));
+			}
+			_searchToolbar.FocusSearchTextBox();
 		}
 
 		private void HideSearchToolBar()

@@ -78,7 +78,7 @@
 			ValidateObject(stashedState, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.StashChangedNotification))
+				RepositoryNotifications.StashChanged))
 			{
 				Repository.Accessor.StashDrop(
 					new StashDropParameters(((IRevisionPointer)stashedState).Pointer));
@@ -108,7 +108,7 @@
 			#endregion
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.StashChangedNotification))
+				RepositoryNotifications.StashChanged))
 			{
 				Repository.Accessor.StashDrop(
 					new StashDropParameters());
@@ -145,7 +145,7 @@
 					var onDeleted = data.OnDeleted;
 
 					using(repository.Monitor.BlockNotifications(
-						RepositoryNotifications.StashChangedNotification))
+						RepositoryNotifications.StashChanged))
 					{
 						repository.Accessor.StashDrop(
 							new StashDropParameters());
@@ -173,7 +173,7 @@
 		public void Clear()
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.StashChangedNotification))
+				RepositoryNotifications.StashChanged))
 			{
 				Repository.Accessor.StashClear(
 					new StashClearParameters());
@@ -206,7 +206,7 @@
 					var repository = data.Repository;
 					var stash = data.List;
 					var onDeleted = data.OnDeleted;
-					using(repository.Monitor.BlockNotifications(RepositoryNotifications.StashChangedNotification))
+					using(repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged))
 					{
 						repository.Accessor.StashClear(
 							new StashClearParameters());
@@ -432,9 +432,9 @@
 			ValidateObject(stashedState, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.StashChangedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.StashChanged,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated))
 			{
 				Repository.Accessor.StashApply(
 					new StashApplyParameters(((IRevisionPointer)stashedState).Pointer, restoreIndex));
@@ -521,9 +521,9 @@
 			ValidateObject(stashedState, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.StashChangedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.StashChanged,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated))
 			{
 				Repository.Accessor.StashPop(
 					new StashPopParameters(((IRevisionPointer)stashedState).Pointer, restoreIndex));
@@ -596,11 +596,11 @@
 			ValidateObject(stashedState, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.CheckoutNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.StashChangedNotification))
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.StashChanged))
 			{
 				Repository.Accessor.StashToBranch(
 					new StashToBranchParameters(((IRevisionPointer)stashedState).Pointer, name));
@@ -649,9 +649,9 @@
 
 			bool created;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.StashChangedNotification))
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.StashChanged))
 			{
 				created = Repository.Accessor.StashSave(
 					new StashSaveParameters(message, keepIndex, includeUntracked));

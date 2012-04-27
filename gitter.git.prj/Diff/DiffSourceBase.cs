@@ -10,7 +10,7 @@
 
 	using Resources = gitter.Git.Properties.Resources;
 
-	abstract class BaseDiffSource : IDiffSource
+	abstract class DiffSourceBase : IDiffSource
 	{
 		public event EventHandler Updated;
 

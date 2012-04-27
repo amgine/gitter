@@ -71,9 +71,9 @@
 			var pointer = revisionIsLocalBranch ? revision.Pointer : revision.FullName;
 
 			using(repository.Monitor.BlockNotifications(
-				RepositoryNotifications.CheckoutNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.IndexUpdatedNotification))
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated))
 			{
 				repository.Accessor.Checkout(
 					new CheckoutParameters(pointer, force));
@@ -91,7 +91,7 @@
 
 			var repository = revision.Repository;
 			using(repository.Monitor.BlockNotifications(
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				repository.Accessor.CheckoutFiles(
 					new CheckoutFilesParameters(revision.Pointer, path)
@@ -108,7 +108,7 @@
 
 			var repository = revision.Repository;
 			using(repository.Monitor.BlockNotifications(
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				repository.Accessor.CheckoutFiles(
 					new CheckoutFilesParameters(revision.Pointer, paths)
@@ -183,10 +183,10 @@
 			try
 			{
 				using(repository.Monitor.BlockNotifications(
-					RepositoryNotifications.IndexUpdatedNotification,
-					RepositoryNotifications.WorktreeUpdatedNotification,
-					RepositoryNotifications.BranchChangedNotification,
-					RepositoryNotifications.CheckoutNotification))
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated,
+					RepositoryNotifications.BranchChanged,
+					RepositoryNotifications.Checkout))
 				{
 					repository.Accessor.CherryPick(
 						new CherryPickParameters(revision.Pointer, noCommit));
@@ -266,15 +266,15 @@
 			var notifications = noCommit ?
 				new[]
 				{
-					RepositoryNotifications.IndexUpdatedNotification,
-					RepositoryNotifications.WorktreeUpdatedNotification,
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated,
 				} :
 				new[]
 				{
-					RepositoryNotifications.BranchChangedNotification,
-					RepositoryNotifications.CheckoutNotification,
-					RepositoryNotifications.IndexUpdatedNotification,
-					RepositoryNotifications.WorktreeUpdatedNotification,
+					RepositoryNotifications.BranchChanged,
+					RepositoryNotifications.Checkout,
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated,
 				};
 			using(repository.Monitor.BlockNotifications(notifications))
 			{
@@ -400,10 +400,10 @@
 			var repository = revision.Repository;
 			var cb = repository.Head.CurrentBranch;
 			using(repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.CheckoutNotification,
-				RepositoryNotifications.IndexUpdatedNotification,
-				RepositoryNotifications.WorktreeUpdatedNotification))
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
 			{
 				try
 				{

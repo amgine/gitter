@@ -56,8 +56,8 @@
 			var rev = startingRevision.Dereference();
 
 			var notifications = checkout ?
-				new[] { RepositoryNotifications.CheckoutNotification, RepositoryNotifications.BranchChangedNotification } :
-				new[] { RepositoryNotifications.BranchChangedNotification };
+				new[] { RepositoryNotifications.Checkout, RepositoryNotifications.BranchChanged } :
+				new[] { RepositoryNotifications.BranchChanged };
 
 			using(Repository.Monitor.BlockNotifications(notifications))
 			{
@@ -239,7 +239,7 @@
 
 			string oldName = branch.Name;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.RenameBranch(
 					new RenameBranchParameters(branch.Name, name));
@@ -276,7 +276,7 @@
 			ValidateObject(branch, "branch");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.DeleteBranch(
 					new DeleteBranchParameters(branch.Name, false, force));

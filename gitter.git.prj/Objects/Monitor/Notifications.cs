@@ -33,7 +33,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.CheckoutNotification; }
+			get { return RepositoryNotifications.Checkout; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -52,7 +52,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.SubmodulesChangedNotification; }
+			get { return RepositoryNotifications.SubmodulesChanged; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -70,7 +70,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.RepositoryRemovedNotification; }
+			get { return RepositoryNotifications.RepositoryRemoved; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -98,7 +98,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.ConfigUpdatedNotification; }
+			get { return RepositoryNotifications.ConfigUpdated; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -116,7 +116,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.IndexUpdatedNotification; }
+			get { return RepositoryNotifications.IndexUpdated; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -137,7 +137,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.WorktreeUpdatedNotification; }
+			get { return RepositoryNotifications.WorktreeUpdated; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -171,7 +171,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.BranchChangedNotification; }
+			get { return RepositoryNotifications.BranchChanged; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -265,7 +265,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.TagChangedNotification; }
+			get { return RepositoryNotifications.TagChanged; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -324,7 +324,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.StashChangedNotification; }
+			get { return RepositoryNotifications.StashChanged; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -360,7 +360,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.RemoteRemovedNotification; }
+			get { return RepositoryNotifications.RemoteRemoved; }
 		}
 
 		public override bool Apply(Repository repository)
@@ -386,7 +386,7 @@
 
 		public override object NotificationType
 		{
-			get { return RepositoryNotifications.RemoteCreatedNotification; }
+			get { return RepositoryNotifications.RemoteCreated; }
 		}
 
 		public override bool Apply(Repository repository)

@@ -55,7 +55,7 @@
 			var rev = revision.Dereference();
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.TagChangedNotification))
+				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.CreateTag(
 					new CreateTagParameters(name, revision.Pointer));
@@ -100,7 +100,7 @@
 			var rev = revision.Dereference();
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.TagChangedNotification))
+				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.CreateTag(
 					new CreateTagParameters(name, revision.Pointer, message, sign));
@@ -146,7 +146,7 @@
 			var rev = revision.Dereference();
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.TagChangedNotification))
+				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.CreateTag(
 					new CreateTagParameters(name, revision.Pointer, message, keyId));
@@ -177,7 +177,7 @@
 			ValidateObject(tag, "tag");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.TagChangedNotification))
+				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.DeleteTag(
 					new DeleteTagParameters(tag.Name));

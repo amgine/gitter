@@ -155,7 +155,7 @@
 				if(!_parameters.ContainsKey(name))
 				{
 					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.ConfigUpdatedNotification))
+						RepositoryNotifications.ConfigUpdated))
 					{
 						Repository.Accessor.AddConfigValue(
 							new AddConfigValueParameters(name, value));
@@ -198,7 +198,7 @@
 			if(parameter == null) throw new ArgumentNullException("parameter");
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.ConfigUpdatedNotification))
+				RepositoryNotifications.ConfigUpdated))
 			{
 				Repository.Accessor.UnsetConfigValue(
 					new UnsetConfigValueParameters(parameter.Name));

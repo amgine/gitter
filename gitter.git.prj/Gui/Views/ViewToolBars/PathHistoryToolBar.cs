@@ -7,29 +7,26 @@ namespace gitter.Git.Gui.Views
 	using Resources = gitter.Git.Properties.Resources;
 
 	[ToolboxItem(false)]
-	internal sealed class HistoryToolbar : ToolStrip
+	internal sealed class PathHistoryToolbar : ToolStrip
 	{
 		#region Data
 
-		private readonly HistoryView _view;
+		private readonly PathHistoryView _view;
 		private ToolStripButton _btnShowDetails;
 		private ToolStripButton _btnRefresh;
 		private ToolStripButton _btnDateOrder;
 		private ToolStripButton _btnTopoOrder;
 		private ToolStripDropDownButton _btnLimit;
-		private ToolStripDropDownButton _btnFilter;
-		private HistoryFilterDropDown _filterDropDown;
 
 		#endregion
 
-		/// <summary>Initializes a new instance of the <see cref="HistoryToolbar"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="PathHistoryToolbar"/> class.</summary>
 		/// <param name="view">Host history view.</param>
-		public HistoryToolbar(HistoryView view)
+		public PathHistoryToolbar(PathHistoryView view)
 		{
 			_view = view;
 
 			_view.LogOptionsChanged += OnLogOptionsChanged;
-			_view.RepositoryChanged += OnRepositoryChanged;
 
 			Items.AddRange(
 				new ToolStripItem[]
@@ -51,15 +48,6 @@ namespace gitter.Git.Gui.Views
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 					new ToolStripSeparator(),
-					_btnFilter = new ToolStripDropDownButton(Resources.StrFilter, CachedResources.Bitmaps["ImgFilter"])
-						{
-							DropDown = new gitter.Framework.Controls.Popup(
-								_filterDropDown = new HistoryFilterDropDown()
-								{
-									LogOptions = _view.LogOptions,
-									Repository = _view.Repository,
-								}),
-						},
 					_btnLimit = new ToolStripDropDownButton(string.Empty, null,
 						new ToolStripItem[]
 						{
@@ -103,14 +91,8 @@ namespace gitter.Git.Gui.Views
 			_view.ShowDetails = button.Checked;
 		}
 
-		private void OnRepositoryChanged(object sender, EventArgs e)
-		{
-			_filterDropDown.Repository = _view.Repository;
-		}
-
 		private void OnLogOptionsChanged(object sender, EventArgs e)
 		{
-			_filterDropDown.LogOptions = _view.LogOptions;
 			_btnDateOrder.Checked = _view.LogOptions.Order == AccessLayer.RevisionQueryOrder.DateOrder;
 			_btnTopoOrder.Checked = _view.LogOptions.Order == AccessLayer.RevisionQueryOrder.TopoOrder;
 			UpdateLimitButtonText();

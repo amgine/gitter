@@ -2,7 +2,7 @@
 {
 	using System;
 
-	public sealed class RepositoryLogSource : BaseLogSource
+	public sealed class RepositoryLogSource : LogSourceBase
 	{
 		private readonly Repository _repository;
 

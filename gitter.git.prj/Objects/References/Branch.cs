@@ -121,7 +121,7 @@
 			if(Revision != rev)
 			{
 				using(Repository.Monitor.BlockNotifications(
-					RepositoryNotifications.BranchChangedNotification))
+					RepositoryNotifications.BranchChanged))
 				{
 					Repository.Accessor.ResetBranch(
 						new ResetBranchParameters(Name, revision.Pointer));

@@ -10,7 +10,7 @@
 
 	using Resources = gitter.Git.Properties.Resources;
 
-	abstract class BaseBlameSource : IBlameSource
+	abstract class BlameSourceBase : IBlameSource
 	{
 		protected abstract BlameFile GetBlameCore(BlameOptions options);
 
@@ -45,6 +45,12 @@
 			return GetBlameCore(options);
 		}
 
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
 		public override string ToString()
 		{
 			return "blame";

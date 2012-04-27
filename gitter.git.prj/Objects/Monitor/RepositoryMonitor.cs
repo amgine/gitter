@@ -383,7 +383,7 @@ namespace gitter.Git
 			switch(GetChangedPath(e.Name))
 			{
 				case ChangedPath.WorkDir:
-					if(!IsBlocked(RepositoryNotifications.WorktreeUpdatedNotification))
+					if(!IsBlocked(RepositoryNotifications.WorktreeUpdated))
 					{
 						EmitDelayedNotification(new WorktreeUpdatedNotification(e.Name));
 					}
@@ -398,12 +398,12 @@ namespace gitter.Git
 				case ChangedPath.WorkDir:
 					if(e.Name == GitConstants.SubmodulesConfigFile)
 					{
-						if(!IsBlocked(RepositoryNotifications.SubmodulesChangedNotification))
+						if(!IsBlocked(RepositoryNotifications.SubmodulesChanged))
 						{
 							EmitNotification(new SubmodulesChangedNotification());
 						}
 					}
-					if(!IsBlocked(RepositoryNotifications.WorktreeUpdatedNotification))
+					if(!IsBlocked(RepositoryNotifications.WorktreeUpdated))
 					{
 						EmitDelayedNotification(new WorktreeUpdatedNotification(e.Name));
 					}
@@ -425,7 +425,7 @@ namespace gitter.Git
 							_sw.Flush();
 						}
 #endif
-						if(!IsBlocked(RepositoryNotifications.StashChangedNotification))
+						if(!IsBlocked(RepositoryNotifications.StashChanged))
 						{
 							EmitNotification(new StashChangedNotification());
 						}
@@ -444,7 +444,7 @@ namespace gitter.Git
 							_sw.Flush();
 						}
 #endif
-						if(!IsBlocked(RepositoryNotifications.BranchChangedNotification))
+						if(!IsBlocked(RepositoryNotifications.BranchChanged))
 						{
 							EmitNotification(new BranchChangedNotification(name, false));
 						}
@@ -463,7 +463,7 @@ namespace gitter.Git
 							_sw.Flush();
 						}
 #endif
-						if(!IsBlocked(RepositoryNotifications.BranchChangedNotification))
+						if(!IsBlocked(RepositoryNotifications.BranchChanged))
 						{
 							EmitNotification(new BranchChangedNotification(name, true));
 						}
@@ -485,7 +485,7 @@ namespace gitter.Git
 								_sw.Flush();
 							}
 #endif
-							if(!IsBlocked(RepositoryNotifications.TagChangedNotification))
+							if(!IsBlocked(RepositoryNotifications.TagChanged))
 							{
 								EmitNotification(new TagChangedNotification(name));
 							}
@@ -518,7 +518,7 @@ namespace gitter.Git
 										_sw.Flush();
 									}
 #endif
-									if(!IsBlocked(RepositoryNotifications.CheckoutNotification))
+									if(!IsBlocked(RepositoryNotifications.Checkout))
 									{
 										EmitNotification(new CheckoutNotification());
 									}
@@ -531,7 +531,7 @@ namespace gitter.Git
 										_sw.Flush();
 									}
 #endif
-									if(!IsBlocked(RepositoryNotifications.ConfigUpdatedNotification))
+									if(!IsBlocked(RepositoryNotifications.ConfigUpdated))
 									{
 										EmitNotification(new ConfigUpdatedNotification());
 									}
@@ -544,7 +544,7 @@ namespace gitter.Git
 										_sw.Flush();
 									}
 #endif
-									if(!IsBlocked(RepositoryNotifications.IndexUpdatedNotification))
+									if(!IsBlocked(RepositoryNotifications.IndexUpdated))
 									{
 										EmitNotification(new IndexUpdatedNotification());
 									}
@@ -570,12 +570,12 @@ namespace gitter.Git
 				case ChangedPath.WorkDir:
 					if(e.Name == GitConstants.SubmodulesConfigFile)
 					{
-						if(!IsBlocked(RepositoryNotifications.SubmodulesChangedNotification))
+						if(!IsBlocked(RepositoryNotifications.SubmodulesChanged))
 						{
 							EmitNotification(new SubmodulesChangedNotification());
 						}
 					}
-					if(!IsBlocked(RepositoryNotifications.WorktreeUpdatedNotification))
+					if(!IsBlocked(RepositoryNotifications.WorktreeUpdated))
 					{
 						EmitDelayedNotification(new WorktreeUpdatedNotification(e.Name));
 					}
@@ -602,7 +602,7 @@ namespace gitter.Git
 								_sw.Flush();
 							}
 							#endif
-							if(!IsBlocked(RepositoryNotifications.BranchChangedNotification))
+							if(!IsBlocked(RepositoryNotifications.BranchChanged))
 							{
 								EmitNotification(new BranchChangedNotification(newName, false));
 							}
@@ -624,7 +624,7 @@ namespace gitter.Git
 								_sw.Flush();
 							}
 							#endif
-							if(!IsBlocked(RepositoryNotifications.BranchChangedNotification))
+							if(!IsBlocked(RepositoryNotifications.BranchChanged))
 							{
 								EmitNotification(new BranchChangedNotification(newName, true));
 							}
@@ -646,7 +646,7 @@ namespace gitter.Git
 								_sw.Flush();
 							}
 							#endif
-							if(!IsBlocked(RepositoryNotifications.TagChangedNotification))
+							if(!IsBlocked(RepositoryNotifications.TagChanged))
 							{
 								EmitNotification(new TagChangedNotification(newName));
 							}
@@ -677,12 +677,12 @@ namespace gitter.Git
 					#endif
 					if(e.OldName == GitConstants.SubmodulesConfigFile || e.Name == GitConstants.SubmodulesConfigFile)
 					{
-						if(!IsBlocked(RepositoryNotifications.SubmodulesChangedNotification))
+						if(!IsBlocked(RepositoryNotifications.SubmodulesChanged))
 						{
 							EmitNotification(new SubmodulesChangedNotification());
 						}
 					}
-					if(!IsBlocked(RepositoryNotifications.WorktreeUpdatedNotification))
+					if(!IsBlocked(RepositoryNotifications.WorktreeUpdated))
 					{
 						EmitDelayedNotification(new WorktreeUpdatedNotification(e.OldName));
 						EmitDelayedNotification(new WorktreeUpdatedNotification(e.Name));

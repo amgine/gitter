@@ -24,7 +24,7 @@
 		private RevisionLog _log;
 		private LogOptions _options;
 		private readonly HistoryToolbar _toolbar;
-		private HistorySearchToolBar _searchToolbar;
+		private HistorySearchToolBar<HistoryView> _searchToolbar;
 		private bool _autoShowDiff;
 		private AsyncLogRequest _pendingRequest;
 
@@ -499,7 +499,7 @@
 		{
 			if(_searchToolbar == null)
 			{
-				AddBottomToolStrip(_searchToolbar = new HistorySearchToolBar(this));
+				AddBottomToolStrip(_searchToolbar = new HistorySearchToolBar<HistoryView>(this));
 			}
 			_searchToolbar.FocusSearchTextBox();
 		}

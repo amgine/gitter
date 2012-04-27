@@ -39,6 +39,22 @@
 			return item;
 		}
 
+		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeFile file)
+			where T : ToolStripItem, new()
+		{
+			if(file == null) throw new ArgumentNullException("file");
+
+			return GetCheckoutPathItem<T>(revision, file.RelativePath);
+		}
+
+		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeDirectory directory)
+			where T : ToolStripItem, new()
+		{
+			if(directory == null) throw new ArgumentNullException("directory");
+
+			return GetCheckoutPathItem<T>(revision, directory.RelativePath + "/");
+		}
+
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, string path)
 			where T : ToolStripItem, new()
 		{
@@ -2617,6 +2633,22 @@
 			return item;
 		}
 
+		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeFile file)
+			where T : ToolStripItem, new()
+		{
+			if(file == null) throw new ArgumentNullException("file");
+
+			return GetPathHistoryItem<T>(revision, file.RelativePath);
+		}
+
+		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeDirectory directory)
+			where T : ToolStripItem, new()
+		{
+			if(directory == null) throw new ArgumentNullException("directory");
+
+			return GetPathHistoryItem<T>(revision, directory.RelativePath + "/");
+		}
+
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, string path)
 			where T : ToolStripItem, new()
 		{
@@ -2786,7 +2818,7 @@
 					try
 					{
 						using(repository.Monitor.BlockNotifications(
-							RepositoryNotifications.WorktreeUpdatedNotification))
+							RepositoryNotifications.WorktreeUpdated))
 						{
 								repository.Accessor.CheckoutFiles(new CheckoutFilesParameters(paths)
 									{

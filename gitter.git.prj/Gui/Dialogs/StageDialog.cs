@@ -77,7 +77,7 @@
 				{
 					var repository = data.Item1;
 					IList<TreeFileData> files;
-					using(repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdatedNotification))
+					using(repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
 					{
 						files = repository.Accessor.QueryFilesToAdd(
 							new AddFilesParameters(data.Item4 ? AddFilesMode.All : AddFilesMode.Update, data.Item2)

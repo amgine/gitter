@@ -176,7 +176,9 @@
 			get
 			{
 				if(_options == null)
+				{
 					_options = new DiffOptions();
+				}
 				return _options;
 			}
 		}

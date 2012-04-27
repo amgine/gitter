@@ -390,8 +390,8 @@
 
 			bool fetchedSomething = false;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification,
-				RepositoryNotifications.TagChangedNotification))
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.TagChanged))
 			{
 				fetchedSomething = Repository.Accessor.Fetch(
 					new FetchParameters(Name));
@@ -424,8 +424,8 @@
 
 					bool fetchedSomething = false;
 					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChangedNotification,
-						RepositoryNotifications.TagChangedNotification))
+						RepositoryNotifications.BranchChanged,
+						RepositoryNotifications.TagChanged))
 					{
 						fetchedSomething = repository.Accessor.Fetch(
 							new FetchParameters(remote.Name)
@@ -462,8 +462,8 @@
 			try
 			{
 				using(Repository.Monitor.BlockNotifications(
-					RepositoryNotifications.BranchChangedNotification,
-					RepositoryNotifications.TagChangedNotification))
+					RepositoryNotifications.BranchChanged,
+					RepositoryNotifications.TagChanged))
 				{
 					Repository.Accessor.Pull(
 						new PullParameters(Name));
@@ -496,8 +496,8 @@
 					try
 					{
 						using(Repository.Monitor.BlockNotifications(
-							RepositoryNotifications.BranchChangedNotification,
-							RepositoryNotifications.TagChangedNotification))
+							RepositoryNotifications.BranchChanged,
+							RepositoryNotifications.TagChanged))
 						{
 
 							if(repository.Accessor.Pull(
@@ -574,7 +574,7 @@
 
 			IList<ReferencePushResult> res;
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.BranchChanged))
 			{
 				res = Repository.Accessor.Push(
 					new PushParameters(Name, sendTags?PushMode.Tags:PushMode.Default, names)
@@ -653,7 +653,7 @@
 
 					IList<ReferencePushResult> res;
 					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChangedNotification))
+						RepositoryNotifications.BranchChanged))
 					{
 						res = repository.Accessor.Push(
 							new PushParameters(remote.Name, tuple.Item5 ? PushMode.Tags : PushMode.Default, tuple.Item2)
@@ -696,7 +696,7 @@
 			#endregion
 
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChangedNotification))
+				RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.PruneRemote(
 					new PruneRemoteParameters(Name));
@@ -723,7 +723,7 @@
 				{
 					var repository = remote.Repository;
 					using(repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChangedNotification))
+						RepositoryNotifications.BranchChanged))
 					{
 						repository.Accessor.PruneRemote(
 							new PruneRemoteParameters(remote.Name));

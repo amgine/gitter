@@ -172,7 +172,7 @@
 				else
 				{
 					using(_repository.Monitor.BlockNotifications(
-						RepositoryNotifications.ConfigUpdatedNotification))
+						RepositoryNotifications.ConfigUpdated))
 					{
 						_repository.Configuration.SetValue(GitConstants.UserNameParameter, userName);
 						_repository.Configuration.SetValue(GitConstants.UserEmailParameter, userEmail);

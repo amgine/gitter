@@ -160,8 +160,8 @@
 		public Submodule Create(string path, string url, string branch)
 		{
 			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.WorktreeUpdatedNotification,
-				RepositoryNotifications.SubmodulesChangedNotification))
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.SubmodulesChanged))
 			{
 				lock(SyncRoot)
 				{

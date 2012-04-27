@@ -10,7 +10,7 @@
 	using gitter.Git.Gui.Controls;
 	using gitter.Git.AccessLayer;
 
-	sealed class RevisionChangesDiffSource : BaseDiffSource
+	sealed class RevisionChangesDiffSource : DiffSourceBase
 	{
 		private readonly IRevisionPointer _revision;
 		private readonly IList<string> _paths;
