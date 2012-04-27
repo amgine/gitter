@@ -106,6 +106,7 @@
 					menu.Items.Add(c);
 					menu.Items.Add(new ToolStripSeparator());
 					menu.Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(rts.Revision, file));
+					menu.Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, file.RelativePath));
 					menu.Items.Add(GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, file.RelativePath));
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
