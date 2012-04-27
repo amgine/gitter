@@ -19,8 +19,8 @@
 
 		public static int CompareById(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Id;
-			var data2 = item2.Data.Id;
+			var data1 = item1.DataContext.Id;
+			var data2 = item2.DataContext.Id;
 			return data1.CompareTo(data2);
 		}
 
@@ -35,8 +35,8 @@
 
 		public static int CompareByDoneRatio(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.DoneRatio;
-			var data2 = item2.Data.DoneRatio;
+			var data1 = item1.DataContext.DoneRatio;
+			var data2 = item2.DataContext.DoneRatio;
 			return data1.CompareTo(data2);
 		}
 
@@ -51,8 +51,8 @@
 
 		public static int CompareByCreatedOn(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.CreatedOn;
-			var data2 = item2.Data.CreatedOn;
+			var data1 = item1.DataContext.CreatedOn;
+			var data2 = item2.DataContext.CreatedOn;
 			return data1.CompareTo(data2);
 		}
 
@@ -67,8 +67,8 @@
 
 		public static int CompareByUpdatedOn(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.UpdatedOn;
-			var data2 = item2.Data.UpdatedOn;
+			var data1 = item1.DataContext.UpdatedOn;
+			var data2 = item2.DataContext.UpdatedOn;
 			return data1.CompareTo(data2);
 		}
 
@@ -83,8 +83,8 @@
 
 		public static int CompareByStartDate(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.StartDate;
-			var data2 = item2.Data.StartDate;
+			var data1 = item1.DataContext.StartDate;
+			var data2 = item2.DataContext.StartDate;
 			if(!data1.HasValue && !data2.HasValue) return 0;
 			if(!data1.HasValue) return 1;
 			else if(!data2.HasValue) return -1;
@@ -102,8 +102,8 @@
 
 		public static int CompareByDueDate(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.DueDate;
-			var data2 = item2.Data.DueDate;
+			var data1 = item1.DataContext.DueDate;
+			var data2 = item2.DataContext.DueDate;
 			if(!data1.HasValue && !data2.HasValue) return 0;
 			if(!data1.HasValue) return 1;
 			else if(!data2.HasValue) return -1;
@@ -121,8 +121,8 @@
 
 		public static int CompareByCategory(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Category;
-			var data2 = item2.Data.Category;
+			var data1 = item1.DataContext.Category;
+			var data2 = item2.DataContext.Category;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -140,8 +140,8 @@
 
 		public static int CompareByProject(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Project;
-			var data2 = item2.Data.Project;
+			var data1 = item1.DataContext.Project;
+			var data2 = item2.DataContext.Project;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -159,8 +159,8 @@
 
 		public static int CompareByPriority(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Priority;
-			var data2 = item2.Data.Priority;
+			var data1 = item1.DataContext.Priority;
+			var data2 = item2.DataContext.Priority;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -178,8 +178,8 @@
 
 		public static int CompareByStatus(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Status;
-			var data2 = item2.Data.Status;
+			var data1 = item1.DataContext.Status;
+			var data2 = item2.DataContext.Status;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -197,8 +197,8 @@
 
 		public static int CompareByTracker(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Tracker;
-			var data2 = item2.Data.Tracker;
+			var data1 = item1.DataContext.Tracker;
+			var data2 = item2.DataContext.Tracker;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -216,8 +216,8 @@
 
 		public static int CompareByAssignedTo(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.AssignedTo;
-			var data2 = item2.Data.AssignedTo;
+			var data1 = item1.DataContext.AssignedTo;
+			var data2 = item2.DataContext.AssignedTo;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -235,8 +235,8 @@
 
 		public static int CompareByAuthor(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Author;
-			var data2 = item2.Data.Author;
+			var data1 = item1.DataContext.Author;
+			var data2 = item2.DataContext.Author;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -254,8 +254,8 @@
 
 		public static int CompareBySubject(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.Subject;
-			var data2 = item2.Data.Subject;
+			var data1 = item1.DataContext.Subject;
+			var data2 = item2.DataContext.Subject;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -282,12 +282,12 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.PropertyChanged += OnIssuePropertyChanged;
+			DataContext.PropertyChanged += OnIssuePropertyChanged;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.PropertyChanged -= OnIssuePropertyChanged;
+			DataContext.PropertyChanged -= OnIssuePropertyChanged;
 			base.OnListBoxDetached();
 		}
 
@@ -449,39 +449,39 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					return measureEventArgs.MeasureText(Data.Id.ToString());
+					return measureEventArgs.MeasureText(DataContext.Id.ToString());
 				case ColumnId.Name:
 				case ColumnId.Subject:
-					return measureEventArgs.MeasureText(Data.Subject);
+					return measureEventArgs.MeasureText(DataContext.Subject);
 				case ColumnId.Author:
-					return MeasureOptionalContent(Data.Author, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Author, measureEventArgs);
 				case ColumnId.AssignedTo:
-					return MeasureOptionalContent(Data.AssignedTo, measureEventArgs);
+					return MeasureOptionalContent(DataContext.AssignedTo, measureEventArgs);
 				case ColumnId.Tracker:
-					return MeasureOptionalContent(Data.Tracker, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Tracker, measureEventArgs);
 				case ColumnId.Priority:
-					return MeasureOptionalContent(Data.Priority, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Priority, measureEventArgs);
 				case ColumnId.Project:
-					return MeasureOptionalContent(Data.Project, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Project, measureEventArgs);
 				case ColumnId.Status:
-					return MeasureOptionalContent(Data.Status, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Status, measureEventArgs);
 				case ColumnId.Category:
-					return MeasureOptionalContent(Data.Category, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Category, measureEventArgs);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(Data.CreatedOn.ToString());
+					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
 				case ColumnId.UpdatedOn:
-					return measureEventArgs.MeasureText(Data.UpdatedOn.ToString());
+					return measureEventArgs.MeasureText(DataContext.UpdatedOn.ToString());
 				case ColumnId.StartDate:
-					return MeasureOptionalContent(Data.StartDate, measureEventArgs);
+					return MeasureOptionalContent(DataContext.StartDate, measureEventArgs);
 				case ColumnId.DueDate:
-					return MeasureOptionalContent(Data.DueDate, measureEventArgs);
+					return MeasureOptionalContent(DataContext.DueDate, measureEventArgs);
 				case ColumnId.DoneRatio:
 					return new Size(60, 1);
 				default:
 					if(measureEventArgs.SubItemId >= (int)ColumnId.CustomFieldOffset)
 					{
 						var cfid = measureEventArgs.SubItemId - (int)ColumnId.CustomFieldOffset;
-						return MeasureOptionalContent(Data.CustomFields[cfid], measureEventArgs);
+						return MeasureOptionalContent(DataContext.CustomFields[cfid], measureEventArgs);
 					}
 					else
 					{
@@ -496,52 +496,52 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					paintEventArgs.PaintText(Data.Id.ToString());
+					paintEventArgs.PaintText(DataContext.Id.ToString());
 					break;
 				case ColumnId.Name:
 				case ColumnId.Subject:
-					paintEventArgs.PaintText(Data.Subject);
+					paintEventArgs.PaintText(DataContext.Subject);
 					break;
 				case ColumnId.Author:
-					PaintOptionalContent(Data.Author, paintEventArgs);
+					PaintOptionalContent(DataContext.Author, paintEventArgs);
 					break;
 				case ColumnId.AssignedTo:
-					PaintOptionalContent(Data.AssignedTo, paintEventArgs);
+					PaintOptionalContent(DataContext.AssignedTo, paintEventArgs);
 					break;
 				case ColumnId.Tracker:
-					PaintOptionalContent(Data.Tracker, paintEventArgs);
+					PaintOptionalContent(DataContext.Tracker, paintEventArgs);
 					break;
 				case ColumnId.Priority:
-					PaintOptionalContent(Data.Priority, paintEventArgs);
+					PaintOptionalContent(DataContext.Priority, paintEventArgs);
 					break;
 				case ColumnId.Project:
-					PaintOptionalContent(Data.Project, paintEventArgs);
+					PaintOptionalContent(DataContext.Project, paintEventArgs);
 					break;
 				case ColumnId.Status:
-					PaintOptionalContent(Data.Status, paintEventArgs);
+					PaintOptionalContent(DataContext.Status, paintEventArgs);
 					break;
 				case ColumnId.Category:
-					PaintOptionalContent(Data.Category, paintEventArgs);
+					PaintOptionalContent(DataContext.Category, paintEventArgs);
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(Data.CreatedOn.ToString());
+					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
 					break;
 				case ColumnId.UpdatedOn:
-					paintEventArgs.PaintText(Data.UpdatedOn.ToString());
+					paintEventArgs.PaintText(DataContext.UpdatedOn.ToString());
 					break;
 				case ColumnId.StartDate:
-					PaintOptionalContent(Data.StartDate, paintEventArgs);
+					PaintOptionalContent(DataContext.StartDate, paintEventArgs);
 					break;
 				case ColumnId.DueDate:
-					PaintOptionalContent(Data.DueDate, paintEventArgs);
+					PaintOptionalContent(DataContext.DueDate, paintEventArgs);
 					break;
 				case ColumnId.DoneRatio:
 					var r = paintEventArgs.Bounds;
 					r.Inflate(-4, -8);
 					paintEventArgs.Graphics.FillRectangle(Brushes.LightBlue, r);
-					if(Data.DoneRatio != 0)
+					if(DataContext.DoneRatio != 0)
 					{
-						var w = (int)(r.Width * Data.DoneRatio / 100);
+						var w = (int)(r.Width * DataContext.DoneRatio / 100);
 						r.Width = w;
 						paintEventArgs.Graphics.FillRectangle(Brushes.Blue, r);
 					}
@@ -550,7 +550,7 @@
 					if(paintEventArgs.SubItemId >= (int)ColumnId.CustomFieldOffset)
 					{
 						var cfid = paintEventArgs.SubItemId - (int)ColumnId.CustomFieldOffset;
-						PaintOptionalContent(Data.CustomFields[cfid], paintEventArgs);
+						PaintOptionalContent(DataContext.CustomFields[cfid], paintEventArgs);
 					}
 					break;
 			}
@@ -558,7 +558,7 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var menu = new IssueMenu(Data);
+			var menu = new IssueMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

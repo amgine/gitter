@@ -40,19 +40,19 @@
 		{
 			if(e.Item is BranchListItem)
 			{
-				var branch = ((BranchListItem)e.Item).Data;
+				var branch = ((BranchListItem)e.Item).DataContext;
 				Text = branch.Name;
 				HideDropDown();
 			}
 			if(e.Item is RemoteBranchListItem)
 			{
-				var branch = ((RemoteBranchListItem)e.Item).Data;
+				var branch = ((RemoteBranchListItem)e.Item).DataContext;
 				Text = branch.Name;
 				HideDropDown();
 			}
 			else if(e.Item is TagListItem)
 			{
-				var tag = ((TagListItem)e.Item).Data;
+				var tag = ((TagListItem)e.Item).DataContext;
 				Text = tag.Name;
 				HideDropDown();
 			}

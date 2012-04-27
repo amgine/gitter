@@ -98,11 +98,11 @@
 			foreach(var item in list)
 			{
 				PropertyPageItem parent;
-				if(dic.TryGetValue(item.Data.GroupGuid, out parent))
+				if(dic.TryGetValue(item.DataContext.GroupGuid, out parent))
 				{
 					parent.Items.Add(item);
 					parent.IsExpanded = true;
-					dic.Remove(item.Data.Guid);
+					dic.Remove(item.DataContext.Guid);
 				}
 			}
 			list.Clear();

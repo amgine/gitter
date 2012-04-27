@@ -21,12 +21,12 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Deleted += OnDeleted;
+			DataContext.Deleted += OnDeleted;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnDeleted;
+			DataContext.Deleted -= OnDeleted;
 			base.OnListBoxDetached();
 		}
 
@@ -41,7 +41,7 @@
 			{
 				case ColumnId.Name:
 					Bitmap image;
-					switch(Data.ReferenceType)
+					switch(DataContext.ReferenceType)
 					{
 						case ReferenceType.LocalBranch:
 							image = ImgBranch;
@@ -53,9 +53,9 @@
 							image = null;
 							break;
 					}
-					return measureEventArgs.MeasureImageAndText(image, Data.Name);
+					return measureEventArgs.MeasureImageAndText(image, DataContext.Name);
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, Data.Hash);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Hash);
 				default:
 					return Size.Empty;
 			}
@@ -67,13 +67,13 @@
 			{
 				case ColumnId.Name:
 					Bitmap image;
-					switch(Data.ReferenceType)
+					switch(DataContext.ReferenceType)
 					{
 						case ReferenceType.LocalBranch:
 							image = ImgBranch;
 							break;
 						case ReferenceType.Tag:
-							var tag = Data as RemoteRepositoryTag;
+							var tag = DataContext as RemoteRepositoryTag;
 							if(tag != null && tag.TagType == TagType.Annotated)
 								image = ImgTagAnnotated;
 							else
@@ -83,7 +83,7 @@
 							image = null;
 							break;
 					}
-					paintEventArgs.PaintImageAndText(image, Data.Name);
+					paintEventArgs.PaintImageAndText(image, DataContext.Name);
 					break;
 				case ColumnId.Hash:
 					var rhc = paintEventArgs.Column as HashColumn;
@@ -97,7 +97,7 @@
 					{
 						abbreviate = HashColumn.DefaultAbbreviate;
 					}
-					paintEventArgs.PaintText(abbreviate?Data.Hash.Substring(0, abbrevLength):Data.Hash, HashColumn.Font);
+					paintEventArgs.PaintText(abbreviate?DataContext.Hash.Substring(0, abbrevLength):DataContext.Hash, HashColumn.Font);
 					break;
 			}
 		}
@@ -105,14 +105,14 @@
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			ContextMenuStrip menu = null;
-			var branch = Data as RemoteRepositoryBranch;
+			var branch = DataContext as RemoteRepositoryBranch;
 			if(branch != null)
 			{
 				menu = new RemoteBranchMenu(branch);
 			}
 			else
 			{
-				var tag = Data as RemoteRepositoryTag;
+				var tag = DataContext as RemoteRepositoryTag;
 				if(tag != null)
 				{
 					menu = new RemoteTagMenu(tag);

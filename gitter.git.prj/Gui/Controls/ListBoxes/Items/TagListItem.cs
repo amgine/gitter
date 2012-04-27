@@ -31,12 +31,12 @@
 
 		protected override Image Image
 		{
-			get { return (Data.TagType == TagType.Annotated) ? ImgTagAnnotated : ImgTag; }
+			get { return (DataContext.TagType == TagType.Annotated) ? ImgTagAnnotated : ImgTag; }
 		}
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new TagMenu(Data);
+			var mnu = new TagMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}

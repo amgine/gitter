@@ -18,8 +18,8 @@
 
 		public static int CompareByName(RemoteListItem item1, RemoteListItem item2)
 		{
-			var data1 = item1.Data.Name;
-			var data2 = item2.Data.Name;
+			var data1 = item1.DataContext.Name;
+			var data2 = item2.DataContext.Name;
 			return string.Compare(data1, data2);
 		}
 
@@ -41,8 +41,8 @@
 
 		public static int CompareByFetchUrl(RemoteListItem item1, RemoteListItem item2)
 		{
-			var data1 = item1.Data.FetchUrl;
-			var data2 = item2.Data.FetchUrl;
+			var data1 = item1.DataContext.FetchUrl;
+			var data2 = item2.DataContext.FetchUrl;
 			return string.Compare(data1, data2);
 		}
 
@@ -64,8 +64,8 @@
 
 		public static int CompareByPushUrl(RemoteListItem item1, RemoteListItem item2)
 		{
-			var data1 = item1.Data.PushUrl;
-			var data2 = item2.Data.PushUrl;
+			var data1 = item1.DataContext.PushUrl;
+			var data2 = item2.DataContext.PushUrl;
 			return string.Compare(data1, data2);
 		}
 
@@ -102,15 +102,15 @@
 
 		protected override void OnListBoxAttached()
 		{
-			Data.Deleted += OnRemoteDeleted;
-			Data.Renamed += OnRenamed;
+			DataContext.Deleted += OnRemoteDeleted;
+			DataContext.Renamed += OnRenamed;
 			base.OnListBoxAttached();
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnRemoteDeleted;
-			Data.Renamed -= OnRenamed;
+			DataContext.Deleted -= OnRemoteDeleted;
+			DataContext.Renamed -= OnRenamed;
 			base.OnListBoxDetached();
 		}
 
@@ -132,12 +132,12 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgRemote, Data.Name);
+					return measureEventArgs.MeasureImageAndText(ImgRemote, DataContext.Name);
 				case ColumnId.Url:
 				case ColumnId.FetchUrl:
-					return measureEventArgs.MeasureText(Data.FetchUrl);
+					return measureEventArgs.MeasureText(DataContext.FetchUrl);
 				case ColumnId.PushUrl:
-					return measureEventArgs.MeasureText(Data.PushUrl);
+					return measureEventArgs.MeasureText(DataContext.PushUrl);
 				default:
 					return Size.Empty;
 			}
@@ -148,21 +148,21 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgRemote, Data.Name);
+					paintEventArgs.PaintImageAndText(ImgRemote, DataContext.Name);
 					break;
 				case ColumnId.Url:
 				case ColumnId.FetchUrl:
-					paintEventArgs.PaintText(Data.FetchUrl);
+					paintEventArgs.PaintText(DataContext.FetchUrl);
 					break;
 				case ColumnId.PushUrl:
-					paintEventArgs.PaintText(Data.PushUrl);
+					paintEventArgs.PaintText(DataContext.PushUrl);
 					break;
 			}
 		}
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new RemoteMenu(Data);
+			var mnu = new RemoteMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}

@@ -48,7 +48,7 @@
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
-			var desc = (e.Item as PropertyPageItem).Data;
+			var desc = (e.Item as PropertyPageItem).DataContext;
 			PropertyPage page;
 			if(_activePage != null)
 			{

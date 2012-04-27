@@ -66,12 +66,12 @@
 			var item = _lstReferences.SelectedItems[0];
 			if(item is BranchListItem)
 			{
-				var branch = ((BranchListItem)item).Data;
+				var branch = ((BranchListItem)item).DataContext;
 				_txtRevision.Text = branch.Name;
 			}
 			else if(item is TagListItem)
 			{
-				var tag = ((TagListItem)item).Data;
+				var tag = ((TagListItem)item).DataContext;
 				_txtRevision.Text = tag.Name;
 			}
 		}

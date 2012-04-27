@@ -50,19 +50,19 @@
 		{
 			foreach(CustomListBoxRow<string> item in _lstDictionaries.Items)
 			{
-				bool loaded = SpellingService.IsLoaded(item.Data);
+				bool loaded = SpellingService.IsLoaded(item.DataContext);
 				if(loaded)
 				{
 					if(!item.IsChecked)
 					{
-						SpellingService.UnloadLocale(item.Data);
+						SpellingService.UnloadLocale(item.DataContext);
 					}
 				}
 				else
 				{
 					if(item.IsChecked)
 					{
-						SpellingService.LoadLocale(item.Data);
+						SpellingService.LoadLocale(item.DataContext);
 					}
 				}
 			}

@@ -19,8 +19,8 @@
 
 		public static int CompareById(VersionListItem item1, VersionListItem item2)
 		{
-			var data1 = item1.Data.Id;
-			var data2 = item2.Data.Id;
+			var data1 = item1.DataContext.Id;
+			var data2 = item2.DataContext.Id;
 			return data1.CompareTo(data2);
 		}
 
@@ -35,8 +35,8 @@
 
 		public static int CompareByStatus(VersionListItem item1, VersionListItem item2)
 		{
-			var data1 = item1.Data.Status;
-			var data2 = item2.Data.Status;
+			var data1 = item1.DataContext.Status;
+			var data2 = item2.DataContext.Status;
 			return data1.CompareTo(data2);
 		}
 
@@ -51,8 +51,8 @@
 
 		public static int CompareByCreatedOn(VersionListItem item1, VersionListItem item2)
 		{
-			var data1 = item1.Data.CreatedOn;
-			var data2 = item2.Data.CreatedOn;
+			var data1 = item1.DataContext.CreatedOn;
+			var data2 = item2.DataContext.CreatedOn;
 			return data1.CompareTo(data2);
 		}
 
@@ -67,8 +67,8 @@
 
 		public static int CompareByUpdatedOn(VersionListItem item1, VersionListItem item2)
 		{
-			var data1 = item1.Data.UpdatedOn;
-			var data2 = item2.Data.UpdatedOn;
+			var data1 = item1.DataContext.UpdatedOn;
+			var data2 = item2.DataContext.UpdatedOn;
 			return data1.CompareTo(data2);
 		}
 
@@ -83,8 +83,8 @@
 
 		public static int CompareByDueDate(VersionListItem item1, VersionListItem item2)
 		{
-			var data1 = item1.Data.DueDate;
-			var data2 = item2.Data.DueDate;
+			var data1 = item1.DataContext.DueDate;
+			var data2 = item2.DataContext.DueDate;
 			if(data1 == data2) return 0;
 			if(!data1.HasValue) return 1;
 			else if(!data2.HasValue) return -1;
@@ -102,8 +102,8 @@
 
 		public static int CompareByName(VersionListItem item1, VersionListItem item2)
 		{
-			var data1 = item1.Data.Name;
-			var data2 = item2.Data.Name;
+			var data1 = item1.DataContext.Name;
+			var data2 = item2.DataContext.Name;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -121,8 +121,8 @@
 
 		public static int CompareByDescription(VersionListItem item1, VersionListItem item2)
 		{
-			var data1 = item1.Data.Description;
-			var data2 = item2.Data.Description;
+			var data1 = item1.DataContext.Description;
+			var data2 = item2.DataContext.Description;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -149,12 +149,12 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.PropertyChanged += OnVersionPropertyChanged;
+			DataContext.PropertyChanged += OnVersionPropertyChanged;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.PropertyChanged -= OnVersionPropertyChanged;
+			DataContext.PropertyChanged -= OnVersionPropertyChanged;
 			base.OnListBoxDetached();
 		}
 
@@ -226,23 +226,23 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					return measureEventArgs.MeasureText(Data.Id.ToString());
+					return measureEventArgs.MeasureText(DataContext.Id.ToString());
 				case ColumnId.Name:
-					return measureEventArgs.MeasureText(Data.Name);
+					return measureEventArgs.MeasureText(DataContext.Name);
 				case ColumnId.Description:
-					return measureEventArgs.MeasureText(Data.Description);
+					return measureEventArgs.MeasureText(DataContext.Description);
 				case ColumnId.Project:
-					return MeasureOptionalContent(Data.Project, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Project, measureEventArgs);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(Data.CreatedOn.ToString());
+					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
 				case ColumnId.UpdatedOn:
-					return measureEventArgs.MeasureText(Data.UpdatedOn.ToString());
+					return measureEventArgs.MeasureText(DataContext.UpdatedOn.ToString());
 				case ColumnId.Status:
-					return measureEventArgs.MeasureText(Data.Status.ToString());
+					return measureEventArgs.MeasureText(DataContext.Status.ToString());
 				case ColumnId.DueDate:
-					if(Data.DueDate.HasValue)
+					if(DataContext.DueDate.HasValue)
 					{
-						return measureEventArgs.MeasureText(Data.DueDate.Value.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern));
+						return measureEventArgs.MeasureText(DataContext.DueDate.Value.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern));
 					}
 					else
 					{
@@ -257,30 +257,30 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					paintEventArgs.PaintText(Data.Id.ToString());
+					paintEventArgs.PaintText(DataContext.Id.ToString());
 					break;
 				case ColumnId.Name:
-					paintEventArgs.PaintText(Data.Name);
+					paintEventArgs.PaintText(DataContext.Name);
 					break;
 				case ColumnId.Description:
-					paintEventArgs.PaintText(Data.Description);
+					paintEventArgs.PaintText(DataContext.Description);
 					break;
 				case ColumnId.Project:
-					PaintOptionalContent(Data.Project, paintEventArgs);
+					PaintOptionalContent(DataContext.Project, paintEventArgs);
 					break;
 				case ColumnId.Status:
-					paintEventArgs.PaintText(Data.Status.ToString());
+					paintEventArgs.PaintText(DataContext.Status.ToString());
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(Data.CreatedOn.ToString());
+					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
 					break;
 				case ColumnId.UpdatedOn:
-					paintEventArgs.PaintText(Data.UpdatedOn.ToString());
+					paintEventArgs.PaintText(DataContext.UpdatedOn.ToString());
 					break;
 				case ColumnId.DueDate:
-					if(Data.DueDate.HasValue)
+					if(DataContext.DueDate.HasValue)
 					{
-						paintEventArgs.PaintText(Data.DueDate.Value.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern));
+						paintEventArgs.PaintText(DataContext.DueDate.Value.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern));
 					}
 					else
 					{
@@ -292,7 +292,7 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var menu = new VersionMenu(Data);
+			var menu = new VersionMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

@@ -23,7 +23,7 @@
 				switch(measureEventArgs.SubItemId)
 				{
 					case 0:
-						return measureEventArgs.MeasureText(Data.Name);
+						return measureEventArgs.MeasureText(DataContext.Name);
 					default:
 						return Size.Empty;
 				}
@@ -34,7 +34,7 @@
 				switch(paintEventArgs.SubItemId)
 				{
 					case 0:
-						paintEventArgs.PaintText(Data.Name);
+						paintEventArgs.PaintText(DataContext.Name);
 						break;
 				}
 			}
@@ -149,7 +149,7 @@
 			_listBox.Columns.Clear();
 			foreach(var item in _lstColumns.Items)
 			{
-				var c = ((ColumnItem)item).Data;
+				var c = ((ColumnItem)item).DataContext;
 				c.IsVisible = item.CheckedState == CheckedState.Checked;
 				_listBox.Columns.Add(c);
 			}

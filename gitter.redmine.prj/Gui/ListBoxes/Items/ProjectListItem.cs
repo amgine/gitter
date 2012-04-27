@@ -20,22 +20,22 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					paintEventArgs.PaintText(Data.Id.ToString());
+					paintEventArgs.PaintText(DataContext.Id.ToString());
 					break;
 				case ColumnId.Name:
-					paintEventArgs.PaintText(Data.Name);
+					paintEventArgs.PaintText(DataContext.Name);
 					break;
 				case ColumnId.Description:
-					paintEventArgs.PaintText(Data.Description);
+					paintEventArgs.PaintText(DataContext.Description);
 					break;
 				case ColumnId.Identifier:
-					paintEventArgs.PaintText(Data.Identifier);
+					paintEventArgs.PaintText(DataContext.Identifier);
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(Data.CreatedOn.ToString());
+					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
 					break;
 				case ColumnId.UpdatedOn:
-					paintEventArgs.PaintText(Data.UpdatedOn.ToString());
+					paintEventArgs.PaintText(DataContext.UpdatedOn.ToString());
 					break;
 			}
 		}
@@ -45,17 +45,17 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					return measureEventArgs.MeasureText(Data.Id.ToString());
+					return measureEventArgs.MeasureText(DataContext.Id.ToString());
 				case ColumnId.Name:
-					return measureEventArgs.MeasureText(Data.Name);
+					return measureEventArgs.MeasureText(DataContext.Name);
 				case ColumnId.Description:
-					return measureEventArgs.MeasureText(Data.Description);
+					return measureEventArgs.MeasureText(DataContext.Description);
 				case ColumnId.Identifier:
-					return measureEventArgs.MeasureText(Data.Identifier);
+					return measureEventArgs.MeasureText(DataContext.Identifier);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(Data.CreatedOn.ToString());
+					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
 				case ColumnId.UpdatedOn:
-					return measureEventArgs.MeasureText(Data.UpdatedOn.ToString());
+					return measureEventArgs.MeasureText(DataContext.UpdatedOn.ToString());
 				default:
 					return Size.Empty;
 			}

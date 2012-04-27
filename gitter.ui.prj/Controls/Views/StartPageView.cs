@@ -77,7 +77,7 @@
 							bool duplicateEntry = false;
 							foreach(RepositoryListItem item in _lstLocalRepositories.Items)
 							{
-								if(item.Data.Path == path)
+								if(item.DataContext.Path == path)
 								{
 									duplicateEntry = true;
 									break;
@@ -120,7 +120,7 @@
 			var item = e.Item as RepositoryListItem;
 			if(item != null)
 			{
-				if(WorkingEnvironment.OpenRepository(item.Data.Path))
+				if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
 				{
 					if(_factory.CloseAfterRepositoryLoad)
 					{
@@ -142,7 +142,7 @@
 				var repoItem = item as RepositoryListItem;
 				if(repoItem != null)
 				{
-					var link = repoItem.Data;
+					var link = repoItem.DataContext;
 					link.SaveTo(itemsNode.GetCreateSection("Repository" + id.ToString(CultureInfo.InvariantCulture)));
 					++id;
 				}

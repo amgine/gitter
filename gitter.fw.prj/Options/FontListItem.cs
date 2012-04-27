@@ -36,7 +36,7 @@
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					return measureEventArgs.MeasureText(Data.Name);
+					return measureEventArgs.MeasureText(DataContext.Name);
 				case 1:
 					if(_font != null)
 					{
@@ -56,7 +56,7 @@
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
-					paintEventArgs.PaintText(Data.Name);
+					paintEventArgs.PaintText(DataContext.Name);
 					break;
 				case 1:
 					if(_font != null)

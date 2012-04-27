@@ -56,9 +56,9 @@
 			{
 				if(_lstReferences.SelectedItems.Count == 0) return null;
 				var branchItem = _lstReferences.SelectedItems[0] as BranchListItem;
-				if(branchItem != null) return branchItem.Data;
+				if(branchItem != null) return branchItem.DataContext;
 				var tagItem = _lstReferences.SelectedItems[0] as TagListItem;
-				if(tagItem != null) return tagItem.Data;
+				if(tagItem != null) return tagItem.DataContext;
 				return null;
 			}
 		}

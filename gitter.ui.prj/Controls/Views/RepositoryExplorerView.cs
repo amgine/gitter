@@ -32,7 +32,7 @@
 			var item = e.Item as ViewListItem;
 			if(item != null)
 			{
-				WorkingEnvironment.ViewDockService.ShowView(item.Data.Guid);
+				WorkingEnvironment.ViewDockService.ShowView(item.DataContext.Guid);
 			}
 		}
 

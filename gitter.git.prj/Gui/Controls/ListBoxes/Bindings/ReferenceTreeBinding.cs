@@ -174,7 +174,7 @@
 						RemoteListItem ritem = null;
 						foreach(var i in _remotes)
 						{
-							if(i.Data.Name == remote.Name)
+							if(i.DataContext.Name == remote.Name)
 							{
 								ritem = i;
 								break;

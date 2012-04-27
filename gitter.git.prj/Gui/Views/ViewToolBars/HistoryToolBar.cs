@@ -42,12 +42,12 @@ namespace gitter.Git.Gui.Views
 					new ToolStripSeparator(),
 					_btnDateOrder = new ToolStripButton(Resources.StrDateOrder, CachedResources.Bitmaps["ImgDateOrder"], OnDateOrderButtonClick)
 						{
-							Checked = _view.LogOptions.Order == AccessLayer.RevisionQueryOrder.DateOrder,
+							Checked = _view.LogOptions.Order == RevisionQueryOrder.DateOrder,
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 					_btnTopoOrder = new ToolStripButton(Resources.StrTopoOrder, CachedResources.Bitmaps["ImgTopoOrder"], OnTopoOrderButtonClick)
 						{
-							Checked = _view.LogOptions.Order == AccessLayer.RevisionQueryOrder.TopoOrder,
+							Checked = _view.LogOptions.Order == RevisionQueryOrder.TopoOrder,
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 					new ToolStripSeparator(),
@@ -88,12 +88,12 @@ namespace gitter.Git.Gui.Views
 
 		private void OnDateOrderButtonClick(object sender, EventArgs e)
 		{
-			_view.LogOptions.Order = AccessLayer.RevisionQueryOrder.DateOrder;
+			_view.LogOptions.Order = RevisionQueryOrder.DateOrder;
 		}
 
 		private void OnTopoOrderButtonClick(object sender, EventArgs e)
 		{
-			_view.LogOptions.Order = AccessLayer.RevisionQueryOrder.TopoOrder;
+			_view.LogOptions.Order = RevisionQueryOrder.TopoOrder;
 		}
 
 		private void OnShowDetailsButtonClick(object sender, EventArgs e)
@@ -111,8 +111,8 @@ namespace gitter.Git.Gui.Views
 		private void OnLogOptionsChanged(object sender, EventArgs e)
 		{
 			_filterDropDown.LogOptions = _view.LogOptions;
-			_btnDateOrder.Checked = _view.LogOptions.Order == AccessLayer.RevisionQueryOrder.DateOrder;
-			_btnTopoOrder.Checked = _view.LogOptions.Order == AccessLayer.RevisionQueryOrder.TopoOrder;
+			_btnDateOrder.Checked = _view.LogOptions.Order == RevisionQueryOrder.DateOrder;
+			_btnTopoOrder.Checked = _view.LogOptions.Order == RevisionQueryOrder.TopoOrder;
 			UpdateLimitButtonText();
 		}
 

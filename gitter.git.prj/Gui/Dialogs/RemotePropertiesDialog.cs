@@ -201,7 +201,7 @@
 				StringBuilder sb = (refspec.Fetch) ? sbfetch : sbpush;
 				if(sb.Length != 0)
 					sb.Append(' ');
-				sb.Append(refspec.Data);
+				sb.Append(refspec.DataContext);
 			}
 			fetch = sbfetch.ToString();
 			push = sbpush.ToString();

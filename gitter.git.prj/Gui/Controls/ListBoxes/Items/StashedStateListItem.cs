@@ -17,8 +17,8 @@
 
 		public static int CompareByIndex(StashedStateListItem item1, StashedStateListItem item2)
 		{
-			var data1 = item1.Data.Index;
-			var data2 = item2.Data.Index;
+			var data1 = item1.DataContext.Index;
+			var data2 = item2.DataContext.Index;
 			return (data1>data2)?1:((data1==data2)?0:-1);
 		}
 
@@ -50,12 +50,12 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Deleted += OnDeleted;
+			DataContext.Deleted += OnDeleted;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnDeleted;
+			DataContext.Deleted -= OnDeleted;
 			base.OnListBoxDetached();
 		}
 
@@ -66,7 +66,7 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new StashedStateMenu(Data);
+			var mnu = new StashedStateMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}
@@ -76,24 +76,24 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, Data.Name);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Name);
 				case ColumnId.Name:
 				case ColumnId.Subject:
-					return SubjectColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Subject);
+					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Subject);
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
-					return CommitDateColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.CommitDate);
+					return CommitDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.CommitDate);
 				case ColumnId.Committer:
-					return CommitterColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Committer);
+					return CommitterColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Committer);
 				case ColumnId.CommitterEmail:
-					return CommitterEmailColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Committer.Email);
+					return CommitterEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Committer.Email);
 				case ColumnId.AuthorDate:
-					return AuthorDateColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.AuthorDate);
+					return AuthorDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.AuthorDate);
 				case ColumnId.User:
 				case ColumnId.Author:
-					return AuthorColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Author);
+					return AuthorColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Author);
 				case ColumnId.AuthorEmail:
-					return AuthorEmailColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Author.Email);
+					return AuthorEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Author.Email);
 				default:
 					return Size.Empty;
 			}
@@ -104,31 +104,31 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, Data.Name);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Name);
 					break;
 				case ColumnId.Name:
 				case ColumnId.Subject:
-					SubjectColumn.OnPaintSubItem(paintEventArgs, Data.Revision, null, null, -1);
+					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision, null, null, -1);
 					break;
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
-					CommitDateColumn.OnPaintSubItem(paintEventArgs, Data.Revision.CommitDate);
+					CommitDateColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.CommitDate);
 					break;
 				case ColumnId.Committer:
-					CommitterColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Committer);
+					CommitterColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Committer);
 					break;
 				case ColumnId.CommitterEmail:
-					CommitterEmailColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Committer.Email);
+					CommitterEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Committer.Email);
 					break;
 				case ColumnId.AuthorDate:
-					AuthorDateColumn.OnPaintSubItem(paintEventArgs, Data.Revision.AuthorDate);
+					AuthorDateColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.AuthorDate);
 					break;
 				case ColumnId.User:
 				case ColumnId.Author:
-					AuthorColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Author);
+					AuthorColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Author);
 					break;
 				case ColumnId.AuthorEmail:
-					AuthorEmailColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Author.Email);
+					AuthorEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Author.Email);
 					break;
 			}
 		}

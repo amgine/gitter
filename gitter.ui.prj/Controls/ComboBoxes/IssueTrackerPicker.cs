@@ -118,7 +118,7 @@
 			var remoteItem = e.Item as IssueTrackerListItem;
 			if(remoteItem != null)
 			{
-				SelectedIssueTracker = remoteItem.Data;
+				SelectedIssueTracker = remoteItem.DataContext;
 				HideDropDown();
 			}
 		}

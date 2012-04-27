@@ -69,7 +69,7 @@
 		{
 			foreach(WorktreeConflictedFileItem item in _lstConflicts.Items)
 			{
-				if(item.Data.RelativePath == file.RelativePath)
+				if(item.DataContext.RelativePath == file.RelativePath)
 				{
 					item.RemoveSafe();
 					break;
@@ -94,7 +94,7 @@
 			var item = e.Item as TreeFileListItem;
 			if(item != null)
 			{
-				var file = item.Data;
+				var file = item.DataContext;
 				if(file.Status == FileStatus.Unmerged)
 				{
 					switch(file.ConflictType)

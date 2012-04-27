@@ -13,6 +13,8 @@
 
 	public interface ILogSource
 	{
+		Repository Repository { get; }
+
 		IAsyncFunc<RevisionLog> GetLogAsync();
 
 		IAsyncFunc<RevisionLog> GetLogAsync(LogOptions options);

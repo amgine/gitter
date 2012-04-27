@@ -41,7 +41,7 @@
 				if(treeSource != null)
 				{
 					Items.Add(new ToolStripSeparator());
-					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(treeSource.Revision, item.Data));
+					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(treeSource.Revision, item.DataContext));
 				}
 			}
 		}
@@ -178,9 +178,9 @@
 			if(_directoryTree.SelectedItems.Count != 0)
 			{
 				var treeItem = (_directoryTree.SelectedItems[0] as TreeDirectoryListItem);
-				if(_currentDirectory != treeItem.Data)
+				if(_currentDirectory != treeItem.DataContext)
 				{
-					_currentDirectory = treeItem.Data;
+					_currentDirectory = treeItem.DataContext;
 					_treeContent.SetTree(_currentDirectory, TreeListBoxMode.ShowDirectoryContent);
 					CurrentDirectoryChanged.Raise(this);
 				}
@@ -205,7 +205,7 @@
 
 		private static TreeDirectoryListItem FindDirectoryEntry(TreeDirectoryListItem root, TreeDirectory folder)
 		{
-			if(root.Data == folder) return root;
+			if(root.DataContext == folder) return root;
 			foreach(TreeDirectoryListItem item in root.Items)
 			{
 				var subSearch = FindDirectoryEntry(item, folder);
@@ -219,19 +219,19 @@
 			var item = e.Item as TreeFileListItem;
 			if(item != null)
 			{
-				_wTree.OpenFile(item.Data.RelativePath);
+				_wTree.OpenFile(item.DataContext.RelativePath);
 			}
 			else
 			{
 				var folderItem = e.Item as TreeDirectoryListItem;
 				if(folderItem != null)
 				{
-					var directoryEntry = FindDirectoryEntry(folderItem.Data);
+					var directoryEntry = FindDirectoryEntry(folderItem.DataContext);
 					if(directoryEntry != null)
 					{
 						if(directoryEntry.IsSelected)
 						{
-							_treeContent.SetTree(folderItem.Data, TreeListBoxMode.ShowDirectoryContent);
+							_treeContent.SetTree(folderItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
 						}
 						else
 						{
@@ -240,9 +240,9 @@
 					}
 					else
 					{
-						_treeContent.SetTree(folderItem.Data, TreeListBoxMode.ShowDirectoryContent);
+						_treeContent.SetTree(folderItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
 					}
-					_currentDirectory = folderItem.Data;
+					_currentDirectory = folderItem.DataContext;
 					CurrentDirectoryChanged.Raise(this);
 				}
 			}

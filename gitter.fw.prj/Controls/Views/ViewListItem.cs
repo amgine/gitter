@@ -26,7 +26,7 @@
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					return measureEventArgs.MeasureImageAndText(Data.Image, Data.Name);
+					return measureEventArgs.MeasureImageAndText(DataContext.Image, DataContext.Name);
 				default:
 					return Size.Empty;
 			}
@@ -39,7 +39,7 @@
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
-					paintEventArgs.PaintImageAndText(Data.Image, Data.Name);
+					paintEventArgs.PaintImageAndText(DataContext.Image, DataContext.Name);
 					break;
 			}
 		}

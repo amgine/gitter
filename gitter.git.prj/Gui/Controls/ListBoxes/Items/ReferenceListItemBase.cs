@@ -61,8 +61,8 @@
 
 		public static int CompareByName(ReferenceListItemBase<T> item1, ReferenceListItemBase<T> item2)
 		{
-			var data1 = item1.Data;
-			var data2 = item2.Data;
+			var data1 = item1.DataContext;
+			var data2 = item2.DataContext;
 			return string.Compare(data1.Name, data2.Name);
 		}
 
@@ -84,8 +84,8 @@
 
 		public static int CompareByPosition(ReferenceListItemBase<T> item1, ReferenceListItemBase<T> item2)
 		{
-			var data1 = item1.Data;
-			var data2 = item2.Data;
+			var data1 = item1.DataContext;
+			var data2 = item2.DataContext;
 			return string.Compare(data1.Revision.Name, data2.Revision.Name);
 		}
 
@@ -115,14 +115,14 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Deleted += OnReferenceDeleted;
-			Data.PositionChanged += OnPositionChanged;
+			DataContext.Deleted += OnReferenceDeleted;
+			DataContext.PositionChanged += OnPositionChanged;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnReferenceDeleted;
-			Data.PositionChanged -= OnPositionChanged;
+			DataContext.Deleted -= OnReferenceDeleted;
+			DataContext.PositionChanged -= OnPositionChanged;
 			base.OnListBoxDetached();
 		}
 
@@ -143,11 +143,11 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(Image, Data.Name);
+					return measureEventArgs.MeasureImageAndText(Image, DataContext.Name);
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Name);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Name);
 				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.TreeHash);
+					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHash);
 				default:
 					return Size.Empty;
 			}
@@ -158,13 +158,13 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(Image, Data.Name);
+					paintEventArgs.PaintImageAndText(Image, DataContext.Name);
 					break;
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Name);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Name);
 					break;
 				case ColumnId.TreeHash:
-					TreeHashColumn.OnPaintSubItem(paintEventArgs, Data.Revision.TreeHash);
+					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHash);
 					break;
 			}
 		}

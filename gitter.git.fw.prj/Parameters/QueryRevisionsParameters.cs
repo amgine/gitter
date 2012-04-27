@@ -63,6 +63,8 @@ namespace gitter.Git.AccessLayer
 
 		public bool FirstParent { get; set; }
 
+		public bool EnableParentsRewriting { get; set; }
+
 		public RevisionMergesQueryMode MergesMode { get; set; }
 
 		public RevisionQueryOrder Order { get; set; }

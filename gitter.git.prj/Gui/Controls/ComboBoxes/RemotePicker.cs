@@ -111,7 +111,7 @@
 			var remoteItem = e.Item as RemoteListItem;
 			if(remoteItem != null)
 			{
-				SelectedRemote = remoteItem.Data;
+				SelectedRemote = remoteItem.DataContext;
 				HideDropDown();
 			}
 		}

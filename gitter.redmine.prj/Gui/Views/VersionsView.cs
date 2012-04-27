@@ -107,7 +107,7 @@
 			var item = e.Item as VersionListItem;
 			if(item != null)
 			{
-				ShowVersionDetails(item.Data);
+				ShowVersionDetails(item.DataContext);
 			}
 		}
 
@@ -181,7 +181,7 @@
 
 		private bool TestItem(VersionListItem item, VersionsSearchOptions search)
 		{
-			var version = item.Data;
+			var version = item.DataContext;
 			if(version.Name.Contains(search.Text)) return true;
 			if(version.Description.Contains(search.Text)) return true;
 			int id;

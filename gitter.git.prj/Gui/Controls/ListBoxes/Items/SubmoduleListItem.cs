@@ -16,8 +16,8 @@
 
 		public static int CompareByName(SubmoduleListItem item1, SubmoduleListItem item2)
 		{
-			var data1 = item1.Data.Name;
-			var data2 = item2.Data.Name;
+			var data1 = item1.DataContext.Name;
+			var data2 = item2.DataContext.Name;
 			return string.Compare(data1, data2);
 		}
 
@@ -39,8 +39,8 @@
 
 		public static int CompareByPath(SubmoduleListItem item1, SubmoduleListItem item2)
 		{
-			var data1 = item1.Data.Path;
-			var data2 = item2.Data.Path;
+			var data1 = item1.DataContext.Path;
+			var data2 = item2.DataContext.Path;
 			return string.Compare(data1, data2);
 		}
 
@@ -62,8 +62,8 @@
 
 		public static int CompareByUrl(SubmoduleListItem item1, SubmoduleListItem item2)
 		{
-			var data1 = item1.Data.Url;
-			var data2 = item2.Data.Url;
+			var data1 = item1.DataContext.Url;
+			var data2 = item2.DataContext.Url;
 			return string.Compare(data1, data2);
 		}
 
@@ -92,13 +92,13 @@
 
 		protected override void OnListBoxAttached()
 		{
-			Data.Deleted += OnDeleted;
+			DataContext.Deleted += OnDeleted;
 			base.OnListBoxAttached();
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnDeleted;
+			DataContext.Deleted -= OnDeleted;
 			base.OnListBoxDetached();
 		}
 
@@ -112,11 +112,11 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgIcon, Data.Name);
+					return measureEventArgs.MeasureImageAndText(ImgIcon, DataContext.Name);
 				case ColumnId.Path:
-					return measureEventArgs.MeasureText(Data.Path);
+					return measureEventArgs.MeasureText(DataContext.Path);
 				case ColumnId.Url:
-					return measureEventArgs.MeasureText(Data.Url);
+					return measureEventArgs.MeasureText(DataContext.Url);
 				default:
 					return Size.Empty;
 			}
@@ -127,20 +127,20 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgIcon, Data.Name);
+					paintEventArgs.PaintImageAndText(ImgIcon, DataContext.Name);
 					break;
 				case ColumnId.Path:
-					paintEventArgs.PaintText(Data.Path);
+					paintEventArgs.PaintText(DataContext.Path);
 					break;
 				case ColumnId.Url:
-					paintEventArgs.PaintText(Data.Url);
+					paintEventArgs.PaintText(DataContext.Url);
 					break;
 			}
 		}
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var menu = new SubmoduleMenu(Data);
+			var menu = new SubmoduleMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

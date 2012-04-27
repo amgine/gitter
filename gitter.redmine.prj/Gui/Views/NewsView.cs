@@ -107,7 +107,7 @@
 			var item = e.Item as NewsListItem;
 			if(item != null)
 			{
-				ShowNewsDetails(item.Data);
+				ShowNewsDetails(item.DataContext);
 			}
 		}
 
@@ -181,7 +181,7 @@
 
 		private bool TestItem(NewsListItem item, NewsSearchOptions search)
 		{
-			var news = item.Data;
+			var news = item.DataContext;
 			if(news.Title.Contains(search.Text)) return true;
 			int id;
 			if(int.TryParse(search.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out id))

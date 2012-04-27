@@ -207,7 +207,7 @@
 		private void _lstFonts_ItemActivated(object sender, ItemEventArgs e)
 		{
 			_blockSampleUpdate = true;
-			var sf = ((FontListItem)e.Item).Data;
+			var sf = ((FontListItem)e.Item).DataContext;
 			_cmbFonts.SelectedItem = sf.Font.FontFamily.Name;
 			_numSize.Value = (decimal)sf.Font.Size;
 			_cmbStyle.SelectedItem = sf.Font.Style;
@@ -219,7 +219,7 @@
 		{
 			foreach(FontListItem item in _lstFonts.Items)
 			{
-				item.Data.Font = item.Font;
+				item.DataContext.Font = item.Font;
 			}
 			return true;
 		}

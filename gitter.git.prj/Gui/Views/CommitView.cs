@@ -294,7 +294,7 @@
 				try
 				{
 					Cursor = Cursors.WaitCursor;
-					item.Data.Unstage();
+					item.DataContext.Unstage();
 					Cursor = Cursors.Default;
 				}
 				catch(GitException exc)
@@ -318,7 +318,7 @@
 				try
 				{
 					Cursor = Cursors.WaitCursor;
-					item.Data.Stage();
+					item.DataContext.Stage();
 					Cursor = Cursors.Default;
 				}
 				catch(GitException exc)

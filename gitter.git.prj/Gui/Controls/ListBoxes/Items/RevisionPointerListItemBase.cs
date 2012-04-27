@@ -18,7 +18,7 @@
 
 		IRevisionPointer IRevisionPointerListItem.RevisionPointer
 		{
-			get { return Data; }
+			get { return DataContext; }
 		}
 
 		#endregion

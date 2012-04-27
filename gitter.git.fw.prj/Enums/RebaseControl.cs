@@ -1,4 +1,4 @@
-﻿namespace gitter.Git.AccessLayer
+﻿namespace gitter.Git
 {
 	public enum RebaseControl
 	{

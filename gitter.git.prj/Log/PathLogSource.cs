@@ -1,19 +1,46 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Collections.Generic;
 
 	public sealed class PathLogSource : LogSourceBase
 	{
+		#region Data
+
 		private readonly IRevisionPointer _revision;
 		private readonly string _path;
+		private bool _followRenames;
 
-		public PathLogSource(IRevisionPointer revision, string path)
+		#endregion
+
+		#region .ctor
+
+		/// <summary>Initializes a new instance of the <see cref="PathLogSource"/> class.</summary>
+		/// <param name="revision">Revision to start history log from.</param>
+		/// <param name="path">Inspected path.</param>
+		/// <param name="followRenames">if set to <c>true</c> follow file renames.</param>
+		public PathLogSource(IRevisionPointer revision, string path, bool followRenames = true)
 		{
 			if(revision == null) throw new ArgumentNullException("repository");
 			if(path == null) throw new ArgumentNullException("path");
 
 			_revision = revision;
 			_path = path;
+			_followRenames = followRenames;
+		}
+
+		#endregion
+
+		#region Properties
+
+		public override Repository Repository
+		{
+			get { return _revision.Repository; }
+		}
+
+		public bool FollowRenames
+		{
+			get { return _followRenames; }
 		}
 
 		public IRevisionPointer Revision
@@ -26,21 +53,25 @@
 			get { return _path; }
 		}
 
+		#endregion
+
+		#region Overrides
+
 		protected override RevisionLog GetLogCore(LogOptions options)
 		{
-			var repository = _revision.Repository;
-			if(repository.IsEmpty)
+			if(Repository.IsEmpty)
 			{
-				return new RevisionLog(repository, new Revision[0]);
+				return new RevisionLog(Repository, new Revision[0]);
 			}
 			else
 			{
 				var parameters = options.GetLogParameters();
 				parameters.References = new[] { Revision.Pointer };
-				parameters.Paths = new[] { _path };
-				var log = repository.Accessor.QueryRevisions(parameters);
-				var res = repository.Revisions.Resolve(log);
-				return new RevisionLog(repository, res);
+				parameters.Paths = new[] { Path };
+				parameters.Follow = FollowRenames;
+				var log = Repository.Accessor.QueryRevisions(parameters);
+				var revisions = Repository.Revisions.Resolve(log);
+				return new RevisionLog(Repository, revisions);
 			}
 		}
 
@@ -87,5 +118,7 @@
 				return _path + " @ " + _revision.Pointer;
 			}
 		}
+
+		#endregion
 	}
 }

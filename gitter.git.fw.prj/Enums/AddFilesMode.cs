@@ -1,4 +1,4 @@
-namespace gitter.Git.AccessLayer
+namespace gitter.Git
 {
 	/// <summary>Add files mode.</summary>
 	public enum AddFilesMode

@@ -23,15 +23,15 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.StagedStatusChanged += OnStagedStatusChanged;
-			Data.StatusChanged += OnStatusChanged; 
+			DataContext.StagedStatusChanged += OnStagedStatusChanged;
+			DataContext.StatusChanged += OnStatusChanged; 
 		}
 
 		/// <summary>Called when item is detached from listbox.</summary>
 		protected override void OnListBoxDetached()
 		{
-			Data.StagedStatusChanged -= OnStagedStatusChanged;
-			Data.StatusChanged -= OnStatusChanged;
+			DataContext.StagedStatusChanged -= OnStagedStatusChanged;
+			DataContext.StatusChanged -= OnStatusChanged;
 			base.OnListBoxDetached();
 		}
 
@@ -59,23 +59,23 @@
 
 		protected override Bitmap GetBitmapIcon()
 		{
-			var path = Data.RelativePath;
+			var path = DataContext.RelativePath;
 			if(path.EndsWith('/'))
 			{
 				return CachedResources.Bitmaps["ImgSubmodule"];
 			}
 			else
 			{
-				return Utility.QueryIcon(Data.FullPath);
+				return Utility.QueryIcon(DataContext.FullPath);
 			}
 		}
 
 		protected override string GetSize()
 		{
-			if(Data.Status == FileStatus.Removed) return "N/A";
+			if(DataContext.Status == FileStatus.Removed) return "N/A";
 			try
 			{
-				var fi = new System.IO.FileInfo(Data.FullPath);
+				var fi = new System.IO.FileInfo(DataContext.FullPath);
 				if(fi.Exists)
 				{
 					var size = fi.Length;
@@ -94,9 +94,9 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Data.Status == FileStatus.Unmerged)
+			if(DataContext.Status == FileStatus.Unmerged)
 			{
-				var mnu = new ConflictedFileMenu(Data);
+				var mnu = new ConflictedFileMenu(DataContext);
 				Utility.MarkDropDownForAutoDispose(mnu);
 				return mnu;
 			}
@@ -121,7 +121,7 @@
 
 		protected override void OnStatusChanged(object sender, EventArgs e)
 		{
-			if(Data.Status != FileStatus.Unmerged)
+			if(DataContext.Status != FileStatus.Unmerged)
 			{
 				RemoveSafe();
 			}

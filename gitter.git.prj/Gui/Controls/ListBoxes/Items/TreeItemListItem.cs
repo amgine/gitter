@@ -131,7 +131,7 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Deleted += OnDeleted;
+			DataContext.Deleted += OnDeleted;
 		}
 
 		/// <summary>
@@ -139,7 +139,7 @@
 		/// </summary>
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnDeleted;
+			DataContext.Deleted -= OnDeleted;
 			base.OnListBoxDetached();
 		}
 
@@ -164,19 +164,19 @@
 
 		private string GetItemText()
 		{
-			return _showFullPath ? Data.RelativePath : Data.Name;
+			return _showFullPath ? DataContext.RelativePath : DataContext.Name;
 		}
 
 		private Bitmap GetItemOverlay()
 		{
-			switch(Data.Status)
+			switch(DataContext.Status)
 			{
 				case FileStatus.Modified:
-					return (Data.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayEdit : ImgOverlayEditStaged;
+					return (DataContext.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayEdit : ImgOverlayEditStaged;
 				case FileStatus.Added:
-					return (Data.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayAdd : ImgOverlayAddStaged;
+					return (DataContext.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayAdd : ImgOverlayAddStaged;
 				case FileStatus.Removed:
-					return (Data.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayDel : ImgOverlayDelStaged;
+					return (DataContext.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayDel : ImgOverlayDelStaged;
 				case FileStatus.Unmerged:
 					return ImgOverlayConflict;
 				default:
@@ -246,15 +246,15 @@
 		/// <returns>Context menu for specified location.</returns>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Data.StagedStatus == StagedStatus.Staged)
+			if(DataContext.StagedStatus == StagedStatus.Staged)
 			{
-				var mnu = new StagedItemMenu(Data);
+				var mnu = new StagedItemMenu(DataContext);
 				Utility.MarkDropDownForAutoDispose(mnu);
 				return mnu;
 			}
-			else if(Data.StagedStatus == StagedStatus.Unstaged)
+			else if(DataContext.StagedStatus == StagedStatus.Unstaged)
 			{
-				var mnu = new UnstagedItemMenu(Data);
+				var mnu = new UnstagedItemMenu(DataContext);
 				Utility.MarkDropDownForAutoDispose(mnu);
 				return mnu;
 			}
@@ -265,7 +265,7 @@
 
 		TreeItem ITreeItemListItem.TreeItem
 		{
-			get { return Data; }
+			get { return DataContext; }
 		}
 
 		#endregion

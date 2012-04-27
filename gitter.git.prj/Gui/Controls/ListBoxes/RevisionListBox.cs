@@ -104,7 +104,7 @@
 				{
 					var revItem = SelectedItems[i] as RevisionListItem;
 					if(revItem != null)
-						revs.Add(revItem.Data);
+						revs.Add(revItem.DataContext);
 				}
 			}
 			var state = new State
@@ -179,7 +179,7 @@
 			if(graphColumn != null)
 			{
 				var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
-				var graph = builder.BuildGraph(revisionLog.Revisions, rev => rev.Parents);
+				var graph = builder.BuildGraph(revisionLog.Revisions, revisionLog.GetParents);
 
 				int graphSize = 0;
 				int currentIndex = -1;
@@ -196,7 +196,7 @@
 						graphSize = graph[i].Length;
 					}
 					revisionListItem.Graph = graph[i];
-					if(revisionListItem.Data == head)
+					if(revisionListItem.DataContext == head)
 					{
 						currentRevisionItem = revisionListItem;
 						currentIndex = i;
@@ -224,7 +224,7 @@
 					var revision = revisionLog.Revisions[i];
 					var revisionListItem = new RevisionListItem(revision);
 					_itemLookupTable.Add(revision, revisionListItem);
-					if(revisionListItem.Data == head)
+					if(revisionListItem.DataContext == head)
 					{
 						currentRevisionItem = revisionListItem;
 						currentIndex = i;
@@ -260,7 +260,7 @@
 			RevisionListItem currentRevisionItem = null;
 			foreach(CustomListBoxItem<Revision> item in Items)
 			{
-				if(item.Data == currentRevision && item.Data != null)
+				if(item.DataContext == currentRevision && item.DataContext != null)
 				{
 					currentRevisionItem = (RevisionListItem)item;
 					currentIndex = id;
@@ -756,7 +756,7 @@
 				var revItem = item as RevisionListItem;
 				if(revItem != null)
 				{
-					revisions.Add(revItem.Data);
+					revisions.Add(revItem.DataContext);
 				}
 			}
 			if(revisions.Count == 2)
@@ -786,7 +786,7 @@
 					if(item != null)
 					{
 						var branch = data.GetData<Branch>();
-						if(branch.Repository == item.Data.Repository)
+						if(branch.Repository == item.DataContext.Repository)
 						{
 							drgevent.Effect = DragDropEffects.Move;
 						}
@@ -822,10 +822,10 @@
 					if(revItem != null)
 					{
 						var branch = data.GetData<Branch>();
-						if(branch.Revision != revItem.Data)
+						if(branch.Revision != revItem.DataContext)
 						{
 							BeginInvoke(new Action<Branch, Revision>(CompleteBranchDragAndDrop),
-								branch, revItem.Data);
+								branch, revItem.DataContext);
 						}
 					}
 				}

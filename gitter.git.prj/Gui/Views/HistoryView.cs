@@ -95,7 +95,7 @@
 			var revItem = e.Item as RevisionListItem;
 			if(revItem != null)
 			{
-				ShowDiffTool(new RevisionChangesDiffSource(revItem.Data));
+				ShowDiffTool(new RevisionChangesDiffSource(revItem.DataContext));
 				return;
 			}
 			var fakeItem = e.Item as FakeRevisionListItem;
@@ -133,7 +133,7 @@
 				if(_lstRevisions.SelectedItems.Count == 0) return null;
 				var item = _lstRevisions.SelectedItems[0] as RevisionListItem;
 				if(item == null) return null;
-				return item.Data;
+				return item.DataContext;
 			}
 		}
 
@@ -144,7 +144,7 @@
 				foreach(var item in _lstRevisions.SelectedItems)
 				{
 					var rli = item as RevisionListItem;
-					if(rli != null) yield return rli.Data;
+					if(rli != null) yield return rli.DataContext;
 				}
 			}
 		}
@@ -325,7 +325,7 @@
 						var revisionItem = item as RevisionListItem;
 						if(revisionItem != null)
 						{
-							ShowContextualDiffTool(new RevisionChangesDiffSource(revisionItem.Data));
+							ShowContextualDiffTool(new RevisionChangesDiffSource(revisionItem.DataContext));
 							return;
 						}
 						var fakeItem = item as FakeRevisionListItem;
@@ -357,7 +357,7 @@
 						var revisionItem2 = item2 as RevisionListItem;
 						if(revisionItem2 == null) return;
 						ShowContextualDiffTool(new RevisionCompareDiffSource(
-							revisionItem1.Data, revisionItem2.Data));
+							revisionItem1.DataContext, revisionItem2.DataContext));
 					}
 					break;
 				default:
@@ -388,7 +388,7 @@
 
 		private bool TestItem(RevisionListItem item, HistorySearchOptions search)
 		{
-			var rev = item.Data;
+			var rev = item.DataContext;
 			if(rev.Subject.Contains(search.Text)) return true;
 			if(rev.Body.Contains(search.Text)) return true;
 			if(rev.Author.Name.Contains(search.Text)) return true;

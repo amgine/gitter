@@ -18,14 +18,14 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Deleted += OnDeleted;
-			Data.Revived += OnRevived;
+			DataContext.Deleted += OnDeleted;
+			DataContext.Revived += OnRevived;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnDeleted;
-			Data.Revived -= OnRevived;
+			DataContext.Deleted -= OnDeleted;
+			DataContext.Revived -= OnRevived;
 			base.OnListBoxDetached();
 		}
 

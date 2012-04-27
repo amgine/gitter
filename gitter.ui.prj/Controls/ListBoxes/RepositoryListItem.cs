@@ -37,18 +37,18 @@
 		{
 			get
 			{
-				if(string.IsNullOrEmpty(Data.Description))
+				if(string.IsNullOrEmpty(DataContext.Description))
 				{
-					if(Data.Path.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+					if(DataContext.Path.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
 					{
-						return Path.GetFileName(Data.Path.Substring(0, Data.Path.Length - 1));
+						return Path.GetFileName(DataContext.Path.Substring(0, DataContext.Path.Length - 1));
 					}
 					else
 					{
-						return Path.GetFileName(Data.Path);
+						return Path.GetFileName(DataContext.Path);
 					}
 				}
-				return Data.Description;
+				return DataContext.Description;
 			}
 		}
 
@@ -57,9 +57,9 @@
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					return measureEventArgs.MeasureImageAndText(ImgRepositorySmall, Data.Path);
+					return measureEventArgs.MeasureImageAndText(ImgRepositorySmall, DataContext.Path);
 				case 1:
-					return measureEventArgs.MeasureImageAndText(ImgRepositoryLarge, Data.Path);
+					return measureEventArgs.MeasureImageAndText(ImgRepositoryLarge, DataContext.Path);
 				default:
 					return Size.Empty;
 			}
@@ -70,7 +70,7 @@
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
-					paintEventArgs.PaintImageAndText(ImgRepositorySmall, Data.Path, paintEventArgs.Brush, PathStringFormat);
+					paintEventArgs.PaintImageAndText(ImgRepositorySmall, DataContext.Path, paintEventArgs.Brush, PathStringFormat);
 					break;
 				case 1:
 					paintEventArgs.PaintImage(ImgRepositoryLarge);
@@ -80,7 +80,7 @@
 					cy += 16;
 					var rc = new Rectangle(36, cy, paintEventArgs.Bounds.Width - 42, 16);
 					GitterApplication.TextRenderer.DrawText(
-						paintEventArgs.Graphics, Data.Path, paintEventArgs.Font, SystemBrushes.GrayText, rc, PathStringFormat);
+						paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, SystemBrushes.GrayText, rc, PathStringFormat);
 					break;
 			}
 		}

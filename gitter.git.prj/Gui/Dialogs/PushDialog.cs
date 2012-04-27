@@ -52,7 +52,7 @@
 			{
 				foreach(BranchListItem item in _lstReferences.Items)
 				{
-					if(item.Data == _repository.Head.Pointer)
+					if(item.DataContext == _repository.Head.Pointer)
 					{
 						item.CheckedState = CheckedState.Checked;
 						break;
@@ -83,7 +83,7 @@
 			var list = new List<Branch>(_lstReferences.Items.Count);
 			foreach(BranchListItem item in _lstReferences.Items)
 			{
-				if(item.CheckedState == CheckedState.Checked) list.Add(item.Data);
+				if(item.CheckedState == CheckedState.Checked) list.Add(item.DataContext);
 			}
 			return list;
 		}

@@ -27,7 +27,7 @@
 
 			_lstReflog.ItemActivated += (sender, e) =>
 				{
-					ShowDiffTool(new RevisionChangesDiffSource(((ReflogRecordListItem)e.Item).Data.Revision));
+					ShowDiffTool(new RevisionChangesDiffSource(((ReflogRecordListItem)e.Item).DataContext.Revision));
 				};
 
 			_lstReflog.PreviewKeyDown += OnKeyDown;
@@ -62,7 +62,7 @@
 						var item = _lstReflog.SelectedItems[0] as ReflogRecordListItem;
 						if(item != null)
 						{
-							ShowContextualDiffTool(new RevisionChangesDiffSource(item.Data.Revision));
+							ShowContextualDiffTool(new RevisionChangesDiffSource(item.DataContext.Revision));
 						}
 					}
 					break;

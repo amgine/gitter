@@ -40,7 +40,7 @@
 				case ColumnId.Name:
 					var rli = Parent as RemoteListItem;
 					return measureEventArgs.MeasureImageAndText(ImgBranchRemote,
-						rli != null ? Data.Name.Substring(rli.Data.Name.Length + 1) : Data.Name);
+						rli != null ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
 				default:
 					return base.OnMeasureSubItem(measureEventArgs);
 			}
@@ -53,7 +53,7 @@
 				case ColumnId.Name:
 					var rli = Parent as RemoteListItem;
 					paintEventArgs.PaintImageAndText(ImgBranchRemote,
-						rli != null ? Data.Name.Substring(rli.Data.Name.Length + 1) : Data.Name);
+						rli != null ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
 					break;
 				default:
 					base.OnPaintSubItem(paintEventArgs);
@@ -63,7 +63,7 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new BranchMenu(Data);
+			var mnu = new BranchMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}

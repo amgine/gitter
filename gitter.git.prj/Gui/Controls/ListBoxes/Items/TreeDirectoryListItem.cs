@@ -42,7 +42,7 @@
 			{
 				case TreeDirectoryListItemType.ShowFilesAndFolders:
 					{
-						var binding = new TreeBinding(Items, Data, false);
+						var binding = new TreeBinding(Items, DataContext, false);
 						if(_itemActivated != null)
 						{
 							binding.ItemActivated += _itemActivated;
@@ -53,7 +53,7 @@
 					break;
 				case TreeDirectoryListItemType.ShowFoldersOnly:
 					{
-						var binding = new TreeDirectoriesBinding(Items, Data, false);
+						var binding = new TreeDirectoriesBinding(Items, DataContext, false);
 						if(_itemActivated != null)
 						{
 							binding.ItemActivated += _itemActivated;

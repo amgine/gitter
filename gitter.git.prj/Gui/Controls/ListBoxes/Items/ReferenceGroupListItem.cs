@@ -35,7 +35,7 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					switch(Data)
+					switch(DataContext)
 					{
 						case ReferenceType.LocalBranch:
 							return measureEventArgs.MeasureImageAndText(
@@ -58,7 +58,7 @@
 		{
 			if(paintEventArgs.SubItemId == (int)ColumnId.Name)
 			{
-				switch(Data)
+				switch(DataContext)
 				{
 					case ReferenceType.LocalBranch:
 						paintEventArgs.PaintImageAndText(
@@ -85,8 +85,8 @@
 			if(_repository != null)
 			{
 				menu = new ContextMenuStrip();
-				menu.Items.Add(GuiItemFactory.GetRefreshReferencesItem<ToolStripMenuItem>(_repository, Data, Resources.StrRefresh));
-				switch(Data)
+				menu.Items.Add(GuiItemFactory.GetRefreshReferencesItem<ToolStripMenuItem>(_repository, DataContext, Resources.StrRefresh));
+				switch(DataContext)
 				{
 					case ReferenceType.LocalBranch:
 						menu.Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(_repository));

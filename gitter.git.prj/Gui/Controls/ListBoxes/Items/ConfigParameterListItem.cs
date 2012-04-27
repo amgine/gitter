@@ -18,8 +18,8 @@
 
 		public static int CompareByName(ConfigParameterListItem item1, ConfigParameterListItem item2)
 		{
-			var data1 = item1.Data.Name;
-			var data2 = item2.Data.Name;
+			var data1 = item1.DataContext.Name;
+			var data2 = item2.DataContext.Name;
 			return string.Compare(data1, data2);
 		}
 
@@ -37,8 +37,8 @@
 
 		public static int CompareByValue(ConfigParameterListItem item1, ConfigParameterListItem item2)
 		{
-			var data1 = item1.Data.Value;
-			var data2 = item2.Data.Value;
+			var data1 = item1.DataContext.Value;
+			var data2 = item2.DataContext.Value;
 			return string.Compare(data1, data2);
 		}
 
@@ -72,15 +72,15 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Deleted += OnDeleted;
-			Data.ValueChanged += OnValueChanged;
+			DataContext.Deleted += OnDeleted;
+			DataContext.ValueChanged += OnValueChanged;
 		}
 
 		protected override void OnListBoxDetached()
 		{
 			base.OnListBoxDetached();
-			Data.Deleted -= OnDeleted;
-			Data.ValueChanged -= OnValueChanged;
+			DataContext.Deleted -= OnDeleted;
+			DataContext.ValueChanged -= OnValueChanged;
 		}
 
 		private void OnDeleted(object sender, EventArgs e)
@@ -100,7 +100,7 @@
 			var column = ListBox.Columns[cid];
 			if(x > column.Left && x < column.Left + column.Width)
 			{
-				var editor = StartTextEditor(column, Data.Value);
+				var editor = StartTextEditor(column, DataContext.Value);
 				editor.Validating += OnEditorValidating;
 			}
 		}
@@ -109,7 +109,7 @@
 		{
 			var editor = (CustomListBoxTextEditor)sender;
 			editor.Validating -= OnEditorValidating;
-			Data.Value = editor.Text.Trim();
+			DataContext.Value = editor.Text.Trim();
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -117,9 +117,9 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgConfig, Data.Name);
+					return measureEventArgs.MeasureImageAndText(ImgConfig, DataContext.Name);
 				case ColumnId.Value:
-					return ConfigParameterValueColumn.OnMeasureSubItem(measureEventArgs, Data.Value);
+					return ConfigParameterValueColumn.OnMeasureSubItem(measureEventArgs, DataContext.Value);
 				default:
 					return Size.Empty;
 			}
@@ -130,10 +130,10 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgConfig, Data.Name);
+					paintEventArgs.PaintImageAndText(ImgConfig, DataContext.Name);
 					break;
 				case ColumnId.Value:
-					ConfigParameterValueColumn.OnPaintSubItem(paintEventArgs, Data.Value);
+					ConfigParameterValueColumn.OnPaintSubItem(paintEventArgs, DataContext.Value);
 					break;
 			}
 		}

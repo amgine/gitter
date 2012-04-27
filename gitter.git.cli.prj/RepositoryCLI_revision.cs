@@ -45,7 +45,7 @@
 			}
 		}
 
-		private void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<CommandArgument> args)
+		private void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<CommandArgument> args, CommandArgument format)
 		{
 			#region Commit Limiting
 
@@ -151,6 +151,10 @@
 			{
 				args.Add(LogCommand.SimplifyByDecoration());
 			}
+			if(parameters.EnableParentsRewriting)
+			{
+				args.Add(LogCommand.Parents());
+			}
 
 			#endregion
 
@@ -176,7 +180,10 @@
 			#region Formatting
 
 			args.Add(LogCommand.NullTerminate());
-			args.Add(GetRevisionFormatArgument());
+			if(format != null)
+			{
+				args.Add(format);
+			}
 
 			#endregion
 
@@ -203,7 +210,6 @@
 			}
 		}
 
-
 		/// <summary>Get revision list.</summary>
 		/// <param name="parameters"><see cref="QueryRevisionsParameters"/>.</param>
 		/// <returns>List of revisions.</returns>
@@ -213,7 +219,7 @@
 			if(parameters == null) throw new ArgumentNullException("parameters");
 
 			var args = new List<CommandArgument>(30);
-			InsertQueryRevisionsParameters(parameters, args);
+			InsertQueryRevisionsParameters(parameters, args, GetRevisionFormatArgument());
 			var cmd = new LogCommand(args);
 			var output = _executor.ExecCommand(cmd);
 			output.ThrowOnBadReturnCode();
@@ -235,6 +241,42 @@
 			}
 
 			return list;
+		}
+
+		/// <summary>Get revision graph.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionsParameters"/>.</param>
+		/// <returns>Revision graph.</returns>
+		public IList<RevisionGraphData> QueryRevisionGraph(QueryRevisionsParameters parameters)
+		{
+			var args = new List<CommandArgument>(30);
+			InsertQueryRevisionsParameters(parameters, args, LogCommand.Format("%H%n%P"));
+			var cmd = new LogCommand(args);
+			var output = _executor.ExecCommand(cmd);
+			output.ThrowOnBadReturnCode();
+
+			var parser = new GitParser(output.Output);
+			var result = new List<RevisionGraphData>();
+			while(!parser.IsAtEndOfString)
+			{
+				var sha1 = parser.ReadString(40, 1);
+				int end = parser.FindNullOrEndOfString();
+				int numParents = (end - parser.Position + 1) / 41;
+				if(numParents == 0)
+				{
+					parser.Position = end + 1;
+					result.Add(new RevisionGraphData(sha1, new string[0]));
+				}
+				else
+				{
+					var parents = new List<string>(numParents);
+					for(int i = 0; i < numParents; ++i)
+					{
+						parents.Add(parser.ReadString(40, 1));
+					}
+					result.Add(new RevisionGraphData(sha1, parents));
+				}
+			}
+			return result;
 		}
 
 		public RevisionData QueryRevision(QueryRevisionParameters parameters)

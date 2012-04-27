@@ -107,7 +107,7 @@
 				{
 					if(item.IsChecked)
 					{
-						yield return item.Data;
+						yield return item.DataContext;
 					}
 				}
 			}

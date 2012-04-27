@@ -99,7 +99,7 @@
 		private void OnItemActivated(object sender, EventArgs e)
 		{
 			var item = (CustomListBoxItem<TObject>)sender;
-			InvokeItemActivated(item, item.Data);
+			InvokeItemActivated(item, item.DataContext);
 		}
 
 		#endregion

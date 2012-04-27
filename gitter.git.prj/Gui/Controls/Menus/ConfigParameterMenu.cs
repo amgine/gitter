@@ -16,7 +16,7 @@
 		{
 			if(listItem == null) throw new ArgumentNullException("listItem");
 			_listItem = listItem;
-			_parameter = listItem.Data;
+			_parameter = listItem.DataContext;
 			if(_parameter.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "ConfigParameter"), "listItem");
 			
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(_parameter));

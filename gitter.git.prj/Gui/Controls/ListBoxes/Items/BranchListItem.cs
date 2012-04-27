@@ -36,13 +36,13 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Renamed += OnRenamed;
+			DataContext.Renamed += OnRenamed;
 		}
 
 		protected override void OnListBoxDetached()
 		{
 			base.OnListBoxDetached();
-			Data.Renamed -= OnRenamed;
+			DataContext.Renamed -= OnRenamed;
 		}
 
 		private void OnRenamed(object sender, EventArgs e)
@@ -58,7 +58,7 @@
 		/// <returns>Context menu for specified location.</returns>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new BranchMenu(Data);
+			var mnu = new BranchMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}

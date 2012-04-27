@@ -71,7 +71,7 @@
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
-			var b = ((BranchListItem)e.Item).Data;
+			var b = ((BranchListItem)e.Item).DataContext;
 			_selectedBranch = b;
 			UpdateButton();
 		}

@@ -27,8 +27,8 @@
 
 		private int Compare(IssueListItem item1, IssueListItem item2)
 		{
-			var data1 = item1.Data.CustomFields[_field];
-			var data2 = item2.Data.CustomFields[_field];
+			var data1 = item1.DataContext.CustomFields[_field];
+			var data2 = item2.DataContext.CustomFields[_field];
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;

@@ -30,55 +30,55 @@
 
 		private void UpdateImage()
 		{
-			if(Data.Message.StartsWith("fetch"))
+			if(DataContext.Message.StartsWith("fetch"))
 			{
 				_image = CachedResources.Bitmaps["ImgFetch"];
 			}
-			else if(Data.Message.StartsWith("pull"))
+			else if(DataContext.Message.StartsWith("pull"))
 			{
 				_image = CachedResources.Bitmaps["ImgPull"];
 			}
-			else if(Data.Message.StartsWith("branch: Created "))
+			else if(DataContext.Message.StartsWith("branch: Created "))
 			{
 				_image = CachedResources.Bitmaps["ImgBranch"];
 			}
-			else if(Data.Message.StartsWith("branch: Reset "))
+			else if(DataContext.Message.StartsWith("branch: Reset "))
 			{
 				_image = CachedResources.Bitmaps["ImgReset"];
 			}
-			else if(Data.Message.StartsWith("reset:"))
+			else if(DataContext.Message.StartsWith("reset:"))
 			{
 				_image = CachedResources.Bitmaps["ImgReset"];
 			}
-			else if(Data.Message.StartsWith("update by push"))
+			else if(DataContext.Message.StartsWith("update by push"))
 			{
 				_image = CachedResources.Bitmaps["ImgPush"];
 			}
-			else if(Data.Message.StartsWith("commit"))
+			else if(DataContext.Message.StartsWith("commit"))
 			{
 				_image = CachedResources.Bitmaps["ImgCommit"];
 			}
-			else if(Data.Message.StartsWith("merge"))
+			else if(DataContext.Message.StartsWith("merge"))
 			{
 				_image = CachedResources.Bitmaps["ImgMerge"];
 			}
-			else if(Data.Message.StartsWith("rebase"))
+			else if(DataContext.Message.StartsWith("rebase"))
 			{
 				_image = CachedResources.Bitmaps["ImgRebase"];
 			}
-			else if(Data.Message.StartsWith("checkout:"))
+			else if(DataContext.Message.StartsWith("checkout:"))
 			{
 				_image = CachedResources.Bitmaps["ImgCheckout"];
 			}
-			else if(Data.Message.StartsWith("cherry-pick"))
+			else if(DataContext.Message.StartsWith("cherry-pick"))
 			{
 				_image = CachedResources.Bitmaps["ImgCherryPick"];
 			}
-			else if(Data.Message.StartsWith("revert"))
+			else if(DataContext.Message.StartsWith("revert"))
 			{
 				_image = CachedResources.Bitmaps["ImgRevert"];
 			}
-			else if(Data.Message.EndsWith(": updating HEAD"))
+			else if(DataContext.Message.EndsWith(": updating HEAD"))
 			{
 				_image = CachedResources.Bitmaps["ImgReset"];
 			}
@@ -91,14 +91,14 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Deleted += OnDeleted;
-			Data.MessageChanged += OnMessageChanged;
+			DataContext.Deleted += OnDeleted;
+			DataContext.MessageChanged += OnMessageChanged;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Deleted -= OnDeleted;
-			Data.MessageChanged -= OnMessageChanged;
+			DataContext.Deleted -= OnDeleted;
+			DataContext.MessageChanged -= OnMessageChanged;
 			base.OnListBoxDetached();
 		}
 
@@ -129,28 +129,28 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Name);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Name);
 				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.TreeHash);
+					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHash);
 				case ColumnId.Name:
 				case ColumnId.Message:
-					return measureEventArgs.MeasureImageAndText(_image, Data.Message);
+					return measureEventArgs.MeasureImageAndText(_image, DataContext.Message);
 				case ColumnId.Subject:
-					return SubjectColumn.OnMeasureSubItem(measureEventArgs, Data.Revision, null);
+					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision, null);
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
-					return CommitDateColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.CommitDate);
+					return CommitDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.CommitDate);
 				case ColumnId.Committer:
-					return CommitterColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Committer);
+					return CommitterColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Committer);
 				case ColumnId.CommitterEmail:
-					return CommitterEmailColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Committer.Email);
+					return CommitterEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Committer.Email);
 				case ColumnId.AuthorDate:
-					return AuthorDateColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.AuthorDate);
+					return AuthorDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.AuthorDate);
 				case ColumnId.User:
 				case ColumnId.Author:
-					return AuthorColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Author);
+					return AuthorColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Author);
 				case ColumnId.AuthorEmail:
-					return AuthorEmailColumn.OnMeasureSubItem(measureEventArgs, Data.Revision.Author.Email);
+					return AuthorEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Author.Email);
 				default:
 					return Size.Empty;
 			}
@@ -161,37 +161,37 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Name);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Name);
 					break;
 				case ColumnId.TreeHash:
-					TreeHashColumn.OnPaintSubItem(paintEventArgs, Data.Revision.TreeHash);
+					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHash);
 					break;
 				case ColumnId.Name:
 				case ColumnId.Message:
-					paintEventArgs.PaintImageAndText(_image, Data.Message);
+					paintEventArgs.PaintImageAndText(_image, DataContext.Message);
 					break;
 				case ColumnId.Subject:
-					SubjectColumn.OnPaintSubItem(paintEventArgs, Data.Revision, null, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
+					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision, null, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
 					break;
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
-					CommitDateColumn.OnPaintSubItem(paintEventArgs, Data.Revision.CommitDate);
+					CommitDateColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.CommitDate);
 					break;
 				case ColumnId.Committer:
-					CommitterColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Committer);
+					CommitterColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Committer);
 					break;
 				case ColumnId.CommitterEmail:
-					CommitterEmailColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Committer.Email);
+					CommitterEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Committer.Email);
 					break;
 				case ColumnId.AuthorDate:
-					AuthorDateColumn.OnPaintSubItem(paintEventArgs, Data.Revision.AuthorDate);
+					AuthorDateColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.AuthorDate);
 					break;
 				case ColumnId.User:
 				case ColumnId.Author:
-					AuthorColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Author);
+					AuthorColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Author);
 					break;
 				case ColumnId.AuthorEmail:
-					AuthorEmailColumn.OnPaintSubItem(paintEventArgs, Data.Revision.Author.Email);
+					AuthorEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Author.Email);
 					break;
 			}
 		}
@@ -201,7 +201,7 @@
 		/// <returns>Context menu for specified location.</returns>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var menu = new ReflogRecordMenu(Data);
+			var menu = new ReflogRecordMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

@@ -23,11 +23,11 @@
 				case LogListBoxColumnId.Type:
 					return new Size(16, 16);
 				case LogListBoxColumnId.Timestamp:
-					return measureEventArgs.MeasureText(Data.Timestamp.FormatISO8601());
+					return measureEventArgs.MeasureText(DataContext.Timestamp.FormatISO8601());
 				case LogListBoxColumnId.Source:
-					return measureEventArgs.MeasureText(Data.Source);
+					return measureEventArgs.MeasureText(DataContext.Source);
 				case LogListBoxColumnId.Message:
-					return measureEventArgs.MeasureText(Data.Message);
+					return measureEventArgs.MeasureText(DataContext.Message);
 				case LogListBoxColumnId.Exception:
 					return new Size(16, 16);
 				default:
@@ -40,21 +40,29 @@
 			switch((LogListBoxColumnId)paintEventArgs.SubItemId)
 			{
 				case LogListBoxColumnId.Type:
-					paintEventArgs.PaintImage(Data.Type.Image);
+					paintEventArgs.PaintImage(DataContext.Type.Image);
 					break;
 				case LogListBoxColumnId.Timestamp:
-					paintEventArgs.PaintText(Data.Timestamp.FormatISO8601());
+					paintEventArgs.PaintText(DataContext.Timestamp.FormatISO8601());
 					break;
 				case LogListBoxColumnId.Source:
-					paintEventArgs.PaintText(Data.Source);
+					paintEventArgs.PaintText(DataContext.Source);
 					break;
 				case LogListBoxColumnId.Message:
-					paintEventArgs.PaintText(Data.Message);
+					paintEventArgs.PaintText(DataContext.Message);
 					break;
 				case LogListBoxColumnId.Exception:
 					paintEventArgs.PaintImage(null);
 					break;
 			}
+		}
+
+		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+		{
+			var menu = new ContextMenuStrip();
+			menu.Items.Add(new ToolStripMenuItem("Copy to Clipboard", null, (s, e) => Clipboard.SetText(DataContext.Message)));
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

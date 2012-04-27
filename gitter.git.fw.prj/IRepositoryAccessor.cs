@@ -51,6 +51,11 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		IList<RevisionData> QueryRevisions(QueryRevisionsParameters parameters);
 
+		/// <summary>Get revision graph.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionsParameters"/>.</param>
+		/// <returns>Revision graph.</returns>
+		IList<RevisionGraphData> QueryRevisionGraph(QueryRevisionsParameters parameters);
+
 		/// <summary>Get reflog.</summary>
 		/// <param name="parameters"><see cref="QueryReflogParameters"/>.</param>
 		/// <returns>List of reflog records.</returns>

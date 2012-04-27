@@ -18,8 +18,8 @@
 
 		public static int CompareById(NewsListItem item1, NewsListItem item2)
 		{
-			var data1 = item1.Data.Id;
-			var data2 = item2.Data.Id;
+			var data1 = item1.DataContext.Id;
+			var data2 = item2.DataContext.Id;
 			return data1.CompareTo(data2);
 		}
 
@@ -34,8 +34,8 @@
 
 		public static int CompareByCreatedOn(NewsListItem item1, NewsListItem item2)
 		{
-			var data1 = item1.Data.CreatedOn;
-			var data2 = item2.Data.CreatedOn;
+			var data1 = item1.DataContext.CreatedOn;
+			var data2 = item2.DataContext.CreatedOn;
 			return data1.CompareTo(data2);
 		}
 
@@ -50,8 +50,8 @@
 
 		public static int CompareByAuthor(NewsListItem item1, NewsListItem item2)
 		{
-			var data1 = item1.Data.Author;
-			var data2 = item2.Data.Author;
+			var data1 = item1.DataContext.Author;
+			var data2 = item2.DataContext.Author;
 			if(data1 == data2) return 0;
 			if(data1 == null) return 1;
 			else if(data2 == null) return -1;
@@ -69,8 +69,8 @@
 
 		public static int CompareByTitle(NewsListItem item1, NewsListItem item2)
 		{
-			var data1 = item1.Data.Title;
-			var data2 = item2.Data.Title;
+			var data1 = item1.DataContext.Title;
+			var data2 = item2.DataContext.Title;
 			return string.Compare(data1, data2);
 		}
 
@@ -94,12 +94,12 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.PropertyChanged += OnNewsPropertyChanged;
+			DataContext.PropertyChanged += OnNewsPropertyChanged;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.PropertyChanged -= OnNewsPropertyChanged;
+			DataContext.PropertyChanged -= OnNewsPropertyChanged;
 			base.OnListBoxDetached();
 		}
 
@@ -171,18 +171,18 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					return measureEventArgs.MeasureText(Data.Id.ToString());
+					return measureEventArgs.MeasureText(DataContext.Id.ToString());
 				case ColumnId.Name:
 				case ColumnId.Title:
-					return measureEventArgs.MeasureText(Data.Title);
+					return measureEventArgs.MeasureText(DataContext.Title);
 				case ColumnId.Summary:
-					return measureEventArgs.MeasureText(Data.Summary);
+					return measureEventArgs.MeasureText(DataContext.Summary);
 				case ColumnId.Project:
-					return MeasureOptionalContent(Data.Project, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Project, measureEventArgs);
 				case ColumnId.Author:
-					return MeasureOptionalContent(Data.Author, measureEventArgs);
+					return MeasureOptionalContent(DataContext.Author, measureEventArgs);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(Data.CreatedOn.ToString());
+					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
 			}
 			return base.MeasureSubItem(measureEventArgs);
 		}
@@ -192,30 +192,30 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					paintEventArgs.PaintText(Data.Id.ToString());
+					paintEventArgs.PaintText(DataContext.Id.ToString());
 					break;
 				case ColumnId.Name:
 				case ColumnId.Title:
-					paintEventArgs.PaintText(Data.Title);
+					paintEventArgs.PaintText(DataContext.Title);
 					break;
 				case ColumnId.Summary:
-					paintEventArgs.PaintText(Data.Summary);
+					paintEventArgs.PaintText(DataContext.Summary);
 					break;
 				case ColumnId.Author:
-					PaintOptionalContent(Data.Author, paintEventArgs);
+					PaintOptionalContent(DataContext.Author, paintEventArgs);
 					break;
 				case ColumnId.Project:
-					PaintOptionalContent(Data.Project, paintEventArgs);
+					PaintOptionalContent(DataContext.Project, paintEventArgs);
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(Data.CreatedOn.ToString());
+					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
 					break;
 			}
 		}
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var menu = new NewsMenu(Data);
+			var menu = new NewsMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

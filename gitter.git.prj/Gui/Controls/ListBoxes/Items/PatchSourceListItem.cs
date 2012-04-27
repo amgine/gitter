@@ -22,7 +22,7 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgPatch, Data.DisplayName);
+					paintEventArgs.PaintImageAndText(ImgPatch, DataContext.DisplayName);
 					break;
 			}
 		}
@@ -32,7 +32,7 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgPatch, Data.DisplayName);
+					return measureEventArgs.MeasureImageAndText(ImgPatch, DataContext.DisplayName);
 				default:
 					return Size.Empty;
 			}

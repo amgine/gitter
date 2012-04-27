@@ -19,10 +19,10 @@
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					if(Data.Icon != null)
-						return measureEventArgs.MeasureImageAndText(Data.Icon, Data.Name);
+					if(DataContext.Icon != null)
+						return measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.Name);
 					else
-						return measureEventArgs.MeasureText(Data.Name);
+						return measureEventArgs.MeasureText(DataContext.Name);
 				default:
 					return Size.Empty;
 			}
@@ -33,10 +33,10 @@
 			switch(paintEventArgs.Column.Id)
 			{
 				case 0:
-					if(Data.Icon != null)
-						paintEventArgs.PaintImageAndText(Data.Icon, Data.Name);
+					if(DataContext.Icon != null)
+						paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.Name);
 					else
-						paintEventArgs.PaintText(Data.Name);
+						paintEventArgs.PaintText(DataContext.Name);
 					break;
 			}
 		}

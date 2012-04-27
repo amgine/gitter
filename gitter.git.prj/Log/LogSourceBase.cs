@@ -17,6 +17,8 @@ namespace gitter.Git
 		{
 		}
 
+		public abstract Repository Repository { get; }
+
 		protected abstract RevisionLog GetLogCore(LogOptions options);
 
 		public IAsyncFunc<RevisionLog> GetLogAsync()
@@ -57,6 +59,12 @@ namespace gitter.Git
 			return GetLogCore(options);
 		}
 
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
 		public override string ToString()
 		{
 			return "log";

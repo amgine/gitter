@@ -1,4 +1,4 @@
-namespace gitter.Git.AccessLayer
+namespace gitter.Git
 {
 	/// <summary>Checkout file mode.</summary>
 	public enum CheckoutFileMode

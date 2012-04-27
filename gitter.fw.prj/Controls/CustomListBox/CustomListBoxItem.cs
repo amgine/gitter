@@ -1003,7 +1003,7 @@
 		}
 
 		/// <summary>Item associated data.</summary>
-		public TData Data
+		public TData DataContext
 		{
 			get { return _data; }
 			set { _data = value; }

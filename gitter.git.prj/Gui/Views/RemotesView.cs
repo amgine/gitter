@@ -37,7 +37,7 @@
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
-			var remote = ((CustomListBoxItem<Remote>)e.Item).Data;
+			var remote = ((CustomListBoxItem<Remote>)e.Item).DataContext;
 			using(var dlg = new RemoteReferencesDialog(remote))
 			{
 				dlg.Run(this);

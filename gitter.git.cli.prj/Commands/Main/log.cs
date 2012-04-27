@@ -82,6 +82,12 @@
 			return new CommandArgument("--first-parent");
 		}
 
+		/// <summary>Print also the parents of the commit (in the form "commit parent..."). Also enables parent rewriting.</summary>
+		public static CommandArgument Parents()
+		{
+			return new CommandArgument("--parents");
+		}
+
 		/// <summary>Print only merge commits.</summary>
 		public static CommandArgument Merges()
 		{

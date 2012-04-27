@@ -27,7 +27,7 @@
 			{
 				if(measureEventArgs.ColumnIndex == 0)
 				{
-					return measureEventArgs.MeasureImageAndText(ImgFolder, Data);
+					return measureEventArgs.MeasureImageAndText(ImgFolder, DataContext);
 				}
 				return Size.Empty;
 			}
@@ -36,7 +36,7 @@
 			{
 				if(paintEventArgs.ColumnIndex == 0)
 				{
-					paintEventArgs.PaintImageAndText(ImgFolder, Data);
+					paintEventArgs.PaintImageAndText(ImgFolder, DataContext);
 				}
 			}
 		}

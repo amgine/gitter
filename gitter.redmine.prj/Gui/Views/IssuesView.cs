@@ -157,7 +157,7 @@
 			var item = e.Item as IssueListItem;
 			if(item != null)
 			{
-				ShowIssueDetails(item.Data);
+				ShowIssueDetails(item.DataContext);
 			}
 		}
 
@@ -231,7 +231,7 @@
 
 		private bool TestItem(IssueListItem item, IssuesSearchOptions search)
 		{
-			var issue = item.Data;
+			var issue = item.DataContext;
 			if(issue.Subject.Contains(search.Text)) return true;
 			int id;
 			if(int.TryParse(search.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out id))

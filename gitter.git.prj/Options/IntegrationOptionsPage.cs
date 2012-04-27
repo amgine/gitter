@@ -28,7 +28,7 @@
 			{
 				if((ColumnId)measureEventArgs.SubItemId == ColumnId.Name)
 				{
-					return measureEventArgs.MeasureImageAndText(Data.Icon, Data.DisplayText);
+					return measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.DisplayText);
 				}
 				return Size.Empty;
 			}
@@ -37,7 +37,7 @@
 			{
 				if((ColumnId)paintEventArgs.SubItemId == ColumnId.Name)
 				{
-					paintEventArgs.PaintImageAndText(Data.Icon, Data.DisplayText);
+					paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.DisplayText);
 				}
 			}
 		}
@@ -64,7 +64,7 @@
 		{
 			foreach(FeatureItem item in _lstFeatures.Items)
 			{
-				item.Data.Enabled = item.IsChecked;
+				item.DataContext.Enabled = item.IsChecked;
 			}
 			return true;
 		}

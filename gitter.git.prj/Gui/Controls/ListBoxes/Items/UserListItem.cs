@@ -19,8 +19,8 @@
 
 		public static int CompareByName(UserListItem item1, UserListItem item2)
 		{
-			var data1 = item1.Data.Name;
-			var data2 = item2.Data.Name;
+			var data1 = item1.DataContext.Name;
+			var data2 = item2.DataContext.Name;
 			return string.Compare(data1, data2);
 		}
 
@@ -38,8 +38,8 @@
 
 		public static int CompareByEmail(UserListItem item1, UserListItem item2)
 		{
-			var data1 = item1.Data.Email;
-			var data2 = item2.Data.Email;
+			var data1 = item1.DataContext.Email;
+			var data2 = item2.DataContext.Email;
 			return string.Compare(data1, data2);
 		}
 
@@ -57,8 +57,8 @@
 
 		public static int CompareByCommitCount(UserListItem item1, UserListItem item2)
 		{
-			var data1 = item1.Data.Commits;
-			var data2 = item2.Data.Commits;
+			var data1 = item1.DataContext.Commits;
+			var data2 = item2.DataContext.Commits;
 			return data1 > data2 ? 1 : (data1 == data2 ? 0 : -1);
 		}
 
@@ -92,12 +92,12 @@
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			Data.Avatar.Updated += OnDataAvatarUpdated;
+			DataContext.Avatar.Updated += OnDataAvatarUpdated;
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			Data.Avatar.Updated -= OnDataAvatarUpdated;
+			DataContext.Avatar.Updated -= OnDataAvatarUpdated;
 			base.OnListBoxDetached();
 		}
 
@@ -112,12 +112,12 @@
 			{
 				case ColumnId.Name:
 				case ColumnId.Committer:
-					return measureEventArgs.MeasureImageAndText(ImgIcon, Data.Name);
+					return measureEventArgs.MeasureImageAndText(ImgIcon, DataContext.Name);
 				case ColumnId.Email:
 				case ColumnId.CommitterEmail:
-					return EmailColumn.OnMeasureSubItem(measureEventArgs, Data.Email);
+					return EmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Email);
 				case ColumnId.Commits:
-					return measureEventArgs.MeasureText(Data.Commits.ToString());
+					return measureEventArgs.MeasureText(DataContext.Commits.ToString());
 				default:
 					return Size.Empty;
 			}
@@ -138,7 +138,7 @@
 						}
 						else
 						{
-							var avatar = Data.Avatar;
+							var avatar = DataContext.Avatar;
 							var imgAvatar = avatar.Image;
 							if(imgAvatar == null)
 							{
@@ -155,21 +155,21 @@
 					{
 						image = ImgIcon;
 					}
-					paintEventArgs.PaintImageAndText(image, Data.Name);
+					paintEventArgs.PaintImageAndText(image, DataContext.Name);
 					break;
 				case ColumnId.Email:
 				case ColumnId.CommitterEmail:
-					paintEventArgs.PaintText(Data.Email);
+					paintEventArgs.PaintText(DataContext.Email);
 					break;
 				case ColumnId.Commits:
-					paintEventArgs.PaintText(Data.Commits.ToString(System.Globalization.CultureInfo.InvariantCulture));
+					paintEventArgs.PaintText(DataContext.Commits.ToString(System.Globalization.CultureInfo.InvariantCulture));
 					break;
 			}
 		}
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var menu = new UserMenu(Data);
+			var menu = new UserMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
