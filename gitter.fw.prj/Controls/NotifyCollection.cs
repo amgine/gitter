@@ -123,6 +123,7 @@
 				if(!VerifyItem(item)) throw new ArgumentException("list");
 				++count;
 			}
+
 			int start = index;
 			int end = start + count - 1;
 			RaiseChanging(start, end, NotifyEvent.Insert);
@@ -144,11 +145,12 @@
 		public void RemoveRange(int index, int count)
 		{
 			if((index < 0) || (index + count > Items.Count))
+			{
 				throw new ArgumentOutOfRangeException("index");
+			}
 
 			int start = index;
 			int end = index + count - 1;
-
 			RaiseChanging(start, end, NotifyEvent.Remove);
 			while(count != 0)
 			{
@@ -167,6 +169,7 @@
 		public int InsertSortedFromTop(T item, Func<T, T, int> comparison)
 		{
 			if(comparison == null) throw new ArgumentNullException("comparison");
+
 			for(int i = 0; i < Items.Count; ++i)
 			{
 				if(comparison(Items[i], item) == -1)
@@ -189,6 +192,7 @@
 		public int InsertSortedFromBottom(T item, Func<T, T, int> comparison)
 		{
 			if(comparison == null) throw new ArgumentNullException("comparison");
+
 			for(int i = Items.Count - 1; i > 0; --i)
 			{
 				if(comparison(Items[i], item) == 1)
@@ -273,7 +277,9 @@
 			int n = Count - 1;
 			RaiseChanging(0, n, NotifyEvent.Clear);
 			for(int i = 0; i < Items.Count; ++i)
+			{
 				FreeItem(Items[i]);
+			}
 			base.ClearItems();
 			RaiseChanged(0, n, NotifyEvent.Clear);
 		}

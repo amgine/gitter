@@ -468,6 +468,7 @@
     <Compile Include="RepositoryUpdateInfo.cs" />
     <Compile Include="Services\MessageBox\MessageBoxResult.cs" />
     <Compile Include="Services\Notifcation\NotificationType.cs" />
+    <Compile Include="ShellUtility.cs" />
     <Compile Include="StaticRepositoryAction.cs" />
     <Compile Include="Services\MessageBox\SystemMessageBoxService.cs" />
     <Compile Include="Utility.cs" />

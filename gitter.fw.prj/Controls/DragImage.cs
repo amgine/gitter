@@ -97,17 +97,15 @@
 
 		protected override void DefWndProc(ref Message m)
 		{
-			const int WM_MOUSEACTIVATE = 0x21;
-			const int WM_NCHITTEST = 0x0084;
 			const int MA_NOACTIVATE = 0x0003;
 			const int HTTRANSPARENT = -1;
 
-			switch(m.Msg)
+			switch((WindowsMessage)m.Msg)
 			{
-				case WM_MOUSEACTIVATE:
+				case WindowsMessage.WM_MOUSEACTIVATE:
 					m.Result = (IntPtr)MA_NOACTIVATE;
 					return;
-				case WM_NCHITTEST:
+				case WindowsMessage.WM_NCHITTEST:
 					m.Result = (IntPtr)HTTRANSPARENT;
 					return;
 			}

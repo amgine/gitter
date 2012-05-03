@@ -68,56 +68,35 @@
 						if(span.TotalDays >= 365)
 						{
 							var years = (int)(span.TotalDays / 365);
-							if(years == 1)
-								return "1 year ago";
-							else
-								return years.ToString() + " years ago";
+							return (years == 1) ? "1 year ago" : years.ToString() + " years ago";
 						}
 						if(span.TotalDays >= 30)
 						{
 							var months = (int)(span.TotalDays / 30);
-							if(months == 1)
-								return "1 month ago";
-							else
-								return months.ToString() + " months ago";
+							return (months == 1) ? "1 month ago" : months.ToString() + " months ago";
 						}
 						if(span.TotalDays >= 7)
 						{
 							var weeks = (int)(span.TotalDays / 7);
-							if(weeks == 1)
-								return "1 week ago";
-							else
-								return weeks.ToString() + " weeks ago";
+							return (weeks == 1) ? "1 week ago" : weeks.ToString() + " weeks ago";
 						}
 						if(span.TotalDays >= 1)
 						{
 							var days = (int)span.TotalDays;
-							if(days == 1)
-								return "1 day ago";
-							else
-								return days.ToString() + " days ago";
+							return (days == 1) ? "1 day ago" : days.ToString() + " days ago";
 						}
 						if(span.TotalHours >= 1)
 						{
 							var hours = (int)span.TotalHours;
-							if(hours == 1)
-								return "1 hour ago";
-							else
-								return hours.ToString() + " hours ago";
+							return (hours == 1) ? "1 hour ago" : hours.ToString() + " hours ago";
 						}
 						if(span.TotalMinutes >= 1)
 						{
 							var minutes = (int)span.TotalMinutes;
-							if(minutes == 1)
-								return "1 minute ago";
-							else
-								return minutes.ToString() + " minutes ago";
+							return (minutes == 1) ? "1 minute ago" : minutes.ToString() + " minutes ago";
 						}
 						var seconds = (int)span.TotalSeconds;
-						if(seconds == 1)
-							return "1 second ago";
-						else
-							return seconds.ToString() + " seconds ago";
+						return (seconds == 1) ? "1 second ago" : seconds.ToString() + " seconds ago";
 					}
 				case DateFormat.ISO8601:
 					return date.FormatISO8601();
@@ -141,165 +120,12 @@
 			const int FILE_ATTRIBUTE_NORMAL = 0x80;
 			const int FILE_ATTRIBUTE_DIR = 0x10;
 
-			var attr = dir?FILE_ATTRIBUTE_DIR|FILE_ATTRIBUTE_NORMAL:FILE_ATTRIBUTE_NORMAL;
-			var req = useExtensionOnly?SHGFI_USEFILEATTRIBUTES|SHGFI_TYPENAME:SHGFI_TYPENAME;
+			var attr = dir ? FILE_ATTRIBUTE_DIR | FILE_ATTRIBUTE_NORMAL : FILE_ATTRIBUTE_NORMAL;
+			var req = useExtensionOnly ? SHGFI_USEFILEATTRIBUTES | SHGFI_TYPENAME : SHGFI_TYPENAME;
 
 			var info = new NativeMethods.SHFILEINFO();
-			var ret = NativeMethods.SHGetFileInfo(fileName, attr, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), req);
+			var ret = NativeMethods.SHGetFileInfo(fileName, attr, ref info, Marshal.SizeOf(info), req);
 			return info.szTypeName;
-		}
-
-		public static Icon ExtractAssociatedFileIcon16ByExt(string fileName)
-		{
-			const int SHGFI_ICON = 0x100;
-			const int SHGFI_SMALLICON = 0x1;
-			const int SHGFI_USEFILEATTRIBUTES = 0x10;
-
-			const int FILE_ATTRIBUTE_NORMAL = 0x80;
-
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
-			try
-			{
-				return Icon.FromHandle(info.hIcon);
-			}
-			catch
-			{
-				return null;
-			}
-		}
-
-		public static Icon ExtractAssociatedFileIcon16(string fileName)
-		{
-			const int SHGFI_ICON = 0x100;
-			const int SHGFI_SMALLICON = 0x1;
-			const int SHGFI_USEFILEATTRIBUTES = 0x10;
-
-			const int FILE_ATTRIBUTE_NORMAL = 0x80;
-
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON);
-			try
-			{
-				return Icon.FromHandle(info.hIcon);
-			}
-			catch
-			{
-				NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
-				try
-				{
-					return Icon.FromHandle(info.hIcon);
-				}
-				catch
-				{
-					return null;
-				}
-			}
-		}
-
-		public static Icon ExtractAssociatedFolderIcon16(string fileName)
-		{
-			const int SHGFI_ICON = 0x100;
-			const int SHGFI_SMALLICON = 0x1;
-			const int SHGFI_USEFILEATTRIBUTES = 0x10;
-
-			const int FILE_ATTRIBUTE_NORMAL = 0x80;
-			const int FILE_ATTRIBUTE_DIR = 0x10;
-
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON);
-			try
-			{
-				return Icon.FromHandle(info.hIcon);
-			}
-			catch
-			{
-				NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
-				try
-				{
-					return Icon.FromHandle(info.hIcon);
-				}
-				catch
-				{
-					return null;
-				}
-			}
-		}
-
-		public static Icon ExtractAssociatedFolderIcon16ByType(string fileName)
-		{
-			const int SHGFI_ICON = 0x100;
-			const int SHGFI_SMALLICON = 0x1;
-			const int SHGFI_USEFILEATTRIBUTES = 0x10;
-
-			const int FILE_ATTRIBUTE_NORMAL = 0x80;
-			const int FILE_ATTRIBUTE_DIR = 0x10;
-
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
-			try
-			{
-				return Icon.FromHandle(info.hIcon);
-			}
-			catch
-			{
-				return null;
-			}
-		}
-
-		public static Icon ExtractAssociatedIcon16_(string fileName)
-		{
-			var pos1 = fileName.LastIndexOf(Path.DirectorySeparatorChar);
-			var pos2 = fileName.LastIndexOf('.');
-			string ext;
-			if(pos2 > pos1)
-			{
-				ext = fileName.Substring(pos2);
-			}
-			else
-			{
-				ext = fileName.Substring(pos1 + 1);
-			}
-			if(ext.Equals(".ico", StringComparison.InvariantCultureIgnoreCase))
-				return new Icon(fileName, 16, 16);
-			try
-			{
-				using(var key = Registry.ClassesRoot.OpenSubKey(ext))
-				{
-					var alias = (string)key.GetValue(null);
-					key.Close();
-					using(var aliasKey = Registry.ClassesRoot.OpenSubKey(alias + @"\DefaultIcon"))
-					{
-						var desc = (string)aliasKey.GetValue(null);
-						var file = desc;
-						var id = 0;
-						var pos = desc.LastIndexOf(',');
-						if(pos != -1)
-						{
-							if(int.TryParse(desc.Substring(pos + 1), out id))
-							{
-								file = desc.Substring(0, pos);
-							}
-						}
-						aliasKey.Close();
-						if(file == "%1") file = fileName;
-						IntPtr[] icons = new IntPtr[1];
-						var c = NativeMethods.ExtractIconEx(file, id, null, icons, 1);
-						if(c == 1)
-						{
-							return Icon.FromHandle(icons[0]);
-						}
-						else
-						{
-							return null;
-						}
-					}
-				}
-			}
-			catch
-			{
-				return null;
-			}
 		}
 
 		public static Control GetParentControl(ToolStripItem item)
@@ -513,9 +339,13 @@
 					FileName = url,
 				};
 			if(Directory.Exists(url))
+			{
 				psi.WorkingDirectory = url;
+			}
 			else if(File.Exists(url))
+			{
 				psi.WorkingDirectory = Path.GetDirectoryName(url);
+			}
 			var p = new System.Diagnostics.Process()
 			{
 				StartInfo = psi,
@@ -531,9 +361,13 @@
 					Arguments = "shell32.dll,OpenAs_RunDLL \"" + fileName + "\"",
 				};
 			if(Directory.Exists(fileName))
+			{
 				psi.WorkingDirectory = fileName;
+			}
 			else if(File.Exists(fileName))
+			{
 				psi.WorkingDirectory = Path.GetDirectoryName(fileName);
+			}
 			var p = new System.Diagnostics.Process()
 			{
 				StartInfo = psi,
