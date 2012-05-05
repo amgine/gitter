@@ -95,6 +95,7 @@
     </Compile>
     <Compile Include="CachedIconResources.cs" />
     <Compile Include="DateFormat.cs" />
+    <Compile Include="FileSize.cs" />
     <Compile Include="HelperExecutables.cs" />
     <Compile Include="IGuiProvider.cs" />
     <Compile Include="Properties\CachedResources.cs" />

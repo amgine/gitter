@@ -81,7 +81,7 @@
 						parent.AddDirectory(wtf);
 						break;
 					case TreeContentType.Blob:
-						parent.AddFile(new TreeFile(Repository, item.Name, parent, FileStatus.Cached, name));
+						parent.AddFile(new TreeFile(Repository, item.Name, parent, FileStatus.Cached, name, ((BlobData)item).Size));
 						break;
 				}
 			}

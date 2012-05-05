@@ -36,24 +36,6 @@
 			get { return _osVersion >= new Version(6, 1); }
 		}
 
-		private static readonly string[] SizePostfix = new[]
-		{
-			"b ", "Kb", "Mb", "Gb", "Tb", "Pb"
-		};
-
-		public static string FormatSize(long size)
-		{
-			double s = size;
-			var sizeId = 0;
-			while(s > 1024)
-			{
-				s /= 1024;
-				++sizeId;
-			}
-			if(sizeId >= SizePostfix.Length) return size.ToString();
-			return ((int)(s + .5)).ToString() + " " + SizePostfix[sizeId];
-		}
-
 		public static string FormatDate(DateTime date, DateFormat format)
 		{
 			switch(format)

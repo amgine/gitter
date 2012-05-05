@@ -110,7 +110,7 @@
 		private Icon _icon;
 		private Bitmap _bmpIcon;
 		private string _type;
-		private string _size;
+		private FileSize? _size;
 		private bool _cachedInfo;
 		private bool _showFullPath;
 
@@ -158,7 +158,7 @@
 			return null;
 		}
 
-		protected abstract string GetSize();
+		protected abstract FileSize? GetSize();
 
 		protected abstract string GetItemType();
 
@@ -204,7 +204,16 @@
 				case ColumnId.Type:
 					return measureEventArgs.MeasureText(_type);
 				case ColumnId.Size:
-					return measureEventArgs.MeasureText(_size);
+					if(_size.HasValue)
+					{
+						var w = measureEventArgs.MeasureText(_size.Value.ShortSize);
+						w.Width += 20;
+						return w;
+					}
+					else
+					{
+						return Size.Empty;
+					}
 				default:
 					return Size.Empty;
 			}
@@ -236,7 +245,21 @@
 					paintEventArgs.PaintText(_type);
 					break;
 				case ColumnId.Size:
-					paintEventArgs.PaintText(_size, DefaultStringFormatRightAlign);
+					if(_size.HasValue)
+					{
+						var rect = paintEventArgs.Bounds;
+						var graphics = paintEventArgs.Graphics;
+						SubItemPaintEventArgs.PrepareRectangle(ref rect);
+						paintEventArgs.PrepareTextRectangle(paintEventArgs.Font, ref rect);
+						var r2 = rect;
+						rect.Width -= 20;
+						r2.X = r2.Right - 17;
+						r2.Width = 17;
+						GitterApplication.TextRenderer.DrawText(
+							graphics, _size.Value.ShortSize, paintEventArgs.Font, paintEventArgs.Brush, rect, DefaultStringFormatRightAlign);
+						GitterApplication.TextRenderer.DrawText(
+							graphics, _size.Value.ShortSizeUnits, paintEventArgs.Font, paintEventArgs.Brush, r2, DefaultStringFormatLeftAlign);
+					}
 					break;
 			}
 		}

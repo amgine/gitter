@@ -70,25 +70,32 @@
 			}
 		}
 
-		protected override string GetSize()
+		protected override FileSize? GetSize()
 		{
-			if(DataContext.Status == FileStatus.Removed) return "N/A";
+			if(DataContext.Status == FileStatus.Cached)
+			{
+				return new FileSize(DataContext.Size);
+			}
+			if(DataContext.Status == FileStatus.Removed)
+			{
+				return null;
+			}
 			try
 			{
 				var fi = new System.IO.FileInfo(DataContext.FullPath);
 				if(fi.Exists)
 				{
 					var size = fi.Length;
-					return Utility.FormatSize(size);
+					return new FileSize(size);
 				}
 				else
 				{
-					return "";
+					return null;
 				}
 			}
 			catch
 			{
-				return "";
+				return null;
 			}
 		}
 

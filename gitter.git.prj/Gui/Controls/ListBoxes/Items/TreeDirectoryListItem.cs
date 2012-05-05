@@ -3,6 +3,7 @@
 	using System;
 	using System.Drawing;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Properties.Resources;
@@ -80,9 +81,9 @@
 			return ImgIcon;
 		}
 
-		protected override string GetSize()
+		protected override FileSize? GetSize()
 		{
-			return "";
+			return null;
 		}
 
 		protected override string GetItemType()

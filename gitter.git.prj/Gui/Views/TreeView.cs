@@ -53,8 +53,8 @@
 
 			_directoryTree.Columns.ShowAll(column => column.Id == (int)ColumnId.Name);
 			_directoryTree.Columns[0].SizeMode = ColumnSizeMode.Auto;
-			_treeContent.Columns.ShowAll(column => column.Id == (int)ColumnId.Name);
-			_treeContent.Columns[0].SizeMode = ColumnSizeMode.Auto;
+			_treeContent.Columns.ShowAll(column => column.Id == (int)ColumnId.Name || column.Id == (int)ColumnId.Size);
+			_treeContent.Columns.GetById((int)ColumnId.Name).SizeMode = ColumnSizeMode.Auto;
 
 			_directoryTree.SelectionChanged += OnDirectoryTreeSelectionChanged;
 			_directoryTree.ItemContextMenuRequested +=

@@ -15,6 +15,7 @@
 		#region Data
 
 		private ConflictType _conflictType;
+		private long _size;
 
 		#endregion
 
@@ -23,6 +24,12 @@
 		public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
 			: base(repository, relativePath, parent, status, name)
 		{
+		}
+
+		public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name, long size)
+			: base(repository, relativePath, parent, status, name)
+		{
+			_size = size;
 		}
 
 		#endregion
@@ -36,6 +43,11 @@
 		{
 			get { return _conflictType; }
 			internal set { _conflictType = value; }
+		}
+
+		public long Size
+		{
+			get { return _size; }
 		}
 
 		public void ResolveConflict(ConflictResolution resolution)

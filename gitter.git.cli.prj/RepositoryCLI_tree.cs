@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Text;
 
 	using gitter.Git.AccessLayer.CLI;
@@ -99,7 +100,7 @@
 			}
 
 			var cmd = new LsTreeCommand(args);
-			var output = _executor.ExecCommand(cmd, Encoding.Default);
+			var output = _executor.ExecCommand(cmd);
 			output.ThrowOnBadReturnCode();
 
 			var content = output.Output;
@@ -130,7 +131,9 @@
 				delimeter = content.IndexOf('\t', pos);
 				long size = 0;
 				if(isBlob)
-					size = long.Parse(content.Substring(pos, delimeter - pos), System.Globalization.CultureInfo.InvariantCulture);
+				{
+					size = long.Parse(content.Substring(pos, delimeter - pos), CultureInfo.InvariantCulture);
+				}
 				pos = delimeter + 1;
 				var name = content.Substring(pos, end - pos);
 				if(isBlob)
