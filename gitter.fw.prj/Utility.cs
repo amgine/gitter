@@ -6,11 +6,11 @@
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
 	using System.Drawing.Text;
+	using System.Globalization;
 	using System.IO;
 	using System.Runtime.InteropServices;
 	using System.Security.Principal;
 	using System.Windows.Forms;
-	using Microsoft.Win32;
 
 	public static class Utility
 	{
@@ -41,44 +41,44 @@
 			switch(format)
 			{
 				case DateFormat.SystemDefault:
-					return date.ToString("dd.MM.yyyy HH:mm:ss");
+					return date.ToString(CultureInfo.CurrentCulture);
 				case DateFormat.UnixTimestamp:
-					return ((int)(date - UnixEraStart).TotalSeconds).ToString();
+					return ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture);
 				case DateFormat.Relative:
 					{
 						var span = DateTime.Now - date;
 						if(span.TotalDays >= 365)
 						{
 							var years = (int)(span.TotalDays / 365);
-							return (years == 1) ? "1 year ago" : years.ToString() + " years ago";
+							return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
 						}
 						if(span.TotalDays >= 30)
 						{
 							var months = (int)(span.TotalDays / 30);
-							return (months == 1) ? "1 month ago" : months.ToString() + " months ago";
+							return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
 						}
 						if(span.TotalDays >= 7)
 						{
 							var weeks = (int)(span.TotalDays / 7);
-							return (weeks == 1) ? "1 week ago" : weeks.ToString() + " weeks ago";
+							return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
 						}
 						if(span.TotalDays >= 1)
 						{
 							var days = (int)span.TotalDays;
-							return (days == 1) ? "1 day ago" : days.ToString() + " days ago";
+							return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
 						}
 						if(span.TotalHours >= 1)
 						{
 							var hours = (int)span.TotalHours;
-							return (hours == 1) ? "1 hour ago" : hours.ToString() + " hours ago";
+							return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
 						}
 						if(span.TotalMinutes >= 1)
 						{
 							var minutes = (int)span.TotalMinutes;
-							return (minutes == 1) ? "1 minute ago" : minutes.ToString() + " minutes ago";
+							return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
 						}
 						var seconds = (int)span.TotalSeconds;
-						return (seconds == 1) ? "1 second ago" : seconds.ToString() + " seconds ago";
+						return (seconds == 1) ? "1 second ago" : seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago";
 					}
 				case DateFormat.ISO8601:
 					return date.FormatISO8601();
