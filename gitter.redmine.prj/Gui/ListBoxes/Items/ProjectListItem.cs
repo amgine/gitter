@@ -1,9 +1,6 @@
 ﻿namespace gitter.Redmine.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Drawing;
 
 	using gitter.Framework.Controls;
@@ -32,10 +29,10 @@
 					paintEventArgs.PaintText(DataContext.Identifier);
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
+					DateColumn.OnPaintSubItem(paintEventArgs, DataContext.CreatedOn);
 					break;
 				case ColumnId.UpdatedOn:
-					paintEventArgs.PaintText(DataContext.UpdatedOn.ToString());
+					DateColumn.OnPaintSubItem(paintEventArgs, DataContext.UpdatedOn);
 					break;
 			}
 		}
@@ -53,9 +50,9 @@
 				case ColumnId.Identifier:
 					return measureEventArgs.MeasureText(DataContext.Identifier);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
+					return DateColumn.OnMeasureSubItem(measureEventArgs, DataContext.CreatedOn);
 				case ColumnId.UpdatedOn:
-					return measureEventArgs.MeasureText(DataContext.UpdatedOn.ToString());
+					return DateColumn.OnMeasureSubItem(measureEventArgs, DataContext.UpdatedOn);
 				default:
 					return Size.Empty;
 			}

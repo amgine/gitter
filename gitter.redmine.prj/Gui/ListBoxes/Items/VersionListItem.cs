@@ -1,10 +1,6 @@
 ﻿namespace gitter.Redmine.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Globalization;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -234,15 +230,15 @@
 				case ColumnId.Project:
 					return MeasureOptionalContent(DataContext.Project, measureEventArgs);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
+					return VersionCreatedOnColumn.OnMeasureSubItem(measureEventArgs, DataContext.CreatedOn);
 				case ColumnId.UpdatedOn:
-					return measureEventArgs.MeasureText(DataContext.UpdatedOn.ToString());
+					return VersionUpdatedOnColumn.OnMeasureSubItem(measureEventArgs, DataContext.UpdatedOn);
 				case ColumnId.Status:
 					return measureEventArgs.MeasureText(DataContext.Status.ToString());
 				case ColumnId.DueDate:
 					if(DataContext.DueDate.HasValue)
 					{
-						return measureEventArgs.MeasureText(DataContext.DueDate.Value.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern));
+						return VersionDueDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.DueDate.Value);
 					}
 					else
 					{
@@ -272,15 +268,15 @@
 					paintEventArgs.PaintText(DataContext.Status.ToString());
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
+					VersionCreatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.CreatedOn);
 					break;
 				case ColumnId.UpdatedOn:
-					paintEventArgs.PaintText(DataContext.UpdatedOn.ToString());
+					VersionUpdatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.UpdatedOn);
 					break;
 				case ColumnId.DueDate:
 					if(DataContext.DueDate.HasValue)
 					{
-						paintEventArgs.PaintText(DataContext.DueDate.Value.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern));
+						VersionDueDateColumn.OnPaintSubItem(paintEventArgs, DataContext.DueDate.Value);
 					}
 					else
 					{

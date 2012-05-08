@@ -130,7 +130,6 @@
     </Compile>
     <Compile Include="Gui\Controls\DiffViewer\DiffFileContextMenuRequestedEventArgs.cs" />
     <Compile Include="Gui\Controls\FilePanel.cs" />
-    <Compile Include="Gui\Controls\ListBoxes\Columns\DateColumn.cs" />
     <Compile Include="Gui\Controls\ListBoxes\Items\PatchSourceListItem.cs" />
     <Compile Include="Gui\Controls\Menus\BranchDragDropMenu.cs">
       <SubType>Component</SubType>
@@ -401,12 +400,6 @@
     <Compile Include="Gui\Controls\ListBoxes\Columns\TreeHashColumn.cs" />
     <Compile Include="Gui\Controls\ListBoxes\Columns\UrlColumn.cs" />
     <Compile Include="Gui\Controls\ListBoxes\Columns\UserColumn.cs" />
-    <Compile Include="Gui\Controls\ListBoxes\Extenders\DateColumnExtender.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Controls\ListBoxes\Extenders\DateColumnExtender.Designer.cs">
-      <DependentUpon>DateColumnExtender.cs</DependentUpon>
-    </Compile>
     <Compile Include="Gui\Controls\ListBoxes\Extenders\GraphColumnExtender.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -899,9 +892,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Dialogs\VersionCheckDialog.resx">
       <DependentUpon>VersionCheckDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Controls\ListBoxes\Extenders\DateColumnExtender.resx">
-      <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Controls\ListBoxes\Extenders\GraphColumnExtender.resx">
       <DependentUpon>GraphColumnExtender.cs</DependentUpon>

@@ -75,6 +75,13 @@
     <Compile Include="AsyncExecution\IAsyncAction.cs" />
     <Compile Include="AsyncExecution\IAsyncFunc.cs" />
     <Compile Include="AsyncExecution\NullMonitor.cs" />
+    <Compile Include="Controls\CustomListBox\DateColumn.cs" />
+    <Compile Include="Controls\CustomListBox\DateColumnExtender.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
+      <DependentUpon>DateColumnExtender.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\HintTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -480,6 +487,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Controls\CustomListBox\ColumnsDialog.resx">
       <DependentUpon>ColumnsDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\CustomListBox\DateColumnExtender.resx">
+      <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Dialogs\ExceptionDialog.resx">
       <DependentUpon>ExceptionDialog.cs</DependentUpon>

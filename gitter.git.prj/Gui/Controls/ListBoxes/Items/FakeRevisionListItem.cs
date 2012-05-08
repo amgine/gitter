@@ -289,19 +289,24 @@
 				case ColumnId.Author:
 				case ColumnId.Committer:
 					var user = _repository.UserIdentity;
-					if(user != null) UserColumn.OnPaintSubItem(paintEventArgs, user, SystemBrushes.GrayText);
+					if(user != null)
+					{
+						UserColumn.OnPaintSubItem(paintEventArgs, user, SystemBrushes.GrayText);
+					}
 					break;
 				case ColumnId.Email:
 				case ColumnId.AuthorEmail:
 				case ColumnId.CommitterEmail:
 					var usermail = _repository.Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 					if(usermail != null)
+					{
 						paintEventArgs.PaintText(usermail, SystemBrushes.GrayText);
+					}
 					break;
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
 				case ColumnId.AuthorDate:
-					paintEventArgs.PaintText(Resources.StrUncommitted.SurroundWith('<', '>'), DateColumn.Font, SystemBrushes.GrayText);
+					paintEventArgs.PaintText(Resources.StrUncommitted.SurroundWith('<', '>'), SystemBrushes.GrayText);
 					break;
 				case ColumnId.Hash:
 				case ColumnId.TreeHash:

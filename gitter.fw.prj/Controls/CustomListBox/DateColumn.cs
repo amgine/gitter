@@ -1,23 +1,18 @@
-﻿namespace gitter.Git.Gui.Controls
+﻿namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Globalization;
-	using System.Text;
 	using System.Windows.Forms;
 	using System.Drawing;
-	using System.Xml;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
-	using Resources = gitter.Git.Properties.Resources;
+	using Resources = gitter.Framework.Properties.Resources;
 
 	public class DateColumn : CustomListBoxColumn
 	{
 		public const DateFormat DefaultDateFormat = DateFormat.SystemDefault;
-
-		public static readonly Font Font = new Font("Segoe UI", 8.25f, FontStyle.Regular, GraphicsUnit.Point);
 
 		#region Data
 
@@ -76,7 +71,7 @@
 				format = DateColumn.DefaultDateFormat;
 			}
 			var strDate = Utility.FormatDate(date, format);
-			return measureEventArgs.MeasureText(strDate, DateColumn.Font);
+			return measureEventArgs.MeasureText(strDate);
 		}
 
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, DateTime date)
@@ -92,7 +87,7 @@
 				format = DateColumn.DefaultDateFormat;
 			}
 			var strdate = Utility.FormatDate(date, format);
-			paintEventArgs.PaintText(strdate, DateColumn.Font);
+			paintEventArgs.PaintText(strdate);
 		}
 
 		public DateFormat DateFormat

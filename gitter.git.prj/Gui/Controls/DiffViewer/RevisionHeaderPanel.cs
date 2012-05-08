@@ -66,11 +66,11 @@
 			Parents,
 		}
 
-		protected sealed class CursorChangeEventArgs : EventArgs
+		protected sealed class CursorChangedEventArgs : EventArgs
 		{
 			private readonly Cursor _cursor;
 
-			public CursorChangeEventArgs(Cursor cursor)
+			public CursorChangedEventArgs(Cursor cursor)
 			{
 				_cursor = cursor;
 			}
@@ -86,7 +86,7 @@
 		{
 			event EventHandler InvalidateRequired;
 
-			event EventHandler<CursorChangeEventArgs> CursorChangeRequired;
+			event EventHandler<CursorChangedEventArgs> CursorChangeRequired;
 
 			/// <summary>Displayed data.</summary>
 			Element Element { get; }
@@ -110,7 +110,7 @@
 		{
 			public event EventHandler InvalidateRequired;
 
-			public event EventHandler<CursorChangeEventArgs> CursorChangeRequired;
+			public event EventHandler<CursorChangedEventArgs> CursorChangeRequired;
 
 			protected void OnInvalidateRequired()
 			{
@@ -121,7 +121,7 @@
 			protected void ChangeCursor(Cursor cursor)
 			{
 				var handler = CursorChangeRequired;
-				if(handler != null) handler(this, new CursorChangeEventArgs(cursor));
+				if(handler != null) handler(this, new CursorChangedEventArgs(cursor));
 			}
 
 			public abstract Element Element { get; }
@@ -463,14 +463,14 @@
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
-				return Measure(graphics, DateColumn.Font, Utility.FormatDate(revision.CommitDate, _dateFormat), width);
+				return Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.CommitDate, _dateFormat), width);
 			}
 
 			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
 			{
 				DefaultPaint(
 					graphics,
-					DateColumn.Font,
+					GitterApplication.FontManager.UIFont,
 					Resources.StrDate.AddColon(),
 					Utility.FormatDate(revision.CommitDate, _dateFormat),
 					rect);

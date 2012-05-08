@@ -182,7 +182,7 @@
 				case ColumnId.Author:
 					return MeasureOptionalContent(DataContext.Author, measureEventArgs);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
+					return NewsCreatedOnColumn.OnMeasureSubItem(measureEventArgs, DataContext.CreatedOn);
 			}
 			return base.MeasureSubItem(measureEventArgs);
 		}
@@ -208,7 +208,7 @@
 					PaintOptionalContent(DataContext.Project, paintEventArgs);
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
+					NewsCreatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.CreatedOn);
 					break;
 			}
 		}

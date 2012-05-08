@@ -385,12 +385,12 @@
 			if(!date.HasValue)
 			{
 				text = Resources.StrsUnassigned.SurroundWith('<', '>');
+				return measureEventArgs.MeasureText(text);
 			}
 			else
 			{
-				text = date.Value.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+				return DateColumn.OnMeasureSubItem(measureEventArgs, date.Value);
 			}
-			return measureEventArgs.MeasureText(text);
 		}
 
 		private static void PaintOptionalContent(NamedRedmineObject data, SubItemPaintEventArgs paintEventArgs)
@@ -418,13 +418,12 @@
 			{
 				text = Resources.StrsUnassigned.SurroundWith('<', '>');
 				brush = SystemBrushes.GrayText;
+				paintEventArgs.PaintText(text, brush);
 			}
 			else
 			{
-				text = date.Value.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
-				brush = paintEventArgs.Brush;
+				DateColumn.OnPaintSubItem(paintEventArgs, date.Value);
 			}
-			paintEventArgs.PaintText(text, brush);
 		}
 
 		private static void PaintOptionalContent(string data, SubItemPaintEventArgs paintEventArgs)
@@ -468,9 +467,9 @@
 				case ColumnId.Category:
 					return MeasureOptionalContent(DataContext.Category, measureEventArgs);
 				case ColumnId.CreatedOn:
-					return measureEventArgs.MeasureText(DataContext.CreatedOn.ToString());
+					return IssueCreatedOnColumn.OnMeasureSubItem(measureEventArgs, DataContext.CreatedOn);
 				case ColumnId.UpdatedOn:
-					return measureEventArgs.MeasureText(DataContext.UpdatedOn.ToString());
+					return IssueUpdatedOnColumn.OnMeasureSubItem(measureEventArgs, DataContext.UpdatedOn);
 				case ColumnId.StartDate:
 					return MeasureOptionalContent(DataContext.StartDate, measureEventArgs);
 				case ColumnId.DueDate:
@@ -524,10 +523,10 @@
 					PaintOptionalContent(DataContext.Category, paintEventArgs);
 					break;
 				case ColumnId.CreatedOn:
-					paintEventArgs.PaintText(DataContext.CreatedOn.ToString());
+					IssueCreatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.CreatedOn);
 					break;
 				case ColumnId.UpdatedOn:
-					paintEventArgs.PaintText(DataContext.UpdatedOn.ToString());
+					IssueUpdatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.UpdatedOn);
 					break;
 				case ColumnId.StartDate:
 					PaintOptionalContent(DataContext.StartDate, paintEventArgs);

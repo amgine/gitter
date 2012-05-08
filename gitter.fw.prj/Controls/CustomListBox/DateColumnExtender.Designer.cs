@@ -1,4 +1,4 @@
-﻿namespace gitter.Git.Gui.Controls
+﻿namespace gitter.Framework.Controls
 {
 	partial class DateColumnExtender
 	{

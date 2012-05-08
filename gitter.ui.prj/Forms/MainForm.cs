@@ -643,6 +643,8 @@
 			foreach(var gui in _additionalGui)
 			{
 				gui.DetachFromEnvironment(this);
+				var disposable = gui as IDisposable;
+				if(disposable != null) disposable.Dispose();
 			}
 			_additionalGui.Clear();
 			_activeIssueTrackerProviders.Clear();

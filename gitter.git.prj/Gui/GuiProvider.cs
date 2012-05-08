@@ -10,7 +10,7 @@
 	using gitter.Git.Gui.Dialogs;
 
 	/// <summary>Git Gui provider.</summary>
-	internal sealed class GuiProvider : IRepositoryGuiProvider
+	internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 	{
 		#region Data
 
@@ -55,6 +55,12 @@
 			}
 		}
 
+		IRepository IRepositoryGuiProvider.Repository
+		{
+			get { return Repository; }
+			set { Repository = value as Repository; }
+		}
+
 		public IWorkingEnvironment Environment
 		{
 			get { return _environment; }
@@ -87,18 +93,18 @@
 
 		public IRevisionPointer GetFocusedRevisionPointer()
 		{
-			var tool = _environment.ViewDockService.ActiveView;
-			if(tool != null)
+			var view = _environment.ViewDockService.ActiveView;
+			if(view != null)
 			{
-				var historyTool = tool as HistoryView;
-				if(historyTool != null)
+				var historyView = view as HistoryView;
+				if(historyView != null)
 				{
-					return historyTool.SelectedRevision;
+					return historyView.SelectedRevision;
 				}
-				var referencesTool = tool as ReferencesView;
-				if(referencesTool != null)
+				var referencesView = view as ReferencesView;
+				if(referencesView != null)
 				{
-					return referencesTool.SelectedReference;
+					return referencesView.SelectedReference;
 				}
 			}
 			return null;
@@ -344,15 +350,11 @@
 			_environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
 		}
 
-		IRepository IRepositoryGuiProvider.Repository
+		public void Dispose()
 		{
-			get { return _repository; }
-			set
-			{
-				var repo = value as Repository;
-				if(repo == null && value != null) throw new ArgumentException();
-				Repository = repo;
-			}
+			_mainToolbar.Dispose();
+			_statusbar.Dispose();
+			_menus.Dispose();
 		}
 	}
 }

@@ -172,7 +172,6 @@
     <Compile Include="Gui\ListBoxes\Columns\ProjectIdentifierColumn.cs" />
     <Compile Include="Gui\ListBoxes\Columns\IssueCreatedOnColumn.cs" />
     <Compile Include="Gui\ListBoxes\Columns\IssueUpdatedOnColumn.cs" />
-    <Compile Include="Gui\ListBoxes\Columns\DateColumn.cs" />
     <Compile Include="Gui\ListBoxes\Columns\NameColumn.cs" />
     <Compile Include="Gui\ListBoxes\ProjectsListBox.cs">
       <SubType>Component</SubType>

@@ -1,4 +1,4 @@
-﻿namespace gitter.Git.Gui.Controls
+﻿namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Collections.Generic;
@@ -10,7 +10,7 @@
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using Resources = gitter.Git.Properties.Resources;
+	using Resources = gitter.Framework.Properties.Resources;
 
 	/// <summary>Extender for <see cref="DateColumn"/>.</summary>
 	[ToolboxItem(false)]
@@ -28,14 +28,14 @@
 
 			InitializeComponent();
 
-			_lblDateFormat.Text = Resources.StrDateFormat.AddColon();
-			_lblExample.Text = Resources.StrExample.AddColon();
+			_lblDateFormat.Text		= Resources.StrDateFormat.AddColon();
+			_lblExample.Text		= Resources.StrExample.AddColon();
 			
-			_radUnixTimestamp.Text = Resources.StrUNIXTimestamp;
-			_radRelative.Text = Resources.StrRelative;
-			_radSystemDefault.Text = Resources.StrDefaultFormat;
-			_radRFC2822.Text = Resources.StrRFC2822;
-			_radISO8601.Text = Resources.StrISO8601;
+			_radUnixTimestamp.Text	= Resources.StrUNIXTimestamp;
+			_radRelative.Text		= Resources.StrRelative;
+			_radSystemDefault.Text	= Resources.StrDefaultFormat;
+			_radRFC2822.Text		= Resources.StrRFC2822;
+			_radISO8601.Text		= Resources.StrISO8601;
 
 			var date = DateTime.Now;
 			_lblUnixTimestamp.Text	= Utility.FormatDate(date, DateFormat.UnixTimestamp);
@@ -69,15 +69,25 @@
 			get
 			{
 				if(_radUnixTimestamp.Checked)
+				{
 					return DateFormat.UnixTimestamp;
+				}
 				if(_radRelative.Checked)
+				{
 					return DateFormat.Relative;
+				}
 				if(_radSystemDefault.Checked)
+				{
 					return DateFormat.SystemDefault;
+				}
 				if(_radRFC2822.Checked)
+				{
 					return DateFormat.RFC2822;
+				}
 				if(_radISO8601.Checked)
+				{
 					return DateFormat.ISO8601;
+				}
 				return DateFormat.SystemDefault;
 			}
 			set

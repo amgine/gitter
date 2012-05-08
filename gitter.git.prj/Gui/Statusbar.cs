@@ -14,7 +14,7 @@
 
 	using Resources = gitter.Git.Properties.Resources;
 
-	internal sealed class Statusbar
+	internal sealed class Statusbar : IDisposable
 	{
 		private readonly ToolStripStatusLabel _headLabel;
 
@@ -141,7 +141,7 @@
 			_userLabel.DoubleClick += OnUserDoubleClick;
 		}
 
-		private static Point GetToolTipPosition(CustomToolTip toolTip, ToolStripStatusLabel label)
+		private static Point GetToolTipPosition(CustomToolTip toolTip, ToolStripItem label)
 		{
 			var b = label.Bounds;
 			var s = toolTip.Size;
@@ -157,13 +157,21 @@
 			return clientCoords;
 		}
 
-		private void ShowToolTip(FileListToolTip toolTip, ToolStripStatusLabel label, bool staged, FileStatus fileStatus)
+		private void ShowToolTip(FileListToolTip toolTip, ToolStripItem label, bool staged, FileStatus fileStatus)
 		{
 			if(_repository != null)
 			{
 				toolTip.Update(_repository.Status, staged, fileStatus);
 				toolTip.Show(label.Owner, GetToolTipPosition(toolTip, label));
 			}
+		}
+
+		private void SetToolTip(ToolStripItem item, FileListToolTip toolTip, bool staged, FileStatus fileStatus)
+		{
+			item.MouseEnter += (sender, e) =>
+				ShowToolTip(toolTip, (ToolStripItem)sender, staged, fileStatus);
+			item.MouseLeave += (sender, e) =>
+				toolTip.Hide(((ToolStripItem)sender).Owner);
 		}
 
 		private void SetToolTips()
@@ -181,40 +189,15 @@
 				_statusToolTip.Hide(_statusLabel.Owner);
 			};
 
-			_statusUnmerged.MouseEnter += (sender, e) =>
-				ShowToolTip(_statusUnmergedToolTip, (ToolStripStatusLabel)sender, false, FileStatus.Unmerged);
-			_statusUnmerged.MouseLeave += (sender, e) =>
-				_statusUnmergedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
+			SetToolTip(_statusUnmerged,				_statusUnmergedToolTip,				false,	FileStatus.Unmerged);
 
-			_statusStagedAdded.MouseEnter += (sender, e) =>
-				ShowToolTip(_statusStagedAddedToolTip, (ToolStripStatusLabel)sender, true, FileStatus.Added);
-			_statusStagedAdded.MouseLeave += (sender, e) =>
-				_statusStagedAddedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
+			SetToolTip(_statusStagedAdded,			_statusStagedAddedToolTip,			true,	FileStatus.Added);
+			SetToolTip(_statusStagedRemoved,		_statusStagedRemovedToolTip,		true,	FileStatus.Removed);
+			SetToolTip(_statusStagedModified,		_statusStagedModifiedToolTip,		true,	FileStatus.Modified);
 
-			_statusStagedRemoved.MouseEnter += (sender, e) =>
-				ShowToolTip(_statusStagedRemovedToolTip, (ToolStripStatusLabel)sender, true, FileStatus.Removed);
-			_statusStagedRemoved.MouseLeave += (sender, e) =>
-				_statusStagedRemovedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
-
-			_statusStagedModified.MouseEnter += (sender, e) =>
-				ShowToolTip(_statusStagedModifiedToolTip, (ToolStripStatusLabel)sender, true, FileStatus.Modified);
-			_statusStagedModified.MouseLeave += (sender, e) =>
-				_statusStagedModifiedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
-
-			_statusUnstagedUntracked.MouseEnter += (sender, e) =>
-				ShowToolTip(_statusUnstagedUntrackedToolTip, (ToolStripStatusLabel)sender, false, FileStatus.Added);
-			_statusUnstagedUntracked.MouseLeave += (sender, e) =>
-				_statusUnstagedUntrackedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
-
-			_statusUnstagedRemoved.MouseEnter += (sender, e) =>
-				ShowToolTip(_statusUnstagedRemovedToolTip, (ToolStripStatusLabel)sender, false, FileStatus.Removed);
-			_statusUnstagedRemoved.MouseLeave += (sender, e) =>
-				_statusUnstagedRemovedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
-
-			_statusUnstagedModified.MouseEnter += (sender, e) =>
-				ShowToolTip(_statusUnstagedModifiedToolTip, (ToolStripStatusLabel)sender, false, FileStatus.Modified);
-			_statusUnstagedModified.MouseLeave += (sender, e) =>
-				_statusUnstagedModifiedToolTip.Hide(((ToolStripStatusLabel)sender).Owner);
+			SetToolTip(_statusUnstagedUntracked,	_statusUnstagedUntrackedToolTip,	false,	FileStatus.Added);
+			SetToolTip(_statusUnstagedRemoved,		_statusUnstagedRemovedToolTip,		false,	FileStatus.Removed);
+			SetToolTip(_statusUnstagedModified,		_statusUnstagedModifiedToolTip,		false,	FileStatus.Modified);
 		}
 
 		private void OnUserLabelMouseDown(object sender, MouseEventArgs e)
@@ -718,6 +701,17 @@
 		public ToolStripItem RemoteLabel
 		{
 			get { return _remoteLabel; }
+		}
+
+		public void Dispose()
+		{
+			_statusUnmergedToolTip.Dispose();
+			_statusStagedAddedToolTip.Dispose();
+			_statusStagedModifiedToolTip.Dispose();
+			_statusStagedRemovedToolTip.Dispose();
+			_statusUnstagedUntrackedToolTip.Dispose();
+			_statusUnstagedModifiedToolTip.Dispose();
+			_statusUnstagedRemovedToolTip.Dispose();
 		}
 	}
 }
