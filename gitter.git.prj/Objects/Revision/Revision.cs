@@ -5,15 +5,14 @@
 
 	using gitter.Git.AccessLayer;
 
-	public sealed class Revision : GitNamedObject, IRevisionPointer
+	public sealed partial class Revision : GitNamedObject, IRevisionPointer
 	{
 		#region Data
 
 		private bool _loaded;
 
-		private readonly List<Revision> _parents;
-
-		private readonly SortedDictionary<string, IRevisionPointer> _refs;
+		private readonly RevisionParentsCollection _parents;
+		private readonly RevisionReferencesCollection _references;
 
 		private string _subject;
 		private string _body;
@@ -28,26 +27,6 @@
 
 		#endregion
 
-		#region Events
-
-		public event EventHandler ReferenceListChanged;
-
-		private void InvokeReferenceListChanged()
-		{
-			var handler = ReferenceListChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
-
-		public event EventHandler NoteChanged;
-
-		private void InvokeNoteChanged()
-		{
-			var handler = NoteChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
-
-		#endregion
-
 		#region .ctor
 
 		internal Revision(Repository repository, string hash)
@@ -56,8 +35,8 @@
 			if(hash == null) throw new ArgumentNullException("hash");
 			if(hash.Length != 40) throw new ArgumentException("hash");
 
-			_parents = new List<Revision>(2);
-			_refs = new SortedDictionary<string, IRevisionPointer>();
+			_parents = new RevisionParentsCollection();
+			_references = new RevisionReferencesCollection();
 		}
 
 		#endregion
@@ -77,84 +56,19 @@
 
 		#region Properties
 
-		public IList<Revision> Parents
+		public RevisionParentsCollection Parents
 		{
 			get { return _parents; }
+		}
+
+		public RevisionReferencesCollection References
+		{
+			get { return _references; }
 		}
 
 		public bool IsCurrent
 		{
 			get { return Repository.Head.Revision == this; }
-		}
-
-		public IDictionary<string, IRevisionPointer> Refs
-		{
-			get { return _refs; }
-		}
-
-		public object RefsSyncRoot
-		{
-			get { return _refs; }
-		}
-
-		public IList<Branch> GetBranches()
-		{
-			lock(RefsSyncRoot)
-			{
-				if(_refs.Count == 0) return new Branch[0];
-				var list = new List<Branch>(_refs.Count);
-				foreach(var reference in _refs.Values)
-				{
-					var branch = reference as Branch;
-					if(branch != null) list.Add(branch);
-				}
-				return list;
-			}
-		}
-
-		public IList<RemoteBranch> GetRemoteBranches()
-		{
-			lock(RefsSyncRoot)
-			{
-				if(_refs.Count == 0) return new RemoteBranch[0];
-				var list = new List<RemoteBranch>(_refs.Count);
-				foreach(var reference in _refs.Values)
-				{
-					var branch = reference as RemoteBranch;
-					if(branch != null) list.Add(branch);
-				}
-				return list;
-			}
-		}
-
-		public IList<BranchBase> GetAllBranches()
-		{
-			lock(RefsSyncRoot)
-			{
-				if(_refs.Count == 0) return new BranchBase[0];
-				var list = new List<BranchBase>(_refs.Count);
-				foreach(var reference in _refs.Values)
-				{
-					var branch = reference as BranchBase;
-					if(branch != null) list.Add(branch);
-				}
-				return list;
-			}
-		}
-
-		public IList<Tag> GetTags()
-		{
-			lock(RefsSyncRoot)
-			{
-				if(_refs.Count == 0) return new Tag[0];
-				var list = new List<Tag>(_refs.Count);
-				foreach(var reference in _refs.Values)
-				{
-					var tag = reference as Tag;
-					if(tag != null) list.Add(tag);
-				}
-				return list;
-			}
 		}
 
 		#endregion
@@ -247,58 +161,6 @@
 			{
 				_body = value;
 			}
-		}
-
-		#endregion
-
-		#region Reference List Management
-
-		internal void RemoveRef(string reference)
-		{
-			if(reference == null) throw new ArgumentNullException("reference");
-
-			bool removed;
-			lock(RefsSyncRoot)
-			{
-				removed = _refs.Remove(reference);
-			}
-			if(removed) InvokeReferenceListChanged();
-		}
-
-		internal void RemoveRef(IRevisionPointer reference)
-		{
-			if(reference == null) throw new ArgumentNullException("reference");
-
-			bool removed;
-			lock(RefsSyncRoot)
-			{
-				removed = _refs.Remove(reference.FullName);
-			}
-			if(removed) InvokeReferenceListChanged();
-		}
-
-		internal void RenameRef(string oldName, IRevisionPointer reference)
-		{
-			if(reference == null) throw new ArgumentNullException("reference");
-			if(oldName == null) throw new ArgumentNullException("oldName");
-
-			lock(RefsSyncRoot)
-			{
-				_refs.Remove(oldName);
-				_refs.Add(reference.FullName, reference);
-			}
-			InvokeReferenceListChanged();
-		}
-
-		internal void AddRef(IRevisionPointer reference)
-		{
-			if(reference == null) throw new ArgumentNullException("reference");
-
-			lock(RefsSyncRoot)
-			{
-				_refs.Add(reference.FullName, reference);
-			}
-			InvokeReferenceListChanged();
 		}
 
 		#endregion

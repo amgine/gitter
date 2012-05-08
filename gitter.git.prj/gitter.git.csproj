@@ -116,6 +116,8 @@
     <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerItemBase.cs" />
     <Compile Include="Gui\RepositoryExplorer\RepositoryStashListItem.cs" />
     <Compile Include="ObjectFactories.cs" />
+    <Compile Include="Objects\Revision\Revision.ParentsCollection.cs" />
+    <Compile Include="Objects\Revision\Revision.ReferencesCollection.cs" />
     <Compile Include="Objects\Tree\RevisionTreeSource.cs" />
     <Compile Include="Objects\Tree\TreeSourceBase.cs" />
     <Compile Include="Properties\CachedResources.cs" />

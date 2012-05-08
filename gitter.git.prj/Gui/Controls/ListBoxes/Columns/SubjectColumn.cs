@@ -288,12 +288,12 @@
 			#region paint tag & branch refs
 
 			bool refsPresent;
-			lock(data.RefsSyncRoot)
+			lock(data.References.SyncRoot)
 			{
-				refsPresent = data.Refs.Count != 0;
+				refsPresent = data.References.Count != 0;
 				if((showLocalBranches || showRemoteBranches || showTags) && refsPresent)
 				{
-					foreach(var reference in data.Refs.Values)
+					foreach(var reference in data.References)
 					{
 						int w = 0;
 						switch(reference.Type)

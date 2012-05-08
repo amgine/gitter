@@ -147,7 +147,7 @@
 			var revision = rev as Revision;
 			if(revision != null)
 			{
-				foreach(var branch in revision.GetBranches())
+				foreach(var branch in revision.References.GetBranches())
 				{
 					if(!branch.IsRemote && !branch.IsCurrent)
 					{

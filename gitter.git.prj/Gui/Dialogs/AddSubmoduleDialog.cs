@@ -69,6 +69,10 @@
 		public bool Execute()
 		{
 			var path = _txtPath.Text.Trim();
+			if(!ValidatePath(path, _txtPath))
+			{
+				return false;
+			}
 			var url = _txtRepository.Text.Trim();
 			var branch = _chkBranch.Checked ? _txtBranch.Text.Trim() : null;
 			try

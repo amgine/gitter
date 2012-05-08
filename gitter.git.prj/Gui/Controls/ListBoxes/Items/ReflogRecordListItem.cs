@@ -42,6 +42,10 @@
 			{
 				_image = CachedResources.Bitmaps["ImgBranch"];
 			}
+			else if(DataContext.Message.StartsWith("Branch: renamed "))
+			{
+				_image = CachedResources.Bitmaps["ImgBranchRename"];
+			}
 			else if(DataContext.Message.StartsWith("branch: Reset "))
 			{
 				_image = CachedResources.Bitmaps["ImgReset"];

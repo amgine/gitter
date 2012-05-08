@@ -533,7 +533,7 @@
 				if(!revIsLocalBranch)
 				{
 					var rev = revision.Dereference();
-					var branches = rev.GetBranches();
+					var branches = rev.References.GetBranches();
 					for(int i = branches.Count - 1; i >= 0; --i)
 					{
 						if(branches[i].IsRemote || branches[i].IsCurrent)

@@ -384,14 +384,14 @@
 		/// <param name="pointer"><see cref="Revision"/>, which this <see cref="Reference"/> was pointing to.</param>
 		protected virtual void LeaveRevision(Revision revision)
 		{
-			revision.RemoveRef(this);
+			revision.References.Remove(this);
 		}
 
 		/// <summary>Called when this <see cref="Reference"/> is moved to <paramref name="Revision"/>.</summary>
 		/// <param name="pointer"><see cref="Revision"/>, which this <see cref="Reference"/> will be pointing to.</param>
 		protected virtual void EnterRevision(Revision revision)
 		{
-			revision.AddRef(this);
+			revision.References.Add(this);
 		}
 
 		/// <summary>Called after marking this <see cref="Reference"/> as deleted.</summary>

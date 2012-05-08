@@ -251,7 +251,7 @@
 		/// <param name="oldName">Old name.</param>
 		internal void NotifyRenamed(Branch branch, string oldName)
 		{
-			branch.Revision.RenameRef(GitConstants.LocalBranchPrefix + oldName, branch);
+			branch.Revision.References.Rename(GitConstants.LocalBranchPrefix + oldName, branch);
 			lock(SyncRoot)
 			{
 				ObjectStorage.Remove(oldName);

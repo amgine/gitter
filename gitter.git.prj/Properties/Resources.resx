@@ -864,7 +864,7 @@ share many of the same objects in common. Enabled by default.</value>
     <value>No path specified</value>
   </data>
   <data name="ErrPathCannotBeEmpty" xml:space="preserve">
-    <value>Path cannot be empty.</value>
+    <value>Path cannot be empty</value>
   </data>
   <data name="ErrFailedToPull" xml:space="preserve">
     <value>Unable to pull</value>

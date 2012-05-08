@@ -54,7 +54,7 @@
 
 			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(_revision));
 
-			var branches = _revision.GetAllBranches();
+			var branches = _revision.References.GetAllBranches();
 			if(branches.Count != 0)
 			{
 				if(branches.Count == 1)
@@ -77,7 +77,7 @@
 
 			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(_revision));
 
-			var tags = _revision.GetTags();
+			var tags = _revision.References.GetTags();
 			if(tags.Count != 0)
 			{
 				if(tags.Count == 1)

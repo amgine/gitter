@@ -346,7 +346,7 @@
 						if(!found)
 						{
 							var obj = CreateRevision(repository, info);
-							revision.Parents.Insert(id, obj);
+							revision.Parents.InsertInternal(id, obj);
 						}
 						++id;
 					}
@@ -354,7 +354,7 @@
 					{
 						foreach(var obj in hset)
 						{
-							revision.Parents.Remove(obj);
+							revision.Parents.RemoveInternal(obj);
 						}
 					}
 				}
@@ -415,7 +415,7 @@
 					foreach(var parentData in revisionData.Parents)
 					{
 						var parent = revisions.GetOrCreateRevision(parentData.SHA1);
-						obj.Parents.Add(parent);
+						obj.Parents.AddInternal(parent);
 					}
 				}
 				if((fields & RevisionField.CommitDate) == RevisionField.CommitDate)

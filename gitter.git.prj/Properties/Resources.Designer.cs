@@ -976,7 +976,7 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Path cannot be empty..
+        ///   Looks up a localized string similar to Path cannot be empty.
         /// </summary>
         internal static string ErrPathCannotBeEmpty {
             get {

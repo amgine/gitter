@@ -395,9 +395,9 @@
 			if(rev.Committer.Name.Contains(search.Text)) return true;
 			if(rev.SHA1.StartsWith(search.Text)) return true;
 			if(rev.TreeHash.StartsWith(search.Text)) return true;
-			lock(rev.RefsSyncRoot)
+			lock(rev.References.SyncRoot)
 			{
-				foreach(var reference in rev.Refs.Values)
+				foreach(var reference in rev.References)
 				{
 					if(reference.FullName.Contains(search.Text)) return true;
 				}

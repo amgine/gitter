@@ -57,7 +57,8 @@
 		{
 			Hash,
 			TreeHash,
-			Date,
+			CommitDate,
+			AuthorDate,
 			Author,
 			Committer,
 			Subject,
@@ -122,6 +123,18 @@
 			{
 				var handler = CursorChangeRequired;
 				if(handler != null) handler(this, new CursorChangedEventArgs(cursor));
+			}
+
+			private readonly FlowPanel _owner;
+
+			protected BaseElement(FlowPanel owner)
+			{
+				_owner = owner;
+			}
+
+			public FlowPanel Owner
+			{
+				get { return _owner; }
 			}
 
 			public abstract Element Element { get; }
@@ -258,6 +271,11 @@
 
 		protected sealed class HashElement : BaseElement
 		{
+			public HashElement(FlowPanel owner)
+				: base(owner)
+			{
+			}
+
 			public override Element Element
 			{
 				get { return RevisionHeaderPanel.Element.Hash; }
@@ -284,6 +302,11 @@
 
 		protected sealed class TreeHashElement : BaseElement
 		{
+			public TreeHashElement(FlowPanel owner)
+				: base(owner)
+			{
+			}
+
 			public override Element Element
 			{
 				get { return RevisionHeaderPanel.Element.TreeHash; }
@@ -310,6 +333,11 @@
 
 		protected sealed class ParentsElement : BaseElement
 		{
+			public ParentsElement(FlowPanel owner)
+				: base(owner)
+			{
+			}
+
 			public override Element Element
 			{
 				get { return RevisionHeaderPanel.Element.Parents; }
@@ -373,6 +401,11 @@
 
 		protected sealed class AuthorElement : BaseElement
 		{
+			public AuthorElement(FlowPanel owner)
+				: base(owner)
+			{
+			}
+
 			public override Element Element
 			{
 				get { return RevisionHeaderPanel.Element.Author; }
@@ -401,6 +434,11 @@
 
 		protected sealed class CommitterElement : BaseElement
 		{
+			public CommitterElement(FlowPanel owner)
+				: base(owner)
+			{
+			}
+
 			public override bool IsAvailableFor(Revision revision)
 			{
 				return revision.Author != revision.Committer;
@@ -432,11 +470,12 @@
 			}
 		}
 
-		protected sealed class DateElement : BaseElement
+		protected sealed class CommitDateElement : BaseElement
 		{
 			private DateFormat _dateFormat;
 
-			public DateElement()
+			public CommitDateElement(FlowPanel owner)
+				: base(owner)
 			{
 				_dateFormat = DateFormat.ISO8601;
 			}
@@ -458,7 +497,7 @@
 
 			public override Element Element
 			{
-				get { return RevisionHeaderPanel.Element.Date; }
+				get { return RevisionHeaderPanel.Element.CommitDate; }
 			}
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
@@ -477,8 +516,59 @@
 			}
 		}
 
+		protected sealed class AuthorDateElement : BaseElement
+		{
+			private DateFormat _dateFormat;
+
+			public AuthorDateElement(FlowPanel owner)
+				: base(owner)
+			{
+				_dateFormat = DateFormat.ISO8601;
+			}
+
+			public override ContextMenuStrip CreateContextMenu(Revision revision)
+			{
+				var menu = new ContextMenuStrip();
+				menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
+					Utility.FormatDate(revision.AuthorDate, _dateFormat)));
+				Utility.MarkDropDownForAutoDispose(menu);
+				return menu;
+			}
+
+			public DateFormat DateFormat
+			{
+				get { return _dateFormat; }
+				set { _dateFormat = value; }
+			}
+
+			public override Element Element
+			{
+				get { return RevisionHeaderPanel.Element.AuthorDate; }
+			}
+
+			public override Size Measure(Graphics graphics, Revision revision, int width)
+			{
+				return Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.AuthorDate, _dateFormat), width);
+			}
+
+			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
+			{
+				DefaultPaint(
+					graphics,
+					GitterApplication.FontManager.UIFont,
+					Resources.StrDate.AddColon(),
+					Utility.FormatDate(revision.AuthorDate, _dateFormat),
+					rect);
+			}
+		}
+
 		protected sealed class SubjectElement : BaseElement
 		{
+			public SubjectElement(FlowPanel owner)
+				: base(owner)
+			{
+			}
+
 			private TextWithHyperlinks _text;
 
 			public override Element Element
@@ -552,6 +642,11 @@
 		protected sealed class BodyElement : BaseElement
 		{
 			private TextWithHyperlinks _text;
+
+			public BodyElement(FlowPanel owner)
+				: base(owner)
+			{
+			}
 
 			public override bool IsAvailableFor(Revision revision)
 			{
@@ -629,12 +724,39 @@
 
 		protected sealed class ReferencesElement : BaseElement
 		{
+			private struct ReferenceVisual
+			{
+				private readonly Reference _reference;
+				private readonly Rectangle _rectangle;
+
+				public ReferenceVisual(Reference reference, Rectangle rectangle)
+				{
+					_reference = reference;
+					_rectangle = rectangle;
+				}
+
+				public Reference Reference
+				{
+					get { return _reference; }
+				}
+
+				public Rectangle Rectangle
+				{
+					get { return _rectangle; }
+				}
+			}
+
+			private LinkedList<ReferenceVisual> _drawnReferences;
+
+			public ReferencesElement(FlowPanel owner)
+				: base(owner)
+			{
+				_drawnReferences = new LinkedList<ReferenceVisual>();
+			}
+
 			public override bool IsAvailableFor(Revision revision)
 			{
-				lock(revision.RefsSyncRoot)
-				{
-					return revision.Refs.Count != 0;
-				}
+				return revision.References.Count != 0;
 			}
 
 			public override Element Element
@@ -642,14 +764,44 @@
 				get { return RevisionHeaderPanel.Element.References; }
 			}
 
+			public override void MouseDown(Rectangle rect, MouseButtons button, int x, int y)
+			{
+				if(button == MouseButtons.Right)
+				{
+					foreach(var reference in _drawnReferences)
+					{
+						if(reference.Rectangle.Contains(x, y))
+						{
+							var branch = reference.Reference as BranchBase;
+							if(branch != null)
+							{
+								var menu = new BranchMenu(branch);
+								Utility.MarkDropDownForAutoDispose(menu);
+								menu.Show(Owner.FlowControl, x + 1, y + 1);
+								return;
+							}
+							var tag = reference.Reference as Tag;
+							if(tag != null)
+							{
+								var menu = new TagMenu(tag);
+								Utility.MarkDropDownForAutoDispose(menu);
+								menu.Show(Owner.FlowControl, x + 1, y + 1);
+								return;
+							}
+							return;
+						}
+					}
+				}
+			}
+
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
 				var font = GitterApplication.FontManager.UIFont.Font;
-				lock(revision.RefsSyncRoot)
+				lock(revision.References.SyncRoot)
 				{
-					if(revision.Refs.Count == 0) return Size.Empty;
+					if(revision.References.Count == 0) return Size.Empty;
 					int offset = 0;
-					foreach(var reference in revision.Refs.Values)
+					foreach(var reference in revision.References)
 					{
 						var name = ((INamedObject)reference).Name;
 						var size = GitterApplication.TextRenderer.MeasureText(graphics, name, font, int.MaxValue, ContentFormat);
@@ -663,6 +815,7 @@
 			{
 				const float Radius = 3;
 
+				_drawnReferences.Clear();
 				PaintHeader(graphics, Resources.StrRefs.AddColon(), rect);
 				var font = GitterApplication.FontManager.UIFont.Font;
 				var r2 = new Rectangle(rect.X + HeaderWidth, rect.Y, rect.Width - HeaderWidth, rect.Height);
@@ -672,9 +825,9 @@
 				using(var localBrush = new SolidBrush(ColorScheme.LocalBranchBackColor))
 				using(var remoteBrush = new SolidBrush(ColorScheme.RemoteBranchBackColor))
 				{
-					lock(revision.RefsSyncRoot)
+					lock(revision.References.SyncRoot)
 					{
-						foreach(var reference in revision.Refs.Values)
+						foreach(var reference in revision.References)
 						{
 							var name = ((INamedObject)reference).Name;
 							var size = GitterApplication.TextRenderer.MeasureText(
@@ -700,6 +853,7 @@
 							var textRect = new Rectangle(r2.X + offset + 3, r2.Y, size.Width + 5, size.Height);
 							GitterApplication.TextRenderer.DrawText(
 								graphics, name, font, SystemBrushes.WindowText, textRect, ContentFormat);
+							_drawnReferences.AddLast(new ReferenceVisual(reference, r));
 							offset += size.Width + 3 + 6;
 						}
 					}
@@ -728,14 +882,14 @@
 		{
 			_elements = new IRevisionHeaderElement[]
 			{
-				new HashElement(),
-				new ParentsElement(),
-				new AuthorElement(),
-				new CommitterElement(),
-				new DateElement(),
-				new SubjectElement(),
-				new BodyElement(),
-				new ReferencesElement(),
+				new HashElement(this),
+				new ParentsElement(this),
+				new AuthorElement(this),
+				new CommitterElement(this),
+				new CommitDateElement(this),
+				new SubjectElement(this),
+				new BodyElement(this),
+				new ReferencesElement(this),
 			};
 			foreach(var e in _elements)
 			{
@@ -831,14 +985,14 @@
 		protected override void OnFlowControlAttached()
 		{
 			_revision.Author.Avatar.Updated += OnAuthorAvatarUpdated;
-			_revision.ReferenceListChanged += OnRefListChanged;
+			_revision.References.Changed += OnRefListChanged;
 			base.OnFlowControlAttached();
 		}
 
 		protected override void OnFlowControlDetached()
 		{
 			_revision.Author.Avatar.Updated -= OnAuthorAvatarUpdated;
-			_revision.ReferenceListChanged -= OnRefListChanged;
+			_revision.References.Changed -= OnRefListChanged;
 			base.OnFlowControlDetached();
 		}
 
@@ -852,9 +1006,9 @@
 			Size size;
 			_sizes.TryGetValue(Element.References, out size);
 			bool norefs;
-			lock(_revision.RefsSyncRoot)
+			lock(_revision.References.SyncRoot)
 			{
-				norefs = _revision.Refs.Count == 0;
+				norefs = _revision.References.Count == 0;
 			}
 			if((size.IsEmpty && !norefs) ||
 				(!size.IsEmpty && norefs))

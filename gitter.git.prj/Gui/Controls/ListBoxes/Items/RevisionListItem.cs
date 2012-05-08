@@ -27,13 +27,13 @@
 
 		protected override void OnListBoxAttached()
 		{
-			DataContext.ReferenceListChanged += OnReferenceListChanged;
+			DataContext.References.Changed += OnReferenceListChanged;
 			base.OnListBoxAttached();
 		}
 
 		protected override void OnListBoxDetached()
 		{
-			DataContext.ReferenceListChanged -= OnReferenceListChanged;
+			DataContext.References.Changed -= OnReferenceListChanged;
 			_drawnPointers.Clear();
 			base.OnListBoxDetached();
 		}
