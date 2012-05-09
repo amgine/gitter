@@ -281,7 +281,7 @@
 			int drawnRefs = 0;
 			int xoffset = 0;
 			var font = paintEventArgs.Column.ContentFont;
-			SubItemPaintEventArgs.PrepareRectangle(ref rect);
+			SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
 
 			#endregion
 

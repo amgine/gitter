@@ -12,7 +12,7 @@
 		private readonly Rectangle _clipRectangle;
 		private readonly Rectangle _bounds;
 		private readonly int _index;
-		private readonly ItemState _itemStyle;
+		private readonly ItemState _itemState;
 		private readonly int _hoveredPart;
 		private readonly bool _hostControlFocused;
 
@@ -36,7 +36,7 @@
 			_clipRectangle = clipRectangle;
 			_bounds = bounds;
 			_index = index;
-			_itemStyle = state;
+			_itemState = state;
 			_hoveredPart = hoveredPart;
 			_hostControlFocused = hostControlFocused;
 		}
@@ -71,7 +71,7 @@
 		/// <summary>Gets the state of the item being drawn.</summary>
 		public ItemState State
 		{
-			get { return _itemStyle; }
+			get { return _itemState; }
 		}
 
 		/// <summary>Hovered part of the item.</summary>
@@ -92,7 +92,7 @@
 
 		/// <summary>Prepare rectangle <paramref name="rect"/> for painting by applying content ofsets.</summary>
 		/// <param name="rect">Rectangle to prepare.</param>
-		public static void PrepareRectangle(ref Rectangle rect)
+		public static void PrepareContentRectangle(ref Rectangle rect)
 		{
 			rect.X += ListBoxConstants.ContentSpacing;
 			rect.Width -= ListBoxConstants.ContentSpacing * 2;

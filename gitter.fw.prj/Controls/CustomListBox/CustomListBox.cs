@@ -113,6 +113,7 @@
 		private int _draggedHeaderIndex;
 		private int _draggedHeaderPositionIndex;
 		private int _draggedHeaderPosition;
+		private DragHelper _headerDragHelper;
 		private bool _haveAutoSizeColumns;
 
 		private int _resizedHeaderSide;
@@ -185,6 +186,7 @@
 			_itemHover = new TrackingService<CustomListBoxItem>(OnItemHoverChanged);
 			_itemFocus = new TrackingService<CustomListBoxItem>(OnItemFocusChanged);
 			_headerHover = new TrackingService<CustomListBoxColumn>(OnHeaderHoverChanged);
+			_headerDragHelper = new DragHelper();
 
 			_showRootTreeLines = true;
 			_allowColumnReorder = true;
@@ -1741,7 +1743,10 @@
 		{
 			if(_draggedHeaderIndex != -1)
 			{
-				PerformHeaderDrag(e);
+				if(_headerDragHelper.IsTracking && _headerDragHelper.Update(e.X, e.Y))
+				{
+					PerformHeaderDrag(e);
+				}
 			}
 			else if(_resizedHeaderIndex != -1)
 			{
@@ -1772,16 +1777,19 @@
 		{
 			if(_draggedHeaderIndex != -1)
 			{
-				if(_draggedHeaderPositionIndex != _draggedHeaderIndex)
+				if(_headerDragHelper.IsDragging)
 				{
-					_columns.Changed -= OnColumnsChanged;
-					_columns.RemoveAt(_draggedHeaderIndex);
-					if(_draggedHeaderPositionIndex > _draggedHeaderIndex)
+					if(_draggedHeaderPositionIndex != _draggedHeaderIndex)
 					{
-						--_draggedHeaderPositionIndex;
+						_columns.Changed -= OnColumnsChanged;
+						_columns.RemoveAt(_draggedHeaderIndex);
+						if(_draggedHeaderPositionIndex > _draggedHeaderIndex)
+						{
+							--_draggedHeaderPositionIndex;
+						}
+						_columns.Insert(_draggedHeaderPositionIndex, _draggedHeader);
+						_columns.Changed += OnColumnsChanged;
 					}
-					_columns.Insert(_draggedHeaderPositionIndex, _draggedHeader);
-					_columns.Changed += OnColumnsChanged;
 					_draggedHeaderIndex = -1;
 					UpdateColumnOffsets();
 					Invalidate(ClientArea);
@@ -1792,6 +1800,10 @@
 					_draggedHeaderIndex = -1;
 					Invalidate(_headersArea);
 				}
+			}
+			if(_headerDragHelper.IsTracking)
+			{
+				_headerDragHelper.Stop();
 			}
 			if(_resizedHeaderIndex != -1)
 			{
@@ -1886,6 +1898,8 @@
 						{
 							_draggedHeader = _columns[itemIndex];
 							_draggedHeaderPosition = GetColumnX(itemIndex) - HScrollPos;
+							_headerDragHelper.Start(e.X, e.Y);
+							InvalidateColumn(_draggedHeaderIndex);
 						}
 						else
 						{
@@ -2628,7 +2642,7 @@
 						columnRect.X = _draggedHeaderPosition;
 						columnRect.Width = w;
 						column.Paint(new ItemPaintEventArgs(
-							gx, clip, columnRect, i, ItemState.Hovered, ColumnHitTestResults.Default, focused));
+							gx, clip, columnRect, i, ItemState.Pressed, ColumnHitTestResults.Default, focused));
 					}
 				}
 			}

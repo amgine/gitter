@@ -249,7 +249,7 @@
 					{
 						var rect = paintEventArgs.Bounds;
 						var graphics = paintEventArgs.Graphics;
-						SubItemPaintEventArgs.PrepareRectangle(ref rect);
+						SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
 						paintEventArgs.PrepareTextRectangle(paintEventArgs.Font, ref rect);
 						var r2 = rect;
 						rect.Width -= 20;

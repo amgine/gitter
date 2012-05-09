@@ -179,7 +179,7 @@
 		{
 			var rect = Bounds;
 			var graphics = Graphics;
-			PrepareRectangle(ref rect);
+			PrepareContentRectangle(ref rect);
 			PrepareTextRectangle(font, ref rect);
 			GitterApplication.TextRenderer.DrawText(
 				graphics, text, font, brush, rect, stringFormat);
@@ -342,7 +342,7 @@
 		{
 			var rect = Bounds;
 			var graphics = Graphics;
-			PrepareRectangle(ref rect);
+			PrepareContentRectangle(ref rect);
 			if(image != null)
 			{
 				int w = image.Width;
@@ -527,7 +527,7 @@
 		{
 			var rect = Bounds;
 			var graphics = Graphics;
-			PrepareRectangle(ref rect);
+			PrepareContentRectangle(ref rect);
 			if(icon != null)
 			{
 				int w = icon.Width;

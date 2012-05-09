@@ -403,53 +403,107 @@
 			var state = paintEventArgs.State;
 			var rect = paintEventArgs.Bounds;
 
-			if(state == ItemState.None)
+			switch(state)
 			{
-				var c1 = Color.FromArgb(223, 234, 247);
-				var c2 = Color.FromArgb(255, 255, 255);
-				var rc = new Rectangle(rect.Right - 1, 0, 1, rect.Height);
-				using(var brush = new LinearGradientBrush(
-					rc, c1, c2, LinearGradientMode.Vertical))
-				{
-					graphics.FillRectangle(brush, rc);
-				}
-			}
-			else
-			{
-				var c1 = Color.FromArgb(227, 232, 238);
-				var c2 = Color.FromArgb(241, 245, 251);
-				using(var p = new Pen(c1))
-				{
-					var rc = rect;
-					rc.Y -= 1;
-					rc.Width -= 1;
-					graphics.DrawRectangle(p, rc);
-				}
-				using(var b = new SolidBrush(c2))
-				{
-					var rc = rect;
-					rc.X += 2;
-					rc.Y += 1;
-					rc.Width -= 4;
-					rc.Height -= 3;
-					graphics.FillRectangle(b, rc);
-				}
-				if(_extender != null)
-				{
-					if(rect.Width > ExtenderButtonWidth)
+				case ItemState.None:
 					{
-						if(paintEventArgs.HoveredPart == ColumnHitTestResults.Extender)
+						var c1 = Color.FromArgb(223, 234, 247);
+						var c2 = Color.FromArgb(255, 255, 255);
+						var rc = new Rectangle(rect.Right - 1, 0, 1, rect.Height);
+						using(var brush = new LinearGradientBrush(
+							rc, c1, c2, LinearGradientMode.Vertical))
 						{
-							graphics.FillRectangle(ExtenderHoveredBrush, rect.Right - ExtenderButtonWidth + 1.5f, rect.Y + 1.5f, ExtenderButtonWidth - 4, rect.Height - 4);
-							graphics.DrawRectangle(ExtenderBorderPenHovered, rect.Right - ExtenderButtonWidth, 0, ExtenderButtonWidth - 1, rect.Height - 1);
+							graphics.FillRectangle(brush, rc);
 						}
-						else
-						{
-							graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height);
-						}
-						graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
 					}
-				}
+					break;
+				case ItemState.Pressed:
+					{
+						var c1 = Color.FromArgb(192, 203, 217);
+						var c2 = Color.FromArgb(246, 247, 248);
+						var c3 = Color.FromArgb(193, 204, 218);
+						var c4 = Color.FromArgb(215, 222, 231);
+						var c5 = Color.FromArgb(235, 238, 242);
+						using(var p = new Pen(c1))
+						{
+							var rc = rect;
+							rc.Y -= 1;
+							rc.X += 1;
+							rc.Width -= 2;
+							graphics.DrawRectangle(p, rc);
+						}
+						using(var b = new SolidBrush(c2))
+						{
+							var rc = rect;
+							rc.Y += 3;
+							rc.X += 2;
+							rc.Width -= 4;
+							rc.Height -= 4;
+							graphics.FillRectangle(b, rc);
+						}
+						using(var p = new Pen(c3))
+						{
+							var rc = rect;
+							graphics.DrawLine(p, rc.X + 1, rc.Y + 0, rc.Right - 2, rc.Y + 0);
+						}
+						using(var p = new Pen(c4))
+						{
+							var rc = rect;
+							graphics.DrawLine(p, rc.X + 1, rc.Y + 1, rc.Right - 2, rc.Y + 1);
+						}
+						using(var p = new Pen(c5))
+						{
+							var rc = rect;
+							graphics.DrawLine(p, rc.X + 1, rc.Y + 2, rc.Right - 2, rc.Y + 2);
+						}
+						if(_extender != null)
+						{
+							if(rect.Width > ExtenderButtonWidth)
+							{
+								graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height - 1);
+								graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
+							}
+						}
+					}
+					break;
+				default:
+					{
+						var c1 = Color.FromArgb(227, 232, 238);
+						var c2 = Color.FromArgb(241, 245, 251);
+						using(var p = new Pen(c1))
+						{
+							var rc = rect;
+							rc.Y -= 1;
+							rc.Width -= 1;
+							graphics.DrawRectangle(p, rc);
+						}
+						using(var b = new SolidBrush(c2))
+						{
+							var rc = rect;
+							rc.X += 2;
+							rc.Y += 1;
+							rc.Width -= 4;
+							rc.Height -= 3;
+							graphics.FillRectangle(b, rc);
+						}
+						if(_extender != null)
+						{
+							if(rect.Width > ExtenderButtonWidth)
+							{
+								if(paintEventArgs.HoveredPart == ColumnHitTestResults.Extender)
+								{
+									graphics.FillRectangle(ExtenderHoveredBrush, rect.Right - ExtenderButtonWidth + 1.5f, rect.Y + 1.5f, ExtenderButtonWidth - 4, rect.Height - 4);
+									graphics.DrawRectangle(ExtenderBorderPenHovered, rect.Right - ExtenderButtonWidth, 0, ExtenderButtonWidth - 1, rect.Height - 1);
+								}
+								else
+								{
+									graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height);
+								}
+								graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
+							}
+						}
+					}
+					break;
 			}
 		}
 
@@ -459,9 +513,9 @@
 			var rect = paintEventArgs.Bounds;
 			var font = HeaderFont;
 
-			ItemPaintEventArgs.PrepareRectangle(ref rect);
+			ItemPaintEventArgs.PrepareContentRectangle(ref rect);
 			paintEventArgs.PrepareTextRectangle(font, font, ref rect);
-			if(_extender != null && ((paintEventArgs.State & ItemState.Hovered) == ItemState.Hovered))
+			if(_extender != null && ((paintEventArgs.State & (ItemState.Hovered | ItemState.Pressed)) != ItemState.None))
 			{
 				rect.Width -= ExtenderButtonWidth;
 				if(rect.Width <= 0) return;

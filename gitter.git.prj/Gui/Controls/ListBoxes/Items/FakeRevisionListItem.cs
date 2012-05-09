@@ -174,7 +174,7 @@
 					rect.Width += availWidth;
 				}
 			}
-			SubItemPaintEventArgs.PrepareRectangle(ref rect);
+			SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
 			if(rect.Width > 1)
 			{
 				string text;
