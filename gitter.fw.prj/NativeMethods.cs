@@ -314,6 +314,28 @@
 			[In] IntPtr hrgnUpdate,
 			[Out]out RECT lprcUpdate);
 
+		[DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
+		public static extern int ScrollWindowEx(
+			[In]  IntPtr hWnd,
+			[In]  int nXAmount,
+			[In]  int nYAmount,
+			[In]  ref RECT rectScrollRegion,
+			[In]  ref RECT rectClip,
+			[In]  IntPtr hrgnUpdate,
+			[Out] out RECT prcUpdate,
+			[In]  int flags);
+
+		[DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
+		public static extern int ScrollWindowEx(
+			[In]  IntPtr hWnd,
+			[In]  int nXAmount,
+			[In]  int nYAmount,
+			[In]  ref RECT rectScrollRegion,
+			[In]  ref RECT rectClip,
+			[In]  IntPtr hrgnUpdate,
+			[In]  IntPtr prcUpdate,
+			[In]  int flags);
+
 		public struct RECT
 		{
 			public int left;

@@ -754,43 +754,29 @@
 		private void ScrollY(int dy)
 		{
 			var hwnd = Handle;
-			var hdc = NativeMethods.GetDC(hwnd);
-			NativeMethods.RECT scroll, clip;
-			if(VScrollAffectsClientArea)
-			{
-				scroll = new NativeMethods.RECT(_clientArea);
-				clip = new NativeMethods.RECT(_clientArea);
-			}
-			else
-			{
-				scroll = new NativeMethods.RECT(_contentArea);
-				clip = new NativeMethods.RECT(_contentArea);
-			}
-			NativeMethods.RECT invalid;
-			NativeMethods.ScrollDC(hdc, 0, dy, ref scroll, ref clip, IntPtr.Zero, out invalid);
-			NativeMethods.ReleaseDC(hwnd, hdc);
-			Invalidate(Rectangle.FromLTRB(invalid.left, invalid.top, invalid.right, invalid.bottom));
+			var scroll = VScrollAffectsClientArea ?
+				new NativeMethods.RECT(_clientArea) :
+				new NativeMethods.RECT(_contentArea);
+			NativeMethods.ScrollWindowEx(
+				hwnd,
+				0, dy,
+				ref scroll, ref scroll,
+				IntPtr.Zero, IntPtr.Zero,
+				0x0002);
 		}
 
 		private void ScrollX(int dx)
 		{
 			var hwnd = Handle;
-			var hdc = NativeMethods.GetDC(hwnd);
-			NativeMethods.RECT scroll, clip;
-			if(HScrollAffectsClientArea)
-			{
-				scroll	= new NativeMethods.RECT(_clientArea);
-				clip	= new NativeMethods.RECT(_clientArea);
-			}
-			else
-			{
-				scroll	= new NativeMethods.RECT(_contentArea);
-				clip	= new NativeMethods.RECT(_contentArea);
-			}
-			NativeMethods.RECT invalid;
-			NativeMethods.ScrollDC(hdc, dx, 0, ref scroll, ref clip, IntPtr.Zero, out invalid);
-			NativeMethods.ReleaseDC(hwnd, hdc);
-			Invalidate(Rectangle.FromLTRB(invalid.left, invalid.top, invalid.right, invalid.bottom));
+			var scroll = HScrollAffectsClientArea ?
+				new NativeMethods.RECT(_clientArea) :
+				new NativeMethods.RECT(_contentArea);
+			NativeMethods.ScrollWindowEx(
+				hwnd,
+				dx, 0,
+				ref scroll, ref scroll,
+				IntPtr.Zero, IntPtr.Zero,
+				0x0002);
 		}
 
 		private static int ClampScrollPosition(int position, int maxPosition)
