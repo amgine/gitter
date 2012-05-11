@@ -213,7 +213,7 @@
 					var w = GitterApplication.TextRenderer.MeasureText(
 						paintEventArgs.Graphics, text, paintEventArgs.Font, int.MaxValue).Width;
 					GitterApplication.TextRenderer.DrawText(
-						paintEventArgs.Graphics, text, paintEventArgs.Font, SystemBrushes.GrayText, rect, DefaultStringFormat);
+						paintEventArgs.Graphics, text, paintEventArgs.Font, SystemBrushes.GrayText, rect);
 					w += 3;
 					rect.X += w;
 					rect.Width -= w;
@@ -233,7 +233,7 @@
 						var textW = GitterApplication.TextRenderer.MeasureText(
 							paintEventArgs.Graphics, countText, paintEventArgs.Font, int.MaxValue).Width;
 						GitterApplication.TextRenderer.DrawText(
-							paintEventArgs.Graphics, countText, paintEventArgs.Font, SystemBrushes.GrayText, rect, DefaultStringFormat);
+							paintEventArgs.Graphics, countText, paintEventArgs.Font, SystemBrushes.GrayText, rect);
 						textW += 2;
 						rect.X += textW;
 						rect.Width -= textW;

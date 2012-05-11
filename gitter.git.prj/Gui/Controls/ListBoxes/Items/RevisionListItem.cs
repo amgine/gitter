@@ -107,7 +107,8 @@
 			{
 				using(var gx = Graphics.FromImage(bmp))
 				{
-					w = GlobalBehavior.GraphStyle.MeasureBranch(gx, ListBox.Font, DefaultStringFormat, branch);
+					w = GlobalBehavior.GraphStyle.MeasureBranch(
+						gx, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
 				}
 			}
 			if(w != 0)
@@ -121,7 +122,7 @@
 					GlobalBehavior.GraphStyle.DrawBranch(
 						gx,
 						ListBox.Font,
-						DefaultStringFormat,
+						GitterApplication.TextRenderer.LeftAlign,
 						0, 0, w, 21,
 						true, branch);
 				}
@@ -135,7 +136,8 @@
 
 		private void DrawBranchDragImage(Branch branch, Graphics gx)
 		{
-			int w = GlobalBehavior.GraphStyle.MeasureBranch(gx, ListBox.Font, DefaultStringFormat, branch);
+			int w = GlobalBehavior.GraphStyle.MeasureBranch(
+				gx, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
 			if(w != 0)
 			{
 				gx.TextRenderingHint = Utility.TextRenderingHint;
@@ -143,7 +145,7 @@
 				GlobalBehavior.GraphStyle.DrawBranch(
 					gx,
 					ListBox.Font,
-					DefaultStringFormat,
+					GitterApplication.TextRenderer.LeftAlign,
 					0, 0, w, 21,
 					true, branch);
 			}
@@ -166,7 +168,8 @@
 							using(var bmp = new Bitmap(1, 1))
 							using(var gx = Graphics.FromImage(bmp))
 							{
-								w = GlobalBehavior.GraphStyle.MeasureBranch(gx, ListBox.Font, DefaultStringFormat, branch);
+								w = GlobalBehavior.GraphStyle.MeasureBranch(
+									gx, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
 							}
 							using(var dragImage = new DragImage(
 								new Size(w, 21), -dx, y,
@@ -211,7 +214,9 @@
 			{
 				var rc = _drawnPointers[i].Item1;
 				if(rc.X <= x && rc.Right > x)
+				{
 					return PointerTagHitOffset + i;
+				}
 			}
 			return base.OnHitTest(x, y);
 		}

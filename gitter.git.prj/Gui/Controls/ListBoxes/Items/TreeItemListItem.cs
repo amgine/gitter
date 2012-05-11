@@ -256,9 +256,9 @@
 						r2.X = r2.Right - 17;
 						r2.Width = 17;
 						GitterApplication.TextRenderer.DrawText(
-							graphics, _size.Value.ShortSize, paintEventArgs.Font, paintEventArgs.Brush, rect, DefaultStringFormatRightAlign);
+							graphics, _size.Value.ShortSize, paintEventArgs.Font, paintEventArgs.Brush, rect, GitterApplication.TextRenderer.RightAlign);
 						GitterApplication.TextRenderer.DrawText(
-							graphics, _size.Value.ShortSizeUnits, paintEventArgs.Font, paintEventArgs.Brush, r2, DefaultStringFormatLeftAlign);
+							graphics, _size.Value.ShortSizeUnits, paintEventArgs.Font, paintEventArgs.Brush, r2);
 					}
 					break;
 			}

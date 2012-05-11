@@ -124,7 +124,7 @@
 		private Size MeasureImageAndTextCore(Image image, string text, Font font)
 		{
 			var s = GitterApplication.TextRenderer.MeasureText(
-				_graphics, text, font, int.MaxValue, Utility.DefaultStringFormat);
+				_graphics, text, font, int.MaxValue);
 			var iconW = (image != null) ? (image.Width) : (ListBoxConstants.DefaultImageWidth);
 			return new Size(s.Width + 1 + 2 * ListBoxConstants.ContentSpacing + (iconW + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage), s.Height);
 		}
@@ -148,7 +148,7 @@
 		private Size MeasureIconAndTextCore(Icon icon, string text, Font font)
 		{
 			var s = GitterApplication.TextRenderer.MeasureText(
-				_graphics, text, font, int.MaxValue, Utility.DefaultStringFormat);
+				_graphics, text, font, int.MaxValue);
 			var iconW = (icon != null) ? (icon.Width) : (ListBoxConstants.DefaultImageWidth);
 			return new Size(s.Width + 1 + 2 * ListBoxConstants.ContentSpacing + (iconW + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage), s.Height);
 		}

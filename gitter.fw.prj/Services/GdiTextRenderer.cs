@@ -15,7 +15,7 @@
 			TextFormatFlags.PreserveGraphicsClipping |
 			TextFormatFlags.Top |
 			TextFormatFlags.Left |
-			TextFormatFlags.WordBreak |
+			TextFormatFlags.EndEllipsis |
 			TextFormatFlags.ExpandTabs;
 
 		private static TextFormatFlags ExtractFormatFlags(StringFormat format)
@@ -92,11 +92,52 @@
 			return flags;
 		}
 
+		private static readonly StringFormat DefaultStringFormatLeftAlign =
+			new StringFormat(StringFormat.GenericTypographic)
+			{
+				FormatFlags =
+					StringFormatFlags.LineLimit |
+					StringFormatFlags.DisplayFormatControl |
+					StringFormatFlags.MeasureTrailingSpaces |
+					StringFormatFlags.FitBlackBox |
+					StringFormatFlags.NoWrap,
+				HotkeyPrefix = HotkeyPrefix.None,
+				LineAlignment = StringAlignment.Near,
+				Trimming = StringTrimming.EllipsisCharacter,
+			};
+
+		private static readonly StringFormat DefaultStringFormatRightAlign =
+			new StringFormat(DefaultStringFormatLeftAlign)
+			{
+				Alignment = StringAlignment.Far,
+			};
+
+		private static readonly StringFormat DefaultStringFormatCenterAlign =
+			new StringFormat(DefaultStringFormatLeftAlign)
+			{
+				Alignment = StringAlignment.Center,
+			};
+
 		private static Color ExtractColor(Brush brush)
 		{
 			var scb = brush as SolidBrush;
 			if(scb != null) return scb.Color;
 			return SystemColors.WindowText;
+		}
+
+		public StringFormat LeftAlign
+		{
+			get { return DefaultStringFormatLeftAlign; }
+		}
+
+		public StringFormat RightAlign
+		{
+			get { return DefaultStringFormatRightAlign; }
+		}
+
+		public StringFormat CenterAlign
+		{
+			get { return DefaultStringFormatCenterAlign; }
 		}
 
 		public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)

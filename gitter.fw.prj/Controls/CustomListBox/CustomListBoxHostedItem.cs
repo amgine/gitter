@@ -8,18 +8,6 @@
 	/// <seealso cref="CustomListBoxItem"/>
 	public abstract class CustomListBoxHostedItem
 	{
-		#region Static Data
-
-		protected static readonly StringFormat DefaultStringFormat = Utility.DefaultStringFormat;
-
-		protected static readonly StringFormat DefaultStringFormatLeftAlign = Utility.DefaultStringFormatLeftAlign;
-
-		protected static readonly StringFormat DefaultStringFormatRightAlign = Utility.DefaultStringFormatRightAlign;
-
-		protected static readonly StringFormat DefaultStringFormatCenterAlign = Utility.DefaultStringFormatCenterAlign;
-
-		#endregion
-
 		#region Data
 
 		/// <summary>Listbox which is currently hosting this item.</summary>

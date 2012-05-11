@@ -4,6 +4,12 @@
 
 	public interface ITextRenderer
 	{
+		StringFormat LeftAlign { get; }
+
+		StringFormat RightAlign { get; }
+
+		StringFormat CenterAlign { get; }
+
 		void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format);
 
 		void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point, StringFormat format);

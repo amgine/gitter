@@ -79,6 +79,7 @@
     <Compile Include="Blame\RevisionFileBlameSource.cs" />
     <Compile Include="Blame\IBlameSource.cs" />
     <Compile Include="Diff\StashedChangesDiffSource.cs" />
+    <Compile Include="Gui\Controls\ListBoxes\Items\TextContent.cs" />
     <Compile Include="Gui\Views\PathHistoryView.cs">
       <SubType>UserControl</SubType>
     </Compile>

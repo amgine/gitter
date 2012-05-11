@@ -235,7 +235,7 @@
 				if(!string.IsNullOrEmpty(Text))
 				{
 					GitterApplication.TextRenderer.DrawText(
-						g, Text, _titleFont, _textBrush, r, Utility.DefaultStringFormatLeftAlign);
+						g, Text, _titleFont, _textBrush, r);
 				}
 				r = new Rectangle(r.X, r.Y + r.Height, r.Width, Height - 8 - r.Bottom);
 				GitterApplication.TextRenderer.DrawText(
@@ -254,7 +254,7 @@
 				if(!string.IsNullOrEmpty(Text))
 				{
 					GitterApplication.TextRenderer.DrawText(
-						g, Text, _titleFont, _textBrush, r, Utility.DefaultStringFormatLeftAlign);
+						g, Text, _titleFont, _textBrush, r);
 				}
 			}
 		}

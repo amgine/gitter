@@ -129,9 +129,13 @@
 			get
 			{
 				if(_contentFont != null)
+				{
 					return _contentFont;
-				if(ListBox != null)
+				}
+				if(IsAttachedToListBox)
+				{
 					return ListBox.Font;
+				}
 				return GitterApplication.FontManager.UIFont;
 			}
 			set
@@ -178,7 +182,7 @@
 				{
 					return _headerFont;
 				}
-				if(ListBox != null)
+				if(IsAttachedToListBox)
 				{
 					return ListBox.Font;
 				}
@@ -225,7 +229,7 @@
 		{
 			get
 			{
-				if(ListBox == null) return -1;
+				if(!IsAttachedToListBox) return -1;
 				return ListBox.Columns.IndexOf(this);
 			}
 		}
@@ -234,7 +238,7 @@
 		{
 			get
 			{
-				if(ListBox == null) return null;
+				if(!IsAttachedToListBox) return null;
 				var index = ListBox.Columns.IndexOf(this);
 				return ListBox.GetPrevVisibleColumn(index);
 			}
@@ -244,7 +248,7 @@
 		{
 			get
 			{
-				if(ListBox == null) return -1;
+				if(!IsAttachedToListBox) return -1;
 				var index = ListBox.Columns.IndexOf(this);
 				return ListBox.GetPrevVisibleColumnIndex(index);
 			}
@@ -254,8 +258,7 @@
 		{
 			get
 			{
-				if(ListBox == null) return null;
-				if(ListBox == null) return null;
+				if(!IsAttachedToListBox) return null;
 				var index = ListBox.Columns.IndexOf(this);
 				return ListBox.GetNextVisibleColumn(index);
 			}
@@ -265,7 +268,7 @@
 		{
 			get
 			{
-				if(ListBox == null) return -1;
+				if(!IsAttachedToListBox) return -1;
 				var index = ListBox.Columns.IndexOf(this);
 				return ListBox.GetNextVisibleColumnIndex(index);
 			}
@@ -296,7 +299,7 @@
 				if(_sizeMode != value)
 				{
 					_sizeMode = value;
-					if(ListBox != null)
+					if(IsAttachedToListBox)
 					{
 						ListBox.ColumnLayoutChanged();
 					}
@@ -313,7 +316,7 @@
 				if(_isVisible != value)
 				{
 					_isVisible = value;
-					if(ListBox != null)
+					if(IsAttachedToListBox)
 					{
 						ListBox.ColumnLayoutChanged();
 					}
@@ -331,7 +334,7 @@
 					throw new InvalidOperationException();
 				}
 				_width = value;
-				if(ListBox != null)
+				if(IsAttachedToListBox)
 				{
 					ListBox.ColumnLayoutChanged();
 				}
@@ -365,12 +368,15 @@
 
 		public virtual void AutoSize(int minWidth)
 		{
-			if(ListBox == null) return;
+			if(!IsAttachedToListBox) return;
 			if(_sizeMode == ColumnSizeMode.Fill)
+			{
 				throw new InvalidOperationException();
+			}
 			if(ListBox.Items.Count == 0)
+			{
 				return;
-			if(ListBox == null) return;
+			}
 			var w = ListBox.GetOptimalColumnWidth(this);
 			if(w < minWidth) w = minWidth;
 			Width = w;
@@ -383,7 +389,7 @@
 
 		public void Invalidate()
 		{
-			if(ListBox != null && _isVisible)
+			if(IsAttachedToListBox && _isVisible)
 			{
 				ListBox.InvalidateColumn(this);
 			}
@@ -391,118 +397,129 @@
 
 		public void InvalidateContent()
 		{
-			if(ListBox != null && _isVisible)
+			if(IsAttachedToListBox && _isVisible)
 			{
 				ListBox.InvalidateColumnContent(this);
 			}
 		}
 
-		protected override void OnPaintBackground(ItemPaintEventArgs paintEventArgs)
+		private static void PaintNormalBackground(ItemPaintEventArgs paintEventArgs)
 		{
 			var graphics = paintEventArgs.Graphics;
-			var state = paintEventArgs.State;
 			var rect = paintEventArgs.Bounds;
+			var c1 = Color.FromArgb(223, 234, 247);
+			var c2 = Color.FromArgb(255, 255, 255);
+			var rc = new Rectangle(rect.Right - 1, 0, 1, rect.Height);
+			using(var brush = new LinearGradientBrush(
+				rc, c1, c2, LinearGradientMode.Vertical))
+			{
+				graphics.FillRectangle(brush, rc);
+			}
+		}
 
-			switch(state)
+		private void PaintPressedBackground(ItemPaintEventArgs paintEventArgs)
+		{
+			var graphics = paintEventArgs.Graphics;
+			var rect = paintEventArgs.Bounds;
+			var c1 = Color.FromArgb(192, 203, 217);
+			var c2 = Color.FromArgb(246, 247, 248);
+			var c3 = Color.FromArgb(193, 204, 218);
+			var c4 = Color.FromArgb(215, 222, 231);
+			var c5 = Color.FromArgb(235, 238, 242);
+			using(var p = new Pen(c1))
+			{
+				var rc = rect;
+				rc.Y -= 1;
+				rc.X += 1;
+				rc.Width -= 2;
+				graphics.DrawRectangle(p, rc);
+			}
+			using(var b = new SolidBrush(c2))
+			{
+				var rc = rect;
+				rc.Y += 3;
+				rc.X += 2;
+				rc.Width -= 4;
+				rc.Height -= 4;
+				graphics.FillRectangle(b, rc);
+			}
+			using(var p = new Pen(c3))
+			{
+				var rc = rect;
+				graphics.DrawLine(p, rc.X + 1, rc.Y + 0, rc.Right - 2, rc.Y + 0);
+			}
+			using(var p = new Pen(c4))
+			{
+				var rc = rect;
+				graphics.DrawLine(p, rc.X + 1, rc.Y + 1, rc.Right - 2, rc.Y + 1);
+			}
+			using(var p = new Pen(c5))
+			{
+				var rc = rect;
+				graphics.DrawLine(p, rc.X + 1, rc.Y + 2, rc.Right - 2, rc.Y + 2);
+			}
+			if(_extender != null)
+			{
+				if(rect.Width > ExtenderButtonWidth)
+				{
+					graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height - 1);
+					graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
+				}
+			}
+		}
+
+		private void PaintHoverBackground(ItemPaintEventArgs paintEventArgs)
+		{
+			var graphics = paintEventArgs.Graphics;
+			var rect = paintEventArgs.Bounds;
+			var c1 = Color.FromArgb(227, 232, 238);
+			var c2 = Color.FromArgb(241, 245, 251);
+			using(var p = new Pen(c1))
+			{
+				var rc = rect;
+				rc.Y -= 1;
+				rc.Width -= 1;
+				graphics.DrawRectangle(p, rc);
+			}
+			using(var b = new SolidBrush(c2))
+			{
+				var rc = rect;
+				rc.X += 2;
+				rc.Y += 1;
+				rc.Width -= 4;
+				rc.Height -= 3;
+				graphics.FillRectangle(b, rc);
+			}
+			if(_extender != null)
+			{
+				if(rect.Width > ExtenderButtonWidth)
+				{
+					if(paintEventArgs.HoveredPart == ColumnHitTestResults.Extender)
+					{
+						graphics.FillRectangle(ExtenderHoveredBrush, rect.Right - ExtenderButtonWidth + 1.5f, rect.Y + 1.5f, ExtenderButtonWidth - 4, rect.Height - 4);
+						graphics.DrawRectangle(ExtenderBorderPenHovered, rect.Right - ExtenderButtonWidth, 0, ExtenderButtonWidth - 1, rect.Height - 1);
+					}
+					else
+					{
+						graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height);
+					}
+					graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
+				}
+			}
+		}
+
+		protected override void OnPaintBackground(ItemPaintEventArgs paintEventArgs)
+		{
+			switch(paintEventArgs.State)
 			{
 				case ItemState.None:
-					{
-						var c1 = Color.FromArgb(223, 234, 247);
-						var c2 = Color.FromArgb(255, 255, 255);
-						var rc = new Rectangle(rect.Right - 1, 0, 1, rect.Height);
-						using(var brush = new LinearGradientBrush(
-							rc, c1, c2, LinearGradientMode.Vertical))
-						{
-							graphics.FillRectangle(brush, rc);
-						}
-					}
+					PaintNormalBackground(paintEventArgs);
 					break;
 				case ItemState.Pressed:
-					{
-						var c1 = Color.FromArgb(192, 203, 217);
-						var c2 = Color.FromArgb(246, 247, 248);
-						var c3 = Color.FromArgb(193, 204, 218);
-						var c4 = Color.FromArgb(215, 222, 231);
-						var c5 = Color.FromArgb(235, 238, 242);
-						using(var p = new Pen(c1))
-						{
-							var rc = rect;
-							rc.Y -= 1;
-							rc.X += 1;
-							rc.Width -= 2;
-							graphics.DrawRectangle(p, rc);
-						}
-						using(var b = new SolidBrush(c2))
-						{
-							var rc = rect;
-							rc.Y += 3;
-							rc.X += 2;
-							rc.Width -= 4;
-							rc.Height -= 4;
-							graphics.FillRectangle(b, rc);
-						}
-						using(var p = new Pen(c3))
-						{
-							var rc = rect;
-							graphics.DrawLine(p, rc.X + 1, rc.Y + 0, rc.Right - 2, rc.Y + 0);
-						}
-						using(var p = new Pen(c4))
-						{
-							var rc = rect;
-							graphics.DrawLine(p, rc.X + 1, rc.Y + 1, rc.Right - 2, rc.Y + 1);
-						}
-						using(var p = new Pen(c5))
-						{
-							var rc = rect;
-							graphics.DrawLine(p, rc.X + 1, rc.Y + 2, rc.Right - 2, rc.Y + 2);
-						}
-						if(_extender != null)
-						{
-							if(rect.Width > ExtenderButtonWidth)
-							{
-								graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height - 1);
-								graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
-							}
-						}
-					}
+					PaintPressedBackground(paintEventArgs);
 					break;
 				default:
-					{
-						var c1 = Color.FromArgb(227, 232, 238);
-						var c2 = Color.FromArgb(241, 245, 251);
-						using(var p = new Pen(c1))
-						{
-							var rc = rect;
-							rc.Y -= 1;
-							rc.Width -= 1;
-							graphics.DrawRectangle(p, rc);
-						}
-						using(var b = new SolidBrush(c2))
-						{
-							var rc = rect;
-							rc.X += 2;
-							rc.Y += 1;
-							rc.Width -= 4;
-							rc.Height -= 3;
-							graphics.FillRectangle(b, rc);
-						}
-						if(_extender != null)
-						{
-							if(rect.Width > ExtenderButtonWidth)
-							{
-								if(paintEventArgs.HoveredPart == ColumnHitTestResults.Extender)
-								{
-									graphics.FillRectangle(ExtenderHoveredBrush, rect.Right - ExtenderButtonWidth + 1.5f, rect.Y + 1.5f, ExtenderButtonWidth - 4, rect.Height - 4);
-									graphics.DrawRectangle(ExtenderBorderPenHovered, rect.Right - ExtenderButtonWidth, 0, ExtenderButtonWidth - 1, rect.Height - 1);
-								}
-								else
-								{
-									graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height);
-								}
-								graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
-							}
-						}
-					}
+					PaintHoverBackground(paintEventArgs);
 					break;
 			}
 		}
@@ -524,16 +541,16 @@
 			switch(_headerAlignment)
 			{
 				case StringAlignment.Near:
-					format = Utility.DefaultStringFormatLeftAlign;
+					format = GitterApplication.TextRenderer.LeftAlign;
 					break;
 				case StringAlignment.Far:
-					format = Utility.DefaultStringFormatRightAlign;
+					format = GitterApplication.TextRenderer.RightAlign;
 					break;
 				case StringAlignment.Center:
-					format = Utility.DefaultStringFormatCenterAlign;
+					format = GitterApplication.TextRenderer.CenterAlign;
 					break;
 				default:
-					format = Utility.DefaultStringFormatLeftAlign;
+					format = GitterApplication.TextRenderer.LeftAlign;
 					break;
 			}
 			GitterApplication.TextRenderer

@@ -22,7 +22,7 @@
 
 		static RepositoryListItem()
 		{
-			PathStringFormat = new StringFormat(Utility.DefaultStringFormatLeftAlign);
+			PathStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
 			PathStringFormat.Trimming = StringTrimming.EllipsisPath;
 			PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
 		}
@@ -76,7 +76,7 @@
 					paintEventArgs.PaintImage(ImgRepositoryLarge);
 					var cy = paintEventArgs.Bounds.Y + 2;
 					GitterApplication.TextRenderer.DrawText(
-						paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, 36, cy, Utility.DefaultStringFormatLeftAlign);
+						paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, 36, cy);
 					cy += 16;
 					var rc = new Rectangle(36, cy, paintEventArgs.Bounds.Width - 42, 16);
 					GitterApplication.TextRenderer.DrawText(

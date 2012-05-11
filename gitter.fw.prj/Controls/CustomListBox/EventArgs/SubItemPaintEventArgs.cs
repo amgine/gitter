@@ -91,13 +91,13 @@
 			switch(alignment)
 			{
 				case StringAlignment.Near:
-					return Utility.DefaultStringFormatLeftAlign;
+					return GitterApplication.TextRenderer.LeftAlign;
 				case StringAlignment.Far:
-					return Utility.DefaultStringFormatRightAlign;
+					return GitterApplication.TextRenderer.RightAlign;
 				case StringAlignment.Center:
-					return Utility.DefaultStringFormatCenterAlign;
+					return GitterApplication.TextRenderer.CenterAlign;
 				default:
-					return Utility.DefaultStringFormatLeftAlign;
+					return GitterApplication.TextRenderer.LeftAlign;
 			}
 		}
 

@@ -501,6 +501,9 @@
     <EmbeddedResource Include="Controls\Notifications\NotificationForm.resx">
       <DependentUpon>NotificationForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Views\ViewSwitcher.resx">
+      <DependentUpon>ViewSwitcher.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\Views\WebBrowserView\WebBrowserView.resx">
       <DependentUpon>WebBrowserView.cs</DependentUpon>
     </EmbeddedResource>

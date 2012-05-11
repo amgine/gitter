@@ -209,28 +209,24 @@
 				drawnPointers.Clear();
 				if(rsc != null)
 				{
-					alignToGraph = rsc.AlignToGraph;
-					showLocalBranches = rsc.ShowLocalBranches;
-					showRemoteBranches = rsc.ShowRemoteBranches;
-					showTags = rsc.ShowTags;
-					showStash = rsc.ShowStash;
+					alignToGraph		= rsc.AlignToGraph;
+					showLocalBranches	= rsc.ShowLocalBranches;
+					showRemoteBranches	= rsc.ShowRemoteBranches;
+					showTags			= rsc.ShowTags;
+					showStash			= rsc.ShowStash;
 				}
 				else
 				{
-					alignToGraph = SubjectColumn.DefaultAlignToGraph;
-					showLocalBranches = SubjectColumn.DefaultShowLocalBranches;
-					showRemoteBranches = SubjectColumn.DefaultShowRemoteBranches;
-					showTags = SubjectColumn.DefaultShowTags;
-					showStash = SubjectColumn.DefaultShowStash;
+					alignToGraph		= SubjectColumn.DefaultAlignToGraph;
+					showLocalBranches	= SubjectColumn.DefaultShowLocalBranches;
+					showRemoteBranches	= SubjectColumn.DefaultShowRemoteBranches;
+					showTags			= SubjectColumn.DefaultShowTags;
+					showStash			= SubjectColumn.DefaultShowStash;
 				}
 			}
 			else
 			{
-				if(rsc != null)
-					alignToGraph = rsc.AlignToGraph;
-				else
-					alignToGraph = SubjectColumn.DefaultAlignToGraph;
-
+				alignToGraph = (rsc != null) ? rsc.AlignToGraph : SubjectColumn.DefaultAlignToGraph;
 				showLocalBranches = false;
 				showRemoteBranches = false;
 				showTags = false;
@@ -256,7 +252,7 @@
 					graphColumnX = rect.X - graphColumn.Width;
 				}
 			}
-			if(alignToGraph && graphColumn != null)
+			if(graphColumn != null && alignToGraph)
 			{
 				int availWidth = graphColumn.Width - GraphCellWidth * graph.Length;
 				for(int i = graph.Length - 1; i >= 0; --i)
@@ -304,7 +300,7 @@
 									w = graphStyle.DrawBranch(
 										paintEventArgs.Graphics,
 										font,
-										DefaultStringFormat,
+										GitterApplication.TextRenderer.LeftAlign,
 										rect.Left + xoffset,
 										rect.Top,
 										rect.Right,
@@ -319,7 +315,7 @@
 									w = graphStyle.DrawBranch(
 										paintEventArgs.Graphics,
 										font,
-										DefaultStringFormat,
+										GitterApplication.TextRenderer.LeftAlign,
 										rect.Left + xoffset,
 										rect.Top,
 										rect.Right,
@@ -334,7 +330,7 @@
 									w = graphStyle.DrawTag(
 										paintEventArgs.Graphics,
 										font,
-										DefaultStringFormat,
+										GitterApplication.TextRenderer.LeftAlign,
 										rect.Left + xoffset,
 										rect.Top,
 										rect.Right,
@@ -369,7 +365,7 @@
 					int w = graphStyle.DrawStash(
 						paintEventArgs.Graphics,
 						font,
-						DefaultStringFormat,
+						GitterApplication.TextRenderer.LeftAlign,
 						rect.Left + xoffset,
 						rect.Top,
 						rect.Right,
@@ -420,7 +416,7 @@
 			{
 				paintEventArgs.PrepareTextRectangle(font, ref rect);
 				GitterApplication.TextRenderer.DrawText(
-					paintEventArgs.Graphics, data.Subject, font, SystemBrushes.WindowText, rect, DefaultStringFormat);
+					paintEventArgs.Graphics, data.Subject, font, SystemBrushes.WindowText, rect);
 			}
 
 			#endregion

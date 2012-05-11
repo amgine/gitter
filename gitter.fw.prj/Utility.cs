@@ -153,37 +153,37 @@
 			Application.Idle -= DisposeRegisteredObjects;
 		}
 
-		public static readonly StringFormat DefaultStringFormat =
-			new StringFormat(StringFormat.GenericTypographic)
-			{
-				FormatFlags =
-					StringFormatFlags.LineLimit |
-					StringFormatFlags.DisplayFormatControl |
-					StringFormatFlags.MeasureTrailingSpaces |
-					StringFormatFlags.FitBlackBox |
-					StringFormatFlags.NoWrap,
-				HotkeyPrefix = HotkeyPrefix.None,
-				LineAlignment = StringAlignment.Near,
-				Trimming = StringTrimming.None,
-			};
+		//public static readonly StringFormat DefaultStringFormat =
+		//    new StringFormat(StringFormat.GenericTypographic)
+		//    {
+		//        FormatFlags =
+		//            StringFormatFlags.LineLimit |
+		//            StringFormatFlags.DisplayFormatControl |
+		//            StringFormatFlags.MeasureTrailingSpaces |
+		//            StringFormatFlags.FitBlackBox |
+		//            StringFormatFlags.NoWrap,
+		//        HotkeyPrefix = HotkeyPrefix.None,
+		//        LineAlignment = StringAlignment.Near,
+		//        Trimming = StringTrimming.None,
+		//    };
 
-		public static readonly StringFormat DefaultStringFormatLeftAlign =
-			new StringFormat(DefaultStringFormat)
-			{
-				Alignment = StringAlignment.Near,
-			};
+		//public static readonly StringFormat DefaultStringFormatLeftAlign =
+		//    new StringFormat(DefaultStringFormat)
+		//    {
+		//        Alignment = StringAlignment.Near,
+		//    };
 
-		public static readonly StringFormat DefaultStringFormatRightAlign =
-			new StringFormat(DefaultStringFormat)
-			{
-				Alignment = StringAlignment.Far,
-			};
+		//public static readonly StringFormat DefaultStringFormatRightAlign =
+		//    new StringFormat(DefaultStringFormat)
+		//    {
+		//        Alignment = StringAlignment.Far,
+		//    };
 
-		public static readonly StringFormat DefaultStringFormatCenterAlign =
-			new StringFormat(DefaultStringFormat)
-			{
-				Alignment = StringAlignment.Center,
-			};
+		//public static readonly StringFormat DefaultStringFormatCenterAlign =
+		//    new StringFormat(DefaultStringFormat)
+		//    {
+		//        Alignment = StringAlignment.Center,
+		//    };
 
 		public const TextRenderingHint TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
