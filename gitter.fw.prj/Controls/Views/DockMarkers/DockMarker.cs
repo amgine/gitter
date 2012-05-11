@@ -81,8 +81,10 @@
 			if(e.IsTracked)
 			{
 				var rect = _dockHost.GetDockBounds(_dockClient, e.Item.Type);
-				if(!rect.IsEmpty)
+				if(rect.Width != 0 && rect.Height != 0)
+				{
 					SpawnDockPositionMarker(rect);
+				}
 			}
 			else
 			{

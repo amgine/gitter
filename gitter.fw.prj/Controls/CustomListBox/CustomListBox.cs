@@ -505,11 +505,11 @@
 			int itemIndex = _itemPlainList.IndexOf(item);
 			if(itemIndex == -1) return;
 			var itemRect = GetItemDisplayRect(itemIndex);
-			if(!itemRect.IsEmpty)
+			if(itemRect.Width != 0 && itemRect.Height != 0)
 			{
 				var columnRect = GetExtendedColumnContentRectangle(columnIndex);
 				var rc = Rectangle.Intersect(itemRect, columnRect);
-				if(!rc.IsEmpty)
+				if(rc.Width != 0 && rc.Height != 0)
 				{
 					Invalidate(rc);
 				}
@@ -2589,7 +2589,7 @@
 			var clipRect = e.ClipRectangle;
 			var clip = Rectangle.Intersect(_headersArea, clipRect);
 
-			if(clip.IsEmpty) return;
+			if(clip.Width == 0 || clip.Height == 0) return;
 
 			int x = _headersArea.X - HScrollPos;
 			int y = _headersArea.Y;
@@ -2689,7 +2689,7 @@
 			var clipRect = e.ClipRectangle;
 			var clip = Rectangle.Intersect(_itemsArea, clipRect);
 
-			if(clip.IsEmpty) return;
+			if(clip.Width == 0 || clip.Height == 0) return;
 
 			gx.SetClip(clip);
 

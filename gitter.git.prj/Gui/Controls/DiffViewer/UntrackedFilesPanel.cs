@@ -179,7 +179,8 @@
 			if(FontHeight == -1)
 				FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(graphics, Font) + 0.5);
 			var rc = new Rectangle(rect.X + 5, rect.Y, FlowControl.ContentArea.Width - 10, LineHeight);
-			if(!Rectangle.Intersect(rc, clip).IsEmpty)
+			var rcClip = Rectangle.Intersect(rc, clip);
+			if(rcClip.Width != 0 && rcClip.Height != 0)
 			{
 				GitterApplication.TextRenderer.DrawText(
 					graphics, Resources.StrUntrackedFiles.AddColon(), Font, SystemBrushes.WindowText, rc, ContentFormat);
@@ -187,7 +188,8 @@
 			for(int i = 0; i < _items.Length; ++i)
 			{
 				rc.Y += LineHeight;
-				if(!Rectangle.Intersect(rc, clip).IsEmpty)
+				rcClip = Rectangle.Intersect(rc, clip);
+				if(rcClip.Width != 0 && rcClip.Height != 0)
 				{
 					_items[i].Draw(graphics, Font, rc, i, i == _fileHover.Index);
 				}

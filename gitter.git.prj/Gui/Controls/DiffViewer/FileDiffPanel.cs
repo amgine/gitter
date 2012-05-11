@@ -740,7 +740,8 @@
 			var clip = paintEventArgs.ClipRectangle;
 			var contentWidth = Math.Max(_size.Width, FlowControl.ContentArea.Width);
 			var rcHeader = new Rectangle(rect.X + Margin, rect.Y, contentWidth - 2*Margin, HeaderHeight);
-			if(!Rectangle.Intersect(clip, rcHeader).IsEmpty)
+			var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
+			if(rcHeaderClip.Width != 0 && rcHeaderClip.Height != 0)
 			{
 				PaintHeader(graphics, rcHeader, GetHeaderIcon(), GetHeaderIconOverlay(), GetHeaderText());
 			}

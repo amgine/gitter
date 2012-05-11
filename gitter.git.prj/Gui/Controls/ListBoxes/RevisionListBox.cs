@@ -313,16 +313,22 @@
 				if(_currentRevisionItem != null || _repository.IsEmpty)
 				{
 					if(_repository.Status.StagedFiles.Count != 0)
+					{
 						needStaged = true;
+					}
 					if(_repository.Status.UnstagedFiles.Count != 0)
+					{
 						needUnstaged = true;
+					}
 				}
 			}
 			int count = 0;
 			if(needStaged)
 			{
 				if(_stagedItem == null)
+				{
 					_stagedItem = new FakeRevisionListItem(_repository, FakeRevisionItemType.StagedChanges);
+				}
 				++count;
 			}
 			else
@@ -332,7 +338,9 @@
 			if(needUnstaged)
 			{
 				if(_unstagedItem == null)
+				{
 					_unstagedItem = new FakeRevisionListItem(_repository, FakeRevisionItemType.UnstagedChanges);
+				}
 				++count;
 			}
 			else
@@ -397,7 +405,9 @@
 						}
 					}
 					if(_unstagedItem.Graph.Length > graphLength)
+					{
 						graphLength = _unstagedItem.Graph.Length;
+					}
 					++fakeItems;
 				}
 				else if(_repository.IsEmpty)
@@ -419,7 +429,9 @@
 						}
 					}
 					if(_unstagedItem.Graph.Length > graphLength)
+					{
 						graphLength = _unstagedItem.Graph.Length;
+					}
 					++fakeItems;
 				}
 				else
