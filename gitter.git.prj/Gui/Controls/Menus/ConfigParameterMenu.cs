@@ -18,7 +18,8 @@
 			_listItem = listItem;
 			_parameter = listItem.DataContext;
 			if(_parameter.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "ConfigParameter"), "listItem");
-			
+
+			Items.Add(new ToolStripMenuItem(Resources.StrEditValue, CachedResources.Bitmaps["ImgConfigEdit"], (s, e) => listItem.StartValueEditor()));
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(_parameter));
 		}
 

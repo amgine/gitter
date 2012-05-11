@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
+	using System.ComponentModel;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -100,16 +101,21 @@
 			var column = ListBox.Columns[cid];
 			if(x > column.Left && x < column.Left + column.Width)
 			{
-				var editor = StartTextEditor(column, DataContext.Value);
-				editor.Validating += OnEditorValidating;
+				StartValueEditor();
 			}
 		}
 
-		private void OnEditorValidating(object sender, System.ComponentModel.CancelEventArgs e)
+		private void OnEditorValidating(object sender, CancelEventArgs e)
 		{
 			var editor = (CustomListBoxTextEditor)sender;
 			editor.Validating -= OnEditorValidating;
 			DataContext.Value = editor.Text.Trim();
+		}
+
+		public void StartValueEditor()
+		{
+			var editor = StartTextEditor(ListBox.Columns.GetById((int)ColumnId.Value), DataContext.Value);
+			editor.Validating += OnEditorValidating;
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

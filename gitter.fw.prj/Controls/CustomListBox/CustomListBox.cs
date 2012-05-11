@@ -2581,6 +2581,15 @@
 			return _itemHeight;
 		}
 
+		protected override void OnVScroll(int dy)
+		{
+			base.OnVScroll(dy);
+			if(_textEditor != null)
+			{
+				_textEditor.Top += dy;
+			}
+		}
+
 		private void PaintHeaders(PaintEventArgs e)
 		{
 			if(_headerStyle == HeaderStyle.Hidden) return;
