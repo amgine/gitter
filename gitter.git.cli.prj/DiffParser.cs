@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
+	using System.Globalization;
 	using System.Collections.Generic;
 
 	/// <summary>Parser to use with git diffs.</summary>
@@ -175,8 +176,17 @@
 					states[nc - 1] = DiffLineState.Removed;
 					break;
 			}
+			int eol = FindLfLineEnding();
 			string ending;
-			int eol = FindLineEnding(out ending);
+			if(String[eol - 1] == '\r')
+			{
+				--eol;
+				ending = LineEnding.CrLf;
+			}
+			else
+			{
+				ending = LineEnding.Lf;
+			}
 			var line = ReadStringUpTo(eol, ending.Length);
 			return new DiffLine(state, states, lineNums, line, ending);
 		}
@@ -210,20 +220,21 @@
 				{
 					var lineNumber = int.Parse(
 						ReadStringUpTo(comma, 1),
-						System.Globalization.NumberStyles.Integer,
-						System.Globalization.CultureInfo.InvariantCulture);
+						NumberStyles.Integer,
+						CultureInfo.InvariantCulture);
 					var lineCount = int.Parse(
 						ReadStringUpTo(space, 1),
-						System.Globalization.NumberStyles.Integer,
-						System.Globalization.CultureInfo.InvariantCulture);
+						NumberStyles.Integer,
+						CultureInfo.InvariantCulture);
 					headers[i] = new DiffColumnHeader(action, lineNumber, lineCount);
 				}
 				else
 				{
+					var lineNumberStr = ReadStringUpTo(space, 1);
 					var lineNumber = int.Parse(
-						ReadStringUpTo(space, 1),
-						System.Globalization.NumberStyles.Integer,
-						System.Globalization.CultureInfo.InvariantCulture);
+						lineNumberStr,
+						NumberStyles.Integer,
+						CultureInfo.InvariantCulture);
 					headers[i] = new DiffColumnHeader(action, lineNumber, 1);
 				}
 			}
