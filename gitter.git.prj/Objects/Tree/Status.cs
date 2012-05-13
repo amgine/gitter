@@ -688,23 +688,33 @@
 
 		#region clean
 
+		/// <summary>Remove untracked and/or ignored files and (optionally) directories.</summary>
+		/// <param name="includePattern">Files to clean.</param>
+		/// <param name="excludePattern">Files to save.</param>
+		/// <param name="mode">Clean mode.</param>
+		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
 		public void Clean(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
 		{
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdated,
-				RepositoryNotifications.WorktreeUpdated))
+			try
 			{
-				Repository.Accessor.CleanFiles(
-					new CleanFilesParameters(includePattern)
-					{
-						ExcludePatterns = new[] { excludePattern },
-						Force = true,
-						Mode = mode,
-						RemoveDirectories = removeDirectories,
-					});
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated))
+				{
+					Repository.Accessor.CleanFiles(
+						new CleanFilesParameters(includePattern)
+						{
+							ExcludePatterns = new[] { excludePattern },
+							Force = true,
+							Mode = mode,
+							RemoveDirectories = removeDirectories,
+						});
+				}
 			}
-
-			Refresh();
+			finally
+			{
+				Refresh();
+			}
 		}
 
 		#endregion
