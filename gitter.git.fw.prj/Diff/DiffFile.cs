@@ -184,9 +184,9 @@
 			{
 				var hunk = _hunks[hid];
 				var c = count;
-				if(c > hunk.LineCount)
+				if(c + start > hunk.LineCount)
 				{
-					c = hunk.LineCount;
+					c = hunk.LineCount - start;
 				}
 				var newHunk = hunk.Cut(start, c);
 				h.Add(newHunk);
