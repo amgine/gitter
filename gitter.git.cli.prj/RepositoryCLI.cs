@@ -752,11 +752,10 @@
 				var tab = parser.FindNoAdvance('\t');
 				string commitsCountStr = parser.ReadStringUpTo(tab, 1);
 				int commitsCount = int.Parse(commitsCountStr, NumberStyles.Integer, CultureInfo.InvariantCulture);
-				string ending;
-				var eol = parser.FindLineEnding(out ending);
+				var eol = parser.FindLfLineEnding();
 				var emailSeparator = parser.String.LastIndexOf(" <", eol - 1, eol - tab - 1);
 				string name = parser.ReadStringUpTo(emailSeparator, 2);
-				string email = parser.ReadStringUpTo(eol - 1, ending.Length + 1);
+				string email = parser.ReadStringUpTo(eol - 1, 2);
 				var userData = new UserData(name, email, commitsCount);
 				res.Add(userData);
 			}
