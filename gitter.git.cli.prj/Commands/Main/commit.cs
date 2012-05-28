@@ -63,7 +63,7 @@
 
 		public static CommandArgument File(string file)
 		{
-			return new CommandArgument("--file", file);
+			return new CommandArgument("--file", file.AssureDoubleQuotes());
 		}
 
 		public static CommandArgument Template(string file)
