@@ -142,7 +142,6 @@
 			{
 				args.Add(InitCommand.Template(parameters.Template));
 			}
-			args.Add(new PathCommandArgument(parameters.Path));
 			var cmd = new InitCommand(args);
 			var output = GitProcess.Exec(new GitInput(parameters.Path, cmd));
 			output.ThrowOnBadReturnCode();
