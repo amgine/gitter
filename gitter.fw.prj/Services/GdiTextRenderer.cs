@@ -11,6 +11,7 @@
 		private static readonly Dictionary<Font, float> _fontHeight = new Dictionary<Font, float>();
 		private const TextFormatFlags DefaultFormatFlags =
 			TextFormatFlags.NoPadding |
+			TextFormatFlags.NoPrefix |
 			TextFormatFlags.PreserveGraphicsTranslateTransform |
 			TextFormatFlags.PreserveGraphicsClipping |
 			TextFormatFlags.Top |
@@ -21,6 +22,10 @@
 		private static TextFormatFlags ExtractFormatFlags(StringFormat format)
 		{
 			var flags = TextFormatFlags.Default;
+			if(format.HotkeyPrefix != HotkeyPrefix.Show)
+			{
+				flags |= TextFormatFlags.NoPrefix;
+			}
 			flags |= TextFormatFlags.NoPadding;
 			flags |= TextFormatFlags.PreserveGraphicsClipping;
 			flags |= TextFormatFlags.PreserveGraphicsTranslateTransform;
