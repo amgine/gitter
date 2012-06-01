@@ -180,6 +180,12 @@
 					if(gitFile[i].StartsWith("gitdir: "))
 					{
 						_gitDirectory = gitFile[i].Substring("gitdir: ".Length);
+						if(!Path.IsPathRooted(_gitDirectory))
+						{
+							_gitDirectory = Path.GetFullPath(Path.Combine(
+								_workingDirectory,
+								_gitDirectory));
+						}
 						break;
 					}
 				}
