@@ -11,6 +11,7 @@
 		Added		= (int)'?',
 		Renamed		= (int)'r',
 		Copied		= (int)'c',
+		Ignored		= (int)'!',
 		ModeChanged	= (int)'x',
 	}
 }

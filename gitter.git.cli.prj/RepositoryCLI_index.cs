@@ -24,6 +24,8 @@
 					return FileStatus.Unmerged;
 				case ' ':
 					return FileStatus.Unknown;
+				case '!':
+					return FileStatus.Ignored;
 				default:
 					return FileStatus.Unknown;
 			}
@@ -31,6 +33,7 @@
 
 		private static ConflictType GetConflictType(char x, char y)
 		{
+			if(x != 'U' && y != 'U') return ConflictType.None;
 			switch(x)
 			{
 				case 'U':
@@ -39,24 +42,24 @@
 						case 'U': return ConflictType.BothModified;
 						case 'A': return ConflictType.AddedByThem;
 						case 'D': return ConflictType.DeletedByThem;
-						default: return ConflictType.None;
+						default: return ConflictType.Unknown;
 					}
 				case 'A':
 					switch(y)
 					{
 						case 'U': return ConflictType.AddedByUs;
 						case 'A': return ConflictType.BothAdded;
-						default: return ConflictType.None;
+						default: return ConflictType.Unknown;
 					}
 				case 'D':
 					switch(y)
 					{
 						case 'U': return ConflictType.DeletedByUs;
 						case 'D': return ConflictType.BothDeleted;
-						default: return ConflictType.None;
+						default: return ConflictType.Unknown;
 					}
 				default:
-					return ConflictType.None;
+					return ConflictType.Unknown;
 			}
 		}
 

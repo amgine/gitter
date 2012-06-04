@@ -21,5 +21,8 @@ namespace gitter.Git
 		DeletedByUs,
 		/// <summary>UD</summary>
 		DeletedByThem,
+
+		/// <summary>Unknown conflict type.</summary>
+		Unknown,
 	}
 }
