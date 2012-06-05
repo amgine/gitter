@@ -276,7 +276,7 @@
 				this.Region.Dispose();
 				this.Region = null;
 			}
-			if(_content.Region != null)
+			if(_content != null && _content.Region != null)
 			{
 				this.Region = _content.Region.Clone();
 			}
@@ -346,16 +346,19 @@
 
 		protected override void OnSizeChanged(EventArgs e)
 		{
-			_content.MinimumSize = Size;
-			_content.MaximumSize = Size;
-			_content.Size = Size;
-			_content.Location = Point.Empty;
+			if(_content != null)
+			{
+				_content.MinimumSize = Size;
+				_content.MaximumSize = Size;
+				_content.Size = Size;
+				_content.Location = Point.Empty;
+			}
 			base.OnSizeChanged(e);
 		}
 
 		protected override void OnOpening(CancelEventArgs e)
 		{
-			if(_content.IsDisposed || _content.Disposing)
+			if(_content == null || _content.IsDisposed || _content.Disposing)
 			{
 				e.Cancel = true;
 				return;
