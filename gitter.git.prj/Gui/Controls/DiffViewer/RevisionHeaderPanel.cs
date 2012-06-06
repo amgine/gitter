@@ -788,6 +788,14 @@
 								menu.Show(Owner.FlowControl, x + 1, y + 1);
 								return;
 							}
+							var head = reference.Reference as Head;
+							if(head != null)
+							{
+								var menu = new HeadMenu(head);
+								Utility.MarkDropDownForAutoDispose(menu);
+								menu.Show(Owner.FlowControl, x + 1, y + 1);
+								return;
+							}
 							return;
 						}
 					}

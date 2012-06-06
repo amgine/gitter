@@ -280,6 +280,7 @@
 				menu.Items.Add(new ToolStripMenuItem(
 					Resources.StrSwitchBranch.AddEllipsis(), CachedResources.Bitmaps["ImgCheckout"],
 					(s, eargs) => _gui.StartCheckoutDialog()));
+				menu.Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(Repository.Head));
 				Utility.MarkDropDownForAutoDispose(menu);
 				var parent = Utility.GetParentControl(item);
 				var x = item.Bounds.X + e.X;
