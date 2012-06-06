@@ -88,6 +88,9 @@
     <Compile Include="Gui\Views\PathHistoryView.Designer.cs">
       <DependentUpon>PathHistoryView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\ReflogToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Gui\Views\ViewToolBars\PathHistoryToolBar.cs">
       <SubType>Component</SubType>
     </Compile>

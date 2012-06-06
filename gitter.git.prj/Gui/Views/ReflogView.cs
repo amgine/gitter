@@ -13,6 +13,8 @@
 
 	internal partial class ReflogView : GitViewBase
 	{
+		private readonly ReflogToolbar _toolbar;
+
 		public ReflogView(IDictionary<string, object> parameters, GuiProvider gui)
 			: base(Guids.ReflogViewGuid, gui, parameters)
 		{
@@ -33,6 +35,7 @@
 			_lstReflog.PreviewKeyDown += OnKeyDown;
 
 			ApplyParameters(parameters);
+			AddTopToolStrip(_toolbar = new ReflogToolbar(this));
 		}
 
 		public override bool IsDocument
@@ -71,9 +74,18 @@
 
 		public override void RefreshContent()
 		{
-			if(_lstReflog.Reflog != null)
+			var reflog = _lstReflog.Reflog;
+			if(reflog != null)
 			{
-				_lstReflog.Reflog.Refresh();
+				_lstReflog.Cursor = Cursors.WaitCursor;
+				try
+				{
+					reflog.Refresh();
+				}
+				finally
+				{
+					_lstReflog.Cursor = Cursors.Default;
+				}
 			}
 		}
 
