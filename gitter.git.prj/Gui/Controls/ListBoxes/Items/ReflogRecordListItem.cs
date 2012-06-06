@@ -86,6 +86,10 @@
 			{
 				_image = CachedResources.Bitmaps["ImgReset"];
 			}
+			else if(DataContext.Message.StartsWith("clone:"))
+			{
+				_image = CachedResources.Bitmaps["ImgClone"];
+			}
 			else
 			{
 				_image = null;
