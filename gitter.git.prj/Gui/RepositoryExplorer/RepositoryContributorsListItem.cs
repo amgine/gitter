@@ -14,12 +14,12 @@
 
 	using Resources = gitter.Git.Properties.Resources;
 
-	sealed class RepositoryUsersListItem : RepositoryExplorerItemBase
+	sealed class RepositoryContributorsListItem : RepositoryExplorerItemBase
 	{
 		private readonly IWorkingEnvironment _environment;
 
-		public RepositoryUsersListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgUsers"], Resources.StrUsers)
+		public RepositoryContributorsListItem(IWorkingEnvironment environment)
+			: base(CachedResources.Bitmaps["ImgUsers"], Resources.StrContributors)
 		{
 			if(environment == null) throw new ArgumentNullException("environment");
 
@@ -29,7 +29,7 @@
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			_environment.ViewDockService.ShowView(Guids.UsersViewGuid);
+			_environment.ViewDockService.ShowView(Guids.ContributorsViewGuid);
 		}
 
 		public override void OnDoubleClick(int x, int y)

@@ -51,7 +51,7 @@
 				_viewTree =				new TreeViewFactory(gui),
 				_viewSubmodules =		new SubmodulesViewFactory(gui),
 				_viewConfig =			new ConfigViewFactory(gui),
-				_viewUsers =			new UsersViewFactory(gui),
+				_viewUsers =			new ContributorsViewFactory(gui),
 				_viewDiff =				new DiffViewFactory(gui),
 				_viewBlame =			new BlameViewFactory(gui),
 				_viewContextualDiff =	new ContextualDiffViewFactory(gui),

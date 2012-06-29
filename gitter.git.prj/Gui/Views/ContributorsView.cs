@@ -15,17 +15,21 @@
 	using Resources = gitter.Git.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class UsersView : GitViewBase
+	partial class ContributorsView : GitViewBase
 	{
-		public UsersView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.UsersViewGuid, gui, parameters)
+		private ContributorsToolBar _toolbar;
+
+		public ContributorsView(IDictionary<string, object> parameters, GuiProvider gui)
+			: base(Guids.ContributorsViewGuid, gui, parameters)
 		{
 			InitializeComponent();
 
-			Text = Resources.StrUsers;
+			Text = Resources.StrContributors;
 
-			_lstUsers.Text = Resources.StrsNoUsersToDisplay;
+			_lstUsers.Text = Resources.StrsNoContributorsToDisplay;
 			_lstUsers.PreviewKeyDown += OnKeyDown;
+
+			AddTopToolStrip(_toolbar = new ContributorsToolBar(this));
 		}
 
 		public override Image Image

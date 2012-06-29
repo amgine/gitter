@@ -1,6 +1,6 @@
 ﻿namespace gitter.Git.Gui.Views
 {
-	partial class UsersView
+	partial class ContributorsView
 	{
 		/// <summary>
 		/// Required designer variable.

@@ -27,7 +27,7 @@
 			= new Guid("80333656-E4BB-4FF9-8E01-982AC29ABAF5");
 		public static readonly Guid SubmodulesViewGuid
 			= new Guid("4549BF50-2686-4F78-813E-2B9263A0F0AF");
-		public static readonly Guid UsersViewGuid
+		public static readonly Guid ContributorsViewGuid
 			= new Guid("0E9CA704-EA37-4586-A5B3-8CEBE80AB9FB");
 		public static readonly Guid TreeViewGuid
 			= new Guid("6EB20555-BFAF-47FB-8A55-F555F55D629A");

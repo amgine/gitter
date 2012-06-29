@@ -2941,6 +2941,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Contributors.
+        /// </summary>
+        internal static string StrContributors {
+            get {
+                return ResourceManager.GetString("StrContributors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy.
         /// </summary>
         internal static string StrCopy {
@@ -5634,6 +5643,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No contributors to display.
+        /// </summary>
+        internal static string StrsNoContributorsToDisplay {
+            get {
+                return ResourceManager.GetString("StrsNoContributorsToDisplay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No files to remove.
         /// </summary>
         internal static string StrsNoFilesToRemove {
@@ -5648,15 +5666,6 @@ namespace gitter.Git.Properties {
         internal static string StrsNoPatchesToApply {
             get {
                 return ResourceManager.GetString("StrsNoPatchesToApply", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No users to display.
-        /// </summary>
-        internal static string StrsNoUsersToDisplay {
-            get {
-                return ResourceManager.GetString("StrsNoUsersToDisplay", resourceCulture);
             }
         }
         

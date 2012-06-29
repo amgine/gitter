@@ -88,6 +88,9 @@
     <Compile Include="Gui\Views\PathHistoryView.Designer.cs">
       <DependentUpon>PathHistoryView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gui\Views\ViewToolBars\ContributorsToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Gui\Views\ViewToolBars\ReflogToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -115,7 +118,7 @@
     <Compile Include="Gui\Notifications\FetchNotification.Designer.cs">
       <DependentUpon>FetchNotification.cs</DependentUpon>
     </Compile>
-    <Compile Include="Gui\RepositoryExplorer\RepositoryUsersListItem.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryContributorsListItem.cs" />
     <Compile Include="Gui\RepositoryExplorer\RepositoryCommitListItem.cs" />
     <Compile Include="Gui\RepositoryExplorer\RepositoryHistoryListItem.cs" />
     <Compile Include="Gui\RepositoryExplorer\RepositoryConfigurationListItem.cs" />
@@ -681,11 +684,11 @@
     <Compile Include="Gui\Controls\Menus\TagMenu.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Gui\Views\UsersView.cs">
+    <Compile Include="Gui\Views\ContributorsView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Gui\Views\UsersView.Designer.cs">
-      <DependentUpon>UsersView.cs</DependentUpon>
+    <Compile Include="Gui\Views\ContributorsView.Designer.cs">
+      <DependentUpon>ContributorsView.cs</DependentUpon>
     </Compile>
     <Compile Include="Gui\Views\CommitView.cs">
       <SubType>UserControl</SubType>
@@ -934,8 +937,8 @@
     <EmbeddedResource Include="Gui\Views\ViewToolBars\HistoryFilterDropDown.resx">
       <DependentUpon>HistoryFilterDropDown.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Views\UsersView.resx">
-      <DependentUpon>UsersView.cs</DependentUpon>
+    <EmbeddedResource Include="Gui\Views\ContributorsView.resx">
+      <DependentUpon>ContributorsView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Views\CommitView.resx">
       <DependentUpon>CommitView.cs</DependentUpon>

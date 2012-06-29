@@ -1771,8 +1771,8 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   <data name="StrRunMergeTool" xml:space="preserve">
     <value>Run Merge Tool</value>
   </data>
-  <data name="StrsNoUsersToDisplay" xml:space="preserve">
-    <value>No users to display</value>
+  <data name="StrsNoContributorsToDisplay" xml:space="preserve">
+    <value>No contributors to display</value>
   </data>
   <data name="StrRefs" xml:space="preserve">
     <value>Refs</value>
@@ -2520,5 +2520,8 @@ Proceed?</value>
   </data>
   <data name="ImgFolderHistory" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\folder-history.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrContributors" xml:space="preserve">
+    <value>Contributors</value>
   </data>
 </root>

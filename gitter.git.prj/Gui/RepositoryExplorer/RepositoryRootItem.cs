@@ -16,15 +16,19 @@
 		{
 			if(environment == null) throw new ArgumentNullException("environment");
 
-			Items.Add(new RepositoryHistoryListItem(environment));
-			Items.Add(new RepositoryCommitListItem(environment));
-			Items.Add(new RepositoryStashListItem(environment));
-			Items.Add(new RepositoryReferencesListItem(environment));
-			Items.Add(new RepositoryRemotesListItem(environment));
-			Items.Add(new RepositorySubmodulesListItem(environment));
-			Items.Add(new RepositoryWorkingDirectoryListItem());
-			Items.Add(new RepositoryConfigurationListItem(environment));
-			Items.Add(new RepositoryUsersListItem(environment));
+			Items.AddRange(
+				new CustomListBoxItem[]
+				{
+					new RepositoryHistoryListItem(environment),
+					new RepositoryCommitListItem(environment),
+					new RepositoryStashListItem(environment),
+					new RepositoryReferencesListItem(environment),
+					new RepositoryRemotesListItem(environment),
+					new RepositorySubmodulesListItem(environment),
+					new RepositoryWorkingDirectoryListItem(),
+					new RepositoryConfigurationListItem(environment),
+					new RepositoryContributorsListItem(environment),
+				});
 		}
 
 		protected override void AttachToRepository()

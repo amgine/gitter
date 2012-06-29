@@ -201,12 +201,12 @@
 		}
 	}
 
-	sealed class UsersViewFactory : ViewFactoryBase
+	sealed class ContributorsViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;
 
-		public UsersViewFactory(GuiProvider guiProvider)
-			: base(Guids.UsersViewGuid, Resources.StrUsers, CachedResources.Bitmaps["ImgUsers"], true)
+		public ContributorsViewFactory(GuiProvider guiProvider)
+			: base(Guids.ContributorsViewGuid, Resources.StrContributors, CachedResources.Bitmaps["ImgUsers"], true)
 		{
 			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
 			_guiProvider = guiProvider;
@@ -214,7 +214,7 @@
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			return new UsersView(parameters, _guiProvider);
+			return new ContributorsView(parameters, _guiProvider);
 		}
 	}
 
