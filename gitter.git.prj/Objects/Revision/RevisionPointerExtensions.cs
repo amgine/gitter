@@ -577,12 +577,29 @@
 
 		/// <summary>Gets <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</summary>
 		/// <param name="revision">The revision.</param>
-		/// <returns><see cref="Tree"/> pointed by the specified <paramref name="revision"/>..</returns>
+		/// <returns><see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</returns>
 		public static Tree GetTree(this IRevisionPointer revision)
 		{
 			ValidateRevisionPointer(revision);
 
 			return new Tree(revision.Repository, revision.FullName);
+		}
+
+		/// <summary>Gets <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</summary>
+		/// <param name="revision">The revision.</param>
+		/// <returns>Function which retrieves <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</returns>
+		public static IAsyncFunc<Tree> GetTreeAsync(this IRevisionPointer revision)
+		{
+			ValidateRevisionPointer(revision);
+
+			return AsyncFunc.Create(
+				revision,
+				(mon, rev) =>
+				{
+					return new Tree(revision.Repository, revision.FullName);
+				},
+				"",
+				"");
 		}
 
 		#endregion

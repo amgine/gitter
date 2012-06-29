@@ -574,15 +574,6 @@
 			return File.ReadAllText(fileName);
 		}
 
-		#region GetWorkingTree()
-
-		public Tree GetWorkingTree()
-		{
-			return new Tree(this);
-		}
-
-		#endregion
-
 		#region init
 
 		public static void Init(string path, string template, bool bare)

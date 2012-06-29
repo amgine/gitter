@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
+	using System.IO;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -15,6 +16,7 @@
 	sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 	{
 		private TreeBinding _binding;
+		private IAsyncFunc<Tree> _getTreeFunc;
 
 		public RepositoryWorkingDirectoryListItem()
 			: base(CachedResources.Bitmaps["ImgFolder"], Resources.StrWorkingDirectory)
@@ -50,6 +52,7 @@
 
 		private void Unbind()
 		{
+			_getTreeFunc = null;
 			if(_binding != null)
 			{
 				_binding.ItemActivated -= OnItemActivated;
@@ -61,7 +64,39 @@
 
 		private void Bind()
 		{
-			_binding = new TreeBinding(Items, Repository.GetWorkingTree().Root, false);
+			var f = _getTreeFunc = Repository.Head.GetTreeAsync();
+			f.BeginInvoke(
+				ListBox,
+				new NullMonitor(),
+				OnTreeLoaded,
+				f);
+		}
+
+		private void OnTreeLoaded(IAsyncResult ar)
+		{
+			var f = (IAsyncFunc<Tree>)ar.AsyncState;
+			if(_getTreeFunc == f)
+			{
+				var listBox = ListBox;
+				if(listBox != null)
+				{
+					var tree = f.EndInvoke(ar);
+					if(listBox.InvokeRequired)
+					{
+						listBox.BeginInvoke(new Action<Tree>(OnTreeLoadedSync), tree);
+					}
+					else
+					{
+						OnTreeLoadedSync(tree);
+					}
+				}
+				_getTreeFunc = null;
+			}
+		}
+
+		private void OnTreeLoadedSync(Tree tree)
+		{
+			_binding = new TreeBinding(Items, tree.Root, false);
 			_binding.ItemActivated += OnItemActivated;
 			_binding.ItemContextMenuRequested += OnItemContextMenuRequested;
 		}
@@ -69,7 +104,10 @@
 		private void Refresh()
 		{
 			Unbind();
-			if(ListBox != null) Bind();
+			if(ListBox != null)
+			{
+				Bind();
+			}
 		}
 
 		private void OnHeadPositionChanged(object sender, RevisionChangedEventArgs e)
@@ -102,34 +140,52 @@
 				if(item.TreeItem is TreeFile)
 				{
 					var menu = new ContextMenuStrip();
-					menu.Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, item.TreeItem.FullPath));
-					menu.Items.Add(GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, item.TreeItem.FullPath));
-					menu.Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, System.IO.Path.GetDirectoryName(item.TreeItem.FullPath)));
-					menu.Items.Add(new ToolStripSeparator());
-					var c = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-					c.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, item.TreeItem.Name));
-					c.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, item.TreeItem.RelativePath));
-					c.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, item.TreeItem.FullPath));
-					menu.Items.Add(c);
-					menu.Items.Add(new ToolStripSeparator());
-					menu.Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath));
-					menu.Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath));
+					menu.Items.AddRange(
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, item.TreeItem.FullPath),
+							GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, item.TreeItem.FullPath),
+							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(item.TreeItem.FullPath)),
+							new ToolStripSeparator(),
+							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+								new ToolStripItem[]
+								{
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, item.TreeItem.Name),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, item.TreeItem.RelativePath),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, item.TreeItem.FullPath),
+								}),
+							new ToolStripSeparator(),
+							GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath),
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath),
+						});
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
 				}
 				else if(item.TreeItem is TreeDirectory)
 				{
 					var menu = new ContextMenuStrip();
-					menu.Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, item.TreeItem.FullPath));
-					menu.Items.Add(GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, item.TreeItem.FullPath));
+					menu.Items.AddRange(
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, item.TreeItem.FullPath),
+							GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, item.TreeItem.FullPath),
+						});
 					if(e.Item.Items.Count != 0)
 					{
-						menu.Items.Add(new ToolStripSeparator());
-						menu.Items.Add(GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(e.Item));
-						menu.Items.Add(GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(e.Item));
+						menu.Items.AddRange(
+							new ToolStripItem[]
+							{
+								new ToolStripSeparator(),
+								GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(e.Item),
+								GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(e.Item),
+							});
 					}
-					menu.Items.Add(new ToolStripSeparator());
-					menu.Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath + "/"));
+					menu.Items.AddRange(
+						new ToolStripItem[]
+						{
+							new ToolStripSeparator(),
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath + "/"),
+						});
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
 				}
@@ -144,13 +200,15 @@
 			if(Repository != null)
 			{
 				var menu = new ContextMenuStrip();
-				menu.Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(
-					Resources.StrOpenInWindowsExplorer, null, Repository.WorkingDirectory));
-				menu.Items.Add(GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(
-					Resources.StrOpenCommandLine, null, Repository.WorkingDirectory));
-				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add(GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(requestEventArgs.Item));
-				menu.Items.Add(GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(requestEventArgs.Item));
+				menu.Items.AddRange(
+					new ToolStripItem[]
+					{
+						GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.WorkingDirectory),
+						GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, Repository.WorkingDirectory),
+						new ToolStripSeparator(),
+						GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(requestEventArgs.Item),
+						GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(requestEventArgs.Item),
+					});
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
