@@ -490,5 +490,44 @@
 		}
 
 		#endregion
+
+		#region archive
+
+		/// <summary>Create an archive of files from a named tree.</summary>
+		/// <param name="parameters"><see cref="ArchiveParameters"/>.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		public void Archive(ArchiveParameters parameters)
+		{
+			if(parameters == null) throw new ArgumentNullException("parameters");
+			if(string.IsNullOrEmpty(parameters.Tree)) throw new ArgumentException();
+
+			var args = new List<CommandArgument>(5);
+			if(!string.IsNullOrEmpty(parameters.Format))
+			{
+				args.Add(ArchiveCommand.Format(parameters.Format));
+			}
+			if(!string.IsNullOrEmpty(parameters.OutputFile))
+			{
+				args.Add(ArchiveCommand.Output(parameters.OutputFile));
+			}
+			if(!string.IsNullOrEmpty(parameters.Remote))
+			{
+				args.Add(ArchiveCommand.Remote(parameters.Remote));
+			}
+			args.Add(new CommandArgument(parameters.Tree));
+			if(!string.IsNullOrEmpty(parameters.Path))
+			{
+				args.Add(new PathCommandArgument(parameters.Path));
+			}
+
+			var cmd = new ArchiveCommand(args);
+			var output = _executor.ExecCommand(cmd);
+			if(output.ExitCode != 0)
+			{
+				throw new GitException(output.Error);
+			}
+		}
+
+		#endregion
 	}
 }

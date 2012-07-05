@@ -18,6 +18,7 @@
 			_tag = tag;
 
 			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(_tag));
+			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(_tag));
 
 			Items.Add(new ToolStripSeparator()); // interactive section
 

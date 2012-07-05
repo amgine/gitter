@@ -23,6 +23,7 @@
 			Items.Add(GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(new RevisionChangesDiffSource(_revision)));
 			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(_revision));
 			Items.Add(GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(_revision));
+			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(_revision));
 
 			Items.Add(new ToolStripSeparator());
 
@@ -39,7 +40,9 @@
 			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, revision.TreeHash));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, revision.Subject));
 			if(!string.IsNullOrEmpty(revision.Body))
+			{
 				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrBody, revision.Body));
+			}
 			if(revision.Committer != revision.Author)
 			{
 				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, revision.Committer.Name));

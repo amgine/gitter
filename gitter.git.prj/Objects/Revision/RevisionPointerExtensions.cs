@@ -741,5 +741,47 @@
 		}
 
 		#endregion
+
+		#region archive
+
+		public static void Archive(this IRevisionPointer pointer, string outputFile, string path = null, string format = null)
+		{
+			ValidateRevisionPointer(pointer);
+
+			pointer.Repository.Accessor.Archive(
+				new ArchiveParameters()
+				{
+					Tree = pointer.FullName,
+					Path = path,
+					OutputFile = outputFile,
+					Format = format,
+				});
+		}
+
+		public static IAsyncAction ArchiveAsync(this IRevisionPointer pointer, string outputFile, string path = null, string format = null)
+		{
+			ValidateRevisionPointer(pointer);
+
+			return AsyncAction.Create(
+				new
+				{
+					Repository = pointer.Repository,
+					Parameters = new ArchiveParameters()
+					{
+						Tree = pointer.FullName,
+						Path = path,
+						OutputFile = outputFile,
+						Format = format,
+					}
+				},
+				(data, mon) =>
+				{
+					data.Repository.Accessor.Archive(data.Parameters);
+				},
+				"Archive",
+				"Creating archive from '{0}'...".UseAsFormat(pointer.Pointer));
+		}
+
+		#endregion
 	}
 }

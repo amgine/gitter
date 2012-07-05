@@ -3,30 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 
-	/// <summary>Archive format.</summary>
-	public enum ArchiveFormat
-	{
-		/// <summary>Tar.</summary>
-		Tar,
-		/// <summary>Zip.</summary>
-		Zip,
-	}
-
 	/// <summary>Create an archive of files from a named tree.</summary>
 	public sealed class ArchiveCommand : Command
 	{
-		/// <summary>Format of the resulting archive: tar or zip. The default is tar.</summary>
-		public static CommandArgument Format(ArchiveFormat format)
+		/// <summary>Format of the resulting archive.</summary>
+		public static CommandArgument Format(string format)
 		{
-			switch(format)
-			{
-				case ArchiveFormat.Tar:
-					return new CommandArgument("--format", "tar");
-				case ArchiveFormat.Zip:
-					return new CommandArgument("--format", "zip");
-				default:
-					throw new ArgumentException("format");
-			}
+			return new CommandArgument("--format", format);
 		}
 
 		/// <summary>Show all available formats.</summary>
@@ -50,7 +33,7 @@
 		/// <summary>Write the archive to file instead of stdout.</summary>
 		public static CommandArgument Output(string file)
 		{
-			return new CommandArgument("--output", file);
+			return new CommandArgument("--output", file.AssureDoubleQuotes());
 		}
 
 		/// <summary>Look for attributes in .gitattributes in working directory too.</summary>

@@ -1404,6 +1404,9 @@
   <ItemGroup>
     <None Include="Resources\folder-history.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\folder-zipper.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

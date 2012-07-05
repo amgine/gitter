@@ -307,7 +307,7 @@
 			if(revision.IsDeleted)
 			{
 				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision1");
+					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision");
 			}
 
 			#endregion
@@ -319,6 +319,30 @@
 				Tag		= revision,
 			};
 			item.Click += OnSaveRevisionPatchClick;
+			return item;
+		}
+
+		public static T GetArchiveItem<T>(IRevisionPointer revision)
+			where T : ToolStripItem, new()
+		{
+			#region validate args
+
+			if(revision == null) throw new ArgumentNullException("revision");
+			if(revision.IsDeleted)
+			{
+				throw new ArgumentException(string.Format(
+					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision");
+			}
+
+			#endregion
+
+			var item = new T()
+			{
+				Image	= CachedResources.Bitmaps["ImgArchive"],
+				Text	= Resources.StrArchive.AddEllipsis(),
+				Tag		= revision,
+			};
+			item.Click += OnArchiveClick;
 			return item;
 		}
 
@@ -438,6 +462,48 @@
 							MessageBoxButton.Close,
 							MessageBoxIcon.Error);
 					}
+				}
+			}
+		}
+
+		private static void OnArchiveClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var revision = (IRevisionPointer)item.Tag;
+			var parent = Utility.GetParentControl(item);
+
+			string fileName = null;
+			using(var dlg = new SaveFileDialog()
+				{
+					Filter = "zip files|.zip|" +
+							 "tar.gz files|.tar.gz|" +
+							 "tar files|.tar|" +
+							 "tgz files|.tgz",
+					DefaultExt = ".zip",
+					OverwritePrompt = true,
+					Title = Resources.StrArchive,
+				})
+			{
+				if(dlg.ShowDialog(parent) == DialogResult.OK)
+				{
+					fileName = dlg.FileName;
+				}
+			}
+			if(!string.IsNullOrEmpty(fileName))
+			{
+				try
+				{
+					revision.ArchiveAsync(fileName).Invoke<ProgressForm>(parent);
+				}
+				catch(GitException exc)
+				{
+					if(parent != null) parent.Cursor = Cursors.Default;
+					GitterApplication.MessageBoxService.Show(
+						parent,
+						exc.Message,
+						Resources.ErrFailedToArchive,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
 				}
 			}
 		}

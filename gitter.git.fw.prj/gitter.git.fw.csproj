@@ -117,6 +117,7 @@
     <Compile Include="ITreeAccessor.cs" />
     <Compile Include="Parameters\ApplyPatchParameters.cs" />
     <Compile Include="Parameters\ApplyPatchTo.cs" />
+    <Compile Include="Parameters\ArchiveParameters.cs" />
     <Compile Include="Parameters\BaseQueryDiffParameters.cs" />
     <Compile Include="Parameters\Branch\BranchQueryMode.cs" />
     <Compile Include="Parameters\Branch\BranchTrackingMode.cs" />

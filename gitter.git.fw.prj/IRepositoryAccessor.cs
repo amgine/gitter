@@ -15,6 +15,11 @@
 		ITreeAccessor,
 		IConfigAccessor
 	{
+		/// <summary>Create an archive of files from a named tree.</summary>
+		/// <param name="parameters"><see cref="ArchiveParameters"/>.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		void Archive(ArchiveParameters parameters);
+
 		/// <summary>Get symbolic reference target.</summary>
 		/// <param name="parameters"><see cref="QuerySymbolicReferenceParameters"/>.</param>
 		/// <returns>Symbolic reference data.</returns>

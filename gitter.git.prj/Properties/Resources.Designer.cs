@@ -256,6 +256,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to create archive.
+        /// </summary>
+        internal static string ErrFailedToArchive {
+            get {
+                return ResourceManager.GetString("ErrFailedToArchive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to checkout &apos;{0}&apos;.
         /// </summary>
         internal static string ErrFailedToCheckout {
@@ -1327,6 +1336,13 @@ namespace gitter.Git.Properties {
         internal static System.Drawing.Bitmap ImgAlignToGraph {
             get {
                 object obj = ResourceManager.GetObject("ImgAlignToGraph", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap ImgArchive {
+            get {
+                object obj = ResourceManager.GetObject("ImgArchive", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2454,6 +2470,15 @@ namespace gitter.Git.Properties {
         internal static string StrApplyTo {
             get {
                 return ResourceManager.GetString("StrApplyTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Archive.
+        /// </summary>
+        internal static string StrArchive {
+            get {
+                return ResourceManager.GetString("StrArchive", resourceCulture);
             }
         }
         
