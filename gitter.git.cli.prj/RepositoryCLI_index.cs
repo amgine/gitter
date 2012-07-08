@@ -33,33 +33,46 @@
 
 		private static ConflictType GetConflictType(char x, char y)
 		{
-			if(x != 'U' && y != 'U') return ConflictType.None;
-			switch(x)
+			if(IsUnmergedState(x, y))
 			{
-				case 'U':
-					switch(y)
-					{
-						case 'U': return ConflictType.BothModified;
-						case 'A': return ConflictType.AddedByThem;
-						case 'D': return ConflictType.DeletedByThem;
-						default: return ConflictType.Unknown;
-					}
-				case 'A':
-					switch(y)
-					{
-						case 'U': return ConflictType.AddedByUs;
-						case 'A': return ConflictType.BothAdded;
-						default: return ConflictType.Unknown;
-					}
-				case 'D':
-					switch(y)
-					{
-						case 'U': return ConflictType.DeletedByUs;
-						case 'D': return ConflictType.BothDeleted;
-						default: return ConflictType.Unknown;
-					}
-				default:
+				if(x == y)
+				{
+					if(x == 'A') return ConflictType.BothAdded;
+					if(x == 'D') return ConflictType.BothDeleted;
+					if(x == 'U') return ConflictType.BothModified;
 					return ConflictType.Unknown;
+				}
+				else
+				{
+					switch(x)
+					{
+						case 'U':
+							switch(y)
+							{
+								case 'A': return ConflictType.AddedByThem;
+								case 'D': return ConflictType.DeletedByThem;
+								default: return ConflictType.Unknown;
+							}
+						case 'A':
+							switch(y)
+							{
+								case 'U': return ConflictType.AddedByUs;
+								default: return ConflictType.Unknown;
+							}
+						case 'D':
+							switch(y)
+							{
+								case 'U': return ConflictType.DeletedByUs;
+								default: return ConflictType.Unknown;
+							}
+						default:
+							return ConflictType.Unknown;
+					}
+				}
+			}
+			else
+			{
+				return ConflictType.None;
 			}
 		}
 
@@ -267,12 +280,11 @@
 							stagedFileStatus = FileStatus.Added;
 						}
 					}
-					if(IsUnmergedState(x, y))
+					conflictType = GetConflictType(x, y);
+					if(conflictType != ConflictType.None)
 					{
 						staged = false;
 						unstaged = true;
-						conflictType = GetConflictType(x, y);
-						y = 'U';
 						unstagedFileStatus = FileStatus.Unmerged;
 						++unmergedCount;
 					}
