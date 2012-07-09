@@ -69,6 +69,11 @@
 				var branch = ((BranchListItem)item).DataContext;
 				_txtRevision.Text = branch.Name;
 			}
+			else if(item is RemoteBranchListItem)
+			{
+				var branch = ((RemoteBranchListItem)item).DataContext;
+				_txtRevision.Text = branch.Name;
+			}
 			else if(item is TagListItem)
 			{
 				var tag = ((TagListItem)item).DataContext;
