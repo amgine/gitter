@@ -103,9 +103,13 @@
 		{
 			_context = context;
 			if(blocking)
+			{
 				ShowDialog(parent);
+			}
 			else
+			{
 				Show(parent);
+			}
 		}
 
 		/// <summary>
@@ -126,13 +130,20 @@
 			get { return Text; }
 			set
 			{
-				if(InvokeRequired)
+				if(!IsDisposed)
 				{
-					Invoke(new Action<string>((text) => Text = text), value);
-				}
-				else
-				{
-					Text = value;
+					try
+					{
+						if(InvokeRequired)
+						{
+							Invoke(new Action<string>((text) => Text = text), value);
+						}
+						else
+						{
+							Text = value;
+						}
+					}
+					catch { }
 				}
 			}
 		}
@@ -146,13 +157,20 @@
 			get { return _canCancel; }
 			set
 			{
-				if(InvokeRequired)
+				if(!IsDisposed)
 				{
-					Invoke(new Action<bool>(SetCanCancel), value);
-				}
-				else
-				{
-					SetCanCancel(value);
+					try
+					{
+						if(InvokeRequired)
+						{
+							Invoke(new Action<bool>(SetCanCancel), value);
+						}
+						else
+						{
+							SetCanCancel(value);
+						}
+					}
+					catch { }
 				}
 			}
 		}
@@ -176,13 +194,20 @@
 		/// <param name="action">Step name.</param>
 		public void SetAction(string action)
 		{
-			if(InvokeRequired)
+			if(!IsDisposed)
 			{
-				Invoke(new Action<string>(SetAction), action);
-			}
-			else
-			{
-				_lblAction.Text = action;
+				try
+				{
+					if(InvokeRequired)
+					{
+						Invoke(new Action<string>(SetAction), action);
+					}
+					else
+					{
+						_lblAction.Text = action;
+					}
+				}
+				catch { }
 			}
 		}
 
@@ -193,16 +218,23 @@
 		/// <param name="max">Maximum.</param>
 		public void SetProgressRange(int min, int max)
 		{
-			if(InvokeRequired)
+			if(!IsDisposed)
 			{
-				Invoke(new Action<int, int>(SetProgressRange), min, max);
-			}
-			else
-			{
-				_progressBar.Style = ProgressBarStyle.Continuous;
-				_progressBar.Minimum = min;
-				_progressBar.Maximum = max;
-				UpdateWin7ProgressBar();
+				try
+				{
+					if(InvokeRequired)
+					{
+						Invoke(new Action<int, int>(SetProgressRange), min, max);
+					}
+					else
+					{
+						_progressBar.Style = ProgressBarStyle.Continuous;
+						_progressBar.Minimum = min;
+						_progressBar.Maximum = max;
+						UpdateWin7ProgressBar();
+					}
+				}
+				catch { }
 			}
 		}
 
@@ -214,16 +246,23 @@
 		/// <param name="action">Step name.</param>
 		public void SetProgressRange(int min, int max, string action)
 		{
-			if(InvokeRequired)
+			if(!IsDisposed)
 			{
-				Invoke(new Action<int, int, string>(SetProgressRange), min, max, action);
-			}
-			else
-			{
-				_progressBar.Minimum = min;
-				_progressBar.Maximum = max;
-				_lblAction.Text = action;
-				UpdateWin7ProgressBar();
+				try
+				{
+					if(InvokeRequired)
+					{
+						Invoke(new Action<int, int, string>(SetProgressRange), min, max, action);
+					}
+					else
+					{
+						_progressBar.Minimum = min;
+						_progressBar.Maximum = max;
+						_lblAction.Text = action;
+						UpdateWin7ProgressBar();
+					}
+				}
+				catch { }
 			}
 		}
 
@@ -233,14 +272,21 @@
 		/// <param name="val">Progress.</param>
 		public void SetProgress(int val)
 		{
-			if(InvokeRequired)
+			if(!IsDisposed)
 			{
-				Invoke(new Action<int>(SetProgress), val);
-			}
-			else
-			{
-				_progressBar.Value = val;
-				UpdateWin7ProgressBar();
+				try
+				{
+					if(InvokeRequired)
+					{
+						Invoke(new Action<int>(SetProgress), val);
+					}
+					else
+					{
+						_progressBar.Value = val;
+						UpdateWin7ProgressBar();
+					}
+				}
+				catch { }
 			}
 		}
 
@@ -251,15 +297,22 @@
 		/// <param name="action">Step name.</param>
 		public void SetProgress(int val, string action)
 		{
-			if(InvokeRequired)
+			if(!IsDisposed)
 			{
-				Invoke(new Action<int, string>(SetProgress), val, action);
-			}
-			else
-			{
-				_progressBar.Value = val;
-				_lblAction.Text = action;
-				UpdateWin7ProgressBar();
+				try
+				{
+					if(InvokeRequired)
+					{
+						Invoke(new Action<int, string>(SetProgress), val, action);
+					}
+					else
+					{
+						_progressBar.Value = val;
+						_lblAction.Text = action;
+						UpdateWin7ProgressBar();
+					}
+				}
+				catch { }
 			}
 		}
 
@@ -268,14 +321,21 @@
 		/// </summary>
 		public void SetProgressIntermediate()
 		{
-			if(InvokeRequired)
+			if(!IsDisposed)
 			{
-				Invoke(new Action(SetProgressIntermediate));
-			}
-			else
-			{
-				_progressBar.Style = ProgressBarStyle.Marquee;
-				UpdateWin7ProgressBar();
+				try
+				{
+					if(InvokeRequired)
+					{
+						Invoke(new Action(SetProgressIntermediate));
+					}
+					else
+					{
+						_progressBar.Style = ProgressBarStyle.Marquee;
+						UpdateWin7ProgressBar();
+					}
+				}
+				catch { }
 			}
 		}
 
@@ -285,18 +345,25 @@
 		public void ProcessCompleted()
 		{
 			_context = null;
-			if(InvokeRequired)
+			if(!IsDisposed)
 			{
-				Invoke(new Action(ProcessCompleted));
-			}
-			else
-			{
-				StopWin7ProgressBar();
-				Close();
+				try
+				{
+					if(InvokeRequired)
+					{
+						Invoke(new Action(ProcessCompleted));
+					}
+					else
+					{
+						StopWin7ProgressBar();
+						Close();
+					}
+				}
+				catch { }
 			}
 		}
 
-		private void _btnCancel_Click(object sender, EventArgs e)
+		private void OnCancelClick(object sender, EventArgs e)
 		{
 			_btnCancel.Enabled = false;
 			var handler = Cancelled;
