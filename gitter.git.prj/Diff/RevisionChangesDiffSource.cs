@@ -7,10 +7,9 @@
 
 	using gitter.Framework.Controls;
 
-	using gitter.Git.Gui.Controls;
 	using gitter.Git.AccessLayer;
 
-	sealed class RevisionChangesDiffSource : DiffSourceBase
+	sealed class RevisionChangesDiffSource : DiffSourceBase, IRevisionDiffSource
 	{
 		private readonly IRevisionPointer _revision;
 		private readonly IList<string> _paths;
@@ -35,6 +34,8 @@
 			get { return _revision; }
 		}
 
+		#region Overrides
+
 		public override Repository Repository
 		{
 			get { return _revision.Repository; }
@@ -51,12 +52,6 @@
 			var ds = obj as RevisionChangesDiffSource;
 			if(ds == null) return false;
 			return _revision == ds._revision;
-		}
-
-		public override IEnumerable<FlowPanel> GetInformationPanels()
-		{
-			yield return new RevisionHeaderPanel() { Revision = _revision.Dereference() };
-			yield return new FlowPanelSeparator() { Style = FlowPanelSeparatorStyle.Line };
 		}
 
 		protected override Diff GetDiffCore(DiffOptions options)
@@ -80,5 +75,7 @@
 				return "log -p " + _revision.Pointer;
 			}
 		}
+
+		#endregion
 	}
 }

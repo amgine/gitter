@@ -23,6 +23,11 @@
 			get { return _fileName; }
 		}
 
+		public override Repository Repository
+		{
+			get { return Revision.Repository; }
+		}
+
 		public IRevisionPointer Revision
 		{
 			get { return _revision; }

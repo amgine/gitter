@@ -213,11 +213,11 @@
 
 		private void _btnScanLocalRepo_LinkClicked(object sender, EventArgs e)
 		{
-			var x = new NotificationForm();
-			var n = new gitter.Git.Gui.FetchNotification();
-			x.ClientSize = n.Size;
-			n.Parent = x;
-			x.Show();
+			//var x = new NotificationForm();
+			//var n = new gitter.Git.Gui.FetchNotification();
+			//x.ClientSize = n.Size;
+			//n.Parent = x;
+			//x.Show();
 		}
 	}
 }

@@ -117,58 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ImgBranch" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\branch.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgBranchRemote" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\branchremote.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFetch" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\fetch.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFolder" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgGit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\git.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgHistory" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\history.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_add.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayCancel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_cancel.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayConflict" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_conflict.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayDel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_del.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayEdit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_edit.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_ok.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPull" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\pull.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPush" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\push.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAuthor" xml:space="preserve">
-    <value>Author</value>
-  </data>
-  <data name="StrAuthorDate" xml:space="preserve">
-    <value>Author Date</value>
-  </data>
-  <data name="StrBody" xml:space="preserve">
-    <value>Body</value>
-  </data>
   <data name="StrBranch" xml:space="preserve">
     <value>Branch</value>
   </data>
@@ -247,23 +195,8 @@
   <data name="StrWorkingTree" xml:space="preserve">
     <value>Working Tree</value>
   </data>
-  <data name="ImgTag" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tag.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTagAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tagadd.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTagDel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tagdel.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgUsers" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\users.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrCheckout" xml:space="preserve">
     <value>Checkout</value>
-  </data>
-  <data name="StrMerge" xml:space="preserve">
-    <value>Merge</value>
   </data>
   <data name="StrReset" xml:space="preserve">
     <value>Reset</value>
@@ -301,51 +234,6 @@
   <data name="StrSoft" xml:space="preserve">
     <value>Soft</value>
   </data>
-  <data name="ImgClean" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clean.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgCommit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\commit.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgCompress" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\compress.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgGraph" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\graph.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgGraphChildren" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\graph-children.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgLinesAdded" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\lines-added.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgLinesRemoved" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\lines-removed.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgMerge" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\merge.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSubmodule" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\module.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSubmoduleAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\module-add.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRefresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\refresh.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStashAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stash-add.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStashDel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stash-remove.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTerminal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\terminal.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrRemote" xml:space="preserve">
     <value>Remote</value>
   </data>
@@ -354,9 +242,6 @@
   </data>
   <data name="StrCreateBranch" xml:space="preserve">
     <value>Create Branch</value>
-  </data>
-  <data name="ImgRevert" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\revert.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrCreateTag" xml:space="preserve">
     <value>Create Tag</value>
@@ -374,41 +259,8 @@
   <data name="StrRemoveTag" xml:space="preserve">
     <value>Delete Tag</value>
   </data>
-  <data name="ImgRemote" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\remote.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAuthorEmail" xml:space="preserve">
-    <value>Author Email</value>
-  </data>
   <data name="StrCommitterEmail" xml:space="preserve">
     <value>Committer Email</value>
-  </data>
-  <data name="ImgCheckout" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\checkout.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSubmoduleDel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\module-del.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgReset" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\reset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgBranchAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\branch-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgBranchDel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\branch-del.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgBranchRemoteDel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\branchremote-del.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgAlignToGraph" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\align-to-graph.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAbbreviate" xml:space="preserve">
-    <value>Abbreviate</value>
-  </data>
-  <data name="StrAlignToGraph" xml:space="preserve">
-    <value>Align to Graph</value>
   </data>
   <data name="StrShowEmail" xml:space="preserve">
     <value>Show Email</value>
@@ -421,12 +273,6 @@
   </data>
   <data name="StrShowTags" xml:space="preserve">
     <value>Show Tags</value>
-  </data>
-  <data name="ImgCherryPick" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cherry-pick.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgMail" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\mail.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrGit" xml:space="preserve">
     <value>Git</value>
@@ -443,23 +289,8 @@
   <data name="StrNoBranch" xml:space="preserve">
     <value>(no branch)</value>
   </data>
-  <data name="ImgSplitPanelVertical" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ui-split-panel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSplitPanelHorizontal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ui-split-panel-vertical.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearch" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrSearch" xml:space="preserve">
     <value>Search</value>
-  </data>
-  <data name="ImgMinus" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\minus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPlus" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\plus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrParent" xml:space="preserve">
     <value>Parent</value>
@@ -470,20 +301,11 @@
   <data name="StrSHA" xml:space="preserve">
     <value>SHA</value>
   </data>
-  <data name="ImgDiff" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\diff.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAdded" xml:space="preserve">
-    <value>Added</value>
-  </data>
   <data name="StrModified" xml:space="preserve">
     <value>Modified</value>
   </data>
   <data name="StrRemoved" xml:space="preserve">
     <value>Removed</value>
-  </data>
-  <data name="ImgBinary" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\binary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrHorizontalSplit" xml:space="preserve">
     <value>Horizontal Split</value>
@@ -493,12 +315,6 @@
   </data>
   <data name="StrVerticalSplit" xml:space="preserve">
     <value>Vertical Split</value>
-  </data>
-  <data name="ImgPanel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ui-panel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrBottomAlignedDetails" xml:space="preserve">
-    <value>Bottom-aligned Details</value>
   </data>
   <data name="StrIgnoreWhitespaces" xml:space="preserve">
     <value>Ignore Whitespaces</value>
@@ -511,12 +327,6 @@
   </data>
   <data name="StrHideDetails" xml:space="preserve">
     <value>Hide Details</value>
-  </data>
-  <data name="StrMergeMultipleBranches" xml:space="preserve">
-    <value>Merge Multiple Branches</value>
-  </data>
-  <data name="StrAddRemote" xml:space="preserve">
-    <value>Add Remote</value>
   </data>
   <data name="StrRemoveRemote" xml:space="preserve">
     <value>Remove Remote</value>
@@ -560,20 +370,11 @@
   <data name="StrReference" xml:space="preserve">
     <value>Reference</value>
   </data>
-  <data name="ImgBranchRename" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\branch-rename.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrBranchesToPush" xml:space="preserve">
-    <value>Branches to push</value>
-  </data>
   <data name="StrCheckoutAfterCreation" xml:space="preserve">
     <value>Checkout after creation</value>
   </data>
   <data name="StrCreateBranchReflog" xml:space="preserve">
     <value>Create branch reflog</value>
-  </data>
-  <data name="StrMergeWith" xml:space="preserve">
-    <value>Merge with</value>
   </data>
   <data name="StrMessage" xml:space="preserve">
     <value>Message</value>
@@ -599,9 +400,6 @@
   <data name="StrSendTags" xml:space="preserve">
     <value>Send tags</value>
   </data>
-  <data name="StrSquash" xml:space="preserve">
-    <value>Squash</value>
-  </data>
   <data name="StrStartingRevision" xml:space="preserve">
     <value>Starting revision</value>
   </data>
@@ -617,9 +415,6 @@
   <data name="ErrFailedToRemoveRemote" xml:space="preserve">
     <value>Unable to remove remote '{0}'</value>
   </data>
-  <data name="ImgWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\exclamation-shield.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrFetchingDataFrom" xml:space="preserve">
     <value>Fetching data from '{0}'...</value>
   </data>
@@ -634,9 +429,6 @@
   </data>
   <data name="StrUseWithCaution" xml:space="preserve">
     <value>Use with caution</value>
-  </data>
-  <data name="ImgRebase" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\rebase.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrShowColors" xml:space="preserve">
     <value>Show Colors</value>
@@ -703,18 +495,6 @@
   </data>
   <data name="ErrYouMustSelectBranchesToPush" xml:space="preserve">
     <value>You must select at least 1 branch to push</value>
-  </data>
-  <data name="ImgLessContext" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\less-context.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgMoreContext" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\more-context.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStageAll" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stage-all.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgUnstageAll" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\unstage-all.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ErrEmptyCommitMessage" xml:space="preserve">
     <value>Empty commit message</value>
@@ -785,62 +565,11 @@
   <data name="StrCheckoutRevision" xml:space="preserve">
     <value>Checkout Revision</value>
   </data>
-  <data name="TipReflog" xml:space="preserve">
-    <value>This activates recording of all changes made to the branch ref, enabling use of date based sha1 expressions
-such as "&lt;branchname&gt;@{yesterday}". Note that in non-bare repositories, reflogs are usually enabled by default
-by the core.logallrefupdates config option.</value>
-  </data>
-  <data name="StrAdd" xml:space="preserve">
-    <value>Add</value>
-  </data>
-  <data name="TipCheckoutAfterCreation" xml:space="preserve">
-    <value>Switch HEAD to newly created branch.</value>
-  </data>
-  <data name="TipMergeNoCommit" xml:space="preserve">
-    <value>Perform the merge but pretend the merge failed and do not autocommit, to give the user a chance
-to inspect and further tweak the merge result before committing.</value>
-  </data>
-  <data name="TipNoFF" xml:space="preserve">
-    <value>Generate a merge commit even if the merge resolved as a fast-forward.</value>
-  </data>
-  <data name="TipPushForceOverwrite" xml:space="preserve">
-    <value>Usually, the command refuses to update a remote ref that is not an ancestor
-of the local ref used to overwrite it. This flag disables the check.
-This can cause the remote repository to lose commits; use it with care.</value>
-  </data>
-  <data name="TipSendTags" xml:space="preserve">
-    <value>All refs under refs/tags are pushed.</value>
-  </data>
-  <data name="TipSquash" xml:space="preserve">
-    <value>Produce the working tree and index state as if a real merge happened (except for the merge
-information), but do not actually make a commit or move the HEAD, nor record
-$GIT_DIR/MERGE_HEAD to cause the next git commit command to create a merge commit.</value>
-  </data>
-  <data name="TipTrack" xml:space="preserve">
-    <value>Set up configuration to mark the start-point branch as "upstream" from the new branch.
-This configuration will tell git to show the relationship between the two branches in git status and git branch -v.
-Furthermore, it directs git pull without arguments to pull from the upstream when the new branch is checked out.
-
-This behavior is the default when the start point is a remote branch.</value>
-  </data>
-  <data name="TipUseTinPack" xml:space="preserve">
-    <value>A thin transfer significantly reduces the amount of sent data when the sender and receiver
-share many of the same objects in common. Enabled by default.</value>
-  </data>
-  <data name="StrBare" xml:space="preserve">
-    <value>Bare</value>
-  </data>
   <data name="StrClone" xml:space="preserve">
     <value>Clone</value>
   </data>
   <data name="StrCloneRepository" xml:space="preserve">
     <value>Clone Repository</value>
-  </data>
-  <data name="StrInit" xml:space="preserve">
-    <value>Init</value>
-  </data>
-  <data name="StrInitRepository" xml:space="preserve">
-    <value>Init Repository</value>
   </data>
   <data name="StrPath" xml:space="preserve">
     <value>Path</value>
@@ -887,21 +616,6 @@ share many of the same objects in common. Enabled by default.</value>
   <data name="ErrUrlCannotBeEmpty" xml:space="preserve">
     <value>URL cannot be empty</value>
   </data>
-  <data name="ImgRemoteAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\remote-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRemoteRemove" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\remote-remove.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFolderTree" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder-tree.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgUser" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\user.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAdvancedOptions" xml:space="preserve">
-    <value>Advanced Options</value>
-  </data>
   <data name="ErrFailedToRemoveTag" xml:space="preserve">
     <value>Unable to remove tag '{0}'</value>
   </data>
@@ -917,23 +631,11 @@ share many of the same objects in common. Enabled by default.</value>
   <data name="ErrNoMessageSpecified" xml:space="preserve">
     <value>No message specified</value>
   </data>
-  <data name="StrAnnotatedTag" xml:space="preserve">
-    <value>Annotated</value>
-  </data>
   <data name="StrSigned" xml:space="preserve">
     <value>Signed</value>
   </data>
   <data name="StrSimpleTag" xml:space="preserve">
     <value>Lightweight</value>
-  </data>
-  <data name="StrlTagType" xml:space="preserve">
-    <value>Tag type</value>
-  </data>
-  <data name="StrUseDefaultEmailKey" xml:space="preserve">
-    <value>Use default e-mail address's key</value>
-  </data>
-  <data name="StrUseKeyId" xml:space="preserve">
-    <value>Use given key id</value>
   </data>
   <data name="StrFiles" xml:space="preserve">
     <value>Files</value>
@@ -959,18 +661,6 @@ share many of the same objects in common. Enabled by default.</value>
   <data name="StrShowAll" xml:space="preserve">
     <value>Show All</value>
   </data>
-  <data name="ImgConfig" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\config.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgConfigAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\config-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgConfigEdit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\config-edit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgConfigRemove" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\config-remove.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrValue" xml:space="preserve">
     <value>Value</value>
   </data>
@@ -979,9 +669,6 @@ share many of the same objects in common. Enabled by default.</value>
   </data>
   <data name="ErrFailedToReset" xml:space="preserve">
     <value>Unable to reset</value>
-  </data>
-  <data name="ImgCopyToClipboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clipboard-sign.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrCopyToClipboard" xml:space="preserve">
     <value>Copy to Clipboard</value>
@@ -1010,39 +697,6 @@ share many of the same objects in common. Enabled by default.</value>
   <data name="StrPruneRemote" xml:space="preserve">
     <value>Prune</value>
   </data>
-  <data name="ImgFileDelete" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\file-delete.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFileRevert" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\file-revert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFileStage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\file-stage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFileUnstage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\file-unstage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFolderStage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder-stage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFolderUnstage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder-unstage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgDelete" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\delete.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgUnstage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\unstage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAddParameter" xml:space="preserve">
-    <value>Add Parameter</value>
-  </data>
-  <data name="StrAddSubmodule" xml:space="preserve">
-    <value>Add Submodule</value>
-  </data>
   <data name="StrLessContext" xml:space="preserve">
     <value>Less Context</value>
   </data>
@@ -1058,9 +712,6 @@ share many of the same objects in common. Enabled by default.</value>
   <data name="StrDefaultFormat" xml:space="preserve">
     <value>Default Format</value>
   </data>
-  <data name="StrISO8601" xml:space="preserve">
-    <value>ISO 8601</value>
-  </data>
   <data name="StrRelative" xml:space="preserve">
     <value>Relative</value>
   </data>
@@ -1069,10 +720,6 @@ share many of the same objects in common. Enabled by default.</value>
   </data>
   <data name="StrUNIXTimestamp" xml:space="preserve">
     <value>UNIX Timestamp</value>
-  </data>
-  <data name="StrAskBranchIsNotFullyMerged" xml:space="preserve">
-    <value>The branch '{0}' is not fully merged.
-Are you sure you want to delete it?</value>
   </data>
   <data name="StrDeleteBranch" xml:space="preserve">
     <value>Delete Branch</value>
@@ -1085,9 +732,6 @@ Are you sure you want to delete it?</value>
   </data>
   <data name="ErrFailedToMergeWith" xml:space="preserve">
     <value>Unable to merge '{0}'</value>
-  </data>
-  <data name="StrAutoFormat" xml:space="preserve">
-    <value>Auto</value>
   </data>
   <data name="ErrAlreadyMerged" xml:space="preserve">
     <value>Branch you specified is already fully contained in HEAD</value>
@@ -1137,9 +781,6 @@ Are you sure you want to delete it?</value>
   <data name="StrSendingDataTo" xml:space="preserve">
     <value>Sending data to '{0}'</value>
   </data>
-  <data name="ImgRemoteRename" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\remote-rename.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrLoadingReferences" xml:space="preserve">
     <value>Loading refrerences</value>
   </data>
@@ -1157,9 +798,6 @@ Are you sure you want to delete it?</value>
   </data>
   <data name="ErrFailedToStashPop" xml:space="preserve">
     <value>Unable to pop stashed state</value>
-  </data>
-  <data name="StrApply" xml:space="preserve">
-    <value>Apply</value>
   </data>
   <data name="StrPop" xml:space="preserve">
     <value>Pop</value>
@@ -1185,18 +823,6 @@ Are you sure you want to delete it?</value>
   <data name="StrToBranch" xml:space="preserve">
     <value>To Branch</value>
   </data>
-  <data name="AskOverwriteUntracked" xml:space="preserve">
-    <value>You have untracked files, which will be overwritten by checking out '{0}'.
-Proceed?</value>
-  </data>
-  <data name="AskThrowAwayConflictedChanges" xml:space="preserve">
-    <value>You have conflicted files in index. Checking out '{0}' will throw them away.
-Proceed?</value>
-  </data>
-  <data name="AskThrowAwayLocalChanges" xml:space="preserve">
-    <value>You have uncommitted local changes. Checking out '{0}' will throw them away.
-Proceed?</value>
-  </data>
   <data name="ErrCherryPickIsNotPossibleWithConflicts" xml:space="preserve">
     <value>Unable to cherry-pick when you have unresolved conflicts.
 Resolve conflicts and try again.</value>
@@ -1205,34 +831,17 @@ Resolve conflicts and try again.</value>
     <value>Unable to cherry-pick when you have local changes.
 Commit or stash them and try again.</value>
   </data>
-  <data name="ImgOverlayAddStaged" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\overlay-add-staged.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayDelStaged" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\overlay-del-staged.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayEditStaged" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\overlay-edit-staged.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrPerformingStashSave" xml:space="preserve">
     <value>Stashing working directory changes</value>
   </data>
   <data name="ErrFailedToRevertPath" xml:space="preserve">
     <value>Unable to revert '{0}'</value>
   </data>
-  <data name="StrAskRevertPath" xml:space="preserve">
-    <value>You are about to lose changes made to '{0}'.
-Proceed?</value>
-  </data>
   <data name="StrDelete" xml:space="preserve">
     <value>Delete</value>
   </data>
   <data name="ErrFailedToDeletePath" xml:space="preserve">
     <value>Unable to delete '{0}'</value>
-  </data>
-  <data name="StrAskDeletePath" xml:space="preserve">
-    <value>You are about to delete '{0}'.
-Proceed?</value>
   </data>
   <data name="StrKeepIndex" xml:space="preserve">
     <value>Keep index</value>
@@ -1248,9 +857,6 @@ Proceed?</value>
   </data>
   <data name="StrConflicts" xml:space="preserve">
     <value>Conflicts</value>
-  </data>
-  <data name="StrAmend" xml:space="preserve">
-    <value>Amend</value>
   </data>
   <data name="StrDiff" xml:space="preserve">
     <value>Diff</value>
@@ -1270,9 +876,6 @@ Proceed?</value>
   <data name="StrRemoteReferences" xml:space="preserve">
     <value>Remote References</value>
   </data>
-  <data name="StrBrowse" xml:space="preserve">
-    <value>Browse</value>
-  </data>
   <data name="StrManualStage" xml:space="preserve">
     <value>Manual Stage</value>
   </data>
@@ -1285,9 +888,6 @@ Proceed?</value>
   <data name="StrUnstagedLocalChanges" xml:space="preserve">
     <value>unstaged local changes</value>
   </data>
-  <data name="AskRemoveRemoteReference" xml:space="preserve">
-    <value>Removing remote reference can be dangerous and lead to loss of data. Proceed?</value>
-  </data>
   <data name="StrRemoveRemoteReference" xml:space="preserve">
     <value>Remove Remote Reference</value>
   </data>
@@ -1296,12 +896,6 @@ Proceed?</value>
   </data>
   <data name="StrUntrackedFilesPresent" xml:space="preserve">
     <value>untracked files are present</value>
-  </data>
-  <data name="ImgStashApply" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stash-apply.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStashPop" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stash-pop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrShowStash" xml:space="preserve">
     <value>Show Stash</value>
@@ -1327,9 +921,6 @@ Proceed?</value>
   <data name="StrStashPop" xml:space="preserve">
     <value>Stash Pop</value>
   </data>
-  <data name="TipStashKeepIndex" xml:space="preserve">
-    <value>Do not stash any staged changes</value>
-  </data>
   <data name="StrPerformingStashApply" xml:space="preserve">
     <value>Applying stashed changes</value>
   </data>
@@ -1341,12 +932,6 @@ Proceed?</value>
   </data>
   <data name="StrStashDrop" xml:space="preserve">
     <value>Stash Drop</value>
-  </data>
-  <data name="ImgDocument" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrLookingForFiles" xml:space="preserve">
-    <value>Looking for files</value>
   </data>
   <data name="StrStatus" xml:space="preserve">
     <value>Status</value>
@@ -1384,15 +969,6 @@ Proceed?</value>
   <data name="StrVCS" xml:space="preserve">
     <value>VCS</value>
   </data>
-  <data name="ImgBranchProperties" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\branch-properties.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRemoteProperties" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\remote-properties.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAll" xml:space="preserve">
-    <value>All</value>
-  </data>
   <data name="StrNone" xml:space="preserve">
     <value>None</value>
   </data>
@@ -1414,23 +990,8 @@ Proceed?</value>
   <data name="StrUsername" xml:space="preserve">
     <value>Username</value>
   </data>
-  <data name="ImgWarning48" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ImgWarning48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgGitIsNotInstalled" xml:space="preserve">
-    <value>You have no git installed. Please install required minimum version or newer to proceed.</value>
-  </data>
-  <data name="MsgGitSupportWillBeDisabled" xml:space="preserve">
-    <value>git support will be disabled until at least the required version is installed.</value>
-  </data>
-  <data name="MsgGitVersionIsOutdated" xml:space="preserve">
-    <value>Your git version is older than required minimum version. Please install required minimum version or newer to proceed.</value>
-  </data>
   <data name="StrGitVersionCheck" xml:space="preserve">
     <value>Git Version Check</value>
-  </data>
-  <data name="StrInstalledVersion" xml:space="preserve">
-    <value>Installed git Version</value>
   </data>
   <data name="StrlDownload" xml:space="preserve">
     <value>download</value>
@@ -1438,20 +999,11 @@ Proceed?</value>
   <data name="StrlNotInstalled" xml:space="preserve">
     <value>not installed</value>
   </data>
-  <data name="StrlRefresh" xml:space="preserve">
-    <value>refresh</value>
-  </data>
   <data name="StrProceed" xml:space="preserve">
     <value>Proceed</value>
   </data>
   <data name="StrRequiredVersion" xml:space="preserve">
     <value>Required git Version</value>
-  </data>
-  <data name="ImgInfo48" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ImgInfo48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgGitVersionOk" xml:space="preserve">
-    <value>Required git version is detected, you may proceed now.</value>
   </data>
   <data name="StrCurrentUser" xml:space="preserve">
     <value>Current User</value>
@@ -1480,13 +1032,6 @@ Proceed?</value>
   <data name="StrUnset" xml:space="preserve">
     <value>Unset</value>
   </data>
-  <data name="AskRemoveConfigParameter" xml:space="preserve">
-    <value>Removing parameter '{0}'</value>
-  </data>
-  <data name="AskRemoveConfigParameterFromAllFiles" xml:space="preserve">
-    <value>This parameter is not present in repository's config file, but it is inherited from your user's git config file and/or system config file.
-Do you want to remove this parameter from all files?</value>
-  </data>
   <data name="ErrInvalidRefspec" xml:space="preserve">
     <value>Invalid refspec</value>
   </data>
@@ -1495,35 +1040,6 @@ Do you want to remove this parameter from all files?</value>
   </data>
   <data name="ErrRefspecCannotContainSpaces" xml:space="preserve">
     <value>Refspec cannot contain spaces</value>
-  </data>
-  <data name="TipRemoteFetchURL" xml:space="preserve">
-    <value>The URL of a remote repository.</value>
-  </data>
-  <data name="TipRemoteMirror" xml:space="preserve">
-    <value>If enabled, pushing to this remote will automatically behave
-as if the --mirror option was given on the command line.</value>
-  </data>
-  <data name="TipRemoteProxy" xml:space="preserve">
-    <value>For remotes that require curl (http, https and ftp), the URL to the
-proxy to use for that remote.
-Set to the empty string to disable proxying for this remote.</value>
-  </data>
-  <data name="TipRemotePushURL" xml:space="preserve">
-    <value>The push URL of a remote repository.</value>
-  </data>
-  <data name="TipRemoteReceivePack" xml:space="preserve">
-    <value>The default program to execute on the remote side when pushing.</value>
-  </data>
-  <data name="TipRemoteSkipFetchAll" xml:space="preserve">
-    <value>If enabled, this remote will be skipped by default when updating
-using git-fetch or the update subcommand of git-remote.</value>
-  </data>
-  <data name="TipRemoteUploadPack" xml:space="preserve">
-    <value>The default program to execute on the remote side when fetching.</value>
-  </data>
-  <data name="TipRemoteVCS" xml:space="preserve">
-    <value>Setting this to a value &lt;vcs&gt; will cause git to interact
-with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   </data>
   <data name="ErrFailedToSetRemoteProperties" xml:space="preserve">
     <value>Unable to set remote parameters</value>
@@ -1540,41 +1056,14 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   <data name="StrlUnstagedUntrackedFiles" xml:space="preserve">
     <value>untracked files</value>
   </data>
-  <data name="ImgNote" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\sticky-note.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgNoteAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\sticky-note--plus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgNoteDel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\sticky-note--minus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgNoteEdit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\sticky-note--pencil.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAddNote" xml:space="preserve">
-    <value>Add Note</value>
-  </data>
-  <data name="StrMergeTool" xml:space="preserve">
-    <value>Merge Tool</value>
-  </data>
   <data name="StrRun" xml:space="preserve">
     <value>Run</value>
   </data>
   <data name="StrSelect" xml:space="preserve">
     <value>Select</value>
   </data>
-  <data name="StrBehavior" xml:space="preserve">
-    <value>Behavior</value>
-  </data>
   <data name="StrTreeHash" xml:space="preserve">
     <value>Tree Hash</value>
-  </data>
-  <data name="ImgClone" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-clone.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgInit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-init.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrlBash" xml:space="preserve">
     <value>bash</value>
@@ -1639,32 +1128,11 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   <data name="StrRemoveObject" xml:space="preserve">
     <value>Remove '{0}'</value>
   </data>
-  <data name="StrsRemoveBranchFrom" xml:space="preserve">
-    <value>Remove branch '{0}' from</value>
-  </data>
-  <data name="StrsRemoveFromRemote" xml:space="preserve">
-    <value>Local and remote repository</value>
-  </data>
-  <data name="StrsRemoveFromRemoteDescription" xml:space="preserve">
-    <value>Remove branch from '{0}' and local repository (this is a potentially dangerous operation)</value>
-  </data>
-  <data name="StrsRemoveLocalOnly" xml:space="preserve">
-    <value>Local repository only</value>
-  </data>
-  <data name="StrsRemoveLocalOnlyDescription" xml:space="preserve">
-    <value>Remove tracking branch from local repository without touching real branch  on remote repository</value>
-  </data>
   <data name="ErrFailedToRemoveBranchFrom" xml:space="preserve">
     <value>Unable to remove branch '{0}' from '{1}'</value>
   </data>
   <data name="StrIntegration" xml:space="preserve">
     <value>Integration</value>
-  </data>
-  <data name="StrAccessMethod" xml:space="preserve">
-    <value>Access Method</value>
-  </data>
-  <data name="StrAutodetect" xml:space="preserve">
-    <value>Autodetect</value>
   </data>
   <data name="StrFoundVersion" xml:space="preserve">
     <value>Found Version</value>
@@ -1707,18 +1175,6 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   </data>
   <data name="ErrRevisionCannotBeEmpty" xml:space="preserve">
     <value>Revision cannot be empty</value>
-  </data>
-  <data name="ImgGravatar" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gravatar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPatchApply" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\patch-apply.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPatchSave" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\patch-save.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTagAnnotated" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tag-annotated.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrNote" xml:space="preserve">
     <value>Note</value>
@@ -1792,10 +1248,6 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   <data name="ErrFailedToUpdateSubmodule" xml:space="preserve">
     <value>Unable to update submodule</value>
   </data>
-  <data name="TipOrphan" xml:space="preserve">
-    <value>The first commit made on this new branch will have no parents and it will be the root of
-a new history totally disconnected from all the other branches and commits.</value>
-  </data>
   <data name="StrfVersionRequired" xml:space="preserve">
     <value>v.{0} is required</value>
   </data>
@@ -1813,9 +1265,6 @@ a new history totally disconnected from all the other branches and commits.</val
   </data>
   <data name="StrWorkingDirectory" xml:space="preserve">
     <value>Working Directory</value>
-  </data>
-  <data name="StrAutoShowDiff" xml:space="preserve">
-    <value>Auto Show Diff</value>
   </data>
   <data name="StrHistoryDiff" xml:space="preserve">
     <value>History Diff</value>
@@ -1838,32 +1287,8 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrViewReflog" xml:space="preserve">
     <value>View Reflog</value>
   </data>
-  <data name="ImgViewReflog" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\view-reflog-local.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgViewReflogRemote" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vew-reflog-remote.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRefsHeads" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\refs-heads.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRefsRemotes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\refs-remotes.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRefsTags" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\refs-tags.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrHeads" xml:space="preserve">
     <value>Heads</value>
-  </data>
-  <data name="ImgSubmodules" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\submodules.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgConfiguration" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\configuration.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRemotes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\remotes.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrSummary" xml:space="preserve">
     <value>Summary</value>
@@ -1904,9 +1329,6 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrFetchNone" xml:space="preserve">
     <value>Fetch None</value>
   </data>
-  <data name="StrlTrackAllBranches" xml:space="preserve">
-    <value>All branches</value>
-  </data>
   <data name="StrlTrackSpecifiedBranches" xml:space="preserve">
     <value>Specified branches</value>
   </data>
@@ -1931,15 +1353,6 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrPrevious" xml:space="preserve">
     <value>Previous</value>
   </data>
-  <data name="ImgSearchNext" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-next.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearchPrevious" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-prevous.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearchClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-close.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrsMergeIsInProcess" xml:space="preserve">
     <value>Merge is in process</value>
   </data>
@@ -1961,14 +1374,8 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrlNoSubdirectories" xml:space="preserve">
     <value>no subdirectories</value>
   </data>
-  <data name="ImgFolderUp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrGoUpOneLevel" xml:space="preserve">
     <value>Go Up One Level</value>
-  </data>
-  <data name="ImgClear" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clear.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrClean" xml:space="preserve">
     <value>Clean</value>
@@ -1978,9 +1385,6 @@ a new history totally disconnected from all the other branches and commits.</val
   </data>
   <data name="StrCleanUntracked" xml:space="preserve">
     <value>Clean Untracked</value>
-  </data>
-  <data name="StrBoth" xml:space="preserve">
-    <value>Both</value>
   </data>
   <data name="StrExcludePattern" xml:space="preserve">
     <value>Exclude Pattern</value>
@@ -2003,68 +1407,11 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrsObjectsThatWillBeRemoved" xml:space="preserve">
     <value>Objects that will be removed</value>
   </data>
-  <data name="TipCheckoutBranch" xml:space="preserve">
-    <value>Checkout a branch to the working tree</value>
-  </data>
-  <data name="TipCherryPick" xml:space="preserve">
-    <value>Apply the changes introduced by some existing commits</value>
-  </data>
-  <data name="TipClean" xml:space="preserve">
-    <value>Remove untracked files from the working tree</value>
-  </data>
-  <data name="TipClone" xml:space="preserve">
-    <value>Clone a repository into a new directory</value>
-  </data>
-  <data name="TipCommit" xml:space="preserve">
-    <value>Record changes to the repository</value>
-  </data>
-  <data name="TipCreateBranch" xml:space="preserve">
-    <value>Create new branch</value>
-  </data>
-  <data name="TipCreateTag" xml:space="preserve">
-    <value>Create new tag</value>
-  </data>
-  <data name="TipFetch" xml:space="preserve">
-    <value>Download objects and refs from another repository</value>
-  </data>
-  <data name="TipHistory" xml:space="preserve">
-    <value>Show repository history</value>
-  </data>
-  <data name="TipInit" xml:space="preserve">
-    <value>Create an empty git repository or reinitialize an existing one</value>
-  </data>
-  <data name="TipMerge" xml:space="preserve">
-    <value>Join two or more development histories together</value>
-  </data>
-  <data name="TipPull" xml:space="preserve">
-    <value>Fetch from and merge with another repository or a local branch</value>
-  </data>
-  <data name="TipPush" xml:space="preserve">
-    <value>Update remote refs along with associated objects</value>
-  </data>
-  <data name="TipRebase" xml:space="preserve">
-    <value>Forward-port local commits to the updated upstream head</value>
-  </data>
-  <data name="TipStash" xml:space="preserve">
-    <value>Stash the changes in a dirty working directory away</value>
-  </data>
   <data name="ErrCleanFailed" xml:space="preserve">
     <value>Unable to clean</value>
   </data>
   <data name="StrOptionalMessage" xml:space="preserve">
     <value>Message (optional)</value>
-  </data>
-  <data name="ImgStashSave" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stash-save.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStashClear" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\stash-clear.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="TipStashSave" xml:space="preserve">
-    <value>Save your local modifications to a new stash, and run git reset --hard to revert them</value>
-  </data>
-  <data name="ImgStatusClean" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tick-circle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrsSearchingStaleBranches" xml:space="preserve">
     <value>Searching for stale branches</value>
@@ -2120,9 +1467,6 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrSendEmail" xml:space="preserve">
     <value>Send Email</value>
   </data>
-  <data name="ImgMailSend" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\mail-send.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrHousekeeping" xml:space="preserve">
     <value>Housekeeping</value>
   </data>
@@ -2134,18 +1478,6 @@ a new history totally disconnected from all the other branches and commits.</val
   </data>
   <data name="StrCompressRepository" xml:space="preserve">
     <value>Compress Repository</value>
-  </data>
-  <data name="ImgRebaseAbort" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\rebase-abort.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRebaseContinue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\rebase-continue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRebaseSkip" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\rebase-skip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAbort" xml:space="preserve">
-    <value>Abort</value>
   </data>
   <data name="StrContinue" xml:space="preserve">
     <value>Continue</value>
@@ -2170,9 +1502,6 @@ a new history totally disconnected from all the other branches and commits.</val
   </data>
   <data name="StrsFetchingTree" xml:space="preserve">
     <value>Fetching tree</value>
-  </data>
-  <data name="ImgGC" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrLatestVersion" xml:space="preserve">
     <value>Latest Version</value>
@@ -2204,9 +1533,6 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrsWorkingDirectoryClean" xml:space="preserve">
     <value>Working directory clean</value>
   </data>
-  <data name="StrAddedFiles" xml:space="preserve">
-    <value>Added Files</value>
-  </data>
   <data name="StrModifiedFiles" xml:space="preserve">
     <value>Modified Files</value>
   </data>
@@ -2219,29 +1545,11 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="ErrShortCommitMessage" xml:space="preserve">
     <value>Message is too short</value>
   </data>
-  <data name="ImgOverlayChmod" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_chmod.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayCopy" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_copy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgOverlayRename" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ovl_rename.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrlCopy" xml:space="preserve">
     <value>copy</value>
   </data>
-  <data name="StrlRename" xml:space="preserve">
-    <value>rename</value>
-  </data>
-  <data name="StrBlame" xml:space="preserve">
-    <value>Blame</value>
-  </data>
   <data name="StrlBlame" xml:space="preserve">
     <value>blame</value>
-  </data>
-  <data name="ImgBlame" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\blame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrConflictResolution" xml:space="preserve">
     <value>Conflict Resolution</value>
@@ -2261,14 +1569,8 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrResolveConflict" xml:space="preserve">
     <value>Resolve Conflict</value>
   </data>
-  <data name="StrApplyPatches" xml:space="preserve">
-    <value>Apply Patches</value>
-  </data>
   <data name="StrPatch" xml:space="preserve">
     <value>Patch</value>
-  </data>
-  <data name="TipApplyPatches" xml:space="preserve">
-    <value>Apply a patch to files and/or to the index</value>
   </data>
   <data name="StrFilter" xml:space="preserve">
     <value>Filter</value>
@@ -2278,15 +1580,6 @@ a new history totally disconnected from all the other branches and commits.</val
   </data>
   <data name="StrTopoOrder" xml:space="preserve">
     <value>Topological Order</value>
-  </data>
-  <data name="ImgDateOrder" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\sort-date.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFilter" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\funnel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTopoOrder" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\node.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrsIgnoreWhitespace" xml:space="preserve">
     <value>Ignore whitespace</value>
@@ -2341,29 +1634,11 @@ Proceed?</value>
   <data name="StrReverse" xml:space="preserve">
     <value>Reverse</value>
   </data>
-  <data name="StrApplyTo" xml:space="preserve">
-    <value>Apply to</value>
-  </data>
-  <data name="StrIndex" xml:space="preserve">
-    <value>Index</value>
-  </data>
-  <data name="StrIndexAndWorkingDirectory" xml:space="preserve">
-    <value>Index and Working Directory</value>
-  </data>
   <data name="StrsWorkingDirectory" xml:space="preserve">
     <value>Working directory</value>
   </data>
   <data name="StrsNoPatchesToApply" xml:space="preserve">
     <value>No patches to apply</value>
-  </data>
-  <data name="ImgPatch" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\patch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrAddFiles" xml:space="preserve">
-    <value>Add Files</value>
-  </data>
-  <data name="StrAddFromClipboard" xml:space="preserve">
-    <value>Add From Clipboard</value>
   </data>
   <data name="StrsIncludeUntrackedFiles" xml:space="preserve">
     <value>Include untracked files</value>
@@ -2389,31 +1664,11 @@ Proceed?</value>
   <data name="StrlRestartRequired" xml:space="preserve">
     <value>restart required</value>
   </data>
-  <data name="StrAskHardReset" xml:space="preserve">
-    <value>All your changes (both staged and unstaged) will be lost.
-This operation cannot be undone.
-Proceed?</value>
-  </data>
   <data name="StrHardReset" xml:space="preserve">
     <value>Hard Reset</value>
   </data>
-  <data name="TipHardReset" xml:space="preserve">
-    <value>Matches the working tree and index to that of the tree being switched to.</value>
-  </data>
-  <data name="TipMixedReset" xml:space="preserve">
-    <value>Resets the index but not the working tree (i.e., the changed files are preserved but not marked for commit).</value>
-  </data>
-  <data name="TipSoftReset" xml:space="preserve">
-    <value>Does not touch the index file nor the working tree at all, but requires them to be in a good order.</value>
-  </data>
   <data name="StrKeep" xml:space="preserve">
     <value>Keep</value>
-  </data>
-  <data name="TipKeepReset" xml:space="preserve">
-    <value>Resets index entries and updates files in the working tree that are different between commit and HEAD.</value>
-  </data>
-  <data name="TipMergeReset" xml:space="preserve">
-    <value>Resets the index and updates the files in the working tree that are different between commit and HEAD, but keeps those which are different between the index and working tree.</value>
   </data>
   <data name="StrlCommits" xml:space="preserve">
     <value>commits</value>
@@ -2421,15 +1676,8 @@ Proceed?</value>
   <data name="StrlUnlimited" xml:space="preserve">
     <value>unlimited</value>
   </data>
-  <data name="StrAskRevertPaths" xml:space="preserve">
-    <value>You are about to lose changes made to selected files.
-Proceed?</value>
-  </data>
   <data name="ErrFailedToRevertPaths" xml:space="preserve">
     <value>Unable to revert selected files.</value>
-  </data>
-  <data name="ImgMarkAsResolved" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\mark-as-resolved.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrMarkAsResolved" xml:space="preserve">
     <value>Mark as Resolved</value>
@@ -2473,39 +1721,6 @@ Proceed?</value>
   <data name="ExcStashIsEmpty" xml:space="preserve">
     <value>Stash is empty.</value>
   </data>
-  <data name="IcoStatusGreen1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-1.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-2.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen3" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-3.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen4" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-4.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen5" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-5.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen6" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-6.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen7" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-7.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen8" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-8.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen9" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-9.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoStatusGreen9p" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\status-green-9p.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgUserUnknown" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\user-silhouette-question.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrChangeIdentity" xml:space="preserve">
     <value>Change Identity</value>
   </data>
@@ -2515,22 +1730,13 @@ Proceed?</value>
   <data name="StrSwitchBranch" xml:space="preserve">
     <value>Switch Branch</value>
   </data>
-  <data name="ImgFileHistory" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\file-history.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgFolderHistory" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder-history.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrContributors" xml:space="preserve">
     <value>Contributors</value>
   </data>
-  <data name="ImgArchive" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder-zipper.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StrArchive" xml:space="preserve">
-    <value>Archive</value>
-  </data>
   <data name="ErrFailedToArchive" xml:space="preserve">
     <value>Unable to create archive</value>
+  </data>
+  <data name="StrLookingForFiles" xml:space="preserve">
+    <value>Looking for files</value>
   </data>
 </root>

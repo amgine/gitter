@@ -2,16 +2,12 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
-	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using gitter.Git.AccessLayer;
-	using gitter.Git.Gui.Controls;
 
-	sealed class IndexChangesDiffSource : DiffSourceBase
+	sealed class IndexChangesDiffSource : DiffSourceBase, IIndexDiffSource
 	{
 		#region Data
 
@@ -70,6 +66,7 @@
 
 		#region Overrides
 
+		/*
 		public override IEnumerable<FlowPanel> GetInformationPanels()
 		{
 			if(!_cached)
@@ -86,6 +83,7 @@
 			}
 			return null;
 		}
+		*/
 
 		public override int GetHashCode()
 		{

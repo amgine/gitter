@@ -2,15 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
-	using gitter.Framework.Controls;
-
-	using gitter.Git.Gui.Controls;
 	using gitter.Git.AccessLayer;
 
-	sealed class StashedChangesDiffSource : DiffSourceBase
+	sealed class StashedChangesDiffSource : DiffSourceBase, IRevisionDiffSource
 	{
 		private readonly StashedState _stashedState;
 		private readonly IList<string> _paths;
@@ -35,17 +30,16 @@
 			get { return _stashedState; }
 		}
 
+		#region Overrides
+
 		public override Repository Repository
 		{
 			get { return _stashedState.Repository; }
 		}
 
-		#region Overrides
-
-		public override IEnumerable<FlowPanel> GetInformationPanels()
+		IRevisionPointer IRevisionDiffSource.Revision
 		{
-			yield return new RevisionHeaderPanel() { Revision = _stashedState.Dereference() };
-			yield return new FlowPanelSeparator() { Style = FlowPanelSeparatorStyle.Line };
+			get { return _stashedState; }
 		}
 
 		protected override Diff GetDiffCore(DiffOptions options)

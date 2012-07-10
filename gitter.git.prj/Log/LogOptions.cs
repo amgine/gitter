@@ -153,7 +153,7 @@ namespace gitter.Git
 			return p;
 		}
 
-		internal void SaveTo(Section section)
+		public void SaveTo(Section section)
 		{
 			if(section == null) throw new ArgumentNullException("section");
 
@@ -162,7 +162,7 @@ namespace gitter.Git
 			section.SetValue("Skip", _skip);
 		}
 
-		internal void LoadFrom(Section section)
+		public void LoadFrom(Section section)
 		{
 			if(section == null) throw new ArgumentNullException("section");
 

@@ -2,9 +2,12 @@
 {
 	public sealed class DiffOptions
 	{
-		internal static readonly DiffOptions Default = new DiffOptions()
+		internal static readonly DiffOptions Default = GetDefault();
+
+		public static DiffOptions GetDefault()
 		{
-		};
+			return new DiffOptions();
+		}
 
 		private int _context;
 		private bool _patience;

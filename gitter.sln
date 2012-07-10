@@ -30,6 +30,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git.cli", "gitter.gi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git.fw", "gitter.git.fw.prj\gitter.git.fw.csproj", "{C2307D21-25F9-47F8-901E-99B07AB66C39}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git.gui", "gitter.git.gui.prj\gitter.git.gui.csproj", "{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{223B9AB6-FD70-491E-B15D-306F27B53298}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = gitter.vsmdi
@@ -145,8 +149,24 @@ Global
 		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C2307D21-25F9-47F8-901E-99B07AB66C39}.Release|x86.ActiveCfg = Release|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{03C71F7F-5D27-43C7-9467-2DF533C6C01B} = {223B9AB6-FD70-491E-B15D-306F27B53298}
+		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9} = {223B9AB6-FD70-491E-B15D-306F27B53298}
+		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC} = {223B9AB6-FD70-491E-B15D-306F27B53298}
+		{C2307D21-25F9-47F8-901E-99B07AB66C39} = {223B9AB6-FD70-491E-B15D-306F27B53298}
 	EndGlobalSection
 EndGlobal

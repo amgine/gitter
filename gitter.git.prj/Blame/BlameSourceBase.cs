@@ -12,6 +12,8 @@
 
 	abstract class BlameSourceBase : IBlameSource
 	{
+		public abstract Repository Repository { get; }
+
 		protected abstract BlameFile GetBlameCore(BlameOptions options);
 
 		public IAsyncFunc<BlameFile> GetBlameAsync()

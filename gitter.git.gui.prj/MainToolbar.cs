@@ -1,0 +1,535 @@
+﻿namespace gitter.Git.Gui
+{
+	using System;
+	using System.ComponentModel;
+	using System.Windows.Forms;
+
+	using gitter.Framework;
+	using gitter.Framework.Services;
+
+	using gitter.Git.Gui.Views;
+	using gitter.Git.Gui.Dialogs;
+
+	using Resources = gitter.Git.Gui.Properties.Resources;
+
+	[ToolboxItem(false)]
+	internal sealed class MainToolbar : ToolStrip
+	{
+		private readonly ToolStripButton _initButton;
+		private readonly ToolStripButton _cloneButton;
+
+		private readonly ToolStripSplitButton _fetchButton;
+		private readonly ToolStripSplitButton _pullButton;
+		private readonly ToolStripButton _pushButton;
+
+		private readonly ToolStripButton _historyButton;
+
+		private readonly ToolStripButton _commitButton;
+		private readonly ToolStripButton _applyPatchButton;
+		private readonly ToolStripSplitButton _stashButton;
+		private readonly ToolStripButton _cleanButton;
+		private readonly ToolStripMenuItem _stashPopItem;
+		private readonly ToolStripMenuItem _stashApplyItem;
+
+		private readonly ToolStripButton _checkoutButton;
+		private readonly ToolStripButton _branchButton;
+		private readonly ToolStripSplitButton _mergeButton;
+		private readonly ToolStripMenuItem _mergeMultipleItem;
+
+		private readonly ToolStripButton _tagButton;
+		private readonly ToolStripButton _noteButton;
+
+		private readonly GuiProvider _gui;
+		private Repository _repository;
+
+		public MainToolbar(GuiProvider gui)
+		{
+			if(gui == null) throw new ArgumentNullException("gui");
+			_gui = gui;
+
+			Text = Resources.StrGit;
+
+			const TextImageRelation tir = TextImageRelation.ImageAboveText;
+			const ToolStripItemDisplayStyle ds = ToolStripItemDisplayStyle.ImageAndText;
+
+			Items.AddRange(new ToolStripItem[]
+				{
+					_initButton = new ToolStripButton(Resources.StrInit, CachedResources.Bitmaps["ImgInit"], OnInitClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipInit },
+					_cloneButton = new ToolStripButton(Resources.StrClone, CachedResources.Bitmaps["ImgClone"], OnCloneClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipClone },
+					new ToolStripSeparator(),
+					_fetchButton = new ToolStripSplitButton(Resources.StrFetch, CachedResources.Bitmaps["ImgFetch"])
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipFetch },
+					_pullButton = new ToolStripSplitButton(Resources.StrPull, CachedResources.Bitmaps["ImgPull"])
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipPull },
+					_pushButton = new ToolStripButton(Resources.StrPush, CachedResources.Bitmaps["ImgPush"])
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipPush },
+					new ToolStripSeparator(),
+					_historyButton = new ToolStripButton(Resources.StrHistory, CachedResources.Bitmaps["ImgHistory"], OnHistoryClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipHistory },
+					new ToolStripSeparator(),
+					_commitButton = new ToolStripButton(Resources.StrCommit, CachedResources.Bitmaps["ImgCommit"], OnCommitClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCommit },
+					_applyPatchButton = new ToolStripButton(Resources.StrPatch, CachedResources.Bitmaps["ImgPatchApply"], OnApplyPatchClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipApplyPatches },
+					_stashButton = new ToolStripSplitButton(Resources.StrStash, CachedResources.Bitmaps["ImgStash"])
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipStash },
+					_cleanButton = new ToolStripButton(Resources.StrClean, CachedResources.Bitmaps["ImgClean"], OnCleanClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipClean },
+					new ToolStripSeparator(),
+					_checkoutButton = new ToolStripButton(Resources.StrCheckout, CachedResources.Bitmaps["ImgCheckout"], OnCheckoutClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCheckoutBranch },
+					_branchButton = new ToolStripButton(Resources.StrBranch, CachedResources.Bitmaps["ImgBranch"], OnBranchClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCreateBranch },
+					_mergeButton = new ToolStripSplitButton(Resources.StrMerge, CachedResources.Bitmaps["ImgMerge"])
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipMerge },
+					new ToolStripSeparator(),
+					_tagButton = new ToolStripButton(Resources.StrTag, CachedResources.Bitmaps["ImgTag"], OnTagClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCreateTag },
+					_noteButton = new ToolStripButton(Resources.StrNote, CachedResources.Bitmaps["ImgNote"], OnNoteClick)
+						{ TextImageRelation = tir, DisplayStyle = ds, Available = false /* GitFeatures.AdvancedNotesCommands.IsAvailable */ },
+				});
+
+			_fetchButton.ButtonClick += OnFetchClick;
+			_pullButton.ButtonClick += OnPullClick;
+			_pushButton.Click += OnPushClick;
+
+			_mergeButton.ButtonClick += OnMergeClick;
+
+			_mergeButton.DropDown.Items.Add(
+				_mergeMultipleItem = new ToolStripMenuItem(Resources.StrMergeMultipleBranches, null, OnMultipleMergeClick));
+
+			_stashButton.ButtonClick += OnStashClick;
+			_stashButton.DropDown.Items.Add(
+				_stashPopItem = new ToolStripMenuItem(Resources.StrSave, CachedResources.Bitmaps["ImgStashSave"], OnStashSaveClick));
+			_stashButton.DropDown.Items.Add(
+				_stashPopItem = new ToolStripMenuItem(Resources.StrPop, CachedResources.Bitmaps["ImgStashPop"], OnStashPopClick));
+			_stashButton.DropDown.Items.Add(
+				_stashApplyItem = new ToolStripMenuItem(Resources.StrApply, CachedResources.Bitmaps["ImgStashApply"], OnStashApplyClick));
+
+			if(gui.Repository != null)
+				AttachToRepository(gui.Repository);
+			else
+				Enabled = false;
+		}
+
+		public Repository Repository
+		{
+			get { return _repository; }
+			set
+			{
+				if(_repository != value)
+				{
+					if(_repository != null)
+						DetachFromRepository(_repository);
+					if(value != null)
+						AttachToRepository(value);
+				}
+			}
+		}
+
+		private void AttachToRepository(Repository repository)
+		{
+			_repository = repository;
+			_mergeButton.Enabled = !repository.Head.IsDetached;
+			if(repository.Remotes.Count != 0)
+			{
+				foreach(var remote in repository.Remotes)
+				{
+					_fetchButton.DropDown.Items.Add(GuiItemFactory.GetFetchFromItem<ToolStripMenuItem>(remote, "{1}"));
+					_pullButton.DropDown.Items.Add(GuiItemFactory.GetPullFromItem<ToolStripMenuItem>(remote, "{1}"));
+				}
+				_fetchButton.Enabled = true;
+				_pullButton.Enabled = true;
+				_pushButton.Enabled = true;
+			}
+			else
+			{
+				_fetchButton.Enabled = false;
+				_pullButton.Enabled = false;
+				_pushButton.Enabled = false;
+			}
+
+			if(repository.Stash.Count != 0)
+			{
+				_stashPopItem.Enabled = true;
+				_stashApplyItem.Enabled = true;
+			}
+			else
+			{
+				_stashPopItem.Enabled = false;
+				_stashApplyItem.Enabled = false;
+			}
+
+			_stashButton.Enabled = !repository.IsEmpty;
+
+			repository.Head.PointerChanged += OnHeadChanged;
+			repository.Remotes.ObjectAdded += OnRemoteAdded;
+			repository.Remotes.ObjectRemoved += OnRemoteRemoved;
+			repository.Remotes.Renamed += OnRemoteRenamed;
+
+			repository.Stash.StashedStateCreated += OnStashCreated;
+			repository.Stash.StashedStateDeleted += OnStashDeleted;
+
+			Enabled = true;
+		}
+
+		private void DetachFromRepository(Repository repository)
+		{
+			_fetchButton.DropDown.Items.Clear();
+			_pullButton.DropDown.Items.Clear();
+
+			repository.Head.PointerChanged -= OnHeadChanged;
+			repository.Remotes.ObjectAdded -= OnRemoteAdded;
+			repository.Remotes.ObjectRemoved -= OnRemoteRemoved;
+			repository.Remotes.Renamed -= OnRemoteRenamed;
+
+			repository.Stash.StashedStateCreated -= OnStashCreated;
+			repository.Stash.StashedStateDeleted -= OnStashDeleted;
+
+			Enabled = false;
+			_repository = null;
+		}
+
+		private void OnHeadChanged(object sender, RevisionPointerChangedEventArgs e)
+		{
+			var head = (Head)sender;
+			_mergeButton.Enabled = !head.IsDetached;
+			if(!_stashButton.Enabled)
+				_stashButton.Enabled = true;
+		}
+
+		private void OnRemoteAdded(object sender, RemoteEventArgs e)
+		{
+			_fetchButton.DropDown.Items.Add(GuiItemFactory.GetFetchFromItem<ToolStripMenuItem>(e.Object, "{1}"));
+			_pullButton.DropDown.Items.Add(GuiItemFactory.GetPullFromItem<ToolStripMenuItem>(e.Object, "{1}"));
+			if(_repository.Remotes.Count == 1)
+			{
+				_fetchButton.Enabled = true;
+				_pullButton.Enabled = true;
+				_pushButton.Enabled = true;
+			}
+		}
+
+		private void OnRemoteRenamed(object sender, RemoteEventArgs e)
+		{
+			foreach(ToolStripItem item in _fetchButton.DropDownItems)
+			{
+				if(item.Tag == e.Object)
+				{
+					item.Text = e.Object.Name;
+					break;
+				}
+			}
+			foreach(ToolStripItem item in _pullButton.DropDownItems)
+			{
+				if(item.Tag == e.Object)
+				{
+					item.Text = e.Object.Name;
+					break;
+				}
+			}
+		}
+
+		private void OnRemoteRemoved(object sender, RemoteEventArgs e)
+		{
+			if(_repository.Remotes.Count == 0)
+			{
+				_fetchButton.Enabled = false;
+				_pullButton.Enabled = false;
+				_pushButton.Enabled = false;
+			}
+			int id = 0;
+			foreach(ToolStripItem item in _fetchButton.DropDown.Items)
+			{
+				if(item.Tag == e.Object)
+				{
+					_fetchButton.DropDown.Items.RemoveAt(id);
+					break;
+				}
+				++id;
+			}
+			id = 0;
+			foreach(ToolStripItem item in _pullButton.DropDown.Items)
+			{
+				if(item.Tag == e.Object)
+				{
+					_pullButton.DropDown.Items.RemoveAt(id);
+					break;
+				}
+				++id;
+			}
+		}
+
+		private void OnStashCreated(object sender, StashedStateEventArgs e)
+		{
+			if(_repository.Stash.Count == 1)
+			{
+				_stashPopItem.Enabled = true;
+				_stashApplyItem.Enabled = true;
+			}
+		}
+
+		private void OnStashDeleted(object sender, StashedStateEventArgs e)
+		{
+			if(_repository.Stash.Count == 0)
+			{
+				_stashPopItem.Enabled = false;
+				_stashApplyItem.Enabled = false;
+			}
+		}
+
+		#region Button Event Handlers
+
+		private void OnRefreshClick(object sender, EventArgs e)
+		{
+			var tool = _gui.Environment.ViewDockService.ActiveView;
+			if(tool != null)
+			{
+				var gitTool = tool as GitView;
+				if(gitTool != null)
+					gitTool.RefreshContent();
+			}
+		}
+
+		private void OnInitClick(object sender, EventArgs e)
+		{
+			RepositoryProvider.RunInitDialog(_gui.Environment);
+		}
+
+		private void OnCloneClick(object sender, EventArgs e)
+		{
+			RepositoryProvider.RunCloneDialog(_gui.Environment);
+		}
+
+		private void OnFetchClick(object sender, EventArgs e)
+		{
+			try
+			{
+				_repository.Remotes.FetchAsync().Invoke<ProgressForm>(this);
+			}
+			catch(Exception exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					exc.Message,
+					Resources.ErrFailedToFetch,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+			}
+		}
+
+		private void OnPullClick(object sender, EventArgs e)
+		{
+			try
+			{
+				_repository.Remotes.PullAsync().Invoke<ProgressForm>(this);
+			}
+			catch(Exception exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					exc.Message,
+					Resources.ErrFailedToPull,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+			}
+		}
+
+		private void OnPushClick(object sender, EventArgs e)
+		{
+			_gui.StartPushDialog();
+		}
+
+		private void OnHistoryClick(object sender, EventArgs e)
+		{
+			_gui.Environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
+		}
+
+		private void OnCommitClick(object sender, EventArgs e)
+		{
+			_gui.Environment.ViewDockService.ShowView(Guids.CommitViewGuid);
+		}
+
+		private void OnApplyPatchClick(object sender, EventArgs e)
+		{
+			_gui.StartApplyPatchesDialog();
+		}
+
+		private void OnCleanClick(object sender, EventArgs e)
+		{
+			_gui.StartCleanDialog();
+		}
+
+		private void OnStashClick(object sender, EventArgs e)
+		{
+			_gui.Environment.ViewDockService.ShowView(Guids.StashViewGuid);
+		}
+
+		private void OnStashSaveClick(object sender, EventArgs e)
+		{
+			bool advanced = Control.ModifierKeys == Keys.Shift;
+			if(advanced)
+			{
+				using(var dlg = new StashSaveDialog(_repository))
+				{
+					dlg.Run(this);
+				}
+			}
+			else
+			{
+				try
+				{
+					_repository.Stash.SaveAsync(false, false, null).Invoke<ProgressForm>(this);
+				}
+				catch(GitException exc)
+				{
+					GitterApplication.MessageBoxService.Show(
+						this,
+						exc.Message,
+						Resources.ErrFailedToStash,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
+				}
+			}
+		}
+
+		private void OnStashPopClick(object sender, EventArgs e)
+		{
+			bool restoreIndex = Control.ModifierKeys == Keys.Shift;
+			try
+			{
+				_repository.Stash.PopAsync(restoreIndex).Invoke<ProgressForm>(this);
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					exc.Message,
+					Resources.ErrFailedToStashPop,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+			}
+		}
+
+		private void OnStashApplyClick(object sender, EventArgs e)
+		{
+			bool restoreIndex = Control.ModifierKeys == Keys.Shift;
+			try
+			{
+				_repository.Stash.ApplyAsync(restoreIndex).Invoke<ProgressForm>(this);
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					exc.Message,
+					Resources.ErrFailedToStashApply,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+			}
+		}
+
+		private void OnCheckoutClick(object sender, EventArgs e)
+		{
+			_gui.StartCheckoutDialog();
+		}
+
+		private void OnBranchClick(object sender, EventArgs e)
+		{
+			_gui.StartCreateBranchDialog();
+		}
+
+		private void OnMergeClick(object sender, EventArgs e)
+		{
+			_gui.StartMergeDialog(false);
+		}
+
+		private void OnMultipleMergeClick(object sender, EventArgs e)
+		{
+			_gui.StartMergeDialog(true);
+		}
+
+		private void OnTagClick(object sender, EventArgs e)
+		{
+			_gui.StartCreateTagDialog();
+		}
+
+		private void OnNoteClick(object sender, EventArgs e)
+		{
+			_gui.StartAddNoteDialog();
+		}
+
+		#endregion
+
+		#region Buttons
+
+		public ToolStripItem InitButton
+		{
+			get { return _initButton; }
+		}
+
+		public ToolStripItem CloneButton
+		{
+			get { return _cloneButton; }
+		}
+
+		public ToolStripItem FetchButton
+		{
+			get { return _fetchButton; }
+		}
+
+		public ToolStripItem PullButton
+		{
+			get { return _pullButton; }
+		}
+
+		public ToolStripItem PushButton
+		{
+			get { return _pushButton; }
+		}
+
+		public ToolStripItem HistoryButton
+		{
+			get { return _historyButton; }
+		}
+
+		public ToolStripItem CommitButton
+		{
+			get { return _commitButton; }
+		}
+
+		public ToolStripItem StashButton
+		{
+			get { return _stashButton; }
+		}
+
+		public ToolStripItem CleanButton
+		{
+			get { return _cleanButton; }
+		}
+
+		public ToolStripItem CheckoutButton
+		{
+			get { return _checkoutButton; }
+		}
+
+		public ToolStripItem BranchButton
+		{
+			get { return _branchButton; }
+		}
+
+		public ToolStripItem MergeButton
+		{
+			get { return _mergeButton; }
+		}
+
+		public ToolStripItem TagButton
+		{
+			get { return _tagButton; }
+		}
+
+		#endregion
+	}
+}

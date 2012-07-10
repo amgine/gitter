@@ -77,6 +77,10 @@
       <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
       <Name>gitter.git.fw</Name>
     </ProjectReference>
+    <ProjectReference Include="..\gitter.git.gui.prj\gitter.git.gui.csproj">
+      <Project>{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}</Project>
+      <Name>gitter.git.gui</Name>
+    </ProjectReference>
     <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj">
       <Project>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</Project>
       <Name>gitter.git</Name>
