@@ -53,22 +53,17 @@
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\gitter.git.cli.prj\gitter.git.cli.csproj">
-      <Project>{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}</Project>
-      <Name>gitter.git.cli</Name>
-    </ProjectReference>
     <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
       <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
       <Name>gitter.git.fw</Name>
     </ProjectReference>
     <Reference Include="System" />
-    <Reference Include="System.Drawing" />
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
     </ProjectReference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
@@ -88,7 +83,6 @@
     <Compile Include="Revision\Revision.ReferencesCollection.cs" />
     <Compile Include="Tree\RevisionTreeSource.cs" />
     <Compile Include="Tree\TreeSourceBase.cs" />
-    <Compile Include="Properties\CachedResources.cs" />
     <Compile Include="Diff\DiffSourceBase.cs" />
     <Compile Include="Diff\RevisionChangesDiffSource.cs" />
     <Compile Include="Diff\RevisionCompareDiffSource.cs" />
