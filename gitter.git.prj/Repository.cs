@@ -34,12 +34,11 @@
 		private readonly HooksCollection _hooks;
 
 		private Head _head;
-
 		private RepositoryMonitor _monitor;
-
 		private RepositoryState _state;
-
 		private User _userIdentity;
+
+		private bool _isDisposed;
 
 		#endregion
 
@@ -283,16 +282,16 @@
 			get { return _accessor; }
 		}
 
-		#endregion
-
-		#region Properties
-
 		/// <summary>Returns repository monitor.</summary>
 		/// <value>Repository monitor.</value>
-		public RepositoryMonitor Monitor
+		internal RepositoryMonitor Monitor
 		{
 			get { return _monitor; }
 		}
+
+		#endregion
+
+		#region Properties
 
 		/// <summary>Returns repository configuration manager.</summary>
 		/// <value>Repository configuration manager.</value>
@@ -771,6 +770,25 @@
 				},
 				Resources.StrHousekeeping,
 				Resources.StrOptimizingRepository.AddEllipsis());
+		}
+
+		#endregion
+
+		#region IDisposable
+
+		public bool IsDisposed
+		{
+			get { return _isDisposed; }
+			private set { _isDisposed = value; }
+		}
+
+		public void Dispose()
+		{
+			if(!IsDisposed)
+			{
+				Monitor.Shutdown();
+				IsDisposed = true;
+			}
 		}
 
 		#endregion

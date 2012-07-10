@@ -5,13 +5,8 @@
 	using System.Drawing;
 	using System.ComponentModel;
 	using System.Windows.Forms;
-	using System.Xml;
 
-	using gitter.Framework;
-	using gitter.Framework.Options;
 	using gitter.Framework.Configuration;
-
-	using gitter.Git.Gui.Dialogs;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 

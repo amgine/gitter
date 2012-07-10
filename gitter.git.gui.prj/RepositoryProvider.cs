@@ -187,7 +187,6 @@
 		public void CloseRepository(IRepository repository)
 		{
 			var gitRepository = (Repository)repository;
-			gitRepository.Monitor.Shutdown();
 			try
 			{
 				var cfgFileName = Path.Combine(gitRepository.GitDirectory, "gitter-config");
@@ -199,6 +198,7 @@
 			catch
 			{
 			}
+			gitRepository.Dispose();
 		}
 
 		public IRepositoryGuiProvider CreateGuiProvider(IRepository repository)

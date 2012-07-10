@@ -4,12 +4,8 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Linq;
-	using System.Text;
 	using System.Windows.Forms;
-	using System.Xml;
 
-	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -91,7 +87,9 @@
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("StashList");
 			if(listNode != null)
+			{
 				_lstStash.LoadViewFrom(listNode);
+			}
 		}
 	}
 }

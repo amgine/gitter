@@ -58,7 +58,7 @@
     </None>
     <None Include="app.config" />
     <None Include="gitter.uac.manifest" />
-    <None Include="postbuild.cmd" />
+    <None Include="Properties\postbuild.cmd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
@@ -68,7 +68,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>..\..\postbuild.cmd $(ConfigurationName)</PostBuildEvent>
+    <PostBuildEvent>..\..\Properties\postbuild.cmd $(ConfigurationName)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

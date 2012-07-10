@@ -9,7 +9,6 @@
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
 

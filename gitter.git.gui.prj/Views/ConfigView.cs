@@ -4,15 +4,9 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Linq;
-	using System.Text;
 	using System.Windows.Forms;
-	using System.Xml;
 
-	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
-
-	using gitter.Git.Gui.Dialogs;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -99,7 +93,9 @@
 			base.LoadMoreViewFrom(section);
 			var listSection = section.TryGetSection("ConfigParameterList");
 			if(listSection != null)
+			{
 				_lstConfig.LoadViewFrom(listSection);
+			}
 		}
 	}
 }

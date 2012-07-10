@@ -168,19 +168,14 @@
 							_repository.Configuration.Refresh();
 						}
 					}
+					if(_repository != null)
+					{
+						_repository.InvokeUserIdentityChanged();
+					}
 				}
 				else
 				{
-					using(_repository.Monitor.BlockNotifications(
-						RepositoryNotifications.ConfigUpdated))
-					{
-						_repository.Configuration.SetValue(GitConstants.UserNameParameter, userName);
-						_repository.Configuration.SetValue(GitConstants.UserEmailParameter, userEmail);
-					}
-				}
-				if(_repository != null)
-				{
-					_repository.InvokeUserIdentityChanged();
+					_repository.Configuration.SetUserIdentity(userName, userEmail);
 				}
 			}
 			catch(GitException exc)

@@ -4,9 +4,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
-	using System.Xml;
 
 	using gitter.Framework.Configuration;
 
@@ -231,7 +229,9 @@
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("ReferenceList");
 			if(listNode != null)
+			{
 				_lstReferences.LoadViewFrom(listNode);
+			}
 		}
 	}
 }

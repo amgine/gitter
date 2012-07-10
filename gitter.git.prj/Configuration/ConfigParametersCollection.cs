@@ -193,6 +193,26 @@
 			return p;
 		}
 
+		public void SetUserIdentity(string userName, string userEmail)
+		{
+			if(userName == null) throw new ArgumentNullException("userName");
+			if(userEmail == null) throw new ArgumentNullException("userEmail");
+
+			try
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.ConfigUpdated))
+				{
+					SetValue(GitConstants.UserNameParameter, userName);
+					SetValue(GitConstants.UserEmailParameter, userEmail);
+				}
+			}
+			finally
+			{
+				Repository.InvokeUserIdentityChanged();
+			}
+		}
+
 		internal void Unset(ConfigParameter parameter)
 		{
 			if(parameter == null) throw new ArgumentNullException("parameter");

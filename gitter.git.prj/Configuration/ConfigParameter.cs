@@ -90,38 +90,54 @@
 				}
 				if(_value != value)
 				{
-					switch(_configFile)
+					if(Repository != null)
 					{
-						case ConfigFile.Other:
-							{
-								_configAccessor.SetConfigValue(
-									new SetConfigValueParameters(Name, value)
-									{
-										FileName = _fileName,
-										ConfigFile = ConfigFile.Other,
-									});
-							}
-							break;
-						case ConfigFile.Repository:
-							{
-								_configAccessor.SetConfigValue(
-									new SetConfigValueParameters(Name, value));
-							}
-							break;
-						default:
-							{
-								_configAccessor.SetConfigValue(
-									new SetConfigValueParameters(Name, value)
-									{
-										FileName = _fileName,
-										ConfigFile = Git.ConfigFile.Other,
-									});
-							}
-							break;
+						using(Repository.Monitor.BlockNotifications(
+							RepositoryNotifications.ConfigUpdated))
+						{
+							CallGitSetValue(value);
+						}
+					}
+					else
+					{
+						CallGitSetValue(value);
 					}
 					_value = value;
 					InvokeValueChanged();
 				}
+			}
+		}
+
+		private void CallGitSetValue(string value)
+		{
+			switch(_configFile)
+			{
+				case ConfigFile.Other:
+					{
+						_configAccessor.SetConfigValue(
+							new SetConfigValueParameters(Name, value)
+							{
+								FileName = _fileName,
+								ConfigFile = ConfigFile.Other,
+							});
+					}
+					break;
+				case ConfigFile.Repository:
+					{
+						_configAccessor.SetConfigValue(
+							new SetConfigValueParameters(Name, value));
+					}
+					break;
+				default:
+					{
+						_configAccessor.SetConfigValue(
+							new SetConfigValueParameters(Name, value)
+							{
+								FileName = _fileName,
+								ConfigFile = Git.ConfigFile.Other,
+							});
+					}
+					break;
 			}
 		}
 

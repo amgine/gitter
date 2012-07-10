@@ -1,14 +1,10 @@
 ﻿namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Linq;
-	using System.IO;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
-	using System.Xml;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;

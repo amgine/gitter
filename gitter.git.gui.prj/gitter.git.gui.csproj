@@ -72,7 +72,6 @@
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
     </ProjectReference>
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">

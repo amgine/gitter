@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Drawing;
-	using System.Xml;
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;

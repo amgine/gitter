@@ -4,13 +4,9 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
-	using System.Xml;
 
 	using gitter.Framework.Configuration;
-
-	using gitter.Git.Gui.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -93,7 +89,9 @@
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("UsersList");
 			if(listNode != null)
+			{
 				_lstUsers.LoadViewFrom(listNode);
+			}
 		}
 	}
 }
