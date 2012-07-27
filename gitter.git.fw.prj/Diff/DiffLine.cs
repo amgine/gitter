@@ -5,7 +5,7 @@
 	using System.Collections.Generic;
 
 	/// <summary>Represents a single diff line.</summary>
-	public sealed class DiffLine
+	public sealed class DiffLine : ICloneable
 	{
 		#region Data
 
@@ -117,5 +117,24 @@
 					return _text;
 			}
 		}
+
+		#region ICloneable
+
+		public DiffLine Clone()
+		{
+			return new DiffLine(
+				_state,
+				(DiffLineState[])_states.Clone(),
+				(int[])_nums.Clone(),
+				_text,
+				_ending);
+		}
+
+		object ICloneable.Clone()
+		{
+			return Clone();
+		}
+
+		#endregion
 	}
 }

@@ -2,15 +2,10 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
-	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	using gitter.Git.AccessLayer;
-
-	using Resources = gitter.Git.Properties.Resources;
 
 	public sealed class LogOptions
 	{

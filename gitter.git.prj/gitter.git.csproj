@@ -76,6 +76,7 @@
     <Compile Include="Diff\IIndexDiffSource.cs" />
     <Compile Include="Diff\IRevisionDiffSource.cs" />
     <Compile Include="Diff\StashedChangesDiffSource.cs" />
+    <Compile Include="Hooks\Hooks.cs" />
     <Compile Include="Log\PathLogSource.cs" />
     <Compile Include="Configuration\ConfigurationFile.cs" />
     <Compile Include="ObjectFactories.cs" />

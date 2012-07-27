@@ -25,7 +25,7 @@
 			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(_branch, "{0} '{1}'"));
 			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(_branch));
 			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(_branch));
-			Items.Add(GuiItemFactory.GetMergeBranchItem<ToolStripMenuItem>(_branch));
+			Items.Add(GuiItemFactory.GetMergeItem<ToolStripMenuItem>(_branch));
 			if(!branch.IsRemote)
 			{
 				Items.Add(GuiItemFactory.GetRenameBranchItem<ToolStripMenuItem>((Branch)_branch, "{0}"));

@@ -5,7 +5,7 @@
 	using System.Collections.Generic;
 
 	/// <summary>Represents changes made to a file.</summary>
-	public sealed class DiffFile : IEnumerable<DiffHunk>
+	public sealed class DiffFile : IEnumerable<DiffHunk>, ICloneable
 	{
 		#region Data
 
@@ -247,5 +247,35 @@
 			ToString(sb);
 			return sb.ToString();
 		}
+
+		#region ICloneable
+
+		public DiffFile Clone()
+		{
+			var hunks = new DiffHunk[_hunks.Count];
+			for(int i = 0; i < _hunks.Count; ++i)
+			{
+				hunks[i] = _hunks[i].Clone();
+			}
+			return new DiffFile(
+				_oldIndex,
+				_newIndex,
+				_oldMode,
+				_newMode,
+				_sourceFile,
+				_targetFile,
+				_status,
+				hunks,
+				_isBinary,
+				_stats.Clone());
+
+		}
+
+		object ICloneable.Clone()
+		{
+			return Clone();
+		}
+
+		#endregion
 	}
 }

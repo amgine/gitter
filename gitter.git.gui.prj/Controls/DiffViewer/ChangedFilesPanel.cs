@@ -314,11 +314,11 @@
 					_diff = value;
 					if(_diff != null)
 					{
-						if(_items == null || _items.Length != _diff.FileCount)
+						if(_items == null || _items.Length != _diff.FilesCount)
 						{
-							_items = new FileItem[_diff.FileCount];
+							_items = new FileItem[_diff.FilesCount];
 						}
-						for(int i = 0; i < _diff.FileCount; ++i)
+						for(int i = 0; i < _diff.FilesCount; ++i)
 						{
 							_items[i] = new FileItem(_diff[i]);
 						}
@@ -418,7 +418,7 @@
 		{
 			if(_diff == null) return Size.Empty;
 			if(FontHeight == -1) FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(measureEventArgs.Graphics, Font) + 0.5f);
-			return new Size(0, (_diff.FileCount + 1) * (LineHeight));
+			return new Size(0, (_diff.FilesCount + 1) * (LineHeight));
 		}
 
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
@@ -431,7 +431,7 @@
 			if(FontHeight == -1) FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(graphics, Font) + 0.5);
 			var rc = new Rectangle(rect.X + 5, rect.Y, FlowControl.ContentArea.Width - 10, LineHeight);
 			var rcClip = Rectangle.Intersect(rc, clip);
-			if(_diff.FileCount == 0)
+			if(_diff.FilesCount == 0)
 			{
 				if(rcClip.Height != 0 && rcClip.Width != 0)
 				{

@@ -1435,10 +1435,10 @@
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps[branch.IsRemote?"ImgBranchRemoteDel":"ImgBranchDel"],
-				Text = string.Format(nameFormat, Resources.StrRemoveBranch, branch.Name),
-				Tag = branch,
-				Enabled = !branch.IsCurrent,
+				Image	= CachedResources.Bitmaps[branch.IsRemote?"ImgBranchRemoteDel":"ImgBranchDel"],
+				Text	= string.Format(nameFormat, Resources.StrRemoveBranch, branch.Name),
+				Tag		= branch,
+				Enabled	= !branch.IsCurrent,
 			};
 			item.Click += OnRemoveBranchClick;
 			return item;
@@ -1452,15 +1452,15 @@
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgBranchRename"],
-				Text = string.Format(nameFormat, Resources.StrRename.AddEllipsis(), branch.Name),
-				Tag = branch,
+				Image	= CachedResources.Bitmaps["ImgBranchRename"],
+				Text	= string.Format(nameFormat, Resources.StrRename.AddEllipsis(), branch.Name),
+				Tag		= branch,
 			};
 			item.Click += OnRenameBranchClick;
 			return item;
 		}
 
-		public static T GetMergeBranchItem<T>(IRevisionPointer revision)
+		public static T GetMergeItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			if(revision == null) throw new ArgumentNullException("branch");
@@ -1468,10 +1468,10 @@
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgMerge"],
-				Text = Resources.StrMerge,
-				Tag = revision,
-				Enabled = revision != revision.Repository.Head.Pointer,
+				Image	= CachedResources.Bitmaps["ImgMerge"],
+				Text	= Resources.StrMerge,
+				Tag		= revision,
+				Enabled	= revision != revision.Repository.Head.Pointer,
 			};
 			item.Click += OnMergeBranchClick;
 			return item;
@@ -1485,9 +1485,9 @@
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRemote"],
-				Text = remote.Name,
-				Tag = Tuple.Create(branch, remote),
+				Image	= CachedResources.Bitmaps["ImgRemote"],
+				Text	= remote.Name,
+				Tag		= Tuple.Create(branch, remote),
 			};
 			item.Click += new EventHandler(OnPushBranchToRemoteClick);
 			return item;
@@ -1503,7 +1503,8 @@
 
 			try
 			{
-				remote.PushAsync(new Branch[] { branch }, false, true, false).Invoke<ProgressForm>(parent);
+				remote.PushAsync(new Branch[] { branch }, false, true, false)
+					  .Invoke<ProgressForm>(parent);
 			}
 			catch(GitException exc)
 			{
@@ -1559,7 +1560,9 @@
 			})
 			{
 				if(defaultName != string.Empty)
+				{
 					dlg.BranchName = defaultName;
+				}
 				dlg.Run(Utility.GetParentControl(item));
 			}
 		}

@@ -188,9 +188,13 @@
 			if(Guid != Guids.ContextualDiffViewGuid)
 			{
 				if(_source != null)
+				{
 					Text = _source.ToString();
+				}
 				else
+				{
 					Text = Resources.StrDiff;
+				}
 			}
 			else
 			{

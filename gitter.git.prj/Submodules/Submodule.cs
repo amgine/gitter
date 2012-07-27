@@ -15,11 +15,27 @@
 		private string _path;
 		private string _url;
 
+		#endregion
+
+		#region Events
+
 		/// <summary><see cref="M:Path"/> property value changed.</summary>
 		public event EventHandler PathChanged;
 
 		/// <summary><see cref="M:Url"/> property value changed.</summary>
 		public event EventHandler UrlChanged;
+
+		private void OnPathChanged()
+		{
+			var handler = PathChanged;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		private void OnUrlChanged()
+		{
+			var handler = UrlChanged;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
 
 		#endregion
 
@@ -54,12 +70,28 @@
 		public string Path
 		{
 			get { return _path; }
+			private set
+			{
+				if(_path != value)
+				{
+					_path = value;
+					OnPathChanged();
+				}
+			}
 		}
 
 		/// <summary>Submodule URL.</summary>
 		public string Url
 		{
 			get { return _url; }
+			private set
+			{
+				if(_url != value)
+				{
+					_url = value;
+					OnUrlChanged();
+				}
+			}
 		}
 
 		#endregion
@@ -101,16 +133,8 @@
 
 		internal void UpdateInfo(string path, string url)
 		{
-			if(_path != path)
-			{
-				_path = path;
-				PathChanged.Raise(this);
-			}
-			if(_url != url)
-			{
-				_url = url;
-				UrlChanged.Raise(this);
-			}
+			Path = path;
+			Url = url;
 		}
 
 		#endregion

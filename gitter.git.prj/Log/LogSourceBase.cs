@@ -1,10 +1,7 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	
+
 	using gitter.Framework;
 	
 	using gitter.Git.AccessLayer;
@@ -13,10 +10,6 @@ namespace gitter.Git
 	
 	public abstract class LogSourceBase : ILogSource
 	{
-		protected internal static void ApplyCommonDiffOptions(QueryRevisionsParameters queryParameters, LogOptions options)
-		{
-		}
-
 		public abstract Repository Repository { get; }
 
 		protected abstract RevisionLog GetLogCore(LogOptions options);

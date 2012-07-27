@@ -109,9 +109,13 @@
 				_stashApplyItem = new ToolStripMenuItem(Resources.StrApply, CachedResources.Bitmaps["ImgStashApply"], OnStashApplyClick));
 
 			if(gui.Repository != null)
+			{
 				AttachToRepository(gui.Repository);
+			}
 			else
+			{
 				Enabled = false;
+			}
 		}
 
 		public Repository Repository
@@ -122,9 +126,13 @@
 				if(_repository != value)
 				{
 					if(_repository != null)
+					{
 						DetachFromRepository(_repository);
+					}
 					if(value != null)
+					{
 						AttachToRepository(value);
+					}
 				}
 			}
 		}

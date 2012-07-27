@@ -160,7 +160,7 @@
 
 		public IRepository OpenRepository(string workingDirectory)
 		{
-			return new Repository(RepositoryProvider.Git, workingDirectory);
+			return Repository.Load(RepositoryProvider.Git, workingDirectory);
 		}
 
 		public IAsyncFunc<IRepository> OpenRepositoryAsync(string workingDirectory)

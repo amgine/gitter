@@ -38,6 +38,24 @@
 				}
 			}
 
+			public bool Contains(string referenceName)
+			{
+				lock(SyncRoot)
+				{
+					return _container.ContainsKey(referenceName);
+				}
+			}
+
+			public bool Contains(Reference reference)
+			{
+				if(reference == null) return false;
+
+				lock(SyncRoot)
+				{
+					return _container.ContainsKey(reference.Name);
+				}
+			}
+
 			public Reference this[string name]
 			{
 				get

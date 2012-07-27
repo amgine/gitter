@@ -9,7 +9,6 @@
 		#region Data
 
 		private readonly Dictionary<string, Hook> _hooks;
-
 		private readonly Hook _applyPatchMsg;
 		private readonly Hook _preApplyPatch;
 		private readonly Hook _postApplyPatch;
@@ -34,25 +33,28 @@
 		internal HooksCollection(Repository repository)
 			: base(repository)
 		{
-			_hooks = new Dictionary<string, Hook>()
-			{
-				{"applypatch-msg",		_applyPatchMsg		= new Hook(repository, "applypatch-msg")},
-				{"pre-applypatch",		_preApplyPatch		= new Hook(repository, "pre-applypatch")},
-				{"post-applypatch",		_postApplyPatch		= new Hook(repository, "post-applypatch")},
-				{"pre-commit",			_preCommit			= new Hook(repository, "pre-commit")},
-				{"prepare-commit-msg",	_prepareCommitMsg	= new Hook(repository, "prepare-commit-msg")},
-				{"commit-msg",			_commitMsg			= new Hook(repository, "commit-msg")},
-				{"post-commit",			_postCommit			= new Hook(repository, "post-commit")},
-				{"pre-rebase",			_preRebase			= new Hook(repository, "pre-rebase")},
-				{"post-checkout",		_postCheckout		= new Hook(repository, "post-checkout")},
-				{"post-merge",			_postMerge			= new Hook(repository, "post-merge")},
-				{"pre-receive",			_preReceive			= new Hook(repository, "pre-receive")},
-				{"update",				_update				= new Hook(repository, "update")},
-				{"post-receive",		_postReceive		= new Hook(repository, "post-receive")},
-				{"post-update",			_postUpdate			= new Hook(repository, "post-update")},
-				{"pre-auto-gc",			_preAutoGC			= new Hook(repository, "pre-auto-gc")},
-				{"post-rewrite",		_postRewrite		= new Hook(repository, "post-rewrite")},
-			};
+			_hooks = new Dictionary<string, Hook>();
+			AddHook(_applyPatchMsg		= new Hook(repository, Hooks.ApplyPatchMsg));
+			AddHook(_preApplyPatch		= new Hook(repository, Hooks.PreApplyPatch));
+			AddHook(_postApplyPatch		= new Hook(repository, Hooks.PostApplyPatch));
+			AddHook(_preCommit			= new Hook(repository, Hooks.PreCommit));
+			AddHook(_prepareCommitMsg	= new Hook(repository, Hooks.PrepareCommitMsg));
+			AddHook(_commitMsg			= new Hook(repository, Hooks.CommitMsg));
+			AddHook(_postCommit			= new Hook(repository, Hooks.PostCommit));
+			AddHook(_preRebase			= new Hook(repository, Hooks.PreRebase));
+			AddHook(_postCheckout		= new Hook(repository, Hooks.PostCheckout));
+			AddHook(_postMerge			= new Hook(repository, Hooks.PostMerge));
+			AddHook(_preReceive			= new Hook(repository, Hooks.PreReceive));
+			AddHook(_update				= new Hook(repository, Hooks.Update));
+			AddHook(_postReceive		= new Hook(repository, Hooks.PostReceive));
+			AddHook(_postUpdate			= new Hook(repository, Hooks.PostUpdate));
+			AddHook(_preAutoGC			= new Hook(repository, Hooks.PreAutoGC));
+			AddHook(_postRewrite		= new Hook(repository, Hooks.PostRewrite));
+		}
+
+		private void AddHook(Hook hook)
+		{
+			_hooks.Add(hook.Name, hook);
 		}
 
 		public Hook ApplyPatchMsg

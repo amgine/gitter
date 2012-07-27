@@ -1,10 +1,8 @@
 ﻿namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
 
 	using gitter.Framework;
-	using gitter.Framework.Controls;
 
 	public interface IBlameSource
 	{

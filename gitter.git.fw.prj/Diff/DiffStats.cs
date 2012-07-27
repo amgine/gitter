@@ -171,6 +171,10 @@
 			_headerLinesCount = headerLinesCount;
 		}
 
+		#endregion
+
+		#region ICloneable
+
 		public DiffStats Clone()
 		{
 			return new DiffStats(
@@ -179,10 +183,6 @@
 				_contextLinesCount,
 				_headerLinesCount);
 		}
-
-		#endregion
-
-		#region ICloneable
 
 		object ICloneable.Clone()
 		{

@@ -93,7 +93,7 @@
 			if(monitor != null) monitor.SetProgress(val, action);
 		}
 
-		private static void Load(Repository repository, IAsyncProgressMonitor monitor)
+		private static void LoadCore(Repository repository, IAsyncProgressMonitor monitor)
 		{
 			if(monitor != null)
 			{
@@ -144,6 +144,11 @@
 			SetProgress(monitor, 8, Resources.StrCompleted.AddPeriod());
 		}
 
+		public static Repository Load(IGitAccessor gitAccessor, string workingDirectory)
+		{
+			return new Repository(gitAccessor, workingDirectory, true);
+		}
+
 		public static IAsyncFunc<Repository> LoadAsync(IGitAccessor gitAccessor, string workingDirectory)
 		{
 			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
@@ -158,12 +163,63 @@
 				{
 					var repository = new Repository(data.GitAccessor, data.WorkingDirectory, false);
 
-					Load(repository, monitor);
+					LoadCore(repository, monitor);
 
 					return repository;
 				},
 				Resources.StrLoadingRepository.AddEllipsis(),
 				string.Empty);
+		}
+
+		private static string GetGitDirectory(string workingDirectory)
+		{
+			const string GitDirPrefix = "gitdir: ";
+
+			var gitDirectory = Path.Combine(workingDirectory, GitConstants.GitDir);
+			if(!Directory.Exists(gitDirectory))
+			{
+				string[] gitFile;
+				gitFile = File.ReadAllLines(gitDirectory);
+				for(int i = 0; i < gitFile.Length; ++i)
+				{
+					if(gitFile[i].StartsWith(GitDirPrefix))
+					{
+						gitDirectory = gitFile[i].Substring(GitDirPrefix.Length);
+						if(!Path.IsPathRooted(gitDirectory))
+						{
+							gitDirectory = Path.GetFullPath(Path.Combine(
+								workingDirectory,
+								gitDirectory));
+						}
+						break;
+					}
+				}
+			}
+			return gitDirectory;
+		}
+
+		private static ConfigurationManager GetConfigurationManager(string gitDirectory)
+		{
+			ConfigurationManager configurationManager = null;
+			var cfgFileName = Path.Combine(gitDirectory, "gitter-config");
+			try
+			{
+				if(File.Exists(cfgFileName))
+				{
+					using(var fs = new FileStream(cfgFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+					{
+						configurationManager = new ConfigurationManager(new XmlAdapter(fs));
+					}
+				}
+			}
+			catch
+			{
+			}
+			if(configurationManager == null)
+			{
+				configurationManager = new ConfigurationManager("Gitter");
+			}
+			return configurationManager;
 		}
 
 		#endregion
@@ -178,46 +234,9 @@
 		{
 			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
 
-			_workingDirectory = Path.GetFullPath(workingDirectory);
-			_gitDirectory = Path.Combine(_workingDirectory, GitConstants.GitDir);
-			if(!Directory.Exists(_gitDirectory))
-			{
-				string[] gitFile;
-				gitFile = File.ReadAllLines(_gitDirectory);
-				for(int i = 0; i < gitFile.Length; ++i)
-				{
-					if(gitFile[i].StartsWith("gitdir: "))
-					{
-						_gitDirectory = gitFile[i].Substring("gitdir: ".Length);
-						if(!Path.IsPathRooted(_gitDirectory))
-						{
-							_gitDirectory = Path.GetFullPath(Path.Combine(
-								_workingDirectory,
-								_gitDirectory));
-						}
-						break;
-					}
-				}
-			}
-
-			var cfgFileName = Path.Combine(_gitDirectory, "gitter-config");
-			try
-			{
-				if(File.Exists(cfgFileName))
-				{
-					using(var fs = new FileStream(cfgFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-					{
-						_configurationManager = new ConfigurationManager(new XmlAdapter(fs));
-					}
-				}
-			}
-			catch
-			{
-			}
-			if(_configurationManager == null)
-			{
-				_configurationManager = new ConfigurationManager("Gitter");
-			}
+			_workingDirectory		= Path.GetFullPath(workingDirectory);
+			_gitDirectory			= GetGitDirectory(_workingDirectory);
+			_configurationManager	= GetConfigurationManager(_gitDirectory);
 
 			_accessor		= gitAccessor.CreateRepositoryAccessor(this);
 
@@ -234,16 +253,8 @@
 
 			if(load)
 			{
-				Load(this, null);
+				LoadCore(this, null);
 			}
-		}
-
-		/// <summary>Create <see cref="Repository"/>.</summary>
-		/// <param name="gitAccessor">Git repository access provider.</param>
-		/// <param name="workingDirectory">Repository working directory.</param>
-		public Repository(IGitAccessor gitAccessor, string workingDirectory)
-			: this(gitAccessor, workingDirectory, true)
-		{
 		}
 
 		#endregion

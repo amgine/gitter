@@ -5,7 +5,7 @@
 	using System.Collections.Generic;
 
 	/// <summary>Continious block of changed lines including context.</summary>
-	public sealed class DiffHunk : IList<DiffLine>
+	public sealed class DiffHunk : IList<DiffLine>, ICloneable
 	{
 		#region Data
 
@@ -267,5 +267,28 @@
 			ToString(sb);
 			return sb.ToString();
 		}
+
+		#region ICloneable
+
+		public DiffHunk Clone()
+		{
+			var lines = new DiffLine[_lines.Count];
+			for(int i = 0; i < _lines.Count; ++i)
+			{
+				lines[i] = _lines[i].Clone();
+			}
+			return new DiffHunk(
+				(DiffColumnHeader[])_headers.Clone(),
+				lines,
+				_stats.Clone(),
+				_isBinary);
+		}
+
+		object ICloneable.Clone()
+		{
+			return Clone();
+		}
+
+		#endregion
 	}
 }

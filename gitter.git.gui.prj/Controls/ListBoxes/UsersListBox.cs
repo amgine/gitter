@@ -23,7 +23,8 @@
 
 		public UsresListBox()
 		{
-			Columns.AddRange(new[]
+			Columns.AddRange(
+				new[]
 				{
 					_colName		= new NameColumn(Resources.StrName),
 					_colEmail		= new EmailColumn(),
@@ -38,10 +39,14 @@
 			if(_repository != repository)
 			{
 				if(_repository != null)
+				{
 					DetachFromRepositoy();
+				}
 				_repository = repository;
 				if(_repository != null)
+				{
 					AttachToRepository();
+				}
 			}
 		}
 
