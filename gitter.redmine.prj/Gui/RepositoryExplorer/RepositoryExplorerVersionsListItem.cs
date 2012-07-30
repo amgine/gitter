@@ -13,8 +13,8 @@
 
 	sealed class RepositoryExplorerVersionsListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryExplorerVersionsListItem(IWorkingEnvironment env, RedmineServiceContext service)
-			: base(env, service, CachedResources.Bitmaps["ImgVersion"], Resources.StrVersions)
+		public RepositoryExplorerVersionsListItem(IWorkingEnvironment env, RedmineGuiProvider guiProvider)
+			: base(env, guiProvider, CachedResources.Bitmaps["ImgVersion"], Resources.StrVersions)
 		{
 		}
 

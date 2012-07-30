@@ -280,4 +280,37 @@
   <data name="StrStartDate" xml:space="preserve">
     <value>Start Date</value>
   </data>
+  <data name="ErrNoServiceUriSpecified" xml:space="preserve">
+    <value>No service URL specified</value>
+  </data>
+  <data name="ErrServiceUriCannotBeEmpty" xml:space="preserve">
+    <value>Service URL cannot be empty</value>
+  </data>
+  <data name="ErrInvalidServiceUri" xml:space="preserve">
+    <value>Invalid service URL</value>
+  </data>
+  <data name="ErrServiceUriIsNotValid" xml:space="preserve">
+    <value>Specified service URL is not valid</value>
+  </data>
+  <data name="ErrApiKeyCannotBeEmpty" xml:space="preserve">
+    <value>API key cannot be empty</value>
+  </data>
+  <data name="ErrNoApiKeySpecified" xml:space="preserve">
+    <value>No API key specified</value>
+  </data>
+  <data name="ErrApiKeyContainsInvalidCharacters" xml:space="preserve">
+    <value>API key contains invalid characters</value>
+  </data>
+  <data name="ErrApiKeyMustContain40Characters" xml:space="preserve">
+    <value>API key must contain 40 characters</value>
+  </data>
+  <data name="ErrInvalidApiKey" xml:space="preserve">
+    <value>Invalid API key</value>
+  </data>
+  <data name="ErrNoProjectNameSpecified" xml:space="preserve">
+    <value>No project name specified</value>
+  </data>
+  <data name="ErrProjectNameCannotBeEmpty" xml:space="preserve">
+    <value>Project name cannot be empty</value>
+  </data>
 </root>

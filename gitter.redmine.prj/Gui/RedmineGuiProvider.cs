@@ -20,9 +20,19 @@
 			_service = svc;
 		}
 
+		public IRepository Repository
+		{
+			get { return _repository; }
+		}
+
+		public RedmineServiceContext ServiceContext
+		{
+			get { return _service; }
+		}
+
 		public void AttachToEnvironment(IWorkingEnvironment environment)
 		{
-			_repositoryExplorer = new RepositoryExplorer(environment, _service);
+			_repositoryExplorer = new RepositoryExplorer(environment, this);
 			environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
 		}
 

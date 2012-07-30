@@ -13,8 +13,8 @@
 
 	sealed class RepositoryExplorerNewsListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryExplorerNewsListItem(IWorkingEnvironment env, RedmineServiceContext service)
-			: base(env, service, CachedResources.Bitmaps["ImgNews"], Resources.StrNews)
+		public RepositoryExplorerNewsListItem(IWorkingEnvironment env, RedmineGuiProvider guiProvider)
+			: base(env, guiProvider, CachedResources.Bitmaps["ImgNews"], Resources.StrNews)
 		{
 		}
 

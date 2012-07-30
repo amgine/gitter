@@ -1,10 +1,7 @@
 ﻿namespace gitter.Redmine.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Drawing;
+	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -13,13 +10,20 @@
 
 	sealed class RepositoryExplorerRootListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryExplorerRootListItem(IWorkingEnvironment env, RedmineServiceContext service)
-			: base(env, service, CachedResources.Bitmaps["ImgRedmine"], Resources.StrRedmine)
+		public RepositoryExplorerRootListItem(IWorkingEnvironment env, RedmineGuiProvider guiProvider)
+			: base(env, guiProvider, CachedResources.Bitmaps["ImgRedmine"], Resources.StrRedmine)
 		{
-			Items.Add(new RepositoryExplorerNewsListItem(env, service));
-			Items.Add(new RepositoryExplorerIssuesListItem(env, service));
-			Items.Add(new RepositoryExplorerVersionsListItem(env, service));
+			Items.Add(new RepositoryExplorerNewsListItem(env, guiProvider));
+			Items.Add(new RepositoryExplorerIssuesListItem(env, guiProvider));
+			Items.Add(new RepositoryExplorerVersionsListItem(env, guiProvider));
 			Expand();
+		}
+
+		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+		{
+			var menu = new RedmineMenu(WorkingEnvironment, GuiProvider);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

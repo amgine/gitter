@@ -43,6 +43,8 @@
 		/// <param name="section">Provider configuration section.</param>
 		public bool LoadFor(IWorkingEnvironment environment, Section section)
 		{
+			if(environment == null) throw new ArgumentNullException("environment");
+
 			environment.ViewDockService.RegisterFactory(new NewsViewFactory());
 			environment.ViewDockService.RegisterFactory(new IssuesViewFactory());
 			environment.ViewDockService.RegisterFactory(new VersionsViewFactory());

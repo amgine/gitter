@@ -8,17 +8,17 @@
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	public abstract class RepositoryExplorerItemBase : CustomListBoxItem
+	abstract class RepositoryExplorerItemBase : CustomListBoxItem
 	{
 		private readonly IWorkingEnvironment _environment;
-		private readonly RedmineServiceContext _service;
+		private readonly RedmineGuiProvider _guiProvider;
 		private readonly string _text;
 		private Bitmap _image;
 
-		protected RepositoryExplorerItemBase(IWorkingEnvironment env, RedmineServiceContext service, Bitmap image, string text)
+		protected RepositoryExplorerItemBase(IWorkingEnvironment env, RedmineGuiProvider guiProvider, Bitmap image, string text)
 		{
 			_environment = env;
-			_service = service;
+			_guiProvider = guiProvider;
 			_image = image;
 			_text = text;
 		}
@@ -28,12 +28,22 @@
 			get { return _environment; }
 		}
 
+		protected RedmineGuiProvider GuiProvider
+		{
+			get { return _guiProvider; }
+		}
+
+		protected RedmineServiceContext ServiceContext
+		{
+			get { return _guiProvider.ServiceContext; }
+		}
+
 		protected void ShowView(Guid guid)
 		{
 			var view = WorkingEnvironment.ViewDockService.ShowView(guid) as RedmineViewBase;
 			if(view != null)
 			{
-				view.ServiceContext = _service;
+				view.ServiceContext = ServiceContext;
 			}
 		}
 

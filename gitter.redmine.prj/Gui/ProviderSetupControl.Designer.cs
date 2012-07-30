@@ -41,7 +41,7 @@
 			this._lblServiceUri.AutoSize = true;
 			this._lblServiceUri.Location = new System.Drawing.Point(3, 6);
 			this._lblServiceUri.Name = "_lblServiceUri";
-			this._lblServiceUri.Size = new System.Drawing.Size(71, 13);
+			this._lblServiceUri.Size = new System.Drawing.Size(71, 15);
 			this._lblServiceUri.TabIndex = 0;
 			this._lblServiceUri.Text = "Service URL:";
 			// 
@@ -51,15 +51,15 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtServiceUri.Location = new System.Drawing.Point(100, 3);
 			this._txtServiceUri.Name = "_txtServiceUri";
-			this._txtServiceUri.Size = new System.Drawing.Size(355, 20);
-			this._txtServiceUri.TabIndex = 1;
+			this._txtServiceUri.Size = new System.Drawing.Size(297, 23);
+			this._txtServiceUri.TabIndex = 0;
 			// 
 			// _lblApiKey
 			// 
 			this._lblApiKey.AutoSize = true;
 			this._lblApiKey.Location = new System.Drawing.Point(3, 32);
 			this._lblApiKey.Name = "_lblApiKey";
-			this._lblApiKey.Size = new System.Drawing.Size(48, 13);
+			this._lblApiKey.Size = new System.Drawing.Size(50, 15);
 			this._lblApiKey.TabIndex = 2;
 			this._lblApiKey.Text = "API Key:";
 			// 
@@ -68,7 +68,7 @@
 			this._lblProject.AutoSize = true;
 			this._lblProject.Location = new System.Drawing.Point(3, 58);
 			this._lblProject.Name = "_lblProject";
-			this._lblProject.Size = new System.Drawing.Size(43, 13);
+			this._lblProject.Size = new System.Drawing.Size(47, 15);
 			this._lblProject.TabIndex = 3;
 			this._lblProject.Text = "Project:";
 			// 
@@ -79,8 +79,8 @@
 			this._cmbProject.FormattingEnabled = true;
 			this._cmbProject.Location = new System.Drawing.Point(100, 55);
 			this._cmbProject.Name = "_cmbProject";
-			this._cmbProject.Size = new System.Drawing.Size(355, 21);
-			this._cmbProject.TabIndex = 4;
+			this._cmbProject.Size = new System.Drawing.Size(297, 23);
+			this._cmbProject.TabIndex = 2;
 			// 
 			// _txtApiKey
 			// 
@@ -88,7 +88,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtApiKey.Location = new System.Drawing.Point(100, 29);
 			this._txtApiKey.Name = "_txtApiKey";
-			this._txtApiKey.Size = new System.Drawing.Size(355, 20);
+			this._txtApiKey.Size = new System.Drawing.Size(297, 23);
 			this._txtApiKey.TabIndex = 1;
 			// 
 			// ProviderSetupControl
@@ -102,7 +102,7 @@
 			this.Controls.Add(this._txtServiceUri);
 			this.Controls.Add(this._lblServiceUri);
 			this.Name = "ProviderSetupControl";
-			this.Size = new System.Drawing.Size(458, 79);
+			this.Size = new System.Drawing.Size(400, 79);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

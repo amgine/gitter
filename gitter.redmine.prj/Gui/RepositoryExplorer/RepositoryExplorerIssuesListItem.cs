@@ -13,8 +13,8 @@
 
 	sealed class RepositoryExplorerIssuesListItem : RepositoryExplorerItemBase
 	{
-		public RepositoryExplorerIssuesListItem(IWorkingEnvironment env, RedmineServiceContext service)
-			: base(env, service, CachedResources.Bitmaps["ImgBug"], Resources.StrIssues)
+		public RepositoryExplorerIssuesListItem(IWorkingEnvironment env, RedmineGuiProvider guiProvider)
+			: base(env, guiProvider, CachedResources.Bitmaps["ImgBug"], Resources.StrIssues)
 		{
 		}
 

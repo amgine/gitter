@@ -85,6 +85,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Gui\ListBoxes\Items\NewsListItem.cs" />
+    <Compile Include="Gui\Menus\RedmineMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Gui\Menus\VersionMenu.cs">
       <SubType>Component</SubType>
     </Compile>
