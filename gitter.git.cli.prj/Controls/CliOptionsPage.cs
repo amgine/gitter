@@ -68,7 +68,7 @@
 			_chkLogCLICalls.Checked = _gitCLI.LogCLICalls;
 			_chkFallbackToAnsi.Checked = GitProcess.EnableAnsiCodepageFallback;
 
-			var version = _gitCLI.GitVersion;
+			var version = TryGetVersion();
 			if(version != null)
 			{
 				_lblVersion.Text = version.ToString();
@@ -79,6 +79,18 @@
 			}
 
 			GitterApplication.FontManager.InputFont.Apply(_txtmSysGitPath);
+		}
+
+		private Version TryGetVersion()
+		{
+			Version version = null;
+			try
+			{
+				_gitCLI.RefreshGitVersion();
+				version = _gitCLI.GitVersion;
+			}
+			catch { }
+			return version;
 		}
 
 		protected override void OnShown()
@@ -118,9 +130,10 @@
 			{
 				if(_downloader.IsAvailable)
 				{
+					var version = TryGetVersion();
 					_btnDownload.Enabled =
-						(_gitCLI.GitVersion == null) ||
-						(_downloader.LatestVersion > _gitCLI.GitVersion);
+						(version == null) ||
+						(_downloader.LatestVersion > version);
 					_lblLatestVersionValue.Text = _downloader.LatestVersion.ToString();
 				}
 				else
@@ -181,9 +194,14 @@
 				{
 					var path = _txtmSysGitPath.Text.Trim();
 					path = Path.GetFullPath(path);
-					if(File.Exists(path))
+					if(Path.GetFileName(path) == "git.exe" && File.Exists(path))
 					{
-						var version = GitProcess.CheckVersion(path);
+						Version version = null;
+						try
+						{
+							version = GitProcess.CheckVersion(path);
+						}
+						catch { }
 						if(version != null)
 						{
 							_lblVersion.Text = version.ToString();
