@@ -84,9 +84,18 @@
 		{
 			if(_downloader != null && _downloader.IsAvailable)
 			{
+				Version currentVersion = null;
+				try
+				{
+					RepositoryProvider.Git.RefreshGitVersion();
+					currentVersion = RepositoryProvider.Git.GitVersion;
+				}
+				catch
+				{
+				}
 				_lnkDownload.Visible =
-					(RepositoryProvider.Git.GitVersion == null) ||
-					(_downloader.LatestVersion > RepositoryProvider.Git.GitVersion);
+					(currentVersion == null) ||
+					(_downloader.LatestVersion > currentVersion);
 				_lblLatestVersionValue.Text = _downloader.LatestVersion.ToString();
 			}
 			else
