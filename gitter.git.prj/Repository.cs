@@ -56,6 +56,9 @@
 		/// <summary>Commit created at the top of HEAD.</summary>
 		public event EventHandler<RevisionEventArgs> CommitCreated;
 
+		/// <summary>Repository deleted.</summary>
+		public event EventHandler Deleted;
+
 		internal void InvokeStateChanged()
 		{
 			var state = GetState();
@@ -82,6 +85,12 @@
 		{
 			var handler = CommitCreated;
 			if(handler != null) handler(this, new RevisionEventArgs(revision));
+		}
+
+		internal void InvokeDeleted()
+		{
+			var handler = Deleted;
+			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
 		#endregion

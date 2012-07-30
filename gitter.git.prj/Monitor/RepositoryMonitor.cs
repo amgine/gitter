@@ -7,6 +7,8 @@ namespace gitter.Git
 	using System.Collections.Generic;
 	using System.Threading;
 
+	using gitter.Framework.Services;
+
 	/// <summary>Watches git repository and notifies about external changes.</summary>
 	public sealed class RepositoryMonitor : IDisposable
 	{
@@ -14,7 +16,7 @@ namespace gitter.Git
 		private readonly FileSystemWatcher _fswWorkDir;
 		private readonly FileSystemWatcher _fswGitDir;
 		#if TRACE_FS_EVENTS
-		private readonly StreamWriter _sw;
+		private static readonly LoggingService Log = new LoggingService("Monitor");
 		#endif
 
 		private readonly List<NotificationBlock> _blockedNotifications;
@@ -163,10 +165,6 @@ namespace gitter.Git
 			_fswWorkDir.Deleted += OnWorkDirDeleted;
 			_fswWorkDir.Renamed += OnWorkDirRenamed;
 			_fswWorkDir.Changed += OnWorkDirChanged;
-
-			#if TRACE_FS_EVENTS
-			_sw = new StreamWriter(@"F:\test.txt");
-			#endif
 
 			_evGotNotification = new AutoResetEvent(false);
 			_evGotDelayedNotification = new AutoResetEvent(false);
@@ -374,11 +372,7 @@ namespace gitter.Git
 		private void OnWorkDirCreated(object sender, FileSystemEventArgs e)
 		{
 			#if TRACE_FS_EVENTS
-			lock(_sw)
-			{
-				_sw.WriteLine(string.Format("{0} {1}", e.ChangeType, e.Name));
-				_sw.Flush();
-			}
+			Log.Debug(string.Format("{0} {1}", e.ChangeType, e.Name));
 			#endif
 			switch(GetChangedPath(e.Name))
 			{
@@ -418,13 +412,9 @@ namespace gitter.Git
 				case GitSubdirectory.Refs:
 					if(e.Name == @"refs\stash" + GitConstants.LockPostfix)
 					{
-#if TRACE_FS_EVENTS
-						lock(_sw)
-						{
-							_sw.WriteLine("Detected possible stash change");
-							_sw.Flush();
-						}
-#endif
+						#if TRACE_FS_EVENTS
+						Log.Debug("Detected possible stash change");
+						#endif
 						if(!IsBlocked(RepositoryNotifications.StashChanged))
 						{
 							EmitNotification(new StashChangedNotification());
@@ -437,13 +427,9 @@ namespace gitter.Git
 						int pos = GitConstants.LocalBranchPrefix.Length;
 						var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
 										 .Replace(Path.DirectorySeparatorChar, '/');
-#if TRACE_FS_EVENTS
-						lock(_sw)
-						{
-							_sw.WriteLine(string.Format("Detected possible branch change: {0}", name));
-							_sw.Flush();
-						}
-#endif
+						#if TRACE_FS_EVENTS
+						Log.Debug(string.Format("Detected possible branch change: {0}", name));
+						#endif
 						if(!IsBlocked(RepositoryNotifications.BranchChanged))
 						{
 							EmitNotification(new BranchChangedNotification(name, false));
@@ -456,13 +442,9 @@ namespace gitter.Git
 						int pos = GitConstants.RemoteBranchPrefix.Length;
 						var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
 										 .Replace(Path.DirectorySeparatorChar, '/');
-#if TRACE_FS_EVENTS
-						lock(_sw)
-						{
-							_sw.WriteLine(string.Format("Detected possible remote branch change: {0}", name));
-							_sw.Flush();
-						}
-#endif
+						#if TRACE_FS_EVENTS
+						Log.Debug(string.Format("Detected possible remote branch change: {0}", name));
+						#endif
 						if(!IsBlocked(RepositoryNotifications.BranchChanged))
 						{
 							EmitNotification(new BranchChangedNotification(name, true));
@@ -478,13 +460,9 @@ namespace gitter.Git
 							var pos = GitConstants.TagPrefix.Length;
 							var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
 											 .Replace(Path.DirectorySeparatorChar, '/');
-#if TRACE_FS_EVENTS
-							lock(_sw)
-							{
-								_sw.WriteLine(string.Format("Detected possible tag removal: {0}", name));
-								_sw.Flush();
-							}
-#endif
+							#if TRACE_FS_EVENTS
+							Log.Debug(string.Format("Detected possible tag removal: {0}", name));
+							#endif
 							if(!IsBlocked(RepositoryNotifications.TagChanged))
 							{
 								EmitNotification(new TagChangedNotification(name));
@@ -496,13 +474,9 @@ namespace gitter.Git
 					{
 						if(e.Name.Length == 0)
 						{
-#if TRACE_FS_EVENTS
-							lock(_sw)
-							{
-								_sw.WriteLine("Repository destruction detected");
-								_sw.Flush();
-							}
-#endif
+							#if TRACE_FS_EVENTS
+							Log.Debug("Repository destruction detected");
+							#endif
 							EmitNotification(new RepositoryRemovedNotification());
 							IsEnabled = false;
 						}
@@ -511,39 +485,27 @@ namespace gitter.Git
 							switch(e.Name)
 							{
 								case GitConstants.HEAD + GitConstants.LockPostfix:
-#if TRACE_FS_EVENTS
-									lock(_sw)
-									{
-										_sw.WriteLine("Checkout detected");
-										_sw.Flush();
-									}
-#endif
+									#if TRACE_FS_EVENTS
+									Log.Debug("Checkout detected");
+									#endif
 									if(!IsBlocked(RepositoryNotifications.Checkout))
 									{
 										EmitNotification(new CheckoutNotification());
 									}
 									break;
 								case "config" + GitConstants.LockPostfix:
-#if TRACE_FS_EVENTS
-									lock(_sw)
-									{
-										_sw.WriteLine("Config update detected");
-										_sw.Flush();
-									}
-#endif
+									#if TRACE_FS_EVENTS
+									Log.Debug("Config update detected");
+									#endif
 									if(!IsBlocked(RepositoryNotifications.ConfigUpdated))
 									{
 										EmitNotification(new ConfigUpdatedNotification());
 									}
 									break;
 								case "index" + GitConstants.LockPostfix:
-#if TRACE_FS_EVENTS
-									lock(_sw)
-									{
-										_sw.WriteLine("Index update detected");
-										_sw.Flush();
-									}
-#endif
+									#if TRACE_FS_EVENTS
+									Log.Debug("Index update detected");
+									#endif
 									if(!IsBlocked(RepositoryNotifications.IndexUpdated))
 									{
 										EmitNotification(new IndexUpdatedNotification());
@@ -559,11 +521,7 @@ namespace gitter.Git
 		private void OnWorkDirDeleted(object sender, FileSystemEventArgs e)
 		{
 			#if TRACE_FS_EVENTS
-			lock(_sw)
-			{
-				_sw.WriteLine(string.Format("{0} {1}", e.ChangeType, e.Name));
-				_sw.Flush();
-			}
+			Log.Debug(string.Format("{0} {1}", e.ChangeType, e.Name));
 			#endif
 			switch(GetChangedPath(e.Name))
 			{
@@ -596,11 +554,7 @@ namespace gitter.Git
 						{
 							newName = newName.Replace(Path.DirectorySeparatorChar, '/');
 							#if TRACE_FS_EVENTS
-							lock(_sw)
-							{
-								_sw.WriteLine("Detected branch creation: " + newName);
-								_sw.Flush();
-							}
+							Log.Debug(string.Format("Detected branch creation: {0}", newName));
 							#endif
 							if(!IsBlocked(RepositoryNotifications.BranchChanged))
 							{
@@ -618,11 +572,7 @@ namespace gitter.Git
 						{
 							newName = newName.Replace(Path.DirectorySeparatorChar, '/');
 							#if TRACE_FS_EVENTS
-							lock(_sw)
-							{
-								_sw.WriteLine("Detected remote branch creation: " + newName);
-								_sw.Flush();
-							}
+							Log.Debug(string.Format("Detected remote branch creation: {0}", newName));
 							#endif
 							if(!IsBlocked(RepositoryNotifications.BranchChanged))
 							{
@@ -640,11 +590,7 @@ namespace gitter.Git
 						{
 							newName = newName.Replace(Path.DirectorySeparatorChar, '/');
 							#if TRACE_FS_EVENTS
-							lock(_sw)
-							{
-								_sw.WriteLine("Detected tag creation: " + newName);
-								_sw.Flush();
-							}
+							Log.Debug(string.Format("Detected tag creation: {0}", newName));
 							#endif
 							if(!IsBlocked(RepositoryNotifications.TagChanged))
 							{
@@ -659,21 +605,13 @@ namespace gitter.Git
 		private void OnWorkDirRenamed(object sender, RenamedEventArgs e)
 		{
 			#if TRACE_FS_EVENTS
-			lock(_sw)
-			{
-				_sw.WriteLine(string.Format("{0} {1} -> {2}", e.ChangeType, e.OldName, e.Name));
-				_sw.Flush();
-			}
+			Log.Debug(string.Format("{0} {1} -> {2}", e.ChangeType, e.OldName, e.Name));
 			#endif
 			switch(GetChangedPath(e.OldName))
 			{
 				case ChangedPath.WorkDir:
 					#if TRACE_FS_EVENTS
-					lock(_sw)
-					{
-						_sw.WriteLine("Detected working directory file rename: " + e.OldName + " -> " + e.Name);
-						_sw.Flush();
-					}
+					Log.Debug(string.Format("Detected working directory file rename: {0} -> {1]", e.OldName , e.Name));
 					#endif
 					if(e.OldName == GitConstants.SubmodulesConfigFile || e.Name == GitConstants.SubmodulesConfigFile)
 					{
@@ -774,9 +712,6 @@ namespace gitter.Git
 			_delayedUnblockingThread.Join();
 			_pendingNotifications.Clear();
 			_delayedNotifications.Clear();
-			#if TRACE_FS_EVENTS
-			_sw.Close();
-			#endif
 		}
 
 		#region IDisposable Members
@@ -801,9 +736,6 @@ namespace gitter.Git
 			{
 				_delayedUnblocks.Clear();
 			}
-			#if TRACE_FS_EVENTS
-			_sw.Dispose();
-			#endif
 			_evGotNotification.Close();
 			_evGotDelayedNotification.Close();
 			_evGotDelayedUnblock.Close();

@@ -75,19 +75,7 @@
 
 		public override bool Apply(Repository repository)
 		{
-			/*
-			RepositoryProvider.Environment.BeginInvoke(
-				new Action(()=>
-				{
-					GitterApplication.MessageBoxService.Show(
-						RepositoryProvider.Environment.MainForm,
-						"Repository was removed externally and will be closed.",
-						repository.WorkingDirectory,
-						MessageBoxButton.Close,
-						System.Windows.Forms.MessageBoxIcon.Warning);
-					RepositoryProvider.Environment.CloseRepository();
-				}), null);
-			*/
+			repository.InvokeDeleted();
 			return true;
 		}
 	}

@@ -14,8 +14,6 @@
 	/// <summary>Accesses repository through git command line interface.</summary>
 	internal sealed partial class RepositoryCLI : IRepositoryAccessor
 	{
-		private static readonly LoggingService Log = new LoggingService("CLI");
-
 		private readonly GitCLI _gitCLI;
 		private readonly IGitRepository _repository;
 		private readonly ICommandExecutor _executor;

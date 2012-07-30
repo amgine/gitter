@@ -7,6 +7,9 @@
 	/// <summary>Abstract repository.</summary>
 	public interface IRepository
 	{
+		/// <summary>Repository deleted.</summary>
+		event EventHandler Deleted;
+
 		/// <summary>Working path of repository.</summary>
 		string WorkingDirectory { get; }
 

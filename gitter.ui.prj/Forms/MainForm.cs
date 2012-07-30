@@ -495,6 +495,7 @@
 			{
 				if(_repository != null)
 				{
+					_repository.Deleted -= OnRepositoryDeleted;
 					_currentProvider.CloseRepository(_repository);
 				}
 				foreach(var gui in _additionalGui)
@@ -505,6 +506,7 @@
 				_activeIssueTrackerProviders.Clear();
 			}
 			_repository = _currentProvider.OpenRepositoryAsync(path).Invoke<ProgressForm>(this);
+			_repository.Deleted += OnRepositoryDeleted;
 			if(_repositoryGui != null)
 			{
 				_repositoryGui.Repository = _repository;
@@ -524,6 +526,22 @@
 			OpenIssueTrackers();
 
 			return true;
+		}
+
+		private void OnRepositoryDeleted(object sender, EventArgs e)
+		{
+			var repository = (IRepository)sender;
+			BeginInvoke(new MethodInvoker(
+				() =>
+				{
+					GitterApplication.MessageBoxService.Show(
+						this,
+						"Repository was removed externally and will be closed.",
+						repository.WorkingDirectory,
+						MessageBoxButton.Close,
+						System.Windows.Forms.MessageBoxIcon.Warning);
+					CloseRepository();
+				}), null);
 		}
 
 		private void OpenIssueTrackers()
@@ -634,6 +652,7 @@
 			{
 				if(_repository != null)
 				{
+					_repository.Deleted -= OnRepositoryDeleted;
 					_currentProvider.CloseRepository(_repository);
 					_repository = null;
 				}

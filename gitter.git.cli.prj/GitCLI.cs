@@ -10,7 +10,6 @@
 	/// <summary>Performs repository-independent git operations.</summary>
 	internal sealed partial class GitCLI : IGitAccessor
 	{
-		private static readonly LoggingService Log = new LoggingService("Global CLI");
 		private static readonly Version _minVersion = new Version(1, 7, 0, 2);
 
 		#region Data
