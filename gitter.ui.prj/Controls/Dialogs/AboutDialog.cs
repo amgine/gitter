@@ -24,7 +24,6 @@
 			this.labelVersion.Text = String.Format("v{0}", AssemblyVersion);
 
 			_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
-			_btnUpdate.ShowUACShield();
 
 			_updateChannel = new gitter.Git.GitRepositoryUpdateChannel("git://github.com/amgine/gitter.git");
 
@@ -45,8 +44,8 @@
 				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
 				if(attributes.Length > 0)
 				{
-					AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
-					if(titleAttribute.Title != "")
+					var titleAttribute = (AssemblyTitleAttribute)attributes[0];
+					if(titleAttribute.Title != string.Empty)
 					{
 						return titleAttribute.Title;
 					}
@@ -70,7 +69,7 @@
 				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
 				if(attributes.Length == 0)
 				{
-					return "";
+					return string.Empty;
 				}
 				return ((AssemblyDescriptionAttribute)attributes[0]).Description;
 			}
@@ -83,7 +82,7 @@
 				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
 				if(attributes.Length == 0)
 				{
-					return "";
+					return string.Empty;
 				}
 				return ((AssemblyProductAttribute)attributes[0]).Product;
 			}
@@ -96,7 +95,7 @@
 				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
 				if(attributes.Length == 0)
 				{
-					return "";
+					return string.Empty;
 				}
 				return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
 			}
@@ -109,7 +108,7 @@
 				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
 				if(attributes.Length == 0)
 				{
-					return "";
+					return string.Empty;
 				}
 				return ((AssemblyCompanyAttribute)attributes[0]).Company;
 			}
@@ -151,24 +150,24 @@
 				var asmVersion = Assembly.GetExecutingAssembly().GetName().Version;
 				if(version <= asmVersion)
 				{
-					_lblUpdateStatus.Text = "Your version is up to date";
+					_lblUpdateStatus.Text = Resources.StrsYourVersionIsUpToDate;
 				}
 				else
 				{
-					_lblUpdateStatus.Text = "v." + version.ToString() + " is available";
+					_lblUpdateStatus.Text = Resources.StrsVersionIsAvailable.UseAsFormat(version);
 					_btnUpdate.Visible = true;
 				}
 			}
 			else
 			{
-				_lblUpdateStatus.Text = "Check failed";
+				_lblUpdateStatus.Text = Resources.StrsCheckFailed;
 			}
 		}
 
 		private void OnCheckForUpdatesClick(object sender, EventArgs e)
 		{
 			_btnCheckForUpdates.Visible = false;
-			_lblUpdateStatus.Text = "Checking for updates...";
+			_lblUpdateStatus.Text = Resources.StrsCheckingForUpdates.AddEllipsis();
 			_lblUpdateStatus.Visible = true;
 			var f = new Func<Version>(_updateChannel.CheckVersion);
 			f.BeginInvoke(OnVersionCheckCompleted, f);

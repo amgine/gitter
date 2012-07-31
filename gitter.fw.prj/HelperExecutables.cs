@@ -140,27 +140,37 @@
 
 		public static void LaunchUpdater(string cmdline)
 		{
+			const string tempPathName = @"gitter-updater";
 			const string updaterExeName = @"gitter.updater.exe";
 			const string updaterConfigName = @"gitter.updater.exe.config";
 
-			var sourcePath = Path.GetDirectoryName(typeof(Utility).Assembly.Location);
-			var targetPath = Path.Combine(Path.GetTempPath(), "gitter-updater");
+			var sourcePath = Path.GetDirectoryName(typeof(HelperExecutables).Assembly.Location);
+			var targetPath = Path.Combine(Path.GetTempPath(), tempPathName);
 			if(!Directory.Exists(targetPath))
 			{
 				Directory.CreateDirectory(targetPath);
 			}
 			File.Copy(Path.Combine(sourcePath, updaterExeName), Path.Combine(targetPath, updaterExeName), true);
 			File.Copy(Path.Combine(sourcePath, updaterConfigName), Path.Combine(targetPath, updaterConfigName), true);
-			using(var process = new Process())
-			{
-				process.StartInfo = new ProcessStartInfo(Path.Combine(targetPath, updaterExeName), cmdline)
+			using(var process = new Process()
 				{
-					WindowStyle = ProcessWindowStyle.Normal,
-					CreateNoWindow = false,
-					LoadUserProfile = true,
-				};
+					StartInfo = new ProcessStartInfo(Path.Combine(targetPath, updaterExeName), cmdline)
+					{
+						WindowStyle = ProcessWindowStyle.Normal,
+						CreateNoWindow = false,
+						LoadUserProfile = true,
+					},
+				})
+			{
 				process.Start();
 			}
+		}
+
+		public static void CleanupUpdaterTemporaryFiles()
+		{
+			const string tempPathName = @"gitter-updater";
+			var path = Path.Combine(Path.GetTempPath(), tempPathName);
+			Directory.Delete(path, true);
 		}
 	}
 }

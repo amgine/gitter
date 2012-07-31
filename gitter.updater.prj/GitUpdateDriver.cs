@@ -7,6 +7,8 @@
 	using System.Security;
 	using System.Runtime.InteropServices;
 
+	using Resources = gitter.Updater.Properties.Resources;
+
 	class GitUpdateDriver : IUpdateDriver
 	{
 		public string Name
@@ -108,6 +110,7 @@
 		private readonly bool _skipVersionCheck;
 
 		private IAsyncResult _currentProcess;
+		private UpdateProcessMonitor _monitor;
 
 		[DllImport("user32.dll")]
 		[SuppressUnmanagedCodeSecurity]
@@ -194,6 +197,7 @@
 
 		private bool DownloadSourceCode()
 		{
+			Utility.EnsureDirectoryExists(_repoDownloadPath);
 			Utility.EnsureDirectoryIsEmpty(_repoDownloadPath);
 			var args = "clone --depth 1 -- " + "\"" + _repoUrl + "\" " + _repoDownloadPath;
 			using(var git = new Process())
@@ -207,6 +211,8 @@
 					LoadUserProfile = true,
 					ErrorDialog = false,
 					CreateNoWindow = true,
+					RedirectStandardError = true,
+					RedirectStandardOutput = true,
 				};
 				if(!psi.EnvironmentVariables.ContainsKey("PLINK_PROTOCOL"))
 				{
@@ -219,6 +225,8 @@
 				}
 				git.StartInfo = psi;
 				git.Start();
+				var stderr = git.StandardError.ReadToEnd();
+				var stdout = git.StandardOutput.ReadToEnd();
 				git.WaitForExit();
 				return git.ExitCode == 0;
 			}
@@ -255,8 +263,44 @@
 		private bool DeployBuildResults()
 		{
 			var source = new DirectoryInfo(Path.Combine(_repoDownloadPath, buildOutputPath));
-			Utility.CopyDirectoryContent(source, _targetDirectory);
-			return true;
+			if(Utility.IsRunningWithAdministratorRights)
+			{
+				Utility.CopyDirectoryContent(source, _targetDirectory);
+				return true;
+			}
+			else
+			{
+				var cmdline = new StringBuilder();
+				cmdline.Append("/forcenewinstance");
+				cmdline.Append(' ');
+				cmdline.Append("/hidden");
+				cmdline.Append(' ');
+				cmdline.Append('\"');
+				cmdline.Append("/source:" + source);
+				cmdline.Append('\"');
+				cmdline.Append(' ');
+				cmdline.Append('\"');
+				cmdline.Append("/target:" + _targetDirectory);
+				cmdline.Append('\"');
+				string exeFileName;
+				using(var p = Process.GetCurrentProcess())
+				{
+					exeFileName = p.MainModule.FileName;
+				}
+				using(var p = new Process()
+					{
+						StartInfo = new ProcessStartInfo(exeFileName, cmdline.ToString())
+						{
+							CreateNoWindow = true,
+							Verb = "runas",
+						},
+					})
+				{
+					p.Start();
+					p.WaitForExit();
+					return p.ExitCode == 0;
+				}
+			}
 		}
 
 		private void CleanUp()
@@ -285,116 +329,124 @@
 		public UpdateFromGitRepositoryProcess(Version currentVersion, string gitExePath, string repoUrl, string targetDirectory, bool skipVersionCheck = false)
 		{
 			_currentVersion = currentVersion;
-			_repoDownloadPath = Path.Combine(Path.GetTempPath(), "gitter-update-download");
+			_repoDownloadPath = Path.Combine(Path.GetTempPath(), "gitter-updater", "src-download"); /*Path.Combine(typeof(UpdateFromGitRepositoryProcess).Assembly.Location, "src-download");*/
 			_gitExePath = gitExePath;
 			_repoUrl = repoUrl;
 			_targetDirectory = targetDirectory;
 			_skipVersionCheck = skipVersionCheck;
 		}
 
-		public void Begin(UpdateProcessMonitor monitor)
+		public void BeginUpdate(UpdateProcessMonitor monitor)
 		{
 			if(_currentProcess != null) throw new InvalidOperationException();
 
-			monitor.Stage = "Initializing...";
+			monitor.Stage = Resources.StrInitializing + "...";
 			monitor.MaximumProgress = 10;
-			Action<UpdateProcessMonitor> proc = UpdateProc;
+			Action proc = UpdateProc;
 
-			_currentProcess = proc.BeginInvoke(monitor, UpdateProcCallback, monitor);
+			_monitor = monitor;
+			_currentProcess = proc.BeginInvoke(UpdateProcCallback, proc);
 		}
 
-		private void UpdateProc(UpdateProcessMonitor monitor)
+		public void Update(UpdateProcessMonitor monitor)
+		{
+			_monitor = monitor;
+			UpdateProc();
+			_monitor = null;
+		}
+
+		private void UpdateProc()
 		{
 			try
 			{
-				if(monitor.CancelRequested)
+				if(_monitor.CancelRequested)
 				{
-					monitor.ReportCancelled();
+					_monitor.ReportCancelled();
 					return;
 				}
 				if(!_skipVersionCheck)
 				{
-					monitor.Stage = "Checking for new version...";
+					_monitor.Stage = "Checking for new version...";
 					var ver = GetRemoteMasterVersion();
 					if(ver == null)
 					{
-						monitor.ReportFailure("Failed to check for new version");
+						_monitor.ReportFailure("Failed to check for new version");
 						return;
 					}
 					else if(ver <= _currentVersion)
 					{
-						monitor.Stage = "Your version is up to date";
-						monitor.CurrentProgress = monitor.MaximumProgress;
-						monitor.ReportSuccess();
+						_monitor.Stage = "Your version is up to date";
+						_monitor.CurrentProgress = _monitor.MaximumProgress;
+						_monitor.ReportSuccess();
 						return;
 					}
-					if(monitor.CancelRequested)
+					if(_monitor.CancelRequested)
 					{
-						monitor.ReportCancelled();
+						_monitor.ReportCancelled();
 						return;
 					}
 				}
-				monitor.Stage = "Downloading source code from " + _repoUrl + "...";
-				monitor.CurrentProgress = 1;
+				_monitor.Stage = "Downloading source code from " + _repoUrl + "...";
+				_monitor.CurrentProgress = 1;
 				if(DownloadSourceCode())
 				{
-					if(monitor.CancelRequested)
+					if(_monitor.CancelRequested)
 					{
-						monitor.ReportCancelled();
+						_monitor.ReportCancelled();
 						return;
 					}
-					monitor.Stage = "Compiling program...";
-					monitor.CurrentProgress = 4;
+					_monitor.Stage = "Compiling program...";
+					_monitor.CurrentProgress = 4;
 					if(BuildSourceCode())
 					{
-						if(monitor.CancelRequested)
+						if(_monitor.CancelRequested)
 						{
-							monitor.ReportCancelled();
+							_monitor.ReportCancelled();
 							return;
 						}
-						monitor.Stage = "Installing program...";
-						monitor.CurrentProgress = 8;
+						_monitor.Stage = "Installing program...";
+						_monitor.CurrentProgress = 8;
 						KillAllGitterProcesses();
-						if(monitor.CancelRequested)
+						if(_monitor.CancelRequested)
 						{
-							monitor.ReportCancelled();
+							_monitor.ReportCancelled();
 							return;
 						}
-						monitor.CanCancel = false;
+						_monitor.CanCancel = false;
 						if(DeployBuildResults())
 						{
-							monitor.Stage = "Cleaning up temporary files...";
-							monitor.CurrentProgress = 9;
+							_monitor.Stage = "Cleaning up temporary files...";
+							_monitor.CurrentProgress = 9;
 							CleanUp();
-							monitor.CurrentProgress = 10;
-							monitor.Stage = "Launching program...";
+							_monitor.CurrentProgress = 10;
+							_monitor.Stage = "Launching program...";
 							StartApplication();
-							monitor.ReportSuccess();
+							_monitor.ReportSuccess();
 						}
 						else
 						{
-							monitor.ReportFailure("Failed to deploy build results.");
+							_monitor.ReportFailure("Failed to deploy build results.");
 						}
 					}
 					else
 					{
-						monitor.ReportFailure("Failed to build source code.");
+						_monitor.ReportFailure("Failed to build source code.");
 					}
 				}
 				else
 				{
-					monitor.ReportFailure("Failed to download source code.");
+					_monitor.ReportFailure("Failed to download source code.");
 				}
 			}
 			catch(Exception exc)
 			{
-				if(monitor.CancelRequested)
+				if(_monitor.CancelRequested)
 				{
-					monitor.ReportCancelled();
+					_monitor.ReportCancelled();
 				}
 				else
 				{
-					monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+					_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
 				}
 			}
 			finally
@@ -410,6 +462,16 @@
 
 		private void UpdateProcCallback(IAsyncResult ar)
 		{
+			var proc = (Action)ar.AsyncState;
+			try
+			{
+				proc.EndInvoke(ar);
+			}
+			catch(Exception exc)
+			{
+				_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+			}
+			_monitor = null;
 			_currentProcess = null;
 		}
 	}

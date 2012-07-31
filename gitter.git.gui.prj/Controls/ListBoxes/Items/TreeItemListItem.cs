@@ -252,9 +252,9 @@
 						SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
 						paintEventArgs.PrepareTextRectangle(paintEventArgs.Font, ref rect);
 						var r2 = rect;
-						rect.Width -= 20;
-						r2.X = r2.Right - 17;
-						r2.Width = 17;
+						rect.Width -= 23;
+						r2.X = r2.Right - 20;
+						r2.Width = 20;
 						GitterApplication.TextRenderer.DrawText(
 							graphics, _size.Value.ShortSize, paintEventArgs.Font, paintEventArgs.Brush, rect, GitterApplication.TextRenderer.RightAlign);
 						GitterApplication.TextRenderer.DrawText(

@@ -32,7 +32,7 @@
 		protected override void OnShown(EventArgs e)
 		{
 			base.OnShown(e);
-			_process.Begin(_monitor);
+			_process.BeginUpdate(_monitor);
 		}
 
 		private void OnUpdateSuccessful(object sender, EventArgs e)

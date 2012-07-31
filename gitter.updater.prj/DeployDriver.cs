@@ -5,6 +5,8 @@
 	using System.Linq;
 	using System.Text;
 
+	using Resources = gitter.Updater.Properties.Resources;
+
 	sealed class DeployDriver : IUpdateDriver
 	{
 		public string Name
@@ -27,6 +29,7 @@
 		private readonly string _source;
 		private readonly string _target;
 		private IAsyncResult _currentProcess;
+		private UpdateProcessMonitor _monitor;
 
 		public DeployProcess(string source, string target)
 		{
@@ -34,43 +37,51 @@
 			_target = target;
 		}
 
-		public void Begin(UpdateProcessMonitor monitor)
+		public void BeginUpdate(UpdateProcessMonitor monitor)
 		{
 			if(_currentProcess != null) throw new InvalidOperationException();
 
-			monitor.Stage = "Initializing...";
+			monitor.Stage = Resources.StrInitializing + "...";
 			monitor.MaximumProgress = 10;
-			Action<UpdateProcessMonitor> proc = UpdateProc;
+			Action proc = UpdateProc;
 
-			_currentProcess = proc.BeginInvoke(monitor, UpdateProcCallback, monitor);
+			_monitor = monitor;
+			_currentProcess = proc.BeginInvoke(UpdateProcCallback, proc);
 		}
 
-		private void UpdateProc(UpdateProcessMonitor monitor)
+		public void Update(UpdateProcessMonitor monitor)
+		{
+			_monitor = monitor;
+			UpdateProc();
+			_monitor = null;
+		}
+
+		private void UpdateProc()
 		{
 			try
 			{
-				if(monitor.CancelRequested)
+				if(_monitor.CancelRequested)
 				{
-					monitor.ReportCancelled();
+					_monitor.ReportCancelled();
 					return;
 				}
-				monitor.Stage = "Closing running app instances...";
+				_monitor.Stage = "Closing running app instances...";
 				Utility.KillAllGitterProcesses(_target);
-				monitor.CurrentProgress = 3;
-				if(monitor.CancelRequested)
+				_monitor.CurrentProgress = 3;
+				if(_monitor.CancelRequested)
 				{
-					monitor.ReportCancelled();
+					_monitor.ReportCancelled();
 					return;
 				}
-				monitor.CanCancel = false;
-				monitor.Stage = "Installing application...";
+				_monitor.CanCancel = false;
+				_monitor.Stage = "Installing application...";
 				Utility.CopyDirectoryContent(_source, _target);
-				monitor.CurrentProgress = monitor.MaximumProgress;
-				monitor.ReportSuccess();
+				_monitor.CurrentProgress = _monitor.MaximumProgress;
+				_monitor.ReportSuccess();
 			}
 			catch(Exception exc)
 			{
-				monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+				_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
 			}
 		}
 
@@ -81,6 +92,16 @@
 
 		private void UpdateProcCallback(IAsyncResult ar)
 		{
+			var proc = (Action)ar.AsyncState;
+			try
+			{
+				proc.EndInvoke(ar);
+			}
+			catch(Exception exc)
+			{
+				_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+			}
+			_monitor = null;
 			_currentProcess = null;
 		}
 	}

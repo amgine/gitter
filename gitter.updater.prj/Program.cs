@@ -22,12 +22,21 @@
 		[STAThread]
 		static void Main()
 		{
-			bool singleInstance = false;
-			using(var s = new Semaphore(0, 1, "gitter-updater", out singleInstance))
+			var cmdline = new CommandLine();
+			bool singleInstance;
+			Semaphore s = null;
+			if(!cmdline.IsDefined("forcenewinstance"))
+			{
+				s = new Semaphore(0, 1, "gitter-updater", out singleInstance);
+			}
+			else
+			{
+				singleInstance = true;
+			}
+			try
 			{
 				if(singleInstance)
 				{
-					var cmdline = new CommandLine();
 					var driverName = cmdline["driver"];
 					if(!string.IsNullOrEmpty(driverName))
 					{
@@ -37,12 +46,27 @@
 							var process = driver.CreateProcess(cmdline);
 							if(process != null)
 							{
-								Application.EnableVisualStyles();
-								Application.SetCompatibleTextRenderingDefault(false);
-								Application.Run(new MainForm(process));
+								if(cmdline.IsDefined("hidden"))
+								{
+									var monitor = new UpdateProcessMonitor();
+									process.Update(monitor);
+								}
+								else
+								{
+									Application.EnableVisualStyles();
+									Application.SetCompatibleTextRenderingDefault(false);
+									Application.Run(new MainForm(process));
+								}
 							}
 						}
 					}
+				}
+			}
+			finally
+			{
+				if(s != null)
+				{
+					s.Dispose();
 				}
 			}
 		}

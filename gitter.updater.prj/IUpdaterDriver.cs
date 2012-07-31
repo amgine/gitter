@@ -1,5 +1,7 @@
 ﻿namespace gitter.Updater
 {
+	using System;
+
 	public interface IUpdateDriver
 	{
 		string Name { get; }
@@ -9,6 +11,8 @@
 
 	public interface IUpdateProcess
 	{
-		void Begin(UpdateProcessMonitor monitor);
+		void BeginUpdate(UpdateProcessMonitor monitor);
+
+		void Update(UpdateProcessMonitor monitor);
 	}
 }

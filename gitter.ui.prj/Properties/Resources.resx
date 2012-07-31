@@ -265,4 +265,16 @@
   <data name="StrAddIssueTracker" xml:space="preserve">
     <value>Add Issue Tracker</value>
   </data>
+  <data name="StrsVersionIsAvailable" xml:space="preserve">
+    <value>v{0} is available</value>
+  </data>
+  <data name="StrsYourVersionIsUpToDate" xml:space="preserve">
+    <value>Your version is up to date</value>
+  </data>
+  <data name="StrsCheckFailed" xml:space="preserve">
+    <value>Check failed</value>
+  </data>
+  <data name="StrsCheckingForUpdates" xml:space="preserve">
+    <value>Checking for updates</value>
+  </data>
 </root>

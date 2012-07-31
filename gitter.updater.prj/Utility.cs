@@ -6,9 +6,20 @@
 	using System.Text;
 	using System.IO;
 	using System.Diagnostics;
+	using System.Security.Principal;
 
 	public static class Utility
 	{
+		/// <summary>Checks if process is running with administrator privileges.</summary>
+		public static bool IsRunningWithAdministratorRights
+		{
+			get
+			{
+				var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+				return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
+			}
+		}
+
 		public static void EnsureDirectoryDoesNotExist(string path)
 		{
 			if(Directory.Exists(path))
