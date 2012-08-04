@@ -64,8 +64,8 @@
 		private readonly ViewDockGrid _grid;
 		private readonly AnchorStyles _side;
 
-		public GridDockMarker(ViewDockGrid grid, ViewHost toolHost, AnchorStyles side)
-			: base(grid, toolHost, new[] { GetButton(side) }, Border, GetPositionBounds(grid, side))
+		public GridDockMarker(ViewDockGrid grid, ViewHost viewHost, AnchorStyles side)
+			: base(grid, viewHost, new[] { GetButton(side) }, Border, GetPositionBounds(grid, side))
 		{
 			_grid = grid;
 			_side = side;

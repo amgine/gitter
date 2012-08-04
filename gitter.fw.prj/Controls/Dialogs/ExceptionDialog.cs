@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Text;
+	using System.Threading;
 	using System.Drawing;
 	using System.Reflection;
 	using System.Windows.Forms;
@@ -50,7 +51,7 @@
 			{
 				stackTrace = exception.StackTrace;
 			}
-			_txtStack.Text = exception.StackTrace;
+			_txtStack.Text = stackTrace;
 		}
 
 		protected override string ActionVerb
@@ -75,7 +76,9 @@
 			str.AppendLine(_date.FormatISO8601());
 			AppendExceptionInfo("Exception", _exception, str);
 			if(_exception.InnerException != null)
+			{
 				AppendInnerException(_exception.InnerException, str);
+			}
 			AppendLoadedAssemblies(str);
 			return str.ToString();
 		}
@@ -84,7 +87,9 @@
 		{
 			AppendExceptionInfo("Inner Exception", exception, str);
 			if(exception.InnerException != null)
+			{
 				AppendInnerException(exception.InnerException, str);
+			}
 		}
 
 		private static void AppendExceptionInfo(string header, Exception exception, StringBuilder str)
@@ -120,18 +125,60 @@
 		private static void AppendAssemblyInfo(Assembly asm, StringBuilder str)
 		{
 			if(asm.GlobalAssemblyCache)
+			{
 				str.Append("[GAC] ");
+			}
 			str.AppendLine(asm.FullName);
 		}
 
-		private void _lnkCopyToClipboard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		private void OnCopyToClipboardLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			Clipboard.SetText(GetMessage());
+			CopyToClipboardSafe();
 		}
 
-		private void _lnkSendBugReport_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		private void OnSendBugReportLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			Utility.OpenUrl(ReportUrl);
+		}
+
+		private void CopyToClipboardSafe()
+		{
+			if(Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+			{
+				CopyToClipboard();
+			}
+			else
+			{
+				var thread = new Thread(CopyToClipboard);
+				if(thread.TrySetApartmentState(ApartmentState.STA))
+				{
+					thread.Start();
+					thread.Join();
+				}
+			}
+		}
+
+		private void CopyToClipboard()
+		{
+			int attempts = 3;
+			var message = GetMessage();
+			while(attempts > 0)
+			{
+				try
+				{
+					Clipboard.SetText(message);
+					break;
+				}
+				catch
+				{
+				}
+				--attempts;
+				if(attempts <= 0)
+				{
+					break;
+				}
+				Thread.Sleep(50);
+			}
 		}
 	}
 }

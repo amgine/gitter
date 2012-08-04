@@ -59,12 +59,12 @@
 			{
 				foreach(var f in _factories.Values)
 				{
-					foreach(var tool in f.CreatedViews)
+					foreach(var view in f.CreatedViews)
 					{
-						var host = tool.Host;
+						var host = view.Host;
 						if(host != null && host.IsActive)
 						{
-							_activeView = tool;
+							_activeView = view;
 							break;
 						}
 					}
@@ -123,12 +123,14 @@
 		private void FindAppropriateViewHost(IViewFactory factory, ViewBase view)
 		{
 			var host = _grid.RootHost;
-			if(!factory.Singleton)
+			if(!factory.IsSingleton)
 			{
 				foreach(var v in factory.CreatedViews)
 				{
 					if(v.Host != null && v.Host.IsDocumentWell)
+					{
 						host = v.Host;
+					}
 				}
 				host.AddView(view);
 			}
@@ -137,12 +139,15 @@
 				switch(factory.DefaultViewPosition)
 				{
 					case ViewPosition.SecondaryDocumentHost:
-						foreach(var h in ViewHost.ViewHosts)
+						lock(ViewHost.ViewHosts)
 						{
-							if(h != host && h.IsDocumentWell)
+							foreach(var h in ViewHost.ViewHosts)
 							{
-								h.AddView(view);
-								return;
+								if(h != host && h.IsDocumentWell)
+								{
+									h.AddView(view);
+									return;
+								}
 							}
 						}
 						host = new ViewHost(_grid, false, true, new[] { view })
@@ -152,36 +157,36 @@
 						_grid.RootHost.PerformDock(host, DockResult.Right);
 						break;
 
-					case ViewPosition.LeftTool:
+					case ViewPosition.Left:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						_grid.PerformDock(host, DockResult.Left);
 						break;
-					case ViewPosition.TopTool:
+					case ViewPosition.Top:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						_grid.PerformDock(host, DockResult.Top);
 						break;
-					case ViewPosition.RightTool:
+					case ViewPosition.Right:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						_grid.PerformDock(host, DockResult.Right);
 						break;
-					case ViewPosition.BottomTool:
+					case ViewPosition.Bottom:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						_grid.PerformDock(host, DockResult.Bottom);
 						break;
 
-					case ViewPosition.LeftAutoHideTool:
+					case ViewPosition.LeftAutoHide:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						host.UnpinFromLeft();
 						break;
-					case ViewPosition.TopAutoHideTool:
+					case ViewPosition.TopAutoHide:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						host.UnpinFromTop();
 						break;
-					case ViewPosition.RightAutoHideTool:
+					case ViewPosition.RightAutoHide:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						host.UnpinFromRight();
 						break;
-					case ViewPosition.BottomAutoHideTool:
+					case ViewPosition.BottomAutoHide:
 						host = new ViewHost(_grid, false, false, new[] { view });
 						host.UnpinFromBottom();
 						break;
@@ -246,13 +251,15 @@
 		{
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
+			{
 				throw new ArgumentException("Unknown GUID.", "guid");
-			if(factory.Singleton)
+			}
+			if(factory.IsSingleton)
 			{
 				ViewBase existing = null;
-				foreach(var tool in factory.CreatedViews)
+				foreach(var view in factory.CreatedViews)
 				{
-					existing = tool;
+					existing = view;
 					break;
 				}
 				if(existing == null)
@@ -260,7 +267,9 @@
 					existing = factory.CreateView(_environment);
 					var section = _section.TryGetSection(GetViewConfigId(existing));
 					if(section != null)
+					{
 						existing.LoadViewFrom(section);
+					}
 					existing.Closing += OnViewClosing;
 					ShowNewView(factory, existing, activate);
 				}
@@ -274,11 +283,11 @@
 			else
 			{
 				ViewBase existing = null;
-				foreach(var tool in factory.CreatedViews)
+				foreach(var view in factory.CreatedViews)
 				{
-					if(tool.ParametersIdentical(null))
+					if(view.ParametersIdentical(null))
 					{
-						existing = tool;
+						existing = view;
 						break;
 					}
 				}
@@ -287,7 +296,9 @@
 					existing = factory.CreateView(_environment);
 					var section = _section.TryGetSection(GetViewConfigId(existing));
 					if(section != null)
+					{
 						existing.LoadViewFrom(section);
+					}
 					existing.Closing += OnViewClosing;
 					ShowNewView(factory, existing, activate);
 				}
@@ -309,12 +320,12 @@
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
 				throw new ArgumentException("Unknown GUID.", "guid");
-			if(factory.Singleton)
+			if(factory.IsSingleton)
 			{
 				ViewBase existing = null;
-				foreach(var tool in factory.CreatedViews)
+				foreach(var view in factory.CreatedViews)
 				{
-					existing = tool;
+					existing = view;
 					break;
 				}
 				if(existing == null)
@@ -333,11 +344,11 @@
 			else
 			{
 				ViewBase existing = null;
-				foreach(var tool in factory.CreatedViews)
+				foreach(var view in factory.CreatedViews)
 				{
-					if(tool.ParametersIdentical(parameters))
+					if(view.ParametersIdentical(parameters))
 					{
-						existing = tool;
+						existing = view;
 						break;
 					}
 				}
@@ -359,10 +370,12 @@
 		{
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
-				return null;
-			foreach(var tool in factory.CreatedViews)
 			{
-				return tool;
+				return null;
+			}
+			foreach(var view in factory.CreatedViews)
+			{
+				return view;
 			}
 			return null;
 		}
@@ -371,11 +384,15 @@
 		{
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
-				return null;
-			foreach(var tool in factory.CreatedViews)
 			{
-				if(tool.ParametersIdentical(parameters))
-					return tool;
+				return null;
+			}
+			foreach(var view in factory.CreatedViews)
+			{
+				if(view.ParametersIdentical(parameters))
+				{
+					return view;
+				}
 			}
 			return null;
 		}
@@ -392,12 +409,16 @@
 		{
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
-				return new ViewBase[0];
-			var list = new List<ViewBase>();
-			foreach(var tool in factory.CreatedViews)
 			{
-				if(tool.ParametersIdentical(parameters))
-					list.Add(tool);
+				return new ViewBase[0];
+			}
+			var list = new List<ViewBase>();
+			foreach(var view in factory.CreatedViews)
+			{
+				if(view.ParametersIdentical(parameters))
+				{
+					list.Add(view);
+				}
 			}
 			return list;
 		}
@@ -406,10 +427,10 @@
 		{
 			foreach(var factory in _factories.Values)
 			{
-				foreach(var tool in factory.CreatedViews)
+				foreach(var view in factory.CreatedViews)
 				{
-					var section = _section.GetCreateSection(GetViewConfigId(tool));
-					tool.SaveViewTo(section);
+					var section = _section.GetCreateSection(GetViewConfigId(view));
+					view.SaveViewTo(section);
 				}
 			}
 		}

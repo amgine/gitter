@@ -12,6 +12,20 @@
 	[ToolboxItem(false)]
 	public class GitDialogBase : DialogBase
 	{
+		//private readonly GuiProvider _guiProvider;
+
+		//internal GitDialogBase(GuiProvider guiProvider)
+		//{
+		//    if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+
+		//    _guiProvider = guiProvider;
+		//}
+
+		//internal GuiProvider GuiProvider
+		//{
+		//    get { return _guiProvider; }
+		//}
+
 		protected void SetupReferenceNameInputBox(TextBox textBox, ReferenceType referenceType)
 		{
 			if(textBox == null) throw new ArgumentNullException("textBox");

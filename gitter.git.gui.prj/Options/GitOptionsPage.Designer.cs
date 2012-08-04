@@ -13,9 +13,19 @@
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && (components != null))
+			if(disposing)
 			{
-				components.Dispose();
+				if(_cachedControls != null)
+				{
+					foreach(var pair in _cachedControls.Values)
+					{
+						pair.Item2.Dispose();
+					}
+				}
+				if(components != null)
+				{
+					components.Dispose();
+				}
 			}
 			base.Dispose(disposing);
 		}
@@ -29,7 +39,7 @@
 		private void InitializeComponent()
 		{
 			this._grpRepositoryAccessor = new gitter.Framework.Controls.GroupSeparator();
-			this._cmbAccessMethod = new System.Windows.Forms.ComboBox();
+			this._cmbAccessorProvider = new System.Windows.Forms.ComboBox();
 			this._lblAccessmethod = new System.Windows.Forms.Label();
 			this._openFileDialog = new System.Windows.Forms.OpenFileDialog();
 			this.SuspendLayout();
@@ -44,19 +54,17 @@
 			this._grpRepositoryAccessor.TabIndex = 0;
 			this._grpRepositoryAccessor.Text = "%Repository access method%";
 			// 
-			// _cmbAccessMethod
+			// _cmbAccessorProvider
 			// 
-			this._cmbAccessMethod.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+			this._cmbAccessorProvider.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._cmbAccessMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this._cmbAccessMethod.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._cmbAccessMethod.FormattingEnabled = true;
-			this._cmbAccessMethod.Items.AddRange(new object[] {
-            "MSysGit command line interface"});
-			this._cmbAccessMethod.Location = new System.Drawing.Point(117, 25);
-			this._cmbAccessMethod.Name = "_cmbAccessMethod";
-			this._cmbAccessMethod.Size = new System.Drawing.Size(359, 23);
-			this._cmbAccessMethod.TabIndex = 4;
+			this._cmbAccessorProvider.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this._cmbAccessorProvider.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this._cmbAccessorProvider.FormattingEnabled = true;
+			this._cmbAccessorProvider.Location = new System.Drawing.Point(117, 25);
+			this._cmbAccessorProvider.Name = "_cmbAccessorProvider";
+			this._cmbAccessorProvider.Size = new System.Drawing.Size(359, 23);
+			this._cmbAccessorProvider.TabIndex = 4;
 			// 
 			// _lblAccessmethod
 			// 
@@ -72,7 +80,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this._lblAccessmethod);
-			this.Controls.Add(this._cmbAccessMethod);
+			this.Controls.Add(this._cmbAccessorProvider);
 			this.Controls.Add(this._grpRepositoryAccessor);
 			this.Name = "GitOptionsPage";
 			this.Size = new System.Drawing.Size(479, 218);
@@ -84,7 +92,7 @@
 		#endregion
 
 		private gitter.Framework.Controls.GroupSeparator _grpRepositoryAccessor;
-		private System.Windows.Forms.ComboBox _cmbAccessMethod;
+		private System.Windows.Forms.ComboBox _cmbAccessorProvider;
 		private System.Windows.Forms.Label _lblAccessmethod;
 		private System.Windows.Forms.OpenFileDialog _openFileDialog;
 	}

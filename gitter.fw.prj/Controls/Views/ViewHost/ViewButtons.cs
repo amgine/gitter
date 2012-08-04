@@ -7,7 +7,7 @@
 
 	using gitter.Framework.Services;
 
-	sealed class ViewButtons : IEnumerable<ViewButton>
+	public sealed class ViewButtons : IEnumerable<ViewButton>
 	{
 		#region Data
 
@@ -22,7 +22,7 @@
 
 		public event EventHandler<ViewButtonClickEventArgs> ButtonClick;
 
-		public ViewButtons(Control hostControl)
+		internal ViewButtons(Control hostControl)
 		{
 			if(hostControl == null) throw new ArgumentNullException("hostControl");
 

@@ -156,7 +156,7 @@
 		{
 			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
 			_guiProvider = guiProvider;
-			DefaultViewPosition = ViewPosition.BottomAutoHideTool;
+			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
@@ -174,7 +174,7 @@
 		{
 			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
 			_guiProvider = guiProvider;
-			DefaultViewPosition = ViewPosition.BottomAutoHideTool;
+			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
@@ -192,7 +192,7 @@
 		{
 			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
 			_guiProvider = guiProvider;
-			DefaultViewPosition = ViewPosition.BottomAutoHideTool;
+			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)

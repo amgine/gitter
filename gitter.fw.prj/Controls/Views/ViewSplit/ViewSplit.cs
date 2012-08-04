@@ -324,7 +324,7 @@
 
 		/// <summary>
 		/// Gets a value indicating whether this <see cref="ViewSplit"/> contains <see cref="ViewHost"/> with
-		/// <see cref="M:ToolHost.IsDocumentWell"/> == true.
+		/// <see cref="M:ViewHost.IsDocumentWell"/> == true.
 		/// </summary>
 		public bool ContainsDocumentWell
 		{
@@ -371,7 +371,7 @@
 				singleItem.Anchor = Anchor;
 				singleItem.Parent = parent;
 				Parent = null;
-				// valid parents for ToolSplit: ToolHostGrid, ToolSplit, ToolFloatingForm
+				// valid parents for ViewSplit: ViewDockGrid, ViewSplit, ViewFloatingForm
 				var split = parent as ViewSplit;
 				if(split != null)
 				{
@@ -402,7 +402,7 @@
 						}
 						else
 						{
-							throw new ApplicationException("Unexpeceted ToolSplit.Parent: " + parent);
+							throw new ApplicationException("Unexpeceted ViewSplit.Parent: " + parent);
 						}
 					}
 				}

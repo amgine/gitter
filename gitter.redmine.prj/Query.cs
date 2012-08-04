@@ -7,10 +7,10 @@
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty IsPublicProperty =
-			new RedmineObjectProperty("is_public", "IsPublic");
-		public static readonly RedmineObjectProperty ProjectIdProperty =
-			new RedmineObjectProperty("project_id", "ProjectId");
+		public static readonly RedmineObjectProperty<bool> IsPublicProperty =
+			new RedmineObjectProperty<bool>("is_public", "IsPublic");
+		public static readonly RedmineObjectProperty<int> ProjectIdProperty =
+			new RedmineObjectProperty<int>("project_id", "ProjectId");
 
 		#endregion
 
@@ -54,27 +54,13 @@
 		public int ProjectId
 		{
 			get { return _projectId; }
-			private set
-			{
-				if(_projectId != value)
-				{
-					_projectId = value;
-					OnPropertyChanged(ProjectIdProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _projectId, value, ProjectIdProperty); }
 		}
 
 		public bool IsPublic
 		{
 			get { return _isPublic; }
-			private set
-			{
-				if(_isPublic != value)
-				{
-					_isPublic = value;
-					OnPropertyChanged(IsPublicProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _isPublic, value, IsPublicProperty); }
 		}
 
 		#endregion

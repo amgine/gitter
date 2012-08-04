@@ -101,6 +101,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CachedIconResources.cs" />
+    <Compile Include="Controls\Views\ViewRendererBase.cs" />
+    <Compile Include="Controls\Views\ViewManager.cs" />
     <Compile Include="DateFormat.cs" />
     <Compile Include="FileSize.cs" />
     <Compile Include="HelperExecutables.cs" />
@@ -207,7 +209,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\Views\ViewPosition.cs" />
-    <Compile Include="Controls\Views\ViewRenderer.cs" />
+    <Compile Include="Styles\IGitterStyle.cs" />
+    <Compile Include="Styles\MSVS2010Style.cs" />
+    <Compile Include="Styles\MSVS2010StyleViewRenderer.cs" />
     <Compile Include="Controls\Views\ViewSplit\ViewSplit.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -251,7 +255,7 @@
     <Compile Include="Services\Gravatar\Gravatar.cs" />
     <Compile Include="IAvatar.cs" />
     <Compile Include="IIssueTrackerProvider.cs" />
-    <Compile Include="MSVS2010StyleRenderer.cs" />
+    <Compile Include="Styles\MSVS2010StyleToolStripRenderer.cs" />
     <Compile Include="Options\SelectableFontManager.cs" />
     <Compile Include="Options\SpellingPage.cs">
       <SubType>UserControl</SubType>

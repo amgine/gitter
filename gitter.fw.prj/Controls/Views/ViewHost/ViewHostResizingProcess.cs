@@ -9,7 +9,7 @@
 	{
 		#region Data
 
-		private readonly ViewHost _toolHost;
+		private readonly ViewHost _viewHost;
 		private SplitterMarker _splitterMarker;
 		private bool _isActive;
 		private int _resizeOffset;
@@ -20,19 +20,19 @@
 
 		#region .ctor
 
-		public ViewHostResizingProcess(ViewHost toolHost)
+		public ViewHostResizingProcess(ViewHost viewHost)
 		{
-			if(toolHost == null) throw new ArgumentNullException("toolHost");
-			_toolHost = toolHost;
+			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			_viewHost = viewHost;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public ViewHost ToolHost
+		public ViewHost ViewHost
 		{
-			get { return _toolHost; }
+			get { return _viewHost; }
 		}
 
 		public bool IsActive
@@ -45,13 +45,13 @@
 		public bool Start(Point location)
 		{
 			if(_isActive) throw new InvalidOperationException();
-			if(_toolHost.Status != ViewHostStatus.AutoHide) throw new InvalidOperationException();
-			if(!_toolHost.Visible) throw new InvalidOperationException();
+			if(_viewHost.Status != ViewHostStatus.AutoHide) throw new InvalidOperationException();
+			if(!_viewHost.Visible) throw new InvalidOperationException();
 
 			_isActive = true;
-			var size = _toolHost.Size;
+			var size = _viewHost.Size;
 			Rectangle bounds;
-			var side = _toolHost.DockSide;
+			var side = _viewHost.DockSide;
 			var grid = side.Grid;
 			var rootCtlBounds = grid.RootControl.Bounds;
 			Orientation orientation;
@@ -96,7 +96,7 @@
 				default:
 					throw new ApplicationException();
 			}
-			bounds.Location = _toolHost.PointToClient(bounds.Location);
+			bounds.Location = _viewHost.PointToClient(bounds.Location);
 			SpawnMarker(bounds, orientation);
 			return true;
 		}
@@ -104,15 +104,19 @@
 		public void Update(Point location)
 		{
 			if(!_isActive) throw new InvalidOperationException();
-			switch(_toolHost.DockSide.Orientation)
+			switch(_viewHost.DockSide.Orientation)
 			{
 				case Orientation.Vertical:
 					{
 						var x = location.X - _resizeOffset;
 						if(x < _minimumPosition)
+						{
 							x = _minimumPosition;
+						}
 						else if(x > _maximumPosition)
+						{
 							x = _maximumPosition;
+						}
 						location = new Point(x, 0);
 					}
 					break;
@@ -120,16 +124,20 @@
 					{
 						var y = location.Y - _resizeOffset;
 						if(y < _minimumPosition)
+						{
 							y = _minimumPosition;
+						}
 						else if(y > _maximumPosition)
+						{
 							y = _maximumPosition;
+						}
 						location = new Point(0, y);
 					}
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolDockSide.Orientation: " + _toolHost.DockSide.Orientation);
+					throw new ApplicationException("Unexpected ViewDockSide.Orientation: " + _viewHost.DockSide.Orientation);
 			}
-			location = _toolHost.PointToScreen(location);
+			location = _viewHost.PointToScreen(location);
 			_splitterMarker.Location = location;
 		}
 
@@ -138,54 +146,70 @@
 			if(!_isActive) throw new InvalidOperationException();
 			KillMarker();
 			_isActive = false;
-			switch(_toolHost.DockSide.Side)
+			switch(_viewHost.DockSide.Side)
 			{
 				case AnchorStyles.Left:
 					{
 						var x = e.X - _resizeOffset;
 						if(x < _minimumPosition)
+						{
 							x = _minimumPosition;
+						}
 						else if(x > _maximumPosition)
+						{
 							x = _maximumPosition;
-						_toolHost.Width = x + ViewConstants.SideDockPanelBorderSize;
+						}
+						_viewHost.Width = x + ViewConstants.SideDockPanelBorderSize;
 					}
 					break;
 				case AnchorStyles.Top:
 					{
 						var y = e.Y - _resizeOffset;
 						if(y < _minimumPosition)
+						{
 							y = _minimumPosition;
+						}
 						else if(y > _maximumPosition)
+						{
 							y = _maximumPosition;
-						_toolHost.Height = y + ViewConstants.SideDockPanelBorderSize;
+						}
+						_viewHost.Height = y + ViewConstants.SideDockPanelBorderSize;
 					}
 					break;
 				case AnchorStyles.Right:
 					{
 						var x = e.X - _resizeOffset;
 						if(x < _minimumPosition)
+						{
 							x = _minimumPosition;
+						}
 						else if(x > _maximumPosition)
+						{
 							x = _maximumPosition;
-						var w = _toolHost.Width - x;
-						var dw = _toolHost.Width - w;
-						 _toolHost.SetBounds(_toolHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
+						}
+						var w = _viewHost.Width - x;
+						var dw = _viewHost.Width - w;
+						 _viewHost.SetBounds(_viewHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
 					}
 					break;
 				case AnchorStyles.Bottom:
 					{
 						var y = e.Y - _resizeOffset;
 						if(y < _minimumPosition)
+						{
 							y = _minimumPosition;
+						}
 						else if(y > _maximumPosition)
+						{
 							y = _maximumPosition;
-						var h = _toolHost.Height - y;
-						var dh = _toolHost.Height - h;
-						_toolHost.SetBounds(0, _toolHost.Top + dh, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
+						}
+						var h = _viewHost.Height - y;
+						var dh = _viewHost.Height - h;
+						_viewHost.SetBounds(0, _viewHost.Top + dh, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
 					}
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolDockSide.Side: " + _toolHost.DockSide.Side);
+					throw new ApplicationException("Unexpected ViewDockSide.Side: " + _viewHost.DockSide.Side);
 			}
 		}
 

@@ -1,6 +1,6 @@
 namespace gitter.Framework.Controls
 {
-	enum ViewButtonType
+	public enum ViewButtonType
 	{
 		None = 0,
 

@@ -8,18 +8,18 @@ namespace gitter.Redmine
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty ProjectProperty =
-			new RedmineObjectProperty("project", "Project");
-		public static readonly RedmineObjectProperty DescriptionProperty =
-			new RedmineObjectProperty("description", "Description");
-		public static readonly RedmineObjectProperty StatusProperty =
-			new RedmineObjectProperty("status", "Status");
-		public static readonly RedmineObjectProperty DueDateProperty =
-			new RedmineObjectProperty("due_date", "DueDate");
-		public static readonly RedmineObjectProperty CreatedOnProperty =
-			new RedmineObjectProperty("created_on", "CreatedOn");
-		public static readonly RedmineObjectProperty UpdatedOnProperty =
-			new RedmineObjectProperty("updated_on", "UpdatedOn");
+		public static readonly RedmineObjectProperty<Project> ProjectProperty =
+			new RedmineObjectProperty<Project>("project", "Project");
+		public static readonly RedmineObjectProperty<string> DescriptionProperty =
+			new RedmineObjectProperty<string>("description", "Description");
+		public static readonly RedmineObjectProperty<VersionStatus> StatusProperty =
+			new RedmineObjectProperty<VersionStatus>("status", "Status");
+		public static readonly RedmineObjectProperty<DateTime?> DueDateProperty =
+			new RedmineObjectProperty<DateTime?>("due_date", "DueDate");
+		public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
+			new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+		public static readonly RedmineObjectProperty<DateTime> UpdatedOnProperty =
+			new RedmineObjectProperty<DateTime>("updated_on", "UpdatedOn");
 
 		#endregion
 
@@ -82,79 +82,37 @@ namespace gitter.Redmine
 		public Project Project
 		{
 			get { return _project; }
-			private set
-			{
-				if(_project != value)
-				{
-					_project = value;
-					OnPropertyChanged(ProjectProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
 		}
 
 		public string Description
 		{
 			get { return _description; }
-			private set
-			{
-				if(_description != value)
-				{
-					_description = value;
-					OnPropertyChanged(DescriptionProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
 		}
 
 		public VersionStatus Status
 		{
 			get { return _status; }
-			private set
-			{
-				if(_status != value)
-				{
-					_status = value;
-					OnPropertyChanged(StatusProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _status, value, StatusProperty); }
 		}
 
 		public DateTime? DueDate
 		{
 			get { return _dueDate; }
-			private set
-			{
-				if(_dueDate != value)
-				{
-					_dueDate = value;
-					OnPropertyChanged(DueDateProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _dueDate, value, DueDateProperty); }
 		}
 
 		public DateTime CreatedOn
 		{
 			get { return _createdOn; }
-			private set
-			{
-				if(_createdOn != value)
-				{
-					_createdOn = value;
-					OnPropertyChanged(CreatedOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
 		}
 
 		public DateTime UpdatedOn
 		{
 			get { return _updatedOn; }
-			private set
-			{
-				if(_updatedOn != value)
-				{
-					_updatedOn = value;
-					OnPropertyChanged(UpdatedOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _updatedOn, value, UpdatedOnProperty); }
 		}
 
 		#endregion

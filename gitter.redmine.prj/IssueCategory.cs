@@ -7,10 +7,10 @@ namespace gitter.Redmine
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty ProjectProperty =
-			new RedmineObjectProperty("project", "Project");
-		public static readonly RedmineObjectProperty AssignedToProperty =
-			new RedmineObjectProperty("assigned_to", "AssignedTo");
+		public static readonly RedmineObjectProperty<Project> ProjectProperty =
+			new RedmineObjectProperty<Project>("project", "Project");
+		public static readonly RedmineObjectProperty<User> AssignedToProperty =
+			new RedmineObjectProperty<User>("assigned_to", "AssignedTo");
 
 		#endregion
 
@@ -54,27 +54,13 @@ namespace gitter.Redmine
 		public Project Project
 		{
 			get { return _project; }
-			private set
-			{
-				if(_project != value)
-				{
-					_project = value;
-					OnPropertyChanged(ProjectProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
 		}
 
 		public User AssignedTo
 		{
 			get { return _assignedTo; }
-			private set
-			{
-				if(_assignedTo != value)
-				{
-					_assignedTo = value;
-					OnPropertyChanged(AssignedToProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _assignedTo, value, AssignedToProperty); }
 		}
 
 		#endregion

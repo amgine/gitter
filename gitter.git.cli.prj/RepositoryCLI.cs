@@ -14,9 +14,13 @@
 	/// <summary>Accesses repository through git command line interface.</summary>
 	internal sealed partial class RepositoryCLI : IRepositoryAccessor
 	{
+		#region Data
+
 		private readonly GitCLI _gitCLI;
 		private readonly IGitRepository _repository;
 		private readonly ICommandExecutor _executor;
+
+		#endregion
 
 		public RepositoryCLI(GitCLI gitCLI, IGitRepository repository)
 		{
@@ -27,6 +31,13 @@
 			_repository = repository;
 			_executor = new RepositoryCommandExecutor(
 				gitCLI, repository.WorkingDirectory);
+		}
+
+		/// <summary>Returns git accessor.</summary>
+		/// <value>git accessor.</value>
+		public IGitAccessor GitAccessor
+		{
+			get { return _gitCLI; }
 		}
 
 		const string refPrefix = "ref: ";

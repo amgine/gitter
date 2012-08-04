@@ -61,7 +61,7 @@
 
 			_configurationService = GitterApplication.ConfigurationService;
 
-			_viewDockService = new ViewDockService(this, _toolDockGrid, _configurationService.ToolsSection);
+			_viewDockService = new ViewDockService(this, _toolDockGrid, _configurationService.ViewsSection);
 			_viewDockService.RegisterFactory(
 				_startPageFactory = new StartPageViewFactory());
 			_viewDockService.RegisterFactory(
@@ -513,15 +513,16 @@
 			}
 			else
 			{
-				_repositoryGui = _currentProvider.CreateGuiProvider(_repository);
+				_repositoryGui = _currentProvider.GuiProvider;
+				_repositoryGui.Repository = _repository;
 				LoadGuiView(_repositoryGui);
 				_repositoryGui.AttachToEnvironment(this);
 			}
-			_repositoryGui.ActivateDefaultTool();
+			_repositoryGui.ActivateDefaultView();
 
 			Text = string.Format(_repository.WorkingDirectory + " - " + Application.ProductName);
 
-			repositoryProvider.OnRepositoryLoaded(this, _repository);
+			repositoryProvider.OnRepositoryLoaded(_repository);
 
 			OpenIssueTrackers();
 

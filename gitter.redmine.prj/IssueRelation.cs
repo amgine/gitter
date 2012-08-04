@@ -8,12 +8,12 @@
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty IssueProperty =
-			new RedmineObjectProperty("issue", "Issue");
-		public static readonly RedmineObjectProperty IssueToProperty =
-			new RedmineObjectProperty("issue_to", "IssueTo");
-		public static readonly RedmineObjectProperty TypeProperty =
-			new RedmineObjectProperty("relation_type", "Type");
+		public static readonly RedmineObjectProperty<Issue> IssueProperty =
+			new RedmineObjectProperty<Issue>("issue", "Issue");
+		public static readonly RedmineObjectProperty<Issue> IssueToProperty =
+			new RedmineObjectProperty<Issue>("issue_to", "IssueTo");
+		public static readonly RedmineObjectProperty<IssueRelationType> TypeProperty =
+			new RedmineObjectProperty<IssueRelationType>("relation_type", "Type");
 
 		#endregion
 
@@ -67,40 +67,19 @@
 		public Issue Issue
 		{
 			get { return _issue; }
-			private set
-			{
-				if(_issue != value)
-				{
-					_issue = value;
-					OnPropertyChanged(IssueProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _issue, value, IssueProperty); }
 		}
 
 		public Issue IssueTo
 		{
 			get { return _issueTo; }
-			private set
-			{
-				if(_issueTo != value)
-				{
-					_issueTo = value;
-					OnPropertyChanged(IssueToProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _issueTo, value, IssueToProperty); }
 		}
 
 		public IssueRelationType Type
 		{
 			get { return _type; }
-			private set
-			{
-				if(_type != value)
-				{
-					_type = value;
-					OnPropertyChanged(TypeProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _type, value, TypeProperty); }
 		}
 
 		#endregion

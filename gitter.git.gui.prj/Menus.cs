@@ -57,7 +57,7 @@
 			_viewMenuItems = new List<ToolStripMenuItem>();
 			foreach(var factory in Gui.ViewFactories)
 			{
-				if(factory.Singleton)
+				if(factory.IsSingleton)
 				{
 					var item = new ToolStripMenuItem(factory.Name, factory.Image, OnShowViewItemClick) { Tag = factory.Guid };
 					_viewMenuItems.Add(item);

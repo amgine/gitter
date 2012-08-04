@@ -87,7 +87,9 @@
 				for(int i = 0; i < _markers.Length; ++i)
 				{
 					if(_markers[i].UpdateHover(position))
+					{
 						result = true;
+					}
 				}
 			}
 			return result;

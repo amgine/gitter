@@ -18,12 +18,14 @@
 
 		public ViewHostDockingProcess(ViewHost viewHost)
 		{
+			if(viewHost == null) throw new ArgumentNullException("viewHost");
+
 			_viewHost = viewHost;
 		}
 
 		#region Properties
 
-		public ViewHost ToolHost
+		public ViewHost ViewHost
 		{
 			get { return _viewHost; }
 		}
@@ -33,24 +35,24 @@
 			get { return _isActive; }
 		}
 
-		public ViewHost HoveredToolHost
+		public ViewHost HoveredViewHost
 		{
 			get { return _hoveredHost; }
 		}
 
-		public ViewDockGrid HoveredGrid
+		public ViewDockGrid HoveredDockGrid
 		{
 			get { return _hoveredGrid; }
 		}
 
 		#endregion
 
-		private static int ZOrderComparer(Control control1, Control control2)
+		private static int ZOrderComparison(Control control1, Control control2)
 		{
-			return ZOrderComparer(control1.TopLevelControl.Handle, control2.TopLevelControl.Handle);
+			return ZOrderComparison(control1.TopLevelControl.Handle, control2.TopLevelControl.Handle);
 		}
 
-		private static int ZOrderComparer(IntPtr hWnd1, IntPtr hWnd2)
+		private static int ZOrderComparison(IntPtr hWnd1, IntPtr hWnd2)
 		{
 			const int GW_HWNDNEXT = 2;
 			const int GW_HWNDPREV = 3;
@@ -89,14 +91,18 @@
 				}
 			}
 			if(candidates.Count == 0)
+			{
 				return null;
+			}
 			if(candidates.Count == 1)
+			{
 				return candidates[0];
-			candidates.Sort(ZOrderComparer);
+			}
+			candidates.Sort(ZOrderComparison);
 			return candidates[0];
 		}
 
-		private ViewHost HitTestHost(Point point)
+		private ViewHost HitTestViewHost(Point point)
 		{
 			var candidates = new List<ViewHost>();
 			lock(ViewHost.ViewHosts)
@@ -118,10 +124,14 @@
 				}
 			}
 			if(candidates.Count == 0)
+			{
 				return null;
+			}
 			if(candidates.Count == 1)
+			{
 				return candidates[0];
-			candidates.Sort(ZOrderComparer);
+			}
+			candidates.Sort(ZOrderComparison);
 			return candidates[0];
 		}
 
@@ -137,7 +147,7 @@
 				grid.DockMarkers.Show(_viewHost);
 				grid.DockMarkers.UpdateHover(location);
 			}
-			var host = HitTestHost(location);
+			var host = HitTestViewHost(location);
 			if(host != null)
 			{
 				_hoveredHost = host;
@@ -179,7 +189,7 @@
 					_hoveredGrid = null;
 				}
 			}
-			var host = HitTestHost(location);
+			var host = HitTestViewHost(location);
 			if(host != null)
 			{
 				if(_hoveredHost != null)
@@ -197,9 +207,13 @@
 					host.DockMarkers.Show(_viewHost);
 				}
 				if(!gridHit)
+				{
 					host.DockMarkers.UpdateHover(location);
+				}
 				else
+				{
 					host.DockMarkers.Unhover();
+				}
 			}
 			else
 			{

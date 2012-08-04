@@ -215,7 +215,11 @@
 			var item = e.Item as TreeFileListItem;
 			if(item != null)
 			{
-				_wTree.OpenFile(item.DataContext.RelativePath);
+				var fileName = _wTree.ExtractBlobToTemporaryFile(item.DataContext.RelativePath);
+				if(!string.IsNullOrWhiteSpace(fileName))
+				{
+					Utility.OpenUrl(fileName);
+				}
 			}
 			else
 			{

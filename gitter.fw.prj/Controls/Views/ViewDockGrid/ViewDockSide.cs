@@ -14,7 +14,7 @@
 	/// represented as tabs.
 	/// </summary>
 	[ToolboxItem(false)]
-	sealed class ViewDockSide : Control, IEnumerable<ViewHost>
+	public sealed class ViewDockSide : Control, IEnumerable<ViewHost>
 	{
 		#region Static Data
 
@@ -662,6 +662,8 @@
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			ViewManager.Renderer.RenderViewDockSide(this, e);
+
 			var graphics = e.Graphics;
 			var clip = e.ClipRectangle;
 			var bounds = Rectangle.Empty;
@@ -678,7 +680,6 @@
 						CultureInfo.InvariantCulture,
 						"Unexpected {0}.Orientation: {1}", GetType().Name, Orientation));
 			}
-			graphics.Clear(BackgroundColor);
 			for(int i = 0; i < _tabs.Count; ++i)
 			{
 				var tab = _tabs[i];
@@ -689,7 +690,9 @@
 						{
 							bounds.Width = length;
 							if(bounds.Right >= clip.X)
+							{
 								tab.OnPaint(graphics, bounds);
+							}
 							bounds.X += bounds.Width + ViewConstants.SideTabSpacing;
 							if(bounds.X >= clip.Right) return;
 						}
@@ -698,7 +701,9 @@
 						{
 							bounds.Height = length;
 							if(bounds.Bottom >= clip.Y)
+							{
 								tab.OnPaint(graphics, bounds);
+							}
 							bounds.Y += bounds.Height + ViewConstants.SideTabSpacing;
 							if(bounds.Y >= clip.Bottom) return;
 						}

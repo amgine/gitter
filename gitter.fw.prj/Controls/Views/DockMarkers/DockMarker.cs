@@ -24,10 +24,8 @@
 
 		protected DockMarker(IDockHost dockHost, ViewHost dockClient, DockMarkerButton[] buttons, Point[] border, Rectangle bounds)
 		{
-			if(dockHost == null)
-				throw new ArgumentNullException("dockHost");
-			if(dockClient == null)
-				throw new ArgumentNullException("dockClient");
+			if(dockHost == null) throw new ArgumentNullException("dockHost");
+			if(dockClient == null) throw new ArgumentNullException("dockClient");
 
 			_dockHost = dockHost;
 			_dockClient = dockClient;
@@ -116,7 +114,6 @@
 			get { return true; }
 		}
 
-
 		protected override CreateParams CreateParams
 		{
 			get
@@ -150,7 +147,7 @@
 				graphics.DrawPolygon(pen, _borderPolygon);
 				for(int i = 0; i < _buttons.Length; ++i)
 				{
-					_buttons[i].Paint(graphics, !_isHovered || _buttonHover.Index == i);
+					_buttons[i].OnPaint(graphics, !_isHovered || _buttonHover.Index == i);
 				}
 			}
 		}

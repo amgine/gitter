@@ -8,17 +8,8 @@
 	using gitter.Framework.Services;
 
 	/// <summary>Tab control for view host.</summary>
-	internal sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
+	public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 	{
-		#region Static
-
-		private static readonly Color Background = Color.FromArgb(41, 57, 85);
-
-		private static readonly Color SelectedTabBackgroundActiveEnd = Color.FromArgb(255, 232, 166);
-		private static readonly Color SelectedTabBackgroundNormalEnd = Color.FromArgb(174, 185, 205);
-
-		#endregion
-
 		#region Data
 
 		private readonly ViewHost _viewHost;
@@ -163,6 +154,21 @@
 			get { return _viewHost; }
 		}
 
+		public ViewButtons LeftButtons
+		{
+			get { return _leftButtons; }
+		}
+
+		public ViewButtons RightButtons
+		{
+			get { return _rightButtons; }
+		}
+
+		public int FirstTabIndex
+		{
+			get { return _firstTabIndex; }
+		}
+
 		#endregion
 
 		#region Methods
@@ -276,12 +282,16 @@
 				if(_firstTabIndex != 0)
 				{
 					if(_leftButtons.Count == 0)
+					{
 						_leftButtons.SetAvailableButtons(ViewButtonType.ScrollTabsLeft);
+					}
 				}
 				else
 				{
 					if(_leftButtons.Count == 1)
+					{
 						_leftButtons.SetAvailableButtons(null);
+					}
 				}
 				if(length > space)
 				{
@@ -289,15 +299,19 @@
 					if(needRightScroll)
 					{
 						if(_rightButtons.Count == 1)
+						{
 							_rightButtons.SetAvailableButtons(
 								ViewButtonType.ScrollTabsRight,
 								ViewButtonType.TabsScrollMenu);
+						}
 					}
 					else
 					{
 						if(_rightButtons.Count == 2)
+						{
 							_rightButtons.SetAvailableButtons(
 								ViewButtonType.TabsScrollMenu);
+						}
 					}
 				}
 				else
@@ -305,21 +319,29 @@
 					if(_rightButtons.Count == 2)
 					{
 						if(_firstTabIndex == 0)
+						{
 							_rightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
+						}
 						else
+						{
 							_rightButtons.SetAvailableButtons(ViewButtonType.TabsScrollMenu);
+						}
 					}
 					else if(_rightButtons.Count == 1)
 					{
 						if(_firstTabIndex == 0)
 						{
 							if(_rightButtons[0].Type == ViewButtonType.TabsScrollMenu)
+							{
 								_rightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
+							}
 						}
 						else
 						{
 							if(_rightButtons[0].Type == ViewButtonType.TabsMenu)
+							{
 								_rightButtons.SetAvailableButtons(ViewButtonType.TabsScrollMenu);
+							}
 						}
 					}
 				}
@@ -397,7 +419,9 @@
 			if(tab == null) throw new ArgumentNullException("tab");
 
 			if(_tabHover.Item == tab)
+			{
 				_tabHover.Reset(-1, null);
+			}
 			_length -= tab.Length;
 			return _tabs.Remove(tab);
 		}
@@ -882,44 +906,32 @@
 
 			graphics.TextRenderingHint = Utility.TextRenderingHint;
 			graphics.TextContrast = Utility.TextContrast;
+
+			ViewManager.Renderer.RenderViewHostTabsBackground(this, e);
+
 			var rect = new Rectangle(0, 0, width, ViewConstants.TabHeight);
-			using(var brush = new SolidBrush(Background))
+			if(ViewHost.IsDocumentWell)
 			{
-				graphics.FillRectangle(brush, e.ClipRectangle);
-			}
-			if(_viewHost.IsDocumentWell)
-			{
-				bool firstTabStartsAt0 = true;
-				if(_leftButtons != null)
+				if(LeftButtons != null)
 				{
-					var lbw = _leftButtons.Width;
+					var lbw = LeftButtons.Width;
 					if(lbw != 0)
 					{
-						firstTabStartsAt0 = false;
 						rect.X += lbw + ViewConstants.TabHeaderButtonSpacing;
 						space -= lbw + ViewConstants.TabHeaderButtonSpacing;
 						var buttonsRect = new Rectangle(0, 0, lbw, ViewConstants.TabHeight);
-						_leftButtons.OnPaint(graphics, buttonsRect, _viewHost.IsActive);
+						LeftButtons.OnPaint(graphics, buttonsRect, ViewHost.IsActive);
 					}
 				}
-				if(_rightButtons != null)
+				if(RightButtons != null)
 				{
-					var rbw = _rightButtons.Width;
+					var rbw = RightButtons.Width;
 					if(rbw != 0)
 					{
 						space -= rbw + ViewConstants.TabHeaderButtonSpacing;
 						var buttonsRect = new Rectangle(width - rbw, 0, rbw, ViewConstants.TabHeight);
-						_rightButtons.OnPaint(graphics, buttonsRect, _viewHost.IsActive);
+						RightButtons.OnPaint(graphics, buttonsRect, ViewHost.IsActive);
 					}
-				}
-				using(var brush = new SolidBrush(
-					_viewHost.IsActive?SelectedTabBackgroundActiveEnd:SelectedTabBackgroundNormalEnd))
-				{
-					var rc = new RectangleF(
-						-0.5f, -0.5f + ViewConstants.TabHeight,
-						width + 1, ViewConstants.TabFooterHeight + 1);
-					var ltCorner = (firstTabStartsAt0 && _tabs[_firstTabIndex].IsActive) ? 0 : 2;
-					graphics.FillRoundedRectangle(brush, rc, ltCorner, 2, 0, 0);
 				}
 			}
 			int dx = 0, dy = 0;
@@ -946,10 +958,13 @@
 						rect.Width = length;
 						dx = length;
 						break;
-					default:
+					case AnchorStyles.Left:
+					case AnchorStyles.Right:
 						rect.Height = length;
 						dy = length;
 						break;
+					default:
+						throw new ApplicationException();
 				}
 				_tabs[i].OnPaint(graphics, rect);
 				if(space <= 0) break;

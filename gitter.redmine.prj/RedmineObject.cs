@@ -1,14 +1,15 @@
 ﻿namespace gitter.Redmine
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Xml;
 
 	public abstract class RedmineObject
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty IdProperty =
-			new RedmineObjectProperty("id", "Id");
+		public static readonly RedmineObjectProperty<int> IdProperty =
+			new RedmineObjectProperty<int>("id", "Id");
 
 		#endregion
 
@@ -72,6 +73,15 @@
 			if(property == null) throw new ArgumentNullException("property");
 
 			return GetType().GetProperty(property.Name).GetValue(this, null);
+		}
+
+		protected void UpdatePropertyValue<T>(ref T field, T value, RedmineObjectProperty<T> property)
+		{
+			if(!EqualityComparer<T>.Default.Equals(field, value))
+			{
+				field = value;
+				OnPropertyChanged(property);
+			}
 		}
 
 		#endregion

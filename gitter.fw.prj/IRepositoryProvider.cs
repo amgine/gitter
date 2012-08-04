@@ -8,6 +8,14 @@
 	/// <summary>Repository provider.</summary>
 	public interface IRepositoryProvider : INamedObject
 	{
+		/// <summary>Returns GUI provider.</summary>
+		/// <value>GUI provider.</value>
+		IRepositoryGuiProvider GuiProvider { get; }
+
+		/// <summary>Gets a value indicating whether this provider is loaded.</summary>
+		/// <value><c>true</c> if this provider is loaded; otherwise, <c>false</c>.</value>
+		bool IsLoaded { get; }
+
 		/// <summary>Prepare to work in context of specified <paramref name="environment"/>.</summary>
 		/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
 		/// <param name="section">Provider configuration section.</param>
@@ -35,23 +43,13 @@
 		IAsyncFunc<IRepository> OpenRepositoryAsync(string workingDirectory);
 
 		/// <summary>Called after repository is successfully loaded by environment.</summary>
-		/// <param name="environment">Working environment.</param>
 		/// <param name="repository">Loaded repository.</param>
-		void OnRepositoryLoaded(IWorkingEnvironment environment, IRepository repository);
+		void OnRepositoryLoaded(IRepository repository);
 
 		/// <summary>Releases all resources allocated by repository if applicable.</summary>
 		/// <param name="repository">Repository to close.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		void CloseRepository(IRepository repository);
-
-		/// <summary>
-		/// Create a gui provider to build interactive interface for <see cref="repository"/>.
-		/// It is assumed that <paramref name="repository"/> was aquired by calling <see cref="OpenRepository()"/> of this <see cref="IRepositoryProvider"/>.
-		/// </summary>
-		/// <param name="repository">Repository to build gui upon.</param>
-		/// <returns><see cref="IRepositoryGuiProvider"/> for <paramref name="repository"/>.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
-		IRepositoryGuiProvider CreateGuiProvider(IRepository repository);
 
 		/// <summary>Get list of static repository operations (that is, operations which do not require local repository).</summary>
 		IEnumerable<StaticRepositoryAction> GetStaticActions();

@@ -9,7 +9,7 @@
 	/// <summary>Interface for gui provider/builder.</summary>
 	public interface IRepositoryGuiProvider : IGuiProvider
 	{
-		void ActivateDefaultTool();
+		void ActivateDefaultView();
 
 		/// <summary>Repository which is currently active.</summary>
 		IRepository Repository { get; set; }

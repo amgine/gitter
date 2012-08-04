@@ -1,7 +1,6 @@
 ﻿namespace gitter.Git
 {
 	using System;
-	using System.Drawing;
 
 	using gitter.Framework;
 	using gitter.Framework.Services;

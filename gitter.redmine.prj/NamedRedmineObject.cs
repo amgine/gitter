@@ -5,10 +5,18 @@ namespace gitter.Redmine
 
 	public abstract class NamedRedmineObject : RedmineObject
 	{
-		public static readonly RedmineObjectProperty NameProperty =
-			new RedmineObjectProperty("name", "Name");
+		#region Static
+
+		public static readonly RedmineObjectProperty<string> NameProperty =
+			new RedmineObjectProperty<string>("name", "Name");
+
+		#endregion
+
+		#region Data
 
 		private string _name;
+
+		#endregion
 
 		#region .ctor
 
@@ -26,28 +34,29 @@ namespace gitter.Redmine
 
 		#endregion
 
+		#region Properties
+
+		public string Name
+		{
+			get { return _name; }
+			internal set { UpdatePropertyValue(ref _name, value, NameProperty); }
+		}
+
+		#endregion
+
+		#region Methods
+
 		internal override void Update(XmlNode node)
 		{
 			base.Update(node);
 			Name = RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
 		}
 
-		public string Name
-		{
-			get { return _name; }
-			internal set
-			{
-				if(_name != value)
-				{
-					_name = value;
-					OnPropertyChanged(NameProperty);
-				}
-			}
-		}
-
 		public override string ToString()
 		{
 			return _name;
 		}
+
+		#endregion
 	}
 }

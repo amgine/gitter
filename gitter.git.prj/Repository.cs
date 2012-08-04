@@ -807,6 +807,11 @@
 			if(!IsDisposed)
 			{
 				Monitor.Shutdown();
+				var disposable = _accessor as IDisposable;
+				if(disposable != null)
+				{
+					disposable.Dispose();
+				}
 				IsDisposed = true;
 			}
 		}

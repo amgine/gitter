@@ -14,6 +14,7 @@
 	{
 		#region Data
 
+		private readonly RepositoryProvider _repositoryProvider;
 		private Repository _repository;
 		private IWorkingEnvironment _environment;
 
@@ -26,16 +27,22 @@
 		#endregion
 
 		/// <summary>Create <see cref="GuiProvider"/>.</summary>
-		/// <param name="repository">Related repository.</param>
-		public GuiProvider(Repository repository)
+		/// <param name="repositoryProvider">Git repository provider.</param>
+		public GuiProvider(RepositoryProvider repositoryProvider)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			_repository = repository;
+			if(repositoryProvider == null) throw new ArgumentNullException("repositoryProvider");
 
-			_mainToolbar = new MainToolbar(this);
-			_viewFactories = new ViewFactoriesCollection(this);
-			_statusbar = new Statusbar(this);
-			_menus = new MainGitMenus(this);
+			_repositoryProvider = repositoryProvider;
+
+			_mainToolbar	= new MainToolbar(this);
+			_viewFactories	= new ViewFactoriesCollection(this);
+			_statusbar		= new Statusbar(this);
+			_menus			= new MainGitMenus(this);
+		}
+
+		public RepositoryProvider RepositoryProvider
+		{
+			get { return _repositoryProvider; }
 		}
 
 		public Repository Repository
@@ -46,11 +53,14 @@
 				if(_repository != value)
 				{
 					_repository = value;
-					_mainToolbar.Repository = _repository;
-					_viewFactories.Repository = _repository;
-					_explorer.Repository = _repository;
-					_statusbar.Repository = _repository;
-					_menus.Repository = _repository;
+					_mainToolbar.Repository		= _repository;
+					_viewFactories.Repository	= _repository;
+					if(_explorer != null)
+					{
+						_explorer.Repository = _repository;
+					}
+					_statusbar.Repository		= _repository;
+					_menus.Repository			= _repository;
 				}
 			}
 		}
@@ -114,29 +124,34 @@
 		{
 			var revision = GetFocusedRevisionPointer();
 			string startingRevision;
-			string defaultName;
+			string defaultBranchName;
 			if(revision != null)
 			{
 				startingRevision = revision.Pointer;
 				var branch = revision as Branch;
 				if(branch != null && branch.IsRemote)
 				{
-					defaultName = branch.Name.Substring(branch.Name.LastIndexOf('/') + 1);
+					defaultBranchName = branch.Name.Substring(branch.Name.LastIndexOf('/') + 1);
 				}
 				else
 				{
-					defaultName = string.Empty;
+					defaultBranchName = string.Empty;
 				}
 			}
 			else
 			{
 				startingRevision = GitConstants.HEAD;
-				defaultName = string.Empty;
+				defaultBranchName = string.Empty;
 			}
+			StartCreateBranchDialog(startingRevision, defaultBranchName);
+		}
+
+		public void StartCreateBranchDialog(string startingRevision, string defaultBranchName)
+		{
 			using(var dlg = new CreateBranchDialog(_repository))
 			{
 				dlg.StartingRevision = startingRevision;
-				dlg.BranchName = defaultName;
+				dlg.BranchName = defaultBranchName;
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -306,7 +321,7 @@
 				env.ProvideViewMenuItem(item);
 			}
 
-			ActivateDefaultTool();
+			ActivateDefaultView();
 		}
 
 		public void DetachFromEnvironment(IWorkingEnvironment env)
@@ -343,7 +358,7 @@
 			_environment = null;
 		}
 
-		public void ActivateDefaultTool()
+		public void ActivateDefaultView()
 		{
 			if(_environment == null) throw new InvalidOperationException();
 

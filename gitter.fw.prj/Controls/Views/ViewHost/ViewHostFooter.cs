@@ -1,23 +1,16 @@
 ﻿namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
-	using System.Drawing;
-	using System.Text;
 
-	sealed class ViewHostFooter : Control
+	public sealed class ViewHostFooter : Control
 	{
-		private static readonly Color Background = Color.FromArgb(41, 57, 85);
-		private static readonly Color ForegroundNormal = Color.FromArgb(206, 212, 223);
-		private static readonly Color ForegroundActive = Color.FromArgb(255, 232, 166);
-
 		private readonly ViewHost _host;
 
-		public ViewHostFooter(ViewHost host)
+		internal ViewHostFooter(ViewHost viewHost)
 		{
-			if(host == null) throw new ArgumentNullException("host");
-			_host = host;
+			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			_host = viewHost;
 
 			SetStyle(
 				ControlStyles.ContainerControl |
@@ -43,25 +36,12 @@
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			using(var brush = new SolidBrush(Background))
-			{
-				e.Graphics.FillRectangle(brush, e.ClipRectangle);
-			}
-			var color = _host.IsActive ? ForegroundActive : ForegroundNormal;
-			using(var brush = new SolidBrush(color))
-			{
-				var rc = (RectangleF)ClientRectangle;
-				rc.X -= 0.5f;
-				rc.Y -= 0.5f;
-				rc.Width += 1;
-				rc.Height += 1;
-				e.Graphics.FillRoundedRectangle(brush, rc, 0, 0, 2, 2);
-			}
+			ViewManager.Renderer.RenderViewHostFooter(this, e);
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			_host.Activate();
+			ViewHost.Activate();
 			base.OnMouseDown(e);
 		}
 	}

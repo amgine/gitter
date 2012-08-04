@@ -2,7 +2,7 @@
 {
 	using System;
 
-	internal sealed class ViewButtonClickEventArgs : EventArgs
+	public sealed class ViewButtonClickEventArgs : EventArgs
 	{
 		private readonly ViewButtonType _button;
 

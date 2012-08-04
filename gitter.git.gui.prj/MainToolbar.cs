@@ -112,10 +112,6 @@
 			{
 				AttachToRepository(gui.Repository);
 			}
-			else
-			{
-				Enabled = false;
-			}
 		}
 
 		public Repository Repository
@@ -303,12 +299,12 @@
 
 		private void OnInitClick(object sender, EventArgs e)
 		{
-			RepositoryProvider.RunInitDialog(_gui.Environment);
+			_gui.RepositoryProvider.RunInitDialog();
 		}
 
 		private void OnCloneClick(object sender, EventArgs e)
 		{
-			RepositoryProvider.RunCloneDialog(_gui.Environment);
+			_gui.RepositoryProvider.RunCloneDialog();
 		}
 
 		private void OnFetchClick(object sender, EventArgs e)

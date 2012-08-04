@@ -62,8 +62,6 @@
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
     </ProjectReference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
@@ -77,6 +75,7 @@
     <Compile Include="Diff\IRevisionDiffSource.cs" />
     <Compile Include="Diff\StashedChangesDiffSource.cs" />
     <Compile Include="Hooks\Hooks.cs" />
+    <Compile Include="IGitRepositoryProvider.cs" />
     <Compile Include="Log\PathLogSource.cs" />
     <Compile Include="Configuration\ConfigurationFile.cs" />
     <Compile Include="ObjectFactories.cs" />

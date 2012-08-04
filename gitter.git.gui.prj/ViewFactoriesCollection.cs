@@ -37,7 +37,6 @@
 		{
 			if(gui == null) throw new ArgumentNullException("gui");
 			_gui = gui;
-			_repository = gui.Repository;
 
 			_viewFactories = new IViewFactory[]
 			{
@@ -57,6 +56,11 @@
 				_viewContextualDiff =	new ContextualDiffViewFactory(gui),
 				_viewReflog =			new ReflogViewFactory(gui),
 			};
+
+			if(gui.Repository != null)
+			{
+				AttachToRepository(gui.Repository);
+			}
 		}
 
 		public IViewFactory this[Guid guid]
@@ -107,7 +111,7 @@
 			_repository = null;
 			foreach(var factory in _viewFactories)
 			{
-				if(factory.Singleton)
+				if(factory.IsSingleton)
 				{
 					foreach(GitViewBase view in factory.CreatedViews)
 					{

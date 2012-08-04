@@ -14,11 +14,17 @@
 	[ToolboxItem(false)]
 	public partial class InitDialog : GitDialogBase, IExecutableDialog
 	{
-		public InitDialog()
+		private readonly IGitRepositoryProvider _gitRepositoryProvider;
+
+		public InitDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
+			if(gitRepositoryProvider == null) throw new ArgumentNullException("gitRepositoryProvider");
+
 			InitializeComponent();
 
 			Text = Resources.StrInitRepository;
+
+			_gitRepositoryProvider = gitRepositoryProvider;
 
 			_lblPath.Text = Resources.StrPath.AddColon();
 			_grpOptions.Text = Resources.StrOptions;
@@ -61,6 +67,11 @@
 		protected override string ActionVerb
 		{
 			get { return Resources.StrInit; }
+		}
+
+		private IGitRepositoryProvider GitRepositoryProvider
+		{
+			get { return _gitRepositoryProvider; }
 		}
 
 		private void _btnSelectDirectory_Click(object sender, EventArgs e)
@@ -118,7 +129,7 @@
 			try
 			{
 				Cursor = Cursors.WaitCursor;
-				Repository.Init(RepositoryProvider.Git, path, template, bare);
+				Repository.Init(GitRepositoryProvider.GitAccessor, path, template, bare);
 				Cursor = Cursors.Default;
 			}
 			catch(GitException exc)

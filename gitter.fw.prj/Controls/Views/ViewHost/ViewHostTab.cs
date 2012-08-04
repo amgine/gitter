@@ -4,26 +4,30 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
-	sealed class ViewHostTab : ViewTabBase
+	public sealed class ViewHostTab : ViewTabBase
 	{
 		#region Data
 
 		private readonly ViewHostTabs _tabs;
-		private readonly ViewHost _toolHost;
+		private readonly ViewHost _viewHost;
 
 		private readonly ViewButtons _buttons;
 		private bool _buttonsHovered;
 
 		#endregion
 
-		public ViewHostTab(ViewHostTabs tabs, ViewBase tool)
-			: base(tabs, tool, tabs.Side)
+		public ViewHostTab(ViewHostTabs tabs, ViewBase view)
+			: base(view, tabs.Side)
 		{
+			if(tabs == null) throw new ArgumentNullException("tabs");
+
 			_tabs = tabs;
-			_toolHost = tabs.ViewHost;
+			_viewHost = tabs.ViewHost;
 			_buttons = new ViewButtons(tabs);
-			if(_toolHost.IsDocumentWell)
+			if(_viewHost.IsDocumentWell)
+			{
 				_buttons.SetAvailableButtons(ViewButtonType.Close);
+			}
 			_buttons.Height = ViewConstants.TabHeight + ViewConstants.TabFooterHeight;
 			_buttons.ButtonClick += OnButtonClick;
 		}
@@ -55,16 +59,16 @@
 
 		protected override int Measure(Graphics graphics)
 		{
-			var length = base.Measure(graphics);
-			length += _buttons.Width;
-			return length;
+			return ViewManager.Renderer.MeasureViewHostTabLength(this, graphics);
 		}
 
-		protected override void OnPaintContent(Graphics graphics, Rectangle bounds)
+		internal override void OnPaint(Graphics graphics, Rectangle bounds)
 		{
-			base.OnPaintContent(graphics, bounds);
-			var buttonsBounds = new Rectangle(bounds.Right - _buttons.Width - 2, 0, _buttons.Width, bounds.Height);
-			_buttons.OnPaint(graphics, buttonsBounds, IsActive);
+			if(bounds.Width > 0 && bounds.Height > 0)
+			{
+				ViewManager.Renderer.RenderViewHostTabBackground(this, graphics, bounds);
+				ViewManager.Renderer.RenderViewHostTabContent(this, graphics, bounds);
+			}
 		}
 
 		public override void OnMouseLeave()

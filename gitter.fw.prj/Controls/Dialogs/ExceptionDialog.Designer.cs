@@ -91,7 +91,7 @@
 			this._lnkCopyToClipboard.TabIndex = 4;
 			this._lnkCopyToClipboard.TabStop = true;
 			this._lnkCopyToClipboard.Text = "%Copy to clipboard%";
-			this._lnkCopyToClipboard.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._lnkCopyToClipboard_LinkClicked);
+			this._lnkCopyToClipboard.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.OnCopyToClipboardLinkClicked);
 			// 
 			// _lnkSendBugReport
 			// 
@@ -103,7 +103,7 @@
 			this._lnkSendBugReport.TabIndex = 5;
 			this._lnkSendBugReport.TabStop = true;
 			this._lnkSendBugReport.Text = "%Send bugreport%";
-			this._lnkSendBugReport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._lnkSendBugReport_LinkClicked);
+			this._lnkSendBugReport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.OnSendBugReportLinkClicked);
 			// 
 			// ExceptionDialog
 			// 

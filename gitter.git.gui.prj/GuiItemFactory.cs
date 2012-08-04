@@ -385,7 +385,7 @@
 			var rev1 = items.Item1;
 			var rev2 = items.Item2;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(
+			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.DiffViewGuid,
 				new Dictionary<string, object>()
 				{
@@ -398,7 +398,7 @@
 		{
 			var item = (ToolStripItem)sender;
 			var reference = (Reference)item.Tag;
-			RepositoryProvider.Environment.ViewDockService.ShowView(
+			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.ReflogViewGuid,
 				new Dictionary<string, object>()
 				{
@@ -522,8 +522,10 @@
 		private static void OnShowViewItemClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
-			var toolGuid = (Guid)item.Tag;
-			RepositoryProvider.Environment.ViewDockService.ShowView(toolGuid, true);
+			var viewGuid = (Guid)item.Tag;
+			GitterApplication.WorkingEnvironment
+							 .ViewDockService
+							 .ShowView(viewGuid, true);
 		}
 
 		private static void OnCheckoutClick(object sender, EventArgs e)
@@ -2741,7 +2743,7 @@
 			var item = (ToolStripItem)sender;
 			var data = (IBlameSource)item.Tag;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(
+			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.BlameViewGuid,
 				new Dictionary<string, object>()
 				{
@@ -2754,7 +2756,7 @@
 			var item = (ToolStripItem)sender;
 			var data = (ILogSource)item.Tag;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(
+			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.PathHistoryViewGuid,
 				new Dictionary<string, object>()
 				{
@@ -3678,13 +3680,18 @@
 			var tree = data.Item1;
 			var path = data.Item2;
 			var openas = data.Item3;
-			if(openas)
+
+			var fileName = tree.ExtractBlobToTemporaryFile(path);
+			if(!string.IsNullOrWhiteSpace(fileName))
 			{
-				tree.ShowOpenFileWithDialog(path);
-			}
-			else
-			{
-				tree.OpenFile(path);
+				if(openas)
+				{
+					Utility.ShowOpenWithDialog(path);
+				}
+				else
+				{
+					Utility.OpenUrl(path);
+				}
 			}
 		}
 
@@ -3741,7 +3748,7 @@
 			var item = (ToolStripItem)sender;
 			var diffSource = (IDiffSource)item.Tag;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(
+			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.DiffViewGuid,
 				new Dictionary<string, object>()
 				{
@@ -3754,7 +3761,7 @@
 			var item = (ToolStripItem)sender;
 			var revPtr = (IRevisionPointer)item.Tag;
 
-			RepositoryProvider.Environment.ViewDockService.ShowView(
+			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.TreeViewGuid,
 				new Dictionary<string, object>()
 				{

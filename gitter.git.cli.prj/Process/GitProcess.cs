@@ -180,13 +180,23 @@
 			{
 				if(_gitExePath != value)
 				{
-					_gitExePath = value;
-					_gitInstallationPath = Path.GetFullPath(
-						Path.Combine(
-							Path.GetDirectoryName(_gitExePath),
-							".."));
-					_shExePath = Path.Combine(_gitInstallationPath, @"bin\sh.exe");
-					_gitkCmdPath = Path.Combine(_gitInstallationPath, @"cmd\gitk.cmd");
+					if(string.IsNullOrWhiteSpace(value))
+					{
+						_gitExePath = string.Empty;
+						_gitInstallationPath = string.Empty;
+						_shExePath = string.Empty;
+						_gitkCmdPath = string.Empty;
+					}
+					else
+					{
+						_gitExePath = value;
+						_gitInstallationPath = Path.GetFullPath(
+							Path.Combine(
+								Path.GetDirectoryName(_gitExePath),
+								".."));
+						_shExePath = Path.Combine(_gitInstallationPath, @"bin\sh.exe");
+						_gitkCmdPath = Path.Combine(_gitInstallationPath, @"cmd\gitk.cmd");
+					}
 				}
 			}
 		}

@@ -5,7 +5,7 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
-	sealed class ViewDockSideTab : ViewTabBase
+	public sealed class ViewDockSideTab : ViewTabBase
 	{
 		#region Data
 
@@ -17,10 +17,10 @@
 		#region .ctor
 
 		public ViewDockSideTab(ViewDockSide side, ViewHost viewHost, ViewBase view)
-			: base(side, view, InvertAnchor(side.Side))
+			: base(view, InvertAnchor(side.Side))
 		{
-			if(viewHost == null)
-				throw new ArgumentNullException("toolHost");
+			if(side == null) throw new ArgumentNullException("side");
+			if(viewHost == null) throw new ArgumentNullException("viewHost");
 
 			_side = side;
 			_viewHost = viewHost;
@@ -46,6 +46,20 @@
 		}
 
 		#endregion
+
+		protected override int Measure(Graphics graphics)
+		{
+			return ViewManager.Renderer.MeasureViewDockSideTabLength(this, graphics);
+		}
+
+		internal override void OnPaint(Graphics graphics, Rectangle bounds)
+		{
+			if(bounds.Width > 0 && bounds.Height > 0)
+			{
+				ViewManager.Renderer.RenderViewDockSideTabBackground(this, graphics, bounds);
+				ViewManager.Renderer.RenderViewDockSideTabContent(this, graphics, bounds);
+			}
+		}
 
 		private static AnchorStyles InvertAnchor(AnchorStyles anchor)
 		{

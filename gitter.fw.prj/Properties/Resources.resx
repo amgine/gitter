@@ -394,13 +394,13 @@
   <data name="StrSpelling" xml:space="preserve">
     <value>Spell Checking</value>
   </data>
-  <data name="ImgToolHostClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="ImgViewHostClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\cross-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ImgToolHostMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="ImgViewHostMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\arrow-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ImgToolHostPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="ImgViewHostPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pin-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ImgTabMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">

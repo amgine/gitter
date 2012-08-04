@@ -20,7 +20,7 @@
 			if(environment == null) throw new ArgumentNullException("environment");
 
 			_rootItem = new RepositoryRootItem(environment, null);
-			DefaultViewPosition = ViewPosition.LeftTool;
+			DefaultViewPosition = ViewPosition.Left;
 		}
 
 		public RepositoryRootItem RootItem

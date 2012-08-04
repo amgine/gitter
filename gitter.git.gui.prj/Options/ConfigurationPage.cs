@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Linq;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
@@ -35,8 +36,13 @@
 			_btnAddUserParameter.Text = Resources.StrAddParameter;
 			_btnAddSystemParameter.Text = Resources.StrAddParameter;
 
-			_userCfg	= ConfigurationFile.OpenCurrentUserFile(RepositoryProvider.Git);
-			_systemCfg	= ConfigurationFile.OpenSystemFile(RepositoryProvider.Git);
+			var gitAccessor = environment.RepositoryProviders
+										 .OfType<IGitRepositoryProvider>()
+										 .First()
+										 .GitAccessor;
+
+			_userCfg	= ConfigurationFile.OpenCurrentUserFile(gitAccessor);
+			_systemCfg	= ConfigurationFile.OpenSystemFile(gitAccessor);
 			_lstUserConfig.LoadData(_userCfg);
 			_lstSystemConfig.LoadData(_systemCfg);
 		}

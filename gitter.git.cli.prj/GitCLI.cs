@@ -14,6 +14,7 @@
 
 		#region Data
 
+		private readonly IGitAccessorProvider _provider;
 		private readonly ICommandExecutor _executor;
 		private Version _gitVersion;
 		private bool _autodetectGitExePath;
@@ -22,13 +23,24 @@
 		#endregion
 
 		/// <summary>Initializes a new instance of the <see cref="GitCLI"/> class.</summary>
-		public GitCLI()
+		/// <param name="provider">Provider of this accessor.</param>
+		public GitCLI(IGitAccessorProvider provider)
 		{
+			if(provider == null) throw new ArgumentNullException("provider");
+
+			_provider = provider;
 			_executor = new GitCommandExecutor(this);
 			_autodetectGitExePath = true;
 			_gitExePath = string.Empty;
 
 			GitProcess.UpdateGitExePath(this);
+		}
+
+		/// <summary>Returns provider of this accessor.</summary>
+		/// <value>Provider of this accessor</value>
+		public IGitAccessorProvider Provider
+		{
+			get { return _provider; }
 		}
 
 		public bool LogCLICalls
@@ -199,6 +211,10 @@
 
 			var cmd = new CloneCommand(args);
 
+			if(!Directory.Exists(parameters.Path))
+			{
+				Directory.CreateDirectory(parameters.Path);
+			}
 			if(parameters.Monitor == null || !GitFeatures.ProgressFlag.IsAvailableFor(this))
 			{
 				var output = _executor.ExecCommand(cmd);
@@ -238,6 +254,11 @@
 		public void SaveTo(Section section)
 		{
 			if(section == null) throw new ArgumentNullException("section");
+
+			section.SetValue("Path", ManualGitExePath);
+			section.SetValue("Autodetect", AutodetectGitExePath);
+			section.SetValue("LogCLICalls", LogCLICalls);
+			section.SetValue("EnableAnsiCodepageFallback", EnableAnsiCodepageFallback);
 		}
 
 		/// <summary>Load parameters from the specified <paramref name="section"/>.</summary>
@@ -246,8 +267,8 @@
 		{
 			if(section == null) throw new ArgumentNullException("section");
 
-			AutodetectGitExePath		= section.GetValue("Autodetect", true);
 			ManualGitExePath			= section.GetValue("Path", string.Empty);
+			AutodetectGitExePath		= section.GetValue("Autodetect", true);
 			LogCLICalls					= section.GetValue("LogCLICalls", false);
 			EnableAnsiCodepageFallback	= section.GetValue("EnableAnsiCodepageFallback", false);
 

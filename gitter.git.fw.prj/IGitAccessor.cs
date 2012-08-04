@@ -7,6 +7,10 @@
 	/// <summary>Defines repository-independent git operations.</summary>
 	public interface IGitAccessor : IConfigAccessor
 	{
+		/// <summary>Returns provider of this accessor.</summary>
+		/// <value>Provider of this accessor</value>
+		IGitAccessorProvider Provider { get; }
+
 		/// <summary>Returns git version.</summary>
 		/// <value>git version.</value>
 		Version GitVersion { get; }

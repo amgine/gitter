@@ -38,7 +38,8 @@
 			using(var gx = Graphics.FromImage(res))
 			{
 				gx.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-				gx.DrawImage(ovl, new Rectangle(0, 0, ovl.Width, ovl.Height), new Rectangle(0, 0, ovl.Width, ovl.Height), GraphicsUnit.Pixel);
+				var rc = new Rectangle(0, 0, ovl.Width, ovl.Height);
+				gx.DrawImage(ovl, rc, rc, GraphicsUnit.Pixel);
 			}
 			return res;
 		}

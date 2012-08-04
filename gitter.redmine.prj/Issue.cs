@@ -10,42 +10,42 @@
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty ProjectProperty =
-			new RedmineObjectProperty("project", "Project");
-		public static readonly RedmineObjectProperty ParentProperty =
-			new RedmineObjectProperty("parent", "Parent");
-		public static readonly RedmineObjectProperty TrackerProperty =
-			new RedmineObjectProperty("tracker", "Tracker");
-		public static readonly RedmineObjectProperty StatusProperty =
-			new RedmineObjectProperty("status", "Status");
-		public static readonly RedmineObjectProperty PriorityProperty =
-			new RedmineObjectProperty("priority", "Priority");
-		public static readonly RedmineObjectProperty AuthorProperty =
-			new RedmineObjectProperty("author", "Author");
-		public static readonly RedmineObjectProperty AssignedToProperty =
-			new RedmineObjectProperty("assigned_to", "AssignedTo");
-		public static readonly RedmineObjectProperty CategoryProperty =
-			new RedmineObjectProperty("category", "Category");
-		public static readonly RedmineObjectProperty FixedVersionProperty =
-			new RedmineObjectProperty("fixed_version", "FixedVersion");
-		public static readonly RedmineObjectProperty SubjectProperty =
-			new RedmineObjectProperty("subject", "Subject");
-		public static readonly RedmineObjectProperty DescriptionProperty =
-			new RedmineObjectProperty("description", "Description");
-		public static readonly RedmineObjectProperty StartDateProperty =
-			new RedmineObjectProperty("start_date", "StartDate");
-		public static readonly RedmineObjectProperty DueDateProperty =
-			new RedmineObjectProperty("due_date", "DueDate");
-		public static readonly RedmineObjectProperty DoneRatioProperty =
-			new RedmineObjectProperty("done_ratio", "DoneRatio");
-		public static readonly RedmineObjectProperty EstimatedHoursProperty =
-			new RedmineObjectProperty("estimated_hours", "EstimatedHours");
-		public static readonly RedmineObjectProperty CustomFieldsProperty =
-			new RedmineObjectProperty("custom_fields", "CustomFields");
-		public static readonly RedmineObjectProperty CreatedOnProperty =
-			new RedmineObjectProperty("created_on", "CreatedOn");
-		public static readonly RedmineObjectProperty UpdatedOnProperty =
-			new RedmineObjectProperty("updated_on", "UpdatedOn");
+		public static readonly RedmineObjectProperty<Project> ProjectProperty =
+			new RedmineObjectProperty<Project>("project", "Project");
+		public static readonly RedmineObjectProperty<Issue> ParentProperty =
+			new RedmineObjectProperty<Issue>("parent", "Parent");
+		public static readonly RedmineObjectProperty<IssueTracker> TrackerProperty =
+			new RedmineObjectProperty<IssueTracker>("tracker", "Tracker");
+		public static readonly RedmineObjectProperty<IssueStatus> StatusProperty =
+			new RedmineObjectProperty<IssueStatus>("status", "Status");
+		public static readonly RedmineObjectProperty<IssuePriority> PriorityProperty =
+			new RedmineObjectProperty<IssuePriority>("priority", "Priority");
+		public static readonly RedmineObjectProperty<User> AuthorProperty =
+			new RedmineObjectProperty<User>("author", "Author");
+		public static readonly RedmineObjectProperty<User> AssignedToProperty =
+			new RedmineObjectProperty<User>("assigned_to", "AssignedTo");
+		public static readonly RedmineObjectProperty<IssueCategory> CategoryProperty =
+			new RedmineObjectProperty<IssueCategory>("category", "Category");
+		public static readonly RedmineObjectProperty<ProjectVersion> FixedVersionProperty =
+			new RedmineObjectProperty<ProjectVersion>("fixed_version", "FixedVersion");
+		public static readonly RedmineObjectProperty<string> SubjectProperty =
+			new RedmineObjectProperty<string>("subject", "Subject");
+		public static readonly RedmineObjectProperty<string> DescriptionProperty =
+			new RedmineObjectProperty<string>("description", "Description");
+		public static readonly RedmineObjectProperty<DateTime?> StartDateProperty =
+			new RedmineObjectProperty<DateTime?>("start_date", "StartDate");
+		public static readonly RedmineObjectProperty<DateTime?> DueDateProperty =
+			new RedmineObjectProperty<DateTime?>("due_date", "DueDate");
+		public static readonly RedmineObjectProperty<double> DoneRatioProperty =
+			new RedmineObjectProperty<double>("done_ratio", "DoneRatio");
+		public static readonly RedmineObjectProperty<double> EstimatedHoursProperty =
+			new RedmineObjectProperty<double>("estimated_hours", "EstimatedHours");
+		public static readonly RedmineObjectProperty<CustomFields> CustomFieldsProperty =
+			new RedmineObjectProperty<CustomFields>("custom_fields", "CustomFields");
+		public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
+			new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+		public static readonly RedmineObjectProperty<DateTime> UpdatedOnProperty =
+			new RedmineObjectProperty<DateTime>("updated_on", "UpdatedOn");
 
 		#endregion
 
@@ -174,92 +174,43 @@
 		public Project Project
 		{
 			get { return _project; }
-			private set
-			{
-				if(_project != value)
-				{
-					_project = value;
-					OnPropertyChanged(ProjectProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
 		}
 
 		public Issue Parent
 		{
 			get { return _parent; }
-			private set
-			{
-				if(_parent != value)
-				{
-					_parent = value;
-					OnPropertyChanged(ParentProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _parent, value, ParentProperty); }
 		}
 
 		public IssueTracker Tracker
 		{
 			get { return _tracker; }
-			private set
-			{
-				if(_tracker != value)
-				{
-					_tracker = value;
-					OnPropertyChanged(TrackerProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _tracker, value, TrackerProperty); }
 		}
 
 		public IssueStatus Status
 		{
 			get { return _status; }
-			private set
-			{
-				if(_status != value)
-				{
-					_status = value;
-					OnPropertyChanged(StatusProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _status, value, StatusProperty); }
 		}
 
 		public IssuePriority Priority
 		{
 			get { return _priority; }
-			private set
-			{
-				if(_priority != value)
-				{
-					_priority = value;
-					OnPropertyChanged(PriorityProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _priority, value, PriorityProperty); }
 		}
 
 		public User Author
 		{
 			get { return _author; }
-			private set
-			{
-				if(_author != value)
-				{
-					_author = value;
-					OnPropertyChanged(AuthorProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _author, value, AuthorProperty); }
 		}
 
 		public User AssignedTo
 		{
 			get { return _assignedTo; }
-			private set
-			{
-				if(_assignedTo != value)
-				{
-					_assignedTo = value;
-					OnPropertyChanged(AssignedToProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _assignedTo, value, AssignedToProperty); }
 		}
 
 		public bool IsAssigned
@@ -270,105 +221,49 @@
 		public IssueCategory Category
 		{
 			get { return _category; }
-			private set
-			{
-				if(_category != value)
-				{
-					_category = value;
-					OnPropertyChanged(CategoryProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _category, value, CategoryProperty); }
 		}
 
 		public ProjectVersion FixedVersion
 		{
 			get { return _fixedVersion; }
-			private set
-			{
-				if(_fixedVersion != value)
-				{
-					_fixedVersion = value;
-					OnPropertyChanged(FixedVersionProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _fixedVersion, value, FixedVersionProperty); }
 		}
 
 		public string Subject
 		{
 			get { return _subject; }
-			private set
-			{
-				if(_subject != value)
-				{
-					_subject = value;
-					OnPropertyChanged(SubjectProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _subject, value, SubjectProperty); }
 		}
 
 		public string Description
 		{
 			get { return _description; }
-			private set
-			{
-				if(_description != value)
-				{
-					_description = value;
-					OnPropertyChanged(DescriptionProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
 		}
 
 		public DateTime? StartDate
 		{
 			get { return _startDate; }
-			private set
-			{
-				if(_startDate != value)
-				{
-					_startDate = value;
-					OnPropertyChanged(StartDateProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _startDate, value, StartDateProperty); }
 		}
 
 		public DateTime? DueDate
 		{
 			get { return _dueDate; }
-			private set
-			{
-				if(_dueDate != value)
-				{
-					_dueDate = value;
-					OnPropertyChanged(DueDateProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _dueDate, value, DueDateProperty); }
 		}
 
 		public double DoneRatio
 		{
 			get { return _doneRatio; }
-			private set
-			{
-				if(_doneRatio != value)
-				{
-					_doneRatio = value;
-					OnPropertyChanged(DoneRatioProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _doneRatio, value, DoneRatioProperty); }
 		}
 
 		public double EstimatedHours
 		{
 			get { return _estimatedHours; }
-			private set
-			{
-				if(_estimatedHours != value)
-				{
-					_estimatedHours = value;
-					OnPropertyChanged(EstimatedHoursProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _estimatedHours, value, EstimatedHoursProperty); }
 		}
 
 		public CustomFields CustomFields
@@ -379,27 +274,13 @@
 		public DateTime CreatedOn
 		{
 			get { return _createdOn; }
-			private set
-			{
-				if(_createdOn != value)
-				{
-					_createdOn = value;
-					OnPropertyChanged(CreatedOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
 		}
 
 		public DateTime UpdatedOn
 		{
 			get { return _updatedOn; }
-			private set
-			{
-				if(_updatedOn != value)
-				{
-					_updatedOn = value;
-					OnPropertyChanged(UpdatedOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _updatedOn, value, UpdatedOnProperty); }
 		}
 
 		#endregion

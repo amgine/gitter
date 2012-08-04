@@ -5,15 +5,15 @@
 		RootDocumentHost,
 		SecondaryDocumentHost,
 
-		LeftTool,
-		TopTool,
-		RightTool,
-		BottomTool,
+		Left,
+		Top,
+		Right,
+		Bottom,
 
-		LeftAutoHideTool,
-		TopAutoHideTool,
-		RightAutoHideTool,
-		BottomAutoHideTool,
+		LeftAutoHide,
+		TopAutoHide,
+		RightAutoHide,
+		BottomAutoHide,
 
 		Float,
 	}

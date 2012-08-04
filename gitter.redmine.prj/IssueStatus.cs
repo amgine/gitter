@@ -7,10 +7,10 @@ namespace gitter.Redmine
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty IsDefaultProperty =
-			new RedmineObjectProperty("is_default", "IsDefault");
-		public static readonly RedmineObjectProperty IsClosedProperty =
-			new RedmineObjectProperty("is_closed", "IsClosed");
+		public static readonly RedmineObjectProperty<bool> IsDefaultProperty =
+			new RedmineObjectProperty<bool>("is_default", "IsDefault");
+		public static readonly RedmineObjectProperty<bool> IsClosedProperty =
+			new RedmineObjectProperty<bool>("is_closed", "IsClosed");
 
 		#endregion
 
@@ -55,27 +55,13 @@ namespace gitter.Redmine
 		public bool IsDefault
 		{
 			get { return _isDefault; }
-			private set
-			{
-				if(_isDefault != value)
-				{
-					_isDefault = value;
-					OnPropertyChanged(IsDefaultProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _isDefault, value, IsDefaultProperty); }
 		}
 
 		public bool IsClosed
 		{
 			get { return _isClosed; }
-			private set
-			{
-				if(_isClosed != value)
-				{
-					_isClosed = value;
-					OnPropertyChanged(IsClosedProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _isDefault, value, IsClosedProperty); }
 		}
 
 		#endregion

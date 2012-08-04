@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Linq;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Windows.Forms;
@@ -17,37 +18,36 @@
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>git <see cref="Repository"/> provider.</summary>
-	public sealed class RepositoryProvider : IRepositoryProvider
+	public sealed class RepositoryProvider : IGitRepositoryProvider
 	{
 		#region Static Data
 
-		private static readonly IGitAccessorProvider[] _gitProviders = new[]
+		private static readonly IGitAccessorProvider[] _gitAccessorProviders = new[]
 			{
 				new gitter.Git.AccessLayer.CLI.MSysGitAccessorProvider(),
 			};
 
 		private static readonly Version _minVersion = new Version(1,7,0,2);
-		private static readonly IGitAccessor _git;
 		private static readonly IntegrationFeatures _integrationFeatures;
-		private static IWorkingEnvironment _environment;
-
-		internal static IWorkingEnvironment Environment
-		{
-			get { return _environment; }
-		}
+		private static IGitAccessorProvider _gitAccessorProvider;
+		private static IGitAccessor _gitAccessor;
 
 		#endregion
+
+		#region Data
+
+		private IWorkingEnvironment _environment;
+		private GuiProvider _guiProvider;
+		private Section _configSection;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Initializes the <see cref="RepositoryProvider"/> class.</summary>
 		static RepositoryProvider()
 		{
 			_integrationFeatures = new IntegrationFeatures();
-			_git = _gitProviders[0].CreateAccessor();
-		}
-
-		public IEnumerable<IGitAccessorProvider> AccessorProviders
-		{
-			get { return _gitProviders; }
 		}
 
 		/// <summary>Create <see cref="RepositoryProvider"/>.</summary>
@@ -55,9 +55,78 @@
 		{
 		}
 
+		#endregion
+
+		#region Properties
+
+		public string Name
+		{
+			get { return "git"; }
+		}
+
+		public bool IsLoaded
+		{
+			get { return _environment != null; }
+		}
+
+		#endregion
+
+		public IEnumerable<IGitAccessorProvider> GitAccessorProviders
+		{
+			get { return _gitAccessorProviders; }
+		}
+
+		public IGitAccessorProvider ActiveGitAccessorProvider
+		{
+			get { return _gitAccessorProvider; }
+			set
+			{
+				if(value == null) throw new ArgumentNullException("value");
+
+				if(_gitAccessorProvider != value)
+				{
+					if(_gitAccessorProvider != null && _gitAccessor != null && _configSection != null)
+					{
+						var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
+						_gitAccessor.SaveTo(gitAccessorSection);
+					}
+
+					_gitAccessorProvider = value;
+					_gitAccessor = value.CreateAccessor();
+
+					if(_gitAccessor != null && _configSection != null)
+					{
+						var gitAccessorSection = _configSection.TryGetSection(value.Name);
+						_gitAccessor.LoadFrom(gitAccessorSection);
+					}
+				}
+			}
+		}
+
+		public IGitAccessor GitAccessor
+		{
+			get { return _gitAccessor; }
+			set
+			{
+				if(value == null) throw new ArgumentNullException("value");
+
+				if(_gitAccessor != value)
+				{
+					if(_gitAccessorProvider != null && _gitAccessor != null && _configSection != null)
+					{
+						var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
+						_gitAccessor.SaveTo(gitAccessorSection);
+					}
+
+					_gitAccessorProvider = _gitAccessor.Provider;
+					_gitAccessor = value;
+				}
+			}
+		}
+
 		internal static IGitAccessor Git
 		{
-			get { return _git; }
+			get { return _gitAccessor; }
 		}
 
 		public static IntegrationFeatures Integration
@@ -70,34 +139,44 @@
 			get { return _minVersion; }
 		}
 
-		public string Name
-		{
-			get { return "git"; }
-		}
-
 		public bool LoadFor(IWorkingEnvironment environment, Section section)
 		{
 			if(environment == null) throw new ArgumentNullException("environment");
+
 			if(section != null)
 			{
-				var msysgitNode = section.TryGetSection("MSysGit");
-				if(msysgitNode != null)
+				var providerName = section.GetValue<string>("AccessorProvider", string.Empty);
+				if(!string.IsNullOrWhiteSpace(providerName))
 				{
-					_git.LoadFrom(msysgitNode);
+					ActiveGitAccessorProvider = GitAccessorProviders.FirstOrDefault(
+						prov => prov.Name == providerName);
 				}
+				if(ActiveGitAccessorProvider == null)
+				{
+					ActiveGitAccessorProvider = GitAccessorProviders.First();
+				}
+				var gitAccessorSection = section.TryGetSection(ActiveGitAccessorProvider.Name);
+				if(gitAccessorSection != null)
+				{
+					GitAccessor.LoadFrom(gitAccessorSection);
+				}
+			}
+			else
+			{
+				ActiveGitAccessorProvider = GitAccessorProviders.First();
 			}
 			Version gitVersion;
 			try
 			{
-				gitVersion = _git.GitVersion;
+				gitVersion = _gitAccessor.GitVersion;
 			}
 			catch
 			{
 				gitVersion = null;
 			}
-			if(gitVersion == null || gitVersion < _minVersion)
+			if(gitVersion == null || gitVersion < MinimumRequiredGitVersion)
 			{
-				using(var dlg = new VersionCheckDialog(environment, _minVersion, gitVersion))
+				using(var dlg = new VersionCheckDialog(environment, this, MinimumRequiredGitVersion, gitVersion))
 				{
 					dlg.Run(environment.MainForm);
 					gitVersion = dlg.InstalledVersion;
@@ -137,6 +216,7 @@
 					GitOptionsPage.Guid,
 					env => new ConfigurationPage(env)));
 			_environment = environment;
+			_configSection = section;
 			return true;
 		}
 
@@ -146,40 +226,54 @@
 		{
 			if(section == null) throw new ArgumentNullException("section");
 
-			var msysgitNode = section.GetCreateSection("MSysGit");
-			_git.SaveTo(msysgitNode);
+			if(ActiveGitAccessorProvider != null)
+			{
+				section.SetValue<string>("AccessorProvider", ActiveGitAccessorProvider.Name);
+				if(GitAccessor != null)
+				{
+					var gitAccessorSection = section.GetCreateSection(ActiveGitAccessorProvider.Name);
+					GitAccessor.SaveTo(gitAccessorSection);
+				}
+			}
 
 			var integrationNode = section.GetCreateSection("Integration");
 			_integrationFeatures.SaveTo(integrationNode);
+			_configSection = section;
 		}
 
 		public bool IsValidFor(string workingDirectory)
 		{
-			return _git.IsValidRepository(workingDirectory);
+			if(GitAccessor != null)
+			{
+				return GitAccessor.IsValidRepository(workingDirectory);
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		public IRepository OpenRepository(string workingDirectory)
 		{
-			return Repository.Load(RepositoryProvider.Git, workingDirectory);
+			return Repository.Load(GitAccessor, workingDirectory);
 		}
 
 		public IAsyncFunc<IRepository> OpenRepositoryAsync(string workingDirectory)
 		{
-			return Repository.LoadAsync(RepositoryProvider.Git, workingDirectory);
+			return Repository.LoadAsync(GitAccessor, workingDirectory);
 		}
 
-		public void OnRepositoryLoaded(IWorkingEnvironment environment, IRepository repository)
+		public void OnRepositoryLoaded(IRepository repository)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
 			if(repository == null) throw new ArgumentNullException("repository");
 			var gitRepository = repository as Repository;
 			if(gitRepository == null) throw new ArgumentException("repository");
 
 			if(gitRepository.UserIdentity == null)
 			{
-				using(var dlg = new UserIdentificationDialog(environment, gitRepository))
+				using(var dlg = new UserIdentificationDialog(_environment, gitRepository))
 				{
-					dlg.Run(environment.MainForm);
+					dlg.Run(_environment.MainForm);
 				}
 			}
 		}
@@ -198,29 +292,37 @@
 			catch
 			{
 			}
-			gitRepository.Dispose();
+			finally
+			{
+				gitRepository.Dispose();
+			}
 		}
 
-		public IRepositoryGuiProvider CreateGuiProvider(IRepository repository)
+		public IRepositoryGuiProvider GuiProvider
 		{
-			return new GuiProvider((Repository)repository);
+			get
+			{
+				if(_guiProvider == null)
+				{
+					_guiProvider = new GuiProvider(this);
+				}
+				return _guiProvider;
+			}
 		}
 
-		public static DialogResult RunInitDialog()
+		public DialogResult RunInitDialog()
 		{
-			return RunInitDialog(_environment);
-		}
-
-		public static DialogResult RunInitDialog(IWorkingEnvironment environment)
-		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			if(_environment == null)
+			{
+				throw new InvalidOperationException(string.Format("{0} is not loaded.", GetType().FullName));
+			}
 
 			DialogResult res;
 			string path = "";
-			using(var dlg = new InitDialog())
+			using(var dlg = new InitDialog(this))
 			{
-				dlg.RepositoryPath = environment.RecentRepositoryPath;
-				res = dlg.Run(environment.MainForm);
+				dlg.RepositoryPath = _environment.RecentRepositoryPath;
+				res = dlg.Run(_environment.MainForm);
 				if(res == DialogResult.OK)
 				{
 					path = Path.GetFullPath(dlg.RepositoryPath.Trim());
@@ -228,26 +330,29 @@
 			}
 			if(res == DialogResult.OK)
 			{
-				environment.OpenRepository(path);
+				_environment.OpenRepository(path);
 			}
 			return res;
 		}
 
-		public static DialogResult RunCloneDialog()
+		bool IGitRepositoryProvider.RunInitDialog()
 		{
-			return RunCloneDialog(_environment);
+			return RunInitDialog() == DialogResult.OK;
 		}
 
-		public static DialogResult RunCloneDialog(IWorkingEnvironment environment)
+		public DialogResult RunCloneDialog()
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			if(_environment == null)
+			{
+				throw new InvalidOperationException(string.Format("{0} is not loaded.", GetType().Name));
+			}
 
 			DialogResult res;
 			string path = "";
-			using(var dlg = new CloneDialog())
+			using(var dlg = new CloneDialog(this))
 			{
-				dlg.RepositoryPath = environment.RecentRepositoryPath;
-				res = dlg.Run(environment.MainForm);
+				dlg.RepositoryPath = _environment.RecentRepositoryPath;
+				res = dlg.Run(_environment.MainForm);
 				if(res == DialogResult.OK)
 				{
 					path = Path.GetFullPath(dlg.TargetPath.Trim());
@@ -255,9 +360,14 @@
 			}
 			if(res == DialogResult.OK)
 			{
-				environment.OpenRepository(path);
+				_environment.OpenRepository(path);
 			}
 			return res;
+		}
+
+		bool IGitRepositoryProvider.RunCloneDialog()
+		{
+			return RunCloneDialog() == DialogResult.OK;
 		}
 
 		public IEnumerable<StaticRepositoryAction> GetStaticActions()
@@ -266,12 +376,12 @@
 				"init",
 				Resources.StrInit.AddEllipsis(),
 				CachedResources.Bitmaps["ImgInit"],
-				env => RunInitDialog(env));
+				env => RunInitDialog());
 			yield return new StaticRepositoryAction(
 				"clone",
 				Resources.StrClone.AddEllipsis(),
 				CachedResources.Bitmaps["ImgClone"],
-				env => RunCloneDialog(env));
+				env => RunCloneDialog());
 		}
 	}
 }

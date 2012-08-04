@@ -1,6 +1,7 @@
 ﻿namespace gitter
 {
 	using System;
+	using System.Linq;
 	using System.IO;
 	using System.Globalization;
 	using System.Collections.Generic;
@@ -185,12 +186,24 @@
 
 		private void _btnInitLocalRepo_LinkClicked(object sender, EventArgs e)
 		{
-			gitter.Git.RepositoryProvider.RunInitDialog(WorkingEnvironment);
+			var provider = WorkingEnvironment.RepositoryProviders
+											 .OfType<gitter.Git.IGitRepositoryProvider>()
+											 .FirstOrDefault();
+			if(provider != null)
+			{
+				provider.RunInitDialog();
+			}
 		}
 
 		private void _btnCloneRemoteRepo_LinkClicked(object sender, EventArgs e)
 		{
-			gitter.Git.RepositoryProvider.RunCloneDialog(WorkingEnvironment);
+			var provider = WorkingEnvironment.RepositoryProviders
+											 .OfType<gitter.Git.IGitRepositoryProvider>()
+											 .FirstOrDefault();
+			if(provider != null)
+			{
+				provider.RunCloneDialog();
+			}
 		}
 
 		private void _chkClosePageAfterRepositoryLoad_CheckedChanged(object sender, EventArgs e)

@@ -652,9 +652,13 @@
 				{
 					var f = (Form)TopLevelControl;
 					if(f.WindowState == FormWindowState.Maximized)
+					{
 						NormalizeFloatingForm();
+					}
 					else
+					{
 						MaximizeFloatingForm();
+					}
 				}
 				else
 				{
@@ -891,7 +895,9 @@
 				if(_views.Count == 0)
 				{
 					if(view == _activeView)
+					{
 						view.Parent = null;
+					}
 					if(!_isRoot)
 					{
 						Undock();
@@ -914,11 +920,17 @@
 					{
 						bool focused = view.ContainsFocus;
 						if(index >= _views.Count)
+						{
 							index = _views.Count - 1;
+						}
 						if(focused)
+						{
 							Activate(_views[index]);
+						}
 						else
+						{
 							SetActiveView(_views[index]);
+						}
 						view.Parent = null;
 					}
 				}
@@ -928,7 +940,9 @@
 				if(_views.Count == 0)
 				{
 					if(view == _activeView)
+					{
 						view.Parent = null;
+					}
 					if(!_isRoot)
 					{
 						Undock();
@@ -959,11 +973,17 @@
 					{
 						bool focused = view.ContainsFocus;
 						if(index >= _views.Count)
+						{
 							index = _views.Count - 1;
+						}
 						if(focused)
+						{
 							Activate(_views[index]);
+						}
 						else
+						{
 							SetActiveView(_views[index]);
+						}
 						view.Parent = null;
 					}
 				}
@@ -1065,9 +1085,13 @@
 				location.X += _header.Left;
 				location.Y += _header.Top;
 				if(_dockingProcess.IsActive)
+				{
 					_dockingProcess.Update(location);
+				}
 				else
+				{
 					_dockingProcess.Start(location);
+				}
 			}
 		}
 

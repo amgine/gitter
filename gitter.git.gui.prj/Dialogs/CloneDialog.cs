@@ -11,11 +11,17 @@
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class CloneDialog : GitDialogBase, IExecutableDialog
+	partial class CloneDialog : GitDialogBase, IExecutableDialog
 	{
-		public CloneDialog()
+		private readonly IGitRepositoryProvider _gitRepositoryProvider;
+
+		public CloneDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
+			if(gitRepositoryProvider == null) throw new ArgumentNullException("gitRepositoryProvider");
+
 			InitializeComponent();
+
+			_gitRepositoryProvider = gitRepositoryProvider;
 
 			Text = Resources.StrCloneRepository;
 
@@ -44,6 +50,11 @@
 		protected override string ActionVerb
 		{
 			get { return Resources.StrClone; }
+		}
+
+		private IGitRepositoryProvider GitRepositoryProvider
+		{
+			get { return _gitRepositoryProvider; }
 		}
 
 		public string RepositoryPath
@@ -250,7 +261,7 @@
 			try
 			{
 				Repository.CloneAsync(
-					RepositoryProvider.Git,
+					GitRepositoryProvider.GitAccessor,
 					url, path, template, remoteName,
 					shallow, depth, bare, mirror, recursive, noCheckout).Invoke<ProgressForm>(this);
 			}

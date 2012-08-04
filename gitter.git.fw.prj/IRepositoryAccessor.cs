@@ -15,6 +15,10 @@
 		ITreeAccessor,
 		IConfigAccessor
 	{
+		/// <summary>Returns git accessor.</summary>
+		/// <value>git accessor.</value>
+		IGitAccessor GitAccessor { get; }
+
 		/// <summary>Create an archive of files from a named tree.</summary>
 		/// <param name="parameters"><see cref="ArchiveParameters"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>

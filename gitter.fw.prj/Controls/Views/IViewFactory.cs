@@ -17,7 +17,7 @@
 		Image Image { get; }
 
 		/// <summary>Only one instance of view should be maintained.</summary>
-		bool Singleton { get; }
+		bool IsSingleton { get; }
 
 		/// <summary>List of views created by this factory.</summary>
 		IEnumerable<ViewBase> CreatedViews { get; }

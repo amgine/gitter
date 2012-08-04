@@ -13,17 +13,24 @@
 	{
 		private const string _downloadUrl = @"http://code.google.com/p/msysgit/downloads/list";
 
+		#region Data
+
 		private readonly IWorkingEnvironment _environment;
+		private readonly IGitRepositoryProvider _gitRepositoryProvider;
 		private Version _requiredVersion;
 		private Version _installedVersion;
 		private MSysGitDownloader _downloader;
 
-		public VersionCheckDialog(IWorkingEnvironment environment, Version requiredVersion, Version installedVersion)
+		#endregion
+
+		public VersionCheckDialog(IWorkingEnvironment environment, IGitRepositoryProvider gitRepositoryProvider, Version requiredVersion, Version installedVersion)
 		{
 			if(environment == null) throw new ArgumentNullException("environment");
+			if(gitRepositoryProvider == null) throw new ArgumentNullException("gitRepositoryProvider");
 			if(requiredVersion == null) throw new ArgumentNullException("requiredVersion");
 
 			_environment = environment;
+			_gitRepositoryProvider = gitRepositoryProvider;
 			_requiredVersion = requiredVersion;
 			_installedVersion = installedVersion;
 
@@ -58,26 +65,39 @@
 			UpdateStatus();
 		}
 
+		private IGitRepositoryProvider GitRepositoryProvider
+		{
+			get { return _gitRepositoryProvider; }
+		}
+
 		private void RefreshLatestVersion()
 		{
 			_lnkRefreshLatestVersion.Visible = false;
 			_lnkDownload.Visible = false;
 			_lblLatestVersionValue.Text = Resources.StrsSearching.AddEllipsis();
-			MSysGitDownloader.BeginCreate(
-				ar =>
+			MSysGitDownloader.BeginCreate(OnMSysGitDownloaderCreated);
+		}
+
+		private void OnMSysGitDownloaderCreated(IAsyncResult ar)
+		{
+			try
+			{
+				_downloader = MSysGitDownloader.EndCreate(ar);
+			}
+			catch
+			{
+				_downloader = null;
+			}
+			if(!Disposing && !IsDisposed)
+			{
+				try
 				{
-					_downloader = MSysGitDownloader.EndCreate(ar);
-					if(!Disposing && !IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new MethodInvoker(UpdateLatestVersion));
-						}
-						catch
-						{
-						}
-					}
-				});
+					BeginInvoke(new MethodInvoker(UpdateLatestVersion));
+				}
+				catch
+				{
+				}
+			}
 		}
 
 		private void UpdateLatestVersion()
@@ -87,8 +107,8 @@
 				Version currentVersion = null;
 				try
 				{
-					RepositoryProvider.Git.RefreshGitVersion();
-					currentVersion = RepositoryProvider.Git.GitVersion;
+					GitRepositoryProvider.GitAccessor.RefreshGitVersion();
+					currentVersion = GitRepositoryProvider.GitAccessor.GitVersion;
 				}
 				catch
 				{
@@ -158,8 +178,8 @@
 			Version gitVersion;
 			try
 			{
-				RepositoryProvider.Git.RefreshGitVersion();
-				gitVersion = RepositoryProvider.Git.GitVersion;
+				GitRepositoryProvider.GitAccessor.RefreshGitVersion();
+				gitVersion = GitRepositoryProvider.GitAccessor.GitVersion;
 			}
 			catch
 			{

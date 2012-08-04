@@ -1,9 +1,9 @@
 ﻿namespace gitter.Framework
 {
 	using System;
+	using System.Linq;
+	using System.Collections.Generic;
 	using System.Windows.Forms;
-	using System.Reflection;
-	using System.Text;
 	using System.Threading;
 
 	using gitter.Framework.Options;
@@ -25,6 +25,14 @@
 
 		private static readonly IMessageBoxService _messageBoxService = new CustomMessageBoxService();
 
+		private static readonly IGitterStyle[] _styles =
+			new IGitterStyle[]
+			{
+				new MSVS2010Style(),
+			};
+
+		private static IGitterStyle _style;
+
 		/// <summary>Returns the selected text renderer for application.</summary>
 		public static ITextRenderer TextRenderer
 		{
@@ -33,6 +41,27 @@
 			{
 				if(value == null) throw new ArgumentNullException("value");
 				_defaultTextRenderer = value;
+			}
+		}
+
+		public static IEnumerable<IGitterStyle> Styles
+		{
+			get { return _styles; }
+		}
+
+		public static IGitterStyle Style
+		{
+			get { return _style; }
+			set
+			{
+				if(value == null) throw new ArgumentNullException("value");
+
+				if(_style != value)
+				{
+					ToolStripManager.Renderer = value.ToolStripRenderer;
+					ViewManager.Renderer = value.ViewRenderer;
+					_style = value;
+				}
 			}
 		}
 
@@ -116,6 +145,17 @@
 			}
 		}
 
+		private static void SelectStyle()
+		{
+			var styleName = _configurationService.GuiSection.GetValue<string>("Style", string.Empty);
+			var style = Styles.FirstOrDefault(s => s.Name == styleName);
+			if(style == null)
+			{
+				style = Styles.First();
+			}
+			Style = style;
+		}
+
 		public static void Run<T>()
 			where T: FormEx, IWorkingEnvironment, new()
 		{
@@ -136,7 +176,7 @@
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
-			ToolStripManager.Renderer = new MSVS2010StyleRenderer();
+			SelectStyle();
 
 			if(Utility.IsOSWindows7OrNewer)
 			{

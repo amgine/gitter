@@ -9,18 +9,18 @@ namespace gitter.Redmine
 	{
 		#region Static
 
-		public static RedmineObjectProperty LoginProperty =
-			new RedmineObjectProperty("login", "Login");
-		public static RedmineObjectProperty FirstNameProperty =
-			new RedmineObjectProperty("firstname", "FirstName");
-		public static RedmineObjectProperty LastNameProperty =
-			new RedmineObjectProperty("lastname", "LastName");
-		public static RedmineObjectProperty MailProperty =
-			new RedmineObjectProperty("mail", "Mail");
-		public static RedmineObjectProperty CreatedOnProperty =
-			new RedmineObjectProperty("created_on", "CreatedOn");
-		public static RedmineObjectProperty LastLoginOnProperty =
-			new RedmineObjectProperty("last_login_on", "LastLoginOn");
+		public static RedmineObjectProperty<string> LoginProperty =
+			new RedmineObjectProperty<string>("login", "Login");
+		public static RedmineObjectProperty<string> FirstNameProperty =
+			new RedmineObjectProperty<string>("firstname", "FirstName");
+		public static RedmineObjectProperty<string> LastNameProperty =
+			new RedmineObjectProperty<string>("lastname", "LastName");
+		public static RedmineObjectProperty<string> MailProperty =
+			new RedmineObjectProperty<string>("mail", "Mail");
+		public static RedmineObjectProperty<DateTime> CreatedOnProperty =
+			new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+		public static RedmineObjectProperty<DateTime?> LastLoginOnProperty =
+			new RedmineObjectProperty<DateTime?>("last_login_on", "LastLoginOn");
 
 		#endregion
 
@@ -131,79 +131,37 @@ namespace gitter.Redmine
 		public string Login
 		{
 			get { return _login; }
-			internal set
-			{
-				if(_login != value)
-				{
-					_login = value;
-					OnPropertyChanged(LoginProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _login, value, LoginProperty); }
 		}
 
 		public string FirstName
 		{
 			get { return _firstName; }
-			internal set
-			{
-				if(_firstName != value)
-				{
-					_firstName = value;
-					OnPropertyChanged(FirstNameProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _firstName, value, FirstNameProperty); }
 		}
 
 		public string LastName
 		{
 			get { return _lastName; }
-			internal set
-			{
-				if(_lastName != value)
-				{
-					_lastName = value;
-					OnPropertyChanged(LastNameProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _lastName, value, LastNameProperty); }
 		}
 
 		public string Mail
 		{
 			get { return _mail; }
-			internal set
-			{
-				if(_mail != value)
-				{
-					_mail = value;
-					OnPropertyChanged(MailProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _mail, value, MailProperty); }
 		}
 
 		public DateTime CreatedOn
 		{
 			get { return _createdOn; }
-			internal set
-			{
-				if(_createdOn != value)
-				{
-					_createdOn = value;
-					OnPropertyChanged(CreatedOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
 		}
 
 		public DateTime? LastLoginOn
 		{
 			get { return _lastLoginOn; }
-			internal set
-			{
-				if(_lastLoginOn != value)
-				{
-					_lastLoginOn = value;
-					OnPropertyChanged(LastLoginOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _lastLoginOn, value, LastLoginOnProperty); }
 		}
 
 		#endregion

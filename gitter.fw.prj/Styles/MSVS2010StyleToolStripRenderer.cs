@@ -7,7 +7,7 @@
 
 	using Resources = gitter.Framework.Properties.Resources;
 
-	sealed class MSVS2010StyleRenderer : ToolStripRenderer
+	sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 	{
 		private static class ColorTable
 		{

@@ -8,20 +8,20 @@
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty FileNameProperty =
-			new RedmineObjectProperty("filename", "FileName");
-		public static readonly RedmineObjectProperty FileSizeProperty =
-			new RedmineObjectProperty("filesize", "FileSize");
-		public static readonly RedmineObjectProperty DescriptionProperty =
-			new RedmineObjectProperty("description", "Description");
-		public static readonly RedmineObjectProperty ContentTypeProperty =
-			new RedmineObjectProperty("content_type", "ContentType");
-		public static readonly RedmineObjectProperty ContentUrlProperty =
-			new RedmineObjectProperty("content_url", "ContentUrl");
-		public static readonly RedmineObjectProperty AuthorProperty =
-			new RedmineObjectProperty("author", "Author");
-		public static readonly RedmineObjectProperty CreatedOnProperty =
-			new RedmineObjectProperty("created_on", "CreatedOn");
+		public static readonly RedmineObjectProperty<string> FileNameProperty =
+			new RedmineObjectProperty<string>("filename", "FileName");
+		public static readonly RedmineObjectProperty<int> FileSizeProperty =
+			new RedmineObjectProperty<int>("filesize", "FileSize");
+		public static readonly RedmineObjectProperty<string> DescriptionProperty =
+			new RedmineObjectProperty<string>("description", "Description");
+		public static readonly RedmineObjectProperty<string> ContentTypeProperty =
+			new RedmineObjectProperty<string>("content_type", "ContentType");
+		public static readonly RedmineObjectProperty<string> ContentUrlProperty =
+			new RedmineObjectProperty<string>("content_url", "ContentUrl");
+		public static readonly RedmineObjectProperty<User> AuthorProperty =
+			new RedmineObjectProperty<User>("author", "Author");
+		public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
+			new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
 
 		#endregion
 
@@ -87,92 +87,43 @@
 		public string FileName
 		{
 			get { return _fileName; }
-			private set
-			{
-				if(_fileName != value)
-				{
-					_fileName = value;
-					OnPropertyChanged(FileNameProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _fileName, value, FileNameProperty); }
 		}
 
 		public int FileSize
 		{
 			get { return _fileSize; }
-			private set
-			{
-				if(_fileSize != value)
-				{
-					_fileSize = value;
-					OnPropertyChanged(FileSizeProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _fileSize, value, FileSizeProperty); }
 		}
 
 		public string ContentType
 		{
 			get { return _contentType; }
-			private set
-			{
-				if(_contentType != value)
-				{
-					_contentType = value;
-					OnPropertyChanged(ContentTypeProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _contentType, value, ContentTypeProperty); }
 		}
 
 		public string Description
 		{
 			get { return _description; }
-			private set
-			{
-				if(_description != value)
-				{
-					_description = value;
-					OnPropertyChanged(DescriptionProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
 		}
 
 		public string ContentUrl
 		{
 			get { return _contentUrl; }
-			private set
-			{
-				if(_contentUrl != value)
-				{
-					_contentUrl = value;
-					OnPropertyChanged(ContentUrlProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _contentUrl, value, ContentUrlProperty); }
 		}
 
 		public User Author
 		{
 			get { return _author; }
-			private set
-			{
-				if(_author != value)
-				{
-					_author = value;
-					OnPropertyChanged(AuthorProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _author, value, AuthorProperty); }
 		}
 
 		public DateTime CreatedOn
 		{
 			get { return _createdOn; }
-			private set
-			{
-				if(_createdOn != value)
-				{
-					_createdOn = value;
-					OnPropertyChanged(CreatedOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
 		}
 
 		#endregion

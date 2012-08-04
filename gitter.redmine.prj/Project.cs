@@ -8,16 +8,16 @@ namespace gitter.Redmine
 	{
 		#region Static
 
-		public static readonly RedmineObjectProperty IdentifierProperty =
-			new RedmineObjectProperty("identifier", "Identifier");
-		public static readonly RedmineObjectProperty DescriptionProperty =
-			new RedmineObjectProperty("description", "Description");
-		public static readonly RedmineObjectProperty ParentProperty =
-			new RedmineObjectProperty("parent", "Parent");
-		public static readonly RedmineObjectProperty CreatedOnProperty =
-			new RedmineObjectProperty("created_on", "CreatedOn");
-		public static readonly RedmineObjectProperty UpdatedOnProperty =
-			new RedmineObjectProperty("updated_on", "UpdatedOn");
+		public static readonly RedmineObjectProperty<string> IdentifierProperty =
+			new RedmineObjectProperty<string>("identifier", "Identifier");
+		public static readonly RedmineObjectProperty<string> DescriptionProperty =
+			new RedmineObjectProperty<string>("description", "Description");
+		public static readonly RedmineObjectProperty<Project> ParentProperty =
+			new RedmineObjectProperty<Project>("parent", "Parent");
+		public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
+			new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+		public static readonly RedmineObjectProperty<DateTime> UpdatedOnProperty =
+			new RedmineObjectProperty<DateTime>("updated_on", "UpdatedOn");
 
 		#endregion
 
@@ -77,69 +77,31 @@ namespace gitter.Redmine
 		public string Description
 		{
 			get { return _description; }
-			private set
-			{
-				if(_description != value)
-				{
-					_description = value;
-					OnPropertyChanged(DescriptionProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
 		}
 
 		public string Identifier
 		{
 			get { return _identifier; }
-			private set
-			{
-				if(_identifier != value)
-				{
-					_identifier = value;
-					OnPropertyChanged(IdentifierProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _identifier, value, IdentifierProperty); }
 		}
 
 		public DateTime CreatedOn
 		{
 			get { return _createdOn; }
-			private set
-			{
-				if(_createdOn != value)
-				{
-					if(_createdOn != value)
-					{
-						_createdOn = value;
-						OnPropertyChanged(CreatedOnProperty);
-					}
-				}
-			}
+			private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
 		}
 
 		public DateTime UpdatedOn
 		{
 			get { return _updatedOn; }
-			private set
-			{
-				if(_updatedOn != value)
-				{
-					_updatedOn = value;
-					OnPropertyChanged(UpdatedOnProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _updatedOn, value, UpdatedOnProperty); }
 		}
 
 		public Project Parent
 		{
 			get { return _parent; }
-			private set
-			{
-				if(_parent != value)
-				{
-					_parent = value;
-					OnPropertyChanged(ParentProperty);
-				}
-			}
+			private set { UpdatePropertyValue(ref _parent, value, ParentProperty); }
 		}
 
 		#endregion

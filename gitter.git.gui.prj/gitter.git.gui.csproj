@@ -80,6 +80,7 @@
     <Compile Include="Controls\Menus\HeadMenu.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="TreeExtensions.cs" />
     <Compile Include="Views\PathHistoryView.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -22,7 +22,7 @@
 		private Section _rootSection;
 		private Section _guiSection;
 		private Section _globalSection;
-		private Section _toolsSection;
+		private Section _viewsSection;
 		private Section _providersSection;
 
 		internal ConfigurationService()
@@ -47,7 +47,7 @@
 			_rootSection = _configuration.RootSection;
 			_guiSection = _rootSection.GetCreateSection("Gui");
 			_globalSection = _rootSection.GetCreateSection("Global");
-			_toolsSection = _rootSection.GetCreateSection("Tools");
+			_viewsSection = _rootSection.GetCreateSection("Tools");
 			_providersSection = _rootSection.GetCreateSection("Providers");
 		}
 
@@ -86,9 +86,9 @@
 			get { return _globalSection; }
 		}
 
-		public Section ToolsSection
+		public Section ViewsSection
 		{
-			get { return _toolsSection; }
+			get { return _viewsSection; }
 		}
 
 		public Section GetSectionForProvider(IRepositoryProvider provider)

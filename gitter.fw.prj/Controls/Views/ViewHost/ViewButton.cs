@@ -5,15 +5,15 @@ namespace gitter.Framework.Controls
 
 	using Resources = gitter.Framework.Properties.Resources;
 
-	sealed class ViewButton
+	public sealed class ViewButton
 	{
 		#region Static Data
 
-		private static readonly Bitmap ImgMenu = Resources.ImgToolHostMenu;
+		private static readonly Bitmap ImgMenu = Resources.ImgViewHostMenu;
 		private static readonly Bitmap ImgNormalize = Resources.ImgNormalize;
 		private static readonly Bitmap ImgMaximize = Resources.ImgMaximize;
-		private static readonly Bitmap ImgPin = Resources.ImgToolHostPin;
-		private static readonly Bitmap ImgClose = Resources.ImgToolHostClose;
+		private static readonly Bitmap ImgPin = Resources.ImgViewHostPin;
+		private static readonly Bitmap ImgClose = Resources.ImgViewHostClose;
 		private static readonly Bitmap ImgScrollLeft = Resources.ImgTabScrollLeft;
 		private static readonly Bitmap ImgScrollRight = Resources.ImgTabScrollRight;
 		private static readonly Bitmap ImgTabMenu = Resources.ImgTabMenu;
@@ -29,7 +29,7 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
-		public ViewButton(int offset, ViewButtonType type)
+		internal ViewButton(int offset, ViewButtonType type)
 		{
 			_offset = offset;
 			_type = type;
@@ -90,36 +90,9 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
-		public void OnPaint(Graphics graphics, Rectangle rect, bool focus, bool hover, bool pressed)
+		internal void OnPaint(Graphics graphics, Rectangle bounds, bool focus, bool hover, bool pressed)
 		{
-			if(hover || pressed)
-			{
-				var rc = rect;
-				rc.Width -= 1;
-				rc.Height -= 1;
-				Color border;
-				Color background;
-				if(pressed)
-				{
-					border = Color.FromArgb(229, 195, 101);
-					background = Color.FromArgb(255, 232, 166);
-				}
-				else
-				{
-					border = Color.FromArgb(229, 195, 101);
-					background = Color.FromArgb(255, 252, 244);
-				}
-				using(var brush = new SolidBrush(background))
-				{
-					graphics.FillRectangle(brush, rc);
-				}
-				using(var pen = new Pen(border))
-				{
-					graphics.DrawRectangle(pen, rc);
-				}
-			}
-			if(_image != null)
-				graphics.DrawImage(_image, rect);
+			ViewManager.Renderer.RenderViewButton(this, graphics, bounds, focus, hover, pressed);
 		}
 
 		public override string ToString()

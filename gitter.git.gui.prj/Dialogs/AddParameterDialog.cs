@@ -116,11 +116,15 @@
 				}
 				else
 				{
-					RepositoryProvider.Git.SetConfigValue(
-						new SetConfigValueParameters(name, value)
-						{
-							ConfigFile = _configFile,
-						});
+					var gitRepositoryProvider = _environment.GetRepositoryProvider<IGitRepositoryProvider>();
+					if(gitRepositoryProvider != null)
+					{
+						gitRepositoryProvider.GitAccessor.SetConfigValue(
+							new SetConfigValueParameters(name, value)
+							{
+								ConfigFile = _configFile,
+							});
+					}
 				}
 				Cursor = Cursors.Default;
 			}

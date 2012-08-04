@@ -3,7 +3,6 @@
 	using System;
 	using System.IO;
 	using System.Collections.Generic;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
@@ -93,58 +92,14 @@
 			return (index == -1)?path:path.Substring(index + 1);
 		}
 
-		private string ExtractBlob(string blobPath)
+		public byte[] GetBlobContent(string blobPath)
 		{
-			var path = Path.Combine(Path.GetTempPath(), "gitter", _treeHash);
-			var fileName = Path.Combine(path, blobPath);
-			byte[] bytes = null;
-			try
-			{
-				bytes = Repository.Accessor.QueryBlobBytes(new AccessLayer.QueryBlobBytesParameters()
+			return Repository.Accessor.QueryBlobBytes(
+				new QueryBlobBytesParameters()
 				{
 					Treeish = _treeHash,
 					ObjectName = blobPath,
 				});
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					null,
-					exc.Message,
-					Resources.ErrfFailedToQueryBlob.UseAsFormat(blobPath),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return null;
-			}
-			if(bytes != null)
-			{
-				path = Path.GetDirectoryName(fileName);
-				if(!Directory.Exists(path)) Directory.CreateDirectory(path);
-				using(var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
-				{
-					fs.Write(bytes, 0, bytes.Length);
-					fs.Close();
-				}
-			}
-			return fileName;
-		}
-
-		public void OpenFile(string fileName)
-		{
-			fileName = ExtractBlob(fileName);
-			if(fileName != null)
-			{
-				Utility.OpenUrl(fileName);
-			}
-		}
-
-		public void ShowOpenFileWithDialog(string fileName)
-		{
-			fileName = ExtractBlob(fileName);
-			if(fileName != null)
-			{
-				Utility.ShowOpenWithDialog(fileName);
-			}
 		}
 	}
 }

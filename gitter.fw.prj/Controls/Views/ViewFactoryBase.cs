@@ -52,7 +52,7 @@
 			get { return _image; }
 		}
 
-		public virtual bool Singleton
+		public virtual bool IsSingleton
 		{
 			get { return _singleton; }
 		}
