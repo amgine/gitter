@@ -55,6 +55,7 @@
 
 		private Diff _diff;
 		private FileItem[] _items;
+		private ChangesCountByType[] _changesByType;
 
 		private sealed class FileItem
 		{
@@ -69,9 +70,13 @@
 				_file = file;
 
 				if(file.Status == FileStatus.Removed)
+				{
 					_text = file.SourceFile;
+				}
 				else
+				{
 					_text = file.TargetFile;
+				}
 				_icon = Utility.QueryIcon(_text);
 				switch(file.Status)
 				{
@@ -285,6 +290,58 @@
 			}
 		}
 
+		private sealed class ChangesCountByType
+		{
+			private readonly FileStatus _status;
+			private readonly Bitmap _image;
+			private int _count;
+
+			public ChangesCountByType(FileStatus status)
+			{
+				_status = status;
+				switch(status)
+				{
+					case FileStatus.Added:
+						_image = FileStatusIcons.ImgUnstagedUntracked;
+						break;
+					case FileStatus.Modified:
+						_image = FileStatusIcons.ImgUnstagedModified;
+						break;
+					case FileStatus.Removed:
+						_image = FileStatusIcons.ImgUnstagedRemoved;
+						break;
+					case FileStatus.Unmerged:
+						_image = FileStatusIcons.ImgUnmerged;
+						break;
+					case FileStatus.Copied:
+						_image = FileStatusIcons.ImgCopied;
+						break;
+					case FileStatus.Renamed:
+						_image = FileStatusIcons.ImgRenamed;
+						break;
+					case FileStatus.ModeChanged:
+						_image = FileStatusIcons.ImgModeChanged;
+						break;
+				}
+			}
+
+			public Bitmap Image
+			{
+				get { return _image; }
+			}
+
+			public FileStatus Status
+			{
+				get { return _status; }
+			}
+
+			public int Count
+			{
+				get { return _count; }
+				set { _count = value; }
+			}
+		}
+
 		private readonly TrackingService<FileItem> _fileHover;
 
 		private static readonly Font Font = GitterApplication.FontManager.UIFont.Font;
@@ -295,6 +352,15 @@
 		{
 			_fileHover = new TrackingService<FileItem>();
 			_fileHover.Changed += OnFileHoverChanged;
+
+			_changesByType = new ChangesCountByType[7];
+			_changesByType[0] = new ChangesCountByType(FileStatus.Added);
+			_changesByType[1] = new ChangesCountByType(FileStatus.Removed);
+			_changesByType[2] = new ChangesCountByType(FileStatus.Modified);
+			_changesByType[3] = new ChangesCountByType(FileStatus.Renamed);
+			_changesByType[4] = new ChangesCountByType(FileStatus.Copied);
+			_changesByType[5] = new ChangesCountByType(FileStatus.Unmerged);
+			_changesByType[6] = new ChangesCountByType(FileStatus.ModeChanged);
 		}
 
 		private void OnFileHoverChanged(object sender, TrackingEventArgs<FileItem> e)
@@ -312,6 +378,10 @@
 				if(_diff != value)
 				{
 					_diff = value;
+					for(int i = 0; i < _changesByType.Length; ++i)
+					{
+						_changesByType[i].Count = 0;
+					}
 					if(_diff != null)
 					{
 						if(_items == null || _items.Length != _diff.FilesCount)
@@ -321,6 +391,14 @@
 						for(int i = 0; i < _diff.FilesCount; ++i)
 						{
 							_items[i] = new FileItem(_diff[i]);
+							for(int j = 0; j < _changesByType.Length; ++j)
+							{
+								if(_changesByType[j].Status == _diff[i].Status)
+								{
+									++_changesByType[j].Count;
+									break;
+								}
+							}
 						}
 					}
 					else
@@ -433,7 +511,7 @@
 			var rcClip = Rectangle.Intersect(rc, clip);
 			if(_diff.FilesCount == 0)
 			{
-				if(rcClip.Height != 0 && rcClip.Width != 0)
+				if(rcClip.Height > 0 && rcClip.Width > 0)
 				{
 					GitterApplication.TextRenderer.DrawText(
 						graphics, Resources.StrNoChangedFiles, Font, SystemBrushes.GrayText, rc, ContentFormat);
@@ -441,16 +519,48 @@
 			}
 			else
 			{
-				if(rcClip.Height != 0 && rcClip.Width != 0)
+				if(rcClip.Height > 0 && rcClip.Width > 0)
 				{
+					var headerBounds = rc;
+
+					string headerText = Resources.StrChangedFiles.AddColon();
+					var headerWidth = GitterApplication.TextRenderer.MeasureText(
+						graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
 					GitterApplication.TextRenderer.DrawText(
-						graphics, Resources.StrChangedFiles.AddColon(), Font, SystemBrushes.WindowText, rc, ContentFormat);
+						graphics, headerText, Font, SystemBrushes.WindowText, headerBounds, ContentFormat);
+
+					headerBounds.X += headerWidth + 5;
+					headerBounds.Width -= headerWidth + 5;
+
+					for(int i = 0; i < _changesByType.Length; ++i)
+					{
+						if(headerBounds.Width <= 0) break;
+
+						if(_changesByType[i].Count != 0)
+						{
+							headerText = _changesByType[i].Count.ToString();
+							var image = _changesByType[i].Image;
+
+							graphics.DrawImage(image, headerBounds.X, headerBounds.Y);
+							headerBounds.X += 16 + 3;
+							headerBounds.Width -= 16 + 3;
+
+							if(headerBounds.Width <= 0) break;
+
+							headerWidth = GitterApplication.TextRenderer.MeasureText(
+								graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
+							GitterApplication.TextRenderer.DrawText(
+								graphics, headerText, Font, SystemBrushes.WindowText, headerBounds, ContentFormat);
+							headerBounds.X += headerWidth + 5;
+							headerBounds.Width -= headerWidth + 5;
+						}
+					}
 				}
 				for(int i = 0; i < _items.Length; ++i)
 				{
 					rc.Y += LineHeight;
 					rcClip = Rectangle.Intersect(rc, clip);
-					if(rcClip.Height != 0 && rcClip.Width != 0)
+					if(rcClip.Height > 0 && rcClip.Width > 0)
 					{
 						_items[i].Draw(graphics, Font, rc, i, i == _fileHover.Index);
 					}
