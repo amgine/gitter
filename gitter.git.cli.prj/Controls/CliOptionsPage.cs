@@ -194,7 +194,8 @@
 				{
 					var path = _txtmSysGitPath.Text.Trim();
 					path = Path.GetFullPath(path);
-					if(Path.GetFileName(path) == "git.exe" && File.Exists(path))
+					var fileName = Path.GetFileName(path).ToLower();
+					if((fileName == "git.exe" || fileName == "git.cmd") && File.Exists(path))
 					{
 						Version version = null;
 						try

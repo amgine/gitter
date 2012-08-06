@@ -12,9 +12,11 @@
 		private static string GetFullPath(string filename)
 		{
 			string environmentVariable = Environment.GetEnvironmentVariable("PATH");
-			if(!string.IsNullOrEmpty(environmentVariable))
+			if(!string.IsNullOrWhiteSpace(environmentVariable))
 			{
-				foreach(string str2 in environmentVariable.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries))
+				foreach(string str2 in environmentVariable.Split(
+					new char[] { Path.PathSeparator },
+					StringSplitOptions.RemoveEmptyEntries))
 				{
 					try
 					{
@@ -34,22 +36,42 @@
 
 		public static string DetectGitExePath()
 		{
-			string fullPath = GetFullPath("git.exe");
-			if(!string.IsNullOrEmpty(fullPath))
+			const string GitExe = "git.exe";
+			const string GitCmd = "git.cmd";
+
+			string gitExeFullPath = GetFullPath(GitExe);
+			if(!string.IsNullOrWhiteSpace(gitExeFullPath))
 			{
-				return fullPath;
+				string gitWrapperExe = string.Format("{0}cmd{0}{1}", Path.DirectorySeparatorChar, GitExe);
+				if(gitExeFullPath.ToLower().EndsWith(gitWrapperExe))
+				{
+					var realGitExe = Path.Combine(
+						gitExeFullPath.Substring(0, gitExeFullPath.Length - gitWrapperExe.Length),
+						@"bin", GitExe);
+					if(File.Exists(realGitExe))
+					{
+						return realGitExe;
+					}
+				}
+				return gitExeFullPath;
 			}
-			string str2 = GetFullPath("git.cmd");
-			if(string.IsNullOrEmpty(str2))
+			string gitCmdFullPath = GetFullPath(GitCmd);
+			if(!string.IsNullOrWhiteSpace(gitCmdFullPath))
 			{
-				return null;
+				string gitWrapperCmd = string.Format("{0}cmd{0}{1}", Path.DirectorySeparatorChar, GitCmd);
+				if(gitCmdFullPath.ToLower().EndsWith(gitWrapperCmd))
+				{
+					var realGitExe = Path.Combine(
+						gitCmdFullPath.Substring(0, gitCmdFullPath.Length - gitWrapperCmd.Length),
+						@"bin", GitExe);
+					if(File.Exists(realGitExe))
+					{
+						return realGitExe;
+					}
+				}
+				return gitCmdFullPath;
 			}
-			int length = str2.ToLower().LastIndexOf(string.Format("{0}cmd{0}", Path.DirectorySeparatorChar));
-			if(length == -1)
-			{
-				return null;
-			}
-			return Path.Combine(str2.Substring(0, length), @"bin\git.exe");
+			return null;
 		}
 
 		public static Version CheckVersion(string gitExe)
