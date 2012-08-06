@@ -275,6 +275,8 @@
 				cmdline.Append(' ');
 				cmdline.Append("/hidden");
 				cmdline.Append(' ');
+				cmdline.Append("/driver:deploy");
+				cmdline.Append(' ');
 				cmdline.Append('\"');
 				cmdline.Append("/source:" + source);
 				cmdline.Append('\"');
