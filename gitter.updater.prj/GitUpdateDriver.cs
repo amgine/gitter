@@ -263,7 +263,7 @@
 		private bool DeployBuildResults()
 		{
 			var source = new DirectoryInfo(Path.Combine(_repoDownloadPath, buildOutputPath));
-			if(Utility.IsRunningWithAdministratorRights)
+			if(Utility.IsRunningWithAdministratorRights || Utility.HasWriteAccess(_targetDirectory))
 			{
 				Utility.CopyDirectoryContent(source, _targetDirectory);
 				return true;

@@ -170,5 +170,24 @@
 			{
 			}
 		}
+
+		public static bool HasWriteAccess(string directory)
+		{
+			const string FileName = "write-test";
+			var fullPath = Path.Combine(directory, FileName);
+			try
+			{
+				using(var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+				{
+					fs.WriteByte(0);
+				}
+				File.Delete(fullPath);
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
 	}
 }
