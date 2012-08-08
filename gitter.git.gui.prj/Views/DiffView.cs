@@ -31,6 +31,7 @@
 
 			_diffViewer.PreviewKeyDown += OnKeyDown;
 			_diffViewer.DiffFileContextMenuRequested += OnDiffFileContextMenuRequested;
+			_diffViewer.UntrackedFileContextMenuRequested += OnUntrackedFileContextMenuRequested;
 
 			ApplyParameters(parameters);
 
@@ -149,6 +150,13 @@
 				Utility.MarkDropDownForAutoDispose(menu);
 				e.ContextMenu = menu;
 			}
+		}
+
+		private void OnUntrackedFileContextMenuRequested(object sender, UntrackedFileContextMenuRequestedEventArgs e)
+		{
+			var menu = new UnstagedItemMenu(e.File);
+			Utility.MarkDropDownForAutoDispose(menu);
+			e.ContextMenu = menu;
 		}
 
 		public void Reload()

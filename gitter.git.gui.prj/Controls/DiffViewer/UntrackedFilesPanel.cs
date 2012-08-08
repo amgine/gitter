@@ -46,20 +46,31 @@
 				_overlay = CachedResources.Bitmaps["ImgOverlayAdd"];
 			}
 
+			public TreeFile File
+			{
+				get { return _file; }
+			}
+
 			public void Draw(Graphics graphics, Font font, Rectangle rect, int index, bool hover)
 			{
 				const int IconSize = 16;
 
 				if(hover)
+				{
 					BackgroundStyle.Hovered.Draw(graphics, rect);
+				}
 				else if(index % 2 == 1)
+				{
 					graphics.FillRectangle(Brushes.WhiteSmoke, rect);
+				}
 
 				int d = (rect.Height - 16) / 2;
 				var iconRect = new Rectangle(rect.X + d, rect.Y + d, IconSize, IconSize);
 				graphics.DrawImage(_icon, iconRect, 0, 0, IconSize, IconSize, GraphicsUnit.Pixel);
 				if(_overlay != null)
+				{
 					graphics.DrawImage(_overlay, iconRect, 0, 0, IconSize, IconSize, GraphicsUnit.Pixel);
+				}
 				rect.X += d + IconSize + 3;
 				rect.Width -= d + IconSize + 3;
 				d = (LineHeight - FontHeight) / 2;
@@ -109,7 +120,9 @@
 							found = true;
 						}
 						if(found)
+						{
 							items.Add(new FileItem(file));
+						}
 					}
 				}
 				_items = items.ToArray();
@@ -139,9 +152,13 @@
 			{
 				int id = y / LineHeight;
 				if(id >= _items.Length)
+				{
 					return -1;
+				}
 				else
+				{
 					return id;
+				}
 			}
 		}
 
@@ -155,10 +172,31 @@
 			if(FontHeight == -1) return;
 			int id = HitTest(x, y);
 			if(id == -1)
+			{
 				_fileHover.Drop();
+			}
 			else
+			{
 				_fileHover.Track(id, _items[id]);
+			}
 			base.OnMouseMove(x, y);
+		}
+
+		protected override void OnMouseDown(int x, int y, MouseButtons button)
+		{
+			base.OnMouseDown(x, y, button);
+			if(button == MouseButtons.Right)
+			{
+				var p = FlowControl as DiffViewer;
+				if(p != null)
+				{
+					var htr = HitTest(x, y);
+					if(htr >= 0 && htr < _items.Length)
+					{
+						p.OnFileContextMenuRequested(_items[htr].File);
+					}
+				}
+			}
 		}
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)

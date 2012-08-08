@@ -21,16 +21,12 @@
 			_diffSource = diffSource;
 			_diffFile = diffFile;
 
+			string fileName = diffFile.Status != FileStatus.Removed ? diffFile.TargetFile : diffFile.SourceFile;
+
 			var indexDiff = diffSource as IIndexDiffSource;
 			if(indexDiff != null)
 			{
 				var repository = indexDiff.Repository;
-				if(indexDiff.Cached)
-				{
-				}
-				else
-				{
-				}
 				if(diffFile.Status != FileStatus.Removed)
 				{
 					try
@@ -46,16 +42,32 @@
 						}
 					}
 					catch { }
-					Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
-						indexDiff.Repository.Head, diffFile.TargetFile));
-					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
-						indexDiff.Repository.Head, diffFile.TargetFile));
+				}
+				if(indexDiff.Cached)
+				{
+					var item = indexDiff.Repository.Status.TryGetStaged(fileName);
+					if(item != null)
+					{
+						Items.Add(GuiItemFactory.GetUnstageItem<ToolStripMenuItem>(item));
+						Items.Add(new ToolStripSeparator());
+					}
 				}
 				else
 				{
-					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
-						indexDiff.Repository.Head, diffFile.SourceFile));
+					var item = indexDiff.Repository.Status.TryGetUnstaged(fileName);
+					if(item != null)
+					{
+						Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(item));
+						Items.Add(new ToolStripSeparator());
+					}
 				}
+				if(diffFile.Status != FileStatus.Removed)
+				{
+					Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
+						indexDiff.Repository.Head, fileName));
+				}
+				Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
+					indexDiff.Repository.Head, fileName));
 			}
 			else
 			{

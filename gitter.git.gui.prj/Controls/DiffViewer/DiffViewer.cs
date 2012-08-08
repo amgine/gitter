@@ -25,12 +25,28 @@
 
 		public event EventHandler<DiffFileContextMenuRequestedEventArgs> DiffFileContextMenuRequested;
 
+		public event EventHandler<UntrackedFileContextMenuRequestedEventArgs> UntrackedFileContextMenuRequested;
+
 		internal void OnFileContextMenuRequested(DiffFile file)
 		{
 			var handler = DiffFileContextMenuRequested;
 			if(handler != null)
 			{
 				var args = new DiffFileContextMenuRequestedEventArgs(file);
+				handler(this, args);
+				if(args.ContextMenu != null)
+				{
+					args.ContextMenu.Show(this, PointToClient(Cursor.Position));
+				}
+			}
+		}
+
+		internal void OnFileContextMenuRequested(TreeFile file)
+		{
+			var handler = UntrackedFileContextMenuRequested;
+			if(handler != null)
+			{
+				var args = new UntrackedFileContextMenuRequestedEventArgs(file);
 				handler(this, args);
 				if(args.ContextMenu != null)
 				{

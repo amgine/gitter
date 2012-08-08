@@ -77,6 +77,7 @@
     <Compile Include="..\common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Controls\DiffViewer\UntrackedFileContextMenuRequestedEventArgs.cs" />
     <Compile Include="Controls\Menus\HeadMenu.cs">
       <SubType>Component</SubType>
     </Compile>
