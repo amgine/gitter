@@ -727,6 +727,7 @@
 					_refs.RefreshBranches();
 					_head.Refresh();
 					_status.Refresh();
+					InvokeStateChanged();
 					InvokeUpdated();
 				}
 			}
