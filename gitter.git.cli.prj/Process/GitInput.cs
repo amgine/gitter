@@ -56,7 +56,7 @@
 
 		public GitInput(string workingDirectory, Command command, Encoding encoding, IList<CommandArgument> options)
 		{
-			if(encoding == null) throw new ArgumentNullException("encoding");
+			Verify.Argument.IsNotNull(encoding, "encoding");
 
 			_workingDirectory = workingDirectory;
 			_command = command;

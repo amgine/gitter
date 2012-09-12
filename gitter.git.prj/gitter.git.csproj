@@ -67,6 +67,12 @@
     <Compile Include="..\common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\shared\Debug.cs">
+      <Link>Shared\Debug.cs</Link>
+    </Compile>
+    <Compile Include="..\shared\Verify.cs">
+      <Link>Shared\Verify.cs</Link>
+    </Compile>
     <Compile Include="Blame\BlameSourceBase.cs" />
     <Compile Include="Blame\BlameOptions.cs" />
     <Compile Include="Blame\RevisionFileBlameSource.cs" />
@@ -162,6 +168,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Verify.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

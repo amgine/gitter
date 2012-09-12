@@ -10,7 +10,8 @@
 
 		public BranchPropertiesDialog(Branch branch)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
+			Verify.Argument.IsNotNull(branch, "branch");
+
 			_branch = branch;
 
 			InitializeComponent();

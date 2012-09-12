@@ -23,7 +23,7 @@
 		public BranchListItem(Branch branch)
 			: base(branch)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
+			Verify.Argument.IsNotNull(branch, "branch");
 		}
 
 		#endregion

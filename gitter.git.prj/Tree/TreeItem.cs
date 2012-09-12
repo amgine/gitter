@@ -58,6 +58,8 @@
 			get { return _stagedStatus; }
 			internal set
 			{
+				Assert.IsFalse(IsDeleted);
+
 				if(_stagedStatus != value)
 				{
 					_stagedStatus = value;
@@ -71,6 +73,8 @@
 			get { return _status; }
 			internal set
 			{
+				Assert.IsFalse(IsDeleted);
+
 				if(_status != value)
 				{
 					_status = value;
@@ -85,15 +89,7 @@
 
 		public void Stage()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat(GetType().Name));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Status.Stage(this);
 			StagedStatus = StagedStatus.Staged;
@@ -101,15 +97,7 @@
 
 		public void Stage(AddFilesMode mode)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat(GetType().Name));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Status.Stage(this, mode);
 			StagedStatus = StagedStatus.Staged;
@@ -117,15 +105,7 @@
 
 		public void Unstage()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat(GetType().Name));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Status.Unstage(this);
 			StagedStatus = StagedStatus.Unstaged;
@@ -133,6 +113,8 @@
 
 		public IDiffSource GetDiffSource()
 		{
+			Verify.State.IsNotDeleted(this);
+
 			switch(_stagedStatus)
 			{
 				case StagedStatus.Staged:
@@ -150,15 +132,7 @@
 
 		public void Remove(bool force)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat(GetType().Name));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
@@ -185,19 +159,8 @@
 
 		public void Revert()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat(GetType().Name));
-			}
-			if((_stagedStatus & StagedStatus.Unstaged) != StagedStatus.Unstaged)
-			{
-				throw new InvalidOperationException();
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
+			Verify.State.IsTrue((_stagedStatus & StagedStatus.Unstaged) == StagedStatus.Unstaged);
 
 			switch(Type)
 			{

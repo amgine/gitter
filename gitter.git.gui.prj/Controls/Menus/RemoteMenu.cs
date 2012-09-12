@@ -13,7 +13,8 @@
 
 		public RemoteMenu(Remote remote)
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
+			Verify.Argument.IsValidGitObject(remote, "remote");
+
 			_remote = remote;
 
 			Items.Add(GuiItemFactory.GetBrowseRemoteItem<ToolStripMenuItem>(remote));

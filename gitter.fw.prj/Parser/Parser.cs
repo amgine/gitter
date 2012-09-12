@@ -20,7 +20,7 @@
 		/// <param name="string">String to parse.</param>
 		public Parser(string @string)
 		{
-			if(@string == null) throw new ArgumentNullException("string");
+			Verify.Argument.IsNotNull(@string, "@string");
 
 			_string = @string;
 		}
@@ -279,7 +279,8 @@
 		/// <returns>True if current string is <see cref="value"/>.</returns>
 		public bool CheckValue(string value)
 		{
-			if(value == null) throw new ArgumentNullException("value");
+			Verify.Argument.IsNotNull(value, "value");
+
 			var vl = value.Length;
 			var sl = _string.Length;
 			if(_position + vl > sl) return false;
@@ -290,18 +291,18 @@
 		/// <param name="value">String to look for.</param>
 		public void Find(string value)
 		{
-			if(value == null) throw new ArgumentNullException("value");
+			Verify.Argument.IsNotNull(value, "value");
+
 			var vl = value.Length;
 			var sl = _string.Length;
 			if(_position + vl > sl)
+			{
 				_position = sl;
+			}
 			else
 			{
 				int pos = _string.IndexOf(value, _position);
-				if(pos == -1)
-					_position = sl;
-				else
-					_position = pos;
+				_position = pos == -1 ? sl : pos;
 			}
 		}
 
@@ -348,18 +349,25 @@
 		/// <returns>Substring.</returns>
 		public Substring FindSubstring(string value)
 		{
-			if(value == null) throw new ArgumentNullException("value");
+			Verify.Argument.IsNotNull(value, "value");
+
 			var vl = value.Length;
 			var sl = _string.Length;
 			if(_position + vl > sl)
+			{
 				return null;
+			}
 			else
 			{
 				int pos = _string.IndexOf(value, _position);
 				if(pos == -1)
+				{
 					return null;
+				}
 				else
+				{
 					return new Substring(_string, pos, value.Length);
+				}
 			}
 		}
 
@@ -367,17 +375,25 @@
 		/// <param name="value">String to look for.</param>
 		public void FindAndSkip(string value)
 		{
+			Verify.Argument.IsNotNull(value, "value");
+
 			var vl = value.Length;
 			var sl = _string.Length;
 			if(_position + vl > sl)
+			{
 				_position = sl;
+			}
 			else
 			{
 				int pos = _string.IndexOf(value, _position);
 				if(pos == -1)
+				{
 					_position = sl;
+				}
 				else
+				{
 					_position = pos + vl;
+				}
 			}
 		}
 
@@ -413,9 +429,13 @@
 				{
 					case '\r':
 						if(prevN)
+						{
 							prevN = false;
+						}
 						else
+						{
 							lines = 0;
+						}
 						prevR = true;
 						break;
 					case '\n':
@@ -456,11 +476,16 @@
 			get { return _position; }
 			set
 			{
-				if(value < 0) throw new ArgumentOutOfRangeException();
+				Verify.Argument.IsNotNegative(value, "value");
+
 				if(value > _string.Length)
+				{
 					_position = _string.Length;
+				}
 				else
+				{
 					_position = value;
+				}
 			}
 		}
 
@@ -518,21 +543,26 @@
 		public void PushPosition()
 		{
 			if(_positions == null)
+			{
 				_positions = new Stack<int>();
+			}
 			_positions.Push(_position);
 		}
 
 		public void PushPosition(int newPosition)
 		{
 			if(_positions == null)
+			{
 				_positions = new Stack<int>();
+			}
 			_positions.Push(_position);
 			_position = newPosition;
 		}
 
 		public void PopPosition()
 		{
-			if(_positions == null || _positions.Count == 0) throw new InvalidOperationException();
+			Verify.State.IsTrue(_positions != null && _positions.Count != 0);
+
 			_position = _positions.Pop();
 		}
 

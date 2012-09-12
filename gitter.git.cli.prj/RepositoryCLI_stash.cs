@@ -14,7 +14,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public RevisionData QueryStashTop(QueryStashTopParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			if(parameters.LoadCommitInfo)
 			{
@@ -41,7 +41,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<StashedStateData> QueryStash(QueryStashParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new LogCommand(
 				LogCommand.WalkReflogs(),
@@ -86,13 +86,13 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public string QueryStashPatch(QueryRevisionDiffParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			args.Add(StashCommand.Show());
-			InsertDiffParameters1(args, parameters);
+			InsertDiffParameters1(parameters, args);
 			args.Add(new CommandArgument(parameters.Revision));
-			InsertDiffParameters2(args, parameters);
+			InsertDiffParameters2(parameters, args);
 
 			var cmd = new StashCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -106,13 +106,13 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public Diff QueryStashDiff(QueryRevisionDiffParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			args.Add(StashCommand.Show());
-			InsertDiffParameters1(args, parameters);
+			InsertDiffParameters1(parameters, args);
 			args.Add(new CommandArgument(parameters.Revision));
-			InsertDiffParameters2(args, parameters);
+			InsertDiffParameters2(parameters, args);
 
 			var cmd = new StashCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -127,7 +127,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public bool StashSave(StashSaveParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			args.Add(StashCommand.Save());
@@ -160,14 +160,18 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void StashPop(StashPopParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(3);
 			args.Add(StashCommand.Pop());
 			if(parameters.RestoreIndex)
+			{
 				args.Add(StashCommand.Index());
+			}
 			if(parameters.StashName != null)
+			{
 				args.Add(new CommandArgument(parameters.StashName));
+			}
 
 			var cmd = new StashCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -190,14 +194,18 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void StashApply(StashApplyParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(3);
 			args.Add(StashCommand.Apply());
 			if(parameters.RestoreIndex)
+			{
 				args.Add(StashCommand.Index());
+			}
 			if(parameters.StashName != null)
+			{
 				args.Add(new CommandArgument(parameters.StashName));
+			}
 
 			var cmd = new StashCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -220,13 +228,15 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void StashToBranch(StashToBranchParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(3);
 			args.Add(StashCommand.Branch());
 			args.Add(new CommandArgument(parameters.BranchName));
 			if(parameters.StashName != null)
+			{
 				args.Add(new CommandArgument(parameters.StashName));
+			}
 
 			var cmd = new StashCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -238,7 +248,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void StashDrop(StashDropParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			StashCommand cmd;
 			if(parameters.StashName != null)
@@ -261,7 +271,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void StashClear(StashClearParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new StashCommand(
 				StashCommand.Clear());

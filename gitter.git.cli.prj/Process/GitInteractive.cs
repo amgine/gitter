@@ -12,7 +12,8 @@
 
 		public GitInteractive(Process process)
 		{
-			if(process == null) throw new ArgumentNullException("process");
+			Verify.Argument.IsNotNull(process, "process");
+
 			_process = process;
 		}
 

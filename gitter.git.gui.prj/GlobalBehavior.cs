@@ -21,8 +21,8 @@
 
 		public static void SetupAutoCompleteSource(TextBox textBox, Repository repository, ReferenceType referenceTypes)
 		{
-			if(textBox == null) throw new ArgumentNullException("textBox");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(textBox, "textBox");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
@@ -56,8 +56,8 @@
 
 		public static void SetupAutoCompleteSource(TextBox textBox, IEnumerable<IRevisionPointer> revisions)
 		{
-			if(textBox == null) throw new ArgumentNullException("textBox");
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			Verify.Argument.IsNotNull(textBox, "textBox");
+			Verify.Argument.IsNotNull(revisions, "revisions");
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
@@ -74,8 +74,8 @@
 
 		public static void SetupAutoCompleteSource(ComboBox comboBox, Repository repository, ReferenceType referenceTypes)
 		{
-			if(comboBox == null) throw new ArgumentNullException("comboBox");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(comboBox, "comboBox");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
@@ -109,8 +109,8 @@
 
 		public static void SetupAutoCompleteSource(ComboBox comboBox, IEnumerable<IRevisionPointer> revisions)
 		{
-			if(comboBox == null) throw new ArgumentNullException("comboBox");
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			Verify.Argument.IsNotNull(comboBox, "comboBox");
+			Verify.Argument.IsNotNull(revisions, "revisions");
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 

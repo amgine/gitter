@@ -38,8 +38,8 @@
 		public ReferenceTreeBinding(CustomListBoxItemsCollection itemHost, Repository repository,
 			bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer> predicate, ReferenceType referenceTypes)
 		{
-			if(itemHost == null) throw new ArgumentNullException("itemHost");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(itemHost, "itemHost");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			_itemHost = itemHost;
 			_repository = repository;
@@ -56,9 +56,13 @@
 				_refsHeads.Items.Comparison = BranchListItem.CompareByName;
 				_refsRemotes = new ReferenceGroupListItem(repository, ReferenceType.RemoteBranch);
 				if(groupRemoteBranches)
+				{
 					_refsRemotes.Items.Comparison = RemoteListItem.CompareByName;
+				}
 				else
+				{
 					_refsRemotes.Items.Comparison = RemoteBranchListItem.CompareByName;
+				}
 				_refsTags = new ReferenceGroupListItem(repository, ReferenceType.Tag);
 				_refsTags.Items.Comparison = TagListItem.CompareByName;
 				_itemHost.Comparison = null;
@@ -85,9 +89,13 @@
 						item.Activated += OnItemActivated;
 						CustomListBoxItemsCollection host;
 						if(groupItems)
+						{
 							host = _refsHeads.Items;
+						}
 						else
+						{
 							host = _itemHost;
+						}
 						host.Add(item);
 					}
 					refs.ObjectAdded += OnBranchCreated;
@@ -109,7 +117,9 @@
 						{
 							var ritem = GetRemoteListItem(branch);
 							if(ritem != null)
+							{
 								host = ritem.Items;
+							}
 						}
 						host.Add(item);
 					}
@@ -129,9 +139,13 @@
 						item.Activated += OnItemActivated;
 						CustomListBoxItemsCollection host;
 						if(groupItems)
+						{
 							host = _refsTags.Items;
+						}
 						else
+						{
 							host = _itemHost;
+						}
 						host.Add(item);
 					}
 					refs.ObjectAdded += OnTagCreated;

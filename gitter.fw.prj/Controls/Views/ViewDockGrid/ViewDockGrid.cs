@@ -87,7 +87,7 @@
 
 		private void SpawnLeftSide()
 		{
-			if(_left != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_left == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -138,7 +138,7 @@
 
 		private void SpawnTopSide()
 		{
-			if(_top != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_top == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -189,7 +189,7 @@
 
 		private void SpawnRightSide()
 		{
-			if(_right != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_right == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -225,7 +225,7 @@
 
 		private void SpawnBottomSide()
 		{
-			if(_bottom != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_bottom == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -276,7 +276,9 @@
 					KillBottomSide();
 					break;
 				default:
-					throw new ArgumentException("side");
+					throw new ArgumentException(
+						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
+						"side");
 			}
 		}
 
@@ -502,29 +504,32 @@
 
 		private ViewDockSide GetCreateDockSide(AnchorStyles side)
 		{
-			ViewDockSide res;
+			ViewDockSide viewDockSide;
 			switch(side)
 			{
 				case AnchorStyles.Left:
 					if(_left == null) SpawnLeftSide();
-					res = _left;
+					viewDockSide = _left;
 					break;
 				case AnchorStyles.Top:
 					if(_top == null) SpawnTopSide();
-					res = _top;
+					viewDockSide = _top;
 					break;
 				case AnchorStyles.Right:
 					if(_right == null) SpawnRightSide();
-					res = _right;
+					viewDockSide = _right;
 					break;
 				case AnchorStyles.Bottom:
 					if(_bottom == null) SpawnBottomSide();
-					res = _bottom;
+					viewDockSide = _bottom;
 					break;
 				default:
-					throw new ArgumentException("side");
+					throw new ArgumentException(
+						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
+						"side");
 			}
-			return res;
+			Assert.AreEqual(viewDockSide.Side, side);
+			return viewDockSide;
 		}
 
 		internal int HorizontalClientSpace
@@ -532,10 +537,8 @@
 			get
 			{
 				var w = Width - ViewConstants.Spacing * 2;
-				if(_left != null)
-					w -= ViewConstants.SideTabHeight;
-				if(_right != null)
-					w -= ViewConstants.SideTabHeight;
+				if(_left != null) w -= ViewConstants.SideTabHeight;
+				if(_right != null) w -= ViewConstants.SideTabHeight;
 				return w;
 			}
 		}
@@ -545,10 +548,8 @@
 			get
 			{
 				var h = Height - ViewConstants.Spacing * 2;
-				if(_top != null)
-					h -= ViewConstants.SideTabHeight;
-				if(_bottom != null)
-					h -= ViewConstants.SideTabHeight;
+				if(_top != null) h -= ViewConstants.SideTabHeight;
+				if(_bottom != null) h -= ViewConstants.SideTabHeight;
 				return h;
 			}
 		}
@@ -739,14 +740,17 @@
 		}
 
 		/// <summary>Determines if <see cref="ViewHost"/> cn be docked into this <see cref="IDockHost"/>.</summary>
-		/// <param name="host"><see cref="ViewHost"/> to dock.</param>
+		/// <param name="viewHost"><see cref="ViewHost"/> to dock.</param>
 		/// <param name="dockResult">Position for docking.</param>
 		/// <returns>true if docking is possible.</returns>
-		public bool CanDock(ViewHost host, DockResult dockResult)
+		public bool CanDock(ViewHost viewHost, DockResult dockResult)
 		{
-			if(host == null) throw new ArgumentNullException("host");
-			if(host.IsDocumentWell || (host.ViewsCount == 1 && host.GetView(0).IsDocument))
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+
+			if(viewHost.IsDocumentWell || (viewHost.ViewsCount == 1 && viewHost.GetView(0).IsDocument))
+			{
 				return false;
+			}
 			switch(dockResult)
 			{
 				case DockResult.Left:
@@ -759,46 +763,49 @@
 			}
 		}
 
-		/// <summary>Docks <paramref name="host"/> into this <see cref="IDockHost"/>.</summary>
-		/// <param name="host"><see cref="ViewHost"/> to dock.</param>
+		/// <summary>Docks <paramref name="viewHost"/> into this <see cref="IDockHost"/>.</summary>
+		/// <param name="viewHost"><see cref="ViewHost"/> to dock.</param>
 		/// <param name="dockResult">Position for docking.</param>
-		public void PerformDock(ViewHost host, DockResult dockResult)
+		public void PerformDock(ViewHost viewHost, DockResult dockResult)
 		{
-			if(host == null) throw new ArgumentNullException("host");
-			if(host.IsDocumentWell || (host.ViewsCount == 1 && host.GetView(0).IsDocument))
-				throw new ArgumentException("host");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsFalse(viewHost.IsDocumentWell, "viewHost");
+			Verify.Argument.IsFalse(viewHost.ViewsCount == 1 && viewHost.GetView(0).IsDocument, "viewHost");
+
 			switch(dockResult)
 			{
 				case DockResult.Left:
-					DockSide(AnchorStyles.Left, host, false);
-					host.Status = ViewHostStatus.Docked;
+					DockSide(AnchorStyles.Left, viewHost, false);
+					viewHost.Status = ViewHostStatus.Docked;
 					break;
 				case DockResult.Top:
-					DockSide(AnchorStyles.Top, host, false);
-					host.Status = ViewHostStatus.Docked;
+					DockSide(AnchorStyles.Top, viewHost, false);
+					viewHost.Status = ViewHostStatus.Docked;
 					break;
 				case DockResult.Right:
-					DockSide(AnchorStyles.Right, host, false);
-					host.Status = ViewHostStatus.Docked;
+					DockSide(AnchorStyles.Right, viewHost, false);
+					viewHost.Status = ViewHostStatus.Docked;
 					break;
 				case DockResult.Bottom:
-					DockSide(AnchorStyles.Bottom, host, false);
-					host.Status = ViewHostStatus.Docked;
+					DockSide(AnchorStyles.Bottom, viewHost, false);
+					viewHost.Status = ViewHostStatus.Docked;
 					break;
 				case DockResult.AutoHideLeft:
-					GetCreateDockSide(AnchorStyles.Left).AddHost(host);
+					GetCreateDockSide(AnchorStyles.Left).AddHost(viewHost);
 					break;
 				case DockResult.AutoHideTop:
-					GetCreateDockSide(AnchorStyles.Top).AddHost(host);
+					GetCreateDockSide(AnchorStyles.Top).AddHost(viewHost);
 					break;
 				case DockResult.AutoHideRight:
-					GetCreateDockSide(AnchorStyles.Right).AddHost(host);
+					GetCreateDockSide(AnchorStyles.Right).AddHost(viewHost);
 					break;
 				case DockResult.AutoHideBottom:
-					GetCreateDockSide(AnchorStyles.Bottom).AddHost(host);
+					GetCreateDockSide(AnchorStyles.Bottom).AddHost(viewHost);
 					break;
 				default:
-					throw new ArgumentException("dockResult");
+					throw new ArgumentException(
+						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
+						"dockResult");
 			}
 		}
 
@@ -808,7 +815,8 @@
 		/// <returns>Bounding rectangle for docked view.</returns>
 		public Rectangle GetDockBounds(ViewHost viewHost, DockResult dockResult)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+
 			var rootBounds = RootControl.Bounds;
 			Rectangle bounds;
 			switch(dockResult)
@@ -846,7 +854,9 @@
 					}
 					break;
 				default:
-					throw new ArgumentException("dockResult");
+					throw new ArgumentException(
+						"Unsuported DockResult value: {0}".UseAsFormat(dockResult),
+						"dockResult");
 			}
 			bounds.Offset(rootBounds.X, rootBounds.Y);
 			return RectangleToScreen(bounds);

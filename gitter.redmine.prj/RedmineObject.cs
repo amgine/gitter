@@ -39,7 +39,7 @@
 
 		protected RedmineObject(RedmineServiceContext context, int id)
 		{
-			if(context == null) throw new ArgumentNullException("context");
+			Verify.Argument.IsNotNull(context, "context");
 
 			_context = context;
 			_id = id;
@@ -47,8 +47,8 @@
 
 		protected RedmineObject(RedmineServiceContext context, XmlNode node)
 		{
-			if(context == null) throw new ArgumentNullException("context");
-			if(node == null) throw new ArgumentNullException("node");
+			Verify.Argument.IsNotNull(context, "context");
+			Verify.Argument.IsNotNull(node, "node");
 
 			_context	= context;
 			_id			= RedmineUtility.LoadInt(node[IdProperty.XmlNodeName]);
@@ -60,7 +60,7 @@
 
 		internal virtual void Update(XmlNode node)
 		{
-			if(node == null) throw new ArgumentNullException("node");
+			Verify.Argument.IsNotNull(node, "node");
 		}
 
 		public virtual void Update()
@@ -70,7 +70,7 @@
 
 		public object GetValue(RedmineObjectProperty property)
 		{
-			if(property == null) throw new ArgumentNullException("property");
+			Verify.Argument.IsNotNull(property, "property");
 
 			return GetType().GetProperty(property.Name).GetValue(this, null);
 		}

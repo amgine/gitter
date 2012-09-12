@@ -25,8 +25,7 @@
 		public static T GetViewReflogItem<T>(Reference reference)
 			where T : ToolStripItem, new()
 		{
-			if(reference == null) throw new ArgumentNullException("reference");
-			if(reference.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Reference"), "reference");
+			Verify.Argument.IsValidGitObject(reference, "reference");
 
 			var item = new T()
 			{
@@ -42,7 +41,7 @@
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeFile file)
 			where T : ToolStripItem, new()
 		{
-			if(file == null) throw new ArgumentNullException("file");
+			Verify.Argument.IsValidGitObject(file, "file");
 
 			return GetCheckoutPathItem<T>(revision, file.RelativePath);
 		}
@@ -50,7 +49,7 @@
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeDirectory directory)
 			where T : ToolStripItem, new()
 		{
-			if(directory == null) throw new ArgumentNullException("directory");
+			Verify.Argument.IsValidGitObject(directory, "directory");
 
 			return GetCheckoutPathItem<T>(revision, directory.RelativePath + "/");
 		}
@@ -58,9 +57,8 @@
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, string path)
 			where T : ToolStripItem, new()
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(path == null) throw new ArgumentNullException("path");
-			if(path.Length == 0) throw new ArgumentException("path");
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
 			var item = new T()
 			{
@@ -75,7 +73,7 @@
 		public static T GetCheckoutRevisionItem<T>(Repository repository, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -90,16 +88,7 @@
 		public static T GetCheckoutRevisionItem<T>(IRevisionPointer revision, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision1");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			bool enabled = true;
 			var head = revision.Repository.Head.Pointer;
@@ -132,16 +121,7 @@
 		public static T GetRevertItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision1");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			bool enabled = true;
 			var rev = revision as Revision;
@@ -162,7 +142,7 @@
 		public static T GetRevertItem<T>(IEnumerable<IRevisionPointer> revisions)
 			where T : ToolStripItem, new()
 		{
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, "revisions");
 
 			var item = new T()
 			{
@@ -177,11 +157,7 @@
 		public static T GetResetItem<T>(Repository repository, ResetMode resetModes = ResetMode.Mixed | ResetMode.Hard)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(repository == null) throw new ArgumentNullException("repository");
-
-			#endregion
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -196,16 +172,7 @@
 		public static T GetResetHeadHereItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision1");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var currentBranch = revision.Repository.Head.CurrentBranch;
 			var item = new T()
@@ -223,16 +190,7 @@
 		public static T GetRebaseHeadHereItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision1");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var currentBranch = revision.Repository.Head.CurrentBranch;
 			var item = new T()
@@ -250,16 +208,7 @@
 		public static T GetCherryPickItem<T>(IRevisionPointer revision, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision1");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			bool enabled = !revision.Repository.IsEmpty;
 
@@ -286,7 +235,7 @@
 		public static T GetCherryPickItem<T>(IEnumerable<IRevisionPointer> revisions)
 			where T : ToolStripItem, new()
 		{
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, "revisions");
 
 			var item = new T()
 			{
@@ -301,16 +250,7 @@
 		public static T GetSavePatchItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var item = new T()
 			{
@@ -325,16 +265,7 @@
 		public static T GetArchiveItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision.GetType().Name), "revision");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var item = new T()
 			{
@@ -349,22 +280,7 @@
 		public static T GetCompareWithItem<T>(IRevisionPointer revision1, IRevisionPointer revision2)
 			where T : ToolStripItem, new()
 		{
-			#region validate args
-
-			if(revision1 == null) throw new ArgumentNullException("revision1");
-			if(revision2 == null) throw new ArgumentNullException("revision2");
-			if(revision1.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision1.GetType().Name), "revision1");
-			}
-			if(revision2.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectIsDeleted, revision2.GetType().Name), "revision2");
-			}
-
-			#endregion
+			Verify.Argument.AreValidRevisionPointers(revision1, revision2);
 
 			var item = new T()
 			{
@@ -409,7 +325,7 @@
 
 		private static void SavePatch(Control parent, string defaultFileName, Func<string> getPatch)
 		{
-			if(getPatch == null) throw new ArgumentNullException("getPatch");
+			Verify.Argument.IsNotNull(getPatch, "getPatch");
 
 			const string patchExt = ".patch";
 
@@ -514,7 +430,7 @@
 			var revision = (IRevisionPointer)item.Tag;
 			var repository = revision.Repository;
 			var parent = Utility.GetParentControl(item);
-			string fileName = revision.Dereference().Name;
+			string fileName = revision.Dereference().Hash;
 
 			SavePatch(parent, fileName, revision.FormatPatch);
 		}
@@ -962,7 +878,7 @@
 		public static T GetRefreshStashItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -977,7 +893,7 @@
 		public static T GetStashClearItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -992,7 +908,7 @@
 		public static T GetStashPopItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1008,8 +924,7 @@
 		public static T GetStashPopItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
-			if(stashedState.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "StashedState"), "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
 
 			var item = new T()
 			{
@@ -1025,7 +940,7 @@
 		public static T GetStashApplyItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1041,8 +956,7 @@
 		public static T GetStashApplyItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
-			if(stashedState.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "StashedState"), "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
 
 			var item = new T()
 			{
@@ -1058,8 +972,7 @@
 		public static T GetStashDropItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
-			if(stashedState.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "StashedState"), "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
 
 			var item = new T()
 			{
@@ -1075,7 +988,7 @@
 		public static T GetStashDropItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1091,8 +1004,7 @@
 		public static T GetStashToBranchItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
-			if(stashedState.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "StashedState"), "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
 
 			var item = new T()
 			{
@@ -1108,7 +1020,7 @@
 		public static T GetStashSaveKeepIndexItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1125,7 +1037,7 @@
 		public static T GetStashSaveItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1360,7 +1272,7 @@
 		public static T GetAddNoteItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var item = new T()
 			{
@@ -1395,8 +1307,7 @@
 		public static T GetCreateBranchItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null)
-				throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1411,7 +1322,10 @@
 		public static T GetCreateBranchItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			if(revision != null && revision.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Revision pointer"), "revision");
+			if(revision != null)
+			{
+				Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			}
 
 			var item = new T()
 			{
@@ -1432,8 +1346,7 @@
 		public static T GetRemoveBranchItem<T>(BranchBase branch, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(branch.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Branch"), "branch");
+			Verify.Argument.IsValidGitObject(branch, "branch");
 
 			var item = new T()
 			{
@@ -1449,8 +1362,7 @@
 		public static T GetRenameBranchItem<T>(Branch branch, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(branch.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Branch"), "branch");
+			Verify.Argument.IsValidGitObject(branch, "branch");
 
 			var item = new T()
 			{
@@ -1465,8 +1377,7 @@
 		public static T GetMergeItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			if(revision == null) throw new ArgumentNullException("branch");
-			if(revision.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Branch"), "branch");
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var item = new T()
 			{
@@ -1482,8 +1393,8 @@
 		public static T GetPushBranchToRemoteItem<T>(Branch branch, Remote remote)
 			where T : ToolStripItem, new()
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(remote == null) throw new ArgumentNullException("remote");
+			Verify.Argument.IsValidGitObject(branch, "branch");
+			Verify.Argument.IsValidGitObject(remote, "remote");
 
 			var item = new T()
 			{
@@ -1702,7 +1613,7 @@
 		public static T GetCreateTagItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1717,7 +1628,10 @@
 		public static T GetCreateTagItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			if(revision != null && revision.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Revision pointer"), "revision");
+			if(revision != null)
+			{
+				Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			}
 			
 			var item = new T()
 			{
@@ -1732,8 +1646,7 @@
 		public static T GetRemoveTagItem<T>(Tag tag, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(tag == null) throw new ArgumentNullException("tag");
-			if(tag.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Tag"), "tag");
+			Verify.Argument.IsValidGitObject(tag, "tag");
 
 			var item = new T()
 			{
@@ -1804,8 +1717,7 @@
 		public static T GetEditRemotePropertiesItem<T>(Remote remote)
 			where T : ToolStripItem, new()
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Remote"), "remote");
+			Verify.Argument.IsValidGitObject(remote, "remote");
 
 			var item = new T()
 			{
@@ -1820,8 +1732,7 @@
 		public static T GetBrowseRemoteItem<T>(Remote remote)
 			where T : ToolStripItem, new()
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Remote"), "remote");
+			Verify.Argument.IsValidGitObject(remote, "remote");
 
 			var item = new T()
 			{
@@ -1842,7 +1753,7 @@
 		public static T GetFetchItem<T>(Repository repository, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 			
 			var item = new T()
 			{
@@ -1858,8 +1769,7 @@
 		public static T GetFetchFromItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Remote"), "remote");
+			Verify.Argument.IsValidGitObject(remote, "remote");
 			
 			var item = new T()
 			{
@@ -1880,7 +1790,7 @@
 		public static T GetPullItem<T>(Repository repository, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1896,9 +1806,8 @@
 		public static T GetPullFromItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Remote"), "remote");
-			if(nameFormat == null) throw new ArgumentNullException("nameFormat");
+			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsNotNull(nameFormat, "nameFormat");
 
 			var item = new T()
 			{
@@ -1913,7 +1822,7 @@
 		public static T GetRefreshRemotesItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1941,7 +1850,7 @@
 		public static T GetAddRemoteItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -1956,9 +1865,8 @@
 		public static T GetRemoveRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Remote"), "remote");
-			if(nameFormat == null) throw new ArgumentNullException("nameFormat");
+			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsNotNull(nameFormat, "nameFormat");
 
 			var item = new T()
 			{
@@ -1973,8 +1881,7 @@
 		public static T GetRenameRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "remote"), "remote");
+			Verify.Argument.IsValidGitObject(remote, "remote");
 
 			var item = new T()
 			{
@@ -1989,8 +1896,9 @@
 		public static T GetPruneRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(nameFormat == null) throw new ArgumentNullException("nameFormat");
+			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsNotNull(nameFormat, "nameFormat");
+
 			var item = new T()
 			{
 				Image = CachedResources.Bitmaps["ImgClean"],
@@ -2004,8 +1912,9 @@
 		public static T GetRemoveRemoteBranchItem<T>(RemoteRepositoryBranch remoteBranch, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(remoteBranch == null) throw new ArgumentNullException("remoteBranch");
-			if(remoteBranch.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "RemoteBranch"), "remoteBranch");
+			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
+			Verify.Argument.IsFalse(remoteBranch.IsDeleted, "remoteBranch",
+				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
 
 			var item = new T()
 			{
@@ -2020,8 +1929,9 @@
 		public static T GetRemoveRemoteTagItem<T>(RemoteRepositoryTag remoteTag, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			if(remoteTag == null) throw new ArgumentNullException("remoteTag");
-			if(remoteTag.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "RemoteTag"), "remoteTag");
+			Verify.Argument.IsNotNull(remoteTag, "remoteTag");
+			Verify.Argument.IsFalse(remoteTag.IsDeleted, "remoteTag",
+				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteTag"));
 
 			var item = new T()
 			{
@@ -2262,7 +2172,7 @@
 		public static T GetRefreshSubmodulesItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2277,7 +2187,7 @@
 		public static T GetAddSubmoduleItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2292,8 +2202,7 @@
 		public static T GetUpdateSubmoduleItem<T>(Submodule submodule)
 			where T : ToolStripItem, new()
 		{
-			if(submodule == null) throw new ArgumentNullException("submodule");
-			if(submodule.IsDeleted) throw new ArgumentNullException(Resources.ExcObjectIsDeleted.UseAsFormat("Submodule"), "submodule");
+			Verify.Argument.IsValidGitObject(submodule, "submodule");
 
 			var item = new T()
 			{
@@ -2308,7 +2217,7 @@
 		public static T GetUpdateSubmodulesItem<T>(SubmodulesCollection submodules)
 			where T : ToolStripItem, new()
 		{
-			if(submodules == null) throw new ArgumentNullException("submodules");
+			Verify.Argument.IsNotNull(submodules, "submodules");
 
 			var item = new T()
 			{
@@ -2390,8 +2299,7 @@
 		public static T GetMarkAsResolvedItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			if(treeItem == null) throw new ArgumentNullException("treeItem");
-			if(treeItem.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Working tree item"), "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
 
 			var item = new T()
 			{
@@ -2406,8 +2314,7 @@
 		public static T GetStageItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			if(treeItem == null) throw new ArgumentNullException("treeItem");
-			if(treeItem.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Working tree item"), "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
 
 			var item = new T()
 			{
@@ -2422,8 +2329,8 @@
 		public static T GetStageItem<T>(Repository repository, TreeItem[] treeItems)
 			where T : ToolStripItem, new()
 		{
-			if(treeItems == null) throw new ArgumentNullException("treeItems");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(treeItems, "treeItems");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2444,7 +2351,7 @@
 		public static T GetManualStageItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2459,7 +2366,7 @@
 		public static T GetStageAllItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2474,7 +2381,7 @@
 		public static T GetUpdateItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2489,7 +2396,7 @@
 		public static T GetCommitItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2504,8 +2411,7 @@
 		public static T GetUnstageItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			if(treeItem == null) throw new ArgumentNullException("treeItem");
-			if(treeItem.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Working tree item"), "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
 
 			var item = new T()
 			{
@@ -2520,8 +2426,8 @@
 		public static T GetUnstageItem<T>(Repository repository, TreeItem[] treeItems)
 			where T : ToolStripItem, new()
 		{
-			if(treeItems == null) throw new ArgumentNullException("treeItems");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(treeItems, "treeItems");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2542,7 +2448,7 @@
 		public static T GetUnstageAllItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -2557,8 +2463,7 @@
 		public static T GetMergeToolItem<T>(TreeFile file, MergeTool mergeTool)
 			where T : ToolStripItem, new()
 		{
-			if(file == null) throw new ArgumentNullException("file");
-			if(file.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "TreeFile"), "file");
+			Verify.Argument.IsValidGitObject(file, "file");
 
 			string text;
 			switch(file.ConflictType)
@@ -2589,8 +2494,7 @@
 		public static T GetResolveConflictItem<T>(TreeFile file, ConflictResolution resolution)
 			where T : ToolStripItem, new()
 		{
-			if(file == null) throw new ArgumentNullException("file");
-			if(file.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "TreeFile"), "file");
+			Verify.Argument.IsValidGitObject(file, "file");
 
 			string text;
 			switch(resolution)
@@ -2630,8 +2534,7 @@
 		public static T GetRevertPathItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			if(treeItem == null) throw new ArgumentNullException("treeItem");
-			if(treeItem.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Working tree item"), "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
 
 			var item = new T()
 			{
@@ -2646,7 +2549,7 @@
 		public static T GetRevertPathsItem<T>(IEnumerable<TreeItem> treeItems)
 			where T : ToolStripItem, new()
 		{
-			if(treeItems == null) throw new ArgumentNullException("treeItem");
+			Verify.Argument.IsNotNull(treeItems, "treeItems");
 
 			var item = new T()
 			{
@@ -2661,8 +2564,7 @@
 		public static T GetRemovePathItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			if(treeItem == null) throw new ArgumentNullException("treeItem");
-			if(treeItem.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Working tree item"), "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
 
 			var item = new T()
 			{
@@ -2677,8 +2579,8 @@
 		public static T GetBlameItem<T>(IRevisionPointer revision, TreeFile file)
 			where T : ToolStripItem, new()
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(file == null) throw new ArgumentNullException("file");
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidGitObject(file, "file");
 
 			var item = new T()
 			{
@@ -2693,8 +2595,8 @@
 		public static T GetBlameItem<T>(IRevisionPointer revision, string fileName)
 			where T : ToolStripItem, new()
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(fileName == null) throw new ArgumentNullException("fileName");
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
 
 			var item = new T()
 			{
@@ -2709,7 +2611,7 @@
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeFile file)
 			where T : ToolStripItem, new()
 		{
-			if(file == null) throw new ArgumentNullException("file");
+			Verify.Argument.IsValidGitObject(file, "file");
 
 			return GetPathHistoryItem<T>(revision, file.RelativePath);
 		}
@@ -2717,7 +2619,7 @@
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeDirectory directory)
 			where T : ToolStripItem, new()
 		{
-			if(directory == null) throw new ArgumentNullException("directory");
+			Verify.Argument.IsValidGitObject(directory, "directory");
 
 			return GetPathHistoryItem<T>(revision, directory.RelativePath + "/");
 		}
@@ -2725,8 +2627,8 @@
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, string path)
 			where T : ToolStripItem, new()
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(path == null) throw new ArgumentNullException("path");
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsNotNull(path, "path");
 
 			var item = new T()
 			{
@@ -3177,7 +3079,7 @@
 		public static T GetRefreshConfigurationItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -3192,7 +3094,8 @@
 		public static T GetUnsetParameterItem<T>(ConfigParameter configParameter)
 			where T : ToolStripItem, new()
 		{
-			if(configParameter == null) throw new ArgumentNullException("configParameter");
+			Verify.Argument.IsValidGitObject(configParameter, "configParameter");
+
 			var item = new T()
 			{
 				Text = Resources.StrUnset,
@@ -3286,8 +3189,8 @@
 		public static T GetCopyDiffLinesItem<T>(IEnumerable<DiffLine> lines, string text, bool copyAsPatch, DiffLineState state)
 			where T : ToolStripItem, new()
 		{
-			if(lines == null)
-				throw new ArgumentNullException("lines");
+			Verify.Argument.IsNotNull(lines, "lines");
+			Verify.Argument.HasNoNullItems(lines, "lines");
 
 			bool enabled = false;
 			foreach(var line in lines)
@@ -3367,8 +3270,8 @@
 		public static T GetExtractAndOpenFileItem<T>(Tree tree, string fileName)
 			where T : ToolStripItem, new()
 		{
-			if(tree == null) throw new ArgumentNullException("tree");
-			if(fileName == null) throw new ArgumentNullException("fileName");
+			Verify.Argument.IsNotNull(tree, "tree");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
 
 			var item = new T()
 			{
@@ -3382,8 +3285,8 @@
 		public static T GetExtractAndOpenFileWithItem<T>(Tree tree, string fileName)
 			where T : ToolStripItem, new()
 		{
-			if(tree == null) throw new ArgumentNullException("tree");
-			if(fileName == null) throw new ArgumentNullException("fileName");
+			Verify.Argument.IsNotNull(tree, "tree");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
 
 			var item = new T()
 			{
@@ -3397,7 +3300,7 @@
 		public static T GetOpenUrlItem<T>(string name, Image image, string url)
 			where T : ToolStripItem, new()
 		{
-			if(url == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
 
 			var item = new T()
 			{
@@ -3412,7 +3315,7 @@
 		public static T GetOpenAppItem<T>(string name, Image image, string app, string cmdLine)
 			where T : ToolStripItem, new()
 		{
-			if(app == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNeitherNullNorWhitespace(app, "app");
 
 			var item = new T()
 			{
@@ -3427,7 +3330,7 @@
 		public static T GetOpenUrlWithItem<T>(string name, Image image, string url)
 			where T : ToolStripItem, new()
 		{
-			if(url == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
 
 			var item = new T()
 			{
@@ -3442,7 +3345,7 @@
 		public static T GetOpenCmdAtItem<T>(string name, Image image, string path)
 			where T : ToolStripItem, new()
 		{
-			if(path == null) throw new ArgumentNullException("path");
+			Verify.Argument.IsNotNull(path, "path");
 
 			var item = new T()
 			{
@@ -3457,7 +3360,7 @@
 		public static T GetCleanItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -3472,8 +3375,7 @@
 		public static T GetViewDiffItem<T>(IDiffSource diffSource)
 			where T : ToolStripItem, new()
 		{
-			if(diffSource == null)
-				throw new ArgumentNullException("diffSource");
+			Verify.Argument.IsNotNull(diffSource, "diffSource");
 
 			var item = new T()
 			{
@@ -3485,17 +3387,16 @@
 			return item;
 		}
 
-		public static T GetViewTreeItem<T>(IRevisionPointer revisionPointer)
+		public static T GetViewTreeItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			if(revisionPointer == null)
-				throw new ArgumentNullException("revisionPointer");
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var item = new T()
 			{
 				Image = CachedResources.Bitmaps["ImgFolderTree"],
 				Text = Resources.StrViewTree,
-				Tag = revisionPointer,
+				Tag = revision,
 			};
 			item.Click += OnViewTreeItemClick;
 			return item;
@@ -3516,6 +3417,8 @@
 		public static T GetRefreshAllReferencesListItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			var item = new T()
 			{
 				Image = CachedResources.Bitmaps["ImgRefresh"],
@@ -3529,6 +3432,8 @@
 		public static T GetCopyToClipboardItem<T>(string name, Func<string> text)
 			where T : ToolStripItem, new()
 		{
+			Verify.Argument.IsNotNull(text, "text");
+
 			var item = new T()
 			{
 				Text = name,
@@ -3582,7 +3487,7 @@
 		public static T GetRefreshReferencesItem<T>(Repository repository, ReferenceType referenceTypes, string name)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -3597,7 +3502,7 @@
 		public static T GetResolveConflictsItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -3612,7 +3517,7 @@
 		public static T GetExpandAllItem<T>(CustomListBoxItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			if(treeItem == null) throw new ArgumentNullException("treeItem");
+			Verify.Argument.IsNotNull(treeItem, "treeItem");
 
 			var item = new T()
 			{
@@ -3628,7 +3533,7 @@
 		public static T GetCollapseAllItem<T>(CustomListBoxItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			if(treeItem == null) throw new ArgumentNullException("treeItem");
+			Verify.Argument.IsNotNull(treeItem, "treeItem");
 
 			var item = new T()
 			{
@@ -3644,7 +3549,7 @@
 		public static T GetSendEmailItem<T>(string email)
 			where T : ToolStripItem, new()
 		{
-			if(email == null) throw new ArgumentNullException("email");
+			Verify.Argument.IsNeitherNullNorWhitespace(email, "email");
 
 			var item = new T()
 			{
@@ -3661,7 +3566,7 @@
 		public static T GetCompressRepositoryItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{

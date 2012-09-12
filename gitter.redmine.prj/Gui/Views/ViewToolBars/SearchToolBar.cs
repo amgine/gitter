@@ -25,7 +25,8 @@
 
 		protected SearchToolBar(TView view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
+
 			_view = view;
 
 			_result = true;

@@ -46,8 +46,8 @@
 
 		public TreeBinding(CustomListBoxItemsCollection itemHost, TreeDirectory root, bool filesOnly, bool oneLevel)
 		{
-			if(itemHost == null) throw new ArgumentNullException("itemHost");
-			if(root == null) throw new ArgumentNullException("root");
+			Verify.Argument.IsNotNull(itemHost, "itemHost");
+			Verify.Argument.IsNotNull(root, "root");
 
 			_itemHost = itemHost;
 			_root = root;

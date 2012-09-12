@@ -19,7 +19,7 @@
 		public ViewHostTab(ViewHostTabs tabs, ViewBase view)
 			: base(view, tabs.Side)
 		{
-			if(tabs == null) throw new ArgumentNullException("tabs");
+			Verify.Argument.IsNotNull(tabs, "tabs");
 
 			_tabs = tabs;
 			_viewHost = tabs.ViewHost;

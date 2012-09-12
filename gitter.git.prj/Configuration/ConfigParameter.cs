@@ -50,7 +50,7 @@
 		internal ConfigParameter(IConfigAccessor configAccessor, ConfigFile configFile, string name, string value)
 			: base(name)
 		{
-			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
 
 			_configAccessor = configAccessor;
 			_configFile = configFile;
@@ -64,7 +64,7 @@
 		internal ConfigParameter(IConfigAccessor configAccessor, string fileName, string name, string value)
 			: base(name)
 		{
-			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
 
 			_configAccessor = configAccessor;
 			_configFile = Git.ConfigFile.Other;
@@ -83,11 +83,8 @@
 			get { return _value; }
 			set
 			{
-				if(IsDeleted)
-				{
-					throw new InvalidOperationException(
-						Resources.ExcObjectIsDeleted.UseAsFormat("ConfigParameter"));
-				}
+				Verify.State.IsNotDeleted(this);
+
 				if(_value != value)
 				{
 					if(Repository != null)

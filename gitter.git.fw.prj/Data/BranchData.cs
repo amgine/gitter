@@ -11,25 +11,25 @@
 
 		private readonly string _name;
 		private readonly string _sha1;
-		private readonly bool _fake;
-		private readonly bool _remote;
-		private readonly bool _current;
+		private readonly bool _isFake;
+		private readonly bool _isRemote;
+		private readonly bool _isCurrent;
 
 		#endregion
 
 		#region .ctor
 
-		public BranchData(string name, string sha1, bool fake, bool remote, bool current)
+		public BranchData(string name, string sha1, bool isFake, bool isRemote, bool isCurrent)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
-			if(sha1 == null) throw new ArgumentNullException("sha1");
-			if(sha1.Length != 40) throw new ArgumentException("sha1");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(sha1, "sha1");
+			Verify.Argument.IsTrue(sha1.Length == 40, "sha1");
+
 			_name = name;
 			_sha1 = sha1;
-			_fake = fake;
-			_remote = remote;
-			_current = current;
+			_isFake = isFake;
+			_isRemote = isRemote;
+			_isCurrent = isCurrent;
 		}
 
 		public BranchData(string name, string sha1, bool remote, bool current)
@@ -56,19 +56,19 @@
 		/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
 		public bool IsFake
 		{
-			get { return _fake; }
+			get { return _isFake; }
 		}
 
 		/// <summary>It is a remote tracking branch.</summary>
 		public bool IsRemote
 		{
-			get { return _remote; }
+			get { return _isRemote; }
 		}
 
 		/// <summary>This branch is current HEAD.</summary>
 		public bool IsCurrent
 		{
-			get { return _current; }
+			get { return _isCurrent; }
 		}
 
 		#endregion

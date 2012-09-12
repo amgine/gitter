@@ -78,7 +78,8 @@
 			get { return _options; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				if(_options != value)
 				{
 					_options.Changed -= OnLogOptionsChanged;
@@ -394,7 +395,7 @@
 			if(rev.Body.Contains(search.Text)) return true;
 			if(rev.Author.Name.Contains(search.Text)) return true;
 			if(rev.Committer.Name.Contains(search.Text)) return true;
-			if(rev.SHA1.StartsWith(search.Text)) return true;
+			if(rev.Hash.StartsWith(search.Text)) return true;
 			if(rev.TreeHash.StartsWith(search.Text)) return true;
 			lock(rev.References.SyncRoot)
 			{
@@ -450,29 +451,27 @@
 
 		public bool SearchFirst(HistorySearchOptions search)
 		{
-			if(search == null)
-			{
-				throw new ArgumentNullException("search");
-			}
+			Verify.Argument.IsNotNull(search, "search");
 
 			return Search(-1, search, 1);
 		}
 
 		public bool SearchNext(HistorySearchOptions search)
 		{
-			if(search == null)
-				throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			if(search.Text.Length == 0) return true;
 			if(_lstRevisions.SelectedItems.Count == 0)
+			{
 				return Search(-1, search, 1);
+			}
 			var start = _lstRevisions.Items.IndexOf(_lstRevisions.SelectedItems[0]);
 			return Search(start, search, 1);
 		}
 
 		public bool SearchPrevious(HistorySearchOptions search)
 		{
-			if(search == null) throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			if(search.Text.Length == 0) return true;
 			if(_lstRevisions.SelectedItems.Count == 0) return Search(-1, search, 1);

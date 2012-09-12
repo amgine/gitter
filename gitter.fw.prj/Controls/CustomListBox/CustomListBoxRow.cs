@@ -22,12 +22,12 @@
 		public CustomListBoxRow(TData data, IEnumerable<CustomListBoxSubItem> subItems)
 			: base(data)
 		{
-			if(subItems == null) throw new ArgumentNullException("subItems");
+			Verify.Argument.IsNotNull(subItems, "subItems");
+			Verify.Argument.HasNoNullItems(subItems, "subItems");
 
 			_subItems = new Dictionary<int, CustomListBoxSubItem>();
 			foreach(var subItem in subItems)
 			{
-				if(subItem == null) throw new ArgumentException("subItems");
 				_subItems.Add(subItem.Id, subItem);
 				subItem.Item = this;
 			}
@@ -39,13 +39,13 @@
 		public CustomListBoxRow(TData data, params CustomListBoxSubItem[] subItems)
 			: base(data)
 		{
-			if(subItems == null) throw new ArgumentNullException("subItems");
+			Verify.Argument.IsNotNull(subItems, "subItems");
+			Verify.Argument.HasNoNullItems(subItems, "subItems");
 
 			_subItems = new Dictionary<int, CustomListBoxSubItem>(subItems.Length);
 			for(int i = 0; i < subItems.Length; ++i)
 			{
 				var subItem = subItems[i];
-				if(subItem == null) throw new ArgumentException("subItems");
 				_subItems.Add(subItems[i].Id, subItem);
 				subItem.Item = this;
 			}
@@ -91,7 +91,7 @@
 		/// <param name="subItem"><see cref="CustomListBoxSubItem"/> to add.</param>
 		public void AddSubItem(CustomListBoxSubItem subItem)
 		{
-			if(subItem == null) throw new ArgumentNullException("subItem");
+			Verify.Argument.IsNotNull(subItem, "subItem");
 
 			_subItems.Add(subItem.Id, subItem);
 			subItem.Item = this;
@@ -101,7 +101,7 @@
 		/// <param name="subItem"><see cref="CustomListBoxSubItem"/> to remove.</param>
 		public void RemoveSubItem(CustomListBoxSubItem subItem)
 		{
-			if(subItem == null) throw new ArgumentNullException("subItem");
+			Verify.Argument.IsNotNull(subItem, "subItem");
 
 			_subItems.Remove(subItem.Id);
 			subItem.Item = null;
@@ -125,7 +125,9 @@
 		{
 			CustomListBoxSubItem subItem;
 			if(_subItems.TryGetValue(paintEventArgs.SubItemId, out subItem))
+			{
 				subItem.Paint(paintEventArgs);
+			}
 		}
 
 		/// <summary>Measure subitem.</summary>
@@ -135,9 +137,13 @@
 		{
 			CustomListBoxSubItem subItem;
 			if(_subItems.TryGetValue(measureEventArgs.SubItemId, out subItem))
+			{
 				return subItem.Measure(measureEventArgs);
+			}
 			else
+			{
 				return Size.Empty;
+			}
 		}
 
 		#endregion

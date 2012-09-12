@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Text;
 	using System.Drawing;
 	using System.Windows.Forms;
@@ -31,9 +32,9 @@
 
 		public ViewDockService(IWorkingEnvironment environment, ViewDockGrid grid, Section section)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
-			if(grid == null) throw new ArgumentNullException("grid");
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(grid, "grid");
+			Verify.Argument.IsNotNull(section, "section");
 
 			_environment = environment;
 			_grid = grid;
@@ -96,13 +97,15 @@
 
 		public void RegisterFactory(IViewFactory factory)
 		{
-			if(factory == null) throw new ArgumentNullException("factory");
+			Verify.Argument.IsNotNull(factory, "factory");
+
 			_factories.Add(factory.Guid, factory);
 		}
 
 		public void UnregisterFactory(IViewFactory factory)
 		{
-			if(factory == null) throw new ArgumentNullException("factory");
+			Verify.Argument.IsNotNull(factory, "factory");
+
 			UnregisterFactory(factory.Guid);
 		}
 
@@ -239,7 +242,13 @@
 
 		public WebBrowserView ShowWebBrowserView(string url, bool activate)
 		{
-			return (WebBrowserView)ShowView(WebBrowserViewFactory.Guid, new Dictionary<string, object>() { { "url", url } }, activate);
+			return (WebBrowserView)ShowView(
+				WebBrowserViewFactory.Guid,
+				new Dictionary<string, object>()
+				{
+					{ "url", url }
+				},
+				activate);
 		}
 
 		public ViewBase ShowView(Guid guid)
@@ -247,13 +256,22 @@
 			return ShowView(guid, true);
 		}
 
-		public ViewBase ShowView(Guid guid, bool activate)
+		private IViewFactory GetViewFactoryByGuid(Guid guid)
 		{
 			IViewFactory factory;
-			if(!_factories.TryGetValue(guid, out factory))
-			{
-				throw new ArgumentException("Unknown GUID.", "guid");
-			}
+			Verify.Argument.IsTrue(
+				_factories.TryGetValue(guid, out factory),
+				"guid",
+				string.Format(
+					CultureInfo.InvariantCulture,
+					"Unknown view factory GUID: {0}",
+					guid));
+			return factory;
+		}
+
+		public ViewBase ShowView(Guid guid, bool activate)
+		{
+			var factory = GetViewFactoryByGuid(guid);
 			if(factory.IsSingleton)
 			{
 				ViewBase existing = null;
@@ -317,9 +335,7 @@
 
 		public ViewBase ShowView(Guid guid, IDictionary<string, object> parameters, bool activate)
 		{
-			IViewFactory factory;
-			if(!_factories.TryGetValue(guid, out factory))
-				throw new ArgumentException("Unknown GUID.", "guid");
+			var factory = GetViewFactoryByGuid(guid);
 			if(factory.IsSingleton)
 			{
 				ViewBase existing = null;
@@ -401,7 +417,9 @@
 		{
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
+			{
 				return new ViewBase[0];
+			}
 			return factory.CreatedViews;
 		}
 

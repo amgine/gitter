@@ -16,7 +16,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		protected GitObject(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			_repository = repository;
 		}
 
@@ -26,7 +27,10 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		protected GitObject(Repository repository, bool allowNullRepository)
 		{
-			if(!allowNullRepository && repository == null) throw new ArgumentNullException("repository");
+			if(!allowNullRepository)
+			{
+				Verify.Argument.IsNotNull(repository, "repository");
+			}
 			_repository = repository;
 		}
 
@@ -34,38 +38,6 @@
 		public Repository Repository
 		{
 			get { return _repository; }
-		}
-
-		[System.Diagnostics.DebuggerHidden]
-		protected void ValidateObject(GitLifeTimeNamedObject obj, string argName)
-		{
-			if(obj == null) throw new ArgumentNullException(argName);
-			if(obj.Repository != Repository)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsNotHandledByThisRepository, obj.GetType().Name), argName);
-			}
-			if(obj.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsDeleted, obj.GetType().Name), argName);
-			}
-		}
-
-		[System.Diagnostics.DebuggerHidden]
-		protected void ValidateRevisionPointer(IRevisionPointer revision, string argName)
-		{
-			if(revision == null) throw new ArgumentNullException(argName);
-			if(revision.Repository != Repository)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsNotHandledByThisRepository, revision.GetType().Name), argName);
-			}
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsDeleted, revision.GetType().Name), argName);
-			}
 		}
 	}
 
@@ -107,9 +79,8 @@
 		protected GitNamedObject(Repository repository, string name)
 			: base(repository)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException(
-				"Unable to create " + GetType().Name + ": name is empty.", "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+
 			_name = name;
 		}
 
@@ -119,9 +90,8 @@
 		protected GitNamedObject(string name)
 			: base(null, true)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException(
-				"Unable to create " + GetType().Name + ": name is empty.", "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+
 			_name = name;
 		}
 
@@ -131,6 +101,8 @@
 			get { return _name; }
 			set
 			{
+				Verify.Argument.IsNeitherNullNorWhitespace(value, "value");
+
 				RenameCore(value);
 				string oldName = _name;
 				_name = value;
@@ -270,7 +242,7 @@
 		/// <summary>This object has been revived.</summary>
 		public event EventHandler Revived;
 
-		private bool _deleted;
+		private bool _isDeleted;
 
 		/// <summary>Create <see cref="GitLifeTimeNamedObject"/>.</summary>
 		/// <param name="repository">Host repository.</param>
@@ -283,9 +255,9 @@
 		/// <summary>Marks this object as delected, invokes <see cref="Deleted"/> and makes all methods of this object fail.</summary>
 		internal void MarkAsDeleted()
 		{
-			if(!_deleted)
+			if(!_isDeleted)
 			{
-				_deleted = true;
+				_isDeleted = true;
 				OnDeleted();
 				var handler = Deleted;
 				if(handler != null) handler(this, EventArgs.Empty);
@@ -295,9 +267,9 @@
 		/// <summary>Makes object alive again.</summary>
 		internal void Revive()
 		{
-			if(_deleted)
+			if(_isDeleted)
 			{
-				_deleted = false;
+				_isDeleted = false;
 				OnRevived();
 				var handler = Revived;
 				if(handler != null) handler(this, EventArgs.Empty);
@@ -317,7 +289,7 @@
 		/// <summary>Checks if object is deleted.</summary>
 		public bool IsDeleted
 		{
-			get { return _deleted; }
+			get { return _isDeleted; }
 		}
 	}
 }

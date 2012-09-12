@@ -24,8 +24,8 @@
 
 		public RepositoryCLI(GitCLI gitCLI, IGitRepository repository)
 		{
-			if(gitCLI == null) throw new ArgumentNullException("gitCLI");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			_gitCLI = gitCLI;
 			_repository = repository;
@@ -48,7 +48,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public SymbolicReferenceData QuerySymbolicReference(QuerySymbolicReferenceParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var fileName = _repository.GetGitFileName(parameters.Name);
 			if(File.Exists(fileName))
@@ -137,7 +137,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public string QueryObjects(QueryObjectsParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(parameters.Objects.Count);
 			foreach(var obj in parameters.Objects)
@@ -159,7 +159,7 @@
 		/// <returns>Lists of references.</returns>
 		public ReferencesData QueryReferences(QueryReferencesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var refTypes = parameters.ReferenceTypes;
 
@@ -301,7 +301,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<ReflogRecordData> QueryReflog(QueryReflogParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(5);
 			args.Add(LogCommand.WalkReflogs());
@@ -373,10 +373,10 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public Diff QueryDiff(QueryDiffParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
-			InsertDiffParameters1(args, parameters);
+			InsertDiffParameters1(parameters, args);
 
 			bool comparison = false;
 			if(!string.IsNullOrEmpty(parameters.Revision1))
@@ -405,7 +405,7 @@
 					type = DiffType.UnstagedChanges;
 				}
 			}
-			InsertDiffParameters2(args, parameters);
+			InsertDiffParameters2(parameters, args);
 
 			var cmd = new DiffCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -421,8 +421,11 @@
 			return parser.ReadDiff(type);
 		}
 
-		private static void InsertDiffParameters1(IList<CommandArgument> args, BaseQueryDiffParameters parameters)
+		private static void InsertDiffParameters1(BaseQueryDiffParameters parameters, IList<CommandArgument> args)
 		{
+			Assert.IsNotNull(parameters);
+			Assert.IsNotNull(args);
+
 			args.Add(DiffCommand.Patch());
 			args.Add(DiffCommand.FullIndex());
 			args.Add(DiffCommand.NoColor());
@@ -456,8 +459,11 @@
 			}
 		}
 
-		private static void InsertDiffParameters2(IList<CommandArgument> args, BaseQueryDiffParameters parameters)
+		private static void InsertDiffParameters2(BaseQueryDiffParameters parameters, IList<CommandArgument> args)
 		{
+			Assert.IsNotNull(parameters);
+			Assert.IsNotNull(args);
+
 			if(parameters.Paths != null && parameters.Paths.Count != 0)
 			{
 				args.Add(DiffCommand.NoMoreOptions());
@@ -470,7 +476,7 @@
 
 		public BlameFile QueryBlame(QueryBlameParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			InsertQueryBlameParameters(parameters, args);
@@ -483,6 +489,9 @@
 
 		private static void InsertQueryBlameParameters(QueryBlameParameters parameters, IList<CommandArgument> args)
 		{
+			Assert.IsNotNull(parameters);
+			Assert.IsNotNull(args);
+
 			args.Add(BlameCommand.Porcelain());
 			if(!string.IsNullOrEmpty(parameters.Revision))
 			{
@@ -501,7 +510,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void Checkout(CheckoutParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			InsertCheckoutParameters(parameters, args);
@@ -568,7 +577,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void Reset(ResetParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			args.Add(ResetCommand.Mode(parameters.Mode));
@@ -592,7 +601,7 @@
 		/// <exception cref="T:gitter.Git.AutomaticMergeFailedException">Merge resulted in conflicts.</exception>
 		public void Merge(MergeParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			InsertMergeParameters(parameters, args);
@@ -646,7 +655,7 @@
 
 		public string FormatMergeMessage(FormatMergeMessageParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			if(parameters.Revisions.Count == 1)
 			{
@@ -692,7 +701,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void Rebase(RebaseParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			if(!string.IsNullOrEmpty(parameters.NewBase))
@@ -744,7 +753,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<UserData> QueryUsers(QueryUsersParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new ShortLogCommand(
 				ShortLogCommand.All(),
@@ -780,7 +789,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void GarbageCollect(GarbageCollectParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new GcCommand();
 
@@ -800,7 +809,7 @@
 						{
 							var parser = new GitParser(e.Data);
 							var progress = parser.ParseProgress();
-							progress.Apply(mon);
+							progress.Notify(mon);
 						}
 						else
 						{

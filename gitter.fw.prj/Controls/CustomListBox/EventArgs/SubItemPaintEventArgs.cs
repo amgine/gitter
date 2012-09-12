@@ -197,9 +197,9 @@
 		/// </exception>
 		public void PaintText(string text, Font font, Brush brush, StringFormat stringFormat)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintTextCore(text, font, brush, stringFormat);
 		}
@@ -215,8 +215,8 @@
 		/// </exception>
 		public void PaintText(string text, Font font, Brush brush, StringAlignment stringAlignment)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintTextCore(text, font, brush, GetFormat(stringAlignment));
 		}
@@ -231,8 +231,8 @@
 		/// </exception>
 		public void PaintText(string text, Font font, Brush brush)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintTextCore(text, font, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -247,8 +247,8 @@
 		/// </exception>
 		public void PaintText(string text, Brush brush, StringFormat stringFormat)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintTextCore(text, _column.ContentFont, brush, stringFormat);
 		}
@@ -260,7 +260,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintText(string text, Brush brush, StringAlignment stringAlignment)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintTextCore(text, _column.ContentFont, brush, GetFormat(stringAlignment));
 		}
@@ -271,7 +271,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintText(string text, Brush brush)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintTextCore(text, _column.ContentFont, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -286,8 +286,8 @@
 		/// </exception>
 		public void PaintText(string text, Font font, StringFormat stringFormat)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintTextCore(text, font, _column.ContentBrush, stringFormat);
 		}
@@ -298,7 +298,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintText(string text, Font font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			PaintTextCore(text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
 		}
@@ -308,7 +308,7 @@
 		/// <param name="stringFormat"><see cref="StringFormat"/> to use.</param>
 		public void PaintText(string text, StringFormat stringFormat)
 		{
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintTextCore(text, _column.ContentFont, _column.ContentBrush, stringFormat);
 		}
@@ -381,9 +381,9 @@
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Font font, Brush brush, StringFormat stringFormat)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageAndTextCore(image, text, font, brush, stringFormat);
 		}
@@ -400,8 +400,8 @@
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Font font, Brush brush, StringAlignment stringAlignment)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintImageAndTextCore(image, text, font, brush, GetFormat(stringAlignment));
 		}
@@ -417,8 +417,8 @@
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Font font, StringFormat stringFormat)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageAndTextCore(image, text, font, _column.ContentBrush, stringFormat);
 		}
@@ -431,7 +431,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, Font font, StringAlignment stringAlignment)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			PaintImageAndTextCore(image, text, font, _column.ContentBrush, GetFormat(stringAlignment));
 		}
@@ -443,7 +443,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, Font font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			PaintImageAndTextCore(image, text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
 		}
@@ -459,15 +459,15 @@
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Brush brush, StringFormat stringFormat)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, brush, stringFormat);
 		}
 
 		public void PaintImageAndText(Image image, string text, Brush brush, StringAlignment stringAlignment)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, brush, GetFormat(stringAlignment));
 		}
@@ -479,7 +479,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, Brush brush)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -491,7 +491,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="stringFormat"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, StringFormat stringFormat)
 		{
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, _column.ContentBrush, stringFormat);
 		}
@@ -569,9 +569,9 @@
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush, StringFormat stringFormat)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, stringFormat);
 		}
@@ -589,8 +589,8 @@
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush, StringAlignment stringAlignment)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, GetFormat(stringAlignment));
 		}
@@ -607,8 +607,8 @@
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Brush brush, StringFormat stringFormat)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, brush, stringFormat);
 		}
@@ -622,7 +622,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Brush brush, StringAlignment stringAlignment)
 		{
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, brush, GetFormat(stringAlignment));
 		}
@@ -639,8 +639,8 @@
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, StringFormat stringFormat)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, stringFormat);
 		}
@@ -654,7 +654,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, StringAlignment stringAlignment)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, GetFormat(stringAlignment));
 		}
@@ -668,7 +668,7 @@
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, StringFormat stringFormat)
 		{
-			if(stringFormat == null) throw new ArgumentNullException("stringFormat");
+			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, _column.ContentBrush, stringFormat);
 		}
@@ -695,8 +695,8 @@
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush)
 		{
-			if(font == null) throw new ArgumentNullException("font");
-			if(brush == null) throw new ArgumentNullException("brush");
+			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(brush, "brush");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -709,7 +709,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
 		}

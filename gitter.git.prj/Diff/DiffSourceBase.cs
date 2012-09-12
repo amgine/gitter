@@ -46,7 +46,7 @@
 
 		public IAsyncFunc<Diff> GetDiffAsync(DiffOptions options)
 		{
-			if(options == null) throw new ArgumentNullException("options");
+			Verify.Argument.IsNotNull(options, "options");
 
 			return AsyncFunc.Create(
 				options,
@@ -65,7 +65,7 @@
 
 		public Diff GetDiff(DiffOptions options)
 		{
-			if(options == null) throw new ArgumentNullException("options");
+			Verify.Argument.IsNotNull(options, "options");
 
 			return GetDiffCore(options);
 		}

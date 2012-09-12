@@ -5,6 +5,8 @@
 
 	using gitter.Git.AccessLayer;
 
+	using Resources = gitter.Git.Properties.Resources;
+
 	public sealed class RemoteReferencesCollection
 	{
 		#region Events
@@ -50,9 +52,11 @@
 
 		#endregion
 
+		#region .ctor
+
 		internal RemoteReferencesCollection(Remote remote)
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
+			Verify.Argument.IsNotNull(remote, "remote");
 
 			_remote = remote;
 			_repository = remote.Repository;
@@ -60,10 +64,13 @@
 			_remoteTags = new Dictionary<string, RemoteRepositoryTag>();
 		}
 
+		#endregion
+
 		internal void RemoveTag(RemoteRepositoryTag tag)
 		{
-			if(tag == null) throw new ArgumentNullException("tag");
-			if(tag.IsDeleted) throw new ArgumentException("tag");
+			Verify.Argument.IsNotNull(tag, "tag");
+			Verify.Argument.IsFalse(tag.IsDeleted, "tag",
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
 
 			_remote.Repository.Accessor.RemoveRemoteReferences(
 				new RemoveRemoteReferencesParameters(_remote.Name, tag.FullName));
@@ -75,8 +82,9 @@
 
 		internal void RemoveBranch(RemoteRepositoryBranch branch)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(branch.IsDeleted) throw new ArgumentException("branch");
+			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
 
 			_remote.Repository.Accessor.RemoveRemoteReferences(
 				new RemoveRemoteReferencesParameters(_remote.Name, branch.FullName));
@@ -143,9 +151,13 @@
 					foreach(var b in _remoteBranches)
 					{
 						if(!branches.ContainsKey(b.Key))
+						{
 							deletedBranches.Add(b.Value);
+						}
 						else
+						{
 							branches.Remove(b.Key);
+						}
 					}
 				}
 			}
@@ -154,8 +166,7 @@
 				deletedBranches = null;
 				foreach(var b in _remoteBranches)
 				{
-					if(branches.ContainsKey(b.Key))
-						branches.Remove(b.Key);
+					branches.Remove(b.Key);
 				}
 			}
 			if(branches.Count != 0)
@@ -190,9 +201,13 @@
 					foreach(var t in _remoteTags)
 					{
 						if(!tags.ContainsKey(t.Key))
+						{
 							deletedTags.Add(t.Value);
+						}
 						else
+						{
 							tags.Remove(t.Key);
+						}
 					}
 				}
 			}
@@ -202,7 +217,9 @@
 				foreach(var t in _remoteTags)
 				{
 					if(tags.ContainsKey(t.Key))
+					{
 						tags.Remove(t.Key);
+					}
 				}
 			}
 			if(tags.Count != 0)

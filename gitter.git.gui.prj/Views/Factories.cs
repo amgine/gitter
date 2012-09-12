@@ -17,7 +17,8 @@
 		public CommitViewFactory(GuiProvider guiProvider)
 			: base(Guids.CommitViewGuid, Resources.StrCommit, CachedResources.Bitmaps["ImgCommit"])
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -34,7 +35,8 @@
 		public ConfigViewFactory(GuiProvider guiProvider)
 			: base(Guids.ConfigViewGuid, Resources.StrConfig, CachedResources.Bitmaps["ImgConfiguration"])
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -51,7 +53,8 @@
 		public GitViewFactory(GuiProvider guiProvider)
 			: base(Guids.GitViewGuid, Resources.StrGit, CachedResources.Bitmaps["ImgGit"])
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -68,7 +71,8 @@
 		public HistoryViewFactory(GuiProvider guiProvider)
 			: base(Guids.HistoryViewGuid, Resources.StrHistory, CachedResources.Bitmaps["ImgHistory"], true)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -85,7 +89,8 @@
 		public PathHistoryViewFactory(GuiProvider guiProvider)
 			: base(Guids.PathHistoryViewGuid, Resources.StrHistory, CachedResources.Bitmaps["ImgFileHistory"], false)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -102,7 +107,8 @@
 		public ReflogViewFactory(GuiProvider guiProvider)
 			: base(Guids.ReflogViewGuid, Resources.StrReflog, CachedResources.Bitmaps["ImgViewReflog"], false)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -119,7 +125,8 @@
 		public MaintenanceToolFactory(GuiProvider guiProvider)
 			: base(Guids.MaintenanceViewGuid, Resources.StrMaintenance, CachedResources.Bitmaps["ImgMaintenance"])
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -136,7 +143,8 @@
 		public ReferencesViewFactory(GuiProvider guiProvider)
 			: base(Guids.ReferencesViewGuid, Resources.StrReferences, CachedResources.Bitmaps["ImgBranch"], true)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
 		}
@@ -154,7 +162,8 @@
 		public RemotesViewFactory(GuiProvider guiProvider)
 			: base(Guids.RemotesViewGuid, Resources.StrRemotes, CachedResources.Bitmaps["ImgRemote"], true)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
@@ -172,7 +181,8 @@
 		public StashViewFactory(GuiProvider guiProvider)
 			: base(Guids.StashViewGuid, Resources.StrStash, CachedResources.Bitmaps["ImgStash"], true)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
@@ -190,7 +200,8 @@
 		public SubmodulesViewFactory(GuiProvider guiProvider)
 			: base(Guids.SubmodulesViewGuid, Resources.StrSubmodules, CachedResources.Bitmaps["ImgSubmodule"], true)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
@@ -208,7 +219,8 @@
 		public ContributorsViewFactory(GuiProvider guiProvider)
 			: base(Guids.ContributorsViewGuid, Resources.StrContributors, CachedResources.Bitmaps["ImgUsers"], true)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -225,7 +237,8 @@
 		public TreeViewFactory(GuiProvider guiProvider)
 			: base(Guids.TreeViewGuid, Resources.StrWorkingTree, CachedResources.Bitmaps["ImgFolder"], false)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -242,7 +255,8 @@
 		public DiffViewFactory(GuiProvider guiProvider)
 			: base(Guids.DiffViewGuid, Resources.StrDiff, CachedResources.Bitmaps["ImgDiff"], false)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -259,7 +273,8 @@
 		public BlameViewFactory(GuiProvider guiProvider)
 			: base(Guids.BlameViewGuid, Resources.StrBlame, CachedResources.Bitmaps["ImgBlame"], false)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 		}
 
@@ -276,7 +291,8 @@
 		public ContextualDiffViewFactory(GuiProvider guiProvider)
 			: base(Guids.ContextualDiffViewGuid, Resources.StrContextualDiff, CachedResources.Bitmaps["ImgDiff"], true)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
 		}

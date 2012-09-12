@@ -13,7 +13,7 @@
 
 		public BranchDragDropMenu(Branch branch)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
+			Verify.Argument.IsValidGitObject(branch, "branch");
 
 			_branch = branch;
 

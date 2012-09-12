@@ -289,7 +289,7 @@
 
 		public void LoadAsync(IDiffSource diffSource)
 		{
-			if(diffSource == null) throw new ArgumentNullException("diffSource");
+			Verify.Argument.IsNotNull(diffSource, "diffSource");
 
 			int scrollpos = 0;
 			if(_loadedDiffSource != null && _loadedDiffSource.Target == diffSource)
@@ -306,8 +306,8 @@
 
 		public void LoadAsync(IDiffSource diffSource, DiffOptions options)
 		{
-			if(diffSource == null) throw new ArgumentNullException("diffSource");
-			if(options == null) throw new ArgumentNullException("options");
+			Verify.Argument.IsNotNull(diffSource, "diffSource");
+			Verify.Argument.IsNotNull(options, "options");
 
 			int scrollpos = 0;
 			if(_loadedDiffSource != null && _loadedDiffSource.Target == diffSource)

@@ -40,8 +40,8 @@
 			string sourceFile, string targetFile,
 			FileStatus status, IList<DiffHunk> hunks, bool isBinary, DiffStats stats)
 		{
-			if(hunks == null) throw new ArgumentNullException("hunks");
-			if(stats == null) throw new ArgumentNullException("stats");
+			Verify.Argument.IsNotNull(hunks, "hunks");
+			Verify.Argument.IsNotNull(stats, "stats");
 
 			_oldIndex = oldIndex;
 			_newIndex = newIndex;
@@ -211,7 +211,7 @@
 
 		internal void ToString(StringBuilder sb)
 		{
-			if(sb == null) throw new ArgumentNullException("sb");
+			Verify.Argument.IsNotNull(sb, "sb");
 
 			sb.Append("diff --git a/");
 			sb.Append(_sourceFile);

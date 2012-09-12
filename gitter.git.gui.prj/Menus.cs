@@ -10,19 +10,20 @@
 
 	internal sealed class MainGitMenus : IDisposable
 	{
-		private readonly GuiProvider _gui;
+		private readonly GuiProvider _guiProvider;
 
 		private Repository _repository;
 		private ToolStripMenuItem[] _menus;
 		private ToolStripMenuItem _gitMenu;
 		private List<ToolStripMenuItem> _viewMenuItems;
 
-		public MainGitMenus(GuiProvider gui)
+		public MainGitMenus(GuiProvider guiProvider)
 		{
-			if(gui == null) throw new ArgumentNullException("gui");
-			_gui = gui;
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
-			var repository = gui.Repository;
+			_guiProvider = guiProvider;
+
+			var repository = guiProvider.Repository;
 
 			_menus = new ToolStripMenuItem[]
 			{
@@ -82,7 +83,7 @@
 
 		public GuiProvider Gui
 		{
-			get { return _gui; }
+			get { return _guiProvider; }
 		}
 
 		//private void OnCheckoutClick(object sender, EventArgs e)
@@ -92,12 +93,12 @@
 
 		private void OnCreateBranchClick(object sender, EventArgs e)
 		{
-			_gui.StartCreateBranchDialog();
+			_guiProvider.StartCreateBranchDialog();
 		}
 
 		private void OnCreateTagClick(object sender, EventArgs e)
 		{
-			_gui.StartCreateTagDialog();
+			_guiProvider.StartCreateTagDialog();
 		}
 
 		//private void OnAddRemoteClick(object sender, EventArgs e)

@@ -8,22 +8,22 @@
 	{
 		#region Data
 
-		private readonly GuiProvider _gui;
+		private readonly GuiProvider _guiProvider;
 		private readonly RepositoryRootItem _rootItem;
 		private Repository _repository;
 
 		#endregion
 
-		public RepositoryExplorer(GuiProvider gui)
+		public RepositoryExplorer(GuiProvider guiProvider)
 		{
-			if(gui == null) throw new ArgumentNullException("gui");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
-			_gui = gui;
-			_rootItem = new RepositoryRootItem(_gui.Environment)
+			_guiProvider = guiProvider;
+			_rootItem = new RepositoryRootItem(_guiProvider.Environment)
 				{
-					Repository = gui.Repository,
+					Repository = guiProvider.Repository,
 				};
-			_repository = gui.Repository;
+			_repository = guiProvider.Repository;
 
 			_rootItem.IsExpanded = true;
 		}

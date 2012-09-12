@@ -39,28 +39,18 @@
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision)
 		{
-			#region validate arguments
-
-			if(name == null) throw new ArgumentNullException("name");
-			ValidateRevisionPointer(revision, "revision");
-			Tag.ValidateName(name);
-			if(ContainsObjectName(name))
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectWithThisNameAlreadyExists, "Tag"), "name");
-			}
-
-			#endregion
+			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
 
 			var rev = revision.Dereference();
-
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.CreateTag(
 					new CreateTagParameters(name, revision.Pointer));
 			}
-
 			var tag = new Tag(Repository, name, rev, TagType.Lightweight);
 			AddObject(tag);
 			return tag;
@@ -83,29 +73,19 @@
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision, string message, bool sign)
 		{
-			#region validate arguments
-
-			if(name == null) throw new ArgumentNullException("name");
-			ValidateRevisionPointer(revision, "revision");
-			Tag.ValidateName(name);
-			if(ContainsObjectName(name))
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectWithThisNameAlreadyExists, "Tag"), "name");
-			}
-			if(message == null) throw new ArgumentNullException("message");
-
-			#endregion
+			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
+			Verify.Argument.IsNotNull(message, "message");
 
 			var rev = revision.Dereference();
-
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.CreateTag(
 					new CreateTagParameters(name, revision.Pointer, message, sign));
 			}
-
 			var tag = new Tag(Repository, name, rev, TagType.Annotated);
 			AddObject(tag);
 			return tag;
@@ -128,30 +108,20 @@
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision, string message, string keyId)
 		{
-			#region validate arguments
-
-			if(name == null) throw new ArgumentNullException("name");
-			ValidateRevisionPointer(revision, "revision");
-			Tag.ValidateName(name);
-			if(ContainsObjectName(name))
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectWithThisNameAlreadyExists, "Tag"), "name");
-			}
-			if(message == null) throw new ArgumentNullException("message");
-			if(keyId == null) throw new ArgumentNullException("keyId");
-
-			#endregion
+			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
+			Verify.Argument.IsNotNull(message, "message");
+			Verify.Argument.IsNotNull(keyId, "keyId");
 
 			var rev = revision.Dereference();
-
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.TagChanged))
 			{
 				Repository.Accessor.CreateTag(
 					new CreateTagParameters(name, revision.Pointer, message, keyId));
 			}
-
 			var tag = new Tag(Repository, name, rev, TagType.Annotated);
 			AddObject(tag);
 			return tag;
@@ -174,7 +144,7 @@
 		/// </exception>
 		internal void Delete(Tag tag)
 		{
-			ValidateObject(tag, "tag");
+			Verify.Argument.IsValidGitObject(tag, Repository, "tag");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.TagChanged))
@@ -216,7 +186,8 @@
 
 		internal void Refresh(IEnumerable<TagData> tagDataList)
 		{
-			if(tagDataList == null) throw new ArgumentNullException("tagDataList");
+			Verify.Argument.IsNotNull(tagDataList, "tagDataList");
+
 			RefreshInternal(tagDataList);
 		}
 
@@ -224,7 +195,7 @@
 		/// <param name="tag">Tag to refresh.</param>
 		internal void Refresh(Tag tag)
 		{
-			ValidateObject(tag, "tag");
+			Verify.Argument.IsValidGitObject(tag, Repository, "tag");
 
 			var tagData = Repository.Accessor.QueryTag(
 				new QueryTagParameters(tag.Name));
@@ -246,8 +217,6 @@
 		/// <param name="tagDataList">List of tag data containers.</param>
 		internal void Load(IEnumerable<TagData> tagDataList)
 		{
-			if(tagDataList == null) throw new ArgumentNullException("tagDataList");
-
 			ObjectStorage.Clear();
 			if(tagDataList != null)
 			{
@@ -282,7 +251,8 @@
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> == <c>null</c>.</exception>
 		protected override string FixInputName(string name)
 		{
-			if(name == null) throw new ArgumentNullException("name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+
 			if(name.StartsWith(GitConstants.TagPrefix) && !ContainsObjectName(name))
 			{
 				return name.Substring(GitConstants.TagPrefix.Length);

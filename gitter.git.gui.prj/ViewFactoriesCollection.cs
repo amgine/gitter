@@ -33,33 +33,33 @@
 
 		#endregion
 
-		public ViewFactoriesCollection(GuiProvider gui)
+		public ViewFactoriesCollection(GuiProvider guiProvider)
 		{
-			if(gui == null) throw new ArgumentNullException("gui");
-			_gui = gui;
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
+			_gui = guiProvider;
 			_viewFactories = new IViewFactory[]
 			{
-				_viewGit =				new GitViewFactory(gui),
-				_viewHistory =			new HistoryViewFactory(gui),
-				_viewPathHistory =		new PathHistoryViewFactory(gui),
-				_viewReferences =		new ReferencesViewFactory(gui),
-				_viewCommit =			new CommitViewFactory(gui),
-				_viewStash =			new StashViewFactory(gui),
-				_viewRemotes =			new RemotesViewFactory(gui),
-				_viewTree =				new TreeViewFactory(gui),
-				_viewSubmodules =		new SubmodulesViewFactory(gui),
-				_viewConfig =			new ConfigViewFactory(gui),
-				_viewUsers =			new ContributorsViewFactory(gui),
-				_viewDiff =				new DiffViewFactory(gui),
-				_viewBlame =			new BlameViewFactory(gui),
-				_viewContextualDiff =	new ContextualDiffViewFactory(gui),
-				_viewReflog =			new ReflogViewFactory(gui),
+				_viewGit =				new GitViewFactory(guiProvider),
+				_viewHistory =			new HistoryViewFactory(guiProvider),
+				_viewPathHistory =		new PathHistoryViewFactory(guiProvider),
+				_viewReferences =		new ReferencesViewFactory(guiProvider),
+				_viewCommit =			new CommitViewFactory(guiProvider),
+				_viewStash =			new StashViewFactory(guiProvider),
+				_viewRemotes =			new RemotesViewFactory(guiProvider),
+				_viewTree =				new TreeViewFactory(guiProvider),
+				_viewSubmodules =		new SubmodulesViewFactory(guiProvider),
+				_viewConfig =			new ConfigViewFactory(guiProvider),
+				_viewUsers =			new ContributorsViewFactory(guiProvider),
+				_viewDiff =				new DiffViewFactory(guiProvider),
+				_viewBlame =			new BlameViewFactory(guiProvider),
+				_viewContextualDiff =	new ContextualDiffViewFactory(guiProvider),
+				_viewReflog =			new ReflogViewFactory(guiProvider),
 			};
 
-			if(gui.Repository != null)
+			if(guiProvider.Repository != null)
 			{
-				AttachToRepository(gui.Repository);
+				AttachToRepository(guiProvider.Repository);
 			}
 		}
 

@@ -35,8 +35,7 @@
 
 		public BlameFilePanel(BlameFile blameFile)
 		{
-			if(blameFile == null)
-				throw new ArgumentNullException("blameFile");
+			Verify.Argument.IsNotNull(blameFile, "blameFile");
 
 			_blameFile = blameFile;
 			_lineHover = new TrackingService(e => Invalidate(GetLineBounds(e.Index)));

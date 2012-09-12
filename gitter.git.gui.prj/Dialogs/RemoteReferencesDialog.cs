@@ -19,8 +19,10 @@
 
 		public RemoteReferencesDialog(Remote remote)
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "remote"), "remote");
+			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsFalse(remote.IsDeleted, "remote",
+				Resources.ExcObjectIsDeleted.UseAsFormat("Remote"));
+
 			_remote = remote;
 
 			InitializeComponent();

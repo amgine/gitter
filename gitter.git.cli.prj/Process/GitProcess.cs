@@ -183,7 +183,7 @@
 
 		public static void UpdateGitExePath(GitCLI gitCLI)
 		{
-			if(gitCLI == null) throw new ArgumentNullException("gitCLI");
+			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
 
 			if(gitCLI.AutodetectGitExePath)
 			{
@@ -225,7 +225,7 @@
 
 		public static Process ExecNormal(GitInput input)
 		{
-			if(input == null) throw new ArgumentNullException("input");
+			Verify.Argument.IsNotNull(input, "input");
 
 			var p = new Process();
 			var psi = new ProcessStartInfo()
@@ -292,7 +292,7 @@
 
 		public static GitOutput Exec(GitInput input)
 		{
-			if(input == null) throw new ArgumentNullException("input");
+			Verify.Argument.IsNotNull(input, "input");
 
 			var psi = new ProcessStartInfo()
 			{
@@ -340,7 +340,7 @@
 
 		public static GitAsync ExecAsync(GitInput input)
 		{
-			if(input == null) throw new ArgumentNullException("input");
+			Verify.Argument.IsNotNull(input, "input");
 
 			var psi = new ProcessStartInfo()
 			{
@@ -378,7 +378,7 @@
 
 		public static GitInteractive ExecInteractive(GitInput input)
 		{
-			if(input == null) throw new ArgumentNullException("input");
+			Verify.Argument.IsNotNull(input, "input");
 
 			var p = new Process();
 			var psi = new ProcessStartInfo()

@@ -30,7 +30,7 @@
 		public RepositoryListItem(RepositoryLink rlink)
 			: base(rlink)
 		{
-			if(rlink == null) throw new ArgumentNullException("rlink");
+			Verify.Argument.IsNotNull(rlink, "rlink");
 		}
 
 		private string Name

@@ -85,7 +85,9 @@
 				case DateFormat.RFC2822:
 					return date.FormatRFC2822();
 				default:
-					throw new ArgumentException("format");
+					throw new ArgumentException(
+						"Unknown DateFormat value: {0}".UseAsFormat(date),
+						"format");
 			}
 		}
 
@@ -112,7 +114,8 @@
 
 		public static Control GetParentControl(ToolStripItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			var cms = item.Owner as ContextMenuStrip;
 			if(cms != null)
 			{
@@ -130,7 +133,8 @@
 
 		public static void MarkDropDownForAutoDispose(ToolStripDropDown menu)
 		{
-			if(menu == null) throw new ArgumentNullException("menu");
+			Verify.Argument.IsNotNull(menu, "menu");
+
 			menu.Closed += (sender, e) => DisposeOnIdle((IDisposable)sender);
 		}
 

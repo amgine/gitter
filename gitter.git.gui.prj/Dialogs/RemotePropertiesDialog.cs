@@ -91,7 +91,9 @@
 						break;
 					case 1:
 						if(_forced)
+						{
 							paintEventArgs.PaintImage(ImgPlus);
+						}
 						break;
 					case 2:
 						paintEventArgs.PaintText(_from);
@@ -107,7 +109,8 @@
 		/// <param name="remote">Related remote.</param>
 		public RemotePropertiesDialog(Remote remote)
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
+			Verify.Argument.IsNotNull(remote, "remote");
+
 			_remote = remote;
 
 			InitializeComponent();
@@ -199,8 +202,7 @@
 			foreach(RefspecItem refspec in _lstUpdatedReferences.Items)
 			{
 				StringBuilder sb = (refspec.Fetch) ? sbfetch : sbpush;
-				if(sb.Length != 0)
-					sb.Append(' ');
+				if(sb.Length != 0) sb.Append(' ');
 				sb.Append(refspec.DataContext);
 			}
 			fetch = sbfetch.ToString();
@@ -253,9 +255,13 @@
 			get
 			{
 				if(_radFetchAll.Checked)
+				{
 					return TagFetchMode.AllTags;
+				}
 				if(_radFetchNone.Checked)
+				{
 					return TagFetchMode.NoTags;
+				}
 				return TagFetchMode.Default;
 			}
 			set
@@ -278,7 +284,7 @@
 		private void _btnAddRefspec_Click(object sender, EventArgs e)
 		{
 			var refspec = _txtRefspec.Text.Trim();
-			if(refspec == "")
+			if(string.IsNullOrWhiteSpace(refspec))
 			{
 				NotificationService.NotifyInputError(
 					_txtRefspec,

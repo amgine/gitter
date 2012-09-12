@@ -1739,4 +1739,10 @@ Proceed?</value>
   <data name="StrLookingForFiles" xml:space="preserve">
     <value>Looking for files</value>
   </data>
+  <data name="StrArchive" xml:space="preserve">
+    <value>Archive</value>
+  </data>
+  <data name="StrfCreatingArchiveFrom" xml:space="preserve">
+    <value>Creating archive from '{0}'</value>
+  </data>
 </root>

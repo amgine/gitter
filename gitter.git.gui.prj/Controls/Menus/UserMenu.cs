@@ -14,7 +14,8 @@
 
 		public UserMenu(User user)
 		{
-			if(user == null) throw new ArgumentNullException("user");
+			Verify.Argument.IsValidGitObject(user, "user");
+
 			_user = user;
 
 			Items.Add(GuiItemFactory.GetSendEmailItem<ToolStripMenuItem>(user.Email));

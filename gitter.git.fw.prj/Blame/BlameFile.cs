@@ -11,8 +11,8 @@
 
 		public BlameFile(string fileName, List<BlameHunk> hunks)
 		{
-			if(fileName == null) throw new ArgumentNullException("fileName");
-			if(hunks == null) throw new ArgumentNullException("hunks");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
+			Verify.Argument.IsNotNull(hunks, "hunks");
 
 			_fileName = fileName;
 			_hunks = hunks;

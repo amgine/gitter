@@ -14,22 +14,23 @@ namespace gitter.Git.Gui.Views
 	{
 		#region Data
 
-		private readonly SubmodulesView _tool;
+		private readonly SubmodulesView _submodulesView;
 		private readonly ToolStripButton _btnAddSubmodule;
 
 		#endregion
 
 		/// <summary>Initializes a new instance of the <see cref="SubmodulesToolbar"/> class.</summary>
-		/// <param name="tool">Host tool.</param>
-		public SubmodulesToolbar(SubmodulesView tool)
+		/// <param name="submodulesView">Host view.</param>
+		public SubmodulesToolbar(SubmodulesView submodulesView)
 		{
-			if(tool == null) throw new ArgumentNullException("tool");
-			_tool = tool;
+			Verify.Argument.IsNotNull(submodulesView, "submodulesView");
+
+			_submodulesView = submodulesView;
 
 			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
 				(sender, e) =>
 				{
-					_tool.RefreshContent();
+					_submodulesView.RefreshContent();
 				})
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -38,9 +39,9 @@ namespace gitter.Git.Gui.Views
 			Items.Add(_btnAddSubmodule = new ToolStripButton(Resources.StrAddSubmodule, CachedResources.Bitmaps["ImgSubmoduleAdd"],
 				(sender, e) =>
 				{
-					using(var dlg = new AddSubmoduleDialog(_tool.Repository))
+					using(var dlg = new AddSubmoduleDialog(_submodulesView.Repository))
 					{
-						dlg.Run(_tool);
+						dlg.Run(_submodulesView);
 					}
 				})
 				{

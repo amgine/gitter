@@ -17,7 +17,10 @@
 
 		public RevertDialog(IRevisionPointer revision)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsFalse(revision.IsDeleted, "revision",
+				Resources.ExcObjectIsDeleted.UseAsFormat(revision.GetType().Name));
+
 			_revision = revision;
 
 			InitializeComponent();

@@ -16,7 +16,8 @@
 		/// <summary>Initializes a new instance of the <see cref="RemoteListBox"/> class.</summary>
 		public RemoteListBox()
 		{
-			Columns.AddRange(new CustomListBoxColumn[]
+			Columns.AddRange(
+				new CustomListBoxColumn[]
 				{
 					new NameColumn() { SizeMode = ColumnSizeMode.Sizeable, Width = 200 },
 					new FetchUrlColumn() { SizeMode = ColumnSizeMode.Fill },
@@ -26,7 +27,7 @@
 
 		public RemoteListBox(params CustomListBoxColumn[] columns)
 		{
-			if(columns == null) throw new ArgumentNullException("columns");
+			Verify.Argument.IsNotNull(columns, "columns");
 
 			Columns.AddRange(columns);
 		}
@@ -50,10 +51,14 @@
 		public void LoadData(Repository repository)
 		{
 			if(_repository != null)
+			{
 				DetachFromRepository();
+			}
 			_repository = repository;
 			if(_repository != null)
+			{
 				AttachToRepository();
+			}
 		}
 
 		/// <summary>Releases unmanaged and - optionally - managed resources.</summary>

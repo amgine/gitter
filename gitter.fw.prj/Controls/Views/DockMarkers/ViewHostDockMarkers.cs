@@ -12,8 +12,7 @@
 		/// <param name="dockHost"><see cref="ViewHost"/> which is the source of dock markers.</param>
 		public ViewHostDockMarkers(ViewHost dockHost)
 		{
-			if(dockHost == null)
-				throw new ArgumentNullException("dockHost");
+			Verify.Argument.IsNotNull(dockHost, "dockHost");
 
 			_dockHost = dockHost;
 		}

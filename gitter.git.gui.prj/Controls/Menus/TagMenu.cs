@@ -13,8 +13,8 @@
 
 		public TagMenu(Tag tag)
 		{
-			if(tag == null) throw new ArgumentNullException("tag");
-			if(tag.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Tag"), "tag");
+			Verify.Argument.IsValidGitObject(tag, "tag");
+
 			_tag = tag;
 
 			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(_tag));
@@ -31,7 +31,7 @@
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, tag.Name));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, tag.FullName));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, tag.Revision.Name));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, tag.Revision.Hash));
 
 			Items.Add(item);
 

@@ -16,7 +16,7 @@
 		/// <param name="revisions">List of related revisions.</param>
 		public RevisionsMenu(IList<Revision> revisions)
 		{
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			Verify.Argument.IsNotNull(revisions, "revisions");
 
 			_revisions = revisions;
 

@@ -33,7 +33,7 @@ namespace gitter.Git
 
 		public void AllowReference(Reference reference)
 		{
-			if(reference == null) throw new ArgumentNullException("reference");
+			Verify.Argument.IsNotNull(reference, "reference");
 
 			if(_allowedReferences.Add(reference))
 			{
@@ -46,7 +46,7 @@ namespace gitter.Git
 
 		public void DisallowReference(Reference reference)
 		{
-			if(reference == null) throw new ArgumentNullException("reference");
+			Verify.Argument.IsNotNull(reference, "reference");
 
 			if(_allowedReferences.Remove(reference))
 			{
@@ -150,7 +150,7 @@ namespace gitter.Git
 
 		public void SaveTo(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			section.SetValue("Order", _order);
 			section.SetValue("MaxCount", _maxCount);
@@ -159,7 +159,7 @@ namespace gitter.Git
 
 		public void LoadFrom(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			bool changed = false;
 			var order = section.GetValue("Order", RevisionQueryOrder.DateOrder);

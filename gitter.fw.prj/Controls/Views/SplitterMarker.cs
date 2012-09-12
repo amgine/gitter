@@ -42,7 +42,9 @@
 					Cursor = Cursors.SizeNS;
 					break;
 				default:
-					throw new ArgumentException("orientation");
+					throw new ArgumentException(
+						"Unknown Orientation value: {0}".UseAsFormat(orientation),
+						"orientation");
 			}
 		}
 

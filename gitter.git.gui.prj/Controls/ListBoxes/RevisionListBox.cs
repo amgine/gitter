@@ -153,7 +153,7 @@
 
 		public void SetLog(RevisionLog revisionLog)
 		{
-			if(revisionLog == null) throw new ArgumentNullException("revisionLog");
+			Verify.Argument.IsNotNull(revisionLog, "revisionLog");
 
 			if(_repository != null)
 			{
@@ -919,7 +919,8 @@
 
 		public void SelectRevision(IRevisionPointer revision)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
+
 			var rev = revision.Dereference();
 			RevisionListItem item;
 			if(_itemLookupTable.TryGetValue(rev, out item))
@@ -930,7 +931,8 @@
 
 		public RevisionListItem TryGetItem(Revision revision)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
+
 			if(_itemLookupTable == null) return null;
 			RevisionListItem item;
 			if(_itemLookupTable.TryGetValue(revision, out item))

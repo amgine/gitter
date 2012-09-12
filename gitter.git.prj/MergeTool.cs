@@ -99,6 +99,8 @@
 
 		#endregion
 
+		#region Properties
+
 		public string Name
 		{
 			get { return _name; }
@@ -119,11 +121,13 @@
 			get { return _suuportsLinux; }
 		}
 
+		#endregion
+
 		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
 		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
 		public override string ToString()
 		{
-			return _name;
+			return Name;
 		}
 	}
 }

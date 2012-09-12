@@ -479,8 +479,9 @@
 
 		public GraphAtom[][] BuildGraph(IList<T> items, Func<T, IList<T>> getParents)
 		{
-			if(items == null) throw new ArgumentNullException("items");
-			if(getParents == null) throw new ArgumentNullException("getParents");
+			Verify.Argument.IsNotNull(items, "items");
+			Verify.Argument.IsNotNull(getParents, "getParents");
+
 			var res = new GraphAtom[items.Count][];
 
 			var cprov = new GraphColorProvider();

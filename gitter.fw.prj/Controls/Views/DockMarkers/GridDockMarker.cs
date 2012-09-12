@@ -38,7 +38,9 @@
 					cy = bounds.Y + bounds.Height - 20 - ViewConstants.Spacing;
 					break;
 				default:
-					throw new ArgumentException("side");
+					throw new ArgumentException(
+						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
+						"side");
 			}
 			return new Rectangle(cx - 20, cy - 20, 40, 40);
 		}
@@ -57,7 +59,9 @@
 				case AnchorStyles.Bottom:
 					return new DockMarkerButton(bounds, DockResult.Bottom);
 				default:
-					throw new ArgumentException("side");
+					throw new ArgumentException(
+						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
+						"side");
 			}
 		}
 

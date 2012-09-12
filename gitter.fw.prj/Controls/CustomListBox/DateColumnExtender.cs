@@ -23,7 +23,8 @@
 		/// <param name="column">Host <see cref="DateColumn"/>.</param>
 		public DateColumnExtender(DateColumn column)
 		{
-			if(column == null) throw new ArgumentNullException("column");
+			Verify.Argument.IsNotNull(column, "column");
+
 			_column = column;
 
 			InitializeComponent();

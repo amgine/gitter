@@ -27,7 +27,8 @@
 
 		public void DrawGraph(Graphics gx, GraphAtom[] graphLine, Rectangle rect, int cellWidth, RevisionGraphItemType type, bool useColors)
 		{
-			if(gx == null) throw new ArgumentNullException("gx");
+			Verify.Argument.IsNotNull(gx, "gx");
+
 			if(graphLine != null)
 			{
 				int x = rect.X;

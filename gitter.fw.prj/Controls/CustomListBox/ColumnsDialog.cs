@@ -46,7 +46,8 @@
 		/// <param name="listBox">Related <see cref="CustomListBox"/>.</param>
 		public ColumnsDialog(CustomListBox listBox)
 		{
-			if(listBox == null) throw new ArgumentNullException("listBox");
+			Verify.Argument.IsNotNull(listBox, "listBox");
+
 			_listBox = listBox;
 
 			InitializeComponent();

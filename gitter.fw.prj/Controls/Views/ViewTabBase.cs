@@ -20,7 +20,7 @@ namespace gitter.Framework.Controls
 		/// <param name="view">Represented <see cref="ViewBase"/>.</param>
 		protected ViewTabBase(ViewBase view, AnchorStyles anchor)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
 
 			switch(anchor)
 			{

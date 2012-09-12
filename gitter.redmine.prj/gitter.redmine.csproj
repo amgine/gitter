@@ -48,6 +48,12 @@
     <Compile Include="..\common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\shared\Debug.cs">
+      <Link>Shared\Debug.cs</Link>
+    </Compile>
+    <Compile Include="..\shared\Verify.cs">
+      <Link>Shared\Verify.cs</Link>
+    </Compile>
     <Compile Include="Attachment.cs" />
     <Compile Include="Collections\AttachmentsCollection.cs" />
     <Compile Include="Collections\CustomFieldsCollection.cs" />

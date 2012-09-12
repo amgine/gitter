@@ -65,8 +65,9 @@
 			/// <param name="reflogSelector">Reflog selector.</param>
 			public ReflogReference(Reference reference, string reflogSelector)
 			{
-				if(reference == null) throw new ArgumentNullException("reference");
-				if(reflogSelector == null) throw new ArgumentNullException("reflogSelector");
+				Verify.Argument.IsNotNull(reference, "reference");
+				Verify.Argument.IsNotNull(reflogSelector, "reflogSelector");
+
 				_reference = reference;
 				_reflogSelector = reflogSelector;
 			}
@@ -93,16 +94,28 @@
 				get { return ReferenceType.ReflogRecord; }
 			}
 
+			/// <summary>
+			/// Revision expression (reference name, sha1, relative expression, etc.).
+			/// </summary>
 			public string Pointer
 			{
 				get { return _reference.Name + "@{" + _reflogSelector + "}"; }
 			}
 
+			/// <summary>
+			/// Returns full non-ambiguous revision name.
+			/// </summary>
 			public string FullName
 			{
 				get { return _reference.FullName + "@{" + _reflogSelector + "}"; ; }
 			}
 
+			/// <summary>
+			/// Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.
+			/// </summary>
+			/// <returns>
+			/// Commit which is pointed by this <see cref="IRevisionPointer"/>.
+			/// </returns>
 			public Revision Dereference()
 			{
 				var revisionData = _reference.Repository.Accessor.Dereference(
@@ -113,6 +126,9 @@
 				return ObjectFactories.CreateRevision(_reference.Repository, revisionData);
 			}
 
+			/// <summary>
+			/// Object is deleted and not valid anymore.
+			/// </summary>
 			public bool IsDeleted
 			{
 				get { return false; }
@@ -122,20 +138,6 @@
 		#endregion
 
 		#region Static
-
-		/// <summary>Validates the reference name.</summary>
-		/// <param name="name">Reference name.</param>
-		/// <exception cref="ArgumentException"><paramref name="name"/> is not a valid reference name.</exception>
-		[System.Diagnostics.DebuggerHidden]
-		public static void ValidateName(string name)
-		{
-			if(name == null) throw new ArgumentNullException("name");
-			string msg;
-			if(!Reference.ValidateName(name, out msg))
-			{
-				throw new ArgumentException(msg, "name");
-			}
-		}
 
 		/// <summary>Validates the reference name.</summary>
 		/// <param name="name">Reference name.</param>
@@ -257,7 +259,8 @@
 		internal Reference(Repository repository, string name, IRevisionPointer pointer)
 			: base(repository, name)
 		{
-			if(pointer == null) throw new ArgumentNullException("pointer");
+			Verify.Argument.IsNotNull(pointer, "pointer");
+
 			_pointer = PrepareInputPointer(pointer);
 			_reflogSync = new object();
 			EnterPointer(_pointer);
@@ -276,7 +279,8 @@
 			get { return _pointer; }
 			internal set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				var newPointer = PrepareInputPointer(value);
 				if(_pointer != newPointer)
 				{
@@ -309,13 +313,15 @@
 		}
 
 		/// <summary>Get a reference to reflog record.</summary>
+		/// <param name="index">Reflog record index.</param>
 		/// <value>Pointer to reflog record.</value>
 		/// <returns>Pointer to reflog record.</returns>
 		public IRevisionPointer this[int index]
 		{
 			get
 			{
-				if(index < 0) throw new ArgumentOutOfRangeException("index");
+				Verify.Argument.IsNotNegative(index, "index");
+
 				if(index == 0) return this;
 				return new ReflogReference(this, index.ToString(CultureInfo.InvariantCulture));
 			}

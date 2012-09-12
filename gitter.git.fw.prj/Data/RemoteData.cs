@@ -18,10 +18,10 @@
 
 		public RemoteData(string name, string fetchUrl, string pushUrl)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
-			if(fetchUrl == null) throw new ArgumentNullException("fetchUrl");
-			if(fetchUrl.Length == 0) throw new ArgumentException("fetchUrl");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(fetchUrl, "fetchUrl");
+			Verify.Argument.IsNotNull(pushUrl, "pushUrl");
+
 			_name = name;
 			_fetchUrl = fetchUrl;
 			_pushUrl = pushUrl;

@@ -153,7 +153,7 @@
 		/// <returns>Array of corresponding <see cref="Revision"/> objects.</returns>
 		internal Revision[] Resolve(IList<RevisionData> data)
 		{
-			if(data == null) throw new ArgumentNullException("data");
+			Verify.Argument.IsNotNull(data, "data");
 
 			var res = new Revision[data.Count];
 			lock(SyncRoot)

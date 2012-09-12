@@ -138,7 +138,7 @@
 
 			public string GetString(Encoding encoding)
 			{
-				if(encoding == null) throw new ArgumentNullException("encoding");
+				Verify.Argument.IsNotNull(encoding, "encoding");
 
 				if(_length == 0)
 				{

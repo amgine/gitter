@@ -15,10 +15,9 @@ namespace gitter.Git.Gui.Views
 
 		public ConfigToolBar(ConfigView configView)
 		{
-			if(configView == null) throw new ArgumentNullException("configView");
+			Verify.Argument.IsNotNull(configView, "configView");
 
 			_configView = configView;
-
 			Items.Add(
 				new ToolStripButton(
 					Resources.StrRefresh,

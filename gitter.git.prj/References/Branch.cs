@@ -90,34 +90,10 @@
 		/// </exception>
 		public void Reset(IRevisionPointer revision)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
-			}
-
-			#endregion
-
-			#region validate arguments
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.Repository != Repository)
-			{
-				throw new ArgumentException(
-					Resources.ExcSuppliedRevisionIsNotHandledByThisRepository, "revision");
-			}
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(
-					Resources.ExcSuppliedRevisionIsDeleted, "revision");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.State.IsNotDeleted(this);
 
 			var rev = revision.Dereference();
-
 			if(Revision != rev)
 			{
 				using(Repository.Monitor.BlockNotifications(
@@ -141,15 +117,7 @@
 		/// </exception>
 		public override void Delete()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Heads.Delete(this, false);
 		}
@@ -167,15 +135,7 @@
 		/// </exception>
 		public override void Delete(bool force)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Heads.Delete(this, force);
 		}
@@ -188,15 +148,7 @@
 		/// </exception>
 		public override void Refresh()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Heads.Refresh(this);
 		}
@@ -209,15 +161,7 @@
 		/// <param name="newName">New name.</param>
 		protected override void RenameCore(string newName)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Heads.Rename(this, newName);
 		}

@@ -39,7 +39,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public TagData QueryTag(QueryTagParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			string fullName = GitConstants.TagPrefix + parameters.TagName;
 			var cmd = new ShowRefCommand(
@@ -125,7 +125,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<TagData> QueryTags(QueryTagsParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new ShowRefCommand(
 				ShowRefCommand.Dereference(),
@@ -151,7 +151,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void CreateTag(CreateTagParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(5);
 			if(parameters.TagType == TagType.Annotated)
@@ -214,7 +214,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void DeleteTag(DeleteTagParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new TagCommand(
 				TagCommand.Delete(),
@@ -236,7 +236,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void VerifyTags(VerifyTagsParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(1 + parameters.TagNames.Count);
 			args.Add(TagCommand.Verify());
@@ -252,7 +252,7 @@
 
 		public string Describe(DescribeParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(2);
 			args.Add(DescribeCommand.Tags());

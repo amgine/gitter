@@ -3,6 +3,7 @@
 	using System;
 	using System.Linq;
 	using System.Collections.Generic;
+	using System.Globalization;
 
 	using gitter.Framework;
 
@@ -35,7 +36,9 @@
 		internal StashedState(Repository repository, int index, Revision revision)
 			: base(repository, index.ToString().SurroundWith(GitConstants.StashName + "@{", "}"))
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNegative(index, "index");
+
 			_revision = revision;
 		}
 
@@ -45,165 +48,77 @@
 
 		public IAsyncAction DropAsync()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return Repository.Stash.DropAsync(this);
 		}
 
 		public void Drop()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Stash.Drop(this);
 		}
 
 		public IAsyncAction PopAsync(bool restoreIndex)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return Repository.Stash.PopAsync(this, restoreIndex);
 		}
 
 		public void Pop(bool restoreIndex)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Stash.Pop(this, restoreIndex);
 		}
 
 		public void Pop()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Stash.Pop(this, false);
 		}
 
 		public IAsyncAction ApplyAsync(bool restoreIndex)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return Repository.Stash.ApplyAsync(this, restoreIndex);
 		}
 
 		public void Apply(bool restoreIndex)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Stash.Apply(this, restoreIndex);
 		}
 
 		public void Apply()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Stash.Apply(this, false);
 		}
 
 		public Branch ToBranch(string name)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return Repository.Stash.ToBranch(this, name);
 		}
 
 		public IRevisionDiffSource GetDiffSource()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return new StashedChangesDiffSource(this);
 		}
 
 		public IRevisionDiffSource GetDiffSource(IEnumerable<string> paths)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "StashedState"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			if(paths == null)
 			{
@@ -219,11 +134,15 @@
 
 		#region Properties
 
+		/// <summary>Returns stash index.</summary>
+		/// <value>Stash index.</value>
 		public int Index
 		{
 			get { return _index; }
 			internal set
 			{
+				Verify.Argument.IsNotNegative(value, "value");
+
 				if(_index != value)
 				{
 					_index = value;
@@ -248,12 +167,12 @@
 
 		string IRevisionPointer.Pointer
 		{
-			get { return GitConstants.StashFullName + "@{" + _index.ToString() + "}"; }
+			get { return GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
 		}
 
 		string IRevisionPointer.FullName
 		{
-			get { return GitConstants.StashFullName + "@{" + _index.ToString() + "}"; }
+			get { return GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
 		}
 
 		public Revision Dereference()

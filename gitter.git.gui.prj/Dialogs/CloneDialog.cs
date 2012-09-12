@@ -17,7 +17,7 @@
 
 		public CloneDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
-			if(gitRepositoryProvider == null) throw new ArgumentNullException("gitRepositoryProvider");
+			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
 
 			InitializeComponent();
 

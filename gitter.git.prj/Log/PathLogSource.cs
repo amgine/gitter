@@ -21,8 +21,8 @@
 		/// <param name="followRenames">if set to <c>true</c> follow file renames.</param>
 		public PathLogSource(IRevisionPointer revision, string path, bool followRenames = true)
 		{
-			if(revision == null) throw new ArgumentNullException("repository");
-			if(path == null) throw new ArgumentNullException("path");
+			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(path, "path");
 
 			_revision = revision;
 			_path = path;

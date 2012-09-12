@@ -21,7 +21,7 @@
 		public RepositoryCommitListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgCommit"], Resources.StrCommit)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 		}

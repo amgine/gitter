@@ -12,7 +12,7 @@
 		/// <remarks>WinVista+ required.</remarks>
 		public static void SetStyleEx(this ProgressBar progressBar, ProgressBarStyleEx style)
 		{
-			if(progressBar == null) throw new ArgumentNullException("progressBar");
+			Verify.Argument.IsNotNull(progressBar, "progressBar");
 
 			const uint TDM_SET_PROGRESS_BAR_STATE = 0x400 + 16;
 			NativeMethods.SendMessage(progressBar.Handle, TDM_SET_PROGRESS_BAR_STATE, (IntPtr)style, (IntPtr)0);

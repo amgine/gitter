@@ -13,7 +13,8 @@
 
 		public StashedStateMenu(StashedState stashedState)
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
+
 			_stashedState = stashedState;
 
 			Items.AddRange(
@@ -33,7 +34,7 @@
 						new ToolStripItem[]
 						{
 							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ((IRevisionPointer)StashedState).Pointer),
-							GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, StashedState.Revision.Name),
+							GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, StashedState.Revision.Hash),
 							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, StashedState.Revision.Subject),
 						}),
 				});

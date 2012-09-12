@@ -11,7 +11,7 @@
 
 		protected RedmineObjectModification(T original)
 		{
-			if(original == null) throw new ArgumentNullException("original");
+			Verify.Argument.IsNotNull(original, "original");
 
 			_original = original;
 

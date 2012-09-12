@@ -101,6 +101,8 @@
 
 		public void GetArgument(StringBuilder stringBuilder)
 		{
+			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
+
 			stringBuilder.Append(_name);
 			if(!string.IsNullOrEmpty(_value))
 			{

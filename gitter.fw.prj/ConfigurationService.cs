@@ -93,26 +93,30 @@
 
 		public Section GetSectionForProvider(IRepositoryProvider provider)
 		{
-			if(provider == null) throw new ArgumentNullException("provider");
+			Verify.Argument.IsNotNull(provider, "provider");
+
 			return _providersSection.GetCreateSection(provider.Name);
 		}
 
 		public Section GetSectionForProvider(IIssueTrackerProvider provider)
 		{
-			if(provider == null) throw new ArgumentNullException("provider");
+			Verify.Argument.IsNotNull(provider, "provider");
+
 			return _providersSection.GetCreateSection(provider.Name);
 		}
 
 		public Section GetSectionForProviderGui(IRepositoryProvider provider)
 		{
-			if(provider == null) throw new ArgumentNullException("provider");
+			Verify.Argument.IsNotNull(provider, "provider");
+
 			var section = _providersSection.GetCreateSection(provider.Name);
 			return section.GetCreateSection("Gui");
 		}
 
 		public Section GetSectionForProviderGui(IIssueTrackerProvider provider)
 		{
-			if(provider == null) throw new ArgumentNullException("provider");
+			Verify.Argument.IsNotNull(provider, "provider");
+
 			var section = _providersSection.GetCreateSection(provider.Name);
 			return section.GetCreateSection("Gui");
 		}

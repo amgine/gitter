@@ -30,10 +30,10 @@
 		/// <param name="headerLinesCount">Header lines count.</param>
 		public DiffStats(int addedLinesCount, int removedLinesCount, int contextLinesCount, int headerLinesCount)
 		{
-			if(addedLinesCount < 0) throw new ArgumentOutOfRangeException("addedLinesCount");
-			if(removedLinesCount < 0) throw new ArgumentOutOfRangeException("removedLinesCount");
-			if(contextLinesCount < 0) throw new ArgumentOutOfRangeException("contextLinesCount");
-			if(headerLinesCount < 0) throw new ArgumentOutOfRangeException("headerLinesCount");
+			Verify.Argument.IsNotNegative(addedLinesCount, "addedLinesCount");
+			Verify.Argument.IsNotNegative(removedLinesCount, "removedLinesCount");
+			Verify.Argument.IsNotNegative(contextLinesCount, "contextLinesCount");
+			Verify.Argument.IsNotNegative(headerLinesCount, "headerLinesCount");
 
 			_addedLinesCount = addedLinesCount;
 			_removedLinesCount = removedLinesCount;
@@ -51,7 +51,8 @@
 			get { return _addedLinesCount; }
 			set
 			{
-				if(value < 0) throw new ArgumentOutOfRangeException("value");
+				Verify.Argument.IsNotNegative(value, "value");
+
 				_addedLinesCount = value;
 			}
 		}
@@ -62,7 +63,8 @@
 			get { return _removedLinesCount; }
 			set
 			{
-				if(value < 0) throw new ArgumentOutOfRangeException("value");
+				Verify.Argument.IsNotNegative(value, "value");
+
 				_removedLinesCount = value;
 			}
 		}
@@ -79,7 +81,8 @@
 			get { return _contextLinesCount; }
 			set
 			{
-				if(value < 0) throw new ArgumentOutOfRangeException("value");
+				Verify.Argument.IsNotNegative(value, "value");
+
 				_contextLinesCount = value;
 			}
 		}
@@ -96,7 +99,8 @@
 
 		public void Add(DiffStats stats)
 		{
-			if(stats == null) throw new ArgumentNullException("stats");
+			Verify.Argument.IsNotNull(stats, "stats");
+
 			_addedLinesCount += stats._addedLinesCount;
 			_removedLinesCount += stats._removedLinesCount;
 			_contextLinesCount += stats._contextLinesCount;
@@ -105,7 +109,8 @@
 
 		public void Subtract(DiffStats stats)
 		{
-			if(stats == null) throw new ArgumentNullException("stats");
+			Verify.Argument.IsNotNull(stats, "stats");
+
 			_addedLinesCount -= stats._addedLinesCount;
 			_removedLinesCount -= stats._removedLinesCount;
 			_contextLinesCount -= stats._contextLinesCount;
@@ -160,10 +165,10 @@
 
 		public void Reset(int addedLinesCount, int removedLinesCount, int contextLinesCount, int headerLinesCount)
 		{
-			if(addedLinesCount < 0) throw new ArgumentOutOfRangeException("addedLinesCount");
-			if(removedLinesCount < 0) throw new ArgumentOutOfRangeException("removedLinesCount");
-			if(contextLinesCount < 0) throw new ArgumentOutOfRangeException("contextLinesCount");
-			if(headerLinesCount < 0) throw new ArgumentOutOfRangeException("headerLinesCount");
+			Verify.Argument.IsNotNegative(addedLinesCount, "addedLinesCount");
+			Verify.Argument.IsNotNegative(removedLinesCount, "removedLinesCount");
+			Verify.Argument.IsNotNegative(contextLinesCount, "contextLinesCount");
+			Verify.Argument.IsNotNegative(headerLinesCount, "headerLinesCount");
 
 			_addedLinesCount = addedLinesCount;
 			_removedLinesCount = removedLinesCount;

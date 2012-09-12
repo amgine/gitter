@@ -21,7 +21,8 @@
 		/// <param name="repository">Repository to create note in.</param>
 		public AddNoteDialog(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			_repository = repository;
 
 			InitializeComponent();
@@ -100,7 +101,7 @@
 			try
 			{
 				Cursor = Cursors.WaitCursor;
-				var ptr = _repository.CreateRevisionPointer(revision);
+				var ptr = _repository.GetRevisionPointer(revision);
 				ptr.AddNote(message);
 				Cursor = Cursors.Default;
 			}

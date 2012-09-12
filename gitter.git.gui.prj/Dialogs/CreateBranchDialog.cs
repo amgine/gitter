@@ -34,7 +34,8 @@
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		public CreateBranchDialog(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			_repository = repository;
 
 			InitializeComponent();
@@ -229,7 +230,7 @@
 			try
 			{
 				Cursor = Cursors.WaitCursor;
-				var ptr = _repository.CreateRevisionPointer(refspec);
+				var ptr = _repository.GetRevisionPointer(refspec);
 				if(orphan)
 				{
 					_repository.Refs.Heads.CreateOrphan(

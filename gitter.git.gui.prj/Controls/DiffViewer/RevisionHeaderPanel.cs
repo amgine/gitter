@@ -284,19 +284,19 @@
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
 				var menu = new ContextMenuStrip();
-				menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, revision.Name));
+				menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, revision.Hash));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
-				return Measure(graphics, TreeHashColumn.Font, revision.Name, width);
+				return Measure(graphics, TreeHashColumn.Font, revision.Hash, width);
 			}
 
 			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
 			{
-				DefaultPaint(graphics, HashColumn.Font, Resources.StrHash.AddColon(), revision.Name, rect);
+				DefaultPaint(graphics, HashColumn.Font, Resources.StrHash.AddColon(), revision.Hash, rect);
 			}
 		}
 
@@ -349,7 +349,7 @@
 				var sb = new StringBuilder(41 * revision.Parents.Count);
 				foreach(var p in revision.Parents)
 				{
-					sb.Append(p.Name);
+					sb.Append(p.Hash);
 					sb.Append('\n');
 				}
 				sb.Remove(sb.Length - 1, 1);
@@ -365,7 +365,7 @@
 					case 0:
 						return Size.Empty;
 					case 1:
-						return Measure(graphics, HashColumn.Font, revision.Parents[0].Name, width);
+						return Measure(graphics, HashColumn.Font, revision.Parents[0].Hash, width);
 					default:
 						var sb = new StringBuilder(41 * revision.Parents.Count);
 						bool first = true;
@@ -374,7 +374,7 @@
 							var p = revision.Parents[i];
 							if(!first) sb.Append('\n');
 							else first = false;
-							sb.Append(p.Name);
+							sb.Append(p.Hash);
 						}
 						return MeasureMultilineContent(graphics, HashColumn.Font, sb.ToString(), width);
 				}
@@ -384,14 +384,14 @@
 			{
 				if(revision.Parents.Count == 1)
 				{
-					DefaultPaint(graphics, HashColumn.Font, Resources.StrParent.AddColon(), revision.Parents[0].Name, rect);
+					DefaultPaint(graphics, HashColumn.Font, Resources.StrParent.AddColon(), revision.Parents[0].Hash, rect);
 				}
 				else
 				{
 					var sb = new StringBuilder(41 * revision.Parents.Count);
 					foreach(var p in revision.Parents)
 					{
-						sb.Append(p.Name);
+						sb.Append(p.Hash);
 						sb.Append('\n');
 					}
 					DefaultPaint(graphics, HashColumn.Font, Resources.StrParents.AddColon(), sb.ToString(), rect);
@@ -993,14 +993,14 @@
 		protected override void OnFlowControlAttached()
 		{
 			_revision.Author.Avatar.Updated += OnAuthorAvatarUpdated;
-			_revision.References.Changed += OnRefListChanged;
+			_revision.References.Changed += OnReferenceListChanged;
 			base.OnFlowControlAttached();
 		}
 
 		protected override void OnFlowControlDetached()
 		{
 			_revision.Author.Avatar.Updated -= OnAuthorAvatarUpdated;
-			_revision.References.Changed -= OnRefListChanged;
+			_revision.References.Changed -= OnReferenceListChanged;
 			base.OnFlowControlDetached();
 		}
 
@@ -1009,7 +1009,7 @@
 			InvalidateSafe();
 		}
 
-		private void OnRefListChanged(object sender, EventArgs e)
+		private void OnReferenceListChanged(object sender, EventArgs e)
 		{
 			Size size;
 			_sizes.TryGetValue(Element.References, out size);

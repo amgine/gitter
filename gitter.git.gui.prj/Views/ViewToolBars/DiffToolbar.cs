@@ -13,7 +13,7 @@ namespace gitter.Git.Gui.Views
 	{
 		#region Data
 
-		private readonly DiffView _view;
+		private readonly DiffView _diffView;
 		private readonly ToolStripTextBox _contextTextBox;
 		private readonly ToolStripDropDownButton _ddbOptions;
 		private readonly ToolStripMenuItem _mnuIgnoreWhitespace;
@@ -21,16 +21,16 @@ namespace gitter.Git.Gui.Views
 
 		#endregion
 
-		public DiffToolbar(DiffView tool)
+		public DiffToolbar(DiffView diffView)
 		{
-			if(tool == null) throw new ArgumentNullException("tool");
+			Verify.Argument.IsNotNull(diffView, "diffView");
 
-			_view = tool;
+			_diffView = diffView;
 
 			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
 				(sender, e) =>
 				{
-					_view.RefreshContent();
+					_diffView.RefreshContent();
 				})
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -43,7 +43,7 @@ namespace gitter.Git.Gui.Views
 				});
 			Items.Add(_contextTextBox = new ToolStripTextBox()
 				{
-					Text = _view.DiffOptions.Context.ToString(CultureInfo.InvariantCulture),
+					Text = _diffView.DiffOptions.Context.ToString(CultureInfo.InvariantCulture),
 					TextBoxTextAlign = HorizontalAlignment.Right,
 					ControlAlign = ContentAlignment.MiddleCenter,
 					AutoSize = false,
@@ -61,11 +61,11 @@ namespace gitter.Git.Gui.Views
 				});
 			_ddbOptions.DropDownItems.Add(_mnuIgnoreWhitespace = new ToolStripMenuItem(Resources.StrsIgnoreWhitespace)
 				{
-					Checked = _view.DiffOptions.IgnoreWhitespace,
+					Checked = _diffView.DiffOptions.IgnoreWhitespace,
 				});
 			_ddbOptions.DropDownItems.Add(_mnuUsePatienceAlgorithm = new ToolStripMenuItem(Resources.StrsUsePatienceDiffAlgorithm)
 				{
-					Checked = _view.DiffOptions.UsePatienceAlgorithm,
+					Checked = _diffView.DiffOptions.UsePatienceAlgorithm,
 				});
 
 			_contextTextBox.TextChanged += (sender, e) =>
@@ -83,15 +83,15 @@ namespace gitter.Git.Gui.Views
 				};
 			_mnuIgnoreWhitespace.Click += (sender, e) =>
 				{
-					_view.DiffOptions.IgnoreWhitespace = !_view.DiffOptions.IgnoreWhitespace;
-					_mnuIgnoreWhitespace.Checked = _view.DiffOptions.IgnoreWhitespace;
-					_view.Reload();
+					_diffView.DiffOptions.IgnoreWhitespace = !_diffView.DiffOptions.IgnoreWhitespace;
+					_mnuIgnoreWhitespace.Checked = _diffView.DiffOptions.IgnoreWhitespace;
+					_diffView.Reload();
 				};
 			_mnuUsePatienceAlgorithm.Click += (sender, e) =>
 				{
-					_view.DiffOptions.UsePatienceAlgorithm = !_view.DiffOptions.UsePatienceAlgorithm;
-					_mnuUsePatienceAlgorithm.Checked = _view.DiffOptions.UsePatienceAlgorithm;
-					_view.Reload();
+					_diffView.DiffOptions.UsePatienceAlgorithm = !_diffView.DiffOptions.UsePatienceAlgorithm;
+					_mnuUsePatienceAlgorithm.Checked = _diffView.DiffOptions.UsePatienceAlgorithm;
+					_diffView.Reload();
 				};
 		}
 
@@ -101,17 +101,17 @@ namespace gitter.Git.Gui.Views
 				context = 0;
 			if(context > 9999)
 				context = 9999;
-			if(_view.DiffOptions.Context != context)
+			if(_diffView.DiffOptions.Context != context)
 			{
-				_view.DiffOptions.Context = context;
-				_view.Reload();
+				_diffView.DiffOptions.Context = context;
+				_diffView.Reload();
 				_contextTextBox.Text = context.ToString(CultureInfo.InvariantCulture);
 			}
 		}
 
 		private void IncrementContext()
 		{
-			var context = _view.DiffOptions.Context;
+			var context = _diffView.DiffOptions.Context;
 			if(context == 9999) return;
 			++context;
 			_contextTextBox.Text = context.ToString(CultureInfo.InvariantCulture);
@@ -119,7 +119,7 @@ namespace gitter.Git.Gui.Views
 
 		private void DecrementContext()
 		{
-			var context = _view.DiffOptions.Context;
+			var context = _diffView.DiffOptions.Context;
 			if(context == 0) return;
 			--context;
 			_contextTextBox.Text = context.ToString(CultureInfo.InvariantCulture);

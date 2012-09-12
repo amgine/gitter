@@ -58,10 +58,10 @@
 		internal ReflogRecord(Repository repository, Reflog reflog, Revision revision, string message, int index)
 			: base(repository)
 		{
-			if(reflog == null) throw new ArgumentNullException("reflog");
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(message == null) throw new ArgumentNullException("message");
-			if(index < 0) throw new ArgumentOutOfRangeException("index");
+			Verify.Argument.IsNotNull(reflog, "reflog");
+			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(message, "message");
+			Verify.Argument.IsNotNegative(index, "index");
 
 			_reflog = reflog;
 			_revision = revision;
@@ -94,7 +94,8 @@
 			get { return _revision; }
 			internal set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				if(_revision != value)
 				{
 					_revision = value;
@@ -110,7 +111,8 @@
 			get { return _message; }
 			internal set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				if(_message != value)
 				{
 					_message = value;
@@ -126,7 +128,8 @@
 			get { return _index; }
 			internal set
 			{
-				if(value < 0) throw new ArgumentOutOfRangeException("value");
+				Verify.Argument.IsNotNegative(value, "value");
+
 				if(_index != value)
 				{
 					_index = value;

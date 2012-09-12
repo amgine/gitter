@@ -176,9 +176,13 @@
 					lock(refs.SyncRoot)
 					{
 						if(refs.Contains(_name))
+						{
 							refs.NotifyRemoved(_name);
+						}
 						else
+						{
 							return false;
+						}
 					}
 				}
 				else
@@ -187,9 +191,13 @@
 					lock(refs.SyncRoot)
 					{
 						if(refs.Contains(_name))
+						{
 							refs.NotifyRemoved(_name);
+						}
 						else
+						{
 							return false;
+						}
 					}
 				}
 			}
@@ -207,10 +215,14 @@
 						}
 						else
 						{
-							if(branch.Revision.Name != branchInformation.SHA1)
+							if(branch.Revision.Hash != branchInformation.SHA1)
+							{
 								branch.NotifyReset(branchInformation);
+							}
 							else
+							{
 								return false;
+							}
 						}
 					}
 				}
@@ -226,10 +238,14 @@
 						}
 						else
 						{
-							if(branch.Revision.Name != branchInformation.SHA1)
+							if(branch.Revision.Hash != branchInformation.SHA1)
+							{
 								branch.NotifyReset(branchInformation);
+							}
 							else
+							{
 								return false;
+							}
 						}
 					}
 				}
@@ -289,7 +305,7 @@
 					}
 					else
 					{
-						if(tag.Revision.Name != tagInformation.SHA1)
+						if(tag.Revision.Hash != tagInformation.SHA1)
 						{
 							refs.NotifyRemoved(_name);
 							refs.NotifyCreated(tagInformation);

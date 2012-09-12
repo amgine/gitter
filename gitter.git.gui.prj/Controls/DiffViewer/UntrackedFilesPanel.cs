@@ -39,7 +39,8 @@
 
 			public FileItem(TreeFile file)
 			{
-				if(file == null) throw new ArgumentNullException("file");
+				Verify.Argument.IsNotNull(file, "file");
+
 				_file = file;
 				_text = file.RelativePath;
 				_icon = Utility.QueryIcon(file.RelativePath);
@@ -93,7 +94,7 @@
 
 		public UntrackedFilesPanel(Status status, IEnumerable<string> paths)
 		{
-			if(status == null) throw new ArgumentNullException("status");
+			Verify.Argument.IsNotNull(status, "status");
 
 			lock(status.SyncRoot)
 			{

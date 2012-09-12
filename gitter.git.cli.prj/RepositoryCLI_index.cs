@@ -201,7 +201,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public StatusData QueryStatus(QueryStatusParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(7);
 
@@ -373,7 +373,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<TreeFileData> QueryFilesToAdd(AddFilesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 5);
 			args.Add(AddCommand.DryRun());
@@ -434,7 +434,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void AddFiles(AddFilesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(
 				(parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 5);
@@ -452,7 +452,7 @@
 		/// <returns>List of files which will be removed by a <see cref="IIndexAccessor.RemoveFiles"/>(<paramref name="parameters"/>) call.</returns>
 		public IList<string> QueryFilesToRemove(RemoveFilesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 5);
 
@@ -485,7 +485,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void RemoveFiles(RemoveFilesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 4);
 
@@ -505,7 +505,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<string> QueryFilesToClean(CleanFilesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(
 				(parameters.ExcludePatterns != null ? parameters.ExcludePatterns.Count : 0) +
@@ -541,7 +541,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void CleanFiles(CleanFilesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(
 				(parameters.ExcludePatterns != null ? parameters.ExcludePatterns.Count : 0) +
@@ -559,7 +559,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void ResetFiles(ResetFilesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 1);
 
@@ -586,7 +586,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void ApplyPatch(ApplyPatchParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			InsertApplyPatchParameters(parameters, args);
@@ -629,7 +629,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void Commit(CommitParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(12);
 			InsertCommitParameters(parameters, args);
@@ -695,7 +695,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void RunMergeTool(RunMergeToolParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>((parameters.Files != null ? parameters.Files.Count : 0) + 2);
 			if(!string.IsNullOrEmpty(parameters.Tool))

@@ -66,7 +66,8 @@
 
 			public FileItem(DiffFile file)
 			{
-				if(file == null) throw new ArgumentNullException("file");
+				Verify.Argument.IsNotNull(file, "file");
+
 				_file = file;
 
 				if(file.Status == FileStatus.Removed)

@@ -109,7 +109,7 @@
 
 		private static List<FontStyle> GetSupportedFontStyles(FontFamily fontFamily)
 		{
-			if(fontFamily == null) throw new ArgumentNullException("fontFamily");
+			Verify.Argument.IsNotNull(fontFamily, "fontFamily");
 
 			var styles = new List<FontStyle>(FontStyles.Length);
 			for(int i = 0; i < FontStyles.Length; ++i)

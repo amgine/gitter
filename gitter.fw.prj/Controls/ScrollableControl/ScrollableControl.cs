@@ -291,7 +291,7 @@
 		/// <param name="redraw">Repaint control.</param>
 		protected virtual void EndUpdate(bool redraw)
 		{
-			if(_updateCount == 0) throw new InvalidOperationException();
+			Verify.State.IsTrue(_updateCount > 0);
 
 			--_updateCount;
 			if(_updateCount == 0)

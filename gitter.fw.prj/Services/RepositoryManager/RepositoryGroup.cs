@@ -10,8 +10,7 @@
 
 		public RepositoryGroup(string name)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
 
 			_name = name;
 			_repositories = new List<RepositoryLink>();
@@ -47,13 +46,16 @@
 			get { return _repositories[index]; }
 			set
 			{
-				if(value == null) throw new InvalidOperationException();
+				Verify.Argument.IsNotNull(value, "value");
+
 				_repositories[index] = value;
 			}
 		}
 
 		public void Add(RepositoryLink item)
 		{
+			Verify.Argument.IsNotNull(item, "item");
+
 			_repositories.Add(item);
 		}
 

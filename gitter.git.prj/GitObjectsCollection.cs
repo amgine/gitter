@@ -42,25 +42,39 @@
 		/// <param name="item">Added item.</param>
 		protected virtual void InvokeObjectAdded(TObject item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			var handler1 = ObjectAdded;
-			if(handler1 != null) handler1(this, CreateEventArgs(item));
+			if(handler1 != null)
+			{
+				handler1(this, CreateEventArgs(item));
+			}
 			var handler2 = CollectionChanged;
-			if(handler2 != null) handler2(this,
-				new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+			if(handler2 != null)
+			{
+				handler2(this, new NotifyCollectionChangedEventArgs(
+					NotifyCollectionChangedAction.Add, item));
+			}
 		}
 
 		/// <summary>Invokes <see cref="ObjectRemoved"/> and <see cref="CollectionChanged"/> events.</summary>
 		/// <param name="item">Removed item.</param>
 		protected virtual void InvokeObjectRemoved(TObject item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			item.MarkAsDeleted();
 			var handler = ObjectRemoved;
-			if(handler != null) handler(this, CreateEventArgs(item));
+			if(handler != null)
+			{
+				handler(this, CreateEventArgs(item));
+			}
 			var handler2 = CollectionChanged;
-			if(handler2 != null) handler2(this,
-				new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+			if(handler2 != null)
+			{
+				handler2(this, new NotifyCollectionChangedEventArgs(
+					NotifyCollectionChangedAction.Remove, item));
+			}
 		}
 
 		#endregion
@@ -102,15 +116,11 @@
 			lock(_dictionary)
 			{
 				TObject item;
-				if(_dictionary.TryGetValue(name, out item))
-				{
-					_dictionary.Remove(name);
-					InvokeObjectRemoved(item);
-				}
-				else
-				{
-					throw new ArgumentException("name");
-				}
+				Verify.Argument.IsTrue(
+					_dictionary.TryGetValue(name, out item),
+					"name", "Object not found.");
+				_dictionary.Remove(name);
+				InvokeObjectRemoved(item);
 			}
 		}
 
@@ -223,7 +233,8 @@
 		/// <param name="item">Removed object.</param>
 		internal void NotifyRemoved(TObject item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			RemoveObject(item);
 		}
 
@@ -231,7 +242,8 @@
 		/// <param name="name">Removed object name.</param>
 		internal void NotifyRemoved(string name)
 		{
-			if(name == null) throw new ArgumentNullException("name");
+			Verify.Argument.IsNotNull(name, "name");
+
 			RemoveObject(name);
 		}
 

@@ -25,9 +25,9 @@
 
 		protected SearchToolBar(TView view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
-			_view = view;
+			Verify.Argument.IsNotNull(view, "view");
 
+			_view = view;
 			_result = true;
 
 			Items.Add(new ToolStripButton(Resources.StrClose, CachedResources.Bitmaps["ImgSearchClose"], (sender, e) =>

@@ -9,11 +9,11 @@
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="ViewListItem"/> class.</summary>
-		/// <param name="toolFactory">The tool factory.</param>
-		public ViewListItem(IViewFactory toolFactory)
-			: base(toolFactory)
+		/// <param name="viewFactory">View factory.</param>
+		public ViewListItem(IViewFactory viewFactory)
+			: base(viewFactory)
 		{
-			if(toolFactory == null) throw new ArgumentNullException("toolFactory");
+			Verify.Argument.IsNotNull(viewFactory, "viewFactory");
 		}
 
 		#endregion

@@ -82,7 +82,7 @@
 
 		public IDisposable Subscribe(IObserver<LogEvent> observer)
 		{
-			if(observer == null) throw new ArgumentNullException("observer");
+			Verify.Argument.IsNotNull(observer, "observer");
 
 			lock(_observers)
 			{

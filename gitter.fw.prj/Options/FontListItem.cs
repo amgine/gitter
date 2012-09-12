@@ -13,7 +13,7 @@
 		public FontListItem(SelectableFont font)
 			: base(font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			_font = font.Font;
 		}

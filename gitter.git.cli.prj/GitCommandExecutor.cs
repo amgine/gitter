@@ -13,7 +13,7 @@
 
 		public GitCommandExecutor(GitCLI gitCLI)
 		{
-			if(gitCLI == null) throw new ArgumentNullException("globalCLI");
+			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
 
 			_gitCLI = gitCLI;
 		}

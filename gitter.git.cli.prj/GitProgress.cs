@@ -68,9 +68,10 @@
 
 		#region Methods
 
-		public void Apply(IAsyncProgressMonitor monitor)
+		public void Notify(IAsyncProgressMonitor monitor)
 		{
-			if(monitor == null) throw new ArgumentNullException("monitor");
+			Verify.Argument.IsNotNull(monitor, "monitor");
+
 			if(_continious)
 			{
 				monitor.SetProgressIntermediate();

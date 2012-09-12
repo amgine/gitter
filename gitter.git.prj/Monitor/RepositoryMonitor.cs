@@ -86,13 +86,15 @@ namespace gitter.Git
 
 		private sealed class NotificationsBlockToken : IDisposable
 		{
-			private readonly RepositoryMonitor _watcher;
+			private readonly RepositoryMonitor _monitor;
 			private readonly object[] _notifications;
 			private readonly object _key;
 
-			public NotificationsBlockToken(RepositoryMonitor watcher, object key, object[] notifications)
+			public NotificationsBlockToken(RepositoryMonitor monitor, object key, object[] notifications)
 			{
-				_watcher = watcher;
+				Assert.IsNotNull(monitor);
+
+				_monitor = monitor;
 				_notifications = notifications;
 				_key = key;
 			}
@@ -101,7 +103,7 @@ namespace gitter.Git
 			{
 				if(_notifications != null && _notifications.Length != 0)
 				{
-					_watcher.UnblockNotifications(_key, _notifications);
+					_monitor.UnblockNotifications(_key, _notifications);
 				}
 			}
 		}
@@ -130,7 +132,7 @@ namespace gitter.Git
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
 		internal RepositoryMonitor(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			_repository = repository;
 

@@ -121,7 +121,8 @@
 		protected TreeItemListItem(T item, bool showFullPath)
 			: base(item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_showFullPath = showFullPath;
 		}
 

@@ -29,7 +29,7 @@
 		{
 			public TreeMenu(ITreeSource treeSource, TreeDirectoryListItem item)
 			{
-				if(item == null) throw new ArgumentNullException("item");
+				Verify.Argument.IsNotNull(item, "item");
 
 				Items.Add(GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(item));
 				Items.Add(GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(item));
@@ -157,7 +157,8 @@
 			get { return _currentDirectory; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				if(_currentDirectory != value)
 				{
 					var item = FindDirectoryEntry(value);

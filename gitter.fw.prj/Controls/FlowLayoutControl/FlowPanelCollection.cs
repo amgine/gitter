@@ -18,7 +18,7 @@
 		/// <param name="control">Host <see cref="FlowLayoutControl"/>.</param>
 		internal FlowPanelCollection(FlowLayoutControl control)
 		{
-			if(control == null) throw new ArgumentNullException("control");
+			Verify.Argument.IsNotNull(control, "control");
 
 			_control = control;
 		}

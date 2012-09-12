@@ -21,8 +21,10 @@
 		/// <exception cref="ArgumentNullException"><paramref name="branch"/> == <c>null</c>.</exception>
 		public RenameBranchDialog(Branch branch)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(branch.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "branch"), "branch");
+			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+				Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
+
 			_branch = branch;
 
 			InitializeComponent();

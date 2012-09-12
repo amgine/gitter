@@ -10,7 +10,7 @@
 		/// <param name="control">Control to disable redraw for.</param>
 		public static void DisableRedraw(this Control control)
 		{
-			if(control == null) throw new ArgumentNullException("control");
+			Verify.Argument.IsNotNull(control, "control");
 
 			NativeMethods.SendMessage(control.Handle, WindowsMessage.WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
 		}
@@ -19,7 +19,7 @@
 		/// <param name="control">Control to disable redraw for.</param>
 		public static void EnableRedraw(this Control control)
 		{
-			if(control == null) throw new ArgumentNullException("control");
+			Verify.Argument.IsNotNull(control, "control");
 
 			NativeMethods.SendMessage(control.Handle, WindowsMessage.WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
 		}
@@ -28,7 +28,7 @@
 		/// <param name="control">Control to force-redraw.</param>
 		public static void RedrawWindow(this Control control)
 		{
-			if(control == null) throw new ArgumentNullException("control");
+			Verify.Argument.IsNotNull(control, "control");
 
 			NativeMethods.RedrawWindow(control.Handle, IntPtr.Zero, IntPtr.Zero,
 				NativeMethods.RedrawWindowFlags.Erase |

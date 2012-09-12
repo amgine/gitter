@@ -23,7 +23,7 @@
 		public GitViewBase(Guid guid, GuiProvider guiProvider, IDictionary<string, object> parameters)
 			: base(guid, guiProvider.Environment, parameters)
 		{
-			if(guiProvider == null) throw new ArgumentNullException("gui");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
 			_gui = guiProvider;
 			_repository = guiProvider.Repository;

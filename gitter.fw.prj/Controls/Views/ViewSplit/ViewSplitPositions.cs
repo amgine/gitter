@@ -10,7 +10,7 @@
 	{
 		#region Data
 
-		private readonly ViewSplit _toolSplit;
+		private readonly ViewSplit _viewSplit;
 		private readonly List<double> _positions;
 
 		private SplitterMarker _movingSplitMarker;
@@ -28,14 +28,16 @@
 		#region .ctor
 
 		/// <summary>Create <see cref="ViewSplitPositions"/>.</summary>
-		/// <param name="toolSplit">Host <see cref="ViewSplit"/>.</param>
+		/// <param name="viewSplit">Host <see cref="ViewSplit"/>.</param>
 		/// <param name="size">Host size.</param>
 		/// <param name="position">First splitter position.</param>
-		public ViewSplitPositions(ViewSplit toolSplit, int size, double position)
+		public ViewSplitPositions(ViewSplit viewSplit, int size, double position)
 		{
-			if(toolSplit == null) throw new ArgumentNullException("toolSplit");
-			if(position < 0 || position > 1) throw new ArgumentOutOfRangeException("position");
-			_toolSplit = toolSplit;
+			Verify.Argument.IsNotNull(viewSplit, "viewSplit");
+			Verify.Argument.IsNotNegative(size, "size");
+			Verify.Argument.IsInRange(0.0, position, 1.0, "position");
+
+			_viewSplit = viewSplit;
 			_size = size;
 			_movingSplitterIndex = -1;
 			_positions = new List<double>() { position };
@@ -54,25 +56,33 @@
 
 			while(first > 0)
 			{
-				var item = _toolSplit[first];
-				var th = item as ViewHost;
-				if(th != null && !th.IsDocumentWell)
+				var item = _viewSplit[first];
+				var viewHost = item as ViewHost;
+				if(viewHost != null && !viewHost.IsDocumentWell)
+				{
 					break;
-				var ts = item as ViewSplit;
-				if(ts != null && !ts.ContainsDocumentWell)
+				}
+				var viewSplit = item as ViewSplit;
+				if(viewSplit != null && !viewSplit.ContainsDocumentWell)
+				{
 					break;
+				}
 				--first;
 			}
 
 			while(last <= _positions.Count)
 			{
-				var item = _toolSplit[last];
-				var th = item as ViewHost;
-				if(th != null && !th.IsDocumentWell)
+				var item = _viewSplit[last];
+				var viewHost = item as ViewHost;
+				if(viewHost != null && !viewHost.IsDocumentWell)
+				{
 					break;
-				var ts = item as ViewSplit;
-				if(ts != null && !ts.ContainsDocumentWell)
+				}
+				var viewSplit = item as ViewSplit;
+				if(viewSplit != null && !viewSplit.ContainsDocumentWell)
+				{
 					break;
+				}
 				++last;
 			}
 
@@ -101,18 +111,19 @@
 		{
 			int size;
 			int pos;
-			switch(_toolSplit.Orientation)
+			switch(_viewSplit.Orientation)
 			{
 				case Orientation.Horizontal:
-					size = _toolSplit.Width;
+					size = _viewSplit.Width;
 					pos = position.X;
 					break;
 				case Orientation.Vertical:
-					size = _toolSplit.Height;
+					size = _viewSplit.Height;
 					pos = position.Y;
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+					throw new ApplicationException(
+						"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
 			for(int i = 0; i < _positions.Count; ++i)
 			{
@@ -120,7 +131,9 @@
 				var min = splitter - ViewConstants.Spacing / 2.0;
 				var max = min + ViewConstants.Spacing;
 				if(splitter >= min && splitter <= max)
+				{
 					return i;
+				}
 			}
 			return -1;
 		}
@@ -131,16 +144,17 @@
 		private int GetSplitterPosition(double value)
 		{
 			int size;
-			switch(_toolSplit.Orientation)
+			switch(_viewSplit.Orientation)
 			{
 				case Orientation.Horizontal:
-					size = _toolSplit.Width;
+					size = _viewSplit.Width;
 					break;
 				case Orientation.Vertical:
-					size = _toolSplit.Height;
+					size = _viewSplit.Height;
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+					throw new ApplicationException(
+						"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
 			return (int)(size * value);
 		}
@@ -149,8 +163,9 @@
 		/// <param name="bounds">Split marker bounds.</param>
 		private void SpawnSplitMarker(Rectangle bounds)
 		{
-			if(_movingSplitMarker != null) throw new InvalidOperationException();
-			_movingSplitMarker = new SplitterMarker(bounds, _toolSplit.Orientation);
+			Verify.State.IsTrue(_movingSplitMarker == null);
+
+			_movingSplitMarker = new SplitterMarker(bounds, _viewSplit.Orientation);
 			_movingSplitMarker.Show();
 		}
 
@@ -169,41 +184,44 @@
 		/// <returns>True is moving process was initiated.</returns>
 		public bool StartMoving(Point position)
 		{
-			if(_isMoving) throw new InvalidOperationException();
+			Verify.State.IsFalse(IsMoving);
+
 			_movingSplitterIndex = FindSplitter(position);
 			if(_movingSplitterIndex != -1)
 			{
 				_movingPosition = _positions[_movingSplitterIndex];
-				var toolSplitPosition = _toolSplit.PointToScreen(Point.Empty);
+				var toolSplitPosition = _viewSplit.PointToScreen(Point.Empty);
 				Rectangle splitterBounds;
-				switch(_toolSplit.Orientation)
+				switch(_viewSplit.Orientation)
 				{
 					case Orientation.Horizontal:
 						{
-							var width = _toolSplit.Width;
+							var width = _viewSplit.Width;
 							var splitterPosition = (int)(_movingPosition * width) - ViewConstants.Spacing / 2;
 							splitterBounds = new Rectangle(
 								toolSplitPosition.X + splitterPosition,
 								toolSplitPosition.Y,
 								ViewConstants.Spacing,
-								_toolSplit.Height);
+								_viewSplit.Height);
 							_movingOffset = position.X - splitterPosition;
 							double min, max;
 							GetResizeBounds(_movingSplitterIndex, out min, out max);
 							_movingMin = (int)(min * width) + ViewConstants.MinimumHostWidth;
 							_movingMax = (int)(max * width) - ViewConstants.Spacing - ViewConstants.MinimumHostWidth;
 							if(_movingMin >= _movingMax)
+							{
 								return false;
+							}
 						}
 						break;
 					case Orientation.Vertical:
 						{
-							var height = _toolSplit.Height;
-							var splitterPosition = (int)(_movingPosition * _toolSplit.Height) - ViewConstants.Spacing / 2;
+							var height = _viewSplit.Height;
+							var splitterPosition = (int)(_movingPosition * _viewSplit.Height) - ViewConstants.Spacing / 2;
 							splitterBounds = new Rectangle(
 								toolSplitPosition.X,
 								toolSplitPosition.Y + splitterPosition,
-								_toolSplit.Width,
+								_viewSplit.Width,
 								ViewConstants.Spacing);
 							_movingOffset = position.Y - splitterPosition;
 							double min, max;
@@ -211,11 +229,14 @@
 							_movingMin = (int)(min * height) + ViewConstants.MinimumHostHeight;
 							_movingMax = (int)(max * height) - ViewConstants.Spacing - ViewConstants.MinimumHostHeight;
 							if(_movingMin >= _movingMax)
+							{
 								return false;
+							}
 						}
 						break;
 					default:
-						throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+						throw new ApplicationException(
+							"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 				}
 				_isMoving = true;
 				SpawnSplitMarker(splitterBounds);
@@ -231,32 +252,42 @@
 		/// <param name="position">Mouse position.</param>
 		public void UpdateMoving(Point position)
 		{
-			if(!_isMoving) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsMoving);
+
 			int splitterPosition;
-			switch(_toolSplit.Orientation)
+			switch(_viewSplit.Orientation)
 			{
 				case Orientation.Horizontal:
 					position.X -= _movingOffset;
 					if(position.X < _movingMin)
+					{
 						position.X = _movingMin;
+					}
 					else if(position.X > _movingMax)
+					{
 						position.X = _movingMax;
-					position.Offset(_toolSplit.PointToScreen(Point.Empty));
+					}
+					position.Offset(_viewSplit.PointToScreen(Point.Empty));
 					splitterPosition = position.X;
 					_movingSplitMarker.Left = splitterPosition;
 					break;
 				case Orientation.Vertical:
 					position.Y -= _movingOffset;
 					if(position.Y < _movingMin)
+					{
 						position.Y = _movingMin;
+					}
 					else if(position.Y > _movingMax)
+					{
 						position.Y = _movingMax;
-					position.Offset(_toolSplit.PointToScreen(Point.Empty));
+					}
+					position.Offset(_viewSplit.PointToScreen(Point.Empty));
 					splitterPosition = position.Y;
 					_movingSplitMarker.Top = splitterPosition;
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+					throw new ApplicationException(
+						"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
 		}
 
@@ -264,30 +295,40 @@
 		/// <param name="position">Mouse position.</param>
 		public void CommitMoving(Point position)
 		{
-			if(!_isMoving) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsMoving);
+
 			_isMoving = false;
 			KillSplitMarker();
 			double pos;
-			switch(_toolSplit.Orientation)
+			switch(_viewSplit.Orientation)
 			{
 				case Orientation.Horizontal:
 					position.X -= _movingOffset;
 					if(position.X < _movingMin)
+					{
 						position.X = _movingMin;
+					}
 					else if(position.X > _movingMax)
+					{
 						position.X = _movingMax;
-					pos = (double)(position.X + ViewConstants.Spacing / 2) / (double)_toolSplit.Width;
+					}
+					pos = (double)(position.X + ViewConstants.Spacing / 2) / (double)_viewSplit.Width;
 					break;
 				case Orientation.Vertical:
 					position.Y -= _movingOffset;
 					if(position.Y < _movingMin)
+					{
 						position.Y = _movingMin;
+					}
 					else if(position.Y > _movingMax)
+					{
 						position.Y = _movingMax;
-					pos = (double)(position.Y + ViewConstants.Spacing / 2) / (double)_toolSplit.Height;
+					}
+					pos = (double)(position.Y + ViewConstants.Spacing / 2) / (double)_viewSplit.Height;
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+					throw new ApplicationException(
+						"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
 			if(_positions[_movingSplitterIndex] != pos)
 			{
@@ -300,7 +341,8 @@
 		/// <summary>Cancels splitter moving.</summary>
 		public void CancelMoving()
 		{
-			if(!_isMoving) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsMoving);
+
 			_isMoving = false;
 			KillSplitMarker();
 		}
@@ -309,13 +351,13 @@
 		/// <param name="splitterIndex">Index of the splitter.</param>
 		public void Apply(int splitterIndex)
 		{
-			if(splitterIndex < 0 || splitterIndex >= _positions.Count)
-				throw new ArgumentOutOfRangeException("index");
+			Verify.Argument.IsValidIndex(splitterIndex, _positions.Count, "splitterIndex");
+
 			int offset = 0;
-			int width = _toolSplit.Width;
-			int height = _toolSplit.Height;
+			int width = _viewSplit.Width;
+			int height = _viewSplit.Height;
 			int lastItem = _positions.Count;
-			switch(_toolSplit.Orientation)
+			switch(_viewSplit.Orientation)
 			{
 				case Orientation.Horizontal:
 					for(int i = 0; i < _positions.Count; ++i)
@@ -323,12 +365,12 @@
 						var pos = (int)(_positions[i] * width - ViewConstants.Spacing / 2.0);
 						if(i >= splitterIndex)
 						{
-							_toolSplit[i].Bounds = new Rectangle(offset, 0, pos - offset, height);
+							_viewSplit[i].Bounds = new Rectangle(offset, 0, pos - offset, height);
 							if(i > splitterIndex) return;
 						}
 						offset = pos + ViewConstants.Spacing;
 					}
-					_toolSplit[lastItem].Bounds = new Rectangle(offset, 0, width - offset, height);
+					_viewSplit[lastItem].Bounds = new Rectangle(offset, 0, width - offset, height);
 					break;
 				case Orientation.Vertical:
 					for(int i = 0; i < _positions.Count; ++i)
@@ -336,15 +378,15 @@
 						var pos = (int)(_positions[i] * height - ViewConstants.Spacing / 2.0);
 						if(i >= splitterIndex)
 						{
-							_toolSplit[i].Bounds = new Rectangle(0, offset, width, pos - offset);
+							_viewSplit[i].Bounds = new Rectangle(0, offset, width, pos - offset);
 							if(i > splitterIndex) return;
 						}
 						offset = pos + ViewConstants.Spacing;
 					}
-					_toolSplit[lastItem].Bounds = new Rectangle(0, offset, width, height - offset);
+					_viewSplit[lastItem].Bounds = new Rectangle(0, offset, width, height - offset);
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
 		}
 
@@ -353,31 +395,31 @@
 		public void Apply()
 		{
 			int offset = 0;
-			int width = _toolSplit.Width;
-			int height = _toolSplit.Height;
+			int width = _viewSplit.Width;
+			int height = _viewSplit.Height;
 			int lastItem = _positions.Count;
-			switch(_toolSplit.Orientation)
+			switch(_viewSplit.Orientation)
 			{
 				case Orientation.Horizontal:
 					for(int i = 0; i < _positions.Count; ++i)
 					{
 						var pos = (int)(_positions[i] * width - ViewConstants.Spacing / 2.0);
-						_toolSplit[i].Bounds = new Rectangle(offset, 0, pos - offset, height);
+						_viewSplit[i].Bounds = new Rectangle(offset, 0, pos - offset, height);
 						offset = pos + ViewConstants.Spacing;
 					}
-					_toolSplit[lastItem].Bounds = new Rectangle(offset, 0, width - offset, height);
+					_viewSplit[lastItem].Bounds = new Rectangle(offset, 0, width - offset, height);
 					break;
 				case Orientation.Vertical:
 					for(int i = 0; i < _positions.Count; ++i)
 					{
 						var pos = (int)(_positions[i] * height - ViewConstants.Spacing / 2.0);
-						_toolSplit[i].Bounds = new Rectangle(0, offset, width, pos - offset);
+						_viewSplit[i].Bounds = new Rectangle(0, offset, width, pos - offset);
 						offset = pos + ViewConstants.Spacing;
 					}
-					_toolSplit[lastItem].Bounds = new Rectangle(0, offset, width, height - offset);
+					_viewSplit[lastItem].Bounds = new Rectangle(0, offset, width, height - offset);
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
 		}
 
@@ -385,15 +427,15 @@
 		/// <remarks>Use this if resize was handled by winforms layout engine.</remarks>
 		public void Actualize()
 		{
-			switch(_toolSplit.Orientation)
+			switch(_viewSplit.Orientation)
 			{
 				case Orientation.Horizontal:
 					{
-						var size = _toolSplit.Width;
+						var size = _viewSplit.Width;
 						var offset = 0;
 						for(int i = 0; i < _positions.Count; ++i)
 						{
-							offset += _toolSplit[i].Width + ViewConstants.Spacing / 2;
+							offset += _viewSplit[i].Width + ViewConstants.Spacing / 2;
 							_positions[i] = (double)offset / size;
 							offset += ViewConstants.Spacing - ViewConstants.Spacing / 2;
 						}
@@ -401,18 +443,19 @@
 					break;
 				case Orientation.Vertical:
 					{
-						var size = _toolSplit.Height;
+						var size = _viewSplit.Height;
 						var offset = 0;
 						for(int i = 0; i < _positions.Count; ++i)
 						{
-							offset += _toolSplit[i].Height + ViewConstants.Spacing / 2;
+							offset += _viewSplit[i].Height + ViewConstants.Spacing / 2;
 							_positions[i] = (double)offset / size;
 							offset += ViewConstants.Spacing - ViewConstants.Spacing / 2;
 						}
 					}
 					break;
 				default:
-					throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _toolSplit.Orientation);
+					throw new ApplicationException(
+						"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
 		}
 

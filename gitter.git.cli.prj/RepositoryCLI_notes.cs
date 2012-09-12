@@ -13,7 +13,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<NoteData> QueryNotes(QueryNotesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			if(!GitFeatures.AdvancedNotesCommands.IsAvailableFor(_gitCLI))
 			{
@@ -44,7 +44,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void AppendNote(AppendNoteParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new NotesCommand(
 				NotesCommand.Append(),

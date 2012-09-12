@@ -17,8 +17,10 @@
 
 		public StashToBranchDialog(StashedState stashedState)
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
-			if(stashedState.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "StashedState"), "stashedState");
+			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsFalse(stashedState.IsDeleted, "stashedState",
+				Resources.ExcObjectIsDeleted.UseAsFormat(stashedState.GetType().Name));
+
 			_stashedState = stashedState;
 
 			InitializeComponent();

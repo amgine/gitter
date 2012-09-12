@@ -23,9 +23,9 @@ namespace gitter.Git.Gui.Views
 
 		public ReferencesToolbar(ReferencesView referencesView)
 		{
-			if(referencesView == null) throw new ArgumentNullException("referencesView");
-			_referencesView = referencesView;
+			Verify.Argument.IsNotNull(referencesView, "referencesView");
 
+			_referencesView = referencesView;
 			Items.Add(_btnRefresh =
 				new ToolStripButton(
 					Resources.StrRefresh,

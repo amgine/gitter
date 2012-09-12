@@ -14,7 +14,7 @@
 		public PatchSourceListItem(IPatchSource patchSource)
 			: base(patchSource)
 		{
-			if(patchSource == null) throw new ArgumentNullException("patchSource");
+			Verify.Argument.IsNotNull(patchSource, "patchSource");
 		}
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)

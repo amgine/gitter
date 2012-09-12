@@ -13,14 +13,11 @@
 
 		public ConflictedFileMenu(TreeFile file)
 		{
-			#region validate arguments
-
-			if(file == null) throw new ArgumentNullException("file");
-			if(file.IsDeleted) throw new ArgumentException(Resources.ExcObjectIsDeleted.UseAsFormat("TreeFile"), "file");
-			if((file.StagedStatus & StagedStatus.Unstaged) != StagedStatus.Unstaged) throw new ArgumentException("This file is not unstaged.", "file");
-			if(file.ConflictType == ConflictType.None) throw new ArgumentException("This file is not unstaged.", "file");
-
-			#endregion
+			Verify.Argument.IsValidGitObject(file, "file");
+			Verify.Argument.AreEqual(StagedStatus.Unstaged, file.StagedStatus & StagedStatus.Unstaged, "file",
+				"This file is not unstaged.");
+			Verify.Argument.AreNotEqual(ConflictType.None, file.ConflictType, "file",
+				"This file is not in conflicted state.");
 
 			_file = file;
 

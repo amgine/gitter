@@ -22,7 +22,7 @@
 
 		public void Start(int x, int y)
 		{
-			if(_isTracking) throw new InvalidOperationException();
+			Verify.State.IsFalse(IsTracking);
 
 			_x = x;
 			_y = y;
@@ -31,7 +31,7 @@
 
 		public void Stop()
 		{
-			if(!_isTracking) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsTracking);
 
 			_isTracking = false;
 			_isDragging = false;
@@ -44,7 +44,8 @@
 
 		public bool Update(int x, int y)
 		{
-			if(!_isTracking) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsTracking);
+
 			if(_isDragging) return true;
 			var dragSize = SystemInformation.DragSize;
 			IsDragging =

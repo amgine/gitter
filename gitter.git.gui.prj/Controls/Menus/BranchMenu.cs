@@ -13,8 +13,8 @@
 
 		public BranchMenu(BranchBase branch)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(branch.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "Branch"), "branch");
+			Verify.Argument.IsValidGitObject(branch, "branch");
+
 			_branch = branch;
 
 			Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(_branch));
@@ -56,7 +56,7 @@
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _branch.Name));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, _branch.FullName));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, _branch.Revision.Name));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, _branch.Revision.Hash));
 
 			Items.Add(item);
 

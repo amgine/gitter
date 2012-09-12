@@ -16,7 +16,7 @@
 
 			public XmlReaderContext(XmlDocument document)
 			{
-				if(document == null) throw new ArgumentNullException("document");
+				Verify.Argument.IsNotNull(document, "document");
 				
 				_document = document;
 				_node = new Stack<XmlNode>();
@@ -44,7 +44,7 @@
 			public XmlNode Push(string name)
 			{
 				var node = Node[name];
-				if(node == null) throw new ArgumentException("name");
+				Verify.Argument.IsTrue(node != null, "name", "Node not found.");
 				_node.Push(node);
 				return node;
 			}
@@ -104,7 +104,7 @@
 
 			public XmlWriterContext(XmlDocument document)
 			{
-				if(document == null) throw new ArgumentNullException("document");
+				Verify.Argument.IsNotNull(document, "document");
 				
 				_document = document;
 				_node = new Stack<XmlNode>();
@@ -996,7 +996,7 @@
 
 		public XmlAdapter(Stream stream)
 		{
-			if(stream == null) throw new ArgumentNullException("stream");
+			Verify.Argument.IsNotNull(stream, "stream");
 
 			_stream = stream;
 		}

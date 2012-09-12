@@ -64,14 +64,16 @@
 
 		public void Remove()
 		{
-			if(FlowControl == null) throw new InvalidOperationException();
+			Verify.State.IsTrue(FlowControl != null);
+
 			FlowControl.Panels.Remove(this);
 		}
 
 		public void RemoveSafe()
 		{
 			var control = FlowControl;
-			if(control == null) throw new InvalidOperationException();
+			Verify.State.IsTrue(control != null);
+
 			control.BeginInvoke(new Func<FlowPanel, bool>(control.Panels.Remove), new object[] { this });
 		}
 
@@ -113,8 +115,8 @@
 
 		public void ShowContextMenu(ContextMenuStrip menu, int x, int y)
 		{
-			if(menu == null) throw new ArgumentNullException("menu");
-			if(FlowControl == null) throw new InvalidOperationException();
+			Verify.Argument.IsNotNull(menu, "menu");
+			Verify.State.IsTrue(FlowControl != null);
 
 			var bounds = FlowControl.GetPanelBounds(this);
 			menu.Show(FlowControl,

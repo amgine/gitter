@@ -278,13 +278,15 @@
 
 		public CustomListBoxTextEditor StartTextEditor(CustomListBoxColumn column, Font font, string text)
 		{
-			if(!IsAttachedToListBox) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsAttachedToListBox);
+
 			return ListBox.StartTextEditor(this, column, font, text);
 		}
 
 		public CustomListBoxTextEditor StartTextEditor(CustomListBoxColumn column, string text)
 		{
-			if(!IsAttachedToListBox) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsAttachedToListBox);
+
 			return ListBox.StartTextEditor(this, column, ListBox.Font, text);
 		}
 
@@ -417,14 +419,16 @@
 		/// <summary>Sets focus and selects this item.</summary>
 		public void FocusAndSelect()
 		{
-			if(!IsAttachedToListBox) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsAttachedToListBox);
+
 			ListBox.FocusAndSelectItem(this);
 		}
 
 		/// <summary>Sets focus to this item.</summary>
 		public void Focus()
 		{
-			if(!IsAttachedToListBox) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsAttachedToListBox);
+
 			ListBox.FocusItem(this);
 		}
 

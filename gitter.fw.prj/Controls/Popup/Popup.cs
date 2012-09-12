@@ -101,7 +101,7 @@
 
 		public Popup(Control content)
 		{
-			if(content == null) throw new ArgumentNullException("content");
+			Verify.Argument.IsNotNull(content, "content");
 
 			_content = content;
 			_popupAnimation = PopupAnimations.SystemDefault;
@@ -284,7 +284,8 @@
 
 		public void Show(Control control)
 		{
-			if(control == null) throw new ArgumentNullException("control");
+			Verify.Argument.IsNotNull(control, "control");
+
 			Show(control, control.ClientRectangle);
 		}
 
@@ -299,7 +300,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is <code>null</code>.</exception>
 		public void Show(Control control, Rectangle area)
 		{
-			if(control == null) throw new ArgumentNullException("control");
+			Verify.Argument.IsNotNull(control, "control");
 
 			SetOwnerItem(control);
 

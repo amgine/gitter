@@ -16,8 +16,8 @@
 	{
 		public static string ExtractBlobToTemporaryFile(this Tree tree, string blobPath)
 		{
-			if(tree == null) throw new ArgumentNullException("tree");
-			if(blobPath == null) throw new ArgumentNullException("blobPath");
+			Verify.Argument.IsNotNull(tree, "tree");
+			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, "blobPath");
 
 			var path = Path.Combine(Path.GetTempPath(), "gitter", tree.TreeHash);
 			var fileName = Path.Combine(path, blobPath);

@@ -13,9 +13,9 @@
 
 		public StagedItemMenu(TreeItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
-			if(item.IsDeleted) throw new ArgumentException(Resources.ExcObjectIsDeleted.UseAsFormat("WorkingTreeItem"), "item");
-			if((item.StagedStatus & StagedStatus.Staged) != StagedStatus.Staged) throw new ArgumentException("This item is not staged.", "item");
+			Verify.Argument.IsValidGitObject(item, "item");
+			Verify.Argument.AreEqual(StagedStatus.Staged, item.StagedStatus & StagedStatus.Staged, "item",
+				"This item is not staged.");
 
 			_item = item;
 

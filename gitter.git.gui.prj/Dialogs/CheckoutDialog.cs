@@ -20,7 +20,8 @@
 
 		public CheckoutDialog(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			_repository = repository;
 
 			InitializeComponent();
@@ -106,7 +107,7 @@
 			var revision = _txtRevision.Text.Trim();
 			if(string.IsNullOrEmpty(revision)) return true;
 
-			var pointer = _repository.CreateRevisionPointer(revision);
+			var pointer = _repository.GetRevisionPointer(revision);
 			bool force = Control.ModifierKeys == Keys.Shift;
 
 			try

@@ -31,13 +31,15 @@
 
 		public void Save(IDataAdapter dataAdapter)
 		{
-			if(dataAdapter == null) throw new ArgumentNullException("dataAdapter");
+			Verify.Argument.IsNotNull(dataAdapter, "dataAdapter");
+
 			dataAdapter.Store(_rootSection);
 		}
 
 		public void Load(IDataAdapter dataAdapter)
 		{
-			if(dataAdapter == null) throw new ArgumentNullException("dataAdapter");
+			Verify.Argument.IsNotNull(dataAdapter, "dataAdapter");
+
 			_rootSection = dataAdapter.Load();
 		}
 

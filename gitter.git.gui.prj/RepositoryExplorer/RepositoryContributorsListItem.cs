@@ -21,7 +21,7 @@
 		public RepositoryContributorsListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgUsers"], Resources.StrContributors)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 		}

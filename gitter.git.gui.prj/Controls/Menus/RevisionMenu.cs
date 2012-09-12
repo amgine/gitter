@@ -17,7 +17,8 @@
 		/// <exception cref="T:System.NullReferenceException"><paramref name="revision"/> == <c>null</c>.</exception>
 		public RevisionMenu(Revision revision)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
+
 			_revision = revision;
 
 			Items.Add(GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(_revision.GetDiffSource()));
@@ -36,7 +37,7 @@
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, revision.Name));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, revision.Hash));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, revision.TreeHash));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, revision.Subject));
 			if(!string.IsNullOrEmpty(revision.Body))

@@ -14,13 +14,15 @@
 
 		public GCCache(Func<T> onReevaluate)
 		{
-			if(onReevaluate == null) throw new ArgumentNullException("onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+
 			_onReevaluate = onReevaluate;
 		}
 
 		public GCCache(Func<T> onReevaluate, T value)
 		{
-			if(onReevaluate == null) throw new ArgumentNullException("onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+
 			_onReevaluate = onReevaluate;
 			if(value != null) _weakRef = new WeakReference(value);
 		}
@@ -42,9 +44,13 @@
 				{
 					var value = (T)_weakRef.Target;
 					if(value == null)
+					{
 						return Reevaluate();
+					}
 					else
+					{
 						return value;
+					}
 				}
 			}
 		}

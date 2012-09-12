@@ -49,8 +49,8 @@
 		internal Submodule(Repository repository, string name, string path, string url)
 			: base(repository, name)
 		{
-			if(path == null) throw new ArgumentNullException("path");
-			if(url == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
+			Verify.Argument.IsNotNull(path, "url");
 
 			_path = path;
 			_url = url;
@@ -100,6 +100,8 @@
 
 		public void Update()
 		{
+			Verify.State.IsNotDeleted(this);
+
 			Repository.Accessor.UpdateSubmodule(
 				new SubmoduleUpdateParameters()
 				{
@@ -111,21 +113,18 @@
 
 		public IAsyncAction UpdateAsync()
 		{
+			Verify.State.IsNotDeleted(this);
+
 			return AsyncAction.Create(
-				new
+				new SubmoduleUpdateParameters()
 				{
-					Accessor = Repository.Accessor,
-					Parameters = 
-						new SubmoduleUpdateParameters()
-						{
-							Path = _path,
-							Recursive = true,
-							Init = true,
-						},
+					Path = _path,
+					Recursive = true,
+					Init = true,
 				},
 				(data, monitor) =>
 				{
-					data.Accessor.UpdateSubmodule(data.Parameters);
+					Repository.Accessor.UpdateSubmodule(data);
 				},
 				Resources.StrUpdate,
 				Resources.StrFetchingDataFromRemoteRepository);
@@ -133,6 +132,9 @@
 
 		internal void UpdateInfo(string path, string url)
 		{
+			Assert.IsNotNull(path);
+			Assert.IsNotNull(url);
+
 			Path = path;
 			Url = url;
 		}

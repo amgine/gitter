@@ -5,13 +5,13 @@
 
 	public sealed class ViewHostFooter : Control
 	{
-		private readonly ViewHost _host;
+		private readonly ViewHost _viewHost;
 
 		internal ViewHostFooter(ViewHost viewHost)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
-			_host = viewHost;
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
+			_viewHost = viewHost;
 			SetStyle(
 				ControlStyles.ContainerControl |
 				ControlStyles.Selectable |
@@ -27,7 +27,7 @@
 
 		public ViewHost ViewHost
 		{
-			get { return _host; }
+			get { return _viewHost; }
 		}
 
 		protected override void OnPaintBackground(PaintEventArgs pevent)

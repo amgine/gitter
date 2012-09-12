@@ -66,21 +66,22 @@
 
 		public static void RegisterSelectableColor(SelectableColor color)
 		{
-			if(color == null) throw new ArgumentNullException("color");
+			Verify.Argument.IsNotNull(color, "color");
 
 			_colors.Add(color.Id, color);
 		}
 
 		public static void RegisterSelectableColorCategory(SelectableColorCategory category)
 		{
-			if(category == null) throw new ArgumentNullException("color");
+			Verify.Argument.IsNotNull(category, "category");
 
 			_colorCategories.Add(category.Id, category);
 		}
 
 		public static void RegisterPropertyPageFactory(PropertyPageFactory description)
 		{
-			if(description == null) throw new ArgumentNullException("description");
+			Verify.Argument.IsNotNull(description, "description");
+
 			_propertyPages.Add(description.Guid, description);
 		}
 

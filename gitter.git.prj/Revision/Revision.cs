@@ -5,19 +5,19 @@
 
 	using gitter.Git.AccessLayer;
 
-	public sealed partial class Revision : GitNamedObject, IRevisionPointer
+	public sealed partial class Revision : GitObject, IRevisionPointer
 	{
 		#region Data
 
-		private bool _loaded;
-
 		private readonly RevisionParentsCollection _parents;
 		private readonly RevisionReferencesCollection _references;
+		private bool _isLoaded;
+
+		private readonly string _hash;
+		private string _treeHash;
 
 		private string _subject;
 		private string _body;
-
-		private string _treeHash;
 
 		private DateTime _commitDate;
 		private User _committer;
@@ -30,13 +30,14 @@
 		#region .ctor
 
 		internal Revision(Repository repository, string hash)
-			: base(repository, hash)
+			: base(repository)
 		{
-			if(hash == null) throw new ArgumentNullException("hash");
-			if(hash.Length != 40) throw new ArgumentException("hash");
+			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsTrue(hash.Length == 40, "hash");
 
 			_parents = new RevisionParentsCollection();
 			_references = new RevisionReferencesCollection();
+			_hash = hash;
 		}
 
 		#endregion
@@ -44,14 +45,14 @@
 		internal void Load()
 		{
 			var revisionData = Repository.Accessor.QueryRevision(
-				new QueryRevisionParameters(Name));
+				new QueryRevisionParameters(Hash));
 			ObjectFactories.UpdateRevision(this, revisionData);
 		}
 
 		internal bool IsLoaded
 		{
-			get { return _loaded; }
-			set { _loaded = value; }
+			get { return _isLoaded; }
+			set { _isLoaded = value; }
 		}
 
 		#region Properties
@@ -75,9 +76,9 @@
 
 		#region Commit Attributes
 
-		public string SHA1
+		public string Hash
 		{
-			get { return Name; }
+			get { return _hash; }
 		}
 
 		public string TreeHash
@@ -85,7 +86,7 @@
 			get { return _treeHash; }
 			internal set
 			{
-				if(!_loaded)
+				if(!_isLoaded)
 				{
 					_treeHash = value;
 				}
@@ -104,7 +105,7 @@
 			get { return _author; }
 			internal set
 			{
-				if(!_loaded)
+				if(!_isLoaded)
 				{
 					_author = value;
 				}
@@ -174,12 +175,12 @@
 
 		string IRevisionPointer.Pointer
 		{
-			get { return Name; }
+			get { return Hash; }
 		}
 
 		string IRevisionPointer.FullName
 		{
-			get { return Name; }
+			get { return Hash; }
 		}
 
 		bool IRevisionPointer.IsDeleted
@@ -196,7 +197,7 @@
 
 		public override string ToString()
 		{
-			return string.Format("{0}: {1}", Name.Substring(0, 7), Subject);
+			return string.Format("{0}: {1}", Hash.Substring(0, 7), Subject);
 		}
 	}
 }

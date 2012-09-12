@@ -60,7 +60,8 @@
 
 		public bool ExistsPath(string path)
 		{
-			if(path == null) throw new ArgumentNullException("path");
+			Verify.Argument.IsNotNull(path, "path");
+
 			lock(SyncRoot)
 			{
 				foreach(var s in ObjectStorage.Values)
@@ -73,7 +74,8 @@
 
 		public bool ExistsUrl(string url)
 		{
-			if(url == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNotNull(url, "url");
+
 			lock(SyncRoot)
 			{
 				foreach(var s in ObjectStorage.Values)
@@ -86,7 +88,8 @@
 
 		public bool TryGetSubmoduleByPath(string path, out Submodule submodule)
 		{
-			if(path == null) throw new ArgumentNullException("path");
+			Verify.Argument.IsNotNull(path, "path");
+
 			lock(SyncRoot)
 			{
 				foreach(var s in ObjectStorage.Values)
@@ -104,7 +107,8 @@
 
 		public Submodule TryGetSubmoduleByPath(string path)
 		{
-			if(path == null) throw new ArgumentNullException("path");
+			Verify.Argument.IsNotNull(path, "path");
+
 			lock(SyncRoot)
 			{
 				foreach(var s in ObjectStorage.Values)
@@ -120,7 +124,8 @@
 
 		public bool TryGetSubmoduleByUrl(string url, out Submodule submodule)
 		{
-			if(url == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNotNull(url, "url");
+
 			lock(SyncRoot)
 			{
 				foreach(var s in ObjectStorage.Values)
@@ -138,7 +143,8 @@
 
 		public Submodule TryGetSubmoduleByUrl(string url)
 		{
-			if(url == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNotNull(url, "url");
+
 			lock(SyncRoot)
 			{
 				foreach(var s in ObjectStorage.Values)
@@ -159,6 +165,9 @@
 
 		public Submodule Create(string path, string url, string branch)
 		{
+			Verify.Argument.IsNotNull(path, "path");
+			Verify.Argument.IsNotNull(url, "url");
+
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.SubmodulesChanged))

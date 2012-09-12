@@ -45,7 +45,7 @@
 		/// <param name="side">Align side.</param>
 		public ViewDockSide(ViewDockGrid grid, AnchorStyles side)
 		{
-			if(grid == null) throw new ArgumentNullException("grid");
+			Verify.Argument.IsNotNull(grid, "grid");
 
 			switch(side)
 			{
@@ -58,7 +58,9 @@
 					_orientation = Orientation.Horizontal;
 					break;
 				default:
-					throw new ArgumentException("side");
+					throw new ArgumentException(
+						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
+						"side");
 			}
 			_grid = grid;
 			_side = side;
@@ -142,7 +144,7 @@
 		/// <param name="viewHost"><see cref="ViewHost"/> to add.</param>
 		public void AddHost(ViewHost viewHost)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
 			_dockedHosts.Add(viewHost);
 			viewHost.DockSide = this;
@@ -191,7 +193,7 @@
 
 		public void RemoveHost(ViewHost viewHost)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
 			if(_dockedHosts.Remove(viewHost))
 			{
@@ -395,8 +397,8 @@
 
 		private Rectangle GetTabBounds(int index)
 		{
-			if(index < 0 || index >= _tabs.Count)
-				throw new ArgumentOutOfRangeException("index");
+			Verify.Argument.IsValidIndex(index, _tabs.Count, "index");
+
 			var bounds = Rectangle.Empty;
 			switch(_orientation)
 			{
@@ -496,13 +498,21 @@
 							"Unexpected {0}.Side: {1}", GetType().Name, Side));
 				}
 				if(_side != AnchorStyles.Left && _grid.LeftSide != null)
+				{
 					_grid.LeftSide.DespawnPanel();
+				}
 				if(_side != AnchorStyles.Top && _grid.TopSide != null)
+				{
 					_grid.TopSide.DespawnPanel();
+				}
 				if(_side != AnchorStyles.Right && _grid.RightSide != null)
+				{
 					_grid.RightSide.DespawnPanel();
+				}
 				if(_side != AnchorStyles.Bottom && _grid.BottomSide != null)
+				{
 					_grid.BottomSide.DespawnPanel();
+				}
 				_visibleHost.SetActiveView(tab.View);
 				_visibleHost.Bounds = bounds;
 				_visibleHost.Anchor = anchor;
@@ -516,7 +526,7 @@
 
 		public void ActivateView(ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
 
 			for(int i = 0; i < _tabs.Count; ++i)
 			{
@@ -527,7 +537,7 @@
 					return;
 				}
 			}
-			throw new ArgumentException("view");
+			throw new ArgumentException("View was not found", "view");
 		}
 
 		internal void KillPanel()

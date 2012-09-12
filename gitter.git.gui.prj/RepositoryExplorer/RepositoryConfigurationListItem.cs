@@ -18,7 +18,7 @@
 		public RepositoryConfigurationListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgConfiguration"], Resources.StrConfig)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 		}

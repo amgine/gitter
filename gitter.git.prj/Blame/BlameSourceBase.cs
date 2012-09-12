@@ -23,7 +23,7 @@
 
 		public IAsyncFunc<BlameFile> GetBlameAsync(BlameOptions options)
 		{
-			if(options == null) throw new ArgumentNullException("options");
+			Verify.Argument.IsNotNull(options, "options");
 
 			return AsyncFunc.Create(
 				options,
@@ -42,7 +42,7 @@
 
 		public BlameFile GetBlame(BlameOptions options)
 		{
-			if(options == null) throw new ArgumentNullException("options");
+			Verify.Argument.IsNotNull(options, "options");
 
 			return GetBlameCore(options);
 		}

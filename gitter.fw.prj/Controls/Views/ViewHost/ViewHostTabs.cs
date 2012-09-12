@@ -35,7 +35,8 @@
 		/// <summary>Create <see cref="ViewHostTabs"/>.</summary>
 		public ViewHostTabs(ViewHost viewHost, AnchorStyles side)
 		{
-			if(viewHost == null) throw new ArgumentNullException("host");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+
 			_viewHost = viewHost;
 			_viewHost.ActiveViewChanged += OnActiveViewChanged;
 
@@ -175,19 +176,21 @@
 
 		public void EnsureVisible(ViewHostTab tab)
 		{
-			if(tab == null) throw new ArgumentNullException("tab");
+			Verify.Argument.IsNotNull(tab, "tab");
+
 			if(ViewHost.IsDocumentWell) EnsureVisible(IndexOf(tab));
 		}
 
 		public void EnsureVisible(ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
+
 			if(ViewHost.IsDocumentWell) EnsureVisible(IndexOf(view));
 		}
 
 		private void EnsureVisible(int index)
 		{
-			if(index < 0 || index >= _tabs.Count) throw new IndexOutOfRangeException("index");
+			Verify.Argument.IsValidIndex(index, _tabs.Count, "index");
 
 			if(index < _firstTabIndex)
 			{
@@ -350,7 +353,7 @@
 
 		public void AddView(ViewBase view)
 		{
-			if(view == null) throw new ArgumentException("view");
+			Verify.Argument.IsNotNull(view, "view");
 
 			var tab = new ViewHostTab(this, view);
 			tab.ResetLength();
@@ -362,7 +365,7 @@
 
 		public void InsertView(ViewBase view, int index)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
 
 			var tab = new ViewHostTab(this, view);
 			tab.ResetLength();
@@ -372,10 +375,20 @@
 			Invalidate();
 		}
 
+		private void SwapTabsCore(int index1, int index2)
+		{
+			if(index1 == index2) return;
+			var tab1 = _tabs[index1];
+			var tab2 = _tabs[index2];
+			_tabs[index1] = tab2;
+			_tabs[index2] = tab1;
+			Invalidate();
+		}
+
 		public void SwapViews(ViewBase view1, ViewBase view2)
 		{
-			if(view1 == null) throw new ArgumentNullException("view1");
-			if(view2 == null) throw new ArgumentNullException("view2");
+			Verify.Argument.IsNotNull(view1, "view1");
+			Verify.Argument.IsNotNull(view2, "view2");
 
 			if(view1 == view2) return;
 			int index1 = -1;
@@ -395,28 +408,22 @@
 					if(index1 == -1) break;
 				}
 			}
-			if(index1 == -1) throw new ArgumentException("view1");
-			if(index2 == -1) throw new ArgumentException("view2");
-			SwapTabs(index1, index2);
+			Verify.Argument.IsTrue(index1 != -1, "view1", "View #1 was not found.");
+			Verify.Argument.IsTrue(index2 != -1, "view2", "View #2 was not found.");
+			SwapTabsCore(index1, index2);
 		}
 
 		public void SwapTabs(int index1, int index2)
 		{
-			if(index1 < 0 || index1 >= _tabs.Count)
-				throw new ArgumentOutOfRangeException("index1");
-			if(index2 < 0 || index2 >= _tabs.Count)
-				throw new ArgumentOutOfRangeException("index2");
-			if(index1 == index2) return;
-			var tab1 = _tabs[index1];
-			var tab2 = _tabs[index2];
-			_tabs[index1] = tab2;
-			_tabs[index2] = tab1;
-			Invalidate();
+			Verify.Argument.IsValidIndex(index1, _tabs.Count, "index1");
+			Verify.Argument.IsValidIndex(index2, _tabs.Count, "index2");
+
+			SwapTabsCore(index1, index2);
 		}
 
 		public bool Remove(ViewHostTab tab)
 		{
-			if(tab == null) throw new ArgumentNullException("tab");
+			Verify.Argument.IsNotNull(tab, "tab");
 
 			if(_tabHover.Item == tab)
 			{
@@ -440,7 +447,8 @@
 
 		public bool RemoveView(ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
+
 			int id = IndexOf(view);
 			if(id != -1)
 			{
@@ -500,20 +508,24 @@
 		{
 			int x = 0;
 			if(_leftButtons != null)
+			{
 				x += _leftButtons.Width;
+			}
 			for(int i = _firstTabIndex; i < _tabs.Count; ++i)
 			{
 				if(_tabs[i] == tab) return x;
 				x += _tabs[i].Length;
 			}
-			throw new ArgumentException("tab");
+			throw new ArgumentException("Tab was not found.", "tab");
 		}
 
 		private int GetTabOffset(int index)
 		{
 			int x = 0;
 			if(_leftButtons != null)
+			{
 				x += _leftButtons.Width;
+			}
 			for(int i = _firstTabIndex; i < index; ++i)
 			{
 				var length = _tabs[i].Length;
@@ -526,7 +538,9 @@
 		{
 			var width = Width;
 			if(x < 0 || x > width || y < 0 || y >= ViewConstants.TabHeight)
+			{
 				return -1;
+			}
 			if(_leftButtons != null)
 			{
 				var lbw = _leftButtons.Width;
@@ -964,7 +978,8 @@
 						dy = length;
 						break;
 					default:
-						throw new ApplicationException();
+						throw new ApplicationException(
+							string.Format("Unknown AnchorStyle value: {0}", Side));
 				}
 				_tabs[i].OnPaint(graphics, rect);
 				if(space <= 0) break;

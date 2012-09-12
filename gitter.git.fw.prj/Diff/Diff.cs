@@ -29,7 +29,8 @@
 		/// <param name="files">List of file diffs.</param>
 		public Diff(DiffType type, IList<DiffFile> files)
 		{
-			if(files == null) throw new ArgumentNullException("files");
+			Verify.Argument.IsNotNull(files, "files");
+			Verify.Argument.HasNoNullItems(files, "files");
 
 			_type = type;
 			_files = files;
@@ -39,21 +40,21 @@
 
 		public void Add(DiffFile diffFile)
 		{
-			if(diffFile == null) throw new ArgumentNullException("diffFile");
+			Verify.Argument.IsNotNull(diffFile, "diffFile");
 
 			_files.Add(diffFile);
 		}
 
 		public void Insert(int index, DiffFile diffFile)
 		{
-			if(diffFile == null) throw new ArgumentNullException("diffFile");
+			Verify.Argument.IsNotNull(diffFile, "diffFile");
 
 			_files.Insert(index, diffFile);
 		}
 
 		public bool Remove(DiffFile diffFile)
 		{
-			if(diffFile == null) throw new ArgumentNullException("diffFile");
+			Verify.Argument.IsNotNull(diffFile, "diffFile");
 
 			return _files.Remove(diffFile);
 		}

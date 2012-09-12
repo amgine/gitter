@@ -19,10 +19,10 @@
 
 		public RevisionCompareDiffSource(IRevisionPointer revision1, IRevisionPointer revision2)
 		{
-			if(revision1 == null) throw new ArgumentNullException("revision1");
-			if(revision2 == null) throw new ArgumentNullException("revision2");
-			if(revision1.Repository != revision2.Repository)
-				throw new ArgumentException("revision2");
+			Verify.Argument.IsNotNull(revision1, "revision1");
+			Verify.Argument.IsNotNull(revision2, "revision2");
+			Verify.Argument.IsTrue(revision1.Repository == revision2.Repository,
+				"revision2", "Cannot compare objects from different repositories.");
 
 			_revision1 = revision1;
 			_revision2 = revision2;

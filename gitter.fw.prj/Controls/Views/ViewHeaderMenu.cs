@@ -15,7 +15,8 @@
 
 		public ViewHeaderMenu(ViewHost viewHost, ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(view, "view");
 
 			_host = viewHost;
 			_view = view;

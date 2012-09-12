@@ -39,13 +39,14 @@
 		private readonly ToolStripButton _tagButton;
 		private readonly ToolStripButton _noteButton;
 
-		private readonly GuiProvider _gui;
+		private readonly GuiProvider _guiProvider;
 		private Repository _repository;
 
-		public MainToolbar(GuiProvider gui)
+		public MainToolbar(GuiProvider guiProvider)
 		{
-			if(gui == null) throw new ArgumentNullException("gui");
-			_gui = gui;
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
+			_guiProvider = guiProvider;
 
 			Text = Resources.StrGit;
 
@@ -108,9 +109,9 @@
 			_stashButton.DropDown.Items.Add(
 				_stashApplyItem = new ToolStripMenuItem(Resources.StrApply, CachedResources.Bitmaps["ImgStashApply"], OnStashApplyClick));
 
-			if(gui.Repository != null)
+			if(guiProvider.Repository != null)
 			{
-				AttachToRepository(gui.Repository);
+				AttachToRepository(guiProvider.Repository);
 			}
 		}
 
@@ -288,7 +289,7 @@
 
 		private void OnRefreshClick(object sender, EventArgs e)
 		{
-			var tool = _gui.Environment.ViewDockService.ActiveView;
+			var tool = _guiProvider.Environment.ViewDockService.ActiveView;
 			if(tool != null)
 			{
 				var gitTool = tool as GitView;
@@ -299,12 +300,12 @@
 
 		private void OnInitClick(object sender, EventArgs e)
 		{
-			_gui.RepositoryProvider.RunInitDialog();
+			_guiProvider.RepositoryProvider.RunInitDialog();
 		}
 
 		private void OnCloneClick(object sender, EventArgs e)
 		{
-			_gui.RepositoryProvider.RunCloneDialog();
+			_guiProvider.RepositoryProvider.RunCloneDialog();
 		}
 
 		private void OnFetchClick(object sender, EventArgs e)
@@ -343,32 +344,32 @@
 
 		private void OnPushClick(object sender, EventArgs e)
 		{
-			_gui.StartPushDialog();
+			_guiProvider.StartPushDialog();
 		}
 
 		private void OnHistoryClick(object sender, EventArgs e)
 		{
-			_gui.Environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
+			_guiProvider.Environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
 		}
 
 		private void OnCommitClick(object sender, EventArgs e)
 		{
-			_gui.Environment.ViewDockService.ShowView(Guids.CommitViewGuid);
+			_guiProvider.Environment.ViewDockService.ShowView(Guids.CommitViewGuid);
 		}
 
 		private void OnApplyPatchClick(object sender, EventArgs e)
 		{
-			_gui.StartApplyPatchesDialog();
+			_guiProvider.StartApplyPatchesDialog();
 		}
 
 		private void OnCleanClick(object sender, EventArgs e)
 		{
-			_gui.StartCleanDialog();
+			_guiProvider.StartCleanDialog();
 		}
 
 		private void OnStashClick(object sender, EventArgs e)
 		{
-			_gui.Environment.ViewDockService.ShowView(Guids.StashViewGuid);
+			_guiProvider.Environment.ViewDockService.ShowView(Guids.StashViewGuid);
 		}
 
 		private void OnStashSaveClick(object sender, EventArgs e)
@@ -437,32 +438,32 @@
 
 		private void OnCheckoutClick(object sender, EventArgs e)
 		{
-			_gui.StartCheckoutDialog();
+			_guiProvider.StartCheckoutDialog();
 		}
 
 		private void OnBranchClick(object sender, EventArgs e)
 		{
-			_gui.StartCreateBranchDialog();
+			_guiProvider.StartCreateBranchDialog();
 		}
 
 		private void OnMergeClick(object sender, EventArgs e)
 		{
-			_gui.StartMergeDialog(false);
+			_guiProvider.StartMergeDialog(false);
 		}
 
 		private void OnMultipleMergeClick(object sender, EventArgs e)
 		{
-			_gui.StartMergeDialog(true);
+			_guiProvider.StartMergeDialog(true);
 		}
 
 		private void OnTagClick(object sender, EventArgs e)
 		{
-			_gui.StartCreateTagDialog();
+			_guiProvider.StartCreateTagDialog();
 		}
 
 		private void OnNoteClick(object sender, EventArgs e)
 		{
-			_gui.StartAddNoteDialog();
+			_guiProvider.StartAddNoteDialog();
 		}
 
 		#endregion

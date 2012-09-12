@@ -40,7 +40,8 @@
 		/// <exception cref="T:System.NullReferenceException"><paramref name="comparison"/> == <c>null</c>.</exception>
 		public void Sort(Comparison<T> comparison)
 		{
-			if(comparison == null) throw new ArgumentNullException("comparison");
+			Verify.Argument.IsNotNull(comparison, "comparison");
+
 			int items = Items.Count;
 			if(items < 2) return;
 			var array = new T[items];
@@ -62,7 +63,8 @@
 		/// <exception cref="T:System.NullReferenceException"><paramref name="comparer"/> == <c>null</c>.</exception>
 		public void Sort(IComparer<T> comparer)
 		{
-			if(comparer == null) throw new ArgumentNullException("comparer");
+			Verify.Argument.IsNotNull(comparer, "comparer");
+
 			int items = Items.Count;
 			if(items < 2) return;
 			var array = new T[items];
@@ -87,11 +89,12 @@
 		/// </exception>
 		public virtual void AddRange(IEnumerable<T> list)
 		{
-			if(list == null) throw new ArgumentNullException("list");
+			Verify.Argument.IsNotNull(list, "list");
+
 			int count = 0;
 			foreach(var item in list)
 			{
-				if(!VerifyItem(item)) throw new ArgumentException("list");
+				Verify.Argument.IsTrue(VerifyItem(item), "list", "List contains invalid items.");
 				++count;
 			}
 			int start = Items.Count;
@@ -115,12 +118,13 @@
 		/// </exception>
 		public virtual void InsertRange(int index, IEnumerable<T> list)
 		{
-			if(list == null) throw new ArgumentNullException("list");
-			if(index < 0 || index > Items.Count) throw new ArgumentOutOfRangeException("index");
+			Verify.Argument.IsNotNull(list, "list");
+			Verify.Argument.IsValidIndex(index, Items.Count, "index");
+
 			int count = 0;
 			foreach(var item in list)
 			{
-				if(!VerifyItem(item)) throw new ArgumentException("list");
+				Verify.Argument.IsTrue(VerifyItem(item), "list", "List contains invalid items.");
 				++count;
 			}
 
@@ -144,10 +148,8 @@
 		/// </exception>
 		public void RemoveRange(int index, int count)
 		{
-			if((index < 0) || (index + count > Items.Count))
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
+			Verify.Argument.IsValidIndex(index, Items.Count, "index");
+			Verify.Argument.IsValidIndex(count, Items.Count - index + 1, "count");
 
 			int start = index;
 			int end = index + count - 1;
@@ -168,7 +170,7 @@
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		public int InsertSortedFromTop(T item, Func<T, T, int> comparison)
 		{
-			if(comparison == null) throw new ArgumentNullException("comparison");
+			Verify.Argument.IsNotNull(comparison, "comparison");
 
 			for(int i = 0; i < Items.Count; ++i)
 			{
@@ -191,7 +193,7 @@
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		public int InsertSortedFromBottom(T item, Func<T, T, int> comparison)
 		{
-			if(comparison == null) throw new ArgumentNullException("comparison");
+			Verify.Argument.IsNotNull(comparison, "comparison");
 
 			for(int i = Items.Count - 1; i > 0; --i)
 			{
@@ -290,7 +292,8 @@
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		protected override void SetItem(int index, T item)
 		{
-			if(!VerifyItem(item)) throw new ArgumentException("item");
+			Verify.Argument.IsTrue(VerifyItem(item), "item");
+
 			RaiseChanging(index, NotifyEvent.Set);
 			FreeItem(Items[index]);
 			AcquireItem(item);
@@ -304,7 +307,8 @@
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		protected override void InsertItem(int index, T item)
 		{
-			if(!VerifyItem(item)) throw new ArgumentException("item");
+			Verify.Argument.IsTrue(VerifyItem(item), "item");
+
 			AcquireItem(item);
 			RaiseChanging(index, NotifyEvent.Insert);
 			base.InsertItem(index, item);

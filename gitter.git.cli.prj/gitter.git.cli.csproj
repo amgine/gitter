@@ -46,6 +46,12 @@
     <Compile Include="..\common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\shared\Debug.cs">
+      <Link>Shared\Debug.cs</Link>
+    </Compile>
+    <Compile Include="..\shared\Verify.cs">
+      <Link>Shared\Verify.cs</Link>
+    </Compile>
     <Compile Include="BlameParser.cs" />
     <Compile Include="Commands\Ancillary\Interrogation\blame.cs" />
     <Compile Include="Commands\Ancillary\Interrogation\rev-parse.cs" />

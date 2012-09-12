@@ -21,7 +21,7 @@
 			get { return _viewRenderer; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
 
 				_viewRenderer = value;
 			}

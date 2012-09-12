@@ -11,19 +11,20 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class RemotesToolbar : ToolStrip
 	{
-		private readonly RemotesView _tool;
+		private readonly RemotesView _remotesView;
 
 		private readonly ToolStripButton _btnAddRemote;
 
-		public RemotesToolbar(RemotesView tool)
+		public RemotesToolbar(RemotesView remotesView)
 		{
-			if(tool == null) throw new ArgumentNullException("tool");
-			_tool = tool;
+			Verify.Argument.IsNotNull(remotesView, "remotesView");
+
+			_remotesView = remotesView;
 
 			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
 				(sender, e) =>
 				{
-					_tool.RefreshContent();
+					_remotesView.RefreshContent();
 				})
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -32,9 +33,9 @@ namespace gitter.Git.Gui.Views
 			Items.Add(_btnAddRemote = new ToolStripButton(Resources.StrAddRemote, CachedResources.Bitmaps["ImgRemoteAdd"],
 				(sender, e) =>
 				{
-					using(var dlg = new AddRemoteDialog(_tool.Repository))
+					using(var dlg = new AddRemoteDialog(_remotesView.Repository))
 					{
-						dlg.Run(_tool);
+						dlg.Run(_remotesView);
 					}
 				}));
 		}

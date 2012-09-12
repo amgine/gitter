@@ -17,7 +17,7 @@
 
 		#region Data
 
-		private readonly TreeView _treeTool;
+		private readonly TreeView _treeView;
 
 		#endregion
 
@@ -31,7 +31,7 @@
 				item.Dispose();
 			}
 			var stack = new Stack<TreeDirectory>();
-			var folder = _treeTool.CurrentDirectory;
+			var folder = _treeView.CurrentDirectory;
 			if(folder != null)
 			{
 				while(folder != null)
@@ -59,7 +59,7 @@
 							};
 							subItem.Click += (sender, e) =>
 							{
-								_treeTool.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
+								_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
 							};
 							item.DropDownItems.Add(subItem);
 						}
@@ -73,7 +73,7 @@
 					}
 					item.ButtonClick += (sender, e) =>
 					{
-						_treeTool.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
+						_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
 					};
 					Items.Add(item);
 					prev = folder;
@@ -83,18 +83,18 @@
 			this.RedrawWindow();
 		}
 
-		public TreeToolbar(TreeView treeTool)
+		public TreeToolbar(TreeView treeView)
 		{
-			if(treeTool == null) throw new ArgumentNullException("treeTool");
+			Verify.Argument.IsNotNull(treeView, "treeView");
 
-			_treeTool = treeTool;
-			_treeTool.CurrentDirectoryChanged += OnCurrentDirectoryChanged;
+			_treeView = treeView;
+			_treeView.CurrentDirectoryChanged += OnCurrentDirectoryChanged;
 
 			Items.Add(new ToolStripButton(Resources.StrGoUpOneLevel, CachedResources.Bitmaps["ImgFolderUp"], (sender, e) =>
 				{
-					var cd = _treeTool.CurrentDirectory;
+					var cd = _treeView.CurrentDirectory;
 					cd = cd.Parent;
-					if(cd != null) _treeTool.CurrentDirectory = cd;
+					if(cd != null) _treeView.CurrentDirectory = cd;
 				})
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.Image,

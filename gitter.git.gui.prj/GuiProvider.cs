@@ -30,7 +30,7 @@
 		/// <param name="repositoryProvider">Git repository provider.</param>
 		public GuiProvider(RepositoryProvider repositoryProvider)
 		{
-			if(repositoryProvider == null) throw new ArgumentNullException("repositoryProvider");
+			Verify.Argument.IsNotNull(repositoryProvider, "repositoryProvider");
 
 			_repositoryProvider = repositoryProvider;
 
@@ -288,70 +288,70 @@
 		{
 		}
 
-		public void AttachToEnvironment(IWorkingEnvironment env)
+		public void AttachToEnvironment(IWorkingEnvironment environment)
 		{
-			if(env == null) throw new ArgumentNullException("env");
-			if(_environment != null) throw new InvalidOperationException();
+			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.State.IsTrue(_environment == null);
 
-			_environment = env;
+			_environment = environment;
 
 			_explorer = new RepositoryExplorer(this);
 
 			foreach(var factory in _viewFactories)
 			{
-				env.ViewDockService.RegisterFactory(factory);
+				environment.ViewDockService.RegisterFactory(factory);
 			}
 
-			env.ProvideRepositoryExplorerItem(_explorer.RootItem);
-			env.ProvideToolbar(_mainToolbar);
+			environment.ProvideRepositoryExplorerItem(_explorer.RootItem);
+			environment.ProvideToolbar(_mainToolbar);
 			for(int i = 0; i < _statusbar.LeftAlignedItems.Length; ++i)
 			{
-				env.ProvideStatusBarObject(_statusbar.LeftAlignedItems[i], true);
+				environment.ProvideStatusBarObject(_statusbar.LeftAlignedItems[i], true);
 			}
 			for(int i = 0; i < _statusbar.RightAlignedItems.Length; ++i)
 			{
-				env.ProvideStatusBarObject(_statusbar.RightAlignedItems[i], false);
+				environment.ProvideStatusBarObject(_statusbar.RightAlignedItems[i], false);
 			}
 			foreach(var menu in _menus.Menus)
 			{
-				env.ProvideMainMenuItem(menu);
+				environment.ProvideMainMenuItem(menu);
 			}
 			foreach(var item in _menus.ViewMenuItems)
 			{
-				env.ProvideViewMenuItem(item);
+				environment.ProvideViewMenuItem(item);
 			}
 
 			ActivateDefaultView();
 		}
 
-		public void DetachFromEnvironment(IWorkingEnvironment env)
+		public void DetachFromEnvironment(IWorkingEnvironment environment)
 		{
-			if(env == null) throw new ArgumentNullException("env");
-			if(_environment != env) throw new InvalidOperationException();
+			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.AreNotEqual(_environment, environment, "environment", string.Empty);
 
 			foreach(var factory in _viewFactories)
 			{
 				factory.CloseAllViews();
-				env.ViewDockService.UnregisterFactory(factory);
+				environment.ViewDockService.UnregisterFactory(factory);
 			}
 
-			env.RemoveRepositoryExplorerItem(_explorer.RootItem);
-			env.RemoveToolbar(_mainToolbar);
+			environment.RemoveRepositoryExplorerItem(_explorer.RootItem);
+			environment.RemoveToolbar(_mainToolbar);
 			for(int i = 0; i < _statusbar.LeftAlignedItems.Length; ++i)
 			{
-				env.RemoveStatusBarObject(_statusbar.LeftAlignedItems[i]);
+				environment.RemoveStatusBarObject(_statusbar.LeftAlignedItems[i]);
 			}
 			for(int i = 0; i < _statusbar.RightAlignedItems.Length; ++i)
 			{
-				env.RemoveStatusBarObject(_statusbar.RightAlignedItems[i]);
+				environment.RemoveStatusBarObject(_statusbar.RightAlignedItems[i]);
 			}
 			foreach(var menu in _menus.Menus)
 			{
-				env.RemoveMainMenuItem(menu);
+				environment.RemoveMainMenuItem(menu);
 			}
 			foreach(var item in _menus.ViewMenuItems)
 			{
-				env.RemoveViewMenuItem(item);
+				environment.RemoveViewMenuItem(item);
 			}
 
 			_explorer = null;
@@ -360,7 +360,7 @@
 
 		public void ActivateDefaultView()
 		{
-			if(_environment == null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_environment != null);
 
 			_environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
 		}

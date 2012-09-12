@@ -73,7 +73,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="stringBuilder"/> == <c>null</c>.</exception>
 		public void GetCommand(StringBuilder stringBuilder)
 		{
-			if(stringBuilder == null) throw new ArgumentNullException("stringBuilder");
+			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
 
 			const char ArgumentSeparator = ' ';
 

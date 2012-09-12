@@ -14,7 +14,7 @@
 		public static T GetRemoveRepositoryItem<T>(RepositoryListItem repository)
 			where T : ToolStripItem, new()
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
@@ -29,7 +29,7 @@
 		public static T GetOpenUrlItem<T>(string name, Image image, string url)
 			where T : ToolStripItem, new()
 		{
-			if(url == null) throw new ArgumentNullException("url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
 
 			var item = new T()
 			{
@@ -44,7 +44,7 @@
 		public static T GetOpenCmdAtItem<T>(string name, Image image, string path)
 			where T : ToolStripItem, new()
 		{
-			if(path == null) throw new ArgumentNullException("path");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
 			var item = new T()
 			{

@@ -88,7 +88,7 @@
 		public NewsListItem(News news)
 			: base(news)
 		{
-			if(news == null) throw new ArgumentNullException("news");
+			Verify.Argument.IsNotNull(news, "news");
 		}
 
 		protected override void OnListBoxAttached()

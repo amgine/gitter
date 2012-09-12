@@ -29,9 +29,9 @@
 
 		internal BaseRemoteReference(RemoteReferencesCollection refs, string name, string hash)
 		{
-			if(refs == null) throw new ArgumentNullException("refs");
-			if(name == null) throw new ArgumentNullException("name");
-			if(hash == null) throw new ArgumentNullException("hash");
+			Verify.Argument.IsNotNull(refs, "refs");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(hash, "hash");
 
 			_refs = refs;
 			_name = name;

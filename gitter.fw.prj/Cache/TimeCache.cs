@@ -14,7 +14,8 @@
 		public TimeCache(Func<T> onReevaluate, TimeSpan lifetime)
 			: base(onReevaluate)
 		{
-			if(onReevaluate == null) throw new ArgumentNullException("onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+
 			_lifetime = lifetime;
 		}
 

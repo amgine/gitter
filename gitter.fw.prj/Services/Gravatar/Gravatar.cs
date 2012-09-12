@@ -28,7 +28,7 @@ namespace gitter.Framework.Services
 
 		public Gravatar(string email)
 		{
-			if(email == null) throw new ArgumentNullException("email");
+			Verify.Argument.IsNotNull(email, "email");
 
 			_email = email;
 		}
@@ -38,7 +38,8 @@ namespace gitter.Framework.Services
 			get { return _email; }
 			set
 			{
-				if(_email == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				if(_email != value)
 				{
 					_email = value;
@@ -73,8 +74,8 @@ namespace gitter.Framework.Services
 
 		public void EndUpdate(IAsyncResult ar)
 		{
-			if(ar == null) throw new ArgumentNullException("ar");
-			if(_avatarLoading == null) throw new InvalidOperationException();
+			Verify.Argument.IsNotNull(ar, "ar");
+			Verify.State.IsTrue(_avatarLoading != null, "No async operation is running.");
 
 			GravatarService.EndGetGravatar(ar);
 		}
@@ -83,8 +84,7 @@ namespace gitter.Framework.Services
 		{
 			lock(_sync)
 			{
-				if(_avatarLoading != null)
-					throw new InvalidOperationException("Async update is already running.");
+				Verify.State.IsTrue(_avatarLoading != null, "Async update is already running.");
 				try
 				{
 					_image = GravatarService.GetGravatar(

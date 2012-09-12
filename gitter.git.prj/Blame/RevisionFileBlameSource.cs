@@ -11,8 +11,8 @@
 
 		public RevisionFileBlameSource(IRevisionPointer revision, string fileName)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(fileName == null) throw new ArgumentNullException("fileName");
+			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
 
 			_revision = revision;
 			_fileName = fileName;

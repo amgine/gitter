@@ -28,7 +28,7 @@ namespace gitter.Git
 
 		public IAsyncFunc<RevisionLog> GetLogAsync(LogOptions options)
 		{
-			if(options == null) throw new ArgumentNullException("options");
+			Verify.Argument.IsNotNull(options, "options");
 
 			return AsyncFunc.Create(
 				options,
@@ -47,7 +47,7 @@ namespace gitter.Git
 
 		public RevisionLog GetLog(LogOptions options)
 		{
-			if(options == null) throw new ArgumentNullException("options");
+			Verify.Argument.IsNotNull(options, "options");
 
 			return GetLogCore(options);
 		}

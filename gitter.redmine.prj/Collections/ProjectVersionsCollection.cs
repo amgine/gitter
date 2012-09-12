@@ -25,7 +25,7 @@
 
 		public LinkedList<ProjectVersion> Fetch(Project project)
 		{
-			if(project == null) throw new ArgumentNullException("project");
+			Verify.Argument.IsNotNull(project, "project");
 
 			return Fetch(project.Id);
 		}

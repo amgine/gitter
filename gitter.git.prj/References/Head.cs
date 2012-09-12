@@ -203,16 +203,7 @@
 		/// </exception>
 		public void Reset(IRevisionPointer pointer, ResetMode mode)
 		{
-			#region validate args
-
-			if(pointer == null) throw new ArgumentNullException("revision");
-			if(pointer.IsDeleted)
-			{
-				throw new ArgumentException(
-					Resources.ExcSuppliedRevisionIsDeleted, "revision");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(pointer, Repository, "pointer");
 
 			var pos = Pointer.Dereference();
 			var rev = pointer.Dereference();
@@ -227,7 +218,7 @@
 				RepositoryNotifications.SubmodulesChanged))
 			{
 				Repository.Accessor.Reset(
-					new ResetParameters(rev.Name, mode));
+					new ResetParameters(rev.Hash, mode));
 			}
 
 			if(currentBranch != null)
@@ -271,26 +262,9 @@
 
 		public string FormatMergeMessage(IRevisionPointer revision)
 		{
-			#region validate arguments
-
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.Repository != Repository)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsNotHandledByThisRepository, "revision"), "revision");
-			}
-			if(revision.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsDeleted, "revision"), "revision");
-			}
-			if(IsEmpty)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcCantDoOnEmptyRepository, "format merge message"));
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.State.IsFalse(IsEmpty,
+				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("format merge message"));
 
 			return Repository.Accessor.FormatMergeMessage(
 				new FormatMergeMessageParameters(revision.Pointer, Pointer.Pointer));
@@ -298,64 +272,29 @@
 
 		public string FormatMergeMessage(ICollection<IRevisionPointer> revisions)
 		{
-			#region validate arguments
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, Repository, "revisions");
+			Verify.Argument.IsTrue(revisions.Count != 0, "revisions",
+				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
+			Verify.State.IsFalse(IsEmpty,
+				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("format merge message"));
 
-			if(revisions == null) throw new ArgumentNullException("revisions");
-			if(revisions.Count == 0)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcCollectionMustContainAtLeastOneObject, "revisions"), "branches");
-			}
 			var names = new List<string>(revisions.Count);
-
 			foreach(var branch in revisions)
 			{
-				if(branch == null)
-				{
-					throw new ArgumentException(
-						Resources.ExcCollectionMustNotContainNullElements, "revisions");
-				}
-				if(branch.Repository != Repository)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAllObjectsMustBeHandledByThisRepository, "revisions"), "revisions");
-				}
-				if(branch.IsDeleted)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAtLeastOneOfSuppliedObjectIsDeleted, "revisions"), "revisions");
-				}
 				names.Add(branch.Pointer);
 			}
-
-			#endregion
-
 			return Repository.Accessor.FormatMergeMessage(
 				new FormatMergeMessageParameters(names, Pointer.Pointer));
 		}
 
 		public Revision Merge(IRevisionPointer branch, bool noCommit, bool noFastForward, bool squash, string message)
 		{
-			#region validate arguments
-
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(branch.Repository != Repository)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsNotHandledByThisRepository, "branch"), "branch");
-			}
-			if(branch.IsDeleted)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsDeleted, "branch"), "branch");
-			}
-
-			#endregion
+			Verify.Argument.IsValidRevisionPointer(branch, Repository, "branch");
+			Verify.State.IsFalse(IsEmpty,
+				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));
 
 			var oldRev = branch.Dereference();
-
 			var currentBranch = CurrentBranch;
-
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.Checkout,
 				RepositoryNotifications.IndexUpdated,
@@ -419,14 +358,12 @@
 
 		public Revision Merge(ICollection<IRevisionPointer> branches, bool noCommit, bool noFastForward, bool squash, string message)
 		{
-			#region validate arguments
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
+			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
+			Verify.State.IsFalse(IsEmpty,
+				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));
 
-			if(branches == null) throw new ArgumentNullException("branches");
-			if(branches.Count == 0)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcCollectionMustContainAtLeastOneObject, "branch"), "branches");
-			}
 			if(branches.Count == 1)
 			{
 				foreach(var branch in branches)
@@ -434,33 +371,15 @@
 					return Merge(branch, noCommit, noFastForward, squash, message);
 				}
 			}
-			var currentBranch = CurrentBranch;
-
 			var oldRevs = new List<Revision>(branches.Count);
 			var branchNames = new List<string>(branches.Count);
 			foreach(var branch in branches)
 			{
-				if(branch == null)
-				{
-					throw new ArgumentException(
-						Resources.ExcCollectionMustNotContainNullElements, "branches");
-				}
-				if(branch.Repository != Repository)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAllObjectsMustBeHandledByThisRepository, "branches"), "branches");
-				}
-				if(branch.IsDeleted)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAtLeastOneOfSuppliedObjectIsDeleted, "branches"), "branches");
-				}
 				oldRevs.Add(branch.Dereference());
 				branchNames.Add(branch.FullName);
 			}
 
-			#endregion
-
+			var currentBranch = CurrentBranch;
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.Checkout,
 				RepositoryNotifications.WorktreeUpdated,

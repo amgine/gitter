@@ -24,7 +24,7 @@
 
 		internal ViewButtons(Control hostControl)
 		{
-			if(hostControl == null) throw new ArgumentNullException("hostControl");
+			Verify.Argument.IsNotNull(hostControl, "hostControl");
 
 			_host = hostControl;
 			_buttonHover = new TrackingService<ViewButton>((e) => _host.Invalidate());

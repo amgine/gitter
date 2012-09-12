@@ -60,7 +60,9 @@
 				case MessageBoxButtons.RetryCancel:
 					return new MessageBoxButton[] { Retry, Cancel };
 				default:
-					throw new ArgumentException("buttons");
+					throw new ArgumentException(
+						"Unknown MessageBoxButtons value: {0}".UseAsFormat(buttons),
+						"buttons");
 			}
 		}
 

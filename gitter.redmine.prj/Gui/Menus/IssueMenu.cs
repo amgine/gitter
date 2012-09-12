@@ -14,7 +14,8 @@
 
 		public IssueMenu(Issue issue)
 		{
-			if(issue == null) throw new ArgumentNullException("issue");
+			Verify.Argument.IsNotNull(issue, "issue");
+
 			_issue = issue;
 
 			Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_issue));

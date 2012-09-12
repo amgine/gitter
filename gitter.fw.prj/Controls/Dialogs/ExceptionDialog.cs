@@ -22,7 +22,8 @@
 		/// <param name="exception">Related exception.</param>
 		public ExceptionDialog(Exception exception)
 		{
-			if(exception == null) throw new ArgumentNullException("exception");
+			Verify.Argument.IsNotNull(exception, "exception");
+
 			_exception = exception;
 			_date = DateTime.Now;
 

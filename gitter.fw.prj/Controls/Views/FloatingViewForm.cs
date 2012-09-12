@@ -26,32 +26,32 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="FloatingViewForm"/> class.</summary>
-		/// <param name="host">Floating <see cref="ViewHost"/>.</param>
-		public FloatingViewForm(ViewHost host)
+		/// <param name="viewHost">Floating <see cref="ViewHost"/>.</param>
+		public FloatingViewForm(ViewHost viewHost)
 		{
-			if(host == null) throw new ArgumentNullException("host");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
 			Font = GitterApplication.FontManager.UIFont;
-			Text = host.Text;
+			Text = viewHost.Text;
 			FormBorderStyle = FormBorderStyle.None;
-			BackColor = host.BackColor;
+			BackColor = viewHost.BackColor;
 			StartPosition = FormStartPosition.Manual;
 			Padding = new Padding(ViewConstants.FloatBorderSize);
-			Bounds = GetBoundsForControl(host);
-			if(host.Width < ViewConstants.MinimumHostWidth)
+			Bounds = GetBoundsForControl(viewHost);
+			if(viewHost.Width < ViewConstants.MinimumHostWidth)
 			{
-				if(host.Height < ViewConstants.MinimumHostHeight)
+				if(viewHost.Height < ViewConstants.MinimumHostHeight)
 				{
-					host.Size = new Size(ViewConstants.MinimumHostWidth, ViewConstants.MinimumHostHeight);
+					viewHost.Size = new Size(ViewConstants.MinimumHostWidth, ViewConstants.MinimumHostHeight);
 				}
 				else
 				{
-					host.Width = ViewConstants.MinimumHostWidth;
+					viewHost.Width = ViewConstants.MinimumHostWidth;
 				}
 			}
-			else if(host.Height < ViewConstants.MinimumHostHeight)
+			else if(viewHost.Height < ViewConstants.MinimumHostHeight)
 			{
-				host.Height = ViewConstants.MinimumHostHeight;
+				viewHost.Height = ViewConstants.MinimumHostHeight;
 			};
 			MinimumSize = new Size(
 				ViewConstants.MinimumHostWidth + ViewConstants.FloatBorderSize * 2,
@@ -61,7 +61,7 @@
 			ControlBox = false;
 			MinimizeBox = false;
 			MaximizeBox = true;
-			_rootControl = host;
+			_rootControl = viewHost;
 		}
 
 		internal bool IsInMulticontrolMode
@@ -71,7 +71,8 @@
 
 		internal void EnterMulticontrolMode()
 		{
-			if(_isInMulticontrolMode) throw new InvalidOperationException();
+			Verify.State.IsFalse(_isInMulticontrolMode);
+
 			if(WindowState == FormWindowState.Maximized)
 				Padding = new Padding(
 					0,
@@ -89,7 +90,8 @@
 
 		internal void LeaveMulticontrolMode()
 		{
-			if(!_isInMulticontrolMode) throw new InvalidOperationException();
+			Verify.State.IsTrue(_isInMulticontrolMode);
+
 			if(WindowState == FormWindowState.Maximized)
 				Padding = new Padding(
 					0,

@@ -19,8 +19,8 @@
 		public ViewDockSideTab(ViewDockSide side, ViewHost viewHost, ViewBase view)
 			: base(view, InvertAnchor(side.Side))
 		{
-			if(side == null) throw new ArgumentNullException("side");
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			Verify.Argument.IsNotNull(side, "side");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
 			_side = side;
 			_viewHost = viewHost;

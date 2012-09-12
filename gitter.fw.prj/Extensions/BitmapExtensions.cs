@@ -8,7 +8,7 @@
 	{
 		public static void SetAlpha(this Bitmap bmp, byte alpha)
 		{
-			if(bmp == null) throw new ArgumentNullException("bmp");
+			Verify.Argument.IsNotNull(bmp, "bmp");
 
 			var data = bmp.LockBits(
 				new Rectangle(0, 0, bmp.Width, bmp.Height),

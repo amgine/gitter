@@ -18,8 +18,9 @@
 		/// <param name="branch"><see cref="RemoteBranch"/> to remove.</param>
 		public RemoveRemoteBranchDialog(RemoteBranch branch)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(!branch.IsRemote) throw new ArgumentException("branch");
+			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
 
 			InitializeComponent();
 

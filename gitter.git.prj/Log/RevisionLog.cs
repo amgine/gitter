@@ -17,8 +17,8 @@ namespace gitter.Git
 
 		public RevisionLog(Repository repository, IList<Revision> revisions)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(revisions, "revisions");
 
 			_repository = repository;
 			_revisions = revisions;
@@ -26,8 +26,8 @@ namespace gitter.Git
 
 		public RevisionLog(Repository repository, IList<Revision> revisions, Dictionary<Revision, IList<Revision>> parents)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(revisions == null) throw new ArgumentNullException("revisions");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(revisions, "revisions");
 
 			_repository = repository;
 			_revisions = revisions;

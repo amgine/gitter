@@ -136,8 +136,8 @@
 
 		public bool TryLoadIssueTracker(IIssueTrackerProvider provider)
 		{
-			if(provider == null) throw new ArgumentNullException("provider");
-			if(_repository == null) throw new InvalidOperationException();
+			Verify.Argument.IsNotNull(provider, "item");
+			Verify.State.IsTrue(_repository != null);
 
 			if(provider.IsValidFor(_repository) && !_activeIssueTrackerProviders.Contains(provider))
 			{
@@ -675,13 +675,15 @@
 
 		public void ProvideMainMenuItem(ToolStripMenuItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_menuStrip.Items.Insert(_menuStrip.Items.IndexOf(_mnuTools), item);
 		}
 
 		public void ProvideViewMenuItem(ToolStripMenuItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_mnuView.DropDownItems.Insert(_mnuView.DropDownItems.Count - 4, item);
 			if(_mnuView.DropDownItems.Count == 7)
 			{
@@ -691,34 +693,43 @@
 
 		public void ProvideRepositoryExplorerItem(CustomListBoxItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_repositoryExplorerFactory.AddItem(item);
 		}
 
 		public void ProvideToolbar(ToolStrip toolStrip)
 		{
-			if(toolStrip == null) throw new ArgumentNullException("toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
 
-			_toolStripContainer.TopToolStripPanel.Join(toolStrip, _toolStripContainer.TopToolStripPanel.Rows.Length);
+			_toolStripContainer.TopToolStripPanel.Join(
+				toolStrip, _toolStripContainer.TopToolStripPanel.Rows.Length);
 
-			_mnuToolbars.DropDownItems.Add(new ToolStripMenuItem(toolStrip.Text, null, (sender, e) =>
-				{
-					var item = ((ToolStripMenuItem)sender);
-					var strip = (ToolStrip)item.Tag;
-					strip.Visible = !strip.Visible;
-					item.Checked = strip.Visible;
-				})
+			_mnuToolbars.DropDownItems.Add(
+				new ToolStripMenuItem(
+					toolStrip.Text,
+					null,
+					(sender, e) =>
+					{
+						var item = ((ToolStripMenuItem)sender);
+						var strip = (ToolStrip)item.Tag;
+						strip.Visible = !strip.Visible;
+						item.Checked = strip.Visible;
+					})
 			{
 				Checked = true,
 				Tag = toolStrip,
 			});
 			if(_mnuToolbars.DropDownItems.Count == 1)
+			{
 				_mnuToolbars.Enabled = true;
+			}
 		}
 
 		public void ProvideStatusBarObject(ToolStripItem item, bool leftAlign)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			if(leftAlign)
 			{
 				var index = _statusStrip.Items.IndexOf(_statusSeparator);
@@ -734,12 +745,15 @@
 
 		public void RemoveMainMenuItem(ToolStripMenuItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_menuStrip.Items.Remove(item);
 		}
 
 		public void RemoveViewMenuItem(ToolStripMenuItem item)
 		{
+			Verify.Argument.IsNotNull(item, "item");
+
 			_mnuView.DropDownItems.Remove(item);
 			if(_mnuView.DropDownItems.Count == 8)
 			{
@@ -749,13 +763,15 @@
 
 		public void RemoveRepositoryExplorerItem(CustomListBoxItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_repositoryExplorerFactory.RemoveItem(item);
 		}
 
 		public void RemoveToolbar(ToolStrip toolStrip)
 		{
-			if(toolStrip == null) throw new ArgumentNullException("toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+
 			toolStrip.Parent = null;
 			foreach(ToolStripItem item in _mnuToolbars.DropDownItems)
 			{
@@ -766,12 +782,15 @@
 				}
 			}
 			if(_mnuToolbars.DropDownItems.Count == 0)
+			{
 				_mnuToolbars.Enabled = false;
+			}
 		}
 
 		public void RemoveStatusBarObject(ToolStripItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_statusStrip.Items.Remove(item);
 		}
 

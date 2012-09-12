@@ -16,7 +16,7 @@
 		void Show(ViewHost dockClient);
 
 		/// <summary>Hides and disposes all dock markers associated with this instance.</summary>
-		void Kill();
+		void Hide();
 
 		/// <summary>Updates hover status of dock markers.</summary>
 		/// <returns>true if mouse is hovering docking button.</returns>

@@ -25,7 +25,8 @@
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		public StashSaveDialog(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			_repository = repository;
 
 			InitializeComponent();
@@ -49,7 +50,9 @@
 			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
 
 			if(SpellingService.Enabled)
+			{
 				_speller = new TextBoxSpellChecker(_txtMessage, true);
+			}
 		}
 
 		/// <summary>Do not stash staged changes.</summary>

@@ -22,7 +22,7 @@
 
 		public static IComparer<T> AsComparer<T>(this Comparison<T> comparison)
 		{
-			if(comparison == null) throw new ArgumentNullException("comparison");
+			Verify.Argument.IsNotNull(comparison, "comparison");
 
 			return new Comparer<T>(comparison);
 		}

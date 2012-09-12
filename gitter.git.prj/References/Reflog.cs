@@ -54,9 +54,13 @@
 					{
 						handler = Delegate.Remove(handler, value);
 						if(handler == null || handler.GetInvocationList().Length == 0)
+						{
 							_recordAddedHandlers.Remove(this);
+						}
 						else
+						{
 							_recordAddedHandlers[this] = handler;
+						}
 					}
 				}
 			}
@@ -89,9 +93,13 @@
 					{
 						handler = Delegate.Remove(handler, value);
 						if(handler == null || handler.GetInvocationList().Length == 0)
+						{
 							_recordRemovedHandlers.Remove(this);
+						}
 						else
+						{
 							_recordRemovedHandlers[this] = handler;
+						}
 					}
 				}
 			}
@@ -104,9 +112,13 @@
 			{
 				Delegate handlerDelegate;
 				if(_recordAddedHandlers.TryGetValue(this, out handlerDelegate))
+				{
 					handler = (EventHandler<ReflogRecordEventArgs>)handlerDelegate;
+				}
 				else
+				{
 					handler = null;
+				}
 			}
 			if(handler != null) handler(this, new ReflogRecordEventArgs(record));
 		}
@@ -118,9 +130,13 @@
 			{
 				Delegate handlerDelegate;
 				if(_recordRemovedHandlers.TryGetValue(this, out handlerDelegate))
+				{
 					handler = (EventHandler<ReflogRecordEventArgs>)handlerDelegate;
+				}
 				else
+				{
 					handler = null;
+				}
 			}
 			if(handler != null) handler(this, new ReflogRecordEventArgs(record));
 		}
@@ -182,7 +198,7 @@
 				}
 				for(int i = _reflog.Count; i < reflog.Count; ++i)
 				{
-					var reflogRecord = ObjectFactories.CreateReflogRecord(Repository, this, reflog[i]);
+					var reflogRecord = ObjectFactories.CreateReflogRecord(this, reflog[i]);
 					_reflog.Add(reflogRecord);
 					InvokeRecordAdded(reflogRecord);
 				}
@@ -202,10 +218,12 @@
 			{
 				if(_reflog.Count != 0)
 				{
-					if(record.Revision.SHA1 == _reflog[0].Revision.Name)
+					if(record.Revision.SHA1 == _reflog[0].Revision.Hash)
+					{
 						return;
+					}
 				}
-				var item = ObjectFactories.CreateReflogRecord(Repository, this, record);
+				var item = ObjectFactories.CreateReflogRecord(this, record);
 				_reflog.Insert(0, item);
 				for(int i = 1; i < _reflog.Count; ++i)
 				{

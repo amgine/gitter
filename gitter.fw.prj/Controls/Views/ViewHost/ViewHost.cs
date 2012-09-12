@@ -97,7 +97,7 @@
 		/// <param name="views">Hosted views.</param>
 		internal ViewHost(ViewDockGrid grid, bool isRoot, bool isDocumentWell, IEnumerable<ViewBase> views)
 		{
-			if(grid == null) throw new ArgumentNullException("grid");
+			Verify.Argument.IsNotNull(grid, "grid");
 
 			SetStyle(ControlStyles.ContainerControl, true);
 			SetStyle(
@@ -114,7 +114,8 @@
 			{
 				foreach(var view in views)
 				{
-					if(view == null) throw new ArgumentException("views");
+					Verify.Argument.IsTrue(view != null, "views", "List of views contains invalid arguments.");
+
 					_views.Add(view);
 					view.Host = this;
 					var ts = view.Size;
@@ -357,7 +358,8 @@
 		/// <param name="size">Control size.</param>
 		private void SpawnHeader(Size size)
 		{
-			if(_header != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_header == null, "Header is already spawned.");
+
 			_header = new ViewHostHeader(this)
 			{
 				Bounds = new Rectangle(0, 0, size.Width, ViewConstants.HeaderHeight),
@@ -392,7 +394,8 @@
 		/// <param name="size">Control size.</param>
 		private void SpawnFooter(Size size)
 		{
-			if(_footer != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_footer == null, "Footer is already spawned.");
+
 			_footer = new ViewHostFooter(this)
 			{
 				Bounds = new Rectangle(
@@ -488,7 +491,8 @@
 		/// <exception cref="InvalidOperationException">This <see cref="ViewHost"/> is not in auto-hide mode.</exception>
 		public void Pin()
 		{
-			if(_status != ViewHostStatus.AutoHide) throw new InvalidOperationException();
+			Verify.State.IsTrue(_status == ViewHostStatus.AutoHide);
+
 			var side = _dockSide.Side;
 			var grid = _dockSide.Grid;
 			Undock();
@@ -592,8 +596,8 @@
 		/// <exception cref="InvalidOperationException">This <see cref="ViewHost"/> is not docked.</exception>
 		public void Unpin()
 		{
-			if(_isDocumentWell || _status != ViewHostStatus.Docked)
-				throw new InvalidOperationException();
+			Verify.State.IsFalse(_isDocumentWell);
+			Verify.State.IsTrue(_status == ViewHostStatus.Docked);
 
 			var side = GetRelativeSide();
 			if(side == AnchorStyles.None) return;
@@ -736,8 +740,8 @@
 		/// <param name="view">View to host.</param>
 		public void AddView(ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
-			if(view.Host != null) throw new ArgumentException("view");
+			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsTrue(view.Host == null, "view", "View is already hosted.");
 
 			_views.Add(view);
 			view.Host = this;
@@ -821,8 +825,8 @@
 		/// <param name="view">View to activate.</param>
 		public void SetActiveView(ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
-			if(view.Host != this) throw new ArgumentException("view");
+			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsTrue(view.Host == this, "view", "View is hosted in another host.");
 
 			if(_activeView != view)
 			{
@@ -885,9 +889,11 @@
 		/// </remarks>
 		internal void RemoveView(ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsTrue(view.Host == this, "view", "View is not hosted in this ViewHost.");
 			int index = _views.IndexOf(view);
-			if(index == -1) throw new ArgumentException("view");
+			Assert.AreNotEqual(index, -1);
+
 			_views.RemoveAt(index);
 			view.Host = null;
 			if(_isDocumentWell)
@@ -995,7 +1001,8 @@
 		/// <param name="size">Control size.</param>
 		private void SpawnTabs(Size size)
 		{
-			if(_tabs != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_tabs == null, "Tabs are already spawned.");
+
 			if(_isDocumentWell)
 			{
 				_tabs = new ViewHostTabs(this, AnchorStyles.Top)
@@ -1165,8 +1172,8 @@
 
 		public void Activate(ViewBase view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
-			if(view.Host != this) throw new ArgumentException("view");
+			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsTrue(view.Host == this, "view", "View is not hosted in this ViewHost.");
 
 			SetActiveView(view);
 			_activeView.Focus();
@@ -1472,8 +1479,8 @@
 		/// </remarks>
 		internal void DockInto(ViewHost viewHost)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
-			if(viewHost == this) throw new ArgumentException("viewHost");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsTrue(viewHost != this, "viewHost", "Cannot sock to itself.");
 
 			ReturnFromFloatingMode();
 			PreventActiveViewDispose();
@@ -1589,12 +1596,13 @@
 		/// <summary>
 		/// Determines if <see cref="ViewHost"/> cn be docked into this <see cref="IDockHost"/>.
 		/// </summary>
-		/// <param name="host"><see cref="ViewHost"/> to dock.</param>
+		/// <param name="viewHost"><see cref="ViewHost"/> to dock.</param>
 		/// <param name="dockResult">Position for docking.</param>
 		/// <returns>true if docking is possible.</returns>
-		public bool CanDock(ViewHost host, DockResult dockResult)
+		public bool CanDock(ViewHost viewHost, DockResult dockResult)
 		{
-			if(host == null) throw new ArgumentNullException("host");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+
 			switch(dockResult)
 			{
 				case DockResult.Left:
@@ -1614,53 +1622,56 @@
 		}
 
 		/// <summary>
-		/// Docks <paramref name="host"/> into this <see cref="IDockHost"/>.
+		/// Docks <paramref name="viewHost"/> into this <see cref="IDockHost"/>.
 		/// </summary>
-		/// <param name="host"><see cref="ViewHost"/> to dock.</param>
+		/// <param name="viewHost"><see cref="ViewHost"/> to dock.</param>
 		/// <param name="dockResult">Position for docking.</param>
-		public void PerformDock(ViewHost host, DockResult dockResult)
+		public void PerformDock(ViewHost viewHost, DockResult dockResult)
 		{
-			if(host == null) throw new ArgumentNullException("host");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+
 			switch(dockResult)
 			{
 				case DockResult.Left:
-					host.DockToSide(this, AnchorStyles.Left);
+					viewHost.DockToSide(this, AnchorStyles.Left);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
-						host.Status = ViewHostStatus.DockedOnFloat;
+						viewHost.Status = ViewHostStatus.DockedOnFloat;
 					break;
 				case DockResult.Top:
-					host.DockToSide(this, AnchorStyles.Top);
+					viewHost.DockToSide(this, AnchorStyles.Top);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
-						host.Status = ViewHostStatus.DockedOnFloat;
+						viewHost.Status = ViewHostStatus.DockedOnFloat;
 					break;
 				case DockResult.Right:
-					host.DockToSide(this, AnchorStyles.Right);
+					viewHost.DockToSide(this, AnchorStyles.Right);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
-						host.Status = ViewHostStatus.DockedOnFloat;
+						viewHost.Status = ViewHostStatus.DockedOnFloat;
 					break;
 				case DockResult.Bottom:
-					host.DockToSide(this, AnchorStyles.Bottom);
+					viewHost.DockToSide(this, AnchorStyles.Bottom);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
-						host.Status = ViewHostStatus.DockedOnFloat;
+						viewHost.Status = ViewHostStatus.DockedOnFloat;
 					break;
 				case DockResult.DocumentLeft:
-					host.DockToSideAsDocument(this, AnchorStyles.Left);
+					viewHost.DockToSideAsDocument(this, AnchorStyles.Left);
 					break;
 				case DockResult.DocumentTop:
-					host.DockToSideAsDocument(this, AnchorStyles.Top);
+					viewHost.DockToSideAsDocument(this, AnchorStyles.Top);
 					break;
 				case DockResult.DocumentRight:
-					host.DockToSideAsDocument(this, AnchorStyles.Right);
+					viewHost.DockToSideAsDocument(this, AnchorStyles.Right);
 					break;
 				case DockResult.DocumentBottom:
-					host.DockToSideAsDocument(this, AnchorStyles.Bottom);
+					viewHost.DockToSideAsDocument(this, AnchorStyles.Bottom);
 					break;
 				case DockResult.Fill:
-					host.DockInto(this);
+					viewHost.DockInto(this);
 					Activate();
 					break;
 				default:
-					throw new ArgumentException("dockResult");
+					throw new ArgumentException(
+						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
+						"dockResult");
 			}
 		}
 
@@ -1670,7 +1681,8 @@
 		/// <returns>Bounding rectangle for docked view.</returns>
 		public Rectangle GetDockBounds(ViewHost viewHost, DockResult dockResult)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+
 			Rectangle bounds;
 			var size = Size;
 			switch(dockResult)
@@ -1716,7 +1728,9 @@
 					bounds.Intersect(_viewContainer.Bounds);
 					break;
 				default:
-					throw new ArgumentException("dockResult");
+					throw new ArgumentException(
+						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
+						"dockResult");
 			}
 			return RectangleToScreen(bounds);
 		}

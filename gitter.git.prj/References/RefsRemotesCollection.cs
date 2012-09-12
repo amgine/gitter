@@ -43,7 +43,7 @@
 		/// </exception>
 		internal void Delete(RemoteBranch branch, bool force)
 		{
-			ValidateObject(branch, "branch");
+			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
 
 			var name = branch.Name;
 			using(Repository.Monitor.BlockNotifications(
@@ -109,7 +109,8 @@
 		/// <param name="branches">Actual remote branch data.</param>
 		internal void Refresh(IEnumerable<RemoteBranchData> branches)
 		{
-			if(branches == null) throw new ArgumentNullException("branches");
+			Verify.Argument.IsNotNull(branches, "branches");
+
 			RefreshInternal(branches);
 		}
 
@@ -117,7 +118,8 @@
 		/// <param name="branches">Actual remote branch data.</param>
 		internal void Refresh(IEnumerable<BranchData> branches)
 		{
-			if(branches == null) throw new ArgumentNullException("branches");
+			Verify.Argument.IsNotNull(branches, "branches");
+
 			RefreshInternal(branches);
 		}
 
@@ -125,7 +127,7 @@
 		/// <param name="branch">Branch to refresh.</param>
 		internal void Refresh(RemoteBranch branch)
 		{
-			ValidateObject(branch, "branch");
+			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
 
 			var remoteBranchData = Repository.Accessor.QueryBranch(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
@@ -197,7 +199,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
 		public IList<RemoteBranch> GetContaining(IRevisionPointer revision)
 		{
-			ValidateRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
 
 			var refs = Repository.Accessor.QueryBranches(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
@@ -227,8 +229,6 @@
 		/// <param name="branchDataList">List of remote branch data containers.</param>
 		internal void Load(IEnumerable<RemoteBranchData> branchDataList)
 		{
-			if(branchDataList == null) throw new ArgumentNullException("branchDataList");
-
 			ObjectStorage.Clear();
 			if(branchDataList != null)
 			{
@@ -243,8 +243,6 @@
 		/// <param name="branchDataList">List of remote branch data containers.</param>
 		internal void Load(IEnumerable<BranchData> branchDataList)
 		{
-			if(branchDataList == null) throw new ArgumentNullException("branchDataList");
-
 			ObjectStorage.Clear();
 			if(branchDataList != null)
 			{
@@ -289,7 +287,8 @@
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> == <c>null</c>.</exception>
 		protected override string FixInputName(string name)
 		{
-			if(name == null) throw new ArgumentNullException("name");
+			Verify.Argument.IsNotNull(name, "name");
+
 			if(name.StartsWith(GitConstants.RemoteBranchPrefix) && !ContainsObjectName(name))
 			{
 				return name.Substring(GitConstants.RemoteBranchPrefix.Length);

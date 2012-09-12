@@ -1206,6 +1206,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Archive.
+        /// </summary>
+        internal static string StrArchive {
+            get {
+                return ResourceManager.GetString("StrArchive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Branch.
         /// </summary>
         internal static string StrBranch {
@@ -1814,6 +1823,15 @@ namespace gitter.Git.Properties {
         internal static string StrfCloning {
             get {
                 return ResourceManager.GetString("StrfCloning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating archive from &apos;{0}&apos;.
+        /// </summary>
+        internal static string StrfCreatingArchiveFrom {
+            get {
+                return ResourceManager.GetString("StrfCreatingArchiveFrom", resourceCulture);
             }
         }
         

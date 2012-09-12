@@ -249,7 +249,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public RemoteData QueryRemote(QueryRemoteParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new RemoteCommand(
 				RemoteCommand.Show(),
@@ -275,7 +275,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<RemoteData> QueryRemotes(QueryRemotesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new RemoteCommand(RemoteCommand.Verbose());
 			var output = _executor.ExecCommand(cmd);
@@ -297,7 +297,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void AddRemote(AddRemoteParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>((parameters.Branches != null ? parameters.Branches.Count : 0) + 6);
 			args.Add(RemoteCommand.Add());
@@ -344,7 +344,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void RenameRemote(RenameRemoteParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new RemoteCommand(
 				RemoteCommand.Rename(),
@@ -361,7 +361,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<string> QueryPrunedBranches(PruneRemoteParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new RemoteCommand(
 				RemoteCommand.Prune(),
@@ -396,7 +396,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void PruneRemote(PruneRemoteParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new RemoteCommand(
 				RemoteCommand.Prune(),
@@ -411,7 +411,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void RemoveRemote(RemoveRemoteParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = RemoteCommand.FormatRemoveCommand(parameters.RemoteName);
 
@@ -425,7 +425,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<RemoteReferenceData> QueryRemoteReferences(QueryRemoteReferencesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(4);
 			if(parameters.Heads)
@@ -463,7 +463,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void RemoveRemoteReferences(RemoveRemoteReferencesParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(1 + parameters.References.Count);
 			args.Add(new CommandArgument(parameters.RemoteName));
@@ -483,7 +483,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public bool Fetch(FetchParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(10);
 			InsertFetchParameters(parameters, args);
@@ -511,7 +511,7 @@
 							{
 								var parser = new GitParser(e.Data);
 								var progress = parser.ParseProgress();
-								progress.Apply(mon);
+								progress.Notify(mon);
 							}
 							else
 							{
@@ -539,7 +539,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public bool Pull(PullParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 
@@ -568,7 +568,7 @@
 						{
 							var parser = new GitParser(e.Data);
 							var progress = parser.ParseProgress();
-							progress.Apply(mon);
+							progress.Notify(mon);
 						}
 						else
 						{
@@ -596,7 +596,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<ReferencePushResult> Push(PushParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			InsertPushparameters(parameters, args);
@@ -625,7 +625,7 @@
 							{
 								var parser = new GitParser(e.Data);
 								var progress = parser.ParseProgress();
-								progress.Apply(mon);
+								progress.Notify(mon);
 							}
 							else
 							{

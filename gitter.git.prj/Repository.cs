@@ -160,7 +160,8 @@
 
 		public static IAsyncFunc<Repository> LoadAsync(IGitAccessor gitAccessor, string workingDirectory)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNotNull(workingDirectory, "workingDirectory");
 
 			return AsyncFunc.Create(
 				new
@@ -241,7 +242,8 @@
 		/// <param name="load"><c>true</c> to load repository; <c>false</c> otherwise.</param>
 		private Repository(IGitAccessor gitAccessor, string workingDirectory, bool load)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNotNull(workingDirectory, "workingDirectory");
 
 			_workingDirectory		= Path.GetFullPath(workingDirectory);
 			_gitDirectory			= GetGitDirectory(_workingDirectory);
@@ -271,12 +273,9 @@
 		/// <summary>Wrap <paramref name="revisionExpression"/> into a usable <see cref="IRevisionPointer"/>.</summary>
 		/// <param name="revisionExpression">Valid revision expression.</param>
 		/// <returns><see cref="IRevisionPointer"/> with <see cref="IRevisionPointer.Pointer"/> == <paramref name="revisionExpression"/>.</returns>
-		public IRevisionPointer CreateRevisionPointer(string revisionExpression)
+		public IRevisionPointer GetRevisionPointer(string revisionExpression)
 		{
-			if(revisionExpression == null)
-			{
-				throw new ArgumentNullException("revisionExpression");
-			}
+			Verify.Argument.IsNeitherNullNorWhitespace(revisionExpression, "revisionExpression");
 
 			if(revisionExpression == GitConstants.HEAD)
 			{
@@ -290,7 +289,7 @@
 			var reference = _refs.TryGetReference(revisionExpression);
 			if(reference != null) return reference;
 
-			return new StaticRevisionPointer(this, revisionExpression);
+			return new DynamicRevisionPointer(this, revisionExpression);
 		}
 
 		#region Internal Services
@@ -610,36 +609,32 @@
 
 		public static void Init(IGitAccessor gitAccessor, string path, string template, bool bare)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
-			if(path == null) throw new ArgumentNullException("path");
-			if(path.Length == 0) throw new ArgumentException("Path cannot be empty.", "path");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
 			gitAccessor.InitRepository(new InitRepositoryParameters(path, template, bare));
 		}
 
 		public static void Init(IGitAccessor gitAccessor, string path, string template)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
-			if(path == null) throw new ArgumentNullException("path");
-			if(path.Length == 0) throw new ArgumentException("Path cannot be empty.", "path");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
 			gitAccessor.InitRepository(new InitRepositoryParameters(path, template, false));
 		}
 
 		public static void Init(IGitAccessor gitAccessor, string path, bool bare)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
-			if(path == null) throw new ArgumentNullException("path");
-			if(path.Length == 0) throw new ArgumentException("Path cannot be empty.", "path");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
 			gitAccessor.InitRepository(new InitRepositoryParameters(path, null, bare));
 		}
 
 		public static void Init(IGitAccessor gitAccessor, string path)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
-			if(path == null) throw new ArgumentNullException("path");
-			if(path.Length == 0) throw new ArgumentException("Path cannot be empty.", "path");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
 			gitAccessor.InitRepository(new InitRepositoryParameters(path, null, false));
 		}
@@ -653,7 +648,7 @@
 			string url, string path, string template, string remoteName,
 			bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 
 			gitAccessor.CloneRepository(
 				new CloneRepositoryParameters()
@@ -677,7 +672,7 @@
 			string url, string path, string template, string remoteName,
 			bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 
 			return AsyncAction.Create(
 				new CloneRepositoryParameters()
@@ -750,7 +745,9 @@
 					details = Resources.StrsSkippingCommit.AddEllipsis();
 					break;
 				default:
-					throw new ArgumentException("control");
+					throw new ArgumentException(
+						"Unknown RebaseControl value: {0}".UseAsFormat(control),
+						"control");
 			}
 			return AsyncAction.Create(
 				new

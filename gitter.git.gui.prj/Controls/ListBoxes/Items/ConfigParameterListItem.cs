@@ -65,7 +65,7 @@
 		public ConfigParameterListItem(ConfigParameter parameter)
 			: base(parameter)
 		{
-			if(parameter == null) throw new ArgumentNullException("parameter");
+			Verify.Argument.IsNotNull(parameter, "parameter");
 		}
 
 		#endregion

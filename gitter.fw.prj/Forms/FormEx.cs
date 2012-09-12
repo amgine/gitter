@@ -50,7 +50,7 @@
 
 		public void SetTaskbarOverlayIcon(Icon icon, string description)
 		{
-			if(icon == null) throw new ArgumentNullException("icon");
+			Verify.Argument.IsNotNull(icon, "icon");
 
 			if(CanUseWin7Api)
 			{

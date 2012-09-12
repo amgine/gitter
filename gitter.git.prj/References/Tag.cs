@@ -98,15 +98,7 @@
 		/// <summary>Deletes this <see cref="Tag"/>.</summary>
 		public void Delete()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Tag"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Tags.Delete(this);
 		}
@@ -114,15 +106,7 @@
 		/// <summary>Refreshes this instance's cached data.</summary>
 		public void Refresh()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Tag"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Tags.Refresh(this);
 		}

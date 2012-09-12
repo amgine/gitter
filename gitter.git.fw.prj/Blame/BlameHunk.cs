@@ -11,8 +11,8 @@
 
 		public BlameHunk(BlameCommit commit, IEnumerable<BlameLine> lines)
 		{
-			if(commit == null) throw new ArgumentNullException("commit");
-			if(lines == null) throw new ArgumentNullException("lines");
+			Verify.Argument.IsNotNull(commit, "commit");
+			Verify.Argument.IsNotNull(lines, "lines");
 			
 			_commit = commit;
 			_lines = new List<BlameLine>(lines);

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 
 	using gitter.Framework;
 
@@ -61,7 +62,7 @@
 
 		internal IAsyncAction DropAsync(StashedState stashedState)
 		{
-			ValidateObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
 			return AsyncAction.Create(
 				stashedState,
@@ -75,7 +76,7 @@
 
 		internal void Drop(StashedState stashedState)
 		{
-			ValidateObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged))
@@ -86,26 +87,23 @@
 
 			lock(SyncRoot)
 			{
-				_stash.RemoveAt(stashedState.Index);
-				for(int i = stashedState.Index; i < _stash.Count; ++i)
+				int index = _stash.IndexOf(stashedState);
+				if(index >= 0)
 				{
-					--_stash[i].Index;
-				}
+					_stash.RemoveAt(index);
+					for(int i = index; i < _stash.Count; ++i)
+					{
+						_stash[i].Index = i;
+					}
 
-				InvokeStashedStateDeleted(stashedState);
+					InvokeStashedStateDeleted(stashedState);
+				}
 			}
 		}
 
 		public void Drop()
 		{
-			#region validate state
-
-			if(_stash.Count == 0)
-			{
-				throw new InvalidOperationException();
-			}
-
-			#endregion
+			Verify.State.IsTrue(_stash.Count != 0);
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged))
@@ -117,11 +115,10 @@
 			lock(SyncRoot)
 			{
 				var stashedState = _stash[0];
-
 				_stash.RemoveAt(0);
 				for(int i = 0; i < _stash.Count; ++i)
 				{
-					--_stash[i].Index;
+					_stash[i].Index = i;
 				}
 
 				InvokeStashedStateDeleted(stashedState);
@@ -130,36 +127,29 @@
 
 		public IAsyncAction DropAsync()
 		{
-			if(_stash.Count == 0) throw new InvalidOperationException();
+			Verify.State.IsTrue(_stash.Count != 0);
+
 			return AsyncAction.Create(
-				new
-				{
-					Repository = Repository,
-					List = _stash,
-					OnDeleted = (Action<StashedState>)InvokeStashedStateDeleted,
-				},
+				new StashDropParameters(),
 				(data, monitor) =>
 				{
-					var repository = data.Repository;
-					var stash = data.List;
-					var onDeleted = data.OnDeleted;
-
-					using(repository.Monitor.BlockNotifications(
+					using(Repository.Monitor.BlockNotifications(
 						RepositoryNotifications.StashChanged))
 					{
-						repository.Accessor.StashDrop(
-							new StashDropParameters());
+						Repository.Accessor.StashDrop(data);
 					}
 
-					lock(stash)
+					lock(SyncRoot)
 					{
-						var stashedState = stash[0];
+						var stashedState = _stash[0];
 
-						stash.RemoveAt(0);
-						for(int i = 0; i < stash.Count; ++i)
-							--stash[i].Index;
+						_stash.RemoveAt(0);
+						for(int i = 0; i < _stash.Count; ++i)
+						{
+							_stash[i].Index = i;
+						}
 
-						onDeleted(stashedState);
+						InvokeStashedStateDeleted(stashedState);
 					}
 				},
 				Resources.StrStashDrop,
@@ -257,40 +247,34 @@
 		{
 			get
 			{
-				if(name == null) throw new ArgumentNullException("name");
-				if(name.StartsWith(GitConstants.StashFullName))
+				const string ExcMessage = "Invalid stash name format.";
+
+				Verify.Argument.IsNotNull(name, "name");
+				Verify.Argument.IsTrue(name.StartsWith(GitConstants.StashFullName), "name", ExcMessage);
+
+				var sfnl = GitConstants.StashFullName.Length;
+				if(name.Length == sfnl)
 				{
-					var l = GitConstants.StashFullName.Length;
-					if(name.Length == l)
+					lock(SyncRoot)
 					{
-						lock(SyncRoot)
-						{
-							return _stash[0];
-						}
-					}
-					else
-					{
-						if(name.Length - l - 3 < 1)
-							throw new ArgumentException("name");
-						if(name[l + 0] != '@')
-							throw new ArgumentException("name");
-						if(name[l + 1] != '{')
-							throw new ArgumentException("name");
-						if(name[name.Length - 1] != '}')
-							throw new ArgumentException("name");
-						var s = name.Substring(l + 2, name.Length - l - 3);
-						int index;
-						if(!int.TryParse(s, out index))
-							throw new ArgumentException("name");
-						lock(SyncRoot)
-						{
-							return _stash[index];
-						}
+						return _stash[0];
 					}
 				}
 				else
 				{
-					throw new ArgumentException("name");
+					Verify.Argument.IsTrue(name.Length - sfnl - 3 >= 1, "name", ExcMessage);
+					Verify.Argument.IsTrue(name[sfnl + 0] == '@', "name", ExcMessage);
+					Verify.Argument.IsTrue(name[sfnl + 1] == '{', "name", ExcMessage);
+					Verify.Argument.IsTrue(name[name.Length - 1] == '}', "name", ExcMessage);
+					var s = name.Substring(sfnl + 2, name.Length - sfnl - 3);
+					int index;
+					Verify.Argument.IsTrue(
+						int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out index),
+						"name", ExcMessage);
+					lock(SyncRoot)
+					{
+						return _stash[index];
+					}
 				}
 			}
 		}
@@ -352,7 +336,7 @@
 						var d = new Dictionary<string, StashedState>(_stash.Count);
 						foreach(var s in _stash)
 						{
-							d.Add(s.Revision.Name, s);
+							d.Add(s.Revision.Hash, s);
 						}
 						_stash.Clear();
 						foreach(var ssinfo in stash)
@@ -415,7 +399,7 @@
 
 		internal IAsyncAction ApplyAsync(StashedState stashedState, bool restoreIndex)
 		{
-			ValidateObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
 			return AsyncAction.Create(
 				Tuple.Create(stashedState, restoreIndex),
@@ -429,7 +413,7 @@
 
 		internal void Apply(StashedState stashedState, bool restoreIndex)
 		{
-			ValidateObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged,
@@ -450,14 +434,7 @@
 
 		public IAsyncAction ApplyAsync(bool restoreIndex)
 		{
-			#region validate state
-
-			if(_stash.Count == 0)
-			{
-				throw new InvalidOperationException(Resources.ExcStashIsEmpty);
-			}
-
-			#endregion
+			Verify.State.IsTrue(_stash.Count != 0);
 
 			return AsyncAction.Create(
 				new
@@ -475,14 +452,7 @@
 
 		public void Apply(bool restoreIndex)
 		{
-			#region validate state
-
-			if(_stash.Count == 0)
-			{
-				throw new InvalidOperationException(Resources.ExcStashIsEmpty);
-			}
-
-			#endregion
+			Verify.State.IsTrue(_stash.Count != 0);
 
 			Apply(_stash[0], restoreIndex);
 		}
@@ -498,7 +468,7 @@
 
 		internal IAsyncAction PopAsync(StashedState stashedState, bool restoreIndex)
 		{
-			ValidateObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
 			return AsyncAction.Create(
 				new
@@ -518,7 +488,7 @@
 
 		internal void Pop(StashedState stashedState, bool restoreIndex)
 		{
-			ValidateObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged,
@@ -549,14 +519,7 @@
 
 		public IAsyncAction PopAsync(bool restoreIndex)
 		{
-			#region validate state
-
-			if(_stash.Count == 0)
-			{
-				throw new InvalidOperationException(Resources.ExcStashIsEmpty);
-			}
-
-			#endregion
+			Verify.State.IsTrue(_stash.Count != 0);
 
 			return AsyncAction.Create(
 				Tuple.Create(Repository, restoreIndex),
@@ -570,14 +533,7 @@
 
 		public void Pop(bool restoreIndex)
 		{
-			#region validate state
-
-			if(_stash.Count == 0)
-			{
-				throw new InvalidOperationException(Resources.ExcStashIsEmpty);
-			}
-
-			#endregion
+			Verify.State.IsTrue(_stash.Count != 0);
 
 			Pop(_stash[0], restoreIndex);
 		}
@@ -593,7 +549,7 @@
 
 		internal Branch ToBranch(StashedState stashedState, string name)
 		{
-			ValidateObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
@@ -619,7 +575,7 @@
 			Repository.Status.Refresh();
 
 			var branchInformation = new BranchData(name,
-				stashedState.Revision.Parents[0].Name, false, true);
+				stashedState.Revision.Parents[0].Hash, false, true);
 			var branch = Repository.Refs.Heads.NotifyCreated(branchInformation);
 			Repository.Head.Pointer = branch;
 
@@ -637,15 +593,8 @@
 
 		public StashedState Save(bool keepIndex, bool includeUntracked, string message)
 		{
-			#region validate state
-
-			if(Repository.IsEmpty)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcCantDoOnEmptyRepository, "stash"));
-			}
-
-			#endregion
+			Verify.State.IsFalse(Repository.IsEmpty,
+				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("stash save"));
 
 			bool created;
 			using(Repository.Monitor.BlockNotifications(

@@ -8,8 +8,8 @@
 
 		public RevisionTreeSource(IRevisionPointer revision)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revision.IsDeleted) throw new ArgumentException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsFalse(revision.IsDeleted, "revision");
 
 			_revision = revision;
 		}

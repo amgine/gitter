@@ -506,16 +506,7 @@
 
 		internal void Stage(TreeItem item, AddFilesMode mode)
 		{
-			#region validate arguments
-
-			if(item == null) throw new ArgumentNullException("item");
-			if(item.Repository != Repository)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsNotHandledByThisRepository, "item"), "item");
-			}
-
-			#endregion
+			Verify.Argument.IsValidGitObject(item, Repository, "item");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
@@ -547,31 +538,34 @@
 			}
 		}
 
-		public void Stage(ICollection<TreeItem> items)
+		private string[] GetPatterns(ICollection<TreeItem> items)
 		{
-			#region validate arguments
-
-			if(items == null) throw new ArgumentNullException("item");
-			if(items.Count == 0) return;
-
-			#endregion
-
+			Verify.Argument.IsNotNull(items, "items");
+			if(items.Count == 0) return null;
+			Verify.Argument.HasNoNullItems(items, "items");
 			var patterns = new string[items.Count];
 			int id = 0;
 			foreach(var item in items)
 			{
-				if(item == null) throw new ArgumentException(Resources.ExcCollectionMustNotContainNullElements, "items");
-				if(item.Repository != Repository) throw new ArgumentException(string.Format(Resources.ExcAllObjectsMustBeHandledByThisRepository, "items"), "items");
+				Verify.Argument.IsTrue(item.Repository == Repository, "items",
+					Resources.ExcAllObjectsMustBeHandledByThisRepository.UseAsFormat("items"));
 				patterns[id++] = item.RelativePath;
 			}
+			return patterns;
+		}
 
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdated))
+		public void Stage(ICollection<TreeItem> items)
+		{
+			var patterns = GetPatterns(items);
+			if(patterns != null)
 			{
-				Repository.Accessor.AddFiles(
-					new AddFilesParameters(AddFilesMode.All, patterns));
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated))
+				{
+					Repository.Accessor.AddFiles(
+						new AddFilesParameters(AddFilesMode.All, patterns));
+				}
 			}
-
 			Refresh();
 		}
 
@@ -662,16 +656,7 @@
 
 		internal void Unstage(TreeItem item)
 		{
-			#region validate arguments
-
-			if(item == null) throw new ArgumentNullException("item");
-			if(item.Repository != Repository)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcSuppliedObjectIsNotHandledByThisRepository, "item"), "item");
-			}
-
-			#endregion
+			Verify.Argument.IsValidGitObject(item, Repository, "item");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
@@ -697,49 +682,28 @@
 
 		public void Unstage(ICollection<TreeItem> items)
 		{
-			#region validate arguments
-
-			if(items == null) throw new ArgumentNullException("items");
-			if(items.Count == 0) return;
-
-			var patterns = new string[items.Count];
-			int id = 0;
-			foreach(var item in items)
+			var patterns = GetPatterns(items);
+			if(patterns != null)
 			{
-				if(item == null)
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated))
 				{
-					throw new ArgumentException(
-						Resources.ExcCollectionMustNotContainNullElements, "items");
-				}
-				if(item.Repository != Repository)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAllObjectsMustBeHandledByThisRepository, "items"), "items");
-				}
-				patterns[id++] = item.RelativePath;
-			}
-
-			#endregion
-
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdated))
-			{
-				if(!Repository.Head.IsEmpty)
-				{
-					Repository.Accessor.ResetFiles(
-						new ResetFilesParameters(patterns));
-				}
-				else
-				{
-					Repository.Accessor.RemoveFiles(
-						new RemoveFilesParameters(patterns)
-						{
-							Cached = true,
-							Recursive = true,
-						});
+					if(!Repository.Head.IsEmpty)
+					{
+						Repository.Accessor.ResetFiles(
+							new ResetFilesParameters(patterns));
+					}
+					else
+					{
+						Repository.Accessor.RemoveFiles(
+							new RemoveFilesParameters(patterns)
+							{
+								Cached = true,
+								Recursive = true,
+							});
+					}
 				}
 			}
-
 			Refresh();
 		}
 
@@ -864,7 +828,7 @@
 		/// <param name="reverse">Reverse patches.</param>
 		public void ApplyPatch(IPatchSource patchSource, ApplyPatchTo applyTo, bool reverse = false)
 		{
-			if(patchSource == null) throw new ArgumentNullException("patchSource");
+			Verify.Argument.IsNotNull(patchSource, "patchSource");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
@@ -890,7 +854,7 @@
 		/// <param name="reverse">Reverse patches.</param>
 		public void ApplyPatches(IEnumerable<IPatchSource> patchSources, ApplyPatchTo applyTo, bool reverse = false)
 		{
-			if(patchSources == null) throw new ArgumentNullException("patchSources");
+			Verify.Argument.IsNotNull(patchSources, "patchSources");
 
 			var files = new List<IPatchFile>();
 			using(Repository.Monitor.BlockNotifications(
@@ -946,14 +910,9 @@
 
 		public Revision Commit(string message, bool amend)
 		{
-			#region validate arguments
-
-			if(message == null) throw new ArgumentNullException("message");
-
-			#endregion
+			Verify.Argument.IsNotNull(message, "message");
 
 			var currentBranch = Repository.Head.Pointer as Branch;
-
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.BranchChanged,

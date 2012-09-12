@@ -17,7 +17,7 @@
 		public RepositoryExplorerViewFactory(IWorkingEnvironment environment)
 			: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, CachedResources.Bitmaps["ImgRepositoryExplorer"], true)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_rootItem = new RepositoryRootItem(environment, null);
 			DefaultViewPosition = ViewPosition.Left;
@@ -30,7 +30,8 @@
 
 		public void AddItem(CustomListBoxItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
+
 			_rootItem.Items.Add(item);
 		}
 

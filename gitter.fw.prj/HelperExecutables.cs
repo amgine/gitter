@@ -14,7 +14,7 @@
 		/// <param name="action">Action to execute.</param>
 		public static void ExecuteWithAdministartorRights(Action action)
 		{
-			if(action == null) throw new ArgumentNullException("action");
+			Verify.Argument.IsNotNull(action, "action");
 
 			if(Utility.IsRunningWithAdministratorRights)
 			{

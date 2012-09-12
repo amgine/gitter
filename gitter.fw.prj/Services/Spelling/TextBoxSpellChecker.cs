@@ -27,8 +27,8 @@
 		/// <param name="enable">Enable spell checking.</param>
 		public TextBoxSpellChecker(TextBox textBox, bool enable)
 		{
-			if(textBox == null)
-				throw new ArgumentNullException("textBox");
+			Verify.Argument.IsNotNull(textBox, "textBox");
+
 			_textBox = textBox;
 			_cache = new Dictionary<string, bool>();
 			_errors = new List<Substring>();
@@ -157,7 +157,9 @@
 		private void OnSizeChanged(object sender, EventArgs e)
 		{
 			if(_textBoxGraphics != null)
+			{
 				_textBoxGraphics.Dispose();
+			}
 			_textBoxGraphics = Graphics.FromHwnd(_textBox.Handle);
 		}
 
@@ -208,7 +210,9 @@
 			{
 				var word = text.GetSubstring(start, text.Length - start);
 				if(!SpellCheck(word))
+				{
 					_errors.Add(word);
+				}
 			}
 			_textBox.Invalidate();
 		}

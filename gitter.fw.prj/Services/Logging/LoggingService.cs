@@ -43,6 +43,8 @@
 
 		private void LogCore(LogEventType type, Exception exc, string @event)
 		{
+			Assert.IsNotNull(type);
+
 			var evt = new LogEvent(_source, type, @event, DateTime.Now, exc);
 			lock(_log)
 			{
@@ -72,7 +74,8 @@
 
 		public static void RegisterAppender(ILogAppender logAppender, bool fill)
 		{
-			if(logAppender == null) throw new ArgumentNullException("logAppender");
+			Verify.Argument.IsNotNull(logAppender, "logAppender");
+
 			lock(_log)
 			{
 				_appenders.Add(logAppender);
@@ -89,7 +92,8 @@
 
 		public static void UnregisterAppender(ILogAppender logAppender)
 		{
-			if(logAppender == null) throw new ArgumentNullException("logAppender");
+			Verify.Argument.IsNotNull(logAppender, "logAppender");
+
 			lock(_log)
 			{
 				_appenders.Remove(logAppender);
@@ -100,37 +104,43 @@
 
 		public void Log(LogEventType type, string @event)
 		{
-			if(type == null) throw new ArgumentNullException("type");
+			Verify.Argument.IsNotNull(type, "type");
+
 			LogCore(type, null, @event);
 		}
 
 		public void Log(LogEventType type, string @event, object arg0)
 		{
-			if(type == null) throw new ArgumentNullException("type");
+			Verify.Argument.IsNotNull(type, "type");
+
 			LogCore(type, null, string.Format(@event, arg0));
 		}
 
 		public void Log(LogEventType type, string @event, params object[] args)
 		{
-			if(type == null) throw new ArgumentNullException("type");
+			Verify.Argument.IsNotNull(type, "type");
+
 			LogCore(type, null, string.Format(@event, args));
 		}
 
 		public void Log(LogEventType type, Exception exc, string @event)
 		{
-			if(type == null) throw new ArgumentNullException("type");
+			Verify.Argument.IsNotNull(type, "type");
+
 			LogCore(type, exc, @event);
 		}
 
 		public void Log(LogEventType type, Exception exc, string @event, object arg0)
 		{
-			if(type == null) throw new ArgumentNullException("type");
+			Verify.Argument.IsNotNull(type, "type");
+
 			LogCore(type, exc, string.Format(@event, arg0));
 		}
 
 		public void Log(LogEventType type, Exception exc, string @event, params object[] args)
 		{
-			if(type == null) throw new ArgumentNullException("type");
+			Verify.Argument.IsNotNull(type, "type");
+
 			LogCore(type, exc, string.Format(@event, args));
 		}
 

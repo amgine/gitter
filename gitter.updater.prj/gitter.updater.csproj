@@ -79,6 +79,12 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\shared\Debug.cs">
+      <Link>Shared\Debug.cs</Link>
+    </Compile>
+    <Compile Include="..\shared\Verify.cs">
+      <Link>Shared\Verify.cs</Link>
+    </Compile>
     <Compile Include="CommandLine.cs" />
     <Compile Include="DeployDriver.cs" />
     <Compile Include="GitUpdateDriver.cs" />

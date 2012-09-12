@@ -12,7 +12,8 @@
 		public VersionFeature(string name, Version version)
 			: base(name)
 		{
-			if(version == null) throw new ArgumentNullException("version");
+			Verify.Argument.IsNotNull(version, "version");
+
 			_version = version;
 		}
 
@@ -23,7 +24,7 @@
 
 		public override bool IsAvailableFor(IGitAccessor gitAccessor)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 
 			return gitAccessor.GitVersion >= _version;
 		}

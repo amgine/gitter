@@ -10,13 +10,18 @@
 
 	public partial class AddIssueTrackerDialog : DialogBase, IExecutableDialog
 	{
+		#region Data
+
 		private readonly IWorkingEnvironment _environment;
 		private Dictionary<IIssueTrackerProvider, Control> _setupControlCache;
 		private Control _activeSetupControl;
 
+		#endregion
+
 		public AddIssueTrackerDialog(IWorkingEnvironment environment)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
+
 			_environment = environment;
 			_setupControlCache = new Dictionary<IIssueTrackerProvider, Control>();
 

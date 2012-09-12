@@ -23,11 +23,15 @@
 
 		#endregion
 
-		public VersionCheckDialog(IWorkingEnvironment environment, IGitRepositoryProvider gitRepositoryProvider, Version requiredVersion, Version installedVersion)
+		public VersionCheckDialog(
+			IWorkingEnvironment environment,
+			IGitRepositoryProvider gitRepositoryProvider,
+			Version requiredVersion,
+			Version installedVersion)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
-			if(gitRepositoryProvider == null) throw new ArgumentNullException("gitRepositoryProvider");
-			if(requiredVersion == null) throw new ArgumentNullException("requiredVersion");
+			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
+			Verify.Argument.IsNotNull(requiredVersion, "requiredVersion");
 
 			_environment = environment;
 			_gitRepositoryProvider = gitRepositoryProvider;

@@ -15,13 +15,13 @@
 		private readonly RepositoryExplorerRootListItem _rootItem;
 		private readonly RedmineServiceContext _service;
 
-		public RepositoryExplorer(IWorkingEnvironment env, RedmineGuiProvider guiProvider)
+		public RepositoryExplorer(IWorkingEnvironment environment, RedmineGuiProvider guiProvider)
 		{
-			if(env == null) throw new ArgumentNullException("env");
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
 			_service = guiProvider.ServiceContext;
-			_rootItem = new RepositoryExplorerRootListItem(env, guiProvider);
+			_rootItem = new RepositoryExplorerRootListItem(environment, guiProvider);
 		}
 
 		public CustomListBoxItem RootItem

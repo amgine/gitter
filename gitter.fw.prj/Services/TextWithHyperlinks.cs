@@ -32,7 +32,7 @@
 
 			public HyperlinkGlyph(Hyperlink href)
 			{
-				if(href == null) throw new ArgumentNullException("href");
+				Verify.Argument.IsNotNull(href, "href");
 
 				_href = href;
 			}

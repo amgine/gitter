@@ -11,7 +11,7 @@
 		public PropertyPageItem(PropertyPageFactory description)
 			: base(description)
 		{
-			if(description == null) throw new ArgumentNullException("description");
+			Verify.Argument.IsNotNull(description, "description");
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

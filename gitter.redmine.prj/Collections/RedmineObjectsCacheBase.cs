@@ -18,7 +18,7 @@
 
 		internal RedmineObjectsCacheBase(RedmineServiceContext context)
 		{
-			if(context == null) throw new ArgumentNullException("context");
+			Verify.Argument.IsNotNull(context, "context");
 
 			_cache = new Dictionary<int, T>();
 			_context = context;
@@ -43,7 +43,7 @@
 
 		internal T Lookup(XmlNode node)
 		{
-			if(node == null) throw new ArgumentNullException("node");
+			Verify.Argument.IsNotNull(node, "node");
 
 			var id = RedmineUtility.LoadInt(node[RedmineObject.IdProperty.XmlNodeName]);
 			T obj;
@@ -95,7 +95,7 @@
 
 		protected IEnumerable<T> Select(XmlNode node)
 		{
-			if(node == null) throw new ArgumentNullException("node");
+			Verify.Argument.IsNotNull(node, "node");
 
 			foreach(XmlNode child in node.ChildNodes)
 			{
@@ -115,7 +115,7 @@
 
 		internal bool Remove(T item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
+			Verify.Argument.IsNotNull(item, "item");
 
 			lock(SyncRoot)
 			{

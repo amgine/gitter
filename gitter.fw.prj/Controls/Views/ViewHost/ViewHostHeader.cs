@@ -29,9 +29,9 @@
 		/// <summary>Create <see cref="ViewHostHeader"/>.</summary>
 		internal ViewHostHeader(ViewHost viewHost)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
-			_viewHost = viewHost;
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
+			_viewHost = viewHost;
 			SetStyle(
 				ControlStyles.ContainerControl |
 				ControlStyles.Selectable |

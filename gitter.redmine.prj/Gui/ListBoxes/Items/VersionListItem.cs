@@ -139,7 +139,7 @@
 		public VersionListItem(ProjectVersion version)
 			: base(version)
 		{
-			if(version == null) throw new ArgumentNullException("version");
+			Verify.Argument.IsNotNull(version, "version");
 		}
 
 		protected override void OnListBoxAttached()

@@ -43,7 +43,7 @@
 		/// <param name="section">Provider configuration section.</param>
 		public bool LoadFor(IWorkingEnvironment environment, Section section)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			environment.ViewDockService.RegisterFactory(new NewsViewFactory());
 			environment.ViewDockService.RegisterFactory(new IssuesViewFactory());
@@ -78,7 +78,7 @@
 
 		public Control CreateSetupControl(IRepository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "environment");
 
 			return new ProviderSetupControl(repository);
 		}

@@ -65,13 +65,18 @@
 			get { return _fetchUrl; }
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				if(_fetchUrl != value)
 				{
 					var pname = "remote." + Name + ".url";
 					Repository.Configuration.SetValue(pname, value);
 					pname = "remote." + Name + ".pushurl";
 					if(_fetchUrl == _pushUrl && !Repository.Configuration.Exists(pname))
+					{
 						_pushUrl = value;
+					}
 					_fetchUrl = value;
 				}
 			}
@@ -88,6 +93,9 @@
 			get { return _pushUrl; }
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				if(_pushUrl != value)
 				{
 					var pname = "remote." + Name + ".pushurl";
@@ -113,6 +121,9 @@
 			}
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".proxy";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -138,6 +149,9 @@
 			}
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".vcs";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -162,6 +176,9 @@
 			}
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".receivepack";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -186,6 +203,9 @@
 			}
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".uploadpack";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -210,6 +230,9 @@
 			}
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".fetch";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -234,6 +257,9 @@
 			}
 			set
 			{
+				Verify.Argument.IsNotNull(value, "value");
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".push";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -260,6 +286,8 @@
 			}
 			set
 			{
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".mirror";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -286,6 +314,8 @@
 			}
 			set
 			{
+				Verify.State.IsNotDeleted(this);
+
 				var pname = "remote." + Name + ".skipfetchall";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p == null)
@@ -335,9 +365,13 @@
 				var pname = "remote." + Name + ".tagopt";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p != null)
+				{
 					p.Value = strvalue;
+				}
 				else if(strvalue != "")
+				{
 					Repository.Configuration.SetValue(pname, strvalue);
+				}
 			}
 		}
 
@@ -347,30 +381,14 @@
 
 		public RemoteReferencesCollection GetReferences()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return new RemoteReferencesCollection(this);
 		}
 
 		public void Delete()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Remotes.RemoveRemote(this);
 		}
@@ -378,15 +396,7 @@
 		/// <summary>Download new objects from remote repository.</summary>
 		public void Fetch()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			bool fetchedSomething = false;
 			using(Repository.Monitor.BlockNotifications(
@@ -406,15 +416,7 @@
 		/// <summary>Download new objects from remote repository.</summary>
 		public IAsyncAction FetchAsync()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return AsyncAction.Create(
 				this,
@@ -449,15 +451,7 @@
 		/// <summary>Download new objects from remote repository and merge tracking branches.</summary>
 		public void Pull()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			try
 			{
@@ -478,15 +472,7 @@
 
 		public IAsyncAction PullAsync()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return AsyncAction.Create(
 				this,
@@ -530,48 +516,16 @@
 		/// <summary>Send local objects to remote repository.</summary>
 		public void Push(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
-
-			#region validate arguments
-
-			if(branches == null) throw new ArgumentNullException("branches");
-			if(branches.Count == 0)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcCollectionMustContainAtLeastOneObject, "branch"), "branches");
-			}
+			Verify.State.IsNotDeleted(this);
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
+			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
 			var names = new List<string>(branches.Count);
-			foreach(var b in branches)
+			foreach(var branch in branches)
 			{
-				if(b == null)
-				{
-					throw new ArgumentException(
-						Resources.ExcCollectionMustNotContainNullElements, "branches");
-				}
-				if(b.Repository != Repository)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAllObjectsMustBeHandledByThisRepository, "branches"), "branches");
-				}
-				if(b.IsDeleted)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAtLeastOneOfSuppliedObjectIsDeleted, "branches"), "branches");
-				}
-				names.Add(b.Name);
+				names.Add(branch.Name);
 			}
-
-			#endregion
-
 			IList<ReferencePushResult> res;
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
@@ -602,48 +556,16 @@
 		/// <summary>Send local objects to remote repository.</summary>
 		public IAsyncAction PushAsync(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
-
-			#region validate arguments
-
-			if(branches == null) throw new ArgumentNullException("branches");
-			if(branches.Count == 0)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcCollectionMustContainAtLeastOneObject, "branch"), "branches");
-			}
+			Verify.State.IsNotDeleted(this);
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
+			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
 			var names = new List<string>(branches.Count);
-			foreach(var b in branches)
+			foreach(var branch in branches)
 			{
-				if(b == null)
-				{
-					throw new ArgumentException(
-						Resources.ExcCollectionMustNotContainNullElements, "branches");
-				}
-				if(b.Repository != Repository)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAllObjectsMustBeHandledByThisRepository, "branches"), "branches");
-				}
-				if(b.IsDeleted)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAtLeastOneOfSuppliedObjectIsDeleted, "branches"), "branches");
-				}
-				names.Add(b.Name);
+				names.Add(branch.Name);
 			}
-
-			#endregion
-
 			return AsyncAction.Create(
 				Tuple.Create(this, names, forceOverwrite, thinPack, sendTags),
 				(tuple, monitor) =>
@@ -685,15 +607,7 @@
 		/// <summary>Deletes all stale tracking branches.</summary>
 		public void Prune()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
@@ -707,15 +621,7 @@
 		/// <summary>Deletes all stale tracking branches.</summary>
 		public IAsyncAction PruneAsync()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			return AsyncAction.Create(
 				this,
@@ -743,15 +649,7 @@
 		/// <param name="newName">New name.</param>
 		protected override void RenameCore(string newName)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(string.Format(
-					Resources.ExcObjectIsDeleted, "Remote"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Remotes.RenameRemote(this, newName);
 		}
@@ -760,6 +658,8 @@
 		/// <param name="oldName">Old name.</param>
 		protected override void AfterRename(string oldName)
 		{
+			Assert.IsNeitherNullNorWhitespace(oldName);
+
 			InvokeRenamed(oldName, Name);
 			Repository.Remotes.NotifyRenamed(this, oldName);
 		}

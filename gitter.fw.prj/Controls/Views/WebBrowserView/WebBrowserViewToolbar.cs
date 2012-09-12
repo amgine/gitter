@@ -20,7 +20,8 @@
 
 		public WebBrowserViewToolbar(WebBrowserView view)
 		{
-			if(view == null) throw new ArgumentNullException("view");
+			Verify.Argument.IsNotNull(view, "view");
+
 			_view = view;
 
 			Items.Add(_btnGoBack = new ToolStripButton(

@@ -19,7 +19,7 @@
 		public RepositoryReferencesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgBranch"], Resources.StrReferences)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 		}

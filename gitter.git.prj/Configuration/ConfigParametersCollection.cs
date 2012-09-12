@@ -70,10 +70,9 @@
 				ConfigParameter res;
 				lock(SyncRoot)
 				{
-					if(!_parameters.TryGetValue(name, out res))
-					{
-						throw new ArgumentException("Parameter not found.", "name");
-					}
+					Verify.Argument.IsTrue(
+						_parameters.TryGetValue(name, out res),
+						"name", "Parameter not found.");
 				}
 				return res;
 			}
@@ -146,28 +145,23 @@
 		/// <returns>Created parameter.</returns>
 		public ConfigParameter CreateParameter(string name, string value)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(value == null) throw new ArgumentNullException("value");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(value, "value");
 
 			ConfigParameter p;
 			lock(SyncRoot)
 			{
-				if(!_parameters.ContainsKey(name))
+				Verify.Argument.IsFalse(_parameters.ContainsKey(name), "name", "Parameter already exists.");
+
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.ConfigUpdated))
 				{
-					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.ConfigUpdated))
-					{
-						Repository.Accessor.AddConfigValue(
-							new AddConfigValueParameters(name, value));
-					}
-					p = new ConfigParameter(Repository, ConfigFile.Repository, name, value);
-					_parameters.Add(name, p);
-					InvokeParameterCreated(p);
+					Repository.Accessor.AddConfigValue(
+						new AddConfigValueParameters(name, value));
 				}
-				else
-				{
-					throw new ArgumentException("Parameter already exists.", "name");
-				}
+				p = new ConfigParameter(Repository, ConfigFile.Repository, name, value);
+				_parameters.Add(name, p);
+				InvokeParameterCreated(p);
 			}
 			return p;
 		}
@@ -195,8 +189,8 @@
 
 		public void SetUserIdentity(string userName, string userEmail)
 		{
-			if(userName == null) throw new ArgumentNullException("userName");
-			if(userEmail == null) throw new ArgumentNullException("userEmail");
+			Verify.Argument.IsNotNull(userName, "userName");
+			Verify.Argument.IsNotNull(userEmail, "userEmail");
 
 			try
 			{
@@ -215,7 +209,7 @@
 
 		internal void Unset(ConfigParameter parameter)
 		{
-			if(parameter == null) throw new ArgumentNullException("parameter");
+			Verify.Argument.IsNotNull(parameter, "parameter");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.ConfigUpdated))
@@ -259,7 +253,9 @@
 			lock(SyncRoot)
 			{
 				if(_parameters.TryGetValue(name, out parameter))
+				{
 					return parameter;
+				}
 			}
 			return null;
 		}
@@ -270,7 +266,9 @@
 			lock(SyncRoot)
 			{
 				if(_parameters.TryGetValue(name, out parameter))
+				{
 					return parameter.Value;
+				}
 			}
 			return null;
 		}
@@ -299,7 +297,7 @@
 
 		internal void Refresh(ConfigParameter configParameter)
 		{
-			if(configParameter == null) throw new ArgumentNullException("configFile");
+			Verify.Argument.IsNotNull(configParameter, "configParameter");
 
 			string name = configParameter.Name;
 			var configParameterData = Repository.Accessor.QueryConfigParameter(

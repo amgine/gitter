@@ -22,7 +22,8 @@
 
 		public ViewHostResizingProcess(ViewHost viewHost)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
+
 			_viewHost = viewHost;
 		}
 
@@ -44,9 +45,9 @@
 
 		public bool Start(Point location)
 		{
-			if(_isActive) throw new InvalidOperationException();
-			if(_viewHost.Status != ViewHostStatus.AutoHide) throw new InvalidOperationException();
-			if(!_viewHost.Visible) throw new InvalidOperationException();
+			Verify.State.IsFalse(IsActive);
+			Verify.State.IsTrue(_viewHost.Status == ViewHostStatus.AutoHide);
+			Verify.State.IsTrue(_viewHost.Visible);
 
 			_isActive = true;
 			var size = _viewHost.Size;
@@ -103,7 +104,8 @@
 
 		public void Update(Point location)
 		{
-			if(!_isActive) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsActive);
+
 			switch(_viewHost.DockSide.Orientation)
 			{
 				case Orientation.Vertical:
@@ -143,7 +145,8 @@
 
 		public void Commit(Point e)
 		{
-			if(!_isActive) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsActive);
+
 			KillMarker();
 			_isActive = false;
 			switch(_viewHost.DockSide.Side)
@@ -215,14 +218,16 @@
 
 		public void Cancel()
 		{
-			if(!_isActive) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsActive);
+
 			KillMarker();
 			_isActive = false;
 		}
 
 		private void SpawnMarker(Rectangle bounds, Orientation orientation)
 		{
-			if(_splitterMarker != null) throw new InvalidOperationException();
+			Verify.State.IsTrue(_splitterMarker == null);
+
 			_splitterMarker = new SplitterMarker(bounds, orientation);
 			_splitterMarker.Show();
 		}

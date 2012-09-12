@@ -40,9 +40,10 @@
 			get { return _height; }
 			set
 			{
+				Verify.Argument.IsNotNegative(value, "value");
+
 				if(_height != value)
 				{
-					if(value < 0) throw new ArgumentOutOfRangeException("value");
 					_height = value;
 					InvalidateSize();
 				}

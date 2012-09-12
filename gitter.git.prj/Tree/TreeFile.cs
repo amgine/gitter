@@ -52,7 +52,7 @@
 
 		public void ResolveConflict(ConflictResolution resolution)
 		{
-			if(Status != FileStatus.Unmerged) throw new InvalidOperationException();
+			Verify.State.IsFalse(ConflictType == Git.ConflictType.None);
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
@@ -75,7 +75,9 @@
 						Stage(AddFilesMode.Default);
 						break;
 					default:
-						throw new ArgumentException("resolution");
+						throw new ArgumentException(
+							"Unknown ConflictResolution value: {0}".UseAsFormat(resolution),
+							"resolution");
 				}
 			}
 		}
@@ -124,22 +126,22 @@
 
 		public void RunMergeTool()
 		{
-			if(_conflictType == Git.ConflictType.None) throw new InvalidOperationException();
+			Verify.State.IsFalse(ConflictType == Git.ConflictType.None);
 
 			RunMergeTool(null, null);
 		}
 
 		public void RunMergeTool(MergeTool mergeTool)
 		{
-			if(mergeTool == null) throw new ArgumentNullException("mergeTool");
-			if(_conflictType == Git.ConflictType.None) throw new InvalidOperationException();
+			Verify.Argument.IsNotNull(mergeTool, "mergeTool");
+			Verify.State.IsFalse(ConflictType == Git.ConflictType.None);
 
 			RunMergeTool(mergeTool, null);
 		}
 
 		public IAsyncAction RunMergeToolAsync()
 		{
-			if(_conflictType == Git.ConflictType.None) throw new InvalidOperationException();
+			Verify.State.IsFalse(ConflictType == Git.ConflictType.None);
 
 			return AsyncAction.Create(this,
 				(file, mon) =>
@@ -153,7 +155,7 @@
 
 		public IAsyncAction RunMergeToolAsync(MergeTool mergeTool)
 		{
-			if(_conflictType == Git.ConflictType.None) throw new InvalidOperationException();
+			Verify.State.IsFalse(ConflictType == Git.ConflictType.None);
 
 			return AsyncAction.Create(new
 				{

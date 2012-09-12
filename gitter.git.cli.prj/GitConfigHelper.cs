@@ -13,7 +13,9 @@
 				case ConfigFile.Repository:
 				case ConfigFile.Other:
 					if(parameters.FileName != null)
+					{
 						args.Add(ConfigCommand.File(parameters.FileName));
+					}
 					break;
 				case ConfigFile.System:
 					args.Add(ConfigCommand.System());
@@ -53,7 +55,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public static ConfigParameterData QueryConfigParameter(ICommandExecutor executor, QueryConfigParameterParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(executor, "executor");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(2);
 			InsertConfigFileSpecifier(args, parameters);
@@ -78,7 +81,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public static IList<ConfigParameterData> QueryConfig(ICommandExecutor executor, QueryConfigParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(executor, "executor");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(3);
 
@@ -89,7 +93,9 @@
 			var cmd = new ConfigCommand(args);
 			var output = executor.ExecCommand(cmd);
 			if(output.ExitCode != 0 && parameters.ConfigFile != ConfigFile.Other)
+			{
 				return new ConfigParameterData[0];
+			}
 			HandleConfigResults(output);
 
 			var res = new List<ConfigParameterData>();
@@ -99,9 +105,13 @@
 				var name = parser.ReadStringUpTo(parser.FindNewLineOrEndOfString(), 1);
 				var value = parser.ReadStringUpTo(parser.FindNullOrEndOfString(), 1);
 				if(parameters.ConfigFile != ConfigFile.Other)
+				{
 					res.Add(new ConfigParameterData(name, value, parameters.ConfigFile));
+				}
 				else
+				{
 					res.Add(new ConfigParameterData(name, value, parameters.FileName));
+				}
 			}
 			return res;
 		}
@@ -111,7 +121,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public static void AddConfigValue(ICommandExecutor executor, AddConfigValueParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(executor, "executor");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(4);
 			GitConfigHelper.InsertConfigFileSpecifier(args, parameters);
@@ -129,7 +140,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public static void SetConfigValue(ICommandExecutor executor, SetConfigValueParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(executor, "executor");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(3);
 			GitConfigHelper.InsertConfigFileSpecifier(args, parameters);
@@ -146,7 +158,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public static void UnsetConfigValue(ICommandExecutor executor, UnsetConfigValueParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(executor, "executor");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(3);
 			GitConfigHelper.InsertConfigFileSpecifier(args, parameters);
@@ -163,7 +176,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public static void RenameConfigSection(ICommandExecutor executor, RenameConfigSectionParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(executor, "executor");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(2);
 
@@ -180,7 +194,8 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public static void DeleteConfigSection(ICommandExecutor executor, DeleteConfigSectionParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(executor, "executor");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(2);
 			GitConfigHelper.InsertConfigFileSpecifier(args, parameters);

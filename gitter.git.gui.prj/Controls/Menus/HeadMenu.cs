@@ -14,7 +14,7 @@
 
 		public HeadMenu(Head head)
 		{
-			if(head == null) throw new ArgumentNullException("head");
+			Verify.Argument.IsValidGitObject(head, "head");
 
 			_head = head;
 

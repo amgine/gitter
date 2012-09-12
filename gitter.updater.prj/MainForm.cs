@@ -11,7 +11,7 @@
 
 		public MainForm(IUpdateProcess process)
 		{
-			if(process == null) throw new ArgumentNullException("process");
+			Verify.Argument.IsNotNull(process, "process");
 
 			InitializeComponent();
 

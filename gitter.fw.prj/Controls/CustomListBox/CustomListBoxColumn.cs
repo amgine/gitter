@@ -329,10 +329,8 @@
 			get { return _width; }
 			set
 			{
-				if(_sizeMode == ColumnSizeMode.Fill)
-				{
-					throw new InvalidOperationException();
-				}
+				Verify.State.IsTrue(SizeMode != ColumnSizeMode.Fill);
+
 				_width = value;
 				if(IsAttachedToListBox)
 				{
@@ -369,10 +367,8 @@
 		public virtual void AutoSize(int minWidth)
 		{
 			if(!IsAttachedToListBox) return;
-			if(_sizeMode == ColumnSizeMode.Fill)
-			{
-				throw new InvalidOperationException();
-			}
+			Verify.State.IsTrue(SizeMode != ColumnSizeMode.Fill);
+
 			if(ListBox.Items.Count == 0)
 			{
 				return;
@@ -678,7 +674,8 @@
 
 		public void SaveTo(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
+
 			section.SetValue("Visible", _isVisible);
 			if(_sizeMode == ColumnSizeMode.Sizeable)
 			{
@@ -693,7 +690,8 @@
 
 		public void LoadFrom(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
+
 			IsVisible = section.GetValue("Visible", _isVisible);
 			if(_sizeMode != ColumnSizeMode.Fill)
 			{

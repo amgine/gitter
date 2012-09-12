@@ -40,7 +40,7 @@
 		/// <param name="string">Base string.</param>
 		public Substring(string @string)
 		{
-			if(@string == null) throw new ArgumentNullException("string");
+			Verify.Argument.IsNotNull(@string, "@string");
 
 			_string = @string;
 			_start = 0;
@@ -52,8 +52,8 @@
 		/// <param name="start">Substring start.</param>
 		public Substring(string @string, int start)
 		{
-			if(@string == null) throw new ArgumentNullException("string");
-			if(start < 0 || start >= @string.Length) throw new ArgumentOutOfRangeException("start");
+			Verify.Argument.IsNotNull(@string, "@string");
+			Verify.Argument.IsValidIndex(start, @string.Length, "start");
 
 			_string = @string;
 			_start = start;
@@ -66,9 +66,9 @@
 		/// <param name="length">Substring length.</param>
 		public Substring(string @string, int start, int length)
 		{
-			if(@string == null) throw new ArgumentNullException("string");
-			if(start < 0 || start >= @string.Length) throw new ArgumentOutOfRangeException("start");
-			if(length < 0 || start + length > @string.Length) throw new ArgumentOutOfRangeException("length");
+			Verify.Argument.IsNotNull(@string, "@string");
+			Verify.Argument.IsValidIndex(start, @string.Length, "start");
+			Verify.Argument.IsValidIndex(length, @string.Length - start + 1, "length");
 
 			_string = @string;
 			_start = start;
@@ -91,12 +91,21 @@
 			get { return _start; }
 			set
 			{
-				if(value != _start)
-				{
-					if(value < 0 || value >= _string.Length) throw new ArgumentOutOfRangeException("start");
-					if(value + _length > _string.Length) throw new ArgumentOutOfRangeException("start");
-					_start = value;
-				}
+				Verify.Argument.IsValidIndex(0, value, _string.Length - _length, "value");
+
+				_start = value;
+			}
+		}
+
+		/// <summary>Substring length.</summary>
+		public int Length
+		{
+			get { return _length; }
+			set
+			{
+				Verify.Argument.IsValidIndex(0, value, _string.Length - _start + 1, "value");
+
+				_length = value;
 			}
 		}
 
@@ -118,20 +127,6 @@
 			get { return _string[_start + _length - 1]; }
 		}
 
-		/// <summary>Substring length.</summary>
-		public int Length
-		{
-			get { return _length; }
-			set
-			{
-				if(value != _length)
-				{
-					if(value < 0 || _start + value > _string.Length) throw new ArgumentOutOfRangeException("length");
-					_length = value;
-				}
-			}
-		}
-
 		/// <summary>Substring is empty.</summary>
 		public bool IsEmpty
 		{
@@ -145,7 +140,8 @@
 		{
 			get
 			{
-				if(index < 0 || index >= _length) throw new ArgumentOutOfRangeException("index");
+				Verify.Argument.IsValidIndex(index, _length, "index");
+
 				return _string[_start + index];
 			}
 		}
@@ -159,8 +155,9 @@
 		/// <param name="length">Substring length.</param>
 		public void SetInterval(int start, int length)
 		{
-			if(start < 0 || start >= _string.Length) throw new ArgumentOutOfRangeException("start");
-			if(length < 0 || start + length > _string.Length) throw new ArgumentOutOfRangeException("length");
+			Verify.Argument.IsValidIndex(start, _string.Length, "start");
+			Verify.Argument.IsValidIndex(length, _string.Length - start + 1, "length");
+
 			_start = start;
 			_length = length;
 		}
@@ -170,10 +167,11 @@
 		/// <returns>Created <see cref="Substring"/>.</returns>
 		public Substring GetSubstring(int start)
 		{
-			if(start < 0 || start >= _start + _length) throw new IndexOutOfRangeException("start");
+			Verify.Argument.IsValidIndex(_start, start, _start + _length, "start");
+
+			if(start == 0) return this;
 			int length = _length - start;
 			if(length == 0) return Empty;
-			if(start == 0) return this;
 			return new Substring(_string, _start + start, length);
 		}
 
@@ -183,8 +181,9 @@
 		/// <returns>Created <see cref="Substring"/>.</returns>
 		public Substring GetSubstring(int start, int length)
 		{
-			if(start < 0 || start >= _start + _length) throw new IndexOutOfRangeException("start");
-			if(length < 0 || start + length > length) throw new IndexOutOfRangeException("length");
+			Verify.Argument.IsValidIndex(_start, start, _length, "start");
+			Verify.Argument.IsValidIndex(length, _length - start + 1, "length");
+
 			if(length == 0) return Empty;
 			if(start == 0 && length == _length) return this;
 			return new Substring(_string, _start + start, length);
@@ -204,8 +203,8 @@
 		/// <returns>String starting index or -1 if it was not found.</returns>
 		public int IndexOf(string value)
 		{
-			if(value == null) throw new ArgumentNullException("value");
-			if(value.Length == 0) throw new ArgumentException("value");
+			Verify.Argument.IsNeitherNullNorEmpty(value, "value");
+
 			if(_length < value.Length) return -1;
 			return _string.IndexOf(value, _start, _length);
 		}
@@ -216,7 +215,8 @@
 		/// <returns>Character index or -1 if it was not found.</returns>
 		public int IndexOf(char value, int startIndex)
 		{
-			if(startIndex < 0 || startIndex >= _length) throw new ArgumentOutOfRangeException("startIndex");
+			Verify.Argument.IsValidIndex(startIndex, _length, "startIndex");
+
 			if(_length == 0) return -1;
 			return _string.IndexOf(value, _start + startIndex, _length - startIndex);
 		}
@@ -227,9 +227,9 @@
 		/// <returns>String starting index or -1 if it was not found.</returns>
 		public int IndexOf(string value, int startIndex)
 		{
-			if(value == null) throw new ArgumentNullException("value");
-			if(value.Length == 0) throw new ArgumentException("value");
-			if(startIndex < 0 || startIndex + value.Length > _length) throw new ArgumentOutOfRangeException("startIndex");
+			Verify.Argument.IsNeitherNullNorEmpty(value, "value");
+			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, "startIndex");
+
 			return _string.IndexOf(value, _start + startIndex, _length - startIndex);
 		}
 
@@ -240,8 +240,9 @@
 		/// <returns>Character index or -1 if it was not found.</returns>
 		public int IndexOf(char value, int startIndex, int count)
 		{
-			if(startIndex < 0 || startIndex >= _length) throw new ArgumentOutOfRangeException("startIndex");
-			if(count < 0 || startIndex + count > _length) throw new ArgumentOutOfRangeException("count");
+			Verify.Argument.IsValidIndex(startIndex, _length, "startIndex");
+			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, "count");
+
 			if(_length == 0) return -1;
 			return _string.IndexOf(value, _start + startIndex, count);
 		}
@@ -253,8 +254,10 @@
 		/// <returns>String index or -1 if it was not found.</returns>
 		public int IndexOf(string value, int startIndex, int count)
 		{
-			if(startIndex < 0 || startIndex >= _length) throw new ArgumentOutOfRangeException("startIndex");
-			if(count < 0 || startIndex + count > _length) throw new ArgumentOutOfRangeException("count");
+			Verify.Argument.IsNeitherNullNorEmpty(value, "value");
+			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, "startIndex");
+			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, "count");
+
 			if(count < value.Length) return -1;
 			return _string.IndexOf(value, _start + startIndex, count);
 		}
@@ -273,7 +276,8 @@
 		/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
 		public bool StartsWith(string value)
 		{
-			if(value == null) throw new ArgumentNullException();
+			Verify.Argument.IsNotNull(value, "value");
+
 			if(value.Length == 0) return true;
 			if(_length < value.Length) return false;
 			return _string.IndexOf(value, _start, value.Length) != -1;
@@ -293,7 +297,8 @@
 		/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
 		public bool EndsWith(string value)
 		{
-			if(value == null) throw new ArgumentNullException();
+			Verify.Argument.IsNotNull(value, "value");
+
 			if(value.Length == 0) return true;
 			if(_length < value.Length) return false;
 			return _string.IndexOf(value, _start + _length - value.Length, value.Length) != -1;
@@ -303,6 +308,13 @@
 
 		#region Overrides
 
+		/// <summary>
+		/// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
+		/// </summary>
+		/// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
+		/// <returns>
+		///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
+		/// </returns>
 		public override bool Equals(object obj)
 		{
 			if(obj == null) return false;
@@ -311,6 +323,12 @@
 			return _equals_non_null(this, s);
 		}
 
+		/// <summary>
+		/// Returns a hash code for this instance.
+		/// </summary>
+		/// <returns>
+		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+		/// </returns>
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
@@ -336,8 +354,7 @@
 			}
 			else
 			{
-				if(substring2 == null)
-					return false;
+				if(substring2 == null) return false;
 				return _equals_non_null(substring1, substring2);
 			}
 		}
@@ -351,8 +368,7 @@
 			}
 			else
 			{
-				if(substring2 == null)
-					return false;
+				if(substring2 == null) return false;
 				return _equals_non_null(substring1, substring2);
 			}
 		}
@@ -360,17 +376,23 @@
 		private static bool _equals_non_null(Substring substring1, Substring substring2)
 		{
 			if(object.ReferenceEquals(substring1, substring2))
+			{
 				return true;
+			}
 			if(substring1._length == substring2._length)
 			{
 				if(object.ReferenceEquals(substring1._string, substring2._string) &&
 					substring1._start == substring2._start)
+				{
 					return true;
+				}
 				var end = substring1._start + substring1._length;
 				for(int i = substring1._start, j = substring2._start; i < end; ++i, ++j)
 				{
 					if(substring1._string[i] != substring2._string[j])
+					{
 						return false;
+					}
 				}
 				return true;
 			}
@@ -380,17 +402,23 @@
 		private static bool _equals_non_null(Substring substring1, string substring2)
 		{
 			if(object.ReferenceEquals(substring1, substring2))
+			{
 				return true;
+			}
 			if(substring1._length == substring2.Length)
 			{
 				if(object.ReferenceEquals(substring1._string, substring2) &&
 					substring1._start == 0)
+				{
 					return true;
+				}
 				var end = substring1._start + substring1._length;
 				for(int i = substring1._start, j = 0; i < end; ++i, ++j)
 				{
 					if(substring1._string[i] != substring2[j])
+					{
 						return false;
+					}
 				}
 				return true;
 			}
@@ -457,6 +485,8 @@
 
 			public Enumerator(Substring substring)
 			{
+				Assert.IsNotNull(substring);
+
 				_substring = substring;
 				_string = substring._string;
 				_position = substring._start;

@@ -49,8 +49,8 @@
 
 		internal Rectangle GetPanelBounds(FlowPanel panel)
 		{
-			if(panel == null) throw new ArgumentNullException("panel");
-			if(panel.FlowControl != this) throw new ArgumentException("panel");
+			Verify.Argument.IsNotNull(panel, "panel");
+			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
 			using(var graphics = CreateGraphics())
 			{
@@ -67,7 +67,8 @@
 					y = maxY;
 				}
 			}
-			throw new ArgumentException("panel");
+			Assert.Fail("Panel not found.");
+			return Rectangle.Empty;
 		}
 
 		internal void InvalidatePanel(FlowPanel panel, Rectangle rect)

@@ -19,10 +19,10 @@
 
 		public TagData(string name, string sha1, TagType tagType)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
-			if(sha1 == null) throw new ArgumentNullException("sha1");
-			if(sha1.Length != 40) throw new ArgumentException("sha1");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(sha1, "sha1");
+			Verify.Argument.IsTrue(sha1.Length == 40, "sha1");
+
 			_name = name;
 			_sha1 = sha1;
 			_tagType = tagType;

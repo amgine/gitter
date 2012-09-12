@@ -39,7 +39,7 @@
 			get { return _defaultTextRenderer; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
 				_defaultTextRenderer = value;
 			}
 		}
@@ -54,7 +54,7 @@
 			get { return _style; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
 
 				if(_style != value)
 				{

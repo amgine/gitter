@@ -31,8 +31,8 @@ namespace gitter.Git.Gui.Controls
 
 		public TreeDirectoriesBinding(CustomListBoxItemsCollection itemHost, TreeDirectory root, bool showRoot)
 		{
-			if(itemHost == null) throw new ArgumentNullException("itemHost");
-			if(root == null) throw new ArgumentNullException("root");
+			Verify.Argument.IsNotNull(itemHost, "itemHost");
+			Verify.Argument.IsNotNull(root, "root");
 
 			_itemHost = itemHost;
 			_root = root;

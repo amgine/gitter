@@ -226,7 +226,7 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Name);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Hash);
 				case ColumnId.TreeHash:
 					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.TreeHash);
 				case ColumnId.Graph:
@@ -258,7 +258,7 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Name);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Hash);
 					break;
 				case ColumnId.TreeHash:
 					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.TreeHash);

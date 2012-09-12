@@ -24,7 +24,7 @@
 		public ConfigurationPage(IWorkingEnvironment environment)
 			: base(Guid)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 

@@ -13,7 +13,8 @@
 
 		public CachedIconResources(ResourceManager manager)
 		{
-			if(manager == null) throw new ArgumentNullException("manager");
+			Verify.Argument.IsNotNull(manager, "manager");
+
 			_manager = manager;
 		}
 

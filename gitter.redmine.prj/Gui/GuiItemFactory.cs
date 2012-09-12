@@ -46,7 +46,7 @@
 		public static T GetUpdateRedmineObjectItem<T>(RedmineObject obj)
 			where T : ToolStripItem, new()
 		{
-			if(obj == null) throw new ArgumentNullException("obj");
+			Verify.Argument.IsNotNull(obj, "obj");
 
 			var item = new T()
 			{

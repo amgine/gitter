@@ -27,7 +27,7 @@
 		/// <param name="environment">Application environment.</param>
 		private AddParameterDialog(IWorkingEnvironment environment)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 
@@ -47,7 +47,8 @@
 		public AddParameterDialog(IWorkingEnvironment environment, Repository repository)
 			: this(environment)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			_repository = repository;
 			_configFile = ConfigFile.Repository;
 		}
@@ -58,10 +59,7 @@
 		public AddParameterDialog(IWorkingEnvironment environment, ConfigFile configFile)
 			: this(environment)
 		{
-			if(configFile != ConfigFile.System && configFile != ConfigFile.User)
-			{
-				throw new ArgumentNullException("configFile");
-			}
+			Verify.Argument.IsFalse(configFile != ConfigFile.System && configFile != ConfigFile.User, "configFile");
 
 			_configFile = configFile;
 		}

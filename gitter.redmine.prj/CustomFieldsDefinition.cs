@@ -32,14 +32,14 @@
 		{
 			get
 			{
-				if(field == null) throw new ArgumentNullException("field");
+				Verify.Argument.IsNotNull(field, "field");
 				CustomFieldValue value;
 				if(_values.TryGetValue(field.Id, out value)) return value.Value;
 				return null;
 			}
 			set
 			{
-				if(field == null) throw new ArgumentNullException("field");
+				Verify.Argument.IsNotNull(field, "field");
 				if(value == null)
 				{
 					_values.Remove(field.Id);

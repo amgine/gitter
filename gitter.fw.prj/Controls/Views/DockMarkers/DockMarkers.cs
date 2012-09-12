@@ -31,7 +31,7 @@
 		/// <value>Dock marker count.</value>
 		public int Count
 		{
-			get { return _markers.Length; }
+			get { return _markers != null ? _markers.Length : 0; }
 		}
 
 		/// <summary>Gets a value indicating whether markers are visible.</summary>
@@ -47,10 +47,9 @@
 		/// <param name="dockClient">Tool host which is being docked.</param>
 		public void Show(ViewHost dockClient)
 		{
-			if(dockClient == null)
-				throw new ArgumentNullException("dockClient");
-			
-			if(_markers != null) throw new InvalidOperationException();
+			Verify.Argument.IsNotNull(dockClient, "dockClient");
+			Verify.State.IsFalse(MarkersVisible);
+
 			_markers = CreateMarkers(dockClient);
 			if(_markers != null)
 			{
@@ -82,7 +81,7 @@
 		public bool UpdateHover(Point position)
 		{
 			bool result = false;
-			if(_markers != null)
+			if(MarkersVisible)
 			{
 				for(int i = 0; i < _markers.Length; ++i)
 				{
@@ -100,7 +99,7 @@
 		/// </summary>
 		public void Unhover()
 		{
-			if(_markers != null)
+			if(MarkersVisible)
 			{
 				for(int i = 0; i < _markers.Length; ++i)
 				{
@@ -110,9 +109,9 @@
 		}
 
 		/// <summary>Hides and disposes all dock markers.</summary>
-		public void Kill()
+		public void Hide()
 		{
-			if(_markers != null)
+			if(MarkersVisible)
 			{
 				for(int i = 0; i < _markers.Length; ++i)
 				{
@@ -138,7 +137,7 @@
 		/// <returns>Position for docking client control.</returns>
 		public DockResult HitTest(Point position)
 		{
-			if(_markers != null)
+			if(MarkersVisible)
 			{
 				for(int i = 0; i < _markers.Length; ++i)
 				{
@@ -176,7 +175,7 @@
 		/// </summary>
 		public void Dispose()
 		{
-			Kill();
+			Hide();
 		}
 	}
 }

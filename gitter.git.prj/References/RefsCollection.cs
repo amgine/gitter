@@ -234,7 +234,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
 		public IList<BranchBase> GetBranchesContaining(IRevisionPointer revision)
 		{
-			ValidateRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
 
 			var refs = Repository.Accessor.QueryBranches(
 		        new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.Contains, revision.Pointer));
@@ -276,7 +276,7 @@
 		/// <param name="refs">References data.</param>
 		internal void Load(ReferencesData refs)
 		{
-			if(refs == null) throw new ArgumentNullException("refs");
+			Verify.Argument.IsNotNull(refs, "refs");
 
 			if(refs.Heads != null)
 			{

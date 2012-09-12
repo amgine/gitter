@@ -609,7 +609,8 @@
 			get { return _itemHeight; }
 			set
 			{
-				if(value < 1) throw new ArgumentOutOfRangeException();
+				Verify.Argument.IsPositive(value, "value");
+
 				if(_itemHeight != value)
 				{
 					_itemHeight = value;
@@ -1010,8 +1011,9 @@
 		/// <param name="item">Item to display.</param>
 		public void EnsureVisible(CustomListBoxItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
-			if(item.ListBox != this) throw new ArgumentException("This item is not owned by this list box.", "item");
+			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsTrue(item.ListBox == this, "item", "This item is not owned by this list box.");
+
 			var p = item.Parent;
 			while(p != null)
 			{
@@ -1059,9 +1061,10 @@
 
 		public int GetOptimalColumnWidth(CustomListBoxColumn column)
 		{
-			if(column == null) throw new ArgumentNullException("column");
+			Verify.Argument.IsNotNull(column, "column");
 			var index = _columns.IndexOf(column);
-			if(index == -1) throw new ArgumentException("column");
+			Verify.Argument.IsTrue(index != -1, "column", "Colum is not present in this collection.");
+
 			int maxw = column.MinWidth;
 			using(var g = CreateGraphics())
 			{
@@ -1166,8 +1169,9 @@
 
 		internal void FocusAndSelectItem(CustomListBoxItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
-			if(item.ListBox != this) throw new ArgumentException("item");
+			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsTrue(item.ListBox == this, "item", "Item is not owned by this ListBox");
+
 			item.Present();
 			FocusAndSelectItem(_itemPlainList.IndexOf(item));
 		}
@@ -2817,7 +2821,8 @@
 
 		public void SaveViewTo(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
+
 			var columnsSection = section.GetCreateSection("Columns");
 			columnsSection.Clear();
 			foreach(var column in _columns)
@@ -2834,7 +2839,8 @@
 
 		public void LoadViewFrom(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
+
 			BeginUpdate();
 			var columnsSection = section.TryGetSection("Columns");
 			if(columnsSection != null)

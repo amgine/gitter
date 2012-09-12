@@ -84,7 +84,7 @@
 		public UserListItem(User committer)
 			: base(committer)
 		{
-			if(committer == null) throw new ArgumentNullException("committer");
+			Verify.Argument.IsNotNull(committer, "committer");
 		}
 
 		#endregion

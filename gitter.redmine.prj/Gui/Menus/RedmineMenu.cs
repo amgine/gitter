@@ -17,20 +17,21 @@
 
 		public RedmineMenu(IWorkingEnvironment environment, RedmineGuiProvider guiProvider)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
-			if(guiProvider == null) throw new ArgumentNullException("guiProvider");
+			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
 			_workingEnvironment = environment;
 			_guiProvider = guiProvider;
 
-			Items.Add(new ToolStripMenuItem("Setup...", null,
-				(s, e) =>
-				{
-					using(var dlg = new ProviderSetupControl(_guiProvider.Repository))
-					{
-						dlg.Run(GitterApplication.MainForm);
-					}
-				}));
+			Items.Add(new ToolStripMenuItem("Setup...", null, OnSetupClick));
+		}
+
+		private void OnSetupClick(object sender, EventArgs e)
+		{
+			using(var dlg = new ProviderSetupControl(_guiProvider.Repository))
+			{
+				dlg.Run(GitterApplication.MainForm);
+			}
 		}
 	}
 }

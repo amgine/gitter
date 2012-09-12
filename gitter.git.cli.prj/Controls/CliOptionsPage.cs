@@ -28,7 +28,7 @@
 		public CliOptionsPage(IGitAccessor gitAccessor)
 			: base(Guid)
 		{
-			if(gitAccessor == null) throw new ArgumentNullException("gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 
 			_gitCLI = (GitCLI)gitAccessor;
 

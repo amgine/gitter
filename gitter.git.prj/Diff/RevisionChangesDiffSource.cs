@@ -16,14 +16,14 @@
 
 		public RevisionChangesDiffSource(IRevisionPointer revision)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
 
 			_revision = revision;
 		}
 
 		public RevisionChangesDiffSource(IRevisionPointer revision, IList<string> paths)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
+			Verify.Argument.IsNotNull(revision, "revision");
 
 			_revision = revision;
 			_paths = paths;

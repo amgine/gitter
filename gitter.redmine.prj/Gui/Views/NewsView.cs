@@ -235,25 +235,27 @@
 
 		public bool SearchFirst(NewsSearchOptions search)
 		{
-			if(search == null) throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			return Search(-1, search, 1);
 		}
 
 		public bool SearchNext(NewsSearchOptions search)
 		{
-			if(search == null) throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			if(search.Text.Length == 0) return true;
 			if(_lstNews.SelectedItems.Count == 0)
+			{
 				return Search(-1, search, 1);
+			}
 			var start = _lstNews.Items.IndexOf(_lstNews.SelectedItems[0]);
 			return Search(start, search, 1);
 		}
 
 		public bool SearchPrevious(NewsSearchOptions search)
 		{
-			if(search == null) throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			if(search.Text.Length == 0) return true;
 			if(_lstNews.SelectedItems.Count == 0) return Search(-1, search, 1);

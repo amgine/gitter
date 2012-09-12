@@ -22,7 +22,8 @@
 		/// <param name="column">Related column.</param>
 		public GraphColumnExtender(GraphColumn column)
 		{
-			if(column == null) throw new ArgumentNullException("column");
+			Verify.Argument.IsNotNull(column, "column");
+
 			_column = column;
 
 			InitializeComponent();

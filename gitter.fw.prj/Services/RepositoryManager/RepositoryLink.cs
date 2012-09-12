@@ -14,7 +14,8 @@
 
 		public RepositoryLink(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("node");
+			Verify.Argument.IsNotNull(section, "section");
+
 			_path = section.GetValue("Path", string.Empty);
 			_type = section.GetValue("Type", string.Empty);
 			_description = section.GetValue("Description", string.Empty);
@@ -50,6 +51,8 @@
 
 		public void SaveTo(Section section)
 		{
+			Verify.Argument.IsNotNull(section, "section");
+
 			section.SetValue("Path", _path);
 			section.SetValue("Type", _type);
 			section.SetValue("Description", _description);

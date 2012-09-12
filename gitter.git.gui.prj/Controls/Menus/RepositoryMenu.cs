@@ -13,8 +13,7 @@
 
 		public RepositoryMenu(Repository repository)
 		{
-			if(repository == null)
-				throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			_repository = repository;
 

@@ -25,7 +25,8 @@
 		/// <summary>Invoke <see cref="Renamed"/>.</summary>
 		private void InvokeRenamed(Remote remote)
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
+			Assert.IsNotNull(remote);
+
 			var handler = Renamed;
 			if(handler != null) handler(this, new RemoteEventArgs(remote));
 		}
@@ -45,19 +46,10 @@
 
 		public Remote AddRemote(string name, string url, bool fetch, bool mirror, TagFetchMode tagFetchMode)
 		{
-			#region validate arguments
-
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
-			if(url == null) throw new ArgumentNullException("url");
-			if(url.Length == 0) throw new ArgumentException("url");
-			if(ContainsObjectName(name))
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectWithThisNameAlreadyExists, "Remote"), "name");
-			}
-
-			#endregion
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Remote"));
+			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
 
 			Repository.Accessor.AddRemote(
 				new AddRemoteParameters(name, url)
@@ -84,17 +76,10 @@
 		/// <param name="name">New remote name.</param>
 		internal void RenameRemote(Remote remote, string name)
 		{
-			#region validate arguments
-
-			if(name == null) throw new ArgumentNullException("remote");
-			ValidateObject(remote, "remote");
-			if(ContainsObjectName(name))
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcObjectWithThisNameAlreadyExists, "Remote"), "name");
-			}
-
-			#endregion
+			Verify.Argument.IsValidGitObject(remote, Repository, "remote");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Remote"));
 
 			var oldName = remote.Name;
 			using(Repository.Monitor.BlockNotifications(
@@ -112,6 +97,9 @@
 		/// <param name="oldName">Old name.</param>
 		internal void NotifyRenamed(Remote remote, string oldName)
 		{
+			Assert.IsNotNull(remote);
+			Assert.IsNeitherNullNorWhitespace(oldName);
+
 			lock(SyncRoot)
 			{
 				ObjectStorage.Remove(oldName);
@@ -129,21 +117,8 @@
 		/// <param name="remote">Removed remote.</param>
 		internal void RemoveRemote(Remote remote)
 		{
-			#region validate arguments
-
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remote.Repository != Repository)
-			{
-				throw new ArgumentNullException(string.Format(
-					Resources.ExcSuppliedObjectIsNotHandledByThisRepository, "remote"), "remote");
-			}
-			if(remote.IsDeleted)
-			{
-				throw new ArgumentNullException(string.Format(
-					Resources.ExcSuppliedObjectIsDeleted, "remote"), "remote");
-			}
-
-			#endregion
+			Verify.Argument.IsNull(remote, "remote");
+			Verify.Argument.IsValidGitObject(remote, Repository, "remote");
 
 			var name = remote.Name;
 			using(Repository.Monitor.BlockNotifications(
@@ -187,7 +162,7 @@
 
 		public void Fetch()
 		{
-			if(Count == 0) throw new InvalidOperationException();
+			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
@@ -202,7 +177,7 @@
 
 		public IAsyncAction FetchAsync()
 		{
-			if(Count == 0) throw new InvalidOperationException();
+			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			return AsyncAction.Create(
 				Repository,
@@ -235,7 +210,7 @@
 
 		public void Pull()
 		{
-			if(Count == 0) throw new InvalidOperationException();
+			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
@@ -256,7 +231,7 @@
 
 		public IAsyncAction PullAsync()
 		{
-			if(Count == 0) throw new InvalidOperationException();
+			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			return AsyncAction.Create(
 				Repository,
@@ -302,39 +277,16 @@
 		/// <summary>Send local objects to remote repository.</summary>
 		public void PushTo(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
-			#region validate arguments
-
-			if(url == null) throw new ArgumentNullException("url");
-			if(branches == null) throw new ArgumentNullException("branches");
-			if(branches.Count == 0)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcCollectionMustContainAtLeastOneObject, "branch"), "branches");
-			}
+			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
+			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
 			var branchNames = new List<string>(branches.Count);
 			foreach(var branch in branches)
 			{
-				if(branch == null)
-				{
-					throw new ArgumentException(
-						Resources.ExcCollectionMustNotContainNullElements, "branches");
-				}
-				if(branch.Repository != Repository)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAllObjectsMustBeHandledByThisRepository, "branches"), "branches");
-				}
-				if(branch.IsDeleted)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAtLeastOneOfSuppliedObjectIsDeleted, "branches"), "branches");
-				}
 				branchNames.Add(branch.Name);
 			}
-
-			#endregion
-
 			IList<ReferencePushResult> res;
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
@@ -364,39 +316,16 @@
 		/// <summary>Send local objects to remote repository.</summary>
 		public IAsyncAction PushToAsync(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
-			#region validate arguments
-
-			if(url == null) throw new ArgumentNullException("url");
-			if(branches == null) throw new ArgumentNullException("branches");
-			if(branches.Count == 0)
-			{
-				throw new ArgumentException(string.Format(
-					Resources.ExcCollectionMustContainAtLeastOneObject, "branch"), "branches");
-			}
+			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
+			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
 			var branchNames = new List<string>(branches.Count);
-			foreach(var b in branches)
+			foreach(var branch in branches)
 			{
-				if(b == null)
-				{
-					throw new ArgumentException(
-						Resources.ExcCollectionMustNotContainNullElements, "branches");
-				}
-				if(b.Repository != Repository)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAllObjectsMustBeHandledByThisRepository, "branches"), "branches");
-				}
-				if(b.IsDeleted)
-				{
-					throw new ArgumentException(string.Format(
-						Resources.ExcAtLeastOneOfSuppliedObjectIsDeleted, "branches"), "branches");
-				}
-				branchNames.Add(b.Name);
+				branchNames.Add(branch.Name);
 			}
-
-			#endregion
-
 			return AsyncAction.Create(
 				new
 				{

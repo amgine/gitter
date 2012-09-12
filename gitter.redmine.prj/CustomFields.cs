@@ -26,7 +26,7 @@
 
 		internal CustomFields(XmlNode node, Func<int, string, CustomField> initializer)
 		{
-			if(initializer == null) throw new ArgumentNullException("initializer");
+			Verify.Argument.IsNotNull(initializer, "initializer");
 
 			_values = new Dictionary<int, CustomFieldValue>();
 			if(node != null)
@@ -97,7 +97,7 @@
 		{
 			get
 			{
-				if(field == null) throw new ArgumentNullException("field");
+				Verify.Argument.IsNotNull(field, "field");
 				return this[field.Id];
 			}
 		}

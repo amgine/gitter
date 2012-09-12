@@ -48,7 +48,7 @@
 		private readonly ToolStripItem[] _leftAlignedItems;
 		private readonly ToolStripItem[] _rightAlignedItems;
 
-		private readonly GuiProvider _gui;
+		private readonly GuiProvider _guiProvider;
 		private Repository _repository;
 
 		private readonly StatusToolTip _statusToolTip;
@@ -62,11 +62,11 @@
 		private static readonly Bitmap ImgRebaseInProcess =
 			CachedResources.Bitmaps.CombineBitmaps("ImgRebase", "ImgOverlayConflict");
 
-		public Statusbar(GuiProvider gui)
+		public Statusbar(GuiProvider guiProvider)
 		{
-			if(gui == null) throw new ArgumentNullException("gui");
-			_gui = gui;
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
+			_guiProvider = guiProvider;
 			_leftAlignedItems = new ToolStripItem[]
 			{
 				new ToolStripStatusLabel(Resources.StrHead.AddColon()),
@@ -116,9 +116,9 @@
 			_userLabel.MouseDown += OnUserLabelMouseDown;
 			_remoteLabel.MouseDown += OnRemoteLabelMouseDown;
 
-			if(gui.Repository != null)
+			if(guiProvider.Repository != null)
 			{
-				AttachToRepository(gui.Repository);
+				AttachToRepository(guiProvider.Repository);
 			}
 
 			_statusToolTip = new StatusToolTip();
@@ -210,7 +210,7 @@
 					var menu = new ContextMenuStrip();
 					menu.Items.Add(new ToolStripMenuItem(
 						Resources.StrChangeIdentity.AddEllipsis(), null,
-						(s, eargs) => _gui.StartUserIdentificationDialog()));
+						(s, eargs) => _guiProvider.StartUserIdentificationDialog()));
 					Utility.MarkDropDownForAutoDispose(menu);
 					var parent = Utility.GetParentControl(item);
 					var x = item.Bounds.X + e.X;
@@ -240,7 +240,7 @@
 
 		private void InvokeRebaseControl(RebaseControl control)
 		{
-			var parent = _gui.Environment.MainForm;
+			var parent = _guiProvider.Environment.MainForm;
 			try
 			{
 				_repository.RebaseAsync(control).Invoke<ProgressForm>(parent);
@@ -279,7 +279,7 @@
 				var menu = new ContextMenuStrip();
 				menu.Items.Add(new ToolStripMenuItem(
 					Resources.StrSwitchBranch.AddEllipsis(), CachedResources.Bitmaps["ImgCheckout"],
-					(s, eargs) => _gui.StartCheckoutDialog()));
+					(s, eargs) => _guiProvider.StartCheckoutDialog()));
 				menu.Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(Repository.Head));
 				Utility.MarkDropDownForAutoDispose(menu);
 				var parent = Utility.GetParentControl(item);
@@ -293,25 +293,25 @@
 		{
 			if(_repository != null)
 			{
-				_gui.StartCheckoutDialog();
+				_guiProvider.StartCheckoutDialog();
 			}
 		}
 
 		private void OnUnstagedDoubleClick(object sender, EventArgs e)
 		{
-			_gui.StartStageFilesDialog();
+			_guiProvider.StartStageFilesDialog();
 		}
 
 		private void OnConflictsDoubleClick(object sender, EventArgs e)
 		{
-			_gui.StartResolveConflictsDialog();
+			_guiProvider.StartResolveConflictsDialog();
 		}
 
 		private void OnUserDoubleClick(object sender, EventArgs e)
 		{
 			if(_repository != null)
 			{
-				_gui.StartUserIdentificationDialog();
+				_guiProvider.StartUserIdentificationDialog();
 			}
 		}
 
@@ -375,9 +375,9 @@
 
 		private void OnHeadChanged(object sender, RevisionPointerChangedEventArgs e)
 		{
-			if(_gui.Environment.InvokeRequired)
+			if(_guiProvider.Environment.InvokeRequired)
 			{
-				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
+				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
 			}
 			else
 			{
@@ -387,9 +387,9 @@
 
 		private void OnUserIdentityChanged(object sender, EventArgs e)
 		{
-			if(_gui.Environment.InvokeRequired)
+			if(_guiProvider.Environment.InvokeRequired)
 			{
-				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateUserIdentityLabel), null);
+				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateUserIdentityLabel), null);
 			}
 			else
 			{
@@ -401,9 +401,9 @@
 		{
 			if(e.Object.IsCurrent)
 			{
-				if(_gui.Environment.InvokeRequired)
+				if(_guiProvider.Environment.InvokeRequired)
 				{
-					_gui.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
+					_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
 				}
 				else
 				{
@@ -414,9 +414,9 @@
 
 		private void OnStatusChanged(object sender, EventArgs e)
 		{
-			if(_gui.Environment.InvokeRequired)
+			if(_guiProvider.Environment.InvokeRequired)
 			{
-				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateStatus), null);
+				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateStatus), null);
 			}
 			else
 			{
@@ -426,9 +426,9 @@
 
 		private void OnStateChanged(object sender, EventArgs e)
 		{
-			if(_gui.Environment.InvokeRequired)
+			if(_guiProvider.Environment.InvokeRequired)
 			{
-				_gui.Environment.BeginInvoke(new MethodInvoker(UpdateState), null);
+				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateState), null);
 			}
 			else
 			{
@@ -681,7 +681,7 @@
 
 		public GuiProvider Gui
 		{
-			get { return _gui; }
+			get { return _guiProvider; }
 		}
 
 		public ToolStripItem[] LeftAlignedItems

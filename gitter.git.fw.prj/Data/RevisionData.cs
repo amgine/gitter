@@ -30,8 +30,9 @@
 
 		public RevisionData(string sha1)
 		{
-			if(sha1 == null) throw new ArgumentNullException("sha1");
-			if(sha1.Length != 40) throw new ArgumentException("sha1");
+			Verify.Argument.IsNotNull(sha1, "sha1");
+			Verify.Argument.IsTrue(sha1.Length == 40, "sha1");
+
 			_sha1 = sha1;
 			_dataFlags = RevisionField.SHA1;
 		}

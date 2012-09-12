@@ -95,7 +95,7 @@
 		public RemoteListItem(Remote remote)
 			: base(remote)
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
+			Verify.Argument.IsNotNull(remote, "remote");
 		}
 
 		#endregion

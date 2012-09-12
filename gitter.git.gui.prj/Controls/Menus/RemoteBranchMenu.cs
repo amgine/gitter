@@ -16,8 +16,10 @@
 		/// <param name="remoteBranch">Remote branch, for which menu is generated.</param>
 		public RemoteBranchMenu(RemoteRepositoryBranch remoteBranch)
 		{
-			if(remoteBranch == null) throw new ArgumentNullException("remoteBranch");
-			if(remoteBranch.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "RemoteBranch"), "remoteBranch");
+			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
+			Verify.Argument.IsFalse(remoteBranch.IsDeleted, "remoteBranch",
+				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
+
 			_remoteBranch = remoteBranch;
 
 			Items.Add(GuiItemFactory.GetRemoveRemoteBranchItem<ToolStripMenuItem>(_remoteBranch, "{0}"));

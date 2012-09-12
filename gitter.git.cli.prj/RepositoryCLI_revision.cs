@@ -216,7 +216,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public IList<RevisionData> QueryRevisions(QueryRevisionsParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(30);
 			InsertQueryRevisionsParameters(parameters, args, GetRevisionFormatArgument());
@@ -279,11 +279,14 @@
 			return result;
 		}
 
+		/// <summary>Get revision information.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionParameters"/>.</param>
+		/// <returns>Revision data.</returns>
 		public RevisionData QueryRevision(QueryRevisionParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
-			if(!GitUtils.IsValidSHA1(parameters.SHA1))
-				throw new ArgumentException("Provided expression is not a valid SHA-1.", "sha1");
+			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsTrue(GitUtils.IsValidSHA1(parameters.SHA1),
+				"parameters.SHA1", "Provided expression is not a valid SHA-1.");
 
 			var cmd = new LogCommand(
 				LogCommand.MaxCount(1),
@@ -307,7 +310,7 @@
 
 		public RevisionData GetRevisionByRefName(string refName)
 		{
-			if(refName == null) throw new ArgumentNullException("refName");
+			Verify.Argument.IsNotNull(refName, "refName");
 
 			var cmd = new LogCommand(
 				LogCommand.MaxCount(1),
@@ -326,14 +329,14 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public string QueryRevisionPatch(QueryRevisionDiffParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			args.Add(LogCommand.MaxCount(1));
-			InsertDiffParameters1(args, parameters);
+			InsertDiffParameters1(parameters, args);
 			args.Add(new CommandArgument("-c"));
 			args.Add(new CommandArgument(parameters.Revision));
-			InsertDiffParameters2(args, parameters);
+			InsertDiffParameters2(parameters, args);
 
 			var cmd = new LogCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -347,14 +350,14 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public Diff QueryRevisionDiff(QueryRevisionDiffParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			args.Add(LogCommand.MaxCount(1));
-			InsertDiffParameters1(args, parameters);
+			InsertDiffParameters1(parameters, args);
 			args.Add(new CommandArgument("-c"));
 			args.Add(new CommandArgument(parameters.Revision));
-			InsertDiffParameters2(args, parameters);
+			InsertDiffParameters2(parameters, args);
 
 			var cmd = new LogCommand(args);
 			var output = _executor.ExecCommand(cmd);
@@ -368,7 +371,7 @@
 		/// <returns>Corresponding <see cref="RevisionData"/>.</returns>
 		public RevisionData Dereference(DereferenceParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var cmd = new LogCommand(
 				new CommandArgument(parameters.Reference),
@@ -414,7 +417,7 @@
 		/// <exception cref="T:gitter.Git.HaveLocalChangesException">Dirty working directory, unable to revert.</exception>
 		public void Revert(RevertParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			if(parameters.NoCommit)
@@ -448,7 +451,7 @@
 		/// <exception cref="T:gitter.Git.AutomaticCherryPickFailedException">Cherry-pick was not finished because of conflicts.</exception>
 		public void CherryPick(CherryPickParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 			if(parameters.NoCommit)
@@ -498,8 +501,8 @@
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void Archive(ArchiveParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
-			if(string.IsNullOrEmpty(parameters.Tree)) throw new ArgumentException();
+			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNeitherNullNorEmpty(parameters.Tree, "parameters.Tree");
 
 			var args = new List<CommandArgument>(5);
 			if(!string.IsNullOrEmpty(parameters.Format))

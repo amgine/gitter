@@ -24,9 +24,9 @@
 		/// <param name="stats"><see cref="DiffStats"/>.</param>
 		public DiffHunk(DiffColumnHeader[] headers, IList<DiffLine> lines, DiffStats stats, bool isBinary)
 		{
-			if(headers == null) throw new ArgumentNullException("headers");
-			if(lines == null) throw new ArgumentNullException("lines");
-			if(stats == null) throw new ArgumentNullException("stats");
+			Verify.Argument.IsNotNull(headers, "headers");
+			Verify.Argument.IsNotNull(lines, "lines");
+			Verify.Argument.IsNotNull(stats, "stats");
 
 			_headers = headers;
 			_lines = lines;
@@ -66,7 +66,8 @@
 			get { return _lines[index]; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				var line = _lines[index];
 				_stats.Decrement(line.State);
 				_lines[index] = value;
@@ -119,7 +120,8 @@
 
 		public void Insert(int index, DiffLine line)
 		{
-			if(line == null) throw new ArgumentNullException("line");
+			Verify.Argument.IsNotNull(line, "line");
+
 			_lines.Insert(index, line);
 			_stats.Increment(line.State);
 		}
@@ -133,7 +135,8 @@
 
 		public void Add(DiffLine line)
 		{
-			if(line == null) throw new ArgumentNullException("line");
+			Verify.Argument.IsNotNull(line, "line");
+
 			_lines.Add(line);
 			_stats.Increment(line.State);
 		}

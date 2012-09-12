@@ -210,8 +210,8 @@
 		/// <param name="item2">Second item.</param>
 		private ViewSplit(Orientation orientation, Rectangle bounds, Control item1, Control item2)
 		{
-			if(item1 == null) throw new ArgumentNullException("item1");
-			if(item2 == null) throw new ArgumentNullException("item2");
+			Verify.Argument.IsNotNull(item1, "item1");
+			Verify.Argument.IsNotNull(item2, "item2");
 
 			SetStyle(ControlStyles.ContainerControl, true);
 			SetStyle(ControlStyles.Selectable, false);
@@ -279,7 +279,9 @@
 						(double)(h1 + ViewConstants.Spacing / 2) / (double)bounds.Height);
 					break;
 				default:
-					throw new ArgumentException("orientation");
+					throw new ArgumentException(
+						string.Format("Unknown Orientation value: {0}", orientation),
+						"orientation");
 			}
 			item1.Dock = DockStyle.None;
 			item1.Anchor = anchor1;
@@ -348,6 +350,8 @@
 		/// <param name="item">Control to remove.</param>
 		public void Remove(Control item)
 		{
+			Verify.Argument.IsNotNull(item, "item");
+
 			RemoveAt(_items.IndexOf(item));
 		}
 
@@ -356,8 +360,8 @@
 		/// <returns>Removed control.</returns>
 		public Control RemoveAt(int index)
 		{
-			if(index < 0 || index >= _items.Count)
-				throw new ArgumentOutOfRangeException("index");
+			Verify.Argument.IsValidIndex(index, _items.Count, "index");
+
 			if(_items.Count == 2)
 			{
 				int singleIndex = index == 0 ? 1 : 0;
@@ -433,6 +437,8 @@
 				case Orientation.Vertical:
 					Cursor = Cursors.SizeNS;
 					break;
+				default:
+					throw new ApplicationException();
 			}
 			base.OnMouseEnter(e);
 		}

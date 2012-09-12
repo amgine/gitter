@@ -27,8 +27,8 @@
 		/// <param name="text">Line text.</param>
 		public DiffLine(DiffLineState state, DiffLineState[] states, int[] nums, string text, string ending = LineEnding.Lf)
 		{
-			if(states == null) throw new ArgumentNullException("states");
-			if(nums == null) throw new ArgumentNullException("nums");
+			Verify.Argument.IsNotNull(states, "states");
+			Verify.Argument.IsNotNull(nums, "nums");
 
 			_charPositions = -1;
 			_text	= text;

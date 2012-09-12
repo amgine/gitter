@@ -285,28 +285,27 @@
 
 		public bool SearchFirst(IssuesSearchOptions search)
 		{
-			if(search == null)
-				throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			return Search(-1, search, 1);
 		}
 
 		public bool SearchNext(IssuesSearchOptions search)
 		{
-			if(search == null)
-				throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			if(search.Text.Length == 0) return true;
 			if(_lstIssues.SelectedItems.Count == 0)
+			{
 				return Search(-1, search, 1);
+			}
 			var start = _lstIssues.Items.IndexOf(_lstIssues.SelectedItems[0]);
 			return Search(start, search, 1);
 		}
 
 		public bool SearchPrevious(IssuesSearchOptions search)
 		{
-			if(search == null)
-				throw new ArgumentNullException("search");
+			Verify.Argument.IsNotNull(search, "search");
 
 			if(search.Text.Length == 0) return true;
 			if(_lstIssues.SelectedItems.Count == 0) return Search(-1, search, 1);

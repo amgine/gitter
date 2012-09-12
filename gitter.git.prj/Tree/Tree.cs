@@ -19,7 +19,8 @@
 		internal Tree(Repository repository, string treeHash)
 			: base(repository)
 		{
-			if(treeHash == null) throw new ArgumentNullException("treeHash");
+			Verify.Argument.IsNeitherNullNorWhitespace(treeHash, "treeHash");
+
 			_treeHash = treeHash;
 			var strRoot = repository.WorkingDirectory;
 			if(strRoot.EndsWith("\\"))

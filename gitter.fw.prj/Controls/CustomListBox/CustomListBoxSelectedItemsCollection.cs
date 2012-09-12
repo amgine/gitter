@@ -8,7 +8,8 @@
 
 		internal CustomListBoxSelectedItemsCollection(CustomListBox listBox)
 		{
-			if(listBox == null) throw new ArgumentNullException("listBox");
+			Verify.Argument.IsNotNull(listBox, "listBox");
+
 			_listBox = listBox;
 		}
 

@@ -24,8 +24,8 @@
 
 		protected DockMarker(IDockHost dockHost, ViewHost dockClient, DockMarkerButton[] buttons, Point[] border, Rectangle bounds)
 		{
-			if(dockHost == null) throw new ArgumentNullException("dockHost");
-			if(dockClient == null) throw new ArgumentNullException("dockClient");
+			Verify.Argument.IsNotNull(dockHost, "dockHost");
+			Verify.Argument.IsNotNull(dockClient, "dockClient");
 
 			_dockHost = dockHost;
 			_dockClient = dockClient;

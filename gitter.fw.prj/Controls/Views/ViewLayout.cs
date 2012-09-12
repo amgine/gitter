@@ -11,28 +11,28 @@
 	public sealed class ViewLayout
 	{
 		/// <summary>Describes <see cref="ViewBase"/>.</summary>
-		private sealed class ToolEntry
+		private sealed class ViewEntry
 		{
 			private readonly Guid _guid;
 
-			public ToolEntry(ViewBase tool)
+			public ViewEntry(ViewBase view)
 			{
-				if(tool == null)
-					throw new ArgumentNullException("tool");
+				Verify.Argument.IsNotNull(view, "view");
 
-				_guid = tool.Guid;
+				_guid = view.Guid;
 			}
 
-			public ToolEntry(Section section)
+			public ViewEntry(Section section)
 			{
-				if(section == null)
-					throw new ArgumentNullException("section");
+				Verify.Argument.IsNotNull(section, "section");
 
 				_guid = section.GetValue<Guid>("Guid");
 			}
 
 			public void SaveTo(Section section)
 			{
+				Verify.Argument.IsNotNull(section, "section");
+
 				section.SetValue("Guid", _guid);
 			}
 		}
@@ -44,45 +44,47 @@
 
 			private readonly bool _isRoot;
 			private readonly bool _isDocumentWell;
-			private readonly List<ToolEntry> _views;
+			private readonly List<ViewEntry> _views;
 
 			#endregion
 
 			/// <summary>Initializes a new instance of the <see cref="HostEntry"/> class.</summary>
 			private HostEntry()
 			{
-				_views = new List<ToolEntry>();
+				_views = new List<ViewEntry>();
 			}
 
-			public HostEntry(ViewHost host)
+			public HostEntry(ViewHost viewHost)
 				: this()
 			{
-				if(host == null) throw new ArgumentNullException("host");
+				Verify.Argument.IsNotNull(viewHost, "viewHost");
 
-				_isRoot = host.IsRoot;
-				_isDocumentWell = host.IsDocumentWell;
-				foreach(var view in host.Views)
+				_isRoot = viewHost.IsRoot;
+				_isDocumentWell = viewHost.IsDocumentWell;
+				foreach(var view in viewHost.Views)
 				{
-					_views.Add(new ToolEntry(view));
+					_views.Add(new ViewEntry(view));
 				}
 			}
 
 			public HostEntry(Section section)
 				: this()
 			{
-				if(section == null) throw new ArgumentNullException("section");
+				Verify.Argument.IsNotNull(section, "section");
 
 				_isRoot = section.GetValue<bool>("IsRoot");
 				_isDocumentWell = section.GetValue<bool>("IsDocumentHost");
 				var tools = section.GetSection("Views");
 				foreach(var t in tools.Sections)
 				{
-					_views.Add(new ToolEntry(t));
+					_views.Add(new ViewEntry(t));
 				}
 			}
 
 			public void SaveTo(Section section)
 			{
+				Verify.Argument.IsNotNull(section, "section");
+
 				section.SetValue("Type", "Host");
 				section.SetValue("IsRoot", _isRoot);
 				section.SetValue("IsDocumentHost", _isDocumentWell);
@@ -115,7 +117,7 @@
 			public SplitEntry(ViewSplit split)
 				: this()
 			{
-				if(split == null) throw new ArgumentNullException("split");
+				Verify.Argument.IsNotNull(split, "split");
 
 				_orientation = split.Orientation;
 				foreach(var control in split)
@@ -131,8 +133,7 @@
 			public SplitEntry(Section section)
 				: this()
 			{
-				if(section == null)
-					throw new ArgumentNullException("section");
+				Verify.Argument.IsNotNull(section, "section");
 
 				_orientation = section.GetValue<Orientation>("Orientation");
 				var splitters = section.GetSection("Splitters");
@@ -149,6 +150,8 @@
 
 			public void SaveTo(Section section)
 			{
+				Verify.Argument.IsNotNull(section, "section");
+
 				section.SetValue("Type", "Split");
 				section.SetValue("Orientation", _orientation);
 				var splitters = section.CreateSection("Splitters");
@@ -187,8 +190,7 @@
 			public SideEntry(ViewDockSide side)
 				: this()
 			{
-				if(side == null)
-					throw new ArgumentNullException("side");
+				Verify.Argument.IsNotNull(side, "side");
 
 				_side = side.Side;
 				foreach(var host in side)
@@ -199,8 +201,7 @@
 
 			public SideEntry(AnchorStyles side, Section section)
 			{
-				if(section == null)
-					throw new ArgumentNullException("section");
+				Verify.Argument.IsNotNull(section, "section");
 
 				_side = side;
 				foreach(var h in section.Sections)
@@ -211,6 +212,8 @@
 
 			public void SaveTo(Section section)
 			{
+				Verify.Argument.IsNotNull(section, "section");
+
 				for(int i = 0; i < _hosts.Count; ++i)
 				{
 					_hosts[i].SaveTo(section.CreateSection("Host_" + i.ToString(
@@ -227,8 +230,7 @@
 
 			public FloatEntry(FloatingViewForm floatingForm)
 			{
-				if(floatingForm == null)
-					throw new ArgumentNullException("floatingForm");
+				Verify.Argument.IsNotNull(floatingForm, "floatingForm");
 
 				_bounds = floatingForm.Bounds;
 				_root = ToLayout(floatingForm.RootControl);
@@ -236,8 +238,7 @@
 
 			public FloatEntry(Section section)
 			{
-				if(section == null)
-					throw new ArgumentNullException("section");
+				Verify.Argument.IsNotNull(section, "section");
 
 				_bounds = section.GetValue<Rectangle>("Bounds");
 				_root = ToLayout(section.GetSection("Root"));
@@ -245,6 +246,8 @@
 
 			public void SaveTo(Section section)
 			{
+				Verify.Argument.IsNotNull(section, "section");
+
 				section.SetValue("Bounds", _bounds);
 				_root.SaveTo(section.CreateSection("Root"));
 			}
@@ -257,7 +260,7 @@
 
 		private static ILayoutBase ToLayout(Control control)
 		{
-			if(control == null) throw new ArgumentNullException("control");
+			Verify.Argument.IsNotNull(control, "control");
 
 			var split = control as ViewSplit;
 			if(split != null)
@@ -280,6 +283,8 @@
 
 		private static ILayoutBase ToLayout(Section section)
 		{
+			Verify.Argument.IsNotNull(section, "section");
+
 			switch(section.GetValue<string>("Type"))
 			{
 				case "Split":
@@ -307,8 +312,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="viewDockService"/> == <c>null</c>.</exception>
 		public ViewLayout(ViewDockService viewDockService)
 		{
-			if(viewDockService == null)
-				throw new ArgumentNullException("toolDockService");
+			Verify.Argument.IsNotNull(viewDockService, "viewDockService");
 
 			var grid = viewDockService.Grid;
 
@@ -332,7 +336,7 @@
 		/// <param name="section">The section.</param>
 		public ViewLayout(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			_root = ToLayout(section.GetSection("Root"));
 
@@ -341,16 +345,24 @@
 			{
 				var left = sides.TryGetSection("Left");
 				if(left != null)
+				{
 					_left = new SideEntry(AnchorStyles.Left, left);
+				}
 				var top = sides.TryGetSection("Top");
 				if(top != null)
+				{
 					_top = new SideEntry(AnchorStyles.Top, top);
+				}
 				var right = sides.TryGetSection("Right");
 				if(right != null)
+				{
 					_right = new SideEntry(AnchorStyles.Right, right);
+				}
 				var bottom = sides.TryGetSection("Bottom");
 				if(bottom != null)
+				{
 					_bottom = new SideEntry(AnchorStyles.Bottom, bottom);
+				}
 			}
 			var floats = section.TryGetSection("Floats");
 			if(floats != null)
@@ -367,15 +379,15 @@
 		/// <exception cref="ArgumentNullException"><paramref name="viewDockService"/> == <c>null</c>.</exception>
 		public void ApplyTo(ViewDockService viewDockService)
 		{
-			if(viewDockService == null)
-				throw new ArgumentNullException("toolDockService");
+			Verify.Argument.IsNotNull(viewDockService, "viewDockService");
+
 		}
 
 		/// <summary>Saves this layout to the specified section.</summary>
 		/// <param name="section">Configuration section.</param>
 		public void SaveTo(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			section.Clear();
 
@@ -385,13 +397,21 @@
 			{
 				var sides = section.CreateSection("Sides");
 				if(_left != null)
+				{
 					_left.SaveTo(sides.CreateSection("Left"));
+				}
 				if(_top != null)
+				{
 					_top.SaveTo(sides.CreateSection("Top"));
+				}
 				if(_right != null)
+				{
 					_right.SaveTo(sides.CreateSection("Right"));
+				}
 				if(_bottom != null)
+				{
 					_bottom.SaveTo(sides.CreateSection("Bottom"));
+				}
 			}
 			
 			if(_floats != null && _floats.Count != 0)

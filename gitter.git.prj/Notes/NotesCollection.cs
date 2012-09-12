@@ -64,7 +64,7 @@
 
 		public bool Exists(string note)
 		{
-			if(note == null) throw new ArgumentNullException("note");
+			Verify.Argument.IsNotNull(note, "note");
 
 			lock(SyncRoot)
 			{
@@ -74,7 +74,7 @@
 
 		public bool TryGetNote(string name, out Note note)
 		{
-			if(name == null) throw new ArgumentNullException("name");
+			Verify.Argument.IsNotNull(name, "name");
 
 			lock(SyncRoot)
 			{
@@ -84,7 +84,8 @@
 
 		public Note TryGetNote(string name)
 		{
-			if(name == null) throw new ArgumentNullException("name");
+			Verify.Argument.IsNotNull(name, "name");
+
 			Note note;
 			lock(SyncRoot)
 			{

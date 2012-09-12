@@ -26,7 +26,7 @@
 		/// <param name="provider">Provider of this accessor.</param>
 		public GitCLI(IGitAccessorProvider provider)
 		{
-			if(provider == null) throw new ArgumentNullException("provider");
+			Verify.Argument.IsNotNull(provider, "provider");
 
 			_provider = provider;
 			_executor = new GitCommandExecutor(this);
@@ -121,7 +121,7 @@
 
 		public IRepositoryAccessor CreateRepositoryAccessor(IGitRepository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			return new RepositoryCLI(this, repository);
 		}
@@ -142,7 +142,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public void InitRepository(InitRepositoryParameters parameters)
 		{
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>(3);
 			if(parameters.Bare)
@@ -168,7 +168,7 @@
 			 * [-q] [-n] [--bare] [--mirror] [-o <name>] [-b <name>] [-u <upload-pack>]
 			 * [--reference <repository>] [--depth <depth>] [--recursive] [--] <repository> [<directory>]
 			*/
-			if(parameters == null) throw new ArgumentNullException("parameters");
+			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var args = new List<CommandArgument>();
 
@@ -232,7 +232,7 @@
 						{
 							var parser = new GitParser(e.Data);
 							var progress = parser.ParseProgress();
-							progress.Apply(mon);
+							progress.Notify(mon);
 						}
 						else
 						{
@@ -253,7 +253,7 @@
 		/// <param name="section">Section to store parameters.</param>
 		public void SaveTo(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			section.SetValue("Path", ManualGitExePath);
 			section.SetValue("Autodetect", AutodetectGitExePath);
@@ -265,7 +265,7 @@
 		/// <param name="section">Section to look for parameters.</param>
 		public void LoadFrom(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			ManualGitExePath			= section.GetValue("Path", string.Empty);
 			AutodetectGitExePath		= section.GetValue("Autodetect", true);

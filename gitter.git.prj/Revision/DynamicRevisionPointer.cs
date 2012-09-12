@@ -18,9 +18,8 @@
 
 		public DynamicRevisionPointer(Repository repository, string pointer)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(pointer == null) throw new ArgumentNullException("pointer");
-			if(pointer == string.Empty) throw new ArgumentException("pointer");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNeitherNullNorWhitespace(pointer, "pointer");
 
 			_repository = repository;
 			_pointer = pointer;

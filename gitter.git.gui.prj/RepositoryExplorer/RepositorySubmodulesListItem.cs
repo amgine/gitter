@@ -19,7 +19,7 @@
 		public RepositorySubmodulesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgSubmodules"], Resources.StrSubmodules)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 		}

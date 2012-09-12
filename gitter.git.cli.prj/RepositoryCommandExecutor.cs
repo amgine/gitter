@@ -17,7 +17,8 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <param name="workingDirectory">Repository working directory.</param>
 		public RepositoryCommandExecutor(GitCLI gitCLI, string workingDirectory)
 		{
-			if(gitCLI == null) throw new ArgumentNullException("gitCLI");
+			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
+			Verify.Argument.IsNotNull(workingDirectory, "workingDirectory");
 
 			_gitCLI = gitCLI;
 			_workingDirectory = workingDirectory;

@@ -15,13 +15,18 @@
 
 	internal partial class AddRepositoryDialog : DialogBase, IExecutableDialog
 	{
+		#region Data
+
 		private readonly IWorkingEnvironment _environment;
 		private readonly LocalRepositoriesListBox _repositoryList;
 
+		#endregion
+
 		public AddRepositoryDialog(IWorkingEnvironment environment, LocalRepositoriesListBox repositoriyList)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
-			if(repositoriyList == null) throw new ArgumentNullException("repositoriesList");
+			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(repositoriyList, "repositoriyList");
+
 			_environment = environment;
 			_repositoryList = repositoriyList;
 

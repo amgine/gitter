@@ -86,7 +86,7 @@
 		{
 			var data1 = item1.DataContext;
 			var data2 = item2.DataContext;
-			return string.Compare(data1.Revision.Name, data2.Revision.Name);
+			return string.Compare(data1.Revision.Hash, data2.Revision.Hash);
 		}
 
 		public static int CompareByPosition(CustomListBoxItem item1, CustomListBoxItem item2)
@@ -145,7 +145,7 @@
 				case ColumnId.Name:
 					return measureEventArgs.MeasureImageAndText(Image, DataContext.Name);
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Name);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Hash);
 				case ColumnId.TreeHash:
 					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHash);
 				default:
@@ -161,7 +161,7 @@
 					paintEventArgs.PaintImageAndText(Image, DataContext.Name);
 					break;
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Name);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Hash);
 					break;
 				case ColumnId.TreeHash:
 					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHash);

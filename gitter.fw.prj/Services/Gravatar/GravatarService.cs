@@ -19,6 +19,8 @@
 
 		private static string MD5(string email)
 		{
+			Assert.IsNotNull(email);
+
 			var hash = md5Provider.ComputeHash(Encoding.ASCII.GetBytes(email.ToLower()));
 			var arr = new char[hash.Length * 2];
 			for(int i = 0, j = 0; i < hash.Length; ++i)
@@ -32,6 +34,8 @@
 
 		private static Bitmap ExtractGravatar(WebResponse response)
 		{
+			Assert.IsNotNull(response);
+
 			using(var stream = response.GetResponseStream())
 			{
 				return new Bitmap(stream);
@@ -40,6 +44,8 @@
 
 		public static Bitmap GetGravatar(string email)
 		{
+			Verify.Argument.IsNotNull(email, "email");
+
 			return GetGravatar(email, DefaultGravatarType.wavatar, GravatarRating.g, 80);
 		}
 
@@ -66,7 +72,8 @@
 
 		public static Bitmap EndGetGravatar(IAsyncResult result)
 		{
-			if(result == null) throw new ArgumentNullException("result");
+			Verify.Argument.IsNotNull(result, "result");
+
 			var func = (Func<string, DefaultGravatarType, GravatarRating, int, Bitmap>)result.AsyncState;
 			return func.EndInvoke(result);
 		}

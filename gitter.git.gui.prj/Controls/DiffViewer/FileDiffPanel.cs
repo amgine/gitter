@@ -64,7 +64,7 @@
 		/// <summary>Create <see cref="FileDiffPanel"/>.</summary>
 		public FileDiffPanel(Repository repository, DiffFile diffFile, DiffType diffType)
 		{
-			if(diffFile == null) throw new ArgumentNullException("diffFile");
+			Verify.Argument.IsNotNull(diffFile, "diffFile");
 
 			_repository = repository;
 			_diffType = diffType;

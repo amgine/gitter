@@ -14,7 +14,8 @@
 
 		public VersionMenu(ProjectVersion version)
 		{
-			if(version == null) throw new ArgumentNullException("version");
+			Verify.Argument.IsNotNull(version, "version");
+
 			_version = version;
 
 			Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_version));

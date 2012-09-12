@@ -12,14 +12,14 @@
 
 		public StashedChangesDiffSource(StashedState stashedState)
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
+			Verify.Argument.IsNotNull(stashedState, "stashedState");
 
 			_stashedState = stashedState;
 		}
 
 		public StashedChangesDiffSource(StashedState stashedState, IList<string> paths)
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
+			Verify.Argument.IsNotNull(stashedState, "stashedState");
 
 			_stashedState = stashedState;
 			_paths = paths;
@@ -44,6 +44,8 @@
 
 		protected override Diff GetDiffCore(DiffOptions options)
 		{
+			Assert.IsNotNull(options);
+
 			var parameters = new QueryRevisionDiffParameters(_stashedState.Name)
 			{
 				Paths = _paths,

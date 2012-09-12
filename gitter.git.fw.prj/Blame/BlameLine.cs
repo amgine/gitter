@@ -18,8 +18,8 @@
 
 		public BlameLine(BlameCommit commit, int num, string text, string ending = LineEnding.Lf)
 		{
-			if(commit == null) throw new ArgumentNullException("commit");
-			if(text == null) throw new ArgumentNullException("text");
+			Verify.Argument.IsNotNull(commit, "commit");
+			Verify.Argument.IsNotNull(text, "text");
 
 			_commit = commit;
 			_text = text;

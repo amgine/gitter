@@ -18,7 +18,7 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="listBox"/> == <c>null</c>.</exception>
 		internal CustomListBoxColumnsCollection(CustomListBox listBox)
 		{
-			if(listBox == null) throw new ArgumentNullException("listBox");
+			Verify.Argument.IsNotNull(listBox, "listBox");
 
 			_listBox = listBox;
 		}
@@ -84,7 +84,8 @@
 
 		public void ShowAll(Predicate<CustomListBoxColumn> predicate)
 		{
-			if(predicate == null) throw new ArgumentNullException("prediacte");
+			Verify.Argument.IsNotNull(predicate, "predicate");
+
 			foreach(var c in this)
 			{
 				c.IsVisible = predicate(c);

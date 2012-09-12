@@ -129,7 +129,7 @@
 
 			internal void Remove(string reference)
 			{
-				if(reference == null) throw new ArgumentNullException("reference");
+				Assert.IsNotNull(reference);
 
 				bool removed;
 				lock(SyncRoot)
@@ -141,7 +141,7 @@
 
 			internal void Remove(Reference reference)
 			{
-				if(reference == null) throw new ArgumentNullException("reference");
+				Assert.IsNotNull(reference);
 
 				bool removed;
 				lock(SyncRoot)
@@ -153,8 +153,8 @@
 
 			internal void Rename(string oldName, Reference reference)
 			{
-				if(reference == null) throw new ArgumentNullException("reference");
-				if(oldName == null) throw new ArgumentNullException("oldName");
+				Assert.IsNeitherNullNorWhitespace(oldName);
+				Verify.Argument.IsNotNull(reference, "reference");
 
 				lock(SyncRoot)
 				{
@@ -166,7 +166,7 @@
 
 			internal void Add(Reference reference)
 			{
-				if(reference == null) throw new ArgumentNullException("reference");
+				Verify.Argument.IsNotNull(reference, "reference");
 
 				lock(SyncRoot)
 				{

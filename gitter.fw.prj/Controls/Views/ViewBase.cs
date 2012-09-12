@@ -58,7 +58,7 @@
 		public ViewBase(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
 			: this()
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_guid = guid;
 			_environment = environment;
@@ -248,7 +248,8 @@
 
 		protected void AddTopToolStrip(ToolStrip toolStrip)
 		{
-			if(toolStrip == null) throw new ArgumentNullException("toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+
 			toolStrip.GripStyle = ToolStripGripStyle.Hidden;
 			toolStrip.Stretch = true;
 			toolStrip.Padding = new Padding(2);
@@ -273,7 +274,8 @@
 
 		protected void AddBottomToolStrip(ToolStrip toolStrip)
 		{
-			if(toolStrip == null) throw new ArgumentNullException("toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+
 			toolStrip.GripStyle = ToolStripGripStyle.Hidden;
 			toolStrip.Stretch = true;
 			toolStrip.Padding = new Padding(2);
@@ -301,8 +303,9 @@
 
 		protected void RemoveToolStrip(ToolStrip toolStrip)
 		{
-			if(toolStrip == null) throw new ArgumentNullException("toolStrip");
-			if(toolStrip.Parent != this) throw new ArgumentException("toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+			Verify.Argument.IsTrue(toolStrip.Parent == this, "toolStrip", "ToolStrip is not hosted in this " + GetType().Name + ".");
+
 			var dock = toolStrip.Dock;
 			toolStrip.Parent = null;
 			toolStrip.Click -= OnToolStripClick;
@@ -385,7 +388,8 @@
 
 		public void SaveViewTo(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
+
 			SaveMoreViewTo(section);
 		}
 
@@ -395,7 +399,8 @@
 
 		public void LoadViewFrom(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
+
 			LoadMoreViewFrom(section);
 		}
 	}

@@ -81,7 +81,7 @@
 			get { return _gitAccessorProvider; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
 
 				if(_gitAccessorProvider != value)
 				{
@@ -108,7 +108,7 @@
 			get { return _gitAccessor; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
 
 				if(_gitAccessor != value)
 				{
@@ -141,7 +141,7 @@
 
 		public bool LoadFor(IWorkingEnvironment environment, Section section)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			if(section != null)
 			{
@@ -224,7 +224,7 @@
 		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
 		public void SaveTo(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			if(ActiveGitAccessorProvider != null)
 			{
@@ -265,9 +265,9 @@
 
 		public void OnRepositoryLoaded(IRepository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 			var gitRepository = repository as Repository;
-			if(gitRepository == null) throw new ArgumentException("repository");
+			Verify.Argument.IsTrue(gitRepository != null, "repository");
 
 			if(gitRepository.UserIdentity == null)
 			{

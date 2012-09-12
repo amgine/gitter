@@ -20,7 +20,8 @@
 
 		public SubjectColumnExtender(SubjectColumn column)
 		{
-			if(column == null) throw new ArgumentNullException("column");
+			Verify.Argument.IsNotNull(column, "column");
+
 			_column = column;
 
 			InitializeComponent();

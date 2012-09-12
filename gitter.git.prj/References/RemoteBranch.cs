@@ -74,15 +74,7 @@
 		/// <exception cref="T:gitter.Git.GitException">Failed to delete <paramref name="branch"/>.</exception>
 		public override void Delete()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Remotes.Delete(this, false);
 		}
@@ -90,15 +82,7 @@
 		/// <summary>Delete branch from remote and local repository.</summary>
 		public void DeleteFromRemote()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			var remote = Remote;
 			if(remote == null) throw new GitException(string.Format("Unable to find remote for branch '{0}'", Name));
@@ -122,15 +106,7 @@
 		/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is already deleted.</exception>
 		public override void Delete(bool force)
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Remotes.Delete(this, force);
 		}
@@ -139,15 +115,7 @@
 		/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is deleted.</exception>
 		public override void Refresh()
 		{
-			#region validate state
-
-			if(IsDeleted)
-			{
-				throw new InvalidOperationException(
-					Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
-			}
-
-			#endregion
+			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Remotes.Refresh(this);
 		}

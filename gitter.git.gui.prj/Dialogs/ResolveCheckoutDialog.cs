@@ -31,14 +31,16 @@
 
 		public void SetAvailableBranches(IEnumerable<Branch> branches)
 		{
-			if(branches == null) throw new ArgumentNullException("branches");
+			Verify.Argument.IsNotNull(branches, "branches");
+			Verify.Argument.HasNoNullItems(branches, "branches");
+
 			_references.BeginUpdate();
 			_references.Items.Clear();
 			Branch first = null;
-			foreach(var b in branches)
+			foreach(var branch in branches)
 			{
-				if(first == null) first = b;
-				_references.Items.Add(new BranchListItem(b));
+				if(first == null) first = branch;
+				_references.Items.Add(new BranchListItem(branch));
 			}
 			if(first != null)
 			{

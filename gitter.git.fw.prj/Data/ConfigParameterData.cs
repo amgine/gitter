@@ -19,9 +19,9 @@
 
 		public ConfigParameterData(string name, string value, ConfigFile configFile, string fileName)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
-			if(value == null) throw new ArgumentNullException("value");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(value, "value");
+
 			_name = name;
 			_value = value;
 			_configFile = configFile;
@@ -30,10 +30,10 @@
 
 		public ConfigParameterData(string name, string value, ConfigFile configFile)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
-			if(value == null) throw new ArgumentNullException("value");
-			if(configFile == ConfigFile.Other) throw new ArgumentException("configFile");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.AreNotEqual(ConfigFile.Other, configFile, "configFile", string.Empty);
+
 			_name = name;
 			_value = value;
 			_configFile = configFile;
@@ -41,10 +41,10 @@
 
 		public ConfigParameterData(string name, string value, string fileName)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(name.Length == 0) throw new ArgumentException("name");
-			if(value == null) throw new ArgumentNullException("value");
-			if(fileName == null) throw new ArgumentNullException("file");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
+
 			_name = name;
 			_value = value;
 			_configFile = ConfigFile.Other;

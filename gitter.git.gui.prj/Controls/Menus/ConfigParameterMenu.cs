@@ -14,10 +14,11 @@
 
 		public ConfigParameterMenu(ConfigParameterListItem listItem)
 		{
-			if(listItem == null) throw new ArgumentNullException("listItem");
+			Verify.Argument.IsNotNull(listItem, "listItem");
+			Verify.Argument.IsValidGitObject(listItem.DataContext, "parameter");
+
 			_listItem = listItem;
 			_parameter = listItem.DataContext;
-			if(_parameter.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "ConfigParameter"), "listItem");
 
 			Items.Add(new ToolStripMenuItem(Resources.StrEditValue, CachedResources.Bitmaps["ImgConfigEdit"], (s, e) => listItem.StartValueEditor()));
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(_parameter));
@@ -25,10 +26,9 @@
 
 		public ConfigParameterMenu(ConfigParameter parameter)
 		{
-			if(parameter == null) throw new ArgumentNullException("parameter");
-			if(parameter.IsDeleted) throw new ArgumentException(string.Format(Resources.ExcObjectIsDeleted, "ConfigParameter"), "parameter");
-			_parameter = parameter;
+			Verify.Argument.IsValidGitObject(parameter, "parameter");
 
+			_parameter = parameter;
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(parameter));
 		}
 

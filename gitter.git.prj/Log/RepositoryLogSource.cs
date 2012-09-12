@@ -8,7 +8,7 @@
 
 		public RepositoryLogSource(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			_repository = repository;
 		}
@@ -20,6 +20,8 @@
 
 		protected override RevisionLog GetLogCore(LogOptions options)
 		{
+			Assert.IsNotNull(options);
+
 			if(Repository.IsEmpty)
 			{
 				return new RevisionLog(Repository, new Revision[0]);

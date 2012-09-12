@@ -98,7 +98,7 @@
 		/// <returns>Created view.</returns>
 		public ViewBase CreateView(IWorkingEnvironment environment)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			var view = CreateViewCore(environment, null);
 			if(view != null)
@@ -118,7 +118,7 @@
 		/// <returns>Created view.</returns>
 		public ViewBase CreateView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			var view = CreateViewCore(environment, parameters);
 			if(view != null)

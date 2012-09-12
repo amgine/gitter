@@ -18,7 +18,7 @@
 
 		public ViewHostDockingProcess(ViewHost viewHost)
 		{
-			if(viewHost == null) throw new ArgumentNullException("viewHost");
+			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
 			_viewHost = viewHost;
 		}
@@ -137,7 +137,8 @@
 
 		public bool Start(Point location)
 		{
-			if(_isActive) throw new InvalidOperationException();
+			Verify.State.IsFalse(IsActive);
+
 			_isActive = true;
 			location = _viewHost.PointToScreen(location);
 			var grid = HitTestGrid(location);
@@ -159,7 +160,8 @@
 
 		public void Update(Point location)
 		{
-			if(!_isActive) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsActive);
+
 			bool gridHit = false;
 			location = _viewHost.PointToScreen(location);
 			var grid = HitTestGrid(location);
@@ -169,7 +171,7 @@
 				{
 					if(_hoveredGrid != grid)
 					{
-						_hoveredGrid.DockMarkers.Kill();
+						_hoveredGrid.DockMarkers.Hide();
 						_hoveredGrid = grid;
 						grid.DockMarkers.Show(_viewHost);
 					}
@@ -185,7 +187,7 @@
 			{
 				if(_hoveredGrid != null)
 				{
-					_hoveredGrid.DockMarkers.Kill();
+					_hoveredGrid.DockMarkers.Hide();
 					_hoveredGrid = null;
 				}
 			}
@@ -196,7 +198,7 @@
 				{
 					if(_hoveredHost != host)
 					{
-						_hoveredHost.DockMarkers.Kill();
+						_hoveredHost.DockMarkers.Hide();
 						_hoveredHost = host;
 						host.DockMarkers.Show(_viewHost);
 					}
@@ -219,7 +221,7 @@
 			{
 				if(_hoveredHost != null)
 				{
-					_hoveredHost.DockMarkers.Kill();
+					_hoveredHost.DockMarkers.Hide();
 					_hoveredHost = null;
 				}
 			}
@@ -227,7 +229,8 @@
 
 		public void Commit(Point location)
 		{
-			if(!_isActive) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsActive);
+
 			_isActive = false;
 			bool docking = false;
 			location = _viewHost.PointToScreen(location);
@@ -239,7 +242,7 @@
 					docking = true;
 					_hoveredGrid.PerformDock(_viewHost, dockResult);
 				}
-				_hoveredGrid.DockMarkers.Kill();
+				_hoveredGrid.DockMarkers.Hide();
 				_hoveredGrid = null;
 			}
 			if(_hoveredHost != null)
@@ -253,23 +256,24 @@
 						host.PerformDock(_viewHost, dockResult);
 					}
 				}
-				host.DockMarkers.Kill();
+				host.DockMarkers.Hide();
 				host = null;
 			}
 		}
 
 		public void Cancel()
 		{
-			if(!_isActive) throw new InvalidOperationException();
+			Verify.State.IsTrue(IsActive);
+
 			_isActive = false;
 			if(_hoveredGrid != null)
 			{
-				_hoveredGrid.DockMarkers.Kill();
+				_hoveredGrid.DockMarkers.Hide();
 				_hoveredGrid = null;
 			}
 			if(_hoveredHost != null)
 			{
-				_hoveredHost.DockMarkers.Kill();
+				_hoveredHost.DockMarkers.Hide();
 				_hoveredHost = null;
 			}
 		}
@@ -278,12 +282,12 @@
 		{
 			if(_hoveredGrid != null)
 			{
-				_hoveredGrid.DockMarkers.Kill();
+				_hoveredGrid.DockMarkers.Hide();
 				_hoveredGrid = null;
 			}
 			if(_hoveredHost != null)
 			{
-				_hoveredHost.DockMarkers.Kill();
+				_hoveredHost.DockMarkers.Hide();
 				_hoveredHost = null;
 			}
 			_isActive = false;

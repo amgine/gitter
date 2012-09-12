@@ -22,7 +22,7 @@
 		public StartPageView(IWorkingEnvironment environment, IDictionary<string, object> parameters, StartPageViewFactory factory)
 			: base(Guids.StartPageView, environment, parameters)
 		{
-			if(factory == null) throw new ArgumentNullException("factory");
+			Verify.Argument.IsNotNull(factory, "factory");
 			
 			InitializeComponent();
 

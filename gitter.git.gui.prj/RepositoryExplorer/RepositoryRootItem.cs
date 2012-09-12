@@ -14,7 +14,7 @@
 		public RepositoryRootItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgGit"], Resources.StrGit)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			Items.AddRange(
 				new CustomListBoxItem[]

@@ -45,7 +45,7 @@
 
 		public T GetValue(RedmineObject obj)
 		{
-			if(obj == null) throw new ArgumentNullException("obj");
+			Verify.Argument.IsNotNull(obj, "obj");
 
 			return (T)obj.GetType().GetProperty(Name).GetValue(obj, null);
 		}

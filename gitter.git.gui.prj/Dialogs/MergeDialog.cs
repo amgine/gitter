@@ -24,8 +24,10 @@
 
 		public MergeDialog(Repository repository)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(repository.Head == null) throw new ArgumentException(string.Format(Resources.ExcCantDoOnEmptyRepository, "merge"), "repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsFalse(repository.IsEmpty, "repository",
+				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));
+
 			_repository = repository;
 
 			InitializeComponent();
@@ -53,7 +55,9 @@
 			GlobalBehavior.SetupAutoCompleteSource(_txtRevision, _unmergedBranches);
 
 			if(SpellingService.Enabled)
+			{
 				_speller = new TextBoxSpellChecker(_txtMessage, true);
+			}
 
 			_references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,
 				(reference) => _unmergedBranches.Contains((BranchBase)reference));

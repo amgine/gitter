@@ -21,7 +21,7 @@
 		public RepositoryStashListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgStash"], Resources.StrStash)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 		}

@@ -16,7 +16,7 @@ namespace gitter.Git.Gui.Views
 	{
 		#region Data
 
-		private readonly CommitView _view;
+		private readonly CommitView _commitView;
 		private readonly ToolStripButton _btnRefresh;
 		private readonly ToolStripButton _btnTreeMode;
 		private readonly ToolStripSplitButton _stageAll;
@@ -25,15 +25,15 @@ namespace gitter.Git.Gui.Views
 
 		#endregion
 
-		public CommitToolbar(CommitView view)
+		public CommitToolbar(CommitView commitView)
 		{
-			if(view == null) throw new ArgumentNullException("view");
-			_view = view;
+			Verify.Argument.IsNotNull(commitView, "commitView");
 
+			_commitView = commitView;
 			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
 				(sender, e) =>
 				{
-					_view.RefreshContent();
+					_commitView.RefreshContent();
 				})
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -42,11 +42,11 @@ namespace gitter.Git.Gui.Views
 				(sender, e) =>
 				{
 					var button = (ToolStripButton)sender;
-					_view.TreeMode = button.Checked = !button.Checked;
+					_commitView.TreeMode = button.Checked = !button.Checked;
 				})
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
-				Checked = view.TreeMode,
+				Checked = commitView.TreeMode,
 			});
 			Items.Add(new ToolStripSeparator());
 			Items.Add(_stageAll = new ToolStripSplitButton(Resources.StrStageAll, CachedResources.Bitmaps["ImgStageAll"])
@@ -66,23 +66,23 @@ namespace gitter.Git.Gui.Views
 
 			_stageAll.ButtonClick += (sender, e) =>
 				{
-					_view.Repository.Status.StageAll();
+					_commitView.Repository.Status.StageAll();
 				};
 
-			_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrUpdate, null, (s, e) => _view.Repository.Status.StageUpdated()));
+			_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrUpdate, null, (s, e) => _commitView.Repository.Status.StageUpdated()));
 			_stageAll.DropDown.Items.Add(new ToolStripSeparator());
 			_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrManual.AddEllipsis(), null,
 				(sender, e) =>
 				{
-					using(var dlg = new StageDialog(_view.Repository))
+					using(var dlg = new StageDialog(_commitView.Repository))
 					{
-						dlg.Run(_view);
+						dlg.Run(_commitView);
 					}
 				}));
 
 			_unstageAll.Click += (sender, e) =>
 				{
-					_view.Repository.Status.UnstageAll();
+					_commitView.Repository.Status.UnstageAll();
 				};
 
 			_btnReset.ButtonClick += (s, e) =>
@@ -125,7 +125,7 @@ namespace gitter.Git.Gui.Views
 			Cursor = Cursors.WaitCursor;
 			try
 			{
-				_view.Repository.Status.Reset(mode);
+				_commitView.Repository.Status.Reset(mode);
 			}
 			catch(GitException exc)
 			{

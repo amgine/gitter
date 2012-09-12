@@ -15,8 +15,8 @@
 
 		public DiffFileMenu(IDiffSource diffSource, DiffFile diffFile)
 		{
-			if(diffSource == null) throw new ArgumentNullException("branch");
-			if(diffFile == null) throw new ArgumentNullException("branch");
+			Verify.Argument.IsNotNull(diffSource, "diffSource");
+			Verify.Argument.IsNotNull(diffFile, "diffFile");
 
 			_diffSource = diffSource;
 			_diffFile = diffFile;

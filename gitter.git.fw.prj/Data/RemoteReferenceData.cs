@@ -16,9 +16,9 @@
 
 		public RemoteReferenceData(string name, string hash)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(hash == null) throw new ArgumentNullException("hash");
-			if(hash.Length != 40) throw new ArgumentException("hash");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsTrue(hash.Length == 40, "hash");
 
 			_name = name;
 			_hash = hash;

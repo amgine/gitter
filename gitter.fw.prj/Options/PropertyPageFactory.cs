@@ -63,7 +63,7 @@
 
 		public PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			if(_getPropertyPage != null)
 			{

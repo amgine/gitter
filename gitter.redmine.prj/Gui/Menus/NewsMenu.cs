@@ -14,7 +14,8 @@
 
 		public NewsMenu(News news)
 		{
-			if(news == null) throw new ArgumentNullException("news");
+			Verify.Argument.IsNotNull(news, "news");
+
 			_news = news;
 
 			//Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_news));

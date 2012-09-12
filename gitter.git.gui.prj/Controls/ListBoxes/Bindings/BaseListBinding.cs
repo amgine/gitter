@@ -33,8 +33,8 @@
 
 		protected BaseListBinding(CustomListBoxItemsCollection itemHost, GitObjectsCollection<TObject, TEventArgs> collection)
 		{
-			if(itemHost == null) throw new ArgumentNullException("itemHost");
-			if(collection == null) throw new ArgumentNullException("collection");
+			Verify.Argument.IsNotNull(itemHost, "itemHost");
+			Verify.Argument.IsNotNull(collection, "collection");
 
 			_itemHost = itemHost;
 			_collection = collection;

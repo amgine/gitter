@@ -19,7 +19,7 @@
 		public RepositoryRemotesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgRemotes"], Resources.StrRemotes)
 		{
-			if(environment == null) throw new ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
 		}

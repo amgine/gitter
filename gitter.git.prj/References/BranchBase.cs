@@ -39,9 +39,9 @@
 		/// <exception cref="ArgumentNullException"><paramref name="branchInformation"/> == <c>null</c>.</exception>
 		internal void NotifyReset(BranchData branchInformation)
 		{
-			if(branchInformation == null) throw new ArgumentNullException("branchInformation");
+			Verify.Argument.IsNotNull(branchInformation, "branchInformation");
 
-			if(Revision.Name != branchInformation.SHA1)
+			if(Revision.Hash != branchInformation.SHA1)
 			{
 				lock(Repository.Revisions.SyncRoot)
 				{

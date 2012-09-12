@@ -39,7 +39,8 @@
 		/// <param name="parameter">New branch.</param>
 		private void InvokeCreated(ConfigParameter parameter)
 		{
-			if(parameter == null) throw new ArgumentNullException("parameter");
+			Assert.IsNotNull(parameter);
+
 			var handler = ParameterCreated;
 			if(handler != null) handler(this, new ConfigParameterEventArgs(parameter));
 		}
@@ -48,7 +49,8 @@
 		/// <param name="branch">Deleted branch.</param>
 		private void InvokeDeleted(ConfigParameter parameter)
 		{
-			if(parameter == null) throw new ArgumentNullException("parameter");
+			Assert.IsNotNull(parameter);
+
 			parameter.MarkAsDeleted();
 			var handler = ParameterDeleted;
 			if(handler != null) handler(this, new ConfigParameterEventArgs(parameter));
@@ -79,7 +81,7 @@
 
 		public ConfigurationFile(Repository repository, string fileName, bool load)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			_configAccessor = repository.Accessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
@@ -91,7 +93,7 @@
 
 		private ConfigurationFile(IConfigAccessor configAccessor, ConfigFile configFile, bool load)
 		{
-			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
 
 			_configAccessor = configAccessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
@@ -111,7 +113,7 @@
 		/// <param name="load">Immediately load file contents.</param>
 		public ConfigurationFile(IConfigAccessor configAccessor, string fileName, bool load)
 		{
-			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
 
 			_configAccessor = configAccessor;
 			_fileName = fileName;
@@ -134,10 +136,10 @@
 			get
 			{
 				ConfigParameter res;
-				lock(_parameters)
+				lock(SyncRoot)
 				{
-					if(!_parameters.TryGetValue(name, out res))
-						throw new ArgumentException("Parameter not found.", "name");
+					Verify.Argument.IsTrue(_parameters.TryGetValue(name, out res), "name",
+						"Parameter not found.");
 				}
 				return res;
 			}
@@ -145,7 +147,7 @@
 
 		public bool Exists(string name)
 		{
-			lock(_parameters)
+			lock(SyncRoot)
 			{
 				return _parameters.ContainsKey(name);
 			}
@@ -155,7 +157,7 @@
 		{
 			get
 			{
-				lock(_parameters)
+				lock(SyncRoot)
 				{
 					return _parameters.Count;
 				}
@@ -172,51 +174,45 @@
 
 		public ConfigParameter CreateParameter(string name, string value)
 		{
-			if(name == null) throw new ArgumentNullException("name");
-			if(value == null) throw new ArgumentNullException("value");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(value, "value");
 
-			ConfigParameter configParameter;
-			lock(_parameters)
+			lock(SyncRoot)
 			{
-				if(!_parameters.ContainsKey(name))
+				Verify.Argument.IsFalse(_parameters.ContainsKey(name), "name",
+					"Parameter already exists.");
+				switch(_configFile)
 				{
-					switch(_configFile)
-					{
-						case ConfigFile.Other:
-							_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
-							{
-								ConfigFile = _configFile,
-								FileName = _fileName,
-							});
-							break;
-						case ConfigFile.System:
-						case ConfigFile.User:
-							_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
-							{
-								ConfigFile = _configFile,
-							});
-							break;
-						case ConfigFile.Repository:
-							_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value));
-							break;
-					}
-					configParameter = _repository != null ?
-						new ConfigParameter(_repository, _configFile, name, value) :
-						new ConfigParameter(_configAccessor, _fileName, name, value);
-					_parameters.Add(name, configParameter);
-					InvokeCreated(configParameter);
+					case ConfigFile.Other:
+						_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
+						{
+							ConfigFile = _configFile,
+							FileName = _fileName,
+						});
+						break;
+					case ConfigFile.System:
+					case ConfigFile.User:
+						_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
+						{
+							ConfigFile = _configFile,
+						});
+						break;
+					case ConfigFile.Repository:
+						_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value));
+						break;
 				}
-				else
-				{
-					throw new ArgumentException("Parameter already exists.", "name");
-				}
+				var configParameter = _repository != null ?
+					new ConfigParameter(_repository, _configFile, name, value) :
+					new ConfigParameter(_configAccessor, _fileName, name, value);
+				_parameters.Add(name, configParameter);
+				InvokeCreated(configParameter);
+				return configParameter;
 			}
-			return configParameter;
 		}
 
 		internal void Unset(ConfigParameter parameter)
 		{
-			if(parameter == null) throw new ArgumentNullException("parameter");
+			Verify.Argument.IsNotNull(parameter, "parameter");
 
 			switch(_configFile)
 			{
@@ -241,7 +237,7 @@
 						new UnsetConfigValueParameters(parameter.Name));
 					break;
 			}
-			lock(_parameters)
+			lock(SyncRoot)
 			{
 				if(_parameters.Remove(parameter.Name))
 				{
@@ -252,7 +248,7 @@
 
 		public bool TryGetParameter(string name, out ConfigParameter parameter)
 		{
-			lock(_parameters)
+			lock(SyncRoot)
 			{
 				return _parameters.TryGetValue(name, out parameter);
 			}
@@ -261,7 +257,7 @@
 		public ConfigParameter TryGetParameter(string name)
 		{
 			ConfigParameter parameter;
-			lock(_parameters)
+			lock(SyncRoot)
 			{
 				if(_parameters.TryGetValue(name, out parameter))
 				{
@@ -310,10 +306,11 @@
 						new QueryConfigParameters(_configFile));
 					break;
 				default:
-					throw new InvalidOperationException();
+					throw new ApplicationException(
+						string.Format("Unknown ConfigFile value: {0}", _configFile));
 			}
 
-			lock(_parameters)
+			lock(SyncRoot)
 			{
 				if(_repository != null)
 				{

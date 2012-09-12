@@ -20,8 +20,7 @@
 
 		public static void DisableCloseButton(this Form form)
 		{
-			if(form == null)
-				throw new ArgumentNullException("form");
+			Verify.Argument.IsNotNull(form, "form");
 
 			var hMenu = NativeMethods.GetSystemMenu(form.Handle, false);
 			NativeMethods.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
@@ -29,8 +28,7 @@
 
 		public static void EnableCloseButton(this Form form)
 		{
-			if(form == null)
-				throw new ArgumentNullException("form");
+			Verify.Argument.IsNotNull(form, "form");
 
 			var hMenu = NativeMethods.GetSystemMenu(form.Handle, false);
 			NativeMethods.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);

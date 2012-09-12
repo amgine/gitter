@@ -88,7 +88,8 @@
 		/// <returns>Subsection with specified name.</returns>
 		public Section GetCreateEmptySection(string name)
 		{
-			if(string.IsNullOrEmpty(name)) throw new ArgumentException("name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+
 			Section section;
 			if(!_sections.TryGetValue(name, out section))
 			{
@@ -109,7 +110,8 @@
 		/// <returns>Subsection with specified name.</returns>
 		public Section GetCreateSection(string name)
 		{
-			if(string.IsNullOrEmpty(name)) throw new ArgumentException("name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+
 			Section section;
 			if(!_sections.TryGetValue(name, out section))
 			{
@@ -125,10 +127,9 @@
 		public Section GetSection(string name)
 		{
 			Section section;
-			if(!_sections.TryGetValue(name, out section))
-			{
-				throw new ArgumentException("name");
-			}
+			Verify.Argument.IsTrue(
+				_sections.TryGetValue(name, out section),
+				"name", "Section not found.");
 			return section;
 		}
 
@@ -144,14 +145,15 @@
 
 		public void AddSection(Section section)
 		{
-			if(section == null) throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			_sections.Add(section.Name, section);
 		}
 
 		public Section CreateSection(string name)
 		{
-			if(string.IsNullOrEmpty(name)) throw new ArgumentException("name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+
 			var section = new Section(name);
 			_sections.Add(name, section);
 			_isModified = true;
@@ -183,7 +185,7 @@
 
 		public void AddParameter(Parameter parameter)
 		{
-			if(parameter == null) throw new ArgumentNullException("parameter");
+			Verify.Argument.IsNotNull(parameter, "parameter");
 
 			_parameters.Add(parameter.Name, parameter);
 		}
@@ -207,9 +209,13 @@
 		{
 			Parameter p;
 			if(_parameters.TryGetValue(name, out p))
+			{
 				return p;
+			}
 			else
+			{
 				return null;
+			}
 		}
 
 		public bool TryGetParameter(string name, out Parameter parameter)
@@ -219,7 +225,8 @@
 
 		public void SetValue<T>(string name, T value)
 		{
-			if(string.IsNullOrEmpty(name)) throw new ArgumentException("name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+
 			Parameter parameter;
 			if(!_parameters.TryGetValue(name, out parameter))
 			{
@@ -240,8 +247,13 @@
 		{
 			Parameter parameter;
 			if(!_parameters.TryGetValue(name, out parameter))
+			{
 				return defaultValue;
-			return TypeHelpers.UnpackValue<T>(parameter.Value);
+			}
+			else
+			{
+				return TypeHelpers.UnpackValue<T>(parameter.Value);
+			}
 		}
 
 		public T GetValue<T>(string name)

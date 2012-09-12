@@ -14,13 +14,15 @@
 
 		public PersistentCache(Func<T> onReevaluate)
 		{
-			if(onReevaluate == null) throw new ArgumentNullException("onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+
 			_onReevaluate = onReevaluate;
 		}
 
 		public PersistentCache(Func<T> onReevaluate, T value)
 		{
-			if(onReevaluate == null) throw new ArgumentNullException("onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+
 			_onReevaluate = onReevaluate;
 			_value = value;
 			_isCached = true;

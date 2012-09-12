@@ -13,9 +13,9 @@
 
 		public UnstagedItemMenu(TreeItem item)
 		{
-			if(item == null) throw new ArgumentNullException("item");
-			if(item.IsDeleted) throw new ArgumentException(Resources.ExcObjectIsDeleted.UseAsFormat("WorkingTreeItem"), "item");
-			if((item.StagedStatus & StagedStatus.Unstaged) != StagedStatus.Unstaged) throw new ArgumentException("This item is not unstaged.", "item");
+			Verify.Argument.IsValidGitObject(item, "item");
+			Verify.Argument.AreEqual(StagedStatus.Unstaged, item.StagedStatus & StagedStatus.Unstaged, "item",
+				"This item is not unstaged.");
 
 			_item = item;
 

@@ -15,7 +15,8 @@
 
 		public SubmoduleMenu(Submodule submodule)
 		{
-			if(submodule == null) throw new ArgumentNullException("submodule");
+			Verify.Argument.IsValidGitObject(submodule, "submodule");
+
 			_submodule = submodule;
 
 			Items.Add(GuiItemFactory.GetOpenAppItem<ToolStripMenuItem>(

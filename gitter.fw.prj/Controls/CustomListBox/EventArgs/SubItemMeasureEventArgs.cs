@@ -107,7 +107,7 @@
 
 		public Size MeasureText(string text, Font font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			return MeasureTextCore(text, font);
 		}
@@ -131,7 +131,7 @@
 
 		public Size MeasureImageAndText(Image image, string text, Font font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			return MeasureImageAndTextCore(image, text, font);
 		}
@@ -155,7 +155,7 @@
 
 		public Size MeasureIconAndText(Icon icon, string text, Font font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNotNull(font, "font");
 
 			return MeasureIconAndTextCore(icon, text, font);
 		}

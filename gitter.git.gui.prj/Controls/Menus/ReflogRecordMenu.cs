@@ -11,7 +11,8 @@
 	{
 		public ReflogRecordMenu(ReflogRecord reflogRecord)
 		{
-			if(reflogRecord == null) throw new ArgumentNullException("reflogRecord");
+			Verify.Argument.IsNotNull(reflogRecord, "reflogRecord");
+
 			var revision = reflogRecord.Revision;
 
 			Items.Add(GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(revision.GetDiffSource()));
@@ -27,7 +28,7 @@
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, revision.Name));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, revision.Hash));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, revision.TreeHash));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrMessage, reflogRecord.Message));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, revision.Subject));

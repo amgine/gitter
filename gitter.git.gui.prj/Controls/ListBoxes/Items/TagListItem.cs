@@ -24,7 +24,7 @@
 		public TagListItem(Tag tag)
 			: base(tag)
 		{
-			if(tag == null) throw new ArgumentNullException("tag");
+			Verify.Argument.IsNotNull(tag, "tag");
 		}
 
 		#endregion

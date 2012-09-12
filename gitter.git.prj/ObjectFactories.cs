@@ -9,9 +9,9 @@
 	{
 		public static Branch CreateBranch(Repository repository, BranchData branchData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(branchData == null) throw new ArgumentNullException("branchData");
-			if(branchData.IsRemote) throw new ArgumentException();
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsFalse(branchData.IsRemote, "branchData", "Cannot create remote branch.");
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -25,12 +25,12 @@
 
 		public static void UpdateBranch(Branch branch, BranchData branchData)
 		{
-			if(branch == null) throw new ArgumentNullException("branch");
-			if(branchData == null) throw new ArgumentNullException("branchData");
-			if(branchData.IsRemote) throw new ArgumentException();
+			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsFalse(branchData.IsRemote, "branchData", "Cannot update remote branch.");
 
 			var repo = branch.Repository;
-			if(branch.Revision.Name != branchData.SHA1)
+			if(branch.Revision.Hash != branchData.SHA1)
 			{
 				lock(repo.Revisions.SyncRoot)
 				{
@@ -45,9 +45,9 @@
 
 		public static RemoteBranch CreateRemoteBranch(Repository repository, BranchData branchData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(branchData == null) throw new ArgumentNullException("branchData");
-			if(!branchData.IsRemote) throw new ArgumentException();
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot create local branch.");
 
 			var repo = (Repository)repository;
 			Revision revision;
@@ -60,12 +60,12 @@
 
 		public static void UpdateRemoteBranch(RemoteBranch remoteBranch, BranchData branchData)
 		{
-			if(remoteBranch == null) throw new ArgumentNullException("remoteBranch");
-			if(branchData == null) throw new ArgumentNullException("branchData");
-			if(!branchData.IsRemote) throw new ArgumentException();
+			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
+			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot update local branch.");
 
 			var repo = remoteBranch.Repository;
-			if(remoteBranch.Revision.Name != branchData.SHA1)
+			if(remoteBranch.Revision.Hash != branchData.SHA1)
 			{
 				lock(repo.Revisions.SyncRoot)
 				{
@@ -76,7 +76,8 @@
 
 		public static RemoteBranch CreateRemoteBranch(Repository repository, RemoteBranchData branchData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(branchData, "branchData");
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -88,11 +89,11 @@
 
 		public static void UpdateRemoteBranch(RemoteBranch remoteBranch, RemoteBranchData branchData)
 		{
-			if(remoteBranch == null) throw new ArgumentNullException("remoteBranch");
-			if(branchData == null) throw new ArgumentNullException("branchData");
+			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
+			Verify.Argument.IsNotNull(branchData, "branchData");
 
 			var repository = remoteBranch.Repository;
-			if(remoteBranch.Revision.Name != branchData.SHA1)
+			if(remoteBranch.Revision.Hash != branchData.SHA1)
 			{
 				remoteBranch.Pointer = repository.Revisions.GetOrCreateRevision(branchData.SHA1);
 			}
@@ -100,8 +101,8 @@
 
 		public static Tag CreateTag(Repository repository, TagData tagData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(tagData == null) throw new ArgumentNullException("tagData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(tagData, "tagData");
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -113,10 +114,10 @@
 
 		public static void UpdateTag(Tag tag, TagData tagData)
 		{
-			if(tag == null) throw new ArgumentNullException("tag");
-			if(tagData == null) throw new ArgumentNullException("tagData");
+			Verify.Argument.IsNotNull(tag, "tag");
+			Verify.Argument.IsNotNull(tagData, "tagData");
 
-			if(tag.Revision.Name != tagData.SHA1)
+			if(tag.Revision.Hash != tagData.SHA1)
 			{
 				var repo = tag.Repository;
 				Revision revision;
@@ -131,16 +132,16 @@
 
 		public static Note CreateNote(Repository repository, NoteData noteData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(noteData == null) throw new ArgumentNullException("noteData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(noteData, "noteData");
 
 			return new Note(repository, noteData.Name, noteData.ObjectName, noteData.Message);
 		}
 
 		public static void UpdateNode(Note note, NoteData noteData)
 		{
-			if(note == null) throw new ArgumentNullException("note");
-			if(noteData == null) throw new ArgumentNullException("noteData");
+			Verify.Argument.IsNotNull(note, "note");
+			Verify.Argument.IsNotNull(noteData, "noteData");
 
 			note.Object = noteData.ObjectName;
 			if(noteData.Message != null)
@@ -151,6 +152,9 @@
 
 		public static TreeDirectory CreateTreeDirectory(Repository repository, TreeDirectoryData treeDirectoryData)
 		{
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(treeDirectoryData, "treeDirectoryData");
+
 			var directory = new TreeDirectory(repository, treeDirectoryData.Name, null, treeDirectoryData.ShortName)
 			{
 				StagedStatus = treeDirectoryData.StagedStatus,
@@ -168,20 +172,20 @@
 
 		public static void UpdateTreeDirectory(TreeDirectory treeDirectory, TreeDirectoryData treeDirectoryData)
 		{
-			if(treeDirectory == null) throw new ArgumentNullException("treeDirectory");
-			if(treeDirectoryData == null) throw new ArgumentNullException("treeDirectoryData");
+			Verify.Argument.IsNotNull(treeDirectory, "treeDirectory");
+			Verify.Argument.IsNotNull(treeDirectoryData, "treeDirectoryData");
 
 		}
 
 		public static ConfigParameter CreateConfigParameter(IConfigAccessor configAccessor, ConfigParameterData configParameterData)
 		{
-			if(configAccessor == null) throw new ArgumentNullException("configAccessor");
-			if(configParameterData == null) throw new ArgumentNullException("configParameterData");
+			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
+			Verify.Argument.IsNotNull(configParameterData, "configParameterData");
 
 			switch(configParameterData.ConfigFile)
 			{
 				case ConfigFile.Repository:
-					throw new ArgumentException();
+					throw new ArgumentException("Config file cannot be 'Repository'.", "configParameterData");
 				case ConfigFile.Other:
 					return new ConfigParameter(
 						configAccessor,
@@ -199,13 +203,16 @@
 
 		public static void UpdateConfigParameter(ConfigParameter configParameter, ConfigParameterData configParameterData)
 		{
+			Verify.Argument.IsNotNull(configParameter, "configParameter");
+			Verify.Argument.IsNotNull(configParameterData, "configParameterData");
+
 			configParameter.SetValue(configParameterData.Value);
 		}
 
 		public static ConfigParameter CreateConfigParameter(Repository repository, ConfigParameterData configParameterData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(configParameterData == null) throw new ArgumentNullException("configParameterData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(configParameterData, "configParameterData");
 
 			return new ConfigParameter(
 				repository,
@@ -216,8 +223,8 @@
 
 		public static void UpdateReflogRecord(ReflogRecord reflogRecord, ReflogRecordData reflogRecordData)
 		{
-			if(reflogRecord == null) throw new ArgumentNullException("reflogRecord");
-			if(reflogRecordData == null) throw new ArgumentNullException("reflogRecordData");
+			Verify.Argument.IsNotNull(reflogRecord, "reflogRecord");
+			Verify.Argument.IsNotNull(reflogRecordData, "reflogRecordData");
 
 			reflogRecord.Index = reflogRecordData.Index;
 			reflogRecord.Message = reflogRecordData.Message;
@@ -233,12 +240,12 @@
 			reflogRecord.Revision = revision;
 		}
 
-		public static ReflogRecord CreateReflogRecord(Repository repository, Reflog reflog, ReflogRecordData reflogRecordData)
+		public static ReflogRecord CreateReflogRecord(Reflog reflog, ReflogRecordData reflogRecordData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(reflog == null) throw new ArgumentNullException("reflog");
-			if(reflogRecordData == null) throw new ArgumentNullException("reflogRecordData");
+			Verify.Argument.IsNotNull(reflog, "reflog");
+			Verify.Argument.IsNotNull(reflogRecordData, "reflogRecordData");
 
+			var repository = reflog.Repository;
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
 			{
@@ -253,15 +260,16 @@
 
 		public static void UpdateStashedState(StashedState stashedState, StashedStateData stashedStateData)
 		{
-			if(stashedState == null) throw new ArgumentNullException("stashedState");
-			if(stashedStateData == null) throw new ArgumentNullException("stashedStateData");
+			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsNotNull(stashedStateData, "stashedStateData");
 
 			stashedState.Index = stashedStateData.Index;
 		}
 
 		public static StashedState CreateStashedState(Repository repository, StashedStateData stashedStateData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(stashedStateData, "stashedStateData");
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -277,24 +285,24 @@
 
 		public static void UpdateSubmodule(Submodule submodule, SubmoduleData submoduleData)
 		{
-			if(submodule == null) throw new ArgumentNullException("submodule");
-			if(submoduleData == null) throw new ArgumentNullException("submoduleData");
+			Verify.Argument.IsNotNull(submodule, "submodule");
+			Verify.Argument.IsNotNull(submoduleData, "submoduleData");
 
 			submodule.UpdateInfo(submoduleData.Path, submoduleData.Url);
 		}
 
 		public static Submodule CreateSubmodue(Repository repository, SubmoduleData submoduleData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(submoduleData == null) throw new ArgumentNullException("submoduleData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(submoduleData, "submoduleData");
 
 			return new Submodule(repository, submoduleData.Name, submoduleData.Path, submoduleData.Url);
 		}
 
 		public static void UpdateRevision(Revision revision, RevisionData revisionData, bool updateParents)
 		{
-			if(revision == null) throw new ArgumentNullException("revision");
-			if(revisionData == null) throw new ArgumentNullException("revisionData");
+			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revisionData, "revisionData");
 
 			var fields = revisionData.Fields;
 			if(fields != RevisionField.SHA1)
@@ -325,7 +333,7 @@
 						bool found = false;
 						for(int i = id; i < revision.Parents.Count; ++i)
 						{
-							if(revision.Parents[i].SHA1 == info.SHA1)
+							if(revision.Parents[i].Hash == info.SHA1)
 							{
 								if(i != id)
 								{
@@ -388,8 +396,8 @@
 
 		public static Revision CreateRevision(Repository repository, RevisionData revisionData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(revisionData == null) throw new ArgumentNullException("revisionData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(revisionData, "revisionData");
 
 			var revisions = repository.Revisions;
 			var obj = revisions.GetOrCreateRevision(revisionData.SHA1);
@@ -461,8 +469,8 @@
 
 		public static TreeFile CreateTreeFile(Repository repository, TreeFileData treeFileData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(treeFileData == null) throw new ArgumentNullException("treeFileData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(treeFileData, "treeFileData");
 
 			var shortName = treeFileData.ShortName.Length == 0 ?
 				GetShortName(treeFileData.Name) : treeFileData.ShortName;
@@ -475,8 +483,8 @@
 
 		public static void UpdateTreeFile(TreeFile treeFile, TreeFileData treeFileData)
 		{
-			if(treeFile == null) throw new ArgumentNullException("treeFile");
-			if(treeFileData == null) throw new ArgumentNullException("treeFileData");
+			Verify.Argument.IsNotNull(treeFile, "treeFile");
+			Verify.Argument.IsNotNull(treeFileData, "treeFileData");
 
 			treeFile.ConflictType = treeFileData.ConflictType;
 			treeFile.Status = treeFileData.FileStatus;
@@ -485,32 +493,32 @@
 
 		public static User CreateUser(Repository repository, UserData userData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(userData == null) throw new ArgumentNullException("userData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(userData, "userData");
 
 			return new User(repository, userData.UserName, userData.Email, userData.Commits);
 		}
 
 		public static void UpdateUser(User user, UserData userData)
 		{
-			if(user == null) throw new ArgumentNullException("user");
-			if(userData == null) throw new ArgumentNullException("userData");
+			Verify.Argument.IsNotNull(user, "user");
+			Verify.Argument.IsNotNull(userData, "userData");
 
 			user.Commits = userData.Commits;
 		}
 
 		public static Remote CreateRemote(Repository repository, RemoteData remoteData)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
-			if(remoteData == null) throw new ArgumentNullException("remoteData");
+			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(remoteData, "remoteData");
 
 			return new Remote(repository, remoteData.Name, remoteData.FetchUrl, remoteData.PushUrl);
 		}
 
 		public static void UpdateRemote(Remote remote, RemoteData remoteData)
 		{
-			if(remote == null) throw new ArgumentNullException("remote");
-			if(remoteData == null) throw new ArgumentNullException("remoteData");
+			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remoteData, "remoteData");
 
 			remote.SetPushUrl(remoteData.PushUrl);
 			remote.SetFetchUrl(remoteData.FetchUrl);

@@ -12,23 +12,9 @@
 	[ToolboxItem(false)]
 	public class GitDialogBase : DialogBase
 	{
-		//private readonly GuiProvider _guiProvider;
-
-		//internal GitDialogBase(GuiProvider guiProvider)
-		//{
-		//    if(guiProvider == null) throw new ArgumentNullException("guiProvider");
-
-		//    _guiProvider = guiProvider;
-		//}
-
-		//internal GuiProvider GuiProvider
-		//{
-		//    get { return _guiProvider; }
-		//}
-
 		protected void SetupReferenceNameInputBox(TextBox textBox, ReferenceType referenceType)
 		{
-			if(textBox == null) throw new ArgumentNullException("textBox");
+			Verify.Argument.IsNotNull(textBox, "textBox");
 
 			textBox.KeyPress += OnRevisionInputBoxKeyPress;
 			textBox.Tag = referenceType;
@@ -84,8 +70,7 @@
 
 		protected bool ValidateNewBranchName(string branchName, Control inputControl, Repository repository)
 		{
-			if(branchName == null) throw new ArgumentNullException("branchName");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			if(string.IsNullOrWhiteSpace(branchName))
 			{
@@ -118,9 +103,8 @@
 
 		protected bool ValidateNewTagName(string tagName, Control inputControl, Repository repository)
 		{
-			if(tagName == null) throw new ArgumentNullException("tagName");
-			if(repository == null) throw new ArgumentNullException("repository");
-			
+			Verify.Argument.IsNotNull(repository, "repository");
+
 			if(string.IsNullOrWhiteSpace(tagName))
 			{
 				NotificationService.NotifyInputError(
@@ -173,8 +157,7 @@
 
 		protected bool ValidateNewRemoteName(string remoteName, Control inputControl, Repository repository)
 		{
-			if(remoteName == null) throw new ArgumentNullException("remoteName");
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			if(!ValidateRemoteName(remoteName, inputControl)) return false;
 			if(repository.Remotes.Contains(remoteName))

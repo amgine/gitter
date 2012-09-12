@@ -30,7 +30,7 @@
 
 		public LinkedList<Issue> FetchOpen(Project project)
 		{
-			if(project == null) throw new ArgumentNullException("project");
+			Verify.Argument.IsNotNull(project, "project");
 
 			return FetchOpen(project.Id);
 		}

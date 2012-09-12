@@ -1,6 +1,7 @@
 ﻿namespace gitter.Framework.Options
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -28,7 +29,8 @@
 
 		public SelectableFont(string id, string name, Font font)
 		{
-			if(font == null) throw new ArgumentNullException("font");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(font, "font");
 
 			_id = id;
 			_name = name;
@@ -37,17 +39,19 @@
 
 		public SelectableFont(string id, string name, Section section)
 		{
-			if(section == null)
-				throw new ArgumentNullException("section");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(section, "section");
 
-			var fontName = section.GetValue<string>("Name", null);
-			if(fontName == null) throw new ArgumentException("section");
-			var size = section.GetValue<float>("Size", 0);
-			if(size <= 0) throw new ArgumentException("section");
-			var style = section.GetValue<FontStyle>("Style", FontStyle.Regular);
-			_font = new Font(fontName, size, style, GraphicsUnit.Point);
-			_id = id;
-			_name = name;
+			var fontName	= section.GetValue<string>("Name", null);
+			var size		= section.GetValue<float>("Size", 0);
+			var style		= section.GetValue<FontStyle>("Style", FontStyle.Regular);
+
+			Verify.Argument.IsTrue(fontName != null, "section", "Section does not contain a valid font name.");
+			Verify.Argument.IsTrue(size > 0, "section", "Section contains invalid font size.");
+
+			_font	= new Font(fontName, size, style, GraphicsUnit.Point);
+			_id		= id;
+			_name	= name;
 		}
 
 		#endregion
@@ -69,7 +73,8 @@
 			get { return _font; }
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, "value");
+
 				if(_font != value)
 				{
 					_font = value;
@@ -82,9 +87,28 @@
 
 		public void Apply(params Control[] controls)
 		{
-			if(controls == null) throw new ArgumentNullException("controls");
-			for(int i = 0; i < controls.Length; ++i)
-				controls[i].Font = _font;
+			Verify.Argument.IsNotNull(controls, "controls");
+			Verify.Argument.HasNoNullItems(controls, "controls");
+
+			ApplyCore(controls);
+		}
+
+		public void Apply(IEnumerable<Control> controls)
+		{
+			Verify.Argument.IsNotNull(controls, "controls");
+			Verify.Argument.HasNoNullItems(controls, "controls");
+
+			ApplyCore(controls);
+		}
+
+		private void ApplyCore(IEnumerable<Control> controls)
+		{
+			Assert.IsNotNull(controls);
+
+			foreach(var control in controls)
+			{
+				control.Font = _font;
+			}
 		}
 
 		public static implicit operator Font(SelectableFont font)
@@ -94,8 +118,7 @@
 
 		public void SaveTo(Section section)
 		{
-			if(section == null)
-				throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
 			section.SetValue("Name", _font.Name);
 			section.SetValue("Size", _font.SizeInPoints);
@@ -104,12 +127,14 @@
 
 		public void LoadFrom(Section section)
 		{
-			if(section == null)
-				throw new ArgumentNullException("section");
+			Verify.Argument.IsNotNull(section, "section");
 
-			var name = section.GetValue<string>("Name", null);
-			var size = section.GetValue<float>("Size", 0);
-			var style = section.GetValue<FontStyle>("Name", FontStyle.Regular);
+			var name	= section.GetValue<string>("Name", null);
+			var size	= section.GetValue<float>("Size", 0);
+			var style	= section.GetValue<FontStyle>("Name", FontStyle.Regular);
+
+			Assert.IsNeitherNullNorWhitespace(name);
+			Assert.BoundedDoubleInc(0, size, 100);
 
 			if(_font.Name != name || _font.Size != size || _font.Style != style)
 			{
@@ -124,6 +149,12 @@
 			}
 		}
 
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
 		public override string ToString()
 		{
 			return _name;
