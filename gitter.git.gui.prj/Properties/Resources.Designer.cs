@@ -2514,6 +2514,16 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Branch &apos;{0}&apos; is not associated with any remote.
+        ///Are you sure you want to remove it?.
+        /// </summary>
+        internal static string StrAskRemoteBranchRemove {
+            get {
+                return ResourceManager.GetString("StrAskRemoteBranchRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You are about to lose changes made to &apos;{0}&apos;.
         ///Proceed?.
         /// </summary>

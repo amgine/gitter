@@ -2488,4 +2488,8 @@ Proceed?</value>
   <data name="ExcSuppliedRevisionIsNotHandledByThisRepository" xml:space="preserve">
     <value>Supplied revision pointer is not handled by this repository.</value>
   </data>
+  <data name="StrAskRemoteBranchRemove" xml:space="preserve">
+    <value>Branch '{0}' is not associated with any remote.
+Are you sure you want to remove it?</value>
+  </data>
 </root>

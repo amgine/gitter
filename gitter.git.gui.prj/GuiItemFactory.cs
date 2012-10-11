@@ -1489,9 +1489,40 @@
 			{
 				if(branch.IsRemote)
 				{
-					using(var dlg = new RemoveRemoteBranchDialog((RemoteBranch)branch))
+					var remoteBranch = (RemoteBranch)branch;
+					if(remoteBranch.Remote != null)
 					{
-						dlg.Run(parent);
+						using(var dlg = new RemoveRemoteBranchDialog(remoteBranch))
+						{
+							dlg.Run(parent);
+						}
+					}
+					else
+					{
+						if(GitterApplication.MessageBoxService.Show(
+							parent,
+							Resources.StrAskRemoteBranchRemove.UseAsFormat(remoteBranch.Name),
+							Resources.StrRemoveBranch,
+							MessageBoxButton.YesNo,
+							MessageBoxIcon.Question) == DialogResult.Yes)
+						{
+							try
+							{
+								if(parent != null) parent.Cursor = Cursors.WaitCursor;
+								remoteBranch.Delete();
+								if(parent != null) parent.Cursor = Cursors.Default;
+							}
+							catch(GitException exc)
+							{
+								if(parent != null) parent.Cursor = Cursors.Default;
+								GitterApplication.MessageBoxService.Show(
+									parent,
+									exc.Message,
+									Resources.ErrFailedToRemoveBranch.UseAsFormat(branch.Name),
+									MessageBoxButton.Close,
+									MessageBoxIcon.Error);
+							}
+						}
 					}
 				}
 				else
@@ -1508,7 +1539,7 @@
 						if(parent != null) parent.Cursor = Cursors.Default;
 						if(GitterApplication.MessageBoxService.Show(
 							parent,
-							string.Format(Resources.StrAskBranchIsNotFullyMerged, branch.Name),
+							Resources.StrAskBranchIsNotFullyMerged.UseAsFormat(branch.Name),
 							Resources.StrDeleteBranch,
 							MessageBoxButtons.YesNo,
 							MessageBoxIcon.Question) == DialogResult.Yes)
@@ -1525,7 +1556,7 @@
 								GitterApplication.MessageBoxService.Show(
 									parent,
 									exc.Message,
-									string.Format(Resources.ErrFailedToRemoveBranch, branch.Name),
+									Resources.ErrFailedToRemoveBranch.UseAsFormat(branch.Name),
 									MessageBoxButton.Close,
 									MessageBoxIcon.Error);
 							}
