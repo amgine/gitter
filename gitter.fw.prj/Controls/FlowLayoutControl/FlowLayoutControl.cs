@@ -18,7 +18,6 @@
 		private readonly FlowPanelCollection _panels;
 		private readonly Dictionary<FlowPanel, Size> _sizes;
 		private readonly TrackingService<FlowPanel> _panelHover;
-		private FlowPanelHeader _currentHeader;
 		private FlowPanel _mouseDownPanel;
 
 		#endregion

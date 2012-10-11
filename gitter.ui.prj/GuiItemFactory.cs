@@ -11,6 +11,21 @@
 
 	static class GuiItemFactory
 	{
+		public static T GetRemoveRecentRepositoryItem<T>(string path)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
+
+			var item = new T()
+			{
+				Text = Resources.StrRemoveRepository,
+				Image = CachedResources.Bitmaps["ImgRepositoryRemove"],
+				Tag = path,
+			};
+			item.Click += OnRemoveRecentRepositoryClick;
+			return item;
+		}
+
 		public static T GetRemoveRepositoryItem<T>(RepositoryListItem repository)
 			where T : ToolStripItem, new()
 		{
@@ -54,6 +69,14 @@
 			};
 			item.Click += OnOpenCmdAtItemClick;
 			return item;
+		}
+
+		private static void OnRemoveRecentRepositoryClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var path = (string)item.Tag;
+
+			GitterApplication.WorkingEnvironment.RecentRepositories.Remove(path);
 		}
 
 		private static void OnRemoveRepositoryClick(object sender, EventArgs e)

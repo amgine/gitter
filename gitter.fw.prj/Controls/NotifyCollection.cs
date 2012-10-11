@@ -158,6 +158,7 @@
 			{
 				FreeItem(Items[start]);
 				Items.RemoveAt(start);
+				--count;
 			}
 			RaiseChanged(start, end, NotifyEvent.Remove);
 		}

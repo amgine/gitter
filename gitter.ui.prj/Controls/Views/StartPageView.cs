@@ -18,6 +18,7 @@
 	internal partial class StartPageView : ViewBase
 	{
 		private readonly StartPageViewFactory _factory;
+		private readonly NotifyCollectionBinding<string> _recentRepositoriesBinding;
 
 		public StartPageView(IWorkingEnvironment environment, IDictionary<string, object> parameters, StartPageViewFactory factory)
 			: base(Guids.StartPageView, environment, parameters)
@@ -33,16 +34,16 @@
 
 			Text = Resources.StrStartPage;
 
-			_lstLocalRepositories.ItemActivated += OnItemActivated;
-			_lstRecentRepositories.ItemActivated += OnItemActivated;
+			_lstLocalRepositories.ItemActivated += OnLocalRepositoriesListItemActivated;
+			_lstRecentRepositories.ItemActivated += OnRecentRepositoriesListItemActivated;
 
 			_lstLocalRepositories.DragEnter += OnLocalRepositoriesDragEnter;
 			_lstLocalRepositories.DragDrop += OnLocalRepositoriesDragDrop;
 
-			foreach(var repo in WorkingEnvironment.RecentRepositories)
-			{
-				_lstRecentRepositories.Items.Add(new RepositoryListItem(new RepositoryLink(repo, "")));
-			}
+			_recentRepositoriesBinding = new NotifyCollectionBinding<string>(
+				_lstRecentRepositories.Items,
+				WorkingEnvironment.RecentRepositories,
+				repo => new RecentRepositoryListItem(repo));
 		}
 
 		private void OnLocalRepositoriesDragEnter(object sender, DragEventArgs e)
@@ -59,6 +60,19 @@
 				}
 			}
 		}
+
+		private bool IsPresentInLocalRepositoryList(string path)
+		{
+			foreach(RepositoryListItem item in _lstLocalRepositories.Items)
+			{
+				if(item.DataContext.Path == path)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private void OnLocalRepositoriesDragDrop(object sender, DragEventArgs e)
 		{
 			if(e.Effect != DragDropEffects.None)
@@ -72,16 +86,7 @@
 						if(di.Exists)
 						{
 							var path = di.FullName;
-							bool duplicateEntry = false;
-							foreach(RepositoryListItem item in _lstLocalRepositories.Items)
-							{
-								if(item.DataContext.Path == path)
-								{
-									duplicateEntry = true;
-									break;
-								}
-							}
-							if(!duplicateEntry)
+							if(!IsPresentInLocalRepositoryList(path))
 							{
 								var provider = WorkingEnvironment.FindProviderForDirectory(data[i]);
 								if(provider != null)
@@ -113,12 +118,27 @@
 			get { return CachedResources.Bitmaps["ImgStartPage"]; }
 		}
 
-		private void OnItemActivated(object sender, ItemEventArgs e)
+		private void OnLocalRepositoriesListItemActivated(object sender, ItemEventArgs e)
 		{
 			var item = e.Item as RepositoryListItem;
 			if(item != null)
 			{
 				if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
+				{
+					if(_factory.CloseAfterRepositoryLoad)
+					{
+						Close();
+					}
+				}
+			}
+		}
+
+		private void OnRecentRepositoriesListItemActivated(object sender, ItemEventArgs e)
+		{
+			var item = e.Item as RecentRepositoryListItem;
+			if(item != null)
+			{
+				if(WorkingEnvironment.OpenRepository(item.DataContext))
 				{
 					if(_factory.CloseAfterRepositoryLoad)
 					{

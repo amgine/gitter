@@ -33,7 +33,7 @@
 
 		private string _recentRepositoryPath;
 
-		private List<string> _recentRepositories;
+		private NotifyCollection<string> _recentRepositories;
 
 		private readonly RepositoryExplorerViewFactory _repositoryExplorerFactory;
 		private readonly StartPageViewFactory _startPageFactory;
@@ -244,7 +244,7 @@
 			get { return _recentRepositoryPath; }
 		}
 
-		public IEnumerable<string> RecentRepositories
+		public NotifyCollection<string> RecentRepositories
 		{
 			get { return _recentRepositories; }
 		}
@@ -354,7 +354,7 @@
 		{
 			if(_recentRepositories == null)
 			{
-				_recentRepositories = new List<string>();
+				_recentRepositories = new NotifyCollection<string>();
 			}
 			else
 			{

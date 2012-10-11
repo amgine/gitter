@@ -15,7 +15,7 @@
 
 		string RecentRepositoryPath { get; }
 
-		IEnumerable<string> RecentRepositories { get; }
+		NotifyCollection<string> RecentRepositories { get; }
 
 
 		IEnumerable<IRepositoryProvider> RepositoryProviders { get; }

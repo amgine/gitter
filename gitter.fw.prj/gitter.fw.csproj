@@ -87,6 +87,7 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CustomListBox\NotifyCollectionBinding.cs" />
     <Compile Include="Controls\DragHelper.cs" />
     <Compile Include="Controls\FlowLayoutControl\FlowPanelHeader.cs" />
     <Compile Include="Controls\HintTextBox.cs">

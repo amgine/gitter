@@ -107,6 +107,10 @@
     <Compile Include="Controls\ComboBoxes\IssueTrackerPicker.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\ListBoxes\RecentRepositoryMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ListBoxes\RecentRepositoryListItem.cs" />
     <Compile Include="Controls\ListBoxes\IssueTrackerListItem.cs" />
     <Compile Include="Properties\CachedResources.cs" />
     <Compile Include="Controls\Dialogs\AboutDialog.cs">
