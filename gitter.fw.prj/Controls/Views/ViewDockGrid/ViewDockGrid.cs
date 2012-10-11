@@ -35,6 +35,7 @@
 		private ViewDockSide _top;
 		private ViewDockSide _right;
 		private ViewDockSide _bottom;
+		private LinkedList<FloatingViewForm> _floatingViewForms;
 
 		#endregion
 
@@ -55,6 +56,7 @@
 				Anchor = ViewConstants.AnchorAll,
 			};
 			_rootControl = _rootHost;
+			_floatingViewForms = new LinkedList<FloatingViewForm>();
 
 			SetStyle(ControlStyles.ContainerControl, true);
 
@@ -83,7 +85,26 @@
 			set { _rootControl = value; }
 		}
 
+		internal IEnumerable<FloatingViewForm> FloatingViewForms
+		{
+			get { return _floatingViewForms; }
+		}
+
 		#endregion
+
+		internal void AddFloatingForm(FloatingViewForm floatingViewForm)
+		{
+			Verify.Argument.IsNotNull(floatingViewForm, "floatingViewForm");
+
+			_floatingViewForms.AddLast(floatingViewForm);
+		}
+
+		internal void RemoveFloatingForm(FloatingViewForm floatingViewForm)
+		{
+			Verify.Argument.IsNotNull(floatingViewForm, "floatingViewForm");
+
+			_floatingViewForms.Remove(floatingViewForm);
+		}
 
 		private void SpawnLeftSide()
 		{
@@ -727,6 +748,7 @@
 					_bottom = null;
 				}
 				_rootControl = null;
+				_floatingViewForms.Clear();
 			}
 			base.Dispose(disposing);
 		}

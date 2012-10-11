@@ -18,6 +18,7 @@
 		private readonly FlowPanelCollection _panels;
 		private readonly Dictionary<FlowPanel, Size> _sizes;
 		private readonly TrackingService<FlowPanel> _panelHover;
+		private FlowPanelHeader _currentHeader;
 		private FlowPanel _mouseDownPanel;
 
 		#endregion
@@ -52,20 +53,18 @@
 			Verify.Argument.IsNotNull(panel, "panel");
 			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
-			using(var graphics = CreateGraphics())
+			var graphics = Utility.MeasurementGraphics;
+			int y = ClientArea.Y;
+			for(int i = 0; i < _panels.Count; ++i)
 			{
-				int y = ClientArea.Y;
-				for(int i = 0; i < _panels.Count; ++i)
+				var p = _panels[i];
+				var size = GetPanelSize(graphics, p);
+				int maxY = y + size.Height;
+				if(p == panel)
 				{
-					var p = _panels[i];
-					var size = GetPanelSize(graphics, p);
-					int maxY = y + size.Height;
-					if(p == panel)
-					{
-						return new Rectangle(ClientArea.X, y, size.Width, size.Height);
-					}
-					y = maxY;
+					return new Rectangle(ClientArea.X, y, size.Width, size.Height);
 				}
+				y = maxY;
 			}
 			Assert.Fail("Panel not found.");
 			return Rectangle.Empty;
@@ -73,77 +72,88 @@
 
 		internal void InvalidatePanel(FlowPanel panel, Rectangle rect)
 		{
-			using(var graphics = CreateGraphics())
+			Verify.Argument.IsNotNull(panel, "panel");
+			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
+
+			var graphics = Utility.MeasurementGraphics;
+			int y = ClientArea.Y - VScrollPos;
+			int x = ClientArea.X - HScrollPos;
+			for(int i = 0; i < _panels.Count; ++i)
 			{
-				int y = ClientArea.Y - VScrollPos;
-				int x = ClientArea.X - HScrollPos;
-				for(int i = 0; i < _panels.Count; ++i)
+				var p = _panels[i];
+				var size = GetPanelSize(graphics, p);
+				int maxY = y + size.Height;
+				if(p == panel)
 				{
-					var p = _panels[i];
-					var size = GetPanelSize(graphics, p);
-					int maxY = y + size.Height;
-					if(p == panel)
+					if(maxY >= ClientArea.Y)
 					{
-						if(maxY >= ClientArea.Y)
-							Invalidate(new Rectangle(x + rect.X, y + rect.Y, rect.Width, rect.Height));
-						break;
+						Invalidate(new Rectangle(x + rect.X, y + rect.Y, rect.Width, rect.Height));
 					}
-					if(maxY >= ClientArea.Bottom)
-						break;
-					y = maxY;
+					break;
 				}
+				if(maxY >= ClientArea.Bottom)
+				{
+					break;
+				}
+				y = maxY;
 			}
 		}
 
 		internal void InvalidatePanel(FlowPanel panel)
 		{
-			using(var graphics = CreateGraphics())
+			Verify.Argument.IsNotNull(panel, "panel");
+			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
+
+			var graphics = Utility.MeasurementGraphics;
+			int y = ClientArea.Y - VScrollPos;
+			for(int i = 0; i < _panels.Count; ++i)
 			{
-				int y = ClientArea.Y - VScrollPos;
-				for(int i = 0; i < _panels.Count; ++i)
+				var p = _panels[i];
+				var size = GetPanelSize(graphics, p);
+				int maxY = y + size.Height;
+				if(p == panel)
 				{
-					var p = _panels[i];
-					var size = GetPanelSize(graphics, p);
-					int maxY = y + size.Height;
-					if(p == panel)
+					if(maxY >= ClientArea.Y)
 					{
-						if(maxY >= ClientArea.Y)
-							Invalidate(new Rectangle(ClientArea.X, y, ClientArea.Width, size.Height));
-						break;
+						Invalidate(new Rectangle(ClientArea.X, y, ClientArea.Width, size.Height));
 					}
-					if(maxY >= ClientArea.Bottom)
-						break;
-					y = maxY;
+					break;
 				}
+				if(maxY >= ClientArea.Bottom)
+				{
+					break;
+				}
+				y = maxY;
 			}
 		}
 
 		internal void ScrollIntoView(FlowPanel p)
 		{
-			Graphics graphics = null;
 			int panelY = 0;
 			for(int i = 0; i < _panels.Count; ++i)
 			{
 				var panel = _panels[i];
-				var size = GetPanelSize(ref graphics, panel);
+				var size = GetPanelSize(panel);
 				int maxY = panelY + size.Height;
 				if(p == panel)
 				{
 					if(panelY > MaxVScrollPos)
+					{
 						panelY = MaxVScrollPos;
+					}
 					VScrollBar.Value = panelY;
 					break;
 				}
 				panelY = maxY;
 			}
-			if(graphics != null)
-				graphics.Dispose();
 		}
 
 		protected override void EndUpdate(bool refresh)
 		{
 			if(UpdateCounter == 1 && refresh)
+			{
 				NotifyContentSizeChanged();
+			}
 			base.EndUpdate(refresh);
 		}
 
@@ -158,9 +168,13 @@
 		private void OnPanelHoverChanged(object sender, TrackingEventArgs<FlowPanel> e)
 		{
 			if(e.IsTracked)
+			{
 				e.Item.MouseEnter();
+			}
 			else
+			{
 				e.Item.MouseLeave();
+			}
 		}
 
 		private void OnPanelsChanging(object sender, NotifyCollectionEventArgs e)
@@ -174,18 +188,26 @@
 					if(_panelHover.Index >= e.StartIndex)
 					{
 						if(_panelHover.Index <= e.EndIndex)
+						{
 							_panelHover.Drop();
+						}
 						else
+						{
 							_panelHover.ResetIndex(_panelHover.Index - e.ModifiedItems);
+						}
 					}
 					break;
 				case NotifyEvent.Set:
 					if(_panelHover.Index >= e.StartIndex)
 					{
 						if(_panelHover.Index <= e.EndIndex)
+						{
 							_panelHover.Drop();
+						}
 						else
+						{
 							_panelHover.ResetIndex(_panelHover.Index - e.ModifiedItems);
+						}
 					}
 					break;
 			}
@@ -195,7 +217,9 @@
 		{
 			_sizes.Clear();
 			if(!IsUpdating)
+			{
 				NotifyContentSizeChanged();
+			}
 		}
 
 		private Size GetPanelSize(Graphics graphics, FlowPanel panel)
@@ -210,13 +234,12 @@
 			return size;
 		}
 
-		private Size GetPanelSize(ref Graphics graphics, FlowPanel panel)
+		private Size GetPanelSize(FlowPanel panel)
 		{
 			Size size;
 			if(!_sizes.TryGetValue(panel, out size))
 			{
-				if(graphics == null)
-					graphics = CreateGraphics();
+				var graphics = Utility.MeasurementGraphics;
 				size = panel.Measure(
 					new FlowPanelMeasureEventArgs(graphics, ClientArea.Width));
 				_sizes.Add(panel, size);
@@ -241,15 +264,15 @@
 			var res = Size.Empty;
 			if(_panels.Count != 0)
 			{
-				using(var graphics = CreateGraphics())
+				var graphics = Utility.MeasurementGraphics;
+				foreach(var panel in _panels)
 				{
-					foreach(var panel in _panels)
+					var size = GetPanelSize(graphics, panel);
+					if(size.Width > res.Width)
 					{
-						var size = GetPanelSize(graphics, panel);
-						if(size.Width > res.Width)
-							res.Width = size.Width;
-						res.Height += size.Height;
+						res.Width = size.Width;
 					}
+					res.Height += size.Height;
 				}
 			}
 			return res;
@@ -261,15 +284,15 @@
 			_sizes.Clear();
 			if(_panels.Count != 0)
 			{
-				using(var graphics = CreateGraphics())
+				var graphics = Utility.MeasurementGraphics;
+				foreach(var panel in _panels)
 				{
-					foreach(var panel in _panels)
+					var size = GetPanelSize(graphics, panel, rect.Width);
+					if(size.Width > res.Width)
 					{
-						var size = GetPanelSize(graphics, panel, rect.Width);
-						if(size.Width > res.Width)
-							res.Width = size.Width;
-						res.Height += size.Height;
+						res.Width = size.Width;
 					}
+					res.Height += size.Height;
 				}
 			}
 			return res;
@@ -284,12 +307,11 @@
 		{
 			if(_mouseDownPanel != null && _mouseDownPanel.FlowControl == this)
 			{
-				Graphics graphics = null;
 				int panelY = ClientArea.Y - VScrollPos;
 				for(int i = 0; i < _panels.Count; ++i)
 				{
 					var panel = _panels[i];
-					var size = GetPanelSize(ref graphics, panel);
+					var size = GetPanelSize(panel);
 					int maxY = panelY + size.Height;
 					if(panel == _mouseDownPanel)
 					{
@@ -299,8 +321,6 @@
 					}
 					panelY = maxY;
 				}
-				if(graphics != null)
-					graphics.Dispose();
 			}
 			else
 			{
@@ -312,7 +332,7 @@
 					for(int i = 0; i < _panels.Count; ++i)
 					{
 						var panel = _panels[i];
-						var size = GetPanelSize(ref graphics, panel);
+						var size = GetPanelSize(panel);
 						int maxY = panelY + size.Height;
 						if(maxY >= y)
 						{
@@ -415,14 +435,13 @@
 		{
 			int x = e.X;
 			int y = e.Y;
-			Graphics graphics = null;
 			int panelY = ClientArea.Y - VScrollPos;
 			_mouseDownPanel = null;
 			bool found = false;
 			for(int i = 0; i < _panels.Count; ++i)
 			{
 				var panel = _panels[i];
-				var size = GetPanelSize(ref graphics, panel);
+				var size = GetPanelSize(panel);
 				int maxY = panelY + size.Height;
 				if(maxY >= y)
 				{
@@ -433,13 +452,15 @@
 					break;
 				}
 				if(maxY >= ClientRectangle.Bottom)
+				{
 					break;
+				}
 				panelY = maxY;
 			}
-			if(graphics != null)
-				graphics.Dispose();
 			if(!found)
+			{
 				OnFreeSpaceMouseDown(x, y, e.Button);
+			}
 			Focus();
 			base.OnMouseDown(e);
 		}
@@ -457,14 +478,13 @@
 		{
 			int x = e.X;
 			int y = e.Y;
-			Graphics graphics = null;
 			int panelY = ClientArea.Y - VScrollPos;
 			_mouseDownPanel = null;
 			bool found = false;
 			for(int i = 0; i < _panels.Count; ++i)
 			{
 				var panel = _panels[i];
-				var size = GetPanelSize(ref graphics, panel);
+				var size = GetPanelSize(panel);
 				int maxY = panelY + size.Height;
 				if(maxY >= y)
 				{
@@ -475,13 +495,15 @@
 					break;
 				}
 				if(maxY >= ClientRectangle.Bottom)
+				{
 					break;
+				}
 				panelY = maxY;
 			}
-			if(graphics != null)
-				graphics.Dispose();
 			if(!found)
+			{
 				OnFreeSpaceDoubleClick(x, y, e.Button);
+			}
 			Focus();
 			base.OnMouseDoubleClick(e);
 		}

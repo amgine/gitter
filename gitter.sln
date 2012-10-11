@@ -1,24 +1,25 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39C7FE6E-D839-4A8D-AA64-00FDAFD27ECA}"
+	ProjectSection(SolutionItems) = preProject
+		common\CommonAssemblyInfo.cs = common\CommonAssemblyInfo.cs
+		common\key.snk = common\key.snk
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{223B9AB6-FD70-491E-B15D-306F27B53298}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utility", "utility", "{4FC01153-459D-4F54-A6F9-D544B0471FAE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "redmine", "redmine", "{E3712014-E758-40B4-ACCC-0F91C986496C}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.ui", "gitter.ui.prj\gitter.ui.csproj", "{5E2FBE20-2DB0-4713-94B3-FD8E4020C33D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.fw", "gitter.fw.prj\gitter.fw.csproj", "{A3B10F01-35EB-466D-89CE-D3BAA3047344}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git", "gitter.git.prj\gitter.git.csproj", "{03C71F7F-5D27-43C7-9467-2DF533C6C01B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39C7FE6E-D839-4A8D-AA64-00FDAFD27ECA}"
-	ProjectSection(SolutionItems) = preProject
-		common\CommonAssemblyInfo.cs = common\CommonAssemblyInfo.cs
-		gitter.vsmdi = gitter.vsmdi
-		common\key.snk = common\key.snk
-		Local.testsettings = Local.testsettings
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.redmine", "gitter.redmine.prj\gitter.redmine.csproj", "{122AA8B0-795B-4DD8-8650-11675D946F3E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.tests", "gitter.tests.prj\gitter.tests.csproj", "{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.uac", "gitter.uac.prj\gitter.uac.csproj", "{A1E4C299-2A68-4029-8481-0900CA5FDD4D}"
 EndProject
@@ -32,16 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git.fw", "gitter.git
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gitter.git.gui", "gitter.git.gui.prj\gitter.git.gui.csproj", "{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{223B9AB6-FD70-491E-B15D-306F27B53298}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utility", "utility", "{4FC01153-459D-4F54-A6F9-D544B0471FAE}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "redmine", "redmine", "{E3712014-E758-40B4-ACCC-0F91C986496C}"
-EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = gitter.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -91,16 +83,6 @@ Global
 		{122AA8B0-795B-4DD8-8650-11675D946F3E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{122AA8B0-795B-4DD8-8650-11675D946F3E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{122AA8B0-795B-4DD8-8650-11675D946F3E}.Release|x86.ActiveCfg = Release|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{1CEA5940-DDB5-481C-8E9A-A57D1CE24F1C}.Release|x86.ActiveCfg = Release|Any CPU
 		{A1E4C299-2A68-4029-8481-0900CA5FDD4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A1E4C299-2A68-4029-8481-0900CA5FDD4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1E4C299-2A68-4029-8481-0900CA5FDD4D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -168,13 +150,13 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{03C71F7F-5D27-43C7-9467-2DF533C6C01B} = {223B9AB6-FD70-491E-B15D-306F27B53298}
 		{7FB6E14E-6A25-44D4-8E57-DE075D301ADC} = {223B9AB6-FD70-491E-B15D-306F27B53298}
 		{C2307D21-25F9-47F8-901E-99B07AB66C39} = {223B9AB6-FD70-491E-B15D-306F27B53298}
 		{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9} = {223B9AB6-FD70-491E-B15D-306F27B53298}
-		{03C71F7F-5D27-43C7-9467-2DF533C6C01B} = {223B9AB6-FD70-491E-B15D-306F27B53298}
+		{A1E4C299-2A68-4029-8481-0900CA5FDD4D} = {4FC01153-459D-4F54-A6F9-D544B0471FAE}
 		{5FC433DF-B282-4F71-882E-EF04EB7E34E8} = {4FC01153-459D-4F54-A6F9-D544B0471FAE}
 		{BAF35255-1B7E-4599-BC31-D9A25FD9F1AB} = {4FC01153-459D-4F54-A6F9-D544B0471FAE}
-		{A1E4C299-2A68-4029-8481-0900CA5FDD4D} = {4FC01153-459D-4F54-A6F9-D544B0471FAE}
 		{122AA8B0-795B-4DD8-8650-11675D946F3E} = {E3712014-E758-40B4-ACCC-0F91C986496C}
 	EndGlobalSection
 EndGlobal

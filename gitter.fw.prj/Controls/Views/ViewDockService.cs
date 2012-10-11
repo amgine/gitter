@@ -49,7 +49,7 @@
 			get { return _grid; }
 		}
 
-		public ICollection<IViewFactory> Factories
+		public ICollection<IViewFactory> ViewFactories
 		{
 			get { return _factories.Values; }
 		}
@@ -58,9 +58,9 @@
 		{
 			get
 			{
-				foreach(var f in _factories.Values)
+				foreach(var factory in ViewFactories)
 				{
-					foreach(var view in f.CreatedViews)
+					foreach(var view in factory.CreatedViews)
 					{
 						var host = view.Host;
 						if(host != null && host.IsActive)
@@ -87,9 +87,9 @@
 		public T GetFactory<T>()
 			where T : class, IViewFactory
 		{
-			foreach(var f in _factories.Values)
+			foreach(var factory in ViewFactories)
 			{
-				var res = f as T;
+				var res = factory as T;
 				if(res != null) return res;
 			}
 			return default(T);

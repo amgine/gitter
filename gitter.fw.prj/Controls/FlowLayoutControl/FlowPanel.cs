@@ -22,30 +22,54 @@
 				if(_flowControl != value)
 				{
 					if(_flowControl != null)
+					{
 						OnFlowControlDetached();
+					}
 					_flowControl = value;
 					if(_flowControl != null)
+					{
 						OnFlowControlAttached();
+					}
 				}
+			}
+		}
+
+		public virtual FlowPanelHeader Header
+		{
+			get { return null; }
+		}
+
+		public Rectangle Bounds
+		{
+			get
+			{
+				if(FlowControl == null) return Rectangle.Empty;
+				return FlowControl.GetPanelBounds(this);
 			}
 		}
 
 		public virtual void InvalidateSize()
 		{
 			if(_flowControl != null)
+			{
 				_flowControl.InvalidatePanelSize(this);
+			}
 		}
 
 		public void Invalidate()
 		{
 			if(FlowControl != null)
+			{
 				FlowControl.InvalidatePanel(this);
+			}
 		}
 
 		public void Invalidate(Rectangle rect)
 		{
 			if(FlowControl != null)
+			{
 				FlowControl.InvalidatePanel(this, rect);
+			}
 		}
 
 		public void InvalidateSafe()

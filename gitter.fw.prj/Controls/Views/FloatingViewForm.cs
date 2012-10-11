@@ -4,11 +4,12 @@
 	using System.Windows.Forms;
 	using System.Drawing;
 
-	/// <summary>hosts floating tools.</summary>
+	/// <summary>hosts floating views.</summary>
 	internal sealed class FloatingViewForm : Form
 	{
 		#region Data
 
+		private readonly ViewDockGrid _dockGrid;
 		private bool _isInMulticontrolMode;
 		private Control _rootControl;
 
@@ -27,8 +28,9 @@
 
 		/// <summary>Initializes a new instance of the <see cref="FloatingViewForm"/> class.</summary>
 		/// <param name="viewHost">Floating <see cref="ViewHost"/>.</param>
-		public FloatingViewForm(ViewHost viewHost)
+		public FloatingViewForm(ViewDockGrid dockGrid, ViewHost viewHost)
 		{
+			Verify.Argument.IsNotNull(dockGrid, "dockGrid");
 			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
 			Font = GitterApplication.FontManager.UIFont;
@@ -62,6 +64,9 @@
 			MinimizeBox = false;
 			MaximizeBox = true;
 			_rootControl = viewHost;
+			_dockGrid = dockGrid;
+
+			_dockGrid.AddFloatingForm(this);
 		}
 
 		internal bool IsInMulticontrolMode
@@ -71,39 +76,47 @@
 
 		internal void EnterMulticontrolMode()
 		{
-			Verify.State.IsFalse(_isInMulticontrolMode);
+			Verify.State.IsFalse(IsInMulticontrolMode);
 
 			if(WindowState == FormWindowState.Maximized)
+			{
 				Padding = new Padding(
 					0,
 					0 + ViewConstants.FloatTitleHeight,
 					0,
 					0);
+			}
 			else
+			{
 				Padding = new Padding(
 					ViewConstants.FloatBorderSize,
 					ViewConstants.FloatBorderSize + ViewConstants.FloatTitleHeight,
 					ViewConstants.FloatBorderSize,
 					ViewConstants.FloatBorderSize);
+			}
 			_isInMulticontrolMode = true;
 		}
 
 		internal void LeaveMulticontrolMode()
 		{
-			Verify.State.IsTrue(_isInMulticontrolMode);
+			Verify.State.IsTrue(IsInMulticontrolMode);
 
 			if(WindowState == FormWindowState.Maximized)
+			{
 				Padding = new Padding(
 					0,
 					0,
 					0,
 					0);
+			}
 			else
+			{
 				Padding = new Padding(
 					ViewConstants.FloatBorderSize,
 					ViewConstants.FloatBorderSize,
 					ViewConstants.FloatBorderSize,
 					ViewConstants.FloatBorderSize);
+			}
 			_isInMulticontrolMode = false;
 		}
 
@@ -288,6 +301,7 @@
 		{
 			if(disposing)
 			{
+				_dockGrid.RemoveFloatingForm(this);
 				_rootControl = null;
 			}
 			base.Dispose(disposing);

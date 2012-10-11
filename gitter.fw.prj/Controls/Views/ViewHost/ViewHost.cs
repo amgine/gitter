@@ -1344,7 +1344,7 @@
 		internal FloatingViewForm PrepareFloatingMode()
 		{
 			if(_status != ViewHostStatus.Offscreen) Undock();
-			var floatingForm = new FloatingViewForm(this);
+			var floatingForm = new FloatingViewForm(_grid, this);
 			Location = new Point(
 				ViewConstants.FloatBorderSize,
 				ViewConstants.FloatBorderSize);
@@ -1635,22 +1635,30 @@
 				case DockResult.Left:
 					viewHost.DockToSide(this, AnchorStyles.Left);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
+					{
 						viewHost.Status = ViewHostStatus.DockedOnFloat;
+					}
 					break;
 				case DockResult.Top:
 					viewHost.DockToSide(this, AnchorStyles.Top);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
+					{
 						viewHost.Status = ViewHostStatus.DockedOnFloat;
+					}
 					break;
 				case DockResult.Right:
 					viewHost.DockToSide(this, AnchorStyles.Right);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
+					{
 						viewHost.Status = ViewHostStatus.DockedOnFloat;
+					}
 					break;
 				case DockResult.Bottom:
 					viewHost.DockToSide(this, AnchorStyles.Bottom);
 					if(_status == ViewHostStatus.DockedOnFloat || _status == ViewHostStatus.Floating)
+					{
 						viewHost.Status = ViewHostStatus.DockedOnFloat;
+					}
 					break;
 				case DockResult.DocumentLeft:
 					viewHost.DockToSideAsDocument(this, AnchorStyles.Left);

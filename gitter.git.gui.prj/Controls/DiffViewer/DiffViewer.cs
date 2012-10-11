@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Drawing;
 	using System.Text;
 	using System.Windows.Forms;
 
@@ -131,7 +132,6 @@
 			}
 		}
 
-
 		private int _scrollPosAfterReload;
 
 		private void OnDiffLoadCompleted(IAsyncResult ar)
@@ -217,6 +217,22 @@
 			base.OnFreeSpaceMouseDown(x, y, button);
 		}
 
+		private bool IsFileHeaderVisible
+		{
+			get
+			{
+				FileDiffPanel fdp = null;
+				foreach(var p in Panels)
+				{
+					fdp = p as FileDiffPanel;
+					if(fdp != null) break;
+				}
+				if(fdp == null) return false;
+				var bounds = fdp.Bounds;
+				return bounds.Y - VScrollPos < 0;
+			}
+		}
+
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{
 			switch(e.KeyCode)
@@ -235,15 +251,21 @@
 								foreach(var line in lines)
 								{
 									if(first)
+									{
 										first = false;
+									}
 									else
+									{
 										sb.Append('\n');
+									}
 									sb.Append(line.Text);
 								}
 								if(sb.Length != 0)
 								{
 									if(sb[sb.Length - 1] == '\r')
+									{
 										sb.Remove(sb.Length - 1, 1);
+									}
 								}
 								Clipboard.SetText(sb.ToString());
 								break;

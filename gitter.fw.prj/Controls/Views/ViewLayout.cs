@@ -319,15 +319,26 @@
 			_root = ToLayout(grid.RootControl);
 
 			if(grid.LeftSide != null)
+			{
 				_left = new SideEntry(grid.LeftSide);
+			}
 			if(grid.TopSide != null)
+			{
 				_top = new SideEntry(grid.TopSide);
+			}
 			if(grid.RightSide != null)
+			{
 				_right = new SideEntry(grid.RightSide);
+			}
 			if(grid.BottomSide != null)
+			{
 				_bottom = new SideEntry(grid.BottomSide);
-
+			}
 			_floats = new List<FloatEntry>();
+			foreach(var floatingViewForm in grid.FloatingViewForms)
+			{
+				_floats.Add(new FloatEntry(floatingViewForm));
+			}
 		}
 
 		/// <summary>

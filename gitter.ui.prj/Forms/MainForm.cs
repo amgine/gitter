@@ -3,9 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.IO;
-	using System.IO.IsolatedStorage;
 	using System.Text;
 	using System.Windows.Forms;
 	using System.Xml;
@@ -14,7 +12,6 @@
 	using gitter.Framework.Options;
 	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
-	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Properties.Resources;
 
@@ -136,7 +133,7 @@
 
 		public bool TryLoadIssueTracker(IIssueTrackerProvider provider)
 		{
-			Verify.Argument.IsNotNull(provider, "item");
+			Verify.Argument.IsNotNull(provider, "provider");
 			Verify.State.IsTrue(_repository != null);
 
 			if(provider.IsValidFor(_repository) && !_activeIssueTrackerProviders.Contains(provider))
@@ -493,11 +490,7 @@
 			}
 			else
 			{
-				if(_repository != null)
-				{
-					_repository.Deleted -= OnRepositoryDeleted;
-					_currentProvider.CloseRepository(_repository);
-				}
+				DetachRepository();
 				foreach(var gui in _additionalGui)
 				{
 					gui.DetachFromEnvironment(this);
@@ -567,7 +560,9 @@
 		public bool OpenRepository(string path, bool allowRecursiveSearch)
 		{
 			if(_repository != null && _repository.WorkingDirectory == path)
+			{
 				return true;
+			}
 			try
 			{
 				_recentRepositoryPath = Path.GetFullPath(path);
@@ -651,12 +646,7 @@
 			}
 			if(_currentProvider != null)
 			{
-				if(_repository != null)
-				{
-					_repository.Deleted -= OnRepositoryDeleted;
-					_currentProvider.CloseRepository(_repository);
-					_repository = null;
-				}
+				DetachRepository();
 				_currentProvider = null;
 			}
 			_repositoryExplorerFactory.RootItem.RepositoryDisplayName = null;
@@ -672,6 +662,17 @@
 			Text = Application.ProductName;
 		}
 
+		private void DetachRepository()
+		{
+			if(_repository != null)
+			{
+				_repository.Deleted -= OnRepositoryDeleted;
+				//var layout = new ViewLayout(_viewDockService);
+				//layout.SaveTo(_repository.ConfigSection.GetCreateEmptySection("Layout"));
+				_currentProvider.CloseRepository(_repository);
+				_repository = null;
+			}
+		}
 
 		public void ProvideMainMenuItem(ToolStripMenuItem item)
 		{
