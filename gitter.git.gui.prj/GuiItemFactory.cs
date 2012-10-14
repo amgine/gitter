@@ -391,6 +391,7 @@
 			string fileName = null;
 			using(var dlg = new SaveFileDialog()
 				{
+					FileName = revision.Pointer,
 					Filter = "zip files|.zip|" +
 							 "tar.gz files|.tar.gz|" +
 							 "tar files|.tar|" +
