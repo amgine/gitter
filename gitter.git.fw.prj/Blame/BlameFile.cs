@@ -33,6 +33,18 @@
 			get { return _hunks[index]; }
 		}
 
+		public BlameLine GetLine(int lineIndex)
+		{
+			int c = 0;
+			int hunkIndex = 0;
+			while(c + _hunks[hunkIndex].Count <= lineIndex)
+			{
+				c += _hunks[hunkIndex].Count;
+				++hunkIndex;
+			}
+			return _hunks[hunkIndex][lineIndex - c];
+		}
+
 		public int Count
 		{
 			get { return _hunks.Count; }

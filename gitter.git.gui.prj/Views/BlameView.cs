@@ -42,7 +42,7 @@
 			Text = Resources.StrBlame + ": " + blame.ToString();
 
 			_blamePanel.Panels.Clear();
-			_blamePanel.Panels.Add(new BlameFilePanel(blame.GetBlame()));
+			_blamePanel.Panels.Add(new BlameFilePanel(blame.Repository, blame.GetBlame()));
 		}
 	}
 }

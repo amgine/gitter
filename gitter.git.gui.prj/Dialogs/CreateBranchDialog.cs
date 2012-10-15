@@ -101,8 +101,8 @@
 		/// <summary>Starting revision for new <see cref="Branch"/>.</summary>
 		public string StartingRevision
 		{
-			get { return _txtRevision.Text; }
-			set { _txtRevision.Text = value; }
+			get { return _txtRevision.Text.Trim(); }
+			set { _txtRevision.Text = value.Trim(); }
 		}
 
 		/// <summary>Allow user to change <see cref="M:StartingRevision"/> property.</summary>

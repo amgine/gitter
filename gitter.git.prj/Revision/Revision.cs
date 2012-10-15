@@ -42,17 +42,11 @@
 
 		#endregion
 
-		internal void Load()
+		public void Load()
 		{
 			var revisionData = Repository.Accessor.QueryRevision(
 				new QueryRevisionParameters(Hash));
 			ObjectFactories.UpdateRevision(this, revisionData);
-		}
-
-		internal bool IsLoaded
-		{
-			get { return _isLoaded; }
-			set { _isLoaded = value; }
 		}
 
 		#region Properties
@@ -70,6 +64,12 @@
 		public bool IsCurrent
 		{
 			get { return Repository.Head.Revision == this; }
+		}
+
+		public bool IsLoaded
+		{
+			get { return _isLoaded; }
+			set { _isLoaded = value; }
 		}
 
 		#endregion

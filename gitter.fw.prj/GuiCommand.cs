@@ -5,25 +5,25 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
-	public sealed class StaticRepositoryAction : INamedObject
+	public sealed class GuiCommand : INamedObject
 	{
 		#region Data
 
 		private readonly string _name;
 		private readonly string _displayName;
-		private readonly Image _icon;
+		private readonly Image _image;
 		private readonly Action<IWorkingEnvironment> _execute;
 
 		#endregion
 
 		#region .ctor
 
-		public StaticRepositoryAction(string name, string displayName, Image icon, Action<IWorkingEnvironment> execute)
+		public GuiCommand(string name, string displayName, Image image, Action<IWorkingEnvironment> execute)
 		{
 			_name = name;
 			_displayName = displayName;
 			_execute = execute;
-			_icon = icon;
+			_image = image;
 		}
 
 		#endregion
@@ -40,9 +40,9 @@
 			get { return _displayName; }
 		}
 
-		public Image Icon
+		public Image Image
 		{
-			get { return _icon; }
+			get { return _image; }
 		}
 
 		#endregion

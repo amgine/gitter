@@ -83,8 +83,14 @@
     <Compile Include="..\shared\Verify.cs">
       <Link>Shared\Verify.cs</Link>
     </Compile>
+    <Compile Include="Controls\ContentContextMenuEventArgs.cs" />
+    <Compile Include="Controls\ContentInvalidatedEventArgs.cs" />
     <Compile Include="Controls\DiffViewer\UntrackedFileContextMenuRequestedEventArgs.cs" />
     <Compile Include="Controls\Menus\HeadMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\RevisionHeaderContent.cs" />
+    <Compile Include="RevisionToolTip.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="TreeExtensions.cs" />

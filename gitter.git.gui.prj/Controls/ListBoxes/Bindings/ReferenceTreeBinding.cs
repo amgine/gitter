@@ -162,6 +162,11 @@
 
 		#endregion
 
+		public Repository Repository
+		{
+			get { return _repository; }
+		}
+
 		public ReferenceGroupListItem Heads
 		{
 			get { return _refsHeads; }
@@ -201,9 +206,13 @@
 							_remotes.Add(ritem);
 							CustomListBoxItemsCollection host;
 							if(_refsRemotes == null)
+							{
 								host = _itemHost;
+							}
 							else
+							{
 								host = _refsRemotes.Items;
+							}
 							host.AddSafe(ritem);
 						}
 						return ritem;
@@ -224,9 +233,13 @@
 				item.Activated += OnItemActivated;
 				CustomListBoxItemsCollection host;
 				if(_groupItems)
+				{
 					host = _refsHeads.Items;
+				}
 				else
+				{
 					host = _itemHost;
+				}
 				host.AddSafe(item);
 			}
 		}
@@ -245,9 +258,13 @@
 					{
 						var p = GetRemoteListItem(branch);
 						if(p == null)
+						{
 							host = _refsRemotes.Items;
+						}
 						else
+						{
 							host = p.Items;
+						}
 					}
 					else
 					{
@@ -260,9 +277,13 @@
 					{
 						var p = GetRemoteListItem(branch);
 						if(p == null)
+						{
 							host = _itemHost;
+						}
 						else
+						{
 							host = p.Items;
+						}
 					}
 					else
 					{
@@ -282,9 +303,13 @@
 				var item = new TagListItem(tag);
 				item.Activated += OnItemActivated;
 				if(_groupItems)
+				{
 					host = _refsTags.Items;
+				}
 				else
+				{
 					host = _itemHost;
+				}
 				host.AddSafe(item);
 			}
 		}

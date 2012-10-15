@@ -16,6 +16,7 @@
 
 	sealed class BlameFilePanel : FilePanel
 	{
+		private readonly Repository _repository;
 		private readonly BlameFile _blameFile;
 		private readonly TrackingService _lineHover;
 		private Size _size;
@@ -25,6 +26,7 @@
 		private bool _selecting;
 		private int _hashColumnWidth;
 		private int _autorColumnWidth;
+		private RevisionToolTip _revisionToolTip;
 
 		private struct HitTestResults
 		{
@@ -33,10 +35,12 @@
 			public int Line;
 		}
 
-		public BlameFilePanel(BlameFile blameFile)
+		public BlameFilePanel(Repository repository, BlameFile blameFile)
 		{
+			Verify.Argument.IsNotNull(repository, "repository");
 			Verify.Argument.IsNotNull(blameFile, "blameFile");
 
+			_repository = repository;
 			_blameFile = blameFile;
 			_lineHover = new TrackingService(e => Invalidate(GetLineBounds(e.Index)));
 			_selStart = -1;
@@ -187,24 +191,29 @@
 				}
 				y -= HeaderHeight;
 			}
-			//if(x < Margin + _lineHeaderWidth)
-			//{
-			//    return new HitTestResults()
-			//    {
-			//        Area = 1,
-			//        Column = (x - Margin) / _columnWidth,
-			//        Line = y / CellSize.Height,
-			//    };
-			//}
-			//else
-			//{
-				return new HitTestResults()
-				{
-					Area = 2,
-					Column = -1,
-					Line = y / CellSize.Height,
-				};
-			//}
+			x -= Margin;
+			int column = 3;
+			x -= (GetDecimalDigits(_blameFile.LineCount) + 1) * CellSize.Width + 2;
+			if(x < 0)
+			{
+				column = 0;
+			}
+			x -= _hashColumnWidth;
+			if(x < 0)
+			{
+				column = 1;
+			}
+			x -= _autorColumnWidth;
+			if(x < 0)
+			{
+				column = 2;
+			}
+			return new HitTestResults()
+			{
+				Area = 2,
+				Column = column,
+				Line = y / CellSize.Height,
+			};
 		}
 
 		protected override void OnMouseDoubleClick(int x, int y, MouseButtons button)
@@ -354,12 +363,84 @@
 				UpdateSelection(x, y);
 			}
 			_lineHover.Track(htr.Line);
+			if(htr.Column == 1 || htr.Column == 2)
+			{
+				if(_lineHover.Index >= 0 && _lineHover.Index < _blameFile.LineCount)
+				{
+					BlameHunk blameHunk;
+					var line = GetLinesToContainingHunk(_lineHover.Index, out blameHunk);
+					Revision revision = null;
+					try
+					{
+						revision = _repository.Revisions[blameHunk.Commit.SHA1];
+					}
+					catch
+					{
+					}
+					if(revision != null)
+					{
+						if(_revisionToolTip.Tag != null || _revisionToolTip.Revision != revision)
+						{
+							_revisionToolTip.Revision = revision;
+							var point = new Point(Margin, Bounds.Y - FlowControl.VScrollPos);
+							point.X += (GetDecimalDigits(_blameFile.LineCount) + 1) * CellSize.Width + _autorColumnWidth + _hashColumnWidth + 1;
+							point.Y += line * CellSize.Height;
+							point.Y += 2;
+							if(ShowHeader)
+							{
+								point.Y += HeaderHeight;
+							}
+							if(point.Y < 1)
+							{
+								point.Y = 1;
+							}
+							_revisionToolTip.Show(FlowControl, point);
+							_revisionToolTip.Tag = null;
+						}
+					}
+					else
+					{
+						HideToolTip();
+					}
+				}
+				else
+				{
+					HideToolTip();
+				}
+			}
+			else
+			{
+				HideToolTip();
+			}
+		}
+
+		private int GetLinesToContainingHunk(int lineIndex, out BlameHunk blameHunk)
+		{
+			int res = 0;
+			for(int i = 0; i < _blameFile.Count; ++i)
+			{
+				if(res + _blameFile[i].Count > lineIndex)
+				{
+					blameHunk = _blameFile[i];
+					return res;
+				}
+				res += _blameFile[i].Count;
+			}
+			blameHunk = null;
+			return res;
 		}
 
 		protected override void OnMouseLeave()
 		{
 			base.OnMouseLeave();
 			_lineHover.Drop();
+			HideToolTip();
+		}
+
+		private void HideToolTip()
+		{
+			_revisionToolTip.Hide(FlowControl);
+			_revisionToolTip.Tag = "hidden";
 		}
 
 		public BlameLine[] GetSelectedLines()
@@ -541,6 +622,20 @@
 			GitterApplication.TextRenderer.DrawText(
 				graphics, line.Text, font, Brushes.Black,
 				rcLine.X, rcLine.Y, ContentFormat);
+		}
+
+		protected override void OnFlowControlAttached()
+		{
+			base.OnFlowControlAttached();
+			_revisionToolTip = new RevisionToolTip();
+			_revisionToolTip.Tag = "hidden";
+		}
+
+		protected override void OnFlowControlDetached()
+		{
+			base.OnFlowControlDetached();
+			_revisionToolTip.Dispose();
+			_revisionToolTip = null;
 		}
 
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)

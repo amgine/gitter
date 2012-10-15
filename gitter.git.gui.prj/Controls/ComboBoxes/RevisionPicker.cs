@@ -12,6 +12,7 @@
 	public class RevisionPicker : CustomPopupComboBox
 	{
 		private ReferencesListBox _lstReferences;
+		private RevisionToolTip _revisionToolTip;
 
 		public RevisionPicker()
 		{
@@ -20,13 +21,14 @@
 				HeaderStyle = HeaderStyle.Hidden,
 				BorderStyle = BorderStyle.FixedSingle,
 				ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick,
-				Size = new Size(Width, 2+2+21*10),
+				Size = new Size(Width, 2 + 2 + 21 * 10),
 				DisableContextMenus = true,
 				Font = LicenseManager.UsageMode == LicenseUsageMode.Runtime ?
 					GitterApplication.FontManager.UIFont.Font :
 					SystemFonts.MessageBoxFont,
 			};
 			_lstReferences.ItemActivated += OnItemActivated;
+			_revisionToolTip = new RevisionToolTip();
 
 			DropDownControl = _lstReferences;
 		}
@@ -58,6 +60,36 @@
 			}
 		}
 
+		protected override void OnMouseEnter(EventArgs e)
+		{
+			base.OnMouseEnter(e);
+			var repository = References.Repository;
+			if(repository != null)
+			{
+				try
+				{
+					var p = repository.GetRevisionPointer(Text.Trim());
+					var revision = p.Dereference();
+					if(!revision.IsLoaded)
+					{
+						revision.Load();
+					}
+					_revisionToolTip.Revision = revision;
+					_revisionToolTip.Show(this, new Point(0, Height + 1));
+				}
+				catch
+				{
+					_revisionToolTip.Revision = null;
+				}
+			}
+		}
+
+		protected override void OnMouseLeave(EventArgs e)
+		{
+			base.OnMouseLeave(e);
+			_revisionToolTip.Hide(this);
+		}
+
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
@@ -68,6 +100,11 @@
 					_lstReferences.ItemActivated -= OnItemActivated;
 					_lstReferences.Dispose();
 					_lstReferences = null;
+				}
+				if(_revisionToolTip != null)
+				{
+					_revisionToolTip.Dispose();
+					_revisionToolTip = null;
 				}
 			}
 			base.Dispose(disposing);

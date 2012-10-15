@@ -11,7 +11,18 @@
 			if(hash.Length != 40) return false;
 			for(int i = 0; i < 40; ++i)
 			{
-				if(!hash[i].IsHexDigit()) return false;
+				if(!Uri.IsHexDigit(hash[i])) return false;
+			}
+			return true;
+		}
+
+		public static bool IsValidPartialSHA1(string hash)
+		{
+			if(hash == null) return false;
+			if(hash.Length > 40) return false;
+			for(int i = 0; i < hash.Length; ++i)
+			{
+				if(!Uri.IsHexDigit(hash[i])) return false;
 			}
 			return true;
 		}

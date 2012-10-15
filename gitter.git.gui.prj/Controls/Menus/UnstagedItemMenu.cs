@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
+	using System.IO;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
@@ -19,9 +20,23 @@
 
 			_item = item;
 
-			Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(_item));
-
 			var dir = _item as TreeDirectory;
+			if(_item.Status != FileStatus.Removed)
+			{
+				var fullPath = _item.FullPath;
+				if(dir == null)
+				{
+					Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, fullPath));
+					Items.Add(GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, fullPath));
+					Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(fullPath)));
+				}
+				else
+				{
+					Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, fullPath));
+				}
+				Items.Add(new ToolStripSeparator());
+			}
+			Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(_item));
 			if(dir != null)
 			{
 				if(HasRevertableItems(dir))

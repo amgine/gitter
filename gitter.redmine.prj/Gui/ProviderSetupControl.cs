@@ -101,7 +101,7 @@
 			}
 			for(int i = 0; i < apiKey.Length; ++i)
 			{
-				if(!apiKey[i].IsHexDigit())
+				if(!Uri.IsHexDigit(apiKey[i]))
 				{
 					NotificationService.NotifyInputError(
 						_txtApiKey,

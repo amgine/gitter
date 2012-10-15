@@ -1,9 +1,10 @@
 ﻿namespace gitter
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Drawing;
 	using System.Windows.Forms;
-	using System.Diagnostics;
 
 	using gitter.Framework;
 
@@ -108,6 +109,43 @@
 				p.StartInfo = psi;
 				p.Start();
 			}
+		}
+
+		public static IList<T> GetRepositoryActions<T>(string workingDirectory)
+			where T : ToolStripItem, new()
+		{
+			var p = GitterApplication.WorkingEnvironment.FindProviderForDirectory(workingDirectory);
+			if(p != null)
+			{
+				var commands = new List<GuiCommand>(p.GetRepositoryCommands(workingDirectory));
+				if(commands.Count == 0)
+				{
+					return new T[0];
+				}
+				var res = new List<T>(commands.Count);
+				foreach(var cmd in commands)
+				{
+					var item = new T()
+					{
+						Tag		= cmd,
+						Name	= cmd.Name,
+						Text	= cmd.DisplayName,
+						Image	= cmd.Image,
+					};
+					item.Click += OnGuiCommandItemClick;
+					res.Add(item);
+				}
+				return res;
+			}
+			return new T[0];
+		}
+
+		static void OnGuiCommandItemClick(object sender, EventArgs e)
+		{
+			var item	= (ToolStripItem)sender;
+			var cmd		= (GuiCommand)item.Tag;
+
+			cmd.Execute(GitterApplication.WorkingEnvironment);
 		}
 	}
 }

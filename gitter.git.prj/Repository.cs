@@ -188,20 +188,23 @@
 			var gitDirectory = Path.Combine(workingDirectory, GitConstants.GitDir);
 			if(!Directory.Exists(gitDirectory))
 			{
-				string[] gitFile;
-				gitFile = File.ReadAllLines(gitDirectory);
-				for(int i = 0; i < gitFile.Length; ++i)
+				using(var sr = new StreamReader(gitDirectory))
 				{
-					if(gitFile[i].StartsWith(GitDirPrefix))
+					string line = sr.ReadLine();
+					while(line != null)
 					{
-						gitDirectory = gitFile[i].Substring(GitDirPrefix.Length);
-						if(!Path.IsPathRooted(gitDirectory))
+						if(line.StartsWith(GitDirPrefix))
 						{
-							gitDirectory = Path.GetFullPath(Path.Combine(
-								workingDirectory,
-								gitDirectory));
+							gitDirectory = line.Substring(GitDirPrefix.Length);
+							if(!Path.IsPathRooted(gitDirectory))
+							{
+								gitDirectory = Path.GetFullPath(Path.Combine(
+									workingDirectory,
+									gitDirectory));
+							}
+							break;
 						}
-						break;
+						line = sr.ReadLine();
 					}
 				}
 			}
@@ -448,18 +451,18 @@
 		{
 			try
 			{
-			fileName = GetGitFileName(fileName);
-			if(File.Exists(fileName))
-			{
-				using(var sr = new StreamReader(fileName))
+				fileName = GetGitFileName(fileName);
+				if(File.Exists(fileName))
 				{
-					return GetRevisionPointer(sr.ReadLine());
+					using(var sr = new StreamReader(fileName))
+					{
+						return GetRevisionPointer(sr.ReadLine());
+					}
 				}
-			}
-			else
-			{
-				return null;
-			}
+				else
+				{
+					return null;
+				}
 			}
 			catch
 			{

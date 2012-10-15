@@ -108,17 +108,17 @@
 
 		private void OnGitGuiClick(object sender, EventArgs e)
 		{
-			StandardTools.StartGitGui(_repository);
+			StandardTools.StartGitGui(_repository.WorkingDirectory);
 		}
 
 		private void OnGitGitkClick(object sender, EventArgs e)
 		{
-			StandardTools.StartGitk(_repository);
+			StandardTools.StartGitk(_repository.WorkingDirectory);
 		}
 
 		private void OnGitBashClick(object sender, EventArgs e)
 		{
-			StandardTools.StartBash(_repository);
+			StandardTools.StartBash(_repository.WorkingDirectory);
 		}
 
 		private void OnShowViewItemClick(object sender, EventArgs e)

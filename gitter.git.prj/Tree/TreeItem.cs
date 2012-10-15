@@ -233,8 +233,12 @@
 						sb.Append(name);
 						sb.Append(Path.DirectorySeparatorChar);
 					}
+					sb.Append(Name);
 				}
-				sb.Append(Name);
+				else
+				{
+					sb.Append(RelativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+				}
 				return sb.ToString();
 			}
 		}

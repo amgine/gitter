@@ -58,6 +58,18 @@
 			}
 		}
 
+		public Repository Repository
+		{
+			get
+			{
+				if(_refBinding != null)
+				{
+					return _refBinding.Repository;
+				}
+				return null;
+			}
+		}
+
 		public void LoadData(Repository repository)
 		{
 			LoadData(repository, ReferenceType.Reference, true, true, null);

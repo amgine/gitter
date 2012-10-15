@@ -52,6 +52,10 @@
 		void CloseRepository(IRepository repository);
 
 		/// <summary>Get list of static repository operations (that is, operations which do not require local repository).</summary>
-		IEnumerable<StaticRepositoryAction> GetStaticActions();
+		IEnumerable<GuiCommand> GetStaticCommands();
+
+		/// <summary>Get list of repository operations.</summary>
+		/// <param name="workingDirectory">Repository working directory.</param>
+		IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory);
 	}
 }

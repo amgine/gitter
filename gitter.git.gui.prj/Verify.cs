@@ -333,13 +333,13 @@
 				}
 				for(int i = 0; i < SHA1_LENGTH; ++i)
 				{
-					if(!value[i].IsHexDigit())
+					if(!Uri.IsHexDigit(value[i]))
 					{
 						throw new ArgumentException(
 							string.Format(
 								CultureInfo.InvariantCulture,
-								"Invalid SHA1 (unexpected character at position {0}).",
-								i),
+								"Invalid SHA1 (unexpected character '{0}' at position {1}).",
+								value[i], i),
 							parameterName);
 					}
 				}

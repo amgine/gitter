@@ -489,7 +489,7 @@
     <Compile Include="Services\MessageBox\MessageBoxResult.cs" />
     <Compile Include="Services\Notifcation\NotificationType.cs" />
     <Compile Include="ShellUtility.cs" />
-    <Compile Include="StaticRepositoryAction.cs" />
+    <Compile Include="GuiCommand.cs" />
     <Compile Include="Services\MessageBox\SystemMessageBoxService.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Win7Support\VistaPickFolderDialog.cs" />

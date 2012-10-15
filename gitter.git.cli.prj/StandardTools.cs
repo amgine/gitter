@@ -5,19 +5,19 @@
 
 	public static class StandardTools
 	{
-		public static void StartGitGui(IRepository repository)
+		public static void StartGitGui(string workingDirectory)
 		{
-			GitProcess.ExecNormal(new GitInput(repository.WorkingDirectory, new Command("gui"))).Dispose();
+			GitProcess.ExecNormal(new GitInput(workingDirectory, new Command("gui"))).Dispose();
 		}
 
-		public static void StartGitk(IRepository repository)
+		public static void StartGitk(string workingDirectory)
 		{
-			GitProcess.ExecGitk(repository.WorkingDirectory, "--all").Dispose();
+			GitProcess.ExecGitk(workingDirectory, "--all").Dispose();
 		}
 
-		public static void StartBash(IRepository repository)
+		public static void StartBash(string workingDirectory)
 		{
-			GitProcess.ExecSh(repository.WorkingDirectory, "--login -i").Dispose();
+			GitProcess.ExecSh(workingDirectory, "--login -i").Dispose();
 		}
 	}
 }

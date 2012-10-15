@@ -77,7 +77,30 @@
 			var control = FlowControl;
 			if(control != null && FlowControl.Created)
 			{
-				control.BeginInvoke(new Action(Invalidate), null);
+				if(control.InvokeRequired)
+				{
+					control.BeginInvoke(new Action(Invalidate), null);
+				}
+				else
+				{
+					Invalidate();
+				}
+			}
+		}
+
+		public void InvalidateSafe(Rectangle rect)
+		{
+			var control = FlowControl;
+			if(control != null && FlowControl.Created)
+			{
+				if(control.InvokeRequired)
+				{
+					control.BeginInvoke(new Action<Rectangle>(Invalidate), rect);
+				}
+				else
+				{
+					Invalidate(rect);
+				}
 			}
 		}
 

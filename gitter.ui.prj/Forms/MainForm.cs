@@ -167,10 +167,10 @@
 			if(provider.LoadFor(this, _configurationService.GetSectionForProvider(provider)))
 			{
 				_repositoryProviders.Add(provider.Name, provider);
-				foreach(var act in provider.GetStaticActions())
+				foreach(var act in provider.GetStaticCommands())
 				{
 					var item = new ToolStripMenuItem(
-						act.DisplayName, act.Icon, OnStaticActionItemClick)
+						act.DisplayName, act.Image, OnGuiCommandItemClick)
 					{
 						Tag = act,
 					};
@@ -187,9 +187,9 @@
 			}
 		}
 
-		private void OnStaticActionItemClick(object sender, EventArgs e)
+		private void OnGuiCommandItemClick(object sender, EventArgs e)
 		{
-			var act = (StaticRepositoryAction)((ToolStripItem)sender).Tag;
+			var act = (GuiCommand)((ToolStripItem)sender).Tag;
 			act.Execute(this);
 		}
 

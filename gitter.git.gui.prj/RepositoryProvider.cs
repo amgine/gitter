@@ -370,18 +370,37 @@
 			return RunCloneDialog() == DialogResult.OK;
 		}
 
-		public IEnumerable<StaticRepositoryAction> GetStaticActions()
+		public IEnumerable<GuiCommand> GetStaticCommands()
 		{
-			yield return new StaticRepositoryAction(
+			yield return new GuiCommand(
 				"init",
 				Resources.StrInit.AddEllipsis(),
 				CachedResources.Bitmaps["ImgInit"],
 				env => RunInitDialog());
-			yield return new StaticRepositoryAction(
+			yield return new GuiCommand(
 				"clone",
 				Resources.StrClone.AddEllipsis(),
 				CachedResources.Bitmaps["ImgClone"],
 				env => RunCloneDialog());
+		}
+
+		public IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory)
+		{
+			yield return new GuiCommand(
+				"gui",
+				Resources.StrlGui,
+				CachedResources.Bitmaps["ImgGit"],
+				env => StandardTools.StartGitGui(workingDirectory));
+			yield return new GuiCommand(
+				"gitk",
+				Resources.StrlGitk,
+				CachedResources.Bitmaps["ImgGit"],
+				env => StandardTools.StartGitk(workingDirectory));
+			yield return new GuiCommand(
+				"bash",
+				Resources.StrlBash,
+				CachedResources.Bitmaps["ImgTerminal"],
+				env => StandardTools.StartBash(workingDirectory));
 		}
 	}
 }
