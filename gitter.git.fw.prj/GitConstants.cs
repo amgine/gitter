@@ -14,6 +14,8 @@
 		public const string MERGE_HEAD = "MERGE_HEAD";
 		/// <summary>CHERRY_PICK_HEAD</summary>
 		public const string CHERRY_PICK_HEAD = "CHERRY_PICK_HEAD";
+		/// <summary>REVERT_HEAD</summary>
+		public const string REVERT_HEAD = "REVERT_HEAD";
 		/// <summary>ORIG_HEAD</summary>
 		public const string ORIG_HEAD = "ORIG_HEAD";
 		/// <summary>FETCH_HEAD</summary>

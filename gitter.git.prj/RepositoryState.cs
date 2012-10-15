@@ -5,6 +5,7 @@
 		Normal,
 		Merging,
 		CherryPicking,
+		Reverting,
 		Rebasing,
 	}
 }

@@ -258,6 +258,11 @@
 						}
 					}
 				}
+				catch(GitException)
+				{
+					repository.InvokeStateChanged();
+					throw;
+				}
 				finally
 				{
 					repository.Status.Refresh();
@@ -307,6 +312,11 @@
 						repository.Head.NotifyRelogRecordAdded();
 					}
 				}
+			}
+			catch(GitException)
+			{
+				repository.InvokeStateChanged();
+				throw;
 			}
 			finally
 			{

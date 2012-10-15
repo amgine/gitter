@@ -444,73 +444,47 @@
 
 		#endregion
 
-		public string GetMergeHead()
+		private IRevisionPointer RevisionPointerFromGitFile(string fileName)
 		{
 			try
 			{
-				var fileName = GetGitFileName(GitConstants.MERGE_HEAD);
-				if(File.Exists(fileName))
+			fileName = GetGitFileName(fileName);
+			if(File.Exists(fileName))
+			{
+				using(var sr = new StreamReader(fileName))
 				{
-					using(var sr = new StreamReader(fileName))
-					{
-						return sr.ReadLine();
-					}
+					return GetRevisionPointer(sr.ReadLine());
 				}
-				else
-				{
-					return string.Empty;
-				}
+			}
+			else
+			{
+				return null;
+			}
 			}
 			catch
 			{
-				return string.Empty;
+				return null;
 			}
 		}
 
-		public string GetCherryPickHead()
+		public IRevisionPointer MergeHead
 		{
-			try
-			{
-				var fileName = GetGitFileName(GitConstants.CHERRY_PICK_HEAD);
-				if(File.Exists(fileName))
-				{
-					using(var sr = new StreamReader(fileName))
-					{
-						return sr.ReadLine();
-					}
-				}
-				else
-				{
-					return string.Empty;
-				}
-			}
-			catch
-			{
-				return string.Empty;
-			}
+			get { return RevisionPointerFromGitFile(GitConstants.MERGE_HEAD); }
 		}
 
-		public string GetRebaseHead()
+		public IRevisionPointer CherryPickHead
 		{
-			try
-			{
-				var fileName = GetGitFileName("rebase-merge/head-name");
-				if(File.Exists(fileName))
-				{
-					using(var sr = new StreamReader(fileName))
-					{
-						return sr.ReadLine();
-					}
-				}
-				else
-				{
-					return string.Empty;
-				}
-			}
-			catch
-			{
-				return string.Empty;
-			}
+			get { return RevisionPointerFromGitFile(GitConstants.CHERRY_PICK_HEAD); }
+		}
+
+		public IRevisionPointer RevertHead
+		{
+			get { return RevisionPointerFromGitFile(GitConstants.REVERT_HEAD); }
+		}
+
+		public IRevisionPointer RebaseHead
+		{
+			get { return RevisionPointerFromGitFile("rebase-merge/head-name"); }
 		}
 
 		private RepositoryState GetState()
@@ -523,6 +497,10 @@
 			else if(File.Exists(GetGitFileName(GitConstants.CHERRY_PICK_HEAD)))
 			{
 				state = RepositoryState.CherryPicking;
+			}
+			else if(File.Exists(GetGitFileName(GitConstants.REVERT_HEAD)))
+			{
+				state = RepositoryState.Reverting;
 			}
 			else if(Directory.Exists(GetGitFileName("rebase-apply")))
 			{

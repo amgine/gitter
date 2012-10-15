@@ -2492,4 +2492,7 @@ Proceed?</value>
     <value>Branch '{0}' is not associated with any remote.
 Are you sure you want to remove it?</value>
   </data>
+  <data name="StrsRevertIsInProcess" xml:space="preserve">
+    <value>Revert is in process</value>
+  </data>
 </root>

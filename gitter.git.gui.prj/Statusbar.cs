@@ -59,6 +59,8 @@
 			CachedResources.Bitmaps.CombineBitmaps("ImgMerge", "ImgOverlayConflict");
 		private static readonly Bitmap ImgCherryPickInProcess =
 			CachedResources.Bitmaps.CombineBitmaps("ImgCherryPick", "ImgOverlayConflict");
+		private static readonly Bitmap ImgRevertInProcess =
+			CachedResources.Bitmaps.CombineBitmaps("ImgRevert", "ImgOverlayConflict");
 		private static readonly Bitmap ImgRebaseInProcess =
 			CachedResources.Bitmaps.CombineBitmaps("ImgRebase", "ImgOverlayConflict");
 
@@ -577,6 +579,27 @@
 			_rebaseContinue.Available = show;
 		}
 
+		private static string GetHeadString(IRevisionPointer revision)
+		{
+			string headString;
+			if(revision != null)
+			{
+				if(GitUtils.IsValidSHA1(revision.Pointer))
+				{
+					headString = revision.Pointer.Substring(0, 7);
+				}
+				else
+				{
+					headString = revision.Pointer;
+				}
+			}
+			else
+			{
+				headString = string.Empty;
+			}
+			return headString;
+		}
+
 		private void UpdateState()
 		{
 			switch(_repository.State)
@@ -584,12 +607,8 @@
 				case RepositoryState.Merging:
 					{
 						_statusRepositoryState.Image = ImgMergeInProcess;
-						var mergeHead = _repository.GetMergeHead();
-						if(GitUtils.IsValidSHA1(mergeHead))
-						{
-							mergeHead = mergeHead.Substring(0, 7);
-						}
-						_statusRepositoryState.Text = string.IsNullOrEmpty(mergeHead) ?
+						var mergeHead = GetHeadString(_repository.MergeHead);
+						_statusRepositoryState.Text = string.IsNullOrWhiteSpace(mergeHead) ?
 							Resources.StrsMergeIsInProcess :
 							string.Format("{0} ({1})", Resources.StrsMergeIsInProcess, mergeHead);
 						_statusRepositoryState.Available = true;
@@ -599,14 +618,21 @@
 				case RepositoryState.CherryPicking:
 					{
 						_statusRepositoryState.Image = ImgCherryPickInProcess;
-						var cherryPickHead = _repository.GetCherryPickHead();
-						if(GitUtils.IsValidSHA1(cherryPickHead))
-						{
-							cherryPickHead = cherryPickHead.Substring(0, 7);
-						}
-						_statusRepositoryState.Text = string.IsNullOrEmpty(cherryPickHead) ?
+						var cherryPickHead = GetHeadString(_repository.CherryPickHead);
+						_statusRepositoryState.Text = string.IsNullOrWhiteSpace(cherryPickHead) ?
 							Resources.StrsCherryPickIsInProcess :
 							string.Format("{0} ({1})", Resources.StrsCherryPickIsInProcess, cherryPickHead);
+						_statusRepositoryState.Available = true;
+						ShowRebaseControls(false);
+					}
+					break;
+				case RepositoryState.Reverting:
+					{
+						_statusRepositoryState.Image = ImgRevertInProcess;
+						var revertHead =  GetHeadString(_repository.RevertHead);
+						_statusRepositoryState.Text = string.IsNullOrEmpty(revertHead) ?
+							Resources.StrsRevertIsInProcess :
+							string.Format("{0} ({1})", Resources.StrsRevertIsInProcess, revertHead);
 						_statusRepositoryState.Available = true;
 						ShowRebaseControls(false);
 					}
@@ -614,20 +640,10 @@
 				case RepositoryState.Rebasing:
 					{
 						_statusRepositoryState.Image = ImgRebaseInProcess;
-						var rebaseHead = _repository.GetRebaseHead();
-						if(GitUtils.IsValidSHA1(rebaseHead))
-						{
-							rebaseHead = rebaseHead.Substring(0, 7);
-						}
-						if(rebaseHead.Length == 0)
-						{
-							_statusRepositoryState.Text = Resources.StrsRebaseIsInProcess;
-						}
-						else
-						{
-							_statusRepositoryState.Text = string.Format("{0} ({1})",
-								Resources.StrsRebaseIsInProcess, rebaseHead);
-						}
+						var rebaseHead = GetHeadString(_repository.RebaseHead);
+						_statusRepositoryState.Text = string.IsNullOrWhiteSpace(rebaseHead) ?
+							Resources.StrsRebaseIsInProcess :
+							string.Format("{0} ({1})", Resources.StrsRebaseIsInProcess, rebaseHead);
 						_statusRepositoryState.Available = true;
 						ShowRebaseControls(true);
 					}
