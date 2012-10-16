@@ -25,6 +25,7 @@
 			_content.Invalidated += OnContentInvalidated;
 			_content.SizeChanged += OnContentSizeChanged;
 			_content.ContextMenuRequested += OnContentContextMenuRequested;
+			_content.CursorChanged += OnContentCursorChanged;
 		}
 
 		#endregion
@@ -42,6 +43,11 @@
 		private void OnContentSizeChanged(object sender, EventArgs e)
 		{
 			InvalidateSize();
+		}
+
+		private void OnContentCursorChanged(object sender, EventArgs e)
+		{
+			FlowControl.Cursor = _content.Cursor;
 		}
 
 		protected override void OnMouseMove(int x, int y)
