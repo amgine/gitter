@@ -266,6 +266,15 @@
 		}
 	}
 
+	/// <summary><see cref="EventArgs"/> identifying <see cref="TreeCommit"/>.</summary>
+	public class TreeCommitEventArgs : ObjectEventArgs<TreeCommit>
+	{
+		public TreeCommitEventArgs(TreeCommit commit)
+			: base(commit)
+		{
+		}
+	}
+
 	/// <summary><see cref="EventArgs"/> identifying <see cref="TreeDirectory"/>.</summary>
 	public class TreeDirectoryEventArgs : EventArgs
 	{

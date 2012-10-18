@@ -87,6 +87,7 @@
     <Compile Include="ObjectFactories.cs" />
     <Compile Include="Revision\Revision.ParentsCollection.cs" />
     <Compile Include="Revision\Revision.ReferencesCollection.cs" />
+    <Compile Include="Tree\TreeCommit.cs" />
     <Compile Include="Tree\RevisionTreeSource.cs" />
     <Compile Include="Tree\TreeSourceBase.cs" />
     <Compile Include="Diff\DiffSourceBase.cs" />

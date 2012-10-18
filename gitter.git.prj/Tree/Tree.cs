@@ -51,7 +51,8 @@
 		public void Refresh()
 		{
 			if(Repository.IsEmpty) return;
-			var tree = Repository.Accessor.QueryTreeContent(new QueryTreeContentParameters(_treeHash, true, false));
+			var tree = Repository.Accessor.QueryTreeContent(
+				new QueryTreeContentParameters(_treeHash, true, false));
 			_root.Files.Clear();
 			_root.Directories.Clear();
 			var trees = new Dictionary<string, TreeDirectory>();
@@ -76,12 +77,23 @@
 				switch(item.Type)
 				{
 					case TreeContentType.Tree:
-						var wtf = new TreeDirectory(Repository, item.Name, parent, name);
-						trees.Add(item.Name, wtf);
-						parent.AddDirectory(wtf);
+						{
+							var dir = new TreeDirectory(Repository, item.Name, parent, name);
+							trees.Add(item.Name, dir);
+							parent.AddDirectory(dir);
+						}
 						break;
 					case TreeContentType.Blob:
-						parent.AddFile(new TreeFile(Repository, item.Name, parent, FileStatus.Cached, name, ((BlobData)item).Size));
+						{
+							var blob = new TreeFile(Repository, item.Name, parent, FileStatus.Cached, name, ((BlobData)item).Size);
+							parent.AddFile(blob);
+						}
+						break;
+					case TreeContentType.Commit:
+						{
+							var commit = new TreeCommit(Repository, item.Name, parent, FileStatus.Cached, name);
+							parent.AddCommit(commit);
+						}
 						break;
 				}
 			}

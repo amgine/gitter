@@ -147,6 +147,30 @@
 					e.OverrideDefaultMenu = true;
 					return;
 				}
+				var commit = ((ITreeItemListItem)e.Item).TreeItem as TreeCommit;
+				if(commit != null)
+				{
+					var menu = new ContextMenuStrip();
+					menu.Items.AddRange(
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, commit),
+							new ToolStripSeparator(),
+							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+								new ToolStripItem[]
+								{
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, commit.Name),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, commit.RelativePath),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, commit.FullPath),
+								}),
+							new ToolStripSeparator(),
+							GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, commit),
+						});
+					Utility.MarkDropDownForAutoDispose(menu);
+					e.ContextMenu = menu;
+					e.OverrideDefaultMenu = true;
+					return;
+				}
 			}
 		}
 
@@ -294,7 +318,10 @@
 
 		public override void RefreshContent()
 		{
-			if(_wTree != null) _wTree.Refresh();
+			if(_wTree != null)
+			{
+				_wTree.Refresh();
+			}
 		}
 
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)

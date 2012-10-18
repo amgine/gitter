@@ -21,7 +21,7 @@
 				{
 					case TreeItemType.Blob:
 						return 1;
-					case TreeItemType.Submodule:
+					case TreeItemType.Commit:
 						if(data2.Type == TreeItemType.Blob)
 							return -1;
 						break;
@@ -60,7 +60,7 @@
 				{
 					case TreeItemType.Blob:
 						return 1;
-					case TreeItemType.Submodule:
+					case TreeItemType.Commit:
 						if(data2.Type == TreeItemType.Blob)
 							return -1;
 						break;
@@ -272,15 +272,15 @@
 		{
 			if(DataContext.StagedStatus == StagedStatus.Staged)
 			{
-				var mnu = new StagedItemMenu(DataContext);
-				Utility.MarkDropDownForAutoDispose(mnu);
-				return mnu;
+				var menu = new StagedItemMenu(DataContext);
+				Utility.MarkDropDownForAutoDispose(menu);
+				return menu;
 			}
 			else if(DataContext.StagedStatus == StagedStatus.Unstaged)
 			{
-				var mnu = new UnstagedItemMenu(DataContext);
-				Utility.MarkDropDownForAutoDispose(mnu);
-				return mnu;
+				var menu = new UnstagedItemMenu(DataContext);
+				Utility.MarkDropDownForAutoDispose(menu);
+				return menu;
 			}
 			return base.GetContextMenu(requestEventArgs);
 		}

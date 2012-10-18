@@ -3,7 +3,7 @@
 	public enum TreeItemType
 	{
 		Tree,
-		Submodule,
+		Commit,
 		Blob,
 	}
 }

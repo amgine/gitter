@@ -46,6 +46,14 @@
 			return GetCheckoutPathItem<T>(revision, file.RelativePath);
 		}
 
+		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeCommit commit)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsValidGitObject(commit, "commit");
+
+			return GetCheckoutPathItem<T>(revision, commit.RelativePath);
+		}
+
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeDirectory directory)
 			where T : ToolStripItem, new()
 		{
@@ -2646,6 +2654,14 @@
 			Verify.Argument.IsValidGitObject(file, "file");
 
 			return GetPathHistoryItem<T>(revision, file.RelativePath);
+		}
+
+		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeCommit commit)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsValidGitObject(commit, "commit");
+
+			return GetPathHistoryItem<T>(revision, commit.RelativePath);
 		}
 
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeDirectory directory)

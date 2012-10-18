@@ -167,7 +167,7 @@
 				case TreeItemType.Tree:
 					RevertCore();
 					break;
-				case TreeItemType.Submodule:
+				case TreeItemType.Commit:
 				case TreeItemType.Blob:
 					switch(Status)
 					{

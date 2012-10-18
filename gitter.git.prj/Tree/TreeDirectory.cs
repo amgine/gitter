@@ -9,6 +9,7 @@
 
 		private readonly List<TreeDirectory> _directories;
 		private readonly List<TreeFile> _files;
+		private readonly List<TreeCommit> _commits;
 
 		#endregion
 
@@ -20,13 +21,16 @@
 		public event EventHandler<TreeFileEventArgs> FileAdded;
 		public event EventHandler<TreeFileEventArgs> FileDeleted;
 
+		public event EventHandler<TreeCommitEventArgs> CommitAdded;
+		public event EventHandler<TreeCommitEventArgs> CommitDeleted;
+
 		private void InvokeDirectoryAdded(TreeDirectory folder)
 		{
 			var handler = DirectoryAdded;
 			if(handler != null) handler(this, new TreeDirectoryEventArgs(folder));
 		}
 
-		private void InvokeDirectoryDeleted(TreeDirectory folder)
+		private void OnDirectoryDeleted(TreeDirectory folder)
 		{
 			var handler = DirectoryDeleted;
 			if(handler != null) handler(this, new TreeDirectoryEventArgs(folder));
@@ -38,10 +42,22 @@
 			if(handler != null) handler(this, new TreeFileEventArgs(file));
 		}
 
-		private void InvokeFileDeleted(TreeFile file)
+		private void OnFileDeleted(TreeFile file)
 		{
 			var handler = FileDeleted;
 			if(handler != null) handler(this, new TreeFileEventArgs(file));
+		}
+
+		private void OnCommitAdded(TreeCommit commit)
+		{
+			var handler = CommitAdded;
+			if(handler != null) handler(this, new TreeCommitEventArgs(commit));
+		}
+
+		private void OnCommitDeleted(TreeCommit commit)
+		{
+			var handler = CommitDeleted;
+			if(handler != null) handler(this, new TreeCommitEventArgs(commit));
 		}
 
 		#endregion
@@ -51,6 +67,7 @@
 		{
 			_directories = new List<TreeDirectory>();
 			_files = new List<TreeFile>();
+			_commits = new List<TreeCommit>();
 		}
 
 		public TreeDirectory(Repository repository, string relativePath, TreeDirectory parent, string name)
@@ -76,7 +93,7 @@
 		{
 			folder.Parent = null;
 			_directories.Remove(folder);
-			InvokeDirectoryDeleted(folder);
+			OnDirectoryDeleted(folder);
 		}
 
 		internal void RemoveDirectoryAt(int index)
@@ -84,7 +101,7 @@
 			var folder = _directories[index];
 			folder.Parent = null;
 			_directories.RemoveAt(index);
-			InvokeDirectoryDeleted(folder);
+			OnDirectoryDeleted(folder);
 		}
 
 		internal void RemoveFileAt(int index)
@@ -92,14 +109,38 @@
 			var file = _files[index];
 			file.Parent = null;
 			_files.RemoveAt(index);
-			InvokeFileDeleted(file);
+			OnFileDeleted(file);
 		}
 
 		internal void RemoveFile(TreeFile file)
 		{
 			file.Parent = null;
 			_files.Remove(file);
-			InvokeFileDeleted(file);
+			OnFileDeleted(file);
+		}
+
+		internal void AddCommit(TreeCommit commit)
+		{
+			commit.Parent = this;
+			_commits.Add(commit);
+			OnCommitAdded(commit);
+		}
+
+		internal void RemoveCommit(TreeCommit commit)
+		{
+			if(_commits.Remove(commit))
+			{
+				commit.Parent = null;
+				OnCommitDeleted(commit);
+			}
+		}
+
+		internal void RemoveCommitAt(int index)
+		{
+			var commit = _commits[index];
+			_commits.RemoveAt(index);
+			commit.Parent = null;
+			OnCommitDeleted(commit);
 		}
 
 		public IList<TreeDirectory> Directories
@@ -110,6 +151,11 @@
 		public IList<TreeFile> Files
 		{
 			get { return _files; }
+		}
+
+		public IList<TreeCommit> Commits
+		{
+			get { return _commits; }
 		}
 
 		public override TreeItemType Type

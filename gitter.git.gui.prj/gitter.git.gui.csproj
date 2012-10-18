@@ -86,6 +86,7 @@
     <Compile Include="Controls\ContentContextMenuEventArgs.cs" />
     <Compile Include="Controls\ContentInvalidatedEventArgs.cs" />
     <Compile Include="Controls\DiffViewer\UntrackedFileContextMenuRequestedEventArgs.cs" />
+    <Compile Include="Controls\ListBoxes\Items\TreeCommitListItem.cs" />
     <Compile Include="Controls\Menus\HeadMenu.cs">
       <SubType>Component</SubType>
     </Compile>

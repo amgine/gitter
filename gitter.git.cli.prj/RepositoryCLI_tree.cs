@@ -118,10 +118,10 @@
 				pos = delimeter + 1;
 				while(content[pos] == ' ') ++pos;
 
-				bool isTree = CheckValue(content, pos, GitConstants.TreeObjectType);
-				bool isBlob = !isTree & CheckValue(content, pos, GitConstants.BlobObjectType);
-				bool isCommit = !isTree & !isBlob & CheckValue(content, pos, GitConstants.CommitObjectType);
-				bool isTag = !isTree & !isBlob & !isCommit & CheckValue(content, pos, GitConstants.TagObjectType);
+				bool isTree		= CheckValue(content, pos, GitConstants.TreeObjectType);
+				bool isBlob		= !isTree && CheckValue(content, pos, GitConstants.BlobObjectType);
+				bool isCommit	= !isTree && !isBlob && CheckValue(content, pos, GitConstants.CommitObjectType);
+				bool isTag		= !isTree && !isBlob && !isCommit && CheckValue(content, pos, GitConstants.TagObjectType);
 
 				pos += 5;
 				delimeter = content.IndexOf(' ', pos);
@@ -140,9 +140,13 @@
 				{
 					res.Add(new BlobData(hash, mode, name, size));
 				}
-				else if(isTree/* || isCommit || isTag*/)
+				else if(isTree)
 				{
 					res.Add(new TreeData(hash, mode, name));
+				}
+				else if(isCommit)
+				{
+					res.Add(new TreeCommitData(hash, mode, name));
 				}
 				pos = end + 1;
 			}

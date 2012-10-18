@@ -137,38 +137,41 @@
 			var item = e.Item as ITreeItemListItem;
 			if(item != null)
 			{
-				if(item.TreeItem is TreeFile)
+				var file = item.TreeItem as TreeFile;
+				if(file != null)
 				{
 					var menu = new ContextMenuStrip();
 					menu.Items.AddRange(
 						new ToolStripItem[]
 						{
-							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, item.TreeItem.FullPath),
-							GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, item.TreeItem.FullPath),
-							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(item.TreeItem.FullPath)),
+							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, file.FullPath),
+							GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, file.FullPath),
+							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(file.FullPath)),
 							new ToolStripSeparator(),
 							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 								new ToolStripItem[]
 								{
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, item.TreeItem.Name),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, item.TreeItem.RelativePath),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, item.TreeItem.FullPath),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
+									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
 								}),
 							new ToolStripSeparator(),
-							GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath),
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath),
+							GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
 						});
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
+					return;
 				}
-				else if(item.TreeItem is TreeDirectory)
+				var directory = item.TreeItem as TreeDirectory;
+				if(directory != null)
 				{
 					var menu = new ContextMenuStrip();
 					menu.Items.AddRange(
 						new ToolStripItem[]
 						{
-							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, item.TreeItem.FullPath),
-							GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, item.TreeItem.FullPath),
+							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, directory.FullPath),
+							GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, directory.FullPath),
 						});
 					if(e.Item.Items.Count != 0)
 					{
@@ -184,10 +187,29 @@
 						new ToolStripItem[]
 						{
 							new ToolStripSeparator(),
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, item.TreeItem.RelativePath + "/"),
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, directory.RelativePath + "/"),
 						});
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
+					return;
+				}
+				var commit = item.TreeItem as TreeCommit;
+				if(commit != null)
+				{
+					var menu = new ContextMenuStrip();
+					menu.Items.AddRange(
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetOpenAppItem<ToolStripMenuItem>(
+								Resources.StrOpenWithGitter, null, Application.ExecutablePath, commit.FullPath.SurroundWithDoubleQuotes()),
+							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, commit.FullPath),
+							GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, commit.FullPath),
+							new ToolStripSeparator(),
+							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, commit.RelativePath),
+						});
+					Utility.MarkDropDownForAutoDispose(menu);
+					e.ContextMenu = menu;
+					return;
 				}
 			}
 		}

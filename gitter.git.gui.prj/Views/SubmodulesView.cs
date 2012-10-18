@@ -53,7 +53,9 @@
 		public override void RefreshContent()
 		{
 			if(Repository != null)
+			{
 				Repository.Submodules.Refresh();
+			}
 		}
 
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)

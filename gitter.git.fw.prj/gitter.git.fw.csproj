@@ -57,6 +57,7 @@
     <Compile Include="Data\BranchData.cs" />
     <Compile Include="Data\BranchesData.cs" />
     <Compile Include="Data\ConfigParameterData.cs" />
+    <Compile Include="Data\TreeCommitData.cs" />
     <Compile Include="Data\RevisionGraphData.cs" />
     <Compile Include="Diff\Diff.cs" />
     <Compile Include="Diff\DiffColumnHeader.cs" />

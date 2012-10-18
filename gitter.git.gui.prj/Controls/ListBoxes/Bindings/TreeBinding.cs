@@ -86,6 +86,13 @@
 				item.ContextMenuRequested += OnItemContextMenuRequested;
 				_itemHost.Add(item);
 			}
+			foreach(var commit in _root.Commits)
+			{
+				var item = new TreeCommitListItem(commit, false);
+				item.Activated += OnItemActivated;
+				item.ContextMenuRequested += OnItemContextMenuRequested;
+				_itemHost.Add(item);
+			}
 			foreach(var file in _root.Files)
 			{
 				var item = new TreeFileListItem(file, false);
@@ -94,6 +101,7 @@
 				_itemHost.Add(item);
 			}
 			_root.DirectoryAdded += OnDirectoryAdded;
+			_root.CommitAdded += OnCommitAdded;
 			_root.FileAdded += OnFileAdded;
 		}
 
@@ -105,29 +113,37 @@
 			InsertFiles(_root, oneLevel);
 		}
 
-		private void InsertFiles(TreeDirectory folder, bool oneLevel)
+		private void InsertFiles(TreeDirectory directory, bool oneLevel)
 		{
 			if(!oneLevel)
 			{
-				foreach(var subFolder in folder.Directories)
+				foreach(var subFolder in directory.Directories)
 				{
 					InsertFiles(subFolder, false);
 				}
 			}
-			foreach(var file in folder.Files)
+			foreach(var commit in directory.Commits)
+			{
+				var item = new TreeCommitListItem(commit, true);
+				item.Activated += OnItemActivated;
+				item.ContextMenuRequested += OnItemContextMenuRequested;
+				_itemHost.AddSafe(item);
+			}
+			foreach(var file in directory.Files)
 			{
 				var item = new TreeFileListItem(file, true);
 				item.Activated += OnItemActivated;
 				item.ContextMenuRequested += OnItemContextMenuRequested;
 				_itemHost.AddSafe(item);
 			}
-			_trackedDirectories.Add(folder);
+			_trackedDirectories.Add(directory);
 			if(!oneLevel)
 			{
-				folder.DirectoryAdded += OnDirectoryAdded2;
+				directory.DirectoryAdded += OnDirectoryAdded2;
 			}
-			folder.FileAdded += OnFileAdded;
-			folder.Deleted += OnDirectoryDeleted;
+			directory.FileAdded += OnFileAdded;
+			directory.CommitAdded += OnCommitAdded;
+			directory.Deleted += OnDirectoryDeleted;
 		}
 
 		private void OnItemActivated(object sender, EventArgs e)
@@ -161,6 +177,7 @@
 			var directory = (TreeDirectory)sender;
 			directory.DirectoryAdded -= OnDirectoryAdded2;
 			directory.FileAdded -= OnFileAdded;
+			directory.CommitAdded -= OnCommitAdded;
 			directory.Deleted -= OnDirectoryDeleted;
 			_trackedDirectories.Remove(directory);
 		}
@@ -186,21 +203,31 @@
 			_itemHost.AddSafe(item);
 		}
 
+		private void OnCommitAdded(object sender, TreeCommitEventArgs e)
+		{
+			var item = new TreeCommitListItem(e.Object, _plain);
+			item.Activated += OnItemActivated;
+			item.ContextMenuRequested += OnItemContextMenuRequested;
+			_itemHost.AddSafe(item);
+		}
+
 		#endregion
 
 		public void Dispose()
 		{
 			_root.FileAdded -= OnFileAdded;
+			_root.CommitAdded -= OnCommitAdded;
 			_root.DirectoryAdded -= OnDirectoryAdded;
 			_root.DirectoryAdded -= OnDirectoryAdded2;
 			_root.Deleted -= OnDirectoryDeleted;
 			if(_trackedDirectories != null)
 			{
-				foreach(var folder in _trackedDirectories)
+				foreach(var directory in _trackedDirectories)
 				{
-					folder.DirectoryAdded -= OnDirectoryAdded2;
-					folder.FileAdded -= OnFileAdded;
-					folder.Deleted -= OnDirectoryDeleted;
+					directory.DirectoryAdded -= OnDirectoryAdded2;
+					directory.FileAdded -= OnFileAdded;
+					directory.CommitAdded -= OnCommitAdded;
+					directory.Deleted -= OnDirectoryDeleted;
 				}
 				_trackedDirectories = null;
 			}
