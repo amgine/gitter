@@ -3,10 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.IO;
 	using System.Drawing;
+	using System.Diagnostics;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
+	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
@@ -38,6 +41,8 @@
 				{
 					Items.Add(new ToolStripSeparator());
 					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(treeSource.Revision, item.DataContext));
+					Items.Add(new ToolStripSeparator());
+					Items.Add(GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(treeSource.Revision, item.DataContext));
 				}
 			}
 		}
@@ -95,7 +100,8 @@
 			var rts = Parameters["tree"] as ITreeSource;
 			if(rts != null)
 			{
-				var file = ((ITreeItemListItem)e.Item).TreeItem as TreeFile;
+				var item = ((ITreeItemListItem)e.Item);
+				var file = item.TreeItem as TreeFile;
 				if(file != null)
 				{
 					var menu = new ContextMenuStrip();
@@ -104,6 +110,7 @@
 						{
 							GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(_wTree, file.RelativePath),
 							GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(_wTree, file.RelativePath),
+							GuiItemFactory.GetSaveAsItem<ToolStripMenuItem>(_wTree, file.RelativePath),
 							new ToolStripSeparator(),
 							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 								new ToolStripItem[]
@@ -123,7 +130,7 @@
 					e.OverrideDefaultMenu = true;
 					return;
 				}
-				var directory = ((ITreeItemListItem)e.Item).TreeItem as TreeDirectory;
+				var directory = item.TreeItem as TreeDirectory;
 				if(directory != null)
 				{
 					var menu = new ContextMenuStrip();
@@ -132,6 +139,8 @@
 						{
 							new ToolStripMenuItem(Resources.StrOpen, null, (s, args) => e.Item.Activate()),
 							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, directory),
+							new ToolStripSeparator(),
+							GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, directory),
 						});
 					Utility.MarkDropDownForAutoDispose(menu);
 					e.ContextMenu = menu;
@@ -219,7 +228,10 @@
 				var fileName = _wTree.ExtractBlobToTemporaryFile(item.DataContext.RelativePath);
 				if(!string.IsNullOrWhiteSpace(fileName))
 				{
-					Utility.OpenUrl(fileName);
+					var process = Utility.CreateProcessFor(fileName);
+					process.EnableRaisingEvents = true;
+					process.Exited += OnFileViewerProcessExited;
+					process.Start();
 				}
 			}
 			else
@@ -247,6 +259,21 @@
 					CurrentDirectoryChanged.Raise(this);
 				}
 			}
+		}
+
+		private static void OnFileViewerProcessExited(object sender, EventArgs e)
+		{
+			var process = (Process)sender;
+			var path = process.StartInfo.FileName;
+			try
+			{
+				File.Delete(path);
+			}
+			catch(Exception exc)
+			{
+				LoggingService.Global.Warning(exc, "Failed to remove temporary file: '{0}'", path);
+			}
+			process.Dispose();
 		}
 
 		protected override void AttachToRepository(Repository repository)

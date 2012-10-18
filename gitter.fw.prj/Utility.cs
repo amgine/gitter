@@ -9,6 +9,7 @@
 	using System.Globalization;
 	using System.IO;
 	using System.Runtime.InteropServices;
+	using System.Security;
 	using System.Security.Principal;
 	using System.Windows.Forms;
 
@@ -318,9 +319,9 @@
 			_taskBarList = null;
 		}
 
-		public static void OpenUrl(string url)
+		public static Process CreateProcessFor(string url)
 		{
-			var psi = new System.Diagnostics.ProcessStartInfo()
+			var psi = new ProcessStartInfo()
 				{
 					FileName = url,
 				};
@@ -332,45 +333,48 @@
 			{
 				psi.WorkingDirectory = Path.GetDirectoryName(url);
 			}
-			var p = new System.Diagnostics.Process()
+			var process = new Process()
 			{
 				StartInfo = psi,
 			};
-			p.Start();
+			return process;
 		}
+
+		public static void OpenUrl(string url)
+		{
+			var process = CreateProcessFor(url);
+			process.Start();
+			process.Dispose();
+		}
+
+		[DllImport("shell32.dll", SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
+		static extern int OpenAs_RunDLL(IntPtr hwnd, IntPtr hInst, string lpFile, int nShowCmd);
 
 		public static void ShowOpenWithDialog(string fileName)
 		{
-			var psi = new System.Diagnostics.ProcessStartInfo()
-				{
-					FileName = "rundll32.exe",
-					Arguments = "shell32.dll,OpenAs_RunDLL \"" + fileName + "\"",
-				};
-			if(Directory.Exists(fileName))
-			{
-				psi.WorkingDirectory = fileName;
-			}
-			else if(File.Exists(fileName))
-			{
-				psi.WorkingDirectory = Path.GetDirectoryName(fileName);
-			}
-			var p = new System.Diagnostics.Process()
-			{
-				StartInfo = psi,
-			};
-			p.Start();
+			const int SW_NORMAL = 1;
+
+			OpenAs_RunDLL(
+				GitterApplication.MainForm.Handle,
+				Marshal.GetHINSTANCE(GitterApplication.MainForm.GetType().Module),
+				fileName,
+				SW_NORMAL);
 		}
+
+		private static readonly Lazy<bool> _isRunningWithAdministratorRights =
+			new Lazy<bool>(
+				() =>
+				{
+					var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+					return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
+				});
 
 		/// <summary>Checks if process is running with administrator privileges.</summary>
 		public static bool IsRunningWithAdministratorRights
 		{
-			get
-			{
-				var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-				return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
-			}
+			get { return _isRunningWithAdministratorRights.Value; }
 		}
-
 
 		[StructLayout(LayoutKind.Sequential)]
 		private struct PROCESS_BASIC_INFORMATION

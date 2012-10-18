@@ -51,7 +51,7 @@
 
 		#region Elements
 
-		protected enum Element
+		enum Element
 		{
 			Hash,
 			TreeHash,
@@ -65,7 +65,7 @@
 			Parents,
 		}
 
-		protected sealed class CursorChangedEventArgs : EventArgs
+		sealed class CursorChangedEventArgs : EventArgs
 		{
 			private readonly Cursor _cursor;
 
@@ -81,7 +81,7 @@
 		}
 
 		/// <summary>Interface for a single data field.</summary>
-		protected interface IRevisionHeaderElement
+		interface IRevisionHeaderElement
 		{
 			event EventHandler InvalidateRequired;
 
@@ -105,7 +105,7 @@
 			void MouseDown(Rectangle rect, MouseButtons button, int x, int y);
 		}
 
-		protected abstract class BaseElement : IRevisionHeaderElement
+		abstract class BaseElement : IRevisionHeaderElement
 		{
 			public event EventHandler InvalidateRequired;
 
@@ -267,7 +267,7 @@
 			}
 		}
 
-		protected sealed class HashElement : BaseElement
+		sealed class HashElement : BaseElement
 		{
 			public HashElement(RevisionHeaderContent owner)
 				: base(owner)
@@ -298,7 +298,7 @@
 			}
 		}
 
-		protected sealed class TreeHashElement : BaseElement
+		sealed class TreeHashElement : BaseElement
 		{
 			public TreeHashElement(RevisionHeaderContent owner)
 				: base(owner)
@@ -329,7 +329,7 @@
 			}
 		}
 
-		protected sealed class ParentsElement : BaseElement
+		sealed class ParentsElement : BaseElement
 		{
 			public ParentsElement(RevisionHeaderContent owner)
 				: base(owner)
@@ -397,7 +397,7 @@
 			}
 		}
 
-		protected sealed class AuthorElement : BaseElement
+		sealed class AuthorElement : BaseElement
 		{
 			public AuthorElement(RevisionHeaderContent owner)
 				: base(owner)
@@ -430,7 +430,7 @@
 			}
 		}
 
-		protected sealed class CommitterElement : BaseElement
+		sealed class CommitterElement : BaseElement
 		{
 			public CommitterElement(RevisionHeaderContent owner)
 				: base(owner)
@@ -468,7 +468,7 @@
 			}
 		}
 
-		protected sealed class CommitDateElement : BaseElement
+		sealed class CommitDateElement : BaseElement
 		{
 			private DateFormat _dateFormat;
 
@@ -514,7 +514,7 @@
 			}
 		}
 
-		protected sealed class AuthorDateElement : BaseElement
+		sealed class AuthorDateElement : BaseElement
 		{
 			private DateFormat _dateFormat;
 
@@ -560,7 +560,7 @@
 			}
 		}
 
-		protected sealed class SubjectElement : BaseElement
+		sealed class SubjectElement : BaseElement
 		{
 			public SubjectElement(RevisionHeaderContent owner)
 				: base(owner)
@@ -637,7 +637,7 @@
 			}
 		}
 
-		protected sealed class BodyElement : BaseElement
+		sealed class BodyElement : BaseElement
 		{
 			private TextWithHyperlinks _text;
 
@@ -720,7 +720,7 @@
 			}
 		}
 
-		protected sealed class ReferencesElement : BaseElement
+		sealed class ReferencesElement : BaseElement
 		{
 			private struct ReferenceVisual
 			{

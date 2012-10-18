@@ -3299,6 +3299,21 @@
 
 		#region Misc Items
 
+		public static T GetSaveAsItem<T>(Tree tree, string fileName)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsNotNull(tree, "tree");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
+
+			var item = new T()
+			{
+				Text = Resources.StrSaveAs.AddEllipsis(),
+				Tag = Tuple.Create(tree, fileName),
+			};
+			item.Click += OnSaveAsItemClick;
+			return item;
+		}
+
 		public static T GetExtractAndOpenFileItem<T>(Tree tree, string fileName)
 			where T : ToolStripItem, new()
 		{
@@ -3610,6 +3625,14 @@
 			return item;
 		}
 
+		private static void OnSaveAsItemClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var data = (Tuple<Tree, string>)item.Tag;
+
+			data.Item1.ExtractBlobToFile(data.Item2);
+		}
+
 		private static void OnExtractFileItemClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
@@ -3623,13 +3646,53 @@
 			{
 				if(openas)
 				{
-					Utility.ShowOpenWithDialog(path);
+					Utility.ShowOpenWithDialog(fileName);
 				}
 				else
 				{
-					Utility.OpenUrl(path);
+					var process = Utility.CreateProcessFor(fileName);
+					process.EnableRaisingEvents = true;
+					process.Exited += OnFileViewerProcessExited;
+					process.Start();
 				}
 			}
+		}
+
+		private static void OnFileViewerProcessExited(object sender, EventArgs e)
+		{
+			var process = (Process)sender;
+			var path = process.StartInfo.FileName;
+			try
+			{
+				if(File.Exists(path))
+				{
+					var time = File.GetLastWriteTime(path);
+					if(time > process.StartTime)
+					{
+						/*
+						GitterApplication.MainForm.BeginInvoke(
+							new Action(() =>
+								{
+									GitterApplication.MessageBoxService.Show(
+										GitterApplication.MainForm,
+										"File '{0}' was modified.\nDo you want to save it",
+										"gitter",
+										MessageBoxButton.YesNo,
+										MessageBoxIcon.Question);
+								}));
+						*/
+						File.Delete(path);
+					}
+					else
+					{
+						File.Delete(path);
+					}
+				}
+			}
+			catch
+			{
+			}
+			process.Dispose();
 		}
 
 		private static void OnCompressRepositoryClick(object sender, EventArgs e)

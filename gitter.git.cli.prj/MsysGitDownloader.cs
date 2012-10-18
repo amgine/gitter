@@ -1,6 +1,8 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Diagnostics;
+	using System.IO;
 	using System.Net;
 	using System.Xml;
 
@@ -64,7 +66,7 @@
 						if(pos != -1)
 						{
 							var fileName = id.Substring(pos + 1);
-							if(fileName.StartsWith("Git-") && !fileName.EndsWith("-unicode.exe"))
+							if(fileName.StartsWith("Git-"))
 							{
 								var parser = new Parser(fileName);
 								try
@@ -128,6 +130,147 @@
 		public void Download()
 		{
 			Utility.OpenUrl(_downloadUrl);
+		}
+
+		private sealed class DownloadAndInstallProcess : IDisposable
+		{
+			public IAsyncProgressMonitor Monitor { get; set; }
+			public WebRequest WebRequest { get; set; }
+			public WebResponse WebResponse { get; set; }
+			public Stream ResponseStream { get; set; }
+			public byte[] Buffer { get; set; }
+			public Stream InstallerFileStream { get; set; }
+			public string InstallerFileName { get; set; }
+			public Process InstallerProcess { get; set; }
+			public long DownloadedBytes { get; set; }
+			public Exception Exception { get; set; }
+
+			public void Dispose()
+			{
+				if(WebResponse != null)
+				{
+					WebResponse.Close();
+					WebResponse = null;
+				}
+				if(ResponseStream != null)
+				{
+					ResponseStream.Dispose();
+					ResponseStream = null;
+				}
+				Buffer = null;
+				if(InstallerFileStream != null)
+				{
+					InstallerFileStream.Dispose();
+					InstallerFileStream = null;
+				}
+				if(InstallerProcess != null)
+				{
+					InstallerProcess.Dispose();
+				}
+			}
+
+			public void OnInstallerProcessExited(object sender, EventArgs e)
+			{
+				InstallerProcess.Dispose();
+				InstallerProcess = null;
+				Monitor.ProcessCompleted();
+				try
+				{
+					File.Delete(InstallerFileName);
+				}
+				catch
+				{
+				}
+			}
+		}
+
+		public void DownloadAndInstall()
+		{
+			var process = new DownloadAndInstallProcess()
+			{
+				Monitor = new NullMonitor(),
+				WebRequest = WebRequest.Create(DownloadUrl),
+			};
+			process.Monitor.SetProgressIntermediate();
+			process.Monitor.SetAction("Connecting to MSysGit download server...");
+			process.WebRequest.BeginGetResponse(OnGotResponse, process);
+		}
+
+		private static void OnGotResponse(IAsyncResult ar)
+		{
+			var process = (DownloadAndInstallProcess)ar.AsyncState;
+			process.Monitor.SetAction("Downloading MSysGit...");
+			process.WebResponse = process.WebRequest.EndGetResponse(ar);
+			process.ResponseStream = process.WebResponse.GetResponseStream();
+			if(process.WebResponse.ContentLength > 0)
+			{
+				process.Monitor.SetProgressRange(0, (int)process.WebResponse.ContentLength);
+			}
+			process.Buffer = new byte[1024*4];
+			process.ResponseStream.BeginRead(
+				process.Buffer,
+				0,
+				process.Buffer.Length,
+				OnResponseStreamRead,
+				process);
+		}
+
+		private static void OnResponseStreamRead(IAsyncResult ar)
+		{
+			var process = (DownloadAndInstallProcess)ar.AsyncState;
+			var bytesRead = process.ResponseStream.EndRead(ar);
+			if(bytesRead == 0)
+			{
+				process.InstallerFileStream.Close();
+				process.InstallerFileStream.Dispose();
+				process.InstallerFileStream = null;
+				process.ResponseStream.Dispose();
+				process.ResponseStream = null;
+				process.WebResponse.Close();
+				process.WebResponse = null;
+				process.Buffer = null;
+				process.Monitor.SetProgressIntermediate();
+				process.Monitor.SetAction("Installing MSysGit...");
+				process.InstallerProcess = new Process()
+				{
+					StartInfo = new ProcessStartInfo()
+					{
+						FileName = process.InstallerFileName,
+						Arguments = @"/silent",
+					},
+					EnableRaisingEvents = true,
+				};
+				process.InstallerProcess.Exited += process.OnInstallerProcessExited;
+				process.InstallerProcess.Start();
+			}
+			else
+			{
+				if(process.InstallerFileStream == null)
+				{
+					process.InstallerFileName = Path.Combine(
+						Path.GetTempPath(), "msysgit-installer.exe");
+					process.InstallerFileStream = new FileStream(
+						process.InstallerFileName,
+						FileMode.Create,
+						FileAccess.Write,
+						FileShare.None);
+				}
+				process.DownloadedBytes += bytesRead;
+				if(process.WebResponse.ContentLength > 0 && process.DownloadedBytes <= process.WebResponse.ContentLength)
+				{
+					process.Monitor.SetProgress((int)process.DownloadedBytes);
+				}
+				process.InstallerFileStream.Write(
+					process.Buffer,
+					0,
+					bytesRead);
+				process.ResponseStream.BeginRead(
+					process.Buffer,
+					0,
+					process.Buffer.Length,
+					OnResponseStreamRead,
+					process);
+			}
 		}
 
 		public override string ToString()

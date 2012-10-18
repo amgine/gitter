@@ -697,6 +697,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to save file &apos;{0}&apos;.
+        /// </summary>
+        internal static string ErrfFailedToSaveFile {
+            get {
+                return ResourceManager.GetString("ErrfFailedToSaveFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid branch name.
         /// </summary>
         internal static string ErrInvalidBranchName {
@@ -5621,6 +5630,15 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrSave {
             get {
                 return ResourceManager.GetString("StrSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save As.
+        /// </summary>
+        internal static string StrSaveAs {
+            get {
+                return ResourceManager.GetString("StrSaveAs", resourceCulture);
             }
         }
         
