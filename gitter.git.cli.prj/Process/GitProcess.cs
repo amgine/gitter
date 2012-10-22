@@ -6,6 +6,7 @@
 	using System.Text;
 	using System.IO;
 	using System.Diagnostics;
+	using System.Threading;
 
 	internal static class GitProcess
 	{
@@ -296,18 +297,18 @@
 
 			var psi = new ProcessStartInfo()
 			{
-				Arguments = input.GetArguments(),
-				WindowStyle = ProcessWindowStyle.Normal,
-				UseShellExecute = false,
-				StandardOutputEncoding = input.Encoding,
-				StandardErrorEncoding = input.Encoding,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				LoadUserProfile = true,
-				FileName = _gitExePath,
-				ErrorDialog = false,
-				CreateNoWindow = true,
+				Arguments				= input.GetArguments(),
+				WindowStyle				= ProcessWindowStyle.Normal,
+				UseShellExecute			= false,
+				StandardOutputEncoding	= input.Encoding,
+				StandardErrorEncoding	= input.Encoding,
+				RedirectStandardInput	= true,
+				RedirectStandardOutput	= true,
+				RedirectStandardError	= true,
+				LoadUserProfile			= true,
+				FileName				= _gitExePath,
+				ErrorDialog				= false,
+				CreateNoWindow			= true,
 			};
 			if(!string.IsNullOrEmpty(input.WorkingDirectory))
 			{
@@ -328,14 +329,110 @@
 			})
 			{
 				process.Start();
-				var stdout = process.StandardOutput.ReadToEnd();
-				var stderr = process.StandardError.ReadToEnd();
-				process.WaitForExit();
-				var code = process.ExitCode;
-				output = new GitOutput(stdout, stderr, code);
+				using(var stdoutReader = new AsyncTextReader(
+					process.StandardOutput.BaseStream, input.Encoding))
+				using(var stderrReader = new AsyncTextReader(
+					process.StandardError.BaseStream, input.Encoding))
+				{
+					stdoutReader.Start();
+					stderrReader.Start();
+					process.WaitForExit();
+					stdoutReader.WaitForEOF();
+					stderrReader.WaitForEOF();
+					var code = process.ExitCode;
+					output = new GitOutput(
+						stdoutReader.GetText(),
+						stderrReader.GetText(),
+						code);
+				}
 				process.Close();
 			}
 			return output;
+		}
+
+		private sealed class AsyncTextReader : IDisposable
+		{
+			#region Data
+
+			private readonly Stream _stream;
+			private readonly byte[] _buffer;
+			private readonly char[] _chars;
+			private readonly Decoder _decoder;
+			private readonly StringBuilder _builder;
+			private readonly ManualResetEvent _eof;
+
+			#endregion
+
+			public AsyncTextReader(Stream stream, Encoding encoding, int bufferSize = 0x400)
+			{
+				Assert.IsNotNull(stream);
+				Assert.IsNotNull(encoding);
+				Assert.IsTrue(bufferSize > 0);
+
+				_stream		= stream;
+				_decoder	= encoding.GetDecoder();
+				_buffer		= new byte[bufferSize];
+				_builder	= new StringBuilder(bufferSize);
+				_chars		= new char[encoding.GetMaxCharCount(bufferSize)];
+				_eof		= new ManualResetEvent(false);
+			}
+
+			public void Start()
+			{
+				BeginReadAsync();
+			}
+
+			public void WaitForEOF()
+			{
+				_eof.WaitOne();
+			}
+
+			private void OnStreamRead(IAsyncResult ar)
+			{
+				int bytesCount = 0;
+				try
+				{
+					bytesCount = _stream.EndRead(ar);
+				}
+				catch(IOException)
+				{
+					bytesCount = 0;
+				}
+				catch(OperationCanceledException)
+				{
+					bytesCount = 0;
+				}
+				if(bytesCount != 0)
+				{
+					Decode(bytesCount);
+					BeginReadAsync();
+				}
+				else
+				{
+					_eof.Set();
+				}
+			}
+
+			public string GetText()
+			{
+				return _builder.ToString();
+			}
+
+			private void BeginReadAsync()
+			{
+				_stream.BeginRead(_buffer, 0, _buffer.Length, OnStreamRead, null);
+			}
+
+			private void Decode(int bytesCount)
+			{
+				int charsCount = _decoder.GetChars(_buffer, 0, bytesCount, _chars, 0);
+				_builder.Append(_chars, 0, charsCount);
+			}
+
+			public void Dispose()
+			{
+				_eof.Close();
+			}
 		}
 
 		public static GitAsync ExecAsync(GitInput input)
