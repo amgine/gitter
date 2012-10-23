@@ -62,10 +62,18 @@
 				new CommandArgument(GitConstants.BlobObjectType),
 				new CommandArgument(parameters.Treeish + ":" + parameters.ObjectName));
 
-			var output = _executor.ExecCommand(cmd, Encoding.Default);
-			output.ThrowOnBadReturnCode();
+			var stdOutReceiver = new AsyncBytesReader();
+			var stdErrReceiver = new AsyncTextReader();
+			var executor = GitProcess.CreateExecutor(
+				stdOutReceiver, stdErrReceiver);
+			var code = executor.Execute(new GitInput(_repository.WorkingDirectory, cmd));
+			if(code != 0)
+			{
+				var output = new GitOutput(string.Empty, stdErrReceiver.GetText(), code);
+				output.ThrowOnBadReturnCode();
+			}
 
-			return Encoding.Default.GetBytes(output.Output);
+			return stdOutReceiver.GetBytes();
 		}
 
 		/// <summary>Get objects contained in a tree.</summary>

@@ -131,7 +131,8 @@
 			var gitPath = Path.Combine(path, GitConstants.GitDir);
 			if(Directory.Exists(gitPath) || File.Exists(gitPath))
 			{
-				var gitOutput = GitProcess.Exec(new GitInput(path, new RevParseCommand(RevParseCommand.GitDir())));
+				var executor = new RepositoryCommandExecutor(this, path);
+				var gitOutput = executor.ExecCommand(new RevParseCommand(RevParseCommand.GitDir()));
 				return gitOutput.ExitCode == 0;
 			}
 			return false;
@@ -154,7 +155,8 @@
 				args.Add(InitCommand.Template(parameters.Template));
 			}
 			var cmd = new InitCommand(args);
-			var output = GitProcess.Exec(new GitInput(parameters.Path, cmd));
+			var executor = new RepositoryCommandExecutor(this, parameters.Path);
+			var output = executor.ExecCommand(cmd);
 			output.ThrowOnBadReturnCode();
 		}
 

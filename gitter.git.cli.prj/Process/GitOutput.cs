@@ -5,7 +5,7 @@
 	using System.Text;
 	using System.Diagnostics;
 
-	/// <summary>Output of git.exe.</summary>
+	/// <summary>Text output of git.exe.</summary>
 	internal sealed class GitOutput
 	{
 		#region Data

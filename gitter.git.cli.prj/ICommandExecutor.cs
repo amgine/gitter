@@ -4,7 +4,7 @@
 	using System.Text;
 
 	/// <summary>Git command line executor.</summary>
-	interface ICommandExecutor
+	internal interface ICommandExecutor
 	{
 		GitOutput ExecCommand(Command command);
 
