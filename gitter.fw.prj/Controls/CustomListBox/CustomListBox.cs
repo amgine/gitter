@@ -489,6 +489,59 @@
 			Invalidate(rc);
 		}
 
+		public int GetInsertIndexFormPoint(int x, int y, bool insertBetween, out CustomListBoxItemsCollection collection)
+		{
+			if(x < ClientRectangle.X || x >= ClientRectangle.Right)
+			{
+				collection = null;
+				return - 1;
+			}
+			y -= ClientRectangle.Y;
+			if(HeaderStyle != HeaderStyle.Hidden)
+			{
+				y -= _headersArea.Height;
+			}
+			y += VScrollPos;
+			if(insertBetween)
+			{
+				y += ItemHeight / 2;
+			}
+			else
+			{
+				y += 0;
+			}
+			int index = y / ItemHeight;
+			if(index > _itemPlainList.Count)
+			{
+				index = _itemPlainList.Count;
+			}
+			if(index < 0)
+			{
+				collection = Items;
+				return 0;
+			}
+			if(index > 0)
+			{
+				var item = _itemPlainList[index == _itemPlainList.Count ? index - 1: index];
+				if(item.Parent != null)
+				{
+					collection = item.Parent.Items;
+					index = collection.IndexOf(item);
+					return index;
+				}
+				else
+				{
+					collection = Items;
+					return index;
+				}
+			}
+			else
+			{
+				collection = Items;
+				return index;
+			}
+		}
+
 		internal void InvalidateSubItem(CustomListBoxItem item, int columnId)
 		{
 			int columnIndex = -1;
@@ -2213,10 +2266,14 @@
 			{
 				int[] indices = new int[_selectedItems.Count];
 				for(int i = 0; i < indices.Length; ++i)
+				{
 					indices[i] = _itemPlainList.IndexOf(_selectedItems[i]);
+				}
 				_selectedItems.Clear();
 				for(int i = 0; i < indices.Length; ++i)
+				{
 					Invalidate(GetItemDisplayRect(indices[i]));
+				}
 			}
 			if(e.Button == MouseButtons.Right)
 			{
@@ -2231,11 +2288,17 @@
 					Events.Raise(ContextMenuRequestedEvent, this, args);
 					ContextMenuStrip menu;
 					if(args.OverrideDefaultMenu)
+					{
 						menu = args.ContextMenu;
+					}
 					else
+					{
 						menu = GetFreeSpaceContextMenu(args);
+					}
 					if(menu != null)
+					{
 						menu.Show(this, e.Location);
+					}
 				}
 			}
 		}

@@ -70,10 +70,16 @@
 
 		public void UpdatePosition(Point point)
 		{
-			var scrPos = point;
-			scrPos.X -= _dx;
-			scrPos.Y -= _dy;
-			Location = scrPos;
+			point.X -= _dx;
+			point.Y -= _dy;
+			Location = point;
+		}
+
+		public void UpdatePosition(Rectangle bounds)
+		{
+			bounds.X -= _dx;
+			bounds.Y -= _dy;
+			Bounds = bounds;
 		}
 
 		protected override void OnPaint(PaintEventArgs e)

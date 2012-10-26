@@ -59,6 +59,18 @@
 					}
 				}
 			}
+			else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
+			{
+				e.Effect = DragDropEffects.Move;
+			}
+			else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
+			{
+				var data = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
+				if(!IsPresentInLocalRepositoryList(data.DataContext))
+				{
+					e.Effect = DragDropEffects.Copy;
+				}
+			}
 		}
 
 		private bool IsPresentInLocalRepositoryList(string path)
@@ -92,19 +104,53 @@
 								if(provider != null)
 								{
 									var link = new RepositoryLink(path, provider.Name);
-									_lstLocalRepositories.Items.Add(new RepositoryListItem(link));
+									var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
+									CustomListBoxItemsCollection itemsCollection;
+									var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
+									if(index != -1)
+									{
+										itemsCollection.Insert(index, new RepositoryListItem(link));
+									}
 								}
 							}
 						}
 					}
 				}
-				/*
-				else if(e.Data.GetDataPresent(typeof(RepositoryLink)))
+				else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
 				{
-					var data = (RepositoryLink)e.Data.GetData(typeof(RepositoryLink));
-
+					var data = (RepositoryListItem)e.Data.GetData(typeof(RepositoryListItem));
+					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
+					CustomListBoxItemsCollection itemsCollection;
+					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
+					if(index == -1) return;
+					var currentIndex = _lstLocalRepositories.Items.IndexOf(data);
+					if(index == currentIndex) return;
+					if(currentIndex == -1)
+					{
+						itemsCollection.Insert(index, data);
+					}
+					else
+					{
+						if(index > _lstLocalRepositories.Items.Count - 1)
+						{
+							--index;
+						}
+						data.Remove();
+						itemsCollection.Insert(index, data);
+					}
 				}
-				*/
+				else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
+				{
+					var data = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
+					var path = data.DataContext;
+					if(IsPresentInLocalRepositoryList(path)) return;
+					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
+					CustomListBoxItemsCollection itemsCollection;
+					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
+					if(index == -1) return;
+					var item = new RepositoryListItem(new RepositoryLink(path, string.Empty));
+					itemsCollection.Insert(index, item);
+				}
 			}
 		}
 

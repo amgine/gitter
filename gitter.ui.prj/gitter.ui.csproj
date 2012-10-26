@@ -112,6 +112,7 @@
     </Compile>
     <Compile Include="Controls\ListBoxes\RecentRepositoryListItem.cs" />
     <Compile Include="Controls\ListBoxes\IssueTrackerListItem.cs" />
+    <Compile Include="Controls\ListBoxes\RepositoryDragImage.cs" />
     <Compile Include="Properties\CachedResources.cs" />
     <Compile Include="Controls\Dialogs\AboutDialog.cs">
       <SubType>UserControl</SubType>
