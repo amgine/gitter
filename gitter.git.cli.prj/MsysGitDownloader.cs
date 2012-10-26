@@ -300,10 +300,20 @@
 					return;
 				}
 				UpdateDownloadProgress(process, bytesRead);
-				process.InstallerFileStream.Write(
-					process.Buffer,
-					0,
-					bytesRead);
+				try
+				{
+					process.InstallerFileStream.Write(
+						process.Buffer,
+						0,
+						bytesRead);
+				}
+				catch(Exception exc)
+				{
+					process.Exception = exc;
+					process.Monitor.ProcessCompleted();
+					process.Dispose();
+					return;
+				}
 				process.ResponseStream.BeginRead(
 					process.Buffer,
 					0,
