@@ -5,6 +5,7 @@
 	using System.IO;
 	using System.Net;
 	using System.Xml;
+	using System.Threading;
 
 	using gitter.Framework;
 
@@ -134,6 +135,11 @@
 
 		private sealed class DownloadAndInstallProcess : IDisposable
 		{
+			public DownloadAndInstallProcess(EventWaitHandle completionWaitHandle)
+			{
+				_waitHandle = completionWaitHandle;
+			}
+
 			public IAsyncProgressMonitor Monitor { get; set; }
 			public WebRequest WebRequest { get; set; }
 			public WebResponse WebResponse { get; set; }
@@ -144,33 +150,47 @@
 			public Process InstallerProcess { get; set; }
 			public long DownloadedBytes { get; set; }
 			public Exception Exception { get; set; }
+			public int InstallerExitCode { get; set; }
+			public bool IsDisposed { get; private set; }
+
+			private EventWaitHandle _waitHandle;
 
 			public void Dispose()
 			{
-				if(WebResponse != null)
+				if(!IsDisposed)
 				{
-					WebResponse.Close();
-					WebResponse = null;
-				}
-				if(ResponseStream != null)
-				{
-					ResponseStream.Dispose();
-					ResponseStream = null;
-				}
-				Buffer = null;
-				if(InstallerFileStream != null)
-				{
-					InstallerFileStream.Dispose();
-					InstallerFileStream = null;
-				}
-				if(InstallerProcess != null)
-				{
-					InstallerProcess.Dispose();
+					if(WebResponse != null)
+					{
+						WebResponse.Close();
+						WebResponse = null;
+					}
+					if(ResponseStream != null)
+					{
+						ResponseStream.Dispose();
+						ResponseStream = null;
+					}
+					Buffer = null;
+					if(InstallerFileStream != null)
+					{
+						InstallerFileStream.Dispose();
+						InstallerFileStream = null;
+					}
+					if(InstallerProcess != null)
+					{
+						InstallerProcess.Dispose();
+					}
+					if(_waitHandle != null)
+					{
+						_waitHandle.Set();
+						_waitHandle = null;
+					}
+					IsDisposed = true;
 				}
 			}
 
 			public void OnInstallerProcessExited(object sender, EventArgs e)
 			{
+				InstallerExitCode = InstallerProcess.ExitCode;
 				InstallerProcess.Dispose();
 				InstallerProcess = null;
 				Monitor.ProcessCompleted();
@@ -181,19 +201,40 @@
 				catch
 				{
 				}
+				Dispose();
 			}
 		}
 
-		public void DownloadAndInstall()
+		public IAsyncFunc<Exception> DownloadAndInstallAsync()
 		{
-			var process = new DownloadAndInstallProcess()
-			{
-				Monitor = new NullMonitor(),
-				WebRequest = WebRequest.Create(DownloadUrl),
-			};
-			process.Monitor.SetProgressIntermediate();
-			process.Monitor.SetAction("Connecting to MSysGit download server...");
-			process.WebRequest.BeginGetResponse(OnGotResponse, process);
+			return AsyncFunc.Create<object, Exception>(
+				null,
+				(data, monitor) =>
+				{
+					using(var evt = new ManualResetEvent(false))
+					{
+						var process = new DownloadAndInstallProcess(evt)
+						{
+							Monitor = monitor,
+							WebRequest = WebRequest.Create(DownloadUrl),
+						};
+						process.Monitor.SetProgressIntermediate();
+						process.Monitor.SetAction("Connecting to MSysGit download server...");
+						process.WebRequest.BeginGetResponse(OnGotResponse, process);
+						evt.WaitOne();
+						if(process.Exception != null)
+						{
+							return process.Exception;
+						}
+						if(process.InstallerExitCode != 0)
+						{
+							return new ApplicationException("Installer returned exit code " + process.InstallerExitCode);
+						}
+						return null;
+					}
+				},
+				"MSysGit Installation",
+				"Initializing...");
 		}
 
 		private static void OnGotResponse(IAsyncResult ar)
@@ -218,48 +259,47 @@
 		private static void OnResponseStreamRead(IAsyncResult ar)
 		{
 			var process = (DownloadAndInstallProcess)ar.AsyncState;
-			var bytesRead = process.ResponseStream.EndRead(ar);
+			int bytesRead = 0;
+			try
+			{
+				bytesRead = process.ResponseStream.EndRead(ar);
+			}
+			catch(Exception exc)
+			{
+				process.Exception = exc;
+				process.Monitor.ProcessCompleted();
+				process.Dispose();
+				return;
+			}
 			if(bytesRead == 0)
 			{
-				process.InstallerFileStream.Close();
-				process.InstallerFileStream.Dispose();
-				process.InstallerFileStream = null;
+				try
+				{
+					process.InstallerFileStream.Close();
+					process.InstallerFileStream.Dispose();
+					process.InstallerFileStream = null;
+				}
+				catch(Exception exc)
+				{
+					process.Exception = exc;
+					process.Monitor.ProcessCompleted();
+					process.Dispose();
+					return;
+				}
 				process.ResponseStream.Dispose();
 				process.ResponseStream = null;
 				process.WebResponse.Close();
 				process.WebResponse = null;
 				process.Buffer = null;
-				process.Monitor.SetProgressIntermediate();
-				process.Monitor.SetAction("Installing MSysGit...");
-				process.InstallerProcess = new Process()
-				{
-					StartInfo = new ProcessStartInfo()
-					{
-						FileName = process.InstallerFileName,
-						Arguments = @"/silent",
-					},
-					EnableRaisingEvents = true,
-				};
-				process.InstallerProcess.Exited += process.OnInstallerProcessExited;
-				process.InstallerProcess.Start();
+				RunInstaller(process);
 			}
 			else
 			{
-				if(process.InstallerFileStream == null)
+				if(!EnsureOutputFileStreamExists(process))
 				{
-					process.InstallerFileName = Path.Combine(
-						Path.GetTempPath(), "msysgit-installer.exe");
-					process.InstallerFileStream = new FileStream(
-						process.InstallerFileName,
-						FileMode.Create,
-						FileAccess.Write,
-						FileShare.None);
+					return;
 				}
-				process.DownloadedBytes += bytesRead;
-				if(process.WebResponse.ContentLength > 0 && process.DownloadedBytes <= process.WebResponse.ContentLength)
-				{
-					process.Monitor.SetProgress((int)process.DownloadedBytes);
-				}
+				UpdateDownloadProgress(process, bytesRead);
 				process.InstallerFileStream.Write(
 					process.Buffer,
 					0,
@@ -270,6 +310,66 @@
 					process.Buffer.Length,
 					OnResponseStreamRead,
 					process);
+			}
+		}
+
+		private static void UpdateDownloadProgress(DownloadAndInstallProcess process, int downloadedBytes)
+		{
+			process.DownloadedBytes += downloadedBytes;
+			if(process.WebResponse.ContentLength > 0 && process.DownloadedBytes <= process.WebResponse.ContentLength)
+			{
+				process.Monitor.SetProgress((int)process.DownloadedBytes);
+			}
+		}
+
+		private static bool EnsureOutputFileStreamExists(DownloadAndInstallProcess process)
+		{
+			if(process.InstallerFileStream == null)
+			{
+				try
+				{
+					process.InstallerFileName = Path.Combine(
+						Path.GetTempPath(), "msysgit-installer.exe");
+					process.InstallerFileStream = new FileStream(
+						process.InstallerFileName,
+						FileMode.Create,
+						FileAccess.Write,
+						FileShare.None);
+				}
+				catch(Exception exc)
+				{
+					process.Exception = exc;
+					process.Monitor.ProcessCompleted();
+					process.Dispose();
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private static void RunInstaller(DownloadAndInstallProcess process)
+		{
+			process.Monitor.SetProgressIntermediate();
+			process.Monitor.SetAction("Installing MSysGit...");
+			try
+			{
+				process.InstallerProcess = new Process()
+				{
+					StartInfo = new ProcessStartInfo()
+					{
+						FileName = process.InstallerFileName,
+						Arguments = @"/verysilent",
+					},
+					EnableRaisingEvents = true,
+				};
+				process.InstallerProcess.Exited += process.OnInstallerProcessExited;
+				process.InstallerProcess.Start();
+			}
+			catch(Exception exc)
+			{
+				process.Exception = exc;
+				process.Monitor.ProcessCompleted();
+				process.Dispose();
 			}
 		}
 

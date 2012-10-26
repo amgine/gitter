@@ -10,6 +10,7 @@
 
 	using gitter.Framework;
 	using gitter.Framework.Options;
+	using gitter.Framework.Services;
 
 	using gitter.Git.AccessLayer;
 	using gitter.Git.AccessLayer.CLI;
@@ -50,7 +51,7 @@
 
 			_lblLatestVersionValue.Text = Resources.StrsSearching.AddEllipsis();
 			_lblLatestVersion.Text = Resources.StrLatestVersion.AddColon();
-			_btnDownload.Text = Resources.StrDownload;
+			_btnDownload.Text = Resources.StrInstall;
 			_btnRefreshLatestVersion.Text = Resources.StrRefresh;
 
 			if(_gitCLI.AutodetectGitExePath)
@@ -231,9 +232,20 @@
 
 		private void _btnDownload_Click(object sender, EventArgs e)
 		{
-			if(_downloader != null && _downloader.IsAvailable)
+			var exc = _downloader.DownloadAndInstallAsync().Invoke<ProgressForm>(this);
+			if(exc != null)
 			{
-				_downloader.Download();
+				GitterApplication.MessageBoxService.Show(
+					this, exc.Message, "MSysGit Installation Failed", MessageBoxButton.Close, MessageBoxIcon.Error);
+			}
+			var version = TryGetVersion();
+			if(version != null)
+			{
+				_lblVersion.Text = version.ToString();
+			}
+			else
+			{
+				_lblVersion.Text = Resources.StrlUnavailable.SurroundWith("<", ">");
 			}
 		}
 
