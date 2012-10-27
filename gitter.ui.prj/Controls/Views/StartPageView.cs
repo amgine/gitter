@@ -244,9 +244,22 @@
 
 		private void _btnAddLocalRepo_LinkClicked(object sender, EventArgs e)
 		{
-			using(var dlg = new AddRepositoryDialog(WorkingEnvironment, Repositories))
+			var path = Utility.ShowPickFolderDialog(this);
+			if(!string.IsNullOrWhiteSpace(path))
 			{
-				dlg.Run(this);
+				var prov = WorkingEnvironment.FindProviderForDirectory(path);
+				if(prov == null)
+				{
+					GitterApplication.MessageBoxService.Show(
+						this,
+						Resources.ErrPathIsNotValidRepository.UseAsFormat(path),
+						Resources.ErrInvalidPath,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
+					return;
+				}
+				var item = new RepositoryListItem(new RepositoryLink(path, prov.Name));
+				_lstLocalRepositories.Items.Add(item);
 			}
 		}
 
