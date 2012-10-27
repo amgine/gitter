@@ -561,6 +561,7 @@
 		{
 			if(_repository != null && _repository.WorkingDirectory == path)
 			{
+				_repositoryGui.ActivateDefaultView();
 				return true;
 			}
 			try
