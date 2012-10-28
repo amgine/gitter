@@ -115,6 +115,17 @@
     <Compile Include="FileSize.cs" />
     <Compile Include="HelperExecutables.cs" />
     <Compile Include="IGuiProvider.cs" />
+    <Compile Include="Integration\ExplorerContextMenuFeature.cs" />
+    <Compile Include="Integration\GravatarFeature.cs" />
+    <Compile Include="Integration\IIntegrationFeature.cs" />
+    <Compile Include="Integration\IntegrationFeature.cs" />
+    <Compile Include="Integration\IntegrationFeatures.cs" />
+    <Compile Include="Options\IntegrationOptionsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\IntegrationOptionsPage.Designer.cs">
+      <DependentUpon>IntegrationOptionsPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\CachedResources.cs" />
     <Compile Include="Cache\Cache.cs" />
     <Compile Include="Cache\GCCache.cs" />
@@ -396,12 +407,6 @@
     <Compile Include="Services\Gravatar\GravatarService.cs" />
     <Compile Include="IRemoteProcedureExecutor.cs" />
     <Compile Include="Mutable.cs" />
-    <Compile Include="Options\BehaviorPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\BehaviorPage.Designer.cs">
-      <DependentUpon>BehaviorPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="Options\ColorsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -521,6 +526,9 @@
     <EmbeddedResource Include="Options\AppearancePage.resx">
       <DependentUpon>AppearancePage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Options\IntegrationOptionsPage.resx">
+      <DependentUpon>IntegrationOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Options\OptionsDialog.resx">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -535,9 +543,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ProgressForm.resx">
       <DependentUpon>ProgressForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\BehaviorPage.resx">
-      <DependentUpon>BehaviorPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options\FontsPage.resx">
       <DependentUpon>FontsPage.cs</DependentUpon>
@@ -714,6 +719,8 @@
     <Content Include="Hunspell\License.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\folder.png" />
+    <None Include="Resources\gravatar.png" />
     <None Include="Resources\arrow-curve-180-left.png" />
     <None Include="Resources\arrow-curve-000-left.png" />
     <None Include="Resources\globe.png" />

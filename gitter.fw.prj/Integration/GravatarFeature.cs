@@ -1,4 +1,4 @@
-﻿namespace gitter.Git.Integration
+﻿namespace gitter.Framework
 {
 	using System;
 	using System.Collections.Generic;
@@ -6,19 +6,19 @@
 	using System.Text;
 
 	using gitter.Framework.Services;
-	using gitter.Git.Gui;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using Resources = gitter.Framework.Properties.Resources;
 
 	/// <summary>Gravatar integration feature.</summary>
-	public sealed class Gravatar : IntegrationFeature
+	public sealed class GravatarFeature : IntegrationFeature
 	{
 		private DefaultGravatarType _defaultType;
 		private const string _name = "Gravatar";
 
-		internal Gravatar()
+		internal GravatarFeature()
 			: base(_name, Resources.StrsGravatarDisplayText, CachedResources.Bitmaps["ImgGravatar"], false)
 		{
+			IsEnabled = true;
 		}
 
 		public DefaultGravatarType DefaultGravatarType

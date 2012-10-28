@@ -1666,9 +1666,6 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   <data name="ErrRevisionCannotBeEmpty" xml:space="preserve">
     <value>Revision cannot be empty</value>
   </data>
-  <data name="ImgGravatar" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gravatar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ImgPatchApply" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\patch-apply.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -1683,9 +1680,6 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   </data>
   <data name="StrSavePatch" xml:space="preserve">
     <value>Save Patch</value>
-  </data>
-  <data name="StrsGravatarDisplayText" xml:space="preserve">
-    <value>Download and show user avatars using gravatar.com</value>
   </data>
   <data name="StrDepth" xml:space="preserve">
     <value>Depth</value>

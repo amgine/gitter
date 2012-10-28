@@ -12,7 +12,6 @@
 
 	using gitter.Git.Gui;
 	using gitter.Git.Gui.Dialogs;
-	using gitter.Git.Integration;
 	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -28,7 +27,6 @@
 			};
 
 		private static readonly Version _minVersion = new Version(1,7,0,2);
-		private static readonly IntegrationFeatures _integrationFeatures;
 		private static IGitAccessorProvider _gitAccessorProvider;
 		private static IGitAccessor _gitAccessor;
 
@@ -47,7 +45,6 @@
 		/// <summary>Initializes the <see cref="RepositoryProvider"/> class.</summary>
 		static RepositoryProvider()
 		{
-			_integrationFeatures = new IntegrationFeatures();
 		}
 
 		/// <summary>Create <see cref="RepositoryProvider"/>.</summary>
@@ -129,11 +126,6 @@
 			get { return _gitAccessor; }
 		}
 
-		public static IntegrationFeatures Integration
-		{
-			get { return _integrationFeatures; }
-		}
-
 		public static Version MinimumRequiredGitVersion
 		{
 			get { return _minVersion; }
@@ -186,14 +178,6 @@
 					}
 				}
 			}
-			if(section != null)
-			{
-				var integrationNode = section.TryGetSection("Integration");
-				if(integrationNode != null)
-				{
-					_integrationFeatures.LoadFrom(integrationNode);
-				}
-			}
 			GlobalOptions.RegisterPropertyPageFactory(
 				new PropertyPageFactory(
 					GitOptionsPage.Guid,
@@ -201,13 +185,6 @@
 					null,
 					PropertyPageFactory.RootGroupGuid,
 					env => new GitOptionsPage(env)));
-			GlobalOptions.RegisterPropertyPageFactory(
-				new PropertyPageFactory(
-					IntegrationOptionsPage.Guid,
-					Resources.StrIntegration,
-					null,
-					GitOptionsPage.Guid,
-					env => new IntegrationOptionsPage()));
 			GlobalOptions.RegisterPropertyPageFactory(
 				new PropertyPageFactory(
 					ConfigurationPage.Guid,
@@ -235,9 +212,6 @@
 					GitAccessor.SaveTo(gitAccessorSection);
 				}
 			}
-
-			var integrationNode = section.GetCreateSection("Integration");
-			_integrationFeatures.SaveTo(integrationNode);
 			_configSection = section;
 		}
 

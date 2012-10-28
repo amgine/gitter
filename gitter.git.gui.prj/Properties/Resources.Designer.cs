@@ -1825,16 +1825,6 @@ namespace gitter.Git.Gui.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ImgGravatar {
-            get {
-                object obj = ResourceManager.GetObject("ImgGravatar", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ImgHistory {
             get {
                 object obj = ResourceManager.GetObject("ImgHistory", resourceCulture);
@@ -5776,15 +5766,6 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrsForCurrentWindowsUser {
             get {
                 return ResourceManager.GetString("StrsForCurrentWindowsUser", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Download and show user avatars using gravatar.com.
-        /// </summary>
-        internal static string StrsGravatarDisplayText {
-            get {
-                return ResourceManager.GetString("StrsGravatarDisplayText", resourceCulture);
             }
         }
         

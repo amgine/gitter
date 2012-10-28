@@ -1117,7 +1117,7 @@
 			var width = bounds.Width;
 			if(_measuredWidth != width) Measure(graphics, width);
 			var r = bounds;
-			if(RepositoryProvider.Integration.Gravatar.Enabled)
+			if(GitterApplication.IntegrationFeatures.Gravatar.IsEnabled)
 			{
 				var avatar = _revision.Author.Avatar;
 				var image = avatar.Image;

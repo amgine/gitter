@@ -29,11 +29,11 @@
 			_colors = new Dictionary<string, SelectableColor>();
 
 			RegisterPropertyPageFactory(new PropertyPageFactory(
-				BehaviorPage.Guid,
-				Resources.StrBehavior,
+				IntegrationOptionsPage.Guid,
+				Resources.StrIntegration,
 				null,
 				PropertyPageFactory.RootGroupGuid,
-				env => new BehaviorPage()));
+				env => new IntegrationOptionsPage()));
 
 			RegisterPropertyPageFactory(new PropertyPageFactory(
 				SpellingPage.Guid,
@@ -94,7 +94,9 @@
 				var item = new PropertyPageItem(kvp.Value);
 				dic.Add(kvp.Key, item);
 				if(kvp.Value.GroupGuid != PropertyPageFactory.RootGroupGuid)
+				{
 					list.Add(item);
+				}
 			}
 			foreach(var item in list)
 			{
@@ -122,17 +124,20 @@
 				{
 					using(var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell\gitter\command", false))
 					{
-						var value = (string)key.GetValue(null, string.Empty);
-						if(value == string.Empty) return false;
-						if(value.EndsWith(" \"%1\""))
+						if(key != null)
 						{
-							value = value.Substring(0, value.Length - 5);
-							if(value.StartsWith("\"") && value.EndsWith("\""))
+							var value = (string)key.GetValue(null, string.Empty);
+							if(value == string.Empty) return false;
+							if(value.EndsWith(" \"%1\""))
 							{
-								value = value.Substring(1, value.Length - 2);
-								value = Path.GetFullPath(value);
-								var appPath = System.IO.Path.GetFullPath(Application.ExecutablePath);
-								return value == appPath;
+								value = value.Substring(0, value.Length - 5);
+								if(value.StartsWith("\"") && value.EndsWith("\""))
+								{
+									value = value.Substring(1, value.Length - 2);
+									value = Path.GetFullPath(value);
+									var appPath = System.IO.Path.GetFullPath(Application.ExecutablePath);
+									return value == appPath;
+								}
 							}
 						}
 						return false;
@@ -174,6 +179,8 @@
 
 		public static void LoadFrom(Section section)
 		{
+			Verify.Argument.IsNotNull(section, "section");
+
 			var appearanceNode = section.TryGetSection("Appearance");
 			if(appearanceNode != null)
 			{
@@ -194,20 +201,23 @@
 			var servicesNode = section.TryGetSection("Services");
 			if(servicesNode != null)
 			{
-				var gravatarNode = servicesNode.TryGetSection("Gravatar");
-				if(gravatarNode != null)
+				var spellingSection = servicesNode.TryGetSection("Spelling");
+				if(spellingSection != null)
 				{
+					SpellingService.LoadFrom(spellingSection);
 				}
-				var spellingNode = servicesNode.TryGetSection("Spelling");
-				if(spellingNode != null)
-				{
-					SpellingService.LoadFrom(spellingNode);
-				}
+			}
+			var featuresSection = section.TryGetSection("IntegrationFeatures");
+			if(featuresSection != null)
+			{
+				GitterApplication.IntegrationFeatures.LoadFrom(featuresSection);
 			}
 		}
 
 		public static void SaveTo(Section section)
 		{
+			Verify.Argument.IsNotNull(section, "section");
+
 			var appearanceNode = section.GetCreateSection("Appearance");
 			if(GitterApplication.TextRenderer == GitterApplication.GdiTextRenderer)
 			{
@@ -218,9 +228,10 @@
 				appearanceNode.SetValue("TextRenderer", "GDI+");
 			}
 			var servicesNode = section.GetCreateSection("Services");
-			var gravatarNode = servicesNode.GetCreateSection("Gravatar");
 			var spellingNode = servicesNode.GetCreateSection("Spelling");
 			SpellingService.SaveTo(spellingNode);
+			var featuresSection = section.GetCreateSection("IntegrationFeatures");
+			GitterApplication.IntegrationFeatures.SaveTo(featuresSection);
 		}
 	}
 }

@@ -556,9 +556,6 @@
     <Compile Include="Dialogs\InitDialog.Designer.cs">
       <DependentUpon>InitDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Integration\Gravatar.cs" />
-    <Compile Include="Integration\IntegrationFeature.cs" />
-    <Compile Include="Integration\IntegrationFeatures.cs" />
     <Compile Include="Options\ConfigurationPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -583,12 +580,6 @@
     </Compile>
     <Compile Include="Dialogs\RenameRemoteDialog.Designer.cs">
       <DependentUpon>RenameRemoteDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\IntegrationOptionsPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\IntegrationOptionsPage.Designer.cs">
-      <DependentUpon>IntegrationOptionsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="RepositoryProvider.cs" />
     <Compile Include="ColorScheme.cs" />
@@ -896,9 +887,6 @@
     <EmbeddedResource Include="Options\GitOptionsPage.resx">
       <DependentUpon>GitOptionsPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Options\IntegrationOptionsPage.resx">
-      <DependentUpon>IntegrationOptionsPage.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -1195,9 +1183,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\tag-annotated.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\gravatar.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\vew-reflog-remote.png" />

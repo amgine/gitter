@@ -1,12 +1,11 @@
-﻿namespace gitter.Git.Integration
+﻿namespace gitter.Framework
 {
 	using System;
 	using System.Drawing;
 
-	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
-	public abstract class IntegrationFeature : INamedObject
+	public abstract class IntegrationFeature : IIntegrationFeature
 	{
 		#region Data
 
@@ -18,7 +17,17 @@
 
 		#endregion
 
-		public event EventHandler EnabledChanged;
+		#region Events
+
+		public event EventHandler IsEnabledChanged;
+
+		protected virtual void OnIsEnabledChanged()
+		{
+			var handler = IsEnabledChanged;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		#endregion
 
 		protected IntegrationFeature(string name, string displayText, Bitmap icon, bool defaultEnabled)
 		{
@@ -44,7 +53,7 @@
 			get { return _icon; }
 		}
 
-		public bool Enabled
+		public bool IsEnabled
 		{
 			get { return _enabled; }
 			set
@@ -52,13 +61,30 @@
 				if(_enabled != value)
 				{
 					_enabled = value;
-					EnabledChanged.Raise(this);
+					OnIsEnabledChanged();
 				}
 			}
 		}
 
+		public virtual bool AdministratorRightsRequired
+		{
+			get { return false; }
+		}
+
+		public Action GetEnableAction(bool enable)
+		{
+			return () => IsEnabled = enable;
+		}
+
+		public bool HasConfiguration
+		{
+			get { return true; }
+		}
+
 		public void SaveTo(Section section)
 		{
+			Verify.Argument.IsNotNull(section, "section");
+
 			section.SetValue("Enabled", _enabled);
 			SaveMoreTo(section);
 		}
@@ -69,7 +95,9 @@
 
 		public void LoadFrom(Section section)
 		{
-			Enabled = section.GetValue("Enabled", _defaultEnabled);
+			Verify.Argument.IsNotNull(section, "section");
+
+			IsEnabled = section.GetValue("Enabled", _defaultEnabled);
 			LoadMoreFrom(section);
 		}
 

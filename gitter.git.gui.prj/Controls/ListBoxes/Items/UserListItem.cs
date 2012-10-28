@@ -130,7 +130,7 @@
 				case ColumnId.Name:
 				case ColumnId.Committer:
 					Bitmap image;
-					if(RepositoryProvider.Integration.Gravatar.Enabled)
+					if(GitterApplication.IntegrationFeatures.Gravatar.IsEnabled)
 					{
 						if(_imgAvatar != null)
 						{

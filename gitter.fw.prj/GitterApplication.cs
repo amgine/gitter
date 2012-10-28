@@ -18,6 +18,7 @@
 
 		private static SelectableFontManager _fontManager;
 		private static ConfigurationService _configurationService;
+		private static IntegrationFeatures _integrationFeatures;
 
 		private static readonly ITextRenderer _gdiPlusTextRenderer = new GdiPlusTextRenderer();
 		private static readonly ITextRenderer _gdiTextRenderer = new GdiTextRenderer();
@@ -100,6 +101,11 @@
 			get { return _configurationService; }
 		}
 
+		public static IntegrationFeatures IntegrationFeatures
+		{
+			get { return _integrationFeatures; }
+		}
+
 		private static void SetupDefaultExceptionHandling()
 		{
 			Application.ThreadException += OnThreadException;
@@ -171,6 +177,7 @@
 
 			_configurationService = new ConfigurationService();
 			_fontManager = new SelectableFontManager(_configurationService.GlobalSection.GetCreateSection("Fonts"));
+			_integrationFeatures = new IntegrationFeatures();
 			GlobalOptions.LoadFrom(_configurationService.GlobalSection);
 
 			Application.EnableVisualStyles();
