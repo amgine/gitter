@@ -7,8 +7,16 @@
 	/// <summary>Receives output from stderr/stdout.</summary>
 	internal interface IOutputReceiver
 	{
-		void Initialize(Process process, StreamReader sr);
+		/// <summary>Gets a value indicating whether this instance is initialized.</summary>
+		/// <value><c>true</c> if this instance is initialized; otherwise, <c>false</c>.</value>
+		bool IsInitialized { get; }
 
+		/// <summary>Initializes output reader.</summary>
+		/// <param name="process">Process to read from.</param>
+		/// <param name="reader">StreamReader to read from.</param>
+		void Initialize(Process process, StreamReader reader);
+
+		/// <summary>Closes the reader.</summary>
 		void Close();
 	}
 }

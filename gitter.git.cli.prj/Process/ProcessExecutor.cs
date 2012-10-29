@@ -17,6 +17,10 @@
 
 		#region .ctor
 
+		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor"/> class.</summary>
+		/// <param name="path">Path to exe file.</param>
+		/// <param name="stdOutReceiver">STDOUT receiver (can be null).</param>
+		/// <param name="stdErrReceiver">STDERR receiver (can be null).</param>
 		public ProcessExecutor(string path, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
@@ -28,17 +32,8 @@
 
 		#endregion
 
-		public int Execute(GitInput input)
+		private ProcessStartInfo InitializeStartInfo(GitInput input)
 		{
-			BeginExecute(input);
-			return EndExecute();
-		}
-
-		public void BeginExecute(GitInput input)
-		{
-			Verify.Argument.IsNotNull(input, "input");
-			Verify.State.IsFalse(IsStarted);
-
 			var psi = new ProcessStartInfo()
 			{
 				Arguments				= input.GetArguments(),
@@ -66,8 +61,21 @@
 					psi.EnvironmentVariables[opt.Key] = opt.Value;
 				}
 			}
-			_process = new Process() { StartInfo = psi };
-			_process.Start();
+			return psi;
+		}
+
+		public int Execute(GitInput input)
+		{
+			BeginExecute(input);
+			return EndExecute();
+		}
+
+		public void BeginExecute(GitInput input)
+		{
+			Verify.Argument.IsNotNull(input, "input");
+			Verify.State.IsFalse(IsStarted);
+
+			_process = Process.Start(InitializeStartInfo(input));
 			if(_stdOutReceiver != null)
 			{
 				_stdOutReceiver.Initialize(_process, _process.StandardOutput);
