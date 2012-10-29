@@ -1,35 +1,35 @@
-﻿namespace gitter.Redmine
+﻿namespace gitter.TeamCity
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Xml;
 
-	public abstract class RedmineObjectsCacheBase<T> : IEnumerable<T>
-		where T : RedmineObject
+	public abstract class TeamCityObjectsCacheBase<T> : IEnumerable<T>
+		where T : TeamCityObject
 	{
 		#region Data
 
-		private readonly Dictionary<int, T> _cache;
-		private readonly RedmineServiceContext _context;
+		private readonly Dictionary<string, T> _cache;
+		private readonly TeamCityServiceContext _context;
 
 		#endregion
 
-		internal RedmineObjectsCacheBase(RedmineServiceContext context)
+		internal TeamCityObjectsCacheBase(TeamCityServiceContext context)
 		{
 			Verify.Argument.IsNotNull(context, "context");
 
-			_cache = new Dictionary<int, T>();
+			_cache = new Dictionary<string, T>();
 			_context = context;
 		}
 
 		protected abstract T Create(XmlNode node);
 
-		protected Dictionary<int, T> Cache
+		protected Dictionary<string, T> Cache
 		{
 			get { return _cache; }
 		}
 
-		protected RedmineServiceContext Context
+		protected internal TeamCityServiceContext Context
 		{
 			get { return _context; }
 		}
@@ -43,7 +43,7 @@
 		{
 			Verify.Argument.IsNotNull(node, "node");
 
-			var id = RedmineUtility.LoadInt(node[RedmineObject.IdProperty.XmlNodeName]);
+			var id = TeamCityUtility.LoadString(node.Attributes[TeamCityObject.IdProperty.XmlNodeName]);
 			T obj;
 			lock(SyncRoot)
 			{
@@ -64,20 +64,6 @@
 		{
 			var xml = Context.GetXml(url);
 			return Lookup(xml.DocumentElement);
-		}
-
-		protected LinkedList<T> FetchItemsFromAllPages(string url)
-		{
-			var list = new LinkedList<T>();
-			Context.GetAllDataPages(url,
-				xml =>
-				{
-					foreach(var item in Select(xml.DocumentElement))
-					{
-						list.AddLast(item);
-					}
-				});
-			return list;
 		}
 
 		protected LinkedList<T> FetchItemsFromSinglePage(string url)
@@ -101,7 +87,7 @@
 			}
 		}
 
-		public T this[int id]
+		public T this[string id]
 		{
 			get { return _cache[id]; }
 		}
@@ -121,7 +107,7 @@
 			}
 		}
 
-		internal bool Remove(int id)
+		internal bool Remove(string id)
 		{
 			lock(SyncRoot)
 			{

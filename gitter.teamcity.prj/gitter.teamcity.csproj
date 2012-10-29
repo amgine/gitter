@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F939CB90-A1FD-4A3C-84FA-097BA644F254}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>gitter.TeamCity</RootNamespace>
+    <AssemblyName>gitter.teamcity</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\shared\Debug.cs">
+      <Link>Shared\Debug.cs</Link>
+    </Compile>
+    <Compile Include="..\shared\Verify.cs">
+      <Link>Shared\Verify.cs</Link>
+    </Compile>
+    <Compile Include="Build.cs" />
+    <Compile Include="BuildLocator.cs" />
+    <Compile Include="BuildTypeLocator.cs" />
+    <Compile Include="CacheSegment.cs" />
+    <Compile Include="Collections\BuildsCollection.cs" />
+    <Compile Include="BuildStatus.cs" />
+    <Compile Include="BuildType.cs" />
+    <Compile Include="Collections\BuildTypeBuildsCollection.cs" />
+    <Compile Include="Collections\BuildTypesCollection.cs" />
+    <Compile Include="Collections\ProjectBuildTypesCollection.cs" />
+    <Compile Include="Collections\NamedTeamCityObjectsCache.cs" />
+    <Compile Include="Gui\ListBoxes\BuildTypeListItem.cs" />
+    <Compile Include="Gui\ListBoxes\BuildListItem.cs" />
+    <Compile Include="Gui\ListBoxes\BuildsListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\BuildTypeBuildsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Views\Factories.cs" />
+    <Compile Include="Gui\Views\Guids.cs" />
+    <Compile Include="ProjectLocator.cs" />
+    <Compile Include="FlagSelector.cs" />
+    <Compile Include="Gui\ListBoxes\ColumnId.cs" />
+    <Compile Include="Gui\Menus\TeamCityMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Gui\ProviderSetupControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\ProviderSetupControl.Designer.cs">
+      <DependentUpon>ProviderSetupControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorer.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerItemBase.cs" />
+    <Compile Include="Gui\RepositoryExplorer\RepositoryExplorerRootListItem.cs" />
+    <Compile Include="Gui\TeamCityGuiProvider.cs" />
+    <Compile Include="Gui\Views\TeamCityViewBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="NamedTeamCityObject.cs" />
+    <Compile Include="ObjectLocator.cs" />
+    <Compile Include="Project.cs" />
+    <Compile Include="Collections\ProjectsCollection.cs" />
+    <Compile Include="Properties\CachedResources.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Collections\TeamCityObjectsCache.cs" />
+    <Compile Include="Collections\TeamCityObjectsCacheBase.cs" />
+    <Compile Include="TeamCityServiceProvider.cs" />
+    <Compile Include="TeamCityUtility.cs" />
+    <Compile Include="TeamCityObjectProperty.cs" />
+    <Compile Include="TeamCityObjectPropertyChangedEventArgs.cs" />
+    <Compile Include="TeamCityObject.cs" />
+    <Compile Include="TeamCityServiceContext.cs" />
+    <Compile Include="UserLocator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Gui\ProviderSetupControl.resx">
+      <DependentUpon>ProviderSetupControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\common\key.snk">
+      <Link>Properties\key.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\TeamCity16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\exclamation-red-frame.png" />
+    <None Include="Resources\exclamation.png" />
+    <Content Include="Resources\gear--arrow.png" />
+    <Content Include="Resources\tick-circle.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

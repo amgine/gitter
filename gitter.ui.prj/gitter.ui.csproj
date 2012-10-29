@@ -58,6 +58,10 @@
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\gitter.teamcity.prj\gitter.teamcity.csproj">
+      <Project>{F939CB90-A1FD-4A3C-84FA-097BA644F254}</Project>
+      <Name>gitter.teamcity</Name>
+    </ProjectReference>
     <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />

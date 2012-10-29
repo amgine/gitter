@@ -160,6 +160,7 @@
 				_mnuRepository.DropDownItems.Insert(menuid, new ToolStripSeparator());
 			}
 			LoadIssueTrackerProvider(new Redmine.RedmineServiceProvider());
+			LoadIssueTrackerProvider(new TeamCity.TeamCityServiceProvider());
 		}
 
 		private void LoadRepositoryProvider(IRepositoryProvider provider, ref int menuid)
