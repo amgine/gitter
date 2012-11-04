@@ -40,10 +40,34 @@
 			_lstLocalRepositories.DragEnter += OnLocalRepositoriesDragEnter;
 			_lstLocalRepositories.DragDrop += OnLocalRepositoriesDragDrop;
 
+			_lstLocalRepositories.KeyDown += OnLocalRepositoriesKeyDown;
+			_lstRecentRepositories.KeyDown += OnRecentRepositoriesKeyDown;
+
 			_recentRepositoriesBinding = new NotifyCollectionBinding<string>(
 				_lstRecentRepositories.Items,
 				WorkingEnvironment.RecentRepositories,
 				repo => new RecentRepositoryListItem(repo));
+		}
+
+		private void OnLocalRepositoriesKeyDown(object sender, KeyEventArgs e)
+		{
+			while(_lstLocalRepositories.SelectedItems.Count != 0)
+			{
+				_lstLocalRepositories.SelectedItems[0].Remove();
+			}
+		}
+
+		private void OnRecentRepositoriesKeyDown(object sender, KeyEventArgs e)
+		{
+			while(_lstRecentRepositories.SelectedItems.Count != 0)
+			{
+				var item = (RecentRepositoryListItem)_lstRecentRepositories.SelectedItems[0];
+				WorkingEnvironment.RecentRepositories.Remove(item.DataContext);
+				if(item.ListBox != null)
+				{
+					item.Remove();
+				}
+			}
 		}
 
 		private void OnLocalRepositoriesDragEnter(object sender, DragEventArgs e)
