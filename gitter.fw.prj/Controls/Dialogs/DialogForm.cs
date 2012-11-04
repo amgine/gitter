@@ -56,14 +56,10 @@
 			_dialog = content;
 			if(content != null)
 			{
-				var margin = content.Margin;
-				var dx = _pnlContainer.Width - content.Width - margin.Left - margin.Right;
-				var dy = _pnlContainer.Height - 1 - content.Height - margin.Top - margin.Bottom;
-				Width -= dx;
-				Height -= dy;
-				content.Location = new Point(margin.Left, margin.Right);
-				content.Parent = _pnlContainer;
-				Text = content.Text;
+				UpdateSize();
+				ShowContent();
+
+				content.SizeChanged += OnContentSizeChanged;
 
 				_expandable = content as IExpandableDialog;
 				if(_expandable != null)
@@ -110,6 +106,28 @@
 			_btnApply.Visible = btnApply;
 		}
 
+		private void ShowContent()
+		{
+			var margin = _dialog.Margin;
+			_dialog.Location = new Point(margin.Left, margin.Right);
+			_dialog.Parent = _pnlContainer;
+			Text = _dialog.Text;
+		}
+
+		private void UpdateSize()
+		{
+			var margin = _dialog.Margin;
+			var dx = _pnlContainer.Width - _dialog.Width - margin.Left - margin.Right;
+			var dy = _pnlContainer.Height - 1 - _dialog.Height - margin.Top - margin.Bottom;
+			Width -= dx;
+			Height -= dy;
+		}
+
+		private void OnContentSizeChanged(object sender, EventArgs e)
+		{
+			UpdateSize();
+		}
+
 		protected override void OnShown(EventArgs e)
 		{
 			base.OnShown(e);
@@ -129,6 +147,7 @@
 		{
 			if(_dialog != null)
 			{
+				_dialog.SizeChanged -= OnContentSizeChanged;
 				_dialog.InvokeOnClosed(DialogResult);
 			}
 		}
