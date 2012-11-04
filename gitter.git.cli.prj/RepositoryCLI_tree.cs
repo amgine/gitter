@@ -3,7 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using System.Text;
+
+	using gitter.Framework.CLI;
 
 	using gitter.Git.AccessLayer.CLI;
 
@@ -122,7 +123,7 @@
 				if(end == -1) end = l;
 
 				int delimeter = content.IndexOf(' ', pos);
-				int mode = int.Parse(content.Substring(pos, delimeter - pos), System.Globalization.CultureInfo.InvariantCulture);
+				int mode = int.Parse(content.Substring(pos, delimeter - pos), CultureInfo.InvariantCulture);
 				pos = delimeter + 1;
 				while(content[pos] == ' ') ++pos;
 

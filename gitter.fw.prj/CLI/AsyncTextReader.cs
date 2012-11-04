@@ -1,4 +1,4 @@
-﻿namespace gitter.Git.AccessLayer.CLI
+﻿namespace gitter.Framework.CLI
 {
 	using System;
 	using System.Diagnostics;
@@ -7,7 +7,7 @@
 	using System.Threading;
 
 	/// <summary>Reads text from stdio/stderr.</summary>
-	internal sealed class AsyncTextReader : IOutputReceiver
+	public sealed class AsyncTextReader : IOutputReceiver
 	{
 		#region Data
 

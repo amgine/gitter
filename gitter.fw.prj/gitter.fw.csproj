@@ -80,6 +80,10 @@
     <Compile Include="AsyncExecution\IAsyncAction.cs" />
     <Compile Include="AsyncExecution\IAsyncFunc.cs" />
     <Compile Include="AsyncExecution\NullMonitor.cs" />
+    <Compile Include="CLI\AsyncBytesReader.cs" />
+    <Compile Include="CLI\AsyncTextReader.cs" />
+    <Compile Include="CLI\IOutputReceiver.cs" />
+    <Compile Include="CLI\ProcessExecutor.cs" />
     <Compile Include="Controls\CustomListBox\DateColumn.cs" />
     <Compile Include="Controls\CustomListBox\DateColumnExtender.cs">
       <SubType>UserControl</SubType>

@@ -120,14 +120,11 @@
     <Compile Include="ICommandExecutor.cs" />
     <Compile Include="MSysGitAccessorProvider.cs" />
     <Compile Include="MSysGitDownloader.cs" />
-    <Compile Include="Process\AsyncBytesReader.cs" />
-    <Compile Include="Process\AsyncTextReader.cs" />
     <Compile Include="Process\GitAsync.cs" />
     <Compile Include="Process\GitInput.cs" />
     <Compile Include="Process\GitInteractive.cs" />
     <Compile Include="Process\GitOutput.cs" />
     <Compile Include="Process\GitProcess.cs" />
-    <Compile Include="Process\IOutputReceiver.cs" />
     <Compile Include="Process\ProcessExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

@@ -3,18 +3,11 @@
 	using System;
 	using System.Diagnostics;
 
+	using gitter.Framework.CLI;
+
 	/// <summary>Executes git.exe.</summary>
-	internal sealed class ProcessExecutor
+	internal sealed class ProcessExecutor : ProcessExecutor<GitInput>
 	{
-		#region Data
-
-		private readonly string _path;
-		private IOutputReceiver _stdOutReceiver;
-		private IOutputReceiver _stdErrReceiver;
-		private Process _process;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor"/> class.</summary>
@@ -22,17 +15,13 @@
 		/// <param name="stdOutReceiver">STDOUT receiver (can be null).</param>
 		/// <param name="stdErrReceiver">STDERR receiver (can be null).</param>
 		public ProcessExecutor(string path, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver)
+			: base(path, stdOutReceiver, stdErrReceiver)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
-
-			_path = path;
-			_stdOutReceiver = stdOutReceiver;
-			_stdErrReceiver = stdErrReceiver;
 		}
 
 		#endregion
 
-		private ProcessStartInfo InitializeStartInfo(GitInput input)
+		protected override ProcessStartInfo InitializeStartInfo(GitInput input)
 		{
 			var psi = new ProcessStartInfo()
 			{
@@ -45,7 +34,7 @@
 				RedirectStandardOutput	= true,
 				RedirectStandardError	= true,
 				LoadUserProfile			= true,
-				FileName				= _path,
+				FileName				= FileName,
 				ErrorDialog				= false,
 				CreateNoWindow			= true,
 			};
@@ -62,52 +51,6 @@
 				}
 			}
 			return psi;
-		}
-
-		public int Execute(GitInput input)
-		{
-			BeginExecute(input);
-			return EndExecute();
-		}
-
-		public void BeginExecute(GitInput input)
-		{
-			Verify.Argument.IsNotNull(input, "input");
-			Verify.State.IsFalse(IsStarted);
-
-			_process = Process.Start(InitializeStartInfo(input));
-			if(_stdOutReceiver != null)
-			{
-				_stdOutReceiver.Initialize(_process, _process.StandardOutput);
-			}
-			if(_stdErrReceiver != null)
-			{
-				_stdErrReceiver.Initialize(_process, _process.StandardError);
-			}
-		}
-
-		public int EndExecute()
-		{
-			Verify.State.IsTrue(IsStarted);
-
-			_process.WaitForExit();
-			if(_stdErrReceiver != null)
-			{
-				_stdErrReceiver.Close();
-			}
-			if(_stdOutReceiver != null)
-			{
-				_stdOutReceiver.Close();
-			}
-			int code = _process.ExitCode;
-			_process.Dispose();
-			_process = null;
-			return code;
-		}
-
-		public bool IsStarted
-		{
-			get { return _process != null; }
 		}
 	}
 }

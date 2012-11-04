@@ -1,4 +1,4 @@
-﻿namespace gitter.Git.AccessLayer.CLI
+﻿namespace gitter.Framework.CLI
 {
 	using System;
 	using System.Collections.Generic;
@@ -7,7 +7,7 @@
 	using System.IO;
 
 	/// <summary>Reads bytes from stdio/stderr.</summary>
-	internal sealed class AsyncBytesReader : IOutputReceiver
+	public sealed class AsyncBytesReader : IOutputReceiver
 	{
 		#region Data
 

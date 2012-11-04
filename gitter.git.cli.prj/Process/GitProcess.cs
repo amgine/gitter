@@ -1,12 +1,12 @@
 ﻿namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Specialized;
 	using System.Text;
 	using System.IO;
 	using System.Diagnostics;
-	using System.Threading;
+
+	using gitter.Framework.CLI;
 
 	internal static class GitProcess
 	{
@@ -72,41 +72,23 @@
 				}
 				return gitCmdFullPath;
 			}
+			var programFilesPath = Environment.Is64BitOperatingSystem ?
+				Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) :
+				Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+			var defaultInstallationPath = Path.Combine(
+				programFilesPath, @"Git\bin", GitExe);
+			if(File.Exists(defaultInstallationPath))
+			{
+				return defaultInstallationPath;
+			}
 			return null;
 		}
 
 		public static Version CheckVersion(string gitExe)
 		{
-			GitOutput res;
-			using(var p = new Process())
-			{
-				var psi = new ProcessStartInfo()
-				{
-					Arguments = "--version",
-					WindowStyle = ProcessWindowStyle.Normal,
-					UseShellExecute = false,
-					StandardOutputEncoding = Encoding.UTF8,
-					StandardErrorEncoding = Encoding.UTF8,
-					RedirectStandardInput = true,
-					RedirectStandardOutput = true,
-					RedirectStandardError = true,
-					LoadUserProfile = true,
-					FileName = _gitExePath,
-					ErrorDialog = false,
-					CreateNoWindow = true,
-				};
-				EnsureEnvironmentVariableExists(psi, GitEnvironment.Home, UserProfile);
-				p.StartInfo = psi;
-				p.Start();
-				var stdout = p.StandardOutput.ReadToEnd();
-				var stderr = p.StandardError.ReadToEnd();
-				p.WaitForExit();
-				var code = p.ExitCode;
-				res = new GitOutput(stdout, stderr, code);
-				p.Close();
-			}
-			res.ThrowOnBadReturnCode();
-			var parser = new GitParser(res.Output);
+			var output = Exec(new GitInput(new Command("--version")));
+			output.ThrowOnBadReturnCode();
+			var parser = new GitParser(output.Output);
 			return parser.ReadVersion();
 		}
 
@@ -228,7 +210,6 @@
 		{
 			Verify.Argument.IsNotNull(input, "input");
 
-			var p = new Process();
 			var psi = new ProcessStartInfo()
 			{
 				Arguments = input.GetArguments(),
@@ -251,14 +232,11 @@
 				}
 			}
 			SetCriticalEnvironmentVariables(psi);
-			p.StartInfo = psi;
-			p.Start();
-			return p;
+			return Process.Start(psi);
 		}
 
 		public static Process ExecSh(string repository, string command)
 		{
-			var p = new Process();
 			var psi = new ProcessStartInfo()
 			{
 				Arguments = command,
@@ -268,14 +246,11 @@
 				FileName = _shExePath,
 				ErrorDialog = false,
 			};
-			p.StartInfo = psi;
-			p.Start();
-			return p;
+			return Process.Start(psi);
 		}
 
 		public static Process ExecGitk(string repository, string command)
 		{
-			var p = new Process();
 			var psi = new ProcessStartInfo()
 			{
 				Arguments = command,
@@ -288,9 +263,7 @@
 				CreateNoWindow = true,
 			};
 			SetCriticalEnvironmentVariables(psi);
-			p.StartInfo = psi;
-			p.Start();
-			return p;
+			return Process.Start(psi);
 		}
 
 		public static GitOutput Exec(GitInput input)
@@ -300,8 +273,7 @@
 			var stdOutReader = new AsyncTextReader();
 			var stdErrReader = new AsyncTextReader();
 			var executor = CreateExecutor(stdOutReader, stdErrReader);
-			executor.BeginExecute(input);
-			var exitCode = executor.EndExecute();
+			var exitCode = executor.Execute(input);
 			return new GitOutput(
 				stdOutReader.GetText(),
 				stdErrReader.GetText(),
