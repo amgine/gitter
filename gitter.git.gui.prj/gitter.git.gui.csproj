@@ -96,6 +96,11 @@
     </Compile>
     <Compile Include="TreeExtensions.cs" />
     <Compile Include="Verify.cs" />
+    <Compile Include="Views\ReflogSearch.cs" />
+    <Compile Include="Views\HistorySearch.cs" />
+    <Compile Include="Views\ISearch.cs" />
+    <Compile Include="Views\ListBoxSearch.cs" />
+    <Compile Include="Views\ReflogSearchOptions.cs" />
     <Compile Include="Views\PathHistoryView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -103,6 +108,9 @@
       <DependentUpon>PathHistoryView.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\ViewToolBars\ContributorsToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\ViewToolBars\ReflogSearchToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Views\ViewToolBars\ReflogToolBar.cs">
@@ -237,9 +245,7 @@
     <Compile Include="Views\ViewToolBars\SubmodulesToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Views\ViewToolBars\ReferencesSearchToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Views\ViewToolBars\ReferencesSearchToolBar.cs" />
     <Compile Include="Views\ViewToolBars\HistorySearchToolBar.cs">
       <SubType>Component</SubType>
     </Compile>

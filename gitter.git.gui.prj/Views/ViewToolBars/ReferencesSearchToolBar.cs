@@ -2,7 +2,7 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
-
+	/*
 	[ToolboxItem(false)]
 	sealed class ReferencesSearchToolBar : SearchToolBar<ReferencesView, SearchOptions>
 	{
@@ -19,4 +19,5 @@ namespace gitter.Git.Gui.Views
 			};
 		}
 	}
+	*/
 }

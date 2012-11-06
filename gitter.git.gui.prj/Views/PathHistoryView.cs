@@ -24,6 +24,7 @@
 		private LogOptions _options;
 		private PathHistoryToolbar _toolBar;
 		private HistorySearchToolBar<PathHistoryView> _searchToolbar;
+		private ISearch<HistorySearchOptions> _search;
 		private bool _autoShowDiff;
 		private AsyncLogRequest _pendingRequest;
 
@@ -63,6 +64,8 @@
 			_lstRevisions.PreviewKeyDown += OnKeyDown;
 			_options = new LogOptions();
 			_options.Changed += OnLogOptionsChanged;
+			_search = new HistorySearch<HistorySearchOptions>(_lstRevisions);
+
 			AddTopToolStrip(_toolBar = new PathHistoryToolbar(this));
 			ApplyParameters(parameters);
 		}
@@ -367,95 +370,9 @@
 			}
 		}
 
-		private bool TestItem(RevisionListItem item, HistorySearchOptions search)
+		public ISearch<HistorySearchOptions> Search
 		{
-			var rev = item.DataContext;
-			if(rev.Subject.Contains(search.Text)) return true;
-			if(rev.Body.Contains(search.Text)) return true;
-			if(rev.Author.Name.Contains(search.Text)) return true;
-			if(rev.Committer.Name.Contains(search.Text)) return true;
-			if(rev.Hash.StartsWith(search.Text)) return true;
-			if(rev.TreeHash.StartsWith(search.Text)) return true;
-			lock(rev.References.SyncRoot)
-			{
-				foreach(var reference in rev.References)
-				{
-					if(reference.FullName.Contains(search.Text)) return true;
-				}
-			}
-			return false;
-		}
-
-		private bool Search(int start, HistorySearchOptions search, int direction)
-		{
-			if(search.Text.Length == 0) return true;
-			int count = _lstRevisions.Items.Count;
-			if(count == 0) return false;
-			int end;
-			if(direction == 1)
-			{
-				start = (start + 1) % count;
-				end = start - 1;
-				if(end < 0) end += count;
-			}
-			else
-			{
-				start = (start - 1);
-				if(start < 0) start += count;
-				end = (start + 1) % count;
-			}
-			while(start != end)
-			{
-				var item = _lstRevisions.Items[start] as RevisionListItem;
-				if(item != null)
-				{
-					if(TestItem(item, search))
-					{
-						item.FocusAndSelect();
-						return true;
-					}
-				}
-				if(direction == 1)
-				{
-					start = (start + 1) % count;
-				}
-				else
-				{
-					--start;
-					if(start < 0) start = count - 1;
-				}
-			}
-			return false;
-		}
-
-		public bool SearchFirst(HistorySearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, "search");
-
-			return Search(-1, search, 1);
-		}
-
-		public bool SearchNext(HistorySearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, "search");
-
-			if(search.Text.Length == 0) return true;
-			if(_lstRevisions.SelectedItems.Count == 0)
-			{
-				return Search(-1, search, 1);
-			}
-			var start = _lstRevisions.Items.IndexOf(_lstRevisions.SelectedItems[0]);
-			return Search(start, search, 1);
-		}
-
-		public bool SearchPrevious(HistorySearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, "search");
-
-			if(search.Text.Length == 0) return true;
-			if(_lstRevisions.SelectedItems.Count == 0) return Search(-1, search, 1);
-			var start = _lstRevisions.Items.IndexOf(_lstRevisions.SelectedItems[0]);
-			return Search(start, search, -1);
+			get { return _search; }
 		}
 
 		public bool SearchToolBarVisible

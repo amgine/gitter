@@ -45,7 +45,7 @@
 			});
 			Items.Add(_btnNext = new ToolStripButton(Resources.StrNext, CachedResources.Bitmaps["ImgSearchNext"], (sender, e) =>
 			{
-				_view.SearchNext(CreateSearchOptions());
+				HandleSearchResult(_view.Search.Next(CreateSearchOptions()));
 			})
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
@@ -53,7 +53,7 @@
 			});
 			Items.Add(_btnPrev = new ToolStripButton(Resources.StrPrevious, CachedResources.Bitmaps["ImgSearchPrevious"], (sender, e) =>
 			{
-				_view.SearchPrevious(CreateSearchOptions());
+				HandleSearchResult(_view.Search.Previous(CreateSearchOptions()));
 			})
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
@@ -74,26 +74,30 @@
 
 			_textBox.TextChanged += (sender, e) =>
 			{
-				var result = _view.SearchFirst(CreateSearchOptions());
-				if(result != _result)
-				{
-					if(result)
-					{
-						_textBox.TextBox.BackColor = SystemColors.Window;
-					}
-					else
-					{
-						_textBox.TextBox.BackColor = Color.FromArgb(255, 200, 200);
-						System.Media.SystemSounds.Beep.Play();
-					}
-					_result = result;
-				}
+				HandleSearchResult(_view.Search.First(CreateSearchOptions()));
 				_btnNext.Enabled = _textBox.TextLength > 0;
 				_btnPrev.Enabled = _textBox.TextLength > 0;
 			};
 		}
 
 		protected abstract TOptions CreateSearchOptions();
+
+		private void HandleSearchResult(bool result)
+		{
+			if(result != _result)
+			{
+				if(result)
+				{
+					_textBox.TextBox.BackColor = SystemColors.Window;
+				}
+				else
+				{
+					_textBox.TextBox.BackColor = Color.FromArgb(255, 200, 200);
+					System.Media.SystemSounds.Beep.Play();
+				}
+				_result = result;
+			}
+		}
 
 		public TView View
 		{

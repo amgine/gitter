@@ -13,10 +13,10 @@
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class ReferencesView : GitViewBase, ISearchableView<SearchOptions>
+	partial class ReferencesView : GitViewBase //, ISearchableView<SearchOptions>
 	{
 		private ReferencesToolbar _toolbar;
-		private ReferencesSearchToolBar _searchToolbar;
+		//private ReferencesSearchToolBar _searchToolbar;
 
 		public ReferencesView(IDictionary<string, object> parameters, GuiProvider gui)
 			: base(Guids.ReferencesViewGuid, gui, parameters)
@@ -107,7 +107,8 @@
 			if(rev.Dereference().Hash.Contains(search.Text)) return true;
 			return false;
 		}
-
+		
+		/*
 		private bool Search(int start, SearchOptions search, int direction)
 		{
 			if(search.Text.Length == 0) return true;
@@ -215,6 +216,7 @@
 				_searchToolbar = null;
 			}
 		}
+		*/
 
 		protected override void SaveMoreViewTo(Section section)
 		{
