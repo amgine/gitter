@@ -184,6 +184,24 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Directory name cannot end with whitespace.
+        /// </summary>
+        internal static string ErrDirectoryNameCannotEndWithWhitespace {
+            get {
+                return ResourceManager.GetString("ErrDirectoryNameCannotEndWithWhitespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Directory name cannot start with whitespace.
+        /// </summary>
+        internal static string ErrDirectoryNameCannotStartWithWhitespace {
+            get {
+                return ResourceManager.GetString("ErrDirectoryNameCannotStartWithWhitespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Email cannot be empty.
         /// </summary>
         internal static string ErrEmailCannotBeEmpty {
@@ -742,6 +760,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid path.
+        /// </summary>
+        internal static string ErrInvalidPath {
+            get {
+                return ResourceManager.GetString("ErrInvalidPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid reference name.
         /// </summary>
         internal static string ErrInvalidReferenceName {
@@ -999,6 +1026,42 @@ namespace gitter.Git.Gui.Properties {
         internal static string ErrPathCannotBeEmpty {
             get {
                 return ResourceManager.GetString("ErrPathCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path cannot contain &apos;{0}&apos; character.
+        /// </summary>
+        internal static string ErrPathCannotContainCharacter {
+            get {
+                return ResourceManager.GetString("ErrPathCannotContainCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path cannot contain empty directory name.
+        /// </summary>
+        internal static string ErrPathCannotContainEmptyDirectoryName {
+            get {
+                return ResourceManager.GetString("ErrPathCannotContainEmptyDirectoryName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path is too short.
+        /// </summary>
+        internal static string ErrPathIsTooShort {
+            get {
+                return ResourceManager.GetString("ErrPathIsTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown path schema.
+        /// </summary>
+        internal static string ErrPathUnknownSchema {
+            get {
+                return ResourceManager.GetString("ErrPathUnknownSchema", resourceCulture);
             }
         }
         

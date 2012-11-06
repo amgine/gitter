@@ -1,7 +1,9 @@
 ﻿namespace gitter.Git.Gui.Dialogs
 {
 	using System;
+	using System.IO;
 	using System.ComponentModel;
+	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -68,25 +70,14 @@
 			}
 		}
 
-		protected bool ValidateNewBranchName(string branchName, Control inputControl, Repository repository)
+		protected bool ValidateBranchName(string branchName, Control inputControl)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-
 			if(string.IsNullOrWhiteSpace(branchName))
 			{
 				NotificationService.NotifyInputError(
 					inputControl,
 					Resources.ErrNoBranchNameSpecified,
 					Resources.ErrBranchNameCannotBeEmpty);
-				return false;
-			}
-			if(repository.Refs.Heads.Contains(branchName) ||
-				repository.Refs.Remotes.Contains(branchName))
-			{
-				NotificationService.NotifyInputError(
-					inputControl,
-					Resources.ErrInvalidBranchName,
-					Resources.ErrBranchAlreadyExists);
 				return false;
 			}
 			string errmsg;
@@ -101,24 +92,14 @@
 			return true;
 		}
 
-		protected bool ValidateNewTagName(string tagName, Control inputControl, Repository repository)
+		protected bool ValidateTagName(string tagName, Control inputControl)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-
 			if(string.IsNullOrWhiteSpace(tagName))
 			{
 				NotificationService.NotifyInputError(
 					inputControl,
 					Resources.ErrNoTagNameSpecified,
 					Resources.ErrTagNameCannotBeEmpty);
-				return false;
-			}
-			if(repository.Refs.Tags.Contains(tagName))
-			{
-				NotificationService.NotifyInputError(
-					inputControl,
-					Resources.ErrInvalidTagName,
-					Resources.ErrTagAlreadyExists);
 				return false;
 			}
 			string errmsg;
@@ -128,6 +109,45 @@
 					inputControl,
 					Resources.ErrInvalidTagName,
 					errmsg);
+				return false;
+			}
+			return true;
+		}
+
+		protected bool ValidateNewBranchName(string branchName, Control inputControl, Repository repository)
+		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
+			if(!ValidateBranchName(branchName, inputControl))
+			{
+				return false;
+			}
+			if(repository.Refs.Heads.Contains(branchName) ||
+				repository.Refs.Remotes.Contains(branchName))
+			{
+				NotificationService.NotifyInputError(
+					inputControl,
+					Resources.ErrInvalidBranchName,
+					Resources.ErrBranchAlreadyExists);
+				return false;
+			}
+			return true;
+		}
+
+		protected bool ValidateNewTagName(string tagName, Control inputControl, Repository repository)
+		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
+			if(!ValidateTagName(tagName, inputControl))
+			{
+				return false;
+			}
+			if(repository.Refs.Tags.Contains(tagName))
+			{
+				NotificationService.NotifyInputError(
+					inputControl,
+					Resources.ErrInvalidTagName,
+					Resources.ErrTagAlreadyExists);
 				return false;
 			}
 			return true;
@@ -184,14 +204,186 @@
 			return true;
 		}
 
-		protected bool ValidatePath(string path, Control inputControl)
+		private bool ValidatePartialPath(string path, Control inputControl, int start, int end)
 		{
-			if(string.IsNullOrWhiteSpace(path))
+			var invalidPathChars = Path.GetInvalidFileNameChars();
+			bool endsWithWhitespace = false;
+			bool isPartStart = true;
+			for(int i = start; i <= end; ++i)
+			{
+				char c = path[i];
+				if(c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar)
+				{
+					if(i != start)
+					{
+						if(isPartStart)
+						{
+							NotificationService.NotifyInputError(
+								inputControl,
+								Resources.ErrInvalidPath,
+								Resources.ErrPathCannotContainEmptyDirectoryName);
+							return false;
+						}
+						if(endsWithWhitespace)
+						{
+							NotificationService.NotifyInputError(
+								inputControl,
+								Resources.ErrInvalidPath,
+								Resources.ErrDirectoryNameCannotEndWithWhitespace);
+							return false;
+						}
+						isPartStart = true;
+					}
+					continue;
+				}
+				if(invalidPathChars.Contains(c))
+				{
+					NotificationService.NotifyInputError(
+						inputControl,
+						Resources.ErrInvalidPath,
+						Resources.ErrPathCannotContainCharacter.UseAsFormat(c));
+					return false;
+				}
+				endsWithWhitespace = char.IsWhiteSpace(c);
+				if(isPartStart)
+				{
+					if(endsWithWhitespace)
+					{
+						NotificationService.NotifyInputError(
+							inputControl,
+							Resources.ErrInvalidPath,
+							Resources.ErrDirectoryNameCannotStartWithWhitespace);
+						return false;
+					}
+					isPartStart = false;
+				}
+			}
+			return true;
+		}
+
+		protected bool ValidateAbsolutePath(string path, Control inputControl)
+		{
+			int start = -1;
+			int end = -1;
+			for(int i = 0; i < path.Length; ++i)
+			{
+				if(!char.IsWhiteSpace(path[i]))
+				{
+					start = i;
+					break;
+				}
+			}
+			if(start == -1)
 			{
 				NotificationService.NotifyInputError(
 					inputControl,
 					Resources.ErrNoPathSpecified,
 					Resources.ErrPathCannotBeEmpty);
+				return false;
+			}
+			for(int i = path.Length - 1; i >= 0; --i)
+			{
+				if(!char.IsWhiteSpace(path[i]))
+				{
+					end = i;
+					break;
+				}
+			}
+			int length = end - start + 1;
+
+			if(length >= 3)
+			{
+				var c0 = path[start + 0];
+				var c1 = path[start + 1];
+				var c2 = path[start + 2];
+				if(c1 == Path.VolumeSeparatorChar)
+				{
+					if(!((c0 >= 'a' && c0 <= 'z') || (c0 >= 'A' && c0 <= 'Z')))
+					{
+						NotificationService.NotifyInputError(
+							inputControl,
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema);
+						return false;
+					}
+					if(c2 != Path.DirectorySeparatorChar && c2 != Path.AltDirectorySeparatorChar)
+					{
+						NotificationService.NotifyInputError(
+							inputControl,
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema);
+						return false;
+					}
+					start += 3;
+					length -= 3;
+				}
+				else
+				{
+					if(c0 != Path.DirectorySeparatorChar && c0 != Path.AltDirectorySeparatorChar)
+					{
+						NotificationService.NotifyInputError(
+							inputControl,
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema);
+						return false;
+					}
+					if(c1 != Path.DirectorySeparatorChar && c1 != Path.AltDirectorySeparatorChar)
+					{
+						NotificationService.NotifyInputError(
+							inputControl,
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema);
+						return false;
+					}
+					start += 2;
+					length += 2;
+				}
+			}
+			else
+			{
+				NotificationService.NotifyInputError(
+					inputControl,
+					Resources.ErrInvalidPath,
+					Resources.ErrPathIsTooShort);
+				return false;
+			}
+			if(!ValidatePartialPath(path, inputControl, start, end))
+			{
+				return false;
+			}
+			return true;
+		}
+
+		protected bool ValidateRelativePath(string path, Control inputControl)
+		{
+			int start = -1;
+			int end = -1;
+			for(int i = 0; i < path.Length; ++i)
+			{
+				if(!char.IsWhiteSpace(path[i]))
+				{
+					start = i;
+					break;
+				}
+			}
+			if(start == -1)
+			{
+				NotificationService.NotifyInputError(
+					inputControl,
+					Resources.ErrNoPathSpecified,
+					Resources.ErrPathCannotBeEmpty);
+				return false;
+			}
+			for(int i = path.Length - 1; i >= 0; --i)
+			{
+				if(!char.IsWhiteSpace(path[i]))
+				{
+					end = i;
+					break;
+				}
+			}
+			if(!ValidatePartialPath(path, inputControl, start, end))
+			{
 				return false;
 			}
 			return true;

@@ -113,7 +113,7 @@
 		/// <param name="name">Object name.</param>
 		protected void RemoveObject(string name)
 		{
-			lock(_dictionary)
+			lock(SyncRoot)
 			{
 				TObject item;
 				Verify.Argument.IsTrue(
@@ -128,7 +128,7 @@
 		/// <param name="item">Object to remove.</param>
 		protected virtual void RemoveObject(TObject item)
 		{
-			lock(_dictionary)
+			lock(SyncRoot)
 			{
 				_dictionary.Remove(item.Name);
 				InvokeObjectRemoved(item);
@@ -139,7 +139,7 @@
 		/// <param name="item">Object to add.</param>
 		protected virtual void AddObject(TObject item)
 		{
-			lock(_dictionary)
+			lock(SyncRoot)
 			{
 				_dictionary.Add(item.Name, item);
 				InvokeObjectAdded(item);
@@ -165,21 +165,21 @@
 		/// <value><see cref="TObject"/> with the specified <paramref name="name"/>.</value>
 		public TObject this[string name]
 		{
-			get { lock(_dictionary) return _dictionary[FixInputName(name)]; }
+			get { lock(SyncRoot) return _dictionary[FixInputName(name)]; }
 		}
 
 		/// <summary>Gets object count.</summary>
 		/// <value>Object count.</value>
 		public int Count
 		{
-			get { lock(_dictionary) return _dictionary.Count; }
+			get { lock(SyncRoot) return _dictionary.Count; }
 		}
 
 		/// <summary>Gets a value indicating whether this collection is empty.</summary>
 		/// <value><c>true</c> if this collection is empty; otherwise, <c>false</c>.</value>
 		public bool IsEmpty
 		{
-			get { lock(_dictionary) return _dictionary.Count == 0; }
+			get { lock(SyncRoot) return _dictionary.Count == 0; }
 		}
 
 		/// <summary>Determines whether this collection contains object with the specified <paramref name="name"/>.</summary>
@@ -189,7 +189,10 @@
 		/// </returns>
 		public virtual bool Contains(string name)
 		{
-			lock(_dictionary) return _dictionary.ContainsKey(FixInputName(name));
+			lock(SyncRoot)
+			{
+				return _dictionary.ContainsKey(FixInputName(name));
+			}
 		}
 
 		/// <summary>Get object with the specified <paramref name="name"/>.</summary>
@@ -217,7 +220,7 @@
 		/// <returns><c>true</c> if this collection contains object with the specified <paramref name="name"/>; otherwise, <c>false</c>.</returns>
 		public bool TryGetItem(string name, out TObject value)
 		{
-			lock(_dictionary) return _dictionary.TryGetValue(FixInputName(name), out value);
+			lock(SyncRoot) return _dictionary.TryGetValue(FixInputName(name), out value);
 		}
 
 		/// <summary>Gets the sync root object.</summary>

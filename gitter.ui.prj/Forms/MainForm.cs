@@ -513,7 +513,7 @@
 			}
 			_repositoryGui.ActivateDefaultView();
 
-			Text = string.Format(_repository.WorkingDirectory + " - " + Application.ProductName);
+			Text = _repository.WorkingDirectory + " - " + Application.ProductName;
 
 			repositoryProvider.OnRepositoryLoaded(_repository);
 

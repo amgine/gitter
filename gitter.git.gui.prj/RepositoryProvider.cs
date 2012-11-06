@@ -291,7 +291,7 @@
 				res = dlg.Run(_environment.MainForm);
 				if(res == DialogResult.OK)
 				{
-					path = Path.GetFullPath(dlg.RepositoryPath.Trim());
+					path = Path.GetFullPath(dlg.RepositoryPath);
 				}
 			}
 			if(res == DialogResult.OK)
@@ -318,7 +318,7 @@
 				res = dlg.Run(_environment.MainForm);
 				if(res == DialogResult.OK)
 				{
-					path = Path.GetFullPath(dlg.TargetPath.Trim());
+					path = Path.GetFullPath(dlg.AcceptedPath);
 				}
 			}
 			if(res == DialogResult.OK)

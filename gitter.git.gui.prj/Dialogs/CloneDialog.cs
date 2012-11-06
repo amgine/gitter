@@ -14,6 +14,7 @@
 	partial class CloneDialog : GitDialogBase, IExecutableDialog
 	{
 		private readonly IGitRepositoryProvider _gitRepositoryProvider;
+		private string _acceptedPath;
 
 		public CloneDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
@@ -156,6 +157,11 @@
 			}
 		}
 
+		public string AcceptedPath
+		{
+			get { return _acceptedPath; }
+		}
+
 		#region Event Handlers
 
 		private void _btnSelectDirectory_Click(object sender, EventArgs e)
@@ -234,7 +240,7 @@
 			{
 				return false;
 			}
-			if(!ValidatePath(path, _txtPath))
+			if(!ValidateAbsolutePath(path, _txtPath))
 			{
 				return false;
 			}
@@ -250,7 +256,7 @@
 			bool shallow = _chkShallowClone.Checked;
 			int depth = shallow ? (int)_numDepth.Value : -1;
 			string template = _chkUseTemplate.Checked ? _txtTemplate.Text.Trim() : null;
-			if(template != null && !ValidatePath(template, _txtTemplate))
+			if(!string.IsNullOrWhiteSpace(template) && !ValidateAbsolutePath(template, _txtTemplate))
 			{
 				return false;
 			}
@@ -275,6 +281,7 @@
 					MessageBoxIcon.Error);
 				return false;
 			}
+			_acceptedPath = path;
 			return true;
 		}
 	}

@@ -76,7 +76,8 @@
 			args.Add(new CommandArgument(parameters.Repository));
 			if(parameters.Path != null)
 			{
-				args.Add(new PathCommandArgument(parameters.Path));
+				var path = parameters.Path.Replace('\\', '/').Trim('/');
+				args.Add(new PathCommandArgument(path));
 			}
 
 			var cmd = new SubmoduleCommand(args);

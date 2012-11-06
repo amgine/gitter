@@ -15,6 +15,7 @@
 	public partial class InitDialog : GitDialogBase, IExecutableDialog
 	{
 		private readonly IGitRepositoryProvider _gitRepositoryProvider;
+		private string _repositoryPath;
 
 		public InitDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
@@ -34,6 +35,16 @@
 			GitterApplication.FontManager.InputFont.Apply(_txtPath, _txtTemplate);
 		}
 
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+
+			if(!string.IsNullOrWhiteSpace(RepositoryPath))
+			{
+				_txtPath.Text = RepositoryPath.Trim();
+			}
+		}
+
 		public bool AllowChangeRepositoryPath
 		{
 			get { return !_txtPath.ReadOnly; }
@@ -42,8 +53,8 @@
 
 		public string RepositoryPath
 		{
-			get { return _txtPath.Text; }
-			set { _txtPath.Text = value; }
+			get { return _repositoryPath; }
+			set { _repositoryPath = value; }
 		}
 
 		public string TemplatePath
@@ -101,12 +112,26 @@
 
 		public bool Execute()
 		{
-			var path = _txtPath.Text.Trim();
+			_repositoryPath = _txtPath.Text.Trim();
+			if(!ValidateAbsolutePath(_repositoryPath, _txtPath))
+			{
+				return false;
+			}
+			string template = null;
+			if(_chkUseTemplate.Checked)
+			{
+				template = _txtTemplate.Text.Trim();
+				if(!ValidateAbsolutePath(_repositoryPath, _txtTemplate))
+				{
+					return false;
+				}
+			}
+			bool bare = _chkBare.Checked;
 			try
 			{
-				if(!Directory.Exists(path))
+				if(!Directory.Exists(_repositoryPath))
 				{
-					Directory.CreateDirectory(path);
+					Directory.CreateDirectory(_repositoryPath);
 				}
 			}
 			catch(Exception exc)
@@ -119,17 +144,10 @@
 					MessageBoxIcon.Error);
 				return false;
 			}
-			string template = null;
-			if(_chkUseTemplate.Checked)
-			{
-				template = _txtTemplate.Text.Trim();
-				if(!ValidatePath(path, _txtTemplate)) return false;
-			}
-			bool bare = _chkBare.Checked;
 			try
 			{
 				Cursor = Cursors.WaitCursor;
-				Repository.Init(GitRepositoryProvider.GitAccessor, path, template, bare);
+				Repository.Init(GitRepositoryProvider.GitAccessor, _repositoryPath, template, bare);
 				Cursor = Cursors.Default;
 			}
 			catch(GitException exc)

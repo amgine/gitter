@@ -70,12 +70,23 @@
 		public bool Execute()
 		{
 			var path = _txtPath.Text.Trim();
-			if(!ValidatePath(path, _txtPath))
+			if(!ValidateRelativePath(path, _txtPath))
 			{
 				return false;
 			}
 			var url = _txtRepository.Text.Trim();
+			if(!ValidateUrl(url, _txtRepository))
+			{
+				return false;
+			}
 			var branch = _chkBranch.Checked ? _txtBranch.Text.Trim() : null;
+			if(!string.IsNullOrWhiteSpace(branch))
+			{
+				if(!ValidateBranchName(branch, _txtBranch))
+				{
+					return false;
+				}
+			}
 			try
 			{
 				Cursor = Cursors.WaitCursor;

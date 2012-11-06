@@ -2495,4 +2495,25 @@ Are you sure you want to remove it?</value>
   <data name="StrSaveAs" xml:space="preserve">
     <value>Save As</value>
   </data>
+  <data name="ErrInvalidPath" xml:space="preserve">
+    <value>Invalid path</value>
+  </data>
+  <data name="ErrPathCannotContainCharacter" xml:space="preserve">
+    <value>Path cannot contain '{0}' character</value>
+  </data>
+  <data name="ErrPathCannotContainEmptyDirectoryName" xml:space="preserve">
+    <value>Path cannot contain empty directory name</value>
+  </data>
+  <data name="ErrDirectoryNameCannotEndWithWhitespace" xml:space="preserve">
+    <value>Directory name cannot end with whitespace</value>
+  </data>
+  <data name="ErrDirectoryNameCannotStartWithWhitespace" xml:space="preserve">
+    <value>Directory name cannot start with whitespace</value>
+  </data>
+  <data name="ErrPathIsTooShort" xml:space="preserve">
+    <value>Path is too short</value>
+  </data>
+  <data name="ErrPathUnknownSchema" xml:space="preserve">
+    <value>Unknown path schema</value>
+  </data>
 </root>

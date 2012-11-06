@@ -181,6 +181,16 @@
 				string.Empty);
 		}
 
+		private static string GetWorkingDirectory(string workingDirectory)
+		{
+			workingDirectory = Path.GetFullPath(workingDirectory);
+			if(workingDirectory.Length > 3 && workingDirectory.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+			{
+				workingDirectory = workingDirectory.Substring(0, workingDirectory.Length - 1);
+			}
+			return workingDirectory;
+		}
+
 		private static string GetGitDirectory(string workingDirectory)
 		{
 			const string GitDirPrefix = "gitdir: ";
@@ -248,7 +258,7 @@
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 			Verify.Argument.IsNotNull(workingDirectory, "workingDirectory");
 
-			_workingDirectory		= Path.GetFullPath(workingDirectory);
+			_workingDirectory		= GetWorkingDirectory(workingDirectory);
 			_gitDirectory			= GetGitDirectory(_workingDirectory);
 			_configurationManager	= GetConfigurationManager(_gitDirectory);
 
