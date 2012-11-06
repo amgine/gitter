@@ -3309,6 +3309,33 @@
 
 		#region Misc Items
 
+		public static T GetShowContributorsViewItem<T>()
+			where T : ToolStripItem, new()
+		{
+			var item = new T()
+			{
+				Text = Resources.StrManage,
+				Tag = Views.Guids.ContributorsViewGuid,
+			};
+			item.Click += OnShowViewItemClick;
+			return item;
+		}
+
+		public static T GetRefreshContributorsItem<T>(Repository repository)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
+			var item = new T()
+			{
+				Text = Resources.StrRefresh,
+				Image = CachedResources.Bitmaps["ImgRefresh"],
+				Tag = repository,
+			};
+			item.Click += OnRefreshContributorsClick;
+			return item;
+		}
+
 		public static T GetSaveAsItem<T>(Tree tree, string fileName)
 			where T : ToolStripItem, new()
 		{
@@ -3633,6 +3660,13 @@
 			};
 			item.Click += OnCompressRepositoryClick;
 			return item;
+		}
+
+		private static void OnRefreshContributorsClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var repository = (Repository)item.Tag;
+			repository.Users.Refresh();
 		}
 
 		private static void OnSaveAsItemClick(object sender, EventArgs e)

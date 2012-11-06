@@ -35,5 +35,19 @@
 		public override void OnDoubleClick(int x, int y)
 		{
 		}
+
+		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+		{
+			if(Repository != null)
+			{
+				var menu = new UsersMenu(Repository);
+				Utility.MarkDropDownForAutoDispose(menu);
+				return menu;
+			}
+			else
+			{
+				return null;
+			}
+		}
 	}
 }
