@@ -82,11 +82,12 @@
 				if(_txtMessage.TextLength == 0)
 				{
 					var rev = Repository.Head.Revision;
-					_txtMessage.AppendText(rev.Subject);
+					_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));
 					if(!string.IsNullOrEmpty(rev.Body))
 					{
 						_txtMessage.AppendText(Environment.NewLine);
-						_txtMessage.AppendText(rev.Body);
+						_txtMessage.AppendText(Environment.NewLine);
+						_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
 					}
 					_txtMessage.SelectAll();
 				}

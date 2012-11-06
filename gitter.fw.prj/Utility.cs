@@ -11,6 +11,7 @@
 	using System.Runtime.InteropServices;
 	using System.Security;
 	using System.Security.Principal;
+	using System.Text;
 	using System.Windows.Forms;
 
 	public static class Utility
@@ -90,6 +91,28 @@
 						"Unknown DateFormat value: {0}".UseAsFormat(date),
 						"format");
 			}
+		}
+
+		public static string ExpandNewLineCharacters(string text)
+		{
+			if(Environment.NewLine == "\n") return text;
+
+			var sb = new StringBuilder(text.Length + 20);
+			for(int i = 0; i < text.Length; ++i)
+			{
+				var c = text[i];
+				if(c == '\r')
+				{
+					continue;
+				}
+				if(c == '\n')
+				{
+					sb.Append(Environment.NewLine);
+					continue;
+				}
+				sb.Append(c);
+			}
+			return sb.ToString();
 		}
 
 		public static Bitmap QueryIcon(string fileName)
