@@ -17,5 +17,12 @@
 		}
 
 		public abstract bool IsAvailableFor(IGitAccessor gitAccessor);
+
+		public virtual bool IsAvailableFor(IGitRepository repository)
+		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
+			return IsAvailableFor(repository.Accessor.GitAccessor);
+		}
 	}
 }

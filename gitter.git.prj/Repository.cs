@@ -297,13 +297,6 @@
 
 		#region Internal Services
 
-		/// <summary>Returns object which provides raw access to this repository.</summary>
-		/// <value>Object which provides raw access to this repository.</value>
-		internal IRepositoryAccessor Accessor
-		{
-			get { return _accessor; }
-		}
-
 		/// <summary>Returns repository monitor.</summary>
 		/// <value>Repository monitor.</value>
 		internal RepositoryMonitor Monitor
@@ -314,6 +307,13 @@
 		#endregion
 
 		#region Properties
+
+		/// <summary>Returns object which provides raw access to this repository.</summary>
+		/// <value>Object which provides raw access to this repository.</value>
+		public IRepositoryAccessor Accessor
+		{
+			get { return _accessor; }
+		}
 
 		/// <summary>Returns repository configuration manager.</summary>
 		/// <value>Repository configuration manager.</value>

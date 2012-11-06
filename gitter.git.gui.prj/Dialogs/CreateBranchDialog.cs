@@ -48,7 +48,7 @@
 			_lblRevision.Text = Resources.StrRevision.AddColon();
 			_grpOptions.Text = Resources.StrOptions;
 			_chkCheckoutAfterCreation.Text = Resources.StrCheckoutAfterCreation;
-			if(GitFeatures.CheckoutOrphan.IsAvailableFor(RepositoryProvider.Git))
+			if(GitFeatures.CheckoutOrphan.IsAvailableFor(repository))
 			{
 				_chkOrphan.Text = Resources.StrlMakeOrphanBranch;
 			}
@@ -198,7 +198,7 @@
 		{
 			if(_chkCheckoutAfterCreation.Checked)
 			{
-				_chkOrphan.Enabled = GitFeatures.CheckoutOrphan.IsAvailableFor(RepositoryProvider.Git);
+				_chkOrphan.Enabled = GitFeatures.CheckoutOrphan.IsAvailableFor(_repository);
 			}
 			else
 			{
@@ -215,7 +215,7 @@
 			var name		= _txtName.Text.Trim();
 			var refspec		= _txtRevision.Text.Trim();
 			var checkout	= _chkCheckoutAfterCreation.Checked;
-			var orphan		= checkout && _chkOrphan.Checked && GitFeatures.CheckoutOrphan.IsAvailableFor(RepositoryProvider.Git);
+			var orphan		= checkout && _chkOrphan.Checked && GitFeatures.CheckoutOrphan.IsAvailableFor(_repository);
 			var reflog		= _chkCreateReflog.Checked;
 
 			if(!ValidateNewBranchName(name, _txtName, _repository))

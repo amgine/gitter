@@ -7,11 +7,9 @@
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
-	using gitter.Framework.Options;
 	using gitter.Framework.Controls;
 
 	using gitter.Git.Gui.Controls;
-	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -63,7 +61,7 @@
 			_lstFilesToClear.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
 			_lstFilesToClear.ShowTreeLines = false;
 
-			if(!GitFeatures.CleanExcludeOption.IsAvailableFor(RepositoryProvider.Git))
+			if(!GitFeatures.CleanExcludeOption.IsAvailableFor(repository))
 			{
 				_lblExcludePattern.Enabled = false;
 				_txtExclude.Enabled = false;

@@ -121,12 +121,7 @@
 			}
 		}
 
-		internal static IGitAccessor Git
-		{
-			get { return _gitAccessor; }
-		}
-
-		public static Version MinimumRequiredGitVersion
+		public Version MinimumRequiredGitVersion
 		{
 			get { return _minVersion; }
 		}
@@ -286,10 +281,7 @@
 
 		public DialogResult RunInitDialog()
 		{
-			if(_environment == null)
-			{
-				throw new InvalidOperationException(string.Format("{0} is not loaded.", GetType().FullName));
-			}
+			Verify.State.IsTrue(IsLoaded, string.Format("{0} is not loaded.", GetType().FullName));
 
 			DialogResult res;
 			string path = "";
@@ -316,10 +308,7 @@
 
 		public DialogResult RunCloneDialog()
 		{
-			if(_environment == null)
-			{
-				throw new InvalidOperationException(string.Format("{0} is not loaded.", GetType().Name));
-			}
+			Verify.State.IsTrue(IsLoaded, string.Format("{0} is not loaded.", GetType().FullName));
 
 			DialogResult res;
 			string path = "";

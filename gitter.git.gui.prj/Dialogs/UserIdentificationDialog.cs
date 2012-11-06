@@ -18,6 +18,7 @@
 		#region Data
 
 		private readonly IWorkingEnvironment _environment;
+		private RepositoryProvider _repositoryProvider;
 		private Repository _repository;
 		private string _oldUserName;
 		private string _oldUserEmail;
@@ -30,6 +31,7 @@
 
 			_environment = environment;
 			_repository = repository;
+			_repositoryProvider = environment.GetRepositoryProvider<RepositoryProvider>();
 
 			InitializeComponent();
 
@@ -157,12 +159,12 @@
 								catch(GitException) { }
 							}
 						}
-						RepositoryProvider.Git.SetConfigValue(
+						_repositoryProvider.GitAccessor.SetConfigValue(
 							new SetConfigValueParameters(GitConstants.UserNameParameter, userName)
 							{
 								ConfigFile = ConfigFile.User,
 							});
-						RepositoryProvider.Git.SetConfigValue(
+						_repositoryProvider.GitAccessor.SetConfigValue(
 							new SetConfigValueParameters(GitConstants.UserEmailParameter, userEmail)
 							{
 								ConfigFile = ConfigFile.User,

@@ -7,6 +7,10 @@
 	/// <summary>Git repository.</summary>
 	public interface IGitRepository : IRepository, IDisposable
 	{
+		/// <summary>Returns object which provides raw access to this repository.</summary>
+		/// <value>Object which provides raw access to this repository.</value>
+		IRepositoryAccessor Accessor { get; }
+
 		/// <summary>GIT_DIR.</summary>
 		string GitDirectory { get; }
 

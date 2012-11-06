@@ -3185,9 +3185,10 @@
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question) == DialogResult.Yes)
 					{
+						var gitAccessor = ((IGitRepository)parameter.Repository).Accessor.GitAccessor;
 						try
 						{
-							RepositoryProvider.Git.UnsetConfigValue(
+							gitAccessor.UnsetConfigValue(
 								new UnsetConfigValueParameters()
 								{
 									ConfigFile = Git.ConfigFile.User,
@@ -3197,7 +3198,7 @@
 						catch { }
 						try
 						{
-							RepositoryProvider.Git.UnsetConfigValue(
+							gitAccessor.UnsetConfigValue(
 								new UnsetConfigValueParameters()
 								{
 									ConfigFile = Git.ConfigFile.System,
