@@ -6,6 +6,8 @@
 	using System.Text;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Redmine.Properties.Resources;
 
 	static class GuiItemFactory
@@ -66,7 +68,7 @@
 			{
 				text = ((Func<string>)item.Tag)();
 			}
-			Clipboard.SetText(text);
+			ClipboardEx.SetTextSafe(text);
 		}
 
 		private static void OnUpdateRedmineObjectClick(object sender, EventArgs e)

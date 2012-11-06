@@ -3302,14 +3302,7 @@
 				}
 			}
 			var text = sb.ToString();
-			if(string.IsNullOrEmpty(text))
-			{
-				Clipboard.Clear();
-			}
-			else
-			{
-				Clipboard.SetText(text);
-			}
+			ClipboardEx.SetTextSafe(text);
 		}
 
 		#endregion
@@ -3849,7 +3842,7 @@
 			{
 				text = ((Func<string>)item.Tag)();
 			}
-			Clipboard.SetText(text);
+			ClipboardEx.SetTextSafe(text);
 		}
 
 		private static void OnCopyHashToClipboardClick(object sender, EventArgs e)
@@ -3864,7 +3857,7 @@
 			{
 				text = text.Substring(0, 7);
 			}
-			Clipboard.SetText(text);
+			ClipboardEx.SetTextSafe(text);
 		}
 
 		private static void OnRefreshReferencesClick(object sender, EventArgs e)
@@ -3875,18 +3868,32 @@
 			var type = data.Item2;
 
 			if((type | ReferenceType.Remote) == ReferenceType.Remote)
+			{
 				repository.Remotes.Refresh();
+			}
 			if((type | ReferenceType.Branch) == ReferenceType.Branch)
+			{
 				repository.Refs.RefreshBranches();
+			}
 			else
+			{
 				if((type | ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
+				{
 					repository.Refs.Heads.Refresh();
+				}
 				else if((type | ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
+				{
 					repository.Refs.Remotes.Refresh();
+				}
+			}
 			if((type | ReferenceType.Tag) == ReferenceType.Tag)
+			{
 				repository.Refs.Tags.Refresh();
+			}
 			if((type | ReferenceType.Stash) == ReferenceType.Stash)
+			{
 				repository.Stash.Refresh();
+			}
 		}
 
 		private static void OnRefreshAllReferencesClick(object sender, EventArgs e)

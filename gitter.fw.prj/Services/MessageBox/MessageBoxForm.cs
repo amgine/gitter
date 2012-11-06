@@ -275,7 +275,7 @@
 			}
 			sb.AppendLine();
 			sb.AppendLine(separator);
-			Clipboard.SetText(sb.ToString());
+			ClipboardEx.SetTextSafe(sb.ToString());
 		}
 
 		private void MessageBoxForm_KeyDown(object sender, KeyEventArgs e)

@@ -80,6 +80,7 @@
     <Compile Include="AsyncExecution\IAsyncAction.cs" />
     <Compile Include="AsyncExecution\IAsyncFunc.cs" />
     <Compile Include="AsyncExecution\NullMonitor.cs" />
+    <Compile Include="ClipboardEx.cs" />
     <Compile Include="CLI\AsyncBytesReader.cs" />
     <Compile Include="CLI\AsyncTextReader.cs" />
     <Compile Include="CLI\IOutputReceiver.cs" />

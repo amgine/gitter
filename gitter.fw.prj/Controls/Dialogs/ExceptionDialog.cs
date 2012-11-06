@@ -161,25 +161,8 @@
 
 		private void CopyToClipboard()
 		{
-			int attempts = 3;
 			var message = GetMessage();
-			while(attempts > 0)
-			{
-				try
-				{
-					Clipboard.SetText(message);
-					break;
-				}
-				catch
-				{
-				}
-				--attempts;
-				if(attempts <= 0)
-				{
-					break;
-				}
-				Thread.Sleep(50);
-			}
+			ClipboardEx.SetTextSafe(message);
 		}
 	}
 }

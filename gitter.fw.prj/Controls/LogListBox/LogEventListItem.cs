@@ -60,7 +60,7 @@
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			var menu = new ContextMenuStrip();
-			menu.Items.Add(new ToolStripMenuItem("Copy to Clipboard", null, (s, e) => Clipboard.SetText(DataContext.Message)));
+			menu.Items.Add(new ToolStripMenuItem("Copy to Clipboard", null, (s, e) => ClipboardEx.SetTextSafe(DataContext.Message)));
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

@@ -267,7 +267,7 @@
 										sb.Remove(sb.Length - 1, 1);
 									}
 								}
-								Clipboard.SetText(sb.ToString());
+								ClipboardEx.SetTextSafe(sb.ToString());
 								break;
 							}
 						}
