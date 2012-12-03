@@ -2516,4 +2516,8 @@ Are you sure you want to remove it?</value>
   <data name="ErrPathUnknownSchema" xml:space="preserve">
     <value>Unknown path schema</value>
   </data>
+  <data name="StrAskBranchExists" xml:space="preserve">
+    <value>Branch '{0}' already exists.
+Reset existing branch instead of creating a new one?</value>
+  </data>
 </root>

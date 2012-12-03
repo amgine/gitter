@@ -2971,6 +2971,16 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Branch &apos;{0}&apos; already exists.
+        ///Reset existing branch instead of creating a new one?.
+        /// </summary>
+        internal static string StrAskBranchExists {
+            get {
+                return ResourceManager.GetString("StrAskBranchExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The branch &apos;{0}&apos; is not fully merged.
         ///Are you sure you want to delete it?.
         /// </summary>

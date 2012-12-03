@@ -212,13 +212,14 @@
 
 		public bool Execute()
 		{
-			var name		= _txtName.Text.Trim();
+			var branchName	= _txtName.Text.Trim();
 			var refspec		= _txtRevision.Text.Trim();
 			var checkout	= _chkCheckoutAfterCreation.Checked;
 			var orphan		= checkout && _chkOrphan.Checked && GitFeatures.CheckoutOrphan.IsAvailableFor(_repository);
 			var reflog		= _chkCreateReflog.Checked;
+			var existent	= _repository.Refs.Heads.TryGetItem(branchName);
 
-			if(!ValidateNewBranchName(name, _txtName, _repository))
+			if(!ValidateBranchName(branchName, _txtName))
 			{
 				return false;
 			}
@@ -226,69 +227,135 @@
 			{
 				return false;
 			}
-			var trackingMode = TrackingMode;
-			try
+			if(existent != null)
 			{
-				Cursor = Cursors.WaitCursor;
-				var ptr = _repository.GetRevisionPointer(refspec);
-				if(orphan)
+				if(GitterApplication.MessageBoxService.Show(
+					this,
+					Resources.StrAskBranchExists.UseAsFormat(branchName),
+					Resources.StrBranch,
+					MessageBoxButtons.YesNo,
+					MessageBoxIcon.Question) == DialogResult.Yes)
 				{
-					_repository.Refs.Heads.CreateOrphan(
-						name,
-						ptr,
-						trackingMode,
-						reflog);
+					var ptr = _repository.GetRevisionPointer(refspec);
+					try
+					{
+						if(existent.IsCurrent)
+						{
+							ResetMode mode;
+							using(var dlg = new SelectResetModeDialog())
+							{
+								if(dlg.Run(this) != DialogResult.OK)
+								{
+									return false;
+								}
+								mode = dlg.ResetMode;
+							}
+							Cursor = Cursors.WaitCursor;
+							_repository.Head.Reset(ptr, mode);
+						}
+						else
+						{
+							Cursor = Cursors.WaitCursor;
+							existent.Reset(ptr);
+							if(checkout)
+							{
+								existent.Checkout(true);
+							}
+						}
+					}
+					catch(UnknownRevisionException)
+					{
+						Cursor = Cursors.Default;
+						NotificationService.NotifyInputError(
+							_txtRevision,
+							Resources.ErrInvalidRevisionExpression,
+							Resources.ErrRevisionIsUnknown);
+						return false;
+					}
+					catch(GitException exc)
+					{
+						Cursor = Cursors.Default;
+						GitterApplication.MessageBoxService.Show(
+							this,
+							exc.Message,
+							Resources.ErrFailedToReset,
+							MessageBoxButton.Close,
+							MessageBoxIcon.Error);
+						return false;
+					}
+					return true;
 				}
 				else
 				{
-					_repository.Refs.Heads.Create(
-						name,
-						ptr,
-						trackingMode,
-						checkout,
-						reflog);
+					return false;
 				}
-				Cursor = Cursors.Default;
 			}
-			catch(UnknownRevisionException)
+			else
 			{
-				Cursor = Cursors.Default;
-				NotificationService.NotifyInputError(
-					_txtRevision,
-					Resources.ErrInvalidRevisionExpression,
-					Resources.ErrRevisionIsUnknown);
-				return false;
+				var trackingMode = TrackingMode;
+				try
+				{
+					Cursor = Cursors.WaitCursor;
+					var ptr = _repository.GetRevisionPointer(refspec);
+					if(orphan)
+					{
+						_repository.Refs.Heads.CreateOrphan(
+							branchName,
+							ptr,
+							trackingMode,
+							reflog);
+					}
+					else
+					{
+						_repository.Refs.Heads.Create(
+							branchName,
+							ptr,
+							trackingMode,
+							checkout,
+							reflog);
+					}
+					Cursor = Cursors.Default;
+				}
+				catch(UnknownRevisionException)
+				{
+					Cursor = Cursors.Default;
+					NotificationService.NotifyInputError(
+						_txtRevision,
+						Resources.ErrInvalidRevisionExpression,
+						Resources.ErrRevisionIsUnknown);
+					return false;
+				}
+				catch(BranchAlreadyExistsException)
+				{
+					Cursor = Cursors.Default;
+					NotificationService.NotifyInputError(
+						_txtName,
+						Resources.ErrInvalidBranchName,
+						Resources.ErrBranchAlreadyExists);
+					return false;
+				}
+				catch(InvalidBranchNameException exc)
+				{
+					Cursor = Cursors.Default;
+					NotificationService.NotifyInputError(
+						_txtName,
+						Resources.ErrInvalidBranchName,
+						exc.Message);
+					return false;
+				}
+				catch(GitException exc)
+				{
+					Cursor = Cursors.Default;
+					GitterApplication.MessageBoxService.Show(
+						this,
+						exc.Message,
+						string.Format(Resources.ErrFailedToCreateBranch, branchName),
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
+					return false;
+				}
+				return true;
 			}
-			catch(BranchAlreadyExistsException)
-			{
-				Cursor = Cursors.Default;
-				NotificationService.NotifyInputError(
-					_txtName,
-					Resources.ErrInvalidBranchName,
-					Resources.ErrBranchAlreadyExists);
-				return false;
-			}
-			catch(InvalidBranchNameException exc)
-			{
-				Cursor = Cursors.Default;
-				NotificationService.NotifyInputError(
-					_txtName,
-					Resources.ErrInvalidBranchName,
-					exc.Message);
-				return false;
-			}
-			catch(GitException exc)
-			{
-				Cursor = Cursors.Default;
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCreateBranch, name),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
 		}
 
 		#endregion
