@@ -63,6 +63,7 @@
 			_lstRevisions.ItemActivated += OnItemActivated;
 			_lstRevisions.PreviewKeyDown += OnKeyDown;
 			_options = new LogOptions();
+			_options.Filter = LogReferenceFilter.Allowed;
 			_options.Changed += OnLogOptionsChanged;
 			_search = new HistorySearch<HistorySearchOptions>(_lstRevisions);
 
