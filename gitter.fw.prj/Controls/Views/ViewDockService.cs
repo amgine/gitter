@@ -9,7 +9,7 @@
 
 	using gitter.Framework.Configuration;
 
-	public class ViewDockService
+	public sealed class ViewDockService
 	{
 		#region Data
 

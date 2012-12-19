@@ -178,6 +178,52 @@
 		}
 	}
 
+	public abstract class RemoteOperationCompletedEventArgs : EventArgs
+	{
+		private readonly ReferenceChange[] _changes;
+		private readonly Remote _remote;
+
+		public RemoteOperationCompletedEventArgs(Remote remote, ReferenceChange[] changes)
+		{
+			_remote = remote;
+			_changes = changes;
+		}
+
+		public Remote Remote
+		{
+			get { return _remote; }
+		}
+
+		public ReferenceChange[] Changes
+		{
+			get { return _changes; }
+		}
+	}
+
+	public class FetchCompletedEventArgs : RemoteOperationCompletedEventArgs
+	{
+		public FetchCompletedEventArgs(Remote remote, ReferenceChange[] changes)
+			: base(remote, changes)
+		{
+		}
+	}
+
+	public class PullCompletedEventArgs : RemoteOperationCompletedEventArgs
+	{
+		public PullCompletedEventArgs(Remote remote, ReferenceChange[] changes)
+			: base(remote, changes)
+		{
+		}
+	}
+
+	public class PruneCompletedEventArgs : RemoteOperationCompletedEventArgs
+	{
+		public PruneCompletedEventArgs(Remote remote, ReferenceChange[] changes)
+			: base(remote, changes)
+		{
+		}
+	}
+
 	/// <summary><see cref="EventArgs"/> identifying <see cref="StashedState"/>.</summary>
 	public class StashedStateEventArgs : ObjectEventArgs<StashedState>
 	{

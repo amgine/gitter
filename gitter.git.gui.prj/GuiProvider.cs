@@ -22,6 +22,7 @@
 		private readonly ViewFactoriesCollection _viewFactories;
 		private readonly Statusbar _statusbar;
 		private readonly MainGitMenus _menus;
+		private readonly Notifications _notifications;
 		private RepositoryExplorer _explorer;
 
 		#endregion
@@ -38,6 +39,7 @@
 			_viewFactories	= new ViewFactoriesCollection(this);
 			_statusbar		= new Statusbar(this);
 			_menus			= new MainGitMenus(this);
+			_notifications	= new Notifications(this);
 		}
 
 		public RepositoryProvider RepositoryProvider
@@ -61,6 +63,7 @@
 					}
 					_statusbar.Repository		= _repository;
 					_menus.Repository			= _repository;
+					_notifications.Repository	= _repository;
 				}
 			}
 		}
@@ -370,6 +373,7 @@
 			_mainToolbar.Dispose();
 			_statusbar.Dispose();
 			_menus.Dispose();
+			_notifications.Dispose();
 		}
 	}
 }

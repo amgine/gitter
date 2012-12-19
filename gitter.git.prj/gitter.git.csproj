@@ -85,6 +85,9 @@
     <Compile Include="Log\PathLogSource.cs" />
     <Compile Include="Configuration\ConfigurationFile.cs" />
     <Compile Include="ObjectFactories.cs" />
+    <Compile Include="RefrenceChange.cs" />
+    <Compile Include="RefsDiff.cs" />
+    <Compile Include="RefsState.cs" />
     <Compile Include="Revision\Revision.ParentsCollection.cs" />
     <Compile Include="Revision\Revision.ReferencesCollection.cs" />
     <Compile Include="Tree\TreeCommit.cs" />

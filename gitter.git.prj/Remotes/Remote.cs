@@ -398,6 +398,7 @@
 		{
 			Verify.State.IsNotDeleted(this);
 
+			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 			bool fetchedSomething = false;
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
@@ -410,6 +411,13 @@
 			{
 				Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
 				Repository.InvokeUpdated();
+				var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
+				var changes = RefsDiff.Calculate(state1, state2);
+				Repository.Remotes.OnFetchCompleted(this, changes);
+			}
+			else
+			{
+				Repository.Remotes.OnFetchCompleted(this, new ReferenceChange[0]);
 			}
 		}
 
@@ -424,8 +432,9 @@
 				{
 					var repository = remote.Repository;
 
+					var state1 = RefsState.Capture(repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 					bool fetchedSomething = false;
-					using(Repository.Monitor.BlockNotifications(
+					using(repository.Monitor.BlockNotifications(
 						RepositoryNotifications.BranchChanged,
 						RepositoryNotifications.TagChanged))
 					{
@@ -441,6 +450,13 @@
 						monitor.SetAction(Resources.StrRefreshingReferences.AddEllipsis());
 						Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
 						repository.InvokeUpdated();
+						var state2 = RefsState.Capture(repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
+						var changes = RefsDiff.Calculate(state1, state2);
+						repository.Remotes.OnFetchCompleted(this, changes);
+					}
+					else
+					{
+						repository.Remotes.OnFetchCompleted(this, new ReferenceChange[0]);
 					}
 				},
 				string.Format(Resources.StrFetch, Name),
@@ -453,6 +469,7 @@
 		{
 			Verify.State.IsNotDeleted(this);
 
+			var state1 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
 			try
 			{
 				using(Repository.Monitor.BlockNotifications(
@@ -468,6 +485,9 @@
 				Repository.Refs.Refresh();
 				Repository.InvokeUpdated();
 			}
+			var state2 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
+			var changes = RefsDiff.Calculate(state1, state2);
+			Repository.Remotes.OnPullCompleted(this, changes);
 		}
 
 		public IAsyncAction PullAsync()
@@ -479,6 +499,7 @@
 				(remote, monitor) =>
 				{
 					var repository = remote.Repository;
+					var state1 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
 					try
 					{
 						using(Repository.Monitor.BlockNotifications(
@@ -507,6 +528,9 @@
 					{
 						repository.InvokeUpdated();
 					}
+					var state2 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
+					var changes = RefsDiff.Calculate(state1, state2);
+					repository.Remotes.OnPullCompleted(this, changes);
 				},
 				string.Format(Resources.StrPull, Name),
 				string.Format(Resources.StrFetchingDataFrom, Name),
@@ -609,6 +633,7 @@
 		{
 			Verify.State.IsNotDeleted(this);
 
+			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
@@ -616,6 +641,9 @@
 					new PruneRemoteParameters(Name));
 			}
 			Repository.Refs.Remotes.Refresh();
+			var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+			var changes = RefsDiff.Calculate(state1, state2);
+			Repository.Remotes.OnPruneCompleted(this, changes);
 		}
 
 		/// <summary>Deletes all stale tracking branches.</summary>
@@ -628,6 +656,7 @@
 				(remote, monitor) =>
 				{
 					var repository = remote.Repository;
+					var state1 = RefsState.Capture(repository, ReferenceType.RemoteBranch);
 					using(repository.Monitor.BlockNotifications(
 						RepositoryNotifications.BranchChanged))
 					{
@@ -635,6 +664,9 @@
 							new PruneRemoteParameters(remote.Name));
 					}
 					repository.Refs.Remotes.Refresh();
+					var state2 = RefsState.Capture(repository, ReferenceType.RemoteBranch);
+					var changes = RefsDiff.Calculate(state1, state2);
+					repository.Remotes.OnPruneCompleted(this, changes);
 				},
 				Resources.StrPruneRemote,
 				Resources.StrsSearchingStaleBranches.AddEllipsis(),

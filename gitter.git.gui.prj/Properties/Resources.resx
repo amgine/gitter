@@ -2520,4 +2520,22 @@ Are you sure you want to remove it?</value>
     <value>Branch '{0}' already exists.
 Reset existing branch instead of creating a new one?</value>
   </data>
+  <data name="StrMoved" xml:space="preserve">
+    <value>Moved</value>
+  </data>
+  <data name="StrNew" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="StrsEverythingIsUpToDate" xml:space="preserve">
+    <value>Everything is up to date</value>
+  </data>
+  <data name="StrUpdated" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="StrfNMoreChangesAreNotShown" xml:space="preserve">
+    <value>{0} more changes are not shown</value>
+  </data>
+  <data name="StrPrune" xml:space="preserve">
+    <value>Prune</value>
+  </data>
 </root>

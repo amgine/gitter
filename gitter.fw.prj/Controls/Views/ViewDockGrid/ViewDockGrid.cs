@@ -30,6 +30,7 @@
 		private readonly ViewHost _rootHost;
 		private readonly GridDockMarkers _dockMarkers;
 		private Control _rootControl;
+		private PopupNotificationsStack _popupsStack;
 
 		private ViewDockSide _left;
 		private ViewDockSide _top;
@@ -57,6 +58,7 @@
 			};
 			_rootControl = _rootHost;
 			_floatingViewForms = new LinkedList<FloatingViewForm>();
+			_popupsStack = new PopupNotificationsStack();
 
 			SetStyle(ControlStyles.ContainerControl, true);
 
@@ -553,6 +555,11 @@
 			return viewDockSide;
 		}
 
+		public PopupNotificationsStack PopupsStack
+		{
+			get { return _popupsStack; }
+		}
+
 		internal int HorizontalClientSpace
 		{
 			get
@@ -746,6 +753,11 @@
 				{
 					_bottom.Dispose();
 					_bottom = null;
+				}
+				if(_popupsStack != null)
+				{
+					_popupsStack.Dispose();
+					_popupsStack = null;
 				}
 				_rootControl = null;
 				_floatingViewForms.Clear();

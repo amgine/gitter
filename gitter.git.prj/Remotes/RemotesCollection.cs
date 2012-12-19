@@ -31,6 +31,42 @@
 			if(handler != null) handler(this, new RemoteEventArgs(remote));
 		}
 
+		/// <summary>Fetch completed.</summary>
+		public event EventHandler<FetchCompletedEventArgs> FetchCompleted;
+
+		/// <summary>Invokes <see cref="FetchCompleted"/>.</summary>
+		/// <param name="remote">Remote.</param>
+		/// <param name="changes">Reference changes.</param>
+		internal void OnFetchCompleted(Remote remote, ReferenceChange[] changes)
+		{
+			var handler = FetchCompleted;
+			if(handler != null) handler(this, new FetchCompletedEventArgs(remote, changes));
+		}
+
+		/// <summary>Pull completed.</summary>
+		public event EventHandler<PullCompletedEventArgs> PullCompleted;
+
+		/// <summary>Invokes <see cref="PullCompleted"/>.</summary>
+		/// <param name="remote">Remote.</param>
+		/// <param name="changes">Reference changes.</param>
+		internal void OnPullCompleted(Remote remote, ReferenceChange[] changes)
+		{
+			var handler = PullCompleted;
+			if(handler != null) handler(this, new PullCompletedEventArgs(remote, changes));
+		}
+
+		/// <summary>Prune completed.</summary>
+		public event EventHandler<PruneCompletedEventArgs> PruneCompleted;
+
+		/// <summary>Invokes <see cref="PruneCompleted"/>.</summary>
+		/// <param name="remote">Remote.</param>
+		/// <param name="changes">Reference changes.</param>
+		internal void OnPruneCompleted(Remote remote, ReferenceChange[] changes)
+		{
+			var handler = PruneCompleted;
+			if(handler != null) handler(this, new PruneCompletedEventArgs(remote, changes));
+		}
+
 		#endregion
 
 		#region .ctor
@@ -117,7 +153,7 @@
 		/// <param name="remote">Removed remote.</param>
 		internal void RemoveRemote(Remote remote)
 		{
-			Verify.Argument.IsNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, "remote");
 			Verify.Argument.IsValidGitObject(remote, Repository, "remote");
 
 			var name = remote.Name;
@@ -164,6 +200,7 @@
 		{
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
+			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.TagChanged))
@@ -173,6 +210,9 @@
 			}
 			Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
 			Repository.InvokeUpdated();
+			var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
+			var changes = RefsDiff.Calculate(state1, state2);
+			OnFetchCompleted(null, changes);
 		}
 
 		public IAsyncAction FetchAsync()
@@ -187,6 +227,7 @@
 						RepositoryNotifications.BranchChanged,
 						RepositoryNotifications.TagChanged))
 					{
+						var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 						if(repository.Accessor.Fetch(
 							new FetchParameters()
 							{
@@ -196,6 +237,9 @@
 							monitor.SetAction(Resources.StrRefreshingReferences.AddEllipsis());
 							Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
 							repository.InvokeUpdated();
+							var state2 = RefsState.Capture(repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
+							var changes = RefsDiff.Calculate(state1, state2);
+							OnFetchCompleted(null, changes);
 						}
 					}
 				},
@@ -212,6 +256,7 @@
 		{
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
+			var state1 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.TagChanged))
@@ -227,6 +272,9 @@
 					Repository.InvokeUpdated();
 				}
 			}
+			var state2 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
+			var changes = RefsDiff.Calculate(state1, state2);
+			OnPullCompleted(null, changes);
 		}
 
 		public IAsyncAction PullAsync()
@@ -241,6 +289,7 @@
 						RepositoryNotifications.BranchChanged,
 						RepositoryNotifications.TagChanged))
 					{
+						var state1 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
 						try
 						{
 							if(repository.Accessor.Pull(
@@ -263,6 +312,9 @@
 						{
 							repository.InvokeUpdated();
 						}
+						var state2 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
+						var changes = RefsDiff.Calculate(state1, state2);
+						OnPullCompleted(null, changes);
 					}
 				},
 				Resources.StrPull,

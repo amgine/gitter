@@ -12,6 +12,7 @@
 	{
 		protected static class ColorTable
 		{
+			public static readonly Color BackgroundColor = Color.FromArgb(41, 57, 85);
 			public static readonly Color ViewHostTabsBackground = Color.FromArgb(41, 57, 85);
 
 			public static readonly Color ViewHostTabsSelectedBackgroundActiveEnd = Color.FromArgb(255, 232, 166);
@@ -63,6 +64,11 @@
 			public static readonly Color DockMarkerButtonContentBorder = Color.FromArgb(68, 88, 121);
 			public static readonly Color DockMarkerButtonContentStart = Color.FromArgb(253, 231, 165);
 			public static readonly Color DockMarkerButtonContentEnd = Color.FromArgb(247, 198, 113);
+		}
+
+		public override Color BackgroundColor
+		{
+			get { return ColorTable.BackgroundColor; }
 		}
 
 		#region Tabs Rendering
@@ -479,7 +485,6 @@
 					StringFormatFlags.LineLimit,
 				Trimming = StringTrimming.EllipsisCharacter,
 			};
-
 
 		public override void RenderViewHostHeader(ViewHostHeader header, PaintEventArgs e)
 		{
@@ -932,6 +937,58 @@
 		{
 			PaintDockMarkerButtonBackground(graphics, button.Bounds, hover);
 			PaintDockMarkerButtonContent(button, graphics, hover);
+		}
+
+		#endregion
+
+		#region Popup Notifications
+
+		public override void RenderPopupNotificationHeader(PopupNotificationHeader header, PaintEventArgs e)
+		{
+			const int BetweenTextAndButtons = 2;
+			const int BeforeContent = 2;
+
+			var graphics = e.Graphics;
+			var client = header.ClientRectangle;
+
+			var rect = (RectangleF)client;
+			rect.X -= .5f;
+			rect.Width += 1;
+			rect.Y -= .5f;
+			rect.Height += 1;
+
+			graphics.TextRenderingHint = Utility.TextRenderingHint;
+			graphics.TextContrast = Utility.TextContrast;
+
+			Color textColor, backgroundStart, backgroundEnd;
+			textColor = ColorTable.ViewHostHeaderTextFocused;
+			backgroundStart = ColorTable.ViewHostHeaderBackgroundFocusedStart;
+			backgroundEnd = ColorTable.ViewHostHeaderBackgroundFocusedEnd;
+			using(var brush = new SolidBrush(ColorTable.ViewHostHeaderBackground))
+			{
+				graphics.FillRectangle(brush, e.ClipRectangle);
+			}
+			graphics.SmoothingMode = SmoothingMode.HighQuality;
+			using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, ViewConstants.HeaderHeight), backgroundStart, backgroundEnd))
+			{
+				graphics.FillRoundedRectangle(brush, rect, 2, 2, 0, 0);
+			}
+			rect.X += BeforeContent;
+			rect.Width -= BeforeContent;
+			if(header.Buttons.Count != 0)
+			{
+				rect.Width -= header.Buttons.Width + BetweenTextAndButtons;
+			}
+			using(var brush = new SolidBrush(textColor))
+			{
+				GitterApplication.TextRenderer.DrawText(
+					graphics,
+					header.Text,
+					GitterApplication.FontManager.UIFont,
+					brush,
+					Rectangle.Truncate(rect),
+					ViewHostHeaderTextFormat);
+			}
 		}
 
 		#endregion

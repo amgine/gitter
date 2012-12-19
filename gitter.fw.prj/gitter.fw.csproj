@@ -57,6 +57,7 @@
       <HintPath>Hunspell\NHunspell.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Windows.Forms" />
@@ -110,10 +111,20 @@
     <Compile Include="Controls\Notifications\NotificationForm.Designer.cs">
       <DependentUpon>NotificationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Views\NotificationContent.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Views\PopupNotificationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\Views\PopupNotificationsStack.cs" />
     <Compile Include="Controls\Views\ViewHeaderMenu.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CachedIconResources.cs" />
+    <Compile Include="Controls\Views\PopupNotificationHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\Views\ViewRendererBase.cs" />
     <Compile Include="Controls\Views\ViewManager.cs" />
     <Compile Include="DateFormat.cs" />

@@ -94,6 +94,10 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\RevisionHeaderContent.cs" />
+    <Compile Include="Notifications.cs" />
+    <Compile Include="Notifications\ReferencesChangedNotification.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="RevisionToolTip.cs">
       <SubType>Component</SubType>
     </Compile>

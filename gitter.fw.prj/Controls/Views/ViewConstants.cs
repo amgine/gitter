@@ -57,5 +57,7 @@
 		public const double SplitterOpacity = 0.70;
 
 		public const double DockPositionMarkerOpacity = 0.50;
+
+		public const int PopupWidth = 300;
 	}
 }

@@ -33,13 +33,13 @@
 			Verify.Argument.IsNotNull(dockGrid, "dockGrid");
 			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
-			Font = GitterApplication.FontManager.UIFont;
-			Text = viewHost.Text;
-			FormBorderStyle = FormBorderStyle.None;
-			BackColor = viewHost.BackColor;
-			StartPosition = FormStartPosition.Manual;
-			Padding = new Padding(ViewConstants.FloatBorderSize);
-			Bounds = GetBoundsForControl(viewHost);
+			Font			= GitterApplication.FontManager.UIFont;
+			Text			= viewHost.Text;
+			FormBorderStyle	= FormBorderStyle.None;
+			BackColor		= GitterApplication.Style.ViewRenderer.BackgroundColor;
+			StartPosition	= FormStartPosition.Manual;
+			Padding			= new Padding(ViewConstants.FloatBorderSize);
+			Bounds			= GetBoundsForControl(viewHost);
 			if(viewHost.Width < ViewConstants.MinimumHostWidth)
 			{
 				if(viewHost.Height < ViewConstants.MinimumHostHeight)
@@ -55,16 +55,16 @@
 			{
 				viewHost.Height = ViewConstants.MinimumHostHeight;
 			};
-			MinimumSize = new Size(
+			MinimumSize		= new Size(
 				ViewConstants.MinimumHostWidth + ViewConstants.FloatBorderSize * 2,
 				ViewConstants.MinimumHostHeight + ViewConstants.FloatBorderSize * 2);
-			ShowInTaskbar = false;
-			ShowIcon = false;
-			ControlBox = false;
-			MinimizeBox = false;
-			MaximizeBox = true;
-			_rootControl = viewHost;
-			_dockGrid = dockGrid;
+			ShowInTaskbar	= false;
+			ShowIcon		= false;
+			ControlBox		= false;
+			MinimizeBox		= false;
+			MaximizeBox		= true;
+			_rootControl	= viewHost;
+			_dockGrid		= dockGrid;
 
 			_dockGrid.AddFloatingForm(this);
 		}

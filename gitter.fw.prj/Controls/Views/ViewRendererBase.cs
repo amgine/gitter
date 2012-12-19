@@ -6,6 +6,8 @@
 
 	public abstract class ViewRenderer
 	{
+		public abstract Color BackgroundColor { get; }
+
 		public abstract int MeasureViewDockSideTabLength(ViewDockSideTab tab, Graphics graphics);
 
 		public abstract void RenderViewDockSideTabBackground(ViewDockSideTab tab, Graphics graphics, Rectangle bounds);
@@ -29,5 +31,7 @@
 		public abstract void RenderViewDockSide(ViewDockSide side, PaintEventArgs e);
 
 		public abstract void RenderDockMarkerButton(DockMarkerButton button, Graphics graphics, bool hover);
+
+		public abstract void RenderPopupNotificationHeader(PopupNotificationHeader header, PaintEventArgs e);
 	}
 }
