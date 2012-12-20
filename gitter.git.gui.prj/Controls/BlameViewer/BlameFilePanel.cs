@@ -301,7 +301,7 @@
 							{
 								var commit = lines[0].Commit;
 								menu.Items.Add(new ToolStripSeparator());
-								menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.SHA1));
+								menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash));
 								menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, commit.Summary));
 								menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author));
 								if(commit.Author != commit.Committer)
@@ -372,7 +372,7 @@
 					Revision revision = null;
 					try
 					{
-						revision = _repository.Revisions[blameHunk.Commit.SHA1];
+						revision = _repository.Revisions[blameHunk.Commit.Hash];
 					}
 					catch
 					{
@@ -610,7 +610,7 @@
 				var rcHash = new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
 				var rcAuthor = new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
 				GitterApplication.TextRenderer.DrawText(
-					graphics, hunk.Commit.SHA1.Substring(0, 7), font, headerBrush,
+					graphics, hunk.Commit.Hash.Substring(0, 7), font, headerBrush,
 					rcHash.X + CellSize.Width / 2, rcHash.Y, ContentFormat);
 				GitterApplication.TextRenderer.DrawText(
 					graphics, hunk.Commit.Author, font, headerBrush,

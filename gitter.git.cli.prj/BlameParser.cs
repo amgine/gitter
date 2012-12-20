@@ -2,8 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text;
-	using System.Globalization;
 
 	internal sealed class BlameParser : GitParser
 	{
@@ -71,57 +69,77 @@
 		{
 		}
 
-		public BlameCommit ParseCommitInfo(IDictionary<string, BlameCommit> cache)
+		private string ReadStringValue(string header)
 		{
-			var sha = ReadString(40);
-			SkipLine();
+			Skip(header.Length + 1);
+			return ReadLine();
+		}
 
-			BlameCommit commit;
-			if(cache.TryGetValue(sha, out commit))
-			{
-				return commit;
-			}
+		private DateTime ReadDateValue(string header)
+		{
+			Skip(header.Length + 1);
+			return ReadUnixTimestampLine();
+		}
 
-			Skip(AuthorHeader.Length + 1);
-			var author = ReadLine();
-			Skip(AuthorMailHeader.Length + 1);
-			var authorMail = ReadLine();
-			Skip(AuthorTimeHeader.Length + 1);
-			var authorTime = ReadUnixTimestampLine();
-			Skip(AuthorTimeZoneHeader.Length + 1);
-			var authorTZ = ReadLine();
-			Skip(CommitterHeader.Length + 1);
-			var committer = ReadLine();
-			Skip(CommitterMailHeader.Length + 1);
-			var committerMail = ReadLine();
-			Skip(CommitterTimeHeader.Length + 1);
-			var committerTime = ReadUnixTimestampLine();
-			Skip(CommitterTimeZoneHeader.Length + 1);
-			var committerTZ = ReadLine();
-			Skip(SummaryHeader.Length + 1);
-			var summary = ReadLine();
-
-			bool isBoundary = false;
-			string previous = null;
+		private bool ReadBoundaryValue()
+		{
+			bool isBoundary;
 			if(CheckValue(BoundaryHeader))
 			{
 				isBoundary = true;
 				Skip(BoundaryHeader.Length + 1);
 			}
+			else
+			{
+				isBoundary = false;
+			}
+			return isBoundary;
+		}
+
+		private string ReadPreviousValue()
+		{
 			if(CheckValue(PreviousHeader))
 			{
 				Skip(PreviousHeader.Length + 1);
-				previous = ReadString(40);
+				var previous = ReadString(40);
 				SkipLine();
+				return previous;
 			}
-			Skip(FileNameHeader.Length + 1);
-			var fileName = ReadLine();
+			else
+			{
+				return null;
+			}
+		}
 
-			commit = new BlameCommit(sha,
+		private BlameCommit ParseCommitInfo(IDictionary<string, BlameCommit> cache)
+		{
+			var hash = ReadString(40);
+			SkipLine();
+
+			BlameCommit commit;
+			if(cache.TryGetValue(hash, out commit))
+			{
+				return commit;
+			}
+
+			var author			= ReadStringValue(AuthorHeader);
+			var authorMail		= ReadStringValue(AuthorMailHeader);
+			var authorTime		= ReadDateValue(AuthorTimeHeader);
+			var authorTZ		= ReadStringValue(AuthorTimeZoneHeader);
+			var committer		= ReadStringValue(CommitterHeader);
+			var committerMail	= ReadStringValue(CommitterMailHeader);
+			var committerTime	= ReadDateValue(CommitterTimeHeader);
+			var committerTZ		= ReadStringValue(CommitterTimeZoneHeader);
+			var summary			= ReadStringValue(SummaryHeader);
+			var isBoundary		= ReadBoundaryValue(); /* optional */
+			var previous		= ReadPreviousValue(); /* optional */
+			var fileName		= ReadStringValue(FileNameHeader);
+
+			commit = new BlameCommit(hash,
 				author, authorMail, authorTime, authorTZ,
 				committer, committerMail, committerTime, committerTZ,
 				summary, isBoundary, previous);
-			cache.Add(sha, commit);
+			cache.Add(hash, commit);
 			return commit;
 		}
 
@@ -130,8 +148,8 @@
 			var cache = new Dictionary<string, BlameCommit>();
 			int lineN = 1;
 			BlameCommit prev = null;
-			List<BlameHunk> hunks = new List<BlameHunk>();
-			List<BlameLine> lines = new List<BlameLine>();
+			var hunks = new List<BlameHunk>();
+			var lines = new List<BlameLine>();
 
 			while(!IsAtEndOfString)
 			{

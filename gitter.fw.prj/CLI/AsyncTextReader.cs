@@ -63,7 +63,7 @@
 			_stream			= reader.BaseStream;
 			_decoder		= encoding.GetDecoder();
 			_byteBuffer		= new byte[_bufferSize];
-			_charBuffer		= new char[encoding.GetMaxCharCount(_bufferSize)];
+			_charBuffer		= new char[encoding.GetMaxCharCount(_bufferSize) + 1];
 			_eof			= new ManualResetEvent(false);
 
 			_stringBuilder.Clear();

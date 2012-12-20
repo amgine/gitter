@@ -652,9 +652,13 @@
 			{
 				pos = refs.IndexOf('\n');
 				if(pos == -1)
+				{
 					pos = l;
+				}
 				else
+				{
 					++pos;
+				}
 			}
 			while(pos < l)
 			{

@@ -220,9 +220,13 @@
 				if(branch != null && (allowFakeBranch || !branch.IsFake))
 				{
 					if(branch.IsRemote)
+					{
 						remotes.Add(branch);
+					}
 					else
+					{
 						heads.Add(branch);
+					}
 				}
 			}
 			return new BranchesData(heads, remotes);
@@ -292,10 +296,17 @@
 			int max = 0;
 			int cur = 0;
 			if(!int.TryParse(String.Substring(p1 + 1, s - p1 - 1), NumberStyles.None, CultureInfo.InvariantCulture, out cur))
+			{
 				return new GitProgress(ReadLine());
+			}
 			if(!int.TryParse(String.Substring(s + 1, p2 - s - 1), NumberStyles.None, CultureInfo.InvariantCulture, out max))
+			{
 				return new GitProgress(ReadLine());
-			if(cur > max) return new GitProgress(ReadLine());
+			}
+			if(cur > max)
+			{
+				return new GitProgress(ReadLine());
+			}
 
 			var stage = ReadStringUpToNoAdvance(p1).Trim();
 			return new GitProgress(stage, min, max, cur);
@@ -357,11 +368,8 @@
 			return res;
 		}
 
-		public void ParseRevisionData(RevisionData rev, Dictionary<string, RevisionData> cache)
+		private RevisionData[] ReadRevisionParents(Dictionary<string, RevisionData> cache)
 		{
-			// Tree Hash
-			rev.TreeHash = ReadString(40, 1);
-			// Parents
 			int end = FindNewLineOrEndOfString();
 			int numParents = (end - Position + 1) / 41;
 			var parents = new RevisionData[numParents];
@@ -388,19 +396,20 @@
 					}
 				}
 			}
-			rev.Parents = parents;
-			// Commit Date
-			rev.CommitDate = ReadUnixTimestampLine();
-			// Committer Name
-			rev.CommitterName = ReadLine();
-			// Committer Email
-			rev.CommitterEmail = ReadLine();
-			// Author Date
-			rev.AuthorDate = ReadUnixTimestampLine();
-			// Author Name
-			rev.AuthorName = ReadLine();
-			// Author Email
-			rev.AuthorEmail = ReadLine();
+			return parents;
+		}
+
+		public void ParseRevisionData(RevisionData rev, Dictionary<string, RevisionData> cache)
+		{
+			rev.TreeHash		= ReadString(40, 1);
+			rev.Parents			= ReadRevisionParents(cache);
+			rev.CommitDate		= ReadUnixTimestampLine();
+			rev.CommitterName	= ReadLine();
+			rev.CommitterEmail	= ReadLine();
+			rev.AuthorDate		= ReadUnixTimestampLine();
+			rev.AuthorName		= ReadLine();
+			rev.AuthorEmail		= ReadLine();
+
 			// Subject + Body
 			int eoc = FindNullOrEndOfString();
 			int bodyStart;
@@ -410,11 +419,17 @@
 				int eos = eoc - 1;
 				char c = String[eos];
 				while((c == '\r') || (c == '\n'))
+				{
 					c = String[--eos];
+				}
 				if(eos > Position)
+				{
 					rev.Subject = ReadStringUpToNoAdvance(eos + 1);
+				}
 				else
+				{
 					rev.Subject = string.Empty;
+				}
 				rev.Body = string.Empty;
 			}
 			else
@@ -424,11 +439,17 @@
 				int eob = eoc - 1;
 				char c = String[eob];
 				while((c == '\r') || (c == '\n'))
+				{
 					c = String[--eob];
+				}
 				if(eob > Position)
+				{
 					rev.Body = ReadStringUpToNoAdvance(eob + 1);
+				}
 				else
+				{
 					rev.Body = string.Empty;
+				}
 			}
 			Position = eoc + 1;
 		}

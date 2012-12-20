@@ -1,15 +1,13 @@
 ﻿namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Text;
 
 	/// <summary>Represents a commit, referenced by a blame output line.</summary>
 	public sealed class BlameCommit
 	{
 		#region Data
 
-		private readonly string _sha1;
+		private readonly string _hash;
 		private readonly string _author;
 		private readonly string _authorEmail;
 		private readonly DateTime _authorDate;
@@ -27,12 +25,12 @@
 		#region .ctor
 
 		public BlameCommit(
-			string sha1,
+			string hash,
 			string author, string authorEmail, DateTime authorDate, string authorTimeZone,
 			string committer, string committerEmail, DateTime commitDate, string committerTimeZone,
 			string summary, bool isBoundary, string previous)
 		{
-			_sha1 = sha1;
+			_hash = hash;
 			_author = author;
 			_authorEmail = authorEmail;
 			_authorDate = authorDate;
@@ -50,9 +48,9 @@
 
 		#region Properties
 
-		public string SHA1
+		public string Hash
 		{
-			get { return _sha1; }
+			get { return _hash; }
 		}
 
 		public string Summary

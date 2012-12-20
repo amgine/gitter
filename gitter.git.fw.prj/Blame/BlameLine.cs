@@ -1,14 +1,10 @@
 ﻿namespace gitter.Git
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text;
-
 	public sealed class BlameLine
 	{
 		#region Data
 
-		private readonly int _num;
+		private readonly int _number;
 		private readonly string _text;
 		private readonly BlameCommit _commit;
 		private readonly string _ending;
@@ -16,7 +12,7 @@
 
 		#endregion
 
-		public BlameLine(BlameCommit commit, int num, string text, string ending = LineEnding.Lf)
+		public BlameLine(BlameCommit commit, int number, string text, string ending = LineEnding.Lf)
 		{
 			Verify.Argument.IsNotNull(commit, "commit");
 			Verify.Argument.IsNotNull(text, "text");
@@ -24,13 +20,13 @@
 			_commit = commit;
 			_text = text;
 			_ending = ending;
-			_num = num;
+			_number = number;
 			_charPositions = -1;
 		}
 
 		public int Number
 		{
-			get { return _num; }
+			get { return _number; }
 		}
 
 		public BlameCommit Commit

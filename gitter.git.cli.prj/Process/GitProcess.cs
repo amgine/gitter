@@ -322,42 +322,5 @@
 				EnableRaisingEvents = true,
 			});
 		}
-
-		public static GitInteractive ExecInteractive(GitInput input)
-		{
-			Verify.Argument.IsNotNull(input, "input");
-
-			var p = new Process();
-			var psi = new ProcessStartInfo()
-			{
-				Arguments = input.GetArguments(),
-				WindowStyle = ProcessWindowStyle.Normal,
-				UseShellExecute = false,
-				StandardOutputEncoding = input.Encoding,
-				StandardErrorEncoding = input.Encoding,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				LoadUserProfile = true,
-				FileName = _gitExePath,
-				ErrorDialog = false,
-				CreateNoWindow = true,
-			};
-			if(!string.IsNullOrEmpty(input.WorkingDirectory))
-			{
-				psi.WorkingDirectory = input.WorkingDirectory;
-			}
-			SetCriticalEnvironmentVariables(psi);
-			if(input.Environment != null)
-			{
-				foreach(var opt in input.Environment)
-				{
-					psi.EnvironmentVariables[opt.Key] = opt.Value;
-				}
-			}
-			p.StartInfo = psi;
-			p.Start();
-			return new GitInteractive(p);
-		}
 	}
 }
