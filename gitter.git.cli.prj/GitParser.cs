@@ -315,9 +315,16 @@
 		protected DateTime ReadUnixTimestampLine()
 		{
 			var timestampStr = ReadLine();
-			var timestamp = long.Parse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture);
-			var date = GitConstants.UnixEraStart.AddSeconds(timestamp).ToLocalTime();
-			return date;
+			long timestamp;
+			if(string.IsNullOrWhiteSpace(timestampStr) || !long.TryParse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture, out timestamp))
+			{
+				return GitConstants.UnixEraStart;
+			}
+			else
+			{
+				var date = GitConstants.UnixEraStart.AddSeconds(timestamp).ToLocalTime();
+				return date;
+			}
 		}
 
 		public void ParseCommitParentsFromRaw(IEnumerable<RevisionData> revs, Dictionary<string, RevisionData> cache)
