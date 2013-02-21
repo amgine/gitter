@@ -35,12 +35,24 @@
 		public static ICollection<string> GetAvailableLocales()
 		{
 			var list = new List<string>();
-			foreach(var file in Directory.EnumerateFiles(DictionaryPath, "*.aff", SearchOption.TopDirectoryOnly))
+			try
 			{
-				if(File.Exists(file.Substring(0, file.Length - 4) + ".dic"))
+				if(Directory.Exists(DictionaryPath))
 				{
-					list.Add(Path.GetFileNameWithoutExtension(file));
+					foreach(var file in Directory.EnumerateFiles(DictionaryPath, "*.aff", SearchOption.TopDirectoryOnly))
+					{
+						if(File.Exists(file.Substring(0, file.Length - 4) + ".dic"))
+						{
+							list.Add(Path.GetFileNameWithoutExtension(file));
+						}
+					}
 				}
+			}
+			catch(DirectoryNotFoundException)
+			{
+			}
+			catch(FileNotFoundException)
+			{
 			}
 			return list;
 		}
