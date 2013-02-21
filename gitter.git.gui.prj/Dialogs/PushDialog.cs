@@ -32,6 +32,7 @@
 
 			Text = Resources.StrPush;
 
+			_lstReferences.Style = GitterApplication.DefaultStyle;
 			_lblBranches.Text = Resources.StrBranchesToPush.AddColon();
 			_grpPushTo.Text = Resources.StrPushTo;
 			_radRemote.Text = Resources.StrRemote;

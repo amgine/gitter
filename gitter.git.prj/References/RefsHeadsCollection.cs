@@ -324,28 +324,36 @@
 
 		#region Get()
 
-		/// <summary>Gets the list of unmerged local branches.</summary>
-		/// <returns>List of unmerged local branches.</returns>
-		public IList<Branch> GetUnmerged()
+		private IList<Branch> GetHeads(BranchesData refs)
 		{
-			var refs = Repository.Accessor.QueryBranches(
-				new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.NoMerged));
 			var heads = refs.Heads;
 			var remotes = refs.Remotes;
 			if(heads.Count == 0)
 			{
 				return new Branch[0];
 			}
-			var res = new List<Branch>(heads.Count);
-			lock(SyncRoot)
+			else
 			{
-				foreach(var head in heads)
+				var res = new List<Branch>(heads.Count);
+				lock(SyncRoot)
 				{
-					var branch = TryGetItem(head.Name);
-					if(branch != null) res.Add(branch);
+					foreach(var head in heads)
+					{
+						var branch = TryGetItem(head.Name);
+						if(branch != null) res.Add(branch);
+					}
 				}
+				return res;
 			}
-			return res;
+		}
+
+		/// <summary>Gets the list of unmerged local branches.</summary>
+		/// <returns>List of unmerged local branches.</returns>
+		public IList<Branch> GetUnmerged()
+		{
+			var refs = Repository.Accessor.QueryBranches(
+				new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.NoMerged));
+			return GetHeads(refs);
 		}
 
 		/// <summary>Gets the list of merged local branches.</summary>
@@ -354,22 +362,7 @@
 		{
 			var refs = Repository.Accessor.QueryBranches(
 				new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.Merged));
-			var heads = refs.Heads;
-			var remotes = refs.Remotes;
-			if(heads.Count == 0)
-			{
-				return new Branch[0];
-			}
-			var res = new List<Branch>(heads.Count);
-			lock(SyncRoot)
-			{
-				foreach(var head in heads)
-				{
-					var branch = TryGetItem(head.Name);
-					if(branch != null) res.Add(branch);
-				}
-			}
-			return res;
+			return GetHeads(refs);
 		}
 
 		/// <summary>Gets the list of local branches, containing specified <paramref name="revision"/>.</summary>
@@ -382,25 +375,7 @@
 
 			var refs = Repository.Accessor.QueryBranches(
 				new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.Contains, revision.Pointer));
-			var heads = refs.Heads;
-			var remotes = refs.Remotes;
-			if(heads.Count == 0)
-			{
-				return new Branch[0];
-			}
-			var res = new List<Branch>(heads.Count);
-			lock(SyncRoot)
-			{
-				foreach(var head in heads)
-				{
-					var branch = TryGetItem(head.Name);
-					if(branch != null)
-					{
-						res.Add(branch);
-					}
-				}
-			}
-			return res;
+			return GetHeads(refs);
 		}
 
 		#endregion

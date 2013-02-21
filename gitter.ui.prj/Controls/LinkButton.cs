@@ -25,7 +25,7 @@
 			InitializeComponent();
 
 			_lblText.Text = Text;
-			_lblText.ForeColor = SystemColors.HotTrack;
+			_lblText.ForeColor = GitterApplication.Style.Colors.HyperlinkText;
 
 			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
 			{
@@ -100,11 +100,13 @@
 				RefreshUnderlineFont();
 			}
 			_lblText.Font = _underlineFont;
+			_lblText.ForeColor = GitterApplication.Style.Colors.HyperlinkTextHotTrack;
 		}
 
 		private void OnInteractivePartMouseLeave(object sender, EventArgs e)
 		{
 			_lblText.Font = null;
+			_lblText.ForeColor = GitterApplication.Style.Colors.HyperlinkText;
 		}
 	}
 }

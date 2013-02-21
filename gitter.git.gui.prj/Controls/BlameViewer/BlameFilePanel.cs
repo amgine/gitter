@@ -552,12 +552,16 @@
 
 		private void PaintLine(int lineIndex, BlameHunk hunk, BlameLine line, bool paintHeader, int digits, Graphics graphics, Font font, bool hover, bool selected, bool alternate, int x, int y, int width)
 		{
+			Brush backgroundBrush;
+
 			var rcColNumbers = new Rectangle(x, y, (digits + 1) * CellSize.Width + 2, CellSize.Height);
 			graphics.SmoothingMode = SmoothingMode.Default;
-			var backgroundBrush = hover ?
-				LineNumberHoverBackground :
-				LineNumberBackground;
-			graphics.FillRectangle(backgroundBrush, rcColNumbers);
+			using(backgroundBrush = hover ?
+				GetLineNumberHoverBackground() :
+				GetLineNumberBackground())
+			{
+				graphics.FillRectangle(backgroundBrush, rcColNumbers);
+			}
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			var num = line.Number;
 			var temp = num;
@@ -568,13 +572,16 @@
 				++d;
 			}
 			int lx = x + ((digits - d)) * CellSize.Width + CellSize.Width / 2;
-			GitterApplication.TextRenderer.DrawText(
-				graphics,
-				num.ToString(CultureInfo.InvariantCulture),
-				font,
-				LineNumberText,
-				lx, y,
-				ContentFormat);
+			using(var brush = GetLineNumberText())
+			{
+				GitterApplication.TextRenderer.DrawText(
+					graphics,
+					num.ToString(CultureInfo.InvariantCulture),
+					font,
+					brush,
+					lx, y,
+					ContentFormat);
+			}
 			int lineX = x;
 			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
 			lineX = x + (digits + 1) * CellSize.Width + 1;
@@ -588,40 +595,43 @@
 			if(hover)
 			{
 				backgroundBrush = selected ?
-					LineSelectedHoverBackground :
-					LineHoverBackground;
+					GetLineSelectedHoverBackground() :
+					GetLineHoverBackground();
 			}
 			else
 			{
 				backgroundBrush = selected ?
-					LineSelectedBackground :
+					GetLineSelectedBackground() :
 					(alternate ?
-						Brushes.WhiteSmoke :
-						Brushes.White);
+						new SolidBrush(Style.Colors.Alternate) :
+						new SolidBrush(Style.Colors.LineContextBackground));
 			}
-			graphics.FillRectangle(backgroundBrush, rcLine);
+			using(backgroundBrush)
+			{
+				graphics.FillRectangle(backgroundBrush, rcLine);
+			}
 			lineX = x + digits * CellSize.Width + _hashColumnWidth + _autorColumnWidth + 1;
 			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-			if(paintHeader)
+			using(var brush = new SolidBrush(Style.Colors.WindowText))
 			{
-				var headerBrush = Brushes.Black;
-				var rcHash = new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
-				var rcAuthor = new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, hunk.Commit.Hash.Substring(0, 7), font, headerBrush,
-					rcHash.X + CellSize.Width / 2, rcHash.Y, ContentFormat);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, hunk.Commit.Author, font, headerBrush,
-					rcAuthor.X + CellSize.Width / 2, rcAuthor.Y, ContentFormat);
-			}
+				if(paintHeader)
+				{
+					var rcHash		= new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
+					var rcAuthor	= new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
+					GitterApplication.TextRenderer.DrawText(
+						graphics, hunk.Commit.Hash.Substring(0, 7), font, brush,
+						rcHash.X + CellSize.Width / 2, rcHash.Y, ContentFormat);
+					GitterApplication.TextRenderer.DrawText(
+						graphics, hunk.Commit.Author, font, brush,
+						rcAuthor.X + CellSize.Width / 2, rcAuthor.Y, ContentFormat);
+				}
 
-			rcLine.X += _hashColumnWidth + _autorColumnWidth;
-			rcLine.Width -= _hashColumnWidth + _autorColumnWidth;
-			GitterApplication.TextRenderer.DrawText(
-				graphics, line.Text, font, Brushes.Black,
-				rcLine.X, rcLine.Y, ContentFormat);
+				rcLine.X += _hashColumnWidth + _autorColumnWidth;
+				rcLine.Width -= _hashColumnWidth + _autorColumnWidth;
+				GitterApplication.TextRenderer.DrawText(
+					graphics, line.Text, font, brush,
+					rcLine.X, rcLine.Y, ContentFormat);
+			}
 		}
 
 		protected override void OnFlowControlAttached()

@@ -33,31 +33,6 @@
 
 		#endregion
 
-		#region Static Data
-
-		private static readonly Bitmap ImgCollapse = Resources.ImgMinus;
-		private static readonly Bitmap ImgCollapseHovered = Resources.ImgMinusHovered;
-		private static readonly Bitmap ImgExpand = Resources.ImgPlus;
-		private static readonly Bitmap ImgExpandHovered = Resources.ImgPlusHovered;
-
-		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedState =
-			new Dictionary<CheckedState, Bitmap>()
-			{
-				{ CheckedState.Checked,			Resources.ImgChecked		},
-				{ CheckedState.Unchecked,		Resources.ImgUnchecked		},
-				{ CheckedState.Intermediate,	Resources.ImgIntermediate	},
-			};
-
-		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedStateHovered =
-			new Dictionary<CheckedState, Bitmap>()
-			{
-				{ CheckedState.Checked,			Resources.ImgCheckedHover		},
-				{ CheckedState.Unchecked,		Resources.ImgUncheckedHover		},
-				{ CheckedState.Intermediate,	Resources.ImgIntermediateHover	},
-			};
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="CustomListBoxItem"/> class.</summary>
@@ -606,309 +581,22 @@
 		/// <param name="paintEventArgs">Painting options.</param>
 		protected override void OnPaintBackground(ItemPaintEventArgs paintEventArgs)
 		{
-			var state = paintEventArgs.State;
-
-			if(state == ItemState.None) return;
-
-			bool hovered	= (state & ItemState.Hovered)  == ItemState.Hovered;
-			bool selected	= (state & ItemState.Selected) == ItemState.Selected;
-			bool focused	= (state & ItemState.Focused)  == ItemState.Focused;
-			IBackgroundStyle background = null;
-			if(selected)
-			{
-				if(paintEventArgs.HostControlFocused)
-				{
-					if(hovered)
-					{
-						background = BackgroundStyle.SelectedFocused;
-					}
-					else if(focused)
-					{
-						background = BackgroundStyle.SelectedFocused;
-					}
-					else
-					{
-						background = BackgroundStyle.Selected;
-					}
-				}
-				else
-				{
-					if(hovered)
-					{
-						background = BackgroundStyle.SelectedFocused;
-					}
-					else
-					{
-						background = BackgroundStyle.SelectedNoFocus;
-					}
-				}
-			}
-			else
-			{
-				if(hovered)
-				{
-					if(focused && paintEventArgs.HostControlFocused)
-					{
-						background = BackgroundStyle.HoveredFocused;
-					}
-					else
-					{
-						background = BackgroundStyle.Hovered;
-					}
-				}
-				else if(focused)
-				{
-					if(paintEventArgs.HostControlFocused)
-					{
-						background = BackgroundStyle.Focused;
-					}
-				}
-			}
-			if(background != null)
-			{
-				background.Draw(paintEventArgs.Graphics, paintEventArgs.Bounds);
-			}
+			ListBox.Renderer.OnPaintItemBackground(this, paintEventArgs);
 		}
 
 		/// <summary>Paint item content.</summary>
 		/// <param name="paintEventArgs">Painting options.</param>
 		protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
 		{
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-
-			#region clip invisible subitems
-
-			var clip = paintEventArgs.ClipRectangle;
-			var clipX1 = clip.X;
-			var clipX2 = clip.Right;
-			var cols = ListBox.Columns;
-			int colCount = cols.Count;
-			int x = rect.X;
-
-			int firstColId;
-			int startColId;
-			int endColId;
-			int startX;
-
-			if(clipX1 <= rect.X && clipX2 >= rect.Right)
-			{
-				// all subitems should be painted
-				startColId = 0;
-				firstColId = 0;
-				endColId = colCount - 1;
-				startX = x;
-			}
-			else
-			{
-				firstColId = -1;
-				startColId = -1;
-				endColId = -1;
-				startX = -1;
-				// skip clipped subitems
-				int prev = -1;
-				for(int i = 0; i < colCount; ++i)
-				{
-					var col = cols[i];
-					if(col.IsVisible)
-					{
-						if(firstColId == -1)
-						{
-							firstColId = i;
-						}
-
-						int x2 = x + col.Width;
-
-						if(startColId == -1 && x2 > clipX1)
-						{
-							if(prev != -1 && cols[prev].ExtendsToRight)
-							{
-								startColId = prev;
-								startX = x - cols[prev].Width;
-							}
-							else
-							{
-								startColId = i;
-								startX = x;
-							}
-						}
-
-						if(startColId != -1 && endColId == -1 && x2 >= clipX2)
-						{
-							endColId = i++;
-							for(; i < colCount; ++i)
-							{
-								if(cols[i].IsVisible)
-								{
-									if(cols[i].ExtendsToLeft)
-									{
-										endColId = i;
-									}
-									break;
-								}
-							}
-							break;
-						}
-
-						x = x2;
-						prev = i;
-					}
-				}
-				// no visible columns found
-				if(startColId == -1) return;
-				if(endColId == -1) endColId = prev;
-			}
-
-			#endregion
-
-			x = startX;
-			bool first = startColId == firstColId;
-			var subrect = new Rectangle(0, rect.Y, 0, rect.Height);
-
-			int hoveredPart = paintEventArgs.HoveredPart;
-
-			for(int i = startColId; i <= endColId; ++i)
-			{
-				var col = cols[i];
-				if(col.IsVisible)
-				{
-					int w = col.Width;
-
-					if(first)
-					{
-						first = false;
-						var level = Level;
-						var listBox = ListBox;
-						int offset = level * ListBoxConstants.LevelMargin + ListBoxConstants.RootMargin;
-						int w2 = w - offset;
-
-						#region paint plus/minus
-
-						if(listBox.ShowTreeLines)
-						{
-							if(!listBox.ShowRootTreeLines)
-							{
-								if(level != 0)
-								{
-									offset -= ListBoxConstants.LevelMargin;
-									w2 += ListBoxConstants.LevelMargin;
-								}
-							}
-							if(level != 0 || listBox.ShowRootTreeLines)
-							{
-								if(w2 > ListBoxConstants.SpaceBeforePlusMinus && _items.Count != 0)
-								{
-									Bitmap image;
-									if(hoveredPart == ItemHitTestResults.PlusMinus)
-									{
-										image = (_expanded) ? (ImgCollapseHovered) : (ImgExpandHovered);
-									}
-									else
-									{
-										image = (_expanded) ? (ImgCollapse) : (ImgExpand);
-									}
-									Rectangle destRect, srcRect;
-									if(w2 < ListBoxConstants.PlusMinusImageWidth + ListBoxConstants.SpaceBeforePlusMinus)
-									{
-										destRect = new Rectangle(
-											x + offset,
-											subrect.Y + (subrect.Height - ListBoxConstants.PlusMinusImageWidth) / 2,
-											w2 - ListBoxConstants.SpaceBeforePlusMinus,
-											ListBoxConstants.PlusMinusImageWidth);
-										srcRect = new Rectangle(
-											0,
-											0,
-											w2 - ListBoxConstants.SpaceBeforePlusMinus,
-											ListBoxConstants.PlusMinusImageWidth);
-									}
-									else
-									{
-										destRect = new Rectangle(
-											x + offset,
-											subrect.Y + (subrect.Height - ListBoxConstants.PlusMinusImageWidth) / 2,
-											ListBoxConstants.PlusMinusImageWidth,
-											ListBoxConstants.PlusMinusImageWidth);
-										srcRect = new Rectangle(
-											0, 0,
-											ListBoxConstants.PlusMinusImageWidth,
-											ListBoxConstants.PlusMinusImageWidth);
-									}
-									graphics.DrawImage(image, destRect, srcRect, GraphicsUnit.Pixel);
-								}
-								offset += ListBoxConstants.PlusMinusAreaWidth;
-								w2 -= ListBoxConstants.PlusMinusAreaWidth;
-							}
-						}
-
-						#endregion
-
-						#region paint checkbox
-
-						if(listBox.ShowCheckBoxes && _checkedState != CheckedState.Unavailable)
-						{
-							Bitmap checkedStateImage = null;
-							if(hoveredPart == ItemHitTestResults.CheckBox)
-							{
-								ImgCheckedStateHovered.TryGetValue(_checkedState, out checkedStateImage);
-							}
-							else
-							{
-								ImgCheckedState.TryGetValue(_checkedState, out checkedStateImage);
-							}
-							if(checkedStateImage != null && w2 > ListBoxConstants.SpaceBeforeCheckbox)
-							{
-								Rectangle destRect, srcRect;
-								if(w2 < ListBoxConstants.CheckboxImageWidth + ListBoxConstants.SpaceBeforeCheckbox)
-								{
-									destRect = new Rectangle(
-										x + offset + ListBoxConstants.SpaceBeforeCheckbox,
-										rect.Y + (rect.Height - ListBoxConstants.CheckboxImageWidth) / 2,
-										w2 - ListBoxConstants.SpaceBeforeCheckbox,
-										ListBoxConstants.CheckboxImageWidth);
-									srcRect = new Rectangle(
-										0, 0,
-										w2 - ListBoxConstants.SpaceBeforeCheckbox,
-										ListBoxConstants.CheckboxImageWidth);
-								}
-								else
-								{
-									destRect = new Rectangle(
-										x + offset + ListBoxConstants.SpaceBeforeCheckbox,
-										rect.Y + (rect.Height - ListBoxConstants.CheckboxImageWidth) / 2,
-										ListBoxConstants.CheckboxImageWidth,
-										ListBoxConstants.CheckboxImageWidth);
-									srcRect = new Rectangle(
-										0, 0,
-										ListBoxConstants.CheckboxImageWidth,
-										ListBoxConstants.CheckboxImageWidth);
-								}
-								graphics.DrawImage(checkedStateImage, destRect, srcRect, GraphicsUnit.Pixel);
-							}
-							offset += ListBoxConstants.CheckBoxAreaWidth;
-							w2 -= ListBoxConstants.CheckBoxAreaWidth;
-						}
-
-						#endregion
-
-						subrect.X = x + offset;
-						subrect.Width = w2;
-						x += w;
-						if(w2 <= 0) continue;
-					}
-					else
-					{
-						subrect.X = x;
-						subrect.Width = w;
-						x += w;
-					}
-					
-					OnPaintSubItem(new SubItemPaintEventArgs(paintEventArgs.Graphics, clip, subrect, paintEventArgs.Index,
-						paintEventArgs.State, hoveredPart, paintEventArgs.HostControlFocused, i, col));
-				}
-			}
+			ListBox.Renderer.OnPaintItemContent(this, paintEventArgs);
 		}
 
 		#endregion
+
+		internal void PaintSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+			OnPaintSubItem(paintEventArgs);
+		}
 
 		/// <summary>Override this to paint part of your item.</summary>
 		/// <param name="paintEventArgs">Paint event args.</param>
@@ -994,30 +682,30 @@
 	}
 
 	/// <summary>Item with some attached data.</summary>
-	/// <typeparam name="TData">Data type.</typeparam>
-	public abstract class CustomListBoxItem<TData> : CustomListBoxItem
+	/// <typeparam name="T">Data type.</typeparam>
+	public abstract class CustomListBoxItem<T> : CustomListBoxItem
 	{
-		private TData _data;
+		private T _dataContext;
 
 		/// <summary>Create <see cref="CustomListBoxItem&lt;TData&gt;"/></summary>
-		/// <param name="data">Associated data.</param>
-		public CustomListBoxItem(TData data)
+		/// <param name="dataContext">Associated data.</param>
+		public CustomListBoxItem(T dataContext)
 		{
-			_data = data;
+			_dataContext = dataContext;
 		}
 
 		/// <summary>Item associated data.</summary>
-		public TData DataContext
+		public T DataContext
 		{
-			get { return _data; }
-			set { _data = value; }
+			get { return _dataContext; }
+			set { _dataContext = value; }
 		}
 
 		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem&lt;TData&gt;"/>.</summary>
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem&lt;TData&gt;"/>.</returns>
 		public override string ToString()
 		{
-			return "item: " + (_data == null?"(null)":_data.ToString());
+			return "item: " + (_dataContext == null?"(null)":_dataContext.ToString());
 		}
 	}
 }

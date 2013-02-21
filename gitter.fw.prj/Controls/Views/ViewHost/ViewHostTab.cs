@@ -28,7 +28,7 @@
 			{
 				_buttons.SetAvailableButtons(ViewButtonType.Close);
 			}
-			_buttons.Height = ViewConstants.TabHeight + ViewConstants.TabFooterHeight;
+			_buttons.Height = ViewManager.Renderer.TabHeight + ViewManager.Renderer.TabFooterHeight;
 			_buttons.ButtonClick += OnButtonClick;
 		}
 
@@ -95,7 +95,7 @@
 				case MouseButtons.Right:
 					return;
 			}
-			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewConstants.TabHeight);
+			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewManager.Renderer.TabHeight);
 			if(buttonsBounds.Contains(x, y))
 			{
 				x -= buttonsBounds.X;
@@ -111,7 +111,7 @@
 		public override void OnMouseMove(int x, int y, MouseButtons button)
 		{
 			base.OnMouseMove(x, y, button);
-			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewConstants.TabHeight);
+			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewManager.Renderer.TabHeight);
 			if(buttonsBounds.Contains(x, y))
 			{
 				_buttonsHovered = true;
@@ -132,7 +132,7 @@
 		public override void OnMouseUp(int x, int y, MouseButtons button)
 		{
 			base.OnMouseUp(x, y, button);
-			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewConstants.TabHeight);
+			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewManager.Renderer.TabHeight);
 			if(_buttons.PressedButton != null || buttonsBounds.Contains(x, y))
 			{
 				x -= buttonsBounds.X;

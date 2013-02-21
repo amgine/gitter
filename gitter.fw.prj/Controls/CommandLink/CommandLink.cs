@@ -192,26 +192,26 @@
 		{
 			var rc = e.ClipRectangle;
 			if(rc.Width <= 0 || rc.Height <= 0) return;
-			var g = e.Graphics;
-			g.Clear(BackColor);
-			g.SetClip(e.ClipRectangle);
-			g.SmoothingMode = SmoothingMode.AntiAlias;
-			g.TextRenderingHint = Utility.TextRenderingHint;
+			var graphics = e.Graphics;
+			graphics.Clear(BackColor);
+			graphics.SetClip(e.ClipRectangle);
+			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+			graphics.TextRenderingHint = Utility.TextRenderingHint;
 			if(Focused)
 			{
 				if(_pressed)
 				{
-					BackgroundStyle.SelectedFocused.Draw(g, ClientRectangle);
+					BackgroundStyle.SelectedFocused.Draw(graphics, ClientRectangle);
 				}
 				else
 				{
 					if(_hovered)
 					{
-						BackgroundStyle.SelectedFocused.Draw(g, ClientRectangle);
+						BackgroundStyle.SelectedFocused.Draw(graphics, ClientRectangle);
 					}
 					else
 					{
-						BackgroundStyle.SelectedNoFocus.Draw(g, ClientRectangle);
+						BackgroundStyle.SelectedNoFocus.Draw(graphics, ClientRectangle);
 					}
 				}
 			}
@@ -219,7 +219,7 @@
 			{
 				if(_hovered)
 				{
-					BackgroundStyle.Hovered.Draw(g, ClientRectangle);
+					BackgroundStyle.Hovered.Draw(graphics, ClientRectangle);
 				}
 			}
 			if(!string.IsNullOrEmpty(_description))
@@ -227,34 +227,34 @@
 				var loc = new Point(5, 15);
 				if(_hovered && _pressed) loc.Offset(1, 1);
 				if(_image == null)
-					g.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
+					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
 				else
-					g.DrawImage(_image, loc);
+					graphics.DrawImage(_image, loc);
 				var r = new Rectangle(25, 8, Width - 30, 21);
 				if(_hovered && _pressed) r.Offset(1, 1);
 				if(!string.IsNullOrEmpty(Text))
 				{
 					GitterApplication.TextRenderer.DrawText(
-						g, Text, _titleFont, _textBrush, r);
+						graphics, Text, _titleFont, _textBrush, r);
 				}
 				r = new Rectangle(r.X, r.Y + r.Height, r.Width, Height - 8 - r.Bottom);
 				GitterApplication.TextRenderer.DrawText(
-					g, _description, _descriptionFont, _textBrush, r, DescriptionStringFormat);
+					graphics, _description, _descriptionFont, _textBrush, r, DescriptionStringFormat);
 			}
 			else
 			{
 				var loc = new Point(5, (Height - 16) / 2);
 				if(_hovered && _pressed) loc.Offset(1, 1);
 				if(_image == null)
-					g.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
+					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
 				else
-					g.DrawImage(_image, loc);
+					graphics.DrawImage(_image, loc);
 				var r = new Rectangle(25, 0, Width - 30, Height);
 				if(_hovered && _pressed) r.Offset(1, 1);
 				if(!string.IsNullOrEmpty(Text))
 				{
 					GitterApplication.TextRenderer.DrawText(
-						g, Text, _titleFont, _textBrush, r);
+						graphics, Text, _titleFont, _textBrush, r);
 				}
 			}
 		}

@@ -22,24 +22,6 @@
 		private static readonly Bitmap ImgPlus = CachedResources.Bitmaps["ImgPlus"];
 		private static readonly Bitmap ImgMinus = CachedResources.Bitmaps["ImgMinus"];
 
-		private static readonly Dictionary<DiffLineState, Brush> TextBrushes =
-			new Dictionary<DiffLineState, Brush>()
-			{
-				{ DiffLineState.Header,		new SolidBrush(ColorScheme.LineHeaderText) },
-				{ DiffLineState.Added,		new SolidBrush(ColorScheme.LineAddedText) },
-				{ DiffLineState.Removed,	new SolidBrush(ColorScheme.LineRemovedText) },
-				{ DiffLineState.Context,	new SolidBrush(ColorScheme.LineContextText) },
-			};
-
-		private static readonly Dictionary<DiffLineState, Brush> BackgroundBrushes =
-			new Dictionary<DiffLineState, Brush>()
-			{
-				{ DiffLineState.Header,		new SolidBrush(ColorScheme.LineNumberBackColor) },
-				{ DiffLineState.Added,		new SolidBrush(ColorScheme.LineAddedBackColor) },
-				{ DiffLineState.Removed,	new SolidBrush(ColorScheme.LineRemovedBackColor) },
-				{ DiffLineState.Context,	new SolidBrush(ColorScheme.LineContextBackColor) },
-			};
-
 		#endregion
 
 		#region Data
@@ -92,6 +74,36 @@
 		public DiffFile DiffFile
 		{
 			get { return _diffFile; }
+		}
+
+		private Brush GetLineBackgroundBrush(DiffLineState state)
+		{
+			switch(state)
+			{
+				case DiffLineState.Added:
+					return new SolidBrush(Style.Colors.LineAddedBackground);
+				case DiffLineState.Removed:
+					return new SolidBrush(Style.Colors.LineRemovedBackground);
+				case DiffLineState.Header:
+					return new SolidBrush(Style.Colors.LineHeaderBackground);
+				default:
+					return new SolidBrush(Style.Colors.LineContextBackground);
+			}
+		}
+
+		private Brush GetLineForegroundBrush(DiffLineState state)
+		{
+			switch(state)
+			{
+				case DiffLineState.Added:
+					return new SolidBrush(Style.Colors.LineAddedForeground);
+				case DiffLineState.Removed:
+					return new SolidBrush(Style.Colors.LineRemovedForeground);
+				case DiffLineState.Header:
+					return new SolidBrush(Style.Colors.LineHeaderForeground);
+				default:
+					return new SolidBrush(Style.Colors.LineContextForeground);
+			}
 		}
 
 		public override void InvalidateSize()
@@ -614,19 +626,19 @@
 			graphics.DrawImage(image, imageX, imageY);
 		}
 
-		private static void PaintLineColumnText(Graphics graphics, Font font, int column, int digits, int x, int y, string text)
+		private static void PaintLineColumnText(Graphics graphics, Font font, Brush brush, int column, int digits, int x, int y, string text)
 		{
 			int lx = x + ((column * digits) + (digits - text.Length)) * CellSize.Width;
 			GitterApplication.TextRenderer.DrawText(
 				graphics,
 				text,
 				font,
-				LineNumberText,
+				brush,
 				lx, y,
 				ContentFormat);
 		}
 
-		private static void PaintLine(
+		private void PaintLine(
 			int lineIndex, DiffLine line, int digits, Graphics graphics, Font font,
 			bool isHovered, bool isSelected, int x, int y, int width)
 		{
@@ -635,56 +647,63 @@
 			Brush backgroundBrush;
 			if(cols != 0)
 			{
-				graphics.SmoothingMode = SmoothingMode.Default;
-				backgroundBrush = isHovered ? LineNumberHoverBackground : LineNumberBackground;
-				graphics.FillRectangle(backgroundBrush, rcColNumbers);
-				graphics.SmoothingMode = SmoothingMode.AntiAlias;
-				for(int i = 0; i < cols; ++i)
+				using(backgroundBrush = isHovered ? GetLineNumberHoverBackground() : GetLineNumberBackground())
 				{
-					switch(line.States[i])
+					graphics.FillRectangle(backgroundBrush, rcColNumbers);
+				}
+				using(var brush = GetLineNumberText())
+				{
+					for(int i = 0; i < cols; ++i)
 					{
-						case DiffLineState.Added:
-							PaintLineColumnImage(graphics, i, digits, ImgPlus, x, y);
-							break;
-						case DiffLineState.Removed:
-							PaintLineColumnImage(graphics, i, digits, ImgMinus, x, y);
-							break;
-						case DiffLineState.Header:
-							PaintLineColumnText(graphics, font, i, digits, x, y, "...");
-							break;
-						default:
-							PaintLineColumnText(graphics, font, i, digits, x, y,
-								line.Nums[i].ToString(CultureInfo.InvariantCulture));
-							break;
+						switch(line.States[i])
+						{
+							case DiffLineState.Added:
+								PaintLineColumnImage(graphics, i, digits, ImgPlus, x, y);
+								break;
+							case DiffLineState.Removed:
+								PaintLineColumnImage(graphics, i, digits, ImgMinus, x, y);
+								break;
+							case DiffLineState.Header:
+								PaintLineColumnText(graphics, font, brush, i, digits, x, y, "...");
+								break;
+							default:
+								PaintLineColumnText(graphics, font, brush, i, digits, x, y,
+									line.Nums[i].ToString(CultureInfo.InvariantCulture));
+								break;
+						}
+						int lineX = x + i * digits * CellSize.Width + ((i == 0) ? 0 : 2);
+						graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
 					}
-					int lineX = x + i * digits * CellSize.Width + ((i == 0) ? 0 : 2);
-					graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
 				}
 			}
 			{
 				int lineX = x + cols * digits * CellSize.Width + (cols != 0?1:0);
 				graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
-				lineX = x + width - 10;
+				lineX = x + width - Margin * 2 - 1;
 				graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
 			}
 			var rcLine = new Rectangle(
 				x + rcColNumbers.Width, y,
-				width - 2*Margin - rcColNumbers.Width, CellSize.Height);
-			graphics.SmoothingMode = SmoothingMode.Default;
+				width - 2*Margin - rcColNumbers.Width- 1, CellSize.Height);
 			if(isHovered)
 			{
 				backgroundBrush = isSelected ?
-					LineSelectedHoverBackground : LineHoverBackground;
+					GetLineSelectedHoverBackground() : GetLineHoverBackground();
 			}
 			else
 			{
 				backgroundBrush = isSelected ?
-					LineSelectedBackground : BackgroundBrushes[line.State];
+					GetLineSelectedBackground() : GetLineBackgroundBrush(line.State);
 			}
-			graphics.FillRectangle(backgroundBrush, rcLine);
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			GitterApplication.TextRenderer.DrawText(
-				graphics, line.Text, font, TextBrushes[line.State], rcLine.X + CellSize.Width / 2, rcLine.Y, ContentFormat);
+			using(backgroundBrush)
+			{
+				graphics.FillRectangle(backgroundBrush, rcLine);
+				using(var foregroundBrush = GetLineForegroundBrush(line.State))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, line.Text, font, foregroundBrush, rcLine.X + CellSize.Width / 2, rcLine.Y, ContentFormat);
+				}
+			}
 		}
 
 		private string GetHeaderText()
@@ -705,9 +724,13 @@
 		private Bitmap GetHeaderIcon()
 		{
 			if(_diffFile.Status == FileStatus.Removed)
+			{
 				return Utility.QueryIcon(_diffFile.SourceFile);
+			}
 			else
+			{
 				return Utility.QueryIcon(_diffFile.TargetFile);
+			}
 		}
 
 		private Bitmap GetHeaderIconOverlay()
@@ -743,6 +766,7 @@
 			var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
 			if(rcHeaderClip.Width > 0 && rcHeaderClip.Height > 0)
 			{
+				graphics.SetClip(rcHeaderClip);
 				PaintHeader(graphics, rcHeader, GetHeaderIcon(), GetHeaderIconOverlay(), GetHeaderText());
 			}
 			var x = rect.X + Margin;
@@ -752,6 +776,8 @@
 			var font = GitterApplication.FontManager.ViewerFont.Font;
 			bool reachedEnd = false;
 			int lineIndex = 0;
+			graphics.SetClip(clip);
+			graphics.SmoothingMode = SmoothingMode.Default;
 			foreach(var hunk in _diffFile)
 			{
 				foreach(var line in hunk)
@@ -778,6 +804,7 @@
 			{
 				graphics.DrawLine(Pens.Gray, rect.X + Margin, y, rect.X + contentWidth - Margin, y);
 			}
+			graphics.ResetClip();
 		}
 	}
 }

@@ -22,8 +22,16 @@
 		{
 			InitializeComponent();
 
-
-			Font = GitterApplication.FontManager.UIFont;
+			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+			{
+				Font = GitterApplication.FontManager.UIFont;
+				BackColor = GitterApplication.Style.Colors.Window;
+				ForeColor = GitterApplication.Style.Colors.WindowText;
+			}
+			else
+			{
+				Font = SystemFonts.MessageBoxFont;
+			}
 		}
 
 		public LogOptions LogOptions

@@ -22,6 +22,10 @@
 
 			Items.Add(new ToolStripMenuItem(Resources.StrEditValue, CachedResources.Bitmaps["ImgConfigEdit"], (s, e) => listItem.StartValueEditor()));
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(_parameter));
+			Items.Add(new ToolStripSeparator());
+			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _parameter.Name),
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, _parameter.Value)));
 		}
 
 		public ConfigParameterMenu(ConfigParameter parameter)
@@ -30,6 +34,10 @@
 
 			_parameter = parameter;
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(parameter));
+			Items.Add(new ToolStripSeparator());
+			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _parameter.Name),
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, _parameter.Value)));
 		}
 
 		public ConfigParameter ConfigParameter

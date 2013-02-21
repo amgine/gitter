@@ -405,11 +405,12 @@
 
 		private static void RenderToolStripBackgroundInternal(ToolStripRenderEventArgs e)
 		{
+			var graphics = e.Graphics;
 			if(e.ToolStrip.Stretch)
 			{
 				using(var brush = new SolidBrush(ColorTable.ToolStripBackground))
 				{
-					e.Graphics.FillRectangle(brush, e.AffectedBounds);
+					graphics.FillRectangle(brush, e.AffectedBounds);
 				}
 			}
 			else
@@ -422,12 +423,14 @@
 				rc.Offset(1, 1);
 				rc.Width -= 2;
 				rc.Height -= 2;
-				e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+				var oldSmoothingMode = graphics.SmoothingMode;
+				graphics.SmoothingMode = SmoothingMode.HighQuality;
 				using(Pen p = new Pen(ColorTable.ToolStripBorder))
 				using(var b = new SolidBrush(ColorTable.ToolStripBackground))
 				{
-					e.Graphics.FillRoundedRectangle(b, p, rc, 3);
+					graphics.FillRoundedRectangle(b, p, rc, 3);
 				}
+				graphics.SmoothingMode = oldSmoothingMode;
 			}
 		}
 

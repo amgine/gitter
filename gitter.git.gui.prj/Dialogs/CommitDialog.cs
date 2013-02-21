@@ -39,6 +39,7 @@
 			}
 
 			_lstStaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
+			_lstStaged.Style = GitterApplication.DefaultStyle;
 			_lstStaged.SetTree(repository.Status.StagedRoot, TreeListBoxMode.ShowFullTree);
 			_lstStaged.ExpandAll();
 

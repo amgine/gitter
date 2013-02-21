@@ -28,6 +28,7 @@
 				ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick,
 				Size = new Size(Width, 2 + 2 + 21 * 5),
 				DisableContextMenus = true,
+				Style = GitterApplication.DefaultStyle,
 				Font = LicenseManager.UsageMode == LicenseUsageMode.Runtime?
 					GitterApplication.FontManager.UIFont.Font:
 					SystemFonts.MessageBoxFont,

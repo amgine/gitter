@@ -15,6 +15,7 @@
 		{
 			if(disposing)
 			{
+				_chkAmend.Dispose();
 				_speller.Dispose();
 				if(components != null)
 				{
@@ -40,7 +41,6 @@
 			this._lstStaged = new gitter.Git.Gui.Controls.TreeListBox();
 			this._lblMessage = new System.Windows.Forms.Label();
 			this._btnCommit = new System.Windows.Forms.Button();
-			this._chkAmend = new System.Windows.Forms.CheckBox();
 			this._txtMessage = new System.Windows.Forms.TextBox();
 			((System.ComponentModel.ISupportInitialize)(this._splitContainer)).BeginInit();
 			this._splitContainer.Panel1.SuspendLayout();
@@ -54,7 +54,6 @@
 			this._splitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._splitContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(57)))), ((int)(((byte)(85)))));
 			this._splitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
 			this._splitContainer.Location = new System.Drawing.Point(0, 0);
 			this._splitContainer.Name = "_splitContainer";
@@ -62,16 +61,13 @@
 			// 
 			// _splitContainer.Panel1
 			// 
-			this._splitContainer.Panel1.BackColor = System.Drawing.SystemColors.Window;
 			this._splitContainer.Panel1.Controls.Add(this._tableChanges);
 			this._splitContainer.Panel1MinSize = 150;
 			// 
 			// _splitContainer.Panel2
 			// 
-			this._splitContainer.Panel2.BackColor = System.Drawing.SystemColors.Window;
 			this._splitContainer.Panel2.Controls.Add(this._lblMessage);
 			this._splitContainer.Panel2.Controls.Add(this._btnCommit);
-			this._splitContainer.Panel2.Controls.Add(this._chkAmend);
 			this._splitContainer.Panel2.Controls.Add(this._txtMessage);
 			this._splitContainer.Size = new System.Drawing.Size(555, 362);
 			this._splitContainer.SplitterDistance = 239;
@@ -167,20 +163,6 @@
 			this._btnCommit.UseVisualStyleBackColor = true;
 			this._btnCommit.Click += new System.EventHandler(this.OnCommitClick);
 			// 
-			// _chkAmend
-			// 
-			this._chkAmend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this._chkAmend.AutoSize = true;
-			this._chkAmend.Enabled = false;
-			this._chkAmend.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkAmend.Location = new System.Drawing.Point(477, 67);
-			this._chkAmend.Name = "_chkAmend";
-			this._chkAmend.Size = new System.Drawing.Size(71, 20);
-			this._chkAmend.TabIndex = 12;
-			this._chkAmend.Text = "Amend";
-			this._chkAmend.UseVisualStyleBackColor = true;
-			this._chkAmend.CheckedChanged += new System.EventHandler(this.OnAmendCheckedChanged);
-			// 
 			// _txtMessage
 			// 
 			this._txtMessage.AcceptsReturn = true;
@@ -216,7 +198,6 @@
 
 		private System.Windows.Forms.SplitContainer _splitContainer;
 		private System.Windows.Forms.Button _btnCommit;
-		private System.Windows.Forms.CheckBox _chkAmend;
 		private System.Windows.Forms.TextBox _txtMessage;
 		private System.Windows.Forms.TableLayoutPanel _tableChanges;
 		private System.Windows.Forms.Label _lblUnstaged;

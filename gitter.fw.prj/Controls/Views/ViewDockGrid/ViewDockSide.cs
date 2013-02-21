@@ -99,14 +99,19 @@
 			switch(Orientation)
 			{
 				case Orientation.Horizontal:
-					return new Size(_size, ViewConstants.SideTabHeight);
+					return new Size(_size, Renderer.SideTabHeight);
 				case Orientation.Vertical:
-					return new Size(ViewConstants.SideTabHeight, _size);
+					return new Size(Renderer.SideTabHeight, _size);
 				default:
 					throw new ApplicationException(string.Format(
 						CultureInfo.InvariantCulture,
 						"Unexpected {0}.Orientation: {1}", GetType().Name, Orientation));
 			}
+		}
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
 		}
 
 		/// <summary>Host <see cref="ViewDockGrid"/>.</summary>
@@ -125,7 +130,7 @@
 		/// <summary>Optiomal control length.</summary>
 		public int OptimalLength
 		{
-			get { return _size + ViewConstants.SideTabSpacing * (_tabs.Count - 1); }
+			get { return _size + Renderer.SideTabSpacing * (_tabs.Count - 1); }
 		}
 
 		/// <summary>Gets control orientation.</summary>
@@ -152,12 +157,15 @@
 			int size = 0;
 			using(var graphics = CreateGraphics())
 			{
-				foreach(var view in viewHost.Views)
+				if(viewHost.ViewsCount != 0)
 				{
-					var tab = new ViewDockSideTab(this, viewHost, view);
-					tab.ResetLength(graphics);
-					size += tab.Length;
-					_tabs.Add(tab);
+					foreach(var view in viewHost.Views)
+					{
+						var tab = new ViewDockSideTab(this, viewHost, view);
+						tab.ResetLength(graphics);
+						size += tab.Length;
+						_tabs.Add(tab);
+					}
 				}
 			}
 			switch(Orientation)
@@ -167,7 +175,7 @@
 						var space = _grid.VerticalClientSpace;
 						var height = _size + size;
 						_size = height;
-						height += _tabs.Count * ViewConstants.SideTabSpacing;
+						height += _tabs.Count * Renderer.SideTabSpacing;
 						if(height > space) height = space;
 						Height = height;
 					}
@@ -177,7 +185,7 @@
 						var space = _grid.HorizontalClientSpace;
 						var width = _size + size;
 						_size = width;
-						width += _tabs.Count * ViewConstants.SideTabSpacing;
+						width += _tabs.Count * Renderer.SideTabSpacing;
 						if(width > space) width = space;
 						Width = width;
 					}
@@ -222,7 +230,7 @@
 						case Orientation.Vertical:
 							{
 								var space = _grid.VerticalClientSpace;
-								size += _tabs.Count * ViewConstants.SideTabSpacing;
+								size += _tabs.Count * Renderer.SideTabSpacing;
 								if(size > space) size = space;
 								Height = size;
 							}
@@ -230,7 +238,7 @@
 						case Orientation.Horizontal:
 							{
 								var space = _grid.HorizontalClientSpace;
-								size += _tabs.Count * ViewConstants.SideTabSpacing;
+								size += _tabs.Count * Renderer.SideTabSpacing;
 								if(size > space) size = space;
 								Width = size;
 							}
@@ -273,7 +281,7 @@
 						var height = _size + size;
 						_size = height;
 						if(_tabs.Count != 1)
-							height += ViewConstants.SideTabSpacing;
+							height += Renderer.SideTabSpacing;
 						if(height > space) height = space;
 						Height = height;
 					}
@@ -284,7 +292,7 @@
 						var width = _size + size;
 						_size = width;
 						if(_tabs.Count != 1)
-							width += ViewConstants.SideTabSpacing;
+							width += Renderer.SideTabSpacing;
 						if(width > space) width = space;
 						Width = width;
 					}
@@ -320,7 +328,7 @@
 					case Orientation.Vertical:
 						{
 							var space = _grid.VerticalClientSpace;
-							size += _tabs.Count * ViewConstants.SideTabSpacing;
+							size += _tabs.Count * Renderer.SideTabSpacing;
 							if(size > space) size = space;
 							Height = size;
 						}
@@ -328,7 +336,7 @@
 					case Orientation.Horizontal:
 						{
 							var space = _grid.HorizontalClientSpace;
-							size += _tabs.Count * ViewConstants.SideTabSpacing;
+							size += _tabs.Count * Renderer.SideTabSpacing;
 							if(size > space) size = space;
 							Width = size;
 						}
@@ -390,7 +398,7 @@
 				var offset2 = offset + tab.Length;
 				if(coord >= offset && coord < offset2)
 					return i;
-				offset = offset2 + ViewConstants.SideTabSpacing;
+				offset = offset2 + Renderer.SideTabSpacing;
 			}
 			return -1;
 		}
@@ -403,10 +411,10 @@
 			switch(_orientation)
 			{
 				case Orientation.Horizontal:
-					bounds.Height = ViewConstants.SideTabHeight;
+					bounds.Height = Renderer.SideTabHeight;
 					break;
 				case Orientation.Vertical:
-					bounds.Width = ViewConstants.SideTabHeight;
+					bounds.Width = Renderer.SideTabHeight;
 					break;
 				default:
 					throw new ApplicationException();
@@ -421,14 +429,14 @@
 						{
 							bounds.Width = length;
 							if(i == index) return bounds;
-							bounds.X += bounds.Width + ViewConstants.SideTabSpacing;
+							bounds.X += bounds.Width + Renderer.SideTabSpacing;
 						}
 						break;
 					case Orientation.Vertical:
 						{
 							bounds.Height = length;
 							if(i == index) return bounds;
-							bounds.Y += bounds.Height + ViewConstants.SideTabSpacing;
+							bounds.Y += bounds.Height + Renderer.SideTabSpacing;
 						}
 						break;
 					default:
@@ -466,14 +474,14 @@
 					case AnchorStyles.Left:
 						{
 							var w = _visibleHost.Width;
-							bounds = new Rectangle(ViewConstants.SideTabHeight, Top, w, _grid.VerticalClientSpace);
+							bounds = new Rectangle(Renderer.SideTabHeight, Top, w, _grid.VerticalClientSpace);
 							anchor = ViewConstants.AnchorDockLeft;
 						}
 						break;
 					case AnchorStyles.Top:
 						{
 							var h = _visibleHost.Height;
-							bounds = new Rectangle(Left, ViewConstants.SideTabHeight, _grid.HorizontalClientSpace, h);
+							bounds = new Rectangle(Left, Renderer.SideTabHeight, _grid.HorizontalClientSpace, h);
 							anchor = ViewConstants.AnchorDockTop;
 						}
 						break;
@@ -680,10 +688,10 @@
 			switch(Orientation)
 			{
 				case Orientation.Horizontal:
-					bounds.Height = ViewConstants.SideTabHeight;
+					bounds.Height = Renderer.SideTabHeight;
 					break;
 				case Orientation.Vertical:
-					bounds.Width = ViewConstants.SideTabHeight;
+					bounds.Width = Renderer.SideTabHeight;
 					break;
 				default:
 					throw new ApplicationException(string.Format(
@@ -703,7 +711,7 @@
 							{
 								tab.OnPaint(graphics, bounds);
 							}
-							bounds.X += bounds.Width + ViewConstants.SideTabSpacing;
+							bounds.X += bounds.Width + Renderer.SideTabSpacing;
 							if(bounds.X >= clip.Right) return;
 						}
 						break;
@@ -714,7 +722,7 @@
 							{
 								tab.OnPaint(graphics, bounds);
 							}
-							bounds.Y += bounds.Height + ViewConstants.SideTabSpacing;
+							bounds.Y += bounds.Height + Renderer.SideTabSpacing;
 							if(bounds.Y >= clip.Bottom) return;
 						}
 						break;

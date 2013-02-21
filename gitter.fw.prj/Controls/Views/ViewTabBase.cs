@@ -11,7 +11,7 @@ namespace gitter.Framework.Controls
 		private readonly ViewBase _view;
 		private readonly AnchorStyles _anchor;
 		private readonly Orientation _orientation;
-		private bool _isHovered;
+		private bool _isMouseOver;
 		private int _length;
 
 		#endregion
@@ -79,9 +79,9 @@ namespace gitter.Framework.Controls
 			get { return _view.Host.ActiveView == View; }
 		}
 
-		public bool IsHovered
+		public bool IsMouseOver
 		{
-			get { return _isHovered; }
+			get { return _isMouseOver; }
 		}
 
 		#endregion
@@ -100,12 +100,12 @@ namespace gitter.Framework.Controls
 
 		public virtual void OnMouseLeave()
 		{
-			_isHovered = false;
+			_isMouseOver = false;
 		}
 
 		public virtual void OnMouseEnter()
 		{
-			_isHovered = true;
+			_isMouseOver = true;
 		}
 
 		public virtual void OnMouseDown(int x, int y, MouseButtons button)

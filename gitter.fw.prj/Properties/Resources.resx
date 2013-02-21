@@ -523,4 +523,43 @@
   <data name="StrsIntegrationFeatures" xml:space="preserve">
     <value>Integration features</value>
   </data>
+  <data name="StrBottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="StrPageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="StrPageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="StrScrollDown" xml:space="preserve">
+    <value>Scroll Down</value>
+  </data>
+  <data name="StrScrollHere" xml:space="preserve">
+    <value>Scroll Here</value>
+  </data>
+  <data name="StrScrollUp" xml:space="preserve">
+    <value>Scroll Up</value>
+  </data>
+  <data name="StrTop" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="StrLeftEdge" xml:space="preserve">
+    <value>Left Edge</value>
+  </data>
+  <data name="StrPageLeft" xml:space="preserve">
+    <value>Page Left</value>
+  </data>
+  <data name="StrPageRight" xml:space="preserve">
+    <value>Page Right</value>
+  </data>
+  <data name="StrRightEdge" xml:space="preserve">
+    <value>Right Edge</value>
+  </data>
+  <data name="StrScrollLeft" xml:space="preserve">
+    <value>Scroll Left</value>
+  </data>
+  <data name="StrScrollRight" xml:space="preserve">
+    <value>Scroll Right</value>
+  </data>
 </root>

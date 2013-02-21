@@ -6,7 +6,31 @@
 
 	public abstract class ViewRenderer
 	{
+		#region Properties
+
 		public abstract Color BackgroundColor { get; }
+
+		public abstract Color DockMarkerBackgroundColor { get; }
+
+		public abstract Color DockMarkerBorderColor { get; }
+
+		public abstract int TabHeight { get; }
+
+		public abstract int TabFooterHeight { get; }
+
+		public abstract int HeaderHeight { get; }
+
+		public abstract int FooterHeight { get; }
+
+		public abstract int ViewButtonSize { get; }
+
+		public abstract int SideTabSpacing { get; }
+
+		public abstract int SideTabHeight { get; }
+
+		#endregion
+
+		#region Methods
 
 		public abstract int MeasureViewDockSideTabLength(ViewDockSideTab tab, Graphics graphics);
 
@@ -33,5 +57,7 @@
 		public abstract void RenderDockMarkerButton(DockMarkerButton button, Graphics graphics, bool hover);
 
 		public abstract void RenderPopupNotificationHeader(PopupNotificationHeader header, PaintEventArgs e);
+
+		#endregion
 	}
 }

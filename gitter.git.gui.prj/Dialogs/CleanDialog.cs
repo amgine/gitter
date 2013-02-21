@@ -58,6 +58,7 @@
 				col.IsVisible = col.Id == (int)ColumnId.Name;
 			}
 
+			_lstFilesToClear.Style = GitterApplication.DefaultStyle;
 			_lstFilesToClear.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
 			_lstFilesToClear.ShowTreeLines = false;
 

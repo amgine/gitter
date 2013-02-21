@@ -25,15 +25,6 @@
 
 		public const int Spacing = 6;
 
-		public const int TabHeight = 20;
-		public const int TabFooterHeight = 4;
-		public const int HeaderHeight = 19;
-		public const int FooterHeight = 4;
-		public const int ViewButtonSize = 15;
-
-		public const int SideTabHeight = 21;
-		public const int SideTabSpacing = 1;
-
 		public const int BeforeTabContent = 3;
 		public const int AfterTabContent = 6;
 		public const int ImageSpacing = 3;

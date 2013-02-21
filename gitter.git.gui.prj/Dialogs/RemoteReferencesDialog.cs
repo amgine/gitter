@@ -30,6 +30,7 @@
 			Text = string.Format("{0} '{1}'", Resources.StrRemote, remote.Name);
 			_lblRemoteReferences.Text = Resources.StrRemoteReferences.AddColon();
 
+			_lstRemotes.Style = GitterApplication.DefaultStyle;
 			_lstRemotes.Load(_remote);
 		}
 

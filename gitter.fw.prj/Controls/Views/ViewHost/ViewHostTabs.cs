@@ -25,7 +25,6 @@
 		private int _mdX;
 		private int _mdY;
 		private int _floatId;
-
 		private int _length;
 
 		#endregion
@@ -33,7 +32,7 @@
 		#region .ctor
 
 		/// <summary>Create <see cref="ViewHostTabs"/>.</summary>
-		public ViewHostTabs(ViewHost viewHost, AnchorStyles side)
+		internal ViewHostTabs(ViewHost viewHost, AnchorStyles side)
 		{
 			Verify.Argument.IsNotNull(viewHost, "viewHost");
 
@@ -78,14 +77,16 @@
 			_areaMouseDown = -1;
 			if(viewHost.IsDocumentWell)
 			{
+				var tabHeight = Renderer.TabHeight;
+				var tabFooterHeight = Renderer.TabFooterHeight;
 				_leftButtons = new ViewButtons(this)
 				{
-					Height = ViewConstants.TabHeight + ViewConstants.TabFooterHeight,
+					Height = tabHeight + tabFooterHeight,
 				};
 				_leftButtons.ButtonClick += OnViewButtonClick;
 				_rightButtons = new ViewButtons(this)
 				{
-					Height = ViewConstants.TabHeight + ViewConstants.TabFooterHeight,
+					Height = tabHeight + tabFooterHeight,
 				};
 				_rightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
 				_rightButtons.ButtonClick += OnViewButtonClick;
@@ -126,9 +127,13 @@
 		private void OnTabHoverChanged(object sender, TrackingEventArgs<ViewHostTab> e)
 		{
 			if(e.IsTracked)
+			{
 				e.Item.OnMouseEnter();
+			}
 			else
+			{
 				e.Item.OnMouseLeave();
+			}
 		}
 
 		#endregion
@@ -138,6 +143,11 @@
 		public ViewHostTab this[int index]
 		{
 			get { return _tabs[index]; }
+		}
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
 		}
 
 		public int Count
@@ -247,8 +257,9 @@
 		{
 			if(_viewHost.IsDocumentWell)
 			{
+				var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
 				var space = Width;
-				space -= _leftButtons.Width + ViewConstants.ViewButtonSize +
+				space -= _leftButtons.Width + viewButtonSize +
 					2 * ViewConstants.TabHeaderButtonSpacing;
 				var length = 0;
 				if(_firstTabIndex == 0)
@@ -537,7 +548,7 @@
 		private int HitTestArea(int x, int y)
 		{
 			var width = Width;
-			if(x < 0 || x > width || y < 0 || y >= ViewConstants.TabHeight)
+			if(x < 0 || x > width || y < 0 || y >= ViewManager.Renderer.TabHeight)
 			{
 				return -1;
 			}
@@ -558,7 +569,9 @@
 				if(rbw != 0)
 				{
 					if(x >= width - rbw)
+					{
 						return 2;
+					}
 				}
 			}
 			return 1;
@@ -566,7 +579,7 @@
 
 		private int HitTestTab(int x, int y, out Rectangle bounds)
 		{
-			if(y >= 0 && y < ViewConstants.TabHeight)
+			if(y >= 0 && y < Renderer.TabHeight)
 			{
 				var maxTabWidth = GetMaxTabWidth();
 				int space = Width;
@@ -602,7 +615,7 @@
 					var cx2 = cx + length;
 					if(x >= cx && x < cx2)
 					{
-						bounds = new Rectangle(cx, 0, length, ViewConstants.TabHeight);
+						bounds = new Rectangle(cx, 0, length, Renderer.TabHeight);
 						return i;
 					}
 					cx = cx2;
@@ -652,9 +665,10 @@
 								});
 						}
 						Utility.MarkDropDownForAutoDispose(menu);
+						var viewButtonSize = Renderer.ViewButtonSize;
 						menu.Show(this,
-							Width - ViewConstants.ViewButtonSize- 1,
-							ViewConstants.ViewButtonSize + 4);
+							Width - viewButtonSize - 1,
+							viewButtonSize + 4);
 					}
 					break;
 			}
@@ -767,8 +781,7 @@
 					{
 						Rectangle bounds;
 						tabId = HitTestTab(e.X, e.Y, out bounds);
-						if(tabId == -1)
-							_tabHover.Drop();
+						if(tabId == -1) _tabHover.Drop();
 						offset = bounds.X;
 					}
 					else
@@ -921,9 +934,10 @@
 			graphics.TextRenderingHint = Utility.TextRenderingHint;
 			graphics.TextContrast = Utility.TextContrast;
 
-			ViewManager.Renderer.RenderViewHostTabsBackground(this, e);
+			Renderer.RenderViewHostTabsBackground(this, e);
 
-			var rect = new Rectangle(0, 0, width, ViewConstants.TabHeight);
+			var tabHeight = Renderer.TabHeight;
+			var rect = new Rectangle(0, 0, width, tabHeight);
 			if(ViewHost.IsDocumentWell)
 			{
 				if(LeftButtons != null)
@@ -933,7 +947,7 @@
 					{
 						rect.X += lbw + ViewConstants.TabHeaderButtonSpacing;
 						space -= lbw + ViewConstants.TabHeaderButtonSpacing;
-						var buttonsRect = new Rectangle(0, 0, lbw, ViewConstants.TabHeight);
+						var buttonsRect = new Rectangle(0, 0, lbw, tabHeight);
 						LeftButtons.OnPaint(graphics, buttonsRect, ViewHost.IsActive);
 					}
 				}
@@ -943,7 +957,7 @@
 					if(rbw != 0)
 					{
 						space -= rbw + ViewConstants.TabHeaderButtonSpacing;
-						var buttonsRect = new Rectangle(width - rbw, 0, rbw, ViewConstants.TabHeight);
+						var buttonsRect = new Rectangle(width - rbw, 0, rbw, tabHeight);
 						RightButtons.OnPaint(graphics, buttonsRect, ViewHost.IsActive);
 					}
 				}

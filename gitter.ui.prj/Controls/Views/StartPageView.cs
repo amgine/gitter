@@ -19,6 +19,8 @@
 	{
 		private readonly StartPageViewFactory _factory;
 		private readonly NotifyCollectionBinding<string> _recentRepositoriesBinding;
+		private ICheckBoxWidget _chkShowPageAtStartup;
+		private ICheckBoxWidget _chkClosePageAfterRepositoryLoad;
 
 		public StartPageView(IWorkingEnvironment environment, IDictionary<string, object> parameters, StartPageViewFactory factory)
 			: base(Guids.StartPageView, environment, parameters)
@@ -27,10 +29,10 @@
 			
 			InitializeComponent();
 
-			_factory = factory;
+			_picLogo.Image = GetLogo();
+			_picLogo2.Image = GetGradient();
 
-			_chkShowPageAtStartup.Checked = _factory.ShowOnStartup;
-			_chkClosePageAfterRepositoryLoad.Checked = _factory.CloseAfterRepositoryLoad;
+			_factory = factory;
 
 			Text = Resources.StrStartPage;
 
@@ -43,30 +45,83 @@
 			_lstLocalRepositories.KeyDown += OnLocalRepositoriesKeyDown;
 			_lstRecentRepositories.KeyDown += OnRecentRepositoriesKeyDown;
 
+			_chkClosePageAfterRepositoryLoad = GitterApplication.Style.CreateCheckBox();
+			_chkClosePageAfterRepositoryLoad.Text = "Close page after repository load";
+			_chkClosePageAfterRepositoryLoad.Control.Bounds = new Rectangle(9, 491, 199, 20);
+			_chkClosePageAfterRepositoryLoad.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+			_chkClosePageAfterRepositoryLoad.Control.Parent = this;
+			_chkClosePageAfterRepositoryLoad.IsChecked = _factory.CloseAfterRepositoryLoad;
+			_chkClosePageAfterRepositoryLoad.IsCheckedChanged += _chkClosePageAfterRepositoryLoad_CheckedChanged;
+
+			_chkShowPageAtStartup = GitterApplication.Style.CreateCheckBox();
+			_chkShowPageAtStartup.Text = "Show page on startup";
+			_chkShowPageAtStartup.Control.Bounds = new Rectangle(9, 511, 199, 20);
+			_chkShowPageAtStartup.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+			_chkShowPageAtStartup.Control.Parent = this;
+			_chkShowPageAtStartup.IsChecked = _factory.ShowOnStartup;
+			_chkShowPageAtStartup.IsCheckedChanged += _chkShowPageAtStartup_CheckedChanged;
+
+			_separator1.BackColor = GitterApplication.Style.Colors.Separator;
+			_separator2.BackColor = GitterApplication.Style.Colors.Separator;
+
 			_recentRepositoriesBinding = new NotifyCollectionBinding<string>(
 				_lstRecentRepositories.Items,
 				WorkingEnvironment.RecentRepositories,
 				repo => new RecentRepositoryListItem(repo));
 		}
 
+		private static Bitmap GetLogo()
+		{
+			if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+			{
+				return Resources.ImgStartPageLogoDark;
+			}
+			else
+			{
+				return Resources.ImgStartPageLogo;
+			}
+		}
+
+		private static Bitmap GetGradient()
+		{
+			if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+			{
+				return Resources.ImgStartPageLogoGradientDark;
+			}
+			else
+			{
+				return Resources.ImgStartPageLogoGradient;
+			}
+		}
+
 		private void OnLocalRepositoriesKeyDown(object sender, KeyEventArgs e)
 		{
-			while(_lstLocalRepositories.SelectedItems.Count != 0)
+			switch(e.KeyCode)
 			{
-				_lstLocalRepositories.SelectedItems[0].Remove();
+				case Keys.Delete:
+					while(_lstLocalRepositories.SelectedItems.Count != 0)
+					{
+						_lstLocalRepositories.SelectedItems[0].Remove();
+					}
+					break;
 			}
 		}
 
 		private void OnRecentRepositoriesKeyDown(object sender, KeyEventArgs e)
 		{
-			while(_lstRecentRepositories.SelectedItems.Count != 0)
+			switch(e.KeyCode)
 			{
-				var item = (RecentRepositoryListItem)_lstRecentRepositories.SelectedItems[0];
-				WorkingEnvironment.RecentRepositories.Remove(item.DataContext);
-				if(item.ListBox != null)
-				{
-					item.Remove();
-				}
+				case Keys.Delete:
+					while(_lstRecentRepositories.SelectedItems.Count != 0)
+					{
+						var item = (RecentRepositoryListItem)_lstRecentRepositories.SelectedItems[0];
+						WorkingEnvironment.RecentRepositories.Remove(item.DataContext);
+						if(item.ListBox != null)
+						{
+							item.Remove();
+						}
+					}
+					break;
 			}
 		}
 
@@ -311,12 +366,12 @@
 
 		private void _chkClosePageAfterRepositoryLoad_CheckedChanged(object sender, EventArgs e)
 		{
-			_factory.CloseAfterRepositoryLoad = _chkClosePageAfterRepositoryLoad.Checked;
+			_factory.CloseAfterRepositoryLoad = _chkClosePageAfterRepositoryLoad.IsChecked;
 		}
 
 		private void _chkShowPageAtStartup_CheckedChanged(object sender, EventArgs e)
 		{
-			_factory.ShowOnStartup = _chkShowPageAtStartup.Checked;
+			_factory.ShowOnStartup = _chkShowPageAtStartup.IsChecked;
 		}
 
 		private void OnLogoClick(object sender, EventArgs e)

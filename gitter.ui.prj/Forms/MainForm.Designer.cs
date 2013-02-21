@@ -206,7 +206,7 @@
 			// _mnuAbout
 			// 
 			this._mnuAbout.Name = "_mnuAbout";
-			this._mnuAbout.Size = new System.Drawing.Size(152, 22);
+			this._mnuAbout.Size = new System.Drawing.Size(136, 22);
 			this._mnuAbout.Text = "%About%...";
 			this._mnuAbout.Click += new System.EventHandler(this._mnuAbout_Click);
 			// 
@@ -214,7 +214,6 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(57)))), ((int)(((byte)(85)))));
 			this.ClientSize = new System.Drawing.Size(795, 496);
 			this.Controls.Add(this._toolStripContainer);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

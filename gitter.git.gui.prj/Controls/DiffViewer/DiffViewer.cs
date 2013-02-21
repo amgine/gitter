@@ -100,11 +100,11 @@
 			{
 				FlowPanelSeparator separator = null;
 				Panels.Add(new ChangedFilesPanel() { Diff = diff });
-				Panels.Add(new FlowPanelSeparator() { Style = FlowPanelSeparatorStyle.Line });
+				Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
 				foreach(var file in diff)
 				{
 					Panels.Add(new FileDiffPanel(_repository, file, diff.Type));
-					Panels.Add(separator = new FlowPanelSeparator() { Style = FlowPanelSeparatorStyle.Simple });
+					Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 				}
 				if(separator != null) separator.Height = 6;
 			}
@@ -293,7 +293,7 @@
 			if(revisionSource != null)
 			{
 				Panels.Add(new RevisionHeaderPanel() { Revision = revisionSource.Revision.Dereference() });
-				Panels.Add(new FlowPanelSeparator() { Style = FlowPanelSeparatorStyle.Line });
+				Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
 			}
 			var indexSource = diffSource as IIndexDiffSource;
 			if(indexSource != null && !indexSource.Cached)
@@ -389,9 +389,9 @@
 			Panels.Clear();
 			if(diffFile != null)
 			{
-				Panels.Add(new FlowPanelSeparator() { Style = FlowPanelSeparatorStyle.Simple, Height = 5 });
+				Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple, Height = 5 });
 				Panels.Add(new FileDiffPanel(_repository, diffFile, DiffType.Patch));
-				Panels.Add(new FlowPanelSeparator() { Style = FlowPanelSeparatorStyle.Simple, Height = 6 });
+				Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple, Height = 6 });
 			}
 			ScrollToTopLeft();
 			EndUpdate();

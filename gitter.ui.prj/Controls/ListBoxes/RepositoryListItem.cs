@@ -79,8 +79,19 @@
 						paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, 36, cy);
 					cy += 16;
 					var rc = new Rectangle(36, cy, paintEventArgs.Bounds.Width - 42, 16);
-					GitterApplication.TextRenderer.DrawText(
-						paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, SystemBrushes.GrayText, rc, PathStringFormat);
+					if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+					{
+						GitterApplication.TextRenderer.DrawText(
+							paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, paintEventArgs.Brush, rc, PathStringFormat);
+					}
+					else
+					{
+						using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
+						{
+							GitterApplication.TextRenderer.DrawText(
+								paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, textBrush, rc, PathStringFormat);
+						}
+					}
 					break;
 			}
 		}

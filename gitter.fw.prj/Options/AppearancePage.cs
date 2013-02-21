@@ -12,6 +12,8 @@
 	[ToolboxItem(false)]
 	public partial class AppearancePage : PropertyPage, IExecutableDialog
 	{
+		private IGitterStyle _selectedStyle;
+
 		public AppearancePage()
 			: base(PropertyPageFactory.AppearanceGroupGuid)
 		{
@@ -25,6 +27,49 @@
 			{
 				_radGdi.Checked = true;
 			}
+
+			_selectedStyle = GitterApplication.StyleOnNextStartup;
+			int yOffset = 3;
+			foreach(var style in GitterApplication.Styles)
+			{
+				var themeRadioButton = new RadioButton()
+				{
+					Left		= 3,
+					Top			= yOffset,
+					Width		= _pnlThemesContainer.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 2,
+					Text		= style.DisplayName,
+					FlatStyle	= FlatStyle.System,
+					Tag			= style,
+					Checked		= style == SelectedStyle,
+				};
+				themeRadioButton.CheckedChanged += OnThemeRadioButtonCheckedChanged;
+				_pnlThemesContainer.Controls.Add(themeRadioButton);
+				yOffset += themeRadioButton.Height;
+			}
+			_pnlRestartRequiredWarning.Visible = SelectedStyle != GitterApplication.Style;
+		}
+
+		private void OnThemeRadioButtonCheckedChanged(object sender, EventArgs e)
+		{
+			var radioButton = (RadioButton)sender;
+			if(radioButton.Checked)
+			{
+				var style = (IGitterStyle)radioButton.Tag;
+				SelectedStyle = style;
+			}
+		}
+
+		private IGitterStyle SelectedStyle
+		{
+			get { return _selectedStyle; }
+			set
+			{
+				if(_selectedStyle != value)
+				{
+					_selectedStyle = value;
+					_pnlRestartRequiredWarning.Visible = value != GitterApplication.Style;
+				}
+			}
 		}
 
 		public bool Execute()
@@ -37,6 +82,7 @@
 			{
 				GitterApplication.TextRenderer = GitterApplication.GdiPlusTextRenderer;
 			}
+			GitterApplication.StyleOnNextStartup = SelectedStyle;
 			return true;
 		}
 	}

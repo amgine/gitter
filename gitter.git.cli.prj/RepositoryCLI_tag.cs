@@ -43,11 +43,11 @@
 
 			string fullName = GitConstants.TagPrefix + parameters.TagName;
 			var cmd = new ShowRefCommand(
-					ShowRefCommand.Tags(),
-					ShowRefCommand.Dereference(),
-					ShowRefCommand.Hash(),
-					ShowRefCommand.NoMoreOptions(),
-					new CommandArgument(fullName));
+				ShowRefCommand.Tags(),
+				ShowRefCommand.Dereference(),
+				ShowRefCommand.Hash(),
+				ShowRefCommand.NoMoreOptions(),
+				new CommandArgument(fullName));
 
 			var output = _executor.ExecCommand(cmd);
 			var tag = output.Output;
@@ -78,8 +78,9 @@
 		/// <returns>Tag message.</returns>
 		public string QueryTagMessage(string tag)
 		{
-			var cmd = new CatFileCommand(new CommandArgument[]
-				{ new CommandArgument("tag"), new CommandArgument(tag) });
+			var cmd = new CatFileCommand(
+				new CommandArgument("tag"),
+				new CommandArgument(tag));
 			var output = _executor.ExecCommand(cmd);
 			output.ThrowOnBadReturnCode();
 			var parser = new GitParser(output.Output);
@@ -132,7 +133,9 @@
 				ShowRefCommand.Tags());
 			var output = _executor.ExecCommand(cmd);
 			if(output.ExitCode != 0)
+			{
 				return new TagData[0];
+			}
 
 			var tags = output.Output;
 			int pos = 0;

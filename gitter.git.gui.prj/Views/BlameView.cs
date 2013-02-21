@@ -28,6 +28,11 @@
 			get { return CachedResources.Bitmaps["ImgBlame"]; }
 		}
 
+		public override bool IsDocument
+		{
+			get { return true; }
+		}
+
 		private static string GetText(BlameFile file)
 		{
 			return Resources.StrlBlame + ": " + file.Name;

@@ -48,7 +48,6 @@
 			// 
 			this._lstOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)));
-			this._lstOptions.BackColor = System.Drawing.SystemColors.Window;
 			this._lstOptions.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstOptions.ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick;
 			this._lstOptions.Location = new System.Drawing.Point(3, 3);

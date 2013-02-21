@@ -26,6 +26,7 @@
 		{
 			_lstIssueTrackers = new CustomListBox()
 			{
+				Style = GitterApplication.DefaultStyle,
 				HeaderStyle = HeaderStyle.Hidden,
 				BorderStyle = BorderStyle.FixedSingle,
 				ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick,

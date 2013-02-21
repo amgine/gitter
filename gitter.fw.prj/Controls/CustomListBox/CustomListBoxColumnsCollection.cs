@@ -42,6 +42,11 @@
 			}
 		}
 
+		public CustomListBox ListBox
+		{
+			get { return _listBox; }
+		}
+
 		#endregion
 
 		#region Overrides

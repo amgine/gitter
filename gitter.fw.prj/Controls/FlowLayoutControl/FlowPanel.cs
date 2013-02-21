@@ -34,6 +34,21 @@
 			}
 		}
 
+		protected IGitterStyle Style
+		{
+			get
+			{
+				if(_flowControl != null)
+				{
+					return _flowControl.Style;
+				}
+				else
+				{
+					return GitterApplication.DefaultStyle;
+				}
+			}
+		}
+
 		public virtual FlowPanelHeader Header
 		{
 			get { return null; }

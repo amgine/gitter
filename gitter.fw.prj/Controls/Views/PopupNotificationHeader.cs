@@ -51,11 +51,12 @@
 
 		private Rectangle GetButtonsRect()
 		{
+			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
 			return new Rectangle(
 				Width - Buttons.Width - 2,
 				0,
-				ViewConstants.ViewButtonSize,
-				ViewConstants.ViewButtonSize);
+				viewButtonSize,
+				viewButtonSize);
 		}
 
 		public ViewButtons Buttons

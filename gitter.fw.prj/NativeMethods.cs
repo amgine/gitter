@@ -130,10 +130,10 @@
 		public const int CBN_SELENDCANCEL = 10;
 
 		[DllImport("kernel32.dll")]
-		public static extern void MoveMemory(IntPtr dest, IntPtr src, int len);
+		public static extern void MoveMemory(IntPtr dest, IntPtr src, UIntPtr len);
 
 		[DllImport("kernel32.dll")]
-		public static extern void CopyMemory(IntPtr dest, IntPtr src, int len);
+		public static extern void CopyMemory(IntPtr dest, IntPtr src, UIntPtr len);
 
 		//[DllImport("gdi32.dll")]
 		//public static extern int SetDIBitsToDevice(

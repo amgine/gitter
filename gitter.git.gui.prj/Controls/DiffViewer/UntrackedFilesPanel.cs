@@ -52,18 +52,9 @@
 				get { return _file; }
 			}
 
-			public void Draw(Graphics graphics, Font font, Rectangle rect, int index, bool hover)
+			public void Draw(Graphics graphics, Font font, Brush textBrush, Rectangle rect, int index)
 			{
 				const int IconSize = 16;
-
-				if(hover)
-				{
-					BackgroundStyle.Hovered.Draw(graphics, rect);
-				}
-				else if(index % 2 == 1)
-				{
-					graphics.FillRectangle(Brushes.WhiteSmoke, rect);
-				}
 
 				int d = (rect.Height - 16) / 2;
 				var iconRect = new Rectangle(rect.X + d, rect.Y + d, IconSize, IconSize);
@@ -78,7 +69,7 @@
 				rect.Y += d;
 				rect.Height -= d;
 				GitterApplication.TextRenderer.DrawText(
-					graphics, _text, font, SystemBrushes.WindowText, rect, ContentFormat);
+					graphics, _text, font, textBrush, rect, ContentFormat);
 			}
 		}
 
@@ -216,21 +207,35 @@
 			var clip = paintEventArgs.ClipRectangle;
 			int y = rect.Y;
 			if(FontHeight == -1)
+			{
 				FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(graphics, Font) + 0.5);
+			}
 			var rc = new Rectangle(rect.X + 5, rect.Y, FlowControl.ContentArea.Width - 10, LineHeight);
 			var rcClip = Rectangle.Intersect(rc, clip);
-			if(rcClip.Width != 0 && rcClip.Height != 0)
+			using(var textBrush = new SolidBrush(FlowControl.Style.Colors.WindowText))
+			using(var alternateBackgroundBrush = new SolidBrush(FlowControl.Style.Colors.Alternate))
 			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, Resources.StrUntrackedFiles.AddColon(), Font, SystemBrushes.WindowText, rc, ContentFormat);
-			}
-			for(int i = 0; i < _items.Length; ++i)
-			{
-				rc.Y += LineHeight;
-				rcClip = Rectangle.Intersect(rc, clip);
-				if(rcClip.Width != 0 && rcClip.Height != 0)
+				if(rcClip.Width > 0 && rcClip.Height > 0)
 				{
-					_items[i].Draw(graphics, Font, rc, i, i == _fileHover.Index);
+					GitterApplication.TextRenderer.DrawText(
+						graphics, Resources.StrUntrackedFiles.AddColon(), Font, textBrush, rc, ContentFormat);
+				}
+				for(int i = 0; i < _items.Length; ++i)
+				{
+					rc.Y += LineHeight;
+					rcClip = Rectangle.Intersect(rc, clip);
+					if(rcClip.Width > 0 && rcClip.Height > 0)
+					{
+						if(i % 2 == 1)
+						{
+							graphics.FillRectangle(alternateBackgroundBrush, rcClip);
+						}
+						if(i == _fileHover.Index)
+						{
+							FlowControl.Style.ItemBackgroundStyles.Hovered.Draw(graphics, rc);
+						}
+						_items[i].Draw(graphics, Font, textBrush, rc, i);
+					}
 				}
 			}
 		}

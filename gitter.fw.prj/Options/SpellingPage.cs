@@ -27,6 +27,7 @@
 
 			Text = Resources.StrSpelling;
 
+			_lstDictionaries.Style = GitterApplication.DefaultStyle;
 			_lstDictionaries.Columns.Add(new CustomListBoxColumn(0, Resources.StrName) { SizeMode = ColumnSizeMode.Fill });
 
 			var loaded = SpellingService.GetLoadedLocales();

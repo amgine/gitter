@@ -33,6 +33,7 @@
 
 		public void SetAvailableButtons(params ViewButtonType[] buttons)
 		{
+			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
 			_buttonHover.Reset(-1, null);
 			_buttonPress.Reset(-1, null);
 			if(buttons == null || buttons.Length == 0)
@@ -42,11 +43,11 @@
 			else
 			{
 				_buttons = new ViewButton[buttons.Length];
-				int x = buttons.Length * ViewConstants.ViewButtonSize + 2;
+				int x = buttons.Length * viewButtonSize + 2;
 				for(int i = 0; i < buttons.Length; ++i)
 				{
 					_buttons[i] = new ViewButton(x, buttons[i]);
-					x -= ViewConstants.ViewButtonSize;
+					x -= viewButtonSize;
 				}
 			}
 			_host.Invalidate();
@@ -91,9 +92,11 @@
 			get
 			{
 				if(_buttons == null || _buttons.Length == 0)
+				{
 					return 0;
-				return ViewConstants.ViewButtonSize +
-					(_buttons.Length - 1) * (ViewConstants.ViewButtonSize + _buttonSpacing);
+				}
+				var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
+				return viewButtonSize + (_buttons.Length - 1) * (viewButtonSize + _buttonSpacing);
 			}
 		}
 
@@ -112,20 +115,21 @@
 		{
 			if(_buttons == null || _buttons.Length == 0) return -1;
 			if(x < 0) return -1;
-			int y1 = (_height - ViewConstants.ViewButtonSize) / 2;
+			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
+			int y1 = (_height - viewButtonSize) / 2;
 			if(y < y1) return -1;
-			if(y >= y1 + ViewConstants.ViewButtonSize) return -1;
-			int id = x / (ViewConstants.ViewButtonSize + _buttonSpacing);
-			if(id >= _buttons.Length)
-				return -1;
+			if(y >= y1 + viewButtonSize) return -1;
+			int id = x / (viewButtonSize + _buttonSpacing);
+			if(id >= _buttons.Length) return -1;
 			return id;
 		}
 
 		public void OnPaint(Graphics graphics, Rectangle bounds, bool focus)
 		{
 			if(_buttons == null || _buttons.Length == 0) return;
-			var y = bounds.Y + (_height - ViewConstants.ViewButtonSize) / 2;
-			var rc = new Rectangle(bounds.X, y, ViewConstants.ViewButtonSize, ViewConstants.ViewButtonSize);
+			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
+			var y = bounds.Y + (_height - viewButtonSize) / 2;
+			var rc = new Rectangle(bounds.X, y, viewButtonSize, viewButtonSize);
 			for(int i = 0; i < _buttons.Length; ++i)
 			{
 				bool hovered = _buttonHover.Index == i;
@@ -140,7 +144,7 @@
 					hovered = true;
 				}
 				_buttons[i].OnPaint(graphics, rc, focus, hovered, pressed);
-				rc.X += ViewConstants.ViewButtonSize + _buttonSpacing;
+				rc.X += viewButtonSize + _buttonSpacing;
 			}
 		}
 
@@ -148,18 +152,26 @@
 		{
 			int id = HitTest(x, y);
 			if(id == -1)
+			{
 				_buttonPress.Drop();
+			}
 			else
+			{
 				_buttonPress.Track(id, _buttons[id]);
+			}
 		}
 
 		public void OnMouseMove(int x, int y, MouseButtons button)
 		{
 			int id = HitTest(x, y);
 			if(id == -1)
+			{
 				_buttonHover.Drop();
+			}
 			else
+			{
 				_buttonHover.Track(id, _buttons[id]);
+			}
 		}
 
 		public void OnMouseUp(int x, int y, MouseButtons button)

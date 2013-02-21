@@ -40,22 +40,35 @@
 			Trimming = StringTrimming.None,
 		};
 
-		private static readonly Color HeaderColor1 = Color.FromArgb(245, 245, 245);
-		private static readonly Color HeaderColor2 = Color.FromArgb(232, 232, 232);
+		protected Brush GetLineHoverBackground()
+		{
+			return new SolidBrush(Style.Colors.LineBackgroundHover);
+		}
 
-		protected static readonly Brush LineHoverBackground =
-			new SolidBrush(ColorScheme.LineHoverBackColor);
-		protected static readonly Brush LineSelectedBackground =
-			new SolidBrush(ColorScheme.LineSelectedBackColor);
-		protected static readonly Brush LineSelectedHoverBackground =
-			new SolidBrush(ColorScheme.LineSelectedHoverBackColor);
+		protected Brush GetLineSelectedBackground()
+		{
+			return new SolidBrush(Style.Colors.LineSelectedBackground);
+		}
 
-		protected static readonly Brush LineNumberText =
-			new SolidBrush(ColorScheme.LineNumberText);
-		protected static readonly Brush LineNumberBackground =
-			new SolidBrush(ColorScheme.LineNumberBackColor);
-		protected static readonly Brush LineNumberHoverBackground =
-			new SolidBrush(ColorScheme.LineNumberHoverBackColor);
+		protected Brush GetLineSelectedHoverBackground()
+		{
+			return new SolidBrush(Style.Colors.LineSelectedBackgroundHover);
+		}
+
+		protected Brush GetLineNumberText()
+		{
+			return new SolidBrush(Style.Colors.LineNumberForeground);
+		}
+
+		protected Brush GetLineNumberBackground()
+		{
+			return new SolidBrush(Style.Colors.LineNumberBackground);
+		}
+
+		protected Brush GetLineNumberHoverBackground()
+		{
+			return new SolidBrush(Style.Colors.LineNumberBackgroundHover);
+		}
 
 		protected static readonly Size CellSize;
 
@@ -65,18 +78,12 @@
 
 		static FilePanel()
 		{
-			using(var bmp = new Bitmap(1, 1))
-			{
-				using(var graphics = Graphics.FromImage(bmp))
-				{
-					CellSize = GitterApplication.TextRenderer.MeasureText(
-						graphics,
-						"0",
-						GitterApplication.FontManager.ViewerFont.Font,
-						int.MaxValue / 2,
-						StringFormat.GenericTypographic);
-				}
-			}
+			CellSize = GitterApplication.TextRenderer.MeasureText(
+				Utility.MeasurementGraphics,
+				"0",
+				GitterApplication.FontManager.ViewerFont.Font,
+				int.MaxValue / 2,
+				StringFormat.GenericTypographic);
 
 			float tabSize = CellSize.Width * TabSize;
 			ContentFormat.SetTabStops(TabSize, new[]
@@ -114,17 +121,25 @@
 			return new Rectangle(x, yOffset + line * CellSize.Height, w, CellSize.Height * count);
 		}
 
-		protected static void PaintHeader(Graphics graphics, Rectangle rcHeader, Image icon, Image overlay, string text)
+		protected void PaintHeader(Graphics graphics, Rectangle rcHeader, Image icon, Image overlay, string text)
 		{
-			var font = GitterApplication.FontManager.ViewerFont.Font;
 			using(var brush = new LinearGradientBrush(
-				rcHeader, HeaderColor1, HeaderColor2, LinearGradientMode.Vertical))
+				rcHeader,
+				Style.Colors.FileHeaderColor1,
+				Style.Colors.FileHeaderColor2,
+				LinearGradientMode.Vertical))
 			{
 				graphics.FillRectangle(brush, rcHeader);
 			}
+
 			var rcBorder = rcHeader;
 			--rcBorder.Height;
-			graphics.DrawRectangle(Pens.Gray, rcBorder);
+			--rcBorder.Width;
+			using(var pen = new Pen(Style.Colors.FilePanelBorder))
+			{
+				graphics.DrawRectangle(pen, rcBorder);
+			}
+
 			var rcImage = new Rectangle(0, 0, 16, 16);
 			const int offset = (HeaderHeight - 16) / 2;
 			var rcStatus = new Rectangle(rcHeader.X + offset, rcHeader.Y + offset, 16, 16);
@@ -134,10 +149,11 @@
 				graphics.DrawImage(overlay, rcStatus, rcImage, GraphicsUnit.Pixel);
 			}
 
+			var font = GitterApplication.FontManager.ViewerFont.Font;
 			rcHeader.X += offset * 2 + rcImage.Width;
 			rcHeader.Width -= offset * 2 + rcImage.Width;
 			GitterApplication.TextRenderer.DrawText(
-				graphics, text, font, SystemBrushes.WindowText, rcHeader, HeaderFormat);
+				graphics, text, font, Style.Colors.WindowText, rcHeader, HeaderFormat);
 		}
 
 		protected static int GetDecimalDigits(int num)

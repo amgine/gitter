@@ -13,7 +13,7 @@
 
 	/// <summary>Extender for <see cref="UserColumn"/>.</summary>
 	[ToolboxItem(false)]
-	public partial class UserColumnExtender : BaseExtender
+	public partial class UserColumnExtender : ExtenderBase
 	{
 		private readonly UserColumn _column;
 		private bool _disableEvents;

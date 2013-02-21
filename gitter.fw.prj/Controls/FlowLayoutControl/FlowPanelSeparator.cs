@@ -28,7 +28,7 @@
 			}
 		}
 
-		public FlowPanelSeparatorStyle Style
+		public FlowPanelSeparatorStyle SeparatorStyle
 		{
 			get { return _style; }
 			set

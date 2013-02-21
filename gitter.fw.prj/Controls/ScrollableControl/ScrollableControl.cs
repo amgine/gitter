@@ -12,8 +12,9 @@
 
 		private BorderStyle _borderStyle;
 
-		private VScrollBar _vScrollBar;
-		private HScrollBar _hScrollBar;
+		private IGitterStyle _style;
+		private IScrollBarWidget _vScrollBar;
+		private IScrollBarWidget _hScrollBar;
 		private bool _blockScrollRedraw;
 		private int _vScrollPos;
 		private int _hScrollPos;
@@ -37,6 +38,24 @@
 
 		#endregion
 
+		#region Events
+
+		private static readonly object StyleChangedEvent = new object();
+
+		public new event EventHandler StyleChanged
+		{
+			add { Events.AddHandler(StyleChangedEvent, value); }
+			remove { Events.RemoveHandler(StyleChangedEvent, value); }
+		}
+
+		protected virtual void OnStyleChanged()
+		{
+			var handler = (EventHandler)Events[StyleChangedEvent];
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		#endregion
+
 		#region .ctor
 
 		/// <summary>Create <see cref="ScrollableControl"/>.</summary>
@@ -44,35 +63,10 @@
 		{
 			_borderStyle = BorderStyle.Fixed3D;
 
-			var scrollWidth = SystemInformation.VerticalScrollBarWidth;
-			_vScrollBar = new VScrollBar()
+			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
 			{
-				Maximum = 1,
-				Minimum = 0,
-				SmallChange = 1,
-				LargeChange = 1,
-				Enabled = false,
-				Bounds = new Rectangle(Width - scrollWidth - 2, 2, scrollWidth, Height - 4),
-				Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
-			};
-			_vScrollBar.ValueChanged += OnVScrollBarValueChanged;
-			_vScrollBar.Scroll += OnVScrollBarScroll;
-			_vScrollBar.MouseCaptureChanged += OnScrollBarCaptureChanged;
-
-			var scrollHeight = SystemInformation.HorizontalScrollBarHeight;
-			_hScrollBar = new HScrollBar()
-			{
-				Maximum = 1,
-				Minimum = 0,
-				SmallChange = 1,
-				LargeChange = 1,
-				Enabled = false,
-				Bounds = new Rectangle(2, Height - 2 - scrollHeight, Width - 4, scrollHeight),
-				Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right,
-			};
-			_hScrollBar.ValueChanged += OnHScrollBarValueChanged;
-			_hScrollBar.Scroll += OnHScrollBarScroll;
-			_hScrollBar.MouseCaptureChanged += OnScrollBarCaptureChanged;
+				_style = new MSVS2010Style();
+			}
 
 			SetStyle(
 				ControlStyles.ContainerControl |
@@ -84,12 +78,37 @@
 				ControlStyles.Selectable |
 				ControlStyles.OptimizedDoubleBuffer, true);
 
+			CreateScrollBars();
 			BackColor = SystemColors.Window;
 		}
 
 		#endregion
 
 		#region Properties
+
+		/// <summary>Gets or sets control style.</summary>
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public IGitterStyle Style
+		{
+			get
+			{
+				if(_style == null)
+				{
+					return GitterApplication.Style;
+				}
+				return _style;
+			}
+			set
+			{
+				if(_style != value)
+				{
+					_style = value;
+					CreateScrollBars();
+					OnStyleChanged();
+					Invalidate();
+				}
+			}
+		}
 
 		/// <summary>Control border style.</summary>
 		[DefaultValue(BorderStyle.Fixed3D)]
@@ -190,7 +209,7 @@
 		/// <summary>Horizontal scrollbar.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		protected HScrollBar HScrollBar
+		protected IScrollBarWidget HScrollBar
 		{
 			get { return _hScrollBar; }
 		}
@@ -198,7 +217,7 @@
 		/// <summary>Vertical scrollbar.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		protected VScrollBar VScrollBar
+		protected IScrollBarWidget VScrollBar
 		{
 			get { return _vScrollBar; }
 		}
@@ -236,6 +255,77 @@
 		}
 
 		#endregion
+
+		private int BorderSize
+		{
+			get
+			{
+				if(_borderStyle == BorderStyle.None)
+				{
+					return 0;
+				}
+				else
+				{
+					return 2;
+				}
+			}
+		}
+
+		private void CreateScrollBars()
+		{
+			if(_vScrollBar != null)
+			{
+				_vScrollBar.Dispose();
+			}
+			if(_hScrollBar != null)
+			{
+				_hScrollBar.Dispose();
+			}
+
+			var borderSize = BorderSize;
+
+			var scrollWidth = SystemInformation.VerticalScrollBarWidth;
+			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+			{
+				_vScrollBar = Style.CreateScrollBar(Orientation.Vertical);
+			}
+			else
+			{
+				_vScrollBar = new SystemScrollBarAdapter(Orientation.Vertical);
+			}
+			_vScrollBar.Maximum = 1;
+			_vScrollBar.Minimum = 0;
+			_vScrollBar.SmallChange = 1;
+			_vScrollBar.LargeChange = 1;
+			_vScrollBar.Control.Enabled = false;
+			_vScrollBar.Control.Bounds = new Rectangle(Width - scrollWidth - borderSize, borderSize, scrollWidth, Height - borderSize * 2);
+			_vScrollBar.Control.Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
+			_vScrollBar.ValueChanged += OnVScrollBarValueChanged;
+			_vScrollBar.Scroll += OnVScrollBarScroll;
+			_vScrollBar.Control.MouseCaptureChanged += OnScrollBarCaptureChanged;
+			_vScrollBar.Control.MouseDown += OnScrollBarMouseDown;
+
+			var scrollHeight = SystemInformation.HorizontalScrollBarHeight;
+			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+			{
+				_hScrollBar = Style.CreateScrollBar(Orientation.Horizontal);
+			}
+			else
+			{
+				_hScrollBar = new SystemScrollBarAdapter(Orientation.Horizontal);
+			}
+			_hScrollBar.Maximum = 1;
+			_hScrollBar.Minimum = 0;
+			_hScrollBar.SmallChange = 1;
+			_hScrollBar.LargeChange = 1;
+			_hScrollBar.Control.Enabled = false;
+			_hScrollBar.Control.Bounds = new Rectangle(borderSize, Height - borderSize - scrollHeight, Width - borderSize * 2, scrollHeight);
+			_hScrollBar.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
+			_hScrollBar.ValueChanged += OnHScrollBarValueChanged;
+			_hScrollBar.Scroll += OnHScrollBarScroll;
+			_hScrollBar.Control.MouseCaptureChanged += OnScrollBarCaptureChanged;
+			_hScrollBar.Control.MouseDown += OnScrollBarMouseDown;
+		}
 
 		public void ScrollToTop()
 		{
@@ -324,7 +414,7 @@
 
 		private Rectangle GetClientArea()
 		{
-			return GetClientArea(_vScrollBar.Parent != null, _hScrollBar.Parent != null);
+			return GetClientArea(_vScrollBar.Control.Parent != null, _hScrollBar.Control.Parent != null);
 		}
 
 		private Rectangle GetClientArea(bool vScrollBar, bool hScrollBar)
@@ -342,11 +432,11 @@
 			}
 			if(vScrollBar)
 			{
-				client.Width -= _vScrollBar.Width - scrollbarOffset;
+				client.Width -= _vScrollBar.Control.Width - scrollbarOffset;
 			}
 			if(hScrollBar)
 			{
-				client.Height -= _hScrollBar.Height - scrollbarOffset;
+				client.Height -= _hScrollBar.Control.Height - scrollbarOffset;
 			}
 			return client;
 		}
@@ -508,22 +598,28 @@
 
 		private Rectangle GetVScrollBounds()
 		{
-			int offset = _borderStyle == BorderStyle.None ? 0 : 2;
-			var bounds = new Rectangle(Width - _vScrollBar.Width - offset, offset, _vScrollBar.Width, Height - offset * 2);
+			int borderSize = BorderSize;
+			var size = Size;
+			var bounds = new Rectangle(
+				size.Width - _vScrollBar.Control.Width - borderSize, borderSize,
+				_vScrollBar.Control.Width, size.Height - borderSize * 2);
 			if(_needHScroll || _alwaysShowHScrollBar)
 			{
-				bounds.Height -= _hScrollBar.Height;
+				bounds.Height -= _hScrollBar.Control.Height;
 			}
 			return bounds;
 		}
 
 		private Rectangle GetHScrollBounds()
 		{
-			int offset = _borderStyle == BorderStyle.None ? 0 : 2;
-			var bounds = new Rectangle(offset, Height - _hScrollBar.Height - offset, Width - offset * 2, _hScrollBar.Height);
+			int borderSize = BorderSize;
+			var size = Size;
+			var bounds = new Rectangle(
+				borderSize, size.Height - _hScrollBar.Control.Height - borderSize,
+				size.Width - borderSize * 2, _hScrollBar.Control.Height);
 			if(_needVScroll || _alwaysShowVScrollBar)
 			{
-				bounds.Width -= _vScrollBar.Width;
+				bounds.Width -= _vScrollBar.Control.Width;
 			}
 			return bounds;
 		}
@@ -538,10 +634,10 @@
 				_maxVScrollPos = msp;
 				var lc = _contentArea.Height;
 				if(lc < 0) lc = 0;
-				if(_vScrollBar.Parent == null)
+				if(_vScrollBar.Control.Parent == null)
 				{
-					_vScrollBar.Bounds = GetVScrollBounds();
-					_vScrollBar.Parent = this;
+					_vScrollBar.Control.Bounds = GetVScrollBounds();
+					_vScrollBar.Control.Parent = this;
 					RecomputeAreas();
 					if(allowRedraw)
 					{
@@ -551,11 +647,9 @@
 				}
 				else
 				{
-					var b = GetVScrollBounds();
-					if(_vScrollBar.Bounds != b)
-						_vScrollBar.Bounds = b;
+					_vScrollBar.Control.Bounds = GetVScrollBounds();
 				}
-				_vScrollBar.Enabled = true;
+				_vScrollBar.Control.Enabled = true;
 				_vScrollBar.SmallChange = GetVScrollSmallChange();
 				_vScrollBar.LargeChange = lc;
 				_vScrollBar.Maximum = _maxVScrollPos + lc - 1;
@@ -568,17 +662,17 @@
 			}
 			else
 			{
-				if((_vScrollBar.Parent == null && _alwaysShowVScrollBar) || (_vScrollBar.Parent != null && !_alwaysShowVScrollBar))
+				if((_vScrollBar.Control.Parent == null && _alwaysShowVScrollBar) || (_vScrollBar.Control.Parent != null && !_alwaysShowVScrollBar))
 				{
 					_vScrollPos = 0;
 					if(_alwaysShowVScrollBar)
 					{
-						_vScrollBar.Bounds = GetVScrollBounds();
-						_vScrollBar.Parent = this;
+						_vScrollBar.Control.Bounds = GetVScrollBounds();
+						_vScrollBar.Control.Parent = this;
 					}
 					else
 					{
-						_vScrollBar.Parent = null;
+						_vScrollBar.Control.Parent = null;
 					}
 					RecomputeAreas();
 					if(allowRedraw)
@@ -588,22 +682,19 @@
 					}
 					_maxVScrollPos = 0;
 					_vScrollBar.Value = 0;
-					_vScrollBar.Enabled = false;
+					_vScrollBar.Control.Enabled = false;
 				}
 				else
 				{
 					var b = GetVScrollBounds();
-					if(_vScrollBar.Bounds != b)
-					{
-						_vScrollBar.Bounds = b;
-					}
+					_vScrollBar.Control.Bounds = b;
 					if(_maxVScrollPos != 0)
 					{
 						_maxVScrollPos = 0;
 						_blockScrollRedraw = !allowRedraw;
 						_vScrollBar.Value = 0;
 						_blockScrollRedraw = false;
-						_vScrollBar.Enabled = false;
+						_vScrollBar.Control.Enabled = false;
 					}
 				}
 			}
@@ -626,10 +717,10 @@
 				_maxHScrollPos = msp;
 				var lc = _contentArea.Width;
 				if(lc < 0) lc = 0;
-				if(_hScrollBar.Parent == null)
+				if(_hScrollBar.Control.Parent == null)
 				{
-					_hScrollBar.Bounds = GetHScrollBounds();
-					_hScrollBar.Parent = this;
+					_hScrollBar.Control.Bounds = GetHScrollBounds();
+					_hScrollBar.Control.Parent = this;
 					RecomputeAreas();
 					if(allowRedraw)
 					{
@@ -639,11 +730,9 @@
 				}
 				else
 				{
-					var b = GetHScrollBounds();
-					if(_hScrollBar.Bounds != b)
-						_hScrollBar.Bounds = b;
+					_hScrollBar.Control.Bounds = GetHScrollBounds();
 				}
-				_hScrollBar.Enabled = true;
+				_hScrollBar.Control.Enabled = true;
 				_hScrollBar.SmallChange = GetHScrollSmallChange();
 				_hScrollBar.LargeChange = lc;
 				_hScrollBar.Maximum = _maxHScrollPos + lc - 1;
@@ -656,17 +745,17 @@
 			}
 			else
 			{
-				if((_hScrollBar.Parent == null && _alwaysShowHScrollBar) || (_hScrollBar.Parent != null && !_alwaysShowHScrollBar))
+				if((_hScrollBar.Control.Parent == null && _alwaysShowHScrollBar) || (_hScrollBar.Control.Parent != null && !_alwaysShowHScrollBar))
 				{
 					_hScrollPos = 0;
 					if(_alwaysShowHScrollBar)
 					{
-						_hScrollBar.Bounds = GetHScrollBounds();
-						_hScrollBar.Parent = this;
+						_hScrollBar.Control.Bounds = GetHScrollBounds();
+						_hScrollBar.Control.Parent = this;
 					}
 					else
 					{
-						_hScrollBar.Parent = null;
+						_hScrollBar.Control.Parent = null;
 					}
 					RecomputeAreas();
 					if(allowRedraw)
@@ -676,22 +765,18 @@
 					}
 					_maxHScrollPos = 0;
 					_hScrollBar.Value = 0;
-					_hScrollBar.Enabled = false;
+					_hScrollBar.Control.Enabled = false;
 				}
 				else
 				{
-					var b = GetHScrollBounds();
-					if(_hScrollBar.Bounds != b)
-					{
-						_hScrollBar.Bounds = b;
-					}
+					_hScrollBar.Control.Bounds = GetHScrollBounds();
 					if(_maxHScrollPos != 0)
 					{
 						_maxHScrollPos = 0;
 						_blockScrollRedraw = !allowRedraw;
 						_hScrollBar.Value = 0;
 						_blockScrollRedraw = false;
-						_hScrollBar.Enabled = false;
+						_hScrollBar.Control.Enabled = false;
 					}
 				}
 			}
@@ -881,6 +966,11 @@
 			if(control.Capture) Focus();
 		}
 
+		private void OnScrollBarMouseDown(object sender, MouseEventArgs e)
+		{
+			Focus();
+		}
+
 		private void OnScrollTimerTick(object sender, EventArgs e)
 		{
 			if(_vScrollDirection > 0)
@@ -951,7 +1041,7 @@
 
 		private void PaintNonClient(PaintEventArgs e)
 		{
-			var gx = e.Graphics;
+			var graphics = e.Graphics;
 			var clip = e.ClipRectangle;
 			int h = Height;
 			int w = Width;
@@ -959,7 +1049,10 @@
 			{
 				if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
 				{
-					gx.DrawRectangle(SystemPens.Window, 0, 0, w - 1, h - 1);
+					using(var pen = new Pen(BackColor))
+					{
+						graphics.DrawRectangle(pen, 0, 0, w - 1, h - 1);
+					}
 				}
 			}
 			else
@@ -968,23 +1061,38 @@
 				{
 					if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
 					{
-						gx.DrawRectangle(SystemPens.ControlDark, 0, 0, w - 1, h - 1);
-						gx.DrawRectangle(SystemPens.Window, 1, 1, w - 3, h - 3);
+						graphics.DrawRectangle(SystemPens.ControlDark, 0, 0, w - 1, h - 1);
+						using(var pen = new Pen(BackColor))
+						{
+							graphics.DrawRectangle(pen, 1, 1, w - 3, h - 3);
+						}
 					}
 				}
 				else
 				{
 					if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
 					{
-						gx.DrawLine(SystemPens.ControlDark, 0, 1, 0, h - 2);
-						gx.DrawLine(SystemPens.ControlDark, 0, 0, w - 2, 0);
-						gx.DrawLine(SystemPens.ControlDarkDark, 1, 2, 1, h - 3);
-						gx.DrawLine(SystemPens.ControlDarkDark, 1, 1, w - 3, 1);
+						graphics.DrawLine(SystemPens.ControlDark, 0, 1, 0, h - 2);
+						graphics.DrawLine(SystemPens.ControlDark, 0, 0, w - 2, 0);
+						graphics.DrawLine(SystemPens.ControlDarkDark, 1, 2, 1, h - 3);
+						graphics.DrawLine(SystemPens.ControlDarkDark, 1, 1, w - 3, 1);
 
-						gx.DrawLine(SystemPens.ControlLightLight, 0, h - 1, w - 1, h - 1);
-						gx.DrawLine(SystemPens.ControlLightLight, w - 1, 0, w - 1, h - 1);
-						gx.DrawLine(SystemPens.ControlLight, 1, h - 2, w - 2, h - 2);
-						gx.DrawLine(SystemPens.ControlLight, w - 2, 1, w - 2, h - 2);
+						graphics.DrawLine(SystemPens.ControlLightLight, 0, h - 1, w - 1, h - 1);
+						graphics.DrawLine(SystemPens.ControlLightLight, w - 1, 0, w - 1, h - 1);
+						graphics.DrawLine(SystemPens.ControlLight, 1, h - 2, w - 2, h - 2);
+						graphics.DrawLine(SystemPens.ControlLight, w - 2, 1, w - 2, h - 2);
+					}
+				}
+			}
+			if(_vScrollBar.Control.Parent != null && _hScrollBar.Control.Parent != null)
+			{
+				var rcSpacing = Rectangle.Intersect(clip,
+					new Rectangle(_vScrollBar.Control.Left, _vScrollBar.Control.Bottom, _vScrollBar.Control.Width, _hScrollBar.Control.Height));
+				if(rcSpacing.Width > 0 && rcSpacing.Height > 0)
+				{
+					using(var brush = new SolidBrush(Style.Colors.ScrollBarSpacing))
+					{
+						graphics.FillRectangle(brush, rcSpacing);
 					}
 				}
 			}
@@ -998,7 +1106,10 @@
 
 		protected sealed override void OnPaint(PaintEventArgs e)
 		{
-			e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
+			using(var brush = new SolidBrush(BackColor))
+			{
+				e.Graphics.FillRectangle(brush, e.ClipRectangle);
+			}
 			PaintNonClient(e);
 			OnPaintClientArea(e);
 		}
@@ -1081,25 +1192,19 @@
 
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && !IsDisposed)
+			if(disposing)
 			{
 				StopScrollTimer();
 
-				if(!_vScrollBar.IsDisposed)
-				{
-					_vScrollBar.Dispose();
-					_vScrollBar.ValueChanged -= OnVScrollBarValueChanged;
-					_vScrollBar.Scroll -= OnVScrollBarScroll;
-					_vScrollBar.MouseCaptureChanged -= OnScrollBarCaptureChanged;
-				}
+				_vScrollBar.ValueChanged -= OnVScrollBarValueChanged;
+				_vScrollBar.Scroll -= OnVScrollBarScroll;
+				_vScrollBar.Control.MouseCaptureChanged -= OnScrollBarCaptureChanged;
+				_vScrollBar.Dispose();
 
-				if(!_hScrollBar.IsDisposed)
-				{
-					_hScrollBar.Dispose();
-					_hScrollBar.ValueChanged -= OnVScrollBarValueChanged;
-					_hScrollBar.Scroll -= OnVScrollBarScroll;
-					_hScrollBar.MouseCaptureChanged -= OnScrollBarCaptureChanged;
-				}
+				_hScrollBar.ValueChanged -= OnVScrollBarValueChanged;
+				_hScrollBar.Scroll -= OnVScrollBarScroll;
+				_hScrollBar.Control.MouseCaptureChanged -= OnScrollBarCaptureChanged;
+				_hScrollBar.Dispose();
 			}
 			base.Dispose(disposing);
 		}

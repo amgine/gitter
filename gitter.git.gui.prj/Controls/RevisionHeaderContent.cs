@@ -3,11 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
+	using System.Drawing.Drawing2D;
 	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
+
 	using gitter.Git.Gui.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -43,9 +45,6 @@
 			LineAlignment = StringAlignment.Near,
 			Trimming = StringTrimming.EllipsisCharacter,
 		};
-
-		private static readonly Brush HeaderTextBrush = SystemBrushes.GrayText;
-		private static readonly Brush ContentTextBrush = SystemBrushes.WindowText;
 
 		#endregion
 
@@ -199,22 +198,25 @@
 				return offset;
 			}
 
-			protected static void PaintHeader(Graphics graphics, string header, Rectangle rect)
+			protected void PaintHeader(Graphics graphics, string header, Rectangle rect)
 			{
 				var font = GitterApplication.FontManager.UIFont.Font;
 				var r1 = new Rectangle(rect.X, rect.Y, HeaderWidth - 4, DefaultElementHeight);
 				r1.Y += GetYOffset(font);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, header, font, HeaderTextBrush, r1, HeaderFormat);
+				using(var brush = new SolidBrush(Owner.Style.Colors.GrayText))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, header, font, brush, r1, HeaderFormat);
+				}
 			}
 
-			protected static void DefaultPaint(Graphics graphics, string header, string content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, string header, string content, Rectangle rect)
 			{
 				var font = GitterApplication.FontManager.UIFont.Font;
 				DefaultPaint(graphics, font, header, content, rect);
 			}
 
-			protected static void DefaultPaint(Graphics graphics, string header, TextWithHyperlinks content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, string header, TextWithHyperlinks content, Rectangle rect)
 			{
 				var font = GitterApplication.FontManager.UIFont.Font;
 				DefaultPaint(graphics, font, header, content, rect);
@@ -227,29 +229,38 @@
 				return r2;
 			}
 
-			protected static void DefaultPaint(Graphics graphics, Font font, string header, string content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, Font font, string header, string content, Rectangle rect)
 			{
 				var r1 = new Rectangle(rect.X, rect.Y, HeaderWidth - 4, DefaultElementHeight);
 				var r2 = new Rectangle(rect.X + HeaderWidth, rect.Y, rect.Width - HeaderWidth, rect.Height);
 				var headerFont = GitterApplication.FontManager.UIFont.Font;
 				r1.Y += GetYOffset(headerFont);
 				r2.Y += GetYOffset(font);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, header, headerFont, HeaderTextBrush, r1, HeaderFormat);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, content, font, ContentTextBrush, r2, ContentFormat);
+				using(var brush = new SolidBrush(Owner.Style.Colors.GrayText))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, header, headerFont, brush, r1, HeaderFormat);
+				}
+				using(var brush = new SolidBrush(Owner.Style.Colors.WindowText))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, content, font, brush, r2, ContentFormat);
+				}
 			}
 
-			protected static void DefaultPaint(Graphics graphics, Font font, string header, TextWithHyperlinks content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, Font font, string header, TextWithHyperlinks content, Rectangle rect)
 			{
 				var r1 = new Rectangle(rect.X, rect.Y, HeaderWidth - 4, DefaultElementHeight);
 				var r2 = new Rectangle(rect.X + HeaderWidth, rect.Y, rect.Width - HeaderWidth, rect.Height);
 				var headerFont = GitterApplication.FontManager.UIFont.Font;
 				r1.Y += GetYOffset(headerFont);
 				r2.Y += GetYOffset(font);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, header, font, HeaderTextBrush, r1, HeaderFormat);
-				content.Render(graphics, font, r2);
+				using(var brush = new SolidBrush(Owner.Style.Colors.GrayText))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, header, headerFont, brush, r1, HeaderFormat);
+				}
+				content.Render(Owner.Style, graphics, font, r2);
 			}
 
 			public abstract void Paint(Graphics graphics, Revision revision, Rectangle rect);
@@ -877,6 +888,7 @@
 		private int _measuredWidth;
 		private int _measuredHeight;
 		private Cursor _cursor;
+		private IGitterStyle _style;
 
 		private Revision _revision;
 
@@ -976,6 +988,25 @@
 					_cursor = value;
 					OnCursorChanged();
 				}
+			}
+		}
+
+		public IGitterStyle Style
+		{
+			get
+			{
+				if(_style != null)
+				{
+					return _style;
+				}
+				else
+				{
+					return GitterApplication.Style;
+				}
+			}
+			set
+			{
+				_style = value;
 			}
 		}
 
@@ -1116,7 +1147,6 @@
 			if(_revision == null) return;
 			var width = bounds.Width;
 			if(_measuredWidth != width) Measure(graphics, width);
-			var r = bounds;
 			if(GitterApplication.IntegrationFeatures.Gravatar.IsEnabled)
 			{
 				var avatar = _revision.Author.Avatar;
@@ -1127,34 +1157,51 @@
 				}
 				else
 				{
-					if(r.Width >= MinWidth + 70)
+					if(bounds.Width >= MinWidth + 70)
 					{
-						graphics.DrawImage(image, new Rectangle(r.Right - 65, r.Y + 5, 60, 60));
+						graphics.DrawImage(image, new Rectangle(bounds.Right - 65, bounds.Y + 5, 60, 60));
 					}
 				}
 			}
+			var elementBounds = bounds;
 			for(int i = 0; i < _elements.Length; ++i)
 			{
-				if(_elements[i].IsAvailableFor(_revision))
+				var element = _elements[i];
+				if(element.IsAvailableFor(Revision))
 				{
-					var size = _sizes[_elements[i].Element];
-					var h = size.Height;
-					if(h != 0)
+					var size = _sizes[element.Element];
+					var elementHeight = size.Height;
+					if(elementHeight != 0)
 					{
-						r.Height = h;
+						elementBounds.Height = elementHeight;
 						if(i == _hoverElement.Index)
 						{
-							var sm = graphics.SmoothingMode;
-							graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-							graphics.FillRectangle(Brushes.WhiteSmoke, new Rectangle(r.X, r.Y, HeaderWidth, size.Height));
-							using(var b = new SolidBrush(Color.FromArgb(238, 238, 238)))
+							Color trackColor1;
+							Color trackColor2;
+							if(Style.Type == GitterStyleType.LightBackground)
 							{
-								graphics.FillRectangle(b, new Rectangle(r.X + HeaderWidth, r.Y, size.Width - HeaderWidth, size.Height));
+								trackColor1 = Color.WhiteSmoke;
+								trackColor2 = Color.FromArgb(238, 238, 238);
 							}
-							graphics.SmoothingMode = sm;
+							else
+							{
+								trackColor1 = Color.FromArgb(18, 18, 18);
+								trackColor2 = Color.FromArgb(18, 18, 18);
+							}
+							var oldMode = graphics.SmoothingMode;
+							graphics.SmoothingMode = SmoothingMode.None;
+							using(var brush = new SolidBrush(trackColor1))
+							{
+								graphics.FillRectangle(brush, new Rectangle(elementBounds.X, elementBounds.Y, HeaderWidth, size.Height));
+							}
+							using(var brush = new SolidBrush(trackColor2))
+							{
+								graphics.FillRectangle(brush, new Rectangle(elementBounds.X + HeaderWidth, elementBounds.Y, size.Width - HeaderWidth, size.Height));
+							}
+							graphics.SmoothingMode = oldMode;
 						}
-						_elements[i].Paint(graphics, _revision, r);
-						r.Y += h;
+						element.Paint(graphics, Revision, elementBounds);
+						elementBounds.Y += elementHeight;
 					}
 				}
 			}

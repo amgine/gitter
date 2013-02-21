@@ -13,7 +13,7 @@
 
 	/// <summary>Extender for <see cref="GraphColumn"/>.</summary>
 	[ToolboxItem(false)]
-	public partial class GraphColumnExtender : BaseExtender
+	public partial class GraphColumnExtender : ExtenderBase
 	{
 		private readonly GraphColumn _column;
 		private bool _disableEvents;

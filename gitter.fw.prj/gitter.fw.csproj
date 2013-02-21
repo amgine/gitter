@@ -81,11 +81,21 @@
     <Compile Include="AsyncExecution\IAsyncAction.cs" />
     <Compile Include="AsyncExecution\IAsyncFunc.cs" />
     <Compile Include="AsyncExecution\NullMonitor.cs" />
+    <Compile Include="Cache\CachedBrush.cs" />
     <Compile Include="ClipboardEx.cs" />
     <Compile Include="CLI\AsyncBytesReader.cs" />
     <Compile Include="CLI\AsyncTextReader.cs" />
     <Compile Include="CLI\IOutputReceiver.cs" />
     <Compile Include="CLI\ProcessExecutor.cs" />
+    <Compile Include="Controls\CheckBox\CustomCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CheckBox\CustomCheckBoxAdapter.cs" />
+    <Compile Include="Controls\CheckBox\CustomCheckBoxRenderer.cs" />
+    <Compile Include="Controls\CheckBox\ICheckBoxWidget.cs" />
+    <Compile Include="Controls\CheckBox\MSVS2012CheckBoxRenderer.cs" />
+    <Compile Include="Controls\CheckBox\SystemCheckBoxAdapter.cs" />
+    <Compile Include="Controls\CustomListBox\CustomListBoxManager.cs" />
     <Compile Include="Controls\CustomListBox\DateColumn.cs" />
     <Compile Include="Controls\CustomListBox\DateColumnExtender.cs">
       <SubType>UserControl</SubType>
@@ -93,12 +103,28 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CustomListBox\MSVS2012CustomListBoxRenderer.cs" />
     <Compile Include="Controls\CustomListBox\NotifyCollectionBinding.cs" />
+    <Compile Include="Controls\CustomListBox\Win7CustomListBoxRenderer.cs" />
     <Compile Include="Controls\DragHelper.cs" />
     <Compile Include="Controls\FlowLayoutControl\FlowPanelHeader.cs" />
     <Compile Include="Controls\HintTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\IItemBackgroundStyles.cs" />
+    <Compile Include="Controls\ProcessOverlay\DefaultOverlayRenderer.cs" />
+    <Compile Include="Controls\ProcessOverlay\MSVS2012OverlayRenderer.cs" />
+    <Compile Include="Controls\ProcessOverlay\ProcessOverlayRenderer.cs" />
+    <Compile Include="Controls\ScrollBar\CustomHScrollbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ScrollBar\CustomScrollBarAdapter.cs" />
+    <Compile Include="Controls\ScrollBar\CustomScrollBarPart.cs" />
+    <Compile Include="Controls\ScrollBar\CustomScrollBarRenderer.cs" />
+    <Compile Include="Controls\ScrollBar\CustomVScrollbar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ScrollBar\IScrollBarWidget.cs" />
     <Compile Include="Controls\Notifications\NotificationBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -111,6 +137,8 @@
     <Compile Include="Controls\Notifications\NotificationForm.Designer.cs">
       <DependentUpon>NotificationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ScrollBar\MSVS2012ScrollBarRenderer.cs" />
+    <Compile Include="Controls\ScrollBar\SystemScrollBarAdapter.cs" />
     <Compile Include="Controls\Views\NotificationContent.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -127,6 +155,9 @@
     </Compile>
     <Compile Include="Controls\Views\ViewRendererBase.cs" />
     <Compile Include="Controls\Views\ViewManager.cs" />
+    <Compile Include="Controls\ScrollBar\CustomScrollBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DateFormat.cs" />
     <Compile Include="FileSize.cs" />
     <Compile Include="HelperExecutables.cs" />
@@ -244,6 +275,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\Views\ViewPosition.cs" />
+    <Compile Include="Controls\CustomListBox\CustomListBoxRenderer.cs" />
+    <Compile Include="Styles\IGitterStyleColors.cs" />
+    <Compile Include="Styles\MSVS2012DarkColors.cs" />
+    <Compile Include="Styles\MSVS2012StyleViewRenderer.cs" />
+    <Compile Include="Styles\MSVS2012StyleToolStripRenderer.cs" />
+    <Compile Include="Styles\MSVS2012DarkStyle.cs" />
     <Compile Include="Styles\IGitterStyle.cs" />
     <Compile Include="Styles\MSVS2010Style.cs" />
     <Compile Include="Styles\MSVS2010StyleViewRenderer.cs" />
@@ -338,7 +375,7 @@
     <Compile Include="Controls\CustomListBox\CustomListBoxColumnsCollection.cs" />
     <Compile Include="Controls\CustomListBox\CustomListBoxItemsCollection.cs" />
     <Compile Include="Controls\CustomListBox\ColumnHitTestResults.cs" />
-    <Compile Include="Controls\CustomListBox\BaseExtender.cs">
+    <Compile Include="Controls\CustomListBox\ExtenderBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\CustomListBox\Enums\CheckedState.cs" />
@@ -512,6 +549,8 @@
     <Compile Include="ShellUtility.cs" />
     <Compile Include="GuiCommand.cs" />
     <Compile Include="Services\MessageBox\SystemMessageBoxService.cs" />
+    <Compile Include="Styles\StyleType.cs" />
+    <Compile Include="Styles\SystemStyleColors.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Win7Support\VistaPickFolderDialog.cs" />
     <Compile Include="Win7Support\ITaskbarList3.cs" />

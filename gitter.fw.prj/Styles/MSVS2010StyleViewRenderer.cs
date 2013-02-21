@@ -57,6 +57,8 @@
 
 			public static readonly Color ViewDockSideBackground = Color.FromArgb(41, 57, 85);
 
+			public static readonly Color DockMarkerBackground = Color.FromArgb(255, 255, 255);
+			public static readonly Color DockMarkerBorder = Color.FromArgb(99, 104, 113);
 			public static readonly Color DockMarkerButtonBorder = Color.FromArgb(138, 145, 156);
 			public static readonly Color DockMarkerButtonBackgroundStart = Color.FromArgb(245, 248, 251);
 			public static readonly Color DockMarkerButtonBackgroundEnd = Color.FromArgb(222, 226, 233);
@@ -66,9 +68,65 @@
 			public static readonly Color DockMarkerButtonContentEnd = Color.FromArgb(247, 198, 113);
 		}
 
+		private static class Constants
+		{
+			public const int TabHeight			= 20;
+			public const int TabFooterHeight	= 4;
+			public const int HeaderHeight		= 19;
+			public const int FooterHeight		= 4;
+			public const int ViewButtonSize		= 15;
+			public const int SideTabSpacing		= 1;
+			public const int SideTabHeight		= 21;
+		}
+
 		public override Color BackgroundColor
 		{
 			get { return ColorTable.BackgroundColor; }
+		}
+
+		public override Color DockMarkerBackgroundColor
+		{
+			get { return ColorTable.DockMarkerBackground; }
+		}
+
+		public override Color DockMarkerBorderColor
+		{
+			get { return ColorTable.DockMarkerBorder; }
+		}
+
+		public override int TabHeight
+		{
+			get { return Constants.TabHeight; }
+		}
+
+		public override int TabFooterHeight
+		{
+			get { return Constants.TabFooterHeight; }
+		}
+
+		public override int HeaderHeight
+		{
+			get { return Constants.HeaderHeight; }
+		}
+
+		public override int FooterHeight
+		{
+			get { return Constants.FooterHeight; }
+		}
+
+		public override int ViewButtonSize
+		{
+			get { return Constants.ViewButtonSize; }
+		}
+
+		public override int SideTabSpacing
+		{
+			get { return Constants.SideTabSpacing; }
+		}
+
+		public override int SideTabHeight
+		{
+			get { return Constants.SideTabHeight; }
 		}
 
 		#region Tabs Rendering
@@ -121,84 +179,60 @@
 			switch(tab.Anchor)
 			{
 				case AnchorStyles.Right:
-					linePoints = new[]
-						{
-							new Point(x, y),
-							new Point(x + w - corner - 1, y),
-							new Point(x + w - 1, y + corner),
-							new Point(x + w - 1, y + h - corner - 1),
-							new Point(x + w - corner - 1, y + h - 1),
-							new Point(x, y + h - 1),
-						};
-					polyPoints = new[]
-						{
-							new Point(x, y),
-							new Point(x + w - corner - 1, y),
-							new Point(x + w - 1, y + corner),
-							new Point(x + w - 1, y + h - corner - 1),
-							new Point(x + w - corner - 1, y + h - 1),
-							new Point(x, y + h - 1),
-						};
+					linePoints[0] = new Point(x, y);
+					linePoints[1] = new Point(x + w - corner - 1, y);
+					linePoints[2] = new Point(x + w - 1, y + corner);
+					linePoints[3] = new Point(x + w - 1, y + h - corner - 1);
+					linePoints[4] = new Point(x + w - corner - 1, y + h - 1);
+					linePoints[5] = new Point(x, y + h - 1);
+					polyPoints[0] = new Point(x, y);
+					polyPoints[1] = new Point(x + w - corner - 1, y);
+					polyPoints[2] = new Point(x + w - 1, y + corner);
+					polyPoints[3] = new Point(x + w - 1, y + h - corner - 1);
+					polyPoints[4] = new Point(x + w - corner - 1, y + h - 1);
+					polyPoints[5] = new Point(x, y + h - 1);
 					break;
 				case AnchorStyles.Left:
-					linePoints = new[]
-						{
-							new Point(x + w - 1, y),
-							new Point(x + corner, y),
-							new Point(x, y + corner),
-							new Point(x, y + h - corner - 1),
-							new Point(x + corner, y + h - 1),
-							new Point(x + w - 1, y + h - 1),
-						};
-					polyPoints = new[]
-						{
-							new Point(x + w - 1, y),
-							new Point(x + corner, y),
-							new Point(x, y + corner),
-							new Point(x, y + h - corner - 1),
-							new Point(x + corner, y + h - 1),
-							new Point(x + w - 1, y + h - 1),
-						};
+					linePoints[0] = new Point(x + w - 1, y);
+					linePoints[1] = new Point(x + corner, y);
+					linePoints[2] = new Point(x, y + corner);
+					linePoints[3] = new Point(x, y + h - corner - 1);
+					linePoints[4] = new Point(x + corner, y + h - 1);
+					linePoints[5] = new Point(x + w - 1, y + h - 1);
+					polyPoints[0] = new Point(x + w - 1, y);
+					polyPoints[1] = new Point(x + corner, y);
+					polyPoints[2] = new Point(x, y + corner);
+					polyPoints[3] = new Point(x, y + h - corner - 1);
+					polyPoints[4] = new Point(x + corner, y + h - 1);
+					polyPoints[5] = new Point(x + w - 1, y + h - 1);
 					break;
 				case AnchorStyles.Top:
-					linePoints = new[]
-						{
-							new Point(x, y + h - 1),
-							new Point(x, y + corner),
-							new Point(x + corner, y),
-							new Point(x + w - corner - 1, y),
-							new Point(x + w - 1, y + corner),
-							new Point(x + w - 1, y + h - 1),
-						};
-					polyPoints = new[]
-						{
-							new Point(x, y + h),
-							new Point(x, y + corner),
-							new Point(x + corner, y),
-							new Point(x + w - corner, y),
-							new Point(x + w, y + corner),
-							new Point(x + w, y + h),
-						};
+					linePoints[0] = new Point(x, y + h - 1);
+					linePoints[1] = new Point(x, y + corner);
+					linePoints[2] = new Point(x + corner, y);
+					linePoints[3] = new Point(x + w - corner - 1, y);
+					linePoints[4] = new Point(x + w - 1, y + corner);
+					linePoints[5] = new Point(x + w - 1, y + h - 1);
+					polyPoints[0] = new Point(x, y + h);
+					polyPoints[1] = new Point(x, y + corner);
+					polyPoints[2] = new Point(x + corner, y);
+					polyPoints[3] = new Point(x + w - corner, y);
+					polyPoints[4] = new Point(x + w, y + corner);
+					polyPoints[5] = new Point(x + w, y + h);
 					break;
 				case AnchorStyles.Bottom:
-					linePoints = new[]
-						{
-							new Point(x, y),
-							new Point(x, y + h - corner - 1),
-							new Point(x + corner, y + h - 1),
-							new Point(x + w - corner - 1, y + h - 1),
-							new Point(x + w - 1, y + h - corner - 1),
-							new Point(x + w - 1, y),
-						};
-					polyPoints = new[]
-						{
-							new Point(x, y),
-							new Point(x, y + h - corner - 1),
-							new Point(x + corner + 1, y + h),
-							new Point(x + w - corner - 1, y + h),
-							new Point(x + w, y + h - corner - 1),
-							new Point(x + w, y),
-						};
+					linePoints[0] = new Point(x, y);
+					linePoints[1] = new Point(x, y + h - corner - 1);
+					linePoints[2] = new Point(x + corner, y + h - 1);
+					linePoints[3] = new Point(x + w - corner - 1, y + h - 1);
+					linePoints[4] = new Point(x + w - 1, y + h - corner - 1);
+					linePoints[5] = new Point(x + w - 1, y);
+					polyPoints[0] = new Point(x, y);
+					polyPoints[1] = new Point(x, y + h - corner - 1);
+					polyPoints[2] = new Point(x + corner + 1, y + h);
+					polyPoints[3] = new Point(x + w - corner - 1, y + h);
+					polyPoints[4] = new Point(x + w, y + h - corner - 1);
+					polyPoints[5] = new Point(x + w, y);
 					break;
 				default:
 					throw new ApplicationException();
@@ -244,7 +278,7 @@
 					}
 				}
 			}
-			else if(tab.IsHovered)
+			else if(tab.IsMouseOver)
 			{
 				using(var brush = new LinearGradientBrush(bounds,
 					ColorTable.TabHoverBackgroundStart,
@@ -399,8 +433,8 @@
 						ColorTable.ViewHostTabsSelectedBackgroundNormalEnd))
 				{
 					var rc = new RectangleF(
-						-0.5f, -0.5f + ViewConstants.TabHeight,
-						tabs.Width + 1, ViewConstants.TabFooterHeight + 1);
+						-0.5f, -0.5f + Constants.TabHeight,
+						tabs.Width + 1, Constants.TabFooterHeight + 1);
 					var ltCorner = ((tabs.LeftButtons == null || tabs.LeftButtons.Width == 0) && tabs[tabs.FirstTabIndex].IsActive) ? 0 : 2;
 					graphics.FillRoundedRectangle(brush, rc, ltCorner, 2, 0, 0);
 				}
@@ -521,7 +555,7 @@
 				((Form)header.ViewHost.TopLevelControl).WindowState == FormWindowState.Maximized)
 			{
 				graphics.SmoothingMode = SmoothingMode.HighQuality;
-				using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, ViewConstants.HeaderHeight), backgroundStart, backgroundEnd))
+				using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, Constants.HeaderHeight), backgroundStart, backgroundEnd))
 				{
 					graphics.FillRectangle(brush, rect);
 				}
@@ -533,7 +567,7 @@
 					graphics.FillRectangle(brush, e.ClipRectangle);
 				}
 				graphics.SmoothingMode = SmoothingMode.HighQuality;
-				using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, ViewConstants.HeaderHeight), backgroundStart, backgroundEnd))
+				using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, Constants.HeaderHeight), backgroundStart, backgroundEnd))
 				{
 					graphics.FillRoundedRectangle(brush, rect, 2, 2, 0, 0);
 				}
@@ -969,7 +1003,7 @@
 				graphics.FillRectangle(brush, e.ClipRectangle);
 			}
 			graphics.SmoothingMode = SmoothingMode.HighQuality;
-			using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, ViewConstants.HeaderHeight), backgroundStart, backgroundEnd))
+			using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, Constants.HeaderHeight), backgroundStart, backgroundEnd))
 			{
 				graphics.FillRoundedRectangle(brush, rect, 2, 2, 0, 0);
 			}

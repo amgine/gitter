@@ -154,6 +154,7 @@
 			_radFetch.Text = Resources.StrFetch;
 			_radPush.Text = Resources.StrPush;
 
+			_lstUpdatedReferences.Style = GitterApplication.DefaultStyle;
 			_lstUpdatedReferences.Columns.AddRange(new[]
 				{
 					new CustomListBoxColumn(0, "") { SizeMode = ColumnSizeMode.Fixed, Width = 20 },

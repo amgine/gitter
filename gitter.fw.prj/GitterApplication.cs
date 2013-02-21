@@ -3,6 +3,7 @@
 	using System;
 	using System.Linq;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Windows.Forms;
 	using System.Threading;
 
@@ -29,10 +30,13 @@
 		private static readonly IGitterStyle[] _styles =
 			new IGitterStyle[]
 			{
-				new MSVS2010Style(),
+				_defaultStyle = new MSVS2010Style(),
+				new MSVS2012DarkStyle(),
 			};
 
+		private static IGitterStyle _defaultStyle;
 		private static IGitterStyle _style;
+		private static IGitterStyle _styleOnNextStartup;
 
 		/// <summary>Returns the selected text renderer for application.</summary>
 		public static ITextRenderer TextRenderer
@@ -41,6 +45,7 @@
 			set
 			{
 				Verify.Argument.IsNotNull(value, "value");
+
 				_defaultTextRenderer = value;
 			}
 		}
@@ -50,19 +55,43 @@
 			get { return _styles; }
 		}
 
+		public static IGitterStyle DefaultStyle
+		{
+			get { return _defaultStyle; }
+		}
+
 		public static IGitterStyle Style
 		{
-			get { return _style; }
-			set
+			get
+			{
+				if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+				{
+					return _defaultStyle;
+				}
+				return _style;
+			}
+			private set
 			{
 				Verify.Argument.IsNotNull(value, "value");
 
 				if(_style != value)
 				{
-					ToolStripManager.Renderer = value.ToolStripRenderer;
-					ViewManager.Renderer = value.ViewRenderer;
+					ToolStripManager.Renderer		= value.ToolStripRenderer;
+					ViewManager.Renderer			= value.ViewRenderer;
+					CustomListBoxManager.Renderer	= value.ListBoxRenderer;
 					_style = value;
 				}
+			}
+		}
+
+		public static IGitterStyle StyleOnNextStartup
+		{
+			get { return _styleOnNextStartup; }
+			set
+			{
+				Verify.Argument.IsNotNull(value, "value");
+
+				_styleOnNextStartup = value;
 			}
 		}
 
@@ -159,6 +188,7 @@
 			{
 				style = Styles.First();
 			}
+			_styleOnNextStartup = style;
 			Style = style;
 		}
 
@@ -213,6 +243,7 @@
 			}
 
 			GlobalOptions.SaveTo(_configurationService.GlobalSection);
+			_configurationService.GuiSection.SetValue<string>("Style", StyleOnNextStartup.Name);
 			_fontManager.Save();
 			_configurationService.Save();
 

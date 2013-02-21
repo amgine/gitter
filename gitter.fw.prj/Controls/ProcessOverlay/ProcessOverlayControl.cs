@@ -22,7 +22,7 @@
 		{
 			e.Graphics.Clear(BackColor);
 			e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-			_overlay.DrawMessage(e.Graphics, Font, ClientRectangle, "Test status");
+			_overlay.DrawMessage(e.Graphics, ClientRectangle, "Test status");
 		}
 	}
 }

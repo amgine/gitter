@@ -8,31 +8,8 @@
 
 	public sealed class ProcessOverlay : IAsyncProgressMonitor, IDisposable
 	{
-		private static readonly Color BackgroundColor = Color.FromArgb(225, 240, 240, 255);
-		private static readonly Color BorderColor = Color.FromArgb(75, 75, 100);
-
-		private static readonly Brush BackgroundBrush = new SolidBrush(BackgroundColor);
-		private static readonly Pen BorderPen = new Pen(BorderColor, 2.0f);
-
-		private static readonly Brush FontBrush = new SolidBrush(BorderColor);
-
-		private static readonly StringFormat StringFormat = new StringFormat()
-		{
-			Alignment = StringAlignment.Center,
-			LineAlignment = StringAlignment.Center,
-			Trimming = StringTrimming.EllipsisCharacter,
-			FormatFlags = StringFormatFlags.FitBlackBox,
-		};
-
-		private static readonly StringFormat TitleStringFormat = new StringFormat(StringFormat.GenericTypographic)
-		{
-			Alignment = StringAlignment.Near,
-			LineAlignment = StringAlignment.Center,
-			Trimming = StringTrimming.EllipsisCharacter,
-			FormatFlags = StringFormatFlags.FitBlackBox,
-		};
-
 		private Control _hostControl;
+		private ProcessOverlayRenderer _renderer;
 
 		private int _max;
 		private int _min;
@@ -41,7 +18,7 @@
 		private string _title;
 		private string _message;
 		private float _rounding;
-		private bool _visible;
+		private bool _isVisible;
 		private bool _canCancel;
 		private IAsyncResult _context;
 		private Font _font;
@@ -105,76 +82,34 @@
 			if(form != null && !form.IsDisposed) form.SetTaskbarProgressState(TbpFlag.NoProgress);
 		}
 
-		private static Color ColorLERP(Color c1, Color c2, double position)
-		{
-			byte r1 = c1.R;
-			byte r2 = c2.R;
-			byte r = (byte)(r1 + (r2 - r1) * position);
-
-			byte g1 = c1.G;
-			byte g2 = c2.G;
-			byte g = (byte)(g1 + (g2 - g1) * position);
-
-			byte b1 = c1.B;
-			byte b2 = c2.B;
-			byte b = (byte)(b1 + (b2 - b1) * position);
-
-			return Color.FromArgb(r, g, b);
-		}
-
-		private static void DrawIntermediateProgress(Graphics graphics, int x, int y, int w, int h)
-		{
-			const int n = 12;
-
-			int cx = x + w / 2;
-			int cy = y + h / 2;
-
-			int r = (w < h ? w : h) / 2;
-
-			long current = (DateTime.Now.Ticks / 1000000) % n;
-
-			for(int i = 0; i < n; ++i)
-			{
-				var a = i * (Math.PI * 2) / n;
-				var cos = Math.Cos(a);
-				var sin = Math.Sin(a);
-				float x1 = (float)(cx + cos * r / 3.0);
-				float y1 = (float)(cy + sin * r / 3.0);
-				float x2 = (float)(cx + cos * r);
-				float y2 = (float)(cy + sin * r);
-
-				Color color;
-				if(i == current)
-				{
-					color = BorderColor;
-				}
-				else
-				{
-					if((current + 1) % n == i)
-					{
-						color = BackgroundColor;
-					}
-					else
-					{
-						var d = i - current;
-						if(d < 0) d += n;
-						d = n - d;
-						var k = (double)d / (double)n;
-						color = ColorLERP(BorderColor, BackgroundColor, k);
-					}
-				}
-
-				using(var pen = new Pen(color, 2.0f))
-				{
-					graphics.DrawLine(pen, x1, y1, x2, y2);
-				}
-			}
-		}
-
 		public Font Font
 		{
-			get { return _font; }
+			get
+			{
+				if(_font != null)
+				{
+					return _font;
+				}
+				if(_hostControl != null)
+				{
+					return _hostControl.Font;
+				}
+				return GitterApplication.FontManager.UIFont;
+			}
 			set { _font = value; }
+		}
+
+		public ProcessOverlayRenderer Renderer
+		{
+			get
+			{
+				if(_renderer != null)
+				{
+					return _renderer;
+				}
+				return ProcessOverlayRenderer.Default;
+			}
+			set { _renderer = value; }
 		}
 
 		public int Minimum
@@ -239,65 +174,22 @@
 
 		public bool Visible
 		{
-			get { return _visible; }
+			get { return _isVisible; }
 		}
 
-		public void OnPaint(Graphics graphics, Rectangle rect)
+		public void OnPaint(Graphics graphics, Rectangle bounds)
 		{
-			if(_visible)
+			if(_isVisible)
 			{
-				var font = _font;
-				if(font == null)
-				{
-					if(_hostControl != null)
-						font = _hostControl.Font;
-					else
-						font = GitterApplication.FontManager.UIFont;
-				}
-				const int spacing = 10;
-				using(var path = Utility.GetRoundedRectangle(rect, _rounding))
-				{
-					graphics.SmoothingMode = SmoothingMode.HighQuality;
-					graphics.TextRenderingHint = Utility.TextRenderingHint;
-
-					graphics.FillPath(BackgroundBrush, path);
-					graphics.DrawPath(BorderPen, path);
-				}
-				var tw = GitterApplication.TextRenderer.MeasureText(
-					graphics, _title, font, rect.Width, TitleStringFormat).Width;
-
-				DrawIntermediateProgress(graphics, rect.X + (rect.Width - tw)/2 - 14 - 5, rect.Y + (rect.Height - 14) /2, 14, 14);
-				var titleRect = new Rectangle(rect.X + (rect.Width - tw)/2, rect.Y, rect.Width - spacing*2 - 5 - 14, rect.Height);
-
-				GitterApplication.TextRenderer.DrawText(
-					graphics, _title, font, FontBrush, titleRect, TitleStringFormat);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, _message, font, FontBrush, rect, StringFormat);
+				Renderer.Paint(this, graphics, bounds);
 			}
 		}
 
-		public void DrawMessage(Graphics gx, Font font, Rectangle rect, string status)
+		public void DrawMessage(Graphics graphics, Rectangle bounds, string status)
 		{
-			if(rect.Height > 25)
+			if(bounds.Height > 25)
 			{
-				using(var path = Utility.GetRoundedRectangle(rect, 10.0f))
-				{
-					gx.FillPath(BackgroundBrush, path);
-					gx.DrawPath(BorderPen, path);
-					GitterApplication.TextRenderer.DrawText(
-						gx, status, font, FontBrush, rect, StringFormat);
-				}
-			}
-		}
-
-		public void DrawProgress(Graphics gx, Font font, Rectangle rect, string status)
-		{
-			using(var path = Utility.GetRoundedRectangle(rect, 10.0f))
-			{
-				gx.FillPath(BackgroundBrush, path);
-				gx.DrawPath(BorderPen, path);
-				GitterApplication.TextRenderer.DrawText(
-					gx, status, font, FontBrush, rect, StringFormat);
+				Renderer.PaintMessage(this, graphics, bounds, status);
 			}
 		}
 
@@ -364,7 +256,7 @@
 			{
 				_hostControl.Enabled = false;
 			}
-			_visible = true;
+			_isVisible = true;
 			_timer.Enabled = true;
 			UpdateWin7ProgressBar();
 			Repaint();
@@ -420,7 +312,7 @@
 		public void ProcessCompleted()
 		{
 			_context = null;
-			_visible = false;
+			_isVisible = false;
 			var timer = _timer;
 			if(timer != null)
 			{
@@ -447,6 +339,8 @@
 
 		#endregion
 
+		#region IDisposable
+
 		public void Dispose()
 		{
 			if(_timer != null)
@@ -455,5 +349,7 @@
 				_timer = null;
 			}
 		}
+
+		#endregion
 	}
 }

@@ -38,7 +38,6 @@
 			// 
 			this.radioButton1.AutoSize = true;
 			this.radioButton1.Checked = true;
-			this.radioButton1.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.radioButton1.Location = new System.Drawing.Point(3, 3);
 			this.radioButton1.Name = "radioButton1";
 			this.radioButton1.Size = new System.Drawing.Size(95, 18);
@@ -51,7 +50,6 @@
 			// radioButton2
 			// 
 			this.radioButton2.AutoSize = true;
-			this.radioButton2.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.radioButton2.Location = new System.Drawing.Point(142, 3);
 			this.radioButton2.Name = "radioButton2";
 			this.radioButton2.Size = new System.Drawing.Size(61, 18);
@@ -63,7 +61,6 @@
 			// radioButton3
 			// 
 			this.radioButton3.AutoSize = true;
-			this.radioButton3.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.radioButton3.Location = new System.Drawing.Point(3, 25);
 			this.radioButton3.Name = "radioButton3";
 			this.radioButton3.Size = new System.Drawing.Size(151, 18);

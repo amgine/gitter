@@ -35,6 +35,7 @@
 			Verify.Argument.HasNoNullItems(branches, "branches");
 
 			_references.BeginUpdate();
+			_references.Style = GitterApplication.DefaultStyle;
 			_references.Items.Clear();
 			Branch first = null;
 			foreach(var branch in branches)

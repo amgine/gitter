@@ -7,6 +7,7 @@
 	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
+	using System.Drawing.Drawing2D;
 
 	/// <summary>"Graph" column.</summary>
 	public sealed class GraphColumn : CustomListBoxColumn
@@ -82,7 +83,6 @@
 				{
 					showColors = GraphColumn.DefaultShowColors;
 				}
-				//paintEventArgs.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 				GlobalBehavior.GraphStyle.DrawGraph(
 					paintEventArgs.Graphics,
 					graph,

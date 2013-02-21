@@ -30,6 +30,7 @@
 
 			_lblRevision.Text = Resources.StrRevision.AddColon();
 
+			_lstReferences.Style = GitterApplication.DefaultStyle;
 			_lstReferences.LoadData(_repository, ReferenceType.Reference, GlobalBehavior.GroupReferences, GlobalBehavior.GroupRemoteBranches);
 			_lstReferences.Items[0].IsExpanded = true;
 			_lstReferences.ItemActivated += OnReferencesItemActivated;

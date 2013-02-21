@@ -414,7 +414,7 @@
 			{
 				paintEventArgs.PrepareTextRectangle(font, ref rect);
 				GitterApplication.TextRenderer.DrawText(
-					paintEventArgs.Graphics, data.Subject, font, SystemBrushes.WindowText, rect);
+					paintEventArgs.Graphics, data.Subject, font, paintEventArgs.Brush, rect);
 			}
 
 			#endregion

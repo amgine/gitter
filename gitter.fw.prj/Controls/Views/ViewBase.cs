@@ -40,13 +40,14 @@
 		/// <summary>To keep designer happy.</summary>
 		public ViewBase()
 		{
-			Size = new Size(555, 362);
-			AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-			AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-			BackColor = System.Drawing.SystemColors.Window;
+			Size				= new Size(555, 362);
+			AutoScaleDimensions	= new SizeF(96F, 96F);
+			AutoScaleMode		= AutoScaleMode.Dpi;
 			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 			{
-				Font = GitterApplication.FontManager.UIFont;
+				Font		= GitterApplication.FontManager.UIFont;
+				BackColor	= GitterApplication.Style.Colors.Window;
+				ForeColor	= GitterApplication.Style.Colors.WindowText;
 			}
 			else
 			{

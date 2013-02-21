@@ -30,6 +30,9 @@
 
 			InitializeComponent();
 
+			_lstSystemConfig.Style = GitterApplication.DefaultStyle;
+			_lstUserConfig.Style = GitterApplication.DefaultStyle;
+
 			_pageUser.Text = Resources.StrCurrentUser;
 			_pageSystem.Text = Resources.StrSystem;
 

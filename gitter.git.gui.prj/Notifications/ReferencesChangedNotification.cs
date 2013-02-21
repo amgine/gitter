@@ -61,51 +61,60 @@
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			e.Graphics.Clear(SystemColors.Window);
+			using(var brush = new SolidBrush(BackColor))
+			{
+				e.Graphics.FillRectangle(brush, e.ClipRectangle);
+			}
 			int x = HorizontalMargin;
 			int y = VerticalMargin;
 			if(_changes == null || _changes.Length == 0)
 			{
-				GitterApplication.TextRenderer.DrawText(
-					e.Graphics, Resources.StrsEverythingIsUpToDate, Font, SystemBrushes.WindowText, new Point(x, y + 2));
+				using(var brush = new SolidBrush(ForeColor))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						e.Graphics, Resources.StrsEverythingIsUpToDate, Font, brush, new Point(x, y + 2));
+				}
 			}
 			else
 			{
-				for(int i = 0; i < _changes.Length; ++i)
+				using(var brush = new SolidBrush(ForeColor))
 				{
-					if(i == MaxItems - 1 && _changes.Length > MaxItems)
+					for(int i = 0; i < _changes.Length; ++i)
 					{
+						if(i == MaxItems - 1 && _changes.Length > MaxItems)
+						{
+							GitterApplication.TextRenderer.DrawText(
+								e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Length - MaxItems + 1),
+								Font, brush, new Point(x, y + 2));
+							break;
+						}
+						var icon = GetIcon(_changes[i]);
+						string prefix;
+						switch(_changes[i].ChangeType)
+						{
+							case ReferenceChangeType.Added:
+								prefix = Resources.StrAdded;
+								break;
+							case ReferenceChangeType.Moved:
+								prefix = Resources.StrUpdated;
+								break;
+							case ReferenceChangeType.Removed:
+								prefix = Resources.StrRemoved;
+								break;
+							default:
+								prefix = string.Empty;
+								break;
+						}
 						GitterApplication.TextRenderer.DrawText(
-							e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Length - MaxItems + 1),
-							Font, SystemBrushes.WindowText, new Point(x, y + 2));
-						break;
+							e.Graphics, prefix, Font, brush, new Point(x, y + 2));
+						if(icon != null)
+						{
+							e.Graphics.DrawImage(icon, new Rectangle(x + 54, y + (ItemHeight - icon.Height) / 2, icon.Width, icon.Height));
+						}
+						GitterApplication.TextRenderer.DrawText(
+							e.Graphics, _changes[i].Name, Font, brush, new Point(x + 54 + (icon != null ? icon.Width : 0) + 4, y + 2));
+						y += ItemHeight;
 					}
-					var icon = GetIcon(_changes[i]);
-					string prefix;
-					switch(_changes[i].ChangeType)
-					{
-						case ReferenceChangeType.Added:
-							prefix = Resources.StrAdded;
-							break;
-						case ReferenceChangeType.Moved:
-							prefix = Resources.StrUpdated;
-							break;
-						case ReferenceChangeType.Removed:
-							prefix = Resources.StrRemoved;
-							break;
-						default:
-							prefix = string.Empty;
-							break;
-					}
-					GitterApplication.TextRenderer.DrawText(
-						e.Graphics, prefix, Font, SystemBrushes.WindowText, new Point(x, y + 2));
-					if(icon != null)
-					{
-						e.Graphics.DrawImage(icon, new Rectangle(x + 54, y + (ItemHeight - icon.Height) / 2, icon.Width, icon.Height));
-					}
-					GitterApplication.TextRenderer.DrawText(
-						e.Graphics, _changes[i].Name, Font, SystemBrushes.WindowText, new Point(x + 54 + (icon != null ? icon.Width : 0) + 4, y + 2));
-					y += ItemHeight;
 				}
 			}
 		}

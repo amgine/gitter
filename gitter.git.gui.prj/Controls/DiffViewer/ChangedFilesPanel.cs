@@ -146,7 +146,7 @@
 				get { return _file; }
 			}
 
-			private void PaintDiffStats(Graphics graphics, Font font, Rectangle rect)
+			private void PaintDiffStats(Graphics graphics, Font font, Brush textBrush, Rectangle rect)
 			{
 				const int squares = 10;
 				const int squareWidth = 4;
@@ -163,7 +163,7 @@
 						graphics,
 						Resources.StrlBinary,
 						font,
-						SystemBrushes.Window,
+						textBrush,
 						rc,
 						DiffStatCenterFormat);
 				}
@@ -183,7 +183,7 @@
 							graphics,
 							Resources.StrlRename,
 							font,
-							SystemBrushes.Window,
+							textBrush,
 							rc,
 							DiffStatCenterFormat);
 					}
@@ -197,7 +197,7 @@
 							graphics,
 							Resources.StrlCopy,
 							font,
-							SystemBrushes.Window,
+							textBrush,
 							rc,
 							DiffStatCenterFormat);
 					}
@@ -246,7 +246,7 @@
 								graphics,
 								changed.ToString(System.Globalization.CultureInfo.InvariantCulture),
 								font,
-								SystemBrushes.WindowText,
+								textBrush,
 								rect,
 								DiffStatFormat);
 						}
@@ -254,19 +254,10 @@
 				}
 			}
 
-			public void Draw(Graphics graphics, Font font, Rectangle rect, int index, bool hover)
+			public void Draw(Graphics graphics, Font font, Brush textBrush, Rectangle rect, int index)
 			{
 				const int IconSize = 16;
 				const int StatSize = (9 + 1) * 5 + 20;
-
-				if(hover)
-				{
-					BackgroundStyle.Hovered.Draw(graphics, rect);
-				}
-				else if(index % 2 == 1)
-				{
-					graphics.FillRectangle(Brushes.WhiteSmoke, rect);
-				}
 
 				int d = (rect.Height - 16) / 2;
 				var iconRect = new Rectangle(rect.X + d, rect.Y + d, IconSize, IconSize);
@@ -283,11 +274,11 @@
 				var statRect = new Rectangle(rect.Right - StatSize - 3, rect.Y, StatSize, rect.Height);
 				if(rect.Width > StatSize * 2)
 				{
-					PaintDiffStats(graphics, font, statRect);
+					PaintDiffStats(graphics, font, textBrush, statRect);
 					rect.Width -= StatSize + 3;
 				}
 				GitterApplication.TextRenderer.DrawText(
-					graphics, _text, font, SystemBrushes.WindowText, rect, ContentFormat);
+					graphics, _text, font, textBrush, rect, ContentFormat);
 			}
 		}
 
@@ -512,58 +503,73 @@
 			var rcClip = Rectangle.Intersect(rc, clip);
 			if(_diff.FilesCount == 0)
 			{
-				if(rcClip.Height > 0 && rcClip.Width > 0)
+				using(var brush = new SolidBrush(FlowControl.Style.Colors.GrayText))
 				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, Resources.StrNoChangedFiles, Font, SystemBrushes.GrayText, rc, ContentFormat);
+					if(rcClip.Height > 0 && rcClip.Width > 0)
+					{
+						GitterApplication.TextRenderer.DrawText(
+							graphics, Resources.StrNoChangedFiles, Font, brush, rc, ContentFormat);
+					}
 				}
 			}
 			else
 			{
-				if(rcClip.Height > 0 && rcClip.Width > 0)
+				using(var textBrush = new SolidBrush(FlowControl.Style.Colors.WindowText))
+				using(var alternateBackgroundBrush = new SolidBrush(FlowControl.Style.Colors.Alternate))
 				{
-					var headerBounds = rc;
-
-					string headerText = Resources.StrChangedFiles.AddColon();
-					var headerWidth = GitterApplication.TextRenderer.MeasureText(
-						graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
-					GitterApplication.TextRenderer.DrawText(
-						graphics, headerText, Font, SystemBrushes.WindowText, headerBounds, ContentFormat);
-
-					headerBounds.X += headerWidth + 5;
-					headerBounds.Width -= headerWidth + 5;
-
-					for(int i = 0; i < _changesByType.Length; ++i)
-					{
-						if(headerBounds.Width <= 0) break;
-
-						if(_changesByType[i].Count != 0)
-						{
-							headerText = _changesByType[i].Count.ToString();
-							var image = _changesByType[i].Image;
-
-							graphics.DrawImage(image, headerBounds.X, headerBounds.Y);
-							headerBounds.X += 16 + 3;
-							headerBounds.Width -= 16 + 3;
-
-							if(headerBounds.Width <= 0) break;
-
-							headerWidth = GitterApplication.TextRenderer.MeasureText(
-								graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
-							GitterApplication.TextRenderer.DrawText(
-								graphics, headerText, Font, SystemBrushes.WindowText, headerBounds, ContentFormat);
-							headerBounds.X += headerWidth + 5;
-							headerBounds.Width -= headerWidth + 5;
-						}
-					}
-				}
-				for(int i = 0; i < _items.Length; ++i)
-				{
-					rc.Y += LineHeight;
-					rcClip = Rectangle.Intersect(rc, clip);
 					if(rcClip.Height > 0 && rcClip.Width > 0)
 					{
-						_items[i].Draw(graphics, Font, rc, i, i == _fileHover.Index);
+						var headerBounds = rc;
+
+						string headerText = Resources.StrChangedFiles.AddColon();
+						var headerWidth = GitterApplication.TextRenderer.MeasureText(
+							graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
+						GitterApplication.TextRenderer.DrawText(
+							graphics, headerText, Font, textBrush, headerBounds, ContentFormat);
+
+						headerBounds.X += headerWidth + 5;
+						headerBounds.Width -= headerWidth + 5;
+
+						for(int i = 0; i < _changesByType.Length; ++i)
+						{
+							if(headerBounds.Width <= 0) break;
+
+							if(_changesByType[i].Count != 0)
+							{
+								headerText = _changesByType[i].Count.ToString();
+								var image = _changesByType[i].Image;
+
+								graphics.DrawImage(image, headerBounds.X, headerBounds.Y);
+								headerBounds.X += 16 + 3;
+								headerBounds.Width -= 16 + 3;
+
+								if(headerBounds.Width <= 0) break;
+
+								headerWidth = GitterApplication.TextRenderer.MeasureText(
+									graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
+								GitterApplication.TextRenderer.DrawText(
+									graphics, headerText, Font, textBrush, headerBounds, ContentFormat);
+								headerBounds.X += headerWidth + 5;
+								headerBounds.Width -= headerWidth + 5;
+							}
+						}
+					}
+					for(int i = 0; i < _items.Length; ++i)
+					{
+						rc.Y += LineHeight;
+						rcClip = Rectangle.Intersect(rc, clip);
+						if(rcClip.Height > 0 && rcClip.Width > 0)
+						{
+							if(i % 2 == 1)
+							{
+								graphics.FillRectangle(alternateBackgroundBrush, rcClip);
+							}
+							if(i == _fileHover.Index)
+							{
+								FlowControl.Style.ItemBackgroundStyles.Hovered.Draw(graphics, rc);
+							}
+							_items[i].Draw(graphics, Font, textBrush, rc, i);
+						}
 					}
 				}
 			}

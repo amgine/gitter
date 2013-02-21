@@ -16,6 +16,8 @@
 			if(disposing)
 			{
 				_recentRepositoriesBinding.Dispose();
+				_chkClosePageAfterRepositoryLoad.Dispose();
+				_chkShowPageAtStartup.Dispose();
 				if(components != null)
 				{
 					components.Dispose();
@@ -34,22 +36,18 @@
 		{
 			System.Windows.Forms.Label label1;
 			System.Windows.Forms.Label label2;
-			System.Windows.Forms.PictureBox _picLogo;
-			System.Windows.Forms.PictureBox _picLogo2;
-			this._chkShowPageAtStartup = new System.Windows.Forms.CheckBox();
-			this._chkClosePageAfterRepositoryLoad = new System.Windows.Forms.CheckBox();
-			this.panel1 = new System.Windows.Forms.Panel();
-			this.panel2 = new System.Windows.Forms.Panel();
+			this._separator1 = new System.Windows.Forms.Panel();
+			this._separator2 = new System.Windows.Forms.Panel();
 			this._lstRecentRepositories = new gitter.RecentRepositoriesListBox();
 			this._lstLocalRepositories = new gitter.LocalRepositoriesListBox();
 			this._btnAddLocalRepo = new gitter.Controls.LinkButton();
 			this._btnScanLocalRepo = new gitter.Controls.LinkButton();
 			this._btnInitLocalRepo = new gitter.Controls.LinkButton();
 			this._btnCloneRemoteRepo = new gitter.Controls.LinkButton();
+			this._picLogo = new System.Windows.Forms.PictureBox();
+			this._picLogo2 = new System.Windows.Forms.PictureBox();
 			label1 = new System.Windows.Forms.Label();
 			label2 = new System.Windows.Forms.Label();
-			_picLogo = new System.Windows.Forms.PictureBox();
-			_picLogo2 = new System.Windows.Forms.PictureBox();
 			((System.ComponentModel.ISupportInitialize)(_picLogo)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(_picLogo2)).BeginInit();
 			this.SuspendLayout();
@@ -76,7 +74,6 @@
 			// 
 			// _picLogo
 			// 
-			_picLogo.Image = global::gitter.Properties.Resources.ImgStartPageLogo;
 			_picLogo.Location = new System.Drawing.Point(0, 0);
 			_picLogo.Margin = new System.Windows.Forms.Padding(0);
 			_picLogo.Name = "_picLogo";
@@ -89,7 +86,6 @@
 			// 
 			_picLogo2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			_picLogo2.Image = global::gitter.Properties.Resources.ImgStartPageLogoGradient;
 			_picLogo2.Location = new System.Drawing.Point(527, 0);
 			_picLogo2.Margin = new System.Windows.Forms.Padding(0);
 			_picLogo2.Name = "_picLogo2";
@@ -99,51 +95,21 @@
 			_picLogo2.TabStop = false;
 			_picLogo2.Click += new System.EventHandler(this.OnLogoClick);
 			// 
-			// _chkShowPageAtStartup
-			// 
-			this._chkShowPageAtStartup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this._chkShowPageAtStartup.AutoSize = true;
-			this._chkShowPageAtStartup.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkShowPageAtStartup.Location = new System.Drawing.Point(9, 511);
-			this._chkShowPageAtStartup.Margin = new System.Windows.Forms.Padding(0);
-			this._chkShowPageAtStartup.Name = "_chkShowPageAtStartup";
-			this._chkShowPageAtStartup.Size = new System.Drawing.Size(147, 20);
-			this._chkShowPageAtStartup.TabIndex = 5;
-			this._chkShowPageAtStartup.Text = "Show page on startup";
-			this._chkShowPageAtStartup.UseVisualStyleBackColor = true;
-			this._chkShowPageAtStartup.CheckedChanged += new System.EventHandler(this._chkShowPageAtStartup_CheckedChanged);
-			// 
-			// _chkClosePageAfterRepositoryLoad
-			// 
-			this._chkClosePageAfterRepositoryLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this._chkClosePageAfterRepositoryLoad.AutoSize = true;
-			this._chkClosePageAfterRepositoryLoad.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkClosePageAfterRepositoryLoad.Location = new System.Drawing.Point(9, 491);
-			this._chkClosePageAfterRepositoryLoad.Margin = new System.Windows.Forms.Padding(0);
-			this._chkClosePageAfterRepositoryLoad.Name = "_chkClosePageAfterRepositoryLoad";
-			this._chkClosePageAfterRepositoryLoad.Size = new System.Drawing.Size(199, 20);
-			this._chkClosePageAfterRepositoryLoad.TabIndex = 5;
-			this._chkClosePageAfterRepositoryLoad.Text = "Close page after repository load";
-			this._chkClosePageAfterRepositoryLoad.UseVisualStyleBackColor = true;
-			this._chkClosePageAfterRepositoryLoad.CheckedChanged += new System.EventHandler(this._chkClosePageAfterRepositoryLoad_CheckedChanged);
-			// 
 			// panel1
 			// 
-			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this._separator1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-			this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(209)))), ((int)(((byte)(226)))), ((int)(((byte)(252)))));
-			this.panel1.Location = new System.Drawing.Point(232, 103);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(1, 418);
-			this.panel1.TabIndex = 9;
+			this._separator1.Location = new System.Drawing.Point(232, 103);
+			this._separator1.Name = "_separator1";
+			this._separator1.Size = new System.Drawing.Size(1, 418);
+			this._separator1.TabIndex = 9;
 			// 
 			// panel2
 			// 
-			this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(209)))), ((int)(((byte)(226)))), ((int)(((byte)(252)))));
-			this.panel2.Location = new System.Drawing.Point(147, 234);
-			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(80, 1);
-			this.panel2.TabIndex = 10;
+			this._separator2.Location = new System.Drawing.Point(147, 234);
+			this._separator2.Name = "_separator2";
+			this._separator2.Size = new System.Drawing.Size(80, 1);
+			this._separator2.TabIndex = 10;
 			// 
 			// _lstRecentRepositories
 			// 
@@ -225,14 +191,12 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this.panel2);
+			this.Controls.Add(this._separator2);
 			this.Controls.Add(_picLogo);
 			this.Controls.Add(this._lstRecentRepositories);
 			this.Controls.Add(this._lstLocalRepositories);
-			this.Controls.Add(this._chkShowPageAtStartup);
-			this.Controls.Add(this.panel1);
+			this.Controls.Add(this._separator1);
 			this.Controls.Add(_picLogo2);
-			this.Controls.Add(this._chkClosePageAfterRepositoryLoad);
 			this.Controls.Add(this._btnAddLocalRepo);
 			this.Controls.Add(label1);
 			this.Controls.Add(this._btnScanLocalRepo);
@@ -252,13 +216,13 @@
 
 		private LocalRepositoriesListBox _lstLocalRepositories;
 		private RecentRepositoriesListBox _lstRecentRepositories;
-		private System.Windows.Forms.CheckBox _chkShowPageAtStartup;
-		private System.Windows.Forms.CheckBox _chkClosePageAfterRepositoryLoad;
 		private Controls.LinkButton _btnAddLocalRepo;
 		private Controls.LinkButton _btnScanLocalRepo;
 		private Controls.LinkButton _btnInitLocalRepo;
 		private Controls.LinkButton _btnCloneRemoteRepo;
-		private System.Windows.Forms.Panel panel1;
-		private System.Windows.Forms.Panel panel2;
+		private System.Windows.Forms.PictureBox _picLogo;
+		private System.Windows.Forms.PictureBox _picLogo2;
+		private System.Windows.Forms.Panel _separator1;
+		private System.Windows.Forms.Panel _separator2;
 	}
 }

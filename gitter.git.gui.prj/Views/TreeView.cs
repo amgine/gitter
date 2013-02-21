@@ -52,6 +52,10 @@
 		{
 			InitializeComponent();
 
+			_splitContainer.BackColor = GitterApplication.Style.Colors.WorkArea;
+			_splitContainer.Panel1.BackColor = GitterApplication.Style.Colors.Window;
+			_splitContainer.Panel2.BackColor = GitterApplication.Style.Colors.Window;
+
 			_directoryTree.Columns.ShowAll(column => column.Id == (int)ColumnId.Name);
 			_directoryTree.Columns[0].SizeMode = ColumnSizeMode.Auto;
 			_treeContent.Columns.ShowAll(column => column.Id == (int)ColumnId.Name || column.Id == (int)ColumnId.Size);

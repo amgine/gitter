@@ -59,6 +59,7 @@
 				_speller = new TextBoxSpellChecker(_txtMessage, true);
 			}
 
+			_references.Style = GitterApplication.DefaultStyle;
 			_references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,
 				(reference) => _unmergedBranches.Contains((BranchBase)reference));
 			_references.ItemActivated += OnItemActivated;

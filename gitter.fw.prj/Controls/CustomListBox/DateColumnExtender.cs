@@ -14,7 +14,7 @@
 
 	/// <summary>Extender for <see cref="DateColumn"/>.</summary>
 	[ToolboxItem(false)]
-	public partial class DateColumnExtender : BaseExtender
+	public partial class DateColumnExtender : ExtenderBase
 	{
 		private readonly DateColumn _column;
 		private bool _disableEvents;

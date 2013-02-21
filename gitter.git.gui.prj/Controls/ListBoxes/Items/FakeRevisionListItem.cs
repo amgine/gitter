@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Drawing;
+	using System.Globalization;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -150,7 +151,9 @@
 			}
 			var graphColumn = ListBox.GetPrevVisibleColumn(paintEventArgs.ColumnIndex);
 			if(graphColumn != null && graphColumn.Id != (int)ColumnId.Graph)
+			{
 				graphColumn = null;
+			}
 			if(alignToGraph && graphColumn != null)
 			{
 				int availWidth;
@@ -160,7 +163,9 @@
 					for(int i = _graph.Length - 1; i != -1; --i)
 					{
 						if(_graph[i].Elements != GraphElement.Space)
+						{
 							break;
+						}
 						availWidth += 21;
 					}
 				}
@@ -208,12 +213,14 @@
 						break;
 				}
 				paintEventArgs.PrepareTextRectangle(ref rect);
-				if(text != null)
+				bool useDefaultBrush = (paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground;
+				var textBrush = useDefaultBrush ? paintEventArgs.Brush : new SolidBrush(GitterApplication.Style.Colors.GrayText);
+				if(!string.IsNullOrWhiteSpace(text))
 				{
 					var w = GitterApplication.TextRenderer.MeasureText(
 						paintEventArgs.Graphics, text, paintEventArgs.Font, int.MaxValue).Width;
-					GitterApplication.TextRenderer.DrawText(
-						paintEventArgs.Graphics, text, paintEventArgs.Font, SystemBrushes.GrayText, rect);
+						GitterApplication.TextRenderer.DrawText(
+							paintEventArgs.Graphics, text, paintEventArgs.Font, textBrush, rect);
 					w += 3;
 					rect.X += w;
 					rect.Width -= w;
@@ -229,15 +236,19 @@
 						rect.Width -= imageRect.Width + 2;
 						if(rect.Width <= 0) break;
 						paintEventArgs.Graphics.DrawImage(image, imageRect);
-						var countText = _iconEntries[i].Count.ToString(System.Globalization.CultureInfo.CurrentCulture);
+						var countText = _iconEntries[i].Count.ToString(CultureInfo.CurrentCulture);
 						var textW = GitterApplication.TextRenderer.MeasureText(
 							paintEventArgs.Graphics, countText, paintEventArgs.Font, int.MaxValue).Width;
 						GitterApplication.TextRenderer.DrawText(
-							paintEventArgs.Graphics, countText, paintEventArgs.Font, SystemBrushes.GrayText, rect);
+							paintEventArgs.Graphics, countText, paintEventArgs.Font, textBrush, rect);
 						textW += 2;
 						rect.X += textW;
 						rect.Width -= textW;
 					}
+				}
+				if(!useDefaultBrush)
+				{
+					textBrush.Dispose();
 				}
 			}
 		}
@@ -260,7 +271,7 @@
 						var username = _repository.Configuration.TryGetParameterValue(GitConstants.UserNameParameter);
 						var usermail = _repository.Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 						return UserColumn.OnMeasureSubItem(measureEventArgs,
-							username == null ? "" : username, usermail == null ? "" : usermail);
+							username == null ? string.Empty : username, usermail == null ? string.Empty : usermail);
 					}
 				case ColumnId.Email:
 				case ColumnId.CommitterEmail:
@@ -284,33 +295,77 @@
 					DrawSubjectColumn(paintEventArgs);
 					break;
 				case ColumnId.Graph:
-					GraphColumn.OnPaintSubItem(paintEventArgs, _graph, _type==FakeRevisionItemType.StagedChanges?RevisionGraphItemType.Uncommitted:RevisionGraphItemType.Unstaged);
+					{
+						var type = _type == FakeRevisionItemType.StagedChanges ?
+							RevisionGraphItemType.Uncommitted : RevisionGraphItemType.Unstaged;
+						GraphColumn.OnPaintSubItem(paintEventArgs, _graph, type);
+					}
 					break;
 				case ColumnId.Author:
 				case ColumnId.Committer:
 					var user = _repository.UserIdentity;
 					if(user != null)
 					{
-						UserColumn.OnPaintSubItem(paintEventArgs, user, SystemBrushes.GrayText);
+						if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+						{
+							UserColumn.OnPaintSubItem(paintEventArgs, user, paintEventArgs.Brush);
+						}
+						else
+						{
+							using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
+							{
+								UserColumn.OnPaintSubItem(paintEventArgs, user, textBrush);
+							}
+						}
 					}
 					break;
 				case ColumnId.Email:
 				case ColumnId.AuthorEmail:
 				case ColumnId.CommitterEmail:
 					var usermail = _repository.Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
-					if(usermail != null)
+					if(!string.IsNullOrWhiteSpace(usermail))
 					{
-						paintEventArgs.PaintText(usermail, SystemBrushes.GrayText);
+						if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+						{
+							paintEventArgs.PaintText(usermail, paintEventArgs.Brush);
+						}
+						else
+						{
+							using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
+							{
+								paintEventArgs.PaintText(usermail, textBrush);
+							}
+						}
 					}
 					break;
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
 				case ColumnId.AuthorDate:
-					paintEventArgs.PaintText(Resources.StrUncommitted.SurroundWith('<', '>'), SystemBrushes.GrayText);
+					if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+					{
+						paintEventArgs.PaintText(Resources.StrUncommitted.SurroundWith('<', '>'), paintEventArgs.Brush);
+					}
+					else
+					{
+						using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
+						{
+							paintEventArgs.PaintText(Resources.StrUncommitted.SurroundWith('<', '>'), textBrush);
+						}
+					}
 					break;
 				case ColumnId.Hash:
 				case ColumnId.TreeHash:
-					HashColumn.OnPaintSubItem(paintEventArgs, NoHash, SystemBrushes.GrayText);
+					if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+					{
+						HashColumn.OnPaintSubItem(paintEventArgs, NoHash, paintEventArgs.Brush);
+					}
+					else
+					{
+						using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
+						{
+							HashColumn.OnPaintSubItem(paintEventArgs, NoHash, textBrush);
+						}
+					}
 					break;
 			}
 		}

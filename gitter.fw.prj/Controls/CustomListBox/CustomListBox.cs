@@ -80,6 +80,7 @@
 
 		private readonly ToolTip _tooltip;
 		private TextBox _textEditor;
+		private CustomListBoxRenderer _renderer;
 
 		private int _columnHeaderHeight;
 		private int _itemHeight;
@@ -182,6 +183,7 @@
 			_itemPlainList = new List<CustomListBoxItem>();
 
 			_processOverlay = new ProcessOverlay(this);
+			_processOverlay.Renderer = Style.OverlayRenderer;
 
 			_itemHover = new TrackingService<CustomListBoxItem>(OnItemHoverChanged);
 			_itemFocus = new TrackingService<CustomListBoxItem>(OnItemFocusChanged);
@@ -196,6 +198,11 @@
 			_resizedHeaderIndex = -1;
 			_columnHeaderHeight = DEFAULT_ITEM_HEIGHT;
 			_itemHeight = DEFAULT_ITEM_HEIGHT;
+
+			_renderer = Style.ListBoxRenderer;
+
+			BackColor = Renderer.BackColor;
+			ForeColor = Renderer.ForeColor;
 
 			_tooltip = new ToolTip()
 			{
@@ -547,9 +554,10 @@
 			int columnIndex = -1;
 			for(int i = 0; i < _columns.Count; ++i)
 			{
-				if(_columns[i].Id == columnId)
+				var column = _columns[i];
+				if(column.Id == columnId)
 				{
-					if(!_columns[i].IsVisible) return;
+					if(!column.IsVisible) return;
 					columnIndex = i;
 					break;
 				}
@@ -557,14 +565,14 @@
 			if(columnIndex == -1) return;
 			int itemIndex = _itemPlainList.IndexOf(item);
 			if(itemIndex == -1) return;
-			var itemRect = GetItemDisplayRect(itemIndex);
-			if(itemRect.Width != 0 && itemRect.Height != 0)
+			var itemDisplayRectangle = GetItemDisplayRect(itemIndex);
+			if(itemDisplayRectangle.Width > 0 && itemDisplayRectangle.Height > 0)
 			{
-				var columnRect = GetExtendedColumnContentRectangle(columnIndex);
-				var rc = Rectangle.Intersect(itemRect, columnRect);
-				if(rc.Width != 0 && rc.Height != 0)
+				var columnContentBounds = GetExtendedColumnContentRectangle(columnIndex);
+				var clipRectangle = Rectangle.Intersect(itemDisplayRectangle, columnContentBounds);
+				if(clipRectangle.Width > 0 && clipRectangle.Height > 0)
 				{
-					Invalidate(rc);
+					Invalidate(clipRectangle);
 				}
 			}
 		}
@@ -721,9 +729,13 @@
 				if(_itemFocus.Index >= startIndex)
 				{
 					if(_itemFocus.Index > endIndex)
+					{
 						_itemFocus.ResetIndex(_itemFocus.Index - (endIndex - startIndex + 1));
+					}
 					else
+					{
 						_itemFocus.Drop();
+					}
 				}
 			}
 			if(_itemHover.IsTracked)
@@ -731,9 +743,13 @@
 				if(_itemHover.Index >= startIndex)
 				{
 					if(_itemHover.Index > endIndex)
+					{
 						_itemHover.ResetIndex(_itemHover.Index - (endIndex - startIndex + 1));
+					}
 					else
+					{
 						_itemHover.Drop();
+					}
 				}
 			}
 			int selected = _selectedItems.Count;
@@ -751,6 +767,23 @@
 			}
 			_itemPlainList.RemoveRange(start, end - start);
 			NotifyContentSizeChanged();
+		}
+
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public CustomListBoxRenderer Renderer
+		{
+			get { return _renderer; }
+			set
+			{
+				Verify.Argument.IsNotNull(value, "value");
+
+				if(_renderer != value)
+				{
+					_renderer = value;
+					BackColor = Renderer.BackColor;
+					ForeColor = Renderer.ForeColor;
+				}
+			}
 		}
 
 		/// <summary>A method of activating an item.</summary>
@@ -1067,11 +1100,11 @@
 			Verify.Argument.IsNotNull(item, "item");
 			Verify.Argument.IsTrue(item.ListBox == this, "item", "This item is not owned by this list box.");
 
-			var p = item.Parent;
-			while(p != null)
+			var parent = item.Parent;
+			while(parent != null)
 			{
-				p.IsExpanded = true;
-				p = p.Parent;
+				parent.IsExpanded = true;
+				parent = parent.Parent;
 			}
 			var id = _itemPlainList.IndexOf(item);
 			EnsureVisible(id);
@@ -1082,10 +1115,10 @@
 			int offset = 0;
 			for(int i = 0; i < _columns.Count; ++i)
 			{
-				var c = _columns[i];
-				if(c.IsVisible)
+				var column = _columns[i];
+				if(column.IsVisible)
 				{
-					var w = c.Width;
+					var w = column.Width;
 					if(x >= offset && x - offset < w)
 					{
 						x -= offset;
@@ -1102,10 +1135,10 @@
 			int offset = 0;
 			for(int i = 0; i < index; ++i)
 			{
-				var c = _columns[i];
-				if(c.IsVisible)
+				var column = _columns[i];
+				if(column.IsVisible)
 				{
-					var w = c.Width;
+					var w = column.Width;
 					offset += w;
 				}
 			}
@@ -1119,13 +1152,10 @@
 			Verify.Argument.IsTrue(index != -1, "column", "Colum is not present in this collection.");
 
 			int maxw = column.MinWidth;
-			using(var g = CreateGraphics())
+			foreach(var item in _itemPlainList)
 			{
-				foreach(var item in _itemPlainList)
-				{
-					var s = item.MeasureSubItem(new SubItemMeasureEventArgs(g, index, column));
-					if(s.Width > maxw) maxw = s.Width;
-				}
+				var s = item.MeasureSubItem(new SubItemMeasureEventArgs(Utility.MeasurementGraphics, index, column));
+				if(s.Width > maxw) maxw = s.Width;
 			}
 			return maxw;
 		}
@@ -1697,10 +1727,6 @@
 							bestpos = i + 1;
 						}
 						lastindex = i;
-						//if(i == _draggedHeaderPositionIndex && i != _draggedHeaderIndex)
-						//{
-						//    offset += c.Width;
-						//}
 					}
 				}
 				d = offset - _draggedHeaderPosition;
@@ -2005,9 +2031,9 @@
 
 		public void StartColumnsDialog()
 		{
-			using(var d = new ColumnsDialog(this))
+			using(var dialog = new ColumnsDialog(this))
 			{
-				d.Run(this);
+				dialog.Run(this);
 			}
 		}
 
@@ -2015,7 +2041,9 @@
 		{
 			var item = _itemPlainList[itemIndex];
 			if(item.Items.Count != 0)
+			{
 				item.IsExpanded = !item.IsExpanded;
+			}
 		}
 
 		private void HandleItemCheckboxMouseDown(int itemIndex, MouseEventArgs e)
@@ -2579,6 +2607,13 @@
 			}
 		}
 
+		protected override void OnStyleChanged()
+		{
+			Renderer = Style.ListBoxRenderer;
+			_processOverlay.Renderer = Style.OverlayRenderer;
+			base.OnStyleChanged();
+		}
+
 		protected override Size MeasureContent()
 		{
 			int w = 0;
@@ -2597,7 +2632,7 @@
 				}
 			}
 
-			return new Size(w, _itemHeight * _itemPlainList.Count);
+			return new Size(w, ItemHeight * _itemPlainList.Count);
 		}
 
 		protected override int TransformVScrollPos(int position)
@@ -2622,7 +2657,7 @@
 		{
 			_itemsArea = ContentArea;
 			_headersArea = ClientArea;
-			if(_headerStyle == gitter.Framework.Controls.HeaderStyle.Hidden)
+			if(HeaderStyle == HeaderStyle.Hidden)
 			{
 				_headersArea.Height = 0;
 			}
@@ -2635,7 +2670,7 @@
 
 		protected override Rectangle GetContentArea(Rectangle clientArea)
 		{
-			if(_headerStyle != gitter.Framework.Controls.HeaderStyle.Hidden)
+			if(HeaderStyle != HeaderStyle.Hidden)
 			{
 				clientArea.Y += _columnHeaderHeight;
 				clientArea.Height -= _columnHeaderHeight;
@@ -2645,7 +2680,16 @@
 
 		protected override int GetVScrollSmallChange()
 		{
-			return _itemHeight;
+			return ItemHeight;
+		}
+
+		protected override void OnHScroll(int dx)
+		{
+			base.OnHScroll(dx);
+			if(_textEditor != null)
+			{
+				_textEditor.Left += dx;
+			}
 		}
 
 		protected override void OnVScroll(int dy)
@@ -2659,26 +2703,23 @@
 
 		private void PaintHeaders(PaintEventArgs e)
 		{
-			if(_headerStyle == HeaderStyle.Hidden) return;
+			if(HeaderStyle == HeaderStyle.Hidden) return;
 
-			var gx = e.Graphics;
+			var graphics = e.Graphics;
 			var clipRect = e.ClipRectangle;
 			var clip = Rectangle.Intersect(_headersArea, clipRect);
 
-			if(clip.Width == 0 || clip.Height == 0) return;
+			if(clip.Width <= 0 || clip.Height <= 0) return;
 
 			int x = _headersArea.X - HScrollPos;
 			int y = _headersArea.Y;
 			int clipX1 = clip.X;
 			int clipX2 = clip.Right;
 
-			gx.SetClip(clip);
-			gx.SmoothingMode = SmoothingMode.HighQuality;
-			gx.TextRenderingHint = Utility.TextRenderingHint;
-			gx.TextContrast = Utility.TextContrast;
-			var columnRect = new Rectangle(x, y, 0, _headersArea.Height);
+			graphics.SetClip(clip);
+			var columnBounds = new Rectangle(x, y, 0, _headersArea.Height);
 
-			bool focused = Focused;
+			bool isControlFocused = Focused;
 
 			if(_draggedHeaderIndex != -1)
 			{
@@ -2698,10 +2739,10 @@
 							var w = column.Width;
 							if(x + w > clipX1)
 							{
-								columnRect.X = x;
-								columnRect.Width = column.Width;
+								columnBounds.X = x;
+								columnBounds.Width = column.Width;
 								column.Paint(new ItemPaintEventArgs(
-									gx, clip, columnRect, i, ItemState.None, ColumnHitTestResults.Default, focused));
+									graphics, clip, columnBounds, i, ItemState.None, ColumnHitTestResults.Default, isControlFocused));
 							}
 							x += column.Width;
 							if(x >= clipX2) break;
@@ -2715,10 +2756,10 @@
 					var w = column.Width;
 					if(_draggedHeaderPosition + w > clipX1)
 					{
-						columnRect.X = _draggedHeaderPosition;
-						columnRect.Width = w;
+						columnBounds.X = _draggedHeaderPosition;
+						columnBounds.Width = w;
 						column.Paint(new ItemPaintEventArgs(
-							gx, clip, columnRect, i, ItemState.Pressed, ColumnHitTestResults.Default, focused));
+							graphics, clip, columnBounds, i, ItemState.Pressed, ColumnHitTestResults.Default, isControlFocused));
 					}
 				}
 			}
@@ -2734,21 +2775,21 @@
 						{
 							bool hovered = _headerHover.Index == i;
 							var state = ItemState.None;
-							if(hovered) state |= ItemState.Hovered;
-							int partId;
+							int hoveredPart;
 							if(hovered)
 							{
-								partId = _extenderVisible ?
+								state |= ItemState.Hovered;
+								hoveredPart = _extenderVisible ?
 									ColumnHitTestResults.Extender : _headerHover.PartId;
 							}
 							else
 							{
-								partId = ColumnHitTestResults.Default;
+								hoveredPart = ColumnHitTestResults.Default;
 							}
-							columnRect.X = x;
-							columnRect.Width = w;
+							columnBounds.X = x;
+							columnBounds.Width = w;
 							column.Paint(new ItemPaintEventArgs(
-								gx, clip, columnRect, i, state, partId, focused));
+								graphics, clip, columnBounds, i, state, hoveredPart, isControlFocused));
 						}
 						x += column.Width;
 						if(x >= clipX2) break;
@@ -2756,82 +2797,99 @@
 				}
 			}
 
-			gx.ResetClip();
+			graphics.ResetClip();
 		}
 
 		private void PaintItems(PaintEventArgs e)
 		{
-			var gx = e.Graphics;
+			var graphics = e.Graphics;
 			var clipRect = e.ClipRectangle;
 			var clip = Rectangle.Intersect(_itemsArea, clipRect);
 
-			if(clip.Width == 0 || clip.Height == 0) return;
-
-			gx.SetClip(clip);
+			if(clip.Width <= 0 || clip.Height <= 0) return;
 
 			if(_itemPlainList.Count == 0)
 			{
-				var itemTargetRect = Rectangle.Intersect(_itemsArea, e.ClipRectangle);
-				gx.FillRectangle(SystemBrushes.Window, itemTargetRect);
-
 				if(_processOverlay.Visible)
 				{
-					_processOverlay.OnPaint(e.Graphics, GetOverlayRect());
+					graphics.SetClip(clip);
+					var overlayBounds = GetOverlayBounds();
+					_processOverlay.OnPaint(graphics, overlayBounds);
 				}
 				else
 				{
-					var rect = GetOverlayRect();
 					if(!string.IsNullOrEmpty(Text))
 					{
-						gx.SmoothingMode = SmoothingMode.HighQuality;
-						gx.TextRenderingHint = Utility.TextRenderingHint;
-						gx.TextContrast = Utility.TextContrast;
-						_processOverlay.DrawMessage(gx, Font, rect, Text);
+						graphics.SetClip(clip);
+						var overlayBounds = GetOverlayBounds();
+						_processOverlay.DrawMessage(graphics, overlayBounds, Text);
 					}
 				}
 			}
 			else
 			{
-				int index = (clip.Y - _itemsArea.Y + VScrollPos) / _itemHeight;
-				int y = index * _itemHeight - VScrollPos + _itemsArea.Y;
+				int index = (clip.Y - _itemsArea.Y + VScrollPos) / ItemHeight;
+				int y = _itemsArea.Y - VScrollPos + index * ItemHeight;
 				int x = _itemsArea.X - HScrollPos;
-				int ey = clip.Bottom;
+				var itemBounds = new Rectangle(x, y, _itemWidth, ItemHeight);
+				int clippingEdge = clip.Bottom;
+				bool isControlFocused = Focused;
 
-				gx.SmoothingMode = SmoothingMode.HighQuality;
-				gx.TextRenderingHint = Utility.TextRenderingHint;
-				gx.TextContrast = Utility.TextContrast;
-				var itemRect = new Rectangle(x, y, _itemWidth, _itemHeight);
-				bool focused = Focused;
-
-				while(index < _itemPlainList.Count && itemRect.Y < ey)
+				while(index < _itemPlainList.Count && itemBounds.Y < clippingEdge)
 				{
 					var item = _itemPlainList[index];
-					var state = ItemState.None;
-					var hoveredPart = 0;
-					if(item.IsSelected) state |= ItemState.Selected;
-					if(_itemFocus.Index == index)
-					{
-						state |= ItemState.Focused;
-					}
-					if(_itemHover.Index == index)
-					{
-						state |= ItemState.Hovered;
-						hoveredPart = _itemHover.PartId;
-					}
-					item.Paint(new ItemPaintEventArgs(gx, clip, itemRect, index, state, hoveredPart, focused));
-					itemRect.Y += _itemHeight;
+					int hoveredPart;
+					var state = GetItemState(item, index, out hoveredPart);
+					var itemClip = Rectangle.Intersect(itemBounds, clip);
+					graphics.SetClip(itemClip);
+					item.Paint(new ItemPaintEventArgs(
+						graphics, itemClip, itemBounds, index, state, hoveredPart, isControlFocused));
+					itemBounds.Y += ItemHeight;
 					++index;
 				}
-				_processOverlay.OnPaint(e.Graphics, GetOverlayRect());
+
+				if(_processOverlay.Visible)
+				{
+					graphics.SetClip(clip);
+					var overlayBounds = GetOverlayBounds();
+					_processOverlay.OnPaint(graphics, overlayBounds);
+				}
 			}
 
-			gx.ResetClip();
+			graphics.ResetClip();
 		}
 
-		protected override void OnPaintClientArea(PaintEventArgs e)
+		private ItemState GetItemState(CustomListBoxItem item, int index, out int hoveredPart)
 		{
-			PaintHeaders(e);
-			PaintItems(e);
+			var state = ItemState.None;
+			if(item.IsSelected)
+			{
+				state |= ItemState.Selected;
+			}
+			if(_itemFocus.Index == index)
+			{
+				state |= ItemState.Focused;
+			}
+			if(_itemHover.Index == index)
+			{
+				state |= ItemState.Hovered;
+				hoveredPart = _itemHover.PartId;
+			}
+			else
+			{
+				hoveredPart = ItemHitTestResults.Default;
+			}
+			return state;
+		}
+
+		protected override void OnPaintClientArea(PaintEventArgs paintEventArgs)
+		{
+			var graphics = paintEventArgs.Graphics;
+			graphics.TextRenderingHint = Utility.TextRenderingHint;
+			graphics.TextContrast = Utility.TextContrast;
+
+			PaintHeaders(paintEventArgs);
+			PaintItems(paintEventArgs);
 		}
 
 		protected override void OnDragOver(DragEventArgs drgevent)
@@ -2866,7 +2924,7 @@
 			base.OnDragDrop(drgevent);
 		}
 
-		private Rectangle GetOverlayRect()
+		private Rectangle GetOverlayBounds()
 		{
 			int w = (int)(_itemsArea.Width * 0.8);
 			int h = (int)(_itemsArea.Height * 0.5);
@@ -2937,7 +2995,7 @@
 
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && !IsDisposed)
+			if(disposing)
 			{
 				_tooltip.Dispose();
 

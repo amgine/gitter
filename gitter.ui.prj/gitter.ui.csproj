@@ -224,6 +224,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\database.png" />
+    <None Include="Resources\start-page-logo-gradient-dark.png" />
+    <None Include="Resources\start-page-logo-dark.png" />
     <None Include="Resources\repo-scan.png" />
     <None Include="Resources\repo-init.png" />
     <None Include="Resources\repo-clone.png" />

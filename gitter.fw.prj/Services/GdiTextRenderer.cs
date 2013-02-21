@@ -175,6 +175,36 @@
 			TextRenderer.DrawText(graphics, text, font, new Point(x, y), ExtractColor(brush), DefaultFormatFlags);
 		}
 
+		public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle, StringFormat format)
+		{
+			TextRenderer.DrawText(graphics, text, font, layoutRectangle, color, ExtractFormatFlags(format));
+		}
+
+		public void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format)
+		{
+			TextRenderer.DrawText(graphics, text, font, point, color, ExtractFormatFlags(format));
+		}
+
+		public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format)
+		{
+			TextRenderer.DrawText(graphics, text, font, new Point(x, y), color, ExtractFormatFlags(format));
+		}
+
+		public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle)
+		{
+			TextRenderer.DrawText(graphics, text, font, layoutRectangle, color, DefaultFormatFlags);
+		}
+
+		public void DrawText(Graphics graphics, string text, Font font, Color color, Point point)
+		{
+			TextRenderer.DrawText(graphics, text, font, point, color, DefaultFormatFlags);
+		}
+
+		public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y)
+		{
+			TextRenderer.DrawText(graphics, text, font, new Point(x, y), color, DefaultFormatFlags);
+		}
+
 		public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea, StringFormat format)
 		{
 			return TextRenderer.MeasureText(graphics, text, font, layoutArea, ExtractFormatFlags(format));

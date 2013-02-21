@@ -27,6 +27,7 @@
 
 			Text = Resources.StrApplyPatches;
 
+			_lstPatches.Style = GitterApplication.DefaultStyle;
 			_lstPatches.HeaderStyle = Framework.Controls.HeaderStyle.Hidden;
 			_lstPatches.ShowCheckBoxes = true;
 			_lstPatches.Multiselect = true;

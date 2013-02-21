@@ -8,8 +8,6 @@
 
 	public abstract class DockMarker : Form
 	{
-		protected static readonly Color BorderColor = Color.FromArgb(99, 104, 113);
-
 		#region Data
 
 		private readonly DockMarkerButton[] _buttons;
@@ -53,6 +51,7 @@
 			ShowInTaskbar = false;
 			Enabled = false;
 			ImeMode = ImeMode.Disable;
+			BackColor = Renderer.DockMarkerBackgroundColor;
 
 			Bounds = bounds;
 			AllowTransparency = true;
@@ -63,6 +62,11 @@
 			_buttonHover.Changed += OnButtonHoverChanged;
 
 			_borderPolygon = border;
+		}
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
 		}
 
 		/// <summary>
@@ -141,14 +145,14 @@
 		{
 			var graphics = e.Graphics;
 			var reg = Region;
-			graphics.Clear(Color.White);
-			using(var pen = new Pen(BorderColor))
+			graphics.Clear(Renderer.DockMarkerBackgroundColor);
+			using(var pen = new Pen(Renderer.DockMarkerBorderColor))
 			{
 				graphics.DrawPolygon(pen, _borderPolygon);
-				for(int i = 0; i < _buttons.Length; ++i)
-				{
-					_buttons[i].OnPaint(graphics, !_isHovered || _buttonHover.Index == i);
-				}
+			}
+			for(int i = 0; i < _buttons.Length; ++i)
+			{
+				_buttons[i].OnPaint(graphics, !_isHovered || _buttonHover.Index == i);
 			}
 		}
 

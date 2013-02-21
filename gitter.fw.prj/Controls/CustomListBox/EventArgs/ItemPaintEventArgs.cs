@@ -81,7 +81,7 @@
 		}
 
 		/// <summary>Host control is focused.</summary>
-		public bool HostControlFocused
+		public bool IsHostControlFocused
 		{
 			get { return _hostControlFocused; }
 		}

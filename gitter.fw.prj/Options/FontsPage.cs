@@ -26,6 +26,7 @@
 
 			Text = Resources.StrFonts;
 
+			_lstFonts.Style = GitterApplication.DefaultStyle;
 			_lblFonts.Text = Resources.StrFonts.AddColon();
 			_lblName.Text = Resources.StrName.AddColon();
 			_lblSize.Text = Resources.StrSize.AddColon();

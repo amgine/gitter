@@ -37,6 +37,7 @@
 			_lblPattern.Text = Resources.StrPattern.AddColon();
 			_chkIncludeUntracked.Text = Resources.StrIncludeUntracked;
 			_chkIncludeIgnored.Text = Resources.StrIncludeIgnored;
+			_lstUnstaged.Style = GitterApplication.DefaultStyle;
 			_lstUnstaged.Text = Resources.StrNoUnstagedChanges;
 
 			for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)

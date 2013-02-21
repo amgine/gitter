@@ -133,16 +133,16 @@
 			{
 				if(isDocumentWell)
 				{
-					size.Height += ViewConstants.TabHeight +
-								   ViewConstants.TabFooterHeight +
-								   ViewConstants.FooterHeight;
+					size.Height += ViewManager.Renderer.TabHeight +
+								   ViewManager.Renderer.TabFooterHeight +
+								   ViewManager.Renderer.FooterHeight;
 				}
 				else
 				{
-					size.Height += ViewConstants.HeaderHeight;
+					size.Height += ViewManager.Renderer.HeaderHeight;
 					if(_views.Count > 1)
 					{
-						size.Height += ViewConstants.TabHeight;
+						size.Height += ViewManager.Renderer.TabHeight;
 					}
 				}
 			}
@@ -151,7 +151,7 @@
 			_dockingProcess = new ViewHostDockingProcess(this);
 			_resizingProcess = new ViewHostResizingProcess(this);
 
-			BackColor = Color.FromArgb(41, 57, 85);
+			BackColor = ViewManager.Renderer.BackgroundColor;
 
 			SuspendLayout();
 
@@ -165,7 +165,7 @@
 					SpawnTabs(size);
 					topOffset = _tabs.Height;
 					SpawnFooter(size);
-					bottomOffset = _footer.Height;
+					bottomOffset = ViewManager.Renderer.FooterHeight;
 				}
 				else
 				{
@@ -196,7 +196,6 @@
 
 			if(_activeView != null)
 			{
-				_activeView.BackColor = SystemColors.Window;
 				_activeView.Bounds = new Rectangle(Point.Empty, _viewContainer.Size);
 				_activeView.Anchor = ViewConstants.AnchorAll;
 				_activeView.Parent = _viewContainer;
@@ -360,22 +359,26 @@
 		{
 			Verify.State.IsTrue(_header == null, "Header is already spawned.");
 
-			_header = new ViewHostHeader(this)
+			var headerHeight = ViewManager.Renderer.HeaderHeight;
+			if(headerHeight > 0)
 			{
-				Bounds = new Rectangle(0, 0, size.Width, ViewConstants.HeaderHeight),
-				Anchor = ViewConstants.AnchorDockTop,
-				Parent = this,
-			};
-			ResetHeaderButtons();
-			_header.MouseDown += OnHeaderMouseDown;
-			_header.MouseMove += OnHeaderMouseMove;
-			_header.MouseUp += OnHeaderMouseUp;
-			_header.MouseDoubleClick += OnHeaderMouseDoubleClick;
-			_header.HeaderButtonClick += OnHeaderButtonClick;
+				_header = new ViewHostHeader(this)
+				{
+					Bounds = new Rectangle(0, 0, size.Width, headerHeight),
+					Anchor = ViewConstants.AnchorDockTop,
+					Parent = this,
+				};
+				ResetHeaderButtons();
+				_header.MouseDown += OnHeaderMouseDown;
+				_header.MouseMove += OnHeaderMouseMove;
+				_header.MouseUp += OnHeaderMouseUp;
+				_header.MouseDoubleClick += OnHeaderMouseDoubleClick;
+				_header.HeaderButtonClick += OnHeaderButtonClick;
+			}
 		}
 
 		/// <summary>Destroy header control.</summary>
-		private void DestroyHeader()
+		private void RemoveHeader()
 		{
 			if(_header != null)
 			{
@@ -396,18 +399,22 @@
 		{
 			Verify.State.IsTrue(_footer == null, "Footer is already spawned.");
 
-			_footer = new ViewHostFooter(this)
+			var footerHeight = ViewManager.Renderer.FooterHeight;
+			if(footerHeight > 0)
 			{
-				Bounds = new Rectangle(
-					0, size.Height - ViewConstants.FooterHeight,
-					size.Width, ViewConstants.FooterHeight),
-				Anchor = ViewConstants.AnchorDockBottom,
-				Parent = this,
-			};
+				_footer = new ViewHostFooter(this)
+				{
+					Bounds = new Rectangle(
+						0, size.Height - footerHeight,
+						size.Width, footerHeight),
+					Anchor = ViewConstants.AnchorDockBottom,
+					Parent = this,
+				};
+			}
 		}
 
 		/// <summary>Destroys footer control.</summary>
-		private void DestroyFooter()
+		private void RemoveFooter()
 		{
 			if(_footer != null)
 			{
@@ -525,8 +532,8 @@
 			Width = w + ViewConstants.SideDockPanelBorderSize;
 			if(_tabs != null)
 			{
-				DestroyTabs();
-				_viewContainer.Height += ViewConstants.TabHeight;
+				RemoveTabs();
+				_viewContainer.Height += ViewManager.Renderer.TabHeight;
 			}
 			_header.Width = w;
 			_viewContainer.Width = w;
@@ -534,10 +541,10 @@
 
 		internal void UnpinFromTop()
 		{
-			var h = Height - ViewConstants.HeaderHeight;
+			var h = Height - ViewManager.Renderer.HeaderHeight;
 			_grid.PerformDock(this, DockResult.AutoHideTop);
 			_dockSide = _grid.TopSide;
-			DestroyTabs();
+			RemoveTabs();
 			Height += ViewConstants.SideDockPanelBorderSize;
 			_viewContainer.Height = h;
 		}
@@ -557,9 +564,9 @@
 			else
 			{
 				_viewContainer.SetBounds(
-					ViewConstants.SideDockPanelBorderSize, 0, w, Height - ViewConstants.HeaderHeight,
+					ViewConstants.SideDockPanelBorderSize, 0, w, Height - ViewManager.Renderer.HeaderHeight,
 					BoundsSpecified.X | BoundsSpecified.Width | BoundsSpecified.Height);
-				DestroyTabs();
+				RemoveTabs();
 			}
 			Width += ViewConstants.SideDockPanelBorderSize;
 			_header.SetBounds(
@@ -574,18 +581,19 @@
 			_grid.PerformDock(this, DockResult.AutoHideBottom);
 			_dockSide = _grid.BottomSide;
 			_viewContainer.SuspendLayout();
+			var headerHeight = ViewManager.Renderer.HeaderHeight;
 			if(_tabs == null)
 			{
-				_viewContainer.Top = ViewConstants.HeaderHeight +
+				_viewContainer.Top = headerHeight +
 					ViewConstants.SideDockPanelBorderSize;
 			}
 			else
 			{
 				_viewContainer.SetBounds(
-					0, ViewConstants.SideDockPanelBorderSize + ViewConstants.HeaderHeight,
-					0, h - ViewConstants.HeaderHeight,
+					0, ViewConstants.SideDockPanelBorderSize + headerHeight,
+					0, h - headerHeight,
 					BoundsSpecified.Y | BoundsSpecified.Height);
-				DestroyTabs();
+				RemoveTabs();
 			}
 			_header.Top = ViewConstants.SideDockPanelBorderSize;
 			Height += ViewConstants.SideDockPanelBorderSize;
@@ -913,8 +921,8 @@
 					else
 					{
 						SuspendLayout();
-						DestroyTabs();
-						DestroyFooter();
+						RemoveTabs();
+						RemoveFooter();
 						ResumeLayout(true);
 						UpdateContentPanelBounds();
 					}
@@ -957,7 +965,7 @@
 					}
 					else
 					{
-						DestroyHeader();
+						RemoveHeader();
 						UpdateContentPanelBounds();
 					}
 				}
@@ -967,7 +975,7 @@
 					{
 						if(_views.Count == 1)
 						{
-							DestroyTabs();
+							RemoveTabs();
 							UpdateContentPanelBounds();
 						}
 						else
@@ -1003,13 +1011,14 @@
 		{
 			Verify.State.IsTrue(_tabs == null, "Tabs are already spawned.");
 
+			var tabHeight = ViewManager.Renderer.TabHeight;
 			if(_isDocumentWell)
 			{
 				_tabs = new ViewHostTabs(this, AnchorStyles.Top)
 				{
 					Bounds = new Rectangle(
 						0, 0,
-						size.Width, ViewConstants.TabHeight + ViewConstants.TabFooterHeight),
+						size.Width, tabHeight + ViewManager.Renderer.TabFooterHeight),
 					Anchor = ViewConstants.AnchorDockTop,
 				};
 			}
@@ -1018,8 +1027,8 @@
 				_tabs = new ViewHostTabs(this, AnchorStyles.Bottom)
 				{
 					Bounds = new Rectangle(
-						0, size.Height - ViewConstants.TabHeight,
-						size.Width, ViewConstants.TabHeight),
+						0, size.Height - tabHeight,
+						size.Width, tabHeight),
 					Anchor = ViewConstants.AnchorDockBottom,
 				};
 			}
@@ -1027,7 +1036,7 @@
 		}
 
 		/// <summary>Destroy tabs control.</summary>
-		private void DestroyTabs()
+		private void RemoveTabs()
 		{
 			if(_tabs != null)
 			{
@@ -1205,7 +1214,7 @@
 									{
 										SpawnTabs(new Size(w, h));
 										_viewContainer.SetBounds(
-											0, 0, w, h - ViewConstants.TabHeight - ViewConstants.HeaderHeight,
+											0, 0, w, h - ViewManager.Renderer.TabHeight - ViewManager.Renderer.HeaderHeight,
 											BoundsSpecified.Width | BoundsSpecified.Height);
 									}
 									else
@@ -1226,7 +1235,7 @@
 									}
 									else
 									{
-										_viewContainer.Height = h - ViewConstants.HeaderHeight;
+										_viewContainer.Height = h - ViewManager.Renderer.HeaderHeight;
 									}
 								}
 								break;
@@ -1235,7 +1244,7 @@
 									var w = Width - ViewConstants.SideDockPanelBorderSize;
 									var h = Height;
 									Width = w;
-									_header.SetBounds(0, 0, w, ViewConstants.HeaderHeight, BoundsSpecified.X | BoundsSpecified.Width);
+									_header.SetBounds(0, 0, w, ViewManager.Renderer.HeaderHeight, BoundsSpecified.X | BoundsSpecified.Width);
 									if(_views.Count > 1)
 									{
 										SpawnTabs(new Size(w, h));
@@ -1260,7 +1269,7 @@
 									}
 									else
 									{
-										_viewContainer.SetBounds(0, ViewConstants.HeaderHeight, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
+										_viewContainer.SetBounds(0, ViewManager.Renderer.HeaderHeight, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
 									}
 								}
 								break;
@@ -1321,7 +1330,7 @@
 
 		public void StartMoving()
 		{
-			int d = ViewConstants.FloatBorderSize + ViewConstants.HeaderHeight / 2;
+			int d = ViewConstants.FloatBorderSize + ViewManager.Renderer.HeaderHeight / 2;
 			StartMoving(d, d);
 		}
 
@@ -1528,8 +1537,8 @@
 			{
 				_isDocumentWell = true;
 				SuspendLayout();
-				DestroyHeader();
-				DestroyTabs();
+				RemoveHeader();
+				RemoveTabs();
 				var size = Size;
 				SpawnTabs(size);
 				SpawnFooter(size);
@@ -1568,9 +1577,9 @@
 					_ownerForm.Deactivate -= OnOwnerFormDeactivated;
 					_ownerForm = null;
 				}
-				DestroyHeader();
-				DestroyTabs();
-				DestroyFooter();
+				RemoveHeader();
+				RemoveTabs();
+				RemoveFooter();
 				_dockingProcess.Dispose();
 				_resizingProcess.Dispose();
 				_viewContainer.Dispose();

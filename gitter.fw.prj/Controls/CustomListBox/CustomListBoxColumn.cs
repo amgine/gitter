@@ -48,24 +48,9 @@
 
 		#endregion
 
-		#region Static Data
-
-		private static readonly Bitmap ImgColumnExtender = Resources.ImgColumnExtender;
-
-		private static readonly Brush ExtenderHoveredBrush =
-			new SolidBrush(Color.FromArgb(210, 229, 253));
-		
-		private static readonly Brush ExtenderBorderBrush =
-			new LinearGradientBrush(Point.Empty, new Point(0, 23), Color.FromArgb(223, 234, 247), Color.FromArgb(238, 242, 249));
-		
-		private static readonly Pen ExtenderBorderPenHovered =
-			new Pen(Color.FromArgb(215, 227, 241));
-
-		#endregion
-
 		#region Constants
 
-		const int ExtenderButtonWidth = 16;
+		public const int ExtenderButtonWidth = 16;
 		const int ResizerProximity = 3;
 
 		#endregion
@@ -74,15 +59,13 @@
 
 		public CustomListBoxColumn(int id, string name, bool visible)
 		{
-			_id = id;
-			_name = name;
-			_isVisible = visible;
-			_sizeMode = ColumnSizeMode.Sizeable;
-			_contentWidth = -1;
-			_contentAlignment = StringAlignment.Near;
-			_headerAlignment = StringAlignment.Near;
-			_contentBrush = SystemBrushes.WindowText;
-			_headerBrush = SystemBrushes.GrayText;
+			_id					= id;
+			_name				= name;
+			_isVisible			= visible;
+			_sizeMode			= ColumnSizeMode.Sizeable;
+			_contentWidth		= -1;
+			_contentAlignment	= StringAlignment.Near;
+			_headerAlignment	= StringAlignment.Near;
 		}
 
 		public CustomListBoxColumn(int id, string name)
@@ -150,7 +133,24 @@
 
 		public Brush ContentBrush
 		{
-			get { return _contentBrush; }
+			get
+			{
+				if(_contentBrush != null)
+				{
+					return _contentBrush;
+				}
+				else
+				{
+					if(IsAttachedToListBox)
+					{
+						return ListBox.Renderer.ForegroundBrush;
+					}
+					else
+					{
+						return CustomListBoxManager.Renderer.ForegroundBrush;
+					}
+				}
+			}
 			set
 			{
 				if(_contentBrush != value)
@@ -201,7 +201,24 @@
 
 		public Brush HeaderBrush
 		{
-			get { return _headerBrush; }
+			get
+			{
+				if(_headerBrush != null)
+				{
+					return _headerBrush;
+				}
+				else
+				{
+					if(IsAttachedToListBox)
+					{
+						return ListBox.Renderer.ColumnHeaderForegroundBrush;
+					}
+					else
+					{
+						return CustomListBoxManager.Renderer.ColumnHeaderForegroundBrush;
+					}
+				}
+			}
 			set
 			{
 				if(_headerBrush != value)
@@ -399,158 +416,14 @@
 			}
 		}
 
-		private static void PaintNormalBackground(ItemPaintEventArgs paintEventArgs)
-		{
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-			var c1 = Color.FromArgb(223, 234, 247);
-			var c2 = Color.FromArgb(255, 255, 255);
-			var rc = new Rectangle(rect.Right - 1, 0, 1, rect.Height);
-			using(var brush = new LinearGradientBrush(
-				rc, c1, c2, LinearGradientMode.Vertical))
-			{
-				graphics.FillRectangle(brush, rc);
-			}
-		}
-
-		private void PaintPressedBackground(ItemPaintEventArgs paintEventArgs)
-		{
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-			var c1 = Color.FromArgb(192, 203, 217);
-			var c2 = Color.FromArgb(246, 247, 248);
-			var c3 = Color.FromArgb(193, 204, 218);
-			var c4 = Color.FromArgb(215, 222, 231);
-			var c5 = Color.FromArgb(235, 238, 242);
-			using(var p = new Pen(c1))
-			{
-				var rc = rect;
-				rc.Y -= 1;
-				rc.X += 1;
-				rc.Width -= 2;
-				graphics.DrawRectangle(p, rc);
-			}
-			using(var b = new SolidBrush(c2))
-			{
-				var rc = rect;
-				rc.Y += 3;
-				rc.X += 2;
-				rc.Width -= 4;
-				rc.Height -= 4;
-				graphics.FillRectangle(b, rc);
-			}
-			using(var p = new Pen(c3))
-			{
-				var rc = rect;
-				graphics.DrawLine(p, rc.X + 1, rc.Y + 0, rc.Right - 2, rc.Y + 0);
-			}
-			using(var p = new Pen(c4))
-			{
-				var rc = rect;
-				graphics.DrawLine(p, rc.X + 1, rc.Y + 1, rc.Right - 2, rc.Y + 1);
-			}
-			using(var p = new Pen(c5))
-			{
-				var rc = rect;
-				graphics.DrawLine(p, rc.X + 1, rc.Y + 2, rc.Right - 2, rc.Y + 2);
-			}
-			if(_extender != null)
-			{
-				if(rect.Width > ExtenderButtonWidth)
-				{
-					graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height - 1);
-					graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
-				}
-			}
-		}
-
-		private void PaintHoverBackground(ItemPaintEventArgs paintEventArgs)
-		{
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-			var c1 = Color.FromArgb(227, 232, 238);
-			var c2 = Color.FromArgb(241, 245, 251);
-			using(var p = new Pen(c1))
-			{
-				var rc = rect;
-				rc.Y -= 1;
-				rc.Width -= 1;
-				graphics.DrawRectangle(p, rc);
-			}
-			using(var b = new SolidBrush(c2))
-			{
-				var rc = rect;
-				rc.X += 2;
-				rc.Y += 1;
-				rc.Width -= 4;
-				rc.Height -= 3;
-				graphics.FillRectangle(b, rc);
-			}
-			if(_extender != null)
-			{
-				if(rect.Width > ExtenderButtonWidth)
-				{
-					if(paintEventArgs.HoveredPart == ColumnHitTestResults.Extender)
-					{
-						graphics.FillRectangle(ExtenderHoveredBrush, rect.Right - ExtenderButtonWidth + 1.5f, rect.Y + 1.5f, ExtenderButtonWidth - 4, rect.Height - 4);
-						graphics.DrawRectangle(ExtenderBorderPenHovered, rect.Right - ExtenderButtonWidth, 0, ExtenderButtonWidth - 1, rect.Height - 1);
-					}
-					else
-					{
-						graphics.FillRectangle(ExtenderBorderBrush, rect.Right - ExtenderButtonWidth - 0.5f, rect.Y, 1, rect.Height);
-					}
-					graphics.DrawImage(ImgColumnExtender, rect.Right - ExtenderButtonWidth + 4, rect.Y + 9, 7, 4);
-				}
-			}
-		}
-
 		protected override void OnPaintBackground(ItemPaintEventArgs paintEventArgs)
 		{
-			switch(paintEventArgs.State)
-			{
-				case ItemState.None:
-					PaintNormalBackground(paintEventArgs);
-					break;
-				case ItemState.Pressed:
-					PaintPressedBackground(paintEventArgs);
-					break;
-				default:
-					PaintHoverBackground(paintEventArgs);
-					break;
-			}
+			ListBox.Renderer.OnPaintColumnBackground(this, paintEventArgs);
 		}
 
 		protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
 		{
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-			var font = HeaderFont;
-
-			ItemPaintEventArgs.PrepareContentRectangle(ref rect);
-			paintEventArgs.PrepareTextRectangle(font, font, ref rect);
-			if(_extender != null && ((paintEventArgs.State & (ItemState.Hovered | ItemState.Pressed)) != ItemState.None))
-			{
-				rect.Width -= ExtenderButtonWidth;
-				if(rect.Width <= 0) return;
-			}
-			StringFormat format;
-			switch(_headerAlignment)
-			{
-				case StringAlignment.Near:
-					format = GitterApplication.TextRenderer.LeftAlign;
-					break;
-				case StringAlignment.Far:
-					format = GitterApplication.TextRenderer.RightAlign;
-					break;
-				case StringAlignment.Center:
-					format = GitterApplication.TextRenderer.CenterAlign;
-					break;
-				default:
-					format = GitterApplication.TextRenderer.LeftAlign;
-					break;
-			}
-			GitterApplication.TextRenderer
-				.DrawText(graphics, _name, font, _headerBrush, rect, format);
+			ListBox.Renderer.OnPaintColumnContent(this, paintEventArgs);
 		}
 
 		protected override int OnHitTest(int x, int y)

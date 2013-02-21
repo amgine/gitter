@@ -28,6 +28,7 @@
 
 			Text = Resources.StrOptions;
 
+			_lstOptions.Style = GitterApplication.DefaultStyle;
 			_propertyPages = new Dictionary<Guid, PropertyPage>();
 		}
 

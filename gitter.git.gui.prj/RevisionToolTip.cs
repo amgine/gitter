@@ -16,6 +16,7 @@
 		public RevisionToolTip()
 		{
 			_content = new RevisionHeaderContent();
+			_content.Style = GitterApplication.DefaultStyle;
 		}
 
 		public Revision Revision

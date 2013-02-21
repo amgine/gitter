@@ -34,14 +34,14 @@
 					ViewConstants.FloatBorderSize,
 					ViewConstants.FloatBorderSize,
 					ViewConstants.PopupWidth - ViewConstants.FloatBorderSize * 2,
-					ViewConstants.HeaderHeight),
+					ViewManager.Renderer.HeaderHeight),
 				Parent	= this,
 			};
 
 			var cr = ClientRectangle;
 			content.Width	= ViewConstants.PopupWidth - ViewConstants.FloatBorderSize * 2;
-			content.Top		= cr.Top + ViewConstants.HeaderHeight + ViewConstants.FloatBorderSize;
-			ClientSize		= new Size(ViewConstants.PopupWidth, content.Height + ViewConstants.HeaderHeight + ViewConstants.FloatBorderSize * 2);
+			content.Top		= cr.Top + ViewManager.Renderer.HeaderHeight + ViewConstants.FloatBorderSize;
+			ClientSize		= new Size(ViewConstants.PopupWidth, content.Height + ViewManager.Renderer.HeaderHeight + ViewConstants.FloatBorderSize * 2);
 			content.Left	= ViewConstants.FloatBorderSize;
 			content.Parent	= this;
 

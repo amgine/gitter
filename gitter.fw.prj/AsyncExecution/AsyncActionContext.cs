@@ -35,7 +35,10 @@
 		/// <returns>Created thread.</returns>
 		protected override Thread CreateThreadCore()
 		{
-			return new Thread(ThreadProc);
+			return new Thread(ThreadProc)
+			{
+				IsBackground = true,
+			};
 		}
 
 		private void ThreadProc()

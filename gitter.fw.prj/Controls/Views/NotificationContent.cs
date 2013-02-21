@@ -1,9 +1,8 @@
 ﻿namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
+	using System.ComponentModel;
+	using System.Drawing;
 	using System.Windows.Forms;
 
 	public class NotificationContent : Control
@@ -12,7 +11,6 @@
 
 		public NotificationContent()
 		{
-			Font = GitterApplication.FontManager.UIFont;
 			_timeout = TimeSpan.FromSeconds(10.0);
 			SetStyle(
 				ControlStyles.ContainerControl |
@@ -25,6 +23,16 @@
 				ControlStyles.AllPaintingInWmPaint |
 				ControlStyles.OptimizedDoubleBuffer,
 				true);
+			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+			{
+				Font = GitterApplication.FontManager.UIFont;
+				ForeColor = GitterApplication.Style.Colors.WindowText;
+				BackColor = GitterApplication.Style.Colors.Window;
+			}
+			else
+			{
+				Font = SystemFonts.MessageBoxFont;
+			}
 		}
 
 		public TimeSpan Timeout

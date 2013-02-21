@@ -52,11 +52,6 @@
 
 			InitializeComponent();
 
-			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
-				Font = SystemFonts.MessageBoxFont;
-			else
-				Font = GitterApplication.FontManager.UIFont;
-
 			Text = Resources.StrColumns;
 
 			_lblVisibleColumns.Text = Resources.StrVisibleColumns.AddColon();
@@ -66,6 +61,7 @@
 			_btnHide.Text = Resources.StrHide;
 			
 			_lstColumns.BeginUpdate();
+			_lstColumns.Style = GitterApplication.DefaultStyle;
 			_lstColumns.HeaderStyle = HeaderStyle.Hidden;
 			_lstColumns.Columns.Add(new CustomListBoxColumn(0, string.Empty, true) { SizeMode = ColumnSizeMode.Fill });
 			foreach(var c in _listBox.Columns)

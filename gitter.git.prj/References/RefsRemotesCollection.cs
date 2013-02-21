@@ -145,28 +145,36 @@
 
 		#region Get()
 
-		/// <summary>Gets the list of unmerged remote branches.</summary>
-		/// <returns>List of unmerged remote branches.</returns>
-		public IList<RemoteBranch> GetUnmerged()
+		private IList<RemoteBranch> GetRemotes(BranchesData refs)
 		{
-			var refs = Repository.Accessor.QueryBranches(
-				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
 			var heads = refs.Heads;
 			var remotes = refs.Remotes;
 			if(heads.Count == 0)
 			{
 				return new RemoteBranch[0];
 			}
-			var res = new List<RemoteBranch>(heads.Count);
-			lock(SyncRoot)
+			else
 			{
-				foreach(var head in heads)
+				var res = new List<RemoteBranch>(heads.Count);
+				lock(SyncRoot)
 				{
-					var branch = TryGetItem(head.Name);
-					if(branch != null) res.Add(branch);
+					foreach(var head in heads)
+					{
+						var branch = TryGetItem(head.Name);
+						if(branch != null) res.Add(branch);
+					}
 				}
+				return res;
 			}
-			return res;
+		}
+
+		/// <summary>Gets the list of unmerged remote branches.</summary>
+		/// <returns>List of unmerged remote branches.</returns>
+		public IList<RemoteBranch> GetUnmerged()
+		{
+			var refs = Repository.Accessor.QueryBranches(
+				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
+			return GetRemotes(refs);
 		}
 
 		/// <summary>Gets the list of merged remote branches.</summary>
@@ -175,22 +183,7 @@
 		{
 			var refs = Repository.Accessor.QueryBranches(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Merged));
-			var heads = refs.Heads;
-			var remotes = refs.Remotes;
-			if(heads.Count == 0)
-			{
-				return new RemoteBranch[0];
-			}
-			var res = new List<RemoteBranch>(heads.Count);
-			lock(SyncRoot)
-			{
-				foreach(var head in heads)
-				{
-					var branch = TryGetItem(head.Name);
-					if(branch != null) res.Add(branch);
-				}
-			}
-			return res;
+			return GetRemotes(refs);
 		}
 
 		/// <summary>Gets the list of remote branches, containing specified <paramref name="revision"/>.</summary>
@@ -203,22 +196,7 @@
 
 			var refs = Repository.Accessor.QueryBranches(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
-			var heads = refs.Heads;
-			var remotes = refs.Remotes;
-			if(heads.Count == 0)
-			{
-				return new RemoteBranch[0];
-			}
-			var res = new List<RemoteBranch>(heads.Count);
-			lock(SyncRoot)
-			{
-				foreach(var head in heads)
-				{
-					var branch = TryGetItem(head.Name);
-					if(branch != null) res.Add(branch);
-				}
-			}
-			return res;
+			return GetRemotes(refs);
 		}
 
 		#endregion

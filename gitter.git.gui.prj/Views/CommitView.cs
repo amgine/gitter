@@ -20,6 +20,7 @@
 	partial class CommitView : GitViewBase
 	{
 		private readonly CommitToolbar _toolbar;
+		private ICheckBoxWidget _chkAmend;
 		private TextBoxSpellChecker _speller;
 		private bool _treeMode;
 		private bool _suppressDiffUpdate;
@@ -32,6 +33,18 @@
 			Text = Resources.StrCommit;
 
 			_treeMode = true;
+
+			_splitContainer.BackColor = GitterApplication.Style.Colors.WorkArea;
+			_splitContainer.Panel1.BackColor = GitterApplication.Style.Colors.Window;
+			_splitContainer.Panel2.BackColor = GitterApplication.Style.Colors.Window;
+
+			_chkAmend = GitterApplication.Style.CreateCheckBox();
+			_chkAmend.Control.Bounds = new Rectangle(477, 67, 71, 20);
+			_chkAmend.Control.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+			_chkAmend.Control.Parent = _splitContainer.Panel2;
+			_chkAmend.Control.Enabled = false;
+			_chkAmend.Control.TabIndex = 12;
+			_chkAmend.IsCheckedChanged += OnAmendCheckedChanged;
 
 			_lblStaged.Text = Resources.StrStagedChanges.AddColon();
 			_lstStaged.Text = Resources.StrNoStagedChanges;
@@ -59,15 +72,18 @@
 
 			for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)
 			{
-				var col = _lstUnstaged.Columns[i];
-				col.IsVisible = col.Id == (int)ColumnId.Name;
+				var column = _lstUnstaged.Columns[i];
+				column.IsVisible = column.Id == (int)ColumnId.Name;
 			}
 
 			for(int i = 0; i < _lstStaged.Columns.Count; ++i)
 			{
-				var col = _lstStaged.Columns[i];
-				col.IsVisible = col.Id == (int)ColumnId.Name;
+				var column = _lstStaged.Columns[i];
+				column.IsVisible = column.Id == (int)ColumnId.Name;
 			}
+
+			_txtMessage.BackColor = GitterApplication.Style.Colors.Window;
+			_txtMessage.ForeColor = GitterApplication.Style.Colors.WindowText;
 
 			AddTopToolStrip(_toolbar = new CommitToolbar(this));
 			_speller = new TextBoxSpellChecker(_txtMessage, true);
@@ -151,7 +167,7 @@
 
 		public override void OnActivated()
 		{
-			_chkAmend.Enabled = !Repository.Head.IsEmpty;
+			_chkAmend.Control.Enabled = !Repository.Head.IsEmpty;
 		}
 
 		protected override void OnClosing()
@@ -245,7 +261,7 @@
 
 		private void OnAmendCheckedChanged(object sender, EventArgs e)
 		{
-			if(_chkAmend.Checked)
+			if(_chkAmend.IsChecked)
 			{
 				if(_txtMessage.TextLength == 0)
 				{
@@ -334,7 +350,7 @@
 		private void OnCommitClick(object sender, EventArgs e)
 		{
 			string message = _txtMessage.Text.Trim();
-			bool amend = _chkAmend.Enabled && _chkAmend.Checked;
+			bool amend = _chkAmend.Control.Enabled && _chkAmend.IsChecked;
 			bool merging = Repository.State == RepositoryState.Merging;
 			if(_lstStaged.Items.Count == 0 && !merging && !amend)
 			{
@@ -378,7 +394,7 @@
 				return;
 			}
 			_txtMessage.Text = string.Empty;
-			_chkAmend.Checked = false;
+			_chkAmend.IsChecked = false;
 		}
 
 		protected override void SaveMoreViewTo(Section section)

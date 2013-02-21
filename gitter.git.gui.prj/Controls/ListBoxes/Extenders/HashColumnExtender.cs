@@ -12,7 +12,7 @@
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class HashColumnExtender : BaseExtender
+	public partial class HashColumnExtender : ExtenderBase
 	{
 		private readonly HashColumn _column;
 		private bool _disableEvents;

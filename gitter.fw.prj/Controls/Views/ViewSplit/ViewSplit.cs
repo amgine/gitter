@@ -216,6 +216,8 @@
 			SetStyle(ControlStyles.ContainerControl, true);
 			SetStyle(ControlStyles.Selectable, false);
 
+			BackColor = ViewManager.Renderer.BackgroundColor;
+
 			_orientation = orientation;
 			_items = new List<Control>() { item1, item2 };
 			_size = bounds.Size;

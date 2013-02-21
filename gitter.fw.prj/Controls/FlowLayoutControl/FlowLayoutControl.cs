@@ -32,6 +32,16 @@
 			_sizes = new Dictionary<FlowPanel, Size>();
 			_panelHover = new TrackingService<FlowPanel>();
 			_panelHover.Changed += OnPanelHoverChanged;
+
+			BackColor = Style.Colors.Window;
+			ForeColor = Style.Colors.WindowText;
+		}
+
+		protected override void OnStyleChanged()
+		{
+			BackColor = Style.Colors.Window;
+			ForeColor = Style.Colors.WindowText;
+			base.OnStyleChanged();
 		}
 
 		internal void InvalidatePanelSize(FlowPanel panel)
@@ -533,9 +543,9 @@
 		{
 			var clientArea = ClientArea;
 			int y = clientArea.Y - VScrollPos;
-			int endy = e.ClipRectangle.Bottom;
 			var graphics = e.Graphics;
-			var clip = Rectangle.Intersect(ClientArea, e.ClipRectangle);
+			var clip = Rectangle.Intersect(clientArea, e.ClipRectangle);
+			int clippingEdge = clip.Bottom;
 			graphics.SetClip(clip);
 			graphics.SmoothingMode = SmoothingMode.HighQuality;
 			graphics.TextRenderingHint = Utility.TextRenderingHint;
@@ -550,7 +560,7 @@
 				{
 					if(y < ContentArea.Bottom)
 					{
-						if(maxY >= clip.Y && y < clip.Bottom)
+						if(maxY >= clip.Y && y < clippingEdge)
 						{
 							var bounds = new Rectangle(clientArea.X - HScrollPos, y, size.Width, size.Height);
 							panel.Paint(new FlowPanelPaintEventArgs(

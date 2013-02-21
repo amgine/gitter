@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Windows.Forms;
 	using System.Drawing;
+	using System.ComponentModel;
 
 	/// <summary>Hosts view hosts and applies grid layout.</summary>
 	public sealed class ViewDockGrid : Control, IDockHost
@@ -70,11 +71,20 @@
 			{
 				_grids.AddLast(this);
 			}
+
+			BackColor = ViewManager.Renderer.BackgroundColor;
 		}
 
 		#endregion
 
 		#region Properties
+
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public override Color BackColor
+		{
+			get { return base.BackColor; }
+			set { base.BackColor = value; }
+		}
 
 		internal ViewHost RootHost
 		{
@@ -90,6 +100,11 @@
 		internal IEnumerable<FloatingViewForm> FloatingViewForms
 		{
 			get { return _floatingViewForms; }
+		}
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
 		}
 
 		#endregion
@@ -115,41 +130,41 @@
 			var size = Size;
 			var bounds = new Rectangle(
 				0, ViewConstants.Spacing,
-				ViewConstants.SideTabHeight, 0);
+				Renderer.SideTabHeight, 0);
 
-			int hspace = size.Width - (ViewConstants.SideTabHeight + ViewConstants.Spacing * 2);
-			if(_right != null) hspace -= ViewConstants.SideTabHeight;
+			int hspace = size.Width - (Renderer.SideTabHeight + ViewConstants.Spacing * 2);
+			if(_right != null) hspace -= Renderer.SideTabHeight;
 
 			if(_top != null)
 			{
 				if(_top.Width > hspace)
 				{
 					_top.Bounds = new Rectangle(
-						ViewConstants.SideTabHeight + ViewConstants.Spacing, 0,
-						hspace, ViewConstants.SideTabHeight);
+						Renderer.SideTabHeight + ViewConstants.Spacing, 0,
+						hspace, Renderer.SideTabHeight);
 				}
 				else
 				{
-					_top.Left += ViewConstants.SideTabHeight;
+					_top.Left += Renderer.SideTabHeight;
 				}
-				bounds.Y += ViewConstants.SideTabHeight;
+				bounds.Y += Renderer.SideTabHeight;
 			}
 			if(_bottom != null)
 			{
 				if(_bottom.Width > hspace)
 				{
 					_bottom.Bounds = new Rectangle(
-						ViewConstants.SideTabHeight + ViewConstants.Spacing, size.Height - ViewConstants.SideTabHeight,
-						hspace, ViewConstants.SideTabHeight);
+						Renderer.SideTabHeight + ViewConstants.Spacing, size.Height - Renderer.SideTabHeight,
+						hspace, Renderer.SideTabHeight);
 				}
 				else
 				{
-					_bottom.Left += ViewConstants.SideTabHeight;
+					_bottom.Left += Renderer.SideTabHeight;
 				}
 			}
 			_rootControl.SetBounds(
-				_rootControl.Left + ViewConstants.SideTabHeight, 0,
-				_rootControl.Width - ViewConstants.SideTabHeight, 0,
+				_rootControl.Left + Renderer.SideTabHeight, 0,
+				_rootControl.Width - Renderer.SideTabHeight, 0,
 				BoundsSpecified.X | BoundsSpecified.Width);
 			_left = new ViewDockSide(this, AnchorStyles.Left)
 			{
@@ -166,41 +181,41 @@
 			var size = Size;
 			var bounds = new Rectangle(
 				ViewConstants.Spacing, 0,
-				0, ViewConstants.SideTabHeight);
+				0, Renderer.SideTabHeight);
 
-			int vspace = size.Height - ViewConstants.SideTabHeight - ViewConstants.Spacing * 2;
-			if(_bottom != null) vspace -= ViewConstants.SideTabHeight;
+			int vspace = size.Height - Renderer.SideTabHeight - ViewConstants.Spacing * 2;
+			if(_bottom != null) vspace -= Renderer.SideTabHeight;
 
 			if(_left != null)
 			{
 				if(_left.Height > vspace)
 				{
 					_left.Bounds = new Rectangle(
-						0, ViewConstants.SideTabHeight + ViewConstants.Spacing,
-						ViewConstants.SideTabHeight, vspace);
+						0, Renderer.SideTabHeight + ViewConstants.Spacing,
+						Renderer.SideTabHeight, vspace);
 				}
 				else
 				{
-					_left.Top += ViewConstants.SideTabHeight;
+					_left.Top += Renderer.SideTabHeight;
 				}
-				bounds.X += ViewConstants.SideTabHeight;
+				bounds.X += Renderer.SideTabHeight;
 			}
 			if(_right != null)
 			{
 				if(_right.Height > vspace)
 				{
 					_right.Bounds = new Rectangle(
-						size.Width - ViewConstants.SideTabHeight, ViewConstants.SideTabHeight + ViewConstants.Spacing,
-						ViewConstants.SideTabHeight, vspace);
+						size.Width - Renderer.SideTabHeight, Renderer.SideTabHeight + ViewConstants.Spacing,
+						Renderer.SideTabHeight, vspace);
 				}
 				else
 				{
-					_right.Top += ViewConstants.SideTabHeight;
+					_right.Top += Renderer.SideTabHeight;
 				}
 			}
 			_rootControl.SetBounds(
-				0, _rootControl.Top + ViewConstants.SideTabHeight,
-				0, _rootControl.Height - ViewConstants.SideTabHeight,
+				0, _rootControl.Top + Renderer.SideTabHeight,
+				0, _rootControl.Height - Renderer.SideTabHeight,
 				BoundsSpecified.Y | BoundsSpecified.Height);
 			_top = new ViewDockSide(this, AnchorStyles.Top)
 			{
@@ -216,11 +231,11 @@
 
 			var size = Size;
 			var bounds = new Rectangle(
-				size.Width - ViewConstants.SideTabHeight, ViewConstants.Spacing,
-				ViewConstants.SideTabHeight, 0);
+				size.Width - Renderer.SideTabHeight, ViewConstants.Spacing,
+				Renderer.SideTabHeight, 0);
 
-			int hspace = size.Width - ViewConstants.SideTabHeight - ViewConstants.Spacing * 2;
-			if(_left != null) hspace -= ViewConstants.SideTabHeight;
+			int hspace = size.Width - Renderer.SideTabHeight - ViewConstants.Spacing * 2;
+			if(_left != null) hspace -= Renderer.SideTabHeight;
 
 			if(_top != null)
 			{
@@ -228,7 +243,7 @@
 				{
 					_top.Width = hspace;
 				}
-				bounds.Y += ViewConstants.SideTabHeight;
+				bounds.Y += Renderer.SideTabHeight;
 			}
 			if(_bottom != null)
 			{
@@ -237,7 +252,7 @@
 					_bottom.Width = hspace;
 				}
 			}
-			_rootControl.Width -= ViewConstants.SideTabHeight;
+			_rootControl.Width -= Renderer.SideTabHeight;
 			_right = new ViewDockSide(this, AnchorStyles.Right)
 			{
 				Anchor = AnchorStyles.Right | AnchorStyles.Top,
@@ -252,11 +267,11 @@
 
 			var size = Size;
 			var bounds = new Rectangle(
-				ViewConstants.Spacing, size.Height - ViewConstants.SideTabHeight,
-				0, ViewConstants.SideTabHeight);
+				ViewConstants.Spacing, size.Height - Renderer.SideTabHeight,
+				0, Renderer.SideTabHeight);
 
-			int vspace = size.Height - ViewConstants.SideTabHeight - ViewConstants.Spacing * 2;
-			if(_top != null) vspace -= ViewConstants.SideTabHeight;
+			int vspace = size.Height - Renderer.SideTabHeight - ViewConstants.Spacing * 2;
+			if(_top != null) vspace -= Renderer.SideTabHeight;
 
 			if(_left != null)
 			{
@@ -264,7 +279,7 @@
 				{
 					_left.Height = vspace;
 				}
-				bounds.X += ViewConstants.SideTabHeight;
+				bounds.X += Renderer.SideTabHeight;
 			}
 			if(_right != null)
 			{
@@ -273,7 +288,7 @@
 					_right.Height = vspace;
 				}
 			}
-			_rootControl.Height -= ViewConstants.SideTabHeight;
+			_rootControl.Height -= Renderer.SideTabHeight;
 			_bottom = new ViewDockSide(this, AnchorStyles.Bottom)
 			{
 				Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
@@ -287,13 +302,13 @@
 			switch(side)
 			{
 				case AnchorStyles.Left:
-					KillLeftSide();
+					RemoveLeftSide();
 					break;
 				case AnchorStyles.Top:
-					KillTopSide();
+					RemoveTopSide();
 					break;
 				case AnchorStyles.Right:
-					KillRightSide();
+					RemoveRightSide();
 					break;
 				case AnchorStyles.Bottom:
 					KillBottomSide();
@@ -305,7 +320,7 @@
 			}
 		}
 
-		private void KillAllSides()
+		private void RemoveAllSides()
 		{
 			SuspendLayout();
 			if(_left != null)
@@ -339,7 +354,7 @@
 			ResumeLayout(true);
 		}
 
-		private void KillLeftSide()
+		private void RemoveLeftSide()
 		{
 			if(_left != null)
 			{
@@ -348,11 +363,11 @@
 				_left = null;
 
 				var bounds = _rootControl.Bounds;
-				bounds.X -= ViewConstants.SideTabHeight;
-				bounds.Width += ViewConstants.SideTabHeight;
+				bounds.X -= Renderer.SideTabHeight;
+				bounds.Width += Renderer.SideTabHeight;
 				_rootControl.Bounds = bounds;
 				var hcs = Width - ViewConstants.Spacing * 2;
-				if(_right != null) hcs -= ViewConstants.SideTabHeight;
+				if(_right != null) hcs -= Renderer.SideTabHeight;
 				if(_top != null)
 				{
 					var w = _top.Width;
@@ -365,7 +380,7 @@
 					{
 						if(len > hcs) len = hcs;
 						_top.SetBounds(
-							ViewConstants.Spacing, 0, len, ViewConstants.SideTabHeight,
+							ViewConstants.Spacing, 0, len, Renderer.SideTabHeight,
 							BoundsSpecified.X | BoundsSpecified.Width);
 					}
 				}
@@ -381,14 +396,14 @@
 					{
 						if(len > hcs) len = hcs;
 						_bottom.SetBounds(
-							ViewConstants.Spacing, 0, len, ViewConstants.SideTabHeight,
+							ViewConstants.Spacing, 0, len, Renderer.SideTabHeight,
 							BoundsSpecified.X | BoundsSpecified.Width);
 					}
 				}
 			}
 		}
 
-		private void KillTopSide()
+		private void RemoveTopSide()
 		{
 			if(_top != null)
 			{
@@ -397,11 +412,11 @@
 				_top = null;
 
 				var bounds = _rootControl.Bounds;
-				bounds.Y -= ViewConstants.SideTabHeight;
-				bounds.Height += ViewConstants.SideTabHeight;
+				bounds.Y -= Renderer.SideTabHeight;
+				bounds.Height += Renderer.SideTabHeight;
 				_rootControl.Bounds = bounds;
-				var vcs = Height - ViewConstants.SideTabHeight * 2;
-				if(_bottom != null) vcs -= ViewConstants.SideTabHeight;
+				var vcs = Height - Renderer.SideTabHeight * 2;
+				if(_bottom != null) vcs -= Renderer.SideTabHeight;
 				if(_left != null)
 				{
 					var h = _left.Height;
@@ -414,7 +429,7 @@
 					{
 						if(len > vcs) len = vcs;
 						_left.SetBounds(
-							0, ViewConstants.Spacing, ViewConstants.SideTabHeight, len,
+							0, ViewConstants.Spacing, Renderer.SideTabHeight, len,
 							BoundsSpecified.Y | BoundsSpecified.Height);
 					}
 				}
@@ -430,24 +445,24 @@
 					{
 						if(len > vcs) len = vcs;
 						_right.SetBounds(
-							0, ViewConstants.Spacing, ViewConstants.SideTabHeight, len,
+							0, ViewConstants.Spacing, Renderer.SideTabHeight, len,
 							BoundsSpecified.Y | BoundsSpecified.Height);
 					}
 				}
 			}
 		}
 
-		private void KillRightSide()
+		private void RemoveRightSide()
 		{
 			if(_right != null)
 			{
 				_right.Parent = null;
 				_right.Dispose();
 				_right = null;
-				_rootControl.Width += ViewConstants.SideTabHeight;
+				_rootControl.Width += Renderer.SideTabHeight;
 
 				var hcs = Width - ViewConstants.Spacing * 2;
-				if(_left != null) hcs -= ViewConstants.SideTabHeight;
+				if(_left != null) hcs -= Renderer.SideTabHeight;
 				if(_top != null)
 				{
 					var w = _top.Width;
@@ -478,10 +493,10 @@
 				_bottom.Parent = null;
 				_bottom.Dispose();
 				_bottom = null;
-				_rootControl.Height += ViewConstants.SideTabHeight;
+				_rootControl.Height += Renderer.SideTabHeight;
 
-				var vcs = Height - ViewConstants.SideTabHeight * 2;
-				if(_bottom != null) vcs -= ViewConstants.SideTabHeight;
+				var vcs = Height - Renderer.SideTabHeight * 2;
+				if(_bottom != null) vcs -= Renderer.SideTabHeight;
 				if(_left != null)
 				{
 					var h = _left.Height;
@@ -551,7 +566,6 @@
 						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
 						"side");
 			}
-			Assert.AreEqual(viewDockSide.Side, side);
 			return viewDockSide;
 		}
 
@@ -565,8 +579,8 @@
 			get
 			{
 				var w = Width - ViewConstants.Spacing * 2;
-				if(_left != null) w -= ViewConstants.SideTabHeight;
-				if(_right != null) w -= ViewConstants.SideTabHeight;
+				if(_left != null) w -= Renderer.SideTabHeight;
+				if(_right != null) w -= Renderer.SideTabHeight;
 				return w;
 			}
 		}
@@ -576,8 +590,8 @@
 			get
 			{
 				var h = Height - ViewConstants.Spacing * 2;
-				if(_top != null) h -= ViewConstants.SideTabHeight;
-				if(_bottom != null) h -= ViewConstants.SideTabHeight;
+				if(_top != null) h -= Renderer.SideTabHeight;
+				if(_bottom != null) h -= Renderer.SideTabHeight;
 				return h;
 			}
 		}

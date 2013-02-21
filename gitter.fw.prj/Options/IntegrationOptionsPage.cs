@@ -51,6 +51,7 @@
 			_lblIntegrationFeatures.Text = Resources.StrsIntegrationFeatures.AddColon();
 
 			_lstFeatures.BeginUpdate();
+			_lstFeatures.Style = GitterApplication.DefaultStyle;
 			_lstFeatures.Columns.Add(new CustomListBoxColumn(0, Resources.StrName) { SizeMode = ColumnSizeMode.Fill });
 			foreach(var feature in GitterApplication.IntegrationFeatures)
 			{

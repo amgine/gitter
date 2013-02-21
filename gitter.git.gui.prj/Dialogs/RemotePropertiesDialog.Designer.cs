@@ -65,7 +65,7 @@
 			this._radFetchNone.Location = new System.Drawing.Point(272, 202);
 			this._radFetchNone.Name = "_radFetchNone";
 			this._radFetchNone.Size = new System.Drawing.Size(80, 20);
-			this._radFetchNone.TabIndex = 11;
+			this._radFetchNone.TabIndex = 10;
 			this._radFetchNone.Text = "%None%";
 			this._radFetchNone.UseVisualStyleBackColor = true;
 			// 
@@ -76,7 +76,7 @@
 			this._radFetchAll.Location = new System.Drawing.Point(201, 202);
 			this._radFetchAll.Name = "_radFetchAll";
 			this._radFetchAll.Size = new System.Drawing.Size(65, 20);
-			this._radFetchAll.TabIndex = 11;
+			this._radFetchAll.TabIndex = 9;
 			this._radFetchAll.Text = "%All%";
 			this._radFetchAll.UseVisualStyleBackColor = true;
 			// 
@@ -87,7 +87,7 @@
 			this._radNormal.Location = new System.Drawing.Point(106, 202);
 			this._radNormal.Name = "_radNormal";
 			this._radNormal.Size = new System.Drawing.Size(89, 20);
-			this._radNormal.TabIndex = 11;
+			this._radNormal.TabIndex = 8;
 			this._radNormal.Text = "%Default%";
 			this._radNormal.UseVisualStyleBackColor = true;
 			// 
@@ -134,7 +134,7 @@
 			this._chkSkipFetchAll.Location = new System.Drawing.Point(3, 251);
 			this._chkSkipFetchAll.Name = "_chkSkipFetchAll";
 			this._chkSkipFetchAll.Size = new System.Drawing.Size(119, 20);
-			this._chkSkipFetchAll.TabIndex = 7;
+			this._chkSkipFetchAll.TabIndex = 12;
 			this._chkSkipFetchAll.Text = "%Skip fetch all%";
 			this._chkSkipFetchAll.UseVisualStyleBackColor = true;
 			// 
@@ -145,14 +145,14 @@
 			this._chkMirror.Location = new System.Drawing.Point(3, 226);
 			this._chkMirror.Name = "_chkMirror";
 			this._chkMirror.Size = new System.Drawing.Size(85, 20);
-			this._chkMirror.TabIndex = 6;
+			this._chkMirror.TabIndex = 11;
 			this._chkMirror.Text = "%Mirror%";
 			this._chkMirror.UseVisualStyleBackColor = true;
 			// 
 			// _grpOptions
 			// 
-			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpOptions.Location = new System.Drawing.Point(0, 119);
 			this._grpOptions.Name = "_grpOptions";
 			this._grpOptions.Size = new System.Drawing.Size(397, 19);
@@ -161,8 +161,8 @@
 			// 
 			// _grpUpdatedReferences
 			// 
-			this._grpUpdatedReferences.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grpUpdatedReferences.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpUpdatedReferences.Location = new System.Drawing.Point(0, 0);
 			this._grpUpdatedReferences.Name = "_grpUpdatedReferences";
 			this._grpUpdatedReferences.Size = new System.Drawing.Size(397, 19);
@@ -171,44 +171,44 @@
 			// 
 			// _txtUploadPack
 			// 
-			this._txtUploadPack.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtUploadPack.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtUploadPack.Location = new System.Drawing.Point(106, 173);
 			this._txtUploadPack.Name = "_txtUploadPack";
 			this._txtUploadPack.Size = new System.Drawing.Size(291, 23);
-			this._txtUploadPack.TabIndex = 3;
+			this._txtUploadPack.TabIndex = 7;
 			// 
 			// _txtReceivePack
 			// 
-			this._txtReceivePack.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtReceivePack.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtReceivePack.Location = new System.Drawing.Point(106, 144);
 			this._txtReceivePack.Name = "_txtReceivePack";
 			this._txtReceivePack.Size = new System.Drawing.Size(291, 23);
-			this._txtReceivePack.TabIndex = 3;
+			this._txtReceivePack.TabIndex = 6;
 			// 
 			// _txtVCS
 			// 
-			this._txtVCS.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtVCS.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtVCS.Location = new System.Drawing.Point(106, 90);
 			this._txtVCS.Name = "_txtVCS";
 			this._txtVCS.Size = new System.Drawing.Size(291, 23);
-			this._txtVCS.TabIndex = 3;
+			this._txtVCS.TabIndex = 5;
 			// 
 			// _txtProxy
 			// 
-			this._txtProxy.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtProxy.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtProxy.Location = new System.Drawing.Point(106, 61);
 			this._txtProxy.Name = "_txtProxy";
 			this._txtProxy.Size = new System.Drawing.Size(291, 23);
-			this._txtProxy.TabIndex = 3;
+			this._txtProxy.TabIndex = 4;
 			// 
 			// _txtPushURL
 			// 
-			this._txtPushURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtPushURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtPushURL.Location = new System.Drawing.Point(106, 32);
 			this._txtPushURL.Name = "_txtPushURL";
 			this._txtPushURL.Size = new System.Drawing.Size(291, 23);
@@ -216,8 +216,8 @@
 			// 
 			// _txtFetchURL
 			// 
-			this._txtFetchURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtFetchURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtFetchURL.Location = new System.Drawing.Point(106, 3);
 			this._txtFetchURL.Name = "_txtFetchURL";
 			this._txtFetchURL.Size = new System.Drawing.Size(291, 23);
@@ -253,13 +253,14 @@
 			// _lstUpdatedReferences
 			// 
 			this._lstUpdatedReferences.AllowColumnReorder = false;
-			this._lstUpdatedReferences.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._lstUpdatedReferences.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._lstUpdatedReferences.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstUpdatedReferences.Location = new System.Drawing.Point(3, 25);
 			this._lstUpdatedReferences.Multiselect = true;
 			this._lstUpdatedReferences.Name = "_lstUpdatedReferences";
 			this._lstUpdatedReferences.Size = new System.Drawing.Size(394, 100);
-			this._lstUpdatedReferences.TabIndex = 12;
+			this._lstUpdatedReferences.TabIndex = 13;
 			// 
 			// _btnAddRefspec
 			// 
@@ -267,7 +268,7 @@
 			this._btnAddRefspec.Location = new System.Drawing.Point(319, 132);
 			this._btnAddRefspec.Name = "_btnAddRefspec";
 			this._btnAddRefspec.Size = new System.Drawing.Size(75, 23);
-			this._btnAddRefspec.TabIndex = 13;
+			this._btnAddRefspec.TabIndex = 15;
 			this._btnAddRefspec.Text = "%Add%";
 			this._btnAddRefspec.UseVisualStyleBackColor = true;
 			this._btnAddRefspec.Click += new System.EventHandler(this._btnAddRefspec_Click);
@@ -286,7 +287,7 @@
 			this._txtRefspec.Location = new System.Drawing.Point(106, 132);
 			this._txtRefspec.Name = "_txtRefspec";
 			this._txtRefspec.Size = new System.Drawing.Size(207, 23);
-			this._txtRefspec.TabIndex = 15;
+			this._txtRefspec.TabIndex = 14;
 			// 
 			// _radFetch
 			// 
@@ -296,7 +297,7 @@
 			this._radFetch.Location = new System.Drawing.Point(106, 156);
 			this._radFetch.Name = "_radFetch";
 			this._radFetch.Size = new System.Drawing.Size(80, 20);
-			this._radFetch.TabIndex = 17;
+			this._radFetch.TabIndex = 16;
 			this._radFetch.TabStop = true;
 			this._radFetch.Text = "%Fetch%";
 			this._radFetch.UseVisualStyleBackColor = true;
@@ -308,15 +309,15 @@
 			this._radPush.Location = new System.Drawing.Point(186, 156);
 			this._radPush.Name = "_radPush";
 			this._radPush.Size = new System.Drawing.Size(77, 20);
-			this._radPush.TabIndex = 18;
+			this._radPush.TabIndex = 17;
 			this._radPush.TabStop = true;
 			this._radPush.Text = "%Push%";
 			this._radPush.UseVisualStyleBackColor = true;
 			// 
 			// panel1
 			// 
-			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.panel1.Controls.Add(this._grpUpdatedReferences);
 			this.panel1.Controls.Add(this._lstUpdatedReferences);
 			this.panel1.Controls.Add(this._btnAddRefspec);

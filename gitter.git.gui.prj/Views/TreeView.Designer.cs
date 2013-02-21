@@ -56,7 +56,6 @@
 			this._splitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this._splitContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(57)))), ((int)(((byte)(85)))));
 			this._splitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
 			this._splitContainer.Location = new System.Drawing.Point(0, 0);
 			this._splitContainer.Name = "_splitContainer";

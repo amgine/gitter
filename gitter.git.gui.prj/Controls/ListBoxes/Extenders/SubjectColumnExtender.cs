@@ -13,7 +13,7 @@
 	using gitter.Framework.Controls;
 
 	[ToolboxItem(false)]
-	public partial class SubjectColumnExtender : BaseExtender
+	public partial class SubjectColumnExtender : ExtenderBase
 	{
 		private readonly SubjectColumn _column;
 		private bool _disableEvents;

@@ -5,6 +5,7 @@
 	using System.Linq;
 	using System.Text;
 	using System.Drawing;
+	using System.Drawing.Drawing2D;
 
 	using gitter.Framework.Services;
 
@@ -114,7 +115,7 @@
 			get { return _text; }
 		}
 
-		public void Render(Graphics graphics, Font font, Rectangle rect)
+		public void Render(IGitterStyle style, Graphics graphics, Font font, Rectangle rect)
 		{
 			bool useCache = _cachedRect == rect;
 			if(useCache)
@@ -133,37 +134,44 @@
 					graphics.ExcludeClip(cr[i]);
 				}
 			}
-			GitterApplication.TextRenderer.DrawText(
-				graphics, _text, font, Brushes.Black, rect, _sf);
+			using(var brush = new SolidBrush(style.Colors.WindowText))
+			{
+				GitterApplication.TextRenderer.DrawText(
+					graphics, _text, font, brush, rect, _sf);
+			}
 			graphics.ResetClip();
 			bool clipIsSet = false;
-			foreach(var g in _glyphs)
+			foreach(var glyph in _glyphs)
 			{
-				if(g != _hoveredLink.Item)
+				if(glyph != _hoveredLink.Item)
 				{
 					if(clipIsSet)
 					{
-						graphics.SetClip(g.Region, System.Drawing.Drawing2D.CombineMode.Union);
+						graphics.SetClip(glyph.Region, CombineMode.Union);
 					}
 					else
 					{
-						graphics.Clip = g.Region;
+						graphics.Clip = glyph.Region;
 						clipIsSet = true;
 					}
 				}
 			}
 			if(clipIsSet)
 			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, _text, font, Brushes.Blue, rect, _sf);
+				using(var linkTextBrush = new SolidBrush(style.Colors.HyperlinkText))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, _text, font, linkTextBrush, rect, _sf);
+				}
 			}
 			if(_hoveredLink.IsTracked)
 			{
 				graphics.Clip = _hoveredLink.Item.Region;
 				using(var f = new Font(font, FontStyle.Underline))
+				using(var linkTextBrush = new SolidBrush(style.Colors.HyperlinkTextHotTrack))
 				{
 					GitterApplication.TextRenderer.DrawText(
-						graphics, _text, f, Brushes.Blue, rect, _sf);
+						graphics, _text, f, linkTextBrush, rect, _sf);
 				}
 			}
 			graphics.ResetClip();
@@ -189,9 +197,13 @@
 		{
 			var index = HitTest(rect, p);
 			if(index != -1)
+			{
 				_hoveredLink.Track(index, _glyphs[index]);
+			}
 			else
+			{
 				_hoveredLink.Drop();
+			}
 		}
 
 		public void OnMouseDown(RectangleF rect, Point p)

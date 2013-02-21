@@ -27,12 +27,14 @@
 
 		protected override void OnFlowControlAttached()
 		{
+			_overlay.Renderer = FlowControl.Style.OverlayRenderer;
 			_overlay.HostControl = FlowControl;
 		}
 
 		protected override void OnFlowControlDetached()
 		{
 			_overlay.HostControl = null;
+			_overlay.Renderer = null;
 		}
 
 		public int Height
@@ -90,7 +92,7 @@
 				{
 					if(!string.IsNullOrEmpty(_message))
 					{
-						_overlay.DrawMessage(graphics, FlowControl.Font, rc, _message);
+						_overlay.DrawMessage(graphics, rc, _message);
 					}
 				}
 			}

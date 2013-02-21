@@ -115,6 +115,7 @@
 			this.linkLabel1.TabIndex = 27;
 			this.linkLabel1.TabStop = true;
 			this.linkLabel1.Text = "amgine.gitter@gmail.com";
+			this.linkLabel1.LinkClicked += OnEmailLinkClicked;
 			// 
 			// label2
 			// 

@@ -26,9 +26,10 @@
 			Text = Resources.StrConflicts;
 
 			_lblConflictingFiles.Text = Resources.StrConflictingFiles.AddColon();
+
+			_lstConflicts.Style = GitterApplication.DefaultStyle;
 			_lstConflicts.Columns.ShowAll(column => (ColumnId)column.Id == ColumnId.Name);
 			_lstConflicts.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
-
 			_lstConflicts.ShowTreeLines = false;
 			_lstConflicts.ItemActivated += OnItemActivated;
 
