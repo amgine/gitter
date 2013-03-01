@@ -709,7 +709,7 @@
 			}
 			if(!reachedEnd && _blameFile.LineCount != 0)
 			{
-				graphics.DrawLine(Pens.Gray, x, y, rect.X + contentWidth - Margin, y);
+				graphics.DrawLine(Pens.Gray, x, y, rect.X + contentWidth - Margin - 1, y);
 			}
 		}
 	}

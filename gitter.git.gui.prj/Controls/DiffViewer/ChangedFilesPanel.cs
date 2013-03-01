@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Drawing;
+	using System.Globalization;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -15,6 +16,16 @@
 	public class ChangedFilesPanel : FlowPanel
 	{
 		#region Static
+
+		private static readonly StringFormat HeaderFormat = new StringFormat(StringFormat.GenericTypographic)
+		{
+			Alignment = StringAlignment.Near,
+			FormatFlags =
+				StringFormatFlags.LineLimit |
+				StringFormatFlags.FitBlackBox,
+			LineAlignment = StringAlignment.Center,
+			Trimming = StringTrimming.None,
+		};
 
 		private static readonly StringFormat ContentFormat = new StringFormat(StringFormat.GenericTypographic)
 		{
@@ -50,8 +61,11 @@
 
 		#endregion
 
-		private const int LineSpacing = 4;
 		private const int LineHeight = 20;
+		private const int HeaderHeight = 20;
+		private const int HeaderBottomMargin = 3;
+		private const int HeaderContentPadding = 3;
+		private const int HeaderSpacing = 7;
 
 		private Diff _diff;
 		private FileItem[] _items;
@@ -153,6 +167,8 @@
 				const int squareHeight = 13;
 				const int squareSpacing = 1;
 				const float radius = 1.5f;
+				var oldMode = graphics.SmoothingMode;
+				graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 				if(_file.IsBinary)
 				{
 					var rc = new Rectangle(
@@ -252,9 +268,10 @@
 						}
 					}
 				}
+				graphics.SmoothingMode = oldMode;
 			}
 
-			public void Draw(Graphics graphics, Font font, Brush textBrush, Rectangle rect, int index)
+			public void Draw(Graphics graphics, Font font, Brush textBrush, Rectangle rect)
 			{
 				const int IconSize = 16;
 				const int StatSize = (9 + 1) * 5 + 20;
@@ -286,6 +303,8 @@
 		{
 			private readonly FileStatus _status;
 			private readonly Bitmap _image;
+			private string _displayText;
+			private Rectangle _displayBounds;
 			private int _count;
 
 			public ChangesCountByType(FileStatus status)
@@ -315,6 +334,39 @@
 						_image = FileStatusIcons.ImgModeChanged;
 						break;
 				}
+				UpdateDisplayText();
+			}
+
+			private void UpdateDisplayText()
+			{
+				switch(Status)
+				{
+					case StatusFilterAll:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}",
+							Count == 1 ? Resources.StrlChange : Resources.StrlChanges, Count);
+						break;
+					case FileStatus.Added:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlAdded, Count);
+						break;
+					case FileStatus.Modified:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlModified, Count);
+						break;
+					case FileStatus.Removed:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRemoved, Count);
+						break;
+					case FileStatus.Unmerged:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlUnmerged, Count);
+						break;
+					case FileStatus.Copied:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlCopied, Count);
+						break;
+					case FileStatus.Renamed:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRenamed, Count);
+						break;
+					case FileStatus.ModeChanged:
+						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlChmod, Count);
+						break;
+				}
 			}
 
 			public Bitmap Image
@@ -330,34 +382,82 @@
 			public int Count
 			{
 				get { return _count; }
-				set { _count = value; }
+				set
+				{
+					if(_count != value)
+					{
+						_count = value;
+						UpdateDisplayText();
+					}
+				}
+			}
+
+			public string DisplayText
+			{
+				get { return _displayText; }
+			}
+
+			public Rectangle DisplayBounds
+			{
+				get { return _displayBounds; }
+				set { _displayBounds = value; }
 			}
 		}
 
 		private readonly TrackingService<FileItem> _fileHover;
+		private readonly TrackingService<ChangesCountByType> _filterHover;
 
 		private static readonly Font Font = GitterApplication.FontManager.UIFont.Font;
 		private static int FontHeight = -1;
 
+		private const FileStatus StatusFilterAll =
+			FileStatus.Added | FileStatus.Removed | FileStatus.Modified |
+			FileStatus.Renamed | FileStatus.Copied | FileStatus.ModeChanged | FileStatus.Unmerged;
+
+		private FileStatus _statusFilter;
+
+		#region Events
+
+		public event EventHandler StatusFilterChanged;
+
+		private void OnStatusFilterChanged()
+		{
+			var handler = StatusFilterChanged;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		#endregion
+
 		/// <summary>Create <see cref="ChangedFilesPanel"/>.</summary>
 		public ChangedFilesPanel()
 		{
-			_fileHover = new TrackingService<FileItem>();
-			_fileHover.Changed += OnFileHoverChanged;
+			_fileHover		= new TrackingService<FileItem>(OnFileHoverChanged);
+			_filterHover	= new TrackingService<ChangesCountByType>(OnStatusFilterHoverChanged);
+			_statusFilter	= StatusFilterAll;
 
-			_changesByType = new ChangesCountByType[7];
-			_changesByType[0] = new ChangesCountByType(FileStatus.Added);
-			_changesByType[1] = new ChangesCountByType(FileStatus.Removed);
-			_changesByType[2] = new ChangesCountByType(FileStatus.Modified);
-			_changesByType[3] = new ChangesCountByType(FileStatus.Renamed);
-			_changesByType[4] = new ChangesCountByType(FileStatus.Copied);
-			_changesByType[5] = new ChangesCountByType(FileStatus.Unmerged);
-			_changesByType[6] = new ChangesCountByType(FileStatus.ModeChanged);
+			_changesByType = new[]
+			{
+				new ChangesCountByType(StatusFilterAll),
+				new ChangesCountByType(FileStatus.Added),
+				new ChangesCountByType(FileStatus.Removed),
+				new ChangesCountByType(FileStatus.Modified),
+				new ChangesCountByType(FileStatus.Renamed),
+				new ChangesCountByType(FileStatus.Copied),
+				new ChangesCountByType(FileStatus.Unmerged),
+				new ChangesCountByType(FileStatus.ModeChanged),
+			};
 		}
 
 		private void OnFileHoverChanged(object sender, TrackingEventArgs<FileItem> e)
 		{
-			Invalidate(new Rectangle(0, (e.Index + 1) * (LineHeight), FlowControl.ContentArea.Width, LineHeight));
+			Invalidate(new Rectangle(0, HeaderHeight + HeaderBottomMargin + GetVisualIndex(e.Index) * LineHeight, FlowControl.ContentArea.Width, LineHeight));
+			FlowControl.Cursor = e.IsTracked ? Cursors.Hand : Cursors.Default;
+		}
+
+
+		private void OnStatusFilterHoverChanged(object sender, TrackingEventArgs<ChangesCountByType> e)
+		{
+			Invalidate(new Rectangle(0, 0, FlowControl.ContentArea.Width, HeaderHeight));
 			FlowControl.Cursor = e.IsTracked ? Cursors.Hand : Cursors.Default;
 		}
 
@@ -370,12 +470,13 @@
 				if(_diff != value)
 				{
 					_diff = value;
-					for(int i = 0; i < _changesByType.Length; ++i)
+					for(int i = 1; i < _changesByType.Length; ++i)
 					{
 						_changesByType[i].Count = 0;
 					}
 					if(_diff != null)
 					{
+						_changesByType[0].Count = _diff.FilesCount;
 						if(_items == null || _items.Length != _diff.FilesCount)
 						{
 							_items = new FileItem[_diff.FilesCount];
@@ -383,7 +484,7 @@
 						for(int i = 0; i < _diff.FilesCount; ++i)
 						{
 							_items[i] = new FileItem(_diff[i]);
-							for(int j = 0; j < _changesByType.Length; ++j)
+							for(int j = 1; j < _changesByType.Length; ++j)
 							{
 								if(_changesByType[j].Status == _diff[i].Status)
 								{
@@ -395,6 +496,7 @@
 					}
 					else
 					{
+						_changesByType[0].Count = 0;
 						_items = new FileItem[0];
 					}
 					_fileHover.Reset(-1, null);
@@ -402,15 +504,43 @@
 			}
 		}
 
+		public FileStatus StatusFilter
+		{
+			get { return _statusFilter; }
+			private set
+			{
+				if(_statusFilter != value)
+				{
+					_statusFilter = value;
+					OnStatusFilterChanged();
+					InvalidateSize();
+				}
+			}
+		}
+
 		protected override void OnMouseLeave()
 		{
 			_fileHover.Drop();
+			_filterHover.Drop();
 		}
 
-		private int HitTest(int x, int y)
+		private int GetVisualIndex(int index)
+		{
+			int visualIndex = -1;
+			for(int i = 0; i <= index; ++i)
+			{
+				if((_items[i].File.Status & StatusFilter) != FileStatus.Unknown)
+				{
+					++visualIndex;
+				}
+			}
+			return visualIndex;
+		}
+
+		private int HitTestFile(int x, int y)
 		{
 			if(x < 5 || x >= FlowControl.ContentArea.Width - 5) return -1;
-			y -= LineHeight;
+			y -= HeaderHeight + HeaderBottomMargin;
 			if(y < 0)
 			{
 				return -1;
@@ -418,15 +548,44 @@
 			else
 			{
 				int id = y / LineHeight;
-				if(id >= _items.Length)
+				if(id < 0 || id >= _items.Length)
 				{
 					return -1;
 				}
-				else
+				if(StatusFilter == StatusFilterAll)
 				{
 					return id;
 				}
+				else
+				{
+					int visualIndex = -1;
+					for(int i = 0; i < _items.Length; ++i)
+					{
+						if((_items[i].File.Status & StatusFilter) != FileStatus.Unknown)
+						{
+							++visualIndex;
+							if(visualIndex == id)
+							{
+								return i;
+							}
+						}
+					}
+					return -1;
+				}
 			}
+		}
+
+		private int HitTestFilter(int x, int y)
+		{
+			if(y < 0 || y > HeaderHeight) return -1;
+			for(int i = 0; i < _changesByType.Length; ++i)
+			{
+				if(_changesByType[i].DisplayBounds.Contains(x, y))
+				{
+					return i;
+				}
+			}
+			return -1;
 		}
 
 		protected override void OnMouseDown(int x, int y, MouseButtons button)
@@ -435,7 +594,7 @@
 			{
 				case MouseButtons.Left:
 					{
-						int id = HitTest(x, y);
+						int id = HitTestFile(x, y);
 						if(id != -1)
 						{
 							var file = _items[id].File;
@@ -449,11 +608,19 @@
 								}
 							}
 						}
+						else
+						{
+							id = HitTestFilter(x, y);
+							if(id != -1)
+							{
+								StatusFilter = _changesByType[id].Status;
+							}
+						}
 					}
 					break;
 				case MouseButtons.Right:
 					{
-						int id = HitTest(x, y);
+						int id = HitTestFile(x, y);
 						if(id != -1)
 						{
 							var file = _items[id].File;
@@ -472,13 +639,23 @@
 		protected override void OnMouseMove(int x, int y)
 		{
 			if(FontHeight == -1) return;
-			int id = HitTest(x, y);
+			int id = HitTestFile(x, y);
 			if(id == -1)
 			{
 				_fileHover.Drop();
+				id = HitTestFilter(x, y);
+				if(id == -1)
+				{
+					_filterHover.Drop();
+				}
+				else
+				{
+					_filterHover.Track(id, _changesByType[id]);
+				}
 			}
 			else
 			{
+				_filterHover.Drop();
 				_fileHover.Track(id, _items[id]);
 			}
 			base.OnMouseMove(x, y);
@@ -487,48 +664,65 @@
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
 			if(_diff == null) return Size.Empty;
-			if(FontHeight == -1) FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(measureEventArgs.Graphics, Font) + 0.5f);
-			return new Size(0, (_diff.FilesCount + 1) * (LineHeight));
+			if(FontHeight == -1)
+			{
+				FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(measureEventArgs.Graphics, Font) + 0.5f);
+			}
+			int lineCount;
+			if(StatusFilter == StatusFilterAll)
+			{
+				lineCount = _diff.FilesCount;
+			}
+			else
+			{
+				lineCount = 0;
+				for(int i = 0; i < _diff.FilesCount; ++i)
+				{
+					if((_diff[i].Status & StatusFilter) != FileStatus.Unknown)
+					{
+						++lineCount;
+					}
+				}
+			}
+			return new Size(0, HeaderHeight + (lineCount == 0 ? 0 : HeaderBottomMargin) + lineCount * LineHeight);
 		}
 
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{
 			if(_diff == null) return;
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-			var clip = paintEventArgs.ClipRectangle;
-			int y = rect.Y;
-			if(FontHeight == -1) FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(graphics, Font) + 0.5);
-			var rc = new Rectangle(rect.X + 5, rect.Y, FlowControl.ContentArea.Width - 10, LineHeight);
-			var rcClip = Rectangle.Intersect(rc, clip);
+			var graphics	= paintEventArgs.Graphics;
+			var rect		= paintEventArgs.Bounds;
+			var clip		= paintEventArgs.ClipRectangle;
+
+			graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+			if(FontHeight == -1)
+			{
+				FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(graphics, Font) + 0.5);
+			}
+			var rcHeader = new Rectangle(rect.X + 5, rect.Y, FlowControl.ContentArea.Width - 10, HeaderHeight);
+			var rcClip = Rectangle.Intersect(rcHeader, clip);
 			if(_diff.FilesCount == 0)
 			{
-				using(var brush = new SolidBrush(FlowControl.Style.Colors.GrayText))
+				if(rcClip.Width <= 0 || rcClip.Height <= 0)
 				{
-					if(rcClip.Height > 0 && rcClip.Width > 0)
-					{
-						GitterApplication.TextRenderer.DrawText(
-							graphics, Resources.StrNoChangedFiles, Font, brush, rc, ContentFormat);
-					}
+					return;
+				}
+				using(var brush = new SolidBrush(Style.Colors.GrayText))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, Resources.StrNoChangedFiles, Font, brush, rcHeader, ContentFormat);
 				}
 			}
 			else
 			{
-				using(var textBrush = new SolidBrush(FlowControl.Style.Colors.WindowText))
-				using(var alternateBackgroundBrush = new SolidBrush(FlowControl.Style.Colors.Alternate))
+				using(var textBrush = new SolidBrush(Style.Colors.WindowText))
 				{
-					if(rcClip.Height > 0 && rcClip.Width > 0)
+					if(rcClip.Width > 0 || rcClip.Height > 0)
 					{
-						var headerBounds = rc;
+						var headerBounds = rcHeader;
 
-						string headerText = Resources.StrChangedFiles.AddColon();
-						var headerWidth = GitterApplication.TextRenderer.MeasureText(
-							graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
-						GitterApplication.TextRenderer.DrawText(
-							graphics, headerText, Font, textBrush, headerBounds, ContentFormat);
-
-						headerBounds.X += headerWidth + 5;
-						headerBounds.Width -= headerWidth + 5;
+						headerBounds.X += 5;
+						headerBounds.Width -= 5;
 
 						for(int i = 0; i < _changesByType.Length; ++i)
 						{
@@ -536,39 +730,81 @@
 
 							if(_changesByType[i].Count != 0)
 							{
-								headerText = _changesByType[i].Count.ToString();
+								// prepare
+								var headerText = _changesByType[i].DisplayText;
+								var headerTextSize = GitterApplication.TextRenderer.MeasureText(
+									graphics, headerText, Font, short.MaxValue, ContentFormat);
+								var headerWidth = headerTextSize.Width;
 								var image = _changesByType[i].Image;
-
-								graphics.DrawImage(image, headerBounds.X, headerBounds.Y);
-								headerBounds.X += 16 + 3;
-								headerBounds.Width -= 16 + 3;
+								var displayBounds = new Rectangle(
+									headerBounds.X - HeaderContentPadding,
+									headerBounds.Y,
+									headerWidth + (image != null ? image.Width + 3 : 0) + HeaderContentPadding * 2,
+									headerBounds.Height);
+								_changesByType[i].DisplayBounds = new Rectangle(
+									displayBounds.X - rect.X, displayBounds.Y - rect.Y, displayBounds.Width, displayBounds.Height);
+								// background
+								if(StatusFilter == _changesByType[i].Status)
+								{
+									Style.ItemBackgroundStyles.Selected.Draw(graphics, displayBounds);
+								}
+								else if(_filterHover.Index == i)
+								{
+									Style.ItemBackgroundStyles.Hovered.Draw(graphics, displayBounds);
+								}
+								// header icon
+								if(image != null)
+								{
+									graphics.DrawImage(image, headerBounds.X, headerBounds.Y + (headerBounds.Height - image.Height) / 2);
+									headerBounds.X += image.Width + 3;
+									headerBounds.Width -= image.Width + 3;
+								}
 
 								if(headerBounds.Width <= 0) break;
-
-								headerWidth = GitterApplication.TextRenderer.MeasureText(
-									graphics, headerText, Font, short.MaxValue, ContentFormat).Width;
+								// header text
 								GitterApplication.TextRenderer.DrawText(
-									graphics, headerText, Font, textBrush, headerBounds, ContentFormat);
-								headerBounds.X += headerWidth + 5;
-								headerBounds.Width -= headerWidth + 5;
+									graphics, headerText, Font, textBrush, headerBounds, HeaderFormat);
+
+								headerBounds.X += headerWidth + HeaderSpacing;
+								headerBounds.Width -= headerWidth + HeaderSpacing;
+								if(i == 0)
+								{
+									headerBounds.X += HeaderSpacing;
+									headerBounds.Width -= HeaderSpacing;
+								}
+							}
+							else
+							{
+								_changesByType[i].DisplayBounds = Rectangle.Empty;
 							}
 						}
 					}
-					for(int i = 0; i < _items.Length; ++i)
+					var rcLine = rcHeader;
+					rcLine.Y += HeaderBottomMargin + HeaderHeight;
+					rcLine.Height = LineHeight;
+					using(var alternateBackgroundBrush = new SolidBrush(Style.Colors.Alternate))
 					{
-						rc.Y += LineHeight;
-						rcClip = Rectangle.Intersect(rc, clip);
-						if(rcClip.Height > 0 && rcClip.Width > 0)
+						bool alternate = false;
+						for(int i = 0; i < _items.Length; ++i)
 						{
-							if(i % 2 == 1)
+							if((_items[i].File.Status & StatusFilter) != FileStatus.Unknown)
 							{
-								graphics.FillRectangle(alternateBackgroundBrush, rcClip);
+								rcClip = Rectangle.Intersect(rcLine, clip);
+								if(rcClip.Height > 0 && rcClip.Width > 0)
+								{
+									if(alternate)
+									{
+										graphics.FillRectangle(alternateBackgroundBrush, rcClip);
+									}
+									if(i == _fileHover.Index)
+									{
+										Style.ItemBackgroundStyles.Hovered.Draw(graphics, rcLine);
+									}
+									_items[i].Draw(graphics, Font, textBrush, rcLine);
+								}
+								alternate = !alternate;
+								rcLine.Y += LineHeight;
 							}
-							if(i == _fileHover.Index)
-							{
-								FlowControl.Style.ItemBackgroundStyles.Hovered.Draw(graphics, rc);
-							}
-							_items[i].Draw(graphics, Font, textBrush, rc, i);
 						}
 					}
 				}

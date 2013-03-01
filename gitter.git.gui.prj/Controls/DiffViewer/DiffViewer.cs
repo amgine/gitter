@@ -19,6 +19,7 @@
 		private FlowProgressPanel _progressPanel;
 		private IAsyncFunc<Diff> _requiredRequest;
 		private readonly object _sync = new object();
+		private List<FileDiffPanel> _allDiffPanels;
 
 		#endregion
 
@@ -63,6 +64,7 @@
 		/// <summary>Create <see cref="DiffViewer"/>.</summary>
 		public DiffViewer()
 		{
+			_allDiffPanels = new List<FileDiffPanel>();
 		}
 
 		#endregion
@@ -91,6 +93,7 @@
 		private void LoadDiffCore(Diff diff, int scrollPos = 0)
 		{
 			BeginUpdate();
+			_allDiffPanels.Clear();
 			if(_progressPanel != null)
 			{
 				_progressPanel.Remove();
@@ -99,11 +102,15 @@
 			if(diff != null)
 			{
 				FlowPanelSeparator separator = null;
-				Panels.Add(new ChangedFilesPanel() { Diff = diff });
+				var changedFilesPanel = new ChangedFilesPanel() { Diff = diff };
+				changedFilesPanel.StatusFilterChanged += OnStatusFilterChanged;
+				Panels.Add(changedFilesPanel);
 				Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
 				foreach(var file in diff)
 				{
-					Panels.Add(new FileDiffPanel(_repository, file, diff.Type));
+					var fileDiffPanel = new FileDiffPanel(_repository, file, diff.Type);
+					_allDiffPanels.Add(fileDiffPanel);
+					Panels.Add(fileDiffPanel);
 					Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 				}
 				if(separator != null) separator.Height = 6;
@@ -113,6 +120,28 @@
 				scrollPos = MaxVScrollPos;
 			}
 			VScrollPos = scrollPos;
+			EndUpdate();
+		}
+
+		private void OnStatusFilterChanged(object sender, EventArgs e)
+		{
+			var changedFilesPanel = (ChangedFilesPanel)sender;
+			var index = Panels.IndexOf(changedFilesPanel) + 2;
+			BeginUpdate();
+			if(index < Panels.Count)
+			{
+				Panels.RemoveRange(index, Panels.Count - index);
+			}
+			FlowPanelSeparator separator = null;
+			for(int i = 0; i < _allDiffPanels.Count; ++i)
+			{
+				if((_allDiffPanels[i].DiffFile.Status & changedFilesPanel.StatusFilter) != FileStatus.Unknown)
+				{
+					Panels.Add(_allDiffPanels[i]);
+					Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
+				}
+			}
+			if(separator != null) separator.Height = 6;
 			EndUpdate();
 		}
 

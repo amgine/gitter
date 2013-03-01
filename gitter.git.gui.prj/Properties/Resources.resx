@@ -2538,4 +2538,25 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrPrune" xml:space="preserve">
     <value>Prune</value>
   </data>
+  <data name="StrChmod" xml:space="preserve">
+    <value>Chmod</value>
+  </data>
+  <data name="StrCopied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="StrRenamed" xml:space="preserve">
+    <value>Renamed</value>
+  </data>
+  <data name="StrlChanges" xml:space="preserve">
+    <value>changes</value>
+  </data>
+  <data name="StrlChmod" xml:space="preserve">
+    <value>chmod</value>
+  </data>
+  <data name="StrlRemoved" xml:space="preserve">
+    <value>removed</value>
+  </data>
+  <data name="StrlChange" xml:space="preserve">
+    <value>change</value>
+  </data>
 </root>

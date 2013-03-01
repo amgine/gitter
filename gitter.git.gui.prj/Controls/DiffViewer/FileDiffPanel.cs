@@ -802,7 +802,7 @@
 			}
 			if(!reachedEnd && _diffFile.LineCount != 0)
 			{
-				graphics.DrawLine(Pens.Gray, rect.X + Margin, y, rect.X + contentWidth - Margin, y);
+				graphics.DrawLine(Pens.Gray, rect.X + Margin, y, rect.X + contentWidth - Margin - 1, y);
 			}
 			graphics.ResetClip();
 		}
