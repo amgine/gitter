@@ -199,7 +199,7 @@
 			{
 				if(_toolStriprenderer == null)
 				{
-					_toolStriprenderer = new MSVS2012StyleToolStripRenderer();
+					_toolStriprenderer = new MSVS2012StyleToolStripRenderer(MSVS2012StyleToolStripRenderer.DarkColors);
 				}
 				return _toolStriprenderer;
 			}

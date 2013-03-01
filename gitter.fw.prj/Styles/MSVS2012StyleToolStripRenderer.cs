@@ -7,34 +7,186 @@
 
 	sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
-		private static class ColorTable
+		#region Color Tables
+
+		public interface IColorTable
 		{
-			public static readonly Color Grip				= Color.FromArgb(70, 70, 74);
-			public static readonly Color ResizeGrip0		= Color.FromArgb(0, 92, 153);
-			public static readonly Color ResizeGrip1		= Color.FromArgb(127, 188, 229);
-			public static readonly Color Highlight			= Color.FromArgb(62, 62, 64);
-			public static readonly Color MenuBackground		= Color.FromArgb(27, 27, 28);
-			public static readonly Color MenuBorder			= Color.FromArgb(51, 51, 55);
-			public static readonly Color VerticalSeparator0 = Color.FromArgb(34, 34, 34);
-			public static readonly Color VerticalSeparator1 = Color.FromArgb(70, 70, 74);
-			public static readonly Color Pressed			= Color.FromArgb(0, 122, 204);
-			public static readonly Color CheckedBorder		= Color.FromArgb(51, 153, 255);
+			Color Grip { get; }
+			Color ResizeGrip0 { get; }
+			Color ResizeGrip1 { get; }
+			Color Highlight { get; }
+			Color MenuBorder { get; }
+			Color VerticalSeparator0 { get; }
+			Color VerticalSeparator1 { get; }
+			Color Pressed { get; }
+			Color CheckedBorder { get; }
 
-			public static readonly Color Text				= Color.FromArgb(241, 241, 241);
-			public static readonly Color ArrowNormal		= Color.FromArgb(153, 153, 153);
-			public static readonly Color ArrowHighlight		= Color.FromArgb(0, 122, 204);
+			Color Text { get; }
+			Color ArrowNormal { get; }
+			Color ArrowHighlight { get; }
 
-			public static readonly Color ToolStripBackground	= Color.FromArgb(45, 45, 48);
-			public static readonly Color MenuStripBackground	= Color.FromArgb(45, 45, 48);
-			public static readonly Color StatusStripBackground	= Color.FromArgb(45, 45, 48);
-			public static readonly Color ContentPanelBackground = Color.FromArgb(45, 45, 48);
+			Color ToolStripBackground { get; }
+			Color MenuStripBackground { get; }
+			Color StatusStripBackground { get; }
+			Color DropDownBackground { get; }
+			Color StatusLabelBackground { get; }
+			Color ContentPanelBackground { get; }
+			Color TextBoxBackground { get; }
 
-			public static readonly Color StatusLabelBackground	= StatusStripBackground;
-
-			public static readonly Color CheckboxBorder		= Color.FromArgb(229, 195, 101);
-			public static readonly Color CheckboxNormal		= Color.FromArgb(255, 239, 187);
-			public static readonly Color CheckboxSelected	= Color.FromArgb(255, 252, 244);
+			Color SelectedCheckboxBackground { get; }
+			Color SelectedCheckboxForeground { get; }
+			Color NormalCheckboxBackground { get; }
+			Color NormalCheckboxForeground { get; }
 		}
+
+		private sealed class DarkColorTable : IColorTable
+		{
+			private static readonly Color GRIP						= Color.FromArgb(70, 70, 74);
+			private static readonly Color RESIZE_GRIP0				= Color.FromArgb(0, 92, 153);
+			private static readonly Color RESIZE_GRIP1				= Color.FromArgb(127, 188, 229);
+			private static readonly Color HIGHLIGHT					= Color.FromArgb(62, 62, 64);
+			private static readonly Color MENU_BORDER				= Color.FromArgb(51, 51, 55);
+			private static readonly Color VERTICAL_SEPARATOR0		= Color.FromArgb(34, 34, 34);
+			private static readonly Color VERTICAL_SEPARATOR1		= Color.FromArgb(70, 70, 74);
+			private static readonly Color PRESSED					= Color.FromArgb(0, 122, 204);
+			private static readonly Color CHCKED_BORDER				= Color.FromArgb(51, 153, 255);
+
+			private static readonly Color TEXT						= MSVS2012DarkColors.WINDOW_TEXT;
+			private static readonly Color ARROW_NORMAL				= Color.FromArgb(153, 153, 153);
+			private static readonly Color ARROW_HIGHLIGHT			= Color.FromArgb(0, 122, 204);
+
+			private static readonly Color TOOL_STRIP_BACKGROUND		= MSVS2012DarkColors.WORK_AREA;
+			private static readonly Color MENU_STRIP_BACKGROUND		= MSVS2012DarkColors.WORK_AREA;
+			private static readonly Color STATUS_STRIP_BACKGROUND	= MSVS2012DarkColors.WORK_AREA;
+			private static readonly Color DROP_DOWN_BACKGROUND		= Color.FromArgb(27, 27, 28);
+			private static readonly Color STATUS_LABEL_BACKGROUND	= MSVS2012DarkColors.WORK_AREA;
+			private static readonly Color CONTENT_PANEL_BACKGROUND	= MSVS2012DarkColors.WORK_AREA;
+			private static readonly Color TEXT_BOX_BACKGROUND		= MSVS2012DarkColors.WINDOW;
+
+			private static readonly Color SELECTED_CHECKBOX_BACKGROUND	= Color.FromArgb(62, 62, 64);
+			private static readonly Color SELECTED_CHECKBOX_FOREGROUND	= Color.FromArgb(241, 241, 241);
+			private static readonly Color NORMAL_CHECKBOX_BACKGROUND	= Color.FromArgb(45, 45, 48);
+			private static readonly Color NORMAL_CHECKBOX_FOREGROUND	= Color.FromArgb(153, 153, 153);
+
+			#region IColorTable
+
+			public Color Grip { get { return GRIP; } }
+			public Color ResizeGrip0 { get { return RESIZE_GRIP0; } }
+			public Color ResizeGrip1 { get { return RESIZE_GRIP1; } }
+			public Color Highlight { get { return HIGHLIGHT; } }
+			public Color MenuBorder { get { return MENU_BORDER; } }
+			public Color VerticalSeparator0 { get { return VERTICAL_SEPARATOR0; } }
+			public Color VerticalSeparator1 { get { return VERTICAL_SEPARATOR1; } }
+			public Color Pressed { get { return PRESSED; } }
+			public Color CheckedBorder { get { return CHCKED_BORDER; } }
+
+			public Color Text { get { return TEXT; } }
+			public Color ArrowNormal { get { return ARROW_NORMAL; } }
+			public Color ArrowHighlight { get { return ARROW_HIGHLIGHT; } }
+
+			public Color ToolStripBackground { get { return TOOL_STRIP_BACKGROUND; } }
+			public Color MenuStripBackground { get { return MENU_STRIP_BACKGROUND; } }
+			public Color StatusStripBackground { get { return STATUS_STRIP_BACKGROUND; } }
+			public Color DropDownBackground { get { return DROP_DOWN_BACKGROUND; } }
+			public Color StatusLabelBackground { get { return STATUS_STRIP_BACKGROUND; } }
+			public Color ContentPanelBackground { get { return CONTENT_PANEL_BACKGROUND; } }
+			public Color TextBoxBackground { get { return TEXT_BOX_BACKGROUND; } }
+
+			public Color SelectedCheckboxBackground { get { return SELECTED_CHECKBOX_BACKGROUND; } }
+			public Color SelectedCheckboxForeground { get { return SELECTED_CHECKBOX_FOREGROUND; } }
+			public Color NormalCheckboxBackground { get { return NORMAL_CHECKBOX_BACKGROUND; } }
+			public Color NormalCheckboxForeground { get { return NORMAL_CHECKBOX_FOREGROUND; } }
+
+			#endregion
+		}
+
+		private static IColorTable _darkColors;
+
+		public static IColorTable DarkColors
+		{
+			get
+			{
+				if(_darkColors == null)
+				{
+					_darkColors = new DarkColorTable();
+				}
+				return _darkColors;
+			}
+		}
+
+		#endregion
+
+		#region Data
+
+		private readonly IColorTable _colorTable;
+
+		#endregion
+
+		#region .ctor
+
+		public MSVS2012StyleToolStripRenderer(IColorTable colorTable)
+		{
+			Verify.Argument.IsNotNull(colorTable, "colorTable");
+
+			_colorTable = colorTable;
+		}
+
+		#endregion
+
+		#region Properties
+
+		private IColorTable ColorTable
+		{
+			get { return _colorTable; }
+		}
+
+		#endregion
+
+		#region Stage 0 - Initialization
+
+		protected override void Initialize(ToolStrip toolStrip)
+		{
+			if(toolStrip is ToolStripDropDown)
+			{
+				toolStrip.BackColor = ColorTable.DropDownBackground;
+			}
+			else if(toolStrip is StatusStrip)
+			{
+				toolStrip.BackColor = ColorTable.StatusStripBackground;
+			}
+			else if(toolStrip is MenuStrip)
+			{
+				toolStrip.BackColor = ColorTable.MenuStripBackground;
+			}
+			else
+			{
+				toolStrip.BackColor = ColorTable.ToolStripBackground;
+			}
+			toolStrip.ForeColor = ColorTable.Text;
+		}
+
+		protected override void InitializePanel(ToolStripPanel toolStripPanel)
+		{
+			toolStripPanel.BackColor = ColorTable.ToolStripBackground;
+		}
+
+		protected override void InitializeContentPanel(ToolStripContentPanel contentPanel)
+		{
+			contentPanel.BackColor = ColorTable.ContentPanelBackground;
+		}
+
+		protected override void InitializeItem(ToolStripItem item)
+		{
+			var tsTextBox = item as ToolStripTextBox;
+			if(tsTextBox!= null)
+			{
+				tsTextBox.BorderStyle = BorderStyle.FixedSingle;
+				tsTextBox.BackColor = ColorTable.TextBoxBackground;
+				tsTextBox.ForeColor = ColorTable.Text;
+			}
+		}
+
+		#endregion
 
 		#region Stage 1 - Container Backgrounds
 
@@ -290,13 +442,13 @@
 			Color checkboxForeground;
 			if(e.Item.Selected)
 			{
-				checkboxBackground = Color.FromArgb(62, 62, 64);
-				checkboxForeground = Color.FromArgb(241, 241, 241);
+				checkboxBackground = ColorTable.SelectedCheckboxBackground;
+				checkboxForeground = ColorTable.SelectedCheckboxForeground;
 			}
 			else
 			{
-				checkboxBackground = Color.FromArgb(45, 45, 48);
-				checkboxForeground = Color.FromArgb(153, 153, 153);
+				checkboxBackground = ColorTable.NormalCheckboxBackground;
+				checkboxForeground = ColorTable.NormalCheckboxForeground;
 			}
 			var graphics = e.Graphics;
 			var rect = e.ImageRectangle;
@@ -376,7 +528,7 @@
 
 		#endregion
 
-		private static void RenderMenuStripBackground(ToolStripRenderEventArgs e)
+		private void RenderMenuStripBackground(ToolStripRenderEventArgs e)
 		{
 			var strip = e.ToolStrip;
 			var rc = new Rectangle(0, 0, strip.Width, strip.Height);
@@ -386,7 +538,7 @@
 			}
 		}
 
-		private static void RenderStatusStripBackground(ToolStripRenderEventArgs e)
+		private void RenderStatusStripBackground(ToolStripRenderEventArgs e)
 		{
 			using(var brush = new SolidBrush(ColorTable.StatusStripBackground))
 			{
@@ -394,25 +546,25 @@
 			}
 		}
 
-		private static void RenderDropDownBackground(ToolStripRenderEventArgs e)
+		private void RenderDropDownBackground(ToolStripRenderEventArgs e)
 		{
 			var strip = e.ToolStrip;
 			var rc = new Rectangle(1, 1, strip.Width - 2, strip.Height - 2);
-			using(var brush = new SolidBrush(ColorTable.MenuBackground))
+			using(var brush = new SolidBrush(ColorTable.DropDownBackground))
 			{
 				e.Graphics.FillRectangle(brush, rc);
 			}
 		}
 
-		private static void RenderToolStripBackgroundInternal(ToolStripRenderEventArgs e)
+		private void RenderToolStripBackgroundInternal(ToolStripRenderEventArgs e)
 		{
-			using(var brush = new SolidBrush(ColorTable.ToolStripBackground))
+			using(var brush = new SolidBrush(ColorTable.MenuStripBackground))
 			{
 				e.Graphics.FillRectangle(brush, e.AffectedBounds);
 			}
 		}
 
-		private static void RenderDropDownBorder(ToolStripRenderEventArgs e)
+		private void RenderDropDownBorder(ToolStripRenderEventArgs e)
 		{
 			var strip = e.ToolStrip as ToolStripDropDown;
 			var rc = new Rectangle(0, 0, e.ToolStrip.Width - 1, e.ToolStrip.Height - 1);
@@ -420,20 +572,20 @@
 			{
 				e.Graphics.DrawRectangle(pen, rc);
 			}
-			using(var brush = new SolidBrush(ColorTable.MenuBackground))
+			using(var brush = new SolidBrush(ColorTable.DropDownBackground))
 			{
 				e.Graphics.FillRectangle(brush, e.ConnectedArea);
 			}
 		}
 
-		private static void RenderMenuItemBackgroundInternal(Graphics graphics, int x, int y, int width, int height, bool isPressed, bool isSelected, bool isRoot)
+		private void RenderMenuItemBackgroundInternal(Graphics graphics, int x, int y, int width, int height, bool isPressed, bool isSelected, bool isRoot)
 		{
 			var rc = new Rectangle(x, y, width - 1, height - 1);
 			if(isPressed)
 			{
 				if(isRoot)
 				{
-					using(var brush = new SolidBrush(ColorTable.MenuBackground))
+					using(var brush = new SolidBrush(ColorTable.DropDownBackground))
 					{
 						graphics.FillRectangle(brush, rc);
 					}
@@ -474,7 +626,7 @@
 			}
 		}
 
-		private static void RenderItemBackgroundInternal(Graphics graphics, int x, int y, int width, int height, bool pressed, bool selected)
+		private void RenderItemBackgroundInternal(Graphics graphics, int x, int y, int width, int height, bool pressed, bool selected)
 		{
 			if(pressed)
 			{
@@ -492,7 +644,7 @@
 			}
 		}
 
-		private static void RenderItemBackgroundInternal(Graphics graphics, int width, int height, bool pressed, bool selected)
+		private void RenderItemBackgroundInternal(Graphics graphics, int width, int height, bool pressed, bool selected)
 		{
 			RenderItemBackgroundInternal(graphics, 0, 0, width, height, pressed, selected);
 		}

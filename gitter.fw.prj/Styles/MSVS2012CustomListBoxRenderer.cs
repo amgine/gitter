@@ -1,11 +1,12 @@
-﻿namespace gitter.Framework.Controls
+﻿namespace gitter.Framework
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
+
+	using gitter.Framework.Controls;
+
 	using Resources = gitter.Framework.Properties.Resources;
 
 	sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer

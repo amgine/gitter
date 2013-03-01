@@ -74,7 +74,7 @@
 			{
 				if(_msvs2012DarkStyleRender == null)
 				{
-					_msvs2012DarkStyleRender = new MSVS2012StyleViewRenderer();
+					_msvs2012DarkStyleRender = new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.DarkColors);
 				}
 				return _msvs2012DarkStyleRender;
 			}

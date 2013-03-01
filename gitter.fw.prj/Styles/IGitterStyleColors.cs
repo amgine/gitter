@@ -1,27 +1,18 @@
 ﻿namespace gitter.Framework
 {
-	using System;
-	using System.Drawing;
+	using Color = System.Drawing.Color;
 
 	public interface IGitterStyleColors
 	{
-		Color WorkArea { get; }
-
-		Color Window { get; }
-
-		Color ScrollBarSpacing { get; }
-
-		Color Separator { get; }
-
-		Color Alternate { get; }
-
-		Color WindowText { get; }
-
-		Color GrayText { get; }
-
-		Color HyperlinkText { get; }
-
-		Color HyperlinkTextHotTrack { get; }
+		Color WorkArea						{ get; }
+		Color Window						{ get; }
+		Color ScrollBarSpacing				{ get; }
+		Color Separator						{ get; }
+		Color Alternate						{ get; }
+		Color WindowText					{ get; }
+		Color GrayText						{ get; }
+		Color HyperlinkText					{ get; }
+		Color HyperlinkTextHotTrack			{ get; }
 
 		Color FileHeaderColor1				{ get; }
 		Color FileHeaderColor2				{ get; }

@@ -17,7 +17,7 @@
 		#region .ctor
 
 		public ViewDockSideTab(ViewDockSide side, ViewHost viewHost, ViewBase view)
-			: base(view, InvertAnchor(side.Side))
+			: base(view, Utility.InvertAnchor(side.Side))
 		{
 			Verify.Argument.IsNotNull(side, "side");
 			Verify.Argument.IsNotNull(viewHost, "viewHost");
@@ -29,6 +29,11 @@
 		#endregion
 
 		#region Properties
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
+		}
 
 		public ViewDockSide Side
 		{
@@ -49,32 +54,15 @@
 
 		protected override int Measure(Graphics graphics)
 		{
-			return ViewManager.Renderer.MeasureViewDockSideTabLength(this, graphics);
+			return Renderer.MeasureViewDockSideTabLength(this, graphics);
 		}
 
 		internal override void OnPaint(Graphics graphics, Rectangle bounds)
 		{
 			if(bounds.Width > 0 && bounds.Height > 0)
 			{
-				ViewManager.Renderer.RenderViewDockSideTabBackground(this, graphics, bounds);
-				ViewManager.Renderer.RenderViewDockSideTabContent(this, graphics, bounds);
-			}
-		}
-
-		private static AnchorStyles InvertAnchor(AnchorStyles anchor)
-		{
-			switch(anchor)
-			{
-				case AnchorStyles.Left:
-					return AnchorStyles.Right;
-				case AnchorStyles.Top:
-					return AnchorStyles.Bottom;
-				case AnchorStyles.Right:
-					return AnchorStyles.Left;
-				case AnchorStyles.Bottom:
-					return AnchorStyles.Top;
-				default:
-					throw new ArgumentException("anchor");
+				Renderer.RenderViewDockSideTabBackground(this, graphics, bounds);
+				Renderer.RenderViewDockSideTabContent(this, graphics, bounds);
 			}
 		}
 	}

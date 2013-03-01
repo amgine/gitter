@@ -28,6 +28,11 @@
 
 		#region Properties
 
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
+		}
+
 		/// <summary>Gets the bounds of this <see cref="DockMarkerButton"/>.</summary>
 		/// <value>Bounds of this <see cref="DockMarkerButton"/>.</value>
 		public Rectangle Bounds
@@ -49,7 +54,7 @@
 		/// <param name="hover">Indicates whether this button is hovered.</param>
 		internal void OnPaint(Graphics graphics, bool hover)
 		{
-			ViewManager.Renderer.RenderDockMarkerButton(this, graphics, hover);
+			Renderer.RenderDockMarkerButton(this, graphics, hover);
 		}
 	}
 }

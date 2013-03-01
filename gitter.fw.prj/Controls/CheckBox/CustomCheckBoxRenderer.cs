@@ -13,7 +13,7 @@
 			{
 				if(_msvs2012Dark == null)
 				{
-					_msvs2012Dark = new MSVS2012CheckBoxRenderer(MSVS2012CheckBoxRenderer.DarkColor);
+					_msvs2012Dark = new MSVS2012CheckBoxRenderer(MSVS2012CheckBoxRenderer.DarkColors);
 				}
 				return _msvs2012Dark;
 			}

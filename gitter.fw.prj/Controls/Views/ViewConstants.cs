@@ -34,10 +34,6 @@
 
 		public const int ViewFloatDragMargin = 6;
 
-		public const int FloatTitleHeight = 16;
-		public const int FloatBorderSize = 4;
-		public const int FloatCornderRadius = 3;
-
 		public const int SideDockPanelBorderSize = 3;
 
 		public const int TabHeaderButtonSpacing = 2;

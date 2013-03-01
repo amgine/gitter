@@ -1,21 +1,13 @@
 ﻿namespace gitter.Git.Gui
 {
-	using System;
-
 	using gitter.Framework;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	static class CachedResources
 	{
-		private static readonly CachedBitmapResources _bitmaps;
-		private static readonly CachedIconResources _icons;
-
-		static CachedResources()
-		{
-			_bitmaps = new CachedBitmapResources(Resources.ResourceManager);
-			_icons = new CachedIconResources(Resources.ResourceManager);
-		}
+		private static readonly CachedBitmapResources _bitmaps = new CachedBitmapResources(Resources.ResourceManager);
+		private static readonly CachedIconResources _icons = new CachedIconResources(Resources.ResourceManager);
 
 		public static CachedBitmapResources Bitmaps
 		{

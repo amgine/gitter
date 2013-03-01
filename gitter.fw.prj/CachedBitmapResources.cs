@@ -2,34 +2,14 @@
 {
 	using System;
 	using System.Resources;
-	using System.Collections.Generic;
 	using System.Drawing;
 
 	/// <summary>Provides cached bitmap resources.</summary>
-	public sealed class CachedBitmapResources
+	public sealed class CachedBitmapResources : CachedResources<Bitmap>
 	{
-		private readonly Dictionary<string, Bitmap> _cache = new Dictionary<string, Bitmap>();
-		private readonly ResourceManager _manager;
-
-		public CachedBitmapResources(ResourceManager manager)
+		public CachedBitmapResources(ResourceManager resourceManager)
+			: base(resourceManager)
 		{
-			Verify.Argument.IsNotNull(manager, "manager");
-
-			_manager = manager;
-		}
-
-		public Bitmap this[string name]
-		{
-			get
-			{
-				Bitmap bmp;
-				if(!_cache.TryGetValue(name, out bmp))
-				{
-					bmp = (Bitmap)_manager.GetObject(name);
-					_cache.Add(name, bmp);
-				}
-				return bmp;
-			}
 		}
 
 		public Bitmap CombineBitmaps(string resBackground, string resOverlay)

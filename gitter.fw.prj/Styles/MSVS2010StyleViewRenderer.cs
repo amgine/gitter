@@ -77,6 +77,9 @@
 			public const int ViewButtonSize		= 15;
 			public const int SideTabSpacing		= 1;
 			public const int SideTabHeight		= 21;
+			public const int FloatTitleHeight	= 16;
+			public const int FloatBorderSize	= 4;
+			public const int FloatCornerRadius	= 3;
 		}
 
 		public override Color BackgroundColor
@@ -127,6 +130,21 @@
 		public override int SideTabHeight
 		{
 			get { return Constants.SideTabHeight; }
+		}
+
+		public override int FloatBorderSize
+		{
+			get { return Constants.FloatBorderSize; }
+		}
+
+		public override int FloatCornerRadius
+		{
+			get { return Constants.FloatCornerRadius; }
+		}
+
+		public override int FloatTitleHeight
+		{
+			get { return Constants.FloatTitleHeight; }
 		}
 
 		#region Tabs Rendering

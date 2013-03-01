@@ -19,7 +19,7 @@
 			BackColor		= GitterApplication.Style.ViewRenderer.BackgroundColor;
 			FormBorderStyle	= FormBorderStyle.None;
 			StartPosition	= FormStartPosition.Manual;
-			Padding			= new Padding(ViewConstants.FloatBorderSize);
+			Padding			= new Padding(Renderer.FloatBorderSize);
 			ShowInTaskbar	= false;
 			ShowIcon		= false;
 			ControlBox		= false;
@@ -31,21 +31,26 @@
 			{
 				Text = content.Text,
 				Bounds = new Rectangle(
-					ViewConstants.FloatBorderSize,
-					ViewConstants.FloatBorderSize,
-					ViewConstants.PopupWidth - ViewConstants.FloatBorderSize * 2,
+					Renderer.FloatBorderSize,
+					Renderer.FloatBorderSize,
+					ViewConstants.PopupWidth - Renderer.FloatBorderSize * 2,
 					ViewManager.Renderer.HeaderHeight),
 				Parent	= this,
 			};
 
 			var cr = ClientRectangle;
-			content.Width	= ViewConstants.PopupWidth - ViewConstants.FloatBorderSize * 2;
-			content.Top		= cr.Top + ViewManager.Renderer.HeaderHeight + ViewConstants.FloatBorderSize;
-			ClientSize		= new Size(ViewConstants.PopupWidth, content.Height + ViewManager.Renderer.HeaderHeight + ViewConstants.FloatBorderSize * 2);
-			content.Left	= ViewConstants.FloatBorderSize;
+			content.Width	= ViewConstants.PopupWidth - Renderer.FloatBorderSize * 2;
+			content.Top		= cr.Top + ViewManager.Renderer.HeaderHeight + Renderer.FloatBorderSize;
+			ClientSize		= new Size(ViewConstants.PopupWidth, content.Height + Renderer.HeaderHeight + Renderer.FloatBorderSize * 2);
+			content.Left	= Renderer.FloatBorderSize;
 			content.Parent	= this;
 
 			AssignEventHandlers(this);
+		}
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
 		}
 
 		private void AssignEventHandlers(Control control)
@@ -140,9 +145,11 @@
 
 		protected override void OnResize(EventArgs e)
 		{
-			var region = Region;
-			Region = Utility.GetRoundedRegion(ClientRectangle, ViewConstants.FloatCornderRadius);
-			if(region != null) region.Dispose();
+			var cornerRadius = Renderer.FloatCornerRadius;
+			if(cornerRadius != 0)
+			{
+				Region = Utility.GetRoundedRegion(ClientRectangle, cornerRadius);
+			}
 			base.OnResize(e);
 		}
 

@@ -25,9 +25,6 @@
 			Verify.Argument.IsNotNull(dockHost, "dockHost");
 			Verify.Argument.IsNotNull(dockClient, "dockClient");
 
-			_dockHost = dockHost;
-			_dockClient = dockClient;
-
 			SetStyle(
 				ControlStyles.ContainerControl |
 				ControlStyles.Selectable |
@@ -40,28 +37,28 @@
 				ControlStyles.OptimizedDoubleBuffer,
 				true);
 
-			MinimumSize = new Size(1, 1);
-			StartPosition = FormStartPosition.Manual;
-			FormBorderStyle = FormBorderStyle.None;
-			ControlBox = false;
-			MaximizeBox = false;
-			MinimizeBox = false;
-			Text = string.Empty;
-			ShowIcon = false;
-			ShowInTaskbar = false;
-			Enabled = false;
-			ImeMode = ImeMode.Disable;
-			BackColor = Renderer.DockMarkerBackgroundColor;
+			_dockHost			= dockHost;
+			_dockClient			= dockClient;
 
-			Bounds = bounds;
-			AllowTransparency = true;
-			Opacity = ViewConstants.OpacityNormal;
+			MinimumSize			= new Size(1, 1);
+			StartPosition		= FormStartPosition.Manual;
+			FormBorderStyle		= FormBorderStyle.None;
+			ControlBox			= false;
+			MaximizeBox			= false;
+			MinimizeBox			= false;
+			Text				= string.Empty;
+			ShowIcon			= false;
+			ShowInTaskbar		= false;
+			Enabled				= false;
+			ImeMode				= ImeMode.Disable;
+			BackColor			= Renderer.DockMarkerBackgroundColor;
+			Bounds				= bounds;
+			AllowTransparency	= true;
+			Opacity				= ViewConstants.OpacityNormal;
 
-			_buttons = buttons;
-			_buttonHover = new TrackingService<DockMarkerButton>();
-			_buttonHover.Changed += OnButtonHoverChanged;
-
-			_borderPolygon = border;
+			_borderPolygon		= border;
+			_buttons			= buttons;
+			_buttonHover		= new TrackingService<DockMarkerButton>(OnButtonHoverChanged);
 		}
 
 		private ViewRenderer Renderer
@@ -161,7 +158,9 @@
 			for(int i = 0; i < _buttons.Length; ++i)
 			{
 				if(_buttons[i].Bounds.Contains(point))
+				{
 					return i;
+				}
 			}
 			return -1;
 		}
@@ -248,9 +247,13 @@
 		private void UpdateDockPositionMarker(Rectangle bounds)
 		{
 			if(_positionMarker == null)
+			{
 				SpawnDockPositionMarker(bounds);
+			}
 			else
+			{
 				_positionMarker.Bounds = bounds;
+			}
 		}
 
 		private void KillDockPositionMarker()

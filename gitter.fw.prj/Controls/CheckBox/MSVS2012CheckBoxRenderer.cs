@@ -7,7 +7,21 @@
 
 	sealed class MSVS2012CheckBoxRenderer : CustomCheckBoxRenderer
 	{
-		public static readonly IColorTable DarkColor = new DarkColorTable();
+		#region Color Tables
+
+		private static IColorTable _darkColors;
+
+		public static IColorTable DarkColors
+		{
+			get
+			{
+				if(_darkColors == null)
+				{
+					_darkColors = new DarkColorTable();
+				}
+				return _darkColors;
+			}
+		}
 
 		public interface IColorTable
 		{
@@ -64,11 +78,13 @@
 			}
 		}
 
+		#endregion
+
 		private readonly IColorTable _colorTable;
 
 		public MSVS2012CheckBoxRenderer(IColorTable colorTable)
 		{
-			if(colorTable == null) throw new ArgumentNullException("colorTable");
+			Verify.Argument.IsNotNull(colorTable, "colorTable");
 
 			_colorTable = colorTable;
 		}

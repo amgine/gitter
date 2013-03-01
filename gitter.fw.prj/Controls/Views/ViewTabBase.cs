@@ -16,6 +16,8 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
+		#region .ctor
+
 		/// <summary>Initializes a new instance of the <see cref="ViewTabBase"/> class.</summary>
 		/// <param name="view">Represented <see cref="ViewBase"/>.</param>
 		protected ViewTabBase(ViewBase view, AnchorStyles anchor)
@@ -32,6 +34,8 @@ namespace gitter.Framework.Controls
 				case AnchorStyles.Bottom:
 					_orientation = Orientation.Horizontal;
 					break;
+				default:
+					throw new ArgumentException("Invalid anchor value.", "anchor");
 			}
 			_anchor = anchor;
 			_view = view;
@@ -41,6 +45,8 @@ namespace gitter.Framework.Controls
 		{
 			Dispose(false);
 		}
+
+		#endregion
 
 		#region Properties
 

@@ -28,6 +28,12 @@
 
 		public abstract int SideTabHeight { get; }
 
+		public abstract int FloatTitleHeight { get; }
+
+		public abstract int FloatBorderSize { get; }
+
+		public abstract int FloatCornerRadius { get; }
+
 		#endregion
 
 		#region Methods

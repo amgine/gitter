@@ -137,8 +137,11 @@
 
 		private static void SetupDefaultExceptionHandling()
 		{
-			Application.ThreadException += OnThreadException;
-			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+			if(!System.Diagnostics.Debugger.IsAttached)
+			{
+				Application.ThreadException += OnThreadException;
+				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+			}
 		}
 
 		private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)

@@ -4,7 +4,7 @@
 	using System.Windows.Forms;
 	using System.Drawing;
 
-	/// <summary>hosts floating views.</summary>
+	/// <summary>Hosts floating views.</summary>
 	internal sealed class FloatingViewForm : Form
 	{
 		#region Data
@@ -14,17 +14,6 @@
 		private Control _rootControl;
 
 		#endregion
-
-		private static Rectangle GetBoundsForControl(Control control)
-		{
-			var loc = control.PointToScreen(Point.Empty);
-			var size = control.Size;
-			loc.X -= ViewConstants.FloatBorderSize;
-			loc.Y -= ViewConstants.FloatBorderSize;
-			size.Width += ViewConstants.FloatBorderSize * 2;
-			size.Height += ViewConstants.FloatBorderSize * 2;
-			return new Rectangle(loc, size);
-		}
 
 		/// <summary>Initializes a new instance of the <see cref="FloatingViewForm"/> class.</summary>
 		/// <param name="viewHost">Floating <see cref="ViewHost"/>.</param>
@@ -36,9 +25,9 @@
 			Font			= GitterApplication.FontManager.UIFont;
 			Text			= viewHost.Text;
 			FormBorderStyle	= FormBorderStyle.None;
-			BackColor		= GitterApplication.Style.ViewRenderer.BackgroundColor;
+			BackColor		= Renderer.BackgroundColor;
 			StartPosition	= FormStartPosition.Manual;
-			Padding			= new Padding(ViewConstants.FloatBorderSize);
+			Padding			= new Padding(Renderer.FloatBorderSize);
 			Bounds			= GetBoundsForControl(viewHost);
 			if(viewHost.Width < ViewConstants.MinimumHostWidth)
 			{
@@ -56,8 +45,8 @@
 				viewHost.Height = ViewConstants.MinimumHostHeight;
 			};
 			MinimumSize		= new Size(
-				ViewConstants.MinimumHostWidth + ViewConstants.FloatBorderSize * 2,
-				ViewConstants.MinimumHostHeight + ViewConstants.FloatBorderSize * 2);
+				ViewConstants.MinimumHostWidth + Renderer.FloatBorderSize * 2,
+				ViewConstants.MinimumHostHeight + Renderer.FloatBorderSize * 2);
 			ShowInTaskbar	= false;
 			ShowIcon		= false;
 			ControlBox		= false;
@@ -67,6 +56,22 @@
 			_dockGrid		= dockGrid;
 
 			_dockGrid.AddFloatingForm(this);
+		}
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
+		}
+
+		private Rectangle GetBoundsForControl(Control control)
+		{
+			var loc = control.PointToScreen(Point.Empty);
+			var size = control.Size;
+			loc.X -= Renderer.FloatBorderSize;
+			loc.Y -= Renderer.FloatBorderSize;
+			size.Width += Renderer.FloatBorderSize * 2;
+			size.Height += Renderer.FloatBorderSize * 2;
+			return new Rectangle(loc, size);
 		}
 
 		internal bool IsInMulticontrolMode
@@ -82,17 +87,17 @@
 			{
 				Padding = new Padding(
 					0,
-					0 + ViewConstants.FloatTitleHeight,
+					0 + Renderer.FloatTitleHeight,
 					0,
 					0);
 			}
 			else
 			{
 				Padding = new Padding(
-					ViewConstants.FloatBorderSize,
-					ViewConstants.FloatBorderSize + ViewConstants.FloatTitleHeight,
-					ViewConstants.FloatBorderSize,
-					ViewConstants.FloatBorderSize);
+					Renderer.FloatBorderSize,
+					Renderer.FloatBorderSize + Renderer.FloatTitleHeight,
+					Renderer.FloatBorderSize,
+					Renderer.FloatBorderSize);
 			}
 			_isInMulticontrolMode = true;
 		}
@@ -112,10 +117,10 @@
 			else
 			{
 				Padding = new Padding(
-					ViewConstants.FloatBorderSize,
-					ViewConstants.FloatBorderSize,
-					ViewConstants.FloatBorderSize,
-					ViewConstants.FloatBorderSize);
+					Renderer.FloatBorderSize,
+					Renderer.FloatBorderSize,
+					Renderer.FloatBorderSize,
+					Renderer.FloatBorderSize);
 			}
 			_isInMulticontrolMode = false;
 		}
@@ -176,7 +181,7 @@
 				{
 					if((new Rectangle(
 						rc.X, rc.Y,
-						rc.Width, ViewConstants.FloatTitleHeight)).Contains(point))
+						rc.Width, Renderer.FloatTitleHeight)).Contains(point))
 					{
 						m.Result = (IntPtr)NativeMethods.HTCAPTION;
 						return true;
@@ -185,10 +190,10 @@
 				else
 				{
 					if((new Rectangle(
-						rc.X + ViewConstants.FloatBorderSize,
-						rc.Y + ViewConstants.FloatBorderSize,
-						rc.Width - ViewConstants.FloatBorderSize * 2,
-						ViewConstants.FloatTitleHeight)).Contains(point))
+						rc.X + Renderer.FloatBorderSize,
+						rc.Y + Renderer.FloatBorderSize,
+						rc.Width - Renderer.FloatBorderSize * 2,
+						Renderer.FloatTitleHeight)).Contains(point))
 					{
 						m.Result = (IntPtr)NativeMethods.HTCAPTION;
 						return true;
@@ -256,14 +261,13 @@
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
 		protected override void OnResize(EventArgs e)
 		{
-			var reg = Region;
 			if(WindowState == FormWindowState.Maximized)
 			{
 				if(_isInMulticontrolMode)
 				{
 					Padding = new Padding(
 						0,
-						0 + ViewConstants.FloatTitleHeight,
+						0 + Renderer.FloatTitleHeight,
 						0,
 						0);
 				}
@@ -278,23 +282,26 @@
 				if(_isInMulticontrolMode)
 				{
 					Padding = new Padding(
-						ViewConstants.FloatBorderSize,
-						ViewConstants.FloatBorderSize + ViewConstants.FloatTitleHeight,
-						ViewConstants.FloatBorderSize,
-						ViewConstants.FloatBorderSize);
+						Renderer.FloatBorderSize,
+						Renderer.FloatBorderSize + Renderer.FloatTitleHeight,
+						Renderer.FloatBorderSize,
+						Renderer.FloatBorderSize);
 				}
 				else
 				{
-					Padding = new Padding(ViewConstants.FloatBorderSize);
+					Padding = new Padding(Renderer.FloatBorderSize);
 				}
-				Region = Utility.GetRoundedRegion(ClientRectangle, ViewConstants.FloatCornderRadius);
+				var cornderRadius = Renderer.FloatCornerRadius;
+				if(cornderRadius != 0)
+				{
+					Region = Utility.GetRoundedRegion(ClientRectangle, Renderer.FloatCornerRadius);
+				}
 			}
-			if(reg != null) reg.Dispose();
 			base.OnResize(e);
 		}
 
 		/// <summary>
-		/// Disposes of the resources (other than memory) used by the <see cref="T:System.Windows.Forms.Form"/>.
+		/// Disposes of the resources (other than memory) used by the <see cref="T:FloatingViewForm"/>.
 		/// </summary>
 		/// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
 		protected override void Dispose(bool disposing)

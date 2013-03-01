@@ -81,6 +81,7 @@
     <Compile Include="AsyncExecution\IAsyncAction.cs" />
     <Compile Include="AsyncExecution\IAsyncFunc.cs" />
     <Compile Include="AsyncExecution\NullMonitor.cs" />
+    <Compile Include="CachedResources.cs" />
     <Compile Include="Cache\CachedBrush.cs" />
     <Compile Include="ClipboardEx.cs" />
     <Compile Include="CLI\AsyncBytesReader.cs" />
@@ -103,7 +104,7 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\CustomListBox\MSVS2012CustomListBoxRenderer.cs" />
+    <Compile Include="Styles\MSVS2012CustomListBoxRenderer.cs" />
     <Compile Include="Controls\CustomListBox\NotifyCollectionBinding.cs" />
     <Compile Include="Controls\CustomListBox\Win7CustomListBoxRenderer.cs" />
     <Compile Include="Controls\DragHelper.cs" />
@@ -153,7 +154,7 @@
     <Compile Include="Controls\Views\PopupNotificationHeader.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\Views\ViewRendererBase.cs" />
+    <Compile Include="Controls\Views\ViewRenderer.cs" />
     <Compile Include="Controls\Views\ViewManager.cs" />
     <Compile Include="Controls\ScrollBar\CustomScrollBar.cs">
       <SubType>Component</SubType>

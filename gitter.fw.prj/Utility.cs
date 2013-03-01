@@ -181,37 +181,21 @@
 			Application.Idle -= DisposeRegisteredObjects;
 		}
 
-		//public static readonly StringFormat DefaultStringFormat =
-		//    new StringFormat(StringFormat.GenericTypographic)
-		//    {
-		//        FormatFlags =
-		//            StringFormatFlags.LineLimit |
-		//            StringFormatFlags.DisplayFormatControl |
-		//            StringFormatFlags.MeasureTrailingSpaces |
-		//            StringFormatFlags.FitBlackBox |
-		//            StringFormatFlags.NoWrap,
-		//        HotkeyPrefix = HotkeyPrefix.None,
-		//        LineAlignment = StringAlignment.Near,
-		//        Trimming = StringTrimming.None,
-		//    };
-
-		//public static readonly StringFormat DefaultStringFormatLeftAlign =
-		//    new StringFormat(DefaultStringFormat)
-		//    {
-		//        Alignment = StringAlignment.Near,
-		//    };
-
-		//public static readonly StringFormat DefaultStringFormatRightAlign =
-		//    new StringFormat(DefaultStringFormat)
-		//    {
-		//        Alignment = StringAlignment.Far,
-		//    };
-
-		//public static readonly StringFormat DefaultStringFormatCenterAlign =
-		//    new StringFormat(DefaultStringFormat)
-		//    {
-		//        Alignment = StringAlignment.Center,
-		//    };
+		public static AnchorStyles InvertAnchor(AnchorStyles anchor)
+		{
+			var inverted = AnchorStyles.None;
+			if((anchor & (AnchorStyles.Left | AnchorStyles.Right)) != (AnchorStyles.Left | AnchorStyles.Right))
+			{
+				if((anchor & AnchorStyles.Left) == AnchorStyles.Left) inverted |= AnchorStyles.Right;
+				if((anchor & AnchorStyles.Right) == AnchorStyles.Right) inverted |= AnchorStyles.Left;
+			}
+			if((anchor & (AnchorStyles.Top | AnchorStyles.Bottom)) != (AnchorStyles.Top | AnchorStyles.Bottom))
+			{
+				if((anchor & AnchorStyles.Top) == AnchorStyles.Top) inverted |= AnchorStyles.Bottom;
+				if((anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom) inverted |= AnchorStyles.Bottom;
+			}
+			return inverted;
+		}
 
 		public const TextRenderingHint TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
@@ -467,7 +451,7 @@
 			}
 			using(var dlg = new FolderBrowserDialog())
 			{
-				if(dlg.ShowDialog() == DialogResult.OK)
+				if(dlg.ShowDialog(parent) == DialogResult.OK)
 				{
 					return dlg.SelectedPath;
 				}

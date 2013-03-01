@@ -133,16 +133,16 @@
 			{
 				if(isDocumentWell)
 				{
-					size.Height += ViewManager.Renderer.TabHeight +
-								   ViewManager.Renderer.TabFooterHeight +
-								   ViewManager.Renderer.FooterHeight;
+					size.Height += Renderer.TabHeight +
+								   Renderer.TabFooterHeight +
+								   Renderer.FooterHeight;
 				}
 				else
 				{
-					size.Height += ViewManager.Renderer.HeaderHeight;
+					size.Height += Renderer.HeaderHeight;
 					if(_views.Count > 1)
 					{
-						size.Height += ViewManager.Renderer.TabHeight;
+						size.Height += Renderer.TabHeight;
 					}
 				}
 			}
@@ -151,7 +151,7 @@
 			_dockingProcess = new ViewHostDockingProcess(this);
 			_resizingProcess = new ViewHostResizingProcess(this);
 
-			BackColor = ViewManager.Renderer.BackgroundColor;
+			BackColor = Renderer.BackgroundColor;
 
 			SuspendLayout();
 
@@ -165,7 +165,7 @@
 					SpawnTabs(size);
 					topOffset = _tabs.Height;
 					SpawnFooter(size);
-					bottomOffset = ViewManager.Renderer.FooterHeight;
+					bottomOffset = Renderer.FooterHeight;
 				}
 				else
 				{
@@ -214,6 +214,11 @@
 		}
 
 		#endregion
+
+		private ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
+		}
 
 		/// <summary>Raises the <see cref="E:System.Windows.Forms.Control.ParentChanged"/> event.</summary>
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
@@ -359,7 +364,7 @@
 		{
 			Verify.State.IsTrue(_header == null, "Header is already spawned.");
 
-			var headerHeight = ViewManager.Renderer.HeaderHeight;
+			var headerHeight = Renderer.HeaderHeight;
 			if(headerHeight > 0)
 			{
 				_header = new ViewHostHeader(this)
@@ -399,7 +404,7 @@
 		{
 			Verify.State.IsTrue(_footer == null, "Footer is already spawned.");
 
-			var footerHeight = ViewManager.Renderer.FooterHeight;
+			var footerHeight = Renderer.FooterHeight;
 			if(footerHeight > 0)
 			{
 				_footer = new ViewHostFooter(this)
@@ -533,7 +538,7 @@
 			if(_tabs != null)
 			{
 				RemoveTabs();
-				_viewContainer.Height += ViewManager.Renderer.TabHeight;
+				_viewContainer.Height += Renderer.TabHeight;
 			}
 			_header.Width = w;
 			_viewContainer.Width = w;
@@ -541,7 +546,7 @@
 
 		internal void UnpinFromTop()
 		{
-			var h = Height - ViewManager.Renderer.HeaderHeight;
+			var h = Height - Renderer.HeaderHeight;
 			_grid.PerformDock(this, DockResult.AutoHideTop);
 			_dockSide = _grid.TopSide;
 			RemoveTabs();
@@ -564,7 +569,7 @@
 			else
 			{
 				_viewContainer.SetBounds(
-					ViewConstants.SideDockPanelBorderSize, 0, w, Height - ViewManager.Renderer.HeaderHeight,
+					ViewConstants.SideDockPanelBorderSize, 0, w, Height - Renderer.HeaderHeight,
 					BoundsSpecified.X | BoundsSpecified.Width | BoundsSpecified.Height);
 				RemoveTabs();
 			}
@@ -581,7 +586,7 @@
 			_grid.PerformDock(this, DockResult.AutoHideBottom);
 			_dockSide = _grid.BottomSide;
 			_viewContainer.SuspendLayout();
-			var headerHeight = ViewManager.Renderer.HeaderHeight;
+			var headerHeight = Renderer.HeaderHeight;
 			if(_tabs == null)
 			{
 				_viewContainer.Top = headerHeight +
@@ -676,8 +681,8 @@
 				{
 					var owner = GetRootOwnerForm();
 					var loc = PointToScreen(Point.Empty);
-					loc.X -= ViewConstants.FloatBorderSize;
-					loc.Y -= ViewConstants.FloatBorderSize;
+					loc.X -= Renderer.FloatBorderSize;
+					loc.Y -= Renderer.FloatBorderSize;
 					var form = PrepareFloatingMode();
 					form.Location = loc;
 					form.Show(owner);
@@ -1011,14 +1016,14 @@
 		{
 			Verify.State.IsTrue(_tabs == null, "Tabs are already spawned.");
 
-			var tabHeight = ViewManager.Renderer.TabHeight;
+			var tabHeight = Renderer.TabHeight;
 			if(_isDocumentWell)
 			{
 				_tabs = new ViewHostTabs(this, AnchorStyles.Top)
 				{
 					Bounds = new Rectangle(
 						0, 0,
-						size.Width, tabHeight + ViewManager.Renderer.TabFooterHeight),
+						size.Width, tabHeight + Renderer.TabFooterHeight),
 					Anchor = ViewConstants.AnchorDockTop,
 				};
 			}
@@ -1214,7 +1219,7 @@
 									{
 										SpawnTabs(new Size(w, h));
 										_viewContainer.SetBounds(
-											0, 0, w, h - ViewManager.Renderer.TabHeight - ViewManager.Renderer.HeaderHeight,
+											0, 0, w, h - Renderer.TabHeight - Renderer.HeaderHeight,
 											BoundsSpecified.Width | BoundsSpecified.Height);
 									}
 									else
@@ -1235,7 +1240,7 @@
 									}
 									else
 									{
-										_viewContainer.Height = h - ViewManager.Renderer.HeaderHeight;
+										_viewContainer.Height = h - Renderer.HeaderHeight;
 									}
 								}
 								break;
@@ -1244,7 +1249,7 @@
 									var w = Width - ViewConstants.SideDockPanelBorderSize;
 									var h = Height;
 									Width = w;
-									_header.SetBounds(0, 0, w, ViewManager.Renderer.HeaderHeight, BoundsSpecified.X | BoundsSpecified.Width);
+									_header.SetBounds(0, 0, w, Renderer.HeaderHeight, BoundsSpecified.X | BoundsSpecified.Width);
 									if(_views.Count > 1)
 									{
 										SpawnTabs(new Size(w, h));
@@ -1269,7 +1274,7 @@
 									}
 									else
 									{
-										_viewContainer.SetBounds(0, ViewManager.Renderer.HeaderHeight, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
+										_viewContainer.SetBounds(0, Renderer.HeaderHeight, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
 									}
 								}
 								break;
@@ -1330,7 +1335,7 @@
 
 		public void StartMoving()
 		{
-			int d = ViewConstants.FloatBorderSize + ViewManager.Renderer.HeaderHeight / 2;
+			int d = Renderer.FloatBorderSize + Renderer.HeaderHeight / 2;
 			StartMoving(d, d);
 		}
 
@@ -1340,8 +1345,8 @@
 			{
 				var pos = Control.MousePosition;
 				pos.Offset(-dx, -dy);
-				_mdX = dx - ViewConstants.FloatBorderSize;
-				_mdY = dy - ViewConstants.FloatBorderSize;
+				_mdX = dx - Renderer.FloatBorderSize;
+				_mdY = dy - Renderer.FloatBorderSize;
 				Parent.Location = pos;
 				_dockingProcess.Start(new Point(dx, dy));
 				_header.Capture = true;
@@ -1355,8 +1360,8 @@
 			if(_status != ViewHostStatus.Offscreen) Undock();
 			var floatingForm = new FloatingViewForm(_grid, this);
 			Location = new Point(
-				ViewConstants.FloatBorderSize,
-				ViewConstants.FloatBorderSize);
+				Renderer.FloatBorderSize,
+				Renderer.FloatBorderSize);
 			Anchor = ViewConstants.AnchorAll;
 			Parent = floatingForm;
 			Status = ViewHostStatus.Floating;
