@@ -49,10 +49,10 @@
 			}
 			else
 			{
-				thumbSize = trackBarSize * LargeChange / physicalRange;
+				thumbSize = NativeMethods.MulDiv(trackBarSize, LargeChange, physicalRange);
 				if(thumbSize < MinThumbSize) thumbSize = MinThumbSize;
 				var freeTrackBarSize = trackBarSize - thumbSize;
-				thumbOffset = freeTrackBarSize * ClampValue(Value) / (physicalRange - LargeChange + 1);
+				thumbOffset = NativeMethods.MulDiv(freeTrackBarSize, ClampValue(Value), (physicalRange - LargeChange + 1));
 			}
 
 			_decreaseButtonBounds	= new Rectangle(0, 0, size.Width, buttonHeight);
@@ -246,7 +246,7 @@
 			int visualRange = _decreaseTrackBarBounds.Height + _increaseTrackBarBounds.Height;
 			int visualPosition = _decreaseTrackBarBounds.Height;
 			int physicalRange = Maximum - Minimum - LargeChange + 1;
-			return physicalRange * visualPosition / visualRange;
+			return NativeMethods.MulDiv(physicalRange, visualPosition, visualRange);
 		}
 
 		#endregion

@@ -124,8 +124,8 @@
 
 		protected int ClampValue(int value)
 		{
-			if(value >= Maximum - LargeChange + 1) return Maximum - LargeChange + 1;
-			if(value <= Minimum) return Minimum;
+			if(value > Maximum - LargeChange + 1) return Maximum - LargeChange + 1;
+			if(value < Minimum) return Minimum;
 			return value;
 		}
 
