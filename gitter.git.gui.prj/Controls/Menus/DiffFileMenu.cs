@@ -90,6 +90,12 @@
 					}
 				}
 			}
+			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSourceFileName, diffFile.SourceFile),
+					GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrDestinationFileName, diffFile.TargetFile),
+				}));
 		}
 
 		public IDiffSource DiffSource

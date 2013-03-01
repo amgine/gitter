@@ -3690,6 +3690,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Destination File Name.
+        /// </summary>
+        internal static string StrDestinationFileName {
+            get {
+                return ResourceManager.GetString("StrDestinationFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Diff.
         /// </summary>
         internal static string StrDiff {
@@ -6190,6 +6199,15 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrSoft {
             get {
                 return ResourceManager.GetString("StrSoft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source File Name.
+        /// </summary>
+        internal static string StrSourceFileName {
+            get {
+                return ResourceManager.GetString("StrSourceFileName", resourceCulture);
             }
         }
         

@@ -8,6 +8,7 @@
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
+	using gitter.Framework.Services;
 
 	using gitter.Git.Gui.Controls;
 
@@ -80,7 +81,15 @@
 				var listBox = ListBox;
 				if(listBox != null)
 				{
-					var tree = f.EndInvoke(ar);
+					Tree tree = null;
+					try
+					{
+						tree = f.EndInvoke(ar);
+					}
+					catch(Exception exc)
+					{
+						LoggingService.Global.Warning(exc, "Failed to fetch HEAD tree: " + exc.Message);
+					}
 					if(listBox.InvokeRequired)
 					{
 						listBox.BeginInvoke(new Action<Tree>(OnTreeLoadedSync), tree);
@@ -96,9 +105,12 @@
 
 		private void OnTreeLoadedSync(Tree tree)
 		{
-			_binding = new TreeBinding(Items, tree.Root, false);
-			_binding.ItemActivated += OnItemActivated;
-			_binding.ItemContextMenuRequested += OnItemContextMenuRequested;
+			if(tree != null)
+			{
+				_binding = new TreeBinding(Items, tree.Root, false);
+				_binding.ItemActivated += OnItemActivated;
+				_binding.ItemContextMenuRequested += OnItemContextMenuRequested;
+			}
 		}
 
 		private void Refresh()

@@ -2559,4 +2559,10 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrlChange" xml:space="preserve">
     <value>change</value>
   </data>
+  <data name="StrDestinationFileName" xml:space="preserve">
+    <value>Destination File Name</value>
+  </data>
+  <data name="StrSourceFileName" xml:space="preserve">
+    <value>Source File Name</value>
+  </data>
 </root>
