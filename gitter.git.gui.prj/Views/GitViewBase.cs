@@ -29,7 +29,7 @@
 			_repository = guiProvider.Repository;
 		}
 
-		protected void ShowDiffTool(IDiffSource diffSource)
+		protected void ShowDiffView(IDiffSource diffSource)
 		{
 			WorkingEnvironment.ViewDockService.ShowView(Guids.DiffViewGuid,
 				new Dictionary<string, object>()
@@ -38,7 +38,7 @@
 				});
 		}
 
-		protected void ShowContextualDiffTool(IDiffSource diffSource)
+		protected void ShowContextualDiffView(IDiffSource diffSource)
 		{
 			WorkingEnvironment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid,
 				new Dictionary<string, object>()

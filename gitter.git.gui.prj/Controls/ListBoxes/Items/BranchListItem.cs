@@ -1,19 +1,20 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="Branch"/> object.</summary>
-	public sealed class BranchListItem : ReferenceListItemBase<Branch>
+	public class BranchListItem : ReferenceListItemBase<Branch>
 	{
+		#region Static
+
 		private static readonly Bitmap ImgBranch = CachedResources.Bitmaps["ImgBranch"];
+
+		#endregion
 
 		#region .ctor
 
@@ -27,6 +28,20 @@
 		}
 
 		#endregion
+
+		#region Event Handlers
+
+		private void OnRenamed(object sender, EventArgs e)
+		{
+			if(EnsureSortOrderSafe())
+			{
+				InvalidateSubItemSafe((int)ColumnId.Name);
+			}
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override Image Image
 		{
@@ -45,14 +60,6 @@
 			DataContext.Renamed -= OnRenamed;
 		}
 
-		private void OnRenamed(object sender, EventArgs e)
-		{
-			if(EnsureSortOrderSafe())
-			{
-				InvalidateSubItemSafe((int)ColumnId.Name);
-			}
-		}
-
 		/// <summary>Gets the context menu.</summary>
 		/// <param name="requestEventArgs">Request parameters.</param>
 		/// <returns>Context menu for specified location.</returns>
@@ -62,5 +69,7 @@
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}
+
+		#endregion
 	}
 }

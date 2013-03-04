@@ -11,6 +11,12 @@
 	[DefaultProperty("Value")]
 	public abstract class CustomScrollBar : Control
 	{
+		#region Constants
+
+		protected const int MinThumbSize = 17;
+
+		#endregion
+
 		#region Data
 
 		private int _value;

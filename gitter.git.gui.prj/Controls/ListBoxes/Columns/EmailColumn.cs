@@ -43,6 +43,11 @@
 			paintEventArgs.PaintText(email);
 		}
 
+		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string email, Brush textBrush)
+		{
+			paintEventArgs.PaintText(email, textBrush);
+		}
+
 		public override string IdentificationString
 		{
 			get { return "Email"; }

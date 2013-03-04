@@ -60,7 +60,7 @@
 
 		/// <summary>Gets the synchronization object.</summary>
 		/// <value>The synchronization object.</value>
-		protected override ISynchronizeInvoke SynchronizationObject
+		protected override ISynchronizeInvoke SynchronizeInvoke
 		{
 			get { return _listBox; }
 		}

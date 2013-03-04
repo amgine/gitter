@@ -192,7 +192,7 @@
 			OnPaintSubItem(paintEventArgs, data, graph, null, -1);
 		}
 
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, Revision data, GraphAtom[] graph, IList<Tuple<Rectangle, IRevisionPointer>> drawnPointers, int hoveredPointer)
+		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, Revision data, GraphAtom[] graph, IList<PointerBounds> drawnPointers, int hoveredPointer)
 		{
 			#region get painting options
 
@@ -340,8 +340,7 @@
 						}
 						if(w != 0)
 						{
-							drawnPointers.Add(new Tuple<Rectangle, IRevisionPointer>(
-								new Rectangle(rect.X + xoffset, rect.Y, w, rect.Height), reference));
+							drawnPointers.Add(new PointerBounds(reference, new Rectangle(rect.X + xoffset, rect.Y, w, rect.Height)));
 							xoffset += w + TagSpacing;
 							++drawnRefs;
 						}
@@ -371,8 +370,7 @@
 						drawnRefs == hoveredPointer,
 						stash);
 
-					drawnPointers.Add(new Tuple<Rectangle, IRevisionPointer>(
-						new Rectangle(rect.X + xoffset, rect.Y, w, rect.Height), stash));
+					drawnPointers.Add(new PointerBounds(stash, new Rectangle(rect.X + xoffset, rect.Y, w, rect.Height)));
 					xoffset += w + TagSpacing;
 					++drawnRefs;
 				}

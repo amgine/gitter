@@ -9,7 +9,7 @@
 		#region Events
 
 		/// <summary>Monitor raises this event to stop monitored action execution.</summary>
-		event EventHandler Cancelled;
+		event EventHandler Canceled;
 
 		/// <summary>Monitor raises this event when it is ready to receive Set() calls after Start() call.</summary>
 		event EventHandler Started;
@@ -26,6 +26,9 @@
 
 		/// <summary>Determines if action can be cancelled.</summary>
 		bool CanCancel { get; set; }
+
+		/// <summary>Returns <c>true</c> if operation must be terminated.</summary>
+		bool IsCancelRequested { get; }
 
 		#endregion
 
@@ -66,7 +69,7 @@
 		void SetProgress(int val, string action);
 
 		/// <summary>Sets progress as unknown.</summary>
-		void SetProgressIntermediate();
+		void SetProgressIndeterminate();
 
 		#endregion
 

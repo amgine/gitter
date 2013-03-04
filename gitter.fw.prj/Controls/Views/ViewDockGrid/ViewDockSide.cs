@@ -165,6 +165,7 @@
 						tab.ResetLength(graphics);
 						size += tab.Length;
 						_tabs.Add(tab);
+						view.TextChanged += OnViewTextChanged;
 					}
 				}
 			}
@@ -217,6 +218,7 @@
 						var tab = _tabs[i];
 						if(tab.ViewHost == viewHost)
 						{
+							tab.View.TextChanged -= OnViewTextChanged;
 							_tabs.RemoveAt(i);
 						}
 						else
@@ -281,7 +283,9 @@
 						var height = _size + size;
 						_size = height;
 						if(_tabs.Count != 1)
+						{
 							height += Renderer.SideTabSpacing;
+						}
 						if(height > space) height = space;
 						Height = height;
 					}
@@ -292,7 +296,9 @@
 						var width = _size + size;
 						_size = width;
 						if(_tabs.Count != 1)
+						{
 							width += Renderer.SideTabSpacing;
+						}
 						if(width > space) width = space;
 						Width = width;
 					}
@@ -302,11 +308,13 @@
 						CultureInfo.InvariantCulture,
 						"Unexpected {0}.Orientation: {1}", GetType().Name, Orientation));
 			}
+			e.View.TextChanged += OnViewTextChanged;
 			Invalidate();
 		}
 
 		private void OnViewRemoved(object sender, ViewEventArgs e)
 		{
+			e.View.TextChanged -= OnViewTextChanged;
 			var size = 0;
 			int index = -1;
 			for(int i = _tabs.Count - 1; i >= 0; --i)
@@ -362,6 +370,17 @@
 			}
 		}
 
+		private void OnViewTextChanged(object sender, EventArgs e)
+		{
+			var view	= (ViewBase)sender;
+			var tab		= GetTab(view);
+			var length	= tab.Length;
+			tab.ResetLength(Utility.MeasurementGraphics);
+			var dl = tab.Length - length;
+			_size += dl;
+			Invalidate();
+		}
+
 		/// <summary>Gets the count of docked <see cref="ViewHost"/>s.</summary>
 		public int Count
 		{
@@ -401,6 +420,18 @@
 				offset = offset2 + Renderer.SideTabSpacing;
 			}
 			return -1;
+		}
+
+		private ViewDockSideTab GetTab(ViewBase view)
+		{
+			for(int i = 0; i < _tabs.Count; ++i)
+			{
+				if(_tabs[i].View == view)
+				{
+					return _tabs[i];
+				}
+			}
+			return null;
 		}
 
 		private Rectangle GetTabBounds(int index)
@@ -746,6 +777,7 @@
 				_dockedHosts.Clear();
 				foreach(var tab in _tabs)
 				{
+					tab.View.TextChanged -= OnViewTextChanged;
 					tab.Dispose();
 				}
 				_tabs.Clear();

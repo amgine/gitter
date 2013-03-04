@@ -36,10 +36,11 @@
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
 			var remote = ((CustomListBoxItem<Remote>)e.Item).DataContext;
-			using(var dlg = new RemoteReferencesDialog(remote))
+			var parameters = new Dictionary<string, object>()
 			{
-				dlg.Run(this);
-			}
+				{ "Remote", remote }
+			};
+			Gui.Environment.ViewDockService.ShowView(Guids.RemoteViewGuid, parameters, true);
 		}
 
 		protected override void AttachToRepository(Repository repository)

@@ -272,7 +272,7 @@
 			var lb = ListBox;
 			if(lb != null)
 			{
-				lb.OnItemCheckedChanged(this);
+				lb.NotifyItemCheckedChanged(this);
 			}
 		}
 
@@ -293,7 +293,7 @@
 		public void Activate()
 		{
 			OnActivate();
-			if(IsAttachedToListBox) ListBox.ActivateItem(this);
+			if(IsAttachedToListBox) ListBox.NotifyItemActivated(this);
 		}
 
 		/// <summary>Invokes <see cref="Activated"/> event.</summary>

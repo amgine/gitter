@@ -7,16 +7,35 @@
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	public sealed class RemoteReferenceListItem : CustomListBoxItem<IRemoteReference>
+	public class RemoteReferenceListItem : CustomListBoxItem<IRemoteReference>
 	{
-		private static readonly Bitmap ImgBranch = CachedResources.Bitmaps["ImgBranch"];
-		private static readonly Bitmap ImgTag = CachedResources.Bitmaps["ImgTag"];
-		private static readonly Bitmap ImgTagAnnotated = CachedResources.Bitmaps["ImgTagAnnotated"];
+		#region Static
+
+		private static readonly Bitmap ImgBranch		= CachedResources.Bitmaps["ImgBranch"];
+		private static readonly Bitmap ImgTag			= CachedResources.Bitmaps["ImgTag"];
+		private static readonly Bitmap ImgTagAnnotated	= CachedResources.Bitmaps["ImgTagAnnotated"];
+
+		#endregion
+
+		#region .ctor
 
 		public RemoteReferenceListItem(IRemoteReference reference)
 			: base(reference)
 		{
 		}
+
+		#endregion
+
+		#region Event Handlers
+
+		private void OnDeleted(object sender, EventArgs e)
+		{
+			RemoveSafe();
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -28,11 +47,6 @@
 		{
 			DataContext.Deleted -= OnDeleted;
 			base.OnListBoxDetached();
-		}
-
-		private void OnDeleted(object sender, EventArgs e)
-		{
-			RemoveSafe();
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -75,7 +89,9 @@
 						case ReferenceType.Tag:
 							var tag = DataContext as RemoteRepositoryTag;
 							if(tag != null && tag.TagType == TagType.Annotated)
+							{
 								image = ImgTagAnnotated;
+							}
 							else
 								image = ImgTag;
 							break;
@@ -124,5 +140,7 @@
 			}
 			return menu;
 		}
+
+		#endregion
 	}
 }

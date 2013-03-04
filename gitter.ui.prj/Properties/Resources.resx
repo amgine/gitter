@@ -262,8 +262,8 @@
   <data name="StrlNone" xml:space="preserve">
     <value>none</value>
   </data>
-  <data name="StrAddIssueTracker" xml:space="preserve">
-    <value>Add Issue Tracker</value>
+  <data name="StrAddService" xml:space="preserve">
+    <value>Add Service</value>
   </data>
   <data name="StrsVersionIsAvailable" xml:space="preserve">
     <value>v{0} is available</value>

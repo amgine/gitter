@@ -3,6 +3,8 @@
 	using System;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	/// <summary>Extension methods for <see cref="T:SystemWindows.Forms.ProgressBar"/> class.</summary>
 	public static class ProgressBarExtensions
 	{
@@ -15,7 +17,7 @@
 			Verify.Argument.IsNotNull(progressBar, "progressBar");
 
 			const uint TDM_SET_PROGRESS_BAR_STATE = 0x400 + 16;
-			NativeMethods.SendMessage(progressBar.Handle, TDM_SET_PROGRESS_BAR_STATE, (IntPtr)style, (IntPtr)0);
+			User32.SendMessage(progressBar.Handle, TDM_SET_PROGRESS_BAR_STATE, (IntPtr)style, (IntPtr)0);
 		}
 	}
 

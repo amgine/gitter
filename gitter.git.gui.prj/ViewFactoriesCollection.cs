@@ -19,6 +19,7 @@
 		private readonly IViewFactory _viewCommit;
 		private readonly IViewFactory _viewStash;
 		private readonly IViewFactory _viewRemotes;
+		private readonly IViewFactory _viewRemote;
 		private readonly IViewFactory _viewTree;
 		private readonly IViewFactory _viewConfig;
 		private readonly IViewFactory _viewSubmodules;
@@ -47,6 +48,7 @@
 				_viewCommit =			new CommitViewFactory(guiProvider),
 				_viewStash =			new StashViewFactory(guiProvider),
 				_viewRemotes =			new RemotesViewFactory(guiProvider),
+				_viewRemote =			new RemoteViewFactory(guiProvider),
 				_viewTree =				new TreeViewFactory(guiProvider),
 				_viewSubmodules =		new SubmodulesViewFactory(guiProvider),
 				_viewConfig =			new ConfigViewFactory(guiProvider),
@@ -165,6 +167,11 @@
 		public IViewFactory RemotesViewFactory
 		{
 			get { return _viewRemotes; }
+		}
+
+		public IViewFactory RemoteViewFactory
+		{
+			get { return _viewRemote; }
 		}
 
 		public IViewFactory SubmodulesViewFactory

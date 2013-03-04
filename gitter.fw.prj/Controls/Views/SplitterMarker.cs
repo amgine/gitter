@@ -4,6 +4,8 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	sealed class SplitterMarker : Form
 	{
 		public SplitterMarker(Rectangle bounds, Orientation orientation)
@@ -50,7 +52,7 @@
 
 		public new void Show()
 		{
-			NativeMethods.ShowWindow(this.Handle, 8);
+			User32.ShowWindow(this.Handle, 8);
 		}
 
 		protected override void DefWndProc(ref Message m)

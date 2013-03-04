@@ -20,6 +20,12 @@
 			remove { Events.RemoveHandler(LinkClickedEvent, value); }
 		}
 
+		protected virtual void OnLinkClicked()
+		{
+			var handler = (EventHandler)Events[LinkClickedEvent];
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
 		public LinkButton()
 		{
 			InitializeComponent();
@@ -83,14 +89,14 @@
 			}
 		}
 
-		private void _lblText_Click(object sender, EventArgs e)
+		private void OnTextLabelClick(object sender, EventArgs e)
 		{
-			Events.Raise(LinkClickedEvent, this);
+			OnLinkClicked();
 		}
 
-		private void _picImage_Click(object sender, EventArgs e)
+		private void OnImageClick(object sender, EventArgs e)
 		{
-			Events.Raise(LinkClickedEvent, this);
+			OnLinkClicked();
 		}
 
 		private void OnInteractivePartMouseEnter(object sender, EventArgs e)

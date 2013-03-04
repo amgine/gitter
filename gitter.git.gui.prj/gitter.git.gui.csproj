@@ -65,6 +65,7 @@
       <Project>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</Project>
       <Name>gitter.git</Name>
     </ProjectReference>
+    <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -72,6 +73,7 @@
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
     </ProjectReference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
@@ -87,6 +89,7 @@
     <Compile Include="Controls\ContentInvalidatedEventArgs.cs" />
     <Compile Include="Controls\DiffViewer\UntrackedFileContextMenuRequestedEventArgs.cs" />
     <Compile Include="Controls\ListBoxes\Items\TreeCommitListItem.cs" />
+    <Compile Include="Controls\ListBoxes\PointerBounds.cs" />
     <Compile Include="Controls\Menus\UsersMenu.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -113,6 +116,12 @@
     </Compile>
     <Compile Include="Views\PathHistoryView.Designer.cs">
       <DependentUpon>PathHistoryView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\RemoteView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\RemoteView.Designer.cs">
+      <DependentUpon>RemoteView.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\ViewToolBars\ContributorsToolBar.cs">
       <SubType>Component</SubType>
@@ -239,6 +248,9 @@
     </Compile>
     <Compile Include="Views\ViewToolBars\HistoryFilterDropDown.Designer.cs">
       <DependentUpon>HistoryFilterDropDown.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ViewToolBars\RemoteToolbar.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Views\ViewToolBars\StashToolBar.cs">
       <SubType>Component</SubType>
@@ -675,7 +687,7 @@
       <DependentUpon>GitView.cs</DependentUpon>
     </Compile>
     <Compile Include="GuiProvider.cs" />
-    <Compile Include="Menus.cs" />
+    <Compile Include="MainGitMenus.cs" />
     <Compile Include="ViewFactoriesCollection.cs" />
     <Compile Include="Statusbar.cs" />
     <Compile Include="MainToolbar.cs">
@@ -859,6 +871,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ReflogView.resx">
       <DependentUpon>ReflogView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\RemoteView.resx">
+      <DependentUpon>RemoteView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\SubmodulesView.resx">
       <DependentUpon>SubmodulesView.cs</DependentUpon>

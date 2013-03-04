@@ -218,7 +218,7 @@
 							Monitor = monitor,
 							WebRequest = WebRequest.Create(DownloadUrl),
 						};
-						process.Monitor.SetProgressIntermediate();
+						process.Monitor.SetProgressIndeterminate();
 						process.Monitor.SetAction("Connecting to MSysGit download server...");
 						process.WebRequest.BeginGetResponse(OnGotResponse, process);
 						evt.WaitOne();
@@ -359,7 +359,7 @@
 
 		private static void RunInstaller(DownloadAndInstallProcess process)
 		{
-			process.Monitor.SetProgressIntermediate();
+			process.Monitor.SetProgressIndeterminate();
 			process.Monitor.SetAction("Installing MSysGit...");
 			try
 			{

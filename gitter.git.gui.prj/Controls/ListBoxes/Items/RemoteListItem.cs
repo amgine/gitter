@@ -7,12 +7,14 @@
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
 	/// <summary><see cref="gitter.Framework.Controls.CustomListBoxItem"/> representing <see cref="gitter.Git.Remote"/>.</summary>
-	public sealed class RemoteListItem : CustomListBoxItem<Remote>
+	public class RemoteListItem : CustomListBoxItem<Remote>
 	{
+		#region Static
+
 		private static readonly Bitmap ImgRemote = CachedResources.Bitmaps["ImgRemote"];
+
+		#endregion
 
 		#region Comparers
 
@@ -100,19 +102,7 @@
 
 		#endregion
 
-		protected override void OnListBoxAttached()
-		{
-			DataContext.Deleted += OnRemoteDeleted;
-			DataContext.Renamed += OnRenamed;
-			base.OnListBoxAttached();
-		}
-
-		protected override void OnListBoxDetached()
-		{
-			DataContext.Deleted -= OnRemoteDeleted;
-			DataContext.Renamed -= OnRenamed;
-			base.OnListBoxDetached();
-		}
+		#region Event Handlers
 
 		private void OnRemoteDeleted(object sender, EventArgs e)
 		{
@@ -125,6 +115,24 @@
 			{
 				InvalidateSubItemSafe((int)ColumnId.Name);
 			}
+		}
+
+		#endregion
+
+		#region Overrides
+
+		protected override void OnListBoxAttached()
+		{
+			DataContext.Deleted += OnRemoteDeleted;
+			DataContext.Renamed += OnRenamed;
+			base.OnListBoxAttached();
+		}
+
+		protected override void OnListBoxDetached()
+		{
+			DataContext.Deleted -= OnRemoteDeleted;
+			DataContext.Renamed -= OnRenamed;
+			base.OnListBoxDetached();
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -166,5 +174,7 @@
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}
+
+		#endregion
 	}
 }

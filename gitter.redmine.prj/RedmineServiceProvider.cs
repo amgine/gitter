@@ -14,7 +14,7 @@
 
 	using Resources = gitter.Redmine.Properties.Resources;
 
-	public sealed class RedmineServiceProvider : IIssueTrackerProvider
+	public sealed class RedmineServiceProvider : IRepositoryServiceProvider
 	{
 		private static IWorkingEnvironment _environment;
 

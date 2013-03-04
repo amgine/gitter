@@ -1,19 +1,21 @@
 ﻿namespace gitter.Framework
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
-	using System.IO.IsolatedStorage;
-	using System.Text;
 
-	using gitter.Framework;
 	using gitter.Framework.Configuration;
 	using gitter.Framework.Services;
 
-	public class ConfigurationService : IDisposable
+	public sealed class ConfigurationService : IDisposable
 	{
+		#region Constants
+
 		private const string ConfigFileName = "gitter.xml";
 		private const string AppFolderName = "gitter";
+
+		#endregion
+
+		#region Data
 
 		private readonly string _configPath;
 		private readonly string _configFileName;
@@ -24,6 +26,12 @@
 		private Section _globalSection;
 		private Section _viewsSection;
 		private Section _providersSection;
+
+		private bool _isDisposed;
+
+		#endregion
+
+		#region .ctor & finalizer
 
 		internal ConfigurationService()
 		{
@@ -43,13 +51,20 @@
 				}
 			}
 
-			_configuration = LoadConfig(ConfigFileName, "Configuration");
-			_rootSection = _configuration.RootSection;
-			_guiSection = _rootSection.GetCreateSection("Gui");
-			_globalSection = _rootSection.GetCreateSection("Global");
-			_viewsSection = _rootSection.GetCreateSection("Tools");
-			_providersSection = _rootSection.GetCreateSection("Providers");
+			_configuration		= LoadConfig(ConfigFileName, "Configuration");
+			_rootSection		= _configuration.RootSection;
+			_guiSection			= _rootSection.GetCreateSection("Gui");
+			_globalSection		= _rootSection.GetCreateSection("Global");
+			_viewsSection		= _rootSection.GetCreateSection("Tools");
+			_providersSection	= _rootSection.GetCreateSection("Providers");
 		}
+
+		~ConfigurationService()
+		{
+			Dispose(false);
+		}
+
+		#endregion
 
 		public ConfigurationManager Configuration
 		{
@@ -98,7 +113,7 @@
 			return _providersSection.GetCreateSection(provider.Name);
 		}
 
-		public Section GetSectionForProvider(IIssueTrackerProvider provider)
+		public Section GetSectionForProvider(IRepositoryServiceProvider provider)
 		{
 			Verify.Argument.IsNotNull(provider, "provider");
 
@@ -113,17 +128,12 @@
 			return section.GetCreateSection("Gui");
 		}
 
-		public Section GetSectionForProviderGui(IIssueTrackerProvider provider)
+		public Section GetSectionForProviderGui(IRepositoryServiceProvider provider)
 		{
 			Verify.Argument.IsNotNull(provider, "provider");
 
 			var section = _providersSection.GetCreateSection(provider.Name);
 			return section.GetCreateSection("Gui");
-		}
-
-		~ConfigurationService()
-		{
-			Dispose(false);
 		}
 
 		public void Save()
@@ -181,6 +191,14 @@
 			}
 		}
 
+		#region IDisposable
+
+		public bool IsDisposed
+		{
+			get { return _isDisposed; }
+			private set { _isDisposed = value; }
+		}
+
 		private void Dispose(bool disposing)
 		{
 			if(disposing)
@@ -190,8 +208,14 @@
 
 		public void Dispose()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+			if(!IsDisposed)
+			{
+				GC.SuppressFinalize(this);
+				Dispose(true);
+				IsDisposed = true;
+			}
 		}
+
+		#endregion
 	}
 }

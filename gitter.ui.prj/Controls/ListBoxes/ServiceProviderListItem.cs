@@ -9,9 +9,9 @@
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	sealed class IssueTrackerListItem : CustomListBoxItem<IIssueTrackerProvider>
+	sealed class ServiceProviderListItem : CustomListBoxItem<IRepositoryServiceProvider>
 	{
-		public IssueTrackerListItem(IIssueTrackerProvider data)
+		public ServiceProviderListItem(IRepositoryServiceProvider data)
 			: base(data)
 		{
 		}

@@ -2,9 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
@@ -20,15 +18,17 @@
 		private readonly ReflogToolbar _toolbar;
 		private ReflogSearchToolBar<ReflogView> _searchToolbar;
 		private ISearch<ReflogSearchOptions> _search;
+		private Reflog _reflog;
+		private Reference _reference;
 
 		#endregion
+
+		#region .ctor
 
 		public ReflogView(IDictionary<string, object> parameters, GuiProvider gui)
 			: base(Guids.ReflogViewGuid, gui, parameters)
 		{
 			InitializeComponent();
-
-			Text = Resources.StrReflog;
 
 			_lstReflog.SelectionChanged += OnReflogSelectionChanged;
 			_lstReflog.ItemActivated += OnReflogItemActivated;
@@ -40,6 +40,10 @@
 			AddTopToolStrip(_toolbar = new ReflogToolbar(this));
 		}
 
+		#endregion
+
+		#region Properties
+
 		public override bool IsDocument
 		{
 			get { return true; }
@@ -49,71 +53,58 @@
 		{
 			get
 			{
-				if(_lstReflog.Reflog != null)
+				if(Reflog != null && Reflog.Reference.Type == ReferenceType.RemoteBranch)
 				{
-					if(_lstReflog.Reflog.Reference.Type == ReferenceType.RemoteBranch)
-						return CachedResources.Bitmaps["ImgViewReflogRemote"];
+					return CachedResources.Bitmaps["ImgViewReflogRemote"];
 				}
-				return CachedResources.Bitmaps["ImgViewReflog"];
+				else
+				{
+					return CachedResources.Bitmaps["ImgViewReflog"];
+				}
 			}
 		}
 
-		private void OnReflogSelectionChanged(object sender, EventArgs e)
+		public Reflog Reflog
 		{
-			ShowSelectedCommitDetails();
-		}
-
-		private void OnReflogItemActivated(object sender, ItemEventArgs e)
-		{
-			ShowDiffTool(((ReflogRecordListItem)e.Item).DataContext.Revision.GetDiffSource());
-		}
-
-		private void ShowSelectedCommitDetails()
-		{
-			switch(_lstReflog.SelectedItems.Count)
+			get { return _reflog; }
+			private set
 			{
-				case 1:
+				if(_reflog != value)
+				{
+					_reflog = value;
+					_lstReflog.Load(value);
+					Reference = value != null ? value.Reference : null;
+				}
+			}
+		}
+
+		public Reference Reference
+		{
+			get { return _reference; }
+			private set
+			{
+				if(_reference != value)
+				{
+					if(_reference != null)
 					{
-						var item = _lstReflog.SelectedItems[0] as ReflogRecordListItem;
-						if(item != null)
+						var branch = _reference as Branch;
+						if(branch != null)
 						{
-							ShowContextualDiffTool(item.DataContext.Revision.GetDiffSource());
+							branch.Renamed -= OnBranchRenamed;
 						}
 					}
-					break;
-			}
-		}
-
-		public override void RefreshContent()
-		{
-			var reflog = _lstReflog.Reflog;
-			if(reflog != null)
-			{
-				_lstReflog.Cursor = Cursors.WaitCursor;
-				try
-				{
-					reflog.Refresh();
-				}
-				finally
-				{
-					_lstReflog.Cursor = Cursors.Default;
+					_reference = value;
+					if(_reference != null)
+					{
+						var branch = _reference as Branch;
+						if(branch != null)
+						{
+							branch.Renamed += OnBranchRenamed;
+						}
+					}
+					UpdateText();
 				}
 			}
-		}
-
-		public override void ApplyParameters(IDictionary<string, object> parameters)
-		{
-			base.ApplyParameters(parameters);
-
-			var reflog = (Reflog)parameters["reflog"];
-			_lstReflog.Load(reflog);
-			Text = Resources.StrReflog + ": " + reflog.Reference.Name;
-		}
-
-		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
-		{
-			OnKeyDown(this, e);
-			base.OnPreviewKeyDown(e);
 		}
 
 		public ISearch<ReflogSearchOptions> Search
@@ -137,6 +128,78 @@
 			}
 		}
 
+		#endregion
+
+		private void ShowSelectedCommitDetails()
+		{
+			switch(_lstReflog.SelectedItems.Count)
+			{
+				case 1:
+					{
+						var item = _lstReflog.SelectedItems[0] as ReflogRecordListItem;
+						if(item != null)
+						{
+							ShowContextualDiffView(item.DataContext.Revision.GetDiffSource());
+						}
+					}
+					break;
+			}
+		}
+
+		public override void RefreshContent()
+		{
+			if(Reflog != null)
+			{
+				_lstReflog.Cursor = Cursors.WaitCursor;
+				try
+				{
+					Reflog.Refresh();
+				}
+				finally
+				{
+					_lstReflog.Cursor = Cursors.Default;
+				}
+			}
+		}
+
+		private static Reflog TryGetReflog(IDictionary<string, object> parameters)
+		{
+			object reflog;
+			if(parameters.TryGetValue("reflog", out reflog))
+			{
+				return reflog as Reflog;
+			}
+			else
+			{
+				return null;
+			}
+		}
+
+		public override void ApplyParameters(IDictionary<string, object> parameters)
+		{
+			base.ApplyParameters(parameters);
+
+			Reflog = TryGetReflog(parameters);
+		}
+
+		private void UpdateText()
+		{
+			if(Reference != null)
+			{
+				Text = Resources.StrReflog + ": " + Reference.Name;
+			}
+			else
+			{
+				Text = Resources.StrReflog;
+			}
+		}
+
+		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+		{
+			OnKeyDown(this, e);
+			base.OnPreviewKeyDown(e);
+		}
+
 		private void ShowSearchToolBar()
 		{
 			if(_searchToolbar == null)
@@ -153,6 +216,44 @@
 				RemoveToolStrip(_searchToolbar);
 				_searchToolbar.Dispose();
 				_searchToolbar = null;
+			}
+		}
+
+		#region Event Handlers
+
+		private void OnReflogSelectionChanged(object sender, EventArgs e)
+		{
+			ShowSelectedCommitDetails();
+		}
+
+		private void OnReflogItemActivated(object sender, ItemEventArgs e)
+		{
+			var item = e.Item as ReflogRecordListItem;
+			if(item != null)
+			{
+				var reflogRecord = item.DataContext;
+				ShowDiffView(reflogRecord.Revision.GetDiffSource());
+			}
+		}
+
+		private void OnBranchRenamed(object sender, NameChangeEventArgs e)
+		{
+			if(!IsDisposed)
+			{
+				if(InvokeRequired)
+				{
+					try
+					{
+						BeginInvoke(new MethodInvoker(UpdateText));
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
+				else
+				{
+					UpdateText();
+				}
 			}
 		}
 
@@ -173,5 +274,7 @@
 					break;
 			}
 		}
+
+		#endregion
 	}
 }

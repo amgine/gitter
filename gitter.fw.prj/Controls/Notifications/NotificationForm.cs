@@ -8,6 +8,8 @@
 	using System.Text;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	public partial class NotificationForm : Form
 	{
 		public NotificationForm()
@@ -42,8 +44,8 @@
 			Location = new Point(
 				scr.Width - size.Width + border.Width - margin,
 				scr.Height - size.Height + border.Height - margin);
-			NativeMethods.ShowWindow(this.Handle, 8);
-			NativeMethods.SetWindowPos(
+			User32.ShowWindow(this.Handle, 8);
+			User32.SetWindowPos(
 				this.Handle, (IntPtr)(-1),
 				0, 0, 0, 0,
 				0x0010 | 0x0002 | 0x001);
@@ -55,13 +57,13 @@
 		protected override void WndProc(ref Message m)
 		{
 			bool processed = false;
-			switch((WindowsMessage)m.Msg)
+			switch((WM)m.Msg)
 			{
-				case WindowsMessage.WM_NCHITTEST:
+				case WM.NCHITTEST:
 					m.Result = (IntPtr)1;
 					processed = true;
 					break;
-				case WindowsMessage.WM_MOUSEACTIVATE:
+				case WM.MOUSEACTIVATE:
 					m.Result = (IntPtr)4;
 					processed = true;
 					return;

@@ -14,6 +14,8 @@
 	using System.Text;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	public static class Utility
 	{
 		private static readonly Version _osVersion = Environment.OSVersion.Version;
@@ -131,8 +133,8 @@
 			var attr = dir ? FILE_ATTRIBUTE_DIR | FILE_ATTRIBUTE_NORMAL : FILE_ATTRIBUTE_NORMAL;
 			var req = useExtensionOnly ? SHGFI_USEFILEATTRIBUTES | SHGFI_TYPENAME : SHGFI_TYPENAME;
 
-			var info = new NativeMethods.SHFILEINFO();
-			var ret = NativeMethods.SHGetFileInfo(fileName, attr, ref info, Marshal.SizeOf(info), req);
+			var info = new SHFILEINFO();
+			var ret = Shell32.SHGetFileInfo(fileName, attr, ref info, Marshal.SizeOf(info), req);
 			return info.szTypeName;
 		}
 
@@ -314,7 +316,7 @@
 			if(_taskBarList != null) return;
 			if(IsOSWindows7OrNewer)
 			{
-				WM_TASKBAR_BUTTON_CREATED = NativeMethods.RegisterWindowMessage("TaskbarButtonCreated");
+				WM_TASKBAR_BUTTON_CREATED = User32.RegisterWindowMessage("TaskbarButtonCreated");
 				_taskBarList = (ITaskbarList)Activator.CreateInstance<TaskbarList>();
 			}
 		}

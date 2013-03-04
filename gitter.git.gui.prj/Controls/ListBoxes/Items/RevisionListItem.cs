@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -12,18 +11,63 @@
 	/// <summary><see cref="CustomListBoxItem"/>, representing <see cref="Revision"/>.</summary>
 	public class RevisionListItem : RevisionPointerListItemBase<Revision>, IRevisionGraphListItem
 	{
-		private readonly List<Tuple<Rectangle, IRevisionPointer>> _drawnPointers;
-		private GraphAtom[] _graph;
+		#region Constants
 
 		private const int PointerTagHitOffset = 1;
+
+		#endregion
+
+		#region Data
+
+		private readonly List<PointerBounds> _drawnPointers;
+		private GraphAtom[] _graph;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="RevisionListItem"/>.</summary>
 		/// <param name="revision">Associated revision.</param>
 		public RevisionListItem(Revision revision)
 			: base(revision)
 		{
-			_drawnPointers = new List<Tuple<Rectangle, IRevisionPointer>>();
+			_drawnPointers = new List<PointerBounds>();
 		}
+
+		#endregion
+
+		#region Properties
+
+		public GraphAtom[] Graph
+		{
+			get { return _graph; }
+			set { _graph = value; }
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void DrawBranchDragImage(Branch branch, Graphics graphics)
+		{
+			int width = GlobalBehavior.GraphStyle.MeasureBranch(
+				graphics, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
+			if(width != 0)
+			{
+				graphics.TextRenderingHint = Utility.TextRenderingHint;
+				graphics.TextContrast = Utility.TextContrast;
+				GlobalBehavior.GraphStyle.DrawBranch(
+					graphics,
+					ListBox.Font,
+					GitterApplication.TextRenderer.LeftAlign,
+					0, 0, width, 21,
+					true, branch);
+			}
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -45,6 +89,7 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			ContextMenuStrip menu = null;
 			if(requestEventArgs.Column != null)
 			{
 				switch((ColumnId)requestEventArgs.SubItemId)
@@ -64,91 +109,16 @@
 						break;
 					case ColumnId.Name:
 					case ColumnId.Subject:
-						foreach(var ptr in _drawnPointers)
-						{
-							if(requestEventArgs.X >= ptr.Item1.X && requestEventArgs.X < ptr.Item1.Right)
-							{
-								var tag = ptr.Item2 as Tag;
-								if(tag != null)
-								{
-									var tagMenu = new TagMenu(tag);
-									Utility.MarkDropDownForAutoDispose(tagMenu);
-									return tagMenu;
-								}
-								var branch = ptr.Item2 as BranchBase;
-								if(branch != null)
-								{
-									var branchMenu = new BranchMenu(branch);
-									Utility.MarkDropDownForAutoDispose(branchMenu);
-									return branchMenu;
-								}
-								var stash = ptr.Item2 as StashedState;
-								if(stash != null)
-								{
-									var stashMenu = new StashedStateMenu(stash);
-									Utility.MarkDropDownForAutoDispose(stashMenu);
-									return stashMenu;
-								}
-								break;
-							}
-						}
+						menu = PointerBounds.GetContextMenu(_drawnPointers, requestEventArgs.X, requestEventArgs.Y);
 						break;
 				}
 			}
-			var mnu = new RevisionMenu(DataContext);
-			Utility.MarkDropDownForAutoDispose(mnu);
-			return mnu;
-		}
-
-		private Bitmap PrepareDragImage(Branch branch)
-		{
-			int w = 0;
-			using(var bmp = new Bitmap(1, 1))
+			if(menu == null)
 			{
-				using(var gx = Graphics.FromImage(bmp))
-				{
-					w = GlobalBehavior.GraphStyle.MeasureBranch(
-						gx, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
-				}
+				menu = new RevisionMenu(DataContext);
 			}
-			if(w != 0)
-			{
-				var bmp = new Bitmap(w, 21, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-				using(var gx = Graphics.FromImage(bmp))
-				{
-					gx.Clear(Color.Transparent);
-					gx.TextRenderingHint = Utility.TextRenderingHint;
-					gx.TextContrast = Utility.TextContrast;
-					GlobalBehavior.GraphStyle.DrawBranch(
-						gx,
-						ListBox.Font,
-						GitterApplication.TextRenderer.LeftAlign,
-						0, 0, w, 21,
-						true, branch);
-				}
-				return bmp;
-			}
-			else
-			{
-				return null;
-			}
-		}
-
-		private void DrawBranchDragImage(Branch branch, Graphics gx)
-		{
-			int w = GlobalBehavior.GraphStyle.MeasureBranch(
-				gx, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
-			if(w != 0)
-			{
-				gx.TextRenderingHint = Utility.TextRenderingHint;
-				gx.TextContrast = Utility.TextContrast;
-				GlobalBehavior.GraphStyle.DrawBranch(
-					gx,
-					ListBox.Font,
-					GitterApplication.TextRenderer.LeftAlign,
-					0, 0, w, 21,
-					true, branch);
-			}
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 
 		public override void OnMouseDown(MouseButtons button, int x, int y)
@@ -157,13 +127,13 @@
 			{
 				for(int i = 0; i < _drawnPointers.Count; ++i)
 				{
-					var rc = _drawnPointers[i].Item1;
+					var rc = _drawnPointers[i].Bounds;
 					if(rc.X <= x && rc.Right > x)
 					{
-						var branch = _drawnPointers[i].Item2 as Branch;
+						var branch = _drawnPointers[i].RevisionPointer as Branch;
 						if(branch != null && !branch.IsRemote)
 						{
-							int dx = _drawnPointers[i].Item1.X - x - 1;
+							int dx = _drawnPointers[i].Bounds.X - x - 1;
 							int w = 0;
 							using(var bmp = new Bitmap(1, 1))
 							using(var gx = Graphics.FromImage(bmp))
@@ -182,7 +152,7 @@
 						}
 						else
 						{
-							var tag = _drawnPointers[i].Item2 as Tag;
+							var tag = _drawnPointers[i].RevisionPointer as Tag;
 							if(tag != null && tag.TagType == TagType.Annotated)
 							{
 								//var message = tag.Message;
@@ -212,7 +182,7 @@
 		{
 			for(int i = 0; i < _drawnPointers.Count; ++i)
 			{
-				var rc = _drawnPointers[i].Item1;
+				var rc = _drawnPointers[i].Bounds;
 				if(rc.X <= x && rc.Right > x)
 				{
 					return PointerTagHitOffset + i;
@@ -230,10 +200,10 @@
 				case ColumnId.TreeHash:
 					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.TreeHash);
 				case ColumnId.Graph:
-					return GraphColumn.OnMeasureSubItem(measureEventArgs, _graph);
+					return GraphColumn.OnMeasureSubItem(measureEventArgs, Graph);
 				case ColumnId.Name:
 				case ColumnId.Subject:
-					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext, _graph);
+					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext, Graph);
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
 					return CommitDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.CommitDate);
@@ -264,11 +234,11 @@
 					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.TreeHash);
 					break;
 				case ColumnId.Graph:
-					GraphColumn.OnPaintSubItem(paintEventArgs, _graph, DataContext.IsCurrent?RevisionGraphItemType.Current:RevisionGraphItemType.Generic);
+					GraphColumn.OnPaintSubItem(paintEventArgs, Graph, DataContext.IsCurrent ? RevisionGraphItemType.Current : RevisionGraphItemType.Generic);
 					break;
 				case ColumnId.Name:
 				case ColumnId.Subject:
-					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext, _graph, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
+					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext, Graph, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
 					break;
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
@@ -293,10 +263,6 @@
 			}
 		}
 
-		public GraphAtom[] Graph
-		{
-			get { return _graph; }
-			set { _graph = value; }
-		}
+		#endregion
 	}
 }

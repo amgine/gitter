@@ -26,13 +26,25 @@
 	}
 
 	/// <summary>Item used to represent uncommitted or unstaged changes to the working tree.</summary>
-	public sealed class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphListItem
+	public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphListItem
 	{
+		#region Helpers
+
 		private struct FileStatusIconEntry
 		{
 			public Bitmap Image;
 			public int Count;
 		}
+
+		#endregion
+
+		#region Constants
+
+		private const string NoHash = "---------------------------------------";
+
+		#endregion
+
+		#region Data
 
 		private readonly Repository _repository;
 		private readonly FakeRevisionItemType _type;
@@ -40,7 +52,9 @@
 		private UnstagedRevisionItemSubtype _subType;
 		private GraphAtom[] _graph;
 
-		const string NoHash = "----------------------------------------";
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="FakeRevisionListItem"/>.</summary>
 		/// <param name="repository">Related repository.</param>
@@ -86,39 +100,92 @@
 					}
 					break;
 				default:
-					throw new ArgumentException("type");
+					throw new ArgumentException("Unknown type value.", "type");
 			}
 		}
 
-		protected override void OnListBoxAttached()
+		#endregion
+
+		#region Properties
+
+		public Repository Repository
 		{
-			base.OnListBoxAttached();
-			_repository.Status.Changed += OnStatusUpdated;
+			get { return _repository; }
 		}
 
-		protected override void OnListBoxDetached()
+		public FakeRevisionItemType Type
 		{
-			base.OnListBoxDetached();
-			_repository.Status.Changed -= OnStatusUpdated;
+			get { return _type; }
 		}
+
+		public UnstagedRevisionItemSubtype SubType
+		{
+			get { return _subType; }
+		}
+
+		public GraphAtom[] Graph
+		{
+			get { return _graph; }
+			set { _graph = value; }
+		}
+
+		private string SubjectText
+		{
+			get
+			{
+				switch(Type)
+				{
+					case FakeRevisionItemType.StagedChanges:
+						return Resources.StrUncommittedLocalChanges;
+					case FakeRevisionItemType.UnstagedChanges:
+						switch(SubType)
+						{
+							case UnstagedRevisionItemSubtype.Conflicts:
+								return Resources.StrlUnmergedFilesPresent;
+							case UnstagedRevisionItemSubtype.RemovedFiles:
+								return Resources.StrlUnstagedRemovedFiles;
+							case UnstagedRevisionItemSubtype.UntrackedFiles:
+								return Resources.StrlUnstagedUntrackedFiles;
+							case UnstagedRevisionItemSubtype.Modifications:
+								return Resources.StrUnstagedLocalChanges;
+							default:
+								return Resources.StrUnstagedLocalChanges;
+						}
+					default:
+						return null;
+				}
+			}
+		}
+
+		#endregion
+
+		#region Methods
 
 		private static UnstagedRevisionItemSubtype GetSubType(Status status)
 		{
 			if(status.UnmergedCount != 0)
+			{
 				return UnstagedRevisionItemSubtype.Conflicts;
+			}
 			if(status.UnstagedModifiedCount != 0)
+			{
 				return UnstagedRevisionItemSubtype.Modifications;
+			}
 			if(status.UnstagedRemovedCount != 0)
+			{
 				return UnstagedRevisionItemSubtype.RemovedFiles;
+			}
 			if(status.UnstagedUntrackedCount != 0)
+			{
 				return UnstagedRevisionItemSubtype.UntrackedFiles;
+			}
 			return UnstagedRevisionItemSubtype.None;
 		}
 
 		private void OnStatusUpdated(object sender, EventArgs e)
 		{
 			var status = (Status)sender;
-			switch(_type)
+			switch(Type)
 			{
 				case FakeRevisionItemType.StagedChanges:
 					_iconEntries[0].Count = status.StagedAddedCount;
@@ -182,39 +249,10 @@
 			SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
 			if(rect.Width > 1)
 			{
-				string text;
-				switch(_type)
-				{
-					case FakeRevisionItemType.StagedChanges:
-						text = Resources.StrUncommittedLocalChanges;
-						break;
-					case FakeRevisionItemType.UnstagedChanges:
-						switch(_subType)
-						{
-							case UnstagedRevisionItemSubtype.Conflicts:
-								text = Resources.StrlUnmergedFilesPresent;
-								break;
-							case UnstagedRevisionItemSubtype.RemovedFiles:
-								text = Resources.StrlUnstagedRemovedFiles;
-								break;
-							case UnstagedRevisionItemSubtype.UntrackedFiles:
-								text = Resources.StrlUnstagedUntrackedFiles;
-								break;
-							case UnstagedRevisionItemSubtype.Modifications:
-								text = Resources.StrUnstagedLocalChanges;
-								break;
-							default:
-								text = Resources.StrUnstagedLocalChanges;
-								break;
-						}
-						break;
-					default:
-						text = null;
-						break;
-				}
+				string text = SubjectText;
 				paintEventArgs.PrepareTextRectangle(ref rect);
-				bool useDefaultBrush = (paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground;
-				var textBrush = useDefaultBrush ? paintEventArgs.Brush : new SolidBrush(GitterApplication.Style.Colors.GrayText);
+				bool useDefaultBrush = (paintEventArgs.State & ItemState.Selected) == ItemState.Selected && paintEventArgs.ListBox.Style.Type == GitterStyleType.DarkBackground;
+				var textBrush = useDefaultBrush ? paintEventArgs.Brush : new SolidBrush(paintEventArgs.ListBox.Style.Colors.GrayText);
 				if(!string.IsNullOrWhiteSpace(text))
 				{
 					var w = GitterApplication.TextRenderer.MeasureText(
@@ -251,6 +289,59 @@
 					textBrush.Dispose();
 				}
 			}
+		}
+
+		private static void PaintGrayText<T>(SubItemPaintEventArgs paintEventArgs, T value, Action<SubItemPaintEventArgs, T, Brush> paintMethod)
+		{
+			Assert.IsNotNull(paintEventArgs);
+			Assert.IsNotNull(paintMethod);
+
+			var style = paintEventArgs.ListBox.Style;
+			if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && style.Type == GitterStyleType.DarkBackground)
+			{
+				paintMethod(paintEventArgs, value, paintEventArgs.Brush);
+			}
+			else
+			{
+				using(var textBrush = new SolidBrush(style.Colors.GrayText))
+				{
+					paintMethod(paintEventArgs, value, textBrush);
+				}
+			}
+		}
+
+		private static void PaintGrayText(SubItemPaintEventArgs paintEventArgs, string text)
+		{
+			Assert.IsNotNull(paintEventArgs);
+
+			var style = paintEventArgs.ListBox.Style;
+			if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && style.Type == GitterStyleType.DarkBackground)
+			{
+				paintEventArgs.PaintText(text, paintEventArgs.Brush);
+			}
+			else
+			{
+				using(var textBrush = new SolidBrush(style.Colors.GrayText))
+				{
+					paintEventArgs.PaintText(text, textBrush);
+				}
+			}
+		}
+
+		#endregion
+
+		#region Overrides
+
+		protected override void OnListBoxAttached()
+		{
+			base.OnListBoxAttached();
+			_repository.Status.Changed += OnStatusUpdated;
+		}
+
+		protected override void OnListBoxDetached()
+		{
+			base.OnListBoxDetached();
+			_repository.Status.Changed -= OnStatusUpdated;
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -296,99 +387,39 @@
 					break;
 				case ColumnId.Graph:
 					{
-						var type = _type == FakeRevisionItemType.StagedChanges ?
+						var type = Type == FakeRevisionItemType.StagedChanges ?
 							RevisionGraphItemType.Uncommitted : RevisionGraphItemType.Unstaged;
-						GraphColumn.OnPaintSubItem(paintEventArgs, _graph, type);
+						GraphColumn.OnPaintSubItem(paintEventArgs, Graph, type);
 					}
 					break;
+				case ColumnId.User:
 				case ColumnId.Author:
 				case ColumnId.Committer:
-					var user = _repository.UserIdentity;
+					var user = Repository.UserIdentity;
 					if(user != null)
 					{
-						if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-						{
-							UserColumn.OnPaintSubItem(paintEventArgs, user, paintEventArgs.Brush);
-						}
-						else
-						{
-							using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
-							{
-								UserColumn.OnPaintSubItem(paintEventArgs, user, textBrush);
-							}
-						}
+						PaintGrayText(paintEventArgs, user, UserColumn.OnPaintSubItem);
 					}
 					break;
 				case ColumnId.Email:
 				case ColumnId.AuthorEmail:
 				case ColumnId.CommitterEmail:
-					var usermail = _repository.Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
+					var usermail = Repository.Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 					if(!string.IsNullOrWhiteSpace(usermail))
 					{
-						if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-						{
-							paintEventArgs.PaintText(usermail, paintEventArgs.Brush);
-						}
-						else
-						{
-							using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
-							{
-								paintEventArgs.PaintText(usermail, textBrush);
-							}
-						}
+						PaintGrayText(paintEventArgs, usermail, EmailColumn.OnPaintSubItem);
 					}
 					break;
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
 				case ColumnId.AuthorDate:
-					if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-					{
-						paintEventArgs.PaintText(Resources.StrUncommitted.SurroundWith('<', '>'), paintEventArgs.Brush);
-					}
-					else
-					{
-						using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
-						{
-							paintEventArgs.PaintText(Resources.StrUncommitted.SurroundWith('<', '>'), textBrush);
-						}
-					}
+					PaintGrayText(paintEventArgs, Resources.StrUncommitted.SurroundWith('<', '>'));
 					break;
 				case ColumnId.Hash:
 				case ColumnId.TreeHash:
-					if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-					{
-						HashColumn.OnPaintSubItem(paintEventArgs, NoHash, paintEventArgs.Brush);
-					}
-					else
-					{
-						using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
-						{
-							HashColumn.OnPaintSubItem(paintEventArgs, NoHash, textBrush);
-						}
-					}
+					PaintGrayText(paintEventArgs, NoHash, HashColumn.OnPaintSubItem);
 					break;
 			}
-		}
-
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
-
-		public FakeRevisionItemType Type
-		{
-			get { return _type; }
-		}
-
-		public UnstagedRevisionItemSubtype SubType
-		{
-			get { return _subType; }
-		}
-
-		public GraphAtom[] Graph
-		{
-			get { return _graph; }
-			set { _graph = value; }
 		}
 
 		/// <summary>Gets the context menu.</summary>
@@ -397,13 +428,13 @@
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			ContextMenuStrip menu = null;
-			switch(_type)
+			switch(Type)
 			{
 				case FakeRevisionItemType.UnstagedChanges:
-					menu = new UnstagedChangesMenu(_repository);
+					menu = new UnstagedChangesMenu(Repository);
 					break;
 				case FakeRevisionItemType.StagedChanges:
-					menu = new StagedChangesMenu(_repository);
+					menu = new StagedChangesMenu(Repository);
 					break;
 			}
 			if(menu != null)
@@ -412,5 +443,7 @@
 			}
 			return menu;
 		}
+
+		#endregion
 	}
 }

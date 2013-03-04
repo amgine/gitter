@@ -4,6 +4,8 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	using Resources = gitter.Framework.Properties.Resources;
 
 	public class CustomHScrollbar : CustomScrollBar
@@ -17,6 +19,7 @@
 		private Rectangle _increaseButtonBounds;
 		private int _initialScrollX;
 		private bool _isArranged;
+		private Point _mouseDownLocation;
 
 		#endregion
 
@@ -33,8 +36,6 @@
 
 		private void Arrange()
 		{
-			const int MinThumbSize = 17;
-
 			var size = Size;
 			if(size.Width <= 0 || size.Height <= 0) return;
 			var buttonWidth = SystemInformation.HorizontalScrollBarArrowWidth;
@@ -49,10 +50,17 @@
 			}
 			else
 			{
-				thumbSize = NativeMethods.MulDiv(trackBarSize, LargeChange, physicalRange);
-				if(thumbSize < MinThumbSize) thumbSize = MinThumbSize;
+				if(trackBarSize < MinThumbSize)
+				{
+					thumbSize = 0;
+				}
+				else
+				{
+					thumbSize = Kernel32.MulDiv(trackBarSize, LargeChange, physicalRange);
+					if(thumbSize < MinThumbSize) thumbSize = MinThumbSize;
+				}
 				var freeTrackBarSize = trackBarSize - thumbSize;
-				thumbOffset = NativeMethods.MulDiv(freeTrackBarSize, ClampValue(Value), (physicalRange - LargeChange + 1));
+				thumbOffset = Kernel32.MulDiv(freeTrackBarSize, ClampValue(Value), (physicalRange - LargeChange + 1));
 			}
 
 			_decreaseButtonBounds	= new Rectangle(0, 0, buttonWidth, size.Height);
@@ -63,12 +71,26 @@
 			_isArranged = true;
 		}
 
+		private int ThumbPositionToValue(int thumbPosition)
+		{
+			int visualRange = _decreaseTrackBarBounds.Width + _increaseTrackBarBounds.Width;
+			int physicalRange = Maximum - Minimum - LargeChange + 1;
+			return Kernel32.MulDiv(physicalRange, thumbPosition, visualRange);
+		}
+
 		#endregion
 
 		#region Event Handlers
 
 		private void OnScrollHereClick(object sender, EventArgs e)
 		{
+			if(!_isArranged)
+			{
+				Arrange();
+			}
+			var x = _mouseDownLocation.X - _decreaseButtonBounds.Width;
+			var thumbPosition = x - _thumbBounds.Width / 2;
+			Value = ClampValue(ThumbPositionToValue(thumbPosition));
 		}
 
 		private void OnLeftEdgeClick(object sender, EventArgs e)
@@ -112,6 +134,7 @@
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
+			_mouseDownLocation = e.Location;
 			switch(e.Button)
 			{
 				case MouseButtons.Right:
@@ -243,10 +266,11 @@
 
 		protected override int ThumbPositionToValue()
 		{
-			int visualRange = _decreaseTrackBarBounds.Width + _increaseTrackBarBounds.Width;
-			int visualPosition = _decreaseTrackBarBounds.Width;
-			int physicalRange = Maximum - Minimum - LargeChange + 1;
-			return NativeMethods.MulDiv(physicalRange, visualPosition, visualRange);
+			if(!_isArranged)
+			{
+				Arrange();
+			}
+			return ThumbPositionToValue(_decreaseTrackBarBounds.Width);
 		}
 
 		#endregion

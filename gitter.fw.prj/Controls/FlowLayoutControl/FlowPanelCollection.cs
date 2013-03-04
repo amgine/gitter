@@ -37,7 +37,7 @@
 
 		#region Overrides
 
-		protected override ISynchronizeInvoke SynchronizationObject
+		protected override ISynchronizeInvoke SynchronizeInvoke
 		{
 			get { return _control; }
 		}

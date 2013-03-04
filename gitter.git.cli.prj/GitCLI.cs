@@ -227,7 +227,7 @@
 				using(var async = _executor.ExecAsync(cmd))
 				{
 					var mon = parameters.Monitor;
-					mon.Cancelled += (sender, e) => async.Kill();
+					mon.Canceled += (sender, e) => async.Kill();
 					async.ErrorReceived += (sender, e) =>
 					{
 						if(e.Data != null && e.Data.Length != 0)
@@ -238,7 +238,7 @@
 						}
 						else
 						{
-							mon.SetProgressIntermediate();
+							mon.SetProgressIndeterminate();
 						}
 					};
 					async.Start();

@@ -22,11 +22,11 @@
 
 		T GetRepositoryProvider<T>() where T : class, IRepositoryProvider;
 
-		IEnumerable<IIssueTrackerProvider> IssueTrackerProviders { get; }
+		IEnumerable<IRepositoryServiceProvider> IssueTrackerProviders { get; }
 
-		IEnumerable<IIssueTrackerProvider> ActiveIssueTrackerProviders { get; }
+		IEnumerable<IRepositoryServiceProvider> ActiveIssueTrackerProviders { get; }
 
-		bool TryLoadIssueTracker(IIssueTrackerProvider provider);
+		bool TryLoadIssueTracker(IRepositoryServiceProvider provider);
 
 
 		ViewDockService ViewDockService { get; }

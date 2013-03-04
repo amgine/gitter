@@ -25,6 +25,12 @@
 
 		public event EventHandler DateFormatChanged;
 
+		protected virtual void OnDateFormatChanged()
+		{
+			var handler = DateFormatChanged;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
 		#endregion
 
 		#region .ctor
@@ -104,7 +110,7 @@
 					{
 						ListBox.Refresh();
 					}
-					DateFormatChanged.Raise(this);
+					OnDateFormatChanged();
 				}
 			}
 		}

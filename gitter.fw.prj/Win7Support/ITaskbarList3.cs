@@ -4,6 +4,8 @@
 	using System.Collections.Generic;
 	using System.Runtime.InteropServices;
 
+	using gitter.Native;
+
 	[ComImport]
 	[Guid("EA1AFB91-9E28-4B86-90E9-9E9F8A5EEFAF")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -53,7 +55,7 @@
 		
 		void SetThumbnailTooltip(IntPtr hWnd, [MarshalAs(UnmanagedType.LPWStr)]string pszTip);
 
-		void SetThumbnailClip(IntPtr hWnd, ref NativeMethods.RECT prcClip);
+		void SetThumbnailClip(IntPtr hWnd, ref RECT prcClip);
 
 		#endregion
 	}

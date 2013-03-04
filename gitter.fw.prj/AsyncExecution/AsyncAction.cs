@@ -86,7 +86,7 @@
 			monitor.ActionName = _actionName;
 			monitor.CanCancel = _canCancel;
 			monitor.SetAction(_actionDetails);
-			monitor.SetProgressIntermediate();
+			monitor.SetProgressIndeterminate();
 
 			using(var context = new AsyncActionContext<TData>(_action, _data, monitor, ownsMonitor))
 			{
@@ -94,14 +94,20 @@
 
 				if(_canCancel)
 				{
-					monitor.Cancelled += OnMonitorCancelled;
+					monitor.Canceled += OnMonitorCancelled;
 				}
 
 				monitor.Start(parent, context, true);
 
+				if(!context.IsCompleted)
+				{
+					var wh = new WaitHandle[] { context.Completed, context.Canceled };
+					WaitHandle.WaitAny(wh);
+				}
+
 				if(_canCancel)
 				{
-					monitor.Cancelled -= OnMonitorCancelled;
+					monitor.Canceled -= OnMonitorCancelled;
 				}
 
 				var exc = context.Exception;
@@ -153,14 +159,14 @@
 				CanCancel = _canCancel,
 			};
 			monitor.SetAction(_actionDetails);
-			monitor.SetProgressIntermediate();
+			monitor.SetProgressIndeterminate();
 
 			var context = new AsyncActionContext<TData>(_action, _data, monitor, true, callback, asyncState);
 
 			monitor.Started += OnMonitorStarted;
 			if(_canCancel)
 			{
-				monitor.Cancelled += OnMonitorCancelled;
+				monitor.Canceled += OnMonitorCancelled;
 			}
 
 			monitor.Start(parent, context, false);
@@ -175,14 +181,14 @@
 			monitor.ActionName = _actionName;
 			monitor.CanCancel = _canCancel;
 			monitor.SetAction(_actionDetails);
-			monitor.SetProgressIntermediate();
+			monitor.SetProgressIndeterminate();
 
 			var context = new AsyncActionContext<TData>(_action, _data, monitor, false, callback, asyncState);
 
 			monitor.Started += OnMonitorStarted;
 			if(_canCancel)
 			{
-				monitor.Cancelled += OnMonitorCancelled;
+				monitor.Canceled += OnMonitorCancelled;
 			}
 
 			monitor.Start(parent, context, false);
@@ -202,11 +208,12 @@
 			var monitor = context.Monitor;
 			if(!context.IsCompleted)
 			{
-				context.Completed.WaitOne();
+				var wh = new WaitHandle[] { context.Completed, context.Canceled };
+				WaitHandle.WaitAny(wh);
 			}
 			if(_canCancel)
 			{
-				monitor.Cancelled -= OnMonitorCancelled;
+				monitor.Canceled -= OnMonitorCancelled;
 			}
 			var exc = context.Exception;
 			context.Dispose();
@@ -262,7 +269,7 @@
 		{
 			var monitor = (IAsyncProgressMonitor)sender;
 			var context = (AsyncContext)monitor.CurrentContext;
-			context.Cancelled.Set();
+			context.Canceled.Set();
 		}
 
 		#endregion

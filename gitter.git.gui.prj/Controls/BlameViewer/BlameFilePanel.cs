@@ -16,6 +16,8 @@
 
 	sealed class BlameFilePanel : FilePanel
 	{
+		#region Data
+
 		private readonly Repository _repository;
 		private readonly BlameFile _blameFile;
 		private readonly TrackingService _lineHover;
@@ -27,6 +29,8 @@
 		private int _hashColumnWidth;
 		private int _autorColumnWidth;
 		private RevisionToolTip _revisionToolTip;
+
+		#endregion
 
 		private struct HitTestResults
 		{

@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -12,11 +11,93 @@
 	/// <summary><see cref="CustomListBoxItem"/>, representing <see cref="ReflogRecord"/>.</summary>
 	public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 	{
-		private readonly List<Tuple<Rectangle, IRevisionPointer>> _drawnPointers;
+		#region Static
 
-		private Image _image;
+		private static Image GetImage(string message)
+		{
+			if(string.IsNullOrWhiteSpace(message))
+			{
+				return null;
+			}
+			if(message.StartsWith("fetch"))
+			{
+				return CachedResources.Bitmaps["ImgFetch"];
+			}
+			if(message.StartsWith("pull"))
+			{
+				return CachedResources.Bitmaps["ImgPull"];
+			}
+			if(message.StartsWith("branch: Created "))
+			{
+				return CachedResources.Bitmaps["ImgBranch"];
+			}
+			if(message.StartsWith("Branch: renamed "))
+			{
+				return CachedResources.Bitmaps["ImgBranchRename"];
+			}
+			if(message.StartsWith("branch: Reset "))
+			{
+				return CachedResources.Bitmaps["ImgReset"];
+			}
+			if(message.StartsWith("reset:"))
+			{
+				return CachedResources.Bitmaps["ImgReset"];
+			}
+			if(message.StartsWith("update by push"))
+			{
+				return CachedResources.Bitmaps["ImgPush"];
+			}
+			if(message.StartsWith("commit"))
+			{
+				return CachedResources.Bitmaps["ImgCommit"];
+			}
+			if(message.StartsWith("merge"))
+			{
+				return CachedResources.Bitmaps["ImgMerge"];
+			}
+			if(message.StartsWith("rebase"))
+			{
+				return CachedResources.Bitmaps["ImgRebase"];
+			}
+			if(message.StartsWith("checkout:"))
+			{
+				return CachedResources.Bitmaps["ImgCheckout"];
+			}
+			if(message.StartsWith("cherry-pick"))
+			{
+				return CachedResources.Bitmaps["ImgCherryPick"];
+			}
+			if(message.StartsWith("revert"))
+			{
+				return CachedResources.Bitmaps["ImgRevert"];
+			}
+			if(message.EndsWith(": updating HEAD"))
+			{
+				return CachedResources.Bitmaps["ImgReset"];
+			}
+			if(message.StartsWith("clone:"))
+			{
+				return CachedResources.Bitmaps["ImgClone"];
+			}
+			return null;
+		}
+
+		#endregion
+
+		#region Constants
 
 		private const int PointerTagHitOffset = 1;
+
+		#endregion
+
+		#region Data
+
+		private readonly List<PointerBounds> _drawnPointers;
+		private Image _image;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="RevisionListItem"/>.</summary>
 		/// <param name="reflogRecord">Associated revision.</param>
@@ -24,77 +105,43 @@
 			: base(reflogRecord)
 		{
 			var revision = reflogRecord.Revision;
-			_drawnPointers = new List<Tuple<Rectangle, IRevisionPointer>>();
+			_drawnPointers = new List<PointerBounds>();
 			UpdateImage();
 		}
 
+		#endregion
+
+		#region Properties
+
+		public Image Image
+		{
+			get { return _image; }
+			private set { _image = value; }
+		}
+
+		#endregion
+
+		#region Methods
+
 		private void UpdateImage()
 		{
-			if(DataContext.Message.StartsWith("fetch"))
-			{
-				_image = CachedResources.Bitmaps["ImgFetch"];
-			}
-			else if(DataContext.Message.StartsWith("pull"))
-			{
-				_image = CachedResources.Bitmaps["ImgPull"];
-			}
-			else if(DataContext.Message.StartsWith("branch: Created "))
-			{
-				_image = CachedResources.Bitmaps["ImgBranch"];
-			}
-			else if(DataContext.Message.StartsWith("Branch: renamed "))
-			{
-				_image = CachedResources.Bitmaps["ImgBranchRename"];
-			}
-			else if(DataContext.Message.StartsWith("branch: Reset "))
-			{
-				_image = CachedResources.Bitmaps["ImgReset"];
-			}
-			else if(DataContext.Message.StartsWith("reset:"))
-			{
-				_image = CachedResources.Bitmaps["ImgReset"];
-			}
-			else if(DataContext.Message.StartsWith("update by push"))
-			{
-				_image = CachedResources.Bitmaps["ImgPush"];
-			}
-			else if(DataContext.Message.StartsWith("commit"))
-			{
-				_image = CachedResources.Bitmaps["ImgCommit"];
-			}
-			else if(DataContext.Message.StartsWith("merge"))
-			{
-				_image = CachedResources.Bitmaps["ImgMerge"];
-			}
-			else if(DataContext.Message.StartsWith("rebase"))
-			{
-				_image = CachedResources.Bitmaps["ImgRebase"];
-			}
-			else if(DataContext.Message.StartsWith("checkout:"))
-			{
-				_image = CachedResources.Bitmaps["ImgCheckout"];
-			}
-			else if(DataContext.Message.StartsWith("cherry-pick"))
-			{
-				_image = CachedResources.Bitmaps["ImgCherryPick"];
-			}
-			else if(DataContext.Message.StartsWith("revert"))
-			{
-				_image = CachedResources.Bitmaps["ImgRevert"];
-			}
-			else if(DataContext.Message.EndsWith(": updating HEAD"))
-			{
-				_image = CachedResources.Bitmaps["ImgReset"];
-			}
-			else if(DataContext.Message.StartsWith("clone:"))
-			{
-				_image = CachedResources.Bitmaps["ImgClone"];
-			}
-			else
-			{
-				_image = null;
-			}
+			Image = GetImage(DataContext.Message);
 		}
+
+		private void OnDeleted(object sender, EventArgs e)
+		{
+			RemoveSafe();
+		}
+
+		private void OnMessageChanged(object sender, EventArgs e)
+		{
+			UpdateImage();
+			InvalidateSubItemSafe((int)ColumnId.Message);
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -110,24 +157,15 @@
 			base.OnListBoxDetached();
 		}
 
-		private void OnDeleted(object sender, EventArgs e)
-		{
-			RemoveSafe();
-		}
-
-		private void OnMessageChanged(object sender, EventArgs e)
-		{
-			UpdateImage();
-			InvalidateSubItemSafe((int)ColumnId.Message);
-		}
-
 		protected override int OnHitTest(int x, int y)
 		{
 			for(int i = 0; i < _drawnPointers.Count; ++i)
 			{
-				var rc = _drawnPointers[i].Item1;
+				var rc = _drawnPointers[i].Bounds;
 				if(rc.X <= x && rc.Right > x)
+				{
 					return PointerTagHitOffset + i;
+				}
 			}
 			return base.OnHitTest(x, y);
 		}
@@ -142,7 +180,7 @@
 					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHash);
 				case ColumnId.Name:
 				case ColumnId.Message:
-					return measureEventArgs.MeasureImageAndText(_image, DataContext.Message);
+					return measureEventArgs.MeasureImageAndText(Image, DataContext.Message);
 				case ColumnId.Subject:
 					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision, null);
 				case ColumnId.Date:
@@ -176,7 +214,7 @@
 					break;
 				case ColumnId.Name:
 				case ColumnId.Message:
-					paintEventArgs.PaintImageAndText(_image, DataContext.Message);
+					paintEventArgs.PaintImageAndText(Image, DataContext.Message);
 					break;
 				case ColumnId.Subject:
 					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision, null, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
@@ -209,9 +247,21 @@
 		/// <returns>Context menu for specified location.</returns>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var menu = new ReflogRecordMenu(DataContext);
+			ContextMenuStrip menu = null;
+			switch((ColumnId)requestEventArgs.SubItemId)
+			{
+				case ColumnId.Subject:
+					menu = PointerBounds.GetContextMenu(_drawnPointers, requestEventArgs.X, requestEventArgs.Y);
+					break;
+			}
+			if(menu == null)
+			{
+				menu = new ReflogRecordMenu(DataContext);
+			}
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
+
+		#endregion
 	}
 }

@@ -9,6 +9,49 @@
 
 	sealed class MSVS2012OverlayRenderer : ProcessOverlayRenderer
 	{
+		private const byte BackgroundAlpha = 255;
+
+		public interface IColorTable
+		{
+			Color Text { get; }
+			Color Background { get; }
+		}
+
+		private sealed class DarkColorTable : IColorTable
+		{
+			public Color Text { get { return MSVS2012DarkColors.WINDOW_TEXT; } }
+
+			public Color Background { get { return MSVS2012DarkColors.WORK_AREA; } }
+		}
+
+		private static IColorTable _darkColors;
+
+		public static IColorTable DarkColors
+		{
+			get
+			{
+				if(_darkColors == null)
+				{
+					_darkColors = new DarkColorTable();
+				}
+				return _darkColors;
+			}
+		}
+
+		private readonly IColorTable _colorTable;
+
+		public MSVS2012OverlayRenderer(IColorTable colorTable)
+		{
+			Verify.Argument.IsNotNull(colorTable, "colorTable");
+
+			_colorTable = colorTable;
+		}
+
+		private IColorTable ColorTable
+		{
+			get { return _colorTable; }
+		}
+
 		private static Color ColorLERP(Color c1, Color c2, double position)
 		{
 			byte r1 = c1.R;
@@ -26,7 +69,7 @@
 			return Color.FromArgb(r, g, b);
 		}
 
-		private static void DrawIndeterminateProgress(Graphics graphics, int x, int y, int w, int h)
+		private void DrawIndeterminateProgress(Graphics graphics, int x, int y, int w, int h)
 		{
 			const int n = 12;
 
@@ -50,13 +93,13 @@
 				Color color;
 				if(i == current)
 				{
-					color = MSVS2012DarkColors.WINDOW_TEXT;
+					color = ColorTable.Text;
 				}
 				else
 				{
 					if((current + 1) % n == i)
 					{
-						color = MSVS2012DarkColors.WORK_AREA;
+						color = ColorTable.Background;
 					}
 					else
 					{
@@ -64,7 +107,7 @@
 						if(d < 0) d += n;
 						d = n - d;
 						var k = (double)d / (double)n;
-						color = ColorLERP(MSVS2012DarkColors.WINDOW_TEXT, MSVS2012DarkColors.WORK_AREA, k);
+						color = ColorLERP(ColorTable.Text, ColorTable.Background, k);
 					}
 				}
 
@@ -78,7 +121,7 @@
 		public override void Paint(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds)
 		{
 			const int spacing = 10;
-			using(var brush = new SolidBrush(Color.FromArgb(225, MSVS2012DarkColors.WORK_AREA)))
+			using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
 			{
 				graphics.FillRectangle(brush, bounds);
 			}
@@ -93,25 +136,25 @@
 			if(!string.IsNullOrWhiteSpace(processOverlay.Title))
 			{
 				GitterApplication.TextRenderer.DrawText(
-					graphics, processOverlay.Title, font, MSVS2012DarkColors.WINDOW_TEXT, titleRect, TitleStringFormat);
+					graphics, processOverlay.Title, font, ColorTable.Text, titleRect, TitleStringFormat);
 			}
 			if(!string.IsNullOrWhiteSpace(processOverlay.Message))
 			{
 				GitterApplication.TextRenderer.DrawText(
-					graphics, processOverlay.Message, font, MSVS2012DarkColors.WINDOW_TEXT, bounds, StringFormat);
+					graphics, processOverlay.Message, font, ColorTable.Text, bounds, StringFormat);
 			}
 		}
 
 		public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
 		{
-			using(var brush = new SolidBrush(Color.FromArgb(225, MSVS2012DarkColors.WORK_AREA)))
+			using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
 			{
 				graphics.FillRectangle(brush, bounds);
 			}
 			if(!string.IsNullOrWhiteSpace(status))
 			{
 				GitterApplication.TextRenderer.DrawText(
-					graphics, status, processOverlay.Font, MSVS2012DarkColors.WINDOW_TEXT, bounds, StringFormat);
+					graphics, status, processOverlay.Font, ColorTable.Text, bounds, StringFormat);
 			}
 		}
 	}

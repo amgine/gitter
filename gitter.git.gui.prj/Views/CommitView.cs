@@ -59,6 +59,11 @@
 			_txtMessage.PreviewKeyDown += OnKeyDown;
 			_btnCommit.PreviewKeyDown += OnKeyDown;
 
+			if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+			{
+				_txtMessage.BorderStyle = BorderStyle.FixedSingle;
+			}
+
 			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
 
 			_lstStaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
@@ -204,7 +209,7 @@
 				_suppressDiffUpdate = true;
 				_lstUnstaged.SelectedItems.Clear();
 				_suppressDiffUpdate = false;
-				ShowContextualDiffTool(null);
+				ShowContextualDiffView(null);
 			}
 		}
 
@@ -215,7 +220,7 @@
 				_suppressDiffUpdate = true;
 				_lstStaged.SelectedItems.Clear();
 				_suppressDiffUpdate = false;
-				ShowContextualDiffTool(null);
+				ShowContextualDiffView(null);
 			}
 		}
 
@@ -225,7 +230,7 @@
 			var items = ((CustomListBox)sender).SelectedItems;
 			if(items.Count == 0)
 			{
-				ShowContextualDiffTool(null);
+				ShowContextualDiffView(null);
 			}
 			else
 			{
@@ -235,7 +240,7 @@
 					paths[i] = ((ITreeItemListItem)items[i]).TreeItem.RelativePath;
 				}
 
-				ShowContextualDiffTool(Repository.Status.GetDiffSource(false, paths));
+				ShowContextualDiffView(Repository.Status.GetDiffSource(false, paths));
 			}
 		}
 
@@ -245,7 +250,7 @@
 			var items = ((CustomListBox)sender).SelectedItems;
 			if(items.Count == 0)
 			{
-				ShowContextualDiffTool(null);
+				ShowContextualDiffView(null);
 			}
 			else
 			{
@@ -255,7 +260,7 @@
 					paths[i] = ((ITreeItemListItem)items[i]).TreeItem.RelativePath;
 				}
 
-				ShowContextualDiffTool(Repository.Status.GetDiffSource(true, paths));
+				ShowContextualDiffView(Repository.Status.GetDiffSource(true, paths));
 			}
 		}
 

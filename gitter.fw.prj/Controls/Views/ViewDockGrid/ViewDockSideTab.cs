@@ -30,11 +30,6 @@
 
 		#region Properties
 
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
-
 		public ViewDockSide Side
 		{
 			get { return _side; }

@@ -1784,6 +1784,21 @@
 			return item;
 		}
 
+		public static T GetShowRemoteItem<T>(Remote remote)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsValidGitObject(remote, "remote");
+
+			var item = new T()
+			{
+				Image = CachedResources.Bitmaps["ImgSearch"],
+				Text = Resources.StrBrowse,
+				Tag = remote,
+			};
+			item.Click += OnShowRemoteClick;
+			return item;
+		}
+
 		public static T GetFetchItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
@@ -2003,6 +2018,19 @@
 			{
 				d.Run(parent);
 			}
+		}
+
+		private static void OnShowRemoteClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var remote = (Remote)item.Tag;
+			var parameters = new Dictionary<string, object>()
+			{
+				{ "Remote", remote },
+			};
+			GitterApplication.WorkingEnvironment
+							 .ViewDockService
+							 .ShowView(Views.Guids.RemoteViewGuid, parameters, true);
 		}
 
 		private static void OnRemoveRemoteReferenceClick(object sender, EventArgs e)

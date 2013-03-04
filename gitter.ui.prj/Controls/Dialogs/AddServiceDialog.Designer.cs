@@ -1,6 +1,6 @@
 ﻿namespace gitter.Controls
 {
-	partial class AddIssueTrackerDialog
+	partial class AddServiceDialog
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -42,22 +42,22 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this._issueTracker = new gitter.Controls.IssueTrackerPicker();
+			this._servicePicker = new gitter.Controls.ServicePicker();
 			this._lblProvider = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// _issueTracker
 			// 
-			this._issueTracker.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+			this._servicePicker.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._issueTracker.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this._issueTracker.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this._issueTracker.FormattingEnabled = true;
-			this._issueTracker.Location = new System.Drawing.Point(100, 3);
-			this._issueTracker.Name = "_issueTracker";
-			this._issueTracker.SelectedIssueTracker = null;
-			this._issueTracker.Size = new System.Drawing.Size(273, 24);
-			this._issueTracker.TabIndex = 0;
+			this._servicePicker.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this._servicePicker.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this._servicePicker.FormattingEnabled = true;
+			this._servicePicker.Location = new System.Drawing.Point(100, 3);
+			this._servicePicker.Name = "_issueTracker";
+			this._servicePicker.SelectedIssueTracker = null;
+			this._servicePicker.Size = new System.Drawing.Size(273, 24);
+			this._servicePicker.TabIndex = 0;
 			// 
 			// _lblProvider
 			// 
@@ -72,7 +72,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lblProvider);
-			this.Controls.Add(this._issueTracker);
+			this.Controls.Add(this._servicePicker);
 			this.Name = "AddIssueTrackerDialog";
 			this.Size = new System.Drawing.Size(376, 30);
 			this.ResumeLayout(false);
@@ -82,7 +82,7 @@
 
 		#endregion
 
-		private IssueTrackerPicker _issueTracker;
+		private ServicePicker _servicePicker;
 		private System.Windows.Forms.Label _lblProvider;
 	}
 }

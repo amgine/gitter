@@ -19,26 +19,26 @@
 
 		private static readonly Pen ExtenderBorderPenHovered = new Pen(Color.FromArgb(215, 227, 241));
 
-		private static readonly Bitmap ImgColumnExtender	= Resources.ImgColumnExtender;
-		private static readonly Bitmap ImgCollapse			= Resources.ImgMinus;
-		private static readonly Bitmap ImgCollapseHovered	= Resources.ImgMinusHovered;
-		private static readonly Bitmap ImgExpand			= Resources.ImgPlus;
-		private static readonly Bitmap ImgExpandHovered		= Resources.ImgPlusHovered;
+		private static readonly Bitmap ImgColumnExtender	= CachedResources.Bitmaps["ImgColumnExtender"];
+		private static readonly Bitmap ImgCollapse			= CachedResources.Bitmaps["ImgMinus"];
+		private static readonly Bitmap ImgCollapseHovered	= CachedResources.Bitmaps["ImgMinusHovered"];
+		private static readonly Bitmap ImgExpand			= CachedResources.Bitmaps["ImgPlus"];
+		private static readonly Bitmap ImgExpandHovered		= CachedResources.Bitmaps["ImgPlusHovered"];
 
 		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedState =
 			new Dictionary<CheckedState, Bitmap>()
 			{
-				{ CheckedState.Checked,			Resources.ImgChecked		},
-				{ CheckedState.Unchecked,		Resources.ImgUnchecked		},
-				{ CheckedState.Intermediate,	Resources.ImgIntermediate	},
+				{ CheckedState.Checked,			CachedResources.Bitmaps["ImgChecked"]					},
+				{ CheckedState.Unchecked,		CachedResources.Bitmaps["ImgUnchecked"]					},
+				{ CheckedState.Indeterminate,	CachedResources.Bitmaps["ImgCheckIndeterminate"]		},
 			};
 
 		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedStateHovered =
 			new Dictionary<CheckedState, Bitmap>()
 			{
-				{ CheckedState.Checked,			Resources.ImgCheckedHover		},
-				{ CheckedState.Unchecked,		Resources.ImgUncheckedHover		},
-				{ CheckedState.Intermediate,	Resources.ImgIntermediateHover	},
+				{ CheckedState.Checked,			CachedResources.Bitmaps["ImgCheckedHover"]				},
+				{ CheckedState.Unchecked,		CachedResources.Bitmaps["ImgUncheckedHover"]			},
+				{ CheckedState.Indeterminate,	CachedResources.Bitmaps["ImgCheckIndeterminateHover"]	},
 			};
 
 		#endregion

@@ -813,7 +813,7 @@
 						}
 						else
 						{
-							mon.SetProgressIntermediate();
+							mon.SetProgressIndeterminate();
 						}
 					};
 					async.Start();

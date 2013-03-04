@@ -37,6 +37,7 @@
 			_cache.Add(".c", icon);
 			_cache.Add(".cpp", icon);
 			_cache.Add(".h", icon);
+			_cache.Add(".hpp", icon);
 			icon = Resources.IcoDocumentExcel;
 			_cache.Add(".xsl", icon);
 			_cache.Add(".xslx", icon);
@@ -89,13 +90,20 @@
 			_cache.Add(".xaml", icon);
 		}
 
+		private static string GetCacheKey(string fileName)
+		{
+			return Path.GetExtension(fileName).ToLower();
+		}
+
 		public static Bitmap GetIcon(string fileName)
 		{
 			Bitmap res;
 			try
 			{
-				if(!_cache.TryGetValue(Path.GetExtension(fileName).ToLower(), out res))
+				if(!_cache.TryGetValue(GetCacheKey(fileName), out res))
+				{
 					res = _defaultIcon;
+				}
 			}
 			catch
 			{

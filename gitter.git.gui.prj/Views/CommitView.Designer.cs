@@ -119,26 +119,28 @@
 			// _lstUnstaged
 			// 
 			this._lstUnstaged.Dock = System.Windows.Forms.DockStyle.Fill;
+			this._lstUnstaged.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstUnstaged.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstUnstaged.Location = new System.Drawing.Point(0, 21);
 			this._lstUnstaged.Margin = new System.Windows.Forms.Padding(0, 0, 2, 4);
 			this._lstUnstaged.Multiselect = true;
 			this._lstUnstaged.Name = "_lstUnstaged";
 			this._lstUnstaged.ShowTreeLines = true;
-			this._lstUnstaged.Size = new System.Drawing.Size(272, 218);
+			this._lstUnstaged.Size = new System.Drawing.Size(272, 214);
 			this._lstUnstaged.TabIndex = 2;
 			this._lstUnstaged.Text = "%No unstaged changes%";
 			// 
 			// _lstStaged
 			// 
 			this._lstStaged.Dock = System.Windows.Forms.DockStyle.Fill;
+			this._lstStaged.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstStaged.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstStaged.Location = new System.Drawing.Point(276, 21);
 			this._lstStaged.Margin = new System.Windows.Forms.Padding(2, 0, 0, 4);
 			this._lstStaged.Multiselect = true;
 			this._lstStaged.Name = "_lstStaged";
 			this._lstStaged.ShowTreeLines = true;
-			this._lstStaged.Size = new System.Drawing.Size(273, 218);
+			this._lstStaged.Size = new System.Drawing.Size(273, 214);
 			this._lstStaged.TabIndex = 2;
 			this._lstStaged.Text = "%No staged changes%";
 			// 

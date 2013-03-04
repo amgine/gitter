@@ -72,7 +72,7 @@
 				_refsHeads = null;
 				_refsRemotes = null;
 				_refsTags = null;
-				_itemHost.Comparison = BaseReferenceListItem.UniversalComparer;
+				_itemHost.Comparison = ReferenceListItemBase.UniversalComparer;
 			}
 
 			_remotes = groupRemoteBranches ? new List<RemoteListItem>(repository.Remotes.Count) : null;

@@ -1,21 +1,29 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 
 	using gitter.Framework.Controls;
 
-	public sealed class PatchSourceListItem : CustomListBoxItem<IPatchSource>
+	public class PatchSourceListItem : CustomListBoxItem<IPatchSource>
 	{
+		#region Static
+
 		private static readonly Bitmap ImgPatch = CachedResources.Bitmaps["ImgPatch"];
+
+		#endregion
+
+		#region .ctor
 
 		public PatchSourceListItem(IPatchSource patchSource)
 			: base(patchSource)
 		{
 			Verify.Argument.IsNotNull(patchSource, "patchSource");
 		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
@@ -37,5 +45,7 @@
 					return Size.Empty;
 			}
 		}
+
+		#endregion
 	}
 }

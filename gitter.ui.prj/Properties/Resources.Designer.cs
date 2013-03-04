@@ -284,20 +284,20 @@ namespace gitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add Issue Tracker.
-        /// </summary>
-        internal static string StrAddIssueTracker {
-            get {
-                return ResourceManager.GetString("StrAddIssueTracker", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Add Repository.
         /// </summary>
         internal static string StrAddRepository {
             get {
                 return ResourceManager.GetString("StrAddRepository", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add Service.
+        /// </summary>
+        internal static string StrAddService {
+            get {
+                return ResourceManager.GetString("StrAddService", resourceCulture);
             }
         }
         

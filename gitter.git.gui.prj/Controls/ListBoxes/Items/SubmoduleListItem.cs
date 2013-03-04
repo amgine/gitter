@@ -2,15 +2,18 @@
 {
 	using System;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	public sealed class SubmoduleListItem : CustomListBoxItem<Submodule>
+	public class SubmoduleListItem : CustomListBoxItem<Submodule>
 	{
-		private static Bitmap ImgIcon = CachedResources.Bitmaps["ImgSubmodule"];
+		#region Static
+
+		private static Bitmap ImgSubmodule = CachedResources.Bitmaps["ImgSubmodule"];
+
+		#endregion
 
 		#region Comparers
 
@@ -85,10 +88,25 @@
 
 		#endregion
 
+		#region .ctor
+
 		public SubmoduleListItem(Submodule submodule)
 			: base(submodule)
 		{
 		}
+
+		#endregion
+
+		#region Event Handlers
+
+		private void OnDeleted(object sender, EventArgs e)
+		{
+			RemoveSafe();
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -102,17 +120,12 @@
 			base.OnListBoxDetached();
 		}
 
-		private void OnDeleted(object sender, EventArgs e)
-		{
-			RemoveSafe();
-		}
-
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgIcon, DataContext.Name);
+					return measureEventArgs.MeasureImageAndText(ImgSubmodule, DataContext.Name);
 				case ColumnId.Path:
 					return measureEventArgs.MeasureText(DataContext.Path);
 				case ColumnId.Url:
@@ -127,7 +140,7 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgIcon, DataContext.Name);
+					paintEventArgs.PaintImageAndText(ImgSubmodule, DataContext.Name);
 					break;
 				case ColumnId.Path:
 					paintEventArgs.PaintText(DataContext.Path);
@@ -144,5 +157,7 @@
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
+
+		#endregion
 	}
 }

@@ -318,7 +318,7 @@
 					_sizeMode = value;
 					if(IsAttachedToListBox)
 					{
-						ListBox.ColumnLayoutChanged();
+						ListBox.NotifyColumnLayoutChanged();
 					}
 					SizeModeChanged.Raise(this);
 				}
@@ -335,7 +335,7 @@
 					_isVisible = value;
 					if(IsAttachedToListBox)
 					{
-						ListBox.ColumnLayoutChanged();
+						ListBox.NotifyColumnLayoutChanged();
 					}
 				}
 			}
@@ -351,7 +351,7 @@
 				_width = value;
 				if(IsAttachedToListBox)
 				{
-					ListBox.ColumnLayoutChanged();
+					ListBox.NotifyColumnLayoutChanged();
 				}
 				WidthChanged.Raise(this);
 			}

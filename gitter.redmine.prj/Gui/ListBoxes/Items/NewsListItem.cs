@@ -149,23 +149,6 @@
 			return measureEventArgs.MeasureText(text);
 		}
 
-		private static void PaintOptionalContent(NamedRedmineObject data, SubItemPaintEventArgs paintEventArgs)
-		{
-			string text;
-			Brush brush;
-			if(data == null)
-			{
-				text = Resources.StrsUnassigned.SurroundWith('<', '>');
-				brush = SystemBrushes.GrayText;
-			}
-			else
-			{
-				text = data.Name;
-				brush = paintEventArgs.Brush;
-			}
-			paintEventArgs.PaintText(text, brush);
-		}
-
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
@@ -202,10 +185,10 @@
 					paintEventArgs.PaintText(DataContext.Summary);
 					break;
 				case ColumnId.Author:
-					PaintOptionalContent(DataContext.Author, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Author, paintEventArgs);
 					break;
 				case ColumnId.Project:
-					PaintOptionalContent(DataContext.Project, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Project, paintEventArgs);
 					break;
 				case ColumnId.CreatedOn:
 					NewsCreatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.CreatedOn);

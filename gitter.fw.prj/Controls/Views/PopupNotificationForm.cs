@@ -4,6 +4,8 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	public sealed class PopupNotificationForm : Form
 	{
 		private readonly NotificationContent _content;
@@ -97,7 +99,7 @@
 
 		public new void Show()
 		{
-			NativeMethods.ShowWindow(this.Handle, 8);
+			User32.ShowWindow(this.Handle, 8);
 			if(_content.Timeout != TimeSpan.MaxValue)
 			{
 				_timer = new Timer();

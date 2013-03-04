@@ -98,20 +98,20 @@
     <Compile Include="..\shared\Verify.cs">
       <Link>Shared\Verify.cs</Link>
     </Compile>
-    <Compile Include="Controls\Dialogs\AddIssueTrackerDialog.cs">
+    <Compile Include="Controls\Dialogs\AddServiceDialog.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\Dialogs\AddIssueTrackerDialog.Designer.cs">
-      <DependentUpon>AddIssueTrackerDialog.cs</DependentUpon>
+    <Compile Include="Controls\Dialogs\AddServiceDialog.Designer.cs">
+      <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ComboBoxes\IssueTrackerPicker.cs">
+    <Compile Include="Controls\ComboBoxes\ServicePicker.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ListBoxes\RecentRepositoryMenu.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ListBoxes\RecentRepositoryListItem.cs" />
-    <Compile Include="Controls\ListBoxes\IssueTrackerListItem.cs" />
+    <Compile Include="Controls\ListBoxes\ServiceProviderListItem.cs" />
     <Compile Include="Controls\ListBoxes\RepositoryDragImage.cs" />
     <Compile Include="Properties\CachedResources.cs" />
     <Compile Include="Controls\Dialogs\AboutDialog.cs">
@@ -169,8 +169,8 @@
     <Compile Include="Controls\ListBoxes\RepositoryMenu.cs">
       <SubType>Component</SubType>
     </Compile>
-    <EmbeddedResource Include="Controls\Dialogs\AddIssueTrackerDialog.resx">
-      <DependentUpon>AddIssueTrackerDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Controls\Dialogs\AddServiceDialog.resx">
+      <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Dialogs\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>

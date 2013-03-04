@@ -351,6 +351,26 @@ namespace gitter.Framework.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgCheckIndeterminate {
+            get {
+                object obj = ResourceManager.GetObject("ImgCheckIndeterminate", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgCheckIndeterminateHover {
+            get {
+                object obj = ResourceManager.GetObject("ImgCheckIndeterminateHover", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgChevronCollapse {
             get {
                 object obj = ResourceManager.GetObject("ImgChevronCollapse", resourceCulture);
@@ -434,26 +454,6 @@ namespace gitter.Framework.Properties {
         internal static System.Drawing.Bitmap ImgGravatar {
             get {
                 object obj = ResourceManager.GetObject("ImgGravatar", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgIntermediate {
-            get {
-                object obj = ResourceManager.GetObject("ImgIntermediate", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgIntermediateHover {
-            get {
-                object obj = ResourceManager.GetObject("ImgIntermediateHover", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

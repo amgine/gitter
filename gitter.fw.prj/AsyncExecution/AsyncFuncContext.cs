@@ -48,12 +48,10 @@
 			{
 				_result = _action(_data, Monitor);
 			}
-#if !DEBUG
 			catch(Exception exc)
 			{
 				Exception = exc;
 			}
-#endif
 			finally
 			{
 				NotifyCompleted();

@@ -90,11 +90,17 @@
 		public void InvalidateSafe()
 		{
 			var control = FlowControl;
-			if(control != null && FlowControl.Created)
+			if(control != null && control.Created && !control.IsDisposed)
 			{
 				if(control.InvokeRequired)
 				{
-					control.BeginInvoke(new Action(Invalidate), null);
+					try
+					{
+						control.BeginInvoke(new MethodInvoker(Invalidate), null);
+					}
+					catch(ObjectDisposedException)
+					{
+					}
 				}
 				else
 				{
@@ -106,11 +112,17 @@
 		public void InvalidateSafe(Rectangle rect)
 		{
 			var control = FlowControl;
-			if(control != null && FlowControl.Created)
+			if(control != null && control.Created && !control.IsDisposed)
 			{
 				if(control.InvokeRequired)
 				{
-					control.BeginInvoke(new Action<Rectangle>(Invalidate), rect);
+					try
+					{
+						control.BeginInvoke(new Action<Rectangle>(Invalidate), rect);
+					}
+					catch(ObjectDisposedException)
+					{
+					}
 				}
 				else
 				{

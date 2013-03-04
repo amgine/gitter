@@ -23,6 +23,8 @@
 			= new Guid("72B7B606-B451-44EA-A710-FFF66187B819");
 		public static readonly Guid RemotesViewGuid
 			= new Guid("2722F5DB-F734-4C70-8E05-1431BCB6990A");
+		public static readonly Guid RemoteViewGuid
+			= new Guid("F2915D43-D834-4BB7-9664-1E58FC54CB1D");
 		public static readonly Guid StashViewGuid
 			= new Guid("80333656-E4BB-4FF9-8E01-982AC29ABAF5");
 		public static readonly Guid SubmodulesViewGuid

@@ -28,7 +28,7 @@
 
 		#region IAsyncProgressMonitor Members
 
-		public event EventHandler Cancelled
+		public event EventHandler Canceled
 		{
 			add { }
 			remove { }
@@ -51,6 +51,11 @@
 		{
 			get { return _canCancel; }
 			set { _canCancel = value; }
+		}
+
+		public bool IsCancelRequested
+		{
+			get { return false; }
 		}
 
 		public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
@@ -85,14 +90,16 @@
 		{
 		}
 
-		public void SetProgressIntermediate()
+		public void SetProgressIndeterminate()
 		{
 		}
 
 		public void ProcessCompleted()
 		{
 			if(_evExit != null)
+			{
 				_evExit.Set();
+			}
 			_currentAction = null;
 		}
 

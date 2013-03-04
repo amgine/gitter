@@ -17,7 +17,7 @@
 
 			_remote = remote;
 
-			Items.Add(GuiItemFactory.GetBrowseRemoteItem<ToolStripMenuItem>(remote));
+			Items.Add(GuiItemFactory.GetShowRemoteItem<ToolStripMenuItem>(remote));
 			Items.Add(GuiItemFactory.GetEditRemotePropertiesItem<ToolStripMenuItem>(remote));
 
 			Items.Add(new ToolStripSeparator());

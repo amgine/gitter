@@ -8,55 +8,55 @@
 
 	using Resources = gitter.Properties.Resources;
 
-	public partial class AddIssueTrackerDialog : DialogBase, IExecutableDialog
+	public partial class AddServiceDialog : DialogBase, IExecutableDialog
 	{
 		#region Data
 
 		private readonly IWorkingEnvironment _environment;
-		private Dictionary<IIssueTrackerProvider, Control> _setupControlCache;
+		private Dictionary<IRepositoryServiceProvider, Control> _setupControlCache;
 		private Control _activeSetupControl;
 
 		#endregion
 
-		public AddIssueTrackerDialog(IWorkingEnvironment environment)
+		public AddServiceDialog(IWorkingEnvironment environment)
 		{
 			Verify.Argument.IsNotNull(environment, "environment");
 
 			_environment = environment;
-			_setupControlCache = new Dictionary<IIssueTrackerProvider, Control>();
+			_setupControlCache = new Dictionary<IRepositoryServiceProvider, Control>();
 
 			InitializeComponent();
 
-			Text = Resources.StrAddIssueTracker;
+			Text = Resources.StrAddService;
 
-			var hs = new HashSet<IIssueTrackerProvider>(environment.ActiveIssueTrackerProviders);
+			var hs = new HashSet<IRepositoryServiceProvider>(environment.ActiveIssueTrackerProviders);
 			foreach(var prov in _environment.IssueTrackerProviders)
 			{
 				if(!hs.Contains(prov))
 				{
-					var item = new IssueTrackerListItem(prov);
-					_issueTracker.IssueTrackers.Items.Add(item);
+					var item = new ServiceProviderListItem(prov);
+					_servicePicker.ServiceProviders.Items.Add(item);
 				}
 			}
 
-			_issueTracker.SelectedIndexChanged += OnSelectedProviderChanged;
+			_servicePicker.SelectedIndexChanged += OnSelectedProviderChanged;
 
-			if(_issueTracker.IssueTrackers.Items.Count != 0)
+			if(_servicePicker.ServiceProviders.Items.Count != 0)
 			{
-				var item = _issueTracker.IssueTrackers.Items[0];
+				var item = _servicePicker.ServiceProviders.Items[0];
 				item.IsSelected = true;
 				item.Activate();
 			}
 			else
 			{
-				_issueTracker.Enabled = false;
+				_servicePicker.Enabled = false;
 				_lblProvider.Enabled = false;
 			}
 		}
 
 		private void OnSelectedProviderChanged(object sender, EventArgs e)
 		{
-			var prov = _issueTracker.SelectedIssueTracker;
+			var prov = _servicePicker.SelectedIssueTracker;
 			if(prov == null) return;
 			Control setupControl;
 			if(!_setupControlCache.TryGetValue(prov, out setupControl))
@@ -79,7 +79,7 @@
 			Height += d;
 			if(_activeSetupControl != null)
 			{
-				_activeSetupControl.SetBounds(0, _issueTracker.Bottom + 3, Width, 0,
+				_activeSetupControl.SetBounds(0, _servicePicker.Bottom + 3, Width, 0,
 					BoundsSpecified.X | BoundsSpecified.Y | BoundsSpecified.Width);
 				_activeSetupControl.Parent = this;
 			}
@@ -92,7 +92,7 @@
 
 		public bool Execute()
 		{
-			var prov = _issueTracker.SelectedIssueTracker;
+			var prov = _servicePicker.SelectedIssueTracker;
 			if(prov == null) return false;
 			var ctl = _activeSetupControl as IExecutableDialog;
 			if(ctl != null)

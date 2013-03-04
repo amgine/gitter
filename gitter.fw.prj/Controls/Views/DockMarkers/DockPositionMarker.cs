@@ -6,6 +6,8 @@
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
 
+	using gitter.Native;
+
 	/// <summary>Dock position indicator.</summary>
 	sealed class DockPositionMarker : Form
 	{
@@ -42,7 +44,7 @@
 		/// <summary>Displays the control to the user.</summary>
 		public new void Show()
 		{
-			NativeMethods.ShowWindow(this.Handle, 8);
+			User32.ShowWindow(this.Handle, 8);
 		}
 
 		/// <summary>

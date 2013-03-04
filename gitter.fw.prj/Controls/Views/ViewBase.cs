@@ -33,6 +33,18 @@
 			remove { Events.RemoveHandler(ClosingEvent, value); }
 		}
 
+		public new event EventHandler TextChanged
+		{
+			add { base.TextChanged += value; }
+			remove { base.TextChanged -= value; }
+		}
+
+		protected virtual void OnClosing()
+		{
+			var handler = (EventHandler)Events[ClosingEvent];
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
 		#endregion
 
 		#region .ctor
@@ -154,11 +166,6 @@
 				}
 			}
 			OnActivated();
-		}
-
-		protected virtual void OnClosing()
-		{
-			Events.Raise(ClosingEvent, this);
 		}
 
 		public void Close()

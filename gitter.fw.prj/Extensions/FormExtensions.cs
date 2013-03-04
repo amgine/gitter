@@ -3,6 +3,8 @@
 	using System;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	/// <summary>Extension methods for <see cref="System.Windows.Forms.Form"/>.</summary>
 	public static class FormExtensions
 	{
@@ -22,16 +24,16 @@
 		{
 			Verify.Argument.IsNotNull(form, "form");
 
-			var hMenu = NativeMethods.GetSystemMenu(form.Handle, false);
-			NativeMethods.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
+			var hMenu = User32.GetSystemMenu(form.Handle, false);
+			User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
 		}
 
 		public static void EnableCloseButton(this Form form)
 		{
 			Verify.Argument.IsNotNull(form, "form");
 
-			var hMenu = NativeMethods.GetSystemMenu(form.Handle, false);
-			NativeMethods.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+			var hMenu = User32.GetSystemMenu(form.Handle, false);
+			User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
 		}
 	}
 }

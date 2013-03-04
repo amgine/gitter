@@ -8,6 +8,7 @@
 
 		private static ViewRenderer _msvs2010StyleRender;
 		private static ViewRenderer _msvs2012DarkStyleRender;
+		private static ViewRenderer _msvs2012LightStyleRender;
 		private static ViewRenderer _viewRenderer;
 
 		#endregion
@@ -77,6 +78,18 @@
 					_msvs2012DarkStyleRender = new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.DarkColors);
 				}
 				return _msvs2012DarkStyleRender;
+			}
+		}
+
+		public static ViewRenderer MSVS2012LightStyleRenderer
+		{
+			get
+			{
+				if(_msvs2012LightStyleRender == null)
+				{
+					_msvs2012LightStyleRender = new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.LightColors);
+				}
+				return _msvs2012LightStyleRender;
 			}
 		}
 

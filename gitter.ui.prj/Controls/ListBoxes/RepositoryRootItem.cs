@@ -14,17 +14,31 @@
 
 	public sealed class RepositoryRootItem : CustomListBoxItem
 	{
+		#region Static
+
 		private static readonly Image ImgRepository = CachedResources.Bitmaps["ImgRepository"];
+
+		#endregion
+
+		#region Data
 
 		private readonly IWorkingEnvironment _environment;
 		private string _repository;
 
+		#endregion
+
+		#region .ctor
+
 		public RepositoryRootItem(IWorkingEnvironment environment, string repository)
 		{
+			Verify.Argument.IsNotNull(environment, "environment");
+
 			_environment = environment;
 			_repository = repository;
 			Expand();
 		}
+
+		#endregion
 
 		public string RepositoryDisplayName
 		{
@@ -42,9 +56,13 @@
 			{
 				case 0:
 					if(_repository == null)
+					{
 						return measureEventArgs.MeasureText("<no repository>");
+					}
 					else
+					{
 						return measureEventArgs.MeasureImageAndText(ImgRepository, _repository);
+					}
 				default:
 					return Size.Empty;
 			}
@@ -69,19 +87,21 @@
 			{
 				var menu = new ContextMenuStrip();
 				var item = new ToolStripMenuItem(
-					Resources.StrAddIssueTracker.AddEllipsis(), null,
-					(s, e) =>
-					{
-						using(var d = new AddIssueTrackerDialog(_environment))
-						{
-							d.Run(ListBox);
-						}
-					});
+					Resources.StrAddService.AddEllipsis(), null,
+					(s, e) => ShowAddServiceDialog());
 				menu.Items.Add(item);
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
 			return base.GetContextMenu(requestEventArgs);
+		}
+
+		private void ShowAddServiceDialog()
+		{
+			using(var d = new AddServiceDialog(_environment))
+			{
+				d.Run(ListBox);
+			}
 		}
 	}
 }

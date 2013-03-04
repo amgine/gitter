@@ -3,6 +3,7 @@
 	using System;
 	using System.Windows.Forms;
 
+	using gitter.Native;
 	using gitter.Framework;
 
 	/// <summary>Extension methods for <see cref="T:SystemWindows.Forms.Button"/> class.</summary>
@@ -14,7 +15,7 @@
 
 			if(Utility.IsOSVistaOrNewer)
 			{
-				NativeMethods.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, (IntPtr)(-1));
+				User32.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, (IntPtr)(-1));
 			}
 		}
 			
@@ -24,7 +25,7 @@
 
 			if(Utility.IsOSVistaOrNewer)
 			{
-				NativeMethods.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, IntPtr.Zero);
+				User32.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, IntPtr.Zero);
 			}
 		}
 	}

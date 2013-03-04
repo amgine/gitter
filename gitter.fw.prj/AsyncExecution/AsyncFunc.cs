@@ -89,7 +89,7 @@
 			monitor.ActionName = _funcName;
 			monitor.CanCancel = _canCancel;
 			monitor.SetAction(_funcDetails);
-			monitor.SetProgressIntermediate();
+			monitor.SetProgressIndeterminate();
 
 			TResult result;
 
@@ -99,14 +99,20 @@
 
 				if(_canCancel)
 				{
-					monitor.Cancelled += OnMonitorCancelled;
+					monitor.Canceled += OnMonitorCancelled;
 				}
 
 				monitor.Start(parent, context, true);
 
 				if(_canCancel)
 				{
-					monitor.Cancelled -= OnMonitorCancelled;
+					monitor.Canceled -= OnMonitorCancelled;
+				}
+
+				if(!context.IsCompleted)
+				{
+					var wh = new WaitHandle[] { context.Completed, context.Canceled };
+					WaitHandle.WaitAny(wh);
 				}
 
 				var exc = context.Exception;
@@ -129,7 +135,18 @@
 		public TResult Invoke<TMonitor>(IWin32Window parent)
 			where TMonitor : IAsyncProgressMonitor, new()
 		{
-			return InvokeCore(parent, new TMonitor(), true);
+			TResult result;
+			var monitor = new TMonitor();
+			try
+			{
+				result = InvokeCore(parent, monitor, true);
+			}
+			finally
+			{
+				var disposable = monitor as IDisposable;
+				if(disposable != null) disposable.Dispose();
+			}
+			return result;
 		}
 
 		/// <summary>Executes action synchronously.</summary>
@@ -162,7 +179,7 @@
 				CanCancel = _canCancel,
 			};
 			monitor.SetAction(_funcDetails);
-			monitor.SetProgressIntermediate();
+			monitor.SetProgressIndeterminate();
 
 			var context = new AsyncFuncContext<TData, TResult>(_func, _data, monitor, true, callback, asyncState);
 
@@ -170,7 +187,7 @@
 
 			if(_canCancel)
 			{
-				monitor.Cancelled += OnMonitorCancelled;
+				monitor.Canceled += OnMonitorCancelled;
 			}
 
 			monitor.Start(parent, context, false);
@@ -185,7 +202,7 @@
 			monitor.ActionName = _funcName;
 			monitor.CanCancel = _canCancel;
 			monitor.SetAction(_funcDetails);
-			monitor.SetProgressIntermediate();
+			monitor.SetProgressIndeterminate();
 
 			var context = new AsyncFuncContext<TData, TResult>(_func, _data, monitor, false, callback, asyncState);
 
@@ -193,7 +210,7 @@
 
 			if(_canCancel)
 			{
-				monitor.Cancelled += OnMonitorCancelled;
+				monitor.Canceled += OnMonitorCancelled;
 			}
 
 			monitor.Start(parent, context, false);
@@ -212,11 +229,12 @@
 
 			if(!context.IsCompleted)
 			{
-				context.Completed.WaitOne();
+				var wh = new WaitHandle[] { context.Completed, context.Canceled };
+				WaitHandle.WaitAny(wh);
 			}
 			if(_canCancel)
 			{
-				context.Monitor.Cancelled -= OnMonitorCancelled;
+				context.Monitor.Canceled -= OnMonitorCancelled;
 			}
 			var exc = context.Exception;
 			if(exc != null)
@@ -274,7 +292,7 @@
 		{
 			var monitor = (IAsyncProgressMonitor)sender;
 			var context = (AsyncContext)monitor.CurrentContext;
-			context.Cancelled.Set();
+			context.Canceled.Set();
 		}
 
 		#endregion

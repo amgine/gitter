@@ -174,6 +174,25 @@
 		}
 	}
 
+	sealed class RemoteViewFactory : ViewFactoryBase
+	{
+		private readonly GuiProvider _guiProvider;
+
+		public RemoteViewFactory(GuiProvider guiProvider)
+			: base(Guids.RemoteViewGuid, Resources.StrRemote, CachedResources.Bitmaps["ImgRemote"], false)
+		{
+			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+
+			_guiProvider = guiProvider;
+			DefaultViewPosition = ViewPosition.RootDocumentHost;
+		}
+
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		{
+			return new RemoteView(parameters, _guiProvider);
+		}
+	}
+
 	sealed class StashViewFactory : ViewFactoryBase
 	{
 		private readonly GuiProvider _guiProvider;

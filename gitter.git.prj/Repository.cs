@@ -99,7 +99,14 @@
 
 		private static void SetProgress(IAsyncProgressMonitor monitor, int val, string action)
 		{
-			if(monitor != null) monitor.SetProgress(val, action);
+			if(monitor != null)
+			{
+				if(monitor.IsCancelRequested)
+				{
+					throw new OperationCanceledException();
+				}
+				monitor.SetProgress(val, action);
+			}
 		}
 
 		private static void LoadCore(Repository repository, IAsyncProgressMonitor monitor)
@@ -127,7 +134,7 @@
 			repository.Notes.Refresh();
 
 			SetProgress(monitor, 3, Resources.StrLoadingHEAD.AddEllipsis());
-			repository._head = new Head(repository);
+			repository.Head = new Head(repository);
 
 			SetProgress(monitor, 4, Resources.StrLoadingRemotes.AddEllipsis());
 			repository.Remotes.Refresh();
@@ -136,15 +143,16 @@
 			SetProgress(monitor, 5, Resources.StrLoadingSubmodules.AddEllipsis());
 			repository.Submodules.Refresh();
 
-			SetProgress(monitor, 6, Resources.StrLoadingUsers.AddEllipsis());
-			if(!repository._head.IsEmpty)
+			if(!repository.Head.IsEmpty)
 			{
+				SetProgress(monitor, 6, Resources.StrLoadingUsers.AddEllipsis());
 				repository.Users.Refresh();
 			}
+
 			SetProgress(monitor, 7, Resources.StrLoadingStatus.AddEllipsis());
 			repository.Status.Refresh();
 
-			repository._monitor = new RepositoryMonitor(repository);
+			repository.Monitor = new RepositoryMonitor(repository);
 
 			repository.UpdateState();
 
@@ -172,13 +180,19 @@
 				(data, monitor) =>
 				{
 					var repository = new Repository(data.GitAccessor, data.WorkingDirectory, false);
-
-					LoadCore(repository, monitor);
-
+					try
+					{
+						LoadCore(repository, monitor);
+					}
+					catch
+					{
+						repository.Dispose();
+						throw;
+					}
 					return repository;
 				},
 				Resources.StrLoadingRepository.AddEllipsis(),
-				string.Empty);
+				string.Empty, true);
 		}
 
 		private static string GetWorkingDirectory(string workingDirectory)
@@ -247,7 +261,7 @@
 
 		#endregion
 
-		#region .ctor
+		#region .ctor & finalizer
 
 		/// <summary>Create <see cref="Repository"/>.</summary>
 		/// <param name="gitAccessor">Git repository access provider.</param>
@@ -277,8 +291,22 @@
 
 			if(load)
 			{
-				LoadCore(this, null);
+				try
+				{
+					LoadCore(this, null);
+				}
+				catch
+				{
+					Dispose();
+					throw;
+				}
 			}
+		}
+
+		/// <summary>Finalizes an instance of the <see cref="Repository"/> class.</summary>
+		~Repository()
+		{
+			Dispose(false);
 		}
 
 		#endregion
@@ -312,6 +340,7 @@
 		internal RepositoryMonitor Monitor
 		{
 			get { return _monitor; }
+			private set { _monitor = value; }
 		}
 
 		#endregion
@@ -379,6 +408,7 @@
 		public Head Head
 		{
 			get { return _head; }
+			private set { _head = value; }
 		}
 
 		/// <summary>Returns references collection.</summary>
@@ -785,22 +815,41 @@
 
 		#region IDisposable
 
+		/// <summary>Gets a value indicating whether this instance is disposed.</summary>
+		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
 		public bool IsDisposed
 		{
 			get { return _isDisposed; }
 			private set { _isDisposed = value; }
 		}
 
+		/// <summary>Releases unmanaged and - optionally - managed resources.</summary>
+		/// <param name="disposing">
+		/// <c>true</c> to release both managed and unmanaged resources;
+		/// <c>false</c> to release only unmanaged resources.
+		/// </param>
+		private void Dispose(bool disposing)
+		{
+			if(Monitor != null)
+			{
+				Monitor.Shutdown();
+			}
+			var disposable = _accessor as IDisposable;
+			if(disposable != null)
+			{
+				disposable.Dispose();
+			}
+		}
+
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
 		public void Dispose()
 		{
 			if(!IsDisposed)
 			{
-				Monitor.Shutdown();
-				var disposable = _accessor as IDisposable;
-				if(disposable != null)
-				{
-					disposable.Dispose();
-				}
+				GC.SuppressFinalize(this);
+				Dispose(true);
 				IsDisposed = true;
 			}
 		}

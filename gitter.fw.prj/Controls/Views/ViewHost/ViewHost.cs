@@ -117,6 +117,7 @@
 					Verify.Argument.IsTrue(view != null, "views", "List of views contains invalid arguments.");
 
 					_views.Add(view);
+					view.TextChanged += OnViewTextChanged;
 					view.Host = this;
 					var ts = view.Size;
 					if(ts.Width > size.Width)
@@ -807,6 +808,7 @@
 					_tabs.AddView(view);
 				}
 			}
+			view.TextChanged += OnViewTextChanged;
 			Events.Raise(ViewAddedEvent, this, new ViewEventArgs(view));
 		}
 
@@ -908,6 +910,7 @@
 			Assert.AreNotEqual(index, -1);
 
 			_views.RemoveAt(index);
+			view.TextChanged -= OnViewTextChanged;
 			view.Host = null;
 			if(_isDocumentWell)
 			{
@@ -1126,6 +1129,19 @@
 				_dockingProcess.Commit(location);
 			}
 			_readyToMove = false;
+		}
+
+		private void OnViewTextChanged(object sender, EventArgs e)
+		{
+			var view = (ViewBase)sender;
+			if(_header != null)
+			{
+				_header.Invalidate();
+			}
+			if(_tabs != null)
+			{
+				_tabs.InvalidateTab(view);
+			}
 		}
 
 		private void InvalidateHelpers()
@@ -1494,7 +1510,7 @@
 		internal void DockInto(ViewHost viewHost)
 		{
 			Verify.Argument.IsNotNull(viewHost, "viewHost");
-			Verify.Argument.IsTrue(viewHost != this, "viewHost", "Cannot sock to itself.");
+			Verify.Argument.IsTrue(viewHost != this, "viewHost", "Cannot dock to itself.");
 
 			ReturnFromFloatingMode();
 			PreventActiveViewDispose();
@@ -1581,6 +1597,10 @@
 					_ownerForm.Activated -= OnOwnerFormActivated;
 					_ownerForm.Deactivate -= OnOwnerFormDeactivated;
 					_ownerForm = null;
+				}
+				foreach(var view in _views)
+				{
+					view.TextChanged -= OnViewTextChanged;
 				}
 				RemoveHeader();
 				RemoveTabs();

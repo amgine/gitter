@@ -11,20 +11,20 @@
 
 	using Resources = gitter.Properties.Resources;
 
-	public class IssueTrackerPicker : CustomPopupComboBox
+	public class ServicePicker : CustomPopupComboBox
 	{
 		private static readonly StringFormat StringFormat = new StringFormat(StringFormat.GenericTypographic)
 		{
 			LineAlignment = StringAlignment.Center,
 		};
 
-		private CustomListBox _lstIssueTrackers;
-		private IIssueTrackerProvider _selectedRemote;
+		private CustomListBox _lstServiceProviders;
+		private IRepositoryServiceProvider _selectedRemote;
 
 		/// <summary>Initializes a new instance of the <see cref="RemotePicker"/> class.</summary>
-		public IssueTrackerPicker()
+		public ServicePicker()
 		{
-			_lstIssueTrackers = new CustomListBox()
+			_lstServiceProviders = new CustomListBox()
 			{
 				Style = GitterApplication.DefaultStyle,
 				HeaderStyle = HeaderStyle.Hidden,
@@ -36,20 +36,20 @@
 					GitterApplication.FontManager.UIFont.Font:
 					SystemFonts.MessageBoxFont,
 			};
-			_lstIssueTrackers.Columns.Add(
+			_lstServiceProviders.Columns.Add(
 				new CustomListBoxColumn(0, Resources.StrName)
 				{
 					SizeMode = ColumnSizeMode.Auto,
 				});
-			_lstIssueTrackers.ItemActivated += OnItemActivated;
+			_lstServiceProviders.ItemActivated += OnItemActivated;
 
 			DropDownStyle = ComboBoxStyle.DropDownList;
 			DrawMode = DrawMode.OwnerDrawFixed;
 
-			DropDownControl = _lstIssueTrackers;
+			DropDownControl = _lstServiceProviders;
 		}
 
-		public IIssueTrackerProvider SelectedIssueTracker
+		public IRepositoryServiceProvider SelectedIssueTracker
 		{
 			get { return _selectedRemote; }
 			set
@@ -109,14 +109,14 @@
 			}
 		}
 
-		public CustomListBox IssueTrackers
+		public CustomListBox ServiceProviders
 		{
-			get { return _lstIssueTrackers; }
+			get { return _lstServiceProviders; }
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
-			var remoteItem = e.Item as IssueTrackerListItem;
+			var remoteItem = e.Item as ServiceProviderListItem;
 			if(remoteItem != null)
 			{
 				SelectedIssueTracker = remoteItem.DataContext;
@@ -128,11 +128,11 @@
 		{
 			if(disposing)
 			{
-				if(_lstIssueTrackers != null)
+				if(_lstServiceProviders != null)
 				{
-					_lstIssueTrackers.ItemActivated -= OnItemActivated;
-					_lstIssueTrackers.Dispose();
-					_lstIssueTrackers = null;
+					_lstServiceProviders.ItemActivated -= OnItemActivated;
+					_lstServiceProviders.Dispose();
+					_lstServiceProviders = null;
 				}
 				_selectedRemote = null;
 			}

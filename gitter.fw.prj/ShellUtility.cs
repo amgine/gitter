@@ -9,6 +9,8 @@
 
 	using Microsoft.Win32;
 
+	using gitter.Native;
+
 	public static class ShellUtility
 	{
 		public static Icon ExtractAssociatedFileIcon16ByExt(string fileName)
@@ -19,8 +21,8 @@
 
 			const int FILE_ATTRIBUTE_NORMAL = 0x80;
 
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, System.Runtime.InteropServices.Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+			var info = new SHFILEINFO();
+			Shell32.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
 			try
 			{
 				return Icon.FromHandle(info.hIcon);
@@ -39,15 +41,15 @@
 
 			const int FILE_ATTRIBUTE_NORMAL = 0x80;
 
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON);
+			var info = new SHFILEINFO();
+			Shell32.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON);
 			try
 			{
 				return Icon.FromHandle(info.hIcon);
 			}
 			catch
 			{
-				NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+				Shell32.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
 				try
 				{
 					return Icon.FromHandle(info.hIcon);
@@ -68,15 +70,15 @@
 			const int FILE_ATTRIBUTE_NORMAL = 0x80;
 			const int FILE_ATTRIBUTE_DIR = 0x10;
 
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON);
+			var info = new SHFILEINFO();
+			Shell32.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON);
 			try
 			{
 				return Icon.FromHandle(info.hIcon);
 			}
 			catch
 			{
-				NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+				Shell32.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
 				try
 				{
 					return Icon.FromHandle(info.hIcon);
@@ -97,8 +99,8 @@
 			const int FILE_ATTRIBUTE_NORMAL = 0x80;
 			const int FILE_ATTRIBUTE_DIR = 0x10;
 
-			var info = new NativeMethods.SHFILEINFO();
-			NativeMethods.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+			var info = new SHFILEINFO();
+			Shell32.SHGetFileInfo(fileName, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_DIR, ref info, Marshal.SizeOf(info), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
 			try
 			{
 				return Icon.FromHandle(info.hIcon);
@@ -148,7 +150,7 @@
 						aliasKey.Close();
 						if(file == "%1") file = fileName;
 						IntPtr[] icons = new IntPtr[1];
-						var c = NativeMethods.ExtractIconEx(file, id, null, icons, 1);
+						var c = Shell32.ExtractIconEx(file, id, null, icons, 1);
 						if(c == 1)
 						{
 							return Icon.FromHandle(icons[0]);

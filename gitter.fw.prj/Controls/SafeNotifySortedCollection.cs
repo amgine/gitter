@@ -20,7 +20,7 @@
 		#region Properties
 
 		/// <summary>Object which is used to synchronize all *Safe() calls.</summary>
-		protected abstract ISynchronizeInvoke SynchronizationObject { get; }
+		protected abstract ISynchronizeInvoke SynchronizeInvoke { get; }
 
 		#endregion
 
@@ -28,122 +28,195 @@
 
 		public void AddSafe(T item)
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				Add(item);
 			}
 			else
 			{
-				control.BeginInvoke(new Action<T>(Add), new object[] { item });
+				try
+				{
+					sync.BeginInvoke(new Action<T>(Add), new object[] { item });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void AddRangeSafe(IEnumerable<T> list)
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				AddRange(list);
 			}
 			else
 			{
-				control.BeginInvoke(new Action<IEnumerable<T>>(AddRange), new object[] { list });
+				try
+				{
+					sync.BeginInvoke(new Action<IEnumerable<T>>(AddRange), new object[] { list });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+		}
+
+		public void SetSafe(int index, T item)
+		{
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
+			{
+				this[index] = item;
+			}
+			else
+			{
+				try
+				{
+					sync.BeginInvoke(new Action<int, T>(SetSafe), new object[] { index, item });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void InsertSafe(int index, T item)
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				Insert(index, item);
 			}
 			else
 			{
-				control.BeginInvoke(new Action<int, T>(Insert), new object[] { index, item });
+				try
+				{
+					sync.BeginInvoke(new Action<int, T>(Insert), new object[] { index, item });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void RemoveSafe(T item)
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				Remove(item);
 			}
 			else
 			{
-				control.BeginInvoke(new Func<T, bool>(Remove), new object[] { item });
+				try
+				{
+					sync.BeginInvoke(new Func<T, bool>(Remove), new object[] { item });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void RemoveAtSafe(int index)
 		{
-			var control = SynchronizationObject;
+			var control = SynchronizeInvoke;
 			if(control == null || !control.InvokeRequired)
 			{
 				RemoveAt(index);
 			}
 			else
 			{
-				control.BeginInvoke(new Action<int>(RemoveAt), new object[] { index });
+				try
+				{
+					control.BeginInvoke(new Action<int>(RemoveAt), new object[] { index });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void RemoveRangeSafe(int index, int count)
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				RemoveRange(index, count);
 			}
 			else
 			{
-				control.BeginInvoke(new Action<int, int>(RemoveRange), new object[] { index, count});
+				try
+				{
+					sync.BeginInvoke(new Action<int, int>(RemoveRange), new object[] { index, count});
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void ClearSafe()
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				Clear();
 			}
 			else
 			{
-				control.BeginInvoke(new Action(Clear), null);
+				try
+				{
+					sync.BeginInvoke(new Action(Clear), null);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void InsertSortedFromTopSafe(T item, Func<T, T, int> comparer)
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				InsertSortedFromTop(item, comparer);
 			}
 			else
 			{
-				control.BeginInvoke(
-					new Func<T, Func<T, T, int>, int>(InsertSortedFromTop),
-					new object[] { item, comparer });
+				try
+				{
+					sync.BeginInvoke(
+						new Func<T, Func<T, T, int>, int>(InsertSortedFromTop),
+						new object[] { item, comparer });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 
 		public void InsertSortedFromBottomSafe(T item, Func<T, T, int> comparer)
 		{
-			var control = SynchronizationObject;
-			if(control == null || !control.InvokeRequired)
+			var sync = SynchronizeInvoke;
+			if(sync == null || !sync.InvokeRequired)
 			{
 				InsertSortedFromBottom(item, comparer);
 			}
 			else
 			{
-				control.BeginInvoke(
-					new Func<T, Func<T, T, int>, int>(InsertSortedFromBottom),
-					new object[] { item, comparer });
+				try
+				{
+					sync.BeginInvoke(
+						new Func<T, Func<T, T, int>, int>(InsertSortedFromBottom),
+						new object[] { item, comparer });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 		}
 

@@ -5,6 +5,8 @@
 	using System.Windows.Forms;
 	using System.Runtime.InteropServices;
 
+	using gitter.Native;
+
 	[ToolboxItem(true)]
 	public partial class CustomPopupComboBox : ComboBox
 	{
@@ -25,39 +27,32 @@
 			base.DropDownHeight = 1;
 			base.DropDownWidth = 1;
 
-			_listBoxWndProc = new NativeMethods.WNDPROC(ListBoxWndProc);
+			_listBoxWndProc = new WNDPROC(ListBoxWndProc);
 		}
 
 		#endregion
 
 		#region Overrides
 
-		private readonly NativeMethods.WNDPROC _listBoxWndProc;
+		private readonly WNDPROC _listBoxWndProc;
 		private IntPtr _listBoxDefaultWndProc;
 
 		protected override void OnHandleCreated(EventArgs e)
 		{
 			base.OnHandleCreated(e);
-			var x = new NativeMethods.COMBOBOXINFO();
-			x.cbSize = (uint)Marshal.SizeOf(typeof(NativeMethods.COMBOBOXINFO));
-			var b = NativeMethods.GetComboBoxInfo(Handle, ref x);
-			if(IntPtr.Size == 8)
-			{
-				_listBoxDefaultWndProc = NativeMethods.SetWindowLongPtr(
-					x.hwndList, NativeMethods.GWLP_WNDPROC, _listBoxWndProc);
-			}
-			else
-			{
-				_listBoxDefaultWndProc = NativeMethods.SetWindowLong(
-					x.hwndList, NativeMethods.GWLP_WNDPROC, _listBoxWndProc);
-			}
+			var x = new COMBOBOXINFO();
+			x.cbSize = (uint)Marshal.SizeOf(typeof(COMBOBOXINFO));
+			var b = User32.GetComboBoxInfo(Handle, ref x);
+			_listBoxDefaultWndProc = NativeUtility.SetWindowProc(x.hwndList, _listBoxWndProc);
 		}
 
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
 			if(DropDown != null)
+			{
 				DropDown.Width = Width;
+			}
 		}
 
 		protected override void Dispose(bool disposing)
@@ -76,26 +71,26 @@
 
 		private IntPtr ListBoxWndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
 		{
-			switch((WindowsMessage)msg)
+			switch((WM)msg)
 			{
-				case WindowsMessage.WM_MOUSEMOVE:
-					NativeMethods.ReleaseCapture();
+				case WM.MOUSEMOVE:
+					User32.ReleaseCapture();
 					break;
-				case WindowsMessage.WM_CAPTURECHANGED:
+				case WM.CAPTURECHANGED:
 					return IntPtr.Zero;
 			}
-			return NativeMethods.CallWindowProc(_listBoxDefaultWndProc, hWnd, msg, wParam, lParam);
+			return User32.CallWindowProc(_listBoxDefaultWndProc, hWnd, msg, wParam, lParam);
 		}
 
 		protected override void WndProc(ref Message m)
 		{
 			switch(m.Msg)
 			{
-				case ((int)WindowsMessage.WM_COMMAND + (int)WindowsMessage.WM_REFLECT):
+				case ((int)WM.COMMAND + (int)WM.REFLECT):
 					{
-						switch(NativeMethods.HIWORD(m.WParam))
+						switch(NativeUtility.HIWORD(m.WParam))
 						{
-							case NativeMethods.CBN_DROPDOWN:
+							case Constants.CBN_DROPDOWN:
 								ShowDropDownCore();
 								return;
 						}
@@ -137,7 +132,7 @@
 		private void dropDown_Closed(object sender, ToolStripDropDownClosedEventArgs e)
 		{
 			_dropDownHideTime = DateTime.UtcNow;
-			NativeMethods.ShowDropDown(Handle, false);
+			NativeUtility.ShowDropDown(Handle, false);
 		}
 
 		public new bool DroppedDown
@@ -146,9 +141,13 @@
 			set
 			{
 				if(value)
+				{
 					ShowDropDown();
+				}
 				else
+				{
 					HideDropDown();
+				}
 			}
 		}
 
@@ -170,7 +169,7 @@
 
 		public void ShowDropDown()
 		{
-			NativeMethods.ShowDropDown(Handle, true);
+			NativeUtility.ShowDropDown(Handle, true);
 		}
 
 		public void HideDropDown()

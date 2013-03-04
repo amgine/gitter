@@ -4,6 +4,7 @@
 	using System.Windows.Forms;
 	using System.Drawing;
 
+	using gitter.Native;
 	using gitter.Framework.Services;
 
 	public abstract class DockMarker : Form
@@ -71,7 +72,7 @@
 		/// </summary>
 		public new void Show()
 		{
-			NativeMethods.ShowWindow(this.Handle, 8);
+			User32.ShowWindow(this.Handle, 8);
 		}
 
 		private void OnButtonHoverChanged(object sender, TrackingEventArgs<DockMarkerButton> e)

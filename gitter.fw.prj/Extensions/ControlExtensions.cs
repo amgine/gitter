@@ -3,6 +3,8 @@
 	using System;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	/// <summary>Extension methods for <see cref="System.Windows.Forms.Control"/>.</summary>
 	public static class ControlExtensions
 	{
@@ -12,7 +14,7 @@
 		{
 			Verify.Argument.IsNotNull(control, "control");
 
-			NativeMethods.SendMessage(control.Handle, WindowsMessage.WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
+			User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)0, IntPtr.Zero);
 		}
 
 		/// <summary>Enables control redrawing.</summary>
@@ -21,7 +23,7 @@
 		{
 			Verify.Argument.IsNotNull(control, "control");
 
-			NativeMethods.SendMessage(control.Handle, WindowsMessage.WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
+			User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)1, IntPtr.Zero);
 		}
 
 		/// <summary>Forces control redraw.</summary>
@@ -30,11 +32,11 @@
 		{
 			Verify.Argument.IsNotNull(control, "control");
 
-			NativeMethods.RedrawWindow(control.Handle, IntPtr.Zero, IntPtr.Zero,
-				NativeMethods.RedrawWindowFlags.Erase |
-				NativeMethods.RedrawWindowFlags.Frame |
-				NativeMethods.RedrawWindowFlags.Invalidate |
-				NativeMethods.RedrawWindowFlags.AllChildren);
+			User32.RedrawWindow(control.Handle, IntPtr.Zero, IntPtr.Zero,
+				RedrawWindowFlags.Erase |
+				RedrawWindowFlags.Frame |
+				RedrawWindowFlags.Invalidate |
+				RedrawWindowFlags.AllChildren);
 		}
 	}
 }

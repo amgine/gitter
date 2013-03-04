@@ -10,6 +10,7 @@
 	using gitter.Framework.Options;
 	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
+	using gitter.Native;
 
 	/// <summary>gitter application class.</summary>
 	public static class GitterApplication
@@ -31,6 +32,7 @@
 			new IGitterStyle[]
 			{
 				_defaultStyle = new MSVS2010Style(),
+				//new MSVS2012LightStyle(),
 				new MSVS2012DarkStyle(),
 			};
 
@@ -201,7 +203,7 @@
 			if(Utility.IsOSWindows7OrNewer)
 			{
 				// for win7 we can provide explicit user id for better shell integration
-				NativeMethods.SetCurrentProcessExplicitAppUserModelID("gitter.app");
+				Shell32.SetCurrentProcessExplicitAppUserModelID("gitter.app");
 			}
 
 			LoggingService.RegisterAppender(LogListBoxAppender.Instance);

@@ -271,9 +271,13 @@
 								list[id] = temp;
 							}
 							if(callUpdate)
+							{
 								info.Update(list[id]);
+							}
 							if(hset != null)
+							{
 								hset.Remove(list[id]);
+							}
 							found = true;
 							break;
 						}
@@ -295,7 +299,9 @@
 				{
 					list.Remove(obj);
 					if(objectDeleted != null)
+					{
 						objectDeleted(obj);
+					}
 				}
 			}
 		}
@@ -329,7 +335,9 @@
 								list[id] = temp;
 							}
 							if(callUpdate)
+							{
 								info.Update(list[id]);
+							}
 							found = true;
 							break;
 						}
@@ -339,7 +347,9 @@
 						var obj = info.Construct(repository);
 						list.Insert(id, obj);
 						if(objectCreated != null)
+						{
 							objectCreated(obj);
+						}
 					}
 					++id;
 				}

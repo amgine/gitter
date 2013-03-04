@@ -150,7 +150,7 @@
 				c.IsVisible = item.CheckedState == CheckedState.Checked;
 				_listBox.Columns.Add(c);
 			}
-			_listBox.ColumnLayoutChanged();
+			_listBox.NotifyColumnLayoutChanged();
 			_listBox.EndUpdate();
 			return true;
 		}

@@ -16,17 +16,17 @@
 		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedState =
 			new Dictionary<CheckedState, Bitmap>()
 			{
-				{ CheckedState.Checked,			Resources.ImgChecked		},
-				{ CheckedState.Unchecked,		Resources.ImgUnchecked		},
-				{ CheckedState.Intermediate,	Resources.ImgIntermediate	},
+				{ CheckedState.Checked,			CachedResources.Bitmaps["ImgChecked"]					},
+				{ CheckedState.Unchecked,		CachedResources.Bitmaps["ImgUnchecked"]					},
+				{ CheckedState.Indeterminate,	CachedResources.Bitmaps["ImgCheckIndeterminate"]		},
 			};
 
 		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedStateHovered =
 			new Dictionary<CheckedState, Bitmap>()
 			{
-				{ CheckedState.Checked,			Resources.ImgCheckedHover		},
-				{ CheckedState.Unchecked,		Resources.ImgUncheckedHover		},
-				{ CheckedState.Intermediate,	Resources.ImgIntermediateHover	},
+				{ CheckedState.Checked,			CachedResources.Bitmaps["ImgCheckedHover"]				},
+				{ CheckedState.Unchecked,		CachedResources.Bitmaps["ImgUncheckedHover"]			},
+				{ CheckedState.Indeterminate,	CachedResources.Bitmaps["ImgCheckIndeterminateHover"]	},
 			};
 
 		private static readonly PointF[] _triangle = new PointF[3];
@@ -36,10 +36,12 @@
 		#region Color Tables
 
 		public static readonly IColorTable DarkColors = new DarkColorTable();
+		public static readonly IColorTable LightColors = new LightColorTable();
 
 		public interface IColorTable
 		{
 			Color Background { get; }
+			Color Text { get; }
 			Color SelectionBackground { get; }
 			Color FocusBorder { get; }
 			Color SelectionBackgroundNoFocus { get; }
@@ -52,6 +54,7 @@
 
 		private sealed class DarkColorTable : IColorTable
 		{
+			private static readonly Color TEXT							= MSVS2012DarkColors.WINDOW_TEXT;
 			private static readonly Color BACKGROUND					= MSVS2012DarkColors.WINDOW;
 			private static readonly Color SELECTION_BACKGROUND			= MSVS2012DarkColors.HIGHLIGHT;
 			private static readonly Color FOCUS_BORDER					= MSVS2012DarkColors.HIGHLIGHT;
@@ -62,9 +65,16 @@
 			private static readonly Color PLUS_MINUS_FOREGROUND			= Color.FromArgb(255, 255, 255);
 			private static readonly Color ACCENT_PLUS_MINUS_FOREGROUND	= Color.FromArgb(0, 122, 204);
 
+			#region IColorTable
+
 			public Color Background
 			{
 				get { return BACKGROUND; }
+			}
+
+			public Color Text
+			{
+				get { return TEXT; }
 			}
 
 			public Color SelectionBackground
@@ -106,6 +116,76 @@
 			{
 				get { return ACCENT_PLUS_MINUS_FOREGROUND; }
 			}
+
+			#endregion
+		}
+
+		private sealed class LightColorTable : IColorTable
+		{
+			private static readonly Color BACKGROUND					= MSVS2012LightColors.WINDOW;
+			private static readonly Color TEXT							= MSVS2012LightColors.WINDOW_TEXT;
+			private static readonly Color SELECTION_BACKGROUND			= MSVS2012LightColors.HIGHLIGHT;
+			private static readonly Color FOCUS_BORDER					= MSVS2012LightColors.HIGHLIGHT;
+			private static readonly Color SELECTION_BACKGROUND_NO_FOCUS	= MSVS2012LightColors.HIDDEN_HIGHLIGHT;
+			private static readonly Color HOVER_BACKGROUND				= MSVS2012LightColors.HOT_TRACK;
+			private static readonly Color EXTENDER_FOREGROUND			= MSVS2012LightColors.WINDOW_TEXT;
+			private static readonly Color HOVER_EXTENDER_FOREGROUND		= Color.FromArgb(28, 151, 234);
+			private static readonly Color PLUS_MINUS_FOREGROUND			= Color.FromArgb(255, 255, 255);
+			private static readonly Color ACCENT_PLUS_MINUS_FOREGROUND	= Color.FromArgb(0, 122, 204);
+
+			#region IColorTable
+
+			public Color Background
+			{
+				get { return BACKGROUND; }
+			}
+
+			public Color Text
+			{
+				get { return TEXT; }
+			}
+
+			public Color SelectionBackground
+			{
+				get { return SELECTION_BACKGROUND; }
+			}
+
+			public Color FocusBorder
+			{
+				get { return FOCUS_BORDER; }
+			}
+
+			public Color SelectionBackgroundNoFocus
+			{
+				get { return SELECTION_BACKGROUND_NO_FOCUS; }
+			}
+
+			public Color HoverBackground
+			{
+				get { return HOVER_BACKGROUND; }
+			}
+
+			public Color ExtenderForeground
+			{
+				get { return EXTENDER_FOREGROUND; }
+			}
+
+			public Color HoverExtenderForeground
+			{
+				get { return HOVER_EXTENDER_FOREGROUND; }
+			}
+
+			public Color PlusMinusForeground
+			{
+				get { return PLUS_MINUS_FOREGROUND; }
+			}
+
+			public Color AccentPlusMinusForeground
+			{
+				get { return ACCENT_PLUS_MINUS_FOREGROUND; }
+			}
+
+			#endregion
 		}
 
 		#endregion
@@ -139,12 +219,12 @@
 
 		public override Color ForeColor
 		{
-			get { return Color.FromArgb(241, 241, 241); }
+			get { return ColorTable.Text; }
 		}
 
 		public override Color ColumnHeaderForeColor
 		{
-			get { return Color.FromArgb(241, 241, 241); }
+			get { return ColorTable.Text; }
 		}
 
 		public override void OnPaintColumnBackground(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs)

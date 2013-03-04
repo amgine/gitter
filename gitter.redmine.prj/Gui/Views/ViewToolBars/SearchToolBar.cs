@@ -6,6 +6,8 @@
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Redmine.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -76,25 +78,39 @@
 			_textBox.TextChanged += (sender, e) =>
 			{
 				var result = _view.SearchFirst(CreateSearchOptions());
-				if(result != _result)
-				{
-					if(result)
-					{
-						_textBox.TextBox.BackColor = SystemColors.Window;
-					}
-					else
-					{
-						_textBox.TextBox.BackColor = Color.FromArgb(255, 200, 200);
-						System.Media.SystemSounds.Beep.Play();
-					}
-					_result = result;
-				}
+				HandleSearchResult(result);
 				_btnNext.Enabled = _textBox.TextLength > 0;
 				_btnPrev.Enabled = _textBox.TextLength > 0;
 			};
 		}
 
 		protected abstract TOptions CreateSearchOptions();
+
+		private void HandleSearchResult(bool result)
+		{
+			if(result != _result)
+			{
+				if(result)
+				{
+					_textBox.TextBox.BackColor = GitterApplication.Style.Colors.Window;
+				}
+				else
+				{
+					var color = GitterApplication.Style.Colors.Window;
+					int r = color.R + 50;
+					if(r > 255) r = 255;
+					_textBox.TextBox.BackColor = Color.FromArgb(r, color.G, color.B);
+					try
+					{
+						System.Media.SystemSounds.Beep.Play();
+					}
+					catch
+					{
+					}
+				}
+				_result = result;
+			}
+		}
 
 		public TView View
 		{

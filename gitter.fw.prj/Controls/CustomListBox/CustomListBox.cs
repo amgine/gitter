@@ -34,6 +34,12 @@
 			remove { Events.RemoveHandler(ItemActivatedEvent, value); }
 		}
 
+		protected virtual void OnItemActivated(CustomListBoxItem item)
+		{
+			var handler = (EventHandler<ItemEventArgs>)Events[ItemActivatedEvent];
+			if(handler != null) handler(this, new ItemEventArgs(item));
+		}
+
 		private static readonly object ItemCheckedChangedEvent = new object();
 		/// <summary>Item checked status is changed.</summary>
 		public event EventHandler<ItemEventArgs> ItemCheckedChanged
@@ -42,12 +48,24 @@
 			remove { Events.RemoveHandler(ItemCheckedChangedEvent, value); }
 		}
 
+		protected virtual void OnItemCheckedChanged(CustomListBoxItem item)
+		{
+			var handler = (EventHandler<ItemEventArgs>)Events[ItemCheckedChangedEvent];
+			if(handler != null) handler(this, new ItemEventArgs(item));
+		}
+
 		private static readonly object SelectionChangedEvent = new object();
 		/// <summary>Selection is changed.</summary>
 		public event EventHandler SelectionChanged
 		{
 			add { Events.AddHandler(SelectionChangedEvent, value); }
 			remove { Events.RemoveHandler(SelectionChangedEvent, value); }
+		}
+
+		protected virtual void OnSelectionChanged()
+		{
+			var handler = (EventHandler)Events[SelectionChangedEvent];
+			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
 		private static readonly object ContextMenuRequestedEvent = new object();
@@ -227,7 +245,7 @@
 
 		private void OnSelectedItemsChanged(object sender, NotifyCollectionEventArgs e)
 		{
-			Events.Raise(SelectionChangedEvent, this);
+			OnSelectionChanged();
 		}
 
 		private int _setItemPos = -1;
@@ -468,7 +486,7 @@
 					c.ContentWidth = -1;
 				}
 			}
-			ColumnLayoutChanged();
+			NotifyColumnLayoutChanged();
 		}
 
 		private static CustomListBoxItem FindLastVisibleItem(CustomListBoxItem item)
@@ -935,18 +953,28 @@
 			get { return _processOverlay; }
 		}
 
-		internal void ActivateItem(CustomListBoxItem item)
+		internal void NotifyItemActivated(CustomListBoxItem item)
 		{
-			Events.Raise(ItemActivatedEvent, this, new ItemEventArgs(item));
+			OnItemActivated(item);
 		}
 
-		internal void OnItemCheckedChanged(CustomListBoxItem item)
+		internal void NotifyItemCheckedChanged(CustomListBoxItem item)
 		{
-			Events.Raise(ItemCheckedChangedEvent, this, new ItemEventArgs(item));
+			OnItemCheckedChanged(item);
+		}
+
+		internal void NotifyColumnLayoutChanged()
+		{
+			UpdateAutoSizeColumnsContentWidth();
+			RecomputeHeaderSizes();
+			NotifyContentSizeChanged();
+			Invalidate(ClientArea);
 		}
 
 		internal void ExpandItem(CustomListBoxItem item)
 		{
+			Assert.IsNotNull(item);
+
 			if(item.Items.Count == 0 || !item.IsPresented) return;
 			var itemId = _itemPlainList.IndexOf(item);
 			if(itemId == -1) return;
@@ -968,6 +996,8 @@
 
 		internal void CollapseItem(CustomListBoxItem item)
 		{
+			Assert.IsNotNull(item);
+
 			if(item.Items.Count == 0 || !item.IsPresented) return;
 			var itemId = _itemPlainList.IndexOf(item);
 			if(itemId == -1) return;
@@ -1021,14 +1051,6 @@
 			{
 				InvalidateAutoSizeColumns();
 			}
-		}
-
-		internal void ColumnLayoutChanged()
-		{
-			UpdateAutoSizeColumnsContentWidth();
-			RecomputeHeaderSizes();
-			NotifyContentSizeChanged();
-			Invalidate(ClientArea);
 		}
 
 		protected int GetItemY1Offset(int itemIndex)
@@ -1641,6 +1663,10 @@
 			{
 				Cursor = Cursors.Default;
 			}
+			else if(isOverResizeGrip && !wasOverResizeGrip)
+			{
+				Cursor = Cursors.VSplit;
+			}
 
 			switch(htr.Area)
 			{
@@ -1656,10 +1682,6 @@
 					}
 					break;
 				case HitTestArea.Header:
-					if(isOverResizeGrip && !wasOverResizeGrip)
-					{
-						Cursor = Cursors.VSplit;
-					}
 					if(htr.ItemIndex != -1)
 					{
 						_headerHover.Track(htr.ItemIndex, _columns[htr.ItemIndex], htr.ItemPart);
@@ -2053,11 +2075,15 @@
 			{
 				case CheckedState.Checked:
 					if(item.ThreeStateCheckboxMode)
-						item.CheckedState = CheckedState.Intermediate;
+					{
+						item.CheckedState = CheckedState.Indeterminate;
+					}
 					else
+					{
 						item.CheckedState = CheckedState.Unchecked;
+					}
 					break;
-				case CheckedState.Intermediate:
+				case CheckedState.Indeterminate:
 					item.CheckedState = CheckedState.Unchecked;
 					break;
 				case CheckedState.Unchecked:
@@ -2107,10 +2133,10 @@
 						{
 							int id = _itemPlainList.IndexOf(_selectedItems[i]);
 							var y1 = GetItemY1Offset(id);
-							if(y1 >= _itemsArea.Height)
+							if(y1 >= _itemsArea.Height || y1 <= -_itemHeight)
+							{
 								continue;
-							if(y1 <= -_itemHeight)
-								continue;
+							}
 							var y2 = y1 + _itemHeight - 1;
 							if(y1 < minY) minY = y1;
 							if(y2 > maxY) maxY = y2;
@@ -2343,14 +2369,16 @@
 			var rc = new Rectangle(x, y, w, h);
 			_textEditor = new TextBox()
 			{
-				Font = font,
-				BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle,
-				Text = text,
-				MinimumSize = rc.Size,
-				MaximumSize = rc.Size,
-				Bounds = rc,
-				Parent = this,
-				CausesValidation = true,
+				Font				= font,
+				BorderStyle			= BorderStyle.FixedSingle,
+				Text				= text,
+				BackColor			= Style.Colors.Window,
+				ForeColor			= Style.Colors.WindowText,
+				MinimumSize			= rc.Size,
+				MaximumSize			= rc.Size,
+				Bounds				= rc,
+				Parent				= this,
+				CausesValidation	= true,
 			};
 			_textEditor.Focus();
 			_textEditor.SelectAll();
@@ -2413,7 +2441,9 @@
 								{
 									var c2 = _columns[p];
 									if(c2.SizeMode == ColumnSizeMode.Sizeable)
+									{
 										c = c2;
+									}
 								}
 							}
 							else
@@ -2850,9 +2880,13 @@
 
 				if(_processOverlay.Visible)
 				{
-					graphics.SetClip(clip);
 					var overlayBounds = GetOverlayBounds();
-					_processOverlay.OnPaint(graphics, overlayBounds);
+					var overlayClip = Rectangle.Intersect(clip, overlayBounds);
+					if(overlayClip.Width > 0 && overlayClip.Height > 0)
+					{
+						graphics.SetClip(overlayClip);
+						_processOverlay.OnPaint(graphics, overlayBounds);
+					}
 				}
 			}
 
@@ -2946,7 +2980,7 @@
 
 			var columnsSection = section.GetCreateSection("Columns");
 			columnsSection.Clear();
-			foreach(var column in _columns)
+			foreach(var column in Columns)
 			{
 				var columnSection = columnsSection.CreateSection(column.IdentificationString);
 				column.SaveTo(columnSection);

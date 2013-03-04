@@ -22,7 +22,7 @@
 
 		public static readonly ProcessOverlayRenderer Default = new DefaultOverlayRenderer();
 
-		public static readonly ProcessOverlayRenderer MSVS2012Dark = new MSVS2012OverlayRenderer();
+		public static readonly ProcessOverlayRenderer MSVS2012Dark = new MSVS2012OverlayRenderer(MSVS2012OverlayRenderer.DarkColors);
 
 		public abstract void Paint(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds);
 

@@ -500,7 +500,7 @@
 				bool isCancelled = false;
 				using(var async = _executor.ExecAsync(cmd))
 				{
-					mon.Cancelled += (sender, e) =>
+					mon.Canceled += (sender, e) =>
 						{
 							async.Kill();
 							isCancelled = true;
@@ -515,7 +515,7 @@
 							}
 							else
 							{
-								mon.SetProgressIntermediate();
+								mon.SetProgressIndeterminate();
 							}
 						};
 					async.Start();
@@ -557,7 +557,7 @@
 				bool isCancelled = false;
 				using(var async = _executor.ExecAsync(cmd))
 				{
-					mon.Cancelled += (sender, e) =>
+					mon.Canceled += (sender, e) =>
 						{
 							async.Kill();
 							isCancelled = true;
@@ -572,7 +572,7 @@
 						}
 						else
 						{
-							mon.SetProgressIntermediate();
+							mon.SetProgressIndeterminate();
 						}
 					};
 					async.Start();
@@ -614,7 +614,7 @@
 				bool isCancelled = false;
 				using(var async = _executor.ExecAsync(cmd))
 				{
-					mon.Cancelled += (sender, e) =>
+					mon.Canceled += (sender, e) =>
 						{
 							async.Kill();
 							isCancelled = true;
@@ -629,7 +629,7 @@
 							}
 							else
 							{
-								mon.SetProgressIntermediate();
+								mon.SetProgressIndeterminate();
 							}
 						};
 					async.Start();

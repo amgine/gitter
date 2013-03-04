@@ -8,12 +8,14 @@
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="ConfigParameter"/> object.</summary>
-	public sealed class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
+	public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 	{
+		#region Static
+
 		private static readonly Bitmap ImgConfig = CachedResources.Bitmaps["ImgConfig"];
+
+		#endregion
 
 		#region Comparers
 
@@ -70,6 +72,39 @@
 
 		#endregion
 
+		#region Methods
+
+		public void StartValueEditor()
+		{
+			var editor = StartTextEditor(ListBox.Columns.GetById((int)ColumnId.Value), DataContext.Value);
+			editor.Validating += OnEditorValidating;
+		}
+
+		#endregion
+
+		#region Event Handlers
+
+		private void OnDeleted(object sender, EventArgs e)
+		{
+			RemoveSafe();
+		}
+
+		private void OnValueChanged(object sender, EventArgs e)
+		{
+			InvalidateSubItemSafe((int)ColumnId.Value);
+		}
+
+		private void OnEditorValidating(object sender, CancelEventArgs e)
+		{
+			var editor = (CustomListBoxTextEditor)sender;
+			editor.Validating -= OnEditorValidating;
+			DataContext.Value = editor.Text.Trim();
+		}
+
+		#endregion
+
+		#region Overrides
+
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
@@ -84,16 +119,6 @@
 			DataContext.ValueChanged -= OnValueChanged;
 		}
 
-		private void OnDeleted(object sender, EventArgs e)
-		{
-			RemoveSafe();
-		}
-
-		private void OnValueChanged(object sender, EventArgs e)
-		{
-			InvalidateSafe();
-		}
-
 		public override void OnDoubleClick(int x, int y)
 		{
 			base.OnDoubleClick(x, y);
@@ -103,19 +128,6 @@
 			{
 				StartValueEditor();
 			}
-		}
-
-		private void OnEditorValidating(object sender, CancelEventArgs e)
-		{
-			var editor = (CustomListBoxTextEditor)sender;
-			editor.Validating -= OnEditorValidating;
-			DataContext.Value = editor.Text.Trim();
-		}
-
-		public void StartValueEditor()
-		{
-			var editor = StartTextEditor(ListBox.Columns.GetById((int)ColumnId.Value), DataContext.Value);
-			editor.Validating += OnEditorValidating;
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -150,5 +162,7 @@
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
+
+		#endregion
 	}
 }

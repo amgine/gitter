@@ -5,7 +5,6 @@
 	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
 
-
 	public sealed class ProcessOverlay : IAsyncProgressMonitor, IDisposable
 	{
 		private Control _hostControl;
@@ -196,27 +195,38 @@
 		private void Repaint()
 		{
 			RepaintRequired.Raise(this);
-			if(_invalidateHost && _hostControl != null && _hostControl.Created)
+			if(_invalidateHost && _hostControl != null && _hostControl.Created && !_hostControl.IsDisposed)
+			{
+				InvalidateHostControl();
+			}
+		}
+
+		private void InvalidateHostControl()
+		{
+			if(_hostControl.InvokeRequired)
+			{
+				try
+				{
+					_hostControl.BeginInvoke(new MethodInvoker(InvalidateHostControl));
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
 			{
 				var rect = (_getOverlayArea == null) ? _hostControl.ClientRectangle : _getOverlayArea();
-				if(_hostControl.InvokeRequired)
-				{
-					_hostControl.BeginInvoke(new Action<Rectangle>(_hostControl.Invalidate), rect);
-				}
-				else
-				{
-					_hostControl.Invalidate(rect);
-				}
+				_hostControl.Invalidate(rect);
 			}
 		}
 
 		#region IAsyncProgressMonitor Members
 
-		public event EventHandler Cancelled;
+		public event EventHandler Canceled;
 
 		private void InvokeCancelled()
 		{
-			var handler = Cancelled;
+			var handler = Canceled;
 			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
@@ -247,6 +257,11 @@
 		{
 			get { return _canCancel; }
 			set { _canCancel = value; }
+		}
+
+		public bool IsCancelRequested
+		{
+			get { return false; }
 		}
 
 		public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
@@ -302,7 +317,7 @@
 			Repaint();
 		}
 
-		public void SetProgressIntermediate()
+		public void SetProgressIndeterminate()
 		{
 			_marquee = true;
 			UpdateWin7ProgressBar();
@@ -321,13 +336,22 @@
 			StopWin7ProgressBar();
 			if(_disableHost)
 			{
-				if(_hostControl.Created)
+				if(_hostControl.Created && !_hostControl.IsDisposed)
 				{
 					try
 					{
-						_hostControl.BeginInvoke(new MethodInvoker(() => _hostControl.Enabled = true));
+						_hostControl.BeginInvoke(new MethodInvoker(
+							() =>
+							{
+								if(!_hostControl.IsDisposed)
+								{
+									_hostControl.Enabled = true;
+								}
+							}));
 					}
-					catch { }
+					catch(ObjectDisposedException)
+					{
+					}
 				}
 			}
 			try

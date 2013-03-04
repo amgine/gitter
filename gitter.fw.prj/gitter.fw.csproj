@@ -104,6 +104,32 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
+    <Compile Include="GuiCommand.cs" />
+    <Compile Include="Native\AnimationFlags.cs" />
+    <Compile Include="Native\BITMAPINFOHEADER.cs" />
+    <Compile Include="Native\COMBOBOXINFO.cs" />
+    <Compile Include="Native\DCX.cs" />
+    <Compile Include="Native\DwmApi.cs" />
+    <Compile Include="Native\DWMNCRP.cs" />
+    <Compile Include="Native\DWMWA.cs" />
+    <Compile Include="Native\Gdi32.cs" />
+    <Compile Include="Native\Kernel32.cs" />
+    <Compile Include="Native\MINMAXINFO.cs" />
+    <Compile Include="Native\NativeUtility.cs" />
+    <Compile Include="Native\NCCALCSIZE_PARAMS.cs" />
+    <Compile Include="Native\RECT.cs" />
+    <Compile Include="Native\RedrawWindowFlags.cs" />
+    <Compile Include="Native\Shell32.cs" />
+    <Compile Include="Native\SHELLEXECUTEINFO.cs" />
+    <Compile Include="Native\SHFILEINFO.cs" />
+    <Compile Include="Native\User.cs" />
+    <Compile Include="Native\User32.cs" />
+    <Compile Include="Native\WINDOWPOS.cs" />
+    <Compile Include="Native\WNDPROC.cs" />
+    <Compile Include="Native\WVR.cs" />
+    <Compile Include="Styles\MSVS2012LightColors.cs" />
+    <Compile Include="Styles\MSVS2012Style.cs" />
+    <Compile Include="Styles\MSVS2012LightStyle.cs" />
     <Compile Include="Styles\MSVS2012CustomListBoxRenderer.cs" />
     <Compile Include="Controls\CustomListBox\NotifyCollectionBinding.cs" />
     <Compile Include="Controls\CustomListBox\Win7CustomListBoxRenderer.cs" />
@@ -520,7 +546,7 @@
     <Compile Include="IRepositoryProvider.cs" />
     <Compile Include="Services\ToolTip\IToolTipService.cs" />
     <Compile Include="IWorkingEnvironment.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Native\Constants.cs" />
     <Compile Include="Forms\ProgressForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -548,14 +574,13 @@
     <Compile Include="Services\MessageBox\MessageBoxResult.cs" />
     <Compile Include="Services\Notifcation\NotificationType.cs" />
     <Compile Include="ShellUtility.cs" />
-    <Compile Include="GuiCommand.cs" />
     <Compile Include="Services\MessageBox\SystemMessageBoxService.cs" />
     <Compile Include="Styles\StyleType.cs" />
     <Compile Include="Styles\SystemStyleColors.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Win7Support\VistaPickFolderDialog.cs" />
     <Compile Include="Win7Support\ITaskbarList3.cs" />
-    <Compile Include="WindowsMessage.cs" />
+    <Compile Include="Native\WM.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\CustomListBox\ColumnsDialog.resx">

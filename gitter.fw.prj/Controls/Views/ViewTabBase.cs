@@ -13,6 +13,7 @@ namespace gitter.Framework.Controls
 		private readonly Orientation _orientation;
 		private bool _isMouseOver;
 		private int _length;
+		private bool _isDisposed;
 
 		#endregion
 
@@ -20,6 +21,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Initializes a new instance of the <see cref="ViewTabBase"/> class.</summary>
 		/// <param name="view">Represented <see cref="ViewBase"/>.</param>
+		/// <param name="anchor">Tab anchor.</param>
 		protected ViewTabBase(ViewBase view, AnchorStyles anchor)
 		{
 			Verify.Argument.IsNotNull(view, "view");
@@ -41,6 +43,7 @@ namespace gitter.Framework.Controls
 			_view = view;
 		}
 
+		/// <summary>Finalizes an instance of the <see cref="ViewTabBase"/> class.</summary>
 		~ViewTabBase()
 		{
 			Dispose(false);
@@ -49,6 +52,11 @@ namespace gitter.Framework.Controls
 		#endregion
 
 		#region Properties
+
+		protected ViewRenderer Renderer
+		{
+			get { return ViewManager.Renderer; }
+		}
 
 		public AnchorStyles Anchor
 		{
@@ -104,12 +112,12 @@ namespace gitter.Framework.Controls
 			_length = Measure(graphics);
 		}
 
-		public virtual void OnMouseLeave()
+		protected internal virtual void OnMouseLeave()
 		{
 			_isMouseOver = false;
 		}
 
-		public virtual void OnMouseEnter()
+		protected internal virtual void OnMouseEnter()
 		{
 			_isMouseOver = true;
 		}
@@ -132,11 +140,25 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
+		#region Overrides
+
 		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
 		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
 		public override string ToString()
 		{
 			return _view.Text;
+		}
+
+		#endregion
+
+		#region IDisposable
+
+		/// <summary>Gets a value indicating whether this instance is disposed.</summary>
+		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
+		public bool IsDisposed
+		{
+			get { return _isDisposed; }
+			private set { _isDisposed = value; }
 		}
 
 		/// <summary>
@@ -150,8 +172,14 @@ namespace gitter.Framework.Controls
 		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
 		public void Dispose()
 		{
-			GC.SuppressFinalize(this);
-			Dispose(true);
+			if(!IsDisposed)
+			{
+				GC.SuppressFinalize(this);
+				Dispose(true);
+				IsDisposed = true;
+			}
 		}
+
+		#endregion
 	}
 }

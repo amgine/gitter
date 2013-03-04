@@ -5,6 +5,8 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	/// <summary>User-drawn control which supports content scrolling in both directions.</summary>
 	public class ScrollableControl : Control
 	{
@@ -840,9 +842,9 @@
 		{
 			var hwnd = Handle;
 			var scroll = VScrollAffectsClientArea ?
-				new NativeMethods.RECT(_clientArea) :
-				new NativeMethods.RECT(_contentArea);
-			NativeMethods.ScrollWindowEx(
+				new RECT(_clientArea) :
+				new RECT(_contentArea);
+			User32.ScrollWindowEx(
 				hwnd,
 				0, dy,
 				ref scroll, ref scroll,
@@ -854,9 +856,9 @@
 		{
 			var hwnd = Handle;
 			var scroll = HScrollAffectsClientArea ?
-				new NativeMethods.RECT(_clientArea) :
-				new NativeMethods.RECT(_contentArea);
-			NativeMethods.ScrollWindowEx(
+				new RECT(_clientArea) :
+				new RECT(_contentArea);
+			User32.ScrollWindowEx(
 				hwnd,
 				dx, 0,
 				ref scroll, ref scroll,

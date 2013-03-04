@@ -148,9 +148,13 @@
 			if(_showChevron)
 			{
 				if(_hover)
-					_picChevron.Image = _expanded?ImgCH:ImgEH;
+				{
+					_picChevron.Image = _expanded ? ImgCH : ImgEH;
+				}
 				else
-					_picChevron.Image = _expanded?ImgCN:ImgEN;
+				{
+					_picChevron.Image = _expanded ? ImgCN : ImgEN;
+				}
 			}
 			else
 			{

@@ -393,56 +393,6 @@
 			}
 		}
 
-		private static void PaintOptionalContent(NamedRedmineObject data, SubItemPaintEventArgs paintEventArgs)
-		{
-			string text;
-			Brush brush;
-			if(data == null)
-			{
-				text = Resources.StrsUnassigned.SurroundWith('<', '>');
-				brush = SystemBrushes.GrayText;
-			}
-			else
-			{
-				text = data.Name;
-				brush = paintEventArgs.Brush;
-			}
-			paintEventArgs.PaintText(text, brush);
-		}
-
-		private static void PaintOptionalContent(DateTime? date, SubItemPaintEventArgs paintEventArgs)
-		{
-			string text;
-			Brush brush;
-			if(!date.HasValue)
-			{
-				text = Resources.StrsUnassigned.SurroundWith('<', '>');
-				brush = SystemBrushes.GrayText;
-				paintEventArgs.PaintText(text, brush);
-			}
-			else
-			{
-				DateColumn.OnPaintSubItem(paintEventArgs, date.Value);
-			}
-		}
-
-		private static void PaintOptionalContent(string data, SubItemPaintEventArgs paintEventArgs)
-		{
-			string text;
-			Brush brush;
-			if(data == null)
-			{
-				text = Resources.StrsUnassigned.SurroundWith('<', '>');
-				brush = SystemBrushes.GrayText;
-			}
-			else
-			{
-				text = data;
-				brush = paintEventArgs.Brush;
-			}
-			paintEventArgs.PaintText(text, brush);
-		}
-
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
@@ -502,25 +452,25 @@
 					paintEventArgs.PaintText(DataContext.Subject);
 					break;
 				case ColumnId.Author:
-					PaintOptionalContent(DataContext.Author, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Author, paintEventArgs);
 					break;
 				case ColumnId.AssignedTo:
-					PaintOptionalContent(DataContext.AssignedTo, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.AssignedTo, paintEventArgs);
 					break;
 				case ColumnId.Tracker:
-					PaintOptionalContent(DataContext.Tracker, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Tracker, paintEventArgs);
 					break;
 				case ColumnId.Priority:
-					PaintOptionalContent(DataContext.Priority, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Priority, paintEventArgs);
 					break;
 				case ColumnId.Project:
-					PaintOptionalContent(DataContext.Project, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Project, paintEventArgs);
 					break;
 				case ColumnId.Status:
-					PaintOptionalContent(DataContext.Status, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Status, paintEventArgs);
 					break;
 				case ColumnId.Category:
-					PaintOptionalContent(DataContext.Category, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.Category, paintEventArgs);
 					break;
 				case ColumnId.CreatedOn:
 					IssueCreatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.CreatedOn);
@@ -529,10 +479,10 @@
 					IssueUpdatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.UpdatedOn);
 					break;
 				case ColumnId.StartDate:
-					PaintOptionalContent(DataContext.StartDate, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.StartDate, paintEventArgs);
 					break;
 				case ColumnId.DueDate:
-					PaintOptionalContent(DataContext.DueDate, paintEventArgs);
+					RedmineGuiUtility.PaintOptionalContent(DataContext.DueDate, paintEventArgs);
 					break;
 				case ColumnId.DoneRatio:
 					var r = paintEventArgs.Bounds;
@@ -549,7 +499,7 @@
 					if(paintEventArgs.SubItemId >= (int)ColumnId.CustomFieldOffset)
 					{
 						var cfid = paintEventArgs.SubItemId - (int)ColumnId.CustomFieldOffset;
-						PaintOptionalContent(DataContext.CustomFields[cfid], paintEventArgs);
+						RedmineGuiUtility.PaintOptionalContent(DataContext.CustomFields[cfid], paintEventArgs);
 					}
 					break;
 			}

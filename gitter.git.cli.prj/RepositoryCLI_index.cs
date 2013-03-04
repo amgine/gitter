@@ -722,7 +722,7 @@
 			{
 				var mon = parameters.Monitor;
 				var output = _executor.ExecAsync(cmd);
-				mon.Cancelled += (sender, e) => output.Kill();
+				mon.Canceled += (sender, e) => output.Kill();
 				output.Start();
 				output.WaitForExit();
 				output.ThrowOnBadReturnCode();

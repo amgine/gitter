@@ -13,7 +13,7 @@
 		private volatile bool _isCompleted;
 		private Thread _thread;
 		private bool _isDisposed;
-		private Exception _exception;
+		private volatile Exception _exception;
 		private ManualResetEvent _cancel;
 		private ManualResetEvent _completed;
 
@@ -84,7 +84,7 @@
 		}
 
 		/// <summary>Check this to see if action is requested to terminate by monitor.</summary>
-		public ManualResetEvent Cancelled
+		public ManualResetEvent Canceled
 		{
 			get { return _cancel; }
 		}

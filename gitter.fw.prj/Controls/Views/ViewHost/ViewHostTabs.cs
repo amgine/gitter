@@ -61,13 +61,10 @@
 			if(_tabs.Count != 0)
 			{
 				int length = 0;
-				using(var graphics = CreateGraphics())
+				foreach(var tab in _tabs)
 				{
-					foreach(var tab in _tabs)
-					{
-						tab.ResetLength(graphics);
-						length += tab.Length;
-					}
+					tab.ResetLength(Utility.MeasurementGraphics);
+					length += tab.Length;
 				}
 				_length = length;
 			}
@@ -184,9 +181,44 @@
 
 		#region Methods
 
+		internal void InvalidateTab(ViewBase view)
+		{
+			Verify.Argument.IsNotNull(view, "view");
+
+			var index	= IndexOf(view);
+			var tab		= _tabs[index];
+			var length	= tab.Length;
+			tab.ResetLength(Utility.MeasurementGraphics);
+			var dl = tab.Length - length;
+			if(dl != 0)
+			{
+				_length += dl;
+				ResetButtons();
+			}
+			Invalidate();
+		}
+
+		internal void InvalidateTab(ViewHostTab tab)
+		{
+			Verify.Argument.IsNotNull(tab, "tab");
+			Verify.Argument.AreEqual(this, tab.Tabs, "tab", "Tab is hosted in another control.");
+
+			var index	= IndexOf(tab);
+			var length	= tab.Length;
+			tab.ResetLength(Utility.MeasurementGraphics);
+			var dl = tab.Length - length;
+			if(dl != 0)
+			{
+				_length += dl;
+				ResetButtons();
+			}
+			Invalidate();
+		}
+
 		public void EnsureVisible(ViewHostTab tab)
 		{
 			Verify.Argument.IsNotNull(tab, "tab");
+			Verify.Argument.AreEqual(this, tab.Tabs, "tab", "Tab is hosted in another control.");
 
 			if(ViewHost.IsDocumentWell) EnsureVisible(IndexOf(tab));
 		}
@@ -234,7 +266,9 @@
 				{
 					int space = 0;
 					for(int i = _firstTabIndex; i <= index; ++i)
+					{
 						space += _tabs[i].Length;
+					}
 
 					if(space > w)
 					{
@@ -275,7 +309,9 @@
 					else
 					{
 						if(_firstTabIndex >= _tabs.Count)
+						{
 							_firstTabIndex = _tabs.Count - 1;
+						}
 						for(int i = _firstTabIndex; i < _tabs.Count; ++i)
 						{
 							length += _tabs[i].Length;

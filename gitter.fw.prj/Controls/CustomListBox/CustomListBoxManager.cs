@@ -8,6 +8,7 @@
 
 		private static CustomListBoxRenderer _renderer;
 		private static CustomListBoxRenderer _win7Renderer;
+		private static CustomListBoxRenderer _msvs2012LightRenderer;
 		private static CustomListBoxRenderer _msvs2012DarkRenderer;
 
 		#endregion
@@ -49,6 +50,18 @@
 					_win7Renderer = new Win7CustomListBoxRenderer();
 				}
 				return _win7Renderer;
+			}
+		}
+
+		public static CustomListBoxRenderer MSVS2012LightRenderer
+		{
+			get
+			{
+				if(_msvs2012LightRenderer == null)
+				{
+					_msvs2012LightRenderer = new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.LightColors);
+				}
+				return _msvs2012LightRenderer;
 			}
 		}
 

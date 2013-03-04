@@ -1,4 +1,5 @@
-﻿namespace gitter.Git.Gui.Controls
+﻿#if UNUSED
+namespace gitter.Git.Gui.Controls
 {
 	using System;
 	using System.Drawing;
@@ -30,12 +31,16 @@
 				if(_staged != value)
 				{
 					if(_staged != null)
+					{
 						_staged.Deleted -= OnStagedDeleted;
+					}
 					_staged = value;
 					if(value != null)
 					{
 						if(ListBox != null)
+						{
 							_staged.Deleted += OnStagedDeleted;
+						}
 					}
 				}
 			}
@@ -127,7 +132,7 @@
 				}
 				else
 				{
-					CheckedState = CheckedState.Intermediate;
+					CheckedState = CheckedState.Indeterminate;
 				}
 			}
 			CheckedStateChanged += OnCSChanged;
@@ -289,3 +294,4 @@
 		}
 	}
 }
+#endif

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Drawing;
+	using System.Globalization;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -12,8 +13,11 @@
 	/// <summary><see cref="CustomListBoxItem"/> representing <see cref="User"/>.</summary>
 	public sealed class UserListItem : CustomListBoxItem<User>
 	{
-		private static readonly Bitmap ImgIcon = CachedResources.Bitmaps["ImgUser"];
-		private Bitmap _imgAvatar;
+		#region Static
+
+		private static readonly Bitmap ImgUser = CachedResources.Bitmaps["ImgUser"];
+
+		#endregion
 
 		#region Comparers
 
@@ -26,11 +30,13 @@
 
 		public static int CompareByName(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			try
+			var userListItem1 = item1 as UserListItem;
+			var userListItem2 = item2 as UserListItem;
+			if(userListItem1 != null && userListItem2 != null)
 			{
-				return CompareByName((UserListItem)item1, (UserListItem)item2);
+				return CompareByName(userListItem1, userListItem2);
 			}
-			catch
+			else
 			{
 				return 0;
 			}
@@ -45,11 +51,13 @@
 
 		public static int CompareByEmail(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			try
+			var userListItem1 = item1 as UserListItem;
+			var userListItem2 = item2 as UserListItem;
+			if(userListItem1 != null && userListItem2 != null)
 			{
-				return CompareByEmail((UserListItem)item1, (UserListItem)item2);
+				return CompareByEmail(userListItem1, userListItem2);
 			}
-			catch
+			else
 			{
 				return 0;
 			}
@@ -64,11 +72,13 @@
 
 		public static int CompareByCommitCount(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			try
+			var userListItem1 = item1 as UserListItem;
+			var userListItem2 = item2 as UserListItem;
+			if(userListItem1 != null && userListItem2 != null)
 			{
-				return CompareByCommitCount((UserListItem)item1, (UserListItem)item2);
+				return CompareByCommitCount(userListItem1, userListItem2);
 			}
-			catch
+			else
 			{
 				return 0;
 			}
@@ -76,18 +86,35 @@
 
 		#endregion
 
+		#region Data
+
+		private Bitmap _imgAvatar;
+
+		#endregion
+
 		#region .ctor
 
 		/// <summary>Create <see cref="UserListItem"/>.</summary>
-		/// <param name="committer">Related <see cref="User"/>.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="committer"/> == <c>null</c>.</exception>
-		public UserListItem(User committer)
-			: base(committer)
+		/// <param name="user">Related <see cref="User"/>.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="user"/> == <c>null</c>.</exception>
+		public UserListItem(User user)
+			: base(user)
 		{
-			Verify.Argument.IsNotNull(committer, "committer");
+			Verify.Argument.IsNotNull(user, "user");
 		}
 
 		#endregion
+
+		#region Event Handlers
+
+		private void OnDataAvatarUpdated(object sender, EventArgs e)
+		{
+			InvalidateSafe();
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -101,18 +128,13 @@
 			base.OnListBoxDetached();
 		}
 
-		private void OnDataAvatarUpdated(object sender, EventArgs e)
-		{
-			InvalidateSafe();
-		}
-
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
 				case ColumnId.Committer:
-					return measureEventArgs.MeasureImageAndText(ImgIcon, DataContext.Name);
+					return measureEventArgs.MeasureImageAndText(ImgUser, DataContext.Name);
 				case ColumnId.Email:
 				case ColumnId.CommitterEmail:
 					return EmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Email);
@@ -128,6 +150,7 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
+				case ColumnId.Author:
 				case ColumnId.Committer:
 					Bitmap image;
 					if(GitterApplication.IntegrationFeatures.Gravatar.IsEnabled)
@@ -143,7 +166,7 @@
 							if(imgAvatar == null)
 							{
 								avatar.BeginUpdate();
-								image = ImgIcon;
+								image = ImgUser;
 							}
 							else
 							{
@@ -153,16 +176,17 @@
 					}
 					else
 					{
-						image = ImgIcon;
+						image = ImgUser;
 					}
 					paintEventArgs.PaintImageAndText(image, DataContext.Name);
 					break;
 				case ColumnId.Email:
+				case ColumnId.AuthorEmail:
 				case ColumnId.CommitterEmail:
 					paintEventArgs.PaintText(DataContext.Email);
 					break;
 				case ColumnId.Commits:
-					paintEventArgs.PaintText(DataContext.Commits.ToString(System.Globalization.CultureInfo.InvariantCulture));
+					paintEventArgs.PaintText(DataContext.Commits.ToString(CultureInfo.InvariantCulture));
 					break;
 			}
 		}
@@ -173,5 +197,7 @@
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
+
+		#endregion
 	}
 }

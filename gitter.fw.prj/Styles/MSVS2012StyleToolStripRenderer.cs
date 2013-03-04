@@ -49,7 +49,7 @@
 			private static readonly Color VERTICAL_SEPARATOR0		= Color.FromArgb(34, 34, 34);
 			private static readonly Color VERTICAL_SEPARATOR1		= Color.FromArgb(70, 70, 74);
 			private static readonly Color PRESSED					= Color.FromArgb(0, 122, 204);
-			private static readonly Color CHCKED_BORDER				= Color.FromArgb(51, 153, 255);
+			private static readonly Color CHECKED_BORDER			= Color.FromArgb(51, 153, 255);
 
 			private static readonly Color TEXT						= MSVS2012DarkColors.WINDOW_TEXT;
 			private static readonly Color ARROW_NORMAL				= Color.FromArgb(153, 153, 153);
@@ -78,7 +78,68 @@
 			public Color VerticalSeparator0 { get { return VERTICAL_SEPARATOR0; } }
 			public Color VerticalSeparator1 { get { return VERTICAL_SEPARATOR1; } }
 			public Color Pressed { get { return PRESSED; } }
-			public Color CheckedBorder { get { return CHCKED_BORDER; } }
+			public Color CheckedBorder { get { return CHECKED_BORDER; } }
+
+			public Color Text { get { return TEXT; } }
+			public Color ArrowNormal { get { return ARROW_NORMAL; } }
+			public Color ArrowHighlight { get { return ARROW_HIGHLIGHT; } }
+
+			public Color ToolStripBackground { get { return TOOL_STRIP_BACKGROUND; } }
+			public Color MenuStripBackground { get { return MENU_STRIP_BACKGROUND; } }
+			public Color StatusStripBackground { get { return STATUS_STRIP_BACKGROUND; } }
+			public Color DropDownBackground { get { return DROP_DOWN_BACKGROUND; } }
+			public Color StatusLabelBackground { get { return STATUS_STRIP_BACKGROUND; } }
+			public Color ContentPanelBackground { get { return CONTENT_PANEL_BACKGROUND; } }
+			public Color TextBoxBackground { get { return TEXT_BOX_BACKGROUND; } }
+
+			public Color SelectedCheckboxBackground { get { return SELECTED_CHECKBOX_BACKGROUND; } }
+			public Color SelectedCheckboxForeground { get { return SELECTED_CHECKBOX_FOREGROUND; } }
+			public Color NormalCheckboxBackground { get { return NORMAL_CHECKBOX_BACKGROUND; } }
+			public Color NormalCheckboxForeground { get { return NORMAL_CHECKBOX_FOREGROUND; } }
+
+			#endregion
+		}
+
+		private sealed class LightColorTable : IColorTable
+		{
+			private static readonly Color GRIP						= Color.FromArgb(70, 70, 74);
+			private static readonly Color RESIZE_GRIP0				= Color.FromArgb(0, 92, 153);
+			private static readonly Color RESIZE_GRIP1				= Color.FromArgb(127, 188, 229);
+			private static readonly Color HIGHLIGHT					= Color.FromArgb(248, 249, 250);
+			private static readonly Color MENU_BORDER				= Color.FromArgb(204, 206, 219);
+			private static readonly Color VERTICAL_SEPARATOR0		= Color.FromArgb(34, 34, 34);
+			private static readonly Color VERTICAL_SEPARATOR1		= Color.FromArgb(70, 70, 74);
+			private static readonly Color PRESSED					= Color.FromArgb(0, 122, 204);
+			private static readonly Color CHECKED_BORDER			= Color.FromArgb(51, 153, 255);
+
+			private static readonly Color TEXT						= MSVS2012LightColors.WINDOW_TEXT;
+			private static readonly Color ARROW_NORMAL				= Color.FromArgb(113, 113, 113);
+			private static readonly Color ARROW_HIGHLIGHT			= Color.FromArgb(0, 122, 204);
+
+			private static readonly Color TOOL_STRIP_BACKGROUND		= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color MENU_STRIP_BACKGROUND		= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color STATUS_STRIP_BACKGROUND	= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color DROP_DOWN_BACKGROUND		= Color.FromArgb(231, 232, 236);
+			private static readonly Color STATUS_LABEL_BACKGROUND	= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color CONTENT_PANEL_BACKGROUND	= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color TEXT_BOX_BACKGROUND		= MSVS2012LightColors.WINDOW;
+
+			private static readonly Color SELECTED_CHECKBOX_BACKGROUND	= Color.FromArgb(62, 62, 64);
+			private static readonly Color SELECTED_CHECKBOX_FOREGROUND	= Color.FromArgb(241, 241, 241);
+			private static readonly Color NORMAL_CHECKBOX_BACKGROUND	= Color.FromArgb(45, 45, 48);
+			private static readonly Color NORMAL_CHECKBOX_FOREGROUND	= Color.FromArgb(153, 153, 153);
+
+			#region IColorTable
+
+			public Color Grip { get { return GRIP; } }
+			public Color ResizeGrip0 { get { return RESIZE_GRIP0; } }
+			public Color ResizeGrip1 { get { return RESIZE_GRIP1; } }
+			public Color Highlight { get { return HIGHLIGHT; } }
+			public Color MenuBorder { get { return MENU_BORDER; } }
+			public Color VerticalSeparator0 { get { return VERTICAL_SEPARATOR0; } }
+			public Color VerticalSeparator1 { get { return VERTICAL_SEPARATOR1; } }
+			public Color Pressed { get { return PRESSED; } }
+			public Color CheckedBorder { get { return CHECKED_BORDER; } }
 
 			public Color Text { get { return TEXT; } }
 			public Color ArrowNormal { get { return ARROW_NORMAL; } }
@@ -101,6 +162,7 @@
 		}
 
 		private static IColorTable _darkColors;
+		private static IColorTable _lightColors;
 
 		public static IColorTable DarkColors
 		{
@@ -111,6 +173,18 @@
 					_darkColors = new DarkColorTable();
 				}
 				return _darkColors;
+			}
+		}
+
+		public static IColorTable LightColors
+		{
+			get
+			{
+				if(_lightColors == null)
+				{
+					_lightColors = new LightColorTable();
+				}
+				return _lightColors;
 			}
 		}
 

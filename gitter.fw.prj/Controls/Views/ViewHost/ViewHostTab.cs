@@ -16,6 +16,8 @@
 
 		#endregion
 
+		#region .ctor
+
 		public ViewHostTab(ViewHostTabs tabs, ViewBase view)
 			: base(view, tabs.Side)
 		{
@@ -28,9 +30,11 @@
 			{
 				_buttons.SetAvailableButtons(ViewButtonType.Close);
 			}
-			_buttons.Height = ViewManager.Renderer.TabHeight + ViewManager.Renderer.TabFooterHeight;
+			_buttons.Height = Renderer.TabHeight + Renderer.TabFooterHeight;
 			_buttons.ButtonClick += OnButtonClick;
 		}
+
+		#endregion
 
 		private void OnButtonClick(object sender, ViewButtonClickEventArgs e)
 		{
@@ -71,14 +75,14 @@
 			}
 		}
 
-		public override void OnMouseLeave()
+		protected internal override void OnMouseLeave()
 		{
 			base.OnMouseLeave();
 			_buttons.OnMouseLeave();
 			_tabs.Invalidate();
 		}
 
-		public override void OnMouseEnter()
+		protected internal override void OnMouseEnter()
 		{
 			base.OnMouseEnter();
 			_tabs.Invalidate();

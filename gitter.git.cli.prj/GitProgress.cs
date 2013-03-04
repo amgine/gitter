@@ -74,7 +74,7 @@
 
 			if(_continious)
 			{
-				monitor.SetProgressIntermediate();
+				monitor.SetProgressIndeterminate();
 			}
 			else
 			{

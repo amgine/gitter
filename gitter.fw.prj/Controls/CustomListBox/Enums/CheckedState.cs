@@ -10,6 +10,6 @@
 		/// <summary>Unchecked.</summary>
 		Unchecked,
 		/// <summary>Intermediate.</summary>
-		Intermediate,
+		Indeterminate,
 	}
 }

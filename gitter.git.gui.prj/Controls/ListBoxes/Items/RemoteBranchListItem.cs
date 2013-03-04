@@ -1,19 +1,20 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="RemoteBranch"/> object.</summary>
 	public sealed class RemoteBranchListItem : ReferenceListItemBase<RemoteBranch>
 	{
+		#region Static
+
 		private static readonly Bitmap ImgBranchRemote = CachedResources.Bitmaps["ImgBranchRemote"];
+
+		#endregion
 
 		#region .ctor
 
@@ -27,6 +28,8 @@
 		}
 
 		#endregion
+
+		#region Overrides
 
 		protected override Image Image
 		{
@@ -63,9 +66,11 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new BranchMenu(DataContext);
-			Utility.MarkDropDownForAutoDispose(mnu);
-			return mnu;
+			var menu = new BranchMenu(DataContext);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
+
+		#endregion
 	}
 }

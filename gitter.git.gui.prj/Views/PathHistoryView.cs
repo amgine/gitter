@@ -119,7 +119,7 @@
 			var revItem = e.Item as RevisionListItem;
 			if(revItem != null)
 			{
-				ShowDiffTool(revItem.DataContext.GetDiffSource(new[] { _logSource.Path }));
+				ShowDiffView(revItem.DataContext.GetDiffSource(new[] { _logSource.Path }));
 				return;
 			}
 			var fakeItem = e.Item as FakeRevisionListItem;
@@ -128,10 +128,10 @@
 				switch(fakeItem.Type)
 				{
 					case FakeRevisionItemType.StagedChanges:
-						ShowDiffTool(Repository.Status.GetDiffSource(true, new[] { _logSource.Path }));
+						ShowDiffView(Repository.Status.GetDiffSource(true, new[] { _logSource.Path }));
 						break;
 					case FakeRevisionItemType.UnstagedChanges:
-						ShowDiffTool(Repository.Status.GetDiffSource(false, new[] { _logSource.Path }));
+						ShowDiffView(Repository.Status.GetDiffSource(false, new[] { _logSource.Path }));
 						break;
 				}
 				return;
@@ -309,7 +309,7 @@
 						var revisionItem = item as RevisionListItem;
 						if(revisionItem != null)
 						{
-							ShowContextualDiffTool(revisionItem.DataContext.GetDiffSource(new[] { _logSource.Path }));
+							ShowContextualDiffView(revisionItem.DataContext.GetDiffSource(new[] { _logSource.Path }));
 							return;
 						}
 						var fakeItem = item as FakeRevisionListItem;
@@ -327,7 +327,7 @@
 							}
 							if(diff != null)
 							{
-								ShowContextualDiffTool(diff);
+								ShowContextualDiffView(diff);
 							}
 						}
 					}
@@ -342,7 +342,7 @@
 						if(revisionItem2 == null) return;
 						var rev1 = revisionItem1.DataContext;
 						var rev2 = revisionItem2.DataContext;
-						ShowContextualDiffTool(rev1.GetCompareDiffSource(rev2, new[] { _logSource.Path }));
+						ShowContextualDiffView(rev1.GetCompareDiffSource(rev2, new[] { _logSource.Path }));
 					}
 					break;
 				default:

@@ -4,6 +4,8 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	using Resources = gitter.Framework.Properties.Resources;
 
 	public class CustomVScrollbar : CustomScrollBar
@@ -17,6 +19,7 @@
 		private Rectangle _increaseButtonBounds;
 		private int _initialScrollY;
 		private bool _isArranged;
+		private Point _mouseDownLocation;
 
 		#endregion
 
@@ -33,8 +36,6 @@
 
 		private void Arrange()
 		{
-			const int MinThumbSize = 17;
-
 			var size = Size;
 			if(size.Width <= 0 || size.Height <= 0) return;
 			var buttonHeight	= SystemInformation.VerticalScrollBarArrowHeight;
@@ -49,10 +50,17 @@
 			}
 			else
 			{
-				thumbSize = NativeMethods.MulDiv(trackBarSize, LargeChange, physicalRange);
-				if(thumbSize < MinThumbSize) thumbSize = MinThumbSize;
+				if(trackBarSize < MinThumbSize)
+				{
+					thumbSize = 0;
+				}
+				else
+				{
+					thumbSize = Kernel32.MulDiv(trackBarSize, LargeChange, physicalRange);
+					if(thumbSize < MinThumbSize) thumbSize = MinThumbSize;
+				}
 				var freeTrackBarSize = trackBarSize - thumbSize;
-				thumbOffset = NativeMethods.MulDiv(freeTrackBarSize, ClampValue(Value), (physicalRange - LargeChange + 1));
+				thumbOffset = Kernel32.MulDiv(freeTrackBarSize, ClampValue(Value), (physicalRange - LargeChange + 1));
 			}
 
 			_decreaseButtonBounds	= new Rectangle(0, 0, size.Width, buttonHeight);
@@ -69,6 +77,13 @@
 
 		private void OnScrollHereClick(object sender, EventArgs e)
 		{
+			if(!_isArranged)
+			{
+				Arrange();
+			}
+			var y = _mouseDownLocation.Y - _decreaseButtonBounds.Height;
+			var thumbPosition = y - _thumbBounds.Height / 2;
+			Value = ClampValue(ThumbPositionToValue(thumbPosition));
 		}
 
 		private void OnTopClick(object sender, EventArgs e)
@@ -112,6 +127,7 @@
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
+			_mouseDownLocation = e.Location;
 			switch(e.Button)
 			{
 				case MouseButtons.Right:
@@ -131,6 +147,13 @@
 					break;
 			}
 			base.OnMouseDown(e);
+		}
+
+		private int ThumbPositionToValue(int thumbPosition)
+		{
+			int visualRange = _decreaseTrackBarBounds.Height + _increaseTrackBarBounds.Height;
+			int physicalRange = Maximum - Minimum - LargeChange + 1;
+			return Kernel32.MulDiv(physicalRange, thumbPosition, visualRange);
 		}
 
 		protected override Rectangle DecreaseButtonBounds
@@ -209,6 +232,10 @@
 
 		protected override bool PerformScroll(Point from, Point to)
 		{
+			if(!_isArranged)
+			{
+				Arrange();
+			}
 			var dy = to.Y - from.Y;
 			if(dy == 0) return false;
 			int y = _initialScrollY + dy;
@@ -243,10 +270,11 @@
 
 		protected override int ThumbPositionToValue()
 		{
-			int visualRange = _decreaseTrackBarBounds.Height + _increaseTrackBarBounds.Height;
-			int visualPosition = _decreaseTrackBarBounds.Height;
-			int physicalRange = Maximum - Minimum - LargeChange + 1;
-			return NativeMethods.MulDiv(physicalRange, visualPosition, visualRange);
+			if(!_isArranged)
+			{
+				Arrange();
+			}
+			return ThumbPositionToValue(_decreaseTrackBarBounds.Height);
 		}
 
 		#endregion

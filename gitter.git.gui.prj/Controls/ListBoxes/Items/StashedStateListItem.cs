@@ -1,14 +1,11 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="StashedState"/> object.</summary>
 	public class StashedStateListItem : RevisionPointerListItemBase<StashedState>
@@ -40,12 +37,27 @@
 
 		#endregion
 
+		#region .ctor
+
 		/// <summary>Create <see cref="StashedStateListItem"/>.</summary>
 		/// <param name="stashedState">Associated <see cref="StashedState"/>.</param>
 		public StashedStateListItem(StashedState stashedState)
 			: base(stashedState)
 		{
 		}
+
+		#endregion
+
+		#region Event Handlers
+
+		private void OnDeleted(object sender, EventArgs e)
+		{
+			RemoveSafe();
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -59,16 +71,11 @@
 			base.OnListBoxDetached();
 		}
 
-		private void OnDeleted(object sender, EventArgs e)
-		{
-			RemoveSafe();
-		}
-
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new StashedStateMenu(DataContext);
-			Utility.MarkDropDownForAutoDispose(mnu);
-			return mnu;
+			var menu = new StashedStateMenu(DataContext);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -132,5 +139,7 @@
 					break;
 			}
 		}
+
+		#endregion
 	}
 }

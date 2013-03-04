@@ -4,6 +4,8 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	public sealed class DragImage : Form
 	{
 		#region Data
@@ -93,8 +95,8 @@
 		public new void Show()
 		{
 			UpdatePosition();
-			NativeMethods.ShowWindow(this.Handle, 8);
-			NativeMethods.SetWindowPos(
+			User32.ShowWindow(this.Handle, 8);
+			User32.SetWindowPos(
 				this.Handle, (IntPtr)(-1),
 				0, 0, 0, 0,
 				0x0010 | 0x0002 | 0x001);
@@ -106,12 +108,12 @@
 			const int MA_NOACTIVATE = 0x0003;
 			const int HTTRANSPARENT = -1;
 
-			switch((WindowsMessage)m.Msg)
+			switch((WM)m.Msg)
 			{
-				case WindowsMessage.WM_MOUSEACTIVATE:
+				case WM.MOUSEACTIVATE:
 					m.Result = (IntPtr)MA_NOACTIVATE;
 					return;
-				case WindowsMessage.WM_NCHITTEST:
+				case WM.NCHITTEST:
 					m.Result = (IntPtr)HTTRANSPARENT;
 					return;
 			}

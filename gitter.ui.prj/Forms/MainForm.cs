@@ -24,9 +24,9 @@
 		private readonly ViewDockService _viewDockService;
 
 		private readonly Dictionary<string, IRepositoryProvider> _repositoryProviders;
-		private readonly Dictionary<string, IIssueTrackerProvider> _issueTrackerProviders;
+		private readonly Dictionary<string, IRepositoryServiceProvider> _issueTrackerProviders;
 		private IRepositoryProvider _currentProvider;
-		private HashSet<IIssueTrackerProvider> _activeIssueTrackerProviders;
+		private HashSet<IRepositoryServiceProvider> _activeIssueTrackerProviders;
 		private IRepository _repository;
 		private IRepositoryGuiProvider _repositoryGui;
 		private LinkedList<IGuiProvider> _additionalGui;
@@ -72,8 +72,8 @@
 			_viewDockService.ShowView(Guids.RepositoryExplorerView);
 
 			_repositoryProviders = new Dictionary<string, IRepositoryProvider>();
-			_issueTrackerProviders = new Dictionary<string, IIssueTrackerProvider>();
-			_activeIssueTrackerProviders = new HashSet<IIssueTrackerProvider>();
+			_issueTrackerProviders = new Dictionary<string, IRepositoryServiceProvider>();
+			_activeIssueTrackerProviders = new HashSet<IRepositoryServiceProvider>();
 			_additionalGui = new LinkedList<IGuiProvider>();
 
 			_notificationService = new BalloonNotificationService();
@@ -121,17 +121,17 @@
 			return default(T);
 		}
 
-		public IEnumerable<IIssueTrackerProvider> IssueTrackerProviders
+		public IEnumerable<IRepositoryServiceProvider> IssueTrackerProviders
 		{
 			get { return _issueTrackerProviders.Values; }
 		}
 
-		public IEnumerable<IIssueTrackerProvider> ActiveIssueTrackerProviders
+		public IEnumerable<IRepositoryServiceProvider> ActiveIssueTrackerProviders
 		{
 			get { return _activeIssueTrackerProviders; }
 		}
 
-		public bool TryLoadIssueTracker(IIssueTrackerProvider provider)
+		public bool TryLoadIssueTracker(IRepositoryServiceProvider provider)
 		{
 			Verify.Argument.IsNotNull(provider, "provider");
 			Verify.State.IsTrue(_repository != null);
@@ -179,7 +179,7 @@
 			}
 		}
 
-		private void LoadIssueTrackerProvider(IIssueTrackerProvider provider)
+		private void LoadIssueTrackerProvider(IRepositoryServiceProvider provider)
 		{
 			if(provider.LoadFor(this, _configurationService.GetSectionForProvider(provider)))
 			{
@@ -498,7 +498,19 @@
 				_additionalGui.Clear();
 				_activeIssueTrackerProviders.Clear();
 			}
-			_repository = _currentProvider.OpenRepositoryAsync(path).Invoke<ProgressForm>(this);
+			try
+			{
+				_repository = null;
+				_repository = _currentProvider.OpenRepositoryAsync(path).Invoke<ProgressForm>(this);
+			}
+			catch(OperationCanceledException)
+			{
+				return false;
+			}
+			if(_repository == null)
+			{
+				return false;
+			}
 			_repository.Deleted += OnRepositoryDeleted;
 			if(_repositoryGui != null)
 			{

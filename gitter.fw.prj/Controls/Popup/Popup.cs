@@ -8,6 +8,8 @@
 	using System.Runtime.InteropServices;
 	using System.Windows.Forms.VisualStyles;
 
+	using gitter.Native;
+
 	/// <summary>Represents a pop-up window.</summary>
 	[ToolboxItem(false)]
 	public partial class Popup : ToolStripDropDown
@@ -173,7 +175,7 @@
 			get
 			{
 				var cp = base.CreateParams;
-				cp.ExStyle |= NativeMethods.WS_EX_NOACTIVATE;
+				cp.ExStyle |= Constants.WS_EX_NOACTIVATE;
 				return cp;
 			}
 		}
@@ -189,7 +191,7 @@
 			{
 				return;
 			}
-			NativeMethods.AnimationFlags flags = Visible ? NativeMethods.AnimationFlags.Roll : NativeMethods.AnimationFlags.Hide;
+			AnimationFlags flags = Visible ? AnimationFlags.Roll : AnimationFlags.Hide;
 			PopupAnimations _flags = Visible ? PopupAnimation : CloseAnimation;
 			if(_flags == PopupAnimations.SystemDefault)
 			{
@@ -235,8 +237,8 @@
 					_flags = (_flags & ~PopupAnimations.LeftToRight) | PopupAnimations.RightToLeft;
 				}
 			}
-			flags = flags | (NativeMethods.AnimationFlags.Mask & (NativeMethods.AnimationFlags)(int)_flags);
-			NativeMethods.AnimateWindow(this, AnimationDuration, flags);
+			flags = flags | (AnimationFlags.Mask & (AnimationFlags)(int)_flags);
+			NativeUtility.AnimateWindow(this, AnimationDuration, flags);
 		}
 
 		/// <summary>
@@ -411,9 +413,9 @@
 
 		private bool InternalProcessResizing(ref Message m, bool contentControl)
 		{
-			switch((WindowsMessage)m.Msg)
+			switch((WM)m.Msg)
 			{
-				case WindowsMessage.WM_NCACTIVATE:
+				case WM.NCACTIVATE:
 					if(m.WParam != IntPtr.Zero && _childPopup != null && _childPopup.Visible)
 					{
 						_childPopup.Hide();
@@ -424,11 +426,11 @@
 			{
 				return false;
 			}
-			switch((WindowsMessage)m.Msg)
+			switch((WM)m.Msg)
 			{
-				case WindowsMessage.WM_NCHITTEST:
+				case WM.NCHITTEST:
 					return OnNcHitTest(ref m, contentControl);
-				case WindowsMessage.WM_GETMINMAXINFO:
+				case WM.GETMINMAXINFO:
 					return OnGetMinMaxInfo(ref m);
 			}
 			return false;
@@ -436,7 +438,7 @@
 
 		private bool OnGetMinMaxInfo(ref Message m)
 		{
-			var minmax = (NativeMethods.MINMAXINFO)Marshal.PtrToStructure(m.LParam, typeof(NativeMethods.MINMAXINFO));
+			var minmax = (MINMAXINFO)Marshal.PtrToStructure(m.LParam, typeof(MINMAXINFO));
 			if(!_maximumSize.IsEmpty)
 			{
 				minmax.maxTrackSize = _maximumSize;
@@ -448,28 +450,28 @@
 
 		private bool OnNcHitTest(ref Message m, bool contentControl)
 		{
-			int x = NativeMethods.LOWORD(m.LParam);
-			int y = NativeMethods.HIWORD(m.LParam);
+			int x = NativeUtility.LOWORD(m.LParam);
+			int y = NativeUtility.HIWORD(m.LParam);
 
 			var clientLocation = PointToClient(new Point(x, y));
 			var gripBounds = new GripBounds(contentControl ? _content.ClientRectangle : ClientRectangle);
-			IntPtr transparent = new IntPtr(NativeMethods.HTTRANSPARENT);
+			IntPtr transparent = new IntPtr(Constants.HTTRANSPARENT);
 
 			if(_resizableTop)
 			{
 				if(_resizableLeft && gripBounds.TopLeft.Contains(clientLocation))
 				{
-					m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTTOPLEFT;
+					m.Result = contentControl ? transparent : (IntPtr)Constants.HTTOPLEFT;
 					return true;
 				}
 				if(!_resizableLeft && gripBounds.TopRight.Contains(clientLocation))
 				{
-					m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTTOPRIGHT;
+					m.Result = contentControl ? transparent : (IntPtr)Constants.HTTOPRIGHT;
 					return true;
 				}
 				if(gripBounds.Top.Contains(clientLocation))
 				{
-					m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTTOP;
+					m.Result = contentControl ? transparent : (IntPtr)Constants.HTTOP;
 					return true;
 				}
 			}
@@ -477,28 +479,28 @@
 			{
 				if(_resizableLeft && gripBounds.BottomLeft.Contains(clientLocation))
 				{
-					m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTBOTTOMLEFT;
+					m.Result = contentControl ? transparent : (IntPtr)Constants.HTBOTTOMLEFT;
 					return true;
 				}
 				if(!_resizableLeft && gripBounds.BottomRight.Contains(clientLocation))
 				{
-					m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTBOTTOMRIGHT;
+					m.Result = contentControl ? transparent : (IntPtr)Constants.HTBOTTOMRIGHT;
 					return true;
 				}
 				if(gripBounds.Bottom.Contains(clientLocation))
 				{
-					m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTBOTTOM;
+					m.Result = contentControl ? transparent : (IntPtr)Constants.HTBOTTOM;
 					return true;
 				}
 			}
 			if(_resizableLeft && gripBounds.Left.Contains(clientLocation))
 			{
-				m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTLEFT;
+				m.Result = contentControl ? transparent : (IntPtr)Constants.HTLEFT;
 				return true;
 			}
 			if(!_resizableLeft && gripBounds.Right.Contains(clientLocation))
 			{
-				m.Result = contentControl ? transparent : (IntPtr)NativeMethods.HTRIGHT;
+				m.Result = contentControl ? transparent : (IntPtr)Constants.HTRIGHT;
 				return true;
 			}
 			return false;

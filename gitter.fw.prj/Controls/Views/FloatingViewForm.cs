@@ -4,6 +4,8 @@
 	using System.Windows.Forms;
 	using System.Drawing;
 
+	using gitter.Native;
+
 	/// <summary>Hosts floating views.</summary>
 	internal sealed class FloatingViewForm : Form
 	{
@@ -154,9 +156,9 @@
 		protected override void WndProc(ref Message m)
 		{
 			bool processed = false;
-			switch((WindowsMessage)m.Msg)
+			switch((WM)m.Msg)
 			{
-				case WindowsMessage.WM_NCHITTEST:
+				case WM.NCHITTEST:
 					processed = OnNcHitTest(ref m);
 					break;
 			}
@@ -168,8 +170,8 @@
 
 		private bool OnNcHitTest(ref Message m)
 		{
-			int x = NativeMethods.LOWORD(m.LParam);
-			int y = NativeMethods.HIWORD(m.LParam);
+			int x = NativeUtility.LOWORD(m.LParam);
+			int y = NativeUtility.HIWORD(m.LParam);
 
 			var point = PointToClient(new Point(x, y));
 			var rc = ClientRectangle;
@@ -183,7 +185,7 @@
 						rc.X, rc.Y,
 						rc.Width, Renderer.FloatTitleHeight)).Contains(point))
 					{
-						m.Result = (IntPtr)NativeMethods.HTCAPTION;
+						m.Result = (IntPtr)Constants.HTCAPTION;
 						return true;
 					}
 				}
@@ -195,7 +197,7 @@
 						rc.Width - Renderer.FloatBorderSize * 2,
 						Renderer.FloatTitleHeight)).Contains(point))
 					{
-						m.Result = (IntPtr)NativeMethods.HTCAPTION;
+						m.Result = (IntPtr)Constants.HTCAPTION;
 						return true;
 					}
 				}
@@ -206,42 +208,42 @@
 			var grip = new GripBounds(rc);
 			if(grip.TopLeft.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTTOPLEFT;
+				m.Result = (IntPtr)Constants.HTTOPLEFT;
 				return true;
 			}
 			if(grip.TopRight.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTTOPRIGHT;
+				m.Result = (IntPtr)Constants.HTTOPRIGHT;
 				return true;
 			}
 			if(grip.Top.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTTOP;
+				m.Result = (IntPtr)Constants.HTTOP;
 				return true;
 			}
 			if(grip.BottomLeft.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTBOTTOMLEFT;
+				m.Result = (IntPtr)Constants.HTBOTTOMLEFT;
 				return true;
 			}
 			if(grip.BottomRight.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTBOTTOMRIGHT;
+				m.Result = (IntPtr)Constants.HTBOTTOMRIGHT;
 				return true;
 			}
 			if(grip.Bottom.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTBOTTOM;
+				m.Result = (IntPtr)Constants.HTBOTTOM;
 				return true;
 			}
 			if(grip.Left.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTLEFT;
+				m.Result = (IntPtr)Constants.HTLEFT;
 				return true;
 			}
 			if(grip.Right.Contains(point))
 			{
-				m.Result = (IntPtr)NativeMethods.HTRIGHT;
+				m.Result = (IntPtr)Constants.HTRIGHT;
 				return true;
 			}
 			return false;

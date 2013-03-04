@@ -58,10 +58,14 @@
 			if(_reflog != reflog)
 			{
 				if(_reflog != null)
+				{
 					DetachFromReflog();
+				}
 				_reflog = reflog;
 				if(_reflog != null)
+				{
 					AttachToReflog();
+				}
 			}
 		}
 

@@ -1,12 +1,11 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 
 	using gitter.Framework.Controls;
 
-	public static class BaseReferenceListItem
+	public static class ReferenceListItemBase
 	{
 		public static int UniversalComparer(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
@@ -14,40 +13,58 @@
 			{
 				var branchItem = item1 as BranchListItem;
 				if(branchItem != null)
+				{
 					return BranchListItem.CompareByName(branchItem, (BranchListItem)item2);
+				}
 				var remoeBranchItem = item1 as RemoteBranchListItem;
 				if(remoeBranchItem != null)
+				{
 					return RemoteBranchListItem.CompareByName(branchItem, (RemoteBranchListItem)item2);
+				}
 				var remoteItem = item1 as RemoteListItem;
 				if(remoteItem != null)
+				{
 					return RemoteListItem.CompareByName(remoteItem, (RemoteListItem)item2);
+				}
 				var tagItem = item1 as TagListItem;
 				if(tagItem != null)
+				{
 					return TagListItem.CompareByName(tagItem, (TagListItem)item2);
+				}
 				return 0;
 			}
 			else
 			{
 				var branchItem = item1 as BranchListItem;
 				if(branchItem != null)
+				{
 					return -1;
+				}
 				var remoteBranchItem = item1 as RemoteBranchListItem;
 				if(remoteBranchItem != null)
 				{
 					var branchItem2 = item2 as BranchListItem;
 					if(branchItem2 != null)
+					{
 						return 1;
+					}
 					else
+					{
 						return -1;
+					}
 				}
 				var remoteListItem = item1 as RemoteListItem;
 				if(remoteListItem != null)
 				{
 					var tagItem2 = item2 as TagListItem;
 					if(tagItem2 == null)
+					{
 						return -1;
+					}
 					else
+					{
 						return 1;
+					}
 				}
 				return 1;
 			}
@@ -69,14 +86,12 @@
 		public static int CompareByName(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
 			var i1 = item1 as ReferenceListItemBase<T>;
-			if(i1 == null) return 0;
 			var i2 = item2 as ReferenceListItemBase<T>;
-			if(i2 == null) return 0;
-			try
+			if(i1 != null && i2 != null)
 			{
 				return CompareByName(i1, i2);
 			}
-			catch
+			else
 			{
 				return 0;
 			}
@@ -92,14 +107,12 @@
 		public static int CompareByPosition(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
 			var i1 = item1 as ReferenceListItemBase<T>;
-			if(i1 == null) return 0;
 			var i2 = item2 as ReferenceListItemBase<T>;
-			if(i2 == null) return 0;
-			try
+			if(i1 != null && i2 != null)
 			{
 				return CompareByPosition(i1, i2);
 			}
-			catch
+			else
 			{
 				return 0;
 			}
@@ -107,10 +120,36 @@
 
 		#endregion
 
+		#region .ctor
+
 		protected ReferenceListItemBase(T data)
 			: base(data)
 		{
 		}
+
+		#endregion
+
+		#region Properties
+
+		protected abstract Image Image { get; }
+
+		#endregion
+
+		#region Event Handlers
+
+		private void OnPositionChanged(object sender, RevisionChangedEventArgs e)
+		{
+			InvalidateSafe();
+		}
+
+		private void OnReferenceDeleted(object sender, EventArgs e)
+		{
+			RemoveSafe();
+		}
+
+		#endregion
+
+		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -125,18 +164,6 @@
 			DataContext.PositionChanged -= OnPositionChanged;
 			base.OnListBoxDetached();
 		}
-
-		private void OnPositionChanged(object sender, RevisionChangedEventArgs e)
-		{
-			InvalidateSubItemSafe((int)ColumnId.Hash);
-		}
-
-		private void OnReferenceDeleted(object sender, EventArgs e)
-		{
-			RemoveSafe();
-		}
-
-		protected abstract Image Image { get; }
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
@@ -168,5 +195,7 @@
 					break;
 			}
 		}
+
+		#endregion
 	}
 }

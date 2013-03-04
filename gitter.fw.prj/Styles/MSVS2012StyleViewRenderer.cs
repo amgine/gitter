@@ -148,7 +148,99 @@
 			#endregion
 		}
 
+		private sealed class LightColorTable : IColorTable
+		{
+			private static readonly Color _BackgroundColor						= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color _ViewHostTabsBackground				= MSVS2012LightColors.WORK_AREA;
+
+			private static readonly Color _DocTabsFooterActive					= Color.FromArgb(0, 122, 204);
+			private static readonly Color _DocTabsFooterNormal					= Color.FromArgb(63, 63, 70);
+			private static readonly Color _DocTabBackground						= Color.FromArgb(41, 57, 85);
+			private static readonly Color _DocTabBackgroundHover				= Color.FromArgb(20, 151, 234);
+			private static readonly Color _DocTabBackgroundSelectedActive		= Color.FromArgb(0, 122, 204);
+			private static readonly Color _DocTabBackgroundSelected				= Color.FromArgb(63, 63, 70);
+
+			private static readonly Color _ToolTabBackgroundActive				= Color.FromArgb(37, 37, 38);
+			private static readonly Color _ToolTabBackgroundHover				= Color.FromArgb(62, 62, 64);
+			private static readonly Color _ToolTabSeparator						= Color.FromArgb(63, 63, 70);
+			private static readonly Color _ToolTabForeground					= Color.FromArgb(208, 208, 208);
+			private static readonly Color _ToolTabForegroundActive				= Color.FromArgb(0, 151, 251);
+			private static readonly Color _ToolTabForegroundHover				= Color.FromArgb(85, 170, 255);
+
+			private static readonly Color _DockSideBackground					= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color _DockSideTabOutline					= Color.FromArgb(63, 63, 70);
+			private static readonly Color _DockSideTabOutlineHover				= Color.FromArgb(0, 122, 204);
+			private static readonly Color _DockSideTabForeground				= Color.FromArgb(208, 208, 208);
+			private static readonly Color _DockSideTabForegroundHover			= Color.FromArgb(0, 151, 251);
+
+			private static readonly Color _ViewButtonPressedBackground			= Color.FromArgb(14, 97, 152);
+			private static readonly Color _ViewButtonHoverBackgroundActive		= Color.FromArgb(82, 176, 239);
+			private static readonly Color _ViewButtonHoverBackgroundInactive	= Color.FromArgb(57, 57, 57);
+			private static readonly Color _ViewButtonForeground					= Color.FromArgb(255, 255, 255);
+
+			private static readonly Color _ViewHostHeaderBackgroundNormal		= MSVS2012LightColors.WORK_AREA;
+			private static readonly Color _ViewHostHeaderBackgroundFocused		= Color.FromArgb(0, 122, 204);
+			private static readonly Color _ViewHostHeaderAccentNormal			= Color.FromArgb(70, 70, 74);
+			private static readonly Color _ViewHostHeaderAccentFocused			= Color.FromArgb(89, 168, 222);
+
+			private static readonly Color _ViewHostHeaderTextNormal				= Color.FromArgb(208, 208, 208);
+			private static readonly Color _ViewHostHeaderTextFocused			= Color.FromArgb(255, 255, 255);
+
+			private static readonly Color _DockMarkerBackground					= Color.FromArgb(30, 30, 30);
+			private static readonly Color _DockMarkerBorder						= Color.FromArgb(51, 51, 55);
+			private static readonly Color _DockMarkerButtonBackground			= Color.FromArgb(37, 37, 38);
+			private static readonly Color _DockMarkerButtonContentBorder		= Color.FromArgb(0, 122, 204);
+			private static readonly Color _DockMarkerButtonContentArrow			= Color.FromArgb(241, 241, 241);
+
+			#region IColorTable
+
+			public Color BackgroundColor { get { return _BackgroundColor; } }
+			public Color ViewHostTabsBackground { get { return _ViewHostTabsBackground; } }
+
+			public Color DocTabsFooterActive { get { return _DocTabsFooterActive; } }
+			public Color DocTabsFooterNormal { get { return _DocTabsFooterNormal; } }
+			public Color DocTabBackground { get { return _DocTabBackground; } }
+			public Color DocTabBackgroundHover { get { return _DocTabBackgroundHover; } }
+			public Color DocTabBackgroundSelectedActive { get { return _DocTabBackgroundSelectedActive; } }
+			public Color DocTabBackgroundSelected { get { return _DocTabBackgroundSelected; } }
+
+			public Color ToolTabBackgroundActive { get { return _ToolTabBackgroundActive; } }
+			public Color ToolTabBackgroundHover { get { return _ToolTabBackgroundHover; } }
+			public Color ToolTabSeparator { get { return _ToolTabSeparator; } }
+			public Color ToolTabForeground { get { return _ToolTabForeground; } }
+			public Color ToolTabForegroundActive { get { return _ToolTabForegroundActive; } }
+			public Color ToolTabForegroundHover { get { return _ToolTabForegroundHover; } }
+
+			public Color DockSideBackground { get { return _DockSideBackground; } }
+			public Color DockSideTabOutline { get { return _DockSideTabOutline; } }
+			public Color DockSideTabOutlineHover { get { return _DockSideTabOutlineHover; } }
+			public Color DockSideTabForeground { get { return _DockSideTabForeground; } }
+			public Color DockSideTabForegroundHover { get { return _DockSideTabForegroundHover; } }
+
+			public Color ViewButtonPressedBackground { get { return _ViewButtonPressedBackground; } }
+			public Color ViewButtonHoverBackgroundActive { get { return _ViewButtonHoverBackgroundActive; } }
+			public Color ViewButtonHoverBackgroundInactive { get { return _ViewButtonHoverBackgroundInactive; } }
+			public Color ViewButtonForeground { get { return _ViewButtonForeground; } }
+
+			public Color ViewHostHeaderBackgroundNormal { get { return _ViewHostHeaderBackgroundNormal; } }
+			public Color ViewHostHeaderBackgroundFocused { get { return _ViewHostHeaderBackgroundFocused; } }
+			public Color ViewHostHeaderAccentNormal { get { return _ViewHostHeaderAccentNormal; } }
+			public Color ViewHostHeaderAccentFocused { get { return _ViewHostHeaderAccentFocused; } }
+
+			public Color ViewHostHeaderTextNormal { get { return _ViewHostHeaderTextNormal; } }
+			public Color ViewHostHeaderTextFocused { get { return _ViewHostHeaderTextFocused; } }
+
+			public Color DockMarkerBackground { get { return _DockMarkerBackground; } }
+			public Color DockMarkerBorder { get { return _DockMarkerBorder; } }
+			public Color DockMarkerButtonBackground { get { return _DockMarkerBackground; } }
+			public Color DockMarkerButtonContentBorder { get { return _DockMarkerButtonContentBorder; } }
+			public Color DockMarkerButtonContentArrow { get { return _DockMarkerButtonContentArrow; } }
+
+			#endregion
+		}
+
 		private static IColorTable _darkColors;
+		private static IColorTable _lightColors;
 
 		public static IColorTable DarkColors
 		{
@@ -159,6 +251,18 @@
 					_darkColors = new DarkColorTable();
 				}
 				return _darkColors;
+			}
+		}
+
+		public static IColorTable LightColors
+		{
+			get
+			{
+				if(_lightColors == null)
+				{
+					_lightColors = new LightColorTable();
+				}
+				return _lightColors;
 			}
 		}
 

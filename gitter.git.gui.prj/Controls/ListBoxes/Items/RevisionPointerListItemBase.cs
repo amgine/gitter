@@ -1,18 +1,18 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text;
-
 	using gitter.Framework.Controls;
 
 	public abstract class RevisionPointerListItemBase<T> : CustomListBoxItem<T>, IRevisionPointerListItem
 		where T : IRevisionPointer
 	{
+		#region .ctor
+
 		protected RevisionPointerListItemBase(T data)
 			: base(data)
 		{
 		}
+
+		#endregion
 
 		#region IRevisionPointerListItem Members
 

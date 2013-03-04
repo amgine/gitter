@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git.Gui
 {
 	using System;
+	using System.ComponentModel;
 	using System.Drawing;
 	using System.Globalization;
 	using System.Windows.Forms;
@@ -16,6 +17,25 @@
 
 	internal sealed class Statusbar : IDisposable
 	{
+		#region Static
+
+		private static readonly Bitmap ImgClean =
+			CachedResources.Bitmaps["ImgStatusClean"];
+		private static readonly Bitmap ImgMergeInProcess =
+			CachedResources.Bitmaps.CombineBitmaps("ImgMerge", "ImgOverlayConflict");
+		private static readonly Bitmap ImgCherryPickInProcess =
+			CachedResources.Bitmaps.CombineBitmaps("ImgCherryPick", "ImgOverlayConflict");
+		private static readonly Bitmap ImgRevertInProcess =
+			CachedResources.Bitmaps.CombineBitmaps("ImgRevert", "ImgOverlayConflict");
+		private static readonly Bitmap ImgRebaseInProcess =
+			CachedResources.Bitmaps.CombineBitmaps("ImgRebase", "ImgOverlayConflict");
+
+		#endregion
+
+		#region Data
+
+		private Repository _repository;
+
 		private readonly ToolStripStatusLabel _headLabel;
 
 		private readonly ToolStripStatusLabel _statusLabel;
@@ -49,20 +69,14 @@
 		private readonly ToolStripItem[] _rightAlignedItems;
 
 		private readonly GuiProvider _guiProvider;
-		private Repository _repository;
 
 		private readonly StatusToolTip _statusToolTip;
 
-		private static readonly Bitmap ImgClean =
-			CachedResources.Bitmaps["ImgStatusClean"];
-		private static readonly Bitmap ImgMergeInProcess =
-			CachedResources.Bitmaps.CombineBitmaps("ImgMerge", "ImgOverlayConflict");
-		private static readonly Bitmap ImgCherryPickInProcess =
-			CachedResources.Bitmaps.CombineBitmaps("ImgCherryPick", "ImgOverlayConflict");
-		private static readonly Bitmap ImgRevertInProcess =
-			CachedResources.Bitmaps.CombineBitmaps("ImgRevert", "ImgOverlayConflict");
-		private static readonly Bitmap ImgRebaseInProcess =
-			CachedResources.Bitmaps.CombineBitmaps("ImgRebase", "ImgOverlayConflict");
+		private bool _isDisposed;
+
+		#endregion
+
+		#region .ctor
 
 		public Statusbar(GuiProvider guiProvider)
 		{
@@ -103,11 +117,10 @@
 					{ Available = false },
 			};
 
-
-			_statusUnmerged.DoubleClick += OnConflictsDoubleClick;
-			_statusUnstagedModified.DoubleClick += OnUnstagedDoubleClick;
-			_statusUnstagedRemoved.DoubleClick += OnUnstagedDoubleClick;
-			_statusUnstagedUntracked.DoubleClick += OnUnstagedDoubleClick;
+			_statusUnmerged.DoubleClick				+= OnConflictsDoubleClick;
+			_statusUnstagedModified.DoubleClick		+= OnUnstagedDoubleClick;
+			_statusUnstagedRemoved.DoubleClick		+= OnUnstagedDoubleClick;
+			_statusUnstagedUntracked.DoubleClick	+= OnUnstagedDoubleClick;
 
 			_rightAlignedItems = new[]
 			{
@@ -123,15 +136,14 @@
 				AttachToRepository(guiProvider.Repository);
 			}
 
-			_statusToolTip = new StatusToolTip();
-
-			_statusUnmergedToolTip = new FileListToolTip();
-			_statusStagedAddedToolTip = new FileListToolTip();
-			_statusStagedModifiedToolTip = new FileListToolTip();
-			_statusStagedRemovedToolTip = new FileListToolTip();
-			_statusUnstagedUntrackedToolTip = new FileListToolTip();
-			_statusUnstagedModifiedToolTip = new FileListToolTip();
-			_statusUnstagedRemovedToolTip = new FileListToolTip();
+			_statusToolTip					= new StatusToolTip();
+			_statusUnmergedToolTip			= new FileListToolTip();
+			_statusStagedAddedToolTip		= new FileListToolTip();
+			_statusStagedModifiedToolTip	= new FileListToolTip();
+			_statusStagedRemovedToolTip		= new FileListToolTip();
+			_statusUnstagedUntrackedToolTip	= new FileListToolTip();
+			_statusUnstagedModifiedToolTip	= new FileListToolTip();
+			_statusUnstagedRemovedToolTip	= new FileListToolTip();
 
 			SetToolTips();
 
@@ -141,6 +153,13 @@
 
 			_userLabel.DoubleClickEnabled = true;
 			_userLabel.DoubleClick += OnUserDoubleClick;
+		}
+
+		#endregion
+
+		private ISynchronizeInvoke SynchronizeInvoke
+		{
+			get { return _guiProvider.Environment; }
 		}
 
 		private static Point GetToolTipPosition(CustomToolTip toolTip, ToolStripItem label)
@@ -161,7 +180,7 @@
 
 		private void ShowToolTip(FileListToolTip toolTip, ToolStripItem label, bool staged, FileStatus fileStatus)
 		{
-			if(_repository != null)
+			if(Repository != null)
 			{
 				toolTip.Update(_repository.Status, staged, fileStatus);
 				toolTip.Show(label.Owner, GetToolTipPosition(toolTip, label));
@@ -178,18 +197,8 @@
 
 		private void SetToolTips()
 		{
-			_statusLabel.MouseEnter += (sender, e) =>
-			{
-				if(_repository != null)
-				{
-					_statusToolTip.Update(_repository.Status);
-					_statusToolTip.Show(_statusLabel.Owner, GetToolTipPosition(_statusToolTip, _statusLabel));
-				}
-			};
-			_statusLabel.MouseLeave += (sender, e) =>
-			{
-				_statusToolTip.Hide(_statusLabel.Owner);
-			};
+			_statusLabel.MouseEnter += OnStatusLabelMouseEnter;
+			_statusLabel.MouseLeave += OnstatusLabelMouseLeave;
 
 			SetToolTip(_statusUnmerged,				_statusUnmergedToolTip,				false,	FileStatus.Unmerged);
 
@@ -200,6 +209,20 @@
 			SetToolTip(_statusUnstagedUntracked,	_statusUnstagedUntrackedToolTip,	false,	FileStatus.Added);
 			SetToolTip(_statusUnstagedRemoved,		_statusUnstagedRemovedToolTip,		false,	FileStatus.Removed);
 			SetToolTip(_statusUnstagedModified,		_statusUnstagedModifiedToolTip,		false,	FileStatus.Modified);
+		}
+
+		private void OnStatusLabelMouseEnter(object sender, EventArgs e)
+		{
+			if(Repository != null)
+			{
+				_statusToolTip.Update(Repository.Status);
+				_statusToolTip.Show(_statusLabel.Owner, GetToolTipPosition(_statusToolTip, _statusLabel));
+			}
+		}
+
+		private void OnstatusLabelMouseLeave(object sender, EventArgs e)
+		{
+			_statusToolTip.Hide(_statusLabel.Owner);
 		}
 
 		private void OnUserLabelMouseDown(object sender, MouseEventArgs e)
@@ -245,7 +268,7 @@
 			var parent = _guiProvider.Environment.MainForm;
 			try
 			{
-				_repository.RebaseAsync(control).Invoke<ProgressForm>(parent);
+				Repository.RebaseAsync(control).Invoke<ProgressForm>(parent);
 			}
 			catch(GitException exc)
 			{
@@ -293,7 +316,7 @@
 
 		private void OnHeadLabelDoubleClick(object sender, EventArgs e)
 		{
-			if(_repository != null)
+			if(Repository != null)
 			{
 				_guiProvider.StartCheckoutDialog();
 			}
@@ -301,17 +324,23 @@
 
 		private void OnUnstagedDoubleClick(object sender, EventArgs e)
 		{
-			_guiProvider.StartStageFilesDialog();
+			if(Repository != null)
+			{
+				_guiProvider.StartStageFilesDialog();
+			}
 		}
 
 		private void OnConflictsDoubleClick(object sender, EventArgs e)
 		{
-			_guiProvider.StartResolveConflictsDialog();
+			if(Repository != null)
+			{
+				_guiProvider.StartResolveConflictsDialog();
+			}
 		}
 
 		private void OnUserDoubleClick(object sender, EventArgs e)
 		{
-			if(_repository != null)
+			if(Repository != null)
 			{
 				_guiProvider.StartUserIdentificationDialog();
 			}
@@ -340,46 +369,42 @@
 		{
 			_repository = repository;
 			UpdateCurrentBranchLabel();
-			if(repository.Remotes.Count != 0)
-			{
-				foreach(var remote in repository.Remotes)
-				{
-					_remoteLabel.Text = remote.FetchUrl;
-					_remoteLabel.Tag = remote;
-					break;
-				}
-				_remoteLabel.Available = true;
-			}
-			else
-			{
-				_remoteLabel.Available = false;
-				_remoteLabel.Tag = null;
-			}
+			UpdateRemoteLabel();
 			UpdateStatus();
 			UpdateUserIdentityLabel();
-			repository.Head.PointerChanged += OnHeadChanged;
-			repository.Refs.Heads.BranchRenamed += OnBranchRenamed;
-			repository.Status.Changed += OnStatusChanged;
-			repository.StateChanged += OnStateChanged;
-			repository.UserIdentityChanged += OnUserIdentityChanged;
+			repository.Head.PointerChanged		+= OnHeadChanged;
+			repository.Refs.Heads.BranchRenamed	+= OnBranchRenamed;
+			repository.Status.Changed			+= OnStatusChanged;
+			repository.Remotes.ObjectAdded		+= OnRemoteAdded;
+			repository.Remotes.ObjectRemoved	+= OnRemoteRemoved;
+			repository.StateChanged				+= OnStateChanged;
+			repository.UserIdentityChanged		+= OnUserIdentityChanged;
 		}
 
 		private void DetachFromRepository(Repository repository)
 		{
-			repository.Head.PointerChanged -= OnHeadChanged;
-			repository.Refs.Heads.BranchRenamed -= OnBranchRenamed;
-			repository.Status.Changed -= OnStatusChanged;
-			repository.StateChanged -= OnStateChanged;
-			repository.UserIdentityChanged -= OnUserIdentityChanged;
+			repository.Head.PointerChanged		-= OnHeadChanged;
+			repository.Refs.Heads.BranchRenamed	-= OnBranchRenamed;
+			repository.Status.Changed			-= OnStatusChanged;
+			repository.Remotes.ObjectAdded		-= OnRemoteAdded;
+			repository.Remotes.ObjectRemoved	-= OnRemoteRemoved;
+			repository.StateChanged				-= OnStateChanged;
+			repository.UserIdentityChanged		-= OnUserIdentityChanged;
 			GitterApplication.MainForm.RemoveTaskbarOverlayIcon();
 			_repository = null;
 		}
 
 		private void OnHeadChanged(object sender, RevisionPointerChangedEventArgs e)
 		{
-			if(_guiProvider.Environment.InvokeRequired)
+			if(SynchronizeInvoke.InvokeRequired)
 			{
-				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
+				try
+				{
+					SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -389,9 +414,15 @@
 
 		private void OnUserIdentityChanged(object sender, EventArgs e)
 		{
-			if(_guiProvider.Environment.InvokeRequired)
+			if(SynchronizeInvoke.InvokeRequired)
 			{
-				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateUserIdentityLabel), null);
+				try
+				{
+					SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateUserIdentityLabel), null);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -403,9 +434,15 @@
 		{
 			if(e.Object.IsCurrent)
 			{
-				if(_guiProvider.Environment.InvokeRequired)
+				if(SynchronizeInvoke.InvokeRequired)
 				{
-					_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
+					try
+					{
+						SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
+					}
+					catch(ObjectDisposedException)
+					{
+					}
 				}
 				else
 				{
@@ -416,9 +453,15 @@
 
 		private void OnStatusChanged(object sender, EventArgs e)
 		{
-			if(_guiProvider.Environment.InvokeRequired)
+			if(SynchronizeInvoke.InvokeRequired)
 			{
-				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateStatus), null);
+				try
+				{
+					SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateStatus), null);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -428,9 +471,9 @@
 
 		private void OnStateChanged(object sender, EventArgs e)
 		{
-			if(_guiProvider.Environment.InvokeRequired)
+			if(SynchronizeInvoke.InvokeRequired)
 			{
-				_guiProvider.Environment.BeginInvoke(new MethodInvoker(UpdateState), null);
+				SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateState), null);
 			}
 			else
 			{
@@ -438,135 +481,221 @@
 			}
 		}
 
+		private void OnRemoteAdded(object sender, RemoteEventArgs e)
+		{
+			if(SynchronizeInvoke.InvokeRequired)
+			{
+				try
+				{
+					SynchronizeInvoke.BeginInvoke(new Action<Remote>(OnRemoteAdded), new object[] { e.Object });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
+			{
+				OnRemoteAdded(e.Object);
+			}
+		}
+
+		private void OnRemoteRemoved(object sender, RemoteEventArgs e)
+		{
+			if(SynchronizeInvoke.InvokeRequired)
+			{
+				try
+				{
+					SynchronizeInvoke.BeginInvoke(new Action<Remote>(OnRemoteRemoved), new object[] { e.Object });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
+			{
+				OnRemoteRemoved(e.Object);
+			}
+		}
+
+		private void OnRemoteAdded(Remote remote)
+		{
+			if(_remoteLabel.Tag == null)
+			{
+				UpdateRemoteLabel();
+			}
+		}
+
+		private void OnRemoteRemoved(Remote remote)
+		{
+			if(_remoteLabel.Tag == remote)
+			{
+				UpdateRemoteLabel();
+			}
+		}
+
 		private string GetUserName()
 		{
-			var username = _repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
-			if(username != null)
+			if(Repository != null)
 			{
-				var useremail = _repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
-				if(useremail != null)
+				var username = Repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
+				if(username != null)
 				{
-					return string.Format("{0} <{1}>", username.Value, useremail.Value);
-				}
-				else
-				{
-					return username.Value;
+					var useremail = Repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
+					if(useremail != null)
+					{
+						return string.Format("{0} <{1}>", username.Value, useremail.Value);
+					}
+					else
+					{
+						return username.Value;
+					}
 				}
 			}
 			return null;
 		}
 
+		private void UpdateRemoteLabel()
+		{
+			lock(Repository.Remotes.SyncRoot)
+			{
+				if(Repository.Remotes.Count != 0)
+				{
+					var remote = Repository.Remotes.TryGetItem(GitConstants.DefaultRemoteName);
+					if(remote == null)
+					{
+						foreach(var item in Repository.Remotes)
+						{
+							remote = item;
+							break;
+						}
+					}
+					_remoteLabel.Text = remote.FetchUrl;
+					_remoteLabel.Tag = remote;
+					_remoteLabel.Available = true;
+				}
+				else
+				{
+					_remoteLabel.Available = false;
+					_remoteLabel.Text = string.Empty;
+					_remoteLabel.Tag = null;
+				}
+			}
+		}
+
 		private void UpdateStatus()
 		{
-			var status = _repository.Status;
-			if(status.StagedFiles.Count == 0 && status.UnstagedFiles.Count == 0)
+			var status = Repository.Status;
+			lock(status.SyncRoot)
 			{
-				_statusClean.Available = true;
-
-				_statusUnmerged.Available = false;
-				_statusStagedAdded.Available = false;
-				_statusStagedModified.Available = false;
-				_statusStagedRemoved.Available = false;
-				_statusUnstagedUntracked.Available = false;
-				_statusUnstagedRemoved.Available = false;
-				_statusUnstagedModified.Available = false;
-
-				GitterApplication.MainForm.RemoveTaskbarOverlayIcon();
-			}
-			else
-			{
-				_statusClean.Available = false;
-
-				if(status.UnmergedCount != 0)
+				if(status.StagedFiles.Count == 0 && status.UnstagedFiles.Count == 0)
 				{
-					_statusUnmerged.Text = status.UnmergedCount.ToString(CultureInfo.CurrentCulture);
-					_statusUnmerged.Available = true;
-				}
-				else
-				{
+					_statusClean.Available = true;
+
 					_statusUnmerged.Available = false;
-				}
-				if(status.StagedAddedCount != 0)
-				{
-					_statusStagedAdded.Text = status.StagedAddedCount.ToString(CultureInfo.CurrentCulture);
-					_statusStagedAdded.Available = true;
-				}
-				else
-				{
 					_statusStagedAdded.Available = false;
-				}
-				if(status.StagedModifiedCount != 0)
-				{
-					_statusStagedModified.Text = status.StagedModifiedCount.ToString(CultureInfo.CurrentCulture);
-					_statusStagedModified.Available = true;
-				}
-				else
-				{
 					_statusStagedModified.Available = false;
-				}
-				if(status.StagedRemovedCount != 0)
-				{
-					_statusStagedRemoved.Text = status.StagedRemovedCount.ToString(CultureInfo.CurrentCulture);
-					_statusStagedRemoved.Available = true;
-				}
-				else
-				{
 					_statusStagedRemoved.Available = false;
-				}
-				if(status.UnstagedUntrackedCount != 0)
-				{
-					_statusUnstagedUntracked.Text = status.UnstagedUntrackedCount.ToString(CultureInfo.CurrentCulture);
-					_statusUnstagedUntracked.Available = true;
-				}
-				else
-				{
 					_statusUnstagedUntracked.Available = false;
-				}
-				if(status.UnstagedModifiedCount != 0)
-				{
-					_statusUnstagedModified.Text = status.UnstagedModifiedCount.ToString(CultureInfo.CurrentCulture);
-					_statusUnstagedModified.Available = true;
-				}
-				else
-				{
-					_statusUnstagedModified.Available = false;
-				}
-				if(status.UnstagedRemovedCount != 0)
-				{
-					_statusUnstagedRemoved.Text = status.UnstagedRemovedCount.ToString(CultureInfo.CurrentCulture);
-					_statusUnstagedRemoved.Available = true;
-				}
-				else
-				{
 					_statusUnstagedRemoved.Available = false;
-				}
+					_statusUnstagedModified.Available = false;
 
-				int count =
-					status.StagedAddedCount +
-					status.StagedModifiedCount +
-					status.StagedRemovedCount +
-					status.UnmergedCount +
-					status.UnstagedModifiedCount +
-					status.UnstagedRemovedCount +
-					status.UnstagedUntrackedCount;
-				string resName;
-				if(count < 1)
-				{
-					resName = null;
-				}
-				else if(count > 9)
-				{
-					resName = "9p";
+					GitterApplication.MainForm.RemoveTaskbarOverlayIcon();
 				}
 				else
 				{
-					resName = count.ToString(CultureInfo.InvariantCulture);
-				}
-				if(resName != null)
-				{
-					GitterApplication.MainForm.SetTaskbarOverlayIcon(
-						CachedResources.Icons["IcoStatusGreen" + resName],
-						string.Format("{0} modifications", count));
+					_statusClean.Available = false;
+
+					if(status.UnmergedCount != 0)
+					{
+						_statusUnmerged.Text = status.UnmergedCount.ToString(CultureInfo.CurrentCulture);
+						_statusUnmerged.Available = true;
+					}
+					else
+					{
+						_statusUnmerged.Available = false;
+					}
+					if(status.StagedAddedCount != 0)
+					{
+						_statusStagedAdded.Text = status.StagedAddedCount.ToString(CultureInfo.CurrentCulture);
+						_statusStagedAdded.Available = true;
+					}
+					else
+					{
+						_statusStagedAdded.Available = false;
+					}
+					if(status.StagedModifiedCount != 0)
+					{
+						_statusStagedModified.Text = status.StagedModifiedCount.ToString(CultureInfo.CurrentCulture);
+						_statusStagedModified.Available = true;
+					}
+					else
+					{
+						_statusStagedModified.Available = false;
+					}
+					if(status.StagedRemovedCount != 0)
+					{
+						_statusStagedRemoved.Text = status.StagedRemovedCount.ToString(CultureInfo.CurrentCulture);
+						_statusStagedRemoved.Available = true;
+					}
+					else
+					{
+						_statusStagedRemoved.Available = false;
+					}
+					if(status.UnstagedUntrackedCount != 0)
+					{
+						_statusUnstagedUntracked.Text = status.UnstagedUntrackedCount.ToString(CultureInfo.CurrentCulture);
+						_statusUnstagedUntracked.Available = true;
+					}
+					else
+					{
+						_statusUnstagedUntracked.Available = false;
+					}
+					if(status.UnstagedModifiedCount != 0)
+					{
+						_statusUnstagedModified.Text = status.UnstagedModifiedCount.ToString(CultureInfo.CurrentCulture);
+						_statusUnstagedModified.Available = true;
+					}
+					else
+					{
+						_statusUnstagedModified.Available = false;
+					}
+					if(status.UnstagedRemovedCount != 0)
+					{
+						_statusUnstagedRemoved.Text = status.UnstagedRemovedCount.ToString(CultureInfo.CurrentCulture);
+						_statusUnstagedRemoved.Available = true;
+					}
+					else
+					{
+						_statusUnstagedRemoved.Available = false;
+					}
+
+					int count =
+						status.StagedAddedCount +
+						status.StagedModifiedCount +
+						status.StagedRemovedCount +
+						status.UnmergedCount +
+						status.UnstagedModifiedCount +
+						status.UnstagedRemovedCount +
+						status.UnstagedUntrackedCount;
+					string resName;
+					if(count < 1)
+					{
+						resName = null;
+					}
+					else if(count > 9)
+					{
+						resName = "9p";
+					}
+					else
+					{
+						resName = count.ToString(CultureInfo.InvariantCulture);
+					}
+					if(resName != null)
+					{
+						GitterApplication.MainForm.SetTaskbarOverlayIcon(
+							CachedResources.Icons["IcoStatusGreen" + resName],
+							string.Format("{0} modifications", count));
+					}
 				}
 			}
 			UpdateState();
@@ -720,15 +849,29 @@
 			get { return _remoteLabel; }
 		}
 
+		#region IDisposable
+
+		public bool IsDisposed
+		{
+			get { return _isDisposed; }
+			private set { _isDisposed = value; }
+		}
+
 		public void Dispose()
 		{
-			_statusUnmergedToolTip.Dispose();
-			_statusStagedAddedToolTip.Dispose();
-			_statusStagedModifiedToolTip.Dispose();
-			_statusStagedRemovedToolTip.Dispose();
-			_statusUnstagedUntrackedToolTip.Dispose();
-			_statusUnstagedModifiedToolTip.Dispose();
-			_statusUnstagedRemovedToolTip.Dispose();
+			if(!IsDisposed)
+			{
+				_statusUnmergedToolTip.Dispose();
+				_statusStagedAddedToolTip.Dispose();
+				_statusStagedModifiedToolTip.Dispose();
+				_statusStagedRemovedToolTip.Dispose();
+				_statusUnstagedUntrackedToolTip.Dispose();
+				_statusUnstagedModifiedToolTip.Dispose();
+				_statusUnstagedRemovedToolTip.Dispose();
+				IsDisposed = true;
+			}
 		}
+
+		#endregion
 	}
 }

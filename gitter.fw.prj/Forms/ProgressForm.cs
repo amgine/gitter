@@ -15,6 +15,7 @@
 
 		private bool _canCancel;
 		private IAsyncResult _context;
+		private volatile bool _isCancelRequested;
 
 		#endregion
 
@@ -23,11 +24,24 @@
 		/// <summary>
 		/// Monitor raises this event to stop monitored action execution.
 		/// </summary>
-		public event EventHandler Cancelled;
+		public event EventHandler Canceled;
+
 		/// <summary>
 		/// Monitor raises this event when it is ready to receive Set() calls after Start() call.
 		/// </summary>
 		public event EventHandler Started;
+
+		protected virtual void OnStarted()
+		{
+			var handler = Started;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		protected virtual void OnCanceled()
+		{
+			var handler = Canceled;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
 
 		#endregion
 
@@ -88,8 +102,7 @@
 		protected override void OnShown(EventArgs e)
 		{
 			base.OnShown(e);
-			var handler = Started;
-			if(handler != null) handler(this, EventArgs.Empty);
+			OnStarted();
 			UpdateWin7ProgressBar();
 		}
 
@@ -132,26 +145,32 @@
 			{
 				if(!IsDisposed)
 				{
-					try
+					if(InvokeRequired)
 					{
-						if(InvokeRequired)
+						try
 						{
-							Invoke(new Action<string>((text) => Text = text), value);
+							BeginInvoke(new Action<string>(
+								text =>
+								{
+									if(!IsDisposed)
+									{
+										Text = text;
+									}
+								}), value);
 						}
-						else
+						catch(ObjectDisposedException)
 						{
-							Text = value;
 						}
 					}
-					catch { }
+					else
+					{
+						Text = value;
+					}
 				}
 			}
 		}
 
-		/// <summary>
-		/// Determines if action can be cancelled.
-		/// </summary>
-		/// <value></value>
+		/// <summary>Determines if action can be cancelled.</summary>
 		public bool CanCancel
 		{
 			get { return _canCancel; }
@@ -159,55 +178,64 @@
 			{
 				if(!IsDisposed)
 				{
-					try
+					if(InvokeRequired)
 					{
-						if(InvokeRequired)
+						try
 						{
-							Invoke(new Action<bool>(SetCanCancel), value);
+							BeginInvoke(new Action<bool>(SetCanCancel), value);
 						}
-						else
+						catch(ObjectDisposedException)
 						{
-							SetCanCancel(value);
 						}
 					}
-					catch { }
+					else
+					{
+						SetCanCancel(value);
+					}
 				}
 			}
 		}
 
-		/// <summary>
-		/// Sets the can cancel.
-		/// </summary>
+		/// <summary>Returns <c>true</c> if operation must be terminated.</summary>
+		public bool IsCancelRequested
+		{
+			get { return _isCancelRequested; }
+		}
+
+		/// <summary>Sets the can cancel.</summary>
 		/// <param name="value">if set to <c>true</c> [value].</param>
 		private void SetCanCancel(bool value)
 		{
-			if(_canCancel != value)
+			if(!IsDisposed)
 			{
-				_btnCancel.Enabled = value;
-				_canCancel = value;
+				if(_canCancel != value)
+				{
+					_btnCancel.Enabled = value;
+					_canCancel = value;
+				}
 			}
 		}
 
-		/// <summary>
-		/// Sets the name of currently executed step.
-		/// </summary>
+		/// <summary>Sets the name of currently executed step.</summary>
 		/// <param name="action">Step name.</param>
 		public void SetAction(string action)
 		{
 			if(!IsDisposed)
 			{
-				try
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						Invoke(new Action<string>(SetAction), action);
+						BeginInvoke(new Action<string>(SetAction), action);
 					}
-					else
+					catch(ObjectDisposedException)
 					{
-						_lblAction.Text = action;
 					}
 				}
-				catch { }
+				else
+				{
+					_lblAction.Text = action;
+				}
 			}
 		}
 
@@ -220,21 +248,23 @@
 		{
 			if(!IsDisposed)
 			{
-				try
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						Invoke(new Action<int, int>(SetProgressRange), min, max);
+						BeginInvoke(new Action<int, int>(SetProgressRange), min, max);
 					}
-					else
+					catch(ObjectDisposedException)
 					{
-						_progressBar.Style = ProgressBarStyle.Continuous;
-						_progressBar.Minimum = min;
-						_progressBar.Maximum = max;
-						UpdateWin7ProgressBar();
 					}
 				}
-				catch { }
+				else
+				{
+					_progressBar.Style = ProgressBarStyle.Continuous;
+					_progressBar.Minimum = min;
+					_progressBar.Maximum = max;
+					UpdateWin7ProgressBar();
+				}
 			}
 		}
 
@@ -248,21 +278,23 @@
 		{
 			if(!IsDisposed)
 			{
-				try
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						Invoke(new Action<int, int, string>(SetProgressRange), min, max, action);
+						BeginInvoke(new Action<int, int, string>(SetProgressRange), min, max, action);
 					}
-					else
+					catch(ObjectDisposedException)
 					{
-						_progressBar.Minimum = min;
-						_progressBar.Maximum = max;
-						_lblAction.Text = action;
-						UpdateWin7ProgressBar();
 					}
 				}
-				catch { }
+				else
+				{
+					_progressBar.Minimum = min;
+					_progressBar.Maximum = max;
+					_lblAction.Text = action;
+					UpdateWin7ProgressBar();
+				}
 			}
 		}
 
@@ -274,19 +306,21 @@
 		{
 			if(!IsDisposed)
 			{
-				try
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						Invoke(new Action<int>(SetProgress), val);
+						BeginInvoke(new Action<int>(SetProgress), val);
 					}
-					else
+					catch(ObjectDisposedException)
 					{
-						_progressBar.Value = val;
-						UpdateWin7ProgressBar();
 					}
 				}
-				catch { }
+				else
+				{
+					_progressBar.Value = val;
+					UpdateWin7ProgressBar();
+				}
 			}
 		}
 
@@ -299,43 +333,47 @@
 		{
 			if(!IsDisposed)
 			{
-				try
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						Invoke(new Action<int, string>(SetProgress), val, action);
+						BeginInvoke(new Action<int, string>(SetProgress), val, action);
 					}
-					else
+					catch(ObjectDisposedException)
 					{
-						_progressBar.Value = val;
-						_lblAction.Text = action;
-						UpdateWin7ProgressBar();
 					}
 				}
-				catch { }
+				else
+				{
+					_progressBar.Value = val;
+					_lblAction.Text = action;
+					UpdateWin7ProgressBar();
+				}
 			}
 		}
 
 		/// <summary>
 		/// Sets progress as unknown.
 		/// </summary>
-		public void SetProgressIntermediate()
+		public void SetProgressIndeterminate()
 		{
 			if(!IsDisposed)
 			{
-				try
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						Invoke(new Action(SetProgressIntermediate));
+						BeginInvoke(new Action(SetProgressIndeterminate));
 					}
-					else
+					catch(ObjectDisposedException)
 					{
-						_progressBar.Style = ProgressBarStyle.Marquee;
-						UpdateWin7ProgressBar();
 					}
 				}
-				catch { }
+				else
+				{
+					_progressBar.Style = ProgressBarStyle.Marquee;
+					UpdateWin7ProgressBar();
+				}
 			}
 		}
 
@@ -347,27 +385,29 @@
 			_context = null;
 			if(!IsDisposed)
 			{
-				try
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						Invoke(new Action(ProcessCompleted));
+						BeginInvoke(new Action(ProcessCompleted));
 					}
-					else
+					catch(ObjectDisposedException)
 					{
-						StopWin7ProgressBar();
-						Close();
 					}
 				}
-				catch { }
+				else
+				{
+					StopWin7ProgressBar();
+					Close();
+				}
 			}
 		}
 
 		private void OnCancelClick(object sender, EventArgs e)
 		{
 			_btnCancel.Enabled = false;
-			var handler = Cancelled;
-			if(handler != null) handler(this, EventArgs.Empty);
+			_isCancelRequested = true;
+			OnCanceled();
 		}
 	}
 }

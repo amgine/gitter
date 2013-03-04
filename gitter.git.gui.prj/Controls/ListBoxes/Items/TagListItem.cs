@@ -1,20 +1,21 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="Tag"/> object.</summary>
-	public sealed class TagListItem : ReferenceListItemBase<Tag>
+	public class TagListItem : ReferenceListItemBase<Tag>
 	{
+		#region Static
+
 		private static readonly Bitmap ImgTag = CachedResources.Bitmaps["ImgTag"];
 		private static readonly Bitmap ImgTagAnnotated = CachedResources.Bitmaps["ImgTagAnnotated"];
+
+		#endregion
 
 		#region .ctor
 
@@ -29,6 +30,8 @@
 
 		#endregion
 
+		#region Overrides
+
 		protected override Image Image
 		{
 			get { return (DataContext.TagType == TagType.Annotated) ? ImgTagAnnotated : ImgTag; }
@@ -36,9 +39,11 @@
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			var mnu = new TagMenu(DataContext);
-			Utility.MarkDropDownForAutoDispose(mnu);
-			return mnu;
+			var menu = new TagMenu(DataContext);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
+
+		#endregion
 	}
 }

@@ -127,15 +127,15 @@
 		{
 			#region Static
 
-			private static readonly Color BACKGROUND		= MSVS2012DarkColors.SCROLLBAR_SPACING;
-			private static readonly Color ARROW_NORMAL		= Color.FromArgb(153, 153, 153);
+			private static readonly Color BACKGROUND		= MSVS2012LightColors.SCROLLBAR_SPACING;
+			private static readonly Color ARROW_NORMAL		= Color.FromArgb(134, 137, 153);
 			private static readonly Color ARROW_HOVER		= Color.FromArgb( 28, 151, 234);
 			private static readonly Color ARROW_PRESSED		= Color.FromArgb(  0, 122, 204);
-			private static readonly Color ARROW_DISABLED	= Color.FromArgb( 85,  85,  88);
-			private static readonly Color THUMB_NORMAL		= Color.FromArgb(104, 104, 104);
-			private static readonly Color THUMB_HOVER		= Color.FromArgb(158, 158, 158);
-			private static readonly Color THUMB_PRESSED		= Color.FromArgb(239, 235, 239);
-			private static readonly Color THUMB_DISABLED	= Color.FromArgb( 85,  85,  88);
+			private static readonly Color ARROW_DISABLED	= Color.FromArgb(202, 203, 211);
+			private static readonly Color THUMB_NORMAL		= Color.FromArgb(208, 209, 215);
+			private static readonly Color THUMB_HOVER		= Color.FromArgb(136, 136, 136);
+			private static readonly Color THUMB_PRESSED		= Color.FromArgb(106, 106, 106);
+			private static readonly Color THUMB_DISABLED	= Color.FromArgb(202, 203, 211);
 
 			#endregion
 

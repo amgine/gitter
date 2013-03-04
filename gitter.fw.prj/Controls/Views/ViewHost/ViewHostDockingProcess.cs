@@ -5,6 +5,8 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Native;
+
 	sealed class ViewHostDockingProcess : IMouseDragProcess, IDisposable
 	{
 		#region Data
@@ -60,13 +62,13 @@
 			hWnd = hWnd1;
 			while(hWnd != IntPtr.Zero)
 			{
-				hWnd = NativeMethods.GetWindow(hWnd, GW_HWNDNEXT);
+				hWnd = User32.GetWindow(hWnd, GW_HWNDNEXT);
 				if(hWnd == hWnd2) return -1;
 			}
 			hWnd = hWnd1;
 			while(hWnd != IntPtr.Zero)
 			{
-				hWnd = NativeMethods.GetWindow(hWnd, GW_HWNDPREV);
+				hWnd = User32.GetWindow(hWnd, GW_HWNDPREV);
 				if(hWnd == hWnd2) return 1;
 			}
 			return 0;

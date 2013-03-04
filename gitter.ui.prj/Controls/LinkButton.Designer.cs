@@ -53,7 +53,7 @@
 			this._lblText.TabIndex = 1;
 			this._lblText.Text = "[TEXT]";
 			this._lblText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this._lblText.Click += new System.EventHandler(this._lblText_Click);
+			this._lblText.Click += new System.EventHandler(this.OnTextLabelClick);
 			this._lblText.MouseEnter += new System.EventHandler(this.OnInteractivePartMouseEnter);
 			this._lblText.MouseLeave += new System.EventHandler(this.OnInteractivePartMouseLeave);
 			// 
@@ -69,7 +69,7 @@
 			this._picImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
 			this._picImage.TabIndex = 0;
 			this._picImage.TabStop = false;
-			this._picImage.Click += new System.EventHandler(this._picImage_Click);
+			this._picImage.Click += new System.EventHandler(this.OnImageClick);
 			this._picImage.MouseEnter += new System.EventHandler(this.OnInteractivePartMouseEnter);
 			this._picImage.MouseLeave += new System.EventHandler(this.OnInteractivePartMouseLeave);
 			// 
