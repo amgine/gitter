@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Globalization;
 	using System.Collections.Generic;
 
 	using gitter.Framework;
@@ -209,7 +210,7 @@
 					new FetchParameters());
 			}
 			Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
-			Repository.InvokeUpdated();
+			Repository.OnUpdated();
 			var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 			var changes = RefsDiff.Calculate(state1, state2);
 			OnFetchCompleted(null, changes);
@@ -236,7 +237,7 @@
 						{
 							monitor.SetAction(Resources.StrRefreshingReferences.AddEllipsis());
 							Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
-							repository.InvokeUpdated();
+							repository.OnUpdated();
 							var state2 = RefsState.Capture(repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 							var changes = RefsDiff.Calculate(state1, state2);
 							OnFetchCompleted(null, changes);
@@ -269,7 +270,7 @@
 				finally
 				{
 					Repository.Refs.Refresh();
-					Repository.InvokeUpdated();
+					Repository.OnUpdated();
 				}
 			}
 			var state2 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
@@ -310,7 +311,7 @@
 						}
 						finally
 						{
-							repository.InvokeUpdated();
+							repository.OnUpdated();
 						}
 						var state2 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
 						var changes = RefsDiff.Calculate(state1, state2);
@@ -418,7 +419,7 @@
 					}
 				},
 				Resources.StrPush,
-				string.Format(Resources.StrSendingDataTo.AddEllipsis(), url),
+				string.Format(CultureInfo.InvariantCulture, Resources.StrSendingDataTo.AddEllipsis(), url),
 				true);
 		}
 

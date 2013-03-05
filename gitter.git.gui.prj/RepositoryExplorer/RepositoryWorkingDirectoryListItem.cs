@@ -138,7 +138,7 @@
 		private static void OnItemActivated(object sender, BoundItemActivatedEventArgs<TreeItem> e)
 		{
 			var item = e.Object;
-			if(item.Type == TreeItemType.Blob)
+			if(item.ItemType == TreeItemType.Blob)
 			{
 				Utility.OpenUrl(item.FullPath);
 			}

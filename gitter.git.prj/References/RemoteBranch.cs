@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Globalization;
 
 	using Resources = gitter.Git.Properties.Resources;
 
@@ -85,7 +86,7 @@
 			Verify.State.IsNotDeleted(this);
 
 			var remote = Remote;
-			if(remote == null) throw new GitException(string.Format("Unable to find remote for branch '{0}'", Name));
+			if(remote == null) throw new GitException(string.Format(CultureInfo.InvariantCulture, "Unable to find remote for branch '{0}'", Name));
 			string branchName = Name.Substring(remote.Name.Length + 1);
 			string remoteRefName = GitConstants.LocalBranchPrefix + branchName;
 			using(Repository.Monitor.BlockNotifications(

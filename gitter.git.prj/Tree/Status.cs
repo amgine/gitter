@@ -826,7 +826,7 @@
 		/// <param name="patchSource">Patch source.</param>
 		/// <param name="applyTo">Patch target.</param>
 		/// <param name="reverse">Reverse patches.</param>
-		public void ApplyPatch(IPatchSource patchSource, ApplyPatchTo applyTo, bool reverse = false)
+		public void ApplyPatch(IPatchSource patchSource, ApplyPatchTo applyTo, bool reverse)
 		{
 			Verify.Argument.IsNotNull(patchSource, "patchSource");
 
@@ -852,7 +852,7 @@
 		/// <param name="patchSources">Patch sources.</param>
 		/// <param name="applyTo">Patch target.</param>
 		/// <param name="reverse">Reverse patches.</param>
-		public void ApplyPatches(IEnumerable<IPatchSource> patchSources, ApplyPatchTo applyTo, bool reverse = false)
+		public void ApplyPatches(IEnumerable<IPatchSource> patchSources, ApplyPatchTo applyTo, bool reverse)
 		{
 			Verify.Argument.IsNotNull(patchSources, "patchSources");
 
@@ -955,7 +955,7 @@
 				commit = currentBranch.Revision;
 				if(commit != oldHeadRev)
 				{
-					Repository.InvokeCommitCreated(commit);
+					Repository.OnCommitCreated(commit);
 				}
 			}
 			else
@@ -965,11 +965,11 @@
 				commit = Repository.Head.Revision;
 				if(commit != oldHeadRev)
 				{
-					Repository.InvokeCommitCreated(commit);
+					Repository.OnCommitCreated(commit);
 				}
 			}
 			Repository.Head.NotifyRelogRecordAdded();
-			Repository.InvokeStateChanged();
+			Repository.OnStateChanged();
 			Refresh();
 			return commit;
 		}

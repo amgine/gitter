@@ -6,7 +6,7 @@
 	using gitter.Framework.Services;
 
 	/// <summary>Committer/Author.</summary>
-	public sealed class User : GitLifeTimeNamedObject
+	public sealed class User : GitNamedObjectWithLifetime
 	{
 		#region Data
 

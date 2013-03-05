@@ -119,9 +119,12 @@
 			return _repository.Accessor.QueryDiff(parameters);
 		}
 
-		public override void Dispose()
+		protected override void Dispose(bool disposing)
 		{
-			_repository.Status.Changed -= OnStatusChanged;
+			if(disposing)
+			{
+				_repository.Status.Changed -= OnStatusChanged;
+			}
 		}
 
 		public override string ToString()

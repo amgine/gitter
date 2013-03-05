@@ -2,21 +2,36 @@
 {
 	public sealed class DiffOptions
 	{
-		internal static readonly DiffOptions Default = GetDefault();
+		#region Static
 
-		public static DiffOptions GetDefault()
+		internal static readonly DiffOptions Default = CreateDefault();
+
+		public static DiffOptions CreateDefault()
 		{
 			return new DiffOptions();
 		}
 
+		#endregion
+
+		#region Data
+
 		private int _context;
-		private bool _patience;
+		private bool _usePatienceAlgorithm;
 		private bool _ignoreWhitespace;
+		private bool _binary;
+
+		#endregion
+
+		#region .ctor
 
 		public DiffOptions()
 		{
 			_context = 3;
 		}
+
+		#endregion
+
+		#region Properties
 
 		public int Context
 		{
@@ -26,8 +41,8 @@
 
 		public bool UsePatienceAlgorithm
 		{
-			get { return _patience; }
-			set { _patience = value; }
+			get { return _usePatienceAlgorithm; }
+			set { _usePatienceAlgorithm = value; }
 		}
 
 		public bool IgnoreWhitespace
@@ -35,5 +50,13 @@
 			get { return _ignoreWhitespace; }
 			set { _ignoreWhitespace = value; }
 		}
+
+		public bool Binary
+		{
+			get { return _binary; }
+			set { _binary = value; }
+		}
+
+		#endregion
 	}
 }

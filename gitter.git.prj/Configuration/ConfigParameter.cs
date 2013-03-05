@@ -1,13 +1,14 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Globalization;
 
 	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>git configuration parameter.</summary>
-	public sealed class ConfigParameter : GitLifeTimeNamedObject
+	public sealed class ConfigParameter : GitNamedObjectWithLifetime
 	{
 		#region Events
 
@@ -208,7 +209,7 @@
 
 		public override string ToString()
 		{
-			return string.Format("{0} = {1}", Name, _value);
+			return string.Format(CultureInfo.InvariantCulture, "{0} = {1}", Name, _value);
 		}
 	}
 }

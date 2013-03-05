@@ -59,7 +59,7 @@
 		/// <summary>Repository deleted.</summary>
 		public event EventHandler Deleted;
 
-		internal void InvokeStateChanged()
+		internal void OnStateChanged()
 		{
 			var state = GetState();
 			if(_state != state)
@@ -70,24 +70,24 @@
 			}
 		}
 
-		public void InvokeUserIdentityChanged()
+		public void OnUserIdentityChanged()
 		{
 			UpdateUserIdentity(true);
 		}
 
-		internal void InvokeUpdated()
+		internal void OnUpdated()
 		{
 			var handler = Updated;
 			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
-		internal void InvokeCommitCreated(Revision revision)
+		internal void OnCommitCreated(Revision revision)
 		{
 			var handler = CommitCreated;
 			if(handler != null) handler(this, new RevisionEventArgs(revision));
 		}
 
-		internal void InvokeDeleted()
+		internal void OnDeleted()
 		{
 			var handler = Deleted;
 			if(handler != null) handler(this, EventArgs.Empty);
@@ -743,8 +743,8 @@
 					_refs.RefreshBranches();
 					_head.Refresh();
 					_status.Refresh();
-					InvokeStateChanged();
-					InvokeUpdated();
+					OnStateChanged();
+					OnUpdated();
 				}
 			}
 		}

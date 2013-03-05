@@ -3114,6 +3114,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Binary.
+        /// </summary>
+        internal static string StrBinary {
+            get {
+                return ResourceManager.GetString("StrBinary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Blame.
         /// </summary>
         internal static string StrBlame {

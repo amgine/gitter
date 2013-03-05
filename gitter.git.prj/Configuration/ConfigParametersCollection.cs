@@ -203,7 +203,7 @@
 			}
 			finally
 			{
-				Repository.InvokeUserIdentityChanged();
+				Repository.OnUserIdentityChanged();
 			}
 		}
 

@@ -9,7 +9,7 @@
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>Symbolic reference.</summary>
-	public class Reference : GitLifeTimeNamedObject, IRevisionPointer
+	public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 	{
 		#region Data
 
@@ -157,13 +157,13 @@
 			*/
 			if(string.IsNullOrWhiteSpace(name))
 			{
-				errorMessage = string.Format(Resources.ErrNameCannotBeEmpty, Resources.StrReference);
+				errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeEmpty, Resources.StrReference);
 				return false;
 			}
 			name = name.Trim();
 			if(name[0] == '-')
 			{
-				errorMessage = string.Format(Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, "-");
+				errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, "-");
 				return false;
 			}
 			for(int i = 0; i < name.Length; ++i)
@@ -173,7 +173,7 @@
 				var cint = (int)c;
 				if(cint < 32 || c == 127)
 				{
-					errorMessage = string.Format(Resources.ErrNameCannotContainASCIIControlCharacters, Resources.StrReference);
+					errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainASCIIControlCharacters, Resources.StrReference);
 					return false;
 				}
 				switch(c)
@@ -181,24 +181,24 @@
 					case '/':
 						if(i == 0)
 						{
-							errorMessage = string.Format(Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, "/");
+							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, "/");
 							return false;
 						}
 						else if(lastchar)
 						{
-							errorMessage = string.Format(Resources.ErrNameCannotEndWithCharacter, Resources.StrReference, "/");
+							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotEndWithCharacter, Resources.StrReference, "/");
 							return false;
 						}
 						else
 						{
 							if(name[i + 1] == '.')
 							{
-								errorMessage = string.Format(Resources.ErrSlashSeparatedComponentCannotBeginWithCharacter, ".");
+								errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrSlashSeparatedComponentCannotBeginWithCharacter, ".");
 								return false;
 							}
 							if(name[i + 1] == '/')
 							{
-								errorMessage = string.Format(Resources.ErrNameCannotContainSequence, Resources.StrReference, "//");
+								errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainSequence, Resources.StrReference, "//");
 								return false;
 							}
 						}
@@ -206,29 +206,29 @@
 					case '.':
 						if(i == 0)
 						{
-							errorMessage = string.Format(Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, ".");
+							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, ".");
 							return false;
 						}
 						if(lastchar)
 						{
-							errorMessage = string.Format(Resources.ErrNameCannotEndWithCharacter, Resources.StrReference, ".");
+							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotEndWithCharacter, Resources.StrReference, ".");
 							return false;
 						}
 						if(!lastchar && name[i + 1] == '.')
 						{
-							errorMessage = string.Format(Resources.ErrNameCannotContainSequence, Resources.StrReference, "..");
+							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainSequence, Resources.StrReference, "..");
 							return false;
 						}
 						if(i == name.Length - 5 && name.IndexOf("lock", i + 1, 4) != -1)
 						{
-							errorMessage = string.Format(Resources.ErrNameCannotEndWithSequence, Resources.StrReference, ".lock");
+							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotEndWithSequence, Resources.StrReference, ".lock");
 							return false;
 						}
 						break;
 					case '@':
 						if(!lastchar && (name[i + 1] == '{'))
 						{
-							errorMessage = string.Format(Resources.ErrNameCannotContainSequence, Resources.StrReference, "@{");
+							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainSequence, Resources.StrReference, "@{");
 							return false;
 						}
 						break;
@@ -240,7 +240,7 @@
 					case '?':
 					case '*':
 					case '[':
-						errorMessage = string.Format(Resources.ErrNameCannotContainCharacter, Resources.StrReference, c);
+						errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainCharacter, Resources.StrReference, c);
 						return false;
 				}
 			}

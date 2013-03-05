@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Drawing;
+	using System.Globalization;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -205,7 +206,7 @@
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					return measureEventArgs.MeasureText(DataContext.Id.ToString());
+					return measureEventArgs.MeasureText(DataContext.Id.ToString(CultureInfo.InvariantCulture));
 				case ColumnId.Name:
 					return measureEventArgs.MeasureText(DataContext.Name);
 				case ColumnId.Description:
@@ -236,7 +237,7 @@
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Id:
-					paintEventArgs.PaintText(DataContext.Id.ToString());
+					paintEventArgs.PaintText(DataContext.Id.ToString(CultureInfo.InvariantCulture));
 					break;
 				case ColumnId.Name:
 					paintEventArgs.PaintText(DataContext.Name);
@@ -257,14 +258,7 @@
 					VersionUpdatedOnColumn.OnPaintSubItem(paintEventArgs, DataContext.UpdatedOn);
 					break;
 				case ColumnId.DueDate:
-					if(DataContext.DueDate.HasValue)
-					{
-						VersionDueDateColumn.OnPaintSubItem(paintEventArgs, DataContext.DueDate.Value);
-					}
-					else
-					{
-						paintEventArgs.PaintText(Resources.StrsUnassigned.SurroundWith('<', '>'), SystemBrushes.GrayText);
-					}
+					RedmineGuiUtility.PaintOptionalContent(DataContext.DueDate, paintEventArgs);
 					break;
 			}
 		}

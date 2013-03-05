@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Globalization;
 	using System.Collections.Generic;
 
 	using gitter.Framework;
@@ -10,7 +11,7 @@
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>git remote repository object.</summary>
-	public sealed class Remote : GitLifeTimeNamedObject
+	public sealed class Remote : GitNamedObjectWithLifetime
 	{
 		#region Events
 
@@ -368,7 +369,7 @@
 				{
 					p.Value = strvalue;
 				}
-				else if(strvalue != "")
+				else if(strvalue.Length == 0)
 				{
 					Repository.Configuration.SetValue(pname, strvalue);
 				}
@@ -410,7 +411,7 @@
 			if(fetchedSomething)
 			{
 				Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
-				Repository.InvokeUpdated();
+				Repository.OnUpdated();
 				var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 				var changes = RefsDiff.Calculate(state1, state2);
 				Repository.Remotes.OnFetchCompleted(this, changes);
@@ -449,7 +450,7 @@
 					{
 						monitor.SetAction(Resources.StrRefreshingReferences.AddEllipsis());
 						Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
-						repository.InvokeUpdated();
+						repository.OnUpdated();
 						var state2 = RefsState.Capture(repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
 						var changes = RefsDiff.Calculate(state1, state2);
 						repository.Remotes.OnFetchCompleted(this, changes);
@@ -459,8 +460,8 @@
 						repository.Remotes.OnFetchCompleted(this, new ReferenceChange[0]);
 					}
 				},
-				string.Format(Resources.StrFetch, Name),
-				string.Format(Resources.StrFetchingDataFrom, Name),
+				string.Format(CultureInfo.InvariantCulture, Resources.StrFetch, Name),
+				string.Format(CultureInfo.InvariantCulture, Resources.StrFetchingDataFrom, Name),
 				true);
 		}
 
@@ -483,7 +484,7 @@
 			finally
 			{
 				Repository.Refs.Refresh();
-				Repository.InvokeUpdated();
+				Repository.OnUpdated();
 			}
 			var state2 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
 			var changes = RefsDiff.Calculate(state1, state2);
@@ -526,14 +527,14 @@
 					}
 					finally
 					{
-						repository.InvokeUpdated();
+						repository.OnUpdated();
 					}
 					var state2 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
 					var changes = RefsDiff.Calculate(state1, state2);
 					repository.Remotes.OnPullCompleted(this, changes);
 				},
-				string.Format(Resources.StrPull, Name),
-				string.Format(Resources.StrFetchingDataFrom, Name),
+				string.Format(CultureInfo.InvariantCulture, Resources.StrPull, Name),
+				string.Format(CultureInfo.InvariantCulture, Resources.StrFetchingDataFrom, Name),
 				true);
 		}
 
@@ -623,8 +624,8 @@
 						Repository.Refs.Remotes.Refresh();
 					}
 				},
-				string.Format(Resources.StrPush, Name),
-				string.Format(Resources.StrSendingDataTo.AddEllipsis(), Name),
+				string.Format(CultureInfo.InvariantCulture, Resources.StrPush, Name),
+				string.Format(CultureInfo.InvariantCulture, Resources.StrSendingDataTo.AddEllipsis(), Name),
 				true);
 		}
 

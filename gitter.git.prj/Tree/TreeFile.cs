@@ -34,7 +34,7 @@
 
 		#endregion
 
-		public override TreeItemType Type
+		public override TreeItemType ItemType
 		{
 			get { return TreeItemType.Blob; }
 		}

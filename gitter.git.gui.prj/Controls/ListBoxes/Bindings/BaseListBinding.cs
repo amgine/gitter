@@ -7,7 +7,7 @@
 	using gitter.Framework.Controls;
 
 	public abstract class BaseListBinding<TObject, TEventArgs> : IDisposable
-		where TObject : GitLifeTimeNamedObject
+		where TObject : GitNamedObjectWithLifetime
 		where TEventArgs : ObjectEventArgs<TObject>
 	{
 		#region Data

@@ -8,7 +8,7 @@
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>Git submodule.</summary>
-	public sealed class Submodule : GitLifeTimeNamedObject
+	public sealed class Submodule : GitNamedObjectWithLifetime
 	{
 		#region Data
 

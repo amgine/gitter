@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git
 {
 	using System;
+	using System.Globalization;
 	using System.Collections.Generic;
 
 	using gitter.Framework;
@@ -307,7 +308,7 @@
 					break;
 				default:
 					throw new ApplicationException(
-						string.Format("Unknown ConfigFile value: {0}", _configFile));
+						string.Format(CultureInfo.InvariantCulture, "Unknown ConfigFile value: {0}", _configFile));
 			}
 
 			lock(SyncRoot)

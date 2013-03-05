@@ -110,7 +110,7 @@
 			try
 			{
 				repository.Accessor.CherryPick(new CherryPickParameters(list));
-				repository.InvokeUpdated();
+				repository.OnUpdated();
 				repository.Head.NotifyRelogRecordAdded();
 			}
 			catch(AutomaticCherryPickFailedException)
@@ -155,7 +155,7 @@
 						var branchTip = cb.Revision;
 						if(branchTip != rev)
 						{
-							repository.InvokeCommitCreated(branchTip);
+							repository.OnCommitCreated(branchTip);
 						}
 					}
 					else
@@ -164,7 +164,7 @@
 						var headRev = repository.Head.Revision;
 						if(headRev != rev)
 						{
-							repository.InvokeCommitCreated(headRev);
+							repository.OnCommitCreated(headRev);
 						}
 					}
 					repository.Head.NotifyRelogRecordAdded();
@@ -172,7 +172,7 @@
 			}
 			catch(GitException)
 			{
-				repository.InvokeStateChanged();
+				repository.OnStateChanged();
 				throw;
 			}
 			finally
@@ -253,14 +253,14 @@
 						var headRev = repository.Head.Revision;
 						if(headRev != rev)
 						{
-							repository.InvokeCommitCreated(headRev);
+							repository.OnCommitCreated(headRev);
 							repository.Head.NotifyRelogRecordAdded();
 						}
 					}
 				}
 				catch(GitException)
 				{
-					repository.InvokeStateChanged();
+					repository.OnStateChanged();
 					throw;
 				}
 				finally
@@ -308,14 +308,14 @@
 					var newHeadRev = repository.Head.Revision;
 					if(newHeadRev != oldHeadRev)
 					{
-						repository.InvokeUpdated();
+						repository.OnUpdated();
 						repository.Head.NotifyRelogRecordAdded();
 					}
 				}
 			}
 			catch(GitException)
 			{
-				repository.InvokeStateChanged();
+				repository.OnStateChanged();
 				throw;
 			}
 			finally
@@ -385,7 +385,7 @@
 					}
 					repository.Status.Refresh();
 				}
-				repository.InvokeUpdated();
+				repository.OnUpdated();
 			}
 		}
 

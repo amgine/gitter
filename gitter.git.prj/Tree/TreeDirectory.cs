@@ -158,7 +158,7 @@
 			get { return _commits; }
 		}
 
-		public override TreeItemType Type
+		public override TreeItemType ItemType
 		{
 			get { return TreeItemType.Tree; }
 		}

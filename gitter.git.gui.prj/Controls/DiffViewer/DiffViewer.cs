@@ -352,7 +352,7 @@
 				_loadedDiffSource = new WeakReference(diffSource);
 			}
 
-			LoadAsyncCore(diffSource, DiffOptions.GetDefault(), scrollpos);
+			LoadAsyncCore(diffSource, DiffOptions.CreateDefault(), scrollpos);
 		}
 
 		public void LoadAsync(IDiffSource diffSource, DiffOptions options)

@@ -19,14 +19,14 @@
 		public event EventHandler Attached;
 
 		/// <summary>Invokes <see cref="Detached"/> event.</summary>
-		private void InvokeDetached()
+		private void OnDetached()
 		{
 			var handler = Detached;
 			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
 		/// <summary>Invokes <see cref="Attached"/> event.</summary>
-		private void InvokeAttached()
+		private void OnAttached()
 		{
 			var handler = Attached;
 			if(handler != null) handler(this, EventArgs.Empty);
@@ -116,6 +116,8 @@
 		/// <returns>Valid pointer.</returns>
 		protected override IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
 		{
+			Verify.Argument.IsNotNull(pointer, "pointer");
+
 			switch(pointer.Type)
 			{
 				case ReferenceType.None:
@@ -163,11 +165,11 @@
 			{
 				if(detached)
 				{
-					InvokeDetached();
+					OnDetached();
 				}
 				else
 				{
-					InvokeAttached();
+					OnAttached();
 				}
 			}
 			if(branch != null)
@@ -237,7 +239,7 @@
 
 			Repository.Status.Refresh();
 			Repository.Submodules.Refresh();
-			Repository.InvokeStateChanged();
+			Repository.OnStateChanged();
 		}
 
 		/// <summary>Reset HEAD to <paramref name="pointer"/>.</summary>
@@ -314,7 +316,7 @@
 				}
 				catch(AutomaticMergeFailedException)
 				{
-					Repository.InvokeStateChanged();
+					Repository.OnStateChanged();
 					Repository.Status.Refresh();
 					throw;
 				}
@@ -332,14 +334,14 @@
 			var headRev = Revision;
 			if(noCommit)
 			{
-				Repository.InvokeStateChanged();
+				Repository.OnStateChanged();
 				Repository.Status.Refresh();
 			}
 			else
 			{
 				if(noFastForward || headRev != oldRev) //not fast-forwarded
 				{
-					Repository.InvokeCommitCreated(headRev);
+					Repository.OnCommitCreated(headRev);
 				}
 			}
 			NotifyRelogRecordAdded();
@@ -399,7 +401,7 @@
 				}
 				catch(AutomaticMergeFailedException)
 				{
-					Repository.InvokeStateChanged();
+					Repository.OnStateChanged();
 					Repository.Status.Refresh();
 					throw;
 				}
@@ -417,14 +419,14 @@
 			var headRev = Revision;
 			if(noCommit)
 			{
-				Repository.InvokeStateChanged();
+				Repository.OnStateChanged();
 				Repository.Status.Refresh();
 			}
 			else
 			{
 				if(noFastForward || !oldRevs.Contains(headRev)) //not fast-forwarded
 				{
-					Repository.InvokeCommitCreated(headRev);
+					Repository.OnCommitCreated(headRev);
 				}
 			}
 			NotifyRelogRecordAdded();

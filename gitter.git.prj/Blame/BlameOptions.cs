@@ -10,5 +10,9 @@
 		internal static readonly BlameOptions Default = new BlameOptions()
 		{
 		};
+
+		public BlameOptions()
+		{
+		}
 	}
 }

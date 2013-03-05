@@ -167,7 +167,7 @@
 	}
 
 	/// <summary>git named object with lifetime control.</summary>
-	public abstract class GitLifeTimeNamedObject : GitNamedObject
+	public abstract class GitNamedObjectWithLifetime : GitNamedObject
 	{
 		/// <summary>This object has been deleted.</summary>
 		public event EventHandler Deleted;
@@ -177,17 +177,17 @@
 
 		private bool _deleted;
 
-		/// <summary>Create <see cref="GitLifeTimeNamedObject"/>.</summary>
+		/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 		/// <param name="repository">Host repository.</param>
 		/// <param name="name">Object name.</param>
-		protected GitLifeTimeNamedObject(Repository repository, string name)
+		protected GitNamedObjectWithLifetime(Repository repository, string name)
 			: base(repository, name)
 		{
 		}
 
-		/// <summary>Create <see cref="GitLifeTimeNamedObject"/>.</summary>
+		/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 		/// <param name="name">Object name.</param>
-		protected GitLifeTimeNamedObject(string name)
+		protected GitNamedObjectWithLifetime(string name)
 			: base(name)
 		{
 		}
@@ -244,7 +244,7 @@
 
 		private bool _isDeleted;
 
-		/// <summary>Create <see cref="GitLifeTimeNamedObject"/>.</summary>
+		/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 		/// <param name="repository">Host repository.</param>
 		/// <param name="name">Object name.</param>
 		protected GitLifeTimeDynamicNamedObject(Repository repository)

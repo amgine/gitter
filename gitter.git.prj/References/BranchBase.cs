@@ -55,6 +55,8 @@
 		/// <returns>Valid pointer.</returns>
 		protected override IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
 		{
+			Verify.Argument.IsNotNull(pointer, "pointer");
+
 			return pointer.Dereference();
 		}
 

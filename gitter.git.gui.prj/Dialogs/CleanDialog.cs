@@ -215,7 +215,7 @@
 			_lstFilesToClear.Items.Clear();
 			foreach(var item in items)
 			{
-				if(item.Type == TreeItemType.Tree)
+				if(item.ItemType == TreeItemType.Tree)
 				{
 					_lstFilesToClear.Items.Add(new TreeDirectoryListItem(
 						(TreeDirectory)item, TreeDirectoryListItemType.ShowNothing));

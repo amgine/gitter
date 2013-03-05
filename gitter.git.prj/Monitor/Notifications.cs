@@ -75,7 +75,7 @@
 
 		public override bool Apply(Repository repository)
 		{
-			repository.InvokeDeleted();
+			repository.OnDeleted();
 			return true;
 		}
 	}
@@ -123,6 +123,11 @@
 		public WorktreeUpdatedNotification(string path)
 		{
 			_path = path;
+		}
+
+		public string Path
+		{
+			get { return _path; }
 		}
 
 		public override object NotificationType

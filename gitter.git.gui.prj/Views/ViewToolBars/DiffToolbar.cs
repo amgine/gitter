@@ -11,6 +11,13 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class DiffToolbar : ToolStrip
 	{
+		#region Constants
+
+		private const int MinimumContext = 0;
+		private const int MaximumContext = 9999;
+
+		#endregion
+
 		#region Data
 
 		private readonly DiffView _diffView;
@@ -18,6 +25,7 @@ namespace gitter.Git.Gui.Views
 		private readonly ToolStripDropDownButton _ddbOptions;
 		private readonly ToolStripMenuItem _mnuIgnoreWhitespace;
 		private readonly ToolStripMenuItem _mnuUsePatienceAlgorithm;
+		private readonly ToolStripMenuItem _mnuBinaryDiff;
 
 		#endregion
 
@@ -59,48 +67,63 @@ namespace gitter.Git.Gui.Views
 			Items.Add(_ddbOptions = new ToolStripDropDownButton(Resources.StrOptions, CachedResources.Bitmaps["ImgConfig"])
 				{
 				});
-			_ddbOptions.DropDownItems.Add(_mnuIgnoreWhitespace = new ToolStripMenuItem(Resources.StrsIgnoreWhitespace)
+			_ddbOptions.DropDownItems.Add(_mnuIgnoreWhitespace = new ToolStripMenuItem(Resources.StrsIgnoreWhitespace, null, OnIgnoreWhitespaceClick)
 				{
 					Checked = _diffView.DiffOptions.IgnoreWhitespace,
 				});
-			_ddbOptions.DropDownItems.Add(_mnuUsePatienceAlgorithm = new ToolStripMenuItem(Resources.StrsUsePatienceDiffAlgorithm)
+			_ddbOptions.DropDownItems.Add(_mnuUsePatienceAlgorithm = new ToolStripMenuItem(Resources.StrsUsePatienceDiffAlgorithm, null, OnUsePatienceAlgorithmClick)
 				{
 					Checked = _diffView.DiffOptions.UsePatienceAlgorithm,
 				});
+			_ddbOptions.DropDownItems.Add(_mnuBinaryDiff = new ToolStripMenuItem(Resources.StrBinary, null, OnBinaryClick)
+				{
+					Checked = _diffView.DiffOptions.Binary,
+				});
 
-			_contextTextBox.TextChanged += (sender, e) =>
-				{
-					int context;
-					if(int.TryParse(_contextTextBox.Text,
-						NumberStyles.None, CultureInfo.InvariantCulture, out context))
-					{
-						SetContext(context);
-					}
-				};
-			_contextTextBox.KeyPress += (sender, e) =>
-				{
-					e.Handled = !char.IsNumber(e.KeyChar);
-				};
-			_mnuIgnoreWhitespace.Click += (sender, e) =>
-				{
-					_diffView.DiffOptions.IgnoreWhitespace = !_diffView.DiffOptions.IgnoreWhitespace;
-					_mnuIgnoreWhitespace.Checked = _diffView.DiffOptions.IgnoreWhitespace;
-					_diffView.Reload();
-				};
-			_mnuUsePatienceAlgorithm.Click += (sender, e) =>
-				{
-					_diffView.DiffOptions.UsePatienceAlgorithm = !_diffView.DiffOptions.UsePatienceAlgorithm;
-					_mnuUsePatienceAlgorithm.Checked = _diffView.DiffOptions.UsePatienceAlgorithm;
-					_diffView.Reload();
-				};
+			_contextTextBox.TextChanged += OnContextTextChanged;
+			_contextTextBox.KeyPress += (sender, e) => e.Handled = !char.IsNumber(e.KeyChar);
+		}
+
+		private void OnContextTextChanged(object sender, EventArgs e)
+		{
+			int context;
+			if(int.TryParse(_contextTextBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out context))
+			{
+				SetContext(context);
+			}
+		}
+
+		private void OnIgnoreWhitespaceClick(object sender, EventArgs e)
+		{
+			_diffView.DiffOptions.IgnoreWhitespace = !_diffView.DiffOptions.IgnoreWhitespace;
+			_mnuIgnoreWhitespace.Checked = _diffView.DiffOptions.IgnoreWhitespace;
+			_diffView.Reload();
+		}
+
+		private void OnUsePatienceAlgorithmClick(object sender, EventArgs e)
+		{
+			_diffView.DiffOptions.UsePatienceAlgorithm = !_diffView.DiffOptions.UsePatienceAlgorithm;
+			_mnuUsePatienceAlgorithm.Checked = _diffView.DiffOptions.UsePatienceAlgorithm;
+			_diffView.Reload();
+		}
+
+		private void OnBinaryClick(object sender, EventArgs e)
+		{
+			_diffView.DiffOptions.Binary = !_diffView.DiffOptions.Binary;
+			_mnuBinaryDiff.Checked = _diffView.DiffOptions.Binary;
+			_diffView.Reload();
 		}
 
 		private void SetContext(int context)
 		{
-			if(context < 0)
-				context = 0;
-			if(context > 9999)
-				context = 9999;
+			if(context < MinimumContext)
+			{
+				context = MinimumContext;
+			}
+			else if(context > MaximumContext)
+			{
+				context = MaximumContext;
+			}
 			if(_diffView.DiffOptions.Context != context)
 			{
 				_diffView.DiffOptions.Context = context;
@@ -112,7 +135,7 @@ namespace gitter.Git.Gui.Views
 		private void IncrementContext()
 		{
 			var context = _diffView.DiffOptions.Context;
-			if(context == 9999) return;
+			if(context >= MaximumContext) return;
 			++context;
 			_contextTextBox.Text = context.ToString(CultureInfo.InvariantCulture);
 		}
@@ -120,7 +143,7 @@ namespace gitter.Git.Gui.Views
 		private void DecrementContext()
 		{
 			var context = _diffView.DiffOptions.Context;
-			if(context == 0) return;
+			if(context <= MinimumContext) return;
 			--context;
 			_contextTextBox.Text = context.ToString(CultureInfo.InvariantCulture);
 		}

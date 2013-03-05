@@ -10,7 +10,7 @@
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>Represents stashed state.</summary>
-	public sealed class StashedState : GitLifeTimeNamedObject, IRevisionPointer
+	public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 	{
 		#region Events
 

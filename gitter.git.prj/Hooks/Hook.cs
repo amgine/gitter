@@ -6,7 +6,7 @@
 	using System.Text;
 
 	/// <summary>Repository hook.</summary>
-	public sealed class Hook : GitLifeTimeNamedObject
+	public sealed class Hook : GitNamedObjectWithLifetime
 	{
 		#region Data
 

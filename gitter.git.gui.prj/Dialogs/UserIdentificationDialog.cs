@@ -176,7 +176,7 @@
 					}
 					if(_repository != null)
 					{
-						_repository.InvokeUserIdentityChanged();
+						_repository.OnUserIdentityChanged();
 					}
 				}
 				else

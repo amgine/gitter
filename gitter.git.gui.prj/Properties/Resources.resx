@@ -2565,4 +2565,7 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrSourceFileName" xml:space="preserve">
     <value>Source File Name</value>
   </data>
+  <data name="StrBinary" xml:space="preserve">
+    <value>Binary</value>
+  </data>
 </root>

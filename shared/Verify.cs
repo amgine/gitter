@@ -168,7 +168,7 @@ namespace gitter
 
 				if(value < 0)
 				{
-					throw new ArgumentOutOfRangeException("Must be non-negative.", parameterName);
+					throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 				}
 			}
 
@@ -188,7 +188,7 @@ namespace gitter
 
 				if(value < 0)
 				{
-					throw new ArgumentOutOfRangeException("Must be non-negative.", parameterName);
+					throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 				}
 			}
 
@@ -208,7 +208,7 @@ namespace gitter
 
 				if(value < 0)
 				{
-					throw new ArgumentOutOfRangeException("Must be non-negative.", parameterName);
+					throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 				}
 			}
 
@@ -228,7 +228,7 @@ namespace gitter
 
 				if(value < 1)
 				{
-					throw new ArgumentOutOfRangeException("Must be non-negative.", parameterName);
+					throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 				}
 			}
 
@@ -248,7 +248,7 @@ namespace gitter
 
 				if(value < 1)
 				{
-					throw new ArgumentOutOfRangeException("Must be non-negative.", parameterName);
+					throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 				}
 			}
 
@@ -268,7 +268,7 @@ namespace gitter
 
 				if(value < 1)
 				{
-					throw new ArgumentOutOfRangeException("Must be non-negative.", parameterName);
+					throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 				}
 			}
 

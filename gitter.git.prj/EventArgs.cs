@@ -180,14 +180,24 @@
 
 	public abstract class RemoteOperationCompletedEventArgs : EventArgs
 	{
+		#region Data
+
 		private readonly ReferenceChange[] _changes;
 		private readonly Remote _remote;
 
-		public RemoteOperationCompletedEventArgs(Remote remote, ReferenceChange[] changes)
+		#endregion
+
+		#region .ctor
+
+		protected RemoteOperationCompletedEventArgs(Remote remote, ReferenceChange[] changes)
 		{
 			_remote = remote;
 			_changes = changes;
 		}
+
+		#endregion
+
+		#region Properties
 
 		public Remote Remote
 		{
@@ -198,6 +208,8 @@
 		{
 			get { return _changes; }
 		}
+
+		#endregion
 	}
 
 	public class FetchCompletedEventArgs : RemoteOperationCompletedEventArgs

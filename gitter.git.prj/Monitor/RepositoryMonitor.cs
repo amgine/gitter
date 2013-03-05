@@ -12,6 +12,9 @@ namespace gitter.Git
 	/// <summary>Watches git repository and notifies about external changes.</summary>
 	public sealed class RepositoryMonitor : IDisposable
 	{
+		private const int _notificationDelayTime = 750;
+		private const int _unblockDelayTime = 750;
+
 		private readonly Repository _repository;
 		private readonly FileSystemWatcher _fswWorkDir;
 		private readonly FileSystemWatcher _fswGitDir;
@@ -30,8 +33,7 @@ namespace gitter.Git
 		private Thread _notificationThread;
 		private Thread _delayedNotificationThread;
 		private Thread _delayedUnblockingThread;
-		private const int _notificationDelayTime = 750;
-		private const int _unblockDelayTime = 750;
+		private bool _isDisposed;
 
 		private sealed class NotificationBlock
 		{
@@ -702,7 +704,7 @@ namespace gitter.Git
 			}
 		}
 
-		public void Shutdown()
+		internal void Shutdown()
 		{
 			_fswWorkDir.EnableRaisingEvents = false;
 			_fswWorkDir.Dispose();
@@ -716,31 +718,41 @@ namespace gitter.Git
 			_delayedNotifications.Clear();
 		}
 
-		#region IDisposable Members
+		#region IDisposable
+
+		public bool IsDisposed
+		{
+			get { return _isDisposed; }
+			private set { _isDisposed = value; }
+		}
 
 		public void Dispose()
 		{
-			_fswWorkDir.Dispose();
-			_fswGitDir.Dispose();
-			_evExit.Set();
-			_notificationThread = null;
-			_delayedNotificationThread = null;
-			_delayedUnblockingThread = null;
-			lock(_pendingNotifications)
+			if(!IsDisposed)
 			{
-				_pendingNotifications.Clear();
+				_fswWorkDir.Dispose();
+				_fswGitDir.Dispose();
+				_evExit.Set();
+				_notificationThread = null;
+				_delayedNotificationThread = null;
+				_delayedUnblockingThread = null;
+				lock(_pendingNotifications)
+				{
+					_pendingNotifications.Clear();
+				}
+				lock(_delayedNotifications)
+				{
+					_delayedNotifications.Clear();
+				}
+				lock(_delayedUnblocks)
+				{
+					_delayedUnblocks.Clear();
+				}
+				_evGotNotification.Close();
+				_evGotDelayedNotification.Close();
+				_evGotDelayedUnblock.Close();
+				IsDisposed = true;
 			}
-			lock(_delayedNotifications)
-			{
-				_delayedNotifications.Clear();
-			}
-			lock(_delayedUnblocks)
-			{
-				_delayedUnblocks.Clear();
-			}
-			_evGotNotification.Close();
-			_evGotDelayedNotification.Close();
-			_evGotDelayedUnblock.Close();
 		}
 
 		#endregion

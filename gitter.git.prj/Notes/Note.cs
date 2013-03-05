@@ -7,7 +7,7 @@
 	using gitter.Git.AccessLayer;
 
 	/// <summary>Additional commit description.</summary>
-	public sealed class Note : GitLifeTimeNamedObject
+	public sealed class Note : GitNamedObjectWithLifetime
 	{
 		#region Data
 

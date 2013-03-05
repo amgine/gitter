@@ -28,7 +28,7 @@
 			#if FW_4_5
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
-			public static void IsValidGitObject(GitLifeTimeNamedObject gitObject, Repository repository, string parameterName)
+			public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, Repository repository, string parameterName)
 			{
 				Assert.IsNotNull(repository);
 				Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -66,7 +66,7 @@
 			#if FW_4_5
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
-			public static void IsValidGitObject(GitLifeTimeNamedObject gitObject, string parameterName)
+			public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, string parameterName)
 			{
 				Assert.IsNeitherNullNorWhitespace(parameterName);
 

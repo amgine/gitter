@@ -2889,7 +2889,7 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(treeItem.Type == TreeItemType.Tree || treeItem.Status == FileStatus.Modified)
+				if(treeItem.ItemType == TreeItemType.Tree || treeItem.Status == FileStatus.Modified)
 				{
 					if(GitterApplication.MessageBoxService.Show(
 						parent,

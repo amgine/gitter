@@ -12,7 +12,7 @@
 	/// <typeparam name="TObject">The type of the object.</typeparam>
 	/// <typeparam name="TEventArgs">The type of the event args.</typeparam>
 	public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INotifyCollectionChanged, IEnumerable<TObject>
-		where TObject : GitLifeTimeNamedObject
+		where TObject : GitNamedObjectWithLifetime
 		where TEventArgs : ObjectEventArgs<TObject>
 	{
 		#region Data

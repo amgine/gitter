@@ -28,7 +28,7 @@
 			#if FW_4_5
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
-			public static void IsValidGitObject(GitLifeTimeNamedObject gitObject, Repository repository, string parameterName)
+			public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, Repository repository, string parameterName)
 			{
 				Assert.IsNotNull(repository);
 				Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -326,7 +326,7 @@
 			/// <exception cref="InvalidOperationException">
 			/// <paramref name="gitObject"/> is deleted.
 			/// </exception>
-			public static void IsNotDeleted(GitLifeTimeNamedObject gitObject)
+			public static void IsNotDeleted(GitNamedObjectWithLifetime gitObject)
 			{
 				Assert.IsNotNull(gitObject);
 

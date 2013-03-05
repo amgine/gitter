@@ -15,18 +15,18 @@
 		{
 			var data1 = item1.TreeItem;
 			var data2 = item2.TreeItem;
-			if(data1.Type != data2.Type)
+			if(data1.ItemType != data2.ItemType)
 			{
-				switch(data1.Type)
+				switch(data1.ItemType)
 				{
 					case TreeItemType.Blob:
 						return 1;
 					case TreeItemType.Commit:
-						if(data2.Type == TreeItemType.Blob)
+						if(data2.ItemType == TreeItemType.Blob)
 							return -1;
 						break;
 					case TreeItemType.Tree:
-						if(data2.Type == TreeItemType.Blob)
+						if(data2.ItemType == TreeItemType.Blob)
 							return -1;
 						break;
 				}
@@ -54,18 +54,18 @@
 		{
 			var data1 = item1.TreeItem;
 			var data2 = item2.TreeItem;
-			if(data1.Type != data2.Type)
+			if(data1.ItemType != data2.ItemType)
 			{
-				switch(data1.Type)
+				switch(data1.ItemType)
 				{
 					case TreeItemType.Blob:
 						return 1;
 					case TreeItemType.Commit:
-						if(data2.Type == TreeItemType.Blob)
+						if(data2.ItemType == TreeItemType.Blob)
 							return -1;
 						break;
 					case TreeItemType.Tree:
-						if(data2.Type == TreeItemType.Blob)
+						if(data2.ItemType == TreeItemType.Blob)
 							return -1;
 						break;
 				}

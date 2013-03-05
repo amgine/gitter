@@ -628,7 +628,7 @@
 					InvokeStashedStateCreated(res);
 				}
 
-				Repository.InvokeCommitCreated(res.Revision);
+				Repository.OnCommitCreated(res.Revision);
 				Repository.Status.Refresh();
 
 				return res;

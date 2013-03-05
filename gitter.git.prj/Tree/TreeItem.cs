@@ -11,7 +11,7 @@
 
 	using Resources = gitter.Git.Properties.Resources;
 
-	public abstract class TreeItem : GitLifeTimeNamedObject
+	public abstract class TreeItem : GitNamedObjectWithLifetime
 	{
 		#region Data
 
@@ -83,7 +83,7 @@
 			}
 		}
 
-		public abstract TreeItemType Type { get; }
+		public abstract TreeItemType ItemType { get; }
 
 		#region Methods
 
@@ -162,7 +162,7 @@
 			Verify.State.IsNotDeleted(this);
 			Verify.State.IsTrue((_stagedStatus & StagedStatus.Unstaged) == StagedStatus.Unstaged);
 
-			switch(Type)
+			switch(ItemType)
 			{
 				case TreeItemType.Tree:
 					RevertCore();

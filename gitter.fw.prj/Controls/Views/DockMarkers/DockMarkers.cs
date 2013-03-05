@@ -41,10 +41,8 @@
 			get { return _markers != null; }
 		}
 
-		/// <summary>
-		/// Shows markers to assist docking process.
-		/// </summary>
-		/// <param name="dockClient">Tool host which is being docked.</param>
+		/// <summary>Shows markers to assist docking process.</summary>
+		/// <param name="dockClient">View host which is being docked.</param>
 		public void Show(ViewHost dockClient)
 		{
 			Verify.Argument.IsNotNull(dockClient, "dockClient");
@@ -60,12 +58,8 @@
 			}
 		}
 
-		/// <summary>
-		/// Updates hover status of dock markers.
-		/// </summary>
-		/// <returns>
-		/// true if mouse is hovering docking button.
-		/// </returns>
+		/// <summary>Updates hover status of dock markers.</summary>
+		/// <returns>true if mouse is hovering docking button.</returns>
 		public bool UpdateHover()
 		{
 			return UpdateHover(Control.MousePosition);
