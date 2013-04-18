@@ -2568,4 +2568,7 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrBinary" xml:space="preserve">
     <value>Binary</value>
   </data>
+  <data name="StrsCommitLimit" xml:space="preserve">
+    <value>Commit limit</value>
+  </data>
 </root>

@@ -5852,6 +5852,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Commit limit.
+        /// </summary>
+        internal static string StrsCommitLimit {
+            get {
+                return ResourceManager.GetString("StrsCommitLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Continuing rebase.
         /// </summary>
         internal static string StrsContinuingRebase {

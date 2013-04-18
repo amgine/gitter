@@ -1,6 +1,7 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
+	using System.Text;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
@@ -26,6 +27,8 @@ namespace gitter.Git.Gui.Views
 		/// <param name="view">Host history view.</param>
 		public HistoryToolbar(HistoryView view)
 		{
+			Verify.Argument.IsNotNull(view, "view");
+
 			_view = view;
 
 			_view.LogOptionsChanged += OnLogOptionsChanged;
@@ -51,7 +54,7 @@ namespace gitter.Git.Gui.Views
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 					new ToolStripSeparator(),
-					_btnFilter = new ToolStripDropDownButton(Resources.StrFilter, CachedResources.Bitmaps["ImgFilter"])
+					_btnFilter = new ToolStripDropDownButton(GetFilterButtonText(), CachedResources.Bitmaps["ImgFilter"])
 						{
 							DropDown = new gitter.Framework.Controls.Popup(
 								_filterDropDown = new HistoryFilterDropDown()
@@ -59,6 +62,7 @@ namespace gitter.Git.Gui.Views
 									LogOptions = _view.LogOptions,
 									Repository = _view.Repository,
 								}),
+							ToolTipText = Resources.StrFilter,
 						},
 					_btnLimit = new ToolStripDropDownButton(string.Empty, null,
 						new ToolStripItem[]
@@ -69,7 +73,10 @@ namespace gitter.Git.Gui.Views
 							new ToolStripMenuItem("1000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 1000 },
 							new ToolStripMenuItem("2000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 2000 },
 							new ToolStripMenuItem("5000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 5000 },
-						}),
+						})
+						{
+							ToolTipText = Resources.StrsCommitLimit,
+						},
 					// right-aligned
 					_btnShowDetails = new ToolStripButton(Resources.StrAutoShowDiff, CachedResources.Bitmaps["ImgDiff"], OnShowDetailsButtonClick)
 						{
@@ -114,11 +121,61 @@ namespace gitter.Git.Gui.Views
 			_btnDateOrder.Checked = _view.LogOptions.Order == RevisionQueryOrder.DateOrder;
 			_btnTopoOrder.Checked = _view.LogOptions.Order == RevisionQueryOrder.TopoOrder;
 			UpdateLimitButtonText();
+			_btnFilter.Text = GetFilterButtonText();
 		}
 
 		private void OnLimitOptionClick(object sender, EventArgs e)
 		{
 			_view.LogOptions.MaxCount = (int)((ToolStripItem)sender).Tag;
+		}
+
+		private string GetFilterButtonText()
+		{
+			switch(_view.LogOptions.Filter)
+			{
+				case LogReferenceFilter.All:
+					return Resources.StrAll;
+				case LogReferenceFilter.HEAD:
+					return GitConstants.HEAD;
+				case LogReferenceFilter.Allowed:
+					StringBuilder sb = null;
+					if(_view.LogOptions.AllowedReferences != null)
+					{
+						int count = 0;
+						foreach(var reference in _view.LogOptions.AllowedReferences)
+						{
+							if(sb == null)
+							{
+								sb = new StringBuilder(reference.Name);
+							}
+							else
+							{
+								if(count < 3)
+								{
+									sb.Append(", ");
+									sb.Append(reference.Name);
+								}
+								else
+								{
+									sb.Append(", ...");
+									break;
+								}
+							}
+							++count;
+						}
+					}
+					if(sb == null)
+					{
+						return GitConstants.HEAD;
+					}
+					else
+					{
+						return sb.ToString();
+					}
+					break;
+				default:
+					return Resources.StrFilter;
+			}
 		}
 
 		private void UpdateLimitButtonText()
