@@ -124,7 +124,7 @@
 		/// <param name="revision">Commit to cherry-pick.</param>
 		public static void CherryPick(this IRevisionPointer revision)
 		{
-			CherryPick(revision, false);
+			CherryPick(revision, 0, false);
 		}
 
 		/// <summary>Performs a cherry-pick operation on <paramref name="revision"/>.</summary>
@@ -132,13 +132,28 @@
 		/// <param name="noCommit">Do not commit.</param>
 		public static void CherryPick(this IRevisionPointer revision, bool noCommit)
 		{
+			CherryPick(revision, 0, noCommit);
+		}
+
+		/// <summary>Performs a cherry-pick operation on <paramref name="revision"/>.</summary>
+		/// <param name="revision">Commit to cherry-pick.</param>
+		/// <param name="mainline">Mainline parent commit.</param>
+		/// <param name="noCommit">Do not commit.</param>
+		public static void CherryPick(this IRevisionPointer revision, int mainline, bool noCommit)
+		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsNotNegative(mainline, "mainline");
 			var repository = revision.Repository;
 			Verify.State.IsFalse(repository.Head.IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("cherry-pick"));
 
 			var rev = repository.Head.Revision;
 			var cb = repository.Head.Pointer as Branch;
+			var parameters = new CherryPickParameters(revision.Pointer, noCommit);
+			if(mainline > 0)
+			{
+				parameters.Mainline = mainline;
+			}
 			try
 			{
 				using(repository.Monitor.BlockNotifications(
@@ -147,8 +162,7 @@
 					RepositoryNotifications.BranchChanged,
 					RepositoryNotifications.Checkout))
 				{
-					repository.Accessor.CherryPick(
-						new CherryPickParameters(revision.Pointer, noCommit));
+					repository.Accessor.CherryPick(parameters);
 					if(cb != null)
 					{
 						cb.Refresh();
@@ -211,12 +225,18 @@
 
 		public static void Revert(this IRevisionPointer revision)
 		{
-			Revert(revision, false);
+			Revert(revision, 0, false);
 		}
 
 		public static void Revert(this IRevisionPointer revision, bool noCommit)
 		{
+			Revert(revision, 0, noCommit);
+		}
+
+		public static void Revert(this IRevisionPointer revision, int mainline, bool noCommit)
+		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsNotNegative(mainline, "mainline");
 
 			var repository = revision.Repository;
 
@@ -237,9 +257,14 @@
 				};
 			using(repository.Monitor.BlockNotifications(notifications))
 			{
+				var parameters = new RevertParameters(revision.Pointer, noCommit);
+				if(mainline > 0)
+				{
+					parameters.Mainline = mainline;
+				}
 				try
 				{
-					repository.Accessor.Revert(new RevertParameters(revision.Pointer, noCommit));
+					repository.Accessor.Revert(parameters);
 					if(!noCommit)
 					{
 						if(currentBranch != null)

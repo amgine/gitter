@@ -96,7 +96,12 @@
 				{
 					if(maxY >= ClientArea.Y)
 					{
-						Invalidate(new Rectangle(x + rect.X, y + rect.Y, rect.Width, rect.Height));
+						var bounds = new Rectangle(x + rect.X, y + rect.Y, rect.Width, rect.Height);
+						var clip = Rectangle.Intersect(bounds, ClientArea);
+						if(clip.Width > 0 && clip.Height > 0)
+						{
+							Invalidate(clip);
+						}
 					}
 					break;
 				}
@@ -124,7 +129,12 @@
 				{
 					if(maxY >= ClientArea.Y)
 					{
-						Invalidate(new Rectangle(ClientArea.X, y, ClientArea.Width, size.Height));
+						var bounds = new Rectangle(ClientArea.X, y, ClientArea.Width, size.Height);
+						var clip = Rectangle.Intersect(bounds, ClientArea);
+						if(clip.Width > 0 && clip.Height > 0)
+						{
+							Invalidate(clip);
+						}
 					}
 					break;
 				}
@@ -547,7 +557,6 @@
 			var clip = Rectangle.Intersect(clientArea, e.ClipRectangle);
 			int clippingEdge = clip.Bottom;
 			graphics.SetClip(clip);
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
 			graphics.TextRenderingHint = Utility.TextRenderingHint;
 			graphics.TextContrast = Utility.TextContrast;
 			for(int i = 0; i < _panels.Count; ++i)
@@ -563,8 +572,14 @@
 						if(maxY >= clip.Y && y < clippingEdge)
 						{
 							var bounds = new Rectangle(clientArea.X - HScrollPos, y, size.Width, size.Height);
-							panel.Paint(new FlowPanelPaintEventArgs(
-								graphics, clip, bounds));
+							var extBounds = bounds;
+							extBounds.Width = Math.Max(ClientArea.Width, size.Width);
+							var panelClip = Rectangle.Intersect(clip, extBounds);
+							if(panelClip.Width > 0 && panelClip.Height > 0)
+							{
+								graphics.SetClip(panelClip);
+								panel.Paint(new FlowPanelPaintEventArgs(graphics, panelClip, bounds));
+							}
 						}
 					}
 					else

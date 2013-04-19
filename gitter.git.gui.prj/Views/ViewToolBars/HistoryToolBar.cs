@@ -172,7 +172,6 @@ namespace gitter.Git.Gui.Views
 					{
 						return sb.ToString();
 					}
-					break;
 				default:
 					return Resources.StrFilter;
 			}

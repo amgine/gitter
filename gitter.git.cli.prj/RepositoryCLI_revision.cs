@@ -424,6 +424,10 @@
 			{
 				args.Add(RevertCommand.NoCommit());
 			}
+			if(parameters.Mainline > 0)
+			{
+				args.Add(RevertCommand.Mainline(parameters.Mainline));
+			}
 			foreach(var rev in parameters.Revisions)
 			{
 				args.Add(new CommandArgument(rev));
@@ -435,6 +439,30 @@
 			{
 				output.ThrowOnBadReturnCode();
 			}
+		}
+
+		/// <summary>Executes revert sequencer subcommand.</summary>
+		/// <param name="control">Operation to execute.</param>
+		public void Revert(RevertControl control)
+		{
+			RevertCommand command;
+			switch(control)
+			{
+				case RevertControl.Continue:
+					command = new RevertCommand(RevertCommand.Continue());
+					break;
+				case RevertControl.Quit:
+					command = new RevertCommand(RevertCommand.Quit());
+					break;
+				case RevertControl.Abort:
+					command = new RevertCommand(RevertCommand.Abort());
+					break;
+				default:
+					throw new ArgumentException("Unknown enum value.", "control");
+			}
+
+			var output = _executor.ExecCommand(command);
+			output.ThrowOnBadReturnCode();
 		}
 
 		#endregion
@@ -457,6 +485,30 @@
 			if(parameters.NoCommit)
 			{
 				args.Add(CherryPickCommand.NoCommit());
+			}
+			if(parameters.Mainline > 0)
+			{
+				args.Add(CherryPickCommand.Mainline(parameters.Mainline));
+			}
+			if(parameters.SignOff)
+			{
+				args.Add(CherryPickCommand.SignOff());
+			}
+			if(parameters.FastForward)
+			{
+				args.Add(CherryPickCommand.FastForward());
+			}
+			if(parameters.AllowEmpty)
+			{
+				args.Add(CherryPickCommand.AllowEmpty());
+			}
+			if(parameters.AllowEmptyMessage)
+			{
+				args.Add(CherryPickCommand.AllowEmptyMessage());
+			}
+			if(parameters.KeepRedundantCommits)
+			{
+				args.Add(CherryPickCommand.KeepRedundantCommits());
 			}
 			foreach(var rev in parameters.Revisions)
 			{
@@ -490,6 +542,30 @@
 				}
 				output.Throw();
 			}
+		}
+
+		/// <summary>Performs a cherry-pick operation.</summary>
+		/// <param name="control">Sequencer command to execute.</param>
+		public void CherryPick(CherryPickControl control)
+		{
+			CherryPickCommand command;
+			switch(control)
+			{
+				case CherryPickControl.Continue:
+					command = new CherryPickCommand(CherryPickCommand.Continue());
+					break;
+				case CherryPickControl.Quit:
+					command = new CherryPickCommand(CherryPickCommand.Quit());
+					break;
+				case CherryPickControl.Abort:
+					command = new CherryPickCommand(CherryPickCommand.Abort());
+					break;
+				default:
+					throw new ArgumentException("Unknown enum value.", "control");
+			}
+
+			var output = _executor.ExecCommand(command);
+			output.ThrowOnBadReturnCode();
 		}
 
 		#endregion

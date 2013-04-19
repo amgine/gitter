@@ -48,5 +48,17 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>Don't create commit.</summary>
 		public bool NoCommit { get; set; }
+
+		public bool SignOff { get; set; }
+
+		public int Mainline { get; set; }
+
+		public bool AllowEmpty { get; set; }
+
+		public bool AllowEmptyMessage { get; set; }
+
+		public bool FastForward { get; set; }
+
+		public bool KeepRedundantCommits { get; set; }
 	}
 }

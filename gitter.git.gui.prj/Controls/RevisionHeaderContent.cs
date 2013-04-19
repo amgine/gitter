@@ -779,7 +779,7 @@
 				{
 					foreach(var reference in _drawnReferences)
 					{
-						if(reference.Rectangle.Contains(x, y))
+						if(reference.Rectangle.X <= x && reference.Rectangle.Right > x)
 						{
 							var branch = reference.Reference as BranchBase;
 							if(branch != null)
@@ -925,6 +925,7 @@
 		private void OnContextMenuRequested(ContextMenuStrip contextMenu, Point position)
 		{
 			var handler = ContextMenuRequested;
+			contextMenu.Renderer = Style.ToolStripRenderer;
 			if(handler != null) handler(this, new ContentContextMenuEventArgs(contextMenu, position));
 		}
 
@@ -1159,7 +1160,7 @@
 				{
 					if(bounds.Width >= MinWidth + 70)
 					{
-						graphics.DrawImage(image, new Rectangle(bounds.Right - 65, bounds.Y + 5, 60, 60));
+						graphics.DrawImage(image, new Rectangle(bounds.Right - 64, bounds.Y + 4, 60, 60));
 					}
 				}
 			}

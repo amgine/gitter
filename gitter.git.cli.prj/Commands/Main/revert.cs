@@ -1,13 +1,14 @@
 ﻿namespace gitter.Git.AccessLayer.CLI
 {
+	using System.Globalization;
 	using System.Collections.Generic;
 
 	/// <summary>Revert an existing commit.</summary>
 	public sealed class RevertCommand : Command
 	{
-		public static CommandArgument Mainline(int n)
+		public static CommandArgument Mainline(int number)
 		{
-			return new CommandArgument("--mainline", n.ToString(), ' ');
+			return new CommandArgument("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
 		}
 
 		public static CommandArgument Edit()
@@ -28,6 +29,21 @@
 		public static CommandArgument SignOff()
 		{
 			return new CommandArgument("--signoff");
+		}
+
+		public static CommandArgument Continue()
+		{
+			return new CommandArgument("--continue");
+		}
+
+		public static CommandArgument Quit()
+		{
+			return new CommandArgument("--quit");
+		}
+
+		public static CommandArgument Abort()
+		{
+			return new CommandArgument("--abort");
 		}
 
 		public RevertCommand()

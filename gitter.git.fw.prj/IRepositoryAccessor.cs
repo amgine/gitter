@@ -102,6 +102,10 @@
 		/// <exception cref="T:gitter.Git.AutomaticCherryPickFailedException">Cherry-pick was not finished because of conflicts.</exception>
 		void CherryPick(CherryPickParameters parameters);
 
+		/// <summary>Performs a cherry-pick operation.</summary>
+		/// <param name="control">Sequencer command to execute.</param>
+		void CherryPick(CherryPickControl control);
+
 		/// <summary>Performs a revert operation.</summary>
 		/// <param name="parameters"><see cref="RevertParameters"/>.</param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
@@ -109,6 +113,19 @@
 		/// <exception cref="T:gitter.Git.CommitIsMergeException">Specified revision is a merge, revert cannot be performed on merges.</exception>
 		/// <exception cref="T:gitter.Git.HaveLocalChangesException">Dirty working directory, unable to revert.</exception>
 		void Revert(RevertParameters parameters);
+
+		/// <summary>Executes revert sequencer subcommand.</summary>
+		/// <param name="control">Operation to execute.</param>
+		void Revert(RevertControl control);
+
+		/// <summary>Forward-port local commits to the updated upstream head.</summary>
+		/// <param name="parameters"><see cref="RebaseParameters"/>.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		void Rebase(RebaseParameters parameters);
+
+		/// <summary>Control rebase process.</summary>
+		/// <param name="control">Rebase control option.</param>
+		void Rebase(RebaseControl control);
 
 		/// <summary>Prepare merge message.</summary>
 		/// <param name="parameters"><see cref="FormatMergeMessageParameters"/>.</param>
@@ -121,15 +138,6 @@
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		/// <exception cref="T:gitter.Git.AutomaticMergeFailedException">Merge resulted in conflicts.</exception>
 		void Merge(MergeParameters parameters);
-
-		/// <summary>Forward-port local commits to the updated upstream head.</summary>
-		/// <param name="parameters"><see cref="RebaseParameters"/>.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-		void Rebase(RebaseParameters parameters);
-
-		/// <summary>Control rebase process.</summary>
-		/// <param name="control">Rebase control option.</param>
-		void Rebase(RebaseControl control);
 
 		/// <summary>Get patch representing changes made by specified commit.</summary>
 		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>

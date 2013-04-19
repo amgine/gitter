@@ -1636,6 +1636,7 @@
 						}
 						if(menu != null)
 						{
+							menu.Renderer = Style.ToolStripRenderer;
 							menu.Show(this, p, ToolStripDropDownDirection.Default);
 						}
 					}
@@ -2037,6 +2038,7 @@
 						menu.Items.Add(new ToolStripMenuItem(
 							Resources.StrColumns.AddEllipsis(), null, (s, args) => StartColumnsDialog()));
 						Utility.MarkDropDownForAutoDispose(menu);
+						menu.Renderer = Style.ToolStripRenderer;
 						menu.Show(this, e.Location, ToolStripDropDownDirection.Default);
 					}
 					break;
@@ -2240,6 +2242,7 @@
 												item.GetContextMenu(args);
 											if(menu != null)
 											{
+												menu.Renderer = Style.ToolStripRenderer;
 												menu.Show(this, e.Location);
 											}
 										}
@@ -2255,6 +2258,7 @@
 												GetMultiselectContextMenu(args);
 											if(menu != null)
 											{
+												menu.Renderer = Style.ToolStripRenderer;
 												menu.Show(this, e.Location);
 											}
 										}
@@ -2351,6 +2355,7 @@
 					}
 					if(menu != null)
 					{
+						menu.Renderer = Style.ToolStripRenderer;
 						menu.Show(this, e.Location);
 					}
 				}

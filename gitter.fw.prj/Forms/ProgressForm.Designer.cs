@@ -88,7 +88,7 @@
 			this._pnlContainer.Controls.Add(this._progressBar);
 			this._pnlContainer.Location = new System.Drawing.Point(0, 0);
 			this._pnlContainer.Name = "_pnlContainer";
-			this._pnlContainer.Size = new System.Drawing.Size(389, 63);
+			this._pnlContainer.Size = new System.Drawing.Size(389, 65);
 			this._pnlContainer.TabIndex = 3;
 			// 
 			// ProgressForm

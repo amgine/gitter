@@ -131,19 +131,24 @@
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
-			bool enabled = true;
-			var rev = revision as Revision;
-			if(rev != null)
-				enabled = rev.Parents.Count <= 1;
+			bool isEnabled	= !revision.Repository.IsEmpty;
+			bool isMerge	= revision.Dereference().Parents.Count > 1;
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRevert"],
-				Text = Resources.StrRevert,
-				Enabled = enabled,
-				Tag = revision,
+				Image	= CachedResources.Bitmaps["ImgRevert"],
+				Text	= isMerge ? Resources.StrRevert.AddEllipsis() : Resources.StrRevert,
+				Enabled	= isEnabled,
+				Tag		= revision,
 			};
-			item.Click += OnRevertClick;
+			if(isMerge)
+			{
+				item.Click += OnRevertMergeClick;
+			}
+			else
+			{
+				item.Click += OnRevertClick;
+			}
 			return item;
 		}
 
@@ -218,25 +223,24 @@
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
-			bool enabled = !revision.Repository.IsEmpty;
-
-			if(enabled)
-			{
-				var rev = revision as Revision;
-				if(rev != null)
-				{
-					enabled = rev.Parents.Count <= 1;
-				}
-			}
+			bool isEnabled	= !revision.Repository.IsEmpty;
+			bool isMerge	= revision.Dereference().Parents.Count > 1;
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgCherryPick"],
-				Text = string.Format(nameFormat, Resources.StrCherryPick),
-				Tag = revision,
-				Enabled = enabled,
+				Image	= CachedResources.Bitmaps["ImgCherryPick"],
+				Text	= string.Format(nameFormat, isMerge ? Resources.StrCherryPick.AddEllipsis() : Resources.StrCherryPick),
+				Tag		= revision,
+				Enabled	= isEnabled,
 			};
-			item.Click += OnCherryPickClick;
+			if(isMerge)
+			{
+				item.Click += OnCherryPickMergeClick;
+			}
+			else
+			{
+				item.Click += OnCherryPickClick;
+			}
 			return item;
 		}
 
@@ -660,6 +664,17 @@
 			}
 		}
 
+		private static void OnRevertMergeClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var revision = (IRevisionPointer)item.Tag;
+			var parent = Utility.GetParentControl(item);
+			using(var dlg = new RevertDialog(revision))
+			{
+				dlg.Run(parent);
+			}
+		}
+
 		private static void OnMultipleRevertClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
@@ -769,49 +784,71 @@
 			var item = (ToolStripItem)sender;
 			var revision = (IRevisionPointer)item.Tag;
 			var parent = Utility.GetParentControl(item);
-			try
+
+			if(Control.ModifierKeys == Keys.Shift)
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				revision.CherryPick();
-				if(parent != null) parent.Cursor = Cursors.Default;
-			}
-			catch(HaveConflictsException)
-			{
-				if(parent != null) parent.Cursor = Cursors.Default;
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					Resources.ErrCherryPickIsNotPossibleWithConflicts,
-					Resources.StrCherryPick,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
-			catch(HaveLocalChangesException)
-			{
-				if(parent != null) parent.Cursor = Cursors.Default;
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					Resources.ErrCherryPickIsNotPossibleWithLocalChnges,
-					Resources.StrCherryPick,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
-			catch(AutomaticCherryPickFailedException)
-			{
-				if(parent != null) parent.Cursor = Cursors.Default;
-				using(var dlg = new ConflictsDialog(revision.Repository))
+				using(var dlg = new CherryPickDialog(revision))
 				{
 					dlg.Run(parent);
 				}
 			}
-			catch(GitException exc)
+			else
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCherryPick, revision.Pointer),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
+				try
+				{
+					if(parent != null) parent.Cursor = Cursors.WaitCursor;
+					revision.CherryPick();
+					if(parent != null) parent.Cursor = Cursors.Default;
+				}
+				catch(HaveConflictsException)
+				{
+					if(parent != null) parent.Cursor = Cursors.Default;
+					GitterApplication.MessageBoxService.Show(
+						parent,
+						Resources.ErrCherryPickIsNotPossibleWithConflicts,
+						Resources.StrCherryPick,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
+				}
+				catch(HaveLocalChangesException)
+				{
+					if(parent != null) parent.Cursor = Cursors.Default;
+					GitterApplication.MessageBoxService.Show(
+						parent,
+						Resources.ErrCherryPickIsNotPossibleWithLocalChnges,
+						Resources.StrCherryPick,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
+				}
+				catch(AutomaticCherryPickFailedException)
+				{
+					if(parent != null) parent.Cursor = Cursors.Default;
+					using(var dlg = new ConflictsDialog(revision.Repository))
+					{
+						dlg.Run(parent);
+					}
+				}
+				catch(GitException exc)
+				{
+					if(parent != null) parent.Cursor = Cursors.Default;
+					GitterApplication.MessageBoxService.Show(
+						parent,
+						exc.Message,
+						string.Format(Resources.ErrFailedToCherryPick, revision.Pointer),
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
+				}
+			}
+		}
+
+		private static void OnCherryPickMergeClick(object sender, EventArgs e)
+		{
+			var item = (ToolStripItem)sender;
+			var revision = (IRevisionPointer)item.Tag;
+			var parent = Utility.GetParentControl(item);
+			using(var dlg = new CherryPickDialog(revision))
+			{
+				dlg.Run(parent);
 			}
 		}
 

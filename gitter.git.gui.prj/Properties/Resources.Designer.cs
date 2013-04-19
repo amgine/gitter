@@ -3249,6 +3249,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cherry-Pick Commit.
+        /// </summary>
+        internal static string StrCherryPickCommit {
+            get {
+                return ResourceManager.GetString("StrCherryPickCommit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chmod.
         /// </summary>
         internal static string StrChmod {
@@ -4649,6 +4658,15 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrlUserIdentityNotConfigured {
             get {
                 return ResourceManager.GetString("StrlUserIdentityNotConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mainline Parent Commit.
+        /// </summary>
+        internal static string StrMainlineParentCommit {
+            get {
+                return ResourceManager.GetString("StrMainlineParentCommit", resourceCulture);
             }
         }
         
@@ -7139,6 +7157,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The cherry-pick is done against the beginning state of your index and no commit is created in process..
+        /// </summary>
+        internal static string TipCherryPickNoCommit {
+            get {
+                return ResourceManager.GetString("TipCherryPickNoCommit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove untracked files from the working tree.
         /// </summary>
         internal static string TipClean {
@@ -7407,6 +7434,15 @@ namespace gitter.Git.Gui.Properties {
         internal static string TipRemoteVCS {
             get {
                 return ResourceManager.GetString("TipRemoteVCS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The revert is done against the beginning state of your index and no commit is created in process..
+        /// </summary>
+        internal static string TipRevertNoCommit {
+            get {
+                return ResourceManager.GetString("TipRevertNoCommit", resourceCulture);
             }
         }
         

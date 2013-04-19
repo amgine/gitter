@@ -48,5 +48,7 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>Don't create commit.</summary>
 		public bool NoCommit { get; set; }
+
+		public int Mainline { get; set; }
 	}
 }

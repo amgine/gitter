@@ -2571,4 +2571,16 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrsCommitLimit" xml:space="preserve">
     <value>Commit limit</value>
   </data>
+  <data name="StrMainlineParentCommit" xml:space="preserve">
+    <value>Mainline Parent Commit</value>
+  </data>
+  <data name="StrCherryPickCommit" xml:space="preserve">
+    <value>Cherry-Pick Commit</value>
+  </data>
+  <data name="TipCherryPickNoCommit" xml:space="preserve">
+    <value>The cherry-pick is done against the beginning state of your index and no commit is created in process.</value>
+  </data>
+  <data name="TipRevertNoCommit" xml:space="preserve">
+    <value>The revert is done against the beginning state of your index and no commit is created in process.</value>
+  </data>
 </root>
