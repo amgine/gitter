@@ -21,6 +21,7 @@
 		private readonly IList<BranchBase> _unmergedBranches;
 		private bool _multipleBranchesMerge;
 		private TextBoxSpellChecker _speller;
+		private IRevisionPointer _mergeFrom;
 
 		public MergeDialog(Repository repository)
 		{
@@ -51,18 +52,37 @@
 
 			_unmergedBranches = _repository.Refs.GetUnmergedBranches();
 
-			GitterApplication.FontManager.InputFont.Apply(_txtMessage, _txtRevision);
-			GlobalBehavior.SetupAutoCompleteSource(_txtRevision, _unmergedBranches);
-
 			if(SpellingService.Enabled)
 			{
 				_speller = new TextBoxSpellChecker(_txtMessage, true);
 			}
 
+			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+
 			_references.Style = GitterApplication.DefaultStyle;
 			_references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,
-				(reference) => _unmergedBranches.Contains((BranchBase)reference));
-			_references.ItemActivated += OnItemActivated;
+				reference => _unmergedBranches.Contains(reference as BranchBase));
+			_references.SelectionChanged += OnReferencesSelectionChanged;
+		}
+
+		private void OnReferencesSelectionChanged(object sender, EventArgs e)
+		{
+			if(_references.SelectedItems.Count == 0)
+			{
+				_mergeFrom = null;
+			}
+			else
+			{
+				var item = _references.SelectedItems[0] as IRevisionPointerListItem;
+				if(item == null)
+				{
+					_mergeFrom = null;
+				}
+				else
+				{
+					_mergeFrom = item.RevisionPointer;
+				}
+			}
 		}
 
 		protected override string ActionVerb
@@ -76,45 +96,64 @@
 			{
 				_multipleBranchesMerge = true;
 				_references.EnableCheckboxes();
-				_lblMergeWith.Visible = false;
-				_txtRevision.Visible = false;
-				var d = _references.Top - _references.Left;
-				_references.Top = _references.Left;
-				_references.Height += d;
+				_references.SelectionChanged -= OnReferencesSelectionChanged;
+				_mergeFrom = null;
 			}
 		}
 
-		public string Branch
+		public IRevisionPointer MergeFrom
 		{
-			get { return _txtRevision.Text; }
-			set { _txtRevision.Text = value; }
-		}
-
-		public bool AllowChangingBranch
-		{
-			get { return !_txtRevision.ReadOnly; }
+			get { return _mergeFrom; }
 			set
 			{
-				if(_txtRevision.ReadOnly == value)
+				if(_mergeFrom != value)
 				{
-					_txtRevision.ReadOnly = !value;
-					var d = _references.Height + _references.Margin.Vertical;
-					if(!value)
+					_mergeFrom = value;
+					if(!_multipleBranchesMerge)
 					{
-						_references.Visible = false;
-						_txtMessage.Top -= d;
-						_txtMessage.Height += d;
-						_lblMessage.Top -= d;
-					}
-					else
-					{
-						_txtMessage.Top += d;
-						_txtMessage.Height -= d;
-						_lblMessage.Top += d;
-						_references.Visible = true;
+						_references.SelectionChanged -= OnReferencesSelectionChanged;
+						if(value == null)
+						{
+							_references.SelectedItems.Clear();
+						}
+						else
+						{
+							var item = TryFindItem(_references.Items, value);
+							if(item != null)
+							{
+								_references.SelectedItems.Clear();
+								item.FocusAndSelect();
+							}
+						}
+						_references.SelectionChanged += OnReferencesSelectionChanged;
 					}
 				}
 			}
+		}
+
+		private static CustomListBoxItem TryFindItem(CustomListBoxItemsCollection items, IRevisionPointer revisionPointer)
+		{
+			if(revisionPointer == null) return null;
+			foreach(var item in items)
+			{
+				var revItem = item as IRevisionPointerListItem;
+				if(revItem != null)
+				{
+					if(revItem.RevisionPointer == revisionPointer)
+					{
+						return item;
+					}
+				}
+				else
+				{
+					var res = TryFindItem(item.Items, revisionPointer);
+					if(res != null)
+					{
+						return res;
+					}
+				}
+			}
+			return null;
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
@@ -122,7 +161,7 @@
 			var item = e.Item as IRevisionPointerListItem;
 			if(item != null)
 			{
-				_txtRevision.Text = item.RevisionPointer.Pointer;
+				_mergeFrom = item.RevisionPointer;
 			}
 		}
 
@@ -142,30 +181,14 @@
 			}
 			else
 			{
-				var branchName = _txtRevision.Text.Trim();
-				if(!string.IsNullOrEmpty(branchName))
+				var branchName = _mergeFrom == null ? null : _mergeFrom.Pointer;
+				if(MergeFrom != null)
 				{
-					var head = _repository.Refs.Heads.TryGetItem(branchName);
-					if(head != null)
+					try
 					{
-						try
-						{
-							_txtMessage.Text = _repository.Head.FormatMergeMessage(head);
-						}
-						catch { }
+						_txtMessage.Text = _repository.Head.FormatMergeMessage(MergeFrom);
 					}
-					else
-					{
-						var remote = _repository.Refs.Heads.TryGetItem(branchName);
-						if(remote != null)
-						{
-							try
-							{
-								_txtMessage.Text = _repository.Head.FormatMergeMessage(remote);
-							}
-							catch { }
-						}
-					}
+					catch { }
 				}
 			}
 		}
@@ -243,40 +266,18 @@
 			}
 			else
 			{
-				var mergeTarget = _txtRevision.Text.Trim();
-				if(mergeTarget.Length == 0)
+				if(MergeFrom == null)
 				{
 					NotificationService.NotifyInputError(
-						_txtRevision,
+						_references,
 						Resources.ErrNoBranchNameSpecified,
 						Resources.ErrYouMustSpecifyBranchToMergeWith);
-					return false;
-				}
-				BranchBase branch = _repository.Refs.Heads.TryGetItem(mergeTarget);
-				if(branch == null)
-				{
-					branch = _repository.Refs.Remotes.TryGetItem(mergeTarget);
-					if(branch == null)
-					{
-						NotificationService.NotifyInputError(
-							_txtRevision,
-							Resources.ErrInvalidBranchName,
-							Resources.ErrSpecifiedBranchNotFound);
-						return false;
-					}
-				}
-				if(!_unmergedBranches.Contains(branch))
-				{
-					NotificationService.NotifyInputError(
-						_txtRevision,
-						Resources.ErrInvalidBranchName,
-						Resources.ErrAlreadyMerged);
 					return false;
 				}
 				try
 				{
 					Cursor = Cursors.WaitCursor;
-					_repository.Head.Merge(branch, noCommit, noFastForward, squash, message);
+					_repository.Head.Merge(MergeFrom, noCommit, noFastForward, squash, message);
 					Cursor = Cursors.Default;
 				}
 				catch(AutomaticMergeFailedException exc)
@@ -296,7 +297,7 @@
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,
-						string.Format(Resources.ErrFailedToMergeWith, _txtRevision.Text),
+						string.Format(Resources.ErrFailedToMergeWith, MergeFrom.Pointer),
 						MessageBoxButton.Close,
 						MessageBoxIcon.Error);
 					return false;

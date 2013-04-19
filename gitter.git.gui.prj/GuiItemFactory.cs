@@ -1646,8 +1646,7 @@
 				{
 					using(var dlg = new MergeDialog(revision.Repository)
 						{
-							Branch = revision.Pointer,
-							AllowChangingBranch = false,
+							MergeFrom = revision,
 						})
 					{
 						dlg.Run(parent);
