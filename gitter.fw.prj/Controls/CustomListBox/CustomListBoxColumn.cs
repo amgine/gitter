@@ -46,6 +46,14 @@
 
 		public event EventHandler HeaderFontChanged;
 
+		public event EventHandler StyleChanged;
+
+		protected virtual void OnStyleChanged()
+		{
+			var handler = StyleChanged;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
 		#endregion
 
 		#region Constants
@@ -80,6 +88,21 @@
 		public int Id
 		{
 			get { return _id; }
+		}
+
+		public IGitterStyle Style
+		{
+			get
+			{
+				if(ListBox != null)
+				{
+					return ListBox.Style;
+				}
+				else
+				{
+					return GitterApplication.Style;
+				}
+			}
 		}
 
 		public ToolStripDropDown Extender
@@ -370,10 +393,26 @@
 			get { return null; }
 		}
 
+		protected override void OnListBoxAttached()
+		{
+			base.OnListBoxAttached();
+			ListBox.StyleChanged += OnListBoxStyleChanged;
+			if(ListBox.Style != GitterApplication.Style)
+			{
+				OnStyleChanged();
+			}
+		}
+
 		protected override void OnListBoxDetached()
 		{
+			ListBox.StyleChanged -= OnListBoxStyleChanged;
 			_contentWidth = -1;
 			base.OnListBoxDetached();
+		}
+
+		private void OnListBoxStyleChanged(object sender, EventArgs e)
+		{
+			OnStyleChanged();
 		}
 
 		public virtual void AutoSize()

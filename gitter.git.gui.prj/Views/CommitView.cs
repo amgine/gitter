@@ -21,6 +21,7 @@
 	{
 		private readonly CommitToolbar _toolbar;
 		private ICheckBoxWidget _chkAmend;
+		private IButtonWidget _btnCommit;
 		private TextBoxSpellChecker _speller;
 		private bool _treeMode;
 		private bool _suppressDiffUpdate;
@@ -46,6 +47,13 @@
 			_chkAmend.Control.TabIndex = 12;
 			_chkAmend.IsCheckedChanged += OnAmendCheckedChanged;
 
+			_btnCommit = GitterApplication.Style.CreateButton();
+			_btnCommit.Control.Bounds = new Rectangle(477, 93, 75, 23);
+			_btnCommit.Control.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+			_btnCommit.Control.Parent = _splitContainer.Panel2;
+			_btnCommit.Control.TabIndex = 11;
+			_btnCommit.Click += OnCommitClick;
+
 			_lblStaged.Text = Resources.StrsStagedChanges.AddColon();
 			_lstStaged.Text = Resources.StrNoStagedChanges;
 			_lblUnstaged.Text = Resources.StrsUnstagedChanges.AddColon();
@@ -57,7 +65,8 @@
 			_lstStaged.PreviewKeyDown += OnKeyDown;
 			_lstUnstaged.PreviewKeyDown += OnKeyDown;
 			_txtMessage.PreviewKeyDown += OnKeyDown;
-			_btnCommit.PreviewKeyDown += OnKeyDown;
+			_chkAmend.Control.PreviewKeyDown += OnKeyDown;
+			_btnCommit.Control.PreviewKeyDown += OnKeyDown;
 
 			if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
 			{

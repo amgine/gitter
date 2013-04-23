@@ -158,6 +158,13 @@
 					}
 					break;
 			}
+			int textOffset = 16;
+			if(checkBox.Image != null)
+			{
+				var image = checkBox.Image;
+				textOffset += image.Width + 4;
+				graphics.DrawImage(image, new Rectangle(16 + 3, (checkBox.Height - image.Height) / 2, image.Width, image.Height));
+			}
 			var text = checkBox.Text;
 			if(!string.IsNullOrWhiteSpace(text))
 			{
@@ -165,7 +172,7 @@
 					graphics,
 					text,
 					checkBox.Font,
-					new Rectangle(16, 0, checkBox.Width - 16, checkBox.Height),
+					new Rectangle(textOffset, 0, checkBox.Width - textOffset, checkBox.Height),
 					foregroundColor,
 					TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 			}

@@ -88,6 +88,14 @@
     <Compile Include="CLI\AsyncTextReader.cs" />
     <Compile Include="CLI\IOutputReceiver.cs" />
     <Compile Include="CLI\ProcessExecutor.cs" />
+    <Compile Include="Controls\Button\CustomButtonAdapter.cs" />
+    <Compile Include="Controls\Button\CustomButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Button\CustomButtonRenderer.cs" />
+    <Compile Include="Controls\Button\IButtonWidget.cs" />
+    <Compile Include="Controls\Button\MSVS2012ButtonRenderer.cs" />
+    <Compile Include="Controls\Button\SystemButtonAdapter.cs" />
     <Compile Include="Controls\CheckBox\CustomCheckBox.cs">
       <SubType>Component</SubType>
     </Compile>

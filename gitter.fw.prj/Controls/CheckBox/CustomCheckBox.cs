@@ -11,6 +11,7 @@
 
 		private CustomCheckBoxRenderer _renderer;
 		private CheckState _checkState;
+		private Image _image;
 		private bool _threeState;
 		private bool _isMouseOver;
 		private bool _isPressed;
@@ -101,6 +102,20 @@
 					{
 						OnIsCheckedChanged();
 					}
+					Invalidate();
+				}
+			}
+		}
+
+		[DefaultValue(null)]
+		public Image Image
+		{
+			get { return _image; }
+			set
+			{
+				if(_image != value)
+				{
+					_image = value;
 					Invalidate();
 				}
 			}

@@ -85,6 +85,11 @@
 			return new SystemCheckBoxAdapter();
 		}
 
+		public IButtonWidget CreateButton()
+		{
+			return new SystemButtonAdapter();
+		}
+
 		public CustomListBoxRenderer ListBoxRenderer
 		{
 			get { return CustomListBoxManager.Win7Renderer; }

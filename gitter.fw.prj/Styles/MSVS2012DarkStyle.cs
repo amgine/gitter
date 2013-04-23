@@ -115,6 +115,11 @@
 			return new CustomCheckBoxAdapter(CustomCheckBoxRenderer.MSVS2012Dark);
 		}
 
+		public IButtonWidget CreateButton()
+		{
+			return new CustomButtonAdapter(CustomButtonRenderer.MSVS2012Dark);
+		}
+
 		public CustomListBoxRenderer ListBoxRenderer
 		{
 			get { return CustomListBoxManager.MSVS2012DarkRenderer; }

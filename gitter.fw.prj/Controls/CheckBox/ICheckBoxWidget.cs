@@ -1,6 +1,7 @@
 ﻿namespace gitter.Framework.Controls
 {
 	using System;
+	using System.Drawing;
 	using System.Windows.Forms;
 
 	public interface ICheckBoxWidget : IDisposable
@@ -18,6 +19,8 @@
 		Control Control { get; }
 
 		string Text { get; set; }
+
+		Image Image { get; set; }
 
 		bool IsChecked { get; set; }
 

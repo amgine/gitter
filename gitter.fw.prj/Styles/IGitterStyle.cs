@@ -21,6 +21,8 @@
 
 		ICheckBoxWidget CreateCheckBox();
 
+		IButtonWidget CreateButton();
+
 		CustomListBoxRenderer ListBoxRenderer { get; }
 
 		ProcessOverlayRenderer OverlayRenderer { get; }

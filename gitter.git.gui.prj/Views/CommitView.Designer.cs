@@ -16,6 +16,7 @@
 			if(disposing)
 			{
 				_chkAmend.Dispose();
+				_btnCommit.Dispose();
 				_speller.Dispose();
 				if(components != null)
 				{
@@ -40,7 +41,6 @@
 			this._lstUnstaged = new gitter.Git.Gui.Controls.TreeListBox();
 			this._lstStaged = new gitter.Git.Gui.Controls.TreeListBox();
 			this._lblMessage = new System.Windows.Forms.Label();
-			this._btnCommit = new System.Windows.Forms.Button();
 			this._txtMessage = new System.Windows.Forms.TextBox();
 			((System.ComponentModel.ISupportInitialize)(this._splitContainer)).BeginInit();
 			this._splitContainer.Panel1.SuspendLayout();
@@ -67,7 +67,6 @@
 			// _splitContainer.Panel2
 			// 
 			this._splitContainer.Panel2.Controls.Add(this._lblMessage);
-			this._splitContainer.Panel2.Controls.Add(this._btnCommit);
 			this._splitContainer.Panel2.Controls.Add(this._txtMessage);
 			this._splitContainer.Size = new System.Drawing.Size(555, 362);
 			this._splitContainer.SplitterDistance = 239;
@@ -153,18 +152,6 @@
 			this._lblMessage.TabIndex = 13;
 			this._lblMessage.Text = "%Message%:";
 			// 
-			// _btnCommit
-			// 
-			this._btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this._btnCommit.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._btnCommit.Location = new System.Drawing.Point(477, 93);
-			this._btnCommit.Name = "_btnCommit";
-			this._btnCommit.Size = new System.Drawing.Size(75, 23);
-			this._btnCommit.TabIndex = 11;
-			this._btnCommit.Text = "Commit";
-			this._btnCommit.UseVisualStyleBackColor = true;
-			this._btnCommit.Click += new System.EventHandler(this.OnCommitClick);
-			// 
 			// _txtMessage
 			// 
 			this._txtMessage.AcceptsReturn = true;
@@ -199,7 +186,6 @@
 		#endregion
 
 		private System.Windows.Forms.SplitContainer _splitContainer;
-		private System.Windows.Forms.Button _btnCommit;
 		private System.Windows.Forms.TextBox _txtMessage;
 		private System.Windows.Forms.TableLayoutPanel _tableChanges;
 		private System.Windows.Forms.Label _lblUnstaged;

@@ -15,148 +15,186 @@
 	[ToolboxItem(false)]
 	public partial class SubjectColumnExtender : ExtenderBase
 	{
-		private readonly SubjectColumn _column;
+		#region Data
+
 		private bool _disableEvents;
 
+		private GroupSeparator _grpVisibleReferences;
+		private ICheckBoxWidget _chkAlignToGraph;
+		private ICheckBoxWidget _chkLocalBranches;
+		private ICheckBoxWidget _chkRemoteBranches;
+		private ICheckBoxWidget _chkTags;
+		private ICheckBoxWidget _chkStash;
+
+		#endregion
+
+		#region .ctor
+
 		public SubjectColumnExtender(SubjectColumn column)
+			: base(column)
 		{
-			Verify.Argument.IsNotNull(column, "column");
-
-			_column = column;
-
 			InitializeComponent();
 
-			_chkAlignToGraph.Text		= Resources.StrAlignToGraph;
-			_grpVisibleReferences.Text	= Resources.StrVisibleReferences;
-			_chkLocalBranches.Text		= Resources.StrLocalBranches;
-			_chkRemoteBranches.Text		= Resources.StrRemoteBranches;
-			_chkTags.Text				= Resources.StrTags;
-			_chkStash.Text				= Resources.StrStash;
+			//_chkAlignToGraph.Text		= Resources.StrAlignToGraph;
+			//_grpVisibleReferences.Text	= Resources.StrVisibleReferences;
+			//_chkLocalBranches.Text		= Resources.StrLocalBranches;
+			//_chkRemoteBranches.Text		= Resources.StrRemoteBranches;
+			//_chkTags.Text				= Resources.StrTags;
+			//_chkStash.Text				= Resources.StrStash;
 
-			_chkAlignToGraph.Image		= CachedResources.Bitmaps["ImgAlignToGraph"];
-			_chkLocalBranches.Image		= CachedResources.Bitmaps["ImgBranch"];
-			_chkRemoteBranches.Image	= CachedResources.Bitmaps["ImgBranchRemote"];
-			_chkTags.Image				= CachedResources.Bitmaps["ImgTag"];
-			_chkStash.Image				= CachedResources.Bitmaps["ImgStash"];
+			//_chkAlignToGraph.Image		= CachedResources.Bitmaps["ImgAlignToGraph"];
+			//_chkLocalBranches.Image		= CachedResources.Bitmaps["ImgBranch"];
+			//_chkRemoteBranches.Image	= CachedResources.Bitmaps["ImgBranchRemote"];
+			//_chkTags.Image				= CachedResources.Bitmaps["ImgTag"];
+			//_chkStash.Image				= CachedResources.Bitmaps["ImgStash"];
 
-			UpdateStates();
+			CreateControls();
+			//UpdateStates();
 			SubscribeToColumnEvents();
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void CreateControls()
+		{
+			const int height = 27;
+			const int hmargin = 6;
+			const int vspacing = -4;
+			int width = Width - hmargin * 2;
+			int yoffset = 0;
+
+			if(_chkAlignToGraph != null) _chkAlignToGraph.Dispose();
+			_chkAlignToGraph = Style.CreateCheckBox();
+			_chkAlignToGraph.Text = Resources.StrAlignToGraph;
+			_chkAlignToGraph.Image = CachedResources.Bitmaps["ImgAlignToGraph"];
+			_chkAlignToGraph.Control.Bounds = new Rectangle(hmargin, yoffset, width, height);
+			_chkAlignToGraph.Control.Parent = this;
+			_chkAlignToGraph.IsChecked = Column.AlignToGraph;
+			_chkAlignToGraph.IsCheckedChanged += OnAlignToGraphCheckedChanged;
+			yoffset += height + vspacing;
+
+			if(_grpVisibleReferences == null)
+			{
+				_grpVisibleReferences = new GroupSeparator()
+				{
+					Text = Resources.StrVisibleReferences,
+					Bounds = new Rectangle(0, yoffset + 2, Width - hmargin, height),
+					Parent = this,
+				};
+			}
+			yoffset += height + vspacing;
+
+			if(_chkLocalBranches != null) _chkLocalBranches.Dispose();
+			_chkLocalBranches = Style.CreateCheckBox();
+			_chkLocalBranches.Text = Resources.StrLocalBranches;
+			_chkLocalBranches.Image = CachedResources.Bitmaps["ImgBranch"];
+			_chkLocalBranches.Control.Bounds = new Rectangle(hmargin, yoffset, width, height);
+			_chkLocalBranches.Control.Parent = this;
+			_chkLocalBranches.IsChecked = Column.ShowLocalBranches;
+			_chkLocalBranches.IsCheckedChanged += OnLocalBranchesCheckedChanged;
+			yoffset += height + vspacing;
+
+			if(_chkRemoteBranches != null) _chkRemoteBranches.Dispose();
+			_chkRemoteBranches = Style.CreateCheckBox();
+			_chkRemoteBranches.Text = Resources.StrRemoteBranches;
+			_chkRemoteBranches.Image = CachedResources.Bitmaps["ImgBranchRemote"];
+			_chkRemoteBranches.Control.Bounds = new Rectangle(hmargin, yoffset, width, height);
+			_chkRemoteBranches.Control.Parent = this;
+			_chkRemoteBranches.IsChecked = Column.ShowRemoteBranches;
+			_chkRemoteBranches.IsCheckedChanged += OnRemoteBranchesCheckedChanged;
+			yoffset += height + vspacing;
+
+			if(_chkTags != null) _chkTags.Dispose();
+			_chkTags = Style.CreateCheckBox();
+			_chkTags.Text = Resources.StrTags;
+			_chkTags.Image = CachedResources.Bitmaps["ImgTag"];
+			_chkTags.Control.Bounds = new Rectangle(hmargin, yoffset, width, height);
+			_chkTags.Control.Parent = this;
+			_chkTags.IsChecked = Column.ShowTags;
+			_chkTags.IsCheckedChanged += OnTagsCheckedChanged;
+			yoffset += height + vspacing;
+
+			if(_chkStash != null) _chkStash.Dispose();
+			_chkStash = Style.CreateCheckBox();
+			_chkStash.Text = Resources.StrStash;
+			_chkStash.Image = CachedResources.Bitmaps["ImgStash"];
+			_chkStash.Control.Bounds = new Rectangle(hmargin, yoffset, width, height);
+			_chkStash.Control.Parent = this;
+			_chkStash.IsChecked = Column.ShowStash;
+			_chkStash.IsCheckedChanged += OnStashCheckedChanged;
 		}
 
 		private void SubscribeToColumnEvents()
 		{
-			_column.AlignToGraphChanged += OnColumnAlignToGraphChanged;
-			_column.ShowLocalBranchesChanged += OnColumnShowLocalBranchesChanged;
-			_column.ShowRemoteBranchesChanged += OnColumnShowRemoteBranchesChanged;
-			_column.ShowTagsChanged += OnColumnShowTagsChanged;
-			_column.ShowStashChanged += OnColumnShowStashChanged;
+			Column.AlignToGraphChanged += OnColumnAlignToGraphChanged;
+			Column.ShowLocalBranchesChanged += OnColumnShowLocalBranchesChanged;
+			Column.ShowRemoteBranchesChanged += OnColumnShowRemoteBranchesChanged;
+			Column.ShowTagsChanged += OnColumnShowTagsChanged;
+			Column.ShowStashChanged += OnColumnShowStashChanged;
 		}
 
 		private void UnsubscribeFromColumnEvents()
 		{
-			_column.AlignToGraphChanged -= OnColumnAlignToGraphChanged;
-			_column.ShowLocalBranchesChanged -= OnColumnShowLocalBranchesChanged;
-			_column.ShowRemoteBranchesChanged -= OnColumnShowRemoteBranchesChanged;
-			_column.ShowTagsChanged -= OnColumnShowTagsChanged;
-			_column.ShowStashChanged -= OnColumnShowStashChanged;
-		}
-
-		private void OnColumnAlignToGraphChanged(object sender, EventArgs e)
-		{
-			AlignToGraph = _column.AlignToGraph;
-		}
-
-		private void OnColumnShowLocalBranchesChanged(object sender, EventArgs e)
-		{
-			ShowLocalBranches = _column.ShowLocalBranches;
-		}
-
-		private void OnColumnShowRemoteBranchesChanged(object sender, EventArgs e)
-		{
-			ShowRemoteBranches = _column.ShowRemoteBranches;
-		}
-
-		private void OnColumnShowTagsChanged(object sender, EventArgs e)
-		{
-			ShowTags = _column.ShowTags;
-		}
-
-		private void OnColumnShowStashChanged(object sender, EventArgs e)
-		{
-			ShowStash = _column.ShowStash;
+			Column.AlignToGraphChanged -= OnColumnAlignToGraphChanged;
+			Column.ShowLocalBranchesChanged -= OnColumnShowLocalBranchesChanged;
+			Column.ShowRemoteBranchesChanged -= OnColumnShowRemoteBranchesChanged;
+			Column.ShowTagsChanged -= OnColumnShowTagsChanged;
+			Column.ShowStashChanged -= OnColumnShowStashChanged;
 		}
 
 		public void UpdateStates()
 		{
 			_disableEvents = true;
-			_chkAlignToGraph.Checked = _column.AlignToGraph;
-			_chkLocalBranches.Checked = _column.ShowLocalBranches;
-			_chkRemoteBranches.Checked = _column.ShowRemoteBranches;
-			_chkTags.Checked = _column.ShowTags;
-			_chkStash.Checked = _column.ShowStash;
+			_chkAlignToGraph.IsChecked = Column.AlignToGraph;
+			_chkLocalBranches.IsChecked = Column.ShowLocalBranches;
+			_chkRemoteBranches.IsChecked = Column.ShowRemoteBranches;
+			_chkTags.IsChecked = Column.ShowTags;
+			_chkStash.IsChecked = Column.ShowStash;
 			_disableEvents = false;
 		}
 
-		public bool AlignToGraph
+		protected override void OnStyleChanged()
 		{
-			get { return _chkAlignToGraph.Checked; }
-			set
-			{
-				_disableEvents = true;
-				_chkAlignToGraph.Checked = value;
-				_disableEvents = false;
-			}
+			base.OnStyleChanged();
+			CreateControls();
 		}
 
-		public bool ShowLocalBranches
+		#endregion
+
+		#region EVent Handlers
+
+		private void OnColumnAlignToGraphChanged(object sender, EventArgs e)
 		{
-			get { return _chkLocalBranches.Checked; }
-			set
-			{
-				_disableEvents = true;
-				_chkLocalBranches.Checked = value;
-				_disableEvents = false;
-			}
+			AlignToGraph = Column.AlignToGraph;
 		}
 
-		public bool ShowRemoteBranches
+		private void OnColumnShowLocalBranchesChanged(object sender, EventArgs e)
 		{
-			get { return _chkRemoteBranches.Checked; }
-			set
-			{
-				_disableEvents = true;
-				_chkRemoteBranches.Checked = value;
-				_disableEvents = false;
-			}
+			ShowLocalBranches = Column.ShowLocalBranches;
 		}
 
-		public bool ShowTags
+		private void OnColumnShowRemoteBranchesChanged(object sender, EventArgs e)
 		{
-			get { return _chkTags.Checked; }
-			set
-			{
-				_disableEvents = true;
-				_chkTags.Checked = value;
-				_disableEvents = false;
-			}
+			ShowRemoteBranches = Column.ShowRemoteBranches;
 		}
 
-		public bool ShowStash
+		private void OnColumnShowTagsChanged(object sender, EventArgs e)
 		{
-			get { return _chkStash.Checked; }
-			set
-			{
-				_disableEvents = true;
-				_chkStash.Checked = value;
-				_disableEvents = false;
-			}
+			ShowTags = Column.ShowTags;
+		}
+
+		private void OnColumnShowStashChanged(object sender, EventArgs e)
+		{
+			ShowStash = Column.ShowStash;
 		}
 
 		private void OnAlignToGraphCheckedChanged(object sender, EventArgs e)
 		{
 			if(!_disableEvents)
 			{
-				_column.AlignToGraph = ((CheckBox)sender).Checked;
+				Column.AlignToGraph = ((ICheckBoxWidget)sender).IsChecked;
 			}
 		}
 
@@ -164,7 +202,7 @@
 		{
 			if(!_disableEvents)
 			{
-				_column.ShowLocalBranches = ((CheckBox)sender).Checked;
+				Column.ShowLocalBranches = ((ICheckBoxWidget)sender).IsChecked;
 			}
 		}
 
@@ -172,7 +210,7 @@
 		{
 			if(!_disableEvents)
 			{
-				_column.ShowRemoteBranches = ((CheckBox)sender).Checked;
+				Column.ShowRemoteBranches = ((ICheckBoxWidget)sender).IsChecked;
 			}
 		}
 
@@ -180,7 +218,7 @@
 		{
 			if(!_disableEvents)
 			{
-				_column.ShowTags = ((CheckBox)sender).Checked;
+				Column.ShowTags = ((ICheckBoxWidget)sender).IsChecked;
 			}
 		}
 
@@ -188,8 +226,74 @@
 		{
 			if(!_disableEvents)
 			{
-				_column.ShowStash = ((CheckBox)sender).Checked;
+				Column.ShowStash = ((ICheckBoxWidget)sender).IsChecked;
 			}
 		}
+
+		#endregion
+
+		#region Properties
+
+		public new SubjectColumn Column
+		{
+			get { return (SubjectColumn)base.Column; }
+		}
+
+		public bool AlignToGraph
+		{
+			get { return _chkAlignToGraph.IsChecked; }
+			set
+			{
+				_disableEvents = true;
+				_chkAlignToGraph.IsChecked = value;
+				_disableEvents = false;
+			}
+		}
+
+		public bool ShowLocalBranches
+		{
+			get { return _chkLocalBranches.IsChecked; }
+			set
+			{
+				_disableEvents = true;
+				_chkLocalBranches.IsChecked = value;
+				_disableEvents = false;
+			}
+		}
+
+		public bool ShowRemoteBranches
+		{
+			get { return _chkRemoteBranches.IsChecked; }
+			set
+			{
+				_disableEvents = true;
+				_chkRemoteBranches.IsChecked = value;
+				_disableEvents = false;
+			}
+		}
+
+		public bool ShowTags
+		{
+			get { return _chkTags.IsChecked; }
+			set
+			{
+				_disableEvents = true;
+				_chkTags.IsChecked = value;
+				_disableEvents = false;
+			}
+		}
+
+		public bool ShowStash
+		{
+			get { return _chkStash.IsChecked; }
+			set
+			{
+				_disableEvents = true;
+				_chkStash.IsChecked = value;
+				_disableEvents = false;
+			}
+		}
+
+		#endregion
 	}
 }

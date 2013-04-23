@@ -1,6 +1,7 @@
 ﻿namespace gitter.Framework.Controls
 {
 	using System;
+	using System.Drawing;
 	using System.Windows.Forms;
 
 	public sealed class CustomCheckBoxAdapter : ICheckBoxWidget
@@ -31,9 +32,11 @@
 
 		#endregion
 
+		#region .ctor
+
 		public CustomCheckBoxAdapter(CustomCheckBoxRenderer renderer)
 		{
-			if(renderer == null) throw new ArgumentNullException("renderer");
+			Verify.Argument.IsNotNull(renderer, "renderer");
 
 			_checkBox = new CustomCheckBox()
 			{
@@ -42,6 +45,10 @@
 			_checkBox.IsCheckedChanged += OnCheckBoxIsCheckedChanged;
 			_checkBox.CheckStateChanged += OnCheckBoxCheckStateChanged;
 		}
+
+		#endregion
+
+		#region Event Handlers
 
 		private void OnCheckBoxIsCheckedChanged(object sender, EventArgs e)
 		{
@@ -53,6 +60,10 @@
 			OnCheckStateChanged();
 		}
 
+		#endregion
+
+		#region Properties
+
 		public Control Control
 		{
 			get { return _checkBox; }
@@ -62,6 +73,12 @@
 		{
 			get { return _checkBox.Text; }
 			set { _checkBox.Text = value; }
+		}
+
+		public Image Image
+		{
+			get { return _checkBox.Image; }
+			set { _checkBox.Image = value; }
 		}
 
 		public bool IsChecked
@@ -82,11 +99,17 @@
 			set { _checkBox.ThreeState = value; }
 		}
 
+		#endregion
+
+		#region IDisposable
+
 		public void Dispose()
 		{
 			_checkBox.IsCheckedChanged -= OnCheckBoxIsCheckedChanged;
 			_checkBox.CheckStateChanged -= OnCheckBoxCheckStateChanged;
 			_checkBox.Dispose();
 		}
+
+		#endregion
 	}
 }
