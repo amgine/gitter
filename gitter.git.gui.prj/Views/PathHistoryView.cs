@@ -287,14 +287,15 @@
 				if(_pendingRequest != null) return;
 				if(Repository != null && _logSource != null)
 				{
-					Cursor = Cursors.WaitCursor;
-					_lstRevisions.BeginUpdate();
-					_revisionLog = _logSource.GetLog(_options);
-					var state = _lstRevisions.GetState();
-					_lstRevisions.SetLog(_revisionLog);
-					_lstRevisions.SetState(state);
-					_lstRevisions.EndUpdate();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						_lstRevisions.BeginUpdate();
+						_revisionLog = _logSource.GetLog(_options);
+						var state = _lstRevisions.GetState();
+						_lstRevisions.SetLog(_revisionLog);
+						_lstRevisions.SetState(state);
+						_lstRevisions.EndUpdate();
+					}
 				}
 			}
 		}

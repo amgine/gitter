@@ -87,13 +87,13 @@
 		{
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				revision.Checkout(true);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					revision.Checkout(true);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -103,23 +103,25 @@
 			}
 		}
 
+		#region IExecutableDialog
+
 		public bool Execute()
 		{
 			var revision = _txtRevision.Text.Trim();
-			if(string.IsNullOrEmpty(revision)) return true;
+			if(string.IsNullOrWhiteSpace(revision)) return true;
 
 			var pointer = _repository.GetRevisionPointer(revision);
 			bool force = Control.ModifierKeys == Keys.Shift;
 
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				pointer.Checkout(force);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					pointer.Checkout(force);
+				}
 			}
 			catch(UnknownRevisionException)
 			{
-				Cursor = Cursors.Default;
 				NotificationService.NotifyInputError(
 					_txtRevision,
 					Resources.ErrInvalidRevisionExpression,
@@ -128,7 +130,6 @@
 			}
 			catch(UntrackedFileWouldBeOverwrittenException)
 			{
-				Cursor = Cursors.Default;
 				if(GitterApplication.MessageBoxService.Show(
 					this,
 					string.Format(Resources.AskOverwriteUntracked, revision),
@@ -141,7 +142,6 @@
 			}
 			catch(HaveLocalChangesException)
 			{
-				Cursor = Cursors.Default;
 				if(GitterApplication.MessageBoxService.Show(
 					this,
 					string.Format(Resources.AskThrowAwayLocalChanges, revision),
@@ -154,7 +154,6 @@
 			}
 			catch(HaveConflictsException)
 			{
-				Cursor = Cursors.Default;
 				if(GitterApplication.MessageBoxService.Show(
 					this,
 					string.Format(Resources.AskThrowAwayConflictedChanges, revision),
@@ -167,7 +166,6 @@
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -178,5 +176,7 @@
 			}
 			return true;
 		}
+
+		#endregion
 	}
 }

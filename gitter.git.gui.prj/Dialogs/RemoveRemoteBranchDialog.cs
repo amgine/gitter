@@ -45,17 +45,17 @@
 
 		#region Event Handlers
 
-		private void _cmdRemoveLocalOnly_Click(object sender, EventArgs e)
+		private void OnRemoveLocalOnlyClick(object sender, EventArgs e)
 		{
-			Cursor = Cursors.WaitCursor;
 			try
 			{
-				_branch.Delete(true);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					_branch.Delete(true);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -66,14 +66,16 @@
 			ClickOk();
 		}
 
-		private void _cmdRemoveFromRemote_Click(object sender, EventArgs e)
+		private void OnRemoveFromRemoteClick(object sender, EventArgs e)
 		{
-			Cursor = Cursors.WaitCursor;
 			string branchName = _branch.Name.Substring(_remote.Name.Length + 1);
 			string remoteRefName = GitConstants.LocalBranchPrefix + branchName;
 			try
 			{
-				_branch.DeleteFromRemote();
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					_branch.DeleteFromRemote();
+				}
 			}
 			catch(GitException exc)
 			{
@@ -88,13 +90,14 @@
 			{
 				if(!_branch.IsDeleted)
 				{
-					_branch.Delete(true);
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						_branch.Delete(true);
+					}
 				}
-				Cursor = Cursors.Default;
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

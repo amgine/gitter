@@ -358,15 +358,16 @@
 			}
 			if(fileName != null)
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
 				string patch = null;
 				try
 				{
-					patch = getPatch();
+					using(parent.ChangeCursor(Cursors.WaitCursor))
+					{
+						patch = getPatch();
+					}
 				}
 				catch(GitException exc)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -374,7 +375,6 @@
 						MessageBoxButton.Close,
 						MessageBoxIcon.Error);
 				}
-				if(parent != null) parent.Cursor = Cursors.Default;
 				if(patch != null)
 				{
 					try
@@ -426,7 +426,6 @@
 				}
 				catch(GitException exc)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -473,16 +472,16 @@
 
 		private static void OnCheckoutPathClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
-			var parent = Utility.GetParentControl(item);
-			var data = (Tuple<IRevisionPointer, string>)item.Tag;
-			var rev = data.Item1;
-			var path = data.Item2;
-			var repo = rev.Repository;
+			var item		= (ToolStripItem)sender;
+			var parent		= Utility.GetParentControl(item);
+			var data		= (Tuple<IRevisionPointer, string>)item.Tag;
+			var revision	= data.Item1;
+			var path		= data.Item2;
+			var repository	= revision.Repository;
 
-			lock(repo.Status.SyncRoot)
+			lock(repository.Status.SyncRoot)
 			{
-				foreach(var f in repo.Status.UnstagedFiles)
+				foreach(var f in repository.Status.UnstagedFiles)
 				{
 					if(f.RelativePath == path)
 					{
@@ -502,13 +501,13 @@
 
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				rev.CheckoutPath(path);
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					revision.CheckoutPath(path);
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -556,13 +555,13 @@
 			}
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				revision.Checkout(force);
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					revision.Checkout(force);
+				}
 			}
 			catch(UntrackedFileWouldBeOverwrittenException)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				if(GitterApplication.MessageBoxService.Show(
 					parent,
 					string.Format(Resources.AskOverwriteUntracked, revision.Pointer),
@@ -575,7 +574,6 @@
 			}
 			catch(HaveLocalChangesException)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				if(GitterApplication.MessageBoxService.Show(
 					parent,
 					string.Format(Resources.AskThrowAwayLocalChanges, revision.Pointer),
@@ -588,7 +586,6 @@
 			}
 			catch(HaveConflictsException)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				if(GitterApplication.MessageBoxService.Show(
 					parent,
 					string.Format(Resources.AskThrowAwayConflictedChanges, revision.Pointer),
@@ -601,7 +598,6 @@
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -615,13 +611,13 @@
 		{
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				revision.Checkout(true);
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					revision.Checkout(true);
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -647,13 +643,13 @@
 			{
 				try
 				{
-					if(parent != null) parent.Cursor = Cursors.WaitCursor;
-					revision.Revert();
-					if(parent != null) parent.Cursor = Cursors.Default;
+					using(parent.ChangeCursor(Cursors.WaitCursor))
+					{
+						revision.Revert();
+					}
 				}
 				catch(GitException exc)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -682,13 +678,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				revisions.Revert();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					revisions.Revert();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -703,19 +699,20 @@
 			var item = (ToolStripItem)sender;
 			var data = (Tuple<Repository, ResetMode>)item.Tag;
 			var parent = Utility.GetParentControl(item);
+
 			using(var dlg = new SelectResetModeDialog(data.Item2))
 			{
 				if(dlg.Run(parent) == DialogResult.OK)
 				{
 					try
 					{
-						if(parent != null) parent.Cursor = Cursors.WaitCursor;
-						data.Item1.Status.Reset(dlg.ResetMode);
-						if(parent != null) parent.Cursor = Cursors.Default;
+						using(parent.ChangeCursor(Cursors.WaitCursor))
+						{
+							data.Item1.Status.Reset(dlg.ResetMode);
+						}
 					}
 					catch(GitException exc)
 					{
-						if(parent != null) parent.Cursor = Cursors.Default;
 						GitterApplication.MessageBoxService.Show(
 							parent,
 							exc.Message,
@@ -732,6 +729,7 @@
 			var item = (ToolStripItem)sender;
 			var revision = (IRevisionPointer)item.Tag;
 			var parent = Utility.GetParentControl(item);
+
 			using(var dlg = new SelectResetModeDialog()
 			{
 				ResetMode = ResetMode.Mixed
@@ -741,13 +739,13 @@
 				{
 					try
 					{
-						if(parent != null) parent.Cursor = Cursors.WaitCursor;
-						revision.ResetHeadHere(dlg.ResetMode);
-						if(parent != null) parent.Cursor = Cursors.Default;
+						using(parent.ChangeCursor(Cursors.WaitCursor))
+						{
+							revision.ResetHeadHere(dlg.ResetMode);
+						}
 					}
 					catch(GitException exc)
 					{
-						if(parent != null) parent.Cursor = Cursors.Default;
 						GitterApplication.MessageBoxService.Show(
 							parent,
 							exc.Message,
@@ -796,13 +794,13 @@
 			{
 				try
 				{
-					if(parent != null) parent.Cursor = Cursors.WaitCursor;
-					revision.CherryPick();
-					if(parent != null) parent.Cursor = Cursors.Default;
+					using(parent.ChangeCursor(Cursors.WaitCursor))
+					{
+						revision.CherryPick();
+					}
 				}
 				catch(HaveConflictsException)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						Resources.ErrCherryPickIsNotPossibleWithConflicts,
@@ -812,7 +810,6 @@
 				}
 				catch(HaveLocalChangesException)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						Resources.ErrCherryPickIsNotPossibleWithLocalChnges,
@@ -822,7 +819,6 @@
 				}
 				catch(AutomaticCherryPickFailedException)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					using(var dlg = new ConflictsDialog(revision.Repository))
 					{
 						dlg.Run(parent);
@@ -830,7 +826,6 @@
 				}
 				catch(GitException exc)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -859,13 +854,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				revisions.CherryPick();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					revisions.CherryPick();
+				}
 			}
 			catch(HaveConflictsException)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					Resources.ErrCherryPickIsNotPossibleWithConflicts,
@@ -875,7 +870,6 @@
 			}
 			catch(HaveLocalChangesException)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					Resources.ErrCherryPickIsNotPossibleWithLocalChnges,
@@ -885,7 +879,6 @@
 			}
 			catch(AutomaticCherryPickFailedException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -895,7 +888,6 @@
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -1554,13 +1546,13 @@
 						{
 							try
 							{
-								if(parent != null) parent.Cursor = Cursors.WaitCursor;
-								remoteBranch.Delete();
-								if(parent != null) parent.Cursor = Cursors.Default;
+								using(parent.ChangeCursor(Cursors.WaitCursor))
+								{
+									remoteBranch.Delete();
+								}
 							}
 							catch(GitException exc)
 							{
-								if(parent != null) parent.Cursor = Cursors.Default;
 								GitterApplication.MessageBoxService.Show(
 									parent,
 									exc.Message,
@@ -1576,13 +1568,13 @@
 					try
 					{
 						bool force = Control.ModifierKeys == Keys.Shift;
-						if(parent != null) parent.Cursor = Cursors.WaitCursor;
-						branch.Delete(force);
-						if(parent != null) parent.Cursor = Cursors.Default;
+						using(parent.ChangeCursor(Cursors.WaitCursor))
+						{
+							branch.Delete(force);
+						}
 					}
 					catch(BranchIsNotFullyMergedException)
 					{
-						if(parent != null) parent.Cursor = Cursors.Default;
 						if(GitterApplication.MessageBoxService.Show(
 							parent,
 							Resources.StrAskBranchIsNotFullyMerged.UseAsFormat(branch.Name),
@@ -1592,13 +1584,13 @@
 						{
 							try
 							{
-								if(parent != null) parent.Cursor = Cursors.WaitCursor;
-								branch.Delete(true);
-								if(parent != null) parent.Cursor = Cursors.Default;
+								using(parent.ChangeCursor(Cursors.WaitCursor))
+								{
+									branch.Delete(true);
+								}
 							}
 							catch(GitException exc)
 							{
-								if(parent != null) parent.Cursor = Cursors.Default;
 								GitterApplication.MessageBoxService.Show(
 									parent,
 									exc.Message,
@@ -1610,7 +1602,6 @@
 					}
 					catch(GitException exc)
 					{
-						if(parent != null) parent.Cursor = Cursors.Default;
 						GitterApplication.MessageBoxService.Show(
 							parent,
 							exc.Message,
@@ -1656,13 +1647,13 @@
 				{
 					try
 					{
-						if(parent != null) parent.Cursor = Cursors.WaitCursor;
-						revision.Repository.Head.Merge(revision);
-						if(parent != null) parent.Cursor = Cursors.Default;
+						using(parent.ChangeCursor(Cursors.WaitCursor))
+						{
+							revision.Repository.Head.Merge(revision);
+						}
 					}
 					catch(AutomaticMergeFailedException)
 					{
-						if(parent != null) parent.Cursor = Cursors.Default;
 						using(var dlg = new ConflictsDialog(revision.Repository))
 						{
 							dlg.Run(parent);
@@ -1670,7 +1661,6 @@
 					}
 					catch(GitException exc)
 					{
-						if(parent != null) parent.Cursor = Cursors.Default;
 						GitterApplication.MessageBoxService.Show(
 							parent,
 							exc.Message,
@@ -1769,13 +1759,13 @@
 			{
 				try
 				{
-					if(parent != null) parent.Cursor = Cursors.WaitCursor;
-					tag.Delete();
-					if(parent != null) parent.Cursor = Cursors.Default;
+					using(parent.ChangeCursor(Cursors.WaitCursor))
+					{
+						tag.Delete();
+					}
 				}
 				catch(GitException exc)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -2083,13 +2073,13 @@
 			{
 				try
 				{
-					parent.Cursor = Cursors.WaitCursor;
-					reference.Delete();
-					parent.Cursor = Cursors.Default;
+					using(parent.ChangeCursor(Cursors.WaitCursor))
+					{
+						reference.Delete();
+					}
 				}
 				catch(GitException exc)
 				{
-					parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -2108,13 +2098,10 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				parent.Cursor = Cursors.WaitCursor;
 				remote.PruneAsync().Invoke<ProgressForm>(parent);
-				parent.Cursor = Cursors.Default;
 			}
 			catch(GitException exc)
 			{
-				parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -2240,13 +2227,13 @@
 			{
 				try
 				{
-					if(parent != null) parent.Cursor = Cursors.WaitCursor;
-					remote.Delete();
-					if(parent != null) parent.Cursor = Cursors.Default;
+					using(parent.ChangeCursor(Cursors.WaitCursor))
+					{
+						remote.Delete();
+					}
 				}
 				catch(GitException exc)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -2785,13 +2772,13 @@
 			var data = (Tuple<TreeFile, ConflictResolution>)item.Tag;
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				data.Item1.ResolveConflict(data.Item2);
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					data.Item1.ResolveConflict(data.Item2);
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -2820,13 +2807,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				repository.Status.UnstageAll();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					repository.Status.UnstageAll();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -2852,13 +2839,13 @@
 				{
 					return;
 				}
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				treeItem.RemoveFromWorkingTree();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					treeItem.RemoveFromWorkingTree();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -2901,13 +2888,13 @@
 						paths.Add(treeItem.RelativePath);
 					}
 
-					if(parent != null) parent.Cursor = Cursors.WaitCursor;
-					repository.Status.RevertPaths(paths);
-					if(parent != null) parent.Cursor = Cursors.Default;
+					using(parent.ChangeCursor(Cursors.WaitCursor))
+					{
+						repository.Status.RevertPaths(paths);
+					}
 				}
 				catch(GitException exc)
 				{
-					if(parent != null) parent.Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -2937,13 +2924,13 @@
 						return;
 					}
 				}
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				treeItem.Revert();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					treeItem.Revert();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -3027,13 +3014,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				treeItem.Stage();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					treeItem.Stage();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -3052,13 +3039,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				repository.Status.Stage(treeItems);
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					repository.Status.Stage(treeItems);
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -3075,13 +3062,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				repository.Status.StageAll();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					repository.Status.StageAll();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -3098,13 +3085,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				repository.Status.StageUpdated();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					repository.Status.StageUpdated();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -3131,13 +3118,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				treeItem.Unstage();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					treeItem.Unstage();
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -3156,13 +3143,13 @@
 			var parent = Utility.GetParentControl(item);
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				repository.Status.Unstage(treeItems);
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					repository.Status.Unstage(treeItems);
+				}
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
@@ -3233,13 +3220,13 @@
 
 			try
 			{
-				if(parent != null) parent.Cursor = Cursors.WaitCursor;
-				parameter.Unset();
-				if(parent != null) parent.Cursor = Cursors.Default;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					parameter.Unset();
+				}
 			}
 			catch(ConfigParameterDoesNotExistException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				if(parameter.ConfigFile == ConfigFile.Repository)
 				{
 					if(GitterApplication.MessageBoxService.Show(
@@ -3285,7 +3272,6 @@
 			}
 			catch(GitException exc)
 			{
-				if(parent != null) parent.Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,

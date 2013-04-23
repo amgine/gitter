@@ -309,7 +309,6 @@
 
 		public bool Execute()
 		{
-			Cursor = Cursors.WaitCursor;
 			string fetchUrl = _txtFetchURL.Text.Trim();
 			string pushUrl = _txtPushURL.Text.Trim();
 			string proxy = _txtProxy.Text.Trim();
@@ -324,25 +323,26 @@
 			var tagFetchMode = TagFetchMode;
 			try
 			{
-				lock(Remote.Repository.Configuration.SyncRoot)
+				using(this.ChangeCursor(Cursors.WaitCursor))
 				{
-					Remote.FetchUrl = fetchUrl;
-					Remote.PushUrl = pushUrl;
-					Remote.Proxy = proxy;
-					Remote.VCS = vcs;
-					Remote.FetchRefspec = fetch;
-					Remote.PushRefspec = push;
-					Remote.ReceivePack = receivePack;
-					Remote.UploadPack = uploadPack;
-					Remote.Mirror = mirror;
-					Remote.SkipFetchAll = skipFetchAll;
-					Remote.TagFetchMode = tagFetchMode;
+					lock(Remote.Repository.Configuration.SyncRoot)
+					{
+						Remote.FetchUrl		= fetchUrl;
+						Remote.PushUrl		= pushUrl;
+						Remote.Proxy		= proxy;
+						Remote.VCS			= vcs;
+						Remote.FetchRefspec	= fetch;
+						Remote.PushRefspec	= push;
+						Remote.ReceivePack	= receivePack;
+						Remote.UploadPack	= uploadPack;
+						Remote.Mirror		= mirror;
+						Remote.SkipFetchAll	= skipFetchAll;
+						Remote.TagFetchMode	= tagFetchMode;
+					}
 				}
-				Cursor = Cursors.Default;
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

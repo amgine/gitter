@@ -250,22 +250,25 @@
 								}
 								mode = dlg.ResetMode;
 							}
-							Cursor = Cursors.WaitCursor;
-							_repository.Head.Reset(ptr, mode);
+							using(this.ChangeCursor(Cursors.WaitCursor))
+							{
+								_repository.Head.Reset(ptr, mode);
+							}
 						}
 						else
 						{
-							Cursor = Cursors.WaitCursor;
-							existent.Reset(ptr);
-							if(checkout)
+							using(this.ChangeCursor(Cursors.WaitCursor))
 							{
-								existent.Checkout(true);
+								existent.Reset(ptr);
+								if(checkout)
+								{
+									existent.Checkout(true);
+								}
 							}
 						}
 					}
 					catch(UnknownRevisionException)
 					{
-						Cursor = Cursors.Default;
 						NotificationService.NotifyInputError(
 							_txtRevision,
 							Resources.ErrInvalidRevisionExpression,
@@ -274,7 +277,6 @@
 					}
 					catch(GitException exc)
 					{
-						Cursor = Cursors.Default;
 						GitterApplication.MessageBoxService.Show(
 							this,
 							exc.Message,
@@ -295,30 +297,30 @@
 				var trackingMode = TrackingMode;
 				try
 				{
-					Cursor = Cursors.WaitCursor;
-					var ptr = _repository.GetRevisionPointer(refspec);
-					if(orphan)
+					using(this.ChangeCursor(Cursors.WaitCursor))
 					{
-						_repository.Refs.Heads.CreateOrphan(
-							branchName,
-							ptr,
-							trackingMode,
-							reflog);
+						var ptr = _repository.GetRevisionPointer(refspec);
+						if(orphan)
+						{
+							_repository.Refs.Heads.CreateOrphan(
+								branchName,
+								ptr,
+								trackingMode,
+								reflog);
+						}
+						else
+						{
+							_repository.Refs.Heads.Create(
+								branchName,
+								ptr,
+								trackingMode,
+								checkout,
+								reflog);
+						}
 					}
-					else
-					{
-						_repository.Refs.Heads.Create(
-							branchName,
-							ptr,
-							trackingMode,
-							checkout,
-							reflog);
-					}
-					Cursor = Cursors.Default;
 				}
 				catch(UnknownRevisionException)
 				{
-					Cursor = Cursors.Default;
 					NotificationService.NotifyInputError(
 						_txtRevision,
 						Resources.ErrInvalidRevisionExpression,
@@ -327,7 +329,6 @@
 				}
 				catch(BranchAlreadyExistsException)
 				{
-					Cursor = Cursors.Default;
 					NotificationService.NotifyInputError(
 						_txtName,
 						Resources.ErrInvalidBranchName,
@@ -336,7 +337,6 @@
 				}
 				catch(InvalidBranchNameException exc)
 				{
-					Cursor = Cursors.Default;
 					NotificationService.NotifyInputError(
 						_txtName,
 						Resources.ErrInvalidBranchName,
@@ -345,7 +345,6 @@
 				}
 				catch(GitException exc)
 				{
-					Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,

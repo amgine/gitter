@@ -165,14 +165,15 @@
 		{
 			int mainline	= MainlineParentCommit;
 			bool noCommit	= NoCommit;
-			Cursor = Cursors.WaitCursor;
 			try
 			{
-				RevisionPointer.CherryPick(mainline, noCommit);
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					RevisionPointer.CherryPick(mainline, noCommit);
+				}
 			}
 			catch(HaveConflictsException)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					Resources.ErrCherryPickIsNotPossibleWithConflicts,
@@ -182,7 +183,6 @@
 			}
 			catch(HaveLocalChangesException)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					Resources.ErrCherryPickIsNotPossibleWithLocalChnges,
@@ -203,7 +203,6 @@
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -211,7 +210,6 @@
 					MessageBoxButton.Close,
 					MessageBoxIcon.Error);
 			}
-			Cursor = Cursors.Default;
 			return true;
 		}
 

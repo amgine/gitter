@@ -100,14 +100,14 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				var ptr = _repository.GetRevisionPointer(revision);
-				ptr.AddNote(message);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					var ptr = _repository.GetRevisionPointer(revision);
+					ptr.AddNote(message);
+				}
 			}
 			catch(UnknownRevisionException)
 			{
-				Cursor = Cursors.Default;
 				NotificationService.NotifyInputError(
 					_txtRevision,
 					Resources.ErrInvalidRevisionExpression,
@@ -116,7 +116,6 @@
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

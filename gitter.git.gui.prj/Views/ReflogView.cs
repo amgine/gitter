@@ -5,6 +5,7 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using gitter.Git.Gui.Controls;
@@ -150,14 +151,9 @@
 		{
 			if(Reflog != null)
 			{
-				_lstReflog.Cursor = Cursors.WaitCursor;
-				try
+				using(this.ChangeCursor(Cursors.WaitCursor))
 				{
 					Reflog.Refresh();
-				}
-				finally
-				{
-					_lstReflog.Cursor = Cursors.Default;
 				}
 			}
 		}

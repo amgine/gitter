@@ -42,7 +42,7 @@
 			this._cmdRemoveLocalOnly.Size = new System.Drawing.Size(319, 66);
 			this._cmdRemoveLocalOnly.TabIndex = 0;
 			this._cmdRemoveLocalOnly.Text = "%Local repository only%";
-			this._cmdRemoveLocalOnly.Click += new System.EventHandler(this._cmdRemoveLocalOnly_Click);
+			this._cmdRemoveLocalOnly.Click += new System.EventHandler(this.OnRemoveLocalOnlyClick);
 			// 
 			// _cmdRemoveFromRemote
 			// 
@@ -53,7 +53,7 @@
 			this._cmdRemoveFromRemote.Size = new System.Drawing.Size(319, 66);
 			this._cmdRemoveFromRemote.TabIndex = 1;
 			this._cmdRemoveFromRemote.Text = "%Local and remote repository%";
-			this._cmdRemoveFromRemote.Click += new System.EventHandler(this._cmdRemoveFromRemote_Click);
+			this._cmdRemoveFromRemote.Click += new System.EventHandler(this.OnRemoveFromRemoteClick);
 			// 
 			// _lblRemoveBranch
 			// 

@@ -857,13 +857,13 @@
 					{
 						try
 						{
-							Cursor = Cursors.WaitCursor;
-							revision.ResetHeadHere(dlg.ResetMode);
-							Cursor = Cursors.Default;
+							using(this.ChangeCursor(Cursors.WaitCursor))
+							{
+								revision.ResetHeadHere(dlg.ResetMode);
+							}
 						}
 						catch(GitException exc)
 						{
-							Cursor = Cursors.Default;
 							GitterApplication.MessageBoxService.Show(
 								this,
 								exc.Message,
@@ -878,13 +878,13 @@
 			{
 				try
 				{
-					Cursor = Cursors.WaitCursor;
-					branch.Reset(revision);
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						branch.Reset(revision);
+					}
 				}
 				catch(GitException exc)
 				{
-					Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,

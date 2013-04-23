@@ -6374,6 +6374,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Staged changes.
+        /// </summary>
+        internal static string StrsStagedChanges {
+            get {
+                return ResourceManager.GetString("StrsStagedChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Stage.
         /// </summary>
         internal static string StrStage {
@@ -6532,6 +6541,15 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrsUnknown {
             get {
                 return ResourceManager.GetString("StrsUnknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unstaged changes.
+        /// </summary>
+        internal static string StrsUnstagedChanges {
+            get {
+                return ResourceManager.GetString("StrsUnstagedChanges", resourceCulture);
             }
         }
         

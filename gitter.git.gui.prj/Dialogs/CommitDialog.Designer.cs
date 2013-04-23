@@ -87,7 +87,7 @@
 			this._chkAmend.TabIndex = 1;
 			this._chkAmend.Text = "%Amend%";
 			this._chkAmend.UseVisualStyleBackColor = true;
-			this._chkAmend.CheckedChanged += new System.EventHandler(this._chkAmend_CheckedChanged);
+			this._chkAmend.CheckedChanged += new System.EventHandler(this.OnAmendCheckedChanged);
 			// 
 			// CommitDialog
 			// 

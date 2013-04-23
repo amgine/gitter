@@ -99,36 +99,36 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				if(_configFile == ConfigFile.Repository)
+				using(this.ChangeCursor(Cursors.WaitCursor))
 				{
-					var p = _repository.Configuration.TryGetParameter(name);
-					if(p != null)
+					if(_configFile == ConfigFile.Repository)
 					{
-						p.Value = value;
+						var p = _repository.Configuration.TryGetParameter(name);
+						if(p != null)
+						{
+							p.Value = value;
+						}
+						else
+						{
+							_repository.Configuration.CreateParameter(name, value);
+						}
 					}
 					else
 					{
-						_repository.Configuration.CreateParameter(name, value);
+						var gitRepositoryProvider = _environment.GetRepositoryProvider<IGitRepositoryProvider>();
+						if(gitRepositoryProvider != null)
+						{
+							gitRepositoryProvider.GitAccessor.SetConfigValue(
+								new SetConfigValueParameters(name, value)
+								{
+									ConfigFile = _configFile,
+								});
+						}
 					}
 				}
-				else
-				{
-					var gitRepositoryProvider = _environment.GetRepositoryProvider<IGitRepositoryProvider>();
-					if(gitRepositoryProvider != null)
-					{
-						gitRepositoryProvider.GitAccessor.SetConfigValue(
-							new SetConfigValueParameters(name, value)
-							{
-								ConfigFile = _configFile,
-							});
-					}
-				}
-				Cursor = Cursors.Default;
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

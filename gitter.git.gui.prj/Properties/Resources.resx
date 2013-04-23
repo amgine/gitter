@@ -2583,4 +2583,10 @@ Reset existing branch instead of creating a new one?</value>
   <data name="TipRevertNoCommit" xml:space="preserve">
     <value>The revert is done against the beginning state of your index and no commit is created in process.</value>
   </data>
+  <data name="StrsStagedChanges" xml:space="preserve">
+    <value>Staged changes</value>
+  </data>
+  <data name="StrsUnstagedChanges" xml:space="preserve">
+    <value>Unstaged changes</value>
+  </data>
 </root>

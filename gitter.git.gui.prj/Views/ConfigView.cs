@@ -6,6 +6,7 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -57,9 +58,10 @@
 			{
 				if(Repository != null)
 				{
-					Cursor = Cursors.WaitCursor;
-					Repository.Configuration.Refresh();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						Repository.Configuration.Refresh();
+					}
 				}
 			}
 		}

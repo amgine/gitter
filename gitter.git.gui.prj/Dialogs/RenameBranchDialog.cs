@@ -72,17 +72,19 @@
 
 			if(oldName == newName) return true;
 			if(!ValidateNewBranchName(newName, _txtNewName, repository))
+			{
 				return false;
+			}
 
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				_branch.Name = newName;
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					_branch.Name = newName;
+				}
 			}
 			catch(BranchAlreadyExistsException)
 			{
-				Cursor = Cursors.Default;
 				NotificationService.NotifyInputError(
 					_txtNewName,
 					Resources.ErrInvalidBranchName,
@@ -91,7 +93,6 @@
 			}
 			catch(InvalidBranchNameException exc)
 			{
-				Cursor = Cursors.Default;
 				NotificationService.NotifyInputError(
 					_txtNewName,
 					Resources.ErrInvalidBranchName,
@@ -100,7 +101,6 @@
 			}
 			catch(Exception exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

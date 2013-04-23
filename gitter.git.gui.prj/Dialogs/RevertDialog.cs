@@ -167,14 +167,15 @@
 		{
 			int mainline	= MainlineParentCommit;
 			bool noCommit	= NoCommit;
-			Cursor = Cursors.WaitCursor;
 			try
 			{
-				RevisionPointer.Revert(mainline, noCommit);
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					RevisionPointer.Revert(mainline, noCommit);
+				}
 			}
 			catch(Exception exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -183,7 +184,6 @@
 					MessageBoxIcon.Error);
 				return false;
 			}
-			Cursor = Cursors.Default;
 			return true;
 		}
 

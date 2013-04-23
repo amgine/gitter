@@ -46,9 +46,9 @@
 			_chkAmend.Control.TabIndex = 12;
 			_chkAmend.IsCheckedChanged += OnAmendCheckedChanged;
 
-			_lblStaged.Text = Resources.StrStagedChanges.AddColon();
+			_lblStaged.Text = Resources.StrsStagedChanges.AddColon();
 			_lstStaged.Text = Resources.StrNoStagedChanges;
-			_lblUnstaged.Text = Resources.StrUnstagedChanges.AddColon();
+			_lblUnstaged.Text = Resources.StrsUnstagedChanges.AddColon();
 			_lstUnstaged.Text = Resources.StrNoUnstagedChanges;
 			_lblMessage.Text = Resources.StrMessage.AddColon();
 			_chkAmend.Text = Resources.StrAmend;
@@ -191,13 +191,14 @@
 			{
 				if(Repository != null)
 				{
-					Cursor = Cursors.WaitCursor;
-					_lstStaged.BeginUpdate();
-					_lstUnstaged.BeginUpdate();
-					Repository.Status.Refresh();
-					_lstStaged.EndUpdate();
-					_lstUnstaged.EndUpdate();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						_lstStaged.BeginUpdate();
+						_lstUnstaged.BeginUpdate();
+						Repository.Status.Refresh();
+						_lstStaged.EndUpdate();
+						_lstUnstaged.EndUpdate();
+					}
 				}
 			}
 		}
@@ -311,13 +312,13 @@
 			{
 				try
 				{
-					Cursor = Cursors.WaitCursor;
-					item.DataContext.Unstage();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						item.DataContext.Unstage();
+					}
 				}
 				catch(GitException exc)
 				{
-					Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,
@@ -335,13 +336,13 @@
 			{
 				try
 				{
-					Cursor = Cursors.WaitCursor;
-					item.DataContext.Stage();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						item.DataContext.Stage();
+					}
 				}
 				catch(GitException exc)
 				{
-					Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,
@@ -383,13 +384,13 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				Repository.Status.Commit(message, amend);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					Repository.Status.Commit(message, amend);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

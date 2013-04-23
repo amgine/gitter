@@ -165,11 +165,12 @@
 			this._lstReferences.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._lstReferences.DisableContextMenus = true;
+			this._lstReferences.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstReferences.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
-			this._lstReferences.Location = new System.Drawing.Point(3, 16);
+			this._lstReferences.Location = new System.Drawing.Point(3, 18);
 			this._lstReferences.Name = "_lstReferences";
 			this._lstReferences.ShowTreeLines = true;
-			this._lstReferences.Size = new System.Drawing.Size(379, 185);
+			this._lstReferences.Size = new System.Drawing.Size(379, 183);
 			this._lstReferences.TabIndex = 0;
 			// 
 			// _grpPushTo

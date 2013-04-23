@@ -29,7 +29,7 @@
 			Text = Resources.StrCommit;
 
 			_lblMessage.Text = Resources.StrMessage.AddColon();
-			_lblStagedFiles.Text = Resources.StrStagedChanges.AddColon();
+			_lblStagedFiles.Text = Resources.StrsStagedChanges.AddColon();
 			_chkAmend.Text = Resources.StrAmend;
 
 			for(int i = 0; i < _lstStaged.Columns.Count; ++i)
@@ -76,22 +76,19 @@
 			get { return Resources.StrCommit; }
 		}
 
-		private void _chkAmend_CheckedChanged(object sender, EventArgs e)
+		private void OnAmendCheckedChanged(object sender, EventArgs e)
 		{
-			if(_chkAmend.Checked)
+			if(_chkAmend.Checked && _txtMessage.TextLength == 0)
 			{
-				if(_txtMessage.TextLength == 0)
+				var rev = Repository.Head.Revision;
+				_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));
+				if(!string.IsNullOrEmpty(rev.Body))
 				{
-					var rev = Repository.Head.Revision;
-					_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));
-					if(!string.IsNullOrEmpty(rev.Body))
-					{
-						_txtMessage.AppendText(Environment.NewLine);
-						_txtMessage.AppendText(Environment.NewLine);
-						_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
-					}
-					_txtMessage.SelectAll();
+					_txtMessage.AppendText(Environment.NewLine);
+					_txtMessage.AppendText(Environment.NewLine);
+					_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
 				}
+				_txtMessage.SelectAll();
 			}
 		}
 
@@ -127,13 +124,13 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				_repository.Status.Commit(message, amend);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					_repository.Status.Commit(message, amend);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

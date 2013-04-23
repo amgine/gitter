@@ -52,9 +52,9 @@
 			this._pnlOptions.Controls.Add(this._chkNoCommit);
 			this._pnlOptions.Controls.Add(this._grpOptions);
 			this._pnlOptions.Controls.Add(this._chkSquash);
-			this._pnlOptions.Location = new System.Drawing.Point(231, 270);
+			this._pnlOptions.Location = new System.Drawing.Point(228, 270);
 			this._pnlOptions.Name = "_pnlOptions";
-			this._pnlOptions.Size = new System.Drawing.Size(408, 86);
+			this._pnlOptions.Size = new System.Drawing.Size(411, 86);
 			this._pnlOptions.TabIndex = 14;
 			// 
 			// _chkNoFF
@@ -85,7 +85,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpOptions.Location = new System.Drawing.Point(0, 0);
 			this._grpOptions.Name = "_grpOptions";
-			this._grpOptions.Size = new System.Drawing.Size(408, 19);
+			this._grpOptions.Size = new System.Drawing.Size(411, 19);
 			this._grpOptions.TabIndex = 0;
 			this._grpOptions.Text = "%Options%";
 			// 
@@ -110,7 +110,7 @@
 			this._lnkAutoFormat.TabStop = true;
 			this._lnkAutoFormat.Text = "%Auto%";
 			this._lnkAutoFormat.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this._lnkAutoFormat.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._lnkAutoFormat_LinkClicked);
+			this._lnkAutoFormat.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.OnAutoFormatLinkClicked);
 			// 
 			// _lblMessage
 			// 

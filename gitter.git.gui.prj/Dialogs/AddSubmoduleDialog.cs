@@ -67,6 +67,8 @@
 			_txtBranch.Enabled = _chkBranch.Checked;
 		}
 
+		#region IExecutableDialog
+
 		public bool Execute()
 		{
 			var path = _txtPath.Text.Trim();
@@ -89,13 +91,13 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				_repository.Submodules.Create(path, url, branch);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					_repository.Submodules.Create(path, url, branch);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -106,5 +108,7 @@
 			}
 			return true;
 		}
+
+		#endregion
 	}
 }

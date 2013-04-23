@@ -305,15 +305,16 @@
 				if(_pendingRequest != null) return;
 				if(Repository != null && _logSource != null)
 				{
-					Cursor = Cursors.WaitCursor;
-					_lstRevisions.BeginUpdate();
-					Repository.Status.Refresh();
-					_log = _logSource.GetLog(_options);
-					var state = _lstRevisions.GetState();
-					_lstRevisions.SetLog(_log);
-					_lstRevisions.SetState(state);
-					_lstRevisions.EndUpdate();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						_lstRevisions.BeginUpdate();
+						Repository.Status.Refresh();
+						_log = _logSource.GetLog(_options);
+						var state = _lstRevisions.GetState();
+						_lstRevisions.SetLog(_log);
+						_lstRevisions.SetState(state);
+						_lstRevisions.EndUpdate();
+					}
 				}
 			}
 		}

@@ -54,15 +54,19 @@
 			var branchName = _txtBranchName.Text.Trim();
 
 			if(!ValidateNewBranchName(branchName, _txtBranchName, _stashedState.Repository))
+			{
 				return false;
+			}
 
 			try
 			{
-				_stashedState.ToBranch(branchName);
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					_stashedState.ToBranch(branchName);
+				}
 			}
 			catch(Exception exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

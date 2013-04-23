@@ -6,6 +6,7 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
@@ -68,9 +69,10 @@
 			{
 				if(Repository != null)
 				{
-					Cursor = Cursors.WaitCursor;
-					Repository.Remotes.Refresh();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						Repository.Remotes.Refresh();
+					}
 				}
 			}
 		}

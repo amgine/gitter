@@ -15,7 +15,13 @@
 
 	public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 	{
+		#region Data
+
 		private Repository _repository;
+
+		#endregion
+
+		#region .ctor
 
 		public ApplyPatchesDialog(Repository repository)
 		{
@@ -45,6 +51,8 @@
 			_grpOptions.Text = Resources.StrOptions;
 			_chkReverse.Text = Resources.StrReverse;
 		}
+
+		#endregion
 
 		#region Properties
 
@@ -117,6 +125,20 @@
 
 		#endregion
 
+		#region Methods
+
+		private void AddPatchSource(IPatchSource patchSource)
+		{
+			Assert.IsNotNull(patchSource);
+
+			var item = new PatchSourceListItem(patchSource);
+			item.CheckedState = Framework.Controls.CheckedState.Checked;
+			_lstPatches.Items.Add(item);
+			item.FocusAndSelect();
+		}
+
+		#endregion
+
 		#region Event Handlers
 
 		private void OnPatchesKeyDown(object sender, KeyEventArgs e)
@@ -170,13 +192,7 @@
 
 		#endregion
 
-		private void AddPatchSource(IPatchSource patchSource)
-		{
-			var item = new PatchSourceListItem(patchSource);
-			item.CheckedState = Framework.Controls.CheckedState.Checked;
-			_lstPatches.Items.Add(item);
-			item.FocusAndSelect();
-		}
+		#region IExecutableDialog
 
 		public bool Execute()
 		{
@@ -185,13 +201,13 @@
 			var sources = SelectedPatchSources;
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				Repository.Status.ApplyPatches(sources, applyTo, reverse);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					Repository.Status.ApplyPatches(sources, applyTo, reverse);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -202,5 +218,7 @@
 			}
 			return true;
 		}
+
+		#endregion
 	}
 }

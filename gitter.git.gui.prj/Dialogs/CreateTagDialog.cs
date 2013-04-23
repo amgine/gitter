@@ -217,31 +217,35 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				var ptr = _repository.GetRevisionPointer(refspec);
-				if(annotated)
+				using(this.ChangeCursor(Cursors.WaitCursor))
 				{
-					if(signed)
+					var ptr = _repository.GetRevisionPointer(refspec);
+					if(annotated)
 					{
-						if(keyId == null)
-							_repository.Refs.Tags.Create(name, ptr, message, true);
+						if(signed)
+						{
+							if(keyId == null)
+							{
+								_repository.Refs.Tags.Create(name, ptr, message, true);
+							}
+							else
+							{
+								_repository.Refs.Tags.Create(name, ptr, message, keyId);
+							}
+						}
 						else
-							_repository.Refs.Tags.Create(name, ptr, message, keyId);
+						{
+							_repository.Refs.Tags.Create(name, ptr, message, false);
+						}
 					}
 					else
 					{
-						_repository.Refs.Tags.Create(name, ptr, message, false);
+						_repository.Refs.Tags.Create(name, ptr);
 					}
 				}
-				else
-				{
-					_repository.Refs.Tags.Create(name, ptr);
-				}
-				Cursor = Cursors.Default;
 			}
 			catch(TagAlreadyExistsException)
 			{
-				Cursor = Cursors.Default;
 				NotificationService.NotifyInputError(
 					_txtName,
 					Resources.ErrInvalidTagName,
@@ -250,7 +254,6 @@
 			}
 			catch(UnknownRevisionException)
 			{
-				Cursor = Cursors.Default;
 				NotificationService.NotifyInputError(
 					_txtRevision,
 					Resources.ErrInvalidRevisionExpression,
@@ -259,7 +262,6 @@
 			}
 			catch(InvalidTagNameException exc)
 			{
-				Cursor = Cursors.Default;
 				NotificationService.NotifyInputError(
 					_txtName,
 					Resources.ErrInvalidTagName,
@@ -268,7 +270,6 @@
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

@@ -51,9 +51,16 @@
 			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtUrl);
 		}
 
+		#region Properties
+
 		protected override string ActionVerb
 		{
 			get { return Resources.StrAdd; }
+		}
+
+		public Repository Repository
+		{
+			get { return _repository; }
 		}
 
 		public string RemoteName
@@ -66,6 +73,18 @@
 		{
 			get { return _txtUrl.Text; }
 			set { _txtUrl.Text = value; }
+		}
+
+		public bool Fetch
+		{
+			get { return _chkFetch.Checked; }
+			set { _chkFetch.Checked = value; }
+		}
+
+		public bool Mirror
+		{
+			get { return _chkMirror.Checked; }
+			set { _chkMirror.Checked = value; }
 		}
 
 		public TagFetchMode TagFetchMode
@@ -101,10 +120,14 @@
 			}
 		}
 
+		#endregion
+
+		#region IExecutableDialog
+
 		public bool Execute()
 		{
 			var name = _txtName.Text.Trim();
-			if(!ValidateNewRemoteName(name, _txtName, _repository))
+			if(!ValidateNewRemoteName(name, _txtName, Repository))
 			{
 				return false;
 			}
@@ -113,18 +136,18 @@
 			{
 				return false;
 			}
-			bool fetch = _chkFetch.Checked;
-			bool mirror = _chkMirror.Checked;
-			var tagFetchMode = TagFetchMode;
-			Cursor = Cursors.WaitCursor;
+			bool fetch			= Fetch;
+			bool mirror			= Mirror;
+			var tagFetchMode	= TagFetchMode;
 			try
 			{
-				_repository.Remotes.AddRemote(name, url, fetch, mirror, tagFetchMode);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					Repository.Remotes.AddRemote(name, url, fetch, mirror, tagFetchMode);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -135,5 +158,7 @@
 			}
 			return true;
 		}
+
+		#endregion
 	}
 }

@@ -57,9 +57,9 @@
 
 		public bool Execute()
 		{
-			var repository = _remote.Repository;
-			var oldName = _txtOldName.Text;
-			var newName = _txtNewName.Text.Trim();
+			var repository	= _remote.Repository;
+			var oldName		= _txtOldName.Text;
+			var newName		= _txtNewName.Text.Trim();
 			if(oldName == newName) return true;
 			if(newName.Length == 0)
 			{
@@ -88,13 +88,13 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				_remote.Name = newName;
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					Remote.Name = newName;
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

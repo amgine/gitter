@@ -146,13 +146,13 @@
 			}
 			try
 			{
-				Cursor = Cursors.WaitCursor;
-				Repository.Init(GitRepositoryProvider.GitAccessor, _repositoryPath, template, bare);
-				Cursor = Cursors.Default;
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					Repository.Init(GitRepositoryProvider.GitAccessor, _repositoryPath, template, bare);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

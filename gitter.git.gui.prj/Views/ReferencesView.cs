@@ -6,6 +6,7 @@
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	using gitter.Git.Gui.Controls;
@@ -71,11 +72,12 @@
 			{
 				if(Repository != null)
 				{
-					Cursor = Cursors.WaitCursor;
-					_lstReferences.BeginUpdate();
-					Repository.Refs.Refresh();
-					_lstReferences.EndUpdate();
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						_lstReferences.BeginUpdate();
+						Repository.Refs.Refresh();
+						_lstReferences.EndUpdate();
+					}
 				}
 			}
 		}

@@ -65,31 +65,6 @@
 			_references.SelectionChanged += OnReferencesSelectionChanged;
 		}
 
-		private void OnReferencesSelectionChanged(object sender, EventArgs e)
-		{
-			if(_references.SelectedItems.Count == 0)
-			{
-				_mergeFrom = null;
-			}
-			else
-			{
-				var item = _references.SelectedItems[0] as IRevisionPointerListItem;
-				if(item == null)
-				{
-					_mergeFrom = null;
-				}
-				else
-				{
-					_mergeFrom = item.RevisionPointer;
-				}
-			}
-		}
-
-		protected override string ActionVerb
-		{
-			get { return Resources.StrMerge; }
-		}
-
 		public void EnableMultipleBrunchesMerge()
 		{
 			if(!_multipleBranchesMerge)
@@ -156,15 +131,6 @@
 			return null;
 		}
 
-		private void OnItemActivated(object sender, ItemEventArgs e)
-		{
-			var item = e.Item as IRevisionPointerListItem;
-			if(item != null)
-			{
-				_mergeFrom = item.RevisionPointer;
-			}
-		}
-
 		private void AutoFormatMessage()
 		{
 			if(_multipleBranchesMerge)
@@ -193,9 +159,40 @@
 			}
 		}
 
-		private void _lnkAutoFormat_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		#region Event Handlers
+
+		private void OnReferencesSelectionChanged(object sender, EventArgs e)
+		{
+			if(_references.SelectedItems.Count == 0)
+			{
+				_mergeFrom = null;
+			}
+			else
+			{
+				var item = _references.SelectedItems[0] as IRevisionPointerListItem;
+				if(item == null)
+				{
+					_mergeFrom = null;
+				}
+				else
+				{
+					_mergeFrom = item.RevisionPointer;
+				}
+			}
+		}
+
+		private void OnAutoFormatLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			AutoFormatMessage();
+		}
+
+		#endregion
+
+		#region Properties
+
+		protected override string ActionVerb
+		{
+			get { return Resources.StrMerge; }
 		}
 
 		public string Message
@@ -203,6 +200,26 @@
 			get { return _txtMessage.Text; }
 			set { _txtMessage.Text = value; }
 		}
+
+		public bool NoCommit
+		{
+			get { return _chkNoCommit.Checked; }
+			set { _chkNoCommit.Checked = value; }
+		}
+
+		public bool Squash
+		{
+			get { return _chkSquash.Checked; }
+			set { _chkSquash.Checked = value; }
+		}
+
+		public bool NoFastForward
+		{
+			get { return _chkNoFF.Checked; }
+			set { _chkNoFF.Checked = value; }
+		}
+
+		#endregion
 
 		private List<IRevisionPointer> GetSelectedBranches()
 		{
@@ -228,10 +245,10 @@
 
 		public bool Execute()
 		{
-			bool noCommit = _chkNoCommit.Checked;
-			bool noFastForward = _chkNoFF.Checked;
-			bool squash = _chkSquash.Checked;
-			string message = _txtMessage.Text;
+			bool noCommit		= NoCommit;
+			bool noFastForward	= NoFastForward;
+			bool squash			= Squash;
+			string message		= Message;
 
 			if(_multipleBranchesMerge)
 			{
@@ -246,14 +263,13 @@
 				}
 				try
 				{
-					Cursor = Cursors.WaitCursor;
-					_repository.Head.Merge(
-						branches, noCommit, noFastForward, squash, message);
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						_repository.Head.Merge(branches, noCommit, noFastForward, squash, message);
+					}
 				}
 				catch(GitException exc)
 				{
-					Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,
@@ -276,13 +292,13 @@
 				}
 				try
 				{
-					Cursor = Cursors.WaitCursor;
-					_repository.Head.Merge(MergeFrom, noCommit, noFastForward, squash, message);
-					Cursor = Cursors.Default;
+					using(this.ChangeCursor(Cursors.WaitCursor))
+					{
+						_repository.Head.Merge(MergeFrom, noCommit, noFastForward, squash, message);
+					}
 				}
 				catch(AutomaticMergeFailedException exc)
 				{
-					Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,
@@ -293,7 +309,6 @@
 				}
 				catch(GitException exc)
 				{
-					Cursor = Cursors.Default;
 					GitterApplication.MessageBoxService.Show(
 						this,
 						exc.Message,

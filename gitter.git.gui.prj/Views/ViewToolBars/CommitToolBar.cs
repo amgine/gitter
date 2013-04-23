@@ -122,24 +122,21 @@ namespace gitter.Git.Gui.Views
 
 		private void Reset(ResetMode mode)
 		{
-			Cursor = Cursors.WaitCursor;
 			try
 			{
-				_commitView.Repository.Status.Reset(mode);
+				using(_commitView.ChangeCursor(Cursors.WaitCursor))
+				{
+					_commitView.Repository.Status.Reset(mode);
+				}
 			}
 			catch(GitException exc)
 			{
-				Cursor = Cursors.Default;
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
 					Resources.ErrFailedToReset,
 					MessageBoxButton.Close,
 					MessageBoxIcon.Error);
-			}
-			finally
-			{
-				Cursor = Cursors.Default;
 			}
 		}
 
