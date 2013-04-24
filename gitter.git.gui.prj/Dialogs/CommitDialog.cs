@@ -15,8 +15,12 @@
 	/// <summary>Dialog for creating commit.</summary>
 	public partial class CommitDialog : GitDialogBase, IExecutableDialog
 	{
+		#region Data
+
 		private readonly Repository _repository;
 		private TextBoxSpellChecker _speller;
+
+		#endregion
 
 		public CommitDialog(Repository repository)
 		{
@@ -25,12 +29,7 @@
 			_repository = repository;
 
 			InitializeComponent();
-
-			Text = Resources.StrCommit;
-
-			_lblMessage.Text = Resources.StrMessage.AddColon();
-			_lblStagedFiles.Text = Resources.StrsStagedChanges.AddColon();
-			_chkAmend.Text = Resources.StrAmend;
+			Localize();
 
 			for(int i = 0; i < _lstStaged.Columns.Count; ++i)
 			{
@@ -52,6 +51,14 @@
 			}
 
 			_txtMessage.Text = repository.Status.LoadCommitMessage();
+		}
+
+		private void Localize()
+		{
+			Text = Resources.StrCommitChanges;
+			_lblMessage.Text = Resources.StrMessage.AddColon();
+			_lblStagedFiles.Text = Resources.StrsStagedChanges.AddColon();
+			_chkAmend.Text = Resources.StrAmend;
 		}
 
 		protected override void OnClosed(DialogResult result)

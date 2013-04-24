@@ -38,7 +38,7 @@
 			_txtRevision.Text = revisionPointer.Pointer;
 			_grpMainlineParentCommit.Text = Resources.StrMainlineParentCommit;
 			_grpOptions.Text = Resources.StrOptions;
-			_chkNoCommit.Text = Resources.StrNoCommit;
+			_chkNoCommit.Text = Resources.StrsNoCommit;
 			ToolTipService.Register(_chkNoCommit, Resources.TipRevertNoCommit);
 
 			_txtRevision.Text = _revisionPointer.Pointer;

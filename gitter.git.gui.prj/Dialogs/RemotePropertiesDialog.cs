@@ -122,18 +122,18 @@
 			_lblProxy.Text = Resources.StrProxy.AddColon();
 			_lblVCS.Text = Resources.StrVCS.AddColon();
 
-			_grpUpdatedReferences.Text = Resources.StrUpdatedReferences;
+			_grpUpdatedReferences.Text = Resources.StrsUpdatedReferences;
 			_lblRefspec.Text = Resources.StrRefspec.AddColon();
 			_btnAddRefspec.Text = Resources.StrAdd;
 
-			_grpOptions.Text = Resources.StrDefaultBehavior;
+			_grpOptions.Text = Resources.StrsDefaultBehavior;
 
-			_lblReceivePack.Text = Resources.StrReceivePack.AddColon();
-			_lblUploadPack.Text = Resources.StrUploadPack.AddColon();
+			_lblReceivePack.Text = Resources.StrsReceivePack.AddColon();
+			_lblUploadPack.Text = Resources.StrsUploadPack.AddColon();
 
 			_chkMirror.Text = Resources.StrMirror;
 			_chkSkipFetchAll.Text = Resources.StrSkipFetchAll;
-			_lblFetchTags.Text = Resources.StrFetchTags.AddColon();
+			_lblFetchTags.Text = Resources.StrsFetchTags.AddColon();
 
 			_radNormal.Text = Resources.StrDefault;
 			_radFetchAll.Text = Resources.StrAll;

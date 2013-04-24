@@ -23,7 +23,7 @@
 			InitializeComponent();
 
 			Text = Resources.StrSubmodules;
-			_lstSubmodules.Text = Resources.StrNoSubmodules;
+			_lstSubmodules.Text = Resources.StrsNoSubmodules;
 			_lstSubmodules.PreviewKeyDown += OnKeyDown;
 
 			AddTopToolStrip(_toolBar = new SubmodulesToolbar(this));

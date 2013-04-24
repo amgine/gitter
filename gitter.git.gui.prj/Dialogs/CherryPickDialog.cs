@@ -36,7 +36,7 @@
 			_lblRevision.Text = Resources.StrRevision.AddColon();
 			_grpMainlineParentCommit.Text = Resources.StrMainlineParentCommit;
 			_grpOptions.Text = Resources.StrOptions;
-			_chkNoCommit.Text = Resources.StrNoCommit;
+			_chkNoCommit.Text = Resources.StrsNoCommit;
 			ToolTipService.Register(_chkNoCommit, Resources.TipCherryPickNoCommit);
 
 			_txtRevision.Text = revisionPointer.Pointer;

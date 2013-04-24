@@ -34,14 +34,14 @@
 			_chkAppendRepositoryNameFromUrl.Text = Resources.StrsAppendRepositoryNameFromURL;
 			_lblWillBeClonedInto.Text = Resources.StrsWillBeClonedInto.AddColon();
 			_chkUseTemplate.Text = Resources.StrTemplate.AddColon();
-			_lblRemoteName.Text = Resources.StrRemoteName.AddColon();
+			_lblRemoteName.Text = Resources.StrsRemoteName.AddColon();
 			_txtRemoteName.Text = GitConstants.DefaultRemoteName;
 			_chkBare.Text = Resources.StrBare;
 			_chkMirror.Text = Resources.StrMirror;
-			_chkShallowClone.Text = Resources.StrShallowClone;
+			_chkShallowClone.Text = Resources.StrsShallowClone;
 			_chkRecursive.Text = Resources.StrRecursive;
 			_lblDepth.Text = Resources.StrDepth.AddColon();
-			_chkNoCheckout.Text = Resources.StrNoCheckout;
+			_chkNoCheckout.Text = Resources.StrsNoCheckout;
 
 			UpdateTargetPathText();
 

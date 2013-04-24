@@ -32,25 +32,8 @@
 			_repository = repository;
 
 			InitializeComponent();
-
-			Text = Resources.StrMerge;
-
-			_references.Text = Resources.StrNoBranchesToMergeWith;
-			_references.DisableContextMenus = true;
-
-			_lblMergeWith.Text = Resources.StrMergeWith.AddColon();
-			_grpOptions.Text = Resources.StrOptions;
-			_lblMessage.Text = Resources.StrMessage.AddColon();
-			_lnkAutoFormat.Text = Resources.StrAutoFormat;
-			_chkNoFF.Text = Resources.StrNoFastForward;
-			_chkNoCommit.Text = Resources.StrNoCommit;
-			_chkSquash.Text = Resources.StrSquash;
-
-			ToolTipService.Register(_chkNoFF, Resources.TipNoFF);
-			ToolTipService.Register(_chkNoCommit, Resources.TipMergeNoCommit);
-			ToolTipService.Register(_chkSquash, Resources.TipSquash);
-
-			_unmergedBranches = _repository.Refs.GetUnmergedBranches();
+			Localize();
+			SetupTooltips();
 
 			if(SpellingService.Enabled)
 			{
@@ -59,10 +42,32 @@
 
 			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
 
+			_unmergedBranches = _repository.Refs.GetUnmergedBranches();
+			_references.DisableContextMenus = true;
 			_references.Style = GitterApplication.DefaultStyle;
 			_references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,
 				reference => _unmergedBranches.Contains(reference as BranchBase));
 			_references.SelectionChanged += OnReferencesSelectionChanged;
+		}
+
+		private void Localize()
+		{
+			Text = Resources.StrMergeBranches;
+			_references.Text = Resources.StrNoBranchesToMergeWith;
+			_lblMergeWith.Text = Resources.StrMergeWith.AddColon();
+			_grpOptions.Text = Resources.StrOptions;
+			_lblMessage.Text = Resources.StrMessage.AddColon();
+			_lnkAutoFormat.Text = Resources.StrAutoFormat;
+			_chkNoFF.Text = Resources.StrsNoFastForward;
+			_chkNoCommit.Text = Resources.StrsNoCommit;
+			_chkSquash.Text = Resources.StrSquash;
+		}
+
+		private void SetupTooltips()
+		{
+			ToolTipService.Register(_chkNoFF, Resources.TipNoFF);
+			ToolTipService.Register(_chkNoCommit, Resources.TipMergeNoCommit);
+			ToolTipService.Register(_chkSquash, Resources.TipSquash);
 		}
 
 		public void EnableMultipleBrunchesMerge()

@@ -203,7 +203,7 @@
 			this._grpTracking.Name = "_grpTracking";
 			this._grpTracking.Size = new System.Drawing.Size(397, 19);
 			this._grpTracking.TabIndex = 0;
-			this._grpTracking.Text = "%Tracking Mode%";
+			this._grpTracking.Text = "%Tracking mode%";
 			// 
 			// CreateBranchDialog
 			// 

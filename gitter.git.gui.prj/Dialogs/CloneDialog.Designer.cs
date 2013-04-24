@@ -177,8 +177,8 @@
 			// 
 			// _txtRemoteName
 			// 
-			this._txtRemoteName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtRemoteName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtRemoteName.Location = new System.Drawing.Point(117, 25);
 			this._txtRemoteName.Name = "_txtRemoteName";
 			this._txtRemoteName.Size = new System.Drawing.Size(265, 23);
@@ -189,9 +189,9 @@
 			this._lblRemoteName.AutoSize = true;
 			this._lblRemoteName.Location = new System.Drawing.Point(9, 28);
 			this._lblRemoteName.Name = "_lblRemoteName";
-			this._lblRemoteName.Size = new System.Drawing.Size(106, 15);
+			this._lblRemoteName.Size = new System.Drawing.Size(104, 15);
 			this._lblRemoteName.TabIndex = 7;
-			this._lblRemoteName.Text = "%Remote Name%:";
+			this._lblRemoteName.Text = "%Remote name%:";
 			// 
 			// _chkMirror
 			// 
@@ -210,9 +210,9 @@
 			this._btnSelectTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnSelectTemplate.Enabled = false;
 			this._btnSelectTemplate.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._btnSelectTemplate.Location = new System.Drawing.Point(353, 53);
+			this._btnSelectTemplate.Location = new System.Drawing.Point(353, 54);
 			this._btnSelectTemplate.Name = "_btnSelectTemplate";
-			this._btnSelectTemplate.Size = new System.Drawing.Size(29, 24);
+			this._btnSelectTemplate.Size = new System.Drawing.Size(29, 23);
 			this._btnSelectTemplate.TabIndex = 7;
 			this._btnSelectTemplate.Text = "...";
 			this._btnSelectTemplate.UseVisualStyleBackColor = true;
@@ -220,8 +220,8 @@
 			// 
 			// _grpOptions
 			// 
-			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpOptions.Location = new System.Drawing.Point(0, 0);
 			this._grpOptions.Name = "_grpOptions";
 			this._grpOptions.Size = new System.Drawing.Size(382, 19);
@@ -254,8 +254,8 @@
 			// 
 			// _txtTemplate
 			// 
-			this._txtTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtTemplate.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
 			this._txtTemplate.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
 			this._txtTemplate.Enabled = false;
@@ -275,8 +275,8 @@
 			// 
 			// _txtUrl
 			// 
-			this._txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtUrl.Location = new System.Drawing.Point(94, 3);
 			this._txtUrl.Name = "_txtUrl";
 			this._txtUrl.Size = new System.Drawing.Size(288, 23);
@@ -306,8 +306,8 @@
 			// 
 			// _txtPath
 			// 
-			this._txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtPath.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
 			this._txtPath.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
 			this._txtPath.Location = new System.Drawing.Point(94, 32);

@@ -22,7 +22,7 @@
 
 			Text = Resources.StrStash;
 
-			_lstStash.Text = Resources.StrNothingStashed;
+			_lstStash.Text = Resources.StrsNothingStashed;
 			_lstStash.PreviewKeyDown += OnKeyDown;
 
 			AddTopToolStrip(_toolBar = new StashToolbar(this));

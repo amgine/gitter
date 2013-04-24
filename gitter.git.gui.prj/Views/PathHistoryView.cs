@@ -51,7 +51,7 @@
 					break;
 				}
 			}
-			_lstRevisions.Text = Resources.StrNoCommitsToDisplay;
+			_lstRevisions.Text = Resources.StrsNoCommitsToDisplay;
 			_lstRevisions.Multiselect = true;
 			_lstRevisions.SelectionChanged += (sender, e) =>
 				{

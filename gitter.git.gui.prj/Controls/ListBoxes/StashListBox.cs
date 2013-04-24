@@ -51,7 +51,7 @@
 					_colAuthorEmail		= new AuthorEmailColumn(),
 				});
 
-			Text = Resources.StrNothingStashed;
+			Text = Resources.StrsNothingStashed;
 		}
 
 		public void LoadData(Repository repository)

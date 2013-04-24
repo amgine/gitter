@@ -51,8 +51,8 @@
 			// 
 			// _txtTemplate
 			// 
-			this._txtTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtTemplate.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
 			this._txtTemplate.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
 			this._txtTemplate.Enabled = false;
@@ -63,8 +63,8 @@
 			// 
 			// _txtPath
 			// 
-			this._txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtPath.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
 			this._txtPath.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
 			this._txtPath.Location = new System.Drawing.Point(94, 3);
@@ -77,9 +77,9 @@
 			this._btnSelectTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnSelectTemplate.Enabled = false;
 			this._btnSelectTemplate.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._btnSelectTemplate.Location = new System.Drawing.Point(353, 22);
+			this._btnSelectTemplate.Location = new System.Drawing.Point(353, 23);
 			this._btnSelectTemplate.Name = "_btnSelectTemplate";
-			this._btnSelectTemplate.Size = new System.Drawing.Size(29, 24);
+			this._btnSelectTemplate.Size = new System.Drawing.Size(29, 23);
 			this._btnSelectTemplate.TabIndex = 4;
 			this._btnSelectTemplate.Text = "...";
 			this._btnSelectTemplate.UseVisualStyleBackColor = true;
@@ -134,8 +134,8 @@
 			// 
 			// _grpOptions
 			// 
-			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpOptions.Location = new System.Drawing.Point(0, 0);
 			this._grpOptions.Name = "_grpOptions";
 			this._grpOptions.Size = new System.Drawing.Size(382, 19);

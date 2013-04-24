@@ -46,7 +46,7 @@
 			this._grpApplyTo.Name = "_grpApplyTo";
 			this._grpApplyTo.Size = new System.Drawing.Size(397, 19);
 			this._grpApplyTo.TabIndex = 1;
-			this._grpApplyTo.Text = "%Apply To%";
+			this._grpApplyTo.Text = "%Apply to%";
 			// 
 			// _grpOptions
 			// 
@@ -65,10 +65,10 @@
 			this._radWorkingDirectory.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this._radWorkingDirectory.Location = new System.Drawing.Point(14, 214);
 			this._radWorkingDirectory.Name = "_radWorkingDirectory";
-			this._radWorkingDirectory.Size = new System.Drawing.Size(147, 20);
+			this._radWorkingDirectory.Size = new System.Drawing.Size(146, 20);
 			this._radWorkingDirectory.TabIndex = 3;
 			this._radWorkingDirectory.TabStop = true;
-			this._radWorkingDirectory.Text = "%Working Directory%";
+			this._radWorkingDirectory.Text = "%Working directory%";
 			this._radWorkingDirectory.UseVisualStyleBackColor = true;
 			// 
 			// _radIndexAndWorkingDirectory
@@ -77,9 +77,9 @@
 			this._radIndexAndWorkingDirectory.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this._radIndexAndWorkingDirectory.Location = new System.Drawing.Point(14, 254);
 			this._radIndexAndWorkingDirectory.Name = "_radIndexAndWorkingDirectory";
-			this._radIndexAndWorkingDirectory.Size = new System.Drawing.Size(201, 20);
+			this._radIndexAndWorkingDirectory.Size = new System.Drawing.Size(198, 20);
 			this._radIndexAndWorkingDirectory.TabIndex = 4;
-			this._radIndexAndWorkingDirectory.Text = "%Index and Working Directory%";
+			this._radIndexAndWorkingDirectory.Text = "%Index and working directory%";
 			this._radIndexAndWorkingDirectory.UseVisualStyleBackColor = true;
 			// 
 			// _radIndexOnly
@@ -141,6 +141,7 @@
 			// 
 			this._lstPatches.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this._lstPatches.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstPatches.Location = new System.Drawing.Point(3, 18);
 			this._lstPatches.Name = "_lstPatches";
 			this._lstPatches.Size = new System.Drawing.Size(394, 136);

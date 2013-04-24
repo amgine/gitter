@@ -26,7 +26,7 @@
 
 			Text = Resources.StrRemotes;
 
-			_lstRemotes.Text = Resources.StrNoRemotes;
+			_lstRemotes.Text = Resources.StrsNoRemotes;
 
 			_lstRemotes.ItemActivated += OnItemActivated;
 			_lstRemotes.PreviewKeyDown += OnKeyDown;

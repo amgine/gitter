@@ -3357,6 +3357,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Commit Changes.
+        /// </summary>
+        internal static string StrCommitChanges {
+            get {
+                return ResourceManager.GetString("StrCommitChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Commit Date.
         /// </summary>
         internal static string StrCommitDate {
@@ -3654,15 +3663,6 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default Behavior.
-        /// </summary>
-        internal static string StrDefaultBehavior {
-            get {
-                return ResourceManager.GetString("StrDefaultBehavior", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Default Format.
         /// </summary>
         internal static string StrDefaultFormat {
@@ -3798,15 +3798,6 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Exclude Pattern.
-        /// </summary>
-        internal static string StrExcludePattern {
-            get {
-                return ResourceManager.GetString("StrExcludePattern", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Expand All.
         /// </summary>
         internal static string StrExpandAll {
@@ -3888,16 +3879,7 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Fetch Tags.
-        /// </summary>
-        internal static string StrFetchTags {
-            get {
-                return ResourceManager.GetString("StrFetchTags", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Fetch Url.
+        ///   Looks up a localized string similar to Fetch URL.
         /// </summary>
         internal static string StrFetchUrl {
             get {
@@ -4158,15 +4140,6 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Include Pattern.
-        /// </summary>
-        internal static string StrIncludePattern {
-            get {
-                return ResourceManager.GetString("StrIncludePattern", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Include untracked.
         /// </summary>
         internal static string StrIncludeUntracked {
@@ -4181,15 +4154,6 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrIndex {
             get {
                 return ResourceManager.GetString("StrIndex", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Index and Working Directory.
-        /// </summary>
-        internal static string StrIndexAndWorkingDirectory {
-            get {
-                return ResourceManager.GetString("StrIndexAndWorkingDirectory", resourceCulture);
             }
         }
         
@@ -4761,6 +4725,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Merge Branches.
+        /// </summary>
+        internal static string StrMergeBranches {
+            get {
+                return ResourceManager.GetString("StrMergeBranches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Merge Multiple Branches.
         /// </summary>
         internal static string StrMergeMultipleBranches {
@@ -4914,65 +4887,11 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No Checkout.
-        /// </summary>
-        internal static string StrNoCheckout {
-            get {
-                return ResourceManager.GetString("StrNoCheckout", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No commit.
-        /// </summary>
-        internal static string StrNoCommit {
-            get {
-                return ResourceManager.GetString("StrNoCommit", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No commits to display.
-        /// </summary>
-        internal static string StrNoCommitsToDisplay {
-            get {
-                return ResourceManager.GetString("StrNoCommitsToDisplay", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No fast-forward.
-        /// </summary>
-        internal static string StrNoFastForward {
-            get {
-                return ResourceManager.GetString("StrNoFastForward", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No local branches.
-        /// </summary>
-        internal static string StrNoLocalBranches {
-            get {
-                return ResourceManager.GetString("StrNoLocalBranches", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to None.
         /// </summary>
         internal static string StrNone {
             get {
                 return ResourceManager.GetString("StrNone", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No remotes.
-        /// </summary>
-        internal static string StrNoRemotes {
-            get {
-                return ResourceManager.GetString("StrNoRemotes", resourceCulture);
             }
         }
         
@@ -4986,47 +4905,11 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No staged changes.
-        /// </summary>
-        internal static string StrNoStagedChanges {
-            get {
-                return ResourceManager.GetString("StrNoStagedChanges", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No submodules.
-        /// </summary>
-        internal static string StrNoSubmodules {
-            get {
-                return ResourceManager.GetString("StrNoSubmodules", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Note.
         /// </summary>
         internal static string StrNote {
             get {
                 return ResourceManager.GetString("StrNote", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Nothing stashed.
-        /// </summary>
-        internal static string StrNothingStashed {
-            get {
-                return ResourceManager.GetString("StrNothingStashed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No unstaged changes.
-        /// </summary>
-        internal static string StrNoUnstagedChanges {
-            get {
-                return ResourceManager.GetString("StrNoUnstagedChanges", resourceCulture);
             }
         }
         
@@ -5328,7 +5211,7 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Push Url.
+        ///   Looks up a localized string similar to Push URL.
         /// </summary>
         internal static string StrPushUrl {
             get {
@@ -5360,15 +5243,6 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrRebaseHere {
             get {
                 return ResourceManager.GetString("StrRebaseHere", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Receive Pack.
-        /// </summary>
-        internal static string StrReceivePack {
-            get {
-                return ResourceManager.GetString("StrReceivePack", resourceCulture);
             }
         }
         
@@ -5495,15 +5369,6 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrRemoteBranches {
             get {
                 return ResourceManager.GetString("StrRemoteBranches", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Remote Name.
-        /// </summary>
-        internal static string StrRemoteName {
-            get {
-                return ResourceManager.GetString("StrRemoteName", resourceCulture);
             }
         }
         
@@ -5897,6 +5762,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default behavior.
+        /// </summary>
+        internal static string StrsDefaultBehavior {
+            get {
+                return ResourceManager.GetString("StrsDefaultBehavior", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete file.
         /// </summary>
         internal static string StrsDeleteFile {
@@ -5978,11 +5852,56 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exclude pattern.
+        /// </summary>
+        internal static string StrsExcludePattern {
+            get {
+                return ResourceManager.GetString("StrsExcludePattern", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fetch all.
+        /// </summary>
+        internal static string StrsFetchAll {
+            get {
+                return ResourceManager.GetString("StrsFetchAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fetching tree.
         /// </summary>
         internal static string StrsFetchingTree {
             get {
                 return ResourceManager.GetString("StrsFetchingTree", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fetch none.
+        /// </summary>
+        internal static string StrsFetchNone {
+            get {
+                return ResourceManager.GetString("StrsFetchNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fetch remote.
+        /// </summary>
+        internal static string StrsFetchRemote {
+            get {
+                return ResourceManager.GetString("StrsFetchRemote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fetch tags.
+        /// </summary>
+        internal static string StrsFetchTags {
+            get {
+                return ResourceManager.GetString("StrsFetchTags", resourceCulture);
             }
         }
         
@@ -6010,15 +5929,6 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrSHA {
             get {
                 return ResourceManager.GetString("StrSHA", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Shallow Clone.
-        /// </summary>
-        internal static string StrShallowClone {
-            get {
-                return ResourceManager.GetString("StrShallowClone", resourceCulture);
             }
         }
         
@@ -6149,11 +6059,29 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Include pattern.
+        /// </summary>
+        internal static string StrsIncludePattern {
+            get {
+                return ResourceManager.GetString("StrsIncludePattern", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Include untracked files.
         /// </summary>
         internal static string StrsIncludeUntrackedFiles {
             get {
                 return ResourceManager.GetString("StrsIncludeUntrackedFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Index and working directory.
+        /// </summary>
+        internal static string StrsIndexAndWorkingDirectory {
+            get {
+                return ResourceManager.GetString("StrsIndexAndWorkingDirectory", resourceCulture);
             }
         }
         
@@ -6203,11 +6131,47 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No checkout.
+        /// </summary>
+        internal static string StrsNoCheckout {
+            get {
+                return ResourceManager.GetString("StrsNoCheckout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No commit.
+        /// </summary>
+        internal static string StrsNoCommit {
+            get {
+                return ResourceManager.GetString("StrsNoCommit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No commits to display.
+        /// </summary>
+        internal static string StrsNoCommitsToDisplay {
+            get {
+                return ResourceManager.GetString("StrsNoCommitsToDisplay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No contributors to display.
         /// </summary>
         internal static string StrsNoContributorsToDisplay {
             get {
                 return ResourceManager.GetString("StrsNoContributorsToDisplay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No fast-forward.
+        /// </summary>
+        internal static string StrsNoFastForward {
+            get {
+                return ResourceManager.GetString("StrsNoFastForward", resourceCulture);
             }
         }
         
@@ -6221,11 +6185,65 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No local branches.
+        /// </summary>
+        internal static string StrsNoLocalBranches {
+            get {
+                return ResourceManager.GetString("StrsNoLocalBranches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No patches to apply.
         /// </summary>
         internal static string StrsNoPatchesToApply {
             get {
                 return ResourceManager.GetString("StrsNoPatchesToApply", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No remotes.
+        /// </summary>
+        internal static string StrsNoRemotes {
+            get {
+                return ResourceManager.GetString("StrsNoRemotes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No staged changes.
+        /// </summary>
+        internal static string StrsNoStagedChanges {
+            get {
+                return ResourceManager.GetString("StrsNoStagedChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No submodules.
+        /// </summary>
+        internal static string StrsNoSubmodules {
+            get {
+                return ResourceManager.GetString("StrsNoSubmodules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing stashed.
+        /// </summary>
+        internal static string StrsNothingStashed {
+            get {
+                return ResourceManager.GetString("StrsNothingStashed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No unstaged changes.
+        /// </summary>
+        internal static string StrsNoUnstagedChanges {
+            get {
+                return ResourceManager.GetString("StrsNoUnstagedChanges", resourceCulture);
             }
         }
         
@@ -6271,6 +6289,24 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrsRebaseIsInProcess {
             get {
                 return ResourceManager.GetString("StrsRebaseIsInProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Receive pack.
+        /// </summary>
+        internal static string StrsReceivePack {
+            get {
+                return ResourceManager.GetString("StrsReceivePack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remote name.
+        /// </summary>
+        internal static string StrsRemoteName {
+            get {
+                return ResourceManager.GetString("StrsRemoteName", resourceCulture);
             }
         }
         
@@ -6365,6 +6401,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Shallow clone.
+        /// </summary>
+        internal static string StrsShallowClone {
+            get {
+                return ResourceManager.GetString("StrsShallowClone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Skipping commit.
         /// </summary>
         internal static string StrsSkippingCommit {
@@ -6433,6 +6478,24 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrStageSelection {
             get {
                 return ResourceManager.GetString("StrStageSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tag fetch mode.
+        /// </summary>
+        internal static string StrsTagFetchMode {
+            get {
+                return ResourceManager.GetString("StrsTagFetchMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tag import mode.
+        /// </summary>
+        internal static string StrsTagImportMode {
+            get {
+                return ResourceManager.GetString("StrsTagImportMode", resourceCulture);
             }
         }
         
@@ -6518,6 +6581,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tracking mode.
+        /// </summary>
+        internal static string StrsTrackingMode {
+            get {
+                return ResourceManager.GetString("StrsTrackingMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Subject.
         /// </summary>
         internal static string StrSubject {
@@ -6559,6 +6631,24 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrsUnstagedChanges {
             get {
                 return ResourceManager.GetString("StrsUnstagedChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updated references.
+        /// </summary>
+        internal static string StrsUpdatedReferences {
+            get {
+                return ResourceManager.GetString("StrsUpdatedReferences", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload pack.
+        /// </summary>
+        internal static string StrsUploadPack {
+            get {
+                return ResourceManager.GetString("StrsUploadPack", resourceCulture);
             }
         }
         
@@ -6653,24 +6743,6 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tag Fetch Mode.
-        /// </summary>
-        internal static string StrTagFetchMode {
-            get {
-                return ResourceManager.GetString("StrTagFetchMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tag Import Mode.
-        /// </summary>
-        internal static string StrTagImportMode {
-            get {
-                return ResourceManager.GetString("StrTagImportMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Tags.
         /// </summary>
         internal static string StrTags {
@@ -6757,15 +6829,6 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrTrackingBranches {
             get {
                 return ResourceManager.GetString("StrTrackingBranches", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tracking Mode.
-        /// </summary>
-        internal static string StrTrackingMode {
-            get {
-                return ResourceManager.GetString("StrTrackingMode", resourceCulture);
             }
         }
         
@@ -6928,24 +6991,6 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrUpdated {
             get {
                 return ResourceManager.GetString("StrUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Updated References.
-        /// </summary>
-        internal static string StrUpdatedReferences {
-            get {
-                return ResourceManager.GetString("StrUpdatedReferences", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Upload Pack.
-        /// </summary>
-        internal static string StrUploadPack {
-            get {
-                return ResourceManager.GetString("StrUploadPack", resourceCulture);
             }
         }
         

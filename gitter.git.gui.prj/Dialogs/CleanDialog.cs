@@ -37,8 +37,8 @@
 
 			Text = Resources.StrClean;
 
-			_lblIncludePattern.Text = Resources.StrIncludePattern.AddColon();
-			_lblExcludePattern.Text = Resources.StrExcludePattern.AddColon();
+			_lblIncludePattern.Text = Resources.StrsIncludePattern.AddColon();
+			_lblExcludePattern.Text = Resources.StrsExcludePattern.AddColon();
 
 			_lblType.Text = Resources.StrType.AddColon();
 

@@ -16,9 +16,13 @@
 			if(disposing)
 			{
 				if(_speller != null)
+				{
 					_speller.Dispose();
+				}
 				if(components != null)
+				{
 					components.Dispose();
+				}
 			}
 			base.Dispose(disposing);
 		}
@@ -41,6 +45,7 @@
 			// _lstStaged
 			// 
 			this._lstStaged.DisableContextMenus = true;
+			this._lstStaged.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstStaged.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstStaged.Location = new System.Drawing.Point(3, 18);
 			this._lstStaged.Name = "_lstStaged";
@@ -64,9 +69,9 @@
 			this._lblStagedFiles.AutoSize = true;
 			this._lblStagedFiles.Location = new System.Drawing.Point(0, 0);
 			this._lblStagedFiles.Name = "_lblStagedFiles";
-			this._lblStagedFiles.Size = new System.Drawing.Size(115, 15);
+			this._lblStagedFiles.Size = new System.Drawing.Size(113, 15);
 			this._lblStagedFiles.TabIndex = 2;
-			this._lblStagedFiles.Text = "%Staged Changes%:";
+			this._lblStagedFiles.Text = "%Staged changes%:";
 			// 
 			// _lblMessage
 			// 

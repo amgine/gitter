@@ -22,26 +22,9 @@
 			_repository = repository;
 
 			InitializeComponent();
+			Localize();
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.Remote);
-
-			Text = Resources.StrAddRemote;
-
-			_lblName.Text			= Resources.StrName.AddColon();
-			_lblUrl.Text			= Resources.StrUrl.AddColon();
-			
-			_grpOptions.Text		= Resources.StrOptions;
-			_chkFetch.Text			= Resources.StrFetchRemote;
-			_chkMirror.Text			= Resources.StrMirror;
-
-			_grpBranches.Text		= Resources.StrTrackingBranches;
-			_trackAllBranches.Text	= Resources.StrlTrackAllBranches;
-			_trackSpecified.Text	= Resources.StrlTrackSpecifiedBranches.AddColon();
-
-			_grpTagImport.Text		= Resources.StrTagFetchMode;
-			_tagFetchDefault.Text	= Resources.StrDefault;
-			_tagFetchAll.Text		= Resources.StrFetchAll;
-			_tagFetchNone.Text		= Resources.StrFetchNone;
 
 			if(_repository.Remotes.Count == 0)
 			{
@@ -49,6 +32,27 @@
 			}
 
 			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtUrl);
+		}
+
+		private void Localize()
+		{
+			Text = Resources.StrAddRemote;
+
+			_lblName.Text			= Resources.StrName.AddColon();
+			_lblUrl.Text			= Resources.StrUrl.AddColon();
+			
+			_grpOptions.Text		= Resources.StrOptions;
+			_chkFetch.Text			= Resources.StrsFetchRemote;
+			_chkMirror.Text			= Resources.StrMirror;
+
+			_grpBranches.Text		= Resources.StrTrackingBranches;
+			_trackAllBranches.Text	= Resources.StrlTrackAllBranches;
+			_trackSpecified.Text	= Resources.StrlTrackSpecifiedBranches.AddColon();
+
+			_grpTagImport.Text		= Resources.StrsTagFetchMode;
+			_tagFetchDefault.Text	= Resources.StrDefault;
+			_tagFetchAll.Text		= Resources.StrsFetchAll;
+			_tagFetchNone.Text		= Resources.StrsFetchNone;
 		}
 
 		#region Properties

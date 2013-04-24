@@ -55,9 +55,9 @@
 			_btnCommit.Click += OnCommitClick;
 
 			_lblStaged.Text = Resources.StrsStagedChanges.AddColon();
-			_lstStaged.Text = Resources.StrNoStagedChanges;
+			_lstStaged.Text = Resources.StrsNoStagedChanges;
 			_lblUnstaged.Text = Resources.StrsUnstagedChanges.AddColon();
-			_lstUnstaged.Text = Resources.StrNoUnstagedChanges;
+			_lstUnstaged.Text = Resources.StrsNoUnstagedChanges;
 			_lblMessage.Text = Resources.StrMessage.AddColon();
 			_chkAmend.Text = Resources.StrAmend;
 			_btnCommit.Text = Resources.StrCommit;

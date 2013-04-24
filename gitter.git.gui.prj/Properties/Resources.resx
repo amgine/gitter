@@ -197,7 +197,7 @@
     <value>Email</value>
   </data>
   <data name="StrFetchUrl" xml:space="preserve">
-    <value>Fetch Url</value>
+    <value>Fetch URL</value>
   </data>
   <data name="StrGraph" xml:space="preserve">
     <value>Graph</value>
@@ -212,7 +212,7 @@
     <value>Name</value>
   </data>
   <data name="StrPushUrl" xml:space="preserve">
-    <value>Push Url</value>
+    <value>Push URL</value>
   </data>
   <data name="StrReferences" xml:space="preserve">
     <value>References</value>
@@ -581,10 +581,10 @@
   <data name="StrNewName" xml:space="preserve">
     <value>New name</value>
   </data>
-  <data name="StrNoCommit" xml:space="preserve">
+  <data name="StrsNoCommit" xml:space="preserve">
     <value>No commit</value>
   </data>
-  <data name="StrNoFastForward" xml:space="preserve">
+  <data name="StrsNoFastForward" xml:space="preserve">
     <value>No fast-forward</value>
   </data>
   <data name="StrOptions" xml:space="preserve">
@@ -737,19 +737,19 @@
   <data name="StrNoBranchesToMergeWith" xml:space="preserve">
     <value>No branches to merge with</value>
   </data>
-  <data name="StrNoCommitsToDisplay" xml:space="preserve">
+  <data name="StrsNoCommitsToDisplay" xml:space="preserve">
     <value>No commits to display</value>
   </data>
-  <data name="StrNoLocalBranches" xml:space="preserve">
+  <data name="StrsNoLocalBranches" xml:space="preserve">
     <value>No local branches</value>
   </data>
-  <data name="StrNoRemotes" xml:space="preserve">
+  <data name="StrsNoRemotes" xml:space="preserve">
     <value>No remotes</value>
   </data>
-  <data name="StrNoStagedChanges" xml:space="preserve">
+  <data name="StrsNoStagedChanges" xml:space="preserve">
     <value>No staged changes</value>
   </data>
-  <data name="StrNoUnstagedChanges" xml:space="preserve">
+  <data name="StrsNoUnstagedChanges" xml:space="preserve">
     <value>No unstaged changes</value>
   </data>
   <data name="ErrFailedToRunMergeTool" xml:space="preserve">
@@ -1113,7 +1113,7 @@ Are you sure you want to delete it?</value>
   <data name="ImgRemoteRename" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\remote-rename.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="StrNothingStashed" xml:space="preserve">
+  <data name="StrsNothingStashed" xml:space="preserve">
     <value>Nothing stashed</value>
   </data>
   <data name="ErrFailedToStash" xml:space="preserve">
@@ -1318,8 +1318,8 @@ Proceed?</value>
   <data name="StrlNone" xml:space="preserve">
     <value>none</value>
   </data>
-  <data name="StrDefaultBehavior" xml:space="preserve">
-    <value>Default Behavior</value>
+  <data name="StrsDefaultBehavior" xml:space="preserve">
+    <value>Default behavior</value>
   </data>
   <data name="StrDontFetchTags" xml:space="preserve">
     <value>Don't fetch tags</value>
@@ -1333,17 +1333,17 @@ Proceed?</value>
   <data name="StrProxy" xml:space="preserve">
     <value>Proxy</value>
   </data>
-  <data name="StrReceivePack" xml:space="preserve">
-    <value>Receive Pack</value>
+  <data name="StrsReceivePack" xml:space="preserve">
+    <value>Receive pack</value>
   </data>
   <data name="StrSkipFetchAll" xml:space="preserve">
     <value>Skip fetch all</value>
   </data>
-  <data name="StrUpdatedReferences" xml:space="preserve">
-    <value>Updated References</value>
+  <data name="StrsUpdatedReferences" xml:space="preserve">
+    <value>Updated references</value>
   </data>
-  <data name="StrUploadPack" xml:space="preserve">
-    <value>Upload Pack</value>
+  <data name="StrsUploadPack" xml:space="preserve">
+    <value>Upload pack</value>
   </data>
   <data name="StrVCS" xml:space="preserve">
     <value>VCS</value>
@@ -1363,8 +1363,8 @@ Proceed?</value>
   <data name="StrNormal" xml:space="preserve">
     <value>Normal</value>
   </data>
-  <data name="StrFetchTags" xml:space="preserve">
-    <value>Fetch Tags</value>
+  <data name="StrsFetchTags" xml:space="preserve">
+    <value>Fetch tags</value>
   </data>
   <data name="StrFrom" xml:space="preserve">
     <value>From</value>
@@ -1684,17 +1684,17 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   <data name="StrDepth" xml:space="preserve">
     <value>Depth</value>
   </data>
-  <data name="StrNoCheckout" xml:space="preserve">
-    <value>No Checkout</value>
+  <data name="StrsNoCheckout" xml:space="preserve">
+    <value>No checkout</value>
   </data>
   <data name="StrRecursive" xml:space="preserve">
     <value>Recursive</value>
   </data>
-  <data name="StrRemoteName" xml:space="preserve">
-    <value>Remote Name</value>
+  <data name="StrsRemoteName" xml:space="preserve">
+    <value>Remote name</value>
   </data>
-  <data name="StrShallowClone" xml:space="preserve">
-    <value>Shallow Clone</value>
+  <data name="StrsShallowClone" xml:space="preserve">
+    <value>Shallow clone</value>
   </data>
   <data name="ErrFailedToClone" xml:space="preserve">
     <value>Unable to clone '{0}'</value>
@@ -1735,7 +1735,7 @@ with the remote with the git-remote-&lt;vcs&gt; helper.</value>
   <data name="StrCompareWith" xml:space="preserve">
     <value>Compare With</value>
   </data>
-  <data name="StrNoSubmodules" xml:space="preserve">
+  <data name="StrsNoSubmodules" xml:space="preserve">
     <value>No submodules</value>
   </data>
   <data name="ErrFailedToUpdateSubmodule" xml:space="preserve">
@@ -1823,8 +1823,8 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrTrack" xml:space="preserve">
     <value>Track</value>
   </data>
-  <data name="StrTrackingMode" xml:space="preserve">
-    <value>Tracking Mode</value>
+  <data name="StrsTrackingMode" xml:space="preserve">
+    <value>Tracking mode</value>
   </data>
   <data name="StrlDoNotTrack" xml:space="preserve">
     <value>Do not track</value>
@@ -1841,8 +1841,8 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrTagType" xml:space="preserve">
     <value>Tag Type</value>
   </data>
-  <data name="StrTagImportMode" xml:space="preserve">
-    <value>Tag Import Mode</value>
+  <data name="StrsTagImportMode" xml:space="preserve">
+    <value>Tag import mode</value>
   </data>
   <data name="ErrFailedToCreateDirectory" xml:space="preserve">
     <value>Unable to create directory</value>
@@ -1859,8 +1859,8 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrlTrackSpecifiedBranches" xml:space="preserve">
     <value>Specified branches</value>
   </data>
-  <data name="StrTagFetchMode" xml:space="preserve">
-    <value>Tag Fetch Mode</value>
+  <data name="StrsTagFetchMode" xml:space="preserve">
+    <value>Tag fetch mode</value>
   </data>
   <data name="StrTrackingBranches" xml:space="preserve">
     <value>Tracking Branches</value>
@@ -1931,14 +1931,14 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrBoth" xml:space="preserve">
     <value>Both</value>
   </data>
-  <data name="StrExcludePattern" xml:space="preserve">
-    <value>Exclude Pattern</value>
+  <data name="StrsExcludePattern" xml:space="preserve">
+    <value>Exclude pattern</value>
   </data>
   <data name="StrIgnored" xml:space="preserve">
     <value>Ignored</value>
   </data>
-  <data name="StrIncludePattern" xml:space="preserve">
-    <value>Include Pattern</value>
+  <data name="StrsIncludePattern" xml:space="preserve">
+    <value>Include pattern</value>
   </data>
   <data name="StrsAlsoRemoveDirectories" xml:space="preserve">
     <value>Also remove directories</value>
@@ -2296,8 +2296,8 @@ Proceed?</value>
   <data name="StrIndex" xml:space="preserve">
     <value>Index</value>
   </data>
-  <data name="StrIndexAndWorkingDirectory" xml:space="preserve">
-    <value>Index and Working Directory</value>
+  <data name="StrsIndexAndWorkingDirectory" xml:space="preserve">
+    <value>Index and working directory</value>
   </data>
   <data name="StrsWorkingDirectory" xml:space="preserve">
     <value>Working directory</value>
@@ -2591,5 +2591,20 @@ Reset existing branch instead of creating a new one?</value>
   </data>
   <data name="StrlCmd" xml:space="preserve">
     <value>cmd</value>
+  </data>
+  <data name="StrCommitChanges" xml:space="preserve">
+    <value>Commit Changes</value>
+  </data>
+  <data name="StrMergeBranches" xml:space="preserve">
+    <value>Merge Branches</value>
+  </data>
+  <data name="StrsFetchAll" xml:space="preserve">
+    <value>Fetch all</value>
+  </data>
+  <data name="StrsFetchNone" xml:space="preserve">
+    <value>Fetch none</value>
+  </data>
+  <data name="StrsFetchRemote" xml:space="preserve">
+    <value>Fetch remote</value>
   </data>
 </root>

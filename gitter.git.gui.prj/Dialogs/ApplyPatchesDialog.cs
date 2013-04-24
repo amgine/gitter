@@ -45,9 +45,9 @@
 			_btnAddFiles.Text = Resources.StrAddFiles.AddEllipsis();
 			_btnAddFromClipboard.Text = Resources.StrAddFromClipboard;
 			_grpApplyTo.Text = Resources.StrApplyTo;
-			_radWorkingDirectory.Text = Resources.StrWorkingDirectory;
+			_radWorkingDirectory.Text = Resources.StrsWorkingDirectory;
 			_radIndexOnly.Text = Resources.StrIndex;
-			_radIndexAndWorkingDirectory.Text = Resources.StrIndexAndWorkingDirectory;
+			_radIndexAndWorkingDirectory.Text = Resources.StrsIndexAndWorkingDirectory;
 			_grpOptions.Text = Resources.StrOptions;
 			_chkReverse.Text = Resources.StrReverse;
 		}

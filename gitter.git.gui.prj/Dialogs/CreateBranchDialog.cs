@@ -39,35 +39,9 @@
 			_repository = repository;
 
 			InitializeComponent();
-
-			Text = Resources.StrCreateBranch;
+			Localize();
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.LocalBranch);
-
-			_lblName.Text = Resources.StrName.AddColon();
-			_lblRevision.Text = Resources.StrRevision.AddColon();
-			_grpOptions.Text = Resources.StrOptions;
-			_chkCheckoutAfterCreation.Text = Resources.StrCheckoutAfterCreation;
-			if(GitFeatures.CheckoutOrphan.IsAvailableFor(repository))
-			{
-				_chkOrphan.Text = Resources.StrlMakeOrphanBranch;
-			}
-			else
-			{
-				_chkOrphan.Text = Resources.StrlMakeOrphanBranch + " " +
-					Resources.StrfVersionRequired.UseAsFormat(GitFeatures.CheckoutOrphan.RequiredVersion).SurroundWithBraces();
-			}
-			_chkCreateReflog.Text = Resources.StrCreateBranchReflog;
-
-			_grpTracking.Text = Resources.StrTrackingMode;
-
-			_trackingDefault.Text = Resources.StrDefault;
-			_trackingDoNotTrack.Text = Resources.StrlDoNotTrack;
-			_trackingTrack.Text = Resources.StrTrack;
-
-			ToolTipService.Register(_chkCheckoutAfterCreation, Resources.TipCheckoutAfterCreation);
-			ToolTipService.Register(_chkOrphan, Resources.TipOrphan);
-			ToolTipService.Register(_chkCreateReflog, Resources.TipReflog);
 
 			var logallrefupdates = _repository.Configuration.TryGetParameterValue(GitConstants.CoreLogAllRefUpdatesParameter);
 			if(logallrefupdates != null && logallrefupdates == "true")
@@ -76,6 +50,9 @@
 				_chkCreateReflog.Enabled = false;
 			}
 
+			ToolTipService.Register(_chkCheckoutAfterCreation, Resources.TipCheckoutAfterCreation);
+			ToolTipService.Register(_chkOrphan, Resources.TipOrphan);
+			ToolTipService.Register(_chkCreateReflog, Resources.TipReflog);
 			ToolTipService.Register(_trackingTrack, Resources.TipTrack);
 
 			_txtRevision.References.LoadData(
@@ -87,6 +64,36 @@
 
 			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtRevision);
 			GlobalBehavior.SetupAutoCompleteSource(_txtRevision, _repository, ReferenceType.Branch);
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void Localize()
+		{
+			Text = Resources.StrCreateBranch;
+
+			_lblName.Text = Resources.StrName.AddColon();
+			_lblRevision.Text = Resources.StrRevision.AddColon();
+
+			_grpOptions.Text = Resources.StrOptions;
+			_chkCheckoutAfterCreation.Text = Resources.StrCheckoutAfterCreation;
+			if(GitFeatures.CheckoutOrphan.IsAvailableFor(_repository))
+			{
+				_chkOrphan.Text = Resources.StrlMakeOrphanBranch;
+			}
+			else
+			{
+				_chkOrphan.Text = Resources.StrlMakeOrphanBranch + " " +
+					Resources.StrfVersionRequired.UseAsFormat(GitFeatures.CheckoutOrphan.RequiredVersion).SurroundWithBraces();
+			}
+			_chkCreateReflog.Text = Resources.StrCreateBranchReflog;
+
+			_grpTracking.Text = Resources.StrsTrackingMode;
+			_trackingDefault.Text = Resources.StrDefault;
+			_trackingDoNotTrack.Text = Resources.StrlDoNotTrack;
+			_trackingTrack.Text = Resources.StrTrack;
 		}
 
 		#endregion

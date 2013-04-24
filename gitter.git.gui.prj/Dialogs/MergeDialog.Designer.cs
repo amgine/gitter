@@ -16,9 +16,13 @@
 			if(disposing)
 			{
 				if(_speller != null)
+				{
 					_speller.Dispose();
+				}
 				if(components != null)
+				{
 					components.Dispose();
+				}
 			}
 			base.Dispose(disposing);
 		}
@@ -103,7 +107,7 @@
 			// _lnkAutoFormat
 			// 
 			this._lnkAutoFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this._lnkAutoFormat.Location = new System.Drawing.Point(533, 3);
+			this._lnkAutoFormat.Location = new System.Drawing.Point(533, 0);
 			this._lnkAutoFormat.Name = "_lnkAutoFormat";
 			this._lnkAutoFormat.Size = new System.Drawing.Size(106, 15);
 			this._lnkAutoFormat.TabIndex = 3;
@@ -115,7 +119,7 @@
 			// _lblMessage
 			// 
 			this._lblMessage.AutoSize = true;
-			this._lblMessage.Location = new System.Drawing.Point(228, 3);
+			this._lblMessage.Location = new System.Drawing.Point(228, 0);
 			this._lblMessage.Name = "_lblMessage";
 			this._lblMessage.Size = new System.Drawing.Size(76, 15);
 			this._lblMessage.TabIndex = 11;
@@ -128,18 +132,18 @@
 			this._txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._txtMessage.Location = new System.Drawing.Point(231, 21);
+			this._txtMessage.Location = new System.Drawing.Point(231, 18);
 			this._txtMessage.Multiline = true;
 			this._txtMessage.Name = "_txtMessage";
 			this._txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this._txtMessage.Size = new System.Drawing.Size(408, 243);
+			this._txtMessage.Size = new System.Drawing.Size(408, 246);
 			this._txtMessage.TabIndex = 2;
 			this._txtMessage.WordWrap = false;
 			// 
 			// _lblMergeWith
 			// 
 			this._lblMergeWith.AutoSize = true;
-			this._lblMergeWith.Location = new System.Drawing.Point(0, 3);
+			this._lblMergeWith.Location = new System.Drawing.Point(0, 0);
 			this._lblMergeWith.Name = "_lblMergeWith";
 			this._lblMergeWith.Size = new System.Drawing.Size(90, 15);
 			this._lblMergeWith.TabIndex = 7;
@@ -152,10 +156,10 @@
 			this._references.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._references.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._references.ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick;
-			this._references.Location = new System.Drawing.Point(3, 21);
+			this._references.Location = new System.Drawing.Point(3, 18);
 			this._references.Name = "_references";
 			this._references.ShowTreeLines = true;
-			this._references.Size = new System.Drawing.Size(222, 335);
+			this._references.Size = new System.Drawing.Size(222, 338);
 			this._references.TabIndex = 1;
 			// 
 			// MergeDialog
