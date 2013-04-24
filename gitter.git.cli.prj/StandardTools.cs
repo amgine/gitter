@@ -10,9 +10,19 @@
 			GitProcess.ExecNormal(new GitInput(workingDirectory, new Command("gui"))).Dispose();
 		}
 
+		public static bool CanStartGitk
+		{
+			get { return GitProcess.CanExecGitk; }
+		}
+
 		public static void StartGitk(string workingDirectory)
 		{
 			GitProcess.ExecGitk(workingDirectory, "--all").Dispose();
+		}
+
+		public static bool CanStartBash
+		{
+			get { return GitProcess.CanExecSh; }
 		}
 
 		public static void StartBash(string workingDirectory)

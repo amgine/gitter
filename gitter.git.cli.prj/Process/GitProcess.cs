@@ -235,6 +235,25 @@
 			return Process.Start(psi);
 		}
 
+		public static bool CanExecSh
+		{
+			get
+			{
+				if(string.IsNullOrWhiteSpace(_shExePath))
+				{
+					return false;
+				}
+				try
+				{
+					return File.Exists(_shExePath);
+				}
+				catch
+				{
+					return false;
+				}
+			}
+		}
+
 		public static Process ExecSh(string repository, string command)
 		{
 			var psi = new ProcessStartInfo()
@@ -247,6 +266,25 @@
 				ErrorDialog = false,
 			};
 			return Process.Start(psi);
+		}
+
+		public static bool CanExecGitk
+		{
+			get
+			{
+				if(string.IsNullOrWhiteSpace(_gitkCmdPath))
+				{
+					return false;
+				}
+				try
+				{
+					return File.Exists(_gitkCmdPath);
+				}
+				catch
+				{
+					return false;
+				}
+			}
 		}
 
 		public static Process ExecGitk(string repository, string command)

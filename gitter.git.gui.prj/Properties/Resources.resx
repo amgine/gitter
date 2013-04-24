@@ -2589,4 +2589,7 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrsUnstagedChanges" xml:space="preserve">
     <value>Unstaged changes</value>
   </data>
+  <data name="StrlCmd" xml:space="preserve">
+    <value>cmd</value>
+  </data>
 </root>

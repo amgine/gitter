@@ -49,11 +49,27 @@
 			_gitMenu.DropDownItems.Add(new ToolStripSeparator());
 
 			_gitMenu.DropDownItems.Add(
-				new ToolStripMenuItem(Resources.StrlGui, CachedResources.Bitmaps["ImgGit"], OnGitGuiClick));
+				new ToolStripMenuItem(Resources.StrlGui, CachedResources.Bitmaps["ImgGit"], OnGitGuiClick)
+				{
+					ShortcutKeys = Keys.F5,
+				});
 			_gitMenu.DropDownItems.Add(
-				new ToolStripMenuItem(Resources.StrlGitk, CachedResources.Bitmaps["ImgGit"], OnGitGitkClick));
+				new ToolStripMenuItem(Resources.StrlGitk, CachedResources.Bitmaps["ImgGit"], OnGitGitkClick)
+				{
+					Enabled = StandardTools.CanStartGitk,
+					ShortcutKeys = Keys.F6,
+				});
 			_gitMenu.DropDownItems.Add(
-				new ToolStripMenuItem(Resources.StrlBash, CachedResources.Bitmaps["ImgTerminal"], OnGitBashClick));
+				new ToolStripMenuItem(Resources.StrlBash, CachedResources.Bitmaps["ImgTerminal"], OnGitBashClick)
+				{
+					Enabled = StandardTools.CanStartBash,
+					ShortcutKeys = Keys.F7,
+				});
+			_gitMenu.DropDownItems.Add(
+				new ToolStripMenuItem(Resources.StrlCmd, CachedResources.Bitmaps["ImgTerminal"], OnCmdClick)
+				{
+					ShortcutKeys = Keys.F8,
+				});
 
 			_viewMenuItems = new List<ToolStripMenuItem>();
 			foreach(var factory in Gui.ViewFactories)
@@ -119,6 +135,17 @@
 		private void OnGitBashClick(object sender, EventArgs e)
 		{
 			StandardTools.StartBash(_repository.WorkingDirectory);
+		}
+
+		private void OnCmdClick(object sender, EventArgs e)
+		{
+			var psi = new System.Diagnostics.ProcessStartInfo("cmd")
+			{
+				WorkingDirectory = Repository.WorkingDirectory,
+			};
+			using(System.Diagnostics.Process.Start(psi))
+			{
+			}
 		}
 
 		private void OnShowViewItemClick(object sender, EventArgs e)

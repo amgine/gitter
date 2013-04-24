@@ -4338,6 +4338,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to cmd.
+        /// </summary>
+        internal static string StrlCmd {
+            get {
+                return ResourceManager.GetString("StrlCmd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to commits.
         /// </summary>
         internal static string StrlCommits {
