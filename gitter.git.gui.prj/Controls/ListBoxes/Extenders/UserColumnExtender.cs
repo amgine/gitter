@@ -1,10 +1,8 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
@@ -13,51 +11,75 @@
 
 	/// <summary>Extender for <see cref="UserColumn"/>.</summary>
 	[ToolboxItem(false)]
-	public partial class UserColumnExtender : ExtenderBase
+	partial class UserColumnExtender : ExtenderBase
 	{
-		private readonly UserColumn _column;
+		#region Data
+
+		private ICheckBoxWidget _chkShowEmail;
 		private bool _disableEvents;
+
+		#endregion
 
 		/// <summary>Create <see cref="UserColumnExtender"/>.</summary>
 		/// <param name="column">Related column.</param>
 		public UserColumnExtender(UserColumn column)
+			: base(column)
 		{
-			Verify.Argument.IsNotNull(column, "column");
-
-			_column = column;
-
 			InitializeComponent();
-
-			_chkShowEmail.Text = Resources.StrShowEmail;
-			_chkShowEmail.Image = CachedResources.Bitmaps["ImgMail"];
-
-			ShowEmail = column.ShowEmail;
+			CreateControls();
 			SubscribeToColumnEvents();
+		}
+
+		private void CreateControls()
+		{
+			if(_chkShowEmail != null) _chkShowEmail.Dispose();
+			_chkShowEmail = Style.CreateCheckBox();
+			_chkShowEmail.IsChecked = Column.ShowEmail;
+			_chkShowEmail.IsCheckedChanged += OnShowEmailCheckedChanged;
+			_chkShowEmail.Image = CachedResources.Bitmaps["ImgMail"];
+			_chkShowEmail.Text = Resources.StrShowEmail;
+			_chkShowEmail.Control.Bounds = new Rectangle(6, 0, 127, 27);
+			_chkShowEmail.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+			_chkShowEmail.Control.Parent = this;
+		}
+
+		protected override void OnStyleChanged()
+		{
+			base.OnStyleChanged();
+			CreateControls();
+		}
+
+		public new UserColumn Column
+		{
+			get { return (UserColumn)base.Column; }
 		}
 
 		private void SubscribeToColumnEvents()
 		{
-			_column.ShowEmailChanged += OnColumnShowEmailChanged;
+			Column.ShowEmailChanged += OnColumnShowEmailChanged;
 		}
 
 		private void UnsubscribeFromColumnEvents()
 		{
-			_column.ShowEmailChanged -= OnColumnShowEmailChanged;
+			Column.ShowEmailChanged -= OnColumnShowEmailChanged;
 		}
 
 		private void OnColumnShowEmailChanged(object sender, EventArgs e)
 		{
-			ShowEmail = _column.ShowEmail;
+			ShowEmail = Column.ShowEmail;
 		}
 
 		public bool ShowEmail
 		{
-			get { return _chkShowEmail.Checked; }
-			set
+			get { return _chkShowEmail != null ? _chkShowEmail.IsChecked : Column.ShowEmail; }
+			private set
 			{
-				_disableEvents = true;
-				_chkShowEmail.Checked = value;
-				_disableEvents = false;
+				if(_chkShowEmail != null)
+				{
+					_disableEvents = true;
+					_chkShowEmail.IsChecked = value;
+					_disableEvents = false;
+				}
 			}
 		}
 
@@ -65,7 +87,9 @@
 		{
 			if(!_disableEvents)
 			{
-				_column.ShowEmail = ((CheckBox)sender).Checked;
+				_disableEvents = true;
+				Column.ShowEmail = _chkShowEmail.IsChecked;
+				_disableEvents = false;
 			}
 		}
 	}

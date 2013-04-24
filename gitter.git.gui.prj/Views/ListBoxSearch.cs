@@ -69,6 +69,19 @@
 			return Search(-1, search, 1);
 		}
 
+		public bool Current(T search)
+		{
+			Verify.Argument.IsNotNull(search, "search");
+
+			if(search.Text.Length == 0) return true;
+			if(ListBox.SelectedItems.Count == 0)
+			{
+				return Search(-1, search, 1);
+			}
+			var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
+			return Search(start - 1, search, 1);
+		}
+
 		public bool Next(T search)
 		{
 			Verify.Argument.IsNotNull(search, "search");

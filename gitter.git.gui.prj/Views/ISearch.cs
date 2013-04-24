@@ -3,6 +3,8 @@
 	interface ISearch<T>
 		where T : SearchOptions
 	{
+		bool Current(T search);
+
 		bool First(T options);
 
 		bool Next(T options);

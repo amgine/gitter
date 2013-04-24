@@ -1,19 +1,15 @@
 ﻿namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Linq;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	using gitter.Framework.Controls;
 
 	[ToolboxItem(false)]
-	public partial class SubjectColumnExtender : ExtenderBase
+	partial class SubjectColumnExtender : ExtenderBase
 	{
 		#region Data
 
@@ -34,22 +30,7 @@
 			: base(column)
 		{
 			InitializeComponent();
-
-			//_chkAlignToGraph.Text		= Resources.StrAlignToGraph;
-			//_grpVisibleReferences.Text	= Resources.StrVisibleReferences;
-			//_chkLocalBranches.Text		= Resources.StrLocalBranches;
-			//_chkRemoteBranches.Text		= Resources.StrRemoteBranches;
-			//_chkTags.Text				= Resources.StrTags;
-			//_chkStash.Text				= Resources.StrStash;
-
-			//_chkAlignToGraph.Image		= CachedResources.Bitmaps["ImgAlignToGraph"];
-			//_chkLocalBranches.Image		= CachedResources.Bitmaps["ImgBranch"];
-			//_chkRemoteBranches.Image	= CachedResources.Bitmaps["ImgBranchRemote"];
-			//_chkTags.Image				= CachedResources.Bitmaps["ImgTag"];
-			//_chkStash.Image				= CachedResources.Bitmaps["ImgStash"];
-
 			CreateControls();
-			//UpdateStates();
 			SubscribeToColumnEvents();
 		}
 
@@ -194,7 +175,9 @@
 		{
 			if(!_disableEvents)
 			{
+				_disableEvents = true;
 				Column.AlignToGraph = ((ICheckBoxWidget)sender).IsChecked;
+				_disableEvents = false;
 			}
 		}
 
@@ -202,7 +185,9 @@
 		{
 			if(!_disableEvents)
 			{
+				_disableEvents = true;
 				Column.ShowLocalBranches = ((ICheckBoxWidget)sender).IsChecked;
+				_disableEvents = false;
 			}
 		}
 
@@ -210,7 +195,9 @@
 		{
 			if(!_disableEvents)
 			{
+				_disableEvents = true;
 				Column.ShowRemoteBranches = ((ICheckBoxWidget)sender).IsChecked;
+				_disableEvents = false;
 			}
 		}
 
@@ -218,7 +205,9 @@
 		{
 			if(!_disableEvents)
 			{
+				_disableEvents = true;
 				Column.ShowTags = ((ICheckBoxWidget)sender).IsChecked;
+				_disableEvents = false;
 			}
 		}
 
@@ -226,7 +215,9 @@
 		{
 			if(!_disableEvents)
 			{
+				_disableEvents = true;
 				Column.ShowStash = ((ICheckBoxWidget)sender).IsChecked;
+				_disableEvents = false;
 			}
 		}
 
@@ -241,56 +232,71 @@
 
 		public bool AlignToGraph
 		{
-			get { return _chkAlignToGraph.IsChecked; }
-			set
+			get { return _chkAlignToGraph != null ? _chkAlignToGraph.IsChecked : Column.AlignToGraph; }
+			private set
 			{
-				_disableEvents = true;
-				_chkAlignToGraph.IsChecked = value;
-				_disableEvents = false;
+				if(_chkAlignToGraph != null)
+				{
+					_disableEvents = true;
+					_chkAlignToGraph.IsChecked = value;
+					_disableEvents = false;
+				}
 			}
 		}
 
 		public bool ShowLocalBranches
 		{
-			get { return _chkLocalBranches.IsChecked; }
-			set
+			get { return _chkLocalBranches != null ? _chkLocalBranches.IsChecked : Column.ShowLocalBranches; }
+			private set
 			{
-				_disableEvents = true;
-				_chkLocalBranches.IsChecked = value;
-				_disableEvents = false;
+				if(_chkLocalBranches != null)
+				{
+					_disableEvents = true;
+					_chkLocalBranches.IsChecked = value;
+					_disableEvents = false;
+				}
 			}
 		}
 
 		public bool ShowRemoteBranches
 		{
-			get { return _chkRemoteBranches.IsChecked; }
-			set
+			get { return _chkRemoteBranches != null ? _chkRemoteBranches.IsChecked : Column.ShowRemoteBranches; }
+			private set
 			{
-				_disableEvents = true;
-				_chkRemoteBranches.IsChecked = value;
-				_disableEvents = false;
+				if(_chkRemoteBranches != null)
+				{
+					_disableEvents = true;
+					_chkRemoteBranches.IsChecked = value;
+					_disableEvents = false;
+				}
 			}
 		}
 
 		public bool ShowTags
 		{
-			get { return _chkTags.IsChecked; }
-			set
+			get { return _chkTags != null ? _chkTags.IsChecked : Column.ShowTags; }
+			private set
 			{
-				_disableEvents = true;
-				_chkTags.IsChecked = value;
-				_disableEvents = false;
+				if(_chkTags != null)
+				{
+					_disableEvents = true;
+					_chkTags.IsChecked = value;
+					_disableEvents = false;
+				}
 			}
 		}
 
 		public bool ShowStash
 		{
-			get { return _chkStash.IsChecked; }
-			set
+			get { return _chkStash != null ? _chkStash.IsChecked : Column.ShowStash; }
+			private set
 			{
-				_disableEvents = true;
-				_chkStash.IsChecked = value;
-				_disableEvents = false;
+				if(_chkStash != null)
+				{
+					_disableEvents = true;
+					_chkStash.IsChecked = value;
+					_disableEvents = false;
+				}
 			}
 		}
 

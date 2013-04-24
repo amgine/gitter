@@ -40,7 +40,7 @@
 			this.radioButton1.Checked = true;
 			this.radioButton1.Location = new System.Drawing.Point(3, 3);
 			this.radioButton1.Name = "radioButton1";
-			this.radioButton1.Size = new System.Drawing.Size(95, 18);
+			this.radioButton1.Size = new System.Drawing.Size(89, 17);
 			this.radioButton1.TabIndex = 1;
 			this.radioButton1.TabStop = true;
 			this.radioButton1.Text = "All references";
@@ -52,7 +52,7 @@
 			this.radioButton2.AutoSize = true;
 			this.radioButton2.Location = new System.Drawing.Point(142, 3);
 			this.radioButton2.Name = "radioButton2";
-			this.radioButton2.Size = new System.Drawing.Size(61, 18);
+			this.radioButton2.Size = new System.Drawing.Size(55, 17);
 			this.radioButton2.TabIndex = 2;
 			this.radioButton2.Text = "HEAD";
 			this.radioButton2.UseVisualStyleBackColor = true;
@@ -63,7 +63,7 @@
 			this.radioButton3.AutoSize = true;
 			this.radioButton3.Location = new System.Drawing.Point(3, 25);
 			this.radioButton3.Name = "radioButton3";
-			this.radioButton3.Size = new System.Drawing.Size(151, 18);
+			this.radioButton3.Size = new System.Drawing.Size(145, 17);
 			this.radioButton3.TabIndex = 3;
 			this.radioButton3.Text = "Only selected references:";
 			this.radioButton3.UseVisualStyleBackColor = true;
@@ -75,6 +75,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._lstReferences.DisableContextMenus = true;
+			this._lstReferences.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstReferences.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstReferences.Location = new System.Drawing.Point(3, 49);
 			this._lstReferences.Name = "_lstReferences";
@@ -93,8 +94,10 @@
 			this.Controls.Add(this.radioButton2);
 			this.Controls.Add(this.radioButton1);
 			this.Controls.Add(this._lstReferences);
+			this.MaximumSize = new System.Drawing.Size(241, 500);
+			this.MinimumSize = new System.Drawing.Size(241, 250);
 			this.Name = "HistoryFilterDropDown";
-			this.Size = new System.Drawing.Size(241, 250);
+			this.Size = new System.Drawing.Size(239, 250);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

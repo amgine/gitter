@@ -18,7 +18,8 @@ namespace gitter.Git.Gui.Views
 		{
 			return new HistorySearchOptions()
 			{
-				Text = SearchText,
+				Text		= SearchText,
+				MatchCase	= MatchCase,
 			};
 		}
 	}

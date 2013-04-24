@@ -78,7 +78,6 @@
 			{
 				if(_showEmail != value)
 				{
-					_extender.ShowEmail = value;
 					_showEmail = value;
 					AutoSize(80);
 					ShowEmailChanged.Raise(this);

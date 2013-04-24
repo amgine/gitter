@@ -16,7 +16,8 @@
 
 		protected static bool TestReflogRecord(ReflogRecord record, T search)
 		{
-			if(record.Message.Contains(search.Text)) return true;
+			var comparison = search.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+			if(record.Message.IndexOf(search.Text, comparison) != -1) return true;
 			return TestRevision(record.Revision, search);
 		}
 

@@ -21,7 +21,9 @@
 		private readonly ToolStripTextBox _textBox;
 		private readonly ToolStripButton _btnNext;
 		private readonly ToolStripButton _btnPrev;
+		private readonly ToolStripButton _btnMatchCase;
 		private bool _result;
+		private TOptions _options;
 
 		#endregion
 
@@ -32,54 +34,93 @@
 			_view = view;
 			_result = true;
 
-			Items.Add(new ToolStripButton(Resources.StrClose, CachedResources.Bitmaps["ImgSearchClose"], (sender, e) =>
+			Items.AddRange(new ToolStripItem[]
+				{
+					new ToolStripButton(Resources.StrClose, CachedResources.Bitmaps["ImgSearchClose"], OnCloseButtonClick)
+					{
+						DisplayStyle = ToolStripItemDisplayStyle.Image,
+					},
+					new ToolStripLabel(Resources.StrFind.AddColon(), null),
+					_textBox = new ToolStripTextBox()
+					{
+						AutoSize = false,
+						Width = 200,
+					},
+					_btnNext = new ToolStripButton(Resources.StrNext, CachedResources.Bitmaps["ImgSearchNext"], OnNextClick)
+					{
+						DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+						Enabled = false,
+					},
+					_btnPrev = new ToolStripButton(Resources.StrPrevious, CachedResources.Bitmaps["ImgSearchPrevious"], OnPreviousClick)
+					{
+						DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+						Enabled = false,
+					},
+					_btnMatchCase = new ToolStripButton(Resources.StrMatchCase, null, OnMatchCaseClick)
+					{
+						DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+						Enabled = true,
+					},
+				});
+			_textBox.TextBox.PreviewKeyDown += OnSearchTextBoxPreviewKeyDown;
+			_textBox.TextChanged += OnSearchTextChanged;
+			_btnMatchCase.CheckedChanged += OnMatchCaseCheckedChanged;
+		}
+
+		private void OnCloseButtonClick(object sender, EventArgs e)
+		{
+			_view.SearchToolBarVisible = false;
+		}
+
+		private void OnSearchTextChanged(object sender, EventArgs e)
+		{
+			Options = CreateSearchOptions();
+			HandleSearchResult(_view.Search.Current(Options));
+			_btnNext.Enabled = _textBox.TextLength > 0;
+			_btnPrev.Enabled = _textBox.TextLength > 0;
+		}
+
+		private void OnSearchTextBoxPreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			if(e.KeyCode == Keys.Escape)
 			{
 				_view.SearchToolBarVisible = false;
-			})
-			{
-				DisplayStyle = ToolStripItemDisplayStyle.Image,
-			});
-			Items.Add(new ToolStripLabel(Resources.StrFind.AddColon(), null));
-			Items.Add(_textBox = new ToolStripTextBox()
-			{
-				AutoSize = false,
-				Width = 200,
-			});
-			Items.Add(_btnNext = new ToolStripButton(Resources.StrNext, CachedResources.Bitmaps["ImgSearchNext"], (sender, e) =>
-			{
-				HandleSearchResult(_view.Search.Next(CreateSearchOptions()));
-			})
-			{
-				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
-				Enabled = false,
-			});
-			Items.Add(_btnPrev = new ToolStripButton(Resources.StrPrevious, CachedResources.Bitmaps["ImgSearchPrevious"], (sender, e) =>
-			{
-				HandleSearchResult(_view.Search.Previous(CreateSearchOptions()));
-			})
-			{
-				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
-				Enabled = false,
-			});
-			/*
-			Items.Add(new ToolStripButton(Resources.StrMatchCase));
-			*/
+				e.IsInputKey = true;
+			}
+		}
 
-			_textBox.TextBox.PreviewKeyDown += (sender, e) =>
+		private void OnNextClick(object sender, EventArgs e)
+		{
+			HandleSearchResult(_view.Search.Next(Options));
+		}
+
+		private void OnPreviousClick(object sender, EventArgs e)
+		{
+			HandleSearchResult(_view.Search.Previous(Options));
+		}
+
+		private void OnMatchCaseClick(object sender, EventArgs e)
+		{
+			_btnMatchCase.Checked = !_btnMatchCase.Checked;
+		}
+
+		private void OnMatchCaseCheckedChanged(object sender, EventArgs e)
+		{
+			Options = CreateSearchOptions();
+			HandleSearchResult(_view.Search.Current(Options));
+		}
+
+		private TOptions Options
+		{
+			get
 			{
-				if(e.KeyCode == Keys.Escape)
+				if(_options == null)
 				{
-					_view.SearchToolBarVisible = false;
-					e.IsInputKey = true;
+					_options = CreateSearchOptions();
 				}
-			};
-
-			_textBox.TextChanged += (sender, e) =>
-			{
-				HandleSearchResult(_view.Search.First(CreateSearchOptions()));
-				_btnNext.Enabled = _textBox.TextLength > 0;
-				_btnPrev.Enabled = _textBox.TextLength > 0;
-			};
+				return _options;
+			}
+			set { _options = value; }
 		}
 
 		protected abstract TOptions CreateSearchOptions();
@@ -127,6 +168,12 @@
 			set { _textBox.Text = value; }
 		}
 
+		public bool MatchCase
+		{
+			get { return _btnMatchCase.Checked; }
+			set { _btnMatchCase.Checked = value; }
+		}
+
 		public ToolStripButton NextButton
 		{
 			get { return _btnNext; }
@@ -135,6 +182,11 @@
 		public ToolStripButton PrevButton
 		{
 			get { return _btnNext; }
+		}
+
+		public ToolStripButton MatchCaseButton
+		{
+			get { return _btnMatchCase; }
 		}
 	}
 }

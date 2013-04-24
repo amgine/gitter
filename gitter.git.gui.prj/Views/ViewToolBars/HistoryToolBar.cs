@@ -5,6 +5,8 @@ namespace gitter.Git.Gui.Views
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework.Controls;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -56,12 +58,15 @@ namespace gitter.Git.Gui.Views
 					new ToolStripSeparator(),
 					_btnFilter = new ToolStripDropDownButton(GetFilterButtonText(), CachedResources.Bitmaps["ImgFilter"])
 						{
-							DropDown = new gitter.Framework.Controls.Popup(
+							DropDown = new Popup(
 								_filterDropDown = new HistoryFilterDropDown()
 								{
 									LogOptions = _view.LogOptions,
 									Repository = _view.Repository,
-								}),
+								})
+								{
+									Resizable = false,
+								},
 							ToolTipText = Resources.StrFilter,
 						},
 					_btnLimit = new ToolStripDropDownButton(string.Empty, null,

@@ -1,11 +1,9 @@
 ﻿namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Linq;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -13,7 +11,7 @@
 
 	using gitter.Git.Gui.Controls;
 
-	public partial class HistoryFilterDropDown : UserControl
+	partial class HistoryFilterDropDown : UserControl
 	{
 		private Repository _repository;
 		private LogOptions _logOptions;

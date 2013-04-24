@@ -163,7 +163,7 @@
     <value>Specify manually</value>
   </data>
   <data name="StrsUnknown" xml:space="preserve">
-    <value>uknown</value>
+    <value>unknown</value>
   </data>
   <data name="StrProviderName" xml:space="preserve">
     <value>MSysGit command line interface</value>

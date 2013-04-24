@@ -18,7 +18,8 @@ namespace gitter.Git.Gui.Views
 		{
 			return new ReflogSearchOptions()
 			{
-				Text = SearchText,
+				Text		= SearchText,
+				MatchCase	= MatchCase,
 			};
 		}
 	}
