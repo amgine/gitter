@@ -782,6 +782,63 @@
 
 		#endregion
 
+		#region count-objects
+
+		public ObjectCountData CountObjects()
+		{
+			int count = 0;
+			int size = 0;
+			int inPack = 0;
+			int packs = 0;
+			int sizePack = 0;
+			int prunePackable = 0;
+			int garbage = 0;
+
+			var command = new CountObjectsCommand(CountObjectsCommand.Verbose());
+			var output = _executor.ExecCommand(command);
+			output.ThrowOnBadReturnCode();
+
+			var parser = new GitParser(output.Output);
+			while(!parser.IsAtEndOfString)
+			{
+				if(parser.CheckValueAndSkip("count: "))
+				{
+					int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out count);
+				}
+				else if(parser.CheckValueAndSkip("size: "))
+				{
+					int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out size);
+				}
+				else if(parser.CheckValueAndSkip("in-pack: "))
+				{
+					int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out inPack);
+				}
+				else if(parser.CheckValueAndSkip("packs: "))
+				{
+					int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out packs);
+				}
+				else if(parser.CheckValueAndSkip("size-pack: "))
+				{
+					int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out sizePack);
+				}
+				else if(parser.CheckValueAndSkip("prune-packable: "))
+				{
+					int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out prunePackable);
+				}
+				else if(parser.CheckValueAndSkip("garbage: "))
+				{
+					int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out garbage);
+				}
+				else
+				{
+					parser.SkipLine();
+				}
+			}
+			return new ObjectCountData(count, size, inPack, packs, sizePack, prunePackable, garbage);
+		}
+
+		#endregion
+
 		#region gc
 
 		/// <summary>Cleanup unnecessary files and optimize the local repository.</summary>

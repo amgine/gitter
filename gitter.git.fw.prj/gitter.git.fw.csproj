@@ -53,6 +53,7 @@
     <Compile Include="Blame\BlameFile.cs" />
     <Compile Include="Blame\BlameHunk.cs" />
     <Compile Include="Blame\BlameLine.cs" />
+    <Compile Include="Data\ObjectCountData.cs" />
     <Compile Include="Enums\RevertControl.cs" />
     <Compile Include="Data\BlobData.cs" />
     <Compile Include="Data\BranchData.cs" />

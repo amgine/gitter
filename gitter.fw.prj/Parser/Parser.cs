@@ -261,9 +261,13 @@
 		{
 			int pos = _string.IndexOf('\n', _position);
 			if(pos == -1)
+			{
 				_position = _string.Length;
+			}
 			else
+			{
 				_position = pos + 1;
+			}
 		}
 
 		/// <summary>Check if current character is <paramref name="value"/>.</summary>
@@ -285,6 +289,27 @@
 			var sl = _string.Length;
 			if(_position + vl > sl) return false;
 			return _string.IndexOf(value, _position, vl) != -1;
+		}
+
+		/// <summary>Check if <paramref name="value"/> can be found at currect position and skips value if it is found.</summary>
+		/// <param name="value">String to check for.</param>
+		/// <returns>True if current string is <see cref="value"/>.</returns>
+		public bool CheckValueAndSkip(string value)
+		{
+			Verify.Argument.IsNotNull(value, "value");
+
+			var vl = value.Length;
+			var sl = _string.Length;
+			if(_position + vl > sl) return false;
+			if(_string.IndexOf(value, _position, vl) != -1)
+			{
+				Skip(value.Length);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		/// <summary>Set position to the start of <paramref name="value"/>.</summary>

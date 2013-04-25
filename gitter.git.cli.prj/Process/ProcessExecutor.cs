@@ -26,7 +26,7 @@
 			var psi = new ProcessStartInfo()
 			{
 				Arguments				= input.GetArguments(),
-				WindowStyle				= ProcessWindowStyle.Normal,
+				WindowStyle				= ProcessWindowStyle.Hidden,
 				UseShellExecute			= false,
 				StandardOutputEncoding	= input.Encoding,
 				StandardErrorEncoding	= input.Encoding,

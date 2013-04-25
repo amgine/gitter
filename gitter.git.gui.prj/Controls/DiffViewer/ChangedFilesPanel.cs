@@ -199,7 +199,7 @@
 							graphics,
 							Resources.StrlRename,
 							font,
-							textBrush,
+							Color.White,
 							rc,
 							DiffStatCenterFormat);
 					}
@@ -213,7 +213,7 @@
 							graphics,
 							Resources.StrlCopy,
 							font,
-							textBrush,
+							Color.White,
 							rc,
 							DiffStatCenterFormat);
 					}

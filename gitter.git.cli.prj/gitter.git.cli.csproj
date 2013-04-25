@@ -54,11 +54,17 @@
     </Compile>
     <Compile Include="BlameParser.cs" />
     <Compile Include="Commands\Ancillary\Interrogation\blame.cs" />
+    <Compile Include="Commands\Ancillary\Interrogation\count-objects.cs" />
+    <Compile Include="Commands\Ancillary\Interrogation\fsck.cs" />
+    <Compile Include="Commands\Ancillary\Interrogation\rerere.cs" />
     <Compile Include="Commands\Ancillary\Interrogation\rev-parse.cs" />
+    <Compile Include="Commands\Ancillary\Interrogation\verify-tag.cs" />
     <Compile Include="Commands\Ancillary\Manipulation\config.cs" />
     <Compile Include="Commands\Ancillary\Manipulation\mergetool.cs" />
+    <Compile Include="Commands\Ancillary\Manipulation\pack-refs.cs" />
     <Compile Include="Commands\Ancillary\Manipulation\prune.cs" />
     <Compile Include="Commands\Ancillary\Manipulation\remote.cs" />
+    <Compile Include="Commands\Ancillary\Manipulation\repack.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandArgument.cs" />
     <Compile Include="Commands\Low-Level\Interrogation\cat-file.cs" />
