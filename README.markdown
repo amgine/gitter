@@ -8,6 +8,12 @@ It is written completely in C# and targets .NET FW 4.0 Client Profile.
 
 Application is mainly tested on Win7, but should work on Vista/XP without any problems.
 
+## License
+
+Gitter is under GNU GPL3.
+
+See the LICENSE file for the full license text.
+
 ## Repository access options
 
 Currently, gitter supports interaction with repository through comand-line interface only, so you'll need git installation to work with gitter.
