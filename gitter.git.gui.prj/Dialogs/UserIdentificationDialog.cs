@@ -167,7 +167,9 @@ namespace gitter.Git.Gui.Dialogs
 								{
 									cpUserName.Unset();
 								}
-								catch(GitException) { }
+								catch(GitException)
+								{
+								}
 							}
 							var cpUserEmail = _repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
 							if(cpUserEmail != null)
@@ -176,19 +178,33 @@ namespace gitter.Git.Gui.Dialogs
 								{
 									cpUserEmail.Unset();
 								}
-								catch(GitException) { }
+								catch(GitException)
+								{
+								}
 							}
 						}
-						_repositoryProvider.GitAccessor.SetConfigValue(
-							new SetConfigValueParameters(GitConstants.UserNameParameter, userName)
-							{
-								ConfigFile = ConfigFile.User,
-							});
-						_repositoryProvider.GitAccessor.SetConfigValue(
-							new SetConfigValueParameters(GitConstants.UserEmailParameter, userEmail)
-							{
-								ConfigFile = ConfigFile.User,
-							});
+						try
+						{
+							_repositoryProvider.GitAccessor.SetConfigValue(
+								new SetConfigValueParameters(GitConstants.UserEmailParameter, userEmail)
+								{
+									ConfigFile = ConfigFile.User,
+								});
+						}
+						catch(ConfigParameterDoesNotExistException)
+						{
+						}
+						try
+						{
+							_repositoryProvider.GitAccessor.SetConfigValue(
+								new SetConfigValueParameters(GitConstants.UserNameParameter, userName)
+								{
+									ConfigFile = ConfigFile.User,
+								});
+						}
+						catch(ConfigParameterDoesNotExistException)
+						{
+						}
 						if(_repository != null)
 						{
 							_repository.Configuration.Refresh();
