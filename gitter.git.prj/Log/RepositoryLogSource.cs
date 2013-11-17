@@ -21,10 +21,22 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
+
+	using Resources = gitter.Git.Properties.Resources;
 
 	public sealed class RepositoryLogSource : LogSourceBase
 	{
+		#region Data
+
 		private readonly Repository _repository;
+
+		#endregion
+
+		#region .ctor
 
 		public RepositoryLogSource(Repository repository)
 		{
@@ -33,25 +45,54 @@ namespace gitter.Git
 			_repository = repository;
 		}
 
+		#endregion
+
+		#region Properties
+
 		public override Repository Repository
 		{
 			get { return _repository; }
 		}
 
-		protected override RevisionLog GetLogCore(LogOptions options)
+		#endregion
+
+		#region Methods
+
+		public override Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Assert.IsNotNull(options);
+			Verify.Argument.IsNotNull(options, "options");
 
 			if(Repository.IsEmpty)
 			{
-				return new RevisionLog(Repository, new Revision[0]);
+				return TaskUtility.TaskFromResult(new RevisionLog(Repository, new Revision[0]));
 			}
 			else
 			{
-				var log = Repository.Accessor.QueryRevisions(options.GetLogParameters());
-				var res = Repository.Revisions.Resolve(log);
-				return new RevisionLog(Repository, res);
+				if(progress != null)
+				{
+					progress.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
+				}
+				return Repository.Accessor
+								 .QueryRevisionsAsync(options.GetLogParameters(), progress, cancellationToken)
+								 .ContinueWith(
+									t =>
+									{
+										if(progress != null)
+										{
+											progress.Report(OperationProgress.Completed);
+										}
+										var revisionData = TaskUtility.UnwrapResult(t);
+										var revisions    = Repository.Revisions.Resolve(revisionData);
+										var revisionLog  = new RevisionLog(Repository, revisions);
+
+										return revisionLog;
+									},
+									cancellationToken,
+									TaskContinuationOptions.ExecuteSynchronously,
+									TaskScheduler.Default);
 			}
 		}
+
+		#endregion
 	}
 }

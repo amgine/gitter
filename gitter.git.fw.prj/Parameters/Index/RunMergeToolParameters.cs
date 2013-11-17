@@ -70,7 +70,5 @@ namespace gitter.Git.AccessLayer
 
 		/// <param name="files">Files to run merge tool on.</param>
 		public IList<string> Files { get; set; }
-
-		public IAsyncProgressMonitor Monitor { get; set; }
 	}
 }

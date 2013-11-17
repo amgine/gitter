@@ -21,6 +21,8 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -40,13 +42,9 @@ namespace gitter.Git
 
 		#region Methods
 
-		IAsyncFunc<Diff> GetDiffAsync();
-
-		IAsyncFunc<Diff> GetDiffAsync(DiffOptions options);
-
-		Diff GetDiff();
-
 		Diff GetDiff(DiffOptions options);
+
+		Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		#endregion
 	}

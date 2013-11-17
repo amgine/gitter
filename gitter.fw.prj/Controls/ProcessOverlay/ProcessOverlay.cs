@@ -25,7 +25,7 @@ namespace gitter.Framework.Controls
 	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
 
-	public sealed class ProcessOverlay : IAsyncProgressMonitor, IDisposable
+	public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 	{
 		private Control _hostControl;
 		private ProcessOverlayRenderer _renderer;
@@ -191,9 +191,10 @@ namespace gitter.Framework.Controls
 			set { _disableHost = value; }
 		}
 
-		public bool Visible
+		public bool IsVisible
 		{
 			get { return _isVisible; }
+			private set { _isVisible = value; }
 		}
 
 		public void OnPaint(Graphics graphics, Rectangle bounds)
@@ -239,8 +240,6 @@ namespace gitter.Framework.Controls
 				_hostControl.Invalidate(rect);
 			}
 		}
-
-		#region IAsyncProgressMonitor Members
 
 		public event EventHandler Canceled;
 
@@ -379,6 +378,61 @@ namespace gitter.Framework.Controls
 				Repaint();
 			}
 			catch { }
+		}
+
+		#region IProgress<OperationProgress> Members
+
+		public void Report(OperationProgress progress)
+		{
+			if(_hostControl.IsDisposed)
+			{
+				return;
+			}
+			if(_hostControl.InvokeRequired)
+			{
+				try
+				{
+					_hostControl.BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
+			{
+				ReportCore(progress);
+			}
+		}
+
+		private void ReportCore(OperationProgress progress)
+		{
+			if(progress.IsCompleted)
+			{
+				if(IsVisible)
+				{
+					ProcessCompleted();
+				}
+				return;
+			}
+			if(!IsVisible)
+			{
+				IsVisible = true;
+				_timer.Enabled = true;
+				if(_disableHost)
+				{
+					_hostControl.Enabled = false;
+				}
+			}
+			Title = progress.ActionName;
+			if(progress.IsIndeterminate)
+			{
+				SetProgressIndeterminate();
+			}
+			else
+			{
+				SetProgressRange(0, progress.MaxProgress);
+				SetProgress(progress.CurrentProgress);
+			}
 		}
 
 		#endregion

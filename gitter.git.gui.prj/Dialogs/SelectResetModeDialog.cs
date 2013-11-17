@@ -34,9 +34,29 @@ namespace gitter.Git.Gui.Dialogs
 	[ToolboxItem(false)]
 	public partial class SelectResetModeDialog : GitDialogBase
 	{
+		#region Static
+
+		private static readonly ResetMode[] ResetModes =
+			new ResetMode[]
+			{
+				ResetMode.Soft,
+				ResetMode.Mixed,
+				ResetMode.Hard,
+				ResetMode.Merge,
+				ResetMode.Keep,
+			};
+
+		#endregion
+
+		#region Data
+
 		private readonly ResetMode _availableModes;
 		private ResetMode _resetMode;
 		private List<CommandLink> _buttons;
+
+		#endregion
+
+		#region .ctor
 
 		public SelectResetModeDialog(ResetMode availableModes)
 		{
@@ -47,39 +67,25 @@ namespace gitter.Git.Gui.Dialogs
 			_availableModes = availableModes;
 			_resetMode = ResetMode.Mixed;
 
-			_buttons = new List<CommandLink>(5);
-
-			if((_availableModes & ResetMode.Soft) == ResetMode.Soft)
+			_buttons = new List<CommandLink>(ResetModes.Length);
+			foreach(var resetMode in ResetModes)
 			{
-				_buttons.Add(CreateResetButton(ResetMode.Soft));
-			}
-			if((_availableModes & ResetMode.Mixed) == ResetMode.Mixed)
-			{
-				_buttons.Add(CreateResetButton(ResetMode.Mixed));
-			}
-			if((_availableModes & ResetMode.Hard) == ResetMode.Hard)
-			{
-				_buttons.Add(CreateResetButton(ResetMode.Hard));
-			}
-			if((_availableModes & ResetMode.Merge) == ResetMode.Merge)
-			{
-				_buttons.Add(CreateResetButton(ResetMode.Merge));
-			}
-			if((_availableModes & ResetMode.Keep) == ResetMode.Keep)
-			{
-				_buttons.Add(CreateResetButton(ResetMode.Keep));
+				if((_availableModes & resetMode) == resetMode)
+				{
+					_buttons.Add(CreateResetButton(resetMode));
+				}
 			}
 
 			const int margin = 16;
 
 			var location = new Point(margin, margin);
 			var h = margin;
-			foreach(var btn in _buttons)
+			foreach(var button in _buttons)
 			{
-				btn.Location = location;
-				btn.Parent = this;
-				h += btn.Height + margin;
-				location.Y += btn.Height + margin;
+				button.Location = location;
+				button.Parent = this;
+				h += button.Height + margin;
+				location.Y += button.Height + margin;
 			}
 
 			Height = h;
@@ -89,6 +95,10 @@ namespace gitter.Git.Gui.Dialogs
 			: this(ResetMode.Soft | ResetMode.Mixed | ResetMode.Hard)
 		{
 		}
+
+		#endregion
+
+		#region Properties
 
 		public ResetMode AvailableModes
 		{
@@ -110,6 +120,10 @@ namespace gitter.Git.Gui.Dialogs
 		{
 			get { return DialogButtons.Cancel; }
 		}
+
+		#endregion
+
+		#region Methods
 
 		private CommandLink CreateResetButton(ResetMode mode)
 		{
@@ -176,5 +190,7 @@ namespace gitter.Git.Gui.Dialogs
 				_buttons[0].Focus();
 			}
 		}
+
+		#endregion
 	}
 }

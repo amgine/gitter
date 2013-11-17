@@ -80,8 +80,5 @@ namespace gitter.Git.AccessLayer
 		/// non-default path for the command run on the other end. 
 		/// </summary>
 		public string UploadPack { get; set; }
-
-		/// <summary>Progress montoring.</summary>
-		public IAsyncProgressMonitor Monitor { get; set; }
 	}
 }

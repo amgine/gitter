@@ -88,6 +88,7 @@
     <Compile Include="RefrenceChange.cs" />
     <Compile Include="RefsDiff.cs" />
     <Compile Include="RefsState.cs" />
+    <Compile Include="Remotes\RemotesUtility.cs" />
     <Compile Include="Revision\RevisionParentsCollection.cs" />
     <Compile Include="Revision\RevisionReferencesCollection.cs" />
     <Compile Include="Tree\TreeCommit.cs" />

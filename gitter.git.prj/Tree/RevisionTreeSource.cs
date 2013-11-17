@@ -21,10 +21,20 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	public sealed class RevisionTreeSource : TreeSourceBase
 	{
+		#region Data
+
 		private readonly IRevisionPointer _revision;
+
+		#endregion
+
+		#region .ctor
 
 		public RevisionTreeSource(IRevisionPointer revision)
 		{
@@ -34,6 +44,10 @@ namespace gitter.Git
 			_revision = revision;
 		}
 
+		#endregion
+
+		#region Properties
+
 		public override IRevisionPointer Revision
 		{
 			get { return _revision; }
@@ -41,22 +55,37 @@ namespace gitter.Git
 
 		protected override Tree GetTreeCore()
 		{
-			return new Tree(_revision.Repository, _revision.Pointer);
+			return new Tree(Revision.Repository, Revision.Pointer);
 		}
 
 		public override string DisplayName
 		{
 			get
 			{
-				if(_revision.Type == ReferenceType.Revision)
+				var pointer = Revision.Pointer;
+				if(Revision.Type == ReferenceType.Revision && pointer.Length == 40)
 				{
-					return _revision.Pointer.Substring(0, 7);
+					return pointer.Substring(0, 7);
 				}
 				else
 				{
-					return _revision.Pointer;
+					return pointer;
 				}
 			}
+		}
+
+		#endregion
+
+		#region Methods
+
+		public override Tree GetTree()
+		{
+			return new Tree(Revision.Repository, Revision.FullName);
+		}
+
+		public override Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			return Tree.GetAsync(Revision.Repository, Revision.FullName, progress, cancellationToken);
 		}
 
 		/// <summary>
@@ -95,5 +124,7 @@ namespace gitter.Git
 		{
 			return _revision.Pointer;
 		}
+
+		#endregion
 	}
 }

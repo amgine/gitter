@@ -22,6 +22,10 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	/// <summary>Object which can perform various operations on git stash.</summary>
 	public interface IStashAccessor
@@ -42,7 +46,13 @@ namespace gitter.Git.AccessLayer
 		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
 		/// <returns>Patch, representing specified stashed changes.</returns>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-		string QueryStashPatch(QueryRevisionDiffParameters parameters);
+		byte[] QueryStashPatch(QueryRevisionDiffParameters parameters);
+
+		/// <summary>Get patch representing stashed changes.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
+		/// <returns>Patch, representing specified stashed changes.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task<byte[]> QueryStashPatchAsync(QueryRevisionDiffParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		/// <summary>Get patch representing stashed changes.</summary>
 		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
@@ -50,21 +60,43 @@ namespace gitter.Git.AccessLayer
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		Diff QueryStashDiff(QueryRevisionDiffParameters parameters);
 
+		/// <summary>Get patch representing stashed changes.</summary>
+		/// <param name="parameters"><see cref="QueryRevisionDiffParameters"/>.</param>
+		/// <returns><see cref="Diff"/>, representing specified stashed changes.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task<Diff> QueryStashDiffAsync(QueryRevisionDiffParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
 		/// <summary>Stash changes in working directory.</summary>
 		/// <param name="parameters"><see cref="StashSaveParameters"/>.</param>
 		/// <returns>true if something was stashed, false otherwise.</returns>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		bool StashSave(StashSaveParameters parameters);
 
+		/// <summary>Stash changes in working directory.</summary>
+		/// <param name="parameters"><see cref="StashSaveParameters"/>.</param>
+		/// <returns>true if something was stashed, false otherwise.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task<bool> StashSaveAsync(StashSaveParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
 		/// <summary>Apply stashed changes and remove stashed state.</summary>
 		/// <param name="parameters"><see cref="StashPopParameters"/></param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void StashPop(StashPopParameters parameters);
 
+		/// <summary>Apply stashed changes and remove stashed state.</summary>
+		/// <param name="parameters"><see cref="StashPopParameters"/></param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task StashPopAsync(StashPopParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
 		/// <summary>Apply stashed changes and do not remove stashed state.</summary>
 		/// <param name="parameters"><see cref="StashApplyParameters"/>.</param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void StashApply(StashApplyParameters parameters);
+
+		/// <summary>Apply stashed changes and do not remove stashed state.</summary>
+		/// <param name="parameters"><see cref="StashApplyParameters"/>.</param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task StashApplyAsync(StashApplyParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		/// <summary>Create new branch, checkout that branch and pop stashed state.</summary>
 		/// <param name="parameters"><see cref="StashToBranchParameters"/>.</param>
@@ -76,9 +108,19 @@ namespace gitter.Git.AccessLayer
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void StashDrop(StashDropParameters parameters);
 
+		/// <summary>Remove stashed state.</summary>
+		/// <param name="parameters"><see cref="StashDropParameters"/>.</param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task StashDropAsync(StashDropParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
 		/// <summary>Clear stash.</summary>
 		/// <param name="parameters"><see cref="StashClearParameters"/>.</param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void StashClear(StashClearParameters parameters);
+
+		/// <summary>Clear stash.</summary>
+		/// <param name="parameters"><see cref="StashClearParameters"/>.</param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task StashClearAsync(StashClearParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 	}
 }

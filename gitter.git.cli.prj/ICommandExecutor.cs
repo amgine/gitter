@@ -22,16 +22,28 @@ namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
 	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework.CLI;
 
 	/// <summary>Git command line executor.</summary>
 	internal interface ICommandExecutor
 	{
-		GitOutput ExecCommand(Command command);
+		GitOutput ExecuteCommand(Command command);
 
-		GitOutput ExecCommand(Command command, Encoding encoding);
+		GitOutput ExecuteCommand(Command command, Encoding encoding);
 
-		GitAsync ExecAsync(Command command);
+		int ExecuteCommand(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver);
 
-		GitAsync ExecAsync(Command command, Encoding encoding);
+		int ExecuteCommand(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver);
+
+		Task<GitOutput> ExecuteCommandAsync(Command command, CancellationToken cancellationToken);
+
+		Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CancellationToken cancellationToken);
+
+		Task<int> ExecuteCommandAsync(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CancellationToken cancellationToken);
+
+		Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CancellationToken cancellationToken);
 	}
 }

@@ -22,16 +22,29 @@ namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
 	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
 
+	using gitter.Framework.CLI;
 	using gitter.Framework.Services;
 
 	/// <summary>Executes commands for specific repository.</summary>
-	sealed class RepositoryCommandExecutor : ICommandExecutor
+	sealed class RepositoryCommandExecutor : CommandExecutorBase
 	{
+		#region Static
+
 		private static readonly LoggingService Log = new LoggingService("CLI");
+
+		#endregion
+
+		#region Data
 
 		private readonly GitCLI _gitCLI;
 		private readonly string _workingDirectory;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="RepositoryCommandExecutor"/> class.</summary>
 		/// <param name="workingDirectory">Repository working directory.</param>
@@ -44,34 +57,18 @@ namespace gitter.Git.AccessLayer.CLI
 			_workingDirectory = workingDirectory;
 		}
 
-		#region ICommandExecutor
+		#endregion
 
-		public GitOutput ExecCommand(Command command)
+		#region Overrides
+
+		protected override void OnCommandExecuting(Command command)
 		{
 			if(_gitCLI.LogCLICalls) Log.Info("git {0}", command);
-			return GitProcess.Exec(
-				new GitInput(_workingDirectory, command, GitProcess.DefaultEncoding));
 		}
 
-		public GitOutput ExecCommand(Command command, Encoding encoding)
+		protected override GitInput PrepareInput(Command command, Encoding encoding)
 		{
-			if(_gitCLI.LogCLICalls) Log.Info("git {0}", command);
-			return GitProcess.Exec(
-				new GitInput(_workingDirectory, command, encoding));
-		}
-
-		public GitAsync ExecAsync(Command command)
-		{
-			if(_gitCLI.LogCLICalls) Log.Info("git {0}", command);
-			return GitProcess.ExecAsync(
-				new GitInput(_workingDirectory, command, GitProcess.DefaultEncoding));
-		}
-
-		public GitAsync ExecAsync(Command command, Encoding encoding)
-		{
-			if(_gitCLI.LogCLICalls) Log.Info("git {0}", command);
-			return GitProcess.ExecAsync(
-				new GitInput(_workingDirectory, command, encoding));
+			return new GitInput(_workingDirectory, command, encoding);
 		}
 
 		#endregion

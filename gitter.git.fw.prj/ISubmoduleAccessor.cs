@@ -22,6 +22,10 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	/// <summary>Object which can perform various operations on git submodules.</summary>
 	public interface ISubmoduleAccessor
@@ -31,9 +35,19 @@ namespace gitter.Git.AccessLayer
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void UpdateSubmodule(SubmoduleUpdateParameters parameters);
 
+		/// <summary>Updates submodule.</summary>
+		/// <param name="parameters"><see cref="SubmoduleUpdateParameters"/>.</param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task UpdateSubmoduleAsync(SubmoduleUpdateParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
 		/// <summary>Adds new submodule.</summary>
 		/// <param name="parameters"><see cref="AddSubmoduleParameters"/>.</param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void AddSubmodule(AddSubmoduleParameters parameters);
+
+		/// <summary>Adds new submodule.</summary>
+		/// <param name="parameters"><see cref="AddSubmoduleParameters"/>.</param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task AddSubmoduleAsync(AddSubmoduleParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 	}
 }

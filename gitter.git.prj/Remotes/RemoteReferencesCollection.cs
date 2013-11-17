@@ -22,7 +22,11 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 
+	using gitter.Framework;
+	
 	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Properties.Resources;
@@ -69,6 +73,7 @@ namespace gitter.Git
 		private readonly Remote _remote;
 		private readonly Dictionary<string, RemoteRepositoryBranch> _remoteBranches;
 		private readonly Dictionary<string, RemoteRepositoryTag> _remoteTags;
+		private readonly object _syncRoot;
 
 		#endregion
 
@@ -78,13 +83,55 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(remote, "remote");
 
-			_remote = remote;
-			_repository = remote.Repository;
+			_remote         = remote;
+			_repository     = remote.Repository;
 			_remoteBranches = new Dictionary<string, RemoteRepositoryBranch>();
-			_remoteTags = new Dictionary<string, RemoteRepositoryTag>();
+			_remoteTags     = new Dictionary<string, RemoteRepositoryTag>();
+			_syncRoot       = new object();
 		}
 
 		#endregion
+
+		#region Properties
+
+		public Repository Repository
+		{
+			get { return _repository; }
+		}
+
+		public IEnumerable<RemoteRepositoryBranch> Branches
+		{
+			get { return _remoteBranches.Values; }
+		}
+
+		public int BranchCount
+		{
+			get { return _remoteBranches.Count; }
+		}
+
+		public IEnumerable<RemoteRepositoryTag> Tags
+		{
+			get { return _remoteTags.Values; }
+		}
+
+		public int TagCount
+		{
+			get { return _remoteTags.Count; }
+		}
+
+		public Remote Remote
+		{
+			get { return _remote; }
+		}
+
+		public object SyncRoot
+		{
+			get { return _syncRoot; }
+		}
+
+		#endregion
+
+		#region Methods
 
 		internal void RemoveTag(RemoteRepositoryTag tag)
 		{
@@ -114,35 +161,13 @@ namespace gitter.Git
 			InvokeBranchDeleted(branch);
 		}
 
-		public IEnumerable<RemoteRepositoryBranch> Branches
+		private QueryRemoteReferencesParameters GetQueryParameters()
 		{
-			get { return _remoteBranches.Values; }
+			return new QueryRemoteReferencesParameters(_remote.Name, true, true);
 		}
 
-		public int BranchCount
+		private void OnFetchCompleted(IList<RemoteReferenceData> refs)
 		{
-			get { return _remoteBranches.Count; }
-		}
-
-		public IEnumerable<RemoteRepositoryTag> Tags
-		{
-			get { return _remoteTags.Values; }
-		}
-
-		public int TagCount
-		{
-			get { return _remoteTags.Count; }
-		}
-
-		public Remote Remote
-		{
-			get { return _remote; }
-		}
-
-		public void Refresh()
-		{
-			var refs = _repository.Accessor.QueryRemoteReferences(
-				new QueryRemoteReferencesParameters(_remote.Name, true, true));
 			var branches = new Dictionary<string, RemoteReferenceData>(refs.Count);
 			var tags = new Dictionary<string, RemoteReferenceData>(refs.Count);
 			foreach(var r in refs)
@@ -261,5 +286,40 @@ namespace gitter.Git
 				}
 			}
 		}
+
+		public void Refresh()
+		{
+			var parameters = GetQueryParameters();
+			var refs = Repository.Accessor.QueryRemoteReferences(parameters);
+			lock(SyncRoot)
+			{
+				OnFetchCompleted(refs);
+			}
+		}
+
+		public Task RefreshAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrFetchingDataFromRemoteRepository));
+			}
+			var parameters = GetQueryParameters();
+			return Repository.Accessor
+				.QueryRemoteReferencesAsync(parameters, progress, cancellationToken)
+				.ContinueWith(
+				t =>
+				{
+					var refs = TaskUtility.UnwrapResult(t);
+					lock(SyncRoot)
+					{
+						OnFetchCompleted(refs);
+					}
+				},
+				cancellationToken,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
+		}
+
+		#endregion
 	}
 }

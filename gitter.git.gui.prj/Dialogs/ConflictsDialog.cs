@@ -165,7 +165,7 @@ namespace gitter.Git.Gui.Dialogs
 						default:
 							try
 							{
-								file.RunMergeToolAsync().Invoke<ProgressForm>(this);
+								ProgressForm.MonitorTaskAsModalWindow(Resources.StrRunningMergeTool, file.RunMergeToolAsync);
 							}
 							catch(GitException exc)
 							{

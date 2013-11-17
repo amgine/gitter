@@ -15,11 +15,7 @@
 		{
 			if(disposing)
 			{
-				if(_source != null)
-				{
-					_source.Updated -= OnSourceUpdated;
-					_source.Dispose();
-				}
+				DiffSource = null;
 				if(components != null)
 				{
 					components.Dispose();

@@ -27,12 +27,50 @@ namespace gitter.Git
 
 	public sealed class BlameOptions
 	{
-		internal static readonly BlameOptions Default = new BlameOptions()
+		#region Static
+
+		public static readonly BlameOptions Default = GetDefault();
+
+		private static BlameOptions GetDefault()
 		{
-		};
+			var options = new BlameOptions();
+			options.Freeze();
+			return options;
+		}
+
+		#endregion
+
+		#region Data
+
+		private bool _isFrozen;
+
+		#endregion
+
+		#region .ctor
 
 		public BlameOptions()
 		{
 		}
+
+		#endregion
+
+		#region Properties
+
+		public bool IsFrozen
+		{
+			get { return _isFrozen; }
+			private set { _isFrozen = value; }
+		}
+
+		#endregion
+
+		#region Methods
+
+		public void Freeze()
+		{
+			IsFrozen = true;
+		}
+
+		#endregion
 	}
 }

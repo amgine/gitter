@@ -27,7 +27,7 @@ namespace gitter.Framework.CLI
 	using System.IO;
 
 	/// <summary>Reads bytes from stdio/stderr.</summary>
-	public sealed class AsyncBytesReader : IOutputReceiver
+	public class AsyncBytesReader : IOutputReceiver
 	{
 		#region Data
 
@@ -90,7 +90,7 @@ namespace gitter.Framework.CLI
 		}
 
 		/// <summary>Closes the reader.</summary>
-		public void Close()
+		public void WaitForEndOfStream()
 		{
 			Verify.State.IsTrue(IsInitialized);
 
@@ -146,7 +146,7 @@ namespace gitter.Framework.CLI
 
 		private void OnStreamRead(IAsyncResult ar)
 		{
-			int bytesCount = 0;
+			int bytesCount;
 			try
 			{
 				bytesCount = _stream.EndRead(ar);

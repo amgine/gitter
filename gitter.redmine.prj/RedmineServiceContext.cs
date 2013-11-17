@@ -23,6 +23,8 @@ namespace gitter.Redmine
 	using System;
 	using System.IO;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Xml;
 	using System.Net;
 
@@ -125,7 +127,6 @@ namespace gitter.Redmine
 			return xmldoc;
 		}
 
-
 		private void SendData(string relativeUrl, string httpMethod, Action<Stream> send)
 		{
 			var request = WebRequest.Create(_serviceUri + relativeUrl);
@@ -196,6 +197,15 @@ namespace gitter.Redmine
 					break;
 				}
 			}
+		}
+
+		internal Task GetAllDataPagesAsync(string url, Action<XmlDocument> processing, CancellationToken cancellationToken)
+		{
+			return Task.Factory.StartNew(
+				() => GetAllDataPages(url, processing),
+				cancellationToken,
+				TaskCreationOptions.None,
+				TaskScheduler.Default);
 		}
 
 		public NewsCollection News

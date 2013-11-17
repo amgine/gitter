@@ -13,9 +13,13 @@
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && (components != null))
+			if(disposing)
 			{
-				components.Dispose();
+				BlameFileBinding = null;
+				if(components != null)
+				{
+					components.Dispose();
+				}
 			}
 			base.Dispose(disposing);
 		}
@@ -46,7 +50,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._blamePanel);
-			this.Name = "BlameTool";
+			this.Name = "BlameView";
 			this.ResumeLayout(false);
 
 		}

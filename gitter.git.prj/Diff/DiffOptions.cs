@@ -24,11 +24,13 @@ namespace gitter.Git
 	{
 		#region Static
 
-		internal static readonly DiffOptions Default = CreateDefault();
+		public static readonly DiffOptions Default = CreateDefault();
 
-		public static DiffOptions CreateDefault()
+		private static DiffOptions CreateDefault()
 		{
-			return new DiffOptions();
+			var options = new DiffOptions();
+			options.Freeze();
+			return options;
 		}
 
 		#endregion
@@ -39,6 +41,7 @@ namespace gitter.Git
 		private bool _usePatienceAlgorithm;
 		private bool _ignoreWhitespace;
 		private bool _binary;
+		private bool _isFrozen;
 
 		#endregion
 
@@ -56,25 +59,60 @@ namespace gitter.Git
 		public int Context
 		{
 			get { return _context; }
-			set { _context = value; }
+			set
+			{
+				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
+
+				_context = value;
+			}
 		}
 
 		public bool UsePatienceAlgorithm
 		{
 			get { return _usePatienceAlgorithm; }
-			set { _usePatienceAlgorithm = value; }
+			set
+			{
+				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
+
+				_usePatienceAlgorithm = value;
+			}
 		}
 
 		public bool IgnoreWhitespace
 		{
 			get { return _ignoreWhitespace; }
-			set { _ignoreWhitespace = value; }
+			set
+			{
+				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
+
+				_ignoreWhitespace = value;
+			}
 		}
 
 		public bool Binary
 		{
 			get { return _binary; }
-			set { _binary = value; }
+			set
+			{
+				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
+
+				_binary = value;
+			}
+		}
+
+		public bool IsFrozen
+		{
+			get { return _isFrozen; }
+			private set { _isFrozen = value; }
+		}
+
+		#endregion
+
+		#region Methods
+
+		public void Freeze()
+		{
+			IsFrozen = true;
 		}
 
 		#endregion

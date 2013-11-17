@@ -31,10 +31,14 @@ namespace gitter.Git.AccessLayer.CLI
 			var args = new CommandArgument[branches.Count + 3 + (force?1:0) + (tags?1:0)];
 			int arg = 0;
 			if(tags)
+			{
 				args[arg++] = Tags();
+			}
 			if(force)
+			{
 				args[arg++] = Force();
-			args[arg++] = thin?Thin():NoThin();
+			}
+			args[arg++] = thin ? Thin() : NoThin();
 			args[arg++] = Porcelain();
 			args[arg++] = new CommandArgument(remote);
 			foreach(var branch in branches)

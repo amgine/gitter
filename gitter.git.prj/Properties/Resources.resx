@@ -1338,8 +1338,8 @@ Commit or stash them and try again.</value>
   <data name="StrTrackingBranches" xml:space="preserve">
     <value>Tracking Branches</value>
   </data>
-  <data name="StrFetchingLog" xml:space="preserve">
-    <value>Fetching Log</value>
+  <data name="StrsFetchingLog" xml:space="preserve">
+    <value>Fetching log</value>
   </data>
   <data name="StrFind" xml:space="preserve">
     <value>Find</value>
@@ -1412,9 +1412,6 @@ Commit or stash them and try again.</value>
   </data>
   <data name="StrOptionalMessage" xml:space="preserve">
     <value>Message (optional)</value>
-  </data>
-  <data name="StrsSearchingStaleBranches" xml:space="preserve">
-    <value>Searching for stale branches</value>
   </data>
   <data name="ErrFailedToStashClear" xml:space="preserve">
     <value>Unable to clear stash</value>
@@ -1744,5 +1741,26 @@ Proceed?</value>
   </data>
   <data name="StrfCreatingArchiveFrom" xml:space="preserve">
     <value>Creating archive from '{0}'</value>
+  </data>
+  <data name="StrsFetchingBlame" xml:space="preserve">
+    <value>Fetching blame</value>
+  </data>
+  <data name="StrsFetchingBlob" xml:space="preserve">
+    <value>Fetching blob object from the tree</value>
+  </data>
+  <data name="StrsCleaningStash" xml:space="preserve">
+    <value>Cleaning stash</value>
+  </data>
+  <data name="StrsUpdatingSubmodule" xml:space="preserve">
+    <value>Updating submodule</value>
+  </data>
+  <data name="StrsUpdatingSubmodules" xml:space="preserve">
+    <value>Updating submodules</value>
+  </data>
+  <data name="StrsSearchingStaleBranches" xml:space="preserve">
+    <value>Searching stale branches</value>
+  </data>
+  <data name="StrsLookingForFiles" xml:space="preserve">
+    <value>Looking for files</value>
   </data>
 </root>

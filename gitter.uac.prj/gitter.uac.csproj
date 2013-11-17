@@ -37,7 +37,7 @@
     <StartupObject>gitter.UAC.Program</StartupObject>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
-    <ApplicationManifest>gitter.uac.manifest</ApplicationManifest>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -63,7 +63,7 @@
       <Link>Properties\key.snk</Link>
     </None>
     <None Include="app.config" />
-    <None Include="gitter.uac.manifest" />
+    <None Include="app.manifest" />
     <None Include="Properties\postbuild.cmd" />
   </ItemGroup>
   <ItemGroup>

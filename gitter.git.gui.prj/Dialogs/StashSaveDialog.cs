@@ -40,6 +40,8 @@ namespace gitter.Git.Gui.Dialogs
 
 		#endregion
 
+		#region .ctor
+
 		/// <summary>Create <see cref="StashSaveDialog"/>.</summary>
 		/// <param name="repository">Repository for performing stash save.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
@@ -75,6 +77,15 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
+		#endregion
+
+		#region Properties
+
+		public Repository Repository
+		{
+			get { return _repository; }
+		}
+
 		/// <summary>Do not stash staged changes.</summary>
 		public bool KeepIndex
 		{
@@ -101,6 +112,8 @@ namespace gitter.Git.Gui.Dialogs
 			get { return Resources.StrSave; }
 		}
 
+		#endregion
+
 		#region IExecutableDialog Members
 
 		/// <summary>Perform stash save.</summary>
@@ -113,20 +126,9 @@ namespace gitter.Git.Gui.Dialogs
 				IncludeUntrackedFiles;
 			var message = Message;
 			message = message == null ? string.Empty : message.Trim();
-			try
+
+			if(GuiCommands.SaveStash(this, Repository.Stash, keepIndex, includeUntracked, message) == GuiCommandStatus.Faulted)
 			{
-				_repository.Stash
-						   .SaveAsync(keepIndex, includeUntracked, message)
-						   .Invoke<ProgressForm>(this);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToStash,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
 				return false;
 			}
 			return true;

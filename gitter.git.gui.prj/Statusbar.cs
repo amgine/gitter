@@ -286,19 +286,8 @@ namespace gitter.Git.Gui
 		private void InvokeRebaseControl(RebaseControl control)
 		{
 			var parent = _guiProvider.Environment.MainForm;
-			try
-			{
-				Repository.RebaseAsync(control).Invoke<ProgressForm>(parent);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToRebase,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
+
+			GuiCommands.Rebase(parent, Repository, control);
 		}
 
 		private void OnRebaseContinueClick(object sender, EventArgs e)

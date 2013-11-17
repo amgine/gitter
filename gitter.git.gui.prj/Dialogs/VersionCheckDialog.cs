@@ -131,7 +131,7 @@ namespace gitter.Git.Gui.Dialogs
 				Version currentVersion = null;
 				try
 				{
-					GitRepositoryProvider.GitAccessor.RefreshGitVersion();
+					GitRepositoryProvider.GitAccessor.InvalidateGitVersion();
 					currentVersion = GitRepositoryProvider.GitAccessor.GitVersion;
 				}
 				catch
@@ -202,7 +202,7 @@ namespace gitter.Git.Gui.Dialogs
 			Version gitVersion;
 			try
 			{
-				GitRepositoryProvider.GitAccessor.RefreshGitVersion();
+				GitRepositoryProvider.GitAccessor.InvalidateGitVersion();
 				gitVersion = GitRepositoryProvider.GitAccessor.GitVersion;
 			}
 			catch

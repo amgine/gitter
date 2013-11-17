@@ -32,13 +32,21 @@ namespace gitter.Redmine.Gui
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
+	using gitter.Redmine.Gui.ListBoxes;
+
 	using Resources = gitter.Redmine.Properties.Resources;
 
 	partial class NewsView : RedmineViewBase, ISearchableView<NewsSearchOptions>
 	{
+		#region Data
+
 		private readonly NewsToolbar _toolbar;
 		private NewsSearchToolBar _searchToolbar;
-		private volatile AsyncFunc<RedmineServiceContext, LinkedList<News>> _currentLookup;
+		private NewsListBinding _dataSource;
+
+		#endregion
+
+		#region .ctor
 
 		public NewsView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 			: base(Guids.NewsViewGuid, environment, parameters)
@@ -53,73 +61,42 @@ namespace gitter.Redmine.Gui
 			_lstNews.PreviewKeyDown += OnKeyDown;
 		}
 
+		#endregion
+
+		#region Properties
+
 		public override Image Image
 		{
 			get { return CachedResources.Bitmaps["ImgNews"]; }
 		}
 
+		private NewsListBinding DataSource
+		{
+			get { return _dataSource; }
+			set
+			{
+				if(_dataSource != value)
+				{
+					if(_dataSource != null)
+					{
+						_dataSource.Dispose();
+					}
+					_dataSource = value;
+					if(_dataSource != null)
+					{
+						_dataSource.ReloadData();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Methods
+
 		protected override void OnContextAttached()
 		{
-			RefreshContent();
-		}
-
-		private void OnFetchCompleted(IAsyncResult ar)
-		{
-			var af = (AsyncFunc<RedmineServiceContext, LinkedList<News>>)ar.AsyncState;
-			if(_currentLookup == af)
-			{
-				_currentLookup = null;
-				IEnumerable<News> news = null;
-				try
-				{
-					news = af.EndInvoke(ar);
-				}
-				catch(Exception exc)
-				{
-					if(!IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new Action<Exception>(ShowErrorNotification), exc);
-						}
-						catch { }
-					}
-				}
-				if(news != null)
-				{
-					if(!IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new Action<IEnumerable<News>>(ShowNews), news);
-						}
-						catch { }
-					}
-				}
-			}
-		}
-
-		private void ShowErrorNotification(Exception exc)
-		{
-			if(IsDisposed) return;
-			_lstNews.Text = Resources.StrsFailedToFetchNews;
-		}
-
-		private void ShowNews(IEnumerable<News> news)
-		{
-			if(IsDisposed) return;
-			_lstNews.BeginUpdate();
-			_lstNews.Items.Clear();
-			foreach(var n in news)
-			{
-				var item = new NewsListItem(n);
-				_lstNews.Items.Add(item);
-			}
-			if(_lstNews.Items.Count == 0)
-			{
-				_lstNews.Text = Resources.StrsNoNewsToDisplay;
-			}
-			_lstNews.EndUpdate();
+			DataSource = new NewsListBinding(ServiceContext, _lstNews);
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
@@ -177,25 +154,13 @@ namespace gitter.Redmine.Gui
 
 		public override void RefreshContent()
 		{
-			if(ServiceContext == null)
+			if(DataSource != null)
 			{
-				_lstNews.Items.Clear();
-			}
-			else
-			{
-				if(_currentLookup != null)
-				{
-					return;
-				}
-				var af = AsyncFunc.Create(
-					ServiceContext,
-					(context, mon) => context.News.Fetch(context.DefaultProjectId),
-					Resources.StrsFetchingNews.AddEllipsis(),
-					string.Empty);
-				_currentLookup = af;
-				af.BeginInvoke(this, _lstNews.ProgressMonitor, OnFetchCompleted, af);
+				DataSource.ReloadData();
 			}
 		}
+
+		#endregion
 
 		#region ISearchableView
 

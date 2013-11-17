@@ -21,13 +21,12 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
+	using gitter.Framework.Services;
 
 	using gitter.Git.Gui.Controls;
 
@@ -39,11 +38,11 @@ namespace gitter.Git.Gui.Dialogs
 		#region Data
 
 		private readonly Repository _repository;
-		private IAsyncResult _asyncResult;
-		private IAsyncFunc<IList<TreeItem>> _currentRequest;
-		private readonly object _requestLock = new object();
+		private FilesToCleanBinding _dataBinding;
 
 		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="CleanDialog"/>.</summary>
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
@@ -55,22 +54,7 @@ namespace gitter.Git.Gui.Dialogs
 
 			InitializeComponent();
 
-			Text = Resources.StrClean;
-
-			_lblIncludePattern.Text = Resources.StrsIncludePattern.AddColon();
-			_lblExcludePattern.Text = Resources.StrsExcludePattern.AddColon();
-
-			_lblType.Text = Resources.StrType.AddColon();
-
-			_radIncludeUntracked.Text = Resources.StrUntracked;
-			_radIncludeIgnored.Text = Resources.StrIgnored;
-			_radIncludeBoth.Text = Resources.StrBoth;
-
-			_chkRemoveDirectories.Text = Resources.StrsAlsoRemoveDirectories;
-
-			_lblObjectList.Text = Resources.StrsObjectsThatWillBeRemoved.AddColon();
-			_lstFilesToClear.Text = Resources.StrsNoFilesToRemove;
-
+			Localize();
 
 			for(int i = 0; i < _lstFilesToClear.Columns.Count; ++i)
 			{
@@ -93,6 +77,52 @@ namespace gitter.Git.Gui.Dialogs
 			GitterApplication.FontManager.InputFont.Apply(_txtPattern, _txtExclude);
 
 			LoadConfig();
+		}
+
+		#endregion
+
+		private void Localize()
+		{
+			Text = Resources.StrClean;
+
+			_lblIncludePattern.Text = Resources.StrsIncludePattern.AddColon();
+			_lblExcludePattern.Text = Resources.StrsExcludePattern.AddColon();
+
+			_lblType.Text = Resources.StrType.AddColon();
+
+			_radIncludeUntracked.Text = Resources.StrUntracked;
+			_radIncludeIgnored.Text = Resources.StrIgnored;
+			_radIncludeBoth.Text = Resources.StrBoth;
+
+			_chkRemoveDirectories.Text = Resources.StrsAlsoRemoveDirectories;
+
+			_lblObjectList.Text = Resources.StrsObjectsThatWillBeRemoved.AddColon();
+			_lstFilesToClear.Text = Resources.StrsNoFilesToRemove;
+		}
+
+		private FilesToCleanBinding DataBinding
+		{
+			get { return _dataBinding; }
+			set
+			{
+				if(_dataBinding != value)
+				{
+					if(_dataBinding != null)
+					{
+						_dataBinding.Dispose();
+					}
+					_dataBinding = value;
+					if(_dataBinding != null)
+					{
+						_dataBinding.ReloadData();
+					}
+				}
+			}
+		}
+
+		public Repository Repository
+		{
+			get { return _repository; }
 		}
 
 		protected override void OnClosed(DialogResult result)
@@ -164,6 +194,33 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
+		public string IncludePattern
+		{
+			get { return _txtPattern.Text.Trim(); }
+			set { _txtPattern.Text = value; }
+		}
+
+		public string ExcludePattern
+		{
+			get
+			{
+				if(_txtExclude.Enabled)
+				{
+					return _txtExclude.Text.Trim();
+				}
+				else
+				{
+					return string.Empty;
+				}
+			}
+			set
+			{
+				Verify.State.IsTrue(_txtExclude.Enabled, "Excluide pattern is not supported.");
+
+				_txtExclude.Text = value;
+			}
+		}
+
 		public bool RemoveDirectories
 		{
 			get { return _chkRemoveDirectories.Checked; }
@@ -172,81 +229,20 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void UpdateList()
 		{
-			lock(_requestLock)
+			if(IsDisposed)
 			{
-				var req = _currentRequest;
-				var ar = _asyncResult;
-				if(req != null && ar != null)
-				{
-					req.EndInvoke(ar);
-				}
+				return;
 			}
-			var func = _repository.Status.GetFilesToCleanAsync(
-				_txtPattern.Text.Trim(),
-				_txtExclude.Text.Trim(),
-				Mode,
-				RemoveDirectories);
-			lock(_requestLock)
-			{
-				_currentRequest = func;
-				_asyncResult = func.BeginInvoke(this,
-					_lstFilesToClear.ProgressMonitor, OnSearchCompleted, func);
-			}
-		}
 
-		private void OnSearchCompleted(IAsyncResult ar)
-		{
-			var func = (IAsyncFunc<IList<TreeItem>>)ar.AsyncState;
-			if(func != null)
+			if(DataBinding == null)
 			{
-				var items = func.EndInvoke(ar);
-				if(_lstFilesToClear.IsHandleCreated)
-				{
-					if(func == _currentRequest)
-					{
-						try
-						{
-							if(InvokeRequired)
-							{
-								var action = new Action<IList<TreeItem>>(UpdateFileList);
-								BeginInvoke(action, items);
-							}
-							else
-							{
-								UpdateFileList(items);
-							}
-						}
-						catch
-						{
-						}
-					}
-				}
+				DataBinding = new FilesToCleanBinding(Repository, _lstFilesToClear);
 			}
-			lock(_requestLock)
-			{
-				_currentRequest = null;
-				_asyncResult = null;
-			}
-		}
-
-		private void UpdateFileList(IList<TreeItem> items)
-		{
-			_lstFilesToClear.BeginUpdate();
-			_lstFilesToClear.Items.Clear();
-			foreach(var item in items)
-			{
-				if(item.ItemType == TreeItemType.Tree)
-				{
-					_lstFilesToClear.Items.Add(new TreeDirectoryListItem(
-						(TreeDirectory)item, TreeDirectoryListItemType.ShowNothing));
-				}
-				else
-				{
-					_lstFilesToClear.Items.Add(new TreeFileListItem(
-						(TreeFile)item, true));
-				}
-			}
-			_lstFilesToClear.EndUpdate();
+			DataBinding.IncludePattern = IncludePattern;
+			DataBinding.ExcludePattern = ExcludePattern;
+			DataBinding.CleanFilesMode = Mode;
+			DataBinding.IncludeDirectories = RemoveDirectories;
+			DataBinding.ReloadData();
 		}
 
 		private void OnPatternTextChanged(object sender, EventArgs e)
@@ -262,12 +258,12 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
-		private void _chkRemoveDirectories_CheckedChanged(object sender, EventArgs e)
+		private void OnRemoveDirectoriesCheckedChanged(object sender, EventArgs e)
 		{
 			UpdateList();
 		}
 
-		private void _lstFilesToClear_ItemActivated(object sender, ItemEventArgs e)
+		private void OnFilesToClearItemActivated(object sender, ItemEventArgs e)
 		{
 			var item = e.Item as ITreeItemListItem;
 			if(item != null)
@@ -281,14 +277,9 @@ namespace gitter.Git.Gui.Dialogs
 		/// <returns><c>true</c>, if action succeded</returns>
 		public bool Execute()
 		{
-			var mode = Mode;
-			string include = _txtPattern.Text.Trim();
-			string exclude = _txtExclude.Enabled?
-				_txtExclude.Text.Trim() : string.Empty;
-			bool removeDirectories = RemoveDirectories;
 			try
 			{
-				_repository.Status.Clean(include, exclude, mode, removeDirectories);
+				Repository.Status.Clean(IncludePattern, ExcludePattern, Mode, RemoveDirectories);
 			}
 			catch(GitException exc)
 			{

@@ -968,7 +968,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Progress monitor for actions which update list contents.</summary>
-		public IAsyncProgressMonitor ProgressMonitor
+		public IProgress<OperationProgress> ProgressMonitor
 		{
 			get { return _processOverlay; }
 		}
@@ -2865,7 +2865,7 @@ namespace gitter.Framework.Controls
 
 			if(_itemPlainList.Count == 0)
 			{
-				if(_processOverlay.Visible)
+				if(_processOverlay.IsVisible)
 				{
 					graphics.SetClip(clip);
 					var overlayBounds = GetOverlayBounds();
@@ -2903,7 +2903,7 @@ namespace gitter.Framework.Controls
 					++index;
 				}
 
-				if(_processOverlay.Visible)
+				if(_processOverlay.IsVisible)
 				{
 					var overlayBounds = GetOverlayBounds();
 					var overlayClip = Rectangle.Intersect(clip, overlayBounds);

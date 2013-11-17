@@ -21,6 +21,8 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -34,13 +36,9 @@ namespace gitter.Git
 
 		#region Methods
 
-		IAsyncFunc<BlameFile> GetBlameAsync();
-
-		IAsyncFunc<BlameFile> GetBlameAsync(BlameOptions options);
-
-		BlameFile GetBlame();
-
 		BlameFile GetBlame(BlameOptions options);
+
+		Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		#endregion
 	}

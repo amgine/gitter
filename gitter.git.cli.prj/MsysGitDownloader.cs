@@ -26,6 +26,7 @@ namespace gitter.Git
 	using System.Net;
 	using System.Xml;
 	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -160,7 +161,7 @@ namespace gitter.Git
 				_waitHandle = completionWaitHandle;
 			}
 
-			public IAsyncProgressMonitor Monitor { get; set; }
+			public IProgress<OperationProgress> Monitor { get; set; }
 			public WebRequest WebRequest { get; set; }
 			public WebResponse WebResponse { get; set; }
 			public Stream ResponseStream { get; set; }
@@ -213,7 +214,10 @@ namespace gitter.Git
 				InstallerExitCode = InstallerProcess.ExitCode;
 				InstallerProcess.Dispose();
 				InstallerProcess = null;
-				Monitor.ProcessCompleted();
+				if(Monitor != null)
+				{
+					Monitor.Report(new OperationProgress("Completed.") { IsCompleted = true });
+				}
 				try
 				{
 					File.Delete(InstallerFileName);
@@ -225,47 +229,67 @@ namespace gitter.Git
 			}
 		}
 
-		public IAsyncFunc<Exception> DownloadAndInstallAsync()
+		public Task DownloadAndInstallAsync(IProgress<OperationProgress> progress)
 		{
-			return AsyncFunc.Create<object, Exception>(
-				null,
-				(data, monitor) =>
+			return Task.Factory.StartNew(
+				() =>
 				{
+					if(progress != null)
+					{
+						progress.Report(new OperationProgress("Initializing..."));
+					}
 					using(var evt = new ManualResetEvent(false))
 					{
 						var process = new DownloadAndInstallProcess(evt)
 						{
-							Monitor = monitor,
+							Monitor = progress,
 							WebRequest = WebRequest.Create(DownloadUrl),
 						};
-						process.Monitor.SetProgressIndeterminate();
-						process.Monitor.SetAction("Connecting to MSysGit download server...");
+						if(progress != null)
+						{
+							progress.Report(new OperationProgress("Connecting to MSysGit download server..."));
+						}
 						process.WebRequest.BeginGetResponse(OnGotResponse, process);
 						evt.WaitOne();
 						if(process.Exception != null)
 						{
-							return process.Exception;
+							throw process.Exception;
 						}
 						if(process.InstallerExitCode != 0)
 						{
-							return new ApplicationException("Installer returned exit code " + process.InstallerExitCode);
+							throw new ApplicationException("Installer returned exit code " + process.InstallerExitCode);
 						}
-						return null;
 					}
 				},
-				"MSysGit Installation",
-				"Initializing...");
+				CancellationToken.None,
+				TaskCreationOptions.None,
+				TaskScheduler.Default);
 		}
 
 		private static void OnGotResponse(IAsyncResult ar)
 		{
 			var process = (DownloadAndInstallProcess)ar.AsyncState;
-			process.Monitor.SetAction("Downloading MSysGit...");
+			var state = new OperationProgress
+			{
+				CurrentProgress = 0,
+				MaxProgress     = 0,
+				IsIndeterminate = true,
+				ActionName      = "Downloading MSysGit...",
+			};
+			if(process.Monitor != null)
+			{
+				process.Monitor.Report(state);
+			}
 			process.WebResponse = process.WebRequest.EndGetResponse(ar);
 			process.ResponseStream = process.WebResponse.GetResponseStream();
 			if(process.WebResponse.ContentLength > 0)
 			{
-				process.Monitor.SetProgressRange(0, (int)process.WebResponse.ContentLength);
+				state.IsIndeterminate = false;
+				state.MaxProgress = (int)process.WebResponse.ContentLength;
+				if(process.Monitor != null)
+				{
+					process.Monitor.Report(state);
+				}
 			}
 			process.Buffer = new byte[1024*4];
 			process.ResponseStream.BeginRead(
@@ -287,7 +311,6 @@ namespace gitter.Git
 			catch(Exception exc)
 			{
 				process.Exception = exc;
-				process.Monitor.ProcessCompleted();
 				process.Dispose();
 				return;
 			}
@@ -302,7 +325,6 @@ namespace gitter.Git
 				catch(Exception exc)
 				{
 					process.Exception = exc;
-					process.Monitor.ProcessCompleted();
 					process.Dispose();
 					return;
 				}
@@ -330,7 +352,6 @@ namespace gitter.Git
 				catch(Exception exc)
 				{
 					process.Exception = exc;
-					process.Monitor.ProcessCompleted();
 					process.Dispose();
 					return;
 				}
@@ -346,9 +367,16 @@ namespace gitter.Git
 		private static void UpdateDownloadProgress(DownloadAndInstallProcess process, int downloadedBytes)
 		{
 			process.DownloadedBytes += downloadedBytes;
-			if(process.WebResponse.ContentLength > 0 && process.DownloadedBytes <= process.WebResponse.ContentLength)
+			if(process.Monitor != null && process.WebResponse.ContentLength > 0 && process.DownloadedBytes <= process.WebResponse.ContentLength)
 			{
-				process.Monitor.SetProgress((int)process.DownloadedBytes);
+				var state = new OperationProgress
+				{
+					CurrentProgress = (int)process.DownloadedBytes,
+					MaxProgress     = (int)process.WebResponse.ContentLength,
+					IsIndeterminate = false,
+					ActionName      = "Downloading MSysGit...",
+				};
+				process.Monitor.Report(state);
 			}
 		}
 
@@ -369,7 +397,6 @@ namespace gitter.Git
 				catch(Exception exc)
 				{
 					process.Exception = exc;
-					process.Monitor.ProcessCompleted();
 					process.Dispose();
 					return false;
 				}
@@ -379,8 +406,17 @@ namespace gitter.Git
 
 		private static void RunInstaller(DownloadAndInstallProcess process)
 		{
-			process.Monitor.SetProgressIndeterminate();
-			process.Monitor.SetAction("Installing MSysGit...");
+			var state = new OperationProgress
+			{
+				CurrentProgress = 0,
+				MaxProgress     = 0,
+				IsIndeterminate = true,
+				ActionName      = "Installing MSysGit...",
+			};
+			if(process.Monitor != null)
+			{
+				process.Monitor.Report(state);
+			}
 			try
 			{
 				process.InstallerProcess = new Process()
@@ -398,7 +434,6 @@ namespace gitter.Git
 			catch(Exception exc)
 			{
 				process.Exception = exc;
-				process.Monitor.ProcessCompleted();
 				process.Dispose();
 			}
 		}

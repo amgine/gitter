@@ -171,4 +171,28 @@
   <data name="StrInstall" xml:space="preserve">
     <value>Install</value>
   </data>
+  <data name="StrsConnectingToRemoteHost" xml:space="preserve">
+    <value>Connecting to remote host</value>
+  </data>
+  <data name="StrsSearchingStaleBranches" xml:space="preserve">
+    <value>Searching for stale branches</value>
+  </data>
+  <data name="StrsLookingForFiles" xml:space="preserve">
+    <value>Looking for files</value>
+  </data>
+  <data name="StrsPerformingStashDrop" xml:space="preserve">
+    <value>Performing stash drop</value>
+  </data>
+  <data name="StrsCleaningStash" xml:space="preserve">
+    <value>Cleaning stash</value>
+  </data>
+  <data name="StrsPerformingStashApply" xml:space="preserve">
+    <value>Applying stashed changes</value>
+  </data>
+  <data name="StrsPerformingStashPop" xml:space="preserve">
+    <value>Restoring stashed changes</value>
+  </data>
+  <data name="StrfCreatingArchiveFrom" xml:space="preserve">
+    <value>Creating archive from '{0}'</value>
+  </data>
 </root>

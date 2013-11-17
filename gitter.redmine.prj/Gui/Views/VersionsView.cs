@@ -32,13 +32,21 @@ namespace gitter.Redmine.Gui
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
+	using gitter.Redmine.Gui.ListBoxes;
+
 	using Resources = gitter.Redmine.Properties.Resources;
 
 	partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOptions>
 	{
+		#region Data
+
 		private readonly VersionsToolbar _toolbar;
 		private VersionsSearchToolBar _searchToolbar;
-		private volatile AsyncFunc<RedmineServiceContext, LinkedList<ProjectVersion>> _currentLookup;
+		private VersionsListBinding _dataSource;
+
+		#endregion
+
+		#region .ctor
 
 		public VersionsView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 			: base(Guids.VersionsViewGuid, environment, parameters)
@@ -53,73 +61,42 @@ namespace gitter.Redmine.Gui
 			_lstVersions.PreviewKeyDown += OnKeyDown;
 		}
 
+		#endregion
+
+		#region Properties
+
 		public override Image Image
 		{
 			get { return CachedResources.Bitmaps["ImgVersion"]; }
 		}
 
+		private VersionsListBinding DataSource
+		{
+			get { return _dataSource; }
+			set
+			{
+				if(_dataSource != value)
+				{
+					if(_dataSource != null)
+					{
+						_dataSource.Dispose();
+					}
+					_dataSource = value;
+					if(_dataSource != null)
+					{
+						_dataSource.ReloadData();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Methods
+
 		protected override void OnContextAttached()
 		{
-			RefreshContent();
-		}
-
-		private void OnFetchCompleted(IAsyncResult ar)
-		{
-			var af = (AsyncFunc<RedmineServiceContext, LinkedList<ProjectVersion>>)ar.AsyncState;
-			if(_currentLookup == af)
-			{
-				_currentLookup = null;
-				IEnumerable<ProjectVersion> versions = null;
-				try
-				{
-					versions = af.EndInvoke(ar);
-				}
-				catch(Exception exc)
-				{
-					if(!IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new Action<Exception>(ShowErrorNotification), exc);
-						}
-						catch { }
-					}
-				}
-				if(versions != null)
-				{
-					if(!IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new Action<IEnumerable<ProjectVersion>>(ShowVersions), versions);
-						}
-						catch { }
-					}
-				}
-			}
-		}
-
-		private void ShowErrorNotification(Exception exc)
-		{
-			if(IsDisposed) return;
-			_lstVersions.Text = Resources.StrsFailedToFetchVersions;
-		}
-
-		private void ShowVersions(IEnumerable<ProjectVersion> versions)
-		{
-			if(IsDisposed) return;
-			_lstVersions.BeginUpdate();
-			_lstVersions.Items.Clear();
-			foreach(var version in versions)
-			{
-				var item = new VersionListItem(version);
-				_lstVersions.Items.Add(item);
-			}
-			if(_lstVersions.Items.Count == 0)
-			{
-				_lstVersions.Text = Resources.StrsNoVersionsToDisplay;
-			}
-			_lstVersions.EndUpdate();
+			DataSource = new VersionsListBinding(ServiceContext, _lstVersions);
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
@@ -177,25 +154,13 @@ namespace gitter.Redmine.Gui
 
 		public override void RefreshContent()
 		{
-			if(ServiceContext == null)
+			if(DataSource != null)
 			{
-				_lstVersions.Items.Clear();
-			}
-			else
-			{
-				if(_currentLookup != null)
-				{
-					return;
-				}
-				var af = AsyncFunc.Create(
-					ServiceContext,
-					(context, mon) => context.ProjectVersions.Fetch(context.DefaultProjectId),
-					Resources.StrsFetchingVersions.AddEllipsis(),
-					string.Empty);
-				_currentLookup = af;
-				af.BeginInvoke(this, _lstVersions.ProgressMonitor, OnFetchCompleted, af);
+				DataSource.ReloadData();
 			}
 		}
+
+		#endregion
 
 		#region ISearchableView
 

@@ -22,9 +22,15 @@ namespace gitter.Redmine
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Linq;
 	using System.Globalization;
 	using System.Xml;
+
+	using gitter.Framework;
+
+	using Resources = gitter.Redmine.Properties.Resources;
 
 	public sealed class NewsCollection : RedmineObjectsCache<News>
 	{
@@ -60,6 +66,17 @@ namespace gitter.Redmine
 			var url = string.Format(CultureInfo.InvariantCulture,
 				@"projects/{0}/news.xml", projectId);
 			return FetchItemsFromAllPages(url);
+		}
+
+		public Task<LinkedList<News>> FetchAsync(string projectId, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			var url = string.Format(CultureInfo.InvariantCulture,
+				@"projects/{0}/news.xml", projectId);
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsFetchingNews.AddEllipsis()));
+			}
+			return FetchItemsFromAllPagesAsync(url, cancellationToken);
 		}
 	}
 }

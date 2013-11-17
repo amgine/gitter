@@ -21,6 +21,8 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -34,13 +36,7 @@ namespace gitter.Git
 
 		#region Methods
 
-		IAsyncFunc<RevisionLog> GetLogAsync();
-
-		IAsyncFunc<RevisionLog> GetLogAsync(LogOptions options);
-
-		RevisionLog GetLog();
-
-		RevisionLog GetLog(LogOptions options);
+		Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		#endregion
 	}

@@ -284,25 +284,12 @@ namespace gitter.Git.Gui.Dialogs
 			bool mirror = bare && _chkMirror.Checked;
 			bool noCheckout = _chkNoCheckout.Checked;
 			bool recursive = _chkRecursive.Checked;
-			try
-			{
-				Repository.CloneAsync(
-					GitRepositoryProvider.GitAccessor,
-					url, path, template, remoteName,
-					shallow, depth, bare, mirror, recursive, noCheckout).Invoke<ProgressForm>(this);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToClone.UseAsFormat(url),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
 			_acceptedPath = path;
-			return true;
+			var status = GuiCommands.Clone(
+				GitRepositoryProvider.GitAccessor,
+				url, path, template, remoteName,
+				shallow, depth, bare, mirror, recursive, noCheckout);
+			return status == GuiCommandStatus.Completed;
 		}
 	}
 }

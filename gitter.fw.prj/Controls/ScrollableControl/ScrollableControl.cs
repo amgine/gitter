@@ -231,7 +231,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Horizontal scrollbar.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		protected IScrollBarWidget HScrollBar
+		public IScrollBarWidget HScrollBar
 		{
 			get { return _hScrollBar; }
 		}
@@ -239,7 +239,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Vertical scrollbar.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		protected IScrollBarWidget VScrollBar
+		public IScrollBarWidget VScrollBar
 		{
 			get { return _vScrollBar; }
 		}

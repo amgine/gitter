@@ -13,9 +13,13 @@
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && (components != null))
+			if(disposing)
 			{
-				components.Dispose();
+				DataBinding = null;
+				if(components != null)
+				{
+					components.Dispose();
+				}
 			}
 			base.Dispose(disposing);
 		}
@@ -62,7 +66,7 @@
 			this._lstUnstaged.ShowTreeLines = true;
 			this._lstUnstaged.Size = new System.Drawing.Size(379, 270);
 			this._lstUnstaged.TabIndex = 2;
-			this._lstUnstaged.ItemActivated += new System.EventHandler<gitter.Framework.Controls.ItemEventArgs>(this._lstFiles_ItemActivated);
+			this._lstUnstaged.ItemActivated += new System.EventHandler<gitter.Framework.Controls.ItemEventArgs>(this.OnFilesItemActivated);
 			// 
 			// _chkIncludeUntracked
 			// 
@@ -76,7 +80,7 @@
 			this._chkIncludeUntracked.TabIndex = 3;
 			this._chkIncludeUntracked.Text = "Include untracked";
 			this._chkIncludeUntracked.UseVisualStyleBackColor = true;
-			this._chkIncludeUntracked.CheckedChanged += new System.EventHandler(this._chkIncludeUntracked_CheckedChanged);
+			this._chkIncludeUntracked.CheckedChanged += new System.EventHandler(this.OnIncludeUntrackedCheckedChanged);
 			// 
 			// _chkIncludeIgnored
 			// 
@@ -88,7 +92,7 @@
 			this._chkIncludeIgnored.TabIndex = 4;
 			this._chkIncludeIgnored.Text = "Include ignored";
 			this._chkIncludeIgnored.UseVisualStyleBackColor = true;
-			this._chkIncludeIgnored.CheckedChanged += new System.EventHandler(this._chkIncludeIgnored_CheckedChanged);
+			this._chkIncludeIgnored.CheckedChanged += new System.EventHandler(this.OnIncludeIgnoredCheckedChanged);
 			// 
 			// StageDialog
 			// 

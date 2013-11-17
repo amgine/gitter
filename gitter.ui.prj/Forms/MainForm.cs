@@ -519,14 +519,26 @@ namespace gitter
 				_additionalGui.Clear();
 				_activeIssueTrackerProviders.Clear();
 			}
+
 			try
 			{
 				_repository = null;
-				_repository = _currentProvider.OpenRepositoryAsync(path).Invoke<ProgressForm>(this);
+				_repository = ProgressForm.MonitorTaskAsModalWindow(
+					Resources.StrLoadingRepository,
+					(p, c) => _currentProvider.OpenRepositoryAsync(path, p, c));
 			}
 			catch(OperationCanceledException)
 			{
 				return false;
+			}
+			catch(Exception exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					exc.Message,
+					Resources.ErrFailedToOpenRepository,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
 			}
 			if(_repository == null)
 			{

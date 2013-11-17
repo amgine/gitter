@@ -45,7 +45,7 @@ namespace gitter
 
 			_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
 
-			_updateChannel = new gitter.Git.GitRepositoryUpdateChannel("git://github.com/amgine/gitter.git");
+			_updateChannel = new gitter.Git.GitRepositoryUpdateChannel("git://github.com/amgine/gitter.git", "master");
 
 			Margin = new Padding(0, 0, 0, 0);
 		}

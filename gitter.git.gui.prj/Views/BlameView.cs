@@ -24,8 +24,6 @@ namespace gitter.Git.Gui.Views
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Git.Gui.Controls;
 
@@ -34,6 +32,14 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal partial class BlameView : GitViewBase
 	{
+		#region Data
+
+		private BlameFileBinding _blameFileBinding;
+
+		#endregion
+
+		#region .ctor
+
 		public BlameView(IDictionary<string, object> parameters, GuiProvider gui)
 			: base(Guids.BlameViewGuid, gui, parameters)
 		{
@@ -42,6 +48,10 @@ namespace gitter.Git.Gui.Views
 			Text = Resources.StrlBlame;
 			ApplyParameters(parameters);
 		}
+
+		#endregion
+
+		#region Properties
 
 		public override Image Image
 		{
@@ -53,21 +63,48 @@ namespace gitter.Git.Gui.Views
 			get { return true; }
 		}
 
-		private static string GetText(BlameFile file)
+		private BlameFileBinding BlameFileBinding
 		{
-			return Resources.StrlBlame + ": " + file.Name;
+			get { return _blameFileBinding; }
+			set
+			{
+				if(_blameFileBinding != value)
+				{
+					if(_blameFileBinding != null)
+					{
+						_blameFileBinding.Dispose();
+					}
+					_blameFileBinding = value;
+					if(_blameFileBinding != null)
+					{
+						_blameFileBinding.ReloadData();
+					}
+				}
+			}
 		}
+
+		#endregion
+
+		#region Methods
 
 		public override void ApplyParameters(IDictionary<string, object> parameters)
 		{
 			base.ApplyParameters(parameters);
 
-			var blame = (IBlameSource)parameters["blame"];
+			var blameSource = (IBlameSource)parameters["blame"];
 
-			Text = Resources.StrBlame + ": " + blame.ToString();
-
-			_blamePanel.Panels.Clear();
-			_blamePanel.Panels.Add(new BlameFilePanel(blame.Repository, blame.GetBlame()));
+			if(blameSource != null)
+			{
+				Text = Resources.StrBlame + ": " + blameSource.ToString();
+				BlameFileBinding = new BlameFileBinding(blameSource, _blamePanel, BlameOptions.Default);
+			}
+			else
+			{
+				Text = Resources.StrBlame;
+				BlameFileBinding = null;
+			}
 		}
+
+		#endregion
 	}
 }

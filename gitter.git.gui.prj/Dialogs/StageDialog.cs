@@ -21,26 +21,27 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
 	using gitter.Framework.Services;
 
 	using gitter.Git.Gui.Controls;
-	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
 	public partial class StageDialog : DialogBase, IExecutableDialog
 	{
+		#region Data
+
 		private readonly Repository _repository;
-		private IAsyncResult _asyncResult;
-		private IAsyncFunc<IList<TreeFile>> _currentRequest;
-		private readonly object _requestLock = new object();
+		private FilesToAddBinding _dataBinding;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="StageDialog"/>.</summary>
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
@@ -71,10 +72,57 @@ namespace gitter.Git.Gui.Dialogs
 			GitterApplication.FontManager.InputFont.Apply(_txtPattern);
 		}
 
+		#endregion
+
+		#region Properties
+
+		public Repository Repository
+		{
+			get { return _repository; }
+		}
+
+		private FilesToAddBinding DataBinding
+		{
+			get { return _dataBinding; }
+			set
+			{
+				if(_dataBinding != value)
+				{
+					if(_dataBinding != null)
+					{
+						_dataBinding.Dispose();
+					}
+					_dataBinding = value;
+				}
+			}
+		}
+
 		protected override string ActionVerb
 		{
 			get { return Resources.StrStage; }
 		}
+
+		public string Pattern
+		{
+			get { return _txtPattern.Text.Trim(); }
+			set { _txtPattern.Text = value; }
+		}
+
+		public bool IncludeUntracked
+		{
+			get { return _chkIncludeUntracked.Checked; }
+			set { _chkIncludeUntracked.Checked = value; }
+		}
+
+		public bool IncludeIgnored
+		{
+			get { return _chkIncludeIgnored.Checked; }
+			set { _chkIncludeIgnored.Checked = value; }
+		}
+
+		#endregion
+
+		#region Methods
 
 		protected override void OnShown()
 		{
@@ -84,64 +132,14 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void UpdateList()
 		{
-			lock(_requestLock)
+			if(DataBinding == null)
 			{
-				var req = _currentRequest;
-				var ar = _asyncResult;
-				if(req != null && ar != null)
-				{
-					req.EndInvoke(ar);
-				}
+				DataBinding = new FilesToAddBinding(Repository, _lstUnstaged);
 			}
-			var func = _repository.Status.GetFilesToAddAsync(
-				_txtPattern.Text.Trim(),
-				_chkIncludeUntracked.Checked,
-				_chkIncludeIgnored.Checked);
-			lock(_requestLock)
-			{
-				_currentRequest = func;
-				_asyncResult = func.BeginInvoke(this, _lstUnstaged.ProgressMonitor, OnSearchCompleted, func);
-			}
-		}
-
-		private void OnSearchCompleted(IAsyncResult ar)
-		{
-			var func = (IAsyncFunc<IList<TreeFile>>)ar.AsyncState;
-			var files = func.EndInvoke(ar);
-			if(_lstUnstaged.IsHandleCreated)
-			{
-				if(func == _currentRequest)
-				{
-					try
-					{
-						if(InvokeRequired)
-						{
-							BeginInvoke(new Action<IList<TreeFile>>(UpdateFileList), files);
-						}
-						else
-						{
-							UpdateFileList(files);
-						}
-					}
-					catch { }
-				}
-			}
-			lock(_requestLock)
-			{
-				_currentRequest = null;
-				_asyncResult = null;
-			}
-		}
-
-		private void UpdateFileList(IList<TreeFile> files)
-		{
-			_lstUnstaged.BeginUpdate();
-			_lstUnstaged.Items.Clear();
-			foreach(var file in files)
-			{
-				_lstUnstaged.Items.Add(new TreeFileListItem(file, true));
-			}
-			_lstUnstaged.EndUpdate();
+			DataBinding.Pattern          = Pattern;
+			DataBinding.IncludeUntracked = IncludeUntracked;
+			DataBinding.IncludeIgnored   = IncludeIgnored;
+			DataBinding.ReloadData();
 		}
 
 		private void OnPatternTextChanged(object sender, EventArgs e)
@@ -149,17 +147,17 @@ namespace gitter.Git.Gui.Dialogs
 			UpdateList();
 		}
 
-		private void _chkIncludeUntracked_CheckedChanged(object sender, EventArgs e)
+		private void OnIncludeUntrackedCheckedChanged(object sender, EventArgs e)
 		{
 			UpdateList();
 		}
 
-		private void _chkIncludeIgnored_CheckedChanged(object sender, EventArgs e)
+		private void OnIncludeIgnoredCheckedChanged(object sender, EventArgs e)
 		{
 			UpdateList();
 		}
 
-		private void _lstFiles_ItemActivated(object sender, Framework.Controls.ItemEventArgs e)
+		private void OnFilesItemActivated(object sender, Framework.Controls.ItemEventArgs e)
 		{
 			var item = e.Item as ITreeItemListItem;
 			if(item.TreeItem.Status != FileStatus.Removed)
@@ -177,7 +175,7 @@ namespace gitter.Git.Gui.Dialogs
 				var pattern = _txtPattern.Text.Trim();
 				bool addIgnored = _chkIncludeIgnored.Checked;
 				bool addUntracked = _chkIncludeUntracked.Checked;
-				_repository.Status.Stage(pattern, addUntracked, addIgnored);
+				Repository.Status.Stage(pattern, addUntracked, addIgnored);
 			}
 			catch(GitException exc)
 			{
@@ -190,5 +188,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 			return true;
 		}
+
+		#endregion
 	}
 }

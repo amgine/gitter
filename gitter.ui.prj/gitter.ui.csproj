@@ -57,6 +57,10 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\gitter.teamcity.prj\gitter.teamcity.csproj">
       <Project>{F939CB90-A1FD-4A3C-84FA-097BA644F254}</Project>
@@ -212,6 +216,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="app.manifest" />
     <None Include="Properties\postbuild.cmd" />
     <None Include="app.ico" />
     <None Include="Resources\repositories.png" />

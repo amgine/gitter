@@ -27,7 +27,7 @@ namespace gitter.Framework.CLI
 	using System.Threading;
 
 	/// <summary>Reads text from stdio/stderr.</summary>
-	public sealed class AsyncTextReader : IOutputReceiver
+	public class AsyncTextReader : IOutputReceiver
 	{
 		#region Data
 
@@ -91,12 +91,12 @@ namespace gitter.Framework.CLI
 		}
 
 		/// <summary>Closes the reader.</summary>
-		public void Close()
+		public void WaitForEndOfStream()
 		{
 			Verify.State.IsTrue(IsInitialized);
 
 			_eof.WaitOne();
-			_eof.Close();
+			_eof.Dispose();
 
 			_stream = null;
 			_byteBuffer = null;
@@ -115,11 +115,47 @@ namespace gitter.Framework.CLI
 			get { return _stringBuilder.Length; }
 		}
 
+		/// <summary>Returns character at the specified position.</summary>
+		/// <param name="index">Characted index.</param>
+		/// <returns>Characted at the specified position.</returns>
+		public char this[int index]
+		{
+			get { return _stringBuilder[index]; }
+		}
+
 		/// <summary>Returns composed text.</summary>
 		/// <returns>Composed text.</returns>
 		public string GetText()
 		{
 			return _stringBuilder.ToString();
+		}
+
+		/// <summary>Returns composed text.</summary>
+		/// <param name="startIndex">Index of the first character.</param>
+		/// <param name="length">Length of the returned string.</param>
+		/// <returns>Composed text.</returns>
+		public string GetText(int startIndex, int length)
+		{
+			return _stringBuilder.ToString(startIndex, length);
+		}
+
+		/// <summary>
+		/// Copies the characters from a specified segment of this instance to a specified
+		/// segment of a destination System.Char array.
+		/// </summary>
+		/// <param name="sourceIndex">
+		/// The starting position in this instance where characters will be copied from.
+		/// The index is zero-based.
+		/// </param>
+		/// <param name="destination">The array where characters will be copied.</param>
+		/// <param name="destinationIndex">
+		/// The starting position in destination where characters will be copied.
+		/// The index is zero-based.
+		/// </param>
+		/// <param name="count">The number of characters to be copied.</param>
+		public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
+		{
+			_stringBuilder.CopyTo(sourceIndex, destination, destinationIndex, count);
 		}
 
 		/// <summary>Returns array of collected characters.</summary>
@@ -145,7 +181,7 @@ namespace gitter.Framework.CLI
 
 		private void OnStreamRead(IAsyncResult ar)
 		{
-			int bytesCount = 0;
+			int bytesCount;
 			try
 			{
 				bytesCount = _stream.EndRead(ar);
@@ -165,6 +201,7 @@ namespace gitter.Framework.CLI
 			}
 			else
 			{
+				OnStringCompleted();
 				_eof.Set();
 			}
 		}
@@ -177,7 +214,16 @@ namespace gitter.Framework.CLI
 		private void Decode(int bytesCount)
 		{
 			int charsCount = _decoder.GetChars(_byteBuffer, 0, bytesCount, _charBuffer, 0);
-			_stringBuilder.Append(_charBuffer, 0, charsCount);
+			OnStringDecoded(_charBuffer, 0, charsCount);
+		}
+
+		protected virtual void OnStringDecoded(char[] buffer, int startIndex, int length)
+		{
+			_stringBuilder.Append(_charBuffer, startIndex, length);
+		}
+
+		protected virtual void OnStringCompleted()
+		{
 		}
 
 		#endregion

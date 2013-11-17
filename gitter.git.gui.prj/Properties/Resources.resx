@@ -1865,8 +1865,8 @@ a new history totally disconnected from all the other branches and commits.</val
   <data name="StrTrackingBranches" xml:space="preserve">
     <value>Tracking Branches</value>
   </data>
-  <data name="StrFetchingLog" xml:space="preserve">
-    <value>Fetching Log</value>
+  <data name="StrsFetchingLog" xml:space="preserve">
+    <value>Fetching log</value>
   </data>
   <data name="StrFind" xml:space="preserve">
     <value>Find</value>

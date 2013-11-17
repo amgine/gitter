@@ -13,9 +13,13 @@
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && (components != null))
+			if(disposing)
 			{
-				components.Dispose();
+				DataBinding = null;
+				if(components != null)
+				{
+					components.Dispose();
+				}
 			}
 			base.Dispose(disposing);
 		}
@@ -138,7 +142,7 @@
 			this._chkRemoveDirectories.TabIndex = 5;
 			this._chkRemoveDirectories.Text = "Also remove directories";
 			this._chkRemoveDirectories.UseVisualStyleBackColor = true;
-			this._chkRemoveDirectories.CheckedChanged += new System.EventHandler(this._chkRemoveDirectories_CheckedChanged);
+			this._chkRemoveDirectories.CheckedChanged += new System.EventHandler(this.OnRemoveDirectoriesCheckedChanged);
 			// 
 			// _lstFilesToClear
 			// 
@@ -152,7 +156,7 @@
 			this._lstFilesToClear.ShowTreeLines = true;
 			this._lstFilesToClear.Size = new System.Drawing.Size(431, 270);
 			this._lstFilesToClear.TabIndex = 6;
-			this._lstFilesToClear.ItemActivated += new System.EventHandler<gitter.Framework.Controls.ItemEventArgs>(this._lstFilesToClear_ItemActivated);
+			this._lstFilesToClear.ItemActivated += new System.EventHandler<gitter.Framework.Controls.ItemEventArgs>(this.OnFilesToClearItemActivated);
 			// 
 			// _lblObjectList
 			// 

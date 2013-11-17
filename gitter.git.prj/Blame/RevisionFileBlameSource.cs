@@ -21,13 +21,25 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	using gitter.Git.AccessLayer;
 
+	using Resources = gitter.Git.Properties.Resources;
+
 	sealed class RevisionFileBlameSource : BlameSourceBase
 	{
+		#region Data
+
 		private readonly IRevisionPointer _revision;
 		private readonly string _fileName;
+
+		#endregion
+
+		#region .ctor
 
 		public RevisionFileBlameSource(IRevisionPointer revision, string fileName)
 		{
@@ -38,14 +50,18 @@ namespace gitter.Git
 			_fileName = fileName;
 		}
 
-		public string FileName
-		{
-			get { return _fileName; }
-		}
+		#endregion
+
+		#region Properties
 
 		public override Repository Repository
 		{
 			get { return Revision.Repository; }
+		}
+
+		public string FileName
+		{
+			get { return _fileName; }
 		}
 
 		public IRevisionPointer Revision
@@ -53,15 +69,52 @@ namespace gitter.Git
 			get { return _revision; }
 		}
 
-		protected override BlameFile GetBlameCore(BlameOptions options)
+		#endregion
+
+		#region Methods
+
+		private QueryBlameParameters GetParameters(BlameOptions options)
 		{
-			var accessor = _revision.Repository.Accessor;
-			return accessor.QueryBlame(
-				new QueryBlameParameters()
+			Assert.IsNotNull(options);
+
+			var parameters = new QueryBlameParameters()
 				{
-					Revision = _revision.Pointer,
-					FileName = _fileName,
-				});
+					Revision = Revision.Pointer,
+					FileName = FileName,
+				};
+			return parameters;
+		}
+
+		public override BlameFile GetBlame(BlameOptions options)
+		{
+			Verify.Argument.IsNotNull(options, "options");
+
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryBlame(parameters);
+		}
+
+		public override Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Verify.Argument.IsNotNull(options, "options");
+
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsFetchingBlame.AddEllipsis()));
+			}
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryBlameAsync(parameters, progress, cancellationToken)
+			                          .ContinueWith(
+										t =>
+										{
+											if(progress != null)
+											{
+												progress.Report(OperationProgress.Completed);
+											}
+											return TaskUtility.UnwrapResult(t);
+										},
+										cancellationToken,
+										TaskContinuationOptions.ExecuteSynchronously,
+										TaskScheduler.Default);
 		}
 
 		/// <summary>
@@ -90,22 +143,20 @@ namespace gitter.Git
 			return _revision == ds._revision && _fileName == ds._fileName;
 		}
 
-		/// <summary>
-		/// Returns a <see cref="System.String"/> that represents this instance.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="System.String"/> that represents this instance.
-		/// </returns>
+		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
+		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
 		public override string ToString()
 		{
-			if(_revision is Revision)
+			if(Revision is Revision)
 			{
-				return _fileName + " @ " + _revision.Pointer.Substring(0, 7);
+				return FileName + " @ " + Revision.Pointer.Substring(0, 7);
 			}
 			else
 			{
-				return _fileName + " @ " + _revision.Pointer;
+				return FileName + " @ " + Revision.Pointer;
 			}
 		}
+
+		#endregion
 	}
 }

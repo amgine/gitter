@@ -36,7 +36,7 @@ namespace gitter.Framework.CLI
 		/// <param name="reader">StreamReader to read from.</param>
 		void Initialize(Process process, StreamReader reader);
 
-		/// <summary>Closes the receiver.</summary>
-		void Close();
+		/// <summary>Waits for outpuit stream end.</summary>
+		void WaitForEndOfStream();
 	}
 }

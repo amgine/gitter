@@ -21,6 +21,7 @@
 namespace gitter.Git.Gui
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -33,8 +34,14 @@ namespace gitter.Git.Gui
 
 	sealed class RepositoryRemotesListItem : RepositoryExplorerItemBase
 	{
+		#region Data
+
 		private readonly IWorkingEnvironment _environment;
 		private RemoteListBinding _binding;
+
+		#endregion
+
+		#region .ctor
 
 		public RepositoryRemotesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgRemotes"], Resources.StrRemotes)
@@ -44,10 +51,29 @@ namespace gitter.Git.Gui
 			_environment = environment;
 		}
 
+		#endregion
+
+		#region Properties
+
+		private IWorkingEnvironment WorkingEnvironment
+		{
+			get { return _environment; }
+		}
+
+		#endregion
+
+		#region Methods
+
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			_environment.ViewDockService.ShowView(Guids.RemotesViewGuid);
+			WorkingEnvironment.ViewDockService.ShowView(Guids.RemotesViewGuid);
+		}
+
+		private void OnRemoteItemActivated(object sender, BoundItemActivatedEventArgs<Remote> e)
+		{
+			WorkingEnvironment.ViewDockService.ShowView(Guids.RemoteViewGuid,
+				new Dictionary<string, object> { { "Remote", e.Object } });
 		}
 
 		public override void OnDoubleClick(int x, int y)
@@ -56,6 +82,7 @@ namespace gitter.Git.Gui
 
 		protected override void DetachFromRepository()
 		{
+			_binding.ItemActivated -= OnRemoteItemActivated;
 			_binding.Dispose();
 			_binding = null;
 		}
@@ -63,6 +90,7 @@ namespace gitter.Git.Gui
 		protected override void AttachToRepository()
 		{
 			_binding = new RemoteListBinding(Items, Repository);
+			_binding.ItemActivated += OnRemoteItemActivated;
 		}
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
@@ -78,5 +106,7 @@ namespace gitter.Git.Gui
 				return null;
 			}
 		}
+
+		#endregion
 	}
 }

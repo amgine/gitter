@@ -20,18 +20,29 @@
 
 namespace gitter.Git
 {
+	using System.Threading;
+	using System.Threading.Tasks;
+
 	using gitter.Framework;
 
 	public interface ITreeSource
 	{
+		#region Properties
+
 		string DisplayName { get; }
 
 		Repository Repository { get; }
 
 		IRevisionPointer Revision { get; }
 
+		#endregion
+
+		#region Methods
+
 		Tree GetTree();
 
-		IAsyncFunc<Tree> GetTreeAsync();
+		Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
+		#endregion
 	}
 }

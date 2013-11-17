@@ -36,6 +36,8 @@ namespace gitter.Git.Gui.Views
 
 		protected static bool TestReflogRecord(ReflogRecord record, T search)
 		{
+			Assert.IsNotNull(record);
+
 			var comparison = search.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 			if(record.Message.IndexOf(search.Text, comparison) != -1) return true;
 			return TestRevision(record.Revision, search);

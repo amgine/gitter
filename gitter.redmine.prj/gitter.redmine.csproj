@@ -68,6 +68,9 @@
     <Compile Include="Collections\IssueTrackersCollection.cs" />
     <Compile Include="Collections\NewsCollection.cs" />
     <Compile Include="CustomFieldsDefinition.cs" />
+    <Compile Include="Gui\ListBoxes\Bindings\VersionsListBinding.cs" />
+    <Compile Include="Gui\ListBoxes\Bindings\NewsListBinding.cs" />
+    <Compile Include="Gui\ListBoxes\Bindings\IssuesListBinding.cs" />
     <Compile Include="Gui\ListBoxes\Columns\VersionUpdatedOnColumn.cs" />
     <Compile Include="Gui\ListBoxes\Columns\VersionStatusColumn.cs" />
     <Compile Include="Gui\ListBoxes\Columns\IssueCustomFieldColumn.cs" />

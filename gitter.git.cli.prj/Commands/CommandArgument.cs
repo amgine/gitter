@@ -26,6 +26,12 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Command argument.</summary>
 	public class CommandArgument
 	{
+		#region Constants
+
+		protected const char DefaultSeparator = '=';
+
+		#endregion
+
 		#region Data
 
 		private readonly string _name;
@@ -74,7 +80,7 @@ namespace gitter.Git.AccessLayer.CLI
 		public CommandArgument(string name)
 		{
 			_name = name;
-			_separator = '=';
+			_separator = DefaultSeparator;
 		}
 
 		public CommandArgument(string name, string value)
@@ -113,13 +119,13 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Methods
 
-		public string GetArgument()
+		public string GetArgumentText()
 		{
 			if(string.IsNullOrEmpty(_value)) return _name;
 			return _name + _separator + _value;
 		}
 
-		public void GetArgument(StringBuilder stringBuilder)
+		public void GetArgumentText(StringBuilder stringBuilder)
 		{
 			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
 
@@ -137,7 +143,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public override string ToString()
 		{
-			return GetArgument();
+			return GetArgumentText();
 		}
 
 		#endregion

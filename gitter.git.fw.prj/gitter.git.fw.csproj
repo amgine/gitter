@@ -196,6 +196,7 @@
     <Compile Include="Parameters\RevertParameters.cs" />
     <Compile Include="Enums\RevisionMergesQueryMode.cs" />
     <Compile Include="Enums\RevisionQueryOrder.cs" />
+    <Compile Include="Parameters\SimilaritySpecification.cs" />
     <Compile Include="Parameters\Stash\QueryStashParameters.cs" />
     <Compile Include="Parameters\Stash\QueryStashTopParameters.cs" />
     <Compile Include="Parameters\Stash\StashApplyParameters.cs" />

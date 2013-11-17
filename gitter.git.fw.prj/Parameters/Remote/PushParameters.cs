@@ -76,8 +76,5 @@ namespace gitter.Git.AccessLayer
 		/// receiver share many of the same objects in common. Enabled by default. 
 		/// </summary>
 		public bool ThinPack { get; set; }
-
-		/// <summary>Progress monitor.</summary>
-		public IAsyncProgressMonitor Monitor { get; set; }
 	}
 }

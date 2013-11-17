@@ -23,6 +23,8 @@ namespace gitter.Git
 	using System;
 	using System.Globalization;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -419,70 +421,15 @@ namespace gitter.Git
 		{
 			Verify.State.IsNotDeleted(this);
 
-			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
-			bool fetchedSomething = false;
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged,
-				RepositoryNotifications.TagChanged))
-			{
-				fetchedSomething = Repository.Accessor.Fetch(
-					new FetchParameters(Name));
-			}
-			if(fetchedSomething)
-			{
-				Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
-				Repository.OnUpdated();
-				var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
-				var changes = RefsDiff.Calculate(state1, state2);
-				Repository.Remotes.OnFetchCompleted(this, changes);
-			}
-			else
-			{
-				Repository.Remotes.OnFetchCompleted(this, new ReferenceChange[0]);
-			}
+			RemotesUtility.FetchOrPull(Repository, this, false);
 		}
 
 		/// <summary>Download new objects from remote repository.</summary>
-		public IAsyncAction FetchAsync()
+		public Task FetchAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.State.IsNotDeleted(this);
 
-			return AsyncAction.Create(
-				this,
-				(remote, monitor) =>
-				{
-					var repository = remote.Repository;
-
-					var state1 = RefsState.Capture(repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
-					bool fetchedSomething = false;
-					using(repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChanged,
-						RepositoryNotifications.TagChanged))
-					{
-						fetchedSomething = repository.Accessor.Fetch(
-							new FetchParameters(remote.Name)
-							{
-								Monitor = monitor,
-							});
-					}
-
-					if(fetchedSomething)
-					{
-						monitor.SetAction(Resources.StrRefreshingReferences.AddEllipsis());
-						Repository.Refs.Refresh(ReferenceType.RemoteBranch | ReferenceType.Tag);
-						repository.OnUpdated();
-						var state2 = RefsState.Capture(repository, ReferenceType.RemoteBranch | ReferenceType.Tag);
-						var changes = RefsDiff.Calculate(state1, state2);
-						repository.Remotes.OnFetchCompleted(this, changes);
-					}
-					else
-					{
-						repository.Remotes.OnFetchCompleted(this, new ReferenceChange[0]);
-					}
-				},
-				string.Format(CultureInfo.InvariantCulture, Resources.StrFetch, Name),
-				string.Format(CultureInfo.InvariantCulture, Resources.StrFetchingDataFrom, Name),
-				true);
+			return RemotesUtility.FetchOrPullAsync(Repository, this, false, progress, cancellationToken);
 		}
 
 		/// <summary>Download new objects from remote repository and merge tracking branches.</summary>
@@ -490,72 +437,15 @@ namespace gitter.Git
 		{
 			Verify.State.IsNotDeleted(this);
 
-			var state1 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
-			try
-			{
-				using(Repository.Monitor.BlockNotifications(
-					RepositoryNotifications.BranchChanged,
-					RepositoryNotifications.TagChanged))
-				{
-					Repository.Accessor.Pull(
-						new PullParameters(Name));
-				}
-			}
-			finally
-			{
-				Repository.Refs.Refresh();
-				Repository.OnUpdated();
-			}
-			var state2 = RefsState.Capture(Repository, ReferenceType.Branch | ReferenceType.Tag);
-			var changes = RefsDiff.Calculate(state1, state2);
-			Repository.Remotes.OnPullCompleted(this, changes);
+			RemotesUtility.FetchOrPull(Repository, this, true);
 		}
 
-		public IAsyncAction PullAsync()
+		/// <summary>Download new objects from remote repository and merge tracking branches.</summary>
+		public Task PullAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.State.IsNotDeleted(this);
 
-			return AsyncAction.Create(
-				this,
-				(remote, monitor) =>
-				{
-					var repository = remote.Repository;
-					var state1 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
-					try
-					{
-						using(Repository.Monitor.BlockNotifications(
-							RepositoryNotifications.BranchChanged,
-							RepositoryNotifications.TagChanged))
-						{
-
-							if(repository.Accessor.Pull(
-								new PullParameters(remote.Name)
-								{
-									Monitor = monitor,
-								}))
-							{
-								monitor.SetAction(Resources.StrRefreshingReferences.AddEllipsis());
-								repository.Refs.Refresh();
-							}
-						}
-					}
-					catch
-					{
-						monitor.SetAction(Resources.StrRefreshingReferences.AddEllipsis());
-						repository.Refs.Refresh();
-						throw;
-					}
-					finally
-					{
-						repository.OnUpdated();
-					}
-					var state2 = RefsState.Capture(repository, ReferenceType.Branch | ReferenceType.Tag);
-					var changes = RefsDiff.Calculate(state1, state2);
-					repository.Remotes.OnPullCompleted(this, changes);
-				},
-				string.Format(CultureInfo.InvariantCulture, Resources.StrPull, Name),
-				string.Format(CultureInfo.InvariantCulture, Resources.StrFetchingDataFrom, Name),
-				true);
+			return RemotesUtility.FetchOrPullAsync(Repository, this, true, progress, cancellationToken);
 		}
 
 		/// <summary>Send local objects to remote repository.</summary>
@@ -598,55 +488,16 @@ namespace gitter.Git
 			}
 		}
 
-		/// <summary>Send local objects to remote repository.</summary>
-		public IAsyncAction PushAsync(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+		public Task PushAsync(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.State.IsNotDeleted(this);
-			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
-			Verify.Argument.IsTrue(branches.Count != 0, "branches",
-				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
-			var names = new List<string>(branches.Count);
-			foreach(var branch in branches)
-			{
-				names.Add(branch.Name);
-			}
-			return AsyncAction.Create(
-				Tuple.Create(this, names, forceOverwrite, thinPack, sendTags),
-				(tuple, monitor) =>
-				{
-					var remote = tuple.Item1;
-					var repository = remote.Repository;
+			return RemotesUtility.PushAsync(Repository, this, branches, forceOverwrite, thinPack, sendTags, progress, cancellationToken);
+		}
 
-					IList<ReferencePushResult> res;
-					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChanged))
-					{
-						res = repository.Accessor.Push(
-							new PushParameters(remote.Name, tuple.Item5 ? PushMode.Tags : PushMode.Default, tuple.Item2)
-							{
-								Force = tuple.Item3,
-								ThinPack = tuple.Item4,
-								Monitor = monitor,
-							});
-					}
-					bool changed = false;
-					for(int i = 0; i < res.Count; ++i)
-					{
-						if(res[i].Type != PushResultType.UpToDate && res[i].Type != PushResultType.Rejected)
-						{
-							changed = true;
-							break;
-						}
-					}
-					if(changed)
-					{
-						Repository.Refs.Remotes.Refresh();
-					}
-				},
-				string.Format(CultureInfo.InvariantCulture, Resources.StrPush, Name),
-				string.Format(CultureInfo.InvariantCulture, Resources.StrSendingDataTo.AddEllipsis(), Name),
-				true);
+		private PruneRemoteParameters GetPruneParameters()
+		{
+			return new PruneRemoteParameters(Name);
 		}
 
 		/// <summary>Deletes all stale tracking branches.</summary>
@@ -658,8 +509,8 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.PruneRemote(
-					new PruneRemoteParameters(Name));
+				var parameters = GetPruneParameters();
+				Repository.Accessor.PruneRemote(parameters);
 			}
 			Repository.Refs.Remotes.Refresh();
 			var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
@@ -668,30 +519,31 @@ namespace gitter.Git
 		}
 
 		/// <summary>Deletes all stale tracking branches.</summary>
-		public IAsyncAction PruneAsync()
+		public Task PruneAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.State.IsNotDeleted(this);
 
-			return AsyncAction.Create(
-				this,
-				(remote, monitor) =>
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsSearchingStaleBranches.AddEllipsis()));
+			}
+			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged);
+			var parameters = GetPruneParameters();
+			return Repository.Accessor.PruneRemoteAsync(parameters, progress, cancellationToken)
+				.ContinueWith(
+				t =>
 				{
-					var repository = remote.Repository;
-					var state1 = RefsState.Capture(repository, ReferenceType.RemoteBranch);
-					using(repository.Monitor.BlockNotifications(
-						RepositoryNotifications.BranchChanged))
-					{
-						repository.Accessor.PruneRemote(
-							new PruneRemoteParameters(remote.Name));
-					}
-					repository.Refs.Remotes.Refresh();
-					var state2 = RefsState.Capture(repository, ReferenceType.RemoteBranch);
+					block.Dispose();
+					Repository.Refs.Remotes.Refresh();
+					var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 					var changes = RefsDiff.Calculate(state1, state2);
-					repository.Remotes.OnPruneCompleted(this, changes);
+					Repository.Remotes.OnPruneCompleted(this, changes);
+					TaskUtility.PropagateFaultedStates(t);
 				},
-				Resources.StrPruneRemote,
-				Resources.StrsSearchingStaleBranches.AddEllipsis(),
-				false);
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		#endregion

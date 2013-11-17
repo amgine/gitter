@@ -24,6 +24,8 @@ namespace gitter.Git
 	using System.Linq;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -247,9 +249,18 @@ namespace gitter.Git
 			return Repository.Load(GitAccessor, workingDirectory);
 		}
 
-		public IAsyncFunc<IRepository> OpenRepositoryAsync(string workingDirectory)
+		public Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			return Repository.LoadAsync(GitAccessor, workingDirectory);
+			return Repository.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
+				.ContinueWith(
+				t =>
+				{
+					var repository = TaskUtility.UnwrapResult(t);
+					return (IRepository)repository;
+				},
+				cancellationToken,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		public void OnRepositoryLoaded(IRepository repository)
@@ -336,12 +347,12 @@ namespace gitter.Git
 			{
 				dlg.RepositoryPath = _environment.RecentRepositoryPath;
 				res = dlg.Run(_environment.MainForm);
-				if(res == DialogResult.OK)
+				if(res == DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.AcceptedPath))
 				{
 					path = Path.GetFullPath(dlg.AcceptedPath);
 				}
 			}
-			if(res == DialogResult.OK)
+			if(!string.IsNullOrWhiteSpace(path))
 			{
 				_environment.OpenRepository(path);
 			}

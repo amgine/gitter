@@ -78,7 +78,7 @@ namespace gitter.Framework.Controls
 			set { _message = value; }
 		}
 
-		public IAsyncProgressMonitor ProgressMonitor
+		public IProgress<OperationProgress> ProgressMonitor
 		{
 			get { return _overlay; }
 		}
@@ -104,7 +104,7 @@ namespace gitter.Framework.Controls
 				w, h);
 			if(_overlay != null)
 			{
-				if(_overlay.Visible)
+				if(_overlay.IsVisible)
 				{
 					_overlay.OnPaint(graphics, rc);
 				}

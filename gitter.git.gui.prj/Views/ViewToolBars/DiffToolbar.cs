@@ -117,21 +117,21 @@ namespace gitter.Git.Gui.Views
 		{
 			_diffView.DiffOptions.IgnoreWhitespace = !_diffView.DiffOptions.IgnoreWhitespace;
 			_mnuIgnoreWhitespace.Checked = _diffView.DiffOptions.IgnoreWhitespace;
-			_diffView.Reload();
+			_diffView.RefreshContent();
 		}
 
 		private void OnUsePatienceAlgorithmClick(object sender, EventArgs e)
 		{
 			_diffView.DiffOptions.UsePatienceAlgorithm = !_diffView.DiffOptions.UsePatienceAlgorithm;
 			_mnuUsePatienceAlgorithm.Checked = _diffView.DiffOptions.UsePatienceAlgorithm;
-			_diffView.Reload();
+			_diffView.RefreshContent();
 		}
 
 		private void OnBinaryClick(object sender, EventArgs e)
 		{
 			_diffView.DiffOptions.Binary = !_diffView.DiffOptions.Binary;
 			_mnuBinaryDiff.Checked = _diffView.DiffOptions.Binary;
-			_diffView.Reload();
+			_diffView.RefreshContent();
 		}
 
 		private void SetContext(int context)
@@ -147,7 +147,7 @@ namespace gitter.Git.Gui.Views
 			if(_diffView.DiffOptions.Context != context)
 			{
 				_diffView.DiffOptions.Context = context;
-				_diffView.Reload();
+				_diffView.RefreshContent();
 				_contextTextBox.Text = context.ToString(CultureInfo.InvariantCulture);
 			}
 		}

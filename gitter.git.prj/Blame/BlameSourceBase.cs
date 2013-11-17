@@ -22,6 +22,8 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -32,40 +34,25 @@ namespace gitter.Git
 
 	abstract class BlameSourceBase : IBlameSource
 	{
+		#region Properties
+
 		public abstract Repository Repository { get; }
 
-		protected abstract BlameFile GetBlameCore(BlameOptions options);
+		#endregion
 
-		public IAsyncFunc<BlameFile> GetBlameAsync()
+		#region .ctor
+
+		protected BlameSourceBase()
 		{
-			return GetBlameAsync(BlameOptions.Default);
 		}
 
-		public IAsyncFunc<BlameFile> GetBlameAsync(BlameOptions options)
-		{
-			Verify.Argument.IsNotNull(options, "options");
+		#endregion
 
-			return AsyncFunc.Create(
-				options,
-				(opt, monitor) =>
-				{
-					return GetBlameCore(opt);
-				},
-				Resources.StrLoadingDiff.AddEllipsis(),
-				string.Empty);
-		}
+		#region Methods
 
-		public BlameFile GetBlame()
-		{
-			return GetBlameCore(BlameOptions.Default);
-		}
+		public abstract BlameFile GetBlame(BlameOptions options);
 
-		public BlameFile GetBlame(BlameOptions options)
-		{
-			Verify.Argument.IsNotNull(options, "options");
-
-			return GetBlameCore(options);
-		}
+		public abstract Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.
@@ -77,5 +64,7 @@ namespace gitter.Git
 		{
 			return "blame";
 		}
+
+		#endregion
 	}
 }

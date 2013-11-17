@@ -38,11 +38,13 @@ namespace gitter.Git.Gui.Views
 	{
 		#region Data
 
-		private IDiffSource _source;
+		private IDiffSource _diffSource;
 		private DiffOptions _options;
-		private bool _loaded;
+		private DiffBinding _diffBinding;
 
 		#endregion
+
+		#region .ctor
 
 		public DiffView(Guid guid, IDictionary<string, object> parameters, GuiProvider gui)
 			: base(guid, gui, parameters)
@@ -58,22 +60,64 @@ namespace gitter.Git.Gui.Views
 			AddTopToolStrip(new DiffToolbar(this));
 		}
 
+		#endregion
+
+		#region Properties
+
 		public override bool IsDocument
 		{
 			get { return true; }
 		}
 
-		protected override void AttachToRepository(Repository repository)
+		public IDiffSource DiffSource
 		{
-			_diffViewer.Repository = repository;
-			base.AttachToRepository(repository);
+			get { return _diffSource; }
+			private set
+			{
+				if(_diffSource != value)
+				{
+					if(_diffSource != null)
+					{
+						DiffBinding = null;
+						_diffSource.Dispose();
+						_diffSource.Updated -= OnDiffSourceUpdated;
+					}
+					_diffSource = value;
+					if(_diffSource != null)
+					{
+						DiffBinding = new DiffBinding(value, _diffViewer, DiffOptions);
+						_diffSource.Updated += OnDiffSourceUpdated;
+					}
+				}
+			}
 		}
+
+		private DiffBinding DiffBinding
+		{
+			get { return _diffBinding; }
+			set
+			{
+				if(_diffBinding != value)
+				{
+					if(_diffBinding != null)
+					{
+						_diffBinding.Dispose();
+					}
+					_diffBinding = value;
+					if(_diffBinding != null)
+					{
+						_diffBinding.ReloadData();
+					}
+				}
+			}
+		}
+
+		#endregion
 
 		protected override void DetachFromRepository(Repository repository)
 		{
+			DiffSource = null;
 			base.DetachFromRepository(repository);
-			_diffViewer.Repository = null;
-			_diffViewer.Clear();
 		}
 
 		protected override void SaveRepositoryConfig(Section section)
@@ -107,20 +151,6 @@ namespace gitter.Git.Gui.Views
 		{
 			if(parameters != null)
 			{
-				var source = (IDiffSource)parameters["source"];
-				if(_source != source)
-				{
-					if(_source != null)
-					{
-						_source.Updated -= OnSourceUpdated;
-						_source.Dispose();
-					}
-					_source = source;
-					if(_source != null)
-					{
-						_source.Updated += OnSourceUpdated;
-					}
-				}
 				object options;
 				if(parameters.TryGetValue("options", out options))
 				{
@@ -130,37 +160,37 @@ namespace gitter.Git.Gui.Views
 				{
 					_options = new DiffOptions();
 				}
+				DiffSource = (IDiffSource)parameters["source"];
 				UpdateText();
-				Reload();
 			}
 			else
 			{
 				UpdateText();
-				_diffViewer.Clear();
-				if(_source != null)
+				DiffBinding = null;
+				if(_diffSource != null)
 				{
-					_source.Updated -= OnSourceUpdated;
-					_source.Dispose();
+					_diffSource.Updated -= OnDiffSourceUpdated;
+					_diffSource.Dispose();
 				}
 			}
 			base.ApplyParameters(parameters);
 		}
 
-		private void OnSourceUpdated(object sender, EventArgs e)
+		private void OnDiffSourceUpdated(object sender, EventArgs e)
 		{
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler(OnSourceUpdated), sender, e);
+				BeginInvoke(new MethodInvoker(RefreshContent));
 			}
 			else
 			{
-				Reload();
+				RefreshContent();
 			}
 		}
 
 		private void OnDiffFileContextMenuRequested(object sender, DiffFileContextMenuRequestedEventArgs e)
 		{
-			var menu = new DiffFileMenu(_source, e.File);
+			var menu = new DiffFileMenu(_diffSource, e.File);
 			if(menu.Items.Count == 0)
 			{
 				menu.Dispose();
@@ -179,24 +209,16 @@ namespace gitter.Git.Gui.Views
 			e.ContextMenu = menu;
 		}
 
-		public void Reload()
-		{
-			if(_loaded)
-			{
-				if(_source != null)
-				{
-					_diffViewer.LoadAsync(_source, _options);
-				}
-				else
-				{
-					_diffViewer.Clear();
-				}
-			}
-		}
-
 		public override void RefreshContent()
 		{
-			Reload();
+			if(DiffBinding != null)
+			{
+				DiffBinding.ReloadData();
+			}
+			else
+			{
+				_diffViewer.Panels.Clear();
+			}
 		}
 
 		public DiffOptions DiffOptions
@@ -215,9 +237,9 @@ namespace gitter.Git.Gui.Views
 		{
 			if(Guid != Guids.ContextualDiffViewGuid)
 			{
-				if(_source != null)
+				if(DiffSource != null)
 				{
-					Text = _source.ToString();
+					Text = DiffSource.ToString();
 				}
 				else
 				{
@@ -227,18 +249,6 @@ namespace gitter.Git.Gui.Views
 			else
 			{
 				Text = Resources.StrContextualDiff;
-			}
-		}
-
-		public void SetSource(IDiffSource diffSource)
-		{
-			if(diffSource != null)
-			{
-				_diffViewer.LoadAsync(diffSource, _options);
-			}
-			else
-			{
-				_diffViewer.Clear();
 			}
 		}
 
@@ -261,16 +271,6 @@ namespace gitter.Git.Gui.Views
 					RefreshContent();
 					e.IsInputKey = true;
 					break;
-			}
-		}
-
-		protected override void OnLoad(EventArgs e)
-		{
-			base.OnLoad(e);
-			if(!_loaded)
-			{
-				_loaded = true;
-				Reload();
 			}
 		}
 	}

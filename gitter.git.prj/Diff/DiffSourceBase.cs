@@ -21,6 +21,8 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Collections.Generic;
 
 	using gitter.Framework;
@@ -81,42 +83,18 @@ namespace gitter.Git
 
 		protected static void ApplyCommonDiffOptions(BaseQueryDiffParameters queryParameters, DiffOptions options)
 		{
-			queryParameters.Context				= options.Context;
-			queryParameters.Patience			= options.UsePatienceAlgorithm;
-			queryParameters.IgnoreSpaceChange	= options.IgnoreWhitespace;
-			queryParameters.Binary				= options.Binary;
+			Assert.IsNotNull(queryParameters);
+			Assert.IsNotNull(options);
+
+			queryParameters.Context           = options.Context;
+			queryParameters.Patience          = options.UsePatienceAlgorithm;
+			queryParameters.IgnoreSpaceChange = options.IgnoreWhitespace;
+			queryParameters.Binary            = options.Binary;
 		}
 
 		protected abstract Diff GetDiffCore(DiffOptions options);
 
-		public IAsyncFunc<Diff> GetDiffAsync()
-		{
-			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
-
-			return GetDiffAsync(DiffOptions.Default);
-		}
-
-		public IAsyncFunc<Diff> GetDiffAsync(DiffOptions options)
-		{
-			Verify.Argument.IsNotNull(options, "options");
-			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
-
-			return AsyncFunc.Create(
-				options,
-				(opt, monitor) =>
-				{
-					return GetDiffCore(opt);
-				},
-				Resources.StrLoadingDiff.AddEllipsis(),
-				string.Empty);
-		}
-
-		public Diff GetDiff()
-		{
-			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
-
-			return GetDiffCore(DiffOptions.Default);
-		}
+		protected abstract Task<Diff> GetDiffCoreAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		public Diff GetDiff(DiffOptions options)
 		{
@@ -124,6 +102,28 @@ namespace gitter.Git
 			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
 
 			return GetDiffCore(options);
+		}
+
+		public Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Verify.Argument.IsNotNull(options, "options");
+			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
+
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrLoadingDiff.AddEllipsis()));
+				return GetDiffCoreAsync(options, progress, cancellationToken)
+					.ContinueWith(t =>
+						{
+							progress.Report(OperationProgress.Completed);
+							return TaskUtility.UnwrapResult(t);
+						},
+						cancellationToken, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+			}
+			else
+			{
+				return GetDiffCoreAsync(options, progress, cancellationToken);
+			}
 		}
 
 		/// <summary>Returns a <see cref="System.String" /> that represents this instance.</summary>

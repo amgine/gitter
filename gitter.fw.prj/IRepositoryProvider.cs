@@ -22,6 +22,8 @@ namespace gitter.Framework
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework.Configuration;
 
@@ -60,7 +62,7 @@ namespace gitter.Framework
 		/// <param name="workingDirectory">Working directory of repository.</param>
 		/// <returns>Opened repository.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="workingDirectory"/> == <c>null</c>.</exception>
-		IAsyncFunc<IRepository> OpenRepositoryAsync(string workingDirectory);
+		Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		/// <summary>Called after repository is successfully loaded by environment.</summary>
 		/// <param name="repository">Loaded repository.</param>

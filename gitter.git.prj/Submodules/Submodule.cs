@@ -21,6 +21,8 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Git.AccessLayer;
@@ -118,36 +120,32 @@ namespace gitter.Git
 
 		#region Methods
 
+		private SubmoduleUpdateParameters GetUpdateParameters()
+		{
+			return new SubmoduleUpdateParameters()
+			{
+				Path = _path,
+				Recursive = true,
+				Init = true,
+			};
+		}
+
 		public void Update()
 		{
 			Verify.State.IsNotDeleted(this);
 
-			Repository.Accessor.UpdateSubmodule(
-				new SubmoduleUpdateParameters()
-				{
-					Path = _path,
-					Recursive = true,
-					Init = true,
-				});
+			var parameters = GetUpdateParameters();
+			Repository.Accessor.UpdateSubmodule(parameters);
 		}
 
-		public IAsyncAction UpdateAsync()
+		public Task UpdateAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.State.IsNotDeleted(this);
-
-			return AsyncAction.Create(
-				new SubmoduleUpdateParameters()
-				{
-					Path = _path,
-					Recursive = true,
-					Init = true,
-				},
-				(data, monitor) =>
-				{
-					Repository.Accessor.UpdateSubmodule(data);
-				},
-				Resources.StrUpdate,
-				Resources.StrFetchingDataFromRemoteRepository);
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsUpdatingSubmodule.AddEllipsis()));
+			}
+			var parameters = GetUpdateParameters();
+			return Repository.Accessor.UpdateSubmoduleAsync(parameters, progress, cancellationToken);
 		}
 
 		internal void UpdateInfo(string path, string url)

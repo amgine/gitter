@@ -22,6 +22,7 @@ namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 
 	/// <summary>Show commit logs.</summary>
 	public sealed class LogCommand : Command
@@ -144,12 +145,12 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static CommandArgument MaxCount(int limit)
 		{
-			return new CommandArgument("--max-count", limit.ToString());
+			return new CommandArgument("--max-count", limit.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public static CommandArgument Skip(int skip)
 		{
-			return new CommandArgument("--skip", skip.ToString());
+			return new CommandArgument("--skip", skip.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public static CommandArgument Format(string format)
@@ -189,12 +190,12 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static CommandArgument Since(DateTime dateTime)
 		{
-			return new CommandArgument("--since", dateTime.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			return new CommandArgument("--since", dateTime.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public static CommandArgument Until(DateTime dateTime)
 		{
-			return new CommandArgument("--until", dateTime.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			return new CommandArgument("--until", dateTime.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public static CommandArgument NullTerminate()

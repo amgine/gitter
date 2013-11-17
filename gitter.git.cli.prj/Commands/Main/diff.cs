@@ -21,6 +21,7 @@
 namespace gitter.Git.AccessLayer.CLI
 {
 	using System.Collections.Generic;
+	using System.Globalization;
 
 	/// <summary>Show changes between commits, commit and working tree, etc.</summary>
 	public sealed class DiffCommand : Command
@@ -82,7 +83,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static CommandArgument NameStatus()
 		{
-			return new CommandArgument("--name-only");
+			return new CommandArgument("--name-status");
 		}
 
 		public static CommandArgument IgnoreSpaceChange()
@@ -112,7 +113,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static CommandArgument Unified(int n)
 		{
-			return new CommandArgument("--unified", n.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			return new CommandArgument("--unified", n.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public static CommandArgument Check()
@@ -123,6 +124,56 @@ namespace gitter.Git.AccessLayer.CLI
 		public static CommandArgument NoColor()
 		{
 			return new CommandArgument("--no-color");
+		}
+
+		public static CommandArgument SwapInputs()
+		{
+			return new CommandArgument("-R");
+		}
+
+		public static CommandArgument TextConv()
+		{
+			return new CommandArgument("--textconv");
+		}
+
+		public static CommandArgument NoTextConv()
+		{
+			return new CommandArgument("--no-textconv");
+		}
+
+		public static CommandArgument ExtDiff()
+		{
+			return new CommandArgument("--ext-diff");
+		}
+
+		public static CommandArgument NoExtDiff()
+		{
+			return new CommandArgument("--no-ext-diff");
+		}
+
+		public static CommandArgument Text()
+		{
+			return new CommandArgument("--text");
+		}
+
+		public static CommandArgument FindRenames()
+		{
+			return new CommandArgument("--find-renames");
+		}
+
+		public static CommandArgument FindRenames(double similarity)
+		{
+			return new CommandArgument("--find-renames", similarity.ToString("G", CultureInfo.InvariantCulture).Substring(2), '=');
+		}
+
+		public static CommandArgument FindCopies()
+		{
+			return new CommandArgument("--find-copies");
+		}
+
+		public static CommandArgument FindCopies(double similarity)
+		{
+			return new CommandArgument("--find-copies", similarity.ToString("G", CultureInfo.InvariantCulture).Substring(2), '=');
 		}
 
 		public static CommandArgument NoMoreOptions()

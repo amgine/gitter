@@ -33,10 +33,15 @@ namespace gitter.Git
 	public sealed class GitRepositoryUpdateChannel : IUpdateChannel
 	{
 		private readonly string _url;
+		private readonly string _branch;
 
-		public GitRepositoryUpdateChannel(string url)
+		public GitRepositoryUpdateChannel(string url, string branch)
 		{
+			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsNeitherNullNorWhitespace(branch, "branch");
+
 			_url = url;
+			_branch = branch;
 		}
 
 		/// <summary>Check latest gitter version on this chanel.</summary>
@@ -52,7 +57,7 @@ namespace gitter.Git
 			GitOutput output;
 			try
 			{
-				output = GitProcess.Exec(new GitInput(cmd));
+				output = GitProcess.Execute(new GitInput(cmd));
 			}
 			catch
 			{
@@ -63,21 +68,21 @@ namespace gitter.Git
 				return null;
 			}
 			var parser = new GitParser(output.Output);
-			string masterSHA1 = null;
+			string branchSHA1 = null;
 			while(!parser.IsAtEndOfString)
 			{
 				var sha1	= parser.ReadString(40, 1);
 				var refname	= parser.ReadLine();
-				if(masterSHA1 == null)
+				if(branchSHA1 == null)
 				{
-					if(refname == GitConstants.LocalBranchPrefix + "master")
+					if(refname == GitConstants.LocalBranchPrefix + _branch)
 					{
-						masterSHA1 = sha1;
+						branchSHA1 = sha1;
 					}
 				}
 				else
 				{
-					if(sha1 == masterSHA1 &&
+					if(sha1 == branchSHA1 &&
 						refname.Length > GitConstants.TagPrefix.Length + 1 &&
 						refname.StartsWith(GitConstants.TagPrefix) &&
 						refname[GitConstants.TagPrefix.Length] == 'v')
@@ -100,8 +105,7 @@ namespace gitter.Git
 			return result;
 		}
 
-		/// <summary>Update gitter using this channel.</summary>
-		public void Update()
+		private string FormatUpdaterCommand()
 		{
 			var sb = new StringBuilder();
 			// update driver
@@ -126,7 +130,14 @@ namespace gitter.Git
 			sb.Append(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 			sb.Append('"');
 
-			HelperExecutables.LaunchUpdater(sb.ToString());
+			return sb.ToString();
+		}
+
+		/// <summary>Update gitter using this channel.</summary>
+		public void Update()
+		{
+			var command = FormatUpdaterCommand();
+			HelperExecutables.LaunchUpdater(command);
 		}
 	}
 }

@@ -21,8 +21,12 @@
 namespace gitter.Redmine
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Collections.Generic;
 	using System.Xml;
+
+	using gitter.Framework;
 
 	public abstract class RedmineObjectsCacheBase<T> : IEnumerable<T>
 		where T : RedmineObject
@@ -98,6 +102,30 @@ namespace gitter.Redmine
 					}
 				});
 			return list;
+		}
+
+		protected Task<LinkedList<T>> FetchItemsFromAllPagesAsync(string url, CancellationToken cancellationToken)
+		{
+			var list = new LinkedList<T>();
+			return Context
+				.GetAllDataPagesAsync(url,
+				xml =>
+				{
+					foreach(var item in Select(xml.DocumentElement))
+					{
+						list.AddLast(item);
+					}
+				},
+				cancellationToken)
+				.ContinueWith(
+				t =>
+				{
+					TaskUtility.PropagateFaultedStates(t);
+					return list;
+				},
+				cancellationToken,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		protected LinkedList<T> FetchItemsFromSinglePage(string url)

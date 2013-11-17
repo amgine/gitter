@@ -31,9 +31,6 @@ namespace gitter.Git.Gui.Controls
 
 	public class RemoteReferencesListBox : CustomListBox
 	{
-		private Remote _remote;
-		private RemoteReferencesCollection _refs;
-
 		private sealed class GroupItem : CustomListBoxItem<string>
 		{
 			private static readonly Bitmap ImgFolder = CachedResources.Bitmaps["ImgFolder"];
@@ -61,8 +58,15 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		#region Data
+
+		private RemoteReferencesCollection _remoteReferences;
 		private readonly GroupItem _grpBranches;
 		private readonly GroupItem _grpTags;
+
+		#endregion
+
+		#region .ctor
 
 		public RemoteReferencesListBox()
 		{
@@ -70,52 +74,71 @@ namespace gitter.Git.Gui.Controls
 			Columns.Add(new HashColumn() { IsVisible = true, Abbreviate = true, Width = 60 });
 
 			_grpBranches = new GroupItem(Resources.StrBranches) { IsExpanded = true };
-			_grpTags = new GroupItem(Resources.StrTags) { IsExpanded = true };
+			_grpTags     = new GroupItem(Resources.StrTags) { IsExpanded = true };
 
 			ShowTreeLines = true;
 		}
 
-		public void Load(Remote remote)
+		#endregion
+
+		#region Properties
+
+		public RemoteReferencesCollection RemoteReferences
 		{
-			if(_remote == remote) return;
-			if(_remote != null)
+			get { return _remoteReferences; }
+			set
 			{
-				DetachFromRemote();
-			}
-			_remote = remote;
-			if(_remote != null)
-			{
-				AttachToRemote();
+				if(_remoteReferences != value)
+				{
+					if(_remoteReferences != null)
+					{
+						lock(_remoteReferences.SyncRoot)
+						{
+							_remoteReferences.BranchCreated -= OnBranchCreated;
+							_remoteReferences.TagCreated -= OnTagCreated;
+							if(_grpBranches != null)
+							{
+								_grpBranches.Items.ClearSafe();
+							}
+							if(_grpTags != null)
+							{
+								_grpTags.Items.ClearSafe();
+							}
+							Items.ClearSafe();
+						}
+					}
+					_remoteReferences = value;
+					if(_remoteReferences != null)
+					{
+						lock(_remoteReferences.SyncRoot)
+						{
+							foreach(var branch in _remoteReferences.Branches)
+							{
+								_grpBranches.Items.AddSafe(new RemoteReferenceListItem(branch));
+							}
+							foreach(var tag in _remoteReferences.Tags)
+							{
+								_grpTags.Items.AddSafe(new RemoteReferenceListItem(tag));
+							}
+							if(_grpBranches.ListBox == null)
+							{
+								Items.AddSafe(_grpBranches);
+							}
+							if(_grpTags.ListBox == null)
+							{
+								Items.AddSafe(_grpTags);
+							}
+							_remoteReferences.BranchCreated += OnBranchCreated;
+							_remoteReferences.TagCreated += OnTagCreated;
+						}
+					}
+				}
 			}
 		}
 
-		private void DetachFromRemote()
-		{
-			_refs.BranchCreated -= OnBranchCreated;
-			_refs.TagCreated -= OnTagCreated;
-			_refs = null;
-			Items.ClearSafe();
-		}
+		#endregion
 
-		private void AttachToRemote()
-		{
-			_refs = _remote.GetReferences();
-			_refs.BranchCreated += OnBranchCreated;
-			_refs.TagCreated += OnTagCreated;
-		}
-
-		public void FetchData()
-		{
-			_refs.Refresh();
-			if(_grpBranches.ListBox == null)
-			{
-				Items.AddSafe(_grpBranches);
-			}
-			if(_grpTags.ListBox == null)
-			{
-				Items.AddSafe(_grpTags);
-			}
-		}
+		#region Methods
 
 		private void OnBranchCreated(object sender, RemoteReferenceEventArgs e)
 		{
@@ -126,5 +149,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			_grpTags.Items.AddSafe(new RemoteReferenceListItem(e.Reference));
 		}
+
+		#endregion
 	}
 }

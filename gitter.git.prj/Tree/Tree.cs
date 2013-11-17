@@ -23,6 +23,8 @@ namespace gitter.Git
 	using System;
 	using System.IO;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
@@ -33,10 +35,39 @@ namespace gitter.Git
 
 	public sealed class Tree : GitObject
 	{
+		#region Data
+
 		private readonly TreeDirectory _root;
 		private readonly string _treeHash;
 
-		internal Tree(Repository repository, string treeHash)
+		#endregion
+
+		public static Task<Tree> GetAsync(Repository repository, string treeHash, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
+			}
+			var parameters = new QueryTreeContentParameters(treeHash, true, false);
+			return repository.Accessor.QueryTreeContentAsync(parameters, progress, cancellationToken)
+				.ContinueWith(
+				t =>
+				{
+					var treeData = TaskUtility.UnwrapResult(t);
+					var tree = new Tree(repository, treeHash, false);
+					tree.SetContent(treeData);
+					return tree;
+				},
+				cancellationToken,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
+		}
+
+		#region .ctor
+
+		private Tree(Repository repository, string treeHash, bool load)
 			: base(repository)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(treeHash, "treeHash");
@@ -50,13 +81,25 @@ namespace gitter.Git
 			int i = strRoot.LastIndexOf('\\');
 			string name = (i != -1) ? strRoot.Substring(i + 1) : strRoot;
 			_root = new TreeDirectory(Repository, string.Empty, null, name);
-			Refresh();
+			if(load)
+			{
+				Refresh();
+			}
+		}
+
+		internal Tree(Repository repository, string treeHash)
+			: this(repository, treeHash, true)
+		{
 		} 
 
 		internal Tree(Repository repository)
 			: this(repository, GitConstants.HEAD)
 		{
 		}
+
+		#endregion
+
+		#region Properties
 
 		public string TreeHash
 		{
@@ -68,13 +111,14 @@ namespace gitter.Git
 			get { return _root; }
 		}
 
-		public void Refresh()
+		#endregion
+
+		#region Methods
+
+		private void SetContent(IList<TreeContentData> tree)
 		{
-			if(Repository.IsEmpty) return;
-			var tree = Repository.Accessor.QueryTreeContent(
-				new QueryTreeContentParameters(_treeHash, true, false));
-			_root.Files.Clear();
-			_root.Directories.Clear();
+			Root.Files.Clear();
+			Root.Directories.Clear();
 			var trees = new Dictionary<string, TreeDirectory>();
 			foreach(var item in tree)
 			{
@@ -119,6 +163,14 @@ namespace gitter.Git
 			}
 		}
 
+		public void Refresh()
+		{
+			if(Repository.IsEmpty) return;
+			var tree = Repository.Accessor.QueryTreeContent(
+				new QueryTreeContentParameters(_treeHash, true, false));
+			SetContent(tree);
+		}
+
 		private static string GetName(string path)
 		{
 			var index = path.LastIndexOf('/');
@@ -130,9 +182,27 @@ namespace gitter.Git
 			return Repository.Accessor.QueryBlobBytes(
 				new QueryBlobBytesParameters()
 				{
-					Treeish = _treeHash,
+					Treeish    = TreeHash,
 					ObjectName = blobPath,
 				});
 		}
+
+		public Task<byte[]> GetBlobContentAsync(string blobPath, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsFetchingBlob.AddEllipsis()));
+			}
+			return Repository.Accessor.QueryBlobBytesAsync(
+				new QueryBlobBytesParameters()
+				{
+					Treeish    = TreeHash,
+					ObjectName = blobPath,
+				},
+				progress,
+				cancellationToken);
+		}
+
+		#endregion
 	}
 }

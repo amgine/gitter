@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Controls
 {
 	using System;
 	using System.ComponentModel;
+	using System.Text;
 	using System.Windows.Forms;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -71,7 +72,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, revision.Author.Name));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthorEmail, revision.Author.Email));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPatch, revision.FormatPatch));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPatch, () => Encoding.UTF8.GetString(revision.FormatPatch())));
 
 			Items.Add(item);
 

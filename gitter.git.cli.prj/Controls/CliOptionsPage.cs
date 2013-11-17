@@ -107,7 +107,7 @@ namespace gitter.Git
 			Version version = null;
 			try
 			{
-				_gitCLI.RefreshGitVersion();
+				_gitCLI.InvalidateGitVersion();
 				version = _gitCLI.GitVersion;
 			}
 			catch { }
@@ -252,11 +252,15 @@ namespace gitter.Git
 
 		private void _btnDownload_Click(object sender, EventArgs e)
 		{
-			var exc = _downloader.DownloadAndInstallAsync().Invoke<ProgressForm>(this);
-			if(exc != null)
+			try
+			{
+				ProgressForm.MonitorTaskAsModalWindow("MSysGit Installation", _downloader.DownloadAndInstallAsync);
+			}
+			catch(Exception exc)
 			{
 				GitterApplication.MessageBoxService.Show(
 					this, exc.Message, "MSysGit Installation Failed", MessageBoxButton.Close, MessageBoxIcon.Error);
+				return;
 			}
 			var version = TryGetVersion();
 			if(version != null)

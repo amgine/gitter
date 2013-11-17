@@ -20,6 +20,10 @@
 
 namespace gitter.Git
 {
+	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
+
 	using gitter.Framework;
 
 	using Resources = gitter.Git.Properties.Resources;
@@ -40,21 +44,8 @@ namespace gitter.Git
 			get;
 		}
 
-		public Tree GetTree()
-		{
-			return GetTreeCore();
-		}
+		public abstract Tree GetTree();
 
-		public IAsyncFunc<Tree> GetTreeAsync()
-		{
-			return AsyncFunc.Create(
-				this,
-				(data, monitor) =>
-				{
-					return data.GetTreeCore();
-				},
-				string.Empty,
-				Resources.StrsFetchingTree.AddEllipsis());
-		}
+		public abstract Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 	}
 }

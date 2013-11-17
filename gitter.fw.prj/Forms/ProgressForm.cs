@@ -25,17 +25,20 @@ namespace gitter.Framework
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using Resources = gitter.Framework.Properties.Resources;
 
-	public partial class ProgressForm : Form, IAsyncProgressMonitor
+	public partial class ProgressForm : Form, IProgress<OperationProgress>
 	{
 		#region Data
 
 		private bool _canCancel;
 		private IAsyncResult _context;
 		private volatile bool _isCancelRequested;
+		private CancellationTokenSource _cancellationTokenSource;
 
 		#endregion
 
@@ -65,7 +68,7 @@ namespace gitter.Framework
 
 		#endregion
 
-		/// <summary>Create <see cref="ProgressForm"/>.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ProgressForm"/> class.</summary>
 		public ProgressForm()
 		{
 			InitializeComponent();
@@ -85,6 +88,99 @@ namespace gitter.Framework
 				_pnlContainer.Height += d;
 				ClientSize = new Size(ClientSize.Width, ClientSize.Height - d);
 			}
+		}
+
+		private static void RunAsModalWithTask(Form dialog, Task task)
+		{
+			Assert.IsNotNull(task);
+
+			if(task.IsCompleted || task.IsFaulted || task.IsCanceled)
+			{
+				if(!dialog.IsDisposed)
+				{
+					dialog.Dispose();
+				}
+				TaskUtility.PropagateFaultedStates(task);
+			}
+			var continuation = task.ContinueWith(
+				t =>
+				{
+					if(!dialog.IsDisposed)
+					{
+						dialog.Close();
+						dialog.Dispose();
+					}
+					TaskUtility.PropagateFaultedStates(t);
+				},
+				TaskScheduler.FromCurrentSynchronizationContext());
+			dialog.ShowDialog(GitterApplication.MainForm);
+			TaskUtility.PropagateFaultedStates(task);
+		}
+
+		private static T RunAsModalWithTask<T>(Form dialog, Task<T> task)
+		{
+			Assert.IsNotNull(task);
+
+			if(task.IsCompleted || task.IsFaulted || task.IsCanceled)
+			{
+				if(!dialog.IsDisposed)
+				{
+					dialog.Dispose();
+				}
+				return TaskUtility.UnwrapResult(task);
+			}
+			var continuation = task.ContinueWith(
+				t =>
+				{
+					if(!dialog.IsDisposed)
+					{
+						dialog.Close();
+						dialog.Dispose();
+					}
+					return TaskUtility.UnwrapResult(task);
+				},
+				TaskScheduler.FromCurrentSynchronizationContext());
+			dialog.ShowDialog(GitterApplication.MainForm);
+			return TaskUtility.UnwrapResult(task);
+		}
+
+		public static void MonitorTaskAsModalWindow(string windowTitle, Func<IProgress<OperationProgress>, Task> func)
+		{
+			Verify.Argument.IsNotNull(func, "func");
+
+			var dialog = new ProgressForm()
+			{
+				Text = windowTitle,
+			};
+			dialog.SetCanCancel(false);
+			var task = func(dialog);
+			RunAsModalWithTask(dialog, task);
+		}
+
+		public static void MonitorTaskAsModalWindow(string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
+		{
+			Verify.Argument.IsNotNull(func, "func");
+
+			var dialog = new ProgressForm()
+			{
+				Text = windowTitle,
+			};
+			dialog.SetCanCancel(true);
+			var task = func(dialog, dialog.CancellationToken);
+			RunAsModalWithTask(dialog, task);
+		}
+
+		public static T MonitorTaskAsModalWindow<T>(string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
+		{
+			Verify.Argument.IsNotNull(func, "func");
+
+			var dialog = new ProgressForm()
+			{
+				Text = windowTitle,
+			};
+			dialog.SetCanCancel(true);
+			var task = func(dialog, dialog.CancellationToken);
+			return RunAsModalWithTask(dialog, task);
 		}
 
 		private void UpdateWin7ProgressBar()
@@ -127,6 +223,16 @@ namespace gitter.Framework
 		}
 
 		/// <summary>
+		/// Raises the <see cref="E:System.Windows.Forms.Form.Closed" /> event.
+		/// </summary>
+		/// <param name="e">The <see cref="T:System.EventArgs" /> that contains the event data.</param>
+		protected override void OnClosed(EventArgs e)
+		{
+			StopWin7ProgressBar();
+			base.OnClosed(e);
+		}
+
+		/// <summary>
 		/// Starts monitor.
 		/// </summary>
 		/// <param name="parent">Reference to parent window which is related to executing action.</param>
@@ -142,6 +248,18 @@ namespace gitter.Framework
 			else
 			{
 				Show(parent);
+			}
+		}
+
+		private CancellationToken CancellationToken
+		{
+			get
+			{
+				if(_cancellationTokenSource == null)
+				{
+					return CancellationToken.None;
+				}
+				return _cancellationTokenSource.Token;
 			}
 		}
 
@@ -232,6 +350,21 @@ namespace gitter.Framework
 				{
 					_btnCancel.Enabled = value;
 					_canCancel = value;
+					if(value)
+					{
+						if(_cancellationTokenSource == null)
+						{
+							_cancellationTokenSource = new CancellationTokenSource();
+						}
+					}
+					else
+					{
+						if(_cancellationTokenSource != null)
+						{
+							_cancellationTokenSource.Dispose();
+							_cancellationTokenSource = null;
+						}
+					}
 				}
 			}
 		}
@@ -372,6 +505,17 @@ namespace gitter.Framework
 			}
 		}
 
+		private void SetProgressCore(int current, int maximum)
+		{
+			if(IsDisposed) return;
+
+			_progressBar.Style = ProgressBarStyle.Continuous;
+			_progressBar.Minimum = 0;
+			_progressBar.Maximum = maximum;
+			_progressBar.Value = current;
+			UpdateWin7ProgressBar();
+		}
+
 		/// <summary>
 		/// Sets progress as unknown.
 		/// </summary>
@@ -383,7 +527,7 @@ namespace gitter.Framework
 				{
 					try
 					{
-						BeginInvoke(new Action(SetProgressIndeterminate));
+						BeginInvoke(new Action(SetProgressIndeterminateCore));
 					}
 					catch(ObjectDisposedException)
 					{
@@ -391,10 +535,27 @@ namespace gitter.Framework
 				}
 				else
 				{
-					_progressBar.Style = ProgressBarStyle.Marquee;
-					UpdateWin7ProgressBar();
+					SetProgressIndeterminateCore();
 				}
 			}
+		}
+
+		private void SetProgressIndeterminateCore()
+		{
+			if(IsDisposed) return;
+
+			if(_progressBar.Style != ProgressBarStyle.Marquee)
+			{
+				_progressBar.Style = ProgressBarStyle.Marquee;
+				UpdateWin7ProgressBar();
+			}
+		}
+
+		private void SetActionNameCore(string actionName)
+		{
+			if(IsDisposed) return;
+
+			_lblAction.Text = actionName;
 		}
 
 		/// <summary>
@@ -417,17 +578,59 @@ namespace gitter.Framework
 				}
 				else
 				{
-					StopWin7ProgressBar();
 					Close();
 				}
 			}
 		}
 
+		public void Report(OperationProgress progress)
+		{
+			if(!IsDisposed)
+			{
+				if(InvokeRequired)
+				{
+					try
+					{
+						BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
+				else
+				{
+					ReportCore(progress);
+				}
+			}
+		}
+
+		private void ReportCore(OperationProgress progress)
+		{
+			if(IsDisposed) return;
+
+			SetActionNameCore(progress.ActionName);
+			if(progress.IsIndeterminate)
+			{
+				SetProgressIndeterminate();
+			}
+			else
+			{
+				SetProgressCore(progress.CurrentProgress, progress.MaxProgress);
+			}
+		}
+
 		private void OnCancelClick(object sender, EventArgs e)
 		{
-			_btnCancel.Enabled = false;
-			_isCancelRequested = true;
-			OnCanceled();
+			if(!_isCancelRequested)
+			{
+				_btnCancel.Enabled = false;
+				_isCancelRequested = true;
+				if(_cancellationTokenSource != null)
+				{
+					_cancellationTokenSource.Cancel();
+				}
+				OnCanceled();
+			}
 		}
 	}
 }

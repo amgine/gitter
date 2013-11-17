@@ -29,7 +29,5 @@ namespace gitter.Git.AccessLayer
 		public GarbageCollectParameters()
 		{
 		}
-
-		public IAsyncProgressMonitor Monitor { get; set; }
 	}
 }

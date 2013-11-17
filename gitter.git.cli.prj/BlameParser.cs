@@ -133,6 +133,8 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private BlameCommit ParseCommitInfo(IDictionary<string, BlameCommit> cache)
 		{
+			Assert.IsNotNull(cache);
+
 			var hash = ReadString(40);
 			SkipLine();
 

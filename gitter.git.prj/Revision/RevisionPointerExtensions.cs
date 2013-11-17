@@ -22,8 +22,9 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -401,12 +402,20 @@ namespace gitter.Git
 
 		#region rebase
 
+		private static RebaseParameters GetRebaseParameters(IRevisionPointer revision)
+		{
+			Assert.IsNotNull(revision);
+
+			return new RebaseParameters(revision.Pointer);
+		}
+
 		public static void RebaseHeadHere(this IRevisionPointer revision)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var repository = revision.Repository;
-			var cb = repository.Head.CurrentBranch;
+			var oldHead = repository.Head.CurrentBranch;
+			var parameters = GetRebaseParameters(revision);
 			using(repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.Checkout,
@@ -415,14 +424,13 @@ namespace gitter.Git
 			{
 				try
 				{
-					repository.Accessor.Rebase(
-						new RebaseParameters(revision.Pointer));
+					repository.Accessor.Rebase(parameters);
 				}
 				finally
 				{
-					if(cb != null)
+					if(oldHead != null)
 					{
-						cb.Refresh();
+						oldHead.Refresh();
 					}
 					else
 					{
@@ -434,17 +442,42 @@ namespace gitter.Git
 			}
 		}
 
-		public static IAsyncAction RebaseHeadHereAsync(this IRevisionPointer revision)
+		public static Task RebaseHeadHereAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
-			return AsyncAction.Create(revision,
-				(rev, monitor) =>
+			var repository = revision.Repository;
+			var oldHead = repository.Head.CurrentBranch;
+			var parameters = GetRebaseParameters(revision);
+			var block = repository.Monitor.BlockNotifications(
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated);
+
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsRebaseIsInProcess.AddEllipsis()));
+			}
+			return repository.Accessor.RebaseAsync(parameters, progress, CancellationToken.None)
+				.ContinueWith(
+				t =>
 				{
-					RebaseHeadHere(rev);
+					block.Dispose();
+					if(oldHead != null)
+					{
+						oldHead.Refresh();
+					}
+					else
+					{
+						repository.Head.Refresh();
+					}
+					TaskUtility.PropagateFaultedStates(t);
+					repository.OnUpdated();
 				},
-				Resources.StrRebase,
-				Resources.StrsRebaseIsInProcess.AddEllipsis());
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		#endregion
@@ -600,18 +633,11 @@ namespace gitter.Git
 		/// <summary>Gets <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</summary>
 		/// <param name="revision">The revision.</param>
 		/// <returns>Function which retrieves <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</returns>
-		public static IAsyncFunc<Tree> GetTreeAsync(this IRevisionPointer revision)
+		public static Task<Tree> GetTreeAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
-			return AsyncFunc.Create(
-				revision,
-				(mon, rev) =>
-				{
-					return new Tree(revision.Repository, revision.FullName);
-				},
-				"",
-				"");
+			return Tree.GetAsync(revision.Repository, revision.FullName, progress, cancellationToken);
 		}
 
 		#endregion
@@ -665,26 +691,22 @@ namespace gitter.Git
 		/// <param name="revision">Revision to get diff for.</param>
 		/// <returns><see cref="Diff"/> for this revision.</returns>
 		/// <exception cref="T:gitter.Git.GitException">Failed to get diff.</exception>
-		public static string FormatPatch(this IRevisionPointer revision)
+		public static byte[] FormatPatch(this IRevisionPointer revision)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
 			var repository = revision.Repository;
+			var parameters = new QueryRevisionDiffParameters(revision.Pointer)
+				{
+					Binary = true
+				};
 			if(revision.Type == ReferenceType.Stash)
 			{
-				return repository.Accessor.QueryStashPatch(
-					new QueryRevisionDiffParameters(revision.Pointer)
-					{
-						Binary = true
-					});
+				return repository.Accessor.QueryStashPatch(parameters);
 			}
 			else
 			{
-				return repository.Accessor.QueryRevisionPatch(
-					new QueryRevisionDiffParameters(revision.Pointer)
-					{
-						Binary = true
-					});
+				return repository.Accessor.QueryRevisionPatch(parameters);
 			};
 		}
 
@@ -703,44 +725,37 @@ namespace gitter.Git
 
 		#region archive
 
-		public static void Archive(this IRevisionPointer revision, string outputFile, string path = null, string format = null)
+		private static ArchiveParameters GetArchiveParameters(IRevisionPointer revision, string outputFile, string path, string format)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, "outputFile");
-
-			revision.Repository.Accessor.Archive(
-				new ArchiveParameters()
-				{
-					Tree = revision.FullName,
-					Path = path,
-					OutputFile = outputFile,
-					Format = format,
-				});
+			return new ArchiveParameters()
+			{
+				Tree       = revision.FullName,
+				Path       = path,
+				OutputFile = outputFile,
+				Format     = format,
+			};
 		}
 
-		public static IAsyncAction ArchiveAsync(this IRevisionPointer revision, string outputFile, string path = null, string format = null)
+		public static void Archive(this IRevisionPointer revision, string outputFile, string path, string format)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, "outputFile");
 
-			return AsyncAction.Create(
-				new
-				{
-					Repository = revision.Repository,
-					Parameters = new ArchiveParameters()
-					{
-						Tree = revision.FullName,
-						Path = path,
-						OutputFile = outputFile,
-						Format = format,
-					}
-				},
-				(data, mon) =>
-				{
-					data.Repository.Accessor.Archive(data.Parameters);
-				},
-				Resources.StrArchive,
-				Resources.StrfCreatingArchiveFrom.UseAsFormat(revision.Pointer).AddEllipsis());
+			var parameters = GetArchiveParameters(revision, outputFile, path, format);
+			revision.Repository.Accessor.Archive(parameters);
+		}
+
+		public static Task ArchiveAsync(this IRevisionPointer revision, string outputFile, string path, string format, IProgress<OperationProgress> progress)
+		{
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, "outputFile");
+
+			var parameters = GetArchiveParameters(revision, outputFile, path, format);
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrfCreatingArchiveFrom.UseAsFormat(parameters.Tree).AddEllipsis()));
+			}
+			return revision.Repository.Accessor.ArchiveAsync(parameters, progress, CancellationToken.None);
 		}
 
 		#endregion

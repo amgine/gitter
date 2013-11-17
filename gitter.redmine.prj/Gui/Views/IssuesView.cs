@@ -22,23 +22,29 @@ namespace gitter.Redmine.Gui
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Drawing;
 	using System.Globalization;
-	using System.Text;
 	using System.Windows.Forms;
-
+	
 	using gitter.Framework;
-	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Controls;
+
+	using gitter.Redmine.Gui.ListBoxes;
 
 	using Resources = gitter.Redmine.Properties.Resources;
 
 	partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 	{
+		#region Data
+
 		private readonly IssuesToolbar _toolbar;
 		private IssuesSearchToolBar _searchToolbar;
-		private volatile AsyncFunc<RedmineServiceContext, LinkedList<Issue>> _currentLookup;
+		private IssuesListBinding _dataSource;
+
+		#endregion
+
+		#region .ctor
 
 		public IssuesView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
 			: base(Guids.IssuesViewGuid, environment, parameters)
@@ -49,127 +55,46 @@ namespace gitter.Redmine.Gui
 
 			AddTopToolStrip(_toolbar = new IssuesToolbar(this));
 
-			//_lstIssues.ShowTreeLines = true;
 			_lstIssues.ItemActivated += OnItemActivated;
 			_lstIssues.PreviewKeyDown += OnKeyDown;
 		}
+
+		#endregion
+
+		#region Properties
 
 		public override Image Image
 		{
 			get { return CachedResources.Bitmaps["ImgBug"]; }
 		}
 
+		private IssuesListBinding DataSource
+		{
+			get { return _dataSource; }
+			set
+			{
+				if(_dataSource != value)
+				{
+					if(_dataSource != null)
+					{
+						_dataSource.Dispose();
+					}
+					_dataSource = value;
+					if(_dataSource != null)
+					{
+						_dataSource.ReloadData();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Methods
+
 		protected override void OnContextAttached()
 		{
-			RefreshContent();
-		}
-
-		private void OnFetchCompleted(IAsyncResult ar)
-		{
-			var af = (AsyncFunc<RedmineServiceContext, LinkedList<Issue>>)ar.AsyncState;
-			if(_currentLookup == af)
-			{
-				_currentLookup = null;
-				LinkedList<Issue> issues = null;
-				try
-				{
-					issues = af.EndInvoke(ar);
-				}
-				catch(Exception exc)
-				{
-					if(!IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new Action<Exception>(ShowErrorNotification), exc);
-						}
-						catch { }
-					}
-				}
-				if(issues != null)
-				{
-					if(!IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new Action<LinkedList<Issue>>(ShowIssues), issues);
-						}
-						catch { }
-					}
-				}
-			}
-		}
-
-		private void ShowErrorNotification(Exception exc)
-		{
-			if(IsDisposed) return;
-			_lstIssues.Text = Resources.StrsFailedToFetchIssues;
-		}
-
-		private void ShowIssues(LinkedList<Issue> issues)
-		{
-			if(IsDisposed) return;
-			_lstIssues.BeginUpdate();
-			_lstIssues.Items.Clear();
-			if(issues.Count != 0)
-			{
-				/*
-				var d = new Dictionary<Issue, IssueListItem>();
-				foreach(var issue in issues)
-				{
-					var item = new IssueListItem(issue);
-					d[issue] = item;
-				}
-				foreach(var kvp in d)
-				{
-					if(kvp.Key.Parent != null)
-					{
-						IssueListItem parent;
-						if(d.TryGetValue(kvp.Key.Parent, out parent))
-						{
-							parent.Expand();
-							parent.Items.Add(kvp.Value);
-						}
-					}
-				}
-				foreach(var issue in issues)
-				{
-					var item = d[issue];
-					if(item.ListBox != null) continue;
-					if(item.Parent == null)
-					{
-						_lstIssues.Items.Add(item);
-					}
-				}
-				*/
-				var cf = new Dictionary<int, CustomListBoxColumn>();
-				foreach(var column in _lstIssues.Columns)
-				{
-					if(column.Id >= (int)ColumnId.CustomFieldOffset)
-					{
-						var id = column.Id - (int)ColumnId.CustomFieldOffset;
-						cf.Add(id, column);
-					}
-				}
-				foreach(var issue in issues)
-				{
-					foreach(var cfv in issue.CustomFields)
-					{
-						if(!cf.ContainsKey(cfv.Field.Id))
-						{
-							var column = new IssueCustomFieldColumn(cfv.Field);
-							cf.Add(cfv.Field.Id, column);
-							_lstIssues.Columns.Add(column);
-						}
-					}
-					_lstIssues.Items.Add(new IssueListItem(issue));
-				}
-			}
-			else
-			{
-				_lstIssues.Text = Resources.StrsNoIssuesToDisplay;
-			}
-			_lstIssues.EndUpdate();
+			DataSource = new IssuesListBinding(ServiceContext, _lstIssues);
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
@@ -227,25 +152,13 @@ namespace gitter.Redmine.Gui
 
 		public override void RefreshContent()
 		{
-			if(ServiceContext == null)
+			if(DataSource != null)
 			{
-				_lstIssues.Items.Clear();
-			}
-			else
-			{
-				if(_currentLookup != null)
-				{
-					return;
-				}
-				var af = AsyncFunc.Create(
-					ServiceContext,
-					(context, mon) => context.Issues.FetchOpen(context.DefaultProjectId),
-					Resources.StrsFetchingIssues.AddEllipsis(),
-					string.Empty);
-				_currentLookup = af;
-				af.BeginInvoke(this, _lstIssues.ProgressMonitor, OnFetchCompleted, af);
+				DataSource.ReloadData();
 			}
 		}
+
+		#endregion
 
 		#region ISearchableView
 

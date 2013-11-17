@@ -21,124 +21,164 @@
 namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
 	using System.IO;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
-
+	
 	using gitter.Git.Gui.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 	{
-		private TreeBinding _binding;
-		private IAsyncFunc<Tree> _getTreeFunc;
+		private sealed class AsyncTreeDataSource : AsyncDataBinding<Tree>
+		{
+			#region Data
+
+			private readonly IRevisionPointer _revision;
+			private readonly CustomListBoxItemsCollection _items;
+			private readonly EventHandler<BoundItemActivatedEventArgs<TreeItem>> _onItemActivated;
+			private readonly EventHandler<ItemContextMenuRequestEventArgs> _onItemContextMenuRequested;
+			private TreeBinding _binding;
+
+			#endregion
+
+			public AsyncTreeDataSource(IRevisionPointer revision, CustomListBoxItemsCollection items,
+				EventHandler<BoundItemActivatedEventArgs<TreeItem>> onItemActivated,
+				EventHandler<ItemContextMenuRequestEventArgs> onItemContextMenuRequested)
+			{
+				Verify.Argument.IsNotNull(revision, "revision");
+				Verify.Argument.IsNotNull(items, "items");
+
+				_revision = revision;
+				_items    = items;
+
+				_onItemActivated = onItemActivated;
+				_onItemContextMenuRequested = onItemContextMenuRequested;
+			}
+
+			public IRevisionPointer Revision
+			{
+				get { return _revision; }
+			}
+
+			public CustomListBoxItemsCollection Items
+			{
+				get { return _items; }
+			}
+
+			protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			{
+				if(_binding != null)
+				{
+					_binding.ItemActivated -= _onItemActivated;
+					_binding.ItemContextMenuRequested -= _onItemContextMenuRequested;
+					_binding.Dispose();
+					_binding = null;
+				}
+				return Revision.GetTreeAsync(progress, cancellationToken);
+			}
+
+			protected override void OnFetchCompleted(Tree tree)
+			{
+				if(tree != null)
+				{
+					_binding = new TreeBinding(Items, tree.Root, false);
+					_binding.ItemActivated += _onItemActivated;
+					_binding.ItemContextMenuRequested += _onItemContextMenuRequested;
+				}
+			}
+
+			protected override void OnFetchFailed(Exception exception)
+			{
+				LoggingService.Global.Warning(exception, "Failed to fetch HEAD tree: " + exception.Message);
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				if(disposing)
+				{
+					if(_binding != null)
+					{
+						_binding.ItemActivated -= _onItemActivated;
+						_binding.ItemContextMenuRequested -= _onItemContextMenuRequested;
+						_binding.Dispose();
+						_binding = null;
+					}
+				}
+				base.Dispose(disposing);
+			}
+		}
+
+		private AsyncTreeDataSource _dataSource;
 
 		public RepositoryWorkingDirectoryListItem()
 			: base(CachedResources.Bitmaps["ImgFolder"], Resources.StrWorkingDirectory)
 		{
 		}
 
+		private AsyncTreeDataSource DataSource
+		{
+			get { return _dataSource; }
+			set
+			{
+				if(_dataSource != value)
+				{
+					if(_dataSource != null)
+					{
+						_dataSource.Dispose();
+					}
+					_dataSource = value;
+					if(_dataSource != null)
+					{
+						_dataSource.ReloadData();
+					}
+				}
+			}
+		}
+
 		/// <summary>Called when item is attached to listbox.</summary>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			if(Repository != null) Bind();
+			if(Repository != null)
+			{
+				DataSource = new AsyncTreeDataSource(Repository.Head, Items, OnItemActivated, OnItemContextMenuRequested);
+			}
 		}
 
 		/// <summary>Called when item is detached from listbox.</summary>
 		protected override void OnListBoxDetached()
 		{
-			Unbind();
+			DataSource = null;
 			base.OnListBoxDetached();
 		}
 
 		protected override void DetachFromRepository()
 		{
+			DataSource = null;
 			Repository.Head.PositionChanged -= OnHeadPositionChanged;
-			Unbind();
-			Collapse();
 		}
 
 		protected override void AttachToRepository()
 		{
-			Refresh();
+			if(IsAttachedToListBox)
+			{
+				DataSource = new AsyncTreeDataSource(Repository.Head, Items, OnItemActivated, OnItemContextMenuRequested);
+			}
 			Repository.Head.PositionChanged += OnHeadPositionChanged;
-		}
-
-		private void Unbind()
-		{
-			_getTreeFunc = null;
-			if(_binding != null)
-			{
-				_binding.ItemActivated -= OnItemActivated;
-				_binding.ItemContextMenuRequested -= OnItemContextMenuRequested;
-				_binding.Dispose();
-				_binding = null;
-			}
-		}
-
-		private void Bind()
-		{
-			var f = _getTreeFunc = Repository.Head.GetTreeAsync();
-			f.BeginInvoke(
-				ListBox,
-				new NullMonitor(),
-				OnTreeLoaded,
-				f);
-		}
-
-		private void OnTreeLoaded(IAsyncResult ar)
-		{
-			var f = (IAsyncFunc<Tree>)ar.AsyncState;
-			if(_getTreeFunc == f)
-			{
-				var listBox = ListBox;
-				if(listBox != null)
-				{
-					Tree tree = null;
-					try
-					{
-						tree = f.EndInvoke(ar);
-					}
-					catch(Exception exc)
-					{
-						LoggingService.Global.Warning(exc, "Failed to fetch HEAD tree: " + exc.Message);
-					}
-					if(listBox.InvokeRequired)
-					{
-						listBox.BeginInvoke(new Action<Tree>(OnTreeLoadedSync), tree);
-					}
-					else
-					{
-						OnTreeLoadedSync(tree);
-					}
-				}
-				_getTreeFunc = null;
-			}
-		}
-
-		private void OnTreeLoadedSync(Tree tree)
-		{
-			if(tree != null)
-			{
-				_binding = new TreeBinding(Items, tree.Root, false);
-				_binding.ItemActivated += OnItemActivated;
-				_binding.ItemContextMenuRequested += OnItemContextMenuRequested;
-			}
 		}
 
 		private void Refresh()
 		{
-			Unbind();
-			if(ListBox != null)
+			if(DataSource != null)
 			{
-				Bind();
+				DataSource.ReloadData();
 			}
 		}
 
@@ -147,7 +187,7 @@ namespace gitter.Git.Gui
 			var listBox = ListBox;
 			if(listBox != null && listBox.InvokeRequired)
 			{
-				listBox.BeginInvoke(new Action(Refresh), null);
+				listBox.BeginInvoke(new MethodInvoker(Refresh), null);
 			}
 			else
 			{

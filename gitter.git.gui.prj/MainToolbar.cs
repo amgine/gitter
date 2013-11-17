@@ -26,9 +26,9 @@ namespace gitter.Git.Gui
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Views;
+	
 	using gitter.Git.Gui.Dialogs;
+	using gitter.Git.Gui.Views;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -222,7 +222,9 @@ namespace gitter.Git.Gui
 			var head = (Head)sender;
 			_mergeButton.Enabled = !head.IsDetached;
 			if(!_stashButton.Enabled)
+			{
 				_stashButton.Enabled = true;
+			}
 		}
 
 		private void OnRemoteAdded(object sender, RemoteEventArgs e)
@@ -309,12 +311,14 @@ namespace gitter.Git.Gui
 
 		private void OnRefreshClick(object sender, EventArgs e)
 		{
-			var tool = _guiProvider.Environment.ViewDockService.ActiveView;
-			if(tool != null)
+			var view = _guiProvider.Environment.ViewDockService.ActiveView;
+			if(view != null)
 			{
-				var gitTool = tool as GitView;
-				if(gitTool != null)
-					gitTool.RefreshContent();
+				var gitView = view as GitView;
+				if(gitView != null)
+				{
+					gitView.RefreshContent();
+				}
 			}
 		}
 
@@ -330,36 +334,12 @@ namespace gitter.Git.Gui
 
 		private void OnFetchClick(object sender, EventArgs e)
 		{
-			try
-			{
-				_repository.Remotes.FetchAsync().Invoke<ProgressForm>(this);
-			}
-			catch(Exception exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToFetch,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
+			GuiCommands.Fetch(Repository);
 		}
 
 		private void OnPullClick(object sender, EventArgs e)
 		{
-			try
-			{
-				_repository.Remotes.PullAsync().Invoke<ProgressForm>(this);
-			}
-			catch(Exception exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToPull,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
+			GuiCommands.Pull(Repository);
 		}
 
 		private void OnPushClick(object sender, EventArgs e)
@@ -404,56 +384,22 @@ namespace gitter.Git.Gui
 			}
 			else
 			{
-				try
-				{
-					_repository.Stash.SaveAsync(false, false, null).Invoke<ProgressForm>(this);
-				}
-				catch(GitException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						this,
-						exc.Message,
-						Resources.ErrFailedToStash,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-				}
+				GuiCommands.SaveStash(this, Repository.Stash, false, false, null);
 			}
 		}
 
 		private void OnStashPopClick(object sender, EventArgs e)
 		{
 			bool restoreIndex = Control.ModifierKeys == Keys.Shift;
-			try
-			{
-				_repository.Stash.PopAsync(restoreIndex).Invoke<ProgressForm>(this);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToStashPop,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
+
+			GuiCommands.PopStashedState(this, _repository.Stash, restoreIndex);
 		}
 
 		private void OnStashApplyClick(object sender, EventArgs e)
 		{
 			bool restoreIndex = Control.ModifierKeys == Keys.Shift;
-			try
-			{
-				_repository.Stash.ApplyAsync(restoreIndex).Invoke<ProgressForm>(this);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToStashApply,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
+
+			GuiCommands.ApplyStashedState(this, _repository.Stash, restoreIndex);
 		}
 
 		private void OnCheckoutClick(object sender, EventArgs e)

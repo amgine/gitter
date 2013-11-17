@@ -22,6 +22,10 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	using gitter.Git.AccessLayer;
 
@@ -62,7 +66,7 @@ namespace gitter.Git
 			get { return _stashedState; }
 		}
 
-		protected override Diff GetDiffCore(DiffOptions options)
+		private QueryRevisionDiffParameters GetParameters(DiffOptions options)
 		{
 			Assert.IsNotNull(options);
 
@@ -71,7 +75,23 @@ namespace gitter.Git
 				Paths = _paths,
 			};
 			ApplyCommonDiffOptions(parameters, options);
-			return _stashedState.Repository.Accessor.QueryStashDiff(parameters);
+			return parameters;
+		}
+
+		protected override Diff GetDiffCore(DiffOptions options)
+		{
+			Assert.IsNotNull(options);
+
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryStashDiff(parameters);
+		}
+
+		protected override Task<Diff> GetDiffCoreAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Assert.IsNotNull(options);
+
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryStashDiffAsync(parameters, progress, cancellationToken);
 		}
 
 		/// <summary>

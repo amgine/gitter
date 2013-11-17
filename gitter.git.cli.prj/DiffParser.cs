@@ -436,9 +436,7 @@ namespace gitter.Git.AccessLayer.CLI
 								{
 									// index <hash>..<hash> <mode>
 									fileHeader.NewIndex = ReadStringUpTo(space, 1);
-									fileHeader.NewMode = int.Parse(ReadStringUpTo(pos, 1),
-										System.Globalization.NumberStyles.None,
-										System.Globalization.CultureInfo.InvariantCulture);
+									fileHeader.NewMode = int.Parse(ReadStringUpTo(pos, 1), NumberStyles.None, CultureInfo.InvariantCulture);
 								}
 							}
 						}
@@ -447,18 +445,14 @@ namespace gitter.Git.AccessLayer.CLI
 						// old mode <mode>
 						if(dataPresent)
 						{
-							fileHeader.OldMode = int.Parse(ReadLine(),
-								System.Globalization.NumberStyles.None,
-								System.Globalization.CultureInfo.InvariantCulture);
+							fileHeader.OldMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
 						}
 						break;
 					case Header.NewMode:
 						// new mode <mode>
 						if(dataPresent)
 						{
-							fileHeader.NewMode = int.Parse(ReadLine(),
-								System.Globalization.NumberStyles.None,
-								System.Globalization.CultureInfo.InvariantCulture);
+							fileHeader.NewMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
 						}
 						break;
 					case Header.Mode:
@@ -473,9 +467,7 @@ namespace gitter.Git.AccessLayer.CLI
 						fileHeader.Status = FileStatus.Added;
 						if(dataPresent)
 						{
-							fileHeader.NewMode = int.Parse(ReadLine(),
-								System.Globalization.NumberStyles.None,
-								System.Globalization.CultureInfo.InvariantCulture);
+							fileHeader.NewMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
 						}
 						break;
 					case Header.DeletedFileMode:
@@ -490,9 +482,7 @@ namespace gitter.Git.AccessLayer.CLI
 							else
 							{
 								// deleted file mode <mode>
-								fileHeader.OldMode = int.Parse(ReadLine(),
-									System.Globalization.NumberStyles.None,
-									System.Globalization.CultureInfo.InvariantCulture);
+								fileHeader.OldMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
 							}
 						}
 						break;
@@ -533,10 +523,7 @@ namespace gitter.Git.AccessLayer.CLI
 							int index;
 							string strIndex = ReadStringUpTo(FindNewLineOrEndOfString() - 1);
 							Skip(2);
-							if(int.TryParse(strIndex,
-								System.Globalization.NumberStyles.Integer,
-								System.Globalization.CultureInfo.InvariantCulture,
-								out index))
+							if(int.TryParse(strIndex, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
 							{
 								fileHeader.SimilarityIndex = index;
 							}
@@ -547,10 +534,7 @@ namespace gitter.Git.AccessLayer.CLI
 							int index;
 							string strIndex = ReadStringUpTo(FindNewLineOrEndOfString() - 1);
 							Skip(2);
-							if(int.TryParse(strIndex,
-								System.Globalization.NumberStyles.Integer,
-								System.Globalization.CultureInfo.InvariantCulture,
-								out index))
+							if(int.TryParse(strIndex, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
 							{
 								fileHeader.DissimilarityIndex = index;
 							}

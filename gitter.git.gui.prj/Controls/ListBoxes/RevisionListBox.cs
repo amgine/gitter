@@ -38,7 +38,7 @@ namespace gitter.Git.Gui.Controls
 	{
 		private Repository _repository;
 		private RevisionListItem _currentRevisionItem;
-		private RevisionLog _log;
+		private RevisionLog _revisionLog;
 		private Dictionary<Revision, RevisionListItem> _itemLookupTable;
 		private int _currentIndex;
 		private Branch _currentBranch;
@@ -135,7 +135,6 @@ namespace gitter.Git.Gui.Controls
 				VScrollPos = VScrollPos,
 			};
 			return state;
-
 		}
 
 		public void SetState(State state)
@@ -166,96 +165,128 @@ namespace gitter.Git.Gui.Controls
 					}
 				}
 				var scrollPos = state.VScrollPos;
-				if(scrollPos > MaxVScrollPos) scrollPos = MaxVScrollPos;
+				if(scrollPos > MaxVScrollPos)
+				{
+					scrollPos = MaxVScrollPos;
+				}
 				VScrollBar.Value = scrollPos;
 			}
 		}
 
-		public void SetLog(RevisionLog revisionLog)
+		public RevisionLog RevisionLog
 		{
-			Verify.Argument.IsNotNull(revisionLog, "revisionLog");
-
-			if(_repository != null)
+			get { return _revisionLog; }
+			set
 			{
-				DetachFromRepository();
-			}
-
-			_repository = revisionLog.Repository;
-
-			_log = revisionLog;
-			_itemLookupTable = new Dictionary<Revision, RevisionListItem>(revisionLog.RevisionsCount);
-
-			if(_currentBranch != null)
-			{
-				_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
-				_currentBranch = null;
-			}
-
-			var head = _repository.Head.Revision;
-
-			BeginUpdate();
-			Items.Clear();
-			var graphColumn = GraphColumn;
-			if(graphColumn != null)
-			{
-				var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
-				var graph = builder.BuildGraph(revisionLog.Revisions, revisionLog.GetParents);
-
-				int graphSize = 0;
-				int currentIndex = -1;
-				RevisionListItem currentRevisionItem = null;
-				_stagedItem = null;
-				_unstagedItem = null;
-				for(int i = 0; i < revisionLog.RevisionsCount; ++i)
+				if(_repository != null)
 				{
-					var revision = revisionLog.Revisions[i];
-					var revisionListItem = new RevisionListItem(revision);
-					_itemLookupTable.Add(revision, revisionListItem);
-					if(graph[i].Length > graphSize)
-					{
-						graphSize = graph[i].Length;
-					}
-					revisionListItem.Graph = graph[i];
-					if(revisionListItem.DataContext == head)
-					{
-						currentRevisionItem = revisionListItem;
-						currentIndex = i;
-					}
-					Items.Add(revisionListItem);
+					DetachFromRepository();
 				}
-				_currentIndex = currentIndex;
-				_currentRevisionItem = currentRevisionItem;
-				graphColumn.Width = 21 * graphSize;
-				lock(_repository.Status.SyncRoot)
+
+				if(_currentBranch != null)
 				{
-					CheckNeedOfFakeItems();
-					ReinsertFakeItems(builder);
-					AttachToRepository();
+					_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
+					_currentBranch = null;
 				}
-			}
-			else
-			{
-				int currentIndex = -1;
-				RevisionListItem currentRevisionItem = null;
-				_stagedItem = null;
-				_unstagedItem = null;
-				for(int i = 0; i < revisionLog.RevisionsCount; ++i)
+
+				if(value == null)
 				{
-					var revision = revisionLog.Revisions[i];
-					var revisionListItem = new RevisionListItem(revision);
-					_itemLookupTable.Add(revision, revisionListItem);
-					if(revisionListItem.DataContext == head)
-					{
-						currentRevisionItem = revisionListItem;
-						currentIndex = i;
-					}
-					Items.Add(revisionListItem);
+					_repository = null;
+					_revisionLog = null;
+					_itemLookupTable = null;
+					_stagedItem = null;
+					_unstagedItem = null;
+					_currentIndex = -1;
+					_currentRevisionItem = null;
+					Items.Clear();
+					return;
 				}
-				_currentIndex = currentIndex;
-				_currentRevisionItem = currentRevisionItem;
+
+				var state = GetState();
+
+				_currentIndex = -1;
+				_currentRevisionItem = null;
+				_repository = value.Repository;
+				_revisionLog = value;
+				var oldLookupTable = _itemLookupTable;
+				_itemLookupTable = new Dictionary<Revision, RevisionListItem>(value.RevisionsCount);
+
+				var head = _repository.Head.Revision;
+
+				BeginUpdate();
+				Items.Clear();
+				var graphColumn = GraphColumn;
+				if(graphColumn != null)
+				{
+					var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
+					var graph   = builder.BuildGraph(value.Revisions, value.GetParents);
+
+					int graphSize = 0;
+					int currentIndex = -1;
+					RevisionListItem currentRevisionItem = null;
+					_stagedItem = null;
+					_unstagedItem = null;
+					for(int i = 0; i < value.RevisionsCount; ++i)
+					{
+						var revision = value.Revisions[i];
+						RevisionListItem revisionListItem;
+						if(oldLookupTable == null || !oldLookupTable.TryGetValue(revision, out revisionListItem))
+						{
+							revisionListItem = new RevisionListItem(revision);
+						}
+						_itemLookupTable.Add(revision, revisionListItem);
+
+						if(graph[i].Length > graphSize)
+						{
+							graphSize = graph[i].Length;
+						}
+						revisionListItem.Graph = graph[i];
+						if(revision == head)
+						{
+							currentRevisionItem = revisionListItem;
+							currentIndex = i;
+						}
+						Items.Add(revisionListItem);
+					}
+					_currentIndex = currentIndex;
+					_currentRevisionItem = currentRevisionItem;
+					graphColumn.Width = 21 * graphSize;
+					lock(value.Repository.Status.SyncRoot)
+					{
+						CheckNeedOfFakeItems();
+						ReinsertFakeItems(builder);
+						AttachToRepository();
+					}
+				}
+				else
+				{
+					int currentIndex = -1;
+					RevisionListItem currentRevisionItem = null;
+					_stagedItem = null;
+					_unstagedItem = null;
+					for(int i = 0; i < value.RevisionsCount; ++i)
+					{
+						var revision = value.Revisions[i];
+						RevisionListItem revisionListItem;
+						if(oldLookupTable == null || !oldLookupTable.TryGetValue(revision, out revisionListItem))
+						{
+							revisionListItem = new RevisionListItem(revision);
+						}
+						_itemLookupTable.Add(revision, revisionListItem);
+						if(revision == head)
+						{
+							currentRevisionItem = revisionListItem;
+							currentIndex = i;
+						}
+						Items.Add(revisionListItem);
+					}
+					_currentIndex = currentIndex;
+					_currentRevisionItem = currentRevisionItem;
+				}
+				RecomputeHeaderSizes();
+				SetState(state);
+				EndUpdate();
 			}
-			RecomputeHeaderSizes();
-			EndUpdate();
 		}
 
 		public RevisionListItem HeadItem
@@ -300,13 +331,17 @@ namespace gitter.Git.Gui.Controls
 				{
 					_stagedItem.Remove();
 					if(_currentIndex != -1)
+					{
 						--_currentIndex;
+					}
 				}
 				if(_unstagedItem != null)
 				{
 					_unstagedItem.Remove();
 					if(_currentIndex != -1)
+					{
 						--_currentIndex;
+					}
 				}
 				if(_currentRevisionItem != null)
 				{
@@ -490,7 +525,7 @@ namespace gitter.Git.Gui.Controls
 				}
 				_currentIndex = -1;
 				_itemLookupTable = null;
-				_log = null;
+				_revisionLog = null;
 				_currentRevisionItem = null;
 				_repository = null;
 				Items.Clear();
@@ -512,7 +547,7 @@ namespace gitter.Git.Gui.Controls
 					}
 					_currentIndex = -1;
 					_itemLookupTable = null;
-					_log = null;
+					_revisionLog = null;
 					_currentRevisionItem = null;
 					_repository = null;
 					Items.Clear();
@@ -521,7 +556,7 @@ namespace gitter.Git.Gui.Controls
 			base.Dispose(disposing);
 		}
 
-		#region event handlers
+		#region Event Handlers
 
 		private void OnHeadChanged(object sender, RevisionPointerChangedEventArgs e)
 		{
@@ -917,7 +952,7 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
-		#region properties
+		#region Properties
 
 		public bool HeadPresented
 		{
@@ -971,7 +1006,7 @@ namespace gitter.Git.Gui.Controls
 				int graphLen = 0;
 				if(_itemLookupTable.Count != 0)
 				{
-					var graph = builder.BuildGraph(_log.Revisions, rev => rev.Parents);
+					var graph = builder.BuildGraph(_revisionLog.Revisions, rev => rev.Parents);
 					int id = 0;
 					foreach(IRevisionGraphListItem item in Items)
 					{

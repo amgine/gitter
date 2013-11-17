@@ -24,6 +24,8 @@ namespace gitter.Git
 	using System.IO;
 	using System.Linq;
 	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Collections.Generic;
 
 	using gitter.Framework;
@@ -613,37 +615,38 @@ namespace gitter.Git
 			Refresh();
 		}
 
-		public IAsyncFunc<IList<TreeFile>> GetFilesToAddAsync(string pattern = null, bool includeUntracked = false, bool includeIgnored = false)
+		private static AddFilesParameters GetAddFilesParameters(string pattern, bool includeUntracked, bool includeIgnored)
 		{
-			return AsyncFunc.Create(
-				new
+			return new AddFilesParameters(includeUntracked ? AddFilesMode.All : AddFilesMode.Update, pattern)
+			{
+				Force = includeIgnored,
+			};
+		}
+
+		public Task<IList<TreeFile>> GetFilesToAddAsync(string pattern, bool includeUntracked, bool includeIgnored, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrLookingForFiles.AddEllipsis()));
+			}
+			var parameters = GetAddFilesParameters(pattern, includeUntracked, includeIgnored);
+			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
+			return Repository.Accessor.QueryFilesToAddAsync(parameters, progress, cancellationToken)
+				.ContinueWith(
+				t =>
 				{
-					Repository = Repository,
-					Pattern = pattern,
-					IncludeUntracked = includeUntracked,
-					IncludeIgnored = includeIgnored,
-				},
-				(data, monitor) =>
-				{
-					var repository = data.Repository;
-					IList<TreeFileData> files;
-					using(repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
-					{
-						files = repository.Accessor.QueryFilesToAdd(
-							new AddFilesParameters(data.IncludeUntracked ? AddFilesMode.All : AddFilesMode.Update, data.Pattern)
-							{
-								Force = data.IncludeIgnored,
-							});
-					}
+					block.Dispose();
+					var files = TaskUtility.UnwrapResult(t);
 					var result = new List<TreeFile>(files.Count);
 					foreach(var treeFileData in files)
 					{
-						result.Add(ObjectFactories.CreateTreeFile(repository, treeFileData));
+						result.Add(ObjectFactories.CreateTreeFile(Repository, treeFileData));
 					}
 					return (IList<TreeFile>)result;
 				},
-				Resources.StrLookingForFiles.AddEllipsis(),
-				"");
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		#endregion
@@ -756,57 +759,85 @@ namespace gitter.Git
 
 		#region clean
 
+		private static CleanFilesParameters GetCleanFilesParameters(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories, bool force = false)
+		{
+			return new CleanFilesParameters(includePattern)
+			{
+				ExcludePatterns   = new string[] { excludePattern },
+				Mode              = mode,
+				RemoveDirectories = removeDirectories,
+				Force             = force,
+			};
+		}
+
+		private IList<TreeItem> RestoreFilesToCleanList(IList<string> files)
+		{
+			Assert.IsNotNull(files);
+
+			var result = new List<TreeItem>(files.Count);
+			foreach(var item in files)
+			{
+				if(item.EndsWith("/"))
+				{
+					var name = item;
+					if(name.Length != 0)
+					{
+						name = name.Substring(0, name.Length - 1);
+					}
+					result.Add(new TreeDirectory(Repository,
+						item, null, FileStatus.Cached, name));
+				}
+				else
+				{
+					result.Add(new TreeFile(Repository,
+						item, null, FileStatus.Cached, item));
+				}
+			}
+			return result;
+		}
+
 		/// <summary>Returns a list of files which will be removed by a clean funciton.</summary>
 		/// <param name="includePattern">Files to clean.</param>
 		/// <param name="excludePattern">Files to save.</param>
 		/// <param name="mode">Clean mode.</param>
 		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
-		/// <returns>Async function to compute result.</returns>
-		public IAsyncFunc<IList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
+		/// <returns>Files that will be removed by a Clean() call.</returns>
+		public IList<TreeItem> GetFilesToClean(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
 		{
-			return AsyncFunc.Create(
-				new
+			IList<string> files;
+			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
+			using(var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
+			{
+				files = Repository.Accessor.QueryFilesToClean(parameters);
+			}
+			return RestoreFilesToCleanList(files);
+		}
+
+		/// <summary>Returns a list of files which will be removed by a clean funciton.</summary>
+		/// <param name="includePattern">Files to clean.</param>
+		/// <param name="excludePattern">Files to save.</param>
+		/// <param name="mode">Clean mode.</param>
+		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
+		/// <returns>Files that will be removed by a Clean() call.</returns>
+		public Task<IList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsLookingForFiles.AddEllipsis()));
+			}
+			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
+			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
+			return Repository.Accessor.QueryFilesToCleanAsync(parameters, progress, cancellationToken)
+				.ContinueWith(
+				t =>
 				{
-					Repository = Repository,
-					Mode = mode,
-					RemoveDirectories = removeDirectories,
-					IncludePattern = includePattern,
-					ExcludePattern = excludePattern,
+					block.Dispose();
+					var files = TaskUtility.UnwrapResult(t);
+					return RestoreFilesToCleanList(files);
 				},
-				(data, monitor) =>
-				{
-					IList<string> items;
-					using(data.Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.IndexUpdated))
-					{
-						items = data.Repository.Accessor.QueryFilesToClean(
-							new CleanFilesParameters(data.IncludePattern)
-							{
-								ExcludePatterns = new string[] { data.ExcludePattern },
-								Mode = data.Mode,
-								RemoveDirectories = data.RemoveDirectories,
-							});
-					}
-					var result = new List<TreeItem>(items.Count);
-					foreach(var item in items)
-					{
-						if(item.EndsWith("/"))
-						{
-							var name = item;
-							if(name.Length != 0) name = name.Substring(0, name.Length - 1);
-							result.Add(new TreeDirectory(data.Repository,
-								item, null, FileStatus.Cached, name));
-						}
-						else
-						{
-							result.Add(new TreeFile(data.Repository,
-								item, null, FileStatus.Cached, item));
-						}
-					}
-					return (IList<TreeItem>)result;
-				},
-				Resources.StrLookingForFiles.AddEllipsis(),
-				"");
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		/// <summary>Remove untracked and/or ignored files and (optionally) directories.</summary>
@@ -816,20 +847,14 @@ namespace gitter.Git
 		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
 		public void Clean(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
 		{
+			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories, true);
 			try
 			{
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.IndexUpdated,
 					RepositoryNotifications.WorktreeUpdated))
 				{
-					Repository.Accessor.CleanFiles(
-						new CleanFilesParameters(includePattern)
-						{
-							ExcludePatterns = new[] { excludePattern },
-							Force = true,
-							Mode = mode,
-							RemoveDirectories = removeDirectories,
-						});
+					Repository.Accessor.CleanFiles(parameters);
 				}
 			}
 			finally

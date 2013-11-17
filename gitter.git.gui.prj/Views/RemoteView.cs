@@ -22,23 +22,110 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
+	
+	using gitter.Git.Gui.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	partial class RemoteView : GitViewBase
 	{
+		private sealed class RemoteReferencesDataSource : AsyncDataBinding<RemoteReferencesCollection>
+		{
+			#region Data
+
+			private readonly Remote _remote;
+			private readonly RemoteReferencesListBox _listBox;
+			private readonly RemoteReferencesCollection _remoteReferences;
+
+			#endregion
+
+			#region .ctor
+
+			public RemoteReferencesDataSource(Remote remote, RemoteReferencesListBox listBox)
+			{
+				_remote           = remote;
+				_listBox          = listBox;
+				_remoteReferences = remote.GetReferences();
+
+				listBox.RemoteReferences = _remoteReferences;
+				Progress = listBox.ProgressMonitor;
+			}
+
+			#endregion
+
+			private RemoteReferencesListBox ListBox
+			{
+				get { return _listBox; }
+			}
+
+			protected override Task<RemoteReferencesCollection> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			{
+				ListBox.Text = string.Empty;
+				ListBox.Cursor = Cursors.WaitCursor;
+				return _remoteReferences.RefreshAsync(progress, cancellationToken)
+					.ContinueWith(
+					t =>
+					{
+						TaskUtility.PropagateFaultedStates(t);
+						return _remoteReferences;
+					},
+					cancellationToken,
+					TaskContinuationOptions.ExecuteSynchronously,
+					TaskScheduler.Default);
+			}
+
+			protected override void OnFetchCompleted(RemoteReferencesCollection data)
+			{
+				if(IsDisposed || ListBox.IsDisposed)
+				{
+					return;
+				}
+
+				ListBox.ProgressMonitor.Report(OperationProgress.Completed);
+				ListBox.Cursor = Cursors.Default;
+			}
+
+			protected override void OnFetchFailed(Exception exception)
+			{
+				if(IsDisposed || ListBox.IsDisposed)
+				{
+					return;
+				}
+
+				ListBox.ProgressMonitor.Report(OperationProgress.Completed);
+				ListBox.Text = exception.Message;
+				ListBox.RemoteReferences = null;
+				ListBox.Cursor = Cursors.Default;
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				if(disposing)
+				{
+					if(!ListBox.IsDisposed)
+					{
+						ListBox.RemoteReferences = null;
+					}
+				}
+				base.Dispose(disposing);
+			}
+		}
+
 		#region Data
 
 		private RemoteToolbar _toolbar;
 		private Remote _remote;
+		private RemoteReferencesDataSource _dataSource;
 
 		#endregion
+
+		#region .ctor
 
 		public RemoteView(IDictionary<string, object> parameters, GuiProvider gui)
 			: base(Guids.RemoteViewGuid, gui, parameters)
@@ -52,19 +139,9 @@ namespace gitter.Git.Gui.Views
 			AddTopToolStrip(_toolbar = new RemoteToolbar(this));
 		}
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
-		{
-			if(parameters != null)
-			{
-				object remote;
-				parameters.TryGetValue("Remote", out remote);
-				Remote = remote as Remote;
-			}
-			else
-			{
-				Remote = null;
-			}
-		}
+		#endregion
+
+		#region Properties
 
 		public override Image Image
 		{
@@ -96,14 +173,62 @@ namespace gitter.Git.Gui.Views
 					}
 
 					UpdateText();
-					FetchData();
+					if(value != null)
+					{
+						DataSource = new RemoteReferencesDataSource(value, _lstRemoteReferences);
+					}
+					else
+					{
+						DataSource = null;
+					}
 				}
+			}
+		}
+
+		private RemoteReferencesDataSource DataSource
+		{
+			get { return _dataSource; }
+			set
+			{
+				if(_dataSource != value)
+				{
+					if(_dataSource != null)
+					{
+						_dataSource.Dispose();
+					}
+					_dataSource = value;
+					if(_dataSource != null)
+					{
+						_dataSource.ReloadData();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Methods
+
+		public override void ApplyParameters(IDictionary<string, object> parameters)
+		{
+			if(parameters != null)
+			{
+				object remote;
+				parameters.TryGetValue("Remote", out remote);
+				Remote = remote as Remote;
+			}
+			else
+			{
+				Remote = null;
 			}
 		}
 
 		public override void RefreshContent()
 		{
-			FetchData();
+			if(DataSource != null)
+			{
+				DataSource.ReloadData();
+			}
 		}
 
 		private void DetachRemote(Remote remote)
@@ -116,59 +241,6 @@ namespace gitter.Git.Gui.Views
 		{
 			remote.Deleted += OnRemoteDeleted;
 			remote.Renamed += OnRemoteRenamed;
-		}
-
-		private void FetchData()
-		{
-			if(Remote == null)
-			{
-				_lstRemoteReferences.Load(null);
-			}
-			else
-			{
-				var action = AsyncAction.Create(
-					Remote,
-					(remote, monitor) =>
-					{
-						_lstRemoteReferences.Load(remote);
-						_lstRemoteReferences.FetchData();
-					},
-					Resources.StrFetchingDataFrom.UseAsFormat(_remote.Name),
-					string.Empty);
-				action.BeginInvoke(this, _lstRemoteReferences.ProgressMonitor, OnFethCompleted, action);
-			}
-		}
-
-		private void OnFethCompleted(IAsyncResult ar)
-		{
-			var action = (AsyncAction<Remote>)ar.AsyncState;
-			try
-			{
-				action.EndInvoke(ar);
-			}
-			catch(GitException exc)
-			{
-				if(action.Data == Remote)
-				{
-					if(!_lstRemoteReferences.IsDisposed)
-					{
-						try
-						{
-							_lstRemoteReferences.BeginInvoke(new Action<string>(
-								msg =>
-								{
-									if(!_lstRemoteReferences.IsDisposed)
-									{
-										_lstRemoteReferences.Text = msg;
-									}
-								}), exc.Message);
-						}
-						catch(ObjectDisposedException)
-						{
-						}
-					}
-				}
-			}
 		}
 
 		private void UpdateText()
@@ -227,5 +299,7 @@ namespace gitter.Git.Gui.Views
 				}
 			}
 		}
+
+		#endregion
 	}
 }

@@ -20,6 +20,7 @@
 
 namespace gitter.Git.AccessLayer.CLI
 {
+	using System.Globalization;
 	using System.Collections.Generic;
 
 	/// <summary>Download objects and refs from another repository.</summary>
@@ -52,7 +53,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static CommandArgument Depth(int depth)
 		{
-			return new CommandArgument("--depth", depth.ToString(System.Globalization.CultureInfo.InvariantCulture), '=');
+			return new CommandArgument("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
 		}
 
 		public static CommandArgument Tags()

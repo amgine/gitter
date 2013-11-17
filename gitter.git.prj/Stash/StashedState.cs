@@ -24,6 +24,7 @@ namespace gitter.Git
 	using System.Linq;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -66,11 +67,11 @@ namespace gitter.Git
 
 		#region Methods
 
-		public IAsyncAction DropAsync()
+		public Task DropAsync(IProgress<OperationProgress> progress)
 		{
 			Verify.State.IsNotDeleted(this);
 
-			return Repository.Stash.DropAsync(this);
+			return Repository.Stash.DropAsync(this, progress);
 		}
 
 		public void Drop()
@@ -80,11 +81,11 @@ namespace gitter.Git
 			Repository.Stash.Drop(this);
 		}
 
-		public IAsyncAction PopAsync(bool restoreIndex)
+		public Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress)
 		{
 			Verify.State.IsNotDeleted(this);
 
-			return Repository.Stash.PopAsync(this, restoreIndex);
+			return Repository.Stash.PopAsync(this, restoreIndex, progress);
 		}
 
 		public void Pop(bool restoreIndex)
@@ -101,11 +102,11 @@ namespace gitter.Git
 			Repository.Stash.Pop(this, false);
 		}
 
-		public IAsyncAction ApplyAsync(bool restoreIndex)
+		public void Apply()
 		{
 			Verify.State.IsNotDeleted(this);
 
-			return Repository.Stash.ApplyAsync(this, restoreIndex);
+			Repository.Stash.Apply(this, false);
 		}
 
 		public void Apply(bool restoreIndex)
@@ -115,11 +116,11 @@ namespace gitter.Git
 			Repository.Stash.Apply(this, restoreIndex);
 		}
 
-		public void Apply()
+		public Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress)
 		{
 			Verify.State.IsNotDeleted(this);
 
-			Repository.Stash.Apply(this, false);
+			return Repository.Stash.ApplyAsync(this, restoreIndex, progress);
 		}
 
 		public Branch ToBranch(string name)

@@ -21,6 +21,8 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	
@@ -30,47 +32,13 @@ namespace gitter.Git
 	
 	public abstract class LogSourceBase : ILogSource
 	{
+		protected LogSourceBase()
+		{
+		}
+
 		public abstract Repository Repository { get; }
 
-		protected abstract RevisionLog GetLogCore(LogOptions options);
-
-		public IAsyncFunc<RevisionLog> GetLogAsync()
-		{
-			return AsyncFunc.Create(
-				new LogOptions(),
-				(opt, monitor) =>
-				{
-					return GetLogCore(opt);
-				},
-				Resources.StrFetchingLog.AddEllipsis(),
-				string.Empty);
-		}
-
-		public IAsyncFunc<RevisionLog> GetLogAsync(LogOptions options)
-		{
-			Verify.Argument.IsNotNull(options, "options");
-
-			return AsyncFunc.Create(
-				options,
-				(opt, monitor) =>
-				{
-					return GetLogCore(opt);
-				},
-				Resources.StrFetchingLog.AddEllipsis(),
-				string.Empty);
-		}
-
-		public RevisionLog GetLog()
-		{
-			return GetLogCore(new LogOptions());
-		}
-
-		public RevisionLog GetLog(LogOptions options)
-		{
-			Verify.Argument.IsNotNull(options, "options");
-
-			return GetLogCore(options);
-		}
+		public abstract Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.

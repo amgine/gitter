@@ -21,7 +21,13 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Collections.Generic;
+
+	using gitter.Framework;
+
+	using Resources = gitter.Git.Properties.Resources;
 
 	public sealed class PathLogSource : LogSourceBase
 	{
@@ -77,11 +83,20 @@ namespace gitter.Git
 
 		#region Overrides
 
-		protected override RevisionLog GetLogCore(LogOptions options)
+		public override Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			if(Repository.IsEmpty)
 			{
-				return new RevisionLog(Repository, new Revision[0]);
+				var tcs = new TaskCompletionSource<RevisionLog>();
+				if(cancellationToken.IsCancellationRequested)
+				{
+					tcs.SetCanceled();
+				}
+				else
+				{
+					tcs.SetResult(new RevisionLog(Repository, new Revision[0]));
+				}
+				return tcs.Task;
 			}
 			else
 			{
@@ -89,9 +104,29 @@ namespace gitter.Git
 				parameters.References = new[] { Revision.Pointer };
 				parameters.Paths = new[] { Path };
 				parameters.Follow = FollowRenames;
-				var log = Repository.Accessor.QueryRevisions(parameters);
-				var revisions = Repository.Revisions.Resolve(log);
-				return new RevisionLog(Repository, revisions);
+
+				if(progress != null)
+				{
+					progress.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
+				}
+				return Repository.Accessor
+								 .QueryRevisionsAsync(parameters, progress, cancellationToken)
+								 .ContinueWith(
+									t =>
+									{
+										if(progress != null)
+										{
+											progress.Report(OperationProgress.Completed);
+										}
+										var revisionData = TaskUtility.UnwrapResult(t);
+										var revisions    = Repository.Revisions.Resolve(revisionData);
+										var revisionLog  = new RevisionLog(Repository, revisions);
+
+										return revisionLog;
+									},
+									cancellationToken,
+									TaskContinuationOptions.ExecuteSynchronously,
+									TaskScheduler.Default);
 			}
 		}
 
@@ -131,11 +166,11 @@ namespace gitter.Git
 		{
 			if(_revision is Revision)
 			{
-				return _path + " @ " + _revision.Pointer.Substring(0, 7);
+				return Path + " @ " + _revision.Pointer.Substring(0, 7);
 			}
 			else
 			{
-				return _path + " @ " + _revision.Pointer;
+				return Path + " @ " + _revision.Pointer;
 			}
 		}
 

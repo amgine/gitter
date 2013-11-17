@@ -40,17 +40,17 @@ namespace gitter.Git.AccessLayer.CLI
 		#region .ctor
 
 		public GitInput(IList<CommandArgument> options)
-			: this(null, null, GitProcess.DefaultEncoding, options)
+			: this(string.Empty, null, GitProcess.DefaultEncoding, options)
 		{
 		}
 
 		public GitInput(Command command)
-			: this(null, command, GitProcess.DefaultEncoding, null)
+			: this(string.Empty, command, GitProcess.DefaultEncoding, null)
 		{
 		}
 
 		public GitInput(Command command, Encoding encoding)
-			: this(null, command, encoding, null)
+			: this(string.Empty, command, encoding, null)
 		{
 		}
 
@@ -78,10 +78,10 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Verify.Argument.IsNotNull(encoding, "encoding");
 
-			_workingDirectory = workingDirectory;
-			_command = command;
-			_options = options;
-			_encoding = encoding;
+			_workingDirectory = workingDirectory ?? string.Empty;
+			_command          = command;
+			_options          = options;
+			_encoding         = encoding;
 		}
 
 		#endregion
@@ -126,12 +126,12 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				foreach(var opt in _options)
 				{
-					opt.GetArgument(sb);
+					opt.GetArgumentText(sb);
 				}
 			}
 			if(_command != null)
 			{
-				_command.GetCommand(sb);
+				_command.GetCommandText(sb);
 			}
 			return sb.ToString();
 		}

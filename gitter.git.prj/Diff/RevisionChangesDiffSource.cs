@@ -22,17 +22,23 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
 
-	using gitter.Framework.Controls;
+	using gitter.Framework;
 
 	using gitter.Git.AccessLayer;
 
 	sealed class RevisionChangesDiffSource : DiffSourceBase, IRevisionDiffSource
 	{
+		#region Data
+
 		private readonly IRevisionPointer _revision;
 		private readonly IList<string> _paths;
+
+		#endregion
+
+		#region .ctor
 
 		public RevisionChangesDiffSource(IRevisionPointer revision)
 		{
@@ -49,21 +55,27 @@ namespace gitter.Git
 			_paths = paths;
 		}
 
+		#endregion
+
+		#region Properties
+
 		public IRevisionPointer Revision
 		{
 			get { return _revision; }
 		}
-
-		#region Overrides
 
 		public override Repository Repository
 		{
 			get { return _revision.Repository; }
 		}
 
+		#endregion
+
+		#region Methods
+
 		public override int GetHashCode()
 		{
-			return _revision.GetHashCode();
+			return Revision.GetHashCode();
 		}
 
 		public override bool Equals(object obj)
@@ -74,25 +86,41 @@ namespace gitter.Git
 			return _revision == ds._revision;
 		}
 
-		protected override Diff GetDiffCore(DiffOptions options)
+		private QueryRevisionDiffParameters GetParameters(DiffOptions options)
 		{
 			var parameters = new QueryRevisionDiffParameters(_revision.Pointer)
 			{
 				Paths = _paths,
 			};
 			ApplyCommonDiffOptions(parameters, options);
-			return _revision.Repository.Accessor.QueryRevisionDiff(parameters);
+			return parameters;
+		}
+
+		protected override Diff GetDiffCore(DiffOptions options)
+		{
+			Assert.IsNotNull(options);
+
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryRevisionDiff(parameters);
+		}
+
+		protected override Task<Diff> GetDiffCoreAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Assert.IsNotNull(options);
+
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryRevisionDiffAsync(parameters, progress, cancellationToken);
 		}
 
 		public override string ToString()
 		{
-			if(_revision is Revision)
+			if(Revision is Revision)
 			{
-				return "log -p " + _revision.Pointer.Substring(0, 7);
+				return "log -p " + Revision.Pointer.Substring(0, 7);
 			}
 			else
 			{
-				return "log -p " + _revision.Pointer;
+				return "log -p " + Revision.Pointer;
 			}
 		}
 

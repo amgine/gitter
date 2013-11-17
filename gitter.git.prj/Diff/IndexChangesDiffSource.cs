@@ -22,7 +22,10 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using gitter.Git.AccessLayer;
@@ -128,15 +131,33 @@ namespace gitter.Git
 			return true;
 		}
 
-		protected override Diff GetDiffCore(DiffOptions options)
+		private QueryDiffParameters GetParameters(DiffOptions options)
 		{
+			Assert.IsNotNull(options);
+
 			var parameters = new QueryDiffParameters()
 			{
 				Cached = _cached,
 				Paths = _paths,
 			};
 			ApplyCommonDiffOptions(parameters, options);
-			return _repository.Accessor.QueryDiff(parameters);
+			return parameters;
+		}
+
+		protected override Diff GetDiffCore(DiffOptions options)
+		{
+			Assert.IsNotNull(options);
+
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryDiff(parameters);
+		}
+
+		protected override Task<Diff> GetDiffCoreAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Assert.IsNotNull(options);
+
+			var parameters = GetParameters(options);
+			return Repository.Accessor.QueryDiffAsync(parameters, progress, cancellationToken);
 		}
 
 		protected override void Dispose(bool disposing)

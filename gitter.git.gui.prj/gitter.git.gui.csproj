@@ -85,9 +85,14 @@
     <Compile Include="..\shared\Verify.cs">
       <Link>Shared\Verify.cs</Link>
     </Compile>
+    <Compile Include="Controls\BlameViewer\BlameFileBinding.cs" />
     <Compile Include="Controls\ContentContextMenuEventArgs.cs" />
     <Compile Include="Controls\ContentInvalidatedEventArgs.cs" />
+    <Compile Include="Controls\DiffViewer\DiffBinding.cs" />
     <Compile Include="Controls\DiffViewer\UntrackedFileContextMenuRequestedEventArgs.cs" />
+    <Compile Include="Controls\ListBoxes\Bindings\FilesToAddBinding.cs" />
+    <Compile Include="Controls\ListBoxes\Bindings\FilesToCleanBinding.cs" />
+    <Compile Include="Controls\ListBoxes\Bindings\RevisionLogBinding.cs" />
     <Compile Include="Controls\ListBoxes\Items\TreeCommitListItem.cs" />
     <Compile Include="Controls\ListBoxes\PointerBounds.cs" />
     <Compile Include="Controls\Menus\UsersMenu.cs">
@@ -97,6 +102,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\RevisionHeaderContent.cs" />
+    <Compile Include="GuiCommands.cs" />
+    <Compile Include="GuiCommandStatus.cs" />
     <Compile Include="Notifications.cs" />
     <Compile Include="Notifications\ReferencesChangedNotification.cs">
       <SubType>Component</SubType>
@@ -106,6 +113,9 @@
     </Compile>
     <Compile Include="TreeExtensions.cs" />
     <Compile Include="Verify.cs" />
+    <Compile Include="Views\HistoryViewBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Views\ReflogSearch.cs" />
     <Compile Include="Views\HistorySearch.cs" />
     <Compile Include="Views\ISearch.cs" />
@@ -113,9 +123,6 @@
     <Compile Include="Views\ReflogSearchOptions.cs" />
     <Compile Include="Views\PathHistoryView.cs">
       <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Views\PathHistoryView.Designer.cs">
-      <DependentUpon>PathHistoryView.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\RemoteView.cs">
       <SubType>UserControl</SubType>
@@ -594,12 +601,6 @@
       <DependentUpon>GitOptionsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="GuiItemTemplate.cs" />
-    <Compile Include="Dialogs\RemoteReferencesDialog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Dialogs\RemoteReferencesDialog.Designer.cs">
-      <DependentUpon>RemoteReferencesDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\RenameRemoteDialog.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -658,9 +659,6 @@
     </Compile>
     <Compile Include="Views\HistoryView.cs">
       <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Views\HistoryView.Designer.cs">
-      <DependentUpon>HistoryView.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\ReferencesView.cs">
       <SubType>UserControl</SubType>
@@ -812,9 +810,6 @@
     <EmbeddedResource Include="Dialogs\RemotePropertiesDialog.resx">
       <DependentUpon>RemotePropertiesDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RemoteReferencesDialog.resx">
-      <DependentUpon>RemoteReferencesDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\RemoveRemoteBranchDialog.resx">
       <DependentUpon>RemoveRemoteBranchDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -863,9 +858,6 @@
     <EmbeddedResource Include="Views\BlameView.resx">
       <DependentUpon>BlameView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\PathHistoryView.resx">
-      <DependentUpon>PathHistoryView.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Views\DiffView.resx">
       <DependentUpon>DiffView.cs</DependentUpon>
     </EmbeddedResource>
@@ -892,9 +884,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\GitView.resx">
       <DependentUpon>GitView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\HistoryView.resx">
-      <DependentUpon>HistoryView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ReferencesView.resx">
       <DependentUpon>ReferencesView.cs</DependentUpon>

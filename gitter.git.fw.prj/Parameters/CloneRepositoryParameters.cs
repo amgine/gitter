@@ -49,7 +49,5 @@ namespace gitter.Git.AccessLayer
 		public int Depth { get; set; }
 
 		public bool NoCheckout { get; set; }
-
-		public IAsyncProgressMonitor Monitor { get; set; }
 	}
 }

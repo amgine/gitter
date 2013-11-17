@@ -21,7 +21,10 @@
 namespace gitter.Git.AccessLayer
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 
+	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	/// <summary>Defines repository-independent git operations.</summary>
@@ -36,7 +39,7 @@ namespace gitter.Git.AccessLayer
 		Version GitVersion { get; }
 
 		/// <summary>Forces re-check of git version.</summary>
-		void RefreshGitVersion();
+		void InvalidateGitVersion();
 
 		/// <summary>Save parameters to the specified <paramref name="section"/>.</summary>
 		/// <param name="section">Section to store parameters.</param>
@@ -62,9 +65,19 @@ namespace gitter.Git.AccessLayer
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void InitRepository(InitRepositoryParameters parameters);
 
+		/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
+		/// <param name="parameters"><see cref="InitRepositoryParameters"/>.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task InitRepositoryAsync(InitRepositoryParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
 		/// <summary>Clone existing repository. </summary>
 		/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		void CloneRepository(CloneRepositoryParameters parameters);
+
+		/// <summary>Clone existing repository.</summary>
+		/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+		Task CloneRepositoryAsync(CloneRepositoryParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 	}
 }

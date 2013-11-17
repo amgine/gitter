@@ -110,6 +110,11 @@ namespace gitter.Git.Gui.Dialogs
 			return list;
 		}
 
+		public Repository Repository
+		{
+			get { return _repository; }
+		}
+
 		public Remote Remote
 		{
 			get { return _remotePicker.SelectedRemote; }
@@ -142,21 +147,39 @@ namespace gitter.Git.Gui.Dialogs
 		private void _txtUrl_TextChanged(object sender, EventArgs e)
 		{
 			if(_txtUrl.TextLength != 0)
+			{
 				_radUrl.Checked = true;
+			}
 		}
 
 		private void _remotePicker_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			if(_remotePicker.SelectedRemote != null)
+			{
 				_radRemote.Checked = true;
+			}
 		}
 
 		public bool Execute()
 		{
 			bool pushToRemote = _radRemote.Checked;
-			var url = _txtUrl.Text.Trim();
-			if(!pushToRemote)
+			string url = string.Empty;
+			Remote remote = null;
+			if(pushToRemote)
 			{
+				remote = _remotePicker.SelectedRemote;
+				if(remote == null)
+				{
+					NotificationService.NotifyInputError(
+						_remotePicker,
+						Resources.ErrInvalidRemoteName,
+						Resources.ErrRemoteNameCannotBeEmpty);
+					return false;
+				}
+			}
+			else
+			{
+				url = _txtUrl.Text.Trim();
 				if(url.Length == 0)
 				{
 					NotificationService.NotifyInputError(
@@ -166,7 +189,6 @@ namespace gitter.Git.Gui.Dialogs
 					return false;
 				}
 			}
-			var remote = _remotePicker.SelectedRemote;
 			var branches = GetSelectedBranches();
 			if(branches.Count == 0)
 			{
@@ -179,26 +201,17 @@ namespace gitter.Git.Gui.Dialogs
 			bool forceOverwrite = _chkForceOverwriteBranches.Checked;
 			bool thinPack = _chkUseThinPack.Checked;
 			bool sendTags = _chkSendTags.Checked;
-			try
+
+			GuiCommandStatus status;
+			if(pushToRemote)
 			{
-				if(pushToRemote)
-					remote.PushAsync(
-						branches, forceOverwrite, thinPack, sendTags).Invoke<ProgressForm>(this);
-				else
-					_repository.Remotes.PushToAsync(
-						url, branches, forceOverwrite, thinPack, sendTags).Invoke<ProgressForm>(this);
+				status = GuiCommands.Push(remote, branches, forceOverwrite, thinPack, sendTags);
 			}
-			catch(GitException exc)
+			else
 			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrPushFailed, pushToRemote ? remote.Name : url),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
+				status = GuiCommands.Push(Repository, url, branches, forceOverwrite, thinPack, sendTags);
 			}
-			return true;
+			return status == GuiCommandStatus.Completed;
 		}
 	}
 }

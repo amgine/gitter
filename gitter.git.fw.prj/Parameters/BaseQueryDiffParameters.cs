@@ -50,7 +50,19 @@ namespace gitter.Git.AccessLayer
 
 		public bool IgnoreAllSpace { get; set; }
 
+		public bool SwapInputs { get; set; }
+
 		/// <summary>Paths to query diff for.</summary>
 		public IList<string> Paths { get; set; }
+
+		public bool? EnableTextConvFilters { get; set; }
+
+		public bool? EnableExternalDiffDrivers { get; set; }
+
+		public bool TreatAllFilesAsText { get; set; }
+
+		public SimilaritySpecification? FindRenames { get; set; }
+
+		public SimilaritySpecification? FindCopies { get; set; }
 	}
 }
