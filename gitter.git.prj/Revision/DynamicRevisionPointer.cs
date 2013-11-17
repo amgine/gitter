@@ -87,7 +87,7 @@ namespace gitter.Git
 		/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
 		public Revision Dereference()
 		{
-			var rev = _repository.Accessor.Dereference(
+			var rev = _repository.Accessor.Dereference.Invoke(
 				new DereferenceParameters(_pointer));
 			lock(_repository.Revisions.SyncRoot)
 			{

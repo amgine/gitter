@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -20,40 +20,15 @@
 
 namespace gitter.Git.AccessLayer
 {
-	using System;
-	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
 
-	public sealed class RebaseParameters
+	using gitter.Framework;
+
+	public interface IGitFunction<in TParameters, TOutput>
 	{
-		public RebaseParameters(RebaseControl control)
-		{
-			Control = control;
-		}
+		TOutput Invoke(TParameters parameters);
 
-		public RebaseParameters(string onto, string branch, string target)
-		{
-			NewBase = onto;
-			Branch = branch;
-			Upstream = target;
-		}
-
-		public RebaseParameters(string branch, string target)
-		{
-			Branch = branch;
-			Upstream = target;
-		}
-
-		public RebaseParameters(string target)
-		{
-			Upstream = target;
-		}
-
-		public RebaseControl? Control { get; set; }
-
-		public string NewBase { get; set; }
-
-		public string Branch { get; set; }
-
-		public string Upstream { get; set; }
+		Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 	}
 }

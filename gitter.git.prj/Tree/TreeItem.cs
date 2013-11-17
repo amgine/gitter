@@ -157,7 +157,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.RemoveFiles(
+				Repository.Accessor.RemoveFiles.Invoke(
 					new RemoveFilesParameters(RelativePath)
 					{
 						Cached = _stagedStatus == Git.StagedStatus.Staged,
@@ -207,7 +207,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.WorktreeUpdated))
 			{
-				Repository.Accessor.CheckoutFiles(
+				Repository.Accessor.CheckoutFiles.Invoke(
 					new CheckoutFilesParameters(RelativePath)
 					{
 						Mode = CheckoutFileMode.IgnoreUnmergedEntries,

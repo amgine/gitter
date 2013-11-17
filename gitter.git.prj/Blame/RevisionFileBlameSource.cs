@@ -90,7 +90,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(options, "options");
 
 			var parameters = GetParameters(options);
-			return Repository.Accessor.QueryBlame(parameters);
+			return Repository.Accessor.QueryBlame.Invoke(parameters);
 		}
 
 		public override Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
@@ -102,7 +102,7 @@ namespace gitter.Git
 				progress.Report(new OperationProgress(Resources.StrsFetchingBlame.AddEllipsis()));
 			}
 			var parameters = GetParameters(options);
-			return Repository.Accessor.QueryBlameAsync(parameters, progress, cancellationToken)
+			return Repository.Accessor.QueryBlame.InvokeAsync(parameters, progress, cancellationToken)
 			                          .ContinueWith(
 										t =>
 										{

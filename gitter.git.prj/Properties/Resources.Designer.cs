@@ -3899,6 +3899,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fetching patch.
+        /// </summary>
+        internal static string StrsFetchingPatch {
+            get {
+                return ResourceManager.GetString("StrsFetchingPatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fetching tree.
         /// </summary>
         internal static string StrsFetchingTree {

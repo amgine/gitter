@@ -107,7 +107,7 @@ namespace gitter.Git
 		/// <summary>Updates all cached references.</summary>
 		public void Refresh()
 		{
-			var refs = Repository.Accessor.QueryReferences(
+			var refs = Repository.Accessor.QueryReferences.Invoke(
 				new QueryReferencesParameters(
 					ReferenceType.LocalBranch |
 					ReferenceType.RemoteBranch |
@@ -121,7 +121,7 @@ namespace gitter.Git
 		/// <param name="referenceTypes">Reference types to update.</param>
 		public void Refresh(ReferenceType referenceTypes)
 		{
-			var refs = Repository.Accessor.QueryReferences(
+			var refs = Repository.Accessor.QueryReferences.Invoke(
 				new QueryReferencesParameters(referenceTypes));
 			if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
 			{
@@ -143,7 +143,7 @@ namespace gitter.Git
 		/// </summary>
 		public void RefreshBranches()
 		{
-			var refs = Repository.Accessor.QueryReferences(
+			var refs = Repository.Accessor.QueryReferences.Invoke(
 				new QueryReferencesParameters(
 					ReferenceType.LocalBranch |
 					ReferenceType.RemoteBranch));
@@ -156,7 +156,7 @@ namespace gitter.Git
 		/// </summary>
 		public void RefreshTags()
 		{
-			var refs = Repository.Accessor.QueryReferences(
+			var refs = Repository.Accessor.QueryReferences.Invoke(
 				new QueryReferencesParameters(ReferenceType.Tag));
 			_tags.Refresh(refs.Tags);
 		}
@@ -186,7 +186,7 @@ namespace gitter.Git
 		/// <returns>List of unmerged branches.</returns>
 		public IList<BranchBase> GetUnmergedBranches()
 		{
-			var refs = Repository.Accessor.QueryBranches(
+			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.NoMerged));
 			var heads = refs.Heads;
 			var remotes = refs.Remotes;
@@ -219,7 +219,7 @@ namespace gitter.Git
 		/// <returns>List of merged branches.</returns>
 		public IList<BranchBase> GetMergedBranches()
 		{
-			var refs = Repository.Accessor.QueryBranches(
+			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.Merged));
 			var heads = refs.Heads;
 			var remotes = refs.Remotes;
@@ -256,7 +256,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
 
-			var refs = Repository.Accessor.QueryBranches(
+			var refs = Repository.Accessor.QueryBranches.Invoke(
 		        new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.Contains, revision.Pointer));
 			var heads = refs.Heads;
 			var remotes = refs.Remotes;

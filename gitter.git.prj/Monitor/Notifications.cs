@@ -191,7 +191,7 @@ namespace gitter.Git
 
 		public override bool Apply(Repository repository)
 		{
-			var branchInformation = repository.Accessor.QueryBranch(
+			var branchInformation = repository.Accessor.QueryBranch.Invoke(
 				new QueryBranchParameters(_name, _remote));
 			if(branchInformation == null)
 			{
@@ -301,7 +301,7 @@ namespace gitter.Git
 
 		public override bool Apply(Repository repository)
 		{
-			var tagInformation = repository.Accessor.QueryTag(
+			var tagInformation = repository.Accessor.QueryTag.Invoke(
 				new QueryTagParameters(_name));
 			if(tagInformation == null)
 			{
@@ -360,7 +360,7 @@ namespace gitter.Git
 
 		public override bool Apply(Repository repository)
 		{
-			var top = repository.Accessor.QueryStashTop(
+			var top = repository.Accessor.QueryStashTop.Invoke(
 				new QueryStashTopParameters(false));
 			if(top == null)
 			{

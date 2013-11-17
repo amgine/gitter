@@ -102,17 +102,19 @@ namespace gitter.Git.AccessLayer.CLI
 
 			var stdOutReceiver = new AsyncTextReader();
 			var stdErrReceiver = new AsyncTextReader();
-			var executor = CreateProcessExecutor();
-			return executor.ExecuteAsync(PrepareInput(command, encoding), stdOutReceiver, stdErrReceiver, cancellationToken)
-						   .ContinueWith(
-								task =>
-								{
-									int exitCode = TaskUtility.UnwrapResult(task);
-									return new GitOutput(stdOutReceiver.GetText(), stdErrReceiver.GetText(), exitCode);
-								},
-								cancellationToken,
-								TaskContinuationOptions.ExecuteSynchronously,
-								TaskScheduler.Default);
+			var input          = PrepareInput(command, encoding);
+			var executor       = CreateProcessExecutor();
+			return executor
+				.ExecuteAsync(input, stdOutReceiver, stdErrReceiver, cancellationToken)
+				.ContinueWith(
+					task =>
+					{
+						int exitCode = TaskUtility.UnwrapResult(task);
+						return new GitOutput(stdOutReceiver.GetText(), stdErrReceiver.GetText(), exitCode);
+					},
+					cancellationToken,
+					TaskContinuationOptions.ExecuteSynchronously,
+					TaskScheduler.Default);
 		}
 
 		public Task<GitOutput> ExecuteCommandAsync(Command command, CancellationToken cancellationToken)
@@ -125,7 +127,6 @@ namespace gitter.Git.AccessLayer.CLI
 		public Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(command, "command");
-			Verify.Argument.IsNotNull(encoding, "encoding");
 
 			return ExecuteCommandAsyncCore(command, encoding, cancellationToken);
 		}
@@ -140,7 +141,6 @@ namespace gitter.Git.AccessLayer.CLI
 		public Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(command, "command");
-			Verify.Argument.IsNotNull(encoding, "encoding");
 
 			return ExecuteCommandAsyncCore(command, encoding, stdOutReceiver, stdErrReceiver, cancellationToken);
 		}

@@ -72,8 +72,9 @@ namespace gitter.Git
 				{
 					progress.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
 				}
+				var parameters = options.GetLogParameters();
 				return Repository.Accessor
-								 .QueryRevisionsAsync(options.GetLogParameters(), progress, cancellationToken)
+								 .QueryRevisions.InvokeAsync(parameters, progress, cancellationToken)
 								 .ContinueWith(
 									t =>
 									{

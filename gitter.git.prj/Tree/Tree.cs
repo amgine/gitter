@@ -51,7 +51,7 @@ namespace gitter.Git
 				progress.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
 			}
 			var parameters = new QueryTreeContentParameters(treeHash, true, false);
-			return repository.Accessor.QueryTreeContentAsync(parameters, progress, cancellationToken)
+			return repository.Accessor.QueryTreeContent.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
 				t =>
 				{
@@ -166,7 +166,7 @@ namespace gitter.Git
 		public void Refresh()
 		{
 			if(Repository.IsEmpty) return;
-			var tree = Repository.Accessor.QueryTreeContent(
+			var tree = Repository.Accessor.QueryTreeContent.Invoke(
 				new QueryTreeContentParameters(_treeHash, true, false));
 			SetContent(tree);
 		}
@@ -179,7 +179,7 @@ namespace gitter.Git
 
 		public byte[] GetBlobContent(string blobPath)
 		{
-			return Repository.Accessor.QueryBlobBytes(
+			return Repository.Accessor.QueryBlobBytes.Invoke(
 				new QueryBlobBytesParameters()
 				{
 					Treeish    = TreeHash,
@@ -193,7 +193,7 @@ namespace gitter.Git
 			{
 				progress.Report(new OperationProgress(Resources.StrsFetchingBlob.AddEllipsis()));
 			}
-			return Repository.Accessor.QueryBlobBytesAsync(
+			return Repository.Accessor.QueryBlobBytes.InvokeAsync(
 				new QueryBlobBytesParameters()
 				{
 					Treeish    = TreeHash,

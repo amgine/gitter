@@ -135,7 +135,7 @@ namespace gitter.Git
 			Verify.State.IsNotDeleted(this);
 
 			var parameters = GetUpdateParameters();
-			Repository.Accessor.UpdateSubmodule(parameters);
+			Repository.Accessor.UpdateSubmodule.Invoke(parameters);
 		}
 
 		public Task UpdateAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
@@ -145,7 +145,7 @@ namespace gitter.Git
 				progress.Report(new OperationProgress(Resources.StrsUpdatingSubmodule.AddEllipsis()));
 			}
 			var parameters = GetUpdateParameters();
-			return Repository.Accessor.UpdateSubmoduleAsync(parameters, progress, cancellationToken);
+			return Repository.Accessor.UpdateSubmodule.InvokeAsync(parameters, progress, cancellationToken);
 		}
 
 		internal void UpdateInfo(string path, string url)

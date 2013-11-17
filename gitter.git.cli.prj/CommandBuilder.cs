@@ -104,6 +104,22 @@ namespace gitter.Git.AccessLayer.CLI
 				GetRevisionFormatArgument());
 		}
 
+		public Command GetQueryStashTopCommand(QueryStashTopParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			if(parameters.LoadCommitInfo)
+			{
+				return GetDereferenceByNameCommand(GitConstants.StashFullName);
+			}
+			else
+			{
+				return new ShowRefCommand(
+					ShowRefCommand.Verify(),
+					new CommandArgument(GitConstants.StashFullName));
+			}
+		}
+
 		public Command GetQueryStatusCommand(QueryStatusParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
@@ -1043,20 +1059,37 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
-			if(parameters.NoCommit)
+			if(parameters.Control.HasValue)
 			{
-				args.Add(RevertCommand.NoCommit());
+				switch(parameters.Control)
+				{
+					case RevertControl.Continue:
+						return new RevertCommand(RevertCommand.Continue());
+					case RevertControl.Quit:
+						return new RevertCommand(RevertCommand.Quit());
+					case RevertControl.Abort:
+						return new RevertCommand(RevertCommand.Abort());
+					default:
+						throw new ArgumentException("Unknown enum value.", "control");
+				}
 			}
-			if(parameters.Mainline > 0)
+			else
 			{
-				args.Add(RevertCommand.Mainline(parameters.Mainline));
+				var args = new List<CommandArgument>();
+				if(parameters.NoCommit)
+				{
+					args.Add(RevertCommand.NoCommit());
+				}
+				if(parameters.Mainline > 0)
+				{
+					args.Add(RevertCommand.Mainline(parameters.Mainline));
+				}
+				foreach(var rev in parameters.Revisions)
+				{
+					args.Add(new CommandArgument(rev));
+				}
+				return new RevertCommand(args);
 			}
-			foreach(var rev in parameters.Revisions)
-			{
-				args.Add(new CommandArgument(rev));
-			}
-			return new RevertCommand(args);
 		}
 
 		public Command GetRevertCommand(RevertControl control)
@@ -1078,40 +1111,57 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
-			if(parameters.NoCommit)
+			if(parameters.Control.HasValue)
 			{
-				args.Add(CherryPickCommand.NoCommit());
+				switch(parameters.Control.Value)
+				{
+					case CherryPickControl.Continue:
+						return new CherryPickCommand(CherryPickCommand.Continue());
+					case CherryPickControl.Quit:
+						return new CherryPickCommand(CherryPickCommand.Quit());
+					case CherryPickControl.Abort:
+						return new CherryPickCommand(CherryPickCommand.Abort());
+					default:
+						throw new ArgumentException("Unknown enum value.", "control");
+				}
 			}
-			if(parameters.Mainline > 0)
+			else
 			{
-				args.Add(CherryPickCommand.Mainline(parameters.Mainline));
+				var args = new List<CommandArgument>();
+				if(parameters.NoCommit)
+				{
+					args.Add(CherryPickCommand.NoCommit());
+				}
+				if(parameters.Mainline > 0)
+				{
+					args.Add(CherryPickCommand.Mainline(parameters.Mainline));
+				}
+				if(parameters.SignOff)
+				{
+					args.Add(CherryPickCommand.SignOff());
+				}
+				if(parameters.FastForward)
+				{
+					args.Add(CherryPickCommand.FastForward());
+				}
+				if(parameters.AllowEmpty)
+				{
+					args.Add(CherryPickCommand.AllowEmpty());
+				}
+				if(parameters.AllowEmptyMessage)
+				{
+					args.Add(CherryPickCommand.AllowEmptyMessage());
+				}
+				if(parameters.KeepRedundantCommits)
+				{
+					args.Add(CherryPickCommand.KeepRedundantCommits());
+				}
+				foreach(var rev in parameters.Revisions)
+				{
+					args.Add(new CommandArgument(rev));
+				}
+				return new CherryPickCommand(args);
 			}
-			if(parameters.SignOff)
-			{
-				args.Add(CherryPickCommand.SignOff());
-			}
-			if(parameters.FastForward)
-			{
-				args.Add(CherryPickCommand.FastForward());
-			}
-			if(parameters.AllowEmpty)
-			{
-				args.Add(CherryPickCommand.AllowEmpty());
-			}
-			if(parameters.AllowEmptyMessage)
-			{
-				args.Add(CherryPickCommand.AllowEmptyMessage());
-			}
-			if(parameters.KeepRedundantCommits)
-			{
-				args.Add(CherryPickCommand.KeepRedundantCommits());
-			}
-			foreach(var rev in parameters.Revisions)
-			{
-				args.Add(new CommandArgument(rev));
-			}
-			return new CherryPickCommand(args);
 		}
 
 		public Command GetCherryPickCommand(CherryPickControl control)
@@ -1174,17 +1224,39 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
-			if(!string.IsNullOrEmpty(parameters.NewBase))
+			if(parameters.Control.HasValue)
 			{
-				args.Add(RebaseCommand.Onto(parameters.NewBase));
+				CommandArgument arg;
+				switch(parameters.Control.Value)
+				{
+					case RebaseControl.Abort:
+						arg = RebaseCommand.Abort();
+						break;
+					case RebaseControl.Continue:
+						arg = RebaseCommand.Continue();
+						break;
+					case RebaseControl.Skip:
+						arg = RebaseCommand.Skip();
+						break;
+					default:
+						throw new ArgumentException("control");
+				}
+				return new RebaseCommand(arg);
 			}
-			args.Add(new CommandArgument(parameters.Upstream));
-			if(!string.IsNullOrEmpty(parameters.Branch))
+			else
 			{
-				args.Add(new CommandArgument(parameters.Branch));
+				var args = new List<CommandArgument>();
+				if(!string.IsNullOrEmpty(parameters.NewBase))
+				{
+					args.Add(RebaseCommand.Onto(parameters.NewBase));
+				}
+				args.Add(new CommandArgument(parameters.Upstream));
+				if(!string.IsNullOrEmpty(parameters.Branch))
+				{
+					args.Add(new CommandArgument(parameters.Branch));
+				}
+				return new RebaseCommand(args);
 			}
-			return new RebaseCommand(args);
 		}
 
 		public Command GetRebaseCommand(RebaseControl control)
@@ -1218,8 +1290,10 @@ namespace gitter.Git.AccessLayer.CLI
 				ShortLogCommand.Email());
 		}
 
-		public Command GetCountObjectsCommand()
+		public Command GetCountObjectsCommand(CountObjectsParameters parameters)
 		{
+			Assert.IsNotNull(parameters);
+
 			return new CountObjectsCommand(CountObjectsCommand.Verbose());
 		}
 

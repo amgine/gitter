@@ -83,11 +83,11 @@ namespace gitter.Git
 		{
 			if(_revision == null)
 			{
-				var rev = _repository.Accessor.Dereference(
-					new DereferenceParameters(_pointer));
-				lock(_repository.Revisions.SyncRoot)
+				var rev = Repository.Accessor.Dereference.Invoke(
+					new DereferenceParameters(Pointer));
+				lock(Repository.Revisions.SyncRoot)
 				{
-					_revision = _repository.Revisions.GetOrCreateRevision(rev.SHA1);
+					_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
 				}
 			}
 			return _revision;

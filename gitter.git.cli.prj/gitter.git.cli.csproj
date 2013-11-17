@@ -118,6 +118,7 @@
       <DependentUpon>CliOptionsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="DiffParser.cs" />
+    <Compile Include="GitCliMethod.cs" />
     <Compile Include="GitCommandExecutor.cs" />
     <Compile Include="GitConfigHelper.cs" />
     <Compile Include="GitParser.cs" />
@@ -125,6 +126,8 @@
     <Compile Include="GitCLI_config.cs" />
     <Compile Include="GitRepositoryUpdateChannel.cs" />
     <Compile Include="ICommandExecutor.cs" />
+    <Compile Include="Methods\CloneImpl.cs" />
+    <Compile Include="Methods\InitImpl.cs" />
     <Compile Include="MSysGitAccessorProvider.cs" />
     <Compile Include="MSysGitDownloader.cs" />
     <Compile Include="OutputParser.cs" />
@@ -138,11 +141,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RepositoryCLI.cs" />
     <Compile Include="RepositoryCLI_config.cs" />
     <Compile Include="RepositoryCommandExecutor.cs" />
     <Compile Include="StandardTools.cs" />
     <Compile Include="StringUtility.cs" />
+    <Compile Include="RepositoryCLI.cs" />
     <Compile Include="UTF8DefaultAnsiCodepageFallback.cs" />
   </ItemGroup>
   <ItemGroup>

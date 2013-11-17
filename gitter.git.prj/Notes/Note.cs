@@ -59,7 +59,7 @@ namespace gitter.Git
 
 		private void LoadContent()
 		{
-			_message = Repository.Accessor.QueryObjects(
+			_message = Repository.Accessor.QueryObjects.Invoke(
 				new QueryObjectsParameters(Name));
 		}
 

@@ -119,7 +119,7 @@ namespace gitter.Git
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.BranchChanged))
 				{
-					Repository.Accessor.ResetBranch(
+					Repository.Accessor.ResetBranch.Invoke(
 						new ResetBranchParameters(Name, revision.Pointer));
 				}
 				Pointer = rev;

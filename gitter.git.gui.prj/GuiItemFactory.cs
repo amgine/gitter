@@ -26,6 +26,8 @@ namespace gitter.Git.Gui
 	using System.Diagnostics;
 	using System.Collections.Generic;
 	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -376,44 +378,45 @@ namespace gitter.Git.Gui
 					fileName = dlg.FileName;
 				}
 			}
-			if(fileName != null)
+			if(fileName == null)
 			{
-				byte[] patch = null;
+				return;
+			}
+			byte[] patch = null;
+			try
+			{
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					patch = getPatch();
+				}
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					parent,
+					exc.Message,
+					Resources.ErrFailedToFormatPatch,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+			}
+			if(patch != null)
+			{
 				try
 				{
-					using(parent.ChangeCursor(Cursors.WaitCursor))
-					{
-						patch = getPatch();
-					}
+					File.WriteAllBytes(fileName, patch);
 				}
-				catch(GitException exc)
+				catch(IOException exc)
 				{
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
-						Resources.ErrFailedToFormatPatch,
+						Resources.ErrFailedToSavePatch,
 						MessageBoxButton.Close,
 						MessageBoxIcon.Error);
 				}
-				if(patch != null)
-				{
-					try
-					{
-						File.WriteAllBytes(fileName, patch);
-					}
-					catch(IOException exc)
-					{
-						GitterApplication.MessageBoxService.Show(
-							parent,
-							exc.Message,
-							Resources.ErrFailedToSavePatch,
-							MessageBoxButton.Close,
-							MessageBoxIcon.Error);
-					}
-				}
 			}
 		}
-
+	
 		private static void OnArchiveClick(object sender, EventArgs e)
 		{
 			var item     = (ToolStripItem)sender;

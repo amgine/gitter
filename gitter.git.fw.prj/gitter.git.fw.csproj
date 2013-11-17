@@ -116,6 +116,8 @@
     <Compile Include="IConfigAccessor.cs" />
     <Compile Include="IGitAccessor.cs" />
     <Compile Include="IGitAccessorProvider.cs" />
+    <Compile Include="IGitAction.cs" />
+    <Compile Include="IGitFunction.cs" />
     <Compile Include="IGitRepository.cs" />
     <Compile Include="IIndexAccessor.cs" />
     <Compile Include="INotesAccessor.cs" />
@@ -149,6 +151,7 @@
     <Compile Include="Parameters\Config\RenameConfigSectionParameters.cs" />
     <Compile Include="Parameters\Config\SetConfigValueParameters.cs" />
     <Compile Include="Parameters\Config\UnsetConfigValueParameters.cs" />
+    <Compile Include="Parameters\CountObjectsParameters.cs" />
     <Compile Include="Parameters\DereferenceParameters.cs" />
     <Compile Include="Parameters\DescribeParameters.cs" />
     <Compile Include="Parameters\FormatMergeMessageParameters.cs" />

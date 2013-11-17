@@ -32,6 +32,12 @@ namespace gitter.Git.AccessLayer
 		}
 
 		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+		public CherryPickParameters(CherryPickControl control)
+		{
+			Control = control;
+		}
+
+		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
 		/// <param name="revision">Revision to cherry-pick.</param>
 		public CherryPickParameters(string revision)
 		{
@@ -62,6 +68,8 @@ namespace gitter.Git.AccessLayer
 			Revisions = revisions;
 			NoCommit = noCommit;
 		}
+
+		public CherryPickControl? Control { get; set; }
 
 		/// <summary>Revisions to cherry-pick.</summary>
 		public IList<string> Revisions { get; set; }

@@ -1763,4 +1763,7 @@ Proceed?</value>
   <data name="StrsLookingForFiles" xml:space="preserve">
     <value>Looking for files</value>
   </data>
+  <data name="StrsFetchingPatch" xml:space="preserve">
+    <value>Fetching patch</value>
+  </data>
 </root>

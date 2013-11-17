@@ -110,7 +110,7 @@ namespace gitter.Git
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Remote"));
 			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
 
-			Repository.Accessor.AddRemote(
+			Repository.Accessor.AddRemote.Invoke(
 				new AddRemoteParameters(name, url)
 				{
 					Fetch = fetch,
@@ -146,7 +146,7 @@ namespace gitter.Git
 				RepositoryNotifications.RemoteCreated,
 				RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.RenameRemote(
+				Repository.Accessor.RenameRemote.Invoke(
 					new RenameRemoteParameters(oldName, name));
 			}
 		}
@@ -184,7 +184,7 @@ namespace gitter.Git
 				RepositoryNotifications.RemoteRemoved,
 				RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.RemoveRemote(
+				Repository.Accessor.RemoveRemote.Invoke(
 					new RemoveRemoteParameters(name));
 			}
 			RemoveObject(remote);
@@ -198,7 +198,7 @@ namespace gitter.Git
 		/// <summary>Sync information on remotes: removes non-existent, adds new, updates url.</summary>
 		public void Refresh()
 		{
-			var remotes = Repository.Accessor.QueryRemotes(
+			var remotes = Repository.Accessor.QueryRemotes.Invoke(
 				new QueryRemotesParameters());
 			lock(SyncRoot)
 			{
@@ -274,7 +274,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
-				res = Repository.Accessor.Push(
+				res = Repository.Accessor.Push.Invoke(
 					new PushParameters(url, sendTags ? PushMode.Tags : PushMode.Default, branchNames)
 					{
 						Force = forceOverwrite,

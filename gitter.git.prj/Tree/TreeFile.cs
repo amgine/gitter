@@ -106,7 +106,7 @@ namespace gitter.Git
 
 		private void UseTheirs()
 		{
-			Repository.Accessor.CheckoutFiles(
+			Repository.Accessor.CheckoutFiles.Invoke(
 				new CheckoutFilesParameters(RelativePath)
 				{
 					Mode = CheckoutFileMode.Theirs
@@ -115,7 +115,7 @@ namespace gitter.Git
 
 		private void UseOurs()
 		{
-			Repository.Accessor.CheckoutFiles(
+			Repository.Accessor.CheckoutFiles.Invoke(
 				new CheckoutFilesParameters(RelativePath)
 				{
 					Mode = CheckoutFileMode.Ours
@@ -132,7 +132,7 @@ namespace gitter.Git
 					RepositoryNotifications.IndexUpdated,
 					RepositoryNotifications.WorktreeUpdated))
 				{
-					Repository.Accessor.RunMergeTool(
+					Repository.Accessor.RunMergeTool.Invoke(
 						new RunMergeToolParameters(RelativePath)
 						{
 							Tool = mergeTool == null ? null : mergeTool.Name,
@@ -155,7 +155,7 @@ namespace gitter.Git
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.WorktreeUpdated);
 			return Repository.Accessor
-				.RunMergeToolAsync(
+				.RunMergeTool.InvokeAsync(
 					new RunMergeToolParameters(RelativePath)
 					{
 						Tool = mergeTool == null ? null : mergeTool.Name,

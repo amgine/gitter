@@ -465,7 +465,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
-				res = Repository.Accessor.Push(
+				res = Repository.Accessor.Push.Invoke(
 					new PushParameters(Name, sendTags?PushMode.Tags:PushMode.Default, names)
 					{
 						Force = forceOverwrite,
@@ -510,7 +510,7 @@ namespace gitter.Git
 				RepositoryNotifications.BranchChanged))
 			{
 				var parameters = GetPruneParameters();
-				Repository.Accessor.PruneRemote(parameters);
+				Repository.Accessor.PruneRemote.Invoke(parameters);
 			}
 			Repository.Refs.Remotes.Refresh();
 			var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
@@ -530,7 +530,7 @@ namespace gitter.Git
 			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged);
 			var parameters = GetPruneParameters();
-			return Repository.Accessor.PruneRemoteAsync(parameters, progress, cancellationToken)
+			return Repository.Accessor.PruneRemote.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
 				t =>
 				{

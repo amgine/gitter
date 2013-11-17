@@ -64,7 +64,7 @@ namespace gitter.Git
 
 		public void Load()
 		{
-			var revisionData = Repository.Accessor.QueryRevision(
+			var revisionData = Repository.Accessor.QueryRevision.Invoke(
 				new QueryRevisionParameters(Hash));
 			ObjectFactories.UpdateRevision(this, revisionData);
 		}

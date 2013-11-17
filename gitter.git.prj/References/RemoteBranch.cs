@@ -112,7 +112,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.RemoveRemoteReferences(
+				Repository.Accessor.RemoveRemoteReferences.Invoke(
 					new AccessLayer.RemoveRemoteReferencesParameters(
 						remote.Name,
 						remoteRefName));

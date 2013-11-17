@@ -31,6 +31,12 @@ namespace gitter.Git.AccessLayer
 		{
 		}
 
+		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+		public RevertParameters(RevertControl control)
+		{
+			Control = control;
+		}
+
 		/// <summary>Create <see cref="RevertParameters"/>.</summary>
 		/// <param name="revision">Revision to revert.</param>
 		public RevertParameters(string revision)
@@ -62,6 +68,8 @@ namespace gitter.Git.AccessLayer
 			Revisions = revisions;
 			NoCommit = noCommit;
 		}
+
+		public RevertControl? Control { get; set; }
 
 		/// <summary>Revisions to revert.</summary>
 		public IList<string> Revisions { get; set; }

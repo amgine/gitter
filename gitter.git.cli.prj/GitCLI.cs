@@ -21,18 +21,9 @@
 namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
-	using System.Globalization;
 	using System.IO;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
 	using gitter.Framework.Configuration;
-	using gitter.Framework.CLI;
-
-	using Resources = gitter.Git.AccessLayer.CLI.Properties.Resources;
 
 	/// <summary>Performs repository-independent git operations.</summary>
 	internal sealed partial class GitCLI : IGitAccessor
@@ -48,6 +39,9 @@ namespace gitter.Git.AccessLayer.CLI
 		private Version _gitVersion;
 		private bool _autodetectGitExePath;
 		private string _gitExePath;
+
+		private readonly IGitAction<InitRepositoryParameters> _init;
+		private readonly IGitAction<CloneRepositoryParameters> _clone;
 
 		#endregion
 
@@ -67,6 +61,9 @@ namespace gitter.Git.AccessLayer.CLI
 			_gitExePath				= string.Empty;
 
 			GitProcess.UpdateGitExePath(this);
+
+			GitCliMethod.Create(out _init,  this, CommandBuilder.GetInitCommand);
+			GitCliMethod.Create(out _clone, CommandExecutor, CommandBuilder.GetCloneCommand);
 		}
 
 		#endregion
@@ -157,6 +154,18 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
+		/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
+		public IGitAction<InitRepositoryParameters> InitRepository
+		{
+			get { return _init; }
+		}
+
+		/// <summary>Clone existing repository.</summary>
+		public IGitAction<CloneRepositoryParameters> CloneRepository
+		{
+			get { return _clone; }
+		}
+
 		#endregion
 
 		/// <summary>Forces re-check of git version.</summary>
@@ -169,7 +178,7 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <returns>git version.</returns>
 		private Version QueryVersion()
 		{
-			var gitOutput = _executor.ExecuteCommand(new Command("--version"));
+			var gitOutput = CommandExecutor.ExecuteCommand(new Command("--version"));
 			gitOutput.ThrowOnBadReturnCode();
 			var parser = new GitParser(gitOutput.Output);
 			return parser.ReadVersion();
@@ -192,133 +201,6 @@ namespace gitter.Git.AccessLayer.CLI
 				return gitOutput.ExitCode == 0;
 			}
 			return false;
-		}
-
-		/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
-		/// <param name="parameters"><see cref="InitRepositoryParameters"/>.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-		public void InitRepository(InitRepositoryParameters parameters)
-		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
-
-			var command  = CommandBuilder.GetInitCommand(parameters);
-			var executor = new RepositoryCommandExecutor(this, parameters.Path);
-			var output   = executor.ExecuteCommand(command);
-			output.ThrowOnBadReturnCode();
-		}
-
-		/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
-		/// <param name="parameters"><see cref="InitRepositoryParameters"/>.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-		public Task InitRepositoryAsync(InitRepositoryParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
-
-			var command  = CommandBuilder.GetInitCommand(parameters);
-			var executor = new RepositoryCommandExecutor(this, parameters.Path);
-			return executor
-				.ExecuteCommandAsync(command, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					TaskUtility.UnwrapResult(t).ThrowOnBadReturnCode();
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
-		}
-
-		/// <summary>Clone existing repository.</summary>
-		/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-		public void CloneRepository(CloneRepositoryParameters parameters)
-		{
-			/*
-			 * git clone [--template=<template_directory>] [-l] [-s] [--no-hardlinks]
-			 * [-q] [-n] [--bare] [--mirror] [-o <name>] [-b <name>] [-u <upload-pack>]
-			 * [--reference <repository>] [--depth <depth>] [--recursive] [--] <repository> [<directory>]
-			*/
-			Verify.Argument.IsNotNull(parameters, "parameters");
-
-			var command = CommandBuilder.GetCloneCommand(parameters, false);
-			if(!Directory.Exists(parameters.Path))
-			{
-				Directory.CreateDirectory(parameters.Path);
-			}
-			var output = _executor.ExecuteCommand(command);
-			output.ThrowOnBadReturnCode();
-		}
-
-		/// <summary>Clone existing repository.</summary>
-		/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-		public Task CloneRepositoryAsync(CloneRepositoryParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
-
-			var command = CommandBuilder.GetCloneCommand(parameters, true);
-			if(!Directory.Exists(parameters.Path))
-			{
-				Directory.CreateDirectory(parameters.Path);
-			}
-			if(progress == null)
-			{
-				progress = NullProgress.Instance;
-			}
-			progress.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
-
-			List<string> errorMessages = null;
-			var stdOutReceiver = new NullReader();
-			var stdErrReceiver = new NotifyingAsyncTextReader();
-			stdErrReceiver.TextLineReceived += (s, e) =>
-				{
-					if(!string.IsNullOrWhiteSpace(e.Text))
-					{
-						var parser = new GitParser(e.Text);
-						var operationProgress = parser.ParseProgress();
-						progress.Report(operationProgress);
-						if(operationProgress.IsIndeterminate)
-						{
-							if(!string.IsNullOrWhiteSpace(operationProgress.ActionName))
-							{
-								if(errorMessages == null)
-								{
-									errorMessages = new List<string>();
-								}
-								errorMessages.Add(operationProgress.ActionName);
-							}
-						}
-						else
-						{
-							if(errorMessages != null)
-							{
-								errorMessages.Clear();
-							}
-						}
-					}
-				};
-			return _executor.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, cancellationToken)
-							.ContinueWith(
-							t =>
-							{
-								var exitCode = TaskUtility.UnwrapResult(t);
-								if(exitCode != 0)
-								{
-									string errorMessage;
-									if(errorMessages != null && errorMessages.Count != 0)
-									{
-										errorMessage = string.Join(Environment.NewLine, errorMessages);
-									}
-									else
-									{
-										errorMessage = string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
-									}
-									throw new GitException(errorMessage);
-								}
-							},
-							cancellationToken,
-							TaskContinuationOptions.ExecuteSynchronously,
-							TaskScheduler.Default);
 		}
 
 		/// <summary>Save parameters to the specified <paramref name="section"/>.</summary>

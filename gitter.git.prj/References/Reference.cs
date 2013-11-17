@@ -138,7 +138,7 @@ namespace gitter.Git
 			/// </returns>
 			public Revision Dereference()
 			{
-				var revisionData = _reference.Repository.Accessor.Dereference(
+				var revisionData = _reference.Repository.Accessor.Dereference.Invoke(
 					new DereferenceParameters(FullName)
 					{
 						LoadRevisionData = true,

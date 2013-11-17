@@ -1676,5 +1676,31 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		#endregion
+
+		public RevisionData ParseQueryStashTopOutput(QueryStashTopParameters parameters, GitOutput output)
+		{
+			Assert.IsNotNull(parameters);
+			Assert.IsNotNull(output);
+
+			if(parameters.LoadCommitInfo)
+			{
+				return new GitParser(output.Output).ParseRevision();
+			}
+			else
+			{
+				if(output.ExitCode != 0 || output.Output.Length < 40)
+				{
+					return null;
+				}
+
+				var hash = output.Output.Substring(0, 40);
+				return new RevisionData(hash);
+			}
+		}
+
+		public string ParseObjects(GitOutput output)
+		{
+			return output.Output;
+		}
 	}
 }

@@ -65,7 +65,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated))
 			{
-				repository.Accessor.Checkout(
+				repository.Accessor.Checkout.Invoke(
 					new CheckoutParameters(pointer, force));
 			}
 
@@ -83,7 +83,7 @@ namespace gitter.Git
 			using(repository.Monitor.BlockNotifications(
 				RepositoryNotifications.WorktreeUpdated))
 			{
-				repository.Accessor.CheckoutFiles(
+				repository.Accessor.CheckoutFiles.Invoke(
 					new CheckoutFilesParameters(revision.Pointer, path)
 					{
 					});
@@ -100,7 +100,7 @@ namespace gitter.Git
 			using(repository.Monitor.BlockNotifications(
 				RepositoryNotifications.WorktreeUpdated))
 			{
-				repository.Accessor.CheckoutFiles(
+				repository.Accessor.CheckoutFiles.Invoke(
 					new CheckoutFilesParameters(revision.Pointer, paths)
 					{
 					});
@@ -130,7 +130,7 @@ namespace gitter.Git
 				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
 			try
 			{
-				repository.Accessor.CherryPick(new CherryPickParameters(list));
+				repository.Accessor.CherryPick.Invoke(new CherryPickParameters(list));
 				repository.OnUpdated();
 				repository.Head.NotifyRelogRecordAdded();
 			}
@@ -183,7 +183,7 @@ namespace gitter.Git
 					RepositoryNotifications.BranchChanged,
 					RepositoryNotifications.Checkout))
 				{
-					repository.Accessor.CherryPick(parameters);
+					repository.Accessor.CherryPick.Invoke(parameters);
 					if(cb != null)
 					{
 						cb.Refresh();
@@ -285,7 +285,7 @@ namespace gitter.Git
 				}
 				try
 				{
-					repository.Accessor.Revert(parameters);
+					repository.Accessor.Revert.Invoke(parameters);
 					if(!noCommit)
 					{
 						if(currentBranch != null)
@@ -338,7 +338,7 @@ namespace gitter.Git
 			var oldHeadRev = repository.Head.Revision;
 			try
 			{
-				repository.Accessor.Revert(
+				repository.Accessor.Revert.Invoke(
 					new RevertParameters(list, noCommit));
 				if(!noCommit)
 				{
@@ -424,7 +424,7 @@ namespace gitter.Git
 			{
 				try
 				{
-					repository.Accessor.Rebase(parameters);
+					repository.Accessor.Rebase.Invoke(parameters);
 				}
 				finally
 				{
@@ -459,7 +459,7 @@ namespace gitter.Git
 			{
 				progress.Report(new OperationProgress(Resources.StrsRebaseIsInProcess.AddEllipsis()));
 			}
-			return repository.Accessor.RebaseAsync(parameters, progress, CancellationToken.None)
+			return repository.Accessor.Rebase.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -490,7 +490,7 @@ namespace gitter.Git
 
 			var repository = revision.Repository;
 
-			var tag = repository.Accessor.Describe(
+			var tag = repository.Accessor.Describe.Invoke(
 				new DescribeParameters(revision.Pointer));
 			if(tag != null)
 			{
@@ -698,15 +698,47 @@ namespace gitter.Git
 			var repository = revision.Repository;
 			var parameters = new QueryRevisionDiffParameters(revision.Pointer)
 				{
+					EnableTextConvFilters = false,
 					Binary = true
 				};
 			if(revision.Type == ReferenceType.Stash)
 			{
-				return repository.Accessor.QueryStashPatch(parameters);
+				return repository.Accessor.QueryStashPatch.Invoke(parameters);
 			}
 			else
 			{
-				return repository.Accessor.QueryRevisionPatch(parameters);
+				return repository.Accessor.QueryRevisionPatch.Invoke(parameters);
+			};
+		}
+
+		/// <summary>Get diff for this revision.</summary>
+		/// <param name="revision">Revision to get diff for.</param>
+		/// <returns><see cref="Diff"/> for this revision.</returns>
+		/// <exception cref="T:gitter.Git.GitException">Failed to get diff.</exception>
+		public static Task<byte[]> FormatPatchAsync(this IRevisionPointer revision,
+			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+
+			var repository = revision.Repository;
+			var parameters = new QueryRevisionDiffParameters(revision.Pointer)
+				{
+					EnableTextConvFilters = false,
+					Binary = true
+				};
+			if(progress != null)
+			{
+				progress.Report(new OperationProgress(Resources.StrsFetchingPatch.AddEllipsis()));
+			}
+			if(revision.Type == ReferenceType.Stash)
+			{
+				return repository.Accessor.QueryStashPatch.InvokeAsync(parameters,
+					progress, cancellationToken);
+			}
+			else
+			{
+				return repository.Accessor.QueryRevisionPatch.InvokeAsync(parameters,
+					progress, cancellationToken);
 			};
 		}
 
@@ -742,7 +774,7 @@ namespace gitter.Git
 			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, "outputFile");
 
 			var parameters = GetArchiveParameters(revision, outputFile, path, format);
-			revision.Repository.Accessor.Archive(parameters);
+			revision.Repository.Accessor.Archive.Invoke(parameters);
 		}
 
 		public static Task ArchiveAsync(this IRevisionPointer revision, string outputFile, string path, string format, IProgress<OperationProgress> progress)
@@ -755,7 +787,8 @@ namespace gitter.Git
 			{
 				progress.Report(new OperationProgress(Resources.StrfCreatingArchiveFrom.UseAsFormat(parameters.Tree).AddEllipsis()));
 			}
-			return revision.Repository.Accessor.ArchiveAsync(parameters, progress, CancellationToken.None);
+			return revision.Repository.Accessor.Archive.InvokeAsync(
+				parameters, progress, CancellationToken.None);
 		}
 
 		#endregion

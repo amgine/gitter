@@ -78,8 +78,8 @@ namespace gitter.Git
 					}
 					else
 					{
-						var revisionData = Repository.Accessor.QueryRevision(
-							new AccessLayer.QueryRevisionParameters(sha1));
+						var revisionData = Repository.Accessor.QueryRevision.Invoke(
+							new QueryRevisionParameters(sha1));
 						revision = ObjectFactories.CreateRevision(Repository, revisionData);
 					}
 					return revision;
@@ -108,7 +108,7 @@ namespace gitter.Git
 					RevisionData revisionData = null;
 					try
 					{
-						revisionData = Repository.Accessor.QueryRevision(
+						revisionData = Repository.Accessor.QueryRevision.Invoke(
 							new QueryRevisionParameters(sha1));
 					}
 					catch(GitException)

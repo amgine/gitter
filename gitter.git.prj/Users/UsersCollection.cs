@@ -88,7 +88,7 @@ namespace gitter.Git
 
 		public void Refresh()
 		{
-			var users = Repository.Accessor.QueryUsers(
+			var users = Repository.Accessor.QueryUsers.Invoke(
 				new QueryUsersParameters());
 			lock(SyncRoot)
 			{

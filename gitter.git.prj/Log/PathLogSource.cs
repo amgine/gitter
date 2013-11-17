@@ -110,7 +110,7 @@ namespace gitter.Git
 					progress.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
 				}
 				return Repository.Accessor
-								 .QueryRevisionsAsync(parameters, progress, cancellationToken)
+								 .QueryRevisions.InvokeAsync(parameters, progress, cancellationToken)
 								 .ContinueWith(
 									t =>
 									{

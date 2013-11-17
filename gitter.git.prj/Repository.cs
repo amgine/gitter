@@ -145,7 +145,7 @@ namespace gitter.Git
 			cancellationToken.ThrowIfCancellationRequested();
 			SetProgress(progress, 1, Resources.StrLoadingReferences.AddEllipsis());
 
-			var refs = repository.Accessor.QueryReferences(
+			var refs = repository.Accessor.QueryReferences.Invoke(
 				new QueryReferencesParameters(ReferenceType.Branch | ReferenceType.Tag | ReferenceType.Stash));
 			repository.Refs.Load(refs);
 
@@ -667,7 +667,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
-			gitAccessor.InitRepository(new InitRepositoryParameters(path, template, bare));
+			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, template, bare));
 		}
 
 		public static void Init(IGitAccessor gitAccessor, string path, string template)
@@ -675,7 +675,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
-			gitAccessor.InitRepository(new InitRepositoryParameters(path, template, false));
+			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, template, false));
 		}
 
 		public static void Init(IGitAccessor gitAccessor, string path, bool bare)
@@ -683,7 +683,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
-			gitAccessor.InitRepository(new InitRepositoryParameters(path, null, bare));
+			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, null, bare));
 		}
 
 		public static void Init(IGitAccessor gitAccessor, string path)
@@ -691,7 +691,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
 
-			gitAccessor.InitRepository(new InitRepositoryParameters(path, null, false));
+			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, null, false));
 		}
 
 		#endregion
@@ -705,7 +705,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 
-			gitAccessor.CloneRepository(
+			gitAccessor.CloneRepository.Invoke(
 				new CloneRepositoryParameters()
 				{
 					Url = url,
@@ -730,7 +730,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 
-			return gitAccessor.CloneRepositoryAsync(
+			return gitAccessor.CloneRepository.InvokeAsync(
 				new CloneRepositoryParameters()
 				{
 					Url = url,
@@ -766,7 +766,7 @@ namespace gitter.Git
 			{
 				try
 				{
-					Accessor.Rebase(control);
+					Accessor.Rebase.Invoke(new RebaseParameters(control));
 				}
 				finally
 				{
@@ -816,7 +816,7 @@ namespace gitter.Git
 				RepositoryNotifications.Checkout,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-			return Accessor.RebaseAsync(control, progress, CancellationToken.None)
+			return Accessor.Rebase.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -848,7 +848,7 @@ namespace gitter.Git
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
 			var parameters = GetGarbageCollectParameters();
-			Accessor.GarbageCollect(parameters);
+			Accessor.GarbageCollect.Invoke(parameters);
 		}
 
 		/// <summary>Perform garbage collection.</summary>
@@ -861,7 +861,7 @@ namespace gitter.Git
 				progress.Report(new OperationProgress(Resources.StrOptimizingRepository.AddEllipsis()));
 			}
 			var parameters = GetGarbageCollectParameters();
-			return Accessor.GarbageCollectAsync(parameters, progress, CancellationToken.None);
+			return Accessor.GarbageCollect.InvokeAsync(parameters, progress, CancellationToken.None);
 		}
 
 		#endregion

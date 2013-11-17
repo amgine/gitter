@@ -76,7 +76,10 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public GitInput(string workingDirectory, Command command, Encoding encoding, IList<CommandArgument> options)
 		{
-			Verify.Argument.IsNotNull(encoding, "encoding");
+			if(encoding == null)
+			{
+				encoding = GitProcess.DefaultEncoding;
+			}
 
 			_workingDirectory = workingDirectory ?? string.Empty;
 			_command          = command;

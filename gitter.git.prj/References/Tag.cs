@@ -91,7 +91,7 @@ namespace gitter.Git
 					{
 						try
 						{
-							_message = Repository.Accessor.QueryTagMessage(FullName);
+							_message = Repository.Accessor.QueryTagMessage.Invoke(FullName);
 						}
 						catch
 						{

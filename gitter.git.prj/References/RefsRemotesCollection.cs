@@ -69,7 +69,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.DeleteBranch(
+				Repository.Accessor.DeleteBranch.Invoke(
 					new DeleteBranchParameters(name, true, force));
 			}
 			RemoveObject(branch);
@@ -120,7 +120,7 @@ namespace gitter.Git
 		/// <summary>Refresh remote branches.</summary>
 		public void Refresh()
 		{
-			var refs = Repository.Accessor.QueryBranches(
+			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote));
 			RefreshInternal(refs.Remotes);
 		}
@@ -149,7 +149,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
 
-			var remoteBranchData = Repository.Accessor.QueryBranch(
+			var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
 			if(remoteBranchData != null)
 			{
@@ -192,7 +192,7 @@ namespace gitter.Git
 		/// <returns>List of unmerged remote branches.</returns>
 		public IList<RemoteBranch> GetUnmerged()
 		{
-			var refs = Repository.Accessor.QueryBranches(
+			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
 			return GetRemotes(refs);
 		}
@@ -201,7 +201,7 @@ namespace gitter.Git
 		/// <returns>List of merged remote branches.</returns>
 		public IList<RemoteBranch> GetMerged()
 		{
-			var refs = Repository.Accessor.QueryBranches(
+			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Merged));
 			return GetRemotes(refs);
 		}
@@ -214,7 +214,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
 
-			var refs = Repository.Accessor.QueryBranches(
+			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
 			return GetRemotes(refs);
 		}

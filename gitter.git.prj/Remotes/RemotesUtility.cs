@@ -53,7 +53,7 @@ namespace gitter.Git
 						{
 							p.Repository = remote.Name;
 						}
-						repository.Accessor.Pull(p);
+						repository.Accessor.Pull.Invoke(p);
 					}
 					else
 					{
@@ -62,7 +62,7 @@ namespace gitter.Git
 						{
 							p.Repository = remote.Name;
 						}
-						repository.Accessor.Fetch(p);
+						repository.Accessor.Fetch.Invoke(p);
 					}
 				}
 				finally
@@ -106,7 +106,7 @@ namespace gitter.Git
 				{
 					p.Repository = remote.Name;
 				}
-				task = repository.Accessor.PullAsync(p, progress, cancellationToken);
+				task = repository.Accessor.Pull.InvokeAsync(p, progress, cancellationToken);
 			}
 			else
 			{
@@ -115,7 +115,7 @@ namespace gitter.Git
 				{
 					p.Repository = remote.Name;
 				}
-				task = repository.Accessor.FetchAsync(p, progress, cancellationToken);
+				task = repository.Accessor.Fetch.InvokeAsync(p, progress, cancellationToken);
 			}
 			return task.ContinueWith(
 				t =>
@@ -163,7 +163,7 @@ namespace gitter.Git
 		{
 			var notificationsBlock = repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged);
 			return repository.Accessor
-							 .PushAsync(parameters, progress, cancellationToken)
+							 .Push.InvokeAsync(parameters, progress, cancellationToken)
 							 .ContinueWith(task =>
 								{
 									notificationsBlock.Dispose();

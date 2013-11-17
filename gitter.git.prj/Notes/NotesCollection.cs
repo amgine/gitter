@@ -116,7 +116,7 @@ namespace gitter.Git
 
 		public void Refresh()
 		{
-			var notes = Repository.Accessor.QueryNotes(
+			var notes = Repository.Accessor.QueryNotes.Invoke(
 				new QueryNotesParameters());
 			lock(SyncRoot)
 			{
@@ -135,7 +135,7 @@ namespace gitter.Git
 
 		internal Note Add(IRevisionPointer revision, string message)
 		{
-			Repository.Accessor.AppendNote(
+			Repository.Accessor.AppendNote.Invoke(
 				new AppendNoteParameters()
 				{
 					Revision = revision.Pointer,

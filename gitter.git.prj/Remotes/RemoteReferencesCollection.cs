@@ -139,7 +139,7 @@ namespace gitter.Git
 			Verify.Argument.IsFalse(tag.IsDeleted, "tag",
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
 
-			_remote.Repository.Accessor.RemoveRemoteReferences(
+			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(
 				new RemoveRemoteReferencesParameters(_remote.Name, tag.FullName));
 
 			_remoteTags.Remove(tag.Name);
@@ -153,7 +153,7 @@ namespace gitter.Git
 			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
 
-			_remote.Repository.Accessor.RemoveRemoteReferences(
+			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(
 				new RemoveRemoteReferencesParameters(_remote.Name, branch.FullName));
 
 			_remoteBranches.Remove(branch.Name);
@@ -290,7 +290,7 @@ namespace gitter.Git
 		public void Refresh()
 		{
 			var parameters = GetQueryParameters();
-			var refs = Repository.Accessor.QueryRemoteReferences(parameters);
+			var refs = Repository.Accessor.QueryRemoteReferences.Invoke(parameters);
 			lock(SyncRoot)
 			{
 				OnFetchCompleted(refs);
@@ -305,7 +305,7 @@ namespace gitter.Git
 			}
 			var parameters = GetQueryParameters();
 			return Repository.Accessor
-				.QueryRemoteReferencesAsync(parameters, progress, cancellationToken)
+				.QueryRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
 				t =>
 				{

@@ -135,7 +135,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged))
 			{
-				Repository.Accessor.StashDrop(parameters);
+				Repository.Accessor.StashDrop.Invoke(parameters);
 			}
 			OnStashedStateDropped(stashedState);
 		}
@@ -150,7 +150,7 @@ namespace gitter.Git
 			}
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			var parameters = GetStashDropParameters(stashedState);
-			return Repository.Accessor.StashDropAsync(parameters, progress, CancellationToken.None)
+			return Repository.Accessor.StashDrop.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 					t =>
 					{
@@ -171,7 +171,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged))
 			{
-				Repository.Accessor.StashDrop(parameters);
+				Repository.Accessor.StashDrop.Invoke(parameters);
 			}
 			OnStashedStateDropped();
 		}
@@ -186,7 +186,7 @@ namespace gitter.Git
 			}
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			var parameters = GetStashDropParameters();
-			return Repository.Accessor.StashDropAsync(parameters, progress, CancellationToken.None)
+			return Repository.Accessor.StashDrop.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 					t =>
 					{
@@ -230,7 +230,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged))
 			{
-				Repository.Accessor.StashClear(parameters);
+				Repository.Accessor.StashClear.Invoke(parameters);
 			}
 			OnStashCleared();
 		}
@@ -244,7 +244,7 @@ namespace gitter.Git
 			var parameters = GetClearStashParameters();
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			return Repository.Accessor
-				.StashClearAsync(parameters, progress, CancellationToken.None)
+				.StashClear.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -351,11 +351,11 @@ namespace gitter.Git
 		/// <summary>Refresh stash content.</summary>
 		public void Refresh()
 		{
-			var top = Repository.Accessor.QueryStashTop(
+			var top = Repository.Accessor.QueryStashTop.Invoke(
 				new QueryStashTopParameters(false));
 			var stash = (top == null)?
-				new StashedStateData[0] : 
-				Repository.Accessor.QueryStash(new QueryStashParameters());
+				new StashedStateData[0] :
+				Repository.Accessor.QueryStash.Invoke(new QueryStashParameters());
 			lock(SyncRoot)
 			lock(Repository.Revisions.SyncRoot)
 			{
@@ -456,7 +456,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.StashApply(parameters);
+				Repository.Accessor.StashApply.Invoke(parameters);
 			}
 
 			Repository.Status.Refresh();
@@ -476,7 +476,7 @@ namespace gitter.Git
 				RepositoryNotifications.IndexUpdated);
 			var parameters = GetStashApplyParameters(stashedState, restoreIndex);
 			return Repository.Accessor
-				.StashApplyAsync(parameters, progress, CancellationToken.None)
+				.StashApply.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -499,7 +499,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.StashApply(parameters);
+				Repository.Accessor.StashApply.Invoke(parameters);
 			}
 
 			Repository.Status.Refresh();
@@ -519,7 +519,7 @@ namespace gitter.Git
 				RepositoryNotifications.IndexUpdated);
 			var parameters = GetStashApplyParameters(restoreIndex);
 			return Repository.Accessor
-				.StashApplyAsync(parameters, progress, CancellationToken.None)
+				.StashApply.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -591,7 +591,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
 			var parameters = GetStashPopParameters(stashedState, restoreIndex);
-			return Repository.Accessor.StashPopAsync(parameters, progress, CancellationToken.None)
+			return Repository.Accessor.StashPop.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -615,7 +615,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.StashPop(parameters);
+				Repository.Accessor.StashPop.Invoke(parameters);
 			}
 
 			OnStashPopCompleted(stashedState);
@@ -630,7 +630,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
 			var parameters = GetStashPopParameters(restoreIndex);
-			return Repository.Accessor.StashPopAsync(parameters, progress, CancellationToken.None)
+			return Repository.Accessor.StashPop.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -653,7 +653,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.StashPop(parameters);
+				Repository.Accessor.StashPop.Invoke(parameters);
 			}
 
 			OnStashPopCompleted();
@@ -674,7 +674,7 @@ namespace gitter.Git
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.StashChanged))
 			{
-				Repository.Accessor.StashToBranch(
+				Repository.Accessor.StashToBranch.Invoke(
 					new StashToBranchParameters(((IRevisionPointer)stashedState).Pointer, name));
 			}
 
@@ -716,7 +716,7 @@ namespace gitter.Git
 		{
 			if(created)
 			{
-				var stashTopData = Repository.Accessor.QueryStashTop(
+				var stashTopData = Repository.Accessor.QueryStashTop.Invoke(
 					new QueryStashTopParameters(true));
 				Revision revision;
 				lock(Repository.Revisions.SyncRoot)
@@ -759,7 +759,7 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.StashChanged))
 			{
-				created = Repository.Accessor.StashSave(parameters);
+				created = Repository.Accessor.StashSave.Invoke(parameters);
 			}
 			return OnStashSaveCompleted(created);
 		}
@@ -778,7 +778,7 @@ namespace gitter.Git
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.StashChanged);
-			return Repository.Accessor.StashSaveAsync(parameters, progress, CancellationToken.None)
+			return Repository.Accessor.StashSave.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{

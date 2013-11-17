@@ -275,16 +275,16 @@ namespace gitter.Git
 					RepositoryNotifications.IndexUpdated,
 					RepositoryNotifications.WorktreeUpdated))
 				{
-					status = Repository.Accessor.QueryStatus(parameters);
+					status = Repository.Accessor.QueryStatus.Invoke(parameters);
 				}
 			}
 			else
 			{
-				status = Repository.Accessor.QueryStatus(parameters);
+				status = Repository.Accessor.QueryStatus.Invoke(parameters);
 			}
 
-			var stagedRoot		= BreakIntoTree(status.StagedFiles,		StagedStatus.Staged);
-			var unstagedRoot	= BreakIntoTree(status.UnstagedFiles,	StagedStatus.Unstaged);
+			var stagedRoot   = BreakIntoTree(status.StagedFiles,   StagedStatus.Staged);
+			var unstagedRoot = BreakIntoTree(status.UnstagedFiles, StagedStatus.Unstaged);
 
 			bool m1, m2, m3;
 			lock(SyncRoot)
@@ -506,7 +506,7 @@ namespace gitter.Git
 					RepositoryNotifications.IndexUpdated,
 					RepositoryNotifications.WorktreeUpdated))
 				{
-					Repository.Accessor.CheckoutFiles(
+					Repository.Accessor.CheckoutFiles.Invoke(
 						new CheckoutFilesParameters(pathsList)
 						{
 							Mode = CheckoutFileMode.IgnoreUnmergedEntries,
@@ -533,7 +533,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.AddFiles(
+				Repository.Accessor.AddFiles.Invoke(
 					new AddFilesParameters(mode, item.RelativePath));
 			}
 
@@ -547,7 +547,7 @@ namespace gitter.Git
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.IndexUpdated))
 				{
-					Repository.Accessor.AddFiles(
+					Repository.Accessor.AddFiles.Invoke(
 						new AddFilesParameters(includeUntracked ? AddFilesMode.All : AddFilesMode.Update, pattern)
 						{
 							Force = includeIgnored,
@@ -584,7 +584,7 @@ namespace gitter.Git
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.IndexUpdated))
 				{
-					Repository.Accessor.AddFiles(
+					Repository.Accessor.AddFiles.Invoke(
 						new AddFilesParameters(AddFilesMode.All, patterns));
 				}
 			}
@@ -596,7 +596,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.AddFiles(
+				Repository.Accessor.AddFiles.Invoke(
 					new AddFilesParameters(AddFilesMode.All, "."));
 			}
 
@@ -608,7 +608,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
 			{
-				Repository.Accessor.AddFiles(
+				Repository.Accessor.AddFiles.Invoke(
 					new AddFilesParameters(AddFilesMode.Update, "."));
 			}
 
@@ -631,7 +631,7 @@ namespace gitter.Git
 			}
 			var parameters = GetAddFilesParameters(pattern, includeUntracked, includeIgnored);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
-			return Repository.Accessor.QueryFilesToAddAsync(parameters, progress, cancellationToken)
+			return Repository.Accessor.QueryFilesToAdd.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
 				t =>
 				{
@@ -660,12 +660,12 @@ namespace gitter.Git
 			{
 				if(!Repository.IsEmpty)
 				{
-					Repository.Accessor.ResetFiles(
+					Repository.Accessor.ResetFiles.Invoke(
 						new ResetFilesParameters("."));
 				}
 				else
 				{
-					Repository.Accessor.RemoveFiles(
+					Repository.Accessor.RemoveFiles.Invoke(
 						new RemoveFilesParameters(".")
 						{
 							Cached = true,
@@ -686,12 +686,12 @@ namespace gitter.Git
 			{
 				if(!Repository.IsEmpty)
 				{
-					Repository.Accessor.ResetFiles(
+					Repository.Accessor.ResetFiles.Invoke(
 						new ResetFilesParameters(item.RelativePath));
 				}
 				else
 				{
-					Repository.Accessor.RemoveFiles(
+					Repository.Accessor.RemoveFiles.Invoke(
 						new RemoveFilesParameters(item.RelativePath)
 						{
 							Cached = true,
@@ -713,12 +713,12 @@ namespace gitter.Git
 				{
 					if(!Repository.Head.IsEmpty)
 					{
-						Repository.Accessor.ResetFiles(
+						Repository.Accessor.ResetFiles.Invoke(
 							new ResetFilesParameters(patterns));
 					}
 					else
 					{
-						Repository.Accessor.RemoveFiles(
+						Repository.Accessor.RemoveFiles.Invoke(
 							new RemoveFilesParameters(patterns)
 							{
 								Cached = true,
@@ -745,7 +745,7 @@ namespace gitter.Git
 					RepositoryNotifications.IndexUpdated,
 					RepositoryNotifications.WorktreeUpdated))
 				{
-					Repository.Accessor.Reset(
+					Repository.Accessor.Reset.Invoke(
 						new ResetParameters(mode));
 				}
 			}
@@ -808,7 +808,7 @@ namespace gitter.Git
 			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
 			using(var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
 			{
-				files = Repository.Accessor.QueryFilesToClean(parameters);
+				files = Repository.Accessor.QueryFilesToClean.Invoke(parameters);
 			}
 			return RestoreFilesToCleanList(files);
 		}
@@ -827,7 +827,7 @@ namespace gitter.Git
 			}
 			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
-			return Repository.Accessor.QueryFilesToCleanAsync(parameters, progress, cancellationToken)
+			return Repository.Accessor.QueryFilesToClean.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
 				t =>
 				{
@@ -854,7 +854,7 @@ namespace gitter.Git
 					RepositoryNotifications.IndexUpdated,
 					RepositoryNotifications.WorktreeUpdated))
 				{
-					Repository.Accessor.CleanFiles(parameters);
+					Repository.Accessor.CleanFiles.Invoke(parameters);
 				}
 			}
 			finally
@@ -881,7 +881,7 @@ namespace gitter.Git
 			{
 				using(var patch = patchSource.PreparePatchFile())
 				{
-					Repository.Accessor.ApplyPatch(
+					Repository.Accessor.ApplyPatch.Invoke(
 						new ApplyPatchParameters()
 						{
 							Patches = new[] { patch.FileName },
@@ -919,7 +919,7 @@ namespace gitter.Git
 						{
 							fileNames[i] = files[i].FileName;
 						}
-						Repository.Accessor.ApplyPatch(
+						Repository.Accessor.ApplyPatch.Invoke(
 							new ApplyPatchParameters()
 							{
 								Patches = fileNames,
@@ -970,7 +970,7 @@ namespace gitter.Git
 				bool commitSuccess = false;
 				try
 				{
-					Repository.Accessor.Commit(
+					Repository.Accessor.Commit.Invoke(
 						new CommitParameters()
 						{
 							MessageFileName = Path.Combine(

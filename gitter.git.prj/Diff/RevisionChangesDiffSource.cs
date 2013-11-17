@@ -101,7 +101,7 @@ namespace gitter.Git
 			Assert.IsNotNull(options);
 
 			var parameters = GetParameters(options);
-			return Repository.Accessor.QueryRevisionDiff(parameters);
+			return Repository.Accessor.QueryRevisionDiff.Invoke(parameters);
 		}
 
 		protected override Task<Diff> GetDiffCoreAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
@@ -109,7 +109,7 @@ namespace gitter.Git
 			Assert.IsNotNull(options);
 
 			var parameters = GetParameters(options);
-			return Repository.Accessor.QueryRevisionDiffAsync(parameters, progress, cancellationToken);
+			return Repository.Accessor.QueryRevisionDiff.InvokeAsync(parameters, progress, cancellationToken);
 		}
 
 		public override string ToString()

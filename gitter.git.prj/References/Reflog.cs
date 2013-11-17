@@ -201,7 +201,8 @@ namespace gitter.Git
 
 		public void Refresh()
 		{
-			var reflog = Repository.Accessor.QueryReflog(new QueryReflogParameters(_reference.FullName));
+			var reflog = Repository.Accessor.QueryReflog.Invoke(
+				new QueryReflogParameters(_reference.FullName));
 			lock(SyncRoot)
 			{
 				if(reflog.Count < _reflog.Count)
@@ -227,7 +228,7 @@ namespace gitter.Git
 
 		internal void NotifyRecordAdded()
 		{
-			var data = Repository.Accessor.QueryReflog(
+			var data = Repository.Accessor.QueryReflog.Invoke(
 				new QueryReflogParameters(_reference.FullName)
 				{
 					MaxCount = 1,
