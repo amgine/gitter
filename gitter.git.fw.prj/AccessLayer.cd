@@ -1,86 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Interface Name="gitter.Git.AccessLayer.IBranchAccessor">
-    <Position X="4.25" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>IACAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAQAAIAABA=</HashCode>
-      <FileName>AccessLayer\IBranchAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="gitter.Git.AccessLayer.ITreeAccessor">
-    <Position X="11.25" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAIgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
-      <FileName>AccessLayer\ITreeAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
   <Interface Name="gitter.Git.AccessLayer.IConfigAccessor">
     <Position X="0.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AQAAAAAAAEAIAAAAAAAAAIAAAABAAAAABIAAAAAAAAA=</HashCode>
-      <FileName>AccessLayer\IConfigAccessor.cs</FileName>
+      <FileName>IConfigAccessor.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="gitter.Git.AccessLayer.IGitAccessor">
-    <Position X="0.5" Y="5.25" Width="1.5" />
-    <InheritanceLine Type="gitter.Git.AccessLayer.IConfigAccessor" FixedFromPoint="true">
-      <Path>
-        <Point X="1.25" Y="2.757" />
-        <Point X="1.25" Y="5.25" />
-      </Path>
-    </InheritanceLine>
+    <Position X="0.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EAAQAEBAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>AccessLayer\IGitAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="gitter.Git.AccessLayer.IIndexAccessor">
-    <Position X="2.5" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AACAAEAAAAQAABAAAAgAAAgAAAAAIAAAAQAAAABABAA=</HashCode>
-      <FileName>AccessLayer\IIndexAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="gitter.Git.AccessLayer.INotesAccessor">
-    <Position X="13" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAA=</HashCode>
-      <FileName>AccessLayer\INotesAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="gitter.Git.AccessLayer.IRemoteAccessor">
-    <Position X="7.75" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AACAAAAAAAFAAAAAAAEAAAAAEAAAAAAAAAIAABBAiAE=</HashCode>
-      <FileName>AccessLayer\IRemoteAccessor.cs</FileName>
+      <HashCode>EAAQAEgAAAAEAAAAAAAAAAAAkAAAAgAAAAAAAIAAAAA=</HashCode>
+      <FileName>IGitAccessor.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="gitter.Git.AccessLayer.IRepositoryAccessor">
-    <Position X="2.25" Y="4.5" Width="2" />
+    <Position X="3" Y="0.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAIDASAAAABCgACCAAAAEAAAIAAQAEQAAAAAgQEEA=</HashCode>
-      <FileName>AccessLayer\IRepositoryAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="gitter.Git.AccessLayer.IStashAccessor">
-    <Position X="9.5" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAIAAAAAAAIAAAAAACAAAAAAAgAAAABAAAIQEAAA=</HashCode>
-      <FileName>AccessLayer\IStashAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="gitter.Git.AccessLayer.ISubmoduleAccessor">
-    <Position X="14.75" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
-      <FileName>AccessLayer\ISubmoduleAccessor.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="gitter.Git.AccessLayer.ITagAccessor">
-    <Position X="6" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAIAAAAAAAAAAAAAAAABAAgAAAAAAAAAACA=</HashCode>
-      <FileName>AccessLayer\ITagAccessor.cs</FileName>
+      <HashCode>IEKgIPASAAbAJLwACCkAiAkAEAABoSgMQRawAJ5WnnE=</HashCode>
+      <FileName>IRepositoryAccessor.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Font Name="Segoe UI" Size="9" />

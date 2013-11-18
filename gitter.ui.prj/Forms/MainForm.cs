@@ -524,6 +524,7 @@ namespace gitter
 			{
 				_repository = null;
 				_repository = ProgressForm.MonitorTaskAsModalWindow(
+					this,
 					Resources.StrLoadingRepository,
 					(p, c) => _currentProvider.OpenRepositoryAsync(path, p, c));
 			}

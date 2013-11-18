@@ -21,6 +21,10 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	/// <summary>Represents a reference on remote repository.</summary>
 	public interface IRemoteReference
@@ -40,6 +44,8 @@ namespace gitter.Git
 
 		/// <summary>Remove reference from remote repository.</summary>
 		void Delete();
+
+		Task DeleteAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		bool IsDeleted { get; }
 	}

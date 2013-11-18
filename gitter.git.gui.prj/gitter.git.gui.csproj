@@ -65,7 +65,10 @@
       <Project>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</Project>
       <Name>gitter.git</Name>
     </ProjectReference>
-    <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL" />
+    <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -93,6 +96,7 @@
     <Compile Include="Controls\ListBoxes\Bindings\FilesToAddBinding.cs" />
     <Compile Include="Controls\ListBoxes\Bindings\FilesToCleanBinding.cs" />
     <Compile Include="Controls\ListBoxes\Bindings\RevisionLogBinding.cs" />
+    <Compile Include="Controls\ListBoxes\Bindings\TreeListsBinding.cs" />
     <Compile Include="Controls\ListBoxes\Items\TreeCommitListItem.cs" />
     <Compile Include="Controls\ListBoxes\PointerBounds.cs" />
     <Compile Include="Controls\Menus\UsersMenu.cs">

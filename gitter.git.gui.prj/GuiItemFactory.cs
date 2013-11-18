@@ -356,66 +356,6 @@ namespace gitter.Git.Gui
 				},
 				true);
 		}
-
-		private static void SavePatch(Control parent, string defaultFileName, Func<byte[]> getPatch)
-		{
-			Verify.Argument.IsNotNull(getPatch, "getPatch");
-
-			const string patchExt = ".patch";
-
-			string fileName = null;
-			using(var dlg = new SaveFileDialog()
-				{
-					Filter = Resources.StrPatches + "|" + patchExt,
-					FileName = defaultFileName + patchExt,
-					DefaultExt = patchExt,
-					OverwritePrompt = true,
-					Title = Resources.StrSavePatch,
-				})
-			{
-				if(dlg.ShowDialog(parent) == DialogResult.OK)
-				{
-					fileName = dlg.FileName;
-				}
-			}
-			if(fileName == null)
-			{
-				return;
-			}
-			byte[] patch = null;
-			try
-			{
-				using(parent.ChangeCursor(Cursors.WaitCursor))
-				{
-					patch = getPatch();
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToFormatPatch,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
-			if(patch != null)
-			{
-				try
-				{
-					File.WriteAllBytes(fileName, patch);
-				}
-				catch(IOException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						parent,
-						exc.Message,
-						Resources.ErrFailedToSavePatch,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-				}
-			}
-		}
 	
 		private static void OnArchiveClick(object sender, EventArgs e)
 		{
@@ -434,7 +374,7 @@ namespace gitter.Git.Gui
 			var parent     = Utility.GetParentControl(item);
 			var fileName   = revision.Dereference().Hash;
 
-			SavePatch(parent, fileName, revision.FormatPatch);
+			GuiCommands.FormatPatch(parent, revision);
 		}
 
 		private static void OnShowViewItemClick(object sender, EventArgs e)
@@ -1332,7 +1272,7 @@ namespace gitter.Git.Gui
 			var branch = data.Item1;
 			var remote = data.Item2;
 
-			GuiCommands.Push(remote, new Branch[] { branch }, false, true, false);
+			GuiCommands.Push(parent, remote, new Branch[] { branch }, false, true, false);
 		}
 
 		private static void OnCreateBranchClick(object sender, EventArgs e)
@@ -1902,9 +1842,10 @@ namespace gitter.Git.Gui
 
 		private static void OnRemoveRemoteReferenceClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item      = (ToolStripItem)sender;
 			var reference = (IRemoteReference)item.Tag;
-			var parent = Utility.GetParentControl(item);
+			var parent    = Utility.GetParentControl(item);
+
 			if(GitterApplication.MessageBoxService.Show(
 				parent,
 				Resources.AskRemoveRemoteReference,
@@ -1938,45 +1879,49 @@ namespace gitter.Git.Gui
 			var remote = (Remote)item.Tag;
 			var parent = Utility.GetParentControl(item);
 
-			GuiCommands.Prune(remote);
+			GuiCommands.Prune(parent, remote);
 		}
 
 		private static void OnFetchClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
+			var parent = Utility.GetParentControl(item);
 
-			GuiCommands.Fetch(repository);
+			GuiCommands.Fetch(parent, repository);
 		}
 
 		private static void OnPullClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item       = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
+			var parent     = Utility.GetParentControl(item);
 
-			GuiCommands.Pull(repository);
+			GuiCommands.Pull(parent, repository);
 		}
 		private static void OnFetchFromClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
-			var remote = (Remote)item.Tag;
+			var item       = (ToolStripItem)sender;
+			var remote     = (Remote)item.Tag;
 			var repository = remote.Repository;
+			var parent     = Utility.GetParentControl(item);
 
 			if(!remote.IsDeleted)
 			{
-				GuiCommands.Fetch(repository);
+				GuiCommands.Fetch(parent, repository);
 			}
 		}
 
 		private static void OnPullFromClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
-			var remote = (Remote)item.Tag;
+			var item       = (ToolStripItem)sender;
+			var remote     = (Remote)item.Tag;
 			var repository = remote.Repository;
+			var parent     = Utility.GetParentControl(item);
 
 			if(!remote.IsDeleted)
 			{
-				GuiCommands.Pull(remote);
+				GuiCommands.Pull(parent, remote);
 			}
 		}
 
@@ -2757,7 +2702,8 @@ namespace gitter.Git.Gui
 						}
 						break;
 					default:
-						ProgressForm.MonitorTaskAsModalWindow(Resources.StrRunningMergeTool, (p, c) => file.RunMergeToolAsync(tool, p, c));
+						ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRunningMergeTool,
+							(p, c) => file.RunMergeToolAsync(tool, p, c));
 						break;
 				}
 			}
@@ -3004,7 +2950,7 @@ namespace gitter.Git.Gui
 						var gitAccessor = ((IGitRepository)parameter.Repository).Accessor.GitAccessor;
 						try
 						{
-							gitAccessor.UnsetConfigValue(
+							gitAccessor.UnsetConfigValue.Invoke(
 								new UnsetConfigValueParameters()
 								{
 									ConfigFile = Git.ConfigFile.User,
@@ -3014,7 +2960,7 @@ namespace gitter.Git.Gui
 						catch { }
 						try
 						{
-							gitAccessor.UnsetConfigValue(
+							gitAccessor.UnsetConfigValue.Invoke(
 								new UnsetConfigValueParameters()
 								{
 									ConfigFile = Git.ConfigFile.System,

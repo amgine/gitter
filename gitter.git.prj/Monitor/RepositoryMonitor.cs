@@ -30,17 +30,20 @@ namespace gitter.Git
 	using gitter.Framework.Services;
 
 	/// <summary>Watches git repository and notifies about external changes.</summary>
-	public sealed class RepositoryMonitor : IDisposable
+	public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 	{
 		private const int _notificationDelayTime = 750;
 		private const int _unblockDelayTime = 750;
 
-		private readonly Repository _repository;
-		private readonly FileSystemWatcher _fswWorkDir;
-		private readonly FileSystemWatcher _fswGitDir;
 		#if TRACE_FS_EVENTS
 		private static readonly LoggingService Log = new LoggingService("Monitor");
 		#endif
+
+		#region Data
+
+		private readonly Repository _repository;
+		private FileSystemWatcher _fswWorkDir;
+		private FileSystemWatcher _fswGitDir;
 
 		private readonly List<NotificationBlock> _blockedNotifications;
 		private readonly Queue<IRepositoryChangedNotification> _pendingNotifications;
@@ -53,7 +56,10 @@ namespace gitter.Git
 		private Thread _notificationThread;
 		private Thread _delayedNotificationThread;
 		private Thread _delayedUnblockingThread;
+		private bool _isEnabled;
 		private bool _isDisposed;
+
+		#endregion
 
 		private sealed class NotificationBlock
 		{
@@ -130,6 +136,17 @@ namespace gitter.Git
 			}
 		}
 
+		private sealed class EmptyBlockToken : IDisposable
+		{
+			public EmptyBlockToken()
+			{
+			}
+
+			public void Dispose()
+			{
+			}
+		}
+
 		private enum ChangedPath
 		{
 			None,
@@ -161,63 +178,7 @@ namespace gitter.Git
 			_blockedNotifications = new List<NotificationBlock>();
 			_pendingNotifications = new Queue<IRepositoryChangedNotification>();
 			_delayedNotifications = new Queue<IRepositoryChangedNotification>();
-			_delayedUnblocks = new Queue<NotificationDelayedUnblock>();
-
-			_fswGitDir = new FileSystemWatcher(repository.GitDirectory)
-			{
-				NotifyFilter =
-					NotifyFilters.CreationTime |
-					NotifyFilters.DirectoryName |
-					NotifyFilters.FileName |
-					NotifyFilters.LastWrite,
-				IncludeSubdirectories = true,
-			};
-			_fswWorkDir = new FileSystemWatcher(repository.WorkingDirectory)
-			{
-				NotifyFilter =
-					NotifyFilters.CreationTime |
-					NotifyFilters.DirectoryName |
-					NotifyFilters.FileName |
-					NotifyFilters.LastWrite,
-				IncludeSubdirectories = true,
-			};
-
-			_fswGitDir.Deleted += OnGitDirDeleted;
-			_fswGitDir.Renamed += OnGitDirRenamed;
-
-			_fswWorkDir.Created += OnWorkDirCreated;
-			_fswWorkDir.Deleted += OnWorkDirDeleted;
-			_fswWorkDir.Renamed += OnWorkDirRenamed;
-			_fswWorkDir.Changed += OnWorkDirChanged;
-
-			_evGotNotification = new AutoResetEvent(false);
-			_evGotDelayedNotification = new AutoResetEvent(false);
-			_evGotDelayedUnblock = new AutoResetEvent(false);
-			_evExit = new ManualResetEvent(false);
-			_notificationThread =
-				new Thread(ApplyProc)
-				{
-					Name = "Repository watcher notification thread",
-					IsBackground = true,
-				};
-			_notificationThread.Start();
-			_delayedNotificationThread =
-				new Thread(DelayProc)
-				{
-					Name = "Repository watcher delayed notification thread",
-					IsBackground = true,
-				};
-			_delayedNotificationThread.Start();
-			_delayedUnblockingThread =
-				new Thread(DelayUnblockProc)
-				{
-					Name = "Repository watcher delayed unblocking thread",
-					IsBackground = true,
-				};
-			_delayedUnblockingThread.Start();
-
-			_fswGitDir.EnableRaisingEvents = true;
-			_fswWorkDir.EnableRaisingEvents = true;
+			_delayedUnblocks      = new Queue<NotificationDelayedUnblock>();
 		}
 
 		private void ApplyProc()
@@ -655,8 +616,132 @@ namespace gitter.Git
 
 		public bool IsEnabled
 		{
-			get { return _fswWorkDir.EnableRaisingEvents; }
-			set { _fswWorkDir.EnableRaisingEvents = value; }
+			get { return _isEnabled; }
+			set
+			{
+				Verify.State.IsFalse(IsDisposed, "RepositoryMonitor is disposed.");
+
+				if(_isEnabled != value)
+				{
+					if(_isEnabled)
+					{
+						Stop();
+					}
+					_isEnabled = value;
+					if(_isEnabled)
+					{
+						Start();
+					}
+				}
+			}
+		}
+
+		private void Stop()
+		{
+			_fswGitDir.EnableRaisingEvents = false;
+			_fswWorkDir.EnableRaisingEvents = false;
+
+			_evExit.Set();
+
+			_fswGitDir.Deleted -= OnGitDirDeleted;
+			_fswGitDir.Renamed -= OnGitDirRenamed;
+
+			_fswWorkDir.Created -= OnWorkDirCreated;
+			_fswWorkDir.Deleted -= OnWorkDirDeleted;
+			_fswWorkDir.Renamed -= OnWorkDirRenamed;
+			_fswWorkDir.Changed -= OnWorkDirChanged;
+
+			_fswGitDir.Dispose();
+			_fswWorkDir.Dispose();
+
+			lock(_pendingNotifications)
+			{
+				_pendingNotifications.Clear();
+			}
+			lock(_delayedNotifications)
+			{
+				_delayedNotifications.Clear();
+			}
+			lock(_delayedUnblocks)
+			{
+				_delayedUnblocks.Clear();
+			}
+
+			_notificationThread.Join();
+			_delayedNotificationThread.Join();
+			_delayedUnblockingThread.Join();
+
+			_evGotNotification.Dispose();
+			_evGotDelayedNotification.Dispose();
+			_evGotDelayedUnblock.Dispose();
+			_evExit.Dispose();
+
+			_fswGitDir = null;
+			_fswWorkDir = null;
+
+			_evGotNotification = null;
+			_evGotDelayedNotification = null;
+			_evGotDelayedUnblock = null;
+			_evExit = null;
+		}
+
+		private void Start()
+		{
+			_fswGitDir = new FileSystemWatcher(_repository.GitDirectory)
+			{
+				NotifyFilter =
+					NotifyFilters.CreationTime |
+					NotifyFilters.DirectoryName |
+					NotifyFilters.FileName |
+					NotifyFilters.LastWrite,
+				IncludeSubdirectories = true,
+			};
+			_fswWorkDir = new FileSystemWatcher(_repository.WorkingDirectory)
+			{
+				NotifyFilter =
+					NotifyFilters.CreationTime |
+					NotifyFilters.DirectoryName |
+					NotifyFilters.FileName |
+					NotifyFilters.LastWrite,
+				IncludeSubdirectories = true,
+			};
+
+			_fswGitDir.Deleted += OnGitDirDeleted;
+			_fswGitDir.Renamed += OnGitDirRenamed;
+
+			_fswWorkDir.Created += OnWorkDirCreated;
+			_fswWorkDir.Deleted += OnWorkDirDeleted;
+			_fswWorkDir.Renamed += OnWorkDirRenamed;
+			_fswWorkDir.Changed += OnWorkDirChanged;
+
+			_evGotNotification = new AutoResetEvent(false);
+			_evGotDelayedNotification = new AutoResetEvent(false);
+			_evGotDelayedUnblock = new AutoResetEvent(false);
+			_evExit = new ManualResetEvent(false);
+			_notificationThread =
+				new Thread(ApplyProc)
+				{
+					Name = "Repository watcher notification thread",
+					IsBackground = true,
+				};
+			_notificationThread.Start();
+			_delayedNotificationThread =
+				new Thread(DelayProc)
+				{
+					Name = "Repository watcher delayed notification thread",
+					IsBackground = true,
+				};
+			_delayedNotificationThread.Start();
+			_delayedUnblockingThread =
+				new Thread(DelayUnblockProc)
+				{
+					Name = "Repository watcher delayed unblocking thread",
+					IsBackground = true,
+				};
+			_delayedUnblockingThread.Start();
+
+			_fswGitDir.EnableRaisingEvents = true;
+			_fswWorkDir.EnableRaisingEvents = true;
 		}
 
 		private bool IsBlocked(object notificationType)
@@ -695,6 +780,10 @@ namespace gitter.Git
 
 		public IDisposable BlockNotifications(params object[] notifications)
 		{
+			if(IsDisposed || !IsEnabled)
+			{
+				return new EmptyBlockToken();
+			}
 			var key = new object();
 			lock(_blockedNotifications)
 			{
@@ -717,25 +806,11 @@ namespace gitter.Git
 					_delayedUnblocks.Enqueue(new NotificationDelayedUnblock(time, key, notification));
 					hadAny = true;
 				}
-				if(hadAny)
+				if(hadAny && _evGotDelayedUnblock != null)
 				{
 					_evGotDelayedUnblock.Set();
 				}
 			}
-		}
-
-		internal void Shutdown()
-		{
-			_fswWorkDir.EnableRaisingEvents = false;
-			_fswWorkDir.Dispose();
-			_fswGitDir.EnableRaisingEvents = false;
-			_fswGitDir.Dispose();
-			_evExit.Set();
-			_notificationThread.Join();
-			_delayedNotificationThread.Join();
-			_delayedUnblockingThread.Join();
-			_pendingNotifications.Clear();
-			_delayedNotifications.Clear();
 		}
 
 		#region IDisposable
@@ -750,27 +825,10 @@ namespace gitter.Git
 		{
 			if(!IsDisposed)
 			{
-				_fswWorkDir.Dispose();
-				_fswGitDir.Dispose();
-				_evExit.Set();
-				_notificationThread = null;
-				_delayedNotificationThread = null;
-				_delayedUnblockingThread = null;
-				lock(_pendingNotifications)
+				if(IsEnabled)
 				{
-					_pendingNotifications.Clear();
+					Stop();
 				}
-				lock(_delayedNotifications)
-				{
-					_delayedNotifications.Clear();
-				}
-				lock(_delayedUnblocks)
-				{
-					_delayedUnblocks.Clear();
-				}
-				_evGotNotification.Close();
-				_evGotDelayedNotification.Close();
-				_evGotDelayedUnblock.Close();
 				IsDisposed = true;
 			}
 		}

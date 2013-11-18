@@ -90,7 +90,7 @@ namespace gitter.Framework
 			}
 		}
 
-		private static void RunAsModalWithTask(Form dialog, Task task)
+		private static void RunAsModalWithTask(IWin32Window parent, Form dialog, Task task)
 		{
 			Assert.IsNotNull(task);
 
@@ -113,11 +113,11 @@ namespace gitter.Framework
 					TaskUtility.PropagateFaultedStates(t);
 				},
 				TaskScheduler.FromCurrentSynchronizationContext());
-			dialog.ShowDialog(GitterApplication.MainForm);
+			dialog.ShowDialog(parent);
 			TaskUtility.PropagateFaultedStates(task);
 		}
 
-		private static T RunAsModalWithTask<T>(Form dialog, Task<T> task)
+		private static T RunAsModalWithTask<T>(IWin32Window parent, Form dialog, Task<T> task)
 		{
 			Assert.IsNotNull(task);
 
@@ -140,11 +140,11 @@ namespace gitter.Framework
 					return TaskUtility.UnwrapResult(task);
 				},
 				TaskScheduler.FromCurrentSynchronizationContext());
-			dialog.ShowDialog(GitterApplication.MainForm);
+			dialog.ShowDialog(parent);
 			return TaskUtility.UnwrapResult(task);
 		}
 
-		public static void MonitorTaskAsModalWindow(string windowTitle, Func<IProgress<OperationProgress>, Task> func)
+		public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, Task> func)
 		{
 			Verify.Argument.IsNotNull(func, "func");
 
@@ -154,10 +154,10 @@ namespace gitter.Framework
 			};
 			dialog.SetCanCancel(false);
 			var task = func(dialog);
-			RunAsModalWithTask(dialog, task);
+			RunAsModalWithTask(parent, dialog, task);
 		}
 
-		public static void MonitorTaskAsModalWindow(string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
+		public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
 		{
 			Verify.Argument.IsNotNull(func, "func");
 
@@ -167,10 +167,10 @@ namespace gitter.Framework
 			};
 			dialog.SetCanCancel(true);
 			var task = func(dialog, dialog.CancellationToken);
-			RunAsModalWithTask(dialog, task);
+			RunAsModalWithTask(parent, dialog, task);
 		}
 
-		public static T MonitorTaskAsModalWindow<T>(string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
+		public static T MonitorTaskAsModalWindow<T>(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
 		{
 			Verify.Argument.IsNotNull(func, "func");
 
@@ -180,7 +180,7 @@ namespace gitter.Framework
 			};
 			dialog.SetCanCancel(true);
 			var task = func(dialog, dialog.CancellationToken);
-			return RunAsModalWithTask(dialog, task);
+			return RunAsModalWithTask(parent, dialog, task);
 		}
 
 		private void UpdateWin7ProgressBar()

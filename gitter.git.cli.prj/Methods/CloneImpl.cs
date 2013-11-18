@@ -60,7 +60,7 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				Directory.CreateDirectory(parameters.Path);
 			}
-			var output = _commandExecutor.ExecuteCommand(command);
+			var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 			output.ThrowOnBadReturnCode();
 		}
 
@@ -113,7 +113,7 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 			};
 			return _commandExecutor
-				.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, cancellationToken)
+				.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, CommandExecutionFlags.None, cancellationToken)
 				.ContinueWith(
 				t =>
 				{

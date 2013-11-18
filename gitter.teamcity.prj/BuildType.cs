@@ -70,7 +70,9 @@ namespace gitter.TeamCity
 		internal override void Update(XmlNode node)
 		{
 			base.Update(node);
-			Project = Context.Projects.Lookup(TeamCityUtility.LoadString(node.Attributes["projectId"]), TeamCityUtility.LoadString(node.Attributes["projectName"]));
+			Project = Context.Projects.Lookup(
+				TeamCityUtility.LoadString(node.Attributes["projectId"]),
+				TeamCityUtility.LoadString(node.Attributes["projectName"]));
 		}
 
 		public BuildTypeLocator CreateLocator()

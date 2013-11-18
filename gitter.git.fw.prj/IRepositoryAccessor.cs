@@ -192,7 +192,7 @@ namespace gitter.Git.AccessLayer
 		IGitFunction<QueryTagParameters, TagData> QueryTag { get; }
 
 		/// <summary>Query tag message.</summary>
-		IGitFunction<string, string> QueryTagMessage { get; }
+		IGitFunction<QueryTagMessageParameters, string> QueryTagMessage { get; }
 
 		/// <summary>Query tag list.</summary>
 		IGitFunction<QueryTagsParameters, IList<TagData>> QueryTags { get; }

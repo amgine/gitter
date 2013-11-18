@@ -22,6 +22,10 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	public abstract class BaseRemoteReference : IRemoteReference
 	{
@@ -60,16 +64,38 @@ namespace gitter.Git
 
 		protected abstract void DeleteCore();
 
+		protected abstract Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
 		public void Delete()
 		{
 			DeleteCore();
 			MarkAsDeleted();
 		}
 
+		public Task DeleteAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			return DeleteCoreAsync(progress, cancellationToken)
+				.ContinueWith(
+				t =>
+				{
+					if(t.IsCompleted)
+					{
+						MarkAsDeleted();
+					}
+					TaskUtility.PropagateFaultedStates(t);
+				},
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
+		}
+
 		public void MarkAsDeleted()
 		{
-			_deleted = true;
-			InvokeDeleted();
+			if(!_deleted)
+			{
+				_deleted = true;
+				InvokeDeleted();
+			}
 		}
 
 		public bool IsDeleted

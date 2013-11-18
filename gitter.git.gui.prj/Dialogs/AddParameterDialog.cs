@@ -138,7 +138,7 @@ namespace gitter.Git.Gui.Dialogs
 						var gitRepositoryProvider = _environment.GetRepositoryProvider<IGitRepositoryProvider>();
 						if(gitRepositoryProvider != null)
 						{
-							gitRepositoryProvider.GitAccessor.SetConfigValue(
+							gitRepositoryProvider.GitAccessor.SetConfigValue.Invoke(
 								new SetConfigValueParameters(name, value)
 								{
 									ConfigFile = _configFile,

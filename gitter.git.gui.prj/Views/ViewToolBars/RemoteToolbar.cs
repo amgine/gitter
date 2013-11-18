@@ -66,7 +66,7 @@ namespace gitter.Git.Gui.Views
 			var remote = _remoteView.Remote;
 			if(remote != null && !remote.IsDeleted)
 			{
-				GuiCommands.Fetch(remote);
+				GuiCommands.Fetch(_remoteView, remote);
 			}
 		}
 
@@ -75,7 +75,7 @@ namespace gitter.Git.Gui.Views
 			var remote = _remoteView.Remote;
 			if(remote != null && !remote.IsDeleted)
 			{
-				GuiCommands.Pull(remote);
+				GuiCommands.Pull(_remoteView, remote);
 			}
 		}
 
@@ -99,7 +99,7 @@ namespace gitter.Git.Gui.Views
 			var remote = _remoteView.Remote;
 			if(remote != null && !remote.IsDeleted)
 			{
-				GuiCommands.Prune(remote);
+				GuiCommands.Prune(_remoteView, remote);
 			}
 		}
 	}

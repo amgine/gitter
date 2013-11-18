@@ -679,8 +679,10 @@ namespace gitter.Git.AccessLayer.CLI
 				new CommandArgument(parameters.Revision));
 		}
 
-		public Command GetPruneNotesCommand()
+		public Command GetPruneNotesCommand(PruneNotesParameters parameters)
 		{
+			Assert.IsNotNull(parameters);
+
 			return new NotesCommand(NotesCommand.Prune());
 		}
 
@@ -1814,13 +1816,13 @@ namespace gitter.Git.AccessLayer.CLI
 				ShowRefCommand.Tags());
 		}
 
-		public Command GetQueryTagMessageCommand(string tag)
+		public Command GetQueryTagMessageCommand(QueryTagMessageParameters parameters)
 		{
-			Assert.IsNotNull(tag);
+			Assert.IsNotNull(parameters);
 
 			return new CatFileCommand(
 				new CommandArgument("tag"),
-				new CommandArgument(tag));
+				new CommandArgument(parameters.TagName));
 		}
 
 		public Command GetDescribeCommand(DescribeParameters parameters)
@@ -1982,6 +1984,105 @@ namespace gitter.Git.AccessLayer.CLI
 				args.Add(new PathCommandArgument(parameters.Path));
 			}
 			return new SubmoduleCommand(args);
+		}
+
+		#endregion
+
+		#region Config
+
+		private static void InsertConfigFileSpecifier(IList<CommandArgument> args, BaseConfigParameters parameters)
+		{
+			switch(parameters.ConfigFile)
+			{
+				case ConfigFile.Repository:
+				case ConfigFile.Other:
+					if(parameters.FileName != null)
+					{
+						args.Add(ConfigCommand.File(parameters.FileName));
+					}
+					break;
+				case ConfigFile.System:
+					args.Add(ConfigCommand.System());
+					break;
+				case ConfigFile.User:
+					args.Add(ConfigCommand.Global());
+					break;
+			}
+		}
+
+		public Command GetQueryConfigParameterCommand(QueryConfigParameterParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<CommandArgument>(2);
+			InsertConfigFileSpecifier(args, parameters);
+			args.Add(new CommandArgument(parameters.ParameterName));
+			return new ConfigCommand(args);
+		}
+
+		public Command GetQueryConfigCommand(QueryConfigParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<CommandArgument>(3);
+			args.Add(ConfigCommand.NullTerminate());
+			args.Add(ConfigCommand.List());
+			InsertConfigFileSpecifier(args, parameters);
+			return new ConfigCommand(args);
+		}
+
+		public Command GetAddConfigValueCommand(AddConfigValueParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<CommandArgument>(4);
+			InsertConfigFileSpecifier(args, parameters);
+			args.Add(ConfigCommand.Add());
+			args.Add(new CommandArgument(parameters.ParameterName));
+			args.Add(new CommandArgument(parameters.ParameterValue.SurroundWith("\"", "\"")));
+			return new ConfigCommand(args);
+		}
+
+		public Command GetSetConfigValueCommand(SetConfigValueParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<CommandArgument>(3);
+			InsertConfigFileSpecifier(args, parameters);
+			args.Add(new CommandArgument(parameters.ParameterName));
+			args.Add(new CommandArgument(parameters.ParameterValue.SurroundWith("\"", "\"")));
+			return new ConfigCommand(args);
+		}
+
+		public Command GetUnsetConfigValueCommand(UnsetConfigValueParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<CommandArgument>(3);
+			InsertConfigFileSpecifier(args, parameters);
+			args.Add(ConfigCommand.Unset());
+			args.Add(new CommandArgument(parameters.ParameterName));
+			return new ConfigCommand(args);
+		}
+
+		public Command GetRenameConfigSectionCommand(RenameConfigSectionParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<CommandArgument>(2);
+			InsertConfigFileSpecifier(args, parameters);
+			args.Add(ConfigCommand.RenameSection(parameters.OldName, parameters.NewName));
+			return new ConfigCommand(args);
+		}
+
+		public Command GetDeleteConfigSectionCommand(DeleteConfigSectionParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<CommandArgument>(2);
+			InsertConfigFileSpecifier(args, parameters);
+			args.Add(ConfigCommand.RemoveSection(parameters.SectionName));
+			return new ConfigCommand(args);
 		}
 
 		#endregion

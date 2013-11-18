@@ -2607,4 +2607,7 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrsFetchRemote" xml:space="preserve">
     <value>Fetch remote</value>
   </data>
+  <data name="StrsFailedToFetchTree" xml:space="preserve">
+    <value>Failed to fetch tree data.</value>
+  </data>
 </root>

@@ -24,13 +24,11 @@ namespace gitter.Git
 	using System.Diagnostics;
 	using System.IO;
 	using System.Net;
-	using System.Xml;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using System.Xml;
 
 	using gitter.Framework;
-
-	using gitter.Git.AccessLayer.CLI;
 
 	public sealed class MSysGitDownloader
 	{

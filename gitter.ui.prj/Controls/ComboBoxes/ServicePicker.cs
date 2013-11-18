@@ -56,6 +56,7 @@ namespace gitter.Controls
 					GitterApplication.FontManager.UIFont.Font:
 					SystemFonts.MessageBoxFont,
 			};
+			_lstServiceProviders.Size = new Size(Width, 2 + 2 + _lstServiceProviders.ItemHeight * 5);
 			_lstServiceProviders.Columns.Add(
 				new CustomListBoxColumn(0, Resources.StrName)
 				{

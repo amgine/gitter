@@ -28,22 +28,32 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class InitImpl : IGitAction<InitRepositoryParameters>
 	{
-		private readonly GitCLI _gitCLI;
+		#region Data
+
+		private readonly ICliOptionsProvider _cliOptionsProvider;
 		private readonly Func<InitRepositoryParameters, Command> _commandFactory;
 
-		public InitImpl(GitCLI gitCLI, Func<InitRepositoryParameters, Command> commandFactory)
+		#endregion
+
+		#region .ctor
+
+		public InitImpl(ICliOptionsProvider cliOptionsProvider, Func<InitRepositoryParameters, Command> commandFactory)
 		{
-			_gitCLI = gitCLI;
-			_commandFactory = commandFactory;
+			_cliOptionsProvider = cliOptionsProvider;
+			_commandFactory     = commandFactory;
 		}
+
+		#endregion
+
+		#region Methods
 
 		public void Invoke(InitRepositoryParameters parameters)
 		{
 			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var command  = _commandFactory(parameters);
-			var executor = new RepositoryCommandExecutor(_gitCLI, parameters.Path);
-			var output   = executor.ExecuteCommand(command);
+			var executor = new RepositoryCommandExecutor(_cliOptionsProvider, parameters.Path);
+			var output   = executor.ExecuteCommand(command, CommandExecutionFlags.None);
 			output.ThrowOnBadReturnCode();
 		}
 
@@ -52,9 +62,9 @@ namespace gitter.Git.AccessLayer.CLI
 			Verify.Argument.IsNotNull(parameters, "parameters");
 
 			var command  = _commandFactory(parameters);
-			var executor = new RepositoryCommandExecutor(_gitCLI, parameters.Path);
+			var executor = new RepositoryCommandExecutor(_cliOptionsProvider, parameters.Path);
 			return executor
-				.ExecuteCommandAsync(command, cancellationToken)
+				.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken)
 				.ContinueWith(
 				t =>
 				{
@@ -64,5 +74,7 @@ namespace gitter.Git.AccessLayer.CLI
 				TaskContinuationOptions.ExecuteSynchronously,
 				TaskScheduler.Default);
 		}
+
+		#endregion
 	}
 }

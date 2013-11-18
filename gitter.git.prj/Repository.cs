@@ -183,13 +183,14 @@ namespace gitter.Git
 			repository.Status.Refresh();
 
 			cancellationToken.ThrowIfCancellationRequested();
-			repository.Monitor = new RepositoryMonitor(repository);
-
-			cancellationToken.ThrowIfCancellationRequested();
 			repository.UpdateState();
 
 			cancellationToken.ThrowIfCancellationRequested();
 			repository.UpdateUserIdentity(false);
+
+			cancellationToken.ThrowIfCancellationRequested();
+			repository.Monitor = new RepositoryMonitor(repository);
+			repository.Monitor.IsEnabled = true;
 
 			cancellationToken.ThrowIfCancellationRequested();
 			SetProgress(progress, 8, Resources.StrCompleted.AddPeriod());
@@ -375,6 +376,13 @@ namespace gitter.Git
 		{
 			get { return _monitor; }
 			private set { _monitor = value; }
+		}
+
+		/// <summary>Returns repository monitor.</summary>
+		/// <value>Repository monitor.</value>
+		IRepositoryMonitor IGitRepository.Monitor
+		{
+			get { return Monitor; }
 		}
 
 		#endregion
@@ -885,7 +893,7 @@ namespace gitter.Git
 		{
 			if(Monitor != null)
 			{
-				Monitor.Shutdown();
+				Monitor.Dispose();
 			}
 			var disposable = _accessor as IDisposable;
 			if(disposable != null)

@@ -176,7 +176,7 @@ namespace gitter.Git
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.ConfigUpdated))
 				{
-					Repository.Accessor.AddConfigValue(
+					Repository.Accessor.AddConfigValue.Invoke(
 						new AddConfigValueParameters(name, value));
 				}
 				p = new ConfigParameter(Repository, ConfigFile.Repository, name, value);
@@ -234,7 +234,7 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.ConfigUpdated))
 			{
-				Repository.Accessor.UnsetConfigValue(
+				Repository.Accessor.UnsetConfigValue.Invoke(
 					new UnsetConfigValueParameters(parameter.Name));
 				Refresh(parameter);
 			}
@@ -297,7 +297,7 @@ namespace gitter.Git
 
 		public void Refresh()
 		{
-			var config = Repository.Accessor.QueryConfig(
+			var config = Repository.Accessor.QueryConfig.Invoke(
 				new QueryConfigParameters());
 
 			lock(SyncRoot)
@@ -320,7 +320,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(configParameter, "configParameter");
 
 			string name = configParameter.Name;
-			var configParameterData = Repository.Accessor.QueryConfigParameter(
+			var configParameterData = Repository.Accessor.QueryConfigParameter.Invoke(
 				new QueryConfigParameterParameters(configParameter.Name));
 			if(configParameterData == null)
 			{

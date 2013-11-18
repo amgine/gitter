@@ -37,6 +37,7 @@ namespace gitter.Framework.CLI
 		private ManualResetEvent _eof;
 		private int _offset;
 		private int _length;
+		private volatile bool _isCanceled;
 
 		#endregion
 
@@ -78,15 +79,30 @@ namespace gitter.Framework.CLI
 			Verify.Argument.IsNotNull(reader, "reader");
 			Verify.State.IsFalse(IsInitialized);
 
-			_stream			= reader.BaseStream;
-			_eof			= new ManualResetEvent(false);
-			_offset			= 0;
-			_length			= 0;
+			_stream = reader.BaseStream;
+			_eof    = new ManualResetEvent(false);
+			_offset = 0;
+			_length = 0;
 
 			_bufferChain.Clear();
 			_bufferChain.AddLast(new byte[_bufferSize]);
 
 			BeginReadAsync();
+		}
+
+		/// <summary>Notifies receiver that output is no longer required.</summary>
+		/// <remarks>Reader should still receive bytes, but disable any stream processing.</remarks>
+		public void NotifyCanceled()
+		{
+			Verify.State.IsTrue(IsInitialized);
+
+			_isCanceled = true;
+			var eof = _eof;
+			if(eof != null)
+			{
+				_eof = null;
+				eof.Dispose();
+			}
 		}
 
 		/// <summary>Closes the reader.</summary>
@@ -161,25 +177,92 @@ namespace gitter.Framework.CLI
 			}
 			if(bytesCount != 0)
 			{
-				_offset += bytesCount;
-				_length += bytesCount;
-				if(_offset >= _bufferSize)
+				if(!_isCanceled)
 				{
-					_offset = 0;
-					_bufferChain.AddLast(new byte[_bufferSize]);
+					_offset += bytesCount;
+					_length += bytesCount;
+					if(_offset >= _bufferSize)
+					{
+						_offset = 0;
+						_bufferChain.AddLast(new byte[_bufferSize]);
+					}
 				}
 				BeginReadAsync();
 			}
 			else
 			{
-				_eof.Set();
+				if(_isCanceled)
+				{
+					return;
+				}
+				var eof = (EventWaitHandle)ar.AsyncState;
+				if(eof != null)
+				{
+					try
+					{
+						eof.Set();
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
 			}
 		}
 
 		private void BeginReadAsync()
 		{
-			var buffer = _bufferChain.Last.Value;
-			_stream.BeginRead(buffer, _offset, buffer.Length - _offset, OnStreamRead, null);
+			if(_isCanceled)
+			{
+				while(_bufferChain.Count > 1)
+				{
+					_bufferChain.RemoveLast();
+				}
+				if(_bufferChain.Count == 0)
+				{
+					_bufferChain.AddLast(new byte[_bufferSize]);
+				}
+				var buffer = _bufferChain.Last.Value;
+				try
+				{
+					_stream.BeginRead(buffer, 0, buffer.Length, OnStreamRead, null);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
+			{
+				bool isReading;
+				var eof = _eof;
+				var buffer = _bufferChain.Last.Value;
+				try
+				{
+					_stream.BeginRead(buffer, _offset, buffer.Length - _offset, OnStreamRead, eof);
+					isReading = true;
+				}
+				catch(IOException)
+				{
+					isReading = false;
+				}
+				catch(ObjectDisposedException)
+				{
+					isReading = false;
+				}
+				if(!isReading)
+				{
+					if(eof != null)
+					{
+						try
+						{
+							eof.Set();
+						}
+						catch(ObjectDisposedException)
+						{
+						}
+					}
+				}
+
+			}
 		}
 
 		#endregion

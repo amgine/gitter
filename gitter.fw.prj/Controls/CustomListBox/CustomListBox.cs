@@ -703,10 +703,10 @@ namespace gitter.Framework.Controls
 			InvalidateColumnContent(id);
 		}
 
-		protected int ItemHeight
+		public int ItemHeight
 		{
 			get { return _itemHeight; }
-			set
+			protected set
 			{
 				Verify.Argument.IsPositive(value, "value");
 

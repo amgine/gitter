@@ -21,6 +21,10 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	/// <summary>Represents a branch on remote repository (not a remote tracking branch).</summary>
 	public sealed class RemoteRepositoryBranch: BaseRemoteReference
@@ -30,14 +34,19 @@ namespace gitter.Git
 		{
 		}
 
+		public override ReferenceType ReferenceType
+		{
+			get { return ReferenceType.LocalBranch; }
+		}
+
 		protected override void DeleteCore()
 		{
 			References.RemoveBranch(this);
 		}
 
-		public override ReferenceType ReferenceType
+		protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			get { return ReferenceType.LocalBranch; }
+			return References.RemoveBranchAsync(this, progress, cancellationToken);
 		}
 	}
 }

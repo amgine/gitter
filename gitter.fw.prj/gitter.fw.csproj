@@ -53,7 +53,8 @@
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NHunspell">
+    <Reference Include="NHunspell, Version=1.1.1.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>Hunspell\NHunspell.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -109,6 +110,7 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
+    <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GuiCommand.cs" />
     <Compile Include="IProgress.cs" />
     <Compile Include="Native\AnimationFlags.cs" />

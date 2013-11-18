@@ -133,18 +133,45 @@ namespace gitter.Git
 
 		#region Methods
 
+		private RemoveRemoteReferencesParameters GetRemoveRemoteReferenceParameters(BaseRemoteReference remoteReference)
+		{
+			return new RemoveRemoteReferencesParameters(_remote.Name, remoteReference.FullName);
+		}
+
 		internal void RemoveTag(RemoteRepositoryTag tag)
 		{
 			Verify.Argument.IsNotNull(tag, "tag");
 			Verify.Argument.IsFalse(tag.IsDeleted, "tag",
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
 
-			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(
-				new RemoveRemoteReferencesParameters(_remote.Name, tag.FullName));
+			var parameters = GetRemoveRemoteReferenceParameters(tag);
+			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
 
 			_remoteTags.Remove(tag.Name);
 			tag.MarkAsDeleted();
 			InvokeTagDeleted(tag);
+		}
+
+		internal Task RemoveTagAsync(RemoteRepositoryTag tag, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Verify.Argument.IsNotNull(tag, "tag");
+			Verify.Argument.IsFalse(tag.IsDeleted, "tag",
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
+
+			var parameters = GetRemoveRemoteReferenceParameters(tag);
+			return _remote.Repository.Accessor
+				.RemoveRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
+				.ContinueWith(
+				t =>
+				{
+					TaskUtility.PropagateFaultedStates(t);
+					_remoteTags.Remove(tag.Name);
+					tag.MarkAsDeleted();
+					InvokeTagDeleted(tag);
+				},
+				cancellationToken,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		internal void RemoveBranch(RemoteRepositoryBranch branch)
@@ -153,12 +180,34 @@ namespace gitter.Git
 			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
 
-			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(
-				new RemoveRemoteReferencesParameters(_remote.Name, branch.FullName));
+			var parameters = GetRemoveRemoteReferenceParameters(branch);
+			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
 
 			_remoteBranches.Remove(branch.Name);
 			branch.MarkAsDeleted();
 			InvokeBranchDeleted(branch);
+		}
+
+		internal Task RemoveBranchAsync(RemoteRepositoryBranch branch, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		{
+			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
+
+			var parameters = GetRemoveRemoteReferenceParameters(branch);
+			return _remote.Repository.Accessor
+				.RemoveRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
+				.ContinueWith(
+				t =>
+				{
+					TaskUtility.PropagateFaultedStates(t);
+					_remoteTags.Remove(branch.Name);
+					branch.MarkAsDeleted();
+					InvokeBranchDeleted(branch);
+				},
+				cancellationToken,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 		}
 
 		private QueryRemoteReferencesParameters GetQueryParameters()

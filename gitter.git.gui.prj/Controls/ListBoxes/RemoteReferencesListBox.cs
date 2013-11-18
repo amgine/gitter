@@ -73,7 +73,7 @@ namespace gitter.Git.Gui.Controls
 			Columns.Add(new NameColumn());
 			Columns.Add(new HashColumn() { IsVisible = true, Abbreviate = true, Width = 60 });
 
-			_grpBranches = new GroupItem(Resources.StrBranches) { IsExpanded = true };
+			_grpBranches = new GroupItem(Resources.StrHeads) { IsExpanded = true };
 			_grpTags     = new GroupItem(Resources.StrTags) { IsExpanded = true };
 
 			ShowTreeLines = true;

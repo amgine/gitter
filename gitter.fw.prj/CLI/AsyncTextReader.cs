@@ -38,6 +38,7 @@ namespace gitter.Framework.CLI
 		private Decoder _decoder;
 		private StringBuilder _stringBuilder;
 		private ManualResetEvent _eof;
+		private volatile bool _isCanceled;
 
 		#endregion
 
@@ -79,15 +80,30 @@ namespace gitter.Framework.CLI
 			Verify.Argument.IsNotNull(reader, "reader");
 			Verify.State.IsFalse(IsInitialized);
 
-			var encoding	= reader.CurrentEncoding;
-			_stream			= reader.BaseStream;
-			_decoder		= encoding.GetDecoder();
-			_byteBuffer		= new byte[_bufferSize];
-			_charBuffer		= new char[encoding.GetMaxCharCount(_bufferSize) + 1];
-			_eof			= new ManualResetEvent(false);
+			var encoding = reader.CurrentEncoding;
+			_stream      = reader.BaseStream;
+			_decoder     = encoding.GetDecoder();
+			_byteBuffer  = new byte[_bufferSize];
+			_charBuffer  = new char[encoding.GetMaxCharCount(_bufferSize) + 1];
+			_eof         = new ManualResetEvent(false);
 
 			_stringBuilder.Clear();
 			BeginReadAsync();
+		}
+
+		/// <summary>Notifies receiver that output is no longer required.</summary>
+		/// <remarks>Reader should still receive bytes, but disable any stream processing.</remarks>
+		public void NotifyCanceled()
+		{
+			Verify.State.IsTrue(IsInitialized);
+
+			_isCanceled = true;
+			var eof = _eof;
+			if(eof != null)
+			{
+				_eof = null;
+				eof.Dispose();
+			}
 		}
 
 		/// <summary>Closes the reader.</summary>
@@ -95,8 +111,18 @@ namespace gitter.Framework.CLI
 		{
 			Verify.State.IsTrue(IsInitialized);
 
-			_eof.WaitOne();
-			_eof.Dispose();
+			var eof = _eof;
+			if(eof != null)
+			{
+				try
+				{
+					eof.WaitOne();
+					eof.Dispose();
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
 
 			_stream = null;
 			_byteBuffer = null;
@@ -196,19 +222,80 @@ namespace gitter.Framework.CLI
 			}
 			if(bytesCount != 0)
 			{
-				Decode(bytesCount);
+				if(!_isCanceled)
+				{
+					Decode(bytesCount);
+				}
 				BeginReadAsync();
 			}
 			else
 			{
+				if(_isCanceled)
+				{
+					return;
+				}
 				OnStringCompleted();
-				_eof.Set();
+				var eof = (EventWaitHandle)ar.AsyncState;
+				if(eof != null)
+				{
+					try
+					{
+						eof.Set();
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
 			}
 		}
 
 		private void BeginReadAsync()
 		{
-			_stream.BeginRead(_byteBuffer, 0, _byteBuffer.Length, OnStreamRead, null);
+			if(_isCanceled)
+			{
+				if(_stringBuilder.Length > 0)
+				{
+					_stringBuilder.Clear();
+				}
+				try
+				{
+					_stream.BeginRead(_byteBuffer, 0, _byteBuffer.Length, OnStreamRead, null);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
+			{
+				bool isReading;
+				var eof = _eof;
+				try
+				{
+					_stream.BeginRead(_byteBuffer, 0, _byteBuffer.Length, OnStreamRead, eof);
+					isReading = true;
+				}
+				catch(IOException)
+				{
+					isReading = false;
+				}
+				catch(ObjectDisposedException)
+				{
+					isReading = false;
+				}
+				if(!isReading)
+				{
+					if(eof != null)
+					{
+						try
+						{
+							eof.Set();
+						}
+						catch(ObjectDisposedException)
+						{
+						}
+					}
+				}
+			}
 		}
 
 		private void Decode(int bytesCount)

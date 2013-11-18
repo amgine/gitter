@@ -132,7 +132,7 @@ namespace gitter.Git
 			{
 				case ConfigFile.Other:
 					{
-						_configAccessor.SetConfigValue(
+						_configAccessor.SetConfigValue.Invoke(
 							new SetConfigValueParameters(Name, value)
 							{
 								FileName = _fileName,
@@ -142,13 +142,13 @@ namespace gitter.Git
 					break;
 				case ConfigFile.Repository:
 					{
-						_configAccessor.SetConfigValue(
+						_configAccessor.SetConfigValue.Invoke(
 							new SetConfigValueParameters(Name, value));
 					}
 					break;
 				default:
 					{
-						_configAccessor.SetConfigValue(
+						_configAccessor.SetConfigValue.Invoke(
 							new SetConfigValueParameters(Name, value)
 							{
 								FileName = _fileName,
@@ -179,7 +179,8 @@ namespace gitter.Git
 			}
 			else
 			{
-				_configAccessor.UnsetConfigValue(new UnsetConfigValueParameters(Name)
+				_configAccessor.UnsetConfigValue.Invoke(
+					new UnsetConfigValueParameters(Name)
 					{
 						ConfigFile = _configFile,
 					});
@@ -199,12 +200,12 @@ namespace gitter.Git
 				ConfigParameterData configParameterData;
 				if(_configFile == ConfigFile.Other)
 				{
-					configParameterData = _configAccessor.QueryConfigParameter(
+					configParameterData = _configAccessor.QueryConfigParameter.Invoke(
 						new QueryConfigParameterParameters(_fileName, Name));
 				}
 				else
 				{
-					configParameterData = _configAccessor.QueryConfigParameter(
+					configParameterData = _configAccessor.QueryConfigParameter.Invoke(
 						new QueryConfigParameterParameters(_configFile, Name));
 				}
 				if(configParameterData == null)

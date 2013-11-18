@@ -34,6 +34,7 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitRepository _repository;
 		private readonly ICommandExecutor _executor;
 
+		private readonly IGitAction   < AddConfigValueParameters                                     > _addConfigValue;
 		private readonly IGitAction   < AddFilesParameters                                           > _addFiles;
 		private readonly IGitAction   < AddRemoteParameters                                          > _addRemote;
 		private readonly IGitAction   < AddSubmoduleParameters                                       > _addSubmodule;
@@ -49,6 +50,7 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitAction   < CreateBranchParameters                                       > _createBranch;
 		private readonly IGitAction   < CreateTagParameters                                          > _createTag;
 		private readonly IGitAction   < DeleteBranchParameters                                       > _deleteBranch;
+		private readonly IGitAction   < DeleteConfigSectionParameters                                > _deleteConfigSection;
 		private readonly IGitAction   < DeleteTagParameters                                          > _deleteTag;
 		private readonly IGitFunction < DereferenceParameters,            RevisionData               > _dereference;
 		private readonly IGitFunction < DescribeParameters,               string                     > _describe;
@@ -56,6 +58,7 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitFunction < FormatMergeMessageParameters,     string                     > _formatMergeMessage;
 		private readonly IGitAction   < GarbageCollectParameters                                     > _garbageCollect;
 		private readonly IGitAction   < MergeParameters                                              > _merge;
+		private readonly IGitAction   < PruneNotesParameters                                         > _pruneNotes;
 		private readonly IGitAction   < PruneRemoteParameters                                        > _pruneRemote;
 		private readonly IGitAction   < PullParameters                                               > _pull;
 		private readonly IGitFunction < PushParameters,                   IList<ReferencePushResult> > _push;
@@ -64,6 +67,8 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitFunction < QueryBranchParameters,            BranchData                 > _queryBranch;
 		private readonly IGitFunction < QueryBranchesParameters,          BranchesData               > _queryBranches;
 		private readonly IGitFunction < PruneRemoteParameters,            IList<string>              > _queryBranchesToPrune;
+		private readonly IGitFunction < QueryConfigParameters,            IList<ConfigParameterData> > _queryConfig;
+		private readonly IGitFunction < QueryConfigParameterParameters,   ConfigParameterData        > _queryConfigParameter;
 		private readonly IGitFunction < QueryDiffParameters,              Diff                       > _queryDiff;
 		private readonly IGitFunction < AddFilesParameters,               IList<TreeFileData>        > _queryFilesToAdd;
 		private readonly IGitFunction < RemoveFilesParameters,            IList<string>              > _queryFilesToRemove;
@@ -88,13 +93,14 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitFunction < QuerySymbolicReferenceParameters, SymbolicReferenceData      > _querySymbolicReference;
 		private readonly IGitFunction < QueryTreeContentParameters,       IList<TreeContentData>     > _queryTreeContent;
 		private readonly IGitFunction < QueryTagParameters,               TagData                    > _queryTag;
-		private readonly IGitFunction < string,                           string                     > _queryTagMessage;
+		private readonly IGitFunction < QueryTagMessageParameters,        string                     > _queryTagMessage;
 		private readonly IGitFunction < QueryTagsParameters,              IList<TagData>             > _queryTags;
 		private readonly IGitFunction < QueryUsersParameters,             IList<UserData>            > _queryUsers;
 		private readonly IGitAction   < RemoveFilesParameters                                        > _removeFiles;
 		private readonly IGitAction   < RemoveRemoteReferencesParameters                             > _removeRemoteReferences;
 		private readonly IGitAction   < RebaseParameters                                             > _rebase;
 		private readonly IGitAction   < RemoveRemoteParameters                                       > _removeRemote;
+		private readonly IGitAction   < RenameConfigSectionParameters                                > _renameConfigSection;
 		private readonly IGitAction   < RenameBranchParameters                                       > _renameBranch;
 		private readonly IGitAction   < RenameRemoteParameters                                       > _renameRemote;
 		private readonly IGitAction   < ResetParameters                                              > _reset;
@@ -102,12 +108,14 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitAction   < ResetBranchParameters                                        > _resetBranch;
 		private readonly IGitAction   < RevertParameters                                             > _revert;
 		private readonly IGitAction   < RunMergeToolParameters                                       > _runMergeTool;
+		private readonly IGitAction   < SetConfigValueParameters                                     > _setConfigValue;
 		private readonly IGitAction   < StashApplyParameters                                         > _stashApply;
 		private readonly IGitAction   < StashDropParameters                                          > _stashDrop;
 		private readonly IGitAction   < StashClearParameters                                         > _stashClear;
 		private readonly IGitAction   < StashPopParameters                                           > _stashPop;
 		private readonly IGitFunction < StashSaveParameters,              bool                       > _stashSave;
 		private readonly IGitAction   < StashToBranchParameters                                      > _stashToBranch;
+		private readonly IGitAction   < UnsetConfigValueParameters                                   > _unsetConfigValue;
 		private readonly IGitAction   < SubmoduleUpdateParameters                                    > _updateSubmodule;
 		private readonly IGitAction   < VerifyTagsParameters                                         > _verifyTags;
 
@@ -124,82 +132,90 @@ namespace gitter.Git.AccessLayer
 			_repository = repository;
 			_executor   = new RepositoryCommandExecutor(gitCLI, repository.WorkingDirectory);
 
-			GitCliMethod.Create(out _addFiles,               CommandExecutor, CommandBuider.GetAddFilesCommand);
-			GitCliMethod.Create(out _addRemote,              CommandExecutor, CommandBuider.GetAddRemoteCommand);
-			GitCliMethod.Create(out _addSubmodule,           CommandExecutor, CommandBuider.GetAddSubmoduleCommand);
-			GitCliMethod.Create(out _appendNote,             CommandExecutor, CommandBuider.GetAppendNoteCommand);
-			GitCliMethod.Create(out _applyPatch,             CommandExecutor, CommandBuider.GetApplyPatchCommand);
-			GitCliMethod.Create(out _archive,                CommandExecutor, CommandBuider.GetArchiveCommand);
-			GitCliMethod.Create(out _cleanFiles,             CommandExecutor, CommandBuider.GetCleanFilesCommand);
-			GitCliMethod.Create(out _checkout,               CommandExecutor, CommandBuider.GetCheckoutCommand,               OutputParser.HandleCheckoutResult);
-			GitCliMethod.Create(out _checkoutFiles,          CommandExecutor, CommandBuider.GetCheckoutFilesCommand);
-			GitCliMethod.Create(out _cherryPick,             CommandExecutor, CommandBuider.GetCherryPickCommand,             OutputParser.HandleCherryPickResult);
-			GitCliMethod.Create(out _commit,                 CommandExecutor, CommandBuider.GetCommitCommand);
-			GitCliMethod.Create(out _countObjects,           CommandExecutor, CommandBuider.GetCountObjectsCommand,           OutputParser.ParseObjectCountData);
-			GitCliMethod.Create(out _createBranch,           CommandExecutor, CommandBuider.GetCreateBranchCommand,           OutputParser.HandleCreateBranchResult);
-			GitCliMethod.Create(out _createTag,              CommandExecutor, CommandBuider.GetCreateTagCommand,              OutputParser.HandleCreateTagResult);
-			GitCliMethod.Create(out _deleteBranch,           CommandExecutor, CommandBuider.GetDeleteBranchCommand,           OutputParser.HandleDeleteBranchResult);
-			GitCliMethod.Create(out _deleteTag,              CommandExecutor, CommandBuider.GetDeleteTagCommand,              OutputParser.HandleDeleteTagResult);
-			GitCliMethod.Create(out _dereference,            CommandExecutor, CommandBuider.GetDereferenceCommand,            OutputParser.ParseDereferenceOutput);
-			GitCliMethod.Create(out _describe,               CommandExecutor, CommandBuider.GetDescribeCommand,               OutputParser.ParseDescribeResult);
-			GitCliMethod.Create(out _fetch,                  CommandExecutor, CommandBuider.GetFetchCommand);
+			GitCliMethod.Create(out _addConfigValue,         CommandExecutor, CommandBuilder.GetAddConfigValueCommand,         OutputParser.HandleConfigResults);
+			GitCliMethod.Create(out _addFiles,               CommandExecutor, CommandBuilder.GetAddFilesCommand);
+			GitCliMethod.Create(out _addRemote,              CommandExecutor, CommandBuilder.GetAddRemoteCommand);
+			GitCliMethod.Create(out _addSubmodule,           CommandExecutor, CommandBuilder.GetAddSubmoduleCommand);
+			GitCliMethod.Create(out _appendNote,             CommandExecutor, CommandBuilder.GetAppendNoteCommand);
+			GitCliMethod.Create(out _applyPatch,             CommandExecutor, CommandBuilder.GetApplyPatchCommand);
+			GitCliMethod.Create(out _archive,                CommandExecutor, CommandBuilder.GetArchiveCommand);
+			GitCliMethod.Create(out _cleanFiles,             CommandExecutor, CommandBuilder.GetCleanFilesCommand);
+			GitCliMethod.Create(out _checkout,               CommandExecutor, CommandBuilder.GetCheckoutCommand,               OutputParser.HandleCheckoutResult);
+			GitCliMethod.Create(out _checkoutFiles,          CommandExecutor, CommandBuilder.GetCheckoutFilesCommand);
+			GitCliMethod.Create(out _cherryPick,             CommandExecutor, CommandBuilder.GetCherryPickCommand,             OutputParser.HandleCherryPickResult);
+			GitCliMethod.Create(out _commit,                 CommandExecutor, CommandBuilder.GetCommitCommand);
+			GitCliMethod.Create(out _countObjects,           CommandExecutor, CommandBuilder.GetCountObjectsCommand,           OutputParser.ParseObjectCountData);
+			GitCliMethod.Create(out _createBranch,           CommandExecutor, CommandBuilder.GetCreateBranchCommand,           OutputParser.HandleCreateBranchResult);
+			GitCliMethod.Create(out _createTag,              CommandExecutor, CommandBuilder.GetCreateTagCommand,              OutputParser.HandleCreateTagResult);
+			GitCliMethod.Create(out _deleteBranch,           CommandExecutor, CommandBuilder.GetDeleteBranchCommand,           OutputParser.HandleDeleteBranchResult);
+			GitCliMethod.Create(out _deleteConfigSection,    CommandExecutor, CommandBuilder.GetDeleteConfigSectionCommand,    OutputParser.HandleConfigResults);
+			GitCliMethod.Create(out _deleteTag,              CommandExecutor, CommandBuilder.GetDeleteTagCommand,              OutputParser.HandleDeleteTagResult);
+			GitCliMethod.Create(out _dereference,            CommandExecutor, CommandBuilder.GetDereferenceCommand,            OutputParser.ParseDereferenceOutput);
+			GitCliMethod.Create(out _describe,               CommandExecutor, CommandBuilder.GetDescribeCommand,               OutputParser.ParseDescribeResult);
+			GitCliMethod.Create(out _fetch,                  CommandExecutor, CommandBuilder.GetFetchCommand);
 			GitCliMethod.Create(out _formatMergeMessage,     CommandExecutor);
-			GitCliMethod.Create(out _garbageCollect,         CommandExecutor, CommandBuider.GetGarbageCollectCommand);
-			GitCliMethod.Create(out _merge,                  CommandExecutor, CommandBuider.GetMergeCommand,                  OutputParser.HandleMergeResult);
-			GitCliMethod.Create(out _pruneRemote,            CommandExecutor, CommandBuider.GetPruneRemoteCommand);
-			GitCliMethod.Create(out _pull,                   CommandExecutor, CommandBuider.GetPullCommand);
-			GitCliMethod.Create(out _push,                   CommandExecutor, CommandBuider.GetPushCommand,                   OutputParser.ParsePushResults);
-			GitCliMethod.Create(out _queryBlame,             CommandExecutor, CommandBuider.GetQueryBlameCommand,             OutputParser.ParseBlame);
-			GitCliMethod.Create(out _queryBlobBytes,         CommandExecutor, CommandBuider.GetQueryBlobBytesCommand);
-			GitCliMethod.Create(out _queryBranch,            CommandExecutor, CommandBuider.GetQueryBranchCommand,            OutputParser.ParseSingleBranch);
-			GitCliMethod.Create(out _queryBranches,          CommandExecutor, CommandBuider.GetQueryBranchesCommand,          OutputParser.ParseBranches);
-			GitCliMethod.Create(out _queryObjects,           CommandExecutor, CommandBuider.GetQueryObjectsCommand,           OutputParser.ParseObjects);
-			GitCliMethod.Create(out _queryRevision,          CommandExecutor, CommandBuider.GetQueryRevisionCommand,          OutputParser.ParseSingleRevision);
-			GitCliMethod.Create(out _queryRevisions,         CommandExecutor, CommandBuider.GetQueryRevisionsCommand,         OutputParser.ParseRevisions);
-			GitCliMethod.Create(out _queryRevisionGraph,     CommandExecutor, CommandBuider.GetQueryRevisionGraphCommand,     OutputParser.ParseRevisionGraph);
-			GitCliMethod.Create(out _queryDiff,              CommandExecutor, CommandBuider.GetDiffCommand,                   OutputParser.ParseDiff);
-			GitCliMethod.Create(out _queryNotes,             CommandExecutor, CommandBuider.GetQueryNotesCommand,             OutputParser.ParseNotes);
-			GitCliMethod.Create(out _queryFilesToAdd,        CommandExecutor, CommandBuider.GetQueryFilesToAddCommand,        OutputParser.ParseFilesToAdd);
-			GitCliMethod.Create(out _queryFilesToRemove,     CommandExecutor, CommandBuider.GetQueryFilesToRemoveCommand,     OutputParser.ParseFilesToRemove);
-			GitCliMethod.Create(out _queryFilesToClean,      CommandExecutor, CommandBuider.GetQueryFilesToCleanCommand,      OutputParser.ParseFilesToClean);
-			GitCliMethod.Create(out _queryRemote,            CommandExecutor, CommandBuider.GetQueryRemoteCommand,            OutputParser.ParseSingleRemote);
-			GitCliMethod.Create(out _queryRemotes,           CommandExecutor, CommandBuider.GetQueryRemotesCommand,           OutputParser.ParseRemotesOutput);
+			GitCliMethod.Create(out _garbageCollect,         CommandExecutor, CommandBuilder.GetGarbageCollectCommand);
+			GitCliMethod.Create(out _merge,                  CommandExecutor, CommandBuilder.GetMergeCommand,                  OutputParser.HandleMergeResult);
+			GitCliMethod.Create(out _pruneNotes,             CommandExecutor, CommandBuilder.GetPruneNotesCommand);
+			GitCliMethod.Create(out _pruneRemote,            CommandExecutor, CommandBuilder.GetPruneRemoteCommand);
+			GitCliMethod.Create(out _pull,                   CommandExecutor, CommandBuilder.GetPullCommand);
+			GitCliMethod.Create(out _push,                   CommandExecutor, CommandBuilder.GetPushCommand,                   OutputParser.ParsePushResults);
+			GitCliMethod.Create(out _queryBlame,             CommandExecutor, CommandBuilder.GetQueryBlameCommand,             OutputParser.ParseBlame);
+			GitCliMethod.Create(out _queryBlobBytes,         CommandExecutor, CommandBuilder.GetQueryBlobBytesCommand);
+			GitCliMethod.Create(out _queryBranch,            CommandExecutor, CommandBuilder.GetQueryBranchCommand,            OutputParser.ParseSingleBranch);
+			GitCliMethod.Create(out _queryBranches,          CommandExecutor, CommandBuilder.GetQueryBranchesCommand,          OutputParser.ParseBranches);
+			GitCliMethod.Create(out _queryConfig,            CommandExecutor, CommandBuilder.GetQueryConfigCommand,            OutputParser.ParseQueryConfigResults);
+			GitCliMethod.Create(out _queryConfigParameter,   CommandExecutor, CommandBuilder.GetQueryConfigParameterCommand,   OutputParser.ParseQueryConfigParameterResult);
+			GitCliMethod.Create(out _queryDiff,              CommandExecutor, CommandBuilder.GetDiffCommand,                   OutputParser.ParseDiff);
+			GitCliMethod.Create(out _queryObjects,           CommandExecutor, CommandBuilder.GetQueryObjectsCommand,           OutputParser.ParseObjects);
+			GitCliMethod.Create(out _queryRevision,          CommandExecutor, CommandBuilder.GetQueryRevisionCommand,          OutputParser.ParseSingleRevision);
+			GitCliMethod.Create(out _queryRevisions,         CommandExecutor, CommandBuilder.GetQueryRevisionsCommand,         OutputParser.ParseRevisions);
+			GitCliMethod.Create(out _queryRevisionGraph,     CommandExecutor, CommandBuilder.GetQueryRevisionGraphCommand,     OutputParser.ParseRevisionGraph);
+			GitCliMethod.Create(out _queryNotes,             CommandExecutor, CommandBuilder.GetQueryNotesCommand,             OutputParser.ParseNotes);
+			GitCliMethod.Create(out _queryFilesToAdd,        CommandExecutor, CommandBuilder.GetQueryFilesToAddCommand,        OutputParser.ParseFilesToAdd);
+			GitCliMethod.Create(out _queryFilesToRemove,     CommandExecutor, CommandBuilder.GetQueryFilesToRemoveCommand,     OutputParser.ParseFilesToRemove);
+			GitCliMethod.Create(out _queryFilesToClean,      CommandExecutor, CommandBuilder.GetQueryFilesToCleanCommand,      OutputParser.ParseFilesToClean);
+			GitCliMethod.Create(out _queryRemote,            CommandExecutor, CommandBuilder.GetQueryRemoteCommand,            OutputParser.ParseSingleRemote);
+			GitCliMethod.Create(out _queryRemotes,           CommandExecutor, CommandBuilder.GetQueryRemotesCommand,           OutputParser.ParseRemotesOutput);
 			GitCliMethod.Create(out _querySymbolicReference, repository);
-			GitCliMethod.Create(out _queryBranchesToPrune,   CommandExecutor, CommandBuider.GetQueryPrunedBranchesCommand,    OutputParser.ParsePrunedBranches);
-			GitCliMethod.Create(out _queryRemoteReferences,  CommandExecutor, CommandBuider.GetQueryRemoteReferencesCommand,  OutputParser.ParseRemoteReferences);
-			GitCliMethod.Create(out _queryReferences,        CommandExecutor, CommandBuider.GetQueryReferencesCommand,        OutputParser.ParseReferences);
-			GitCliMethod.Create(out _queryReflog,            CommandExecutor, CommandBuider.GetQueryReflogCommand);
-			GitCliMethod.Create(out _queryStash,             CommandExecutor, CommandBuider.GetQueryStashCommand);
-			GitCliMethod.Create(out _queryStashPatch,        CommandExecutor, CommandBuider.GetQueryStashDiffCommand);
-			GitCliMethod.Create(out _queryStashTop,          CommandExecutor, CommandBuider.GetQueryStashTopCommand,          OutputParser.ParseQueryStashTopOutput);
-			GitCliMethod.Create(out _queryStashDiff,         CommandExecutor, CommandBuider.GetQueryStashDiffCommand,         OutputParser.ParseRevisionDiff);
-			GitCliMethod.Create(out _queryStatus,            CommandExecutor, CommandBuider.GetQueryStatusCommand,            OutputParser.ParseStatus);
-			GitCliMethod.Create(out _queryRevisionDiff,      CommandExecutor, CommandBuider.GetQueryRevisionDiffCommand,      OutputParser.ParseRevisionDiff);
-			GitCliMethod.Create(out _queryRevisionPatch,     CommandExecutor, CommandBuider.GetQueryRevisionDiffCommand);
-			GitCliMethod.Create(out _queryTreeContent,       CommandExecutor, CommandBuider.GetQueryTreeContentCommand,       OutputParser.ParseTreeContent);
-			GitCliMethod.Create(out _queryUsers,             CommandExecutor, CommandBuider.GetQueryUsersCommand,             OutputParser.ParseUsers);
-			GitCliMethod.Create(out _queryTag,               CommandExecutor, CommandBuider.GetQueryTagCommand,               OutputParser.ParseTag);
-			GitCliMethod.Create(out _queryTagMessage,        CommandExecutor, CommandBuider.GetQueryTagMessageCommand);
-			GitCliMethod.Create(out _queryTags,              CommandExecutor, CommandBuider.GetQueryTagsCommand,              OutputParser.ParseTags);
-			GitCliMethod.Create(out _removeFiles,            CommandExecutor, CommandBuider.GetRemoveFilesCommand);
-			GitCliMethod.Create(out _removeRemoteReferences, CommandExecutor, CommandBuider.GetRemoveRemoteReferencesCommand);
-			GitCliMethod.Create(out _rebase,                 CommandExecutor, CommandBuider.GetRebaseCommand);
-			GitCliMethod.Create(out _removeRemote,           CommandExecutor, CommandBuider.GetRemoveRemoteCommand);
-			GitCliMethod.Create(out _renameBranch,           CommandExecutor, CommandBuider.GetRenameBranchCommand,           OutputParser.HandleRenameBranchResult);
-			GitCliMethod.Create(out _renameRemote,           CommandExecutor, CommandBuider.GetRenameRemoteCommand);
-			GitCliMethod.Create(out _reset,                  CommandExecutor, CommandBuider.GetResetCommand);
-			GitCliMethod.Create(out _resetFiles,             CommandExecutor, CommandBuider.GetResetFilesCommand);
-			GitCliMethod.Create(out _resetBranch,            CommandExecutor, CommandBuider.GetResetBranchCommand);
-			GitCliMethod.Create(out _revert,                 CommandExecutor, CommandBuider.GetRevertCommand,                 OutputParser.HandleRevertResult);
-			GitCliMethod.Create(out _runMergeTool,           CommandExecutor, CommandBuider.GetRunMergeToolCommand);
-			GitCliMethod.Create(out _stashApply,             CommandExecutor, CommandBuider.GetStashApplyCommand, 			  OutputParser.HandleStashApplyResult);
-			GitCliMethod.Create(out _stashDrop,              CommandExecutor, CommandBuider.GetStashDropCommand);
-			GitCliMethod.Create(out _stashClear,             CommandExecutor, CommandBuider.GetStashClearCommand);
-			GitCliMethod.Create(out _stashPop,               CommandExecutor, CommandBuider.GetStashPopCommand,               OutputParser.HandleStashPopResult);
-			GitCliMethod.Create(out _stashSave,              CommandExecutor, CommandBuider.GetStashSaveCommand,              OutputParser.ParseStashSaveResult);
-			GitCliMethod.Create(out _stashToBranch,          CommandExecutor, CommandBuider.GetStashToBranchCommand);
-			GitCliMethod.Create(out _updateSubmodule,        CommandExecutor, CommandBuider.GetUpdateSubmoduleCommand);
-			GitCliMethod.Create(out _verifyTags,             CommandExecutor, CommandBuider.GetVerifyTagsCommand);
+			GitCliMethod.Create(out _queryBranchesToPrune,   CommandExecutor, CommandBuilder.GetQueryPrunedBranchesCommand,    OutputParser.ParsePrunedBranches);
+			GitCliMethod.Create(out _queryRemoteReferences,  CommandExecutor, CommandBuilder.GetQueryRemoteReferencesCommand,  OutputParser.ParseRemoteReferences);
+			GitCliMethod.Create(out _queryReferences,        CommandExecutor, CommandBuilder.GetQueryReferencesCommand,        OutputParser.ParseReferences);
+			GitCliMethod.Create(out _queryReflog,            CommandExecutor, CommandBuilder.GetQueryReflogCommand);
+			GitCliMethod.Create(out _queryStash,             CommandExecutor, CommandBuilder.GetQueryStashCommand);
+			GitCliMethod.Create(out _queryStashPatch,        CommandExecutor, CommandBuilder.GetQueryStashDiffCommand);
+			GitCliMethod.Create(out _queryStashTop,          CommandExecutor, CommandBuilder.GetQueryStashTopCommand,          OutputParser.ParseQueryStashTopOutput);
+			GitCliMethod.Create(out _queryStashDiff,         CommandExecutor, CommandBuilder.GetQueryStashDiffCommand,         OutputParser.ParseRevisionDiff);
+			GitCliMethod.Create(out _queryStatus,            CommandExecutor, CommandBuilder.GetQueryStatusCommand,            OutputParser.ParseStatus, CommandExecutionFlags.DoNotKillProcess);
+			GitCliMethod.Create(out _queryRevisionDiff,      CommandExecutor, CommandBuilder.GetQueryRevisionDiffCommand,      OutputParser.ParseRevisionDiff);
+			GitCliMethod.Create(out _queryRevisionPatch,     CommandExecutor, CommandBuilder.GetQueryRevisionDiffCommand);
+			GitCliMethod.Create(out _queryTreeContent,       CommandExecutor, CommandBuilder.GetQueryTreeContentCommand,       OutputParser.ParseTreeContent);
+			GitCliMethod.Create(out _queryUsers,             CommandExecutor, CommandBuilder.GetQueryUsersCommand,             OutputParser.ParseUsers);
+			GitCliMethod.Create(out _queryTag,               CommandExecutor, CommandBuilder.GetQueryTagCommand,               OutputParser.ParseTag);
+			GitCliMethod.Create(out _queryTagMessage,        CommandExecutor, CommandBuilder.GetQueryTagMessageCommand);
+			GitCliMethod.Create(out _queryTags,              CommandExecutor, CommandBuilder.GetQueryTagsCommand,              OutputParser.ParseTags);
+			GitCliMethod.Create(out _removeFiles,            CommandExecutor, CommandBuilder.GetRemoveFilesCommand);
+			GitCliMethod.Create(out _removeRemoteReferences, CommandExecutor, CommandBuilder.GetRemoveRemoteReferencesCommand);
+			GitCliMethod.Create(out _rebase,                 CommandExecutor, CommandBuilder.GetRebaseCommand);
+			GitCliMethod.Create(out _removeRemote,           CommandExecutor, CommandBuilder.GetRemoveRemoteCommand);
+			GitCliMethod.Create(out _renameBranch,           CommandExecutor, CommandBuilder.GetRenameBranchCommand,           OutputParser.HandleRenameBranchResult);
+			GitCliMethod.Create(out _renameConfigSection,    CommandExecutor, CommandBuilder.GetRenameConfigSectionCommand,    OutputParser.HandleConfigResults);
+			GitCliMethod.Create(out _renameRemote,           CommandExecutor, CommandBuilder.GetRenameRemoteCommand);
+			GitCliMethod.Create(out _reset,                  CommandExecutor, CommandBuilder.GetResetCommand);
+			GitCliMethod.Create(out _resetFiles,             CommandExecutor, CommandBuilder.GetResetFilesCommand);
+			GitCliMethod.Create(out _resetBranch,            CommandExecutor, CommandBuilder.GetResetBranchCommand);
+			GitCliMethod.Create(out _revert,                 CommandExecutor, CommandBuilder.GetRevertCommand,                 OutputParser.HandleRevertResult);
+			GitCliMethod.Create(out _runMergeTool,           CommandExecutor, CommandBuilder.GetRunMergeToolCommand);
+			GitCliMethod.Create(out _setConfigValue,         CommandExecutor, CommandBuilder.GetSetConfigValueCommand,         OutputParser.HandleConfigResults);
+			GitCliMethod.Create(out _stashApply,             CommandExecutor, CommandBuilder.GetStashApplyCommand, 			   OutputParser.HandleStashApplyResult);
+			GitCliMethod.Create(out _stashDrop,              CommandExecutor, CommandBuilder.GetStashDropCommand);
+			GitCliMethod.Create(out _stashClear,             CommandExecutor, CommandBuilder.GetStashClearCommand);
+			GitCliMethod.Create(out _stashPop,               CommandExecutor, CommandBuilder.GetStashPopCommand,               OutputParser.HandleStashPopResult);
+			GitCliMethod.Create(out _stashSave,              CommandExecutor, CommandBuilder.GetStashSaveCommand,              OutputParser.ParseStashSaveResult);
+			GitCliMethod.Create(out _stashToBranch,          CommandExecutor, CommandBuilder.GetStashToBranchCommand);
+			GitCliMethod.Create(out _unsetConfigValue,       CommandExecutor, CommandBuilder.GetUnsetConfigValueCommand,       OutputParser.HandleConfigResults);
+			GitCliMethod.Create(out _updateSubmodule,        CommandExecutor, CommandBuilder.GetUpdateSubmoduleCommand);
+			GitCliMethod.Create(out _verifyTags,             CommandExecutor, CommandBuilder.GetVerifyTagsCommand);
 		}
 
 		#endregion
@@ -211,7 +227,7 @@ namespace gitter.Git.AccessLayer
 			get { return _gitCLI; }
 		}
 
-		private CommandBuilder CommandBuider
+		private CommandBuilder CommandBuilder
 		{
 			get { return _gitCLI.CommandBuilder; }
 		}
@@ -496,7 +512,7 @@ namespace gitter.Git.AccessLayer
 			get { return _queryTag; }
 		}
 
-		public IGitFunction<string, string> QueryTagMessage
+		public IGitFunction<QueryTagMessageParameters, string> QueryTagMessage
 		{
 			get { return _queryTagMessage; }
 		}
@@ -604,6 +620,41 @@ namespace gitter.Git.AccessLayer
 		public IGitAction<VerifyTagsParameters> VerifyTags
 		{
 			get { return _verifyTags; }
+		}
+
+		public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig
+		{
+			get { return _queryConfig; }
+		}
+
+		public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter
+		{
+			get { return _queryConfigParameter; }
+		}
+
+		public IGitAction<AddConfigValueParameters> AddConfigValue
+		{
+			get { return _addConfigValue; }
+		}
+
+		public IGitAction<SetConfigValueParameters> SetConfigValue
+		{
+			get { return _setConfigValue; }
+		}
+
+		public IGitAction<UnsetConfigValueParameters> UnsetConfigValue
+		{
+			get { return _unsetConfigValue; }
+		}
+
+		public IGitAction<RenameConfigSectionParameters> RenameConfigSection
+		{
+			get { return _renameConfigSection; }
+		}
+
+		public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection
+		{
+			get { return _deleteConfigSection; }
 		}
 
 		#endregion

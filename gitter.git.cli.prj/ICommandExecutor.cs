@@ -30,20 +30,20 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Git command line executor.</summary>
 	internal interface ICommandExecutor
 	{
-		GitOutput ExecuteCommand(Command command);
+		GitOutput ExecuteCommand(Command command, CommandExecutionFlags flags);
 
-		GitOutput ExecuteCommand(Command command, Encoding encoding);
+		GitOutput ExecuteCommand(Command command, Encoding encoding, CommandExecutionFlags flags);
 
-		int ExecuteCommand(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver);
+		int ExecuteCommand(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags);
 
-		int ExecuteCommand(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver);
+		int ExecuteCommand(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags);
 
-		Task<GitOutput> ExecuteCommandAsync(Command command, CancellationToken cancellationToken);
+		Task<GitOutput> ExecuteCommandAsync(Command command, CommandExecutionFlags flags, CancellationToken cancellationToken);
 
-		Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CancellationToken cancellationToken);
+		Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken);
 
-		Task<int> ExecuteCommandAsync(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CancellationToken cancellationToken);
+		Task<int> ExecuteCommandAsync(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken);
 
-		Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CancellationToken cancellationToken);
+		Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken);
 	}
 }

@@ -49,6 +49,8 @@ namespace gitter.Redmine.Gui.ListBoxes
 
 			_serviceContext  = serviceContext;
 			_versionsListBox = versionsListBox;
+
+			Progress = versionsListBox.ProgressMonitor;
 		}
 
 		#endregion

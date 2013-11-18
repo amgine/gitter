@@ -285,7 +285,7 @@ namespace gitter.Git.Gui.Dialogs
 			bool noCheckout = _chkNoCheckout.Checked;
 			bool recursive = _chkRecursive.Checked;
 			_acceptedPath = path;
-			var status = GuiCommands.Clone(
+			var status = GuiCommands.Clone(this,
 				GitRepositoryProvider.GitAccessor,
 				url, path, template, remoteName,
 				shallow, depth, bare, mirror, recursive, noCheckout);

@@ -25,6 +25,35 @@ namespace gitter.Framework.CLI
 	using System.Threading;
 	using System.Threading.Tasks;
 
+	public static class ProcessExecutor
+	{
+		public static class CancellationMethods
+		{
+			public static void KillProcess(Process process)
+			{
+				Verify.Argument.IsNotNull(process, "process");
+
+				try
+				{
+					process.Kill();
+				}
+				catch(Exception exc)
+				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
+				}
+			}
+
+			public static void AllowToExecute(Process process)
+			{
+				Verify.Argument.IsNotNull(process, "process");
+
+			}
+		}
+	}
+
 	/// <summary>Executes process with output redirecting.</summary>
 	/// <typeparam name="TInput">Process input type.</typeparam>
 	public abstract class ProcessExecutor<TInput>
@@ -100,7 +129,7 @@ namespace gitter.Framework.CLI
 			}
 		}
 
-		public Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CancellationToken cancellationToken)
+		public Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, Action<Process> cancellationMethod, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(input, "input");
 
@@ -123,6 +152,10 @@ namespace gitter.Framework.CLI
 						}
 						catch(Exception exc)
 						{
+							if(exc.IsCritical())
+							{
+								throw;
+							}
 							tcs.TrySetException(exc);
 							return;
 						}
@@ -147,12 +180,17 @@ namespace gitter.Framework.CLI
 				{
 					if(task.IsCanceled)
 					{
-						try
+						if(stdErrReceiver != null)
 						{
-							process.Kill();
+							stdErrReceiver.NotifyCanceled();
 						}
-						catch
+						if(stdOutReceiver != null)
 						{
+							stdOutReceiver.NotifyCanceled();
+						}
+						if(cancellationMethod != null)
+						{
+							cancellationMethod(process);
 						}
 					}
 					else

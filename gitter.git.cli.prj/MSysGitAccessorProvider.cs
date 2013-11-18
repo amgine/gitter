@@ -25,6 +25,8 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Provides accessor which works through MSysGit command line interface.</summary>
 	public sealed class MSysGitAccessorProvider : IGitAccessorProvider
 	{
+		#region Properties
+
 		/// <summary>Returns string used to identify git accessor.</summary>
 		public string Name
 		{
@@ -37,11 +39,17 @@ namespace gitter.Git.AccessLayer.CLI
 			get { return Resources.StrProviderName; }
 		}
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>Creates git accessor.</summary>
 		/// <returns>Created git accessor.</returns>
 		public IGitAccessor CreateAccessor()
 		{
 			return new GitCLI(this);
 		}
+
+		#endregion
 	}
 }

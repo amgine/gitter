@@ -334,12 +334,12 @@ namespace gitter.Git.Gui
 
 		private void OnFetchClick(object sender, EventArgs e)
 		{
-			GuiCommands.Fetch(Repository);
+			GuiCommands.Fetch(_guiProvider.Environment.MainForm, Repository);
 		}
 
 		private void OnPullClick(object sender, EventArgs e)
 		{
-			GuiCommands.Pull(Repository);
+			GuiCommands.Pull(_guiProvider.Environment.MainForm, Repository);
 		}
 
 		private void OnPushClick(object sender, EventArgs e)

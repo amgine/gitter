@@ -23,30 +23,52 @@ namespace gitter.Git.Gui.Views
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.IO;
-	using System.Drawing;
 	using System.Diagnostics;
+	using System.Drawing;
+	using System.IO;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
-	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Controls;
+	using gitter.Framework.Services;
 
 	using gitter.Git.Gui.Controls;
+	using gitter.Git.Gui.Controls.ListBoxes;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
 	partial class TreeView : GitViewBase
 	{
-		private ITreeSource _treeSource;
-		private Tree _wTree;
-		private TreeDirectory _currentDirectory;
+		#region Data
 
+		private ITreeSource _treeSource;
+		private TreeListsBinding _dataSource;
+		private TreeDirectory _currentDirectory;
 		private TreeToolbar _toolBar;
 
-		public event EventHandler CurrentDirectoryChanged;
+		#endregion
+
+		#region Events
+
+		private static readonly object CurrentDirectoryChangedEvent = new object();
+
+		public event EventHandler CurrentDirectoryChanged
+		{
+			add { Events.AddHandler(CurrentDirectoryChangedEvent, value); }
+			remove { Events.RemoveHandler(CurrentDirectoryChangedEvent, value); }
+		}
+
+		protected virtual void OnCurrentDirectoryChanged()
+		{
+			var handler = (EventHandler)Events[CurrentDirectoryChangedEvent];
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		#endregion
+
+		#region Helpers
 
 		private sealed class TreeMenu : ContextMenuStrip
 		{
@@ -66,6 +88,10 @@ namespace gitter.Git.Gui.Views
 				}
 			}
 		}
+
+		#endregion
+
+		#region .ctor
 
 		public TreeView(IDictionary<string, object> parameters, GuiProvider gui)
 			: base(Guids.TreeViewGuid, gui, parameters)
@@ -101,6 +127,67 @@ namespace gitter.Git.Gui.Views
 			AddTopToolStrip(_toolBar = new TreeToolbar(this));
 		}
 
+		#endregion
+
+		#region Properties
+
+		private TreeListsBinding DataSource
+		{
+			get { return _dataSource; }
+			set
+			{
+				if(_dataSource != value)
+				{
+					if(_dataSource != null)
+					{
+						_dataSource.DataChanged -= OnTreeChanged;
+						_dataSource.Dispose();
+					}
+					_dataSource = value;
+					if(_dataSource != null)
+					{
+						_dataSource.DataChanged += OnTreeChanged;
+						_dataSource.ReloadData();
+					}
+				}
+			}
+		}
+
+		/// <summary>Gets a value indicating whether this instance is document.</summary>
+		/// <value><c>true</c> if this instance is document; otherwise, <c>false</c>.</value>
+		public override bool IsDocument
+		{
+			get { return true; }
+		}
+
+		public override Image Image
+		{
+			get { return CachedResources.Bitmaps["ImgFolderTree"]; }
+		}
+
+		public TreeDirectory CurrentDirectory
+		{
+			get { return _currentDirectory; }
+			set
+			{
+				Verify.Argument.IsNotNull(value, "value");
+
+				if(_currentDirectory != value)
+				{
+					var item = FindDirectoryEntry(value);
+					if(item == null)
+						throw new ArgumentException("value");
+					item.FocusAndSelect();
+					_currentDirectory = value;
+					OnCurrentDirectoryChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region Methods
+
 		private void OnTreeContentSelectionChanged(object sender, EventArgs e)
 		{
 			//var rev = Parameters["tree"] as RevisionTreeSource;
@@ -132,9 +219,9 @@ namespace gitter.Git.Gui.Views
 					menu.Items.AddRange(
 						new ToolStripItem[]
 						{
-							GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(_wTree, file.RelativePath),
-							GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(_wTree, file.RelativePath),
-							GuiItemFactory.GetSaveAsItem<ToolStripMenuItem>(_wTree, file.RelativePath),
+							GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
+							GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
+							GuiItemFactory.GetSaveAsItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
 							new ToolStripSeparator(),
 							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 								new ToolStripItem[]
@@ -198,32 +285,12 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		/// <summary>
-		/// Gets a value indicating whether this instance is document.
-		/// </summary>
-		/// <value>
-		/// 	<c>true</c> if this instance is document; otherwise, <c>false</c>.
-		/// </value>
-		public override bool IsDocument
+		private void UpdateCurrentDirectory(TreeDirectory directory)
 		{
-			get { return true; }
-		}
-
-		public TreeDirectory CurrentDirectory
-		{
-			get { return _currentDirectory; }
-			set
+			if(_currentDirectory != directory)
 			{
-				Verify.Argument.IsNotNull(value, "value");
-
-				if(_currentDirectory != value)
-				{
-					var item = FindDirectoryEntry(value);
-					if(item == null) throw new ArgumentException("value");
-					item.FocusAndSelect();
-					_currentDirectory = value;
-					CurrentDirectoryChanged.Raise(this);
-				}
+				_currentDirectory = directory;
+				OnCurrentDirectoryChanged();
 			}
 		}
 
@@ -236,7 +303,7 @@ namespace gitter.Git.Gui.Views
 				{
 					_currentDirectory = treeItem.DataContext;
 					_treeContent.SetTree(_currentDirectory, TreeListBoxMode.ShowDirectoryContent);
-					CurrentDirectoryChanged.Raise(this);
+					OnCurrentDirectoryChanged();
 				}
 			}
 		}
@@ -244,12 +311,29 @@ namespace gitter.Git.Gui.Views
 		public override void ApplyParameters(IDictionary<string, object> parameters)
 		{
 			_treeSource = (ITreeSource)parameters["tree"];
-			_wTree = _treeSource.GetTree();
-			_currentDirectory = _wTree.Root;
-			CurrentDirectoryChanged.Raise(this);
-			_directoryTree.SetTree(_currentDirectory, TreeListBoxMode.ShowDirectoryTree);
-			_treeContent.SetTree(_currentDirectory, TreeListBoxMode.ShowDirectoryContent);
-			Text = Resources.StrTree + " " + _treeSource.DisplayName;
+
+			if(_treeSource != null)
+			{
+				Text = Resources.StrTree + " " + _treeSource.DisplayName;
+				DataSource = new TreeListsBinding(_treeSource, _directoryTree, _treeContent);
+			}
+			else
+			{
+				Text = Resources.StrTree;
+				DataSource = null;
+			}
+		}
+
+		private void OnTreeChanged(object sender, EventArgs e)
+		{
+			if(DataSource != null && DataSource.Data != null)
+			{
+				UpdateCurrentDirectory(DataSource.Data.Root);
+			}
+			else
+			{
+				UpdateCurrentDirectory(null);
+			}
 		}
 
 		private TreeDirectoryListItem FindDirectoryEntry(TreeDirectory folder)
@@ -273,7 +357,7 @@ namespace gitter.Git.Gui.Views
 			var item = e.Item as TreeFileListItem;
 			if(item != null)
 			{
-				var fileName = _wTree.ExtractBlobToTemporaryFile(item.DataContext.RelativePath);
+				var fileName = DataSource.Data.ExtractBlobToTemporaryFile(item.DataContext.RelativePath);
 				if(!string.IsNullOrWhiteSpace(fileName))
 				{
 					var process = Utility.CreateProcessFor(fileName);
@@ -304,7 +388,7 @@ namespace gitter.Git.Gui.Views
 						_treeContent.SetTree(folderItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
 					}
 					_currentDirectory = folderItem.DataContext;
-					CurrentDirectoryChanged.Raise(this);
+					OnCurrentDirectoryChanged();
 				}
 			}
 		}
@@ -335,16 +419,11 @@ namespace gitter.Git.Gui.Views
 			_treeContent.Clear();
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgFolderTree"]; }
-		}
-
 		public override void RefreshContent()
 		{
-			if(_wTree != null)
+			if(DataSource != null)
 			{
-				_wTree.Refresh();
+				DataSource.ReloadData();
 			}
 		}
 
@@ -381,5 +460,7 @@ namespace gitter.Git.Gui.Views
 				_treeContent.LoadViewFrom(listNode);
 			}
 		}
+
+		#endregion
 	}
 }

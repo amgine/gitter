@@ -205,7 +205,7 @@ namespace gitter.Git
 				switch(_configFile)
 				{
 					case ConfigFile.Other:
-						_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
+						_configAccessor.SetConfigValue.Invoke(new SetConfigValueParameters(name, value)
 						{
 							ConfigFile = _configFile,
 							FileName = _fileName,
@@ -213,13 +213,13 @@ namespace gitter.Git
 						break;
 					case ConfigFile.System:
 					case ConfigFile.User:
-						_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value)
+						_configAccessor.SetConfigValue.Invoke(new SetConfigValueParameters(name, value)
 						{
 							ConfigFile = _configFile,
 						});
 						break;
 					case ConfigFile.Repository:
-						_configAccessor.SetConfigValue(new SetConfigValueParameters(name, value));
+						_configAccessor.SetConfigValue.Invoke(new SetConfigValueParameters(name, value));
 						break;
 				}
 				var configParameter = _repository != null ?
@@ -238,7 +238,7 @@ namespace gitter.Git
 			switch(_configFile)
 			{
 				case ConfigFile.Other:
-					_configAccessor.UnsetConfigValue(
+					_configAccessor.UnsetConfigValue.Invoke(
 						new UnsetConfigValueParameters(parameter.Name)
 						{
 							FileName = _fileName,
@@ -247,14 +247,14 @@ namespace gitter.Git
 					break;
 				case ConfigFile.System:
 				case ConfigFile.User:
-					_configAccessor.UnsetConfigValue(
+					_configAccessor.UnsetConfigValue.Invoke(
 						new UnsetConfigValueParameters(parameter.Name)
 						{
 							ConfigFile = _configFile,
 						});
 					break;
 				case ConfigFile.Repository:
-					_configAccessor.UnsetConfigValue(
+					_configAccessor.UnsetConfigValue.Invoke(
 						new UnsetConfigValueParameters(parameter.Name));
 					break;
 			}
@@ -314,16 +314,16 @@ namespace gitter.Git
 			switch(_configFile)
 			{
 				case ConfigFile.Other:
-					config = _configAccessor.QueryConfig(
+					config = _configAccessor.QueryConfig.Invoke(
 						new QueryConfigParameters(_fileName));
 					break;
 				case ConfigFile.Repository:
-					config = _configAccessor.QueryConfig(
+					config = _configAccessor.QueryConfig.Invoke(
 						new QueryConfigParameters());
 					break;
 				case ConfigFile.System:
 				case ConfigFile.User:
-					config = _configAccessor.QueryConfig(
+					config = _configAccessor.QueryConfig.Invoke(
 						new QueryConfigParameters(_configFile));
 					break;
 				default:

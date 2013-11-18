@@ -185,7 +185,7 @@ namespace gitter.Git.Gui.Dialogs
 						}
 						try
 						{
-							_repositoryProvider.GitAccessor.SetConfigValue(
+							_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
 								new SetConfigValueParameters(GitConstants.UserEmailParameter, userEmail)
 								{
 									ConfigFile = ConfigFile.User,
@@ -196,7 +196,7 @@ namespace gitter.Git.Gui.Dialogs
 						}
 						try
 						{
-							_repositoryProvider.GitAccessor.SetConfigValue(
+							_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
 								new SetConfigValueParameters(GitConstants.UserNameParameter, userName)
 								{
 									ConfigFile = ConfigFile.User,

@@ -459,7 +459,8 @@ namespace gitter.Git
 			{
 				progress.Report(new OperationProgress(Resources.StrsRebaseIsInProcess.AddEllipsis()));
 			}
-			return repository.Accessor.Rebase.InvokeAsync(parameters, progress, CancellationToken.None)
+			return repository.Accessor
+				.Rebase.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
 				t =>
 				{
@@ -687,6 +688,35 @@ namespace gitter.Git
 			}
 		}
 
+		#endregion
+
+		#region FormatPatch
+
+		private static QueryRevisionDiffParameters GetFormatPatchParameters(IRevisionPointer revision)
+		{
+			Assert.IsNotNull(revision);
+
+			return new QueryRevisionDiffParameters(revision.Pointer)
+				{
+					EnableTextConvFilters = false,
+					Binary = true
+				};
+		}
+
+		private static IGitFunction<QueryRevisionDiffParameters, byte[]> GetFormatPatchFunction(IRevisionPointer revision)
+		{
+			Assert.IsNotNull(revision);
+
+			if(revision.Type == ReferenceType.Stash)
+			{
+				return revision.Repository.Accessor.QueryStashPatch;
+			}
+			else
+			{
+				return revision.Repository.Accessor.QueryRevisionPatch;
+			}
+		}
+
 		/// <summary>Get diff for this revision.</summary>
 		/// <param name="revision">Revision to get diff for.</param>
 		/// <returns><see cref="Diff"/> for this revision.</returns>
@@ -695,20 +725,10 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
-			var repository = revision.Repository;
-			var parameters = new QueryRevisionDiffParameters(revision.Pointer)
-				{
-					EnableTextConvFilters = false,
-					Binary = true
-				};
-			if(revision.Type == ReferenceType.Stash)
-			{
-				return repository.Accessor.QueryStashPatch.Invoke(parameters);
-			}
-			else
-			{
-				return repository.Accessor.QueryRevisionPatch.Invoke(parameters);
-			};
+			var parameters = GetFormatPatchParameters(revision);
+			var function   = GetFormatPatchFunction(revision);
+
+			return function.Invoke(parameters);
 		}
 
 		/// <summary>Get diff for this revision.</summary>
@@ -720,26 +740,14 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, "revision");
 
-			var repository = revision.Repository;
-			var parameters = new QueryRevisionDiffParameters(revision.Pointer)
-				{
-					EnableTextConvFilters = false,
-					Binary = true
-				};
 			if(progress != null)
 			{
 				progress.Report(new OperationProgress(Resources.StrsFetchingPatch.AddEllipsis()));
 			}
-			if(revision.Type == ReferenceType.Stash)
-			{
-				return repository.Accessor.QueryStashPatch.InvokeAsync(parameters,
-					progress, cancellationToken);
-			}
-			else
-			{
-				return repository.Accessor.QueryRevisionPatch.InvokeAsync(parameters,
-					progress, cancellationToken);
-			};
+			var parameters = GetFormatPatchParameters(revision);
+			var function   = GetFormatPatchFunction(revision);
+
+			return function.InvokeAsync(parameters, progress, cancellationToken);
 		}
 
 		#endregion

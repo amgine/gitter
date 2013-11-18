@@ -20,6 +20,7 @@
 
 namespace gitter.Git.AccessLayer.CLI
 {
+	using System;
 	using System.Text;
 
 	using gitter.Framework.Services;
@@ -34,17 +35,17 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Data
 
-		private readonly GitCLI _gitCLI;
+		private readonly ICliOptionsProvider _cliOptionsProvider;
 
 		#endregion
 
 		#region .ctor
 
-		public GitCommandExecutor(GitCLI gitCLI)
+		public GitCommandExecutor(ICliOptionsProvider cliOptionsProvider)
 		{
-			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
+			Verify.Argument.IsNotNull(cliOptionsProvider, "cliOptionsProvider");
 
-			_gitCLI = gitCLI;
+			_cliOptionsProvider = cliOptionsProvider;
 		}
 
 		#endregion
@@ -53,11 +54,22 @@ namespace gitter.Git.AccessLayer.CLI
 
 		protected override void OnCommandExecuting(Command command)
 		{
-			if(_gitCLI.LogCLICalls) Log.Info("git {0}", command);
+			Assert.IsNotNull(command);
+
+			if(_cliOptionsProvider.LogCalls)
+			{
+				Log.Info("git {0}", command);
+			}
 		}
 
 		protected override GitInput PrepareInput(Command command, Encoding encoding)
 		{
+			Assert.IsNotNull(command);
+
+			if(encoding == null)
+			{
+				encoding = _cliOptionsProvider.DefaultEncoding;
+			}
 			return new GitInput(command, encoding);
 		}
 

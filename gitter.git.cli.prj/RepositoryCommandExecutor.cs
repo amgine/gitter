@@ -22,10 +22,7 @@ namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
 	using System.Text;
-	using System.Threading;
-	using System.Threading.Tasks;
 
-	using gitter.Framework.CLI;
 	using gitter.Framework.Services;
 
 	/// <summary>Executes commands for specific repository.</summary>
@@ -39,7 +36,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Data
 
-		private readonly GitCLI _gitCLI;
+		private readonly ICliOptionsProvider _cliOptionsProvider;
 		private readonly string _workingDirectory;
 
 		#endregion
@@ -47,14 +44,15 @@ namespace gitter.Git.AccessLayer.CLI
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="RepositoryCommandExecutor"/> class.</summary>
+		/// <param name="cliOptionsProvider">CLI options provider.</param>
 		/// <param name="workingDirectory">Repository working directory.</param>
-		public RepositoryCommandExecutor(GitCLI gitCLI, string workingDirectory)
+		public RepositoryCommandExecutor(ICliOptionsProvider cliOptionsProvider, string workingDirectory)
 		{
-			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
-			Verify.Argument.IsNotNull(workingDirectory, "workingDirectory");
+			Verify.Argument.IsNotNull(cliOptionsProvider, "cliOptionsProvider");
+			Verify.Argument.IsNeitherNullNorWhitespace(workingDirectory, "workingDirectory");
 
-			_gitCLI = gitCLI;
-			_workingDirectory = workingDirectory;
+			_cliOptionsProvider = cliOptionsProvider;
+			_workingDirectory   = workingDirectory;
 		}
 
 		#endregion
@@ -63,11 +61,22 @@ namespace gitter.Git.AccessLayer.CLI
 
 		protected override void OnCommandExecuting(Command command)
 		{
-			if(_gitCLI.LogCLICalls) Log.Info("git {0}", command);
+			Assert.IsNotNull(command);
+
+			if(_cliOptionsProvider.LogCalls)
+			{
+				Log.Info("git {0}", command);
+			}
 		}
 
 		protected override GitInput PrepareInput(Command command, Encoding encoding)
 		{
+			Assert.IsNotNull(command);
+
+			if(encoding == null)
+			{
+				encoding = _cliOptionsProvider.DefaultEncoding;
+			}
 			return new GitInput(_workingDirectory, command, encoding);
 		}
 

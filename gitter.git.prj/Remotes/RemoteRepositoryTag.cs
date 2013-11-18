@@ -22,6 +22,10 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
+	using System.Threading.Tasks;
+
+	using gitter.Framework;
 
 	/// <summary>Represents a tag on remote repository.</summary>
 	public sealed class RemoteRepositoryTag : BaseRemoteReference
@@ -32,6 +36,11 @@ namespace gitter.Git
 			: base(refs, name, hash)
 		{
 			_tagType = type;
+		}
+
+		public override ReferenceType ReferenceType
+		{
+			get { return ReferenceType.Tag; }
 		}
 
 		public TagType TagType
@@ -45,9 +54,9 @@ namespace gitter.Git
 			References.RemoveTag(this);
 		}
 
-		public override ReferenceType ReferenceType
+		protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			get { return ReferenceType.Tag; }
+			return References.RemoveTagAsync(this, progress, cancellationToken);
 		}
 	}
 }

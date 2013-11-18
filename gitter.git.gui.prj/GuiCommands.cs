@@ -23,14 +23,16 @@ namespace gitter.Git.Gui
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
-	using gitter.Git.AccessLayer;
 
+	using gitter.Git.AccessLayer;
+	
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	public static class GuiCommands
@@ -41,7 +43,7 @@ namespace gitter.Git.Gui
 			return exc.Message;
 		}
 
-		private static GuiCommandStatus Fetch(Repository repository, Remote remote)
+		private static GuiCommandStatus Fetch(IWin32Window parent, Repository repository, Remote remote)
 		{
 			Func<IProgress<OperationProgress>, CancellationToken, Task> func;
 			if(remote == null)
@@ -54,7 +56,7 @@ namespace gitter.Git.Gui
 			}
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrFetch, func);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrFetch, func);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -67,7 +69,7 @@ namespace gitter.Git.Gui
 					string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToFetchFrom, remote.Name) :
 					Resources.ErrFailedToFetch;
 				GitterApplication.MessageBoxService.Show(
-					GitterApplication.MainForm,
+					parent,
 					ExtractErrorMessage(exc),
 					messageTitle,
 					MessageBoxButton.Close,
@@ -76,21 +78,21 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public static GuiCommandStatus Fetch(Repository repository)
+		public static GuiCommandStatus Fetch(IWin32Window parent, Repository repository)
 		{
 			Verify.Argument.IsNotNull(repository, "repository");
 
-			return Fetch(repository, null);
+			return Fetch(parent, repository, null);
 		}
 
-		public static GuiCommandStatus Fetch(Remote remote)
+		public static GuiCommandStatus Fetch(IWin32Window parent, Remote remote)
 		{
 			Verify.Argument.IsNotNull(remote, "remote");
 
-			return Fetch(remote.Repository, remote);
+			return Fetch(parent, remote.Repository, remote);
 		}
 
-		private static GuiCommandStatus Pull(Repository repository, Remote remote)
+		private static GuiCommandStatus Pull(IWin32Window parent, Repository repository, Remote remote)
 		{
 			Func<IProgress<OperationProgress>, CancellationToken, Task> func;
 			if(remote == null)
@@ -103,7 +105,7 @@ namespace gitter.Git.Gui
 			}
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrPull, func);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrPull, func);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -116,7 +118,7 @@ namespace gitter.Git.Gui
 					string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToPullFrom, remote.Name) :
 					Resources.ErrFailedToPull;
 				GitterApplication.MessageBoxService.Show(
-					GitterApplication.MainForm,
+					parent,
 					ExtractErrorMessage(exc),
 					messageTitle,
 					MessageBoxButton.Close,
@@ -125,25 +127,25 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public static GuiCommandStatus Pull(Repository repository)
+		public static GuiCommandStatus Pull(IWin32Window parent, Repository repository)
 		{
 			Verify.Argument.IsNotNull(repository, "repository");
 
-			return Pull(repository, null);
+			return Pull(parent, repository, null);
 		}
 
-		public static GuiCommandStatus Pull(Remote remote)
+		public static GuiCommandStatus Pull(IWin32Window parent, Remote remote)
 		{
 			Verify.Argument.IsNotNull(remote, "remote");
 
-			return Pull(remote.Repository, remote);
+			return Pull(parent, remote.Repository, remote);
 		}
 
-		private static GuiCommandStatus Push(Func<IProgress<OperationProgress>, CancellationToken, Task> func, string remoteRepository)
+		private static GuiCommandStatus Push(IWin32Window parent, Func<IProgress<OperationProgress>, CancellationToken, Task> func, string remoteRepository)
 		{
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrPush, func);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrPush, func);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -154,7 +156,7 @@ namespace gitter.Git.Gui
 			{
 				var messageTitle = string.Format(CultureInfo.InvariantCulture, Resources.ErrPushFailed, remoteRepository);
 				GitterApplication.MessageBoxService.Show(
-					GitterApplication.MainForm,
+					parent,
 					ExtractErrorMessage(exc),
 					messageTitle,
 					MessageBoxButton.Close,
@@ -163,29 +165,30 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public static GuiCommandStatus Push(Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+		public static GuiCommandStatus Push(IWin32Window parent, Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
 			Func<IProgress<OperationProgress>, CancellationToken, Task> func =
 				(p, c) => remote.PushAsync(branches, forceOverwrite, thinPack, sendTags, p, c);
 
-			return Push(func, remote.Name);
+			return Push(parent, func, remote.Name);
 		}
 
-		public static GuiCommandStatus Push(Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+		public static GuiCommandStatus Push(IWin32Window parent, Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
 			Func<IProgress<OperationProgress>, CancellationToken, Task> func =
 				(p, c) => repository.Remotes.PushToAsync(url, branches, forceOverwrite, thinPack, sendTags, p, c);
 
-			return Push(func, url);
+			return Push(parent, func, url);
 		}
 
-		public static GuiCommandStatus Prune(Remote remote)
+		public static GuiCommandStatus Prune(IWin32Window parent, Remote remote)
 		{
 			Verify.Argument.IsNotNull(remote, "remote");
 
 			try
 			{
 				ProgressForm.MonitorTaskAsModalWindow(
+					parent,
 					Resources.StrPrune + ": " + remote.Name,
 					remote.PruneAsync);
 				return GuiCommandStatus.Completed;
@@ -197,7 +200,7 @@ namespace gitter.Git.Gui
 			catch(GitException exc)
 			{
 				GitterApplication.MessageBoxService.Show(
-					GitterApplication.MainForm,
+					parent,
 					exc.Message,
 					string.Format(Resources.ErrFailedToPrune, remote.Name),
 					MessageBoxButton.Close,
@@ -206,11 +209,11 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public static GuiCommandStatus Clone(IGitAccessor gitAccessor, string url, string path, string template, string remoteName, bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
+		public static GuiCommandStatus Clone(IWin32Window parent, IGitAccessor gitAccessor, string url, string path, string template, string remoteName, bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
 		{
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrClone, (p, c) =>
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrClone, (p, c) =>
 					Repository.CloneAsync(gitAccessor, url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout, p, c));
 				return GuiCommandStatus.Completed;
 			}
@@ -221,7 +224,7 @@ namespace gitter.Git.Gui
 			catch(GitException exc)
 			{
 				GitterApplication.MessageBoxService.Show(
-					GitterApplication.MainForm,
+					parent,
 					exc.Message,
 					Resources.ErrFailedToClone.UseAsFormat(url),
 					MessageBoxButton.Close,
@@ -256,8 +259,8 @@ namespace gitter.Git.Gui
 			}
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrArchive, (p) =>
-					revision.ArchiveAsync(outputPath, null, null, p));
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrArchive,
+					(p) => revision.ArchiveAsync(outputPath, null, null, p));
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -276,13 +279,83 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		public static GuiCommandStatus FormatPatch(IWin32Window parent, IRevisionPointer revision)
+		{
+			Verify.Argument.IsNotNull(revision, "revision");
+
+			const string patchExt = ".patch";
+			string outputPath = null;
+			using(var dlg = new SaveFileDialog()
+				{
+					FileName        = revision.Pointer + patchExt,
+					Filter          = Resources.StrPatches + "|" + patchExt,
+					DefaultExt      = patchExt,
+					OverwritePrompt = true,
+					Title           = Resources.StrSavePatch,
+				})
+			{
+				if(dlg.ShowDialog(parent) == DialogResult.OK)
+				{
+					outputPath = dlg.FileName;
+				}
+				else
+				{
+					return GuiCommandStatus.Canceled;
+				}
+			}
+			if(string.IsNullOrWhiteSpace(outputPath))
+			{
+				return GuiCommandStatus.Canceled;
+			}
+			byte[] patch;
+			try
+			{
+				patch = ProgressForm.MonitorTaskAsModalWindow(parent,
+					Resources.StrSavePatch, revision.FormatPatchAsync);
+			}
+			catch(OperationCanceledException)
+			{
+				return GuiCommandStatus.Canceled;
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					parent,
+					exc.Message,
+					Resources.ErrFailedToFormatPatch,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return GuiCommandStatus.Faulted;
+			}
+			if(patch != null)
+			{
+				try
+				{
+					File.WriteAllBytes(outputPath, patch);
+					return GuiCommandStatus.Completed;
+				}
+				catch(Exception exc)
+				{
+					GitterApplication.MessageBoxService.Show(
+						parent,
+						exc.Message,
+						Resources.ErrFailedToSavePatch,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
+					return GuiCommandStatus.Faulted;
+				}
+			}
+			return GuiCommandStatus.Faulted;
+		}
+
 		public static GuiCommandStatus RebaseHeadTo(IWin32Window parent, IRevisionPointer revision)
 		{
 			Verify.Argument.IsNotNull(revision, "revision");
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrRebase, p => revision.RebaseHeadHereAsync(p));
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRebase,
+					p => revision.RebaseHeadHereAsync(p));
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -307,7 +380,8 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrRebase, p => repository.RebaseAsync(control, p));
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRebase,
+					p => repository.RebaseAsync(control, p));
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -330,7 +404,7 @@ namespace gitter.Git.Gui
 		{
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashSave,
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashSave,
 					p => stash.SaveAsync(keepIndex, includeUntracked, message, p));
 				return GuiCommandStatus.Completed;
 			}
@@ -356,7 +430,8 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashPop, p => stashedState.PopAsync(restoreIndex, p));
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashPop,
+					p => stashedState.PopAsync(restoreIndex, p));
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -381,7 +456,8 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashPop, p => stash.PopAsync(restoreIndex, p));
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashPop,
+					p => stash.PopAsync(restoreIndex, p));
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -406,7 +482,8 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashApply, p => stashedState.ApplyAsync(restoreIndex, p));
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashApply,
+					p => stashedState.ApplyAsync(restoreIndex, p));
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -431,7 +508,8 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashApply, p => stash.ApplyAsync(restoreIndex, p));
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashApply,
+					p => stash.ApplyAsync(restoreIndex, p));
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -456,7 +534,7 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashDrop, stashedState.DropAsync);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashDrop, stashedState.DropAsync);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -481,7 +559,7 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashDrop, stash.DropAsync);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashDrop, stash.DropAsync);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -510,7 +588,7 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(Resources.StrStashClear, stash.ClearAsync);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashClear, stash.ClearAsync);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -539,8 +617,8 @@ namespace gitter.Git.Gui
 			}
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(
-					Resources.StrUpdate + ": " + submodule.Name, submodule.UpdateAsync);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate + ": " + submodule.Name,
+					submodule.UpdateAsync);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -569,8 +647,7 @@ namespace gitter.Git.Gui
 			}
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(
-					Resources.StrUpdate, submodules.UpdateAsync);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate, submodules.UpdateAsync);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)
@@ -595,8 +672,7 @@ namespace gitter.Git.Gui
 
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(
-					Resources.StrHousekeeping, repository.GarbageCollectAsync);
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrHousekeeping, repository.GarbageCollectAsync);
 				return GuiCommandStatus.Completed;
 			}
 			catch(OperationCanceledException)

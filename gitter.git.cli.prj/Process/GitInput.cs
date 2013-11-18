@@ -127,8 +127,22 @@ namespace gitter.Git.AccessLayer.CLI
 			var sb = new StringBuilder();
 			if(_options != null && _options.Count != 0)
 			{
+				const char OptionSeparator = ' ';
+				bool first = true;
 				foreach(var opt in _options)
 				{
+					if(opt == null)
+					{
+						continue;
+					}
+					if(!first)
+					{
+						sb.Append(OptionSeparator);
+					}
+					else
+					{
+						first = false;
+					}
 					opt.GetArgumentText(sb);
 				}
 			}

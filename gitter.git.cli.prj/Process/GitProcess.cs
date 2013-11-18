@@ -21,9 +21,10 @@
 namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
-	using System.Text;
-	using System.IO;
 	using System.Diagnostics;
+	using System.IO;
+	using System.Reflection;
+	using System.Text;
 
 	using gitter.Framework.CLI;
 
@@ -105,11 +106,11 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static Version CheckVersion(string gitExe)
 		{
-			var stdErrReceiver = new NullReader();
+			var stdErrReceiver = new AsyncTextReader();
 			var stdOutReceiver = new AsyncTextReader();
 			var executor = new GitProcessExecutor(gitExe);
 			var exitCode = executor.Execute(new GitInput(new Command("--version")), stdOutReceiver, stdErrReceiver);
-			var output = new GitOutput(stdOutReceiver.GetText(), string.Empty, exitCode);
+			var output = new GitOutput(stdOutReceiver.GetText(), stdErrReceiver.GetText(), exitCode);
 			output.ThrowOnBadReturnCode();
 			var parser = new GitParser(output.Output);
 			return parser.ReadVersion();
@@ -124,24 +125,16 @@ namespace gitter.Git.AccessLayer.CLI
 			psi.EnsureEnvironmentVariableExists(GitEnvironment.Display, "localhost:0.0");
 		}
 
-		private static Encoding _defaultEncoding;
+		private static Encoding _defaultEncoding = Encoding.UTF8;
 		private static bool _enableCodepageFallback;
 		private static string _gitInstallationPath;
-		private static string _askPassUtilityPath;
+		private static string _askPassUtilityPath = Path.Combine(
+				Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+				"gitter.askpass.exe");
 		private static string _gitExePath;
 		private static string _shExePath;
 		private static string _gitkCmdPath;
-		private static readonly string UserProfile;
-
-		static GitProcess()
-		{
-			UserProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-			DefaultEncoding = Encoding.UTF8;
-
-			_askPassUtilityPath = Path.Combine(
-				Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]),
-				"gitter.askpass.exe");
-		}
+		private static readonly string UserProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
 		public static Encoding DefaultEncoding
 		{

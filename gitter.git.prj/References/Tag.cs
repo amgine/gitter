@@ -22,6 +22,8 @@ namespace gitter.Git
 {
 	using System;
 
+	using gitter.Git.AccessLayer;
+
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>git tag object.</summary>
@@ -91,7 +93,8 @@ namespace gitter.Git
 					{
 						try
 						{
-							_message = Repository.Accessor.QueryTagMessage.Invoke(FullName);
+							_message = Repository.Accessor.QueryTagMessage.Invoke(
+								new QueryTagMessageParameters { TagName = FullName });
 						}
 						catch
 						{

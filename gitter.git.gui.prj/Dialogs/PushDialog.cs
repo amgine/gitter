@@ -205,11 +205,11 @@ namespace gitter.Git.Gui.Dialogs
 			GuiCommandStatus status;
 			if(pushToRemote)
 			{
-				status = GuiCommands.Push(remote, branches, forceOverwrite, thinPack, sendTags);
+				status = GuiCommands.Push(this, remote, branches, forceOverwrite, thinPack, sendTags);
 			}
 			else
 			{
-				status = GuiCommands.Push(Repository, url, branches, forceOverwrite, thinPack, sendTags);
+				status = GuiCommands.Push(this, Repository, url, branches, forceOverwrite, thinPack, sendTags);
 			}
 			return status == GuiCommandStatus.Completed;
 		}

@@ -86,7 +86,7 @@ namespace gitter.Git
 			}
 			_txtmSysGitPath.Text = _versionPath;
 
-			_chkLogCLICalls.Checked = _gitCLI.LogCLICalls;
+			_chkLogCLICalls.Checked = _gitCLI.LogCalls;
 			_chkFallbackToAnsi.Checked = GitProcess.EnableAnsiCodepageFallback;
 
 			var version = TryGetVersion();
@@ -254,7 +254,7 @@ namespace gitter.Git
 		{
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow("MSysGit Installation", _downloader.DownloadAndInstallAsync);
+				ProgressForm.MonitorTaskAsModalWindow(this, "MSysGit Installation", _downloader.DownloadAndInstallAsync);
 			}
 			catch(Exception exc)
 			{
@@ -279,7 +279,7 @@ namespace gitter.Git
 		{
 			_gitCLI.ManualGitExePath = Path.GetFullPath(_txtmSysGitPath.Text.Trim());
 			_gitCLI.AutodetectGitExePath = _radAlwaysAutodetect.Checked;
-			_gitCLI.LogCLICalls = _chkLogCLICalls.Checked;
+			_gitCLI.LogCalls = _chkLogCLICalls.Checked;
 			_gitCLI.EnableAnsiCodepageFallback = _chkFallbackToAnsi.Checked;
 			return true;
 		}

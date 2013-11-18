@@ -61,22 +61,22 @@ namespace gitter.Git.Gui
 			_gui = guiProvider;
 			_viewFactories = new IViewFactory[]
 			{
-				_viewGit =				new GitViewFactory(guiProvider),
-				_viewHistory =			new HistoryViewFactory(guiProvider),
-				_viewPathHistory =		new PathHistoryViewFactory(guiProvider),
-				_viewReferences =		new ReferencesViewFactory(guiProvider),
-				_viewCommit =			new CommitViewFactory(guiProvider),
-				_viewStash =			new StashViewFactory(guiProvider),
-				_viewRemotes =			new RemotesViewFactory(guiProvider),
-				_viewRemote =			new RemoteViewFactory(guiProvider),
-				_viewTree =				new TreeViewFactory(guiProvider),
-				_viewSubmodules =		new SubmodulesViewFactory(guiProvider),
-				_viewConfig =			new ConfigViewFactory(guiProvider),
-				_viewUsers =			new ContributorsViewFactory(guiProvider),
-				_viewDiff =				new DiffViewFactory(guiProvider),
-				_viewBlame =			new BlameViewFactory(guiProvider),
-				_viewContextualDiff =	new ContextualDiffViewFactory(guiProvider),
-				_viewReflog =			new ReflogViewFactory(guiProvider),
+				_viewGit            = new GitViewFactory(guiProvider),
+				_viewHistory        = new HistoryViewFactory(guiProvider),
+				_viewPathHistory    = new PathHistoryViewFactory(guiProvider),
+				_viewReferences     = new ReferencesViewFactory(guiProvider),
+				_viewCommit         = new CommitViewFactory(guiProvider),
+				_viewStash          = new StashViewFactory(guiProvider),
+				_viewRemotes        = new RemotesViewFactory(guiProvider),
+				_viewRemote         = new RemoteViewFactory(guiProvider),
+				_viewTree           = new TreeViewFactory(guiProvider),
+				_viewSubmodules     = new SubmodulesViewFactory(guiProvider),
+				_viewConfig         = new ConfigViewFactory(guiProvider),
+				_viewUsers          = new ContributorsViewFactory(guiProvider),
+				_viewDiff           = new DiffViewFactory(guiProvider),
+				_viewBlame          = new BlameViewFactory(guiProvider),
+				_viewContextualDiff = new ContextualDiffViewFactory(guiProvider),
+				_viewReflog         = new ReflogViewFactory(guiProvider),
 			};
 
 			if(guiProvider.Repository != null)

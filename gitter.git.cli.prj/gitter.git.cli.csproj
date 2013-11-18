@@ -53,6 +53,7 @@
       <Link>Shared\Verify.cs</Link>
     </Compile>
     <Compile Include="BlameParser.cs" />
+    <Compile Include="CommandExecutionFlags.cs" />
     <Compile Include="CommandBuilder.cs" />
     <Compile Include="CommandExecutorBase.cs" />
     <Compile Include="Commands\Ancillary\Interrogation\blame.cs" />
@@ -120,14 +121,20 @@
     <Compile Include="DiffParser.cs" />
     <Compile Include="GitCliMethod.cs" />
     <Compile Include="GitCommandExecutor.cs" />
-    <Compile Include="GitConfigHelper.cs" />
     <Compile Include="GitParser.cs" />
     <Compile Include="GitCLI.cs" />
-    <Compile Include="GitCLI_config.cs" />
     <Compile Include="GitRepositoryUpdateChannel.cs" />
+    <Compile Include="ICliOptionsProvider.cs" />
     <Compile Include="ICommandExecutor.cs" />
     <Compile Include="Methods\CloneImpl.cs" />
+    <Compile Include="Methods\FetchOrPullImpl.cs" />
+    <Compile Include="Methods\FormatMergeMessageImpl.cs" />
     <Compile Include="Methods\InitImpl.cs" />
+    <Compile Include="Methods\PushImpl.cs" />
+    <Compile Include="Methods\QueryReflogImpl.cs" />
+    <Compile Include="Methods\QueryStashImpl.cs" />
+    <Compile Include="Methods\QuerySymbolicReferenceImpl.cs" />
+    <Compile Include="Methods\QueryTagMessageImpl.cs" />
     <Compile Include="MSysGitAccessorProvider.cs" />
     <Compile Include="MSysGitDownloader.cs" />
     <Compile Include="OutputParser.cs" />
@@ -141,7 +148,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RepositoryCLI_config.cs" />
     <Compile Include="RepositoryCommandExecutor.cs" />
     <Compile Include="StandardTools.cs" />
     <Compile Include="StringUtility.cs" />

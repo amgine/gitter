@@ -51,7 +51,7 @@ namespace gitter.Framework.CLI
 			get { return _stream != null; }
 		}
 
-		public void Initialize(Process process, System.IO.StreamReader reader)
+		public void Initialize(Process process, StreamReader reader)
 		{
 			Verify.Argument.IsNotNull(process, "process");
 			Verify.Argument.IsNotNull(reader, "reader");
@@ -63,12 +63,35 @@ namespace gitter.Framework.CLI
 			BeginReadAsync();
 		}
 
+		public void NotifyCanceled()
+		{
+			Verify.State.IsTrue(IsInitialized);
+
+			var eof = _eof;
+			if(eof != null)
+			{
+				_eof = null;
+				eof.Dispose();
+			}
+		}
+
 		public void WaitForEndOfStream()
 		{
 			Verify.State.IsTrue(IsInitialized);
 
-			_eof.WaitOne();
-			_eof.Dispose();
+			var eof = _eof;
+			if(eof != null)
+			{
+				try
+				{
+					var test = eof.WaitOne(0);
+					eof.WaitOne();
+					eof.Dispose();
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
 
 			_stream = null;
 			_eof = null;
@@ -99,13 +122,50 @@ namespace gitter.Framework.CLI
 			}
 			else
 			{
-				_eof.Set();
+				var eof = (EventWaitHandle)ar.AsyncState;
+				if(eof != null)
+				{
+					try
+					{
+						eof.Set();
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
 			}
 		}
 
 		private void BeginReadAsync()
 		{
-			_stream.BeginRead(_buffer, 0, _buffer.Length, OnStreamRead, null);
+			var eof = _eof;
+			bool isReading;
+			try
+			{
+				_stream.BeginRead(_buffer, 0, _buffer.Length, OnStreamRead, eof);
+				isReading = true;
+			}
+			catch(IOException)
+			{
+				isReading = false;
+			}
+			catch(ObjectDisposedException)
+			{
+				isReading = false;
+			}
+			if(!isReading)
+			{
+				if(eof != null)
+				{
+					try
+					{
+						eof.Set();
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
+			}
 		}
 
 		#endregion
