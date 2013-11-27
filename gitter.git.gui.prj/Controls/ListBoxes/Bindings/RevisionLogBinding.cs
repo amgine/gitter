@@ -49,6 +49,8 @@ namespace gitter.Git.Gui.Controls
 			_logSource = logSource;
 			_revisionListBox = revisionListBox;
 			_logOptions = logOptions;
+
+			Progress = _revisionListBox.ProgressMonitor;
 		}
 
 		#endregion
