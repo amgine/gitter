@@ -179,8 +179,12 @@ namespace gitter.Git
 			{
 				gitVersion = _gitAccessor.GitVersion;
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				gitVersion = null;
 			}
 			if(gitVersion == null || gitVersion < MinimumRequiredGitVersion)
@@ -289,8 +293,12 @@ namespace gitter.Git
 					gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
 				}
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 			}
 			finally
 			{

@@ -200,8 +200,12 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				patch = Clipboard.GetText();
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 			}
 			if(!string.IsNullOrWhiteSpace(patch))
 			{

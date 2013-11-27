@@ -68,22 +68,34 @@ namespace gitter.Framework.Options
 				{
 					_cmbFonts.SelectedItem = font.FontFamily.Name;
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 				}
 				try
 				{
 					_numSize.Value = (decimal)font.Size;
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 				}
 				try
 				{
 					_cmbStyle.SelectedItem = font.Style;
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 				}
 				UpdateSample();
 				_pnlSelectedFont.Enabled = true;

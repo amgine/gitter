@@ -52,8 +52,12 @@ namespace gitter.Git.Gui.Controls
 			{
 				return CompareByName((ConfigParameterListItem)item1, (ConfigParameterListItem)item2);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return 0;
 			}
 		}
@@ -71,8 +75,12 @@ namespace gitter.Git.Gui.Controls
 			{
 				return CompareByValue((ConfigParameterListItem)item1, (ConfigParameterListItem)item2);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return 0;
 			}
 		}

@@ -55,8 +55,12 @@ namespace gitter.Git.Gui.Controls
 			{
 				return CompareByName(i1, i2);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return 0;
 			}
 		}
@@ -78,8 +82,12 @@ namespace gitter.Git.Gui.Controls
 			{
 				return CompareByFetchUrl(i1, i2);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return 0;
 			}
 		}
@@ -101,8 +109,12 @@ namespace gitter.Git.Gui.Controls
 			{
 				return CompareByPushUrl(i1, i2);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return 0;
 			}
 		}

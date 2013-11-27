@@ -403,6 +403,10 @@ namespace gitter.Git.Gui.Views
 			}
 			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				LoggingService.Global.Warning(exc, "Failed to remove temporary file: '{0}'", path);
 			}
 			process.Dispose();

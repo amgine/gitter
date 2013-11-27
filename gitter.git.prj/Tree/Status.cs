@@ -987,7 +987,13 @@ namespace gitter.Git
 						{
 							File.Delete(fileName);
 						}
-						catch { }
+						catch(Exception exc)
+						{
+							if(exc.IsCritical())
+							{
+								throw;
+							}
+						}
 					}
 				}
 			}
@@ -1035,8 +1041,12 @@ namespace gitter.Git
 					return string.Empty;
 				}
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return string.Empty;
 			}
 		}
@@ -1057,7 +1067,13 @@ namespace gitter.Git
 					File.WriteAllText(fileName, message);
 				}
 			}
-			catch { }
+			catch(Exception exc)
+			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
+			}
 		}
 
 		#endregion

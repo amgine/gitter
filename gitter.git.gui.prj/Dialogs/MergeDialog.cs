@@ -167,7 +167,13 @@ namespace gitter.Git.Gui.Dialogs
 					{
 						_txtMessage.Text = _repository.Head.FormatMergeMessage(branches);
 					}
-					catch { }
+					catch(Exception exc)
+					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
+					}
 				}
 			}
 			else
@@ -179,7 +185,13 @@ namespace gitter.Git.Gui.Dialogs
 					{
 						_txtMessage.Text = _repository.Head.FormatMergeMessage(MergeFrom);
 					}
-					catch { }
+					catch(Exception exc)
+					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
+					}
 				}
 			}
 		}

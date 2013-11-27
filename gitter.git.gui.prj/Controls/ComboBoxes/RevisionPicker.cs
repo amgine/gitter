@@ -98,8 +98,12 @@ namespace gitter.Git.Gui.Controls
 					_revisionToolTip.Revision = revision;
 					_revisionToolTip.Show(this, new Point(0, Height + 1));
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 					_revisionToolTip.Revision = null;
 				}
 			}

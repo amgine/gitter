@@ -85,8 +85,12 @@ namespace gitter.Controls
 			{
 				_underlineFont = new Font(Font, FontStyle.Underline);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				_underlineFont = (Font)Font.Clone();
 			}
 		}

@@ -149,16 +149,27 @@ namespace gitter
 			{
 				version = f.EndInvoke(ar);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 			}
-			if(IsDisposed) return;
+			if(IsDisposed)
+			{
+				return;
+			}
 			try
 			{
 				BeginInvoke(new Action<Version>(OnVersionCheckCompleted), version);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 			}
 		}
 
@@ -202,8 +213,12 @@ namespace gitter
 					_updateChannel.Update();
 					_btnUpdate.Enabled = false;
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 				}
 			}
 		}

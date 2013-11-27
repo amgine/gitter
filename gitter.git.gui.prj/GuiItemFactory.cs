@@ -2957,7 +2957,13 @@ namespace gitter.Git.Gui
 									ParameterName = parameter.Name,
 								});
 						}
-						catch { }
+						catch(Exception exception)
+						{
+							if(exception.IsCritical())
+							{
+								throw;
+							}
+						}
 						try
 						{
 							gitAccessor.UnsetConfigValue.Invoke(
@@ -2967,7 +2973,13 @@ namespace gitter.Git.Gui
 									ParameterName = parameter.Name,
 								});
 						}
-						catch { }
+						catch(Exception exception)
+						{
+							if(exception.IsCritical())
+							{
+								throw;
+							}
+						}
 						parameter.Refresh();
 					}
 				}
@@ -3494,8 +3506,12 @@ namespace gitter.Git.Gui
 					}
 				}
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 			}
 			process.Dispose();
 		}

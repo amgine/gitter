@@ -194,7 +194,7 @@ namespace gitter.Git.Gui.Dialogs
 					RevisionPointer.Revert(mainline, noCommit);
 				}
 			}
-			catch(Exception exc)
+			catch(GitException exc)
 			{
 				GitterApplication.MessageBoxService.Show(
 					this,

@@ -67,6 +67,10 @@ namespace gitter.Framework
 				}
 				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 					LoggingService.Global.Error(exc);
 				}
 			}
@@ -180,6 +184,10 @@ namespace gitter.Framework
 								}
 								catch(Exception exc)
 								{
+									if(exc.IsCritical())
+									{
+										throw;
+									}
 									LoggingService.Global.Error(exc);
 								}
 							}
@@ -188,10 +196,17 @@ namespace gitter.Framework
 				}
 				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 					LoggingService.Global.Error(exc);
 				}
 			}
-			if(config == null) config = new ConfigurationManager(configName);
+			if(config == null)
+			{
+				config = new ConfigurationManager(configName);
+			}
 			return config;
 		}
 
@@ -207,6 +222,10 @@ namespace gitter.Framework
 			}
 			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				LoggingService.Global.Error(exc);
 			}
 		}

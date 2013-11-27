@@ -626,8 +626,12 @@ namespace gitter.Git.Gui.Controls
 						longestLineWidth = GitterApplication.TextRenderer.MeasureText(
 							measureEventArgs.Graphics, longestLine.Text, font, int.MaxValue, ContentFormat).Width + CellSize.Width;
 					}
-					catch
+					catch(Exception exc)
 					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
 						longestLineWidth = (int)(maxLength * CellSize.Width);
 					}
 					w += longestLineWidth;

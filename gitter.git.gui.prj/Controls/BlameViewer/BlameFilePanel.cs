@@ -398,8 +398,12 @@ namespace gitter.Git.Gui.Controls
 					{
 						revision = _repository.Revisions[blameHunk.Commit.Hash];
 					}
-					catch
+					catch(Exception exc)
 					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
 					}
 					if(revision != null)
 					{
@@ -540,8 +544,12 @@ namespace gitter.Git.Gui.Controls
 						longestLineWidth = GitterApplication.TextRenderer.MeasureText(
 							measureEventArgs.Graphics, longestLine.Text, font, int.MaxValue, ContentFormat).Width + (CellSize.Width / 2);
 					}
-					catch
+					catch(Exception exc)
 					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
 						longestLineWidth = (int)(maxLength * CellSize.Width);
 					}
 					int longestAuthorWidth;
@@ -550,8 +558,12 @@ namespace gitter.Git.Gui.Controls
 						longestAuthorWidth = GitterApplication.TextRenderer.MeasureText(
 							measureEventArgs.Graphics, longestAuthor, font, int.MaxValue, ContentFormat).Width + CellSize.Width;
 					}
-					catch
+					catch(Exception exc)
 					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
 						longestAuthorWidth = (int)(longestAuthor.Length * CellSize.Width);
 					}
 					longestAuthorWidth += CellSize.Width;

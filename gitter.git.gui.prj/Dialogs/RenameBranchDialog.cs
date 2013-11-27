@@ -119,7 +119,7 @@ namespace gitter.Git.Gui.Dialogs
 					exc.Message);
 				return false;
 			}
-			catch(Exception exc)
+			catch(GitException exc)
 			{
 				GitterApplication.MessageBoxService.Show(
 					this,

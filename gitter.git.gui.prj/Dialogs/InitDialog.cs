@@ -156,6 +156,10 @@ namespace gitter.Git.Gui.Dialogs
 			}
 			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,

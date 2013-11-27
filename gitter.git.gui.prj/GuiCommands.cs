@@ -336,6 +336,10 @@ namespace gitter.Git.Gui
 				}
 				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,

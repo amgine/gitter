@@ -113,8 +113,12 @@ namespace gitter.Git.Gui.Controls
 					return null;
 				}
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return null;
 			}
 		}

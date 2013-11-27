@@ -85,7 +85,7 @@ namespace gitter.Git.Gui.Dialogs
 					_stashedState.ToBranch(branchName);
 				}
 			}
-			catch(Exception exc)
+			catch(GitException exc)
 			{
 				GitterApplication.MessageBoxService.Show(
 					this,

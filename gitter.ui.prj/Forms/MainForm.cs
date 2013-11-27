@@ -225,7 +225,9 @@ namespace gitter
 			{
 				args = Environment.GetCommandLineArgs();
 			}
-			catch(NotSupportedException) { }
+			catch(NotSupportedException)
+			{
+			}
 			if(args == null || args.Length <= 1)
 			{
 				if(!cd.EndsWith("\\")) cd += "\\";
@@ -401,7 +403,13 @@ namespace gitter
 						}
 					}
 				}
-				catch { }
+				catch(Exception exc)
+				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
+				}
 			}
 			UpdateRecentRepositoriesMenu();
 		}
@@ -423,7 +431,13 @@ namespace gitter
 					SaveXml(newdoc, stream);
 				}
 			}
-			catch { }
+			catch(Exception exc)
+			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
+			}
 		}
 
 		private void UpdateRecentRepositoriesMenu()
@@ -534,6 +548,10 @@ namespace gitter
 			}
 			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -614,8 +632,12 @@ namespace gitter
 			{
 				_recentRepositoryPath = Path.GetFullPath(path);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				_recentRepositoryPath = string.Empty;
 			}
 			var prov = FindProviderForDirectory(path);

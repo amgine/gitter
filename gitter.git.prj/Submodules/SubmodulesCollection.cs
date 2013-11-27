@@ -223,8 +223,12 @@ namespace gitter.Git
 				{
 					cfgFile = new ConfigurationFile(Repository, GitConstants.SubmodulesConfigFile, true);
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 					skipUpdate = true;
 				}
 				if(cfgFile != null)

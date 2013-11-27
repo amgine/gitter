@@ -61,14 +61,7 @@ namespace gitter.Framework
 						},
 					})
 					{
-						try
-						{
-							administratorProcess.Start();
-						}
-						catch
-						{
-							throw new Exception();
-						}
+						administratorProcess.Start();
 						try
 						{
 							IRemoteProcedureExecutor executor = null;
@@ -80,8 +73,17 @@ namespace gitter.Framework
 									executor = (IRemoteProcedureExecutor)Activator.GetObject(typeof(IRemoteProcedureExecutor),
 										string.Format(@"ipc://{0}/{1}", RemotingChannelName, RemotingObjectName));
 								}
-								catch { }
-								if(executor != null) break;
+								catch(Exception exc)
+								{
+									if(exc.IsCritical())
+									{
+										throw;
+									}
+								}
+								if(executor != null)
+								{
+									break;
+								}
 							}
 							if(executor != null)
 							{
@@ -104,8 +106,12 @@ namespace gitter.Framework
 										executor.Close();
 										allowWaitForExit = true;
 									}
-									catch
+									catch(Exception exc)
 									{
+										if(exc.IsCritical())
+										{
+											throw;
+										}
 									}
 								}
 							}
@@ -130,7 +136,13 @@ namespace gitter.Framework
 									administratorProcess.Kill();
 								}
 							}
-							catch { }
+							catch(Exception exc)
+							{
+								if(exc.IsCritical())
+								{
+									throw;
+								}
+							}
 						}
 					}
 				}

@@ -284,8 +284,12 @@ namespace gitter.Git
 					}
 				}
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 			}
 			if(configurationManager == null)
 			{
@@ -546,8 +550,12 @@ namespace gitter.Git
 					return null;
 				}
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return null;
 			}
 		}

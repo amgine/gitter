@@ -991,8 +991,12 @@ namespace gitter.Framework.Configuration
 							{
 								res.AddParameter(ParameterPersister.Load(context));
 							}
-							catch
+							catch(Exception exc)
 							{
+								if(exc.IsCritical())
+								{
+									throw;
+								}
 							}
 							finally
 							{

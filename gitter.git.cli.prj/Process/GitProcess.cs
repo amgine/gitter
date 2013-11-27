@@ -47,8 +47,12 @@ namespace gitter.Git.AccessLayer.CLI
 							return path;
 						}
 					}
-					catch
+					catch(Exception exc)
 					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
 					}
 				}
 			}
@@ -246,8 +250,12 @@ namespace gitter.Git.AccessLayer.CLI
 				{
 					return File.Exists(_shExePath);
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 					return false;
 				}
 			}
@@ -279,8 +287,12 @@ namespace gitter.Git.AccessLayer.CLI
 				{
 					return File.Exists(_gitkCmdPath);
 				}
-				catch
+				catch(Exception exc)
 				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
 					return false;
 				}
 			}

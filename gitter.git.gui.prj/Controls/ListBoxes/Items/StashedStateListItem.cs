@@ -49,8 +49,12 @@ namespace gitter.Git.Gui.Controls
 			{
 				return CompareByIndex(i1, i2);
 			}
-			catch
+			catch(Exception exc)
 			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
 				return 0;
 			}
 		}

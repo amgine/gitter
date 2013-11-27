@@ -377,7 +377,13 @@ namespace gitter.Framework.Controls
 			{
 				Repaint();
 			}
-			catch { }
+			catch(Exception exc)
+			{
+				if(exc.IsCritical())
+				{
+					throw;
+				}
+			}
 		}
 
 		#region IProgress<OperationProgress> Members

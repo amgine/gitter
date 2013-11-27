@@ -158,7 +158,13 @@ namespace gitter.Git.Gui.Dialogs
 				{
 					path = Path.Combine(path, GitUtils.GetHumanishName(url));
 				}
-				catch { }
+				catch(Exception exc)
+				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
+				}
 			}
 			return path;
 		}
