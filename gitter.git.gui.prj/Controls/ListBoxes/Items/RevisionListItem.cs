@@ -72,7 +72,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			int width = GlobalBehavior.GraphStyle.MeasureBranch(
 				graphics, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
-			if(width != 0)
+			if(width > 0)
 			{
 				graphics.TextRenderingHint = Utility.TextRenderingHint;
 				graphics.TextContrast = Utility.TextContrast;
@@ -165,7 +165,7 @@ namespace gitter.Git.Gui.Controls
 								new Size(w, 21), -dx, y,
 								eargs => DrawBranchDragImage(branch, eargs.Graphics)))
 							{
-								dragImage.Show();
+								dragImage.ShowDragVisual(ListBox);
 								ListBox.DoDragDrop(branch, DragDropEffects.None | DragDropEffects.Scroll | DragDropEffects.Move);
 							}
 							return;

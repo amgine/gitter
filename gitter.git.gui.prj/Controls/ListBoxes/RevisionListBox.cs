@@ -840,8 +840,13 @@ namespace gitter.Git.Gui.Controls
 
 		#region drag'n'drop support
 
-		protected override void OnDragOver(DragEventArgs drgevent)
+		private void UpdateDragEffect(DragEventArgs drgevent)
 		{
+			if((drgevent.AllowedEffect & DragDropEffects.Move) != DragDropEffects.Move)
+			{
+				drgevent.Effect = DragDropEffects.None;
+				return;
+			}
 			var data = drgevent.Data;
 			if(data.GetDataPresent<Branch>())
 			{
@@ -872,7 +877,23 @@ namespace gitter.Git.Gui.Controls
 					drgevent.Effect = DragDropEffects.None;
 				}
 			}
+		}
+
+		protected override void OnDragOver(DragEventArgs drgevent)
+		{
+			UpdateDragEffect(drgevent);
 			base.OnDragOver(drgevent);
+		}
+
+		protected override void OnDragEnter(DragEventArgs drgevent)
+		{
+			UpdateDragEffect(drgevent);
+			base.OnDragEnter(drgevent);
+		}
+
+		protected override void OnDragLeave(EventArgs e)
+		{
+			base.OnDragLeave(e);
 		}
 
 		protected override void OnDragDrop(DragEventArgs drgevent)

@@ -49,5 +49,11 @@ namespace gitter.Native
 		/// </returns>
 		[DllImport(DllName)]
 		public static extern int MulDiv(int nNumber, int nNumerator, int nDenominator);
+
+		[DllImport(DllName)]
+		public static extern int GetCurrentThreadId();
+
+		[DllImport(DllName)]
+		public static extern IntPtr GetModuleHandle(string lpModuleName);
 	}
 }

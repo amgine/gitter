@@ -40,7 +40,10 @@ namespace gitter.Native
 		public static extern int RegisterWindowMessage(string lpString);
 
 		[DllImport(DllName)]
-		public static extern IntPtr WindowFromPoint(Point lpPoint);
+		public static extern IntPtr WindowFromPoint(POINT point);
+
+		[DllImport(DllName)]
+		public static extern IntPtr WindowFromPoint(Point point);
 
 		[DllImport(DllName)]
 		public static extern IntPtr GetAncestor(IntPtr hwnd, int gaFlags);
@@ -182,5 +185,25 @@ namespace gitter.Native
 		[DllImport(DllName)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool GetComboBoxInfo(IntPtr hwndCombo, ref COMBOBOXINFO pcbi);
+
+		[DllImport(DllName)]
+		public static extern IntPtr SetWindowsHookEx(
+			[In]  WH idHook,
+			[MarshalAs(UnmanagedType.FunctionPtr)]
+			[In]  HookProc lpfn,
+			[In]  IntPtr hMod,
+			[In]  int dwThreadId);
+
+		[DllImport(DllName)]
+		public static extern IntPtr CallNextHookEx(
+			[In]  IntPtr hhk,
+			[In]  int nCode,
+			[In]  IntPtr wParam,
+			[In]  IntPtr lParam);
+
+		[DllImport(DllName)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool UnhookWindowsHookEx(
+			[In]  IntPtr hhk);
 	}
 }

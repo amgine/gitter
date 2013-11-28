@@ -21,10 +21,12 @@
 namespace gitter.Framework.Controls
 {
 	using System;
+	using System.ComponentModel;
 	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Native;
+	using gitter.Framework.Hooks;
 
 	public sealed class DragImage : Form
 	{
@@ -34,6 +36,7 @@ namespace gitter.Framework.Controls
 		private readonly int _dy;
 		private Action<PaintEventArgs> _paintProc;
 		private Timer _timer;
+		private LowLevelMouseHook _hook;
 
 		#endregion
 
@@ -112,7 +115,7 @@ namespace gitter.Framework.Controls
 			if(_paintProc != null) _paintProc(e);
 		}
 
-		public new void Show()
+		public void ShowDragVisual(Control control)
 		{
 			UpdatePosition();
 			User32.ShowWindow(this.Handle, 8);
@@ -120,7 +123,61 @@ namespace gitter.Framework.Controls
 				this.Handle, (IntPtr)(-1),
 				0, 0, 0, 0,
 				0x0010 | 0x0002 | 0x001);
-			_timer.Enabled = true;
+
+			try
+			{
+				_hook = new LowLevelMouseHook();
+				_hook.Activate(0);
+			}
+			catch(Win32Exception)
+			{
+				if(_hook != null)
+				{
+					_hook.Dispose();
+					_hook = null;
+				}
+			}
+
+			if(_hook == null)
+			{
+				_timer.Enabled = true;
+				if(control != null)
+				{
+					control.GiveFeedback += OnControlGiveFeedback;
+				}
+			}
+			else
+			{
+				_hook.MouseMove += (s, e) =>
+					{
+						if(InvokeRequired)
+						{
+							BeginInvoke(new Action<Point>(UpdatePosition), e.Location);
+						}
+						else
+						{
+							UpdatePosition(e.Location);
+						}
+					};
+				_hook.MouseWheel += (s, e) =>
+					{
+						if(e.Delta == 0)
+						{
+							return;
+						}
+						var h = User32.WindowFromPoint(new POINT(e.X, e.Y));
+						if(h == IntPtr.Zero)
+						{
+							return;
+						}
+						User32.SendMessage(h, WM.MOUSEWHEEL, (IntPtr)(e.Delta << 16), (IntPtr)((e.Y << 16) | e.X));
+					};
+			}
+		}
+
+		private void OnControlGiveFeedback(object sender, GiveFeedbackEventArgs e)
+		{
+			UpdatePosition();
 		}
 
 		protected override void DefWndProc(ref Message m)
@@ -160,6 +217,11 @@ namespace gitter.Framework.Controls
 		{
 			if(disposing)
 			{
+				if(_hook != null)
+				{
+					_hook.Dispose();
+					_hook = null;
+				}
 				_timer.Dispose();
 			}
 			base.Dispose(disposing);

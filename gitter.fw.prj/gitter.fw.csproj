@@ -112,6 +112,7 @@
     </Compile>
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GuiCommand.cs" />
+    <Compile Include="Hooks\LowLevelMouseHook.cs" />
     <Compile Include="IProgress.cs" />
     <Compile Include="Native\AnimationFlags.cs" />
     <Compile Include="Native\BITMAPINFOHEADER.cs" />
@@ -121,10 +122,13 @@
     <Compile Include="Native\DWMNCRP.cs" />
     <Compile Include="Native\DWMWA.cs" />
     <Compile Include="Native\Gdi32.cs" />
+    <Compile Include="Native\HookProc.cs" />
     <Compile Include="Native\Kernel32.cs" />
     <Compile Include="Native\MINMAXINFO.cs" />
+    <Compile Include="Native\MSLLHOOKSTRUCT.cs" />
     <Compile Include="Native\NativeUtility.cs" />
     <Compile Include="Native\NCCALCSIZE_PARAMS.cs" />
+    <Compile Include="Native\POINT.cs" />
     <Compile Include="Native\RECT.cs" />
     <Compile Include="Native\RedrawWindowFlags.cs" />
     <Compile Include="Native\Shell32.cs" />
@@ -132,9 +136,11 @@
     <Compile Include="Native\SHFILEINFO.cs" />
     <Compile Include="Native\User.cs" />
     <Compile Include="Native\User32.cs" />
+    <Compile Include="Native\WH.cs" />
     <Compile Include="Native\WINDOWPOS.cs" />
     <Compile Include="Native\WNDPROC.cs" />
     <Compile Include="Native\WVR.cs" />
+    <Compile Include="Native\MOUSEHOOKSTRUCT.cs" />
     <Compile Include="NullProgress.cs" />
     <Compile Include="OperationProgress.cs" />
     <Compile Include="Styles\MSVS2012LightColors.cs" />
@@ -591,6 +597,7 @@
     <Compile Include="Win7Support\VistaPickFolderDialog.cs" />
     <Compile Include="Win7Support\ITaskbarList3.cs" />
     <Compile Include="Native\WM.cs" />
+    <Compile Include="Hooks\WindowsHook.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\CustomListBox\ColumnsDialog.resx">

@@ -389,6 +389,16 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		public void ScrollUp()
+		{
+			ScrollItems(1);
+		}
+
+		public void ScrollDown()
+		{
+			ScrollItems(-1);
+		}
+
 		/// <summary>Disable control redraw events.</summary>
 		public void BeginUpdate()
 		{
@@ -1180,25 +1190,29 @@ namespace gitter.Framework.Controls
 		{
 			if(ClientRectangle.Contains(e.Location))
 			{
-				int lines = SystemInformation.MouseWheelScrollLines;
-				int scrollpos = VScrollPos;
-				if(lines < 0)
-				{
-					int h = VScrollAffectsClientArea ? ClientArea.Height : ContentArea.Height;
-					h = Math.Max(GetVScrollSmallChange(), h);
-					scrollpos -= h * Math.Sign(e.Delta);
-				}
-				else
-				{
-					scrollpos -= GetVScrollSmallChange() * Math.Sign(e.Delta) * lines;
-				}
-				scrollpos = ClampScrollPosition(scrollpos, MaxVScrollPos);
-				scrollpos = TransformVScrollPos(scrollpos);
-				_vScrollBar.Value = scrollpos;
-
+				ScrollItems(e.Delta);
 				UpdateHover(e.X, e.Y);
 			}
 			base.OnMouseWheel(e);
+		}
+
+		private void ScrollItems(int delta)
+		{
+			int lines = SystemInformation.MouseWheelScrollLines;
+			int scrollpos = VScrollPos;
+			if(lines < 0)
+			{
+				int h = VScrollAffectsClientArea ? ClientArea.Height : ContentArea.Height;
+				h = Math.Max(GetVScrollSmallChange(), h);
+				scrollpos -= h * Math.Sign(delta);
+			}
+			else
+			{
+				scrollpos -= GetVScrollSmallChange() * Math.Sign(delta) * lines;
+			}
+			scrollpos = ClampScrollPosition(scrollpos, MaxVScrollPos);
+			scrollpos = TransformVScrollPos(scrollpos);
+			_vScrollBar.Value = scrollpos;
 		}
 
 		protected override void OnResize(EventArgs e)
