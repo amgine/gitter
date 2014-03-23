@@ -23,100 +23,83 @@ namespace gitter.Framework.Services
 	using System;
 	using System.Collections.Generic;
 
-	public sealed class RepositoryGroup : IList<RepositoryLink>
+	public sealed class RepositoryGroup
 	{
-		private readonly string _name;
-		private readonly List<RepositoryLink> _repositories;
+		#region Data
+
+		private string _name;
+		private readonly RepositoryCollection _repositories;
+		private readonly RepositoryGroupCollection _groups;
+
+		#endregion
+
+		#region Events
+
+		public event EventHandler NameChanged;
+
+		private void OnNameChanged()
+		{
+			var handler = NameChanged;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		public event EventHandler Deleted;
+
+		internal void OnDeleted()
+		{
+			var handler = Deleted;
+			if(handler != null) handler(this, EventArgs.Empty);
+		}
+
+		#endregion
+
+		#region .ctor
 
 		public RepositoryGroup(string name)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
 
-			_name = name;
-			_repositories = new List<RepositoryLink>();
+			_name         = name;
+			_repositories = new RepositoryCollection();
+			_groups       = new RepositoryGroupCollection();
 		}
+
+		#endregion
+
+		#region Properties
 
 		public string Name
 		{
 			get { return _name; }
-		}
-
-		public override string ToString()
-		{
-			return _name;
-		}
-
-		public int IndexOf(RepositoryLink item)
-		{
-			return _repositories.IndexOf(item);
-		}
-
-		public void Insert(int index, RepositoryLink item)
-		{
-			_repositories.Insert(index, item);
-		}
-
-		public void RemoveAt(int index)
-		{
-			_repositories.RemoveAt(index);
-		}
-
-		public RepositoryLink this[int index]
-		{
-			get { return _repositories[index]; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
-
-				_repositories[index] = value;
+				if(_name != value)
+				{
+					_name = value;
+					OnNameChanged();
+				}
 			}
 		}
 
-		public void Add(RepositoryLink item)
+		public RepositoryGroupCollection Groups
 		{
-			Verify.Argument.IsNotNull(item, "item");
-
-			_repositories.Add(item);
+			get { return _groups; }
 		}
 
-		public void Clear()
+		public RepositoryCollection Respositories
 		{
-			_repositories.Clear();
+			get { return _repositories; }
 		}
 
-		public bool Contains(RepositoryLink item)
+		#endregion
+
+		#region Methods
+
+		public override string ToString()
 		{
-			return _repositories.Contains(item);
+			return Name;
 		}
 
-		public void CopyTo(RepositoryLink[] array, int arrayIndex)
-		{
-			_repositories.CopyTo(array, arrayIndex);
-		}
-
-		public int Count
-		{
-			get { return _repositories.Count; }
-		}
-
-		public bool IsReadOnly
-		{
-			get { return false; }
-		}
-
-		public bool Remove(RepositoryLink item)
-		{
-			return _repositories.Remove(item);
-		}
-
-		public IEnumerator<RepositoryLink> GetEnumerator()
-		{
-			return _repositories.GetEnumerator();
-		}
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _repositories.GetEnumerator();
-		}
+		#endregion
 	}
 }

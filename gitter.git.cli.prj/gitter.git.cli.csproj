@@ -43,6 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
+      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
+      <Name>gitter.git.fw</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
@@ -158,16 +168,6 @@
     <None Include="..\common\key.snk">
       <Link>Properties\key.snk</Link>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
-      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
-      <Name>gitter.fw</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
-      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
-      <Name>gitter.git.fw</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\CliOptionsPage.resx">

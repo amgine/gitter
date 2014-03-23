@@ -143,6 +143,8 @@
     <Compile Include="Native\MOUSEHOOKSTRUCT.cs" />
     <Compile Include="NullProgress.cs" />
     <Compile Include="OperationProgress.cs" />
+    <Compile Include="Services\RepositoryManager\RepositoryGroupCollection.cs" />
+    <Compile Include="Services\RepositoryManager\RepositoryGroupEventArgs.cs" />
     <Compile Include="Styles\MSVS2012LightColors.cs" />
     <Compile Include="Styles\MSVS2012Style.cs" />
     <Compile Include="Styles\MSVS2012LightStyle.cs" />

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,65 +18,74 @@
  */
 #endregion
 
+
 namespace gitter
 {
 	using System;
-	using System.IO;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
 
-	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
 
-	using Resources = gitter.Properties.Resources;
-
-	internal sealed class RecentRepositoryListItem : CustomListBoxItem<RepositoryLink>
+	sealed class RepositoryGroupListItem : CustomListBoxItem<RepositoryGroup>
 	{
-		private static readonly Bitmap ImgRepositorySmall = CachedResources.Bitmaps["ImgRepository"];
-		private static readonly StringFormat PathStringFormat;
+		private RepositoryGroupBinding _binding;
 
-		static RecentRepositoryListItem()
+		public RepositoryGroupListItem(RepositoryGroup repositoryGroup)
+			: base(repositoryGroup)
 		{
-			PathStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
-			PathStringFormat.Trimming = StringTrimming.EllipsisPath;
-			PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
 		}
 
-		public RecentRepositoryListItem(RepositoryLink repository)
-			: base(repository)
+		protected override void OnListBoxAttached()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			base.OnListBoxAttached();
+			DataContext.NameChanged += OnRepositoryGroupNameChanged;
+			if(_binding != null)
+			{
+				_binding.Dispose();
+			}
+			_binding = new RepositoryGroupBinding(this.Items, DataContext);
+		}
+
+		protected override void OnListBoxDetached()
+		{
+			DataContext.NameChanged -= OnRepositoryGroupNameChanged;
+			if(_binding != null)
+			{
+				_binding.Dispose();
+			}
+			base.OnListBoxDetached();
+		}
+
+		private void OnRepositoryGroupNameChanged(object sender, EventArgs e)
+		{
+			InvalidateSafe();
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					return measureEventArgs.MeasureImageAndText(ImgRepositorySmall, DataContext.Path);
+					return measureEventArgs.MeasureText(DataContext.Name);
+
 				default:
-					return Size.Empty;
+					return base.MeasureSubItem(measureEventArgs);
 			}
 		}
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
-					paintEventArgs.PaintImageAndText(ImgRepositorySmall, DataContext.Path, paintEventArgs.Brush, PathStringFormat);
+					paintEventArgs.PaintText(DataContext.Name);
 					break;
 			}
-		}
-
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			var menu = new RecentRepositoryMenu(this);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
 		}
 	}
 }

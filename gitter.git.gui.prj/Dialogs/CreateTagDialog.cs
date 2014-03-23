@@ -136,6 +136,18 @@ namespace gitter.Git.Gui.Dialogs
 			set { _radSigned.Checked = true; }
 		}
 
+		public bool Annotated
+		{
+			get { return _radAnnotated.Checked; }
+			set { _radAnnotated.Checked = value; }
+		}
+
+		public string Message
+		{
+			get { return _txtMessage.Text; }
+			set { _txtMessage.Text = value; }
+		}
+
 		/// <summary>GPG key id.</summary>
 		public string KeyId
 		{
@@ -303,4 +315,175 @@ namespace gitter.Git.Gui.Dialogs
 
 		#endregion
 	}
+
+	/*
+	interface ICreateTagView
+	{
+		#region Properties
+
+		/// <summary>Tagged revision.</summary>
+		string Revision { get; set; }
+
+		/// <summary>Allow user to change starting revision.</summary>
+		bool AllowChangingRevision { get; set; }
+
+		/// <summary>Tag name.</summary>
+		string TagName { get; set; }
+
+		/// <summary>Allow user to edit <see cref="M:TagName"/>.</summary>
+		bool AllowChangingTagName { get; set; }
+
+		/// <summary>Make signed tag.</summary>
+		bool Signed { get; set; }
+
+		bool Annotated { get; set; }
+
+		string Message { get; set; }
+
+		/// <summary>GPG key id.</summary>
+		string KeyId { get; set; }
+
+		/// <summary>Allow user to change <see cref="M:KeyId"/>.</summary>
+		bool AllowChangingKeyId { get; set; }
+
+		#endregion
+	}
+
+	class Presenter<T>
+		where T : class
+	{
+		private readonly T _view;
+
+		public Presenter(T view)
+		{
+			Verify.Argument.IsNotNull(view, "view");
+
+			_view = view;
+		}
+
+		public T View
+		{
+			get { return _view; }
+		}
+	}
+
+	sealed class CreateTagPresenter : Presenter<ICreateTagView>
+	{
+		public CreateTagPresenter(ICreateTagView view)
+			: base(view)
+		{
+		}
+
+		private bool TryCreateTag()
+		{
+			var name	= View.TagName.Trim();
+			var refspec	= View.Revision.Trim();
+
+			if(!ValidateNewTagName(name, _txtName, _repository))
+			{
+				return false;
+			}
+			if(!ValidateRefspec(refspec, _txtRevision))
+			{
+				return false;
+			}
+
+			string message	= null;
+			bool signed		= View.Signed;
+			bool annotated	= signed || View.Annotated.Checked;
+			if(annotated)
+			{
+				message = View.Message.Trim();
+				if(message.Length == 0)
+				{
+					NotificationService.NotifyInputError(
+						_txtMessage,
+						Resources.ErrNoMessageSpecified,
+						Resources.ErrMessageCannotBeEmpty);
+					return false;
+				}
+			}
+			string keyId = null;
+			if(signed)
+			{
+				if(_radUseKeyId.Checked)
+				{
+					keyId = _txtKeyId.Text.Trim();
+					if(keyId.Length == 0)
+					{
+						NotificationService.NotifyInputError(
+							_txtKeyId,
+							Resources.ErrNoKeyIdSpecified,
+							Resources.ErrKeyIdCannotBeEmpty);
+						return false;
+					}
+				}
+			}
+			try
+			{
+				using(this.ChangeCursor(Cursors.WaitCursor))
+				{
+					var ptr = _repository.GetRevisionPointer(refspec);
+					if(annotated)
+					{
+						if(signed)
+						{
+							if(keyId == null)
+							{
+								_repository.Refs.Tags.Create(name, ptr, message, true);
+							}
+							else
+							{
+								_repository.Refs.Tags.Create(name, ptr, message, keyId);
+							}
+						}
+						else
+						{
+							_repository.Refs.Tags.Create(name, ptr, message, false);
+						}
+					}
+					else
+					{
+						_repository.Refs.Tags.Create(name, ptr);
+					}
+				}
+			}
+			catch(TagAlreadyExistsException)
+			{
+				NotificationService.NotifyInputError(
+					_txtName,
+					Resources.ErrInvalidTagName,
+					Resources.ErrTagAlreadyExists);
+				return false;
+			}
+			catch(UnknownRevisionException)
+			{
+				NotificationService.NotifyInputError(
+					_txtRevision,
+					Resources.ErrInvalidRevisionExpression,
+					Resources.ErrRevisionIsUnknown);
+				return false;
+			}
+			catch(InvalidTagNameException exc)
+			{
+				NotificationService.NotifyInputError(
+					_txtName,
+					Resources.ErrInvalidTagName,
+					exc.Message);
+				return false;
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					View as IWin32Window,
+					exc.Message,
+					string.Format(Resources.ErrFailedToCreateTag, name),
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return false;
+			}
+			return true;
+		}
+	}
+	*/
 }

@@ -35,7 +35,7 @@ namespace gitter.Framework
 
 		string RecentRepositoryPath { get; }
 
-		NotifyCollection<string> RecentRepositories { get; }
+		RepositoryManagerService RepositoryManagerService { get; }
 
 
 		IEnumerable<IRepositoryProvider> RepositoryProviders { get; }

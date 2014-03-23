@@ -36,8 +36,6 @@
   <PropertyGroup>
     <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup />
-  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>gitter.updater.manifest</ApplicationManifest>
   </PropertyGroup>

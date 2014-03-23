@@ -38,7 +38,7 @@ namespace gitter
 	internal partial class StartPageView : ViewBase
 	{
 		private readonly StartPageViewFactory _factory;
-		private readonly NotifyCollectionBinding<string> _recentRepositoriesBinding;
+		private readonly NotifyCollectionBinding<RepositoryLink> _recentRepositoriesBinding;
 		private ICheckBoxWidget _chkShowPageAtStartup;
 		private ICheckBoxWidget _chkClosePageAfterRepositoryLoad;
 
@@ -66,7 +66,7 @@ namespace gitter
 			_lstRecentRepositories.KeyDown += OnRecentRepositoriesKeyDown;
 
 			_chkClosePageAfterRepositoryLoad = GitterApplication.Style.CreateCheckBox();
-			_chkClosePageAfterRepositoryLoad.Text = "Close page after repository load";
+			_chkClosePageAfterRepositoryLoad.Text = Resources.StrsClosePageAfterRepositoryLoad;
 			_chkClosePageAfterRepositoryLoad.Control.Bounds = new Rectangle(9, 491, 199, 20);
 			_chkClosePageAfterRepositoryLoad.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
 			_chkClosePageAfterRepositoryLoad.Control.Parent = this;
@@ -74,7 +74,7 @@ namespace gitter
 			_chkClosePageAfterRepositoryLoad.IsCheckedChanged += _chkClosePageAfterRepositoryLoad_CheckedChanged;
 
 			_chkShowPageAtStartup = GitterApplication.Style.CreateCheckBox();
-			_chkShowPageAtStartup.Text = "Show page on startup";
+			_chkShowPageAtStartup.Text = Resources.StrsShowPageOnStartup;
 			_chkShowPageAtStartup.Control.Bounds = new Rectangle(9, 511, 199, 20);
 			_chkShowPageAtStartup.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
 			_chkShowPageAtStartup.Control.Parent = this;
@@ -84,9 +84,9 @@ namespace gitter
 			_separator1.BackColor = GitterApplication.Style.Colors.Separator;
 			_separator2.BackColor = GitterApplication.Style.Colors.Separator;
 
-			_recentRepositoriesBinding = new NotifyCollectionBinding<string>(
+			_recentRepositoriesBinding = new NotifyCollectionBinding<RepositoryLink>(
 				_lstRecentRepositories.Items,
-				WorkingEnvironment.RecentRepositories,
+				WorkingEnvironment.RepositoryManagerService.RecentRepositories,
 				repo => new RecentRepositoryListItem(repo));
 		}
 
@@ -135,7 +135,7 @@ namespace gitter
 					while(_lstRecentRepositories.SelectedItems.Count != 0)
 					{
 						var item = (RecentRepositoryListItem)_lstRecentRepositories.SelectedItems[0];
-						WorkingEnvironment.RecentRepositories.Remove(item.DataContext);
+						WorkingEnvironment.RepositoryManagerService.RecentRepositories.Remove(item.DataContext);
 						if(item.ListBox != null)
 						{
 							item.Remove();
@@ -165,7 +165,7 @@ namespace gitter
 			else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
 			{
 				var data = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
-				if(!IsPresentInLocalRepositoryList(data.DataContext))
+				if(!IsPresentInLocalRepositoryList(data.DataContext.Path))
 				{
 					e.Effect = DragDropEffects.Copy;
 				}
@@ -217,16 +217,16 @@ namespace gitter
 				}
 				else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
 				{
-					var data = (RepositoryListItem)e.Data.GetData(typeof(RepositoryListItem));
+					var itemToMove = (RepositoryListItem)e.Data.GetData(typeof(RepositoryListItem));
 					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
 					CustomListBoxItemsCollection itemsCollection;
 					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
 					if(index == -1) return;
-					var currentIndex = _lstLocalRepositories.Items.IndexOf(data);
+					var currentIndex = _lstLocalRepositories.Items.IndexOf(itemToMove);
 					if(index == currentIndex) return;
 					if(currentIndex == -1)
 					{
-						itemsCollection.Insert(index, data);
+						itemsCollection.Insert(index, itemToMove);
 					}
 					else
 					{
@@ -234,21 +234,21 @@ namespace gitter
 						{
 							--index;
 						}
-						data.Remove();
-						itemsCollection.Insert(index, data);
+						itemToMove.Remove();
+						itemsCollection.Insert(index, itemToMove);
 					}
 				}
 				else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
 				{
-					var data = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
-					var path = data.DataContext;
+					var itemToMove = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
+					var path = itemToMove.DataContext.Path;
 					if(IsPresentInLocalRepositoryList(path)) return;
 					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
 					CustomListBoxItemsCollection itemsCollection;
 					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
 					if(index == -1) return;
-					var item = new RepositoryListItem(new RepositoryLink(path, string.Empty));
-					itemsCollection.Insert(index, item);
+					var itemToInsert = new RepositoryListItem(new RepositoryLink(path, string.Empty));
+					itemsCollection.Insert(index, itemToInsert);
 				}
 			}
 		}
@@ -283,7 +283,7 @@ namespace gitter
 			var item = e.Item as RecentRepositoryListItem;
 			if(item != null)
 			{
-				if(WorkingEnvironment.OpenRepository(item.DataContext))
+				if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
 				{
 					if(_factory.CloseAfterRepositoryLoad)
 					{

@@ -61,9 +61,9 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		private static Bitmap GetIcon(ReferenceChange change)
+		private static Bitmap GetIcon(ReferenceType referenceType)
 		{
-			switch(change.ReferenceType)
+			switch(referenceType)
 			{
 				case ReferenceType.RemoteBranch:
 					return CachedResources.Bitmaps["ImgBranchRemote"];
@@ -73,6 +73,21 @@ namespace gitter.Git.Gui
 					return CachedResources.Bitmaps["ImgTag"];
 				default:
 					return null;
+			}
+		}
+
+		private static string GetTextPrefix(ReferenceChangeType change)
+		{
+			switch(change)
+			{
+				case ReferenceChangeType.Added:
+					return Resources.StrAdded;
+				case ReferenceChangeType.Moved:
+					return Resources.StrUpdated;
+				case ReferenceChangeType.Removed:
+					return Resources.StrRemoved;
+				default:
+					return string.Empty;
 			}
 		}
 
@@ -105,25 +120,13 @@ namespace gitter.Git.Gui
 								Font, brush, new Point(x, y + 2));
 							break;
 						}
-						var icon = GetIcon(_changes[i]);
-						string prefix;
-						switch(_changes[i].ChangeType)
+						var prefix = GetTextPrefix(_changes[i].ChangeType);
+						if(!string.IsNullOrWhiteSpace(prefix))
 						{
-							case ReferenceChangeType.Added:
-								prefix = Resources.StrAdded;
-								break;
-							case ReferenceChangeType.Moved:
-								prefix = Resources.StrUpdated;
-								break;
-							case ReferenceChangeType.Removed:
-								prefix = Resources.StrRemoved;
-								break;
-							default:
-								prefix = string.Empty;
-								break;
+							GitterApplication.TextRenderer.DrawText(
+								e.Graphics, prefix, Font, brush, new Point(x, y + 2));
 						}
-						GitterApplication.TextRenderer.DrawText(
-							e.Graphics, prefix, Font, brush, new Point(x, y + 2));
+						var icon = GetIcon(_changes[i].ReferenceType);
 						if(icon != null)
 						{
 							e.Graphics.DrawImage(icon, new Rectangle(x + 54, y + (ItemHeight - icon.Height) / 2, icon.Width, icon.Height));

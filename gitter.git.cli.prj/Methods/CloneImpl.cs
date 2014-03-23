@@ -55,11 +55,18 @@ namespace gitter.Git.AccessLayer.CLI
 			*/
 			Verify.Argument.IsNotNull(parameters, "parameters");
 
-			var command = _commandFactory(parameters, false);
-			if(!Directory.Exists(parameters.Path))
+			try
 			{
-				Directory.CreateDirectory(parameters.Path);
+				if(!Directory.Exists(parameters.Path))
+				{
+					Directory.CreateDirectory(parameters.Path);
+				}
 			}
+			catch(Exception exc)
+			{
+				throw new GitException(exc.Message, exc);
+			}
+			var command = _commandFactory(parameters, false);
 			var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 			output.ThrowOnBadReturnCode();
 		}

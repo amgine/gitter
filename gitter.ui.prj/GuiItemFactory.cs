@@ -27,21 +27,22 @@ namespace gitter
 	using System.Windows.Forms;
 
 	using gitter.Framework;
+	using gitter.Framework.Services;
 
 	using Resources = gitter.Properties.Resources;
 
 	static class GuiItemFactory
 	{
-		public static T GetRemoveRecentRepositoryItem<T>(string path)
+		public static T GetRemoveRecentRepositoryItem<T>(RepositoryLink repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
+			Verify.Argument.IsNotNull(repository, "repository");
 
 			var item = new T()
 			{
-				Text = Resources.StrRemoveRepository,
+				Text  = Resources.StrRemoveRepository,
 				Image = CachedResources.Bitmaps["ImgRepositoryRemove"],
-				Tag = path,
+				Tag   = repository,
 			};
 			item.Click += OnRemoveRecentRepositoryClick;
 			return item;
@@ -95,9 +96,9 @@ namespace gitter
 		private static void OnRemoveRecentRepositoryClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
-			var path = (string)item.Tag;
+			var repo = (RepositoryLink)item.Tag;
 
-			GitterApplication.WorkingEnvironment.RecentRepositories.Remove(path);
+			GitterApplication.WorkingEnvironment.RepositoryManagerService.RecentRepositories.Remove(repo);
 		}
 
 		private static void OnRemoveRepositoryClick(object sender, EventArgs e)

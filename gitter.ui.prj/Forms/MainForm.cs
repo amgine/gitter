@@ -53,13 +53,12 @@ namespace gitter
 
 		private string _recentRepositoryPath;
 
-		private NotifyCollection<string> _recentRepositories;
-
 		private readonly RepositoryExplorerViewFactory _repositoryExplorerFactory;
 		private readonly StartPageViewFactory _startPageFactory;
 		private readonly LogViewFactory _logFactory;
 
 		private readonly ConfigurationService _configurationService;
+		private readonly RepositoryManagerService _repositoryManagerService;
 
 		#endregion
 
@@ -76,9 +75,13 @@ namespace gitter
 		{
 			InitializeComponent();
 
-			_configurationService = GitterApplication.ConfigurationService;
+			_configurationService     = GitterApplication.ConfigurationService;
+			_repositoryManagerService = new RepositoryManagerService(SavedRecentRepositories);
+			_viewDockService          = new ViewDockService(this, _toolDockGrid, _configurationService.ViewsSection);
+			_notificationService      = new BalloonNotificationService();
 
-			_viewDockService = new ViewDockService(this, _toolDockGrid, _configurationService.ViewsSection);
+			_repositoryManagerService.RecentRepositories.Changed += OnRecentRepositoriesChanged;
+
 			_viewDockService.RegisterFactory(
 				_startPageFactory = new StartPageViewFactory());
 			_viewDockService.RegisterFactory(
@@ -91,12 +94,10 @@ namespace gitter
 
 			_viewDockService.ShowView(Guids.RepositoryExplorerView);
 
-			_repositoryProviders = new Dictionary<string, IRepositoryProvider>();
-			_issueTrackerProviders = new Dictionary<string, IRepositoryServiceProvider>();
+			_repositoryProviders         = new Dictionary<string, IRepositoryProvider>();
+			_issueTrackerProviders       = new Dictionary<string, IRepositoryServiceProvider>();
 			_activeIssueTrackerProviders = new HashSet<IRepositoryServiceProvider>();
-			_additionalGui = new LinkedList<IGuiProvider>();
-
-			_notificationService = new BalloonNotificationService();
+			_additionalGui               = new LinkedList<IGuiProvider>();
 
 			LoadProviders();
 
@@ -267,9 +268,9 @@ namespace gitter
 			get { return _recentRepositoryPath; }
 		}
 
-		public NotifyCollection<string> RecentRepositories
+		public RepositoryManagerService RepositoryManagerService
 		{
-			get { return _recentRepositories; }
+			get { return _repositoryManagerService; }
 		}
 
 		public INotificationService NotificationService
@@ -342,6 +343,7 @@ namespace gitter
 
 		private void LoadOptions()
 		{
+			_repositoryManagerService.LoadFrom(_configurationService.RepositoryManagerSection);
 			var mainWindowNode = _configurationService.GuiSection.TryGetSection("MainWindow");
 			if(mainWindowNode != null)
 			{
@@ -370,19 +372,14 @@ namespace gitter
 			startPageNode.SetValue("ShowOnStartup", _startPageFactory.ShowOnStartup);
 			startPageNode.SetValue("CloseAfterRepositoryLoad", _startPageFactory.CloseAfterRepositoryLoad);
 
+			_repositoryManagerService.SaveTo(_configurationService.RepositoryManagerSection);
 			_viewDockService.SaveSettings();
 		}
 
 		private void LoadRecentRepositories()
 		{
-			if(_recentRepositories == null)
-			{
-				_recentRepositories = new NotifyCollection<string>();
-			}
-			else
-			{
-				_recentRepositories.Clear();
-			}
+			_repositoryManagerService.RecentRepositories.Changed -= OnRecentRepositoriesChanged;
+			_repositoryManagerService.RecentRepositories.Clear();
 			var cfgName = "recent.xml";
 			if(_configurationService.FileExists(cfgName))
 			{
@@ -399,7 +396,7 @@ namespace gitter
 						if(repoNode.Name == "Repository")
 						{
 							var path = repoNode.Attributes["Path"].Value;
-							_recentRepositories.Add(path);
+							_repositoryManagerService.RecentRepositories.Add(new RepositoryLink(path, @""));
 						}
 					}
 				}
@@ -411,18 +408,19 @@ namespace gitter
 					}
 				}
 			}
+			_repositoryManagerService.RecentRepositories.Changed += OnRecentRepositoriesChanged;
 			UpdateRecentRepositoriesMenu();
 		}
 
 		private void SaveRecentRepositories()
 		{
 			var cfgName = "recent.xml";
-			int n = Math.Min(_recentRepositories.Count, SavedRecentRepositories);
 			var newdoc = new XmlDocument();
 			var rootnode = newdoc.AppendChild(newdoc.CreateElement("Recent"));
-			for(int i = 0; i < n; ++i)
+			for(int i = 0; i < _repositoryManagerService.RecentRepositories.Count; ++i)
 			{
-				rootnode.AppendChild(newdoc.CreateElement("Repository")).Attributes.Append(newdoc.CreateAttribute("Path")).Value = _recentRepositories[i];
+				rootnode.AppendChild(newdoc.CreateElement("Repository")).Attributes.Append(newdoc.CreateAttribute("Path")).Value =
+					_repositoryManagerService.RecentRepositories[i].Path;
 			}
 			try
 			{
@@ -443,7 +441,7 @@ namespace gitter
 		private void UpdateRecentRepositoriesMenu()
 		{
 			_mnuRecentRepositories.DropDownItems.Clear();
-			if(_recentRepositories != null && _recentRepositories.Count == 0)
+			if(_repositoryManagerService.RecentRepositories.Count == 0)
 			{
 				_mnuRecentRepositories.DropDownItems.Add(new ToolStripMenuItem(Resources.StrlNoAvailable.SurroundWith("<", ">"))
 				{
@@ -452,10 +450,10 @@ namespace gitter
 			}
 			else
 			{
-				foreach(var repo in _recentRepositories)
+				foreach(var repo in _repositoryManagerService.RecentRepositories)
 				{
 					_mnuRecentRepositories.DropDownItems.Add(new ToolStripMenuItem(
-						repo, CachedResources.Bitmaps["ImgRepository"], OnRecentRepositoryClick)
+						repo.Path, CachedResources.Bitmaps["ImgRepository"], OnRecentRepositoryClick)
 					{
 						Tag = repo,
 					});
@@ -465,8 +463,8 @@ namespace gitter
 
 		private void OnRecentRepositoryClick(object sender, EventArgs e)
 		{
-			var repo = (string)((ToolStripItem)sender).Tag;
-			OpenRepository(repo);
+			var repo = (RepositoryLink)((ToolStripItem)sender).Tag;
+			OpenRepository(repo.Path);
 		}
 
 		protected override void OnClosing(CancelEventArgs e)
@@ -511,7 +509,9 @@ namespace gitter
 			foreach(var prov in _repositoryProviders.Values)
 			{
 				if(prov.IsValidFor(workingDirectory))
+				{
 					return prov;
+				}
 			}
 			return null;
 		}
@@ -602,6 +602,11 @@ namespace gitter
 				}), null);
 		}
 
+		private void OnRecentRepositoriesChanged(object sender, NotifyCollectionEventArgs e)
+		{
+			UpdateRecentRepositoriesMenu();
+		}
+
 		private void OpenIssueTrackers()
 		{
 			foreach(var prov in _issueTrackerProviders.Values)
@@ -670,37 +675,16 @@ namespace gitter
 			}
 			else
 			{
-				var res = OpenRepository(path, prov);
-				if(res)
+				var wasOpened = OpenRepository(path, prov);
+				if(wasOpened)
 				{
-					RegisterRecentRepository(path);
+					RepositoryManagerService.RegisterRecentRepository(path);
 					_repositoryExplorerFactory.RootItem.RepositoryDisplayName =
 						Path.GetFileName(path.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) ?
 										 path.Substring(0, path.Length - 1) : path);
 				}
-				return res;
+				return wasOpened;
 			}
-		}
-
-		private void RegisterRecentRepository(string repo)
-		{
-			if(string.IsNullOrWhiteSpace(repo)) return;
-			if(repo.EndsWith(Path.DirectorySeparatorChar) || repo.EndsWith(Path.AltDirectorySeparatorChar))
-			{
-				repo = repo.Substring(0, repo.Length - 1);
-			}
-			var id = _recentRepositories.IndexOf(repo);
-			if(id == 0) return;
-			if(id != -1)
-			{
-				_recentRepositories.RemoveAt(id);
-			}
-			_recentRepositories.Insert(0, repo);
-			while(_recentRepositories.Count > SavedRecentRepositories)
-			{
-				_recentRepositories.RemoveAt(SavedRecentRepositories);
-			}
-			UpdateRecentRepositoriesMenu();
 		}
 
 		public void CloseRepository()

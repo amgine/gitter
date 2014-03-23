@@ -26,7 +26,7 @@ namespace gitter.Framework.Services
 
 	using gitter.Framework.Controls;
 
-	public class RepositoryCollection : NotifyCollection<RepositoryLink>
+	public class RepositoryGroupCollection : NotifyCollection<RepositoryGroup>
 	{
 	}
 }

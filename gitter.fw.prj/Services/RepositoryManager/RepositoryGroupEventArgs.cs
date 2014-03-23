@@ -21,12 +21,19 @@
 namespace gitter.Framework.Services
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
 
-	using gitter.Framework.Controls;
-
-	public class RepositoryCollection : NotifyCollection<RepositoryLink>
+	public sealed class RepositoryGroupEventArgs : EventArgs
 	{
+		private readonly RepositoryGroup _repositoryGroup;
+
+		public RepositoryGroupEventArgs(RepositoryGroup repositoryGroup)
+		{
+			_repositoryGroup = repositoryGroup;
+		}
+
+		public RepositoryGroup RepositoryGroup
+		{
+			get { return _repositoryGroup; }
+		}
 	}
 }

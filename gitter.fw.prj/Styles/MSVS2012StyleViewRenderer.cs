@@ -930,10 +930,23 @@ namespace gitter.Framework.Controls
 
 					using(var brush = new HatchBrush(HatchStyle.Percent20, accentColor, backgroundColor))
 					{
-						var ro = graphics.RenderingOrigin;
-						graphics.RenderingOrigin = new Point(client.X % 4, client.Y % 4);
+						var ro = default(Point);
+						try
+						{
+							ro = graphics.RenderingOrigin;
+							graphics.RenderingOrigin = new Point(client.X % 4, client.Y % 4);
+						}
+						catch(NotImplementedException)
+						{
+						}
 						graphics.FillRectangle(brush, client);
-						graphics.RenderingOrigin = ro;
+						try
+						{
+							graphics.RenderingOrigin = ro;
+						}
+						catch(NotImplementedException)
+						{
+						}
 					}
 				}
 			}

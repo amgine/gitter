@@ -57,22 +57,22 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\gitter.teamcity.prj\gitter.teamcity.csproj">
-      <Project>{F939CB90-A1FD-4A3C-84FA-097BA644F254}</Project>
-      <Name>gitter.teamcity</Name>
-    </ProjectReference>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
       <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
       <Name>gitter.fw</Name>
@@ -97,7 +97,10 @@
       <Project>{122AA8B0-795B-4DD8-8650-11675D946F3E}</Project>
       <Name>gitter.redmine</Name>
     </ProjectReference>
-    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\gitter.teamcity.prj\gitter.teamcity.csproj">
+      <Project>{F939CB90-A1FD-4A3C-84FA-097BA644F254}</Project>
+      <Name>gitter.teamcity</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
@@ -122,6 +125,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ListBoxes\RecentRepositoryListItem.cs" />
+    <Compile Include="Controls\ListBoxes\RepositoryGroupBinding.cs" />
+    <Compile Include="Controls\ListBoxes\RepositoryGroupListItem.cs" />
     <Compile Include="Controls\ListBoxes\ServiceProviderListItem.cs" />
     <Compile Include="Controls\ListBoxes\RepositoryDragImage.cs" />
     <Compile Include="Properties\CachedResources.cs" />
@@ -221,21 +226,17 @@
     </None>
     <None Include="app.manifest" />
     <None Include="Properties\postbuild.cmd" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="app.ico" />
     <None Include="Resources\repositories.png" />
     <None Include="Resources\repository-go1.png" />
     <None Include="Resources\repository-remove.png" />
     <None Include="Resources\repository-add.png" />
     <None Include="Resources\repository.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\application--arrow.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\repository-explorer.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\database.png" />
+    <None Include="Resources\database.png" />
     <None Include="Resources\start-page-logo-gradient-dark.png" />
     <None Include="Resources\start-page-logo-dark.png" />
     <None Include="Resources\repo-scan.png" />
@@ -245,7 +246,6 @@
     <None Include="Resources\start-page-logo-gradient.png" />
     <None Include="Resources\start-page-logo.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>..\..\Properties\postbuild.cmd $(ConfigurationName)</PostBuildEvent>

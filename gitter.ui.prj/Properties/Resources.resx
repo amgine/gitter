@@ -286,4 +286,10 @@
   <data name="StrLoadingRepository" xml:space="preserve">
     <value>Loading Repository</value>
   </data>
+  <data name="StrsClosePageAfterRepositoryLoad" xml:space="preserve">
+    <value>Close page after repository load</value>
+  </data>
+  <data name="StrsShowPageOnStartup" xml:space="preserve">
+    <value>Show page on startup</value>
+  </data>
 </root>
