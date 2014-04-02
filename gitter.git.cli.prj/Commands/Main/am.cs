@@ -27,21 +27,21 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class AmCommand : Command
 	{
 		/// <summary>Add a Signed-off-by: line to the commit message, using the committer identity of yourself.</summary>
-		public static CommandArgument SignOff()
+		public static ICommandArgument SignOff()
 		{
-			return CommandArgument.SignOff();
+			return CommandFlag.SignOff();
 		}
 
 		/// <summary>Pass -k flag to git-mailinfo (see git-mailinfo(1)).</summary>
-		public static CommandArgument Keep()
+		public static ICommandArgument Keep()
 		{
-			return new CommandArgument("--keep");
+			return new CommandFlag("--keep");
 		}
 
 		/// <summary>Be quiet. Only print error messages.</summary>
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return CommandArgument.Quiet();
+			return CommandFlag.Quiet();
 		}
 
 		/// <summary>
@@ -49,32 +49,32 @@ namespace gitter.Git.AccessLayer.CLI
 		///	is re-coded into UTF-8 encoding (configuration variable i18n.commitencoding can be used to specify project's
 		///	preferred encoding if it is not UTF-8). 
 		/// </summary>
-		public static CommandArgument Utf8()
+		public static ICommandArgument Utf8()
 		{
-			return new CommandArgument("--utf8");
+			return new CommandFlag("--utf8");
 		}
 
 		/// <summary>
 		///	Pass -n flag to git-mailinfo (see git-mailinfo(1)).
 		/// </summary>
-		public static CommandArgument NoUtf8()
+		public static ICommandArgument NoUtf8()
 		{
-			return new CommandArgument("--no-utf8");
+			return new CommandFlag("--no-utf8");
 		}
 
 		/// <summary>
 		///	When the patch does not apply cleanly, fall back on 3-way merge if the patch records the identity of blobs it
 		///	is supposed to apply to and we have those blobs available locally.
 		/// </summary>
-		public static CommandArgument FallbackOn3WayMerge()
+		public static ICommandArgument FallbackOn3WayMerge()
 		{
-			return new CommandArgument("--3way");
+			return new CommandFlag("--3way");
 		}
 
 		/// <summary>Run interactively.</summary>
-		public static CommandArgument Interactive()
+		public static ICommandArgument Interactive()
 		{
-			return new CommandArgument("--interactive");
+			return new CommandFlag("--interactive");
 		}
 
 		public AmCommand()
@@ -82,12 +82,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public AmCommand(params CommandArgument[] args)
+		public AmCommand(params ICommandArgument[] args)
 			: base("am", args)
 		{
 		}
 
-		public AmCommand(IList<CommandArgument> args)
+		public AmCommand(IList<ICommandArgument> args)
 			: base("am", args)
 		{
 		}

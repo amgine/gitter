@@ -69,7 +69,10 @@
     <Compile Include="Commands\Ancillary\Manipulation\remote.cs" />
     <Compile Include="Commands\Ancillary\Manipulation\repack.cs" />
     <Compile Include="Commands\Command.cs" />
-    <Compile Include="Commands\CommandArgument.cs" />
+    <Compile Include="Commands\CommandParameter.cs" />
+    <Compile Include="Commands\CommandFlag.cs" />
+    <Compile Include="Commands\CommandParameterValue.cs" />
+    <Compile Include="Commands\ICommandArgument.cs" />
     <Compile Include="Commands\Low-Level\Interrogation\cat-file.cs" />
     <Compile Include="Commands\Low-Level\Interrogation\diff-index.cs" />
     <Compile Include="Commands\Low-Level\Interrogation\ls-files.cs" />
@@ -112,6 +115,7 @@
     <Compile Include="Commands\Main\status.cs" />
     <Compile Include="Commands\Main\submodule.cs" />
     <Compile Include="Commands\Main\tag.cs" />
+    <Compile Include="Commands\PathCommandArgument.cs" />
     <Compile Include="Controls\CliOptionsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -25,89 +25,89 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Initialize, update or inspect submodules.</summary>
 	public sealed class SubmoduleCommand : Command
 	{
-		public static CommandArgument Add()
+		public static ICommandArgument Add()
 		{
-			return new CommandArgument("add");
+			return new CommandParameter("add");
 		}
 
-		public static CommandArgument Init()
+		public static ICommandArgument Init()
 		{
-			return new CommandArgument("init");
+			return new CommandParameter("init");
 		}
 
-		public static CommandArgument Update()
+		public static ICommandArgument Update()
 		{
-			return new CommandArgument("update");
+			return new CommandParameter("update");
 		}
 
-		public static CommandArgument Sync()
+		public static ICommandArgument Sync()
 		{
-			return new CommandArgument("sync");
+			return new CommandParameter("sync");
 		}
 
-		public static CommandArgument Foreach()
+		public static ICommandArgument Foreach()
 		{
-			return new CommandArgument("foreach");
+			return new CommandParameter("foreach");
 		}
 
-		public static CommandArgument Status()
+		public static ICommandArgument Status()
 		{
-			return new CommandArgument("status");
+			return new CommandParameter("status");
 		}
 
-		public static CommandArgument Summary()
+		public static ICommandArgument Summary()
 		{
-			return new CommandArgument("summary");
+			return new CommandParameter("summary");
 		}
 
-		public static CommandArgument InitFlag()
+		public static ICommandArgument InitFlag()
 		{
-			return new CommandArgument("--init");
+			return new CommandFlag("--init");
 		}
 
-		public static CommandArgument NoFetch()
+		public static ICommandArgument NoFetch()
 		{
-			return new CommandArgument("--no-fetch");
+			return new CommandFlag("--no-fetch");
 		}
 
-		public static CommandArgument Rebase()
+		public static ICommandArgument Rebase()
 		{
-			return new CommandArgument("--rebase");
+			return new CommandFlag("--rebase");
 		}
 
-		public static CommandArgument Recursive()
+		public static ICommandArgument Recursive()
 		{
-			return new CommandArgument("--recursive");
+			return new CommandFlag("--recursive");
 		}
 
-		public static CommandArgument Merge()
+		public static ICommandArgument Merge()
 		{
-			return new CommandArgument("--merge");
+			return new CommandFlag("--merge");
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("--quiet");
+			return new CommandFlag("--quiet");
 		}
 
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force");
+			return new CommandFlag("--force");
 		}
 
-		public static CommandArgument Reference(string repository)
+		public static ICommandArgument Reference(string repository)
 		{
-			return new CommandArgument("--reference", repository, ' ');
+			return new CommandParameterValue("--reference", repository, ' ');
 		}
 
-		public static CommandArgument Branch(string name)
+		public static ICommandArgument Branch(string name)
 		{
-			return new CommandArgument("-b" , name, ' ');
+			return new CommandParameterValue("-b" , name, ' ');
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public SubmoduleCommand()
@@ -115,12 +115,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public SubmoduleCommand(params CommandArgument[] args)
+		public SubmoduleCommand(params ICommandArgument[] args)
 			: base("submodule", args)
 		{
 		}
 
-		public SubmoduleCommand(IList<CommandArgument> args)
+		public SubmoduleCommand(IList<ICommandArgument> args)
 			: base("submodule", args)
 		{
 		}

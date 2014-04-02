@@ -25,9 +25,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class BlameCommand : Command
 	{
-		public static CommandArgument Porcelain()
+		public static ICommandArgument Porcelain()
 		{
-			return new CommandArgument("--porcelain");
+			return new CommandFlag("--porcelain");
 		}
 
 		public BlameCommand()
@@ -35,12 +35,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public BlameCommand(params CommandArgument[] args)
+		public BlameCommand(params ICommandArgument[] args)
 			: base("blame", args)
 		{
 		}
 
-		public BlameCommand(IList<CommandArgument> args)
+		public BlameCommand(IList<ICommandArgument> args)
 			: base("blame", args)
 		{
 		}

@@ -25,94 +25,94 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Get and set repository or global options.</summary>
 	public sealed class ConfigCommand : Command
 	{
-		public static CommandArgument List()
+		public static ICommandArgument List()
 		{
-			return new CommandArgument("--list");
+			return new CommandFlag("--list");
 		}
 
-		public static CommandArgument NullTerminate()
+		public static ICommandArgument NullTerminate()
 		{
-			return new CommandArgument("--null");
+			return new CommandFlag("--null");
 		}
 
-		public static CommandArgument Add()
+		public static ICommandArgument Add()
 		{
-			return new CommandArgument("--add");
+			return new CommandFlag("--add");
 		}
 
-		public static CommandArgument Unset()
+		public static ICommandArgument Unset()
 		{
-			return new CommandArgument("--unset");
+			return new CommandFlag("--unset");
 		}
 
-		public static CommandArgument UnsetAll()
+		public static ICommandArgument UnsetAll()
 		{
-			return new CommandArgument("--unset-all");
+			return new CommandFlag("--unset-all");
 		}
 
-		public static CommandArgument Get(string name)
+		public static ICommandArgument Get(string name)
 		{
-			return new CommandArgument("--get", name, ' ');
+			return new CommandParameterValue("--get", name, ' ');
 		}
 
-		public static CommandArgument GetAll(string name)
+		public static ICommandArgument GetAll(string name)
 		{
-			return new CommandArgument("--get-all", name, ' ');
+			return new CommandParameterValue("--get-all", name, ' ');
 		}
 
-		public static CommandArgument GetRegexp(string nameregex)
+		public static ICommandArgument GetRegexp(string nameregex)
 		{
-			return new CommandArgument("--get-regexp", nameregex, ' ');
+			return new CommandParameterValue("--get-regexp", nameregex, ' ');
 		}
 
-		public static CommandArgument Global()
+		public static ICommandArgument Global()
 		{
-			return new CommandArgument("--global");
+			return new CommandFlag("--global");
 		}
 
-		public static CommandArgument System()
+		public static ICommandArgument System()
 		{
-			return new CommandArgument("--system");
+			return new CommandFlag("--system");
 		}
 
-		public static CommandArgument Int()
+		public static ICommandArgument Int()
 		{
-			return new CommandArgument("--int");
+			return new CommandFlag("--int");
 		}
 
-		public static CommandArgument Path()
+		public static ICommandArgument Path()
 		{
-			return new CommandArgument("--path");
+			return new CommandFlag("--path");
 		}
 
-		public static CommandArgument Edit()
+		public static ICommandArgument Edit()
 		{
-			return new CommandArgument("--edit");
+			return new CommandFlag("--edit");
 		}
 
-		public static CommandArgument Bool()
+		public static ICommandArgument Bool()
 		{
-			return new CommandArgument("--bool");
+			return new CommandFlag("--bool");
 		}
 
-		public static CommandArgument BoolOrInt()
+		public static ICommandArgument BoolOrInt()
 		{
-			return new CommandArgument("--bool-or-int");
+			return new CommandFlag("--bool-or-int");
 		}
 
-		public static CommandArgument File(string fileName)
+		public static ICommandArgument File(string fileName)
 		{
-			return new CommandArgument("--file", fileName, ' ');
+			return new CommandParameterValue("--file", fileName, ' ');
 		}
 
-		public static CommandArgument RemoveSection(string name)
+		public static ICommandArgument RemoveSection(string name)
 		{
-			return new CommandArgument("--remove-section", name, ' ');
+			return new CommandParameterValue("--remove-section", name, ' ');
 		}
 
-		public static CommandArgument RenameSection(string oldName, string newName)
+		public static ICommandArgument RenameSection(string oldName, string newName)
 		{
-			return new CommandArgument("--rename-section", oldName + " " + newName, ' ');
+			return new CommandParameterValue("--rename-section", oldName + " " + newName, ' ');
 		}
 
 		public ConfigCommand()
@@ -120,12 +120,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public ConfigCommand(params CommandArgument[] args)
+		public ConfigCommand(params ICommandArgument[] args)
 			: base("config", args)
 		{
 		}
 
-		public ConfigCommand(IList<CommandArgument> args)
+		public ConfigCommand(IList<ICommandArgument> args)
 			: base("config", args)
 		{
 		}

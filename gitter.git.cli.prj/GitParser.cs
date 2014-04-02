@@ -125,7 +125,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public ByteString(int bufferSize)
 			{
-				if(bufferSize < 1) throw new ArgumentOutOfRangeException();
+				Verify.Argument.IsPositive(bufferSize, "bufferSize");
 
 				_buffer = new byte[bufferSize];
 			}

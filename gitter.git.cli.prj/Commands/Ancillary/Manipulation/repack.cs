@@ -26,24 +26,24 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class RepackCommand : Command
 	{
-		public static CommandArgument Window(int window)
+		public static ICommandArgument Window(int window)
 		{
-			return new CommandArgument("--window", window.ToString(CultureInfo.InvariantCulture), '=');
+			return new CommandParameterValue("--window", window.ToString(CultureInfo.InvariantCulture), '=');
 		}
 
-		public static CommandArgument WindowMemory(int windowMemory)
+		public static ICommandArgument WindowMemory(int windowMemory)
 		{
-			return new CommandArgument("--window-memory", windowMemory.ToString(CultureInfo.InvariantCulture), '=');
+			return new CommandParameterValue("--window-memory", windowMemory.ToString(CultureInfo.InvariantCulture), '=');
 		}
 
-		public static CommandArgument Depth(int depth)
+		public static ICommandArgument Depth(int depth)
 		{
-			return new CommandArgument("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
+			return new CommandParameterValue("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
 		}
 
-		public static CommandArgument MaxPackSize(int maxPackSize)
+		public static ICommandArgument MaxPackSize(int maxPackSize)
 		{
-			return new CommandArgument("--max-pack-size", maxPackSize.ToString(CultureInfo.InvariantCulture), '=');
+			return new CommandParameterValue("--max-pack-size", maxPackSize.ToString(CultureInfo.InvariantCulture), '=');
 		}
 
 		public RepackCommand()
@@ -51,12 +51,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public RepackCommand(params CommandArgument[] args)
+		public RepackCommand(params ICommandArgument[] args)
 			: base("repack", args)
 		{
 		}
 
-		public RepackCommand(IEnumerable<CommandArgument> args)
+		public RepackCommand(IEnumerable<ICommandArgument> args)
 			: base("repack", args)
 		{
 		}

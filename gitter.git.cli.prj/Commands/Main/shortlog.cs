@@ -25,27 +25,27 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Summarize 'git-log' output.</summary>
 	public sealed class ShortLogCommand : Command
 	{
-		internal static CommandArgument All()
+		internal static ICommandArgument All()
 		{
-			return new CommandArgument("--all");
+			return new CommandFlag("--all");
 		}
 
 		/// <summary>Suppress commit description and provide a commit count summary only.</summary>
-		public static CommandArgument Summary()
+		public static ICommandArgument Summary()
 		{
-			return new CommandArgument("--summary");
+			return new CommandFlag("--summary");
 		}
 
 		/// <summary>Sort output according to the number of commits per author instead of author alphabetic order.</summary>
-		public static CommandArgument Numbered()
+		public static ICommandArgument Numbered()
 		{
-			return new CommandArgument("--numbered");
+			return new CommandFlag("--numbered");
 		}
 
 		/// <summary>Show the email address of each author.</summary>
-		public static CommandArgument Email()
+		public static ICommandArgument Email()
 		{
-			return new CommandArgument("--email");
+			return new CommandFlag("--email");
 		}
 
 		public ShortLogCommand()
@@ -53,12 +53,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public ShortLogCommand(params CommandArgument[] args)
+		public ShortLogCommand(params ICommandArgument[] args)
 			: base("shortlog", args)
 		{
 		}
 
-		public ShortLogCommand(IList<CommandArgument> args)
+		public ShortLogCommand(IList<ICommandArgument> args)
 			: base("shortlog", args)
 		{
 		}

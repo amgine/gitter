@@ -30,12 +30,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public GcCommand(params CommandArgument[] args)
+		public GcCommand(params ICommandArgument[] args)
 			: base("gc", args)
 		{
 		}
 
-		public GcCommand(IList<CommandArgument> args)
+		public GcCommand(IList<ICommandArgument> args)
 			: base("gc", args)
 		{
 		}

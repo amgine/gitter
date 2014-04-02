@@ -27,9 +27,9 @@ namespace gitter.Git.AccessLayer.CLI
 	sealed class VerifyTagCommand : Command
 	{
 		/// <summary>Print the contents of the tag object before validating it.</summary>
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
 		public VerifyTagCommand()
@@ -37,12 +37,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public VerifyTagCommand(params CommandArgument[] args)
+		public VerifyTagCommand(params ICommandArgument[] args)
 			: base("verify-tag", args)
 		{
 		}
 
-		public VerifyTagCommand(IEnumerable<CommandArgument> args)
+		public VerifyTagCommand(IEnumerable<ICommandArgument> args)
 			: base("verify-tag", args)
 		{
 		}

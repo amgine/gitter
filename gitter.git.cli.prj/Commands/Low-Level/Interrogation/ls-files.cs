@@ -26,93 +26,93 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class LsFilesCommand : Command
 	{
 		/// <summary>Show cached files in the output (default).</summary>
-		public static CommandArgument Cached()
+		public static ICommandArgument Cached()
 		{
-			return new CommandArgument("--cached");
+			return new CommandFlag("--cached");
 		}
 
 		/// <summary>Show deleted files in the output.</summary>
-		public static CommandArgument Deleted()
+		public static ICommandArgument Deleted()
 		{
-			return new CommandArgument("--deleted");
+			return new CommandFlag("--deleted");
 		}
 
 		/// <summary>Show modified files in the output.</summary>
-		public static CommandArgument Modified()
+		public static ICommandArgument Modified()
 		{
-			return new CommandArgument("--modified");
+			return new CommandFlag("--modified");
 		}
 
 		/// <summary>Show other files in the output.</summary>
-		public static CommandArgument Others()
+		public static ICommandArgument Others()
 		{
-			return new CommandArgument("--others");
+			return new CommandFlag("--others");
 		}
 
 		/// <summary>Show ignored files in the output. Note that this also reverses any exclude list present.</summary>
-		public static CommandArgument Ignored()
+		public static ICommandArgument Ignored()
 		{
-			return new CommandArgument("--ignored");
+			return new CommandFlag("--ignored");
 		}
 
 		/// <summary>Show staged contents' object name, mode bits and stage number in the output.</summary>
-		public static CommandArgument Stage()
+		public static ICommandArgument Stage()
 		{
-			return new CommandArgument("--stage");
+			return new CommandFlag("--stage");
 		}
 
 		/// <summary>If a whole directory is classified as "other", show just its name (with a trailing slash) and not its whole contents.</summary>
-		public static CommandArgument Directory()
+		public static ICommandArgument Directory()
 		{
-			return new CommandArgument("--directory");
+			return new CommandFlag("--directory");
 		}
 
 		/// <summary>Do not list empty directories. Has no effect without --directory.</summary>
-		public static CommandArgument NoEmptyDirectory()
+		public static ICommandArgument NoEmptyDirectory()
 		{
-			return new CommandArgument("--no-empty-directory");
+			return new CommandFlag("--no-empty-directory");
 		}
 
 		/// <summary>Show unmerged files in the output (forces --stage).</summary>
-		public static CommandArgument Unmerged()
+		public static ICommandArgument Unmerged()
 		{
-			return new CommandArgument("--unmerged");
+			return new CommandFlag("--unmerged");
 		}
 
 		/// <summary>Show files on the filesystem that need to be removed due to file/directory conflicts for checkout-index to succeed.</summary>
-		public static CommandArgument Killed()
+		public static ICommandArgument Killed()
 		{
-			return new CommandArgument("--killed");
+			return new CommandFlag("--killed");
 		}
 
 		/// <summary>\0 line termination on output.</summary>
-		public static CommandArgument ZeroLineTermination()
+		public static ICommandArgument ZeroLineTermination()
 		{
-			return new CommandArgument("-z");
+			return new CommandFlag("-z");
 		}
 
 		/// <summary>Skips files matching pattern. Note that pattern is a shell wildcard pattern.</summary>
-		public static CommandArgument Exclude(string pattern)
+		public static ICommandArgument Exclude(string pattern)
 		{
-			return new CommandArgument("--exclude", "\"" + pattern + "\"");
+			return new CommandParameterValue("--exclude", "\"" + pattern + "\"");
 		}
 
 		/// <summary>Exclude patterns are read from <paramref name="file"/>; 1 per line.</summary>
-		public static CommandArgument ExcludeFrom(string file)
+		public static ICommandArgument ExcludeFrom(string file)
 		{
-			return new CommandArgument("--exclude-from", "\"" + file + "\"");
+			return new CommandParameterValue("--exclude-from", "\"" + file + "\"");
 		}
 
 		/// <summary>Add the standard git exclusions: .git/info/exclude, .gitignore in each directory, and the user's global exclusion file.</summary>
-		public static CommandArgument ExcludeStandard()
+		public static ICommandArgument ExcludeStandard()
 		{
-			return new CommandArgument("--exclude-standard");
+			return new CommandFlag("--exclude-standard");
 		}
 
 		/// <summary>If any file does not appear in the index, treat this as an error (return 1).</summary>
-		public static CommandArgument ErrorUnmatch()
+		public static ICommandArgument ErrorUnmatch()
 		{
-			return new CommandArgument("--error-unmatch");
+			return new CommandFlag("--error-unmatch");
 		}
 
 		/// <summary>
@@ -120,27 +120,27 @@ namespace gitter.Git.AccessLayer.CLI
 		/// pretend that paths which were removed in the index since the named tree-ish are still present.
 		/// Using this option with -s or -u options does not make any sense.
 		/// </summary>
-		public static CommandArgument WithTree(string tree)
+		public static ICommandArgument WithTree(string tree)
 		{
-			return new CommandArgument("--with-tree", tree);
+			return new CommandParameterValue("--with-tree", tree);
 		}
 
 		/// <summary>Identify the file status with tags (followed by a space) at the start of each line.</summary>
-		public static CommandArgument ShowStatus()
+		public static ICommandArgument ShowStatus()
 		{
-			return new CommandArgument("-t");
+			return new CommandFlag("-t");
 		}
 
 		/// <summary>When run from a subdirectory, the command usually outputs paths relative to the current directory. This option forces paths to be output relative to the project top directory.</summary>
-		public static CommandArgument FullName()
+		public static ICommandArgument FullName()
 		{
-			return new CommandArgument("--full-name");
+			return new CommandFlag("--full-name");
 		}
 
 		/// <summary>Do not interpret any more arguments as options.</summary>
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public LsFilesCommand()
@@ -148,12 +148,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public LsFilesCommand(params CommandArgument[] args)
+		public LsFilesCommand(params ICommandArgument[] args)
 			: base("ls-files", args)
 		{
 		}
 
-		public LsFilesCommand(IList<CommandArgument> args)
+		public LsFilesCommand(IList<ICommandArgument> args)
 			: base("ls-files", args)
 		{
 		}

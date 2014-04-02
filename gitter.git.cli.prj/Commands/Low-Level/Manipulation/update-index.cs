@@ -25,99 +25,99 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Register file contents in the working tree to the index.</summary>
 	public sealed class UpdateIndexCommand : Command
 	{
-		public static CommandArgument Add()
+		public static ICommandArgument Add()
 		{
-			return new CommandArgument("--add");
+			return new CommandFlag("--add");
 		}
 
-		public static CommandArgument Remove()
+		public static ICommandArgument Remove()
 		{
-			return new CommandArgument("--remove");
+			return new CommandFlag("--remove");
 		}
 
-		public static CommandArgument Refresh()
+		public static ICommandArgument Refresh()
 		{
-			return new CommandArgument("--refresh");
+			return new CommandFlag("--refresh");
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("-q");
+			return new CommandFlag("-q");
 		}
 
-		public static CommandArgument IgnoreSubmodules()
+		public static ICommandArgument IgnoreSubmodules()
 		{
-			return new CommandArgument("--ignore-submodules");
+			return new CommandFlag("--ignore-submodules");
 		}
 
-		public static CommandArgument Unmerged()
+		public static ICommandArgument Unmerged()
 		{
-			return new CommandArgument("--unmerged");
+			return new CommandFlag("--unmerged");
 		}
 
-		public static CommandArgument IgnoreMissing()
+		public static ICommandArgument IgnoreMissing()
 		{
-			return new CommandArgument("--ignore-missing");
+			return new CommandFlag("--ignore-missing");
 		}
 
-		public static CommandArgument IndexInfo()
+		public static ICommandArgument IndexInfo()
 		{
-			return new CommandArgument("--index-info");
+			return new CommandFlag("--index-info");
 		}
 
-		public static CommandArgument AssumeUnchanged()
+		public static ICommandArgument AssumeUnchanged()
 		{
-			return new CommandArgument("--assume-unchanged");
+			return new CommandFlag("--assume-unchanged");
 		}
 
-		public static CommandArgument NoAssumeUnchanged()
+		public static ICommandArgument NoAssumeUnchanged()
 		{
-			return new CommandArgument("--no-assume-unchanged");
+			return new CommandFlag("--no-assume-unchanged");
 		}
 
-		public static CommandArgument Again()
+		public static ICommandArgument Again()
 		{
-			return new CommandArgument("--again");
+			return new CommandFlag("--again");
 		}
 
-		public static CommandArgument Unresolve()
+		public static ICommandArgument Unresolve()
 		{
-			return new CommandArgument("--unresolve");
+			return new CommandFlag("--unresolve");
 		}
 
-		public static CommandArgument InfoOnly()
+		public static ICommandArgument InfoOnly()
 		{
-			return new CommandArgument("--info-only");
+			return new CommandFlag("--info-only");
 		}
 
-		public static CommandArgument ForceRemove()
+		public static ICommandArgument ForceRemove()
 		{
-			return new CommandArgument("--force-remove");
+			return new CommandFlag("--force-remove");
 		}
 
-		public static CommandArgument Replace()
+		public static ICommandArgument Replace()
 		{
-			return new CommandArgument("--replace");
+			return new CommandFlag("--replace");
 		}
 
-		public static CommandArgument Stdin()
+		public static ICommandArgument Stdin()
 		{
-			return new CommandArgument("--stdin");
+			return new CommandFlag("--stdin");
 		}
 
-		public static CommandArgument NullTerminate()
+		public static ICommandArgument NullTerminate()
 		{
-			return new CommandArgument("-z");
+			return new CommandFlag("-z");
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public UpdateIndexCommand()
@@ -125,12 +125,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public UpdateIndexCommand(params CommandArgument[] args)
+		public UpdateIndexCommand(params ICommandArgument[] args)
 			: base("update-index", args)
 		{
 		}
 
-		public UpdateIndexCommand(IList<CommandArgument> args)
+		public UpdateIndexCommand(IList<ICommandArgument> args)
 			: base("update-index", args)
 		{
 		}

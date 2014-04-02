@@ -52,7 +52,7 @@ namespace gitter.Git
 			var cmd = new LsRemoteCommand(
 				LsRemoteCommand.Heads(),
 				LsRemoteCommand.Tags(),
-				new CommandArgument(_url));
+				new CommandParameter(_url));
 
 			GitOutput output;
 			try

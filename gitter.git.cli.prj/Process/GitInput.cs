@@ -33,13 +33,13 @@ namespace gitter.Git.AccessLayer.CLI
 		private readonly Command _command;
 		private readonly Encoding _encoding;
 		private IDictionary<string, string> _environment;
-		private IList<CommandArgument> _options;
+		private IList<ICommandArgument> _options;
 
 		#endregion
 
 		#region .ctor
 
-		public GitInput(IList<CommandArgument> options)
+		public GitInput(IList<ICommandArgument> options)
 			: this(string.Empty, null, GitProcess.DefaultEncoding, options)
 		{
 		}
@@ -64,17 +64,17 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public GitInput(string workingDirectory, IList<CommandArgument> options)
+		public GitInput(string workingDirectory, IList<ICommandArgument> options)
 			: this(workingDirectory, null, GitProcess.DefaultEncoding, options)
 		{
 		}
 
-		public GitInput(string workingDirectory, Command command, IList<CommandArgument> options)
+		public GitInput(string workingDirectory, Command command, IList<ICommandArgument> options)
 			: this(workingDirectory, command, GitProcess.DefaultEncoding, options)
 		{
 		}
 
-		public GitInput(string workingDirectory, Command command, Encoding encoding, IList<CommandArgument> options)
+		public GitInput(string workingDirectory, Command command, Encoding encoding, IList<ICommandArgument> options)
 		{
 			if(encoding == null)
 			{
@@ -101,7 +101,7 @@ namespace gitter.Git.AccessLayer.CLI
 			get { return _encoding; }
 		}
 
-		public IList<CommandArgument> Options
+		public IList<ICommandArgument> Options
 		{
 			get { return _options; }
 			set { _options = value; }
@@ -143,12 +143,12 @@ namespace gitter.Git.AccessLayer.CLI
 					{
 						first = false;
 					}
-					opt.GetArgumentText(sb);
+					opt.ToString(sb);
 				}
 			}
 			if(_command != null)
 			{
-				_command.GetCommandText(sb);
+				_command.ToString(sb);
 			}
 			return sb.ToString();
 		}

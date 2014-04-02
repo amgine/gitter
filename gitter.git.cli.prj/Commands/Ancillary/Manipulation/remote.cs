@@ -27,7 +27,7 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		public static RemoteCommand FormatAddCommand(string name, string url, string master, string[] branches, bool mirror, bool fetch, bool tags)
 		{
-			var args = new CommandArgument[1+2+(master!=null?1:0)+(branches!=null?branches.Length:0)+(mirror?1:0)+(fetch?(tags?2:1):0)];
+			var args = new ICommandArgument[1+2+(master!=null?1:0)+(branches!=null?branches.Length:0)+(mirror?1:0)+(fetch?(tags?2:1):0)];
 			int id = 0;
 			args[id++] = Add();
 			if(branches != null && branches.Length != 0)
@@ -50,94 +50,94 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args[id++] = Mirror();
 			}
-			args[id++] = new CommandArgument(name);
-			args[id++] = new CommandArgument(url);
+			args[id++] = new CommandParameter(name);
+			args[id++] = new CommandParameter(url);
 			return new RemoteCommand(args);
 		}
 
 		public static RemoteCommand FormatRemoveCommand(string name)
 		{
-			return new RemoteCommand(Remove(), new CommandArgument(name));
+			return new RemoteCommand(Remove(), new CommandParameter(name));
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
-		public static CommandArgument Fetch()
+		public static ICommandArgument Fetch()
 		{
-			return new CommandArgument("-f");
+			return new CommandFlag("-f");
 		}
 
-		public static CommandArgument Cached()
+		public static ICommandArgument Cached()
 		{
-			return new CommandArgument("-n");
+			return new CommandFlag("-n");
 		}
 
-		public static CommandArgument Tags()
+		public static ICommandArgument Tags()
 		{
-			return new CommandArgument("--tags");
+			return new CommandFlag("--tags");
 		}
 
-		public static CommandArgument NoTags()
+		public static ICommandArgument NoTags()
 		{
-			return new CommandArgument("--no-tags");
+			return new CommandFlag("--no-tags");
 		}
 
-		public static CommandArgument Mirror()
+		public static ICommandArgument Mirror()
 		{
-			return new CommandArgument("--mirror");
+			return new CommandFlag("--mirror");
 		}
 
-		public static CommandArgument Master(string branch)
+		public static ICommandArgument Master(string branch)
 		{
-			return new CommandArgument("-m", branch, ' ');
+			return new CommandParameterValue("-m", branch, ' ');
 		}
 
-		public static CommandArgument TrackBranch(string branch)
+		public static ICommandArgument TrackBranch(string branch)
 		{
-			return new CommandArgument("-t", branch, ' ');
+			return new CommandParameterValue("-t", branch, ' ');
 		}
 
-		public static CommandArgument Show()
+		public static ICommandArgument Show()
 		{
-			return new CommandArgument("show");
+			return new CommandParameter("show");
 		}
 
-		public static CommandArgument Add()
+		public static ICommandArgument Add()
 		{
-			return new CommandArgument("add");
+			return new CommandParameter("add");
 		}
 
-		public static CommandArgument Remove()
+		public static ICommandArgument Remove()
 		{
-			return new CommandArgument("rm");
+			return new CommandParameter("rm");
 		}
 
-		public static CommandArgument Rename()
+		public static ICommandArgument Rename()
 		{
-			return new CommandArgument("rename");
+			return new CommandParameter("rename");
 		}
 
-		public static CommandArgument SetHead()
+		public static ICommandArgument SetHead()
 		{
-			return new CommandArgument("set-head");
+			return new CommandParameter("set-head");
 		}
 
-		public static CommandArgument Prune()
+		public static ICommandArgument Prune()
 		{
-			return new CommandArgument("prune");
+			return new CommandParameter("prune");
 		}
 
-		public static CommandArgument Update()
+		public static ICommandArgument Update()
 		{
-			return new CommandArgument("update");
+			return new CommandParameter("update");
 		}
 
-		public static CommandArgument DryRun()
+		public static ICommandArgument DryRun()
 		{
-			return new CommandArgument("--dry-run");
+			return new CommandFlag("--dry-run");
 		}
 
 		public RemoteCommand()
@@ -145,12 +145,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public RemoteCommand(params CommandArgument[] args)
+		public RemoteCommand(params ICommandArgument[] args)
 			: base("remote", args)
 		{
 		}
 
-		public RemoteCommand(IList<CommandArgument> args)
+		public RemoteCommand(IList<ICommandArgument> args)
 			: base("remote", args)
 		{
 		}

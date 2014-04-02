@@ -25,24 +25,24 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
 	public sealed class InitCommand : Command
 	{
-		public static CommandArgument Template(string template)
+		public static ICommandArgument Template(string template)
 		{
-			return new CommandArgument("--template", template, '=');
+			return new CommandParameterValue("--template", template, '=');
 		}
 
-		public static CommandArgument Shared(string permissions)
+		public static ICommandArgument Shared(string permissions)
 		{
-			return new CommandArgument("--shared", permissions, '=');
+			return new CommandParameterValue("--shared", permissions, '=');
 		}
 
-		public static CommandArgument Bare()
+		public static ICommandArgument Bare()
 		{
-			return new CommandArgument("--bare");
+			return new CommandFlag("--bare");
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return CommandArgument.Quiet();
+			return CommandFlag.Quiet();
 		}
 
 		public InitCommand()
@@ -50,12 +50,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public InitCommand(params CommandArgument[] args)
+		public InitCommand(params ICommandArgument[] args)
 			: base("init", args)
 		{
 		}
 
-		public InitCommand(IList<CommandArgument> args)
+		public InitCommand(IList<ICommandArgument> args)
 			: base("init", args)
 		{
 		}

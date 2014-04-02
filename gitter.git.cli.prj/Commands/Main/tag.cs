@@ -25,59 +25,59 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Create, list, delete or verify a tag object signed with GPG.</summary>
 	public sealed class TagCommand : Command
 	{
-		public static CommandArgument Annotate()
+		public static ICommandArgument Annotate()
 		{
-			return new CommandArgument("-a");
+			return new CommandFlag("-a");
 		}
 
-		public static CommandArgument SignByEmail()
+		public static ICommandArgument SignByEmail()
 		{
-			return new CommandArgument("-s");
+			return new CommandFlag("-s");
 		}
 
-		public static CommandArgument Message(string message)
+		public static ICommandArgument Message(string message)
 		{
-			return new CommandArgument("-m", "\"" + message + "\"", ' ');
+			return new CommandParameterValue("-m", "\"" + message + "\"", ' ');
 		}
 
-		public static CommandArgument MessageFromFile(string filename)
+		public static ICommandArgument MessageFromFile(string filename)
 		{
-			return new CommandArgument("-F", filename, ' ');
+			return new CommandParameterValue("-F", filename, ' ');
 		}
 
-		public static CommandArgument SignByKey(string keyid)
+		public static ICommandArgument SignByKey(string keyid)
 		{
-			return new CommandArgument("-u", keyid, ' ');
+			return new CommandParameterValue("-u", keyid, ' ');
 		}
 
-		public static CommandArgument Verify()
+		public static ICommandArgument Verify()
 		{
-			return new CommandArgument("-v");
+			return new CommandFlag("-v");
 		}
 
-		public static CommandArgument List()
+		public static ICommandArgument List()
 		{
-			return new CommandArgument("-l");
+			return new CommandFlag("-l");
 		}
 
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("-f");
+			return new CommandFlag("-f");
 		}
 
-		public static CommandArgument List(string pattern)
+		public static ICommandArgument List(string pattern)
 		{
-			return new CommandArgument("-l", pattern, ' ');
+			return new CommandParameterValue("-l", pattern, ' ');
 		}
 
-		public static CommandArgument ReplaceExisting()
+		public static ICommandArgument ReplaceExisting()
 		{
-			return new CommandArgument("-f");
+			return new CommandFlag("-f");
 		}
 
-		public static CommandArgument Delete()
+		public static ICommandArgument Delete()
 		{
-			return new CommandArgument("-d");
+			return new CommandFlag("-d");
 		}
 
 		public TagCommand()
@@ -85,12 +85,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public TagCommand(params CommandArgument[] args)
+		public TagCommand(params ICommandArgument[] args)
 			: base("tag", args)
 		{
 		}
 
-		public TagCommand(IList<CommandArgument> args)
+		public TagCommand(IList<ICommandArgument> args)
 			: base("tag", args)
 		{
 		}

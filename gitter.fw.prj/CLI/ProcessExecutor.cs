@@ -171,9 +171,14 @@ namespace gitter.Framework.CLI
 			{
 				stdErrReceiver.Initialize(process, process.StandardError);
 			}
+			CancellationTokenRegistration cancellationRegistration;
 			if(cancellationToken.CanBeCanceled)
 			{
-				cancellationToken.Register(() => tcs.TrySetCanceled());
+				cancellationRegistration = cancellationToken.Register(() => tcs.TrySetCanceled());
+			}
+			else
+			{
+				cancellationRegistration = default(CancellationTokenRegistration);
 			}
 			return tcs.Task.ContinueWith(
 				task =>
@@ -204,6 +209,7 @@ namespace gitter.Framework.CLI
 							stdOutReceiver.WaitForEndOfStream();
 						}
 					}
+					cancellationRegistration.Dispose();
 					process.Dispose();
 					return TaskUtility.UnwrapResult(task);
 				},

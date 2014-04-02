@@ -27,180 +27,180 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Show commit logs.</summary>
 	public sealed class LogCommand : Command
 	{
-		public static CommandArgument All()
+		public static ICommandArgument All()
 		{
-			return new CommandArgument("--all");
+			return new CommandFlag("--all");
 		}
 
-		public static CommandArgument Not()
+		public static ICommandArgument Not()
 		{
-			return new CommandArgument("--not");
+			return new CommandFlag("--not");
 		}
 
-		public static CommandArgument Branches(string pattern)
+		public static ICommandArgument Branches(string pattern)
 		{
-			return new CommandArgument("--branches", pattern, '=');
+			return new CommandParameterValue("--branches", pattern, '=');
 		}
 
-		public static CommandArgument Tags(string pattern)
+		public static ICommandArgument Tags(string pattern)
 		{
-			return new CommandArgument("--tags", pattern, '=');
+			return new CommandParameterValue("--tags", pattern, '=');
 		}
 
-		public static CommandArgument Glob(string pattern)
+		public static ICommandArgument Glob(string pattern)
 		{
-			return new CommandArgument("--glob", pattern, '=');
+			return new CommandParameterValue("--glob", pattern, '=');
 		}
 
-		public static CommandArgument Remotes(string pattern)
+		public static ICommandArgument Remotes(string pattern)
 		{
-			return new CommandArgument("--remotes", pattern, '=');
+			return new CommandParameterValue("--remotes", pattern, '=');
 		}
 
-		public static CommandArgument Author(string pattern)
+		public static ICommandArgument Author(string pattern)
 		{
-			return new CommandArgument("--author", pattern, '=');
+			return new CommandParameterValue("--author", pattern, '=');
 		}
 
-		public static CommandArgument SimplifyByDecoration()
+		public static ICommandArgument SimplifyByDecoration()
 		{
-			return new CommandArgument("--simplify-by-decoration");
+			return new CommandFlag("--simplify-by-decoration");
 		}
 
-		public static CommandArgument Committer(string pattern)
+		public static ICommandArgument Committer(string pattern)
 		{
-			return new CommandArgument("--committer", pattern, '=');
+			return new CommandParameterValue("--committer", pattern, '=');
 		}
 
-		public static CommandArgument Grep(string pattern)
+		public static ICommandArgument Grep(string pattern)
 		{
-			return new CommandArgument("--grep", pattern, '=');
+			return new CommandParameterValue("--grep", pattern, '=');
 		}
 
-		public static CommandArgument RegexpIgnoreCase()
+		public static ICommandArgument RegexpIgnoreCase()
 		{
-			return new CommandArgument("--regexp-ignore-case");
+			return new CommandFlag("--regexp-ignore-case");
 		}
 
-		public static CommandArgument ExtendedRegexp()
+		public static ICommandArgument ExtendedRegexp()
 		{
-			return new CommandArgument("--extended-regexp");
+			return new CommandFlag("--extended-regexp");
 		}
 
-		public static CommandArgument FixedStrings()
+		public static ICommandArgument FixedStrings()
 		{
-			return new CommandArgument("--fixed-strings");
+			return new CommandFlag("--fixed-strings");
 		}
 
-		public static CommandArgument AllMatch()
+		public static ICommandArgument AllMatch()
 		{
-			return new CommandArgument("--all-match");
+			return new CommandFlag("--all-match");
 		}
 
 		/// <summary>Follow only the first parent commit upon seeing a merge commit.</summary>
-		public static CommandArgument FirstParent()
+		public static ICommandArgument FirstParent()
 		{
-			return new CommandArgument("--first-parent");
+			return new CommandFlag("--first-parent");
 		}
 
 		/// <summary>Print also the parents of the commit (in the form "commit parent..."). Also enables parent rewriting.</summary>
-		public static CommandArgument Parents()
+		public static ICommandArgument Parents()
 		{
-			return new CommandArgument("--parents");
+			return new CommandFlag("--parents");
 		}
 
 		/// <summary>Print only merge commits.</summary>
-		public static CommandArgument Merges()
+		public static ICommandArgument Merges()
 		{
-			return new CommandArgument("--merges");
+			return new CommandFlag("--merges");
 		}
 
 		/// <summary>Do not print commits with more than one parent.</summary>
-		public static CommandArgument NoMerges()
+		public static ICommandArgument NoMerges()
 		{
-			return new CommandArgument("--no-merges");
+			return new CommandFlag("--no-merges");
 		}
 
-		public static CommandArgument Graph()
+		public static ICommandArgument Graph()
 		{
-			return new CommandArgument("--graph");
+			return new CommandFlag("--graph");
 		}
 
-		public static CommandArgument WalkReflogs()
+		public static ICommandArgument WalkReflogs()
 		{
-			return new CommandArgument("--walk-reflogs");
+			return new CommandFlag("--walk-reflogs");
 		}
 
 		/// <summary>Continue listing the history of a file beyond renames (works only for a single file).</summary>
-		public static CommandArgument Follow()
+		public static ICommandArgument Follow()
 		{
-			return new CommandArgument("--follow");
+			return new CommandFlag("--follow");
 		}
 
 		/// <summary>Stop when a given path disappears from the tree.</summary>
-		public static CommandArgument RemoveEmpty()
+		public static ICommandArgument RemoveEmpty()
 		{
-			return new CommandArgument("--remove-empty");
+			return new CommandFlag("--remove-empty");
 		}
 
-		public static CommandArgument MaxCount(int limit)
+		public static ICommandArgument MaxCount(int limit)
 		{
-			return new CommandArgument("--max-count", limit.ToString(CultureInfo.InvariantCulture));
+			return new CommandParameterValue("--max-count", limit.ToString(CultureInfo.InvariantCulture));
 		}
 
-		public static CommandArgument Skip(int skip)
+		public static ICommandArgument Skip(int skip)
 		{
-			return new CommandArgument("--skip", skip.ToString(CultureInfo.InvariantCulture));
+			return new CommandParameterValue("--skip", skip.ToString(CultureInfo.InvariantCulture));
 		}
 
-		public static CommandArgument Format(string format)
+		public static ICommandArgument Format(string format)
 		{
-			return new CommandArgument("--format", "format:\"" + format + "\"", '=');
+			return new CommandParameterValue("--format", "format:\"" + format + "\"", '=');
 		}
 
-		public static CommandArgument FormatRaw()
+		public static ICommandArgument FormatRaw()
 		{
-			return new CommandArgument("--format", "raw", '=');
+			return new CommandParameterValue("--format", "raw", '=');
 		}
 
-		public static CommandArgument TFormat(string format)
+		public static ICommandArgument TFormat(string format)
 		{
-			return new CommandArgument("--format", "tformat:\"" + format + "\"");
+			return new CommandParameterValue("--format", "tformat:\"" + format + "\"");
 		}
 
-		public static CommandArgument OneLine()
+		public static ICommandArgument OneLine()
 		{
-			return new CommandArgument("--oneline");
+			return new CommandFlag("--oneline");
 		}
 
-		public static CommandArgument Reverse()
+		public static ICommandArgument Reverse()
 		{
-			return new CommandArgument("--reverse");
+			return new CommandFlag("--reverse");
 		}
 
-		public static CommandArgument TopoOrder()
+		public static ICommandArgument TopoOrder()
 		{
-			return new CommandArgument("--topo-order");
+			return new CommandFlag("--topo-order");
 		}
 
-		public static CommandArgument DateOrder()
+		public static ICommandArgument DateOrder()
 		{
-			return new CommandArgument("--date-order");
+			return new CommandFlag("--date-order");
 		}
 
-		public static CommandArgument Since(DateTime dateTime)
+		public static ICommandArgument Since(DateTime dateTime)
 		{
-			return new CommandArgument("--since", dateTime.ToString(CultureInfo.InvariantCulture));
+			return new CommandParameterValue("--since", dateTime.ToString(CultureInfo.InvariantCulture));
 		}
 
-		public static CommandArgument Until(DateTime dateTime)
+		public static ICommandArgument Until(DateTime dateTime)
 		{
-			return new CommandArgument("--until", dateTime.ToString(CultureInfo.InvariantCulture));
+			return new CommandParameterValue("--until", dateTime.ToString(CultureInfo.InvariantCulture));
 		}
 
-		public static CommandArgument NullTerminate()
+		public static ICommandArgument NullTerminate()
 		{
-			return new CommandArgument("-z");
+			return new CommandFlag("-z");
 		}
 
 		public LogCommand()
@@ -208,12 +208,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public LogCommand(params CommandArgument[] args)
+		public LogCommand(params ICommandArgument[] args)
 			: base("log", args)
 		{
 		}
 
-		public LogCommand(IList<CommandArgument> args)
+		public LogCommand(IList<ICommandArgument> args)
 			: base("log", args)
 		{
 		}

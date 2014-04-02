@@ -26,98 +26,98 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Join two or more development histories together.</summary>
 	public sealed class MergeCommand : Command
 	{
-		public static CommandArgument Stat()
+		public static ICommandArgument Stat()
 		{
-			return new CommandArgument("--stat");
+			return new CommandFlag("--stat");
 		}
 
-		public static CommandArgument NoStat()
+		public static ICommandArgument NoStat()
 		{
-			return new CommandArgument("--no-stat");
+			return new CommandFlag("--no-stat");
 		}
 
-		public static CommandArgument Log()
+		public static ICommandArgument Log()
 		{
-			return new CommandArgument("--log");
+			return new CommandFlag("--log");
 		}
 
-		public static CommandArgument NoLog()
+		public static ICommandArgument NoLog()
 		{
-			return new CommandArgument("--no-log");
+			return new CommandFlag("--no-log");
 		}
 
-		public static CommandArgument Commit()
+		public static ICommandArgument Commit()
 		{
-			return new CommandArgument("--commit");
+			return new CommandFlag("--commit");
 		}
 
-		public static CommandArgument NoCommit()
+		public static ICommandArgument NoCommit()
 		{
-			return new CommandArgument("--no-commit");
+			return new CommandFlag("--no-commit");
 		}
 
-		public static CommandArgument Squash()
+		public static ICommandArgument Squash()
 		{
-			return new CommandArgument("--squash");
+			return new CommandFlag("--squash");
 		}
 
-		public static CommandArgument NoSquash()
+		public static ICommandArgument NoSquash()
 		{
-			return new CommandArgument("--no-squash");
+			return new CommandFlag("--no-squash");
 		}
 
-		public static CommandArgument FastForward()
+		public static ICommandArgument FastForward()
 		{
-			return new CommandArgument("--ff");
+			return new CommandFlag("--ff");
 		}
 
-		public static CommandArgument NoFastForward()
+		public static ICommandArgument NoFastForward()
 		{
-			return new CommandArgument("--no-ff");
+			return new CommandFlag("--no-ff");
 		}
 
-		public static CommandArgument Message(string msg)
+		public static ICommandArgument Message(string msg)
 		{
-			return new CommandArgument("-m", "\"" + msg + "\"", ' ');
+			return new CommandParameterValue("-m", "\"" + msg + "\"", ' ');
 		}
 
-		public static CommandArgument Strategy(string strategy)
+		public static ICommandArgument Strategy(string strategy)
 		{
-			return new CommandArgument("--strategy", strategy, '=');
+			return new CommandParameterValue("--strategy", strategy, '=');
 		}
 
-		public static CommandArgument Strategy(MergeStrategy strategy)
+		public static ICommandArgument Strategy(MergeStrategy strategy)
 		{
 			switch(strategy)
 			{
 				case MergeStrategy.Octopus:
-					return new CommandArgument("--strategy", "octopus", '=');
+					return new CommandParameterValue("--strategy", "octopus", '=');
 				case MergeStrategy.Ours:
-					return new CommandArgument("--strategy", "ours", '=');
+					return new CommandParameterValue("--strategy", "ours", '=');
 				case MergeStrategy.Recursive:
-					return new CommandArgument("--strategy", "recursive", '=');
+					return new CommandParameterValue("--strategy", "recursive", '=');
 				case MergeStrategy.Resolve:
-					return new CommandArgument("--strategy", "resolve", '=');
+					return new CommandParameterValue("--strategy", "resolve", '=');
 				case MergeStrategy.Subtree:
-					return new CommandArgument("--strategy", "subtree", '=');
+					return new CommandParameterValue("--strategy", "subtree", '=');
 				default:
 					return null;
 			}
 		}
 
-		public static CommandArgument StrategyOption(string option)
+		public static ICommandArgument StrategyOption(string option)
 		{
-			return new CommandArgument("--strategy-option", option, '=');
+			return new CommandParameterValue("--strategy-option", option, '=');
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("--quiet");
+			return new CommandFlag("--quiet");
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return new CommandArgument("--verbose");
+			return new CommandFlag("--verbose");
 		}
 
 		public MergeCommand()
@@ -125,12 +125,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public MergeCommand(params CommandArgument[] args)
+		public MergeCommand(params ICommandArgument[] args)
 			: base("merge", args)
 		{
 		}
 
-		public MergeCommand(IList<CommandArgument> args)
+		public MergeCommand(IList<ICommandArgument> args)
 			: base("merge", args)
 		{
 		}

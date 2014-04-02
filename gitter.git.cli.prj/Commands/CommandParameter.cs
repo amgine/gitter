@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,54 @@
 
 namespace gitter.Git.AccessLayer.CLI
 {
-	using System.Collections.Generic;
+	using System;
+	using System.Text;
 
-	/// <summary>Print lines matching a pattern.</summary>
-	public sealed class GrepCommand : Command
+	/// <summary>Command parameter.</summary>
+	public class CommandParameter : ICommandArgument
 	{
-		public GrepCommand()
-			: base("grep")
+		#region Data
+
+		private readonly string _value;
+
+		#endregion
+
+		#region .ctor
+
+		public CommandParameter(string value)
 		{
+			_value = value;
 		}
 
-		public GrepCommand(params ICommandArgument[] args)
-			: base("grep", args)
+		#endregion
+
+		#region Properties
+
+		public string Value
 		{
+			get { return _value; }
 		}
 
-		public GrepCommand(IList<ICommandArgument> args)
-			: base("grep", args)
+		#endregion
+
+		#region Methods
+
+		public void ToString(StringBuilder stringBuilder)
 		{
+			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
+
+			stringBuilder.Append(Value);
 		}
+
+		#endregion
+
+		#region Overrides
+
+		public override string ToString()
+		{
+			return Value;
+		}
+
+		#endregion
 	}
 }

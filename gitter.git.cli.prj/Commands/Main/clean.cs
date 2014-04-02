@@ -28,61 +28,61 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <summary>
 		/// If the git configuration variable clean.requireForce is not set to false, git clean will refuse to run unless given -f or -n.
 		/// </summary>
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force");
+			return new CommandFlag("--force");
 		}
 
 		/// <summary>
 		/// Remove untracked directories in addition to untracked files. If an untracked directory is managed by a different git
 		/// repository, it is not removed by default. Use -f option twice if you really want to remove such a directory.
 		/// </summary>
-		public static CommandArgument Directories()
+		public static ICommandArgument Directories()
 		{
-			return new CommandArgument("-d");
+			return new CommandFlag("-d");
 		}
 
 		/// <summary>Be quiet, only report errors, but not the files that are successfully removed.</summary>
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("--quiet");
+			return new CommandFlag("--quiet");
 		}
 
 		/// <summary>Don't actually remove anything, just show what would be done.</summary>
-		public static CommandArgument DryRun()
+		public static ICommandArgument DryRun()
 		{
-			return new CommandArgument("--dry-run");
+			return new CommandFlag("--dry-run");
 		}
 
 		/// <summary>
 		/// Specify special exceptions to not be cleaned. Each <pattern> is the same form as in $GIT_DIR/info/excludes
 		/// and this option can be given multiple times.
 		/// </summary>
-		public static CommandArgument Exclude(string pattern)
+		public static ICommandArgument Exclude(string pattern)
 		{
-			return new CommandArgument("--exclude", pattern, '=');
+			return new CommandParameterValue("--exclude", pattern, '=');
 		}
 
 		/// <summary>
 		/// Don't use the ignore rules. This allows removing all untracked files, including build products.
 		/// This can be used (possibly in conjunction with git reset) to create a pristine working directory to test a clean build.
 		/// </summary>
-		public static CommandArgument IncludeIgnored()
+		public static ICommandArgument IncludeIgnored()
 		{
-			return new CommandArgument("-x");
+			return new CommandFlag("-x");
 		}
 
 		/// <summary>
 		/// Remove only files ignored by git. This may be useful to rebuild everything from scratch, but keep manually created files.
 		/// </summary>
-		public static CommandArgument ExcludeUntracked()
+		public static ICommandArgument ExcludeUntracked()
 		{
-			return new CommandArgument("-X");
+			return new CommandFlag("-X");
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public CleanCommand()
@@ -90,12 +90,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public CleanCommand(params CommandArgument[] args)
+		public CleanCommand(params ICommandArgument[] args)
 			: base("clean", args)
 		{
 		}
 
-		public CleanCommand(IList<CommandArgument> args)
+		public CleanCommand(IList<ICommandArgument> args)
 			: base("clean", args)
 		{
 		}

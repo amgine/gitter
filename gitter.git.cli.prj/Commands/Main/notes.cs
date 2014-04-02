@@ -26,114 +26,114 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Add or inspect object notes.</summary>
 	public sealed class NotesCommand : Command
 	{
-		public static CommandArgument List()
+		public static ICommandArgument List()
 		{
-			return new CommandArgument("list");
+			return new CommandParameter("list");
 		}
 
-		public static CommandArgument List(string @object)
+		public static ICommandArgument List(string @object)
 		{
-			return new CommandArgument("list", @object, ' ');
+			return new CommandParameterValue("list", @object, ' ');
 		}
 
-		public static CommandArgument Add()
+		public static ICommandArgument Add()
 		{
-			return new CommandArgument("add");
+			return new CommandParameter("add");
 		}
 
-		public static CommandArgument Copy()
+		public static ICommandArgument Copy()
 		{
-			return new CommandArgument("copy");
+			return new CommandParameter("copy");
 		}
 
-		public static CommandArgument Append()
+		public static ICommandArgument Append()
 		{
-			return new CommandArgument("copy");
+			return new CommandParameter("append");
 		}
 
-		public static CommandArgument Edit()
+		public static ICommandArgument Edit()
 		{
-			return new CommandArgument("edit");
+			return new CommandParameter("edit");
 		}
 
-		public static CommandArgument Edit(string @object)
+		public static ICommandArgument Edit(string @object)
 		{
-			return new CommandArgument("edit", @object, ' ');
+			return new CommandParameterValue("edit", @object, ' ');
 		}
 
-		public static CommandArgument Show()
+		public static ICommandArgument Show()
 		{
-			return new CommandArgument("show");
+			return new CommandParameter("show");
 		}
 
-		public static CommandArgument Show(string @object)
+		public static ICommandArgument Show(string @object)
 		{
-			return new CommandArgument("show", @object, ' ');
+			return new CommandParameterValue("show", @object, ' ');
 		}
 
-		public static CommandArgument Remove()
+		public static ICommandArgument Remove()
 		{
-			return new CommandArgument("remove");
+			return new CommandParameter("remove");
 		}
 
-		public static CommandArgument Remove(string @object)
+		public static ICommandArgument Remove(string @object)
 		{
-			return new CommandArgument("remove", @object, ' ');
+			return new CommandParameterValue("remove", @object, ' ');
 		}
 
-		public static CommandArgument Prune()
+		public static ICommandArgument Prune()
 		{
-			return new CommandArgument("prune");
+			return new CommandParameter("prune");
 		}
 
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force");
+			return new CommandFlag("--force");
 		}
 
-		public static CommandArgument Stdin()
+		public static ICommandArgument Stdin()
 		{
-			return new CommandArgument("--stdin");
+			return new CommandFlag("--stdin");
 		}
 
-		public static CommandArgument File(string file)
+		public static ICommandArgument File(string file)
 		{
-			return new CommandArgument("--file", file.SurroundWith("\"", "\""), '=');
+			return new CommandParameterValue("--file", file.SurroundWith("\"", "\""), '=');
 		}
 
-		public static CommandArgument Message(string message)
+		public static ICommandArgument Message(string message)
 		{
-			return new CommandArgument("--message", message.SurroundWith("\"", "\""));
+			return new CommandParameterValue("--message", message.SurroundWith("\"", "\""));
 		}
 
-		public static CommandArgument ReuseMessage(string @object)
+		public static ICommandArgument ReuseMessage(string @object)
 		{
-			return new CommandArgument("--reuse-message", @object, '=');
+			return new CommandParameterValue("--reuse-message", @object, '=');
 		}
 
-		public static CommandArgument ReeditMessage(string @object)
+		public static ICommandArgument ReeditMessage(string @object)
 		{
-			return new CommandArgument("--reedit-message", @object, '=');
+			return new CommandParameterValue("--reedit-message", @object, '=');
 		}
 
-		public static CommandArgument Ref(string @ref)
+		public static ICommandArgument Ref(string @ref)
 		{
-			return new CommandArgument("--ref", @ref, ' ');
+			return new CommandParameterValue("--ref", @ref, ' ');
 		}
 
-		public static CommandArgument DoNotRemove()
+		public static ICommandArgument DoNotRemove()
 		{
-			return new CommandArgument("-n");
+			return new CommandFlag("-n");
 		}
 
-		public static CommandArgument VerboseRemove()
+		public static ICommandArgument VerboseRemove()
 		{
-			return new CommandArgument("-v");
+			return new CommandFlag("-v");
 		}
 
-		public static CommandArgument GetRef()
+		public static ICommandArgument GetRef()
 		{
-			return new CommandArgument("get-ref");
+			return new CommandFlag("get-ref");
 		}
 
 		public NotesCommand()
@@ -141,12 +141,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public NotesCommand(params CommandArgument[] args)
+		public NotesCommand(params ICommandArgument[] args)
 			: base("notes", args)
 		{
 		}
 
-		public NotesCommand(IList<CommandArgument> args)
+		public NotesCommand(IList<ICommandArgument> args)
 			: base("notes", args)
 		{
 		}

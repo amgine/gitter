@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,23 +20,10 @@
 
 namespace gitter.Git.AccessLayer.CLI
 {
-	using System.Collections.Generic;
-
-	/// <summary>Print lines matching a pattern.</summary>
-	public sealed class GrepCommand : Command
+	public class PathCommandArgument : CommandParameter
 	{
-		public GrepCommand()
-			: base("grep")
-		{
-		}
-
-		public GrepCommand(params ICommandArgument[] args)
-			: base("grep", args)
-		{
-		}
-
-		public GrepCommand(IList<ICommandArgument> args)
-			: base("grep", args)
+		public PathCommandArgument(string path)
+			: base(path.AssureDoubleQuotes())
 		{
 		}
 	}

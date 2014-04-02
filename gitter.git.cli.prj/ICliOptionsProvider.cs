@@ -27,5 +27,7 @@ namespace gitter.Git.AccessLayer.CLI
 		bool LogCalls { get; }
 
 		Encoding DefaultEncoding { get; }
+
+		string GitExecutablePath { get; }
 	}
 }

@@ -28,7 +28,7 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		public static BranchCommand FormatCreateBranchCommand(string name, string startingRevision, bool specifyTracking, bool track, bool reflog)
 		{
-			var args = new CommandArgument[2+(specifyTracking?1:0)+(reflog?1:0)];
+			var args = new ICommandArgument[2+(specifyTracking?1:0)+(reflog?1:0)];
 			int id = 0;
 			if(specifyTracking)
 			{
@@ -38,93 +38,93 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args[id++] = RefLog();
 			}
-			args[id + 0] = new CommandArgument(name);
-			args[id + 1] = new CommandArgument(startingRevision);
+			args[id + 0] = new CommandParameter(name);
+			args[id + 1] = new CommandParameter(startingRevision);
 			return new BranchCommand(args);
 		}
 
 		/// <summary>Delete a branch. The branch must be fully merged in HEAD.</summary>
-		public static CommandArgument Delete()
+		public static ICommandArgument Delete()
 		{
-			return new CommandArgument("-d");
+			return new CommandFlag("-d");
 		}
 
 		/// <summary>Delete a branch irrespective of its merged status.</summary>
-		public static CommandArgument DeleteForce()
+		public static ICommandArgument DeleteForce()
 		{
-			return new CommandArgument("-D");
+			return new CommandFlag("-D");
 		}
 
 		/// <summary>
 		///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
 		///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
 		/// </summary>
-		public static CommandArgument RefLog()
+		public static ICommandArgument RefLog()
 		{
-			return new CommandArgument("-l");
+			return new CommandFlag("-l");
 		}
 
 		/// <summary>Reset branchname to startpoint if branchname exists already. Without -f git-branch refuses to change an existing branch.</summary>
-		public static CommandArgument Reset()
+		public static ICommandArgument Reset()
 		{
-			return new CommandArgument("-f");
+			return new CommandFlag("-f");
 		}
 
 		/// <summary>Move/rename a branch and the corresponding reflog.</summary>
-		public static CommandArgument Move()
+		public static ICommandArgument Move()
 		{
-			return new CommandArgument("-m");
+			return new CommandFlag("-m");
 		}
 
 		/// <summary>Move/rename a branch even if the new branch name already exists.</summary>
-		public static CommandArgument MoveForce()
+		public static ICommandArgument MoveForce()
 		{
-			return new CommandArgument("-M");
+			return new CommandFlag("-M");
 		}
 
 		/// <summary>Color branches to highlight current, local, and remote branches.</summary>
-		public static CommandArgument Color()
+		public static ICommandArgument Color()
 		{
-			return new CommandArgument("--color");
+			return new CommandFlag("--color");
 		}
 
 		/// <summary>Turn off branch colors, even when the configuration file gives the default to color output.</summary>
-		public static CommandArgument NoColor()
+		public static ICommandArgument NoColor()
 		{
-			return new CommandArgument("--no-color");
+			return new CommandFlag("--no-color");
 		}
 
 		/// <summary>List or delete (if used with -d) the remote-tracking branches.</summary>
-		public static CommandArgument Remote()
+		public static ICommandArgument Remote()
 		{
-			return new CommandArgument("-r");
+			return new CommandFlag("-r");
 		}
 
 		/// <summary>List both remote-tracking branches and local branches.</summary>
-		public static CommandArgument All()
+		public static ICommandArgument All()
 		{
-			return new CommandArgument("-a");
+			return new CommandFlag("-a");
 		}
 
 		/// <summary>
 		/// Show sha1 and commit subject line for each head, along with relationship to upstream branch (if any).
 		/// If given twice, print the name of the upstream branch, as well. 
 		/// </summary>
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 		
 		/// <summary>Alter the sha1's minimum display length in the output listing. The default value is 7.</summary>
-		public static CommandArgument Abbrev(int length)
+		public static ICommandArgument Abbrev(int length)
 		{
-			return new CommandArgument("--abbrev", length.ToString());
+			return new CommandParameterValue("--abbrev", length.ToString());
 		}
 
 		/// <summary>Display the full sha1s in the output listing rather than abbreviating them.</summary>
-		public static CommandArgument NoAbbrev()
+		public static ICommandArgument NoAbbrev()
 		{
-			return new CommandArgument("--no-abbrev");
+			return new CommandFlag("--no-abbrev");
 		}
 
 		/// <summary>
@@ -137,39 +137,39 @@ namespace gitter.Git.AccessLayer.CLI
 		///	were given. Set it to always if you want this behavior when the start-point is either a local or 
 		///	remote branch.</para>
 		/// </summary>
-		public static CommandArgument Track()
+		public static ICommandArgument Track()
 		{
-			return new CommandArgument("--track");
+			return new CommandFlag("--track");
 		}
 
 		/// <summary>Do not set up "upstream" configuration, even if the branch.autosetupmerge configuration variable is true.</summary>
-		public static CommandArgument NoTrack()
+		public static ICommandArgument NoTrack()
 		{
-			return new CommandArgument("--no-track");
+			return new CommandFlag("--no-track");
 		}
 
 		/// <summary>Only list branches which contain the specified commit.</summary>
-		public static CommandArgument Contains()
+		public static ICommandArgument Contains()
 		{
-			return new CommandArgument("--contains");
+			return new CommandFlag("--contains");
 		}
 
 		/// <summary>Only list branches which contain the specified commit.</summary>
-		public static CommandArgument Contains(string commit)
+		public static ICommandArgument Contains(string commit)
 		{
-			return new CommandArgument("--contains", commit, ' ');
+			return new CommandParameterValue("--contains", commit, ' ');
 		}
 
 		/// <summary>Only list branches which are fully contained by HEAD.</summary>
-		public static CommandArgument Merged()
+		public static ICommandArgument Merged()
 		{
-			return new CommandArgument("--merged");
+			return new CommandFlag("--merged");
 		}
 
 		/// <summary>Do not list branches which are fully contained by HEAD.</summary>
-		public static CommandArgument NoMerged()
+		public static ICommandArgument NoMerged()
 		{
-			return new CommandArgument("--no-merged");
+			return new CommandFlag("--no-merged");
 		}
 
 		public BranchCommand()
@@ -177,12 +177,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public BranchCommand(params CommandArgument[] args)
+		public BranchCommand(params ICommandArgument[] args)
 			: base("branch", args)
 		{
 		}
 
-		public BranchCommand(IList<CommandArgument> args)
+		public BranchCommand(IList<ICommandArgument> args)
 			: base("branch", args)
 		{
 		}

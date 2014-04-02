@@ -25,9 +25,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class CountObjectsCommand : Command
 	{
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return new CommandArgument("--verbose");
+			return new CommandFlag("--verbose");
 		}
 
 		public CountObjectsCommand()
@@ -35,12 +35,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public CountObjectsCommand(params CommandArgument[] args)
+		public CountObjectsCommand(params ICommandArgument[] args)
 			: base("count-objects", args)
 		{
 		}
 
-		public CountObjectsCommand(IEnumerable<CommandArgument> args)
+		public CountObjectsCommand(IEnumerable<ICommandArgument> args)
 			: base("count-objects", args)
 		{
 		}

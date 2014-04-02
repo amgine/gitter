@@ -31,18 +31,18 @@ namespace gitter.Git.AccessLayer.CLI
 		/// This is because branches are expected to be actively developed and packing their tips does not help performance.
 		/// This option causes branch tips to be packed as well. Useful for a repository with many branches of historical interests.
 		/// </summary>
-		public static CommandArgument All()
+		public static ICommandArgument All()
 		{
-			return new CommandArgument("--all");
+			return new CommandFlag("--all");
 		}
 
 		/// <summary>
 		/// The command usually removes loose refs under $GIT_DIR/refs hierarchy after packing them.
 		/// This option tells it not to.
 		/// </summary>
-		public static CommandArgument NoPrune()
+		public static ICommandArgument NoPrune()
 		{
-			return new CommandArgument("--no-prune");
+			return new CommandFlag("--no-prune");
 		}
 
 		public PackRefsCommand()
@@ -50,12 +50,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public PackRefsCommand(params CommandArgument[] args)
+		public PackRefsCommand(params ICommandArgument[] args)
 			: base("pack-refs", args)
 		{
 		}
 
-		public PackRefsCommand(IEnumerable<CommandArgument> args)
+		public PackRefsCommand(IEnumerable<ICommandArgument> args)
 			: base("pack-refs", args)
 		{
 		}

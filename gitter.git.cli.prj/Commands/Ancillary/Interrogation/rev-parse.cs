@@ -25,9 +25,9 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Get and set repository or global options.</summary>
 	public sealed class RevParseCommand : Command
 	{
-		public static CommandArgument GitDir()
+		public static ICommandArgument GitDir()
 		{
-			return new CommandArgument("--git-dir");
+			return new CommandFlag("--git-dir");
 		}
 
 		public RevParseCommand()
@@ -35,12 +35,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public RevParseCommand(params CommandArgument[] args)
+		public RevParseCommand(params ICommandArgument[] args)
 			: base("rev-parse", args)
 		{
 		}
 
-		public RevParseCommand(IList<CommandArgument> args)
+		public RevParseCommand(IList<ICommandArgument> args)
 			: base("rev-parse", args)
 		{
 		}

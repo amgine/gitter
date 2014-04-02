@@ -30,9 +30,9 @@ namespace gitter.Git.AccessLayer.CLI
 		///	Tell the command to automatically stage files that have been modified and deleted, but new files you have not
 		///	told git about are not affected.
 		/// </summary>
-		public static CommandArgument All()
+		public static ICommandArgument All()
 		{
-			return new CommandArgument("--all");
+			return new CommandFlag("--all");
 		}
 
 		/// <summary>
@@ -41,104 +41,104 @@ namespace gitter.Git.AccessLayer.CLI
 		///	the commit message from the tip of the current branch. The commit you create replaces the current tip —
 		///	if it was a merge, it will have the parents of the current tip as parents — so the current top commit is discarded. 
 		/// </summary>
-		public static CommandArgument Amend()
+		public static ICommandArgument Amend()
 		{
-			return new CommandArgument("--amend");
+			return new CommandFlag("--amend");
 		}
 
-		public static CommandArgument ResetAuthor()
+		public static ICommandArgument ResetAuthor()
 		{
-			return new CommandArgument("--reset-author");
+			return new CommandFlag("--reset-author");
 		}
 
-		public static CommandArgument Author(string author)
+		public static ICommandArgument Author(string author)
 		{
-			return new CommandArgument("--author", author.SurroundWithDoubleQuotes(), '=');
+			return new CommandParameterValue("--author", author.SurroundWithDoubleQuotes(), '=');
 		}
 
-		public static CommandArgument Date(DateTime date)
+		public static ICommandArgument Date(DateTime date)
 		{
-			return new CommandArgument("--date", ((int)(date - GitConstants.UnixEraStart).TotalSeconds).ToString(
+			return new CommandParameterValue("--date", ((int)(date - GitConstants.UnixEraStart).TotalSeconds).ToString(
 				System.Globalization.CultureInfo.InvariantCulture), '=');
 		}
 
-		public static CommandArgument Message(string message)
+		public static ICommandArgument Message(string message)
 		{
-			return new CommandArgument("--message", message.SurroundWithDoubleQuotes(), '=');
+			return new CommandParameterValue("--message", message.SurroundWithDoubleQuotes(), '=');
 		}
 
 		/// <summary>
 		///	Take an existing commit object, and reuse the log message and the authorship information (including the timestamp)
 		///	when creating the commit.
 		/// </summary>
-		public static CommandArgument ReuseMessage(string commit)
+		public static ICommandArgument ReuseMessage(string commit)
 		{
-			return new CommandArgument("--reuse-message", commit);
+			return new CommandParameterValue("--reuse-message", commit);
 		}
 
-		public static CommandArgument ReeditMessage(string commit)
+		public static ICommandArgument ReeditMessage(string commit)
 		{
-			return new CommandArgument("--reedit-message", commit);
+			return new CommandParameterValue("--reedit-message", commit);
 		}
 
-		public static CommandArgument File(string file)
+		public static ICommandArgument File(string file)
 		{
-			return new CommandArgument("--file", file.AssureDoubleQuotes());
+			return new CommandParameterValue("--file", file.AssureDoubleQuotes());
 		}
 
-		public static CommandArgument Template(string file)
+		public static ICommandArgument Template(string file)
 		{
-			return new CommandArgument("--template", file);
+			return new CommandParameterValue("--template", file);
 		}
 
-		public static CommandArgument Only()
+		public static ICommandArgument Only()
 		{
-			return new CommandArgument("--only");
+			return new CommandFlag("--only");
 		}
 
-		public static CommandArgument Include()
+		public static ICommandArgument Include()
 		{
-			return new CommandArgument("--include");
+			return new CommandFlag("--include");
 		}
 
-		public static CommandArgument SignOff()
+		public static ICommandArgument SignOff()
 		{
-			return CommandArgument.SignOff();
+			return CommandFlag.SignOff();
 		}
 
-		public static CommandArgument NoVerify()
+		public static ICommandArgument NoVerify()
 		{
-			return new CommandArgument("--no-verify");
+			return new CommandFlag("--no-verify");
 		}
 
-		public static CommandArgument AllowEmpty()
+		public static ICommandArgument AllowEmpty()
 		{
-			return new CommandArgument("--allow-empty");
+			return new CommandFlag("--allow-empty");
 		}
 
-		public static CommandArgument AllowEmptyMessage()
+		public static ICommandArgument AllowEmptyMessage()
 		{
-			return new CommandArgument("--allow-empty-message");
+			return new CommandFlag("--allow-empty-message");
 		}
 
-		public static CommandArgument Edit()
+		public static ICommandArgument Edit()
 		{
-			return new CommandArgument("--edit");
+			return new CommandFlag("--edit");
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return CommandArgument.Quiet();
+			return CommandFlag.Quiet();
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return new CommandArgument("--");
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public CommitCommand()
@@ -146,12 +146,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public CommitCommand(params CommandArgument[] args)
+		public CommitCommand(params ICommandArgument[] args)
 			: base("commit", args)
 		{
 		}
 
-		public CommitCommand(IList<CommandArgument> args)
+		public CommitCommand(IList<ICommandArgument> args)
 			: base("commit", args)
 		{
 		}

@@ -25,54 +25,54 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Show the most recent tag that is reachable from a commit.</summary>
 	public sealed class DescribeCommand : Command
 	{
-		public static CommandArgument All()
+		public static ICommandArgument All()
 		{
-			return new CommandArgument("--all");
+			return new CommandFlag("--all");
 		}
 
-		public static CommandArgument Always()
+		public static ICommandArgument Always()
 		{
-			return new CommandArgument("--always");
+			return new CommandFlag("--always");
 		}
 
-		public static CommandArgument Tags()
+		public static ICommandArgument Tags()
 		{
-			return new CommandArgument("--tags");
+			return new CommandFlag("--tags");
 		}
 
-		public static CommandArgument Contains()
+		public static ICommandArgument Contains()
 		{
-			return new CommandArgument("--contains");
+			return new CommandFlag("--contains");
 		}
 
-		public static CommandArgument Abbrev(int n)
+		public static ICommandArgument Abbrev(int n)
 		{
-			return new CommandArgument("--abbrev", n.ToString());
+			return new CommandParameterValue("--abbrev", n.ToString());
 		}
 
-		public static CommandArgument Candidates(int n)
+		public static ICommandArgument Candidates(int n)
 		{
-			return new CommandArgument("--candidates", n.ToString());
+			return new CommandParameterValue("--candidates", n.ToString());
 		}
 
-		public static CommandArgument ExactMatch()
+		public static ICommandArgument ExactMatch()
 		{
-			return new CommandArgument("--exact-match");
+			return new CommandFlag("--exact-match");
 		}
 
-		public static CommandArgument Long()
+		public static ICommandArgument Long()
 		{
-			return new CommandArgument("--long");
+			return new CommandFlag("--long");
 		}
 
-		public static CommandArgument Debug()
+		public static ICommandArgument Debug()
 		{
-			return new CommandArgument("--debug");
+			return new CommandFlag("--debug");
 		}
 
-		public static CommandArgument Match(string pattern)
+		public static ICommandArgument Match(string pattern)
 		{
-			return new CommandArgument("--match", pattern, ' ');
+			return new CommandParameterValue("--match", pattern, ' ');
 		}
 
 		public DescribeCommand()
@@ -80,12 +80,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public DescribeCommand(params CommandArgument[] args)
+		public DescribeCommand(params ICommandArgument[] args)
 			: base("describe", args)
 		{
 		}
 
-		public DescribeCommand(IList<CommandArgument> args)
+		public DescribeCommand(IList<ICommandArgument> args)
 			: base("describe", args)
 		{
 		}

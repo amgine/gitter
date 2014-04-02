@@ -45,7 +45,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private static Command GetCommand2(QueryReflogParameters parameters)
 		{
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(LogCommand.WalkReflogs());
 			if(parameters.MaxCount != 0)
 			{
@@ -55,7 +55,7 @@ namespace gitter.Git.AccessLayer.CLI
 			args.Add(LogCommand.FormatRaw());
 			if(parameters.Reference != null)
 			{
-				args.Add(new CommandArgument(parameters.Reference));
+				args.Add(new CommandParameter(parameters.Reference));
 			}
 			return new LogCommand(args);
 		}

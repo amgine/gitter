@@ -30,12 +30,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public BundleCommand(params CommandArgument[] args)
+		public BundleCommand(params ICommandArgument[] args)
 			: base("bundle", args)
 		{
 		}
 
-		public BundleCommand(IList<CommandArgument> args)
+		public BundleCommand(IList<ICommandArgument> args)
 			: base("bundle", args)
 		{
 		}

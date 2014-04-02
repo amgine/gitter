@@ -25,74 +25,74 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Stash the changes in a dirty working directory away.</summary>
 	public sealed class StashCommand : Command
 	{
-		public static CommandArgument Save()
+		public static ICommandArgument Save()
 		{
-			return new CommandArgument("save");
+			return new CommandParameter("save");
 		}
 
-		public static CommandArgument List()
+		public static ICommandArgument List()
 		{
-			return new CommandArgument("list");
+			return new CommandParameter("list");
 		}
 
-		public static CommandArgument Show()
+		public static ICommandArgument Show()
 		{
-			return new CommandArgument("show");
+			return new CommandParameter("show");
 		}
 
-		public static CommandArgument Pop()
+		public static ICommandArgument Pop()
 		{
-			return new CommandArgument("pop");
+			return new CommandParameter("pop");
 		}
 
-		public static CommandArgument Apply()
+		public static ICommandArgument Apply()
 		{
-			return new CommandArgument("apply");
+			return new CommandParameter("apply");
 		}
 
-		public static CommandArgument Branch()
+		public static ICommandArgument Branch()
 		{
-			return new CommandArgument("branch");
+			return new CommandParameter("branch");
 		}
 
-		public static CommandArgument Clear()
+		public static ICommandArgument Clear()
 		{
-			return new CommandArgument("clear");
+			return new CommandParameter("clear");
 		}
 
-		public static CommandArgument Drop()
+		public static ICommandArgument Drop()
 		{
-			return new CommandArgument("drop");
+			return new CommandParameter("drop");
 		}
 
-		public static CommandArgument Create()
+		public static ICommandArgument Create()
 		{
-			return new CommandArgument("create");
+			return new CommandParameter("create");
 		}
 
-		public static CommandArgument NoKeepIndex()
+		public static ICommandArgument NoKeepIndex()
 		{
-			return new CommandArgument("--no-keep-index");
+			return new CommandFlag("--no-keep-index");
 		}
 
-		public static CommandArgument KeepIndex()
+		public static ICommandArgument KeepIndex()
 		{
-			return new CommandArgument("--keep-index");
+			return new CommandFlag("--keep-index");
 		}
 
-		public static CommandArgument Index()
+		public static ICommandArgument Index()
 		{
-			return new CommandArgument("--index");
+			return new CommandFlag("--index");
 		}
 
-		public static CommandArgument IncludeUntracked()
+		public static ICommandArgument IncludeUntracked()
 		{
-			return new CommandArgument("--include-untracked");
+			return new CommandFlag("--include-untracked");
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return CommandArgument.Quiet();
+			return CommandFlag.Quiet();
 		}
 
 		public StashCommand()
@@ -100,12 +100,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public StashCommand(params CommandArgument[] args)
+		public StashCommand(params ICommandArgument[] args)
 			: base("stash", args)
 		{
 		}
 
-		public StashCommand(IList<CommandArgument> args)
+		public StashCommand(IList<ICommandArgument> args)
 			: base("stash", args)
 		{
 		}

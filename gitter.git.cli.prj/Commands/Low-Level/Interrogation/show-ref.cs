@@ -25,49 +25,49 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>List references in a local repository.</summary>
 	public sealed class ShowRefCommand : Command
 	{
-		public static CommandArgument Head()
+		public static ICommandArgument Head()
 		{
-			return new CommandArgument("--head");
+			return new CommandFlag("--head");
 		}
 
-		public static CommandArgument Dereference()
+		public static ICommandArgument Dereference()
 		{
-			return new CommandArgument("--dereference");
+			return new CommandFlag("--dereference");
 		}
 
-		public static CommandArgument Tags()
+		public static ICommandArgument Tags()
 		{
-			return new CommandArgument("--tags");
+			return new CommandFlag("--tags");
 		}
 
-		public static CommandArgument Hash()
+		public static ICommandArgument Hash()
 		{
-			return new CommandArgument("--hash");
+			return new CommandFlag("--hash");
 		}
 
-		public static CommandArgument Hash(int n)
+		public static ICommandArgument Hash(int n)
 		{
-			return new CommandArgument("--hash", n.ToString());
+			return new CommandParameterValue("--hash", n.ToString());
 		}
 
-		public static CommandArgument Heads()
+		public static ICommandArgument Heads()
 		{
-			return new CommandArgument("--heads");
+			return new CommandFlag("--heads");
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("--quiet");
+			return new CommandFlag("--quiet");
 		}
 
-		public static CommandArgument Verify()
+		public static ICommandArgument Verify()
 		{
-			return new CommandArgument("--verify");
+			return new CommandFlag("--verify");
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public ShowRefCommand()
@@ -75,12 +75,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public ShowRefCommand(params CommandArgument[] args)
+		public ShowRefCommand(params ICommandArgument[] args)
 			: base("show-ref", args)
 		{
 		}
 
-		public ShowRefCommand(IList<CommandArgument> args)
+		public ShowRefCommand(IList<ICommandArgument> args)
 			: base("show-ref", args)
 		{
 		}

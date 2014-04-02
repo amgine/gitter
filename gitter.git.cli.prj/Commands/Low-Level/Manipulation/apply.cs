@@ -25,39 +25,39 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>List references in a local repository.</summary>
 	public sealed class ApplyCommand : Command
 	{
-		public static CommandArgument Cached()
+		public static ICommandArgument Cached()
 		{
-			return new CommandArgument("--cached");
+			return new CommandFlag("--cached");
 		}
 
-		public static CommandArgument Index()
+		public static ICommandArgument Index()
 		{
-			return new CommandArgument("--index");
+			return new CommandFlag("--index");
 		}
 
-		public static CommandArgument Check()
+		public static ICommandArgument Check()
 		{
-			return new CommandArgument("--check");
+			return new CommandFlag("--check");
 		}
 
-		public static CommandArgument Reverse()
+		public static ICommandArgument Reverse()
 		{
-			return new CommandArgument("--reverse");
+			return new CommandFlag("--reverse");
 		}
 
-		public static CommandArgument FromStdin()
+		public static ICommandArgument FromStdin()
 		{
-			return new CommandArgument("-");
+			return new CommandFlag("-");
 		}
 
-		public static CommandArgument Whitespace(string action)
+		public static ICommandArgument Whitespace(string action)
 		{
-			return new CommandArgument("--whitespace", action, '=');
+			return new CommandParameterValue("--whitespace", action, '=');
 		}
 
-		public static CommandArgument UnidiffZero()
+		public static ICommandArgument UnidiffZero()
 		{
-			return new CommandArgument("--unidiff-zero");
+			return new CommandFlag("--unidiff-zero");
 		}
 
 		public ApplyCommand()
@@ -65,12 +65,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public ApplyCommand(params CommandArgument[] args)
+		public ApplyCommand(params ICommandArgument[] args)
 			: base("apply", args)
 		{
 		}
 
-		public ApplyCommand(IList<CommandArgument> args)
+		public ApplyCommand(IList<ICommandArgument> args)
 			: base("apply", args)
 		{
 		}

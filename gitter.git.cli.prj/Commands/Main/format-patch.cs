@@ -30,12 +30,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public FormatPatchCommand(params CommandArgument[] args)
+		public FormatPatchCommand(params ICommandArgument[] args)
 			: base("format-patch", args)
 		{
 		}
 
-		public FormatPatchCommand(IList<CommandArgument> args)
+		public FormatPatchCommand(IList<ICommandArgument> args)
 			: base("format-patch", args)
 		{
 		}

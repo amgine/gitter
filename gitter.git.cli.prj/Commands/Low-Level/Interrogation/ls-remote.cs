@@ -29,23 +29,23 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			return new LsRemoteCommand(
 				Heads(),
-				new CommandArgument(remote),
-				new CommandArgument("/refs/heads/*"));
+				new CommandParameter(remote),
+				new CommandParameter("/refs/heads/*"));
 		}
 
-		public static CommandArgument Heads()
+		public static ICommandArgument Heads()
 		{
-			return new CommandArgument("--heads");
+			return new CommandFlag("--heads");
 		}
 
-		public static CommandArgument Tags()
+		public static ICommandArgument Tags()
 		{
-			return new CommandArgument("--tags");
+			return new CommandFlag("--tags");
 		}
 
-		public static CommandArgument UploadPack(string path)
+		public static ICommandArgument UploadPack(string path)
 		{
-			return new CommandArgument("--upload-pack", path, '=');
+			return new CommandParameterValue("--upload-pack", path, '=');
 		}
 
 		public LsRemoteCommand()
@@ -53,12 +53,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public LsRemoteCommand(params CommandArgument[] args)
+		public LsRemoteCommand(params ICommandArgument[] args)
 			: base("ls-remote", args)
 		{
 		}
 
-		public LsRemoteCommand(IList<CommandArgument> args)
+		public LsRemoteCommand(IList<ICommandArgument> args)
 			: base("ls-remote", args)
 		{
 		}

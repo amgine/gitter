@@ -25,74 +25,74 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class FsckCommand : Command
 	{
-		public static CommandArgument Tags()
+		public static ICommandArgument Tags()
 		{
-			return new CommandArgument("--tags");
+			return new CommandFlag("--tags");
 		}
 
-		public static CommandArgument Root()
+		public static ICommandArgument Root()
 		{
-			return new CommandArgument("--root");
+			return new CommandFlag("--root");
 		}
 
-		public static CommandArgument Unreachable()
+		public static ICommandArgument Unreachable()
 		{
-			return new CommandArgument("--unreachable");
+			return new CommandFlag("--unreachable");
 		}
 
-		public static CommandArgument Cache()
+		public static ICommandArgument Cache()
 		{
-			return new CommandArgument("--cache");
+			return new CommandFlag("--cache");
 		}
 
-		public static CommandArgument NoReflogs()
+		public static ICommandArgument NoReflogs()
 		{
-			return new CommandArgument("--no-reflogs");
+			return new CommandFlag("--no-reflogs");
 		}
 
-		public static CommandArgument Full()
+		public static ICommandArgument Full()
 		{
-			return new CommandArgument("--full");
+			return new CommandFlag("--full");
 		}
 
-		public static CommandArgument NoFull()
+		public static ICommandArgument NoFull()
 		{
-			return new CommandArgument("--no-full");
+			return new CommandFlag("--no-full");
 		}
 
-		public static CommandArgument Strict()
+		public static ICommandArgument Strict()
 		{
-			return new CommandArgument("--strict");
+			return new CommandFlag("--strict");
 		}
 
-		public static CommandArgument LostFound()
+		public static ICommandArgument LostFound()
 		{
-			return new CommandArgument("--lost-found");
+			return new CommandFlag("--lost-found");
 		}
 
-		public static CommandArgument Dangling()
+		public static ICommandArgument Dangling()
 		{
-			return new CommandArgument("--dangling");
+			return new CommandFlag("--dangling");
 		}
 
-		public static CommandArgument NoDangling()
+		public static ICommandArgument NoDangling()
 		{
-			return new CommandArgument("--no-dangling");
+			return new CommandFlag("--no-dangling");
 		}
 
-		public static CommandArgument Progress()
+		public static ICommandArgument Progress()
 		{
-			return new CommandArgument("--progress");
+			return new CommandFlag("--progress");
 		}
 
-		public static CommandArgument NoProgress()
+		public static ICommandArgument NoProgress()
 		{
-			return new CommandArgument("--no-progress");
+			return new CommandFlag("--no-progress");
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
 		public FsckCommand()
@@ -100,12 +100,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public FsckCommand(params CommandArgument[] args)
+		public FsckCommand(params ICommandArgument[] args)
 			: base("fsck", args)
 		{
 		}
 
-		public FsckCommand(IEnumerable<CommandArgument> args)
+		public FsckCommand(IEnumerable<ICommandArgument> args)
 			: base("fsck", args)
 		{
 		}

@@ -25,99 +25,99 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Forward-port local commits to the updated upstream head.</summary>
 	public sealed class RebaseCommand : Command
 	{
-		public static CommandArgument Abort()
+		public static ICommandArgument Abort()
 		{
-			return new CommandArgument("--abort");
+			return new CommandFlag("--abort");
 		}
 
-		public static CommandArgument Skip()
+		public static ICommandArgument Skip()
 		{
-			return new CommandArgument("--skip");
+			return new CommandFlag("--skip");
 		}
 
-		public static CommandArgument Continue()
+		public static ICommandArgument Continue()
 		{
-			return new CommandArgument("--continue");
+			return new CommandFlag("--continue");
 		}
 
-		public static CommandArgument Onto(string branch)
+		public static ICommandArgument Onto(string branch)
 		{
-			return new CommandArgument("--onto", branch, ' ');
+			return new CommandParameterValue("--onto", branch, ' ');
 		}
 
-		public static CommandArgument Root()
+		public static ICommandArgument Root()
 		{
-			return new CommandArgument("--root");
+			return new CommandFlag("--root");
 		}
 
-		public static CommandArgument Interactive()
+		public static ICommandArgument Interactive()
 		{
-			return new CommandArgument("--interactive");
+			return new CommandFlag("--interactive");
 		}
 
-		public static CommandArgument Merge()
+		public static ICommandArgument Merge()
 		{
-			return new CommandArgument("--merge");
+			return new CommandFlag("--merge");
 		}
 
-		public static CommandArgument Strategy(string strategy)
+		public static ICommandArgument Strategy(string strategy)
 		{
-			return new CommandArgument("--strategy", strategy, '=');
+			return new CommandParameterValue("--strategy", strategy, '=');
 		}
 
-		public static CommandArgument StrategyOption(string strategyOption)
+		public static ICommandArgument StrategyOption(string strategyOption)
 		{
-			return new CommandArgument("--strategy-option", strategyOption, '=');
+			return new CommandParameterValue("--strategy-option", strategyOption, '=');
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("--quiet");
+			return new CommandFlag("--quiet");
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return new CommandArgument("--verbose");
+			return new CommandFlag("--verbose");
 		}
 
-		public static CommandArgument Stat()
+		public static ICommandArgument Stat()
 		{
-			return new CommandArgument("--stat");
+			return new CommandFlag("--stat");
 		}
 
-		public static CommandArgument NoStat()
+		public static ICommandArgument NoStat()
 		{
-			return new CommandArgument("--no-stat");
+			return new CommandFlag("--no-stat");
 		}
 
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force-rebase");
+			return new CommandFlag("--force-rebase");
 		}
 
-		public static CommandArgument IgnoreWhitespace()
+		public static ICommandArgument IgnoreWhitespace()
 		{
-			return new CommandArgument("--ignore-whitespace");
+			return new CommandFlag("--ignore-whitespace");
 		}
 
-		public static CommandArgument PreserveMerges()
+		public static ICommandArgument PreserveMerges()
 		{
-			return new CommandArgument("--preserve-merges");
+			return new CommandFlag("--preserve-merges");
 		}
 
-		public static CommandArgument Autosquash()
+		public static ICommandArgument Autosquash()
 		{
-			return new CommandArgument("--autosquash");
+			return new CommandFlag("--autosquash");
 		}
 
-		public static CommandArgument NoAutosquash()
+		public static ICommandArgument NoAutosquash()
 		{
-			return new CommandArgument("--no-autosquash");
+			return new CommandFlag("--no-autosquash");
 		}
 
-		public static CommandArgument NoFF()
+		public static ICommandArgument NoFF()
 		{
-			return new CommandArgument("--no-ff");
+			return new CommandFlag("--no-ff");
 		}
 
 		public RebaseCommand()
@@ -125,12 +125,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public RebaseCommand(params CommandArgument[] args)
+		public RebaseCommand(params ICommandArgument[] args)
 			: base("rebase", args)
 		{
 		}
 
-		public RebaseCommand(IList<CommandArgument> args)
+		public RebaseCommand(IList<ICommandArgument> args)
 			: base("rebase", args)
 		{
 		}

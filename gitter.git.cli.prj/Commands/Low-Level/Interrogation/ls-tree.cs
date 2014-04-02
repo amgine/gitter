@@ -25,54 +25,54 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>List the contents of a tree object.</summary>
 	public sealed class LsTreeCommand : Command
 	{
-		public static CommandArgument Directories()
+		public static ICommandArgument Directories()
 		{
-			return new CommandArgument("-d");
+			return new CommandFlag("-d");
 		}
 
-		public static CommandArgument Recurse()
+		public static ICommandArgument Recurse()
 		{
-			return new CommandArgument("-r");
+			return new CommandFlag("-r");
 		}
 
-		public static CommandArgument Tree()
+		public static ICommandArgument Tree()
 		{
-			return new CommandArgument("-t");
+			return new CommandFlag("-t");
 		}
 
-		public static CommandArgument Long()
+		public static ICommandArgument Long()
 		{
-			return new CommandArgument("--long");
+			return new CommandFlag("--long");
 		}
 
-		public static CommandArgument NameOnly()
+		public static ICommandArgument NameOnly()
 		{
-			return new CommandArgument("--name-only");
+			return new CommandFlag("--name-only");
 		}
 
-		public static CommandArgument FullName()
+		public static ICommandArgument FullName()
 		{
-			return new CommandArgument("--full-name");
+			return new CommandFlag("--full-name");
 		}
 
-		public static CommandArgument FullTree()
+		public static ICommandArgument FullTree()
 		{
-			return new CommandArgument("--full-tree");
+			return new CommandFlag("--full-tree");
 		}
 
-		public static CommandArgument Abbrev()
+		public static ICommandArgument Abbrev()
 		{
-			return new CommandArgument("--abbrev");
+			return new CommandFlag("--abbrev");
 		}
 
-		public static CommandArgument Abbrev(int n)
+		public static ICommandArgument Abbrev(int n)
 		{
-			return new CommandArgument("--abbrev", n.ToString(System.Globalization.CultureInfo.InvariantCulture), '=');
+			return new CommandParameterValue("--abbrev", n.ToString(System.Globalization.CultureInfo.InvariantCulture), '=');
 		}
 
-		public static CommandArgument NullTerminate()
+		public static ICommandArgument NullTerminate()
 		{
-			return new CommandArgument("-z");
+			return new CommandFlag("-z");
 		}
 
 		public LsTreeCommand()
@@ -80,12 +80,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public LsTreeCommand(params CommandArgument[] args)
+		public LsTreeCommand(params ICommandArgument[] args)
 			: base("ls-tree", args)
 		{
 		}
 
-		public LsTreeCommand(IList<CommandArgument> args)
+		public LsTreeCommand(IList<ICommandArgument> args)
 			: base("ls-tree", args)
 		{
 		}

@@ -27,7 +27,7 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		public static CheckoutCommand FormatCreateBranchCommand(string name, string startingRevision, bool specifyTracking, bool track, bool reflog)
 		{
-			var args = new CommandArgument[3 + (specifyTracking ? 1 : 0) + (reflog ? 1 : 0)];
+			var args = new ICommandArgument[3 + (specifyTracking ? 1 : 0) + (reflog ? 1 : 0)];
 			int id = 0;
 			if(specifyTracking)
 			{
@@ -38,8 +38,8 @@ namespace gitter.Git.AccessLayer.CLI
 				args[id++] = RefLog();
 			}
 			args[id + 0] = Branch();
-			args[id + 1] = new CommandArgument(name);
-			args[id + 2] = new CommandArgument(startingRevision);
+			args[id + 1] = new CommandParameter(name);
+			args[id + 2] = new CommandParameter(startingRevision);
 			return new CheckoutCommand(args);
 		}
 
@@ -47,9 +47,9 @@ namespace gitter.Git.AccessLayer.CLI
 		/// When switching branches, proceed even if the index or the working tree differs from HEAD. This is used to throw away local changes.
 		/// When checking out paths from the index, do not fail upon unmerged entries; instead, unmerged entries are ignored.
 		/// </summary>
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force");
+			return new CommandFlag("--force");
 		}
 
 		/// <summary>
@@ -58,34 +58,34 @@ namespace gitter.Git.AccessLayer.CLI
 		/// in context. However, with this option, a three-way merge between the current branch, your working tree contents, and the
 		/// new branch is done, and you will be on the new branch. 
 		/// </summary>
-		public static CommandArgument Merge()
+		public static ICommandArgument Merge()
 		{
-			return new CommandArgument("--merge");
+			return new CommandFlag("--merge");
 		}
 
-		public static CommandArgument Ours()
+		public static ICommandArgument Ours()
 		{
-			return new CommandArgument("--ours");
+			return new CommandFlag("--ours");
 		}
 
-		public static CommandArgument Theirs()
+		public static ICommandArgument Theirs()
 		{
-			return new CommandArgument("--theirs");
+			return new CommandFlag("--theirs");
 		}
 
 		/// <summary>
 		///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
 		///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
 		/// </summary>
-		public static CommandArgument RefLog()
+		public static ICommandArgument RefLog()
 		{
-			return new CommandArgument("-l");
+			return new CommandFlag("-l");
 		}
 
 		/// <summary>Create a new branch.</summary>
-		public static CommandArgument Branch()
+		public static ICommandArgument Branch()
 		{
-			return new CommandArgument("-b");
+			return new CommandFlag("-b");
 		}
 
 		/// <summary>
@@ -98,26 +98,26 @@ namespace gitter.Git.AccessLayer.CLI
 		///	were given. Set it to always if you want this behavior when the start-point is either a local or 
 		///	remote branch.</para>
 		/// </summary>
-		public static CommandArgument Track()
+		public static ICommandArgument Track()
 		{
-			return new CommandArgument("--track");
+			return new CommandFlag("--track");
 		}
 
 		/// <summary>Do not set up "upstream" configuration, even if the branch.autosetupmerge configuration variable is true.</summary>
-		public static CommandArgument NoTrack()
+		public static ICommandArgument NoTrack()
 		{
-			return new CommandArgument("--no-track");
+			return new CommandFlag("--no-track");
 		}
 
 		/// <summary>Create a new orphan branch.</summary>
-		public static CommandArgument Orphan()
+		public static ICommandArgument Orphan()
 		{
-			return new CommandArgument("--orphan");
+			return new CommandFlag("--orphan");
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public CheckoutCommand()
@@ -125,12 +125,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public CheckoutCommand(params CommandArgument[] args)
+		public CheckoutCommand(params ICommandArgument[] args)
 			: base("checkout", args)
 		{
 		}
 
-		public CheckoutCommand(IList<CommandArgument> args)
+		public CheckoutCommand(IList<ICommandArgument> args)
 			: base("checkout", args)
 		{
 		}

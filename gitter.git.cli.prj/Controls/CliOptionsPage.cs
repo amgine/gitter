@@ -76,14 +76,13 @@ namespace gitter.Git
 
 			if(_gitCLI.AutodetectGitExePath)
 			{
-				_versionPath = GitProcess.GitExePath;
 				_radAlwaysAutodetect.Checked = true;
 			}
 			else
 			{
-				_versionPath = _gitCLI.ManualGitExePath;
 				_radSpecifyManually.Checked = true;
 			}
+			_versionPath = _gitCLI.GitExecutablePath;
 			_txtmSysGitPath.Text = _versionPath;
 
 			_chkLogCLICalls.Checked = _gitCLI.LogCalls;

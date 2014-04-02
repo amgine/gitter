@@ -30,78 +30,78 @@ namespace gitter.Git.AccessLayer.CLI
 		/// Terminate entries with NUL, instead of LF.
 		/// This implies the --porcelain output format if no other format is given.
 		/// </summary>
-		public static CommandArgument NullTerminate()
+		public static ICommandArgument NullTerminate()
 		{
-			return new CommandArgument("-z");
+			return new CommandFlag("-z");
 		}
 
 		/// <summary>Give the output in the short-format.</summary>
-		public static CommandArgument Short()
+		public static ICommandArgument Short()
 		{
-			return new CommandArgument("--short");
+			return new CommandFlag("--short");
 		}
 
 		/// <summary>
 		/// Give the output in a stable, easy-to-parse format for scripts. Currently this is identical to --short output,
 		/// but is guaranteed not to change in the future, making it safe for scripts.
 		/// </summary>
-		public static CommandArgument Porcelain()
+		public static ICommandArgument Porcelain()
 		{
-			return new CommandArgument("--porcelain");
+			return new CommandFlag("--porcelain");
 		}
 
 		/// <summary>Show the branch and tracking info even in short-format.</summary>
-		public static CommandArgument Branch()
+		public static ICommandArgument Branch()
 		{
-			return new CommandArgument("--branch");
+			return new CommandFlag("--branch");
 		}
 
 		/// <summary>Show untracked files (Default: all).</summary>
-		public static CommandArgument UntrackedFiles(StatusUntrackedFilesMode mode)
+		public static ICommandArgument UntrackedFiles(StatusUntrackedFilesMode mode)
 		{
 			switch(mode)
 			{
 				case StatusUntrackedFilesMode.No:
-					return new CommandArgument("--untracked-files", "no", '=');
+					return new CommandParameterValue("--untracked-files", "no", '=');
 				case StatusUntrackedFilesMode.Normal:
-					return new CommandArgument("--untracked-files", "normal", '=');
+					return new CommandParameterValue("--untracked-files", "normal", '=');
 				case StatusUntrackedFilesMode.All:
-					return new CommandArgument("--untracked-files", "all", '=');
+					return new CommandParameterValue("--untracked-files", "all", '=');
 				default:
 					throw new ArgumentException("mode");
 			}
 		}
 
 		/// <summary>Ignore changes to submodules when looking for changes.</summary>
-		public static CommandArgument IgnoreSubmodules()
+		public static ICommandArgument IgnoreSubmodules()
 		{
-			return new CommandArgument("--ignore-submodules");
+			return new CommandFlag("--ignore-submodules");
 		}
 
 		/// <summary>Ignore changes to submodules when looking for changes.</summary>
-		public static CommandArgument IgnoreSubmodules(StatusIgnoreSubmodulesMode mode)
+		public static ICommandArgument IgnoreSubmodules(StatusIgnoreSubmodulesMode mode)
 		{
 			switch(mode)
 			{
 				case StatusIgnoreSubmodulesMode.All:
-					return new CommandArgument("--ignore-submodules", "all", '=');
+					return new CommandParameterValue("--ignore-submodules", "all", '=');
 				case StatusIgnoreSubmodulesMode.Dirty:
-					return new CommandArgument("--ignore-submodules", "dirty", '=');
+					return new CommandParameterValue("--ignore-submodules", "dirty", '=');
 				case StatusIgnoreSubmodulesMode.Untracked:
-					return new CommandArgument("--ignore-submodules", "untracked", '=');
+					return new CommandParameterValue("--ignore-submodules", "untracked", '=');
 				default:
 					throw new ArgumentException("mode");
 			}
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
 		public StatusCommand()
@@ -109,12 +109,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public StatusCommand(params CommandArgument[] args)
+		public StatusCommand(params ICommandArgument[] args)
 			: base("status", args)
 		{
 		}
 
-		public StatusCommand(IList<CommandArgument> args)
+		public StatusCommand(IList<ICommandArgument> args)
 			: base("status", args)
 		{
 		}

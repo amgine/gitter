@@ -41,7 +41,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			var cmd = new LogCommand(
 				LogCommand.TFormat(lineFormat),
-				new CommandArgument(head + ".." + branch));
+				new CommandParameter(head + ".." + branch));
 			var output = _commandExecutor.ExecuteCommand(cmd, CommandExecutionFlags.None);
 			output.ThrowOnBadReturnCode();
 			return output.Output;

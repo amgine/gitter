@@ -24,20 +24,20 @@ namespace gitter.Git.AccessLayer.CLI
 
 	public sealed class DiffIndexCommand : Command
 	{
-		public static CommandArgument NameStatus()
+		public static ICommandArgument NameStatus()
 		{
-			return new CommandArgument("--name-status");
+			return new CommandFlag("--name-status");
 		}
 
-		public static CommandArgument Cached()
+		public static ICommandArgument Cached()
 		{
-			return new CommandArgument("--cached");
+			return new CommandFlag("--cached");
 		}
 
 		/// <summary>\0 line termination on output.</summary>
-		public static CommandArgument ZeroLineTermination()
+		public static ICommandArgument ZeroLineTermination()
 		{
-			return new CommandArgument("-z");
+			return new CommandFlag("-z");
 		}
 
 		public DiffIndexCommand()
@@ -45,12 +45,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public DiffIndexCommand(params CommandArgument[] args)
+		public DiffIndexCommand(params ICommandArgument[] args)
 			: base("diff-index", args)
 		{
 		}
 
-		public DiffIndexCommand(IList<CommandArgument> args)
+		public DiffIndexCommand(IList<ICommandArgument> args)
 			: base("diff-index", args)
 		{
 		}

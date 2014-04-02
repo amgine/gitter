@@ -26,44 +26,44 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Revert an existing commit.</summary>
 	public sealed class RevertCommand : Command
 	{
-		public static CommandArgument Mainline(int number)
+		public static ICommandArgument Mainline(int number)
 		{
-			return new CommandArgument("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
+			return new CommandParameterValue("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
 		}
 
-		public static CommandArgument Edit()
+		public static ICommandArgument Edit()
 		{
-			return new CommandArgument("--edit");
+			return new CommandFlag("--edit");
 		}
 
-		public static CommandArgument NoEdit()
+		public static ICommandArgument NoEdit()
 		{
-			return new CommandArgument("--no-edit");
+			return new CommandFlag("--no-edit");
 		}
 
-		public static CommandArgument NoCommit()
+		public static ICommandArgument NoCommit()
 		{
-			return new CommandArgument("--no-commit");
+			return new CommandFlag("--no-commit");
 		}
 
-		public static CommandArgument SignOff()
+		public static ICommandArgument SignOff()
 		{
-			return new CommandArgument("--signoff");
+			return new CommandFlag("--signoff");
 		}
 
-		public static CommandArgument Continue()
+		public static ICommandArgument Continue()
 		{
-			return new CommandArgument("--continue");
+			return new CommandFlag("--continue");
 		}
 
-		public static CommandArgument Quit()
+		public static ICommandArgument Quit()
 		{
-			return new CommandArgument("--quit");
+			return new CommandFlag("--quit");
 		}
 
-		public static CommandArgument Abort()
+		public static ICommandArgument Abort()
 		{
-			return new CommandArgument("--abort");
+			return new CommandFlag("--abort");
 		}
 
 		public RevertCommand()
@@ -71,12 +71,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public RevertCommand(params CommandArgument[] args)
+		public RevertCommand(params ICommandArgument[] args)
 			: base("revert", args)
 		{
 		}
 
-		public RevertCommand(IList<CommandArgument> args)
+		public RevertCommand(IList<ICommandArgument> args)
 			: base("revert", args)
 		{
 		}

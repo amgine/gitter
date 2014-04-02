@@ -27,34 +27,34 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <remarks>You need to set the configuration variable rerere.enabled in order to enable this command.</remarks>
 	sealed class RerereCommand : Command
 	{
-		public static CommandArgument Clear()
+		public static ICommandArgument Clear()
 		{
-			return new CommandArgument("clear");
+			return new CommandParameter("clear");
 		}
 
-		public static CommandArgument Forget(string pathspec)
+		public static ICommandArgument Forget(string pathspec)
 		{
-			return new CommandArgument("forget", pathspec, ' ');
+			return new CommandParameterValue("forget", pathspec, ' ');
 		}
 
-		public static CommandArgument Diff()
+		public static ICommandArgument Diff()
 		{
-			return new CommandArgument("diff");
+			return new CommandParameter("diff");
 		}
 
-		public static CommandArgument Remaining()
+		public static ICommandArgument Remaining()
 		{
-			return new CommandArgument("remaining");
+			return new CommandParameter("remaining");
 		}
 
-		public static CommandArgument Status()
+		public static ICommandArgument Status()
 		{
-			return new CommandArgument("status");
+			return new CommandParameter("status");
 		}
 
-		public static CommandArgument Gc()
+		public static ICommandArgument Gc()
 		{
-			return new CommandArgument("gc");
+			return new CommandParameter("gc");
 		}
 
 		public RerereCommand()
@@ -62,12 +62,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public RerereCommand(params CommandArgument[] args)
+		public RerereCommand(params ICommandArgument[] args)
 			: base("rerere", args)
 		{
 		}
 
-		public RerereCommand(IEnumerable<CommandArgument> args)
+		public RerereCommand(IEnumerable<ICommandArgument> args)
 			: base("rerere", args)
 		{
 		}

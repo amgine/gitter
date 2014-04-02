@@ -28,24 +28,24 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Prune all unreachable objects from the object database.</summary>
 	sealed class PruneCommand : Command
 	{
-		public static CommandArgument DryRun()
+		public static ICommandArgument DryRun()
 		{
-			return CommandArgument.DryRun();
+			return CommandFlag.DryRun();
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
-		public static CommandArgument Expire(DateTime expire)
+		public static ICommandArgument Expire(DateTime expire)
 		{
-			return new CommandArgument("--expire", Utility.FormatDate(expire, DateFormat.UnixTimestamp), ' ');
+			return new CommandParameterValue("--expire", Utility.FormatDate(expire, DateFormat.UnixTimestamp), ' ');
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public PruneCommand()
@@ -53,12 +53,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public PruneCommand(params CommandArgument[] args)
+		public PruneCommand(params ICommandArgument[] args)
 			: base("prune", args)
 		{
 		}
 
-		public PruneCommand(IList<CommandArgument> args)
+		public PruneCommand(IList<ICommandArgument> args)
 			: base("prune", args)
 		{
 		}

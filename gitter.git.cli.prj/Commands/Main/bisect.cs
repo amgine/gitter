@@ -30,12 +30,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public BisectCommand(params CommandArgument[] args)
+		public BisectCommand(params ICommandArgument[] args)
 			: base("bisect", args)
 		{
 		}
 
-		public BisectCommand(IList<CommandArgument> args)
+		public BisectCommand(IList<ICommandArgument> args)
 			: base("bisect", args)
 		{
 		}

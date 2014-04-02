@@ -44,6 +44,7 @@ namespace gitter.Git.AccessLayer.CLI
 		private readonly OutputParser _outputParser;
 		private Version _gitVersion;
 		private bool _autodetectGitExePath;
+		private string _manualGitExePath;
 		private string _gitExePath;
 
 		private readonly IGitAction<InitRepositoryParameters> _init;
@@ -71,7 +72,7 @@ namespace gitter.Git.AccessLayer.CLI
 			_commandBuilder			= new CommandBuilder(this);
 			_outputParser			= new OutputParser(this);
 			_autodetectGitExePath	= true;
-			_gitExePath				= string.Empty;
+			_manualGitExePath		= string.Empty;
 
 			GitProcess.UpdateGitExePath(this);
 
@@ -112,6 +113,26 @@ namespace gitter.Git.AccessLayer.CLI
 			get { return _executor; }
 		}
 
+		public string GitExecutablePath
+		{
+			get
+			{
+				if(_gitExePath == null)
+				{
+					if(AutodetectGitExePath)
+					{
+						_gitExePath = GitProcess.DetectGitExePath();
+					}
+					else
+					{
+						_gitExePath = ManualGitExePath;
+					}
+					GitProcess.UpdateGitExePath(this);
+				}
+				return _gitExePath;
+			}
+		}
+
 		public bool LogCalls
 		{
 			get;
@@ -142,6 +163,7 @@ namespace gitter.Git.AccessLayer.CLI
 				if(_autodetectGitExePath != value)
 				{
 					_autodetectGitExePath = value;
+					_gitExePath = null;
 					GitProcess.UpdateGitExePath(this);
 				}
 			}
@@ -149,14 +171,15 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public string ManualGitExePath
 		{
-			get { return _gitExePath; }
+			get { return _manualGitExePath; }
 			set
 			{
-				if(_gitExePath != value)
+				if(_manualGitExePath != value)
 				{
-					_gitExePath = value;
+					_manualGitExePath = value;
 					if(!AutodetectGitExePath)
 					{
+						_gitExePath = value;
 						GitProcess.UpdateGitExePath(this);
 					}
 				}

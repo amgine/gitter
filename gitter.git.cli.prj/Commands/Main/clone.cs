@@ -37,20 +37,20 @@ namespace gitter.Git.AccessLayer.CLI
 		/// heads, without mapping them to refs/remotes/origin/. When this option is used, neither remote-tracking branches nor
 		/// the related configuration variables are created.
 		/// </summary>
-		public static CommandArgument Bare()
+		public static ICommandArgument Bare()
 		{
-			return new CommandArgument("--bare");
+			return new CommandFlag("--bare");
 		}
 
-		public static CommandArgument NoCheckout()
+		public static ICommandArgument NoCheckout()
 		{
-			return new CommandArgument("--no-checkout");
+			return new CommandFlag("--no-checkout");
 		}
 
 		/// <summary>Instead of using the remote name origin to keep track of the upstream repository, use <paramref name="name"/>.</summary>
-		public static CommandArgument Origin(string name)
+		public static ICommandArgument Origin(string name)
 		{
-			return new CommandArgument("--origin", name, ' ');
+			return new CommandParameterValue("--origin", name, ' ');
 		}
 
 		/// <summary>
@@ -58,41 +58,41 @@ namespace gitter.Git.AccessLayer.CLI
 		///	number of limitations (you cannot clone or fetch from it, nor push from nor into it), but is adequate if you are
 		///	only interested in the recent history of a large project with a long history, and would want to send in fixes as patches.
 		/// </summary>
-		public static CommandArgument Depth(int depth)
+		public static ICommandArgument Depth(int depth)
 		{
-			return new CommandArgument("--depth", depth.ToString(), ' ');
+			return new CommandParameterValue("--depth", depth.ToString(), ' ');
 		}
 
 		/// <summary>Display the progressbar, even in case the standard output is not a terminal.</summary>
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
 		/// <summary>Set up a mirror of the remote repository. This implies --bare.</summary>
-		public static CommandArgument Mirror()
+		public static ICommandArgument Mirror()
 		{
-			return new CommandArgument("--mirror");
+			return new CommandFlag("--mirror");
 		}
 
-		public static CommandArgument Recursive()
+		public static ICommandArgument Recursive()
 		{
-			return new CommandArgument("--recursive");
+			return new CommandFlag("--recursive");
 		}
 
-		public static CommandArgument Progress()
+		public static ICommandArgument Progress()
 		{
-			return new CommandArgument("--progress");
+			return new CommandFlag("--progress");
 		}
 
-		public static CommandArgument Template(string template)
+		public static ICommandArgument Template(string template)
 		{
-			return new CommandArgument("--template", template.AssureDoubleQuotes(), '=');
+			return new CommandParameterValue("--template", template.AssureDoubleQuotes(), '=');
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public CloneCommand()
@@ -100,12 +100,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public CloneCommand(params CommandArgument[] args)
+		public CloneCommand(params ICommandArgument[] args)
 			: base("clone", args)
 		{
 		}
 
-		public CloneCommand(IList<CommandArgument> args)
+		public CloneCommand(IList<ICommandArgument> args)
 			: base("clone", args)
 		{
 		}

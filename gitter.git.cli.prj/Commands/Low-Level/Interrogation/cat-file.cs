@@ -26,25 +26,25 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class CatFileCommand : Command
 	{
 		/// <summary>Instead of the content, show the object type.</summary>
-		public static CommandArgument ShowType()
+		public static ICommandArgument ShowType()
 		{
-			return new CommandArgument("-t");
+			return new CommandFlag("-t");
 		}
 
 		/// <summary>Instead of the content, show the object size.</summary>
-		public static CommandArgument ShowSize()
+		public static ICommandArgument ShowSize()
 		{
-			return new CommandArgument("-s");
+			return new CommandFlag("-s");
 		}
 
-		public static CommandArgument CheckExists()
+		public static ICommandArgument CheckExists()
 		{
-			return new CommandArgument("-e");
+			return new CommandFlag("-e");
 		}
 
-		public static CommandArgument Pretty()
+		public static ICommandArgument Pretty()
 		{
-			return new CommandArgument("-p");
+			return new CommandFlag("-p");
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="CatFileCommand"/> class.</summary>
@@ -53,12 +53,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public CatFileCommand(params CommandArgument[] args)
+		public CatFileCommand(params ICommandArgument[] args)
 			: base("cat-file", args)
 		{
 		}
 
-		public CatFileCommand(IList<CommandArgument> args)
+		public CatFileCommand(IList<ICommandArgument> args)
 			: base("cat-file", args)
 		{
 		}

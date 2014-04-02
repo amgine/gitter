@@ -25,9 +25,9 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Show various types of objects.</summary>
 	public sealed class ShowCommand : Command
 	{
-		public CommandArgument AbbrevCommit()
+		public ICommandArgument AbbrevCommit()
 		{
-			return new CommandArgument("--abbrev-commit");
+			return new CommandFlag("--abbrev-commit");
 		}
 
 		public ShowCommand()
@@ -35,12 +35,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public ShowCommand(params CommandArgument[] args)
+		public ShowCommand(params ICommandArgument[] args)
 			: base("show", args)
 		{
 		}
 
-		public ShowCommand(IList<CommandArgument> args)
+		public ShowCommand(IList<ICommandArgument> args)
 			: base("show", args)
 		{
 		}

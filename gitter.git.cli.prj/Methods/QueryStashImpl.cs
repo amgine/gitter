@@ -49,7 +49,7 @@ namespace gitter.Git.AccessLayer.CLI
 				LogCommand.WalkReflogs(),
 				LogCommand.NullTerminate(),
 				LogCommand.FormatRaw(),
-				new CommandArgument(GitConstants.StashFullName));
+				new CommandParameter(GitConstants.StashFullName));
 		}
 
 		public IList<StashedStateData> Invoke(QueryStashParameters parameters)

@@ -171,14 +171,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
 
-			if(gitCLI.AutodetectGitExePath)
-			{
-				GitExePath = DetectGitExePath();
-			}
-			else
-			{
-				GitExePath = gitCLI.ManualGitExePath;
-			}
+			GitExePath = gitCLI.GitExecutablePath;
 		}
 
 		public static string GitExePath

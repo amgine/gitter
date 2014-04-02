@@ -36,7 +36,6 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Data
 
-		private readonly ICliOptionsProvider _cliOptionsProvider;
 		private readonly string _workingDirectory;
 
 		#endregion
@@ -47,12 +46,20 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <param name="cliOptionsProvider">CLI options provider.</param>
 		/// <param name="workingDirectory">Repository working directory.</param>
 		public RepositoryCommandExecutor(ICliOptionsProvider cliOptionsProvider, string workingDirectory)
+			: base(cliOptionsProvider)
 		{
-			Verify.Argument.IsNotNull(cliOptionsProvider, "cliOptionsProvider");
 			Verify.Argument.IsNeitherNullNorWhitespace(workingDirectory, "workingDirectory");
 
-			_cliOptionsProvider = cliOptionsProvider;
 			_workingDirectory   = workingDirectory;
+		}
+
+		#endregion
+
+		#region Properties
+
+		public string WorkingDirectory
+		{
+			get { return _workingDirectory; }
 		}
 
 		#endregion
@@ -63,7 +70,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(command);
 
-			if(_cliOptionsProvider.LogCalls)
+			if(CliOptionsProvider.LogCalls)
 			{
 				Log.Info("git {0}", command);
 			}
@@ -75,9 +82,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(encoding == null)
 			{
-				encoding = _cliOptionsProvider.DefaultEncoding;
+				encoding = CliOptionsProvider.DefaultEncoding;
 			}
-			return new GitInput(_workingDirectory, command, encoding);
+			return new GitInput(WorkingDirectory, command, encoding);
 		}
 
 		#endregion

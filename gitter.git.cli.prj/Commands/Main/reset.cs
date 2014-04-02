@@ -26,7 +26,7 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Reset current HEAD to the specified state.</summary>
 	public sealed class ResetCommand : Command
 	{
-		public static CommandArgument Mode(ResetMode mode)
+		public static ICommandArgument Mode(ResetMode mode)
 		{
 			switch(mode)
 			{
@@ -49,53 +49,53 @@ namespace gitter.Git.AccessLayer.CLI
 		/// Resets the index but not the working tree (i.e., the changed files are preserved but not marked for commit)
 		/// and reports what has not been updated. This is the default action.
 		/// </summary>
-		public static CommandArgument Mixed()
+		public static ICommandArgument Mixed()
 		{
-			return new CommandArgument("--mixed");
+			return new CommandFlag("--mixed");
 		}
 
 		/// <summary>
 		/// Does not touch the index file nor the working tree at all, but requires them to be in a good order.
 		/// This leaves all your changed files "Changes to be committed", as git-status would put it
 		/// </summary>
-		public static CommandArgument Soft()
+		public static ICommandArgument Soft()
 		{
-			return new CommandArgument("--soft");
+			return new CommandFlag("--soft");
 		}
 
 		/// <summary>
 		/// Matches the working tree and index to that of the tree being switched to. Any changes to
 		/// tracked files in the working tree since "commit" are lost.
 		/// </summary>
-		public static CommandArgument Hard()
+		public static ICommandArgument Hard()
 		{
-			return new CommandArgument("--hard");
+			return new CommandFlag("--hard");
 		}
 
 		/// <summary>
 		/// Resets the index to match the tree recorded by the named commit, and updates the
 		/// files that are different between the named commit and the current commit in the working tree.
 		/// </summary>
-		public static CommandArgument Merge()
+		public static ICommandArgument Merge()
 		{
-			return new CommandArgument("--merge");
+			return new CommandFlag("--merge");
 		}
 
-		public static CommandArgument Keep()
+		public static ICommandArgument Keep()
 		{
-			return new CommandArgument("--keep");
+			return new CommandFlag("--keep");
 		}
 
 		/// <summary>Be quiet, only report errors.</summary>
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("-q");
+			return new CommandFlag("-q");
 		}
 
 		/// <summary></summary>
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return new CommandArgument("--");
+			return CommandFlag.NoMoreOptions();
 		}
 
 		public ResetCommand()
@@ -103,12 +103,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public ResetCommand(params CommandArgument[] args)
+		public ResetCommand(params ICommandArgument[] args)
 			: base("reset", args)
 		{
 		}
 
-		public ResetCommand(IList<CommandArgument> args)
+		public ResetCommand(IList<ICommandArgument> args)
 			: base("reset", args)
 		{
 		}

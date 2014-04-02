@@ -40,7 +40,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(3);
+			var args = new List<ICommandArgument>(3);
 			if(parameters.Bare)
 			{
 				args.Add(InitCommand.Bare());
@@ -56,7 +56,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			if(!string.IsNullOrEmpty(parameters.Template))
 			{
 				args.Add(CloneCommand.Template(parameters.Template));
@@ -100,7 +100,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			return new LogCommand(
 				LogCommand.MaxCount(1),
-				new CommandArgument(refName),
+				new CommandParameter(refName),
 				GetRevisionFormatArgument());
 		}
 
@@ -116,7 +116,7 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				return new ShowRefCommand(
 					ShowRefCommand.Verify(),
-					new CommandArgument(GitConstants.StashFullName));
+					new CommandParameter(GitConstants.StashFullName));
 			}
 		}
 
@@ -124,7 +124,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(7);
+			var args = new List<ICommandArgument>(7);
 			args.Add(StatusCommand.Porcelain());
 			args.Add(StatusCommand.UntrackedFiles(parameters.UntrackedFilesMode));
 			args.Add(StatusCommand.NullTerminate());
@@ -147,10 +147,10 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(parameters.Objects.Count);
+			var args = new List<ICommandArgument>(parameters.Objects.Count);
 			foreach(var obj in parameters.Objects)
 			{
-				args.Add(new CommandArgument(obj));
+				args.Add(new CommandParameter(obj));
 			}
 			return new ShowCommand(args);
 		}
@@ -159,7 +159,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(30);
+			var args = new List<ICommandArgument>(30);
 			InsertQueryRevisionsParameters(parameters, args, GetRevisionFormatArgument());
 			return new LogCommand(args);
 		}
@@ -168,7 +168,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(30);
+			var args = new List<ICommandArgument>(30);
 			InsertQueryRevisionsParameters(parameters, args, LogCommand.Format("%H%n%P"));
 			return new LogCommand(args);
 		}
@@ -179,7 +179,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return new LogCommand(
 				LogCommand.MaxCount(1),
-				new CommandArgument(parameters.SHA1),
+				new CommandParameter(parameters.SHA1),
 				GetRevisionDataFormatArgument());
 		}
 
@@ -187,7 +187,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(5);
+			var args = new List<ICommandArgument>(5);
 			args.Add(LogCommand.WalkReflogs());
 			if(parameters.MaxCount != 0)
 			{
@@ -197,12 +197,12 @@ namespace gitter.Git.AccessLayer.CLI
 			args.Add(GetReflogFormatArgument());
 			if(parameters.Reference != null)
 			{
-				args.Add(new CommandArgument(parameters.Reference));
+				args.Add(new CommandParameter(parameters.Reference));
 			}
 			return new LogCommand(args);
 		}
 
-		private CommandArgument GetReflogFormatArgument()
+		private ICommandArgument GetReflogFormatArgument()
 		{
 			if(GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI))
 			{
@@ -214,7 +214,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		private CommandArgument GetRevisionFormatArgument()
+		private ICommandArgument GetRevisionFormatArgument()
 		{
 			if(GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI))
 			{
@@ -226,7 +226,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		private CommandArgument GetRevisionDataFormatArgument()
+		private ICommandArgument GetRevisionDataFormatArgument()
 		{
 			if(GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI))
 			{
@@ -238,7 +238,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		private static void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<CommandArgument> args, CommandArgument format)
+		private static void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<ICommandArgument> args, ICommandArgument format)
 		{
 			#region Commit Limiting
 
@@ -382,20 +382,20 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(parameters.Since != null && parameters.Until != null)
 			{
-				args.Add(new CommandArgument(parameters.Since + ".." + parameters.Until));
+				args.Add(new CommandParameter(parameters.Since + ".." + parameters.Until));
 			}
 
 			if(parameters.References != null)
 			{
 				foreach(var reference in parameters.References)
 				{
-					args.Add(new CommandArgument(reference));
+					args.Add(new CommandParameter(reference));
 				}
 			}
 
 			if(parameters.Paths != null && parameters.Paths.Count != 0)
 			{
-				args.Add(CommandArgument.NoMoreOptions());
+				args.Add(CommandFlag.NoMoreOptions());
 				foreach(var path in parameters.Paths)
 				{
 					args.Add(new PathCommandArgument(path));
@@ -413,7 +413,7 @@ namespace gitter.Git.AccessLayer.CLI
 			Assert.IsNotNull(parameters);
 
 			return new LogCommand(
-				new CommandArgument(parameters.Reference),
+				new CommandParameter(parameters.Reference),
 				LogCommand.MaxCount(1),
 				parameters.LoadRevisionData ?
 					GetRevisionFormatArgument() : LogCommand.Format("%H"));
@@ -423,7 +423,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(12);
+			var args = new List<ICommandArgument>(12);
 			if(parameters.All)
 			{
 				args.Add(CommitCommand.All());
@@ -479,7 +479,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 6);
+			var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 6);
 			args.Add(AddCommand.DryRun());
 			InsertAddFilesParameters(parameters, args);
 			return new AddCommand(args);
@@ -489,7 +489,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 5);
+			var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 5);
 			args.Add(RmCommand.DryRun());
 			InsertRemoveFilesParameters(parameters, args);
 			return new RmCommand(args);
@@ -499,7 +499,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(
+			var args = new List<ICommandArgument>(
 				(parameters.ExcludePatterns != null ? parameters.ExcludePatterns.Count : 0) +
 				(parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 4);
 			args.Add(CleanCommand.DryRun());
@@ -511,12 +511,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 5);
+			var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 5);
 			InsertAddFilesParameters(parameters, args);
 			return new AddCommand(args);
 		}
 
-		private static void InsertAddFilesParameters(AddFilesParameters parameters, IList<CommandArgument> args)
+		private static void InsertAddFilesParameters(AddFilesParameters parameters, IList<ICommandArgument> args)
 		{
 			if(parameters.Force)
 			{
@@ -557,12 +557,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 4);
+			var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 4);
 			InsertRemoveFilesParameters(parameters, args);
 			return new RmCommand(args);
 		}
 
-		private static void InsertRemoveFilesParameters(RemoveFilesParameters parameters, IList<CommandArgument> args)
+		private static void InsertRemoveFilesParameters(RemoveFilesParameters parameters, IList<ICommandArgument> args)
 		{
 			if(parameters.Force)
 			{
@@ -594,14 +594,14 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(
+			var args = new List<ICommandArgument>(
 				(parameters.ExcludePatterns != null ? parameters.ExcludePatterns.Count : 0) +
 				(parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 3);
 			InsertCleanFilesParameters(parameters, args);
 			return new CleanCommand(args);
 		}
 
-		private void InsertCleanFilesParameters(CleanFilesParameters parameters, IList<CommandArgument> args)
+		private void InsertCleanFilesParameters(CleanFilesParameters parameters, IList<ICommandArgument> args)
 		{
 			if(parameters.Force)
 			{
@@ -653,10 +653,10 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 1);
+			var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 1);
 			if(!string.IsNullOrEmpty(parameters.Revision))
 			{
-				args.Add(new CommandArgument(parameters.Revision));
+				args.Add(new CommandParameter(parameters.Revision));
 			}
 			if(parameters.Paths != null && parameters.Paths.Count != 0)
 			{
@@ -676,7 +676,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return new NotesCommand(
 				NotesCommand.Append(),
 				NotesCommand.Message(parameters.Message),
-				new CommandArgument(parameters.Revision));
+				new CommandParameter(parameters.Revision));
 		}
 
 		public Command GetPruneNotesCommand(PruneNotesParameters parameters)
@@ -690,15 +690,15 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			InsertDiffParameters1(parameters, args);
 			if(!string.IsNullOrEmpty(parameters.Revision1))
 			{
-				args.Add(new CommandArgument(parameters.Revision1));
+				args.Add(new CommandParameter(parameters.Revision1));
 			}
 			if(!string.IsNullOrEmpty(parameters.Revision2))
 			{
-				args.Add(new CommandArgument(parameters.Revision2));
+				args.Add(new CommandParameter(parameters.Revision2));
 			}
 			InsertDiffParameters2(parameters, args);
 			return new DiffCommand(args);
@@ -708,11 +708,11 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(LogCommand.MaxCount(1));
 			InsertDiffParameters1(parameters, args);
-			args.Add(new CommandArgument("-c"));
-			args.Add(new CommandArgument(parameters.Revision));
+			args.Add(new CommandFlag("-c"));
+			args.Add(new CommandParameter(parameters.Revision));
 			InsertDiffParameters2(parameters, args);
 			return new LogCommand(args);
 		}
@@ -721,15 +721,15 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(StashCommand.Show());
 			InsertDiffParameters1(parameters, args);
-			args.Add(new CommandArgument(parameters.Revision));
+			args.Add(new CommandParameter(parameters.Revision));
 			InsertDiffParameters2(parameters, args);
 			return new StashCommand(args);
 		}
 
-		private static void InsertDiffParameters1(BaseQueryDiffParameters parameters, IList<CommandArgument> args)
+		private static void InsertDiffParameters1(BaseQueryDiffParameters parameters, IList<ICommandArgument> args)
 		{
 			Assert.IsNotNull(parameters);
 			Assert.IsNotNull(args);
@@ -819,7 +819,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		private static void InsertDiffParameters2(BaseQueryDiffParameters parameters, IList<CommandArgument> args)
+		private static void InsertDiffParameters2(BaseQueryDiffParameters parameters, IList<ICommandArgument> args)
 		{
 			Assert.IsNotNull(parameters);
 			Assert.IsNotNull(args);
@@ -842,14 +842,14 @@ namespace gitter.Git.AccessLayer.CLI
 				LogCommand.WalkReflogs(),
 				LogCommand.NullTerminate(),
 				GetRevisionFormatArgument(),
-				new CommandArgument(GitConstants.StashFullName));
+				new CommandParameter(GitConstants.StashFullName));
 		}
 
 		public Command GetStashSaveCommand(StashSaveParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(StashCommand.Save());
 			args.Add(parameters.KeepIndex ? StashCommand.KeepIndex() : StashCommand.NoKeepIndex());
 			if(parameters.IncludeUntracked && GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(_gitCLI))
@@ -858,7 +858,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(!string.IsNullOrWhiteSpace(parameters.Message))
 			{
-				args.Add(new CommandArgument(parameters.Message.SurroundWithDoubleQuotes()));
+				args.Add(new CommandParameter(parameters.Message.SurroundWithDoubleQuotes()));
 			}
 
 			return new StashCommand(args);
@@ -868,7 +868,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(3);
+			var args = new List<ICommandArgument>(3);
 			args.Add(StashCommand.Apply());
 			if(parameters.RestoreIndex)
 			{
@@ -876,7 +876,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(parameters.StashName != null)
 			{
-				args.Add(new CommandArgument(parameters.StashName));
+				args.Add(new CommandParameter(parameters.StashName));
 			}
 			return new StashCommand(args);
 		}
@@ -885,7 +885,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(3);
+			var args = new List<ICommandArgument>(3);
 			args.Add(StashCommand.Pop());
 			if(parameters.RestoreIndex)
 			{
@@ -893,7 +893,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(parameters.StashName != null)
 			{
-				args.Add(new CommandArgument(parameters.StashName));
+				args.Add(new CommandParameter(parameters.StashName));
 			}
 			return new StashCommand(args);
 		}
@@ -902,12 +902,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(3);
+			var args = new List<ICommandArgument>(3);
 			args.Add(StashCommand.Branch());
-			args.Add(new CommandArgument(parameters.BranchName));
+			args.Add(new CommandParameter(parameters.BranchName));
 			if(parameters.StashName != null)
 			{
-				args.Add(new CommandArgument(parameters.StashName));
+				args.Add(new CommandParameter(parameters.StashName));
 			}
 
 			return new StashCommand(args);
@@ -921,7 +921,7 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				return new StashCommand(
 					StashCommand.Drop(),
-					new CommandArgument(parameters.StashName));
+					new CommandParameter(parameters.StashName));
 			}
 			else
 			{
@@ -941,7 +941,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			if(parameters.OnlyTrees)
 			{
 				args.Add(LsTreeCommand.Directories());
@@ -954,7 +954,7 @@ namespace gitter.Git.AccessLayer.CLI
 			args.Add(LsTreeCommand.FullName());
 			args.Add(LsTreeCommand.Long());
 			args.Add(LsTreeCommand.NullTerminate());
-			args.Add(new CommandArgument(parameters.TreeId));
+			args.Add(new CommandParameter(parameters.TreeId));
 			if(parameters.Paths != null)
 			{
 				foreach(var path in parameters.Paths)
@@ -969,7 +969,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			switch(parameters.ApplyTo)
 			{
 				case ApplyPatchTo.WorkingDirectory:
@@ -1002,7 +1002,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			if(parameters.Force)
 			{
 				args.Add(CheckoutCommand.Force());
@@ -1011,7 +1011,7 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args.Add(CheckoutCommand.Merge());
 			}
-			args.Add(new CommandArgument(parameters.Revision));
+			args.Add(new CommandParameter(parameters.Revision));
 			return new CheckoutCommand(args);
 		}
 
@@ -1019,7 +1019,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 2);
+			var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 2);
 			switch(parameters.Mode)
 			{
 				case CheckoutFileMode.Ours:
@@ -1037,7 +1037,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(!string.IsNullOrEmpty(parameters.Revision))
 			{
-				args.Add(new CommandArgument(parameters.Revision));
+				args.Add(new CommandParameter(parameters.Revision));
 			}
 			if(parameters.Paths != null && parameters.Paths.Count != 0)
 			{
@@ -1053,8 +1053,8 @@ namespace gitter.Git.AccessLayer.CLI
 		public Command GetQueryBlobBytesCommand(QueryBlobBytesParameters parameters)
 		{
 			return new CatFileCommand(
-				new CommandArgument(GitConstants.BlobObjectType),
-				new CommandArgument(parameters.Treeish + ":" + parameters.ObjectName));
+				new CommandParameter(GitConstants.BlobObjectType),
+				new CommandParameter(parameters.Treeish + ":" + parameters.ObjectName));
 		}
 
 		public Command GetRevertCommand(RevertParameters parameters)
@@ -1077,7 +1077,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			else
 			{
-				var args = new List<CommandArgument>();
+				var args = new List<ICommandArgument>();
 				if(parameters.NoCommit)
 				{
 					args.Add(RevertCommand.NoCommit());
@@ -1088,7 +1088,7 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 				foreach(var rev in parameters.Revisions)
 				{
-					args.Add(new CommandArgument(rev));
+					args.Add(new CommandParameter(rev));
 				}
 				return new RevertCommand(args);
 			}
@@ -1129,7 +1129,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			else
 			{
-				var args = new List<CommandArgument>();
+				var args = new List<ICommandArgument>();
 				if(parameters.NoCommit)
 				{
 					args.Add(CherryPickCommand.NoCommit());
@@ -1160,7 +1160,7 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 				foreach(var rev in parameters.Revisions)
 				{
-					args.Add(new CommandArgument(rev));
+					args.Add(new CommandParameter(rev));
 				}
 				return new CherryPickCommand(args);
 			}
@@ -1185,11 +1185,11 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(ResetCommand.Mode(parameters.Mode));
 			if(!string.IsNullOrEmpty(parameters.Revision))
 			{
-				args.Add(new CommandArgument(parameters.Revision));
+				args.Add(new CommandParameter(parameters.Revision));
 			}
 			return new ResetCommand(args);
 		}
@@ -1198,7 +1198,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			if(parameters.NoCommit)
 			{
 				args.Add(MergeCommand.NoCommit());
@@ -1217,7 +1217,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			foreach(var rev in parameters.Revisions)
 			{
-				args.Add(new CommandArgument(rev));
+				args.Add(new CommandParameter(rev));
 			}
 			return new MergeCommand(args);
 		}
@@ -1228,7 +1228,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(parameters.Control.HasValue)
 			{
-				CommandArgument arg;
+				ICommandArgument arg;
 				switch(parameters.Control.Value)
 				{
 					case RebaseControl.Abort:
@@ -1247,15 +1247,15 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			else
 			{
-				var args = new List<CommandArgument>();
+				var args = new List<ICommandArgument>();
 				if(!string.IsNullOrEmpty(parameters.NewBase))
 				{
 					args.Add(RebaseCommand.Onto(parameters.NewBase));
 				}
-				args.Add(new CommandArgument(parameters.Upstream));
+				args.Add(new CommandParameter(parameters.Upstream));
 				if(!string.IsNullOrEmpty(parameters.Branch))
 				{
-					args.Add(new CommandArgument(parameters.Branch));
+					args.Add(new CommandParameter(parameters.Branch));
 				}
 				return new RebaseCommand(args);
 			}
@@ -1263,7 +1263,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Command GetRebaseCommand(RebaseControl control)
 		{
-			CommandArgument arg;
+			ICommandArgument arg;
 			switch(control)
 			{
 				case RebaseControl.Abort:
@@ -1310,7 +1310,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(5);
+			var args = new List<ICommandArgument>(5);
 			if(!string.IsNullOrEmpty(parameters.Format))
 			{
 				args.Add(ArchiveCommand.Format(parameters.Format));
@@ -1323,7 +1323,7 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args.Add(ArchiveCommand.Remote(parameters.Remote));
 			}
-			args.Add(new CommandArgument(parameters.Tree));
+			args.Add(new CommandParameter(parameters.Tree));
 			if(!string.IsNullOrEmpty(parameters.Path))
 			{
 				args.Add(new PathCommandArgument(parameters.Path));
@@ -1335,13 +1335,13 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(BlameCommand.Porcelain());
 			if(!string.IsNullOrEmpty(parameters.Revision))
 			{
-				args.Add(new CommandArgument(parameters.Revision));
+				args.Add(new CommandParameter(parameters.Revision));
 			}
-			args.Add(CommandArgument.NoMoreOptions());
+			args.Add(CommandFlag.NoMoreOptions());
 			args.Add(new PathCommandArgument(parameters.FileName));
 			return new BlameCommand(args);
 		}
@@ -1350,7 +1350,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(10);
+			var args = new List<ICommandArgument>(10);
 			InsertFetchParameters(parameters, args);
 			if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(_gitCLI))
 			{
@@ -1359,7 +1359,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return new FetchCommand(args);
 		}
 
-		private static void InsertFetchParameters(FetchParameters parameters, IList<CommandArgument> args)
+		private static void InsertFetchParameters(FetchParameters parameters, IList<ICommandArgument> args)
 		{
 			if(parameters.All)
 			{
@@ -1402,7 +1402,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(!string.IsNullOrWhiteSpace(parameters.Repository))
 			{
-				args.Add(new CommandArgument(parameters.Repository));
+				args.Add(new CommandParameter(parameters.Repository));
 			}
 		}
 
@@ -1410,7 +1410,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			InsertPullParameters(parameters, args);
 			if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(_gitCLI))
 			{
@@ -1419,7 +1419,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return new PullCommand(args);
 		}
 
-		private static void InsertPullParameters(PullParameters parameters, IList<CommandArgument> args)
+		private static void InsertPullParameters(PullParameters parameters, IList<ICommandArgument> args)
 		{
 			if(parameters.NoFastForward)
 			{
@@ -1449,7 +1449,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			switch(parameters.PushMode)
 			{
 				case PushMode.Default:
@@ -1488,13 +1488,13 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(!string.IsNullOrWhiteSpace(parameters.Repository))
 			{
-				args.Add(new CommandArgument(parameters.Repository));
+				args.Add(new CommandParameter(parameters.Repository));
 			}
 			if(parameters.Refspecs != null && parameters.Refspecs.Count != 0)
 			{
 				foreach(var refspec in parameters.Refspecs)
 				{
-					args.Add(new CommandArgument(refspec));
+					args.Add(new CommandParameter(refspec));
 				}
 			}
 			return new PushCommand(args);
@@ -1507,7 +1507,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return new RemoteCommand(
 				RemoteCommand.Show(),
 				RemoteCommand.Cached(),
-				new CommandArgument(parameters.RemoteName));
+				new CommandParameter(parameters.RemoteName));
 		}
 
 		public Command GetQueryRemotesCommand(QueryRemotesParameters parameters)
@@ -1521,7 +1521,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Branches != null ? parameters.Branches.Count : 0) + 6);
+			var args = new List<ICommandArgument>((parameters.Branches != null ? parameters.Branches.Count : 0) + 6);
 			args.Add(RemoteCommand.Add());
 			if(parameters.Branches != null && parameters.Branches.Count != 0)
 			{
@@ -1553,8 +1553,8 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args.Add(RemoteCommand.Mirror());
 			}
-			args.Add(new CommandArgument(parameters.RemoteName));
-			args.Add(new CommandArgument(parameters.Url));
+			args.Add(new CommandParameter(parameters.RemoteName));
+			args.Add(new CommandParameter(parameters.Url));
 			return new RemoteCommand(args);
 		}
 
@@ -1564,8 +1564,8 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return new RemoteCommand(
 				RemoteCommand.Rename(),
-				new CommandArgument(parameters.OldName),
-				new CommandArgument(parameters.NewName));
+				new CommandParameter(parameters.OldName),
+				new CommandParameter(parameters.NewName));
 		}
 
 		public Command GetRemoveRemoteCommand(RemoveRemoteParameters parameters)
@@ -1582,7 +1582,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return new RemoteCommand(
 				RemoteCommand.Prune(),
 				RemoteCommand.DryRun(),
-				new CommandArgument(parameters.RemoteName));
+				new CommandParameter(parameters.RemoteName));
 		}
 
 		public Command GetPruneRemoteCommand(PruneRemoteParameters parameters)
@@ -1591,14 +1591,14 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return new RemoteCommand(
 				RemoteCommand.Prune(),
-				new CommandArgument(parameters.RemoteName));
+				new CommandParameter(parameters.RemoteName));
 		}
 
 		public Command GetQueryRemoteReferencesCommand(QueryRemoteReferencesParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(4);
+			var args = new List<ICommandArgument>(4);
 			if(parameters.Heads)
 			{
 				args.Add(LsRemoteCommand.Heads());
@@ -1607,10 +1607,10 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args.Add(LsRemoteCommand.Tags());
 			}
-			args.Add(new CommandArgument(parameters.RemoteName));
+			args.Add(new CommandParameter(parameters.RemoteName));
 			if(!string.IsNullOrEmpty(parameters.Pattern))
 			{
-				args.Add(new CommandArgument(parameters.Pattern));
+				args.Add(new CommandParameter(parameters.Pattern));
 			}
 			return new LsRemoteCommand(args);
 		}
@@ -1619,11 +1619,11 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(1 + parameters.References.Count);
-			args.Add(new CommandArgument(parameters.RemoteName));
+			var args = new List<ICommandArgument>(1 + parameters.References.Count);
+			args.Add(new CommandParameter(parameters.RemoteName));
 			foreach(var reference in parameters.References)
 			{
-				args.Add(new CommandArgument(":" + reference));
+				args.Add(new CommandParameter(":" + reference));
 			}
 			return new PushCommand(args);
 		}
@@ -1667,14 +1667,14 @@ namespace gitter.Git.AccessLayer.CLI
 					ShowRefCommand.Heads(),
 					ShowRefCommand.Hash(),
 					ShowRefCommand.NoMoreOptions(),
-					new CommandArgument(fullName));
+					new CommandParameter(fullName));
 		}
 
 		public Command GetQueryBranchesCommand(QueryBranchesParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(6);
+			var args = new List<ICommandArgument>(6);
 			args.Add(BranchCommand.NoColor());
 			args.Add(BranchCommand.Verbose());
 			args.Add(BranchCommand.NoAbbrev());
@@ -1701,7 +1701,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(parameters.Revision != null)
 			{
-				args.Add(new CommandArgument(parameters.Revision));
+				args.Add(new CommandParameter(parameters.Revision));
 			}
 
 			return new BranchCommand(args);
@@ -1711,7 +1711,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(6);
+			var args = new List<ICommandArgument>(6);
 			switch(parameters.TrackingMode)
 			{
 				case BranchTrackingMode.NotTracking:
@@ -1736,10 +1736,10 @@ namespace gitter.Git.AccessLayer.CLI
 					args.Add(CheckoutCommand.Branch());
 				}
 			}
-			args.Add(new CommandArgument(parameters.BranchName));
+			args.Add(new CommandParameter(parameters.BranchName));
 			if(!string.IsNullOrEmpty(parameters.StartingRevision))
 			{
-				args.Add(new CommandArgument(parameters.StartingRevision));
+				args.Add(new CommandParameter(parameters.StartingRevision));
 			}
 			if(parameters.Checkout)
 			{
@@ -1757,8 +1757,8 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return new BranchCommand(
 				BranchCommand.Reset(),
-				new CommandArgument(parameters.BranchName),
-				new CommandArgument(parameters.Revision));
+				new CommandParameter(parameters.BranchName),
+				new CommandParameter(parameters.Revision));
 		}
 
 		public Command GetDeleteBranchCommand(DeleteBranchParameters parameters)
@@ -1770,13 +1770,13 @@ namespace gitter.Git.AccessLayer.CLI
 				return new BranchCommand(
 					parameters.Force ? BranchCommand.DeleteForce() : BranchCommand.Delete(),
 					BranchCommand.Remote(),
-					new CommandArgument(parameters.BranchName));
+					new CommandParameter(parameters.BranchName));
 			}
 			else
 			{
 				return new BranchCommand(
 					parameters.Force ? BranchCommand.DeleteForce() : BranchCommand.Delete(),
-					new CommandArgument(parameters.BranchName));
+					new CommandParameter(parameters.BranchName));
 			}
 		}
 
@@ -1786,8 +1786,8 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return new BranchCommand(
 				parameters.Force ? BranchCommand.MoveForce() : BranchCommand.Move(),
-				new CommandArgument(parameters.OldName),
-				new CommandArgument(parameters.NewName));
+				new CommandParameter(parameters.OldName),
+				new CommandParameter(parameters.NewName));
 		}
 
 		#endregion
@@ -1804,7 +1804,7 @@ namespace gitter.Git.AccessLayer.CLI
 				ShowRefCommand.Dereference(),
 				ShowRefCommand.Hash(),
 				ShowRefCommand.NoMoreOptions(),
-				new CommandArgument(fullTagName));
+				new CommandParameter(fullTagName));
 		}
 
 		public Command GetQueryTagsCommand(QueryTagsParameters parameters)
@@ -1821,19 +1821,19 @@ namespace gitter.Git.AccessLayer.CLI
 			Assert.IsNotNull(parameters);
 
 			return new CatFileCommand(
-				new CommandArgument("tag"),
-				new CommandArgument(parameters.TagName));
+				new CommandParameter("tag"),
+				new CommandParameter(parameters.TagName));
 		}
 
 		public Command GetDescribeCommand(DescribeParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(2);
+			var args = new List<ICommandArgument>(2);
 			args.Add(DescribeCommand.Tags());
 			if(parameters.Revision != null)
 			{
-				args.Add(new CommandArgument(parameters.Revision));
+				args.Add(new CommandParameter(parameters.Revision));
 			}
 			return new DescribeCommand(args);
 		}
@@ -1842,7 +1842,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(5);
+			var args = new List<ICommandArgument>(5);
 			if(parameters.TagType == TagType.Annotated)
 			{
 				if(parameters.Signed)
@@ -1873,10 +1873,10 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args.Add(TagCommand.MessageFromFile(parameters.MessageFile));
 			}
-			args.Add(new CommandArgument(parameters.TagName));
+			args.Add(new CommandParameter(parameters.TagName));
 			if(parameters.TaggedObject != null)
 			{
-				args.Add(new CommandArgument(parameters.TaggedObject));
+				args.Add(new CommandParameter(parameters.TaggedObject));
 			}
 			return new TagCommand(args);
 		}
@@ -1887,18 +1887,18 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return new TagCommand(
 				TagCommand.Delete(),
-				new CommandArgument(parameters.TagName));
+				new CommandParameter(parameters.TagName));
 		}
 
 		public Command GetVerifyTagsCommand(VerifyTagsParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(1 + parameters.TagNames.Count);
+			var args = new List<ICommandArgument>(1 + parameters.TagNames.Count);
 			args.Add(TagCommand.Verify());
 			foreach(var tagName in parameters.TagNames)
 			{
-				args.Add(new CommandArgument(tagName));
+				args.Add(new CommandParameter(tagName));
 			}
 			return new TagCommand(args);
 		}
@@ -1907,7 +1907,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>((parameters.Files != null ? parameters.Files.Count : 0) + 2);
+			var args = new List<ICommandArgument>((parameters.Files != null ? parameters.Files.Count : 0) + 2);
 			if(!string.IsNullOrEmpty(parameters.Tool))
 			{
 				args.Add(MergeToolCommand.Tool(parameters.Tool));
@@ -1927,7 +1927,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(SubmoduleCommand.Add());
 			if(parameters.Branch != null)
 			{
@@ -1941,8 +1941,8 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				args.Add(SubmoduleCommand.Reference(parameters.ReferenceRepository));
 			}
-			args.Add(CommandArgument.NoMoreOptions());
-			args.Add(new CommandArgument(parameters.Repository));
+			args.Add(CommandFlag.NoMoreOptions());
+			args.Add(new CommandParameter(parameters.Repository));
 			if(parameters.Path != null)
 			{
 				var path = parameters.Path.Replace('\\', '/').Trim('/');
@@ -1955,7 +1955,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>();
+			var args = new List<ICommandArgument>();
 			args.Add(SubmoduleCommand.Update());
 			if(parameters.Init)
 			{
@@ -1990,7 +1990,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Config
 
-		private static void InsertConfigFileSpecifier(IList<CommandArgument> args, BaseConfigParameters parameters)
+		private static void InsertConfigFileSpecifier(IList<ICommandArgument> args, BaseConfigParameters parameters)
 		{
 			switch(parameters.ConfigFile)
 			{
@@ -2014,9 +2014,9 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(2);
+			var args = new List<ICommandArgument>(2);
 			InsertConfigFileSpecifier(args, parameters);
-			args.Add(new CommandArgument(parameters.ParameterName));
+			args.Add(new CommandParameter(parameters.ParameterName));
 			return new ConfigCommand(args);
 		}
 
@@ -2024,7 +2024,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(3);
+			var args = new List<ICommandArgument>(3);
 			args.Add(ConfigCommand.NullTerminate());
 			args.Add(ConfigCommand.List());
 			InsertConfigFileSpecifier(args, parameters);
@@ -2035,11 +2035,11 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(4);
+			var args = new List<ICommandArgument>(4);
 			InsertConfigFileSpecifier(args, parameters);
 			args.Add(ConfigCommand.Add());
-			args.Add(new CommandArgument(parameters.ParameterName));
-			args.Add(new CommandArgument(parameters.ParameterValue.SurroundWith("\"", "\"")));
+			args.Add(new CommandParameter(parameters.ParameterName));
+			args.Add(new CommandParameter(parameters.ParameterValue.SurroundWith("\"", "\"")));
 			return new ConfigCommand(args);
 		}
 
@@ -2047,10 +2047,10 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(3);
+			var args = new List<ICommandArgument>(3);
 			InsertConfigFileSpecifier(args, parameters);
-			args.Add(new CommandArgument(parameters.ParameterName));
-			args.Add(new CommandArgument(parameters.ParameterValue.SurroundWith("\"", "\"")));
+			args.Add(new CommandFlag(parameters.ParameterName));
+			args.Add(new CommandFlag(parameters.ParameterValue.SurroundWith("\"", "\"")));
 			return new ConfigCommand(args);
 		}
 
@@ -2058,10 +2058,10 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(3);
+			var args = new List<ICommandArgument>(3);
 			InsertConfigFileSpecifier(args, parameters);
 			args.Add(ConfigCommand.Unset());
-			args.Add(new CommandArgument(parameters.ParameterName));
+			args.Add(new CommandParameter(parameters.ParameterName));
 			return new ConfigCommand(args);
 		}
 
@@ -2069,7 +2069,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(2);
+			var args = new List<ICommandArgument>(2);
 			InsertConfigFileSpecifier(args, parameters);
 			args.Add(ConfigCommand.RenameSection(parameters.OldName, parameters.NewName));
 			return new ConfigCommand(args);
@@ -2079,7 +2079,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<CommandArgument>(2);
+			var args = new List<ICommandArgument>(2);
 			InsertConfigFileSpecifier(args, parameters);
 			args.Add(ConfigCommand.RemoveSection(parameters.SectionName));
 			return new ConfigCommand(args);

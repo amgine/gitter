@@ -31,15 +31,39 @@ namespace gitter.Git.AccessLayer.CLI
 
 	abstract class CommandExecutorBase : ICommandExecutor
 	{
-		protected CommandExecutorBase()
+		#region Data
+
+		private readonly ICliOptionsProvider _cliOptionsProvider;
+
+		#endregion
+
+		#region .ctor
+
+		protected CommandExecutorBase(ICliOptionsProvider cliOptionsProvider)
 		{
+			Verify.Argument.IsNotNull(cliOptionsProvider, "cliOptionsProvider");
+
+			_cliOptionsProvider = cliOptionsProvider;
 		}
+
+		#endregion
+
+		#region Properties
+
+		protected ICliOptionsProvider CliOptionsProvider
+		{
+			get { return _cliOptionsProvider; }
+		}
+
+		#endregion
+
+		#region methods
 
 		protected abstract GitInput PrepareInput(Command command, Encoding encoding);
 
 		protected virtual ProcessExecutor<GitInput> CreateProcessExecutor()
 		{
-			return GitProcess.CreateExecutor();
+			return new GitProcessExecutor(CliOptionsProvider.GitExecutablePath);
 		}
 
 		protected virtual void OnCommandExecuting(Command command)
@@ -169,5 +193,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return ExecuteCommandAsyncCore(command, encoding, stdOutReceiver, stdErrReceiver, flags, cancellationToken);
 		}
+
+		#endregion
 	}
 }

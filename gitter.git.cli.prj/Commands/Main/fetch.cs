@@ -26,44 +26,44 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Download objects and refs from another repository.</summary>
 	public sealed class FetchCommand : Command
 	{
-		public static CommandArgument All()
+		public static ICommandArgument All()
 		{
-			return new CommandArgument("--all");
+			return new CommandFlag("--all");
 		}
 
-		public static CommandArgument Append()
+		public static ICommandArgument Append()
 		{
-			return new CommandArgument("--append");
+			return new CommandFlag("--append");
 		}
 
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force");
+			return new CommandFlag("--force");
 		}
 
-		public static CommandArgument Progress()
+		public static ICommandArgument Progress()
 		{
-			return new CommandArgument("--progress");
+			return new CommandFlag("--progress");
 		}
 
-		public static CommandArgument Prune()
+		public static ICommandArgument Prune()
 		{
-			return new CommandArgument("--prune");
+			return new CommandFlag("--prune");
 		}
 
-		public static CommandArgument Depth(int depth)
+		public static ICommandArgument Depth(int depth)
 		{
-			return new CommandArgument("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
+			return new CommandParameterValue("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
 		}
 
-		public static CommandArgument Tags()
+		public static ICommandArgument Tags()
 		{
-			return new CommandArgument("--tags");
+			return new CommandFlag("--tags");
 		}
 
-		public static CommandArgument NoTags()
+		public static ICommandArgument NoTags()
 		{
-			return new CommandArgument("--no-tags");
+			return new CommandFlag("--no-tags");
 		}
 
 		/// <summary>
@@ -72,29 +72,29 @@ namespace gitter.Git.AccessLayer.CLI
 		///	to communicate with git-fetch, and unless you are implementing your own Porcelain you are
 		///	not supposed to use it.
 		/// </summary>
-		public static CommandArgument UpdateHeadOk()
+		public static ICommandArgument UpdateHeadOk()
 		{
-			return new CommandArgument("--update-head-ok");
+			return new CommandFlag("--update-head-ok");
 		}
 
-		public static CommandArgument UploadPack(string uploadPack)
+		public static ICommandArgument UploadPack(string uploadPack)
 		{
-			return new CommandArgument("--upload-pack", uploadPack, ' ');
+			return new CommandParameterValue("--upload-pack", uploadPack, ' ');
 		}
 
-		public static CommandArgument Keep()
+		public static ICommandArgument Keep()
 		{
-			return new CommandArgument("--keep");
+			return new CommandFlag("--keep");
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return new CommandArgument("--quiet");
+			return new CommandFlag("--quiet");
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return new CommandArgument("--verbose");
+			return new CommandFlag("--verbose");
 		}
 
 		public FetchCommand()
@@ -102,12 +102,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public FetchCommand(params CommandArgument[] args)
+		public FetchCommand(params ICommandArgument[] args)
 			: base("fetch", args)
 		{
 		}
 
-		public FetchCommand(IList<CommandArgument> args)
+		public FetchCommand(IList<ICommandArgument> args)
 			: base("fetch", args)
 		{
 		}

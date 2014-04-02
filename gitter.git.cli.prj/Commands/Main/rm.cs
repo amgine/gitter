@@ -25,39 +25,39 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Remove files from the working tree and from the index.</summary>
 	public sealed class RmCommand : Command
 	{
-		public static CommandArgument Recursive()
+		public static ICommandArgument Recursive()
 		{
-			return new CommandArgument("-r");
+			return new CommandFlag("-r");
 		}
 
-		public static CommandArgument IgnoreUnmatch()
+		public static ICommandArgument IgnoreUnmatch()
 		{
-			return new CommandArgument("--ignore-unmatch");
+			return new CommandFlag("--ignore-unmatch");
 		}
 
-		public static CommandArgument Cached()
+		public static ICommandArgument Cached()
 		{
-			return new CommandArgument("--cached");
+			return new CommandFlag("--cached");
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force");
+			return new CommandFlag("--force");
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return CommandArgument.Quiet();
+			return CommandFlag.Quiet();
 		}
 
-		public static CommandArgument DryRun()
+		public static ICommandArgument DryRun()
 		{
-			return CommandArgument.DryRun();
+			return CommandFlag.DryRun();
 		}
 
 		public RmCommand()
@@ -65,12 +65,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public RmCommand(params CommandArgument[] args)
+		public RmCommand(params ICommandArgument[] args)
 			: base("rm", args)
 		{
 		}
 
-		public RmCommand(IList<CommandArgument> args)
+		public RmCommand(IList<ICommandArgument> args)
 			: base("rm", args)
 		{
 		}

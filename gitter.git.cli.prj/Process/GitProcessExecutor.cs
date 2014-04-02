@@ -31,9 +31,9 @@ namespace gitter.Git.AccessLayer.CLI
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="GitProcessExecutor"/> class.</summary>
-		/// <param name="path">Path to exe file.</param>
-		public GitProcessExecutor(string path)
-			: base(path)
+		/// <param name="exeFileName">Path to exe file.</param>
+		public GitProcessExecutor(string exeFileName)
+			: base(exeFileName)
 		{
 		}
 

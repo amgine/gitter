@@ -27,51 +27,51 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class ArchiveCommand : Command
 	{
 		/// <summary>Format of the resulting archive.</summary>
-		public static CommandArgument Format(string format)
+		public static ICommandArgument Format(string format)
 		{
-			return new CommandArgument("--format", format);
+			return new CommandParameterValue("--format", format);
 		}
 
 		/// <summary>Show all available formats.</summary>
-		public static CommandArgument List()
+		public static ICommandArgument List()
 		{
-			return new CommandArgument("--list");
+			return new CommandFlag("--list");
 		}
 
 		/// <summary>Report progress to stderr.</summary>
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
 		/// <summary>Prepend prefix to each filename in the archive.</summary>
-		public static CommandArgument Prefix(string prefix)
+		public static ICommandArgument Prefix(string prefix)
 		{
-			return new CommandArgument("--prefix", prefix);
+			return new CommandParameterValue("--prefix", prefix);
 		}
 
 		/// <summary>Write the archive to file instead of stdout.</summary>
-		public static CommandArgument Output(string file)
+		public static ICommandArgument Output(string file)
 		{
-			return new CommandArgument("--output", file.AssureDoubleQuotes());
+			return new CommandParameterValue("--output", file.AssureDoubleQuotes());
 		}
 
 		/// <summary>Look for attributes in .gitattributes in working directory too.</summary>
-		public static CommandArgument WorktreeAttributes()
+		public static ICommandArgument WorktreeAttributes()
 		{
-			return new CommandArgument("--worktree-attributes");
+			return new CommandFlag("--worktree-attributes");
 		}
 
 		/// <summary>Instead of making a tar archive from the local repository, retrieve a tar archive from a remote repository.</summary>
-		public static CommandArgument Remote(string repo)
+		public static ICommandArgument Remote(string repo)
 		{
-			return new CommandArgument("--remote", repo);
+			return new CommandParameterValue("--remote", repo);
 		}
 
 		/// <summary>Used with --remote to specify the path to the git-upload-archive on the remote side.</summary>
-		public static CommandArgument Exec(string gitUploadArchive)
+		public static ICommandArgument Exec(string gitUploadArchive)
 		{
-			return new CommandArgument("--exec", gitUploadArchive);
+			return new CommandParameterValue("--exec", gitUploadArchive);
 		}
 
 		public ArchiveCommand()
@@ -79,12 +79,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public ArchiveCommand(params CommandArgument[] args)
+		public ArchiveCommand(params ICommandArgument[] args)
 			: base("archive", args)
 		{
 		}
 
-		public ArchiveCommand(IList<CommandArgument> args)
+		public ArchiveCommand(IList<ICommandArgument> args)
 			: base("archive", args)
 		{
 		}

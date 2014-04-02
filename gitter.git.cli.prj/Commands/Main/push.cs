@@ -28,7 +28,7 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		public static PushCommand FormatPushCommand(string remote, ICollection<string> branches, bool force, bool thin, bool tags)
 		{
-			var args = new CommandArgument[branches.Count + 3 + (force?1:0) + (tags?1:0)];
+			var args = new ICommandArgument[branches.Count + 3 + (force?1:0) + (tags?1:0)];
 			int arg = 0;
 			if(tags)
 			{
@@ -40,10 +40,10 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			args[arg++] = thin ? Thin() : NoThin();
 			args[arg++] = Porcelain();
-			args[arg++] = new CommandArgument(remote);
+			args[arg++] = new CommandParameter(remote);
 			foreach(var branch in branches)
 			{
-				args[arg++] = new CommandArgument(branch);
+				args[arg++] = new CommandParameter(branch);
 			}
 			return new PushCommand(args);
 		}
@@ -52,73 +52,73 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			return new PushCommand(
 				Porcelain(),
-				new CommandArgument(remote),
-				new CommandArgument(":" + reference));
+				new CommandParameter(remote),
+				new CommandParameter(":" + reference));
 		}
 
-		public static CommandArgument All()
+		public static ICommandArgument All()
 		{
-			return new CommandArgument("--all");
+			return new CommandFlag("--all");
 		}
 
-		public static CommandArgument Mirror()
+		public static ICommandArgument Mirror()
 		{
-			return new CommandArgument("--mirror");
+			return new CommandFlag("--mirror");
 		}
 
-		public static CommandArgument Delete()
+		public static ICommandArgument Delete()
 		{
-			return new CommandArgument("--delete");
+			return new CommandFlag("--delete");
 		}
 
-		public static CommandArgument Force()
+		public static ICommandArgument Force()
 		{
-			return new CommandArgument("--force");
+			return new CommandFlag("--force");
 		}
 
-		public static CommandArgument Tags()
+		public static ICommandArgument Tags()
 		{
-			return new CommandArgument("--tags");
+			return new CommandFlag("--tags");
 		}
 
-		public static CommandArgument Thin()
+		public static ICommandArgument Thin()
 		{
-			return new CommandArgument("--thin");
+			return new CommandFlag("--thin");
 		}
 
-		public static CommandArgument NoThin()
+		public static ICommandArgument NoThin()
 		{
-			return new CommandArgument("--no-thin");
+			return new CommandFlag("--no-thin");
 		}
 
-		public static CommandArgument Porcelain()
+		public static ICommandArgument Porcelain()
 		{
-			return new CommandArgument("--porcelain");
+			return new CommandFlag("--porcelain");
 		}
 
-		public static CommandArgument Progress()
+		public static ICommandArgument Progress()
 		{
-			return new CommandArgument("--progress");
+			return new CommandFlag("--progress");
 		}
 
-		public static CommandArgument SetUpstream()
+		public static ICommandArgument SetUpstream()
 		{
-			return new CommandArgument("--set-upstream");
+			return new CommandFlag("--set-upstream");
 		}
 
-		public static CommandArgument ReceivePack(string receivePack)
+		public static ICommandArgument ReceivePack(string receivePack)
 		{
-			return new CommandArgument("--receive-pack", receivePack, '=');
+			return new CommandParameterValue("--receive-pack", receivePack, '=');
 		}
 
-		public static CommandArgument Verbose()
+		public static ICommandArgument Verbose()
 		{
-			return CommandArgument.Verbose();
+			return CommandFlag.Verbose();
 		}
 
-		public static CommandArgument Quiet()
+		public static ICommandArgument Quiet()
 		{
-			return CommandArgument.Quiet();
+			return CommandFlag.Quiet();
 		}
 
 		public PushCommand()
@@ -126,12 +126,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public PushCommand(params CommandArgument[] args)
+		public PushCommand(params ICommandArgument[] args)
 			: base("push", args)
 		{
 		}
 
-		public PushCommand(IList<CommandArgument> args)
+		public PushCommand(IList<ICommandArgument> args)
 			: base("push", args)
 		{
 		}

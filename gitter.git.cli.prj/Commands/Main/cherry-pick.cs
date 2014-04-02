@@ -26,59 +26,59 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Apply the change introduced by an existing commit.</summary>
 	public sealed class CherryPickCommand : Command
 	{
-		public static CommandArgument Edit()
+		public static ICommandArgument Edit()
 		{
-			return new CommandArgument("--edit");
+			return new CommandFlag("--edit");
 		}
 
-		public static CommandArgument Mainline(int number)
+		public static ICommandArgument Mainline(int number)
 		{
-			return new CommandArgument("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
+			return new CommandParameterValue("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
 		}
 
-		public static CommandArgument NoCommit()
+		public static ICommandArgument NoCommit()
 		{
-			return new CommandArgument("--no-commit");
+			return new CommandFlag("--no-commit");
 		}
 
-		public static CommandArgument SignOff()
+		public static ICommandArgument SignOff()
 		{
-			return new CommandArgument("--signoff");
+			return new CommandFlag("--signoff");
 		}
 
-		public static CommandArgument FastForward()
+		public static ICommandArgument FastForward()
 		{
-			return new CommandArgument("--ff");
+			return new CommandFlag("--ff");
 		}
 
-		public static CommandArgument AllowEmpty()
+		public static ICommandArgument AllowEmpty()
 		{
-			return new CommandArgument("--allow-empty");
+			return new CommandFlag("--allow-empty");
 		}
 
-		public static CommandArgument AllowEmptyMessage()
+		public static ICommandArgument AllowEmptyMessage()
 		{
-			return new CommandArgument("--allow-empty-message");
+			return new CommandFlag("--allow-empty-message");
 		}
 
-		public static CommandArgument KeepRedundantCommits()
+		public static ICommandArgument KeepRedundantCommits()
 		{
-			return new CommandArgument("--keep-redundant-commits");
+			return new CommandFlag("--keep-redundant-commits");
 		}
 
-		public static CommandArgument Continue()
+		public static ICommandArgument Continue()
 		{
-			return new CommandArgument("--continue");
+			return new CommandFlag("--continue");
 		}
 
-		public static CommandArgument Quit()
+		public static ICommandArgument Quit()
 		{
-			return new CommandArgument("--quit");
+			return new CommandFlag("--quit");
 		}
 
-		public static CommandArgument Abort()
+		public static ICommandArgument Abort()
 		{
-			return new CommandArgument("--abort");
+			return new CommandFlag("--abort");
 		}
 
 		public CherryPickCommand()
@@ -86,12 +86,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public CherryPickCommand(params CommandArgument[] args)
+		public CherryPickCommand(params ICommandArgument[] args)
 			: base("cherry-pick", args)
 		{
 		}
 
-		public CherryPickCommand(IList<CommandArgument> args)
+		public CherryPickCommand(IList<ICommandArgument> args)
 			: base("cherry-pick", args)
 		{
 		}

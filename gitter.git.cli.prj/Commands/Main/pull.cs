@@ -30,12 +30,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public PullCommand(params CommandArgument[] args)
+		public PullCommand(params ICommandArgument[] args)
 			: base("pull", args)
 		{
 		}
 
-		public PullCommand(IList<CommandArgument> args)
+		public PullCommand(IList<ICommandArgument> args)
 			: base("pull", args)
 		{
 		}

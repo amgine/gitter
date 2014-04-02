@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,16 @@
 namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
-	using System.Text;
-	using System.Linq;
 	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text;
 
 	/// <summary>Represents git command line command.</summary>
 	public class Command
 	{
 		#region Data
 
-		private readonly IEnumerable<CommandArgument> _arguments;
+		private readonly IEnumerable<ICommandArgument> _arguments;
 		private readonly string _name;
 
 		#endregion
@@ -42,12 +42,12 @@ namespace gitter.Git.AccessLayer.CLI
 		/// </summary>
 		/// <param name="name">Command name.</param>
 		/// <param name="arguments">Command arguments.</param>
-		public Command(string name, IEnumerable<CommandArgument> arguments)
+		public Command(string name, IEnumerable<ICommandArgument> arguments)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
 
 			_name = name;
-			_arguments = arguments ?? Enumerable.Empty<CommandArgument>();
+			_arguments = arguments ?? Enumerable.Empty<ICommandArgument>();
 		}
 
 		/// <summary>
@@ -72,7 +72,7 @@ namespace gitter.Git.AccessLayer.CLI
 		
 		/// <summary>Returns collection of command arguments.</summary>
 		/// <value>Collection of command arguments.</value>
-		public IEnumerable<CommandArgument> Arguments
+		public IEnumerable<ICommandArgument> Arguments
 		{
 			get { return _arguments; }
 		}
@@ -81,19 +81,10 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Methods
 
-		/// <summary>Returns string representation of command with arguments.</summary>
-		/// <returns>String representation of command with arguments.</returns>
-		public string GetCommandText()
-		{
-			var sb = new StringBuilder();
-			GetCommandText(sb);
-			return sb.ToString();
-		}
-
 		/// <summary>Appends command with all arguments to a specified <paramref name="stringBuilder"/>.</summary>
 		/// <param name="stringBuilder"><see cref="StringBuilder"/> which will receive command string representation.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="stringBuilder"/> == <c>null</c>.</exception>
-		public void GetCommandText(StringBuilder stringBuilder)
+		public void ToString(StringBuilder stringBuilder)
 		{
 			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
 
@@ -102,7 +93,7 @@ namespace gitter.Git.AccessLayer.CLI
 			foreach(var arg in Arguments)
 			{
 				stringBuilder.Append(ArgumentSeparator);
-				arg.GetArgumentText(stringBuilder);
+				arg.ToString(stringBuilder);
 			}
 		}
 
@@ -110,7 +101,9 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <returns>A <see cref="System.String"/> that represents this <see cref="Command"/>.</returns>
 		public override string ToString()
 		{
-			return GetCommandText();
+			var sb = new StringBuilder();
+			ToString(sb);
+			return sb.ToString();
 		}
 
 		#endregion

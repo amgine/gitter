@@ -26,19 +26,19 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Run merge conflict resolution tools to resolve merge conflicts.</summary>
 	public sealed class MergeToolCommand : Command
 	{
-		public static CommandArgument Tool(string tool)
+		public static ICommandArgument Tool(string tool)
 		{
-			return new CommandArgument("--tool", tool, '=');
+			return new CommandParameterValue("--tool", tool, '=');
 		}
 
-		public static CommandArgument Prompt()
+		public static ICommandArgument Prompt()
 		{
-			return new CommandArgument("--prompt");
+			return new CommandFlag("--prompt");
 		}
 
-		public static CommandArgument NoPrompt()
+		public static ICommandArgument NoPrompt()
 		{
-			return new CommandArgument("--no-prompt");
+			return new CommandFlag("--no-prompt");
 		}
 
 		public MergeToolCommand()
@@ -46,12 +46,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public MergeToolCommand(params CommandArgument[] args)
+		public MergeToolCommand(params ICommandArgument[] args)
 			: base("mergetool", args)
 		{
 		}
 
-		public MergeToolCommand(IList<CommandArgument> args)
+		public MergeToolCommand(IList<ICommandArgument> args)
 			: base("mergetool", args)
 		{
 		}

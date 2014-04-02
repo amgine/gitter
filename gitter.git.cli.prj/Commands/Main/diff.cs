@@ -26,164 +26,164 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Show changes between commits, commit and working tree, etc.</summary>
 	public sealed class DiffCommand : Command
 	{
-		public static CommandArgument FullIndex()
+		public static ICommandArgument FullIndex()
 		{
-			return new CommandArgument("--full-index");
+			return new CommandFlag("--full-index");
 		}
 
-		public static CommandArgument Binary()
+		public static ICommandArgument Binary()
 		{
-			return new CommandArgument("--binary");
+			return new CommandFlag("--binary");
 		}
 
-		public static CommandArgument NoPrefix()
+		public static ICommandArgument NoPrefix()
 		{
-			return new CommandArgument("--no-prefix");
+			return new CommandFlag("--no-prefix");
 		}
 
-		public static CommandArgument Cached()
+		public static ICommandArgument Cached()
 		{
-			return new CommandArgument("--cached");
+			return new CommandFlag("--cached");
 		}
 
-		public static CommandArgument Patch()
+		public static ICommandArgument Patch()
 		{
-			return new CommandArgument("-p");
+			return new CommandFlag("-p");
 		}
 
-		public static CommandArgument Raw()
+		public static ICommandArgument Raw()
 		{
-			return new CommandArgument("--raw");
+			return new CommandFlag("--raw");
 		}
 
-		public static CommandArgument Patience()
+		public static ICommandArgument Patience()
 		{
-			return new CommandArgument("--patience");
+			return new CommandFlag("--patience");
 		}
 
-		public static CommandArgument Stat()
+		public static ICommandArgument Stat()
 		{
-			return new CommandArgument("--stat");
+			return new CommandFlag("--stat");
 		}
 
-		public static CommandArgument NumStat()
+		public static ICommandArgument NumStat()
 		{
-			return new CommandArgument("--numstat");
+			return new CommandFlag("--numstat");
 		}
 
-		public static CommandArgument ShortStat()
+		public static ICommandArgument ShortStat()
 		{
-			return new CommandArgument("--shortstat");
+			return new CommandFlag("--shortstat");
 		}
 
-		public static CommandArgument NameOnly()
+		public static ICommandArgument NameOnly()
 		{
-			return new CommandArgument("--name-only");
+			return new CommandFlag("--name-only");
 		}
 
-		public static CommandArgument NameStatus()
+		public static ICommandArgument NameStatus()
 		{
-			return new CommandArgument("--name-status");
+			return new CommandFlag("--name-status");
 		}
 
-		public static CommandArgument IgnoreSpaceChange()
+		public static ICommandArgument IgnoreSpaceChange()
 		{
-			return new CommandArgument("--ignore-space-change");
+			return new CommandFlag("--ignore-space-change");
 		}
 
-		public static CommandArgument IgnoreSpaceAtEOL()
+		public static ICommandArgument IgnoreSpaceAtEOL()
 		{
-			return new CommandArgument("--ignore-space-at-eol");
+			return new CommandFlag("--ignore-space-at-eol");
 		}
 
-		public static CommandArgument IgnoreAllSpace()
+		public static ICommandArgument IgnoreAllSpace()
 		{
-			return new CommandArgument("--ignore-all-space");
+			return new CommandFlag("--ignore-all-space");
 		}
 
-		public static CommandArgument NoRenames()
+		public static ICommandArgument NoRenames()
 		{
-			return new CommandArgument("--no-renames");
+			return new CommandFlag("--no-renames");
 		}
 
-		public static CommandArgument PatchWithRaw()
+		public static ICommandArgument PatchWithRaw()
 		{
-			return new CommandArgument("--patch-with-raw");
+			return new CommandFlag("--patch-with-raw");
 		}
 
-		public static CommandArgument Unified(int n)
+		public static ICommandArgument Unified(int n)
 		{
-			return new CommandArgument("--unified", n.ToString(CultureInfo.InvariantCulture));
+			return new CommandParameterValue("--unified", n.ToString(CultureInfo.InvariantCulture));
 		}
 
-		public static CommandArgument Check()
+		public static ICommandArgument Check()
 		{
-			return new CommandArgument("--check");
+			return new CommandFlag("--check");
 		}
 
-		public static CommandArgument NoColor()
+		public static ICommandArgument NoColor()
 		{
-			return new CommandArgument("--no-color");
+			return new CommandFlag("--no-color");
 		}
 
-		public static CommandArgument SwapInputs()
+		public static ICommandArgument SwapInputs()
 		{
-			return new CommandArgument("-R");
+			return new CommandFlag("-R");
 		}
 
-		public static CommandArgument TextConv()
+		public static ICommandArgument TextConv()
 		{
-			return new CommandArgument("--textconv");
+			return new CommandFlag("--textconv");
 		}
 
-		public static CommandArgument NoTextConv()
+		public static ICommandArgument NoTextConv()
 		{
-			return new CommandArgument("--no-textconv");
+			return new CommandFlag("--no-textconv");
 		}
 
-		public static CommandArgument ExtDiff()
+		public static ICommandArgument ExtDiff()
 		{
-			return new CommandArgument("--ext-diff");
+			return new CommandFlag("--ext-diff");
 		}
 
-		public static CommandArgument NoExtDiff()
+		public static ICommandArgument NoExtDiff()
 		{
-			return new CommandArgument("--no-ext-diff");
+			return new CommandFlag("--no-ext-diff");
 		}
 
-		public static CommandArgument Text()
+		public static ICommandArgument Text()
 		{
-			return new CommandArgument("--text");
+			return new CommandFlag("--text");
 		}
 
-		public static CommandArgument FindRenames()
+		public static ICommandArgument FindRenames()
 		{
-			return new CommandArgument("--find-renames");
+			return new CommandFlag("--find-renames");
 		}
 
-		public static CommandArgument FindRenames(double similarity)
+		public static ICommandArgument FindRenames(double similarity)
 		{
-			return new CommandArgument("--find-renames", similarity.ToString("G", CultureInfo.InvariantCulture).Substring(2), '=');
+			return new CommandParameterValue("--find-renames", similarity.ToString("G", CultureInfo.InvariantCulture).Substring(2), '=');
 		}
 
-		public static CommandArgument FindCopies()
+		public static ICommandArgument FindCopies()
 		{
-			return new CommandArgument("--find-copies");
+			return new CommandFlag("--find-copies");
 		}
 
-		public static CommandArgument FindCopies(double similarity)
+		public static ICommandArgument FindCopies(double similarity)
 		{
-			return new CommandArgument("--find-copies", similarity.ToString("G", CultureInfo.InvariantCulture).Substring(2), '=');
+			return new CommandParameterValue("--find-copies", similarity.ToString("G", CultureInfo.InvariantCulture).Substring(2), '=');
 		}
 
-		public static CommandArgument NoMoreOptions()
+		public static ICommandArgument NoMoreOptions()
 		{
-			return CommandArgument.NoMoreOptions();
+			return CommandFlag.NoMoreOptions();
 		}
 
-		public static CommandArgument NullTerminate()
+		public static ICommandArgument NullTerminate()
 		{
-			return new CommandArgument("-z");
+			return new CommandFlag("-z");
 		}
 
 		public DiffCommand()
@@ -191,12 +191,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		public DiffCommand(params CommandArgument[] args)
+		public DiffCommand(params ICommandArgument[] args)
 			: base("diff", args)
 		{
 		}
 
-		public DiffCommand(IList<CommandArgument> args)
+		public DiffCommand(IList<ICommandArgument> args)
 			: base("diff", args)
 		{
 		}

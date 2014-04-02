@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ namespace gitter.Git.AccessLayer.CLI
 	using System;
 	using System.Text;
 
-	/// <summary>Command argument.</summary>
-	public class CommandArgument
+	/// <summary>Command parameter (param-name = value).</summary>
+	public class CommandParameterValue : ICommandArgument
 	{
 		#region Constants
 
@@ -40,59 +40,20 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#endregion
 
-		#region Static
-
-		public static CommandArgument DryRun()
-		{
-			return new CommandArgument("--dry-run");
-		}
-
-		public static CommandArgument Verbose()
-		{
-			return new CommandArgument("--verbose");
-		}
-
-		public static CommandArgument Quiet()
-		{
-			return new CommandArgument("--quiet");
-		}
-
-		public static CommandArgument SignOff()
-		{
-			return new CommandArgument("--signoff");
-		}
-
-		public static CommandArgument Interactive()
-		{
-			return new CommandArgument("--interactive");
-		}
-
-		/// <summary>Do not interpret any more arguments as options.</summary>
-		public static CommandArgument NoMoreOptions()
-		{
-			return new CommandArgument("--");
-		}
-
-		#endregion
-
 		#region .ctor
 
-		public CommandArgument(string name)
+		public CommandParameterValue(string name, string value)
 		{
-			_name = name;
+			_name      = name;
 			_separator = DefaultSeparator;
+			_value     = value;
 		}
 
-		public CommandArgument(string name, string value)
-			: this(name)
+		public CommandParameterValue(string name, string value, char separator)
 		{
-			_value = value;
-		}
-
-		public CommandArgument(string name, string value, char separator)
-			: this(name, value)
-		{
+			_name      = name;
 			_separator = separator;
+			_value     = value;
 		}
 
 		#endregion
@@ -112,29 +73,19 @@ namespace gitter.Git.AccessLayer.CLI
 		public string Value
 		{
 			get { return _value; }
-			set { _value = value; }
 		}
 
 		#endregion
 
 		#region Methods
 
-		public string GetArgumentText()
-		{
-			if(string.IsNullOrEmpty(_value)) return _name;
-			return _name + _separator + _value;
-		}
-
-		public void GetArgumentText(StringBuilder stringBuilder)
+		public void ToString(StringBuilder stringBuilder)
 		{
 			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
 
 			stringBuilder.Append(_name);
-			if(!string.IsNullOrEmpty(_value))
-			{
-				stringBuilder.Append(_separator);
-				stringBuilder.Append(_value);
-			}
+			stringBuilder.Append(_separator);
+			stringBuilder.Append(_value);
 		}
 
 		#endregion
@@ -143,17 +94,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public override string ToString()
 		{
-			return GetArgumentText();
+			return Name + Separator + Value;
 		}
 
 		#endregion
-	}
-
-	public class PathCommandArgument : CommandArgument
-	{
-		public PathCommandArgument(string path)
-			: base(path.AssureDoubleQuotes())
-		{
-		}
 	}
 }
