@@ -326,11 +326,11 @@ namespace gitter.Git
 			string path = "";
 			using(var dlg = new InitDialog(this))
 			{
-				dlg.RepositoryPath = _environment.RecentRepositoryPath;
+				dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
 				res = dlg.Run(_environment.MainForm);
 				if(res == DialogResult.OK)
 				{
-					path = Path.GetFullPath(dlg.RepositoryPath);
+					path = Path.GetFullPath(dlg.RepositoryPath.Value);
 				}
 			}
 			if(res == DialogResult.OK)
@@ -353,7 +353,7 @@ namespace gitter.Git
 			string path = "";
 			using(var dlg = new CloneDialog(this))
 			{
-				dlg.RepositoryPath = _environment.RecentRepositoryPath;
+				dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
 				res = dlg.Run(_environment.MainForm);
 				if(res == DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.AcceptedPath))
 				{

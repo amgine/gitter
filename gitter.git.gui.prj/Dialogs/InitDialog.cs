@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,79 +21,60 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
-	using System.IO;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class InitDialog : GitDialogBase, IExecutableDialog
+	public partial class InitDialog : GitDialogBase, IExecutableDialog, IInitView
 	{
+		#region Data
+
 		private readonly IGitRepositoryProvider _gitRepositoryProvider;
-		private string _repositoryPath;
+		private readonly IUserInputSource<string> _repositoryPathInput;
+		private readonly IUserInputSource<bool> _bareInput;
+		private readonly IUserInputSource<bool> _useCustomTemplateInput;
+		private readonly IUserInputSource<string> _templateInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+		private readonly IInitController _controller;
+
+		#endregion
+
+		#region .ctor
 
 		public InitDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
 			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
 
-			InitializeComponent();
-
-			Text = Resources.StrInitRepository;
-
 			_gitRepositoryProvider = gitRepositoryProvider;
 
-			_lblPath.Text = Resources.StrPath.AddColon();
-			_grpOptions.Text = Resources.StrOptions;
-			_chkUseTemplate.Text = Resources.StrTemplate.AddColon();
-			_chkBare.Text = Resources.StrBare;
+			InitializeComponent();
+			Localize();
+
+			var inputs = new IUserInputSource[]
+			{
+				_repositoryPathInput    = new TextBoxInputSource(_txtPath),
+				_bareInput              = new CheckBoxInputSource(_chkBare),
+				_useCustomTemplateInput = new CheckBoxInputSource(_chkUseTemplate),
+				_templateInput          = new TextBoxInputSource(_txtTemplate),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			GitterApplication.FontManager.InputFont.Apply(_txtPath, _txtTemplate);
+
+			_controller = new InitController(gitRepositoryProvider) { View = this };
 		}
 
-		protected override void OnLoad(EventArgs e)
-		{
-			base.OnLoad(e);
+		#endregion
 
-			if(!string.IsNullOrWhiteSpace(RepositoryPath))
-			{
-				_txtPath.Text = RepositoryPath.Trim();
-			}
-		}
-
-		public bool AllowChangeRepositoryPath
-		{
-			get { return !_txtPath.ReadOnly; }
-			set { _txtPath.ReadOnly = !value; }
-		}
-
-		public string RepositoryPath
-		{
-			get { return _repositoryPath; }
-			set { _repositoryPath = value; }
-		}
-
-		public string TemplatePath
-		{
-			get { return _txtTemplate.Text; }
-			set { _txtTemplate.Text = value; }
-		}
-
-		public bool UseTemplate
-		{
-			get { return _chkUseTemplate.Checked; }
-			set { _chkUseTemplate.Checked = value; }
-		}
-
-		public bool Bare
-		{
-			get { return _chkBare.Checked; }
-			set { _chkBare.Checked = value; }
-		}
+		#region Properties
 
 		protected override string ActionVerb
 		{
@@ -103,6 +84,45 @@ namespace gitter.Git.Gui.Dialogs
 		private IGitRepositoryProvider GitRepositoryProvider
 		{
 			get { return _gitRepositoryProvider; }
+		}
+
+		public IUserInputSource<string> RepositoryPath
+		{
+			get { return _repositoryPathInput; }
+		}
+
+		public IUserInputSource<bool> Bare
+		{
+			get { return _bareInput; }
+		}
+
+		public IUserInputSource<bool> UseCustomTemplate
+		{
+			get { return _useCustomTemplateInput; }
+		}
+
+		public IUserInputSource<string> Template
+		{
+			get { return _templateInput; }
+		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void Localize()
+		{
+			Text = Resources.StrInitRepository;
+
+			_lblPath.Text        = Resources.StrPath.AddColon();
+			_grpOptions.Text     = Resources.StrOptions;
+			_chkUseTemplate.Text = Resources.StrTemplate.AddColon();
+			_chkBare.Text        = Resources.StrBare;
 		}
 
 		private void _btnSelectDirectory_Click(object sender, EventArgs e)
@@ -130,62 +150,15 @@ namespace gitter.Git.Gui.Dialogs
 			_btnSelectTemplate.Enabled = check;
 		}
 
+		#endregion
+
+		#region IExecutableDialog
+
 		public bool Execute()
 		{
-			_repositoryPath = _txtPath.Text.Trim();
-			if(!ValidateAbsolutePath(_repositoryPath, _txtPath))
-			{
-				return false;
-			}
-			string template = null;
-			if(_chkUseTemplate.Checked)
-			{
-				template = _txtTemplate.Text.Trim();
-				if(!ValidateAbsolutePath(_repositoryPath, _txtTemplate))
-				{
-					return false;
-				}
-			}
-			bool bare = _chkBare.Checked;
-			try
-			{
-				if(!Directory.Exists(_repositoryPath))
-				{
-					Directory.CreateDirectory(_repositoryPath);
-				}
-			}
-			catch(Exception exc)
-			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToCreateDirectory,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					Repository.Init(GitRepositoryProvider.GitAccessor, _repositoryPath, template, bare);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToInit,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryInit();
 		}
+
+		#endregion
 	}
 }

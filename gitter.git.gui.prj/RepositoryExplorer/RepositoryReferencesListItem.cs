@@ -78,7 +78,7 @@ namespace gitter.Git.Gui
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null && !Repository.IsEmpty)
+			if(Repository != null)
 			{
 				var menu = new ReferencesMenu(Repository);
 				Utility.MarkDropDownForAutoDispose(menu);

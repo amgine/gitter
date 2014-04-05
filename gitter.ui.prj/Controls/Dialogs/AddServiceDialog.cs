@@ -60,6 +60,11 @@ namespace gitter.Controls
 			}
 
 			_servicePicker.SelectedIndexChanged += OnSelectedProviderChanged;
+		}
+
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
 
 			if(_servicePicker.ServiceProviders.Items.Count != 0)
 			{
@@ -99,7 +104,7 @@ namespace gitter.Controls
 			Height += d;
 			if(_activeSetupControl != null)
 			{
-				_activeSetupControl.SetBounds(0, _servicePicker.Bottom + 3, Width, 0,
+				_activeSetupControl.SetBounds(0, _servicePicker.Bottom, Width, 0,
 					BoundsSpecified.X | BoundsSpecified.Y | BoundsSpecified.Width);
 				_activeSetupControl.Parent = this;
 			}

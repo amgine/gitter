@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +22,32 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class AddSubmoduleDialog : GitDialogBase, IExecutableDialog
+	public partial class AddSubmoduleDialog : GitDialogBase, IExecutableDialog, IAddSubmoduleView
 	{
+		#region Data
+
 		private Repository _repository;
+		private readonly IUserInputSource<string> _pathInput;
+		private readonly IUserInputSource<string> _urlInput;
+		private readonly IUserInputSource<bool> _useCustomBranchInput;
+		private readonly IUserInputSource<string> _branchNameInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+		private readonly IAddSubmoduleController _controller;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="AddSubmoduleDialog"/>.</summary>
 		public AddSubmoduleDialog(Repository repository)
@@ -43,43 +57,67 @@ namespace gitter.Git.Gui.Dialogs
 			_repository = repository;
 
 			InitializeComponent();
+			Localize();
 
-			Text = Resources.StrAddSubmodule;
-
-			_lblPath.Text = Resources.StrPath.AddColon();
-			_lblUrl.Text = Resources.StrUrl.AddColon();
-			_chkBranch.Text = Resources.StrBranch.AddColon();
+			var inputs = new IUserInputSource[]
+			{
+				_pathInput            = new TextBoxInputSource(_txtPath),
+				_urlInput             = new TextBoxInputSource(_txtRepository),
+				_useCustomBranchInput = new CheckBoxInputSource(_chkBranch),
+				_branchNameInput      = new TextBoxInputSource(_txtBranch),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			GitterApplication.FontManager.InputFont.Apply(_txtBranch, _txtRepository, _txtPath);
+
+			_controller = new AddSubmoduleController(repository) { View = this };
 		}
+
+		#endregion
+
+		#region Properties
 
 		protected override string ActionVerb
 		{
 			get { return Resources.StrAdd; }
 		}
 
-		public string Path
+		public IUserInputSource<string> Path
 		{
-			get { return _txtRepository.Text; }
-			set { _txtRepository.Text = value; }
+			get { return _pathInput; }
 		}
 
-		public string Repository
+		public IUserInputSource<string> Url
 		{
-			get { return _txtPath.Text; }
-			set { _txtPath.Text = value; }
+			get { return _urlInput; }
 		}
 
-		public string Branch
+		public IUserInputSource<bool> UseCustomBranch
 		{
-			get { return _txtBranch.Text; }
-			set { _txtBranch.Text = value; }
+			get { return _useCustomBranchInput; }
 		}
 
-		public bool UseCustomBranch
+		public IUserInputSource<string> BranchName
 		{
-			get { return _chkBranch.Checked; }
-			set { _chkBranch.Checked = value; }
+			get { return _branchNameInput; }
+		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void Localize()
+		{
+			Text = Resources.StrAddSubmodule;
+
+			_lblPath.Text = Resources.StrPath.AddColon();
+			_lblUrl.Text = Resources.StrUrl.AddColon();
+			_chkBranch.Text = Resources.StrBranch.AddColon();
 		}
 
 		private void _chkBranch_CheckedChanged(object sender, EventArgs e)
@@ -87,46 +125,13 @@ namespace gitter.Git.Gui.Dialogs
 			_txtBranch.Enabled = _chkBranch.Checked;
 		}
 
+		#endregion
+
 		#region IExecutableDialog
 
 		public bool Execute()
 		{
-			var path = _txtPath.Text.Trim();
-			if(!ValidateRelativePath(path, _txtPath))
-			{
-				return false;
-			}
-			var url = _txtRepository.Text.Trim();
-			if(!ValidateUrl(url, _txtRepository))
-			{
-				return false;
-			}
-			var branch = _chkBranch.Checked ? _txtBranch.Text.Trim() : null;
-			if(!string.IsNullOrWhiteSpace(branch))
-			{
-				if(!ValidateBranchName(branch, _txtBranch))
-				{
-					return false;
-				}
-			}
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					_repository.Submodules.Create(path, url, branch);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrFailedToAddSubmodule, path),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryAddSubmodule();
 		}
 
 		#endregion

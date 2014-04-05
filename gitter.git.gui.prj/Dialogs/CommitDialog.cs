@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,22 +25,32 @@ namespace gitter.Git.Gui.Dialogs
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
 	using gitter.Framework.Services;
-	using gitter.Framework.Options;
 
+	using gitter.Git.Gui.Controllers;
 	using gitter.Git.Gui.Controls;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Dialog for creating commit.</summary>
-	public partial class CommitDialog : GitDialogBase, IExecutableDialog
+	public partial class CommitDialog : GitDialogBase, IExecutableDialog, ICommitView
 	{
 		#region Data
 
 		private readonly Repository _repository;
 		private TextBoxSpellChecker _speller;
+		private readonly IUserInputSource<string> _messageInput;
+		private readonly IUserInputSource<bool> _amendInput;
+		private readonly IUserInputSource _stagedItemsInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+		private readonly ICommitController _controller;
 
 		#endregion
+
+		#region .ctor
 
 		public CommitDialog(Repository repository)
 		{
@@ -50,6 +60,14 @@ namespace gitter.Git.Gui.Dialogs
 
 			InitializeComponent();
 			Localize();
+
+			var inputs = new IUserInputSource[]
+			{
+				_messageInput     = new TextBoxInputSource(_txtMessage),
+				_amendInput       = new CheckBoxInputSource(_chkAmend),
+				_stagedItemsInput = new ControlInputSource(_lstStaged),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			for(int i = 0; i < _lstStaged.Columns.Count; ++i)
 			{
@@ -71,7 +89,47 @@ namespace gitter.Git.Gui.Dialogs
 			}
 
 			_txtMessage.Text = repository.Status.LoadCommitMessage();
+
+			_controller = new CommitController(repository) { View = this };
 		}
+
+		#endregion
+
+		#region Properties
+
+		public Repository Repository
+		{
+			get { return _repository; }
+		}
+
+		protected override string ActionVerb
+		{
+			get { return Resources.StrCommit; }
+		}
+
+		public IUserInputSource<string> Message
+		{
+			get { return _messageInput; }
+		}
+
+		public IUserInputSource<bool> Amend
+		{
+			get { return _amendInput; }
+		}
+
+		public IUserInputSource StagedItems
+		{
+			get { return _stagedItemsInput; }
+		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
+		}
+
+		#endregion
+
+		#region Methods
 
 		private void Localize()
 		{
@@ -93,16 +151,6 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
-
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCommit; }
-		}
-
 		private void OnAmendCheckedChanged(object sender, EventArgs e)
 		{
 			if(_chkAmend.Checked && _txtMessage.TextLength == 0)
@@ -119,54 +167,13 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
+		#endregion
+
 		#region IExecutableDialog Members
 
 		public bool Execute()
 		{
-			string message = _txtMessage.Text.Trim();
-			bool amend = _chkAmend.Checked;
-			if(_lstStaged.Items.Count == 0 && !amend)
-			{
-				NotificationService.NotifyInputError(
-					_lstStaged,
-					Resources.ErrNothingToCommit,
-					Resources.ErrNofilesStagedForCommit);
-				return false;
-			}
-			if(message.Length == 0)
-			{
-				NotificationService.NotifyInputError(
-					_txtMessage,
-					Resources.ErrEmptyCommitMessage,
-					Resources.ErrEnterCommitMessage);
-				return false;
-			}
-			else if(message.Length < 2)
-			{
-				NotificationService.NotifyInputError(
-					_txtMessage,
-					Resources.ErrShortCommitMessage,
-					Resources.ErrEnterLongerCommitMessage.UseAsFormat(2));
-				return false;
-			}
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					_repository.Status.Commit(message, amend);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToCommit,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryCommit();
 		}
 
 		#endregion

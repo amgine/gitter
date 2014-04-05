@@ -167,13 +167,6 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		public static void UpdateGitExePath(GitCLI gitCLI)
-		{
-			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
-
-			GitExePath = gitCLI.GitExecutablePath;
-		}
-
 		public static string GitExePath
 		{
 			get { return _gitExePath; }
@@ -314,17 +307,12 @@ namespace gitter.Git.AccessLayer.CLI
 
 			var stdOutReader = new AsyncTextReader();
 			var stdErrReader = new AsyncTextReader();
-			var executor = CreateExecutor();
+			var executor = new GitProcessExecutor(GitExePath);
 			var exitCode = executor.Execute(input, stdOutReader, stdErrReader);
 			return new GitOutput(
 				stdOutReader.GetText(),
 				stdErrReader.GetText(),
 				exitCode);
-		}
-
-		public static GitProcessExecutor CreateExecutor()
-		{
-			return new GitProcessExecutor(_gitExePath);
 		}
 	}
 }

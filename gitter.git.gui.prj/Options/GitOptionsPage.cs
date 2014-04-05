@@ -53,20 +53,32 @@ namespace gitter.Git
 		private IGitAccessorProvider _selectedAccessorProvder;
 		private IGitAccessor _selectedAccessor;
 
-		public GitOptionsPage(IWorkingEnvironment environment)
+		private GitOptionsPage()
 			: base(Guid)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
-
 			InitializeComponent();
 
 			Text = Resources.StrGit;
+			_grpRepositoryAccessor.Text = Resources.StrsRepositoryAccessMethod;
+			_lblAccessmethod.Text = Resources.StrAccessMethod.AddColon();
+		}
+
+		public GitOptionsPage(IWorkingEnvironment environment)
+			: this()
+		{
+			Verify.Argument.IsNotNull(environment, "environment");
 
 			_repositoryProvider = environment.GetRepositoryProvider<RepositoryProvider>();
 			ShowGitAccessorProviders();
+		}
 
-			_grpRepositoryAccessor.Text = Resources.StrsRepositoryAccessMethod;
-			_lblAccessmethod.Text = Resources.StrAccessMethod.AddColon();
+		public GitOptionsPage(IGitRepositoryProvider repositoryProvider)
+			: this()
+		{
+			Verify.Argument.IsNotNull(repositoryProvider, "repositoryProvider");
+
+			_repositoryProvider = repositoryProvider;
+			ShowGitAccessorProviders();
 		}
 
 		private void ShowGitAccessorProviders()

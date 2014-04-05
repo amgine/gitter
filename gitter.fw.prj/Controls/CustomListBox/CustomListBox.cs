@@ -2434,23 +2434,20 @@ namespace gitter.Framework.Controls
 			switch(_oldHitTestResult.Area)
 			{
 				case HitTestArea.Item:
-					if(_itemFocus.IsTracked)
+					if(_oldHitTestResult.ItemPart >= 0 && _itemFocus.IsTracked && _itemFocus.Index >= 0 && _itemFocus.Index < _itemPlainList.Count)
 					{
-						if(_oldHitTestResult.ItemPart != ItemHitTestResults.PlusMinus)
+						var item = _itemPlainList[_itemFocus.Index];
+						item.OnDoubleClick(_mouseDownX, _mouseDownY);
+						if(_itemActivation == ItemActivation.DoubleClick)
 						{
-							var item = _itemPlainList[_itemFocus.Index];
-							item.OnDoubleClick(_mouseDownX, _mouseDownY);
-							if(_itemActivation == ItemActivation.DoubleClick)
-							{
-								item.Activate();
-							}
+							item.Activate();
 						}
 					}
 					break;
 				case HitTestArea.Header:
 					bool isOverLeftResizeGrip = _oldHitTestResult.ItemPart == ColumnHitTestResults.LeftResizer;
 					bool isOverRightResizeGrip = _oldHitTestResult.ItemPart == ColumnHitTestResults.RightResizer;
-					if (isOverLeftResizeGrip || isOverRightResizeGrip)
+					if(isOverLeftResizeGrip || isOverRightResizeGrip)
 					{
 						var index = _oldHitTestResult.ItemIndex;
 						if(index != -1)

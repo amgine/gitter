@@ -173,8 +173,8 @@ namespace gitter.Git.Gui
 		{
 			using(var dlg = new CreateBranchDialog(_repository))
 			{
-				dlg.StartingRevision = startingRevision;
-				dlg.BranchName = defaultBranchName;
+				dlg.StartingRevision.Value = startingRevision;
+				dlg.BranchName.Value = defaultBranchName;
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -198,7 +198,7 @@ namespace gitter.Git.Gui
 			{
 				if(rev != null)
 				{
-					dlg.Revision = rev.Pointer;
+					dlg.Revision.Value = rev.Pointer;
 				}
 				dlg.Run(_environment.MainForm);
 			}
@@ -237,7 +237,7 @@ namespace gitter.Git.Gui
 			var rev = GetFocusedRevisionPointer();
 			using(var dlg = new CreateTagDialog(_repository))
 			{
-				dlg.Revision = rev != null ? rev.Pointer : GitConstants.HEAD;
+				dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
 				dlg.Run(_environment.MainForm);
 			}
 		}
@@ -247,7 +247,7 @@ namespace gitter.Git.Gui
 			var rev = GetFocusedRevisionPointer();
 			using(var dlg = new AddNoteDialog(_repository))
 			{
-				dlg.Revision = rev != null ? rev.Pointer : GitConstants.HEAD;
+				dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
 				dlg.Run(_environment.MainForm);
 			}
 		}

@@ -52,6 +52,7 @@
 			this._txtServiceUri.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtServiceUri.Location = new System.Drawing.Point(100, 3);
+			this._txtServiceUri.MinimumSize = new System.Drawing.Size(0, 23);
 			this._txtServiceUri.Name = "_txtServiceUri";
 			this._txtServiceUri.Size = new System.Drawing.Size(297, 23);
 			this._txtServiceUri.TabIndex = 0;
@@ -89,6 +90,7 @@
 			this._txtUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtUsername.Location = new System.Drawing.Point(100, 29);
+			this._txtUsername.MinimumSize = new System.Drawing.Size(0, 23);
 			this._txtUsername.Name = "_txtUsername";
 			this._txtUsername.Size = new System.Drawing.Size(297, 23);
 			this._txtUsername.TabIndex = 1;
@@ -98,6 +100,7 @@
 			this._txtPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtPassword.Location = new System.Drawing.Point(100, 55);
+			this._txtPassword.MinimumSize = new System.Drawing.Size(0, 23);
 			this._txtPassword.Name = "_txtPassword";
 			this._txtPassword.Size = new System.Drawing.Size(297, 23);
 			this._txtPassword.TabIndex = 2;

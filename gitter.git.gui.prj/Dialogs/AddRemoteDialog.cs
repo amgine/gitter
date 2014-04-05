@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +22,33 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class AddRemoteDialog : GitDialogBase, IExecutableDialog
+	public partial class AddRemoteDialog : GitDialogBase, IExecutableDialog, IAddRemoteView
 	{
+		#region Data
+
 		private readonly Repository _repository;
+		private readonly IAddRemoteController _controller;
+		private readonly IUserInputSource<string> _remoteNameInput;
+		private readonly IUserInputSource<string> _urlInput;
+		private readonly IUserInputSource<bool> _fetchInput;
+		private readonly IUserInputSource<bool> _mirrorInput;
+		private readonly IUserInputSource<TagFetchMode> _tagFetchModeInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+
+		#endregion
+
+		#region .ctor
 
 		public AddRemoteDialog(Repository repository)
 		{
@@ -44,6 +59,22 @@ namespace gitter.Git.Gui.Dialogs
 			InitializeComponent();
 			Localize();
 
+			var inputs = new IUserInputSource[]
+			{
+				_remoteNameInput   = new TextBoxInputSource(_txtName),
+				_urlInput          = new TextBoxInputSource(_txtUrl),
+				_fetchInput        = new CheckBoxInputSource(_chkFetch),
+				_mirrorInput       = new CheckBoxInputSource(_chkMirror),
+				_tagFetchModeInput = new RadioButtonGroupInputSource<TagFetchMode>(
+					new[]
+					{
+						Tuple.Create(_tagFetchDefault, gitter.Git.TagFetchMode.Default),
+						Tuple.Create(_tagFetchNone,    gitter.Git.TagFetchMode.NoTags),
+						Tuple.Create(_tagFetchAll,     gitter.Git.TagFetchMode.AllTags),
+					}),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+
 			SetupReferenceNameInputBox(_txtName, ReferenceType.Remote);
 
 			if(_repository.Remotes.Count == 0)
@@ -52,7 +83,13 @@ namespace gitter.Git.Gui.Dialogs
 			}
 
 			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtUrl);
+
+			_controller = new AddRemoteController(repository) { View = this };
 		}
+
+		#endregion
+
+		#region Methods
 
 		private void Localize()
 		{
@@ -75,6 +112,8 @@ namespace gitter.Git.Gui.Dialogs
 			_tagFetchNone.Text		= Resources.StrsFetchNone;
 		}
 
+		#endregion
+
 		#region Properties
 
 		protected override string ActionVerb
@@ -87,61 +126,34 @@ namespace gitter.Git.Gui.Dialogs
 			get { return _repository; }
 		}
 
-		public string RemoteName
+		public IUserInputSource<string> RemoteName
 		{
-			get { return _txtName.Text; }
-			set { _txtName.Text = value; }
+			get { return _remoteNameInput; }
 		}
 
-		public string Url
+		public IUserInputSource<string> Url
 		{
-			get { return _txtUrl.Text; }
-			set { _txtUrl.Text = value; }
+			get { return _urlInput; }
 		}
 
-		public bool Fetch
+		public IUserInputSource<bool> Fetch
 		{
-			get { return _chkFetch.Checked; }
-			set { _chkFetch.Checked = value; }
+			get { return _fetchInput; }
 		}
 
-		public bool Mirror
+		public IUserInputSource<bool> Mirror
 		{
-			get { return _chkMirror.Checked; }
-			set { _chkMirror.Checked = value; }
+			get { return _mirrorInput; }
 		}
 
-		public TagFetchMode TagFetchMode
+		public IUserInputSource<TagFetchMode> TagFetchMode
 		{
-			get
-			{
-				if(_tagFetchAll.Checked)
-				{
-					return TagFetchMode.AllTags;
-				}
-				if(_tagFetchNone.Checked)
-				{
-					return TagFetchMode.NoTags;
-				}
-				return TagFetchMode.Default;
-			}
-			set
-			{
-				switch(value)
-				{
-					case TagFetchMode.AllTags:
-						_tagFetchAll.Checked = true;
-						break;
-					case TagFetchMode.NoTags:
-						_tagFetchNone.Checked = true;
-						break;
-					case TagFetchMode.Default:
-						_tagFetchDefault.Checked = true;
-						break;
-					default:
-						throw new ArgumentException("value");
-				}
-			}
+			get { return _tagFetchModeInput; }
+		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
 		}
 
 		#endregion
@@ -150,37 +162,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public bool Execute()
 		{
-			var name = _txtName.Text.Trim();
-			if(!ValidateNewRemoteName(name, _txtName, Repository))
-			{
-				return false;
-			}
-			var url = _txtUrl.Text.Trim();
-			if(!ValidateUrl(url, _txtUrl))
-			{
-				return false;
-			}
-			bool fetch			= Fetch;
-			bool mirror			= Mirror;
-			var tagFetchMode	= TagFetchMode;
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					Repository.Remotes.AddRemote(name, url, fetch, mirror, tagFetchMode);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToAddRemote,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryAddRemote();
 		}
 
 		#endregion

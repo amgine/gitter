@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1213,11 +1213,15 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(!string.IsNullOrEmpty(parameters.Message))
 			{
-				args.Add(MergeCommand.Message(parameters.Message));
+				var message = parameters.Message.Replace("\"", "\\\"");
+				args.Add(MergeCommand.Message(message));
 			}
-			foreach(var rev in parameters.Revisions)
+			if(parameters.Revisions != null)
 			{
-				args.Add(new CommandParameter(rev));
+				foreach(var rev in parameters.Revisions)
+				{
+					args.Add(new CommandParameter(rev));
+				}
 			}
 			return new MergeCommand(args);
 		}

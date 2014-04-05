@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,19 +22,30 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
-	using gitter.Framework.Services;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Dialog for renaming local branch.</summary>
 	[ToolboxItem(false)]
-	public partial class RenameBranchDialog : GitDialogBase, IExecutableDialog
+	public partial class RenameBranchDialog : GitDialogBase, IExecutableDialog, IRenameBranchView
 	{
+		#region Data
+
 		private readonly Branch _branch;
+		private readonly IUserInputSource<string> _newNameInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+		private readonly IRenameBranchController _controller;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="RenameBranchDialog"/>.</summary>
 		/// <param name="branch">Branch to rename.</param>
@@ -48,20 +59,29 @@ namespace gitter.Git.Gui.Dialogs
 			_branch = branch;
 
 			InitializeComponent();
+			Localize();
+
+			var inputs = new IUserInputSource[]
+			{
+				_newNameInput = new TextBoxInputSource(_txtNewName),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtNewName, ReferenceType.LocalBranch);
 
-			Text = Resources.StrRenameBranch;
-
-			_lblOldName.Text = Resources.StrBranch.AddColon();
-			_lblNewName.Text = Resources.StrNewName.AddColon();
-
-			_txtOldName.Text = branch.Name;
-			_txtNewName.Text = branch.Name;
+			var branchName = branch.Name;
+			_txtOldName.Text = branchName;
+			_txtNewName.Text = branchName;
 			_txtNewName.SelectAll();
 
 			GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
+
+			_controller = new RenameBranchController(branch) { View = this };
 		}
+
+		#endregion
+
+		#region Properties
 
 		/// <summary>Verb, describing operation.</summary>
 		protected override string ActionVerb
@@ -75,61 +95,39 @@ namespace gitter.Git.Gui.Dialogs
 			get { return _branch; }
 		}
 
-		/// <summary>New branche's name.</summary>
-		public string NewName
+		public IUserInputSource<string> NewName
 		{
-			get { return _txtNewName.Text; }
-			set { _txtNewName.Text = value; }
+			get { return _newNameInput; }
 		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void Localize()
+		{
+			Text = Resources.StrRenameBranch;
+
+			_lblOldName.Text = Resources.StrBranch.AddColon();
+			_lblNewName.Text = Resources.StrNewName.AddColon();
+		}
+
+		#endregion
+
+		#region IExecutableDialog
 
 		/// <summary>Perform rename.</summary>
 		/// <returns>true if rename succeeded.</returns>
 		public bool Execute()
 		{
-			var repository = _branch.Repository;
-			var oldName = _txtOldName.Text;
-			var newName = _txtNewName.Text.Trim();
-
-			if(oldName == newName) return true;
-			if(!ValidateNewBranchName(newName, _txtNewName, repository))
-			{
-				return false;
-			}
-
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					_branch.Name = newName;
-				}
-			}
-			catch(BranchAlreadyExistsException)
-			{
-				NotificationService.NotifyInputError(
-					_txtNewName,
-					Resources.ErrInvalidBranchName,
-					Resources.ErrBranchAlreadyExists);
-				return false;
-			}
-			catch(InvalidBranchNameException exc)
-			{
-				NotificationService.NotifyInputError(
-					_txtNewName,
-					Resources.ErrInvalidBranchName,
-					exc.Message);
-				return false;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrFailedToRenameBranch, oldName),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryRename();
 		}
+
+		#endregion
 	}
 }

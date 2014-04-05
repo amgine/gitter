@@ -1148,12 +1148,9 @@ namespace gitter.Git.Gui
 			var revision = (IRevisionPointer)item.Tag;
 			var parent = Utility.GetParentControl(item);
 
-			using(var dlg = new AddNoteDialog(revision.Repository)
-				{
-					Revision = revision.Pointer,
-					AllowChangeRevision = false,
-				})
+			using(var dlg = new AddNoteDialog(revision.Repository))
 			{
+				dlg.Revision.Value = revision.Pointer;
 				dlg.Run(parent);
 			}
 		}
@@ -1279,11 +1276,9 @@ namespace gitter.Git.Gui
 		{
 			var item = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
-			using(var dlg = new CreateBranchDialog(repository)
+			using(var dlg = new CreateBranchDialog(repository))
 			{
-				StartingRevision = GitConstants.HEAD,
-			})
-			{
+				dlg.StartingRevision.Value = GitConstants.HEAD;
 				dlg.Run(Utility.GetParentControl(item));
 			}
 		}
@@ -1312,14 +1307,12 @@ namespace gitter.Git.Gui
 				startingRevision = string.Empty;
 				defaultName = string.Empty;
 			}
-			using(var dlg = new CreateBranchDialog(revision.Repository)
+			using(var dlg = new CreateBranchDialog(revision.Repository))
 			{
-				StartingRevision = startingRevision,
-			})
-			{
+				dlg.StartingRevision.Value = startingRevision;
 				if(defaultName != string.Empty)
 				{
-					dlg.BranchName = defaultName;
+					dlg.BranchName.Value = defaultName;
 				}
 				dlg.Run(Utility.GetParentControl(item));
 			}
@@ -1442,11 +1435,9 @@ namespace gitter.Git.Gui
 			{
 				if(Control.ModifierKeys == Keys.Shift)
 				{
-					using(var dlg = new MergeDialog(revision.Repository)
-						{
-							MergeFrom = revision,
-						})
+					using(var dlg = new MergeDialog(revision.Repository))
 					{
+						dlg.Revisions.Value = new[] { revision };
 						dlg.Run(parent);
 					}
 				}
@@ -1535,11 +1526,9 @@ namespace gitter.Git.Gui
 		{
 			var item = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
-			using(var dlg = new CreateTagDialog(repository)
+			using(var dlg = new CreateTagDialog(repository))
 			{
-				Revision = GitConstants.HEAD,
-			})
-			{
+				dlg.Revision.Value = GitConstants.HEAD;
 				dlg.Run(Utility.GetParentControl(item));
 			}
 		}
@@ -1548,11 +1537,9 @@ namespace gitter.Git.Gui
 		{
 			var item = (ToolStripItem)sender;
 			var revision = (IRevisionPointer)item.Tag;
-			using(var dlg = new CreateTagDialog(revision.Repository)
+			using(var dlg = new CreateTagDialog(revision.Repository))
 			{
-				Revision = (revision != null) ? revision.Pointer : GitConstants.HEAD,
-			})
-			{
+				dlg.Revision.Value = (revision != null) ? revision.Pointer : GitConstants.HEAD;
 				dlg.Run(Utility.GetParentControl(item));
 			}
 		}

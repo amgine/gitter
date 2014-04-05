@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,52 +21,79 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
-	using System.IO;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class CloneDialog : GitDialogBase, IExecutableDialog
+	partial class CloneDialog : GitDialogBase, IExecutableDialog, ICloneView
 	{
+		#region Data
+
 		private readonly IGitRepositoryProvider _gitRepositoryProvider;
+		private readonly IUserInputSource<string> _urlInput;
+		private readonly IUserInputSource<string> _repositoryPathInput;
+		private readonly IUserInputSource<string> _remoteNameInput;
+		private readonly IUserInputSource<bool> _appendRepositoryNameFromUrlInput;
+		private readonly IUserInputSource<bool> _shallowCloneInput;
+		private readonly IUserInputSource<int> _depthInput;
+		private readonly IUserInputSource<bool> _useTemplateInput;
+		private readonly IUserInputSource<string> _templatePathInput;
+		private readonly IUserInputSource<bool> _bareInput;
+		private readonly IUserInputSource<bool> _mirrorInput;
+		private readonly IUserInputSource<bool> _noCheckoutInput;
+		private readonly IUserInputSource<bool> _recursiveInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+		private readonly ICloneController _controller;
 		private string _acceptedPath;
+
+		#endregion
+
+		#region .ctor
 
 		public CloneDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
 			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
 
-			InitializeComponent();
-
 			_gitRepositoryProvider = gitRepositoryProvider;
 
-			Text = Resources.StrCloneRepository;
+			InitializeComponent();
+			Localize();
 
-			_lblPath.Text = Resources.StrPath.AddColon();
-			_lblUrl.Text = Resources.StrUrl.AddColon();
-
-			_grpOptions.Text = Resources.StrOptions;
-
-			_chkAppendRepositoryNameFromUrl.Text = Resources.StrsAppendRepositoryNameFromURL;
-			_lblWillBeClonedInto.Text = Resources.StrsWillBeClonedInto.AddColon();
-			_chkUseTemplate.Text = Resources.StrTemplate.AddColon();
-			_lblRemoteName.Text = Resources.StrsRemoteName.AddColon();
-			_txtRemoteName.Text = GitConstants.DefaultRemoteName;
-			_chkBare.Text = Resources.StrBare;
-			_chkMirror.Text = Resources.StrMirror;
-			_chkShallowClone.Text = Resources.StrsShallowClone;
-			_chkRecursive.Text = Resources.StrRecursive;
-			_lblDepth.Text = Resources.StrDepth.AddColon();
-			_chkNoCheckout.Text = Resources.StrsNoCheckout;
+			var inputs = new IUserInputSource[]
+			{
+				_urlInput                         = new TextBoxInputSource(_txtUrl),
+				_repositoryPathInput              = new TextBoxInputSource(_txtPath),
+				_remoteNameInput                  = new TextBoxInputSource(_txtRemoteName),
+				_appendRepositoryNameFromUrlInput = new CheckBoxInputSource(_chkAppendRepositoryNameFromUrl),
+				_shallowCloneInput                = new CheckBoxInputSource(_chkShallowClone),
+				_depthInput                       = new NumericUpDownInputSource<int>(_numDepth, value => (int)value, value => value),
+				_useTemplateInput                 = new CheckBoxInputSource(_chkUseTemplate),
+				_templatePathInput                = new TextBoxInputSource(_txtTemplate),
+				_bareInput                        = new CheckBoxInputSource(_chkBare),
+				_mirrorInput                      = new CheckBoxInputSource(_chkMirror),
+				_noCheckoutInput                  = new CheckBoxInputSource(_chkNoCheckout),
+				_recursiveInput                   = new CheckBoxInputSource(_chkRecursive),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			UpdateTargetPathText();
 
 			GitterApplication.FontManager.InputFont.Apply(_txtUrl, _txtPath, _txtRemoteName);
+
+			_controller = new CloneController(gitRepositoryProvider) { View = this };
 		}
+
+		#endregion
+
+		#region Properties
 
 		protected override string ActionVerb
 		{
@@ -78,95 +105,69 @@ namespace gitter.Git.Gui.Dialogs
 			get { return _gitRepositoryProvider; }
 		}
 
-		public string RepositoryPath
+		public IUserInputSource<string> Url
 		{
-			get { return _txtPath.Text; }
-			set { _txtPath.Text = value; }
+			get { return _urlInput; }
 		}
 
-		public bool AppendRepositoryPathFromUrl
+		public IUserInputSource<string> RepositoryPath
 		{
-			get { return _chkAppendRepositoryNameFromUrl.Checked; }
-			set { _chkAppendRepositoryNameFromUrl.Checked = value; }
+			get { return _repositoryPathInput; }
 		}
 
-		public string Url
+		public IUserInputSource<bool> AppendRepositoryNameFromUrl
 		{
-			get { return _txtUrl.Text; }
-			set { _txtUrl.Text = value; }
+			get { return _appendRepositoryNameFromUrlInput; }
 		}
 
-		public bool Bare
+		public IUserInputSource<bool> Bare
 		{
-			get { return _chkBare.Checked; }
-			set { _chkBare.Checked = value; }
+			get { return _bareInput; }
 		}
 
-		public bool Mirror
+		public IUserInputSource<bool> Mirror
 		{
-			get { return _chkMirror.Checked; }
-			set { _chkMirror.Checked = value; }
+			get { return _mirrorInput; }
 		}
 
-		public bool UseTemplate
+		public IUserInputSource<bool> UseTemplate
 		{
-			get { return _chkUseTemplate.Checked; }
-			set { _chkUseTemplate.Checked = value; }
+			get { return _useTemplateInput; }
 		}
 
-		public string RemoteName
+		public IUserInputSource<string> RemoteName
 		{
-			get { return _txtRemoteName.Text; }
-			set { _txtRemoteName.Text = value; }
+			get { return _remoteNameInput; }
 		}
 
-		public string Template
+		public IUserInputSource<string> TemplatePath
 		{
-			get { return _txtTemplate.Text; }
-			set { _txtTemplate.Text = value; }
+			get { return _templatePathInput; }
 		}
 
-		public bool ShallowClone
+		public IUserInputSource<bool> ShallowClone
 		{
-			get { return _chkShallowClone.Checked; }
-			set { _chkShallowClone.Checked = value; }
+			get { return _shallowCloneInput; }
 		}
 
-		public int Depth
+		public IUserInputSource<int> Depth
 		{
-			get { return (int)_numDepth.Value; }
-			set { _numDepth.Value = value; }
+			get { return _depthInput; }
 		}
 
-		public bool Recursive
+		public IUserInputSource<bool> Recursive
 		{
-			get { return _chkRecursive.Checked; }
-			set { _chkRecursive.Checked = value; }
+			get { return _recursiveInput; }
 		}
 
-		public bool NoCheckout
+		public IUserInputSource<bool> NoCheckout
 		{
-			get { return _chkNoCheckout.Checked; }
-			set { _chkNoCheckout.Checked = value; }
+			get { return _noCheckoutInput; }
 		}
 
-		private static string AppendUrlToPath(string path, string url)
+		public IUserInputErrorNotifier ErrorNotifier
 		{
-			if(url.Length != 0)
-			{
-				try
-				{
-					path = Path.Combine(path, GitUtils.GetHumanishName(url));
-				}
-				catch(Exception exc)
-				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
-				}
-			}
-			return path;
+			get { return _errorNotifier; }
 		}
 
 		public string TargetPath
@@ -188,7 +189,50 @@ namespace gitter.Git.Gui.Dialogs
 			get { return _acceptedPath; }
 		}
 
-		#region Event Handlers
+		#endregion
+
+		#region Methods
+
+		private void Localize()
+		{
+			Text = Resources.StrCloneRepository;
+
+			_lblPath.Text = Resources.StrPath.AddColon();
+			_lblUrl.Text = Resources.StrUrl.AddColon();
+
+			_grpOptions.Text = Resources.StrOptions;
+
+			_chkAppendRepositoryNameFromUrl.Text = Resources.StrsAppendRepositoryNameFromURL;
+			_lblWillBeClonedInto.Text = Resources.StrsWillBeClonedInto.AddColon();
+			_chkUseTemplate.Text = Resources.StrTemplate.AddColon();
+			_lblRemoteName.Text = Resources.StrsRemoteName.AddColon();
+			_txtRemoteName.Text = GitConstants.DefaultRemoteName;
+			_chkBare.Text = Resources.StrBare;
+			_chkMirror.Text = Resources.StrMirror;
+			_chkShallowClone.Text = Resources.StrsShallowClone;
+			_chkRecursive.Text = Resources.StrRecursive;
+			_lblDepth.Text = Resources.StrDepth.AddColon();
+			_chkNoCheckout.Text = Resources.StrsNoCheckout;
+		}
+
+		private static string AppendUrlToPath(string path, string url)
+		{
+			if(url.Length != 0)
+			{
+				try
+				{
+					path = System.IO.Path.Combine(path, GitUtils.GetHumanishName(url));
+				}
+				catch(Exception exc)
+				{
+					if(exc.IsCritical())
+					{
+						throw;
+					}
+				}
+			}
+			return path;
+		}
 
 		private void _btnSelectDirectory_Click(object sender, EventArgs e)
 		{
@@ -258,44 +302,15 @@ namespace gitter.Git.Gui.Dialogs
 
 		#endregion
 
+		#region IExecutableDialog
+
 		public bool Execute()
 		{
-			var url = _txtUrl.Text.Trim();
-			var path = _txtPath.Text.Trim();
-			if(!ValidateUrl(url, _txtUrl))
-			{
-				return false;
-			}
-			if(!ValidateAbsolutePath(path, _txtPath))
-			{
-				return false;
-			}
-			if(_chkAppendRepositoryNameFromUrl.Checked)
-			{
-				path = AppendUrlToPath(path, url);
-			}
-			var remoteName = _txtRemoteName.Text.Trim();
-			if(!ValidateRemoteName(remoteName, _txtRemoteName))
-			{
-				return false;
-			}
-			bool shallow = _chkShallowClone.Checked;
-			int depth = shallow ? (int)_numDepth.Value : -1;
-			string template = _chkUseTemplate.Checked ? _txtTemplate.Text.Trim() : null;
-			if(!string.IsNullOrWhiteSpace(template) && !ValidateAbsolutePath(template, _txtTemplate))
-			{
-				return false;
-			}
-			bool bare = _chkBare.Checked;
-			bool mirror = bare && _chkMirror.Checked;
-			bool noCheckout = _chkNoCheckout.Checked;
-			bool recursive = _chkRecursive.Checked;
-			_acceptedPath = path;
-			var status = GuiCommands.Clone(this,
-				GitRepositoryProvider.GitAccessor,
-				url, path, template, remoteName,
-				shallow, depth, bare, mirror, recursive, noCheckout);
-			return status == GuiCommandStatus.Completed;
+			var result = _controller.TryClone();
+			_acceptedPath = TargetPath;
+			return result;
 		}
+
+		#endregion
 	}
 }

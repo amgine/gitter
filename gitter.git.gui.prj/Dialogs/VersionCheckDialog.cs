@@ -241,7 +241,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void OnConfigureClick(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			using(var dlg = new GitOptionsPage(_environment))
+			using(var dlg = new GitOptionsPage(_gitRepositoryProvider))
 			{
 				if(dlg.Run(this) == DialogResult.OK)
 				{

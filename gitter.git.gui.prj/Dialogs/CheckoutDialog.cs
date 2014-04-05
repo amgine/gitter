@@ -22,21 +22,31 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
 
+	using gitter.Git.Gui.Controllers;
 	using gitter.Git.Gui.Controls;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class CheckoutDialog : GitDialogBase, IExecutableDialog
+	public partial class CheckoutDialog : GitDialogBase, IExecutableDialog, ICheckoutView
 	{
+		#region Data
+
 		private readonly Repository _repository;
+		private readonly IUserInputSource<string> _revisionInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+		private readonly ICheckoutController _controller;
+
+		#endregion
+
+		#region .ctor
 
 		public CheckoutDialog(Repository repository)
 		{
@@ -45,6 +55,12 @@ namespace gitter.Git.Gui.Dialogs
 			_repository = repository;
 
 			InitializeComponent();
+
+			var inputs = new IUserInputSource[]
+			{
+				_revisionInput = new TextBoxInputSource(_txtRevision),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			Text = Resources.StrCheckoutRevision;
 
@@ -57,144 +73,91 @@ namespace gitter.Git.Gui.Dialogs
 
 			GlobalBehavior.SetupAutoCompleteSource(_txtRevision, _repository, ReferenceType.Reference);
 			GitterApplication.FontManager.InputFont.Apply(_txtRevision);
+
+			_controller = new CheckoutController(repository) { View = this };
 		}
+
+		#endregion
+
+		#region Properties
 
 		protected override string ActionVerb
 		{
 			get { return Resources.StrCheckout; }
 		}
 
-		public string Revision
+		public IUserInputSource<string> Revision
 		{
-			get { return _txtRevision.Text; }
-			set { _txtRevision.Text = value; }
+			get { return _revisionInput; }
 		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
+		}
+
+		#endregion
+
+		#region Methods
 
 		private void OnReferencesItemActivated(object sender, ItemEventArgs e)
 		{
-			if(e.Item is BranchListItem)
+			if((e.Item is BranchListItem) || (e.Item is TagListItem))
 			{
 				ClickOk();
 			}
-			else if(e.Item is TagListItem)
+		}
+
+		private bool TrySetRevisionText(BranchListItem listItem)
+		{
+			if(listItem != null)
 			{
-				ClickOk();
+				var branch = listItem.DataContext;
+				_txtRevision.Text = branch.Name;
+				return true;
 			}
+			return false;
+		}
+
+		private bool TrySetRevisionText(RemoteBranchListItem listItem)
+		{
+			if(listItem != null)
+			{
+				var branch = listItem.DataContext;
+				_txtRevision.Text = branch.Name;
+				return true;
+			}
+			return false;
+		}
+
+		private bool TrySetRevisionText(TagListItem listItem)
+		{
+			if(listItem != null)
+			{
+				var tag = listItem.DataContext;
+				_txtRevision.Text = tag.Name;
+				return true;
+			}
+			return false;
 		}
 
 		private void OnSelectionChanged(object sender, EventArgs e)
 		{
 			if(_lstReferences.SelectedItems.Count != 1) return;
 			var item = _lstReferences.SelectedItems[0];
-			if(item is BranchListItem)
-			{
-				var branch = ((BranchListItem)item).DataContext;
-				_txtRevision.Text = branch.Name;
-			}
-			else if(item is RemoteBranchListItem)
-			{
-				var branch = ((RemoteBranchListItem)item).DataContext;
-				_txtRevision.Text = branch.Name;
-			}
-			else if(item is TagListItem)
-			{
-				var tag = ((TagListItem)item).DataContext;
-				_txtRevision.Text = tag.Name;
-			}
+
+			if(TrySetRevisionText(item as BranchListItem)) return;
+			if(TrySetRevisionText(item as RemoteBranchListItem)) return;
+			if(TrySetRevisionText(item as TagListItem)) return;
 		}
 
-		private void ProceedCheckout(IRevisionPointer revision)
-		{
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					revision.Checkout(true);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCheckout, revision.Pointer),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
-		}
+		#endregion
 
 		#region IExecutableDialog
 
 		public bool Execute()
 		{
-			var revision = _txtRevision.Text.Trim();
-			if(string.IsNullOrWhiteSpace(revision)) return true;
-
-			var pointer = _repository.GetRevisionPointer(revision);
-			bool force = Control.ModifierKeys == Keys.Shift;
-
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					pointer.Checkout(force);
-				}
-			}
-			catch(UnknownRevisionException)
-			{
-				NotificationService.NotifyInputError(
-					_txtRevision,
-					Resources.ErrInvalidRevisionExpression,
-					Resources.ErrRevisionIsUnknown);
-				return false;
-			}
-			catch(UntrackedFileWouldBeOverwrittenException)
-			{
-				if(GitterApplication.MessageBoxService.Show(
-					this,
-					string.Format(Resources.AskOverwriteUntracked, revision),
-					Resources.StrCheckout,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.Yes)
-				{
-					ProceedCheckout(pointer);
-				}
-			}
-			catch(HaveLocalChangesException)
-			{
-				if(GitterApplication.MessageBoxService.Show(
-					this,
-					string.Format(Resources.AskThrowAwayLocalChanges, revision),
-					Resources.StrCheckout,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.Yes)
-				{
-					ProceedCheckout(pointer);
-				}
-			}
-			catch(HaveConflictsException)
-			{
-				if(GitterApplication.MessageBoxService.Show(
-					this,
-					string.Format(Resources.AskThrowAwayConflictedChanges, revision),
-					Resources.StrCheckout,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.Yes)
-				{
-					ProceedCheckout(pointer);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCheckout, _txtRevision.Text),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryCheckout();
 		}
 
 		#endregion

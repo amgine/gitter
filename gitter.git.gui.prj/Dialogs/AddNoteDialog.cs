@@ -22,20 +22,33 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
 	using gitter.Framework.Services;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Dialog for creating <see cref="Note"/> object.</summary>
 	[ToolboxItem(false)]
-	public partial class AddNoteDialog : GitDialogBase, IExecutableDialog
+	public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteView
 	{
+		#region Data
+
 		private Repository _repository;
 		private TextBoxSpellChecker _speller;
+		private readonly IUserInputSource<string> _revisionInput;
+		private readonly IUserInputSource<string> _messageInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+		private readonly IAddNoteController _controller;
+
+		#endregion
+
+		#region .ctor
 
 		/// <summary>Create <see cref="AddNoteDialog"/>.</summary>
 		/// <param name="repository">Repository to create note in.</param>
@@ -46,6 +59,13 @@ namespace gitter.Git.Gui.Dialogs
 			_repository = repository;
 
 			InitializeComponent();
+
+			var inputs = new IUserInputSource[]
+			{
+				_revisionInput = new ControlInputSource(_txtRevision),
+				_messageInput  = new TextBoxInputSource(_txtMessage),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			Text = Resources.StrAddNote;
 
@@ -66,7 +86,12 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				_speller = new TextBoxSpellChecker(_txtMessage, true);
 			}
+			_controller = new AddNoteController(repository) { View = this };
 		}
+
+		#endregion
+
+		#region Properties
 
 		protected override string ActionVerb
 		{
@@ -78,73 +103,28 @@ namespace gitter.Git.Gui.Dialogs
 			get { return _repository; }
 		}
 
-		public string Revision
+		public IUserInputSource<string> Revision
 		{
-			get { return _txtRevision.Text; }
-			set { _txtRevision.Text = value; }
+			get { return _revisionInput; }
 		}
 
-		public bool AllowChangeRevision
+		public IUserInputSource<string> Message
 		{
-			get { return _txtRevision.Enabled; }
-			set { _txtRevision.Enabled = value; }
+			get { return _messageInput; }
 		}
 
-		public string Message
+		public IUserInputErrorNotifier ErrorNotifier
 		{
-			get { return _txtMessage.Text; }
-			set { _txtMessage.Text = value; }
+			get { return _errorNotifier; }
 		}
+
+		#endregion
 
 		#region IExecutableDialog Members
 
 		public bool Execute()
 		{
-			var revision = _txtRevision.Text.Trim();
-			var message = _txtMessage.Text.Trim();
-			if(revision.Length == 0)
-			{
-				NotificationService.NotifyInputError(
-					_txtRevision,
-					Resources.ErrInvalidRevisionExpression,
-					Resources.ErrRevisionCannotBeEmpty);
-				return false;
-			}
-			if(message.Length == 0)
-			{
-				NotificationService.NotifyInputError(
-					_txtMessage,
-					Resources.ErrInvalidMessage,
-					Resources.ErrMessageCannotBeEmpty);
-				return false;
-			}
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					var ptr = _repository.GetRevisionPointer(revision);
-					ptr.AddNote(message);
-				}
-			}
-			catch(UnknownRevisionException)
-			{
-				NotificationService.NotifyInputError(
-					_txtRevision,
-					Resources.ErrInvalidRevisionExpression,
-					Resources.ErrRevisionIsUnknown);
-				return false;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToAddNote,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryAddNote();
 		}
 
 		#endregion

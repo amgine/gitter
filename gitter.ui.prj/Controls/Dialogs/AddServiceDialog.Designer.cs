@@ -42,11 +42,20 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this._servicePicker = new gitter.Controls.ServicePicker();
 			this._lblProvider = new System.Windows.Forms.Label();
+			this._servicePicker = new gitter.Controls.ServicePicker();
 			this.SuspendLayout();
 			// 
-			// _issueTracker
+			// _lblProvider
+			// 
+			this._lblProvider.AutoSize = true;
+			this._lblProvider.Location = new System.Drawing.Point(3, 7);
+			this._lblProvider.Name = "_lblProvider";
+			this._lblProvider.Size = new System.Drawing.Size(54, 15);
+			this._lblProvider.TabIndex = 1;
+			this._lblProvider.Text = "Provider:";
+			// 
+			// _servicePicker
 			// 
 			this._servicePicker.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -54,26 +63,17 @@
 			this._servicePicker.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this._servicePicker.FormattingEnabled = true;
 			this._servicePicker.Location = new System.Drawing.Point(100, 3);
-			this._servicePicker.Name = "_issueTracker";
+			this._servicePicker.Name = "_servicePicker";
 			this._servicePicker.SelectedIssueTracker = null;
 			this._servicePicker.Size = new System.Drawing.Size(273, 24);
 			this._servicePicker.TabIndex = 0;
 			// 
-			// _lblProvider
-			// 
-			this._lblProvider.AutoSize = true;
-			this._lblProvider.Location = new System.Drawing.Point(3, 6);
-			this._lblProvider.Name = "_lblProvider";
-			this._lblProvider.Size = new System.Drawing.Size(54, 15);
-			this._lblProvider.TabIndex = 1;
-			this._lblProvider.Text = "Provider:";
-			// 
-			// AddIssueTrackerDialog
+			// AddServiceDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lblProvider);
 			this.Controls.Add(this._servicePicker);
-			this.Name = "AddIssueTrackerDialog";
+			this.Name = "AddServiceDialog";
 			this.Size = new System.Drawing.Size(376, 30);
 			this.ResumeLayout(false);
 			this.PerformLayout();

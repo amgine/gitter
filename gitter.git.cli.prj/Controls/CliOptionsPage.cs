@@ -21,11 +21,8 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.IO;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -289,6 +286,11 @@ namespace gitter.Git
 			if(version != null)
 			{
 				_lblVersion.Text = version.ToString();
+				_versionPath = _gitCLI.GitExecutablePath;
+				if(string.IsNullOrWhiteSpace(_txtmSysGitPath.Text))
+				{
+					_txtmSysGitPath.Text = _versionPath;
+				}
 			}
 			else
 			{

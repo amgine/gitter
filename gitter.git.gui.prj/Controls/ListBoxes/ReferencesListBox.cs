@@ -57,14 +57,23 @@ namespace gitter.Git.Gui.Controls
 		{
 			foreach(var item in Items)
 			{
-				EnableCheckboxes(item);
+				EnableCheckboxes(item, true);
 			}
 			ShowCheckBoxes = true;
 		}
 
-		private static void EnableCheckboxes(CustomListBoxItem item)
+		public void DisableCheckboxes()
 		{
-			if(item is IRevisionPointerListItem)
+			foreach(var item in Items)
+			{
+				EnableCheckboxes(item, false);
+			}
+			ShowCheckBoxes = false;
+		}
+
+		private static void EnableCheckboxes(CustomListBoxItem item, bool state)
+		{
+			if(state && item is IRevisionPointerListItem)
 			{
 				item.CheckedState = CheckedState.Unchecked;
 			}
@@ -74,7 +83,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			foreach(var i in item.Items)
 			{
-				EnableCheckboxes(i);
+				EnableCheckboxes(i, state);
 			}
 		}
 

@@ -22,22 +22,34 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
 	using gitter.Framework.Services;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Dialog for creating <see cref="Tag"/> object.</summary>
 	[ToolboxItem(false)]
-	public partial class CreateTagDialog : GitDialogBase, IExecutableDialog
+	public partial class CreateTagDialog : GitDialogBase, IExecutableDialog, ICreateTagView
 	{
 		#region Data
 
 		private Repository _repository;
 		private TextBoxSpellChecker _speller;
+		private readonly ICreateTagController _controller;
+		private readonly IUserInputSource<string> _tagNameInput;
+		private readonly IUserInputSource<string> _revisionInput;
+		private readonly IUserInputSource<string> _messageInput;
+		private readonly IUserInputSource<bool> _annotatedInput;
+		private readonly IUserInputSource<bool> _signedInput;
+		private readonly IUserInputSource<bool> _useKeyIdInput;
+		private readonly IUserInputSource<string> _keyIdInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
 
 		#endregion
 
@@ -53,8 +65,20 @@ namespace gitter.Git.Gui.Dialogs
 			_repository = repository;
 
 			InitializeComponent();
-
 			Localize();
+
+			var inputs = new IUserInputSource[]
+			{
+				_tagNameInput   = new TextBoxInputSource(_txtName),
+				_revisionInput  = new ControlInputSource(_txtRevision),
+				_messageInput   = new TextBoxInputSource(_txtMessage),
+				_annotatedInput = new RadioButtonInputSource(_radAnnotated),
+				_signedInput    = new RadioButtonInputSource(_radSigned),
+				_useKeyIdInput  = new RadioButtonInputSource(_radUseKeyId),
+				_keyIdInput     = new TextBoxInputSource(_txtKeyId),
+			};
+
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.Tag);
 
@@ -71,7 +95,62 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				_speller = new TextBoxSpellChecker(_txtMessage, true);
 			}
+
+			_controller = new CreateTagController(repository) { View = this };
 		}
+
+		#endregion
+
+		#region Properties
+
+		protected override string ActionVerb
+		{
+			get { return Resources.StrCreate; }
+		}
+
+		public IUserInputSource<string> TagName
+		{
+			get { return _tagNameInput; }
+		}
+
+		public IUserInputSource<string> Revision
+		{
+			get { return _revisionInput; }
+		}
+
+		public IUserInputSource<string> Message
+		{
+			get { return _messageInput; }
+		}
+
+		public IUserInputSource<bool> Signed
+		{
+			get { return _signedInput; }
+		}
+
+		public IUserInputSource<bool> Annotated
+		{
+			get { return _annotatedInput; }
+		}
+
+		public IUserInputSource<bool> UseKeyId
+		{
+			get { return _useKeyIdInput; }
+		}
+
+		public IUserInputSource<string> KeyId
+		{
+			get { return _keyIdInput; }
+		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
+		}
+
+		#endregion
+
+		#region Methods
 
 		private void Localize()
 		{
@@ -91,68 +170,6 @@ namespace gitter.Git.Gui.Dialogs
 			_radUseDefaultEmailKey.Text = Resources.StrUseDefaultEmailKey;
 			_radUseKeyId.Text	= Resources.StrUseKeyId.AddColon();
 		}
-
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCreate; }
-		}
-
-		/// <summary>Tagged revision.</summary>
-		public string Revision
-		{
-			get { return _txtRevision.Text; }
-			set { _txtRevision.Text = value; }
-		}
-
-		/// <summary>Allow user to change starting revision.</summary>
-		public bool AllowChangingRevision
-		{
-			get { return _txtRevision.Enabled; }
-			set { _txtRevision.Enabled = value; }
-		}
-
-		/// <summary>Tag name.</summary>
-		public string TagName
-		{
-			get { return _txtName.Text; }
-			set { _txtName.Text = value; }
-		}
-
-		/// <summary>Allow user to edit <see cref="M:TagName"/>.</summary>
-		public bool AllowChangingTagName
-		{
-			get { return !_txtName.ReadOnly; }
-			set { _txtName.ReadOnly = !value; }
-		}
-
-		/// <summary>Make signed tag.</summary>
-		public bool Signed
-		{
-			get { return _radSigned.Checked; }
-			set { _radSigned.Checked = true; }
-		}
-
-		/// <summary>GPG key id.</summary>
-		public string KeyId
-		{
-			get { return _txtKeyId.Text; }
-			set { _txtKeyId.Text = value; }
-		}
-
-		/// <summary>Allow user to change <see cref="M:KeyId"/>.</summary>
-		public bool AllowChangingKeyId
-		{
-			get { return !_txtKeyId.ReadOnly; }
-			set { _txtKeyId.ReadOnly = !value; }
-		}
-
-		#endregion
-
-		#region Event Handlers
 
 		private void SetControlStates()
 		{
@@ -192,113 +209,7 @@ namespace gitter.Git.Gui.Dialogs
 		/// <returns>true, if <see cref="Tag"/> was created successfully.</returns>
 		public bool Execute()
 		{
-			var name	= _txtName.Text.Trim();
-			var refspec	= _txtRevision.Text.Trim();
-
-			if(!ValidateNewTagName(name, _txtName, _repository))
-			{
-				return false;
-			}
-			if(!ValidateRefspec(refspec, _txtRevision))
-			{
-				return false;
-			}
-
-			string message	= null;
-			bool signed		= _radSigned.Checked;
-			bool annotated	= signed || _radAnnotated.Checked;
-			if(annotated)
-			{
-				message = _txtMessage.Text.Trim();
-				if(message.Length == 0)
-				{
-					NotificationService.NotifyInputError(
-						_txtMessage,
-						Resources.ErrNoMessageSpecified,
-						Resources.ErrMessageCannotBeEmpty);
-					return false;
-				}
-			}
-			string keyId = null;
-			if(signed)
-			{
-				if(_radUseKeyId.Checked)
-				{
-					keyId = _txtKeyId.Text.Trim();
-					if(keyId.Length == 0)
-					{
-						NotificationService.NotifyInputError(
-							_txtKeyId,
-							Resources.ErrNoKeyIdSpecified,
-							Resources.ErrKeyIdCannotBeEmpty);
-						return false;
-					}
-				}
-			}
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					var ptr = _repository.GetRevisionPointer(refspec);
-					if(annotated)
-					{
-						if(signed)
-						{
-							if(keyId == null)
-							{
-								_repository.Refs.Tags.Create(name, ptr, message, true);
-							}
-							else
-							{
-								_repository.Refs.Tags.Create(name, ptr, message, keyId);
-							}
-						}
-						else
-						{
-							_repository.Refs.Tags.Create(name, ptr, message, false);
-						}
-					}
-					else
-					{
-						_repository.Refs.Tags.Create(name, ptr);
-					}
-				}
-			}
-			catch(TagAlreadyExistsException)
-			{
-				NotificationService.NotifyInputError(
-					_txtName,
-					Resources.ErrInvalidTagName,
-					Resources.ErrTagAlreadyExists);
-				return false;
-			}
-			catch(UnknownRevisionException)
-			{
-				NotificationService.NotifyInputError(
-					_txtRevision,
-					Resources.ErrInvalidRevisionExpression,
-					Resources.ErrRevisionIsUnknown);
-				return false;
-			}
-			catch(InvalidTagNameException exc)
-			{
-				NotificationService.NotifyInputError(
-					_txtName,
-					Resources.ErrInvalidTagName,
-					exc.Message);
-				return false;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCreateTag, name),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryCreateTag();
 		}
 
 		#endregion

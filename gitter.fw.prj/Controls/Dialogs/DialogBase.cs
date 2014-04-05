@@ -25,6 +25,8 @@ namespace gitter.Framework
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
 	using gitter.Framework.Options;
 	using gitter.Framework.Services;
 
@@ -92,6 +94,12 @@ namespace gitter.Framework
 		public virtual DialogButtons OptimalButtons
 		{
 			get { return DialogButtons.OkCancel; }
+		}
+
+		public MouseCursor MouseCursor
+		{
+			get { return MouseCursorConverter.Convert(Cursor); }
+			set { Cursor = MouseCursorConverter.Convert(value); }
 		}
 
 		/// <summary>Runs this dialog.</summary>

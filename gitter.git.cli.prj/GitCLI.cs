@@ -74,7 +74,7 @@ namespace gitter.Git.AccessLayer.CLI
 			_autodetectGitExePath	= true;
 			_manualGitExePath		= string.Empty;
 
-			GitProcess.UpdateGitExePath(this);
+			GitProcess.GitExePath = GitExecutablePath;
 
 			GitCliMethod.Create(out _init,                 this,            CommandBuilder.GetInitCommand);
 			GitCliMethod.Create(out _clone,                CommandExecutor, CommandBuilder.GetCloneCommand);
@@ -127,7 +127,7 @@ namespace gitter.Git.AccessLayer.CLI
 					{
 						_gitExePath = ManualGitExePath;
 					}
-					GitProcess.UpdateGitExePath(this);
+					GitProcess.GitExePath = _gitExePath;
 				}
 				return _gitExePath;
 			}
@@ -164,7 +164,7 @@ namespace gitter.Git.AccessLayer.CLI
 				{
 					_autodetectGitExePath = value;
 					_gitExePath = null;
-					GitProcess.UpdateGitExePath(this);
+					GitProcess.GitExePath = null;
 				}
 			}
 		}
@@ -180,7 +180,7 @@ namespace gitter.Git.AccessLayer.CLI
 					if(!AutodetectGitExePath)
 					{
 						_gitExePath = value;
-						GitProcess.UpdateGitExePath(this);
+						GitProcess.GitExePath = _gitExePath;
 					}
 				}
 			}
@@ -313,7 +313,7 @@ namespace gitter.Git.AccessLayer.CLI
 			LogCalls					= section.GetValue("LogCLICalls", false);
 			EnableAnsiCodepageFallback	= section.GetValue("EnableAnsiCodepageFallback", false);
 
-			GitProcess.UpdateGitExePath(this);
+			GitProcess.GitExePath = GitExecutablePath;
 		}
 	}
 }

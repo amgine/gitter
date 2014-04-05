@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,29 +21,35 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
 
 	using gitter.Git.AccessLayer;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Dialog for creating <see cref="Branch"/> object.</summary>
 	[ToolboxItem(false)]
-	public partial class CreateBranchDialog : GitDialogBase, IExecutableDialog
+	public partial class CreateBranchDialog : GitDialogBase, IExecutableDialog, ICreateBranchView
 	{
 		#region Data
 
 		private Repository _repository;
+		private ICreateBranchController _controller;
 		private bool _branchNameEdited;
+		private readonly IUserInputSource<string> _branchNameInput;
+		private readonly IUserInputSource<string> _startingRevisionInput;
+		private readonly IUserInputSource<bool> _checkoutInput;
+		private readonly IUserInputSource<bool> _orphanInput;
+		private readonly IUserInputSource<bool> _createReflogInput;
+		private readonly IUserInputSource<BranchTrackingMode> _trackingModeInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
 
 		#endregion
 
@@ -60,6 +66,24 @@ namespace gitter.Git.Gui.Dialogs
 
 			InitializeComponent();
 			Localize();
+
+			var inputs = new IUserInputSource[]
+			{
+				_branchNameInput       = new TextBoxInputSource(_txtName),
+				_startingRevisionInput = new ControlInputSource(_txtRevision),
+				_checkoutInput         = new CheckBoxInputSource(_chkCheckoutAfterCreation),
+				_orphanInput           = new CheckBoxInputSource(_chkOrphan),
+				_createReflogInput     = new CheckBoxInputSource(_chkCreateReflog),
+				_trackingModeInput     = new RadioButtonGroupInputSource<BranchTrackingMode>(
+					new[]
+					{
+						Tuple.Create(_trackingDefault,    BranchTrackingMode.Default),
+						Tuple.Create(_trackingTrack,      BranchTrackingMode.Tracking),
+						Tuple.Create(_trackingDoNotTrack, BranchTrackingMode.NotTracking),
+					}),
+			};
+
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.LocalBranch);
 
@@ -84,6 +108,52 @@ namespace gitter.Git.Gui.Dialogs
 
 			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtRevision);
 			GlobalBehavior.SetupAutoCompleteSource(_txtRevision, _repository, ReferenceType.Branch);
+
+			_controller = new CreateBranchController(repository) { View = this };
+		}
+
+		#endregion
+
+		#region Properties
+
+		protected override string ActionVerb
+		{
+			get { return Resources.StrCreate; }
+		}
+
+		public IUserInputSource<string> StartingRevision
+		{
+			get { return _startingRevisionInput; }
+		}
+
+		public IUserInputSource<string> BranchName
+		{
+			get { return _branchNameInput; }
+		}
+
+		public IUserInputSource<BranchTrackingMode> TrackingMode
+		{
+			get { return _trackingModeInput; }
+		}
+
+		public IUserInputSource<bool> Checkout
+		{
+			get { return _checkoutInput; }
+		}
+
+		public IUserInputSource<bool> Orphan
+		{
+			get { return _orphanInput; }
+		}
+
+		public IUserInputSource<bool> CreateReflog
+		{
+			get { return _createReflogInput; }
+		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
 		}
 
 		#endregion
@@ -116,92 +186,6 @@ namespace gitter.Git.Gui.Dialogs
 			_trackingTrack.Text = Resources.StrTrack;
 		}
 
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCreate; }
-		}
-
-		/// <summary>Starting revision for new <see cref="Branch"/>.</summary>
-		public string StartingRevision
-		{
-			get { return _txtRevision.Text.Trim(); }
-			set { _txtRevision.Text = value.Trim(); }
-		}
-
-		/// <summary>Allow user to change <see cref="M:StartingRevision"/> property.</summary>
-		public bool AllowChangingStartingRevision
-		{
-			get { return _txtRevision.Enabled; }
-			set { _txtRevision.Enabled = value; }
-		}
-
-		/// <summary>Branch tracking mode.</summary>
-		public BranchTrackingMode TrackingMode
-		{
-			get
-			{
-				if(_trackingTrack.Checked)
-				{
-					return BranchTrackingMode.Tracking;
-				}
-				if(_trackingDoNotTrack.Checked)
-				{
-					return BranchTrackingMode.NotTracking;
-				}
-				return BranchTrackingMode.Default;
-			}
-			set
-			{
-				switch(value)
-				{
-					case BranchTrackingMode.Default:
-						_trackingDefault.Checked = true;
-						break;
-					case BranchTrackingMode.NotTracking:
-						_trackingDoNotTrack.Checked = true;
-						break;
-					case BranchTrackingMode.Tracking:
-						_trackingTrack.Checked = true;
-						break;
-					default:
-						throw new ArgumentException("value");
-				}
-			}
-		}
-
-		/// <summary>Create a new orphan branch.</summary>
-		public bool Orphan
-		{
-			get { return _chkOrphan.Checked; }
-			set { _chkOrphan.Checked = value; }
-		}
-
-		/// <summary>Branch name.</summary>
-		public string BranchName
-		{
-			get { return _txtName.Text; }
-			set
-			{
-				_txtName.Text = value;
-				_branchNameEdited = !string.IsNullOrEmpty(_txtName.Text);
-			}
-		}
-
-		/// <summary>Allow user to change <see cref="M:BranchName"/> property.</summary>
-		public bool AllowChangingBranchName
-		{
-			get { return !_txtName.ReadOnly; }
-			set { _txtName.ReadOnly = !value; }
-		}
-
-		#endregion
-
-		#region Event Handlers
-
 		private void OnBranchNameChanged(object sender, EventArgs e)
 		{
 			_branchNameEdited = !string.IsNullOrEmpty(_txtName.Text);
@@ -215,7 +199,7 @@ namespace gitter.Git.Gui.Dialogs
 				var branch = _repository.Refs.Remotes.TryGetItem(branchName);
 				if(branch != null)
 				{
-					_txtName.Text = branch.Name.Substring(branch.Name.LastIndexOf('/')+1);
+					_txtName.Text = branch.Name.Substring(branch.Name.LastIndexOf('/') + 1);
 					_branchNameEdited = false;
 				}
 			}
@@ -239,149 +223,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public bool Execute()
 		{
-			var branchName	= _txtName.Text.Trim();
-			var refspec		= _txtRevision.Text.Trim();
-			var checkout	= _chkCheckoutAfterCreation.Checked;
-			var orphan		= checkout && _chkOrphan.Checked && GitFeatures.CheckoutOrphan.IsAvailableFor(_repository);
-			var reflog		= _chkCreateReflog.Checked;
-			var existent	= _repository.Refs.Heads.TryGetItem(branchName);
-
-			if(!ValidateBranchName(branchName, _txtName))
-			{
-				return false;
-			}
-			if(!ValidateRefspec(refspec, _txtRevision))
-			{
-				return false;
-			}
-			if(existent != null)
-			{
-				if(GitterApplication.MessageBoxService.Show(
-					this,
-					Resources.StrAskBranchExists.UseAsFormat(branchName),
-					Resources.StrBranch,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Question) == DialogResult.Yes)
-				{
-					var ptr = _repository.GetRevisionPointer(refspec);
-					try
-					{
-						if(existent.IsCurrent)
-						{
-							ResetMode mode;
-							using(var dlg = new SelectResetModeDialog())
-							{
-								if(dlg.Run(this) != DialogResult.OK)
-								{
-									return false;
-								}
-								mode = dlg.ResetMode;
-							}
-							using(this.ChangeCursor(Cursors.WaitCursor))
-							{
-								_repository.Head.Reset(ptr, mode);
-							}
-						}
-						else
-						{
-							using(this.ChangeCursor(Cursors.WaitCursor))
-							{
-								existent.Reset(ptr);
-								if(checkout)
-								{
-									existent.Checkout(true);
-								}
-							}
-						}
-					}
-					catch(UnknownRevisionException)
-					{
-						NotificationService.NotifyInputError(
-							_txtRevision,
-							Resources.ErrInvalidRevisionExpression,
-							Resources.ErrRevisionIsUnknown);
-						return false;
-					}
-					catch(GitException exc)
-					{
-						GitterApplication.MessageBoxService.Show(
-							this,
-							exc.Message,
-							Resources.ErrFailedToReset,
-							MessageBoxButton.Close,
-							MessageBoxIcon.Error);
-						return false;
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			else
-			{
-				var trackingMode = TrackingMode;
-				try
-				{
-					using(this.ChangeCursor(Cursors.WaitCursor))
-					{
-						var ptr = _repository.GetRevisionPointer(refspec);
-						if(orphan)
-						{
-							_repository.Refs.Heads.CreateOrphan(
-								branchName,
-								ptr,
-								trackingMode,
-								reflog);
-						}
-						else
-						{
-							_repository.Refs.Heads.Create(
-								branchName,
-								ptr,
-								trackingMode,
-								checkout,
-								reflog);
-						}
-					}
-				}
-				catch(UnknownRevisionException)
-				{
-					NotificationService.NotifyInputError(
-						_txtRevision,
-						Resources.ErrInvalidRevisionExpression,
-						Resources.ErrRevisionIsUnknown);
-					return false;
-				}
-				catch(BranchAlreadyExistsException)
-				{
-					NotificationService.NotifyInputError(
-						_txtName,
-						Resources.ErrInvalidBranchName,
-						Resources.ErrBranchAlreadyExists);
-					return false;
-				}
-				catch(InvalidBranchNameException exc)
-				{
-					NotificationService.NotifyInputError(
-						_txtName,
-						Resources.ErrInvalidBranchName,
-						exc.Message);
-					return false;
-				}
-				catch(GitException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						this,
-						exc.Message,
-						string.Format(Resources.ErrFailedToCreateBranch, branchName),
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-					return false;
-				}
-				return true;
-			}
+			return _controller.TryCreateBranch();
 		}
 
 		#endregion

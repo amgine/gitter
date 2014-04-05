@@ -50,6 +50,7 @@
 			this._txtServiceUri.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtServiceUri.Location = new System.Drawing.Point(100, 3);
+			this._txtServiceUri.MinimumSize = new System.Drawing.Size(0, 23);
 			this._txtServiceUri.Name = "_txtServiceUri";
 			this._txtServiceUri.Size = new System.Drawing.Size(297, 23);
 			this._txtServiceUri.TabIndex = 0;
@@ -87,6 +88,7 @@
 			this._txtApiKey.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtApiKey.Location = new System.Drawing.Point(100, 29);
+			this._txtApiKey.MinimumSize = new System.Drawing.Size(0, 23);
 			this._txtApiKey.Name = "_txtApiKey";
 			this._txtApiKey.Size = new System.Drawing.Size(297, 23);
 			this._txtApiKey.TabIndex = 1;

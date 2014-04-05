@@ -88,6 +88,19 @@
     <Compile Include="..\shared\Verify.cs">
       <Link>Shared\Verify.cs</Link>
     </Compile>
+    <Compile Include="Controllers\MergeController.cs" />
+    <Compile Include="Controllers\AddNoteController.cs" />
+    <Compile Include="Controllers\AddRemoteController.cs" />
+    <Compile Include="Controllers\AddSubmoduleController.cs" />
+    <Compile Include="Controllers\CheckoutController.cs" />
+    <Compile Include="Controllers\CloneController.cs" />
+    <Compile Include="Controllers\CommitController.cs" />
+    <Compile Include="Controllers\CreateBranchController.cs" />
+    <Compile Include="Controllers\CreateTagController.cs" />
+    <Compile Include="Controllers\GitControllerUtility.cs" />
+    <Compile Include="Controllers\InitController.cs" />
+    <Compile Include="Controllers\StashToBranchController.cs" />
+    <Compile Include="Controllers\RenameBranchController.cs" />
     <Compile Include="Controls\BlameViewer\BlameFileBinding.cs" />
     <Compile Include="Controls\ContentContextMenuEventArgs.cs" />
     <Compile Include="Controls\ContentInvalidatedEventArgs.cs" />
@@ -108,6 +121,30 @@
     <Compile Include="Controls\RevisionHeaderContent.cs" />
     <Compile Include="GuiCommands.cs" />
     <Compile Include="GuiCommandStatus.cs" />
+    <Compile Include="Interfaces\IMergeController.cs" />
+    <Compile Include="Interfaces\IMergeView.cs" />
+    <Compile Include="Interfaces\IRenameBranchController.cs" />
+    <Compile Include="Interfaces\IRenameBranchView.cs" />
+    <Compile Include="Interfaces\IAddSubmoduleController.cs" />
+    <Compile Include="Interfaces\IAddSubmoduleView.cs" />
+    <Compile Include="Interfaces\IInitController.cs" />
+    <Compile Include="Interfaces\ICloneController.cs" />
+    <Compile Include="Interfaces\IInitView.cs" />
+    <Compile Include="Interfaces\ICloneView.cs" />
+    <Compile Include="Interfaces\IAddNoteView.cs" />
+    <Compile Include="Interfaces\IAddNoteController.cs" />
+    <Compile Include="Interfaces\ICheckoutController.cs" />
+    <Compile Include="Interfaces\IAddRemoteController.cs" />
+    <Compile Include="Interfaces\ICheckoutView.cs" />
+    <Compile Include="Interfaces\ICommitController.cs" />
+    <Compile Include="Interfaces\IAddRemoteView.cs" />
+    <Compile Include="Interfaces\ICreateTagController.cs" />
+    <Compile Include="Interfaces\ICreateBranchController.cs" />
+    <Compile Include="Interfaces\ICommitView.cs" />
+    <Compile Include="Interfaces\ICreateTagView.cs" />
+    <Compile Include="Interfaces\ICreateBranchView.cs" />
+    <Compile Include="Interfaces\IStashToBranchController.cs" />
+    <Compile Include="Interfaces\IStashToBranchView.cs" />
     <Compile Include="Notifications.cs" />
     <Compile Include="Notifications\ReferencesChangedNotification.cs">
       <SubType>Component</SubType>
@@ -1337,6 +1374,7 @@
   <ItemGroup>
     <Content Include="Resources\folder-zipper.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
