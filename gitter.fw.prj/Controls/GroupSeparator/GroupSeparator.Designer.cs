@@ -37,7 +37,6 @@
 			// _line
 			// 
 			this._line.BackColor = System.Drawing.SystemColors.ControlDark;
-			this._line.Location = new System.Drawing.Point(65, 9);
 			this._line.Name = "_line";
 			this._line.Size = new System.Drawing.Size(340, 1);
 			this._line.TabIndex = 1;
@@ -76,8 +75,8 @@
 			this.Controls.Add(this._picChevron);
 			this.Controls.Add(this._lblText);
 			this.Controls.Add(this._line);
-			this.MaximumSize = new System.Drawing.Size(9999, 19);
-			this.MinimumSize = new System.Drawing.Size(0, 19);
+			this.MaximumSize = new System.Drawing.Size(9999, System.Windows.Forms.SystemInformation.SmallIconSize.Height + 3);
+			this.MinimumSize = new System.Drawing.Size(0, System.Windows.Forms.SystemInformation.SmallIconSize.Height + 3);
 			this.Name = "GroupSeparator";
 			this.Size = new System.Drawing.Size(407, 19);
 			this.Click += new System.EventHandler(this.OnClick);

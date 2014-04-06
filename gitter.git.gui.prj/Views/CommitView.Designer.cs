@@ -42,6 +42,8 @@
 			this._lstStaged = new gitter.Git.Gui.Controls.TreeListBox();
 			this._lblMessage = new System.Windows.Forms.Label();
 			this._txtMessage = new System.Windows.Forms.TextBox();
+			this._chkAmend = gitter.Framework.GitterApplication.Style.CreateCheckBox();
+			this._btnCommit = gitter.Framework.GitterApplication.Style.CreateButton();
 			((System.ComponentModel.ISupportInitialize)(this._splitContainer)).BeginInit();
 			this._splitContainer.Panel1.SuspendLayout();
 			this._splitContainer.Panel2.SuspendLayout();
@@ -166,6 +168,23 @@
 			this._txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this._txtMessage.Size = new System.Drawing.Size(468, 98);
 			this._txtMessage.TabIndex = 10;
+			//
+			// _chkAmend
+			//
+			this._chkAmend.Control.Bounds = new System.Drawing.Rectangle(477, 67, 71, 20);
+			this._chkAmend.Control.Anchor = System.Windows.Forms.AnchorStyles.Right | System.Windows.Forms.AnchorStyles.Bottom;
+			this._chkAmend.Control.Parent = _splitContainer.Panel2;
+			this._chkAmend.Control.Enabled = false;
+			this._chkAmend.Control.TabIndex = 12;
+			this._chkAmend.IsCheckedChanged += OnAmendCheckedChanged;
+			//
+			// _btnCommit
+			//
+			this._btnCommit.Control.Bounds = new System.Drawing.Rectangle(477, 93, 75, 23);
+			this._btnCommit.Control.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+			this._btnCommit.Control.Parent = _splitContainer.Panel2;
+			this._btnCommit.Control.TabIndex = 11;
+			this._btnCommit.Click += OnCommitClick;
 			// 
 			// CommitView
 			// 
@@ -193,5 +212,7 @@
 		private Controls.TreeListBox _lstUnstaged;
 		private Controls.TreeListBox _lstStaged;
 		private System.Windows.Forms.Label _lblMessage;
+		private gitter.Framework.Controls.ICheckBoxWidget _chkAmend;
+		private gitter.Framework.Controls.IButtonWidget _btnCommit;
 	}
 }

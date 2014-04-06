@@ -160,7 +160,7 @@ namespace gitter.Framework.Controls
 			var x = _lblText.Right + 4;
 			var w = Width - x;
 			if(_showChevron) w -= 19+5;
-			_line.SetBounds(x, 10, w, 1);
+			_line.SetBounds(x, (Height + 1) / 2, w, 1);
 		}
 
 		private void UpdateChevron()

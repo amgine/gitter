@@ -292,15 +292,15 @@ namespace gitter.Framework.Controls
 
 		private static class Constants
 		{
-			public const int TabHeight			= 19;
+			public static readonly int TabHeight        = SystemInformation.SmallIconSize.Height + 3;
+			public static readonly int HeaderHeight     = SystemInformation.SmallIconSize.Height + 5;
+			public static readonly int ViewButtonSize   = SystemInformation.SmallIconSize.Height - 1;
+			public static readonly int FloatTitleHeight = SystemInformation.SmallIconSize.Height;
 			public const int TabFooterHeight	= 2;
-			public const int HeaderHeight		= 21;
 			public const int FooterHeight		= 0;
-			public const int ViewButtonSize		= 15;
 			public const int SideTabSpacing		= 12;
 			public const int SideTabHeight		= 25;
 			public const int SideTabOutline		= 6;
-			public const int FloatTitleHeight	= 16;
 			public const int FloatBorderSize	= 1;
 			public const int FloatCornerRadius	= 0;
 		}

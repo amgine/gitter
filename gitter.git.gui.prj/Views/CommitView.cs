@@ -40,8 +40,6 @@ namespace gitter.Git.Gui.Views
 	partial class CommitView : GitViewBase
 	{
 		private readonly CommitToolbar _toolbar;
-		private ICheckBoxWidget _chkAmend;
-		private IButtonWidget _btnCommit;
 		private TextBoxSpellChecker _speller;
 		private bool _treeMode;
 		private bool _suppressDiffUpdate;
@@ -58,21 +56,6 @@ namespace gitter.Git.Gui.Views
 			_splitContainer.BackColor = GitterApplication.Style.Colors.WorkArea;
 			_splitContainer.Panel1.BackColor = GitterApplication.Style.Colors.Window;
 			_splitContainer.Panel2.BackColor = GitterApplication.Style.Colors.Window;
-
-			_chkAmend = GitterApplication.Style.CreateCheckBox();
-			_chkAmend.Control.Bounds = new Rectangle(477, 67, 71, 20);
-			_chkAmend.Control.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
-			_chkAmend.Control.Parent = _splitContainer.Panel2;
-			_chkAmend.Control.Enabled = false;
-			_chkAmend.Control.TabIndex = 12;
-			_chkAmend.IsCheckedChanged += OnAmendCheckedChanged;
-
-			_btnCommit = GitterApplication.Style.CreateButton();
-			_btnCommit.Control.Bounds = new Rectangle(477, 93, 75, 23);
-			_btnCommit.Control.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-			_btnCommit.Control.Parent = _splitContainer.Panel2;
-			_btnCommit.Control.TabIndex = 11;
-			_btnCommit.Click += OnCommitClick;
 
 			_lblStaged.Text = Resources.StrsStagedChanges.AddColon();
 			_lstStaged.Text = Resources.StrsNoStagedChanges;

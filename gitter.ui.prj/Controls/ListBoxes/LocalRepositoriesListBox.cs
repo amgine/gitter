@@ -40,7 +40,7 @@ namespace gitter
 			});
 
 			HeaderStyle = HeaderStyle.Hidden;
-			ItemHeight = 36;
+			ItemHeight = SystemInformation.IconSize.Height + 4;
 			AllowDrop = true;
 			_dragHelper = new DragHelper();
 		}

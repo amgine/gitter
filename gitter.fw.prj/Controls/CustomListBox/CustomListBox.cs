@@ -40,7 +40,7 @@ namespace gitter.Framework.Controls
 	{
 		#region Constants
 
-		protected const int DEFAULT_ITEM_HEIGHT = 21;
+		protected static readonly int DEFAULT_ITEM_HEIGHT = SystemInformation.SmallIconSize.Height + 5;
 
 		#endregion
 
