@@ -73,6 +73,7 @@
 			// 
 			// StashToBranchDialog
 			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lblBranchName);
 			this.Controls.Add(this._txtBranchName);
 			this.Controls.Add(this._lblStash);

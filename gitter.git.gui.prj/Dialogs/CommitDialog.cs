@@ -89,6 +89,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 
 			_txtMessage.Text = repository.Status.LoadCommitMessage();
+			_txtMessage.Height = _chkAmend.Top - _txtMessage.Top - 2;
 
 			_controller = new CommitController(repository) { View = this };
 		}

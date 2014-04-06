@@ -199,8 +199,7 @@
 			// 
 			// CliOptionsPage
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lblLatestVersionValue);
 			this.Controls.Add(this._lblLatestVersion);
 			this.Controls.Add(this._lblPathToGitExe);
@@ -218,7 +217,6 @@
 			this.Name = "CliOptionsPage";
 			this.Size = new System.Drawing.Size(479, 158);
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
 		}
 

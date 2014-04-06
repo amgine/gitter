@@ -217,6 +217,7 @@ namespace gitter.Framework.Controls
 			graphics.SetClip(e.ClipRectangle);
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			graphics.TextRenderingHint = Utility.TextRenderingHint;
+			var k = (graphics.DpiY / 96f);
 			if(Focused)
 			{
 				if(_pressed)
@@ -247,10 +248,14 @@ namespace gitter.Framework.Controls
 				var loc = new Point(5, 15);
 				if(_hovered && _pressed) loc.Offset(1, 1);
 				if(_image == null)
+				{
 					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
+				}
 				else
+				{
 					graphics.DrawImage(_image, loc);
-				var r = new Rectangle(25, 8, Width - 30, 21);
+				}
+				var r = new Rectangle(25, 8, Width - 30, (int)(21 * k));
 				if(_hovered && _pressed) r.Offset(1, 1);
 				if(!string.IsNullOrEmpty(Text))
 				{
@@ -266,9 +271,13 @@ namespace gitter.Framework.Controls
 				var loc = new Point(5, (Height - 16) / 2);
 				if(_hovered && _pressed) loc.Offset(1, 1);
 				if(_image == null)
+				{
 					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
+				}
 				else
+				{
 					graphics.DrawImage(_image, loc);
+				}
 				var r = new Rectangle(25, 0, Width - 30, Height);
 				if(_hovered && _pressed) r.Offset(1, 1);
 				if(!string.IsNullOrEmpty(Text))

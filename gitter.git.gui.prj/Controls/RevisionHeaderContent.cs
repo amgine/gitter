@@ -38,9 +38,9 @@ namespace gitter.Git.Gui
 	{
 		#region Constants
 
-		private const int DefaultElementHeight = 16;
-		private const int HeaderWidth = 70;
-		private const int MinWidth = HeaderWidth + 295;
+		private static readonly int DefaultElementHeight = SystemInformation.SmallIconSize.Height;
+		private static readonly int HeaderWidth          = (int)((SystemInformation.SmallIconSize.Width / 16.0) * 70);
+		private static readonly int MinWidth             = HeaderWidth + (int)((SystemInformation.SmallIconSize.Width / 16.0) * 295);
 
 		#endregion
 

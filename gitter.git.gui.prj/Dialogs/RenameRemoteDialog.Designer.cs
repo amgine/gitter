@@ -73,6 +73,7 @@
 			// 
 			// RenameRemoteDialog
 			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lblNewName);
 			this.Controls.Add(this._lblOldName);
 			this.Controls.Add(this._txtNewName);

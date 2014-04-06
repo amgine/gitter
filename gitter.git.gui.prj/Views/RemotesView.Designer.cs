@@ -42,14 +42,14 @@
 			this._lstRemotes.TabIndex = 1;
 			this._lstRemotes.Text = "No Remotes";
 			// 
-			// RemotesTool
+			// RemotesView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstRemotes);
-			this.Margin = new System.Windows.Forms.Padding(48, 22, 48, 22);
-			this.Name = "RemotesTool";
+			this.Name = "RemotesView";
 			this.Size = new System.Drawing.Size(555, 160);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

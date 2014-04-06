@@ -47,12 +47,13 @@
 			this._diffViewer.TabIndex = 0;
 			this._diffViewer.Text = "diffViewer1";
 			// 
-			// DiffTool
+			// DiffView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._diffViewer);
-			this.Name = "DiffTool";
+			this.Name = "DiffView";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

@@ -190,7 +190,6 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._splitContainer);
-			this.Margin = new System.Windows.Forms.Padding(48, 22, 48, 22);
 			this.Name = "CommitView";
 			this._splitContainer.Panel1.ResumeLayout(false);
 			this._splitContainer.Panel2.ResumeLayout(false);
@@ -199,6 +198,7 @@
 			this._splitContainer.ResumeLayout(false);
 			this._tableChanges.ResumeLayout(false);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

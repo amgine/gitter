@@ -140,8 +140,7 @@
 			// 
 			// AppearancePage
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._pnlRestartRequiredWarning);
 			this.Controls.Add(this._pnlThemesContainer);
 			this.Controls.Add(this.groupSeparator2);
@@ -155,6 +154,7 @@
 			this._pnlRestartRequiredWarning.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

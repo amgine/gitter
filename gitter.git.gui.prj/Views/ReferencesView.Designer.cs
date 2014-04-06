@@ -42,11 +42,13 @@
 			this._lstReferences.TabIndex = 1;
 			this._lstReferences.Text = "referencesListBox1";
 			// 
-			// ReferencesTool
+			// ReferencesView
 			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstReferences);
-			this.Name = "ReferencesTool";
+			this.Name = "ReferencesView";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

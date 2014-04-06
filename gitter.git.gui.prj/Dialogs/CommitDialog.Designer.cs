@@ -57,6 +57,9 @@
 			// 
 			this._txtMessage.AcceptsReturn = true;
 			this._txtMessage.AcceptsTab = true;
+			this._txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtMessage.Location = new System.Drawing.Point(231, 18);
 			this._txtMessage.Multiline = true;
 			this._txtMessage.Name = "_txtMessage";
@@ -84,6 +87,7 @@
 			// 
 			// _chkAmend
 			// 
+			this._chkAmend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this._chkAmend.AutoSize = true;
 			this._chkAmend.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this._chkAmend.Location = new System.Drawing.Point(231, 336);

@@ -41,14 +41,14 @@
 			this._lstStash.TabIndex = 1;
 			this._lstStash.Text = "Nothing stashed";
 			// 
-			// StashTool
+			// StashView
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstStash);
-			this.Name = "StashTool";
+			this.Name = "StashView";
 			this.Size = new System.Drawing.Size(555, 160);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

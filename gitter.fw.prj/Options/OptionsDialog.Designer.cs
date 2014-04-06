@@ -69,11 +69,13 @@
 			// 
 			// OptionsDialog
 			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._pnlPageContainer);
 			this.Controls.Add(this._lstOptions);
 			this.Name = "OptionsDialog";
 			this.Size = new System.Drawing.Size(619, 381);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

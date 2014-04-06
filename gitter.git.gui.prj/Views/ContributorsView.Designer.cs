@@ -42,13 +42,13 @@
 			this._lstUsers.TabIndex = 1;
 			this._lstUsers.Text = "No Users";
 			// 
-			// UsersTool
+			// ContributorsView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstUsers);
-			this.Margin = new System.Windows.Forms.Padding(48, 22, 48, 22);
-			this.Name = "UsersTool";
+			this.Name = "ContributorsView";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

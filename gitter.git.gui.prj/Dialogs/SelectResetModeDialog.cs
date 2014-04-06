@@ -78,6 +78,7 @@ namespace gitter.Git.Gui.Dialogs
 
 			const int margin = 16;
 
+			SuspendLayout();
 			var location = new Point(margin, margin);
 			var h = margin;
 			foreach(var button in _buttons)
@@ -89,6 +90,9 @@ namespace gitter.Git.Gui.Dialogs
 			}
 
 			Height = h;
+			AutoScaleDimensions = new SizeF(96F, 96F);
+			ResumeLayout(false);
+			PerformLayout();
 		}
 
 		public SelectResetModeDialog()

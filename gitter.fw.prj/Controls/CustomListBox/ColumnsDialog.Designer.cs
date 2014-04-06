@@ -111,7 +111,6 @@
 			// 
 			// ColumnsDialog
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lblVisibleColumns);
 			this.Controls.Add(this._lstColumns);
 			this.Controls.Add(this._btnHide);

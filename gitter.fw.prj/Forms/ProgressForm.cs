@@ -21,10 +21,7 @@
 namespace gitter.Framework
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
@@ -72,6 +69,8 @@ namespace gitter.Framework
 		public ProgressForm()
 		{
 			InitializeComponent();
+
+			ClientSize = new Size(ClientSize.Width, _pnlContainer.Height + panel1.Height);
 
 			_btnCancel.Text = Resources.StrCancel;
 

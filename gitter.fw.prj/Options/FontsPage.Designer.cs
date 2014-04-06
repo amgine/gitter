@@ -57,6 +57,7 @@
 			this._lstFonts.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this._lstFonts.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstFonts.ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick;
 			this._lstFonts.Location = new System.Drawing.Point(0, 18);
 			this._lstFonts.Name = "_lstFonts";
@@ -144,8 +145,7 @@
 			// 
 			// _pnlSelectedFont
 			// 
-			this._pnlSelectedFont.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+			this._pnlSelectedFont.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._pnlSelectedFont.Controls.Add(this._lblName);
 			this._pnlSelectedFont.Controls.Add(this._numSize);

@@ -84,17 +84,17 @@
 			this._directoryTree.TabIndex = 2;
 			this._directoryTree.Text = "Tree is empty";
 			// 
-			// TreeTool
+			// TreeView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._splitContainer);
-			this.Margin = new System.Windows.Forms.Padding(48, 22, 48, 22);
-			this.Name = "TreeTool";
+			this.Name = "TreeView";
 			this._splitContainer.Panel1.ResumeLayout(false);
 			this._splitContainer.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this._splitContainer)).EndInit();
 			this._splitContainer.ResumeLayout(false);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

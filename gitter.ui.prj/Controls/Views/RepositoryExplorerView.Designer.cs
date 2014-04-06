@@ -45,7 +45,6 @@
 			// 
 			// ToolboxTool
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstRepositoryExplorer);
 			this.Name = "ToolboxTool";
 			this.Size = new System.Drawing.Size(153, 449);

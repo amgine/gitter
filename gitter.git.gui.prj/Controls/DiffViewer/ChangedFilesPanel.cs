@@ -81,8 +81,8 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
-		private const int LineHeight = 20;
-		private const int HeaderHeight = 20;
+		private static readonly int LineHeight   = SystemInformation.SmallIconSize.Height + 4;
+		private static readonly int HeaderHeight = SystemInformation.SmallIconSize.Height + 4;
 		private const int HeaderBottomMargin = 3;
 		private const int HeaderContentPadding = 3;
 		private const int HeaderSpacing = 7;

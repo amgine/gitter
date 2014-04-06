@@ -55,12 +55,13 @@
 			this._lstReflog.TabIndex = 0;
 			this._lstReflog.Text = "Reflog is empty";
 			// 
-			// ReflogTool
+			// ReflogView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstReflog);
-			this.Name = "ReflogTool";
+			this.Name = "ReflogView";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

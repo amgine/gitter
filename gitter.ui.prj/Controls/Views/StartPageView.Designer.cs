@@ -44,10 +44,10 @@
 			this._btnScanLocalRepo = new gitter.Controls.LinkButton();
 			this._btnInitLocalRepo = new gitter.Controls.LinkButton();
 			this._btnCloneRemoteRepo = new gitter.Controls.LinkButton();
-			this._picLogo = new System.Windows.Forms.PictureBox();
-			this._picLogo2 = new System.Windows.Forms.PictureBox();
 			label1 = new System.Windows.Forms.Label();
 			label2 = new System.Windows.Forms.Label();
+			_picLogo = new System.Windows.Forms.PictureBox();
+			_picLogo2 = new System.Windows.Forms.PictureBox();
 			((System.ComponentModel.ISupportInitialize)(_picLogo)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(_picLogo2)).BeginInit();
 			this.SuspendLayout();
@@ -72,30 +72,7 @@
 			label2.TabIndex = 2;
 			label2.Text = "Recent repositories";
 			// 
-			// _picLogo
-			// 
-			_picLogo.Location = new System.Drawing.Point(0, 0);
-			_picLogo.Margin = new System.Windows.Forms.Padding(0);
-			_picLogo.Name = "_picLogo";
-			_picLogo.Size = new System.Drawing.Size(527, 90);
-			_picLogo.TabIndex = 6;
-			_picLogo.TabStop = false;
-			_picLogo.Click += new System.EventHandler(this.OnLogoClick);
-			// 
-			// _picLogo2
-			// 
-			_picLogo2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			_picLogo2.Location = new System.Drawing.Point(527, 0);
-			_picLogo2.Margin = new System.Windows.Forms.Padding(0);
-			_picLogo2.Name = "_picLogo2";
-			_picLogo2.Size = new System.Drawing.Size(164, 90);
-			_picLogo2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			_picLogo2.TabIndex = 7;
-			_picLogo2.TabStop = false;
-			_picLogo2.Click += new System.EventHandler(this.OnLogoClick);
-			// 
-			// panel1
+			// _separator1
 			// 
 			this._separator1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
@@ -104,7 +81,7 @@
 			this._separator1.Size = new System.Drawing.Size(1, 418);
 			this._separator1.TabIndex = 9;
 			// 
-			// panel2
+			// _separator2
 			// 
 			this._separator2.Location = new System.Drawing.Point(147, 234);
 			this._separator2.Name = "_separator2";
@@ -116,6 +93,7 @@
 			this._lstRecentRepositories.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
 			this._lstRecentRepositories.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this._lstRecentRepositories.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstRecentRepositories.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstRecentRepositories.Location = new System.Drawing.Point(3, 247);
 			this._lstRecentRepositories.MaximumSize = new System.Drawing.Size(500, 9000);
@@ -130,6 +108,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._lstLocalRepositories.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this._lstLocalRepositories.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstLocalRepositories.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstLocalRepositories.Location = new System.Drawing.Point(234, 119);
 			this._lstLocalRepositories.MaximumSize = new System.Drawing.Size(500, 9000);
@@ -187,10 +166,33 @@
 			this._btnCloneRemoteRepo.Text = "Clone Remote Repository...";
 			this._btnCloneRemoteRepo.LinkClicked += new System.EventHandler(this._btnCloneRemoteRepo_LinkClicked);
 			// 
+			// _picLogo
+			// 
+			_picLogo.Location = new System.Drawing.Point(0, 0);
+			_picLogo.Margin = new System.Windows.Forms.Padding(0);
+			_picLogo.Name = "_picLogo";
+			_picLogo.Size = new System.Drawing.Size(527, 90);
+			_picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			_picLogo.TabIndex = 6;
+			_picLogo.TabStop = false;
+			_picLogo.Click += new System.EventHandler(this.OnLogoClick);
+			// 
+			// _picLogo2
+			// 
+			_picLogo2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			_picLogo2.Location = new System.Drawing.Point(527, 0);
+			_picLogo2.Margin = new System.Windows.Forms.Padding(0);
+			_picLogo2.Name = "_picLogo2";
+			_picLogo2.Size = new System.Drawing.Size(164, 90);
+			_picLogo2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			_picLogo2.TabIndex = 7;
+			_picLogo2.TabStop = false;
+			_picLogo2.Click += new System.EventHandler(this.OnLogoClick);
+			// 
 			// StartPageView
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._separator2);
 			this.Controls.Add(_picLogo);
 			this.Controls.Add(this._lstRecentRepositories);
@@ -208,7 +210,6 @@
 			((System.ComponentModel.ISupportInitialize)(_picLogo)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(_picLogo2)).EndInit();
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
 		}
 
@@ -220,9 +221,10 @@
 		private Controls.LinkButton _btnScanLocalRepo;
 		private Controls.LinkButton _btnInitLocalRepo;
 		private Controls.LinkButton _btnCloneRemoteRepo;
-		private System.Windows.Forms.PictureBox _picLogo;
-		private System.Windows.Forms.PictureBox _picLogo2;
 		private System.Windows.Forms.Panel _separator1;
 		private System.Windows.Forms.Panel _separator2;
+		private System.Windows.Forms.PictureBox _picLogo;
+		private System.Windows.Forms.PictureBox _picLogo2;
+
 	}
 }

@@ -32,9 +32,10 @@
 			// 
 			// GitView
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Name = "GitView";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

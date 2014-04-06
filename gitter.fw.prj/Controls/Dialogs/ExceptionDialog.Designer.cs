@@ -107,7 +107,6 @@
 			// 
 			// ExceptionDialog
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lnkSendBugReport);
 			this.Controls.Add(this._lnkCopyToClipboard);
 			this.Controls.Add(this._lblSTack);

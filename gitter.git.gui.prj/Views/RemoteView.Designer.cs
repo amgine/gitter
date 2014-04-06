@@ -54,6 +54,7 @@
 			this.Controls.Add(this._lstRemoteReferences);
 			this.Name = "RemoteView";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

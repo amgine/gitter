@@ -282,6 +282,8 @@ namespace gitter.Git.Gui.Dialogs
 			_references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,
 				reference => _unmergedBranches.Contains(reference as BranchBase));
 
+			_txtMessage.Height = _pnlOptions.Top - _txtMessage.Top - 6;
+
 			_controller = new MergeController(repository) { View = this };
 		}
 

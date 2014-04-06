@@ -46,12 +46,13 @@
 			this._blamePanel.Size = new System.Drawing.Size(555, 362);
 			this._blamePanel.TabIndex = 0;
 			// 
-			// BlameTool
+			// BlameView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._blamePanel);
 			this.Name = "BlameView";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

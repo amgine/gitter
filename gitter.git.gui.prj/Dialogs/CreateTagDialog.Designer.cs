@@ -224,7 +224,6 @@
 			// 
 			this._txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this._txtName.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this._txtName.Location = new System.Drawing.Point(94, 3);
 			this._txtName.Name = "_txtName";
 			this._txtName.Size = new System.Drawing.Size(303, 23);
@@ -243,7 +242,6 @@
 			// 
 			this._txtRevision.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this._txtRevision.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this._txtRevision.FormattingEnabled = true;
 			this._txtRevision.Location = new System.Drawing.Point(94, 29);
 			this._txtRevision.Name = "_txtRevision";
@@ -252,8 +250,7 @@
 			// 
 			// CreateTagDialog
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this.panel2);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this._txtRevision);

@@ -61,7 +61,7 @@
 			this._logoPictureBox.Location = new System.Drawing.Point(0, 0);
 			this._logoPictureBox.Name = "_logoPictureBox";
 			this._logoPictureBox.Size = new System.Drawing.Size(500, 90);
-			this._logoPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+			this._logoPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 			this._logoPictureBox.TabIndex = 13;
 			this._logoPictureBox.TabStop = false;
 			// 
@@ -174,8 +174,7 @@
 			// 
 			// AboutDialog
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._pnlUpdates);
 			this.Controls.Add(this.linkLabel1);
 			this.Controls.Add(this.labelVersion);

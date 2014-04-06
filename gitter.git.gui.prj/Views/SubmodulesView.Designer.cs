@@ -42,14 +42,14 @@
 			this._lstSubmodules.TabIndex = 1;
 			this._lstSubmodules.Text = "No Submodules";
 			// 
-			// SubmodulesTool
+			// SubmodulesView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstSubmodules);
-			this.Margin = new System.Windows.Forms.Padding(48, 22, 48, 22);
-			this.Name = "SubmodulesTool";
+			this.Name = "SubmodulesView";
 			this.Size = new System.Drawing.Size(555, 160);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 

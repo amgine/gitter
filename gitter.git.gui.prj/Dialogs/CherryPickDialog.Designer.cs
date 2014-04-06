@@ -126,8 +126,7 @@
 			// 
 			// CherryPickDialog
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._txtRevision);
 			this.Controls.Add(this._lblRevision);
 			this.Controls.Add(this._pnlMainlineParentCommit);

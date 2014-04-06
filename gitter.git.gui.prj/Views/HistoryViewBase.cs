@@ -96,8 +96,10 @@ namespace gitter.Git.Gui.Views
 			};
 			_lstRevisions.SelectionChanged += OnSelectionChanged;
 			_lstRevisions.ItemActivated += OnItemActivated;
+			AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			Controls.Add(_lstRevisions);
 			ResumeLayout(false);
+			PerformLayout();
 			_showDetails = true;
 			_search = new HistorySearch<HistorySearchOptions>(_lstRevisions);
 			_options = new LogOptions();

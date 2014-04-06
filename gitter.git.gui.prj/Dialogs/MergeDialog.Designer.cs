@@ -107,9 +107,9 @@
 			// _lnkAutoFormat
 			// 
 			this._lnkAutoFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this._lnkAutoFormat.Location = new System.Drawing.Point(533, 0);
+			this._lnkAutoFormat.Location = new System.Drawing.Point(484, 0);
 			this._lnkAutoFormat.Name = "_lnkAutoFormat";
-			this._lnkAutoFormat.Size = new System.Drawing.Size(106, 15);
+			this._lnkAutoFormat.Size = new System.Drawing.Size(155, 15);
 			this._lnkAutoFormat.TabIndex = 3;
 			this._lnkAutoFormat.TabStop = true;
 			this._lnkAutoFormat.Text = "%Auto%";
@@ -129,8 +129,7 @@
 			// 
 			this._txtMessage.AcceptsReturn = true;
 			this._txtMessage.AcceptsTab = true;
-			this._txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+			this._txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtMessage.Location = new System.Drawing.Point(231, 18);
 			this._txtMessage.Multiline = true;
@@ -166,11 +165,11 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._pnlOptions);
-			this.Controls.Add(this._lnkAutoFormat);
 			this.Controls.Add(this._lblMessage);
 			this.Controls.Add(this._txtMessage);
 			this.Controls.Add(this._lblMergeWith);
 			this.Controls.Add(this._references);
+			this.Controls.Add(this._lnkAutoFormat);
 			this.Name = "MergeDialog";
 			this.Size = new System.Drawing.Size(642, 359);
 			this._pnlOptions.ResumeLayout(false);
