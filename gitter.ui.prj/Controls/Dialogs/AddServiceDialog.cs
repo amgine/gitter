@@ -55,7 +55,7 @@ namespace gitter.Controls
 				if(!hs.Contains(prov))
 				{
 					var item = new ServiceProviderListItem(prov);
-					_servicePicker.ServiceProviders.Items.Add(item);
+					_servicePicker.DropDownItems.Add(item);
 				}
 			}
 
@@ -66,9 +66,9 @@ namespace gitter.Controls
 		{
 			base.OnLoad(e);
 
-			if(_servicePicker.ServiceProviders.Items.Count != 0)
+			if(_servicePicker.DropDownItems.Count != 0)
 			{
-				var item = _servicePicker.ServiceProviders.Items[0];
+				var item = _servicePicker.DropDownItems[0];
 				item.IsSelected = true;
 				item.Activate();
 			}
@@ -81,7 +81,7 @@ namespace gitter.Controls
 
 		private void OnSelectedProviderChanged(object sender, EventArgs e)
 		{
-			var prov = _servicePicker.SelectedIssueTracker;
+			var prov = _servicePicker.SelectedValue;
 			if(prov == null) return;
 			Control setupControl;
 			if(!_setupControlCache.TryGetValue(prov, out setupControl))
@@ -117,7 +117,7 @@ namespace gitter.Controls
 
 		public bool Execute()
 		{
-			var prov = _servicePicker.SelectedIssueTracker;
+			var prov = _servicePicker.SelectedValue;
 			if(prov == null) return false;
 			var ctl = _activeSetupControl as IExecutableDialog;
 			if(ctl != null)

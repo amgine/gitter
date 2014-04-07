@@ -23,6 +23,7 @@ namespace gitter.Git
 	using System;
 	using System.Linq;
 	using System.Collections.Generic;
+	using System.Drawing;
 	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -81,6 +82,16 @@ namespace gitter.Git
 		public string Name
 		{
 			get { return "git"; }
+		}
+
+		public string DisplayName
+		{
+			get { return "Git"; }
+		}
+
+		public Image Icon
+		{
+			get { return CachedResources.Bitmaps["ImgGit"]; }
 		}
 
 		public bool IsLoaded

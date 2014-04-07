@@ -109,19 +109,23 @@
     <Compile Include="..\shared\Verify.cs">
       <Link>Shared\Verify.cs</Link>
     </Compile>
+    <Compile Include="Controls\ComboBoxes\RepositoryProviderPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\Dialogs\AddServiceDialog.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\Dialogs\AddServiceDialog.Designer.cs">
       <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ComboBoxes\ServicePicker.cs">
+    <Compile Include="Controls\ComboBoxes\ServiceProviderPicker.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ListBoxes\RecentRepositoryMenu.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ListBoxes\RecentRepositoryListItem.cs" />
+    <Compile Include="Controls\ListBoxes\RepositoryProviderListItem.cs" />
     <Compile Include="Controls\ListBoxes\ServiceProviderListItem.cs" />
     <Compile Include="Controls\ListBoxes\RepositoryDragImage.cs" />
     <Compile Include="Properties\CachedResources.cs" />

@@ -75,7 +75,7 @@ namespace gitter.Framework.Options
 			_fonts.Add(IdFontUI, _uiFont = TryLoadFont(_section, IdFontUI, Resources.StrUIFont,
 				() => new Font("Segoe UI", 9.0f, FontStyle.Regular, GraphicsUnit.Point)));
 			_fonts.Add(IdFontInput, _inputFont = TryLoadFont(_section, IdFontInput, Resources.StrInputFont,
-				() => new Font("Consolas", 9.0f, FontStyle.Regular, GraphicsUnit.Point)));
+				() => new Font("Consolas", 10.0f, FontStyle.Regular, GraphicsUnit.Point)));
 			_fonts.Add(IdFontViewer, _viewerFont = TryLoadFont(_section, IdFontViewer, Resources.StrViewerFont,
 				() => new Font("Consolas", 9.0f, FontStyle.Regular, GraphicsUnit.Point)));
 		}

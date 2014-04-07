@@ -92,7 +92,7 @@ namespace gitter.Git.Gui.Dialogs
 					break;
 				}
 			}
-			_remotePicker.SelectedRemote = remote;
+			_remotePicker.SelectedValue = remote;
 		}
 
 		protected override string ActionVerb
@@ -117,8 +117,8 @@ namespace gitter.Git.Gui.Dialogs
 
 		public Remote Remote
 		{
-			get { return _remotePicker.SelectedRemote; }
-			set { _remotePicker.SelectedRemote = value; }
+			get { return _remotePicker.SelectedValue; }
+			set { _remotePicker.SelectedValue = value; }
 		}
 
 		public bool SendTags
@@ -154,7 +154,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void _remotePicker_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			if(_remotePicker.SelectedRemote != null)
+			if(_remotePicker.SelectedValue != null)
 			{
 				_radRemote.Checked = true;
 			}
@@ -167,7 +167,7 @@ namespace gitter.Git.Gui.Dialogs
 			Remote remote = null;
 			if(pushToRemote)
 			{
-				remote = _remotePicker.SelectedRemote;
+				remote = _remotePicker.SelectedValue;
 				if(remote == null)
 				{
 					NotificationService.NotifyInputError(

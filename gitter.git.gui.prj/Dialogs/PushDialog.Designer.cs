@@ -155,7 +155,6 @@
 			this._remotePicker.FormattingEnabled = true;
 			this._remotePicker.Location = new System.Drawing.Point(104, 24);
 			this._remotePicker.Name = "_remotePicker";
-			this._remotePicker.SelectedRemote = null;
 			this._remotePicker.Size = new System.Drawing.Size(275, 24);
 			this._remotePicker.TabIndex = 2;
 			this._remotePicker.SelectedIndexChanged += new System.EventHandler(this._remotePicker_SelectedIndexChanged);

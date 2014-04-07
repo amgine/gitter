@@ -110,6 +110,9 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Popup\CustomObjectPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GuiCommand.cs" />
     <Compile Include="Hooks\LowLevelMouseHook.cs" />

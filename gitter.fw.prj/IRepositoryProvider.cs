@@ -22,6 +22,7 @@ namespace gitter.Framework
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Drawing;
 	using System.Threading;
 	using System.Threading.Tasks;
 
@@ -30,6 +31,14 @@ namespace gitter.Framework
 	/// <summary>Repository provider.</summary>
 	public interface IRepositoryProvider : INamedObject
 	{
+		/// <summary>Returns provider display name.</summary>
+		/// <value>Provider display name.</value>
+		string DisplayName { get; }
+
+		/// <summary>Returns provider icon.</summary>
+		/// <value>Provider icon.</value>
+		Image Icon { get; }
+
 		/// <summary>Returns GUI provider.</summary>
 		/// <value>GUI provider.</value>
 		IRepositoryGuiProvider GuiProvider { get; }

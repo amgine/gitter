@@ -18,44 +18,40 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Controls
 {
+	using System;
+	using System.Drawing;
+
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	public class RemotePicker : CustomObjectPicker<RemoteListBox, RemoteListItem, Remote>
+	sealed class RepositoryProviderListItem : CustomListBoxItem<IRepositoryProvider>
 	{
-		#region .ctor
-
-		/// <summary>Initializes a new instance of the <see cref="RemotePicker"/> class.</summary>
-		public RemotePicker()
+		public RepositoryProviderListItem(IRepositoryProvider data)
+			: base(data)
 		{
-			foreach(var column in DropDownControl.Columns)
+		}
+
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+			switch(paintEventArgs.SubItemId)
 			{
-				if(column.Id == (int)ColumnId.Name)
-				{
-					column.SizeMode = ColumnSizeMode.Fill;
-				}
-				else
-				{
-					column.IsVisible = false;
-				}
+				case 0:
+					paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.DisplayName);
+					break;
 			}
 		}
 
-		#endregion
-
-		#region Methods
-
-		protected override Remote GetValue(RemoteListItem item)
+		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
-			return item != null ? item.DataContext : null;
+			switch(measureEventArgs.SubItemId)
+			{
+				case 0:
+					return measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.DisplayName);
+				default:
+					return Size.Empty;
+			}
 		}
-
-		public void LoadData(Repository repository)
-		{
-			DropDownControl.LoadData(repository);
-		}
-
-		#endregion
 	}
 }

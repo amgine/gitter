@@ -43,7 +43,7 @@
 		private void InitializeComponent()
 		{
 			this._lblProvider = new System.Windows.Forms.Label();
-			this._servicePicker = new gitter.Controls.ServicePicker();
+			this._servicePicker = new gitter.Controls.ServiceProviderPicker();
 			this.SuspendLayout();
 			// 
 			// _lblProvider
@@ -64,7 +64,6 @@
 			this._servicePicker.FormattingEnabled = true;
 			this._servicePicker.Location = new System.Drawing.Point(100, 3);
 			this._servicePicker.Name = "_servicePicker";
-			this._servicePicker.SelectedIssueTracker = null;
 			this._servicePicker.Size = new System.Drawing.Size(273, 24);
 			this._servicePicker.TabIndex = 0;
 			// 
@@ -82,7 +81,7 @@
 
 		#endregion
 
-		private ServicePicker _servicePicker;
+		private ServiceProviderPicker _servicePicker;
 		private System.Windows.Forms.Label _lblProvider;
 	}
 }
