@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,7 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
-	using System.IO;
 	using System.ComponentModel;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -88,48 +86,6 @@ namespace gitter.Git.Gui.Dialogs
 						break;
 				}
 			}
-		}
-
-		protected bool ValidateBranchName(string branchName, Control inputControl)
-		{
-			if(string.IsNullOrWhiteSpace(branchName))
-			{
-				NotificationService.NotifyInputError(
-					inputControl,
-					Resources.ErrNoBranchNameSpecified,
-					Resources.ErrBranchNameCannotBeEmpty);
-				return false;
-			}
-			string errmsg;
-			if(!Branch.ValidateName(branchName, out errmsg))
-			{
-				NotificationService.NotifyInputError(
-					inputControl,
-					Resources.ErrInvalidBranchName,
-					errmsg);
-				return false;
-			}
-			return true;
-		}
-
-		protected bool ValidateNewBranchName(string branchName, Control inputControl, Repository repository)
-		{
-			Verify.Argument.IsNotNull(repository, "repository");
-
-			if(!ValidateBranchName(branchName, inputControl))
-			{
-				return false;
-			}
-			if(repository.Refs.Heads.Contains(branchName) ||
-				repository.Refs.Remotes.Contains(branchName))
-			{
-				NotificationService.NotifyInputError(
-					inputControl,
-					Resources.ErrInvalidBranchName,
-					Resources.ErrBranchAlreadyExists);
-				return false;
-			}
-			return true;
 		}
 	}
 }

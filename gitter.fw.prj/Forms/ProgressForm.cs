@@ -21,6 +21,7 @@
 namespace gitter.Framework
 {
 	using System;
+	using System.ComponentModel;
 	using System.Drawing;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -69,6 +70,15 @@ namespace gitter.Framework
 		public ProgressForm()
 		{
 			InitializeComponent();
+
+			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+			{
+				Font = GitterApplication.FontManager.UIFont;
+			}
+			else
+			{
+				Font = SystemFonts.MessageBoxFont;
+			}
 
 			ClientSize = new Size(ClientSize.Width, _pnlContainer.Height + panel1.Height);
 
