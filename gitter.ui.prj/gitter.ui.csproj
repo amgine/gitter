@@ -109,14 +109,15 @@
     <Compile Include="..\shared\Verify.cs">
       <Link>Shared\Verify.cs</Link>
     </Compile>
+    <Compile Include="Controls\ComboBoxes\IPicker.cs" />
+    <Compile Include="Controls\ComboBoxes\PickerDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\ComboBoxes\RepositoryProviderPicker.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\Dialogs\AddServiceDialog.cs">
       <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Dialogs\AddServiceDialog.Designer.cs">
-      <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\ComboBoxes\ServiceProviderPicker.cs">
       <SubType>Component</SubType>
@@ -184,9 +185,6 @@
     <Compile Include="Controls\ListBoxes\RepositoryMenu.cs">
       <SubType>Component</SubType>
     </Compile>
-    <EmbeddedResource Include="Controls\Dialogs\AddServiceDialog.resx">
-      <DependentUpon>AddServiceDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Controls\Dialogs\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>

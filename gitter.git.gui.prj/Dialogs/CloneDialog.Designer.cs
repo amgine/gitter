@@ -87,6 +87,8 @@
 			// 
 			// _pnlOptions
 			// 
+			this._pnlOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._pnlOptions.Controls.Add(this._lblDepth);
 			this._pnlOptions.Controls.Add(this._chkNoCheckout);
 			this._pnlOptions.Controls.Add(this._chkRecursive);
@@ -102,7 +104,7 @@
 			this._pnlOptions.Controls.Add(this._txtTemplate);
 			this._pnlOptions.Location = new System.Drawing.Point(0, 115);
 			this._pnlOptions.Name = "_pnlOptions";
-			this._pnlOptions.Size = new System.Drawing.Size(382, 181);
+			this._pnlOptions.Size = new System.Drawing.Size(397, 181);
 			this._pnlOptions.TabIndex = 19;
 			// 
 			// _lblDepth
@@ -181,7 +183,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtRemoteName.Location = new System.Drawing.Point(117, 25);
 			this._txtRemoteName.Name = "_txtRemoteName";
-			this._txtRemoteName.Size = new System.Drawing.Size(265, 23);
+			this._txtRemoteName.Size = new System.Drawing.Size(280, 23);
 			this._txtRemoteName.TabIndex = 4;
 			// 
 			// _lblRemoteName
@@ -210,7 +212,7 @@
 			this._btnSelectTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnSelectTemplate.Enabled = false;
 			this._btnSelectTemplate.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._btnSelectTemplate.Location = new System.Drawing.Point(353, 54);
+			this._btnSelectTemplate.Location = new System.Drawing.Point(368, 54);
 			this._btnSelectTemplate.Name = "_btnSelectTemplate";
 			this._btnSelectTemplate.Size = new System.Drawing.Size(29, 23);
 			this._btnSelectTemplate.TabIndex = 7;
@@ -224,7 +226,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpOptions.Location = new System.Drawing.Point(0, 0);
 			this._grpOptions.Name = "_grpOptions";
-			this._grpOptions.Size = new System.Drawing.Size(382, 19);
+			this._grpOptions.Size = new System.Drawing.Size(397, 19);
 			this._grpOptions.TabIndex = 0;
 			this._grpOptions.Text = "%Options%";
 			// 
@@ -261,7 +263,7 @@
 			this._txtTemplate.Enabled = false;
 			this._txtTemplate.Location = new System.Drawing.Point(117, 54);
 			this._txtTemplate.Name = "_txtTemplate";
-			this._txtTemplate.Size = new System.Drawing.Size(236, 23);
+			this._txtTemplate.Size = new System.Drawing.Size(251, 23);
 			this._txtTemplate.TabIndex = 6;
 			// 
 			// _lblUrl
@@ -279,7 +281,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtUrl.Location = new System.Drawing.Point(94, 3);
 			this._txtUrl.Name = "_txtUrl";
-			this._txtUrl.Size = new System.Drawing.Size(288, 23);
+			this._txtUrl.Size = new System.Drawing.Size(303, 23);
 			this._txtUrl.TabIndex = 0;
 			this._txtUrl.TextChanged += new System.EventHandler(this._txtUrl_TextChanged);
 			// 
@@ -287,7 +289,7 @@
 			// 
 			this._btnSelectDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnSelectDirectory.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._btnSelectDirectory.Location = new System.Drawing.Point(353, 32);
+			this._btnSelectDirectory.Location = new System.Drawing.Point(368, 32);
 			this._btnSelectDirectory.Name = "_btnSelectDirectory";
 			this._btnSelectDirectory.Size = new System.Drawing.Size(29, 23);
 			this._btnSelectDirectory.TabIndex = 2;
@@ -312,7 +314,7 @@
 			this._txtPath.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
 			this._txtPath.Location = new System.Drawing.Point(94, 32);
 			this._txtPath.Name = "_txtPath";
-			this._txtPath.Size = new System.Drawing.Size(259, 23);
+			this._txtPath.Size = new System.Drawing.Size(274, 23);
 			this._txtPath.TabIndex = 1;
 			this._txtPath.TextChanged += new System.EventHandler(this._txtPath_TextChanged);
 			// 
@@ -329,7 +331,7 @@
 			this.Controls.Add(this._lblPath);
 			this.Controls.Add(this._txtPath);
 			this.Name = "CloneDialog";
-			this.Size = new System.Drawing.Size(385, 297);
+			this.Size = new System.Drawing.Size(400, 297);
 			this._pnlOptions.ResumeLayout(false);
 			this._pnlOptions.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._numDepth)).EndInit();

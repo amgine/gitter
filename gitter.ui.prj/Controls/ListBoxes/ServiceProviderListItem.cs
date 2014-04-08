@@ -26,7 +26,7 @@ namespace gitter.Controls
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	sealed class ServiceProviderListItem : CustomListBoxItem<IRepositoryServiceProvider>
+	public sealed class ServiceProviderListItem : CustomListBoxItem<IRepositoryServiceProvider>
 	{
 		public ServiceProviderListItem(IRepositoryServiceProvider data)
 			: base(data)

@@ -23,7 +23,7 @@ namespace gitter.Controls
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	sealed class ServiceProviderPicker : CustomObjectPicker<CustomListBox, ServiceProviderListItem, IRepositoryServiceProvider>
+	public sealed class ServiceProviderPicker : CustomObjectPicker<CustomListBox, ServiceProviderListItem, IRepositoryServiceProvider>, IPicker<IRepositoryServiceProvider>
 	{
 		#region .ctor
 

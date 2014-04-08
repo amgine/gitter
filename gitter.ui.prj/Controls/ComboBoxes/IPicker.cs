@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,37 +21,15 @@
 namespace gitter.Controls
 {
 	using System;
-	using System.Drawing;
 
-	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	public sealed class RepositoryProviderListItem : CustomListBoxItem<IRepositoryProvider>
+	public interface IPicker<T>
 	{
-		public RepositoryProviderListItem(IRepositoryProvider data)
-			: base(data)
-		{
-		}
+		event EventHandler SelectedValueChanged;
 
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.DisplayName);
-					break;
-			}
-		}
+		CustomListBoxItemsCollection DropDownItems { get; }
 
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.DisplayName);
-				default:
-					return Size.Empty;
-			}
-		}
+		T SelectedValue { get; set; }
 	}
 }

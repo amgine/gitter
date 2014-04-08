@@ -286,4 +286,10 @@
   <data name="StrLoadingRepository" xml:space="preserve">
     <value>Loading Repository</value>
   </data>
+  <data name="StrProvider" xml:space="preserve">
+    <value>Provider</value>
+  </data>
+  <data name="StrVCS" xml:space="preserve">
+    <value>VCS</value>
+  </data>
 </root>
