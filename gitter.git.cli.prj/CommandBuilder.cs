@@ -179,7 +179,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			return new LogCommand(
 				LogCommand.MaxCount(1),
-				new CommandParameter(parameters.SHA1),
+				new CommandParameter(parameters.SHA1.ToString()),
 				GetRevisionDataFormatArgument());
 		}
 

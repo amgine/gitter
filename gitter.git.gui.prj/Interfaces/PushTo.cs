@@ -18,18 +18,11 @@
  */
 #endregion
 
-namespace gitter.Controls
+namespace gitter.Git.Gui.Interfaces
 {
-	using System;
-
-	using gitter.Framework.Controls;
-
-	public interface IPicker<T>
+	public enum PushTo
 	{
-		event EventHandler SelectedValueChanged;
-
-		CustomListBoxItemsCollection DropDownItems { get; }
-
-		T SelectedValue { get; set; }
+		Remote,
+		Url,
 	}
 }

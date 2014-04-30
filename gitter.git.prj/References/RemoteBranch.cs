@@ -22,7 +22,9 @@ namespace gitter.Git
 {
 	using System;
 	using System.Globalization;
-
+	using System.Threading;
+	using System.Threading.Tasks;
+	using gitter.Framework;
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>Git remote tracking branch.</summary>
@@ -118,6 +120,35 @@ namespace gitter.Git
 						remoteRefName));
 			}
 			Refresh();
+		}
+
+		/// <summary>Delete branch from remote and local repository.</summary>
+		public Task DeleteFromRemoteAsync(CancellationToken cancellationToken)
+		{
+			Verify.State.IsNotDeleted(this);
+
+			var remote = Remote;
+			if(remote == null)
+			{
+				throw new GitException(string.Format(CultureInfo.InvariantCulture, "Unable to find remote for branch '{0}'", Name));
+			}
+			string branchName = Name.Substring(remote.Name.Length + 1);
+			string remoteRefName = GitConstants.LocalBranchPrefix + branchName;
+
+
+			var notificationsBlock = Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.BranchChanged);
+			var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
+				remote.Name, remoteRefName);
+
+			return
+				Repository.Accessor.RemoveRemoteReferences.InvokeAsync(parameters, null, cancellationToken)
+				.ContinueWith(t =>
+					{
+						notificationsBlock.Dispose();
+						TaskUtility.PropagateFaultedStates(t);
+						Refresh();
+					});
 		}
 
 		/// <summary>Delete branch.</summary>

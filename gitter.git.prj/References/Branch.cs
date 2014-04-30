@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,28 @@ namespace gitter.Git
 	/// <summary>Git local branch.</summary>
 	public sealed class Branch : BranchBase
 	{
+		#region Static
+
+		/// <summary>Validates the branch name.</summary>
+		/// <param name="name">Branch name.</param>
+		/// <param name="errorMessage">Error message.</param>
+		/// <returns><c>true</c> if <paramref name="name"/> is a valid branch name; otherwise, <c>false</c>.</returns>
+		public static bool ValidateName(string name, out string errorMessage)
+		{
+			if(!Reference.ValidateName(name, ReferenceType.Branch, out errorMessage))
+			{
+				return false;
+			}
+			if(name == GitConstants.HEAD)
+			{
+				errorMessage = Resources.ErrCannotCreateHeadManually;
+				return false;
+			}
+			return true;
+		}
+
+		#endregion
+
 		#region Events
 
 		/// <summary>Occurs when branch is renamed.</summary>

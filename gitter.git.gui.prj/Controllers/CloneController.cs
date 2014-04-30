@@ -56,29 +56,6 @@ namespace gitter.Git.Gui.Controllers
 
 		#endregion
 
-		#region Methods
-
-		private static string AppendUrlToPath(string path, string url)
-		{
-			if(url.Length != 0)
-			{
-				try
-				{
-					path = Path.Combine(path, GitUtils.GetHumanishName(url));
-				}
-				catch(Exception exc)
-				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
-				}
-			}
-			return path;
-		}
-
-		#endregion
-
 		#region ICloneController Members
 
 		public bool TryClone()
@@ -94,10 +71,6 @@ namespace gitter.Git.Gui.Controllers
 			if(!GitControllerUtility.ValidateAbsolutePath(path, View.RepositoryPath, View.ErrorNotifier))
 			{
 				return false;
-			}
-			if(View.AppendRepositoryNameFromUrl.Value)
-			{
-				path = AppendUrlToPath(path, url);
 			}
 			var remoteName = View.RemoteName.Value;
 			if(!GitControllerUtility.ValidateRemoteName(remoteName, View.RemoteName, View.ErrorNotifier))

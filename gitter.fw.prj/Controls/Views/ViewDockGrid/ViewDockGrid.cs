@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -616,7 +616,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		private static ViewBase FindView(Control control, Guid guid, IDictionary<string, object> parameters, bool considerParameters)
+		private static ViewBase FindView(Control control, Guid guid, object viewModel, bool considerViewModel)
 		{
 			foreach(Control child in control.Controls)
 			{
@@ -627,9 +627,9 @@ namespace gitter.Framework.Controls
 					{
 						if(view.Guid == guid)
 						{
-							if(considerParameters)
+							if(considerViewModel)
 							{
-								if(view.ParametersIdentical(parameters))
+								if(object.Equals(view.ViewModel, viewModel))
 								{
 									return view;
 								}
@@ -644,7 +644,7 @@ namespace gitter.Framework.Controls
 				}
 				else
 				{
-					var view = FindView(child, guid, parameters, considerParameters);
+					var view = FindView(child, guid, viewModel, considerViewModel);
 					if(view != null) return view;
 				}
 			}

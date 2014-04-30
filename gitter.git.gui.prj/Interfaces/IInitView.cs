@@ -20,12 +20,11 @@
 
 namespace gitter.Git.Gui.Interfaces
 {
+	using gitter.Framework;
 	using gitter.Framework.Mvc;
 
-	interface IInitView : IView
+	interface IInitView : IView, IRepositoryInitDialog
 	{
-		IUserInputSource<string> RepositoryPath { get; }
-
 		IUserInputSource<bool> Bare { get; }
 
 		IUserInputSource<bool> UseCustomTemplate { get; }

@@ -82,7 +82,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(panel, "panel");
 			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
-			var graphics = Utility.MeasurementGraphics;
+			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y;
 			for(int i = 0; i < _panels.Count; ++i)
 			{
@@ -104,7 +104,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(panel, "panel");
 			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
-			var graphics = Utility.MeasurementGraphics;
+			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y - VScrollPos;
 			int x = ClientArea.X - HScrollPos;
 			for(int i = 0; i < _panels.Count; ++i)
@@ -138,7 +138,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(panel, "panel");
 			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
-			var graphics = Utility.MeasurementGraphics;
+			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y - VScrollPos;
 			for(int i = 0; i < _panels.Count; ++i)
 			{
@@ -278,7 +278,7 @@ namespace gitter.Framework.Controls
 			Size size;
 			if(!_sizes.TryGetValue(panel, out size))
 			{
-				var graphics = Utility.MeasurementGraphics;
+				var graphics = GraphicsUtility.MeasurementGraphics;
 				size = panel.Measure(
 					new FlowPanelMeasureEventArgs(graphics, ClientArea.Width));
 				_sizes.Add(panel, size);
@@ -303,7 +303,7 @@ namespace gitter.Framework.Controls
 			var res = Size.Empty;
 			if(_panels.Count != 0)
 			{
-				var graphics = Utility.MeasurementGraphics;
+				var graphics = GraphicsUtility.MeasurementGraphics;
 				foreach(var panel in _panels)
 				{
 					var size = GetPanelSize(graphics, panel);
@@ -323,7 +323,7 @@ namespace gitter.Framework.Controls
 			_sizes.Clear();
 			if(_panels.Count != 0)
 			{
-				var graphics = Utility.MeasurementGraphics;
+				var graphics = GraphicsUtility.MeasurementGraphics;
 				foreach(var panel in _panels)
 				{
 					var size = GetPanelSize(graphics, panel, rect.Width);
@@ -577,8 +577,8 @@ namespace gitter.Framework.Controls
 			var clip = Rectangle.Intersect(clientArea, e.ClipRectangle);
 			int clippingEdge = clip.Bottom;
 			graphics.SetClip(clip);
-			graphics.TextRenderingHint = Utility.TextRenderingHint;
-			graphics.TextContrast = Utility.TextContrast;
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			graphics.TextContrast = GraphicsUtility.TextContrast;
 			for(int i = 0; i < _panels.Count; ++i)
 			{
 				var panel = _panels[i];

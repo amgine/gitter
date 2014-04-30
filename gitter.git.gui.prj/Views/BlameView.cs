@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,13 +40,12 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		public BlameView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.BlameViewGuid, gui, parameters)
+		public BlameView(GuiProvider gui)
+			: base(Guids.BlameViewGuid, gui)
 		{
 			InitializeComponent();
 
 			Text = Resources.StrlBlame;
-			ApplyParameters(parameters);
 		}
 
 		#endregion
@@ -87,21 +86,24 @@ namespace gitter.Git.Gui.Views
 
 		#region Methods
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			base.ApplyParameters(parameters);
+			base.AttachViewModel(viewModel);
 
-			var blameSource = (IBlameSource)parameters["blame"];
-
-			if(blameSource != null)
+			var vm = viewModel as BlameViewModel;
+			if(vm != null)
 			{
-				Text = Resources.StrBlame + ": " + blameSource.ToString();
-				BlameFileBinding = new BlameFileBinding(blameSource, _blamePanel, BlameOptions.Default);
-			}
-			else
-			{
-				Text = Resources.StrBlame;
-				BlameFileBinding = null;
+				var blameSource = vm.BlameSource;
+				if(blameSource != null)
+				{
+					Text = Resources.StrBlame + ": " + blameSource.ToString();
+					BlameFileBinding = new BlameFileBinding(blameSource, _blamePanel, BlameOptions.Default);
+				}
+				else
+				{
+					Text = Resources.StrBlame;
+					BlameFileBinding = null;
+				}
 			}
 		}
 

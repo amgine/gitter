@@ -131,11 +131,11 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		private BlameCommit ParseCommitInfo(IDictionary<string, BlameCommit> cache)
+		private BlameCommit ParseCommitInfo(Dictionary<Hash, BlameCommit> cache)
 		{
 			Assert.IsNotNull(cache);
 
-			var hash = ReadString(40);
+			var hash = ReadHash();
 			SkipLine();
 
 			BlameCommit commit;
@@ -167,7 +167,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public BlameFile ParseBlameFile(string fileName)
 		{
-			var cache = new Dictionary<string, BlameCommit>();
+			var cache = new Dictionary<Hash, BlameCommit>(Hash.EqualityComparer);
 			int lineN = 1;
 			BlameCommit prev = null;
 			var hunks = new List<BlameHunk>();

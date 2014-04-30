@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,13 +69,12 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(branchData, "branchData");
 			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot create local branch.");
 
-			var repo = (Repository)repository;
 			Revision revision;
-			lock(repo.Revisions.SyncRoot)
+			lock(repository.Revisions.SyncRoot)
 			{
-				revision = repo.Revisions.GetOrCreateRevision(branchData.SHA1);
+				revision = repository.Revisions.GetOrCreateRevision(branchData.SHA1);
 			}
-			return new RemoteBranch(repo, branchData.Name, revision);
+			return new RemoteBranch(repository, branchData.Name, revision);
 		}
 
 		public static void UpdateRemoteBranch(RemoteBranch remoteBranch, BranchData branchData)
@@ -84,12 +83,12 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(branchData, "branchData");
 			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot update local branch.");
 
-			var repo = remoteBranch.Repository;
 			if(remoteBranch.Revision.Hash != branchData.SHA1)
 			{
-				lock(repo.Revisions.SyncRoot)
+				var revisionCache = remoteBranch.Repository.Revisions;
+				lock(revisionCache.SyncRoot)
 				{
-					remoteBranch.Pointer = repo.Revisions.GetOrCreateRevision(branchData.SHA1);
+					remoteBranch.Pointer = revisionCache.GetOrCreateRevision(branchData.SHA1);
 				}
 			}
 		}
@@ -112,10 +111,9 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
 			Verify.Argument.IsNotNull(branchData, "branchData");
 
-			var repository = remoteBranch.Repository;
 			if(remoteBranch.Revision.Hash != branchData.SHA1)
 			{
-				remoteBranch.Pointer = repository.Revisions.GetOrCreateRevision(branchData.SHA1);
+				remoteBranch.Pointer = remoteBranch.Repository.Revisions.GetOrCreateRevision(branchData.SHA1);
 			}
 		}
 
@@ -420,51 +418,51 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(revisionData, "revisionData");
 
 			var revisions = repository.Revisions;
-			var obj = revisions.GetOrCreateRevision(revisionData.SHA1);
-			var fields = revisionData.Fields;
-			if(!obj.IsLoaded && (fields != RevisionField.SHA1))
+			var revision  = revisions.GetOrCreateRevision(revisionData.SHA1);
+			var fields    = revisionData.Fields;
+			if(!revision.IsLoaded && (fields != RevisionField.SHA1))
 			{
 				if((fields & RevisionField.Subject) == RevisionField.Subject)
 				{
-					obj.Subject = revisionData.Subject;
+					revision.Subject = revisionData.Subject;
 				}
 				if((fields & RevisionField.Body) == RevisionField.Body)
 				{
-					obj.Body = revisionData.Body;
+					revision.Body = revisionData.Body;
 				}
 				if((fields & RevisionField.TreeHash) == RevisionField.TreeHash)
 				{
-					obj.TreeHash = revisionData.TreeHash;
+					revision.TreeHash = revisionData.TreeHash;
 				}
 				if((fields & RevisionField.Parents) == RevisionField.Parents)
 				{
 					foreach(var parentData in revisionData.Parents)
 					{
 						var parent = revisions.GetOrCreateRevision(parentData.SHA1);
-						obj.Parents.AddInternal(parent);
+						revision.Parents.AddInternal(parent);
 					}
 				}
 				if((fields & RevisionField.CommitDate) == RevisionField.CommitDate)
 				{
-					obj.CommitDate = revisionData.CommitDate;
+					revision.CommitDate = revisionData.CommitDate;
 				}
 				if((fields & (RevisionField.CommitterName | RevisionField.CommitterEmail)) ==
 					(RevisionField.CommitterName | RevisionField.CommitterEmail))
 				{
-					obj.Committer = repository.Users.GetOrCreateUser(revisionData.CommitterName, revisionData.CommitterEmail);
+					revision.Committer = repository.Users.GetOrCreateUser(revisionData.CommitterName, revisionData.CommitterEmail);
 				}
 				if((fields & RevisionField.AuthorDate) == RevisionField.AuthorDate)
 				{
-					obj.AuthorDate = revisionData.AuthorDate;
+					revision.AuthorDate = revisionData.AuthorDate;
 				}
 				if((fields & (RevisionField.AuthorName | RevisionField.AuthorEmail)) ==
 					(RevisionField.AuthorName | RevisionField.AuthorEmail))
 				{
-					obj.Author = repository.Users.GetOrCreateUser(revisionData.AuthorName, revisionData.AuthorEmail);
+					revision.Author = repository.Users.GetOrCreateUser(revisionData.AuthorName, revisionData.AuthorEmail);
 				}
-				obj.IsLoaded = true;
+				revision.IsLoaded = true;
 			}
-			return obj;
+			return revision;
 		}
 
 		private static string GetShortName(string name)

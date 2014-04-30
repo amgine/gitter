@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,14 @@ namespace gitter.Framework
 	using System;
 	using System.Drawing;
 	using System.Windows.Forms;
-	using System.Collections.Generic;
 
 	using gitter.Framework.Configuration;
 
 	/// <summary>Provides additional services for repository.</summary>
 	public interface IRepositoryServiceProvider : INamedObject
 	{
+		#region Properties
+
 		/// <summary>Returns service display name.</summary>
 		/// <value>Service display name.</value>
 		string DisplayName { get; }
@@ -37,6 +38,10 @@ namespace gitter.Framework
 		/// <summary>Returns service icon.</summary>
 		/// <value>Service icon.</value>
 		Image Icon { get; }
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>Prepare for working inside specified <paramref name="environment"/>.</summary>
 		/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
@@ -55,11 +60,13 @@ namespace gitter.Framework
 		/// <summary>Creates service setup control for the specified repository.</summary>
 		/// <param name="repository">Repository to configure service for.</param>
 		/// <returns>Setup control for the service.</returns>
-		Control CreateSetupControl(IRepository repository);
+		Control CreateSetupDialog(IRepository repository);
 
 		/// <summary>Creates GUI provider to modify application UI.</summary>
 		/// <param name="repository">Specifies repository.</param>
 		/// <returns>GUI provider for the service.</returns>
 		IGuiProvider CreateGuiProvider(IRepository repository);
+
+		#endregion
 	}
 }

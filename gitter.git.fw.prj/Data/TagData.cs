@@ -30,21 +30,19 @@ namespace gitter.Git.AccessLayer
 		#region Data
 
 		private readonly string _name;
-		private readonly string _sha1;
+		private readonly Hash _sha1;
 		private readonly TagType _tagType;
 
 		#endregion
 
 		#region .ctor
 
-		public TagData(string name, string sha1, TagType tagType)
+		public TagData(string name, Hash sha1, TagType tagType)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(sha1, "sha1");
-			Verify.Argument.IsTrue(sha1.Length == 40, "sha1");
 
-			_name = name;
-			_sha1 = sha1;
+			_name    = name;
+			_sha1    = sha1;
 			_tagType = tagType;
 		}
 
@@ -57,7 +55,7 @@ namespace gitter.Git.AccessLayer
 			get { return _name; }
 		}
 
-		public string SHA1
+		public Hash SHA1
 		{
 			get { return _sha1; }
 		}
@@ -69,6 +67,8 @@ namespace gitter.Git.AccessLayer
 
 		#endregion
 
+		#region Methods
+
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.
 		/// </summary>
@@ -79,5 +79,7 @@ namespace gitter.Git.AccessLayer
 		{
 			return _name;
 		}
+
+		#endregion
 	}
 }

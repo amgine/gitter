@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,8 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
 	using System.ComponentModel;
+	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Configuration;
@@ -31,13 +30,13 @@ namespace gitter.Framework.Controls
 
 	/// <summary>Represents control with advanced docking capabilities.</summary>
 	[ToolboxItem(false)]
-	public partial class ViewBase : UserControl
+	public class ViewBase : UserControl
 	{
 		#region Data
 
 		private readonly Guid _guid;
 		private readonly IWorkingEnvironment _environment;
-		private IDictionary<string, object> _parameters;
+		private object _viewModel;
 		private ViewHost _host;
 		private INotificationService _notificationService;
 		private IToolTipService _toolTipService;
@@ -77,9 +76,9 @@ namespace gitter.Framework.Controls
 			AutoScaleMode		= AutoScaleMode.Dpi;
 			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 			{
-				Font		= GitterApplication.FontManager.UIFont;
-				BackColor	= GitterApplication.Style.Colors.Window;
-				ForeColor	= GitterApplication.Style.Colors.WindowText;
+				Font      = GitterApplication.FontManager.UIFont;
+				BackColor = GitterApplication.Style.Colors.Window;
+				ForeColor = GitterApplication.Style.Colors.WindowText;
 			}
 			else
 			{
@@ -88,14 +87,13 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Create <see cref="ViewBase"/>.</summary>
-		public ViewBase(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		public ViewBase(Guid guid, IWorkingEnvironment environment)
 			: this()
 		{
 			Verify.Argument.IsNotNull(environment, "environment");
 
-			_guid = guid;
+			_guid        = guid;
 			_environment = environment;
-			_parameters = parameters;
 		}
 
 		#endregion
@@ -162,9 +160,24 @@ namespace gitter.Framework.Controls
 			get { return _guid; }
 		}
 
-		public IDictionary<string, object> Parameters
+		public object ViewModel
 		{
-			get { return _parameters; }
+			get { return _viewModel; }
+			set
+			{
+				if(!object.Equals(_viewModel, value))
+				{
+					if(_viewModel != null)
+					{
+						DetachViewModel(_viewModel);
+					}
+					_viewModel = value;
+					if(_viewModel != null)
+					{
+						AttachViewModel(_viewModel);
+					}
+				}
+			}
 		}
 
 		public virtual bool IsDocument
@@ -197,46 +210,11 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public virtual bool ParametersIdentical(IDictionary<string, object> parameters)
+		protected virtual void DetachViewModel(object viewModel)
 		{
-			if(_parameters == parameters) return true;
-			if(_parameters == null || parameters == null)
-			{
-				if(_parameters == null)
-				{
-					if(parameters == null) return true;
-					if(parameters.Count == 0) return true;
-				}
-				else
-				{
-					if(_parameters == null) return true;
-					if(_parameters.Count == 0) return true;
-				}
-				return false;
-			}
-			else
-			{
-				if(_parameters.Count == parameters.Count)
-				{
-					foreach(var kvp in _parameters)
-					{
-						object value;
-						if(!parameters.TryGetValue(kvp.Key, out value) ||
-							!object.Equals(value, kvp.Value))
-						{
-							return false;
-						}
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
 		}
 
-		public virtual void ApplyParameters(IDictionary<string, object> parameters)
+		protected virtual void AttachViewModel(object viewModel)
 		{
 		}
 
@@ -405,7 +383,7 @@ namespace gitter.Framework.Controls
 					_toolTipService.Dispose();
 					_toolTipService = null;
 				}
-				_parameters = null;
+				_viewModel = null;
 			}
 			base.Dispose(disposing);
 		}

@@ -195,9 +195,9 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Hash);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.HashString);
 				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHash);
+					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHashString);
 				case ColumnId.Name:
 				case ColumnId.Message:
 					return measureEventArgs.MeasureImageAndText(Image, DataContext.Message);
@@ -227,10 +227,10 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Hash);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.HashString);
 					break;
 				case ColumnId.TreeHash:
-					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHash);
+					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHashString);
 					break;
 				case ColumnId.Name:
 				case ColumnId.Message:

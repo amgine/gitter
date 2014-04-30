@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,12 +32,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -73,6 +69,7 @@
     <Compile Include="Gui\Views\BuildTypeBuildsView.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Gui\Views\BuildTypeBuildsViewModel.cs" />
     <Compile Include="Gui\Views\Factories.cs" />
     <Compile Include="Gui\Views\Guids.cs" />
     <Compile Include="ProjectLocator.cs" />
@@ -137,12 +134,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\TeamCity16.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\exclamation-red-frame.png" />
+    <None Include="Resources\exclamation-red-frame.png" />
     <None Include="Resources\exclamation.png" />
-    <Content Include="Resources\gear--arrow.png" />
-    <Content Include="Resources\tick-circle.png" />
+    <None Include="Resources\gear--arrow.png" />
+    <None Include="Resources\tick-circle.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

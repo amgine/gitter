@@ -391,7 +391,7 @@ namespace gitter.Git.Gui.Controllers
 				return false;
 			}
 			string errorMessage;
-			if(!Reference.ValidateName(remoteName, out errorMessage))
+			if(!Reference.ValidateName(remoteName, ReferenceType.Remote, out errorMessage))
 			{
 				inputErrorNotifier.NotifyError(userInputSource,
 					new UserInputError(

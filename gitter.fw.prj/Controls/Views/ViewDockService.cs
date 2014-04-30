@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -264,10 +264,7 @@ namespace gitter.Framework.Controls
 		{
 			return (WebBrowserView)ShowView(
 				WebBrowserViewFactory.Guid,
-				new Dictionary<string, object>()
-				{
-					{ "url", url }
-				},
+				new WebBrowserViewModel(url),
 				activate);
 		}
 
@@ -313,7 +310,7 @@ namespace gitter.Framework.Controls
 				}
 				else
 				{
-					existing.ApplyParameters(null);
+					existing.ViewModel = null;
 					ShowExistingView(existing, activate);
 				}
 				return existing;
@@ -323,7 +320,7 @@ namespace gitter.Framework.Controls
 				ViewBase existing = null;
 				foreach(var view in factory.CreatedViews)
 				{
-					if(view.ParametersIdentical(null))
+					if(object.Equals(view.ViewModel, null))
 					{
 						existing = view;
 						break;
@@ -348,12 +345,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public ViewBase ShowView(Guid guid, IDictionary<string, object> parameters)
-		{
-			return ShowView(guid, parameters, true);
-		}
-
-		public ViewBase ShowView(Guid guid, IDictionary<string, object> parameters, bool activate)
+		public ViewBase ShowView(Guid guid, object viewModel, bool activate = true)
 		{
 			var factory = GetViewFactoryByGuid(guid);
 			if(factory.IsSingleton)
@@ -366,13 +358,14 @@ namespace gitter.Framework.Controls
 				}
 				if(existing == null)
 				{
-					existing = factory.CreateView(_environment, parameters);
+					existing = factory.CreateView(_environment);
+					existing.ViewModel = viewModel;
 					existing.Closing += OnViewClosing;
 					ShowNewView(factory, existing, activate);
 				}
 				else
 				{
-					existing.ApplyParameters(parameters);
+					existing.ViewModel = viewModel;
 					ShowExistingView(existing, activate);
 				}
 				return existing;
@@ -382,7 +375,7 @@ namespace gitter.Framework.Controls
 				ViewBase existing = null;
 				foreach(var view in factory.CreatedViews)
 				{
-					if(view.ParametersIdentical(parameters))
+					if(object.Equals(view.ViewModel, viewModel))
 					{
 						existing = view;
 						break;
@@ -390,7 +383,8 @@ namespace gitter.Framework.Controls
 				}
 				if(existing == null)
 				{
-					existing = factory.CreateView(_environment, parameters);
+					existing = factory.CreateView(_environment);
+					existing.ViewModel = viewModel;
 					existing.Closing += OnViewClosing;
 					ShowNewView(factory, existing, activate);
 				}
@@ -416,7 +410,7 @@ namespace gitter.Framework.Controls
 			return null;
 		}
 
-		public ViewBase FindView(Guid guid, IDictionary<string, object> parameters)
+		public ViewBase FindView(Guid guid, object viewModel)
 		{
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
@@ -425,7 +419,7 @@ namespace gitter.Framework.Controls
 			}
 			foreach(var view in factory.CreatedViews)
 			{
-				if(view.ParametersIdentical(parameters))
+				if(object.Equals(view.ViewModel, viewModel))
 				{
 					return view;
 				}
@@ -443,7 +437,7 @@ namespace gitter.Framework.Controls
 			return factory.CreatedViews;
 		}
 
-		public IEnumerable<ViewBase> FindViews(Guid guid, IDictionary<string, object> parameters)
+		public IEnumerable<ViewBase> FindViews(Guid guid, object viewModel)
 		{
 			IViewFactory factory;
 			if(!_factories.TryGetValue(guid, out factory))
@@ -453,7 +447,7 @@ namespace gitter.Framework.Controls
 			var list = new List<ViewBase>();
 			foreach(var view in factory.CreatedViews)
 			{
-				if(view.ParametersIdentical(parameters))
+				if(object.Equals(view.ViewModel, viewModel))
 				{
 					list.Add(view);
 				}

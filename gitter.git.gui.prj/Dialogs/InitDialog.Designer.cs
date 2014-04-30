@@ -28,49 +28,31 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this._lblPath = new System.Windows.Forms.Label();
-			this._txtTemplate = new System.Windows.Forms.TextBox();
-			this._txtPath = new System.Windows.Forms.TextBox();
+			this._pnlOptions = new System.Windows.Forms.Panel();
 			this._btnSelectTemplate = new System.Windows.Forms.Button();
+			this._grpOptions = new gitter.Framework.Controls.GroupSeparator();
 			this._chkBare = new System.Windows.Forms.CheckBox();
 			this._chkUseTemplate = new System.Windows.Forms.CheckBox();
+			this._txtTemplate = new System.Windows.Forms.TextBox();
 			this._btnSelectDirectory = new System.Windows.Forms.Button();
-			this._pnlOptions = new System.Windows.Forms.Panel();
-			this._grpOptions = new gitter.Framework.Controls.GroupSeparator();
+			this._lblPath = new System.Windows.Forms.Label();
+			this._txtPath = new System.Windows.Forms.TextBox();
 			this._pnlOptions.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// _lblPath
+			// _pnlOptions
 			// 
-			this._lblPath.AutoSize = true;
-			this._lblPath.Location = new System.Drawing.Point(0, 6);
-			this._lblPath.Name = "_lblPath";
-			this._lblPath.Size = new System.Drawing.Size(54, 15);
-			this._lblPath.TabIndex = 10;
-			this._lblPath.Text = "%Path%:";
-			// 
-			// _txtTemplate
-			// 
-			this._txtTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+			this._pnlOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._txtTemplate.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-			this._txtTemplate.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
-			this._txtTemplate.Enabled = false;
-			this._txtTemplate.Location = new System.Drawing.Point(117, 23);
-			this._txtTemplate.Name = "_txtTemplate";
-			this._txtTemplate.Size = new System.Drawing.Size(236, 23);
-			this._txtTemplate.TabIndex = 3;
-			// 
-			// _txtPath
-			// 
-			this._txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this._txtPath.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-			this._txtPath.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
-			this._txtPath.Location = new System.Drawing.Point(94, 3);
-			this._txtPath.Name = "_txtPath";
-			this._txtPath.Size = new System.Drawing.Size(259, 23);
-			this._txtPath.TabIndex = 0;
+			this._pnlOptions.Controls.Add(this._btnSelectTemplate);
+			this._pnlOptions.Controls.Add(this._grpOptions);
+			this._pnlOptions.Controls.Add(this._chkBare);
+			this._pnlOptions.Controls.Add(this._txtTemplate);
+			this._pnlOptions.Controls.Add(this._chkUseTemplate);
+			this._pnlOptions.Location = new System.Drawing.Point(0, 29);
+			this._pnlOptions.Name = "_pnlOptions";
+			this._pnlOptions.Size = new System.Drawing.Size(382, 69);
+			this._pnlOptions.TabIndex = 14;
 			// 
 			// _btnSelectTemplate
 			// 
@@ -84,6 +66,16 @@
 			this._btnSelectTemplate.Text = "...";
 			this._btnSelectTemplate.UseVisualStyleBackColor = true;
 			this._btnSelectTemplate.Click += new System.EventHandler(this._btnSelectTemplate_Click);
+			// 
+			// _grpOptions
+			// 
+			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._grpOptions.Location = new System.Drawing.Point(0, 0);
+			this._grpOptions.Name = "_grpOptions";
+			this._grpOptions.Size = new System.Drawing.Size(382, 19);
+			this._grpOptions.TabIndex = 0;
+			this._grpOptions.Text = "%Options%";
 			// 
 			// _chkBare
 			// 
@@ -108,6 +100,18 @@
 			this._chkUseTemplate.UseVisualStyleBackColor = true;
 			this._chkUseTemplate.CheckedChanged += new System.EventHandler(this._chkUseTemplate_CheckedChanged);
 			// 
+			// _txtTemplate
+			// 
+			this._txtTemplate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._txtTemplate.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+			this._txtTemplate.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
+			this._txtTemplate.Enabled = false;
+			this._txtTemplate.Location = new System.Drawing.Point(94, 23);
+			this._txtTemplate.Name = "_txtTemplate";
+			this._txtTemplate.Size = new System.Drawing.Size(259, 23);
+			this._txtTemplate.TabIndex = 3;
+			// 
 			// _btnSelectDirectory
 			// 
 			this._btnSelectDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -120,27 +124,25 @@
 			this._btnSelectDirectory.UseVisualStyleBackColor = true;
 			this._btnSelectDirectory.Click += new System.EventHandler(this._btnSelectDirectory_Click);
 			// 
-			// _pnlOptions
+			// _lblPath
 			// 
-			this._pnlOptions.Controls.Add(this._btnSelectTemplate);
-			this._pnlOptions.Controls.Add(this._grpOptions);
-			this._pnlOptions.Controls.Add(this._chkBare);
-			this._pnlOptions.Controls.Add(this._chkUseTemplate);
-			this._pnlOptions.Controls.Add(this._txtTemplate);
-			this._pnlOptions.Location = new System.Drawing.Point(0, 29);
-			this._pnlOptions.Name = "_pnlOptions";
-			this._pnlOptions.Size = new System.Drawing.Size(382, 69);
-			this._pnlOptions.TabIndex = 14;
+			this._lblPath.AutoSize = true;
+			this._lblPath.Location = new System.Drawing.Point(0, 6);
+			this._lblPath.Name = "_lblPath";
+			this._lblPath.Size = new System.Drawing.Size(54, 15);
+			this._lblPath.TabIndex = 10;
+			this._lblPath.Text = "%Path%:";
 			// 
-			// _grpOptions
+			// _txtPath
 			// 
-			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+			this._txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._grpOptions.Location = new System.Drawing.Point(0, 0);
-			this._grpOptions.Name = "_grpOptions";
-			this._grpOptions.Size = new System.Drawing.Size(382, 19);
-			this._grpOptions.TabIndex = 0;
-			this._grpOptions.Text = "%Options%";
+			this._txtPath.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+			this._txtPath.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
+			this._txtPath.Location = new System.Drawing.Point(94, 3);
+			this._txtPath.Name = "_txtPath";
+			this._txtPath.Size = new System.Drawing.Size(259, 23);
+			this._txtPath.TabIndex = 0;
 			// 
 			// InitDialog
 			// 

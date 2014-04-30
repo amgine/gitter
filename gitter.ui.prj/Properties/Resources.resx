@@ -292,4 +292,37 @@
   <data name="StrVCS" xml:space="preserve">
     <value>VCS</value>
   </data>
+  <data name="StrCloneRepository" xml:space="preserve">
+    <value>Clone Repository</value>
+  </data>
+  <data name="StrInitRepository" xml:space="preserve">
+    <value>Init Repository</value>
+  </data>
+  <data name="StrClone" xml:space="preserve">
+    <value>Clone</value>
+  </data>
+  <data name="StrInit" xml:space="preserve">
+    <value>Init</value>
+  </data>
+  <data name="ImgRepositoryCloneSmall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\repository-clone.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgRepositoryInitSmall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\repository-init.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="TipClone" xml:space="preserve">
+    <value>Clone a repository into a new directory</value>
+  </data>
+  <data name="TipInit" xml:space="preserve">
+    <value>Create an empty repository</value>
+  </data>
+  <data name="StrsClosePageAfterRepositoryLoad" xml:space="preserve">
+    <value>Close page after repository load</value>
+  </data>
+  <data name="StrsShowPageOnStartup" xml:space="preserve">
+    <value>Show page on startup</value>
+  </data>
 </root>

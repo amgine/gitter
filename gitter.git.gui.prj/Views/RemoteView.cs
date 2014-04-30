@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,14 +127,12 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		public RemoteView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.RemoteViewGuid, gui, parameters)
+		public RemoteView(GuiProvider gui)
+			: base(Guids.RemoteViewGuid, gui)
 		{
 			InitializeComponent();
 
 			Text = Resources.StrRemote;
-
-			ApplyParameters(parameters);
 
 			AddTopToolStrip(_toolbar = new RemoteToolbar(this));
 		}
@@ -209,15 +207,23 @@ namespace gitter.Git.Gui.Views
 
 		#region Methods
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			if(parameters != null)
+			base.AttachViewModel(viewModel);
+
+			var vm = viewModel as RemoteViewModel;
+			if(vm != null)
 			{
-				object remote;
-				parameters.TryGetValue("Remote", out remote);
-				Remote = remote as Remote;
+				Remote = vm.Remote;
 			}
-			else
+		}
+
+		protected override void DetachViewModel(object viewModel)
+		{
+			base.DetachViewModel(viewModel);
+
+			var vm = viewModel as RemoteViewModel;
+			if(vm != null)
 			{
 				Remote = null;
 			}

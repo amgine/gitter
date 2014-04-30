@@ -65,7 +65,7 @@
 			// 
 			this._chkNoFF.AutoSize = true;
 			this._chkNoFF.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkNoFF.Location = new System.Drawing.Point(12, 25);
+			this._chkNoFF.Location = new System.Drawing.Point(13, 25);
 			this._chkNoFF.Name = "_chkNoFF";
 			this._chkNoFF.Size = new System.Drawing.Size(136, 20);
 			this._chkNoFF.TabIndex = 4;
@@ -76,7 +76,7 @@
 			// 
 			this._chkNoCommit.AutoSize = true;
 			this._chkNoCommit.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkNoCommit.Location = new System.Drawing.Point(12, 45);
+			this._chkNoCommit.Location = new System.Drawing.Point(13, 45);
 			this._chkNoCommit.Name = "_chkNoCommit";
 			this._chkNoCommit.Size = new System.Drawing.Size(113, 20);
 			this._chkNoCommit.TabIndex = 5;
@@ -97,7 +97,7 @@
 			// 
 			this._chkSquash.AutoSize = true;
 			this._chkSquash.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkSquash.Location = new System.Drawing.Point(12, 65);
+			this._chkSquash.Location = new System.Drawing.Point(13, 65);
 			this._chkSquash.Name = "_chkSquash";
 			this._chkSquash.Size = new System.Drawing.Size(90, 20);
 			this._chkSquash.TabIndex = 6;

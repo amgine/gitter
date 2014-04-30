@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,11 @@ namespace gitter.Native
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct RECT
 	{
+		public static RECT FromXYWH(int x, int y, int width, int height)
+		{
+			return new RECT(x, y, x + width, y + height);
+		}
+
 		public int left;
 		public int top;
 		public int right;
@@ -34,17 +39,17 @@ namespace gitter.Native
 
 		public RECT(int l, int t, int r, int b)
 		{
-			left = l;
-			top = t;
-			right = r;
+			left   = l;
+			top    = t;
+			right  = r;
 			bottom = b;
 		}
 
 		public RECT(Rectangle rect)
 		{
-			left = rect.Left;
-			top = rect.Top;
-			right = rect.Right;
+			left   = rect.Left;
+			top    = rect.Top;
+			right  = rect.Right;
 			bottom = rect.Bottom;
 		}
 	};

@@ -27,7 +27,7 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly string _hash;
+		private readonly Hash _hash;
 		private readonly string _author;
 		private readonly string _authorEmail;
 		private readonly DateTime _authorDate;
@@ -45,7 +45,7 @@ namespace gitter.Git
 		#region .ctor
 
 		public BlameCommit(
-			string hash,
+			Hash hash,
 			string author, string authorEmail, DateTime authorDate, string authorTimeZone,
 			string committer, string committerEmail, DateTime commitDate, string committerTimeZone,
 			string summary, bool isBoundary, string previous)
@@ -68,7 +68,7 @@ namespace gitter.Git
 
 		#region Properties
 
-		public string Hash
+		public Hash Hash
 		{
 			get { return _hash; }
 		}

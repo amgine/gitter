@@ -21,10 +21,8 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using Resources = gitter.Framework.Properties.Resources;
@@ -37,8 +35,8 @@ namespace gitter.Framework.Controls
 		private LogListBox _logListBox;
 
 		/// <summary>Initializes a new instance of the <see cref="LogView"/> class.</summary>
-		public LogView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(LogViewFactory.Guid, environment, parameters)
+		public LogView(IWorkingEnvironment environment)
+			: base(LogViewFactory.Guid, environment)
 		{
 			Height = 200;
 

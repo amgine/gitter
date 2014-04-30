@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ namespace gitter.Git.Gui.Views
 	{
 		private RemotesToolbar _toolbar;
 
-		public RemotesView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.RemotesViewGuid, gui, parameters)
+		public RemotesView(GuiProvider gui)
+			: base(Guids.RemotesViewGuid, gui)
 		{
 			InitializeComponent();
 
@@ -57,11 +57,7 @@ namespace gitter.Git.Gui.Views
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
 			var remote = ((CustomListBoxItem<Remote>)e.Item).DataContext;
-			var parameters = new Dictionary<string, object>()
-			{
-				{ "Remote", remote }
-			};
-			Gui.Environment.ViewDockService.ShowView(Guids.RemoteViewGuid, parameters, true);
+			Gui.Environment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(remote), true);
 		}
 
 		protected override void AttachToRepository(Repository repository)

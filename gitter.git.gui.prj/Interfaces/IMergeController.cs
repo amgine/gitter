@@ -22,7 +22,7 @@ namespace gitter.Git.Gui.Interfaces
 {
 	using gitter.Framework.Mvc;
 
-	interface IMergeController  : IViewController<IMergeView>
+	interface IMergeController : IViewController<IMergeView>
 	{
 		bool TryMerge();
 	}

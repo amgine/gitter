@@ -37,7 +37,7 @@ namespace gitter
 		public static DragImage Create(string path)
 		{
 			var size = GitterApplication.TextRenderer.MeasureText(
-				Utility.MeasurementGraphics,
+				GraphicsUtility.MeasurementGraphics,
 				path,
 				GitterApplication.FontManager.UIFont,
 				int.MaxValue / 2);

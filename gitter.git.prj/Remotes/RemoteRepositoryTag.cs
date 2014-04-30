@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace gitter.Git
 	{
 		private TagType _tagType;
 
-		internal RemoteRepositoryTag(RemoteReferencesCollection refs, string name, TagType type, string hash)
+		internal RemoteRepositoryTag(RemoteReferencesCollection refs, string name, TagType type, Hash hash)
 			: base(refs, name, hash)
 		{
 			_tagType = type;

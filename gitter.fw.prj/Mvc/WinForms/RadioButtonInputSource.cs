@@ -22,46 +22,37 @@ namespace gitter.Framework.Mvc.WinForms
 {
 	using System.Windows.Forms;
 
-	public class RadioButtonInputSource : IUserInputSource<bool>, IWin32ControlInputSource
+	public class RadioButtonInputSource : ControlInputSource<RadioButton, bool>
 	{
-		#region Data
-
-		private readonly RadioButton _radioButton;
-
-		#endregion
-
 		#region .ctor
 
 		public RadioButtonInputSource(RadioButton radionButton)
+			: base(radionButton)
 		{
-			Verify.Argument.IsNotNull(radionButton, "radionButton");
-
-			_radioButton = radionButton;
 		}
 
 		#endregion
 
-		#region IUserInputSource<bool> Members
+		#region Methods
 
-		public bool Value
+		protected override bool FetchValue()
 		{
-			get { return _radioButton.Checked; }
-			set { _radioButton.Checked = value; }
+			return Control.Checked;
 		}
 
-		public bool IsReadOnly
+		protected override void SetValue(bool value)
 		{
-			get { return !_radioButton.Enabled; }
-			set { _radioButton.Enabled = !value; }
+			Control.Checked = value;
 		}
 
-		#endregion
-
-		#region IWin32ControlInputSource Members
-
-		public Control Control
+		protected override void SubscribeToValueChangeEvent()
 		{
-			get { return _radioButton; }
+			Control.CheckedChanged += OnControlValueChanged;
+		}
+
+		protected override void UnsubscribeToValueChangeEvent()
+		{
+			Control.CheckedChanged -= OnControlValueChanged;
 		}
 
 		#endregion

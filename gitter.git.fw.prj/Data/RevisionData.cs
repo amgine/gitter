@@ -28,9 +28,8 @@ namespace gitter.Git.AccessLayer
 	{
 		#region Data
 
-		private readonly string _sha1;
-
-		private string _treeHash;
+		private readonly Hash _sha1;
+		private Hash _treeHash;
 		private RevisionData[] _parents;
 		private RevisionData[] _children;
 		private string _subject;
@@ -48,11 +47,8 @@ namespace gitter.Git.AccessLayer
 
 		#region .ctor
 
-		public RevisionData(string sha1)
+		public RevisionData(Hash sha1)
 		{
-			Verify.Argument.IsNotNull(sha1, "sha1");
-			Verify.Argument.IsTrue(sha1.Length == 40, "sha1");
-
 			_sha1 = sha1;
 			_dataFlags = RevisionField.SHA1;
 		}
@@ -61,12 +57,12 @@ namespace gitter.Git.AccessLayer
 
 		#region Properties
 
-		public string SHA1
+		public Hash SHA1
 		{
 			get { return _sha1; }
 		}
 
-		public string TreeHash
+		public Hash TreeHash
 		{
 			get { return _treeHash; }
 			set
@@ -184,6 +180,8 @@ namespace gitter.Git.AccessLayer
 
 		#endregion
 
+		#region Methods
+
 		public bool DataValid(RevisionField data)
 		{
 			return (_dataFlags & data) == data;
@@ -191,12 +189,14 @@ namespace gitter.Git.AccessLayer
 
 		string INamedObject.Name
 		{
-			get { return _sha1; }
+			get { return _sha1.ToString(); }
 		}
 
 		public override string ToString()
 		{
-			return _sha1;
+			return _sha1.ToString();
 		}
+
+		#endregion
 	}
 }

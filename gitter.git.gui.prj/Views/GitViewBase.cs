@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@ namespace gitter.Git.Gui.Views
 		{
 		}
 
-		public GitViewBase(Guid guid, GuiProvider guiProvider, IDictionary<string, object> parameters)
-			: base(guid, guiProvider.Environment, parameters)
+		public GitViewBase(Guid guid, GuiProvider guiProvider)
+			: base(guid, guiProvider.Environment)
 		{
 			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
@@ -51,20 +51,12 @@ namespace gitter.Git.Gui.Views
 
 		protected void ShowDiffView(IDiffSource diffSource)
 		{
-			WorkingEnvironment.ViewDockService.ShowView(Guids.DiffViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "source", diffSource }
-				});
+			WorkingEnvironment.ViewDockService.ShowView(Guids.DiffViewGuid, new DiffViewModel(diffSource, null));
 		}
 
 		protected void ShowContextualDiffView(IDiffSource diffSource)
 		{
-			WorkingEnvironment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "source", diffSource }
-				}, false);
+			WorkingEnvironment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid, new DiffViewModel(diffSource, null), false);
 		}
 
 		protected override void OnCreateControl()

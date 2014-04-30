@@ -29,7 +29,7 @@ namespace gitter
 	{
 		public static void DrawRoundedRectangle(this Graphics g, Pen pen, RectangleF rect, float cornerRadius)
 		{
-			using(var gp = Utility.GetRoundedRectangle(rect, cornerRadius))
+			using(var gp = GraphicsUtility.GetRoundedRectangle(rect, cornerRadius))
 			{
 				g.DrawPath(pen, gp);
 			}
@@ -37,7 +37,7 @@ namespace gitter
 
 		public static void FillRoundedRectangle(this Graphics g, Brush brush, RectangleF rect, float cornerRadius)
 		{
-			using(var gp = Utility.GetRoundedRectangle(rect, cornerRadius))
+			using(var gp = GraphicsUtility.GetRoundedRectangle(rect, cornerRadius))
 			{
 				g.FillPath(brush, gp);
 			}
@@ -45,7 +45,7 @@ namespace gitter
 
 		public static void FillRoundedRectangle(this Graphics g, Brush brush, RectangleF rect, float topLeftCorner, float topRightCorner, float bottomLeftCorner, float bottomRightCorner)
 		{
-			using(var gp = Utility.GetRoundedRectangle(rect, topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner))
+			using(var gp = GraphicsUtility.GetRoundedRectangle(rect, topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner))
 			{
 				g.FillPath(brush, gp);
 			}
@@ -53,7 +53,7 @@ namespace gitter
 
 		public static void FillRoundedRectangle(this Graphics g, Brush fillBrush, Pen borderPen, RectangleF rect, float cornerRadius)
 		{
-			using(var gp = Utility.GetRoundedRectangle(rect, cornerRadius))
+			using(var gp = GraphicsUtility.GetRoundedRectangle(rect, cornerRadius))
 			{
 				g.FillPath(fillBrush, gp);
 				g.DrawPath(borderPen, gp);

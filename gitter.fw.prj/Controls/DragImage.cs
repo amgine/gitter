@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,8 +110,8 @@ namespace gitter.Framework.Controls
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			e.Graphics.Clear(TransparencyKey);
-			e.Graphics.TextContrast = Utility.TextContrast;
-			e.Graphics.TextRenderingHint = Utility.TextRenderingHint;
+			e.Graphics.TextContrast      = GraphicsUtility.TextContrast;
+			e.Graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
 			if(_paintProc != null) _paintProc(e);
 		}
 

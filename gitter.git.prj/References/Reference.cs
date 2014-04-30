@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,11 +159,29 @@ namespace gitter.Git
 
 		#region Static
 
+		public static string GetReferenceTypeName(ReferenceType referenceType)
+		{
+			switch(referenceType)
+			{
+				case ReferenceType.Branch:
+					return Resources.StrBranch;
+				case ReferenceType.Tag:
+					return Resources.StrTag;
+				case ReferenceType.RemoteBranch:
+					return Resources.StrBranch;
+				case ReferenceType.Remote:
+					return Resources.StrRemote;
+				default:
+					return string.Empty;
+			}
+		}
+
 		/// <summary>Validates the reference name.</summary>
 		/// <param name="name">Reference name.</param>
+		/// <param name="referenceType">Reference type.</param>
 		/// <param name="errorMessage">Error message.</param>
 		/// <returns><c>true</c> if <paramref name="name"/> is a valid reference name; otherwise, <c>false</c>.</returns>
-		public static bool ValidateName(string name, out string errorMessage)
+		public static bool ValidateName(string name, ReferenceType referenceType, out string errorMessage)
 		{
 			/*
 			   1. They can include slash / for hierarchical (directory) grouping, but no slash-separated component can begin with a dot ..
@@ -177,23 +195,25 @@ namespace gitter.Git
 			*/
 			if(string.IsNullOrWhiteSpace(name))
 			{
-				errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeEmpty, Resources.StrReference);
+				errorMessage = string.Format(CultureInfo.InvariantCulture,
+					Resources.ErrNameCannotBeEmpty, GetReferenceTypeName(referenceType));
 				return false;
 			}
 			name = name.Trim();
 			if(name[0] == '-')
 			{
-				errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, "-");
+				errorMessage = string.Format(CultureInfo.InvariantCulture,
+					Resources.ErrNameCannotBeginWithCharacter, GetReferenceTypeName(referenceType), "-");
 				return false;
 			}
 			for(int i = 0; i < name.Length; ++i)
 			{
 				bool lastchar = i == name.Length - 1;
 				var c = name[i];
-				var cint = (int)c;
-				if(cint < 32 || c == 127)
+				if(c < 32 || c == 127)
 				{
-					errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainASCIIControlCharacters, Resources.StrReference);
+					errorMessage = string.Format(CultureInfo.InvariantCulture,
+						Resources.ErrNameCannotContainASCIIControlCharacters, GetReferenceTypeName(referenceType));
 					return false;
 				}
 				switch(c)
@@ -201,54 +221,60 @@ namespace gitter.Git
 					case '/':
 						if(i == 0)
 						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, "/");
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotBeginWithCharacter, GetReferenceTypeName(referenceType), "/");
 							return false;
 						}
-						else if(lastchar)
+						if(lastchar)
 						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotEndWithCharacter, Resources.StrReference, "/");
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotEndWithCharacter, GetReferenceTypeName(referenceType), "/");
 							return false;
 						}
-						else
+						if(name[i + 1] == '.')
 						{
-							if(name[i + 1] == '.')
-							{
-								errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrSlashSeparatedComponentCannotBeginWithCharacter, ".");
-								return false;
-							}
-							if(name[i + 1] == '/')
-							{
-								errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainSequence, Resources.StrReference, "//");
-								return false;
-							}
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrSlashSeparatedComponentCannotBeginWithCharacter, ".");
+							return false;
+						}
+						if(name[i + 1] == '/')
+						{
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotContainSequence, GetReferenceTypeName(referenceType), "//");
+							return false;
 						}
 						break;
 					case '.':
 						if(i == 0)
 						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotBeginWithCharacter, Resources.StrReference, ".");
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotBeginWithCharacter, GetReferenceTypeName(referenceType), ".");
 							return false;
 						}
 						if(lastchar)
 						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotEndWithCharacter, Resources.StrReference, ".");
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotEndWithCharacter, GetReferenceTypeName(referenceType), ".");
 							return false;
 						}
 						if(!lastchar && name[i + 1] == '.')
 						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainSequence, Resources.StrReference, "..");
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotContainSequence, GetReferenceTypeName(referenceType), "..");
 							return false;
 						}
 						if(i == name.Length - 5 && name.IndexOf("lock", i + 1, 4) != -1)
 						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotEndWithSequence, Resources.StrReference, ".lock");
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotEndWithSequence, GetReferenceTypeName(referenceType), ".lock");
 							return false;
 						}
 						break;
 					case '@':
 						if(!lastchar && (name[i + 1] == '{'))
 						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainSequence, Resources.StrReference, "@{");
+							errorMessage = string.Format(CultureInfo.InvariantCulture,
+								Resources.ErrNameCannotContainSequence, GetReferenceTypeName(referenceType), "@{");
 							return false;
 						}
 						break;
@@ -260,7 +286,8 @@ namespace gitter.Git
 					case '?':
 					case '*':
 					case '[':
-						errorMessage = string.Format(CultureInfo.InvariantCulture, Resources.ErrNameCannotContainCharacter, Resources.StrReference, c);
+						errorMessage = string.Format(CultureInfo.InvariantCulture,
+							Resources.ErrNameCannotContainCharacter, referenceType, c);
 						return false;
 				}
 			}

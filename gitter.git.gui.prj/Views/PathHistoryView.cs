@@ -43,13 +43,12 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		public PathHistoryView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.PathHistoryViewGuid, gui, parameters)
+		public PathHistoryView(GuiProvider gui)
+			: base(Guids.PathHistoryViewGuid, gui)
 		{
 			RemoveGraphColumn();
 			RevisionListBox.PreviewKeyDown += OnKeyDown;
 			AddTopToolStrip(_toolBar = new PathHistoryToolbar(this));
-			ApplyParameters(parameters);
 		}
 
 		#endregion
@@ -66,16 +65,31 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			base.ApplyParameters(parameters);
-			var logSource = parameters["source"] as PathLogSource;
-			if(logSource != null)
+			base.AttachViewModel(viewModel);
+
+			var vm = viewModel as HistoryViewModel;
+			if(vm != null)
 			{
-				LogSource = logSource;
-				Text      = Resources.StrHistory + ": " + logSource.ToString();
+				LogSource = vm.LogSource as PathLogSource;
+				if(LogSource != null)
+				{
+					Text = Resources.StrHistory + ": " + LogSource.ToString();
+				}
+				else
+				{
+					Text = Resources.StrHistory;
+				}
 			}
-			else
+		}
+
+		protected override void DetachViewModel(object viewModel)
+		{
+			base.DetachViewModel(viewModel);
+
+			var vm = viewModel as HistoryViewModel;
+			if(vm != null)
 			{
 				LogSource = null;
 				Text      = Resources.StrHistory;

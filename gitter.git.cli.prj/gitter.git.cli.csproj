@@ -43,6 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
+      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
+      <Name>gitter.git.fw</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
@@ -134,14 +144,20 @@
     <Compile Include="Methods\FetchOrPullImpl.cs" />
     <Compile Include="Methods\FormatMergeMessageImpl.cs" />
     <Compile Include="Methods\InitImpl.cs" />
+    <Compile Include="Methods\ParserBasedFunctionImpl.cs" />
     <Compile Include="Methods\PushImpl.cs" />
     <Compile Include="Methods\QueryReflogImpl.cs" />
+    <Compile Include="Methods\QueryStatusImpl.cs" />
+    <Compile Include="Methods\QueryRevisionsImpl.cs" />
     <Compile Include="Methods\QueryStashImpl.cs" />
     <Compile Include="Methods\QuerySymbolicReferenceImpl.cs" />
     <Compile Include="Methods\QueryTagMessageImpl.cs" />
     <Compile Include="MSysGitAccessorProvider.cs" />
     <Compile Include="MSysGitDownloader.cs" />
     <Compile Include="OutputParser.cs" />
+    <Compile Include="Parsers\LogParser.cs" />
+    <Compile Include="Parsers\RawLogParser.cs" />
+    <Compile Include="Parsers\StatusParser.cs" />
     <Compile Include="Process\GitInput.cs" />
     <Compile Include="Process\GitOutput.cs" />
     <Compile Include="Process\GitProcess.cs" />
@@ -162,16 +178,6 @@
     <None Include="..\common\key.snk">
       <Link>Properties\key.snk</Link>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
-      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
-      <Name>gitter.fw</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
-      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
-      <Name>gitter.git.fw</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\CliOptionsPage.resx">

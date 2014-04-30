@@ -264,8 +264,10 @@
 			// 
 			// _btnAddRefspec
 			// 
+			this._btnAddRefspec.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnAddRefspec.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._btnAddRefspec.Location = new System.Drawing.Point(319, 132);
+			this._btnAddRefspec.Location = new System.Drawing.Point(322, 132);
 			this._btnAddRefspec.Name = "_btnAddRefspec";
 			this._btnAddRefspec.Size = new System.Drawing.Size(75, 23);
 			this._btnAddRefspec.TabIndex = 15;
@@ -286,7 +288,7 @@
 			// 
 			this._txtRefspec.Location = new System.Drawing.Point(106, 132);
 			this._txtRefspec.Name = "_txtRefspec";
-			this._txtRefspec.Size = new System.Drawing.Size(207, 23);
+			this._txtRefspec.Size = new System.Drawing.Size(210, 23);
 			this._txtRefspec.TabIndex = 14;
 			// 
 			// _radFetch

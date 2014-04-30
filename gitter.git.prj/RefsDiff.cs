@@ -38,7 +38,7 @@ namespace gitter.Git
 							refState2.ReferenceType,
 							refState2.FullName,
 							refState2.Name,
-							null,
+							default(Hash),
 							refState2.Hash,
 							ReferenceChangeType.Added));
 				}
@@ -68,7 +68,7 @@ namespace gitter.Git
 							refState1.FullName,
 							refState1.Name,
 							refState1.Hash,
-							null,
+							default(Hash),
 							ReferenceChangeType.Removed));
 				}
 			}

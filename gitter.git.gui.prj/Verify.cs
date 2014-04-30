@@ -292,6 +292,7 @@ namespace gitter
 
 			/// <summary>Validates the reference name.</summary>
 			/// <param name="referenceName">Reference name.</param>
+			/// <param name="referenceType">Reference type.</param>
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			/// <exception cref="ArgumentNullException">
 			/// <paramref name="referenceName"/> is <c>null</c>.
@@ -304,7 +305,7 @@ namespace gitter
 			#if FW_4_5
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
-			public static void IsValidReferenceName(string referenceName, string parameterName)
+			public static void IsValidReferenceName(string referenceName, ReferenceType referenceType, string parameterName)
 			{
 				Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -313,7 +314,7 @@ namespace gitter
 					throw new ArgumentNullException(parameterName);
 				}
 				string msg;
-				if(!Reference.ValidateName(referenceName, out msg))
+				if(!Reference.ValidateName(referenceName, referenceType, out msg))
 				{
 					throw new ArgumentException(msg, parameterName);
 				}

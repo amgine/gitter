@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,12 +67,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Verify.Argument.IsNotNull(provider, "provider");
 
-			_provider				= provider;
-			_executor				= new GitCommandExecutor(this);
-			_commandBuilder			= new CommandBuilder(this);
-			_outputParser			= new OutputParser(this);
-			_autodetectGitExePath	= true;
-			_manualGitExePath		= string.Empty;
+			_provider             = provider;
+			_executor             = new GitCommandExecutor(this);
+			_commandBuilder       = new CommandBuilder(this);
+			_outputParser         = new OutputParser(this);
+			_autodetectGitExePath = true;
+			_manualGitExePath     = string.Empty;
 
 			GitProcess.GitExePath = GitExecutablePath;
 
@@ -308,10 +308,10 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Verify.Argument.IsNotNull(section, "section");
 
-			ManualGitExePath			= section.GetValue("Path", string.Empty);
-			AutodetectGitExePath		= section.GetValue("Autodetect", true);
-			LogCalls					= section.GetValue("LogCLICalls", false);
-			EnableAnsiCodepageFallback	= section.GetValue("EnableAnsiCodepageFallback", false);
+			ManualGitExePath           = section.GetValue("Path", string.Empty);
+			AutodetectGitExePath       = section.GetValue("Autodetect", true);
+			LogCalls                   = section.GetValue("LogCLICalls", false);
+			EnableAnsiCodepageFallback = section.GetValue("EnableAnsiCodepageFallback", false);
 
 			GitProcess.GitExePath = GitExecutablePath;
 		}

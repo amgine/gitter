@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, "name");
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
 			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
@@ -93,7 +93,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision, string message, bool sign)
 		{
-			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, "name");
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
 			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
@@ -128,7 +128,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision, string message, string keyId)
 		{
-			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, "name");
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
 			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));

@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -112,6 +114,8 @@
     <Compile Include="GitEnvironment.cs" />
     <Compile Include="GitExceptions.cs" />
     <Compile Include="GitUtils.cs" />
+    <Compile Include="Hash.cs" />
+    <Compile Include="HashStringCache.cs" />
     <Compile Include="IConfigAccessor.cs" />
     <Compile Include="IGitAccessor.cs" />
     <Compile Include="IGitAccessorProvider.cs" />

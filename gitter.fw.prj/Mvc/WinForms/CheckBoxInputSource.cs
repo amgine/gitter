@@ -23,7 +23,7 @@ namespace gitter.Framework.Mvc.WinForms
 	using System;
 	using System.Windows.Forms;
 
-	public class CheckBoxInputSource : ControlInputSource<CheckBox, bool>, IWin32ControlInputSource
+	public class CheckBoxInputSource : ControlInputSource<CheckBox, bool>
 	{
 		#region .ctor
 

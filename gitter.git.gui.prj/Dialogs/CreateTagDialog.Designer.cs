@@ -60,7 +60,7 @@
 			this.panel2.Controls.Add(this._grpSigning);
 			this.panel2.Controls.Add(this._radUseKeyId);
 			this.panel2.Controls.Add(this._radUseDefaultEmailKey);
-			this.panel2.Location = new System.Drawing.Point(0, 285);
+			this.panel2.Location = new System.Drawing.Point(0, 289);
 			this.panel2.Margin = new System.Windows.Forms.Padding(0);
 			this.panel2.Name = "panel2";
 			this.panel2.Size = new System.Drawing.Size(397, 75);
@@ -68,8 +68,8 @@
 			// 
 			// _txtKeyId
 			// 
-			this._txtKeyId.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtKeyId.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtKeyId.Enabled = false;
 			this._txtKeyId.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this._txtKeyId.Location = new System.Drawing.Point(142, 44);
@@ -79,8 +79,8 @@
 			// 
 			// _grpSigning
 			// 
-			this._grpSigning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grpSigning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpSigning.Location = new System.Drawing.Point(0, 0);
 			this._grpSigning.Name = "_grpSigning";
 			this._grpSigning.Size = new System.Drawing.Size(397, 19);
@@ -118,16 +118,16 @@
 			// 
 			this.panel1.Controls.Add(this._grpMessage);
 			this.panel1.Controls.Add(this._txtMessage);
-			this.panel1.Location = new System.Drawing.Point(0, 106);
+			this.panel1.Location = new System.Drawing.Point(0, 109);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(397, 179);
+			this.panel1.Size = new System.Drawing.Size(397, 180);
 			this.panel1.TabIndex = 14;
 			// 
 			// _grpMessage
 			// 
-			this._grpMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grpMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpMessage.Location = new System.Drawing.Point(0, 0);
 			this._grpMessage.Name = "_grpMessage";
 			this._grpMessage.Size = new System.Drawing.Size(397, 19);
@@ -138,16 +138,16 @@
 			// 
 			this._txtMessage.AcceptsReturn = true;
 			this._txtMessage.AcceptsTab = true;
-			this._txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtMessage.Enabled = false;
 			this._txtMessage.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this._txtMessage.Location = new System.Drawing.Point(15, 25);
 			this._txtMessage.Multiline = true;
 			this._txtMessage.Name = "_txtMessage";
 			this._txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this._txtMessage.Size = new System.Drawing.Size(382, 151);
+			this._txtMessage.Size = new System.Drawing.Size(382, 152);
 			this._txtMessage.TabIndex = 5;
 			this._txtMessage.WordWrap = false;
 			// 
@@ -157,7 +157,7 @@
 			this._pnlOptions.Controls.Add(this._grpOptions);
 			this._pnlOptions.Controls.Add(this._radSimple);
 			this._pnlOptions.Controls.Add(this._radAnnotated);
-			this._pnlOptions.Location = new System.Drawing.Point(0, 58);
+			this._pnlOptions.Location = new System.Drawing.Point(0, 61);
 			this._pnlOptions.Margin = new System.Windows.Forms.Padding(0);
 			this._pnlOptions.Name = "_pnlOptions";
 			this._pnlOptions.Size = new System.Drawing.Size(397, 48);
@@ -177,8 +177,8 @@
 			// 
 			// _grpOptions
 			// 
-			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._grpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._grpOptions.Location = new System.Drawing.Point(0, 0);
 			this._grpOptions.Name = "_grpOptions";
 			this._grpOptions.Size = new System.Drawing.Size(397, 19);
@@ -214,7 +214,7 @@
 			// _lblRevision
 			// 
 			this._lblRevision.AutoSize = true;
-			this._lblRevision.Location = new System.Drawing.Point(0, 32);
+			this._lblRevision.Location = new System.Drawing.Point(0, 35);
 			this._lblRevision.Name = "_lblRevision";
 			this._lblRevision.Size = new System.Drawing.Size(74, 15);
 			this._lblRevision.TabIndex = 8;
@@ -222,8 +222,8 @@
 			// 
 			// _txtName
 			// 
-			this._txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtName.Location = new System.Drawing.Point(94, 3);
 			this._txtName.Name = "_txtName";
 			this._txtName.Size = new System.Drawing.Size(303, 23);
@@ -240,10 +240,10 @@
 			// 
 			// _txtRevision
 			// 
-			this._txtRevision.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._txtRevision.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtRevision.FormattingEnabled = true;
-			this._txtRevision.Location = new System.Drawing.Point(94, 29);
+			this._txtRevision.Location = new System.Drawing.Point(94, 32);
 			this._txtRevision.Name = "_txtRevision";
 			this._txtRevision.Size = new System.Drawing.Size(303, 23);
 			this._txtRevision.TabIndex = 1;
@@ -259,7 +259,7 @@
 			this.Controls.Add(this._txtName);
 			this.Controls.Add(this._lblName);
 			this.Name = "CreateTagDialog";
-			this.Size = new System.Drawing.Size(400, 361);
+			this.Size = new System.Drawing.Size(400, 364);
 			this.panel2.ResumeLayout(false);
 			this.panel2.PerformLayout();
 			this.panel1.ResumeLayout(false);

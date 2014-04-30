@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,8 +48,8 @@ namespace gitter.Redmine.Gui
 
 		#region .ctor
 
-		public NewsView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(Guids.NewsViewGuid, environment, parameters)
+		public NewsView(IWorkingEnvironment environment)
+			: base(Guids.NewsViewGuid, environment)
 		{
 			InitializeComponent();
 

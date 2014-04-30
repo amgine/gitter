@@ -46,8 +46,8 @@ namespace gitter.Redmine.Gui
 
 		#region .ctor
 
-		public IssuesView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(Guids.IssuesViewGuid, environment, parameters)
+		public IssuesView(IWorkingEnvironment environment)
+			: base(Guids.IssuesViewGuid, environment)
 		{
 			InitializeComponent();
 

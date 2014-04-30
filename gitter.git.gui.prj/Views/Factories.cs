@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new CommitView(parameters, _guiProvider);
+			return new CommitView(_guiProvider);
 		}
 	}
 
@@ -60,9 +60,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new ConfigView(parameters, _guiProvider);
+			return new ConfigView(_guiProvider);
 		}
 	}
 
@@ -78,9 +78,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new GitView(parameters, _guiProvider);
+			return new GitView(_guiProvider);
 		}
 	}
 
@@ -96,9 +96,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new HistoryView(parameters, _guiProvider);
+			return new HistoryView(_guiProvider);
 		}
 	}
 
@@ -114,9 +114,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new PathHistoryView(parameters, _guiProvider);
+			return new PathHistoryView(_guiProvider);
 		}
 	}
 
@@ -132,9 +132,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new ReflogView(parameters, _guiProvider);
+			return new ReflogView(_guiProvider);
 		}
 	}
 
@@ -150,9 +150,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new MaintenanceView(parameters, _guiProvider);
+			return new MaintenanceView(_guiProvider);
 		}
 	}
 
@@ -169,9 +169,9 @@ namespace gitter.Git.Gui.Views
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new ReferencesView(parameters, _guiProvider);
+			return new ReferencesView(_guiProvider);
 		}
 	}
 
@@ -188,9 +188,9 @@ namespace gitter.Git.Gui.Views
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new RemotesView(parameters, _guiProvider);
+			return new RemotesView(_guiProvider);
 		}
 	}
 
@@ -207,9 +207,9 @@ namespace gitter.Git.Gui.Views
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new RemoteView(parameters, _guiProvider);
+			return new RemoteView(_guiProvider);
 		}
 	}
 
@@ -226,9 +226,9 @@ namespace gitter.Git.Gui.Views
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new StashView(parameters, _guiProvider);
+			return new StashView(_guiProvider);
 		}
 	}
 
@@ -245,9 +245,9 @@ namespace gitter.Git.Gui.Views
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new SubmodulesView(parameters, _guiProvider);
+			return new SubmodulesView(_guiProvider);
 		}
 	}
 
@@ -263,9 +263,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new ContributorsView(parameters, _guiProvider);
+			return new ContributorsView(_guiProvider);
 		}
 	}
 
@@ -281,9 +281,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new TreeView(parameters, _guiProvider);
+			return new TreeView(_guiProvider);
 		}
 	}
 
@@ -299,9 +299,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new DiffView(Guids.DiffViewGuid, parameters, _guiProvider);
+			return new DiffView(Guids.DiffViewGuid, _guiProvider);
 		}
 	}
 
@@ -317,9 +317,9 @@ namespace gitter.Git.Gui.Views
 			_guiProvider = guiProvider;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new BlameView(parameters, _guiProvider);
+			return new BlameView(_guiProvider);
 		}
 	}
 
@@ -336,9 +336,9 @@ namespace gitter.Git.Gui.Views
 			DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new DiffView(Guids.ContextualDiffViewGuid, parameters, _guiProvider);
+			return new DiffView(Guids.ContextualDiffViewGuid, _guiProvider);
 		}
 	}
 }

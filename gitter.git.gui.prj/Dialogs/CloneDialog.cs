@@ -22,6 +22,8 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
+	using System.IO;
+	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Mvc;
@@ -35,13 +37,146 @@ namespace gitter.Git.Gui.Dialogs
 	[ToolboxItem(false)]
 	partial class CloneDialog : GitDialogBase, IExecutableDialog, ICloneView
 	{
+		#region Helpers
+
+		private sealed class RepositoryPathInput : IUserInputSource<string>, IWin32ControlInputSource
+		{
+			#region Data
+
+			private readonly TextBoxBase _txtPath;
+			private readonly TextBoxBase _txtUrl;
+			private readonly CheckBox _chkAppendUrlToPath;
+
+			#endregion
+
+			#region Evrnts
+
+			public event EventHandler ValueChanged;
+
+			private void OnValueChanged()
+			{
+				var handler = ValueChanged;
+				if(handler != null) handler(this, EventArgs.Empty);
+			}
+
+			#endregion
+
+			#region .ctor
+
+			public RepositoryPathInput(TextBoxBase txtPath, TextBoxBase txtUrl, CheckBox chkAppendUrlToPath)
+			{
+				Verify.Argument.IsNotNull(txtPath, "txtPath");
+				Verify.Argument.IsNotNull(txtUrl, "txtUrl");
+				Verify.Argument.IsNotNull(chkAppendUrlToPath, "chkAppendUrlToPath");
+
+				_txtPath = txtPath;
+				_txtUrl = txtUrl;
+				_chkAppendUrlToPath = chkAppendUrlToPath;
+
+				_chkAppendUrlToPath.CheckedChanged += OnAppendUrlToPathCheckedChanged;
+				_txtPath.TextChanged += OnPathTextChanged;
+				_txtUrl.TextChanged  += OnUrlTextChanged;
+			}
+
+			#endregion
+
+			#region Methods
+
+			private void OnAppendUrlToPathCheckedChanged(object sender, EventArgs e)
+			{
+				OnValueChanged();
+			}
+
+			private void OnPathTextChanged(object sender, EventArgs e)
+			{
+				OnValueChanged();
+			}
+
+			private void OnUrlTextChanged(object sender, EventArgs e)
+			{
+				if(_chkAppendUrlToPath.Checked)
+				{
+					OnValueChanged();
+				}
+			}
+
+			private static string AppendUrlToPath(string path, string url)
+			{
+				if(!string.IsNullOrWhiteSpace(url))
+				{
+					try
+					{
+						path = Path.Combine(path, GitUtils.GetHumanishName(url));
+					}
+					catch(Exception exc)
+					{
+						if(exc.IsCritical())
+						{
+							throw;
+						}
+					}
+				}
+				return path;
+			}
+
+			#endregion
+
+			#region IUserInputSource<string> Members
+
+			public string Value
+			{
+				get
+				{
+					if(_chkAppendUrlToPath.Checked)
+					{
+						return AppendUrlToPath(_txtPath.Text.Trim(), _txtUrl.Text.Trim());
+					}
+					else
+					{
+						return _txtPath.Text;
+					}
+				}
+				set
+				{
+					_chkAppendUrlToPath.Checked = false;
+					_txtPath.Text = value;
+				}
+			}
+
+			#endregion
+
+			#region IUserInputSource Members
+
+			public bool IsReadOnly
+			{
+				get { return _txtUrl.ReadOnly; }
+				set
+				{
+					_txtUrl.ReadOnly = value;
+					_chkAppendUrlToPath.Enabled = value;
+				}
+			}
+
+			#endregion
+
+			#region IWin32ControlInputSource Members
+
+			public Control Control
+			{
+				get { return _txtPath; }
+			}
+
+			#endregion
+		}
+
+		#endregion
+
 		#region Data
 
 		private readonly IGitRepositoryProvider _gitRepositoryProvider;
 		private readonly IUserInputSource<string> _urlInput;
-		private readonly IUserInputSource<string> _repositoryPathInput;
+		private readonly RepositoryPathInput _repositoryPathInput;
 		private readonly IUserInputSource<string> _remoteNameInput;
-		private readonly IUserInputSource<bool> _appendRepositoryNameFromUrlInput;
 		private readonly IUserInputSource<bool> _shallowCloneInput;
 		private readonly IUserInputSource<int> _depthInput;
 		private readonly IUserInputSource<bool> _useTemplateInput;
@@ -52,7 +187,6 @@ namespace gitter.Git.Gui.Dialogs
 		private readonly IUserInputSource<bool> _recursiveInput;
 		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly ICloneController _controller;
-		private string _acceptedPath;
 
 		#endregion
 
@@ -69,20 +203,20 @@ namespace gitter.Git.Gui.Dialogs
 
 			var inputs = new IUserInputSource[]
 			{
-				_urlInput                         = new TextBoxInputSource(_txtUrl),
-				_repositoryPathInput              = new TextBoxInputSource(_txtPath),
-				_remoteNameInput                  = new TextBoxInputSource(_txtRemoteName),
-				_appendRepositoryNameFromUrlInput = new CheckBoxInputSource(_chkAppendRepositoryNameFromUrl),
-				_shallowCloneInput                = new CheckBoxInputSource(_chkShallowClone),
-				_depthInput                       = new NumericUpDownInputSource<int>(_numDepth, value => (int)value, value => value),
-				_useTemplateInput                 = new CheckBoxInputSource(_chkUseTemplate),
-				_templatePathInput                = new TextBoxInputSource(_txtTemplate),
-				_bareInput                        = new CheckBoxInputSource(_chkBare),
-				_mirrorInput                      = new CheckBoxInputSource(_chkMirror),
-				_noCheckoutInput                  = new CheckBoxInputSource(_chkNoCheckout),
-				_recursiveInput                   = new CheckBoxInputSource(_chkRecursive),
+				_urlInput            = new TextBoxInputSource(_txtUrl),
+				_repositoryPathInput = new RepositoryPathInput(_txtPath, _txtUrl, _chkAppendRepositoryNameFromUrl),
+				_remoteNameInput     = new TextBoxInputSource(_txtRemoteName),
+				_shallowCloneInput   = new CheckBoxInputSource(_chkShallowClone),
+				_depthInput          = new NumericUpDownInputSource<int>(_numDepth, value => (int)value, value => value),
+				_useTemplateInput    = new CheckBoxInputSource(_chkUseTemplate),
+				_templatePathInput   = new TextBoxInputSource(_txtTemplate),
+				_bareInput           = new CheckBoxInputSource(_chkBare),
+				_mirrorInput         = new CheckBoxInputSource(_chkMirror),
+				_noCheckoutInput     = new CheckBoxInputSource(_chkNoCheckout),
+				_recursiveInput      = new CheckBoxInputSource(_chkRecursive),
 			};
 			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			_repositoryPathInput.ValueChanged += (s, e) => UpdateTargetPathText();
 
 			UpdateTargetPathText();
 
@@ -113,11 +247,6 @@ namespace gitter.Git.Gui.Dialogs
 		public IUserInputSource<string> RepositoryPath
 		{
 			get { return _repositoryPathInput; }
-		}
-
-		public IUserInputSource<bool> AppendRepositoryNameFromUrl
-		{
-			get { return _appendRepositoryNameFromUrlInput; }
 		}
 
 		public IUserInputSource<bool> Bare
@@ -168,25 +297,6 @@ namespace gitter.Git.Gui.Dialogs
 		public IUserInputErrorNotifier ErrorNotifier
 		{
 			get { return _errorNotifier; }
-		}
-
-		public string TargetPath
-		{
-			get
-			{
-				if(_chkAppendRepositoryNameFromUrl.Checked)
-				{
-					string path = _txtPath.Text.Trim();
-					string url = _txtUrl.Text.Trim();
-					return AppendUrlToPath(path, url);
-				}
-				return _txtPath.Text.Trim();
-			}
-		}
-
-		public string AcceptedPath
-		{
-			get { return _acceptedPath; }
 		}
 
 		#endregion
@@ -254,8 +364,8 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void UpdateTargetPathText()
 		{
-			var path = TargetPath;
-			if(path.Length == 0)
+			var path = RepositoryPath.Value;
+			if(string.IsNullOrWhiteSpace(path))
 			{
 				_lblRealPath.Text = Resources.StrlNoPathSpecified.SurroundWith("<", ">");
 			}
@@ -263,22 +373,6 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				_lblRealPath.Text = path;
 			}
-		}
-
-		private void _txtUrl_TextChanged(object sender, EventArgs e)
-		{
-			if(_chkAppendRepositoryNameFromUrl.Checked)
-				UpdateTargetPathText();
-		}
-
-		private void _txtPath_TextChanged(object sender, EventArgs e)
-		{
-			UpdateTargetPathText();
-		}
-
-		private void _chkAppendRepositoryNameFromUrl_CheckedChanged(object sender, EventArgs e)
-		{
-			UpdateTargetPathText();
 		}
 
 		private void _chkUseTemplate_CheckedChanged(object sender, EventArgs e)
@@ -306,9 +400,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public bool Execute()
 		{
-			var result = _controller.TryClone();
-			_acceptedPath = TargetPath;
-			return result;
+			return _controller.TryClone();
 		}
 
 		#endregion

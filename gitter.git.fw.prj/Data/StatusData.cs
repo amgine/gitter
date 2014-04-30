@@ -26,9 +26,10 @@ namespace gitter.Git.AccessLayer
 	/// <summary>Working tree status information.</summary>
 	public sealed class StatusData
 	{
+		#region Data
+
 		private readonly IDictionary<string, TreeFileData> _stagedFiles;
 		private readonly IDictionary<string, TreeFileData> _unstagedFiles;
-
 		private readonly int _unstagedUntrackedCount;
 		private readonly int _unstagedRemovedCount;
 		private readonly int _unstagedModifiedCount;
@@ -36,6 +37,10 @@ namespace gitter.Git.AccessLayer
 		private readonly int _stagedAddedCount;
 		private readonly int _stagedModifiedCount;
 		private readonly int _stagedRemovedCount;
+
+		#endregion
+
+		#region .ctor
 
 		public StatusData(
 			IDictionary<string, TreeFileData> stagedFiles,
@@ -48,17 +53,20 @@ namespace gitter.Git.AccessLayer
 			int stagedModifiedCount,
 			int stagedRemovedCount)
 		{
-			_stagedFiles = stagedFiles;
-			_unstagedFiles = unstagedFiles;
-
+			_stagedFiles            = stagedFiles;
+			_unstagedFiles          = unstagedFiles;
 			_unstagedUntrackedCount = unstagedUntrackedCount;
-			_unstagedRemovedCount = unstagedRemovedCount;
-			_unstagedModifiedCount = unstagedModifiedCount;
-			_unmergedCount = unmergedCount;
-			_stagedAddedCount = stagedAddedCount;
-			_stagedModifiedCount = stagedModifiedCount;
-			_stagedRemovedCount = stagedRemovedCount;
+			_unstagedRemovedCount   = unstagedRemovedCount;
+			_unstagedModifiedCount  = unstagedModifiedCount;
+			_unmergedCount          = unmergedCount;
+			_stagedAddedCount       = stagedAddedCount;
+			_stagedModifiedCount    = stagedModifiedCount;
+			_stagedRemovedCount     = stagedRemovedCount;
 		}
+
+		#endregion
+
+		#region Properties
 
 		public IDictionary<string, TreeFileData> StagedFiles
 		{
@@ -104,5 +112,7 @@ namespace gitter.Git.AccessLayer
 		{
 			get { return _stagedRemovedCount; }
 		}
+
+		#endregion
 	}
 }

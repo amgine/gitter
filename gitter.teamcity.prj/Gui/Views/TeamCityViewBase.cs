@@ -38,8 +38,8 @@ namespace gitter.TeamCity.Gui
 		}
 
 		/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
-		public TeamCityViewBase(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(guid, environment, parameters)
+		public TeamCityViewBase(Guid guid, IWorkingEnvironment environment)
+			: base(guid, environment)
 		{
 		}
 

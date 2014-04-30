@@ -60,7 +60,7 @@ namespace gitter.Git.AccessLayer.CLI
 			var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 			output.ThrowOnBadReturnCode();
 
-			var cache = new Dictionary<string, RevisionData>();
+			var cache = new Dictionary<Hash, RevisionData>(Hash.EqualityComparer);
 			var list = ParseResult1(output, cache);
 
 			// get real commit parents
@@ -73,15 +73,16 @@ namespace gitter.Git.AccessLayer.CLI
 			return list;
 		}
 
-		private static IList<StashedStateData> ParseResult1(GitOutput output, Dictionary<string, RevisionData> cache)
+		private static IList<StashedStateData> ParseResult1(GitOutput output, Dictionary<Hash, RevisionData> cache)
 		{
 			int index = 0;
 			var parser = new GitParser(output.Output);
 			var res = new List<StashedStateData>();
 			while(!parser.IsAtEndOfString)
 			{
-				var sha1 = parser.ReadString(40, 1);
-				var rev = new RevisionData(sha1);
+				var sha1 = new Hash(parser.String, parser.Position);
+				var rev  = new RevisionData(sha1);
+				parser.Skip(41);
 				parser.ParseRevisionData(rev, cache);
 				var state = new StashedStateData(index, rev);
 				res.Add(state);
@@ -163,7 +164,7 @@ namespace gitter.Git.AccessLayer.CLI
 					var output2 = TaskUtility.UnwrapResult(task2);
 					output2.ThrowOnBadReturnCode();
 
-					var cache = new Dictionary<string, RevisionData>();
+					var cache = new Dictionary<Hash, RevisionData>(Hash.EqualityComparer);
 					var list = ParseResult1(output1, cache);
 					var parser = new GitParser(output2.Output);
 					parser.ParseCommitParentsFromRaw(list.Select(rrd => rrd.Revision), cache);

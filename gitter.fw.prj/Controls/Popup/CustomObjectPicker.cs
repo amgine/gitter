@@ -29,7 +29,7 @@ namespace gitter.Framework.Controls
 	using Resources = gitter.Framework.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupComboBox
+	public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupComboBox, IPicker<TValue>
 		where TListBox : CustomListBox, new()
 		where TItem : CustomListBoxItem
 	{
@@ -180,8 +180,8 @@ namespace gitter.Framework.Controls
 			Assert.IsNotNull(e);
 
 			e.DrawBackground();
-			e.Graphics.TextRenderingHint = Utility.TextRenderingHint;
-			e.Graphics.TextContrast = Utility.TextContrast;
+			e.Graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			e.Graphics.TextContrast      = GraphicsUtility.TextContrast;
 
 			var selectedItem = SelectedItem;
 			if(selectedItem == null)
@@ -269,6 +269,35 @@ namespace gitter.Framework.Controls
 
 			SelectedItem = e.Item as TItem;
 			HideDropDown();
+		}
+
+		protected override void OnMouseWheel(MouseEventArgs e)
+		{
+			var items = DropDownItems;
+			if(items == null || items.Count <= 1)
+			{
+				return;
+			}
+			var index = SelectedItem == null ? -1 : items.IndexOf(SelectedItem);
+			if(e.Delta > 0)
+			{
+				if(--index < 0)
+				{
+					return;
+				}
+			}
+			else
+			{
+				if(++index >= items.Count)
+				{
+					return;
+				}
+			}
+			var item = items[index];
+			DropDownControl.FocusAndSelectItem(item);
+			SelectedItem = item as TItem;
+			Invalidate();
+			base.OnMouseWheel(e);
 		}
 
 		protected override void Dispose(bool disposing)

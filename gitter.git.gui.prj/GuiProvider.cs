@@ -38,7 +38,7 @@ namespace gitter.Git.Gui
 		private Repository _repository;
 		private IWorkingEnvironment _environment;
 
-		private readonly MainToolbar _mainToolbar;
+		private readonly GitToolbar _mainToolbar;
 		private readonly ViewFactoriesCollection _viewFactories;
 		private readonly Statusbar _statusbar;
 		private readonly MainGitMenus _menus;
@@ -55,7 +55,7 @@ namespace gitter.Git.Gui
 
 			_repositoryProvider = repositoryProvider;
 
-			_mainToolbar	= new MainToolbar(this);
+			_mainToolbar	= new GitToolbar(this);
 			_viewFactories	= new ViewFactoriesCollection(this);
 			_statusbar		= new Statusbar(this);
 			_menus			= new MainGitMenus(this);
@@ -109,7 +109,7 @@ namespace gitter.Git.Gui
 			get { return _explorer; }
 		}
 
-		public MainToolbar MainToolBar
+		public GitToolbar MainToolBar
 		{
 			get { return _mainToolbar; }
 		}

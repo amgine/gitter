@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,12 +25,15 @@ namespace gitter.Framework
 	using System.Drawing;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using System.Windows.Forms;
 
 	using gitter.Framework.Configuration;
 
 	/// <summary>Repository provider.</summary>
 	public interface IRepositoryProvider : INamedObject
 	{
+		#region Properties
+
 		/// <summary>Returns provider display name.</summary>
 		/// <value>Provider display name.</value>
 		string DisplayName { get; }
@@ -46,6 +49,10 @@ namespace gitter.Framework
 		/// <summary>Gets a value indicating whether this provider is loaded.</summary>
 		/// <value><c>true</c> if this provider is loaded; otherwise, <c>false</c>.</value>
 		bool IsLoaded { get; }
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>Prepare to work in context of specified <paramref name="environment"/>.</summary>
 		/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
@@ -82,11 +89,18 @@ namespace gitter.Framework
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		void CloseRepository(IRepository repository);
 
-		/// <summary>Get list of static repository operations (that is, operations which do not require local repository).</summary>
-		IEnumerable<GuiCommand> GetStaticCommands();
+		/// <summary>Creates control to initialize new repository.</summary>
+		/// <returns>Control to initialize new repository.</returns>
+		Control CreateInitDialog();
+
+		/// <summary>Creates control to clone existing repository.</summary>
+		/// <returns>Control to clone existing repository.</returns>
+		Control CreateCloneDialog();
 
 		/// <summary>Get list of repository operations.</summary>
 		/// <param name="workingDirectory">Repository working directory.</param>
 		IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory);
+
+		#endregion
 	}
 }

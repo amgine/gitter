@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,21 +21,21 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Linq;
 	using System.Collections.Generic;
 	using System.Drawing;
 	using System.IO;
+	using System.Linq;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Options;
 
+	using gitter.Git.AccessLayer;
 	using gitter.Git.Gui;
 	using gitter.Git.Gui.Dialogs;
-	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -329,6 +329,16 @@ namespace gitter.Git
 			}
 		}
 
+		public Control CreateInitDialog()
+		{
+			return new InitDialog(this);
+		}
+
+		public Control CreateCloneDialog()
+		{
+			return new CloneDialog(this);
+		}
+
 		public DialogResult RunInitDialog()
 		{
 			Verify.State.IsTrue(IsLoaded, string.Format("{0} is not loaded.", GetType().FullName));
@@ -361,14 +371,18 @@ namespace gitter.Git
 			Verify.State.IsTrue(IsLoaded, string.Format("{0} is not loaded.", GetType().FullName));
 
 			DialogResult res;
-			string path = "";
+			var path = default(string);
 			using(var dlg = new CloneDialog(this))
 			{
 				dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
 				res = dlg.Run(_environment.MainForm);
-				if(res == DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.AcceptedPath))
+				if(res == DialogResult.OK)
 				{
-					path = Path.GetFullPath(dlg.AcceptedPath);
+					path = dlg.RepositoryPath.Value;
+					if(!string.IsNullOrWhiteSpace(path))
+					{
+						path = Path.GetFullPath(path);
+					}
 				}
 			}
 			if(!string.IsNullOrWhiteSpace(path))
@@ -381,20 +395,6 @@ namespace gitter.Git
 		bool IGitRepositoryProvider.RunCloneDialog()
 		{
 			return RunCloneDialog() == DialogResult.OK;
-		}
-
-		public IEnumerable<GuiCommand> GetStaticCommands()
-		{
-			yield return new GuiCommand(
-				"init",
-				Resources.StrInit.AddEllipsis(),
-				CachedResources.Bitmaps["ImgInit"],
-				env => RunInitDialog());
-			yield return new GuiCommand(
-				"clone",
-				Resources.StrClone.AddEllipsis(),
-				CachedResources.Bitmaps["ImgClone"],
-				env => RunCloneDialog());
 		}
 
 		public IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory)

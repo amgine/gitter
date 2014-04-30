@@ -35,8 +35,8 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	partial class MaintenanceView : GitViewBase
 	{
-		public MaintenanceView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.MaintenanceViewGuid, gui, parameters)
+		public MaintenanceView(GuiProvider gui)
+			: base(Guids.MaintenanceViewGuid, gui)
 		{
 			InitializeComponent();
 

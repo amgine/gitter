@@ -26,19 +26,17 @@ namespace gitter.Git.AccessLayer
 	{
 		#region Data
 
-		private readonly string _hash;
 		private readonly string _name;
+		private readonly Hash _hash;
 		private TagType _tagType;
 
 		#endregion
 
 		#region .ctor
 
-		public RemoteReferenceData(string name, string hash)
+		public RemoteReferenceData(string name, Hash hash)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(hash, "hash");
-			Verify.Argument.IsTrue(hash.Length == 40, "hash");
 
 			_name = name;
 			_hash = hash;
@@ -71,7 +69,7 @@ namespace gitter.Git.AccessLayer
 			get { return _name; }
 		}
 
-		public string Hash
+		public Hash Hash
 		{
 			get { return _hash; }
 		}

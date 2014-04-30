@@ -571,9 +571,9 @@ namespace gitter.Framework.Controls
 			rect.Width += 1;
 			rect.Y -= .5f;
 			rect.Height += 1;
-	
-			graphics.TextRenderingHint = Utility.TextRenderingHint;
-			graphics.TextContrast = Utility.TextContrast;
+
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			graphics.TextContrast       = GraphicsUtility.TextContrast;
 
 			Color textColor, backgroundStart, backgroundEnd;
 			if(header.ViewHost.IsActive)
@@ -1029,8 +1029,8 @@ namespace gitter.Framework.Controls
 			rect.Y -= .5f;
 			rect.Height += 1;
 
-			graphics.TextRenderingHint = Utility.TextRenderingHint;
-			graphics.TextContrast = Utility.TextContrast;
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			graphics.TextContrast      = GraphicsUtility.TextContrast;
 
 			Color textColor, backgroundStart, backgroundEnd;
 			textColor = ColorTable.ViewHostHeaderTextFocused;

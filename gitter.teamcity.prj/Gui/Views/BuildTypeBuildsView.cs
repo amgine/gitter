@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ namespace gitter.TeamCity.Gui.Views
 		private BuildType _buildType;
 		private CustomListBox _lstBuilds;
 
-		public BuildTypeBuildsView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(Guids.BuildTypeBuildsViewGuid, environment, parameters)
+		public BuildTypeBuildsView(IWorkingEnvironment environment)
+			: base(Guids.BuildTypeBuildsViewGuid, environment)
 		{
 			_lstBuilds = new CustomListBox();
 			_lstBuilds.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -54,8 +54,6 @@ namespace gitter.TeamCity.Gui.Views
 								System.Windows.Forms.AnchorStyles.Right |
 								System.Windows.Forms.AnchorStyles.Bottom;
 			_lstBuilds.Parent = this;
-
-			ApplyParameters(parameters);
 		}
 
 		public override Image Image
@@ -63,30 +61,34 @@ namespace gitter.TeamCity.Gui.Views
 			get { return CachedResources.Bitmaps["ImgBuildType"]; }
 		}
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			base.ApplyParameters(parameters);
+			base.AttachViewModel(viewModel);
 
-			object buildType;
-			if(parameters.TryGetValue("BuildType", out buildType) && buildType != null)
+			var vm = viewModel as BuildTypeBuildsViewModel;
+			if(vm != null)
 			{
-				_buildType = buildType as BuildType;
+				_buildType = vm.BuildType;
+				if(_buildType != null)
+				{
+					Text = _buildType.Name;
+					if(ServiceContext != null)
+					{
+						RefreshContent();
+					}
+				}
 			}
-			else
+		}
+
+		protected override void DetachViewModel(object viewModel)
+		{
+			base.DetachViewModel(viewModel);
+
+			var vm = viewModel as BuildTypeBuildsViewModel;
+			if(vm != null)
 			{
 				_buildType = null;
-			}
-			if(_buildType != null)
-			{
-				Text = _buildType.Name;
-			}
-			else
-			{
 				Text = string.Empty;
-			}
-			if(ServiceContext != null)
-			{
-				RefreshContent();
 			}
 		}
 

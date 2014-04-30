@@ -50,7 +50,7 @@ namespace gitter.Git.Gui.Controls
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
 				Resources.StrFullName, _remoteTag.FullName));
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(
-				Resources.StrPosition, _remoteTag.Hash));
+				Resources.StrPosition, _remoteTag.Hash.ToString()));
 			Items.Add(copyToClipboardItem);
 		}
 

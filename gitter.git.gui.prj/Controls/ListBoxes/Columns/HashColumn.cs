@@ -54,6 +54,7 @@ namespace gitter.Git.Gui.Controls
 			: base(id, name, visible)
 		{
 			Width = 56;
+			ContentFont = Font;
 
 			_abbreviate = DefaultAbbreviate;
 		}
@@ -98,53 +99,68 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string data)
+		private static bool IsAbbreviateEnabled(CustomListBoxColumn column)
 		{
-			bool abbreviate;
-			var rhc = measureEventArgs.Column as HashColumn;
+			var rhc = column as HashColumn;
 			if(rhc != null)
 			{
-				abbreviate = rhc.Abbreviate;
+				return rhc.Abbreviate;
 			}
 			else
 			{
-				abbreviate = HashColumn.DefaultAbbreviate;
+				return HashColumn.DefaultAbbreviate;
 			}
+		}
+
+		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string data)
+		{
+			Assert.IsNotNull(measureEventArgs);
+			Assert.IsNotNull(data);
+
+			bool abbreviate = IsAbbreviateEnabled(measureEventArgs.Column);
 			return measureEventArgs.MeasureText(
 				abbreviate ? data.Substring(0, HashColumn.DefaultAbbrevLength) : (data),
 				HashColumn.Font);
 		}
 
+		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, HashStringCache data)
+		{
+			Assert.IsNotNull(measureEventArgs);
+			Assert.IsNotNull(data);
+
+			bool abbreviate = IsAbbreviateEnabled(measureEventArgs.Column);
+			return measureEventArgs.MeasureText(
+				data.GetValue(abbreviate ? HashColumn.DefaultAbbrevLength : 40),
+				HashColumn.Font);
+		}
+
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string data)
 		{
-			bool abbreviate;
-			var rhc = paintEventArgs.Column as HashColumn;
-			if(rhc != null)
-			{
-				abbreviate = rhc.Abbreviate;
-			}
-			else
-			{
-				abbreviate = HashColumn.DefaultAbbreviate;
-			}
+			Assert.IsNotNull(paintEventArgs);
+			Assert.IsNotNull(data);
+
+			bool abbreviate = IsAbbreviateEnabled(paintEventArgs.Column);
 			paintEventArgs.PaintText(
-				abbreviate ? data.Substring(0, HashColumn.DefaultAbbrevLength) : (data), HashColumn.Font);
+				abbreviate ? data.Substring(0, HashColumn.DefaultAbbrevLength) : (data), paintEventArgs.Font);
+		}
+
+		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, HashStringCache data)
+		{
+			Assert.IsNotNull(paintEventArgs);
+			Assert.IsNotNull(data);
+
+			bool abbreviate = IsAbbreviateEnabled(paintEventArgs.Column);
+			paintEventArgs.PaintText(data.GetValue(abbreviate ? HashColumn.DefaultAbbrevLength : 40));
 		}
 
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string data, Brush brush)
 		{
-			bool abbreviate;
-			var rhc = paintEventArgs.Column as HashColumn;
-			if(rhc != null)
-			{
-				abbreviate = rhc.Abbreviate;
-			}
-			else
-			{
-				abbreviate = HashColumn.DefaultAbbreviate;
-			}
+			Assert.IsNotNull(paintEventArgs);
+			Assert.IsNotNull(data);
+
+			bool abbreviate = IsAbbreviateEnabled(paintEventArgs.Column);
 			paintEventArgs.PaintText(
-				abbreviate ? data.Substring(0, HashColumn.DefaultAbbrevLength) : (data), HashColumn.Font, brush);
+				abbreviate ? data.Substring(0, HashColumn.DefaultAbbrevLength) : (data), paintEventArgs.Font, brush);
 		}
 
 		protected override void SaveMoreTo(Section section)

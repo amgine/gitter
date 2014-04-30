@@ -89,7 +89,7 @@ namespace gitter.Git.Gui.Controls
 					}
 					return measureEventArgs.MeasureImageAndText(image, DataContext.Name);
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Hash);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Hash.ToString());
 				default:
 					return Size.Empty;
 			}
@@ -133,7 +133,10 @@ namespace gitter.Git.Gui.Controls
 					{
 						abbreviate = HashColumn.DefaultAbbreviate;
 					}
-					paintEventArgs.PaintText(abbreviate?DataContext.Hash.Substring(0, abbrevLength):DataContext.Hash, HashColumn.Font);
+					paintEventArgs.PaintText(abbreviate
+						? DataContext.Hash.ToString(abbrevLength)
+						: DataContext.Hash.ToString(),
+						HashColumn.Font);
 					break;
 			}
 		}

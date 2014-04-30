@@ -84,11 +84,9 @@ namespace gitter.Git.Gui.Views
 			var remote = _remoteView.Remote;
 			if(remote != null && !remote.IsDeleted)
 			{
-				using(var dlg = new PushDialog(_remoteView.Repository)
-					{
-						Remote = remote,
-					})
+				using(var dlg = new PushDialog(_remoteView.Repository))
 				{
+					dlg.Remote.Value = remote;
 					dlg.Run(_remoteView);
 				}
 			}

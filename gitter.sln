@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39C7FE6E-D839-4A8D-AA64-00FDAFD27ECA}"
 	ProjectSection(SolutionItems) = preProject
 		common\CommonAssemblyInfo.cs = common\CommonAssemblyInfo.cs

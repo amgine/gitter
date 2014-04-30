@@ -85,7 +85,7 @@ namespace gitter.TeamCity.Gui
 
 			var view = WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.BuildTypeBuildsViewGuid,
-				new Dictionary<string, object>() { {"BuildType", buildType} },
+				new Views.BuildTypeBuildsViewModel(buildType),
 				true) as TeamCityViewBase;
 			if(view != null)
 			{

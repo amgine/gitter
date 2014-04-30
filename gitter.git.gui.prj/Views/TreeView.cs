@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,8 +93,8 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		public TreeView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.TreeViewGuid, gui, parameters)
+		public TreeView(GuiProvider gui)
+			: base(Guids.TreeViewGuid, gui)
 		{
 			InitializeComponent();
 
@@ -111,18 +111,20 @@ namespace gitter.Git.Gui.Views
 			_directoryTree.ItemContextMenuRequested +=
 				(sender, e) =>
 				{
-					var menu = new TreeMenu(Parameters["tree"] as ITreeSource, (TreeDirectoryListItem)e.Item);
-					Utility.MarkDropDownForAutoDispose(menu);
-					e.ContextMenu = menu;
-					e.OverrideDefaultMenu = true;
+					var vm = ViewModel as TreeViewModel;
+					if(vm != null && vm.TreeSource != null)
+					{
+						var menu = new TreeMenu(vm.TreeSource, (TreeDirectoryListItem)e.Item);
+						Utility.MarkDropDownForAutoDispose(menu);
+						e.ContextMenu = menu;
+						e.OverrideDefaultMenu = true;
+					}
 				};
 			_directoryTree.PreviewKeyDown += OnKeyDown;
 
 			_treeContent.ItemContextMenuRequested += OnContextMenuRequested;
 			_treeContent.SelectionChanged += OnTreeContentSelectionChanged;
 			_treeContent.PreviewKeyDown += OnKeyDown;
-
-			Text = Resources.StrTree + " " + ((ITreeSource)parameters["tree"]).DisplayName;
 
 			AddTopToolStrip(_toolBar = new TreeToolbar(this));
 		}
@@ -208,7 +210,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
 		{
-			var rts = Parameters["tree"] as ITreeSource;
+			var vm = ViewModel as TreeViewModel;
+			var rts = vm != null ? vm.TreeSource : null;
 			if(rts != null)
 			{
 				var item = ((ITreeItemListItem)e.Item);
@@ -308,17 +311,35 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			_treeSource = (ITreeSource)parameters["tree"];
+			base.AttachViewModel(viewModel);
 
-			if(_treeSource != null)
+			var vm = viewModel as TreeViewModel;
+			if(vm != null)
 			{
-				Text = Resources.StrTree + " " + _treeSource.DisplayName;
-				DataSource = new TreeListsBinding(_treeSource, _directoryTree, _treeContent);
+				_treeSource = vm.TreeSource;
+				if(_treeSource != null)
+				{
+					Text = Resources.StrTree + " " + _treeSource.DisplayName;
+					DataSource = new TreeListsBinding(_treeSource, _directoryTree, _treeContent);
+				}
+				else
+				{
+					Text = Resources.StrTree;
+					DataSource = null;
+				}
 			}
-			else
+		}
+
+		protected override void DetachViewModel(object viewModel)
+		{
+			base.DetachViewModel(viewModel);
+
+			var vm = viewModel as TreeViewModel;
+			if(vm != null)
 			{
+				_treeSource = null;
 				Text = Resources.StrTree;
 				DataSource = null;
 			}
@@ -410,11 +431,6 @@ namespace gitter.Git.Gui.Views
 				LoggingService.Global.Warning(exc, "Failed to remove temporary file: '{0}'", path);
 			}
 			process.Dispose();
-		}
-
-		protected override void AttachToRepository(Repository repository)
-		{
-			ApplyParameters(Parameters);
 		}
 
 		protected override void DetachFromRepository(Repository repository)

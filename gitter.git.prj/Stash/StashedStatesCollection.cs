@@ -372,7 +372,7 @@ namespace gitter.Git
 					}
 					else
 					{
-						var d = new Dictionary<string, StashedState>(_stash.Count);
+						var d = new Dictionary<Hash, StashedState>(_stash.Count, Hash.EqualityComparer);
 						foreach(var s in _stash)
 						{
 							d.Add(s.Revision.Hash, s);

@@ -38,11 +38,10 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Create new view with specified parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
-		/// <param name="parameters">Creation parameters.</param>
 		/// <returns>Created view.</returns>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new LogView(environment, parameters);
+			return new LogView(environment);
 		}
 	}
 }

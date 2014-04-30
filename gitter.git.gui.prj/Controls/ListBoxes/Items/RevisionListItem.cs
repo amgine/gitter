@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,14 +68,20 @@ namespace gitter.Git.Gui.Controls
 
 		#region Methods
 
+		private static bool IsAlignToGraphEnabled(CustomListBoxColumn column)
+		{
+			var subjectColumn = column as SubjectColumn;
+			return subjectColumn != null && subjectColumn.AlignToGraph;
+		}
+
 		private void DrawBranchDragImage(Branch branch, Graphics graphics)
 		{
 			int width = GlobalBehavior.GraphStyle.MeasureBranch(
 				graphics, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
 			if(width > 0)
 			{
-				graphics.TextRenderingHint = Utility.TextRenderingHint;
-				graphics.TextContrast = Utility.TextContrast;
+				graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+				graphics.TextContrast      = GraphicsUtility.TextContrast;
 				GlobalBehavior.GraphStyle.DrawBranch(
 					graphics,
 					ListBox.Font,
@@ -116,13 +122,13 @@ namespace gitter.Git.Gui.Controls
 				{
 					case ColumnId.Graph:
 						var ncid = ListBox.GetNextVisibleColumnIndex(requestEventArgs.ColumnIndex);
-						if(ncid != -1)
+						if(ncid >= 0 && ncid < ListBox.Columns.Count)
 						{
-							var rsc = ListBox.Columns[ncid] as SubjectColumn;
-							if(rsc != null && rsc.AlignToGraph)
+							var column = ListBox.Columns[ncid];
+							if(IsAlignToGraphEnabled(column))
 							{
 								return GetContextMenu(new ItemContextMenuRequestEventArgs(
-									requestEventArgs.Item, rsc, ncid,
+									requestEventArgs.Item, column, ncid,
 									requestEventArgs.X, requestEventArgs.Y));
 							}
 						}
@@ -161,8 +167,7 @@ namespace gitter.Git.Gui.Controls
 								w = GlobalBehavior.GraphStyle.MeasureBranch(
 									gx, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
 							}
-							using(var dragImage = new DragImage(
-								new Size(w, 21), -dx, y,
+							using(var dragImage = new DragImage(new Size(w, 21), -dx, y,
 								eargs => DrawBranchDragImage(branch, eargs.Graphics)))
 							{
 								dragImage.ShowDragVisual(ListBox);
@@ -216,9 +221,9 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Hash);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.HashString);
 				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.TreeHash);
+					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.TreeHashString);
 				case ColumnId.Graph:
 					return GraphColumn.OnMeasureSubItem(measureEventArgs, Graph);
 				case ColumnId.Name:
@@ -248,10 +253,10 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Hash);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.HashString);
 					break;
 				case ColumnId.TreeHash:
-					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.TreeHash);
+					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.TreeHashString);
 					break;
 				case ColumnId.Graph:
 					GraphColumn.OnPaintSubItem(paintEventArgs, Graph, DataContext.IsCurrent ? RevisionGraphItemType.Current : RevisionGraphItemType.Generic);

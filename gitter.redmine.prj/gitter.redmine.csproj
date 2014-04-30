@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,12 +32,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -234,8 +230,8 @@
     </Compile>
     <Compile Include="RedmineObject.cs" />
     <Compile Include="RedmineServiceContext.cs" />
-    <Compile Include="User.cs" />
     <Compile Include="RedmineUtility.cs" />
+    <Compile Include="User.cs" />
     <Compile Include="VersionSharing.cs" />
     <Compile Include="VersionStatus.cs" />
   </ItemGroup>
@@ -264,26 +260,20 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\redmine.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\common\key.snk">
       <Link>Properties\key.snk</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\redmine.png" />
     <None Include="Resources\bug.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\refresh.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\chart-up-color.png" />
-    <Content Include="Resources\clipboard-sign.png" />
-    <Content Include="Resources\newspaper.png" />
-    <Content Include="Resources\search-close.png" />
-    <Content Include="Resources\search-next.png" />
-    <Content Include="Resources\search-prevous.png" />
+    <None Include="Resources\chart-up-color.png" />
+    <None Include="Resources\clipboard-sign.png" />
+    <None Include="Resources\newspaper.png" />
+    <None Include="Resources\search-close.png" />
+    <None Include="Resources\search-next.png" />
+    <None Include="Resources\search-prevous.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

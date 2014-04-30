@@ -72,8 +72,7 @@ namespace gitter.Git.Gui
 
 		private void OnRemoteItemActivated(object sender, BoundItemActivatedEventArgs<Remote> e)
 		{
-			WorkingEnvironment.ViewDockService.ShowView(Guids.RemoteViewGuid,
-				new Dictionary<string, object> { { "Remote", e.Object } });
+			WorkingEnvironment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(e.Object));
 		}
 
 		public override void OnDoubleClick(int x, int y)

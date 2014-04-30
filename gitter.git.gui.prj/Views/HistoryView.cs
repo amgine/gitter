@@ -47,8 +47,8 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		public HistoryView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.HistoryViewGuid, gui, parameters)
+		public HistoryView(GuiProvider gui)
+			: base(Guids.HistoryViewGuid, gui)
 		{
 			RevisionListBox.PreviewKeyDown += OnKeyDown;
 			Text = Resources.StrHistory;

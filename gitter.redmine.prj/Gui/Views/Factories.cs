@@ -37,11 +37,10 @@ namespace gitter.Redmine.Gui
 
 		/// <summary>Create new view with specified parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
-		/// <param name="parameters">Creation parameters.</param>
 		/// <returns>Created view.</returns>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new IssuesView(environment, parameters);
+			return new IssuesView(environment);
 		}
 	}
 
@@ -54,11 +53,10 @@ namespace gitter.Redmine.Gui
 
 		/// <summary>Create new view with specified parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
-		/// <param name="parameters">Creation parameters.</param>
 		/// <returns>Created view.</returns>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new NewsView(environment, parameters);
+			return new NewsView(environment);
 		}
 	}
 
@@ -71,11 +69,10 @@ namespace gitter.Redmine.Gui
 
 		/// <summary>Create new view with specified parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
-		/// <param name="parameters">Creation parameters.</param>
 		/// <returns>Created view.</returns>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new VersionsView(environment, parameters);
+			return new VersionsView(environment);
 		}
 	}
 }

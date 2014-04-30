@@ -62,8 +62,8 @@ namespace gitter.Framework.Controls
 			{
 				gx.DrawRoundedRectangle(p, e.Bounds, 1);
 			}
-			gx.TextRenderingHint = Utility.TextRenderingHint;
-			gx.TextContrast = Utility.TextContrast;
+			gx.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			gx.TextContrast = GraphicsUtility.TextContrast;
 			toolTip.OnPaint(e);
 		}
 

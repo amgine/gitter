@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +33,8 @@ namespace gitter.Git.Gui
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	internal sealed class MainToolbar : ToolStrip
+	internal sealed class GitToolbar : ToolStrip
 	{
-		private readonly ToolStripButton _initButton;
-		private readonly ToolStripButton _cloneButton;
-
 		private readonly ToolStripSplitButton _fetchButton;
 		private readonly ToolStripSplitButton _pullButton;
 		private readonly ToolStripButton _pushButton;
@@ -62,7 +59,7 @@ namespace gitter.Git.Gui
 		private readonly GuiProvider _guiProvider;
 		private Repository _repository;
 
-		public MainToolbar(GuiProvider guiProvider)
+		public GitToolbar(GuiProvider guiProvider)
 		{
 			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
 
@@ -75,11 +72,6 @@ namespace gitter.Git.Gui
 
 			Items.AddRange(new ToolStripItem[]
 				{
-					_initButton = new ToolStripButton(Resources.StrInit, CachedResources.Bitmaps["ImgInit"], OnInitClick)
-						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipInit },
-					_cloneButton = new ToolStripButton(Resources.StrClone, CachedResources.Bitmaps["ImgClone"], OnCloneClick)
-						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipClone },
-					new ToolStripSeparator(),
 					_fetchButton = new ToolStripSplitButton(Resources.StrFetch, CachedResources.Bitmaps["ImgFetch"])
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipFetch },
 					_pullButton = new ToolStripSplitButton(Resources.StrPull, CachedResources.Bitmaps["ImgPull"])
@@ -322,16 +314,6 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		private void OnInitClick(object sender, EventArgs e)
-		{
-			_guiProvider.RepositoryProvider.RunInitDialog();
-		}
-
-		private void OnCloneClick(object sender, EventArgs e)
-		{
-			_guiProvider.RepositoryProvider.RunCloneDialog();
-		}
-
 		private void OnFetchClick(object sender, EventArgs e)
 		{
 			GuiCommands.Fetch(_guiProvider.Environment.MainForm, Repository);
@@ -435,16 +417,6 @@ namespace gitter.Git.Gui
 		#endregion
 
 		#region Buttons
-
-		public ToolStripItem InitButton
-		{
-			get { return _initButton; }
-		}
-
-		public ToolStripItem CloneButton
-		{
-			get { return _cloneButton; }
-		}
 
 		public ToolStripItem FetchButton
 		{

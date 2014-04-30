@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,16 +46,14 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		public DiffView(Guid guid, IDictionary<string, object> parameters, GuiProvider gui)
-			: base(guid, gui, parameters)
+		public DiffView(Guid guid, GuiProvider gui)
+			: base(guid, gui)
 		{
 			InitializeComponent();
 
 			_diffViewer.PreviewKeyDown += OnKeyDown;
 			_diffViewer.DiffFileContextMenuRequested += OnDiffFileContextMenuRequested;
 			_diffViewer.UntrackedFileContextMenuRequested += OnUntrackedFileContextMenuRequested;
-
-			ApplyParameters(parameters);
 
 			AddTopToolStrip(new DiffToolbar(this));
 		}
@@ -147,33 +145,38 @@ namespace gitter.Git.Gui.Views
 			base.LoadRepositoryConfig(section);
 		}
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			if(parameters != null)
+			base.AttachViewModel(viewModel);
+
+			var vm = viewModel as DiffViewModel;
+			if(vm != null)
 			{
-				object options;
-				if(parameters.TryGetValue("options", out options))
-				{
-					_options = options as DiffOptions;
-				}
+				_options = vm.DiffOptions;
 				if(_options == null)
 				{
 					_options = new DiffOptions();
 				}
-				DiffSource = (IDiffSource)parameters["source"];
+				DiffSource = vm.DiffSource;
 				UpdateText();
 			}
-			else
+		}
+
+		protected override void DetachViewModel(object viewModel)
+		{
+			var vm = viewModel as DiffViewModel;
+			if(vm != null)
 			{
-				UpdateText();
 				DiffBinding = null;
 				if(_diffSource != null)
 				{
 					_diffSource.Updated -= OnDiffSourceUpdated;
 					_diffSource.Dispose();
+					_diffSource = null;
 				}
+				UpdateText();
 			}
-			base.ApplyParameters(parameters);
+			base.DetachViewModel(viewModel);
 		}
 
 		private void OnDiffSourceUpdated(object sender, EventArgs e)

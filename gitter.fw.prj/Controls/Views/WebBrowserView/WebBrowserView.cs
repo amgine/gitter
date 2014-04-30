@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +38,8 @@ namespace gitter.Framework.Controls
 			InitializeComponent();
 		}
 
-		public WebBrowserView(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(guid, environment, parameters)
+		public WebBrowserView(Guid guid, IWorkingEnvironment environment)
+			: base(guid, environment)
 		{
 			InitializeComponent();
 
@@ -48,8 +48,6 @@ namespace gitter.Framework.Controls
 			//_webBrowser.DocumentCompleted += OnWebBrowserDocumentCompleted;
 
 			AddTopToolStrip(_toolbar = new WebBrowserViewToolbar(this));
-
-			ApplyParameters(parameters);
 		}
 
 		private void OnWebBrowserDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -67,12 +65,13 @@ namespace gitter.Framework.Controls
 			get { return _webBrowser; }
 		}
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			 base.ApplyParameters(parameters);
-
-			 var url = parameters["url"].ToString();
-			 _webBrowser.Navigate(url);
+			var vm = viewModel as WebBrowserViewModel;
+			if(vm != null)
+			{
+				_webBrowser.Navigate(vm.Url);
+			}
 		}
 	}
 }

@@ -38,8 +38,8 @@ namespace gitter.Redmine.Gui
 		}
 
 		/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
-		public RedmineViewBase(Guid guid, IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(guid, environment, parameters)
+		public RedmineViewBase(Guid guid, IWorkingEnvironment environment)
+			: base(guid, environment)
 		{
 		}
 

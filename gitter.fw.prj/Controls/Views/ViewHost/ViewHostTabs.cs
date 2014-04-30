@@ -83,7 +83,7 @@ namespace gitter.Framework.Controls
 				int length = 0;
 				foreach(var tab in _tabs)
 				{
-					tab.ResetLength(Utility.MeasurementGraphics);
+					tab.ResetLength(GraphicsUtility.MeasurementGraphics);
 					length += tab.Length;
 				}
 				_length = length;
@@ -208,7 +208,7 @@ namespace gitter.Framework.Controls
 			var index	= IndexOf(view);
 			var tab		= _tabs[index];
 			var length	= tab.Length;
-			tab.ResetLength(Utility.MeasurementGraphics);
+			tab.ResetLength(GraphicsUtility.MeasurementGraphics);
 			var dl = tab.Length - length;
 			if(dl != 0)
 			{
@@ -225,7 +225,7 @@ namespace gitter.Framework.Controls
 
 			var index	= IndexOf(tab);
 			var length	= tab.Length;
-			tab.ResetLength(Utility.MeasurementGraphics);
+			tab.ResetLength(GraphicsUtility.MeasurementGraphics);
 			var dl = tab.Length - length;
 			if(dl != 0)
 			{
@@ -987,8 +987,8 @@ namespace gitter.Framework.Controls
 			int space = width;
 			var maxTabWidth = GetMaxTabWidth();
 
-			graphics.TextRenderingHint = Utility.TextRenderingHint;
-			graphics.TextContrast = Utility.TextContrast;
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			graphics.TextContrast      = GraphicsUtility.TextContrast;
 
 			Renderer.RenderViewHostTabsBackground(this, e);
 

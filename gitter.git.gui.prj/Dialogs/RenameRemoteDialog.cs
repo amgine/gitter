@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +22,29 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
-	using gitter.Framework.Options;
+	using gitter.Framework.Mvc;
+	using gitter.Framework.Mvc.WinForms;
+
+	using gitter.Git.Gui.Controllers;
+	using gitter.Git.Gui.Interfaces;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog
+	public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog, IRenameRemoteView
 	{
+		#region Data
+
 		private readonly Remote _remote;
+		private readonly IRenameRemoteController _controller;
+		private readonly IUserInputSource<string> _newNameInput;
+		private readonly IUserInputErrorNotifier _errorNotifier;
+
+		#endregion
+
+		#region .ctor
 
 		public RenameRemoteDialog(Remote remote)
 		{
@@ -44,20 +55,28 @@ namespace gitter.Git.Gui.Dialogs
 			_remote = remote;
 
 			InitializeComponent();
+			Localize();
 
 			SetupReferenceNameInputBox(_txtNewName, ReferenceType.Remote);
-
-			Text = Resources.StrRenameRemote;
-
-			_lblOldName.Text = Resources.StrRemote.AddColon();
-			_lblNewName.Text = Resources.StrNewName.AddColon();
 
 			_txtOldName.Text = remote.Name;
 			_txtNewName.Text = remote.Name;
 			_txtNewName.SelectAll();
 
+			var inputs = new IUserInputSource[]
+			{
+				_newNameInput = new TextBoxInputSource(_txtNewName),
+			};
+			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+
 			GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
+
+			_controller = new RenameRemoteController(remote);
 		}
+
+		#endregion
+
+		#region Properties
 
 		protected override string ActionVerb
 		{
@@ -69,61 +88,37 @@ namespace gitter.Git.Gui.Dialogs
 			get { return _remote; }
 		}
 
-		public string NewName
+		public IUserInputSource<string> NewName
 		{
-			get { return _txtNewName.Text; }
-			set { _txtNewName.Text = value; }
+			get { return _newNameInput; }
 		}
+
+		public IUserInputErrorNotifier ErrorNotifier
+		{
+			get { return _errorNotifier; }
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void Localize()
+		{
+			Text = Resources.StrRenameRemote;
+
+			_lblOldName.Text = Resources.StrRemote.AddColon();
+			_lblNewName.Text = Resources.StrNewName.AddColon();
+		}
+
+		#endregion
+
+		#region IExecutableDialog Members
 
 		public bool Execute()
 		{
-			var repository	= _remote.Repository;
-			var oldName		= _txtOldName.Text;
-			var newName		= _txtNewName.Text.Trim();
-			if(oldName == newName) return true;
-			if(newName.Length == 0)
-			{
-				NotificationService.NotifyInputError(
-					_txtNewName,
-					Resources.ErrNoRemoteNameSpecified,
-					Resources.ErrRemoteNameCannotBeEmpty);
-				return false;
-			}
-			if(repository.Remotes.Contains(newName))
-			{
-				NotificationService.NotifyInputError(
-					_txtNewName,
-					Resources.ErrInvalidRemoteName,
-					Resources.ErrRemoteAlreadyExists);
-				return false;
-			}
-			string errmsg;
-			if(!Reference.ValidateName(newName, out errmsg))
-			{
-				NotificationService.NotifyInputError(
-					_txtNewName,
-					Resources.ErrInvalidRemoteName,
-					errmsg);
-				return false;
-			}
-			try
-			{
-				using(this.ChangeCursor(Cursors.WaitCursor))
-				{
-					Remote.Name = newName;
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					string.Format(Resources.ErrFailedToRenameRemote, oldName),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			return _controller.TryRename();
 		}
+
+		#endregion
 	}
 }

@@ -1766,4 +1766,7 @@ Proceed?</value>
   <data name="StrsFetchingPatch" xml:space="preserve">
     <value>Fetching patch</value>
   </data>
+  <data name="ErrCannotCreateHeadManually" xml:space="preserve">
+    <value>You cannot create HEAD manually</value>
+  </data>
 </root>

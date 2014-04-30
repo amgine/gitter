@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,9 +46,9 @@ namespace gitter.Git
 		internal RefsCollection(Repository repository)
 			: base(repository, false)
 		{
-			_heads		= new RefsHeadsCollection(repository);
-			_remotes	= new RefsRemotesCollection(repository);
-			_tags		= new RefsTagsCollection(repository);
+			_heads   = new RefsHeadsCollection(repository);
+			_remotes = new RefsRemotesCollection(repository);
+			_tags    = new RefsTagsCollection(repository);
 		}
 
 		#endregion

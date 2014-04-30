@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ namespace gitter.Git.Gui.Views
 		private ReferencesToolbar _toolbar;
 		//private ReferencesSearchToolBar _searchToolbar;
 
-		public ReferencesView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.ReferencesViewGuid, gui, parameters)
+		public ReferencesView(GuiProvider gui)
+			: base(Guids.ReferencesViewGuid, gui)
 		{
 			InitializeComponent();
 			_lstReferences.Columns.ShowAll((c) => c.Id != (int)ColumnId.TreeHash);
@@ -126,10 +126,10 @@ namespace gitter.Git.Gui.Views
 		{
 			var rev = item.RevisionPointer;
 			if(rev.FullName.Contains(search.Text)) return true;
-			if(rev.Dereference().Hash.Contains(search.Text)) return true;
+			if(rev.Dereference().HashString.Contains(search.Text)) return true;
 			return false;
 		}
-		
+
 		/*
 		private bool Search(int start, SearchOptions search, int direction)
 		{

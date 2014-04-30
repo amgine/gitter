@@ -55,7 +55,7 @@ namespace gitter.Git.Gui
 		{
 			get
 			{
-				var size = _content.OnMeasure(Utility.MeasurementGraphics, MaxWidth);
+				var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, MaxWidth);
 				size.Height += 3;
 				return size;
 			}

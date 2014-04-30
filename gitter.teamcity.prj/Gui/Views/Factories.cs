@@ -37,9 +37,9 @@ namespace gitter.TeamCity.Gui.Views
 		{
 		}
 
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new BuildTypeBuildsView(environment, parameters);
+			return new BuildTypeBuildsView(environment);
 		}
 	}
 }

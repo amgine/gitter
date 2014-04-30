@@ -337,11 +337,7 @@ namespace gitter.Git.Gui
 
 			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.DiffViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "source", rev1.GetCompareDiffSource(rev2) }
-				},
-				true);
+				new Views.DiffViewModel(rev1.GetCompareDiffSource(rev2), null));
 		}
 
 		private static void OnViewReflogClick(object sender, EventArgs e)
@@ -350,11 +346,7 @@ namespace gitter.Git.Gui
 			var reference = (Reference)item.Tag;
 			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.ReflogViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "reflog", reference.Reflog }
-				},
-				true);
+				new Views.ReflogViewModel(reference.Reflog));
 		}
 	
 		private static void OnArchiveClick(object sender, EventArgs e)
@@ -1818,13 +1810,10 @@ namespace gitter.Git.Gui
 		{
 			var item = (ToolStripItem)sender;
 			var remote = (Remote)item.Tag;
-			var parameters = new Dictionary<string, object>()
-			{
-				{ "Remote", remote },
-			};
+			var viewModel = new Views.RemoteViewModel(remote);
 			GitterApplication.WorkingEnvironment
 							 .ViewDockService
-							 .ShowView(Views.Guids.RemoteViewGuid, parameters, true);
+							 .ShowView(Views.Guids.RemoteViewGuid, viewModel);
 		}
 
 		private static void OnRemoveRemoteReferenceClick(object sender, EventArgs e)
@@ -2443,10 +2432,7 @@ namespace gitter.Git.Gui
 
 			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.BlameViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "blame", data }
-				});
+				new Views.BlameViewModel(data));
 		}
 
 		private static void OnPathHistoryClick(object sender, EventArgs e)
@@ -2456,10 +2442,7 @@ namespace gitter.Git.Gui
 
 			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.PathHistoryViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "source", data }
-				});
+				new Views.HistoryViewModel(data));
 		}
 
 		private static void OnResolveConflictItemClick(object sender, EventArgs e)
@@ -3546,10 +3529,7 @@ namespace gitter.Git.Gui
 
 			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.DiffViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "source", diffSource }
-				});
+				new Views.DiffViewModel(diffSource, null));
 		}
 
 		private static void OnViewTreeItemClick(object sender, EventArgs e)
@@ -3559,10 +3539,7 @@ namespace gitter.Git.Gui
 
 			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 				Views.Guids.TreeViewGuid,
-				new Dictionary<string, object>()
-				{
-					{ "tree", new RevisionTreeSource(revPtr) }
-				});
+				new Views.TreeViewModel(new RevisionTreeSource(revPtr)));
 		}
 
 		private static void OnResolveConflictsClick(object sender, EventArgs e)

@@ -62,7 +62,9 @@ namespace gitter.Framework
 						obj = factory(info);
 						dictionary.Add(obj.Name, obj);
 						if(objectCreated != null)
+						{
 							objectCreated(obj);
+						}
 					}
 					else
 					{

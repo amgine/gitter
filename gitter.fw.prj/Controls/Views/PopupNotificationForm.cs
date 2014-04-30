@@ -170,7 +170,7 @@ namespace gitter.Framework.Controls
 			var cornerRadius = Renderer.FloatCornerRadius;
 			if(cornerRadius != 0)
 			{
-				Region = Utility.GetRoundedRegion(ClientRectangle, cornerRadius);
+				Region = GraphicsUtility.GetRoundedRegion(ClientRectangle, cornerRadius);
 			}
 			base.OnResize(e);
 		}

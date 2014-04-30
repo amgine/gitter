@@ -81,8 +81,8 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		protected HistoryViewBase(Guid guid, GuiProvider gui, IDictionary<string, object> parameters)
-			: base(guid, gui, parameters)
+		protected HistoryViewBase(Guid guid, GuiProvider gui)
+			: base(guid, gui)
 		{
 			SuspendLayout();
 			_lstRevisions = new RevisionListBox

@@ -64,9 +64,9 @@ namespace gitter
 		/// <param name="environment">Application working environment.</param>
 		/// <param name="parameters">Creation parameters.</param>
 		/// <returns>Created view.</returns>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			var view = new RepositoryExplorerView(environment, parameters);
+			var view = new RepositoryExplorerView(environment);
 			view.AddItem(_rootItem);
 			return view;
 		}
@@ -83,11 +83,10 @@ namespace gitter
 
 		/// <summary>Create new view with specified parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
-		/// <param name="parameters">Creation parameters.</param>
 		/// <returns>Created view.</returns>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters)
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
-			return new StartPageView(environment, parameters, this);
+			return new StartPageView(environment, this);
 		}
 
 		public bool CloseAfterRepositoryLoad

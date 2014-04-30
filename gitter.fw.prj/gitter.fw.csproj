@@ -38,6 +38,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -47,6 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -80,7 +82,12 @@
     <Compile Include="ClipboardEx.cs" />
     <Compile Include="CLI\AsyncBytesReader.cs" />
     <Compile Include="CLI\AsyncTextReader.cs" />
+    <Compile Include="CLI\AsyncTextParser.cs" />
+    <Compile Include="CLI\StringTextSegment.cs" />
+    <Compile Include="CLI\CharArrayTextSegment.cs" />
     <Compile Include="CLI\IOutputReceiver.cs" />
+    <Compile Include="CLI\IParser.cs" />
+    <Compile Include="CLI\ITextSegment.cs" />
     <Compile Include="CLI\NullReader.cs" />
     <Compile Include="CLI\TextLineReceivedEventArgs.cs" />
     <Compile Include="CLI\NotifyingAsyncTextReader.cs" />
@@ -110,10 +117,15 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Dialogs\IRepositoryCloneDialog.cs" />
+    <Compile Include="Controls\Dialogs\IRepositoryInitDialog.cs" />
     <Compile Include="Controls\Popup\CustomObjectPicker.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\Popup\IPicker.cs" />
+    <Compile Include="Controls\Views\WebBrowserView\WebBrowserViewModel.cs" />
     <Compile Include="ExceptionExtensions.cs" />
+    <Compile Include="GraphicsUtility.cs" />
     <Compile Include="GuiCommand.cs" />
     <Compile Include="Hooks\LowLevelMouseHook.cs" />
     <Compile Include="IProgress.cs" />
@@ -124,6 +136,7 @@
     <Compile Include="Mvc\MouseCursor.cs" />
     <Compile Include="Mvc\ViewControllerBase.cs" />
     <Compile Include="Mvc\WinForms\NumericUpDownInputSource.cs" />
+    <Compile Include="Mvc\WinForms\PickerInputSource.cs" />
     <Compile Include="Mvc\WinForms\RadioButtonInputSource.cs" />
     <Compile Include="Mvc\WinForms\CheckBoxInputSource.cs" />
     <Compile Include="Mvc\WinForms\ControlInputSource.cs" />
@@ -138,6 +151,8 @@
     <Compile Include="Native\BITMAPINFOHEADER.cs" />
     <Compile Include="Native\COMBOBOXINFO.cs" />
     <Compile Include="Native\DCX.cs" />
+    <Compile Include="Native\DRAWTEXTPARAMS.cs" />
+    <Compile Include="Native\DT.cs" />
     <Compile Include="Native\DwmApi.cs" />
     <Compile Include="Native\DWMNCRP.cs" />
     <Compile Include="Native\DWMWA.cs" />
@@ -163,6 +178,8 @@
     <Compile Include="Native\MOUSEHOOKSTRUCT.cs" />
     <Compile Include="NullProgress.cs" />
     <Compile Include="OperationProgress.cs" />
+    <Compile Include="Services\RepositoryManager\RepositoryGroupCollection.cs" />
+    <Compile Include="Services\RepositoryManager\RepositoryGroupEventArgs.cs" />
     <Compile Include="Styles\MSVS2012LightColors.cs" />
     <Compile Include="Styles\MSVS2012Style.cs" />
     <Compile Include="Styles\MSVS2012LightStyle.cs" />
@@ -389,7 +406,7 @@
     <Compile Include="Services\GdiTextRenderer.cs" />
     <Compile Include="Services\Gravatar\Gravatar.cs" />
     <Compile Include="IAvatar.cs" />
-    <Compile Include="IIssueTrackerProvider.cs" />
+    <Compile Include="IRepositoryServiceProvider.cs" />
     <Compile Include="Styles\MSVS2010StyleToolStripRenderer.cs" />
     <Compile Include="Options\SelectableFontManager.cs" />
     <Compile Include="Options\SpellingPage.cs">

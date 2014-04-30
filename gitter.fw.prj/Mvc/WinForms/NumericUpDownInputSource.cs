@@ -23,7 +23,7 @@ namespace gitter.Framework.Mvc.WinForms
 	using System;
 	using System.Windows.Forms;
 
-	public class NumericUpDownInputSource<T> : ControlInputSource<NumericUpDown, T>, IWin32ControlInputSource
+	public class NumericUpDownInputSource<T> : ControlInputSource<NumericUpDown, T>
 	{
 		#region Data
 

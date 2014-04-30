@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -392,10 +392,10 @@ namespace gitter.Framework.Controls
 
 		private void OnViewTextChanged(object sender, EventArgs e)
 		{
-			var view	= (ViewBase)sender;
-			var tab		= GetTab(view);
-			var length	= tab.Length;
-			tab.ResetLength(Utility.MeasurementGraphics);
+			var view   = (ViewBase)sender;
+			var tab    = GetTab(view);
+			var length = tab.Length;
+			tab.ResetLength(GraphicsUtility.MeasurementGraphics);
 			var dl = tab.Length - length;
 			_size += dl;
 			Invalidate();

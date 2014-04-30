@@ -216,7 +216,7 @@ namespace gitter.Framework.Controls
 			graphics.Clear(BackColor);
 			graphics.SetClip(e.ClipRectangle);
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			graphics.TextRenderingHint = Utility.TextRenderingHint;
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
 			var k = (graphics.DpiY / 96f);
 			if(Focused)
 			{

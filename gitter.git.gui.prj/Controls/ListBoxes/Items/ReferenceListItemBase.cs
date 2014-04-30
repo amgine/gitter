@@ -121,7 +121,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			var data1 = item1.DataContext;
 			var data2 = item2.DataContext;
-			return string.Compare(data1.Revision.Hash, data2.Revision.Hash);
+			return string.Compare(data1.Revision.HashString, data2.Revision.HashString);
 		}
 
 		public static int CompareByPosition(CustomListBoxItem item1, CustomListBoxItem item2)
@@ -192,9 +192,9 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.Name:
 					return measureEventArgs.MeasureImageAndText(Image, DataContext.Name);
 				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Hash);
+					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.HashString);
 				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHash);
+					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHashString);
 				default:
 					return Size.Empty;
 			}
@@ -208,10 +208,10 @@ namespace gitter.Git.Gui.Controls
 					paintEventArgs.PaintImageAndText(Image, DataContext.Name);
 					break;
 				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Hash);
+					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.HashString);
 					break;
 				case ColumnId.TreeHash:
-					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHash);
+					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHashString);
 					break;
 			}
 		}

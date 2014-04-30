@@ -95,21 +95,21 @@ namespace gitter.Git.Gui.Dialogs
 		{
 			Text = Resources.StrAddRemote;
 
-			_lblName.Text			= Resources.StrName.AddColon();
-			_lblUrl.Text			= Resources.StrUrl.AddColon();
+			_lblName.Text          = Resources.StrName.AddColon();
+			_lblUrl.Text           = Resources.StrUrl.AddColon();
 			
-			_grpOptions.Text		= Resources.StrOptions;
-			_chkFetch.Text			= Resources.StrsFetchRemote;
-			_chkMirror.Text			= Resources.StrMirror;
+			_grpOptions.Text       = Resources.StrOptions;
+			_chkFetch.Text         = Resources.StrsFetchRemote;
+			_chkMirror.Text        = Resources.StrMirror;
 
-			_grpBranches.Text		= Resources.StrTrackingBranches;
-			_trackAllBranches.Text	= Resources.StrlTrackAllBranches;
-			_trackSpecified.Text	= Resources.StrlTrackSpecifiedBranches.AddColon();
+			_grpBranches.Text      = Resources.StrTrackingBranches;
+			_trackAllBranches.Text = Resources.StrlTrackAllBranches;
+			_trackSpecified.Text   = Resources.StrlTrackSpecifiedBranches.AddColon();
 
-			_grpTagImport.Text		= Resources.StrsTagFetchMode;
-			_tagFetchDefault.Text	= Resources.StrDefault;
-			_tagFetchAll.Text		= Resources.StrsFetchAll;
-			_tagFetchNone.Text		= Resources.StrsFetchNone;
+			_grpTagImport.Text     = Resources.StrsTagFetchMode;
+			_tagFetchDefault.Text  = Resources.StrDefault;
+			_tagFetchAll.Text      = Resources.StrsFetchAll;
+			_tagFetchNone.Text     = Resources.StrsFetchNone;
 		}
 
 		#endregion

@@ -311,12 +311,11 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
 			Verify.Argument.IsNotNull(workingDirectory, "workingDirectory");
 
-			_workingDirectory		= GetWorkingDirectory(workingDirectory);
-			_gitDirectory			= GetGitDirectory(_workingDirectory);
-			_configurationManager	= GetConfigurationManager(_gitDirectory);
+			_workingDirectory     = GetWorkingDirectory(workingDirectory);
+			_gitDirectory         = GetGitDirectory(_workingDirectory);
+			_configurationManager = GetConfigurationManager(_gitDirectory);
 
-			_accessor		= gitAccessor.CreateRepositoryAccessor(this);
-
+			_accessor      = gitAccessor.CreateRepositoryAccessor(this);
 			_revisionCache = new RevisionCache(this);
 			_configuration = new ConfigParametersCollection(this);
 			_status        = new Status(this);
@@ -361,9 +360,10 @@ namespace gitter.Git
 			{
 				return _head;
 			}
-			if(GitUtils.IsValidSHA1(revisionExpression))
+			Hash hash;
+			if(Hash.TryParse(revisionExpression, out hash))
 			{
-				var revision = _revisionCache.TryGetRevision(revisionExpression);
+				var revision = _revisionCache.TryGetRevision(hash);
 				if(revision != null) return revision;
 			}
 			var reference = _refs.TryGetReference(revisionExpression);
@@ -616,8 +616,8 @@ namespace gitter.Git
 		private void UpdateUserIdentity(bool raiseEvent)
 		{
 			User userIdentity;
-			var name	= _configuration.TryGetParameterValue(GitConstants.UserNameParameter);
-			var email	= _configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
+			var name  = _configuration.TryGetParameterValue(GitConstants.UserNameParameter);
+			var email = _configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 			if(name == null || email == null)
 			{
 				userIdentity = null;

@@ -33,7 +33,7 @@ namespace gitter
 
 	using Resources = gitter.Properties.Resources;
 
-	internal sealed class RecentRepositoryListItem : CustomListBoxItem<string>
+	internal sealed class RecentRepositoryListItem : CustomListBoxItem<RepositoryLink>
 	{
 		private static readonly Bitmap ImgRepositorySmall = CachedResources.Bitmaps["ImgRepository"];
 		private static readonly StringFormat PathStringFormat;
@@ -45,10 +45,10 @@ namespace gitter
 			PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
 		}
 
-		public RecentRepositoryListItem(string path)
-			: base(path)
+		public RecentRepositoryListItem(RepositoryLink repository)
+			: base(repository)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
+			Verify.Argument.IsNotNull(repository, "repository");
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -56,7 +56,7 @@ namespace gitter
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					return measureEventArgs.MeasureImageAndText(ImgRepositorySmall, DataContext);
+					return measureEventArgs.MeasureImageAndText(ImgRepositorySmall, DataContext.Path);
 				default:
 					return Size.Empty;
 			}
@@ -67,7 +67,7 @@ namespace gitter
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
-					paintEventArgs.PaintImageAndText(ImgRepositorySmall, DataContext, paintEventArgs.Brush, PathStringFormat);
+					paintEventArgs.PaintImageAndText(ImgRepositorySmall, DataContext.Path, paintEventArgs.Brush, PathStringFormat);
 					break;
 			}
 		}

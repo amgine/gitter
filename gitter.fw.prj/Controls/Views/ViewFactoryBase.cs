@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,9 +109,9 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Create new view with specified parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
-		/// <param name="parameters">Creation parameters.</param>
+		/// <param name="viewModel">View model.</param>
 		/// <returns>Created view.</returns>
-		protected abstract ViewBase CreateViewCore(IWorkingEnvironment environment, IDictionary<string, object> parameters);
+		protected abstract ViewBase CreateViewCore(IWorkingEnvironment environment);
 
 		/// <summary>Create new view with default parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
@@ -120,27 +120,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(environment, "environment");
 
-			var view = CreateViewCore(environment, null);
-			if(view != null)
-			{
-				lock(_createdViews)
-				{
-					_createdViews.AddLast(view);
-					view.Disposed += OnViewDisposed;
-				}
-			}
-			return view;
-		}
-
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <param name="parameters">Creation parameters.</param>
-		/// <returns>Created view.</returns>
-		public ViewBase CreateView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
-		{
-			Verify.Argument.IsNotNull(environment, "environment");
-
-			var view = CreateViewCore(environment, parameters);
+			var view = CreateViewCore(environment);
 			if(view != null)
 			{
 				lock(_createdViews)

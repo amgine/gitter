@@ -34,16 +34,18 @@ namespace gitter.Git
 		private readonly ReferenceType _referenceType;
 		private readonly string _fullName;
 		private readonly string _name;
-		private readonly string _oldHash;
-		private readonly string _newHash;
+		private readonly Hash _oldHash;
+		private readonly Hash _newHash;
 		private readonly ReferenceChangeType _changeType;
 
 		#endregion
 
+		#region .ctor
+
 		public ReferenceChange(
 			ReferenceType referenceType,
 			string fullName, string name,
-			string oldHash, string newHash,
+			Hash oldHash, Hash newHash,
 			ReferenceChangeType changeType)
 		{
 			_referenceType = referenceType;
@@ -53,6 +55,10 @@ namespace gitter.Git
 			_newHash = newHash;
 			_changeType = changeType;
 		}
+
+		#endregion
+
+		#region Properties
 
 		public ReferenceType ReferenceType
 		{
@@ -69,12 +75,12 @@ namespace gitter.Git
 			get { return _name;}
 		}
 
-		public string OldHash
+		public Hash OldHash
 		{
 			get { return _oldHash; }
 		}
 
-		public string NewHash
+		public Hash NewHash
 		{
 			get { return _newHash; }
 		}
@@ -83,5 +89,7 @@ namespace gitter.Git
 		{
 			get { return _changeType; }
 		}
+
+		#endregion
 	}
 }

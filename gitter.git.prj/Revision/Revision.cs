@@ -33,8 +33,10 @@ namespace gitter.Git
 		private readonly RevisionReferencesCollection _references;
 		private bool _isLoaded;
 
-		private readonly string _hash;
-		private string _treeHash;
+		private readonly Hash _hash;
+		private readonly string _hashString;
+		private Hash _treeHash;
+		private string _treeHashString;
 
 		private string _subject;
 		private string _body;
@@ -49,15 +51,13 @@ namespace gitter.Git
 
 		#region .ctor
 
-		internal Revision(Repository repository, string hash)
+		internal Revision(Repository repository, Hash hash)
 			: base(repository)
 		{
-			Verify.Argument.IsNotNull(hash, "hash");
-			Verify.Argument.IsTrue(hash.Length == 40, "hash");
-
-			_parents = new RevisionParentsCollection();
+			_parents    = new RevisionParentsCollection();
 			_references = new RevisionReferencesCollection();
-			_hash = hash;
+			_hash       = hash;
+			_hashString = hash.ToString();
 		}
 
 		#endregion
@@ -96,12 +96,17 @@ namespace gitter.Git
 
 		#region Commit Attributes
 
-		public string Hash
+		public Hash Hash
 		{
 			get { return _hash; }
 		}
 
-		public string TreeHash
+		public string HashString
+		{
+			get { return _hashString; }
+		}
+
+		public Hash TreeHash
 		{
 			get { return _treeHash; }
 			internal set
@@ -109,15 +114,22 @@ namespace gitter.Git
 				if(!_isLoaded)
 				{
 					_treeHash = value;
+					_treeHashString = value.ToString();
 				}
 				else
 				{
 					if(_treeHash != value)
 					{
 						_treeHash = value;
+						_treeHashString = value.ToString();
 					}
 				}
 			}
+		}
+
+		public string TreeHashString
+		{
+			get { return _treeHashString; }
 		}
 
 		public User Author
@@ -195,12 +207,12 @@ namespace gitter.Git
 
 		string IRevisionPointer.Pointer
 		{
-			get { return Hash; }
+			get { return _hashString; }
 		}
 
 		string IRevisionPointer.FullName
 		{
-			get { return Hash; }
+			get { return _hashString; }
 		}
 
 		bool IRevisionPointer.IsDeleted
@@ -217,7 +229,7 @@ namespace gitter.Git
 
 		public override string ToString()
 		{
-			return string.Format("{0}: {1}", Hash.Substring(0, 7), Subject);
+			return string.Format("{0}: {1}", _hash.ToString(7), Subject);
 		}
 	}
 }

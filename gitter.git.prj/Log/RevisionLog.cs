@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(revisions, "revisions");
 
 			_repository = repository;
-			_revisions = revisions;
+			_revisions  = revisions;
 		}
 
 		public RevisionLog(Repository repository, IList<Revision> revisions, Dictionary<Revision, IList<Revision>> parents)
@@ -50,14 +50,18 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(revisions, "revisions");
 
 			_repository = repository;
-			_revisions = revisions;
-			_parents = parents;
+			_revisions  = revisions;
+			_parents    = parents;
 		}
 
 		#endregion
 
+		#region Methods
+
 		public IList<Revision> GetParents(Revision revision)
 		{
+			Verify.Argument.IsNotNull(revision, "revision");
+
 			if(_parents == null)
 			{
 				return revision.Parents;
@@ -76,6 +80,10 @@ namespace gitter.Git
 			}
 		}
 
+		#endregion
+
+		#region Properties
+
 		public Repository Repository
 		{
 			get { return _repository; }
@@ -90,5 +98,7 @@ namespace gitter.Git
 		{
 			get { return _revisions.Count; }
 		}
+
+		#endregion
 	}
 }

@@ -32,8 +32,8 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	partial class GitView : GitViewBase
 	{
-		public GitView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.GitViewGuid, gui, parameters)
+		public GitView(GuiProvider gui)
+			: base(Guids.GitViewGuid, gui)
 		{
 			InitializeComponent();
 

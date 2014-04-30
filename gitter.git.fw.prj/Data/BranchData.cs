@@ -30,7 +30,7 @@ namespace gitter.Git.AccessLayer
 		#region Data
 
 		private readonly string _name;
-		private readonly string _sha1;
+		private readonly Hash _sha1;
 		private readonly bool _isFake;
 		private readonly bool _isRemote;
 		private readonly bool _isCurrent;
@@ -39,11 +39,9 @@ namespace gitter.Git.AccessLayer
 
 		#region .ctor
 
-		public BranchData(string name, string sha1, bool isFake, bool isRemote, bool isCurrent)
+		public BranchData(string name, Hash sha1, bool isFake, bool isRemote, bool isCurrent)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(sha1, "sha1");
-			Verify.Argument.IsTrue(sha1.Length == 40, "sha1");
 
 			_name = name;
 			_sha1 = sha1;
@@ -52,7 +50,7 @@ namespace gitter.Git.AccessLayer
 			_isCurrent = isCurrent;
 		}
 
-		public BranchData(string name, string sha1, bool remote, bool current)
+		public BranchData(string name, Hash sha1, bool remote, bool current)
 			: this(name, sha1, false, remote, current)
 		{
 		}
@@ -68,7 +66,7 @@ namespace gitter.Git.AccessLayer
 		}
 
 		/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-		public string SHA1
+		public Hash SHA1
 		{
 			get { return _sha1; }
 		}

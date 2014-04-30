@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 		public Branch CreateOrphan(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool createRefLog)
 		{
-			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, "name");
 			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, "startingRevision");
 			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
@@ -136,7 +136,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 		public Branch Create(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool checkout, bool createRefLog)
 		{
-			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, "name");
 			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, "startingRevision");
 			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
@@ -229,7 +229,7 @@ namespace gitter.Git
 		internal void Rename(Branch branch, string name)
 		{
 			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
-			Verify.Argument.IsValidReferenceName(name, "name");
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, "name");
 			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
 

@@ -20,17 +20,12 @@
 
 namespace gitter.Git.Gui.Interfaces
 {
+	using gitter.Framework;
 	using gitter.Framework.Mvc;
 
-	interface ICloneView : IView
+	interface ICloneView : IView, IRepositoryCloneDialog
 	{
-		IUserInputSource<string> Url { get; }
-
-		IUserInputSource<string> RepositoryPath { get; }
-
 		IUserInputSource<string> RemoteName { get; }
-
-		IUserInputSource<bool> AppendRepositoryNameFromUrl { get; }
 
 		IUserInputSource<bool> ShallowClone { get; }
 

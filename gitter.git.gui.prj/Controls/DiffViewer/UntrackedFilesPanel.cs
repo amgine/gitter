@@ -63,7 +63,7 @@ namespace gitter.Git.Gui.Controls
 
 				_file = file;
 				_text = file.RelativePath;
-				_icon = Utility.QueryIcon(file.RelativePath);
+				_icon = GraphicsUtility.QueryIcon(file.RelativePath);
 				_overlay = CachedResources.Bitmaps["ImgOverlayAdd"];
 			}
 

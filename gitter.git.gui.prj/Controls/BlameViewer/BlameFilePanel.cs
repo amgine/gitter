@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -325,7 +325,7 @@ namespace gitter.Git.Gui.Controls
 							{
 								var commit = lines[0].Commit;
 								menu.Items.Add(new ToolStripSeparator());
-								menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash));
+								menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash.ToString()));
 								menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, commit.Summary));
 								menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author));
 								if(commit.Author != commit.Committer)
@@ -652,10 +652,10 @@ namespace gitter.Git.Gui.Controls
 			{
 				if(paintHeader)
 				{
-					var rcHash		= new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
-					var rcAuthor	= new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
+					var rcHash   = new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
+					var rcAuthor = new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
 					GitterApplication.TextRenderer.DrawText(
-						graphics, hunk.Commit.Hash.Substring(0, 7), font, brush,
+						graphics, hunk.Commit.Hash.ToString(7), font, brush,
 						rcHash.X + CellSize.Width / 2, rcHash.Y, ContentFormat);
 					GitterApplication.TextRenderer.DrawText(
 						graphics, hunk.Commit.Author, font, brush,
@@ -698,7 +698,7 @@ namespace gitter.Git.Gui.Controls
 				var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
 				if(rcHeaderClip.Width != 0 && rcHeaderClip.Height != 0)
 				{
-					PaintHeader(graphics, rcHeader, Utility.QueryIcon(_blameFile.Name), null, _blameFile.Name);
+					PaintHeader(graphics, rcHeader, GraphicsUtility.QueryIcon(_blameFile.Name), null, _blameFile.Name);
 				}
 				y += rcHeader.Bottom;
 			}

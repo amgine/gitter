@@ -30,17 +30,15 @@ namespace gitter.Git.AccessLayer
 		#region Data
 
 		private readonly string _name;
-		private readonly string _sha1;
+		private readonly Hash _sha1;
 
 		#endregion
 
 		#region .ctor
 
-		public RemoteBranchData(string name, string sha1)
+		public RemoteBranchData(string name, Hash sha1)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(sha1, "sha1");
-			Verify.Argument.IsTrue(sha1.Length == 40, "sha1");
 
 			_name = name;
 			_sha1 = sha1;
@@ -57,7 +55,7 @@ namespace gitter.Git.AccessLayer
 		}
 
 		/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-		public string SHA1
+		public Hash SHA1
 		{
 			get { return _sha1; }
 		}

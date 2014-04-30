@@ -58,7 +58,7 @@
 			this._pnlOptions.Controls.Add(this._chkCheckoutAfterCreation);
 			this._pnlOptions.Controls.Add(this._grpOptions);
 			this._pnlOptions.Controls.Add(this._chkCreateReflog);
-			this._pnlOptions.Location = new System.Drawing.Point(0, 58);
+			this._pnlOptions.Location = new System.Drawing.Point(0, 61);
 			this._pnlOptions.Margin = new System.Windows.Forms.Padding(0);
 			this._pnlOptions.Name = "_pnlOptions";
 			this._pnlOptions.Size = new System.Drawing.Size(400, 90);
@@ -122,7 +122,7 @@
 			// _lblRevision
 			// 
 			this._lblRevision.AutoSize = true;
-			this._lblRevision.Location = new System.Drawing.Point(0, 32);
+			this._lblRevision.Location = new System.Drawing.Point(0, 35);
 			this._lblRevision.Name = "_lblRevision";
 			this._lblRevision.Size = new System.Drawing.Size(74, 15);
 			this._lblRevision.TabIndex = 4;
@@ -140,7 +140,7 @@
 			// _txtRevision
 			// 
 			this._txtRevision.FormattingEnabled = true;
-			this._txtRevision.Location = new System.Drawing.Point(94, 29);
+			this._txtRevision.Location = new System.Drawing.Point(94, 32);
 			this._txtRevision.Name = "_txtRevision";
 			this._txtRevision.Size = new System.Drawing.Size(303, 23);
 			this._txtRevision.TabIndex = 1;
@@ -154,7 +154,7 @@
 			this.panel1.Controls.Add(this._trackingTrack);
 			this.panel1.Controls.Add(this._trackingDefault);
 			this.panel1.Controls.Add(this._grpTracking);
-			this.panel1.Location = new System.Drawing.Point(0, 148);
+			this.panel1.Location = new System.Drawing.Point(0, 151);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(400, 49);
@@ -215,7 +215,7 @@
 			this.Controls.Add(this._lblRevision);
 			this.Controls.Add(this._lblName);
 			this.Name = "CreateBranchDialog";
-			this.Size = new System.Drawing.Size(400, 197);
+			this.Size = new System.Drawing.Size(400, 200);
 			this._pnlOptions.ResumeLayout(false);
 			this._pnlOptions.PerformLayout();
 			this.panel1.ResumeLayout(false);

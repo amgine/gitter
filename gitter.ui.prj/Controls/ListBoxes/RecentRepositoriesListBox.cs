@@ -69,7 +69,7 @@ namespace gitter
 				if(SelectedItems.Count != 1) return;
 				var item = SelectedItems[0];
 				using(var dragImage = RepositoryDragImage.Create(
-					((RecentRepositoryListItem)item).DataContext))
+					((RecentRepositoryListItem)item).DataContext.Path))
 				{
 					dragImage.ShowDragVisual(this);
 					DoDragDrop(item, DragDropEffects.Copy);

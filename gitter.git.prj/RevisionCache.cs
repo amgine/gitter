@@ -30,7 +30,7 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly Dictionary<string, Revision> _revisions;
+		private readonly Dictionary<Hash, Revision> _revisions;
 		private readonly object _syncRoot;
 
 		#endregion
@@ -42,8 +42,8 @@ namespace gitter.Git
 		public RevisionCache(Repository repository)
 			: base(repository)
 		{
-			_revisions = new Dictionary<string, Revision>();
-			_syncRoot = new object();
+			_revisions = new Dictionary<Hash, Revision>(Hash.EqualityComparer);
+			_syncRoot  = new object();
 		}
 
 		#endregion
@@ -59,10 +59,9 @@ namespace gitter.Git
 		/// <param name="sha1">SHA-1 of required revision.</param>
 		/// <returns>Revision with specified SHA-1.</returns>
 		/// <exception cref="ArgumentException">Invalid SHA-1 expression.</exception>
-		/// <exception cref="ArgumentNullException"><paramref name="sha1"/> == <c>null</c>.</exception>
 		/// <exception cref="GitException">Revision does not exist.</exception>
 		/// <remarks>If revision is not present in cache, it will be queried from git repo.</remarks>
-		public Revision this[string sha1]
+		public Revision this[Hash sha1]
 		{
 			get
 			{
@@ -91,7 +90,7 @@ namespace gitter.Git
 		/// <param name="sha1">SHA-1 of required revision.</param>
 		/// <returns>Revision with specified SHA-1 or <c>null</c> if such revision does not exist.</returns>
 		/// <remarks>If revision is not present in cache, it will be queried from git repo.</remarks>
-		public Revision TryGetRevision(string sha1)
+		public Revision TryGetRevision(Hash sha1)
 		{
 			lock(SyncRoot)
 			{
@@ -125,7 +124,7 @@ namespace gitter.Git
 		/// <param name="sha1">SHA-1 of required revision.</param>
 		/// <returns>Revision with specified SHA-1 or <c>null</c> if such revision is not found in cache.</returns>
 		/// <remarks>Does not query revision from git repository if it is not present in cache..</remarks>
-		public Revision TryGetRevisionFromCacheOnly(string sha1)
+		public Revision TryGetRevisionFromCacheOnly(Hash sha1)
 		{
 			lock(SyncRoot)
 			{
@@ -154,7 +153,7 @@ namespace gitter.Git
 			}
 		}
 
-		internal Revision GetOrCreateRevision(string sha1)
+		internal Revision GetOrCreateRevision(Hash sha1)
 		{
 			Revision revision;
 			if(!_revisions.TryGetValue(sha1, out revision))
@@ -188,12 +187,12 @@ namespace gitter.Git
 						{
 							ObjectFactories.UpdateRevision(revision, revisionData);
 						}
-						res[i] = revision;
 					}
 					else
 					{
-						res[i] = ObjectFactories.CreateRevision(Repository, revisionData);
+						revision = ObjectFactories.CreateRevision(Repository, revisionData);
 					}
+					res[i] = revision;
 				}
 			}
 			return res;

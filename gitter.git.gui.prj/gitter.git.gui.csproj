@@ -53,6 +53,22 @@
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="NHunspell, Version=1.1.1.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
+      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
+      <Name>gitter.fw</Name>
+    </ProjectReference>
     <ProjectReference Include="..\gitter.git.cli.prj\gitter.git.cli.csproj">
       <Project>{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}</Project>
       <Name>gitter.git.cli</Name>
@@ -65,18 +81,6 @@
       <Project>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</Project>
       <Name>gitter.git</Name>
     </ProjectReference>
-    <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
-      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
-      <Name>gitter.fw</Name>
-    </ProjectReference>
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\common\CommonAssemblyInfo.cs">
@@ -99,6 +103,8 @@
     <Compile Include="Controllers\CreateTagController.cs" />
     <Compile Include="Controllers\GitControllerUtility.cs" />
     <Compile Include="Controllers\InitController.cs" />
+    <Compile Include="Controllers\PushController.cs" />
+    <Compile Include="Controllers\RenameRemoteController.cs" />
     <Compile Include="Controllers\StashToBranchController.cs" />
     <Compile Include="Controllers\RenameBranchController.cs" />
     <Compile Include="Controls\BlameViewer\BlameFileBinding.cs" />
@@ -123,7 +129,11 @@
     <Compile Include="GuiCommandStatus.cs" />
     <Compile Include="Interfaces\IMergeController.cs" />
     <Compile Include="Interfaces\IMergeView.cs" />
+    <Compile Include="Interfaces\IPushController.cs" />
+    <Compile Include="Interfaces\IPushView.cs" />
+    <Compile Include="Interfaces\IRenameRemoteController.cs" />
     <Compile Include="Interfaces\IRenameBranchController.cs" />
+    <Compile Include="Interfaces\IRenameRemoteView.cs" />
     <Compile Include="Interfaces\IRenameBranchView.cs" />
     <Compile Include="Interfaces\IAddSubmoduleController.cs" />
     <Compile Include="Interfaces\IAddSubmoduleView.cs" />
@@ -145,6 +155,7 @@
     <Compile Include="Interfaces\ICreateBranchView.cs" />
     <Compile Include="Interfaces\IStashToBranchController.cs" />
     <Compile Include="Interfaces\IStashToBranchView.cs" />
+    <Compile Include="Interfaces\PushTo.cs" />
     <Compile Include="Notifications.cs" />
     <Compile Include="Notifications\ReferencesChangedNotification.cs">
       <SubType>Component</SubType>
@@ -154,9 +165,12 @@
     </Compile>
     <Compile Include="TreeExtensions.cs" />
     <Compile Include="Verify.cs" />
+    <Compile Include="Views\BlameViewModel.cs" />
+    <Compile Include="Views\DiffViewModel.cs" />
     <Compile Include="Views\HistoryViewBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Views\HistoryViewModel.cs" />
     <Compile Include="Views\ReflogSearch.cs" />
     <Compile Include="Views\HistorySearch.cs" />
     <Compile Include="Views\ISearch.cs" />
@@ -165,12 +179,15 @@
     <Compile Include="Views\PathHistoryView.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Views\ReflogViewModel.cs" />
     <Compile Include="Views\RemoteView.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Views\RemoteView.Designer.cs">
       <DependentUpon>RemoteView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\RemoteViewModel.cs" />
+    <Compile Include="Views\TreeViewModel.cs" />
     <Compile Include="Views\ViewToolBars\ContributorsToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -729,7 +746,7 @@
     <Compile Include="MainGitMenus.cs" />
     <Compile Include="ViewFactoriesCollection.cs" />
     <Compile Include="Statusbar.cs" />
-    <Compile Include="MainToolbar.cs">
+    <Compile Include="GitToolbar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Dialogs\SelectResetModeDialog.cs">
@@ -955,424 +972,148 @@
     <None Include="..\common\key.snk">
       <Link>Properties\key.snk</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\branch.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\branchremote.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\fetch.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\folder.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\git.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\history.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_add.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_cancel.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_conflict.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_del.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_edit.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_ok.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\pull.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\push.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\tag.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\tagadd.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\tagdel.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\users.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\clean.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\compress.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\graph.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\graph-children.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\lines-added.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\lines-removed.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\merge.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\module.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\module-add.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\refresh.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stash.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stash-add.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stash-remove.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\terminal.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\commit.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\revert.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\repository-clone.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\remote.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\checkout.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\reset.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\module-del.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\branch-add.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\branch-del.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\branchremote-del.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\align-to-graph.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\mail.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\cherry-pick.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ui-split-panel.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ui-split-panel-vertical.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\search.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\minus.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\plus.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\diff.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\binary.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ui-panel.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\branch-rename.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\exclamation-shield.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stage-all.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\unstage-all.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\less-context.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\more-context.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\remote-add.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\remote-remove.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\folder-tree.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\user.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\config.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\config-add.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\config-edit.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\config-remove.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\clipboard-sign.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\file-delete.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\file-revert.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\file-stage.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\file-unstage.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\folder-stage.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\folder-unstage.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stage.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\unstage.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\delete.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\remote-rename.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\overlay-add-staged.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\overlay-del-staged.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\overlay-edit-staged.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stash-apply.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stash-pop.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\document.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\branch-properties.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\remote-properties.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ImgWarning48.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ImgInfo48.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\sticky-note.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\sticky-note--minus.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\sticky-note--pencil.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\sticky-note--plus.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\repository-init.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\patch-apply.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\patch-save.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\tag-annotated.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\vew-reflog-remote.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\view-reflog-local.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\refs-heads.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\refs-remotes.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\refs-tags.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\submodules.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\remotes.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\configuration.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\search-next.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\search-prevous.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\search-close.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\folder_up.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\clear.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stash-save.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\stash-clear.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\tick-circle.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\mail-send.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\rebase-abort.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\rebase-continue.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\rebase-skip.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\gc.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_copy.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_rename.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ovl_chmod.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\blame.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\sort-date.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\node.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\funnel.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\patch.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\mark-as-resolved.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-1.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-2.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-3.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-4.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-5.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-6.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-7.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-8.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-9.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\status-green-9p.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\user-silhouette-question.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\file-history.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\folder-history.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\folder-zipper.png" />
+    <None Include="Resources\folder-zipper.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

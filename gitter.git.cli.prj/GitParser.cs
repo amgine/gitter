@@ -37,33 +37,6 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		private static ushort UnhexShort(string str, int offset, int length)
-		{
-			int res = 0;
-			for(int i = offset + length - 1, n = 1; i >= offset; --i, n *= 16)
-			{
-				char c = str[i];
-				int value;
-				if(char.IsDigit(c))
-				{
-					value = c - '0';
-				}
-				else
-				{
-					if(char.IsLower(c))
-					{
-						value = 10 + c - 'a';
-					}
-					else
-					{
-						value = 10 + c - 'A';
-					}
-				}
-				res += value * n;
-			}
-			return (ushort)res;
-		}
-
 		private static byte ByteFromOctString(string str, int offset, int length)
 		{
 			int res = 0;
@@ -263,7 +236,7 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				Skip(GitConstants.NoBranch.Length);
 				Skip(' ');
-				var sha1 = ReadStringNoAdvance(40);
+				var sha1 = new Hash(String, Position);
 				res = new BranchData(GitConstants.NoBranch, sha1, true, false, true);
 			}
 			else
@@ -276,7 +249,7 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 				else
 				{
-					var sha1 = ReadStringNoAdvance(40);
+					var sha1 = new Hash(String, Position);
 					bool remote;
 					switch(restriction)
 					{
@@ -377,7 +350,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		public void ParseCommitParentsFromRaw(IEnumerable<RevisionData> revs, Dictionary<string, RevisionData> cache)
+		public void ParseCommitParentsFromRaw(IEnumerable<RevisionData> revs, Dictionary<Hash, RevisionData> cache)
 		{
 			var parents = new List<RevisionData>();
 			foreach(var rev in revs)
@@ -392,7 +365,8 @@ namespace gitter.Git.AccessLayer.CLI
 					while(CheckValue("parent ") && Position < eoc)
 					{
 						Skip(7);
-						var p = ReadLine();
+						var p = ReadHash();
+						SkipLine();
 						RevisionData prd;
 						if(cache != null)
 						{
@@ -419,13 +393,13 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public RevisionData ParseRevision()
 		{
-			var sha1 = ReadString(40, 1);
-			var res = new RevisionData(sha1);
-			ParseRevisionData(res, null);
-			return res;
+			var hash     = ReadHash(skip: 1);
+			var revision = new RevisionData(hash);
+			ParseRevisionData(revision, null);
+			return revision;
 		}
 
-		private RevisionData[] ReadRevisionParents(Dictionary<string, RevisionData> cache)
+		private RevisionData[] ReadRevisionParents(Dictionary<Hash, RevisionData> cache)
 		{
 			int end = FindNewLineOrEndOfString();
 			int numParents = (end - Position + 1) / 41;
@@ -438,7 +412,7 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				for(int i = 0; i < numParents; ++i)
 				{
-					var sha1 = ReadString(40, 1);
+					var sha1 = ReadHash(skip: 1);
 					if(cache == null)
 					{
 						parents[i] = new RevisionData(sha1);
@@ -456,16 +430,32 @@ namespace gitter.Git.AccessLayer.CLI
 			return parents;
 		}
 
-		public void ParseRevisionData(RevisionData rev, Dictionary<string, RevisionData> cache)
+		public Hash ReadHash()
 		{
-			rev.TreeHash		= ReadString(40, 1);
-			rev.Parents			= ReadRevisionParents(cache);
-			rev.CommitDate		= ReadUnixTimestampLine();
-			rev.CommitterName	= ReadLine();
-			rev.CommitterEmail	= ReadLine();
-			rev.AuthorDate		= ReadUnixTimestampLine();
-			rev.AuthorName		= ReadLine();
-			rev.AuthorEmail		= ReadLine();
+			var hash = new Hash(String, Position);
+			Skip(40);
+			return hash;
+		}
+
+		public Hash ReadHash(int skip)
+		{
+			Verify.Argument.IsNotNegative(skip, "skip");
+
+			var hash = new Hash(String, Position);
+			Skip(40 + skip);
+			return hash;
+		}
+
+		public void ParseRevisionData(RevisionData rev, Dictionary<Hash, RevisionData> cache)
+		{
+			rev.TreeHash       = ReadHash(skip: 1);
+			rev.Parents        = ReadRevisionParents(cache);
+			rev.CommitDate     = ReadUnixTimestampLine();
+			rev.CommitterName  = ReadLine();
+			rev.CommitterEmail = ReadLine();
+			rev.AuthorDate     = ReadUnixTimestampLine();
+			rev.AuthorName     = ReadLine();
+			rev.AuthorEmail    = ReadLine();
 
 			// Subject + Body
 			int eoc = FindNullOrEndOfString();

@@ -239,263 +239,6 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#endregion
 
-		#region Status
-
-		public StatusData ParseStatus(GitOutput output)
-		{
-			output.ThrowOnBadReturnCode();
-
-			var stagedFiles = new Dictionary<string, TreeFileData>();
-			var unstagedFiles = new Dictionary<string, TreeFileData>();
-
-			int unstagedUntrackedCount = 0;
-			int unstagedRemovedCount = 0;
-			int unstagedModifiedCount = 0;
-			int unmergedCount = 0;
-			int stagedAddedCount = 0;
-			int stagedModifiedCount = 0;
-			int stagedRemovedCount = 0;
-
-			var parser = new GitParser(output.Output);
-			while(!parser.IsAtEndOfString)
-			{
-				var x = parser.ReadChar();
-				var y = parser.ReadChar();
-				parser.Skip();
-
-				bool staged = false;
-				bool unstaged = false;
-				var conflictType = ConflictType.None;
-				var stagedFileStatus = FileStatus.Unknown;
-				var unstagedFileStatus = FileStatus.Unknown;
-
-				var to = ReadStatusFileName(parser);
-				string from = string.Empty;
-
-				if(x == '?')
-				{
-					staged = false;
-					unstaged = true;
-					unstagedFileStatus = FileStatus.Added;
-					++unstagedUntrackedCount;
-				}
-				else
-				{
-					if(x == 'C' || x == 'R')
-					{
-						from = ReadStatusFileName(parser);
-						if(x == 'C')
-						{
-							x = 'A';
-							stagedFileStatus = FileStatus.Added;
-						}
-						else
-						{
-							if(!stagedFiles.ContainsKey(from))
-							{
-								var file = new TreeFileData(from, FileStatus.Removed, ConflictType.None, StagedStatus.Staged);
-								stagedFiles.Add(from, file);
-								++stagedRemovedCount;
-							}
-							x = 'A';
-							stagedFileStatus = FileStatus.Added;
-						}
-					}
-					conflictType = GetConflictType(x, y);
-					if(conflictType != ConflictType.None)
-					{
-						staged = false;
-						unstaged = true;
-						unstagedFileStatus = FileStatus.Unmerged;
-						++unmergedCount;
-					}
-					else
-					{
-						if(x != ' ')
-						{
-							staged = true;
-							stagedFileStatus = CharToFileStatus(x);
-							switch(stagedFileStatus)
-							{
-								case FileStatus.Added:
-									++stagedAddedCount;
-									break;
-								case FileStatus.Removed:
-									++stagedRemovedCount;
-									break;
-								case FileStatus.Modified:
-									++stagedModifiedCount;
-									break;
-							}
-						}
-						if(y != ' ')
-						{
-							unstaged = true;
-							unstagedFileStatus = CharToFileStatus(y);
-							switch(unstagedFileStatus)
-							{
-								case FileStatus.Added:
-									++unstagedUntrackedCount;
-									break;
-								case FileStatus.Removed:
-									++unstagedRemovedCount;
-									break;
-								case FileStatus.Modified:
-									++unstagedModifiedCount;
-									break;
-							}
-						}
-					}
-				}
-
-				if(staged)
-				{
-					var file = new TreeFileData(to, stagedFileStatus, ConflictType.None, StagedStatus.Staged);
-					if(!stagedFiles.ContainsKey(to))
-					{
-						stagedFiles.Add(to, file);
-					}
-					else
-					{
-						stagedFiles[to] = file;
-					}
-				}
-				if(unstaged)
-				{
-					var file = new TreeFileData(to, unstagedFileStatus, conflictType, StagedStatus.Unstaged);
-					TreeFileData existing;
-					if(unstagedFiles.TryGetValue(to, out existing))
-					{
-						if(existing.FileStatus == FileStatus.Removed)
-						{
-							unstagedFiles[to] = file;
-						}
-					}
-					else
-					{
-						unstagedFiles.Add(to, file);
-					}
-				}
-			}
-			return new StatusData(
-				stagedFiles, unstagedFiles,
-				unstagedUntrackedCount,
-				unstagedRemovedCount,
-				unstagedModifiedCount,
-				unmergedCount,
-				stagedAddedCount,
-				stagedModifiedCount,
-				stagedRemovedCount);
-		}
-
-		private static string ReadStatusFileName(GitParser parser)
-		{
-			Assert.IsNotNull(parser);
-
-			var eol = parser.FindNullOrEndOfString();
-			return parser.String[eol - 1] == '/' ?
-				parser.ReadStringUpTo(eol - 1, 2) :
-				parser.ReadStringUpTo(eol, 1);
-		}
-
-		private static FileStatus CharToFileStatus(char c)
-		{
-			switch(c)
-			{
-				case 'M':
-					return FileStatus.Modified;
-				case 'A':
-					return FileStatus.Added;
-				case 'D':
-					return FileStatus.Removed;
-				case '?':
-					return FileStatus.Added;
-				case 'U':
-					return FileStatus.Unmerged;
-				case ' ':
-					return FileStatus.Unknown;
-				case '!':
-					return FileStatus.Ignored;
-				default:
-					return FileStatus.Unknown;
-			}
-		}
-
-		private static ConflictType GetConflictType(char x, char y)
-		{
-			if(IsUnmergedState(x, y))
-			{
-				if(x == y)
-				{
-					if(x == 'A') return ConflictType.BothAdded;
-					if(x == 'D') return ConflictType.BothDeleted;
-					if(x == 'U') return ConflictType.BothModified;
-					return ConflictType.Unknown;
-				}
-				else
-				{
-					switch(x)
-					{
-						case 'U':
-							switch(y)
-							{
-								case 'A': return ConflictType.AddedByThem;
-								case 'D': return ConflictType.DeletedByThem;
-								default: return ConflictType.Unknown;
-							}
-						case 'A':
-							switch(y)
-							{
-								case 'U': return ConflictType.AddedByUs;
-								default: return ConflictType.Unknown;
-							}
-						case 'D':
-							switch(y)
-							{
-								case 'U': return ConflictType.DeletedByUs;
-								default: return ConflictType.Unknown;
-							}
-						default:
-							return ConflictType.Unknown;
-					}
-				}
-			}
-			else
-			{
-				return ConflictType.None;
-			}
-		}
-
-		private static bool IsUnmergedState(char x, char y)
-		{
-			return (x == 'U' || y == 'U') || (x == 'A' && y == 'A') || (x == 'D' && y == 'D');
-		}
-
-		#endregion
-
-		public IList<RevisionData> ParseRevisions(GitOutput output)
-		{
-			Assert.IsNotNull(output);
-
-			output.ThrowOnBadReturnCode();
-			var cache = new Dictionary<string, RevisionData>();
-			var list = new List<RevisionData>();
-			var parser = new GitParser(output.Output);
-			while(!parser.IsAtEndOfString)
-			{
-				var sha1 = parser.ReadString(40, 1);
-				RevisionData rev;
-				if(!cache.TryGetValue(sha1, out rev))
-				{
-					rev = new RevisionData(sha1);
-					cache.Add(sha1, rev);
-				}
-				parser.ParseRevisionData(rev, cache);
-				list.Add(rev);
-			}
-			return list;
-		}
-
 		public RevisionData ParseSingleRevision(QueryRevisionParameters parameters, GitOutput output)
 		{
 			Assert.IsNotNull(parameters);
@@ -503,9 +246,10 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(output.ExitCode != 0)
 			{
-				if(IsUnknownRevisionError(output.Error, parameters.SHA1))
+				var revName = parameters.SHA1.ToString();
+				if(IsUnknownRevisionError(output.Error, revName))
 				{
-					throw new UnknownRevisionException(parameters.SHA1);
+					throw new UnknownRevisionException(revName);
 				}
 				output.Throw();
 			}
@@ -570,7 +314,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			else
 			{
-				var hash = output.Output;
+				var hash = new Hash(output.Output);
 				return new RevisionData(hash);
 			}
 		}
@@ -905,11 +649,11 @@ namespace gitter.Git.AccessLayer.CLI
 					if(StringUtility.CheckValues(output, pos2, name, GitConstants.DereferencedTagPostfix))
 					{
 						pos = end + 1;
-						return new RemoteReferenceData(name, hash2) { TagType = TagType.Annotated };
+						return new RemoteReferenceData(name, new Hash(hash2)) { TagType = TagType.Annotated };
 					}
 				}
 			}
-			return new RemoteReferenceData(name, hash);
+			return new RemoteReferenceData(name, new Hash(hash));
 		}
 
 		public IList<string> ParsePrunedBranches(GitOutput output)
@@ -1184,9 +928,9 @@ namespace gitter.Git.AccessLayer.CLI
 			bool needTags		= (refTypes & ReferenceType.Tag) == ReferenceType.Tag;
 			bool needStash		= (refTypes & ReferenceType.Stash) == ReferenceType.Stash;
 
-			var heads	= needHeads		? new List<BranchData>()	: null;
-			var remotes	= needRemotes	? new List<BranchData>()	: null;
-			var tags	= needTags		? new List<TagData>()		: null;
+			var heads	= needHeads   ? new List<BranchData>() : null;
+			var remotes	= needRemotes ? new List<BranchData>() : null;
+			var tags	= needTags    ? new List<TagData>()    : null;
 			RevisionData stash = null;
 
 			bool encounteredRemoteBranch = false;
@@ -1198,7 +942,7 @@ namespace gitter.Git.AccessLayer.CLI
 			int l = refs.Length;
 			while(pos < l)
 			{
-				var hash = refs.Substring(pos, 40);
+				var hash = new Hash(refs, pos);
 				pos += 41;
 				var end = refs.IndexOf('\n', pos);
 				if(end == -1) end = l;
@@ -1257,7 +1001,7 @@ namespace gitter.Git.AccessLayer.CLI
 								if(StringUtility.CheckValue(refs, pos2, name) && StringUtility.CheckValue(refs, pos2 + name.Length, GitConstants.DereferencedTagPostfix))
 								{
 									type = TagType.Annotated;
-									hash = refs.Substring(s2, 40);
+									hash = new Hash(refs, s2);
 									end = end2;
 								}
 							}
@@ -1281,7 +1025,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(output.ExitCode == 0)
 			{
-				var hash = output.Output.Substring(0, 40);
+				var hash = new Hash(output.Output);
 				return new BranchData(parameters.BranchName, hash, false, parameters.IsRemote, false);
 			}
 			else
@@ -1449,16 +1193,16 @@ namespace gitter.Git.AccessLayer.CLI
 			var tag = output.Output;
 			if(output.ExitCode == 0 && tag.Length >= 40)
 			{
-				string hash;
+				Hash hash;
 				TagType type;
 				if(tag.Length >= 81)
 				{
-					hash = output.Output.Substring(41, 40);
+					hash = new Hash(output.Output, 41);
 					type = TagType.Annotated;
 				}
 				else
 				{
-					hash = output.Output.Substring(0, 40);
+					hash = new Hash(output.Output);
 					type = TagType.Lightweight;
 				}
 				return new TagData(parameters.TagName, hash, type);
@@ -1513,7 +1257,7 @@ namespace gitter.Git.AccessLayer.CLI
 					}
 				}
 			}
-			return new TagData(strName, strHash, type);
+			return new TagData(strName, new Hash(strHash), type);
 		}
 
 		public string ParseDescribeResult(DescribeParameters parameters, GitOutput output)
@@ -1693,7 +1437,7 @@ namespace gitter.Git.AccessLayer.CLI
 					return null;
 				}
 
-				var hash = output.Output.Substring(0, 40);
+				var hash = new Hash(output.Output);
 				return new RevisionData(hash);
 			}
 		}

@@ -25,6 +25,7 @@ namespace gitter.Controls
 	using System.Windows.Forms;
 
 	using gitter.Framework;
+	using gitter.Framework.Controls;
 
 	using Resources = gitter.Properties.Resources;
 
@@ -35,7 +36,7 @@ namespace gitter.Controls
 		#region Data
 
 		private Dictionary<TValue, Control> _controlCache;
-		private Control _activeControl;
+		private Control _selectedControl;
 		private Label _label;
 		private TPicker _picker;
 
@@ -54,17 +55,14 @@ namespace gitter.Controls
 			// 
 			_label.Name = "_label";
 			_label.AutoSize = true;
-			_label.Location = new System.Drawing.Point(3, 7);
-			_label.Size = new System.Drawing.Size(54, 15);
-			_label.TabIndex = 1;
+			_label.Bounds = new System.Drawing.Rectangle(0, 6, 54, 15);
 			_label.Text = displayName;
 			// 
 			// _picker
 			// 
 			_picker.Name = "_picker";
 			_picker.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-			_picker.Location = new System.Drawing.Point(100, 3);
-			_picker.Size = new System.Drawing.Size(297, 24);
+			_picker.Bounds = new System.Drawing.Rectangle(94, 3, 303, 23);
 			_picker.TabIndex = 0;
 			_picker.SelectedValueChanged += OnSelectedValueChanged;
 			// 
@@ -87,6 +85,16 @@ namespace gitter.Controls
 			get { return _picker.SelectedValue; }
 		}
 
+		protected virtual int MinimumSelectableItems
+		{
+			get { return 1; }
+		}
+
+		protected Control SelectedControl
+		{
+			get { return _selectedControl; }
+		}
+
 		#endregion
 
 		#region Methods
@@ -106,6 +114,10 @@ namespace gitter.Controls
 				var item = _picker.DropDownItems[0];
 				item.IsSelected = true;
 				item.Activate();
+				if(_picker.DropDownItems.Count < MinimumSelectableItems)
+				{
+					_picker.Enabled = false;
+				}
 			}
 			else
 			{
@@ -134,23 +146,25 @@ namespace gitter.Controls
 			}
 			var control = GetOrCreateControl(item);
 			int d = 0;
-			if(_activeControl != null)
+			if(_selectedControl != null)
 			{
-				d -= _activeControl.Height;
-				_activeControl.Parent = null;
-				_activeControl = null;
+				d -= _selectedControl.Height;
+				_selectedControl.Parent = null;
+				_selectedControl = null;
+				d -= 3;
 			}
-			_activeControl = control;
-			if(_activeControl != null)
+			_selectedControl = control;
+			if(_selectedControl != null)
 			{
-				d += _activeControl.Height;
+				d += _selectedControl.Height;
+				d += 3;
 			}
 			Height += d;
-			if(_activeControl != null)
+			if(_selectedControl != null)
 			{
-				_activeControl.SetBounds(0, _picker.Bottom, Width, 0,
+				_selectedControl.SetBounds(0, _picker.Bottom + 3, Width, 0,
 					BoundsSpecified.X | BoundsSpecified.Y | BoundsSpecified.Width);
-				_activeControl.Parent = this;
+				_selectedControl.Parent = this;
 			}
 		}
 
@@ -166,7 +180,7 @@ namespace gitter.Controls
 				{
 					foreach(var ctl in _controlCache.Values)
 					{
-						if(ctl != null)
+						if(ctl != null && !ctl.IsDisposed)
 						{
 							ctl.Dispose();
 						}
@@ -183,9 +197,9 @@ namespace gitter.Controls
 
 		public virtual bool Execute()
 		{
-			if(_activeControl != null)
+			if(_selectedControl != null)
 			{
-				var ctl = _activeControl as IExecutableDialog;
+				var ctl = _selectedControl as IExecutableDialog;
 				if(ctl != null)
 				{
 					if(!ctl.Execute())

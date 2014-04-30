@@ -23,7 +23,7 @@ namespace gitter.Framework.Mvc.WinForms
 	using System;
 	using System.Windows.Forms;
 
-	public class TextBoxInputSource : ControlInputSource<TextBoxBase, string>, IWin32ControlInputSource
+	public class TextBoxInputSource : ControlInputSource<TextBoxBase, string>
 	{
 		#region .ctor
 

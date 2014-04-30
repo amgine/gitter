@@ -57,7 +57,7 @@
 			this._pnlOptions.Controls.Add(this._chkUseThinPack);
 			this._pnlOptions.Controls.Add(this._chkForceOverwriteBranches);
 			this._pnlOptions.Controls.Add(this._chkSendTags);
-			this._pnlOptions.Location = new System.Drawing.Point(0, 288);
+			this._pnlOptions.Location = new System.Drawing.Point(0, 290);
 			this._pnlOptions.Name = "_pnlOptions";
 			this._pnlOptions.Size = new System.Drawing.Size(382, 89);
 			this._pnlOptions.TabIndex = 20;
@@ -109,7 +109,7 @@
 			this._chkUseThinPack.Checked = true;
 			this._chkUseThinPack.CheckState = System.Windows.Forms.CheckState.Checked;
 			this._chkUseThinPack.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkUseThinPack.Location = new System.Drawing.Point(12, 45);
+			this._chkUseThinPack.Location = new System.Drawing.Point(13, 45);
 			this._chkUseThinPack.Name = "_chkUseThinPack";
 			this._chkUseThinPack.Size = new System.Drawing.Size(123, 20);
 			this._chkUseThinPack.TabIndex = 6;
@@ -120,19 +120,19 @@
 			// 
 			this._chkForceOverwriteBranches.AutoSize = true;
 			this._chkForceOverwriteBranches.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkForceOverwriteBranches.Location = new System.Drawing.Point(12, 25);
+			this._chkForceOverwriteBranches.Location = new System.Drawing.Point(13, 25);
 			this._chkForceOverwriteBranches.Name = "_chkForceOverwriteBranches";
 			this._chkForceOverwriteBranches.Size = new System.Drawing.Size(225, 20);
 			this._chkForceOverwriteBranches.TabIndex = 5;
 			this._chkForceOverwriteBranches.Text = "%Force overwrite remote branches%";
 			this._chkForceOverwriteBranches.UseVisualStyleBackColor = true;
-			this._chkForceOverwriteBranches.CheckedChanged += new System.EventHandler(this._chkForceOverwriteBranches_CheckedChanged);
+			this._chkForceOverwriteBranches.CheckedChanged += new System.EventHandler(this.OnForceOverwriteCheckedChanged);
 			// 
 			// _chkSendTags
 			// 
 			this._chkSendTags.AutoSize = true;
 			this._chkSendTags.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkSendTags.Location = new System.Drawing.Point(12, 65);
+			this._chkSendTags.Location = new System.Drawing.Point(13, 65);
 			this._chkSendTags.Name = "_chkSendTags";
 			this._chkSendTags.Size = new System.Drawing.Size(103, 20);
 			this._chkSendTags.TabIndex = 7;
@@ -155,9 +155,9 @@
 			this._remotePicker.FormattingEnabled = true;
 			this._remotePicker.Location = new System.Drawing.Point(104, 24);
 			this._remotePicker.Name = "_remotePicker";
-			this._remotePicker.Size = new System.Drawing.Size(275, 24);
+			this._remotePicker.Size = new System.Drawing.Size(278, 23);
 			this._remotePicker.TabIndex = 2;
-			this._remotePicker.SelectedIndexChanged += new System.EventHandler(this._remotePicker_SelectedIndexChanged);
+			this._remotePicker.SelectedIndexChanged += new System.EventHandler(this.OnRemotePickerSelectedIndexChanged);
 			// 
 			// _lstReferences
 			// 
@@ -193,22 +193,22 @@
 			this._pnlPushTo.Controls.Add(this._grpPushTo);
 			this._pnlPushTo.Location = new System.Drawing.Point(0, 207);
 			this._pnlPushTo.Name = "_pnlPushTo";
-			this._pnlPushTo.Size = new System.Drawing.Size(382, 78);
+			this._pnlPushTo.Size = new System.Drawing.Size(382, 80);
 			this._pnlPushTo.TabIndex = 10;
 			// 
 			// _txtUrl
 			// 
-			this._txtUrl.Location = new System.Drawing.Point(104, 51);
+			this._txtUrl.Location = new System.Drawing.Point(104, 53);
 			this._txtUrl.Name = "_txtUrl";
-			this._txtUrl.Size = new System.Drawing.Size(275, 23);
+			this._txtUrl.Size = new System.Drawing.Size(278, 23);
 			this._txtUrl.TabIndex = 4;
-			this._txtUrl.TextChanged += new System.EventHandler(this._txtUrl_TextChanged);
+			this._txtUrl.TextChanged += new System.EventHandler(this.OnUrlTextChanged);
 			// 
 			// _radUrl
 			// 
 			this._radUrl.AutoSize = true;
 			this._radUrl.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._radUrl.Location = new System.Drawing.Point(12, 52);
+			this._radUrl.Location = new System.Drawing.Point(12, 54);
 			this._radUrl.Name = "_radUrl";
 			this._radUrl.Size = new System.Drawing.Size(72, 20);
 			this._radUrl.TabIndex = 3;
@@ -236,7 +236,7 @@
 			this.Controls.Add(this._lblBranches);
 			this.Controls.Add(this._lstReferences);
 			this.Name = "PushDialog";
-			this.Size = new System.Drawing.Size(385, 378);
+			this.Size = new System.Drawing.Size(385, 379);
 			this._pnlOptions.ResumeLayout(false);
 			this._pnlOptions.PerformLayout();
 			this._pnlWarning.ResumeLayout(false);

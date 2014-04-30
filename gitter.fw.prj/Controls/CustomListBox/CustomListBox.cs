@@ -1196,7 +1196,7 @@ namespace gitter.Framework.Controls
 			int maxw = column.MinWidth;
 			foreach(var item in _itemPlainList)
 			{
-				var s = item.MeasureSubItem(new SubItemMeasureEventArgs(Utility.MeasurementGraphics, index, column));
+				var s = item.MeasureSubItem(new SubItemMeasureEventArgs(GraphicsUtility.MeasurementGraphics, index, column));
 				if(s.Width > maxw) maxw = s.Width;
 			}
 			return maxw;
@@ -2518,7 +2518,7 @@ namespace gitter.Framework.Controls
 						if(c.ContentWidth <= 0)
 						{
 							int max = 0;
-							var args = new SubItemMeasureEventArgs(Utility.MeasurementGraphics, c.Index, c);
+							var args = new SubItemMeasureEventArgs(GraphicsUtility.MeasurementGraphics, c.Index, c);
 							foreach(var item in _itemPlainList)
 							{
 								var width = item.MeasureSubItem(args).Width;
@@ -2941,8 +2941,8 @@ namespace gitter.Framework.Controls
 		protected override void OnPaintClientArea(PaintEventArgs paintEventArgs)
 		{
 			var graphics = paintEventArgs.Graphics;
-			graphics.TextRenderingHint = Utility.TextRenderingHint;
-			graphics.TextContrast = Utility.TextContrast;
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			graphics.TextContrast      = GraphicsUtility.TextContrast;
 
 			PaintHeaders(paintEventArgs);
 			PaintItems(paintEventArgs);

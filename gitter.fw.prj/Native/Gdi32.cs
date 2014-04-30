@@ -27,7 +27,7 @@ namespace gitter.Native
 	[SuppressUnmanagedCodeSecurity]
 	internal static class Gdi32
 	{
-		private const string DllName = "gdi32.dll";
+		private const string DllName = @"gdi32.dll";
 
 		[DllImport(DllName)]
 		public static extern int SetDIBitsToDevice(
@@ -43,5 +43,38 @@ namespace gitter.Native
 			IntPtr lpvBits,
 			ref BITMAPINFOHEADER lpbmi,
 			int fuColorUse);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern bool DeleteObject(IntPtr hObject);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern bool Ellipse(IntPtr hDc, int x1, int y1, int x2, int y2);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr SelectObject(IntPtr hdc, IntPtr obj);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr GetCurrentObject(IntPtr hDC, int uObjectType);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int SetTextColor(IntPtr hdc, int crColor);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int GetTextAlign(IntPtr hdc);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int GetTextColor(IntPtr hDC);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int SetBkColor(IntPtr hDC, int clr);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int SetBkMode(IntPtr hDC, int nBkMode);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int GetBkMode(IntPtr hDC);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int GetBkColor(IntPtr hDC);
 	}
 }

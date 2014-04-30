@@ -28,11 +28,11 @@ namespace gitter.Git.AccessLayer
 		{
 		}
 
-		public QueryRevisionParameters(string sha1)
+		public QueryRevisionParameters(Hash sha1)
 		{
 			SHA1 = sha1;
 		}
 
-		public string SHA1 { get; set; }
+		public Hash SHA1 { get; set; }
 	}
 }

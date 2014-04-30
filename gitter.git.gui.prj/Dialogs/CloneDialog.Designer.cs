@@ -77,13 +77,12 @@
 			this._chkAppendRepositoryNameFromUrl.Checked = true;
 			this._chkAppendRepositoryNameFromUrl.CheckState = System.Windows.Forms.CheckState.Checked;
 			this._chkAppendRepositoryNameFromUrl.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this._chkAppendRepositoryNameFromUrl.Location = new System.Drawing.Point(94, 61);
+			this._chkAppendRepositoryNameFromUrl.Location = new System.Drawing.Point(94, 58);
 			this._chkAppendRepositoryNameFromUrl.Name = "_chkAppendRepositoryNameFromUrl";
 			this._chkAppendRepositoryNameFromUrl.Size = new System.Drawing.Size(277, 20);
 			this._chkAppendRepositoryNameFromUrl.TabIndex = 3;
 			this._chkAppendRepositoryNameFromUrl.Text = "%Append repository name from URL to path%";
 			this._chkAppendRepositoryNameFromUrl.UseVisualStyleBackColor = true;
-			this._chkAppendRepositoryNameFromUrl.CheckedChanged += new System.EventHandler(this._chkAppendRepositoryNameFromUrl_CheckedChanged);
 			// 
 			// _pnlOptions
 			// 
@@ -283,7 +282,6 @@
 			this._txtUrl.Name = "_txtUrl";
 			this._txtUrl.Size = new System.Drawing.Size(303, 23);
 			this._txtUrl.TabIndex = 0;
-			this._txtUrl.TextChanged += new System.EventHandler(this._txtUrl_TextChanged);
 			// 
 			// _btnSelectDirectory
 			// 
@@ -316,7 +314,6 @@
 			this._txtPath.Name = "_txtPath";
 			this._txtPath.Size = new System.Drawing.Size(274, 23);
 			this._txtPath.TabIndex = 1;
-			this._txtPath.TextChanged += new System.EventHandler(this._txtPath_TextChanged);
 			// 
 			// CloneDialog
 			// 

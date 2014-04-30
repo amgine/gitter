@@ -48,8 +48,8 @@ namespace gitter.Redmine.Gui
 
 		#region .ctor
 
-		public VersionsView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(Guids.VersionsViewGuid, environment, parameters)
+		public VersionsView(IWorkingEnvironment environment)
+			: base(Guids.VersionsViewGuid, environment)
 		{
 			InitializeComponent();
 

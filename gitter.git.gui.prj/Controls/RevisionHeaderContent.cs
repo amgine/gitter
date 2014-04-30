@@ -313,19 +313,19 @@ namespace gitter.Git.Gui
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
 				var menu = new ContextMenuStrip();
-				menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, revision.Hash));
+				menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, revision.HashString));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
-				return Measure(graphics, TreeHashColumn.Font, revision.Hash, width);
+				return Measure(graphics, TreeHashColumn.Font, revision.HashString, width);
 			}
 
 			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
 			{
-				DefaultPaint(graphics, HashColumn.Font, Resources.StrHash.AddColon(), revision.Hash, rect);
+				DefaultPaint(graphics, HashColumn.Font, Resources.StrHash.AddColon(), revision.HashString, rect);
 			}
 		}
 
@@ -344,19 +344,19 @@ namespace gitter.Git.Gui
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
 				var menu = new ContextMenuStrip();
-				menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, revision.TreeHash));
+				menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, revision.TreeHashString));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
-				return Measure(graphics, TreeHashColumn.Font, revision.TreeHash, width);
+				return Measure(graphics, TreeHashColumn.Font, revision.TreeHashString, width);
 			}
 
 			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
 			{
-				DefaultPaint(graphics, TreeHashColumn.Font, Resources.StrTreeHash.AddColon(), revision.TreeHash, rect);
+				DefaultPaint(graphics, TreeHashColumn.Font, Resources.StrTreeHash.AddColon(), revision.TreeHashString, rect);
 			}
 		}
 
@@ -394,7 +394,7 @@ namespace gitter.Git.Gui
 					case 0:
 						return Size.Empty;
 					case 1:
-						return Measure(graphics, HashColumn.Font, revision.Parents[0].Hash, width);
+						return Measure(graphics, HashColumn.Font, revision.Parents[0].HashString, width);
 					default:
 						var sb = new StringBuilder(41 * revision.Parents.Count);
 						bool first = true;
@@ -413,7 +413,7 @@ namespace gitter.Git.Gui
 			{
 				if(revision.Parents.Count == 1)
 				{
-					DefaultPaint(graphics, HashColumn.Font, Resources.StrParent.AddColon(), revision.Parents[0].Hash, rect);
+					DefaultPaint(graphics, HashColumn.Font, Resources.StrParent.AddColon(), revision.Parents[0].HashString, rect);
 				}
 				else
 				{

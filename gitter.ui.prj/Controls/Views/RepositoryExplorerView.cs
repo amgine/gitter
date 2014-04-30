@@ -34,8 +34,8 @@ namespace gitter
 
 	public partial class RepositoryExplorerView : ViewBase
 	{
-		public RepositoryExplorerView(IWorkingEnvironment environment, IDictionary<string, object> parameters)
-			: base(Guids.RepositoryExplorerView, environment, parameters)
+		public RepositoryExplorerView(IWorkingEnvironment environment)
+			: base(Guids.RepositoryExplorerView, environment)
 		{
 			InitializeComponent();
 

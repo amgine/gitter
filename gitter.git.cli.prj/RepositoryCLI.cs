@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@ namespace gitter.Git.AccessLayer
 			GitCliMethod.Create(out _queryDiff,              CommandExecutor, CommandBuilder.GetDiffCommand,                   OutputParser.ParseDiff);
 			GitCliMethod.Create(out _queryObjects,           CommandExecutor, CommandBuilder.GetQueryObjectsCommand,           OutputParser.ParseObjects);
 			GitCliMethod.Create(out _queryRevision,          CommandExecutor, CommandBuilder.GetQueryRevisionCommand,          OutputParser.ParseSingleRevision);
-			GitCliMethod.Create(out _queryRevisions,         CommandExecutor, CommandBuilder.GetQueryRevisionsCommand,         OutputParser.ParseRevisions);
+			GitCliMethod.Create(out _queryRevisions,         CommandExecutor, CommandBuilder);
 			GitCliMethod.Create(out _queryRevisionGraph,     CommandExecutor, CommandBuilder.GetQueryRevisionGraphCommand,     OutputParser.ParseRevisionGraph);
 			GitCliMethod.Create(out _queryNotes,             CommandExecutor, CommandBuilder.GetQueryNotesCommand,             OutputParser.ParseNotes);
 			GitCliMethod.Create(out _queryFilesToAdd,        CommandExecutor, CommandBuilder.GetQueryFilesToAddCommand,        OutputParser.ParseFilesToAdd);
@@ -186,7 +186,8 @@ namespace gitter.Git.AccessLayer
 			GitCliMethod.Create(out _queryStashPatch,        CommandExecutor, CommandBuilder.GetQueryStashDiffCommand);
 			GitCliMethod.Create(out _queryStashTop,          CommandExecutor, CommandBuilder.GetQueryStashTopCommand,          OutputParser.ParseQueryStashTopOutput);
 			GitCliMethod.Create(out _queryStashDiff,         CommandExecutor, CommandBuilder.GetQueryStashDiffCommand,         OutputParser.ParseRevisionDiff);
-			GitCliMethod.Create(out _queryStatus,            CommandExecutor, CommandBuilder.GetQueryStatusCommand,            OutputParser.ParseStatus, CommandExecutionFlags.DoNotKillProcess);
+			//GitCliMethod.Create(out _queryStatus,            CommandExecutor, CommandBuilder.GetQueryStatusCommand,            OutputParser.ParseStatus, CommandExecutionFlags.DoNotKillProcess);
+			_queryStatus = new QueryStatusImpl(CommandExecutor, CommandBuilder);
 			GitCliMethod.Create(out _queryRevisionDiff,      CommandExecutor, CommandBuilder.GetQueryRevisionDiffCommand,      OutputParser.ParseRevisionDiff);
 			GitCliMethod.Create(out _queryRevisionPatch,     CommandExecutor, CommandBuilder.GetQueryRevisionDiffCommand);
 			GitCliMethod.Create(out _queryTreeContent,       CommandExecutor, CommandBuilder.GetQueryTreeContentCommand,       OutputParser.ParseTreeContent);

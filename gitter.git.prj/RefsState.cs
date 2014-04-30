@@ -37,9 +37,9 @@ namespace gitter.Git
 			private readonly ReferenceType _referenceType;
 			private readonly string _fullName;
 			private readonly string _name;
-			private readonly string _hash;
+			private readonly Hash _hash;
 
-			public ReferenceState(ReferenceType referenceType, string fullName, string name, string hash)
+			public ReferenceState(ReferenceType referenceType, string fullName, string name, Hash hash)
 			{
 				_referenceType = referenceType;
 				_fullName = fullName;
@@ -62,7 +62,7 @@ namespace gitter.Git
 				get { return _name;}
 			}
 
-			public string Hash
+			public Hash Hash
 			{
 				get { return _hash; }
 			}

@@ -97,7 +97,7 @@ namespace gitter.TeamCity
 			return false;
 		}
 
-		public Control CreateSetupControl(IRepository repository)
+		public Control CreateSetupDialog(IRepository repository)
 		{
 			Verify.Argument.IsNotNull(repository, "environment");
 

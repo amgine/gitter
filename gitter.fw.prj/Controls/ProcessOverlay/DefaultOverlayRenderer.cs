@@ -103,7 +103,7 @@ namespace gitter.Framework.Controls
 			var oldMode = graphics.SmoothingMode;
 			graphics.SmoothingMode = SmoothingMode.HighQuality;
 			const int spacing = 10;
-			using(var path = Utility.GetRoundedRectangle(bounds, processOverlay.Rounding))
+			using(var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding))
 			{
 				using(var brush = new SolidBrush(BackgroundColor))
 				{
@@ -133,7 +133,7 @@ namespace gitter.Framework.Controls
 
 		public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
 		{
-			using(var path = Utility.GetRoundedRectangle(bounds, processOverlay.Rounding))
+			using(var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding))
 			{
 				var oldMode = graphics.SmoothingMode;
 				graphics.SmoothingMode = SmoothingMode.HighQuality;

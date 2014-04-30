@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ namespace gitter.Native
 	internal static class User32
 	{
 		private const string DllName = "user32.dll";
+
+		[DllImport(DllName, ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern unsafe int DrawTextExW(IntPtr hDC, char* lpszString, int nCount, ref RECT lpRect, DT nFormat, ref DRAWTEXTPARAMS lpDTParams);
 
 		[DllImport(DllName)]
 		public static extern IntPtr GetSystemMenu(IntPtr hWnd, bool revert);

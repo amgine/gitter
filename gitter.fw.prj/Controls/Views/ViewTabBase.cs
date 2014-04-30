@@ -124,7 +124,7 @@ namespace gitter.Framework.Controls
 
 		public void ResetLength()
 		{
-			ResetLength(Utility.MeasurementGraphics);
+			ResetLength(GraphicsUtility.MeasurementGraphics);
 		}
 
 		public void ResetLength(Graphics graphics)

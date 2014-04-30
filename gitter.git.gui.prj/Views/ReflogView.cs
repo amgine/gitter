@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,8 +46,8 @@ namespace gitter.Git.Gui.Views
 
 		#region .ctor
 
-		public ReflogView(IDictionary<string, object> parameters, GuiProvider gui)
-			: base(Guids.ReflogViewGuid, gui, parameters)
+		public ReflogView(GuiProvider gui)
+			: base(Guids.ReflogViewGuid, gui)
 		{
 			InitializeComponent();
 
@@ -57,7 +57,6 @@ namespace gitter.Git.Gui.Views
 
 			_search = new ReflogSearch<ReflogSearchOptions>(_lstReflog);
 
-			ApplyParameters(parameters);
 			AddTopToolStrip(_toolbar = new ReflogToolbar(this));
 		}
 
@@ -178,24 +177,26 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		private static Reflog TryGetReflog(IDictionary<string, object> parameters)
+		protected override void AttachViewModel(object viewModel)
 		{
-			object reflog;
-			if(parameters.TryGetValue("reflog", out reflog))
+			base.AttachViewModel(viewModel);
+
+			var vm = viewModel as ReflogViewModel;
+			if(vm != null)
 			{
-				return reflog as Reflog;
-			}
-			else
-			{
-				return null;
+				Reflog = vm.Reflog;
 			}
 		}
 
-		public override void ApplyParameters(IDictionary<string, object> parameters)
+		protected override void DetachViewModel(object viewModel)
 		{
-			base.ApplyParameters(parameters);
+			base.DetachViewModel(viewModel);
 
-			Reflog = TryGetReflog(parameters);
+			var vm = viewModel as ReflogViewModel;
+			if(vm != null)
+			{
+				Reflog = null;
+			}
 		}
 
 		private void UpdateText()

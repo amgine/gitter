@@ -76,7 +76,7 @@ namespace gitter.Git.Gui.Controls
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _branch.Name));
 			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, _branch.FullName));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, _branch.Revision.Hash));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, _branch.Revision.HashString));
 
 			Items.Add(item);
 

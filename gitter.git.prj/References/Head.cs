@@ -124,7 +124,7 @@ namespace gitter.Git
 				case ReferenceType.Revision:
 					lock(repository.Revisions.SyncRoot)
 					{
-						return repository.Revisions.GetOrCreateRevision(head.TargetObject);
+						return repository.Revisions.GetOrCreateRevision(new Hash(head.TargetObject));
 					}
 				default:
 					return new NowherePointer(repository, head.TargetObject);
@@ -240,7 +240,7 @@ namespace gitter.Git
 				RepositoryNotifications.SubmodulesChanged))
 			{
 				Repository.Accessor.Reset.Invoke(
-					new ResetParameters(rev.Hash, mode));
+					new ResetParameters(rev.Hash.ToString(), mode));
 			}
 
 			if(currentBranch != null)

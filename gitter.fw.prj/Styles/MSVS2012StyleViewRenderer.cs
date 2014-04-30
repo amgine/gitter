@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -905,8 +905,8 @@ namespace gitter.Framework.Controls
 				int textWidth;
 				using(var brush = new SolidBrush(textColor))
 				{
-					graphics.TextRenderingHint = Utility.TextRenderingHint;
-					graphics.TextContrast = Utility.TextContrast;
+					graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+					graphics.TextContrast      = GraphicsUtility.TextContrast;
 					textWidth = GitterApplication.TextRenderer.MeasureText(
 						graphics,
 						header.Text,
@@ -930,10 +930,23 @@ namespace gitter.Framework.Controls
 
 					using(var brush = new HatchBrush(HatchStyle.Percent20, accentColor, backgroundColor))
 					{
-						var ro = graphics.RenderingOrigin;
-						graphics.RenderingOrigin = new Point(client.X % 4, client.Y % 4);
+						var ro = default(Point);
+						try
+						{
+							ro = graphics.RenderingOrigin;
+							graphics.RenderingOrigin = new Point(client.X % 4, client.Y % 4);
+						}
+						catch(NotImplementedException)
+						{
+						}
 						graphics.FillRectangle(brush, client);
-						graphics.RenderingOrigin = ro;
+						try
+						{
+							graphics.RenderingOrigin = ro;
+						}
+						catch(NotImplementedException)
+						{
+						}
 					}
 				}
 			}
@@ -1313,8 +1326,8 @@ namespace gitter.Framework.Controls
 				int textWidth;
 				using(var brush = new SolidBrush(textColor))
 				{
-					graphics.TextRenderingHint = Utility.TextRenderingHint;
-					graphics.TextContrast = Utility.TextContrast;
+					graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+					graphics.TextContrast      = GraphicsUtility.TextContrast;
 					textWidth = GitterApplication.TextRenderer.MeasureText(
 						graphics,
 						header.Text,
