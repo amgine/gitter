@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,12 +28,13 @@ namespace gitter.Git.Gui.Controls
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
-	sealed class DiffBinding : AsyncDataBinding<Diff>
+	sealed class SplitDiffBinding : AsyncDataBinding<Diff>
 	{
 		#region Data
 
 		private readonly IDiffSource _diffSource;
-		private readonly DiffViewer _diffViewer;
+		private readonly DiffViewer _diffViewerHeaders;
+		private readonly DiffViewer _diffViewerFiles;
 		private DiffOptions _diffOptions;
 		private readonly List<FileDiffPanel> _allDiffPanels;
 		private readonly FlowProgressPanel _progressPanel;
@@ -43,14 +44,16 @@ namespace gitter.Git.Gui.Controls
 
 		#region .ctor
 
-		public DiffBinding(IDiffSource diffSource, DiffViewer diffViewer, DiffOptions diffOptions)
+		public SplitDiffBinding(IDiffSource diffSource, DiffViewer diffViewerHeaders, DiffViewer diffViewerFiles, DiffOptions diffOptions)
 		{
 			Verify.Argument.IsNotNull(diffSource, "diffSource");
-			Verify.Argument.IsNotNull(diffViewer, "diffViewer");
+			Verify.Argument.IsNotNull(diffViewerHeaders, "diffViewerHeaders");
+			Verify.Argument.IsNotNull(diffViewerFiles, "diffViewerFiles");
 			Verify.Argument.IsNotNull(diffOptions, "diffOptions");
 
 			_diffSource = diffSource;
-			_diffViewer = diffViewer;
+			_diffViewerHeaders = diffViewerHeaders;
+			_diffViewerFiles = diffViewerFiles;
 			_diffOptions = diffOptions;
 
 			_allDiffPanels = new List<FileDiffPanel>();
@@ -67,9 +70,14 @@ namespace gitter.Git.Gui.Controls
 			get { return _diffSource; }
 		}
 
-		public DiffViewer DiffViewer
+		public DiffViewer DiffViewerHeaders
 		{
-			get { return _diffViewer; }
+			get { return _diffViewerHeaders; }
+		}
+
+		public DiffViewer DiffViewerFiles
+		{
+			get { return _diffViewerFiles; }
 		}
 
 		public DiffOptions DiffOptions
@@ -92,8 +100,8 @@ namespace gitter.Git.Gui.Controls
 			var revisionSource = DiffSource as IRevisionDiffSource;
 			if(revisionSource != null)
 			{
-				DiffViewer.Panels.Add(new RevisionHeaderPanel() { Revision = revisionSource.Revision.Dereference() });
-				DiffViewer.Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
+				DiffViewerHeaders.Panels.Add(new RevisionHeaderPanel() { Revision = revisionSource.Revision.Dereference() });
+				DiffViewerHeaders.Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
 				return;
 			}
 			var indexSource = DiffSource as IIndexDiffSource;
@@ -102,8 +110,8 @@ namespace gitter.Git.Gui.Controls
 				var panel = new UntrackedFilesPanel(indexSource.Repository.Status);
 				if(panel.Count != 0)
 				{
-					DiffViewer.Panels.Add(panel);
-					DiffViewer.Panels.Add(new FlowPanelSeparator() { Height = 5 });
+					DiffViewerHeaders.Panels.Add(panel);
+					DiffViewerHeaders.Panels.Add(new FlowPanelSeparator() { Height = 5 });
 				}
 				return;
 			}
@@ -113,113 +121,134 @@ namespace gitter.Git.Gui.Controls
 		{
 			Verify.State.IsFalse(IsDisposed, "DiffBinding is disposed.");
 
-			if(!DiffViewer.Created)
+			if(!DiffViewerHeaders.Created)
 			{
-				DiffViewer.CreateControl();
+				DiffViewerHeaders.CreateControl();
 			}
-			_scrollPosAfterReload = DiffViewer.VScrollPos;
-			DiffViewer.BeginUpdate();
-			DiffViewer.Panels.Clear();
-			DiffViewer.ScrollToTopLeft();
+			if(!DiffViewerFiles.Created)
+			{
+				DiffViewerFiles.CreateControl();
+			}
+			_scrollPosAfterReload = DiffViewerFiles.VScrollPos;
+			DiffViewerFiles.Panels.Clear();
+			DiffViewerHeaders.BeginUpdate();
+			DiffViewerHeaders.Panels.Clear();
+			DiffViewerHeaders.ScrollToTopLeft();
 			AddSourceSpecificPanels();
-			DiffViewer.Panels.Add(_progressPanel);
-			DiffViewer.EndUpdate();
+			DiffViewerHeaders.Panels.Add(_progressPanel);
+			DiffViewerHeaders.EndUpdate();
 			_allDiffPanels.Clear();
 			return DiffSource.GetDiffAsync(DiffOptions, progress, cancellationToken);
 		}
 
 		protected override void OnFetchCompleted(Diff diff)
 		{
-			if(DiffViewer.IsDisposed)
+			if(DiffViewerHeaders.IsDisposed || DiffViewerFiles.IsDisposed)
 			{
 				return;
 			}
 
-			DiffViewer.BeginUpdate();
+			DiffViewerFiles.BeginUpdate();
 			_allDiffPanels.Clear();
 			_progressPanel.Remove();
 			if(diff != null)
 			{
 				FlowPanelSeparator separator = null;
 				var changedFilesPanel = new ChangedFilesPanel() { Diff = diff };
+				changedFilesPanel.FileNavigationRequested +=
+					(s, e) =>
+					{
+						foreach(var panel in DiffViewerFiles.Panels)
+						{
+							var diffpanel = panel as FileDiffPanel;
+							if(diffpanel != null && diffpanel.DiffFile == e.DiffFile)
+							{
+								diffpanel.ScrollIntoView();
+								break;
+							}
+						}
+					};
 				changedFilesPanel.StatusFilterChanged += OnStatusFilterChanged;
-				DiffViewer.Panels.Add(changedFilesPanel);
-				DiffViewer.Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
+				DiffViewerHeaders.Panels.Add(changedFilesPanel);
 				foreach(var file in diff)
 				{
 					var fileDiffPanel = new FileDiffPanel(DiffSource.Repository, file, diff.Type);
 					_allDiffPanels.Add(fileDiffPanel);
-					DiffViewer.Panels.Add(fileDiffPanel);
-					DiffViewer.Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
+					DiffViewerFiles.Panels.Add(fileDiffPanel);
+					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 				}
 				if(separator != null)
 				{
 					separator.Height = 6;
 				}
 			}
-			DiffViewer.EndUpdate();
+			DiffViewerFiles.EndUpdate();
 			if(_scrollPosAfterReload != 0)
 			{
-				DiffViewer.BeginInvoke(new Action<int>(SetScrollPos), _scrollPosAfterReload);
+				DiffViewerFiles.BeginInvoke(new Action<int>(SetScrollPos), _scrollPosAfterReload);
 			}
 		}
 
 		private void SetScrollPos(int scrollPos)
 		{
-			if(scrollPos > DiffViewer.MaxVScrollPos)
+			if(scrollPos > DiffViewerFiles.MaxVScrollPos)
 			{
-				scrollPos = DiffViewer.MaxVScrollPos;
+				scrollPos = DiffViewerFiles.MaxVScrollPos;
 			}
-			DiffViewer.VScrollBar.Value = scrollPos;
+			DiffViewerFiles.VScrollBar.Value = scrollPos;
 		}
 
 		private void OnStatusFilterChanged(object sender, EventArgs e)
 		{
 			var changedFilesPanel = (ChangedFilesPanel)sender;
-			var index = DiffViewer.Panels.IndexOf(changedFilesPanel) + 2;
-			DiffViewer.BeginUpdate();
-			if(index < DiffViewer.Panels.Count)
+			var index = 0;
+			DiffViewerFiles.BeginUpdate();
+			if(index < DiffViewerFiles.Panels.Count)
 			{
-				DiffViewer.Panels.RemoveRange(index, DiffViewer.Panels.Count - index);
+				DiffViewerFiles.Panels.RemoveRange(index, DiffViewerFiles.Panels.Count - index);
 			}
 			FlowPanelSeparator separator = null;
 			for(int i = 0; i < _allDiffPanels.Count; ++i)
 			{
 				if((_allDiffPanels[i].DiffFile.Status & changedFilesPanel.StatusFilter) != FileStatus.Unknown)
 				{
-					DiffViewer.Panels.Add(_allDiffPanels[i]);
-					DiffViewer.Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
+					DiffViewerFiles.Panels.Add(_allDiffPanels[i]);
+					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 				}
 			}
 			if(separator != null)
 			{
 				separator.Height = 6;
 			}
-			DiffViewer.EndUpdate();
+			DiffViewerFiles.EndUpdate();
 		}
 
 		protected override void OnFetchFailed(Exception exception)
 		{
-			if(DiffViewer.IsDisposed)
+			if(DiffViewerHeaders.IsDisposed || DiffViewerFiles.IsDisposed)
 			{
 				return;
 			}
-			DiffViewer.BeginUpdate();
+			DiffViewerHeaders.BeginUpdate();
 			_progressPanel.Remove();
 			if(exception != null && !string.IsNullOrWhiteSpace(exception.Message))
 			{
-				DiffViewer.Panels.Add(new FlowProgressPanel() { Message = exception.Message });
+				DiffViewerHeaders.Panels.Add(new FlowProgressPanel() { Message = exception.Message });
 			}
-			DiffViewer.EndUpdate();
+			DiffViewerHeaders.EndUpdate();
 		}
 
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
 			{
-				if(!DiffViewer.IsDisposed)
+				if(!DiffViewerHeaders.IsDisposed)
 				{
-					DiffViewer.Panels.Clear();
+					DiffViewerHeaders.Panels.Clear();
+				}
+				if(!DiffViewerFiles.IsDisposed)
+				{
+					DiffViewerFiles.Panels.Clear();
 				}
 			}
 			base.Dispose(disposing);

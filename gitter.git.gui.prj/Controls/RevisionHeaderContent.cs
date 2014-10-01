@@ -313,6 +313,10 @@ namespace gitter.Git.Gui
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
 				var menu = new ContextMenuStrip();
+				menu.Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(revision));
+				menu.Items.Add(GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(revision));
+				menu.Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(revision));
+				menu.Items.Add(new ToolStripSeparator());
 				menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, revision.HashString));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;

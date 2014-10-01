@@ -446,6 +446,14 @@ namespace gitter.Git.Gui.Controls
 			if(handler != null) handler(this, EventArgs.Empty);
 		}
 
+		public event EventHandler<DiffFileEventArgs> FileNavigationRequested;
+
+		private void OnFileNavigationRequested(DiffFile diffFile)
+		{
+			var handler = FileNavigationRequested;
+			if(handler != null) handler(this, new DiffFileEventArgs(diffFile));
+		}
+
 		#endregion
 
 		/// <summary>Create <see cref="ChangedFilesPanel"/>.</summary>
@@ -618,14 +626,20 @@ namespace gitter.Git.Gui.Controls
 						if(id != -1)
 						{
 							var file = _items[id].File;
+							bool found = false;
 							foreach(var panel in FlowControl.Panels)
 							{
 								var diffpanel = panel as FileDiffPanel;
 								if(diffpanel != null && diffpanel.DiffFile == file)
 								{
 									diffpanel.ScrollIntoView();
+									found = true;
 									break;
 								}
+							}
+							if(!found)
+							{
+								OnFileNavigationRequested(file);
 							}
 						}
 						else

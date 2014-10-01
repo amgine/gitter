@@ -2610,4 +2610,16 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrsFailedToFetchTree" xml:space="preserve">
     <value>Failed to fetch tree data.</value>
   </data>
+  <data name="ImgDiffSingleView" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\diff-single-view.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgDiffSplitView" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\diff-split-view.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrDiffSingleView" xml:space="preserve">
+    <value>Single View</value>
+  </data>
+  <data name="StrDiffSplitView" xml:space="preserve">
+    <value>Split View</value>
+  </data>
 </root>

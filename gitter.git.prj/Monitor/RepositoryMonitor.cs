@@ -528,6 +528,10 @@ namespace gitter.Git
 
 		private void OnGitDirRenamed(object sender, RenamedEventArgs e)
 		{
+			if(e == null || e.OldName == null)
+			{
+				return;
+			}
 			switch(GetSubdirectory(e.OldName))
 			{
 				case GitSubdirectory.RefsHeads:
@@ -589,6 +593,10 @@ namespace gitter.Git
 
 		private void OnWorkDirRenamed(object sender, RenamedEventArgs e)
 		{
+			if(e == null || e.OldName == null)
+			{
+				return;
+			}
 			#if TRACE_FS_EVENTS
 			Log.Debug(string.Format("{0} {1} -> {2}", e.ChangeType, e.OldName, e.Name));
 			#endif

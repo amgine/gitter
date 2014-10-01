@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using gitter.Framework.CLI;
-
-namespace gitter.Git.AccessLayer.CLI
+﻿namespace gitter.Git.AccessLayer.CLI
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text;
+	using gitter.Framework.CLI;
+
+#if NOTINMPLEMENTED
 	class RawLogParser
 	{
 		private sealed class RawCommitParser
@@ -228,4 +229,5 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 	}
+#endif
 }

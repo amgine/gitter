@@ -111,6 +111,8 @@
     <Compile Include="Controls\ContentContextMenuEventArgs.cs" />
     <Compile Include="Controls\ContentInvalidatedEventArgs.cs" />
     <Compile Include="Controls\DiffViewer\DiffBinding.cs" />
+    <Compile Include="Controls\DiffViewer\DiffBindingMode.cs" />
+    <Compile Include="Controls\DiffViewer\SplitDiffBinding.cs" />
     <Compile Include="Controls\DiffViewer\UntrackedFileContextMenuRequestedEventArgs.cs" />
     <Compile Include="Controls\ListBoxes\Bindings\FilesToAddBinding.cs" />
     <Compile Include="Controls\ListBoxes\Bindings\FilesToCleanBinding.cs" />
@@ -166,6 +168,7 @@
     <Compile Include="TreeExtensions.cs" />
     <Compile Include="Verify.cs" />
     <Compile Include="Views\BlameViewModel.cs" />
+    <Compile Include="Views\DiffViewMode.cs" />
     <Compile Include="Views\DiffViewModel.cs" />
     <Compile Include="Views\HistoryViewBase.cs">
       <SubType>UserControl</SubType>
@@ -1115,7 +1118,10 @@
     <None Include="Resources\folder-history.png" />
     <None Include="Resources\folder-zipper.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\diff-single-view.png" />
+    <Content Include="Resources\diff-split-view.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

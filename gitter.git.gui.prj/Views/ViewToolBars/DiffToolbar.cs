@@ -46,6 +46,8 @@ namespace gitter.Git.Gui.Views
 		private readonly ToolStripMenuItem _mnuIgnoreWhitespace;
 		private readonly ToolStripMenuItem _mnuUsePatienceAlgorithm;
 		private readonly ToolStripMenuItem _mnuBinaryDiff;
+		private readonly ToolStripButton _btnSingleMode;
+		private readonly ToolStripButton _btnSplitMode;
 
 		#endregion
 
@@ -100,8 +102,28 @@ namespace gitter.Git.Gui.Views
 					Checked = _diffView.DiffOptions.Binary,
 				});
 
+			Items.Add(_btnSplitMode = new ToolStripButton(Resources.StrDiffSplitView, CachedResources.Bitmaps["ImgDiffSplitView"], (s, e) => _diffView.ViewMode = DiffViewMode.Split)
+				{
+					DisplayStyle = ToolStripItemDisplayStyle.Image,
+					Alignment = ToolStripItemAlignment.Right,
+					Checked = _diffView.ViewMode == DiffViewMode.Split,
+				});
+			Items.Add(_btnSingleMode = new ToolStripButton(Resources.StrDiffSingleView, CachedResources.Bitmaps["ImgDiffSingleView"], (s, e) => _diffView.ViewMode = DiffViewMode.Single)
+				{
+					DisplayStyle = ToolStripItemDisplayStyle.Image,
+					Alignment = ToolStripItemAlignment.Right,
+					Checked = _diffView.ViewMode == DiffViewMode.Single,
+				});
+
 			_contextTextBox.TextChanged += OnContextTextChanged;
 			_contextTextBox.KeyPress += (sender, e) => e.Handled = !char.IsNumber(e.KeyChar);
+			_diffView.ViewModeChanged += OnDiffViewViewModeChanged;
+		}
+
+		private void OnDiffViewViewModeChanged(object sender, EventArgs e)
+		{
+			_btnSingleMode.Checked = _diffView.ViewMode == DiffViewMode.Single;
+			_btnSplitMode.Checked  = _diffView.ViewMode == DiffViewMode.Split;
 		}
 
 		private void OnContextTextChanged(object sender, EventArgs e)
