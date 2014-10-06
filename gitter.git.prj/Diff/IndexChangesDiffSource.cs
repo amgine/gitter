@@ -121,9 +121,18 @@ namespace gitter.Git
 			if(ds._repository != _repository) return false;
 			if(ds._cached != _cached) return false;
 			if(ds._paths == _paths) return true;
-			if(ds._paths == null && _paths.Count == 0) return true;
-			if(_paths == null && ds._paths.Count == 0) return true;
-			if(ds._paths.Count != _paths.Count) return false;
+			if(ds._paths == null || ds._paths.Count == 0)
+			{
+				return _paths == null || _paths.Count == 0;
+			}
+			if(_paths == null || _paths.Count == 0)
+			{
+				return ds._paths == null || ds._paths.Count == 0;
+			}
+			if(ds._paths.Count != _paths.Count)
+			{
+				return false;
+			}
 			foreach(var path in _paths)
 			{
 				if(!ds._paths.Contains(path)) return false;
