@@ -134,7 +134,7 @@ namespace gitter.Git.Gui.Views
 							_diffViewer.Parent = null;
 							_diffViewer.Bounds = _container.Bounds;
 							_diffViewer.Dock = DockStyle.Bottom;
-							_diffViewer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+							_diffViewer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
 							_diffViewer.Parent = this;
 							if(_container != null)
 							{
@@ -152,7 +152,7 @@ namespace gitter.Git.Gui.Views
 								Orientation = Orientation.Horizontal,
 								Bounds = _diffViewer.Bounds,
 								Dock = DockStyle.Bottom,
-								Anchor = AnchorStyles.Top | AnchorStyles.Bottom,
+								Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
 								Parent = this,
 							};
 							if(_container.Height > _container.SplitterWidth)
@@ -200,7 +200,7 @@ namespace gitter.Git.Gui.Views
 						_diffViewerFiles.Dispose();
 					}
 					_diffViewerFiles = value;
-					if(_diffViewerFiles != value)
+					if(_diffViewerFiles != null)
 					{
 						_diffViewerFiles.DiffFileContextMenuRequested += OnDiffFileContextMenuRequested;
 						_diffViewerFiles.UntrackedFileContextMenuRequested += OnUntrackedFileContextMenuRequested;
