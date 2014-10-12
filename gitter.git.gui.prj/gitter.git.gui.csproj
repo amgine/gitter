@@ -1119,6 +1119,12 @@
     <None Include="Resources\folder-zipper.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\revert-quit.png" />
+    <None Include="Resources\revert-continue.png" />
+    <None Include="Resources\revert-abort.png" />
+    <None Include="Resources\cherry-pick-abort.png" />
+    <None Include="Resources\cherry-pick-continue.png" />
+    <None Include="Resources\cherry-pick-quit.png" />
     <Content Include="Resources\diff-single-view.png" />
     <Content Include="Resources\diff-split-view.png" />
   </ItemGroup>

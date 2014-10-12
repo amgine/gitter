@@ -766,6 +766,108 @@ namespace gitter.Git
 
 		#endregion
 
+		#region cherry-pick
+
+		public Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress> progress)
+		{
+			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+
+			switch(control)
+			{
+				case CherryPickControl.Abort:
+					if(progress != null)
+					{
+						progress.Report(new OperationProgress(Resources.StrsAbortingCherryPick.AddEllipsis()));
+					}
+					break;
+				case CherryPickControl.Continue:
+					if(progress != null)
+					{
+						progress.Report(new OperationProgress(Resources.StrsContinuingCherryPick.AddEllipsis()));
+					}
+					break;
+				case CherryPickControl.Quit:
+					if(progress != null)
+					{
+						progress.Report(new OperationProgress(Resources.StrsQuitingCherryPick.AddEllipsis()));
+					}
+					break;
+				default:
+					throw new ArgumentException(
+						"Unknown CherryPickControl value: {0}".UseAsFormat(control),
+						"control");
+			}
+
+			var block = Monitor.BlockNotifications(
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated);
+			return Accessor.CherryPick.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
+				.ContinueWith(
+				t =>
+				{
+					block.Dispose();
+					_head.Refresh();
+					_status.Refresh();
+					OnStateChanged();
+					OnUpdated();
+					TaskUtility.PropagateFaultedStates(t);
+				});
+		}
+
+		#endregion
+
+		#region revert
+
+		public Task RevertAsync(RevertControl control, IProgress<OperationProgress> progress)
+		{
+			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+
+			switch(control)
+			{
+				case RevertControl.Abort:
+					if(progress != null)
+					{
+						progress.Report(new OperationProgress(Resources.StrsAbortingRevert.AddEllipsis()));
+					}
+					break;
+				case RevertControl.Continue:
+					if(progress != null)
+					{
+						progress.Report(new OperationProgress(Resources.StrsContinuingRevert.AddEllipsis()));
+					}
+					break;
+				case RevertControl.Quit:
+					if(progress != null)
+					{
+						progress.Report(new OperationProgress(Resources.StrsQuitingRevert.AddEllipsis()));
+					}
+					break;
+				default:
+					throw new ArgumentException(
+						"Unknown RevertControl value: {0}".UseAsFormat(control),
+						"control");
+			}
+
+			var block = Monitor.BlockNotifications(
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.IndexUpdated);
+			return Accessor.Revert.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
+				.ContinueWith(
+				t =>
+				{
+					block.Dispose();
+					_head.Refresh();
+					_status.Refresh();
+					OnStateChanged();
+					OnUpdated();
+					TaskUtility.PropagateFaultedStates(t);
+				});
+		}
+
+		#endregion
+
 		#region rebase
 
 		/// <summary>Control rebase process.</summary>

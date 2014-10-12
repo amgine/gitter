@@ -1769,4 +1769,22 @@ Proceed?</value>
   <data name="ErrCannotCreateHeadManually" xml:space="preserve">
     <value>You cannot create HEAD manually</value>
   </data>
+  <data name="StrsAbortingCherryPick" xml:space="preserve">
+    <value>Aboring cherry-pick</value>
+  </data>
+  <data name="StrsContinuingCherryPick" xml:space="preserve">
+    <value>Continuing cherry-pick</value>
+  </data>
+  <data name="StrsQuitingCherryPick" xml:space="preserve">
+    <value>Quiting cherry-pick</value>
+  </data>
+  <data name="StrsAbortingRevert" xml:space="preserve">
+    <value>Aborting revert</value>
+  </data>
+  <data name="StrsContinuingRevert" xml:space="preserve">
+    <value>Continuing revert</value>
+  </data>
+  <data name="StrsQuitingRevert" xml:space="preserve">
+    <value>Quiting revert</value>
+  </data>
 </root>

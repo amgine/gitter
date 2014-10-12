@@ -82,6 +82,14 @@ namespace gitter.Git.Gui
 		private readonly ToolStripButton _rebaseSkip;
 		private readonly ToolStripButton _rebaseAbort;
 
+		private readonly ToolStripButton _cherryPickContinue;
+		private readonly ToolStripButton _cherryPickQuit;
+		private readonly ToolStripButton _cherryPickAbort;
+
+		private readonly ToolStripButton _revertContinue;
+		private readonly ToolStripButton _revertQuit;
+		private readonly ToolStripButton _revertAbort;
+
 		private readonly ToolStripStatusLabel _remoteLabel;
 		private readonly ToolStripStatusLabel _userLabel;
 
@@ -135,6 +143,20 @@ namespace gitter.Git.Gui
 					{ Available = false },
 				_rebaseAbort = new ToolStripButton(Resources.StrAbort, CachedResources.Bitmaps["ImgRebaseAbort"], OnRebaseAbortClick)
 					{ Available = false },
+
+				_cherryPickContinue = new ToolStripButton(Resources.StrContinue, CachedResources.Bitmaps["ImgCherryPickContinue"], OnCherryPickContinueClick)
+					{ Available = false, ToolTipText = Resources.TipCherryPickContinue },
+				_cherryPickQuit = new ToolStripButton(Resources.StrQuit, CachedResources.Bitmaps["ImgCherryPickQuit"], OnCherryPickQuitClick)
+					{ Available = false, ToolTipText = Resources.TipCherryPickQuit },
+				_cherryPickAbort = new ToolStripButton(Resources.StrAbort, CachedResources.Bitmaps["ImgCherryPickAbort"], OnCherryPickAbortClick)
+					{ Available = false, ToolTipText = Resources.TipCherryPickAbort },
+
+				_revertContinue = new ToolStripButton(Resources.StrContinue, CachedResources.Bitmaps["ImgRevertContinue"], OnRevertContinueClick)
+					{ Available = false, ToolTipText = Resources.TipRevertContinue },
+				_revertQuit = new ToolStripButton(Resources.StrQuit, CachedResources.Bitmaps["ImgRevertQuit"], OnRevertQuitClick)
+					{ Available = false, ToolTipText = Resources.TipRevertQuit },
+				_revertAbort = new ToolStripButton(Resources.StrAbort, CachedResources.Bitmaps["ImgRevertAbort"], OnRevertAbortClick)
+					{ Available = false, ToolTipText = Resources.TipRevertAbort },
 			};
 
 			_statusUnmerged.DoubleClick				+= OnConflictsDoubleClick;
@@ -303,6 +325,50 @@ namespace gitter.Git.Gui
 		private void OnRebaseAbortClick(object sender, EventArgs e)
 		{
 			InvokeRebaseControl(RebaseControl.Abort);
+		}
+
+		private void InvokeCherryPickControl(CherryPickControl control)
+		{
+			var parent = _guiProvider.Environment.MainForm;
+
+			GuiCommands.CherryPick(parent, Repository, control);
+		}
+
+		private void OnCherryPickContinueClick(object sender, EventArgs e)
+		{
+			InvokeCherryPickControl(CherryPickControl.Continue);
+		}
+
+		private void OnCherryPickQuitClick(object sender, EventArgs e)
+		{
+			InvokeCherryPickControl(CherryPickControl.Quit);
+		}
+
+		private void OnCherryPickAbortClick(object sender, EventArgs e)
+		{
+			InvokeCherryPickControl(CherryPickControl.Abort);
+		}
+
+		private void InvokeRevertControl(RevertControl control)
+		{
+			var parent = _guiProvider.Environment.MainForm;
+
+			GuiCommands.Revert(parent, Repository, control);
+		}
+
+		private void OnRevertContinueClick(object sender, EventArgs e)
+		{
+			InvokeRevertControl(RevertControl.Continue);
+		}
+
+		private void OnRevertQuitClick(object sender, EventArgs e)
+		{
+			InvokeRevertControl(RevertControl.Quit);
+		}
+
+		private void OnRevertAbortClick(object sender, EventArgs e)
+		{
+			InvokeRevertControl(RevertControl.Abort);
 		}
 
 		private void OnHeadLabelMouseDown(object sender, MouseEventArgs e)
@@ -717,6 +783,20 @@ namespace gitter.Git.Gui
 			_rebaseContinue.Available = show;
 		}
 
+		private void ShowCherryPickControls(bool show)
+		{
+			_cherryPickAbort.Available = show;
+			_cherryPickQuit.Available = show;
+			_cherryPickContinue.Available = show;
+		}
+
+		private void ShowRevertControls(bool show)
+		{
+			_revertAbort.Available = show;
+			_revertQuit.Available = show;
+			_revertContinue.Available = show;
+		}
+
 		private static string GetHeadString(IRevisionPointer revision)
 		{
 			string headString;
@@ -751,6 +831,8 @@ namespace gitter.Git.Gui
 							string.Format("{0} ({1})", Resources.StrsMergeIsInProcess, mergeHead);
 						_statusRepositoryState.Available = true;
 						ShowRebaseControls(false);
+						ShowCherryPickControls(false);
+						ShowRevertControls(false);
 					}
 					break;
 				case RepositoryState.CherryPicking:
@@ -762,6 +844,8 @@ namespace gitter.Git.Gui
 							string.Format("{0} ({1})", Resources.StrsCherryPickIsInProcess, cherryPickHead);
 						_statusRepositoryState.Available = true;
 						ShowRebaseControls(false);
+						ShowRevertControls(false);
+						ShowCherryPickControls(true);
 					}
 					break;
 				case RepositoryState.Reverting:
@@ -773,6 +857,8 @@ namespace gitter.Git.Gui
 							string.Format("{0} ({1})", Resources.StrsRevertIsInProcess, revertHead);
 						_statusRepositoryState.Available = true;
 						ShowRebaseControls(false);
+						ShowCherryPickControls(false);
+						ShowRevertControls(true);
 					}
 					break;
 				case RepositoryState.Rebasing:
@@ -783,6 +869,8 @@ namespace gitter.Git.Gui
 							Resources.StrsRebaseIsInProcess :
 							string.Format("{0} ({1})", Resources.StrsRebaseIsInProcess, rebaseHead);
 						_statusRepositoryState.Available = true;
+						ShowCherryPickControls(false);
+						ShowRevertControls(false);
 						ShowRebaseControls(true);
 					}
 					break;
@@ -790,6 +878,8 @@ namespace gitter.Git.Gui
 					{
 						_statusRepositoryState.Available = false;
 						ShowRebaseControls(false);
+						ShowCherryPickControls(false);
+						ShowRevertControls(false);
 					}
 					break;
 			}

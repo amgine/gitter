@@ -2622,4 +2622,50 @@ Reset existing branch instead of creating a new one?</value>
   <data name="StrDiffSplitView" xml:space="preserve">
     <value>Split View</value>
   </data>
+  <data name="ImgCherryPickAbort" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cherry-pick-abort.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgCherryPickContinue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cherry-pick-continue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgCherryPickQuit" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cherry-pick-quit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SrtQuit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+  <data name="StrQuit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+  <data name="TipCherryPickAbort" xml:space="preserve">
+    <value>Cancel the operation and return to the pre-sequence state.</value>
+  </data>
+  <data name="TipCherryPickContinue" xml:space="preserve">
+    <value>Continue the operation in progress using the information in .git/sequencer.
+Can be used to continue after resolving conflicts in a failed cherry-pick.</value>
+  </data>
+  <data name="TipCherryPickQuit" xml:space="preserve">
+    <value>Forget about the current operation in progress.
+Can be used to clear the sequencer state after a failed cherry-pick.</value>
+  </data>
+  <data name="TipRevertAbort" xml:space="preserve">
+    <value>Cancel the operation and return to the pre-sequence state.</value>
+  </data>
+  <data name="TipRevertContinue" xml:space="preserve">
+    <value>Continue the operation in progress using the information in .git/sequencer.
+Can be used to continue after resolving conflicts in a failed revert.</value>
+  </data>
+  <data name="TipRevertQuit" xml:space="preserve">
+    <value>Forget about the current operation in progress.
+Can be used to clear the sequencer state after a failed revert.</value>
+  </data>
+  <data name="ImgRevertAbort" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\revert-abort.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgRevertContinue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\revert-continue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgRevertQuit" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\revert-quit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

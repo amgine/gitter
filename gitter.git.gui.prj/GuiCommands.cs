@@ -404,6 +404,58 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		public static GuiCommandStatus CherryPick(IWin32Window parent, Repository repository, CherryPickControl control)
+		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
+			try
+			{
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrCherryPick,
+					p => repository.CherryPickAsync(control, p));
+				return GuiCommandStatus.Completed;
+			}
+			catch(OperationCanceledException)
+			{
+				return GuiCommandStatus.Canceled;
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					parent,
+					exc.Message,
+					Resources.ErrFailedToCherryPick,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return GuiCommandStatus.Faulted;
+			}
+		}
+
+		public static GuiCommandStatus Revert(IWin32Window parent, Repository repository, RevertControl control)
+		{
+			Verify.Argument.IsNotNull(repository, "repository");
+
+			try
+			{
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRevert,
+					p => repository.RevertAsync(control, p));
+				return GuiCommandStatus.Completed;
+			}
+			catch(OperationCanceledException)
+			{
+				return GuiCommandStatus.Canceled;
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					parent,
+					exc.Message,
+					Resources.ErrFailedToRevert,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return GuiCommandStatus.Faulted;
+			}
+		}
+
 		public static GuiCommandStatus SaveStash(IWin32Window parent, StashedStatesCollection stash, bool keepIndex, bool includeUntracked, string message)
 		{
 			try

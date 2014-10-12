@@ -1568,6 +1568,36 @@ namespace gitter.Git.Gui.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgCherryPickAbort {
+            get {
+                object obj = ResourceManager.GetObject("ImgCherryPickAbort", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgCherryPickContinue {
+            get {
+                object obj = ResourceManager.GetObject("ImgCherryPickContinue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgCherryPickQuit {
+            get {
+                object obj = ResourceManager.GetObject("ImgCherryPickQuit", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgClean {
             get {
                 object obj = ResourceManager.GetObject("ImgClean", resourceCulture);
@@ -2418,6 +2448,36 @@ namespace gitter.Git.Gui.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgRevertAbort {
+            get {
+                object obj = ResourceManager.GetObject("ImgRevertAbort", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgRevertContinue {
+            get {
+                object obj = ResourceManager.GetObject("ImgRevertContinue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgRevertQuit {
+            get {
+                object obj = ResourceManager.GetObject("ImgRevertQuit", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgSearch {
             get {
                 object obj = ResourceManager.GetObject("ImgSearch", resourceCulture);
@@ -2798,6 +2858,15 @@ namespace gitter.Git.Gui.Properties {
         internal static string MsgGitVersionOk {
             get {
                 return ResourceManager.GetString("MsgGitVersionOk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quit.
+        /// </summary>
+        internal static string SrtQuit {
+            get {
+                return ResourceManager.GetString("SrtQuit", resourceCulture);
             }
         }
         
@@ -5249,6 +5318,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Quit.
+        /// </summary>
+        internal static string StrQuit {
+            get {
+                return ResourceManager.GetString("StrQuit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rebase.
         /// </summary>
         internal static string StrRebase {
@@ -7276,11 +7354,40 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel the operation and return to the pre-sequence state..
+        /// </summary>
+        internal static string TipCherryPickAbort {
+            get {
+                return ResourceManager.GetString("TipCherryPickAbort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Continue the operation in progress using the information in .git/sequencer.
+        ///Can be used to continue after resolving conflicts in a failed cherry-pick..
+        /// </summary>
+        internal static string TipCherryPickContinue {
+            get {
+                return ResourceManager.GetString("TipCherryPickContinue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The cherry-pick is done against the beginning state of your index and no commit is created in process..
         /// </summary>
         internal static string TipCherryPickNoCommit {
             get {
                 return ResourceManager.GetString("TipCherryPickNoCommit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Forget about the current operation in progress.
+        ///Can be used to clear the sequencer state after a failed cherry-pick..
+        /// </summary>
+        internal static string TipCherryPickQuit {
+            get {
+                return ResourceManager.GetString("TipCherryPickQuit", resourceCulture);
             }
         }
         
@@ -7557,11 +7664,40 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel the operation and return to the pre-sequence state..
+        /// </summary>
+        internal static string TipRevertAbort {
+            get {
+                return ResourceManager.GetString("TipRevertAbort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Continue the operation in progress using the information in .git/sequencer.
+        ///Can be used to continue after resolving conflicts in a failed revert..
+        /// </summary>
+        internal static string TipRevertContinue {
+            get {
+                return ResourceManager.GetString("TipRevertContinue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The revert is done against the beginning state of your index and no commit is created in process..
         /// </summary>
         internal static string TipRevertNoCommit {
             get {
                 return ResourceManager.GetString("TipRevertNoCommit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Forget about the current operation in progress.
+        ///Can be used to clear the sequencer state after a failed revert..
+        /// </summary>
+        internal static string TipRevertQuit {
+            get {
+                return ResourceManager.GetString("TipRevertQuit", resourceCulture);
             }
         }
         
