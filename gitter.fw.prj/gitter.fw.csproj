@@ -109,6 +109,8 @@
     <Compile Include="Controls\CheckBox\ICheckBoxWidget.cs" />
     <Compile Include="Controls\CheckBox\MSVS2012CheckBoxRenderer.cs" />
     <Compile Include="Controls\CheckBox\SystemCheckBoxAdapter.cs" />
+    <Compile Include="Controls\ListExtensions.cs" />
+    <Compile Include="Controls\CustomListBox\Enums\ColumnResizeSide.cs" />
     <Compile Include="Controls\CustomListBox\CustomListBoxManager.cs" />
     <Compile Include="Controls\CustomListBox\DateColumn.cs" />
     <Compile Include="Controls\CustomListBox\DateColumnExtender.cs">
@@ -117,6 +119,8 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CustomListBox\Enums\MoveAction.cs" />
+    <Compile Include="Controls\CustomListBox\ColumnResizing.cs" />
     <Compile Include="Controls\Dialogs\IRepositoryCloneDialog.cs" />
     <Compile Include="Controls\Dialogs\IRepositoryInitDialog.cs" />
     <Compile Include="Controls\Popup\CustomObjectPicker.cs">

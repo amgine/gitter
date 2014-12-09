@@ -155,8 +155,7 @@ namespace gitter.Framework.Controls
 		private DragHelper _headerDragHelper;
 		private bool _haveAutoSizeColumns;
 
-		private int _resizedHeaderSide;
-		private int _resizedHeaderIndex;
+		private ColumnResizing _actualResizing;
 
 		private readonly TrackingService<CustomListBoxItem> _itemHover;
 		private readonly TrackingService<CustomListBoxItem> _itemFocus;
@@ -233,7 +232,7 @@ namespace gitter.Framework.Controls
 			_integralScroll = true;
 			_lastClickedItemIndex = -1;
 			_draggedHeaderIndex = -1;
-			_resizedHeaderIndex = -1;
+			_actualResizing = null;
 			_columnHeaderHeight = DEFAULT_ITEM_HEIGHT;
 			_itemHeight = DEFAULT_ITEM_HEIGHT;
 
@@ -1202,17 +1201,6 @@ namespace gitter.Framework.Controls
 			return maxw;
 		}
 
-		public int GetPrevVisibleColumnIndex(int index)
-		{
-			--index;
-			while(index >= 0)
-			{
-				if(_columns[index].IsVisible) return index;
-				--index;
-			}
-			return -1;
-		}
-
 		public CustomListBoxColumn GetPrevVisibleColumn(int index)
 		{
 			--index;
@@ -1789,80 +1777,18 @@ namespace gitter.Framework.Controls
 
 		private void PerformHeaderResize(MouseEventArgs e)
 		{
-			var c = _columns[_resizedHeaderIndex];
-			int d = e.X - _mouseDownX;
+			int deltaOfResize = e.X - _mouseDownX;
+			if (_actualResizing.Influence == MoveAction.DecreaseWidth)
+			{
+				deltaOfResize = -deltaOfResize;
+			}
 
-			int autoSizeId = int.MaxValue;
-			for(int i = 0; i < _columns.Count; ++i)
+			var w = _actualResizing.InitialWidth + deltaOfResize;
+			if (w <= _actualResizing.ResizingColumn.MinWidth)
 			{
-				if(_columns[i].IsVisible && _columns[i].SizeMode == ColumnSizeMode.Fill)
-				{
-					autoSizeId = i;
-					break;
-				}
+				w = _actualResizing.ResizingColumn.MinWidth;
 			}
-			if(_resizedHeaderSide == -1)
-			{
-				int p = GetPrevVisibleColumnIndex(_resizedHeaderIndex);
-				if(p != -1 && _resizedHeaderIndex <= autoSizeId)
-				{
-					var c2 = _columns[p];
-					if(c2.SizeMode == ColumnSizeMode.Sizeable)
-					{
-						c = c2;
-						if(_resizedHeaderIndex > autoSizeId)
-						{
-							d = -d;
-						}
-					}
-					else
-					{
-						d = -d;
-					}
-				}
-				else
-				{
-					d = -d;
-				}
-				if(c.SizeMode != ColumnSizeMode.Sizeable)
-				{
-					return;
-				}
-			}
-			else
-			{
-				if(c.SizeMode != ColumnSizeMode.Sizeable || _resizedHeaderIndex > autoSizeId)
-				{
-					var c_id = GetNextVisibleColumnIndex(_resizedHeaderIndex);
-					if(c_id != -1)
-					{
-						if(c.Width + d < c.MinWidth)
-						{
-							d = c.MinWidth - c.Width;
-							if(d == 0) return;
-						}
-						c = _columns[c_id];
-						d = -d;
-					}
-					else
-					{
-						return;
-					}
-				}
-			}
-			var w = c.Width;
-			var minw = c.MinWidth;
-			w += d;
-			if(w <= minw)
-			{
-				_mouseDownX = e.X + (minw - w);
-				w = minw;
-			}
-			else
-			{
-				_mouseDownX = e.X;
-			}
-			c.Width = w;
+			_actualResizing.ResizingColumn.Width = w;
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
@@ -1874,7 +1800,7 @@ namespace gitter.Framework.Controls
 					PerformHeaderDrag(e);
 				}
 			}
-			else if(_resizedHeaderIndex != -1)
+			else if(_actualResizing != null)
 			{
 				PerformHeaderResize(e);
 			}
@@ -1931,9 +1857,9 @@ namespace gitter.Framework.Controls
 			{
 				_headerDragHelper.Stop();
 			}
-			if(_resizedHeaderIndex != -1)
+			if (_actualResizing != null)
 			{
-				_resizedHeaderIndex = -1;
+				_actualResizing = null;
 			}
 			base.OnMouseUp(e);
 		}
@@ -2004,8 +1930,9 @@ namespace gitter.Framework.Controls
 		{
 			if(e.Button == MouseButtons.Left)
 			{
-				_resizedHeaderSide = itemPart == ColumnHitTestResults.LeftResizer ? -1 : 1;
-				_resizedHeaderIndex = itemIndex;
+				var resizeSide = itemPart == ColumnHitTestResults.LeftResizer ? ColumnResizeSide.FromLeft : ColumnResizeSide.FromRight;
+
+				_actualResizing = ColumnResizing.FromActiveColumn(_columns, itemIndex, resizeSide);
 			}
 		}
 
@@ -2452,30 +2379,32 @@ namespace gitter.Framework.Controls
 						var index = _oldHitTestResult.ItemIndex;
 						if(index != -1)
 						{
-							var c = _columns[index];
-							var d2 = Math.Abs(_mouseDownX - c.Left);
-							var d3 = Math.Abs(_mouseDownX - (c.Left + c.Width));
+							var autosizingColumn = _columns[index];
 
+							var activeColumn = _actualResizing.ActiveColumnIndex;
 							if(isOverLeftResizeGrip)
 							{
-								int p = GetPrevVisibleColumnIndex(_resizedHeaderIndex);
-								if(p != -1)
+								var previousColumn = _columns.FindPrevious(activeColumn, column => column.IsVisible);
+								if(previousColumn != null)
 								{
-									var c2 = _columns[p];
-									if(c2.SizeMode == ColumnSizeMode.Sizeable)
+									if (previousColumn.SizeMode == ColumnSizeMode.Sizeable)
 									{
-										c = c2;
+										autosizingColumn = previousColumn;
 									}
 								}
 							}
 							else
 							{
-								if(c.SizeMode != ColumnSizeMode.Sizeable)
+								if(autosizingColumn.SizeMode != ColumnSizeMode.Sizeable)
 								{
-									c = _columns[GetNextVisibleColumnIndex(_resizedHeaderIndex)];
+									var nextColumn = _columns.FindNext(activeColumn, column => column.IsVisible);
+									if (nextColumn != null)
+									{
+										autosizingColumn = nextColumn;
+									}
 								}
 							}
-							c.AutoSize();
+							autosizingColumn.AutoSize();
 						}
 					}
 					break;

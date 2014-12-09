@@ -304,16 +304,6 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public int PreviousVisibleColumnIndex
-		{
-			get
-			{
-				if(!IsAttachedToListBox) return -1;
-				var index = ListBox.Columns.IndexOf(this);
-				return ListBox.GetPrevVisibleColumnIndex(index);
-			}
-		}
-
 		public CustomListBoxColumn NextVisibleColumn
 		{
 			get
@@ -321,16 +311,6 @@ namespace gitter.Framework.Controls
 				if(!IsAttachedToListBox) return null;
 				var index = ListBox.Columns.IndexOf(this);
 				return ListBox.GetNextVisibleColumn(index);
-			}
-		}
-
-		public int NextVisibleColumnIndex
-		{
-			get
-			{
-				if(!IsAttachedToListBox) return -1;
-				var index = ListBox.Columns.IndexOf(this);
-				return ListBox.GetNextVisibleColumnIndex(index);
 			}
 		}
 
