@@ -155,6 +155,9 @@ namespace gitter.Git.Gui.Views
 								Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
 								Parent = this,
 							};
+							_container.BackColor = GitterApplication.Style.Colors.WorkArea;
+							_container.Panel1.BackColor = GitterApplication.Style.Colors.Window;
+							_container.Panel2.BackColor = GitterApplication.Style.Colors.Window;
 							if(_container.Height > _container.SplitterWidth)
 							{
 								try
