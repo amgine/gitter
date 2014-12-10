@@ -1280,31 +1280,23 @@ namespace gitter.Git.Gui
 			var item = (ToolStripItem)sender;
 			var revision = (IRevisionPointer)item.Tag;
 			string startingRevision;
-			string defaultName;
+			string defaultBranchName;
 			if(revision != null)
 			{
-				startingRevision = revision.Pointer;
-				var branch = revision as Branch;
-				if(branch != null && branch.IsRemote)
-				{
-					defaultName = branch.Name.Substring(branch.Name.LastIndexOf('/') + 1);
-				}
-				else
-				{
-					defaultName = string.Empty;
-				}
+				startingRevision  = revision.Pointer;
+				defaultBranchName = BranchHelper.TryFormatDefaultLocalBranchName(revision);
 			}
 			else
 			{
-				startingRevision = string.Empty;
-				defaultName = string.Empty;
+				startingRevision  = string.Empty;
+				defaultBranchName = string.Empty;
 			}
 			using(var dlg = new CreateBranchDialog(revision.Repository))
 			{
 				dlg.StartingRevision.Value = startingRevision;
-				if(defaultName != string.Empty)
+				if(defaultBranchName != string.Empty)
 				{
-					dlg.BranchName.Value = defaultName;
+					dlg.BranchName.Value = defaultBranchName;
 				}
 				dlg.Run(Utility.GetParentControl(item));
 			}

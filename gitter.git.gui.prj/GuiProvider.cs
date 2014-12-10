@@ -150,20 +150,12 @@ namespace gitter.Git.Gui
 			string defaultBranchName;
 			if(revision != null)
 			{
-				startingRevision = revision.Pointer;
-				var branch = revision as Branch;
-				if(branch != null && branch.IsRemote)
-				{
-					defaultBranchName = branch.Name.Substring(branch.Name.LastIndexOf('/') + 1);
-				}
-				else
-				{
-					defaultBranchName = string.Empty;
-				}
+				startingRevision  = revision.Pointer;
+				defaultBranchName = BranchHelper.TryFormatDefaultLocalBranchName(revision);
 			}
 			else
 			{
-				startingRevision = GitConstants.HEAD;
+				startingRevision  = GitConstants.HEAD;
 				defaultBranchName = string.Empty;
 			}
 			StartCreateBranchDialog(startingRevision, defaultBranchName);

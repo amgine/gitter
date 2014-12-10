@@ -77,6 +77,7 @@
     <Compile Include="Blame\BlameOptions.cs" />
     <Compile Include="Blame\RevisionFileBlameSource.cs" />
     <Compile Include="Blame\IBlameSource.cs" />
+    <Compile Include="BranchHelper.cs" />
     <Compile Include="Diff\IIndexDiffSource.cs" />
     <Compile Include="Diff\IRevisionDiffSource.cs" />
     <Compile Include="Diff\StashedChangesDiffSource.cs" />
