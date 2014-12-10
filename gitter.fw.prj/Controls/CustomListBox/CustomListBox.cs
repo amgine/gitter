@@ -155,7 +155,7 @@ namespace gitter.Framework.Controls
 		private DragHelper _headerDragHelper;
 		private bool _haveAutoSizeColumns;
 
-		private ColumnResizing _actualResizing;
+		private ColumnResizeProcess _columnResizeProcess;
 
 		private readonly TrackingService<CustomListBoxItem> _itemHover;
 		private readonly TrackingService<CustomListBoxItem> _itemFocus;
@@ -232,7 +232,6 @@ namespace gitter.Framework.Controls
 			_integralScroll = true;
 			_lastClickedItemIndex = -1;
 			_draggedHeaderIndex = -1;
-			_actualResizing = null;
 			_columnHeaderHeight = DEFAULT_ITEM_HEIGHT;
 			_itemHeight = DEFAULT_ITEM_HEIGHT;
 
@@ -1389,6 +1388,13 @@ namespace gitter.Framework.Controls
 						item.Activate();
 					}
 					break;
+				case Keys.Escape:
+					if(_columnResizeProcess != null)
+					{
+						_columnResizeProcess.Cancel();
+						_columnResizeProcess = null;
+					}
+					break;
 				case Keys.Right:
 					if(_itemPlainList.Count == 0) return;
 					if(_itemFocus.Index < 0 || _itemFocus.Index >= _itemPlainList.Count)
@@ -1775,22 +1781,6 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		private void PerformHeaderResize(MouseEventArgs e)
-		{
-			int deltaOfResize = e.X - _mouseDownX;
-			if (_actualResizing.Influence == MoveAction.DecreaseWidth)
-			{
-				deltaOfResize = -deltaOfResize;
-			}
-
-			var w = _actualResizing.InitialWidth + deltaOfResize;
-			if (w <= _actualResizing.ResizingColumn.MinWidth)
-			{
-				w = _actualResizing.ResizingColumn.MinWidth;
-			}
-			_actualResizing.ResizingColumn.Width = w;
-		}
-
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			if(_draggedHeaderIndex != -1)
@@ -1800,9 +1790,9 @@ namespace gitter.Framework.Controls
 					PerformHeaderDrag(e);
 				}
 			}
-			else if(_actualResizing != null)
+			else if(_columnResizeProcess != null)
 			{
-				PerformHeaderResize(e);
+				_columnResizeProcess.Update(e.Location);
 			}
 			else
 			{
@@ -1857,9 +1847,10 @@ namespace gitter.Framework.Controls
 			{
 				_headerDragHelper.Stop();
 			}
-			if (_actualResizing != null)
+			if(_columnResizeProcess != null)
 			{
-				_actualResizing = null;
+				_columnResizeProcess.Update(e.Location);
+				_columnResizeProcess = null;
 			}
 			base.OnMouseUp(e);
 		}
@@ -1926,14 +1917,9 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		private void HandleHeaderResizerMouseDown(int itemIndex, int itemPart, MouseEventArgs e)
+		private void HandleHeaderResizerMouseDown(int itemIndex, ColumnResizeSide resizeSide, MouseEventArgs e)
 		{
-			if(e.Button == MouseButtons.Left)
-			{
-				var resizeSide = itemPart == ColumnHitTestResults.LeftResizer ? ColumnResizeSide.FromLeft : ColumnResizeSide.FromRight;
-
-				_actualResizing = ColumnResizing.FromActiveColumn(_columns, itemIndex, resizeSide);
-			}
+			_columnResizeProcess = ColumnResizeProcess.FromActiveColumn(Columns, itemIndex, resizeSide, e.Location);
 		}
 
 		private void HandleHeaderDefaultMouseDown(int itemIndex, MouseEventArgs e)
@@ -2220,25 +2206,28 @@ namespace gitter.Framework.Controls
 
 		private void HandleHeaderMouseDown(int itemIndex, int itemPart, MouseEventArgs e)
 		{
-			if(e.Button == MouseButtons.Right)
+			switch(e.Button)
 			{
-				HandleHeaderDefaultMouseDown(itemIndex, e);
-			}
-			else
-			{
-				switch(itemPart)
-				{
-					case ColumnHitTestResults.Extender:
-						HandleHeaderExtenderMouseDown(itemIndex, e);
-						break;
-					case ColumnHitTestResults.LeftResizer:
-					case ColumnHitTestResults.RightResizer:
-						HandleHeaderResizerMouseDown(itemIndex, itemPart, e);
-						break;
-					default:
-						HandleHeaderDefaultMouseDown(itemIndex, e);
-						break;
-				}
+				case MouseButtons.Left:
+					switch(itemPart)
+					{
+						case ColumnHitTestResults.Extender:
+							HandleHeaderExtenderMouseDown(itemIndex, e);
+							break;
+						case ColumnHitTestResults.LeftResizer:
+							HandleHeaderResizerMouseDown(itemIndex, ColumnResizeSide.Left, e);
+							break;
+						case ColumnHitTestResults.RightResizer:
+							HandleHeaderResizerMouseDown(itemIndex, ColumnResizeSide.Right, e);
+							break;
+						default:
+							HandleHeaderDefaultMouseDown(itemIndex, e);
+							break;
+					}
+					break;
+				case MouseButtons.Right:
+					HandleHeaderDefaultMouseDown(itemIndex, e);
+					break;
 			}
 		}
 
@@ -2358,6 +2347,7 @@ namespace gitter.Framework.Controls
 
 		protected override void OnDoubleClick(EventArgs e)
 		{
+			_columnResizeProcess = null;
 			switch(_oldHitTestResult.Area)
 			{
 				case HitTestArea.Item:
@@ -2372,7 +2362,7 @@ namespace gitter.Framework.Controls
 					}
 					break;
 				case HitTestArea.Header:
-					bool isOverLeftResizeGrip = _oldHitTestResult.ItemPart == ColumnHitTestResults.LeftResizer;
+					bool isOverLeftResizeGrip  = _oldHitTestResult.ItemPart == ColumnHitTestResults.LeftResizer;
 					bool isOverRightResizeGrip = _oldHitTestResult.ItemPart == ColumnHitTestResults.RightResizer;
 					if(isOverLeftResizeGrip || isOverRightResizeGrip)
 					{
@@ -2380,31 +2370,29 @@ namespace gitter.Framework.Controls
 						if(index != -1)
 						{
 							var autosizingColumn = _columns[index];
-
-							var activeColumn = _actualResizing.ActiveColumnIndex;
 							if(isOverLeftResizeGrip)
 							{
-								var previousColumn = _columns.FindPrevious(activeColumn, column => column.IsVisible);
-								if(previousColumn != null)
+								var previousColumn = _columns.FindPrevious(index, column => column.IsVisible);
+								if(previousColumn != null && previousColumn.SizeMode == ColumnSizeMode.Sizeable)
 								{
-									if (previousColumn.SizeMode == ColumnSizeMode.Sizeable)
-									{
-										autosizingColumn = previousColumn;
-									}
+									autosizingColumn = previousColumn;
 								}
 							}
 							else
 							{
 								if(autosizingColumn.SizeMode != ColumnSizeMode.Sizeable)
 								{
-									var nextColumn = _columns.FindNext(activeColumn, column => column.IsVisible);
-									if (nextColumn != null)
+									var nextColumn = _columns.FindNext(index, column => column.IsVisible);
+									if(nextColumn != null && nextColumn.SizeMode == ColumnSizeMode.Sizeable)
 									{
 										autosizingColumn = nextColumn;
 									}
 								}
 							}
-							autosizingColumn.AutoSize();
+							if(autosizingColumn != null && autosizingColumn.SizeMode == ColumnSizeMode.Sizeable)
+							{
+								autosizingColumn.AutoSize();
+							}
 						}
 					}
 					break;

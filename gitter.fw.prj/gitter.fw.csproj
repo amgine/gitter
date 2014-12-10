@@ -119,8 +119,7 @@
     <Compile Include="Controls\CustomListBox\DateColumnExtender.Designer.cs">
       <DependentUpon>DateColumnExtender.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\CustomListBox\Enums\MoveAction.cs" />
-    <Compile Include="Controls\CustomListBox\ColumnResizing.cs" />
+    <Compile Include="Controls\CustomListBox\ColumnResizeProcess.cs" />
     <Compile Include="Controls\Dialogs\IRepositoryCloneDialog.cs" />
     <Compile Include="Controls\Dialogs\IRepositoryInitDialog.cs" />
     <Compile Include="Controls\Popup\CustomObjectPicker.cs">
