@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this._lblPassword = new System.Windows.Forms.Label();
+			this._lblField = new System.Windows.Forms.Label();
 			this._lblPrompt = new System.Windows.Forms.Label();
 			this._txtPassword = new System.Windows.Forms.TextBox();
 			this._btnCancel = new System.Windows.Forms.Button();
@@ -40,15 +40,15 @@
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.SuspendLayout();
 			// 
-			// _lblPassword
+			// _lblField
 			// 
-			this._lblPassword.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this._lblPassword.AutoSize = true;
-			this._lblPassword.Location = new System.Drawing.Point(49, 51);
-			this._lblPassword.Name = "_lblPassword";
-			this._lblPassword.Size = new System.Drawing.Size(56, 13);
-			this._lblPassword.TabIndex = 0;
-			this._lblPassword.Text = "Password:";
+			this._lblField.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this._lblField.AutoSize = true;
+			this._lblField.Location = new System.Drawing.Point(49, 51);
+			this._lblField.Name = "_lblField";
+			this._lblField.Size = new System.Drawing.Size(56, 13);
+			this._lblField.TabIndex = 0;
+			this._lblField.Text = "Password:";
 			// 
 			// _lblPrompt
 			// 
@@ -107,7 +107,7 @@
 			this._pnlContainer.Controls.Add(this.pictureBox1);
 			this._pnlContainer.Controls.Add(this._pnlLine);
 			this._pnlContainer.Controls.Add(this._lblPrompt);
-			this._pnlContainer.Controls.Add(this._lblPassword);
+			this._pnlContainer.Controls.Add(this._lblField);
 			this._pnlContainer.Controls.Add(this._txtPassword);
 			this._pnlContainer.Location = new System.Drawing.Point(1, 0);
 			this._pnlContainer.Name = "_pnlContainer";
@@ -159,7 +159,7 @@
 
 		#endregion
 
-		private System.Windows.Forms.Label _lblPassword;
+		private System.Windows.Forms.Label _lblField;
 		private System.Windows.Forms.Label _lblPrompt;
 		private System.Windows.Forms.TextBox _txtPassword;
 		private System.Windows.Forms.Button _btnCancel;

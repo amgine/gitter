@@ -24,12 +24,17 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace gitter
 {
 	public partial class MainForm : Form
 	{
+		private const string DefaultFieldName = "Password:";
+		private const string LoginRegex = "^Username for \'.*\':";
+		private const string PasswordRegex = "^Password for \'.*\':";
+
 		public MainForm()
 		{
 			InitializeComponent();
@@ -38,7 +43,9 @@ namespace gitter
 
 			if(args.Length >= 2)
 			{
-				_lblPrompt.Text = args[1];
+				var gitPrompt = args[1];
+				_lblPrompt.Text = gitPrompt;
+				_lblField.Text = GetFieldName(gitPrompt);
 			}
 
 			Font = SystemFonts.MessageBoxFont;
@@ -58,6 +65,22 @@ namespace gitter
 		private void _btnCancel_Click(object sender, EventArgs e)
 		{
 			Close();
+		}
+
+		private string GetFieldName(string gitInput)
+		{
+			if (Regex.IsMatch(gitInput, LoginRegex))
+			{
+				return "Username:";
+			}
+			else if (Regex.IsMatch(gitInput, PasswordRegex))
+			{
+				return "Password:";
+			}
+			else
+			{
+				return DefaultFieldName;
+			}
 		}
 	}
 }
