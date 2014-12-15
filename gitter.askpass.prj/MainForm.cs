@@ -18,17 +18,13 @@
  */
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-
 namespace gitter
 {
+	using System;
+	using System.Drawing;
+	using System.Text.RegularExpressions;
+	using System.Windows.Forms;
+
 	public partial class MainForm : Form
 	{
 		private const string DefaultFieldName = "Password:";
@@ -67,13 +63,13 @@ namespace gitter
 			Close();
 		}
 
-		private string GetFieldName(string gitInput)
+		private static string GetFieldName(string gitInput)
 		{
-			if (Regex.IsMatch(gitInput, LoginRegex))
+			if(Regex.IsMatch(gitInput, LoginRegex))
 			{
 				return "Username:";
 			}
-			else if (Regex.IsMatch(gitInput, PasswordRegex))
+			else if(Regex.IsMatch(gitInput, PasswordRegex))
 			{
 				return "Password:";
 			}
