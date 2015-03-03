@@ -24,7 +24,7 @@ using System.Reflection;
 
 [assembly: AssemblyCompany("amgine")]
 [assembly: AssemblyProduct("gitter")]
-[assembly: AssemblyCopyright("Copyright © amgine 2012")]
+[assembly: AssemblyCopyright("Copyright © amgine 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Reflection;
 
 [assembly: NeutralResourcesLanguage("en-us")]
 
-[assembly: AssemblyFileVersion("1.0.16.0")]
-[assembly: AssemblyVersion("1.0.16.0")] 
+[assembly: AssemblyFileVersion("1.0.17.0")]
+[assembly: AssemblyVersion("1.0.17.0")] 
