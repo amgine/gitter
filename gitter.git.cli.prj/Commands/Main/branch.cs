@@ -26,7 +26,8 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>List, create, or delete branches.</summary>
 	public sealed class BranchCommand : Command
 	{
-		public static BranchCommand FormatCreateBranchCommand(string name, string startingRevision, bool specifyTracking, bool track, bool reflog)
+		public static BranchCommand FormatCreateBranchCommand(Version gitVersion, string name, 
+			string startingRevision, bool specifyTracking, bool track, bool reflog)
 		{
 			var args = new ICommandArgument[2+(specifyTracking?1:0)+(reflog?1:0)];
 			int id = 0;
@@ -36,7 +37,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(reflog)
 			{
-				args[id++] = RefLog();
+				args[id++] = RefLog(gitVersion);
 			}
 			args[id + 0] = new CommandParameter(name);
 			args[id + 1] = new CommandParameter(startingRevision);
@@ -44,10 +45,7 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		/// <summary>Delete a branch. The branch must be fully merged in HEAD.</summary>
-		public static ICommandArgument Delete()
-		{
-			return new CommandFlag("-d");
-		}
+		public static ICommandArgument Delete() => new CommandFlag("-d");
 
 		/// <summary>Delete a branch irrespective of its merged status.</summary>
 		public static ICommandArgument DeleteForce()
@@ -55,13 +53,17 @@ namespace gitter.Git.AccessLayer.CLI
 			return new CommandFlag("-D");
 		}
 
+		static readonly Version NewReflogArgVersion = new Version(2, 20, 0);
+
 		/// <summary>
 		///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
 		///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
 		/// </summary>
-		public static ICommandArgument RefLog()
+		public static ICommandArgument RefLog(Version gitVersion)
 		{
-			return new CommandFlag("-l");
+			return gitVersion >= NewReflogArgVersion
+				? new CommandFlag("--create-reflog")
+				: new CommandFlag("-l");
 		}
 
 		/// <summary>Reset branchname to startpoint if branchname exists already. Without -f git-branch refuses to change an existing branch.</summary>

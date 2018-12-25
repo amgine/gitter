@@ -29,7 +29,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public CommandBuilder(GitCLI gitCLI)
 		{
-			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
+			Verify.Argument.IsNotNull(gitCLI, nameof(gitCLI));
 
 			_gitCLI = gitCLI;
 		}
@@ -1105,7 +1105,7 @@ namespace gitter.Git.AccessLayer.CLI
 				case RevertControl.Abort:
 					return new RevertCommand(RevertCommand.Abort());
 				default:
-					throw new ArgumentException("Unknown enum value.", "control");
+					throw new ArgumentException("Unknown enum value.", nameof(control));
 			}
 		}
 
@@ -1177,7 +1177,7 @@ namespace gitter.Git.AccessLayer.CLI
 				case CherryPickControl.Abort:
 					return new CherryPickCommand(CherryPickCommand.Abort());
 				default:
-					throw new ArgumentException("Unknown enum value.", "control");
+					throw new ArgumentException("Unknown enum value.", nameof(control));
 			}
 		}
 
@@ -1280,7 +1280,7 @@ namespace gitter.Git.AccessLayer.CLI
 					arg = RebaseCommand.Skip();
 					break;
 				default:
-					throw new ArgumentException("control");
+					throw new ArgumentException(nameof(control));
 			}
 			return new RebaseCommand(arg);
 		}
@@ -1727,7 +1727,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			if(parameters.CreateReflog)
 			{
-				args.Add(BranchCommand.RefLog());
+				args.Add(BranchCommand.RefLog(_gitCLI.GitVersion));
 			}
 			if(parameters.Checkout)
 			{
