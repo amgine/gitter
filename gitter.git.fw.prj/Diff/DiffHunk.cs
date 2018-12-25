@@ -24,7 +24,7 @@ namespace gitter.Git
 	using System.Text;
 	using System.Collections.Generic;
 
-	/// <summary>Continious block of changed lines including context.</summary>
+	/// <summary>Continuous block of changed lines including context.</summary>
 	public sealed class DiffHunk : IList<DiffLine>, ICloneable
 	{
 		#region Data
@@ -44,9 +44,9 @@ namespace gitter.Git
 		/// <param name="stats"><see cref="DiffStats"/>.</param>
 		public DiffHunk(DiffColumnHeader[] headers, IList<DiffLine> lines, DiffStats stats, bool isBinary)
 		{
-			Verify.Argument.IsNotNull(headers, "headers");
-			Verify.Argument.IsNotNull(lines, "lines");
-			Verify.Argument.IsNotNull(stats, "stats");
+			Verify.Argument.IsNotNull(headers, nameof(headers));
+			Verify.Argument.IsNotNull(lines, nameof(lines));
+			Verify.Argument.IsNotNull(stats, nameof(stats));
 
 			_headers = headers;
 			_lines = lines;
@@ -66,27 +66,18 @@ namespace gitter.Git
 		#region Properties
 
 		/// <summary>Hunk is empty.</summary>
-		public bool IsEmpty
-		{
-			get { return _lines.Count == 0; }
-		}
+		public bool IsEmpty => _lines.Count == 0;
 
-		public bool IsBinary
-		{
-			get { return _isBinary; }
-		}
+		public bool IsBinary => _isBinary;
 
-		public DiffStats Stats
-		{
-			get { return _stats; }
-		}
+		public DiffStats Stats => _stats;
 
 		public DiffLine this[int index]
 		{
 			get { return _lines[index]; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				var line = _lines[index];
 				_stats.Decrement(line.State);
@@ -95,10 +86,7 @@ namespace gitter.Git
 			}
 		}
 
-		public int LineCount
-		{
-			get { return _lines.Count; }
-		}
+		public int LineCount => _lines.Count;
 
 		public int MaxLineNum
 		{
@@ -121,26 +109,17 @@ namespace gitter.Git
 			}
 		}
 
-		public int ColumnCount
-		{
-			get { return _headers.Length; }
-		}
+		public int ColumnCount => _headers.Length;
 
-		int ICollection<DiffLine>.Count
-		{
-			get { return _lines.Count; }
-		}
+		int ICollection<DiffLine>.Count => _lines.Count;
 
 		#endregion
 
-		public int IndexOf(DiffLine item)
-		{
-			return _lines.IndexOf(item);
-		}
+		public int IndexOf(DiffLine item) => _lines.IndexOf(item);
 
 		public void Insert(int index, DiffLine line)
 		{
-			Verify.Argument.IsNotNull(line, "line");
+			Verify.Argument.IsNotNull(line, nameof(line));
 
 			_lines.Insert(index, line);
 			_stats.Increment(line.State);
@@ -155,7 +134,7 @@ namespace gitter.Git
 
 		public void Add(DiffLine line)
 		{
-			Verify.Argument.IsNotNull(line, "line");
+			Verify.Argument.IsNotNull(line, nameof(line));
 
 			_lines.Add(line);
 			_stats.Increment(line.State);
@@ -177,10 +156,7 @@ namespace gitter.Git
 			_lines.CopyTo(array, arrayIndex);
 		}
 
-		public bool IsReadOnly
-		{
-			get { return _lines.IsReadOnly; }
-		}
+		public bool IsReadOnly => _lines.IsReadOnly;
 
 		public bool Remove(DiffLine line)
 		{
@@ -307,10 +283,7 @@ namespace gitter.Git
 				_isBinary);
 		}
 
-		object ICloneable.Clone()
-		{
-			return Clone();
-		}
+		object ICloneable.Clone() => Clone();
 
 		#endregion
 	}

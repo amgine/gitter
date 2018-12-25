@@ -53,7 +53,7 @@ namespace gitter.Git.AccessLayer.CLI
 			 * [-q] [-n] [--bare] [--mirror] [-o <name>] [-b <name>] [-u <upload-pack>]
 			 * [--reference <repository>] [--depth <depth>] [--recursive] [--] <repository> [<directory>]
 			*/
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			try
 			{
@@ -76,7 +76,7 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
 		public Task InvokeAsync(CloneRepositoryParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters, true);
 			if(!Directory.Exists(parameters.Path))

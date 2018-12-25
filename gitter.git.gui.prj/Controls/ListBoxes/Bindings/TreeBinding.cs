@@ -66,8 +66,8 @@ namespace gitter.Git.Gui.Controls
 
 		public TreeBinding(CustomListBoxItemsCollection itemHost, TreeDirectory root, bool filesOnly, bool oneLevel)
 		{
-			Verify.Argument.IsNotNull(itemHost, "itemHost");
-			Verify.Argument.IsNotNull(root, "root");
+			Verify.Argument.IsNotNull(itemHost, nameof(itemHost));
+			Verify.Argument.IsNotNull(root, nameof(root));
 
 			_itemHost = itemHost;
 			_root = root;

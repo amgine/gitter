@@ -138,8 +138,7 @@ namespace gitter.Git.AccessLayer.CLI
 			var hash = ReadHash();
 			SkipLine();
 
-			BlameCommit commit;
-			if(cache.TryGetValue(hash, out commit))
+			if(cache.TryGetValue(hash, out var commit))
 			{
 				return commit;
 			}

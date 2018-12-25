@@ -64,7 +64,9 @@ namespace gitter.Git.Gui
 		public void ReleaseColor(int color)
 		{
 			if(color != 0)
+			{
 				_colors[color] = false;
+			}
 		}
 	}
 }

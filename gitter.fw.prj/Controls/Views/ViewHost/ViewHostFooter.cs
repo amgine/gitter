@@ -29,7 +29,7 @@ namespace gitter.Framework.Controls
 
 		internal ViewHostFooter(ViewHost viewHost)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			_viewHost = viewHost;
 			SetStyle(

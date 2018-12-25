@@ -52,9 +52,9 @@ namespace gitter.Framework.Controls
 
 		public ViewDockService(IWorkingEnvironment environment, ViewDockGrid grid, Section section)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
-			Verify.Argument.IsNotNull(grid, "grid");
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
+			Verify.Argument.IsNotNull(grid, nameof(grid));
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			_environment = environment;
 			_grid = grid;
@@ -117,14 +117,14 @@ namespace gitter.Framework.Controls
 
 		public void RegisterFactory(IViewFactory factory)
 		{
-			Verify.Argument.IsNotNull(factory, "factory");
+			Verify.Argument.IsNotNull(factory, nameof(factory));
 
 			_factories.Add(factory.Guid, factory);
 		}
 
 		public void UnregisterFactory(IViewFactory factory)
 		{
-			Verify.Argument.IsNotNull(factory, "factory");
+			Verify.Argument.IsNotNull(factory, nameof(factory));
 
 			UnregisterFactory(factory.Guid);
 		}

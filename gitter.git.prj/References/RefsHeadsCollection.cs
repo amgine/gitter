@@ -41,10 +41,7 @@ namespace gitter.Git
 		/// <param name="branch">Renamed branch.</param>
 		/// <param name="oldName">Old branch name.</param>
 		private void InvokeBranchRenamed(Branch branch, string oldName)
-		{
-			var handler = BranchRenamed;
-			if(handler != null) handler(this, new BranchRenamedEventArgs(branch, oldName));
-		}
+			=> BranchRenamed?.Invoke(this, new BranchRenamedEventArgs(branch, oldName));
 
 		#endregion
 
@@ -112,9 +109,9 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 		public Branch CreateOrphan(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool createRefLog)
 		{
-			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, "name");
-			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, "startingRevision");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
+			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
 
 			return CreateBranchCore(name, startingRevision, tracking, createRefLog, true, true);
@@ -136,9 +133,9 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 		public Branch Create(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool checkout, bool createRefLog)
 		{
-			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, "name");
-			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, "startingRevision");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
+			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
 
 			return CreateBranchCore(name, startingRevision, tracking, createRefLog, checkout, false);
@@ -228,9 +225,9 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to rename <paramref name="branch"/>.</exception>
 		internal void Rename(Branch branch, string name)
 		{
-			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
-			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, "name");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
 
 			string oldName = branch.Name;
@@ -272,7 +269,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to delete <paramref name="branch"/>.</exception>
 		internal void Delete(Branch branch, bool force)
 		{
-			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
@@ -317,7 +314,7 @@ namespace gitter.Git
 		/// <summary>Refresh local branches.</summary>
 		internal void Refresh(IEnumerable<BranchData> branches)
 		{
-			Verify.Argument.IsNotNull(branches, "branches");
+			Verify.Argument.IsNotNull(branches, nameof(branches));
 
 			RefreshInternal(branches);
 		}
@@ -326,7 +323,7 @@ namespace gitter.Git
 		/// <param name="branch">Branch to refresh.</param>
 		internal void Refresh(Branch branch)
 		{
-			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
 
 			var branchData = Repository.Accessor.QueryBranch.Invoke(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
@@ -391,7 +388,7 @@ namespace gitter.Git
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
 		public IList<Branch> GetContaining(IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.Contains, revision.Pointer));
@@ -440,7 +437,7 @@ namespace gitter.Git
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> == <c>null</c>.</exception>
 		protected override string FixInputName(string name)
 		{
-			Verify.Argument.IsNotNull(name, "name");
+			Verify.Argument.IsNotNull(name, nameof(name));
 
 			if(name.StartsWith(GitConstants.LocalBranchPrefix) && !ContainsObjectName(name))
 			{

@@ -52,15 +52,9 @@ namespace gitter.Git.Gui.Views
 
 		#region Properties
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgBlame"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgBlame"];
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
 		private BlameFileBinding BlameFileBinding
 		{

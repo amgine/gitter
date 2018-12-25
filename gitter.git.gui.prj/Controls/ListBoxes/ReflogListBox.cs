@@ -21,13 +21,8 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
 
-	using gitter.Framework;
 	using gitter.Framework.Controls;
-	using gitter.Git.Gui.Dialogs;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -55,7 +50,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			Columns.AddRange(new[]
 				{
-					_colHash			= new HashColumn()				{ IsVisible = true, Abbreviate = true, Width = 58 },
+					_colHash			= new HashColumn()				{ IsVisible = true,  Abbreviate = true, Width = 58 },
 					_colTreeHash		= new TreeHashColumn()			{ IsVisible = false, Abbreviate = true, Width = 58 },
 					_colCommitDate		= new CommitDateColumn()		{ IsVisible = false },
 					_colMessage			= new MessageColumn()			{ IsVisible = true },

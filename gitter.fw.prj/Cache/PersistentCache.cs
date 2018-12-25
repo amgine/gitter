@@ -34,14 +34,14 @@ namespace gitter.Framework
 
 		public PersistentCache(Func<T> onReevaluate)
 		{
-			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
 
 			_onReevaluate = onReevaluate;
 		}
 
 		public PersistentCache(Func<T> onReevaluate, T value)
 		{
-			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
 
 			_onReevaluate = onReevaluate;
 			_value = value;

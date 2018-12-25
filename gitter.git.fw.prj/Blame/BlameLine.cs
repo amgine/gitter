@@ -34,8 +34,8 @@ namespace gitter.Git
 
 		public BlameLine(BlameCommit commit, int number, string text, string ending = LineEnding.Lf)
 		{
-			Verify.Argument.IsNotNull(commit, "commit");
-			Verify.Argument.IsNotNull(text, "text");
+			Verify.Argument.IsNotNull(commit, nameof(commit));
+			Verify.Argument.IsNotNull(text, nameof(text));
 
 			_commit = commit;
 			_text = text;

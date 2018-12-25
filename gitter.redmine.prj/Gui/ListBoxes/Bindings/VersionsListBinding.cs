@@ -44,8 +44,8 @@ namespace gitter.Redmine.Gui.ListBoxes
 
 		public VersionsListBinding(RedmineServiceContext serviceContext, VersionsListBox versionsListBox)
 		{
-			Verify.Argument.IsNotNull(serviceContext, "serviceContext");
-			Verify.Argument.IsNotNull(versionsListBox, "versionsListBox");
+			Verify.Argument.IsNotNull(serviceContext, nameof(serviceContext));
+			Verify.Argument.IsNotNull(versionsListBox, nameof(versionsListBox));
 
 			_serviceContext  = serviceContext;
 			_versionsListBox = versionsListBox;

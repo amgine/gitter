@@ -317,7 +317,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void Parse(ITextSegment textSegment)
 		{
-			Verify.Argument.IsNotNull(textSegment, "textSegment");
+			Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
 
 			while(textSegment.Length > 0)
 			{

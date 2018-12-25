@@ -102,7 +102,7 @@ namespace gitter.Git
 
 		public ConfigurationFile(Repository repository, string fileName, bool load)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_configAccessor = repository.Accessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
@@ -114,7 +114,7 @@ namespace gitter.Git
 
 		private ConfigurationFile(IConfigAccessor configAccessor, ConfigFile configFile, bool load)
 		{
-			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
 
 			_configAccessor = configAccessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
@@ -134,7 +134,7 @@ namespace gitter.Git
 		/// <param name="load">Immediately load file contents.</param>
 		public ConfigurationFile(IConfigAccessor configAccessor, string fileName, bool load)
 		{
-			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
 
 			_configAccessor = configAccessor;
 			_fileName = fileName;
@@ -195,8 +195,8 @@ namespace gitter.Git
 
 		public ConfigParameter CreateParameter(string name, string value)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			lock(SyncRoot)
 			{
@@ -233,7 +233,7 @@ namespace gitter.Git
 
 		internal void Unset(ConfigParameter parameter)
 		{
-			Verify.Argument.IsNotNull(parameter, "parameter");
+			Verify.Argument.IsNotNull(parameter, nameof(parameter));
 
 			switch(_configFile)
 			{

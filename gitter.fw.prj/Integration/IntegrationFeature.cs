@@ -103,7 +103,7 @@ namespace gitter.Framework
 
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			section.SetValue("Enabled", _enabled);
 			SaveMoreTo(section);
@@ -115,7 +115,7 @@ namespace gitter.Framework
 
 		public void LoadFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			IsEnabled = section.GetValue("Enabled", _defaultEnabled);
 			LoadMoreFrom(section);

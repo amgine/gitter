@@ -38,7 +38,7 @@ namespace gitter.Git.Gui.Controls
 		public PatchSourceListItem(IPatchSource patchSource)
 			: base(patchSource)
 		{
-			Verify.Argument.IsNotNull(patchSource, "patchSource");
+			Verify.Argument.IsNotNull(patchSource, nameof(patchSource));
 		}
 
 		#endregion

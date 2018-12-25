@@ -34,13 +34,6 @@ namespace gitter.Git
 	/// <summary>Represents a file in a directory.</summary>
 	public sealed class TreeFile : TreeItem
 	{
-		#region Data
-
-		private ConflictType _conflictType;
-		private long _size;
-
-		#endregion
-
 		#region .ctor
 
 		public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
@@ -51,26 +44,16 @@ namespace gitter.Git
 		public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name, long size)
 			: base(repository, relativePath, parent, status, name)
 		{
-			_size = size;
+			Size = size;
 		}
 
 		#endregion
 
-		public override TreeItemType ItemType
-		{
-			get { return TreeItemType.Blob; }
-		}
+		public override TreeItemType ItemType => TreeItemType.Blob;
 
-		public ConflictType ConflictType
-		{
-			get { return _conflictType; }
-			internal set { _conflictType = value; }
-		}
+		public ConflictType ConflictType { get; internal set; }
 
-		public long Size
-		{
-			get { return _size; }
-		}
+		public long Size { get; }
 
 		public void ResolveConflict(ConflictResolution resolution)
 		{

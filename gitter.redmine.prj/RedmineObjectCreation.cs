@@ -32,7 +32,7 @@ namespace gitter.Redmine
 
 		protected RedmineObjectCreation(RedmineServiceContext context)
 		{
-			Verify.Argument.IsNotNull(context, "context");
+			Verify.Argument.IsNotNull(context, nameof(context));
 
 			_context = context;
 			ResetCore();

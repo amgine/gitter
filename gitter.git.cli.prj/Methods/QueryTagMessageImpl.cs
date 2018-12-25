@@ -92,7 +92,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public string Invoke(QueryTagMessageParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters);
 			var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
@@ -101,7 +101,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Task<string> InvokeAsync(QueryTagMessageParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters);
 			return _commandExecutor

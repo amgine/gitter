@@ -33,7 +33,7 @@ namespace gitter.Git.Gui
 
 		public Notifications(GuiProvider guiProvider)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -65,24 +65,38 @@ namespace gitter.Git.Gui
 
 		private void AttachToRepository(Repository repository)
 		{
-			repository.Remotes.FetchCompleted	+= OnFetchCompleted;
-			repository.Remotes.PullCompleted	+= OnPullCompleted;
-			repository.Remotes.PruneCompleted	+= OnPruneCompleted;
+			Assert.IsNotNull(repository);
+
+			repository.Remotes.FetchCompleted += OnFetchCompleted;
+			repository.Remotes.PullCompleted  += OnPullCompleted;
+			repository.Remotes.PruneCompleted += OnPruneCompleted;
+
+			//repository.Status.Committed += OnCommitted;
 		}
 
 		private void DetachFromRepository(Repository repository)
 		{
-			repository.Remotes.FetchCompleted	-= OnFetchCompleted;
-			repository.Remotes.PullCompleted	-= OnPullCompleted;
-			repository.Remotes.PruneCompleted	-= OnPruneCompleted;
+			Assert.IsNotNull(repository);
+
+			repository.Remotes.FetchCompleted -= OnFetchCompleted;
+			repository.Remotes.PullCompleted  -= OnPullCompleted;
+			repository.Remotes.PruneCompleted -= OnPruneCompleted;
+
+			repository.Status.Committed -= OnCommitted;
 		}
 
 		private void OnFetchCompleted(object sender, FetchCompletedEventArgs e)
 		{
 			if(_guiProvider.Environment.InvokeRequired)
 			{
-				_guiProvider.Environment.BeginInvoke(
-					new Action<FetchCompletedEventArgs>(OnFetchCompleted), new object[] { e }); 
+				try
+				{
+					_guiProvider.Environment.BeginInvoke(
+						new Action<FetchCompletedEventArgs>(OnFetchCompleted), new object[] { e }); 
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -94,8 +108,14 @@ namespace gitter.Git.Gui
 		{
 			if(_guiProvider.Environment.InvokeRequired)
 			{
-				_guiProvider.Environment.BeginInvoke(
-					new Action<PullCompletedEventArgs>(OnPullCompleted), new object[] { e }); 
+				try
+				{
+					_guiProvider.Environment.BeginInvoke(
+						new Action<PullCompletedEventArgs>(OnPullCompleted), new object[] { e }); 
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -107,12 +127,37 @@ namespace gitter.Git.Gui
 		{
 			if(_guiProvider.Environment.InvokeRequired)
 			{
-				_guiProvider.Environment.BeginInvoke(
-					new Action<PruneCompletedEventArgs>(OnPruneCompleted), new object[] { e }); 
+				try
+				{
+					_guiProvider.Environment.BeginInvoke(
+						new Action<PruneCompletedEventArgs>(OnPruneCompleted), new object[] { e }); 
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
 				OnPruneCompleted(e);
+			}
+		}
+
+		private void OnCommitted(object sender, CommitResultEventArgs e)
+		{
+			if(_guiProvider.Environment.InvokeRequired)
+			{
+				try
+				{
+					_guiProvider.Environment.BeginInvoke(
+						new Action<CommitResultEventArgs>(OnCommitted), new object[] { e });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
+			{
+				OnCommitted(e);
 			}
 		}
 
@@ -141,6 +186,15 @@ namespace gitter.Git.Gui
 				Text = e.Remote == null ? Resources.StrPrune : Resources.StrPrune + ": " + e.Remote.Name,
 			};
 			PopupsStack.PushNotification(notification);
+		}
+
+		private void OnCommitted(CommitResultEventArgs e)
+		{
+			var message = e.CommitResult.Message;
+			if(!string.IsNullOrWhiteSpace(message))
+			{
+				PopupsStack.PushNotification(new PlainTextNotificationContent(message) { Text = Resources.StrCommit });
+			}
 		}
 
 		public void Dispose()

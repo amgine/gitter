@@ -32,7 +32,7 @@ namespace gitter.Framework.Controls
 		/// <param name="dockHost"><see cref="ViewHost"/> which is the source of dock markers.</param>
 		public ViewHostDockMarkers(ViewHost dockHost)
 		{
-			Verify.Argument.IsNotNull(dockHost, "dockHost");
+			Verify.Argument.IsNotNull(dockHost, nameof(dockHost));
 
 			_dockHost = dockHost;
 		}

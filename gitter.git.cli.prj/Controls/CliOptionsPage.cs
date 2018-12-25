@@ -46,7 +46,7 @@ namespace gitter.Git
 		public CliOptionsPage(IGitAccessor gitAccessor)
 			: base(Guid)
 		{
-			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 
 			_gitCLI = (GitCLI)gitAccessor;
 

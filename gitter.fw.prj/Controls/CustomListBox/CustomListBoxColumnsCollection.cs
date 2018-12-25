@@ -38,7 +38,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="listBox"/> == <c>null</c>.</exception>
 		internal CustomListBoxColumnsCollection(CustomListBox listBox)
 		{
-			Verify.Argument.IsNotNull(listBox, "listBox");
+			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
 			_listBox = listBox;
 		}
@@ -109,7 +109,7 @@ namespace gitter.Framework.Controls
 
 		public void ShowAll(Predicate<CustomListBoxColumn> predicate)
 		{
-			Verify.Argument.IsNotNull(predicate, "predicate");
+			Verify.Argument.IsNotNull(predicate, nameof(predicate));
 
 			foreach(var c in this)
 			{

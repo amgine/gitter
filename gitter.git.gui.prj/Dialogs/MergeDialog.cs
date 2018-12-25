@@ -238,11 +238,6 @@ namespace gitter.Git.Gui.Dialogs
 		private readonly IList<BranchBase> _unmergedBranches;
 		private TextBoxSpellChecker _speller;
 		private readonly RevisionsInput _revisionsInput;
-		private readonly IUserInputSource<string> _messageInput;
-		private readonly IUserInputSource<bool> _noFastForwardInput;
-		private readonly IUserInputSource<bool> _noCommitInput;
-		private readonly IUserInputSource<bool> _squashInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly IMergeController _controller;
 
 		#endregion
@@ -251,7 +246,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public MergeDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -261,13 +256,13 @@ namespace gitter.Git.Gui.Dialogs
 
 			var inputs = new IUserInputSource[]
 			{
-				_revisionsInput     = new RevisionsInput(_references),
-				_messageInput       = new TextBoxInputSource(_txtMessage),
-				_noFastForwardInput = new CheckBoxInputSource(_chkNoFF),
-				_noCommitInput      = new CheckBoxInputSource(_chkNoCommit),
-				_squashInput        = new CheckBoxInputSource(_chkSquash),
+				_revisionsInput = new RevisionsInput(_references),
+				Message         = new TextBoxInputSource(_txtMessage),
+				NoFastForward   = new CheckBoxInputSource(_chkNoFF),
+				NoCommit        = new CheckBoxInputSource(_chkNoCommit),
+				Squash          = new CheckBoxInputSource(_chkSquash),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			if(SpellingService.Enabled)
 			{
@@ -363,49 +358,25 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrMerge; }
-		}
+		protected override string ActionVerb => Resources.StrMerge;
 
-		public IUserInputSource<IList<IRevisionPointer>> Revisions
-		{
-			get { return _revisionsInput; }
-		}
+		public IUserInputSource<IList<IRevisionPointer>> Revisions => _revisionsInput;
 
-		public IUserInputSource<string> Message
-		{
-			get { return _messageInput; }
-		}
+		public IUserInputSource<string> Message { get; }
 
-		public IUserInputSource<bool> NoFastForward
-		{
-			get { return _noFastForwardInput; }
-		}
+		public IUserInputSource<bool> NoFastForward { get; }
 
-		public IUserInputSource<bool> NoCommit
-		{
-			get { return _noCommitInput; }
-		}
+		public IUserInputSource<bool> NoCommit { get; }
 
-		public IUserInputSource<bool> Squash
-		{
-			get { return _squashInput; }
-		}
+		public IUserInputSource<bool> Squash { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
 		#region IExecutableDialog Members
 
-		public bool Execute()
-		{
-			return _controller.TryMerge();
-		}
+		public bool Execute() => _controller.TryMerge();
 
 		#endregion
 	}

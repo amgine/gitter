@@ -25,16 +25,11 @@ namespace gitter.Framework.Configuration
 	/// <summary>Configuration parameter.</summary>
 	public sealed class Parameter : INamedObject
 	{
+
 		#region Data
 
-		/// <summary>Parameter name.</summary>
-		private readonly string _name;
-		/// <summary>Parameter type.</summary>
-		private Type _type;
 		/// <summary>Parameter value.</summary>
 		private object _value;
-		/// <summary>Parameter modification flag.</summary>
-		private bool _isModified;
 
 		#endregion
 
@@ -44,8 +39,8 @@ namespace gitter.Framework.Configuration
 		/// <param name="value">Parameter value.</param>
 		public Parameter(string name, Type type, object value)
 		{
-			_name = name;
-			_type = type;
+			Name = name;
+			Type = type;
 			_value = value;
 		}
 
@@ -53,17 +48,11 @@ namespace gitter.Framework.Configuration
 
 		/// <summary>Gets parameter name.</summary>
 		/// <value>Parameter name.</value>
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		/// <summary>Gets parameter type.</summary>
 		/// <value>Parameter type.</value>
-		public Type Type
-		{
-			get { return _type; }
-		}
+		public Type Type { get; }
 
 		/// <summary>Gets or sets parameter value.</summary>
 		/// <value>Parameter value.</value>
@@ -73,16 +62,13 @@ namespace gitter.Framework.Configuration
 			set
 			{
 				_value = value;
-				_isModified = true;
+				IsModified = true;
 			}
 		}
 
 		/// <summary>Gets a value indicating whether this parameter is modified.</summary>
 		/// <value><c>true</c> if this parameter is modified; otherwise, <c>false</c>.</value>
-		public bool IsModified
-		{
-			get { return _isModified; }
-		}
+		public bool IsModified { get; private set; }
 
 		#endregion
 
@@ -95,7 +81,7 @@ namespace gitter.Framework.Configuration
 		public override string ToString()
 		{
 			return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-				"{0} = {1}", _name, _value);
+				"{0} = {1}", Name, _value);
 		}
 	}
 }

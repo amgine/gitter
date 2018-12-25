@@ -67,7 +67,7 @@ namespace gitter.Framework.Controls
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_viewRenderer != value)
 				{

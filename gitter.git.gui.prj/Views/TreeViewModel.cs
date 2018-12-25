@@ -22,27 +22,18 @@ namespace gitter.Git.Gui.Views
 {
 	public class TreeViewModel
 	{
-		#region Data
-
-		private readonly ITreeSource _treeSource;
-
-		#endregion
-
 		#region .ctor
 
 		public TreeViewModel(ITreeSource treeSource)
 		{
-			_treeSource = treeSource;
+			TreeSource = treeSource;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public ITreeSource TreeSource
-		{
-			get { return _treeSource; }
-		}
+		public ITreeSource TreeSource { get; }
 
 		#endregion
 

@@ -27,22 +27,15 @@ namespace gitter.Git
 	/// <summary>Dynamic revision pointer.</summary>
 	internal sealed class DynamicRevisionPointer : IRevisionPointer
 	{
-		#region Data
-
-		private readonly Repository _repository;
-		private readonly string _pointer;
-
-		#endregion
-
 		#region .ctor
 
 		public DynamicRevisionPointer(Repository repository, string pointer)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNeitherNullNorWhitespace(pointer, "pointer");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNeitherNullNorWhitespace(pointer, nameof(pointer));
 
-			_repository = repository;
-			_pointer = pointer;
+			Repository = repository;
+			Pointer    = pointer;
 		}
 
 		#endregion
@@ -50,34 +43,19 @@ namespace gitter.Git
 		#region Properties
 
 		/// <summary>Host repository. Never null.</summary>
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
 		/// <summary><see cref="ReferenceType"/>.</summary>
-		public ReferenceType Type
-		{
-			get { return ReferenceType.Revision; }
-		}
+		public ReferenceType Type => ReferenceType.Revision;
 
 		/// <summary>Revision expression (reference name, sha1, relative expression, etc.).</summary>
-		public string Pointer
-		{
-			get { return _pointer; }
-		}
+		public string Pointer { get; }
 
 		/// <summary>Returns full non-ambiguous revision name.</summary>
-		public string FullName
-		{
-			get { return _pointer; }
-		}
+		public string FullName => Pointer;
 
 		/// <summary>Object is deleted and not valid anymore.</summary>
-		public bool IsDeleted
-		{
-			get { return false; }
-		}
+		public bool IsDeleted => false;
 
 		#endregion
 
@@ -87,11 +65,11 @@ namespace gitter.Git
 		/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
 		public Revision Dereference()
 		{
-			var rev = _repository.Accessor.Dereference.Invoke(
-				new DereferenceParameters(_pointer));
-			lock(_repository.Revisions.SyncRoot)
+			var rev = Repository.Accessor.Dereference.Invoke(
+				new DereferenceParameters(Pointer));
+			lock(Repository.Revisions.SyncRoot)
 			{
-				return _repository.Revisions.GetOrCreateRevision(rev.SHA1);
+				return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
 			}
 		}
 

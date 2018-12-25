@@ -22,27 +22,18 @@ namespace gitter.Git.Gui.Views
 {
 	public class ReflogViewModel
 	{
-		#region Data
-
-		private readonly Reflog _reflog;
-
-		#endregion
-
 		#region .ctor
 
 		public ReflogViewModel(Reflog reflog)
 		{
-			_reflog = reflog;
+			Reflog = reflog;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Reflog Reflog
-		{
-			get { return _reflog; }
-		}
+		public Reflog Reflog { get; }
 
 		#endregion
 

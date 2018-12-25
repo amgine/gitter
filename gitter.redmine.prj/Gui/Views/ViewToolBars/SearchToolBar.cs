@@ -47,7 +47,7 @@ namespace gitter.Redmine.Gui
 
 		protected SearchToolBar(TView view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			_view = view;
 

@@ -54,7 +54,7 @@ namespace gitter.Framework.Controls
 
 		protected ExtenderBase(CustomListBoxColumn column)
 		{
-			Verify.Argument.IsNotNull(column, "column");
+			Verify.Argument.IsNotNull(column, nameof(column));
 
 			_column = column;
 

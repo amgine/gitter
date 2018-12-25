@@ -36,7 +36,6 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private readonly Repository _repository;
 		private FilesToAddBinding _dataBinding;
 
 		#endregion
@@ -47,9 +46,9 @@ namespace gitter.Git.Gui.Dialogs
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
 		public StageDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 
@@ -76,10 +75,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
 		private FilesToAddBinding DataBinding
 		{
@@ -97,10 +93,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrStage; }
-		}
+		protected override string ActionVerb => Resources.StrStage;
 
 		public string Pattern
 		{

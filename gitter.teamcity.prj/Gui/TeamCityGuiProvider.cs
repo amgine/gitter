@@ -54,7 +54,7 @@ namespace gitter.TeamCity.Gui
 
 		public void AttachToEnvironment(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_repositoryExplorer = new RepositoryExplorer(environment, this);
 			environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
@@ -62,7 +62,7 @@ namespace gitter.TeamCity.Gui
 
 		public void DetachFromEnvironment(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			var views1 = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();
 			foreach(var view in views1) view.Close();

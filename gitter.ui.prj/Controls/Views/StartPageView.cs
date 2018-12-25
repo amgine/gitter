@@ -51,7 +51,7 @@ namespace gitter
 		public StartPageView(IWorkingEnvironment environment, StartPageViewFactory factory)
 			: base(Guids.StartPageView, environment)
 		{
-			Verify.Argument.IsNotNull(factory, "factory");
+			Verify.Argument.IsNotNull(factory, nameof(factory));
 			
 			InitializeComponent();
 

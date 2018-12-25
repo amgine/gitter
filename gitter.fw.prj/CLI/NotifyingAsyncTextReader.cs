@@ -34,11 +34,7 @@ namespace gitter.Framework.CLI
 
 		public event EventHandler<TextLineReceivedEventArgs> TextLineReceived;
 
-		private void OnTextLineReceived(string text)
-		{
-			var handler = TextLineReceived;
-			if(handler != null) handler(this, new TextLineReceivedEventArgs(text));
-		}
+		private void OnTextLineReceived(string text) => TextLineReceived?.Invoke(this, new TextLineReceivedEventArgs(text));
 
 		private void OnTextLineReceived(char[] buffer, int startIndex, int count)
 		{

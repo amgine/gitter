@@ -38,8 +38,8 @@ namespace gitter.Git
 
 		public RevisionTreeSource(IRevisionPointer revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
-			Verify.Argument.IsFalse(revision.IsDeleted, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
+			Verify.Argument.IsFalse(revision.IsDeleted, nameof(revision));
 
 			_revision = revision;
 		}
@@ -48,10 +48,7 @@ namespace gitter.Git
 
 		#region Properties
 
-		public override IRevisionPointer Revision
-		{
-			get { return _revision; }
-		}
+		public override IRevisionPointer Revision => _revision;
 
 		protected override Tree GetTreeCore()
 		{
@@ -109,10 +106,7 @@ namespace gitter.Git
 		/// <returns>
 		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
 		/// </returns>
-		public override int GetHashCode()
-		{
-			return _revision.GetHashCode();
-		}
+		public override int GetHashCode() => _revision.GetHashCode();
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.
@@ -120,10 +114,7 @@ namespace gitter.Git
 		/// <returns>
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
-		public override string ToString()
-		{
-			return _revision.Pointer;
-		}
+		public override string ToString() => _revision.Pointer;
 
 		#endregion
 	}

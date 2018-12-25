@@ -39,7 +39,7 @@ namespace gitter.Git.Gui
 
 		public MainGitMenus(GuiProvider guiProvider)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 
@@ -107,20 +107,11 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public IEnumerable<ToolStripMenuItem> Menus
-		{
-			get { return _menus; }
-		}
+		public IEnumerable<ToolStripMenuItem> Menus => _menus;
 
-		public IEnumerable<ToolStripMenuItem> ViewMenuItems
-		{
-			get { return _viewMenuItems; }
-		}
+		public IEnumerable<ToolStripMenuItem> ViewMenuItems => _viewMenuItems;
 
-		public GuiProvider Gui
-		{
-			get { return _guiProvider; }
-		}
+		public GuiProvider Gui => _guiProvider;
 
 		//private void OnCheckoutClick(object sender, EventArgs e)
 		//{

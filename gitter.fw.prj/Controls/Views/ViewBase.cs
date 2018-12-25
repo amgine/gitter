@@ -90,7 +90,7 @@ namespace gitter.Framework.Controls
 		public ViewBase(Guid guid, IWorkingEnvironment environment)
 			: this()
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_guid        = guid;
 			_environment = environment;
@@ -254,7 +254,7 @@ namespace gitter.Framework.Controls
 
 		protected void AddTopToolStrip(ToolStrip toolStrip)
 		{
-			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, nameof(toolStrip));
 
 			toolStrip.GripStyle = ToolStripGripStyle.Hidden;
 			toolStrip.Stretch = true;
@@ -280,7 +280,7 @@ namespace gitter.Framework.Controls
 
 		protected void AddBottomToolStrip(ToolStrip toolStrip)
 		{
-			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, nameof(toolStrip));
 
 			toolStrip.GripStyle = ToolStripGripStyle.Hidden;
 			toolStrip.Stretch = true;
@@ -309,7 +309,7 @@ namespace gitter.Framework.Controls
 
 		protected void RemoveToolStrip(ToolStrip toolStrip)
 		{
-			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, nameof(toolStrip));
 			Verify.Argument.IsTrue(toolStrip.Parent == this, "toolStrip", "ToolStrip is not hosted in this " + GetType().Name + ".");
 
 			var dock = toolStrip.Dock;
@@ -394,7 +394,7 @@ namespace gitter.Framework.Controls
 
 		public void SaveViewTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			SaveMoreViewTo(section);
 		}
@@ -405,7 +405,7 @@ namespace gitter.Framework.Controls
 
 		public void LoadViewFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			LoadMoreViewFrom(section);
 		}

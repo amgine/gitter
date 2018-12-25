@@ -30,29 +30,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class CloneController : ViewControllerBase<ICloneView>, ICloneController
 	{
-		#region Data
-
-		private readonly IGitRepositoryProvider _gitRepositoryProvider;
-
-		#endregion
-
 		#region .ctor
 
 		public CloneController(IGitRepositoryProvider gitRepositoryProvider)
 		{
-			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
+			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
 
-			_gitRepositoryProvider = gitRepositoryProvider;
+			GitRepositoryProvider = gitRepositoryProvider;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private IGitRepositoryProvider GitRepositoryProvider
-		{
-			get { return _gitRepositoryProvider; }
-		}
+		private IGitRepositoryProvider GitRepositoryProvider { get; }
 
 		#endregion
 

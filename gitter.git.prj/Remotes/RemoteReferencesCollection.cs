@@ -39,41 +39,26 @@ namespace gitter.Git
 		public event EventHandler<RemoteReferenceEventArgs> BranchDeleted;
 
 		private void InvokeTagDeleted(RemoteRepositoryTag tag)
-		{
-			var handler = TagDeleted;
-			if(handler != null) handler(this, new RemoteReferenceEventArgs(tag));
-		}
+			=> TagDeleted?.Invoke(this, new RemoteReferenceEventArgs(tag));
 
 		private void InvokeBranchDeleted(RemoteRepositoryBranch branch)
-		{
-			var handler = BranchDeleted;
-			if(handler != null) handler(this, new RemoteReferenceEventArgs(branch));
-		}
+			=> BranchDeleted?.Invoke(this, new RemoteReferenceEventArgs(branch));
 
 		public event EventHandler<RemoteReferenceEventArgs> TagCreated;
 		public event EventHandler<RemoteReferenceEventArgs> BranchCreated;
 
 		private void InvokeTagCreated(RemoteRepositoryTag tag)
-		{
-			var handler = TagCreated;
-			if(handler != null) handler(this, new RemoteReferenceEventArgs(tag));
-		}
+			=> TagCreated?.Invoke(this, new RemoteReferenceEventArgs(tag));
 
 		private void InvokeBranchCreated(RemoteRepositoryBranch branch)
-		{
-			var handler = BranchCreated;
-			if(handler != null) handler(this, new RemoteReferenceEventArgs(branch));
-		}
+			=> BranchCreated?.Invoke(this, new RemoteReferenceEventArgs(branch));
 
 		#endregion
 
 		#region Data
 
-		private readonly Repository _repository;
-		private readonly Remote _remote;
 		private readonly Dictionary<string, RemoteRepositoryBranch> _remoteBranches;
 		private readonly Dictionary<string, RemoteRepositoryTag> _remoteTags;
-		private readonly object _syncRoot;
 
 		#endregion
 
@@ -81,53 +66,32 @@ namespace gitter.Git
 
 		internal RemoteReferencesCollection(Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
 
-			_remote         = remote;
-			_repository     = remote.Repository;
+			Remote          = remote;
+			Repository      = remote.Repository;
 			_remoteBranches = new Dictionary<string, RemoteRepositoryBranch>();
 			_remoteTags     = new Dictionary<string, RemoteRepositoryTag>();
-			_syncRoot       = new object();
+			SyncRoot        = new object();
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		public IEnumerable<RemoteRepositoryBranch> Branches
-		{
-			get { return _remoteBranches.Values; }
-		}
+		public IEnumerable<RemoteRepositoryBranch> Branches => _remoteBranches.Values;
 
-		public int BranchCount
-		{
-			get { return _remoteBranches.Count; }
-		}
+		public int BranchCount => _remoteBranches.Count;
 
-		public IEnumerable<RemoteRepositoryTag> Tags
-		{
-			get { return _remoteTags.Values; }
-		}
+		public IEnumerable<RemoteRepositoryTag> Tags => _remoteTags.Values;
 
-		public int TagCount
-		{
-			get { return _remoteTags.Count; }
-		}
+		public int TagCount => _remoteTags.Count;
 
-		public Remote Remote
-		{
-			get { return _remote; }
-		}
+		public Remote Remote { get; }
 
-		public object SyncRoot
-		{
-			get { return _syncRoot; }
-		}
+		public object SyncRoot { get; }
 
 		#endregion
 
@@ -135,17 +99,17 @@ namespace gitter.Git
 
 		private RemoveRemoteReferencesParameters GetRemoveRemoteReferenceParameters(BaseRemoteReference remoteReference)
 		{
-			return new RemoveRemoteReferencesParameters(_remote.Name, remoteReference.FullName);
+			return new RemoveRemoteReferencesParameters(Remote.Name, remoteReference.FullName);
 		}
 
 		internal void RemoveTag(RemoteRepositoryTag tag)
 		{
-			Verify.Argument.IsNotNull(tag, "tag");
-			Verify.Argument.IsFalse(tag.IsDeleted, "tag",
+			Verify.Argument.IsNotNull(tag, nameof(tag));
+			Verify.Argument.IsFalse(tag.IsDeleted, nameof(tag),
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
 
 			var parameters = GetRemoveRemoteReferenceParameters(tag);
-			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
+			Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
 
 			_remoteTags.Remove(tag.Name);
 			tag.MarkAsDeleted();
@@ -154,12 +118,12 @@ namespace gitter.Git
 
 		internal Task RemoveTagAsync(RemoteRepositoryTag tag, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(tag, "tag");
-			Verify.Argument.IsFalse(tag.IsDeleted, "tag",
+			Verify.Argument.IsNotNull(tag, nameof(tag));
+			Verify.Argument.IsFalse(tag.IsDeleted, nameof(tag),
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
 
 			var parameters = GetRemoveRemoteReferenceParameters(tag);
-			return _remote.Repository.Accessor
+			return Remote.Repository.Accessor
 				.RemoveRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
 				t =>
@@ -176,12 +140,12 @@ namespace gitter.Git
 
 		internal void RemoveBranch(RemoteRepositoryBranch branch)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
-			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+			Verify.Argument.IsNotNull(branch, nameof(branch));
+			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
 
 			var parameters = GetRemoveRemoteReferenceParameters(branch);
-			_remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
+			Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
 
 			_remoteBranches.Remove(branch.Name);
 			branch.MarkAsDeleted();
@@ -190,12 +154,12 @@ namespace gitter.Git
 
 		internal Task RemoveBranchAsync(RemoteRepositoryBranch branch, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
-			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+			Verify.Argument.IsNotNull(branch, nameof(branch));
+			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
 				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
 
 			var parameters = GetRemoveRemoteReferenceParameters(branch);
-			return _remote.Repository.Accessor
+			return Remote.Repository.Accessor
 				.RemoveRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
 				t =>
@@ -212,7 +176,7 @@ namespace gitter.Git
 
 		private QueryRemoteReferencesParameters GetQueryParameters()
 		{
-			return new QueryRemoteReferencesParameters(_remote.Name, true, true);
+			return new QueryRemoteReferencesParameters(Remote.Name, true, true);
 		}
 
 		private void OnFetchCompleted(IList<RemoteReferenceData> refs)

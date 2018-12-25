@@ -27,26 +27,21 @@ namespace gitter.Git
 	/// <summary>Feature which is available in specified version of git.</summary>
 	public sealed class VersionFeature : GitFeature
 	{
-		private readonly Version _version;
-
 		public VersionFeature(string name, Version version)
 			: base(name)
 		{
-			Verify.Argument.IsNotNull(version, "version");
+			Verify.Argument.IsNotNull(version, nameof(version));
 
-			_version = version;
+			RequiredVersion = version;
 		}
 
-		public Version RequiredVersion
-		{
-			get { return _version; }
-		}
+		public Version RequiredVersion { get; }
 
 		public override bool IsAvailableFor(IGitAccessor gitAccessor)
 		{
-			Verify.Argument.IsNotNull(gitAccessor, "gitAccessor");
+			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 
-			return gitAccessor.GitVersion >= _version;
+			return gitAccessor.GitVersion >= RequiredVersion;
 		}
 	}
 }

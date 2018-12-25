@@ -53,7 +53,7 @@ namespace gitter.Git.Gui.Views
 
 		public DiffToolbar(DiffView diffView)
 		{
-			Verify.Argument.IsNotNull(diffView, "diffView");
+			Verify.Argument.IsNotNull(diffView, nameof(diffView));
 
 			_diffView = diffView;
 

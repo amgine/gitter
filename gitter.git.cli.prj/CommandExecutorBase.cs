@@ -41,7 +41,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		protected CommandExecutorBase(ICliOptionsProvider cliOptionsProvider)
 		{
-			Verify.Argument.IsNotNull(cliOptionsProvider, "cliOptionsProvider");
+			Verify.Argument.IsNotNull(cliOptionsProvider, nameof(cliOptionsProvider));
 
 			_cliOptionsProvider = cliOptionsProvider;
 		}
@@ -168,28 +168,28 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Task<GitOutput> ExecuteCommandAsync(Command command, CommandExecutionFlags flags, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(command, "command");
+			Verify.Argument.IsNotNull(command, nameof(command));
 
 			return ExecuteCommandAsyncCore(command, GitProcess.DefaultEncoding, flags, cancellationToken);
 		}
 
 		public Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(command, "command");
+			Verify.Argument.IsNotNull(command, nameof(command));
 
 			return ExecuteCommandAsyncCore(command, encoding, flags, cancellationToken);
 		}
 
 		public Task<int> ExecuteCommandAsync(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(command, "command");
+			Verify.Argument.IsNotNull(command, nameof(command));
 
 			return ExecuteCommandAsyncCore(command, GitProcess.DefaultEncoding, stdOutReceiver, stdErrReceiver, flags, cancellationToken);
 		}
 
 		public Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(command, "command");
+			Verify.Argument.IsNotNull(command, nameof(command));
 
 			return ExecuteCommandAsyncCore(command, encoding, stdOutReceiver, stdErrReceiver, flags, cancellationToken);
 		}

@@ -37,7 +37,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public ConflictsDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -182,14 +182,8 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrClose; }
-		}
+		protected override string ActionVerb => Resources.StrClose;
 
-		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.Ok; }
-		}
+		public override DialogButtons OptimalButtons => DialogButtons.Ok;
 	}
 }

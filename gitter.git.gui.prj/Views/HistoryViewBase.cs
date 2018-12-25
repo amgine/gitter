@@ -37,12 +37,10 @@ namespace gitter.Git.Gui.Views
 	{
 		#region Data
 
-		private RevisionListBox _lstRevisions;
 		private ILogSource _logSource;
 		private LogOptions _options;
 		private RevisionLogBinding _dataSource;
 		private HistorySearchToolBar<HistoryViewBase> _searchToolbar;
-		private ISearch<HistorySearchOptions> _search;
 		private bool _showDetails;
 
 		#endregion
@@ -58,10 +56,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected virtual void OnLogOptionsChanged()
-		{
-			var handler = (EventHandler)Events[LogOptionsChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[LogOptionsChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 		private static readonly object ShowDetailsChangedEvent = new object();
 
@@ -72,10 +67,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected virtual void OnShowDetailsChanged()
-		{
-			var handler = (EventHandler)Events[ShowDetailsChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[ShowDetailsChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -85,7 +77,7 @@ namespace gitter.Git.Gui.Views
 			: base(guid, gui)
 		{
 			SuspendLayout();
-			_lstRevisions = new RevisionListBox
+			RevisionListBox = new RevisionListBox
 			{
 				BorderStyle		= BorderStyle.None,
 				Dock			= DockStyle.Fill,
@@ -94,14 +86,14 @@ namespace gitter.Git.Gui.Views
 				Multiselect		= true,
 				Text			= Resources.StrsNoCommitsToDisplay,
 			};
-			_lstRevisions.SelectionChanged += OnSelectionChanged;
-			_lstRevisions.ItemActivated += OnItemActivated;
+			RevisionListBox.SelectionChanged += OnSelectionChanged;
+			RevisionListBox.ItemActivated += OnItemActivated;
 			AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-			Controls.Add(_lstRevisions);
+			Controls.Add(RevisionListBox);
 			ResumeLayout(false);
 			PerformLayout();
 			_showDetails = true;
-			_search = new HistorySearch<HistorySearchOptions>(_lstRevisions);
+			Search = new HistorySearch<HistorySearchOptions>(RevisionListBox);
 			_options = new LogOptions();
 			_options.Changed += OnLogOptionsChanged;
 		}
@@ -112,15 +104,9 @@ namespace gitter.Git.Gui.Views
 
 		/// <summary>Returns a value indicating whether this instance is a document.</summary>
 		/// <value><c>true</c> if this instance is a document; otherwise, <c>false</c>.</value>
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
-		protected RevisionListBox RevisionListBox
-		{
-			get { return _lstRevisions; }
-		}
+		protected RevisionListBox RevisionListBox { get; }
 
 		protected ILogSource LogSource
 		{
@@ -147,7 +133,7 @@ namespace gitter.Git.Gui.Views
 			get { return _options; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_options != value)
 				{
@@ -187,8 +173,8 @@ namespace gitter.Git.Gui.Views
 		{
 			get
 			{
-				if(_lstRevisions.SelectedItems.Count == 0) return null;
-				var item = _lstRevisions.SelectedItems[0] as RevisionListItem;
+				if(RevisionListBox.SelectedItems.Count == 0) return null;
+				var item = RevisionListBox.SelectedItems[0] as RevisionListItem;
 				if(item == null) return null;
 				return item.DataContext;
 			}
@@ -260,10 +246,7 @@ namespace gitter.Git.Gui.Views
 
 		#region ISearchableView<HistorySearchOptions>
 
-		public ISearch<HistorySearchOptions> Search
-		{
-			get { return _search; }
-		}
+		public ISearch<HistorySearchOptions> Search { get; }
 
 		public bool SearchToolBarVisible
 		{

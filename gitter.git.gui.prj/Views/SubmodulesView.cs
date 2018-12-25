@@ -65,10 +65,7 @@ namespace gitter.Git.Gui.Views
 			base.DetachFromRepository(repository);
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgSubmodule"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgSubmodule"];
 
 		public override void RefreshContent()
 		{

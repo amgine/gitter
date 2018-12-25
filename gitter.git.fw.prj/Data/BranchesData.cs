@@ -25,34 +25,21 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class BranchesData
 	{
-		#region Data
-
-		private readonly IList<BranchData> _heads;
-		private readonly IList<BranchData> _remotes;
-
-		#endregion
-
 		#region .ctor
 
 		public BranchesData(IList<BranchData> heads, IList<BranchData> remotes)
 		{
-			_heads = heads;
-			_remotes = remotes;
+			Heads   = heads;
+			Remotes = remotes;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public IList<BranchData> Heads
-		{
-			get { return _heads; }
-		}
+		public IList<BranchData> Heads { get; }
 
-		public IList<BranchData> Remotes
-		{
-			get { return _remotes; }
-		}
+		public IList<BranchData> Remotes { get; }
 
 		#endregion
 	}

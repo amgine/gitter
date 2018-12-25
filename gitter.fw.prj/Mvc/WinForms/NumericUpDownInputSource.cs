@@ -37,8 +37,8 @@ namespace gitter.Framework.Mvc.WinForms
 		public NumericUpDownInputSource(NumericUpDown numericUpDown, Converter<decimal, T> convert, Converter<T, decimal> convertBack)
 			: base(numericUpDown)
 		{
-			Verify.Argument.IsNotNull(convert, "convert");
-			Verify.Argument.IsNotNull(convertBack, "convertBack");
+			Verify.Argument.IsNotNull(convert, nameof(convert));
+			Verify.Argument.IsNotNull(convertBack, nameof(convertBack));
 
 			_convert = convert;
 			_convertBack = convertBack;

@@ -49,9 +49,9 @@ namespace gitter.Git.Gui.Dialogs
 			Version requiredVersion,
 			Version installedVersion)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
-			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
-			Verify.Argument.IsNotNull(requiredVersion, "requiredVersion");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
+			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
+			Verify.Argument.IsNotNull(requiredVersion, nameof(requiredVersion));
 
 			_environment = environment;
 			_gitRepositoryProvider = gitRepositoryProvider;

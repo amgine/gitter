@@ -47,7 +47,7 @@ namespace gitter.Git.Gui.Controls
 
 		public RemoteListBox(params CustomListBoxColumn[] columns)
 		{
-			Verify.Argument.IsNotNull(columns, "columns");
+			Verify.Argument.IsNotNull(columns, nameof(columns));
 
 			Columns.AddRange(columns);
 		}

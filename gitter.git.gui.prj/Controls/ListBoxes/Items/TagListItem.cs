@@ -45,7 +45,7 @@ namespace gitter.Git.Gui.Controls
 		public TagListItem(Tag tag)
 			: base(tag)
 		{
-			Verify.Argument.IsNotNull(tag, "tag");
+			Verify.Argument.IsNotNull(tag, nameof(tag));
 		}
 
 		#endregion

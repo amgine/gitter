@@ -26,8 +26,6 @@ namespace gitter.Git.Gui
 	using System.Diagnostics;
 	using System.Collections.Generic;
 	using System.Text;
-	using System.Threading;
-	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -47,7 +45,7 @@ namespace gitter.Git.Gui
 		public static T GetViewReflogItem<T>(Reference reference)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(reference, "reference");
+			Verify.Argument.IsValidGitObject(reference, nameof(reference));
 
 			var item = new T()
 			{
@@ -63,7 +61,7 @@ namespace gitter.Git.Gui
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeFile file)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(file, "file");
+			Verify.Argument.IsValidGitObject(file, nameof(file));
 
 			return GetCheckoutPathItem<T>(revision, file.RelativePath);
 		}
@@ -71,7 +69,7 @@ namespace gitter.Git.Gui
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeCommit commit)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(commit, "commit");
+			Verify.Argument.IsValidGitObject(commit, nameof(commit));
 
 			return GetCheckoutPathItem<T>(revision, commit.RelativePath);
 		}
@@ -79,7 +77,7 @@ namespace gitter.Git.Gui
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeDirectory directory)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(directory, "directory");
+			Verify.Argument.IsValidGitObject(directory, nameof(directory));
 
 			return GetCheckoutPathItem<T>(revision, directory.RelativePath + "/");
 		}
@@ -87,8 +85,8 @@ namespace gitter.Git.Gui
 		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, string path)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
 
 			var item = new T()
 			{
@@ -103,7 +101,7 @@ namespace gitter.Git.Gui
 		public static T GetCheckoutRevisionItem<T>(Repository repository, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -118,7 +116,7 @@ namespace gitter.Git.Gui
 		public static T GetCheckoutRevisionItem<T>(IRevisionPointer revision, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			bool enabled = true;
 			var head = revision.Repository.Head.Pointer;
@@ -151,7 +149,7 @@ namespace gitter.Git.Gui
 		public static T GetRevertItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			bool isEnabled	= !revision.Repository.IsEmpty;
 			bool isMerge	= revision.Dereference().Parents.Count > 1;
@@ -177,7 +175,7 @@ namespace gitter.Git.Gui
 		public static T GetRevertItem<T>(IEnumerable<IRevisionPointer> revisions)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointerSequence(revisions, "revisions");
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
 
 			var item = new T()
 			{
@@ -192,7 +190,7 @@ namespace gitter.Git.Gui
 		public static T GetResetItem<T>(Repository repository, ResetMode resetModes = ResetMode.Mixed | ResetMode.Hard)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -207,7 +205,7 @@ namespace gitter.Git.Gui
 		public static T GetResetHeadHereItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var currentBranch = revision.Repository.Head.CurrentBranch;
 			var item = new T()
@@ -225,7 +223,7 @@ namespace gitter.Git.Gui
 		public static T GetRebaseHeadHereItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var currentBranch = revision.Repository.Head.CurrentBranch;
 			var item = new T()
@@ -243,7 +241,7 @@ namespace gitter.Git.Gui
 		public static T GetCherryPickItem<T>(IRevisionPointer revision, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			bool isEnabled	= !revision.Repository.IsEmpty;
 			bool isMerge	= revision.Dereference().Parents.Count > 1;
@@ -269,7 +267,7 @@ namespace gitter.Git.Gui
 		public static T GetCherryPickItem<T>(IEnumerable<IRevisionPointer> revisions)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointerSequence(revisions, "revisions");
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
 
 			var item = new T()
 			{
@@ -284,7 +282,7 @@ namespace gitter.Git.Gui
 		public static T GetSavePatchItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
@@ -299,7 +297,7 @@ namespace gitter.Git.Gui
 		public static T GetArchiveItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
@@ -829,7 +827,7 @@ namespace gitter.Git.Gui
 		public static T GetRefreshStashItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -844,7 +842,7 @@ namespace gitter.Git.Gui
 		public static T GetStashClearItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -859,7 +857,7 @@ namespace gitter.Git.Gui
 		public static T GetStashPopItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -875,7 +873,7 @@ namespace gitter.Git.Gui
 		public static T GetStashPopItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, nameof(stashedState));
 
 			var item = new T()
 			{
@@ -891,7 +889,7 @@ namespace gitter.Git.Gui
 		public static T GetStashApplyItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -907,7 +905,7 @@ namespace gitter.Git.Gui
 		public static T GetStashApplyItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, nameof(stashedState));
 
 			var item = new T()
 			{
@@ -923,7 +921,7 @@ namespace gitter.Git.Gui
 		public static T GetStashDropItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, nameof(stashedState));
 
 			var item = new T()
 			{
@@ -939,7 +937,7 @@ namespace gitter.Git.Gui
 		public static T GetStashDropItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -955,7 +953,7 @@ namespace gitter.Git.Gui
 		public static T GetStashToBranchItem<T>(StashedState stashedState)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, nameof(stashedState));
 
 			var item = new T()
 			{
@@ -971,7 +969,7 @@ namespace gitter.Git.Gui
 		public static T GetStashSaveKeepIndexItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -988,7 +986,7 @@ namespace gitter.Git.Gui
 		public static T GetStashSaveItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1122,7 +1120,7 @@ namespace gitter.Git.Gui
 		public static T GetAddNoteItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
@@ -1154,7 +1152,7 @@ namespace gitter.Git.Gui
 		public static T GetCreateBranchItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1171,7 +1169,7 @@ namespace gitter.Git.Gui
 		{
 			if(revision != null)
 			{
-				Verify.Argument.IsValidRevisionPointer(revision, "revision");
+				Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 			}
 
 			var item = new T()
@@ -1193,7 +1191,7 @@ namespace gitter.Git.Gui
 		public static T GetRemoveBranchItem<T>(BranchBase branch, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(branch, "branch");
+			Verify.Argument.IsValidGitObject(branch, nameof(branch));
 
 			var item = new T()
 			{
@@ -1209,7 +1207,7 @@ namespace gitter.Git.Gui
 		public static T GetRenameBranchItem<T>(Branch branch, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(branch, "branch");
+			Verify.Argument.IsValidGitObject(branch, nameof(branch));
 
 			var item = new T()
 			{
@@ -1224,7 +1222,7 @@ namespace gitter.Git.Gui
 		public static T GetMergeItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
@@ -1240,8 +1238,8 @@ namespace gitter.Git.Gui
 		public static T GetPushBranchToRemoteItem<T>(Branch branch, Remote remote)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(branch, "branch");
-			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsValidGitObject(branch, nameof(branch));
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 
 			var item = new T()
 			{
@@ -1461,7 +1459,7 @@ namespace gitter.Git.Gui
 		public static T GetCreateTagItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1478,7 +1476,7 @@ namespace gitter.Git.Gui
 		{
 			if(revision != null)
 			{
-				Verify.Argument.IsValidRevisionPointer(revision, "revision");
+				Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 			}
 			
 			var item = new T()
@@ -1494,7 +1492,7 @@ namespace gitter.Git.Gui
 		public static T GetRemoveTagItem<T>(Tag tag, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(tag, "tag");
+			Verify.Argument.IsValidGitObject(tag, nameof(tag));
 
 			var item = new T()
 			{
@@ -1561,7 +1559,7 @@ namespace gitter.Git.Gui
 		public static T GetEditRemotePropertiesItem<T>(Remote remote)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 
 			var item = new T()
 			{
@@ -1576,7 +1574,7 @@ namespace gitter.Git.Gui
 		public static T GetShowRemoteItem<T>(Remote remote)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 
 			var item = new T()
 			{
@@ -1597,7 +1595,7 @@ namespace gitter.Git.Gui
 		public static T GetFetchItem<T>(Repository repository, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 			
 			var item = new T()
 			{
@@ -1613,7 +1611,7 @@ namespace gitter.Git.Gui
 		public static T GetFetchFromItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 			
 			var item = new T()
 			{
@@ -1634,7 +1632,7 @@ namespace gitter.Git.Gui
 		public static T GetPullItem<T>(Repository repository, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1650,8 +1648,8 @@ namespace gitter.Git.Gui
 		public static T GetPullFromItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
-			Verify.Argument.IsNotNull(nameFormat, "nameFormat");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
+			Verify.Argument.IsNotNull(nameFormat, nameof(nameFormat));
 
 			var item = new T()
 			{
@@ -1666,7 +1664,7 @@ namespace gitter.Git.Gui
 		public static T GetRefreshRemotesItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1694,7 +1692,7 @@ namespace gitter.Git.Gui
 		public static T GetAddRemoteItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1709,8 +1707,8 @@ namespace gitter.Git.Gui
 		public static T GetRemoveRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
-			Verify.Argument.IsNotNull(nameFormat, "nameFormat");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
+			Verify.Argument.IsNotNull(nameFormat, nameof(nameFormat));
 
 			var item = new T()
 			{
@@ -1725,7 +1723,7 @@ namespace gitter.Git.Gui
 		public static T GetRenameRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 
 			var item = new T()
 			{
@@ -1740,8 +1738,8 @@ namespace gitter.Git.Gui
 		public static T GetPruneRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
-			Verify.Argument.IsNotNull(nameFormat, "nameFormat");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
+			Verify.Argument.IsNotNull(nameFormat, nameof(nameFormat));
 
 			var item = new T()
 			{
@@ -1756,8 +1754,8 @@ namespace gitter.Git.Gui
 		public static T GetRemoveRemoteBranchItem<T>(RemoteRepositoryBranch remoteBranch, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
-			Verify.Argument.IsFalse(remoteBranch.IsDeleted, "remoteBranch",
+			Verify.Argument.IsNotNull(remoteBranch, nameof(remoteBranch));
+			Verify.Argument.IsFalse(remoteBranch.IsDeleted, nameof(remoteBranch),
 				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
 
 			var item = new T()
@@ -1773,8 +1771,8 @@ namespace gitter.Git.Gui
 		public static T GetRemoveRemoteTagItem<T>(RemoteRepositoryTag remoteTag, string nameFormat)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(remoteTag, "remoteTag");
-			Verify.Argument.IsFalse(remoteTag.IsDeleted, "remoteTag",
+			Verify.Argument.IsNotNull(remoteTag, nameof(remoteTag));
+			Verify.Argument.IsFalse(remoteTag.IsDeleted, nameof(remoteTag),
 				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteTag"));
 
 			var item = new T()
@@ -1852,9 +1850,9 @@ namespace gitter.Git.Gui
 
 		private static void OnFetchClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item       = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
-			var parent = Utility.GetParentControl(item);
+			var parent     = Utility.GetParentControl(item);
 
 			GuiCommands.Fetch(parent, repository);
 		}
@@ -1867,16 +1865,16 @@ namespace gitter.Git.Gui
 
 			GuiCommands.Pull(parent, repository);
 		}
+
 		private static void OnFetchFromClick(object sender, EventArgs e)
 		{
-			var item       = (ToolStripItem)sender;
-			var remote     = (Remote)item.Tag;
-			var repository = remote.Repository;
-			var parent     = Utility.GetParentControl(item);
+			var item   = (ToolStripItem)sender;
+			var remote = (Remote)item.Tag;
+			var parent = Utility.GetParentControl(item);
 
 			if(!remote.IsDeleted)
 			{
-				GuiCommands.Fetch(parent, repository);
+				GuiCommands.Fetch(parent, remote);
 			}
 		}
 
@@ -1884,7 +1882,6 @@ namespace gitter.Git.Gui
 		{
 			var item       = (ToolStripItem)sender;
 			var remote     = (Remote)item.Tag;
-			var repository = remote.Repository;
 			var parent     = Utility.GetParentControl(item);
 
 			if(!remote.IsDeleted)
@@ -1965,7 +1962,7 @@ namespace gitter.Git.Gui
 		public static T GetRefreshSubmodulesItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1980,7 +1977,7 @@ namespace gitter.Git.Gui
 		public static T GetAddSubmoduleItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -1995,7 +1992,7 @@ namespace gitter.Git.Gui
 		public static T GetUpdateSubmoduleItem<T>(Submodule submodule)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(submodule, "submodule");
+			Verify.Argument.IsValidGitObject(submodule, nameof(submodule));
 
 			var item = new T()
 			{
@@ -2010,7 +2007,7 @@ namespace gitter.Git.Gui
 		public static T GetUpdateSubmodulesItem<T>(SubmodulesCollection submodules)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(submodules, "submodules");
+			Verify.Argument.IsNotNull(submodules, nameof(submodules));
 
 			var item = new T()
 			{
@@ -2068,7 +2065,7 @@ namespace gitter.Git.Gui
 		public static T GetMarkAsResolvedItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
@@ -2083,7 +2080,7 @@ namespace gitter.Git.Gui
 		public static T GetStageItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
@@ -2098,8 +2095,8 @@ namespace gitter.Git.Gui
 		public static T GetStageItem<T>(Repository repository, TreeItem[] treeItems)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(treeItems, "treeItems");
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(treeItems, nameof(treeItems));
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2120,7 +2117,7 @@ namespace gitter.Git.Gui
 		public static T GetManualStageItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2135,7 +2132,7 @@ namespace gitter.Git.Gui
 		public static T GetStageAllItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2150,7 +2147,7 @@ namespace gitter.Git.Gui
 		public static T GetUpdateItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2165,7 +2162,7 @@ namespace gitter.Git.Gui
 		public static T GetCommitItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2180,7 +2177,7 @@ namespace gitter.Git.Gui
 		public static T GetUnstageItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
@@ -2195,8 +2192,8 @@ namespace gitter.Git.Gui
 		public static T GetUnstageItem<T>(Repository repository, TreeItem[] treeItems)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(treeItems, "treeItems");
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(treeItems, nameof(treeItems));
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2217,7 +2214,7 @@ namespace gitter.Git.Gui
 		public static T GetUnstageAllItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2232,7 +2229,7 @@ namespace gitter.Git.Gui
 		public static T GetMergeToolItem<T>(TreeFile file, MergeTool mergeTool)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(file, "file");
+			Verify.Argument.IsValidGitObject(file, nameof(file));
 
 			string text;
 			switch(file.ConflictType)
@@ -2263,7 +2260,7 @@ namespace gitter.Git.Gui
 		public static T GetResolveConflictItem<T>(TreeFile file, ConflictResolution resolution)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(file, "file");
+			Verify.Argument.IsValidGitObject(file, nameof(file));
 
 			string text;
 			switch(resolution)
@@ -2303,7 +2300,7 @@ namespace gitter.Git.Gui
 		public static T GetRevertPathItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
@@ -2318,7 +2315,7 @@ namespace gitter.Git.Gui
 		public static T GetRevertPathsItem<T>(IEnumerable<TreeItem> treeItems)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(treeItems, "treeItems");
+			Verify.Argument.IsNotNull(treeItems, nameof(treeItems));
 
 			var item = new T()
 			{
@@ -2333,7 +2330,7 @@ namespace gitter.Git.Gui
 		public static T GetRemovePathItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(treeItem, "treeItem");
+			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
@@ -2348,8 +2345,8 @@ namespace gitter.Git.Gui
 		public static T GetBlameItem<T>(IRevisionPointer revision, TreeFile file)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsValidGitObject(file, "file");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsValidGitObject(file, nameof(file));
 
 			var item = new T()
 			{
@@ -2364,8 +2361,8 @@ namespace gitter.Git.Gui
 		public static T GetBlameItem<T>(IRevisionPointer revision, string fileName)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
 			var item = new T()
 			{
@@ -2380,7 +2377,7 @@ namespace gitter.Git.Gui
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeFile file)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(file, "file");
+			Verify.Argument.IsValidGitObject(file, nameof(file));
 
 			return GetPathHistoryItem<T>(revision, file.RelativePath);
 		}
@@ -2388,7 +2385,7 @@ namespace gitter.Git.Gui
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeCommit commit)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(commit, "commit");
+			Verify.Argument.IsValidGitObject(commit, nameof(commit));
 
 			return GetPathHistoryItem<T>(revision, commit.RelativePath);
 		}
@@ -2396,7 +2393,7 @@ namespace gitter.Git.Gui
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, TreeDirectory directory)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(directory, "directory");
+			Verify.Argument.IsValidGitObject(directory, nameof(directory));
 
 			return GetPathHistoryItem<T>(revision, directory.RelativePath + "/");
 		}
@@ -2404,8 +2401,8 @@ namespace gitter.Git.Gui
 		public static T GetPathHistoryItem<T>(IRevisionPointer revision, string path)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNotNull(path, "path");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNotNull(path, nameof(path));
 
 			var item = new T()
 			{
@@ -2851,7 +2848,7 @@ namespace gitter.Git.Gui
 		public static T GetRefreshConfigurationItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -2866,7 +2863,7 @@ namespace gitter.Git.Gui
 		public static T GetUnsetParameterItem<T>(ConfigParameter configParameter)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidGitObject(configParameter, "configParameter");
+			Verify.Argument.IsValidGitObject(configParameter, nameof(configParameter));
 
 			var item = new T()
 			{
@@ -2973,8 +2970,8 @@ namespace gitter.Git.Gui
 		public static T GetCopyDiffLinesItem<T>(IEnumerable<DiffLine> lines, string text, bool copyAsPatch, DiffLineState state)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(lines, "lines");
-			Verify.Argument.HasNoNullItems(lines, "lines");
+			Verify.Argument.IsNotNull(lines, nameof(lines));
+			Verify.Argument.HasNoNullItems(lines, nameof(lines));
 
 			bool enabled = false;
 			foreach(var line in lines)
@@ -3059,7 +3056,7 @@ namespace gitter.Git.Gui
 		public static T GetRefreshContributorsItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -3074,7 +3071,7 @@ namespace gitter.Git.Gui
 		public static T GetSaveAsItem<T>(Tree tree, string fileName)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(tree, "tree");
+			Verify.Argument.IsNotNull(tree, nameof(tree));
 			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
 
 			var item = new T()
@@ -3089,7 +3086,7 @@ namespace gitter.Git.Gui
 		public static T GetExtractAndOpenFileItem<T>(Tree tree, string fileName)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(tree, "tree");
+			Verify.Argument.IsNotNull(tree, nameof(tree));
 			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
 
 			var item = new T()
@@ -3104,7 +3101,7 @@ namespace gitter.Git.Gui
 		public static T GetExtractAndOpenFileWithItem<T>(Tree tree, string fileName)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(tree, "tree");
+			Verify.Argument.IsNotNull(tree, nameof(tree));
 			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
 
 			var item = new T()
@@ -3119,7 +3116,7 @@ namespace gitter.Git.Gui
 		public static T GetOpenUrlItem<T>(string name, Image image, string url)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 
 			var item = new T()
 			{
@@ -3134,7 +3131,7 @@ namespace gitter.Git.Gui
 		public static T GetOpenAppItem<T>(string name, Image image, string app, string cmdLine)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(app, "app");
+			Verify.Argument.IsNeitherNullNorWhitespace(app, nameof(app));
 
 			var item = new T()
 			{
@@ -3149,7 +3146,7 @@ namespace gitter.Git.Gui
 		public static T GetOpenUrlWithItem<T>(string name, Image image, string url)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 
 			var item = new T()
 			{
@@ -3164,7 +3161,7 @@ namespace gitter.Git.Gui
 		public static T GetOpenCmdAtItem<T>(string name, Image image, string path)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(path, "path");
+			Verify.Argument.IsNotNull(path, nameof(path));
 
 			var item = new T()
 			{
@@ -3179,7 +3176,7 @@ namespace gitter.Git.Gui
 		public static T GetCleanItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -3194,7 +3191,7 @@ namespace gitter.Git.Gui
 		public static T GetViewDiffItem<T>(IDiffSource diffSource)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(diffSource, "diffSource");
+			Verify.Argument.IsNotNull(diffSource, nameof(diffSource));
 
 			var item = new T()
 			{
@@ -3209,7 +3206,7 @@ namespace gitter.Git.Gui
 		public static T GetViewTreeItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
@@ -3236,7 +3233,7 @@ namespace gitter.Git.Gui
 		public static T GetRefreshAllReferencesListItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -3251,7 +3248,7 @@ namespace gitter.Git.Gui
 		public static T GetCopyToClipboardItem<T>(string name, Func<string> text)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(text, "text");
+			Verify.Argument.IsNotNull(text, nameof(text));
 
 			var item = new T()
 			{
@@ -3306,7 +3303,7 @@ namespace gitter.Git.Gui
 		public static T GetRefreshReferencesItem<T>(Repository repository, ReferenceType referenceTypes, string name)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -3321,7 +3318,7 @@ namespace gitter.Git.Gui
 		public static T GetResolveConflictsItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -3336,7 +3333,7 @@ namespace gitter.Git.Gui
 		public static T GetExpandAllItem<T>(CustomListBoxItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(treeItem, "treeItem");
+			Verify.Argument.IsNotNull(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
@@ -3352,7 +3349,7 @@ namespace gitter.Git.Gui
 		public static T GetCollapseAllItem<T>(CustomListBoxItem treeItem)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(treeItem, "treeItem");
+			Verify.Argument.IsNotNull(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
@@ -3368,7 +3365,7 @@ namespace gitter.Git.Gui
 		public static T GetSendEmailItem<T>(string email)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(email, "email");
+			Verify.Argument.IsNeitherNullNorWhitespace(email, nameof(email));
 
 			var item = new T()
 			{
@@ -3385,7 +3382,7 @@ namespace gitter.Git.Gui
 		public static T GetCompressRepositoryItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{

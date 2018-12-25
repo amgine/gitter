@@ -60,7 +60,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.NullReferenceException"><paramref name="comparison"/> == <c>null</c>.</exception>
 		public void Sort(Comparison<T> comparison)
 		{
-			Verify.Argument.IsNotNull(comparison, "comparison");
+			Verify.Argument.IsNotNull(comparison, nameof(comparison));
 
 			int items = Items.Count;
 			if(items < 2) return;
@@ -83,7 +83,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.NullReferenceException"><paramref name="comparer"/> == <c>null</c>.</exception>
 		public void Sort(IComparer<T> comparer)
 		{
-			Verify.Argument.IsNotNull(comparer, "comparer");
+			Verify.Argument.IsNotNull(comparer, nameof(comparer));
 
 			int items = Items.Count;
 			if(items < 2) return;
@@ -109,12 +109,12 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public virtual void AddRange(IEnumerable<T> list)
 		{
-			Verify.Argument.IsNotNull(list, "list");
+			Verify.Argument.IsNotNull(list, nameof(list));
 
 			int count = 0;
 			foreach(var item in list)
 			{
-				Verify.Argument.IsTrue(VerifyItem(item), "list", "List contains invalid items.");
+				Verify.Argument.IsTrue(VerifyItem(item), nameof(list), "List contains invalid items.");
 				++count;
 			}
 			int start = Items.Count;
@@ -138,13 +138,13 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public virtual void InsertRange(int index, IEnumerable<T> list)
 		{
-			Verify.Argument.IsNotNull(list, "list");
-			Verify.Argument.IsValidIndex(index, Items.Count, "index");
+			Verify.Argument.IsNotNull(list, nameof(list));
+			Verify.Argument.IsValidIndex(index, Items.Count, nameof(index));
 
 			int count = 0;
 			foreach(var item in list)
 			{
-				Verify.Argument.IsTrue(VerifyItem(item), "list", "List contains invalid items.");
+				Verify.Argument.IsTrue(VerifyItem(item), nameof(list), "List contains invalid items.");
 				++count;
 			}
 
@@ -168,8 +168,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void RemoveRange(int index, int count)
 		{
-			Verify.Argument.IsValidIndex(index, Items.Count, "index");
-			Verify.Argument.IsValidIndex(count, Items.Count - index + 1, "count");
+			Verify.Argument.IsValidIndex(index, Items.Count, nameof(index));
+			Verify.Argument.IsValidIndex(count, Items.Count - index + 1, nameof(count));
 
 			int start = index;
 			int end = index + count - 1;
@@ -191,7 +191,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		public int InsertSortedFromTop(T item, Func<T, T, int> comparison)
 		{
-			Verify.Argument.IsNotNull(comparison, "comparison");
+			Verify.Argument.IsNotNull(comparison, nameof(comparison));
 
 			for(int i = 0; i < Items.Count; ++i)
 			{
@@ -214,7 +214,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		public int InsertSortedFromBottom(T item, Func<T, T, int> comparison)
 		{
-			Verify.Argument.IsNotNull(comparison, "comparison");
+			Verify.Argument.IsNotNull(comparison, nameof(comparison));
 
 			for(int i = Items.Count - 1; i > 0; --i)
 			{
@@ -236,39 +236,27 @@ namespace gitter.Framework.Controls
 		/// <param name="index">Index of the item which is changing.</param>
 		/// <param name="notifyEvent">Change type.</param>
 		protected void RaiseChanging(int index, NotifyEvent notifyEvent)
-		{
-			var handler = Changing;
-			if(handler != null) handler(this, new NotifyCollectionEventArgs(index, notifyEvent));
-		}
+			=> Changing?.Invoke(this, new NotifyCollectionEventArgs(index, notifyEvent));
 
 		/// <summary>Raise <see cref="Changing"/> event.</summary>
 		/// <param name="startIndex">Index of the first item in a changing range.</param>
 		/// <param name="endIndex">Index of the last item in a changing range.</param>
 		/// <param name="notifyEvent">Change type.</param>
 		protected void RaiseChanging(int startIndex, int endIndex, NotifyEvent notifyEvent)
-		{
-			var handler = Changing;
-			if(handler != null) handler(this, new NotifyCollectionEventArgs(startIndex, endIndex, notifyEvent));
-		}
+			=> Changing?.Invoke(this, new NotifyCollectionEventArgs(startIndex, endIndex, notifyEvent));
 
 		/// <summary>Raise <see cref="Changed"/> event.</summary>
 		/// <param name="index">Index of the item which is changed.</param>
 		/// <param name="notifyEvent">Change type.</param>
 		protected void RaiseChanged(int index, NotifyEvent notifyEvent)
-		{
-			var handler = Changed;
-			if(handler != null) handler(this, new NotifyCollectionEventArgs(index, notifyEvent));
-		}
+			=> Changed?.Invoke(this, new NotifyCollectionEventArgs(index, notifyEvent));
 
 		/// <summary>Raise <see cref="Changed"/> event.</summary>
 		/// <param name="startIndex">Index of the first item in a changed range.</param>
 		/// <param name="endIndex">Index of the last item in a changed range.</param>
 		/// <param name="notifyEvent">Change type.</param>
 		protected void RaiseChanged(int startIndex, int endIndex, NotifyEvent notifyEvent)
-		{
-			var handler = Changed;
-			if(handler != null) handler(this, new NotifyCollectionEventArgs(startIndex, endIndex, notifyEvent));
-		}
+			=> Changed?.Invoke(this, new NotifyCollectionEventArgs(startIndex, endIndex, notifyEvent));
 
 		/// <summary>Called when item is removed from collection.</summary>
 		/// <param name="item">Removed item.</param>
@@ -313,7 +301,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		protected override void SetItem(int index, T item)
 		{
-			Verify.Argument.IsTrue(VerifyItem(item), "item");
+			Verify.Argument.IsTrue(VerifyItem(item), nameof(item));
 
 			RaiseChanging(index, NotifyEvent.Set);
 			FreeItem(Items[index]);
@@ -328,7 +316,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 		protected override void InsertItem(int index, T item)
 		{
-			Verify.Argument.IsTrue(VerifyItem(item), "item");
+			Verify.Argument.IsTrue(VerifyItem(item), nameof(item));
 
 			AcquireItem(item);
 			RaiseChanging(index, NotifyEvent.Insert);

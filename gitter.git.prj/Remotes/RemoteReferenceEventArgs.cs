@@ -24,16 +24,11 @@ namespace gitter.Git
 
 	public sealed class RemoteReferenceEventArgs : EventArgs
 	{
-		private IRemoteReference _reference;
-
 		public RemoteReferenceEventArgs(IRemoteReference reference)
 		{
-			_reference = reference;
+			Reference = reference;
 		}
 
-		public IRemoteReference Reference
-		{
-			get { return _reference; }
-		}
+		public IRemoteReference Reference { get; }
 	}
 }

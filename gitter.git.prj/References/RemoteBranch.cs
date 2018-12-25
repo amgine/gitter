@@ -24,7 +24,9 @@ namespace gitter.Git
 	using System.Globalization;
 	using System.Threading;
 	using System.Threading.Tasks;
+
 	using gitter.Framework;
+
 	using Resources = gitter.Git.Properties.Resources;
 
 	/// <summary>Git remote tracking branch.</summary>
@@ -45,18 +47,12 @@ namespace gitter.Git
 
 		/// <summary>Gets a value indicating whether this branch is remote.</summary>
 		/// <value><c>true</c>.</value>
-		public override bool IsRemote
-		{
-			get { return true; }
-		}
+		public override bool IsRemote => true;
 
 		/// <summary>Gets a value indicating whether this branch is current HEAD.</summary>
 		/// <value><c>false</c>.</value>
 		/// <remarks><see cref="RemoteBranch"/> can't be current HEAD.</remarks>
-		public override bool IsCurrent
-		{
-			get { return false; }
-		}
+		public override bool IsCurrent => false;
 
 		/// <summary>Returns remote this branch is associated with.</summary>
 		/// <value>Remote this branch is associated with.</value>
@@ -80,17 +76,11 @@ namespace gitter.Git
 
 		/// <summary>Gets the type of this reference.</summary>
 		/// <value><see cref="ReferenceType.RemoteBranch"/>.</value>
-		public override ReferenceType Type
-		{
-			get { return ReferenceType.RemoteBranch; }
-		}
+		public override ReferenceType Type => ReferenceType.RemoteBranch;
 
 		/// <summary>Gets the full branch name.</summary>
 		/// <value>Full branch name.</value>
-		public override string FullName
-		{
-			get { return GitConstants.RemoteBranchPrefix + Name; }
-		}
+		public override string FullName => GitConstants.RemoteBranchPrefix + Name;
 
 		/// <summary>Delete branch.</summary>
 		/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted by calling <see cref="Delete(bool)"/> with <paramref name="force"/> == true.</exception>

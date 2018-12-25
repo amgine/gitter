@@ -36,8 +36,8 @@ namespace gitter.Git.Gui
 	{
 		public static string ExtractBlobToFile(this Tree tree, string blobPath)
 		{
-			Verify.Argument.IsNotNull(tree, "tree");
-			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, "blobPath");
+			Verify.Argument.IsNotNull(tree, nameof(tree));
+			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
 			string fileName = null;
 			using(var dlg = new SaveFileDialog()
 			{
@@ -62,9 +62,9 @@ namespace gitter.Git.Gui
 
 		public static bool ExtractBlobToFile(this Tree tree, string blobPath, string fileName)
 		{
-			Verify.Argument.IsNotNull(tree, "tree");
-			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, "blobPath");
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
+			Verify.Argument.IsNotNull(tree, nameof(tree));
+			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
 			byte[] bytes = null;
 			try
@@ -107,8 +107,8 @@ namespace gitter.Git.Gui
 
 		public static string ExtractBlobToTemporaryFile(this Tree tree, string blobPath)
 		{
-			Verify.Argument.IsNotNull(tree, "tree");
-			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, "blobPath");
+			Verify.Argument.IsNotNull(tree, nameof(tree));
+			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
 
 			var path = Path.Combine(Path.GetTempPath(), "gitter", tree.TreeHash);
 			var fileName = Path.Combine(path, blobPath);

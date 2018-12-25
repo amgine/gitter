@@ -27,53 +27,33 @@ namespace gitter.Git
 	{
 		public static RefsState Capture(Repository repository, ReferenceType referenceTypes)
 		{
-			if(repository == null) throw new ArgumentNullException("repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			return new RefsState(repository, referenceTypes);
 		}
 
 		public sealed class ReferenceState
 		{
-			private readonly ReferenceType _referenceType;
-			private readonly string _fullName;
-			private readonly string _name;
-			private readonly Hash _hash;
-
 			public ReferenceState(ReferenceType referenceType, string fullName, string name, Hash hash)
 			{
-				_referenceType = referenceType;
-				_fullName = fullName;
-				_name = name;
-				_hash = hash;
+				ReferenceType = referenceType;
+				FullName      = fullName;
+				Name          = name;
+				Hash          = hash;
 			}
 
-			public ReferenceType ReferenceType
-			{
-				get { return _referenceType; }
-			}
+			public ReferenceType ReferenceType { get; }
 
-			public string FullName
-			{
-				get { return _fullName; }
-			}
+			public string FullName { get; }
 
-			public string Name
-			{
-				get { return _name;}
-			}
+			public string Name { get; }
 
-			public Hash Hash
-			{
-				get { return _hash; }
-			}
+			public Hash Hash { get; }
 		}
 
 		private readonly Dictionary<string, ReferenceState> _states;
 
-		public IEnumerable<ReferenceState> States
-		{
-			get { return _states.Values; }
-		}
+		public IEnumerable<ReferenceState> States => _states.Values;
 
 		public ReferenceState GetState(string fullName, ReferenceType type)
 		{

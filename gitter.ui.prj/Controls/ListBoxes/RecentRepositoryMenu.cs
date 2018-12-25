@@ -31,7 +31,7 @@ namespace gitter
 
 		public RecentRepositoryMenu(RecentRepositoryListItem repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 

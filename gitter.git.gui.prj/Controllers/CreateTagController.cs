@@ -33,29 +33,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class CreateTagController : ViewControllerBase<ICreateTagView>, ICreateTagController
 	{
-		#region Data
-
-		private readonly Repository _repository;
-
-		#endregion
-
 		#region .ctor
 
 		public CreateTagController(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private Repository Repository
-		{
-			get { return _repository; }
-		}
+		private Repository Repository { get; }
 
 		#endregion
 

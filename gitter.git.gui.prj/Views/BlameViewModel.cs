@@ -22,27 +22,18 @@ namespace gitter.Git.Gui.Views
 {
 	public class BlameViewModel
 	{
-		#region Data
-
-		private readonly IBlameSource _blameSource;
-
-		#endregion
-
 		#region .ctor
 
 		public BlameViewModel(IBlameSource blameSource)
 		{
-			_blameSource = blameSource;
+			BlameSource = blameSource;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public IBlameSource BlameSource
-		{
-			get { return _blameSource; }
-		}
+		public IBlameSource BlameSource { get; }
 
 		#endregion
 

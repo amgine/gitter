@@ -69,10 +69,7 @@ namespace gitter.Framework.CLI
 			}
 		}
 
-		public int Length
-		{
-			get { return _length; }
-		}
+		public int Length => _length;
 
 		public char PeekChar()
 		{
@@ -113,7 +110,7 @@ namespace gitter.Framework.CLI
 
 		public void Skip(int count)
 		{
-			Verify.Argument.IsNotNegative(count, "count");
+			Verify.Argument.IsNotNegative(count, nameof(count));
 			Verify.State.IsTrue(_length != 0, "Text segment is empty.");
 
 			_offset += count;

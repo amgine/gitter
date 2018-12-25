@@ -21,8 +21,6 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Text;
 
 	using System.Windows.Forms;
 
@@ -30,13 +28,11 @@ namespace gitter.Git.Gui.Controls
 
 	public sealed class ReferencesMenu : ContextMenuStrip
 	{
-		private readonly Repository _repository;
-
 		public ReferencesMenu(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			Items.Add(GuiItemFactory.GetShowReferencesViewItem<ToolStripMenuItem>());
 			Items.Add(GuiItemFactory.GetRefreshAllReferencesListItem<ToolStripMenuItem>(repository));
@@ -45,9 +41,6 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(repository));
 		}
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 	}
 }

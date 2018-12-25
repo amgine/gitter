@@ -21,11 +21,7 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
 
@@ -35,7 +31,6 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		private readonly ConflictResolution _resolution1;
 		private readonly ConflictResolution _resolution2;
-		private ConflictResolution _resolution;
 
 		private static string StatusToString(FileStatus status)
 		{
@@ -48,7 +43,7 @@ namespace gitter.Git.Gui.Dialogs
 				case FileStatus.Modified:
 					return Resources.StrlModified;
 				default:
-					throw new ArgumentException("status");
+					throw new ArgumentException(nameof(status));
 			}
 		}
 
@@ -63,7 +58,7 @@ namespace gitter.Git.Gui.Dialogs
 				case FileStatus.Modified:
 					return Color.Yellow;
 				default:
-					throw new ArgumentException("status");
+					throw new ArgumentException(nameof(status));
 			}
 		}
 
@@ -80,7 +75,7 @@ namespace gitter.Git.Gui.Dialogs
 				case ConflictResolution.UseTheirs:
 					return Resources.StrsUseTheirsVersion;
 				default:
-					throw new ArgumentException("conflictResolution");
+					throw new ArgumentException(nameof(conflictResolution));
 			}
 		}
 
@@ -103,25 +98,19 @@ namespace gitter.Git.Gui.Dialogs
 			_resolution2 = resolution2;
 		}
 
-		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.Cancel; }
-		}
+		public override DialogButtons OptimalButtons => DialogButtons.Cancel;
 
-		public ConflictResolution ConflictResolution
-		{
-			get { return _resolution; }
-		}
+		public ConflictResolution ConflictResolution { get; private set; }
 
 		private void _btnResolution1_Click(object sender, EventArgs e)
 		{
-			_resolution = _resolution1;
+			ConflictResolution = _resolution1;
 			ClickOk();
 		}
 
 		private void _btnResolution2_Click(object sender, EventArgs e)
 		{
-			_resolution = _resolution2;
+			ConflictResolution = _resolution2;
 			ClickOk();
 		}
 	}

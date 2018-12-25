@@ -43,7 +43,7 @@ namespace gitter.Git.Gui.Controllers
 
 		public AddSubmoduleController(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 		}

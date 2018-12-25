@@ -61,10 +61,7 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 			}
 
-			public override int Remaining
-			{
-				get { return _length - _pos; }
-			}
+			public override int Remaining => _length - _pos;
 
 			public override bool MovePrevious()
 			{
@@ -87,10 +84,7 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		public override int MaxCharCount
-		{
-			get { return 1; }
-		}
+		public override int MaxCharCount => 1;
 
 		public override DecoderFallbackBuffer CreateFallbackBuffer()
 		{

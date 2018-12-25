@@ -31,7 +31,7 @@ namespace gitter.Updater
 
 		public MainForm(IUpdateProcess process)
 		{
-			Verify.Argument.IsNotNull(process, "process");
+			Verify.Argument.IsNotNull(process, nameof(process));
 
 			InitializeComponent();
 

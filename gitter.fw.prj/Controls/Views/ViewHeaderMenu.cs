@@ -35,8 +35,8 @@ namespace gitter.Framework.Controls
 
 		public ViewHeaderMenu(ViewHost viewHost, ViewBase view)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			_host = viewHost;
 			_view = view;

@@ -30,7 +30,7 @@ namespace gitter.TeamCity
 
 		internal CacheSegment(TeamCityObjectsCacheBase<T> cache)
 		{
-			Verify.Argument.IsNotNull(cache, "cache");
+			Verify.Argument.IsNotNull(cache, nameof(cache));
 
 			_cache = cache;
 		}

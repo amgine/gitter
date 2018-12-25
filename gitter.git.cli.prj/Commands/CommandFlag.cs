@@ -26,44 +26,20 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Command flag.</summary>
 	public class CommandFlag : ICommandArgument
 	{
-		#region Data
-
-		private readonly string _name;
-
-		#endregion
-
 		#region Static
 
-		public static ICommandArgument DryRun()
-		{
-			return new CommandFlag("--dry-run");
-		}
+		public static ICommandArgument DryRun() => new CommandFlag("--dry-run");
 
-		public static ICommandArgument Verbose()
-		{
-			return new CommandFlag("--verbose");
-		}
+		public static ICommandArgument Verbose() => new CommandFlag("--verbose");
 
-		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("--quiet");
-		}
+		public static ICommandArgument Quiet() => new CommandFlag("--quiet");
 
-		public static ICommandArgument SignOff()
-		{
-			return new CommandFlag("--signoff");
-		}
+		public static ICommandArgument SignOff() => new CommandFlag("--signoff");
 
-		public static ICommandArgument Interactive()
-		{
-			return new CommandFlag("--interactive");
-		}
+		public static ICommandArgument Interactive() => new CommandFlag("--interactive");
 
 		/// <summary>Do not interpret any more arguments as options.</summary>
-		public static ICommandArgument NoMoreOptions()
-		{
-			return new CommandFlag("--");
-		}
+		public static ICommandArgument NoMoreOptions() => new CommandFlag("--");
 
 		#endregion
 
@@ -71,17 +47,14 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public CommandFlag(string name)
 		{
-			_name = name;
+			Name = name;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		#endregion
 
@@ -89,7 +62,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void ToString(StringBuilder stringBuilder)
 		{
-			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
+			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
 
 			stringBuilder.Append(Name);
 		}
@@ -98,10 +71,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Overrides
 
-		public override string ToString()
-		{
-			return Name;
-		}
+		public override string ToString() => Name;
 
 		#endregion
 	}

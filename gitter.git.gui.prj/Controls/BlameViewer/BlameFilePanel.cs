@@ -39,7 +39,6 @@ namespace gitter.Git.Gui.Controls
 		#region Data
 
 		private readonly Repository _repository;
-		private readonly BlameFile _blameFile;
 		private readonly TrackingService _lineHover;
 		private Size _size;
 		private int _selOrigin;
@@ -61,21 +60,18 @@ namespace gitter.Git.Gui.Controls
 
 		public BlameFilePanel(Repository repository, BlameFile blameFile)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(blameFile, "blameFile");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(blameFile, nameof(blameFile));
 
 			_repository = repository;
-			_blameFile = blameFile;
+			BlameFile = blameFile;
 			_lineHover = new TrackingService(e => Invalidate(GetLineBounds(e.Index)));
 			_selStart = -1;
 			_selEnd = -1;
 			_selOrigin = -1;
 		}
 
-		public BlameFile BlameFile
-		{
-			get { return _blameFile; }
-		}
+		public BlameFile BlameFile { get; }
 
 		public override void InvalidateSize()
 		{
@@ -97,10 +93,7 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		protected override bool ShowHeader
-		{
-			get { return false; }
-		}
+		protected override bool ShowHeader => false;
 
 		private void SetSelection(int line)
 		{
@@ -191,7 +184,7 @@ namespace gitter.Git.Gui.Controls
 		private HitTestResults HitTest(int x, int y)
 		{
 			int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
-			if(_blameFile == null ||
+			if(BlameFile == null ||
 				x < Margin || x > contentWidth - Margin ||
 				y < 0 || y >= _size.Height)
 			{
@@ -217,7 +210,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			x -= Margin;
 			int column = 3;
-			x -= (GetDecimalDigits(_blameFile.LineCount) + 1) * CellSize.Width + 2;
+			x -= (GetDecimalDigits(BlameFile.LineCount) + 1) * CellSize.Width + 2;
 			if(x < 0)
 			{
 				column = 0;
@@ -251,7 +244,7 @@ namespace gitter.Git.Gui.Controls
 						{
 							int start = 0;
 							int end = 0;
-							foreach(var h in _blameFile)
+							foreach(var h in BlameFile)
 							{
 								end = h.Count + start;
 								if(end > htr.Line)
@@ -365,9 +358,9 @@ namespace gitter.Git.Gui.Controls
 			{
 				line = 0;
 			}
-			else if(line >= _blameFile.LineCount)
+			else if(line >= BlameFile.LineCount)
 			{
-				line = _blameFile.LineCount - 1;
+				line = BlameFile.LineCount - 1;
 			}
 			SetSelection(_selOrigin, line);
 		}
@@ -389,7 +382,7 @@ namespace gitter.Git.Gui.Controls
 			_lineHover.Track(htr.Line);
 			if(htr.Column == 1 || htr.Column == 2)
 			{
-				if(_lineHover.Index >= 0 && _lineHover.Index < _blameFile.LineCount)
+				if(_lineHover.Index >= 0 && _lineHover.Index < BlameFile.LineCount)
 				{
 					BlameHunk blameHunk;
 					var line = GetLinesToContainingHunk(_lineHover.Index, out blameHunk);
@@ -411,7 +404,7 @@ namespace gitter.Git.Gui.Controls
 						{
 							_revisionToolTip.Revision = revision;
 							var point = new Point(Margin, Bounds.Y - FlowControl.VScrollPos);
-							point.X += (GetDecimalDigits(_blameFile.LineCount) + 1) * CellSize.Width + _autorColumnWidth + _hashColumnWidth + 1;
+							point.X += (GetDecimalDigits(BlameFile.LineCount) + 1) * CellSize.Width + _autorColumnWidth + _hashColumnWidth + 1;
 							point.Y += line * CellSize.Height;
 							point.Y += 2;
 							if(ShowHeader)
@@ -445,14 +438,14 @@ namespace gitter.Git.Gui.Controls
 		private int GetLinesToContainingHunk(int lineIndex, out BlameHunk blameHunk)
 		{
 			int res = 0;
-			for(int i = 0; i < _blameFile.Count; ++i)
+			for(int i = 0; i < BlameFile.Count; ++i)
 			{
-				if(res + _blameFile[i].Count > lineIndex)
+				if(res + BlameFile[i].Count > lineIndex)
 				{
-					blameHunk = _blameFile[i];
+					blameHunk = BlameFile[i];
 					return res;
 				}
-				res += _blameFile[i].Count;
+				res += BlameFile[i].Count;
 			}
 			blameHunk = null;
 			return res;
@@ -477,9 +470,9 @@ namespace gitter.Git.Gui.Controls
 			int offset = 0;
 			int i = 0;
 			int num = _selStart;
-			while(_blameFile[i].Count <= num)
+			while(BlameFile[i].Count <= num)
 			{
-				int lc = _blameFile[i].Count;
+				int lc = BlameFile[i].Count;
 				offset += lc;
 				num -= lc;
 				++i;
@@ -489,8 +482,8 @@ namespace gitter.Git.Gui.Controls
 			int id = 0;
 			while(id != res.Length)
 			{
-				res[id++] = _blameFile[i][num++];
-				if(num >= _blameFile[i].Count)
+				res[id++] = BlameFile[i][num++];
+				if(num >= BlameFile[i].Count)
 				{
 					++i;
 					num = 0;
@@ -511,13 +504,13 @@ namespace gitter.Git.Gui.Controls
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
-			if(_blameFile == null) return Size.Empty;
+			if(BlameFile == null) return Size.Empty;
 			if(_size.IsEmpty)
 			{
 				int maxLength = 0;
 				BlameLine longestLine = null;
 				string longestAuthor = string.Empty;
-				foreach(var hunk in _blameFile)
+				foreach(var hunk in BlameFile)
 				{
 					foreach(var line in hunk)
 					{
@@ -533,7 +526,7 @@ namespace gitter.Git.Gui.Controls
 						longestAuthor = hunk.Commit.Author;
 					}
 				}
-				var digits = GetDecimalDigits(_blameFile.LineCount) + 1;
+				var digits = GetDecimalDigits(BlameFile.LineCount) + 1;
 				var font = GitterApplication.FontManager.ViewerFont.Font;
 				int w = CellSize.Width * digits + 2 * Margin;
 				if(longestLine != null)
@@ -572,12 +565,12 @@ namespace gitter.Git.Gui.Controls
 					_hashColumnWidth = CellSize.Width * 7 + CellSize.Width;
 					w += _hashColumnWidth;
 				}
-				var h = _blameFile.LineCount * CellSize.Height;
+				var h = BlameFile.LineCount * CellSize.Height;
 				if(ShowHeader)
 				{
 					h += HeaderHeight;
 				}
-				if(_blameFile.LineCount != 0)
+				if(BlameFile.LineCount != 0)
 				{
 					h += 2;
 				}
@@ -698,26 +691,26 @@ namespace gitter.Git.Gui.Controls
 				var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
 				if(rcHeaderClip.Width != 0 && rcHeaderClip.Height != 0)
 				{
-					PaintHeader(graphics, rcHeader, GraphicsUtility.QueryIcon(_blameFile.Name), null, _blameFile.Name);
+					PaintHeader(graphics, rcHeader, GraphicsUtility.QueryIcon(BlameFile.Name), null, BlameFile.Name);
 				}
 				y += rcHeader.Bottom;
 			}
 			else
 			{
-				if(_blameFile.LineCount != 0)
+				if(BlameFile.LineCount != 0)
 				{
 					graphics.DrawLine(Pens.Gray, x, rect.Y, rect.X + contentWidth - Margin, rect.Y);
 				}
 				y += rect.Y + 1;
 			}
-			int maxLineNum = _blameFile.LineCount;
+			int maxLineNum = BlameFile.LineCount;
 			int digits = GetDecimalDigits(maxLineNum);
 			var font = GitterApplication.FontManager.ViewerFont.Font;
 			bool reachedEnd = false;
 			int lineIndex = 0;
 			bool alternate = false;
 			bool first;
-			foreach(var hunk in _blameFile)
+			foreach(var hunk in BlameFile)
 			{
 				first = true;
 				foreach(var line in hunk)
@@ -743,7 +736,7 @@ namespace gitter.Git.Gui.Controls
 				alternate = !alternate;
 				if(reachedEnd) break;
 			}
-			if(!reachedEnd && _blameFile.LineCount != 0)
+			if(!reachedEnd && BlameFile.LineCount != 0)
 			{
 				graphics.DrawLine(Pens.Gray, x, y, rect.X + contentWidth - Margin - 1, y);
 			}

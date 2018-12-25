@@ -30,13 +30,11 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class UserMenu : ContextMenuStrip
 	{
-		private readonly User _user;
-
 		public UserMenu(User user)
 		{
-			Verify.Argument.IsValidGitObject(user, "user");
+			Verify.Argument.IsValidGitObject(user, nameof(user));
 
-			_user = user;
+			User = user;
 
 			Items.Add(GuiItemFactory.GetSendEmailItem<ToolStripMenuItem>(user.Email));
 
@@ -47,9 +45,6 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(item);
 		}
 
-		public User User
-		{
-			get { return _user; }
-		}
+		public User User { get; }
 	}
 }

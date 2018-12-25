@@ -41,9 +41,6 @@ namespace gitter.Git
 
 		#endregion
 
-		public override TreeItemType ItemType
-		{
-			get { return TreeItemType.Commit; }
-		}
+		public override TreeItemType ItemType => TreeItemType.Commit;
 	}
 }

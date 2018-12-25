@@ -37,7 +37,7 @@ namespace gitter.Git.Gui.Views
 
 		public RemotesToolbar(RemotesView remotesView)
 		{
-			Verify.Argument.IsNotNull(remotesView, "remotesView");
+			Verify.Argument.IsNotNull(remotesView, nameof(remotesView));
 
 			_remotesView = remotesView;
 

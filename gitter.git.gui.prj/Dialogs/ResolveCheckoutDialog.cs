@@ -34,9 +34,6 @@ namespace gitter.Git.Gui.Dialogs
 	[ToolboxItem(false)]
 	public partial class ResolveCheckoutDialog : GitDialogBase
 	{
-		private Branch _selectedBranch;
-		private bool _checkoutCommit = true;
-
 		public ResolveCheckoutDialog()
 		{
 			InitializeComponent();
@@ -44,15 +41,12 @@ namespace gitter.Git.Gui.Dialogs
 			Text = Resources.StrCheckout;
 		}
 
-		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.Cancel; }
-		}
+		public override DialogButtons OptimalButtons => DialogButtons.Cancel;
 
 		public void SetAvailableBranches(IEnumerable<Branch> branches)
 		{
-			Verify.Argument.IsNotNull(branches, "branches");
-			Verify.Argument.HasNoNullItems(branches, "branches");
+			Verify.Argument.IsNotNull(branches, nameof(branches));
+			Verify.Argument.HasNoNullItems(branches, nameof(branches));
 
 			_references.BeginUpdate();
 			_references.Style = GitterApplication.DefaultStyle;
@@ -65,7 +59,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 			if(first != null)
 			{
-				_selectedBranch = first;
+				SelectedBranch = first;
 				UpdateButton();
 			}
 			_references.EndUpdate();
@@ -77,38 +71,32 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
-		public bool CheckoutCommit
-		{
-			get { return _checkoutCommit; }
-		}
+		public bool CheckoutCommit { get; private set; } = true;
 
-		public Branch SelectedBranch
-		{
-			get { return _selectedBranch; }
-		}
+		public Branch SelectedBranch { get; private set; }
 
 		private void UpdateButton()
 		{
-			_btnCheckoutBranch.Text = string.Format("{0} '{1}'", Resources.StrCheckout, _selectedBranch.Name);
+			_btnCheckoutBranch.Text = string.Format("{0} '{1}'", Resources.StrCheckout, SelectedBranch.Name);
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
 			var b = ((BranchListItem)e.Item).DataContext;
-			_selectedBranch = b;
+			SelectedBranch = b;
 			UpdateButton();
 		}
 
 		private void _btnCheckoutCommit_Click(object sender, EventArgs e)
 		{
-			_checkoutCommit = true;
+			CheckoutCommit = true;
 			GlobalBehavior.AskOnCommitCheckouts = !_chkDontShowAgain.Checked;
 			ClickOk();
 		}
 
 		private void _btnCheckoutBranch_Click(object sender, EventArgs e)
 		{
-			_checkoutCommit = false;
+			CheckoutCommit = false;
 			GlobalBehavior.AskOnCommitCheckouts = !_chkDontShowAgain.Checked;
 			ClickOk();
 		}

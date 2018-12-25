@@ -39,8 +39,8 @@ namespace gitter.Framework.Controls
 		public ViewDockSideTab(ViewDockSide side, ViewHost viewHost, ViewBase view)
 			: base(view, Utility.InvertAnchor(side.Side))
 		{
-			Verify.Argument.IsNotNull(side, "side");
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(side, nameof(side));
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			_side = side;
 			_viewHost = viewHost;

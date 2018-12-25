@@ -59,7 +59,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public IList<ReferencePushResult> Invoke(PushParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters, false);
 			var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
@@ -70,7 +70,7 @@ namespace gitter.Git.AccessLayer.CLI
 		public Task<IList<ReferencePushResult>> InvokeAsync(PushParameters parameters,
 			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters, true);
 

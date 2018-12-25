@@ -40,12 +40,7 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private readonly Repository _repository;
 		private TextBoxSpellChecker _speller;
-		private readonly IUserInputSource<string> _messageInput;
-		private readonly IUserInputSource<bool> _amendInput;
-		private readonly IUserInputSource _stagedItemsInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly ICommitController _controller;
 
 		#endregion
@@ -54,20 +49,20 @@ namespace gitter.Git.Gui.Dialogs
 
 		public CommitDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 			Localize();
 
 			var inputs = new IUserInputSource[]
 			{
-				_messageInput     = new TextBoxInputSource(_txtMessage),
-				_amendInput       = new CheckBoxInputSource(_chkAmend),
-				_stagedItemsInput = new ControlInputSource(_lstStaged),
+				Message     = new TextBoxInputSource(_txtMessage),
+				Amend       = new CheckBoxInputSource(_chkAmend),
+				StagedItems = new ControlInputSource(_lstStaged),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			for(int i = 0; i < _lstStaged.Columns.Count; ++i)
 			{
@@ -98,35 +93,20 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
 		protected override string ActionVerb
 		{
 			get { return Resources.StrCommit; }
 		}
 
-		public IUserInputSource<string> Message
-		{
-			get { return _messageInput; }
-		}
+		public IUserInputSource<string> Message { get; }
 
-		public IUserInputSource<bool> Amend
-		{
-			get { return _amendInput; }
-		}
+		public IUserInputSource<bool> Amend { get; }
 
-		public IUserInputSource StagedItems
-		{
-			get { return _stagedItemsInput; }
-		}
+		public IUserInputSource StagedItems { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -144,11 +124,11 @@ namespace gitter.Git.Gui.Dialogs
 		{
 			if(result != DialogResult.OK)
 			{
-				_repository.Status.SaveCommitMessage(_txtMessage.Text);
+				Repository.Status.SaveCommitMessage(_txtMessage.Text);
 			}
 			else
 			{
-				_repository.Status.SaveCommitMessage(string.Empty);
+				Repository.Status.SaveCommitMessage(string.Empty);
 			}
 		}
 
@@ -172,10 +152,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog Members
 
-		public bool Execute()
-		{
-			return _controller.TryCommit();
-		}
+		public bool Execute() => _controller.TryCommit();
 
 		#endregion
 	}

@@ -92,8 +92,8 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateAbsolutePath(string path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			int start = -1;
 			int end = -1;
@@ -223,8 +223,8 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateBranchName(string branchName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(string.IsNullOrWhiteSpace(branchName))
 			{
@@ -248,9 +248,9 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateNewBranchName(string branchName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(!ValidateBranchName(branchName, userInputSource, inputErrorNotifier))
 			{
@@ -270,8 +270,8 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateTagName(string tagName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(string.IsNullOrWhiteSpace(tagName))
 			{
@@ -295,9 +295,9 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateNewTagName(string tagName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(!ValidateTagName(tagName, userInputSource, inputErrorNotifier))
 			{
@@ -316,8 +316,8 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateRefspec(string refspec, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(string.IsNullOrEmpty(refspec))
 			{
@@ -363,8 +363,8 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateUrl(string url, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(string.IsNullOrWhiteSpace(url))
 			{
@@ -379,8 +379,8 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateRemoteName(string remoteName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(string.IsNullOrWhiteSpace(remoteName))
 			{
@@ -404,9 +404,9 @@ namespace gitter.Git.Gui.Controllers
 
 		public static bool ValidateNewRemoteName(string remoteName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(userInputSource, "userInputSource");
-			Verify.Argument.IsNotNull(inputErrorNotifier, "inputErrorNotifier");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
+			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
 
 			if(!ValidateRemoteName(remoteName, userInputSource, inputErrorNotifier))
 			{

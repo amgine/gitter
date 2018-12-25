@@ -64,10 +64,7 @@ namespace gitter.Git.Gui.Views
 
 		#region Properties
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
 		public override Image Image
 		{

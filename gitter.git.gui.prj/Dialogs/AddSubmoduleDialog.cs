@@ -38,11 +38,6 @@ namespace gitter.Git.Gui.Dialogs
 		#region Data
 
 		private Repository _repository;
-		private readonly IUserInputSource<string> _pathInput;
-		private readonly IUserInputSource<string> _urlInput;
-		private readonly IUserInputSource<bool> _useCustomBranchInput;
-		private readonly IUserInputSource<string> _branchNameInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly IAddSubmoduleController _controller;
 
 		#endregion
@@ -52,7 +47,7 @@ namespace gitter.Git.Gui.Dialogs
 		/// <summary>Create <see cref="AddSubmoduleDialog"/>.</summary>
 		public AddSubmoduleDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -61,12 +56,12 @@ namespace gitter.Git.Gui.Dialogs
 
 			var inputs = new IUserInputSource[]
 			{
-				_pathInput            = new TextBoxInputSource(_txtPath),
-				_urlInput             = new TextBoxInputSource(_txtRepository),
-				_useCustomBranchInput = new CheckBoxInputSource(_chkBranch),
-				_branchNameInput      = new TextBoxInputSource(_txtBranch),
+				Path            = new TextBoxInputSource(_txtPath),
+				Url             = new TextBoxInputSource(_txtRepository),
+				UseCustomBranch = new CheckBoxInputSource(_chkBranch),
+				BranchName      = new TextBoxInputSource(_txtBranch),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			GitterApplication.FontManager.InputFont.Apply(_txtBranch, _txtRepository, _txtPath);
 
@@ -77,35 +72,17 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrAdd; }
-		}
+		protected override string ActionVerb => Resources.StrAdd;
 
-		public IUserInputSource<string> Path
-		{
-			get { return _pathInput; }
-		}
+		public IUserInputSource<string> Path { get; }
 
-		public IUserInputSource<string> Url
-		{
-			get { return _urlInput; }
-		}
+		public IUserInputSource<string> Url { get; }
 
-		public IUserInputSource<bool> UseCustomBranch
-		{
-			get { return _useCustomBranchInput; }
-		}
+		public IUserInputSource<bool> UseCustomBranch { get; }
 
-		public IUserInputSource<string> BranchName
-		{
-			get { return _branchNameInput; }
-		}
+		public IUserInputSource<string> BranchName { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -115,8 +92,8 @@ namespace gitter.Git.Gui.Dialogs
 		{
 			Text = Resources.StrAddSubmodule;
 
-			_lblPath.Text = Resources.StrPath.AddColon();
-			_lblUrl.Text = Resources.StrUrl.AddColon();
+			_lblPath.Text   = Resources.StrPath.AddColon();
+			_lblUrl.Text    = Resources.StrUrl.AddColon();
 			_chkBranch.Text = Resources.StrBranch.AddColon();
 		}
 
@@ -129,10 +106,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog
 
-		public bool Execute()
-		{
-			return _controller.TryAddSubmodule();
-		}
+		public bool Execute() => _controller.TryAddSubmodule();
 
 		#endregion
 	}

@@ -127,7 +127,7 @@ namespace gitter.Framework.Controls
 
 		public Size MeasureText(string text, Font font)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			return MeasureTextCore(text, font);
 		}
@@ -151,7 +151,7 @@ namespace gitter.Framework.Controls
 
 		public Size MeasureImageAndText(Image image, string text, Font font)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			return MeasureImageAndTextCore(image, text, font);
 		}
@@ -175,7 +175,7 @@ namespace gitter.Framework.Controls
 
 		public Size MeasureIconAndText(Icon icon, string text, Font font)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			return MeasureIconAndTextCore(icon, text, font);
 		}

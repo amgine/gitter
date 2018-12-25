@@ -45,7 +45,7 @@ namespace gitter.Git.Gui
 
 		public void DrawGraph(Graphics graphics, GraphAtom[] graphLine, Rectangle bounds, int cellWidth, RevisionGraphItemType type, bool useColors)
 		{
-			Verify.Argument.IsNotNull(graphics, "graphics");
+			Verify.Argument.IsNotNull(graphics, nameof(graphics));
 
 			if(graphLine != null)
 			{

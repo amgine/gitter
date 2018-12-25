@@ -32,7 +32,6 @@ namespace gitter.Framework.Hooks
 		private readonly HookProc _hookProc;
 		private readonly WH _hookType;
 		private IntPtr _hook;
-		private bool _isDisposed;
 
 		#endregion
 
@@ -118,11 +117,7 @@ namespace gitter.Framework.Hooks
 
 		#region IDisposable Members
 
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		protected virtual void Dispose(bool disposing)
 		{

@@ -124,10 +124,7 @@ namespace gitter.Git.Gui.Dialogs
 
 			#region IWin32ControlInputSource Members
 
-			public Control Control
-			{
-				get { return _referencesListBox; }
-			}
+			public Control Control => _referencesListBox;
 
 			#endregion
 		}
@@ -136,15 +133,6 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Data
 
-		private readonly Repository _repository;
-		private readonly IUserInputSource<PushTo> _pushToInput;
-		private readonly IUserInputSource<Remote> _remoteInput;
-		private readonly IUserInputSource<string> _urlInput;
-		private readonly IUserInputSource<ICollection<Branch>> _referencesInput;
-		private readonly IUserInputSource<bool> _forceOverwriteInput;
-		private readonly IUserInputSource<bool> _thinPackInput;
-		private readonly IUserInputSource<bool> _sendTagsInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly IPushController _controller;
 
 		#endregion
@@ -153,41 +141,41 @@ namespace gitter.Git.Gui.Dialogs
 
 		public PushDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 			Localize();
 
 			var inputs = new IUserInputSource[]
 			{
-				_pushToInput = new RadioButtonGroupInputSource<PushTo>(
+				PushTo = new RadioButtonGroupInputSource<PushTo>(
 					new[]
 					{
 						Tuple.Create(_radRemote, gitter.Git.Gui.Interfaces.PushTo.Remote),
 						Tuple.Create(_radUrl,    gitter.Git.Gui.Interfaces.PushTo.Url),
 					}),
-				_remoteInput         = PickerInputSource.Create(_remotePicker),
-				_urlInput            = new TextBoxInputSource(_txtUrl),
-				_referencesInput     = new BranchesInputSource(_lstReferences),
-				_forceOverwriteInput = new CheckBoxInputSource(_chkForceOverwriteBranches),
-				_thinPackInput       = new CheckBoxInputSource(_chkUseThinPack),
-				_sendTagsInput       = new CheckBoxInputSource(_chkSendTags),
+				Remote         = PickerInputSource.Create(_remotePicker),
+				Url            = new TextBoxInputSource(_txtUrl),
+				References     = new BranchesInputSource(_lstReferences),
+				ForceOverwrite = new CheckBoxInputSource(_chkForceOverwriteBranches),
+				ThinPack       = new CheckBoxInputSource(_chkUseThinPack),
+				SendTags       = new CheckBoxInputSource(_chkSendTags),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 
 			_picWarning.Image = CachedResources.Bitmaps["ImgWarning"];
 
-			_lstReferences.LoadData(_repository, ReferenceType.LocalBranch, false, false, null);
+			_lstReferences.LoadData(Repository, ReferenceType.LocalBranch, false, false, null);
 			_lstReferences.EnableCheckboxes();
 
-			if(!_repository.Head.IsDetached)
+			if(!Repository.Head.IsDetached)
 			{
 				foreach(BranchListItem item in _lstReferences.Items)
 				{
-					if(item.DataContext == _repository.Head.Pointer)
+					if(item.DataContext == Repository.Head.Pointer)
 					{
 						item.CheckedState = CheckedState.Checked;
 						break;
@@ -214,55 +202,25 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrPush; }
-		}
+		protected override string ActionVerb => Resources.StrPush;
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		public IUserInputSource<PushTo> PushTo
-		{
-			get { return _pushToInput; }
-		}
+		public IUserInputSource<PushTo> PushTo { get; }
 
-		public IUserInputSource<Remote> Remote
-		{
-			get { return _remoteInput; }
-		}
+		public IUserInputSource<Remote> Remote { get; }
 
-		public IUserInputSource<string> Url
-		{
-			get { return _urlInput; }
-		}
+		public IUserInputSource<string> Url { get; }
 
-		public IUserInputSource<ICollection<Branch>> References
-		{
-			get { return _referencesInput; }
-		}
+		public IUserInputSource<ICollection<Branch>> References { get; }
 
-		public IUserInputSource<bool> ForceOverwrite
-		{
-			get { return _forceOverwriteInput; }
-		}
+		public IUserInputSource<bool> ForceOverwrite { get; }
 
-		public IUserInputSource<bool> ThinPack
-		{
-			get { return _thinPackInput; }
-		}
+		public IUserInputSource<bool> ThinPack { get; }
 
-		public IUserInputSource<bool> SendTags
-		{
-			get { return _sendTagsInput; }
-		}
+		public IUserInputSource<bool> SendTags { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -313,10 +271,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog
 
-		public bool Execute()
-		{
-			return _controller.TryPush();
-		}
+		public bool Execute() => _controller.TryPush();
 
 		#endregion
 	}

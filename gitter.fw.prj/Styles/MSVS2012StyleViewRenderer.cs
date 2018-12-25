@@ -317,7 +317,7 @@ namespace gitter.Framework.Controls
 
 		public MSVS2012StyleViewRenderer(IColorTable colorTable)
 		{
-			Verify.Argument.IsNotNull(colorTable, "colorTable");
+			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
 			_colorTable = colorTable;
 		}

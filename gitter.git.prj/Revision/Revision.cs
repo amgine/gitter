@@ -29,22 +29,7 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly RevisionParentsCollection _parents;
-		private readonly RevisionReferencesCollection _references;
-		private bool _isLoaded;
-
-		private readonly Hash _hash;
-		private readonly string _hashString;
 		private Hash _treeHash;
-		private string _treeHashString;
-
-		private string _subject;
-		private string _body;
-
-		private DateTime _commitDate;
-		private User _committer;
-
-		private DateTime _authorDate;
 		private User _author;
 
 		#endregion
@@ -54,10 +39,10 @@ namespace gitter.Git
 		internal Revision(Repository repository, Hash hash)
 			: base(repository)
 		{
-			_parents    = new RevisionParentsCollection();
-			_references = new RevisionReferencesCollection();
-			_hash       = hash;
-			_hashString = hash.ToString();
+			Parents    = new RevisionParentsCollection();
+			References = new RevisionReferencesCollection();
+			Hash       = hash;
+			HashString = hash.ToString();
 		}
 
 		#endregion
@@ -71,73 +56,51 @@ namespace gitter.Git
 
 		#region Properties
 
-		public RevisionParentsCollection Parents
-		{
-			get { return _parents; }
-		}
+		public RevisionParentsCollection Parents { get; }
 
-		public RevisionReferencesCollection References
-		{
-			get { return _references; }
-		}
+		public RevisionReferencesCollection References { get; }
 
-		public bool IsCurrent
-		{
-			get { return Repository.Head.Revision == this; }
-		}
+		public bool IsCurrent => Repository.Head.Revision == this;
 
-		public bool IsLoaded
-		{
-			get { return _isLoaded; }
-			set { _isLoaded = value; }
-		}
+		public bool IsLoaded { get; set; }
 
 		#endregion
 
 		#region Commit Attributes
 
-		public Hash Hash
-		{
-			get { return _hash; }
-		}
+		public Hash Hash { get; }
 
-		public string HashString
-		{
-			get { return _hashString; }
-		}
+		public string HashString { get; }
 
 		public Hash TreeHash
 		{
 			get { return _treeHash; }
 			internal set
 			{
-				if(!_isLoaded)
+				if(!IsLoaded)
 				{
 					_treeHash = value;
-					_treeHashString = value.ToString();
+					TreeHashString = value.ToString();
 				}
 				else
 				{
 					if(_treeHash != value)
 					{
 						_treeHash = value;
-						_treeHashString = value.ToString();
+						TreeHashString = value.ToString();
 					}
 				}
 			}
 		}
 
-		public string TreeHashString
-		{
-			get { return _treeHashString; }
-		}
+		public string TreeHashString { get; private set; }
 
 		public User Author
 		{
 			get { return _author; }
 			internal set
 			{
-				if(!_isLoaded)
+				if(!IsLoaded)
 				{
 					_author = value;
 				}
@@ -151,85 +114,35 @@ namespace gitter.Git
 			}
 		}
 
-		public DateTime AuthorDate
-		{
-			get { return _authorDate; }
-			internal set
-			{
-				_authorDate = value;
-			}
-		}
+		public DateTime AuthorDate { get; internal set; }
 
-		public User Committer
-		{
-			get { return _committer; }
-			internal set
-			{
-				_committer = value;
-			}
-		}
+		public User Committer { get; internal set; }
 
-		public DateTime CommitDate
-		{
-			get { return _commitDate; }
-			internal set
-			{
-				_commitDate = value; 
-			}
-		}
+		public DateTime CommitDate { get; internal set; }
 
-		public string Subject
-		{
-			get { return _subject; }
-			internal set
-			{
-				_subject = value;
-			}
-		}
+		public string Subject { get; internal set; }
 
-		public string Body
-		{
-			get { return _body; }
-			internal set
-			{
-				_body = value;
-			}
-		}
+		public string Body { get; internal set; }
 
 		#endregion
 
 		#region IRevisionPointer Members
 
-		ReferenceType IRevisionPointer.Type
-		{
-			get { return ReferenceType.Revision; }
-		}
+		ReferenceType IRevisionPointer.Type => ReferenceType.Revision;
 
-		string IRevisionPointer.Pointer
-		{
-			get { return _hashString; }
-		}
+		string IRevisionPointer.Pointer => HashString;
 
-		string IRevisionPointer.FullName
-		{
-			get { return _hashString; }
-		}
+		string IRevisionPointer.FullName => HashString;
 
-		bool IRevisionPointer.IsDeleted
-		{
-			get { return false; }
-		}
+		bool IRevisionPointer.IsDeleted => false;
 
-		Revision IRevisionPointer.Dereference()
-		{
-			return this;
-		}
+		Revision IRevisionPointer.Dereference() => this;
 
 		#endregion
 
 		public override string ToString()
 		{
-			return string.Format("{0}: {1}", _hash.ToString(7), Subject);
+			return string.Format("{0}: {1}", Hash.ToString(7), Subject);
 		}
 	}
 }

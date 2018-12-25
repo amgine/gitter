@@ -27,7 +27,6 @@ namespace gitter.Git.Gui.Controls
 	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
-	using System.Drawing.Drawing2D;
 
 	/// <summary>"Graph" column.</summary>
 	public sealed class GraphColumn : CustomListBoxColumn
@@ -130,9 +129,6 @@ namespace gitter.Git.Gui.Controls
 			ShowColors = section.GetValue("ShowColors", ShowColors);
 		}
 
-		public override string IdentificationString
-		{
-			get { return "Graph"; }
-		}
+		public override string IdentificationString => "Graph";
 	}
 }

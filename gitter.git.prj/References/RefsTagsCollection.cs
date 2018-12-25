@@ -59,9 +59,9 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, "name");
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, nameof(name));
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
 
 			var rev = revision.Dereference();
@@ -93,11 +93,11 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision, string message, bool sign)
 		{
-			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, "name");
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, nameof(name));
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
-			Verify.Argument.IsNotNull(message, "message");
+			Verify.Argument.IsNotNull(message, nameof(message));
 
 			var rev = revision.Dereference();
 			using(Repository.Monitor.BlockNotifications(
@@ -128,12 +128,12 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 		public Tag Create(string name, IRevisionPointer revision, string message, string keyId)
 		{
-			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, "name");
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, nameof(name));
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
-			Verify.Argument.IsNotNull(message, "message");
-			Verify.Argument.IsNotNull(keyId, "keyId");
+			Verify.Argument.IsNotNull(message, nameof(message));
+			Verify.Argument.IsNotNull(keyId, nameof(keyId));
 
 			var rev = revision.Dereference();
 			using(Repository.Monitor.BlockNotifications(
@@ -164,7 +164,7 @@ namespace gitter.Git
 		/// </exception>
 		internal void Delete(Tag tag)
 		{
-			Verify.Argument.IsValidGitObject(tag, Repository, "tag");
+			Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.TagChanged))
@@ -206,7 +206,7 @@ namespace gitter.Git
 
 		internal void Refresh(IEnumerable<TagData> tagDataList)
 		{
-			Verify.Argument.IsNotNull(tagDataList, "tagDataList");
+			Verify.Argument.IsNotNull(tagDataList, nameof(tagDataList));
 
 			RefreshInternal(tagDataList);
 		}
@@ -271,7 +271,7 @@ namespace gitter.Git
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> == <c>null</c>.</exception>
 		protected override string FixInputName(string name)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			if(name.StartsWith(GitConstants.TagPrefix) && !ContainsObjectName(name))
 			{

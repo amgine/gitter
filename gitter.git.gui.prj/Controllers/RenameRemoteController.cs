@@ -33,29 +33,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class RenameRemoteController : ViewControllerBase<IRenameRemoteView>, IRenameRemoteController
 	{
-		#region Data
-
-		private readonly Remote _remote;
-
-		#endregion
-
 		#region .ctor
 
 		public RenameRemoteController(Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
 
-			_remote = remote;
+			Remote = remote;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private Remote Remote
-		{
-			get { return _remote; }
-		}
+		private Remote Remote { get; }
 
 		#endregion
 

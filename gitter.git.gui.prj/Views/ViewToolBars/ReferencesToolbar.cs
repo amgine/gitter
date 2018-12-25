@@ -43,7 +43,7 @@ namespace gitter.Git.Gui.Views
 
 		public ReferencesToolbar(ReferencesView referencesView)
 		{
-			Verify.Argument.IsNotNull(referencesView, "referencesView");
+			Verify.Argument.IsNotNull(referencesView, nameof(referencesView));
 
 			_referencesView = referencesView;
 			Items.Add(_btnRefresh =

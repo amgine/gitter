@@ -97,7 +97,7 @@ namespace gitter.Framework.Controls
 
 		public void PushNotification(NotificationContent content)
 		{
-			if(content == null) throw new ArgumentNullException("content");
+			Verify.Argument.IsNotNull(content, nameof(content));
 			if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
 			if(_windows.Count < MaximumVisibleNotifications)

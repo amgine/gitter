@@ -45,9 +45,9 @@ namespace gitter.Git.Gui.Controls
 
 		public DiffBinding(IDiffSource diffSource, DiffViewer diffViewer, DiffOptions diffOptions)
 		{
-			Verify.Argument.IsNotNull(diffSource, "diffSource");
-			Verify.Argument.IsNotNull(diffViewer, "diffViewer");
-			Verify.Argument.IsNotNull(diffOptions, "diffOptions");
+			Verify.Argument.IsNotNull(diffSource, nameof(diffSource));
+			Verify.Argument.IsNotNull(diffViewer, nameof(diffViewer));
+			Verify.Argument.IsNotNull(diffOptions, nameof(diffOptions));
 
 			_diffSource = diffSource;
 			_diffViewer = diffViewer;
@@ -77,7 +77,7 @@ namespace gitter.Git.Gui.Controls
 			get { return _diffOptions; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				_diffOptions = value;
 			}

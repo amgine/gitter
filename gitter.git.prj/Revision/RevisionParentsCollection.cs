@@ -54,10 +54,7 @@ namespace gitter.Git
 			}
 		}
 
-		public int Count
-		{
-			get { return _container.Count; }
-		}
+		public int Count => _container.Count;
 
 		#endregion
 

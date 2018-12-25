@@ -49,7 +49,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Create <see cref="ViewHostHeader"/>.</summary>
 		internal ViewHostHeader(ViewHost viewHost)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			_viewHost = viewHost;
 			SetStyle(

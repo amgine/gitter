@@ -24,21 +24,13 @@ namespace gitter.Framework.CLI
 
 	public sealed class TextLineReceivedEventArgs : EventArgs
 	{
-		private readonly string _text;
-
 		public TextLineReceivedEventArgs(string text)
 		{
-			_text = text;
+			Text = text;
 		}
 
-		public string Text
-		{
-			get { return _text; }
-		}
+		public string Text { get; }
 
-		public override string ToString()
-		{
-			return Text;
-		}
+		public override string ToString() => Text;
 	}
 }

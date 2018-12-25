@@ -82,7 +82,7 @@ namespace gitter.Git.Gui.Controls
 		public FakeRevisionListItem(Repository repository, FakeRevisionItemType type)
 			: base(null)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 			_type = type;

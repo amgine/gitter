@@ -165,7 +165,7 @@ namespace gitter.Framework
 
 		public static Control GetParentControl(ToolStripItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			var cms = item.Owner as ContextMenuStrip;
 			if(cms != null)
@@ -184,7 +184,7 @@ namespace gitter.Framework
 
 		public static void MarkDropDownForAutoDispose(ToolStripDropDown menu)
 		{
-			Verify.Argument.IsNotNull(menu, "menu");
+			Verify.Argument.IsNotNull(menu, nameof(menu));
 
 			menu.Closed += (sender, e) => DisposeOnIdle((IDisposable)sender);
 		}

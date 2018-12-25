@@ -197,7 +197,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static Process ExecNormal(GitInput input)
 		{
-			Verify.Argument.IsNotNull(input, "input");
+			Verify.Argument.IsNotNull(input, nameof(input));
 
 			var psi = new ProcessStartInfo()
 			{
@@ -303,7 +303,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static GitOutput Execute(GitInput input)
 		{
-			Verify.Argument.IsNotNull(input, "input");
+			Verify.Argument.IsNotNull(input, nameof(input));
 
 			var stdOutReader = new AsyncTextReader();
 			var stdErrReader = new AsyncTextReader();

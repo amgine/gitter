@@ -46,7 +46,7 @@ namespace gitter.Redmine
 
 		internal CustomFields(XmlNode node, Func<int, string, CustomField> initializer)
 		{
-			Verify.Argument.IsNotNull(initializer, "initializer");
+			Verify.Argument.IsNotNull(initializer, nameof(initializer));
 
 			_values = new Dictionary<int, CustomFieldValue>();
 			if(node != null)
@@ -117,7 +117,7 @@ namespace gitter.Redmine
 		{
 			get
 			{
-				Verify.Argument.IsNotNull(field, "field");
+				Verify.Argument.IsNotNull(field, nameof(field));
 				return this[field.Id];
 			}
 		}

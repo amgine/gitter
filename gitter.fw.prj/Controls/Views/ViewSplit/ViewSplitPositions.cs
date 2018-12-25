@@ -53,8 +53,8 @@ namespace gitter.Framework.Controls
 		/// <param name="position">First splitter position.</param>
 		public ViewSplitPositions(ViewSplit viewSplit, int size, double position)
 		{
-			Verify.Argument.IsNotNull(viewSplit, "viewSplit");
-			Verify.Argument.IsNotNegative(size, "size");
+			Verify.Argument.IsNotNull(viewSplit, nameof(viewSplit));
+			Verify.Argument.IsNotNegative(size, nameof(size));
 			Verify.Argument.IsInRange(0.0, position, 1.0, "position");
 
 			_viewSplit = viewSplit;

@@ -108,7 +108,7 @@ namespace gitter.Redmine.Gui
 		public NewsListItem(News news)
 			: base(news)
 		{
-			Verify.Argument.IsNotNull(news, "news");
+			Verify.Argument.IsNotNull(news, nameof(news));
 		}
 
 		protected override void OnListBoxAttached()

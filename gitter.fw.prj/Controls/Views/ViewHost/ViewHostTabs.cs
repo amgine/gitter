@@ -54,7 +54,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Create <see cref="ViewHostTabs"/>.</summary>
 		internal ViewHostTabs(ViewHost viewHost, AnchorStyles side)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			_viewHost = viewHost;
 			_viewHost.ActiveViewChanged += OnActiveViewChanged;
@@ -203,7 +203,7 @@ namespace gitter.Framework.Controls
 
 		internal void InvalidateTab(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			var index	= IndexOf(view);
 			var tab		= _tabs[index];
@@ -220,7 +220,7 @@ namespace gitter.Framework.Controls
 
 		internal void InvalidateTab(ViewHostTab tab)
 		{
-			Verify.Argument.IsNotNull(tab, "tab");
+			Verify.Argument.IsNotNull(tab, nameof(tab));
 			Verify.Argument.AreEqual(this, tab.Tabs, "tab", "Tab is hosted in another control.");
 
 			var index	= IndexOf(tab);
@@ -237,7 +237,7 @@ namespace gitter.Framework.Controls
 
 		public void EnsureVisible(ViewHostTab tab)
 		{
-			Verify.Argument.IsNotNull(tab, "tab");
+			Verify.Argument.IsNotNull(tab, nameof(tab));
 			Verify.Argument.AreEqual(this, tab.Tabs, "tab", "Tab is hosted in another control.");
 
 			if(ViewHost.IsDocumentWell) EnsureVisible(IndexOf(tab));
@@ -245,7 +245,7 @@ namespace gitter.Framework.Controls
 
 		public void EnsureVisible(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			if(ViewHost.IsDocumentWell) EnsureVisible(IndexOf(view));
 		}
@@ -420,7 +420,7 @@ namespace gitter.Framework.Controls
 
 		public void AddView(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			var tab = new ViewHostTab(this, view);
 			tab.ResetLength();
@@ -432,7 +432,7 @@ namespace gitter.Framework.Controls
 
 		public void InsertView(ViewBase view, int index)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			var tab = new ViewHostTab(this, view);
 			tab.ResetLength();
@@ -454,8 +454,8 @@ namespace gitter.Framework.Controls
 
 		public void SwapViews(ViewBase view1, ViewBase view2)
 		{
-			Verify.Argument.IsNotNull(view1, "view1");
-			Verify.Argument.IsNotNull(view2, "view2");
+			Verify.Argument.IsNotNull(view1, nameof(view1));
+			Verify.Argument.IsNotNull(view2, nameof(view2));
 
 			if(view1 == view2) return;
 			int index1 = -1;
@@ -490,7 +490,7 @@ namespace gitter.Framework.Controls
 
 		public bool Remove(ViewHostTab tab)
 		{
-			Verify.Argument.IsNotNull(tab, "tab");
+			Verify.Argument.IsNotNull(tab, nameof(tab));
 
 			if(_tabHover.Item == tab)
 			{
@@ -514,7 +514,7 @@ namespace gitter.Framework.Controls
 
 		public bool RemoveView(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			int id = IndexOf(view);
 			if(id != -1)

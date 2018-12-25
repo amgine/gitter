@@ -26,74 +26,53 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class ConfigParameterData : INamedObject
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly string _value;
-		private readonly ConfigFile _configFile;
-		private readonly string _fileName;
-
-		#endregion
-
 		#region .ctor
 
 		public ConfigParameterData(string name, string value, ConfigFile configFile, string fileName)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(value, nameof(value));
 
-			_name = name;
-			_value = value;
-			_configFile = configFile;
-			_fileName = fileName;
+			Name = name;
+			Value = value;
+			ConfigFile = configFile;
+			SpecifiedFile = fileName;
 		}
 
 		public ConfigParameterData(string name, string value, ConfigFile configFile)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(value, nameof(value));
 			Verify.Argument.AreNotEqual(ConfigFile.Other, configFile, "configFile", string.Empty);
 
-			_name = name;
-			_value = value;
-			_configFile = configFile;
+			Name = name;
+			Value = value;
+			ConfigFile = configFile;
 		}
 
 		public ConfigParameterData(string name, string value, string fileName)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(value, "value");
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(value, nameof(value));
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
-			_name = name;
-			_value = value;
-			_configFile = ConfigFile.Other;
-			_fileName = fileName;
+			Name = name;
+			Value = value;
+			ConfigFile = ConfigFile.Other;
+			SpecifiedFile = fileName;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public string Value
-		{
-			get { return _value; }
-		}
+		public string Value { get; }
 
-		public ConfigFile ConfigFile
-		{
-			get { return _configFile; }
-		}
+		public ConfigFile ConfigFile { get; }
 
-		public string SpecifiedFile
-		{
-			get { return _fileName; }
-		}
+		public string SpecifiedFile { get; }
 
 		#endregion
 	}

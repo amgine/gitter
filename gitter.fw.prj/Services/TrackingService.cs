@@ -90,13 +90,13 @@ namespace gitter.Framework.Services
 				{
 					var args = new TrackingEventArgs(false, _index);
 					_index = -1;
-					Changed.Raise(this, args);
+					Changed?.Invoke(this, args);
 				}
 				if(index != -1)
 				{
 					_index = index;
 					var args = new TrackingEventArgs(true, _index);
-					Changed.Raise(this, args);
+					Changed?.Invoke(this, args);
 				}
 			}
 		}
@@ -108,7 +108,7 @@ namespace gitter.Framework.Services
 			{
 				var args = new TrackingEventArgs(false, _index);
 				_index = -1;
-				Changed.Raise(this, args);
+				Changed?.Invoke(this, args);
 			}
 		}
 
@@ -217,7 +217,7 @@ namespace gitter.Framework.Services
 					_index = -1;
 					_partId = 0;
 					_item = default(T);
-					Changed.Raise(this, args);
+					Changed?.Invoke(this, args);
 				}
 				if(index != -1)
 				{
@@ -225,7 +225,7 @@ namespace gitter.Framework.Services
 					_item = element;
 					_partId = partId;
 					var args = new TrackingEventArgs<T>(true, _index, _item);
-					Changed.Raise(this, args);
+					Changed?.Invoke(this, args);
 				}
 			}
 		}
@@ -262,7 +262,7 @@ namespace gitter.Framework.Services
 				_index = -1;
 				_partId = 0;
 				_item = default(T);
-				Changed.Raise(this, args);
+				Changed?.Invoke(this, args);
 			}
 		}
 

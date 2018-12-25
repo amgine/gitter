@@ -34,7 +34,7 @@ namespace gitter.Framework
 		/// <remarks>WinVista+ required.</remarks>
 		public static void SetStyleEx(this ProgressBar progressBar, ProgressBarStyleEx style)
 		{
-			Verify.Argument.IsNotNull(progressBar, "progressBar");
+			Verify.Argument.IsNotNull(progressBar, nameof(progressBar));
 
 			const uint TDM_SET_PROGRESS_BAR_STATE = 0x400 + 16;
 			User32.SendMessage(progressBar.Handle, TDM_SET_PROGRESS_BAR_STATE, (IntPtr)style, (IntPtr)0);

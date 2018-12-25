@@ -24,16 +24,11 @@ namespace gitter.Git
 
 	public class DiffFileEventArgs : EventArgs
 	{
-		private readonly DiffFile _diffFile;
-
 		public DiffFileEventArgs(DiffFile diffFile)
 		{
-			_diffFile = diffFile;
+			DiffFile = diffFile;
 		}
 
-		public DiffFile DiffFile
-		{
-			get { return _diffFile; }
-		}
+		public DiffFile DiffFile { get; }
 	}
 }

@@ -29,28 +29,26 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class BranchMenu : ContextMenuStrip
 	{
-		private readonly BranchBase _branch;
-
 		public BranchMenu(BranchBase branch)
 		{
-			Verify.Argument.IsValidGitObject(branch, "branch");
+			Verify.Argument.IsValidGitObject(branch, nameof(branch));
 
-			_branch = branch;
+			Branch = branch;
 
-			Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(_branch));
-			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(_branch));
+			Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(Branch));
+			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(Branch));
 
 			Items.Add(new ToolStripSeparator()); // interactive section
 
-			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(_branch, "{0} '{1}'"));
-			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(_branch));
-			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(_branch));
-			Items.Add(GuiItemFactory.GetMergeItem<ToolStripMenuItem>(_branch));
+			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(Branch, "{0} '{1}'"));
+			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(Branch));
+			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(Branch));
+			Items.Add(GuiItemFactory.GetMergeItem<ToolStripMenuItem>(Branch));
 			if(!branch.IsRemote)
 			{
-				Items.Add(GuiItemFactory.GetRenameBranchItem<ToolStripMenuItem>((Branch)_branch, "{0}"));
+				Items.Add(GuiItemFactory.GetRenameBranchItem<ToolStripMenuItem>((Branch)Branch, "{0}"));
 			}
-			Items.Add(GuiItemFactory.GetRemoveBranchItem<ToolStripMenuItem>(_branch));
+			Items.Add(GuiItemFactory.GetRemoveBranchItem<ToolStripMenuItem>(Branch));
 			if(!branch.IsRemote)
 			{
 				lock(branch.Repository.Remotes.SyncRoot)
@@ -74,21 +72,18 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _branch.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, _branch.FullName));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, _branch.Revision.HashString));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Branch.Name));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Branch.FullName));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Branch.Revision.HashString));
 
 			Items.Add(item);
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(_branch));
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(_branch));
+			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Branch));
+			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Branch));
 		}
 
-		public BranchBase Branch
-		{
-			get { return _branch; }
-		}
+		public BranchBase Branch { get; }
 	}
 }

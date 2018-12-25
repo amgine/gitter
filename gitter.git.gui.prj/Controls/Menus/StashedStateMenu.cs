@@ -29,13 +29,11 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class StashedStateMenu : ContextMenuStrip
 	{
-		private readonly StashedState _stashedState;
-
 		public StashedStateMenu(StashedState stashedState)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, nameof(stashedState));
 
-			_stashedState = stashedState;
+			StashedState = stashedState;
 
 			Items.AddRange(
 				new ToolStripItem[]
@@ -60,9 +58,6 @@ namespace gitter.Git.Gui.Controls
 				});
 		}
 
-		public StashedState StashedState
-		{
-			get { return _stashedState; }
-		}
+		public StashedState StashedState { get; }
 	}
 }

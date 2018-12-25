@@ -37,10 +37,7 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private readonly Remote _remote;
 		private readonly IRenameRemoteController _controller;
-		private readonly IUserInputSource<string> _newNameInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 
 		#endregion
 
@@ -48,11 +45,11 @@ namespace gitter.Git.Gui.Dialogs
 
 		public RenameRemoteDialog(Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
-			Verify.Argument.IsFalse(remote.IsDeleted, "remote",
+			Verify.Argument.IsNotNull(remote, nameof(remote));
+			Verify.Argument.IsFalse(remote.IsDeleted, nameof(remote),
 				Resources.ExcObjectIsDeleted.UseAsFormat("Remote"));
 
-			_remote = remote;
+			Remote = remote;
 
 			InitializeComponent();
 			Localize();
@@ -65,9 +62,9 @@ namespace gitter.Git.Gui.Dialogs
 
 			var inputs = new IUserInputSource[]
 			{
-				_newNameInput = new TextBoxInputSource(_txtNewName),
+				NewName = new TextBoxInputSource(_txtNewName),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
 
@@ -78,25 +75,13 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrRename; }
-		}
+		protected override string ActionVerb => Resources.StrRename;
 
-		public Remote Remote
-		{
-			get { return _remote; }
-		}
+		public Remote Remote { get; }
 
-		public IUserInputSource<string> NewName
-		{
-			get { return _newNameInput; }
-		}
+		public IUserInputSource<string> NewName { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -114,10 +99,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog Members
 
-		public bool Execute()
-		{
-			return _controller.TryRename();
-		}
+		public bool Execute() => _controller.TryRename();
 
 		#endregion
 	}

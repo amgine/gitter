@@ -126,6 +126,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\Popup\IPicker.cs" />
+    <Compile Include="Controls\Views\PlainTextNotificationContent.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\Views\WebBrowserView\WebBrowserViewModel.cs" />
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GraphicsUtility.cs" />

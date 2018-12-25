@@ -37,7 +37,7 @@ namespace gitter
 		public RepositoryExplorerViewFactory(IWorkingEnvironment environment)
 			: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, CachedResources.Bitmaps["ImgRepositoryExplorer"], true)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_rootItem = new RepositoryRootItem(environment, null);
 			DefaultViewPosition = ViewPosition.Left;
@@ -50,7 +50,7 @@ namespace gitter
 
 		public void AddItem(CustomListBoxItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_rootItem.Items.Add(item);
 		}

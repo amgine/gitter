@@ -34,7 +34,7 @@ namespace gitter.Framework
 		public TimeCache(Func<T> onReevaluate, TimeSpan lifetime)
 			: base(onReevaluate)
 		{
-			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
 
 			_lifetime = lifetime;
 		}

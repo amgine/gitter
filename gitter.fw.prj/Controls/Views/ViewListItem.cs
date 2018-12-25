@@ -33,7 +33,7 @@ namespace gitter.Framework.Controls
 		public ViewListItem(IViewFactory viewFactory)
 			: base(viewFactory)
 		{
-			Verify.Argument.IsNotNull(viewFactory, "viewFactory");
+			Verify.Argument.IsNotNull(viewFactory, nameof(viewFactory));
 		}
 
 		#endregion

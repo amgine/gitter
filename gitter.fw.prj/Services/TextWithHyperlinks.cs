@@ -53,7 +53,7 @@ namespace gitter.Framework
 
 			public HyperlinkGlyph(Hyperlink href)
 			{
-				Verify.Argument.IsNotNull(href, "href");
+				Verify.Argument.IsNotNull(href, nameof(href));
 
 				_href = href;
 			}

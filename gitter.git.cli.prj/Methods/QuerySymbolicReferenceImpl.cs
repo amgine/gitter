@@ -54,7 +54,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public SymbolicReferenceData Invoke(QuerySymbolicReferenceParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var fileName = _repository.GetGitFileName(parameters.Name);
 			if(File.Exists(fileName))
@@ -83,7 +83,7 @@ namespace gitter.Git.AccessLayer.CLI
 		public Task<SymbolicReferenceData> InvokeAsync(QuerySymbolicReferenceParameters parameters,
 			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			return Task.Factory.StartNew<SymbolicReferenceData>(
 				(state) => Invoke((QuerySymbolicReferenceParameters)state),

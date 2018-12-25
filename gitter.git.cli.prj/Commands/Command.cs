@@ -28,13 +28,6 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Represents git command line command.</summary>
 	public class Command
 	{
-		#region Data
-
-		private readonly IEnumerable<ICommandArgument> _arguments;
-		private readonly string _name;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>
@@ -44,10 +37,10 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <param name="arguments">Command arguments.</param>
 		public Command(string name, IEnumerable<ICommandArgument> arguments)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			_name = name;
-			_arguments = arguments ?? Enumerable.Empty<ICommandArgument>();
+			Name = name;
+			Arguments = arguments ?? Enumerable.Empty<ICommandArgument>();
 		}
 
 		/// <summary>
@@ -65,17 +58,11 @@ namespace gitter.Git.AccessLayer.CLI
 
 		/// <summary>Returns command name.</summary>
 		/// <value>Command name.</value>
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 		
 		/// <summary>Returns collection of command arguments.</summary>
 		/// <value>Collection of command arguments.</value>
-		public IEnumerable<ICommandArgument> Arguments
-		{
-			get { return _arguments; }
-		}
+		public IEnumerable<ICommandArgument> Arguments { get; }
 
 		#endregion
 
@@ -86,7 +73,7 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <exception cref="ArgumentNullException"><paramref name="stringBuilder"/> == <c>null</c>.</exception>
 		public void ToString(StringBuilder stringBuilder)
 		{
-			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
+			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
 
 			const char ArgumentSeparator = ' ';
 			stringBuilder.Append(Name);

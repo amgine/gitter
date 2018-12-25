@@ -46,38 +46,32 @@ namespace gitter.Git
 
 		private void InvokeDirectoryAdded(TreeDirectory folder)
 		{
-			var handler = DirectoryAdded;
-			if(handler != null) handler(this, new TreeDirectoryEventArgs(folder));
+			DirectoryAdded?.Invoke(this, new TreeDirectoryEventArgs(folder));
 		}
 
 		private void OnDirectoryDeleted(TreeDirectory folder)
 		{
-			var handler = DirectoryDeleted;
-			if(handler != null) handler(this, new TreeDirectoryEventArgs(folder));
+			DirectoryDeleted?.Invoke(this, new TreeDirectoryEventArgs(folder));
 		}
 
 		private void InvokeFileAdded(TreeFile file)
 		{
-			var handler = FileAdded;
-			if(handler != null) handler(this, new TreeFileEventArgs(file));
+			FileAdded?.Invoke(this, new TreeFileEventArgs(file));
 		}
 
 		private void OnFileDeleted(TreeFile file)
 		{
-			var handler = FileDeleted;
-			if(handler != null) handler(this, new TreeFileEventArgs(file));
+			FileDeleted?.Invoke(this, new TreeFileEventArgs(file));
 		}
 
 		private void OnCommitAdded(TreeCommit commit)
 		{
-			var handler = CommitAdded;
-			if(handler != null) handler(this, new TreeCommitEventArgs(commit));
+			CommitAdded?.Invoke(this, new TreeCommitEventArgs(commit));
 		}
 
 		private void OnCommitDeleted(TreeCommit commit)
 		{
-			var handler = CommitDeleted;
-			if(handler != null) handler(this, new TreeCommitEventArgs(commit));
+			CommitDeleted?.Invoke(this, new TreeCommitEventArgs(commit));
 		}
 
 		#endregion
@@ -163,25 +157,13 @@ namespace gitter.Git
 			OnCommitDeleted(commit);
 		}
 
-		public IList<TreeDirectory> Directories
-		{
-			get { return _directories; }
-		}
+		public IList<TreeDirectory> Directories => _directories;
 
-		public IList<TreeFile> Files
-		{
-			get { return _files; }
-		}
+		public IList<TreeFile> Files => _files;
 
-		public IList<TreeCommit> Commits
-		{
-			get { return _commits; }
-		}
+		public IList<TreeCommit> Commits => _commits;
 
-		public override TreeItemType ItemType
-		{
-			get { return TreeItemType.Tree; }
-		}
+		public override TreeItemType ItemType => TreeItemType.Tree;
 
 		public bool IsEmpty
 		{

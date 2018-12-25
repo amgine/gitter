@@ -22,9 +22,6 @@ namespace gitter.Framework.Services
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Reflection;
 	using System.Diagnostics;
 
 	public class LoggingService
@@ -94,7 +91,7 @@ namespace gitter.Framework.Services
 
 		public static void RegisterAppender(ILogAppender logAppender, bool fill)
 		{
-			Verify.Argument.IsNotNull(logAppender, "logAppender");
+			Verify.Argument.IsNotNull(logAppender, nameof(logAppender));
 
 			lock(_log)
 			{
@@ -112,7 +109,7 @@ namespace gitter.Framework.Services
 
 		public static void UnregisterAppender(ILogAppender logAppender)
 		{
-			Verify.Argument.IsNotNull(logAppender, "logAppender");
+			Verify.Argument.IsNotNull(logAppender, nameof(logAppender));
 
 			lock(_log)
 			{
@@ -124,42 +121,42 @@ namespace gitter.Framework.Services
 
 		public void Log(LogEventType type, string @event)
 		{
-			Verify.Argument.IsNotNull(type, "type");
+			Verify.Argument.IsNotNull(type, nameof(type));
 
 			LogCore(type, null, @event);
 		}
 
 		public void Log(LogEventType type, string @event, object arg0)
 		{
-			Verify.Argument.IsNotNull(type, "type");
+			Verify.Argument.IsNotNull(type, nameof(type));
 
 			LogCore(type, null, string.Format(@event, arg0));
 		}
 
 		public void Log(LogEventType type, string @event, params object[] args)
 		{
-			Verify.Argument.IsNotNull(type, "type");
+			Verify.Argument.IsNotNull(type, nameof(type));
 
 			LogCore(type, null, string.Format(@event, args));
 		}
 
 		public void Log(LogEventType type, Exception exc, string @event)
 		{
-			Verify.Argument.IsNotNull(type, "type");
+			Verify.Argument.IsNotNull(type, nameof(type));
 
 			LogCore(type, exc, @event);
 		}
 
 		public void Log(LogEventType type, Exception exc, string @event, object arg0)
 		{
-			Verify.Argument.IsNotNull(type, "type");
+			Verify.Argument.IsNotNull(type, nameof(type));
 
 			LogCore(type, exc, string.Format(@event, arg0));
 		}
 
 		public void Log(LogEventType type, Exception exc, string @event, params object[] args)
 		{
-			Verify.Argument.IsNotNull(type, "type");
+			Verify.Argument.IsNotNull(type, nameof(type));
 
 			LogCore(type, exc, string.Format(@event, args));
 		}
@@ -189,7 +186,7 @@ namespace gitter.Framework.Services
 		[Conditional("DEBUG")]
 		public void Debug(Exception exc)
 		{
-			LogCore(LogEventType.Debug, exc, exc != null ? exc.Message : null);
+			LogCore(LogEventType.Debug, exc, exc?.Message);
 		}
 
 		[Conditional("DEBUG")]
@@ -231,7 +228,7 @@ namespace gitter.Framework.Services
 
 		public void Info(Exception exc)
 		{
-			LogCore(LogEventType.Information, exc, exc != null ? exc.Message : null);
+			LogCore(LogEventType.Information, exc, exc?.Message);
 		}
 
 		public void Info(Exception exc, string @event)
@@ -270,7 +267,7 @@ namespace gitter.Framework.Services
 
 		public void Warning(Exception exc)
 		{
-			LogCore(LogEventType.Warning, exc, exc != null ? exc.Message : null);
+			LogCore(LogEventType.Warning, exc, exc?.Message);
 		}
 
 		public void Warning(Exception exc, string @event)
@@ -309,7 +306,7 @@ namespace gitter.Framework.Services
 
 		public void Error(Exception exc)
 		{
-			LogCore(LogEventType.Error, exc, exc != null ? exc.Message : null);
+			LogCore(LogEventType.Error, exc, exc?.Message);
 		}
 
 		public void Error(Exception exc, string @event)

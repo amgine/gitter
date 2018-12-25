@@ -36,7 +36,7 @@ namespace gitter
 		public static T GetRemoveRecentRepositoryItem<T>(RepositoryLink repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -51,7 +51,7 @@ namespace gitter
 		public static T GetRemoveRepositoryItem<T>(RepositoryListItem repository)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
@@ -66,7 +66,7 @@ namespace gitter
 		public static T GetOpenUrlItem<T>(string name, Image image, string url)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 
 			var item = new T()
 			{
@@ -81,7 +81,7 @@ namespace gitter
 		public static T GetOpenCmdAtItem<T>(string name, Image image, string path)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
 
 			var item = new T()
 			{

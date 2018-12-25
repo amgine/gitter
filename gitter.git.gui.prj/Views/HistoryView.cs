@@ -24,8 +24,6 @@ namespace gitter.Git.Gui.Views
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
-	using System.Threading;
-	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -59,10 +57,7 @@ namespace gitter.Git.Gui.Views
 
 		/// <summary>Gets view image.</summary>
 		/// <value>This view image.</value>
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgHistory"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgHistory"];
 
 		protected override void AttachToRepository(Repository repository)
 		{

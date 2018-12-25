@@ -44,7 +44,7 @@ namespace gitter.Git.Gui.Controls
 		public RemoteBranchListItem(RemoteBranch branch)
 			: base(branch)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsNotNull(branch, nameof(branch));
 		}
 
 		#endregion

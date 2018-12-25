@@ -47,7 +47,7 @@ namespace gitter.Framework.Mvc
 
 		public static CursorChangeToken ChangeCursor(this IView view, MouseCursor cursor)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			var oldCursor = view.MouseCursor;
 			view.MouseCursor = cursor;

@@ -66,7 +66,7 @@ namespace gitter.Framework
 			get { return _defaultTextRenderer; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				_defaultTextRenderer = value;
 			}
@@ -94,7 +94,7 @@ namespace gitter.Framework
 			}
 			private set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_style != value)
 				{
@@ -111,7 +111,7 @@ namespace gitter.Framework
 			get { return _styleOnNextStartup; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				_styleOnNextStartup = value;
 			}

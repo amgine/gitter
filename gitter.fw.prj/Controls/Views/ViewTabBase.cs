@@ -44,7 +44,7 @@ namespace gitter.Framework.Controls
 		/// <param name="anchor">Tab anchor.</param>
 		protected ViewTabBase(ViewBase view, AnchorStyles anchor)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			switch(anchor)
 			{

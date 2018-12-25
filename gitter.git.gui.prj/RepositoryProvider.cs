@@ -79,25 +79,13 @@ namespace gitter.Git
 
 		#region Properties
 
-		public string Name
-		{
-			get { return "git"; }
-		}
+		public string Name => "git";
 
-		public string DisplayName
-		{
-			get { return "Git"; }
-		}
+		public string DisplayName => "Git";
 
-		public Image Icon
-		{
-			get { return CachedResources.Bitmaps["ImgGit"]; }
-		}
+		public Image Icon => CachedResources.Bitmaps["ImgGit"];
 
-		public bool IsLoaded
-		{
-			get { return _environment != null; }
-		}
+		public bool IsLoaded => _environment != null;
 
 		#endregion
 
@@ -111,7 +99,7 @@ namespace gitter.Git
 			get { return _gitAccessorProvider; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_gitAccessorProvider != value)
 				{
@@ -138,7 +126,7 @@ namespace gitter.Git
 			get { return _gitAccessor; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_gitAccessor != value)
 				{
@@ -154,14 +142,11 @@ namespace gitter.Git
 			}
 		}
 
-		public Version MinimumRequiredGitVersion
-		{
-			get { return _minVersion; }
-		}
+		public Version MinimumRequiredGitVersion => _minVersion;
 
 		public bool LoadFor(IWorkingEnvironment environment, Section section)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			if(section != null)
 			{
@@ -233,7 +218,7 @@ namespace gitter.Git
 		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			if(ActiveGitAccessorProvider != null)
 			{
@@ -280,7 +265,7 @@ namespace gitter.Git
 
 		public void OnRepositoryLoaded(IRepository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 			var gitRepository = repository as Repository;
 			Verify.Argument.IsTrue(gitRepository != null, "repository");
 

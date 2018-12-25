@@ -44,7 +44,7 @@ namespace gitter.Git.Gui.Views
 		/// <param name="stashView">Stash view.</param>
 		public StashToolbar(StashView stashView)
 		{
-			Verify.Argument.IsNotNull(stashView, "stashView");
+			Verify.Argument.IsNotNull(stashView, nameof(stashView));
 
 			_stashView = stashView;
 			Items.Add(

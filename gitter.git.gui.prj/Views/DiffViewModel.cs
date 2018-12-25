@@ -22,34 +22,21 @@ namespace gitter.Git.Gui.Views
 {
 	public class DiffViewModel
 	{
-		#region Data
-
-		private readonly DiffOptions _diffOptions;
-		private readonly IDiffSource _diffSource;
-
-		#endregion
-
 		#region .ctor
 
 		public DiffViewModel(IDiffSource diffSource, DiffOptions diffOptions)
 		{
-			_diffSource  = diffSource;
-			_diffOptions = diffOptions;
+			DiffSource  = diffSource;
+			DiffOptions = diffOptions;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public IDiffSource DiffSource
-		{
-			get { return _diffSource; }
-		}
-		
-		public DiffOptions DiffOptions
-		{
-			get { return _diffOptions; }
-		}
+		public IDiffSource DiffSource { get; }
+
+		public DiffOptions DiffOptions { get; }
 
 		#endregion
 

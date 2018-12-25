@@ -95,7 +95,7 @@ namespace gitter.Git.Gui.Controls
 		public ConfigParameterListItem(ConfigParameter parameter)
 			: base(parameter)
 		{
-			Verify.Argument.IsNotNull(parameter, "parameter");
+			Verify.Argument.IsNotNull(parameter, nameof(parameter));
 		}
 
 		#endregion

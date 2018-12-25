@@ -26,31 +26,18 @@ namespace gitter.Git
 
 	public abstract class TreeContentData : INamedObject
 	{
-		private readonly string _hash;
-		private readonly int _mode;
-		private readonly string _name;
-
 		internal TreeContentData(string hash, int mode, string name)
 		{
-			_hash = hash; ;
-			_name = name;
-			_mode = mode;
+			SHA1 = hash;
+			Name = name;
+			Mode = mode;
 		}
 
-		public string SHA1
-		{
-			get { return _hash; }
-		}
+		public string SHA1 { get; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public int Mode
-		{
-			get { return _mode; }
-		}
+		public int Mode { get; }
 
 		public abstract TreeContentType Type { get; }
 	}

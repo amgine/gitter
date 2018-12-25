@@ -40,7 +40,7 @@ namespace gitter.Framework.Options
 
 		public OptionsDialog(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 

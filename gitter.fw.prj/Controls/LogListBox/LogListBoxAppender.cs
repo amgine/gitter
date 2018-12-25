@@ -102,7 +102,7 @@ namespace gitter.Framework.Controls
 
 		public IDisposable Subscribe(IObserver<LogEvent> observer)
 		{
-			Verify.Argument.IsNotNull(observer, "observer");
+			Verify.Argument.IsNotNull(observer, nameof(observer));
 
 			lock(_observers)
 			{

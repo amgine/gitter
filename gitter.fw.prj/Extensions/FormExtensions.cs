@@ -42,7 +42,7 @@ namespace gitter.Framework
 
 		public static void DisableCloseButton(this Form form)
 		{
-			Verify.Argument.IsNotNull(form, "form");
+			Verify.Argument.IsNotNull(form, nameof(form));
 
 			var hMenu = User32.GetSystemMenu(form.Handle, false);
 			User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
@@ -50,7 +50,7 @@ namespace gitter.Framework
 
 		public static void EnableCloseButton(this Form form)
 		{
-			Verify.Argument.IsNotNull(form, "form");
+			Verify.Argument.IsNotNull(form, nameof(form));
 
 			var hMenu = User32.GetSystemMenu(form.Handle, false);
 			User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);

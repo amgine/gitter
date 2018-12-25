@@ -44,8 +44,8 @@ namespace gitter
 
 		public AddRepositoryDialog(IWorkingEnvironment environment, LocalRepositoriesListBox repositoriyList)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
-			Verify.Argument.IsNotNull(repositoriyList, "repositoriyList");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
+			Verify.Argument.IsNotNull(repositoriyList, nameof(repositoriyList));
 
 			_environment = environment;
 			_repositoryList = repositoriyList;

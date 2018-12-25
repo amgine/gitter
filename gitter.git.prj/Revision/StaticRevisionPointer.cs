@@ -30,7 +30,6 @@ namespace gitter.Git
 		#region Data
 
 		private readonly string _pointer;
-		private readonly Repository _repository;
 		private Revision _revision;
 
 		#endregion
@@ -39,10 +38,10 @@ namespace gitter.Git
 
 		public StaticRevisionPointer(Repository repository, string pointer)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNeitherNullNorWhitespace(pointer, "pointer");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNeitherNullNorWhitespace(pointer, nameof(pointer));
 
-			_repository = repository;
+			Repository = repository;
 			_pointer = pointer;
 		}
 
@@ -50,30 +49,15 @@ namespace gitter.Git
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		public virtual ReferenceType Type
-		{
-			get { return ReferenceType.Revision; }
-		}
+		public virtual ReferenceType Type => ReferenceType.Revision;
 
-		public virtual string Pointer
-		{
-			get { return _pointer; }
-		}
+		public virtual string Pointer => _pointer;
 
-		public virtual string FullName
-		{
-			get { return _pointer; }
-		}
+		public virtual string FullName => _pointer;
 
-		public virtual bool IsDeleted
-		{
-			get { return false; }
-		}
+		public virtual bool IsDeleted => false;
 
 		#endregion
 

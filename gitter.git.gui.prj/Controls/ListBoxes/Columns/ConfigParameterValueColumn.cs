@@ -54,9 +54,6 @@ namespace gitter.Git.Gui.Controls
 			paintEventArgs.PaintText(value);
 		}
 
-		public override string IdentificationString
-		{
-			get { return "Value"; }
-		}
+		public override string IdentificationString => "Value";
 	}
 }

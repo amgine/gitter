@@ -41,7 +41,7 @@ namespace gitter.Git.Gui
 		public RepositoryContributorsListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgUsers"], Resources.StrContributors)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

@@ -36,7 +36,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public OutputParser(GitCLI gitCLI)
 		{
-			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
+			Verify.Argument.IsNotNull(gitCLI, nameof(gitCLI));
 
 			_gitCLI = gitCLI;
 		}
@@ -1280,6 +1280,11 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				return null;
 			}
+			return output.Output;
+		}
+
+		public string ParseCommitResult(CommitParameters parameters, GitOutput output)
+		{
 			return output.Output;
 		}
 

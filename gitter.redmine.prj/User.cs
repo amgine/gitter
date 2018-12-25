@@ -82,7 +82,7 @@ namespace gitter.Redmine
 
 		internal override void Update(XmlNode node)
 		{
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			Login		= RedmineUtility.LoadString(node[LoginProperty.XmlNodeName]);
 			FirstName	= RedmineUtility.LoadString(node[FirstNameProperty.XmlNodeName]);

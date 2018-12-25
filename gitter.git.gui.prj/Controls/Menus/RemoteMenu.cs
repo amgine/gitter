@@ -29,13 +29,11 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class RemoteMenu : ContextMenuStrip
 	{
-		private readonly Remote _remote;
-
 		public RemoteMenu(Remote remote)
 		{
-			Verify.Argument.IsValidGitObject(remote, "remote");
+			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 
-			_remote = remote;
+			Remote = remote;
 
 			Items.Add(GuiItemFactory.GetShowRemoteItem<ToolStripMenuItem>(remote));
 			Items.Add(GuiItemFactory.GetEditRemotePropertiesItem<ToolStripMenuItem>(remote));
@@ -62,9 +60,6 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(item);
 		}
 
-		public Remote Remote
-		{
-			get { return _remote; }
-		}
+		public Remote Remote { get; }
 	}
 }

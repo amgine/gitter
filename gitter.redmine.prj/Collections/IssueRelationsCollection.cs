@@ -45,7 +45,7 @@ namespace gitter.Redmine
 
 		public LinkedList<IssueRelation> Fetch(Issue issue)
 		{
-			Verify.Argument.IsNotNull(issue, "issue");
+			Verify.Argument.IsNotNull(issue, nameof(issue));
 
 			return Fetch(issue.Id);
 		}

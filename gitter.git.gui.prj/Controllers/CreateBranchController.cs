@@ -34,29 +34,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICreateBranchController
 	{
-		#region Data
-
-		private readonly Repository _repository;
-
-		#endregion
-
 		#region .ctor
 
 		public CreateBranchController(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 		}
 
 		#endregion
 
-		#region Prtoperties
+		#region Properties
 
-		private Repository Repository
-		{
-			get { return _repository; }
-		}
+		private Repository Repository { get; }
 
 		#endregion
 

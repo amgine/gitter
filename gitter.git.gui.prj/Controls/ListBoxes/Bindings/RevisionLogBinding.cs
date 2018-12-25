@@ -42,9 +42,9 @@ namespace gitter.Git.Gui.Controls
 
 		public RevisionLogBinding(ILogSource logSource, RevisionListBox revisionListBox, LogOptions logOptions)
 		{
-			Verify.Argument.IsNotNull(logSource, "logSource");
-			Verify.Argument.IsNotNull(revisionListBox, "revisionListBox");
-			Verify.Argument.IsNotNull(logOptions, "logOptions");
+			Verify.Argument.IsNotNull(logSource, nameof(logSource));
+			Verify.Argument.IsNotNull(revisionListBox, nameof(revisionListBox));
+			Verify.Argument.IsNotNull(logOptions, nameof(logOptions));
 
 			_logSource = logSource;
 			_revisionListBox = revisionListBox;
@@ -72,7 +72,7 @@ namespace gitter.Git.Gui.Controls
 			get { return _logOptions; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				_logOptions = value;
 			}

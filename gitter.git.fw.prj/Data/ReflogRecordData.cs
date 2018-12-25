@@ -22,50 +22,28 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	using gitter.Framework;
-
 	public sealed class ReflogRecordData
 	{
-		#region Data
-
-		private readonly int _index;
-		private readonly string _message;
-		private readonly RevisionData _revision;
-
-		#endregion
-
 		#region .ctor
 
 		public ReflogRecordData(int index, string message, RevisionData revision)
 		{
-			_index = index;
-			_message = message;
-			_revision = revision;
+			Index    = index;
+			Message  = message;
+			Revision = revision;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Name
-		{
-			get { return GitConstants.StashFullName + "@{" + _index + "}"; }
-		}
+		public string Name => GitConstants.StashFullName + "@{" + Index + "}";
 
-		public string Message
-		{
-			get { return _message; }
-		}
+		public string Message { get; }
 
-		public int Index
-		{
-			get { return _index; }
-		}
+		public int Index { get; }
 
-		public RevisionData Revision
-		{
-			get { return _revision; }
-		}
+		public RevisionData Revision { get; }
 
 		#endregion
 	}

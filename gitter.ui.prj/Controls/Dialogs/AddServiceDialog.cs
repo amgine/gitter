@@ -41,7 +41,7 @@ namespace gitter.Controls
 		public AddServiceDialog(IWorkingEnvironment environment)
 			: base(Resources.StrProvider.AddColon())
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 

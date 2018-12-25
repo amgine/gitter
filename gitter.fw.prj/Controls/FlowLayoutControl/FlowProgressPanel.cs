@@ -62,7 +62,7 @@ namespace gitter.Framework.Controls
 			get { return _height; }
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				if(_height != value)
 				{

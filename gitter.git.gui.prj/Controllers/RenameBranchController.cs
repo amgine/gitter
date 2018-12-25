@@ -33,29 +33,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class RenameBranchController : ViewControllerBase<IRenameBranchView>, IRenameBranchController
 	{
-		#region Data
-
-		private readonly Branch _branch;
-
-		#endregion
-
 		#region .ctor
 
 		public RenameBranchController(Branch branch)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsNotNull(branch, nameof(branch));
 
-			_branch = branch;
+			Branch = branch;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private Branch Branch
-		{
-			get { return _branch; }
-		}
+		private Branch Branch { get; }
 
 		#endregion
 

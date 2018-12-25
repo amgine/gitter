@@ -37,8 +37,8 @@ namespace gitter.Git
 
 		public GitRepositoryUpdateChannel(string url, string branch)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
-			Verify.Argument.IsNeitherNullNorWhitespace(branch, "branch");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
+			Verify.Argument.IsNeitherNullNorWhitespace(branch, nameof(branch));
 
 			_url = url;
 			_branch = branch;

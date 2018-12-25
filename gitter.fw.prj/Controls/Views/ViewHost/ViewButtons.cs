@@ -44,7 +44,7 @@ namespace gitter.Framework.Controls
 
 		internal ViewButtons(Control hostControl)
 		{
-			Verify.Argument.IsNotNull(hostControl, "hostControl");
+			Verify.Argument.IsNotNull(hostControl, nameof(hostControl));
 
 			_host = hostControl;
 			_buttonHover = new TrackingService<ViewButton>((e) => _host.Invalidate());

@@ -117,7 +117,7 @@ namespace gitter.Framework.Controls
 		/// <param name="views">Hosted views.</param>
 		internal ViewHost(ViewDockGrid grid, bool isRoot, bool isDocumentWell, IEnumerable<ViewBase> views)
 		{
-			Verify.Argument.IsNotNull(grid, "grid");
+			Verify.Argument.IsNotNull(grid, nameof(grid));
 
 			SetStyle(ControlStyles.ContainerControl, true);
 			SetStyle(
@@ -774,7 +774,7 @@ namespace gitter.Framework.Controls
 		/// <param name="view">View to host.</param>
 		public void AddView(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 			Verify.Argument.IsTrue(view.Host == null, "view", "View is already hosted.");
 
 			_views.Add(view);
@@ -860,7 +860,7 @@ namespace gitter.Framework.Controls
 		/// <param name="view">View to activate.</param>
 		public void SetActiveView(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 			Verify.Argument.IsTrue(view.Host == this, "view", "View is hosted in another host.");
 
 			if(_activeView != view)
@@ -924,7 +924,7 @@ namespace gitter.Framework.Controls
 		/// </remarks>
 		internal void RemoveView(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 			Verify.Argument.IsTrue(view.Host == this, "view", "View is not hosted in this ViewHost.");
 			int index = _views.IndexOf(view);
 			Assert.AreNotEqual(index, -1);
@@ -1222,7 +1222,7 @@ namespace gitter.Framework.Controls
 
 		public void Activate(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 			Verify.Argument.IsTrue(view.Host == this, "view", "View is not hosted in this ViewHost.");
 
 			SetActiveView(view);
@@ -1529,7 +1529,7 @@ namespace gitter.Framework.Controls
 		/// </remarks>
 		internal void DockInto(ViewHost viewHost)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 			Verify.Argument.IsTrue(viewHost != this, "viewHost", "Cannot dock to itself.");
 
 			ReturnFromFloatingMode();
@@ -1655,7 +1655,7 @@ namespace gitter.Framework.Controls
 		/// <returns>true if docking is possible.</returns>
 		public bool CanDock(ViewHost viewHost, DockResult dockResult)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			switch(dockResult)
 			{
@@ -1682,7 +1682,7 @@ namespace gitter.Framework.Controls
 		/// <param name="dockResult">Position for docking.</param>
 		public void PerformDock(ViewHost viewHost, DockResult dockResult)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			switch(dockResult)
 			{
@@ -1743,7 +1743,7 @@ namespace gitter.Framework.Controls
 		/// <returns>Bounding rectangle for docked view.</returns>
 		public Rectangle GetDockBounds(ViewHost viewHost, DockResult dockResult)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			Rectangle bounds;
 			var size = Size;

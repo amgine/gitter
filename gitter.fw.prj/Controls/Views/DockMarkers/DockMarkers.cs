@@ -65,7 +65,7 @@ namespace gitter.Framework.Controls
 		/// <param name="dockClient">View host which is being docked.</param>
 		public void Show(ViewHost dockClient)
 		{
-			Verify.Argument.IsNotNull(dockClient, "dockClient");
+			Verify.Argument.IsNotNull(dockClient, nameof(dockClient));
 			Verify.State.IsFalse(MarkersVisible);
 
 			_markers = CreateMarkers(dockClient);

@@ -155,7 +155,7 @@ namespace gitter.Framework
 
 		public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, Task> func)
 		{
-			Verify.Argument.IsNotNull(func, "func");
+			Verify.Argument.IsNotNull(func, nameof(func));
 
 			var dialog = new ProgressForm()
 			{
@@ -168,7 +168,7 @@ namespace gitter.Framework
 
 		public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
 		{
-			Verify.Argument.IsNotNull(func, "func");
+			Verify.Argument.IsNotNull(func, nameof(func));
 
 			var dialog = new ProgressForm()
 			{
@@ -181,7 +181,7 @@ namespace gitter.Framework
 
 		public static T MonitorTaskAsModalWindow<T>(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
 		{
-			Verify.Argument.IsNotNull(func, "func");
+			Verify.Argument.IsNotNull(func, nameof(func));
 
 			var dialog = new ProgressForm()
 			{

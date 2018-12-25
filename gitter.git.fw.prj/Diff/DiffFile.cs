@@ -29,16 +29,7 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly string _sourceFile;
-		private readonly string _targetFile;
-		private readonly FileStatus _status;
 		private readonly IList<DiffHunk> _hunks;
-		private readonly string _oldIndex;
-		private readonly string _newIndex;
-		private readonly int _oldMode;
-		private readonly int _newMode;
-		private readonly bool _isBinary;
-		private readonly DiffStats _stats;
 
 		#endregion
 
@@ -60,19 +51,19 @@ namespace gitter.Git
 			string sourceFile, string targetFile,
 			FileStatus status, IList<DiffHunk> hunks, bool isBinary, DiffStats stats)
 		{
-			Verify.Argument.IsNotNull(hunks, "hunks");
-			Verify.Argument.IsNotNull(stats, "stats");
+			Verify.Argument.IsNotNull(hunks, nameof(hunks));
+			Verify.Argument.IsNotNull(stats, nameof(stats));
 
-			_oldIndex = oldIndex;
-			_newIndex = newIndex;
-			_oldMode = oldMode;
-			_newMode = newMode;
-			_sourceFile = sourceFile;
-			_targetFile = targetFile;
-			_status = status;
-			_hunks = hunks;
-			_isBinary = isBinary;
-			_stats = stats;
+			OldIndex   = oldIndex;
+			NewIndex   = newIndex;
+			OldMode    = oldMode;
+			NewMode    = newMode;
+			SourceFile = sourceFile;
+			TargetFile = targetFile;
+			Status     = status;
+			_hunks     = hunks;
+			IsBinary   = isBinary;
+			Stats      = stats;
 		}
 
 		#endregion
@@ -80,58 +71,31 @@ namespace gitter.Git
 		#region Properties
 
 		/// <summary>Old file index.</summary>
-		public string OldIndex
-		{
-			get { return _oldIndex; }
-		}
+		public string OldIndex { get; }
 
 		/// <summary>New file index.</summary>
-		public string NewIndex
-		{
-			get { return _newIndex; }
-		}
+		public string NewIndex { get; }
 
 		/// <summary>Old file mode.</summary>
-		public int OldMode
-		{
-			get { return _oldMode; }
-		}
+		public int OldMode { get; }
 
 		/// <summary>New file mode.</summary>
-		public int NewMode
-		{
-			get { return _newMode; }
-		}
+		public int NewMode { get; }
 
 		/// <summary>File is binary.</summary>
-		public bool IsBinary
-		{
-			get { return _isBinary; }
-		}
+		public bool IsBinary { get; }
 
 		/// <summary>Line statistics.</summary>
-		public DiffStats Stats
-		{
-			get { return _stats; }
-		}
+		public DiffStats Stats { get; }
 
 		/// <summary>Source file name.</summary>
-		public string SourceFile
-		{
-			get { return _sourceFile; }
-		}
+		public string SourceFile { get; }
 
 		/// <summary>Target file name.</summary>
-		public string TargetFile
-		{
-			get { return _targetFile; }
-		}
+		public string TargetFile { get; }
 
 		/// <summary>File status.</summary>
-		public FileStatus Status
-		{
-			get { return _status; }
-		}
+		public FileStatus Status { get; }
 
 		public int MaxLineNum
 		{
@@ -147,15 +111,9 @@ namespace gitter.Git
 			}
 		}
 
-		public DiffHunk this[int index]
-		{
-			get { return _hunks[index]; }
-		}
+		public DiffHunk this[int index] => _hunks[index];
 
-		public int HunkCount
-		{
-			get { return _hunks.Count; }
-		}
+		public int HunkCount => _hunks.Count;
 
 		public int LineCount
 		{
@@ -217,42 +175,42 @@ namespace gitter.Git
 			}
 
 			return new DiffFile(
-				_oldIndex,
-				_newIndex,
-				_oldMode,
-				_newMode,
-				_sourceFile,
-				_targetFile,
-				_status,
+				OldIndex,
+				NewIndex,
+				OldMode,
+				NewMode,
+				SourceFile,
+				TargetFile,
+				Status,
 				h,
-				_isBinary,
+				IsBinary,
 				s);
 		}
 
 		internal void ToString(StringBuilder sb)
 		{
-			Verify.Argument.IsNotNull(sb, "sb");
+			Verify.Argument.IsNotNull(sb, nameof(sb));
 
 			sb.Append("diff --git a/");
-			sb.Append(_sourceFile);
+			sb.Append(SourceFile);
 			sb.Append(" b/");
-			sb.Append(_targetFile);
+			sb.Append(TargetFile);
 			sb.Append(LineEnding.Lf);
 
 			sb.Append("index ");
-			sb.Append(_oldIndex);
+			sb.Append(OldIndex);
 			sb.Append("..");
-			sb.Append(_newIndex);
+			sb.Append(NewIndex);
 			sb.Append(' ');
-			sb.Append(_newMode);
+			sb.Append(NewMode);
 			sb.Append(LineEnding.Lf);
 
 			sb.Append("--- a/");
-			sb.Append(_sourceFile);
+			sb.Append(SourceFile);
 			sb.Append(LineEnding.Lf);
 
 			sb.Append("+++ b/");
-			sb.Append(_targetFile);
+			sb.Append(TargetFile);
 			sb.Append(LineEnding.Lf);
 
 			foreach(var hunk in _hunks)
@@ -278,23 +236,20 @@ namespace gitter.Git
 				hunks[i] = _hunks[i].Clone();
 			}
 			return new DiffFile(
-				_oldIndex,
-				_newIndex,
-				_oldMode,
-				_newMode,
-				_sourceFile,
-				_targetFile,
-				_status,
+				OldIndex,
+				NewIndex,
+				OldMode,
+				NewMode,
+				SourceFile,
+				TargetFile,
+				Status,
 				hunks,
-				_isBinary,
-				_stats.Clone());
+				IsBinary,
+				Stats.Clone());
 
 		}
 
-		object ICloneable.Clone()
-		{
-			return Clone();
-		}
+		object ICloneable.Clone() => Clone();
 
 		#endregion
 	}

@@ -49,8 +49,8 @@ namespace gitter.Framework.Options
 
 		public SelectableFont(string id, string name, Font font)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			_id = id;
 			_name = name;
@@ -59,8 +59,8 @@ namespace gitter.Framework.Options
 
 		public SelectableFont(string id, string name, Section section)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			var fontName	= section.GetValue<string>("Name", null);
 			var size		= section.GetValue<float>("Size", 0);
@@ -93,7 +93,7 @@ namespace gitter.Framework.Options
 			get { return _font; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_font != value)
 				{
@@ -107,16 +107,16 @@ namespace gitter.Framework.Options
 
 		public void Apply(params Control[] controls)
 		{
-			Verify.Argument.IsNotNull(controls, "controls");
-			Verify.Argument.HasNoNullItems(controls, "controls");
+			Verify.Argument.IsNotNull(controls, nameof(controls));
+			Verify.Argument.HasNoNullItems(controls, nameof(controls));
 
 			ApplyCore(controls);
 		}
 
 		public void Apply(IEnumerable<Control> controls)
 		{
-			Verify.Argument.IsNotNull(controls, "controls");
-			Verify.Argument.HasNoNullItems(controls, "controls");
+			Verify.Argument.IsNotNull(controls, nameof(controls));
+			Verify.Argument.HasNoNullItems(controls, nameof(controls));
 
 			ApplyCore(controls);
 		}
@@ -138,7 +138,7 @@ namespace gitter.Framework.Options
 
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			section.SetValue("Name", _font.Name);
 			section.SetValue("Size", _font.SizeInPoints);
@@ -147,7 +147,7 @@ namespace gitter.Framework.Options
 
 		public void LoadFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			var name	= section.GetValue<string>("Name", null);
 			var size	= section.GetValue<float>("Size", 0);

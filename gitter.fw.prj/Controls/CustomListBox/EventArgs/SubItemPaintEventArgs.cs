@@ -217,9 +217,9 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintText(string text, Font font, Brush brush, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintTextCore(text, font, brush, stringFormat);
 		}
@@ -235,8 +235,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintText(string text, Font font, Brush brush, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintTextCore(text, font, brush, GetFormat(stringAlignment));
 		}
@@ -251,8 +251,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintText(string text, Font font, Brush brush)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintTextCore(text, font, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -267,8 +267,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintText(string text, Brush brush, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintTextCore(text, _column.ContentFont, brush, stringFormat);
 		}
@@ -280,7 +280,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintText(string text, Brush brush, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintTextCore(text, _column.ContentFont, brush, GetFormat(stringAlignment));
 		}
@@ -291,7 +291,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintText(string text, Brush brush)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintTextCore(text, _column.ContentFont, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -306,8 +306,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintText(string text, Font font, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintTextCore(text, font, _column.ContentBrush, stringFormat);
 		}
@@ -318,7 +318,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintText(string text, Font font)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			PaintTextCore(text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
 		}
@@ -328,7 +328,7 @@ namespace gitter.Framework.Controls
 		/// <param name="stringFormat"><see cref="StringFormat"/> to use.</param>
 		public void PaintText(string text, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintTextCore(text, _column.ContentFont, _column.ContentBrush, stringFormat);
 		}
@@ -401,9 +401,9 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Font font, Brush brush, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageAndTextCore(image, text, font, brush, stringFormat);
 		}
@@ -420,8 +420,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Font font, Brush brush, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintImageAndTextCore(image, text, font, brush, GetFormat(stringAlignment));
 		}
@@ -437,8 +437,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Font font, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageAndTextCore(image, text, font, _column.ContentBrush, stringFormat);
 		}
@@ -451,7 +451,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, Font font, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			PaintImageAndTextCore(image, text, font, _column.ContentBrush, GetFormat(stringAlignment));
 		}
@@ -463,7 +463,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, Font font)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			PaintImageAndTextCore(image, text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
 		}
@@ -479,15 +479,15 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageAndText(Image image, string text, Brush brush, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, brush, stringFormat);
 		}
 
 		public void PaintImageAndText(Image image, string text, Brush brush, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, brush, GetFormat(stringAlignment));
 		}
@@ -499,7 +499,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, Brush brush)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -511,7 +511,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="stringFormat"/> == <c>null</c>.</exception>
 		public void PaintImageAndText(Image image, string text, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageAndTextCore(image, text, _column.ContentFont, _column.ContentBrush, stringFormat);
 		}
@@ -589,9 +589,9 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, stringFormat);
 		}
@@ -609,8 +609,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, GetFormat(stringAlignment));
 		}
@@ -627,8 +627,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Brush brush, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, brush, stringFormat);
 		}
@@ -642,7 +642,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Brush brush, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, brush, GetFormat(stringAlignment));
 		}
@@ -659,8 +659,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, stringFormat);
 		}
@@ -674,7 +674,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, StringAlignment stringAlignment)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, GetFormat(stringAlignment));
 		}
@@ -688,7 +688,7 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, StringFormat stringFormat)
 		{
-			Verify.Argument.IsNotNull(stringFormat, "stringFormat");
+			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, _column.ContentBrush, stringFormat);
 		}
@@ -715,8 +715,8 @@ namespace gitter.Framework.Controls
 		/// </exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush)
 		{
-			Verify.Argument.IsNotNull(font, "font");
-			Verify.Argument.IsNotNull(brush, "brush");
+			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(brush, nameof(brush));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, GetFormat(_column.ContentAlignment));
 		}
@@ -729,7 +729,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
 		}

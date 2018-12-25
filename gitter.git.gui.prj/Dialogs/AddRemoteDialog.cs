@@ -37,14 +37,7 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private readonly Repository _repository;
 		private readonly IAddRemoteController _controller;
-		private readonly IUserInputSource<string> _remoteNameInput;
-		private readonly IUserInputSource<string> _urlInput;
-		private readonly IUserInputSource<bool> _fetchInput;
-		private readonly IUserInputSource<bool> _mirrorInput;
-		private readonly IUserInputSource<TagFetchMode> _tagFetchModeInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 
 		#endregion
 
@@ -52,20 +45,20 @@ namespace gitter.Git.Gui.Dialogs
 
 		public AddRemoteDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 			Localize();
 
 			var inputs = new IUserInputSource[]
 			{
-				_remoteNameInput   = new TextBoxInputSource(_txtName),
-				_urlInput          = new TextBoxInputSource(_txtUrl),
-				_fetchInput        = new CheckBoxInputSource(_chkFetch),
-				_mirrorInput       = new CheckBoxInputSource(_chkMirror),
-				_tagFetchModeInput = new RadioButtonGroupInputSource<TagFetchMode>(
+				RemoteName   = new TextBoxInputSource(_txtName),
+				Url          = new TextBoxInputSource(_txtUrl),
+				Fetch        = new CheckBoxInputSource(_chkFetch),
+				Mirror       = new CheckBoxInputSource(_chkMirror),
+				TagFetchMode = new RadioButtonGroupInputSource<TagFetchMode>(
 					new[]
 					{
 						Tuple.Create(_tagFetchDefault, gitter.Git.TagFetchMode.Default),
@@ -73,11 +66,11 @@ namespace gitter.Git.Gui.Dialogs
 						Tuple.Create(_tagFetchAll,     gitter.Git.TagFetchMode.AllTags),
 					}),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.Remote);
 
-			if(_repository.Remotes.Count == 0)
+			if(Repository.Remotes.Count == 0)
 			{
 				_txtName.Text = GitConstants.DefaultRemoteName;
 			}
@@ -116,54 +109,27 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrAdd; }
-		}
+		protected override string ActionVerb => Resources.StrAdd;
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		public IUserInputSource<string> RemoteName
-		{
-			get { return _remoteNameInput; }
-		}
+		public IUserInputSource<string> RemoteName { get; }
 
-		public IUserInputSource<string> Url
-		{
-			get { return _urlInput; }
-		}
+		public IUserInputSource<string> Url { get; }
 
-		public IUserInputSource<bool> Fetch
-		{
-			get { return _fetchInput; }
-		}
+		public IUserInputSource<bool> Fetch { get; }
 
-		public IUserInputSource<bool> Mirror
-		{
-			get { return _mirrorInput; }
-		}
+		public IUserInputSource<bool> Mirror { get; }
 
-		public IUserInputSource<TagFetchMode> TagFetchMode
-		{
-			get { return _tagFetchModeInput; }
-		}
+		public IUserInputSource<TagFetchMode> TagFetchMode { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
 		#region IExecutableDialog
 
-		public bool Execute()
-		{
-			return _controller.TryAddRemote();
-		}
+		public bool Execute() => _controller.TryAddRemote();
 
 		#endregion
 	}

@@ -39,7 +39,7 @@ namespace gitter.Git.Gui
 		public RepositoryReferencesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgBranch"], Resources.StrReferences)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

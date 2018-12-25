@@ -47,7 +47,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to checkout.</exception>
 		public static void Checkout(this IRevisionPointer revision, bool force = false)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			if(repository.Head == revision) return;
@@ -77,7 +77,7 @@ namespace gitter.Git
 
 		public static void CheckoutPath(this IRevisionPointer revision, string path)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			using(repository.Monitor.BlockNotifications(
@@ -94,7 +94,7 @@ namespace gitter.Git
 
 		public static void CheckoutPaths(this IRevisionPointer revision, IList<string> paths)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			using(repository.Monitor.BlockNotifications(
@@ -117,7 +117,7 @@ namespace gitter.Git
 		/// <param name="revisions">Commits to cherry-pick.</param>
 		public static void CherryPick(this IEnumerable<IRevisionPointer> revisions)
 		{
-			Verify.Argument.IsValidRevisionPointerSequence(revisions, "revisions");
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
 
 			var list = new List<string>();
 			Repository repository = null;
@@ -126,7 +126,7 @@ namespace gitter.Git
 				list.Add(rev.Pointer);
 				repository = rev.Repository;
 			}
-			Verify.Argument.IsTrue(list.Count != 0, "revisions",
+			Verify.Argument.IsTrue(list.Count != 0, nameof(revisions),
 				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
 			try
 			{
@@ -162,8 +162,8 @@ namespace gitter.Git
 		/// <param name="noCommit">Do not commit.</param>
 		public static void CherryPick(this IRevisionPointer revision, int mainline, bool noCommit)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNotNegative(mainline, "mainline");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNotNegative(mainline, nameof(mainline));
 			var repository = revision.Repository;
 			Verify.State.IsFalse(repository.Head.IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("cherry-pick"));
@@ -234,7 +234,7 @@ namespace gitter.Git
 		/// </exception>
 		public static void ResetHeadHere(this IRevisionPointer revision, ResetMode mode = ResetMode.Mixed)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			repository.Head.Reset(revision, mode);
@@ -256,8 +256,8 @@ namespace gitter.Git
 
 		public static void Revert(this IRevisionPointer revision, int mainline, bool noCommit)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNotNegative(mainline, "mainline");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNotNegative(mainline, nameof(mainline));
 
 			var repository = revision.Repository;
 
@@ -323,7 +323,7 @@ namespace gitter.Git
 
 		public static void Revert(this IEnumerable<IRevisionPointer> revisions, bool noCommit)
 		{
-			Verify.Argument.IsValidRevisionPointerSequence(revisions, "revisions");
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
 
 			var list = new List<string>();
 			Repository repository = null;
@@ -376,7 +376,7 @@ namespace gitter.Git
 
 		public static void Merge(this IRevisionPointer revision, bool noCommit, bool noFastForward, bool squash, string message)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			repository.Head.Merge(revision, noCommit, noFastForward, squash, message);
@@ -384,7 +384,7 @@ namespace gitter.Git
 
 		public static void Merge(this IRevisionPointer revision, bool noCommit, bool noFastForward, bool squash)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			repository.Head.Merge(revision, noCommit, noFastForward, squash);
@@ -392,7 +392,7 @@ namespace gitter.Git
 
 		public static void Merge(this IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			repository.Head.Merge(revision);
@@ -411,7 +411,7 @@ namespace gitter.Git
 
 		public static void RebaseHeadHere(this IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			var oldHead = repository.Head.CurrentBranch;
@@ -444,7 +444,7 @@ namespace gitter.Git
 
 		public static Task RebaseHeadHereAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			var oldHead = repository.Head.CurrentBranch;
@@ -491,7 +491,7 @@ namespace gitter.Git
 
 		public static Tag Describe(this IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 
@@ -514,7 +514,7 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Branch"/>.</returns>
 		public static Branch CreateBranch(this IRevisionPointer revision, string name)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			return repository.Refs.Heads.Create(name, revision);
@@ -527,7 +527,7 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Branch"/>.</returns>
 		public static Branch CreateBranch(this IRevisionPointer revision, string name, bool checkout)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			return repository.Refs.Heads.Create(name, revision, checkout);
@@ -540,7 +540,7 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Branch"/>.</returns>
 		public static Branch CreateBranch(this IRevisionPointer revision, string name, BranchTrackingMode tracking)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			return repository.Refs.Heads.Create(name, revision, tracking);
@@ -554,7 +554,7 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Branch"/>.</returns>
 		public static Branch CreateBranch(this IRevisionPointer revision, string name, BranchTrackingMode tracking, bool checkout)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			return repository.Refs.Heads.Create(name, revision, tracking, checkout);
@@ -570,7 +570,7 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Tag"/>.</returns>
 		public static Tag CreateTag(this IRevisionPointer revision, string name)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			return repository.Refs.Tags.Create(name, revision);
@@ -584,7 +584,7 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Tag"/>.</returns>
 		public static Tag CreateTag(this IRevisionPointer revision, string name, string message, bool sign)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			return repository.Refs.Tags.Create(name, revision, message, sign);
@@ -598,7 +598,7 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Tag"/>.</returns>
 		public static Tag CreateTag(this IRevisionPointer revision, string name, string message, string keyId)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var repository = revision.Repository;
 			return repository.Refs.Tags.Create(name, revision, message, keyId);
@@ -614,8 +614,8 @@ namespace gitter.Git
 		/// <returns>Created <see cref="Note"/>.</returns>
 		public static Note AddNote(this IRevisionPointer revision, string message)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNeitherNullNorEmpty(message, "message");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNeitherNullNorEmpty(message, nameof(message));
 
 			var repository = revision.Repository;
 			return repository.Notes.Add(revision, message);
@@ -630,7 +630,7 @@ namespace gitter.Git
 		/// <returns><see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</returns>
 		public static Tree GetTree(this IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			return new Tree(revision.Repository, revision.FullName);
 		}
@@ -640,7 +640,7 @@ namespace gitter.Git
 		/// <returns>Function which retrieves <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</returns>
 		public static Task<Tree> GetTreeAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			return Tree.GetAsync(revision.Repository, revision.FullName, progress, cancellationToken);
 		}
@@ -651,7 +651,7 @@ namespace gitter.Git
 
 		public static IRevisionDiffSource GetDiffSource(this IRevisionPointer revision, IEnumerable<string> paths = null)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var stashedState = revision as StashedState;
 			if(stashedState != null)
@@ -727,7 +727,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to get diff.</exception>
 		public static byte[] FormatPatch(this IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var parameters = GetFormatPatchParameters(revision);
 			var function   = GetFormatPatchFunction(revision);
@@ -742,7 +742,7 @@ namespace gitter.Git
 		public static Task<byte[]> FormatPatchAsync(this IRevisionPointer revision,
 			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			if(progress != null)
 			{
@@ -760,7 +760,7 @@ namespace gitter.Git
 
 		public static IBlameSource GetBlameSource(this IRevisionPointer revision, string fileName)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			return new RevisionFileBlameSource(revision, fileName);
 		}
@@ -782,8 +782,8 @@ namespace gitter.Git
 
 		public static void Archive(this IRevisionPointer revision, string outputFile, string path, string format)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, "outputFile");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, nameof(outputFile));
 
 			var parameters = GetArchiveParameters(revision, outputFile, path, format);
 			revision.Repository.Accessor.Archive.Invoke(parameters);
@@ -791,8 +791,8 @@ namespace gitter.Git
 
 		public static Task ArchiveAsync(this IRevisionPointer revision, string outputFile, string path, string format, IProgress<OperationProgress> progress)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, "revision");
-			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, "outputFile");
+			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, nameof(outputFile));
 
 			var parameters = GetArchiveParameters(revision, outputFile, path, format);
 			if(progress != null)

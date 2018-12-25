@@ -32,23 +32,9 @@ namespace gitter.Git.Gui
 		#region Data
 
 		private readonly IViewFactory[] _viewFactories;
-		private readonly IViewFactory _viewGit;
-		private readonly IViewFactory _viewHistory;
-		private readonly IViewFactory _viewPathHistory;
-		private readonly IViewFactory _viewReferences;
-		private readonly IViewFactory _viewCommit;
-		private readonly IViewFactory _viewStash;
-		private readonly IViewFactory _viewRemotes;
-		private readonly IViewFactory _viewRemote;
-		private readonly IViewFactory _viewTree;
-		private readonly IViewFactory _viewConfig;
-		private readonly IViewFactory _viewSubmodules;
-		private readonly IViewFactory _viewUsers;
 		private readonly IViewFactory _viewDiff;
 		private readonly IViewFactory _viewBlame;
 		private readonly IViewFactory _viewContextualDiff;
-		private readonly IViewFactory _viewReflog;
-
 		private readonly GuiProvider _gui;
 		private Repository _repository;
 
@@ -56,27 +42,27 @@ namespace gitter.Git.Gui
 
 		public ViewFactoriesCollection(GuiProvider guiProvider)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_gui = guiProvider;
 			_viewFactories = new IViewFactory[]
 			{
-				_viewGit            = new GitViewFactory(guiProvider),
-				_viewHistory        = new HistoryViewFactory(guiProvider),
-				_viewPathHistory    = new PathHistoryViewFactory(guiProvider),
-				_viewReferences     = new ReferencesViewFactory(guiProvider),
-				_viewCommit         = new CommitViewFactory(guiProvider),
-				_viewStash          = new StashViewFactory(guiProvider),
-				_viewRemotes        = new RemotesViewFactory(guiProvider),
-				_viewRemote         = new RemoteViewFactory(guiProvider),
-				_viewTree           = new TreeViewFactory(guiProvider),
-				_viewSubmodules     = new SubmodulesViewFactory(guiProvider),
-				_viewConfig         = new ConfigViewFactory(guiProvider),
-				_viewUsers          = new ContributorsViewFactory(guiProvider),
-				_viewDiff           = new DiffViewFactory(guiProvider),
-				_viewBlame          = new BlameViewFactory(guiProvider),
-				_viewContextualDiff = new ContextualDiffViewFactory(guiProvider),
-				_viewReflog         = new ReflogViewFactory(guiProvider),
+				GitViewFactory            = new GitViewFactory(guiProvider),
+				HistoryViewFactory        = new HistoryViewFactory(guiProvider),
+				PathHistoryViewFactory    = new PathHistoryViewFactory(guiProvider),
+				ReferencesViewFactory     = new ReferencesViewFactory(guiProvider),
+				CommitViewFactory         = new CommitViewFactory(guiProvider),
+				StashViewFactory          = new StashViewFactory(guiProvider),
+				RemotesViewFactory        = new RemotesViewFactory(guiProvider),
+				RemoteViewFactory         = new RemoteViewFactory(guiProvider),
+				WorkingTreeViewFactory    = new TreeViewFactory(guiProvider),
+				SubmodulesViewFactory     = new SubmodulesViewFactory(guiProvider),
+				ConfigurationViewFactory  = new ConfigViewFactory(guiProvider),
+				UsersViewFactory          = new ContributorsViewFactory(guiProvider),
+				DiffViewFactory           = new DiffViewFactory(guiProvider),
+				BlameViewFactory          = new BlameViewFactory(guiProvider),
+				ContextualDiffViewFactory = new ContextualDiffViewFactory(guiProvider),
+				ReflogViewFactory         = new ReflogViewFactory(guiProvider),
 			};
 
 			if(guiProvider.Repository != null)
@@ -149,70 +135,37 @@ namespace gitter.Git.Gui
 
 		#region View Factories
 
-		public IViewFactory GitViewFactory
-		{
-			get { return _viewGit; }
-		}
+		public IViewFactory GitViewFactory { get; }
 
-		public IViewFactory HistoryViewFactory
-		{
-			get { return _viewHistory; }
-		}
+		public IViewFactory HistoryViewFactory { get; }
 
-		public IViewFactory PathHistoryViewFactory
-		{
-			get { return _viewPathHistory; }
-		}
+		public IViewFactory PathHistoryViewFactory { get; }
 
-		public IViewFactory ReferencesViewFactory
-		{
-			get { return _viewReferences; }
-		}
+		public IViewFactory ReferencesViewFactory { get; }
 
-		public IViewFactory ReflogViewFactory
-		{
-			get { return _viewReflog; }
-		}
+		public IViewFactory ReflogViewFactory { get; }
 
-		public IViewFactory CommitViewFactory
-		{
-			get { return _viewCommit; }
-		}
+		public IViewFactory CommitViewFactory { get; }
 
-		public IViewFactory StashViewFactory
-		{
-			get { return _viewStash; }
-		}
+		public IViewFactory StashViewFactory { get; }
 
-		public IViewFactory RemotesViewFactory
-		{
-			get { return _viewRemotes; }
-		}
+		public IViewFactory RemotesViewFactory { get; }
 
-		public IViewFactory RemoteViewFactory
-		{
-			get { return _viewRemote; }
-		}
+		public IViewFactory RemoteViewFactory { get; }
 
-		public IViewFactory SubmodulesViewFactory
-		{
-			get { return _viewSubmodules; }
-		}
+		public IViewFactory SubmodulesViewFactory { get; }
 
-		public IViewFactory WorkingTreeViewFactory
-		{
-			get { return _viewTree; }
-		}
+		public IViewFactory WorkingTreeViewFactory { get; }
 
-		public IViewFactory ConfigurationViewFactory
-		{
-			get { return _viewConfig; }
-		}
+		public IViewFactory ConfigurationViewFactory { get; }
 
-		public IViewFactory UsersViewFactory
-		{
-			get { return _viewUsers; }
-		}
+		public IViewFactory UsersViewFactory { get; }
+
+		public IViewFactory DiffViewFactory { get; }
+
+		public IViewFactory ContextualDiffViewFactory { get; }
+
+		public IViewFactory BlameViewFactory { get; }
 
 		#endregion
 

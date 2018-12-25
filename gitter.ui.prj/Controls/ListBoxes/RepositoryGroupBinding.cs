@@ -41,8 +41,8 @@ namespace gitter
 
 		public RepositoryGroupBinding(CustomListBoxItemsCollection items, RepositoryGroup group)
 		{
-			Verify.Argument.IsNotNull(items, "items");
-			Verify.Argument.IsNotNull(group, "group");
+			Verify.Argument.IsNotNull(items, nameof(items));
+			Verify.Argument.IsNotNull(group, nameof(group));
 
 			_items               = items;
 			_group               = group;

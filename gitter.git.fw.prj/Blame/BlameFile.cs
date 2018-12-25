@@ -31,8 +31,8 @@ namespace gitter.Git
 
 		public BlameFile(string fileName, List<BlameHunk> hunks)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
-			Verify.Argument.IsNotNull(hunks, "hunks");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
+			Verify.Argument.IsNotNull(hunks, nameof(hunks));
 
 			_fileName = fileName;
 			_hunks = hunks;

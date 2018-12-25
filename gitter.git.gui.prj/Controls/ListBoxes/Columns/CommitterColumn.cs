@@ -37,9 +37,6 @@ namespace gitter.Git.Gui.Controls
 		{
 		}
 
-		public override string IdentificationString
-		{
-			get { return "Committer"; }
-		}
+		public override string IdentificationString => "Committer";
 	}
 }

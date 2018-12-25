@@ -23,6 +23,7 @@ namespace gitter.Framework.Hooks
 	using System;
 	using System.Runtime.InteropServices;
 	using System.Windows.Forms;
+
 	using gitter.Native;
 
 	public class LowLevelMouseHook : WindowsHook
@@ -32,16 +33,10 @@ namespace gitter.Framework.Hooks
 		public event EventHandler<MouseEventArgs> MouseMove;
 
 		protected virtual void OnMouseWheel(MouseEventArgs args)
-		{
-			var handler = MouseWheel;
-			if(handler != null) handler(this, args);
-		}
+			=> MouseWheel?.Invoke(this, args);
 
 		protected virtual void OnMouseMove(MouseEventArgs args)
-		{
-			var handler = MouseMove;
-			if(handler != null) handler(this, args);
-		}
+			=> MouseMove?.Invoke(this, args);
 
 		public LowLevelMouseHook()
 			: base(Native.WH.MOUSE_LL)

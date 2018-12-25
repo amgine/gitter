@@ -29,8 +29,8 @@ namespace gitter.Git
 	{
 		public static Branch CreateBranch(Repository repository, BranchData branchData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(branchData, nameof(branchData));
 			Verify.Argument.IsFalse(branchData.IsRemote, "branchData", "Cannot create remote branch.");
 
 			Revision revision;
@@ -45,8 +45,8 @@ namespace gitter.Git
 
 		public static void UpdateBranch(Branch branch, BranchData branchData)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
-			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsNotNull(branch, nameof(branch));
+			Verify.Argument.IsNotNull(branchData, nameof(branchData));
 			Verify.Argument.IsFalse(branchData.IsRemote, "branchData", "Cannot update remote branch.");
 
 			var repo = branch.Repository;
@@ -65,8 +65,8 @@ namespace gitter.Git
 
 		public static RemoteBranch CreateRemoteBranch(Repository repository, BranchData branchData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(branchData, nameof(branchData));
 			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot create local branch.");
 
 			Revision revision;
@@ -79,8 +79,8 @@ namespace gitter.Git
 
 		public static void UpdateRemoteBranch(RemoteBranch remoteBranch, BranchData branchData)
 		{
-			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
-			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsNotNull(remoteBranch, nameof(remoteBranch));
+			Verify.Argument.IsNotNull(branchData, nameof(branchData));
 			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot update local branch.");
 
 			if(remoteBranch.Revision.Hash != branchData.SHA1)
@@ -95,8 +95,8 @@ namespace gitter.Git
 
 		public static RemoteBranch CreateRemoteBranch(Repository repository, RemoteBranchData branchData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(branchData, nameof(branchData));
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -108,8 +108,8 @@ namespace gitter.Git
 
 		public static void UpdateRemoteBranch(RemoteBranch remoteBranch, RemoteBranchData branchData)
 		{
-			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
-			Verify.Argument.IsNotNull(branchData, "branchData");
+			Verify.Argument.IsNotNull(remoteBranch, nameof(remoteBranch));
+			Verify.Argument.IsNotNull(branchData, nameof(branchData));
 
 			if(remoteBranch.Revision.Hash != branchData.SHA1)
 			{
@@ -119,8 +119,8 @@ namespace gitter.Git
 
 		public static Tag CreateTag(Repository repository, TagData tagData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(tagData, "tagData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(tagData, nameof(tagData));
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -132,8 +132,8 @@ namespace gitter.Git
 
 		public static void UpdateTag(Tag tag, TagData tagData)
 		{
-			Verify.Argument.IsNotNull(tag, "tag");
-			Verify.Argument.IsNotNull(tagData, "tagData");
+			Verify.Argument.IsNotNull(tag, nameof(tag));
+			Verify.Argument.IsNotNull(tagData, nameof(tagData));
 
 			if(tag.Revision.Hash != tagData.SHA1)
 			{
@@ -150,16 +150,16 @@ namespace gitter.Git
 
 		public static Note CreateNote(Repository repository, NoteData noteData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(noteData, "noteData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(noteData, nameof(noteData));
 
 			return new Note(repository, noteData.Name, noteData.ObjectName, noteData.Message);
 		}
 
 		public static void UpdateNode(Note note, NoteData noteData)
 		{
-			Verify.Argument.IsNotNull(note, "note");
-			Verify.Argument.IsNotNull(noteData, "noteData");
+			Verify.Argument.IsNotNull(note, nameof(note));
+			Verify.Argument.IsNotNull(noteData, nameof(noteData));
 
 			note.Object = noteData.ObjectName;
 			if(noteData.Message != null)
@@ -170,8 +170,8 @@ namespace gitter.Git
 
 		public static TreeDirectory CreateTreeDirectory(Repository repository, TreeDirectoryData treeDirectoryData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(treeDirectoryData, "treeDirectoryData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(treeDirectoryData, nameof(treeDirectoryData));
 
 			var directory = new TreeDirectory(repository, treeDirectoryData.Name, null, treeDirectoryData.ShortName)
 			{
@@ -190,15 +190,15 @@ namespace gitter.Git
 
 		public static void UpdateTreeDirectory(TreeDirectory treeDirectory, TreeDirectoryData treeDirectoryData)
 		{
-			Verify.Argument.IsNotNull(treeDirectory, "treeDirectory");
-			Verify.Argument.IsNotNull(treeDirectoryData, "treeDirectoryData");
+			Verify.Argument.IsNotNull(treeDirectory, nameof(treeDirectory));
+			Verify.Argument.IsNotNull(treeDirectoryData, nameof(treeDirectoryData));
 
 		}
 
 		public static ConfigParameter CreateConfigParameter(IConfigAccessor configAccessor, ConfigParameterData configParameterData)
 		{
-			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
-			Verify.Argument.IsNotNull(configParameterData, "configParameterData");
+			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
+			Verify.Argument.IsNotNull(configParameterData, nameof(configParameterData));
 
 			switch(configParameterData.ConfigFile)
 			{
@@ -221,16 +221,16 @@ namespace gitter.Git
 
 		public static void UpdateConfigParameter(ConfigParameter configParameter, ConfigParameterData configParameterData)
 		{
-			Verify.Argument.IsNotNull(configParameter, "configParameter");
-			Verify.Argument.IsNotNull(configParameterData, "configParameterData");
+			Verify.Argument.IsNotNull(configParameter, nameof(configParameter));
+			Verify.Argument.IsNotNull(configParameterData, nameof(configParameterData));
 
 			configParameter.SetValue(configParameterData.Value);
 		}
 
 		public static ConfigParameter CreateConfigParameter(Repository repository, ConfigParameterData configParameterData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(configParameterData, "configParameterData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(configParameterData, nameof(configParameterData));
 
 			return new ConfigParameter(
 				repository,
@@ -241,8 +241,8 @@ namespace gitter.Git
 
 		public static void UpdateReflogRecord(ReflogRecord reflogRecord, ReflogRecordData reflogRecordData)
 		{
-			Verify.Argument.IsNotNull(reflogRecord, "reflogRecord");
-			Verify.Argument.IsNotNull(reflogRecordData, "reflogRecordData");
+			Verify.Argument.IsNotNull(reflogRecord, nameof(reflogRecord));
+			Verify.Argument.IsNotNull(reflogRecordData, nameof(reflogRecordData));
 
 			reflogRecord.Index = reflogRecordData.Index;
 			reflogRecord.Message = reflogRecordData.Message;
@@ -260,8 +260,8 @@ namespace gitter.Git
 
 		public static ReflogRecord CreateReflogRecord(Reflog reflog, ReflogRecordData reflogRecordData)
 		{
-			Verify.Argument.IsNotNull(reflog, "reflog");
-			Verify.Argument.IsNotNull(reflogRecordData, "reflogRecordData");
+			Verify.Argument.IsNotNull(reflog, nameof(reflog));
+			Verify.Argument.IsNotNull(reflogRecordData, nameof(reflogRecordData));
 
 			var repository = reflog.Repository;
 			Revision revision;
@@ -278,16 +278,16 @@ namespace gitter.Git
 
 		public static void UpdateStashedState(StashedState stashedState, StashedStateData stashedStateData)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
-			Verify.Argument.IsNotNull(stashedStateData, "stashedStateData");
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
+			Verify.Argument.IsNotNull(stashedStateData, nameof(stashedStateData));
 
 			stashedState.Index = stashedStateData.Index;
 		}
 
 		public static StashedState CreateStashedState(Repository repository, StashedStateData stashedStateData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(stashedStateData, "stashedStateData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(stashedStateData, nameof(stashedStateData));
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -303,24 +303,24 @@ namespace gitter.Git
 
 		public static void UpdateSubmodule(Submodule submodule, SubmoduleData submoduleData)
 		{
-			Verify.Argument.IsNotNull(submodule, "submodule");
-			Verify.Argument.IsNotNull(submoduleData, "submoduleData");
+			Verify.Argument.IsNotNull(submodule, nameof(submodule));
+			Verify.Argument.IsNotNull(submoduleData, nameof(submoduleData));
 
 			submodule.UpdateInfo(submoduleData.Path, submoduleData.Url);
 		}
 
 		public static Submodule CreateSubmodue(Repository repository, SubmoduleData submoduleData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(submoduleData, "submoduleData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(submoduleData, nameof(submoduleData));
 
 			return new Submodule(repository, submoduleData.Name, submoduleData.Path, submoduleData.Url);
 		}
 
 		public static void UpdateRevision(Revision revision, RevisionData revisionData, bool updateParents)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
-			Verify.Argument.IsNotNull(revisionData, "revisionData");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
+			Verify.Argument.IsNotNull(revisionData, nameof(revisionData));
 
 			var fields = revisionData.Fields;
 			if(fields != RevisionField.SHA1)
@@ -414,8 +414,8 @@ namespace gitter.Git
 
 		public static Revision CreateRevision(Repository repository, RevisionData revisionData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(revisionData, "revisionData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(revisionData, nameof(revisionData));
 
 			var revisions = repository.Revisions;
 			var revision  = revisions.GetOrCreateRevision(revisionData.SHA1);
@@ -487,8 +487,8 @@ namespace gitter.Git
 
 		public static TreeFile CreateTreeFile(Repository repository, TreeFileData treeFileData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(treeFileData, "treeFileData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(treeFileData, nameof(treeFileData));
 
 			var shortName = treeFileData.ShortName.Length == 0 ?
 				GetShortName(treeFileData.Name) : treeFileData.ShortName;
@@ -501,8 +501,8 @@ namespace gitter.Git
 
 		public static void UpdateTreeFile(TreeFile treeFile, TreeFileData treeFileData)
 		{
-			Verify.Argument.IsNotNull(treeFile, "treeFile");
-			Verify.Argument.IsNotNull(treeFileData, "treeFileData");
+			Verify.Argument.IsNotNull(treeFile, nameof(treeFile));
+			Verify.Argument.IsNotNull(treeFileData, nameof(treeFileData));
 
 			treeFile.ConflictType = treeFileData.ConflictType;
 			treeFile.Status = treeFileData.FileStatus;
@@ -511,32 +511,32 @@ namespace gitter.Git
 
 		public static User CreateUser(Repository repository, UserData userData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(userData, "userData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(userData, nameof(userData));
 
 			return new User(repository, userData.UserName, userData.Email, userData.Commits);
 		}
 
 		public static void UpdateUser(User user, UserData userData)
 		{
-			Verify.Argument.IsNotNull(user, "user");
-			Verify.Argument.IsNotNull(userData, "userData");
+			Verify.Argument.IsNotNull(user, nameof(user));
+			Verify.Argument.IsNotNull(userData, nameof(userData));
 
 			user.Commits = userData.Commits;
 		}
 
 		public static Remote CreateRemote(Repository repository, RemoteData remoteData)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(remoteData, "remoteData");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(remoteData, nameof(remoteData));
 
 			return new Remote(repository, remoteData.Name, remoteData.FetchUrl, remoteData.PushUrl);
 		}
 
 		public static void UpdateRemote(Remote remote, RemoteData remoteData)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
-			Verify.Argument.IsNotNull(remoteData, "remoteData");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
+			Verify.Argument.IsNotNull(remoteData, nameof(remoteData));
 
 			remote.SetPushUrl(remoteData.PushUrl);
 			remote.SetFetchUrl(remoteData.FetchUrl);

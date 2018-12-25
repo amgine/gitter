@@ -167,9 +167,6 @@ namespace gitter.Git.Gui.Controls
 			ShowEmail = section.GetValue("ShowEmail", ShowEmail);
 		}
 
-		public override string IdentificationString
-		{
-			get { return "User"; }
-		}
+		public override string IdentificationString => "User";
 	}
 }

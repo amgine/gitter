@@ -22,27 +22,18 @@ namespace gitter.Git.Gui.Views
 {
 	public class HistoryViewModel
 	{
-		#region Data
-
-		private readonly ILogSource _logSource;
-
-		#endregion
-
 		#region .ctor
 
 		public HistoryViewModel(ILogSource logSource)
 		{
-			_logSource = logSource;
+			LogSource = logSource;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public ILogSource LogSource
-		{
-			get { return _logSource; }
-		}
+		public ILogSource LogSource { get; }
 
 		#endregion
 

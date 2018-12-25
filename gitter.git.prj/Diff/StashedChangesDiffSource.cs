@@ -36,14 +36,14 @@ namespace gitter.Git
 
 		public StashedChangesDiffSource(StashedState stashedState)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
 			_stashedState = stashedState;
 		}
 
 		public StashedChangesDiffSource(StashedState stashedState, IList<string> paths)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
 			_stashedState = stashedState;
 			_paths = paths;

@@ -32,48 +32,31 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#endregion
 
-		#region Data
-
-		private readonly string _name;
-		private readonly char _separator;
-		private string _value;
-
-		#endregion
-
 		#region .ctor
 
 		public CommandParameterValue(string name, string value)
 		{
-			_name      = name;
-			_separator = DefaultSeparator;
-			_value     = value;
+			Name      = name;
+			Separator = DefaultSeparator;
+			Value     = value;
 		}
 
 		public CommandParameterValue(string name, string value, char separator)
 		{
-			_name      = name;
-			_separator = separator;
-			_value     = value;
+			Name      = name;
+			Separator = separator;
+			Value     = value;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public char Separator
-		{
-			get { return _separator; }
-		}
+		public char Separator { get; }
 
-		public string Value
-		{
-			get { return _value; }
-		}
+		public string Value { get; }
 
 		#endregion
 
@@ -81,21 +64,18 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void ToString(StringBuilder stringBuilder)
 		{
-			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
+			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
 
-			stringBuilder.Append(_name);
-			stringBuilder.Append(_separator);
-			stringBuilder.Append(_value);
+			stringBuilder.Append(Name);
+			stringBuilder.Append(Separator);
+			stringBuilder.Append(Value);
 		}
 
 		#endregion
 
 		#region Overrides
 
-		public override string ToString()
-		{
-			return Name + Separator + Value;
-		}
+		public override string ToString() => Name + Separator + Value;
 
 		#endregion
 	}

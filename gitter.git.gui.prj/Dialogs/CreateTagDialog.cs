@@ -42,14 +42,6 @@ namespace gitter.Git.Gui.Dialogs
 		private Repository _repository;
 		private TextBoxSpellChecker _speller;
 		private readonly ICreateTagController _controller;
-		private readonly IUserInputSource<string> _tagNameInput;
-		private readonly IUserInputSource<string> _revisionInput;
-		private readonly IUserInputSource<string> _messageInput;
-		private readonly IUserInputSource<bool> _annotatedInput;
-		private readonly IUserInputSource<bool> _signedInput;
-		private readonly IUserInputSource<bool> _useKeyIdInput;
-		private readonly IUserInputSource<string> _keyIdInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 
 		#endregion
 
@@ -60,7 +52,7 @@ namespace gitter.Git.Gui.Dialogs
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		public CreateTagDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -69,16 +61,16 @@ namespace gitter.Git.Gui.Dialogs
 
 			var inputs = new IUserInputSource[]
 			{
-				_tagNameInput   = new TextBoxInputSource(_txtName),
-				_revisionInput  = new ControlInputSource(_txtRevision),
-				_messageInput   = new TextBoxInputSource(_txtMessage),
-				_annotatedInput = new RadioButtonInputSource(_radAnnotated),
-				_signedInput    = new RadioButtonInputSource(_radSigned),
-				_useKeyIdInput  = new RadioButtonInputSource(_radUseKeyId),
-				_keyIdInput     = new TextBoxInputSource(_txtKeyId),
+				TagName   = new TextBoxInputSource(_txtName),
+				Revision  = new ControlInputSource(_txtRevision),
+				Message   = new TextBoxInputSource(_txtMessage),
+				Annotated = new RadioButtonInputSource(_radAnnotated),
+				Signed    = new RadioButtonInputSource(_radSigned),
+				UseKeyId  = new RadioButtonInputSource(_radUseKeyId),
+				KeyId     = new TextBoxInputSource(_txtKeyId),
 			};
 
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.Tag);
 
@@ -103,50 +95,23 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCreate; }
-		}
+		protected override string ActionVerb => Resources.StrCreate;
 
-		public IUserInputSource<string> TagName
-		{
-			get { return _tagNameInput; }
-		}
+		public IUserInputSource<string> TagName { get; }
 
-		public IUserInputSource<string> Revision
-		{
-			get { return _revisionInput; }
-		}
+		public IUserInputSource<string> Revision { get; }
 
-		public IUserInputSource<string> Message
-		{
-			get { return _messageInput; }
-		}
+		public IUserInputSource<string> Message { get; }
 
-		public IUserInputSource<bool> Signed
-		{
-			get { return _signedInput; }
-		}
+		public IUserInputSource<bool> Signed { get; }
 
-		public IUserInputSource<bool> Annotated
-		{
-			get { return _annotatedInput; }
-		}
+		public IUserInputSource<bool> Annotated { get; }
 
-		public IUserInputSource<bool> UseKeyId
-		{
-			get { return _useKeyIdInput; }
-		}
+		public IUserInputSource<bool> UseKeyId { get; }
 
-		public IUserInputSource<string> KeyId
-		{
-			get { return _keyIdInput; }
-		}
+		public IUserInputSource<string> KeyId { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -207,10 +172,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		/// <summary>Create <see cref="Tag"/>.</summary>
 		/// <returns>true, if <see cref="Tag"/> was created successfully.</returns>
-		public bool Execute()
-		{
-			return _controller.TryCreateTag();
-		}
+		public bool Execute() => _controller.TryCreateTag();
 
 		#endregion
 	}

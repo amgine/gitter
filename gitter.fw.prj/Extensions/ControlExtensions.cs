@@ -52,7 +52,7 @@ namespace gitter.Framework
 		/// <param name="control">Control to disable redraw for.</param>
 		public static void DisableRedraw(this Control control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)0, IntPtr.Zero);
 		}
@@ -61,7 +61,7 @@ namespace gitter.Framework
 		/// <param name="control">Control to disable redraw for.</param>
 		public static void EnableRedraw(this Control control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)1, IntPtr.Zero);
 		}
@@ -70,7 +70,7 @@ namespace gitter.Framework
 		/// <param name="control">Control to force-redraw.</param>
 		public static void RedrawWindow(this Control control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			User32.RedrawWindow(control.Handle, IntPtr.Zero, IntPtr.Zero,
 				RedrawWindowFlags.Erase |

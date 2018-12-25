@@ -61,10 +61,7 @@ namespace gitter.Framework
 					{
 						obj = factory(info);
 						dictionary.Add(obj.Name, obj);
-						if(objectCreated != null)
-						{
-							objectCreated(obj);
-						}
+						objectCreated?.Invoke(obj);
 					}
 					else
 					{
@@ -85,10 +82,7 @@ namespace gitter.Framework
 				foreach(var obj in hset)
 				{
 					dictionary.Remove(obj.Name);
-					if(objectDeleted != null)
-					{
-						objectDeleted(obj);
-					}
+					objectDeleted?.Invoke(obj);
 				}
 			}
 		}
@@ -128,8 +122,7 @@ namespace gitter.Framework
 					{
 						obj = factory(info);
 						dictionary.Add(obj.Name, obj);
-						if(objectCreated != null)
-							objectCreated(obj);
+						objectCreated?.Invoke(obj);
 					}
 					else
 					{
@@ -150,10 +143,7 @@ namespace gitter.Framework
 				foreach(var obj in hset)
 				{
 					dictionary.Remove(obj.Name);
-					if(objectDeleted != null)
-					{
-						objectDeleted(obj);
-					}
+					objectDeleted?.Invoke(obj);
 				}
 			}
 		}
@@ -193,15 +183,16 @@ namespace gitter.Framework
 					{
 						obj = info.Construct(repository);
 						dictionary.Add(obj.Name, obj);
-						if(objectCreated != null)
-							objectCreated(obj);
+						objectCreated?.Invoke(obj);
 					}
 					else
 					{
 						if(callUpdate)
+						{
 							info.Update(obj);
-						if(hset != null)
-							hset.Remove(obj);
+						}
+
+						if(hset != null) hset.Remove(obj);
 					}
 				}
 			}
@@ -211,8 +202,7 @@ namespace gitter.Framework
 				foreach(var obj in hset)
 				{
 					dictionary.Remove(obj.Name);
-					if(objectDeleted != null)
-						objectDeleted(obj);
+					objectDeleted?.Invoke(obj);
 				}
 			}
 		}
@@ -238,13 +228,14 @@ namespace gitter.Framework
 					{
 						obj = info.Construct(repository);
 						dictionary[obj.Name] = obj;
-						if(objectCreated != null)
-							objectCreated(obj);
+						objectCreated?.Invoke(obj);
 					}
 					else
 					{
 						if(callUpdate)
+						{
 							info.Update(obj);
+						}
 					}
 				}
 			}
@@ -308,8 +299,7 @@ namespace gitter.Framework
 					{
 						var obj = info.Construct(repository);
 						list.Insert(id, obj);
-						if(objectCreated != null)
-							objectCreated(obj);
+						objectCreated?.Invoke(obj);
 					}
 					++id;
 				}
@@ -320,10 +310,7 @@ namespace gitter.Framework
 				foreach(var obj in hset)
 				{
 					list.Remove(obj);
-					if(objectDeleted != null)
-					{
-						objectDeleted(obj);
-					}
+					objectDeleted?.Invoke(obj);
 				}
 			}
 		}
@@ -368,10 +355,7 @@ namespace gitter.Framework
 					{
 						var obj = info.Construct(repository);
 						list.Insert(id, obj);
-						if(objectCreated != null)
-						{
-							objectCreated(obj);
-						}
+						objectCreated?.Invoke(obj);
 					}
 					++id;
 				}

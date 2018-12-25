@@ -43,7 +43,7 @@ namespace gitter.Git.Gui.Views
 		/// <param name="submodulesView">Host view.</param>
 		public SubmodulesToolbar(SubmodulesView submodulesView)
 		{
-			Verify.Argument.IsNotNull(submodulesView, "submodulesView");
+			Verify.Argument.IsNotNull(submodulesView, nameof(submodulesView));
 
 			_submodulesView = submodulesView;
 

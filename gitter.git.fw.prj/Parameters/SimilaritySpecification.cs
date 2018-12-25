@@ -22,42 +22,29 @@ namespace gitter.Git.AccessLayer
 {
 	public struct SimilaritySpecification
 	{
-		#region Data
-
-		private readonly bool _isSpecified;
-		private readonly double _similarity;
-
-		#endregion
-
 		#region .ctor
 
 		public SimilaritySpecification(bool isSpecified)
 		{
-			_isSpecified = isSpecified;
-			_similarity = 0.0;
+			IsSpecified = isSpecified;
+			Similarity  = 0.0;
 		}
 
 		public SimilaritySpecification(double similarity)
 		{
-			Verify.Argument.IsInRange(0.0, similarity, 1.0, "similarity");
+			Verify.Argument.IsInRange(0.0, similarity, 1.0, nameof(similarity));
 
-			_isSpecified = true;
-			_similarity = similarity;
+			IsSpecified = true;
+			Similarity  = similarity;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public bool IsSpecified
-		{
-			get { return _isSpecified; }
-		}
+		public bool IsSpecified { get; }
 
-		public double Similarity
-		{
-			get { return _similarity; }
-		}
+		public double Similarity { get; }
 
 		#endregion
 	}

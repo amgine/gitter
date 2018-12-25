@@ -31,7 +31,7 @@ namespace gitter
 	{
 		public static void ShowUACShield(this Button button)
 		{
-			Verify.Argument.IsNotNull(button, "button");
+			Verify.Argument.IsNotNull(button, nameof(button));
 
 			if(Utility.IsOSVistaOrNewer)
 			{
@@ -41,7 +41,7 @@ namespace gitter
 			
 		public static void HideUACShield(this Button button)
 		{
-			Verify.Argument.IsNotNull(button, "button");
+			Verify.Argument.IsNotNull(button, nameof(button));
 
 			if(Utility.IsOSVistaOrNewer)
 			{

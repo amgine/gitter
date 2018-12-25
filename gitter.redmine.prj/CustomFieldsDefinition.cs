@@ -52,14 +52,14 @@ namespace gitter.Redmine
 		{
 			get
 			{
-				Verify.Argument.IsNotNull(field, "field");
+				Verify.Argument.IsNotNull(field, nameof(field));
 				CustomFieldValue value;
 				if(_values.TryGetValue(field.Id, out value)) return value.Value;
 				return null;
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(field, "field");
+				Verify.Argument.IsNotNull(field, nameof(field));
 				if(value == null)
 				{
 					_values.Remove(field.Id);

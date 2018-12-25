@@ -41,8 +41,8 @@ namespace gitter.Git.Gui.Controls
 
 		public FilesToCleanBinding(Repository repository, TreeListBox treeListBox)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(treeListBox, "treeListBox");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(treeListBox, nameof(treeListBox));
 
 			_repository  = repository;
 			_treeListBox = treeListBox;

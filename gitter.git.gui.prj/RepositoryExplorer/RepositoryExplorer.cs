@@ -36,7 +36,7 @@ namespace gitter.Git.Gui
 
 		public RepositoryExplorer(GuiProvider guiProvider)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			_rootItem = new RepositoryRootItem(_guiProvider.Environment)

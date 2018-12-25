@@ -26,51 +26,31 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class RemoteData : INamedObject
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly string _fetchUrl;
-		private readonly string _pushUrl;
-
-		#endregion
-
 		#region .ctor
 
 		public RemoteData(string name, string fetchUrl, string pushUrl)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(fetchUrl, "fetchUrl");
-			Verify.Argument.IsNotNull(pushUrl, "pushUrl");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(fetchUrl, nameof(fetchUrl));
+			Verify.Argument.IsNotNull(pushUrl, nameof(pushUrl));
 
-			_name = name;
-			_fetchUrl = fetchUrl;
-			_pushUrl = pushUrl;
+			Name     = name;
+			FetchUrl = fetchUrl;
+			PushUrl  = pushUrl;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public string FetchUrl
-		{
-			get { return _fetchUrl; }
-		}
+		public string FetchUrl { get; }
 
-		public string PushUrl
-		{
-			get { return _pushUrl; }
-		}
+		public string PushUrl { get; }
 
 		#endregion
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

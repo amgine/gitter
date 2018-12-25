@@ -40,17 +40,11 @@ namespace gitter.Git
 
 		/// <summary>Invokes <see cref="Detached"/> event.</summary>
 		private void OnDetached()
-		{
-			var handler = Detached;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> Detached?.Invoke(this, EventArgs.Empty);
 
 		/// <summary>Invokes <see cref="Attached"/> event.</summary>
 		private void OnAttached()
-		{
-			var handler = Attached;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> Attached?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -83,10 +77,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the current branch.</summary>
 		/// <value>Current branch or <c>null</c> if HEAD is detached.</value>
-		public Branch CurrentBranch
-		{
-			get { return Pointer as Branch; }
-		}
+		public Branch CurrentBranch => Pointer as Branch;
 
 		/// <summary>Returns object pointed by HEAD.</summary>
 		/// <param name="repository">Repository to get HEAD from.</param>
@@ -136,7 +127,7 @@ namespace gitter.Git
 		/// <returns>Valid pointer.</returns>
 		protected override IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
 		{
-			Verify.Argument.IsNotNull(pointer, "pointer");
+			Verify.Argument.IsNotNull(pointer, nameof(pointer));
 
 			switch(pointer.Type)
 			{
@@ -150,18 +141,12 @@ namespace gitter.Git
 
 		/// <summary>Gets a value indicating whether HEAD is detached.</summary>
 		/// <value><c>true</c> if HEAD is detached; otherwise, <c>false</c>.</value>
-		public bool IsDetached
-		{
-			get { return Pointer.Type != ReferenceType.LocalBranch; }
-		}
+		public bool IsDetached => Pointer.Type != ReferenceType.LocalBranch;
 
 		/// <summary>Gets a value indicating whether HEAD is pointing to non-existent object.</summary>
 		/// <value><c>true</c> if HEAD is pointing to non-existent object; otherwise, <c>false</c>.</value>
 		/// <remarks>It is typical to newly created repository whith Head.IsEmpty == <c>true</c>.</remarks>
-		public bool IsEmpty
-		{
-			get { return Pointer.Type == ReferenceType.None; }
-		}
+		public bool IsEmpty => Pointer.Type == ReferenceType.None;
 
 		/// <summary>Called when this <see cref="Reference"/> is moved away from <paramref name="pointer"/>.</summary>
 		/// <param name="pointer">Object, which this <see cref="Reference"/> was pointing to.</param>
@@ -225,7 +210,7 @@ namespace gitter.Git
 		/// </exception>
 		public void Reset(IRevisionPointer pointer, ResetMode mode)
 		{
-			Verify.Argument.IsValidRevisionPointer(pointer, Repository, "pointer");
+			Verify.Argument.IsValidRevisionPointer(pointer, Repository, nameof(pointer));
 
 			var pos = Pointer.Dereference();
 			var rev = pointer.Dereference();
@@ -284,7 +269,7 @@ namespace gitter.Git
 
 		public string FormatMergeMessage(IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 			Verify.State.IsFalse(IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("format merge message"));
 
@@ -294,8 +279,8 @@ namespace gitter.Git
 
 		public string FormatMergeMessage(ICollection<IRevisionPointer> revisions)
 		{
-			Verify.Argument.IsValidRevisionPointerSequence(revisions, Repository, "revisions");
-			Verify.Argument.IsTrue(revisions.Count != 0, "revisions",
+			Verify.Argument.IsValidRevisionPointerSequence(revisions, Repository, nameof(revisions));
+			Verify.Argument.IsTrue(revisions.Count != 0, nameof(revisions),
 				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
 			Verify.State.IsFalse(IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("format merge message"));
@@ -311,7 +296,7 @@ namespace gitter.Git
 
 		public Revision Merge(IRevisionPointer branch, bool noCommit, bool noFastForward, bool squash, string message)
 		{
-			Verify.Argument.IsValidRevisionPointer(branch, Repository, "branch");
+			Verify.Argument.IsValidRevisionPointer(branch, Repository, nameof(branch));
 			Verify.State.IsFalse(IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));
 
@@ -380,8 +365,8 @@ namespace gitter.Git
 
 		public Revision Merge(ICollection<IRevisionPointer> branches, bool noCommit, bool noFastForward, bool squash, string message)
 		{
-			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
-			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, nameof(branches));
+			Verify.Argument.IsTrue(branches.Count != 0, nameof(branches),
 				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 			Verify.State.IsFalse(IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));

@@ -47,7 +47,7 @@ namespace gitter.Framework.Controls
 
 		public CustomButtonAdapter(CustomButtonRenderer renderer)
 		{
-			Verify.Argument.IsNotNull(renderer, "renderer");
+			Verify.Argument.IsNotNull(renderer, nameof(renderer));
 
 			_button = new CustomButton()
 			{

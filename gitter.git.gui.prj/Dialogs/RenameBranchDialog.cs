@@ -38,9 +38,6 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private readonly Branch _branch;
-		private readonly IUserInputSource<string> _newNameInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly IRenameBranchController _controller;
 
 		#endregion
@@ -52,20 +49,20 @@ namespace gitter.Git.Gui.Dialogs
 		/// <exception cref="ArgumentNullException"><paramref name="branch"/> == <c>null</c>.</exception>
 		public RenameBranchDialog(Branch branch)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
-			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+			Verify.Argument.IsNotNull(branch, nameof(branch));
+			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
 				Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
 
-			_branch = branch;
+			Branch = branch;
 
 			InitializeComponent();
 			Localize();
 
 			var inputs = new IUserInputSource[]
 			{
-				_newNameInput = new TextBoxInputSource(_txtNewName),
+				NewName = new TextBoxInputSource(_txtNewName),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtNewName, ReferenceType.LocalBranch);
 
@@ -84,26 +81,14 @@ namespace gitter.Git.Gui.Dialogs
 		#region Properties
 
 		/// <summary>Verb, describing operation.</summary>
-		protected override string ActionVerb
-		{
-			get { return Resources.StrRename; }
-		}
+		protected override string ActionVerb => Resources.StrRename;
 
 		/// <summary>Branch to rename.</summary>
-		public Branch Branch
-		{
-			get { return _branch; }
-		}
+		public Branch Branch { get; }
 
-		public IUserInputSource<string> NewName
-		{
-			get { return _newNameInput; }
-		}
+		public IUserInputSource<string> NewName { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -123,10 +108,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		/// <summary>Perform rename.</summary>
 		/// <returns>true if rename succeeded.</returns>
-		public bool Execute()
-		{
-			return _controller.TryRename();
-		}
+		public bool Execute() => _controller.TryRename();
 
 		#endregion
 	}

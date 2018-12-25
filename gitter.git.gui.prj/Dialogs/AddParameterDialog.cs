@@ -47,7 +47,7 @@ namespace gitter.Git.Gui.Dialogs
 		/// <param name="environment">Application environment.</param>
 		private AddParameterDialog(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 
@@ -67,7 +67,7 @@ namespace gitter.Git.Gui.Dialogs
 		public AddParameterDialog(IWorkingEnvironment environment, Repository repository)
 			: this(environment)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 			_configFile = ConfigFile.Repository;
@@ -84,10 +84,7 @@ namespace gitter.Git.Gui.Dialogs
 			_configFile = configFile;
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrAdd; }
-		}
+		protected override string ActionVerb => Resources.StrAdd;
 
 		/// <summary>Parameter name.</summary>
 		public string ParameterName

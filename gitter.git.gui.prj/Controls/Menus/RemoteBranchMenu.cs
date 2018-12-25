@@ -30,36 +30,32 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class RemoteBranchMenu : ContextMenuStrip
 	{
-		private readonly RemoteRepositoryBranch _remoteBranch;
 
 		/// <summary>Create <see cref="RemoteBranchMenu"/>.</summary>
 		/// <param name="remoteBranch">Remote branch, for which menu is generated.</param>
 		public RemoteBranchMenu(RemoteRepositoryBranch remoteBranch)
 		{
-			Verify.Argument.IsNotNull(remoteBranch, "remoteBranch");
-			Verify.Argument.IsFalse(remoteBranch.IsDeleted, "remoteBranch",
+			Verify.Argument.IsNotNull(remoteBranch, nameof(remoteBranch));
+			Verify.Argument.IsFalse(remoteBranch.IsDeleted, nameof(remoteBranch),
 				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
 
-			_remoteBranch = remoteBranch;
+			RemoteBranch = remoteBranch;
 
-			Items.Add(GuiItemFactory.GetRemoveRemoteBranchItem<ToolStripMenuItem>(_remoteBranch, "{0}"));
+			Items.Add(GuiItemFactory.GetRemoveRemoteBranchItem<ToolStripMenuItem>(RemoteBranch, "{0}"));
 
 			var copyToClipboardItem = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
-				Resources.StrName, _remoteBranch.Name));
+				Resources.StrName, RemoteBranch.Name));
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
-				Resources.StrFullName, _remoteBranch.FullName));
+				Resources.StrFullName, RemoteBranch.FullName));
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(
-				Resources.StrPosition, _remoteBranch.Hash.ToString()));
+				Resources.StrPosition, RemoteBranch.Hash.ToString()));
 
 			Items.Add(copyToClipboardItem);
 		}
 
 		/// <summary>Remote branch, for which menu is generated.</summary>
-		public RemoteRepositoryBranch RemoteBranch
-		{
-			get { return _remoteBranch; }
-		}
+		public RemoteRepositoryBranch RemoteBranch { get; }
 	}
 }

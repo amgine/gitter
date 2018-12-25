@@ -24,36 +24,23 @@ namespace gitter.Git
 
 	public struct DiffColumnHeader
 	{
-		private readonly DiffColumnAction _action;
-		private readonly int _startLine;
-		private readonly int _lineCount;
-
 		public DiffColumnHeader(DiffColumnAction action, int startLine, int lineCount)
 		{
-			_action = action;
-			_startLine = startLine;
-			_lineCount = lineCount;
+			Action    = action;
+			StartLine = startLine;
+			LineCount = lineCount;
 		}
 
-		public DiffColumnAction Action
-		{
-			get { return _action; }
-		}
+		public DiffColumnAction Action { get; }
 
-		public int StartLine
-		{
-			get { return _startLine; }
-		}
+		public int StartLine { get; }
 
-		public int LineCount
-		{
-			get { return _lineCount; }
-		}
+		public int LineCount { get; }
 
 		public override string ToString()
 		{
 			return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-				"{0}{1},{2}", Action == DiffColumnAction.Add ? '+' : '-', _startLine, _lineCount);
+				"{0}{1},{2}", Action == DiffColumnAction.Add ? '+' : '-', StartLine, LineCount);
 		}
 	}
 }

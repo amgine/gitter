@@ -26,23 +26,14 @@ namespace gitter.Git.Gui
 
 	sealed class ContentContextMenuEventArgs : EventArgs
 	{
-		private readonly ContextMenuStrip _contextMenu;
-		private readonly Point _position;
-
 		public ContentContextMenuEventArgs(ContextMenuStrip contextMenu, Point position)
 		{
-			_contextMenu = contextMenu;
-			_position = position;
+			ContextMenu = contextMenu;
+			Position    = position;
 		}
 
-		public ContextMenuStrip ContextMenu
-		{
-			get { return _contextMenu; }
-		}
+		public ContextMenuStrip ContextMenu { get; }
 
-		public Point Position
-		{
-			get { return _position; }
-		}
+		public Point Position { get; }
 	}
 }

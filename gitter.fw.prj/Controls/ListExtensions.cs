@@ -27,8 +27,8 @@ namespace gitter.Framework.Controls
 	{
 		public static T FindPrevious<T>(this IList<T> items, int currentIndex, Predicate<T> filter)
 		{
-			Verify.Argument.IsNotNull(items, "items");
-			Verify.Argument.IsNotNull(filter, "filter");
+			Verify.Argument.IsNotNull(items, nameof(items));
+			Verify.Argument.IsNotNull(filter, nameof(filter));
 
 			while(--currentIndex >= 0)
 			{
@@ -43,8 +43,8 @@ namespace gitter.Framework.Controls
 
 		public static T FindNext<T>(this IList<T> items, int currentIndex, Predicate<T> filter)
 		{
-			Verify.Argument.IsNotNull(items, "items");
-			Verify.Argument.IsNotNull(filter, "filter");
+			Verify.Argument.IsNotNull(items, nameof(items));
+			Verify.Argument.IsNotNull(filter, nameof(filter));
 
 			while(++currentIndex < items.Count)
 			{

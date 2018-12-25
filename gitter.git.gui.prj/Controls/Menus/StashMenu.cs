@@ -29,21 +29,16 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class StashMenu : ContextMenuStrip
 	{
-		private readonly Repository _repository;
-
 		public StashMenu(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			Items.Add(GuiItemFactory.GetShowStashViewItem<ToolStripMenuItem>());
-			Items.Add(GuiItemFactory.GetRefreshStashItem<ToolStripMenuItem>(_repository));
+			Items.Add(GuiItemFactory.GetRefreshStashItem<ToolStripMenuItem>(Repository));
 		}
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 	}
 }

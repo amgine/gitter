@@ -139,21 +139,21 @@ namespace gitter.Framework
 
 		public Section GetSectionForProvider(IRepositoryProvider provider)
 		{
-			Verify.Argument.IsNotNull(provider, "provider");
+			Verify.Argument.IsNotNull(provider, nameof(provider));
 
 			return _providersSection.GetCreateSection(provider.Name);
 		}
 
 		public Section GetSectionForProvider(IRepositoryServiceProvider provider)
 		{
-			Verify.Argument.IsNotNull(provider, "provider");
+			Verify.Argument.IsNotNull(provider, nameof(provider));
 
 			return _providersSection.GetCreateSection(provider.Name);
 		}
 
 		public Section GetSectionForProviderGui(IRepositoryProvider provider)
 		{
-			Verify.Argument.IsNotNull(provider, "provider");
+			Verify.Argument.IsNotNull(provider, nameof(provider));
 
 			var section = _providersSection.GetCreateSection(provider.Name);
 			return section.GetCreateSection("Gui");
@@ -161,7 +161,7 @@ namespace gitter.Framework
 
 		public Section GetSectionForProviderGui(IRepositoryServiceProvider provider)
 		{
-			Verify.Argument.IsNotNull(provider, "provider");
+			Verify.Argument.IsNotNull(provider, nameof(provider));
 
 			var section = _providersSection.GetCreateSection(provider.Name);
 			return section.GetCreateSection("Gui");

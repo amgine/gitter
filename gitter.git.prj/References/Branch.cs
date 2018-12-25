@@ -58,10 +58,7 @@ namespace gitter.Git
 
 		/// <summary>Invokes <see cref="Renamed"/> event.</summary>
 		private void InvokeNameChanged(string oldName, string newName)
-		{
-			var handler = Renamed;
-			if(handler != null) handler(this, new NameChangeEventArgs(oldName, newName));
-		}
+			=> Renamed?.Invoke(this, new NameChangeEventArgs(oldName, newName));
 
 		#endregion
 
@@ -86,31 +83,19 @@ namespace gitter.Git
 
 		/// <summary>Gets the type of this reference.</summary>
 		/// <value><see cref="ReferenceType.LocalBranch"/>.</value>
-		public override ReferenceType Type
-		{
-			get { return ReferenceType.LocalBranch; }
-		}
+		public override ReferenceType Type => ReferenceType.LocalBranch;
 
 		/// <summary>Gets the full branch name.</summary>
 		/// <value>Full branch name.</value>
-		public override string FullName
-		{
-			get { return GitConstants.LocalBranchPrefix + Name; }
-		}
+		public override string FullName => GitConstants.LocalBranchPrefix + Name;
 
 		/// <summary>Gets a value indicating whether this branch is remote.</summary>
 		/// <value><c>false</c>.</value>
-		public override bool IsRemote
-		{
-			get { return false; }
-		}
+		public override bool IsRemote => false;
 
 		/// <summary>Gets a value indicating whether this branch is current HEAD.</summary>
 		/// <value><c>true</c> if this instance is current HEAD; otherwise, <c>false</c>.</value>
-		public override bool IsCurrent
-		{
-			get { return Repository.Head.Pointer == this; }
-		}
+		public override bool IsCurrent => Repository.Head.Pointer == this;
 
 		#endregion
 
@@ -132,7 +117,7 @@ namespace gitter.Git
 		/// </exception>
 		public void Reset(IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 			Verify.State.IsNotDeleted(this);
 
 			var rev = revision.Dereference();

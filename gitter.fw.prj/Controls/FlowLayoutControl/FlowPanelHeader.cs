@@ -31,7 +31,7 @@ namespace gitter.Framework.Controls
 
 		protected FlowPanelHeader(FlowPanel flowPanel)
 		{
-			Verify.Argument.IsNotNull(flowPanel, "flowPanel");
+			Verify.Argument.IsNotNull(flowPanel, nameof(flowPanel));
 
 			_flowPanel = flowPanel;
 		}

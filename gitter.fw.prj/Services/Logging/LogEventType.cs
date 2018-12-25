@@ -21,9 +21,7 @@
 namespace gitter.Framework.Services
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 
 	using Resources = gitter.Framework.Properties.Resources;
 
@@ -65,10 +63,7 @@ namespace gitter.Framework.Services
 
 		#region Overrides
 
-		public override string ToString()
-		{
-			return Name;
-		}
+		public override string ToString() => Name;
 
 		#endregion
 	}

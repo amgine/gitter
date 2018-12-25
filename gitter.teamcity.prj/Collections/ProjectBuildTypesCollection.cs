@@ -29,7 +29,7 @@ namespace gitter.TeamCity
 		internal ProjectBuildTypesCollection(Project project, BuildTypesCollection buildTypes)
 			: base(buildTypes)
 		{
-			Verify.Argument.IsNotNull(project, "project");
+			Verify.Argument.IsNotNull(project, nameof(project));
 
 			_project = project;
 		}

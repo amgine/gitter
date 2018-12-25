@@ -26,14 +26,14 @@ namespace gitter.Framework
 	{
 		public static T GetData<T>(this IDataObject data)
 		{
-			Verify.Argument.IsNotNull(data, "data");
+			Verify.Argument.IsNotNull(data, nameof(data));
 
 			return (T)data.GetData(typeof(T));
 		}
 
 		public static bool GetDataPresent<T>(this IDataObject data)
 		{
-			Verify.Argument.IsNotNull(data, "data");
+			Verify.Argument.IsNotNull(data, nameof(data));
 
 			return data.GetDataPresent(typeof(T));
 		}

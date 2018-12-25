@@ -30,29 +30,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class PushController : ViewControllerBase<IPushView>, IPushController
 	{
-		#region Data
-
-		private readonly Repository _repository;
-
-		#endregion
-
 		#region .ctor
 
 		public PushController(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 		}
 
 		#endregion
 
 		#region properties
 
-		private Repository Repository
-		{
-			get { return _repository; }
-		}
+		private Repository Repository { get; }
 
 		#endregion
 

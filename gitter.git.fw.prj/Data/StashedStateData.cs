@@ -26,36 +26,20 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class StashedStateData : INamedObject
 	{
-		#region Data
-
-		private readonly int _index;
-		private readonly RevisionData _revision;
-
-		#endregion
-
 		#region .ctor
 
 		public StashedStateData(int index, RevisionData revision)
 		{
-			_index = index;
-			_revision = revision;
+			Index    = index;
+			Revision = revision;
 		}
 
 		#endregion
 
-		public string Name
-		{
-			get { return GitConstants.StashFullName + "@{" + _index + "}"; }
-		}
+		public string Name => GitConstants.StashFullName + "@{" + Index + "}";
 
-		public int Index
-		{
-			get { return _index; }
-		}
+		public int Index { get; }
 
-		public RevisionData Revision
-		{
-			get { return _revision; }
-		}
+		public RevisionData Revision { get; }
 	}
 }

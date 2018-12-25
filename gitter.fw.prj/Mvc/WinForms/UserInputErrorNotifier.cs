@@ -37,8 +37,8 @@ namespace gitter.Framework.Mvc.WinForms
 
 		public UserInputErrorNotifier(INotificationService notificationService, IEnumerable<IUserInputSource> inputSources)
 		{
-			Verify.Argument.IsNotNull(notificationService, "notificationService");
-			Verify.Argument.IsNotNull(inputSources, "inputSources");
+			Verify.Argument.IsNotNull(notificationService, nameof(notificationService));
+			Verify.Argument.IsNotNull(inputSources, nameof(inputSources));
 
 			_notificationService = notificationService;
 			_inputSources = inputSources;

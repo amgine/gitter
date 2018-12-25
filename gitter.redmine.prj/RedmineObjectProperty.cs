@@ -65,7 +65,7 @@ namespace gitter.Redmine
 
 		public T GetValue(RedmineObject obj)
 		{
-			Verify.Argument.IsNotNull(obj, "obj");
+			Verify.Argument.IsNotNull(obj, nameof(obj));
 
 			return (T)obj.GetType().GetProperty(Name).GetValue(obj, null);
 		}

@@ -51,7 +51,7 @@ namespace gitter
 
 		public RepositoryRootItem(IWorkingEnvironment environment, string repository)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 			_repository = repository;

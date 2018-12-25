@@ -66,7 +66,7 @@ namespace gitter.Git
 		public GitOptionsPage(IWorkingEnvironment environment)
 			: this()
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_repositoryProvider = environment.GetRepositoryProvider<RepositoryProvider>();
 			ShowGitAccessorProviders();
@@ -75,7 +75,7 @@ namespace gitter.Git
 		public GitOptionsPage(IGitRepositoryProvider repositoryProvider)
 			: this()
 		{
-			Verify.Argument.IsNotNull(repositoryProvider, "repositoryProvider");
+			Verify.Argument.IsNotNull(repositoryProvider, nameof(repositoryProvider));
 
 			_repositoryProvider = repositoryProvider;
 			ShowGitAccessorProviders();

@@ -52,17 +52,11 @@ namespace gitter.Git
 
 		/// <summary>Invoke <see cref="PointerChanged"/>.</summary>
 		private void InvokePointerChanged(IRevisionPointer oldPos, IRevisionPointer newPos)
-		{
-			var handler = PointerChanged;
-			if(handler != null) handler(this, new RevisionPointerChangedEventArgs(oldPos, newPos));
-		}
+			=> PointerChanged?.Invoke(this, new RevisionPointerChangedEventArgs(oldPos, newPos));
 
 		/// <summary>Invoke <see cref="PositionChanged"/>.</summary>
 		protected void InvokePositionChanged(Revision oldPos, Revision newPos)
-		{
-			var handler = PositionChanged;
-			if(handler != null) handler(this, new RevisionChangedEventArgs(oldPos, newPos));
-		}
+			=> PositionChanged?.Invoke(this, new RevisionChangedEventArgs(oldPos, newPos));
 
 		#endregion
 
@@ -73,8 +67,6 @@ namespace gitter.Git
 		{
 			#region Data
 
-			/// <summary>Reflog selector.</summary>
-			private readonly string _reflogSelector;
 			/// <summary>Owner reference.</summary>
 			private readonly Reference _reference;
 
@@ -85,50 +77,35 @@ namespace gitter.Git
 			/// <param name="reflogSelector">Reflog selector.</param>
 			public ReflogReference(Reference reference, string reflogSelector)
 			{
-				Verify.Argument.IsNotNull(reference, "reference");
-				Verify.Argument.IsNotNull(reflogSelector, "reflogSelector");
+				Verify.Argument.IsNotNull(reference, nameof(reference));
+				Verify.Argument.IsNotNull(reflogSelector, nameof(reflogSelector));
 
 				_reference = reference;
-				_reflogSelector = reflogSelector;
+				ReflogSelector = reflogSelector;
 			}
 
 			/// <summary>Gets the reflog selector.</summary>
 			/// <value>Reflog selector.</value>
-			public string ReflogSelector
-			{
-				get { return _reflogSelector; }
-			}
+			public string ReflogSelector { get; }
 
 			/// <summary>Gets the host repository.</summary>
 			/// <value>Host repository</value>
 			/// <remarks>Never returns <c>null</c>.</remarks>
-			public Repository Repository
-			{
-				get { return _reference.Repository; }
-			}
+			public Repository Repository => _reference.Repository;
 
 			/// <summary><see cref="ReferenceType"/>.</summary>
 			/// <value><see cref="ReferenceType.ReflogRecord"/>.</value>
-			public ReferenceType Type
-			{
-				get { return ReferenceType.ReflogRecord; }
-			}
+			public ReferenceType Type => ReferenceType.ReflogRecord;
 
 			/// <summary>
 			/// Revision expression (reference name, sha1, relative expression, etc.).
 			/// </summary>
-			public string Pointer
-			{
-				get { return _reference.Name + "@{" + _reflogSelector + "}"; }
-			}
+			public string Pointer => _reference.Name + "@{" + ReflogSelector + "}";
 
 			/// <summary>
 			/// Returns full non-ambiguous revision name.
 			/// </summary>
-			public string FullName
-			{
-				get { return _reference.FullName + "@{" + _reflogSelector + "}"; ; }
-			}
+			public string FullName => _reference.FullName + "@{" + ReflogSelector + "}";
 
 			/// <summary>
 			/// Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.
@@ -149,10 +126,7 @@ namespace gitter.Git
 			/// <summary>
 			/// Object is deleted and not valid anymore.
 			/// </summary>
-			public bool IsDeleted
-			{
-				get { return false; }
-			}
+			public bool IsDeleted => false;
 		}
 
 		#endregion
@@ -306,7 +280,7 @@ namespace gitter.Git
 		internal Reference(Repository repository, string name, IRevisionPointer pointer)
 			: base(repository, name)
 		{
-			Verify.Argument.IsNotNull(pointer, "pointer");
+			Verify.Argument.IsNotNull(pointer, nameof(pointer));
 
 			_pointer = PrepareInputPointer(pointer);
 			_reflogSync = new object();
@@ -326,7 +300,7 @@ namespace gitter.Git
 			get { return _pointer; }
 			internal set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				var newPointer = PrepareInputPointer(value);
 				if(_pointer != newPointer)
@@ -367,7 +341,7 @@ namespace gitter.Git
 		{
 			get
 			{
-				Verify.Argument.IsNotNegative(index, "index");
+				Verify.Argument.IsNotNegative(index, nameof(index));
 
 				if(index == 0) return this;
 				return new ReflogReference(this, index.ToString(CultureInfo.InvariantCulture));
@@ -376,10 +350,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the <see cref="Revision"/>, pointed by this <see cref="Reference"/>.</summary>
 		/// <value><see cref="Revision"/>, pointed by this <see cref="Reference"/>.</value>
-		public Revision Revision
-		{
-			get { return _pointer.Dereference(); }
-		}
+		public Revision Revision => _pointer.Dereference();
 
 		/// <summary>Gets this <see cref="Reference"/>'s reflog - history of pointer modifications.</summary>
 		/// <value>Reflog of this <see cref="Reference"/>.</value>
@@ -416,10 +387,7 @@ namespace gitter.Git
 		/// <summary>Filter <see cref="IRevisionPointer"/> to types supported by this <see cref="Reference"/>.</summary>
 		/// <param name="pointer">Raw pointer.</param>
 		/// <returns>Valid pointer.</returns>
-		protected virtual IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
-		{
-			return pointer;
-		}
+		protected virtual IRevisionPointer PrepareInputPointer(IRevisionPointer pointer) => pointer;
 
 		/// <summary>Called when this <see cref="Reference"/> is moved away from <paramref name="pointer"/>.</summary>
 		/// <param name="pointer">Object, which this <see cref="Reference"/> was pointing to.</param>
@@ -481,26 +449,17 @@ namespace gitter.Git
 
 		/// <summary><see cref="ReferenceType"/>.</summary>
 		/// <value>Reference type.</value>
-		public virtual ReferenceType Type
-		{
-			get { return ReferenceType.Reference; }
-		}
+		public virtual ReferenceType Type => ReferenceType.Reference;
 
 		/// <summary>Gets the full reference name.</summary>
 		/// <value>Full reference name.</value>
-		public virtual string FullName
-		{
-			get { return Name; }
-		}
+		public virtual string FullName => Name;
 
 		/// <summary>
 		/// Returns revision expression (reference name, sha1, relative expression, etc.).
 		/// </summary>
 		/// <value>Revision expression.</value>
-		string IRevisionPointer.Pointer
-		{
-			get { return Name; }
-		}
+		string IRevisionPointer.Pointer => Name;
 
 		/// <summary>
 		/// Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.
@@ -508,9 +467,6 @@ namespace gitter.Git
 		/// <returns>
 		/// Commit which is pointed by this <see cref="IRevisionPointer"/>.
 		/// </returns>
-		Revision IRevisionPointer.Dereference()
-		{
-			return _pointer.Dereference();
-		}
+		Revision IRevisionPointer.Dereference() => _pointer.Dereference();
 	}
 }

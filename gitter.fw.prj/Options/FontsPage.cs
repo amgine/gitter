@@ -142,7 +142,7 @@ namespace gitter.Framework.Options
 
 		private static List<FontStyle> GetSupportedFontStyles(FontFamily fontFamily)
 		{
-			Verify.Argument.IsNotNull(fontFamily, "fontFamily");
+			Verify.Argument.IsNotNull(fontFamily, nameof(fontFamily));
 
 			var styles = new List<FontStyle>(FontStyles.Length);
 			for(int i = 0; i < FontStyles.Length; ++i)

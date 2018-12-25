@@ -230,8 +230,8 @@ namespace gitter.Framework.Controls
 		/// <param name="item2">Second item.</param>
 		private ViewSplit(Orientation orientation, Rectangle bounds, Control item1, Control item2)
 		{
-			Verify.Argument.IsNotNull(item1, "item1");
-			Verify.Argument.IsNotNull(item2, "item2");
+			Verify.Argument.IsNotNull(item1, nameof(item1));
+			Verify.Argument.IsNotNull(item2, nameof(item2));
 
 			SetStyle(ControlStyles.ContainerControl, true);
 			SetStyle(ControlStyles.Selectable, false);
@@ -372,7 +372,7 @@ namespace gitter.Framework.Controls
 		/// <param name="item">Control to remove.</param>
 		public void Remove(Control item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			RemoveAt(_items.IndexOf(item));
 		}

@@ -42,10 +42,7 @@ namespace gitter.Git
 
 		/// <summary>Invoke <see cref="Renamed"/>.</summary>
 		private void InvokeRenamed(string oldName, string newName)
-		{
-			var handler = Renamed;
-			if(handler != null) handler(this, new NameChangeEventArgs(oldName, newName));
-		}
+			=> Renamed?.Invoke(this, new NameChangeEventArgs(oldName, newName));
 
 		#endregion
 
@@ -88,7 +85,7 @@ namespace gitter.Git
 			get { return _fetchUrl; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				if(_fetchUrl != value)
@@ -116,7 +113,7 @@ namespace gitter.Git
 			get { return _pushUrl; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				if(_pushUrl != value)
@@ -144,7 +141,7 @@ namespace gitter.Git
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				var pname = "remote." + Name + ".proxy";
@@ -172,7 +169,7 @@ namespace gitter.Git
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				var pname = "remote." + Name + ".vcs";
@@ -199,7 +196,7 @@ namespace gitter.Git
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				var pname = "remote." + Name + ".receivepack";
@@ -226,7 +223,7 @@ namespace gitter.Git
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				var pname = "remote." + Name + ".uploadpack";
@@ -253,7 +250,7 @@ namespace gitter.Git
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				var pname = "remote." + Name + ".fetch";
@@ -280,7 +277,7 @@ namespace gitter.Git
 			}
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 				Verify.State.IsNotDeleted(this);
 
 				var pname = "remote." + Name + ".push";

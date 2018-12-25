@@ -40,12 +40,6 @@ namespace gitter.Git
 
 		#endregion
 
-		#region Data
-
-		private bool _isFrozen;
-
-		#endregion
-
 		#region .ctor
 
 		public BlameOptions()
@@ -56,11 +50,7 @@ namespace gitter.Git
 
 		#region Properties
 
-		public bool IsFrozen
-		{
-			get { return _isFrozen; }
-			private set { _isFrozen = value; }
-		}
+		public bool IsFrozen { get; private set; }
 
 		#endregion
 

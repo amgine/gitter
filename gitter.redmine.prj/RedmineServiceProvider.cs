@@ -63,7 +63,7 @@ namespace gitter.Redmine
 		/// <param name="section">Provider configuration section.</param>
 		public bool LoadFor(IWorkingEnvironment environment, Section section)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			environment.ViewDockService.RegisterFactory(new NewsViewFactory());
 			environment.ViewDockService.RegisterFactory(new IssuesViewFactory());

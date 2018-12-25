@@ -29,22 +29,20 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class TagMenu : ContextMenuStrip
 	{
-		private readonly Tag _tag;
-
 		public TagMenu(Tag tag)
 		{
-			Verify.Argument.IsValidGitObject(tag, "tag");
+			Verify.Argument.IsValidGitObject(tag, nameof(tag));
 
-			_tag = tag;
+			Tag = tag;
 
-			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(_tag));
-			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(_tag));
+			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(Tag));
+			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(Tag));
 
 			Items.Add(new ToolStripSeparator()); // interactive section
 
-			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(_tag, "{0} '{1}'"));
-			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(_tag));
-			Items.Add(GuiItemFactory.GetRemoveTagItem<ToolStripMenuItem>(_tag, Resources.StrDelete));
+			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(Tag, "{0} '{1}'"));
+			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(Tag));
+			Items.Add(GuiItemFactory.GetRemoveTagItem<ToolStripMenuItem>(Tag, Resources.StrDelete));
 
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
@@ -57,13 +55,10 @@ namespace gitter.Git.Gui.Controls
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(_tag));
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(_tag));
+			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Tag));
+			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Tag));
 		}
 
-		public new Tag Tag
-		{
-			get { return _tag; }
-		}
+		public new Tag Tag { get; }
 	}
 }

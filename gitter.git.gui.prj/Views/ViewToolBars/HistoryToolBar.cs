@@ -49,7 +49,7 @@ namespace gitter.Git.Gui.Views
 		/// <param name="view">Host history view.</param>
 		public HistoryToolbar(HistoryView view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			_view = view;
 

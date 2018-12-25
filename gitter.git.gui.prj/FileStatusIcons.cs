@@ -21,7 +21,6 @@
 namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;

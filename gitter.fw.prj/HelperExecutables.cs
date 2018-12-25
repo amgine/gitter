@@ -34,7 +34,7 @@ namespace gitter.Framework
 		/// <param name="action">Action to execute.</param>
 		public static void ExecuteWithAdministartorRights(Action action)
 		{
-			Verify.Argument.IsNotNull(action, "action");
+			Verify.Argument.IsNotNull(action, nameof(action));
 
 			if(Utility.IsRunningWithAdministratorRights)
 			{

@@ -24,23 +24,18 @@ namespace gitter.Git
 
 	public abstract class GitFeature
 	{
-		private readonly string _name;
-
 		protected GitFeature(string name)
 		{
-			_name = name;
+			Name = name;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		public abstract bool IsAvailableFor(IGitAccessor gitAccessor);
 
 		public virtual bool IsAvailableFor(IGitRepository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			return IsAvailableFor(repository.Accessor.GitAccessor);
 		}

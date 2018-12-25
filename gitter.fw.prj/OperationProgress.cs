@@ -31,7 +31,7 @@
 
 		public OperationProgress(string actionName, int maxProgress)
 		{
-			Verify.Argument.IsNotNegative(maxProgress, "maxProgress");
+			Verify.Argument.IsNotNegative(maxProgress, nameof(maxProgress));
 
 			_actionName = actionName;
 			_isIndeterminate = false;

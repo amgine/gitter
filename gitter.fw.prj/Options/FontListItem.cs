@@ -33,7 +33,7 @@ namespace gitter.Framework.Options
 		public FontListItem(SelectableFont font)
 			: base(font)
 		{
-			Verify.Argument.IsNotNull(font, "font");
+			Verify.Argument.IsNotNull(font, nameof(font));
 
 			_font = font.Font;
 		}

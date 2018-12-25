@@ -352,7 +352,7 @@ namespace gitter.Git
 
 		public Hash(byte[] hash)
 		{
-			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsNotNull(hash, nameof(hash));
 			Verify.Argument.IsTrue(hash.Length >= 20, "hash", "Hash must be at least 20 bytes long.");
 
 			_part0 = ParsePart(hash,  0);
@@ -364,7 +364,7 @@ namespace gitter.Git
 
 		public Hash(byte[] hash, int offset)
 		{
-			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsNotNull(hash, nameof(hash));
 			Verify.Argument.IsInRange(0, offset, hash.Length - 20, "hash", "Hash must be at least 20 bytes long after offset.");
 
 			_part0 = ParsePart(hash,  0 + offset);
@@ -376,7 +376,7 @@ namespace gitter.Git
 
 		public Hash(string hash)
 		{
-			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsNotNull(hash, nameof(hash));
 			Verify.Argument.IsTrue(hash.Length >= 40, "hash", "Hash must be at least 40 characters long.");
 
 			_part0 = ParsePart(hash,  0);
@@ -388,7 +388,7 @@ namespace gitter.Git
 
 		public Hash(string hash, int offset)
 		{
-			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsNotNull(hash, nameof(hash));
 			Verify.Argument.IsInRange(0, offset, hash.Length - 40, "hash", "Hash must be at least 40 characters long after offset.");
 
 			_part0 = ParsePart(hash,  0 + offset);
@@ -400,7 +400,7 @@ namespace gitter.Git
 
 		public Hash(char[] hash)
 		{
-			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsNotNull(hash, nameof(hash));
 			Verify.Argument.IsTrue(hash.Length >= 40, "hash", "Hash must be at least 40 characters long.");
 
 			_part0 = ParsePart(hash,  0);
@@ -412,7 +412,7 @@ namespace gitter.Git
 
 		public Hash(char[] hash, int offset)
 		{
-			Verify.Argument.IsNotNull(hash, "hash");
+			Verify.Argument.IsNotNull(hash, nameof(hash));
 			Verify.Argument.IsInRange(0, offset, hash.Length - 40, "hash", "Hash must be at least 40 characters long after offset.");
 
 			_part0 = ParsePart(hash,  0 + offset);
@@ -580,7 +580,7 @@ namespace gitter.Git
 
 		public void ToByteArray(byte[] buffer, int offset)
 		{
-			Verify.Argument.IsNotNull(buffer, "buffer");
+			Verify.Argument.IsNotNull(buffer, nameof(buffer));
 			Verify.Argument.IsInRange(0, offset, buffer.Length - 20, "offset");
 
 			unsafe
@@ -642,7 +642,7 @@ namespace gitter.Git
 
 		public void ToString(StringBuilder stringBuilder)
 		{
-			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
+			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
 
 			DumpPart(_part0, stringBuilder);
 			DumpPart(_part1, stringBuilder);
@@ -653,7 +653,7 @@ namespace gitter.Git
 
 		public void ToString(StringBuilder stringBuilder, int length)
 		{
-			Verify.Argument.IsNotNull(stringBuilder, "stringBuilder");
+			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
 			Verify.Argument.IsInRange(0, length, 40, "length");
 
 			DumpPart(_part0, stringBuilder, length);

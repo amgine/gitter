@@ -288,7 +288,7 @@ namespace gitter.Git
 			{
 				const string ExcMessage = "Invalid stash name format.";
 
-				Verify.Argument.IsNotNull(name, "name");
+				Verify.Argument.IsNotNull(name, nameof(name));
 				Verify.Argument.IsTrue(name.StartsWith(GitConstants.StashFullName), "name", ExcMessage);
 
 				var sfnl = GitConstants.StashFullName.Length;

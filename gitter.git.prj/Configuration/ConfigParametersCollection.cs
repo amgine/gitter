@@ -165,8 +165,8 @@ namespace gitter.Git
 		/// <returns>Created parameter.</returns>
 		public ConfigParameter CreateParameter(string name, string value)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			ConfigParameter p;
 			lock(SyncRoot)
@@ -209,8 +209,8 @@ namespace gitter.Git
 
 		public void SetUserIdentity(string userName, string userEmail)
 		{
-			Verify.Argument.IsNotNull(userName, "userName");
-			Verify.Argument.IsNotNull(userEmail, "userEmail");
+			Verify.Argument.IsNotNull(userName, nameof(userName));
+			Verify.Argument.IsNotNull(userEmail, nameof(userEmail));
 
 			try
 			{
@@ -229,7 +229,7 @@ namespace gitter.Git
 
 		internal void Unset(ConfigParameter parameter)
 		{
-			Verify.Argument.IsNotNull(parameter, "parameter");
+			Verify.Argument.IsNotNull(parameter, nameof(parameter));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.ConfigUpdated))
@@ -317,7 +317,7 @@ namespace gitter.Git
 
 		internal void Refresh(ConfigParameter configParameter)
 		{
-			Verify.Argument.IsNotNull(configParameter, "configParameter");
+			Verify.Argument.IsNotNull(configParameter, nameof(configParameter));
 
 			string name = configParameter.Name;
 			var configParameterData = Repository.Accessor.QueryConfigParameter.Invoke(

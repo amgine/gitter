@@ -57,7 +57,6 @@ namespace gitter.Git
 		private Thread _delayedNotificationThread;
 		private Thread _delayedUnblockingThread;
 		private bool _isEnabled;
-		private bool _isDisposed;
 
 		#endregion
 
@@ -171,7 +170,7 @@ namespace gitter.Git
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
 		internal RepositoryMonitor(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -823,11 +822,7 @@ namespace gitter.Git
 
 		#region IDisposable
 
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		public void Dispose()
 		{

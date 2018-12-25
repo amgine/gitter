@@ -61,7 +61,7 @@ namespace gitter.Git.Gui
 
 		public GitToolbar(GuiProvider guiProvider)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 

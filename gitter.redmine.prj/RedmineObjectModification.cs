@@ -31,7 +31,7 @@ namespace gitter.Redmine
 
 		protected RedmineObjectModification(T original)
 		{
-			Verify.Argument.IsNotNull(original, "original");
+			Verify.Argument.IsNotNull(original, nameof(original));
 
 			_original = original;
 

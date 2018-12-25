@@ -30,24 +30,15 @@ namespace gitter.Git
 	/// <summary>Represents a tag on remote repository.</summary>
 	public sealed class RemoteRepositoryTag : BaseRemoteReference
 	{
-		private TagType _tagType;
-
 		internal RemoteRepositoryTag(RemoteReferencesCollection refs, string name, TagType type, Hash hash)
 			: base(refs, name, hash)
 		{
-			_tagType = type;
+			TagType = type;
 		}
 
-		public override ReferenceType ReferenceType
-		{
-			get { return ReferenceType.Tag; }
-		}
+		public override ReferenceType ReferenceType => ReferenceType.Tag;
 
-		public TagType TagType
-		{
-			get { return _tagType; }
-			internal set { _tagType = value; }
-		}
+		public TagType TagType { get; internal set; }
 
 		protected override void DeleteCore()
 		{

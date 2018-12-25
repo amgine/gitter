@@ -38,8 +38,8 @@ namespace gitter.Git.Gui.Dialogs
 		/// <param name="branch"><see cref="RemoteBranch"/> to remove.</param>
 		public RemoveRemoteBranchDialog(RemoteBranch branch)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
-			Verify.Argument.IsFalse(branch.IsDeleted, "branch",
+			Verify.Argument.IsNotNull(branch, nameof(branch));
+			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
 				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteBranch"));
 
 			InitializeComponent();
@@ -58,10 +58,7 @@ namespace gitter.Git.Gui.Dialogs
 			_cmdRemoveFromRemote.Description = Resources.StrsRemoveFromRemoteDescription.UseAsFormat(_remote.Name);
 		}
 
-		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.Cancel; }
-		}
+		public override DialogButtons OptimalButtons => DialogButtons.Cancel;
 
 		#region Event Handlers
 

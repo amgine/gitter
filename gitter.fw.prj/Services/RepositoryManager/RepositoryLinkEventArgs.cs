@@ -24,16 +24,11 @@ namespace gitter.Framework.Services
 
 	public sealed class RepositoryLinkEventArgs : EventArgs
 	{
-		private readonly RepositoryLink _repository;
-
 		public RepositoryLinkEventArgs(RepositoryLink repository)
 		{
-			_repository = repository;
+			Repository = repository;
 		}
 
-		public RepositoryLink Repository
-		{
-			get { return _repository; }
-		}
+		public RepositoryLink Repository { get; }
 	}
 }

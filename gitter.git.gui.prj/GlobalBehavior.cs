@@ -41,8 +41,8 @@ namespace gitter.Git.Gui
 
 		public static void SetupAutoCompleteSource(TextBox textBox, Repository repository, ReferenceType referenceTypes)
 		{
-			Verify.Argument.IsNotNull(textBox, "textBox");
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(textBox, nameof(textBox));
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
@@ -76,8 +76,8 @@ namespace gitter.Git.Gui
 
 		public static void SetupAutoCompleteSource(TextBox textBox, IEnumerable<IRevisionPointer> revisions)
 		{
-			Verify.Argument.IsNotNull(textBox, "textBox");
-			Verify.Argument.IsNotNull(revisions, "revisions");
+			Verify.Argument.IsNotNull(textBox, nameof(textBox));
+			Verify.Argument.IsNotNull(revisions, nameof(revisions));
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
@@ -94,8 +94,8 @@ namespace gitter.Git.Gui
 
 		public static void SetupAutoCompleteSource(ComboBox comboBox, Repository repository, ReferenceType referenceTypes)
 		{
-			Verify.Argument.IsNotNull(comboBox, "comboBox");
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(comboBox, nameof(comboBox));
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
@@ -129,8 +129,8 @@ namespace gitter.Git.Gui
 
 		public static void SetupAutoCompleteSource(ComboBox comboBox, IEnumerable<IRevisionPointer> revisions)
 		{
-			Verify.Argument.IsNotNull(comboBox, "comboBox");
-			Verify.Argument.IsNotNull(revisions, "revisions");
+			Verify.Argument.IsNotNull(comboBox, nameof(comboBox));
+			Verify.Argument.IsNotNull(revisions, nameof(revisions));
 
 			if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 

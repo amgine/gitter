@@ -31,8 +31,6 @@ namespace gitter.Git.Gui.Controls
 	{
 		#region Data
 
-		private readonly IBlameSource _blameSource;
-		private readonly BlameViewer _blameViewer;
 		private readonly FlowProgressPanel _progressPanel;
 		private BlameOptions _blameOptions;
 
@@ -42,12 +40,12 @@ namespace gitter.Git.Gui.Controls
 
 		public BlameFileBinding(IBlameSource blameSource, BlameViewer blameViewer, BlameOptions blameOptions)
 		{
-			Verify.Argument.IsNotNull(blameSource, "blameSource");
-			Verify.Argument.IsNotNull(blameViewer, "blameViewer");
-			Verify.Argument.IsNotNull(blameOptions, "blameOptions");
+			Verify.Argument.IsNotNull(blameSource, nameof(blameSource));
+			Verify.Argument.IsNotNull(blameViewer, nameof(blameViewer));
+			Verify.Argument.IsNotNull(blameOptions, nameof(blameOptions));
 
-			_blameSource = blameSource;
-			_blameViewer = blameViewer;
+			BlameSource = blameSource;
+			BlameViewer = blameViewer;
 			_blameOptions = blameOptions;
 			_progressPanel = new FlowProgressPanel();
 
@@ -58,22 +56,16 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public IBlameSource BlameSource
-		{
-			get { return _blameSource; }
-		}
+		public IBlameSource BlameSource { get; }
 
-		public BlameViewer BlameViewer
-		{
-			get { return _blameViewer; }
-		}
+		public BlameViewer BlameViewer { get; }
 
 		public BlameOptions BlameOptions
 		{
 			get { return _blameOptions; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				_blameOptions = value;
 			}

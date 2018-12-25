@@ -54,7 +54,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public IList<StashedStateData> Invoke(QueryStashParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters);
 			var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
@@ -94,7 +94,7 @@ namespace gitter.Git.AccessLayer.CLI
 		public Task<IList<StashedStateData>> InvokeAsync(QueryStashParameters parameters,
 			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command1 = _commandFactory(parameters);
 			var command2 = GetCommand2(parameters);

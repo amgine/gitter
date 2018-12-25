@@ -120,7 +120,7 @@ namespace gitter.Git.Gui.Controls
 		public UserListItem(User user)
 			: base(user)
 		{
-			Verify.Argument.IsNotNull(user, "user");
+			Verify.Argument.IsNotNull(user, nameof(user));
 		}
 
 		#endregion

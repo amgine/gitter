@@ -39,11 +39,7 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private Repository _repository;
 		private TextBoxSpellChecker _speller;
-		private readonly IUserInputSource<string> _revisionInput;
-		private readonly IUserInputSource<string> _messageInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly IAddNoteController _controller;
 
 		#endregion
@@ -54,23 +50,23 @@ namespace gitter.Git.Gui.Dialogs
 		/// <param name="repository">Repository to create note in.</param>
 		public AddNoteDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 
 			var inputs = new IUserInputSource[]
 			{
-				_revisionInput = new ControlInputSource(_txtRevision),
-				_messageInput  = new TextBoxInputSource(_txtMessage),
+				Revision = new ControlInputSource(_txtRevision),
+				Message  = new TextBoxInputSource(_txtMessage),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			Text = Resources.StrAddNote;
 
 			_txtRevision.References.LoadData(
-				_repository,
+				Repository,
 				ReferenceType.Reference,
 				GlobalBehavior.GroupReferences,
 				GlobalBehavior.GroupRemoteBranches);
@@ -93,39 +89,21 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrAdd; }
-		}
+		protected override string ActionVerb => Resources.StrAdd;
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		public IUserInputSource<string> Revision
-		{
-			get { return _revisionInput; }
-		}
+		public IUserInputSource<string> Revision { get; }
 
-		public IUserInputSource<string> Message
-		{
-			get { return _messageInput; }
-		}
+		public IUserInputSource<string> Message { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
 		#region IExecutableDialog Members
 
-		public bool Execute()
-		{
-			return _controller.TryAddNote();
-		}
+		public bool Execute() => _controller.TryAddNote();
 
 		#endregion
 	}

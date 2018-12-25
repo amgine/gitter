@@ -34,15 +34,9 @@ namespace gitter.Git
 
 		public abstract string DisplayName { get; }
 
-		public virtual Repository Repository
-		{
-			get { return Revision.Repository; }
-		}
+		public virtual Repository Repository => Revision.Repository;
 
-		public abstract IRevisionPointer Revision
-		{
-			get;
-		}
+		public abstract IRevisionPointer Revision { get; }
 
 		public abstract Tree GetTree();
 

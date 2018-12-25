@@ -21,9 +21,6 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Text;
-	using System.IO;
 
 	using System.Windows.Forms;
 
@@ -31,20 +28,18 @@ namespace gitter.Git.Gui.Controls
 
 	public sealed class SubmoduleMenu : ContextMenuStrip
 	{
-		private readonly Submodule _submodule;
-
 		public SubmoduleMenu(Submodule submodule)
 		{
-			Verify.Argument.IsValidGitObject(submodule, "submodule");
+			Verify.Argument.IsValidGitObject(submodule, nameof(submodule));
 
-			_submodule = submodule;
+			Submodule = submodule;
 
 			Items.Add(GuiItemFactory.GetOpenAppItem<ToolStripMenuItem>(
-				Resources.StrOpenWithGitter, null, Application.ExecutablePath, _submodule.FullPath.SurroundWithDoubleQuotes()));
+				Resources.StrOpenWithGitter, null, Application.ExecutablePath, Submodule.FullPath.SurroundWithDoubleQuotes()));
 			Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(
-				Resources.StrOpenInWindowsExplorer, null, _submodule.FullPath));
+				Resources.StrOpenInWindowsExplorer, null, Submodule.FullPath));
 			Items.Add(GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(
-				Resources.StrOpenCommandLine, null, _submodule.FullPath));
+				Resources.StrOpenCommandLine, null, Submodule.FullPath));
 
 			Items.Add(new ToolStripSeparator());
 
@@ -53,16 +48,13 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _submodule.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPath, _submodule.Path));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrUrl, _submodule.Url));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Submodule.Name));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPath, Submodule.Path));
+			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrUrl, Submodule.Url));
 
 			Items.Add(item);
 		}
 
-		public Submodule Submodule
-		{
-			get { return _submodule; }
-		}
+		public Submodule Submodule { get; }
 	}
 }

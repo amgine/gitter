@@ -26,20 +26,15 @@ namespace gitter.Git.Gui.Dialogs
 
 	public partial class BranchPropertiesDialog : GitDialogBase
 	{
-		private Branch _branch;
-
 		public BranchPropertiesDialog(Branch branch)
 		{
-			Verify.Argument.IsNotNull(branch, "branch");
+			Verify.Argument.IsNotNull(branch, nameof(branch));
 
-			_branch = branch;
+			Branch = branch;
 
 			InitializeComponent();
 		}
 
-		public Branch Branch
-		{
-			get { return _branch; }
-		}
+		public Branch Branch { get; }
 	}
 }

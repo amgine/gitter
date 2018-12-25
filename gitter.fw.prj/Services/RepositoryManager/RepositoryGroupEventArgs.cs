@@ -24,16 +24,11 @@ namespace gitter.Framework.Services
 
 	public sealed class RepositoryGroupEventArgs : EventArgs
 	{
-		private readonly RepositoryGroup _repositoryGroup;
-
 		public RepositoryGroupEventArgs(RepositoryGroup repositoryGroup)
 		{
-			_repositoryGroup = repositoryGroup;
+			RepositoryGroup = repositoryGroup;
 		}
 
-		public RepositoryGroup RepositoryGroup
-		{
-			get { return _repositoryGroup; }
-		}
+		public RepositoryGroup RepositoryGroup { get; }
 	}
 }

@@ -48,16 +48,10 @@ namespace gitter.Git
 		public event EventHandler UrlChanged;
 
 		private void OnPathChanged()
-		{
-			var handler = PathChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> PathChanged?.Invoke(this, EventArgs.Empty);
 
 		private void OnUrlChanged()
-		{
-			var handler = UrlChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> UrlChanged?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -71,8 +65,8 @@ namespace gitter.Git
 		internal Submodule(Repository repository, string name, string path, string url)
 			: base(repository, name)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(path, "path");
-			Verify.Argument.IsNotNull(path, "url");
+			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
+			Verify.Argument.IsNotNull(path, nameof(path));
 
 			_path = path;
 			_url = url;

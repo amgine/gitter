@@ -40,7 +40,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		protected ParserBasedFunctionImpl(ICommandExecutor commandExecutor)
 		{
-			Verify.Argument.IsNotNull(commandExecutor, "commandExecutor");
+			Verify.Argument.IsNotNull(commandExecutor, nameof(commandExecutor));
 
 			_commandExecutor = commandExecutor;
 		}
@@ -71,7 +71,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public TOutput Invoke(TParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command        = CreateCommand(parameters);
 			var parser         = CreateParser();
@@ -88,7 +88,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command        = CreateCommand(parameters);
 			var parser         = CreateParser();

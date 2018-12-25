@@ -41,7 +41,7 @@ namespace gitter.Git.AccessLayer.CLI
 				case ResetMode.Keep:
 					return ResetCommand.Keep();
 				default:
-					throw new ArgumentException("Unknown ResetMode", "mode");
+					throw new ArgumentException("Unknown ResetMode", nameof(mode));
 			}
 		}
 

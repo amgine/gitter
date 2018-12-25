@@ -25,23 +25,14 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class RevisionGraphData
 	{
-		private readonly string _hash;
-		private readonly IList<string> _parents;
-
 		public RevisionGraphData(string hash, IList<string> parents)
 		{
-			_hash = hash;
-			_parents = parents;
+			Hash = hash;
+			Parents = parents;
 		}
 
-		public string Hash
-		{
-			get { return _hash; }
-		}
+		public string Hash { get; }
 
-		public IList<string> Parents
-		{
-			get { return _parents; }
-		}
+		public IList<string> Parents { get; }
 	}
 }

@@ -44,8 +44,6 @@ namespace gitter.Git
 
 		#region Data
 
-		/// <summary>Tag type.</summary>
-		private TagType _type;
 		/// <summary>Annotated tag message.</summary>
 		private string _message;
 
@@ -61,7 +59,7 @@ namespace gitter.Git
 		internal Tag(Repository repository, string name, IRevisionPointer pointer, TagType type)
 			: base(repository, name, pointer)
 		{
-			_type = type;
+			TagType = type;
 		}
 
 		#endregion
@@ -70,25 +68,15 @@ namespace gitter.Git
 
 		/// <summary><see cref="ReferenceType"/>.</summary>
 		/// <value><see cref="ReferenceType.Tag"/>.</value>
-		public override ReferenceType Type
-		{
-			get { return ReferenceType.Tag; }
-		}
+		public override ReferenceType Type => ReferenceType.Tag;
 
 		/// <summary>Gets the full tag name.</summary>
 		/// <value>Full tag name.</value>
-		public override string FullName
-		{
-			get { return GitConstants.TagPrefix + Name; }
-		}
+		public override string FullName => GitConstants.TagPrefix + Name;
 
 		/// <summary>Gets or sets the type of this tag.</summary>
 		/// <value>Type of this tag.</value>
-		public TagType TagType
-		{
-			get { return _type; }
-			internal set { _type = value; }
-		}
+		public TagType TagType { get; internal set; }
 
 		/// <summary>Gets the message of annotated tag.</summary>
 		/// <value>Message of annotated tag.</value>
@@ -96,7 +84,7 @@ namespace gitter.Git
 		{
 			get
 			{
-				if(_type == Git.TagType.Lightweight)
+				if(TagType == Git.TagType.Lightweight)
 				{
 					return null;
 				}
@@ -132,7 +120,7 @@ namespace gitter.Git
 		/// <returns>Valid pointer.</returns>
 		protected override IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
 		{
-			Verify.Argument.IsNotNull(pointer, "pointer");
+			Verify.Argument.IsNotNull(pointer, nameof(pointer));
 
 			return pointer.Dereference();
 		}

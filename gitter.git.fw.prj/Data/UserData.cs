@@ -26,14 +26,6 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class UserData : INamedObject
 	{
-		#region Data
-
-		private readonly string _name;
-		private string _email;
-		private int _commits;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Create <see cref="UserData"/>.</summary>
@@ -42,9 +34,9 @@ namespace gitter.Git.AccessLayer
 		/// <param name="commits">Commit count.</param>
 		public UserData(string name, string email, int commits)
 		{
-			_name = name;
-			_email = email;
-			_commits = commits;
+			UserName = name;
+			Email = email;
+			Commits = commits;
 		}
 
 		#endregion
@@ -52,36 +44,22 @@ namespace gitter.Git.AccessLayer
 		#region Properties
 
 		/// <summary>User id.</summary>
-		public string Name
-		{
-			get { return _name + "\n" + _email; }
-		}
+		public string Name => UserName + "\n" + Email;
 
 		/// <summary>User name.</summary>
-		public string UserName
-		{
-			get { return _name; }
-		}
+		public string UserName { get; }
 
 		/// <summary>User email.</summary>
-		public string Email
-		{
-			get { return _email; }
-			set { _email = value; }
-		}
+		public string Email { get; set; }
 
 		/// <summary>Commit count.</summary>
-		public int Commits
-		{
-			get { return _commits; }
-			set { _commits = value; }
-		}
+		public int Commits { get; set; }
 
 		#endregion
 
 		public override string ToString()
 		{
-			return string.Format("{0} <{1}>", _name, _email);
+			return string.Format("{0} <{1}>", UserName, Email);
 		}
 	}
 }

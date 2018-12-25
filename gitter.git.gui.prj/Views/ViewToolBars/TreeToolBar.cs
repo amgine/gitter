@@ -105,7 +105,7 @@ namespace gitter.Git.Gui.Views
 
 		public TreeToolbar(TreeView treeView)
 		{
-			Verify.Argument.IsNotNull(treeView, "treeView");
+			Verify.Argument.IsNotNull(treeView, nameof(treeView));
 
 			_treeView = treeView;
 			_treeView.CurrentDirectoryChanged += OnCurrentDirectoryChanged;

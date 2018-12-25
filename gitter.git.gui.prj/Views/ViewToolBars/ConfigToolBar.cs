@@ -35,7 +35,7 @@ namespace gitter.Git.Gui.Views
 
 		public ConfigToolBar(ConfigView configView)
 		{
-			Verify.Argument.IsNotNull(configView, "configView");
+			Verify.Argument.IsNotNull(configView, nameof(configView));
 
 			_configView = configView;
 			Items.Add(

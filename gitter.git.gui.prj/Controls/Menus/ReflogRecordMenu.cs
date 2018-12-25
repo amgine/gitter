@@ -31,7 +31,7 @@ namespace gitter.Git.Gui.Controls
 	{
 		public ReflogRecordMenu(ReflogRecord reflogRecord)
 		{
-			Verify.Argument.IsNotNull(reflogRecord, "reflogRecord");
+			Verify.Argument.IsNotNull(reflogRecord, nameof(reflogRecord));
 
 			var revision = reflogRecord.Revision;
 

@@ -29,9 +29,6 @@ namespace gitter.Git
 		{
 		}
 
-		public override TreeContentType Type
-		{
-			get { return TreeContentType.Tree; }
-		}
+		public override TreeContentType Type => TreeContentType.Tree;
 	}
 }

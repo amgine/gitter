@@ -36,9 +36,6 @@ namespace gitter.Git.Gui.Controls
 			Width = 106;
 		}
 
-		public override string IdentificationString
-		{
-			get { return "AuthorDate"; }
-		}
+		public override string IdentificationString => "AuthorDate";
 	}
 }

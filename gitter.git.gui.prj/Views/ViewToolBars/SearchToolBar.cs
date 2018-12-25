@@ -49,7 +49,7 @@ namespace gitter.Git.Gui.Views
 
 		protected SearchToolBar(TView view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			_view = view;
 			_result = true;

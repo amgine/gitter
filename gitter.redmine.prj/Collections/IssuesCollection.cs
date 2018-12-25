@@ -55,7 +55,7 @@ namespace gitter.Redmine
 
 		public LinkedList<Issue> FetchOpen(Project project)
 		{
-			Verify.Argument.IsNotNull(project, "project");
+			Verify.Argument.IsNotNull(project, nameof(project));
 
 			return FetchOpen(project.Id);
 		}

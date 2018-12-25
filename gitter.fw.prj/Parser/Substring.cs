@@ -223,7 +223,7 @@ namespace gitter.Framework
 		/// <returns>String starting index or -1 if it was not found.</returns>
 		public int IndexOf(string value)
 		{
-			Verify.Argument.IsNeitherNullNorEmpty(value, "value");
+			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
 
 			if(_length < value.Length) return -1;
 			return _string.IndexOf(value, _start, _length);
@@ -247,7 +247,7 @@ namespace gitter.Framework
 		/// <returns>String starting index or -1 if it was not found.</returns>
 		public int IndexOf(string value, int startIndex)
 		{
-			Verify.Argument.IsNeitherNullNorEmpty(value, "value");
+			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
 			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, "startIndex");
 
 			return _string.IndexOf(value, _start + startIndex, _length - startIndex);
@@ -274,7 +274,7 @@ namespace gitter.Framework
 		/// <returns>String index or -1 if it was not found.</returns>
 		public int IndexOf(string value, int startIndex, int count)
 		{
-			Verify.Argument.IsNeitherNullNorEmpty(value, "value");
+			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
 			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, "startIndex");
 			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, "count");
 
@@ -296,7 +296,7 @@ namespace gitter.Framework
 		/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
 		public bool StartsWith(string value)
 		{
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			if(value.Length == 0) return true;
 			if(_length < value.Length) return false;
@@ -317,7 +317,7 @@ namespace gitter.Framework
 		/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
 		public bool EndsWith(string value)
 		{
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			if(value.Length == 0) return true;
 			if(_length < value.Length) return false;

@@ -40,7 +40,6 @@ namespace gitter.Git.Gui.Views
 			#region Data
 
 			private readonly Remote _remote;
-			private readonly RemoteReferencesListBox _listBox;
 			private readonly RemoteReferencesCollection _remoteReferences;
 
 			#endregion
@@ -50,7 +49,7 @@ namespace gitter.Git.Gui.Views
 			public RemoteReferencesDataSource(Remote remote, RemoteReferencesListBox listBox)
 			{
 				_remote           = remote;
-				_listBox          = listBox;
+				ListBox           = listBox;
 				_remoteReferences = remote.GetReferences();
 
 				listBox.RemoteReferences = _remoteReferences;
@@ -59,10 +58,7 @@ namespace gitter.Git.Gui.Views
 
 			#endregion
 
-			private RemoteReferencesListBox ListBox
-			{
-				get { return _listBox; }
-			}
+			private RemoteReferencesListBox ListBox { get; }
 
 			protected override Task<RemoteReferencesCollection> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
@@ -141,15 +137,9 @@ namespace gitter.Git.Gui.Views
 
 		#region Properties
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgRemote"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgRemote"];
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
 		public Remote Remote
 		{

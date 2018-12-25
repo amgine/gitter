@@ -58,10 +58,7 @@ namespace gitter.Git.Gui.Views
 			_lstStash.LoadData(null);
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgStash"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgStash"];
 
 		public override void RefreshContent()
 		{

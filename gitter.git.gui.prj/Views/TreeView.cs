@@ -61,10 +61,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected virtual void OnCurrentDirectoryChanged()
-		{
-			var handler = (EventHandler)Events[CurrentDirectoryChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[CurrentDirectoryChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -74,7 +71,7 @@ namespace gitter.Git.Gui.Views
 		{
 			public TreeMenu(ITreeSource treeSource, TreeDirectoryListItem item)
 			{
-				Verify.Argument.IsNotNull(item, "item");
+				Verify.Argument.IsNotNull(item, nameof(item));
 
 				Items.Add(GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(item));
 				Items.Add(GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(item));
@@ -157,28 +154,21 @@ namespace gitter.Git.Gui.Views
 
 		/// <summary>Gets a value indicating whether this instance is document.</summary>
 		/// <value><c>true</c> if this instance is document; otherwise, <c>false</c>.</value>
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgFolderTree"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgFolderTree"];
 
 		public TreeDirectory CurrentDirectory
 		{
 			get { return _currentDirectory; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_currentDirectory != value)
 				{
 					var item = FindDirectoryEntry(value);
-					if(item == null)
-						throw new ArgumentException("value");
+					if(item == null) throw new ArgumentException(nameof(value));
 					item.FocusAndSelect();
 					_currentDirectory = value;
 					OnCurrentDirectoryChanged();

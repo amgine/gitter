@@ -42,8 +42,7 @@ namespace gitter.Git
 		/// <param name="note">Created <see cref="Note"/>.</param>
 		private void InvokeCreated(Note note)
 		{
-			var handler = Created;
-			if(handler != null) handler(this, new NoteEventArgs(note));
+			Created?.Invoke(this, new NoteEventArgs(note));
 		}
 
 		/// <summary>Invokes <see cref="Deleted"/> & other related events.</summary>
@@ -51,8 +50,7 @@ namespace gitter.Git
 		private void InvokeDeleted(Note note)
 		{
 			note.MarkAsDeleted();
-			var handler = Deleted;
-			if(handler != null) handler(this, new NoteEventArgs(note));
+			Deleted?.Invoke(this, new NoteEventArgs(note));
 		}
 
 		#endregion
@@ -84,7 +82,7 @@ namespace gitter.Git
 
 		public bool Exists(string note)
 		{
-			Verify.Argument.IsNotNull(note, "note");
+			Verify.Argument.IsNotNull(note, nameof(note));
 
 			lock(SyncRoot)
 			{
@@ -94,7 +92,7 @@ namespace gitter.Git
 
 		public bool TryGetNote(string name, out Note note)
 		{
-			Verify.Argument.IsNotNull(name, "name");
+			Verify.Argument.IsNotNull(name, nameof(name));
 
 			lock(SyncRoot)
 			{
@@ -104,7 +102,7 @@ namespace gitter.Git
 
 		public Note TryGetNote(string name)
 		{
-			Verify.Argument.IsNotNull(name, "name");
+			Verify.Argument.IsNotNull(name, nameof(name));
 
 			Note note;
 			lock(SyncRoot)

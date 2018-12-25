@@ -37,7 +37,7 @@ namespace gitter.Framework
 
 		public CachedResources(ResourceManager manager)
 		{
-			Verify.Argument.IsNotNull(manager, "manager");
+			Verify.Argument.IsNotNull(manager, nameof(manager));
 
 			_manager = manager;
 			_cache = new Dictionary<string, T>();

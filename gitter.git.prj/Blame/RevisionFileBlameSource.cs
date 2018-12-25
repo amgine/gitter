@@ -32,42 +32,26 @@ namespace gitter.Git
 
 	sealed class RevisionFileBlameSource : BlameSourceBase
 	{
-		#region Data
-
-		private readonly IRevisionPointer _revision;
-		private readonly string _fileName;
-
-		#endregion
-
 		#region .ctor
 
 		public RevisionFileBlameSource(IRevisionPointer revision, string fileName)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fileName");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
-			_revision = revision;
-			_fileName = fileName;
+			Revision = revision;
+			FileName = fileName;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public override Repository Repository
-		{
-			get { return Revision.Repository; }
-		}
+		public override Repository Repository => Revision.Repository;
 
-		public string FileName
-		{
-			get { return _fileName; }
-		}
+		public string FileName { get; }
 
-		public IRevisionPointer Revision
-		{
-			get { return _revision; }
-		}
+		public IRevisionPointer Revision { get; }
 
 		#endregion
 
@@ -87,7 +71,7 @@ namespace gitter.Git
 
 		public override BlameFile GetBlame(BlameOptions options)
 		{
-			Verify.Argument.IsNotNull(options, "options");
+			Verify.Argument.IsNotNull(options, nameof(options));
 
 			var parameters = GetParameters(options);
 			return Repository.Accessor.QueryBlame.Invoke(parameters);
@@ -95,7 +79,7 @@ namespace gitter.Git
 
 		public override Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(options, "options");
+			Verify.Argument.IsNotNull(options, nameof(options));
 
 			if(progress != null)
 			{
@@ -125,7 +109,7 @@ namespace gitter.Git
 		/// </returns>
 		public override int GetHashCode()
 		{
-			return _revision.GetHashCode() ^ _fileName.GetHashCode();
+			return Revision.GetHashCode() ^ FileName.GetHashCode();
 		}
 
 		/// <summary>
@@ -140,7 +124,7 @@ namespace gitter.Git
 			if(obj == null) return false;
 			var ds = obj as RevisionFileBlameSource;
 			if(ds == null) return false;
-			return _revision == ds._revision && _fileName == ds._fileName;
+			return Revision == ds.Revision && FileName == ds.FileName;
 		}
 
 		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>

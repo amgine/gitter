@@ -29,22 +29,17 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class StagedItemMenu : ContextMenuStrip
 	{
-		private readonly TreeItem _item;
-
 		public StagedItemMenu(TreeItem item)
 		{
-			Verify.Argument.IsValidGitObject(item, "item");
+			Verify.Argument.IsValidGitObject(item, nameof(item));
 			Verify.Argument.AreEqual(StagedStatus.Staged, item.StagedStatus & StagedStatus.Staged, "item",
 				"This item is not staged.");
 
-			_item = item;
+			Item = item;
 
-			Items.Add(GuiItemFactory.GetUnstageItem<ToolStripMenuItem>(_item));
+			Items.Add(GuiItemFactory.GetUnstageItem<ToolStripMenuItem>(Item));
 		}
 
-		public TreeItem Item
-		{
-			get { return _item; }
-		}
+		public TreeItem Item { get; }
 	}
 }

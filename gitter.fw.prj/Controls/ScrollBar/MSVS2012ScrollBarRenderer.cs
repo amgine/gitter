@@ -224,7 +224,7 @@ namespace gitter.Framework.Controls
 			/// <exception cref="ArgumentNullException"><paramref name="colorTable"/> == <c>null</c>.</exception>
 			public CustomColorTable(IColorTable colorTable)
 			{
-				Verify.Argument.IsNotNull(colorTable, "colorTable");
+				Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
 				Background		= colorTable.Background;
 				ArrowNormal		= colorTable.ArrowNormal;
@@ -242,7 +242,7 @@ namespace gitter.Framework.Controls
 			/// <exception cref="ArgumentNullException"><paramref name="section"/> == <c>null</c>.</exception>
 			public CustomColorTable(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				Background		= section.GetValue<Color>("Background");
 				ArrowNormal		= section.GetValue<Color>("ArrowNormal");
@@ -340,7 +340,7 @@ namespace gitter.Framework.Controls
 			/// <exception cref="ArgumentNullException"><paramref name="section"/> == <c>null</c>.</exception>
 			public void Save(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				section.SetValue<Color>("Background",		Background);
 				section.SetValue<Color>("ArrowNormal",		ArrowNormal);
@@ -374,7 +374,7 @@ namespace gitter.Framework.Controls
 
 		public MSVS2012ScrollBarRenderer(IColorTable colorTable)
 		{
-			Verify.Argument.IsNotNull(colorTable, "colorTable");
+			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
 			_colorTable = colorTable;
 		}

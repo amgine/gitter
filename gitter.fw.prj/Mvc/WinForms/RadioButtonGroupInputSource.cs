@@ -36,7 +36,7 @@ namespace gitter.Framework.Mvc.WinForms
 
 		public RadioButtonGroupInputSource(Tuple<RadioButton, T>[] valueMappings)
 		{
-			Verify.Argument.IsNotNull(valueMappings, "valueMappings");
+			Verify.Argument.IsNotNull(valueMappings, nameof(valueMappings));
 
 			_valueMappings = valueMappings;
 		}

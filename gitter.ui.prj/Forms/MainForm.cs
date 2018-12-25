@@ -166,7 +166,7 @@ namespace gitter
 
 		public bool TryLoadIssueTracker(IRepositoryServiceProvider provider)
 		{
-			Verify.Argument.IsNotNull(provider, "provider");
+			Verify.Argument.IsNotNull(provider, nameof(provider));
 			Verify.State.IsTrue(_repository != null);
 
 			if(provider.IsValidFor(_repository) && !_activeIssueTrackerProviders.Contains(provider))
@@ -742,14 +742,14 @@ namespace gitter
 
 		public void ProvideMainMenuItem(ToolStripMenuItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_menuStrip.Items.Insert(_menuStrip.Items.IndexOf(_mnuTools), item);
 		}
 
 		public void ProvideViewMenuItem(ToolStripMenuItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_mnuView.DropDownItems.Insert(_mnuView.DropDownItems.Count - 4, item);
 			if(_mnuView.DropDownItems.Count == 7)
@@ -760,14 +760,14 @@ namespace gitter
 
 		public void ProvideRepositoryExplorerItem(CustomListBoxItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_repositoryExplorerFactory.AddItem(item);
 		}
 
 		public void ProvideToolbar(ToolStrip toolStrip)
 		{
-			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, nameof(toolStrip));
 
 			if(_toolStripContainer.TopToolStripPanel.Rows.Length > 1)
 			{
@@ -818,7 +818,7 @@ namespace gitter
 
 		public void ProvideStatusBarObject(ToolStripItem item, bool leftAlign)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			if(leftAlign)
 			{
@@ -835,14 +835,14 @@ namespace gitter
 
 		public void RemoveMainMenuItem(ToolStripMenuItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_menuStrip.Items.Remove(item);
 		}
 
 		public void RemoveViewMenuItem(ToolStripMenuItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_mnuView.DropDownItems.Remove(item);
 			if(_mnuView.DropDownItems.Count == 8)
@@ -853,14 +853,14 @@ namespace gitter
 
 		public void RemoveRepositoryExplorerItem(CustomListBoxItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_repositoryExplorerFactory.RemoveItem(item);
 		}
 
 		public void RemoveToolbar(ToolStrip toolStrip)
 		{
-			Verify.Argument.IsNotNull(toolStrip, "toolStrip");
+			Verify.Argument.IsNotNull(toolStrip, nameof(toolStrip));
 
 			toolStrip.Parent = null;
 			foreach(ToolStripItem item in _mnuToolbars.DropDownItems)
@@ -879,7 +879,7 @@ namespace gitter
 
 		public void RemoveStatusBarObject(ToolStripItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_statusStrip.Items.Remove(item);
 		}

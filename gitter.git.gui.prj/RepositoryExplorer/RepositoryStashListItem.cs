@@ -41,7 +41,7 @@ namespace gitter.Git.Gui
 		public RepositoryStashListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgStash"], Resources.StrStash)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

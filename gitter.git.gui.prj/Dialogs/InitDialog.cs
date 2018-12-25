@@ -37,12 +37,6 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private readonly IGitRepositoryProvider _gitRepositoryProvider;
-		private readonly IUserInputSource<string> _repositoryPathInput;
-		private readonly IUserInputSource<bool> _bareInput;
-		private readonly IUserInputSource<bool> _useCustomTemplateInput;
-		private readonly IUserInputSource<string> _templateInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly IInitController _controller;
 
 		#endregion
@@ -51,21 +45,21 @@ namespace gitter.Git.Gui.Dialogs
 
 		public InitDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
-			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
+			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
 
-			_gitRepositoryProvider = gitRepositoryProvider;
+			GitRepositoryProvider = gitRepositoryProvider;
 
 			InitializeComponent();
 			Localize();
 
 			var inputs = new IUserInputSource[]
 			{
-				_repositoryPathInput    = new TextBoxInputSource(_txtPath),
-				_bareInput              = new CheckBoxInputSource(_chkBare),
-				_useCustomTemplateInput = new CheckBoxInputSource(_chkUseTemplate),
-				_templateInput          = new TextBoxInputSource(_txtTemplate),
+				RepositoryPath    = new TextBoxInputSource(_txtPath),
+				Bare              = new CheckBoxInputSource(_chkBare),
+				UseCustomTemplate = new CheckBoxInputSource(_chkUseTemplate),
+				Template          = new TextBoxInputSource(_txtTemplate),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			GitterApplication.FontManager.InputFont.Apply(_txtPath, _txtTemplate);
 
@@ -76,40 +70,19 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrInit; }
-		}
+		protected override string ActionVerb => Resources.StrInit;
 
-		private IGitRepositoryProvider GitRepositoryProvider
-		{
-			get { return _gitRepositoryProvider; }
-		}
+		private IGitRepositoryProvider GitRepositoryProvider { get; }
 
-		public IUserInputSource<string> RepositoryPath
-		{
-			get { return _repositoryPathInput; }
-		}
+		public IUserInputSource<string> RepositoryPath { get; }
 
-		public IUserInputSource<bool> Bare
-		{
-			get { return _bareInput; }
-		}
+		public IUserInputSource<bool> Bare { get; }
 
-		public IUserInputSource<bool> UseCustomTemplate
-		{
-			get { return _useCustomTemplateInput; }
-		}
+		public IUserInputSource<bool> UseCustomTemplate { get; }
 
-		public IUserInputSource<string> Template
-		{
-			get { return _templateInput; }
-		}
+		public IUserInputSource<string> Template { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -154,10 +127,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog
 
-		public bool Execute()
-		{
-			return _controller.TryInit();
-		}
+		public bool Execute() => _controller.TryInit();
 
 		#endregion
 	}

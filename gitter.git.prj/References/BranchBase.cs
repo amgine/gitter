@@ -59,7 +59,7 @@ namespace gitter.Git
 		/// <exception cref="ArgumentNullException"><paramref name="branchInformation"/> == <c>null</c>.</exception>
 		internal void NotifyReset(BranchData branchInformation)
 		{
-			Verify.Argument.IsNotNull(branchInformation, "branchInformation");
+			Verify.Argument.IsNotNull(branchInformation, nameof(branchInformation));
 
 			if(Revision.Hash != branchInformation.SHA1)
 			{
@@ -75,7 +75,7 @@ namespace gitter.Git
 		/// <returns>Valid pointer.</returns>
 		protected override IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
 		{
-			Verify.Argument.IsNotNull(pointer, "pointer");
+			Verify.Argument.IsNotNull(pointer, nameof(pointer));
 
 			return pointer.Dereference();
 		}

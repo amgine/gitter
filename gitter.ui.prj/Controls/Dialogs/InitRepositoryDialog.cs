@@ -40,7 +40,7 @@ namespace gitter.Controls
 		public InitRepositoryDialog(IWorkingEnvironment workingEnvironment)
 			: base(Resources.StrVCS.AddColon())
 		{
-			Verify.Argument.IsNotNull(workingEnvironment, "workingEnvironment");
+			Verify.Argument.IsNotNull(workingEnvironment, nameof(workingEnvironment));
 
 			_workingEnvironment = workingEnvironment;
 

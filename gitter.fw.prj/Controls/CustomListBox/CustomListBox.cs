@@ -706,7 +706,7 @@ namespace gitter.Framework.Controls
 			get { return _itemHeight; }
 			protected set
 			{
-				Verify.Argument.IsPositive(value, "value");
+				Verify.Argument.IsPositive(value, nameof(value));
 
 				if(_itemHeight != value)
 				{
@@ -811,7 +811,7 @@ namespace gitter.Framework.Controls
 			get { return _renderer; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_renderer != value)
 				{
@@ -1137,7 +1137,7 @@ namespace gitter.Framework.Controls
 		/// <param name="item">Item to display.</param>
 		public void EnsureVisible(CustomListBoxItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 			Verify.Argument.IsTrue(item.ListBox == this, "item", "This item is not owned by this list box.");
 
 			var parent = item.Parent;
@@ -1187,7 +1187,7 @@ namespace gitter.Framework.Controls
 
 		public int GetOptimalColumnWidth(CustomListBoxColumn column)
 		{
-			Verify.Argument.IsNotNull(column, "column");
+			Verify.Argument.IsNotNull(column, nameof(column));
 			var index = _columns.IndexOf(column);
 			Verify.Argument.IsTrue(index != -1, "column", "Colum is not present in this collection.");
 
@@ -1281,7 +1281,7 @@ namespace gitter.Framework.Controls
 
 		internal void FocusAndSelectItem(CustomListBoxItem item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 			Verify.Argument.IsTrue(item.ListBox == this, "item", "Item is not owned by this ListBox");
 
 			item.Present();
@@ -2915,7 +2915,7 @@ namespace gitter.Framework.Controls
 
 		public void SaveViewTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			var columnsSection = section.GetCreateSection("Columns");
 			columnsSection.Clear();
@@ -2933,7 +2933,7 @@ namespace gitter.Framework.Controls
 
 		public void LoadViewFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			BeginUpdate();
 			var columnsSection = section.TryGetSection("Columns");

@@ -31,7 +31,7 @@ namespace gitter.Framework.CLI
 		{
 			public static void KillProcess(Process process)
 			{
-				Verify.Argument.IsNotNull(process, "process");
+				Verify.Argument.IsNotNull(process, nameof(process));
 
 				try
 				{
@@ -48,7 +48,7 @@ namespace gitter.Framework.CLI
 
 			public static void AllowToExecute(Process process)
 			{
-				Verify.Argument.IsNotNull(process, "process");
+				Verify.Argument.IsNotNull(process, nameof(process));
 
 			}
 		}
@@ -59,12 +59,6 @@ namespace gitter.Framework.CLI
 	public abstract class ProcessExecutor<TInput>
 		where TInput : class
 	{
-		#region Data
-
-		private readonly string _exeFileName;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor&lt;TInput&gt;"/> class.</summary>
@@ -73,19 +67,16 @@ namespace gitter.Framework.CLI
 		/// <param name="stdErrReceiver">STDERR receiver (can be null).</param>
 		public ProcessExecutor(string exeFileName)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(exeFileName, "exeFileName");
+			Verify.Argument.IsNeitherNullNorWhitespace(exeFileName, nameof(exeFileName));
 
-			_exeFileName = exeFileName;
+			ExeFileName = exeFileName;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string ExeFileName
-		{
-			get { return _exeFileName; }
-		}
+		public string ExeFileName { get; }
 
 		#endregion
 
@@ -103,7 +94,7 @@ namespace gitter.Framework.CLI
 
 		public int Execute(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver)
 		{
-			Verify.Argument.IsNotNull(input, "input");
+			Verify.Argument.IsNotNull(input, nameof(input));
 
 			using(var process = CreateProcess(input))
 			{
@@ -131,7 +122,7 @@ namespace gitter.Framework.CLI
 
 		public Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, Action<Process> cancellationMethod, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(input, "input");
+			Verify.Argument.IsNotNull(input, nameof(input));
 
 			var tcs = new TaskCompletionSource<int>();
 			if(cancellationToken.IsCancellationRequested)

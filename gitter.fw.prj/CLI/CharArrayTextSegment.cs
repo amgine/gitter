@@ -67,10 +67,7 @@ namespace gitter.Framework.CLI
 			_length = buffer != null ? buffer.Length : 0;
 		}
 
-		public override string ToString()
-		{
-			return new string(_buffer, _offset, _length);
-		}
+		public override string ToString() => new string(_buffer, _offset, _length);
 
 		#endregion
 
@@ -86,10 +83,7 @@ namespace gitter.Framework.CLI
 			}
 		}
 
-		public int Length
-		{
-			get { return _length; }
-		}
+		public int Length => _length;
 
 		public char PeekChar()
 		{
@@ -137,7 +131,7 @@ namespace gitter.Framework.CLI
 
 		public void Skip(int count)
 		{
-			Verify.Argument.IsNotNegative(count, "count");
+			Verify.Argument.IsNotNegative(count, nameof(count));
 			Verify.State.IsTrue(_length != 0, "Text segment is empty.");
 
 			_offset += count;

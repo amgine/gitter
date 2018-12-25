@@ -38,7 +38,7 @@ namespace gitter.Git.Gui
 		public RepositoryConfigurationListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgConfiguration"], Resources.StrConfig)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

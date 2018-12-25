@@ -30,13 +30,11 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class StagedChangesMenu : ContextMenuStrip
 	{
-		private readonly Repository _repository;
-
 		public StagedChangesMenu(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			Items.Add(GuiItemFactory.GetCommitItem<ToolStripMenuItem>(repository));
 			Items.Add(GuiItemFactory.GetStashSaveItem<ToolStripMenuItem>(repository));
@@ -47,9 +45,6 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(GuiItemFactory.GetResetItem<ToolStripMenuItem>(repository, ResetMode.Mixed | ResetMode.Hard));
 		}
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 	}
 }

@@ -129,7 +129,7 @@ namespace gitter.Git.Gui.Controls
 		public RemoteListItem(Remote remote)
 			: base(remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
 		}
 
 		#endregion

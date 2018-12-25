@@ -48,10 +48,7 @@ namespace gitter.Git.Gui.Views
 			AddTopToolStrip(_toolBar = new ConfigToolBar(this));
 		}
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
 		protected override void AttachToRepository(Repository repository)
 		{
@@ -63,10 +60,7 @@ namespace gitter.Git.Gui.Views
 			_lstConfig.Clear();
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgConfig"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgConfig"];
 
 		public override void RefreshContent()
 		{

@@ -30,16 +30,13 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class DiffFileMenu : ContextMenuStrip
 	{
-		private readonly IDiffSource _diffSource;
-		private readonly DiffFile _diffFile;
-
 		public DiffFileMenu(IDiffSource diffSource, DiffFile diffFile)
 		{
-			Verify.Argument.IsNotNull(diffSource, "diffSource");
-			Verify.Argument.IsNotNull(diffFile, "diffFile");
+			Verify.Argument.IsNotNull(diffSource, nameof(diffSource));
+			Verify.Argument.IsNotNull(diffFile, nameof(diffFile));
 
-			_diffSource = diffSource;
-			_diffFile = diffFile;
+			DiffSource = diffSource;
+			DiffFile = diffFile;
 
 			string fileName = diffFile.Status != FileStatus.Removed ? diffFile.TargetFile : diffFile.SourceFile;
 
@@ -124,14 +121,8 @@ namespace gitter.Git.Gui.Controls
 				}));
 		}
 
-		public IDiffSource DiffSource
-		{
-			get { return _diffSource; }
-		}
+		public IDiffSource DiffSource { get; }
 
-		public DiffFile DiffFile
-		{
-			get { return _diffFile; }
-		}
+		public DiffFile DiffFile { get; }
 	}
 }

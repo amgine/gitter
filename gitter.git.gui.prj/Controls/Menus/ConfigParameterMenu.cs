@@ -30,39 +30,35 @@ namespace gitter.Git.Gui.Controls
 	public sealed class ConfigParameterMenu : ContextMenuStrip
 	{
 		private readonly ConfigParameterListItem _listItem;
-		private readonly ConfigParameter _parameter;
 
 		public ConfigParameterMenu(ConfigParameterListItem listItem)
 		{
-			Verify.Argument.IsNotNull(listItem, "listItem");
-			Verify.Argument.IsValidGitObject(listItem.DataContext, "parameter");
+			Verify.Argument.IsNotNull(listItem, nameof(listItem));
+			Verify.Argument.IsValidGitObject(listItem.DataContext, nameof(listItem));
 
 			_listItem = listItem;
-			_parameter = listItem.DataContext;
+			ConfigParameter = listItem.DataContext;
 
 			Items.Add(new ToolStripMenuItem(Resources.StrEditValue, CachedResources.Bitmaps["ImgConfigEdit"], (s, e) => listItem.StartValueEditor()));
-			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(_parameter));
+			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(ConfigParameter));
 			Items.Add(new ToolStripSeparator());
 			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _parameter.Name),
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, _parameter.Value)));
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ConfigParameter.Name),
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, ConfigParameter.Value)));
 		}
 
 		public ConfigParameterMenu(ConfigParameter parameter)
 		{
-			Verify.Argument.IsValidGitObject(parameter, "parameter");
+			Verify.Argument.IsValidGitObject(parameter, nameof(parameter));
 
-			_parameter = parameter;
+			ConfigParameter = parameter;
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(parameter));
 			Items.Add(new ToolStripSeparator());
 			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _parameter.Name),
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, _parameter.Value)));
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ConfigParameter.Name),
+				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, ConfigParameter.Value)));
 		}
 
-		public ConfigParameter ConfigParameter
-		{
-			get { return _parameter; }
-		}
+		public ConfigParameter ConfigParameter { get; }
 	}
 }

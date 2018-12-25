@@ -31,7 +31,6 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	partial class GitViewBase : ViewBase
 	{
-		private readonly GuiProvider _gui;
 		private Repository _repository;
 
 		public event EventHandler RepositoryChanged;
@@ -43,9 +42,9 @@ namespace gitter.Git.Gui.Views
 		public GitViewBase(Guid guid, GuiProvider guiProvider)
 			: base(guid, guiProvider.Environment)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
-			_gui = guiProvider;
+			Gui = guiProvider;
 			_repository = guiProvider.Repository;
 		}
 
@@ -122,10 +121,7 @@ namespace gitter.Git.Gui.Views
 		{
 		}
 
-		public GuiProvider Gui
-		{
-			get { return _gui; }
-		}
+		public GuiProvider Gui { get; }
 
 		public virtual void RefreshContent()
 		{

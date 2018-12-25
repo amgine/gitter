@@ -22,27 +22,18 @@ namespace gitter.Git.Gui.Views
 {
 	public class RemoteViewModel
 	{
-		#region Data
-
-		private readonly Remote _remote;
-
-		#endregion
-
 		#region .ctor
 
 		public RemoteViewModel(Remote remote)
 		{
-			_remote = remote;
+			Remote = remote;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Remote Remote
-		{
-			get { return _remote; }
-		}
+		public Remote Remote { get; }
 
 		#endregion
 

@@ -34,7 +34,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public PullDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -43,9 +43,6 @@ namespace gitter.Git.Gui.Dialogs
 			Text = Resources.StrPull;
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrPull; }
-		}
+		protected override string ActionVerb => Resources.StrPull;
 	}
 }

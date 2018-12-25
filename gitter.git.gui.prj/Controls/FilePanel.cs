@@ -21,16 +21,11 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
-	using System.Globalization;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
 	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -110,10 +105,7 @@ namespace gitter.Git.Gui.Controls
 				{ tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, });
 		}
 
-		protected virtual bool ShowHeader
-		{
-			get { return true; }
-		}
+		protected virtual bool ShowHeader => true;
 
 		protected static int TabSize
 		{

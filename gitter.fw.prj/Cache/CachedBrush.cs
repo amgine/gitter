@@ -37,7 +37,7 @@ namespace gitter.Framework
 
 		public CachedBrush(Func<Color> brushColorProvider)
 		{
-			Verify.Argument.IsNotNull(brushColorProvider, "brushColorProvider");
+			Verify.Argument.IsNotNull(brushColorProvider, nameof(brushColorProvider));
 
 			_brushColorProvider = brushColorProvider;
 		}

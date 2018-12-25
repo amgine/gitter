@@ -98,10 +98,7 @@ namespace gitter.Git.Gui.Controls
 
 		/// <summary>Gets the identification string.</summary>
 		/// <value>The identification string.</value>
-		public override string IdentificationString
-		{
-			get { return "Subject"; }
-		}
+		public override string IdentificationString => "Subject";
 
 		/// <summary>Align text and tags to graph column, if it is possible.</summary>
 		public bool AlignToGraph

@@ -34,7 +34,7 @@ namespace gitter.Git.Gui
 		public RepositoryRootItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgGit"], Resources.StrGit)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			Items.AddRange(
 				new CustomListBoxItem[]

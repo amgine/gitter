@@ -25,42 +25,22 @@ namespace gitter.Git
 
 	internal sealed class NowherePointer : GitObject, IRevisionPointer
 	{
-		private readonly string _name;
-
 		public NowherePointer(Repository repository, string name)
 			: base(repository)
 		{
-			_name = name;
+			Pointer = name;
 		}
 
-		ReferenceType IRevisionPointer.Type
-		{
-			get { return ReferenceType.None; }
-		}
+		ReferenceType IRevisionPointer.Type => ReferenceType.None;
 
-		public string Pointer
-		{
-			get { return _name; }
-		}
+		public string Pointer { get; }
 
-		string IRevisionPointer.FullName
-		{
-			get { return _name; }
-		}
+		string IRevisionPointer.FullName => Pointer;
 
-		Revision IRevisionPointer.Dereference()
-		{
-			return null;
-		}
+		Revision IRevisionPointer.Dereference() => null;
 
-		bool IRevisionPointer.IsDeleted
-		{
-			get { return false; }
-		}
+		bool IRevisionPointer.IsDeleted => false;
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Pointer;
 	}
 }

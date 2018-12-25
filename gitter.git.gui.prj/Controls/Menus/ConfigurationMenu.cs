@@ -29,21 +29,16 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class ConfigurationMenu : ContextMenuStrip
 	{
-		private readonly Repository _repository;
-
 		public ConfigurationMenu(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			Items.Add(GuiItemFactory.GetShowConfigurationViewItem<ToolStripMenuItem>());
-			Items.Add(GuiItemFactory.GetRefreshConfigurationItem<ToolStripMenuItem>(_repository));
+			Items.Add(GuiItemFactory.GetRefreshConfigurationItem<ToolStripMenuItem>(Repository));
 		}
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 	}
 }

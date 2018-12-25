@@ -21,7 +21,6 @@
 namespace gitter.Framework.Services
 {
 	using System;
-	using System.Collections.Generic;
 
 	public sealed class RepositoryGroup
 	{
@@ -38,18 +37,12 @@ namespace gitter.Framework.Services
 		public event EventHandler NameChanged;
 
 		private void OnNameChanged()
-		{
-			var handler = NameChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> NameChanged?.Invoke(this, EventArgs.Empty);
 
 		public event EventHandler Deleted;
 
 		internal void OnDeleted()
-		{
-			var handler = Deleted;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> Deleted?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -57,7 +50,7 @@ namespace gitter.Framework.Services
 
 		public RepositoryGroup(string name)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			_name         = name;
 			_repositories = new RepositoryCollection();
@@ -81,24 +74,15 @@ namespace gitter.Framework.Services
 			}
 		}
 
-		public RepositoryGroupCollection Groups
-		{
-			get { return _groups; }
-		}
+		public RepositoryGroupCollection Groups => _groups;
 
-		public RepositoryCollection Respositories
-		{
-			get { return _repositories; }
-		}
+		public RepositoryCollection Respositories => _repositories;
 
 		#endregion
 
 		#region Methods
 
-		public override string ToString()
-		{
-			return Name;
-		}
+		public override string ToString() => Name;
 
 		#endregion
 	}

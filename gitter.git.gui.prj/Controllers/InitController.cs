@@ -34,29 +34,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class InitController : ViewControllerBase<IInitView>, IInitController
 	{
-		#region Data
-
-		private readonly IGitRepositoryProvider _gitRepositoryProvider;
-
-		#endregion
-
 		#region .ctor
 
 		public InitController(IGitRepositoryProvider gitRepositoryProvider)
 		{
-			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
+			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
 
-			_gitRepositoryProvider = gitRepositoryProvider;
+			GitRepositoryProvider = gitRepositoryProvider;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private IGitRepositoryProvider GitRepositoryProvider
-		{
-			get { return _gitRepositoryProvider; }
-		}
+		private IGitRepositoryProvider GitRepositoryProvider { get; }
 
 		#endregion
 

@@ -35,9 +35,8 @@ namespace gitter.Git.Gui.Dialogs
 	[ToolboxItem(false)]
 	public partial class CleanDialog : DialogBase, IExecutableDialog
 	{
-		#region Data
 
-		private readonly Repository _repository;
+		#region Data
 		private FilesToCleanBinding _dataBinding;
 
 		#endregion
@@ -48,9 +47,9 @@ namespace gitter.Git.Gui.Dialogs
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
 		public CleanDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 
@@ -120,10 +119,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 		}
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
 		protected override void OnClosed(DialogResult result)
 		{
@@ -133,7 +129,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void LoadConfig()
 		{
-			var section = _repository.ConfigSection.TryGetSection("CleanDialog");
+			var section = Repository.ConfigSection.TryGetSection("CleanDialog");
 			if(section != null)
 			{
 				_txtPattern.Text = section.GetValue<string>("Pattern", string.Empty);
@@ -145,17 +141,14 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void SaveConfig()
 		{
-			var section = _repository.ConfigSection.GetCreateSection("CleanDialog");
+			var section = Repository.ConfigSection.GetCreateSection("CleanDialog");
 			section.SetValue<string>("Pattern", _txtPattern.Text);
 			section.SetValue<string>("Exclude", _txtExclude.Text);
 			section.SetValue<bool>("RemoveDirectories", RemoveDirectories);
 			section.SetValue<CleanFilesMode>("Mode", Mode);
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrClean; }
-		}
+		protected override string ActionVerb => Resources.StrClean;
 
 		protected override void OnShown()
 		{

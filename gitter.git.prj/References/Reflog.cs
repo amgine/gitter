@@ -40,7 +40,6 @@ namespace gitter.Git
 
 		#region Data
 
-		private readonly Reference _reference;
 		private readonly List<ReflogRecord> _reflog;
 
 		#endregion
@@ -168,7 +167,7 @@ namespace gitter.Git
 		internal Reflog(Reference reference)
 			: base(reference.Repository)
 		{
-			_reference = reference;
+			Reference = reference;
 			_reflog = new List<ReflogRecord>();
 			Refresh();
 		}
@@ -177,32 +176,20 @@ namespace gitter.Git
 
 		#region Properties
 
-		public Reference Reference
-		{
-			get { return _reference; }
-		}
+		public Reference Reference { get; }
 
-		public int Count
-		{
-			get { return _reflog.Count; }
-		}
+		public int Count => _reflog.Count;
 
-		public ReflogRecord this[int index]
-		{
-			get { return _reflog[index]; }
-		}
+		public ReflogRecord this[int index] => _reflog[index];
 
-		public object SyncRoot
-		{
-			get { return _reflog; }
-		}
+		public object SyncRoot => _reflog;
 
 		#endregion
 
 		public void Refresh()
 		{
 			var reflog = Repository.Accessor.QueryReflog.Invoke(
-				new QueryReflogParameters(_reference.FullName));
+				new QueryReflogParameters(Reference.FullName));
 			lock(SyncRoot)
 			{
 				if(reflog.Count < _reflog.Count)
@@ -229,7 +216,7 @@ namespace gitter.Git
 		internal void NotifyRecordAdded()
 		{
 			var data = Repository.Accessor.QueryReflog.Invoke(
-				new QueryReflogParameters(_reference.FullName)
+				new QueryReflogParameters(Reference.FullName)
 				{
 					MaxCount = 1,
 				});

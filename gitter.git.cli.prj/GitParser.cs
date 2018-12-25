@@ -98,7 +98,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public ByteString(int bufferSize)
 			{
-				Verify.Argument.IsPositive(bufferSize, "bufferSize");
+				Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
 
 				_buffer = new byte[bufferSize];
 			}
@@ -131,7 +131,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public string GetString(Encoding encoding)
 			{
-				Verify.Argument.IsNotNull(encoding, "encoding");
+				Verify.Argument.IsNotNull(encoding, nameof(encoding));
 
 				if(_length == 0)
 				{
@@ -264,7 +264,7 @@ namespace gitter.Git.AccessLayer.CLI
 							remote = true;
 							break;
 						default:
-							throw new ArgumentException("restriction");
+							throw new ArgumentException(nameof(restriction));
 					}
 					res = new BranchData(name, sha1, remote, current);
 				}
@@ -439,7 +439,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Hash ReadHash(int skip)
 		{
-			Verify.Argument.IsNotNegative(skip, "skip");
+			Verify.Argument.IsNotNegative(skip, nameof(skip));
 
 			var hash = new Hash(String, Position);
 			Skip(40 + skip);

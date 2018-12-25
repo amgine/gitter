@@ -126,7 +126,7 @@ namespace gitter.Framework.Controls
 
 		public MSVS2012ButtonRenderer(IColorTable colorTable)
 		{
-			Verify.Argument.IsNotNull(colorTable, "colorTable");
+			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
 			_colorTable = colorTable;
 		}

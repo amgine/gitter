@@ -43,8 +43,8 @@ namespace gitter.Framework.Controls
 
 		protected DockMarker(IDockHost dockHost, ViewHost dockClient, DockMarkerButton[] buttons, Point[] border, Rectangle bounds)
 		{
-			Verify.Argument.IsNotNull(dockHost, "dockHost");
-			Verify.Argument.IsNotNull(dockClient, "dockClient");
+			Verify.Argument.IsNotNull(dockHost, nameof(dockHost));
+			Verify.Argument.IsNotNull(dockClient, nameof(dockClient));
 
 			SetStyle(
 				ControlStyles.ContainerControl |

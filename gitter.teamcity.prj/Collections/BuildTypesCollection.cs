@@ -56,7 +56,7 @@ namespace gitter.TeamCity
 
 		public void UpdateCache(ProjectLocator projectLocator)
 		{
-			Verify.Argument.IsNotNull(projectLocator, "projectLocator");
+			Verify.Argument.IsNotNull(projectLocator, nameof(projectLocator));
 			var pl = projectLocator.ToString();
 			Verify.Argument.IsNeitherNullNorWhitespace(pl, "projectLocator");
 

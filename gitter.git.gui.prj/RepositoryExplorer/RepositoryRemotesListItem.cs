@@ -46,7 +46,7 @@ namespace gitter.Git.Gui
 		public RepositoryRemotesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgRemotes"], Resources.StrRemotes)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

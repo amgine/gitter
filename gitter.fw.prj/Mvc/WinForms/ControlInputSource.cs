@@ -35,7 +35,7 @@ namespace gitter.Framework.Mvc.WinForms
 
 		public ControlInputSource(Control control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			_control = control;
 		}
@@ -87,7 +87,7 @@ namespace gitter.Framework.Mvc.WinForms
 
 		public ControlInputSource(TControl control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			_control = control;
 			if(!control.IsDisposed)

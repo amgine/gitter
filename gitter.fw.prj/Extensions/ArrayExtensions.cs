@@ -32,7 +32,7 @@ namespace gitter.Framework
 		/// <param name="value">Value to set.</param>
 		public static void Initialize<T>(this T[] array, T value)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			for(int i = 0; i < array.Length; ++i)
 			{
@@ -46,7 +46,7 @@ namespace gitter.Framework
 		/// <param name="getValue">Function which returns value for each array element.</param>
 		public static void Initialize<T>(this T[] array, Func<int, T> getValue)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			for(int i = 0; i < array.Length; ++i)
 			{
@@ -60,7 +60,7 @@ namespace gitter.Framework
 		/// <param name="getValue">Function which returns value for each array element.</param>
 		public static void Initialize<T>(this T[] array, Func<int, T, T> getValue)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			for(int i = 0; i < array.Length; ++i)
 			{
@@ -75,8 +75,8 @@ namespace gitter.Framework
 
 		public static bool TrueForAll<T>(this T[] array, Func<int, T, bool> match)
 		{
-			Verify.Argument.IsNotNull(array, "array");
-			Verify.Argument.IsNotNull(match, "match");
+			Verify.Argument.IsNotNull(array, nameof(array));
+			Verify.Argument.IsNotNull(match, nameof(match));
 
 			for(int i = 0; i < array.Length; ++i)
 			{
@@ -92,9 +92,9 @@ namespace gitter.Framework
 
 		public static T[] CloneSegment<T>(this T[] array, int offset, int count)
 		{
-			Verify.Argument.IsNotNull(array, "array");
-			Verify.Argument.IsValidIndex(offset, array.Length, "offset");
-			Verify.Argument.IsValidIndex(count, array.Length - offset + 1, "count");
+			Verify.Argument.IsNotNull(array, nameof(array));
+			Verify.Argument.IsValidIndex(offset, array.Length, nameof(offset));
+			Verify.Argument.IsValidIndex(count, array.Length - offset + 1, nameof(count));
 
 			var res = new T[count];
 			Array.Copy(array, offset, res, 0, count);
@@ -103,36 +103,36 @@ namespace gitter.Framework
 
 		public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] array)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.AsReadOnly<T>(array);
 		}
 
 		public static T Find<T>(this T[] array, Predicate<T> match)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.Find<T>(array, match);
 		}
 
 		public static T[] FindAll<T>(this T[] array, Predicate<T> match)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.FindAll<T>(array, match);
 		}
 
 		public static void ForEach<T>(this T[] array, Action<T> action)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			Array.ForEach<T>(array, action);
 		}
 
 		public static void ForEach<T>(this T[] array, Action<int, T> action)
 		{
-			Verify.Argument.IsNotNull(array, "array");
-			Verify.Argument.IsNotNull(action, "action");
+			Verify.Argument.IsNotNull(array, nameof(array));
+			Verify.Argument.IsNotNull(action, nameof(action));
 
 			for(int i = 0; i < array.Length; ++i)
 			{
@@ -142,57 +142,57 @@ namespace gitter.Framework
 
 		public static bool Contains<T>(this T[] array, T value)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.IndexOf<T>(array, value) != -1;
 		}
 
 		public static TOutput[] Convert<TInput, TOutput>(this TInput[] array, Converter<TInput, TOutput> converter)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.ConvertAll<TInput, TOutput>(array, converter);
 		}
 
 		public static void Sort<T>(this T[] array)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			Array.Sort<T>(array);
 		}
 
 		public static void Sort<T>(this T[] array, int index, int length)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			Array.Sort<T>(array, index, length);
 		}
 
 		public static void Sort<T>(this T[] array, Comparison<T> comparison)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			Array.Sort<T>(array, comparison);
 		}
 
 		public static void Sort<T>(this T[] array, IComparer<T> comparer)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			Array.Sort<T>(array, comparer);
 		}
 
 		public static void Sort<T>(this T[] array, int index, int length, IComparer<T> comparer)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			Array.Sort<T>(array, index, length, comparer);
 		}
 
 		public static int FindIndex<T>(this T[] array, Predicate<T> match)
 		{
-			Verify.Argument.IsNotNull(array, "array");
-			Verify.Argument.IsNotNull(match, "match");
+			Verify.Argument.IsNotNull(array, nameof(array));
+			Verify.Argument.IsNotNull(match, nameof(match));
 
 			for(int i = 0; i < array.Length; ++i)
 			{
@@ -204,9 +204,9 @@ namespace gitter.Framework
 
 		public static int FindIndex<T>(this T[] array, Predicate<T> match, int offset)
 		{
-			Verify.Argument.IsNotNull(array, "array");
-			Verify.Argument.IsNotNull(match, "match");
-			Verify.Argument.IsValidIndex(offset, array.Length, "offset");
+			Verify.Argument.IsNotNull(array, nameof(array));
+			Verify.Argument.IsNotNull(match, nameof(match));
+			Verify.Argument.IsValidIndex(offset, array.Length, nameof(offset));
 
 			for(int i = offset; i < array.Length; ++i)
 			{
@@ -220,10 +220,10 @@ namespace gitter.Framework
 
 		public static int FindIndex<T>(this T[] array, Predicate<T> match, int offset, int count)
 		{
-			Verify.Argument.IsNotNull(array, "array");
-			Verify.Argument.IsNotNull(match, "match");
-			Verify.Argument.IsValidIndex(offset, array.Length, "offset");
-			Verify.Argument.IsValidIndex(count, array.Length - offset + 1, "count");
+			Verify.Argument.IsNotNull(array, nameof(array));
+			Verify.Argument.IsNotNull(match, nameof(match));
+			Verify.Argument.IsValidIndex(offset, array.Length, nameof(offset));
+			Verify.Argument.IsValidIndex(count, array.Length - offset + 1, nameof(count));
 
 			int end = offset + count;
 			for(int i = offset; i < end; ++i)
@@ -236,42 +236,42 @@ namespace gitter.Framework
 
 		public static int IndexOf<T>(this T[] array, T value)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.IndexOf<T>(array, value);
 		}
 
 		public static int IndexOf<T>(this T[] array, T value, int startIndex)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.IndexOf<T>(array, value, startIndex);
 		}
 
 		public static int IndexOf<T>(this T[] array, T value, int startIndex, int count)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.IndexOf<T>(array, value, startIndex, count);
 		}
 
 		public static int LastIndexOf<T>(this T[] array, T value)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.LastIndexOf<T>(array, value);
 		}
 
 		public static int LastIndexOf<T>(this T[] array, T value, int startIndex)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.LastIndexOf<T>(array, value, startIndex);
 		}
 
 		public static int LastIndexOf<T>(this T[] array, T value, int startIndex, int count)
 		{
-			Verify.Argument.IsNotNull(array, "array");
+			Verify.Argument.IsNotNull(array, nameof(array));
 
 			return Array.LastIndexOf<T>(array, value, count);
 		}

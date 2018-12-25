@@ -37,8 +37,8 @@ namespace gitter.Git
 
 		public RevisionLog(Repository repository, IList<Revision> revisions)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(revisions, "revisions");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(revisions, nameof(revisions));
 
 			_repository = repository;
 			_revisions  = revisions;
@@ -46,8 +46,8 @@ namespace gitter.Git
 
 		public RevisionLog(Repository repository, IList<Revision> revisions, Dictionary<Revision, IList<Revision>> parents)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
-			Verify.Argument.IsNotNull(revisions, "revisions");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Verify.Argument.IsNotNull(revisions, nameof(revisions));
 
 			_repository = repository;
 			_revisions  = revisions;
@@ -60,7 +60,7 @@ namespace gitter.Git
 
 		public IList<Revision> GetParents(Revision revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			if(_parents == null)
 			{

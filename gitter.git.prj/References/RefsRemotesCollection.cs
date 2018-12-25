@@ -63,7 +63,7 @@ namespace gitter.Git
 		/// </exception>
 		internal void Delete(RemoteBranch branch, bool force)
 		{
-			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
 
 			var name = branch.Name;
 			using(Repository.Monitor.BlockNotifications(
@@ -129,7 +129,7 @@ namespace gitter.Git
 		/// <param name="branches">Actual remote branch data.</param>
 		internal void Refresh(IEnumerable<RemoteBranchData> branches)
 		{
-			Verify.Argument.IsNotNull(branches, "branches");
+			Verify.Argument.IsNotNull(branches, nameof(branches));
 
 			RefreshInternal(branches);
 		}
@@ -138,7 +138,7 @@ namespace gitter.Git
 		/// <param name="branches">Actual remote branch data.</param>
 		internal void Refresh(IEnumerable<BranchData> branches)
 		{
-			Verify.Argument.IsNotNull(branches, "branches");
+			Verify.Argument.IsNotNull(branches, nameof(branches));
 
 			RefreshInternal(branches);
 		}
@@ -147,7 +147,7 @@ namespace gitter.Git
 		/// <param name="branch">Branch to refresh.</param>
 		internal void Refresh(RemoteBranch branch)
 		{
-			Verify.Argument.IsValidGitObject(branch, Repository, "branch");
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
 
 			var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
@@ -212,7 +212,7 @@ namespace gitter.Git
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
 		public IList<RemoteBranch> GetContaining(IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
@@ -285,7 +285,7 @@ namespace gitter.Git
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> == <c>null</c>.</exception>
 		protected override string FixInputName(string name)
 		{
-			Verify.Argument.IsNotNull(name, "name");
+			Verify.Argument.IsNotNull(name, nameof(name));
 
 			if(name.StartsWith(GitConstants.RemoteBranchPrefix) && !ContainsObjectName(name))
 			{

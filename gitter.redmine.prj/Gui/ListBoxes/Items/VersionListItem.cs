@@ -160,7 +160,7 @@ namespace gitter.Redmine.Gui
 		public VersionListItem(ProjectVersion version)
 			: base(version)
 		{
-			Verify.Argument.IsNotNull(version, "version");
+			Verify.Argument.IsNotNull(version, nameof(version));
 		}
 
 		protected override void OnListBoxAttached()

@@ -51,7 +51,7 @@ namespace gitter.Git.Gui
 		/// <param name="repositoryProvider">Git repository provider.</param>
 		public GuiProvider(RepositoryProvider repositoryProvider)
 		{
-			Verify.Argument.IsNotNull(repositoryProvider, "repositoryProvider");
+			Verify.Argument.IsNotNull(repositoryProvider, nameof(repositoryProvider));
 
 			_repositoryProvider = repositoryProvider;
 
@@ -305,7 +305,7 @@ namespace gitter.Git.Gui
 
 		public void AttachToEnvironment(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 			Verify.State.IsTrue(_environment == null);
 
 			_environment = environment;
@@ -341,7 +341,7 @@ namespace gitter.Git.Gui
 
 		public void DetachFromEnvironment(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 			Verify.Argument.AreNotEqual(_environment, environment, "environment", string.Empty);
 
 			foreach(var factory in _viewFactories)

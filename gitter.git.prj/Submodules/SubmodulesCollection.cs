@@ -76,7 +76,7 @@ namespace gitter.Git
 
 		public bool ExistsPath(string path)
 		{
-			Verify.Argument.IsNotNull(path, "path");
+			Verify.Argument.IsNotNull(path, nameof(path));
 
 			lock(SyncRoot)
 			{
@@ -90,7 +90,7 @@ namespace gitter.Git
 
 		public bool ExistsUrl(string url)
 		{
-			Verify.Argument.IsNotNull(url, "url");
+			Verify.Argument.IsNotNull(url, nameof(url));
 
 			lock(SyncRoot)
 			{
@@ -104,7 +104,7 @@ namespace gitter.Git
 
 		public bool TryGetSubmoduleByPath(string path, out Submodule submodule)
 		{
-			Verify.Argument.IsNotNull(path, "path");
+			Verify.Argument.IsNotNull(path, nameof(path));
 
 			lock(SyncRoot)
 			{
@@ -123,7 +123,7 @@ namespace gitter.Git
 
 		public Submodule TryGetSubmoduleByPath(string path)
 		{
-			Verify.Argument.IsNotNull(path, "path");
+			Verify.Argument.IsNotNull(path, nameof(path));
 
 			lock(SyncRoot)
 			{
@@ -140,7 +140,7 @@ namespace gitter.Git
 
 		public bool TryGetSubmoduleByUrl(string url, out Submodule submodule)
 		{
-			Verify.Argument.IsNotNull(url, "url");
+			Verify.Argument.IsNotNull(url, nameof(url));
 
 			lock(SyncRoot)
 			{
@@ -159,7 +159,7 @@ namespace gitter.Git
 
 		public Submodule TryGetSubmoduleByUrl(string url)
 		{
-			Verify.Argument.IsNotNull(url, "url");
+			Verify.Argument.IsNotNull(url, nameof(url));
 
 			lock(SyncRoot)
 			{
@@ -181,8 +181,8 @@ namespace gitter.Git
 
 		public Submodule Create(string path, string url, string branch)
 		{
-			Verify.Argument.IsNotNull(path, "path");
-			Verify.Argument.IsNotNull(url, "url");
+			Verify.Argument.IsNotNull(path, nameof(path));
+			Verify.Argument.IsNotNull(url, nameof(url));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.WorktreeUpdated,

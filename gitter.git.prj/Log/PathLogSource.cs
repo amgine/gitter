@@ -47,8 +47,8 @@ namespace gitter.Git
 		/// <param name="followRenames">if set to <c>true</c> follow file renames.</param>
 		public PathLogSource(IRevisionPointer revision, string path, bool followRenames = true)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
-			Verify.Argument.IsNotNull(path, "path");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
+			Verify.Argument.IsNotNull(path, nameof(path));
 
 			_revision = revision;
 			_path = path;

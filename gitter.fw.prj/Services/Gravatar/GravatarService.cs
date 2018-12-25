@@ -64,7 +64,7 @@ namespace gitter.Framework.Services
 
 		public static Bitmap GetGravatar(string email)
 		{
-			Verify.Argument.IsNotNull(email, "email");
+			Verify.Argument.IsNotNull(email, nameof(email));
 
 			return GetGravatar(email, DefaultGravatarType.wavatar, GravatarRating.g, 80);
 		}
@@ -92,7 +92,7 @@ namespace gitter.Framework.Services
 
 		public static Bitmap EndGetGravatar(IAsyncResult result)
 		{
-			Verify.Argument.IsNotNull(result, "result");
+			Verify.Argument.IsNotNull(result, nameof(result));
 
 			var func = (Func<string, DefaultGravatarType, GravatarRating, int, Bitmap>)result.AsyncState;
 			return func.EndInvoke(result);

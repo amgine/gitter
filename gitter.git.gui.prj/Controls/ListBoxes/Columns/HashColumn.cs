@@ -175,9 +175,6 @@ namespace gitter.Git.Gui.Controls
 			Abbreviate = section.GetValue("Abbreviate", Abbreviate);
 		}
 
-		public override string IdentificationString
-		{
-			get { return "Hash"; }
-		}
+		public override string IdentificationString => "Hash";
 	}
 }

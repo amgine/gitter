@@ -35,19 +35,13 @@ namespace gitter.Git.Gui.Dialogs
 
 	public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 	{
-		#region Data
-
-		private Repository _repository;
-
-		#endregion
-
 		#region .ctor
 
 		public ApplyPatchesDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 
@@ -76,10 +70,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
 		public ApplyPatchTo ApplyTo
 		{
@@ -124,10 +115,7 @@ namespace gitter.Git.Gui.Dialogs
 			set { _chkReverse.Checked = value; }
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrApply; }
-		}
+		protected override string ActionVerb => Resources.StrApply;
 
 		public IEnumerable<IPatchSource> SelectedPatchSources
 		{

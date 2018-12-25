@@ -160,7 +160,7 @@ namespace gitter.Framework.Controls
 			get { return _renderer; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				_renderer = value;
 				Invalidate();
@@ -477,7 +477,7 @@ namespace gitter.Framework.Controls
 			get { return _smallChange; }
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				_smallChange = value;
 			}
@@ -489,7 +489,7 @@ namespace gitter.Framework.Controls
 			get { return _largeChange; }
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				if(_largeChange != value)
 				{

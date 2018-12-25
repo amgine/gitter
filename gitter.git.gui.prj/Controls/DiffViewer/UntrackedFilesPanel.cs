@@ -59,7 +59,7 @@ namespace gitter.Git.Gui.Controls
 
 			public FileItem(TreeFile file)
 			{
-				Verify.Argument.IsNotNull(file, "file");
+				Verify.Argument.IsNotNull(file, nameof(file));
 
 				_file = file;
 				_text = file.RelativePath;
@@ -105,7 +105,7 @@ namespace gitter.Git.Gui.Controls
 
 		public UntrackedFilesPanel(Status status, IEnumerable<string> paths)
 		{
-			Verify.Argument.IsNotNull(status, "status");
+			Verify.Argument.IsNotNull(status, nameof(status));
 
 			lock(status.SyncRoot)
 			{

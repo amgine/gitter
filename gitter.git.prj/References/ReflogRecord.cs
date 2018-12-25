@@ -21,7 +21,6 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Globalization;
 
 	/// <summary>Represents historical change of <see cref="Reference"/>'s position.</summary>
@@ -29,7 +28,6 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly Reflog _reflog;
 		private Revision _revision;
 		private string _message;
 		private int _index;
@@ -48,22 +46,13 @@ namespace gitter.Git
 		public event EventHandler MessageChanged;
 
 		private void InvokeIndexChanged()
-		{
-			var handler = IndexChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> IndexChanged?.Invoke(this, EventArgs.Empty);
 
 		private void InvokeRevisionChanged()
-		{
-			var handler = RevisionChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> RevisionChanged?.Invoke(this, EventArgs.Empty);
 
 		private void InvokeMessageChanged()
-		{
-			var handler = MessageChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> MessageChanged?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -78,15 +67,15 @@ namespace gitter.Git
 		internal ReflogRecord(Repository repository, Reflog reflog, Revision revision, string message, int index)
 			: base(repository)
 		{
-			Verify.Argument.IsNotNull(reflog, "reflog");
-			Verify.Argument.IsNotNull(revision, "revision");
-			Verify.Argument.IsNotNull(message, "message");
-			Verify.Argument.IsNotNegative(index, "index");
+			Verify.Argument.IsNotNull(reflog, nameof(reflog));
+			Verify.Argument.IsNotNull(revision, nameof(revision));
+			Verify.Argument.IsNotNull(message, nameof(message));
+			Verify.Argument.IsNotNegative(index, nameof(index));
 
-			_reflog = reflog;
+			Reflog    = reflog;
 			_revision = revision;
-			_message = message;
-			_index = index;
+			_message  = message;
+			_index    = index;
 		}
 
 		#endregion
@@ -95,17 +84,11 @@ namespace gitter.Git
 
 		/// <summary>Gets the reference, which owns this reflog record.</summary>
 		/// <value>Reference, which owns this reflog record..</value>
-		public Reference Reference
-		{
-			get { return _reflog.Reference; }
-		}
+		public Reference Reference => Reflog.Reference;
 
 		/// <summary>Gets reflog, containing this record.</summary>
 		/// <value>Reflog, containing this record.</value>
-		public Reflog Reflog
-		{
-			get { return _reflog; }
-		}
+		public Reflog Reflog { get; }
 
 		/// <summary>Gets revision, pointed by this <see cref="ReflogRecord"/>.</summary>
 		/// <value>Revision, pointed by this <see cref="ReflogRecord"/>.</value>
@@ -114,7 +97,7 @@ namespace gitter.Git
 			get { return _revision; }
 			internal set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_revision != value)
 				{
@@ -131,7 +114,7 @@ namespace gitter.Git
 			get { return _message; }
 			internal set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_message != value)
 				{
@@ -148,7 +131,7 @@ namespace gitter.Git
 			get { return _index; }
 			internal set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				if(_index != value)
 				{
@@ -169,31 +152,25 @@ namespace gitter.Git
 		/// <value>Full name of this <see cref="ReflogRecord"/>.</value>
 		public string FullName
 		{
-			get { return _reflog.Reference.FullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
+			get { return Reflog.Reference.FullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
 		}
 
 		#endregion
 
 		protected override string GetName()
 		{
-			return _reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
+			return Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 		}
 
 		string IRevisionPointer.Pointer
 		{
-			get { return _reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
+			get { return Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
 		}
 
-		Revision IRevisionPointer.Dereference()
-		{
-			return _revision;
-		}
+		Revision IRevisionPointer.Dereference() => _revision;
 
 		/// <summary>Returns a <see cref="System.String"/> that represents this <see cref="ReflogRecord"/>.</summary>
 		/// <returns>A <see cref="System.String"/> that represents this <see cref="ReflogRecord"/>.</returns>
-		public override string ToString()
-		{
-			return Name + ": " + _message;
-		}
+		public override string ToString() => Name + ": " + _message;
 	}
 }

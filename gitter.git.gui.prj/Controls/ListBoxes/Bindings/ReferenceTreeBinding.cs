@@ -58,8 +58,8 @@ namespace gitter.Git.Gui.Controls
 		public ReferenceTreeBinding(CustomListBoxItemsCollection itemHost, Repository repository,
 			bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer> predicate, ReferenceType referenceTypes)
 		{
-			Verify.Argument.IsNotNull(itemHost, "itemHost");
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(itemHost, nameof(itemHost));
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_itemHost = itemHost;
 			_repository = repository;

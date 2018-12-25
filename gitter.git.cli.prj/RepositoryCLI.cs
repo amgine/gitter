@@ -45,7 +45,7 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitAction   < CheckoutParameters                                           > _checkout;
 		private readonly IGitAction   < CheckoutFilesParameters                                      > _checkoutFiles;
 		private readonly IGitAction   < CherryPickParameters                                         > _cherryPick;
-		private readonly IGitAction   < CommitParameters                                             > _commit;
+		private readonly IGitFunction < CommitParameters,                 string                     > _commit;
 		private readonly IGitFunction < CountObjectsParameters,           ObjectCountData            > _countObjects;
 		private readonly IGitAction   < CreateBranchParameters                                       > _createBranch;
 		private readonly IGitAction   < CreateTagParameters                                          > _createTag;
@@ -125,8 +125,8 @@ namespace gitter.Git.AccessLayer
 
 		public RepositoryCLI(GitCLI gitCLI, IGitRepository repository)
 		{
-			Verify.Argument.IsNotNull(gitCLI, "gitCLI");
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(gitCLI, nameof(gitCLI));
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_gitCLI     = gitCLI;
 			_repository = repository;
@@ -143,7 +143,7 @@ namespace gitter.Git.AccessLayer
 			GitCliMethod.Create(out _checkout,               CommandExecutor, CommandBuilder.GetCheckoutCommand,               OutputParser.HandleCheckoutResult);
 			GitCliMethod.Create(out _checkoutFiles,          CommandExecutor, CommandBuilder.GetCheckoutFilesCommand);
 			GitCliMethod.Create(out _cherryPick,             CommandExecutor, CommandBuilder.GetCherryPickCommand,             OutputParser.HandleCherryPickResult);
-			GitCliMethod.Create(out _commit,                 CommandExecutor, CommandBuilder.GetCommitCommand);
+			GitCliMethod.Create(out _commit,                 CommandExecutor, CommandBuilder.GetCommitCommand,                 OutputParser.ParseCommitResult);
 			GitCliMethod.Create(out _countObjects,           CommandExecutor, CommandBuilder.GetCountObjectsCommand,           OutputParser.ParseObjectCountData);
 			GitCliMethod.Create(out _createBranch,           CommandExecutor, CommandBuilder.GetCreateBranchCommand,           OutputParser.HandleCreateBranchResult);
 			GitCliMethod.Create(out _createTag,              CommandExecutor, CommandBuilder.GetCreateTagCommand,              OutputParser.HandleCreateTagResult);
@@ -222,440 +222,179 @@ namespace gitter.Git.AccessLayer
 
 		#region Properties
 
-		public IGitAccessor GitAccessor
-		{
-			get { return _gitCLI; }
-		}
-
-		private CommandBuilder CommandBuilder
-		{
-			get { return _gitCLI.CommandBuilder; }
-		}
-
-		private OutputParser OutputParser
-		{
-			get { return _gitCLI.OutputParser; }
-		}
-
-		private ICommandExecutor CommandExecutor
-		{
-			get { return _executor; }
-		}
-
-		public IGitAction<AddFilesParameters> AddFiles
-		{
-			get { return _addFiles; }
-		}
-
-		public IGitAction<AddRemoteParameters> AddRemote
-		{
-			get { return _addRemote; }
-		}
-
-		public IGitAction<AddSubmoduleParameters> AddSubmodule
-		{
-			get { return _addSubmodule; }
-		}
-
-		public IGitAction<AppendNoteParameters> AppendNote
-		{
-			get { return _appendNote; }
-		}
-
-		public IGitAction<ApplyPatchParameters> ApplyPatch
-		{
-			get { return _applyPatch; }
-		}
-
-		public IGitAction<ArchiveParameters> Archive
-		{
-			get { return _archive; }
-		}
-
-		public IGitAction<CleanFilesParameters> CleanFiles
-		{
-			get { return _cleanFiles; }
-		}
-
-		public IGitAction<CheckoutParameters> Checkout
-		{
-			get { return _checkout; }
-		}
-
-		public IGitAction<CheckoutFilesParameters> CheckoutFiles
-		{
-			get { return _checkoutFiles; }
-		}
-
-		public IGitAction<CherryPickParameters> CherryPick
-		{
-			get { return _cherryPick; }
-		}
-
-		public IGitAction<CommitParameters> Commit
-		{
-			get { return _commit; }
-		}
-
-		public IGitFunction<CountObjectsParameters, ObjectCountData> CountObjects
-		{
-			get { return _countObjects; }
-		}
-
-		public IGitAction<CreateBranchParameters> CreateBranch
-		{
-			get { return _createBranch; }
-		}
-
-		public IGitAction<CreateTagParameters> CreateTag
-		{
-			get { return _createTag; }
-		}
-
-		public IGitAction<DeleteBranchParameters> DeleteBranch
-		{
-			get { return _deleteBranch; }
-		}
-
-		public IGitAction<DeleteTagParameters> DeleteTag
-		{
-			get { return _deleteTag; }
-		}
-
-		public IGitFunction<DereferenceParameters, RevisionData> Dereference
-		{
-			get { return _dereference; }
-		}
-
-		public IGitFunction<DescribeParameters, string> Describe
-		{
-			get { return _describe; }
-		}
-
-		public IGitAction<FetchParameters> Fetch
-		{
-			get { return _fetch; }
-		}
-
-		public IGitFunction<FormatMergeMessageParameters, string> FormatMergeMessage
-		{
-			get { return _formatMergeMessage; }
-		}
-
-		public IGitAction<GarbageCollectParameters> GarbageCollect
-		{
-			get { return _garbageCollect; }
-		}
-
-		public IGitAction<MergeParameters> Merge
-		{
-			get { return _merge; }
-		}
-
-		public IGitAction<PruneRemoteParameters> PruneRemote
-		{
-			get { return _pruneRemote; }
-		}
-
-		public IGitAction<PullParameters> Pull
-		{
-			get { return _pull; }
-		}
-
-		public IGitFunction<PushParameters, IList<ReferencePushResult>> Push
-		{
-			get { return _push; }
-		}
-
-		public IGitFunction<QueryBlameParameters, BlameFile> QueryBlame
-		{
-			get { return _queryBlame; }
-		}
-
-		public IGitFunction<QueryBlobBytesParameters, byte[]> QueryBlobBytes
-		{
-			get { return _queryBlobBytes; }
-		}
-
-		public IGitFunction<QueryBranchParameters, BranchData> QueryBranch
-		{
-			get { return _queryBranch; }
-		}
-
-		public IGitFunction<QueryBranchesParameters, BranchesData> QueryBranches
-		{
-			get { return _queryBranches; }
-		}
-
-		public IGitFunction<PruneRemoteParameters, IList<string>> QueryBranchesToPrune
-		{
-			get { return _queryBranchesToPrune; }
-		}
-
-		public IGitFunction<QueryDiffParameters, Diff> QueryDiff
-		{
-			get { return _queryDiff; }
-		}
-
-		public IGitFunction<AddFilesParameters, IList<TreeFileData>> QueryFilesToAdd
-		{
-			get { return _queryFilesToAdd; }
-		}
-
-		public IGitFunction<RemoveFilesParameters, IList<string>> QueryFilesToRemove
-		{
-			get { return _queryFilesToRemove; }
-		}
-
-		public IGitFunction<CleanFilesParameters, IList<string>> QueryFilesToClean
-		{
-			get { return _queryFilesToClean; }
-		}
-
-		public IGitFunction<QueryNotesParameters, IList<NoteData>> QueryNotes
-		{
-			get { return _queryNotes; }
-		}
-
-		public IGitFunction<QueryObjectsParameters, string> QueryObjects
-		{
-			get { return _queryObjects; }
-		}
-
-		public IGitFunction<QueryRevisionParameters, RevisionData> QueryRevision
-		{
-			get { return _queryRevision; }
-		}
-
-		public IGitFunction<QueryRevisionsParameters, IList<RevisionData>> QueryRevisions
-		{
-			get { return _queryRevisions; }
-		}
-
-		public IGitFunction<QueryRevisionsParameters, IList<RevisionGraphData>> QueryRevisionGraph
-		{
-			get { return _queryRevisionGraph; }
-		}
-
-		public IGitFunction<QueryRevisionDiffParameters, byte[]> QueryRevisionPatch
-		{
-			get { return _queryRevisionPatch; }
-		}
-
-		public IGitFunction<QueryReferencesParameters, ReferencesData> QueryReferences
-		{
-			get { return _queryReferences; }
-		}
-
-		public IGitFunction<QueryReflogParameters, IList<ReflogRecordData>> QueryReflog
-		{
-			get { return _queryReflog; }
-		}
-
-		public IGitFunction<QueryRemoteParameters, RemoteData> QueryRemote
-		{
-			get { return _queryRemote; }
-		}
-
-		public IGitFunction<QueryRemoteReferencesParameters, IList<RemoteReferenceData>> QueryRemoteReferences
-		{
-			get { return _queryRemoteReferences; }
-		}
-
-		public IGitFunction<QueryRemotesParameters, IList<RemoteData>> QueryRemotes
-		{
-			get { return _queryRemotes; }
-		}
-
-		public IGitFunction<QueryRevisionDiffParameters, Diff> QueryRevisionDiff
-		{
-			get { return _queryRevisionDiff; }
-		}
-
-		public IGitFunction<QueryStashParameters, IList<StashedStateData>> QueryStash
-		{
-			get { return _queryStash; }
-		}
-
-		public IGitFunction<QueryRevisionDiffParameters, byte[]> QueryStashPatch
-		{
-			get { return _queryStashPatch; }
-		}
-
-		public IGitFunction<QueryStashTopParameters, RevisionData> QueryStashTop
-		{
-			get { return _queryStashTop; }
-		}
-
-		public IGitFunction<QueryRevisionDiffParameters, Diff> QueryStashDiff
-		{
-			get { return _queryStashDiff; }
-		}
-
-		public IGitFunction<QueryStatusParameters, StatusData> QueryStatus
-		{
-			get { return _queryStatus; }
-		}
-
-		public IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData> QuerySymbolicReference
-		{
-			get { return _querySymbolicReference; }
-		}
-
-		public IGitFunction<QueryTreeContentParameters, IList<TreeContentData>> QueryTreeContent
-		{
-			get { return _queryTreeContent; }
-		}
-
-		public IGitFunction<QueryTagParameters, TagData> QueryTag
-		{
-			get { return _queryTag; }
-		}
-
-		public IGitFunction<QueryTagMessageParameters, string> QueryTagMessage
-		{
-			get { return _queryTagMessage; }
-		}
-
-		public IGitFunction<QueryTagsParameters, IList<TagData>> QueryTags
-		{
-			get { return _queryTags; }
-		}
-
-		public IGitFunction<QueryUsersParameters, IList<UserData>> QueryUsers
-		{
-			get { return _queryUsers; }
-		}
-
-		public IGitAction<RemoveFilesParameters> RemoveFiles
-		{
-			get { return _removeFiles; }
-		}
-
-		public IGitAction<RemoveRemoteReferencesParameters> RemoveRemoteReferences
-		{
-			get { return _removeRemoteReferences; }
-		}
-
-		public IGitAction<RebaseParameters> Rebase
-		{
-			get { return _rebase; }
-		}
-
-		public IGitAction<RemoveRemoteParameters> RemoveRemote
-		{
-			get { return _removeRemote; }
-		}
-
-		public IGitAction<RenameBranchParameters> RenameBranch
-		{
-			get { return _renameBranch; }
-		}
-
-		public IGitAction<RenameRemoteParameters> RenameRemote
-		{
-			get { return _renameRemote; }
-		}
-
-		public IGitAction<ResetParameters> Reset
-		{
-			get { return _reset; }
-		}
-
-		public IGitAction<ResetFilesParameters> ResetFiles
-		{
-			get { return _resetFiles; }
-		}
-
-		public IGitAction<ResetBranchParameters> ResetBranch
-		{
-			get { return _resetBranch; }
-		}
-
-		public IGitAction<RevertParameters> Revert
-		{
-			get { return _revert; }
-		}
-
-		public IGitAction<RunMergeToolParameters> RunMergeTool
-		{
-			get { return _runMergeTool; }
-		}
-
-		public IGitAction<StashApplyParameters> StashApply
-		{
-			get { return _stashApply; }
-		}
-
-		public IGitAction<StashDropParameters> StashDrop
-		{
-			get { return _stashDrop; }
-		}
-
-		public IGitAction<StashClearParameters> StashClear
-		{
-			get { return _stashClear; }
-		}
-
-		public IGitAction<StashPopParameters> StashPop
-		{
-			get { return _stashPop; }
-		}
-
-		public IGitFunction<StashSaveParameters, bool> StashSave
-		{
-			get { return _stashSave; }
-		}
-
-		public IGitAction<StashToBranchParameters> StashToBranch
-		{
-			get { return _stashToBranch; }
-		}
-
-		public IGitAction<SubmoduleUpdateParameters> UpdateSubmodule
-		{
-			get { return _updateSubmodule; }
-		}
-
-		public IGitAction<VerifyTagsParameters> VerifyTags
-		{
-			get { return _verifyTags; }
-		}
-
-		public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig
-		{
-			get { return _queryConfig; }
-		}
-
-		public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter
-		{
-			get { return _queryConfigParameter; }
-		}
-
-		public IGitAction<AddConfigValueParameters> AddConfigValue
-		{
-			get { return _addConfigValue; }
-		}
-
-		public IGitAction<SetConfigValueParameters> SetConfigValue
-		{
-			get { return _setConfigValue; }
-		}
-
-		public IGitAction<UnsetConfigValueParameters> UnsetConfigValue
-		{
-			get { return _unsetConfigValue; }
-		}
-
-		public IGitAction<RenameConfigSectionParameters> RenameConfigSection
-		{
-			get { return _renameConfigSection; }
-		}
-
-		public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection
-		{
-			get { return _deleteConfigSection; }
-		}
+		public IGitAccessor GitAccessor => _gitCLI;
+
+		private CommandBuilder CommandBuilder => _gitCLI.CommandBuilder;
+
+		private OutputParser OutputParser => _gitCLI.OutputParser;
+
+		private ICommandExecutor CommandExecutor => _executor;
+
+		public IGitAction<AddFilesParameters> AddFiles => _addFiles;
+
+		public IGitAction<AddRemoteParameters> AddRemote => _addRemote;
+
+		public IGitAction<AddSubmoduleParameters> AddSubmodule => _addSubmodule;
+
+		public IGitAction<AppendNoteParameters> AppendNote => _appendNote;
+
+		public IGitAction<ApplyPatchParameters> ApplyPatch => _applyPatch;
+
+		public IGitAction<ArchiveParameters> Archive => _archive;
+
+		public IGitAction<CleanFilesParameters> CleanFiles => _cleanFiles;
+
+		public IGitAction<CheckoutParameters> Checkout => _checkout;
+
+		public IGitAction<CheckoutFilesParameters> CheckoutFiles => _checkoutFiles;
+
+		public IGitAction<CherryPickParameters> CherryPick => _cherryPick;
+
+		public IGitFunction<CommitParameters, string> Commit => _commit;
+
+		public IGitFunction<CountObjectsParameters, ObjectCountData> CountObjects => _countObjects;
+
+		public IGitAction<CreateBranchParameters> CreateBranch => _createBranch;
+
+		public IGitAction<CreateTagParameters> CreateTag => _createTag;
+
+		public IGitAction<DeleteBranchParameters> DeleteBranch => _deleteBranch;
+
+		public IGitAction<DeleteTagParameters> DeleteTag => _deleteTag;
+
+		public IGitFunction<DereferenceParameters, RevisionData> Dereference => _dereference;
+
+		public IGitFunction<DescribeParameters, string> Describe => _describe;
+
+		public IGitAction<FetchParameters> Fetch => _fetch;
+
+		public IGitFunction<FormatMergeMessageParameters, string> FormatMergeMessage => _formatMergeMessage;
+
+		public IGitAction<GarbageCollectParameters> GarbageCollect => _garbageCollect;
+
+		public IGitAction<MergeParameters> Merge => _merge;
+
+		public IGitAction<PruneRemoteParameters> PruneRemote => _pruneRemote;
+
+		public IGitAction<PullParameters> Pull => _pull;
+
+		public IGitFunction<PushParameters, IList<ReferencePushResult>> Push => _push;
+
+		public IGitFunction<QueryBlameParameters, BlameFile> QueryBlame => _queryBlame;
+
+		public IGitFunction<QueryBlobBytesParameters, byte[]> QueryBlobBytes => _queryBlobBytes;
+
+		public IGitFunction<QueryBranchParameters, BranchData> QueryBranch => _queryBranch;
+
+		public IGitFunction<QueryBranchesParameters, BranchesData> QueryBranches => _queryBranches;
+
+		public IGitFunction<PruneRemoteParameters, IList<string>> QueryBranchesToPrune => _queryBranchesToPrune;
+
+		public IGitFunction<QueryDiffParameters, Diff> QueryDiff => _queryDiff;
+
+		public IGitFunction<AddFilesParameters, IList<TreeFileData>> QueryFilesToAdd => _queryFilesToAdd;
+
+		public IGitFunction<RemoveFilesParameters, IList<string>> QueryFilesToRemove => _queryFilesToRemove;
+
+		public IGitFunction<CleanFilesParameters, IList<string>> QueryFilesToClean => _queryFilesToClean;
+
+		public IGitFunction<QueryNotesParameters, IList<NoteData>> QueryNotes => _queryNotes;
+
+		public IGitFunction<QueryObjectsParameters, string> QueryObjects => _queryObjects;
+
+		public IGitFunction<QueryRevisionParameters, RevisionData> QueryRevision => _queryRevision;
+
+		public IGitFunction<QueryRevisionsParameters, IList<RevisionData>> QueryRevisions => _queryRevisions;
+
+		public IGitFunction<QueryRevisionsParameters, IList<RevisionGraphData>> QueryRevisionGraph => _queryRevisionGraph;
+
+		public IGitFunction<QueryRevisionDiffParameters, byte[]> QueryRevisionPatch => _queryRevisionPatch;
+
+		public IGitFunction<QueryReferencesParameters, ReferencesData> QueryReferences => _queryReferences;
+
+		public IGitFunction<QueryReflogParameters, IList<ReflogRecordData>> QueryReflog => _queryReflog;
+
+		public IGitFunction<QueryRemoteParameters, RemoteData> QueryRemote => _queryRemote;
+
+		public IGitFunction<QueryRemoteReferencesParameters, IList<RemoteReferenceData>> QueryRemoteReferences => _queryRemoteReferences;
+
+		public IGitFunction<QueryRemotesParameters, IList<RemoteData>> QueryRemotes => _queryRemotes;
+
+		public IGitFunction<QueryRevisionDiffParameters, Diff> QueryRevisionDiff => _queryRevisionDiff;
+
+		public IGitFunction<QueryStashParameters, IList<StashedStateData>> QueryStash => _queryStash;
+
+		public IGitFunction<QueryRevisionDiffParameters, byte[]> QueryStashPatch => _queryStashPatch;
+
+		public IGitFunction<QueryStashTopParameters, RevisionData> QueryStashTop => _queryStashTop;
+
+		public IGitFunction<QueryRevisionDiffParameters, Diff> QueryStashDiff => _queryStashDiff;
+
+		public IGitFunction<QueryStatusParameters, StatusData> QueryStatus => _queryStatus;
+
+		public IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData> QuerySymbolicReference => _querySymbolicReference;
+
+		public IGitFunction<QueryTreeContentParameters, IList<TreeContentData>> QueryTreeContent => _queryTreeContent;
+
+		public IGitFunction<QueryTagParameters, TagData> QueryTag => _queryTag;
+
+		public IGitFunction<QueryTagMessageParameters, string> QueryTagMessage => _queryTagMessage;
+
+		public IGitFunction<QueryTagsParameters, IList<TagData>> QueryTags => _queryTags;
+
+		public IGitFunction<QueryUsersParameters, IList<UserData>> QueryUsers => _queryUsers;
+
+		public IGitAction<RemoveFilesParameters> RemoveFiles => _removeFiles;
+
+		public IGitAction<RemoveRemoteReferencesParameters> RemoveRemoteReferences => _removeRemoteReferences;
+
+		public IGitAction<RebaseParameters> Rebase => _rebase;
+
+		public IGitAction<RemoveRemoteParameters> RemoveRemote => _removeRemote;
+
+		public IGitAction<RenameBranchParameters> RenameBranch => _renameBranch;
+
+		public IGitAction<RenameRemoteParameters> RenameRemote => _renameRemote;
+
+		public IGitAction<ResetParameters> Reset => _reset;
+
+		public IGitAction<ResetFilesParameters> ResetFiles => _resetFiles;
+
+		public IGitAction<ResetBranchParameters> ResetBranch => _resetBranch;
+
+		public IGitAction<RevertParameters> Revert => _revert;
+
+		public IGitAction<RunMergeToolParameters> RunMergeTool => _runMergeTool;
+
+		public IGitAction<StashApplyParameters> StashApply => _stashApply;
+
+		public IGitAction<StashDropParameters> StashDrop => _stashDrop;
+
+		public IGitAction<StashClearParameters> StashClear => _stashClear;
+
+		public IGitAction<StashPopParameters> StashPop => _stashPop;
+
+		public IGitFunction<StashSaveParameters, bool> StashSave => _stashSave;
+
+		public IGitAction<StashToBranchParameters> StashToBranch => _stashToBranch;
+
+		public IGitAction<SubmoduleUpdateParameters> UpdateSubmodule => _updateSubmodule;
+
+		public IGitAction<VerifyTagsParameters> VerifyTags => _verifyTags;
+
+		public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig => _queryConfig;
+
+		public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter => _queryConfigParameter;
+
+		public IGitAction<AddConfigValueParameters> AddConfigValue => _addConfigValue;
+
+		public IGitAction<SetConfigValueParameters> SetConfigValue => _setConfigValue;
+
+		public IGitAction<UnsetConfigValueParameters> UnsetConfigValue => _unsetConfigValue;
+
+		public IGitAction<RenameConfigSectionParameters> RenameConfigSection => _renameConfigSection;
+
+		public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection => _deleteConfigSection;
 
 		#endregion
 	}

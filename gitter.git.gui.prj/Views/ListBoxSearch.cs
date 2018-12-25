@@ -31,7 +31,7 @@ namespace gitter.Git.Gui.Views
 
 		protected ListBoxSearch(CustomListBox listBox)
 		{
-			Verify.Argument.IsNotNull(listBox, "listBox");
+			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
 			_listBox = listBox;
 		}
@@ -84,14 +84,14 @@ namespace gitter.Git.Gui.Views
 
 		public bool First(T search)
 		{
-			Verify.Argument.IsNotNull(search, "search");
+			Verify.Argument.IsNotNull(search, nameof(search));
 
 			return Search(-1, search, 1);
 		}
 
 		public bool Current(T search)
 		{
-			Verify.Argument.IsNotNull(search, "search");
+			Verify.Argument.IsNotNull(search, nameof(search));
 
 			if(search.Text.Length == 0) return true;
 			if(ListBox.SelectedItems.Count == 0)
@@ -104,7 +104,7 @@ namespace gitter.Git.Gui.Views
 
 		public bool Next(T search)
 		{
-			Verify.Argument.IsNotNull(search, "search");
+			Verify.Argument.IsNotNull(search, nameof(search));
 
 			if(search.Text.Length == 0) return true;
 			if(ListBox.SelectedItems.Count == 0)
@@ -117,7 +117,7 @@ namespace gitter.Git.Gui.Views
 
 		public bool Previous(T search)
 		{
-			Verify.Argument.IsNotNull(search, "search");
+			Verify.Argument.IsNotNull(search, nameof(search));
 
 			if(search.Text.Length == 0) return true;
 			if(ListBox.SelectedItems.Count == 0) return Search(-1, search, 1);

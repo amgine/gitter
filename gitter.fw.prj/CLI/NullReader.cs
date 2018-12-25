@@ -46,15 +46,12 @@ namespace gitter.Framework.CLI
 
 		#region IOutputReceiver Members
 
-		public bool IsInitialized
-		{
-			get { return _stream != null; }
-		}
+		public bool IsInitialized =>  _stream != null;
 
 		public void Initialize(Process process, StreamReader reader)
 		{
-			Verify.Argument.IsNotNull(process, "process");
-			Verify.Argument.IsNotNull(reader, "reader");
+			Verify.Argument.IsNotNull(process, nameof(process));
+			Verify.Argument.IsNotNull(reader, nameof(reader));
 			Verify.State.IsFalse(IsInitialized);
 
 			_stream	= reader.BaseStream;

@@ -27,7 +27,6 @@ namespace gitter.Git.Gui.Dialogs
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
-	using gitter.Framework.Options;
 
 	using gitter.Git.Gui.Controls;
 
@@ -36,19 +35,13 @@ namespace gitter.Git.Gui.Dialogs
 	[ToolboxItem(false)]
 	public partial class RevertDialog : GitDialogBase, IExecutableDialog
 	{
-		#region Data
-
-		private IRevisionPointer _revisionPointer;
-
-		#endregion
-
 		#region .ctor
 
 		public RevertDialog(IRevisionPointer revisionPointer)
 		{
-			Verify.Argument.IsValidRevisionPointer(revisionPointer, "revisionPointer");
+			Verify.Argument.IsValidRevisionPointer(revisionPointer, nameof(revisionPointer));
 
-			_revisionPointer = revisionPointer;
+			RevisionPointer = revisionPointer;
 
 			InitializeComponent();
 
@@ -61,7 +54,7 @@ namespace gitter.Git.Gui.Dialogs
 			_chkNoCommit.Text = Resources.StrsNoCommit;
 			ToolTipService.Register(_chkNoCommit, Resources.TipRevertNoCommit);
 
-			_txtRevision.Text = _revisionPointer.Pointer;
+			_txtRevision.Text = RevisionPointer.Pointer;
 
 			GitterApplication.FontManager.InputFont.Apply(_txtRevision);
 
@@ -109,15 +102,9 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrRevert; }
-		}
+		protected override string ActionVerb => Resources.StrRevert;
 
-		public IRevisionPointer RevisionPointer
-		{
-			get { return _revisionPointer; }
-		}
+		public IRevisionPointer RevisionPointer { get; }
 
 		public bool NoCommit
 		{
@@ -146,7 +133,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				if(value == 0)
 				{
@@ -185,8 +172,8 @@ namespace gitter.Git.Gui.Dialogs
 
 		public bool Execute()
 		{
-			int mainline	= MainlineParentCommit;
-			bool noCommit	= NoCommit;
+			int mainline  = MainlineParentCommit;
+			bool noCommit = NoCommit;
 			try
 			{
 				using(this.ChangeCursor(Cursors.WaitCursor))

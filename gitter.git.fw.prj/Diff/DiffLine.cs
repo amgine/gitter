@@ -22,7 +22,6 @@ namespace gitter.Git
 {
 	using System;
 	using System.Text;
-	using System.Collections.Generic;
 
 	/// <summary>Represents a single diff line.</summary>
 	public sealed class DiffLine : ICloneable
@@ -47,8 +46,8 @@ namespace gitter.Git
 		/// <param name="text">Line text.</param>
 		public DiffLine(DiffLineState state, DiffLineState[] states, int[] nums, string text, string ending = LineEnding.Lf)
 		{
-			Verify.Argument.IsNotNull(states, "states");
-			Verify.Argument.IsNotNull(nums, "nums");
+			Verify.Argument.IsNotNull(states, nameof(states));
+			Verify.Argument.IsNotNull(nums, nameof(nums));
 
 			_charPositions = -1;
 			_text	= text;
@@ -60,25 +59,13 @@ namespace gitter.Git
 
 		#endregion
 
-		public DiffLineState State
-		{
-			get { return _state; }
-		}
+		public DiffLineState State => _state;
 
-		public DiffLineState[] States
-		{
-			get { return _states; }
-		}
+		public DiffLineState[] States => _states;
 
-		public string Text
-		{
-			get { return _text; }
-		}
+		public string Text => _text;
 
-		public string Ending
-		{
-			get { return _ending; }
-		}
+		public string Ending => _ending;
 
 		public int GetCharacterPositions(int tabSize)
 		{
@@ -100,10 +87,7 @@ namespace gitter.Git
 			return _charPositions;
 		}
 
-		public int[] Nums
-		{
-			get { return _nums; }
-		}
+		public int[] Nums => _nums;
 
 		public int MaxLineNum
 		{
@@ -118,10 +102,7 @@ namespace gitter.Git
 			}
 		}
 
-		internal void ToString(StringBuilder sb)
-		{
-			sb.Append(ToString());
-		}
+		internal void ToString(StringBuilder sb) => sb.Append(ToString());
 
 		public override string ToString()
 		{
@@ -150,10 +131,7 @@ namespace gitter.Git
 				_ending);
 		}
 
-		object ICloneable.Clone()
-		{
-			return Clone();
-		}
+		object ICloneable.Clone() => Clone();
 
 		#endregion
 	}

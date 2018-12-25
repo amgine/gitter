@@ -43,7 +43,7 @@ namespace gitter.Framework.Controls
 		/// <param name="column">Host <see cref="DateColumn"/>.</param>
 		public DateColumnExtender(DateColumn column)
 		{
-			Verify.Argument.IsNotNull(column, "column");
+			Verify.Argument.IsNotNull(column, nameof(column));
 
 			_column = column;
 

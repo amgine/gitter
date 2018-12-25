@@ -30,15 +30,14 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class RevisionsMenu : ContextMenuStrip
 	{
-		private readonly IList<Revision> _revisions;
 
 		/// <summary>Create <see cref="RevisionsMenu"/>.</summary>
 		/// <param name="revisions">List of related revisions.</param>
 		public RevisionsMenu(IList<Revision> revisions)
 		{
-			Verify.Argument.IsNotNull(revisions, "revisions");
+			Verify.Argument.IsNotNull(revisions, nameof(revisions));
 
-			_revisions = revisions;
+			Revisions = revisions;
 
 			//Items.Add(GuiItemFactory.GetCherryPickItem<ToolStripMenuItem>(revisions));
 			//Items.Add(GuiItemFactory.GetRevertItem<ToolStripMenuItem>(revisions));
@@ -49,9 +48,6 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		public IList<Revision> Revisions
-		{
-			get { return _revisions; }
-		}
+		public IList<Revision> Revisions { get; }
 	}
 }

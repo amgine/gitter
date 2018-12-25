@@ -37,7 +37,7 @@ namespace gitter.Git.Gui.Views
 		public CommitViewFactory(GuiProvider guiProvider)
 			: base(Guids.CommitViewGuid, Resources.StrCommit, CachedResources.Bitmaps["ImgCommit"])
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -55,7 +55,7 @@ namespace gitter.Git.Gui.Views
 		public ConfigViewFactory(GuiProvider guiProvider)
 			: base(Guids.ConfigViewGuid, Resources.StrConfig, CachedResources.Bitmaps["ImgConfiguration"])
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -73,7 +73,7 @@ namespace gitter.Git.Gui.Views
 		public GitViewFactory(GuiProvider guiProvider)
 			: base(Guids.GitViewGuid, Resources.StrGit, CachedResources.Bitmaps["ImgGit"])
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -91,7 +91,7 @@ namespace gitter.Git.Gui.Views
 		public HistoryViewFactory(GuiProvider guiProvider)
 			: base(Guids.HistoryViewGuid, Resources.StrHistory, CachedResources.Bitmaps["ImgHistory"], true)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -109,7 +109,7 @@ namespace gitter.Git.Gui.Views
 		public PathHistoryViewFactory(GuiProvider guiProvider)
 			: base(Guids.PathHistoryViewGuid, Resources.StrHistory, CachedResources.Bitmaps["ImgFileHistory"], false)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -127,7 +127,7 @@ namespace gitter.Git.Gui.Views
 		public ReflogViewFactory(GuiProvider guiProvider)
 			: base(Guids.ReflogViewGuid, Resources.StrReflog, CachedResources.Bitmaps["ImgViewReflog"], false)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -145,7 +145,7 @@ namespace gitter.Git.Gui.Views
 		public MaintenanceToolFactory(GuiProvider guiProvider)
 			: base(Guids.MaintenanceViewGuid, Resources.StrMaintenance, CachedResources.Bitmaps["ImgMaintenance"])
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -163,7 +163,7 @@ namespace gitter.Git.Gui.Views
 		public ReferencesViewFactory(GuiProvider guiProvider)
 			: base(Guids.ReferencesViewGuid, Resources.StrReferences, CachedResources.Bitmaps["ImgBranch"], true)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
@@ -182,7 +182,7 @@ namespace gitter.Git.Gui.Views
 		public RemotesViewFactory(GuiProvider guiProvider)
 			: base(Guids.RemotesViewGuid, Resources.StrRemotes, CachedResources.Bitmaps["ImgRemote"], true)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
@@ -201,7 +201,7 @@ namespace gitter.Git.Gui.Views
 		public RemoteViewFactory(GuiProvider guiProvider)
 			: base(Guids.RemoteViewGuid, Resources.StrRemote, CachedResources.Bitmaps["ImgRemote"], false)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
@@ -220,7 +220,7 @@ namespace gitter.Git.Gui.Views
 		public StashViewFactory(GuiProvider guiProvider)
 			: base(Guids.StashViewGuid, Resources.StrStash, CachedResources.Bitmaps["ImgStash"], true)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
@@ -239,7 +239,7 @@ namespace gitter.Git.Gui.Views
 		public SubmodulesViewFactory(GuiProvider guiProvider)
 			: base(Guids.SubmodulesViewGuid, Resources.StrSubmodules, CachedResources.Bitmaps["ImgSubmodule"], true)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.BottomAutoHide;
@@ -258,7 +258,7 @@ namespace gitter.Git.Gui.Views
 		public ContributorsViewFactory(GuiProvider guiProvider)
 			: base(Guids.ContributorsViewGuid, Resources.StrContributors, CachedResources.Bitmaps["ImgUsers"], true)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -276,7 +276,7 @@ namespace gitter.Git.Gui.Views
 		public TreeViewFactory(GuiProvider guiProvider)
 			: base(Guids.TreeViewGuid, Resources.StrWorkingTree, CachedResources.Bitmaps["ImgFolder"], false)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -294,7 +294,7 @@ namespace gitter.Git.Gui.Views
 		public DiffViewFactory(GuiProvider guiProvider)
 			: base(Guids.DiffViewGuid, Resources.StrDiff, CachedResources.Bitmaps["ImgDiff"], false)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -312,7 +312,7 @@ namespace gitter.Git.Gui.Views
 		public BlameViewFactory(GuiProvider guiProvider)
 			: base(Guids.BlameViewGuid, Resources.StrBlame, CachedResources.Bitmaps["ImgBlame"], false)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 		}
@@ -330,7 +330,7 @@ namespace gitter.Git.Gui.Views
 		public ContextualDiffViewFactory(GuiProvider guiProvider)
 			: base(Guids.ContextualDiffViewGuid, Resources.StrContextualDiff, CachedResources.Bitmaps["ImgDiff"], true)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			DefaultViewPosition = ViewPosition.SecondaryDocumentHost;

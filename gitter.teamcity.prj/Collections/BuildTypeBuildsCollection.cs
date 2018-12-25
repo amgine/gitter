@@ -29,7 +29,7 @@ namespace gitter.TeamCity
 		internal BuildTypeBuildsCollection(BuildType buildType, BuildsCollection builds)
 			: base(builds)
 		{
-			Verify.Argument.IsNotNull(buildType, "buildType");
+			Verify.Argument.IsNotNull(buildType, nameof(buildType));
 
 			_buildType = buildType;
 		}

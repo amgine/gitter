@@ -58,10 +58,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected virtual void OnViewModeChanged(EventArgs e)
-		{
-			var handler = (EventHandler)Events[ViewModeChangedEvent];
-			if(handler != null) handler(this, e);
-		}
+			=> ((EventHandler)Events[ViewModeChangedEvent])?.Invoke(this, e);
 
 		#endregion
 
@@ -83,10 +80,7 @@ namespace gitter.Git.Gui.Views
 
 		#region Properties
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
 		public IDiffSource DiffSource
 		{
@@ -388,10 +382,7 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgDiff"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgDiff"];
 
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{

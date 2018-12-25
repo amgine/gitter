@@ -46,10 +46,10 @@ namespace gitter.Git.Gui.Controls
 
 		public SplitDiffBinding(IDiffSource diffSource, DiffViewer diffViewerHeaders, DiffViewer diffViewerFiles, DiffOptions diffOptions)
 		{
-			Verify.Argument.IsNotNull(diffSource, "diffSource");
-			Verify.Argument.IsNotNull(diffViewerHeaders, "diffViewerHeaders");
-			Verify.Argument.IsNotNull(diffViewerFiles, "diffViewerFiles");
-			Verify.Argument.IsNotNull(diffOptions, "diffOptions");
+			Verify.Argument.IsNotNull(diffSource, nameof(diffSource));
+			Verify.Argument.IsNotNull(diffViewerHeaders, nameof(diffViewerHeaders));
+			Verify.Argument.IsNotNull(diffViewerFiles, nameof(diffViewerFiles));
+			Verify.Argument.IsNotNull(diffOptions, nameof(diffOptions));
 
 			_diffSource = diffSource;
 			_diffViewerHeaders = diffViewerHeaders;
@@ -85,7 +85,7 @@ namespace gitter.Git.Gui.Controls
 			get { return _diffOptions; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				_diffOptions = value;
 			}

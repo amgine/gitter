@@ -586,7 +586,7 @@ namespace gitter.Framework.Controls
 
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			section.SetValue("Visible", _isVisible);
 			if(_sizeMode == ColumnSizeMode.Sizeable)
@@ -602,7 +602,7 @@ namespace gitter.Framework.Controls
 
 		public void LoadFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			IsVisible = section.GetValue("Visible", _isVisible);
 			if(_sizeMode != ColumnSizeMode.Fill)

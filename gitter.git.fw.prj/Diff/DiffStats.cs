@@ -21,8 +21,6 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Text;
 
 	/// <summary>Diff stats (line counters).</summary>
 	public sealed class DiffStats : ICloneable
@@ -50,10 +48,10 @@ namespace gitter.Git
 		/// <param name="headerLinesCount">Header lines count.</param>
 		public DiffStats(int addedLinesCount, int removedLinesCount, int contextLinesCount, int headerLinesCount)
 		{
-			Verify.Argument.IsNotNegative(addedLinesCount, "addedLinesCount");
-			Verify.Argument.IsNotNegative(removedLinesCount, "removedLinesCount");
-			Verify.Argument.IsNotNegative(contextLinesCount, "contextLinesCount");
-			Verify.Argument.IsNotNegative(headerLinesCount, "headerLinesCount");
+			Verify.Argument.IsNotNegative(addedLinesCount, nameof(addedLinesCount));
+			Verify.Argument.IsNotNegative(removedLinesCount, nameof(removedLinesCount));
+			Verify.Argument.IsNotNegative(contextLinesCount, nameof(contextLinesCount));
+			Verify.Argument.IsNotNegative(headerLinesCount, nameof(headerLinesCount));
 
 			_addedLinesCount = addedLinesCount;
 			_removedLinesCount = removedLinesCount;
@@ -71,7 +69,7 @@ namespace gitter.Git
 			get { return _addedLinesCount; }
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				_addedLinesCount = value;
 			}
@@ -83,7 +81,7 @@ namespace gitter.Git
 			get { return _removedLinesCount; }
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				_removedLinesCount = value;
 			}
@@ -101,7 +99,7 @@ namespace gitter.Git
 			get { return _contextLinesCount; }
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				_contextLinesCount = value;
 			}
@@ -119,7 +117,7 @@ namespace gitter.Git
 
 		public void Add(DiffStats stats)
 		{
-			Verify.Argument.IsNotNull(stats, "stats");
+			Verify.Argument.IsNotNull(stats, nameof(stats));
 
 			_addedLinesCount += stats._addedLinesCount;
 			_removedLinesCount += stats._removedLinesCount;
@@ -129,7 +127,7 @@ namespace gitter.Git
 
 		public void Subtract(DiffStats stats)
 		{
-			Verify.Argument.IsNotNull(stats, "stats");
+			Verify.Argument.IsNotNull(stats, nameof(stats));
 
 			_addedLinesCount -= stats._addedLinesCount;
 			_removedLinesCount -= stats._removedLinesCount;
@@ -185,15 +183,15 @@ namespace gitter.Git
 
 		public void Reset(int addedLinesCount, int removedLinesCount, int contextLinesCount, int headerLinesCount)
 		{
-			Verify.Argument.IsNotNegative(addedLinesCount, "addedLinesCount");
-			Verify.Argument.IsNotNegative(removedLinesCount, "removedLinesCount");
-			Verify.Argument.IsNotNegative(contextLinesCount, "contextLinesCount");
-			Verify.Argument.IsNotNegative(headerLinesCount, "headerLinesCount");
+			Verify.Argument.IsNotNegative(addedLinesCount, nameof(addedLinesCount));
+			Verify.Argument.IsNotNegative(removedLinesCount, nameof(removedLinesCount));
+			Verify.Argument.IsNotNegative(contextLinesCount, nameof(contextLinesCount));
+			Verify.Argument.IsNotNegative(headerLinesCount, nameof(headerLinesCount));
 
-			_addedLinesCount = addedLinesCount;
+			_addedLinesCount   = addedLinesCount;
 			_removedLinesCount = removedLinesCount;
 			_contextLinesCount = contextLinesCount;
-			_headerLinesCount = headerLinesCount;
+			_headerLinesCount  = headerLinesCount;
 		}
 
 		#endregion
@@ -209,10 +207,7 @@ namespace gitter.Git
 				_headerLinesCount);
 		}
 
-		object ICloneable.Clone()
-		{
-			return Clone();
-		}
+		object ICloneable.Clone() => Clone();
 
 		#endregion
 	}

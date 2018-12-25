@@ -30,34 +30,30 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class RemoteTagMenu : ContextMenuStrip
 	{
-		private readonly RemoteRepositoryTag _remoteTag;
 
 		/// <summary>Create <see cref="RemoteBranchMenu"/>.</summary>
 		/// <param name="remoteTag">Remote branch, for which menu is generated.</param>
 		public RemoteTagMenu(RemoteRepositoryTag remoteTag)
 		{
-			Verify.Argument.IsNotNull(remoteTag, "remoteTag");
-			Verify.Argument.IsFalse(remoteTag.IsDeleted, "remote",
+			Verify.Argument.IsNotNull(remoteTag, nameof(remoteTag));
+			Verify.Argument.IsFalse(remoteTag.IsDeleted, nameof(remoteTag),
 				Resources.ExcObjectIsDeleted.UseAsFormat("RemoteTag"));
 
-			_remoteTag = remoteTag;
+			RemoteTag = remoteTag;
 
-			Items.Add(GuiItemFactory.GetRemoveRemoteTagItem<ToolStripMenuItem>(_remoteTag, "{0}"));
+			Items.Add(GuiItemFactory.GetRemoveRemoteTagItem<ToolStripMenuItem>(RemoteTag, "{0}"));
 
 			var copyToClipboardItem = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
-				Resources.StrName, _remoteTag.Name));
+				Resources.StrName, RemoteTag.Name));
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
-				Resources.StrFullName, _remoteTag.FullName));
+				Resources.StrFullName, RemoteTag.FullName));
 			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(
-				Resources.StrPosition, _remoteTag.Hash.ToString()));
+				Resources.StrPosition, RemoteTag.Hash.ToString()));
 			Items.Add(copyToClipboardItem);
 		}
 
 		/// <summary>Remote tag, for which menu is generated.</summary>
-		public RemoteRepositoryTag RemoteTag
-		{
-			get { return _remoteTag; }
-		}
+		public RemoteRepositoryTag RemoteTag { get; }
 	}
 }

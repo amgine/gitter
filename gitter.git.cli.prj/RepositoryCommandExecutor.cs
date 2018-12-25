@@ -34,12 +34,6 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#endregion
 
-		#region Data
-
-		private readonly string _workingDirectory;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="RepositoryCommandExecutor"/> class.</summary>
@@ -48,19 +42,16 @@ namespace gitter.Git.AccessLayer.CLI
 		public RepositoryCommandExecutor(ICliOptionsProvider cliOptionsProvider, string workingDirectory)
 			: base(cliOptionsProvider)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(workingDirectory, "workingDirectory");
+			Verify.Argument.IsNeitherNullNorWhitespace(workingDirectory, nameof(workingDirectory));
 
-			_workingDirectory   = workingDirectory;
+			WorkingDirectory   = workingDirectory;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string WorkingDirectory
-		{
-			get { return _workingDirectory; }
-		}
+		public string WorkingDirectory { get; }
 
 		#endregion
 

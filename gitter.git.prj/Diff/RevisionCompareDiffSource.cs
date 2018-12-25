@@ -43,8 +43,8 @@ namespace gitter.Git
 
 		public RevisionCompareDiffSource(IRevisionPointer revision1, IRevisionPointer revision2)
 		{
-			Verify.Argument.IsNotNull(revision1, "revision1");
-			Verify.Argument.IsNotNull(revision2, "revision2");
+			Verify.Argument.IsNotNull(revision1, nameof(revision1));
+			Verify.Argument.IsNotNull(revision2, nameof(revision2));
 			Verify.Argument.IsTrue(revision1.Repository == revision2.Repository,
 				"revision2", "Cannot compare objects from different repositories.");
 

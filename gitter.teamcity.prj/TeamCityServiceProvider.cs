@@ -64,7 +64,7 @@ namespace gitter.TeamCity
 		/// <param name="section">Provider configuration section.</param>
 		public bool LoadFor(IWorkingEnvironment environment, Section section)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			environment.ViewDockService.RegisterFactory(new BuildTypeBuildsViewFactory());
 

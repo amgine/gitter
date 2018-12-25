@@ -34,7 +34,7 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		protected void SetupReferenceNameInputBox(TextBox textBox, ReferenceType referenceType)
 		{
-			Verify.Argument.IsNotNull(textBox, "textBox");
+			Verify.Argument.IsNotNull(textBox, nameof(textBox));
 
 			textBox.KeyPress += OnRevisionInputBoxKeyPress;
 			textBox.Tag = referenceType;

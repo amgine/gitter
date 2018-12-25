@@ -98,7 +98,7 @@ namespace gitter.Git
 
 		public Diff GetDiff(DiffOptions options)
 		{
-			Verify.Argument.IsNotNull(options, "options");
+			Verify.Argument.IsNotNull(options, nameof(options));
 			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
 
 			return GetDiffCore(options);
@@ -106,7 +106,7 @@ namespace gitter.Git
 
 		public Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(options, "options");
+			Verify.Argument.IsNotNull(options, nameof(options));
 			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
 
 			if(progress != null)

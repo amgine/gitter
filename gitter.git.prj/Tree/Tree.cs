@@ -44,7 +44,7 @@ namespace gitter.Git
 
 		public static Task<Tree> GetAsync(Repository repository, string treeHash, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			if(progress != null)
 			{
@@ -70,7 +70,7 @@ namespace gitter.Git
 		private Tree(Repository repository, string treeHash, bool load)
 			: base(repository)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(treeHash, "treeHash");
+			Verify.Argument.IsNeitherNullNorWhitespace(treeHash, nameof(treeHash));
 
 			_treeHash = treeHash;
 			var strRoot = repository.WorkingDirectory;

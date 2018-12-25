@@ -35,21 +35,15 @@ namespace gitter.Git.Gui.Dialogs
 	[ToolboxItem(false)]
 	public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 	{
-		#region Data
-
-		private readonly IRevisionPointer _revisionPointer;
-
-		#endregion
-
 		#region .ctor
 
 		public CherryPickDialog(IRevisionPointer revisionPointer)
 		{
-			Verify.Argument.IsValidRevisionPointer(revisionPointer, "revisionPointer");
+			Verify.Argument.IsValidRevisionPointer(revisionPointer, nameof(revisionPointer));
 
 			InitializeComponent();
 
-			_revisionPointer = revisionPointer;
+			RevisionPointer = revisionPointer;
 
 			Text = Resources.StrCherryPickCommit;
 
@@ -107,15 +101,9 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		public IRevisionPointer RevisionPointer
-		{
-			get { return _revisionPointer; }
-		}
+		public IRevisionPointer RevisionPointer { get; }
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCherryPick; }
-		}
+		protected override string ActionVerb => Resources.StrCherryPick;
 
 		public bool NoCommit
 		{
@@ -144,7 +132,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				if(value == 0)
 				{

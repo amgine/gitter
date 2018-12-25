@@ -50,8 +50,7 @@ namespace gitter.Git
 		{
 			Assert.IsNotNull(remote);
 
-			var handler = Renamed;
-			if(handler != null) handler(this, new RemoteEventArgs(remote));
+			Renamed?.Invoke(this, new RemoteEventArgs(remote));
 		}
 
 		/// <summary>Fetch completed.</summary>
@@ -61,10 +60,7 @@ namespace gitter.Git
 		/// <param name="remote">Remote.</param>
 		/// <param name="changes">Reference changes.</param>
 		internal void OnFetchCompleted(Remote remote, ReferenceChange[] changes)
-		{
-			var handler = FetchCompleted;
-			if(handler != null) handler(this, new FetchCompletedEventArgs(remote, changes));
-		}
+			=> FetchCompleted?.Invoke(this, new FetchCompletedEventArgs(remote, changes));
 
 		/// <summary>Pull completed.</summary>
 		public event EventHandler<PullCompletedEventArgs> PullCompleted;
@@ -73,10 +69,7 @@ namespace gitter.Git
 		/// <param name="remote">Remote.</param>
 		/// <param name="changes">Reference changes.</param>
 		internal void OnPullCompleted(Remote remote, ReferenceChange[] changes)
-		{
-			var handler = PullCompleted;
-			if(handler != null) handler(this, new PullCompletedEventArgs(remote, changes));
-		}
+			=> PullCompleted?.Invoke(this, new PullCompletedEventArgs(remote, changes));
 
 		/// <summary>Prune completed.</summary>
 		public event EventHandler<PruneCompletedEventArgs> PruneCompleted;
@@ -85,10 +78,7 @@ namespace gitter.Git
 		/// <param name="remote">Remote.</param>
 		/// <param name="changes">Reference changes.</param>
 		internal void OnPruneCompleted(Remote remote, ReferenceChange[] changes)
-		{
-			var handler = PruneCompleted;
-			if(handler != null) handler(this, new PruneCompletedEventArgs(remote, changes));
-		}
+			=> PruneCompleted?.Invoke(this, new PruneCompletedEventArgs(remote, changes));
 
 		#endregion
 
@@ -105,10 +95,10 @@ namespace gitter.Git
 
 		public Remote AddRemote(string name, string url, bool fetch, bool mirror, TagFetchMode tagFetchMode)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Remote"));
-			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 
 			Repository.Accessor.AddRemote.Invoke(
 				new AddRemoteParameters(name, url)
@@ -135,9 +125,9 @@ namespace gitter.Git
 		/// <param name="name">New remote name.</param>
 		internal void RenameRemote(Remote remote, string name)
 		{
-			Verify.Argument.IsValidGitObject(remote, Repository, "remote");
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
-			Verify.Argument.IsFalse(ContainsObjectName(name), "name",
+			Verify.Argument.IsValidGitObject(remote, Repository, nameof(remote));
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Remote"));
 
 			var oldName = remote.Name;
@@ -176,8 +166,8 @@ namespace gitter.Git
 		/// <param name="remote">Removed remote.</param>
 		internal void RemoveRemote(Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
-			Verify.Argument.IsValidGitObject(remote, Repository, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
+			Verify.Argument.IsValidGitObject(remote, Repository, nameof(remote));
 
 			var name = remote.Name;
 			using(Repository.Monitor.BlockNotifications(
@@ -228,7 +218,7 @@ namespace gitter.Git
 
 		public Task FetchAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(progress, "progress");
+			Verify.Argument.IsNotNull(progress, nameof(progress));
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			return RemotesUtility.FetchOrPullAsync(Repository, null, false, progress, cancellationToken);
@@ -247,7 +237,7 @@ namespace gitter.Git
 
 		public Task PullAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(progress, "progress");
+			Verify.Argument.IsNotNull(progress, nameof(progress));
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			return RemotesUtility.FetchOrPullAsync(Repository, null, true, progress, cancellationToken);
@@ -260,9 +250,9 @@ namespace gitter.Git
 		/// <summary>Send local objects to remote repository.</summary>
 		public void PushTo(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
-			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
-			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, nameof(branches));
+			Verify.Argument.IsTrue(branches.Count != 0, nameof(branches),
 				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
 			var branchNames = new List<string>(branches.Count);
@@ -299,7 +289,7 @@ namespace gitter.Git
 		/// <summary>Send local objects to remote repository.</summary>
 		public Task PushToAsync(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(url, "url");
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 
 			return RemotesUtility.PushAsync(Repository, url, branches, forceOverwrite, thinPack, sendTags, progress, cancellationToken);
 		}

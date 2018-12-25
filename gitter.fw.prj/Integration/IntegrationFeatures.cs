@@ -60,7 +60,7 @@ namespace gitter.Framework
 
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			foreach(var feature in _features.Values)
 			{
@@ -74,7 +74,7 @@ namespace gitter.Framework
 
 		public void LoadFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			if(section != null)
 			{

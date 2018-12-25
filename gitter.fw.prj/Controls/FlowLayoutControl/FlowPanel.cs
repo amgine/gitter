@@ -209,7 +209,7 @@ namespace gitter.Framework.Controls
 
 		public void ShowContextMenu(ContextMenuStrip menu, int x, int y)
 		{
-			Verify.Argument.IsNotNull(menu, "menu");
+			Verify.Argument.IsNotNull(menu, nameof(menu));
 			Verify.State.IsTrue(FlowControl != null);
 
 			var bounds = FlowControl.GetPanelBounds(this);

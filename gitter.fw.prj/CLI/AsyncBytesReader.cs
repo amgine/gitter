@@ -47,7 +47,7 @@ namespace gitter.Framework.CLI
 		/// <param name="bufferSize">Size of the internal buffer.</param>
 		public AsyncBytesReader(int bufferSize)
 		{
-			Verify.Argument.IsPositive(bufferSize, "bufferSize");
+			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
 
 			_bufferSize		= bufferSize;
 			_bufferChain	= new LinkedList<byte[]>();
@@ -65,18 +65,15 @@ namespace gitter.Framework.CLI
 
 		/// <summary>Gets a value indicating whether this instance is initialized.</summary>
 		/// <value><c>true</c> if this instance is initialized; otherwise, <c>false</c>.</value>
-		public bool IsInitialized
-		{
-			get { return _stream != null; }
-		}
+		public bool IsInitialized => _stream != null;
 
 		/// <summary>Initializes output reader.</summary>
 		/// <param name="process">Process to read from.</param>
 		/// <param name="sr">StreamReader to read from.</param>
 		public void Initialize(Process process, StreamReader reader)
 		{
-			Verify.Argument.IsNotNull(process, "process");
-			Verify.Argument.IsNotNull(reader, "reader");
+			Verify.Argument.IsNotNull(process, nameof(process));
+			Verify.Argument.IsNotNull(reader, nameof(reader));
 			Verify.State.IsFalse(IsInitialized);
 
 			_stream = reader.BaseStream;
@@ -122,10 +119,7 @@ namespace gitter.Framework.CLI
 		#region Public
 
 		/// <summary>Returns the number of collected bytes.</summary>
-		public int Length
-		{
-			get { return _length; }
-		}
+		public int Length => _length;
 
 		/// <summary>Returns collected bytes.</summary>
 		/// <returns>Collected bytes.</returns>

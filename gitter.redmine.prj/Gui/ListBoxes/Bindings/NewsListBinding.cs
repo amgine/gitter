@@ -44,8 +44,8 @@ namespace gitter.Redmine.Gui.ListBoxes
 
 		public NewsListBinding(RedmineServiceContext serviceContext, NewsListBox newsListBox)
 		{
-			Verify.Argument.IsNotNull(serviceContext, "serviceContext");
-			Verify.Argument.IsNotNull(newsListBox, "newsListBox");
+			Verify.Argument.IsNotNull(serviceContext, nameof(serviceContext));
+			Verify.Argument.IsNotNull(newsListBox, nameof(newsListBox));
 
 			_serviceContext = serviceContext;
 			_newsListBox    = newsListBox;

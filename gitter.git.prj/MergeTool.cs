@@ -28,15 +28,6 @@ namespace gitter.Git
 	/// <summary>Describes an external merge tool used by 'git mergetool' command.</summary>
 	public sealed class MergeTool : INamedObject
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly string _url;
-		private readonly bool _supportsWin;
-		private readonly bool _suuportsLinux;
-
-		#endregion
-
 		#region Static
 
 		public static readonly MergeTool kdiff3;
@@ -75,10 +66,7 @@ namespace gitter.Git
 			get { return _tools.Values; }
 		}
 
-		public static int KnownToolsCount
-		{
-			get { return _tools.Count; }
-		}
+		public static int KnownToolsCount => _tools.Count;
 
 		#endregion
 
@@ -106,48 +94,33 @@ namespace gitter.Git
 
 		internal MergeTool(string name)
 		{
-			_name = name;
+			Name = name;
 		}
 
 		private MergeTool(string name, string url, bool supportsWin, bool supportsLinux)
 		{
-			_name = name;
-			_url = url;
-			_supportsWin = supportsWin;
-			_suuportsLinux = supportsLinux;
+			Name = name;
+			DownloadUrl = url;
+			SupportsWin = supportsWin;
+			SupportsLinux = supportsLinux;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public string DownloadUrl
-		{
-			get { return _url; }
-		}
+		public string DownloadUrl { get; }
 
-		public bool SupportsWin
-		{
-			get { return _supportsWin; }
-		}
+		public bool SupportsWin { get; }
 
-		public bool SupportsLinux
-		{
-			get { return _suuportsLinux; }
-		}
+		public bool SupportsLinux { get; }
 
 		#endregion
 
 		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
 		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
-		public override string ToString()
-		{
-			return Name;
-		}
+		public override string ToString() => Name;
 	}
 }

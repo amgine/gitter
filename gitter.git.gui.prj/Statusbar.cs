@@ -100,15 +100,13 @@ namespace gitter.Git.Gui
 
 		private readonly StatusToolTip _statusToolTip;
 
-		private bool _isDisposed;
-
 		#endregion
 
 		#region .ctor
 
 		public Statusbar(GuiProvider guiProvider)
 		{
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_guiProvider = guiProvider;
 			_leftAlignedItems = new ToolStripItem[]
@@ -199,10 +197,7 @@ namespace gitter.Git.Gui
 
 		#endregion
 
-		private ISynchronizeInvoke SynchronizeInvoke
-		{
-			get { return _guiProvider.Environment; }
-		}
+		private ISynchronizeInvoke SynchronizeInvoke => _guiProvider.Environment;
 
 		private static Point GetToolTipPosition(CustomToolTip toolTip, ToolStripItem label)
 		{
@@ -923,38 +918,19 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public GuiProvider Gui
-		{
-			get { return _guiProvider; }
-		}
+		public GuiProvider Gui => _guiProvider;
 
-		public ToolStripItem[] LeftAlignedItems
-		{
-			get { return _leftAlignedItems; }
-		}
+		public ToolStripItem[] LeftAlignedItems => _leftAlignedItems;
 
-		public ToolStripItem[] RightAlignedItems
-		{
-			get { return _rightAlignedItems; }
-		}
+		public ToolStripItem[] RightAlignedItems => _rightAlignedItems;
 
-		public ToolStripItem HeadLabel
-		{
-			get { return _headLabel; }
-		}
+		public ToolStripItem HeadLabel => _headLabel;
 
-		public ToolStripItem RemoteLabel
-		{
-			get { return _remoteLabel; }
-		}
+		public ToolStripItem RemoteLabel => _remoteLabel;
 
 		#region IDisposable
 
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		public void Dispose()
 		{

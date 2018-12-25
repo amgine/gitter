@@ -32,7 +32,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private readonly string _output;
 		private readonly string _error;
-		private readonly int _processExitCode;
+		private readonly int _exitCode;
 
 		#endregion
 
@@ -44,9 +44,9 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <param name="exitCode">Process exit code.</param>
 		public GitOutput(string output, string error, int exitCode)
 		{
-			_output = output;
-			_error = error;
-			_processExitCode = exitCode;
+			_output   = output;
+			_error    = error;
+			_exitCode = exitCode;
 		}
 
 		#endregion
@@ -54,22 +54,13 @@ namespace gitter.Git.AccessLayer.CLI
 		#region Properties
 
 		/// <summary>stdout.</summary>
-		public string Output
-		{
-			get { return _output; }
-		}
+		public string Output => _output;
 
 		/// <summary>stderr.</summary>
-		public string Error
-		{
-			get { return _error; }
-		}
+		public string Error => _error;
 
 		/// <summary>Process exit code.</summary>
-		public int ExitCode
-		{
-			get { return _processExitCode; }
-		}
+		public int ExitCode => _exitCode;
 
 		#endregion
 
@@ -96,7 +87,7 @@ namespace gitter.Git.AccessLayer.CLI
 		[DebuggerHidden]
 		public void ThrowOnBadReturnCode()
 		{
-			if(_processExitCode != 0)
+			if(_exitCode != 0)
 			{
 				throw new GitException(_error.Length == 0 ? _output : _error);
 			}
@@ -108,10 +99,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="GitOutput"/>.</summary>
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="GitOutput"/>.</returns>
-		public override string ToString()
-		{
-			return _output;
-		}
+		public override string ToString() => _output;
 
 		#endregion
 	}

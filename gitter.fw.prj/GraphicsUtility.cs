@@ -28,12 +28,8 @@ namespace gitter.Framework
 	public static class GraphicsUtility
 	{
 		private static readonly Image _dummyImage = new Bitmap(1, 1, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-		private static readonly Graphics _measurementGraphics = Graphics.FromImage(_dummyImage);
 
-		public static Graphics MeasurementGraphics
-		{
-			get { return _measurementGraphics; }
-		}
+		public static Graphics MeasurementGraphics { get; } = Graphics.FromImage(_dummyImage);
 
 		public static Bitmap QueryIcon(string fileName)
 		{

@@ -31,7 +31,7 @@ namespace gitter.Framework.Options
 		public PropertyPageItem(PropertyPageFactory description)
 			: base(description)
 		{
-			Verify.Argument.IsNotNull(description, "description");
+			Verify.Argument.IsNotNull(description, nameof(description));
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

@@ -91,32 +91,15 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region Properties
 
-		public string WorkingDirectory
-		{
-			get { return _workingDirectory; }
-		}
+		public string WorkingDirectory => _workingDirectory;
 
-		public Encoding Encoding
-		{
-			get { return _encoding; }
-		}
+		public Encoding Encoding => _encoding;
 
-		public IList<ICommandArgument> Options
-		{
-			get { return _options; }
-			set { _options = value; }
-		}
+		public IList<ICommandArgument> Options => _options;
 
-		public Command Command
-		{
-			get { return _command; }
-		}
+		public Command Command => _command;
 
-		public IDictionary<string, string> Environment
-		{
-			get { return _environment; }
-			set { _environment = value; }
-		}
+		public IDictionary<string, string> Environment => _environment;
 
 		#endregion
 

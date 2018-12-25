@@ -131,14 +131,14 @@ namespace gitter.Framework.Controls
 
 		internal void AddFloatingForm(FloatingViewForm floatingViewForm)
 		{
-			Verify.Argument.IsNotNull(floatingViewForm, "floatingViewForm");
+			Verify.Argument.IsNotNull(floatingViewForm, nameof(floatingViewForm));
 
 			_floatingViewForms.AddLast(floatingViewForm);
 		}
 
 		internal void RemoveFloatingForm(FloatingViewForm floatingViewForm)
 		{
-			Verify.Argument.IsNotNull(floatingViewForm, "floatingViewForm");
+			Verify.Argument.IsNotNull(floatingViewForm, nameof(floatingViewForm));
 
 			_floatingViewForms.Remove(floatingViewForm);
 		}
@@ -813,7 +813,7 @@ namespace gitter.Framework.Controls
 		/// <returns>true if docking is possible.</returns>
 		public bool CanDock(ViewHost viewHost, DockResult dockResult)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			if(viewHost.IsDocumentWell || (viewHost.ViewsCount == 1 && viewHost.GetView(0).IsDocument))
 			{
@@ -836,7 +836,7 @@ namespace gitter.Framework.Controls
 		/// <param name="dockResult">Position for docking.</param>
 		public void PerformDock(ViewHost viewHost, DockResult dockResult)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 			Verify.Argument.IsFalse(viewHost.IsDocumentWell, "viewHost");
 			Verify.Argument.IsFalse(viewHost.ViewsCount == 1 && viewHost.GetView(0).IsDocument, "viewHost");
 
@@ -883,7 +883,7 @@ namespace gitter.Framework.Controls
 		/// <returns>Bounding rectangle for docked view.</returns>
 		public Rectangle GetDockBounds(ViewHost viewHost, DockResult dockResult)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			var rootBounds = RootControl.Bounds;
 			Rectangle bounds;

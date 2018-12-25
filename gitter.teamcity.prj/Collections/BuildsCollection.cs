@@ -35,7 +35,7 @@ namespace gitter.TeamCity
 
 		public Build[] Query(BuildLocator locator)
 		{
-			Verify.Argument.IsNotNull(locator, "locator");
+			Verify.Argument.IsNotNull(locator, nameof(locator));
 
 			var xml = Context.GetXml(QUERY + locator.ToString());
 			var root = xml["builds"];
@@ -50,7 +50,7 @@ namespace gitter.TeamCity
 
 		public void UpdateCache(BuildLocator locator)
 		{
-			Verify.Argument.IsNotNull(locator, "locator");
+			Verify.Argument.IsNotNull(locator, nameof(locator));
 
 			var xml = Context.GetXml(QUERY + locator.ToString());
 			var root = xml["builds"];

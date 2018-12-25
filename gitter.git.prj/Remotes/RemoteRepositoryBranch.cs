@@ -34,10 +34,7 @@ namespace gitter.Git
 		{
 		}
 
-		public override ReferenceType ReferenceType
-		{
-			get { return ReferenceType.LocalBranch; }
-		}
+		public override ReferenceType ReferenceType => ReferenceType.LocalBranch;
 
 		protected override void DeleteCore()
 		{

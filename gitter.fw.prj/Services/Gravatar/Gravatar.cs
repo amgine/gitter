@@ -39,16 +39,13 @@ namespace gitter.Framework.Services
 		public event EventHandler Updated;
 
 		private void InvokeUpdated()
-		{
-			var handler = Updated;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> Updated?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
 		public Gravatar(string email)
 		{
-			Verify.Argument.IsNotNull(email, "email");
+			Verify.Argument.IsNotNull(email, nameof(email));
 
 			_email = email;
 		}
@@ -58,7 +55,7 @@ namespace gitter.Framework.Services
 			get { return _email; }
 			set
 			{
-				Verify.Argument.IsNotNull(value, "value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_email != value)
 				{
@@ -71,15 +68,9 @@ namespace gitter.Framework.Services
 
 		#region IAvatar
 
-		public Image Image
-		{
-			get { return _image; }
-		}
+		public Image Image => _image;
 
-		public bool IsLoaded
-		{
-			get { return _image != null; }
-		}
+		public bool IsLoaded => _image != null;
 
 		public IAsyncResult BeginUpdate()
 		{
@@ -94,7 +85,7 @@ namespace gitter.Framework.Services
 
 		public void EndUpdate(IAsyncResult ar)
 		{
-			Verify.Argument.IsNotNull(ar, "ar");
+			Verify.Argument.IsNotNull(ar, nameof(ar));
 			Verify.State.IsTrue(_avatarLoading != null, "No async operation is running.");
 
 			GravatarService.EndGetGravatar(ar);

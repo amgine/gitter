@@ -48,7 +48,7 @@ namespace gitter.Framework.CLI
 		/// <param name="bufferSize">Size of the internal buffer.</param>
 		public AsyncTextReader(int bufferSize)
 		{
-			Verify.Argument.IsPositive(bufferSize, "bufferSize");
+			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
 
 			_bufferSize		= bufferSize;
 			_stringBuilder	= new StringBuilder(bufferSize);
@@ -76,8 +76,8 @@ namespace gitter.Framework.CLI
 		/// <param name="reader">StreamReader to read from.</param>
 		public void Initialize(Process process, StreamReader reader)
 		{
-			Verify.Argument.IsNotNull(process, "process");
-			Verify.Argument.IsNotNull(reader, "reader");
+			Verify.Argument.IsNotNull(process, nameof(process));
+			Verify.Argument.IsNotNull(reader, nameof(reader));
 			Verify.State.IsFalse(IsInitialized);
 
 			var encoding = reader.CurrentEncoding;

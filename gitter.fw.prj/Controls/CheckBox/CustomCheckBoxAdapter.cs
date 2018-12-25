@@ -56,7 +56,7 @@ namespace gitter.Framework.Controls
 
 		public CustomCheckBoxAdapter(CustomCheckBoxRenderer renderer)
 		{
-			Verify.Argument.IsNotNull(renderer, "renderer");
+			Verify.Argument.IsNotNull(renderer, nameof(renderer));
 
 			_checkBox = new CustomCheckBox()
 			{

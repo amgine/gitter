@@ -31,8 +31,8 @@ namespace gitter.Git
 
 		public BlameHunk(BlameCommit commit, IEnumerable<BlameLine> lines)
 		{
-			Verify.Argument.IsNotNull(commit, "commit");
-			Verify.Argument.IsNotNull(lines, "lines");
+			Verify.Argument.IsNotNull(commit, nameof(commit));
+			Verify.Argument.IsNotNull(lines, nameof(lines));
 			
 			_commit = commit;
 			_lines = new List<BlameLine>(lines);

@@ -31,29 +31,27 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class RevisionMenu : ContextMenuStrip
 	{
-		private readonly Revision _revision;
-
 		/// <summary>Create <see cref="RevisionMenu"/>.</summary>
 		/// <param name="revision">Related <see cref="Revision"/>.</param>
 		/// <exception cref="T:System.NullReferenceException"><paramref name="revision"/> == <c>null</c>.</exception>
 		public RevisionMenu(Revision revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
-			_revision = revision;
+			Revision = revision;
 
-			Items.Add(GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(_revision.GetDiffSource()));
-			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(_revision));
-			Items.Add(GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(_revision));
-			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(_revision));
+			Items.Add(GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(Revision.GetDiffSource()));
+			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(Revision));
+			Items.Add(GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(Revision));
+			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(Revision));
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(_revision, "{0}"));
-			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(_revision));
-			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(_revision));
-			Items.Add(GuiItemFactory.GetRevertItem<ToolStripMenuItem>(_revision));
-			Items.Add(GuiItemFactory.GetCherryPickItem<ToolStripMenuItem>(_revision, "{0}"));
+			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(Revision, "{0}"));
+			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(Revision));
+			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(Revision));
+			Items.Add(GuiItemFactory.GetRevertItem<ToolStripMenuItem>(Revision));
+			Items.Add(GuiItemFactory.GetCherryPickItem<ToolStripMenuItem>(Revision, "{0}"));
 
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
@@ -78,9 +76,9 @@ namespace gitter.Git.Gui.Controls
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(_revision));
+			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Revision));
 
-			var branches = _revision.References.GetAllBranches();
+			var branches = Revision.References.GetAllBranches();
 			if(branches.Count != 0)
 			{
 				if(branches.Count == 1)
@@ -101,9 +99,9 @@ namespace gitter.Git.Gui.Controls
 				}
 			}
 
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(_revision));
+			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Revision));
 
-			var tags = _revision.References.GetTags();
+			var tags = Revision.References.GetTags();
 			if(tags.Count != 0)
 			{
 				if(tags.Count == 1)
@@ -131,9 +129,6 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		/// <summary>Associated revision.</summary>
-		public Revision Revision
-		{
-			get { return _revision; }
-		}
+		public Revision Revision { get; }
 	}
 }

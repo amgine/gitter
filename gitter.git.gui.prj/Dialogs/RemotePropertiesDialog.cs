@@ -27,7 +27,6 @@ namespace gitter.Git.Gui.Dialogs
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
-	using gitter.Framework.Options;
 	using gitter.Framework.Services;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -35,8 +34,6 @@ namespace gitter.Git.Gui.Dialogs
 	/// <summary>Dialog for diaplaying and/or editing <see cref="Remote"/> object properties.</summary>
 	public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 	{
-		private Remote _remote;
-
 		private sealed class RefspecItem : CustomListBoxItem<string>
 		{
 			private readonly bool _forced;
@@ -129,9 +126,9 @@ namespace gitter.Git.Gui.Dialogs
 		/// <param name="remote">Related remote.</param>
 		public RemotePropertiesDialog(Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
 
-			_remote = remote;
+			Remote = remote;
 
 			InitializeComponent();
 
@@ -230,10 +227,7 @@ namespace gitter.Git.Gui.Dialogs
 			push = sbpush.ToString();
 		}
 
-		public Remote Remote
-		{
-			get { return _remote; }
-		}
+		public Remote Remote { get; }
 
 		public string FetchURL
 		{

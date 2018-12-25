@@ -49,7 +49,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void Invoke(InitRepositoryParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command  = _commandFactory(parameters);
 			var executor = new RepositoryCommandExecutor(_cliOptionsProvider, parameters.Path);
@@ -59,7 +59,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Task InvokeAsync(InitRepositoryParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command  = _commandFactory(parameters);
 			var executor = new RepositoryCommandExecutor(_cliOptionsProvider, parameters.Path);

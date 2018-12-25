@@ -41,7 +41,7 @@ namespace gitter.Controls
 
 		public StandardToolbar(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 

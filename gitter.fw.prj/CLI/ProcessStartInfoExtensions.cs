@@ -27,8 +27,8 @@ namespace gitter.Framework.CLI
 	{
 		public static void EnsureEnvironmentVariableExists(this ProcessStartInfo psi, string variable, string value, bool resetIfExists = false)
 		{
-			Verify.Argument.IsNotNull(psi, "psi");
-			Verify.Argument.IsNeitherNullNorWhitespace(variable, "variable");
+			Verify.Argument.IsNotNull(psi, nameof(psi));
+			Verify.Argument.IsNeitherNullNorWhitespace(variable, nameof(variable));
 
 			EnsureEnvironmentVariableExists(psi.EnvironmentVariables, variable, value, resetIfExists);
 		}

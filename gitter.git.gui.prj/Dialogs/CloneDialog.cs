@@ -49,15 +49,12 @@ namespace gitter.Git.Gui.Dialogs
 
 			#endregion
 
-			#region Evrnts
+			#region Events
 
 			public event EventHandler ValueChanged;
 
 			private void OnValueChanged()
-			{
-				var handler = ValueChanged;
-				if(handler != null) handler(this, EventArgs.Empty);
-			}
+				=> ValueChanged?.Invoke(this, EventArgs.Empty);
 
 			#endregion
 
@@ -65,9 +62,9 @@ namespace gitter.Git.Gui.Dialogs
 
 			public RepositoryPathInput(TextBoxBase txtPath, TextBoxBase txtUrl, CheckBox chkAppendUrlToPath)
 			{
-				Verify.Argument.IsNotNull(txtPath, "txtPath");
-				Verify.Argument.IsNotNull(txtUrl, "txtUrl");
-				Verify.Argument.IsNotNull(chkAppendUrlToPath, "chkAppendUrlToPath");
+				Verify.Argument.IsNotNull(txtPath, nameof(txtPath));
+				Verify.Argument.IsNotNull(txtUrl, nameof(txtUrl));
+				Verify.Argument.IsNotNull(chkAppendUrlToPath, nameof(chkAppendUrlToPath));
 
 				_txtPath = txtPath;
 				_txtUrl = txtUrl;
@@ -161,10 +158,7 @@ namespace gitter.Git.Gui.Dialogs
 
 			#region IWin32ControlInputSource Members
 
-			public Control Control
-			{
-				get { return _txtPath; }
-			}
+			public Control Control => _txtPath;
 
 			#endregion
 		}
@@ -194,7 +188,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public CloneDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
-			Verify.Argument.IsNotNull(gitRepositoryProvider, "gitRepositoryProvider");
+			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
 
 			_gitRepositoryProvider = gitRepositoryProvider;
 
@@ -229,75 +223,33 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrClone; }
-		}
+		protected override string ActionVerb => Resources.StrClone;
 
-		private IGitRepositoryProvider GitRepositoryProvider
-		{
-			get { return _gitRepositoryProvider; }
-		}
+		private IGitRepositoryProvider GitRepositoryProvider => _gitRepositoryProvider;
 
-		public IUserInputSource<string> Url
-		{
-			get { return _urlInput; }
-		}
+		public IUserInputSource<string> Url => _urlInput;
 
-		public IUserInputSource<string> RepositoryPath
-		{
-			get { return _repositoryPathInput; }
-		}
+		public IUserInputSource<string> RepositoryPath => _repositoryPathInput;
 
-		public IUserInputSource<bool> Bare
-		{
-			get { return _bareInput; }
-		}
+		public IUserInputSource<bool> Bare => _bareInput;
 
-		public IUserInputSource<bool> Mirror
-		{
-			get { return _mirrorInput; }
-		}
+		public IUserInputSource<bool> Mirror => _mirrorInput;
 
-		public IUserInputSource<bool> UseTemplate
-		{
-			get { return _useTemplateInput; }
-		}
+		public IUserInputSource<bool> UseTemplate => _useTemplateInput;
 
-		public IUserInputSource<string> RemoteName
-		{
-			get { return _remoteNameInput; }
-		}
+		public IUserInputSource<string> RemoteName => _remoteNameInput;
 
-		public IUserInputSource<string> TemplatePath
-		{
-			get { return _templatePathInput; }
-		}
+		public IUserInputSource<string> TemplatePath => _templatePathInput;
 
-		public IUserInputSource<bool> ShallowClone
-		{
-			get { return _shallowCloneInput; }
-		}
+		public IUserInputSource<bool> ShallowClone => _shallowCloneInput;
 
-		public IUserInputSource<int> Depth
-		{
-			get { return _depthInput; }
-		}
+		public IUserInputSource<int> Depth => _depthInput;
 
-		public IUserInputSource<bool> Recursive
-		{
-			get { return _recursiveInput; }
-		}
+		public IUserInputSource<bool> Recursive => _recursiveInput;
 
-		public IUserInputSource<bool> NoCheckout
-		{
-			get { return _noCheckoutInput; }
-		}
+		public IUserInputSource<bool> NoCheckout => _noCheckoutInput;
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier => _errorNotifier;
 
 		#endregion
 
@@ -398,10 +350,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog
 
-		public bool Execute()
-		{
-			return _controller.TryClone();
-		}
+		public bool Execute() => _controller.TryClone();
 
 		#endregion
 	}

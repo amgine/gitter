@@ -21,10 +21,7 @@
 namespace gitter.Git.AccessLayer
 {
 	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
 
-	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	/// <summary>Defines repository-independent git operations.</summary>

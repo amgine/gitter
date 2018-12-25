@@ -29,16 +29,14 @@ namespace gitter.Git
 	/// <summary>Base class for all repository-related objects.</summary>
 	public abstract class GitObject
 	{
-		private readonly Repository _repository;
-
 		/// <summary>Create <see cref="GitObject"/>.</summary>
 		/// <param name="repository">Host repository.</param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		protected GitObject(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 		}
 
 		/// <summary>Create <see cref="GitObject"/>.</summary>
@@ -49,16 +47,13 @@ namespace gitter.Git
 		{
 			if(!allowNullRepository)
 			{
-				Verify.Argument.IsNotNull(repository, "repository");
+				Verify.Argument.IsNotNull(repository, nameof(repository));
 			}
-			_repository = repository;
+			Repository = repository;
 		}
 
 		/// <summary>Host repository.</summary>
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 	}
 
 	public interface ILifetimeObject
@@ -79,7 +74,7 @@ namespace gitter.Git
 	internal interface ILifetimeObjectControlService
 	{
 		/// <summary>
-		/// Marks this object as delected, invokes <see cref="ILifetimeObject.Deleted"/>
+		/// Marks this object as deleted, invokes <see cref="ILifetimeObject.Deleted"/>
 		/// and makes all methods of this object fail.
 		/// </summary>
 		void MarkAsDeleted();
@@ -99,7 +94,7 @@ namespace gitter.Git
 		protected GitNamedObject(Repository repository, string name)
 			: base(repository)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			_name = name;
 		}
@@ -110,7 +105,7 @@ namespace gitter.Git
 		protected GitNamedObject(string name)
 			: base(null, true)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			_name = name;
 		}
@@ -121,7 +116,7 @@ namespace gitter.Git
 			get { return _name; }
 			set
 			{
-				Verify.Argument.IsNeitherNullNorWhitespace(value, "value");
+				Verify.Argument.IsNeitherNullNorWhitespace(value, nameof(value));
 
 				RenameCore(value);
 				string oldName = _name;
@@ -146,10 +141,7 @@ namespace gitter.Git
 
 		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="GitNamedObject"/>.</summary>
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="GitNamedObject"/>.</returns>
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => _name;
 	}
 
 	/// <summary>git object with a dynamic name.</summary>
@@ -173,17 +165,11 @@ namespace gitter.Git
 		protected abstract string GetName();
 
 		/// <summary>Object name.</summary>
-		public string Name
-		{
-			get { return GetName(); }
-		}
+		public string Name => GetName();
 
 		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="GitNamedObject"/>.</summary>
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="GitNamedObject"/>.</returns>
-		public override string ToString()
-		{
-			return GetName();
-		}
+		public override string ToString() => Name;
 	}
 
 	/// <summary>git named object with lifetime control.</summary>
@@ -194,8 +180,6 @@ namespace gitter.Git
 
 		/// <summary>This object has been revived.</summary>
 		public event EventHandler Revived;
-
-		private bool _deleted;
 
 		/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 		/// <param name="repository">Host repository.</param>
@@ -212,27 +196,25 @@ namespace gitter.Git
 		{
 		}
 
-		/// <summary>Marks this object as delected, invokes <see cref="Deleted"/> and makes all methods of this object fail.</summary>
+		/// <summary>Marks this object as deleted, invokes <see cref="Deleted"/> and makes all methods of this object fail.</summary>
 		internal void MarkAsDeleted()
 		{
-			if(!_deleted)
+			if(!IsDeleted)
 			{
-				_deleted = true;
+				IsDeleted = true;
 				OnDeleted();
-				var handler = Deleted;
-				if(handler != null) handler(this, EventArgs.Empty);
+				Deleted?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
 		/// <summary>Makes object alive again.</summary>
 		internal void Revive()
 		{
-			if(_deleted)
+			if(IsDeleted)
 			{
-				_deleted = false;
+				IsDeleted = false;
 				OnRevived();
-				var handler = Revived;
-				if(handler != null) handler(this, EventArgs.Empty);
+				Revived?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
@@ -247,10 +229,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Checks if object is deleted.</summary>
-		public bool IsDeleted
-		{
-			get { return _deleted; }
-		}
+		public bool IsDeleted { get; private set; }
 	}
 
 	/// <summary>git named object with lifetime control.</summary>
@@ -262,8 +241,6 @@ namespace gitter.Git
 		/// <summary>This object has been revived.</summary>
 		public event EventHandler Revived;
 
-		private bool _isDeleted;
-
 		/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 		/// <param name="repository">Host repository.</param>
 		/// <param name="name">Object name.</param>
@@ -272,27 +249,25 @@ namespace gitter.Git
 		{
 		}
 
-		/// <summary>Marks this object as delected, invokes <see cref="Deleted"/> and makes all methods of this object fail.</summary>
+		/// <summary>Marks this object as deleted, invokes <see cref="Deleted"/> and makes all methods of this object fail.</summary>
 		internal void MarkAsDeleted()
 		{
-			if(!_isDeleted)
+			if(!IsDeleted)
 			{
-				_isDeleted = true;
+				IsDeleted = true;
 				OnDeleted();
-				var handler = Deleted;
-				if(handler != null) handler(this, EventArgs.Empty);
+				Deleted?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
 		/// <summary>Makes object alive again.</summary>
 		internal void Revive()
 		{
-			if(_isDeleted)
+			if(IsDeleted)
 			{
-				_isDeleted = false;
+				IsDeleted = false;
 				OnRevived();
-				var handler = Revived;
-				if(handler != null) handler(this, EventArgs.Empty);
+				Revived?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
@@ -307,9 +282,6 @@ namespace gitter.Git
 		}
 
 		/// <summary>Checks if object is deleted.</summary>
-		public bool IsDeleted
-		{
-			get { return _isDeleted; }
-		}
+		public bool IsDeleted { get; private set; }
 	}
 }

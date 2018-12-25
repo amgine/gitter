@@ -60,10 +60,7 @@ namespace gitter.Git
 		/// <returns>
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
-		public override string ToString()
-		{
-			return "blame";
-		}
+		public override string ToString() => "blame";
 
 		#endregion
 	}

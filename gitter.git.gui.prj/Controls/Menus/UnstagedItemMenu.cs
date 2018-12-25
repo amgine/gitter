@@ -30,20 +30,18 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class UnstagedItemMenu : ContextMenuStrip
 	{
-		private readonly TreeItem _item;
-
 		public UnstagedItemMenu(TreeItem item)
 		{
-			Verify.Argument.IsValidGitObject(item, "item");
+			Verify.Argument.IsValidGitObject(item, nameof(item));
 			Verify.Argument.AreEqual(StagedStatus.Unstaged, item.StagedStatus & StagedStatus.Unstaged, "item",
 				"This item is not unstaged.");
 
-			_item = item;
+			Item = item;
 
-			var dir = _item as TreeDirectory;
-			if(_item.Status != FileStatus.Removed)
+			var dir = Item as TreeDirectory;
+			if(Item.Status != FileStatus.Removed)
 			{
-				var fullPath = _item.FullPath;
+				var fullPath = Item.FullPath;
 				if(dir == null)
 				{
 					Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, fullPath));
@@ -56,23 +54,23 @@ namespace gitter.Git.Gui.Controls
 				}
 				Items.Add(new ToolStripSeparator());
 			}
-			Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(_item));
+			Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(Item));
 			if(dir != null)
 			{
 				if(HasRevertableItems(dir))
 				{
-					Items.Add(GuiItemFactory.GetRevertPathItem<ToolStripMenuItem>(_item));
+					Items.Add(GuiItemFactory.GetRevertPathItem<ToolStripMenuItem>(Item));
 				}
 			}
 			else
 			{
-				if(_item.Status == FileStatus.Removed || _item.Status == FileStatus.Modified)
+				if(Item.Status == FileStatus.Removed || Item.Status == FileStatus.Modified)
 				{
-					Items.Add(GuiItemFactory.GetRevertPathItem<ToolStripMenuItem>(_item));
+					Items.Add(GuiItemFactory.GetRevertPathItem<ToolStripMenuItem>(Item));
 				}
-				if(_item.Status == FileStatus.Modified || _item.Status == FileStatus.Added)
+				if(Item.Status == FileStatus.Modified || Item.Status == FileStatus.Added)
 				{
-					Items.Add(GuiItemFactory.GetRemovePathItem<ToolStripMenuItem>(_item));
+					Items.Add(GuiItemFactory.GetRemovePathItem<ToolStripMenuItem>(Item));
 				}
 			}
 		}
@@ -96,9 +94,6 @@ namespace gitter.Git.Gui.Controls
 			return false;
 		}
 
-		public TreeItem Item
-		{
-			get { return _item; }
-		}
+		public TreeItem Item { get; }
 	}
 }

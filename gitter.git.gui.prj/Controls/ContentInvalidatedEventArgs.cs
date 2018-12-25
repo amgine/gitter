@@ -25,16 +25,11 @@ namespace gitter.Git.Gui
 
 	sealed class ContentInvalidatedEventArgs : EventArgs
 	{
-		private readonly Rectangle _bounds;
-
 		public ContentInvalidatedEventArgs(Rectangle bounds)
 		{
-			_bounds = bounds;
+			Bounds = bounds;
 		}
 
-		public Rectangle Bounds
-		{
-			get { return _bounds; }
-		}
+		public Rectangle Bounds { get; }
 	}
 }

@@ -22,7 +22,7 @@
 					_speller = null;
 				}
 			}
-			_repository = null;
+			Repository = null;
 			base.Dispose(disposing);
 		}
 

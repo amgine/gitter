@@ -44,7 +44,7 @@ namespace gitter.Git
 		public ConfigurationPage(IWorkingEnvironment environment)
 			: base(Guid)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 

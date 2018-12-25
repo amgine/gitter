@@ -40,8 +40,6 @@ namespace gitter.Git.Gui.Dialogs
 		#region Data
 
 		private readonly Repository _repository;
-		private readonly IUserInputSource<string> _revisionInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly ICheckoutController _controller;
 
 		#endregion
@@ -50,7 +48,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public CheckoutDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -58,9 +56,9 @@ namespace gitter.Git.Gui.Dialogs
 
 			var inputs = new IUserInputSource[]
 			{
-				_revisionInput = new TextBoxInputSource(_txtRevision),
+				Revision = new TextBoxInputSource(_txtRevision),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			Text = Resources.StrCheckoutRevision;
 
@@ -81,20 +79,11 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCheckout; }
-		}
+		protected override string ActionVerb => Resources.StrCheckout;
 
-		public IUserInputSource<string> Revision
-		{
-			get { return _revisionInput; }
-		}
+		public IUserInputSource<string> Revision { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -155,10 +144,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog
 
-		public bool Execute()
-		{
-			return _controller.TryCheckout();
-		}
+		public bool Execute() => _controller.TryCheckout();
 
 		#endregion
 	}

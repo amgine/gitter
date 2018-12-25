@@ -27,62 +27,37 @@ namespace gitter.Git.AccessLayer
 	/// <summary>RemoteBranch description.</summary>
 	public sealed class RemoteBranchData : INamedObject
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly Hash _sha1;
-
-		#endregion
-
 		#region .ctor
 
 		public RemoteBranchData(string name, Hash sha1)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			_name = name;
-			_sha1 = sha1;
+			Name = name;
+			SHA1 = sha1;
 		}
 
 		#endregion
 
 		#region Properties
 
-		/// <summary>Branche's name (short format, excluding /refs/remotes/).</summary>
-		public string Name
-		{
-			get { return _name; }
-		}
+		/// <summary>Branch's name (short format, excluding /refs/remotes/).</summary>
+		public string Name { get; }
 
 		/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-		public Hash SHA1
-		{
-			get { return _sha1; }
-		}
+		public Hash SHA1 { get; }
 
 		/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
-		public bool IsFake
-		{
-			get { return false; }
-		}
+		public bool IsFake => false;
 
 		/// <summary>It is a remote tracking branch.</summary>
-		public bool IsRemote
-		{
-			get { return true; }
-		}
+		public bool IsRemote => true;
 
 		/// <summary>This branch is current HEAD.</summary>
-		public bool IsCurrent
-		{
-			get { return false; }
-		}
+		public bool IsCurrent => false;
 
 		#endregion
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

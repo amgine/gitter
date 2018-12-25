@@ -60,7 +60,7 @@ namespace gitter.Git.AccessLayer
 		IGitAction<CherryPickParameters> CherryPick { get; }
 
 		/// <summary>Commit changes.</summary>
-		IGitAction<CommitParameters> Commit { get; }
+		IGitFunction<CommitParameters, string> Commit { get; }
 
 		/// <summary>Calculate object count.</summary>
 		IGitFunction<CountObjectsParameters, ObjectCountData> CountObjects { get; }

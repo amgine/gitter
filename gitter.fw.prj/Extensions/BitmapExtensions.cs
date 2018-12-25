@@ -28,7 +28,7 @@ namespace gitter.Framework
 	{
 		public static void SetAlpha(this Bitmap bmp, byte alpha)
 		{
-			Verify.Argument.IsNotNull(bmp, "bmp");
+			Verify.Argument.IsNotNull(bmp, nameof(bmp));
 
 			var data = bmp.LockBits(
 				new Rectangle(0, 0, bmp.Width, bmp.Height),

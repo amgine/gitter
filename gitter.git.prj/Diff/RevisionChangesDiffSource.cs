@@ -42,14 +42,14 @@ namespace gitter.Git
 
 		public RevisionChangesDiffSource(IRevisionPointer revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			_revision = revision;
 		}
 
 		public RevisionChangesDiffSource(IRevisionPointer revision, IList<string> paths)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			_revision = revision;
 			_paths = paths;

@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
@@ -35,7 +34,6 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private Repository _repository;
 		private TextBoxSpellChecker _speller;
 
 		#endregion
@@ -47,9 +45,9 @@ namespace gitter.Git.Gui.Dialogs
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		public StashSaveDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
 			InitializeComponent();
 
@@ -81,10 +79,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; private set; }
 
 		/// <summary>Do not stash staged changes.</summary>
 		public bool KeepIndex
@@ -107,10 +102,7 @@ namespace gitter.Git.Gui.Dialogs
 			set { _txtMessage.Text = value; }
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrSave; }
-		}
+		protected override string ActionVerb => Resources.StrSave;
 
 		#endregion
 
@@ -122,7 +114,7 @@ namespace gitter.Git.Gui.Dialogs
 		{
 			bool keepIndex = KeepIndex;
 			bool includeUntracked =
-				GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(_repository) &&
+				GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(Repository) &&
 				IncludeUntrackedFiles;
 			var message = Message;
 			message = message == null ? string.Empty : message.Trim();

@@ -50,8 +50,6 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Data
 
-		private readonly ResetMode _availableModes;
-		private ResetMode _resetMode;
 		private List<CommandLink> _buttons;
 
 		#endregion
@@ -64,13 +62,13 @@ namespace gitter.Git.Gui.Dialogs
 
 			Text = Resources.StrReset;
 
-			_availableModes = availableModes;
-			_resetMode = ResetMode.Mixed;
+			AvailableModes = availableModes;
+			ResetMode = ResetMode.Mixed;
 
 			_buttons = new List<CommandLink>(ResetModes.Length);
 			foreach(var resetMode in ResetModes)
 			{
-				if((_availableModes & resetMode) == resetMode)
+				if((AvailableModes & resetMode) == resetMode)
 				{
 					_buttons.Add(CreateResetButton(resetMode));
 				}
@@ -104,26 +102,13 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		public ResetMode AvailableModes
-		{
-			get { return _availableModes; }
-		}
+		public ResetMode AvailableModes { get; }
 
-		public ResetMode ResetMode
-		{
-			get { return _resetMode; }
-			set { _resetMode = value; }
-		}
+		public ResetMode ResetMode { get; set; }
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrReset; }
-		}
+		protected override string ActionVerb => Resources.StrReset;
 
-		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.Cancel; }
-		}
+		public override DialogButtons OptimalButtons => DialogButtons.Cancel;
 
 		#endregion
 
@@ -185,7 +170,7 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				foreach(var btn in _buttons)
 				{
-					if(((ResetMode)btn.Tag) == _resetMode)
+					if(((ResetMode)btn.Tag) == ResetMode)
 					{
 						btn.Focus();
 						return;

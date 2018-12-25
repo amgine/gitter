@@ -24,22 +24,14 @@ namespace gitter.Git
 
 	public sealed class BlobData : TreeContentData
 	{
-		private readonly long _size;
-
 		public BlobData(string hash, int mode, string name, long size)
 			: base(hash, mode, name)
 		{
-			_size = size;
+			Size = size;
 		}
 
-		public override TreeContentType Type
-		{
-			get { return TreeContentType.Blob; }
-		}
+		public override TreeContentType Type => TreeContentType.Blob;
 
-		public long Size
-		{
-			get { return _size; }
-		}
+		public long Size { get; }
 	}
 }

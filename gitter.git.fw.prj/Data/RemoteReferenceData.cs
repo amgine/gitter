@@ -24,61 +24,40 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class RemoteReferenceData
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly Hash _hash;
-		private TagType _tagType;
-
-		#endregion
-
 		#region .ctor
 
 		public RemoteReferenceData(string name, Hash hash)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			_name = name;
-			_hash = hash;
+			Name = name;
+			Hash = hash;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public TagType TagType
-		{
-			get { return _tagType; }
-			set { _tagType = value; }
-		}
+		public TagType TagType { get; set; }
 
 		public ReferenceType ReferenceType
 		{
 			get
 			{
-				if(_name.StartsWith(GitConstants.LocalBranchPrefix))
+				if(Name.StartsWith(GitConstants.LocalBranchPrefix))
 					return ReferenceType.LocalBranch;
-				if(_name.StartsWith(GitConstants.TagPrefix))
+				if(Name.StartsWith(GitConstants.TagPrefix))
 					return ReferenceType.Tag;
 				return ReferenceType.Reference;
 			}
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public Hash Hash
-		{
-			get { return _hash; }
-		}
+		public Hash Hash { get; }
 
 		#endregion
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

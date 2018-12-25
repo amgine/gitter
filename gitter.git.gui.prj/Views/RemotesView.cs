@@ -30,8 +30,6 @@ namespace gitter.Git.Gui.Views
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
-	using gitter.Git.Gui.Dialogs;
-
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -70,10 +68,7 @@ namespace gitter.Git.Gui.Views
 			_lstRemotes.LoadData(null);
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgRemote"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgRemote"];
 
 		public override void RefreshContent()
 		{

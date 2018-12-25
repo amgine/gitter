@@ -22,7 +22,7 @@ namespace gitter.Git
 {
 	using System;
 
-	/// <summary>Helper class for determining available extra fetures.</summary>
+	/// <summary>Helper class for determining available extra features.</summary>
 	public static class GitFeatures
 	{
 		/// <summary>Ability to create orphan branches.</summary>

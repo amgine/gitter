@@ -38,17 +38,13 @@ namespace gitter.Git
 		public event EventHandler IndexChanged;
 
 		private void InvokeIndexChanged()
-		{
-			var handler = IndexChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> IndexChanged?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
 		#region Data
 
 		private int _index;
-		private readonly Revision _revision;
 
 		#endregion
 
@@ -57,10 +53,10 @@ namespace gitter.Git
 		internal StashedState(Repository repository, int index, Revision revision)
 			: base(repository, index.ToString().SurroundWith(GitConstants.StashName + "@{", "}"))
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
-			Verify.Argument.IsNotNegative(index, "index");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
+			Verify.Argument.IsNotNegative(index, nameof(index));
 
-			_revision = revision;
+			Revision = revision;
 		}
 
 		#endregion
@@ -162,7 +158,7 @@ namespace gitter.Git
 			get { return _index; }
 			internal set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				if(_index != value)
 				{
@@ -172,19 +168,13 @@ namespace gitter.Git
 			}
 		}
 
-		public Revision Revision
-		{
-			get { return _revision; }
-		}
+		public Revision Revision { get; }
 
 		#endregion
 
 		#region IRevisionPointer
 
-		ReferenceType IRevisionPointer.Type
-		{
-			get { return ReferenceType.Stash; }
-		}
+		ReferenceType IRevisionPointer.Type => ReferenceType.Stash;
 
 		string IRevisionPointer.Pointer
 		{
@@ -196,10 +186,7 @@ namespace gitter.Git
 			get { return GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
 		}
 
-		public Revision Dereference()
-		{
-			return _revision;
-		}
+		public Revision Dereference() => Revision;
 
 		#endregion
 	}

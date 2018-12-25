@@ -29,17 +29,6 @@ namespace gitter.Git
 
 	public sealed class ReferenceChange
 	{
-		#region Data
-
-		private readonly ReferenceType _referenceType;
-		private readonly string _fullName;
-		private readonly string _name;
-		private readonly Hash _oldHash;
-		private readonly Hash _newHash;
-		private readonly ReferenceChangeType _changeType;
-
-		#endregion
-
 		#region .ctor
 
 		public ReferenceChange(
@@ -48,47 +37,29 @@ namespace gitter.Git
 			Hash oldHash, Hash newHash,
 			ReferenceChangeType changeType)
 		{
-			_referenceType = referenceType;
-			_fullName = fullName;
-			_name = name;
-			_oldHash = oldHash;
-			_newHash = newHash;
-			_changeType = changeType;
+			ReferenceType = referenceType;
+			FullName = fullName;
+			Name = name;
+			OldHash = oldHash;
+			NewHash = newHash;
+			ChangeType = changeType;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public ReferenceType ReferenceType
-		{
-			get { return _referenceType; }
-		}
+		public ReferenceType ReferenceType { get; }
 
-		public string FullName
-		{
-			get { return _fullName;}
-		}
+		public string FullName { get; }
 
-		public string Name
-		{
-			get { return _name;}
-		}
+		public string Name { get; }
 
-		public Hash OldHash
-		{
-			get { return _oldHash; }
-		}
+		public Hash OldHash { get; }
 
-		public Hash NewHash
-		{
-			get { return _newHash; }
-		}
+		public Hash NewHash { get; }
 
-		public ReferenceChangeType ChangeType
-		{
-			get { return _changeType; }
-		}
+		public ReferenceChangeType ChangeType { get; }
 
 		#endregion
 	}

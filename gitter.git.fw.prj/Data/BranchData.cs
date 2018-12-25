@@ -27,27 +27,17 @@ namespace gitter.Git.AccessLayer
 	/// <summary>Branch description.</summary>
 	public sealed class BranchData : INamedObject
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly Hash _sha1;
-		private readonly bool _isFake;
-		private readonly bool _isRemote;
-		private readonly bool _isCurrent;
-
-		#endregion
-
 		#region .ctor
 
 		public BranchData(string name, Hash sha1, bool isFake, bool isRemote, bool isCurrent)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			_name = name;
-			_sha1 = sha1;
-			_isFake = isFake;
-			_isRemote = isRemote;
-			_isCurrent = isCurrent;
+			Name = name;
+			SHA1 = sha1;
+			IsFake = isFake;
+			IsRemote = isRemote;
+			IsCurrent = isCurrent;
 		}
 
 		public BranchData(string name, Hash sha1, bool remote, bool current)
@@ -60,40 +50,22 @@ namespace gitter.Git.AccessLayer
 		#region Properties
 
 		/// <summary>Branche's name (short format, excluding refs/heads/ or /refs/%remote%/).</summary>
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-		public Hash SHA1
-		{
-			get { return _sha1; }
-		}
+		public Hash SHA1 { get; }
 
 		/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
-		public bool IsFake
-		{
-			get { return _isFake; }
-		}
+		public bool IsFake { get; }
 
 		/// <summary>It is a remote tracking branch.</summary>
-		public bool IsRemote
-		{
-			get { return _isRemote; }
-		}
+		public bool IsRemote { get; }
 
 		/// <summary>This branch is current HEAD.</summary>
-		public bool IsCurrent
-		{
-			get { return _isCurrent; }
-		}
+		public bool IsCurrent { get; }
 
 		#endregion
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

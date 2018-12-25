@@ -30,7 +30,7 @@ namespace gitter.Git
 
 		public HashStringCache(Func<Hash> getHash)
 		{
-			Verify.Argument.IsNotNull(getHash, "getHash");
+			Verify.Argument.IsNotNull(getHash, nameof(getHash));
 
 			_getHash = getHash;
 			_ref     = new WeakReference(null);

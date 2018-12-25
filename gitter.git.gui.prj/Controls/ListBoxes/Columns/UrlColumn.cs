@@ -41,9 +41,6 @@ namespace gitter.Git.Gui.Controls
 		{
 		}
 
-		public override string IdentificationString
-		{
-			get { return "Url"; }
-		}
+		public override string IdentificationString => "Url";
 	}
 }

@@ -995,7 +995,7 @@ namespace gitter.Git.Gui.Controls
 
 		public void SelectRevision(IRevisionPointer revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			var rev = revision.Dereference();
 			RevisionListItem item;
@@ -1007,7 +1007,7 @@ namespace gitter.Git.Gui.Controls
 
 		public RevisionListItem TryGetItem(Revision revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			if(_itemLookupTable == null) return null;
 			RevisionListItem item;

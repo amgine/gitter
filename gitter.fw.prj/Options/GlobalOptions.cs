@@ -86,21 +86,21 @@ namespace gitter.Framework
 
 		public static void RegisterSelectableColor(SelectableColor color)
 		{
-			Verify.Argument.IsNotNull(color, "color");
+			Verify.Argument.IsNotNull(color, nameof(color));
 
 			_colors.Add(color.Id, color);
 		}
 
 		public static void RegisterSelectableColorCategory(SelectableColorCategory category)
 		{
-			Verify.Argument.IsNotNull(category, "category");
+			Verify.Argument.IsNotNull(category, nameof(category));
 
 			_colorCategories.Add(category.Id, category);
 		}
 
 		public static void RegisterPropertyPageFactory(PropertyPageFactory description)
 		{
-			Verify.Argument.IsNotNull(description, "description");
+			Verify.Argument.IsNotNull(description, nameof(description));
 
 			_propertyPages.Add(description.Guid, description);
 		}
@@ -203,7 +203,7 @@ namespace gitter.Framework
 
 		public static void LoadFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			var appearanceNode = section.TryGetSection("Appearance");
 			if(appearanceNode != null)
@@ -240,7 +240,7 @@ namespace gitter.Framework
 
 		public static void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			var appearanceNode = section.GetCreateSection("Appearance");
 			if(GitterApplication.TextRenderer == GitterApplication.GdiTextRenderer)

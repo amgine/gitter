@@ -65,7 +65,7 @@ namespace gitter.TeamCity
 
 		public T GetValue(TeamCityObject obj)
 		{
-			Verify.Argument.IsNotNull(obj, "obj");
+			Verify.Argument.IsNotNull(obj, nameof(obj));
 
 			return (T)obj.GetType().GetProperty(Name).GetValue(obj, null);
 		}

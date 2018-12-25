@@ -50,7 +50,7 @@ namespace gitter
 		public RepositoryListItem(RepositoryLink rlink)
 			: base(rlink)
 		{
-			Verify.Argument.IsNotNull(rlink, "rlink");
+			Verify.Argument.IsNotNull(rlink, nameof(rlink));
 		}
 
 		private string Name

@@ -62,7 +62,7 @@ namespace gitter.TeamCity
 
 		protected TeamCityObject(TeamCityServiceContext context, string id)
 		{
-			Verify.Argument.IsNotNull(context, "context");
+			Verify.Argument.IsNotNull(context, nameof(context));
 
 			_context = context;
 			_id = id;
@@ -70,8 +70,8 @@ namespace gitter.TeamCity
 
 		protected TeamCityObject(TeamCityServiceContext context, XmlNode node)
 		{
-			Verify.Argument.IsNotNull(context, "context");
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(context, nameof(context));
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			_context	= context;
 			_id			= TeamCityUtility.LoadString(node.Attributes[IdProperty.XmlNodeName]);
@@ -84,7 +84,7 @@ namespace gitter.TeamCity
 
 		internal virtual void Update(XmlNode node)
 		{
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			WebUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
 		}
@@ -96,7 +96,7 @@ namespace gitter.TeamCity
 
 		public object GetValue(TeamCityObjectProperty property)
 		{
-			Verify.Argument.IsNotNull(property, "property");
+			Verify.Argument.IsNotNull(property, nameof(property));
 
 			return GetType().GetProperty(property.Name).GetValue(this, null);
 		}

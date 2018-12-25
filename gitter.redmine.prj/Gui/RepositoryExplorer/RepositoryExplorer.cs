@@ -37,8 +37,8 @@ namespace gitter.Redmine.Gui
 
 		public RepositoryExplorer(IWorkingEnvironment environment, RedmineGuiProvider guiProvider)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
-			Verify.Argument.IsNotNull(guiProvider, "guiProvider");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
+			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_service = guiProvider.ServiceContext;
 			_rootItem = new RepositoryExplorerRootListItem(environment, guiProvider);

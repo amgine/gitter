@@ -46,34 +46,21 @@ namespace gitter.Git.Gui
 
 		#endregion
 
-		#region Data
-
-		private readonly IRevisionPointer _revisionPointer;
-		private readonly Rectangle _bounds;
-
-		#endregion
-
 		#region .ctor
 
 		public PointerBounds(IRevisionPointer revisionPointer, Rectangle bounds)
 		{
-			_revisionPointer = revisionPointer;
-			_bounds = bounds;
+			RevisionPointer = revisionPointer;
+			Bounds = bounds;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public IRevisionPointer RevisionPointer
-		{
-			get { return _revisionPointer; }
-		}
+		public IRevisionPointer RevisionPointer { get; }
 
-		public Rectangle Bounds
-		{
-			get { return _bounds; }
-		}
+		public Rectangle Bounds { get; }
 
 		#endregion
 
@@ -81,27 +68,14 @@ namespace gitter.Git.Gui
 
 		public ContextMenuStrip GetContextMenu()
 		{
-			var tag = RevisionPointer as Tag;
-			if(tag != null)
+			switch(RevisionPointer)
 			{
-				return new TagMenu(tag);
+				case Tag tag:            return new TagMenu(tag);
+				case BranchBase branch:  return new BranchMenu(branch);
+				case StashedState stash: return new StashedStateMenu(stash);
+				case Head head:          return new HeadMenu(head);
+				default: return null;
 			}
-			var branch = RevisionPointer as BranchBase;
-			if(branch != null)
-			{
-				return new BranchMenu(branch);
-			}
-			var stash = RevisionPointer as StashedState;
-			if(stash != null)
-			{
-				return new StashedStateMenu(stash);
-			}
-			var head = RevisionPointer as Head;
-			if(head != null)
-			{
-				return new HeadMenu(head);
-			}
-			return null;
 		}
 
 		#endregion

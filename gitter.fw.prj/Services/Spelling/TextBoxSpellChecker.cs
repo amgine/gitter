@@ -24,7 +24,6 @@ namespace gitter.Framework.Services
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
 	using System.Collections.Generic;
-	using System.Text;
 	using System.Windows.Forms;
 
 	/// <summary>Highlights all spelling errors in specified <see cref="TextBox"/>.</summary>
@@ -47,7 +46,7 @@ namespace gitter.Framework.Services
 		/// <param name="enable">Enable spell checking.</param>
 		public TextBoxSpellChecker(TextBox textBox, bool enable)
 		{
-			Verify.Argument.IsNotNull(textBox, "textBox");
+			Verify.Argument.IsNotNull(textBox, nameof(textBox));
 
 			_textBox = textBox;
 			_cache = new Dictionary<string, bool>();

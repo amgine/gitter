@@ -32,7 +32,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public FetchDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -41,9 +41,6 @@ namespace gitter.Git.Gui.Dialogs
 			Text = Resources.StrFetch;
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrFetch; }
-		}
+		protected override string ActionVerb => Resources.StrFetch;
 	}
 }

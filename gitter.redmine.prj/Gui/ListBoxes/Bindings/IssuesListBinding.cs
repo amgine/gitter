@@ -44,8 +44,8 @@ namespace gitter.Redmine.Gui.ListBoxes
 
 		public IssuesListBinding(RedmineServiceContext serviceContext, IssuesListBox issuesListBox)
 		{
-			Verify.Argument.IsNotNull(serviceContext, "serviceContext");
-			Verify.Argument.IsNotNull(issuesListBox, "issuesListBox");
+			Verify.Argument.IsNotNull(serviceContext, nameof(serviceContext));
+			Verify.Argument.IsNotNull(issuesListBox, nameof(issuesListBox));
 
 			_serviceContext = serviceContext;
 			_issuesListBox  = issuesListBox;

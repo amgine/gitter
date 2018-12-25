@@ -38,7 +38,7 @@ namespace gitter.Git.AccessLayer.CLI
 		public QueryRevisionsImpl(ICommandExecutor commandExecutor, CommandBuilder commandBuilder)
 			: base(commandExecutor)
 		{
-			Verify.Argument.IsNotNull(commandBuilder, "commandBuilder");
+			Verify.Argument.IsNotNull(commandBuilder, nameof(commandBuilder));
 
 			_commandBuilder = commandBuilder;
 		}

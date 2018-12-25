@@ -53,29 +53,30 @@ namespace gitter.Git
 		public event EventHandler<TreeFileEventArgs> RemovedUnstagedFile;
 		public event EventHandler<TreeDirectoryEventArgs> RemovedUnstagedFolder;
 
+		public event EventHandler<CommitResultEventArgs> Committed;
+
 		private void InvokeChanged()
 		{
-			var handler = Changed;
-			if(handler != null) handler(this, EventArgs.Empty);
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void InvokeNewFile(TreeFile file)
 		{
 			var handler = file.StagedStatus == StagedStatus.Staged ? NewStagedFile : NewUnstagedFile;
-			if(handler != null) handler(this, new TreeFileEventArgs(file));
+			handler?.Invoke(this, new TreeFileEventArgs(file));
 		}
 
 		private void InvokeAddedDirectory(TreeDirectory folder)
 		{
 			var handler = folder.StagedStatus == StagedStatus.Staged ? NewStagedFolder : NewUnstagedFolder;
-			if(handler != null) handler(this, new TreeDirectoryEventArgs(folder));
+			handler?.Invoke(this, new TreeDirectoryEventArgs(folder));
 		}
 
 		private void InvokeRemovedFile(TreeFile file)
 		{
 			file.MarkAsDeleted();
 			var handler = file.StagedStatus == StagedStatus.Staged ? RemovedStagedFile : RemovedUnstagedFile;
-			if(handler != null) handler(this, new TreeFileEventArgs(file));
+			handler?.Invoke(this, new TreeFileEventArgs(file));
 		}
 
 		private void InvokeRemovedDirectory(TreeDirectory folder)
@@ -86,12 +87,15 @@ namespace gitter.Git
 			}
 			folder.MarkAsDeleted();
 			var handler = folder.StagedStatus == StagedStatus.Staged ? RemovedStagedFolder : RemovedUnstagedFolder;
-			if(handler != null) handler(this, new TreeDirectoryEventArgs(folder));
+			handler?.Invoke(this, new TreeDirectoryEventArgs(folder));
 			foreach(var file in folder.Files)
 			{
 				InvokeRemovedFile(file);
 			}
 		}
+
+		private void OnCommitted(CommitResult commitResult)
+			=> Committed?.Invoke(this, new CommitResultEventArgs(commitResult));
 
 		#endregion
 
@@ -562,9 +566,9 @@ namespace gitter.Git
 
 		private string[] GetPatterns(ICollection<TreeItem> items)
 		{
-			Verify.Argument.IsNotNull(items, "items");
+			Verify.Argument.IsNotNull(items, nameof(items));
 			if(items.Count == 0) return null;
-			Verify.Argument.HasNoNullItems(items, "items");
+			Verify.Argument.HasNoNullItems(items, nameof(items));
 			var patterns = new string[items.Count];
 			int id = 0;
 			foreach(var item in items)
@@ -679,7 +683,7 @@ namespace gitter.Git
 
 		internal void Unstage(TreeItem item)
 		{
-			Verify.Argument.IsValidGitObject(item, Repository, "item");
+			Verify.Argument.IsValidGitObject(item, Repository, nameof(item));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
@@ -873,7 +877,7 @@ namespace gitter.Git
 		/// <param name="reverse">Reverse patches.</param>
 		public void ApplyPatch(IPatchSource patchSource, ApplyPatchTo applyTo, bool reverse)
 		{
-			Verify.Argument.IsNotNull(patchSource, "patchSource");
+			Verify.Argument.IsNotNull(patchSource, nameof(patchSource));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
@@ -899,7 +903,7 @@ namespace gitter.Git
 		/// <param name="reverse">Reverse patches.</param>
 		public void ApplyPatches(IEnumerable<IPatchSource> patchSources, ApplyPatchTo applyTo, bool reverse)
 		{
-			Verify.Argument.IsNotNull(patchSources, "patchSources");
+			Verify.Argument.IsNotNull(patchSources, nameof(patchSources));
 
 			var files = new List<IPatchFile>();
 			using(Repository.Monitor.BlockNotifications(
@@ -948,16 +952,12 @@ namespace gitter.Git
 		 *			  [-F <file> | -m <msg>] [--reset-author] [--allow-empty] [--no-verify] [-e] [--author=<author>]
 		 *			  [--date=<date>] [--cleanup=<mode>] [--status | --no-status] [--] [[-i | -o ]<file>…]  */
 
-		public Revision Commit(string message)
+		public CommitResult Commit(string message, bool amend = false)
 		{
-			return Commit(message, false);
-		}
-
-		public Revision Commit(string message, bool amend)
-		{
-			Verify.Argument.IsNotNull(message, "message");
+			Verify.Argument.IsNotNull(message, nameof(message));
 
 			var currentBranch = Repository.Head.Pointer as Branch;
+			var output = default(string);
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.BranchChanged,
@@ -970,8 +970,8 @@ namespace gitter.Git
 				bool commitSuccess = false;
 				try
 				{
-					Repository.Accessor.Commit.Invoke(
-						new CommitParameters()
+					output = Repository.Accessor.Commit.Invoke(
+						new CommitParameters
 						{
 							MessageFileName = Path.Combine(
 								Repository.GitDirectory, GitConstants.CommitMessageFileName),
@@ -987,12 +987,8 @@ namespace gitter.Git
 						{
 							File.Delete(fileName);
 						}
-						catch(Exception exc)
+						catch(Exception exc) when(!exc.IsCritical())
 						{
-							if(exc.IsCritical())
-							{
-								throw;
-							}
 						}
 					}
 				}
@@ -1022,7 +1018,9 @@ namespace gitter.Git
 			Repository.Head.NotifyRelogRecordAdded();
 			Repository.OnStateChanged();
 			Refresh();
-			return commit;
+			var result = new CommitResult(commit, output);
+			OnCommitted(result);
+			return result;
 		}
 
 		public string LoadCommitMessage()
@@ -1041,12 +1039,8 @@ namespace gitter.Git
 					return string.Empty;
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return string.Empty;
 			}
 		}
@@ -1067,12 +1061,8 @@ namespace gitter.Git
 					File.WriteAllText(fileName, message);
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 		}
 

@@ -36,7 +36,7 @@ namespace gitter.Framework.Configuration
 
 			public XmlReaderContext(XmlDocument document)
 			{
-				Verify.Argument.IsNotNull(document, "document");
+				Verify.Argument.IsNotNull(document, nameof(document));
 				
 				_document = document;
 				_node = new Stack<XmlNode>();
@@ -124,7 +124,7 @@ namespace gitter.Framework.Configuration
 
 			public XmlWriterContext(XmlDocument document)
 			{
-				Verify.Argument.IsNotNull(document, "document");
+				Verify.Argument.IsNotNull(document, nameof(document));
 				
 				_document = document;
 				_node = new Stack<XmlNode>();
@@ -1020,7 +1020,7 @@ namespace gitter.Framework.Configuration
 
 		public XmlAdapter(Stream stream)
 		{
-			Verify.Argument.IsNotNull(stream, "stream");
+			Verify.Argument.IsNotNull(stream, nameof(stream));
 
 			_stream = stream;
 		}

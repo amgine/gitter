@@ -40,7 +40,7 @@ namespace gitter.Redmine
 
 		internal RedmineObjectsCacheBase(RedmineServiceContext context)
 		{
-			Verify.Argument.IsNotNull(context, "context");
+			Verify.Argument.IsNotNull(context, nameof(context));
 
 			_cache = new Dictionary<int, T>();
 			_context = context;
@@ -65,7 +65,7 @@ namespace gitter.Redmine
 
 		internal T Lookup(XmlNode node)
 		{
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			var id = RedmineUtility.LoadInt(node[RedmineObject.IdProperty.XmlNodeName]);
 			T obj;
@@ -141,7 +141,7 @@ namespace gitter.Redmine
 
 		protected IEnumerable<T> Select(XmlNode node)
 		{
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			foreach(XmlNode child in node.ChildNodes)
 			{
@@ -161,7 +161,7 @@ namespace gitter.Redmine
 
 		internal bool Remove(T item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			lock(SyncRoot)
 			{

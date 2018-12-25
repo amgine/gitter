@@ -36,7 +36,7 @@ namespace gitter.TeamCity
 
 		internal TeamCityObjectsCacheBase(TeamCityServiceContext context)
 		{
-			Verify.Argument.IsNotNull(context, "context");
+			Verify.Argument.IsNotNull(context, nameof(context));
 
 			_cache = new Dictionary<string, T>();
 			_context = context;
@@ -61,7 +61,7 @@ namespace gitter.TeamCity
 
 		internal T Lookup(XmlNode node)
 		{
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			var id = TeamCityUtility.LoadString(node.Attributes[TeamCityObject.IdProperty.XmlNodeName]);
 			T obj;
@@ -99,7 +99,7 @@ namespace gitter.TeamCity
 
 		protected IEnumerable<T> Select(XmlNode node)
 		{
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			foreach(XmlNode child in node.ChildNodes)
 			{
@@ -119,7 +119,7 @@ namespace gitter.TeamCity
 
 		internal bool Remove(T item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			lock(SyncRoot)
 			{

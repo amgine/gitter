@@ -39,7 +39,7 @@ namespace gitter.Git.Gui
 		public RepositorySubmodulesListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgSubmodules"], Resources.StrSubmodules)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

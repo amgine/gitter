@@ -28,7 +28,7 @@ namespace gitter.Framework.Controls
 
 		internal CustomListBoxSelectedItemsCollection(CustomListBox listBox)
 		{
-			Verify.Argument.IsNotNull(listBox, "listBox");
+			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
 			_listBox = listBox;
 		}

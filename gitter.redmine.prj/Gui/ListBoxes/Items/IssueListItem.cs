@@ -296,7 +296,7 @@ namespace gitter.Redmine.Gui
 		public IssueListItem(Issue issue)
 			: base(issue)
 		{
-			Verify.Argument.IsNotNull(issue, "issue");
+			Verify.Argument.IsNotNull(issue, nameof(issue));
 		}
 
 		protected override void OnListBoxAttached()

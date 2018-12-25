@@ -92,6 +92,8 @@
     <Compile Include="Remotes\RemotesUtility.cs" />
     <Compile Include="Revision\RevisionParentsCollection.cs" />
     <Compile Include="Revision\RevisionReferencesCollection.cs" />
+    <Compile Include="Tree\CommitResult.cs" />
+    <Compile Include="Tree\CommitResultEventArgs.cs" />
     <Compile Include="Tree\TreeCommit.cs" />
     <Compile Include="Tree\RevisionTreeSource.cs" />
     <Compile Include="Tree\TreeSourceBase.cs" />

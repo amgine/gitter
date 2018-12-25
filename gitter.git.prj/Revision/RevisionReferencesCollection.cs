@@ -31,10 +31,7 @@ namespace gitter.Git
 		public event EventHandler Changed;
 
 		private void OnChanged()
-		{
-			var handler = Changed;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> Changed?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -55,10 +52,7 @@ namespace gitter.Git
 
 		#region Properties
 
-		public object SyncRoot
-		{
-			get { return _container; }
-		}
+		public object SyncRoot => _container;
 
 		public int Count
 		{
@@ -195,7 +189,7 @@ namespace gitter.Git
 		internal void Rename(string oldName, Reference reference)
 		{
 			Assert.IsNeitherNullNorWhitespace(oldName);
-			Verify.Argument.IsNotNull(reference, "reference");
+			Verify.Argument.IsNotNull(reference, nameof(reference));
 
 			lock(SyncRoot)
 			{
@@ -207,7 +201,7 @@ namespace gitter.Git
 
 		internal void Add(Reference reference)
 		{
-			Verify.Argument.IsNotNull(reference, "reference");
+			Verify.Argument.IsNotNull(reference, nameof(reference));
 
 			lock(SyncRoot)
 			{

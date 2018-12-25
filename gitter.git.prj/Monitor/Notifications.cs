@@ -138,17 +138,12 @@ namespace gitter.Git
 
 	sealed class WorktreeUpdatedNotification : RepositoryChangedNotification
 	{
-		private readonly string _path;
-
 		public WorktreeUpdatedNotification(string path)
 		{
-			_path = path;
+			Path = path;
 		}
 
-		public string Path
-		{
-			get { return _path; }
-		}
+		public string Path { get; }
 
 		public override object NotificationType
 		{
@@ -165,44 +160,32 @@ namespace gitter.Git
 	/// <summary>Branch created/deleted/reset.</summary>
 	sealed class BranchChangedNotification : RepositoryChangedNotification
 	{
-		private readonly string _name;
-		private readonly bool _remote;
-
 		public BranchChangedNotification(string name, bool remote)
 		{
-			_name = name;
-			_remote = remote;
+			Name     = name;
+			IsRemote = remote;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public bool IsRemote
-		{
-			get { return _remote; }
-		}
+		public bool IsRemote { get; }
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.BranchChanged; }
-		}
+		public override object NotificationType => RepositoryNotifications.BranchChanged;
 
 		public override bool Apply(Repository repository)
 		{
 			var branchInformation = repository.Accessor.QueryBranch.Invoke(
-				new QueryBranchParameters(_name, _remote));
+				new QueryBranchParameters(Name, IsRemote));
 			if(branchInformation == null)
 			{
-				if(_remote)
+				if(IsRemote)
 				{
 					var refs = repository.Refs.Remotes;
 					lock(refs.SyncRoot)
 					{
-						if(refs.Contains(_name))
+						if(refs.Contains(Name))
 						{
-							refs.NotifyRemoved(_name);
+							refs.NotifyRemoved(Name);
 						}
 						else
 						{
@@ -215,9 +198,9 @@ namespace gitter.Git
 					var refs = repository.Refs.Heads;
 					lock(refs.SyncRoot)
 					{
-						if(refs.Contains(_name))
+						if(refs.Contains(Name))
 						{
-							refs.NotifyRemoved(_name);
+							refs.NotifyRemoved(Name);
 						}
 						else
 						{
@@ -228,12 +211,12 @@ namespace gitter.Git
 			}
 			else
 			{
-				if(_remote)
+				if(IsRemote)
 				{
 					var refs = repository.Refs.Remotes;
 					lock(refs.SyncRoot)
 					{
-						var branch = refs.TryGetItem(_name);
+						var branch = refs.TryGetItem(Name);
 						if(branch == null)
 						{
 							refs.NotifyCreated(branchInformation);
@@ -256,7 +239,7 @@ namespace gitter.Git
 					var refs = repository.Refs.Heads;
 					lock(refs.SyncRoot)
 					{
-						var branch = refs.TryGetItem(_name);
+						var branch = refs.TryGetItem(Name);
 						if(branch == null)
 						{
 							refs.NotifyCreated(branchInformation);
@@ -282,35 +265,27 @@ namespace gitter.Git
 	/// <summary>Tag created/deleted.</summary>
 	sealed class TagChangedNotification : RepositoryChangedNotification
 	{
-		private readonly string _name;
-
 		public TagChangedNotification(string name)
 		{
-			_name = name;
+			Name = name;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.TagChanged; }
-		}
+		public override object NotificationType => RepositoryNotifications.TagChanged;
 
 		public override bool Apply(Repository repository)
 		{
 			var tagInformation = repository.Accessor.QueryTag.Invoke(
-				new QueryTagParameters(_name));
+				new QueryTagParameters(Name));
 			if(tagInformation == null)
 			{
 				var refs = repository.Refs.Tags;
 				lock(refs.SyncRoot)
 				{
-					if(refs.Contains(_name))
+					if(refs.Contains(Name))
 					{
-						refs.NotifyRemoved(_name);
+						refs.NotifyRemoved(Name);
 					}
 					else
 					{
@@ -323,7 +298,7 @@ namespace gitter.Git
 				var refs = repository.Refs.Tags;
 				lock(refs.SyncRoot)
 				{
-					var tag = refs.TryGetItem(_name);
+					var tag = refs.TryGetItem(Name);
 					if(tag == null)
 					{
 						refs.NotifyCreated(tagInformation);
@@ -332,7 +307,7 @@ namespace gitter.Git
 					{
 						if(tag.Revision.Hash != tagInformation.SHA1)
 						{
-							refs.NotifyRemoved(_name);
+							refs.NotifyRemoved(Name);
 							refs.NotifyCreated(tagInformation);
 						}
 						else
@@ -353,10 +328,7 @@ namespace gitter.Git
 		{
 		}
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.StashChanged; }
-		}
+		public override object NotificationType => RepositoryNotifications.StashChanged;
 
 		public override bool Apply(Repository repository)
 		{
@@ -377,52 +349,30 @@ namespace gitter.Git
 	/// <summary>Remote deleted.</summary>
 	sealed class RemoteRemovedNotification : RepositoryChangedNotification
 	{
-		private readonly string _name;
-
 		public RemoteRemovedNotification(string name)
 		{
-			_name = name;
+			Name = name;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.RemoteRemoved; }
-		}
+		public override object NotificationType => RepositoryNotifications.RemoteRemoved;
 
-		public override bool Apply(Repository repository)
-		{
-			return false;
-		}
+		public override bool Apply(Repository repository) => false;
 	}
 
 	/// <summary>Remote created.</summary>
 	sealed class RemoteCreatedNotification : RepositoryChangedNotification
 	{
-		private readonly string _name;
-
 		public RemoteCreatedNotification(string name)
 		{
-			_name = name;
+			Name = name;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.RemoteCreated; }
-		}
+		public override object NotificationType => RepositoryNotifications.RemoteCreated;
 
-		public override bool Apply(Repository repository)
-		{
-			return false;
-		}
+		public override bool Apply(Repository repository) => false;
 	}
 }

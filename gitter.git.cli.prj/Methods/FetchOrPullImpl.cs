@@ -45,7 +45,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void Invoke(TParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters, false);
 			var output = _commandExecutor.ExecuteCommand(command, null, CommandExecutionFlags.None);
@@ -54,7 +54,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			if(progress != null)
 			{

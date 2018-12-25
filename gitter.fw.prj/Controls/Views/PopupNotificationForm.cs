@@ -33,7 +33,7 @@ namespace gitter.Framework.Controls
 
 		public PopupNotificationForm(NotificationContent content)
 		{
-			if(content == null) throw new ArgumentNullException("content");
+			Verify.Argument.IsNotNull(content, nameof(content));
 
 			_content		= content;
 			Text			= content.Text;
@@ -46,8 +46,8 @@ namespace gitter.Framework.Controls
 			ShowIcon		= false;
 			ControlBox		= false;
 			MinimizeBox		= false;
-			MaximizeBox		= true;
-			TopMost			= true;
+			MaximizeBox		= false;
+			TopMost			= false;
 
 			var header = new PopupNotificationHeader()
 			{
@@ -70,10 +70,7 @@ namespace gitter.Framework.Controls
 			AssignEventHandlers(this);
 		}
 
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
+		private ViewRenderer Renderer => ViewManager.Renderer;
 
 		private void AssignEventHandlers(Control control)
 		{
@@ -119,7 +116,13 @@ namespace gitter.Framework.Controls
 
 		public new void Show()
 		{
-			User32.ShowWindow(this.Handle, 8);
+			Owner = GitterApplication.MainForm;
+			if(!IsHandleCreated)
+			{
+				CreateControl();
+			}
+			User32.ShowWindow(this.Handle, 4);
+			User32.SetWindowPos(this.Handle, new IntPtr(-1), 0, 0, 0, 0, 0x0010 | 0x0002 | 0x0001);
 			if(_content.Timeout != TimeSpan.MaxValue)
 			{
 				_timer = new Timer();
@@ -131,12 +134,11 @@ namespace gitter.Framework.Controls
 
 		protected override void DefWndProc(ref Message m)
 		{
-			const int WM_MOUSEACTIVATE = 0x21;
 			const int MA_NOACTIVATE = 0x0003;
 
 			switch(m.Msg)
 			{
-				case WM_MOUSEACTIVATE:
+				case (int)WM.MOUSEACTIVATE:
 					m.Result = (IntPtr)MA_NOACTIVATE;
 					return;
 			}
@@ -149,18 +151,16 @@ namespace gitter.Framework.Controls
 			Close();
 		}
 
-		protected override bool ShowWithoutActivation
-		{
-			get { return true; }
-		}
+		protected override bool ShowWithoutActivation => true;
 
 		protected override CreateParams CreateParams
 		{
 			get
 			{
-				const int WS_EX_TOOLWINDOW = 0x80;
+				const int WS_EX_TOOLWINDOW = 0x00000080;
+				const int WS_EX_NOACTIVATE = 0x08000000;
 				var cp = base.CreateParams;
-				cp.ExStyle |= WS_EX_TOOLWINDOW;
+				cp.ExStyle |= WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
 				return cp;
 			}
 		}

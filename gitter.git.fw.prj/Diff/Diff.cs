@@ -49,8 +49,8 @@ namespace gitter.Git
 		/// <param name="files">List of file diffs.</param>
 		public Diff(DiffType type, IList<DiffFile> files)
 		{
-			Verify.Argument.IsNotNull(files, "files");
-			Verify.Argument.HasNoNullItems(files, "files");
+			Verify.Argument.IsNotNull(files, nameof(files));
+			Verify.Argument.HasNoNullItems(files, nameof(files));
 
 			_type = type;
 			_files = files;
@@ -60,21 +60,21 @@ namespace gitter.Git
 
 		public void Add(DiffFile diffFile)
 		{
-			Verify.Argument.IsNotNull(diffFile, "diffFile");
+			Verify.Argument.IsNotNull(diffFile, nameof(diffFile));
 
 			_files.Add(diffFile);
 		}
 
 		public void Insert(int index, DiffFile diffFile)
 		{
-			Verify.Argument.IsNotNull(diffFile, "diffFile");
+			Verify.Argument.IsNotNull(diffFile, nameof(diffFile));
 
 			_files.Insert(index, diffFile);
 		}
 
 		public bool Remove(DiffFile diffFile)
 		{
-			Verify.Argument.IsNotNull(diffFile, "diffFile");
+			Verify.Argument.IsNotNull(diffFile, nameof(diffFile));
 
 			return _files.Remove(diffFile);
 		}
@@ -84,21 +84,12 @@ namespace gitter.Git
 			_files.RemoveAt(index);
 		}
 
-		public DiffType Type
-		{
-			get { return _type; }
-		}
+		public DiffType Type => _type;
 
 		/// <summary>Diff is empty.</summary>
-		public bool IsEmpty
-		{
-			get { return _files.Count == 0; }
-		}
+		public bool IsEmpty => _files.Count == 0;
 
-		public DiffFile this[int index]
-		{
-			get { return _files[index]; }
-		}
+		public DiffFile this[int index] => _files[index];
 
 		public DiffFile this[string name]
 		{
@@ -121,10 +112,7 @@ namespace gitter.Git
 			}
 		}
 
-		public int FilesCount
-		{
-			get { return _files.Count; }
-		}
+		public int FilesCount => _files.Count;
 
 		#region IEnumerable<DiffFile> Members
 
@@ -157,10 +145,7 @@ namespace gitter.Git
 			return new Diff(_type, files);
 		}
 
-		object ICloneable.Clone()
-		{
-			return Clone();
-		}
+		object ICloneable.Clone() => Clone();
 
 		#endregion
 

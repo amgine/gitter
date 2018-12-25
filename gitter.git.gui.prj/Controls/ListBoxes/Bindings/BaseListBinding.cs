@@ -53,8 +53,8 @@ namespace gitter.Git.Gui.Controls
 
 		protected BaseListBinding(CustomListBoxItemsCollection itemHost, GitObjectsCollection<TObject, TEventArgs> collection)
 		{
-			Verify.Argument.IsNotNull(itemHost, "itemHost");
-			Verify.Argument.IsNotNull(collection, "collection");
+			Verify.Argument.IsNotNull(itemHost, nameof(itemHost));
+			Verify.Argument.IsNotNull(collection, nameof(collection));
 
 			_itemHost = itemHost;
 			_collection = collection;

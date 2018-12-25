@@ -27,11 +27,9 @@ namespace gitter.Framework.Controls
 
 	public class NotificationContent : Control
 	{
-		private TimeSpan _timeout;
-
 		public NotificationContent()
 		{
-			_timeout = TimeSpan.FromSeconds(10.0);
+			Timeout = TimeSpan.FromSeconds(10.0);
 			SetStyle(
 				ControlStyles.ContainerControl |
 				ControlStyles.Selectable |
@@ -55,11 +53,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public TimeSpan Timeout
-		{
-			get { return _timeout; }
-			set { _timeout = value; }
-		}
+		public TimeSpan Timeout { get; set; }
 
 		protected override void OnPaintBackground(PaintEventArgs pevent)
 		{

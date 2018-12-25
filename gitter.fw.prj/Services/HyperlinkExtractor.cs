@@ -22,8 +22,6 @@ namespace gitter.Framework.Services
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Text.RegularExpressions;
 
 	/// <summary>Extracts hyperlinks from plain text.</summary>

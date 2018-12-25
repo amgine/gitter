@@ -40,14 +40,8 @@ namespace gitter.Git.Gui.Views
 			Text = Resources.StrGit;
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgGit"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgGit"];
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 	}
 }

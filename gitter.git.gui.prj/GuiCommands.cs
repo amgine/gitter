@@ -80,14 +80,14 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus Fetch(IWin32Window parent, Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			return Fetch(parent, repository, null);
 		}
 
 		public static GuiCommandStatus Fetch(IWin32Window parent, Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
 
 			return Fetch(parent, remote.Repository, remote);
 		}
@@ -129,14 +129,14 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus Pull(IWin32Window parent, Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			return Pull(parent, repository, null);
 		}
 
 		public static GuiCommandStatus Pull(IWin32Window parent, Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
 
 			return Pull(parent, remote.Repository, remote);
 		}
@@ -183,7 +183,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus Prune(IWin32Window parent, Remote remote)
 		{
-			Verify.Argument.IsNotNull(remote, "remote");
+			Verify.Argument.IsNotNull(remote, nameof(remote));
 
 			try
 			{
@@ -281,7 +281,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus FormatPatch(IWin32Window parent, IRevisionPointer revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			const string patchExt = ".patch";
 			string outputPath = null;
@@ -354,7 +354,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus RebaseHeadTo(IWin32Window parent, IRevisionPointer revision)
 		{
-			Verify.Argument.IsNotNull(revision, "revision");
+			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			try
 			{
@@ -380,7 +380,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus Rebase(IWin32Window parent, Repository repository, RebaseControl control)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			try
 			{
@@ -406,7 +406,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus CherryPick(IWin32Window parent, Repository repository, CherryPickControl control)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			try
 			{
@@ -432,7 +432,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus Revert(IWin32Window parent, Repository repository, RevertControl control)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			try
 			{
@@ -482,7 +482,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
 			try
 			{
@@ -508,7 +508,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
 		{
-			Verify.Argument.IsNotNull(stash, "stash");
+			Verify.Argument.IsNotNull(stash, nameof(stash));
 
 			try
 			{
@@ -534,7 +534,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
 			try
 			{
@@ -560,7 +560,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
 		{
-			Verify.Argument.IsNotNull(stash, "stash");
+			Verify.Argument.IsNotNull(stash, nameof(stash));
 
 			try
 			{
@@ -586,7 +586,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedState stashedState)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
 			try
 			{
@@ -611,7 +611,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedStatesCollection stash)
 		{
-			Verify.Argument.IsNotNull(stash, "stash");
+			Verify.Argument.IsNotNull(stash, nameof(stash));
 
 			try
 			{
@@ -640,7 +640,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus ClearStash(IWin32Window parent, StashedStatesCollection stash)
 		{
-			Verify.Argument.IsNotNull(stash, "stash");
+			Verify.Argument.IsNotNull(stash, nameof(stash));
 
 			try
 			{
@@ -665,7 +665,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus UpdateSubmodule(IWin32Window parent, Submodule submodule)
 		{
-			Verify.Argument.IsNotNull(submodule, "submodule");
+			Verify.Argument.IsNotNull(submodule, nameof(submodule));
 
 			if(parent == null)
 			{
@@ -695,7 +695,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus UpdateSubmodules(IWin32Window parent, SubmodulesCollection submodules)
 		{
-			Verify.Argument.IsNotNull(submodules, "submodules");
+			Verify.Argument.IsNotNull(submodules, nameof(submodules));
 
 			if(parent == null)
 			{
@@ -724,7 +724,7 @@ namespace gitter.Git.Gui
 
 		public static GuiCommandStatus GarbageCollect(IWin32Window parent, Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			try
 			{

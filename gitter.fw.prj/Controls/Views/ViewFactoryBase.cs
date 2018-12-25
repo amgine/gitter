@@ -118,7 +118,7 @@ namespace gitter.Framework.Controls
 		/// <returns>Created view.</returns>
 		public ViewBase CreateView(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			var view = CreateViewCore(environment);
 			if(view != null)

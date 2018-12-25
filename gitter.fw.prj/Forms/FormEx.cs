@@ -70,7 +70,7 @@ namespace gitter.Framework
 
 		public void SetTaskbarOverlayIcon(Icon icon, string description)
 		{
-			Verify.Argument.IsNotNull(icon, "icon");
+			Verify.Argument.IsNotNull(icon, nameof(icon));
 
 			if(CanUseWin7Api)
 			{

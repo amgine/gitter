@@ -33,7 +33,7 @@ namespace gitter.Git.Gui
 
 		public RepositoryMenu(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 

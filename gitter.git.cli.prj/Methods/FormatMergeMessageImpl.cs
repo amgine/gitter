@@ -49,7 +49,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public string Invoke(FormatMergeMessageParameters parameters)
 		{
-			Verify.Argument.IsNotNull(parameters, "parameters");
+			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			if(parameters.Revisions.Count == 1)
 			{

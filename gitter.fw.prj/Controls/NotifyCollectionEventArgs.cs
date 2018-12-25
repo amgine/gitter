@@ -25,14 +25,6 @@ namespace gitter.Framework.Controls
 	/// <summary>Arguments for collection notification events.</summary>
 	public sealed class NotifyCollectionEventArgs : EventArgs
 	{
-		#region Data
-
-		private readonly int _startIndex;
-		private readonly int _endIndex;
-		private readonly NotifyEvent _event;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Create <see cref="NotifyCollectionEventArgs"/>.</summary>
@@ -40,9 +32,9 @@ namespace gitter.Framework.Controls
 		/// <param name="evt">Change type.</param>
 		public NotifyCollectionEventArgs(int index, NotifyEvent evt)
 		{
-			_startIndex = index;
-			_endIndex = index;
-			_event = evt;
+			StartIndex = index;
+			EndIndex = index;
+			Event = evt;
 		}
 
 		/// <summary>Create <see cref="NotifyCollectionEventArgs"/>.</summary>
@@ -51,9 +43,9 @@ namespace gitter.Framework.Controls
 		/// <param name="evt">Change type.</param>
 		public NotifyCollectionEventArgs(int startIndex, int endIndex, NotifyEvent evt)
 		{
-			_startIndex = startIndex;
-			_endIndex = endIndex;
-			_event = evt;
+			StartIndex = startIndex;
+			EndIndex   = endIndex;
+			Event      = evt;
 		}
 
 		#endregion
@@ -61,28 +53,16 @@ namespace gitter.Framework.Controls
 		#region Properties
 
 		/// <summary>Number of modified items.</summary>
-		public int ModifiedItems
-		{
-			get { return _endIndex - _startIndex + 1; }
-		}
+		public int ModifiedItems => EndIndex - StartIndex + 1;
 
 		/// <summary>Index of first item in modified range.</summary>
-		public int StartIndex
-		{
-			get { return _startIndex; }
-		}
+		public int StartIndex { get; }
 
 		/// <summary>Index of last item in modified range.</summary>
-		public int EndIndex
-		{
-			get { return _endIndex; }
-		}
+		public int EndIndex { get; }
 
 		/// <summary>Change type.</summary>
-		public NotifyEvent Event
-		{
-			get { return _event; }
-		}
+		public NotifyEvent Event { get; }
 
 		#endregion
 	}

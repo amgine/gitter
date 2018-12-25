@@ -29,30 +29,28 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class ConflictedFileMenu : ContextMenuStrip
 	{
-		private readonly TreeFile _file;
-
 		public ConflictedFileMenu(TreeFile file)
 		{
-			Verify.Argument.IsValidGitObject(file, "file");
-			Verify.Argument.AreEqual(StagedStatus.Unstaged, file.StagedStatus & StagedStatus.Unstaged, "file",
+			Verify.Argument.IsValidGitObject(file, nameof(file));
+			Verify.Argument.AreEqual(StagedStatus.Unstaged, file.StagedStatus & StagedStatus.Unstaged, nameof(file),
 				"This file is not unstaged.");
-			Verify.Argument.AreNotEqual(ConflictType.None, file.ConflictType, "file",
+			Verify.Argument.AreNotEqual(ConflictType.None, file.ConflictType, nameof(file),
 				"This file is not in conflicted state.");
 
-			_file = file;
+			File = file;
 
-			Items.Add(GuiItemFactory.GetMergeToolItem<ToolStripMenuItem>(_file));
-			if( _file.ConflictType != ConflictType.DeletedByUs &&
-				_file.ConflictType != ConflictType.DeletedByThem &&
-				_file.ConflictType != ConflictType.AddedByThem &&
-				_file.ConflictType != ConflictType.AddedByUs)
+			Items.Add(GuiItemFactory.GetMergeToolItem<ToolStripMenuItem>(File));
+			if( File.ConflictType != ConflictType.DeletedByUs &&
+				File.ConflictType != ConflictType.DeletedByThem &&
+				File.ConflictType != ConflictType.AddedByThem &&
+				File.ConflictType != ConflictType.AddedByUs)
 			{
 				var mergeTools = new ToolStripMenuItem("Select Merge Tool");
 				foreach(var tool in MergeTool.KnownTools)
 				{
 					if(tool.SupportsWin)
 					{
-						mergeTools.DropDownItems.Add(GuiItemFactory.GetMergeToolItem<ToolStripMenuItem>(_file, tool));
+						mergeTools.DropDownItems.Add(GuiItemFactory.GetMergeToolItem<ToolStripMenuItem>(File, tool));
 					}
 				}
 				Items.Add(mergeTools);
@@ -60,29 +58,26 @@ namespace gitter.Git.Gui.Controls
 
 			Items.Add(new ToolStripSeparator());
 
-			switch(_file.ConflictType)
+			switch(File.ConflictType)
 			{
 				case ConflictType.DeletedByThem:
 				case ConflictType.DeletedByUs:
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.KeepModifiedFile));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.DeleteFile));
+					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.KeepModifiedFile));
+					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.DeleteFile));
 					break;
 				case ConflictType.AddedByThem:
 				case ConflictType.AddedByUs:
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.KeepModifiedFile));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.DeleteFile));
+					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.KeepModifiedFile));
+					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.DeleteFile));
 					break;
 				default:
-					Items.Add(GuiItemFactory.GetMarkAsResolvedItem<ToolStripMenuItem>(_file));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.UseOurs));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(_file, ConflictResolution.UseTheirs));
+					Items.Add(GuiItemFactory.GetMarkAsResolvedItem<ToolStripMenuItem>(File));
+					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.UseOurs));
+					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.UseTheirs));
 					break;
 			}
 		}
 
-		public TreeFile File
-		{
-			get { return _file; }
-		}
+		public TreeFile File { get; }
 	}
 }

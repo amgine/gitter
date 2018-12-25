@@ -49,7 +49,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public bool Parse(ITextSegment textSegment)
 			{
-				Verify.Argument.IsNotNull(textSegment, "textSegment");
+				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
 				Verify.State.IsFalse(_offset == 41, "Field is already completed.");
 
 				if(_offset < 40)
@@ -100,7 +100,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public bool Parse(ITextSegment textSegment)
 			{
-				Verify.Argument.IsNotNull(textSegment, "textSegment");
+				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
 				Verify.State.IsFalse(_isCompleted, "Field is already completed.");
 
 				if(_offset == 0 && textSegment.Length > 0)
@@ -146,7 +146,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public bool Parse(ITextSegment textSegment)
 			{
-				Verify.Argument.IsNotNull(textSegment, "textSegment");
+				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
 				Verify.State.IsFalse(_isCompleted, "Field is already completed.");
 
 				while(textSegment.Length > 0)
@@ -197,7 +197,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public bool Parse(ITextSegment textSegment)
 			{
-				Verify.Argument.IsNotNull(textSegment, "textSegment");
+				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
 				Verify.State.IsFalse(_isCompleted, "Field is already completed.");
 
 				if(textSegment.Length > 0)
@@ -327,7 +327,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public bool Parse(ITextSegment textSegment)
 			{
-				Verify.Argument.IsNotNull(textSegment, "textSegment");
+				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
 				Verify.State.IsFalse(_isCompleted, "Field is already completed.");
 
 				while(textSegment.Length > 0)
@@ -437,7 +437,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public LogParser(Dictionary<Hash, RevisionData> cache)
 		{
-			Verify.Argument.IsNotNull(cache, "cache");
+			Verify.Argument.IsNotNull(cache, nameof(cache));
 
 			_cache = cache;
 			_log   = new List<RevisionData>();
@@ -521,7 +521,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void Parse(ITextSegment textSegment)
 		{
-			Verify.Argument.IsNotNull(textSegment, "textSegment");
+			Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
 
 			while(textSegment.Length > 0)
 			{

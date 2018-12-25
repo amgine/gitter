@@ -34,7 +34,7 @@ namespace gitter.Redmine.Gui
 
 		public VersionMenu(ProjectVersion version)
 		{
-			Verify.Argument.IsNotNull(version, "version");
+			Verify.Argument.IsNotNull(version, nameof(version));
 
 			_version = version;
 

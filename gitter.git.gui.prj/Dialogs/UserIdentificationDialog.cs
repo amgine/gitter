@@ -26,7 +26,6 @@ namespace gitter.Git.Gui.Dialogs
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
-	using gitter.Framework.Options;
 
 	using gitter.Git.AccessLayer;
 
@@ -47,7 +46,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public UserIdentificationDialog(IWorkingEnvironment environment, Repository repository)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 			_repository = repository;

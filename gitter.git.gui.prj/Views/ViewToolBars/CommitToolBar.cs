@@ -47,7 +47,7 @@ namespace gitter.Git.Gui.Views
 
 		public CommitToolbar(CommitView commitView)
 		{
-			Verify.Argument.IsNotNull(commitView, "commitView");
+			Verify.Argument.IsNotNull(commitView, nameof(commitView));
 
 			_commitView = commitView;
 			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],

@@ -79,7 +79,7 @@ namespace gitter.Framework.Controls
 
 		internal Rectangle GetPanelBounds(FlowPanel panel)
 		{
-			Verify.Argument.IsNotNull(panel, "panel");
+			Verify.Argument.IsNotNull(panel, nameof(panel));
 			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
 			var graphics = GraphicsUtility.MeasurementGraphics;
@@ -101,7 +101,7 @@ namespace gitter.Framework.Controls
 
 		internal void InvalidatePanel(FlowPanel panel, Rectangle rect)
 		{
-			Verify.Argument.IsNotNull(panel, "panel");
+			Verify.Argument.IsNotNull(panel, nameof(panel));
 			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
 			var graphics = GraphicsUtility.MeasurementGraphics;
@@ -135,7 +135,7 @@ namespace gitter.Framework.Controls
 
 		internal void InvalidatePanel(FlowPanel panel)
 		{
-			Verify.Argument.IsNotNull(panel, "panel");
+			Verify.Argument.IsNotNull(panel, nameof(panel));
 			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
 
 			var graphics = GraphicsUtility.MeasurementGraphics;

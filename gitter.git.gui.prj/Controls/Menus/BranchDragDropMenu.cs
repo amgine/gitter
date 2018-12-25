@@ -33,7 +33,7 @@ namespace gitter.Git.Gui.Controls
 
 		public BranchDragDropMenu(Branch branch)
 		{
-			Verify.Argument.IsValidGitObject(branch, "branch");
+			Verify.Argument.IsValidGitObject(branch, nameof(branch));
 
 			_branch = branch;
 

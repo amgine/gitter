@@ -27,43 +27,26 @@ namespace gitter.Git.AccessLayer
 	/// <summary>Tag description.</summary>
 	public sealed class TagData : INamedObject
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly Hash _sha1;
-		private readonly TagType _tagType;
-
-		#endregion
-
 		#region .ctor
 
 		public TagData(string name, Hash sha1, TagType tagType)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			_name    = name;
-			_sha1    = sha1;
-			_tagType = tagType;
+			Name    = name;
+			SHA1    = sha1;
+			TagType = tagType;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public Hash SHA1
-		{
-			get { return _sha1; }
-		}
+		public Hash SHA1 { get; }
 
-		public TagType TagType
-		{
-			get { return _tagType; }
-		}
+		public TagType TagType { get; }
 
 		#endregion
 
@@ -75,10 +58,7 @@ namespace gitter.Git.AccessLayer
 		/// <returns>
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 
 		#endregion
 	}

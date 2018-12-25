@@ -108,7 +108,7 @@ namespace gitter.Framework.Configuration
 		/// <returns>Subsection with specified name.</returns>
 		public Section GetCreateEmptySection(string name)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			Section section;
 			if(!_sections.TryGetValue(name, out section))
@@ -130,7 +130,7 @@ namespace gitter.Framework.Configuration
 		/// <returns>Subsection with specified name.</returns>
 		public Section GetCreateSection(string name)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			Section section;
 			if(!_sections.TryGetValue(name, out section))
@@ -165,14 +165,14 @@ namespace gitter.Framework.Configuration
 
 		public void AddSection(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			_sections.Add(section.Name, section);
 		}
 
 		public Section CreateSection(string name)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			var section = new Section(name);
 			_sections.Add(name, section);
@@ -205,7 +205,7 @@ namespace gitter.Framework.Configuration
 
 		public void AddParameter(Parameter parameter)
 		{
-			Verify.Argument.IsNotNull(parameter, "parameter");
+			Verify.Argument.IsNotNull(parameter, nameof(parameter));
 
 			_parameters.Add(parameter.Name, parameter);
 		}
@@ -245,7 +245,7 @@ namespace gitter.Framework.Configuration
 
 		public void SetValue<T>(string name, T value)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			Parameter parameter;
 			if(!_parameters.TryGetValue(name, out parameter))
@@ -296,9 +296,6 @@ namespace gitter.Framework.Configuration
 		/// <returns>
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

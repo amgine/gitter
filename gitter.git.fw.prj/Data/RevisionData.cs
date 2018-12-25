@@ -28,7 +28,6 @@ namespace gitter.Git.AccessLayer
 	{
 		#region Data
 
-		private readonly Hash _sha1;
 		private Hash _treeHash;
 		private RevisionData[] _parents;
 		private RevisionData[] _children;
@@ -41,26 +40,21 @@ namespace gitter.Git.AccessLayer
 		private string _authorName;
 		private string _authorEmail;
 
-		private RevisionField _dataFlags;
-
 		#endregion
 
 		#region .ctor
 
 		public RevisionData(Hash sha1)
 		{
-			_sha1 = sha1;
-			_dataFlags = RevisionField.SHA1;
+			SHA1 = sha1;
+			Fields = RevisionField.SHA1;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Hash SHA1
-		{
-			get { return _sha1; }
-		}
+		public Hash SHA1 { get; }
 
 		public Hash TreeHash
 		{
@@ -68,7 +62,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_treeHash = value;
-				_dataFlags |= RevisionField.TreeHash;
+				Fields |= RevisionField.TreeHash;
 			}
 		}
 
@@ -78,7 +72,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_parents = value;
-				_dataFlags |= RevisionField.Parents;
+				Fields |= RevisionField.Parents;
 			}
 		}
 
@@ -88,7 +82,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_children = value;
-				_dataFlags |= RevisionField.Children;
+				Fields |= RevisionField.Children;
 			}
 		}
 
@@ -98,7 +92,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_subject = value;
-				_dataFlags |= RevisionField.Subject;
+				Fields |= RevisionField.Subject;
 			}
 		}
 
@@ -108,7 +102,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_body = value;
-				_dataFlags |= RevisionField.Body;
+				Fields |= RevisionField.Body;
 			}
 		}
 
@@ -118,7 +112,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_commitDate = value;
-				_dataFlags |= RevisionField.CommitDate;
+				Fields |= RevisionField.CommitDate;
 			}
 		}
 
@@ -128,7 +122,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_committerName = value;
-				_dataFlags |= RevisionField.CommitterName;
+				Fields |= RevisionField.CommitterName;
 			}
 		}
 
@@ -138,7 +132,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_committerEmail = value;
-				_dataFlags |= RevisionField.CommitterEmail;
+				Fields |= RevisionField.CommitterEmail;
 			}
 		}
 
@@ -149,7 +143,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_authorDate = value;
-				_dataFlags |= RevisionField.AuthorDate;
+				Fields |= RevisionField.AuthorDate;
 			}
 		}
 
@@ -159,7 +153,7 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_authorName = value;
-				_dataFlags |= RevisionField.AuthorName;
+				Fields |= RevisionField.AuthorName;
 			}
 		}
 
@@ -169,33 +163,22 @@ namespace gitter.Git.AccessLayer
 			set
 			{
 				_authorEmail = value;
-				_dataFlags |= RevisionField.AuthorEmail;
+				Fields |= RevisionField.AuthorEmail;
 			}
 		}
 
-		public RevisionField Fields
-		{
-			get { return _dataFlags; }
-		}
+		public RevisionField Fields { get; private set; }
 
 		#endregion
 
 		#region Methods
 
 		public bool DataValid(RevisionField data)
-		{
-			return (_dataFlags & data) == data;
-		}
+			=> (Fields & data) == data;
 
-		string INamedObject.Name
-		{
-			get { return _sha1.ToString(); }
-		}
+		string INamedObject.Name => SHA1.ToString();
 
-		public override string ToString()
-		{
-			return _sha1.ToString();
-		}
+		public override string ToString() => SHA1.ToString();
 
 		#endregion
 	}

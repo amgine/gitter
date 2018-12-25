@@ -65,7 +65,7 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <param name="provider">Provider of this accessor.</param>
 		public GitCLI(IGitAccessorProvider provider)
 		{
-			Verify.Argument.IsNotNull(provider, "provider");
+			Verify.Argument.IsNotNull(provider, nameof(provider));
 
 			_provider             = provider;
 			_executor             = new GitCommandExecutor(this);
@@ -93,25 +93,13 @@ namespace gitter.Git.AccessLayer.CLI
 
 		/// <summary>Returns provider of this accessor.</summary>
 		/// <value>Provider of this accessor</value>
-		public IGitAccessorProvider Provider
-		{
-			get { return _provider; }
-		}
+		public IGitAccessorProvider Provider => _provider;
 
-		internal OutputParser OutputParser
-		{
-			get { return _outputParser; }
-		}
+		internal OutputParser OutputParser => _outputParser;
 
-		internal CommandBuilder CommandBuilder
-		{
-			get { return _commandBuilder; }
-		}
+		internal CommandBuilder CommandBuilder => _commandBuilder;
 
-		private ICommandExecutor CommandExecutor
-		{
-			get { return _executor; }
-		}
+		private ICommandExecutor CommandExecutor => _executor;
 
 		public string GitExecutablePath
 		{
@@ -133,31 +121,21 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		public bool LogCalls
-		{
-			get;
-			set;
-		}
+		public bool LogCalls { get; set; }
 
-		public Encoding DefaultEncoding
-		{
-			get { return GitProcess.DefaultEncoding; }
-		}
+		public Encoding DefaultEncoding => GitProcess.DefaultEncoding;
 
-		public Version MinimumRequiredGitVersion
-		{
-			get { return _minVersion; }
-		}
+		public Version MinimumRequiredGitVersion => _minVersion;
 
 		public bool EnableAnsiCodepageFallback
 		{
-			get { return GitProcess.EnableAnsiCodepageFallback; }
-			set { GitProcess.EnableAnsiCodepageFallback = value; }
+			get => GitProcess.EnableAnsiCodepageFallback;
+			set => GitProcess.EnableAnsiCodepageFallback = value;
 		}
 
 		public bool AutodetectGitExePath
 		{
-			get { return _autodetectGitExePath; }
+			get => _autodetectGitExePath;
 			set
 			{
 				if(_autodetectGitExePath != value)
@@ -171,7 +149,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public string ManualGitExePath
 		{
-			get { return _manualGitExePath; }
+			get => _manualGitExePath;
 			set
 			{
 				if(_manualGitExePath != value)
@@ -203,51 +181,24 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
-		public IGitAction<InitRepositoryParameters> InitRepository
-		{
-			get { return _init; }
-		}
+		public IGitAction<InitRepositoryParameters> InitRepository => _init;
 
 		/// <summary>Clone existing repository.</summary>
-		public IGitAction<CloneRepositoryParameters> CloneRepository
-		{
-			get { return _clone; }
-		}
+		public IGitAction<CloneRepositoryParameters> CloneRepository => _clone;
 
-		public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig
-		{
-			get { return _queryConfig; }
-		}
+		public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig => _queryConfig;
 
-		public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter
-		{
-			get { return _queryConfigParameter; }
-		}
+		public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter => _queryConfigParameter;
 
-		public IGitAction<AddConfigValueParameters> AddConfigValue
-		{
-			get { return _addConfigValue; }
-		}
+		public IGitAction<AddConfigValueParameters> AddConfigValue => _addConfigValue;
 
-		public IGitAction<SetConfigValueParameters> SetConfigValue
-		{
-			get { return _setConfigValue; }
-		}
+		public IGitAction<SetConfigValueParameters> SetConfigValue => _setConfigValue;
 
-		public IGitAction<UnsetConfigValueParameters> UnsetConfigValue
-		{
-			get { return _unsetConfigValue; }
-		}
+		public IGitAction<UnsetConfigValueParameters> UnsetConfigValue => _unsetConfigValue;
 
-		public IGitAction<RenameConfigSectionParameters> RenameConfigSection
-		{
-			get { return _renameConfigSection; }
-		}
+		public IGitAction<RenameConfigSectionParameters> RenameConfigSection => _renameConfigSection;
 
-		public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection
-		{
-			get { return _deleteConfigSection; }
-		}
+		public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection => _deleteConfigSection;
 
 		#endregion
 
@@ -271,7 +222,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public IRepositoryAccessor CreateRepositoryAccessor(IGitRepository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			return new RepositoryCLI(this, repository);
 		}
@@ -294,7 +245,7 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <param name="section">Section to store parameters.</param>
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			section.SetValue("Path", ManualGitExePath);
 			section.SetValue("Autodetect", AutodetectGitExePath);
@@ -306,7 +257,7 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <param name="section">Section to look for parameters.</param>
 		public void LoadFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			ManualGitExePath           = section.GetValue("Path", string.Empty);
 			AutodetectGitExePath       = section.GetValue("Autodetect", true);

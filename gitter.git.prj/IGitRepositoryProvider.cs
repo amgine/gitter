@@ -22,8 +22,6 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
 	using gitter.Framework;
 	using gitter.Git.AccessLayer;

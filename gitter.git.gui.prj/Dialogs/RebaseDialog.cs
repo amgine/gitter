@@ -37,9 +37,6 @@ namespace gitter.Git.Gui.Dialogs
 			Text = Resources.StrRebase;
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrRebase; }
-		}
+		protected override string ActionVerb => Resources.StrRebase;
 	}
 }

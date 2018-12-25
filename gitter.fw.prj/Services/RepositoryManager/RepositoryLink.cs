@@ -34,7 +34,7 @@ namespace gitter.Framework.Services
 
 		public RepositoryLink(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			_path = section.GetValue("Path", string.Empty);
 			_type = section.GetValue("Type", string.Empty);
@@ -71,7 +71,7 @@ namespace gitter.Framework.Services
 
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			section.SetValue("Path", _path);
 			section.SetValue("Type", _type);

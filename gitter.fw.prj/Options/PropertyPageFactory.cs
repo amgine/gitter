@@ -83,7 +83,7 @@ namespace gitter.Framework.Options
 
 		public PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			if(_getPropertyPage != null)
 			{

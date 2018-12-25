@@ -42,9 +42,9 @@ namespace gitter.Git.Gui.Controls.ListBoxes
 
 		public TreeListsBinding(ITreeSource treeSource, TreeListBox directoryTreeListBox, TreeListBox directoryContentListBox)
 		{
-			Verify.Argument.IsNotNull(treeSource, "treeSource");
-			Verify.Argument.IsNotNull(directoryTreeListBox, "directoryTreeListBox");
-			Verify.Argument.IsNotNull(directoryContentListBox, "directoryContentListBox");
+			Verify.Argument.IsNotNull(treeSource, nameof(treeSource));
+			Verify.Argument.IsNotNull(directoryTreeListBox, nameof(directoryTreeListBox));
+			Verify.Argument.IsNotNull(directoryContentListBox, nameof(directoryContentListBox));
 
 			_treeSource              = treeSource;
 			_directoryTreeListBox    = directoryTreeListBox;

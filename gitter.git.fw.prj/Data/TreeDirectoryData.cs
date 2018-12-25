@@ -23,46 +23,31 @@ namespace gitter.Git
 	using System;
 	using System.Collections.Generic;
 
-	using gitter.Framework;
-
 	public sealed class TreeDirectoryData : TreeItemData
 	{
-		private readonly TreeDirectoryData _parent;
-		private readonly IList<TreeDirectoryData> _directories;
-		private readonly IList<TreeFileData> _files;
-
 		public TreeDirectoryData(string name, string shortName, TreeDirectoryData parent, FileStatus fileStatus, StagedStatus stagedStatus)
 			: base(name, fileStatus, stagedStatus)
 		{
-			_parent = parent;
+			Parent = parent;
 			ShortName = shortName;
-			_files = new List<TreeFileData>();
-			_directories = new List<TreeDirectoryData>();
+			Files = new List<TreeFileData>();
+			Directories = new List<TreeDirectoryData>();
 		}
 
-		public TreeDirectoryData Parent
-		{
-			get { return _parent; }
-		}
+		public TreeDirectoryData Parent { get; }
 
-		public IList<TreeDirectoryData> Directories
-		{
-			get { return _directories; }
-		}
+		public IList<TreeDirectoryData> Directories { get; }
 
-		public IList<TreeFileData> Files
-		{
-			get { return _files; }
-		}
+		public IList<TreeFileData> Files { get; }
 
 		public void AddDirectory(TreeDirectoryData directory)
 		{
-			_directories.Add(directory);
+			Directories.Add(directory);
 		}
 
 		public void AddFile(TreeFileData file)
 		{
-			_files.Add(file);
+			Files.Add(file);
 		}
 	}
 }

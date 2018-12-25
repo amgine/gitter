@@ -34,14 +34,14 @@ namespace gitter.Framework
 
 		public GCCache(Func<T> onReevaluate)
 		{
-			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
 
 			_onReevaluate = onReevaluate;
 		}
 
 		public GCCache(Func<T> onReevaluate, T value)
 		{
-			Verify.Argument.IsNotNull(onReevaluate, "onReevaluate");
+			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
 
 			_onReevaluate = onReevaluate;
 			if(value != null) _weakRef = new WeakReference(value);

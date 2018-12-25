@@ -68,7 +68,7 @@ namespace gitter.Redmine.Gui
 		public static T GetUpdateRedmineObjectItem<T>(RedmineObject obj)
 			where T : ToolStripItem, new()
 		{
-			Verify.Argument.IsNotNull(obj, "obj");
+			Verify.Argument.IsNotNull(obj, nameof(obj));
 
 			var item = new T()
 			{

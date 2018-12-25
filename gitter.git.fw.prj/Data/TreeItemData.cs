@@ -26,16 +26,13 @@ namespace gitter.Git
 
 	public abstract class TreeItemData : INamedObject
 	{
-		private readonly string _name;
 		private string _shortName;
-		private FileStatus _fileStatus;
-		private StagedStatus _stagedStatus;
 
 		protected TreeItemData(string name, FileStatus fileStatus, StagedStatus stagedStatus)
 		{
-			_name = name;
-			_fileStatus = fileStatus;
-			_stagedStatus = stagedStatus;
+			Name         = name;
+			FileStatus   = fileStatus;
+			StagedStatus = stagedStatus;
 		}
 
 		public string ShortName
@@ -54,26 +51,12 @@ namespace gitter.Git
 			set { _shortName = value; }
 		}
 
-		public FileStatus FileStatus
-		{
-			get { return _fileStatus; }
-			set { _fileStatus = value; }
-		}
+		public FileStatus FileStatus { get; set; }
 
-		public StagedStatus StagedStatus
-		{
-			get { return _stagedStatus; }
-			set { _stagedStatus = value; }
-		}
+		public StagedStatus StagedStatus { get; set; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

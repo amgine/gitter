@@ -220,7 +220,7 @@ namespace gitter.Framework
 
 		public MSVS2012StyleToolStripRenderer(IColorTable colorTable)
 		{
-			Verify.Argument.IsNotNull(colorTable, "colorTable");
+			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
 			_colorTable = colorTable;
 		}

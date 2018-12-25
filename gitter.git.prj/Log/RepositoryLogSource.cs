@@ -40,7 +40,7 @@ namespace gitter.Git
 
 		public RepositoryLogSource(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 		}
@@ -60,7 +60,7 @@ namespace gitter.Git
 
 		public override Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			Verify.Argument.IsNotNull(options, "options");
+			Verify.Argument.IsNotNull(options, nameof(options));
 
 			if(Repository.IsEmpty)
 			{

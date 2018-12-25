@@ -41,8 +41,8 @@ namespace gitter.Framework.Controls
 		/// <param name="viewHost">Floating <see cref="ViewHost"/>.</param>
 		public FloatingViewForm(ViewDockGrid dockGrid, ViewHost viewHost)
 		{
-			Verify.Argument.IsNotNull(dockGrid, "dockGrid");
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(dockGrid, nameof(dockGrid));
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			Font			= GitterApplication.FontManager.UIFont;
 			Text			= viewHost.Text;

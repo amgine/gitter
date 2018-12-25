@@ -49,10 +49,7 @@ namespace gitter.Git.Gui.Views
 			AddTopToolStrip(_toolbar = new ContributorsToolBar(this));
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgUser"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgUser"];
 
 		protected override void AttachToRepository(Repository repository)
 		{

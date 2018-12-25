@@ -46,10 +46,7 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public bool IsEmpty
-		{
-			get { return Elements == GraphElement.Space; }
-		}
+		public bool IsEmpty => Elements == GraphElement.Space;
 
 		public bool HasElement(GraphElement element)
 		{

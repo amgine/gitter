@@ -86,17 +86,12 @@ namespace gitter.Git.Gui
 
 		sealed class CursorChangedEventArgs : EventArgs
 		{
-			private readonly Cursor _cursor;
-
 			public CursorChangedEventArgs(Cursor cursor)
 			{
-				_cursor = cursor;
+				Cursor = cursor;
 			}
 
-			public Cursor Cursor
-			{
-				get { return _cursor; }
-			}
+			public Cursor Cursor { get; }
 		}
 
 		/// <summary>Interface for a single data field.</summary>
@@ -131,28 +126,17 @@ namespace gitter.Git.Gui
 			public event EventHandler<CursorChangedEventArgs> CursorChangeRequired;
 
 			protected void OnInvalidateRequired()
-			{
-				var handler = InvalidateRequired;
-				if(handler != null) handler(this, EventArgs.Empty);
-			}
+				=> InvalidateRequired?.Invoke(this, EventArgs.Empty);
 
 			protected void ChangeCursor(Cursor cursor)
-			{
-				var handler = CursorChangeRequired;
-				if(handler != null) handler(this, new CursorChangedEventArgs(cursor));
-			}
-
-			private readonly RevisionHeaderContent _owner;
+				=> CursorChangeRequired?.Invoke(this, new CursorChangedEventArgs(cursor));
 
 			protected BaseElement(RevisionHeaderContent owner)
 			{
-				_owner = owner;
+				Owner = owner;
 			}
 
-			public RevisionHeaderContent Owner
-			{
-				get { return _owner; }
-			}
+			public RevisionHeaderContent Owner { get; }
 
 			public abstract Element Element { get; }
 
@@ -170,15 +154,9 @@ namespace gitter.Git.Gui
 				}
 			}
 
-			public virtual bool IsAvailableFor(Revision revision)
-			{
-				return true;
-			}
+			public virtual bool IsAvailableFor(Revision revision) => true;
 
-			public virtual ContextMenuStrip CreateContextMenu(Revision revision)
-			{
-				return null;
-			}
+			public virtual ContextMenuStrip CreateContextMenu(Revision revision) => null;
 
 			public virtual Size Measure(Graphics graphics, Revision revision, int width)
 			{
@@ -305,10 +283,7 @@ namespace gitter.Git.Gui
 			{
 			}
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.Hash; }
-			}
+			public override Element Element => Element.Hash;
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
@@ -340,10 +315,7 @@ namespace gitter.Git.Gui
 			{
 			}
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.TreeHash; }
-			}
+			public override Element Element => Element.TreeHash;
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
@@ -371,10 +343,7 @@ namespace gitter.Git.Gui
 			{
 			}
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.Parents; }
-			}
+			public override Element Element => Element.Parents;
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
@@ -439,10 +408,7 @@ namespace gitter.Git.Gui
 			{
 			}
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.Author; }
-			}
+			public override Element Element => Element.Author;
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
@@ -477,10 +443,7 @@ namespace gitter.Git.Gui
 				return revision.Author != revision.Committer;
 			}
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.Committer; }
-			}
+			public override Element Element => Element.Committer;
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
@@ -505,37 +468,28 @@ namespace gitter.Git.Gui
 
 		sealed class CommitDateElement : BaseElement
 		{
-			private DateFormat _dateFormat;
-
 			public CommitDateElement(RevisionHeaderContent owner)
 				: base(owner)
 			{
-				_dateFormat = DateFormat.ISO8601;
+				DateFormat = DateFormat.ISO8601;
 			}
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
 				var menu = new ContextMenuStrip();
 				menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
-					Utility.FormatDate(revision.CommitDate, _dateFormat)));
+					Utility.FormatDate(revision.CommitDate, DateFormat)));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
 
-			public DateFormat DateFormat
-			{
-				get { return _dateFormat; }
-				set { _dateFormat = value; }
-			}
+			public DateFormat DateFormat { get; set; }
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.CommitDate; }
-			}
+			public override Element Element => Element.CommitDate;
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
-				return Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.CommitDate, _dateFormat), width);
+				return Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.CommitDate, DateFormat), width);
 			}
 
 			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
@@ -544,44 +498,35 @@ namespace gitter.Git.Gui
 					graphics,
 					GitterApplication.FontManager.UIFont,
 					Resources.StrDate.AddColon(),
-					Utility.FormatDate(revision.CommitDate, _dateFormat),
+					Utility.FormatDate(revision.CommitDate, DateFormat),
 					rect);
 			}
 		}
 
 		sealed class AuthorDateElement : BaseElement
 		{
-			private DateFormat _dateFormat;
-
 			public AuthorDateElement(RevisionHeaderContent owner)
 				: base(owner)
 			{
-				_dateFormat = DateFormat.ISO8601;
+				DateFormat = DateFormat.ISO8601;
 			}
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
 				var menu = new ContextMenuStrip();
 				menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
-					Utility.FormatDate(revision.AuthorDate, _dateFormat)));
+					Utility.FormatDate(revision.AuthorDate, DateFormat)));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
 
-			public DateFormat DateFormat
-			{
-				get { return _dateFormat; }
-				set { _dateFormat = value; }
-			}
+			public DateFormat DateFormat { get; set; }
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.AuthorDate; }
-			}
+			public override Element Element => Element.AuthorDate;
 
 			public override Size Measure(Graphics graphics, Revision revision, int width)
 			{
-				return Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.AuthorDate, _dateFormat), width);
+				return Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.AuthorDate, DateFormat), width);
 			}
 
 			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
@@ -590,7 +535,7 @@ namespace gitter.Git.Gui
 					graphics,
 					GitterApplication.FontManager.UIFont,
 					Resources.StrDate.AddColon(),
-					Utility.FormatDate(revision.AuthorDate, _dateFormat),
+					Utility.FormatDate(revision.AuthorDate, DateFormat),
 					rect);
 			}
 		}
@@ -604,10 +549,7 @@ namespace gitter.Git.Gui
 
 			private TextWithHyperlinks _text;
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.Subject; }
-			}
+			public override Element Element => Element.Subject;
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
@@ -686,10 +628,7 @@ namespace gitter.Git.Gui
 				return !string.IsNullOrEmpty(revision.Body);
 			}
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.Body; }
-			}
+			public override Element Element => Element.Body;
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision)
 			{
@@ -759,24 +698,15 @@ namespace gitter.Git.Gui
 		{
 			private struct ReferenceVisual
 			{
-				private readonly Reference _reference;
-				private readonly Rectangle _rectangle;
-
 				public ReferenceVisual(Reference reference, Rectangle rectangle)
 				{
-					_reference = reference;
-					_rectangle = rectangle;
+					Reference = reference;
+					Rectangle = rectangle;
 				}
 
-				public Reference Reference
-				{
-					get { return _reference; }
-				}
+				public Reference Reference { get; }
 
-				public Rectangle Rectangle
-				{
-					get { return _rectangle; }
-				}
+				public Rectangle Rectangle { get; }
 			}
 
 			private LinkedList<ReferenceVisual> _drawnReferences;
@@ -792,10 +722,7 @@ namespace gitter.Git.Gui
 				return revision.References.Count != 0;
 			}
 
-			public override Element Element
-			{
-				get { return RevisionHeaderContent.Element.References; }
-			}
+			public override Element Element => Element.References;
 
 			public override void MouseDown(Rectangle rect, MouseButtons button, int x, int y)
 			{
@@ -805,29 +732,23 @@ namespace gitter.Git.Gui
 					{
 						if(reference.Rectangle.X <= x && reference.Rectangle.Right > x)
 						{
-							var branch = reference.Reference as BranchBase;
-							if(branch != null)
+							var menu = default(ContextMenuStrip);
+							switch(reference.Reference)
 							{
-								var menu = new BranchMenu(branch);
-								Utility.MarkDropDownForAutoDispose(menu);
-								Owner.OnContextMenuRequested(menu, new Point(x + 1, y + 1));
-								return;
+								case BranchBase branch:
+									menu = new BranchMenu(branch);
+									break;
+								case Tag tag:
+									menu = new TagMenu(tag);
+									break;
+								case Head head:
+									menu = new HeadMenu(head);
+									break;
 							}
-							var tag = reference.Reference as Tag;
-							if(tag != null)
+							if(menu != null)
 							{
-								var menu = new TagMenu(tag);
 								Utility.MarkDropDownForAutoDispose(menu);
 								Owner.OnContextMenuRequested(menu, new Point(x + 1, y + 1));
-								return;
-							}
-							var head = reference.Reference as Head;
-							if(head != null)
-							{
-								var menu = new HeadMenu(head);
-								Utility.MarkDropDownForAutoDispose(menu);
-								Owner.OnContextMenuRequested(menu, new Point(x + 1, y + 1));
-								return;
 							}
 							return;
 						}
@@ -929,28 +850,19 @@ namespace gitter.Git.Gui
 		public event EventHandler SizeChanged;
 
 		private void OnInvalidated(Rectangle bounds)
-		{
-			var handler = Invalidated;
-			if(handler != null) handler(this, new ContentInvalidatedEventArgs(bounds));
-		}
+			=> Invalidated?.Invoke(this, new ContentInvalidatedEventArgs(bounds));
 
 		private void OnCursorChanged()
-		{
-			var handler = CursorChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> CursorChanged?.Invoke(this, EventArgs.Empty);
 
 		private void OnSizeChanged()
-		{
-			var handler = SizeChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> SizeChanged?.Invoke(this, EventArgs.Empty);
 
 		private void OnContextMenuRequested(ContextMenuStrip contextMenu, Point position)
 		{
 			var handler = ContextMenuRequested;
 			contextMenu.Renderer = Style.ToolStripRenderer;
-			if(handler != null) handler(this, new ContentContextMenuEventArgs(contextMenu, position));
+			handler?.Invoke(this, new ContentContextMenuEventArgs(contextMenu, position));
 		}
 
 		#endregion
@@ -1042,8 +954,7 @@ namespace gitter.Git.Gui
 
 		private void OnReferenceListChanged(object sender, EventArgs e)
 		{
-			Size size;
-			_sizes.TryGetValue(Element.References, out size);
+			_sizes.TryGetValue(Element.References, out var size);
 			bool norefs;
 			lock(_revision.References.SyncRoot)
 			{
@@ -1078,8 +989,7 @@ namespace gitter.Git.Gui
 			{
 				if(_elements[i].IsAvailableFor(_revision))
 				{
-					Size size;
-					if(!_sizes.TryGetValue(_elements[i].Element, out size)) break;
+					if(!_sizes.TryGetValue(_elements[i].Element, out var size)) break;
 					if(i == index) return new Rectangle(0, cy, size.Width, size.Height);
 					var nexty = cy + size.Height;
 					cy = nexty;
@@ -1095,8 +1005,7 @@ namespace gitter.Git.Gui
 			{
 				if(_elements[i].IsAvailableFor(_revision))
 				{
-					Size size;
-					if(!_sizes.TryGetValue(_elements[i].Element, out size)) break;
+					if(!_sizes.TryGetValue(_elements[i].Element, out var size)) break;
 					var nexty = cy + size.Height;
 					if(y < nexty)
 					{

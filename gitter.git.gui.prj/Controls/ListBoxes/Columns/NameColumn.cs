@@ -43,14 +43,8 @@ namespace gitter.Git.Gui.Controls
 			SizeMode = ColumnSizeMode.Fill;
 		}
 
-		public override int MinWidth
-		{
-			get { return 22; }
-		}
+		public override int MinWidth => 22;
 
-		public override string IdentificationString
-		{
-			get { return "Name"; }
-		}
+		public override string IdentificationString => "Name";
 	}
 }

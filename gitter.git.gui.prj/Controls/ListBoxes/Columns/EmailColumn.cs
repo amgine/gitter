@@ -68,9 +68,6 @@ namespace gitter.Git.Gui.Controls
 			paintEventArgs.PaintText(email, textBrush);
 		}
 
-		public override string IdentificationString
-		{
-			get { return "Email"; }
-		}
+		public override string IdentificationString => "Email";
 	}
 }

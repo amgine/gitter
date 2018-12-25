@@ -30,9 +30,6 @@ namespace gitter
 	{
 		/// <summary>The main entry point for the application.</summary>
 		[STAThread]
-		public static void Main()
-		{
-			GitterApplication.Run<MainForm>();
-		}
+		public static void Main() => GitterApplication.Run<MainForm>();
 	}
 }

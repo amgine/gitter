@@ -66,7 +66,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Create <see cref="FileDiffPanel"/>.</summary>
 		public FileDiffPanel(Repository repository, DiffFile diffFile, DiffType diffType)
 		{
-			Verify.Argument.IsNotNull(diffFile, "diffFile");
+			Verify.Argument.IsNotNull(diffFile, nameof(diffFile));
 
 			_repository = repository;
 			_diffType = diffType;

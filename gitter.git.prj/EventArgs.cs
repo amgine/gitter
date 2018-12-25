@@ -26,53 +26,35 @@ namespace gitter.Git
 	/// <typeparam name="T">Type of associated object.</typeparam>
 	public class ObjectEventArgs<T> : EventArgs
 	{
-		private readonly T _object;
-
 		/// <summary>Create <see cref="ObjectEventArgs&lt;T&gt;"/>.</summary>
 		/// <param name="object">Object, associated with event.</param>
 		public ObjectEventArgs(T @object)
 		{
-			_object = @object;
+			Object = @object;
 		}
 
 		/// <summary>Object, associated with event.</summary>
-		public T Object
-		{
-			get { return _object; }
-		}
+		public T Object { get; }
 	}
 
-	/// <summary><see cref="EventArgs"/> cpecifying changed value of type <typeparamref name="T"/>.</summary>
+	/// <summary><see cref="EventArgs"/> specifying changed value of type <typeparamref name="T"/>.</summary>
 	/// <typeparam name="T">Type of associated object.</typeparam>
 	public class ObjectChangedEventArgs<T> : EventArgs
 	{
-		#region Data
-
-		private readonly T _oldValue;
-		private readonly T _newValue;
-
-		#endregion
-
 		/// <summary>Create <see cref="ObjectChangedEventArgs&lt;T&gt;"/>.</summary>
 		/// <param name="oldValue">Old value.</param>
 		/// <param name="newValue">New value.</param>
 		public ObjectChangedEventArgs(T oldValue, T newValue)
 		{
-			_oldValue = oldValue;
-			_newValue = newValue;
+			OldValue = oldValue;
+			NewValue = newValue;
 		}
 
 		/// <summary>Old value.</summary>
-		public T OldValue
-		{
-			get { return _oldValue; }
-		}
+		public T OldValue { get; }
 
 		/// <summary>New value.</summary>
-		public T NewValue
-		{
-			get { return _newValue; }
-		}
+		public T NewValue { get; }
 	}
 
 	/// <summary><see cref="EventArgs"/> identifying <see cref="Branch"/>.</summary>
@@ -89,23 +71,17 @@ namespace gitter.Git
 	/// <summary>Arguments for branch renamed event.</summary>
 	public class BranchRenamedEventArgs : BranchEventArgs
 	{
-		/// <summary>Old branch name.</summary>
-		private readonly string _oldName;
-
 		/// <summary>Create <see cref="BranchRenamedEventArgs"/>.</summary>
 		/// <param name="branch"><see cref="Branch"/> which is related to event.</param>
 		public BranchRenamedEventArgs(Branch branch, string oldName)
 			: base(branch)
 		{
-			_oldName = oldName;
+			OldName = oldName;
 		}
 
 		/// <summary>Returns old branch name.</summary>
 		/// <value>Old branch name.</value>
-		public string OldName
-		{
-			get { return _oldName; }
-		}
+		public string OldName { get; }
 	}
 
 	/// <summary><see cref="EventArgs"/> identifying <see cref="RemoteBranch"/>.</summary>
@@ -200,34 +176,21 @@ namespace gitter.Git
 
 	public abstract class RemoteOperationCompletedEventArgs : EventArgs
 	{
-		#region Data
-
-		private readonly ReferenceChange[] _changes;
-		private readonly Remote _remote;
-
-		#endregion
-
 		#region .ctor
 
 		protected RemoteOperationCompletedEventArgs(Remote remote, ReferenceChange[] changes)
 		{
-			_remote = remote;
-			_changes = changes;
+			Remote  = remote;
+			Changes = changes;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Remote Remote
-		{
-			get { return _remote; }
-		}
+		public Remote Remote { get; }
 
-		public ReferenceChange[] Changes
-		{
-			get { return _changes; }
-		}
+		public ReferenceChange[] Changes { get; }
 
 		#endregion
 	}
@@ -303,45 +266,31 @@ namespace gitter.Git
 	/// <summary><see cref="EventArgs"/>for renaming events.</summary>
 	public class NameChangeEventArgs : EventArgs
 	{
-		private readonly string _oldName;
-		private readonly string _newName;
-
 		/// <summary>Create <see cref="NameChangeEventArgs"/>.</summary>
 		/// <param name="oldName">Old object's name.</param>
 		/// <param name="newName">New object's name</param>
 		public NameChangeEventArgs(string oldName, string newName)
 		{
-			_oldName = oldName;
-			_newName = newName;
+			OldName = oldName;
+			NewName = newName;
 		}
 
 		/// <summary>New object's name.</summary>
-		public string NewName
-		{
-			get { return _newName; }
-		}
+		public string NewName { get; }
 
 		/// <summary>Old object's name.</summary>
-		public string OldName
-		{
-			get { return _oldName;}
-		}
+		public string OldName { get; }
 	}
 
 	/// <summary><see cref="EventArgs"/> identifying <see cref="TreeFile"/>.</summary>
 	public class TreeFileEventArgs : EventArgs
 	{
-		private readonly TreeFile _file;
-
 		public TreeFileEventArgs(TreeFile file)
 		{
-			_file = file;
+			File = file;
 		}
 
-		public TreeFile File
-		{
-			get { return _file; }
-		}
+		public TreeFile File { get; }
 	}
 
 	/// <summary><see cref="EventArgs"/> identifying <see cref="TreeCommit"/>.</summary>
@@ -356,35 +305,26 @@ namespace gitter.Git
 	/// <summary><see cref="EventArgs"/> identifying <see cref="TreeDirectory"/>.</summary>
 	public class TreeDirectoryEventArgs : EventArgs
 	{
-		private readonly TreeDirectory _folder;
-
 		public TreeDirectoryEventArgs(TreeDirectory folder)
 		{
-			_folder = folder;
+			Folder = folder;
 		}
 
-		public TreeDirectory Folder
-		{
-			get { return _folder; }
-		}
+		public TreeDirectory Folder { get; }
 	}
 
 	/// <summary><see cref="EventArgs"/> identifying <see cref="Note"/>.</summary>
 	public class NoteEventArgs : EventArgs
 	{
-		private readonly Note _note;
 
 		/// <summary>Create <see cref="NoteEventArgs"/>.</summary>
 		/// <param name="note"><see cref="Note"/> which is related to event.</param>
 		public NoteEventArgs(Note note)
 		{
-			_note = note;
+			Note = note;
 		}
 
 		/// <summary><see cref="Note"/> which is related to event.</summary>
-		public Note Note
-		{
-			get { return _note; }
-		}
+		public Note Note { get; }
 	}
 }

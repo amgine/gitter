@@ -65,7 +65,7 @@ namespace gitter.Framework.Controls
 		/// <param name="side">Align side.</param>
 		public ViewDockSide(ViewDockGrid grid, AnchorStyles side)
 		{
-			Verify.Argument.IsNotNull(grid, "grid");
+			Verify.Argument.IsNotNull(grid, nameof(grid));
 
 			switch(side)
 			{
@@ -169,7 +169,7 @@ namespace gitter.Framework.Controls
 		/// <param name="viewHost"><see cref="ViewHost"/> to add.</param>
 		public void AddHost(ViewHost viewHost)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			_dockedHosts.Add(viewHost);
 			viewHost.DockSide = this;
@@ -222,7 +222,7 @@ namespace gitter.Framework.Controls
 
 		public void RemoveHost(ViewHost viewHost)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			if(_dockedHosts.Remove(viewHost))
 			{
@@ -585,7 +585,7 @@ namespace gitter.Framework.Controls
 
 		public void ActivateView(ViewBase view)
 		{
-			Verify.Argument.IsNotNull(view, "view");
+			Verify.Argument.IsNotNull(view, nameof(view));
 
 			for(int i = 0; i < _tabs.Count; ++i)
 			{

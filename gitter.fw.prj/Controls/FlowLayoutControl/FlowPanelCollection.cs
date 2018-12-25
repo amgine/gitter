@@ -38,7 +38,7 @@ namespace gitter.Framework.Controls
 		/// <param name="control">Host <see cref="FlowLayoutControl"/>.</param>
 		internal FlowPanelCollection(FlowLayoutControl control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			_control = control;
 		}

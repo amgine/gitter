@@ -21,8 +21,6 @@
 namespace gitter.Framework.Services
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
 
 	using gitter.Framework.Controls;
 

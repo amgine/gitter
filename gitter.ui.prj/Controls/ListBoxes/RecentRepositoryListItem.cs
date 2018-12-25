@@ -48,7 +48,7 @@ namespace gitter
 		public RecentRepositoryListItem(RepositoryLink repository)
 			: base(repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

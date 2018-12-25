@@ -26,20 +26,6 @@ namespace gitter.Git.AccessLayer
 	/// <summary>Working tree status information.</summary>
 	public sealed class StatusData
 	{
-		#region Data
-
-		private readonly IDictionary<string, TreeFileData> _stagedFiles;
-		private readonly IDictionary<string, TreeFileData> _unstagedFiles;
-		private readonly int _unstagedUntrackedCount;
-		private readonly int _unstagedRemovedCount;
-		private readonly int _unstagedModifiedCount;
-		private readonly int _unmergedCount;
-		private readonly int _stagedAddedCount;
-		private readonly int _stagedModifiedCount;
-		private readonly int _stagedRemovedCount;
-
-		#endregion
-
 		#region .ctor
 
 		public StatusData(
@@ -53,65 +39,38 @@ namespace gitter.Git.AccessLayer
 			int stagedModifiedCount,
 			int stagedRemovedCount)
 		{
-			_stagedFiles            = stagedFiles;
-			_unstagedFiles          = unstagedFiles;
-			_unstagedUntrackedCount = unstagedUntrackedCount;
-			_unstagedRemovedCount   = unstagedRemovedCount;
-			_unstagedModifiedCount  = unstagedModifiedCount;
-			_unmergedCount          = unmergedCount;
-			_stagedAddedCount       = stagedAddedCount;
-			_stagedModifiedCount    = stagedModifiedCount;
-			_stagedRemovedCount     = stagedRemovedCount;
+			StagedFiles            = stagedFiles;
+			UnstagedFiles          = unstagedFiles;
+			UnstagedUntrackedCount = unstagedUntrackedCount;
+			UnstagedRemovedCount   = unstagedRemovedCount;
+			UnstagedModifiedCount  = unstagedModifiedCount;
+			UnmergedCount          = unmergedCount;
+			StagedAddedCount       = stagedAddedCount;
+			StagedModifiedCount    = stagedModifiedCount;
+			StagedRemovedCount     = stagedRemovedCount;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public IDictionary<string, TreeFileData> StagedFiles
-		{
-			get { return _stagedFiles; }
-		}
+		public IDictionary<string, TreeFileData> StagedFiles { get; }
 
-		public IDictionary<string, TreeFileData> UnstagedFiles
-		{
-			get { return _unstagedFiles; }
-		}
+		public IDictionary<string, TreeFileData> UnstagedFiles { get; }
 
-		public int UnstagedUntrackedCount
-		{
-			get { return _unstagedUntrackedCount; }
-		}
+		public int UnstagedUntrackedCount { get; }
 
-		public int UnstagedModifiedCount
-		{
-			get { return _unstagedModifiedCount; }
-		}
+		public int UnstagedModifiedCount { get; }
 
-		public int UnstagedRemovedCount
-		{
-			get { return _unstagedRemovedCount; }
-		}
+		public int UnstagedRemovedCount { get; }
 
-		public int UnmergedCount
-		{
-			get { return _unmergedCount; }
-		}
+		public int UnmergedCount { get; }
 
-		public int StagedAddedCount
-		{
-			get { return _stagedAddedCount; }
-		}
+		public int StagedAddedCount { get; }
 
-		public int StagedModifiedCount
-		{
-			get { return _stagedModifiedCount; }
-		}
+		public int StagedModifiedCount { get; }
 
-		public int StagedRemovedCount
-		{
-			get { return _stagedRemovedCount; }
-		}
+		public int StagedRemovedCount { get; }
 
 		#endregion
 	}

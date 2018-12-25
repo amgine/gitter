@@ -37,21 +37,21 @@ namespace gitter.Framework.Controls
 
 			public ViewEntry(ViewBase view)
 			{
-				Verify.Argument.IsNotNull(view, "view");
+				Verify.Argument.IsNotNull(view, nameof(view));
 
 				_guid = view.Guid;
 			}
 
 			public ViewEntry(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				_guid = section.GetValue<Guid>("Guid");
 			}
 
 			public void SaveTo(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				section.SetValue("Guid", _guid);
 			}
@@ -77,7 +77,7 @@ namespace gitter.Framework.Controls
 			public HostEntry(ViewHost viewHost)
 				: this()
 			{
-				Verify.Argument.IsNotNull(viewHost, "viewHost");
+				Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 				_isRoot = viewHost.IsRoot;
 				_isDocumentWell = viewHost.IsDocumentWell;
@@ -90,7 +90,7 @@ namespace gitter.Framework.Controls
 			public HostEntry(Section section)
 				: this()
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				_isRoot = section.GetValue<bool>("IsRoot");
 				_isDocumentWell = section.GetValue<bool>("IsDocumentHost");
@@ -103,7 +103,7 @@ namespace gitter.Framework.Controls
 
 			public void SaveTo(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				section.SetValue("Type", "Host");
 				section.SetValue("IsRoot", _isRoot);
@@ -137,7 +137,7 @@ namespace gitter.Framework.Controls
 			public SplitEntry(ViewSplit split)
 				: this()
 			{
-				Verify.Argument.IsNotNull(split, "split");
+				Verify.Argument.IsNotNull(split, nameof(split));
 
 				_orientation = split.Orientation;
 				foreach(var control in split)
@@ -153,7 +153,7 @@ namespace gitter.Framework.Controls
 			public SplitEntry(Section section)
 				: this()
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				_orientation = section.GetValue<Orientation>("Orientation");
 				var splitters = section.GetSection("Splitters");
@@ -170,7 +170,7 @@ namespace gitter.Framework.Controls
 
 			public void SaveTo(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				section.SetValue("Type", "Split");
 				section.SetValue("Orientation", _orientation);
@@ -210,7 +210,7 @@ namespace gitter.Framework.Controls
 			public SideEntry(ViewDockSide side)
 				: this()
 			{
-				Verify.Argument.IsNotNull(side, "side");
+				Verify.Argument.IsNotNull(side, nameof(side));
 
 				_side = side.Side;
 				foreach(var host in side)
@@ -221,7 +221,7 @@ namespace gitter.Framework.Controls
 
 			public SideEntry(AnchorStyles side, Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				_side = side;
 				foreach(var h in section.Sections)
@@ -232,7 +232,7 @@ namespace gitter.Framework.Controls
 
 			public void SaveTo(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				for(int i = 0; i < _hosts.Count; ++i)
 				{
@@ -250,7 +250,7 @@ namespace gitter.Framework.Controls
 
 			public FloatEntry(FloatingViewForm floatingForm)
 			{
-				Verify.Argument.IsNotNull(floatingForm, "floatingForm");
+				Verify.Argument.IsNotNull(floatingForm, nameof(floatingForm));
 
 				_bounds = floatingForm.Bounds;
 				_root = ToLayout(floatingForm.RootControl);
@@ -258,7 +258,7 @@ namespace gitter.Framework.Controls
 
 			public FloatEntry(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				_bounds = section.GetValue<Rectangle>("Bounds");
 				_root = ToLayout(section.GetSection("Root"));
@@ -266,7 +266,7 @@ namespace gitter.Framework.Controls
 
 			public void SaveTo(Section section)
 			{
-				Verify.Argument.IsNotNull(section, "section");
+				Verify.Argument.IsNotNull(section, nameof(section));
 
 				section.SetValue("Bounds", _bounds);
 				_root.SaveTo(section.CreateSection("Root"));
@@ -280,7 +280,7 @@ namespace gitter.Framework.Controls
 
 		private static ILayoutBase ToLayout(Control control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			var split = control as ViewSplit;
 			if(split != null)
@@ -303,7 +303,7 @@ namespace gitter.Framework.Controls
 
 		private static ILayoutBase ToLayout(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			switch(section.GetValue<string>("Type"))
 			{
@@ -332,7 +332,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="ArgumentNullException"><paramref name="viewDockService"/> == <c>null</c>.</exception>
 		public ViewLayout(ViewDockService viewDockService)
 		{
-			Verify.Argument.IsNotNull(viewDockService, "viewDockService");
+			Verify.Argument.IsNotNull(viewDockService, nameof(viewDockService));
 
 			var grid = viewDockService.Grid;
 
@@ -367,7 +367,7 @@ namespace gitter.Framework.Controls
 		/// <param name="section">The section.</param>
 		public ViewLayout(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			_root = ToLayout(section.GetSection("Root"));
 
@@ -410,7 +410,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="ArgumentNullException"><paramref name="viewDockService"/> == <c>null</c>.</exception>
 		public void ApplyTo(ViewDockService viewDockService)
 		{
-			Verify.Argument.IsNotNull(viewDockService, "viewDockService");
+			Verify.Argument.IsNotNull(viewDockService, nameof(viewDockService));
 
 		}
 
@@ -418,7 +418,7 @@ namespace gitter.Framework.Controls
 		/// <param name="section">Configuration section.</param>
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			section.Clear();
 

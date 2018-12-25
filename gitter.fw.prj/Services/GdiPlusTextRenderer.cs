@@ -65,20 +65,11 @@ namespace gitter.Framework.Services
 				Alignment = StringAlignment.Center,
 			};
 
-		public StringFormat LeftAlign
-		{
-			get { return DefaultStringFormatLeftAlign; }
-		}
+		public StringFormat LeftAlign => DefaultStringFormatLeftAlign;
 
-		public StringFormat RightAlign
-		{
-			get { return DefaultStringFormatRightAlign; }
-		}
+		public StringFormat RightAlign => DefaultStringFormatRightAlign;
 
-		public StringFormat CenterAlign
-		{
-			get { return DefaultStringFormatCenterAlign; }
-		}
+		public StringFormat CenterAlign => DefaultStringFormatCenterAlign;
 
 		public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
 		{
@@ -178,10 +169,7 @@ namespace gitter.Framework.Services
 			return TruncateSize(graphics.MeasureString(text, font, width, DefaultStringFormatLeftAlign));
 		}
 
-		public float GetFontHeight(Font font)
-		{
-			return GetFontHeight(null, font);
-		}
+		public float GetFontHeight(Font font) => GetFontHeight(null, font);
 
 		public float GetFontHeight(Graphics graphics, Font font)
 		{

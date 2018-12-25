@@ -59,7 +59,7 @@ namespace gitter.Redmine
 
 		protected RedmineObject(RedmineServiceContext context, int id)
 		{
-			Verify.Argument.IsNotNull(context, "context");
+			Verify.Argument.IsNotNull(context, nameof(context));
 
 			_context = context;
 			_id = id;
@@ -67,8 +67,8 @@ namespace gitter.Redmine
 
 		protected RedmineObject(RedmineServiceContext context, XmlNode node)
 		{
-			Verify.Argument.IsNotNull(context, "context");
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(context, nameof(context));
+			Verify.Argument.IsNotNull(node, nameof(node));
 
 			_context	= context;
 			_id			= RedmineUtility.LoadInt(node[IdProperty.XmlNodeName]);
@@ -80,7 +80,7 @@ namespace gitter.Redmine
 
 		internal virtual void Update(XmlNode node)
 		{
-			Verify.Argument.IsNotNull(node, "node");
+			Verify.Argument.IsNotNull(node, nameof(node));
 		}
 
 		public virtual void Update()
@@ -90,7 +90,7 @@ namespace gitter.Redmine
 
 		public object GetValue(RedmineObjectProperty property)
 		{
-			Verify.Argument.IsNotNull(property, "property");
+			Verify.Argument.IsNotNull(property, nameof(property));
 
 			return GetType().GetProperty(property.Name).GetValue(this, null);
 		}

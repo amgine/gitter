@@ -33,29 +33,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class StashToBranchController : ViewControllerBase<IStashToBranchView>, IStashToBranchController
 	{
-		#region Data
-
-		private readonly StashedState _stashedState;
-
-		#endregion
-
 		#region .ctor
 
 		public StashToBranchController(StashedState stashedState)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
-			_stashedState = stashedState;
+			StashedState = stashedState;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private StashedState StashedState
-		{
-			get { return _stashedState; }
-		}
+		private StashedState StashedState { get; }
 
 		#endregion
 

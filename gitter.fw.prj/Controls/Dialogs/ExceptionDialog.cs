@@ -42,7 +42,7 @@ namespace gitter.Framework
 		/// <param name="exception">Related exception.</param>
 		public ExceptionDialog(Exception exception)
 		{
-			Verify.Argument.IsNotNull(exception, "exception");
+			Verify.Argument.IsNotNull(exception, nameof(exception));
 
 			_exception = exception;
 			_date = DateTime.Now;

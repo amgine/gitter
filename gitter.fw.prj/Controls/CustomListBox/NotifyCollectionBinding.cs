@@ -37,9 +37,9 @@ namespace gitter.Framework.Controls
 			NotifyCollection<T> boundCollection,
 			Converter<T, CustomListBoxItem> itemConverter)
 		{
-			Verify.Argument.IsNotNull(itemsCollection, "itemsCollection");
-			Verify.Argument.IsNotNull(boundCollection, "boundCollection");
-			Verify.Argument.IsNotNull(itemConverter, "itemConverter");
+			Verify.Argument.IsNotNull(itemsCollection, nameof(itemsCollection));
+			Verify.Argument.IsNotNull(boundCollection, nameof(boundCollection));
+			Verify.Argument.IsNotNull(itemConverter, nameof(itemConverter));
 
 			_itemsCollection = itemsCollection;
 			_boundCollection = boundCollection;

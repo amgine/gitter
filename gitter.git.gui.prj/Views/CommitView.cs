@@ -21,8 +21,6 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.IO;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Windows.Forms;
@@ -122,10 +120,7 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
 		protected override void AttachToRepository(Repository repository)
 		{
@@ -177,10 +172,7 @@ namespace gitter.Git.Gui.Views
 			set { _txtMessage.Text = value; }
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgCommit"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgCommit"];
 
 		public override void OnActivated()
 		{
@@ -319,8 +311,7 @@ namespace gitter.Git.Gui.Views
 
 		private void OnStagedItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as TreeFileListItem;
-			if(item != null)
+			if(e.Item is TreeFileListItem item)
 			{
 				try
 				{
@@ -343,8 +334,7 @@ namespace gitter.Git.Gui.Views
 
 		private void OnUnstagedItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as TreeFileListItem;
-			if(item != null)
+			if(e.Item is TreeFileListItem item)
 			{
 				try
 				{

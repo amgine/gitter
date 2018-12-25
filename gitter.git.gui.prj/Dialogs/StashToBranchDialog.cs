@@ -37,9 +37,6 @@ namespace gitter.Git.Gui.Dialogs
 	{
 		#region Data
 
-		private readonly StashedState _stashedState;
-		private readonly IUserInputSource<string> _branchNameInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 		private readonly IStashToBranchController _controller;
 
 		#endregion
@@ -48,24 +45,24 @@ namespace gitter.Git.Gui.Dialogs
 
 		public StashToBranchDialog(StashedState stashedState)
 		{
-			Verify.Argument.IsNotNull(stashedState, "stashedState");
-			Verify.Argument.IsFalse(stashedState.IsDeleted, "stashedState",
+			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
+			Verify.Argument.IsFalse(stashedState.IsDeleted, nameof(stashedState),
 				Resources.ExcObjectIsDeleted.UseAsFormat(stashedState.GetType().Name));
 
-			_stashedState = stashedState;
+			StashedState = stashedState;
 
 			InitializeComponent();
 			Localize();
 
 			var inputs = new IUserInputSource[]
 			{
-				_branchNameInput = new TextBoxInputSource(_txtBranchName),
+				BranchName = new TextBoxInputSource(_txtBranchName),
 			};
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtBranchName, ReferenceType.LocalBranch);
 
-			_txtStashName.Text = ((IRevisionPointer)_stashedState).Pointer;
+			_txtStashName.Text = ((IRevisionPointer)StashedState).Pointer;
 
 			GitterApplication.FontManager.InputFont.Apply(_txtBranchName, _txtStashName);
 
@@ -76,25 +73,13 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCreate; }
-		}
+		protected override string ActionVerb => Resources.StrCreate;
 
-		public StashedState StashedState
-		{
-			get { return _stashedState; }
-		}
+		public StashedState StashedState { get; }
 
-		public IUserInputSource<string> BranchName
-		{
-			get { return _branchNameInput; }
-		}
+		public IUserInputSource<string> BranchName { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -112,10 +97,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog Members
 
-		public bool Execute()
-		{
-			return _controller.TryCreateBranch();
-		}
+		public bool Execute() => _controller.TryCreateBranch();
 
 		#endregion
 	}

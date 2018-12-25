@@ -24,12 +24,7 @@ namespace gitter.Framework
 	{
 		#region Static
 
-		private static readonly NullProgress _instance = new NullProgress();
-
-		public static IProgress<OperationProgress> Instance
-		{
-			get { return _instance; }
-		}
+		public static IProgress<OperationProgress> Instance { get; } = new NullProgress();
 
 		#endregion
 

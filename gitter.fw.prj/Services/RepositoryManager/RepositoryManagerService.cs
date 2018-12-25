@@ -23,6 +23,7 @@ namespace gitter.Framework.Services
 	using System;
 	using System.Globalization;
 	using System.IO;
+
 	using gitter.Framework.Configuration;
 
 	public sealed class RepositoryManagerService
@@ -38,15 +39,9 @@ namespace gitter.Framework.Services
 			_local  = new RepositoryGroup("ROOT");
 		}
 
-		public RepositoryCollection RecentRepositories
-		{
-			get { return _recent; }
-		}
+		public RepositoryCollection RecentRepositories => _recent;
 
-		public RepositoryGroup LocalRepositories
-		{
-			get { return _local; }
-		}
+		public RepositoryGroup LocalRepositories => _local;
 
 		public void RegisterRecentRepository(string repositoryPath)
 		{
@@ -64,7 +59,7 @@ namespace gitter.Framework.Services
 
 		public void RegisterRecentRepository(RepositoryLink repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			int id = -1;
 			for(int i = 0; i < _recent.Count; ++i)
@@ -186,7 +181,7 @@ namespace gitter.Framework.Services
 
 		public void LoadFrom(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			var localRepositories = section.TryGetSection("LocalRepositories");
 			if(localRepositories != null)
@@ -210,7 +205,7 @@ namespace gitter.Framework.Services
 
 		public void SaveTo(Section section)
 		{
-			Verify.Argument.IsNotNull(section, "section");
+			Verify.Argument.IsNotNull(section, nameof(section));
 
 			var localRepositories = section.GetCreateEmptySection("LocalRepositories");
 			if(_local.Groups.Count != 0 && _local.Respositories.Count != 0)

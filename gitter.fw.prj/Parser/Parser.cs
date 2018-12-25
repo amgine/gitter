@@ -303,7 +303,7 @@ namespace gitter.Framework
 		/// <returns>True if current string is <see cref="value"/>.</returns>
 		public bool CheckValue(string value)
 		{
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
 			var sl = _string.Length;
@@ -316,7 +316,7 @@ namespace gitter.Framework
 		/// <returns>True if current string is <see cref="value"/>.</returns>
 		public bool CheckValueAndSkip(string value)
 		{
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
 			var sl = _string.Length;
@@ -336,7 +336,7 @@ namespace gitter.Framework
 		/// <param name="value">String to look for.</param>
 		public void Find(string value)
 		{
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
 			var sl = _string.Length;
@@ -394,7 +394,7 @@ namespace gitter.Framework
 		/// <returns>Substring.</returns>
 		public Substring FindSubstring(string value)
 		{
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
 			var sl = _string.Length;
@@ -420,7 +420,7 @@ namespace gitter.Framework
 		/// <param name="value">String to look for.</param>
 		public void FindAndSkip(string value)
 		{
-			Verify.Argument.IsNotNull(value, "value");
+			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
 			var sl = _string.Length;
@@ -521,7 +521,7 @@ namespace gitter.Framework
 			get { return _position; }
 			set
 			{
-				Verify.Argument.IsNotNegative(value, "value");
+				Verify.Argument.IsNotNegative(value, nameof(value));
 
 				if(value > _string.Length)
 				{

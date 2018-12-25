@@ -52,8 +52,8 @@ namespace gitter.Git.Gui
 				EventHandler<BoundItemActivatedEventArgs<TreeItem>> onItemActivated,
 				EventHandler<ItemContextMenuRequestEventArgs> onItemContextMenuRequested)
 			{
-				Verify.Argument.IsNotNull(revision, "revision");
-				Verify.Argument.IsNotNull(items, "items");
+				Verify.Argument.IsNotNull(revision, nameof(revision));
+				Verify.Argument.IsNotNull(items, nameof(items));
 
 				_revision = revision;
 				_items    = items;

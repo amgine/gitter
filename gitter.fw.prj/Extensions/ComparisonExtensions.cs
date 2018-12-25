@@ -42,7 +42,7 @@ namespace gitter.Framework.Extensions
 
 		public static IComparer<T> AsComparer<T>(this Comparison<T> comparison)
 		{
-			Verify.Argument.IsNotNull(comparison, "comparison");
+			Verify.Argument.IsNotNull(comparison, nameof(comparison));
 
 			return new Comparer<T>(comparison);
 		}

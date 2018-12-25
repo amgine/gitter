@@ -44,7 +44,7 @@ namespace gitter.Git
 
 		public IndexChangesDiffSource(Repository repository, bool cached, IList<string> paths)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 			_cached = cached;

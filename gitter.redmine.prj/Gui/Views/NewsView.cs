@@ -220,14 +220,14 @@ namespace gitter.Redmine.Gui
 
 		public bool SearchFirst(NewsSearchOptions search)
 		{
-			Verify.Argument.IsNotNull(search, "search");
+			Verify.Argument.IsNotNull(search, nameof(search));
 
 			return Search(-1, search, 1);
 		}
 
 		public bool SearchNext(NewsSearchOptions search)
 		{
-			Verify.Argument.IsNotNull(search, "search");
+			Verify.Argument.IsNotNull(search, nameof(search));
 
 			if(search.Text.Length == 0) return true;
 			if(_lstNews.SelectedItems.Count == 0)
@@ -240,7 +240,7 @@ namespace gitter.Redmine.Gui
 
 		public bool SearchPrevious(NewsSearchOptions search)
 		{
-			Verify.Argument.IsNotNull(search, "search");
+			Verify.Argument.IsNotNull(search, nameof(search));
 
 			if(search.Text.Length == 0) return true;
 			if(_lstNews.SelectedItems.Count == 0) return Search(-1, search, 1);

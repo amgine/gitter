@@ -87,12 +87,12 @@ namespace gitter.Git.Gui
 						list.Add(new TextEntry { Text = Resources.StrModifiedFiles.AddColon() });
 						break;
 					case FileStatus.Unmerged:
-						if(staged) throw new ArgumentException("fileStatus");
+						if(staged) throw new ArgumentException(nameof(fileStatus));
 						list.Add(new TextEntry { Text = Resources.StrConflictingFiles.AddColon() });
 						count = status.UnmergedCount;
 						break;
 					default:
-						throw new ArgumentException("fileStatus");
+						throw new ArgumentException(nameof(fileStatus));
 				}
 				var files = staged ? status.StagedFiles : status.UnstagedFiles;
 				int i = 0;
@@ -149,10 +149,7 @@ namespace gitter.Git.Gui
 			_size = new Size(HorizontalMargin * 2 + maxW, VerticalMargin * 2 + textEntries.Count * (_rowHeight + VerticalSpacing));
 		}
 
-		public override Size Size
-		{
-			get { return _size; }
-		}
+		public override Size Size => _size;
 
 		public FileListToolTip()
 		{

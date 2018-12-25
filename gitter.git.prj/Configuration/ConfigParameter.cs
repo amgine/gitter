@@ -71,7 +71,7 @@ namespace gitter.Git
 		internal ConfigParameter(IConfigAccessor configAccessor, ConfigFile configFile, string name, string value)
 			: base(name)
 		{
-			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
 
 			_configAccessor = configAccessor;
 			_configFile = configFile;
@@ -85,7 +85,7 @@ namespace gitter.Git
 		internal ConfigParameter(IConfigAccessor configAccessor, string fileName, string name, string value)
 			: base(name)
 		{
-			Verify.Argument.IsNotNull(configAccessor, "configAccessor");
+			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
 
 			_configAccessor = configAccessor;
 			_configFile = Git.ConfigFile.Other;

@@ -21,17 +21,12 @@
 namespace gitter.Framework
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Windows.Forms;
 
 	public sealed class GuiCommand : INamedObject
 	{
 		#region Data
 
-		private readonly string _name;
-		private readonly string _displayName;
-		private readonly Image _image;
 		private readonly Action<IWorkingEnvironment> _execute;
 
 		#endregion
@@ -40,39 +35,27 @@ namespace gitter.Framework
 
 		public GuiCommand(string name, string displayName, Image image, Action<IWorkingEnvironment> execute)
 		{
-			_name = name;
-			_displayName = displayName;
-			_execute = execute;
-			_image = image;
+			Name        = name;
+			DisplayName = displayName;
+			Image       = image;
+			_execute    = execute;
 		}
 
 		#endregion
 
-		#region Propertes
+		#region Properties
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public string DisplayName
-		{
-			get { return _displayName; }
-		}
+		public string DisplayName { get; }
 
-		public Image Image
-		{
-			get { return _image; }
-		}
+		public Image Image { get; }
 
 		#endregion
 
 		#region Methods
 
-		public void Execute(IWorkingEnvironment env)
-		{
-			_execute(env);
-		}
+		public void Execute(IWorkingEnvironment env) => _execute(env);
 
 		#endregion
 	}

@@ -21,7 +21,6 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
 
@@ -34,31 +33,18 @@ namespace gitter.Git
 		public event EventHandler Deleted;
 
 		private void InvokeDeleted()
-		{
-			var handler = Deleted;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
-
-		#endregion
-
-		#region Data
-
-		private readonly RemoteReferencesCollection _refs;
-		private readonly string _name;
-		private readonly Hash _hash;
-
-		private bool _deleted;
+			=> Deleted?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
 		internal BaseRemoteReference(RemoteReferencesCollection refs, string name, Hash hash)
 		{
-			Verify.Argument.IsNotNull(refs, "refs");
-			Verify.Argument.IsNeitherNullNorWhitespace(name, "name");
+			Verify.Argument.IsNotNull(refs, nameof(refs));
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			_refs = refs;
-			_name = name;
-			_hash = hash;
+			References = refs;
+			Name = name;
+			Hash = hash;
 		}
 
 		protected abstract void DeleteCore();
@@ -90,32 +76,20 @@ namespace gitter.Git
 
 		public void MarkAsDeleted()
 		{
-			if(!_deleted)
+			if(!IsDeleted)
 			{
-				_deleted = true;
+				IsDeleted = true;
 				InvokeDeleted();
 			}
 		}
 
-		public bool IsDeleted
-		{
-			get { return _deleted; }
-		}
+		public bool IsDeleted { get; private set; }
 
-		protected RemoteReferencesCollection References
-		{
-			get { return _refs; }
-		}
+		protected RemoteReferencesCollection References { get; }
 
-		public Remote Remote
-		{
-			get { return _refs.Remote; }
-		}
+		public Remote Remote => References.Remote;
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		public string FullName
 		{
@@ -124,25 +98,19 @@ namespace gitter.Git
 				switch(ReferenceType)
 				{
 					case ReferenceType.LocalBranch:
-						return GitConstants.LocalBranchPrefix + _name;
+						return GitConstants.LocalBranchPrefix + Name;
 					case ReferenceType.Tag:
-						return GitConstants.TagPrefix + _name;
+						return GitConstants.TagPrefix + Name;
 					default:
-						return _name;
+						return Name;
 				}
 			}
 		}
 
-		public Hash Hash
-		{
-			get { return _hash; }
-		}
+		public Hash Hash { get; }
 
 		public abstract ReferenceType ReferenceType { get; }
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

@@ -66,7 +66,7 @@ namespace gitter.Framework.Controls
 		/// <param name="listBox">Related <see cref="CustomListBox"/>.</param>
 		public ColumnsDialog(CustomListBox listBox)
 		{
-			Verify.Argument.IsNotNull(listBox, "listBox");
+			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
 			_listBox = listBox;
 

@@ -123,7 +123,7 @@ namespace gitter.Framework.Controls
 
 		public Popup(Control content)
 		{
-			Verify.Argument.IsNotNull(content, "content");
+			Verify.Argument.IsNotNull(content, nameof(content));
 
 			_content = content;
 			_popupAnimation = PopupAnimations.SystemDefault;
@@ -306,7 +306,7 @@ namespace gitter.Framework.Controls
 
 		public void Show(Control control)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			Show(control, control.ClientRectangle);
 		}
@@ -322,7 +322,7 @@ namespace gitter.Framework.Controls
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is <code>null</code>.</exception>
 		public void Show(Control control, Rectangle area)
 		{
-			Verify.Argument.IsNotNull(control, "control");
+			Verify.Argument.IsNotNull(control, nameof(control));
 
 			SetOwnerItem(control);
 

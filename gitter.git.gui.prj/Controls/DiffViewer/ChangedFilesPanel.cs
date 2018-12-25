@@ -100,7 +100,7 @@ namespace gitter.Git.Gui.Controls
 
 			public FileItem(DiffFile file)
 			{
-				Verify.Argument.IsNotNull(file, "file");
+				Verify.Argument.IsNotNull(file, nameof(file));
 
 				_file = file;
 

@@ -59,7 +59,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public void Invoke(TParameters parameters)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var output = _commandExecutor.ExecuteCommand(command, _flags);
@@ -68,7 +68,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				return _commandExecutor
@@ -115,7 +115,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public void Invoke(TParameters parameters)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var output = _commandExecutor.ExecuteCommand(command, _flags);
@@ -124,7 +124,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				return _commandExecutor
@@ -171,7 +171,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public void Invoke(TParameters parameters)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var output = _commandExecutor.ExecuteCommand(command, _flags);
@@ -180,7 +180,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				return _commandExecutor
@@ -227,7 +227,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public TOutput Invoke(TParameters parameters)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var output = _commandExecutor.ExecuteCommand(command, _flags);
@@ -236,7 +236,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				return _commandExecutor
@@ -283,7 +283,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public TOutput Invoke(TParameters parameters)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var output  = _commandExecutor.ExecuteCommand(command, _flags);
@@ -292,7 +292,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				return _commandExecutor
@@ -336,7 +336,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public byte[] Invoke(TParameters parameters)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var stdInReceiver = new AsyncBytesReader();
@@ -355,7 +355,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public Task<byte[]> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
-				Verify.Argument.IsNotNull(parameters, "parameters");
+				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var stdInReceiver = new AsyncBytesReader();

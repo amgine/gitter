@@ -34,7 +34,7 @@ namespace gitter.Redmine.Gui
 
 		public IssueMenu(Issue issue)
 		{
-			Verify.Argument.IsNotNull(issue, "issue");
+			Verify.Argument.IsNotNull(issue, nameof(issue));
 
 			_issue = issue;
 

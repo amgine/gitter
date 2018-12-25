@@ -43,13 +43,6 @@ namespace gitter.Git.Gui.Dialogs
 		private Repository _repository;
 		private ICreateBranchController _controller;
 		private bool _branchNameEdited;
-		private readonly IUserInputSource<string> _branchNameInput;
-		private readonly IUserInputSource<string> _startingRevisionInput;
-		private readonly IUserInputSource<bool> _checkoutInput;
-		private readonly IUserInputSource<bool> _orphanInput;
-		private readonly IUserInputSource<bool> _createReflogInput;
-		private readonly IUserInputSource<BranchTrackingMode> _trackingModeInput;
-		private readonly IUserInputErrorNotifier _errorNotifier;
 
 		#endregion
 
@@ -60,7 +53,7 @@ namespace gitter.Git.Gui.Dialogs
 		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		public CreateBranchDialog(Repository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "repository");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
 
@@ -69,12 +62,12 @@ namespace gitter.Git.Gui.Dialogs
 
 			var inputs = new IUserInputSource[]
 			{
-				_branchNameInput       = new TextBoxInputSource(_txtName),
-				_startingRevisionInput = new ControlInputSource(_txtRevision),
-				_checkoutInput         = new CheckBoxInputSource(_chkCheckoutAfterCreation),
-				_orphanInput           = new CheckBoxInputSource(_chkOrphan),
-				_createReflogInput     = new CheckBoxInputSource(_chkCreateReflog),
-				_trackingModeInput     = new RadioButtonGroupInputSource<BranchTrackingMode>(
+				BranchName       = new TextBoxInputSource(_txtName),
+				StartingRevision = new ControlInputSource(_txtRevision),
+				Checkout         = new CheckBoxInputSource(_chkCheckoutAfterCreation),
+				Orphan           = new CheckBoxInputSource(_chkOrphan),
+				CreateReflog     = new CheckBoxInputSource(_chkCreateReflog),
+				TrackingMode     = new RadioButtonGroupInputSource<BranchTrackingMode>(
 					new[]
 					{
 						Tuple.Create(_trackingDefault,    BranchTrackingMode.Default),
@@ -83,7 +76,7 @@ namespace gitter.Git.Gui.Dialogs
 					}),
 			};
 
-			_errorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.LocalBranch);
 
@@ -116,45 +109,21 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCreate; }
-		}
+		protected override string ActionVerb => Resources.StrCreate;
 
-		public IUserInputSource<string> StartingRevision
-		{
-			get { return _startingRevisionInput; }
-		}
+		public IUserInputSource<string> StartingRevision { get; }
 
-		public IUserInputSource<string> BranchName
-		{
-			get { return _branchNameInput; }
-		}
+		public IUserInputSource<string> BranchName { get; }
 
-		public IUserInputSource<BranchTrackingMode> TrackingMode
-		{
-			get { return _trackingModeInput; }
-		}
+		public IUserInputSource<BranchTrackingMode> TrackingMode { get; }
 
-		public IUserInputSource<bool> Checkout
-		{
-			get { return _checkoutInput; }
-		}
+		public IUserInputSource<bool> Checkout { get; }
 
-		public IUserInputSource<bool> Orphan
-		{
-			get { return _orphanInput; }
-		}
+		public IUserInputSource<bool> Orphan { get; }
 
-		public IUserInputSource<bool> CreateReflog
-		{
-			get { return _createReflogInput; }
-		}
+		public IUserInputSource<bool> CreateReflog { get; }
 
-		public IUserInputErrorNotifier ErrorNotifier
-		{
-			get { return _errorNotifier; }
-		}
+		public IUserInputErrorNotifier ErrorNotifier { get; }
 
 		#endregion
 
@@ -221,10 +190,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region IExecutableDialog
 
-		public bool Execute()
-		{
-			return _controller.TryCreateBranch();
-		}
+		public bool Execute() => _controller.TryCreateBranch();
 
 		#endregion
 	}

@@ -42,8 +42,8 @@ namespace gitter.Framework.Controls
 		public CustomListBoxRow(TData data, IEnumerable<CustomListBoxSubItem> subItems)
 			: base(data)
 		{
-			Verify.Argument.IsNotNull(subItems, "subItems");
-			Verify.Argument.HasNoNullItems(subItems, "subItems");
+			Verify.Argument.IsNotNull(subItems, nameof(subItems));
+			Verify.Argument.HasNoNullItems(subItems, nameof(subItems));
 
 			_subItems = new Dictionary<int, CustomListBoxSubItem>();
 			foreach(var subItem in subItems)
@@ -59,8 +59,8 @@ namespace gitter.Framework.Controls
 		public CustomListBoxRow(TData data, params CustomListBoxSubItem[] subItems)
 			: base(data)
 		{
-			Verify.Argument.IsNotNull(subItems, "subItems");
-			Verify.Argument.HasNoNullItems(subItems, "subItems");
+			Verify.Argument.IsNotNull(subItems, nameof(subItems));
+			Verify.Argument.HasNoNullItems(subItems, nameof(subItems));
 
 			_subItems = new Dictionary<int, CustomListBoxSubItem>(subItems.Length);
 			for(int i = 0; i < subItems.Length; ++i)
@@ -111,7 +111,7 @@ namespace gitter.Framework.Controls
 		/// <param name="subItem"><see cref="CustomListBoxSubItem"/> to add.</param>
 		public void AddSubItem(CustomListBoxSubItem subItem)
 		{
-			Verify.Argument.IsNotNull(subItem, "subItem");
+			Verify.Argument.IsNotNull(subItem, nameof(subItem));
 
 			_subItems.Add(subItem.Id, subItem);
 			subItem.Item = this;
@@ -121,7 +121,7 @@ namespace gitter.Framework.Controls
 		/// <param name="subItem"><see cref="CustomListBoxSubItem"/> to remove.</param>
 		public void RemoveSubItem(CustomListBoxSubItem subItem)
 		{
-			Verify.Argument.IsNotNull(subItem, "subItem");
+			Verify.Argument.IsNotNull(subItem, nameof(subItem));
 
 			_subItems.Remove(subItem.Id);
 			subItem.Item = null;

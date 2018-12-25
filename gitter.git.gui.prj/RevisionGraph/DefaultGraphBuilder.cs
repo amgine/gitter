@@ -499,8 +499,8 @@ namespace gitter.Git.Gui
 
 		public GraphAtom[][] BuildGraph(IList<T> items, Func<T, IList<T>> getParents)
 		{
-			Verify.Argument.IsNotNull(items, "items");
-			Verify.Argument.IsNotNull(getParents, "getParents");
+			Verify.Argument.IsNotNull(items, nameof(items));
+			Verify.Argument.IsNotNull(getParents, nameof(getParents));
 
 			var res = new GraphAtom[items.Count][];
 

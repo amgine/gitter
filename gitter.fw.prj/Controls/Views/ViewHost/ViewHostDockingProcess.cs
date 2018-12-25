@@ -40,7 +40,7 @@ namespace gitter.Framework.Controls
 
 		public ViewHostDockingProcess(ViewHost viewHost)
 		{
-			Verify.Argument.IsNotNull(viewHost, "viewHost");
+			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
 			_viewHost = viewHost;
 		}

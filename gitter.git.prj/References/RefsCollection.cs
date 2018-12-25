@@ -30,14 +30,6 @@ namespace gitter.Git
 	/// <summary>Collections of repository's references ("$GIT_DIR/refs/" cache).</summary>
 	public sealed class RefsCollection : GitObject, IEnumerable<Reference>
 	{
-		#region Data
-
-		private readonly RefsHeadsCollection _heads;
-		private readonly RefsRemotesCollection _remotes;
-		private readonly RefsTagsCollection _tags;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="RefsCollection"/> class.</summary>
@@ -46,9 +38,9 @@ namespace gitter.Git
 		internal RefsCollection(Repository repository)
 			: base(repository, false)
 		{
-			_heads   = new RefsHeadsCollection(repository);
-			_remotes = new RefsRemotesCollection(repository);
-			_tags    = new RefsTagsCollection(repository);
+			Heads   = new RefsHeadsCollection(repository);
+			Remotes = new RefsRemotesCollection(repository);
+			Tags    = new RefsTagsCollection(repository);
 		}
 
 		#endregion
@@ -57,24 +49,15 @@ namespace gitter.Git
 
 		/// <summary>Gets the collection of repository's heads.</summary>
 		/// <value>Collection of repository's heads.</value>
-		public RefsHeadsCollection Heads
-		{
-			get { return _heads; }
-		}
+		public RefsHeadsCollection Heads { get; }
 
 		/// <summary>Gets the collection of repository's remote heads.</summary>
 		/// <value>Collection of repository's remote heads.</value>
-		public RefsRemotesCollection Remotes
-		{
-			get { return _remotes; }
-		}
+		public RefsRemotesCollection Remotes { get; }
 
 		/// <summary>Gets the collection of repository's tags.</summary>
 		/// <value>Collection of repository's tags.</value>
-		public RefsTagsCollection Tags
-		{
-			get { return _tags; }
-		}
+		public RefsTagsCollection Tags { get; }
 
 		/// <summary>Returns total reference count.</summary>
 		/// <value>Total reference count.</value>
@@ -112,9 +95,9 @@ namespace gitter.Git
 					ReferenceType.LocalBranch |
 					ReferenceType.RemoteBranch |
 					ReferenceType.Tag));
-			_heads.Refresh(refs.Heads);
-			_remotes.Refresh(refs.Remotes);
-			_tags.Refresh(refs.Tags);
+			Heads.Refresh(refs.Heads);
+			Remotes.Refresh(refs.Remotes);
+			Tags.Refresh(refs.Tags);
 		}
 
 		/// <summary>Updates cached references of specified types.</summary>
@@ -125,15 +108,15 @@ namespace gitter.Git
 				new QueryReferencesParameters(referenceTypes));
 			if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
 			{
-				_heads.Refresh(refs.Heads);
+				Heads.Refresh(refs.Heads);
 			}
 			if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
 			{
-				_remotes.Refresh(refs.Remotes);
+				Remotes.Refresh(refs.Remotes);
 			}
 			if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
 			{
-				_tags.Refresh(refs.Tags);
+				Tags.Refresh(refs.Tags);
 			}
 		}
 
@@ -147,8 +130,8 @@ namespace gitter.Git
 				new QueryReferencesParameters(
 					ReferenceType.LocalBranch |
 					ReferenceType.RemoteBranch));
-			_heads.Refresh(refs.Heads);
-			_remotes.Refresh(refs.Remotes);
+			Heads.Refresh(refs.Heads);
+			Remotes.Refresh(refs.Remotes);
 		}
 
 		/// <summary>
@@ -158,7 +141,7 @@ namespace gitter.Git
 		{
 			var refs = Repository.Accessor.QueryReferences.Invoke(
 				new QueryReferencesParameters(ReferenceType.Tag));
-			_tags.Refresh(refs.Tags);
+			Tags.Refresh(refs.Tags);
 		}
 
 		#endregion
@@ -200,7 +183,7 @@ namespace gitter.Git
 			{
 				foreach(var head in heads)
 				{
-					var branch = _heads.TryGetItem(head.Name);
+					var branch = Heads.TryGetItem(head.Name);
 					if(branch != null) res.Add(branch);
 				}
 			}
@@ -208,7 +191,7 @@ namespace gitter.Git
 			{
 				foreach(var remote in remotes)
 				{
-					var branch = _remotes.TryGetItem(remote.Name);
+					var branch = Remotes.TryGetItem(remote.Name);
 					if(branch != null) res.Add(branch);
 				}
 			}
@@ -254,7 +237,7 @@ namespace gitter.Git
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
 		public IList<BranchBase> GetBranchesContaining(IRevisionPointer revision)
 		{
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, "revision");
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 		        new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.Contains, revision.Pointer));
@@ -296,7 +279,7 @@ namespace gitter.Git
 		/// <param name="refs">References data.</param>
 		internal void Load(ReferencesData refs)
 		{
-			Verify.Argument.IsNotNull(refs, "refs");
+			Verify.Argument.IsNotNull(refs, nameof(refs));
 
 			if(refs.Heads != null)
 			{
@@ -322,15 +305,15 @@ namespace gitter.Git
 		/// </returns>
 		public IEnumerator<Reference> GetEnumerator()
 		{
-			foreach(var head in _heads)
+			foreach(var head in Heads)
 			{
 				yield return head;
 			}
-			foreach(var remote in _remotes)
+			foreach(var remote in Remotes)
 			{
 				yield return remote;
 			}
-			foreach(var tag in _tags)
+			foreach(var tag in Tags)
 			{
 				yield return tag;
 			}

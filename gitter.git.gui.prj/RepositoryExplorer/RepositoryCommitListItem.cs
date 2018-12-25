@@ -41,7 +41,7 @@ namespace gitter.Git.Gui
 		public RepositoryCommitListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgCommit"], Resources.StrCommit)
 		{
-			Verify.Argument.IsNotNull(environment, "environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

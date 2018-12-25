@@ -62,39 +62,23 @@ namespace gitter.Git
 		/// <param name="item">Added item.</param>
 		protected virtual void InvokeObjectAdded(TObject item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
-			var handler1 = ObjectAdded;
-			if(handler1 != null)
-			{
-				handler1(this, CreateEventArgs(item));
-			}
-			var handler2 = CollectionChanged;
-			if(handler2 != null)
-			{
-				handler2(this, new NotifyCollectionChangedEventArgs(
+			ObjectAdded?.Invoke(this, CreateEventArgs(item));
+			CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
 					NotifyCollectionChangedAction.Add, item));
-			}
 		}
 
 		/// <summary>Invokes <see cref="ObjectRemoved"/> and <see cref="CollectionChanged"/> events.</summary>
 		/// <param name="item">Removed item.</param>
 		protected virtual void InvokeObjectRemoved(TObject item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			item.MarkAsDeleted();
-			var handler = ObjectRemoved;
-			if(handler != null)
-			{
-				handler(this, CreateEventArgs(item));
-			}
-			var handler2 = CollectionChanged;
-			if(handler2 != null)
-			{
-				handler2(this, new NotifyCollectionChangedEventArgs(
+			ObjectRemoved?.Invoke(this, CreateEventArgs(item));
+			CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
 					NotifyCollectionChangedAction.Remove, item));
-			}
 		}
 
 		#endregion
@@ -124,10 +108,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the internal object storage.</summary>
 		/// <value>Internal object storage.</value>
-		protected IDictionary<string, TObject> ObjectStorage
-		{
-			get { return _dictionary; }
-		}
+		protected IDictionary<string, TObject> ObjectStorage => _dictionary;
 
 		/// <summary>Removes object from this collection.</summary>
 		/// <param name="name">Object name.</param>
@@ -135,9 +116,8 @@ namespace gitter.Git
 		{
 			lock(SyncRoot)
 			{
-				TObject item;
 				Verify.Argument.IsTrue(
-					_dictionary.TryGetValue(name, out item),
+					_dictionary.TryGetValue(name, out TObject item),
 					"name", "Object not found.");
 				_dictionary.Remove(name);
 				InvokeObjectRemoved(item);
@@ -169,17 +149,11 @@ namespace gitter.Git
 		/// <summary>Returns non-ambiguous object name.</summary>
 		/// <param name="name">Object name.</param>
 		/// <returns>Non-ambiguous object name.</returns>
-		protected virtual string FixInputName(string name)
-		{
-			return name;
-		}
+		protected virtual string FixInputName(string name) => name;
 
 		/// <summary>Gets the collection of object names.</summary>
 		/// <value>Collection of object names.</value>
-		public ICollection<string> Names
-		{
-			get { return _dictionary.Keys; }
-		}
+		public ICollection<string> Names => _dictionary.Keys;
 
 		/// <summary>Gets the <see cref="TObject"/> with the specified <paramref name="name"/>.</summary>
 		/// <value><see cref="TObject"/> with the specified <paramref name="name"/>.</value>
@@ -225,8 +199,7 @@ namespace gitter.Git
 		{
 			lock(SyncRoot)
 			{
-				TObject value;
-				if(_dictionary.TryGetValue(FixInputName(name), out value))
+				if(_dictionary.TryGetValue(FixInputName(name), out TObject value))
 				{
 					return value;
 				}
@@ -245,10 +218,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the sync root object.</summary>
 		/// <value>The sync root object.</value>
-		public object SyncRoot
-		{
-			get { return _dictionary; }
-		}
+		public object SyncRoot => _dictionary;
 
 		#region Notify()
 
@@ -256,7 +226,7 @@ namespace gitter.Git
 		/// <param name="item">Removed object.</param>
 		internal void NotifyRemoved(TObject item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			RemoveObject(item);
 		}
@@ -265,7 +235,7 @@ namespace gitter.Git
 		/// <param name="name">Removed object name.</param>
 		internal void NotifyRemoved(string name)
 		{
-			Verify.Argument.IsNotNull(name, "name");
+			Verify.Argument.IsNotNull(name, nameof(name));
 
 			RemoveObject(name);
 		}

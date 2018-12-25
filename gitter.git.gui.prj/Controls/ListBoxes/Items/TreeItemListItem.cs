@@ -149,7 +149,7 @@ namespace gitter.Git.Gui.Controls
 		protected TreeItemListItem(T item, bool showFullPath)
 			: base(item)
 		{
-			Verify.Argument.IsNotNull(item, "item");
+			Verify.Argument.IsNotNull(item, nameof(item));
 
 			_showFullPath = showFullPath;
 		}

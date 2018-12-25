@@ -34,9 +34,6 @@ namespace gitter.Git.Gui.Controls
 		{
 		}
 
-		public override string IdentificationString
-		{
-			get { return "TreeHash"; }
-		}
+		public override string IdentificationString => "TreeHash";
 	}
 }

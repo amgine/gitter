@@ -41,7 +41,7 @@ namespace gitter.Framework.Controls
 		public ViewHostTab(ViewHostTabs tabs, ViewBase view)
 			: base(view, tabs.Side)
 		{
-			Verify.Argument.IsNotNull(tabs, "tabs");
+			Verify.Argument.IsNotNull(tabs, nameof(tabs));
 
 			_tabs = tabs;
 			_viewHost = tabs.ViewHost;
