@@ -79,9 +79,11 @@
     <Compile Include="Commands\Ancillary\Manipulation\remote.cs" />
     <Compile Include="Commands\Ancillary\Manipulation\repack.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\CommandBuilderBase.cs" />
     <Compile Include="Commands\CommandParameter.cs" />
     <Compile Include="Commands\CommandFlag.cs" />
     <Compile Include="Commands\CommandParameterValue.cs" />
+    <Compile Include="Commands\CommonArguments.cs" />
     <Compile Include="Commands\ICommandArgument.cs" />
     <Compile Include="Commands\Low-Level\Interrogation\cat-file.cs" />
     <Compile Include="Commands\Low-Level\Interrogation\diff-index.cs" />

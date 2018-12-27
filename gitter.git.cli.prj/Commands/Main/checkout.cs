@@ -25,99 +25,92 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Checkout a branch or paths to the working tree.</summary>
 	public sealed class CheckoutCommand : Command
 	{
-		public static CheckoutCommand FormatCreateBranchCommand(string name, string startingRevision, bool specifyTracking, bool track, bool reflog)
+		public static class KnownArguments
 		{
-			var args = new ICommandArgument[3 + (specifyTracking ? 1 : 0) + (reflog ? 1 : 0)];
-			int id = 0;
-			if(specifyTracking)
+			public static ICommandArgument Quiet => CommonArguments.Quiet;
+
+			public static ICommandArgument Progress { get; } = new CommandFlag("--progress");
+
+			public static ICommandArgument NoProgress { get; } = new CommandFlag("--no-progress");
+
+			public static ICommandArgument Force { get; } = new CommandFlag("-f", "--force");
+
+			public static ICommandArgument Ours { get; } = new CommandFlag("--ours");
+
+			public static ICommandArgument Theirs { get; } = new CommandFlag("--theirs");
+
+			public static ICommandArgument Branch { get; } = new CommandFlag("-b");
+
+			public static ICommandArgument BranchForce { get; } = new CommandFlag("-B");
+
+			/// <summary>
+			/// When creating a new branch, set up branch.name.remote and branch.name.merge configuration entries
+			/// to mark the start-point branch as "upstream" from the new branch.
+			/// </summary>
+			public static ICommandArgument Track { get; } = new CommandFlag("-t", "--track");
+
+			/// <summary>Do not set up "upstream" configuration, even if the branch.autoSetupMerge configuration variable is true.</summary>
+			public static ICommandArgument NoTrack { get; } = new CommandFlag("--no-track");
+
+			/// <summary>
+			///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
+			///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
+			/// </summary>
+			public static ICommandArgument CreateReflog { get; } = new CommandFlag("-l");
+
+			public static ICommandArgument Detach { get; } = new CommandFlag("--detach");
+
+			public static ICommandArgument Orphan { get; } = new CommandFlag("--orphan");
+
+			public static ICommandArgument IgnoreSkipWorktreeBits { get; } = new CommandFlag("--ignore-skip-worktree-bits");
+
+			public static ICommandArgument Merge { get; } = new CommandFlag("-m", "--merge");
+
+			public static ICommandArgument Patch { get; } = new CommandFlag("-p", "--patch");
+
+			public static ICommandArgument IgnoreOtherWorktrees { get; } = new CommandFlag("--ignore-other-worktrees");
+
+			public static ICommandArgument RecurseSubmodules { get; } = new CommandFlag("--recurse-submodules");
+
+			public static ICommandArgument NoRecurseSubmodules { get; } = new CommandFlag("--no-recurse-submodules");
+
+			public static ICommandArgument NoMoreOptions => CommonArguments.NoMoreOptions;
+		}
+
+		public class Builder : CommandBuilderBase
+		{
+			public Builder()
+				: base("checkout")
 			{
-				args[id++] = track ? Track() : NoTrack();
 			}
-			if(reflog)
-			{
-				args[id++] = RefLog();
-			}
-			args[id + 0] = Branch();
-			args[id + 1] = new CommandParameter(name);
-			args[id + 2] = new CommandParameter(startingRevision);
-			return new CheckoutCommand(args);
-		}
 
-		/// <summary>
-		/// When switching branches, proceed even if the index or the working tree differs from HEAD. This is used to throw away local changes.
-		/// When checking out paths from the index, do not fail upon unmerged entries; instead, unmerged entries are ignored.
-		/// </summary>
-		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			public void Quiet() => AddArgument(KnownArguments.Quiet);
 
-		/// <summary>
-		/// When switching branches, if you have local modifications to one or more files that are different between the current branch
-		/// and the branch to which you are switching, the command refuses to switch branches in order to preserve your modifications
-		/// in context. However, with this option, a three-way merge between the current branch, your working tree contents, and the
-		/// new branch is done, and you will be on the new branch. 
-		/// </summary>
-		public static ICommandArgument Merge()
-		{
-			return new CommandFlag("--merge");
-		}
+			public void Progress() => AddArgument(KnownArguments.Progress);
 
-		public static ICommandArgument Ours()
-		{
-			return new CommandFlag("--ours");
-		}
+			public void NoProgress() => AddArgument(KnownArguments.NoProgress);
 
-		public static ICommandArgument Theirs()
-		{
-			return new CommandFlag("--theirs");
-		}
+			public void Force() => AddArgument(KnownArguments.Force);
 
-		/// <summary>
-		///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
-		///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
-		/// </summary>
-		public static ICommandArgument RefLog()
-		{
-			return new CommandFlag("-l");
-		}
+			public void Ours() => AddArgument(KnownArguments.Ours);
 
-		/// <summary>Create a new branch.</summary>
-		public static ICommandArgument Branch()
-		{
-			return new CommandFlag("-b");
-		}
+			public void Theirs() => AddArgument(KnownArguments.Theirs);
 
-		/// <summary>
-		/// <para>When creating a new branch, set up configuration to mark the start-point branch as "upstream" from
-		/// the new branch. This configuration will tell git to show the relationship between the two branches in git
-		/// status and git branch -v. Furthermore, it directs git pull without arguments to pull from the upstream when
-		/// the new branch is checked out.</para>
-		///	<para>This behavior is the default when the start point is a remote branch. Set the branch.autosetupmerge
-		///	configuration variable to false if you want git checkout and git branch to always behave as if --no-track
-		///	were given. Set it to always if you want this behavior when the start-point is either a local or 
-		///	remote branch.</para>
-		/// </summary>
-		public static ICommandArgument Track()
-		{
-			return new CommandFlag("--track");
-		}
+			public void Branch(bool force = false) => AddArgument(force ? KnownArguments.Branch : KnownArguments.BranchForce);
 
-		/// <summary>Do not set up "upstream" configuration, even if the branch.autosetupmerge configuration variable is true.</summary>
-		public static ICommandArgument NoTrack()
-		{
-			return new CommandFlag("--no-track");
-		}
+			public void Track() => AddArgument(KnownArguments.Track);
 
-		/// <summary>Create a new orphan branch.</summary>
-		public static ICommandArgument Orphan()
-		{
-			return new CommandFlag("--orphan");
-		}
+			public void NoTrack() => AddArgument(KnownArguments.NoTrack);
 
-		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
+			public void CreateReflog() => AddArgument(KnownArguments.CreateReflog);
+
+			public void Detach() => AddArgument(KnownArguments.Detach);
+
+			public void Orphan() => AddArgument(KnownArguments.Orphan);
+
+			public void Merge() => AddArgument(KnownArguments.Merge);
+
+			public void NoMoreOptions() => AddArgument(KnownArguments.NoMoreOptions);
 		}
 
 		public CheckoutCommand()

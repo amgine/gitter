@@ -32,9 +32,6 @@ namespace gitter.Git.Gui
 		#region Data
 
 		private readonly IViewFactory[] _viewFactories;
-		private readonly IViewFactory _viewDiff;
-		private readonly IViewFactory _viewBlame;
-		private readonly IViewFactory _viewContextualDiff;
 		private readonly GuiProvider _gui;
 		private Repository _repository;
 

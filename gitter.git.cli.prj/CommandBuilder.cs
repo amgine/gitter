@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2018  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1002,52 +1002,52 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<ICommandArgument>();
+			var builder = new CheckoutCommand.Builder();
 			if(parameters.Force)
 			{
-				args.Add(CheckoutCommand.Force());
+				builder.Force();
 			}
 			if(parameters.Merge)
 			{
-				args.Add(CheckoutCommand.Merge());
+				builder.Merge();
 			}
-			args.Add(new CommandParameter(parameters.Revision));
-			return new CheckoutCommand(args);
+			builder.AddArgument(parameters.Revision);
+			return builder.Build();
 		}
 
 		public Command GetCheckoutFilesCommand(CheckoutFilesParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 2);
+			var builder = new CheckoutCommand.Builder();
 			switch(parameters.Mode)
 			{
 				case CheckoutFileMode.Ours:
-					args.Add(CheckoutCommand.Ours());
+					builder.Ours();
 					break;
 				case CheckoutFileMode.Theirs:
-					args.Add(CheckoutCommand.Theirs());
+					builder.Theirs();
 					break;
 				case CheckoutFileMode.Merge:
-					args.Add(CheckoutCommand.Merge());
+					builder.Merge();
 					break;
 				case CheckoutFileMode.IgnoreUnmergedEntries:
-					args.Add(CheckoutCommand.Force());
+					builder.Force();
 					break;
 			}
 			if(!string.IsNullOrEmpty(parameters.Revision))
 			{
-				args.Add(new CommandParameter(parameters.Revision));
+				builder.AddArgument(parameters.Revision);
 			}
 			if(parameters.Paths != null && parameters.Paths.Count != 0)
 			{
-				args.Add(CheckoutCommand.NoMoreOptions());
+				builder.NoMoreOptions();
 				foreach(var path in parameters.Paths)
 				{
-					args.Add(new PathCommandArgument(path));
+					builder.AddArgument(new PathCommandArgument(path));
 				}
 			}
-			return new CheckoutCommand(args);
+			return builder.Build();
 		}
 
 		public Command GetQueryBlobBytesCommand(QueryBlobBytesParameters parameters)
@@ -1678,80 +1678,91 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<ICommandArgument>(6);
-			args.Add(BranchCommand.NoColor());
-			args.Add(BranchCommand.Verbose());
-			args.Add(BranchCommand.NoAbbrev());
+			var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
+			builder.NoColor();
+			builder.Verbose();
+			builder.NoAbbrev();
 			switch(parameters.Restriction)
 			{
 				case QueryBranchRestriction.All:
-					args.Add(BranchCommand.All());
+					builder.All();
 					break;
 				case QueryBranchRestriction.Remote:
-					args.Add(BranchCommand.Remote());
+					builder.Remotes();
 					break;
 			}
 			switch(parameters.Mode)
 			{
 				case BranchQueryMode.Contains:
-					args.Add(BranchCommand.Contains());
+					builder.Contains(parameters.Revision);
 					break;
 				case BranchQueryMode.Merged:
-					args.Add(BranchCommand.Merged());
+					builder.Merged(parameters.Revision);
 					break;
 				case BranchQueryMode.NoMerged:
-					args.Add(BranchCommand.NoMerged());
+					builder.NoMerged(parameters.Revision);
 					break;
 			}
-			if(parameters.Revision != null)
-			{
-				args.Add(new CommandParameter(parameters.Revision));
-			}
-
-			return new BranchCommand(args);
+			return builder.Build();
 		}
 
 		public Command GetCreateBranchCommand(CreateBranchParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			var args = new List<ICommandArgument>(6);
-			switch(parameters.TrackingMode)
-			{
-				case BranchTrackingMode.NotTracking:
-					args.Add(BranchCommand.NoTrack());
-					break;
-				case BranchTrackingMode.Tracking:
-					args.Add(BranchCommand.Track());
-					break;
-			}
-			if(parameters.CreateReflog)
-			{
-				args.Add(BranchCommand.RefLog(_gitCLI.GitVersion));
-			}
 			if(parameters.Checkout)
 			{
+				var builder = new CheckoutCommand.Builder();
+				switch(parameters.TrackingMode)
+				{
+					case BranchTrackingMode.NotTracking:
+						builder.NoTrack();
+						break;
+					case BranchTrackingMode.Tracking:
+						builder.Track();
+						break;
+				}
+				if(parameters.CreateReflog)
+				{
+					builder.CreateReflog();
+				}
 				if(parameters.Orphan)
 				{
-					args.Add(CheckoutCommand.Orphan());
+					builder.Orphan();
 				}
 				else
 				{
-					args.Add(CheckoutCommand.Branch());
+					builder.Branch();
 				}
-			}
-			args.Add(new CommandParameter(parameters.BranchName));
-			if(!string.IsNullOrEmpty(parameters.StartingRevision))
-			{
-				args.Add(new CommandParameter(parameters.StartingRevision));
-			}
-			if(parameters.Checkout)
-			{
-				return new CheckoutCommand(args);
+				builder.AddArgument(new CommandParameter(parameters.BranchName));
+				if(!string.IsNullOrEmpty(parameters.StartingRevision))
+				{
+					builder.AddArgument(new CommandParameter(parameters.StartingRevision));
+				}
+				return builder.Build();
 			}
 			else
 			{
-				return new BranchCommand(args);
+				var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
+				switch(parameters.TrackingMode)
+				{
+					case BranchTrackingMode.NotTracking:
+						builder.NoTrack();
+						break;
+					case BranchTrackingMode.Tracking:
+						builder.Track();
+						break;
+				}
+				if(parameters.CreateReflog)
+				{
+					builder.CreateReflog();
+				}
+				builder.AddArgument(new CommandParameter(parameters.BranchName));
+				if(!string.IsNullOrEmpty(parameters.StartingRevision))
+				{
+					builder.AddArgument(new CommandParameter(parameters.StartingRevision));
+				}
+				return builder.Build();
 			}
 		}
 
@@ -1759,39 +1770,36 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			return new BranchCommand(
-				BranchCommand.Reset(),
-				new CommandParameter(parameters.BranchName),
-				new CommandParameter(parameters.Revision));
+			var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
+			builder.Force();
+			builder.AddArgument(parameters.BranchName);
+			builder.AddArgument(parameters.Revision);
+			return builder.Build();
 		}
 
 		public Command GetDeleteBranchCommand(DeleteBranchParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
+			var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
+			builder.Delete(parameters.Force);
 			if(parameters.Remote)
 			{
-				return new BranchCommand(
-					parameters.Force ? BranchCommand.DeleteForce() : BranchCommand.Delete(),
-					BranchCommand.Remote(),
-					new CommandParameter(parameters.BranchName));
+				builder.Remotes();
 			}
-			else
-			{
-				return new BranchCommand(
-					parameters.Force ? BranchCommand.DeleteForce() : BranchCommand.Delete(),
-					new CommandParameter(parameters.BranchName));
-			}
+			builder.AddArgument(parameters.BranchName);
+			return builder.Build();
 		}
 
 		public Command GetRenameBranchCommand(RenameBranchParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
-			return new BranchCommand(
-				parameters.Force ? BranchCommand.MoveForce() : BranchCommand.Move(),
-				new CommandParameter(parameters.OldName),
-				new CommandParameter(parameters.NewName));
+			var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
+			builder.Move(parameters.Force);
+			builder.AddArgument(parameters.OldName);
+			builder.AddArgument(parameters.NewName);
+			return builder.Build();
 		}
 
 		#endregion

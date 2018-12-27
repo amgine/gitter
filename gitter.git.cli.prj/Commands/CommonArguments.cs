@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2018  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,19 +18,14 @@
  */
 #endregion
 
-using System;
-using System.Resources;
-using System.Reflection;
+namespace gitter.Git.AccessLayer.CLI
+{
+	static class CommonArguments
+	{
+		public static ICommandArgument Verbose { get; } = new CommandFlag("-v", "--verbose");
 
-[assembly: AssemblyCompany("amgine")]
-[assembly: AssemblyProduct("gitter")]
-[assembly: AssemblyCopyright("Copyright © amgine 2018")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+		public static ICommandArgument Quiet { get; } = new CommandFlag("-q", "--quiet");
 
-[assembly: CLSCompliant(true)]
-
-[assembly: NeutralResourcesLanguage("en-us")]
-
-[assembly: AssemblyFileVersion("1.0.19.0")]
-[assembly: AssemblyVersion("1.0.19.0")] 
+		public static ICommandArgument NoMoreOptions { get; } = new CommandFlag("--");
+	}
+}

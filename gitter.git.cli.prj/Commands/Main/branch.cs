@@ -22,156 +22,198 @@ namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
+
+	public enum BranchColorWhen
+	{
+		Always,
+		Never,
+		Auto,
+	}
 
 	/// <summary>List, create, or delete branches.</summary>
 	public sealed class BranchCommand : Command
 	{
-		public static BranchCommand FormatCreateBranchCommand(Version gitVersion, string name, 
-			string startingRevision, bool specifyTracking, bool track, bool reflog)
+		public static class KnownArguments
 		{
-			var args = new ICommandArgument[2+(specifyTracking?1:0)+(reflog?1:0)];
-			int id = 0;
-			if(specifyTracking)
+			/// <summary>Delete a branch. The branch must be fully merged in HEAD.</summary>
+			public static ICommandArgument Delete { get; } = new CommandFlag("-d", "--delete");
+
+			/// <summary>Delete a branch irrespective of its merged status.</summary>
+			public static ICommandArgument DeleteForce { get; } = new CommandFlag("-D");
+
+			/// <summary>
+			///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
+			///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
+			/// </summary>
+			public static ICommandArgument CreateReflog { get; } = new CommandFlag("--create-reflog");
+
+			/// <summary>
+			///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
+			///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
+			/// </summary>
+			public static ICommandArgument CreateReflogOld { get; } = new CommandFlag("-l");
+
+			/// <summary>Reset branchname to startpoint if branchname exists already. Without -f git-branch refuses to change an existing branch.</summary>
+			public static ICommandArgument Force { get; } = new CommandFlag("-f", "--force");
+
+			/// <summary>Move/rename a branch and the corresponding reflog.</summary>
+			public static ICommandArgument Move { get; } = new CommandFlag("-m", "--move");
+
+			/// <summary>Shortcut for --move --force.</summary>
+			public static ICommandArgument MoveForce { get; } = new CommandFlag("-M");
+
+			/// <summary>Move/rename a branch and the corresponding reflog.</summary>
+			public static ICommandArgument Copy { get; } = new CommandFlag("-c", "--copy");
+
+			/// <summary>Shortcut for --move --force.</summary>
+			public static ICommandArgument CopyForce { get; } = new CommandFlag("-C");
+
+			/// <summary>Color branches to highlight current, local, and remote-tracking branches.</summary>
+			public static ICommandArgument ColorAlways { get; } = new CommandParameterValue("--color", "always", ' ');
+
+			/// <summary>Color branches to highlight current, local, and remote-tracking branches.</summary>
+			public static ICommandArgument ColorNever { get; } = new CommandParameterValue("--color", "never", ' ');
+
+			/// <summary>Color branches to highlight current, local, and remote-tracking branches.</summary>
+			public static ICommandArgument ColorAuto { get; } = new CommandParameterValue("--color", "auto", ' ');
+
+			/// <summary>Color branches to highlight current, local, and remote-tracking branches.</summary>
+			/// <param name="when">The value must be always (the default), never, or auto.</param>
+			public static ICommandArgument Color(BranchColorWhen when)
 			{
-				args[id++] = track ? Track() : NoTrack();
+				switch(when)
+				{
+					case BranchColorWhen.Always: return ColorAlways;
+					case BranchColorWhen.Never:  return ColorNever;
+					case BranchColorWhen.Auto:   return ColorAuto;
+					default: throw new ArgumentException(nameof(when));
+				}
 			}
-			if(reflog)
+
+			/// <summary>Turn off branch colors, even when the configuration file gives the default to color output. Same as --color=never.</summary>
+			public static ICommandArgument NoColor { get; } = new CommandFlag("--no-color");
+
+			/// <summary>Sorting and filtering branches are case insensitive.</summary>
+			public static ICommandArgument IgnoreCase { get; } = new CommandFlag("-i", "--ignore-case");
+
+			/// <summary>List or delete (if used with -d) the remote-tracking branches.</summary>
+			public static ICommandArgument Remotes { get; } = new CommandFlag("-r", "--remotes");
+
+			/// <summary>
+			/// List branches.With optional pattern..., e.g.git branch --list 'maint-*', list only the branches that match the pattern(s).
+			/// </summary>
+			public static ICommandArgument List { get; } = new CommandFlag("-l", "--list");
+
+			/// <summary>List both remote-tracking branches and local branches.</summary>
+			public static ICommandArgument All { get; } = new CommandFlag("-a", "--all");
+
+			/// <summary>
+			/// When creating a new branch, set up branch.name.remote and branch.name.merge configuration entries
+			/// to mark the start-point branch as "upstream" from the new branch.
+			/// </summary>
+			public static ICommandArgument Track { get; } = new CommandFlag("-t", "--track");
+
+			/// <summary>Do not set up "upstream" configuration, even if the branch.autoSetupMerge configuration variable is true.</summary>
+			public static ICommandArgument NoTrack { get; } = new CommandFlag("--no-track");
+
+			/// <summary>
+			/// When in list mode, show sha1 and commit subject line for each head, along with relationship to upstream
+			/// branch (if any). If given twice, print the name of the upstream branch, as well.
+			/// </summary>
+			public static ICommandArgument Verbose => CommonArguments.Verbose;
+
+			/// <summary>
+			/// Be more quiet when creating or deleting a branch, suppressing non-error messages.
+			/// </summary>
+			public static ICommandArgument Quiet => CommonArguments.Quiet;
+
+			/// <summary>Display the full sha1s in the output listing rather than abbreviating them.</summary>
+			public static ICommandArgument Abbrev(int length = 7) => new CommandParameterValue("--abbrev", length.ToString(CultureInfo.InvariantCulture), '=');
+
+			/// <summary>Display the full sha1s in the output listing rather than abbreviating them.</summary>
+			public static ICommandArgument NoAbbrev { get; } = new CommandFlag("--no-abbrev");
+
+			private static ICommandArgument ContainsHEAD { get; } = new CommandFlag("--contains");
+
+			private static ICommandArgument NoContainsHEAD { get; } = new CommandFlag("--no-contains");
+
+			private static ICommandArgument MergedHEAD { get; } = new CommandFlag("--merged");
+
+			private static ICommandArgument NoMergedHEAD { get; } = new CommandFlag("--no-merged");
+
+			public static ICommandArgument Contains(string commit) => commit == null ? ContainsHEAD : new CommandParameterValue("--contains", commit, ' ');
+
+			public static ICommandArgument NoContains(string commit) => commit == null ? NoContainsHEAD : new CommandParameterValue("--no-contains", commit, ' ');
+
+			public static ICommandArgument Merged(string commit) => commit == null ? MergedHEAD : new CommandParameterValue("--merged", commit, ' ');
+
+			public static ICommandArgument NoMerged(string commit) => commit == null ? NoMergedHEAD : new CommandParameterValue("--no-merged", commit, ' ');
+		}
+
+		public sealed class Builder : CommandBuilderBase
+		{
+			static readonly Version NewReflogArgVersion = new Version(2, 20, 0);
+
+			public Builder(Version gitVersion)
+				: base("branch")
 			{
-				args[id++] = RefLog(gitVersion);
+				GitVersion = gitVersion;
 			}
-			args[id + 0] = new CommandParameter(name);
-			args[id + 1] = new CommandParameter(startingRevision);
-			return new BranchCommand(args);
-		}
 
-		/// <summary>Delete a branch. The branch must be fully merged in HEAD.</summary>
-		public static ICommandArgument Delete() => new CommandFlag("-d");
+			private Version GitVersion { get; }
 
-		/// <summary>Delete a branch irrespective of its merged status.</summary>
-		public static ICommandArgument DeleteForce()
-		{
-			return new CommandFlag("-D");
-		}
+			public void Delete(bool force = false)
+				=> AddArgument(force
+					? KnownArguments.Delete
+					: KnownArguments.DeleteForce);
 
-		static readonly Version NewReflogArgVersion = new Version(2, 20, 0);
+			public void Move(bool force = false)
+				=> AddArgument(force
+					? KnownArguments.Move
+					: KnownArguments.MoveForce);
 
-		/// <summary>
-		///	Create the branch's reflog. This activates recording of all changes made to the branch ref,
-		///	enabling use of date based sha1 expressions such as "branchname@{yesterday}".
-		/// </summary>
-		public static ICommandArgument RefLog(Version gitVersion)
-		{
-			return gitVersion >= NewReflogArgVersion
-				? new CommandFlag("--create-reflog")
-				: new CommandFlag("-l");
-		}
+			public void Copy(bool force = false)
+				=> AddArgument(force
+					? KnownArguments.Copy
+					: KnownArguments.CopyForce);
 
-		/// <summary>Reset branchname to startpoint if branchname exists already. Without -f git-branch refuses to change an existing branch.</summary>
-		public static ICommandArgument Reset()
-		{
-			return new CommandFlag("-f");
-		}
+			public void Force() => AddArgument(KnownArguments.Force);
 
-		/// <summary>Move/rename a branch and the corresponding reflog.</summary>
-		public static ICommandArgument Move()
-		{
-			return new CommandFlag("-m");
-		}
+			public void CreateReflog()
+				=> AddArgument(GitVersion >= NewReflogArgVersion
+					? KnownArguments.CreateReflog
+					: KnownArguments.CreateReflogOld);
 
-		/// <summary>Move/rename a branch even if the new branch name already exists.</summary>
-		public static ICommandArgument MoveForce()
-		{
-			return new CommandFlag("-M");
-		}
+			public void Color(BranchColorWhen when = BranchColorWhen.Always) => AddArgument(KnownArguments.Color(when));
 
-		/// <summary>Color branches to highlight current, local, and remote branches.</summary>
-		public static ICommandArgument Color()
-		{
-			return new CommandFlag("--color");
-		}
+			public void NoColor() => AddArgument(KnownArguments.NoColor);
 
-		/// <summary>Turn off branch colors, even when the configuration file gives the default to color output.</summary>
-		public static ICommandArgument NoColor()
-		{
-			return new CommandFlag("--no-color");
-		}
+			public void List() => AddArgument(KnownArguments.List);
 
-		/// <summary>List or delete (if used with -d) the remote-tracking branches.</summary>
-		public static ICommandArgument Remote()
-		{
-			return new CommandFlag("-r");
-		}
+			public void Remotes() => AddArgument(KnownArguments.Remotes);
 
-		/// <summary>List both remote-tracking branches and local branches.</summary>
-		public static ICommandArgument All()
-		{
-			return new CommandFlag("-a");
-		}
+			public void All() => AddArgument(KnownArguments.All);
 
-		/// <summary>
-		/// Show sha1 and commit subject line for each head, along with relationship to upstream branch (if any).
-		/// If given twice, print the name of the upstream branch, as well. 
-		/// </summary>
-		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
-		
-		/// <summary>Alter the sha1's minimum display length in the output listing. The default value is 7.</summary>
-		public static ICommandArgument Abbrev(int length)
-		{
-			return new CommandParameterValue("--abbrev", length.ToString());
-		}
+			public void Track() => AddArgument(KnownArguments.Track);
 
-		/// <summary>Display the full sha1s in the output listing rather than abbreviating them.</summary>
-		public static ICommandArgument NoAbbrev()
-		{
-			return new CommandFlag("--no-abbrev");
-		}
+			public void NoTrack() => AddArgument(KnownArguments.NoTrack);
 
-		/// <summary>
-		/// <para>When creating a new branch, set up configuration to mark the start-point branch as "upstream" from
-		/// the new branch. This configuration will tell git to show the relationship between the two branches in git
-		/// status and git branch -v. Furthermore, it directs git pull without arguments to pull from the upstream when
-		/// the new branch is checked out.</para>
-		///	<para>This behavior is the default when the start point is a remote branch. Set the branch.autosetupmerge
-		///	configuration variable to false if you want git checkout and git branch to always behave as if --no-track
-		///	were given. Set it to always if you want this behavior when the start-point is either a local or 
-		///	remote branch.</para>
-		/// </summary>
-		public static ICommandArgument Track()
-		{
-			return new CommandFlag("--track");
-		}
+			public void Abbrev(int length = 7) => AddArgument(KnownArguments.Abbrev(length));
 
-		/// <summary>Do not set up "upstream" configuration, even if the branch.autosetupmerge configuration variable is true.</summary>
-		public static ICommandArgument NoTrack()
-		{
-			return new CommandFlag("--no-track");
-		}
+			public void NoAbbrev() => AddArgument(KnownArguments.NoAbbrev);
 
-		/// <summary>Only list branches which contain the specified commit.</summary>
-		public static ICommandArgument Contains()
-		{
-			return new CommandFlag("--contains");
-		}
+			public void Verbose() => AddArgument(KnownArguments.Verbose);
 
-		/// <summary>Only list branches which contain the specified commit.</summary>
-		public static ICommandArgument Contains(string commit)
-		{
-			return new CommandParameterValue("--contains", commit, ' ');
-		}
+			public void Quiet() => AddArgument(KnownArguments.Quiet);
 
-		/// <summary>Only list branches which are fully contained by HEAD.</summary>
-		public static ICommandArgument Merged()
-		{
-			return new CommandFlag("--merged");
-		}
+			public void Contains(string commit = null) => AddArgument(KnownArguments.Contains(commit));
 
-		/// <summary>Do not list branches which are fully contained by HEAD.</summary>
-		public static ICommandArgument NoMerged()
-		{
-			return new CommandFlag("--no-merged");
+			public void NoContains(string commit = null) => AddArgument(KnownArguments.NoContains(commit));
+
+			public void Merged(string commit = null) => AddArgument(KnownArguments.Merged(commit));
+
+			public void NoMerged(string commit = null) => AddArgument(KnownArguments.NoMerged(commit));
 		}
 
 		public BranchCommand()

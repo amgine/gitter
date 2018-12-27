@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2018  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,16 +30,16 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static ICommandArgument DryRun() => new CommandFlag("--dry-run");
 
-		public static ICommandArgument Verbose() => new CommandFlag("--verbose");
+		public static ICommandArgument Verbose() => CommonArguments.Verbose;
 
-		public static ICommandArgument Quiet() => new CommandFlag("--quiet");
+		public static ICommandArgument Quiet() => CommonArguments.Quiet;
 
 		public static ICommandArgument SignOff() => new CommandFlag("--signoff");
 
 		public static ICommandArgument Interactive() => new CommandFlag("--interactive");
 
 		/// <summary>Do not interpret any more arguments as options.</summary>
-		public static ICommandArgument NoMoreOptions() => new CommandFlag("--");
+		public static ICommandArgument NoMoreOptions() => CommonArguments.NoMoreOptions;
 
 		#endregion
 
@@ -47,7 +47,14 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public CommandFlag(string name)
 		{
-			Name = name;
+			Name     = name;
+			LongName = name;
+		}
+
+		public CommandFlag(string name, string longName)
+		{
+			Name     = name;
+			LongName = longName;
 		}
 
 		#endregion
@@ -55,6 +62,8 @@ namespace gitter.Git.AccessLayer.CLI
 		#region Properties
 
 		public string Name { get; }
+
+		public string LongName { get; }
 
 		#endregion
 
