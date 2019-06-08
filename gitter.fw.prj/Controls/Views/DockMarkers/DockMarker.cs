@@ -29,8 +29,6 @@ namespace gitter.Framework.Controls
 
 	public abstract class DockMarker : Form
 	{
-		#region Data
-
 		private readonly DockMarkerButton[] _buttons;
 		private readonly TrackingService<DockMarkerButton> _buttonHover;
 		private readonly Point[] _borderPolygon;
@@ -38,8 +36,6 @@ namespace gitter.Framework.Controls
 		private DockPositionMarker _positionMarker;
 		private IDockHost _dockHost;
 		private ViewHost _dockClient;
-
-		#endregion
 
 		protected DockMarker(IDockHost dockHost, ViewHost dockClient, DockMarkerButton[] buttons, Point[] border, Rectangle bounds)
 		{
@@ -58,34 +54,31 @@ namespace gitter.Framework.Controls
 				ControlStyles.OptimizedDoubleBuffer,
 				true);
 
-			_dockHost			= dockHost;
-			_dockClient			= dockClient;
+			_dockHost         = dockHost;
+			_dockClient       = dockClient;
 
-			MinimumSize			= new Size(1, 1);
-			StartPosition		= FormStartPosition.Manual;
-			FormBorderStyle		= FormBorderStyle.None;
-			ControlBox			= false;
-			MaximizeBox			= false;
-			MinimizeBox			= false;
-			Text				= string.Empty;
-			ShowIcon			= false;
-			ShowInTaskbar		= false;
-			Enabled				= false;
-			ImeMode				= ImeMode.Disable;
-			BackColor			= Renderer.DockMarkerBackgroundColor;
-			Bounds				= bounds;
-			AllowTransparency	= true;
-			Opacity				= ViewConstants.OpacityNormal;
+			MinimumSize       = new Size(1, 1);
+			StartPosition     = FormStartPosition.Manual;
+			FormBorderStyle   = FormBorderStyle.None;
+			ControlBox        = false;
+			MaximizeBox       = false;
+			MinimizeBox       = false;
+			Text              = string.Empty;
+			ShowIcon          = false;
+			ShowInTaskbar     = false;
+			Enabled           = false;
+			ImeMode           = ImeMode.Disable;
+			BackColor         = Renderer.DockMarkerBackgroundColor;
+			Bounds            = bounds;
+			AllowTransparency = true;
+			Opacity           = ViewConstants.OpacityNormal;
 
-			_borderPolygon		= border;
-			_buttons			= buttons;
-			_buttonHover		= new TrackingService<DockMarkerButton>(OnButtonHoverChanged);
+			_borderPolygon    = border;
+			_buttons          = buttons;
+			_buttonHover      = new TrackingService<DockMarkerButton>(OnButtonHoverChanged);
 		}
 
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
+		private ViewRenderer Renderer => ViewManager.Renderer;
 
 		/// <summary>
 		/// Displays the control to the user.
@@ -131,10 +124,7 @@ namespace gitter.Framework.Controls
 			TopMost = true;
 		}
 
-		protected override bool ShowWithoutActivation
-		{
-			get { return true; }
-		}
+		protected override bool ShowWithoutActivation => true;
 
 		protected override CreateParams CreateParams
 		{
@@ -186,10 +176,7 @@ namespace gitter.Framework.Controls
 			return -1;
 		}
 
-		public DockResult HitTest()
-		{
-			return HitTest(Control.MousePosition);
-		}
+		public DockResult HitTest() => HitTest(Control.MousePosition);
 
 		public DockResult HitTest(Point point)
 		{
@@ -243,10 +230,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public void UpdateHover()
-		{
-			UpdateHover(Control.MousePosition);
-		}
+		public void UpdateHover() => UpdateHover(Control.MousePosition);
 
 		public void Unhover()
 		{

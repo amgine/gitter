@@ -24,16 +24,11 @@ namespace gitter.Framework.Controls
 
 	public class ViewEventArgs : EventArgs
 	{
-		private readonly ViewBase _view;
-
 		public ViewEventArgs(ViewBase view)
 		{
-			_view = view;
+			View = view;
 		}
 
-		public ViewBase View
-		{
-			get { return _view; }
-		}
+		public ViewBase View { get; }
 	}
 }

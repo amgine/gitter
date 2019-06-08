@@ -25,23 +25,15 @@ namespace gitter.Git
 
 	public sealed class RevisionLog
 	{
-		#region Data
-
-		private readonly Repository _repository;
-		private readonly IList<Revision> _revisions;
 		private readonly Dictionary<Revision, IList<Revision>> _parents;
-
-		#endregion
-
-		#region .ctor
 
 		public RevisionLog(Repository repository, IList<Revision> revisions)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(revisions, nameof(revisions));
 
-			_repository = repository;
-			_revisions  = revisions;
+			Repository = repository;
+			Revisions  = revisions;
 		}
 
 		public RevisionLog(Repository repository, IList<Revision> revisions, Dictionary<Revision, IList<Revision>> parents)
@@ -49,14 +41,10 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(revisions, nameof(revisions));
 
-			_repository = repository;
-			_revisions  = revisions;
-			_parents    = parents;
+			Repository = repository;
+			Revisions  = revisions;
+			_parents   = parents;
 		}
-
-		#endregion
-
-		#region Methods
 
 		public IList<Revision> GetParents(Revision revision)
 		{
@@ -68,37 +56,16 @@ namespace gitter.Git
 			}
 			else
 			{
-				IList<Revision> parents;
-				if(_parents.TryGetValue(revision, out parents))
-				{
-					return parents;
-				}
-				else
-				{
-					return new Revision[0];
-				}
+				return _parents.TryGetValue(revision, out var parents)
+					? parents
+					: new Revision[0];
 			}
 		}
 
-		#endregion
+		public Repository Repository { get; }
 
-		#region Properties
+		public IList<Revision> Revisions { get; }
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
-
-		public IList<Revision> Revisions
-		{
-			get { return _revisions; }
-		}
-
-		public int RevisionsCount
-		{
-			get { return _revisions.Count; }
-		}
-
-		#endregion
+		public int RevisionsCount => Revisions.Count;
 	}
 }

@@ -28,35 +28,25 @@ namespace gitter.Framework
 	public sealed class IntegrationFeatures : IEnumerable<IIntegrationFeature>
 	{
 		private readonly Dictionary<string, IIntegrationFeature> _features;
-		private readonly GravatarFeature _gravatar;
 
 		/// <summary>Create <see cref="IntegrationFeatures"/>.</summary>
 		internal IntegrationFeatures()
 		{
-			_gravatar = new GravatarFeature();
+			Gravatar = new GravatarFeature();
 			var explorerContextMenu = new ExplorerContextMenuFeature();
 			_features = new Dictionary<string, IIntegrationFeature>()
 			{
 				{ explorerContextMenu.Name, explorerContextMenu },
-				{ _gravatar.Name, _gravatar },
+				{ Gravatar.Name, Gravatar },
 			};
 		}
 
 		/// <summary>Gravatar integration support.</summary>
-		public GravatarFeature Gravatar
-		{
-			get { return _gravatar; }
-		}
+		public GravatarFeature Gravatar { get; }
 
-		public IIntegrationFeature this[string name]
-		{
-			get { return _features[name]; }
-		}
+		public IIntegrationFeature this[string name] => _features[name];
 
-		public int Count
-		{
-			get { return _features.Count; }
-		}
+		public int Count => _features.Count;
 
 		public void SaveTo(Section section)
 		{
@@ -80,8 +70,7 @@ namespace gitter.Framework
 			{
 				foreach(var featureNode in section.Sections)
 				{
-					IIntegrationFeature feature;
-					if(_features.TryGetValue(featureNode.Name, out feature) && feature.HasConfiguration)
+					if(_features.TryGetValue(featureNode.Name, out var feature) && feature.HasConfiguration)
 					{
 						feature.LoadFrom(featureNode);
 					}

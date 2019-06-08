@@ -130,10 +130,7 @@ namespace gitter.Git
 
 		private Task RunMergeToolAsyncCore(MergeTool mergeTool, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrWaitingMergeTool.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrWaitingMergeTool.AddEllipsis()));
 			var blockedNotifications = Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.WorktreeUpdated);

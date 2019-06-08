@@ -51,10 +51,7 @@ namespace gitter.Git
 		{
 		}
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.Checkout; }
-		}
+		public override object NotificationType => RepositoryNotifications.Checkout;
 
 		public override bool Apply(Repository repository)
 		{
@@ -70,10 +67,7 @@ namespace gitter.Git
 		{
 		}
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.SubmodulesChanged; }
-		}
+		public override object NotificationType => RepositoryNotifications.SubmodulesChanged;
 
 		public override bool Apply(Repository repository)
 		{
@@ -88,10 +82,7 @@ namespace gitter.Git
 		{
 		}
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.RepositoryRemoved; }
-		}
+		public override object NotificationType => RepositoryNotifications.RepositoryRemoved;
 
 		public override bool Apply(Repository repository)
 		{
@@ -106,10 +97,7 @@ namespace gitter.Git
 		{
 		}
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.ConfigUpdated; }
-		}
+		public override object NotificationType => RepositoryNotifications.ConfigUpdated;
 
 		public override bool Apply(Repository repository)
 		{
@@ -124,10 +112,7 @@ namespace gitter.Git
 		{
 		}
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.IndexUpdated; }
-		}
+		public override object NotificationType => RepositoryNotifications.IndexUpdated;
 
 		public override bool Apply(Repository repository)
 		{
@@ -145,10 +130,7 @@ namespace gitter.Git
 
 		public string Path { get; }
 
-		public override object NotificationType
-		{
-			get { return RepositoryNotifications.WorktreeUpdated; }
-		}
+		public override object NotificationType => RepositoryNotifications.WorktreeUpdated;
 
 		public override bool Apply(Repository repository)
 		{

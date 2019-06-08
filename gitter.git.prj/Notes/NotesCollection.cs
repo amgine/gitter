@@ -65,10 +65,7 @@ namespace gitter.Git
 			_notes = new Dictionary<string, Note>();
 		}
 
-		public object SyncRoot
-		{
-			get { return _notes; }
-		}
+		public object SyncRoot => _notes;
 
 		public Note this[string noteObjectName]
 		{

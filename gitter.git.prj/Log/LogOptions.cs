@@ -46,10 +46,7 @@ namespace gitter.Git
 			_maxCount = 500;
 		}
 
-		public IEnumerable<Reference> AllowedReferences
-		{
-			get { return _allowedReferences; }
-		}
+		public IEnumerable<Reference> AllowedReferences => _allowedReferences;
 
 		public void AllowReference(Reference reference)
 		{
@@ -59,7 +56,7 @@ namespace gitter.Git
 			{
 				if(_filter == LogReferenceFilter.Allowed)
 				{
-					Changed.Raise(this);
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -72,7 +69,7 @@ namespace gitter.Git
 			{
 				if(_filter == LogReferenceFilter.Allowed)
 				{
-					Changed.Raise(this);
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -85,7 +82,7 @@ namespace gitter.Git
 				if(_filter != value)
 				{
 					_filter = value;
-					Changed.Raise(this);
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -98,7 +95,7 @@ namespace gitter.Git
 				if(_order != value)
 				{
 					_order = value;
-					Changed.Raise(this);
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -111,7 +108,7 @@ namespace gitter.Git
 				if(_maxCount != value)
 				{
 					_maxCount = value;
-					Changed.Raise(this);
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -124,7 +121,7 @@ namespace gitter.Git
 				if(_skip != value)
 				{
 					_skip = value;
-					Changed.Raise(this);
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -137,7 +134,7 @@ namespace gitter.Git
 			_filter = LogReferenceFilter.All;
 			_maxCount = 0;
 			_skip = 0;
-			Changed.Raise(this);
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
 		internal QueryRevisionsParameters GetLogParameters()
@@ -200,7 +197,7 @@ namespace gitter.Git
 				_skip = skip;
 				changed = true;
 			}
-			if(changed) Changed.Raise(this);
+			if(changed) Changed?.Invoke(this, EventArgs.Empty);
 		}
 	}
 }

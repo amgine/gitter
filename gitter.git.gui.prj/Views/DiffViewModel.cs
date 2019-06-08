@@ -58,12 +58,7 @@ namespace gitter.Git.Gui.Views
 
 		public override bool Equals(object obj)
 		{
-			if(obj == null)
-			{
-				return false;
-			}
-			var other = obj as DiffViewModel;
-			if(other == null)
+			if(!(obj is DiffViewModel other))
 			{
 				return false;
 			}

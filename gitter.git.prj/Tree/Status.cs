@@ -629,10 +629,7 @@ namespace gitter.Git
 
 		public Task<IList<TreeFile>> GetFilesToAddAsync(string pattern, bool includeUntracked, bool includeIgnored, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrLookingForFiles.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrLookingForFiles.AddEllipsis()));
 			var parameters = GetAddFilesParameters(pattern, includeUntracked, includeIgnored);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
 			return Repository.Accessor.QueryFilesToAdd.InvokeAsync(parameters, progress, cancellationToken)
@@ -825,10 +822,7 @@ namespace gitter.Git
 		/// <returns>Files that will be removed by a Clean() call.</returns>
 		public Task<IList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsLookingForFiles.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsLookingForFiles.AddEllipsis()));
 			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
 			return Repository.Accessor.QueryFilesToClean.InvokeAsync(parameters, progress, cancellationToken)

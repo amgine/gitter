@@ -520,10 +520,9 @@ namespace gitter.Git.AccessLayer.CLI
 						break;
 					case Header.SimilarityIndex:
 						{
-							int index;
 							string strIndex = ReadStringUpTo(FindNewLineOrEndOfString() - 1);
 							Skip(2);
-							if(int.TryParse(strIndex, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
+							if(int.TryParse(strIndex, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index))
 							{
 								fileHeader.SimilarityIndex = index;
 							}
@@ -531,10 +530,9 @@ namespace gitter.Git.AccessLayer.CLI
 						break;
 					case Header.DissimilarityIndex:
 						{
-							int index;
 							string strIndex = ReadStringUpTo(FindNewLineOrEndOfString() - 1);
 							Skip(2);
-							if(int.TryParse(strIndex, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
+							if(int.TryParse(strIndex, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index))
 							{
 								fileHeader.DissimilarityIndex = index;
 							}
@@ -587,8 +585,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private DiffFile ReadDiffFile()
 		{
-			string source, target;
-			bool isCombined = ReadDiffFileHeader1(out source, out target);
+			bool isCombined = ReadDiffFileHeader1(out var source, out var target);
 			var header = ReadDiffFileHeader2(isCombined);
 
 			ReadDiffFileHeader3(ref source, ref target);

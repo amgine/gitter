@@ -29,45 +29,20 @@ namespace gitter.Framework.Controls
 
 	sealed class ViewHostDockingProcess : IMouseDragProcess, IDisposable
 	{
-		#region Data
-
-		private readonly ViewHost _viewHost;
-		private bool _isActive;
-		private ViewHost _hoveredHost;
-		private ViewDockGrid _hoveredGrid;
-
-		#endregion
-
 		public ViewHostDockingProcess(ViewHost viewHost)
 		{
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
-			_viewHost = viewHost;
+			ViewHost = viewHost;
 		}
 
-		#region Properties
+		public ViewHost ViewHost { get; }
 
-		public ViewHost ViewHost
-		{
-			get { return _viewHost; }
-		}
+		public bool IsActive { get; private set; }
 
-		public bool IsActive
-		{
-			get { return _isActive; }
-		}
+		public ViewHost HoveredViewHost { get; private set; }
 
-		public ViewHost HoveredViewHost
-		{
-			get { return _hoveredHost; }
-		}
-
-		public ViewDockGrid HoveredDockGrid
-		{
-			get { return _hoveredGrid; }
-		}
-
-		#endregion
+		public ViewDockGrid HoveredDockGrid { get; private set; }
 
 		private static int ZOrderComparison(Control control1, Control control2)
 		{
@@ -133,7 +108,7 @@ namespace gitter.Framework.Controls
 				{
 					if(host.Created && host.Visible)
 					{
-						if(host != _viewHost && host.Visible && host.Status != ViewHostStatus.AutoHide)
+						if(host != ViewHost && host.Visible && host.Status != ViewHostStatus.AutoHide)
 						{
 							var p = host.PointToClient(point);
 							var bounds = host.ClientRectangle;
@@ -161,20 +136,20 @@ namespace gitter.Framework.Controls
 		{
 			Verify.State.IsFalse(IsActive);
 
-			_isActive = true;
-			location = _viewHost.PointToScreen(location);
+			IsActive = true;
+			location = ViewHost.PointToScreen(location);
 			var grid = HitTestGrid(location);
 			if(grid != null)
 			{
-				_hoveredGrid = grid;
-				grid.DockMarkers.Show(_viewHost);
+				HoveredDockGrid = grid;
+				grid.DockMarkers.Show(ViewHost);
 				grid.DockMarkers.UpdateHover(location);
 			}
 			var host = HitTestViewHost(location);
 			if(host != null)
 			{
-				_hoveredHost = host;
-				host.DockMarkers.Show(_viewHost);
+				HoveredViewHost = host;
+				host.DockMarkers.Show(ViewHost);
 				host.DockMarkers.UpdateHover(location);
 			}
 			return true;
@@ -185,50 +160,50 @@ namespace gitter.Framework.Controls
 			Verify.State.IsTrue(IsActive);
 
 			bool gridHit = false;
-			location = _viewHost.PointToScreen(location);
+			location = ViewHost.PointToScreen(location);
 			var grid = HitTestGrid(location);
 			if(grid != null)
 			{
-				if(_hoveredGrid != null)
+				if(HoveredDockGrid != null)
 				{
-					if(_hoveredGrid != grid)
+					if(HoveredDockGrid != grid)
 					{
-						_hoveredGrid.DockMarkers.Hide();
-						_hoveredGrid = grid;
-						grid.DockMarkers.Show(_viewHost);
+						HoveredDockGrid.DockMarkers.Hide();
+						HoveredDockGrid = grid;
+						grid.DockMarkers.Show(ViewHost);
 					}
 				}
 				else
 				{
-					_hoveredGrid = grid;
-					grid.DockMarkers.Show(_viewHost);
+					HoveredDockGrid = grid;
+					grid.DockMarkers.Show(ViewHost);
 				}
 				gridHit = grid.DockMarkers.UpdateHover(location);
 			}
 			else
 			{
-				if(_hoveredGrid != null)
+				if(HoveredDockGrid != null)
 				{
-					_hoveredGrid.DockMarkers.Hide();
-					_hoveredGrid = null;
+					HoveredDockGrid.DockMarkers.Hide();
+					HoveredDockGrid = null;
 				}
 			}
 			var host = HitTestViewHost(location);
 			if(host != null)
 			{
-				if(_hoveredHost != null)
+				if(HoveredViewHost != null)
 				{
-					if(_hoveredHost != host)
+					if(HoveredViewHost != host)
 					{
-						_hoveredHost.DockMarkers.Hide();
-						_hoveredHost = host;
-						host.DockMarkers.Show(_viewHost);
+						HoveredViewHost.DockMarkers.Hide();
+						HoveredViewHost = host;
+						host.DockMarkers.Show(ViewHost);
 					}
 				}
 				else
 				{
-					_hoveredHost = host;
-					host.DockMarkers.Show(_viewHost);
+					HoveredViewHost = host;
+					host.DockMarkers.Show(ViewHost);
 				}
 				if(!gridHit)
 				{
@@ -241,10 +216,10 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				if(_hoveredHost != null)
+				if(HoveredViewHost != null)
 				{
-					_hoveredHost.DockMarkers.Hide();
-					_hoveredHost = null;
+					HoveredViewHost.DockMarkers.Hide();
+					HoveredViewHost = null;
 				}
 			}
 		}
@@ -253,33 +228,32 @@ namespace gitter.Framework.Controls
 		{
 			Verify.State.IsTrue(IsActive);
 
-			_isActive = false;
+			IsActive = false;
 			bool docking = false;
-			location = _viewHost.PointToScreen(location);
-			if(_hoveredGrid != null)
+			location = ViewHost.PointToScreen(location);
+			if(HoveredDockGrid != null)
 			{
-				var dockResult = _hoveredGrid.DockMarkers.HitTest(location);
-				if(_hoveredGrid.CanDock(_viewHost, dockResult))
+				var dockResult = HoveredDockGrid.DockMarkers.HitTest(location);
+				if(HoveredDockGrid.CanDock(ViewHost, dockResult))
 				{
 					docking = true;
-					_hoveredGrid.PerformDock(_viewHost, dockResult);
+					HoveredDockGrid.PerformDock(ViewHost, dockResult);
 				}
-				_hoveredGrid.DockMarkers.Hide();
-				_hoveredGrid = null;
+				HoveredDockGrid.DockMarkers.Hide();
+				HoveredDockGrid = null;
 			}
-			if(_hoveredHost != null)
+			if(HoveredViewHost != null)
 			{
-				var host = _hoveredHost;
+				var host = HoveredViewHost;
 				if(!docking)
 				{
 					var dockResult = host.DockMarkers.HitTest(location);
-					if(host.CanDock(_viewHost, dockResult))
+					if(host.CanDock(ViewHost, dockResult))
 					{
-						host.PerformDock(_viewHost, dockResult);
+						host.PerformDock(ViewHost, dockResult);
 					}
 				}
 				host.DockMarkers.Hide();
-				host = null;
 			}
 		}
 
@@ -287,32 +261,32 @@ namespace gitter.Framework.Controls
 		{
 			Verify.State.IsTrue(IsActive);
 
-			_isActive = false;
-			if(_hoveredGrid != null)
+			IsActive = false;
+			if(HoveredDockGrid != null)
 			{
-				_hoveredGrid.DockMarkers.Hide();
-				_hoveredGrid = null;
+				HoveredDockGrid.DockMarkers.Hide();
+				HoveredDockGrid = null;
 			}
-			if(_hoveredHost != null)
+			if(HoveredViewHost != null)
 			{
-				_hoveredHost.DockMarkers.Hide();
-				_hoveredHost = null;
+				HoveredViewHost.DockMarkers.Hide();
+				HoveredViewHost = null;
 			}
 		}
 
 		public void Dispose()
 		{
-			if(_hoveredGrid != null)
+			if(HoveredDockGrid != null)
 			{
-				_hoveredGrid.DockMarkers.Hide();
-				_hoveredGrid = null;
+				HoveredDockGrid.DockMarkers.Hide();
+				HoveredDockGrid = null;
 			}
-			if(_hoveredHost != null)
+			if(HoveredViewHost != null)
 			{
-				_hoveredHost.DockMarkers.Hide();
-				_hoveredHost = null;
+				HoveredViewHost.DockMarkers.Hide();
+				HoveredViewHost = null;
 			}
-			_isActive = false;
+			IsActive = false;
 		}
 	}
 }

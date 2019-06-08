@@ -29,10 +29,7 @@ namespace gitter.Framework
 	{
 		#region Data
 
-		private readonly string _name;
 		private readonly bool _defaultEnabled;
-		private readonly string _displayText;
-		private readonly Bitmap _icon;
 		private bool _enabled;
 
 		#endregion
@@ -41,41 +38,28 @@ namespace gitter.Framework
 
 		public event EventHandler IsEnabledChanged;
 
-		protected virtual void OnIsEnabledChanged()
-		{
-			var handler = IsEnabledChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		protected virtual void OnIsEnabledChanged() => IsEnabledChanged?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
 		protected IntegrationFeature(string name, string displayText, Bitmap icon, bool defaultEnabled)
 		{
-			_name = name;
-			_displayText = displayText;
-			_icon = icon;
+			Name = name;
+			DisplayText = displayText;
+			Icon = icon;
 			_defaultEnabled = defaultEnabled;
 			_enabled = defaultEnabled;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public string DisplayText
-		{
-			get { return _displayText; }
-		}
+		public string DisplayText { get; }
 
-		public Bitmap Icon
-		{
-			get { return _icon; }
-		}
+		public Bitmap Icon { get; }
 
 		public bool IsEnabled
 		{
-			get { return _enabled; }
+			get => _enabled;
 			set
 			{
 				if(_enabled != value)
@@ -86,20 +70,11 @@ namespace gitter.Framework
 			}
 		}
 
-		public virtual bool AdministratorRightsRequired
-		{
-			get { return false; }
-		}
+		public virtual bool AdministratorRightsRequired => false;
 
-		public Action GetEnableAction(bool enable)
-		{
-			return () => IsEnabled = enable;
-		}
+		public Action GetEnableAction(bool enable) => () => IsEnabled = enable;
 
-		public bool HasConfiguration
-		{
-			get { return true; }
-		}
+		public bool HasConfiguration => true;
 
 		public void SaveTo(Section section)
 		{

@@ -58,14 +58,9 @@ namespace gitter.Framework.Options
 				case 0:
 					return measureEventArgs.MeasureText(DataContext.Name);
 				case 1:
-					if(_font != null)
-					{
-						return measureEventArgs.MeasureText(_font.Name, _font);
-					}
-					else
-					{
-						return Size.Empty;
-					}
+					return _font != null
+						? measureEventArgs.MeasureText(_font.Name, _font)
+						: Size.Empty;
 				default:
 					return Size.Empty;
 			}

@@ -33,8 +33,6 @@ namespace gitter.Framework.Options
 	{
 		#region Data
 
-		private readonly string _id;
-		private readonly string _name;
 		private Font _font;
 
 		#endregion
@@ -52,8 +50,8 @@ namespace gitter.Framework.Options
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			_id = id;
-			_name = name;
+			Id = id;
+			Name = name;
 			_font = font;
 		}
 
@@ -70,23 +68,17 @@ namespace gitter.Framework.Options
 			Verify.Argument.IsTrue(size > 0, "section", "Section contains invalid font size.");
 
 			_font	= new Font(fontName, size, style, GraphicsUnit.Point);
-			_id		= id;
-			_name	= name;
+			Id		= id;
+			Name	= name;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public string Id
-		{
-			get { return _id; }
-		}
+		public string Id { get; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		public Font Font
 		{
@@ -98,7 +90,7 @@ namespace gitter.Framework.Options
 				if(_font != value)
 				{
 					_font = value;
-					Changed.Raise(this);
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -131,10 +123,7 @@ namespace gitter.Framework.Options
 			}
 		}
 
-		public static implicit operator Font(SelectableFont font)
-		{
-			return font._font;
-		}
+		public static implicit operator Font(SelectableFont font) => font._font;
 
 		public void SaveTo(Section section)
 		{
@@ -174,7 +163,7 @@ namespace gitter.Framework.Options
 				{
 					_font = font;
 				}
-				Changed.Raise(this);
+				Changed?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
@@ -184,9 +173,6 @@ namespace gitter.Framework.Options
 		/// <returns>
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

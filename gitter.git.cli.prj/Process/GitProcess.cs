@@ -47,12 +47,8 @@ namespace gitter.Git.AccessLayer.CLI
 							return path;
 						}
 					}
-					catch(Exception exc)
+					catch(Exception exc) when(!exc.IsCritical())
 					{
-						if(exc.IsCritical())
-						{
-							throw;
-						}
 					}
 				}
 			}
@@ -129,10 +125,9 @@ namespace gitter.Git.AccessLayer.CLI
 			psi.EnsureEnvironmentVariableExists(GitEnvironment.Display, "localhost:0.0");
 		}
 
-		private static Encoding _defaultEncoding = Encoding.UTF8;
 		private static bool _enableCodepageFallback;
 		private static string _gitInstallationPath;
-		private static string _askPassUtilityPath = Path.Combine(
+		private static readonly string _askPassUtilityPath = Path.Combine(
 				Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
 				"gitter.askpass.exe");
 		private static string _gitExePath;
@@ -140,11 +135,7 @@ namespace gitter.Git.AccessLayer.CLI
 		private static string _gitkCmdPath;
 		private static readonly string UserProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-		public static Encoding DefaultEncoding
-		{
-			get { return _defaultEncoding; }
-			private set { _defaultEncoding = value; }
-		}
+		public static Encoding DefaultEncoding { get; private set; } = Encoding.UTF8;
 
 		public static bool EnableAnsiCodepageFallback
 		{
@@ -199,15 +190,14 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Verify.Argument.IsNotNull(input, nameof(input));
 
-			var psi = new ProcessStartInfo()
+			var psi = new ProcessStartInfo(_gitExePath)
 			{
-				Arguments = input.GetArguments(),
-				WindowStyle = ProcessWindowStyle.Normal,
+				Arguments       = input.GetArguments(),
+				WindowStyle     = ProcessWindowStyle.Normal,
 				UseShellExecute = false,
 				LoadUserProfile = true,
-				FileName = _gitExePath,
-				ErrorDialog = false,
-				CreateNoWindow = true,
+				ErrorDialog     = false,
+				CreateNoWindow  = true,
 			};
 			if(!string.IsNullOrEmpty(input.WorkingDirectory))
 			{
@@ -236,12 +226,8 @@ namespace gitter.Git.AccessLayer.CLI
 				{
 					return File.Exists(_shExePath);
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 					return false;
 				}
 			}
@@ -273,12 +259,8 @@ namespace gitter.Git.AccessLayer.CLI
 				{
 					return File.Exists(_gitkCmdPath);
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 					return false;
 				}
 			}
@@ -286,16 +268,15 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public static Process ExecGitk(string repository, string command)
 		{
-			var psi = new ProcessStartInfo()
+			var psi = new ProcessStartInfo(_gitkCmdPath)
 			{
-				Arguments = command,
+				Arguments        = command,
 				WorkingDirectory = repository,
-				WindowStyle = ProcessWindowStyle.Normal,
-				LoadUserProfile = true,
-				FileName = _gitkCmdPath,
-				ErrorDialog = false,
-				UseShellExecute = false,
-				CreateNoWindow = true,
+				WindowStyle      = ProcessWindowStyle.Normal,
+				LoadUserProfile  = true,
+				ErrorDialog      = false,
+				UseShellExecute  = false,
+				CreateNoWindow   = true,
 			};
 			SetCriticalEnvironmentVariables(psi);
 			return Process.Start(psi);

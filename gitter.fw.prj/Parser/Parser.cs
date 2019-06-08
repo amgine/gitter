@@ -30,7 +30,6 @@ namespace gitter.Framework
 	{
 		#region Data
 
-		private readonly string _string;
 		private Stack<int> _positions;
 		private int _position;
 
@@ -42,7 +41,7 @@ namespace gitter.Framework
 		{
 			Verify.Argument.IsNotNull(@string, "@string");
 
-			_string = @string;
+			String = @string;
 		}
 
 		/// <summary>Parser is at the start of string.</summary>
@@ -54,33 +53,30 @@ namespace gitter.Framework
 		/// <summary>Parser is at the start of line.</summary>
 		public bool IsAtStartOfLine
 		{
-			get { return _position == 0 || (_position < _string.Length && _string[_position - 1] == '\n'); }
+			get { return _position == 0 || (_position < String.Length && String[_position - 1] == '\n'); }
 		}
 
 		/// <summary>Parser is at the end of line.</summary>
 		public bool IsAtEndOfLine
 		{
-			get { return _position >= _string.Length || _string[_position] == '\n'; }
+			get { return _position >= String.Length || String[_position] == '\n'; }
 		}
 
 		/// <summary>Parser is at the end of string.</summary>
 		public bool IsAtEndOfString
 		{
-			get { return _position >= _string.Length; }
+			get { return _position >= String.Length; }
 		}
 
 		/// <summary>Parsed string.</summary>
-		public string String
-		{
-			get { return _string; }
-		}
+		public string String { get; }
 
 		/// <summary>Find next <see cref="value"/>.</summary>
 		/// <param name="value">Character to look for.</param>
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindPositionSafe(char value)
 		{
-			int pos = _string.IndexOf(value, _position);
+			int pos = String.IndexOf(value, _position);
 			if(pos == -1) return Length;
 			return pos;
 		}
@@ -89,7 +85,7 @@ namespace gitter.Framework
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindNullOrEndOfString()
 		{
-			int pos = _string.IndexOf('\0', _position);
+			int pos = String.IndexOf('\0', _position);
 			if(pos == -1) return Length;
 			return pos;
 		}
@@ -98,9 +94,9 @@ namespace gitter.Framework
 		/// <returns>Character position or string length if it was not found.</returns>
 		public void FindNullAndSkip()
 		{
-			int pos = _string.IndexOf('\0', _position);
+			int pos = String.IndexOf('\0', _position);
 			if(pos == -1)
-				_position = _string.Length;
+				_position = String.Length;
 			else
 				_position = pos + 1;
 		}
@@ -109,8 +105,8 @@ namespace gitter.Framework
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindNewLineOrEndOfString()
 		{
-			int pos = _string.IndexOf('\n', _position);
-			if(pos == -1) return _string.Length;
+			int pos = String.IndexOf('\n', _position);
+			if(pos == -1) return String.Length;
 			return pos;
 		}
 
@@ -119,12 +115,12 @@ namespace gitter.Framework
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindLineEnding(out string ending)
 		{
-			for(int i = _position; i < _string.Length; ++i)
+			for(int i = _position; i < String.Length; ++i)
 			{
-				switch(_string[i])
+				switch(String[i])
 				{
 					case '\r':
-						if(i != _string.Length - 1 && _string[i + 1] == '\n')
+						if(i != String.Length - 1 && String[i + 1] == '\n')
 						{
 							ending = LineEnding.CrLf;
 						}
@@ -139,54 +135,54 @@ namespace gitter.Framework
 				}
 			}
 			ending = string.Empty;
-			return _string.Length;
+			return String.Length;
 		}
 
 		/// <summary>Find next \n line ending.</summary>
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindLfLineEnding()
 		{
-			for(int i = _position; i < _string.Length; ++i)
+			for(int i = _position; i < String.Length; ++i)
 			{
-				if(_string[i] == '\n') return i;
+				if(String[i] == '\n') return i;
 			}
-			return _string.Length;
+			return String.Length;
 		}
 
 		/// <summary>Find next space character.</summary>
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindSpace()
 		{
-			return _string.IndexOf(' ', _position);
+			return String.IndexOf(' ', _position);
 		}
 
 		/// <summary>Find next space character.</summary>
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindSpace(int limit)
 		{
-			return _string.IndexOf(' ', _position, limit);
+			return String.IndexOf(' ', _position, limit);
 		}
 
 		/// <summary>Find next , character.</summary>
 		/// <returns>Character position or -1 if it was not found.</returns>
 		public int FindComma()
 		{
-			return _string.IndexOf(',', _position);
+			return String.IndexOf(',', _position);
 		}
 
 		/// <summary>Find next , character.</summary>
 		/// <returns>Character position or -1 if it was not found.</returns>
 		public int FindComma(int limit)
 		{
-			return _string.IndexOf(',', _position, limit);
+			return String.IndexOf(',', _position, limit);
 		}
 
 		/// <summary>Find next space character.</summary>
 		public void FindSpaceAndSkip()
 		{
-			int pos = _string.IndexOf(' ', _position);
+			int pos = String.IndexOf(' ', _position);
 			if(pos == -1)
-				_position = _string.Length;
+				_position = String.Length;
 			else
 				_position = pos + 1;
 		}
@@ -196,8 +192,8 @@ namespace gitter.Framework
 		/// <returns>String position or string length if it was not found.</returns>
 		public int FindPositionSafe(string value)
 		{
-			int pos = _string.IndexOf(value, _position);
-			if(pos == -1) return _string.Length;
+			int pos = String.IndexOf(value, _position);
+			if(pos == -1) return String.Length;
 			return pos;
 		}
 
@@ -206,15 +202,15 @@ namespace gitter.Framework
 		public string ReadLine()
 		{
 			string res;
-			int pos = _string.IndexOf('\n', _position);
+			int pos = String.IndexOf('\n', _position);
 			if(pos == -1)
 			{
-				res = _string.Substring(_position);
-				_position = _string.Length;
+				res = String.Substring(_position);
+				_position = String.Length;
 			}
 			else
 			{
-				res = _string.Substring(_position, pos - _position);
+				res = String.Substring(_position, pos - _position);
 				_position = pos + 1;
 			}
 			return res;
@@ -222,56 +218,56 @@ namespace gitter.Framework
 
 		public string ReadLineNoAdvance()
 		{
-			int pos = _string.IndexOf('\n', _position);
+			int pos = String.IndexOf('\n', _position);
 			if(pos == -1)
 			{
-				return _string.Substring(_position);
+				return String.Substring(_position);
 			}
 			else
 			{
-				return _string.Substring(_position, pos - _position);
+				return String.Substring(_position, pos - _position);
 			}
 		}
 
 		public char ReadChar()
 		{
-			return _string[_position++];
+			return String[_position++];
 		}
 
 		public string ReadString(int length)
 		{
-			var res = _string.Substring(_position, length);
+			var res = String.Substring(_position, length);
 			_position += length;
 			return res;
 		}
 
 		public string ReadStringNoAdvance(int length)
 		{
-			return _string.Substring(_position, length);
+			return String.Substring(_position, length);
 		}
 
 		public string ReadStringUpTo(int position)
 		{
-			var res = _string.Substring(_position, position - _position);
+			var res = String.Substring(_position, position - _position);
 			_position = position;
 			return res;
 		}
 
 		public string ReadStringUpToNoAdvance(int position)
 		{
-			return _string.Substring(_position, position - _position);
+			return String.Substring(_position, position - _position);
 		}
 
 		public string ReadStringUpTo(int position, int skip)
 		{
-			var res = _string.Substring(_position, position - _position);
+			var res = String.Substring(_position, position - _position);
 			_position = position + skip;
 			return res;
 		}
 
 		public string ReadString(int length, int skip)
 		{
-			var res = _string.Substring(_position, length);
+			var res = String.Substring(_position, length);
 			_position += length + skip;
 			return res;
 		}
@@ -279,10 +275,10 @@ namespace gitter.Framework
 		/// <summary>Skip current line.</summary>
 		public void SkipLine()
 		{
-			int pos = _string.IndexOf('\n', _position);
+			int pos = String.IndexOf('\n', _position);
 			if(pos == -1)
 			{
-				_position = _string.Length;
+				_position = String.Length;
 			}
 			else
 			{
@@ -295,7 +291,7 @@ namespace gitter.Framework
 		/// <returns>True if current character is <see cref="value"/>.</returns>
 		public bool CheckValue(char value)
 		{
-			return _position < _string.Length && _string[_position] == value;
+			return _position < String.Length && String[_position] == value;
 		}
 
 		/// <summary>Check if <paramref name="value"/> can be found at currect position.</summary>
@@ -306,9 +302,9 @@ namespace gitter.Framework
 			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
-			var sl = _string.Length;
+			var sl = String.Length;
 			if(_position + vl > sl) return false;
-			return _string.IndexOf(value, _position, vl) != -1;
+			return String.IndexOf(value, _position, vl) != -1;
 		}
 
 		/// <summary>Check if <paramref name="value"/> can be found at currect position and skips value if it is found.</summary>
@@ -319,9 +315,9 @@ namespace gitter.Framework
 			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
-			var sl = _string.Length;
+			var sl = String.Length;
 			if(_position + vl > sl) return false;
-			if(_string.IndexOf(value, _position, vl) != -1)
+			if(String.IndexOf(value, _position, vl) != -1)
 			{
 				Skip(value.Length);
 				return true;
@@ -339,14 +335,14 @@ namespace gitter.Framework
 			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
-			var sl = _string.Length;
+			var sl = String.Length;
 			if(_position + vl > sl)
 			{
 				_position = sl;
 			}
 			else
 			{
-				int pos = _string.IndexOf(value, _position);
+				int pos = String.IndexOf(value, _position);
 				_position = pos == -1 ? sl : pos;
 			}
 		}
@@ -397,21 +393,21 @@ namespace gitter.Framework
 			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
-			var sl = _string.Length;
+			var sl = String.Length;
 			if(_position + vl > sl)
 			{
 				return null;
 			}
 			else
 			{
-				int pos = _string.IndexOf(value, _position);
+				int pos = String.IndexOf(value, _position);
 				if(pos == -1)
 				{
 					return null;
 				}
 				else
 				{
-					return new Substring(_string, pos, value.Length);
+					return new Substring(String, pos, value.Length);
 				}
 			}
 		}
@@ -423,14 +419,14 @@ namespace gitter.Framework
 			Verify.Argument.IsNotNull(value, nameof(value));
 
 			var vl = value.Length;
-			var sl = _string.Length;
+			var sl = String.Length;
 			if(_position + vl > sl)
 			{
 				_position = sl;
 			}
 			else
 			{
-				int pos = _string.IndexOf(value, _position);
+				int pos = String.IndexOf(value, _position);
 				if(pos == -1)
 				{
 					_position = sl;
@@ -444,22 +440,22 @@ namespace gitter.Framework
 
 		public int FindNoAdvance(string value)
 		{
-			return _string.IndexOf(value, _position);
+			return String.IndexOf(value, _position);
 		}
 
 		public int FindNoAdvance(string value, int limit)
 		{
-			return _string.IndexOf(value, _position, limit);
+			return String.IndexOf(value, _position, limit);
 		}
 
 		public int FindNoAdvance(char value)
 		{
-			return _string.IndexOf(value, _position);
+			return String.IndexOf(value, _position);
 		}
 
 		public int FindNoAdvance(char value, int limit)
 		{
-			return _string.IndexOf(value, _position, limit);
+			return String.IndexOf(value, _position, limit);
 		}
 
 		public int FindSeparatingEmptyLine(int limit, out int part2Start)
@@ -469,7 +465,7 @@ namespace gitter.Framework
 			int lines = 0;
 			for(int i = _position; i < limit; ++i)
 			{
-				var c = _string[i];
+				var c = String[i];
 				switch(c)
 				{
 					case '\r':
@@ -523,9 +519,9 @@ namespace gitter.Framework
 			{
 				Verify.Argument.IsNotNegative(value, nameof(value));
 
-				if(value > _string.Length)
+				if(value > String.Length)
 				{
-					_position = _string.Length;
+					_position = String.Length;
 				}
 				else
 				{
@@ -534,25 +530,13 @@ namespace gitter.Framework
 			}
 		}
 
-		public int RemainingSymbols
-		{
-			get { return _string.Length - _position; }
-		}
+		public int RemainingSymbols => String.Length - _position;
 
-		public int Length
-		{
-			get { return _string.Length; }
-		}
+		public int Length => String.Length;
 
-		public char CurrentChar
-		{
-			get { return _string[_position]; }
-		}
+		public char CurrentChar => String[_position];
 
-		public char this[int index]
-		{
-			get { return _string[_position + index]; }
-		}
+		public char this[int index] => String[_position + index];
 
 		public void Skip()
 		{
@@ -567,7 +551,7 @@ namespace gitter.Framework
 		public int Skip(char value)
 		{
 			int skipped = 0;
-			while(_position < _string.Length && _string[_position] == value)
+			while(_position < String.Length && String[_position] == value)
 			{
 				++_position;
 				++skipped;
@@ -582,7 +566,7 @@ namespace gitter.Framework
 
 		public void GoToEnd()
 		{
-			_position = _string.Length;
+			_position = String.Length;
 		}
 
 		public void PushPosition()
@@ -661,9 +645,6 @@ namespace gitter.Framework
 			throw new Exception("Unable to read version.");
 		}
 
-		public override string ToString()
-		{
-			return _string;
-		}
+		public override string ToString() => String;
 	}
 }

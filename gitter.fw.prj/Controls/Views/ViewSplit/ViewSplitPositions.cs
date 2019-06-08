@@ -28,24 +28,16 @@ namespace gitter.Framework.Controls
 	/// <summary>Collection of splitter positions.</summary>
 	sealed class ViewSplitPositions : IEnumerable<double>, IDisposable
 	{
-		#region Data
-
 		private readonly ViewSplit _viewSplit;
 		private readonly List<double> _positions;
 
 		private SplitterMarker _movingSplitMarker;
 		private double _movingPosition;
-		private int _movingSplitterIndex;
-		private bool _isMoving;
 		private int _movingOffset;
 		private int _movingMin;
 		private int _movingMax;
 
-		private int _size;
-
-		#endregion
-
-		#region .ctor
+		private readonly int _size;
 
 		/// <summary>Create <see cref="ViewSplitPositions"/>.</summary>
 		/// <param name="viewSplit">Host <see cref="ViewSplit"/>.</param>
@@ -55,15 +47,13 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(viewSplit, nameof(viewSplit));
 			Verify.Argument.IsNotNegative(size, nameof(size));
-			Verify.Argument.IsInRange(0.0, position, 1.0, "position");
+			Verify.Argument.IsInRange(0.0, position, 1.0, nameof(position));
 
 			_viewSplit = viewSplit;
 			_size = size;
-			_movingSplitterIndex = -1;
+			MovingSplitterIndex = -1;
 			_positions = new List<double>() { position };
 		}
-
-		#endregion
 
 		/// <summary>Gets minimum and maximum splitter positions for specified splitter.</summary>
 		/// <param name="index">The index of splitter to check bounds for.</param>
@@ -77,13 +67,11 @@ namespace gitter.Framework.Controls
 			while(first > 0)
 			{
 				var item = _viewSplit[first];
-				var viewHost = item as ViewHost;
-				if(viewHost != null && !viewHost.IsDocumentWell)
+				if(item is ViewHost viewHost && !viewHost.IsDocumentWell)
 				{
 					break;
 				}
-				var viewSplit = item as ViewSplit;
-				if(viewSplit != null && !viewSplit.ContainsDocumentWell)
+				if(item is ViewSplit viewSplit && !viewSplit.ContainsDocumentWell)
 				{
 					break;
 				}
@@ -93,13 +81,11 @@ namespace gitter.Framework.Controls
 			while(last <= _positions.Count)
 			{
 				var item = _viewSplit[last];
-				var viewHost = item as ViewHost;
-				if(viewHost != null && !viewHost.IsDocumentWell)
+				if(item is ViewHost viewHost && !viewHost.IsDocumentWell)
 				{
 					break;
 				}
-				var viewSplit = item as ViewSplit;
-				if(viewSplit != null && !viewSplit.ContainsDocumentWell)
+				if(item is ViewSplit viewSplit && !viewSplit.ContainsDocumentWell)
 				{
 					break;
 				}
@@ -112,17 +98,11 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Gets a value indicating whether some splitter is moving.</summary>
 		/// <value><c>true</c> if some splitter is moving; otherwise, <c>false</c>.</value>
-		public bool IsMoving
-		{
-			get { return _isMoving; }
-		}
+		public bool IsMoving { get; private set; }
 
 		/// <summary>Gets the index of the moving splitter.</summary>
 		/// <value>Index of the moving splitter.</value>
-		public int MovingSplitterIndex
-		{
-			get { return _movingSplitterIndex; }
-		}
+		public int MovingSplitterIndex { get; private set; }
 
 		/// <summary>Finds splitter index which contains specified <paramref name="position"/>.</summary>
 		/// <param name="position">Position to check for.</param>
@@ -206,10 +186,10 @@ namespace gitter.Framework.Controls
 		{
 			Verify.State.IsFalse(IsMoving);
 
-			_movingSplitterIndex = FindSplitter(position);
-			if(_movingSplitterIndex != -1)
+			MovingSplitterIndex = FindSplitter(position);
+			if(MovingSplitterIndex != -1)
 			{
-				_movingPosition = _positions[_movingSplitterIndex];
+				_movingPosition = _positions[MovingSplitterIndex];
 				var toolSplitPosition = _viewSplit.PointToScreen(Point.Empty);
 				Rectangle splitterBounds;
 				switch(_viewSplit.Orientation)
@@ -224,8 +204,7 @@ namespace gitter.Framework.Controls
 								ViewConstants.Spacing,
 								_viewSplit.Height);
 							_movingOffset = position.X - splitterPosition;
-							double min, max;
-							GetResizeBounds(_movingSplitterIndex, out min, out max);
+							GetResizeBounds(MovingSplitterIndex, out var min, out var max);
 							_movingMin = (int)(min * width) + ViewConstants.MinimumHostWidth;
 							_movingMax = (int)(max * width) - ViewConstants.Spacing - ViewConstants.MinimumHostWidth;
 							if(_movingMin >= _movingMax)
@@ -244,8 +223,7 @@ namespace gitter.Framework.Controls
 								_viewSplit.Width,
 								ViewConstants.Spacing);
 							_movingOffset = position.Y - splitterPosition;
-							double min, max;
-							GetResizeBounds(_movingSplitterIndex, out min, out max);
+							GetResizeBounds(MovingSplitterIndex, out var min, out var max);
 							_movingMin = (int)(min * height) + ViewConstants.MinimumHostHeight;
 							_movingMax = (int)(max * height) - ViewConstants.Spacing - ViewConstants.MinimumHostHeight;
 							if(_movingMin >= _movingMax)
@@ -258,7 +236,7 @@ namespace gitter.Framework.Controls
 						throw new ApplicationException(
 							"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 				}
-				_isMoving = true;
+				IsMoving = true;
 				SpawnSplitMarker(splitterBounds);
 				return true;
 			}
@@ -317,7 +295,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.State.IsTrue(IsMoving);
 
-			_isMoving = false;
+			IsMoving = false;
 			KillSplitMarker();
 			double pos;
 			switch(_viewSplit.Orientation)
@@ -350,11 +328,11 @@ namespace gitter.Framework.Controls
 					throw new ApplicationException(
 						"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
 			}
-			if(_positions[_movingSplitterIndex] != pos)
+			if(_positions[MovingSplitterIndex] != pos)
 			{
-				_positions[_movingSplitterIndex] = pos;
-				Apply(_movingSplitterIndex);
-				_movingSplitterIndex = -1;
+				_positions[MovingSplitterIndex] = pos;
+				Apply(MovingSplitterIndex);
+				MovingSplitterIndex = -1;
 			}
 		}
 
@@ -363,7 +341,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.State.IsTrue(IsMoving);
 
-			_isMoving = false;
+			IsMoving = false;
 			KillSplitMarker();
 		}
 
@@ -480,16 +458,10 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Gets splitter position at the specified index.</summary>
-		public double this[int index]
-		{
-			get { return _positions[index]; }
-		}
+		public double this[int index] => _positions[index];
 
 		/// <summary>Gets the splitter count.</summary>
-		public int Count
-		{
-			get { return _positions.Count; }
-		}
+		public int Count => _positions.Count;
 
 		/// <summary>Inserts new splitter at specified <paramref name="index"/>.</summary>
 		/// <param name="index">Splitter index.</param>

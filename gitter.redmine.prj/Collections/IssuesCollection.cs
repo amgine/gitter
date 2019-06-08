@@ -76,10 +76,7 @@ namespace gitter.Redmine
 		{
 			var url = string.Format(CultureInfo.InvariantCulture,
 				@"projects/{0}/issues.xml", projectId);
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsFetchingIssues.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsFetchingIssues.AddEllipsis()));
 			return FetchItemsFromAllPagesAsync(url, cancellationToken);
 		}
 	}

@@ -24,23 +24,18 @@ namespace gitter.Framework.Controls
 
 	public sealed class CustomListBoxSelectedItemsCollection : NotifyCollection<CustomListBoxItem>
 	{
-		private readonly CustomListBox _listBox;
-
 		internal CustomListBoxSelectedItemsCollection(CustomListBox listBox)
 		{
 			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
-			_listBox = listBox;
+			ListBox = listBox;
 		}
 
-		internal CustomListBox ListBox
-		{
-			get { return _listBox; }
-		}
+		internal CustomListBox ListBox { get; }
 
 		protected override void FreeItem(CustomListBoxItem item)
 		{
-			if(item.ListBox == _listBox)
+			if(item.ListBox == ListBox)
 			{
 				item.SetSelected(false);
 			}
@@ -53,7 +48,7 @@ namespace gitter.Framework.Controls
 
 		protected override bool VerifyItem(CustomListBoxItem item)
 		{
-			return item != null && item.ListBox == _listBox;
+			return item != null && item.ListBox == ListBox;
 		}
 	}
 }

@@ -25,14 +25,6 @@ namespace gitter.Framework.Controls
 	/// <summary>Collection of <see cref="CustomListBoxColumn"/>, hosted by <see cref="CustomListBox"/> control.</summary>
 	public sealed class CustomListBoxColumnsCollection : NotifyCollection<CustomListBoxColumn>
 	{
-		#region Data
-
-		private readonly CustomListBox _listBox;
-
-		#endregion
-
-		#region .ctor
-
 		/// <summary>Create <see cref="CustomListBoxColumnsCollection"/>.</summary>
 		/// <param name="listBox">Host <see cref="CustomListBox"/> control.</param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="listBox"/> == <c>null</c>.</exception>
@@ -40,12 +32,8 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
-			_listBox = listBox;
+			ListBox = listBox;
 		}
-
-		#endregion
-
-		#region Properties
 
 		internal bool HasFillModeVisibleColumn
 		{
@@ -62,14 +50,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public CustomListBox ListBox
-		{
-			get { return _listBox; }
-		}
-
-		#endregion
-
-		#region Overrides
+		public CustomListBox ListBox { get; }
 
 		protected override void FreeItem(CustomListBoxColumn item)
 		{
@@ -78,17 +59,13 @@ namespace gitter.Framework.Controls
 
 		protected override void AcquireItem(CustomListBoxColumn item)
 		{
-			item.ListBox = _listBox;
+			item.ListBox = ListBox;
 		}
 
 		protected override bool VerifyItem(CustomListBoxColumn item)
 		{
 			return item != null && item.ListBox == null;
 		}
-
-		#endregion
-
-		#region Methods
 
 		public CustomListBoxColumn GetById(int columnId)
 		{
@@ -132,7 +109,5 @@ namespace gitter.Framework.Controls
 			if(id == -1) return false;
 			return Items[id].IsVisible;
 		}
-
-		#endregion
 	}
 }

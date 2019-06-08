@@ -26,35 +26,24 @@ namespace gitter.Framework.Controls
 
 	public sealed class ViewHostTab : ViewTabBase
 	{
-		#region Data
-
-		private readonly ViewHostTabs _tabs;
 		private readonly ViewHost _viewHost;
-
-		private readonly ViewButtons _buttons;
 		private bool _buttonsHovered;
-
-		#endregion
-
-		#region .ctor
 
 		public ViewHostTab(ViewHostTabs tabs, ViewBase view)
 			: base(view, tabs.Side)
 		{
 			Verify.Argument.IsNotNull(tabs, nameof(tabs));
 
-			_tabs = tabs;
+			Tabs = tabs;
 			_viewHost = tabs.ViewHost;
-			_buttons = new ViewButtons(tabs);
+			Buttons = new ViewButtons(tabs);
 			if(_viewHost.IsDocumentWell)
 			{
-				_buttons.SetAvailableButtons(ViewButtonType.Close);
+				Buttons.SetAvailableButtons(ViewButtonType.Close);
 			}
-			_buttons.Height = Renderer.TabHeight + Renderer.TabFooterHeight;
-			_buttons.ButtonClick += OnButtonClick;
+			Buttons.Height = Renderer.TabHeight + Renderer.TabFooterHeight;
+			Buttons.ButtonClick += OnButtonClick;
 		}
-
-		#endregion
 
 		private void OnButtonClick(object sender, ViewButtonClickEventArgs e)
 		{
@@ -68,18 +57,12 @@ namespace gitter.Framework.Controls
 
 		public void EnsureVisible()
 		{
-			_tabs.EnsureVisible(this);
+			Tabs.EnsureVisible(this);
 		}
 
-		public ViewHostTabs Tabs
-		{
-			get { return _tabs; }
-		}
+		public ViewHostTabs Tabs { get; }
 
-		public ViewButtons Buttons
-		{
-			get { return _buttons; }
-		}
+		public ViewButtons Buttons { get; }
 
 		protected override int Measure(Graphics graphics)
 		{
@@ -98,14 +81,14 @@ namespace gitter.Framework.Controls
 		protected internal override void OnMouseLeave()
 		{
 			base.OnMouseLeave();
-			_buttons.OnMouseLeave();
-			_tabs.Invalidate();
+			Buttons.OnMouseLeave();
+			Tabs.Invalidate();
 		}
 
 		protected internal override void OnMouseEnter()
 		{
 			base.OnMouseEnter();
-			_tabs.Invalidate();
+			Tabs.Invalidate();
 		}
 
 		public override void OnMouseDown(int x, int y, MouseButtons button)
@@ -119,14 +102,14 @@ namespace gitter.Framework.Controls
 				case MouseButtons.Right:
 					return;
 			}
-			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewManager.Renderer.TabHeight);
+			var buttonsBounds = new Rectangle(Length - Buttons.Width - 2, 0, Buttons.Width, ViewManager.Renderer.TabHeight);
 			if(buttonsBounds.Contains(x, y))
 			{
 				x -= buttonsBounds.X;
 				y -= buttonsBounds.Y;
-				_buttons.OnMouseDown(x, y, button);
+				Buttons.OnMouseDown(x, y, button);
 			}
-			if(_buttons.PressedButton == null)
+			if(Buttons.PressedButton == null)
 			{
 				View.Activate();
 			}
@@ -135,19 +118,19 @@ namespace gitter.Framework.Controls
 		public override void OnMouseMove(int x, int y, MouseButtons button)
 		{
 			base.OnMouseMove(x, y, button);
-			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewManager.Renderer.TabHeight);
+			var buttonsBounds = new Rectangle(Length - Buttons.Width - 2, 0, Buttons.Width, ViewManager.Renderer.TabHeight);
 			if(buttonsBounds.Contains(x, y))
 			{
 				_buttonsHovered = true;
 				x -= buttonsBounds.X;
 				y -= buttonsBounds.Y;
-				_buttons.OnMouseMove(x, y, button);
+				Buttons.OnMouseMove(x, y, button);
 			}
 			else
 			{
 				if(_buttonsHovered)
 				{
-					_buttons.OnMouseLeave();
+					Buttons.OnMouseLeave();
 					_buttonsHovered = false;
 				}
 			}
@@ -156,12 +139,12 @@ namespace gitter.Framework.Controls
 		public override void OnMouseUp(int x, int y, MouseButtons button)
 		{
 			base.OnMouseUp(x, y, button);
-			var buttonsBounds = new Rectangle(Length - _buttons.Width - 2, 0, _buttons.Width, ViewManager.Renderer.TabHeight);
-			if(_buttons.PressedButton != null || buttonsBounds.Contains(x, y))
+			var buttonsBounds = new Rectangle(Length - Buttons.Width - 2, 0, Buttons.Width, ViewManager.Renderer.TabHeight);
+			if(Buttons.PressedButton != null || buttonsBounds.Contains(x, y))
 			{
 				x -= buttonsBounds.X;
 				y -= buttonsBounds.Y;
-				_buttons.OnMouseUp(x, y, button);
+				Buttons.OnMouseUp(x, y, button);
 			}
 		}
 	}

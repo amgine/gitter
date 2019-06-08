@@ -36,10 +36,7 @@ namespace gitter.Framework.Mvc.WinForms
 
 		#region Methods
 
-		protected override bool FetchValue()
-		{
-			return Control.Checked;
-		}
+		protected override bool FetchValue() => Control.Checked;
 
 		protected override void SetValue(bool value)
 		{

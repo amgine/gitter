@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -43,7 +42,6 @@ namespace gitter.Framework.Controls
 
 		#region Data
 
-		private readonly CustomListBoxItemsCollection _items;
 		private CustomListBoxItem _parent;
 		private bool _selected;
 		private bool _expanded;
@@ -60,12 +58,12 @@ namespace gitter.Framework.Controls
 		{
 			_cachedLevel = -1;
 
-			_items = new CustomListBoxItemsCollection(null, this);
+			Items = new CustomListBoxItemsCollection(null, this);
 
 			_checkedState = CheckedState.Unchecked;
 
-			_items.Changing += OnItemsChanging;
-			_items.Changed += OnItemsChanged;
+			Items.Changing += OnItemsChanging;
+			Items.Changed += OnItemsChanged;
 		}
 
 		#endregion
@@ -113,28 +111,17 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_parent == null)
-				{
-					return ListBox != null ? ListBox.Items : null;
-				}
-				else
-				{
-					return _parent.Items;
-				}
+				return _parent == null
+					? ListBox?.Items
+					: _parent.Items;
 			}
 		}
 
 		/// <summary>Child items.</summary>
-		public CustomListBoxItemsCollection Items
-		{
-			get { return _items; }
-		}
+		public CustomListBoxItemsCollection Items { get; }
 
 		/// <summary>Tooltip text for an item.</summary>
-		public string ToolTipText
-		{
-			get { return GetToolTipText(); }
-		}
+		public string ToolTipText => GetToolTipText();
 
 		/// <summary>Current <see cref="CheckedState"/> of this item.</summary>
 		public CheckedState CheckedState
@@ -207,10 +194,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Returns true if this item is currently focused.</summary>
-		public bool IsFocused
-		{
-			get { return IsAttachedToListBox && ListBox.FocusedItem == this; }
-		}
+		public bool IsFocused => ListBox?.FocusedItem == this;
 
 		/// <summary>Gets/sets item expanded state.</summary>
 		public bool IsExpanded
@@ -266,10 +250,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Returns tooltip text for an item.</summary>
 		/// <returns>Tooltip text for an item.</returns>
-		protected virtual string GetToolTipText()
-		{
-			return null;
-		}
+		protected virtual string GetToolTipText() => null;
 
 		public CustomListBoxTextEditor StartTextEditor(CustomListBoxColumn column, Font font, string text)
 		{
@@ -288,12 +269,8 @@ namespace gitter.Framework.Controls
 		/// <summary>Called when <see cref="M:CheckedState"/> property value changes.</summary>
 		protected virtual void OnCheckedStateChanged()
 		{
-			CheckedStateChanged.Raise(this);
-			var lb = ListBox;
-			if(lb != null)
-			{
-				lb.NotifyItemCheckedChanged(this);
-			}
+			CheckedStateChanged?.Invoke(this, EventArgs.Empty);
+			ListBox?.NotifyItemCheckedChanged(this);
 		}
 
 		protected virtual void OnParentChanged()
@@ -319,7 +296,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Invokes <see cref="Activated"/> event.</summary>
 		protected virtual void OnActivate()
 		{
-			Activated.Raise(this);
+			Activated?.Invoke(this, EventArgs.Empty);
 		}
 
 		internal void SetSelected(bool selected)
@@ -357,7 +334,7 @@ namespace gitter.Framework.Controls
 			if(!_expanded)
 			{
 				_expanded = true;
-				if(IsAttachedToListBox && IsPresented && _items.Count != 0)
+				if(IsAttachedToListBox && IsPresented && Items.Count != 0)
 				{
 					ListBox.ExpandItem(this);
 				}
@@ -367,7 +344,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Expands whole tree of items starting at this item.</summary>
 		public void ExpandAll()
 		{
-			if(_items.Count == 0) return;
+			if(Items.Count == 0) return;
 			bool p = IsPresented;
 			bool hasListBox = IsAttachedToListBox;
 			if(hasListBox && p)
@@ -387,7 +364,7 @@ namespace gitter.Framework.Controls
 			if(_expanded)
 			{
 				_expanded = false;
-				if(IsAttachedToListBox && IsPresented && _items.Count != 0)
+				if(IsAttachedToListBox && IsPresented && Items.Count != 0)
 				{
 					ListBox.CollapseItem(this);
 				}
@@ -397,7 +374,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Collapses whole tree of items starting at this item.</summary>
 		public void CollapseAll()
 		{
-			if(_items.Count == 0) return;
+			if(Items.Count == 0) return;
 			bool p = IsPresented;
 			bool hasListBox = IsAttachedToListBox;
 			if(hasListBox && p)
@@ -581,19 +558,17 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		#region Overrides
-
 		/// <summary>Called when item is attached to listbox.</summary>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			_items.ListBox = ListBox;
+			Items.ListBox = ListBox;
 		}
 
 		/// <summary>Called when item is detached from listbox.</summary>
 		protected override void OnListBoxDetached()
 		{
-			_items.ListBox = null;
+			Items.ListBox = null;
 			base.OnListBoxDetached();
 		}
 
@@ -610,8 +585,6 @@ namespace gitter.Framework.Controls
 		{
 			ListBox.Renderer.OnPaintItemContent(this, paintEventArgs);
 		}
-
-		#endregion
 
 		internal void PaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
@@ -696,7 +669,7 @@ namespace gitter.Framework.Controls
 		public virtual ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			if(requestEventArgs == null) return null;
-			ContextMenuRequested.Raise(this, requestEventArgs);
+			ContextMenuRequested?.Invoke(this, requestEventArgs);
 			return requestEventArgs.ContextMenu;
 		}
 	}
@@ -705,27 +678,21 @@ namespace gitter.Framework.Controls
 	/// <typeparam name="T">Data type.</typeparam>
 	public abstract class CustomListBoxItem<T> : CustomListBoxItem
 	{
-		private T _dataContext;
-
 		/// <summary>Create <see cref="CustomListBoxItem&lt;TData&gt;"/></summary>
 		/// <param name="dataContext">Associated data.</param>
 		public CustomListBoxItem(T dataContext)
 		{
-			_dataContext = dataContext;
+			DataContext = dataContext;
 		}
 
 		/// <summary>Item associated data.</summary>
-		public T DataContext
-		{
-			get { return _dataContext; }
-			set { _dataContext = value; }
-		}
+		public T DataContext { get; set; }
 
 		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem&lt;TData&gt;"/>.</summary>
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem&lt;TData&gt;"/>.</returns>
 		public override string ToString()
 		{
-			return "item: " + (_dataContext == null?"(null)":_dataContext.ToString());
+			return "item: " + (DataContext == null?"(null)":DataContext.ToString());
 		}
 	}
 }

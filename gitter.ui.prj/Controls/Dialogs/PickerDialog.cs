@@ -33,16 +33,9 @@ namespace gitter.Controls
 		where TPicker : Control, IPicker<TValue>, new()
 		where TValue : class
 	{
-		#region Data
-
-		private Dictionary<TValue, Control> _controlCache;
-		private Control _selectedControl;
-		private Label _label;
-		private TPicker _picker;
-
-		#endregion
-
-		#region .ctor
+		private readonly Dictionary<TValue, Control> _controlCache;
+		private readonly Label _label;
+		private readonly TPicker _picker;
 
 		protected PickerDialog(string displayName)
 		{
@@ -76,28 +69,11 @@ namespace gitter.Controls
 			PerformLayout();
 		}
 
-		#endregion
+		public TValue SelectedValue => _picker.SelectedValue;
 
-		#region Properties
+		protected virtual int MinimumSelectableItems => 1;
 
-		public TValue SelectedValue
-		{
-			get { return _picker.SelectedValue; }
-		}
-
-		protected virtual int MinimumSelectableItems
-		{
-			get { return 1; }
-		}
-
-		protected Control SelectedControl
-		{
-			get { return _selectedControl; }
-		}
-
-		#endregion
-
-		#region Methods
+		protected Control SelectedControl { get; private set; }
 
 		protected abstract void LoadItems(TPicker picker);
 
@@ -128,8 +104,7 @@ namespace gitter.Controls
 
 		protected Control GetOrCreateControl(TValue item)
 		{
-			Control control;
-			if(!_controlCache.TryGetValue(item, out control))
+			if(!_controlCache.TryGetValue(item, out var control))
 			{
 				control = CreateControl(item);
 				_controlCache.Add(item, control);
@@ -146,25 +121,25 @@ namespace gitter.Controls
 			}
 			var control = GetOrCreateControl(item);
 			int d = 0;
-			if(_selectedControl != null)
+			if(SelectedControl != null)
 			{
-				d -= _selectedControl.Height;
-				_selectedControl.Parent = null;
-				_selectedControl = null;
+				d -= SelectedControl.Height;
+				SelectedControl.Parent = null;
+				SelectedControl = null;
 				d -= 3;
 			}
-			_selectedControl = control;
-			if(_selectedControl != null)
+			SelectedControl = control;
+			if(SelectedControl != null)
 			{
-				d += _selectedControl.Height;
+				d += SelectedControl.Height;
 				d += 3;
 			}
 			Height += d;
-			if(_selectedControl != null)
+			if(SelectedControl != null)
 			{
-				_selectedControl.SetBounds(0, _picker.Bottom + 3, Width, 0,
+				SelectedControl.SetBounds(0, _picker.Bottom + 3, Width, 0,
 					BoundsSpecified.X | BoundsSpecified.Y | BoundsSpecified.Width);
-				_selectedControl.Parent = this;
+				SelectedControl.Parent = this;
 			}
 		}
 
@@ -191,26 +166,13 @@ namespace gitter.Controls
 			base.Dispose(disposing);
 		}
 
-		#endregion
-
-		#region IExecutableDialog Members
-
 		public virtual bool Execute()
 		{
-			if(_selectedControl != null)
+			if(SelectedControl is IExecutableDialog ctl)
 			{
-				var ctl = _selectedControl as IExecutableDialog;
-				if(ctl != null)
-				{
-					if(!ctl.Execute())
-					{
-						return false;
-					}
-				}
+				return ctl.Execute();
 			}
 			return true;
 		}
-
-		#endregion
 	}
 }

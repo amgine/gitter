@@ -86,8 +86,7 @@ namespace gitter
 				case NotifyEvent.Remove:
 					for(int i = e.StartIndex; i <= e.EndIndex; ++i)
 					{
-						var item = _items[i] as RepositoryGroupListItem;
-						if(item != null)
+						if(_items[i] is RepositoryGroupListItem item)
 						{
 							_groupsMapping.Remove(item.DataContext);
 						}
@@ -97,8 +96,7 @@ namespace gitter
 				case NotifyEvent.Set:
 					for(int i = e.StartIndex; i <= e.EndIndex; ++i)
 					{
-						var item = _items[i] as RepositoryGroupListItem;
-						if(item != null)
+						if(_items[i] is RepositoryGroupListItem item)
 						{
 							_groupsMapping.Remove(item.DataContext);
 						}
@@ -131,8 +129,7 @@ namespace gitter
 				case NotifyEvent.Remove:
 					for(int i = e.StartIndex; i <= e.EndIndex; ++i)
 					{
-						var item = _items[i + _groupsMapping.Count] as RepositoryListItem;
-						if(item != null)
+						if(_items[i + _groupsMapping.Count] is RepositoryListItem item)
 						{
 							_repositoriesMapping.Remove(item.DataContext);
 						}
@@ -142,8 +139,7 @@ namespace gitter
 				case NotifyEvent.Set:
 					for(int i = e.StartIndex; i <= e.EndIndex; ++i)
 					{
-						var item = _items[i + _groupsMapping.Count] as RepositoryListItem;
-						if(item != null)
+						if(_items[i + _groupsMapping.Count] is RepositoryListItem item)
 						{
 							_repositoriesMapping.Remove(item.DataContext);
 						}

@@ -25,13 +25,8 @@ namespace gitter.Framework.Controls
 
 	public class FlowProgressPanel : FlowPanel
 	{
-		#region Data
-
-		private ProcessOverlay _overlay;
+		private readonly ProcessOverlay _overlay;
 		private int _height;
-		private string _message;
-
-		#endregion
 
 		/// <summary>Create <see cref="FlowProgressPanel"/>.</summary>
 		public FlowProgressPanel()
@@ -72,16 +67,9 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public string Message
-		{
-			get { return _message; }
-			set { _message = value; }
-		}
+		public string Message { get; set; }
 
-		public IProgress<OperationProgress> ProgressMonitor
-		{
-			get { return _overlay; }
-		}
+		public IProgress<OperationProgress> ProgressMonitor => _overlay;
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
@@ -110,9 +98,9 @@ namespace gitter.Framework.Controls
 				}
 				else
 				{
-					if(!string.IsNullOrEmpty(_message))
+					if(!string.IsNullOrEmpty(Message))
 					{
-						_overlay.DrawMessage(graphics, rc, _message);
+						_overlay.DrawMessage(graphics, rc, Message);
 					}
 				}
 			}

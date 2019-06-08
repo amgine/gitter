@@ -26,14 +26,7 @@ namespace gitter.Framework.Controls
 	/// <summary>Collection of <see cref="CustomListBoxItem"/>.</summary>
 	public sealed class CustomListBoxItemsCollection : SafeNotifySortedCollection<CustomListBoxItem>
 	{
-		#region Data
-
-		private readonly CustomListBoxItem _parent;
 		private CustomListBox _listBox;
-
-		#endregion
-
-		#region .ctor
 
 		/// <summary>Create <see cref="CustomListBoxItemsCollection"/>.</summary>
 		/// <param name="listBox">Host <see cref="CustomListBox"/>.</param>
@@ -41,12 +34,8 @@ namespace gitter.Framework.Controls
 		internal CustomListBoxItemsCollection(CustomListBox listBox, CustomListBoxItem parent)
 		{
 			_listBox = listBox;
-			_parent = parent;
+			Parent = parent;
 		}
-
-		#endregion
-
-		#region Properties
 
 		/// <summary><see cref="CustomListBox"/> which hosts this collection or <see cref="CustomListBoxItem"/> owning this collection.</summary>
 		internal CustomListBox ListBox
@@ -69,21 +58,11 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary><see cref="CustomListBoxItem"/> which owns this collection (null if collection is owned by <see cref="CustomListBox"/> itself).</summary>
-		internal CustomListBoxItem Parent
-		{
-			get { return _parent; }
-		}
-
-		#endregion
-
-		#region Overrides
+		internal CustomListBoxItem Parent { get; }
 
 		/// <summary>Gets the synchronization object.</summary>
 		/// <value>The synchronization object.</value>
-		protected override ISynchronizeInvoke SynchronizeInvoke
-		{
-			get { return _listBox; }
-		}
+		protected override ISynchronizeInvoke SynchronizeInvoke => _listBox;
 
 		/// <summary>Frees the item.</summary>
 		/// <param name="item">The item.</param>
@@ -101,7 +80,7 @@ namespace gitter.Framework.Controls
 		protected override void AcquireItem(CustomListBoxItem item)
 		{
 			item.ListBox = _listBox;
-			item.Parent = _parent;
+			item.Parent = Parent;
 		}
 
 		/// <summary>Verifies the item.</summary>
@@ -111,7 +90,5 @@ namespace gitter.Framework.Controls
 		{
 			return item != null && item.ListBox == null;
 		}
-
-		#endregion
 	}
 }

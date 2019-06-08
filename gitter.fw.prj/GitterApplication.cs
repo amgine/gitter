@@ -72,15 +72,9 @@ namespace gitter.Framework
 			}
 		}
 
-		public static IEnumerable<IGitterStyle> Styles
-		{
-			get { return _styles; }
-		}
+		public static IEnumerable<IGitterStyle> Styles => _styles;
 
-		public static IGitterStyle DefaultStyle
-		{
-			get { return _defaultStyle; }
-		}
+		public static IGitterStyle DefaultStyle => _defaultStyle;
 
 		public static IGitterStyle Style
 		{
@@ -117,45 +111,21 @@ namespace gitter.Framework
 			}
 		}
 
-		public static ITextRenderer GdiTextRenderer
-		{
-			get { return _gdiTextRenderer; }
-		}
+		public static ITextRenderer GdiTextRenderer => _gdiTextRenderer;
 
-		public static ITextRenderer GdiPlusTextRenderer
-		{
-			get { return _gdiPlusTextRenderer; }
-		}
+		public static ITextRenderer GdiPlusTextRenderer => _gdiPlusTextRenderer;
 
-		public static IMessageBoxService MessageBoxService
-		{
-			get { return _messageBoxService; }
-		}
+		public static IMessageBoxService MessageBoxService => _messageBoxService;
 
-		public static IWorkingEnvironment WorkingEnvironment
-		{
-			get { return _environment; }
-		}
+		public static IWorkingEnvironment WorkingEnvironment => _environment;
 
-		public static FormEx MainForm
-		{
-			get { return _mainForm; }
-		}
+		public static FormEx MainForm => _mainForm;
 
-		public static SelectableFontManager FontManager
-		{
-			get { return _fontManager; }
-		}
+		public static SelectableFontManager FontManager => _fontManager;
 
-		public static ConfigurationService ConfigurationService
-		{
-			get { return _configurationService; }
-		}
+		public static ConfigurationService ConfigurationService => _configurationService;
 
-		public static IntegrationFeatures IntegrationFeatures
-		{
-			get { return _integrationFeatures; }
-		}
+		public static IntegrationFeatures IntegrationFeatures => _integrationFeatures;
 
 		private static void SetupDefaultExceptionHandling()
 		{

@@ -27,8 +27,7 @@ namespace gitter.Framework
 	{
 		public static Exception UnwrapException(Exception exc)
 		{
-			var ae = exc as AggregateException;
-			if(ae != null && ae.InnerExceptions.Count == 1)
+			if(exc is AggregateException ae && ae.InnerExceptions.Count == 1)
 			{
 				return UnwrapException(ae.InnerExceptions[0]);
 			}

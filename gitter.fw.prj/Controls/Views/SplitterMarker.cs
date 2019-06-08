@@ -94,10 +94,7 @@ namespace gitter.Framework.Controls
 			TopMost = true;
 		}
 
-		protected override bool ShowWithoutActivation
-		{
-			get { return true; }
-		}
+		protected override bool ShowWithoutActivation => true;
 
 		protected override CreateParams CreateParams
 		{

@@ -81,24 +81,21 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsFetchingBlame.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsFetchingBlame.AddEllipsis()));
 			var parameters = GetParameters(options);
-			return Repository.Accessor.QueryBlame.InvokeAsync(parameters, progress, cancellationToken)
-			                          .ContinueWith(
-										t =>
-										{
-											if(progress != null)
-											{
-												progress.Report(OperationProgress.Completed);
-											}
-											return TaskUtility.UnwrapResult(t);
-										},
-										cancellationToken,
-										TaskContinuationOptions.ExecuteSynchronously,
-										TaskScheduler.Default);
+			return Repository
+				.Accessor
+				.QueryBlame
+				.InvokeAsync(parameters, progress, cancellationToken)
+			    .ContinueWith(
+					t =>
+					{
+						progress?.Report(OperationProgress.Completed);
+						return TaskUtility.UnwrapResult(t);
+					},
+					cancellationToken,
+					TaskContinuationOptions.ExecuteSynchronously,
+					TaskScheduler.Default);
 		}
 
 		/// <summary>
@@ -107,10 +104,7 @@ namespace gitter.Git
 		/// <returns>
 		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
 		/// </returns>
-		public override int GetHashCode()
-		{
-			return Revision.GetHashCode() ^ FileName.GetHashCode();
-		}
+		public override int GetHashCode() => Revision.GetHashCode() ^ FileName.GetHashCode();
 
 		/// <summary>
 		/// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
@@ -131,14 +125,9 @@ namespace gitter.Git
 		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
 		public override string ToString()
 		{
-			if(Revision is Revision)
-			{
-				return FileName + " @ " + Revision.Pointer.Substring(0, 7);
-			}
-			else
-			{
-				return FileName + " @ " + Revision.Pointer;
-			}
+			return Revision is Revision
+				? FileName + " @ " + Revision.Pointer.Substring(0, 7)
+				: FileName + " @ " + Revision.Pointer;
 		}
 
 		#endregion

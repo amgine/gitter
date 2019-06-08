@@ -25,12 +25,8 @@ namespace gitter.Framework
 	public class GCCache<T> : Cache<T>
 		where T : class
 	{
-		#region Data
-
 		private readonly Func<T> _onReevaluate;
 		private WeakReference _weakRef;
-
-		#endregion
 
 		public GCCache(Func<T> onReevaluate)
 		{
@@ -47,10 +43,7 @@ namespace gitter.Framework
 			if(value != null) _weakRef = new WeakReference(value);
 		}
 
-		public override bool IsCached
-		{
-			get { return _weakRef != null && _weakRef.IsAlive; }
-		}
+		public override bool IsCached => _weakRef != null && _weakRef.IsAlive;
 
 		public override T Value
 		{

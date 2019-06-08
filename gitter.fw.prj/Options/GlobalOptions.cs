@@ -120,8 +120,7 @@ namespace gitter.Framework
 			}
 			foreach(var item in list)
 			{
-				PropertyPageItem parent;
-				if(dic.TryGetValue(item.DataContext.GroupGuid, out parent))
+				if(dic.TryGetValue(item.DataContext.GroupGuid, out var parent))
 				{
 					parent.Items.Add(item);
 					parent.IsExpanded = true;

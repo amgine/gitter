@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2018  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2019  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ namespace gitter.Git.AccessLayer.CLI
 	public abstract class CommandBuilderBase
 	{
 		private List<ICommandArgument> _args;
+		private List<ICommandArgument> _options;
 
 		protected CommandBuilderBase(string commandName)
 		{
@@ -48,6 +49,20 @@ namespace gitter.Git.AccessLayer.CLI
 			_args.Add(argument);
 		}
 
-		public Command Build() => new Command(CommandName, _args);
+		public void AddOption(string option)
+		{
+			AddOption(new CommandParameter(option));
+		}
+
+		public void AddOption(ICommandArgument option)
+		{
+			if(_options == null)
+			{
+				_options = new List<ICommandArgument>();
+			}
+			_options.Add(option);
+		}
+
+		public Command Build() => new Command(_options, CommandName, _args);
 	}
 }

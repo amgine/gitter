@@ -33,15 +33,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class PushImpl : IGitFunction<PushParameters, IList<ReferencePushResult>>
 	{
-		#region Data
-
 		private readonly ICommandExecutor _commandExecutor;
 		private readonly Func<PushParameters, bool, Command> _commandFactory;
 		private readonly Func<string, IList<ReferencePushResult>> _resultsParser;
-
-		#endregion
-
-		#region .ctor
 
 		public PushImpl(
 			ICommandExecutor commandExecutor,
@@ -52,10 +46,6 @@ namespace gitter.Git.AccessLayer.CLI
 			_commandFactory = commandFactory;
 			_resultsParser = resultsParser;
 		}
-
-		#endregion
-
-		#region Methods
 
 		public IList<ReferencePushResult> Invoke(PushParameters parameters)
 		{
@@ -74,11 +64,8 @@ namespace gitter.Git.AccessLayer.CLI
 
 			var command = _commandFactory(parameters, true);
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
-			}
-			List<string> errorMessages = null;
+			progress?.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
+			var errorMessages  = default(List<string>);
 			var stdOutReceiver = new AsyncTextReader();
 			var stdErrReceiver = new NotifyingAsyncTextReader();
 			stdErrReceiver.TextLineReceived += (s, e) =>
@@ -87,10 +74,7 @@ namespace gitter.Git.AccessLayer.CLI
 				{
 					var parser = new GitParser(e.Text);
 					var operationProgress = parser.ParseProgress();
-					if(progress != null)
-					{
-						progress.Report(operationProgress);
-					}
+					progress?.Report(operationProgress);
 					if(operationProgress.IsIndeterminate)
 					{
 						if(errorMessages == null)
@@ -101,10 +85,7 @@ namespace gitter.Git.AccessLayer.CLI
 					}
 					else
 					{
-						if(errorMessages != null)
-						{
-							errorMessages.Clear();
-						}
+						errorMessages?.Clear();
 					}
 				}
 			};
@@ -120,27 +101,16 @@ namespace gitter.Git.AccessLayer.CLI
 					int exitCode = TaskUtility.UnwrapResult(task);
 					if(exitCode != 0)
 					{
-						string errorMessage;
-						if(errorMessages != null && errorMessages.Count != 0)
-						{
-							errorMessage = string.Join(Environment.NewLine, errorMessages);
-						}
-						else
-						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
-						}
+						var errorMessage = errorMessages != null && errorMessages.Count != 0
+							? string.Join(Environment.NewLine, errorMessages)
+							: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
 						throw new GitException(errorMessage);
 					}
-					else
-					{
-						return _resultsParser(stdOutReceiver.GetText());
-					}
+					return _resultsParser(stdOutReceiver.GetText());
 				},
 				cancellationToken,
 				TaskContinuationOptions.ExecuteSynchronously,
 				TaskScheduler.Default);
 		}
-
-		#endregion
 	}
 }

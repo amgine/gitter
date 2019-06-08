@@ -32,7 +32,7 @@ namespace gitter.Framework.Controls
 	{
 		private static readonly Bitmap ImgLog = Resources.ImgLog;
 
-		private LogListBox _logListBox;
+		private readonly LogListBox _logListBox;
 
 		/// <summary>Initializes a new instance of the <see cref="LogView"/> class.</summary>
 		public LogView(IWorkingEnvironment environment)
@@ -50,9 +50,6 @@ namespace gitter.Framework.Controls
 			Text = Resources.StrLog;
 		}
 
-		public override Image Image
-		{
-			get { return ImgLog; }
-		}
+		public override Image Image => ImgLog;
 	}
 }

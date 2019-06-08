@@ -25,14 +25,10 @@ namespace gitter.Framework.Controls
 	using System.Drawing;
 	using System.Windows.Forms;
 
-	using gitter.Framework.Options;
-
 	/// <summary>Base class or column header extenders.</summary>
 	[ToolboxItem(false)]
 	public partial class ExtenderBase : UserControl
 	{
-		private CustomListBoxColumn _column;
-
 		/// <summary>Create <see cref="ExtenderBase"/>.</summary>
 		public ExtenderBase()
 		{
@@ -41,14 +37,14 @@ namespace gitter.Framework.Controls
 			BorderStyle			= BorderStyle.FixedSingle;
 			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
 			{
-				Font		= SystemFonts.MessageBoxFont;
-				BackColor	= SystemColors.Window;
+				Font      = SystemFonts.MessageBoxFont;
+				BackColor = SystemColors.Window;
 			}
 			else
 			{
-				Font		= GitterApplication.FontManager.UIFont;
-				BackColor	= GitterApplication.Style.Colors.Window;
-				ForeColor	= GitterApplication.Style.Colors.WindowText;
+				Font      = GitterApplication.FontManager.UIFont;
+				BackColor = GitterApplication.Style.Colors.Window;
+				ForeColor = GitterApplication.Style.Colors.WindowText;
 			}
 		}
 
@@ -56,45 +52,37 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(column, nameof(column));
 
-			_column = column;
+			Column = column;
 
 			AutoScaleDimensions	= new SizeF(96F, 96F);
 			AutoScaleMode		= AutoScaleMode.Dpi;
 			BorderStyle			= BorderStyle.FixedSingle;
 			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
 			{
-				Font		= SystemFonts.MessageBoxFont;
-				BackColor	= SystemColors.Window;
+				Font      = SystemFonts.MessageBoxFont;
+				BackColor = SystemColors.Window;
 			}
 			else
 			{
-				Font		= GitterApplication.FontManager.UIFont;
-				BackColor	= _column.Style.Colors.Window;
-				ForeColor	= _column.Style.Colors.WindowText;
+				Font      = GitterApplication.FontManager.UIFont;
+				BackColor = Column.Style.Colors.Window;
+				ForeColor = Column.Style.Colors.WindowText;
 			}
 
-			_column.StyleChanged += OnColumnStyleChanged;
+			Column.StyleChanged += OnColumnStyleChanged;
 		}
 
 		protected IGitterStyle Style
 		{
 			get
 			{
-				if(_column != null)
-				{
-					return _column.Style;
-				}
-				else
-				{
-					return GitterApplication.Style;
-				}
+				return Column != null
+					? Column.Style
+					: GitterApplication.Style;
 			}
 		}
 
-		public CustomListBoxColumn Column
-		{
-			get { return _column; }
-		}
+		public CustomListBoxColumn Column { get; }
 
 		private void OnColumnStyleChanged(object sender, EventArgs e)
 		{
@@ -111,9 +99,9 @@ namespace gitter.Framework.Controls
 		{
 			if(disposing)
 			{
-				if(_column != null)
+				if(Column != null)
 				{
-					_column.StyleChanged -= OnColumnStyleChanged;
+					Column.StyleChanged -= OnColumnStyleChanged;
 				}
 			}
 			base.Dispose(disposing);

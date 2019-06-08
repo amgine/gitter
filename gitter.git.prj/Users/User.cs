@@ -28,21 +28,10 @@ namespace gitter.Git
 	/// <summary>Committer/Author.</summary>
 	public sealed class User : GitNamedObjectWithLifetime
 	{
-		#region Data
-
-		private readonly string _name;
-		private readonly string _email;
 		private int _commits;
-		private IAvatar _avatar;
-
-		#endregion
-
-		#region Events
 
 		/// <summary><see cref="Commits"/> has changed.</summary>
 		public event EventHandler CommitsChanged;
-
-		#endregion
 
 		/// <summary>Create <see cref="User"/>.</summary>
 		/// <param name="repository">Related repository.</param>
@@ -52,23 +41,17 @@ namespace gitter.Git
 		internal User(Repository repository, string name, string email, int commits)
 			: base(repository, name + "\n" + email)
 		{
-			_name = name;
-			_email = email;
+			Name = name;
+			Email = email;
 			_commits = commits;
-			_avatar = new Gravatar(email);
+			Avatar = new Gravatar(email);
 		}
 
 		/// <summary>User name.</summary>
-		public new string Name
-		{
-			get { return _name; }
-		}
+		public new string Name { get; }
 
 		/// <summary>User email.</summary>
-		public string Email
-		{
-			get { return _email; }
-		}
+		public string Email { get; }
 
 		/// <summary>User commit count.</summary>
 		public int Commits
@@ -79,15 +62,12 @@ namespace gitter.Git
 				if(_commits != value)
 				{
 					_commits = value;
-					CommitsChanged.Raise(this);
+					CommitsChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
 
 		/// <summary>Avatar.</summary>
-		public IAvatar Avatar
-		{
-			get { return _avatar; }
-		}
+		public IAvatar Avatar { get; }
 	}
 }

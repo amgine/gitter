@@ -32,15 +32,10 @@ namespace gitter.Framework.Controls
 	{
 		#region Data
 
-		private readonly ViewHost _viewHost;
 		private readonly List<ViewHostTab> _tabs;
 		private readonly TrackingService<ViewHostTab> _tabHover;
 		private readonly TrackingService<object> _areaHover;
 		private int _areaMouseDown;
-		private readonly AnchorStyles _side;
-		private readonly ViewButtons _leftButtons;
-		private readonly ViewButtons _rightButtons;
-		private int _firstTabIndex;
 		private bool _readyToFloat;
 		private int _mdX;
 		private int _mdY;
@@ -56,8 +51,8 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
-			_viewHost = viewHost;
-			_viewHost.ActiveViewChanged += OnActiveViewChanged;
+			ViewHost = viewHost;
+			ViewHost.ActiveViewChanged += OnActiveViewChanged;
 
 			SetStyle(
 				ControlStyles.ContainerControl |
@@ -71,7 +66,7 @@ namespace gitter.Framework.Controls
 				ControlStyles.OptimizedDoubleBuffer,
 				true);
 
-			_side = side;
+			Side = side;
 
 			_tabs = new List<ViewHostTab>();
 			foreach(var view in viewHost.Views)
@@ -96,17 +91,17 @@ namespace gitter.Framework.Controls
 			{
 				var tabHeight = Renderer.TabHeight;
 				var tabFooterHeight = Renderer.TabFooterHeight;
-				_leftButtons = new ViewButtons(this)
+				LeftButtons = new ViewButtons(this)
 				{
 					Height = tabHeight + tabFooterHeight,
 				};
-				_leftButtons.ButtonClick += OnViewButtonClick;
-				_rightButtons = new ViewButtons(this)
+				LeftButtons.ButtonClick += OnViewButtonClick;
+				RightButtons = new ViewButtons(this)
 				{
 					Height = tabHeight + tabFooterHeight,
 				};
-				_rightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
-				_rightButtons.ButtonClick += OnViewButtonClick;
+				RightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
+				RightButtons.ButtonClick += OnViewButtonClick;
 			}
 			_floatId = -1;
 		}
@@ -123,7 +118,7 @@ namespace gitter.Framework.Controls
 				case 0:
 					if(!e.IsTracked)
 					{
-						_leftButtons.OnMouseLeave();
+						LeftButtons.OnMouseLeave();
 					}
 					break;
 				case 1:
@@ -135,7 +130,7 @@ namespace gitter.Framework.Controls
 				case 2:
 					if(!e.IsTracked)
 					{
-						_rightButtons.OnMouseLeave();
+						RightButtons.OnMouseLeave();
 					}
 					break;
 			}
@@ -157,45 +152,21 @@ namespace gitter.Framework.Controls
 
 		#region Properties
 
-		public ViewHostTab this[int index]
-		{
-			get { return _tabs[index]; }
-		}
+		public ViewHostTab this[int index] => _tabs[index];
 
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
+		private ViewRenderer Renderer => ViewManager.Renderer;
 
-		public int Count
-		{
-			get { return _tabs.Count; }
-		}
+		public int Count => _tabs.Count;
 
-		public AnchorStyles Side
-		{
-			get { return _side; }
-		}
+		public AnchorStyles Side { get; }
 
-		public ViewHost ViewHost
-		{
-			get { return _viewHost; }
-		}
+		public ViewHost ViewHost { get; }
 
-		public ViewButtons LeftButtons
-		{
-			get { return _leftButtons; }
-		}
+		public ViewButtons LeftButtons { get; }
 
-		public ViewButtons RightButtons
-		{
-			get { return _rightButtons; }
-		}
+		public ViewButtons RightButtons { get; }
 
-		public int FirstTabIndex
-		{
-			get { return _firstTabIndex; }
-		}
+		public int FirstTabIndex { get; private set; }
 
 		#endregion
 
@@ -254,38 +225,38 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsValidIndex(index, _tabs.Count, "index");
 
-			if(index < _firstTabIndex)
+			if(index < FirstTabIndex)
 			{
-				_firstTabIndex = index;
+				FirstTabIndex = index;
 				ResetButtons();
 				Invalidate();
 			}
-			else if(index == _firstTabIndex)
+			else if(index == FirstTabIndex)
 			{
 				return;
 			}
 			else
 			{
 				var w = Width;
-				if(_leftButtons != null && _leftButtons.Count != 0)
+				if(LeftButtons != null && LeftButtons.Count != 0)
 				{
-					w -= _leftButtons.Width + ViewConstants.TabHeaderButtonSpacing;
+					w -= LeftButtons.Width + ViewConstants.TabHeaderButtonSpacing;
 				}
-				if(_rightButtons != null && _rightButtons.Count != 0)
+				if(RightButtons != null && RightButtons.Count != 0)
 				{
-					w -= _rightButtons.Width + ViewConstants.TabHeaderButtonSpacing;
+					w -= RightButtons.Width + ViewConstants.TabHeaderButtonSpacing;
 				}
 
 				if(w <= 0)
 				{
-					_firstTabIndex = index;
+					FirstTabIndex = index;
 					ResetButtons();
 					Invalidate();
 				}
 				else
 				{
 					int space = 0;
-					for(int i = _firstTabIndex; i <= index; ++i)
+					for(int i = FirstTabIndex; i <= index; ++i)
 					{
 						space += _tabs[i].Length;
 					}
@@ -293,11 +264,11 @@ namespace gitter.Framework.Controls
 					if(space > w)
 					{
 						space = 0;
-						_firstTabIndex = index;
-						for(int i = index; i >= _firstTabIndex; --i)
+						FirstTabIndex = index;
+						for(int i = index; i >= FirstTabIndex; --i)
 						{
 							if(space > w) break;
-							_firstTabIndex = i;
+							FirstTabIndex = i;
 							space += _tabs[i].Length;
 						}
 						ResetButtons();
@@ -309,14 +280,14 @@ namespace gitter.Framework.Controls
 
 		private void ResetButtons()
 		{
-			if(_viewHost.IsDocumentWell)
+			if(ViewHost.IsDocumentWell)
 			{
 				var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
 				var space = Width;
-				space -= _leftButtons.Width + viewButtonSize +
+				space -= LeftButtons.Width + viewButtonSize +
 					2 * ViewConstants.TabHeaderButtonSpacing;
 				var length = 0;
-				if(_firstTabIndex == 0)
+				if(FirstTabIndex == 0)
 				{
 					length = _length;
 				}
@@ -324,93 +295,93 @@ namespace gitter.Framework.Controls
 				{
 					if(_length < space)
 					{
-						_firstTabIndex = 0;
+						FirstTabIndex = 0;
 					}
 					else
 					{
-						if(_firstTabIndex >= _tabs.Count)
+						if(FirstTabIndex >= _tabs.Count)
 						{
-							_firstTabIndex = _tabs.Count - 1;
+							FirstTabIndex = _tabs.Count - 1;
 						}
-						for(int i = _firstTabIndex; i < _tabs.Count; ++i)
+						for(int i = FirstTabIndex; i < _tabs.Count; ++i)
 						{
 							length += _tabs[i].Length;
 						}
 						int free = 0;
-						for(int i = _firstTabIndex - 1; i >= 0; --i)
+						for(int i = FirstTabIndex - 1; i >= 0; --i)
 						{
 							free += _tabs[i].Length;
 							if(free + length > space)
 							{
-								_firstTabIndex = i + 1;
+								FirstTabIndex = i + 1;
 								length += free - _tabs[i].Length;
 								break;
 							}
 						}
 					}
 				}
-				if(_firstTabIndex != 0)
+				if(FirstTabIndex != 0)
 				{
-					if(_leftButtons.Count == 0)
+					if(LeftButtons.Count == 0)
 					{
-						_leftButtons.SetAvailableButtons(ViewButtonType.ScrollTabsLeft);
+						LeftButtons.SetAvailableButtons(ViewButtonType.ScrollTabsLeft);
 					}
 				}
 				else
 				{
-					if(_leftButtons.Count == 1)
+					if(LeftButtons.Count == 1)
 					{
-						_leftButtons.SetAvailableButtons(null);
+						LeftButtons.SetAvailableButtons(null);
 					}
 				}
 				if(length > space)
 				{
-					bool needRightScroll = (_firstTabIndex != _tabs.Count - 1);
+					bool needRightScroll = (FirstTabIndex != _tabs.Count - 1);
 					if(needRightScroll)
 					{
-						if(_rightButtons.Count == 1)
+						if(RightButtons.Count == 1)
 						{
-							_rightButtons.SetAvailableButtons(
+							RightButtons.SetAvailableButtons(
 								ViewButtonType.ScrollTabsRight,
 								ViewButtonType.TabsScrollMenu);
 						}
 					}
 					else
 					{
-						if(_rightButtons.Count == 2)
+						if(RightButtons.Count == 2)
 						{
-							_rightButtons.SetAvailableButtons(
+							RightButtons.SetAvailableButtons(
 								ViewButtonType.TabsScrollMenu);
 						}
 					}
 				}
 				else
 				{
-					if(_rightButtons.Count == 2)
+					if(RightButtons.Count == 2)
 					{
-						if(_firstTabIndex == 0)
+						if(FirstTabIndex == 0)
 						{
-							_rightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
+							RightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
 						}
 						else
 						{
-							_rightButtons.SetAvailableButtons(ViewButtonType.TabsScrollMenu);
+							RightButtons.SetAvailableButtons(ViewButtonType.TabsScrollMenu);
 						}
 					}
-					else if(_rightButtons.Count == 1)
+					else if(RightButtons.Count == 1)
 					{
-						if(_firstTabIndex == 0)
+						if(FirstTabIndex == 0)
 						{
-							if(_rightButtons[0].Type == ViewButtonType.TabsScrollMenu)
+							if(RightButtons[0].Type == ViewButtonType.TabsScrollMenu)
 							{
-								_rightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
+								RightButtons.SetAvailableButtons(ViewButtonType.TabsMenu);
 							}
 						}
 						else
 						{
-							if(_rightButtons[0].Type == ViewButtonType.TabsMenu)
+							if(RightButtons[0].Type == ViewButtonType.TabsMenu)
 							{
-								_rightButtons.SetAvailableButtons(ViewButtonType.TabsScrollMenu);
+								RightButtons.SetAvailableButtons(ViewButtonType.TabsScrollMenu);
 							}
 						}
 					}
@@ -574,11 +545,11 @@ namespace gitter.Framework.Controls
 		private int GetTabOffset(ViewHostTab tab)
 		{
 			int x = 0;
-			if(_leftButtons != null)
+			if(LeftButtons != null)
 			{
-				x += _leftButtons.Width;
+				x += LeftButtons.Width;
 			}
-			for(int i = _firstTabIndex; i < _tabs.Count; ++i)
+			for(int i = FirstTabIndex; i < _tabs.Count; ++i)
 			{
 				if(_tabs[i] == tab) return x;
 				x += _tabs[i].Length;
@@ -589,11 +560,11 @@ namespace gitter.Framework.Controls
 		private int GetTabOffset(int index)
 		{
 			int x = 0;
-			if(_leftButtons != null)
+			if(LeftButtons != null)
 			{
-				x += _leftButtons.Width;
+				x += LeftButtons.Width;
 			}
-			for(int i = _firstTabIndex; i < index; ++i)
+			for(int i = FirstTabIndex; i < index; ++i)
 			{
 				var length = _tabs[i].Length;
 				x += length;
@@ -608,9 +579,9 @@ namespace gitter.Framework.Controls
 			{
 				return -1;
 			}
-			if(_leftButtons != null)
+			if(LeftButtons != null)
 			{
-				var lbw = _leftButtons.Width;
+				var lbw = LeftButtons.Width;
 				if(lbw != 0)
 				{
 					if(x <= lbw)
@@ -619,9 +590,9 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			if(_rightButtons != null)
+			if(RightButtons != null)
 			{
-				var rbw = _rightButtons.Width;
+				var rbw = RightButtons.Width;
 				if(rbw != 0)
 				{
 					if(x >= width - rbw)
@@ -640,30 +611,30 @@ namespace gitter.Framework.Controls
 				var maxTabWidth = GetMaxTabWidth();
 				int space = Width;
 				int cx = 0;
-				if(_leftButtons != null)
+				if(LeftButtons != null)
 				{
-					if(_leftButtons.Count != 0)
+					if(LeftButtons.Count != 0)
 					{
-						var lbw = _leftButtons.Width;
+						var lbw = LeftButtons.Width;
 						space -= lbw + ViewConstants.TabHeaderButtonSpacing;
 						cx += lbw + ViewConstants.TabHeaderButtonSpacing;
 					}
 				}
-				if(_rightButtons != null)
+				if(RightButtons != null)
 				{
-					if(_rightButtons.Count != 0)
+					if(RightButtons.Count != 0)
 					{
-						var rbw = _rightButtons.Width;
+						var rbw = RightButtons.Width;
 						space -= rbw + ViewConstants.TabHeaderButtonSpacing;
 					}
 				}
-				for(int i = _firstTabIndex; i < _tabs.Count; ++i)
+				for(int i = FirstTabIndex; i < _tabs.Count; ++i)
 				{
 					var length = _tabs[i].Length;
 					if(length > maxTabWidth)
 						length = maxTabWidth;
 					space -= length;
-					if(!_viewHost.IsDocumentWell)
+					if(!ViewHost.IsDocumentWell)
 					{
 						if(maxTabWidth != int.MaxValue && space < 3)
 							length += space;
@@ -687,17 +658,17 @@ namespace gitter.Framework.Controls
 			switch(e.Button)
 			{
 				case ViewButtonType.ScrollTabsLeft:
-					if(_firstTabIndex != 0)
+					if(FirstTabIndex != 0)
 					{
-						--_firstTabIndex;
+						--FirstTabIndex;
 						ResetButtons();
 						Invalidate();
 					}
 					break;
 				case ViewButtonType.ScrollTabsRight:
-					if(_firstTabIndex < _tabs.Count - 1)
+					if(FirstTabIndex < _tabs.Count - 1)
 					{
-						++_firstTabIndex;
+						++FirstTabIndex;
 						ResetButtons();
 						Invalidate();
 					}
@@ -714,7 +685,7 @@ namespace gitter.Framework.Controls
 									(item, args) =>
 									{
 										var view = (ViewBase)((ToolStripMenuItem)item).Tag;
-										_viewHost.Activate(view);
+										ViewHost.Activate(view);
 									})
 								{
 									Tag = tab.View,
@@ -749,7 +720,7 @@ namespace gitter.Framework.Controls
 			switch(_areaMouseDown)
 			{
 				case 0:
-					_leftButtons.OnMouseDown(e.X, e.Y, e.Button);
+					LeftButtons.OnMouseDown(e.X, e.Y, e.Button);
 					break;
 				case 1:
 					int tabId = HitTestTab(_mdX, _mdY, out bounds);
@@ -772,14 +743,14 @@ namespace gitter.Framework.Controls
 					}
 					else
 					{
-						_viewHost.Focus();
+						ViewHost.Focus();
 					}
 					break;
 				case 2:
-					_rightButtons.OnMouseDown(e.X - (Width - _rightButtons.Width), e.Y, e.Button);
+					RightButtons.OnMouseDown(e.X - (Width - RightButtons.Width), e.Y, e.Button);
 					break;
 				default:
-					_viewHost.Focus();
+					ViewHost.Focus();
 					break;
 			}
 			base.OnMouseDown(e);
@@ -794,14 +765,14 @@ namespace gitter.Framework.Controls
 				if(Math.Abs(_mdX - e.X) >= ViewConstants.ViewFloatDragMargin ||
 					Math.Abs(_mdY - e.Y) >= ViewConstants.ViewFloatDragMargin)
 				{
-					var form = _viewHost.GetRootOwnerForm();
+					var form = ViewHost.GetRootOwnerForm();
 					_readyToFloat = false;
 					var tab = _tabs[_floatId];
-					_viewHost.RemoveView(tab.View);
-					var host = new ViewHost(_viewHost.Grid, false, false, new[] { tab.View });
+					ViewHost.RemoveView(tab.View);
+					var host = new ViewHost(ViewHost.Grid, false, false, new[] { tab.View });
 					var floatingForm = host.PrepareFloatingMode();
 					Capture = false;
-					_viewHost.Focus();
+					ViewHost.Focus();
 					floatingForm.Show(form);
 					floatingForm.Shown += (sender, args) =>
 						((ViewHost)((Form)sender).Controls[0]).StartMoving(e.X, e.Y);
@@ -835,8 +806,7 @@ namespace gitter.Framework.Controls
 				{
 					if(areaId == 1)
 					{
-						Rectangle bounds;
-						tabId = HitTestTab(e.X, e.Y, out bounds);
+						tabId = HitTestTab(e.X, e.Y, out var bounds);
 						if(tabId == -1) _tabHover.Drop();
 						offset = bounds.X;
 					}
@@ -856,7 +826,7 @@ namespace gitter.Framework.Controls
 			switch(areaId)
 			{
 				case 0:
-					_leftButtons.OnMouseMove(e.X, e.Y, e.Button);
+					LeftButtons.OnMouseMove(e.X, e.Y, e.Button);
 					break;
 				case 1:
 					if(tabId != -1)
@@ -864,7 +834,7 @@ namespace gitter.Framework.Controls
 						_tabHover.Track(tabId, _tabs[tabId]);
 						int x = e.X;
 						int y = e.Y;
-						switch(_side)
+						switch(Side)
 						{
 							case AnchorStyles.Top:
 							case AnchorStyles.Bottom:
@@ -879,7 +849,7 @@ namespace gitter.Framework.Controls
 					}
 					break;
 				case 2:
-					_rightButtons.OnMouseMove(e.X - (Width - _rightButtons.Width), e.Y, e.Button);
+					RightButtons.OnMouseMove(e.X - (Width - RightButtons.Width), e.Y, e.Button);
 					break;
 			}
 			base.OnMouseMove(e);
@@ -892,7 +862,7 @@ namespace gitter.Framework.Controls
 			switch(_areaMouseDown)
 			{
 				case 0:
-					_leftButtons.OnMouseUp(e.X, e.Y, e.Button);
+					LeftButtons.OnMouseUp(e.X, e.Y, e.Button);
 					break;
 				case 1:
 					if(_floatId != -1)
@@ -900,7 +870,7 @@ namespace gitter.Framework.Controls
 						var offset = GetTabOffset(_floatId);
 						int x = e.X;
 						int y = e.Y;
-						switch(_side)
+						switch(Side)
 						{
 							case AnchorStyles.Top:
 							case AnchorStyles.Bottom:
@@ -917,7 +887,7 @@ namespace gitter.Framework.Controls
 					_floatId = -1;
 					break;
 				case 2:
-					_rightButtons.OnMouseUp(e.X - (Width - _rightButtons.Width), e.Y, e.Button);
+					RightButtons.OnMouseUp(e.X - (Width - RightButtons.Width), e.Y, e.Button);
 					break;
 			}
 			_areaMouseDown = -1;
@@ -934,7 +904,7 @@ namespace gitter.Framework.Controls
 		{
 			var width = Width;
 			int maxTabWidth;
-			if(!_viewHost.IsDocumentWell)
+			if(!ViewHost.IsDocumentWell)
 			{
 				if(_length > width && _tabs.Count != 0)
 				{
@@ -1020,7 +990,7 @@ namespace gitter.Framework.Controls
 			}
 			int dx = 0, dy = 0;
 			graphics.SetClip(new Rectangle(rect.X, rect.Y, space, rect.Height));
-			for(int i = _firstTabIndex; i < _tabs.Count; ++i)
+			for(int i = FirstTabIndex; i < _tabs.Count; ++i)
 			{
 				var length = _tabs[i].Length;
 				if(length > maxTabWidth)
@@ -1028,7 +998,7 @@ namespace gitter.Framework.Controls
 					length = maxTabWidth;
 				}
 				space -= length;
-				if(!_viewHost.IsDocumentWell)
+				if(!ViewHost.IsDocumentWell)
 				{
 					if(maxTabWidth != int.MaxValue && space < 3)
 					{
@@ -1073,7 +1043,7 @@ namespace gitter.Framework.Controls
 					tab.Dispose();
 				}
 				_tabs.Clear();
-				_viewHost.ActiveViewChanged -= OnActiveViewChanged;
+				ViewHost.ActiveViewChanged -= OnActiveViewChanged;
 			}
 			base.Dispose(disposing);
 		}

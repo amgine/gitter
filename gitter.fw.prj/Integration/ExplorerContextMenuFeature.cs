@@ -30,30 +30,17 @@ namespace gitter.Framework
 	{
 		public event EventHandler IsEnabledChanged;
 
-		private void OnIsEnabledChanged()
-		{
-			var handler = IsEnabledChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		private void OnIsEnabledChanged() => IsEnabledChanged?.Invoke(this, EventArgs.Empty);
 
-		public string Name
-		{
-			get { return "ExplorerContextMenu"; }
-		}
+		public string Name => "ExplorerContextMenu";
 
-		public string DisplayText
-		{
-			get { return Resources.StrsExplorerContextMenuFeature; }
-		}
+		public string DisplayText => Resources.StrsExplorerContextMenuFeature;
 
-		public Bitmap Icon
-		{
-			get { return CachedResources.Bitmaps["ImgFolder"]; }
-		}
+		public Bitmap Icon => CachedResources.Bitmaps["ImgFolder"];
 
 		public bool IsEnabled
 		{
-			get { return GlobalOptions.IsIntegratedInExplorerContextMenu; }
+			get => GlobalOptions.IsIntegratedInExplorerContextMenu;
 			set
 			{
 				if(value)
@@ -67,10 +54,7 @@ namespace gitter.Framework
 			}
 		}
 
-		public bool AdministratorRightsRequired
-		{
-			get { return true; }
-		}
+		public bool AdministratorRightsRequired => false;
 
 		public Action GetEnableAction(bool enable)
 		{
@@ -79,10 +63,7 @@ namespace gitter.Framework
 				(Action)GlobalOptions.RemoveFromExplorerContextMenu;
 		}
 
-		bool IIntegrationFeature.HasConfiguration
-		{
-			get { return false; }
-		}
+		bool IIntegrationFeature.HasConfiguration => false;
 
 		void IIntegrationFeature.SaveTo(Section section)
 		{

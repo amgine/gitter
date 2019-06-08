@@ -23,13 +23,7 @@ namespace gitter.Framework.Mvc
 	public class ViewControllerBase<T> : IViewController<T>
 		where T : class, IView
 	{
-		#region Data
-
 		private T _view;
-
-		#endregion
-
-		#region Properties
 
 		public T View
 		{
@@ -51,10 +45,6 @@ namespace gitter.Framework.Mvc
 			}
 		}
 
-		#endregion
-
-		#region Methods
-
 		protected virtual void OnViewDetaching()
 		{
 		}
@@ -62,7 +52,5 @@ namespace gitter.Framework.Mvc
 		protected virtual void OnViewAttached()
 		{
 		}
-
-		#endregion
 	}
 }

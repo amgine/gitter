@@ -24,8 +24,6 @@ namespace gitter.Framework.Configuration
 
 	public sealed class ConfigurationManager : INamedObject
 	{
-		private Section _rootSection;
-
 		public ConfigurationManager(IDataAdapter dataAdapter)
 		{
 			Load(dataAdapter);
@@ -33,25 +31,25 @@ namespace gitter.Framework.Configuration
 
 		public ConfigurationManager(string name)
 		{
-			_rootSection = new Section(name);
+			RootSection = new Section(name);
 		}
 
-		public string Name => _rootSection.Name;
+		public string Name => RootSection.Name;
 
-		public Section RootSection => _rootSection;
+		public Section RootSection { get; private set; }
 
 		public void Save(IDataAdapter dataAdapter)
 		{
 			Verify.Argument.IsNotNull(dataAdapter, nameof(dataAdapter));
 
-			dataAdapter.Store(_rootSection);
+			dataAdapter.Store(RootSection);
 		}
 
 		public void Load(IDataAdapter dataAdapter)
 		{
 			Verify.Argument.IsNotNull(dataAdapter, nameof(dataAdapter));
 
-			_rootSection = dataAdapter.Load();
+			RootSection = dataAdapter.Load();
 		}
 
 		public override string ToString() => Name;

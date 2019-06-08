@@ -32,7 +32,6 @@ namespace gitter.Framework
 	/// <summary>Gravatar integration feature.</summary>
 	public sealed class GravatarFeature : IntegrationFeature
 	{
-		private DefaultGravatarType _defaultType;
 		private const string _name = "Gravatar";
 
 		internal GravatarFeature()
@@ -41,10 +40,6 @@ namespace gitter.Framework
 			IsEnabled = true;
 		}
 
-		public DefaultGravatarType DefaultGravatarType
-		{
-			get { return _defaultType; }
-			set { _defaultType = value; }
-		}
+		public DefaultGravatarType DefaultGravatarType { get; set; }
 	}
 }

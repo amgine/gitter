@@ -60,15 +60,13 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		private readonly CustomListBox _listBox;
-
 		/// <summary>Create <see cref="ColumnsDialog"/>.</summary>
 		/// <param name="listBox">Related <see cref="CustomListBox"/>.</param>
 		public ColumnsDialog(CustomListBox listBox)
 		{
 			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
-			_listBox = listBox;
+			ListBox = listBox;
 
 			InitializeComponent();
 
@@ -84,7 +82,7 @@ namespace gitter.Framework.Controls
 			_lstColumns.Style = GitterApplication.DefaultStyle;
 			_lstColumns.HeaderStyle = HeaderStyle.Hidden;
 			_lstColumns.Columns.Add(new CustomListBoxColumn(0, string.Empty, true) { SizeMode = ColumnSizeMode.Fill });
-			foreach(var c in _listBox.Columns)
+			foreach(var c in ListBox.Columns)
 			{
 				_lstColumns.Items.Add(new ColumnItem(c));
 			}
@@ -92,10 +90,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Affected <see cref="CustomListBox"/>.</summary>
-		public CustomListBox ListBox
-		{
-			get { return _listBox; }
-		}
+		public CustomListBox ListBox { get; }
 
 		private void _lstColumns_SelectionChanged(object sender, EventArgs e)
 		{
@@ -112,7 +107,7 @@ namespace gitter.Framework.Controls
 				_btnHide.Enabled = true;
 				var item = _lstColumns.SelectedItems[0];
 				var index = _lstColumns.Items.IndexOf(item);
-				if(_listBox.AllowColumnReorder)
+				if(ListBox.AllowColumnReorder)
 				{
 					_btnUp.Enabled = index != 0;
 					_btnDown.Enabled = index != _lstColumns.Items.Count - 1;
@@ -158,23 +153,19 @@ namespace gitter.Framework.Controls
 			item.IsSelected = true;
 		}
 
-		#region IExecutableDialog Members
-
 		public bool Execute()
 		{
-			_listBox.BeginUpdate();
-			_listBox.Columns.Clear();
+			ListBox.BeginUpdate();
+			ListBox.Columns.Clear();
 			foreach(var item in _lstColumns.Items)
 			{
 				var c = ((ColumnItem)item).DataContext;
 				c.IsVisible = item.CheckedState == CheckedState.Checked;
-				_listBox.Columns.Add(c);
+				ListBox.Columns.Add(c);
 			}
-			_listBox.NotifyColumnLayoutChanged();
-			_listBox.EndUpdate();
+			ListBox.NotifyColumnLayoutChanged();
+			ListBox.EndUpdate();
 			return true;
 		}
-
-		#endregion
 	}
 }

@@ -49,8 +49,8 @@ namespace gitter.Framework.CLI
 		{
 			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
 
-			_bufferSize		= bufferSize;
-			_bufferChain	= new LinkedList<byte[]>();
+			_bufferSize  = bufferSize;
+			_bufferChain = new LinkedList<byte[]>();
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="AsyncBytesReader"/> class.</summary>

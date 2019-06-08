@@ -25,16 +25,10 @@ namespace gitter.Framework.Mvc.WinForms
 
 	public class TextBoxInputSource : ControlInputSource<TextBoxBase, string>
 	{
-		#region .ctor
-
 		public TextBoxInputSource(TextBoxBase textBox)
 			: base(textBox)
 		{
 		}
-
-		#endregion
-
-		#region Properties
 
 		public override bool IsReadOnly
 		{
@@ -42,19 +36,9 @@ namespace gitter.Framework.Mvc.WinForms
 			set { Control.ReadOnly = value; }
 		}
 
-		#endregion
+		protected override string FetchValue() => Control.Text;
 
-		#region Methods
-
-		protected override string FetchValue()
-		{
-			return Control.Text;
-		}
-
-		protected override void SetValue(string value)
-		{
-			Control.Text = value;
-		}
+		protected override void SetValue(string value) => Control.Text = value;
 
 		protected override void SubscribeToValueChangeEvent()
 		{
@@ -65,7 +49,5 @@ namespace gitter.Framework.Mvc.WinForms
 		{
 			Control.TextChanged -= OnControlValueChanged;
 		}
-
-		#endregion
 	}
 }

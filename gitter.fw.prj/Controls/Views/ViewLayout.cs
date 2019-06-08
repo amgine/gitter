@@ -282,22 +282,17 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(control, nameof(control));
 
-			var split = control as ViewSplit;
-			if(split != null)
+			if(control is ViewSplit split)
 			{
 				return new SplitEntry(split);
 			}
+			else if(control is ViewHost host)
+			{
+				return new HostEntry(host);
+			}
 			else
 			{
-				var host = control as ViewHost;
-				if(host != null)
-				{
-					return new HostEntry(host);
-				}
-				else
-				{
-					throw new ArgumentException("control");
-				}
+				throw new ArgumentException("control");
 			}
 		}
 

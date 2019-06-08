@@ -29,46 +29,21 @@ namespace gitter.Controls
 
 	public partial class CloneRepositoryDialog : PickerDialog<RepositoryProviderPicker, IRepositoryProvider>, IExecutableDialog
 	{
-		#region Data
-
-		private readonly IWorkingEnvironment _workingEnvironment;
-
-		#endregion
-
-		#region .ctor
-
 		public CloneRepositoryDialog(IWorkingEnvironment workingEnvironment)
 			: base(Resources.StrVCS.AddColon())
 		{
 			Verify.Argument.IsNotNull(workingEnvironment, nameof(workingEnvironment));
 
-			_workingEnvironment = workingEnvironment;
+			WorkingEnvironment = workingEnvironment;
 
 			Text = Resources.StrCloneRepository;
 		}
 
-		#endregion
+		protected override string ActionVerb => Resources.StrClone;
 
-		#region Properties
+		protected override int MinimumSelectableItems => 2;
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrClone; }
-		}
-
-		protected override int MinimumSelectableItems
-		{
-			get { return 2; }
-		}
-
-		private IWorkingEnvironment WorkingEnvironment
-		{
-			get { return _workingEnvironment; }
-		}
-
-		#endregion
-
-		#region Methods
+		private IWorkingEnvironment WorkingEnvironment { get; }
 
 		protected override void LoadItems(RepositoryProviderPicker picker)
 		{
@@ -99,8 +74,7 @@ namespace gitter.Controls
 			{
 				return false;
 			}
-			var cloneDialog = SelectedControl as IRepositoryCloneDialog;
-			if(cloneDialog != null)
+			if(SelectedControl is IRepositoryCloneDialog cloneDialog)
 			{
 				var repositoryPath = cloneDialog.RepositoryPath.Value;
 				WorkingEnvironment.BeginInvoke(
@@ -109,7 +83,5 @@ namespace gitter.Controls
 			}
 			return true;
 		}
-
-		#endregion
 	}
 }

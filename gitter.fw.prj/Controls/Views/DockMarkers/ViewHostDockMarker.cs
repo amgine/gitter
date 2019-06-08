@@ -86,12 +86,10 @@ namespace gitter.Framework.Controls
 				new Point(0, 72), new Point(62, 72),
 			};
 
-		private readonly ViewHost _dockHost;
-
 		public ViewHostDockMarker(ViewHost dockHost, ViewHost dockClient)
 			: base(dockHost, dockClient, GetButtons(dockHost, dockClient), GetBorder(dockHost, dockClient), GetBounds(dockHost, dockClient))
 		{
-			_dockHost = dockHost;
+			Host = dockHost;
 
 			Region = GetRegion(dockHost, dockClient);
 			dockHost.Resize += OnHostBoundsChanged;
@@ -222,14 +220,11 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public ViewHost Host
-		{
-			get { return _dockHost; }
-		}
+		public ViewHost Host { get; }
 
 		private void OnHostBoundsChanged(object sender, EventArgs e)
 		{
-			var bounds = _dockHost.RectangleToScreen(_dockHost.Bounds);
+			var bounds = Host.RectangleToScreen(Host.Bounds);
 			Location = new Point(
 				bounds.X + (bounds.Width - 112) / 2,
 				bounds.Y + (bounds.Height - 112) / 2);
@@ -239,8 +234,8 @@ namespace gitter.Framework.Controls
 		{
 			if(disposing)
 			{
-				_dockHost.Resize -= OnHostBoundsChanged;
-				_dockHost.LocationChanged -= OnHostBoundsChanged;
+				Host.Resize -= OnHostBoundsChanged;
+				Host.LocationChanged -= OnHostBoundsChanged;
 			}
 			base.Dispose(disposing);
 		}

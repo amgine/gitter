@@ -26,19 +26,6 @@ namespace gitter.Framework.Controls
 
 	public abstract class ViewTabBase : IDisposable
 	{
-		#region Data
-
-		private readonly ViewBase _view;
-		private readonly AnchorStyles _anchor;
-		private readonly Orientation _orientation;
-		private bool _isMouseOver;
-		private int _length;
-		private bool _isDisposed;
-
-		#endregion
-
-		#region .ctor
-
 		/// <summary>Initializes a new instance of the <see cref="ViewTabBase"/> class.</summary>
 		/// <param name="view">Represented <see cref="ViewBase"/>.</param>
 		/// <param name="anchor">Tab anchor.</param>
@@ -50,17 +37,17 @@ namespace gitter.Framework.Controls
 			{
 				case AnchorStyles.Left:
 				case AnchorStyles.Right:
-					_orientation = Orientation.Vertical;
+					Orientation = Orientation.Vertical;
 					break;
 				case AnchorStyles.Top:
 				case AnchorStyles.Bottom:
-					_orientation = Orientation.Horizontal;
+					Orientation = Orientation.Horizontal;
 					break;
 				default:
-					throw new ArgumentException("Invalid anchor value.", "anchor");
+					throw new ArgumentException("Invalid anchor value.", nameof(anchor));
 			}
-			_anchor = anchor;
-			_view = view;
+			Anchor = anchor;
+			View = view;
 		}
 
 		/// <summary>Finalizes an instance of the <see cref="ViewTabBase"/> class.</summary>
@@ -69,58 +56,23 @@ namespace gitter.Framework.Controls
 			Dispose(false);
 		}
 
-		#endregion
+		protected ViewRenderer Renderer => ViewManager.Renderer;
 
-		#region Properties
+		public AnchorStyles Anchor { get; }
 
-		protected ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
+		public Orientation Orientation { get; }
 
-		public AnchorStyles Anchor
-		{
-			get { return _anchor; }
-		}
+		public ViewBase View { get; }
 
-		public Orientation Orientation
-		{
-			get { return _orientation; }
-		}
+		public Image Image => View.Image;
 
-		public ViewBase View
-		{
-			get { return _view; }
-		}
+		public int Length { get; private set; }
 
-		public Image Image
-		{
-			get { return _view.Image; }
-		}
+		public string Text => View.Text;
 
-		public int Length
-		{
-			get { return _length; }
-		}
+		public virtual bool IsActive => View.Host.ActiveView == View;
 
-		public string Text
-		{
-			get { return _view.Text; }
-		}
-
-		public virtual bool IsActive
-		{
-			get { return _view.Host.ActiveView == View; }
-		}
-
-		public bool IsMouseOver
-		{
-			get { return _isMouseOver; }
-		}
-
-		#endregion
-
-		#region Methods
+		public bool IsMouseOver { get; private set; }
 
 		public void ResetLength()
 		{
@@ -129,17 +81,17 @@ namespace gitter.Framework.Controls
 
 		public void ResetLength(Graphics graphics)
 		{
-			_length = Measure(graphics);
+			Length = Measure(graphics);
 		}
 
 		protected internal virtual void OnMouseLeave()
 		{
-			_isMouseOver = false;
+			IsMouseOver = false;
 		}
 
 		protected internal virtual void OnMouseEnter()
 		{
-			_isMouseOver = true;
+			IsMouseOver = true;
 		}
 
 		public virtual void OnMouseDown(int x, int y, MouseButtons button)
@@ -158,28 +110,13 @@ namespace gitter.Framework.Controls
 
 		internal abstract void OnPaint(Graphics graphics, Rectangle bounds);
 
-		#endregion
-
-		#region Overrides
-
 		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
 		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
-		public override string ToString()
-		{
-			return _view.Text;
-		}
-
-		#endregion
-
-		#region IDisposable
+		public override string ToString() => View.Text;
 
 		/// <summary>Gets a value indicating whether this instance is disposed.</summary>
 		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		/// <summary>
 		/// Releases unmanaged and - optionally - managed resources
@@ -199,7 +136,5 @@ namespace gitter.Framework.Controls
 				IsDisposed = true;
 			}
 		}
-
-		#endregion
 	}
 }

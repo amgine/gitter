@@ -27,83 +27,28 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Input data for git.exe.</summary>
 	internal sealed class GitInput
 	{
-		#region .ctor
-
-		public GitInput(IList<ICommandArgument> options)
-			: this(string.Empty, null, GitProcess.DefaultEncoding, options)
-		{
-		}
-
-		public GitInput(Command command)
-			: this(string.Empty, command, GitProcess.DefaultEncoding, null)
-		{
-		}
-
-		public GitInput(Command command, Encoding encoding)
+		public GitInput(Command command, Encoding encoding = null)
 			: this(string.Empty, command, encoding, null)
 		{
 		}
 
 		public GitInput(string workingDirectory, Command command, Encoding encoding = null,
-			IList<ICommandArgument> options = null,
 			IDictionary<string, string> environment = null)
 		{
 			WorkingDirectory = workingDirectory ?? string.Empty;
 			Command          = command;
-			Options          = options;
 			Encoding         = encoding ?? GitProcess.DefaultEncoding;
 			Environment      = environment;
 		}
-
-		#endregion
-
-		#region Properties
 
 		public string WorkingDirectory { get; }
 
 		public Encoding Encoding { get; }
 
-		public IList<ICommandArgument> Options { get; }
-
 		public Command Command { get; }
 
 		public IDictionary<string, string> Environment { get; }
 
-		#endregion
-
-		#region Methods
-
-		public string GetArguments()
-		{
-			const char OptionSeparator = ' ';
-
-			var sb = new StringBuilder();
-			if(Options != null && Options.Count != 0)
-			{
-				foreach(var opt in Options)
-				{
-					if(opt == null)
-					{
-						continue;
-					}
-					if(sb.Length != 0)
-					{
-						sb.Append(OptionSeparator);
-					}
-					opt.ToString(sb);
-				}
-			}
-			if(Command != null)
-			{
-				if(sb.Length != 0)
-				{
-					sb.Append(OptionSeparator);
-				}
-				Command.ToString(sb);
-			}
-			return sb.ToString();
-		}
-
-		#endregion
+		public string GetArguments() => Command?.ToString() ?? string.Empty;
 	}
 }

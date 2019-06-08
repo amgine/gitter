@@ -40,11 +40,7 @@ namespace gitter.Controls
 			remove { Events.RemoveHandler(LinkClickedEvent, value); }
 		}
 
-		protected virtual void OnLinkClicked()
-		{
-			var handler = (EventHandler)Events[LinkClickedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		protected virtual void OnLinkClicked() => ((EventHandler)Events[LinkClickedEvent])?.Invoke(this, EventArgs.Empty);
 
 		public LinkButton()
 		{
@@ -80,17 +76,14 @@ namespace gitter.Controls
 			if(_underlineFont != null)
 			{
 				_underlineFont.Dispose();
+				_underlineFont = null;
 			}
 			try
 			{
 				_underlineFont = new Font(Font, FontStyle.Underline);
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				_underlineFont = (Font)Font.Clone();
 			}
 		}

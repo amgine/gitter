@@ -69,10 +69,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public virtual FlowPanelHeader Header
-		{
-			get { return null; }
-		}
+		public virtual FlowPanelHeader Header => null;
 
 		public Rectangle Bounds
 		{

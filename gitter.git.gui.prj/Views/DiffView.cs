@@ -276,11 +276,13 @@ namespace gitter.Git.Gui.Views
 		{
 			base.AttachViewModel(viewModel);
 
-			var vm = viewModel as DiffViewModel;
-			if(vm != null)
+			if(viewModel is DiffViewModel vm)
 			{
-				_options = vm.DiffOptions;
-				if(_options == null)
+				if(vm.DiffOptions != null)
+				{
+					_options = vm.DiffOptions;
+				}
+				else if(_options == null)
 				{
 					_options = new DiffOptions();
 				}
@@ -291,8 +293,7 @@ namespace gitter.Git.Gui.Views
 
 		protected override void DetachViewModel(object viewModel)
 		{
-			var vm = viewModel as DiffViewModel;
-			if(vm != null)
+			if(viewModel is DiffViewModel vm)
 			{
 				DiffBinding = null;
 				if(_diffSource != null)

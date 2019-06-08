@@ -22,25 +22,14 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
-	using System.Windows.Forms;
 
 	public abstract class CustomListBoxRenderer
 	{
-		public virtual Color BackColor
-		{
-			get { return SystemColors.Window; }
-		}
+		public virtual Color BackColor => SystemColors.Window;
 
-		public virtual Color ForeColor
-		{
-			get { return SystemColors.WindowText;  }
-		}
+		public virtual Color ForeColor => SystemColors.WindowText;
 
-		public virtual Color ColumnHeaderForeColor
-		{
-			get { return SystemColors.GrayText; }
-		}
+		public virtual Color ColumnHeaderForeColor => SystemColors.GrayText;
 
 		private Brush _foregroundBrush;
 		public Brush ForegroundBrush

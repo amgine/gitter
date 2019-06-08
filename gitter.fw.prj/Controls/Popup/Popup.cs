@@ -37,8 +37,6 @@ namespace gitter.Framework.Controls
 		#region Data
 
 		private VisualStyleRenderer _sizeGripRenderer;
-
-		private Control _content;
 		private PopupAnimations _popupAnimation;
 		private PopupAnimations _closeAnimation;
 		private int _animationDuration;
@@ -62,10 +60,7 @@ namespace gitter.Framework.Controls
 
 		#region Properties
 
-		public Control Content
-		{
-			get { return _content; }
-		}
+		public Control Content { get; private set; }
 
 		public PopupAnimations PopupAnimation
 		{
@@ -125,7 +120,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(content, nameof(content));
 
-			_content = content;
+			Content = content;
 			_popupAnimation = PopupAnimations.SystemDefault;
 			_closeAnimation = PopupAnimations.None;
 			_animationDuration = 100;
@@ -180,10 +175,10 @@ namespace gitter.Framework.Controls
 		{
 			if(disposing)
 			{
-				if(_content != null)
+				if(Content != null)
 				{
-					var c = _content;
-					_content = null;
+					var c = Content;
+					Content = null;
 					c.Dispose();
 				}
 			}
@@ -257,7 +252,7 @@ namespace gitter.Framework.Controls
 					_flags = (_flags & ~PopupAnimations.LeftToRight) | PopupAnimations.RightToLeft;
 				}
 			}
-			flags = flags | (AnimationFlags.Mask & (AnimationFlags)(int)_flags);
+			flags |= (AnimationFlags.Mask & (AnimationFlags)(int)_flags);
 			NativeUtility.AnimateWindow(this, AnimationDuration, flags);
 		}
 
@@ -298,9 +293,9 @@ namespace gitter.Framework.Controls
 				this.Region.Dispose();
 				this.Region = null;
 			}
-			if(_content != null && _content.Region != null)
+			if(Content != null && Content.Region != null)
 			{
-				this.Region = _content.Region.Clone();
+				this.Region = Content.Region.Clone();
 			}
 		}
 
@@ -369,19 +364,19 @@ namespace gitter.Framework.Controls
 
 		protected override void OnSizeChanged(EventArgs e)
 		{
-			if(_content != null)
+			if(Content != null)
 			{
-				_content.MinimumSize = Size;
-				_content.MaximumSize = Size;
-				_content.Size = Size;
-				_content.Location = Point.Empty;
+				Content.MinimumSize = Size;
+				Content.MaximumSize = Size;
+				Content.Size = Size;
+				Content.Location = Point.Empty;
 			}
 			base.OnSizeChanged(e);
 		}
 
 		protected override void OnOpening(CancelEventArgs e)
 		{
-			if(_content == null || _content.IsDisposed || _content.Disposing)
+			if(Content == null || Content.IsDisposed || Content.Disposing)
 			{
 				e.Cancel = true;
 				return;
@@ -398,7 +393,7 @@ namespace gitter.Framework.Controls
 			}
 			if(_focusOnPopup)
 			{
-				_content.Focus();
+				Content.Focus();
 			}
 			base.OnOpened(e);
 		}
@@ -474,7 +469,7 @@ namespace gitter.Framework.Controls
 			int y = NativeUtility.HIWORD(m.LParam);
 
 			var clientLocation = PointToClient(new Point(x, y));
-			var gripBounds = new GripBounds(contentControl ? _content.ClientRectangle : ClientRectangle);
+			var gripBounds = new GripBounds(contentControl ? Content.ClientRectangle : ClientRectangle);
 			IntPtr transparent = new IntPtr(Constants.HTTRANSPARENT);
 
 			if(_resizableTop)
@@ -534,7 +529,7 @@ namespace gitter.Framework.Controls
 			if(e == null || e.Graphics == null || !_resizable)
 				return;
 
-			var clientSize = _content.ClientSize;
+			var clientSize = Content.ClientSize;
 			using(var gripImage = new Bitmap(gripWidth, gripHeight))
 			{
 				using(var graphics = Graphics.FromImage(gripImage))
@@ -549,7 +544,7 @@ namespace gitter.Framework.Controls
 					}
 					else
 					{
-						ControlPaint.DrawSizeGrip(graphics, _content.BackColor, 0, 0, gripWidth, gripHeight);
+						ControlPaint.DrawSizeGrip(graphics, Content.BackColor, 0, 0, gripWidth, gripHeight);
 					}
 				}
 				var gs = e.Graphics.Save();

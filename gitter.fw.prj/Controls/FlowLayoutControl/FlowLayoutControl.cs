@@ -24,7 +24,6 @@ namespace gitter.Framework.Controls
 	using System.ComponentModel;
 	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Services;
@@ -33,21 +32,16 @@ namespace gitter.Framework.Controls
 	[DefaultProperty("Panels")]
 	public class FlowLayoutControl : ScrollableControl
 	{
-		#region Data
-
-		private readonly FlowPanelCollection _panels;
 		private readonly Dictionary<FlowPanel, Size> _sizes;
 		private readonly TrackingService<FlowPanel> _panelHover;
 		private FlowPanel _mouseDownPanel;
 
-		#endregion
-
 		/// <summary>Create <see cref="FlowLayoutControl"/>.</summary>
 		public FlowLayoutControl()
 		{
-			_panels = new FlowPanelCollection(this);
-			_panels.Changing += OnPanelsChanging;
-			_panels.Changed += OnPanelsChanged;
+			Panels = new FlowPanelCollection(this);
+			Panels.Changing += OnPanelsChanging;
+			Panels.Changed += OnPanelsChanged;
 
 			_sizes = new Dictionary<FlowPanel, Size>();
 			_panelHover = new TrackingService<FlowPanel>();
@@ -84,9 +78,9 @@ namespace gitter.Framework.Controls
 
 			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y;
-			for(int i = 0; i < _panels.Count; ++i)
+			for(int i = 0; i < Panels.Count; ++i)
 			{
-				var p = _panels[i];
+				var p = Panels[i];
 				var size = GetPanelSize(graphics, p);
 				int maxY = y + size.Height;
 				if(p == panel)
@@ -107,9 +101,9 @@ namespace gitter.Framework.Controls
 			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y - VScrollPos;
 			int x = ClientArea.X - HScrollPos;
-			for(int i = 0; i < _panels.Count; ++i)
+			for(int i = 0; i < Panels.Count; ++i)
 			{
-				var p = _panels[i];
+				var p = Panels[i];
 				var size = GetPanelSize(graphics, p);
 				int maxY = y + size.Height;
 				if(p == panel)
@@ -140,9 +134,9 @@ namespace gitter.Framework.Controls
 
 			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y - VScrollPos;
-			for(int i = 0; i < _panels.Count; ++i)
+			for(int i = 0; i < Panels.Count; ++i)
 			{
-				var p = _panels[i];
+				var p = Panels[i];
 				var size = GetPanelSize(graphics, p);
 				int maxY = y + size.Height;
 				if(p == panel)
@@ -169,9 +163,9 @@ namespace gitter.Framework.Controls
 		internal void ScrollIntoView(FlowPanel p)
 		{
 			int panelY = 0;
-			for(int i = 0; i < _panels.Count; ++i)
+			for(int i = 0; i < Panels.Count; ++i)
 			{
-				var panel = _panels[i];
+				var panel = Panels[i];
 				var size = GetPanelSize(panel);
 				int maxY = panelY + size.Height;
 				if(p == panel)
@@ -199,10 +193,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Collection of hosted <see cref="FlowPanel"/>'s.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public FlowPanelCollection Panels
-		{
-			get { return _panels; }
-		}
+		public FlowPanelCollection Panels { get; }
 
 		private void OnPanelHoverChanged(object sender, TrackingEventArgs<FlowPanel> e)
 		{
@@ -263,8 +254,7 @@ namespace gitter.Framework.Controls
 
 		private Size GetPanelSize(Graphics graphics, FlowPanel panel)
 		{
-			Size size;
-			if(!_sizes.TryGetValue(panel, out size))
+			if(!_sizes.TryGetValue(panel, out var size))
 			{
 				size = panel.Measure(
 					new FlowPanelMeasureEventArgs(graphics, ClientArea.Width));
@@ -275,8 +265,7 @@ namespace gitter.Framework.Controls
 
 		private Size GetPanelSize(FlowPanel panel)
 		{
-			Size size;
-			if(!_sizes.TryGetValue(panel, out size))
+			if(!_sizes.TryGetValue(panel, out var size))
 			{
 				var graphics = GraphicsUtility.MeasurementGraphics;
 				size = panel.Measure(
@@ -288,8 +277,7 @@ namespace gitter.Framework.Controls
 
 		private Size GetPanelSize(Graphics graphics, FlowPanel panel, int width)
 		{
-			Size size;
-			if(!_sizes.TryGetValue(panel, out size))
+			if(!_sizes.TryGetValue(panel, out var size))
 			{
 				size = panel.Measure(
 					new FlowPanelMeasureEventArgs(graphics, width));
@@ -301,10 +289,10 @@ namespace gitter.Framework.Controls
 		protected override Size MeasureContent()
 		{
 			var res = Size.Empty;
-			if(_panels.Count != 0)
+			if(Panels.Count != 0)
 			{
 				var graphics = GraphicsUtility.MeasurementGraphics;
-				foreach(var panel in _panels)
+				foreach(var panel in Panels)
 				{
 					var size = GetPanelSize(graphics, panel);
 					if(size.Width > res.Width)
@@ -321,10 +309,10 @@ namespace gitter.Framework.Controls
 		{
 			var res = Size.Empty;
 			_sizes.Clear();
-			if(_panels.Count != 0)
+			if(Panels.Count != 0)
 			{
 				var graphics = GraphicsUtility.MeasurementGraphics;
-				foreach(var panel in _panels)
+				foreach(var panel in Panels)
 				{
 					var size = GetPanelSize(graphics, panel, rect.Width);
 					if(size.Width > res.Width)
@@ -337,19 +325,16 @@ namespace gitter.Framework.Controls
 			return res;
 		}
 
-		protected override int GetVScrollSmallChange()
-		{
-			return 16;
-		}
+		protected override int GetVScrollSmallChange() => 16;
 
 		protected override void UpdateHover(int x, int y)
 		{
 			if(_mouseDownPanel != null && _mouseDownPanel.FlowControl == this)
 			{
 				int panelY = ClientArea.Y - VScrollPos;
-				for(int i = 0; i < _panels.Count; ++i)
+				for(int i = 0; i < Panels.Count; ++i)
 				{
-					var panel = _panels[i];
+					var panel = Panels[i];
 					var size = GetPanelSize(panel);
 					int maxY = panelY + size.Height;
 					if(panel == _mouseDownPanel)
@@ -368,9 +353,9 @@ namespace gitter.Framework.Controls
 					bool hover = false;
 					Graphics graphics = null;
 					int panelY = ClientArea.Y - VScrollPos;
-					for(int i = 0; i < _panels.Count; ++i)
+					for(int i = 0; i < Panels.Count; ++i)
 					{
-						var panel = _panels[i];
+						var panel = Panels[i];
 						var size = GetPanelSize(panel);
 						int maxY = panelY + size.Height;
 						if(maxY >= y)
@@ -477,9 +462,9 @@ namespace gitter.Framework.Controls
 			int panelY = ClientArea.Y - VScrollPos;
 			_mouseDownPanel = null;
 			bool found = false;
-			for(int i = 0; i < _panels.Count; ++i)
+			for(int i = 0; i < Panels.Count; ++i)
 			{
-				var panel = _panels[i];
+				var panel = Panels[i];
 				var size = GetPanelSize(panel);
 				int maxY = panelY + size.Height;
 				if(maxY >= y)
@@ -520,9 +505,9 @@ namespace gitter.Framework.Controls
 			int panelY = ClientArea.Y - VScrollPos;
 			_mouseDownPanel = null;
 			bool found = false;
-			for(int i = 0; i < _panels.Count; ++i)
+			for(int i = 0; i < Panels.Count; ++i)
 			{
-				var panel = _panels[i];
+				var panel = Panels[i];
 				var size = GetPanelSize(panel);
 				int maxY = panelY + size.Height;
 				if(maxY >= y)
@@ -579,9 +564,9 @@ namespace gitter.Framework.Controls
 			graphics.SetClip(clip);
 			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
 			graphics.TextContrast = GraphicsUtility.TextContrast;
-			for(int i = 0; i < _panels.Count; ++i)
+			for(int i = 0; i < Panels.Count; ++i)
 			{
-				var panel = _panels[i];
+				var panel = Panels[i];
 				var size = GetPanelSize(graphics, panel);
 				if(size.Width == 0) size.Width = ContentSize.Width;
 				int maxY = y + size.Height;
@@ -615,7 +600,7 @@ namespace gitter.Framework.Controls
 		{
 			if(disposing)
 			{
-				_panels.Clear();
+				Panels.Clear();
 			}
 			base.Dispose(disposing);
 		}

@@ -22,11 +22,8 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
-	using System.Xml;
 
-	using gitter.Framework.Options;
 	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Framework.Properties.Resources;
@@ -36,16 +33,10 @@ namespace gitter.Framework.Controls
 	{
 		#region Data
 
-		private readonly int _id;
-
 		private string _name;
 		private int _width;
-		private int _contentWidth;
 		private ColumnSizeMode _sizeMode;
 		private bool _isVisible;
-		private int _left;
-		private ToolStripDropDown _extender;
-
 		private Font _contentFont;
 		private Brush _contentBrush;
 		private StringAlignment _contentAlignment;
@@ -68,11 +59,7 @@ namespace gitter.Framework.Controls
 
 		public event EventHandler StyleChanged;
 
-		protected virtual void OnStyleChanged()
-		{
-			var handler = StyleChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		protected virtual void OnStyleChanged() => StyleChanged?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -87,11 +74,11 @@ namespace gitter.Framework.Controls
 
 		public CustomListBoxColumn(int id, string name, bool visible)
 		{
-			_id					= id;
+			Id					= id;
 			_name				= name;
 			_isVisible			= visible;
 			_sizeMode			= ColumnSizeMode.Sizeable;
-			_contentWidth		= -1;
+			ContentWidth		= -1;
 			_contentAlignment	= StringAlignment.Near;
 			_headerAlignment	= StringAlignment.Near;
 		}
@@ -105,10 +92,7 @@ namespace gitter.Framework.Controls
 
 		#region Properties
 
-		public int Id
-		{
-			get { return _id; }
-		}
+		public int Id { get; }
 
 		public IGitterStyle Style
 		{
@@ -125,11 +109,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public ToolStripDropDown Extender
-		{
-			get { return _extender; }
-			set { _extender = value; }
-		}
+		public ToolStripDropDown Extender { get; set; }
 
 		public string Name
 		{
@@ -144,11 +124,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public int Left
-		{
-			get { return _left; }
-			internal set { _left = value; }
-		}
+		public int Left { get; internal set; }
 
 		public Font ContentFont
 		{
@@ -169,7 +145,7 @@ namespace gitter.Framework.Controls
 				if(_contentFont != value)
 				{
 					_contentFont = value;
-					ContentFontChanged.Raise(this);
+					ContentFontChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -237,7 +213,7 @@ namespace gitter.Framework.Controls
 				{
 					_headerFont = value;
 					Invalidate();
-					HeaderFontChanged.Raise(this);
+					HeaderFontChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -315,21 +291,12 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>This column affects content of the column to the left.</summary>
-		public virtual bool ExtendsToLeft
-		{
-			get { return false; }
-		}
+		public virtual bool ExtendsToLeft => false;
 
 		/// <summary>This column affects content of the column to the right.</summary>
-		public virtual bool ExtendsToRight
-		{
-			get { return false; }
-		}
+		public virtual bool ExtendsToRight => false;
 
-		public virtual int MinWidth
-		{
-			get { return 10; }
-		}
+		public virtual int MinWidth => 10;
 
 		public ColumnSizeMode SizeMode
 		{
@@ -343,7 +310,7 @@ namespace gitter.Framework.Controls
 					{
 						ListBox.NotifyColumnLayoutChanged();
 					}
-					SizeModeChanged.Raise(this);
+					SizeModeChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -376,22 +343,15 @@ namespace gitter.Framework.Controls
 				{
 					ListBox.NotifyColumnLayoutChanged();
 				}
-				WidthChanged.Raise(this);
+				WidthChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
-		internal int ContentWidth
-		{
-			get { return _contentWidth; }
-			set { _contentWidth = value; }
-		}
+		internal int ContentWidth { get; set; }
 
 		#endregion
 
-		protected virtual Comparison<CustomListBoxItem> SortComparison
-		{
-			get { return null; }
-		}
+		protected virtual Comparison<CustomListBoxItem> SortComparison => null;
 
 		protected override void OnListBoxAttached()
 		{
@@ -406,7 +366,7 @@ namespace gitter.Framework.Controls
 		protected override void OnListBoxDetached()
 		{
 			ListBox.StyleChanged -= OnListBoxStyleChanged;
-			_contentWidth = -1;
+			ContentWidth = -1;
 			base.OnListBoxDetached();
 		}
 
@@ -536,7 +496,7 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			if(_extender != null)
+			if(Extender != null)
 			{
 				if(_width - x < ExtenderButtonWidth)
 				{
@@ -577,7 +537,7 @@ namespace gitter.Framework.Controls
 
 		public virtual string IdentificationString
 		{
-			get { return "Column" + _id.ToString(System.Globalization.CultureInfo.InvariantCulture); }
+			get { return "Column" + Id.ToString(System.Globalization.CultureInfo.InvariantCulture); }
 		}
 
 		protected virtual void SaveMoreTo(Section section)
@@ -612,9 +572,6 @@ namespace gitter.Framework.Controls
 			LoadMoreFrom(section);
 		}
 
-		public override string ToString()
-		{
-			return IdentificationString;
-		}
+		public override string ToString() => IdentificationString;
 	}
 }

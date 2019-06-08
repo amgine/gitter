@@ -30,33 +30,14 @@ namespace gitter.Git
 
 	public sealed class RepositoryLogSource : LogSourceBase
 	{
-		#region Data
-
-		private readonly Repository _repository;
-
-		#endregion
-
-		#region .ctor
-
 		public RepositoryLogSource(Repository repository)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 		}
 
-		#endregion
-
-		#region Properties
-
-		public override Repository Repository
-		{
-			get { return _repository; }
-		}
-
-		#endregion
-
-		#region Methods
+		public override Repository Repository { get; }
 
 		public override Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
@@ -68,32 +49,25 @@ namespace gitter.Git
 			}
 			else
 			{
-				if(progress != null)
-				{
-					progress.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
-				}
+				progress?.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
 				var parameters = options.GetLogParameters();
-				return Repository.Accessor
-								 .QueryRevisions.InvokeAsync(parameters, progress, cancellationToken)
-								 .ContinueWith(
-									t =>
-									{
-										if(progress != null)
-										{
-											progress.Report(OperationProgress.Completed);
-										}
-										var revisionData = TaskUtility.UnwrapResult(t);
-										var revisions    = Repository.Revisions.Resolve(revisionData);
-										var revisionLog  = new RevisionLog(Repository, revisions);
+				return Repository
+					.Accessor
+					.QueryRevisions.InvokeAsync(parameters, progress, cancellationToken)
+					.ContinueWith(
+						t =>
+						{
+							progress?.Report(OperationProgress.Completed);
+							var revisionData = TaskUtility.UnwrapResult(t);
+							var revisions    = Repository.Revisions.Resolve(revisionData);
+							var revisionLog  = new RevisionLog(Repository, revisions);
 
-										return revisionLog;
-									},
-									cancellationToken,
-									TaskContinuationOptions.ExecuteSynchronously,
-									TaskScheduler.Default);
+							return revisionLog;
+						},
+						cancellationToken,
+						TaskContinuationOptions.ExecuteSynchronously,
+						TaskScheduler.Default);
 			}
 		}
-
-		#endregion
 	}
 }

@@ -240,8 +240,7 @@ namespace gitter.Framework.Services
 
 		public float GetFontHeight(Graphics graphics, Font font)
 		{
-			float height;
-			if(!_fontHeight.TryGetValue(font, out height))
+			if(!_fontHeight.TryGetValue(font, out var height))
 			{
 				var size = TextRenderer.MeasureText("0", font, new Size(1000, 1000), DefaultFormatFlags);
 				height = size.Height;

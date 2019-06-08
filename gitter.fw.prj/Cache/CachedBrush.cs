@@ -44,10 +44,7 @@ namespace gitter.Framework
 
 		#endregion
 
-		public override bool IsCached
-		{
-			get { return _cachedBrush != null; }
-		}
+		public override bool IsCached => _cachedBrush != null;
 
 		public override void Invalidate()
 		{
@@ -82,10 +79,7 @@ namespace gitter.Framework
 
 		#region IDisposable Members
 
-		public bool IsDisposed
-		{
-			get { return _brushColorProvider == null; }
-		}
+		public bool IsDisposed => _brushColorProvider == null;
 
 		public void Dispose()
 		{

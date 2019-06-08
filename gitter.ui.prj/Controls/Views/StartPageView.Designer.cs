@@ -34,8 +34,10 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.Label label1;
 			System.Windows.Forms.Label label2;
+			this._lblLocalRepositories = new System.Windows.Forms.Label();
+			this._picLogo = new System.Windows.Forms.PictureBox();
+			this._picLogo2 = new System.Windows.Forms.PictureBox();
 			this._separator1 = new System.Windows.Forms.Panel();
 			this._separator2 = new System.Windows.Forms.Panel();
 			this._lstRecentRepositories = new gitter.RecentRepositoriesListBox();
@@ -44,23 +46,21 @@
 			this._btnScanLocalRepo = new gitter.Controls.LinkButton();
 			this._btnInitLocalRepo = new gitter.Controls.LinkButton();
 			this._btnCloneRemoteRepo = new gitter.Controls.LinkButton();
-			label1 = new System.Windows.Forms.Label();
+			this._txtFilter = new gitter.Framework.Controls.HintTextBox();
 			label2 = new System.Windows.Forms.Label();
-			_picLogo = new System.Windows.Forms.PictureBox();
-			_picLogo2 = new System.Windows.Forms.PictureBox();
-			((System.ComponentModel.ISupportInitialize)(_picLogo)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(_picLogo2)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this._picLogo)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this._picLogo2)).BeginInit();
 			this.SuspendLayout();
 			// 
-			// label1
+			// _lblLocalRepositories
 			// 
-			label1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			label1.Location = new System.Drawing.Point(239, 93);
-			label1.Name = "label1";
-			label1.Size = new System.Drawing.Size(171, 23);
-			label1.TabIndex = 2;
-			label1.Text = "Local repositories";
+			this._lblLocalRepositories.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this._lblLocalRepositories.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this._lblLocalRepositories.Location = new System.Drawing.Point(239, 93);
+			this._lblLocalRepositories.Name = "_lblLocalRepositories";
+			this._lblLocalRepositories.Size = new System.Drawing.Size(171, 23);
+			this._lblLocalRepositories.TabIndex = 2;
+			this._lblLocalRepositories.Text = "Local repositories";
 			// 
 			// label2
 			// 
@@ -71,6 +71,30 @@
 			label2.Size = new System.Drawing.Size(219, 23);
 			label2.TabIndex = 2;
 			label2.Text = "Recent repositories";
+			// 
+			// _picLogo
+			// 
+			this._picLogo.Location = new System.Drawing.Point(0, 0);
+			this._picLogo.Margin = new System.Windows.Forms.Padding(0);
+			this._picLogo.Name = "_picLogo";
+			this._picLogo.Size = new System.Drawing.Size(527, 90);
+			this._picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this._picLogo.TabIndex = 6;
+			this._picLogo.TabStop = false;
+			this._picLogo.Click += new System.EventHandler(this.OnLogoClick);
+			// 
+			// _picLogo2
+			// 
+			this._picLogo2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._picLogo2.Location = new System.Drawing.Point(527, 0);
+			this._picLogo2.Margin = new System.Windows.Forms.Padding(0);
+			this._picLogo2.Name = "_picLogo2";
+			this._picLogo2.Size = new System.Drawing.Size(164, 90);
+			this._picLogo2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this._picLogo2.TabIndex = 7;
+			this._picLogo2.TabStop = false;
+			this._picLogo2.Click += new System.EventHandler(this.OnLogoClick);
 			// 
 			// _separator1
 			// 
@@ -166,50 +190,38 @@
 			this._btnCloneRemoteRepo.Text = "Clone Remote Repository...";
 			this._btnCloneRemoteRepo.LinkClicked += new System.EventHandler(this._btnCloneRemoteRepo_LinkClicked);
 			// 
-			// _picLogo
+			// _txtFilter
 			// 
-			_picLogo.Location = new System.Drawing.Point(0, 0);
-			_picLogo.Margin = new System.Windows.Forms.Padding(0);
-			_picLogo.Name = "_picLogo";
-			_picLogo.Size = new System.Drawing.Size(527, 90);
-			_picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			_picLogo.TabIndex = 6;
-			_picLogo.TabStop = false;
-			_picLogo.Click += new System.EventHandler(this.OnLogoClick);
-			// 
-			// _picLogo2
-			// 
-			_picLogo2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			_picLogo2.Location = new System.Drawing.Point(527, 0);
-			_picLogo2.Margin = new System.Windows.Forms.Padding(0);
-			_picLogo2.Name = "_picLogo2";
-			_picLogo2.Size = new System.Drawing.Size(164, 90);
-			_picLogo2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			_picLogo2.TabIndex = 7;
-			_picLogo2.TabStop = false;
-			_picLogo2.Click += new System.EventHandler(this.OnLogoClick);
+			this._txtFilter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this._txtFilter.ForeColor = System.Drawing.SystemColors.GrayText;
+			this._txtFilter.Hint = "filter";
+			this._txtFilter.Location = new System.Drawing.Point(503, 93);
+			this._txtFilter.Name = "_txtFilter";
+			this._txtFilter.Size = new System.Drawing.Size(188, 23);
+			this._txtFilter.TabIndex = 11;
 			// 
 			// StartPageView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.Controls.Add(this._txtFilter);
 			this.Controls.Add(this._separator2);
-			this.Controls.Add(_picLogo);
+			this.Controls.Add(this._picLogo);
 			this.Controls.Add(this._lstRecentRepositories);
 			this.Controls.Add(this._lstLocalRepositories);
 			this.Controls.Add(this._separator1);
-			this.Controls.Add(_picLogo2);
+			this.Controls.Add(this._picLogo2);
 			this.Controls.Add(this._btnAddLocalRepo);
-			this.Controls.Add(label1);
+			this.Controls.Add(this._lblLocalRepositories);
 			this.Controls.Add(this._btnScanLocalRepo);
 			this.Controls.Add(this._btnInitLocalRepo);
 			this.Controls.Add(this._btnCloneRemoteRepo);
 			this.Controls.Add(label2);
 			this.Name = "StartPageView";
 			this.Size = new System.Drawing.Size(691, 536);
-			((System.ComponentModel.ISupportInitialize)(_picLogo)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(_picLogo2)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this._picLogo)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this._picLogo2)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -225,6 +237,7 @@
 		private System.Windows.Forms.Panel _separator2;
 		private System.Windows.Forms.PictureBox _picLogo;
 		private System.Windows.Forms.PictureBox _picLogo2;
-
+		private Framework.Controls.HintTextBox _txtFilter;
+		private System.Windows.Forms.Label _lblLocalRepositories;
 	}
 }

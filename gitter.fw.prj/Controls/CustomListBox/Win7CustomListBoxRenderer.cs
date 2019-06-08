@@ -464,7 +464,7 @@ namespace gitter.Framework.Controls
 
 						if(listBox.ShowCheckBoxes && item.CheckedState != CheckedState.Unavailable)
 						{
-							Bitmap checkedStateImage = null;
+							Bitmap checkedStateImage;
 							if(hoveredPart == ItemHitTestResults.CheckBox)
 							{
 								ImgCheckedStateHovered.TryGetValue(item.CheckedState, out checkedStateImage);

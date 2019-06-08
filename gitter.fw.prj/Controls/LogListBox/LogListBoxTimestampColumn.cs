@@ -33,9 +33,6 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Gets the identification string.</summary>
 		/// <value>The identification string.</value>
-		public override string IdentificationString
-		{
-			get { return "Timestamp"; }
-		}
+		public override string IdentificationString => "Timestamp";
 	}
 }

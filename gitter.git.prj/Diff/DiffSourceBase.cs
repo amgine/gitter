@@ -38,17 +38,7 @@ namespace gitter.Git
 
 		public event EventHandler Updated;
 
-		protected virtual void OnUpdated()
-		{
-			var handler = Updated;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
-
-		#endregion
-
-		#region Data
-
-		private bool _isDisposed;
+		protected virtual void OnUpdated() => Updated?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -69,17 +59,11 @@ namespace gitter.Git
 
 		#region Properties
 
-		public abstract Repository Repository
-		{
-			get;
-		}
+		public abstract Repository Repository { get; }
 
 		#endregion
 
-		public virtual IEnumerable<FlowPanel> GetInformationPanels()
-		{
-			return null;
-		}
+		public virtual IEnumerable<FlowPanel> GetInformationPanels() => null;
 
 		protected static void ApplyCommonDiffOptions(BaseQueryDiffParameters queryParameters, DiffOptions options)
 		{
@@ -128,20 +112,13 @@ namespace gitter.Git
 
 		/// <summary>Returns a <see cref="System.String" /> that represents this instance.</summary>
 		/// <returns>A <see cref="System.String" /> that represents this instance.</returns>
-		public override string ToString()
-		{
-			return "diff";
-		}
+		public override string ToString() => "diff";
 
 		#region IDisposable
 
 		/// <summary>Gets a value indicating whether this instance is disposed.</summary>
 		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		/// <summary>Releases unmanaged and - optionally - managed resources.</summary>
 		/// <param name="disposing">

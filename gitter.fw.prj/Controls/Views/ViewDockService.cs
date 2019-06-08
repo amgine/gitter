@@ -23,9 +23,7 @@ namespace gitter.Framework.Controls
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using System.Text;
 	using System.Drawing;
-	using System.Windows.Forms;
 
 	using gitter.Framework.Configuration;
 
@@ -35,7 +33,6 @@ namespace gitter.Framework.Controls
 
 		private readonly Dictionary<Guid, IViewFactory> _factories;
 		private readonly IWorkingEnvironment _environment;
-		private readonly ViewDockGrid _grid;
 		private readonly Section _section;
 
 		private ViewBase _activeView;
@@ -46,8 +43,7 @@ namespace gitter.Framework.Controls
 
 		private void InvokeActiveViewChanged()
 		{
-			var handler = ActiveViewChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
+			ActiveViewChanged?.Invoke(this, EventArgs.Empty);
 		}
 
 		public ViewDockService(IWorkingEnvironment environment, ViewDockGrid grid, Section section)
@@ -57,17 +53,14 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(section, nameof(section));
 
 			_environment = environment;
-			_grid = grid;
+			Grid = grid;
 			_section = section;
 			_factories = new Dictionary<Guid, IViewFactory>();
 
 			RegisterFactory(new WebBrowserViewFactory());
 		}
 
-		public ViewDockGrid Grid
-		{
-			get { return _grid; }
-		}
+		public ViewDockGrid Grid { get; }
 
 		public ICollection<IViewFactory> ViewFactories
 		{
@@ -109,8 +102,7 @@ namespace gitter.Framework.Controls
 		{
 			foreach(var factory in ViewFactories)
 			{
-				var res = factory as T;
-				if(res != null) return res;
+				if(factory is T res) return res;
 			}
 			return default(T);
 		}
@@ -145,7 +137,7 @@ namespace gitter.Framework.Controls
 
 		private void FindAppropriateViewHost(IViewFactory factory, ViewBase view)
 		{
-			var host = _grid.RootHost;
+			var host = Grid.RootHost;
 			if(!factory.IsSingleton)
 			{
 				foreach(var v in factory.CreatedViews)
@@ -173,56 +165,56 @@ namespace gitter.Framework.Controls
 								}
 							}
 						}
-						host = new ViewHost(_grid, false, true, new[] { view })
+						host = new ViewHost(Grid, false, true, new[] { view })
 						{
-							Size = _grid.RootHost.Size
+							Size = Grid.RootHost.Size
 						};
-						_grid.RootHost.PerformDock(host, DockResult.Right);
+						Grid.RootHost.PerformDock(host, DockResult.Right);
 						break;
 
 					case ViewPosition.Left:
-						host = new ViewHost(_grid, false, false, new[] { view });
-						_grid.PerformDock(host, DockResult.Left);
+						host = new ViewHost(Grid, false, false, new[] { view });
+						Grid.PerformDock(host, DockResult.Left);
 						break;
 					case ViewPosition.Top:
-						host = new ViewHost(_grid, false, false, new[] { view });
-						_grid.PerformDock(host, DockResult.Top);
+						host = new ViewHost(Grid, false, false, new[] { view });
+						Grid.PerformDock(host, DockResult.Top);
 						break;
 					case ViewPosition.Right:
-						host = new ViewHost(_grid, false, false, new[] { view });
-						_grid.PerformDock(host, DockResult.Right);
+						host = new ViewHost(Grid, false, false, new[] { view });
+						Grid.PerformDock(host, DockResult.Right);
 						break;
 					case ViewPosition.Bottom:
-						host = new ViewHost(_grid, false, false, new[] { view });
-						_grid.PerformDock(host, DockResult.Bottom);
+						host = new ViewHost(Grid, false, false, new[] { view });
+						Grid.PerformDock(host, DockResult.Bottom);
 						break;
 
 					case ViewPosition.LeftAutoHide:
-						host = new ViewHost(_grid, false, false, new[] { view });
+						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromLeft();
 						break;
 					case ViewPosition.TopAutoHide:
-						host = new ViewHost(_grid, false, false, new[] { view });
+						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromTop();
 						break;
 					case ViewPosition.RightAutoHide:
-						host = new ViewHost(_grid, false, false, new[] { view });
+						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromRight();
 						break;
 					case ViewPosition.BottomAutoHide:
-						host = new ViewHost(_grid, false, false, new[] { view });
+						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromBottom();
 						break;
 
 					case ViewPosition.Float:
-						host = new ViewHost(_grid, false, false, new[] { view });
+						host = new ViewHost(Grid, false, false, new[] { view });
 						var form = host.PrepareFloatingMode();
-						form.Location = _grid.PointToScreen(new Point(20, 20));
-						form.Show(_grid.TopLevelControl);
+						form.Location = Grid.PointToScreen(new Point(20, 20));
+						form.Show(Grid.TopLevelControl);
 						break;
 
 					default:
-						_grid.RootHost.AddView(view);
+						Grid.RootHost.AddView(view);
 						break;
 				}
 			}
@@ -246,7 +238,7 @@ namespace gitter.Framework.Controls
 				if(_activeView != view)
 				{
 					_activeView = view;
-					ActiveViewChanged.Raise(this);
+					ActiveViewChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			else
@@ -275,9 +267,8 @@ namespace gitter.Framework.Controls
 
 		private IViewFactory GetViewFactoryByGuid(Guid guid)
 		{
-			IViewFactory factory;
 			Verify.Argument.IsTrue(
-				_factories.TryGetValue(guid, out factory),
+				_factories.TryGetValue(guid, out var factory),
 				"guid",
 				string.Format(
 					CultureInfo.InvariantCulture,
@@ -398,8 +389,7 @@ namespace gitter.Framework.Controls
 
 		public ViewBase FindView(Guid guid)
 		{
-			IViewFactory factory;
-			if(!_factories.TryGetValue(guid, out factory))
+			if(!_factories.TryGetValue(guid, out var factory))
 			{
 				return null;
 			}
@@ -412,8 +402,7 @@ namespace gitter.Framework.Controls
 
 		public ViewBase FindView(Guid guid, object viewModel)
 		{
-			IViewFactory factory;
-			if(!_factories.TryGetValue(guid, out factory))
+			if(!_factories.TryGetValue(guid, out var factory))
 			{
 				return null;
 			}
@@ -429,8 +418,7 @@ namespace gitter.Framework.Controls
 
 		public IEnumerable<ViewBase> FindViews(Guid guid)
 		{
-			IViewFactory factory;
-			if(!_factories.TryGetValue(guid, out factory))
+			if(!_factories.TryGetValue(guid, out var factory))
 			{
 				return new ViewBase[0];
 			}
@@ -439,8 +427,7 @@ namespace gitter.Framework.Controls
 
 		public IEnumerable<ViewBase> FindViews(Guid guid, object viewModel)
 		{
-			IViewFactory factory;
-			if(!_factories.TryGetValue(guid, out factory))
+			if(!_factories.TryGetValue(guid, out var factory))
 			{
 				return new ViewBase[0];
 			}

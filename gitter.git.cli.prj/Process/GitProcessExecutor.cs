@@ -28,8 +28,6 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Executes git.exe.</summary>
 	internal sealed class GitProcessExecutor : ProcessExecutor<GitInput>
 	{
-		#region .ctor
-
 		/// <summary>Initializes a new instance of the <see cref="GitProcessExecutor"/> class.</summary>
 		/// <param name="exeFileName">Path to exe file.</param>
 		public GitProcessExecutor(string exeFileName)
@@ -37,15 +35,11 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 		}
 
-		#endregion
-
-		#region Methods
-
 		protected override ProcessStartInfo InitializeStartInfo(GitInput input)
 		{
 			Assert.IsNotNull(input);
 
-			var psi = new ProcessStartInfo
+			var psi = new ProcessStartInfo(ExeFileName)
 			{
 				Arguments              = input.GetArguments(),
 				WorkingDirectory       = input.WorkingDirectory,
@@ -57,7 +51,6 @@ namespace gitter.Git.AccessLayer.CLI
 				RedirectStandardOutput = true,
 				RedirectStandardError  = true,
 				LoadUserProfile        = true,
-				FileName               = ExeFileName,
 				ErrorDialog            = false,
 				CreateNoWindow         = true,
 			};
@@ -71,7 +64,5 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 			return psi;
 		}
-
-		#endregion
 	}
 }

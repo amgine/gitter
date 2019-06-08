@@ -94,7 +94,7 @@ namespace gitter.Git.Gui.Controls
 					{
 						ListBox.Refresh();
 					}
-					AbbreviateChanged.Raise(this);
+					AbbreviateChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}

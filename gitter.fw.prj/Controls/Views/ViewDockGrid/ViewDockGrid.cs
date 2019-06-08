@@ -33,10 +33,7 @@ namespace gitter.Framework.Controls
 
 		private static readonly LinkedList<ViewDockGrid> _grids;
 
-		internal static IEnumerable<ViewDockGrid> Grids
-		{
-			get { return _grids; }
-		}
+		internal static IEnumerable<ViewDockGrid> Grids => _grids;
 
 		/// <summary>Initializes the <see cref="ViewDockGrid"/> class.</summary>
 		static ViewDockGrid()
@@ -48,15 +45,7 @@ namespace gitter.Framework.Controls
 
 		#region Data
 
-		private readonly ViewHost _rootHost;
 		private readonly GridDockMarkers _dockMarkers;
-		private Control _rootControl;
-		private PopupNotificationsStack _popupsStack;
-
-		private ViewDockSide _left;
-		private ViewDockSide _top;
-		private ViewDockSide _right;
-		private ViewDockSide _bottom;
 		private LinkedList<FloatingViewForm> _floatingViewForms;
 
 		#endregion
@@ -72,19 +61,19 @@ namespace gitter.Framework.Controls
 			bounds.Y += ViewConstants.Spacing;
 			bounds.Width -= ViewConstants.Spacing * 2;
 			bounds.Height -= ViewConstants.Spacing * 2;
-			_rootHost = new ViewHost(this, true, true, null)
+			RootHost = new ViewHost(this, true, true, null)
 			{
 				Bounds = bounds,
 				Anchor = ViewConstants.AnchorAll,
 			};
-			_rootControl = _rootHost;
+			RootControl = RootHost;
 			_floatingViewForms = new LinkedList<FloatingViewForm>();
-			_popupsStack = new PopupNotificationsStack();
+			PopupsStack = new PopupNotificationsStack();
 
 			SetStyle(ControlStyles.ContainerControl, true);
 
 			SuspendLayout();
-			_rootHost.Parent = this;
+			RootHost.Parent = this;
 			ResumeLayout(true);
 
 			lock(_grids)
@@ -106,16 +95,9 @@ namespace gitter.Framework.Controls
 			set { base.BackColor = value; }
 		}
 
-		internal ViewHost RootHost
-		{
-			get { return _rootHost; }
-		}
+		internal ViewHost RootHost { get; }
 
-		internal Control RootControl
-		{
-			get { return _rootControl; }
-			set { _rootControl = value; }
-		}
+		internal Control RootControl { get; set; }
 
 		internal IEnumerable<FloatingViewForm> FloatingViewForms
 		{
@@ -145,7 +127,7 @@ namespace gitter.Framework.Controls
 
 		private void SpawnLeftSide()
 		{
-			Verify.State.IsTrue(_left == null);
+			Verify.State.IsTrue(LeftSide == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -153,40 +135,40 @@ namespace gitter.Framework.Controls
 				Renderer.SideTabHeight, 0);
 
 			int hspace = size.Width - (Renderer.SideTabHeight + ViewConstants.Spacing * 2);
-			if(_right != null) hspace -= Renderer.SideTabHeight;
+			if(RightSide != null) hspace -= Renderer.SideTabHeight;
 
-			if(_top != null)
+			if(TopSide != null)
 			{
-				if(_top.Width > hspace)
+				if(TopSide.Width > hspace)
 				{
-					_top.Bounds = new Rectangle(
+					TopSide.Bounds = new Rectangle(
 						Renderer.SideTabHeight + ViewConstants.Spacing, 0,
 						hspace, Renderer.SideTabHeight);
 				}
 				else
 				{
-					_top.Left += Renderer.SideTabHeight;
+					TopSide.Left += Renderer.SideTabHeight;
 				}
 				bounds.Y += Renderer.SideTabHeight;
 			}
-			if(_bottom != null)
+			if(BottomSide != null)
 			{
-				if(_bottom.Width > hspace)
+				if(BottomSide.Width > hspace)
 				{
-					_bottom.Bounds = new Rectangle(
+					BottomSide.Bounds = new Rectangle(
 						Renderer.SideTabHeight + ViewConstants.Spacing, size.Height - Renderer.SideTabHeight,
 						hspace, Renderer.SideTabHeight);
 				}
 				else
 				{
-					_bottom.Left += Renderer.SideTabHeight;
+					BottomSide.Left += Renderer.SideTabHeight;
 				}
 			}
-			_rootControl.SetBounds(
-				_rootControl.Left + Renderer.SideTabHeight, 0,
-				_rootControl.Width - Renderer.SideTabHeight, 0,
+			RootControl.SetBounds(
+				RootControl.Left + Renderer.SideTabHeight, 0,
+				RootControl.Width - Renderer.SideTabHeight, 0,
 				BoundsSpecified.X | BoundsSpecified.Width);
-			_left = new ViewDockSide(this, AnchorStyles.Left)
+			LeftSide = new ViewDockSide(this, AnchorStyles.Left)
 			{
 				Anchor = AnchorStyles.Left | AnchorStyles.Top,
 				Bounds = bounds,
@@ -196,7 +178,7 @@ namespace gitter.Framework.Controls
 
 		private void SpawnTopSide()
 		{
-			Verify.State.IsTrue(_top == null);
+			Verify.State.IsTrue(TopSide == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -204,40 +186,40 @@ namespace gitter.Framework.Controls
 				0, Renderer.SideTabHeight);
 
 			int vspace = size.Height - Renderer.SideTabHeight - ViewConstants.Spacing * 2;
-			if(_bottom != null) vspace -= Renderer.SideTabHeight;
+			if(BottomSide != null) vspace -= Renderer.SideTabHeight;
 
-			if(_left != null)
+			if(LeftSide != null)
 			{
-				if(_left.Height > vspace)
+				if(LeftSide.Height > vspace)
 				{
-					_left.Bounds = new Rectangle(
+					LeftSide.Bounds = new Rectangle(
 						0, Renderer.SideTabHeight + ViewConstants.Spacing,
 						Renderer.SideTabHeight, vspace);
 				}
 				else
 				{
-					_left.Top += Renderer.SideTabHeight;
+					LeftSide.Top += Renderer.SideTabHeight;
 				}
 				bounds.X += Renderer.SideTabHeight;
 			}
-			if(_right != null)
+			if(RightSide != null)
 			{
-				if(_right.Height > vspace)
+				if(RightSide.Height > vspace)
 				{
-					_right.Bounds = new Rectangle(
+					RightSide.Bounds = new Rectangle(
 						size.Width - Renderer.SideTabHeight, Renderer.SideTabHeight + ViewConstants.Spacing,
 						Renderer.SideTabHeight, vspace);
 				}
 				else
 				{
-					_right.Top += Renderer.SideTabHeight;
+					RightSide.Top += Renderer.SideTabHeight;
 				}
 			}
-			_rootControl.SetBounds(
-				0, _rootControl.Top + Renderer.SideTabHeight,
-				0, _rootControl.Height - Renderer.SideTabHeight,
+			RootControl.SetBounds(
+				0, RootControl.Top + Renderer.SideTabHeight,
+				0, RootControl.Height - Renderer.SideTabHeight,
 				BoundsSpecified.Y | BoundsSpecified.Height);
-			_top = new ViewDockSide(this, AnchorStyles.Top)
+			TopSide = new ViewDockSide(this, AnchorStyles.Top)
 			{
 				Anchor = AnchorStyles.Left | AnchorStyles.Top,
 				Bounds = bounds,
@@ -247,7 +229,7 @@ namespace gitter.Framework.Controls
 
 		private void SpawnRightSide()
 		{
-			Verify.State.IsTrue(_right == null);
+			Verify.State.IsTrue(RightSide == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -255,25 +237,25 @@ namespace gitter.Framework.Controls
 				Renderer.SideTabHeight, 0);
 
 			int hspace = size.Width - Renderer.SideTabHeight - ViewConstants.Spacing * 2;
-			if(_left != null) hspace -= Renderer.SideTabHeight;
+			if(LeftSide != null) hspace -= Renderer.SideTabHeight;
 
-			if(_top != null)
+			if(TopSide != null)
 			{
-				if(_top.Width > hspace)
+				if(TopSide.Width > hspace)
 				{
-					_top.Width = hspace;
+					TopSide.Width = hspace;
 				}
 				bounds.Y += Renderer.SideTabHeight;
 			}
-			if(_bottom != null)
+			if(BottomSide != null)
 			{
-				if(_bottom.Width > hspace)
+				if(BottomSide.Width > hspace)
 				{
-					_bottom.Width = hspace;
+					BottomSide.Width = hspace;
 				}
 			}
-			_rootControl.Width -= Renderer.SideTabHeight;
-			_right = new ViewDockSide(this, AnchorStyles.Right)
+			RootControl.Width -= Renderer.SideTabHeight;
+			RightSide = new ViewDockSide(this, AnchorStyles.Right)
 			{
 				Anchor = AnchorStyles.Right | AnchorStyles.Top,
 				Bounds = bounds,
@@ -283,7 +265,7 @@ namespace gitter.Framework.Controls
 
 		private void SpawnBottomSide()
 		{
-			Verify.State.IsTrue(_bottom == null);
+			Verify.State.IsTrue(BottomSide == null);
 
 			var size = Size;
 			var bounds = new Rectangle(
@@ -291,25 +273,25 @@ namespace gitter.Framework.Controls
 				0, Renderer.SideTabHeight);
 
 			int vspace = size.Height - Renderer.SideTabHeight - ViewConstants.Spacing * 2;
-			if(_top != null) vspace -= Renderer.SideTabHeight;
+			if(TopSide != null) vspace -= Renderer.SideTabHeight;
 
-			if(_left != null)
+			if(LeftSide != null)
 			{
-				if(_left.Height > vspace)
+				if(LeftSide.Height > vspace)
 				{
-					_left.Height = vspace;
+					LeftSide.Height = vspace;
 				}
 				bounds.X += Renderer.SideTabHeight;
 			}
-			if(_right != null)
+			if(RightSide != null)
 			{
-				if(_right.Height > vspace)
+				if(RightSide.Height > vspace)
 				{
-					_right.Height = vspace;
+					RightSide.Height = vspace;
 				}
 			}
-			_rootControl.Height -= Renderer.SideTabHeight;
-			_bottom = new ViewDockSide(this, AnchorStyles.Bottom)
+			RootControl.Height -= Renderer.SideTabHeight;
+			BottomSide = new ViewDockSide(this, AnchorStyles.Bottom)
 			{
 				Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
 				Bounds = bounds,
@@ -343,29 +325,29 @@ namespace gitter.Framework.Controls
 		private void RemoveAllSides()
 		{
 			SuspendLayout();
-			if(_left != null)
+			if(LeftSide != null)
 			{
-				_left.Parent = null;
-				_left.Dispose();
-				_left = null;
+				LeftSide.Parent = null;
+				LeftSide.Dispose();
+				LeftSide = null;
 			}
-			if(_top != null)
+			if(TopSide != null)
 			{
-				_top.Parent = null;
-				_top.Dispose();
-				_top = null;
+				TopSide.Parent = null;
+				TopSide.Dispose();
+				TopSide = null;
 			}
-			if(_right != null)
+			if(RightSide != null)
 			{
-				_right.Parent = null;
-				_right.Dispose();
-				_right = null;
+				RightSide.Parent = null;
+				RightSide.Dispose();
+				RightSide = null;
 			}
-			if(_bottom != null)
+			if(BottomSide != null)
 			{
-				_bottom.Parent = null;
-				_bottom.Dispose();
-				_bottom = null;
+				BottomSide.Parent = null;
+				BottomSide.Dispose();
+				BottomSide = null;
 			}
 			RootControl.SetBounds(
 				ViewConstants.Spacing, ViewConstants.Spacing,
@@ -376,46 +358,46 @@ namespace gitter.Framework.Controls
 
 		private void RemoveLeftSide()
 		{
-			if(_left != null)
+			if(LeftSide != null)
 			{
-				_left.Parent = null;
-				_left.Dispose();
-				_left = null;
+				LeftSide.Parent = null;
+				LeftSide.Dispose();
+				LeftSide = null;
 
-				var bounds = _rootControl.Bounds;
+				var bounds = RootControl.Bounds;
 				bounds.X -= Renderer.SideTabHeight;
 				bounds.Width += Renderer.SideTabHeight;
-				_rootControl.Bounds = bounds;
+				RootControl.Bounds = bounds;
 				var hcs = Width - ViewConstants.Spacing * 2;
-				if(_right != null) hcs -= Renderer.SideTabHeight;
-				if(_top != null)
+				if(RightSide != null) hcs -= Renderer.SideTabHeight;
+				if(TopSide != null)
 				{
-					var w = _top.Width;
-					var len = _top.OptimalLength;
+					var w = TopSide.Width;
+					var len = TopSide.OptimalLength;
 					if(w >= len)
 					{
-						_top.Left = ViewConstants.Spacing;
+						TopSide.Left = ViewConstants.Spacing;
 					}
 					else
 					{
 						if(len > hcs) len = hcs;
-						_top.SetBounds(
+						TopSide.SetBounds(
 							ViewConstants.Spacing, 0, len, Renderer.SideTabHeight,
 							BoundsSpecified.X | BoundsSpecified.Width);
 					}
 				}
-				if(_bottom != null)
+				if(BottomSide != null)
 				{
-					var w = _bottom.Height;
-					var len = _bottom.OptimalLength;
+					var w = BottomSide.Height;
+					var len = BottomSide.OptimalLength;
 					if(w >= len)
 					{
-						_bottom.Left = ViewConstants.Spacing;
+						BottomSide.Left = ViewConstants.Spacing;
 					}
 					else
 					{
 						if(len > hcs) len = hcs;
-						_bottom.SetBounds(
+						BottomSide.SetBounds(
 							ViewConstants.Spacing, 0, len, Renderer.SideTabHeight,
 							BoundsSpecified.X | BoundsSpecified.Width);
 					}
@@ -425,46 +407,46 @@ namespace gitter.Framework.Controls
 
 		private void RemoveTopSide()
 		{
-			if(_top != null)
+			if(TopSide != null)
 			{
-				_top.Parent = null;
-				_top.Dispose();
-				_top = null;
+				TopSide.Parent = null;
+				TopSide.Dispose();
+				TopSide = null;
 
-				var bounds = _rootControl.Bounds;
+				var bounds = RootControl.Bounds;
 				bounds.Y -= Renderer.SideTabHeight;
 				bounds.Height += Renderer.SideTabHeight;
-				_rootControl.Bounds = bounds;
+				RootControl.Bounds = bounds;
 				var vcs = Height - Renderer.SideTabHeight * 2;
-				if(_bottom != null) vcs -= Renderer.SideTabHeight;
-				if(_left != null)
+				if(BottomSide != null) vcs -= Renderer.SideTabHeight;
+				if(LeftSide != null)
 				{
-					var h = _left.Height;
-					var len = _left.OptimalLength;
+					var h = LeftSide.Height;
+					var len = LeftSide.OptimalLength;
 					if(h >= len)
 					{
-						_left.Top = ViewConstants.Spacing;
+						LeftSide.Top = ViewConstants.Spacing;
 					}
 					else
 					{
 						if(len > vcs) len = vcs;
-						_left.SetBounds(
+						LeftSide.SetBounds(
 							0, ViewConstants.Spacing, Renderer.SideTabHeight, len,
 							BoundsSpecified.Y | BoundsSpecified.Height);
 					}
 				}
-				if(_right != null)
+				if(RightSide != null)
 				{
-					var h = _right.Height;
-					var len = _right.OptimalLength;
+					var h = RightSide.Height;
+					var len = RightSide.OptimalLength;
 					if(h >= len)
 					{
-						_right.Top = ViewConstants.Spacing;
+						RightSide.Top = ViewConstants.Spacing;
 					}
 					else
 					{
 						if(len > vcs) len = vcs;
-						_right.SetBounds(
+						RightSide.SetBounds(
 							0, ViewConstants.Spacing, Renderer.SideTabHeight, len,
 							BoundsSpecified.Y | BoundsSpecified.Height);
 					}
@@ -474,33 +456,33 @@ namespace gitter.Framework.Controls
 
 		private void RemoveRightSide()
 		{
-			if(_right != null)
+			if(RightSide != null)
 			{
-				_right.Parent = null;
-				_right.Dispose();
-				_right = null;
-				_rootControl.Width += Renderer.SideTabHeight;
+				RightSide.Parent = null;
+				RightSide.Dispose();
+				RightSide = null;
+				RootControl.Width += Renderer.SideTabHeight;
 
 				var hcs = Width - ViewConstants.Spacing * 2;
-				if(_left != null) hcs -= Renderer.SideTabHeight;
-				if(_top != null)
+				if(LeftSide != null) hcs -= Renderer.SideTabHeight;
+				if(TopSide != null)
 				{
-					var w = _top.Width;
-					var len = _top.OptimalLength;
+					var w = TopSide.Width;
+					var len = TopSide.OptimalLength;
 					if(w < len)
 					{
 						if(len > hcs) len = hcs;
-						_top.Width = len;
+						TopSide.Width = len;
 					}
 				}
-				if(_bottom != null)
+				if(BottomSide != null)
 				{
-					var w = _bottom.Height;
-					var len = _bottom.OptimalLength;
+					var w = BottomSide.Height;
+					var len = BottomSide.OptimalLength;
 					if(w < len)
 					{
 						if(len > hcs) len = hcs;
-						_bottom.Width = len;
+						BottomSide.Width = len;
 					}
 				}
 			}
@@ -508,57 +490,45 @@ namespace gitter.Framework.Controls
 
 		private void KillBottomSide()
 		{
-			if(_bottom != null)
+			if(BottomSide != null)
 			{
-				_bottom.Parent = null;
-				_bottom.Dispose();
-				_bottom = null;
-				_rootControl.Height += Renderer.SideTabHeight;
+				BottomSide.Parent = null;
+				BottomSide.Dispose();
+				BottomSide = null;
+				RootControl.Height += Renderer.SideTabHeight;
 
 				var vcs = Height - Renderer.SideTabHeight * 2;
-				if(_bottom != null) vcs -= Renderer.SideTabHeight;
-				if(_left != null)
+				if(BottomSide != null) vcs -= Renderer.SideTabHeight;
+				if(LeftSide != null)
 				{
-					var h = _left.Height;
-					var len = _left.OptimalLength;
+					var h = LeftSide.Height;
+					var len = LeftSide.OptimalLength;
 					if(h < len)
 					{
 						if(len > vcs) len = vcs;
-						_left.Height = len;
+						LeftSide.Height = len;
 					}
 				}
-				if(_right != null)
+				if(RightSide != null)
 				{
-					var h = _right.Height;
-					var len = _right.OptimalLength;
+					var h = RightSide.Height;
+					var len = RightSide.OptimalLength;
 					if(h < len)
 					{
 						if(len > vcs) len = vcs;
-						_right.Height = len;
+						RightSide.Height = len;
 					}
 				}
 			}
 		}
 
-		internal ViewDockSide LeftSide
-		{
-			get { return _left; }
-		}
+		internal ViewDockSide LeftSide { get; private set; }
 
-		internal ViewDockSide RightSide
-		{
-			get { return _right; }
-		}
+		internal ViewDockSide RightSide { get; private set; }
 
-		internal ViewDockSide TopSide
-		{
-			get { return _top; }
-		}
+		internal ViewDockSide TopSide { get; private set; }
 
-		internal ViewDockSide BottomSide
-		{
-			get { return _bottom; }
-		}
+		internal ViewDockSide BottomSide { get; private set; }
 
 		private ViewDockSide GetCreateDockSide(AnchorStyles side)
 		{
@@ -566,20 +536,20 @@ namespace gitter.Framework.Controls
 			switch(side)
 			{
 				case AnchorStyles.Left:
-					if(_left == null) SpawnLeftSide();
-					viewDockSide = _left;
+					if(LeftSide == null) SpawnLeftSide();
+					viewDockSide = LeftSide;
 					break;
 				case AnchorStyles.Top:
-					if(_top == null) SpawnTopSide();
-					viewDockSide = _top;
+					if(TopSide == null) SpawnTopSide();
+					viewDockSide = TopSide;
 					break;
 				case AnchorStyles.Right:
-					if(_right == null) SpawnRightSide();
-					viewDockSide = _right;
+					if(RightSide == null) SpawnRightSide();
+					viewDockSide = RightSide;
 					break;
 				case AnchorStyles.Bottom:
-					if(_bottom == null) SpawnBottomSide();
-					viewDockSide = _bottom;
+					if(BottomSide == null) SpawnBottomSide();
+					viewDockSide = BottomSide;
 					break;
 				default:
 					throw new ArgumentException(
@@ -589,18 +559,15 @@ namespace gitter.Framework.Controls
 			return viewDockSide;
 		}
 
-		public PopupNotificationsStack PopupsStack
-		{
-			get { return _popupsStack; }
-		}
+		public PopupNotificationsStack PopupsStack { get; private set; }
 
 		internal int HorizontalClientSpace
 		{
 			get
 			{
 				var w = Width - ViewConstants.Spacing * 2;
-				if(_left != null) w -= Renderer.SideTabHeight;
-				if(_right != null) w -= Renderer.SideTabHeight;
+				if(LeftSide != null) w -= Renderer.SideTabHeight;
+				if(RightSide != null) w -= Renderer.SideTabHeight;
 				return w;
 			}
 		}
@@ -610,8 +577,8 @@ namespace gitter.Framework.Controls
 			get
 			{
 				var h = Height - ViewConstants.Spacing * 2;
-				if(_top != null) h -= Renderer.SideTabHeight;
-				if(_bottom != null) h -= Renderer.SideTabHeight;
+				if(TopSide != null) h -= Renderer.SideTabHeight;
+				if(BottomSide != null) h -= Renderer.SideTabHeight;
 				return h;
 			}
 		}
@@ -673,7 +640,7 @@ namespace gitter.Framework.Controls
 
 		public void DockRoot(ViewBase view)
 		{
-			_rootHost.AddView(view);
+			RootHost.AddView(view);
 		}
 
 		/// <summary>
@@ -685,71 +652,71 @@ namespace gitter.Framework.Controls
 			base.OnResize(e);
 			var vspace = VerticalClientSpace;
 			var hspace = HorizontalClientSpace;
-			if(_left != null)
+			if(LeftSide != null)
 			{
-				var h = _left.Height;
+				var h = LeftSide.Height;
 				if(h > vspace)
 				{
-					_left.Height = vspace;
+					LeftSide.Height = vspace;
 				}
 				else
 				{
-					if(h < _left.OptimalLength)
+					if(h < LeftSide.OptimalLength)
 					{
-						h = _left.OptimalLength;
+						h = LeftSide.OptimalLength;
 						if(h > vspace) h = vspace;
-						_left.Height = h;
+						LeftSide.Height = h;
 					}
 				}
 			}
-			if(_top != null)
+			if(TopSide != null)
 			{
-				var w = _top.Width;
+				var w = TopSide.Width;
 				if(w > hspace)
 				{
-					_top.Width = hspace;
+					TopSide.Width = hspace;
 				}
 				else
 				{
-					if(w < _top.OptimalLength)
+					if(w < TopSide.OptimalLength)
 					{
-						w = _top.OptimalLength;
+						w = TopSide.OptimalLength;
 						if(w > hspace) w = hspace;
-						_top.Width = w;
+						TopSide.Width = w;
 					}
 				}
 			}
-			if(_right != null)
+			if(RightSide != null)
 			{
-				var h = _right.Height;
+				var h = RightSide.Height;
 				if(h > vspace)
 				{
-					_right.Height = vspace;
+					RightSide.Height = vspace;
 				}
 				else
 				{
-					if(h < _right.OptimalLength)
+					if(h < RightSide.OptimalLength)
 					{
-						h = _right.OptimalLength;
+						h = RightSide.OptimalLength;
 						if(h > vspace) h = vspace;
-						_right.Height = h;
+						RightSide.Height = h;
 					}
 				}
 			}
-			if(_bottom != null)
+			if(BottomSide != null)
 			{
-				var w = _bottom.Width;
+				var w = BottomSide.Width;
 				if(w > hspace)
 				{
-					_bottom.Width = hspace;
+					BottomSide.Width = hspace;
 				}
 				else
 				{
-					if(w < _bottom.OptimalLength)
+					if(w < BottomSide.OptimalLength)
 					{
-						w = _bottom.OptimalLength;
+						w = BottomSide.OptimalLength;
 						if(w > hspace) w = hspace;
-						_bottom.Width = w;
+						BottomSide.Width = w;
 					}
 				}
 			}
@@ -768,32 +735,32 @@ namespace gitter.Framework.Controls
 			if(disposing)
 			{
 				_dockMarkers.Dispose();
-				if(_left != null)
+				if(LeftSide != null)
 				{
-					_left.Dispose();
-					_left = null;
+					LeftSide.Dispose();
+					LeftSide = null;
 				}
-				if(_top != null)
+				if(TopSide != null)
 				{
-					_top.Dispose();
-					_top = null;
+					TopSide.Dispose();
+					TopSide = null;
 				}
-				if(_right != null)
+				if(RightSide != null)
 				{
-					_right.Dispose();
-					_right = null;
+					RightSide.Dispose();
+					RightSide = null;
 				}
-				if(_bottom != null)
+				if(BottomSide != null)
 				{
-					_bottom.Dispose();
-					_bottom = null;
+					BottomSide.Dispose();
+					BottomSide = null;
 				}
-				if(_popupsStack != null)
+				if(PopupsStack != null)
 				{
-					_popupsStack.Dispose();
-					_popupsStack = null;
+					PopupsStack.Dispose();
+					PopupsStack = null;
 				}
-				_rootControl = null;
+				RootControl = null;
 				_floatingViewForms.Clear();
 			}
 			base.Dispose(disposing);

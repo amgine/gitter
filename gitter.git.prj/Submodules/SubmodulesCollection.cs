@@ -66,10 +66,7 @@ namespace gitter.Git
 
 		public Task UpdateAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsUpdatingSubmodules.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsUpdatingSubmodules.AddEllipsis()));
 			var parameters = GetUpdateParameters();
 			return Repository.Accessor.UpdateSubmodule.InvokeAsync(parameters, progress, cancellationToken);
 		}

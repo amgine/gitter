@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2019  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,44 +26,49 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Revert an existing commit.</summary>
 	public sealed class RevertCommand : Command
 	{
-		public static ICommandArgument Mainline(int number)
+		public static class KnownArguments
 		{
-			return new CommandParameterValue("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
+			public static ICommandArgument Edit { get; } = new CommandFlag("--edit");
+
+			public static ICommandArgument Mainline(int number) => new CommandParameterValue("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
+
+			public static ICommandArgument NoCommit { get; } = new CommandFlag("--no-commit");
+
+			public static ICommandArgument NoEdit { get; } = new CommandFlag("--no-edit");
+
+			public static ICommandArgument SignOff { get; } = new CommandFlag("--signoff");
+
+			public static ICommandArgument Continue { get; } = new CommandFlag("--continue");
+
+			public static ICommandArgument Quit { get; } = new CommandFlag("--quit");
+
+			public static ICommandArgument Abort { get; } = new CommandFlag("--abort");
 		}
 
-		public static ICommandArgument Edit()
+		public class Builder : CommandBuilderBase
 		{
-			return new CommandFlag("--edit");
-		}
+			public Builder()
+				: base("revert")
+			{
+			}
 
-		public static ICommandArgument NoEdit()
-		{
-			return new CommandFlag("--no-edit");
-		}
+			public void Edit() => AddArgument(KnownArguments.Edit);
 
-		public static ICommandArgument NoCommit()
-		{
-			return new CommandFlag("--no-commit");
-		}
+			public void Mainline(int number) => AddArgument(KnownArguments.Mainline(number));
 
-		public static ICommandArgument SignOff()
-		{
-			return new CommandFlag("--signoff");
-		}
+			public void NoEdit() => AddArgument(KnownArguments.NoEdit);
 
-		public static ICommandArgument Continue()
-		{
-			return new CommandFlag("--continue");
-		}
+			public void NoCommit() => AddArgument(KnownArguments.NoCommit);
 
-		public static ICommandArgument Quit()
-		{
-			return new CommandFlag("--quit");
-		}
+			public void SignOff() => AddArgument(KnownArguments.SignOff);
 
-		public static ICommandArgument Abort()
-		{
-			return new CommandFlag("--abort");
+			public void FastForward() => AddArgument(KnownArguments.SignOff);
+
+			public void Continue() => AddArgument(KnownArguments.Continue);
+
+			public void Quit() => AddArgument(KnownArguments.Quit);
+
+			public void Abort() => AddArgument(KnownArguments.Abort);
 		}
 
 		public RevertCommand()

@@ -30,9 +30,6 @@ namespace gitter.Framework.Controls
 		#region Data
 
 		private readonly Point _mouseDownLocation;
-		private readonly CustomListBoxColumn _resizingColumn;
-		private readonly int _deltaSign;
-		private readonly int _initialWidth;
 
 		#endregion
 
@@ -102,9 +99,9 @@ namespace gitter.Framework.Controls
 			Assert.IsNotNull(resizingColumn);
 
 			_mouseDownLocation = mouseDownLocation;
-			_resizingColumn    = resizingColumn;
-			_initialWidth      = resizingColumn.Width;
-			_deltaSign         = deltaSign;
+			ResizingColumn    = resizingColumn;
+			InitialWidth      = resizingColumn.Width;
+			DeltaSign         = deltaSign;
 		}
 
 		#endregion
@@ -112,22 +109,13 @@ namespace gitter.Framework.Controls
 		#region Properties
 
 		/// <summary> Column actually resizing. May differ from active column. </summary>
-		public CustomListBoxColumn ResizingColumn
-		{
-			get { return _resizingColumn; }
-		}
+		public CustomListBoxColumn ResizingColumn { get; }
 
 		/// <summary>Sign to apply to x-coordinate delta when resizing.</summary>
-		public int DeltaSign
-		{
-			get { return _deltaSign; }
-		}
+		public int DeltaSign { get; }
 
 		/// <summary>Initial column width.</summary>
-		public int InitialWidth
-		{
-			get { return _initialWidth; }
-		}
+		public int InitialWidth { get; }
 
 		#endregion
 

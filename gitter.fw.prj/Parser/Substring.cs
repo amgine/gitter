@@ -38,7 +38,6 @@ namespace gitter.Framework
 
 		#region Data
 
-		private readonly string _string;
 		private int _start;
 		private int _length;
 
@@ -62,7 +61,7 @@ namespace gitter.Framework
 		{
 			Verify.Argument.IsNotNull(@string, "@string");
 
-			_string = @string;
+			String = @string;
 			_start = 0;
 			_length = @string.Length;
 		}
@@ -75,7 +74,7 @@ namespace gitter.Framework
 			Verify.Argument.IsNotNull(@string, "@string");
 			Verify.Argument.IsValidIndex(start, @string.Length, "start");
 
-			_string = @string;
+			String = @string;
 			_start = start;
 			_length = @string.Length - start;
 		}
@@ -90,7 +89,7 @@ namespace gitter.Framework
 			Verify.Argument.IsValidIndex(start, @string.Length, "start");
 			Verify.Argument.IsValidIndex(length, @string.Length - start + 1, "length");
 
-			_string = @string;
+			String = @string;
 			_start = start;
 			_length = length;
 		}
@@ -100,10 +99,7 @@ namespace gitter.Framework
 		#region Properties
 
 		/// <summary>Base string.</summary>
-		public string String
-		{
-			get { return _string; }
-		}
+		public string String { get; }
 
 		/// <summary>Substring start.</summary>
 		public int Start
@@ -111,7 +107,7 @@ namespace gitter.Framework
 			get { return _start; }
 			set
 			{
-				Verify.Argument.IsValidIndex(0, value, _string.Length - _length, "value");
+				Verify.Argument.IsValidIndex(0, value, String.Length - _length, "value");
 
 				_start = value;
 			}
@@ -123,35 +119,23 @@ namespace gitter.Framework
 			get { return _length; }
 			set
 			{
-				Verify.Argument.IsValidIndex(0, value, _string.Length - _start + 1, "value");
+				Verify.Argument.IsValidIndex(0, value, String.Length - _start + 1, "value");
 
 				_length = value;
 			}
 		}
 
 		/// <summary>Start character.</summary>
-		public char StartCharacter
-		{
-			get { return _string[_start]; }
-		}
+		public char StartCharacter => String[_start];
 
 		/// <summary>Last character index.</summary>
-		public int End
-		{
-			get { return _start + _length - 1; }
-		}
+		public int End => _start + _length - 1;
 
 		/// <summary>Last character.</summary>
-		public char EndCharacter
-		{
-			get { return _string[_start + _length - 1]; }
-		}
+		public char EndCharacter => String[_start + _length - 1];
 
 		/// <summary>Substring is empty.</summary>
-		public bool IsEmpty
-		{
-			get { return _length == 0; }
-		}
+		public bool IsEmpty => _length == 0;
 
 		/// <summary>Get a character from this substring.</summary>
 		/// <param name="index">Character index.</param>
@@ -162,7 +146,7 @@ namespace gitter.Framework
 			{
 				Verify.Argument.IsValidIndex(index, _length, "index");
 
-				return _string[_start + index];
+				return String[_start + index];
 			}
 		}
 
@@ -175,8 +159,8 @@ namespace gitter.Framework
 		/// <param name="length">Substring length.</param>
 		public void SetInterval(int start, int length)
 		{
-			Verify.Argument.IsValidIndex(start, _string.Length, "start");
-			Verify.Argument.IsValidIndex(length, _string.Length - start + 1, "length");
+			Verify.Argument.IsValidIndex(start, String.Length, "start");
+			Verify.Argument.IsValidIndex(length, String.Length - start + 1, "length");
 
 			_start = start;
 			_length = length;
@@ -192,7 +176,7 @@ namespace gitter.Framework
 			if(start == 0) return this;
 			int length = _length - start;
 			if(length == 0) return Empty;
-			return new Substring(_string, _start + start, length);
+			return new Substring(String, _start + start, length);
 		}
 
 		/// <summary>Get substring of this <see cref="Substring"/>.</summary>
@@ -206,7 +190,7 @@ namespace gitter.Framework
 
 			if(length == 0) return Empty;
 			if(start == 0 && length == _length) return this;
-			return new Substring(_string, _start + start, length);
+			return new Substring(String, _start + start, length);
 		}
 
 		/// <summary>Find character <paramref name="value"/>.</summary>
@@ -215,7 +199,7 @@ namespace gitter.Framework
 		public int IndexOf(char value)
 		{
 			if(_length == 0) return -1;
-			return _string.IndexOf(value, _start, _length);
+			return String.IndexOf(value, _start, _length);
 		}
 
 		/// <summary>Find string <paramref name="value"/>.</summary>
@@ -226,7 +210,7 @@ namespace gitter.Framework
 			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
 
 			if(_length < value.Length) return -1;
-			return _string.IndexOf(value, _start, _length);
+			return String.IndexOf(value, _start, _length);
 		}
 
 		/// <summary>Find character <paramref name="value"/>.</summary>
@@ -238,7 +222,7 @@ namespace gitter.Framework
 			Verify.Argument.IsValidIndex(startIndex, _length, "startIndex");
 
 			if(_length == 0) return -1;
-			return _string.IndexOf(value, _start + startIndex, _length - startIndex);
+			return String.IndexOf(value, _start + startIndex, _length - startIndex);
 		}
 
 		/// <summary>Find string <paramref name="value"/>.</summary>
@@ -250,7 +234,7 @@ namespace gitter.Framework
 			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
 			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, "startIndex");
 
-			return _string.IndexOf(value, _start + startIndex, _length - startIndex);
+			return String.IndexOf(value, _start + startIndex, _length - startIndex);
 		}
 
 		/// <summary>Find character <paramref name="value"/>.</summary>
@@ -264,7 +248,7 @@ namespace gitter.Framework
 			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, "count");
 
 			if(_length == 0) return -1;
-			return _string.IndexOf(value, _start + startIndex, count);
+			return String.IndexOf(value, _start + startIndex, count);
 		}
 
 		/// <summary>Find string <paramref name="value"/>.</summary>
@@ -279,7 +263,7 @@ namespace gitter.Framework
 			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, "count");
 
 			if(count < value.Length) return -1;
-			return _string.IndexOf(value, _start + startIndex, count);
+			return String.IndexOf(value, _start + startIndex, count);
 		}
 
 		/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
@@ -288,7 +272,7 @@ namespace gitter.Framework
 		public bool StartsWith(char value)
 		{
 			if(_length == 0) return false;
-			return _string[_start] == value;
+			return String[_start] == value;
 		}
 
 		/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
@@ -300,7 +284,7 @@ namespace gitter.Framework
 
 			if(value.Length == 0) return true;
 			if(_length < value.Length) return false;
-			return _string.IndexOf(value, _start, value.Length) != -1;
+			return String.IndexOf(value, _start, value.Length) != -1;
 		}
 
 		/// <summary>Checks if this <see cref="Substring"/> ends with <paramref name="value"/>.</summary>
@@ -309,7 +293,7 @@ namespace gitter.Framework
 		public bool EndsWith(char value)
 		{
 			if(_length == 0) return false;
-			return _string[_start + _length -1] == value;
+			return String[_start + _length -1] == value;
 		}
 
 		/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
@@ -321,7 +305,7 @@ namespace gitter.Framework
 
 			if(value.Length == 0) return true;
 			if(_length < value.Length) return false;
-			return _string.IndexOf(value, _start + _length - value.Length, value.Length) != -1;
+			return String.IndexOf(value, _start + _length - value.Length, value.Length) != -1;
 		}
 
 		#endregion
@@ -358,7 +342,7 @@ namespace gitter.Framework
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="Substring"/>.</returns>
 		public override string ToString()
 		{
-			return _string.Substring(_start, _length);
+			return String.Substring(_start, _length);
 		}
 
 		#endregion
@@ -401,7 +385,7 @@ namespace gitter.Framework
 			}
 			if(substring1._length == substring2._length)
 			{
-				if(object.ReferenceEquals(substring1._string, substring2._string) &&
+				if(object.ReferenceEquals(substring1.String, substring2.String) &&
 					substring1._start == substring2._start)
 				{
 					return true;
@@ -409,7 +393,7 @@ namespace gitter.Framework
 				var end = substring1._start + substring1._length;
 				for(int i = substring1._start, j = substring2._start; i < end; ++i, ++j)
 				{
-					if(substring1._string[i] != substring2._string[j])
+					if(substring1.String[i] != substring2.String[j])
 					{
 						return false;
 					}
@@ -427,7 +411,7 @@ namespace gitter.Framework
 			}
 			if(substring1._length == substring2.Length)
 			{
-				if(object.ReferenceEquals(substring1._string, substring2) &&
+				if(object.ReferenceEquals(substring1.String, substring2) &&
 					substring1._start == 0)
 				{
 					return true;
@@ -435,7 +419,7 @@ namespace gitter.Framework
 				var end = substring1._start + substring1._length;
 				for(int i = substring1._start, j = 0; i < end; ++i, ++j)
 				{
-					if(substring1._string[i] != substring2[j])
+					if(substring1.String[i] != substring2[j])
 					{
 						return false;
 					}
@@ -454,7 +438,7 @@ namespace gitter.Framework
 		/// <returns>Corresponding <see cref="T:System.String"/>.</returns>
 		public static implicit operator string(Substring substring)
 		{
-			return substring._string.Substring(substring._start, substring._length);
+			return substring.String.Substring(substring._start, substring._length);
 		}
 
 		public static bool operator ==(Substring substring1, Substring substring2)
@@ -508,7 +492,7 @@ namespace gitter.Framework
 				Assert.IsNotNull(substring);
 
 				_substring = substring;
-				_string = substring._string;
+				_string = substring.String;
 				_position = substring._start;
 				_maxPosition = _position + substring._length;
 				_current = _string[_position];

@@ -115,7 +115,7 @@ namespace gitter.Git.Gui.Controls
 						prev.InvalidateContent();
 					}
 					InvalidateContent();
-					AlignToGraphChanged.Raise(this);
+					AlignToGraphChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -130,7 +130,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					_showLocalBranches = value;
 					InvalidateContent();
-					ShowLocalBranchesChanged.Raise(this);
+					ShowLocalBranchesChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -145,7 +145,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					_showRemoteBranches = value;
 					InvalidateContent();
-					ShowRemoteBranchesChanged.Raise(this);
+					ShowRemoteBranchesChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -160,7 +160,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					_showTags = value;
 					InvalidateContent();
-					ShowTagsChanged.Raise(this);
+					ShowTagsChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -175,7 +175,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					_showStash = value;
 					InvalidateContent();
-					ShowStashChanged.Raise(this);
+					ShowStashChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}

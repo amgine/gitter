@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -55,20 +54,13 @@ namespace gitter.Framework.Controls
 			Text = _webBrowser.DocumentTitle;
 		}
 
-		public override Image Image
-		{
-			get { return _image; }
-		}
+		public override Image Image => _image;
 
-		internal protected WebBrowser WebBrowser
-		{
-			get { return _webBrowser; }
-		}
+		internal protected WebBrowser WebBrowser => _webBrowser;
 
 		protected override void AttachViewModel(object viewModel)
 		{
-			var vm = viewModel as WebBrowserViewModel;
-			if(vm != null)
+			if(viewModel is WebBrowserViewModel vm)
 			{
 				_webBrowser.Navigate(vm.Url);
 			}

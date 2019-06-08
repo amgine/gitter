@@ -56,8 +56,7 @@ namespace gitter.Framework.Controls
 
 		protected virtual void OnItemActivated(CustomListBoxItem item)
 		{
-			var handler = (EventHandler<ItemEventArgs>)Events[ItemActivatedEvent];
-			if(handler != null) handler(this, new ItemEventArgs(item));
+			((EventHandler<ItemEventArgs>)Events[ItemActivatedEvent])?.Invoke(this, new ItemEventArgs(item));
 		}
 
 		private static readonly object ItemCheckedChangedEvent = new object();
@@ -70,8 +69,7 @@ namespace gitter.Framework.Controls
 
 		protected virtual void OnItemCheckedChanged(CustomListBoxItem item)
 		{
-			var handler = (EventHandler<ItemEventArgs>)Events[ItemCheckedChangedEvent];
-			if(handler != null) handler(this, new ItemEventArgs(item));
+			((EventHandler<ItemEventArgs>)Events[ItemCheckedChangedEvent])?.Invoke(this, new ItemEventArgs(item));
 		}
 
 		private static readonly object SelectionChangedEvent = new object();
@@ -84,8 +82,7 @@ namespace gitter.Framework.Controls
 
 		protected virtual void OnSelectionChanged()
 		{
-			var handler = (EventHandler)Events[SelectionChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
+			((EventHandler)Events[SelectionChangedEvent])?.Invoke(this, EventArgs.Empty);
 		}
 
 		private static readonly object ContextMenuRequestedEvent = new object();
@@ -2806,9 +2803,8 @@ namespace gitter.Framework.Controls
 
 				while(index < _itemPlainList.Count && itemBounds.Y < clippingEdge)
 				{
-					var item = _itemPlainList[index];
-					int hoveredPart;
-					var state = GetItemState(item, index, out hoveredPart);
+					var item     = _itemPlainList[index];
+					var state    = GetItemState(item, index, out var hoveredPart);
 					var itemClip = Rectangle.Intersect(itemBounds, clip);
 					graphics.SetClip(itemClip);
 					item.Paint(new ItemPaintEventArgs(
@@ -2949,8 +2945,7 @@ namespace gitter.Framework.Controls
 				foreach(var child in columnsSection.Sections)
 				{
 					var name = child.Name;
-					CustomListBoxColumn column;
-					if(dict.TryGetValue(name, out column))
+					if(dict.TryGetValue(name, out var column))
 					{
 						column.LoadFrom(child);
 						_columns.Add(column);

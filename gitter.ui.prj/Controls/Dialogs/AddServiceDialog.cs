@@ -52,10 +52,7 @@ namespace gitter.Controls
 
 		#region Properties
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrAdd; }
-		}
+		protected override string ActionVerb => Resources.StrAdd;
 
 		#endregion
 

@@ -34,10 +34,7 @@ namespace gitter.Framework.Controls
 
 		private static readonly LinkedList<ViewHost> _viewHosts;
 
-		public static IEnumerable<ViewHost> ViewHosts
-		{
-			get { return _viewHosts; }
-		}
+		public static IEnumerable<ViewHost> ViewHosts => _viewHosts;
 
 		/// <summary>Initializes the <see cref="ViewHost"/> class.</summary>
 		static ViewHost()
@@ -236,10 +233,7 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
+		private ViewRenderer Renderer => ViewManager.Renderer;
 
 		/// <summary>Raises the <see cref="E:System.Windows.Forms.Control.ParentChanged"/> event.</summary>
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
@@ -251,18 +245,7 @@ namespace gitter.Framework.Controls
 
 		private void UpdateOwnerForm()
 		{
-			var form = TopLevelControl as Form;
-			if(form == null)
-			{
-				if(_ownerForm != null)
-				{
-					_ownerForm.Activated -= OnOwnerFormActivated;
-					_ownerForm.Deactivate -= OnOwnerFormDeactivated;
-					_ownerForm = null;
-					_isActive = false;
-				}
-			}
-			else
+			if(TopLevelControl is Form form)
 			{
 				if(_ownerForm != form)
 				{
@@ -275,6 +258,16 @@ namespace gitter.Framework.Controls
 					form.Activated += OnOwnerFormActivated;
 					form.Deactivate += OnOwnerFormDeactivated;
 					_isActive = form.Focused;
+				}
+			}
+			else
+			{
+				if(_ownerForm != null)
+				{
+					_ownerForm.Activated -= OnOwnerFormActivated;
+					_ownerForm.Deactivate -= OnOwnerFormDeactivated;
+					_ownerForm = null;
+					_isActive = false;
 				}
 			}
 		}
@@ -299,17 +292,11 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Gets a value indicating whether this <see cref="ViewHost"/> is resizing.</summary>
 		/// <value><c>true</c> if this instance is resizing; otherwise, <c>false</c>.</value>
-		public bool IsResizing
-		{
-			get { return _resizingProcess.IsActive; }
-		}
+		public bool IsResizing => _resizingProcess.IsActive;
 
 		/// <summary>Gets a value indicating whether this <see cref="ViewHost"/> is moving.</summary>
 		/// <value><c>true</c> if this instance is moving; otherwise, <c>false</c>.</value>
-		public bool IsMoving
-		{
-			get { return _dockingProcess.IsActive; }
-		}
+		public bool IsMoving => _dockingProcess.IsActive;
 
 		/// <summary>Raises the <see cref="E:System.Windows.Forms.Control.MouseLeave"/> event.</summary>
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
@@ -453,19 +440,18 @@ namespace gitter.Framework.Controls
 		private static AnchorStyles GetRelativeSide(ViewSplit viewSplit, int index, int side)
 		{
 			var item = viewSplit[index];
-			var th = item as ViewHost;
-			bool isDw = false;
-			if(th != null)
+			bool isDw;
+			switch(item)
 			{
-				isDw = th.IsDocumentWell;
-			}
-			else
-			{
-				var ts = item as ViewSplit;
-				if(ts != null)
-				{
+				case ViewHost th:
+					isDw = th.IsDocumentWell;
+					break;
+				case ViewSplit ts:
 					isDw = ts.ContainsDocumentWell;
-				}
+					break;
+				default:
+					isDw = false;
+					break;
 			}
 			if(isDw)
 			{
@@ -495,8 +481,7 @@ namespace gitter.Framework.Controls
 				var anchor = GetRelativeSide(viewSplit, i, 1);
 				if(anchor != AnchorStyles.None) return anchor;
 			}
-			var parent = viewSplit.Parent as ViewSplit;
-			if(parent != null)
+			if(viewSplit.Parent is ViewSplit parent)
 			{
 				return GetRelativeSide(parent, viewSplit);
 			}
@@ -507,12 +492,9 @@ namespace gitter.Framework.Controls
 		{
 			if(_isDocumentWell) return AnchorStyles.None;
 			if(_status == ViewHostStatus.Floating) return AnchorStyles.None;
-			var parent = Parent;
-			if(parent == null) return AnchorStyles.None;
-			var ts = parent as ViewSplit;
-			if(ts != null)
+			if(Parent is ViewSplit parent)
 			{
-				return GetRelativeSide(ts, this);
+				return GetRelativeSide(parent, this);
 			}
 			else
 			{
@@ -833,10 +815,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Number of hosted views.</summary>
-		public int ViewsCount
-		{
-			get { return _views.Count; }
-		}
+		public int ViewsCount => _views.Count;
 
 		/// <summary>Returns hosted view.</summary>
 		/// <param name="index">View index.</param>
@@ -1230,10 +1209,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>This view host is active.</summary>
-		public bool IsActive
-		{
-			get { return ContainsFocus; }
-		}
+		public bool IsActive => ContainsFocus;
 
 		/// <summary>Undocks this <see cref="ViewHost"/>.</summary>
 		private void Undock()
@@ -1329,8 +1305,7 @@ namespace gitter.Framework.Controls
 							parent.DisableRedraw();
 							try
 							{
-								var split = parent as ViewSplit;
-								if(split != null)
+								if(parent is ViewSplit split)
 								{
 									split.Remove(this);
 									return;
@@ -1408,13 +1383,15 @@ namespace gitter.Framework.Controls
 		/// <returns>Root owner form.</returns>
 		public Form GetRootOwnerForm()
 		{
-			var form = TopLevelControl as Form;
-			if(form == null) return null;
-			while(form.Owner != null)
+			if(TopLevelControl is Form form)
 			{
-				form = form.Owner;
+				while(form.Owner != null)
+				{
+					form = form.Owner;
+				}
+				return form;
 			}
-			return form;
+			return null;
 		}
 
 		/// <summary>Undock and go floating.</summary>
@@ -1450,10 +1427,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Gets the hosting <see cref="ViewDockGrid"/>.</summary>
 		/// <value>Hosting <see cref="ViewDockGrid"/>.</value>
-		internal ViewDockGrid Grid
-		{
-			get { return _grid; }
-		}
+		internal ViewDockGrid Grid => _grid;
 
 		/// <summary>Host dock status.</summary>
 		public ViewHostStatus Status

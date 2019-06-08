@@ -25,14 +25,8 @@ namespace gitter.Framework.Mvc.WinForms
 
 	public class RadioButtonGroupInputSource<T> : IUserInputSource<T>
 	{
-		#region Data
-
 		private readonly Tuple<RadioButton, T>[] _valueMappings;
 		private bool _isReadonly;
-
-		#endregion
-
-		#region .ctor
 
 		public RadioButtonGroupInputSource(Tuple<RadioButton, T>[] valueMappings)
 		{
@@ -40,10 +34,6 @@ namespace gitter.Framework.Mvc.WinForms
 
 			_valueMappings = valueMappings;
 		}
-
-		#endregion
-
-		#region IUserInputSource<T> Members
 
 		public T Value
 		{
@@ -91,7 +81,5 @@ namespace gitter.Framework.Mvc.WinForms
 				}
 			}
 		}
-
-		#endregion
 	}
 }

@@ -100,7 +100,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					_showEmail = value;
 					AutoSize(80);
-					ShowEmailChanged.Raise(this);
+					ShowEmailChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -112,17 +112,12 @@ namespace gitter.Git.Gui.Controls
 
 		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string userName, string userEmail)
 		{
-			bool showEmail;
-			var rcc = measureEventArgs.Column as UserColumn;
-			if(rcc != null)
-			{
-				showEmail = rcc.ShowEmail;
-			}
-			else
-			{
-				showEmail = UserColumn.DefaultShowEmail;
-			}
-			return measureEventArgs.MeasureText(showEmail ? (string.Format(EmailFormat, userName, userEmail)) : (userName));
+			var showEmail = measureEventArgs.Column is UserColumn uc
+				? uc.ShowEmail
+				: UserColumn.DefaultShowEmail;
+			return measureEventArgs.MeasureText(showEmail
+				? (string.Format(EmailFormat, userName, userEmail))
+				: (userName));
 		}
 
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, User user)
@@ -142,17 +137,12 @@ namespace gitter.Git.Gui.Controls
 
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string userName, string userEmail, Brush textBrush)
 		{
-			bool showEmail = false;
-			var uc = paintEventArgs.Column as UserColumn;
-			if(uc != null)
-			{
-				showEmail = uc.ShowEmail;
-			}
-			else
-			{
-				showEmail = UserColumn.DefaultShowEmail;
-			}
-			paintEventArgs.PaintText(showEmail ? (string.Format(EmailFormat, userName, userEmail)) : (userName), textBrush);
+			var showEmail = paintEventArgs.Column is UserColumn uc
+				? uc.ShowEmail
+				: UserColumn.DefaultShowEmail;
+			paintEventArgs.PaintText(showEmail
+				? (string.Format(EmailFormat, userName, userEmail))
+				: (userName), textBrush);
 		}
 
 		protected override void SaveMoreTo(Section section)

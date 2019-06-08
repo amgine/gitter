@@ -27,8 +27,6 @@ namespace gitter.Framework.Controls
 
 	public sealed class ViewButton
 	{
-		#region Static Data
-
 		private static readonly Bitmap ImgMenu = Resources.ImgViewHostMenu;
 		private static readonly Bitmap ImgNormalize = Resources.ImgNormalize;
 		private static readonly Bitmap ImgMaximize = Resources.ImgMaximize;
@@ -39,85 +37,59 @@ namespace gitter.Framework.Controls
 		private static readonly Bitmap ImgTabMenu = Resources.ImgTabMenu;
 		private static readonly Bitmap ImgTabMenuExt = Resources.ImgTabMenuExtends;
 
-		#endregion
-
-		#region Data
-
-		private int _offset;
-		private ViewButtonType _type;
-		private Image _image;
-
-		#endregion
-
 		internal ViewButton(int offset, ViewButtonType type)
 		{
-			_offset = offset;
-			_type = type;
-			switch(_type)
+			Offset = offset;
+			Type = type;
+			switch(Type)
 			{
 				case ViewButtonType.Menu:
-					_image = ImgMenu;
+					Image = ImgMenu;
 					break;
 				case ViewButtonType.Pin:
-					_image = ImgPin;
+					Image = ImgPin;
 					break;
 				case ViewButtonType.Unpin:
-					_image = ImgPin;
+					Image = ImgPin;
 					break;
 				case ViewButtonType.Normalize:
-					_image = ImgNormalize;
+					Image = ImgNormalize;
 					break;
 				case ViewButtonType.Maximize:
-					_image = ImgMaximize;
+					Image = ImgMaximize;
 					break;
 				case ViewButtonType.Close:
-					_image = ImgClose;
+					Image = ImgClose;
 					break;
 				case ViewButtonType.ScrollTabsLeft:
-					_image = ImgScrollLeft;
+					Image = ImgScrollLeft;
 					break;
 				case ViewButtonType.ScrollTabsRight:
-					_image = ImgScrollRight;
+					Image = ImgScrollRight;
 					break;
 				case ViewButtonType.TabsMenu:
-					_image = ImgTabMenu;
+					Image = ImgTabMenu;
 					break;
 				case ViewButtonType.TabsScrollMenu:
-					_image = ImgTabMenuExt;
+					Image = ImgTabMenuExt;
 					break;
 				default:
-					_image = null;
+					Image = null;
 					break;
 			}
 		}
 
-		#region Properties
+		public int Offset { get; }
 
-		public int Offset
-		{
-			get { return _offset; }
-		}
+		public ViewButtonType Type { get; }
 
-		public ViewButtonType Type
-		{
-			get { return _type; }
-		}
-
-		public Image Image
-		{
-			get { return _image; }
-		}
-
-		#endregion
+		public Image Image { get; }
 
 		internal void OnPaint(Graphics graphics, Rectangle bounds, bool focus, bool hover, bool pressed)
 		{
 			ViewManager.Renderer.RenderViewButton(this, graphics, bounds, focus, hover, pressed);
 		}
 
-		public override string ToString()
-		{
-			return _type.ToString();
-		}
+		public override string ToString() => Type.ToString();
 	}
 }

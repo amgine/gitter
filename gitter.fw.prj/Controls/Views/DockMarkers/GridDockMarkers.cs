@@ -21,22 +21,16 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	sealed class GridDockMarkers : DockMarkers<GridDockMarker>
 	{
-		private readonly ViewDockGrid _grid;
-
 		public GridDockMarkers(ViewDockGrid grid)
 		{
-			_grid = grid;
+			Grid = grid;
 		}
 
-		public ViewDockGrid Grid
-		{
-			get { return _grid; }
-		}
+		public ViewDockGrid Grid { get; }
 
 		/// <summary>Creates the markers.</summary>
 		/// <param name="dockClient">The dock client.</param>
@@ -51,10 +45,10 @@ namespace gitter.Framework.Controls
 			{
 				return new GridDockMarker[]
 				{
-					new GridDockMarker(_grid, dockClient, AnchorStyles.Left),
-					new GridDockMarker(_grid, dockClient, AnchorStyles.Top),
-					new GridDockMarker(_grid, dockClient, AnchorStyles.Right),
-					new GridDockMarker(_grid, dockClient, AnchorStyles.Bottom),
+					new GridDockMarker(Grid, dockClient, AnchorStyles.Left),
+					new GridDockMarker(Grid, dockClient, AnchorStyles.Top),
+					new GridDockMarker(Grid, dockClient, AnchorStyles.Right),
+					new GridDockMarker(Grid, dockClient, AnchorStyles.Bottom),
 				};
 			}
 		}

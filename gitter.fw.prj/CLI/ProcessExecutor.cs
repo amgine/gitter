@@ -37,12 +37,8 @@ namespace gitter.Framework.CLI
 				{
 					process.Kill();
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 			}
 
@@ -59,8 +55,6 @@ namespace gitter.Framework.CLI
 	public abstract class ProcessExecutor<TInput>
 		where TInput : class
 	{
-		#region .ctor
-
 		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor&lt;TInput&gt;"/> class.</summary>
 		/// <param name="exeFileName">Path to exe file.</param>
 		/// <param name="stdOutReceiver">STDOUT receiver (can be null).</param>
@@ -72,19 +66,11 @@ namespace gitter.Framework.CLI
 			ExeFileName = exeFileName;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public string ExeFileName { get; }
-
-		#endregion
-
-		#region Methods
 
 		protected virtual ProcessStartInfo InitializeStartInfo(TInput input)
 		{
-			return new ProcessStartInfo { FileName = ExeFileName };
+			return new ProcessStartInfo(ExeFileName);
 		}
 
 		protected virtual Process CreateProcess(TInput input)
@@ -99,23 +85,11 @@ namespace gitter.Framework.CLI
 			using(var process = CreateProcess(input))
 			{
 				process.Start();
-				if(stdOutReceiver != null)
-				{
-					stdOutReceiver.Initialize(process, process.StandardOutput);
-				}
-				if(stdErrReceiver != null)
-				{
-					stdErrReceiver.Initialize(process, process.StandardError);
-				}
+				stdOutReceiver?.Initialize(process, process.StandardOutput);
+				stdErrReceiver?.Initialize(process, process.StandardError);
 				process.WaitForExit();
-				if(stdErrReceiver != null)
-				{
-					stdErrReceiver.WaitForEndOfStream();
-				}
-				if(stdOutReceiver != null)
-				{
-					stdOutReceiver.WaitForEndOfStream();
-				}
+				stdErrReceiver?.WaitForEndOfStream();
+				stdOutReceiver?.WaitForEndOfStream();
 				return process.ExitCode;
 			}
 		}
@@ -141,12 +115,8 @@ namespace gitter.Framework.CLI
 						{
 							exitCode = ((Process)s).ExitCode;
 						}
-						catch(Exception exc)
+						catch(Exception exc) when(!exc.IsCritical())
 						{
-							if(exc.IsCritical())
-							{
-								throw;
-							}
 							tcs.TrySetException(exc);
 							return;
 						}
@@ -154,51 +124,24 @@ namespace gitter.Framework.CLI
 					}
 				};
 			process.Start();
-			if(stdOutReceiver != null)
-			{
-				stdOutReceiver.Initialize(process, process.StandardOutput);
-			}
-			if(stdErrReceiver != null)
-			{
-				stdErrReceiver.Initialize(process, process.StandardError);
-			}
-			CancellationTokenRegistration cancellationRegistration;
-			if(cancellationToken.CanBeCanceled)
-			{
-				cancellationRegistration = cancellationToken.Register(() => tcs.TrySetCanceled());
-			}
-			else
-			{
-				cancellationRegistration = default(CancellationTokenRegistration);
-			}
+			stdOutReceiver?.Initialize(process, process.StandardOutput);
+			stdErrReceiver?.Initialize(process, process.StandardError);
+			var cancellationRegistration = cancellationToken.CanBeCanceled
+				? cancellationToken.Register(() => tcs.TrySetCanceled())
+				: default;
 			return tcs.Task.ContinueWith(
 				task =>
 				{
 					if(task.IsCanceled)
 					{
-						if(stdErrReceiver != null)
-						{
-							stdErrReceiver.NotifyCanceled();
-						}
-						if(stdOutReceiver != null)
-						{
-							stdOutReceiver.NotifyCanceled();
-						}
-						if(cancellationMethod != null)
-						{
-							cancellationMethod(process);
-						}
+						stdErrReceiver?.NotifyCanceled();
+						stdOutReceiver?.NotifyCanceled();
+						cancellationMethod?.Invoke(process);
 					}
 					else
 					{
-						if(stdErrReceiver != null)
-						{
-							stdErrReceiver.WaitForEndOfStream();
-						}
-						if(stdOutReceiver != null)
-						{
-							stdOutReceiver.WaitForEndOfStream();
-						}
+						stdErrReceiver?.WaitForEndOfStream();
+						stdOutReceiver?.WaitForEndOfStream();
 					}
 					cancellationRegistration.Dispose();
 					process.Dispose();
@@ -208,7 +151,5 @@ namespace gitter.Framework.CLI
 				TaskContinuationOptions.None,
 				TaskScheduler.Default);
 		}
-
-		#endregion
 	}
 }

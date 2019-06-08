@@ -372,12 +372,12 @@ namespace gitter.Framework.Controls
 				graphics.DrawImage(image,
 					new Rectangle(rect.X + ListBoxConstants.SpaceBeforeImage, rect.Y + (rect.Height - h) / 2, w, h),
 					new Rectangle(0, 0, w, h), GraphicsUnit.Pixel);
-				rect.X += w + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
+				rect.X     += w + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
 				rect.Width -= w + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
 			}
 			else
 			{
-				rect.X += ListBoxConstants.DefaultImageWidth + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
+				rect.X     += ListBoxConstants.DefaultImageWidth + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
 				rect.Width -= ListBoxConstants.DefaultImageWidth + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
 			}
 			if(rect.Width > 0)

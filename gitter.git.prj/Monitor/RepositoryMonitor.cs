@@ -62,53 +62,31 @@ namespace gitter.Git
 
 		private sealed class NotificationBlock
 		{
-			private readonly object _key;
-			private readonly object _notificationType;
-
 			public NotificationBlock(object key, object notificationType)
 			{
-				_key = key;
-				_notificationType = notificationType;
+				Key = key;
+				NotificationType = notificationType;
 			}
 
-			public object Key
-			{
-				get { return _key;}
-			}
+			public object Key { get; }
 
-			public object NotificationType
-			{
-				get { return _notificationType; }
-			}
+			public object NotificationType { get; }
 		}
 
 		private sealed class NotificationDelayedUnblock
 		{
-			private readonly object _key;
-			private readonly object _notificationType;
-			private readonly DateTime _createdOn;
-
 			public NotificationDelayedUnblock(DateTime createdOn, object key, object notificationType)
 			{
-				_createdOn = createdOn;
-				_key = key;
-				_notificationType = notificationType;
+				CreatedOn = createdOn;
+				Key = key;
+				NotificationType = notificationType;
 			}
 
-			public DateTime CreatedOn
-			{
-				get { return _createdOn; }
-			}
+			public DateTime CreatedOn { get; }
 
-			public object Key
-			{
-				get { return _key; }
-			}
+			public object Key { get; }
 
-			public object NotificationType
-			{
-				get { return _notificationType; }
-			}
+			public object NotificationType { get; }
 		}
 
 		private sealed class NotificationsBlockToken : IDisposable
@@ -235,8 +213,7 @@ namespace gitter.Git
 						int count = 0;
 						foreach(var n in notifications)
 						{
-							var wtn = n as WorktreeUpdatedNotification;
-							if(wtn != null)
+							if(n is WorktreeUpdatedNotification wtn)
 							{
 								if(count == 0)
 								{
@@ -256,7 +233,9 @@ namespace gitter.Git
 						}
 						notifications.Clear();
 						if(globalwtn != null)
+						{
 							EmitNotification(globalwtn);
+						}
 						break;
 				}
 			}

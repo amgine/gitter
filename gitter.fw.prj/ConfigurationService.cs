@@ -39,16 +39,7 @@ namespace gitter.Framework
 
 		private readonly string _configPath;
 		private readonly string _configFileName;
-		private ConfigurationManager _configuration;
-
-		private Section _rootSection;
-		private Section _guiSection;
-		private Section _globalSection;
-		private Section _viewsSection;
 		private Section _providersSection;
-		private Section _repositoryManagerSection;
-
-		private bool _isDisposed;
 
 		#endregion
 
@@ -76,13 +67,13 @@ namespace gitter.Framework
 				}
 			}
 
-			_configuration            = LoadConfig(ConfigFileName, "Configuration");
-			_rootSection              = _configuration.RootSection;
-			_guiSection               = _rootSection.GetCreateSection("Gui");
-			_globalSection            = _rootSection.GetCreateSection("Global");
-			_viewsSection             = _rootSection.GetCreateSection("Tools");
-			_providersSection         = _rootSection.GetCreateSection("Providers");
-			_repositoryManagerSection = _rootSection.GetCreateSection("RepositoryManager");
+			Configuration            = LoadConfig(ConfigFileName, "Configuration");
+			RootSection              = Configuration.RootSection;
+			GuiSection               = RootSection.GetCreateSection("Gui");
+			GlobalSection            = RootSection.GetCreateSection("Global");
+			ViewsSection             = RootSection.GetCreateSection("Tools");
+			_providersSection        = RootSection.GetCreateSection("Providers");
+			RepositoryManagerSection = RootSection.GetCreateSection("RepositoryManager");
 		}
 
 		~ConfigurationService()
@@ -92,10 +83,7 @@ namespace gitter.Framework
 
 		#endregion
 
-		public ConfigurationManager Configuration
-		{
-			get { return _configuration; }
-		}
+		public ConfigurationManager Configuration { get; }
 
 		public Stream CreateFile(string fileName)
 		{
@@ -112,30 +100,15 @@ namespace gitter.Framework
 			return File.Exists(Path.Combine(_configPath, fileName));
 		}
 
-		public Section RootSection
-		{
-			get { return _rootSection; }
-		}
+		public Section RootSection { get; }
 
-		public Section GuiSection
-		{
-			get { return _guiSection; }
-		}
+		public Section GuiSection { get; }
 
-		public Section GlobalSection
-		{
-			get { return _globalSection; }
-		}
+		public Section GlobalSection { get; }
 
-		public Section ViewsSection
-		{
-			get { return _viewsSection; }
-		}
+		public Section ViewsSection { get; }
 
-		public Section RepositoryManagerSection
-		{
-			get { return _repositoryManagerSection; }
-		}
+		public Section RepositoryManagerSection { get; }
 
 		public Section GetSectionForProvider(IRepositoryProvider provider)
 		{
@@ -169,7 +142,7 @@ namespace gitter.Framework
 
 		public void Save()
 		{
-			SaveConfig(ConfigFileName, _configuration);
+			SaveConfig(ConfigFileName, Configuration);
 		}
 
 		private ConfigurationManager LoadConfig(string configFile, string configName)
@@ -239,11 +212,7 @@ namespace gitter.Framework
 
 		#region IDisposable
 
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		private void Dispose(bool disposing)
 		{

@@ -85,23 +85,14 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Gets the <see cref="CustomListBoxSubItem"/> with the specified id.</summary>
 		/// <param name="id">Subitem id to get.</param>
-		public CustomListBoxSubItem this[int id]
-		{
-			get { return _subItems[id]; }
-		}
+		public CustomListBoxSubItem this[int id] => _subItems[id];
 
 		/// <summary>Collection of subitems.</summary>
-		public IEnumerable<CustomListBoxSubItem> SubItems
-		{
-			get { return _subItems.Values; }
-		}
+		public IEnumerable<CustomListBoxSubItem> SubItems => _subItems.Values;
 
 		/// <summary>Gets the subitem count.</summary>
 		/// <value>The sub item count.</value>
-		public int SubItemCount
-		{
-			get { return _subItems.Count; }
-		}
+		public int SubItemCount => _subItems.Count;
 
 		#endregion
 
@@ -131,8 +122,7 @@ namespace gitter.Framework.Controls
 		/// <param name="id">Removed subitem's id.</param>
 		public void RemoveSubItem(int id)
 		{
-			CustomListBoxSubItem subItem;
-			if(_subItems.TryGetValue(id, out subItem))
+			if(_subItems.TryGetValue(id, out var subItem))
 			{
 				subItem.Item = null;
 				_subItems.Remove(id);
@@ -143,8 +133,7 @@ namespace gitter.Framework.Controls
 		/// <param name="paintEventArgs">Paint event args.</param>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
-			CustomListBoxSubItem subItem;
-			if(_subItems.TryGetValue(paintEventArgs.SubItemId, out subItem))
+			if(_subItems.TryGetValue(paintEventArgs.SubItemId, out var subItem))
 			{
 				subItem.Paint(paintEventArgs);
 			}
@@ -155,15 +144,9 @@ namespace gitter.Framework.Controls
 		/// <returns>Size of the subitem.</returns>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
-			CustomListBoxSubItem subItem;
-			if(_subItems.TryGetValue(measureEventArgs.SubItemId, out subItem))
-			{
-				return subItem.Measure(measureEventArgs);
-			}
-			else
-			{
-				return Size.Empty;
-			}
+			return _subItems.TryGetValue(measureEventArgs.SubItemId, out var subItem)
+				? subItem.Measure(measureEventArgs)
+				: Size.Empty;
 		}
 
 		#endregion

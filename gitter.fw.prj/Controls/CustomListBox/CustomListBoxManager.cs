@@ -24,24 +24,14 @@ namespace gitter.Framework.Controls
 
 	public static class CustomListBoxManager
 	{
-		#region Data
-
 		private static CustomListBoxRenderer _renderer;
 		private static CustomListBoxRenderer _win7Renderer;
 		private static CustomListBoxRenderer _msvs2012LightRenderer;
 		private static CustomListBoxRenderer _msvs2012DarkRenderer;
 
-		#endregion
-
-		#region .ctor
-
 		static CustomListBoxManager()
 		{
 		}
-
-		#endregion
-
-		#region Properties
 
 		public static CustomListBoxRenderer Renderer
 		{
@@ -96,7 +86,5 @@ namespace gitter.Framework.Controls
 				return _msvs2012DarkRenderer;
 			}
 		}
-
-		#endregion
 	}
 }

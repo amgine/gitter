@@ -22,7 +22,6 @@ namespace gitter
 {
 	using System;
 	using System.Drawing;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -75,14 +74,9 @@ namespace gitter
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					if(_repository == null)
-					{
-						return measureEventArgs.MeasureText("<no repository>");
-					}
-					else
-					{
-						return measureEventArgs.MeasureImageAndText(ImgRepository, _repository);
-					}
+					return _repository == null
+						? measureEventArgs.MeasureText("<no repository>")
+						: measureEventArgs.MeasureImageAndText(ImgRepository, _repository);
 				default:
 					return Size.Empty;
 			}

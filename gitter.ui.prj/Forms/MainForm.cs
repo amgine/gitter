@@ -66,7 +66,7 @@ namespace gitter
 
 		#region Constants
 
-		private const int SavedRecentRepositories = 10;
+		private const int SavedRecentRepositories = 25;
 
 		#endregion
 

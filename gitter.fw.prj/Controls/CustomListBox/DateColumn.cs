@@ -21,11 +21,9 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Windows.Forms;
 	using System.Drawing;
 
 	using gitter.Framework;
-	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Framework.Properties.Resources;
@@ -34,26 +32,12 @@ namespace gitter.Framework.Controls
 	{
 		public const DateFormat DefaultDateFormat = DateFormat.SystemDefault;
 
-		#region Data
-
 		private DateFormat _dateFormat;
 		private DateColumnExtender _extender;
 
-		#endregion
-
-		#region Events
-
 		public event EventHandler DateFormatChanged;
 
-		protected virtual void OnDateFormatChanged()
-		{
-			var handler = DateFormatChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
-
-		#endregion
-
-		#region .ctor
+		protected virtual void OnDateFormatChanged() => DateFormatChanged?.Invoke(this, EventArgs.Empty);
 
 		public DateColumn(int id, string name, bool visible)
 			: base(id, name, visible)
@@ -65,8 +49,6 @@ namespace gitter.Framework.Controls
 			: this(id, Resources.StrDate, visible)
 		{
 		}
-
-		#endregion
 
 		protected override void OnListBoxAttached()
 		{
@@ -86,32 +68,18 @@ namespace gitter.Framework.Controls
 
 		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, DateTime date)
 		{
-			var dc = measureEventArgs.Column as DateColumn;
-			DateFormat format;
-			if(dc != null)
-			{
-				format = dc.DateFormat;
-			}
-			else
-			{
-				format = DateColumn.DefaultDateFormat;
-			}
+			var format = measureEventArgs.Column is DateColumn dc
+				? dc.DateFormat
+				: DateColumn.DefaultDateFormat;
 			var strDate = Utility.FormatDate(date, format);
 			return measureEventArgs.MeasureText(strDate);
 		}
 
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, DateTime date)
 		{
-			DateFormat format;
-			var dc = paintEventArgs.Column as DateColumn;
-			if(dc != null)
-			{
-				format = dc.DateFormat;
-			}
-			else
-			{
-				format = DateColumn.DefaultDateFormat;
-			}
+			var format = paintEventArgs.Column is DateColumn dc
+				? dc.DateFormat
+				: DateColumn.DefaultDateFormat;
 			var strdate = Utility.FormatDate(date, format);
 			paintEventArgs.PaintText(strdate);
 		}
@@ -147,9 +115,6 @@ namespace gitter.Framework.Controls
 			section.SetValue("DateFormat", DateFormat);
 		}
 
-		public override string IdentificationString
-		{
-			get { return "Date"; }
-		}
+		public override string IdentificationString => "Date";
 	}
 }

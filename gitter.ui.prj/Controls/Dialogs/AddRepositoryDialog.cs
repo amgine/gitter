@@ -21,14 +21,8 @@
 namespace gitter
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
 	using gitter.Framework.Services;
 
 	using Resources = gitter.Properties.Resources;
@@ -60,10 +54,7 @@ namespace gitter
 			GitterApplication.FontManager.InputFont.Apply(_txtPath, _txtDescription);
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrAdd; }
-		}
+		protected override string ActionVerb => Resources.StrAdd;
 
 		public string Path
 		{

@@ -42,24 +42,15 @@ namespace gitter.Framework.Controls
 		/// <returns>Array of created markers.</returns>
 		protected abstract T[] CreateMarkers(ViewHost dockClient);
 
-		public T this[int index]
-		{
-			get { return _markers[index]; }
-		}
+		public T this[int index] => _markers[index];
 
 		/// <summary>Gets the count of dock markers.</summary>
 		/// <value>Dock marker count.</value>
-		public int Count
-		{
-			get { return _markers != null ? _markers.Length : 0; }
-		}
+		public int Count => _markers != null ? _markers.Length : 0;
 
 		/// <summary>Gets a value indicating whether markers are visible.</summary>
 		/// <value><c>true</c> if markers are visible; otherwise, <c>false</c>.</value>
-		public bool MarkersVisible
-		{
-			get { return _markers != null; }
-		}
+		public bool MarkersVisible => _markers != null;
 
 		/// <summary>Shows markers to assist docking process.</summary>
 		/// <param name="dockClient">View host which is being docked.</param>
@@ -80,10 +71,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Updates hover status of dock markers.</summary>
 		/// <returns>true if mouse is hovering docking button.</returns>
-		public bool UpdateHover()
-		{
-			return UpdateHover(Control.MousePosition);
-		}
+		public bool UpdateHover() => UpdateHover(Control.MousePosition);
 
 		/// <summary>
 		/// Updates hover status of dock markers.
@@ -139,10 +127,7 @@ namespace gitter.Framework.Controls
 		/// Checks docking position at current mose position.
 		/// </summary>
 		/// <returns>Position for docking client control.</returns>
-		public DockResult HitTest()
-		{
-			return HitTest(Control.MousePosition);
-		}
+		public DockResult HitTest() => HitTest(Control.MousePosition);
 
 		/// <summary>
 		/// Checks docking position at specified <paramref name="position"/>.

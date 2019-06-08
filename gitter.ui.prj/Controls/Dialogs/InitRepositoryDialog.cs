@@ -29,46 +29,21 @@ namespace gitter.Controls
 
 	public partial class InitRepositoryDialog : PickerDialog<RepositoryProviderPicker, IRepositoryProvider>, IExecutableDialog
 	{
-		#region Data
-
-		private readonly IWorkingEnvironment _workingEnvironment;
-
-		#endregion
-
-		#region .ctor
-
 		public InitRepositoryDialog(IWorkingEnvironment workingEnvironment)
 			: base(Resources.StrVCS.AddColon())
 		{
 			Verify.Argument.IsNotNull(workingEnvironment, nameof(workingEnvironment));
 
-			_workingEnvironment = workingEnvironment;
+			WorkingEnvironment = workingEnvironment;
 
 			Text = Resources.StrInitRepository;
 		}
 
-		#endregion
+		private IWorkingEnvironment WorkingEnvironment { get; }
 
-		#region Properties
+		protected override string ActionVerb => Resources.StrInit;
 
-		private IWorkingEnvironment WorkingEnvironment
-		{
-			get { return _workingEnvironment; }
-		}
-
-		protected override string ActionVerb
-		{
-			get { return Resources.StrInit; }
-		}
-
-		protected override int MinimumSelectableItems
-		{
-			get { return 2; }
-		}
-
-		#endregion
-
-		#region Methods
+		protected override int MinimumSelectableItems => 2;
 
 		protected override void LoadItems(RepositoryProviderPicker picker)
 		{
@@ -99,8 +74,7 @@ namespace gitter.Controls
 			{
 				return false;
 			}
-			var initDialog = SelectedControl as IRepositoryInitDialog;
-			if(initDialog != null)
+			if(SelectedControl is IRepositoryInitDialog initDialog)
 			{
 				var repositoryPath = initDialog.RepositoryPath.Value;
 				WorkingEnvironment.BeginInvoke(
@@ -109,7 +83,5 @@ namespace gitter.Controls
 			}
 			return true;
 		}
-
-		#endregion
 	}
 }

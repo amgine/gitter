@@ -26,41 +26,19 @@ namespace gitter.Framework.Controls
 	/// <summary>Collection of <see cref="FlowPanel"/>'s hosted in <see cref="FlowLayoutControl"/>.</summary>
 	public sealed class FlowPanelCollection : SafeNotifySortedCollection<FlowPanel>
 	{
-		#region Data
-
-		private readonly FlowLayoutControl _control;
-
-		#endregion
-
-		#region .ctor
-
 		/// <summary>Create <see cref="FlowPanelCollection"/>.</summary>
 		/// <param name="control">Host <see cref="FlowLayoutControl"/>.</param>
 		internal FlowPanelCollection(FlowLayoutControl control)
 		{
 			Verify.Argument.IsNotNull(control, nameof(control));
 
-			_control = control;
+			FlowLayoutControl = control;
 		}
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>Host <see cref="FlowLayoutControl"/>.</summary>
-		public FlowLayoutControl FlowLayoutControl
-		{
-			get { return _control; }
-		}
+		public FlowLayoutControl FlowLayoutControl { get; }
 
-		#endregion
-
-		#region Overrides
-
-		protected override ISynchronizeInvoke SynchronizeInvoke
-		{
-			get { return _control; }
-		}
+		protected override ISynchronizeInvoke SynchronizeInvoke => FlowLayoutControl;
 
 		protected override void FreeItem(FlowPanel item)
 		{
@@ -69,14 +47,12 @@ namespace gitter.Framework.Controls
 
 		protected override void AcquireItem(FlowPanel item)
 		{
-			item.FlowControl = _control;
+			item.FlowControl = FlowLayoutControl;
 		}
 
 		protected override bool VerifyItem(FlowPanel item)
 		{
 			return item != null && item.FlowControl == null;
 		}
-
-		#endregion
 	}
 }

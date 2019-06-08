@@ -129,8 +129,7 @@ namespace gitter.Git
 			EventHandler<ReflogRecordEventArgs> handler;
 			lock(_recordAddedHandlers)
 			{
-				Delegate handlerDelegate;
-				if(_recordAddedHandlers.TryGetValue(this, out handlerDelegate))
+				if(_recordAddedHandlers.TryGetValue(this, out var handlerDelegate))
 				{
 					handler = (EventHandler<ReflogRecordEventArgs>)handlerDelegate;
 				}
@@ -139,7 +138,7 @@ namespace gitter.Git
 					handler = null;
 				}
 			}
-			if(handler != null) handler(this, new ReflogRecordEventArgs(record));
+			handler?.Invoke(this, new ReflogRecordEventArgs(record));
 		}
 
 		private void InvokeRecordRemoved(ReflogRecord record)
@@ -147,8 +146,7 @@ namespace gitter.Git
 			EventHandler<ReflogRecordEventArgs> handler;
 			lock(_recordRemovedHandlers)
 			{
-				Delegate handlerDelegate;
-				if(_recordRemovedHandlers.TryGetValue(this, out handlerDelegate))
+				if(_recordRemovedHandlers.TryGetValue(this, out var handlerDelegate))
 				{
 					handler = (EventHandler<ReflogRecordEventArgs>)handlerDelegate;
 				}
@@ -157,7 +155,7 @@ namespace gitter.Git
 					handler = null;
 				}
 			}
-			if(handler != null) handler(this, new ReflogRecordEventArgs(record));
+			handler?.Invoke(this, new ReflogRecordEventArgs(record));
 		}
 
 		#endregion

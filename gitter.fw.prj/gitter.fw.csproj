@@ -599,7 +599,7 @@
     <Compile Include="INamedObject.cs" />
     <Compile Include="Services\Notifcation\INotificationService.cs" />
     <Compile Include="IconCache.cs" />
-    <Compile Include="IObjectInformation.cs" />
+    <Compile Include="IObjectData.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IRepositoryProvider.cs" />
     <Compile Include="Services\ToolTip\IToolTipService.cs" />

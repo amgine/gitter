@@ -342,8 +342,7 @@ namespace gitter.Git
 					new RevertParameters(list, noCommit));
 				if(!noCommit)
 				{
-					var currentBranch = repository.Head.Pointer as Branch;
-					if(currentBranch != null)
+					if(repository.Head.Pointer is Branch currentBranch)
 					{
 						currentBranch.Refresh();
 					}
@@ -455,10 +454,7 @@ namespace gitter.Git
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.WorktreeUpdated);
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsRebaseIsInProcess.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsRebaseIsInProcess.AddEllipsis()));
 			return repository.Accessor
 				.Rebase.InvokeAsync(parameters, progress, CancellationToken.None)
 				.ContinueWith(
@@ -744,10 +740,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsFetchingPatch.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsFetchingPatch.AddEllipsis()));
 			var parameters = GetFormatPatchParameters(revision);
 			var function   = GetFormatPatchFunction(revision);
 
@@ -795,10 +788,7 @@ namespace gitter.Git
 			Verify.Argument.IsNeitherNullNorWhitespace(outputFile, nameof(outputFile));
 
 			var parameters = GetArchiveParameters(revision, outputFile, path, format);
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrfCreatingArchiveFrom.UseAsFormat(parameters.Tree).AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrfCreatingArchiveFrom.UseAsFormat(parameters.Tree).AddEllipsis()));
 			return revision.Repository.Accessor.Archive.InvokeAsync(
 				parameters, progress, CancellationToken.None);
 		}

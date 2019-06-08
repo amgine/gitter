@@ -22,35 +22,14 @@ namespace gitter.Framework.Mvc
 {
 	public sealed class UserInputError
 	{
-		#region Data
-
-		private readonly string _title;
-		private readonly string _message;
-
-		#endregion
-
-		#region .ctor
-
 		public UserInputError(string title, string message)
 		{
-			_title = title;
-			_message = message;
+			Title   = title;
+			Message = message;
 		}
 
-		#endregion
+		public string Title { get; }
 
-		#region Properties
-
-		public string Title
-		{
-			get { return _title; }
-		}
-
-		public string Message
-		{
-			get { return _message; }
-		}
-
-		#endregion
+		public string Message { get; }
 	}
 }

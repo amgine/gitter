@@ -25,50 +25,29 @@ namespace gitter.Framework
 
 	public sealed class RepositoryUpdateInfo
 	{
-		private readonly Image _icon;
-		private readonly string _name;
-
 		public RepositoryUpdateInfo(string name, Image icon)
 		{
-			_name = name;
-			_icon = icon;
+			Name = name;
+			Icon = icon;
 		}
 
-		public Image Icon
-		{
-			get { return _icon;}
-		}
+		public Image Icon { get; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 	}
 
 	public sealed class UpdatedItem
 	{
-		private readonly Image _icon;
-		private readonly string _name;
-
 		public UpdatedItem(string name, Image icon)
 		{
-			_name = name;
-			_icon = icon;
+			Name = name;
+			Icon = icon;
 		}
 
-		public Image Icon
-		{
-			get { return _icon; }
-		}
+		public Image Icon { get; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

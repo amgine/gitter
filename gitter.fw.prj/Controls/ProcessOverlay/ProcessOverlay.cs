@@ -22,28 +22,12 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
 
 	public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 	{
-		private Control _hostControl;
 		private ProcessOverlayRenderer _renderer;
-
-		private int _max;
-		private int _min;
-		private int _value;
-		private bool _marquee;
-		private string _title;
-		private string _message;
-		private float _rounding;
-		private bool _isVisible;
-		private bool _canCancel;
-		private IAsyncResult _context;
 		private Font _font;
-		private bool _invalidateHost;
-		private bool _disableHost;
-
 		private readonly Func<Rectangle> _getOverlayArea;
 
 		private Timer _timer;
@@ -52,11 +36,11 @@ namespace gitter.Framework.Controls
 
 		public ProcessOverlay(Control hostControl, Func<Rectangle> getOverlayArea)
 		{
-			_hostControl = hostControl;
+			HostControl = hostControl;
 			_getOverlayArea = getOverlayArea;
-			_rounding = 10.0f;
-			_invalidateHost = true;
-			_disableHost = true;
+			Rounding = 10.0f;
+			InvalidateHost = true;
+			DisableHost = true;
 
 			_timer = new Timer()
 			{
@@ -81,7 +65,7 @@ namespace gitter.Framework.Controls
 			var form = GitterApplication.MainForm;
 			if(form != null && !form.IsDisposed)
 			{
-				if(_marquee)
+				if(Marquee)
 				{
 					form.SetTaskbarProgressState(TbpFlag.Indeterminate);
 				}
@@ -89,8 +73,8 @@ namespace gitter.Framework.Controls
 				{
 					form.SetTaskbarProgressState(TbpFlag.Normal);
 					form.SetTaskbarProgressValue(
-						(long)(_value - _min),
-						(long)(_max - _min));
+						(long)(Value - Minimum),
+						(long)(Maximum - Minimum));
 				}
 			}
 		}
@@ -109,9 +93,9 @@ namespace gitter.Framework.Controls
 				{
 					return _font;
 				}
-				if(_hostControl != null)
+				if(HostControl != null)
 				{
-					return _hostControl.Font;
+					return HostControl.Font;
 				}
 				return GitterApplication.FontManager.UIFont;
 			}
@@ -131,75 +115,31 @@ namespace gitter.Framework.Controls
 			set { _renderer = value; }
 		}
 
-		public int Minimum
-		{
-			get { return _min; }
-			set { _min = value; }
-		}
+		public int Minimum { get; set; }
 
-		public int Maximum
-		{
-			get { return _max; }
-			set { _max = value; }
-		}
+		public int Maximum { get; set; }
 
-		public int Value
-		{
-			get { return _value; }
-			set { _value = value; }
-		}
+		public int Value { get; set; }
 
-		public string Title
-		{
-			get { return _title; }
-			set { _title = value; }
-		}
+		public string Title { get; set; }
 
-		public string Message
-		{
-			get { return _message; }
-			set { _message = value; }
-		}
+		public string Message { get; set; }
 
-		public bool Marquee
-		{
-			get { return _marquee; }
-			set { _marquee = value; }
-		}
+		public bool Marquee { get; set; }
 
-		public float Rounding
-		{
-			get { return _rounding; }
-			set { _rounding = value; }
-		}
+		public float Rounding { get; set; }
 
-		public Control HostControl
-		{
-			get { return _hostControl; }
-			internal set { _hostControl = value; }
-		}
+		public Control HostControl { get; internal set; }
 
-		public bool InvalidateHost
-		{
-			get { return _invalidateHost; }
-			set { _invalidateHost = value; }
-		}
+		public bool InvalidateHost { get; set; }
 
-		public bool DisableHost
-		{
-			get { return _disableHost; }
-			set { _disableHost = value; }
-		}
+		public bool DisableHost { get; set; }
 
-		public bool IsVisible
-		{
-			get { return _isVisible; }
-			private set { _isVisible = value; }
-		}
+		public bool IsVisible { get; private set; }
 
 		public void OnPaint(Graphics graphics, Rectangle bounds)
 		{
-			if(_isVisible)
+			if(IsVisible)
 			{
 				Renderer.Paint(this, graphics, bounds);
 			}
@@ -215,8 +155,8 @@ namespace gitter.Framework.Controls
 
 		private void Repaint()
 		{
-			RepaintRequired.Raise(this);
-			if(_invalidateHost && _hostControl != null && _hostControl.Created && !_hostControl.IsDisposed)
+			RepaintRequired?.Invoke(this, EventArgs.Empty);
+			if(InvalidateHost && HostControl != null && HostControl.Created && !HostControl.IsDisposed)
 			{
 				InvalidateHostControl();
 			}
@@ -224,11 +164,11 @@ namespace gitter.Framework.Controls
 
 		private void InvalidateHostControl()
 		{
-			if(_hostControl.InvokeRequired)
+			if(HostControl.InvokeRequired)
 			{
 				try
 				{
-					_hostControl.BeginInvoke(new MethodInvoker(InvalidateHostControl));
+					HostControl.BeginInvoke(new MethodInvoker(InvalidateHostControl));
 				}
 				catch(ObjectDisposedException)
 				{
@@ -236,61 +176,43 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				var rect = (_getOverlayArea == null) ? _hostControl.ClientRectangle : _getOverlayArea();
-				_hostControl.Invalidate(rect);
+				var rect = (_getOverlayArea == null) ? HostControl.ClientRectangle : _getOverlayArea();
+				HostControl.Invalidate(rect);
 			}
 		}
 
 		public event EventHandler Canceled;
 
-		private void InvokeCancelled()
-		{
-			var handler = Canceled;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		private void InvokeCanceled() => Canceled?.Invoke(this, EventArgs.Empty);
 
 		public event EventHandler Started;
 
-		private void InvokeStarted()
-		{
-			var handler = Started;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		private void InvokeStarted() => Started?.Invoke(this, EventArgs.Empty);
 
-		public IAsyncResult CurrentContext
-		{
-			get { return _context; }
-		}
+		public IAsyncResult CurrentContext { get; private set; }
 
 		public string ActionName
 		{
-			get { return _title; }
+			get { return Title; }
 			set
 			{
-				_title = value;
+				Title = value;
 				Repaint();
 			}
 		}
 
-		public bool CanCancel
-		{
-			get { return _canCancel; }
-			set { _canCancel = value; }
-		}
+		public bool CanCancel { get; set; }
 
-		public bool IsCancelRequested
-		{
-			get { return false; }
-		}
+		public bool IsCancelRequested => false;
 
 		public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
 		{
-			_context = context;
-			if(_disableHost)
+			CurrentContext = context;
+			if(DisableHost)
 			{
-				_hostControl.Enabled = false;
+				HostControl.Enabled = false;
 			}
-			_isVisible = true;
+			IsVisible = true;
 			_timer.Enabled = true;
 			UpdateWin7ProgressBar();
 			Repaint();
@@ -299,72 +221,72 @@ namespace gitter.Framework.Controls
 
 		public void SetAction(string action)
 		{
-			_message = action;
+			Message = action;
 			Repaint();
 		}
 
 		public void SetProgressRange(int min, int max)
 		{
-			_min = min;
-			_max = max;
+			Minimum = min;
+			Maximum = max;
 			UpdateWin7ProgressBar();
 		}
 
 		public void SetProgressRange(int min, int max, string action)
 		{
-			_min = min;
-			_max = max;
-			_message = action;
+			Minimum = min;
+			Maximum = max;
+			Message = action;
 			UpdateWin7ProgressBar();
 			Repaint();
 		}
 
 		public void SetProgress(int val)
 		{
-			_value = val;
-			_marquee = false;
+			Value = val;
+			Marquee = false;
 			UpdateWin7ProgressBar();
 			Repaint();
 		}
 
 		public void SetProgress(int val, string action)
 		{
-			_value = val;
-			_message = action;
-			_marquee = false;
+			Value = val;
+			Message = action;
+			Marquee = false;
 			UpdateWin7ProgressBar();
 			Repaint();
 		}
 
 		public void SetProgressIndeterminate()
 		{
-			_marquee = true;
+			Marquee = true;
 			UpdateWin7ProgressBar();
 			Repaint();
 		}
 
 		public void ProcessCompleted()
 		{
-			_context = null;
-			_isVisible = false;
+			CurrentContext = null;
+			IsVisible = false;
 			var timer = _timer;
 			if(timer != null)
 			{
 				timer.Enabled = false;
 			}
 			StopWin7ProgressBar();
-			if(_disableHost)
+			if(DisableHost)
 			{
-				if(_hostControl.Created && !_hostControl.IsDisposed)
+				if(HostControl.Created && !HostControl.IsDisposed)
 				{
 					try
 					{
-						_hostControl.BeginInvoke(new MethodInvoker(
+						HostControl.BeginInvoke(new MethodInvoker(
 							() =>
 							{
-								if(!_hostControl.IsDisposed)
+								if(!HostControl.IsDisposed)
 								{
-									_hostControl.Enabled = true;
+									HostControl.Enabled = true;
 								}
 							}));
 					}
@@ -377,12 +299,8 @@ namespace gitter.Framework.Controls
 			{
 				Repaint();
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 		}
 
@@ -390,15 +308,15 @@ namespace gitter.Framework.Controls
 
 		public void Report(OperationProgress progress)
 		{
-			if(_hostControl.IsDisposed)
+			if(HostControl.IsDisposed)
 			{
 				return;
 			}
-			if(_hostControl.InvokeRequired)
+			if(HostControl.InvokeRequired)
 			{
 				try
 				{
-					_hostControl.BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
+					HostControl.BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
 				}
 				catch(ObjectDisposedException)
 				{
@@ -424,9 +342,9 @@ namespace gitter.Framework.Controls
 			{
 				IsVisible = true;
 				_timer.Enabled = true;
-				if(_disableHost)
+				if(DisableHost)
 				{
-					_hostControl.Enabled = false;
+					HostControl.Enabled = false;
 				}
 			}
 			Title = progress.ActionName;

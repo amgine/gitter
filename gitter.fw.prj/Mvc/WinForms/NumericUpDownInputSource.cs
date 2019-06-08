@@ -25,14 +25,8 @@ namespace gitter.Framework.Mvc.WinForms
 
 	public class NumericUpDownInputSource<T> : ControlInputSource<NumericUpDown, T>
 	{
-		#region Data
-
 		private readonly Converter<decimal, T> _convert;
 		private readonly Converter<T, decimal> _convertBack;
-
-		#endregion
-
-		#region .ctor
 
 		public NumericUpDownInputSource(NumericUpDown numericUpDown, Converter<decimal, T> convert, Converter<T, decimal> convertBack)
 			: base(numericUpDown)
@@ -44,29 +38,15 @@ namespace gitter.Framework.Mvc.WinForms
 			_convertBack = convertBack;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public override bool IsReadOnly
 		{
 			get { return Control.ReadOnly; }
 			set { Control.ReadOnly = value; }
 		}
 
-		#endregion
+		protected override T FetchValue() => _convert(Control.Value);
 
-		#region Methods
-
-		protected override T FetchValue()
-		{
-			return _convert(Control.Value);
-		}
-
-		protected override void SetValue(T value)
-		{
-			Control.Value = _convertBack(value);
-		}
+		protected override void SetValue(T value) => Control.Value = _convertBack(value);
 
 		protected override void SubscribeToValueChangeEvent()
 		{
@@ -77,7 +57,5 @@ namespace gitter.Framework.Mvc.WinForms
 		{
 			Control.ValueChanged -= OnControlValueChanged;
 		}
-
-		#endregion
 	}
 }

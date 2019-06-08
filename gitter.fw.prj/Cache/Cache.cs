@@ -30,9 +30,6 @@ namespace gitter.Framework
 
 		public abstract T Value { get; }
 
-		public static implicit operator T(Cache<T> cache)
-		{
-			return cache.Value;
-		}
+		public static implicit operator T(Cache<T> cache) => cache.Value;
 	}
 }

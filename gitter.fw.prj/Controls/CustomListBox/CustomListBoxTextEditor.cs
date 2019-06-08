@@ -28,12 +28,11 @@ namespace gitter.Framework.Controls
 	{
 		public event EventHandler<CancelEventArgs> Validating;
 
-		private readonly CustomListBox _listBox;
 		private readonly TextBox _textBox;
 
 		internal CustomListBoxTextEditor(CustomListBox listBox, TextBox textBox)
 		{
-			_listBox = listBox;
+			ListBox = listBox;
 			_textBox = textBox;
 			_textBox.Validating += OnValidating;
 			_textBox.KeyDown += OnKeyDown;
@@ -69,10 +68,7 @@ namespace gitter.Framework.Controls
 			Stop();
 		}
 
-		public CustomListBox ListBox
-		{
-			get { return _listBox; }
-		}
+		public CustomListBox ListBox { get; }
 
 		public string Text
 		{
@@ -84,7 +80,7 @@ namespace gitter.Framework.Controls
 		{
 			_textBox.Validating -= OnValidating;
 			_textBox.KeyDown -= OnKeyDown;
-			_listBox.StopTextEditor();
+			ListBox.StopTextEditor();
 		}
 	}
 }

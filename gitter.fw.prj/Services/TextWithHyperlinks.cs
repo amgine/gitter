@@ -21,9 +21,7 @@
 namespace gitter.Framework
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
 
@@ -33,7 +31,6 @@ namespace gitter.Framework
 	{
 		#region Data
 
-		private readonly string _text;
 		private readonly StringFormat _sf;
 		private readonly HyperlinkGlyph[] _glyphs;
 		private RectangleF _cachedRect;
@@ -48,42 +45,29 @@ namespace gitter.Framework
 
 		private sealed class HyperlinkGlyph
 		{
-			private readonly Hyperlink _href;
 			private Region _region;
 
 			public HyperlinkGlyph(Hyperlink href)
 			{
 				Verify.Argument.IsNotNull(href, nameof(href));
 
-				_href = href;
+				Hyperlink = href;
 			}
 
-			public Hyperlink Hyperlink
-			{
-				get { return _href; }
-			}
+			public Hyperlink Hyperlink { get; }
 
-			public int Start
-			{
-				get { return _href.Text.Start; }
-			}
+			public int Start => Hyperlink.Text.Start;
 
-			public int End
-			{
-				get { return _href.Text.End; }
-			}
+			public int End => Hyperlink.Text.End;
 
-			public int Length
-			{
-				get { return _href.Text.Length; }
-			}
+			public int Length => Hyperlink.Text.Length;
 
 			public Region Region
 			{
 				get { return _region; }
 				set
 				{
-					if(_region != null) _region.Dispose();
+					_region?.Dispose();
 					_region = value;
 				}
 			}
@@ -91,11 +75,11 @@ namespace gitter.Framework
 			public bool IsHovered { get; set; }
 		}
 
-		private TrackingService<HyperlinkGlyph> _hoveredLink;
+		private readonly TrackingService<HyperlinkGlyph> _hoveredLink;
 
 		public TextWithHyperlinks(string text, HyperlinkExtractor extractor = null)
 		{
-			_text = text;
+			Text = text;
 			_sf = (StringFormat)(StringFormat.GenericTypographic.Clone());
 			_sf.FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.MeasureTrailingSpaces;
 			if(extractor == null) extractor = new HyperlinkExtractor();
@@ -113,27 +97,19 @@ namespace gitter.Framework
 		{
 			get
 			{
-				if(_hoveredLink.IsTracked)
-				{
-					return _hoveredLink.Item.Hyperlink;
-				}
-				else
-				{
-					return null;
-				}
+				return _hoveredLink.IsTracked
+					? _hoveredLink.Item.Hyperlink
+					: null;
 			}
 		}
 
 		private void OnHoveredLinkChanged(object sender, TrackingEventArgs<TextWithHyperlinks.HyperlinkGlyph> e)
 		{
 			e.Item.IsHovered = e.IsTracked;
-			InvalidateRequired.Raise(this);
+			InvalidateRequired?.Invoke(this, EventArgs.Empty);
 		}
 
-		public string Text
-		{
-			get { return _text; }
-		}
+		public string Text { get; }
 
 		public void Render(IGitterStyle style, Graphics graphics, Font font, Rectangle rect)
 		{
@@ -147,7 +123,7 @@ namespace gitter.Framework
 			}
 			else
 			{
-				var cr = graphics.MeasureCharacterRanges(_text, font, rect, _sf);
+				var cr = graphics.MeasureCharacterRanges(Text, font, rect, _sf);
 				for(int i = 0; i < _glyphs.Length; ++i)
 				{
 					_glyphs[i].Region = cr[i];
@@ -157,7 +133,7 @@ namespace gitter.Framework
 			using(var brush = new SolidBrush(style.Colors.WindowText))
 			{
 				GitterApplication.TextRenderer.DrawText(
-					graphics, _text, font, brush, rect, _sf);
+					graphics, Text, font, brush, rect, _sf);
 			}
 			graphics.ResetClip();
 			bool clipIsSet = false;
@@ -181,7 +157,7 @@ namespace gitter.Framework
 				using(var linkTextBrush = new SolidBrush(style.Colors.HyperlinkText))
 				{
 					GitterApplication.TextRenderer.DrawText(
-						graphics, _text, font, linkTextBrush, rect, _sf);
+						graphics, Text, font, linkTextBrush, rect, _sf);
 				}
 			}
 			if(_hoveredLink.IsTracked)
@@ -191,7 +167,7 @@ namespace gitter.Framework
 				using(var linkTextBrush = new SolidBrush(style.Colors.HyperlinkTextHotTrack))
 				{
 					GitterApplication.TextRenderer.DrawText(
-						graphics, _text, f, linkTextBrush, rect, _sf);
+						graphics, Text, f, linkTextBrush, rect, _sf);
 				}
 			}
 			graphics.ResetClip();
@@ -232,14 +208,8 @@ namespace gitter.Framework
 			if(index != -1) _glyphs[index].Hyperlink.Navigate();
 		}
 
-		public void OnMouseLeave()
-		{
-			_hoveredLink.Drop();
-		}
+		public void OnMouseLeave() => _hoveredLink.Drop();
 
-		public override string ToString()
-		{
-			return _text;
-		}
+		public override string ToString() => Text;
 	}
 }

@@ -667,22 +667,13 @@ namespace gitter.Git
 			switch(control)
 			{
 				case CherryPickControl.Abort:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsAbortingCherryPick.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsAbortingCherryPick.AddEllipsis()));
 					break;
 				case CherryPickControl.Continue:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsContinuingCherryPick.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsContinuingCherryPick.AddEllipsis()));
 					break;
 				case CherryPickControl.Quit:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsQuitingCherryPick.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsQuitingCherryPick.AddEllipsis()));
 					break;
 				default:
 					throw new ArgumentException(
@@ -699,7 +690,14 @@ namespace gitter.Git
 				t =>
 				{
 					block.Dispose();
-					Head.Refresh();
+					if(Head.Pointer is Branch branch && !branch.IsRemote)
+					{
+						branch.Refresh();
+					}
+					else
+					{
+						Head.Refresh();
+					}
 					_status.Refresh();
 					OnStateChanged();
 					OnUpdated();
@@ -718,22 +716,13 @@ namespace gitter.Git
 			switch(control)
 			{
 				case RevertControl.Abort:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsAbortingRevert.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsAbortingRevert.AddEllipsis()));
 					break;
 				case RevertControl.Continue:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsContinuingRevert.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsContinuingRevert.AddEllipsis()));
 					break;
 				case RevertControl.Quit:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsQuitingRevert.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsQuitingRevert.AddEllipsis()));
 					break;
 				default:
 					throw new ArgumentException(
@@ -750,7 +739,14 @@ namespace gitter.Git
 				t =>
 				{
 					block.Dispose();
-					Head.Refresh();
+					if(Head.Pointer is Branch branch && !branch.IsRemote)
+					{
+						branch.Refresh();
+					}
+					else
+					{
+						Head.Refresh();
+					}
 					_status.Refresh();
 					OnStateChanged();
 					OnUpdated();
@@ -782,6 +778,10 @@ namespace gitter.Git
 				{
 					_refs.RefreshBranches();
 					Head.Refresh();
+					if(Head.Pointer is Branch branch && !branch.IsRemote)
+					{
+						branch.Refresh();
+					}
 					_status.Refresh();
 					OnStateChanged();
 					OnUpdated();
@@ -798,22 +798,13 @@ namespace gitter.Git
 			switch(control)
 			{
 				case RebaseControl.Abort:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsAbortingRebase.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsAbortingRebase.AddEllipsis()));
 					break;
 				case RebaseControl.Continue:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsContinuingRebase.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsContinuingRebase.AddEllipsis()));
 					break;
 				case RebaseControl.Skip:
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress(Resources.StrsSkippingCommit.AddEllipsis()));
-					}
+					progress?.Report(new OperationProgress(Resources.StrsSkippingCommit.AddEllipsis()));
 					break;
 				default:
 					throw new ArgumentException(
@@ -833,6 +824,10 @@ namespace gitter.Git
 					block.Dispose();
 					_refs.RefreshBranches();
 					Head.Refresh();
+					if(Head.Pointer is Branch branch && !branch.IsRemote)
+					{
+						branch.Refresh();
+					}
 					_status.Refresh();
 					OnStateChanged();
 					OnUpdated();

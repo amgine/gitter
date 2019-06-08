@@ -31,12 +31,9 @@ namespace gitter.Framework.Controls
 	{
 		#region Data
 
-		private readonly Control _host;
 		private ViewButton[] _buttons;
 		private readonly TrackingService<ViewButton> _buttonHover;
 		private readonly TrackingService<ViewButton> _buttonPress;
-		private int _buttonSpacing;
-		private int _height;
 
 		#endregion
 
@@ -46,9 +43,9 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(hostControl, nameof(hostControl));
 
-			_host = hostControl;
-			_buttonHover = new TrackingService<ViewButton>((e) => _host.Invalidate());
-			_buttonPress = new TrackingService<ViewButton>((e) => _host.Invalidate());
+			Host = hostControl;
+			_buttonHover = new TrackingService<ViewButton>((e) => Host.Invalidate());
+			_buttonPress = new TrackingService<ViewButton>((e) => Host.Invalidate());
 		}
 
 		public void SetAvailableButtons(params ViewButtonType[] buttons)
@@ -70,7 +67,7 @@ namespace gitter.Framework.Controls
 					x -= viewButtonSize;
 				}
 			}
-			_host.Invalidate();
+			Host.Invalidate();
 		}
 
 		public void Clear()
@@ -78,34 +75,18 @@ namespace gitter.Framework.Controls
 			_buttonHover.Reset(-1, null);
 			_buttonPress.Reset(-1, null);
 			_buttons = null;
-			_host.Invalidate();
+			Host.Invalidate();
 		}
 
-		public int ButtonSpacing
-		{
-			get { return _buttonSpacing; }
-			set { _buttonSpacing = value; }
-		}
+		public int ButtonSpacing { get; set; }
 
-		public Control Host
-		{
-			get { return _host; }
-		}
+		public Control Host { get; }
 
-		public ViewButton PressedButton
-		{
-			get { return _buttonPress.Item; }
-		}
+		public ViewButton PressedButton => _buttonPress.Item;
 
-		public ViewButton HoveredButton
-		{
-			get { return _buttonHover.Item; }
-		}
+		public ViewButton HoveredButton => _buttonHover.Item;
 
-		public int Count
-		{
-			get { return _buttons != null ? _buttons.Length : 0; }
-		}
+		public int Count => _buttons != null ? _buttons.Length : 0;
 
 		public int Width
 		{
@@ -116,30 +97,23 @@ namespace gitter.Framework.Controls
 					return 0;
 				}
 				var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
-				return viewButtonSize + (_buttons.Length - 1) * (viewButtonSize + _buttonSpacing);
+				return viewButtonSize + (_buttons.Length - 1) * (viewButtonSize + ButtonSpacing);
 			}
 		}
 
-		public int Height
-		{
-			get { return _height; }
-			set { _height = value; }
-		}
+		public int Height { get; set; }
 
-		public ViewButton this[int index]
-		{
-			get { return _buttons[index]; }
-		}
+		public ViewButton this[int index] => _buttons[index];
 
 		private int HitTest(int x, int y)
 		{
 			if(_buttons == null || _buttons.Length == 0) return -1;
 			if(x < 0) return -1;
 			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
-			int y1 = (_height - viewButtonSize) / 2;
+			int y1 = (Height - viewButtonSize) / 2;
 			if(y < y1) return -1;
 			if(y >= y1 + viewButtonSize) return -1;
-			int id = x / (viewButtonSize + _buttonSpacing);
+			int id = x / (viewButtonSize + ButtonSpacing);
 			if(id >= _buttons.Length) return -1;
 			return id;
 		}
@@ -148,7 +122,7 @@ namespace gitter.Framework.Controls
 		{
 			if(_buttons == null || _buttons.Length == 0) return;
 			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
-			var y = bounds.Y + (_height - viewButtonSize) / 2;
+			var y = bounds.Y + (Height - viewButtonSize) / 2;
 			var rc = new Rectangle(bounds.X, y, viewButtonSize, viewButtonSize);
 			for(int i = 0; i < _buttons.Length; ++i)
 			{
@@ -164,7 +138,7 @@ namespace gitter.Framework.Controls
 					hovered = true;
 				}
 				_buttons[i].OnPaint(graphics, rc, focus, hovered, pressed);
-				rc.X += viewButtonSize + _buttonSpacing;
+				rc.X += viewButtonSize + ButtonSpacing;
 			}
 		}
 
@@ -201,16 +175,13 @@ namespace gitter.Framework.Controls
 				int id = HitTest(x, y);
 				if(id == _buttonPress.Index)
 				{
-					ButtonClick.Raise(this, new ViewButtonClickEventArgs(_buttonPress.Item.Type));
+					ButtonClick?.Invoke(this, new ViewButtonClickEventArgs(_buttonPress.Item.Type));
 				}
 				_buttonPress.Drop();
 			}
 		}
 
-		public void OnMouseLeave()
-		{
-			_buttonHover.Drop();
-		}
+		public void OnMouseLeave() => _buttonHover.Drop();
 
 		public IEnumerator<ViewButton> GetEnumerator()
 		{

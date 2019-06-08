@@ -21,11 +21,7 @@
 namespace gitter
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -42,15 +38,11 @@ namespace gitter
 			Text = Resources.StrRepositoryExplorer;
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgRepositoryExplorer"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgRepositoryExplorer"];
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as ViewListItem;
-			if(item != null)
+			if(e.Item is ViewListItem item)
 			{
 				WorkingEnvironment.ViewDockService.ShowView(item.DataContext.Guid);
 			}

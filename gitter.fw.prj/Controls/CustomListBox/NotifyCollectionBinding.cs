@@ -24,13 +24,9 @@ namespace gitter.Framework.Controls
 
 	public class NotifyCollectionBinding<T> : IDisposable
 	{
-		#region Data
-
 		private readonly CustomListBoxItemsCollection _itemsCollection;
 		private readonly NotifyCollection<T> _boundCollection;
 		private readonly Converter<T, CustomListBoxItem> _itemConverter;
-
-		#endregion
 
 		public NotifyCollectionBinding(
 			CustomListBoxItemsCollection itemsCollection,

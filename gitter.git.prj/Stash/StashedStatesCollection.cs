@@ -144,10 +144,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			var parameters = GetStashDropParameters(stashedState);
 			return Repository.Accessor.StashDrop.InvokeAsync(parameters, progress, CancellationToken.None)
@@ -180,10 +177,7 @@ namespace gitter.Git
 		{
 			Verify.State.IsTrue(_stash.Count != 0);
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			var parameters = GetStashDropParameters();
 			return Repository.Accessor.StashDrop.InvokeAsync(parameters, progress, CancellationToken.None)
@@ -237,10 +231,7 @@ namespace gitter.Git
 
 		public Task ClearAsync(IProgress<OperationProgress> progress)
 		{
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsCleaningStash.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsCleaningStash.AddEllipsis()));
 			var parameters = GetClearStashParameters();
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			return Repository.Accessor
@@ -466,10 +457,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
 			var block = Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged,
 				RepositoryNotifications.WorktreeUpdated,
@@ -509,10 +497,7 @@ namespace gitter.Git
 		{
 			Verify.State.IsTrue(_stash.Count != 0);
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
 			var block = Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged,
 				RepositoryNotifications.WorktreeUpdated,
@@ -769,10 +754,7 @@ namespace gitter.Git
 			Verify.State.IsFalse(Repository.IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("stash save"));
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrPerformingStashSave.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrPerformingStashSave.AddEllipsis()));
 			var parameters = GetStashSaveParameters(keepIndex, includeUntracked, message);
 			var block = Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,

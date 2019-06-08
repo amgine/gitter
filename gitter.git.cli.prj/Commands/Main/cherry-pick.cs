@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2019  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,59 +26,59 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Apply the change introduced by an existing commit.</summary>
 	public sealed class CherryPickCommand : Command
 	{
-		public static ICommandArgument Edit()
+		public static class KnownArguments
 		{
-			return new CommandFlag("--edit");
+			public static ICommandArgument Edit { get; } = new CommandFlag("--edit");
+
+			public static ICommandArgument Mainline(int number) => new CommandParameterValue("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
+
+			public static ICommandArgument NoCommit { get; } = new CommandFlag("--no-commit");
+
+			public static ICommandArgument SignOff { get; } = new CommandFlag("--signoff");
+
+			public static ICommandArgument FastForward { get; } = new CommandFlag("--ff");
+
+			public static ICommandArgument AllowEmpty { get; } = new CommandFlag("--allow-empty");
+
+			public static ICommandArgument AllowEmptyMessage { get; } = new CommandFlag("--allow-empty-message");
+
+			public static ICommandArgument KeepRedundantCommits { get; } = new CommandFlag("--keep-redundant-commits");
+
+			public static ICommandArgument Continue { get; } = new CommandFlag("--continue");
+
+			public static ICommandArgument Quit { get; } = new CommandFlag("--quit");
+
+			public static ICommandArgument Abort { get; } = new CommandFlag("--abort");
 		}
 
-		public static ICommandArgument Mainline(int number)
+		public class Builder : CommandBuilderBase
 		{
-			return new CommandParameterValue("--mainline", number.ToString(CultureInfo.InvariantCulture), ' ');
-		}
+			public Builder()
+				: base("cherry-pick")
+			{
+			}
 
-		public static ICommandArgument NoCommit()
-		{
-			return new CommandFlag("--no-commit");
-		}
+			public void Edit() => AddArgument(KnownArguments.Edit);
 
-		public static ICommandArgument SignOff()
-		{
-			return new CommandFlag("--signoff");
-		}
+			public void Mainline(int number) => AddArgument(KnownArguments.Mainline(number));
 
-		public static ICommandArgument FastForward()
-		{
-			return new CommandFlag("--ff");
-		}
+			public void NoCommit() => AddArgument(KnownArguments.NoCommit);
 
-		public static ICommandArgument AllowEmpty()
-		{
-			return new CommandFlag("--allow-empty");
-		}
+			public void SignOff() => AddArgument(KnownArguments.SignOff);
 
-		public static ICommandArgument AllowEmptyMessage()
-		{
-			return new CommandFlag("--allow-empty-message");
-		}
+			public void FastForward() => AddArgument(KnownArguments.SignOff);
 
-		public static ICommandArgument KeepRedundantCommits()
-		{
-			return new CommandFlag("--keep-redundant-commits");
-		}
+			public void AllowEmpty() => AddArgument(KnownArguments.AllowEmpty);
 
-		public static ICommandArgument Continue()
-		{
-			return new CommandFlag("--continue");
-		}
+			public void AllowEmptyMessage() => AddArgument(KnownArguments.AllowEmptyMessage);
 
-		public static ICommandArgument Quit()
-		{
-			return new CommandFlag("--quit");
-		}
+			public void KeepRedundantCommits() => AddArgument(KnownArguments.KeepRedundantCommits);
 
-		public static ICommandArgument Abort()
-		{
-			return new CommandFlag("--abort");
+			public void Continue() => AddArgument(KnownArguments.Continue);
+
+			public void Quit() => AddArgument(KnownArguments.Quit);
+
+			public void Abort() => AddArgument(KnownArguments.Abort);
 		}
 
 		public CherryPickCommand()

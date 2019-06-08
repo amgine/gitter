@@ -120,7 +120,7 @@ namespace gitter.Git
 			return task.ContinueWith(
 				t =>
 				{
-					progress.Report(new OperationProgress(Resources.StrRefreshingReferences.AddEllipsis()));
+					progress?.Report(new OperationProgress(Resources.StrRefreshingReferences.AddEllipsis()));
 					repository.Refs.Refresh(affectedReferences);
 					var state2 = RefsState.Capture(repository, affectedReferences);
 					var changes = RefsDiff.Calculate(state1, state2);

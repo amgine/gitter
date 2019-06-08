@@ -72,10 +72,7 @@ namespace gitter.Git.AccessLayer.CLI
 				_offset = 0;
 			}
 
-			public Hash GetValue()
-			{
-				return new Hash(_buffer);
-			}
+			public Hash GetValue() => new Hash(_buffer);
 		}
 
 		sealed class MultiHashField : IField
@@ -133,10 +130,7 @@ namespace gitter.Git.AccessLayer.CLI
 				return false;
 			}
 
-			public List<Hash> GetValue()
-			{
-				return _hashes;
-			}
+			public List<Hash> GetValue() => _hashes;
 		}
 
 		sealed class UnixTimestampField : IField
@@ -166,10 +160,7 @@ namespace gitter.Git.AccessLayer.CLI
 				return false;
 			}
 
-			public DateTime GetValue()
-			{
-				return GitConstants.UnixEraStart.AddSeconds(_timestamp).ToLocalTime();
-			}
+			public DateTime GetValue() => GitConstants.UnixEraStart.AddSeconds(_timestamp).ToLocalTime();
 
 			public void Reset()
 			{
@@ -188,10 +179,7 @@ namespace gitter.Git.AccessLayer.CLI
 				_line = new StringBuilder();
 			}
 
-			public string GetValue()
-			{
-				return _line.ToString();
-			}
+			public string GetValue() => _line.ToString();
 
 			#region IField Members
 
@@ -297,15 +285,9 @@ namespace gitter.Git.AccessLayer.CLI
 				_separator = new EmptyLineSeparator();
 			}
 
-			public string GetSubject()
-			{
-				return _subject.ToString();
-			}
+			public string GetSubject() => _subject.ToString();
 
-			public string GetBody()
-			{
-				return _body.ToString();
-			}
+			public string GetBody() => _body.ToString();
 
 			private static void RemoveTrailingWhitespace(StringBuilder stringBuilder)
 			{
@@ -468,8 +450,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private RevisionData GetRevisionData(Hash sha1)
 		{
-			RevisionData revisionData;
-			if(!_cache.TryGetValue(sha1, out revisionData))
+			if(!_cache.TryGetValue(sha1, out var revisionData))
 			{
 				revisionData = new RevisionData(sha1);
 				_cache.Add(sha1, revisionData);
@@ -510,10 +491,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region IParser<IList<RevisionData>> Members
 
-		public IList<RevisionData> GetResult()
-		{
-			return _log;
-		}
+		public IList<RevisionData> GetResult() => _log;
 
 		#endregion
 

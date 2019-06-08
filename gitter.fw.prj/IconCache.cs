@@ -125,12 +125,8 @@ namespace gitter.Framework
 					res = _defaultIcon;
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				res = _defaultIcon;
 			}
 			return res;

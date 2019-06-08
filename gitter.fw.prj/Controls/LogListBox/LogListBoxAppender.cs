@@ -22,8 +22,6 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
 	using gitter.Framework.Services;
 
@@ -68,10 +66,7 @@ namespace gitter.Framework.Controls
 			_events = new LogEvent[500];
 		}
 
-		public object SyncRoot
-		{
-			get { return _events; }
-		}
+		public object SyncRoot => _events;
 
 		public void DropCache()
 		{

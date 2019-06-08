@@ -29,15 +29,9 @@ namespace gitter.Controls
 
 	sealed class StandardToolbar : ToolStrip
 	{
-		#region Data
-
 		private readonly IWorkingEnvironment _environment;
 		private readonly ToolStripButton _initRepositoryButton;
 		private readonly ToolStripButton _cloneRepositoryButton;
-
-		#endregion
-
-		#region .ctor
 
 		public StandardToolbar(IWorkingEnvironment environment)
 		{
@@ -59,10 +53,6 @@ namespace gitter.Controls
 				});
 		}
 
-		#endregion
-
-		#region Methods
-
 		private void OnInitRepositoryClick(object sender, EventArgs e)
 		{
 			using(var dlg = new InitRepositoryDialog(_environment))
@@ -79,6 +69,5 @@ namespace gitter.Controls
 			}
 		}
 
-		#endregion
 	}
 }

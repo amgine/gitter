@@ -108,7 +108,7 @@ namespace gitter.Git.Gui.Views
 					{
 						AttachToRepository(_repository);
 					}
-					RepositoryChanged.Raise(this);
+					RepositoryChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}

@@ -520,10 +520,7 @@ namespace gitter.Git
 		{
 			Verify.State.IsNotDeleted(this);
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsSearchingStaleBranches.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsSearchingStaleBranches.AddEllipsis()));
 			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged);
 			var parameters = GetPruneParameters();

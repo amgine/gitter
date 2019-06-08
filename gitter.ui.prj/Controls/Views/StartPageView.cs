@@ -41,8 +41,9 @@ namespace gitter
 
 		private readonly StartPageViewFactory _factory;
 		private readonly NotifyCollectionBinding<RepositoryLink> _recentRepositoriesBinding;
-		private ICheckBoxWidget _chkShowPageAtStartup;
-		private ICheckBoxWidget _chkClosePageAfterRepositoryLoad;
+		private readonly ICheckBoxWidget _chkShowPageAtStartup;
+		private readonly ICheckBoxWidget _chkClosePageAfterRepositoryLoad;
+		private readonly List<RepositoryListItem> _repositories;
 
 		#endregion
 
@@ -59,8 +60,29 @@ namespace gitter
 			_picLogo2.Image = GetGradient();
 
 			_factory = factory;
+			_repositories = new List<RepositoryListItem>();
 
 			Text = Resources.StrStartPage;
+
+			_txtFilter.BackColor     = GitterApplication.Style.Colors.Window;
+			_txtFilter.HintForeColor = GitterApplication.Style.Colors.GrayText;
+			_txtFilter.TextForeColor = GitterApplication.Style.Colors.WindowText;
+
+			_lstLocalRepositories.SizeChanged += (s, e) =>
+			{
+				var x = _lstLocalRepositories.Width + _lstLocalRepositories.Left - _txtFilter.Width;
+				if(x > _lblLocalRepositories.Left + _lblLocalRepositories.Width)
+				{
+					_txtFilter.Left = x;
+					_txtFilter.Visible = true;
+				}
+				else
+				{
+					_txtFilter.Visible = false;
+				}
+			};
+
+			_txtFilter.TextChanged += OnFilterTextChanged;
 
 			_lstLocalRepositories.ItemActivated += OnLocalRepositoriesListItemActivated;
 			_lstRecentRepositories.ItemActivated += OnRecentRepositoriesListItemActivated;
@@ -100,15 +122,9 @@ namespace gitter
 
 		#region Properties
 
-		public override bool IsDocument
-		{
-			get { return true; }
-		}
+		public override bool IsDocument => true;
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgStartPage"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgStartPage"];
 
 		#endregion
 
@@ -116,26 +132,16 @@ namespace gitter
 
 		private static Bitmap GetLogo()
 		{
-			if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-			{
-				return Resources.ImgStartPageLogoDark;
-			}
-			else
-			{
-				return Resources.ImgStartPageLogo;
-			}
+			return GitterApplication.Style.Type == GitterStyleType.DarkBackground
+				? Resources.ImgStartPageLogoDark
+				: Resources.ImgStartPageLogo;
 		}
 
 		private static Bitmap GetGradient()
 		{
-			if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-			{
-				return Resources.ImgStartPageLogoGradientDark;
-			}
-			else
-			{
-				return Resources.ImgStartPageLogoGradient;
-			}
+			return GitterApplication.Style.Type == GitterStyleType.DarkBackground
+				? Resources.ImgStartPageLogoGradientDark
+				: Resources.ImgStartPageLogoGradient;
 		}
 
 		private void OnLocalRepositoriesKeyDown(object sender, KeyEventArgs e)
@@ -145,7 +151,9 @@ namespace gitter
 				case Keys.Delete:
 					while(_lstLocalRepositories.SelectedItems.Count != 0)
 					{
-						_lstLocalRepositories.SelectedItems[0].Remove();
+						var item = (RepositoryListItem)_lstLocalRepositories.SelectedItems[0];
+						_repositories.Remove(item);
+						item.Remove();
 					}
 					break;
 			}
@@ -184,7 +192,10 @@ namespace gitter
 			}
 			else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
 			{
-				e.Effect = DragDropEffects.Move;
+				if(string.IsNullOrWhiteSpace(_txtFilter.Text))
+				{
+					e.Effect = DragDropEffects.Move;
+				}
 			}
 			else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
 			{
@@ -198,7 +209,7 @@ namespace gitter
 
 		private bool IsPresentInLocalRepositoryList(string path)
 		{
-			foreach(RepositoryListItem item in _lstLocalRepositories.Items)
+			foreach(var item in _repositories)
 			{
 				if(item.DataContext.Path == path)
 				{
@@ -217,7 +228,7 @@ namespace gitter
 					var data = (string[])(e.Data.GetData(DataFormats.FileDrop));
 					for(int i = 0; i < data.Length; ++i)
 					{
-						var di =  new DirectoryInfo(data[i]);
+						var di = new DirectoryInfo(data[i]);
 						if(di.Exists)
 						{
 							var path = di.FullName;
@@ -228,11 +239,11 @@ namespace gitter
 								{
 									var link = new RepositoryLink(path, provider.Name);
 									var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
-									CustomListBoxItemsCollection itemsCollection;
-									var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
+									var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
 									if(index != -1)
 									{
-										itemsCollection.Insert(index, new RepositoryListItem(link));
+										var itemToInsert = new RepositoryListItem(link);
+										InsertRepositoryItem(index, itemsCollection, itemToInsert);
 									}
 								}
 							}
@@ -241,15 +252,19 @@ namespace gitter
 				}
 				else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
 				{
+					if(!string.IsNullOrWhiteSpace(_txtFilter.Text))
+					{
+						return;
+					}
 					var itemToMove = (RepositoryListItem)e.Data.GetData(typeof(RepositoryListItem));
 					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
-					CustomListBoxItemsCollection itemsCollection;
-					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
+					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
 					if(index == -1) return;
 					var currentIndex = _lstLocalRepositories.Items.IndexOf(itemToMove);
 					if(index == currentIndex) return;
 					if(currentIndex == -1)
 					{
+						_repositories.Insert(index, itemToMove);
 						itemsCollection.Insert(index, itemToMove);
 					}
 					else
@@ -258,7 +273,9 @@ namespace gitter
 						{
 							--index;
 						}
+						_repositories.Remove(itemToMove);
 						itemToMove.Remove();
+						_repositories.Insert(index, itemToMove);
 						itemsCollection.Insert(index, itemToMove);
 					}
 				}
@@ -268,19 +285,44 @@ namespace gitter
 					var path = itemToMove.DataContext.Path;
 					if(IsPresentInLocalRepositoryList(path)) return;
 					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
-					CustomListBoxItemsCollection itemsCollection;
-					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out itemsCollection);
-					if(index == -1) return;
-					var itemToInsert = new RepositoryListItem(new RepositoryLink(path, string.Empty));
-					itemsCollection.Insert(index, itemToInsert);
+					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
+					if(index != -1)
+					{
+						var itemToInsert = new RepositoryListItem(new RepositoryLink(path, string.Empty));
+						InsertRepositoryItem(index, itemsCollection, itemToInsert);
+					}
 				}
+			}
+		}
+
+		private void InsertRepositoryItem(int index, CustomListBoxItemsCollection target, RepositoryListItem itemToInsert)
+		{
+			if(!string.IsNullOrWhiteSpace(_txtFilter.Text))
+			{
+				if(index == 0)
+				{
+					_repositories.Insert(0, itemToInsert);
+				}
+				else
+				{
+					var dst = _repositories.IndexOf((RepositoryListItem)_lstLocalRepositories.Items[index - 1]);
+					_repositories.Insert(dst + 1, itemToInsert);
+				}
+				if(FilterItem(itemToInsert))
+				{
+					target.Insert(index, itemToInsert);
+				}
+			}
+			else
+			{
+				_repositories.Insert(index, itemToInsert);
+				target.Insert(index, itemToInsert);
 			}
 		}
 
 		private void OnLocalRepositoriesListItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as RepositoryListItem;
-			if(item != null)
+			if(e.Item is RepositoryListItem item)
 			{
 				if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
 				{
@@ -294,8 +336,7 @@ namespace gitter
 
 		private void OnRecentRepositoriesListItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as RecentRepositoryListItem;
-			if(item != null)
+			if(e.Item is RecentRepositoryListItem item)
 			{
 				if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
 				{
@@ -314,15 +355,11 @@ namespace gitter
 			_lstLocalRepositories.SaveViewTo(listNode);
 			var itemsNode = listNode.GetCreateEmptySection("Items");
 			int id = 0;
-			foreach(var item in _lstLocalRepositories.Items)
+			foreach(var item in _repositories)
 			{
-				var repoItem = item as RepositoryListItem;
-				if(repoItem != null)
-				{
-					var link = repoItem.DataContext;
-					link.SaveTo(itemsNode.GetCreateSection("Repository" + id.ToString(CultureInfo.InvariantCulture)));
-					++id;
-				}
+				var link = item.DataContext;
+				link.SaveTo(itemsNode.GetCreateSection("Repository" + id.ToString(CultureInfo.InvariantCulture)));
+				++id;
 			}
 		}
 
@@ -336,6 +373,7 @@ namespace gitter
 				_lstLocalRepositories.BeginUpdate();
 				_lstLocalRepositories.Items.Clear();
 				_lstLocalRepositories.LoadViewFrom(listNode);
+				_repositories.Clear();
 				var itemsNode = listNode.TryGetSection("Items");
 				if(itemsNode != null)
 				{
@@ -343,6 +381,7 @@ namespace gitter
 					{
 						var link = new RepositoryLink(s);
 						var item = new RepositoryListItem(link);
+						_repositories.Add(item);
 						_lstLocalRepositories.Items.Add(item);
 					}
 				}
@@ -350,10 +389,7 @@ namespace gitter
 			}
 		}
 
-		public LocalRepositoriesListBox Repositories
-		{
-			get { return _lstLocalRepositories; }
-		}
+		public LocalRepositoriesListBox Repositories => _lstLocalRepositories;
 
 		private void _btnAddLocalRepo_LinkClicked(object sender, EventArgs e)
 		{
@@ -372,6 +408,7 @@ namespace gitter
 					return;
 				}
 				var item = new RepositoryListItem(new RepositoryLink(path, prov.Name));
+				_repositories.Add(item);
 				_lstLocalRepositories.Items.Add(item);
 			}
 		}
@@ -414,6 +451,47 @@ namespace gitter
 			//x.ClientSize = n.Size;
 			//n.Parent = x;
 			//x.Show();
+		}
+
+		private bool FilterItem(RepositoryListItem item) => FilterItem(item, _txtFilter.Text);
+
+		private static bool FilterItem(RepositoryListItem item, string filter)
+		{
+			if(string.IsNullOrWhiteSpace(filter)) return true;
+			var index = item.DataContext.Path.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase);
+			return index >= 0;
+		}
+
+		private void RefillLocalRepositories()
+		{
+			var filter = _txtFilter.Text;
+			_lstLocalRepositories.BeginUpdate();
+			int index1 = 0;
+			for(int index = 0; index < _repositories.Count; ++index)
+			{
+				var item = _repositories[index];
+				if(FilterItem(item, filter))
+				{
+					if(!item.IsAttachedToListBox)
+					{
+						_lstLocalRepositories.Items.Insert(index1, item);
+					}
+					++index1;
+				}
+				else
+				{
+					if(item.IsAttachedToListBox)
+					{
+						item.Remove();
+					}
+				}
+			}
+			_lstLocalRepositories.EndUpdate();
+		}
+
+		private void OnFilterTextChanged(object sender, EventArgs e)
+		{
+			RefillLocalRepositories();
 		}
 
 		#endregion

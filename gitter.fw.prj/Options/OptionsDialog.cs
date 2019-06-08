@@ -94,7 +94,7 @@ namespace gitter.Framework.Options
 				_propertyPages.Add(desc.Guid, page);
 				if(raiseElevatedChanged)
 				{
-					RequireElevationChanged.Raise(this);
+					RequireElevationChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			if(page != null)
@@ -129,7 +129,7 @@ namespace gitter.Framework.Options
 				}
 			}
 			if(require) return;
-			RequireElevationChanged.Raise(this);
+			RequireElevationChanged?.Invoke(this, EventArgs.Empty);
 		}
 
 		#region IExecutableDialog Members
@@ -168,9 +168,10 @@ namespace gitter.Framework.Options
 				{
 					if(page != null)
 					{
-						var elevated = page as IElevatedExecutableDialog;
-						if(elevated != null)
+						if(page is IElevatedExecutableDialog elevated)
+						{
 							if(elevated.RequireElevation) return true;
+						}
 					}
 				}
 				return false;
@@ -186,8 +187,7 @@ namespace gitter.Framework.Options
 				{
 					if(page != null)
 					{
-						var elevated = page as IElevatedExecutableDialog;
-						if(elevated != null && elevated.RequireElevation)
+						if(page is IElevatedExecutableDialog elevated && elevated.RequireElevation)
 						{
 							var action = elevated.ElevatedExecutionAction;
 							if(action != null) list.Add(action);
@@ -196,7 +196,7 @@ namespace gitter.Framework.Options
 				}
 				if(list.Count == 0) return null;
 				if(list.Count == 1) return list[0];
-				return (Action)MulticastDelegate.Combine(list.ToArray());
+				return (Action)Delegate.Combine(list.ToArray());
 			}
 		}
 

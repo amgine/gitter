@@ -31,7 +31,6 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private string _object;
 		private string _message;
 
 		#endregion
@@ -44,7 +43,7 @@ namespace gitter.Git
 		internal Note(Repository repository, string name, string @object, string message)
 			: base(repository, name)
 		{
-			_object = @object;
+			Object = @object;
 			_message = message;
 		}
 
@@ -64,11 +63,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Object id, to which this <see cref="Note"/> is attached.</summary>
-		public string Object
-		{
-			get { return _object; }
-			internal set { _object = value; }
-		}
+		public string Object { get; internal set; }
 
 		/// <summary>Note contents.</summary>
 		public string Message

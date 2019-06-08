@@ -21,9 +21,6 @@
 namespace gitter
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Text;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -32,32 +29,27 @@ namespace gitter
 
 	sealed class RepositoryExplorerViewFactory : ViewFactoryBase
 	{
-		private readonly RepositoryRootItem _rootItem;
-
 		public RepositoryExplorerViewFactory(IWorkingEnvironment environment)
 			: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, CachedResources.Bitmaps["ImgRepositoryExplorer"], true)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
-			_rootItem = new RepositoryRootItem(environment, null);
+			RootItem = new RepositoryRootItem(environment, null);
 			DefaultViewPosition = ViewPosition.Left;
 		}
 
-		public RepositoryRootItem RootItem
-		{
-			get { return _rootItem; }
-		}
+		public RepositoryRootItem RootItem { get; }
 
 		public void AddItem(CustomListBoxItem item)
 		{
 			Verify.Argument.IsNotNull(item, nameof(item));
 
-			_rootItem.Items.Add(item);
+			RootItem.Items.Add(item);
 		}
 
 		public void RemoveItem(CustomListBoxItem item)
 		{
-			_rootItem.Items.Remove(item);
+			RootItem.Items.Remove(item);
 		}
 
 		/// <summary>Create new view with specified parameters.</summary>
@@ -67,7 +59,7 @@ namespace gitter
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
 			var view = new RepositoryExplorerView(environment);
-			view.AddItem(_rootItem);
+			view.AddItem(RootItem);
 			return view;
 		}
 	}
@@ -89,16 +81,8 @@ namespace gitter
 			return new StartPageView(environment, this);
 		}
 
-		public bool CloseAfterRepositoryLoad
-		{
-			get;
-			set;
-		}
+		public bool CloseAfterRepositoryLoad { get; set; }
 
-		public bool ShowOnStartup
-		{
-			get;
-			set;
-		}
+		public bool ShowOnStartup { get; set; }
 	}
 }

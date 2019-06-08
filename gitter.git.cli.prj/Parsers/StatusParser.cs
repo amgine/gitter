@@ -32,8 +32,6 @@ namespace gitter.Git.AccessLayer.CLI
 
 		sealed class StatusLine
 		{
-			private char _x;
-			private char _y;
 			private readonly StringBuilder _from;
 			private readonly StringBuilder _to;
 			private int _offset;
@@ -87,11 +85,11 @@ namespace gitter.Git.AccessLayer.CLI
 					switch(_offset)
 					{
 						case -3:
-							_x = textSegment.ReadChar();
+							X = textSegment.ReadChar();
 							++_offset;
 							break;
 						case -2:
-							_y = textSegment.ReadChar();
+							Y = textSegment.ReadChar();
 							++_offset;
 							break;
 						case -1:
@@ -102,7 +100,7 @@ namespace gitter.Git.AccessLayer.CLI
 							if(ParseFileName(textSegment, _to))
 							{
 								++_offset;
-								if(_x != 'C' && _x != 'R')
+								if(X != 'C' && X != 'R')
 								{
 									++_offset;
 									return true;
@@ -121,25 +119,13 @@ namespace gitter.Git.AccessLayer.CLI
 				return false;
 			}
 
-			public char X
-			{
-				get { return _x; }
-			}
+			public char X { get; private set; }
 
-			public char Y
-			{
-				get { return _y; }
-			}
+			public char Y { get; private set; }
 
-			public string From
-			{
-				get { return _from.ToString(); }
-			}
+			public string From => _from.ToString();
 
-			public string To
-			{
-				get { return _to.ToString(); }
-			}
+			public string To => _to.ToString();
 
 			public void Reset()
 			{
@@ -204,62 +190,50 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private static ConflictType GetConflictType(char x, char y)
 		{
-			if(IsUnmergedState(x, y))
+			if(!IsUnmergedState(x, y))
 			{
-				if(x == y)
-				{
-					if(x == 'A')
-						return ConflictType.BothAdded;
-					if(x == 'D')
-						return ConflictType.BothDeleted;
-					if(x == 'U')
-						return ConflictType.BothModified;
-					return ConflictType.Unknown;
-				}
-				else
-				{
-					switch(x)
-					{
-						case 'U':
-							switch(y)
-							{
-								case 'A':
-									return ConflictType.AddedByThem;
-								case 'D':
-									return ConflictType.DeletedByThem;
-								default:
-									return ConflictType.Unknown;
-							}
-						case 'A':
-							switch(y)
-							{
-								case 'U':
-									return ConflictType.AddedByUs;
-								default:
-									return ConflictType.Unknown;
-							}
-						case 'D':
-							switch(y)
-							{
-								case 'U':
-									return ConflictType.DeletedByUs;
-								default:
-									return ConflictType.Unknown;
-							}
-						default:
-							return ConflictType.Unknown;
-					}
-				}
+				return ConflictType.None;
+			}
+			if(x == y)
+			{
+				if(x == 'A') return ConflictType.BothAdded;
+				if(x == 'D') return ConflictType.BothDeleted;
+				if(x == 'U') return ConflictType.BothModified;
+				return ConflictType.Unknown;
 			}
 			else
 			{
-				return ConflictType.None;
+				switch(x)
+				{
+					case 'U':
+						switch(y)
+						{
+							case 'A': return ConflictType.AddedByThem;
+							case 'D': return ConflictType.DeletedByThem;
+							default: return ConflictType.Unknown;
+						}
+					case 'A':
+						switch(y)
+						{
+							case 'U': return ConflictType.AddedByUs;
+							default: return ConflictType.Unknown;
+						}
+					case 'D':
+						switch(y)
+						{
+							case 'U': return ConflictType.DeletedByUs;
+							default: return ConflictType.Unknown;
+						}
+					default: return ConflictType.Unknown;
+				}
 			}
 		}
 
 		private static bool IsUnmergedState(char x, char y)
 		{
-			return (x == 'U' || y == 'U') || (x == 'A' && y == 'A') || (x == 'D' && y == 'D');
+			return (x == 'U' || y == 'U')
+				|| (x == 'A' && y == 'A')
+				|| (x == 'D' && y == 'D');
 		}
 
 		private void AddUnstagedStats(FileStatus fileStatus, int count)
@@ -390,8 +364,7 @@ namespace gitter.Git.AccessLayer.CLI
 					if(staged)
 					{
 						var file = new TreeFileData(to, stagedFileStatus, ConflictType.None, StagedStatus.Staged);
-						TreeFileData existing;
-						if(_stagedFiles.TryGetValue(to, out existing))
+						if(_stagedFiles.TryGetValue(to, out var existing))
 						{
 							AddStagedStats(existing.FileStatus, -1);
 							_stagedFiles[to] = file;
@@ -404,8 +377,7 @@ namespace gitter.Git.AccessLayer.CLI
 					if(unstaged)
 					{
 						var file = new TreeFileData(to, unstagedFileStatus, conflictType, StagedStatus.Unstaged);
-						TreeFileData existing;
-						if(_unstagedFiles.TryGetValue(to, out existing))
+						if(_unstagedFiles.TryGetValue(to, out var existing))
 						{
 							if(existing.FileStatus == FileStatus.Removed)
 							{

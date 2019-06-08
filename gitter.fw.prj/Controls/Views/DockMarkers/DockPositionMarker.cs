@@ -96,10 +96,7 @@ namespace gitter.Framework.Controls
 		/// </summary>
 		/// <value></value>
 		/// <returns>True if the window will not be activated when it is shown; otherwise, false. The default is false.</returns>
-		protected override bool ShowWithoutActivation
-		{
-			get { return true; }
-		}
+		protected override bool ShowWithoutActivation => true;
 
 		/// <summary>
 		/// </summary>

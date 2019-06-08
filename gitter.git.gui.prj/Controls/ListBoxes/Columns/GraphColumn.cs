@@ -80,7 +80,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					_showColors = value;
 					InvalidateContent();
-					ShowColorsChanged.Raise(this);
+					ShowColorsChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}

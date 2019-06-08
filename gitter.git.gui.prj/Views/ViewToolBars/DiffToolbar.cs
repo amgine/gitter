@@ -128,8 +128,7 @@ namespace gitter.Git.Gui.Views
 
 		private void OnContextTextChanged(object sender, EventArgs e)
 		{
-			int context;
-			if(int.TryParse(_contextTextBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out context))
+			if(int.TryParse(_contextTextBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int context))
 			{
 				SetContext(context);
 			}

@@ -35,14 +35,10 @@ namespace gitter.Framework.Mvc
 				_cursor = cursor;
 			}
 
-			#region IDisposable Members
-
 			public void Dispose()
 			{
 				_view.MouseCursor = _cursor;
 			}
-
-			#endregion
 		}
 
 		public static CursorChangeToken ChangeCursor(this IView view, MouseCursor cursor)

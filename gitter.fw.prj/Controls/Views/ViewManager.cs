@@ -39,8 +39,7 @@ namespace gitter.Framework.Controls
 
 		private static void OnRendererChanged()
 		{
-			var handler = RendererChanged;
-			if(handler != null) handler(null, EventArgs.Empty);
+			RendererChanged?.Invoke(null, EventArgs.Empty);
 		}
 
 		#endregion

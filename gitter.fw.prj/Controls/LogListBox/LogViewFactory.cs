@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 
 	using Resources = gitter.Framework.Properties.Resources;
 

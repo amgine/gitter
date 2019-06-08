@@ -1063,50 +1063,46 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(parameters.Control.HasValue)
 			{
-				switch(parameters.Control)
-				{
-					case RevertControl.Continue:
-						return new RevertCommand(RevertCommand.Continue());
-					case RevertControl.Quit:
-						return new RevertCommand(RevertCommand.Quit());
-					case RevertControl.Abort:
-						return new RevertCommand(RevertCommand.Abort());
-					default:
-						throw new ArgumentException("Unknown enum value.", "control");
-				}
+				return GetRevertCommand(parameters.Control.Value);
 			}
 			else
 			{
-				var args = new List<ICommandArgument>();
+				var builder = new RevertCommand.Builder();
 				if(parameters.NoCommit)
 				{
-					args.Add(RevertCommand.NoCommit());
+					builder.NoCommit();
 				}
 				if(parameters.Mainline > 0)
 				{
-					args.Add(RevertCommand.Mainline(parameters.Mainline));
+					builder.Mainline(parameters.Mainline);
 				}
 				foreach(var rev in parameters.Revisions)
 				{
-					args.Add(new CommandParameter(rev));
+					builder.AddArgument(new CommandParameter(rev));
 				}
-				return new RevertCommand(args);
+				return builder.Build();
 			}
 		}
 
 		public Command GetRevertCommand(RevertControl control)
 		{
+			var builder = new RevertCommand.Builder();
 			switch(control)
 			{
 				case RevertControl.Continue:
-					return new RevertCommand(RevertCommand.Continue());
+					builder.AddOption(new ConfigurationValueOverride("core.editor", "true"));
+					builder.Continue();
+					break;
 				case RevertControl.Quit:
-					return new RevertCommand(RevertCommand.Quit());
+					builder.Quit();
+					break;
 				case RevertControl.Abort:
-					return new RevertCommand(RevertCommand.Abort());
+					builder.Abort();
+					break;
 				default:
 					throw new ArgumentException("Unknown enum value.", nameof(control));
 			}
+			return builder.Build();
 		}
 
 		public Command GetCherryPickCommand(CherryPickParameters parameters)
@@ -1115,70 +1111,66 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(parameters.Control.HasValue)
 			{
-				switch(parameters.Control.Value)
-				{
-					case CherryPickControl.Continue:
-						return new CherryPickCommand(CherryPickCommand.Continue());
-					case CherryPickControl.Quit:
-						return new CherryPickCommand(CherryPickCommand.Quit());
-					case CherryPickControl.Abort:
-						return new CherryPickCommand(CherryPickCommand.Abort());
-					default:
-						throw new ArgumentException("Unknown enum value.", "control");
-				}
+				return GetCherryPickCommand(parameters.Control.Value);
 			}
 			else
 			{
-				var args = new List<ICommandArgument>();
+				var builder = new CherryPickCommand.Builder();
 				if(parameters.NoCommit)
 				{
-					args.Add(CherryPickCommand.NoCommit());
+					builder.NoCommit();
 				}
 				if(parameters.Mainline > 0)
 				{
-					args.Add(CherryPickCommand.Mainline(parameters.Mainline));
+					builder.Mainline(parameters.Mainline);
 				}
 				if(parameters.SignOff)
 				{
-					args.Add(CherryPickCommand.SignOff());
+					builder.SignOff();
 				}
 				if(parameters.FastForward)
 				{
-					args.Add(CherryPickCommand.FastForward());
+					builder.FastForward();
 				}
 				if(parameters.AllowEmpty)
 				{
-					args.Add(CherryPickCommand.AllowEmpty());
+					builder.AllowEmpty();
 				}
 				if(parameters.AllowEmptyMessage)
 				{
-					args.Add(CherryPickCommand.AllowEmptyMessage());
+					builder.AllowEmptyMessage();
 				}
 				if(parameters.KeepRedundantCommits)
 				{
-					args.Add(CherryPickCommand.KeepRedundantCommits());
+					builder.KeepRedundantCommits();
 				}
 				foreach(var rev in parameters.Revisions)
 				{
-					args.Add(new CommandParameter(rev));
+					builder.AddArgument(new CommandParameter(rev));
 				}
-				return new CherryPickCommand(args);
+				return builder.Build();
 			}
 		}
 
 		public Command GetCherryPickCommand(CherryPickControl control)
 		{
+			var builder = new CherryPickCommand.Builder();
 			switch(control)
 			{
 				case CherryPickControl.Continue:
-					return new CherryPickCommand(CherryPickCommand.Continue());
+					builder.AddOption(new ConfigurationValueOverride("core.editor", "true"));
+					builder.Continue();
+					break;
 				case CherryPickControl.Quit:
-					return new CherryPickCommand(CherryPickCommand.Quit());
+					builder.Quit();
+					break;
 				case CherryPickControl.Abort:
-					return new CherryPickCommand(CherryPickCommand.Abort());
+					builder.Abort();
+					break;
 				default:
-					throw new ArgumentException("Unknown enum value.", nameof(control));
+					throw new ArgumentException("Unknown enum value.", "control");
 			}
+			return builder.Build();
 		}
 
 		public Command GetResetCommand(ResetParameters parameters)

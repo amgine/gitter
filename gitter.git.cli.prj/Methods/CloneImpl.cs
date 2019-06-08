@@ -62,7 +62,7 @@ namespace gitter.Git.AccessLayer.CLI
 					Directory.CreateDirectory(parameters.Path);
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
 				throw new GitException(exc.Message, exc);
 			}
@@ -83,13 +83,9 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				Directory.CreateDirectory(parameters.Path);
 			}
-			if(progress == null)
-			{
-				progress = NullProgress.Instance;
-			}
-			progress.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
+			progress?.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
 
-			List<string> errorMessages = null;
+			var errorMessages  = default(List<string>);
 			var stdOutReceiver = new NullReader();
 			var stdErrReceiver = new NotifyingAsyncTextReader();
 			stdErrReceiver.TextLineReceived += (s, e) =>
@@ -98,7 +94,7 @@ namespace gitter.Git.AccessLayer.CLI
 				{
 					var parser = new GitParser(e.Text);
 					var operationProgress = parser.ParseProgress();
-					progress.Report(operationProgress);
+					progress?.Report(operationProgress);
 					if(operationProgress.IsIndeterminate)
 					{
 						if(!string.IsNullOrWhiteSpace(operationProgress.ActionName))
@@ -112,10 +108,7 @@ namespace gitter.Git.AccessLayer.CLI
 					}
 					else
 					{
-						if(errorMessages != null)
-						{
-							errorMessages.Clear();
-						}
+						errorMessages?.Clear();
 					}
 				}
 			};
@@ -127,15 +120,9 @@ namespace gitter.Git.AccessLayer.CLI
 					var exitCode = TaskUtility.UnwrapResult(t);
 					if(exitCode != 0)
 					{
-						string errorMessage;
-						if(errorMessages != null && errorMessages.Count != 0)
-						{
-							errorMessage = string.Join(Environment.NewLine, errorMessages);
-						}
-						else
-						{
-							errorMessage = string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
-						}
+						var errorMessage = errorMessages != null && errorMessages.Count != 0
+							? string.Join(Environment.NewLine, errorMessages)
+							: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
 						throw new GitException(errorMessage);
 					}
 				},

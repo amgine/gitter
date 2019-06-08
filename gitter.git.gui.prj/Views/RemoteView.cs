@@ -161,14 +161,9 @@ namespace gitter.Git.Gui.Views
 					}
 
 					UpdateText();
-					if(value != null)
-					{
-						DataSource = new RemoteReferencesDataSource(value, _lstRemoteReferences);
-					}
-					else
-					{
-						DataSource = null;
-					}
+					DataSource = value != null
+						? new RemoteReferencesDataSource(value, _lstRemoteReferences)
+						: null;
 				}
 			}
 		}
@@ -201,8 +196,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.AttachViewModel(viewModel);
 
-			var vm = viewModel as RemoteViewModel;
-			if(vm != null)
+			if(viewModel is RemoteViewModel vm)
 			{
 				Remote = vm.Remote;
 			}
@@ -212,8 +206,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.DetachViewModel(viewModel);
 
-			var vm = viewModel as RemoteViewModel;
-			if(vm != null)
+			if(viewModel is RemoteViewModel)
 			{
 				Remote = null;
 			}
@@ -221,10 +214,7 @@ namespace gitter.Git.Gui.Views
 
 		public override void RefreshContent()
 		{
-			if(DataSource != null)
-			{
-				DataSource.ReloadData();
-			}
+			DataSource?.ReloadData();
 		}
 
 		private void DetachRemote(Remote remote)
@@ -243,14 +233,9 @@ namespace gitter.Git.Gui.Views
 		{
 			if(!IsDisposed)
 			{
-				if(Remote != null)
-				{
-					Text = Remote.Name;
-				}
-				else
-				{
-					Text = Resources.StrRemote;
-				}
+				Text = Remote != null
+					? Remote.Name
+					: Resources.StrRemote;
 			}
 		}
 

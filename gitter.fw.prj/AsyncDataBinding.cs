@@ -40,11 +40,7 @@ namespace gitter.Framework
 
 		public event EventHandler DataChanged;
 
-		protected virtual void OnDataChanged()
-		{
-			var handler = DataChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		protected virtual void OnDataChanged() => DataChanged?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -123,16 +119,13 @@ namespace gitter.Framework
 					}
 					else if(t.IsFaulted)
 					{
-						Data = default(T);
+						Data = default;
 						OnFetchFailed(TaskUtility.UnwrapException(t.Exception));
 					}
 					else if(t.IsCompleted)
 					{
 						var data = t.Result;
-						if(progress != null)
-						{
-							progress.Report(OperationProgress.Completed);
-						}
+						progress?.Report(OperationProgress.Completed);
 						Data = data;
 						OnFetchCompleted(data);
 					}

@@ -55,9 +55,9 @@ namespace gitter
 
 			var item = new T()
 			{
-				Text = Resources.StrRemoveRepository,
+				Text  = Resources.StrRemoveRepository,
 				Image = CachedResources.Bitmaps["ImgRepositoryRemove"],
-				Tag = repository,
+				Tag   = repository,
 			};
 			item.Click += OnRemoveRepositoryClick;
 			return item;
@@ -71,8 +71,8 @@ namespace gitter
 			var item = new T()
 			{
 				Image = image,
-				Text = name != null ? name : url,
-				Tag = url,
+				Text  = name ?? url,
+				Tag   = url,
 			};
 			item.Click += OnOpenUrlItemClick;
 			return item;
@@ -86,8 +86,8 @@ namespace gitter
 			var item = new T()
 			{
 				Image = image,
-				Text = name != null ? name : path,
-				Tag = path,
+				Text  = name ?? path,
+				Tag   = path,
 			};
 			item.Click += OnOpenCmdAtItemClick;
 			return item;
@@ -111,7 +111,7 @@ namespace gitter
 		private static void OnOpenUrlItemClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
-			var url = (string)item.Tag;
+			var url  = (string)item.Tag;
 
 			Utility.OpenUrl(url);
 		}
@@ -163,8 +163,8 @@ namespace gitter
 
 		static void OnGuiCommandItemClick(object sender, EventArgs e)
 		{
-			var item	= (ToolStripItem)sender;
-			var cmd		= (GuiCommand)item.Tag;
+			var item = (ToolStripItem)sender;
+			var cmd  = (GuiCommand)item.Tag;
 
 			cmd.Execute(GitterApplication.WorkingEnvironment);
 		}

@@ -33,13 +33,29 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Command"/> class.
 		/// </summary>
+		/// <param name="options">Arguments passed to git before command.</param>
+		/// <param name="name">Command name.</param>
+		/// <param name="arguments">Command arguments.</param>
+		public Command(IEnumerable<ICommandArgument> options, string name, IEnumerable<ICommandArgument> arguments)
+		{
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+
+			Name      = name;
+			Options   = options   ?? Enumerable.Empty<ICommandArgument>();
+			Arguments = arguments ?? Enumerable.Empty<ICommandArgument>();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Command"/> class.
+		/// </summary>
 		/// <param name="name">Command name.</param>
 		/// <param name="arguments">Command arguments.</param>
 		public Command(string name, IEnumerable<ICommandArgument> arguments)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			Name = name;
+			Name      = name;
+			Options   = Enumerable.Empty<ICommandArgument>();
 			Arguments = arguments ?? Enumerable.Empty<ICommandArgument>();
 		}
 
@@ -59,6 +75,10 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <summary>Returns command name.</summary>
 		/// <value>Command name.</value>
 		public string Name { get; }
+
+		/// <summary>Returns collection of arguments passed to git before command.</summary>
+		/// <value>Collection of arguments passed to git before command.</value>
+		public IEnumerable<ICommandArgument> Options { get; }
 		
 		/// <summary>Returns collection of command arguments.</summary>
 		/// <value>Collection of command arguments.</value>
@@ -76,6 +96,11 @@ namespace gitter.Git.AccessLayer.CLI
 			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
 
 			const char ArgumentSeparator = ' ';
+			foreach(var arg in Options)
+			{
+				arg.ToString(stringBuilder);
+				stringBuilder.Append(ArgumentSeparator);
+			}
 			stringBuilder.Append(Name);
 			foreach(var arg in Arguments)
 			{

@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -85,24 +84,15 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		private readonly ViewDockGrid _grid;
-		private readonly AnchorStyles _side;
-
 		public GridDockMarker(ViewDockGrid grid, ViewHost viewHost, AnchorStyles side)
 			: base(grid, viewHost, new[] { GetButton(side) }, Border, GetPositionBounds(grid, side))
 		{
-			_grid = grid;
-			_side = side;
+			Grid = grid;
+			Side = side;
 		}
 
-		public ViewDockGrid Grid
-		{
-			get { return _grid; }
-		}
+		public ViewDockGrid Grid { get; }
 
-		public AnchorStyles Side
-		{
-			get { return _side; }
-		}
+		public AnchorStyles Side { get; }
 	}
 }

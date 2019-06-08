@@ -24,13 +24,9 @@ namespace gitter.Framework
 
 	public class PersistentCache<T> : Cache<T>
 	{
-		#region Data
-
 		private readonly Func<T> _onReevaluate;
 		private T _value;
 		private bool _isCached;
-
-		#endregion
 
 		public PersistentCache(Func<T> onReevaluate)
 		{
@@ -48,17 +44,13 @@ namespace gitter.Framework
 			_isCached = true;
 		}
 
-		public override bool IsCached
-		{
-			get { return _isCached; }
-		}
+		public override bool IsCached => _isCached;
 
 		public override T Value
 		{
 			get
 			{
-				if(!IsCached)
-					Reevaluate();
+				if(!IsCached) Reevaluate();
 				return _value;
 			}
 		}

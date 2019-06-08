@@ -26,48 +26,18 @@ namespace gitter.Framework.Controls
 	/// <summary>Atomic listbox element - single cell.</summary>
 	public abstract class CustomListBoxSubItem
 	{
-		#region Data
-
-		private readonly int _id;
-		private CustomListBoxItem _item;
-
-		#endregion
-
-		#region .ctor
-
 		protected CustomListBoxSubItem(int id)
 		{
-			_id = id;
+			Id = id;
 		}
 
-		#endregion
+		public int Id { get; }
 
-		#region Properties
+		public CustomListBoxItem Item { get; internal set; }
 
-		public int Id
-		{
-			get { return _id; }
-		}
+		public void Invalidate() => Item?.InvalidateSubItem(Id);
 
-		public CustomListBoxItem Item
-		{
-			get { return _item; }
-			internal set { _item = value; }
-		}
-
-		#endregion
-
-		#region Methods
-
-		public void Invalidate()
-		{
-			if(_item != null) _item.InvalidateSubItem(_id);
-		}
-
-		public void InvalidateSafe()
-		{
-			if(_item != null) _item.InvalidateSubItemSafe(_id);
-		}
+		public void InvalidateSafe() => Item?.InvalidateSubItemSafe(Id);
 
 		public void Paint(SubItemPaintEventArgs paintEventArgs)
 		{
@@ -82,7 +52,5 @@ namespace gitter.Framework.Controls
 		protected abstract void OnPaint(SubItemPaintEventArgs paintEventArgs);
 
 		protected abstract Size OnMeasure(SubItemMeasureEventArgs measureEventArgs);
-
-		#endregion
 	}
 }

@@ -312,10 +312,7 @@ namespace gitter.Git
 
 		public Task RefreshAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrFetchingDataFromRemoteRepository));
-			}
+			progress?.Report(new OperationProgress(Resources.StrFetchingDataFromRemoteRepository));
 			var parameters = GetQueryParameters();
 			return Repository.Accessor
 				.QueryRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)

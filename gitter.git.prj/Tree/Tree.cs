@@ -46,10 +46,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
 			var parameters = new QueryTreeContentParameters(treeHash, true, false);
 			return repository.Accessor.QueryTreeContent.InvokeAsync(parameters, progress, cancellationToken)
 				.ContinueWith(
@@ -189,10 +186,7 @@ namespace gitter.Git
 
 		public Task<byte[]> GetBlobContentAsync(string blobPath, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrsFetchingBlob.AddEllipsis()));
-			}
+			progress?.Report(new OperationProgress(Resources.StrsFetchingBlob.AddEllipsis()));
 			return Repository.Accessor.QueryBlobBytes.InvokeAsync(
 				new QueryBlobBytesParameters()
 				{

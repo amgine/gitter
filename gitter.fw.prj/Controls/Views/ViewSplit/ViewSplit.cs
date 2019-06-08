@@ -28,14 +28,9 @@ namespace gitter.Framework.Controls
 	/// <summary>Splits controls by movable splitters.</summary>
 	internal sealed class ViewSplit : Control, IEnumerable<Control>
 	{
-		#region Data
-
-		private readonly Orientation _orientation;
 		private readonly List<Control> _items;
 		private readonly ViewSplitPositions _positions;
 		private Size _size;
-
-		#endregion
 
 		/// <summary>
 		/// Replace <paramref name="origin"/> with a <see cref="ViewSplit"/>, containing
@@ -87,41 +82,31 @@ namespace gitter.Framework.Controls
 				split.SuspendLayout();
 				split.Bounds = bounds;
 				split.Parent = parent;
-				var psplit = parent as ViewSplit;
-				if(psplit != null)
+
+				switch(parent)
 				{
-					split.Anchor = anchor;
-					var index = psplit.IndexOf(origin);
-					psplit[index] = split;
-				}
-				else
-				{
-					var pgrid = parent as ViewDockGrid;
-					if(pgrid != null)
-					{
+					case ViewSplit psplit:
+						split.Anchor = anchor;
+						var index = psplit.IndexOf(origin);
+						psplit[index] = split;
+						break;
+					case ViewDockGrid pgrid:
 						split.Anchor = anchor;
 						pgrid.RootControl = split;
-					}
-					else
-					{
-						var pfloat = parent as FloatingViewForm;
-						if(pfloat != null)
+						break;
+					case FloatingViewForm pfloat:
+						pfloat.RootControl = split;
+						split.Dock = DockStyle.Fill;
+						if(origin is ViewHost vh)
 						{
-							pfloat.RootControl = split;
-							split.Dock = DockStyle.Fill;
-							var vh = origin as ViewHost;
-							if(vh != null)
-							{
-								pfloat.EnterMulticontrolMode();
-								vh.Status = ViewHostStatus.DockedOnFloat;
-							}
+							pfloat.EnterMulticontrolMode();
+							vh.Status = ViewHostStatus.DockedOnFloat;
 						}
-						else
-						{
-							throw new ApplicationException("Unsupported parent control type.");
-						}
-					}
+						break;
+					default:
+						throw new ApplicationException("Unsupported parent control type.");
 				}
+
 				item1.Parent = split;
 				item2.Parent = split;
 				split.ResumeLayout(false);
@@ -190,34 +175,10 @@ namespace gitter.Framework.Controls
 		/// <returns>Result of comparing <paramref name="c1"/> and <paramref name="c2"/>.</returns>
 		private static int ComparePriority(Control c1, Control c2)
 		{
-			bool dw1;
-			var host1 = c1 as ViewHost;
-			if(host1 != null)
-			{
-				dw1 = host1.IsDocumentWell;
-			}
-			else
-			{
-				var ts = c1 as ViewSplit;
-				if(ts != null)
-					dw1 = ts.ContainsDocumentWell;
-				else
-					dw1 = false;
-			}
-			bool dw2;
-			var host2 = c2 as ViewHost;
-			if(host2 != null)
-			{
-				dw2 = host2.IsDocumentWell;
-			}
-			else
-			{
-				var ts = c2 as ViewSplit;
-				if(ts != null)
-					dw2 = ts.ContainsDocumentWell;
-				else
-					dw2 = false;
-			}
+			var dw1 = (c1 is ViewHost host1 && host1.IsDocumentWell)
+			       || (c1 is ViewSplit ts1 && ts1.ContainsDocumentWell);
+			var dw2 = (c2 is ViewHost host2 && host2.IsDocumentWell)
+			       || (c2 is ViewSplit ts2 && ts2.ContainsDocumentWell);
 			if(dw1 == dw2) return 0;
 			if(dw1) return -1;
 			return 1;
@@ -238,7 +199,7 @@ namespace gitter.Framework.Controls
 
 			BackColor = ViewManager.Renderer.BackgroundColor;
 
-			_orientation = orientation;
+			Orientation = orientation;
 			_items = new List<Control>() { item1, item2 };
 			_size = bounds.Size;
 			Rectangle bounds1, bounds2;
@@ -314,10 +275,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Layout orientation.</summary>
-		public Orientation Orientation
-		{
-			get { return _orientation; }
-		}
+		public Orientation Orientation { get; }
 
 		/// <summary>Gets or sets hosted <see cref="System.Windows.Forms.Control"/> at the specified index.</summary>
 		public Control this[int index]
@@ -328,10 +286,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Gets the hosted control count.</summary>
 		/// <value>Hosted control count.</value>
-		public int Count
-		{
-			get { return _items.Count; }
-		}
+		public int Count => _items.Count;
 
 		/// <summary>Returns index of hosted <paramref name="control"/>.</summary>
 		/// <param name="control">Control to look for.</param>
@@ -341,10 +296,7 @@ namespace gitter.Framework.Controls
 			return _items.IndexOf(control);
 		}
 
-		public IEnumerable<double> Positions
-		{
-			get { return _positions; }
-		}
+		public IEnumerable<double> Positions => _positions;
 
 		/// <summary>
 		/// Gets a value indicating whether this <see cref="ViewSplit"/> contains <see cref="ViewHost"/> with
@@ -356,13 +308,15 @@ namespace gitter.Framework.Controls
 			{
 				foreach(var ctl in _items)
 				{
-					var host = ctl as ViewHost;
-					if(host != null && host.IsDocumentWell) return true;
-				}
-				foreach(var ctl in _items)
-				{
-					var split = ctl as ViewSplit;
-					if(split != null && split.ContainsDocumentWell) return true;
+					switch(ctl)
+					{
+						case ViewHost host:
+							if(host.IsDocumentWell) return true;
+							break;
+						case ViewSplit split:
+							if(split.ContainsDocumentWell) return true;
+							break;
+					}
 				}
 				return false;
 			}
@@ -382,7 +336,7 @@ namespace gitter.Framework.Controls
 		/// <returns>Removed control.</returns>
 		public Control RemoveAt(int index)
 		{
-			Verify.Argument.IsValidIndex(index, _items.Count, "index");
+			Verify.Argument.IsValidIndex(index, _items.Count, nameof(index));
 
 			if(_items.Count == 2)
 			{
@@ -398,39 +352,27 @@ namespace gitter.Framework.Controls
 				singleItem.Parent = parent;
 				Parent = null;
 				// valid parents for ViewSplit: ViewDockGrid, ViewSplit, ViewFloatingForm
-				var split = parent as ViewSplit;
-				if(split != null)
+				switch(parent)
 				{
-					// embed remaining item into this split's old position.
-					split[split.IndexOf(this)] = singleItem;
-				}
-				else
-				{
-					var pgrid = parent as ViewDockGrid;
-					if(pgrid != null)
-					{
+					case ViewSplit split:
+						// embed remaining item into this split's old position.
+						split[split.IndexOf(this)] = singleItem;
+						break;
+					case ViewDockGrid pgrid:
 						pgrid.RootControl = singleItem;
-					}
-					else
-					{
-						var pfloat = parent as FloatingViewForm;
-						if(pfloat != null)
+						break;
+					case FloatingViewForm pfloat:
+						pfloat.RootControl = singleItem;
+						if(singleItem is ViewHost th)
 						{
-							pfloat.RootControl = singleItem;
-							var th = singleItem as ViewHost;
-							if(th != null)
-							{
-								pfloat.LeaveMulticontrolMode();
-								th.Status = ViewHostStatus.Floating;
-							}
-							singleItem.Anchor = AnchorStyles.Left | AnchorStyles.Top;
-							singleItem.Dock = DockStyle.Fill;
+							pfloat.LeaveMulticontrolMode();
+							th.Status = ViewHostStatus.Floating;
 						}
-						else
-						{
-							throw new ApplicationException("Unexpeceted ViewSplit.Parent: " + parent);
-						}
-					}
+						singleItem.Anchor = AnchorStyles.Left | AnchorStyles.Top;
+						singleItem.Dock = DockStyle.Fill;
+						break;
+					default:
+						throw new ApplicationException("Unexpeceted ViewSplit.Parent: " + parent);
 				}
 				ResumeLayout(false);
 				Dispose();
@@ -451,7 +393,7 @@ namespace gitter.Framework.Controls
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
 		protected override void OnMouseEnter(EventArgs e)
 		{
-			switch(_orientation)
+			switch(Orientation)
 			{
 				case Orientation.Horizontal:
 					Cursor = Cursors.SizeWE;
@@ -484,7 +426,7 @@ namespace gitter.Framework.Controls
 			base.OnResize(eventargs);
 			var size = Size;
 			bool enforceChildSizes = true;
-			switch(_orientation)
+			switch(Orientation)
 			{
 				case Orientation.Horizontal:
 					if(_size.Width == size.Width)

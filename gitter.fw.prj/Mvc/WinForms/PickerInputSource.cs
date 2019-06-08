@@ -36,26 +36,14 @@ namespace gitter.Framework.Mvc.WinForms
 		where TListBox : CustomListBox, new()
 		where TItem : CustomListBoxItem
 	{
-		#region .ctor
-
 		public PickerInputSource(CustomObjectPicker<TListBox, TItem, TValue> picker)
 			: base(picker)
 		{
 		}
 
-		#endregion
+		protected override TValue FetchValue() => Control.SelectedValue;
 
-		#region Methods
-
-		protected override TValue FetchValue()
-		{
-			return Control.SelectedValue;
-		}
-
-		protected override void SetValue(TValue value)
-		{
-			Control.SelectedValue = value;
-		}
+		protected override void SetValue(TValue value) => Control.SelectedValue = value;
 
 		protected override void SubscribeToValueChangeEvent()
 		{
@@ -66,7 +54,5 @@ namespace gitter.Framework.Mvc.WinForms
 		{
 			Control.SelectedValueChanged -= OnControlValueChanged;
 		}
-
-		#endregion
 	}
 }

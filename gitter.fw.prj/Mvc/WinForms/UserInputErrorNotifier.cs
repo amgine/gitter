@@ -22,18 +22,13 @@ namespace gitter.Framework.Mvc.WinForms
 {
 	using System.Collections.Generic;
 	using System.Windows.Forms;
+
 	using gitter.Framework.Services;
 
 	public class UserInputErrorNotifier : IUserInputErrorNotifier
 	{
-		#region Data
-
 		private readonly INotificationService _notificationService;
 		private readonly IEnumerable<IUserInputSource> _inputSources;
-
-		#endregion
-
-		#region .ctor
 
 		public UserInputErrorNotifier(INotificationService notificationService, IEnumerable<IUserInputSource> inputSources)
 		{
@@ -43,10 +38,6 @@ namespace gitter.Framework.Mvc.WinForms
 			_notificationService = notificationService;
 			_inputSources = inputSources;
 		}
-
-		#endregion
-
-		#region Methods
 
 		private Control GetControlFromInputSource(IUserInputSource userInputSource)
 		{
@@ -58,23 +49,11 @@ namespace gitter.Framework.Mvc.WinForms
 			{
 				if(inputSource == userInputSource)
 				{
-					var win32inputSource = inputSource as IWin32ControlInputSource;
-					if(win32inputSource != null)
-					{
-						return win32inputSource.Control;
-					}
-					else
-					{
-						return null;
-					}
+					return (inputSource as IWin32ControlInputSource)?.Control;
 				}
 			}
 			return null;
 		}
-
-		#endregion
-
-		#region IUserInputErrorNotifier Members
 
 		public void NotifyError(IUserInputSource userInputSource, UserInputError userInputError)
 		{
@@ -87,7 +66,5 @@ namespace gitter.Framework.Mvc.WinForms
 				}
 			}
 		}
-
-		#endregion
 	}
 }

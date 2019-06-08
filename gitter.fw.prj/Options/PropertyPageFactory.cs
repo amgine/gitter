@@ -25,76 +25,34 @@ namespace gitter.Framework.Options
 
 	public sealed class PropertyPageFactory
 	{
-		#region Static Data
-
 		public static readonly Guid RootGroupGuid		= Guid.Empty;
 		public static readonly Guid AppearanceGroupGuid = new Guid("F1F07910-1105-4928-9B7C-F62657601747");
 
-		#endregion
-
-		#region Data
-
-		private readonly Guid _guid;
-		private readonly Guid _groupGuid;
-		private readonly string _name;
-		private Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
-		private Bitmap _icon;
-
-		#endregion
-
-		#region .ctor
+		private readonly Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
 
 		public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, Func<IWorkingEnvironment, PropertyPage> getPropertyPage)
 		{
-			_guid = guid;
-			_name = name;
-			_groupGuid = groupGuid;
-			_icon = icon;
+			Guid      = guid;
+			Name      = name;
+			GroupGuid = groupGuid;
+			Icon      = icon;
+
 			_getPropertyPage = getPropertyPage;
 		}
 
-		#endregion
+		public Guid Guid { get; }
 
-		#region Properties
+		public Guid GroupGuid { get; }
 
-		public Guid Guid
-		{
-			get { return _guid; }
-		}
+		public string Name { get; }
 
-		public Guid GroupGuid
-		{
-			get { return _groupGuid; }
-		}
-
-		public string Name
-		{
-			get { return _name; }
-		}
-
-		public Bitmap Icon
-		{
-			get { return _icon; }
-		}
-
-		#endregion
-
-		#region Methods
+		public Bitmap Icon { get; }
 
 		public PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
-			if(_getPropertyPage != null)
-			{
-				return _getPropertyPage(environment);
-			}
-			else
-			{
-				return null;
-			}
+			return _getPropertyPage?.Invoke(environment);
 		}
-
-		#endregion
 	}
 }

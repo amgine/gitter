@@ -83,7 +83,7 @@ namespace gitter.Git
 				if(_stagedStatus != value)
 				{
 					_stagedStatus = value;
-					StagedStatusChanged.Raise(this);
+					StagedStatusChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -98,7 +98,7 @@ namespace gitter.Git
 				if(_status != value)
 				{
 					_status = value;
-					StatusChanged.Raise(this);
+					StatusChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}

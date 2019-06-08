@@ -45,14 +45,14 @@ namespace gitter.Framework.Controls
 		private void EnterHintMode()
 		{
 			_userTextEntered = false;
-			ForeColor = SystemColors.GrayText;
+			ForeColor = HintForeColor;
 			base.Text = Hint;
 		}
 
 		private void EnterNormalMode()
 		{
 			_userTextEntered = true;
-			ForeColor = SystemColors.WindowText;
+			ForeColor = TextForeColor;
 		}
 
 		protected override void OnGotFocus(EventArgs e)
@@ -77,6 +77,16 @@ namespace gitter.Framework.Controls
 				EnterHintMode();
 			}
 		}
+
+		[DefaultValue("GrayText")]
+		[Browsable(true)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+		public Color HintForeColor { get; set; } = SystemColors.GrayText;
+
+		[DefaultValue("WindowText")]
+		[Browsable(true)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+		public Color TextForeColor { get; set; } = SystemColors.WindowText;
 
 		[DefaultValue("")]
 		[Browsable(true)]

@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2018  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,33 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
+	using System.Text;
 
-	public sealed class ViewButtonClickEventArgs : EventArgs
+	sealed class ConfigurationValueOverride : ICommandArgument
 	{
-		public ViewButtonClickEventArgs(ViewButtonType button)
+		public ConfigurationValueOverride(string name, string value)
 		{
-			Button = button;
+			Name  = name;
+			Value = value;
 		}
 
-		public ViewButtonType Button { get; }
+		public string Name { get; }
+
+		public string Value { get; }
+
+		public void ToString(StringBuilder stringBuilder)
+		{
+			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
+
+			stringBuilder.Append("-c ");
+			stringBuilder.Append(Name);
+			stringBuilder.Append("=");
+			stringBuilder.Append(Value);
+		}
+
+		public override string ToString() => "-c " + Name + "=" + Value;
 	}
 }

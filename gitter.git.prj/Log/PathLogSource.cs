@@ -23,7 +23,6 @@ namespace gitter.Git
 	using System;
 	using System.Threading;
 	using System.Threading.Tasks;
-	using System.Collections.Generic;
 
 	using gitter.Framework;
 
@@ -31,14 +30,6 @@ namespace gitter.Git
 
 	public sealed class PathLogSource : LogSourceBase
 	{
-		#region Data
-
-		private readonly IRevisionPointer _revision;
-		private readonly string _path;
-		private bool _followRenames;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Initializes a new instance of the <see cref="PathLogSource"/> class.</summary>
@@ -50,34 +41,22 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 			Verify.Argument.IsNotNull(path, nameof(path));
 
-			_revision = revision;
-			_path = path;
-			_followRenames = followRenames;
+			Revision = revision;
+			Path = path;
+			FollowRenames = followRenames;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public override Repository Repository
-		{
-			get { return _revision.Repository; }
-		}
+		public override Repository Repository => Revision.Repository;
 
-		public bool FollowRenames
-		{
-			get { return _followRenames; }
-		}
+		public bool FollowRenames { get; }
 
-		public IRevisionPointer Revision
-		{
-			get { return _revision; }
-		}
+		public IRevisionPointer Revision { get; }
 
-		public string Path
-		{
-			get { return _path; }
-		}
+		public string Path { get; }
 
 		#endregion
 
@@ -105,28 +84,24 @@ namespace gitter.Git
 				parameters.Paths = new[] { Path };
 				parameters.Follow = FollowRenames;
 
-				if(progress != null)
-				{
-					progress.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
-				}
-				return Repository.Accessor
-								 .QueryRevisions.InvokeAsync(parameters, progress, cancellationToken)
-								 .ContinueWith(
-									t =>
-									{
-										if(progress != null)
-										{
-											progress.Report(OperationProgress.Completed);
-										}
-										var revisionData = TaskUtility.UnwrapResult(t);
-										var revisions    = Repository.Revisions.Resolve(revisionData);
-										var revisionLog  = new RevisionLog(Repository, revisions);
+				progress?.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
+				return Repository
+					.Accessor
+					.QueryRevisions
+					.InvokeAsync(parameters, progress, cancellationToken)
+					.ContinueWith(
+						t =>
+						{
+							progress?.Report(OperationProgress.Completed);
+							var revisionData = TaskUtility.UnwrapResult(t);
+							var revisions    = Repository.Revisions.Resolve(revisionData);
+							var revisionLog  = new RevisionLog(Repository, revisions);
 
-										return revisionLog;
-									},
-									cancellationToken,
-									TaskContinuationOptions.ExecuteSynchronously,
-									TaskScheduler.Default);
+							return revisionLog;
+						},
+						cancellationToken,
+						TaskContinuationOptions.ExecuteSynchronously,
+						TaskScheduler.Default);
 			}
 		}
 
@@ -137,13 +112,7 @@ namespace gitter.Git
 		/// <returns>
 		///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
 		/// </returns>
-		public override bool Equals(object obj)
-		{
-			if(obj == null) return false;
-			var other = obj as PathLogSource;
-			if(other == null) return false;
-			return _revision == other._revision && _path == other._path;
-		}
+		public override bool Equals(object obj) => obj is PathLogSource other && Revision == other.Revision && Path == other.Path;
 
 		/// <summary>
 		/// Returns a hash code for this instance.
@@ -151,10 +120,7 @@ namespace gitter.Git
 		/// <returns>
 		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
 		/// </returns>
-		public override int GetHashCode()
-		{
-			return _revision.GetHashCode() ^ _path.GetHashCode();
-		}
+		public override int GetHashCode() => Revision.GetHashCode() ^ Path.GetHashCode();
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.
@@ -164,14 +130,9 @@ namespace gitter.Git
 		/// </returns>
 		public override string ToString()
 		{
-			if(_revision is Revision)
-			{
-				return Path + " @ " + _revision.Pointer.Substring(0, 7);
-			}
-			else
-			{
-				return Path + " @ " + _revision.Pointer;
-			}
+			return Revision is Revision
+				? Path + " @ " + Revision.Pointer.Substring(0, 7)
+				: Path + " @ " + Revision.Pointer;
 		}
 
 		#endregion

@@ -32,7 +32,7 @@ namespace gitter.Framework.Services
 		private readonly RepositoryGroup _local;
 		private int _maxRecentREpositories;
 
-		public RepositoryManagerService(int maxRecentRepositories = 10)
+		public RepositoryManagerService(int maxRecentRepositories = 25)
 		{
 			_maxRecentREpositories = maxRecentRepositories;
 			_recent = new RepositoryCollection();

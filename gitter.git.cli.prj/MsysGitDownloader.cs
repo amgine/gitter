@@ -212,10 +212,7 @@ namespace gitter.Git
 				InstallerExitCode = InstallerProcess.ExitCode;
 				InstallerProcess.Dispose();
 				InstallerProcess = null;
-				if(Monitor != null)
-				{
-					Monitor.Report(new OperationProgress("Completed.") { IsCompleted = true });
-				}
+				Monitor?.Report(new OperationProgress("Completed.") { IsCompleted = true });
 				try
 				{
 					File.Delete(InstallerFileName);
@@ -232,21 +229,15 @@ namespace gitter.Git
 			return Task.Factory.StartNew(
 				() =>
 				{
-					if(progress != null)
-					{
-						progress.Report(new OperationProgress("Initializing..."));
-					}
+					progress?.Report(new OperationProgress("Initializing..."));
 					using(var evt = new ManualResetEvent(false))
 					{
 						var process = new DownloadAndInstallProcess(evt)
 						{
-							Monitor = progress,
+							Monitor    = progress,
 							WebRequest = WebRequest.Create(DownloadUrl),
 						};
-						if(progress != null)
-						{
-							progress.Report(new OperationProgress("Connecting to MSysGit download server..."));
-						}
+						progress?.Report(new OperationProgress("Connecting to MSysGit download server..."));
 						process.WebRequest.BeginGetResponse(OnGotResponse, process);
 						evt.WaitOne();
 						if(process.Exception != null)
@@ -274,20 +265,14 @@ namespace gitter.Git
 				IsIndeterminate = true,
 				ActionName      = "Downloading MSysGit...",
 			};
-			if(process.Monitor != null)
-			{
-				process.Monitor.Report(state);
-			}
+			process.Monitor?.Report(state);
 			process.WebResponse = process.WebRequest.EndGetResponse(ar);
 			process.ResponseStream = process.WebResponse.GetResponseStream();
 			if(process.WebResponse.ContentLength > 0)
 			{
 				state.IsIndeterminate = false;
 				state.MaxProgress = (int)process.WebResponse.ContentLength;
-				if(process.Monitor != null)
-				{
-					process.Monitor.Report(state);
-				}
+				process.Monitor?.Report(state);
 			}
 			process.Buffer = new byte[1024*4];
 			process.ResponseStream.BeginRead(
@@ -411,10 +396,7 @@ namespace gitter.Git
 				IsIndeterminate = true,
 				ActionName      = "Installing MSysGit...",
 			};
-			if(process.Monitor != null)
-			{
-				process.Monitor.Report(state);
-			}
+			process.Monitor?.Report(state);
 			try
 			{
 				process.InstallerProcess = new Process()
@@ -436,9 +418,6 @@ namespace gitter.Git
 			}
 		}
 
-		public override string ToString()
-		{
-			return _downloadUrl;
-		}
+		public override string ToString() => _downloadUrl;
 	}
 }

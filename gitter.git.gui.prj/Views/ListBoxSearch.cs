@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2019  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,19 +27,14 @@ namespace gitter.Git.Gui.Views
 	abstract class ListBoxSearch<T> : ISearch<T>
 		where T : SearchOptions
 	{
-		private readonly CustomListBox _listBox;
-
 		protected ListBoxSearch(CustomListBox listBox)
 		{
 			Verify.Argument.IsNotNull(listBox, nameof(listBox));
 
-			_listBox = listBox;
+			ListBox = listBox;
 		}
 
-		protected CustomListBox ListBox
-		{
-			get { return _listBox; }
-		}
+		protected CustomListBox ListBox { get; }
 
 		protected abstract bool TestItem(CustomListBoxItem item, T search);
 

@@ -31,6 +31,7 @@ namespace gitter.Framework
 	using System.Security.Principal;
 	using System.Text;
 	using System.Windows.Forms;
+
 	using gitter.Native;
 
 	public static class Utility
@@ -40,15 +41,9 @@ namespace gitter.Framework
 		/// <summary>1 Jan 1970</summary>
 		private static readonly DateTime UnixEraStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-		public static bool IsOSVistaOrNewer
-		{
-			get { return _osVersion >= new Version(6, 0); }
-		}
+		public static bool IsOSVistaOrNewer => _osVersion >= new Version(6, 0);
 
-		public static bool IsOSWindows7OrNewer
-		{
-			get { return _osVersion >= new Version(6, 1); }
-		}
+		public static bool IsOSWindows7OrNewer => _osVersion >= new Version(6, 1);
 
 		public static string FormatDate(DateTime date, DateFormat format)
 		{
@@ -224,29 +219,25 @@ namespace gitter.Framework
 			return inverted;
 		}
 
-		private static ITaskbarList _taskBarList;
 		internal static int WM_TASKBAR_BUTTON_CREATED;
 
-		internal static ITaskbarList TaskBarList
-		{
-			get { return _taskBarList; }
-		}
+		internal static ITaskbarList TaskBarList { get; private set; }
 
 		public static void EnableWin7TaskbarSupport()
 		{
-			if(_taskBarList != null) return;
+			if(TaskBarList != null) return;
 			if(IsOSWindows7OrNewer)
 			{
 				WM_TASKBAR_BUTTON_CREATED = User32.RegisterWindowMessage("TaskbarButtonCreated");
-				_taskBarList = (ITaskbarList)Activator.CreateInstance<TaskbarList>();
+				TaskBarList = (ITaskbarList)Activator.CreateInstance<TaskbarList>();
 			}
 		}
 
 		public static void DisableWin7TaskbarSupport()
 		{
-			if(_taskBarList == null) return;
-			Marshal.ReleaseComObject(_taskBarList);
-			_taskBarList = null;
+			if(TaskBarList == null) return;
+			Marshal.ReleaseComObject(TaskBarList);
+			TaskBarList = null;
 		}
 
 		public static Process CreateProcessFor(string url)

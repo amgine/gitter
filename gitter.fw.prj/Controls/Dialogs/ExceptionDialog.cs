@@ -27,15 +27,11 @@ namespace gitter.Framework
 	using System.Reflection;
 	using System.Windows.Forms;
 
-	using gitter.Framework.Options;
-
 	using Resources = gitter.Framework.Properties.Resources;
 
 	public partial class ExceptionDialog : DialogBase
 	{
 		private const string ReportUrl = @"https://github.com/amgine/gitter/issues/new";
-
-		private Exception _exception;
 		private DateTime _date;
 
 		/// <summary>Create <see cref="ExceptionDialog"/>.</summary>
@@ -44,7 +40,7 @@ namespace gitter.Framework
 		{
 			Verify.Argument.IsNotNull(exception, nameof(exception));
 
-			_exception = exception;
+			Exception = exception;
 			_date = DateTime.Now;
 
 			InitializeComponent();
@@ -75,30 +71,21 @@ namespace gitter.Framework
 			_txtStack.Text = stackTrace;
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrClose; }
-		}
+		protected override string ActionVerb => Resources.StrClose;
 
-		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.Ok; }
-		}
+		public override DialogButtons OptimalButtons => DialogButtons.Ok;
 
-		public Exception Exception
-		{
-			get { return _exception; }
-		}
+		public Exception Exception { get; }
 
 		private string GetMessage()
 		{
 			var str = new StringBuilder();
 			str.Append("Date: ");
 			str.AppendLine(_date.FormatISO8601());
-			AppendExceptionInfo("Exception", _exception, str);
-			if(_exception.InnerException != null)
+			AppendExceptionInfo("Exception", Exception, str);
+			if(Exception.InnerException != null)
 			{
-				AppendInnerException(_exception.InnerException, str);
+				AppendInnerException(Exception.InnerException, str);
 			}
 			AppendLoadedAssemblies(str);
 			return str.ToString();

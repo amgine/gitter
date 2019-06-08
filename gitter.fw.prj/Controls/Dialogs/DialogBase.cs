@@ -27,7 +27,6 @@ namespace gitter.Framework
 
 	using gitter.Framework.Mvc;
 	using gitter.Framework.Mvc.WinForms;
-	using gitter.Framework.Options;
 	using gitter.Framework.Services;
 
 	using Resources = gitter.Framework.Properties.Resources;
@@ -35,18 +34,11 @@ namespace gitter.Framework
 	[ToolboxItem(false)]
 	public partial class DialogBase : UserControl
 	{
-		#region Data
-
-		private INotificationService _notificationService;
-		private IToolTipService _tooltipService;
-
-		#endregion
-
 		/// <summary>Initializes a new instance of the <see cref="DialogBase"/> class.</summary>
 		public DialogBase()
 		{
-			_notificationService = new BalloonNotificationService();
-			_tooltipService = new DefaultToolTipService();
+			NotificationService = new BalloonNotificationService();
+			ToolTipService = new DefaultToolTipService();
 			SuspendLayout();
 			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 			{
@@ -67,8 +59,8 @@ namespace gitter.Framework
 		{
 			if(disposing)
 			{
-				_tooltipService.Dispose();
-				_notificationService.Dispose();
+				ToolTipService.Dispose();
+				NotificationService.Dispose();
 			}
 			base.Dispose(disposing);
 		}
@@ -91,10 +83,7 @@ namespace gitter.Framework
 		{
 		}
 
-		public virtual DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.OkCancel; }
-		}
+		public virtual DialogButtons OptimalButtons => DialogButtons.OkCancel;
 
 		public MouseCursor MouseCursor
 		{
@@ -117,20 +106,13 @@ namespace gitter.Framework
 			}
 		}
 
-		protected virtual string ActionVerb
-		{
-			get { return Resources.StrOk; }
-		}
+		protected virtual string ActionVerb => Resources.StrOk;
 
-		protected virtual string CancelVerb
-		{
-			get { return Resources.StrCancel; }
-		}
+		protected virtual string CancelVerb => Resources.StrCancel;
 
 		protected void ClickOk()
 		{
-			var form = ParentForm as DialogForm;
-			if(form != null)
+			if(ParentForm is DialogForm form)
 			{
 				form.ClickOk();
 			}
@@ -143,8 +125,7 @@ namespace gitter.Framework
 
 		protected void ClickCancel()
 		{
-			var form = ParentForm as DialogForm;
-			if(form != null)
+			if(ParentForm is DialogForm form)
 			{
 				form.ClickCancel();
 			}
@@ -157,36 +138,26 @@ namespace gitter.Framework
 
 		protected void ClickApply()
 		{
-			var form = ParentForm as DialogForm;
-			if(form != null) form.ClickApply();
+			if(ParentForm is DialogForm form) form.ClickApply();
 		}
 
 		protected void SetOkEnabled(bool enabled)
 		{
-			var form = ParentForm as DialogForm;
-			if(form != null) form.OkButtonEnabled = enabled;
+			if(ParentForm is DialogForm form) form.OkButtonEnabled = enabled;
 		}
 
 		protected void SetCancelEnabled(bool enabled)
 		{
-			var form = ParentForm as DialogForm;
-			if(form != null) form.CancelButtonEnabled = enabled;
+			if(ParentForm is DialogForm form) form.CancelButtonEnabled = enabled;
 		}
 
 		protected void SetApplyEnabled(bool enabled)
 		{
-			var form = ParentForm as DialogForm;
-			if(form != null) form.ApplyButtonEnabled = enabled;
+			if(ParentForm is DialogForm form) form.ApplyButtonEnabled = enabled;
 		}
 
-		protected INotificationService NotificationService
-		{
-			get { return _notificationService; }
-		}
+		protected INotificationService NotificationService { get; }
 
-		protected IToolTipService ToolTipService
-		{
-			get { return _tooltipService; }
-		}
+		protected IToolTipService ToolTipService { get; }
 	}
 }

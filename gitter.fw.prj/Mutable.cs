@@ -24,25 +24,16 @@ namespace gitter.Framework
 
 	public sealed class Mutable<T>
 	{
-		private T _value;
-
 		public Mutable()
 		{
 		}
 
 		public Mutable(T value)
 		{
-			_value = value;
+			Value = value;
 		}
 
-		public T Value
-		{
-			get { return _value; }
-			set
-			{
-				_value = value;
-			}
-		}
+		public T Value { get; set; }
 
 		public static implicit operator Mutable<T>(T value)
 		{
@@ -52,7 +43,7 @@ namespace gitter.Framework
 		public static implicit operator T(Mutable<T> mutable)
 		{
 			if(mutable == null) return default(T);
-			return mutable._value;
+			return mutable.Value;
 		}
 	}
 }

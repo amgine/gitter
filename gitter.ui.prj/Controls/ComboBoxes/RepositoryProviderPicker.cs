@@ -25,22 +25,11 @@ namespace gitter.Controls
 
 	public sealed class RepositoryProviderPicker : CustomObjectPicker<CustomListBox, RepositoryProviderListItem, IRepositoryProvider>
 	{
-		#region .ctor
-
 		/// <summary>Initializes a new instance of the <see cref="RepositoryProviderPicker"/> class.</summary>
 		public RepositoryProviderPicker()
 		{
 		}
 
-		#endregion
-
-		#region Methods
-
-		protected override IRepositoryProvider GetValue(RepositoryProviderListItem item)
-		{
-			return item != null ? item.DataContext : null;
-		}
-
-		#endregion
+		protected override IRepositoryProvider GetValue(RepositoryProviderListItem item) => item?.DataContext;
 	}
 }

@@ -21,51 +21,25 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Windows.Forms;
 
 	public sealed class ViewDockSideTab : ViewTabBase
 	{
-		#region Data
-
-		private readonly ViewDockSide _side;
-		private readonly ViewHost _viewHost;
-
-		#endregion
-
-		#region .ctor
-
 		public ViewDockSideTab(ViewDockSide side, ViewHost viewHost, ViewBase view)
 			: base(view, Utility.InvertAnchor(side.Side))
 		{
 			Verify.Argument.IsNotNull(side, nameof(side));
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
-			_side = side;
-			_viewHost = viewHost;
+			Side = side;
+			ViewHost = viewHost;
 		}
 
-		#endregion
+		public ViewDockSide Side { get; }
 
-		#region Properties
+		public ViewHost ViewHost { get; }
 
-		public ViewDockSide Side
-		{
-			get { return _side; }
-		}
-
-		public ViewHost ViewHost
-		{
-			get { return _viewHost; }
-		}
-
-		public override bool IsActive
-		{
-			get { return false; }
-		}
-
-		#endregion
+		public override bool IsActive => false;
 
 		protected override int Measure(Graphics graphics)
 		{

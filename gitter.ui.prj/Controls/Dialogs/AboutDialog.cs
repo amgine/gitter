@@ -21,11 +21,8 @@
 namespace gitter
 {
 	using System;
-	using System.Text;
 	using System.Reflection;
 	using System.Windows.Forms;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
 
 	using gitter.Framework;
 	using gitter.Framework.Services;
@@ -34,14 +31,14 @@ namespace gitter
 
 	public partial class AboutDialog : DialogBase
 	{
-		private IUpdateChannel _updateChannel;
+		private readonly IUpdateChannel _updateChannel;
 
 		public AboutDialog()
 		{
 			InitializeComponent();
 
 			this.Text = Resources.StrAbout;
-			this.labelVersion.Text = String.Format("v{0}", AssemblyVersion);
+			this.labelVersion.Text = string.Format("v{0}", AssemblyVersion);
 
 			_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
 
@@ -50,10 +47,7 @@ namespace gitter
 			Margin = new Padding(0, 0, 0, 0);
 		}
 
-		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.Ok; }
-		}
+		public override DialogButtons OptimalButtons => DialogButtons.Ok;
 
 		#region Assembly Attribute Accessors
 
@@ -74,13 +68,7 @@ namespace gitter
 			}
 		}
 
-		public string AssemblyVersion
-		{
-			get
-			{
-				return Assembly.GetExecutingAssembly().GetName().Version.ToString();
-			}
-		}
+		public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
 		public string AssemblyDescription
 		{
@@ -149,12 +137,8 @@ namespace gitter
 			{
 				version = f.EndInvoke(ar);
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 			if(IsDisposed)
 			{
@@ -164,12 +148,8 @@ namespace gitter
 			{
 				BeginInvoke(new Action<Version>(OnVersionCheckCompleted), version);
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 		}
 
@@ -213,12 +193,8 @@ namespace gitter
 					_updateChannel.Update();
 					_btnUpdate.Enabled = false;
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 			}
 		}

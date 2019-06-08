@@ -34,10 +34,7 @@ namespace gitter.Framework.Controls
 	{
 		#region Data
 
-		private readonly Guid _guid;
-		private readonly IWorkingEnvironment _environment;
 		private object _viewModel;
-		private ViewHost _host;
 		private INotificationService _notificationService;
 		private IToolTipService _toolTipService;
 
@@ -60,8 +57,7 @@ namespace gitter.Framework.Controls
 
 		protected virtual void OnClosing()
 		{
-			var handler = (EventHandler)Events[ClosingEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
+			((EventHandler)Events[ClosingEvent])?.Invoke(this, EventArgs.Empty);
 		}
 
 		#endregion
@@ -92,16 +88,13 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
-			_guid        = guid;
-			_environment = environment;
+			Guid        = guid;
+			WorkingEnvironment = environment;
 		}
 
 		#endregion
 
-		public IWorkingEnvironment WorkingEnvironment
-		{
-			get { return _environment; }
-		}
+		public IWorkingEnvironment WorkingEnvironment { get; }
 
 		protected INotificationService NotificationService
 		{
@@ -155,10 +148,7 @@ namespace gitter.Framework.Controls
 		//    base.OnKeyDown(e);
 		//}
 
-		public Guid Guid
-		{
-			get { return _guid; }
-		}
+		public Guid Guid { get; }
 
 		public object ViewModel
 		{
@@ -180,22 +170,19 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public virtual bool IsDocument
-		{
-			get { return false; }
-		}
+		public virtual bool IsDocument => false;
 
 		public void Activate()
 		{
-			if(_host != null)
+			if(Host != null)
 			{
-				if(_host.Status == ViewHostStatus.AutoHide)
+				if(Host.Status == ViewHostStatus.AutoHide)
 				{
-					_host.DockSide.ActivateView(this);
+					Host.DockSide.ActivateView(this);
 				}
 				else
 				{
-					_host.Activate(this);
+					Host.Activate(this);
 				}
 			}
 			OnActivated();
@@ -203,9 +190,9 @@ namespace gitter.Framework.Controls
 
 		public void Close()
 		{
-			if(_host != null)
+			if(Host != null)
 			{
-				_host.RemoveView(this);
+				Host.RemoveView(this);
 				Dispose();
 			}
 		}
@@ -218,26 +205,16 @@ namespace gitter.Framework.Controls
 		{
 		}
 
-		internal ViewHost Host
-		{
-			get { return _host; }
-			set { _host = value; }
-		}
+		internal ViewHost Host { get; set; }
 
-		internal bool IsHosted
-		{
-			get { return _host != null; }
-		}
+		internal bool IsHosted =>  Host != null;
 
 		public virtual void OnActivated()
 		{
 		}
 
 		/// <summary>View's identification string.</summary>
-		public virtual string IdentificationString
-		{
-			get { return GetType().Name; }
-		}
+		public virtual string IdentificationString => GetType().Name;
 
 		/// <summary>View's text.</summary>
 		public override string Text
@@ -247,10 +224,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>View's image.</summary>
-		public virtual Image Image
-		{
-			get { return null; }
-		}
+		public virtual Image Image => null;
 
 		protected void AddTopToolStrip(ToolStrip toolStrip)
 		{
