@@ -20,8 +20,7 @@
 
 namespace gitter.Git
 {
-	using System;
-
+	
 	using gitter.Git.AccessLayer;
 
 	/// <summary>Dynamic revision pointer.</summary>

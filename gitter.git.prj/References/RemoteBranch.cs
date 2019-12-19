@@ -27,8 +27,6 @@ namespace gitter.Git
 
 	using gitter.Framework;
 
-	using Resources = gitter.Git.Properties.Resources;
-
 	/// <summary>Git remote tracking branch.</summary>
 	public sealed class RemoteBranch : BranchBase
 	{

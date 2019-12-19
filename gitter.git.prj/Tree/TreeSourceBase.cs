@@ -26,8 +26,6 @@ namespace gitter.Git
 
 	using gitter.Framework;
 
-	using Resources = gitter.Git.Properties.Resources;
-
 	public abstract class TreeSourceBase : ITreeSource
 	{
 		protected abstract Tree GetTreeCore();

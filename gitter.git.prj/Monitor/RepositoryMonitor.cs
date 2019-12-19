@@ -27,8 +27,6 @@ namespace gitter.Git
 	using System.Collections.Generic;
 	using System.Threading;
 
-	using gitter.Framework.Services;
-
 	/// <summary>Watches git repository and notifies about external changes.</summary>
 	public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 	{

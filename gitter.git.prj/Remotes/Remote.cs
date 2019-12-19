@@ -21,7 +21,6 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Globalization;
 	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;

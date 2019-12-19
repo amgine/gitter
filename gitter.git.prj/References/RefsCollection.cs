@@ -25,8 +25,6 @@ namespace gitter.Git
 
 	using gitter.Git.AccessLayer;
 
-	using Resources = gitter.Git.Properties.Resources;
-
 	/// <summary>Collections of repository's references ("$GIT_DIR/refs/" cache).</summary>
 	public sealed class RefsCollection : GitObject, IEnumerable<Reference>
 	{

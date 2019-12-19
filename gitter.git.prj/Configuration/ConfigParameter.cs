@@ -25,8 +25,6 @@ namespace gitter.Git
 
 	using gitter.Git.AccessLayer;
 
-	using Resources = gitter.Git.Properties.Resources;
-
 	/// <summary>git configuration parameter.</summary>
 	public sealed class ConfigParameter : GitNamedObjectWithLifetime
 	{
@@ -36,8 +34,7 @@ namespace gitter.Git
 
 		private void InvokeValueChanged()
 		{
-			var handler = ValueChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
+			ValueChanged?.Invoke(this, EventArgs.Empty);
 		}
 
 		#endregion

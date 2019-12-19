@@ -47,8 +47,7 @@ namespace gitter.Git
 		/// <param name="state">Created stash.</param>
 		private void InvokeStashedStateCreated(StashedState state)
 		{
-			var handler = StashedStateCreated;
-			if(handler != null) handler(this, new StashedStateEventArgs(state));
+			StashedStateCreated?.Invoke(this, new StashedStateEventArgs(state));
 		}
 
 		/// <summary>Invokes <see cref="StashedStateDeleted"/> event.</summary>
@@ -56,8 +55,7 @@ namespace gitter.Git
 		private void InvokeStashedStateDeleted(StashedState state)
 		{
 			state.MarkAsDeleted();
-			var handler = StashedStateDeleted;
-			if(handler != null) handler(this, new StashedStateEventArgs(state));
+			StashedStateDeleted?.Invoke(this, new StashedStateEventArgs(state));
 		}
 
 		#endregion

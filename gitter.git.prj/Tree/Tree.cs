@@ -21,13 +21,11 @@
 namespace gitter.Git
 {
 	using System;
-	using System.IO;
 	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
 
 	using gitter.Git.AccessLayer;
 

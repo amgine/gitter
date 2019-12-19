@@ -25,11 +25,7 @@ namespace gitter.Git
 	using System.Text;
 	using System.Collections.Generic;
 
-	using gitter.Framework;
-
 	using gitter.Git.AccessLayer;
-
-	using Resources = gitter.Git.Properties.Resources;
 
 	public abstract class TreeItem : GitNamedObjectWithLifetime
 	{

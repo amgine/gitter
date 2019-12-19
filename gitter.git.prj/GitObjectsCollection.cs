@@ -24,10 +24,6 @@ namespace gitter.Git
 	using System.Collections.Generic;
 	using System.Collections.Specialized;
 
-	using gitter.Framework;
-
-	using Resources = gitter.Git.Properties.Resources;
-
 	/// <summary>Cached collection of git objects.</summary>
 	/// <typeparam name="TObject">The type of the object.</typeparam>
 	/// <typeparam name="TEventArgs">The type of the event args.</typeparam>
