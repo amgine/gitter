@@ -86,7 +86,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
-			return Task.Factory.StartNew<SymbolicReferenceData>(
+			return Task.Factory.StartNew(
 				(state) => Invoke((QuerySymbolicReferenceParameters)state),
 				parameters,
 				cancellationToken,

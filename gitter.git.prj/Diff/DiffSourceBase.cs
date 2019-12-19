@@ -88,7 +88,7 @@ namespace gitter.Git
 			return GetDiffCore(options);
 		}
 
-		public Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
@@ -96,17 +96,20 @@ namespace gitter.Git
 			if(progress != null)
 			{
 				progress.Report(new OperationProgress(Resources.StrLoadingDiff.AddEllipsis()));
-				return GetDiffCoreAsync(options, progress, cancellationToken)
-					.ContinueWith(t =>
-						{
-							progress.Report(OperationProgress.Completed);
-							return TaskUtility.UnwrapResult(t);
-						},
-						cancellationToken, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+				var result = await GetDiffCoreAsync(options, progress, cancellationToken);
+				progress.Report(OperationProgress.Completed);
+				return result;
+				//return GetDiffCoreAsync(options, progress, cancellationToken)
+				//	.ContinueWith(t =>
+				//		{
+				//			progress.Report(OperationProgress.Completed);
+				//			return TaskUtility.UnwrapResult(t);
+				//		},
+				//		cancellationToken, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 			}
 			else
 			{
-				return GetDiffCoreAsync(options, progress, cancellationToken);
+				return await GetDiffCoreAsync(options, progress, cancellationToken);
 			}
 		}
 

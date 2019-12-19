@@ -113,7 +113,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Delete branch from remote and local repository.</summary>
-		public Task DeleteFromRemoteAsync(CancellationToken cancellationToken)
+		public async Task DeleteFromRemoteAsync(CancellationToken cancellationToken)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -130,15 +130,18 @@ namespace gitter.Git
 				RepositoryNotifications.BranchChanged);
 			var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
 				remote.Name, remoteRefName);
-
-			return
-				Repository.Accessor.RemoveRemoteReferences.InvokeAsync(parameters, null, cancellationToken)
-				.ContinueWith(t =>
-					{
-						notificationsBlock.Dispose();
-						TaskUtility.PropagateFaultedStates(t);
-						Refresh();
-					});
+			var task = Repository.Accessor.RemoveRemoteReferences.InvokeAsync(parameters, null, cancellationToken);
+			await task;
+			notificationsBlock.Dispose();
+			TaskUtility.PropagateFaultedStates(task);
+			Refresh();
+			//return	Repository.Accessor.RemoveRemoteReferences.InvokeAsync(parameters, null, cancellationToken)
+			//	.ContinueWith(t =>
+			//		{
+			//			notificationsBlock.Dispose();
+			//			TaskUtility.PropagateFaultedStates(t);
+			//			Refresh();
+			//		});
 		}
 
 		/// <summary>Delete branch.</summary>

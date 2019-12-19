@@ -86,7 +86,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return parser.GetResult();
 		}
 
-		public Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
@@ -95,21 +95,31 @@ namespace gitter.Git.AccessLayer.CLI
 			var stdOutReceiver = new AsyncTextParser(parser);
 			var stdErrReceiver = new AsyncTextReader();
 
-			return _commandExecutor
+			var exitCode = await _commandExecutor
 				.ExecuteCommandAsync(
-					command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken)
-				.ContinueWith(task =>
-				{
-					int exitCode = TaskUtility.UnwrapResult(task);
-					if(exitCode != 0)
-					{
-						HandleNonZeroExitCode(stdErrReceiver, exitCode);
-					}
-					return parser.GetResult();
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+					command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken);
+
+			if(exitCode != 0)
+			{
+				HandleNonZeroExitCode(stdErrReceiver, exitCode);
+			}
+			return parser.GetResult();
+
+			//return _commandExecutor
+			//	.ExecuteCommandAsync(
+			//		command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken)
+			//	.ContinueWith(task =>
+			//	{
+			//		int exitCode = TaskUtility.UnwrapResult(task);
+			//		if(exitCode != 0)
+			//		{
+			//			HandleNonZeroExitCode(stdErrReceiver, exitCode);
+			//		}
+			//		return parser.GetResult();
+			//	},
+			//	cancellationToken,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		#endregion

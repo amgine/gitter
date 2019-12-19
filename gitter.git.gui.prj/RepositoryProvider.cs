@@ -249,18 +249,19 @@ namespace gitter.Git
 			return Repository.Load(GitAccessor, workingDirectory);
 		}
 
-		public Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			return Repository.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					var repository = TaskUtility.UnwrapResult(t);
-					return (IRepository)repository;
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+			return await Repository.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken);
+			//return Repository.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		var repository = TaskUtility.UnwrapResult(t);
+			//		return (IRepository)repository;
+			//	},
+			//	cancellationToken,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		public void OnRepositoryLoaded(IRepository repository)

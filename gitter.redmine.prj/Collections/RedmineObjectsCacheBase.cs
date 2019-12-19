@@ -104,10 +104,10 @@ namespace gitter.Redmine
 			return list;
 		}
 
-		protected Task<LinkedList<T>> FetchItemsFromAllPagesAsync(string url, CancellationToken cancellationToken)
+		protected async Task<LinkedList<T>> FetchItemsFromAllPagesAsync(string url, CancellationToken cancellationToken)
 		{
 			var list = new LinkedList<T>();
-			return Context
+			await Context
 				.GetAllDataPagesAsync(url,
 				xml =>
 				{
@@ -116,16 +116,27 @@ namespace gitter.Redmine
 						list.AddLast(item);
 					}
 				},
-				cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					TaskUtility.PropagateFaultedStates(t);
-					return list;
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+				cancellationToken);
+			return list;
+			//return Context
+			//	.GetAllDataPagesAsync(url,
+			//	xml =>
+			//	{
+			//		foreach(var item in Select(xml.DocumentElement))
+			//		{
+			//			list.AddLast(item);
+			//		}
+			//	},
+			//	cancellationToken)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		TaskUtility.PropagateFaultedStates(t);
+			//		return list;
+			//	},
+			//	cancellationToken,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		protected LinkedList<T> FetchItemsFromSinglePage(string url)

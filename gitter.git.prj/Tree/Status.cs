@@ -627,27 +627,22 @@ namespace gitter.Git
 			};
 		}
 
-		public Task<IList<TreeFile>> GetFilesToAddAsync(string pattern, bool includeUntracked, bool includeIgnored, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<IList<TreeFile>> GetFilesToAddAsync(string pattern, bool includeUntracked, bool includeIgnored, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			progress?.Report(new OperationProgress(Resources.StrLookingForFiles.AddEllipsis()));
 			var parameters = GetAddFilesParameters(pattern, includeUntracked, includeIgnored);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
-			return Repository.Accessor.QueryFilesToAdd.InvokeAsync(parameters, progress, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					block.Dispose();
-					var files = TaskUtility.UnwrapResult(t);
-					var result = new List<TreeFile>(files.Count);
-					foreach(var treeFileData in files)
-					{
-						result.Add(ObjectFactories.CreateTreeFile(Repository, treeFileData));
-					}
-					return (IList<TreeFile>)result;
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+			var files = await Repository
+				.Accessor
+				.QueryFilesToAdd
+				.InvokeAsync(parameters, progress, cancellationToken);
+			block.Dispose();
+			var result = new List<TreeFile>(files.Count);
+			foreach(var treeFileData in files)
+			{
+				result.Add(ObjectFactories.CreateTreeFile(Repository, treeFileData));
+			}
+			return result;
 		}
 
 		#endregion
@@ -820,22 +815,28 @@ namespace gitter.Git
 		/// <param name="mode">Clean mode.</param>
 		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
 		/// <returns>Files that will be removed by a Clean() call.</returns>
-		public Task<IList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<IList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			progress?.Report(new OperationProgress(Resources.StrsLookingForFiles.AddEllipsis()));
 			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
-			return Repository.Accessor.QueryFilesToClean.InvokeAsync(parameters, progress, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					block.Dispose();
-					var files = TaskUtility.UnwrapResult(t);
-					return RestoreFilesToCleanList(files);
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+			var files = await Repository
+				.Accessor
+				.QueryFilesToClean
+				.InvokeAsync(parameters, progress, cancellationToken);
+			block.Dispose();
+			return RestoreFilesToCleanList(files);
+			//return Repository.Accessor.QueryFilesToClean.InvokeAsync(parameters, progress, cancellationToken)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		block.Dispose();
+			//		var files = TaskUtility.UnwrapResult(t);
+			//		return RestoreFilesToCleanList(files);
+			//	},
+			//	CancellationToken.None,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		/// <summary>Remove untracked and/or ignored files and (optionally) directories.</summary>

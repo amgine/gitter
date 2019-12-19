@@ -60,20 +60,22 @@ namespace gitter.Git.Gui.Views
 
 			private RemoteReferencesListBox ListBox { get; }
 
-			protected override Task<RemoteReferencesCollection> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			protected override async Task<RemoteReferencesCollection> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				ListBox.Text = string.Empty;
 				ListBox.Cursor = Cursors.WaitCursor;
-				return _remoteReferences.RefreshAsync(progress, cancellationToken)
-					.ContinueWith(
-					t =>
-					{
-						TaskUtility.PropagateFaultedStates(t);
-						return _remoteReferences;
-					},
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				await _remoteReferences.RefreshAsync(progress, cancellationToken);
+				return _remoteReferences;
+				//return _remoteReferences.RefreshAsync(progress, cancellationToken)
+				//	.ContinueWith(
+				//	t =>
+				//	{
+				//		TaskUtility.PropagateFaultedStates(t);
+				//		return _remoteReferences;
+				//	},
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			protected override void OnFetchCompleted(RemoteReferencesCollection data)

@@ -62,7 +62,7 @@ namespace gitter.Git
 
 		#region Overrides
 
-		public override Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public override async Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			if(Repository.IsEmpty)
 			{
@@ -75,7 +75,7 @@ namespace gitter.Git
 				{
 					tcs.SetResult(new RevisionLog(Repository, new Revision[0]));
 				}
-				return tcs.Task;
+				return await tcs.Task.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			else
 			{
@@ -85,23 +85,31 @@ namespace gitter.Git
 				parameters.Follow = FollowRenames;
 
 				progress?.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
-				return Repository
+				var revisionData = await Repository
 					.Accessor
 					.QueryRevisions
-					.InvokeAsync(parameters, progress, cancellationToken)
-					.ContinueWith(
-						t =>
-						{
-							progress?.Report(OperationProgress.Completed);
-							var revisionData = TaskUtility.UnwrapResult(t);
-							var revisions    = Repository.Revisions.Resolve(revisionData);
-							var revisionLog  = new RevisionLog(Repository, revisions);
+					.InvokeAsync(parameters, progress, cancellationToken);
+				progress?.Report(OperationProgress.Completed);
+				var revisions = Repository.Revisions.Resolve(revisionData);
+				var revisionLog = new RevisionLog(Repository, revisions);
+				return revisionLog;
+				//return Repository
+				//	.Accessor
+				//	.QueryRevisions
+				//	.InvokeAsync(parameters, progress, cancellationToken)
+				//	.ContinueWith(
+				//		t =>
+				//		{
+				//			progress?.Report(OperationProgress.Completed);
+				//			var revisionData = TaskUtility.UnwrapResult(t);
+				//			var revisions    = Repository.Revisions.Resolve(revisionData);
+				//			var revisionLog  = new RevisionLog(Repository, revisions);
 
-							return revisionLog;
-						},
-						cancellationToken,
-						TaskContinuationOptions.ExecuteSynchronously,
-						TaskScheduler.Default);
+				//			return revisionLog;
+				//		},
+				//		cancellationToken,
+				//		TaskContinuationOptions.ExecuteSynchronously,
+				//		TaskScheduler.Default);
 			}
 		}
 

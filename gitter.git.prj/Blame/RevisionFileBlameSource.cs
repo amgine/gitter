@@ -77,25 +77,32 @@ namespace gitter.Git
 			return Repository.Accessor.QueryBlame.Invoke(parameters);
 		}
 
-		public override Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public override async Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 
 			progress?.Report(new OperationProgress(Resources.StrsFetchingBlame.AddEllipsis()));
 			var parameters = GetParameters(options);
-			return Repository
+			var result = await Repository
 				.Accessor
 				.QueryBlame
-				.InvokeAsync(parameters, progress, cancellationToken)
-			    .ContinueWith(
-					t =>
-					{
-						progress?.Report(OperationProgress.Completed);
-						return TaskUtility.UnwrapResult(t);
-					},
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				.InvokeAsync(parameters, progress, cancellationToken);
+			progress?.Report(OperationProgress.Completed);
+			return result;
+
+			//return Repository
+			//	.Accessor
+			//	.QueryBlame
+			//	.InvokeAsync(parameters, progress, cancellationToken)
+			//	.ContinueWith(
+			//		t =>
+			//		{
+			//			progress?.Report(OperationProgress.Completed);
+			//			return TaskUtility.UnwrapResult(t);
+			//		},
+			//		cancellationToken,
+			//		TaskContinuationOptions.ExecuteSynchronously,
+			//		TaskScheduler.Default);
 		}
 
 		/// <summary>
