@@ -20,6 +20,7 @@
 
 namespace gitter.Git.AccessLayer
 {
+	using System;
 	using System.Threading;
 	using System.Threading.Tasks;
 

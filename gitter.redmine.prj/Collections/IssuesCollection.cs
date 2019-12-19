@@ -72,7 +72,7 @@ namespace gitter.Redmine
 			return FetchItemsFromAllPages(url);
 		}
 
-		public Task<LinkedList<Issue>> FetchOpenAsync(string projectId, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task<LinkedList<Issue>> FetchOpenAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			var url = string.Format(CultureInfo.InvariantCulture,
 				@"projects/{0}/issues.xml", projectId);

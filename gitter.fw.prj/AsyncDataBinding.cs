@@ -28,8 +28,6 @@ namespace gitter.Framework
 	{
 		#region Data
 
-		private readonly TaskScheduler _scheduler;
-		private IProgress<OperationProgress> _progress;
 		private CancellationTokenSource _cancellationTokenSource;
 		private T _data;
 		private bool _isDisposed;
@@ -48,7 +46,7 @@ namespace gitter.Framework
 
 		public AsyncDataBinding()
 		{
-			_scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			Scheduler = TaskScheduler.FromCurrentSynchronizationContext();
 		}
 
 		~AsyncDataBinding()
@@ -62,7 +60,7 @@ namespace gitter.Framework
 
 		protected TaskScheduler Scheduler
 		{
-			get { return _scheduler; }
+			get;
 		}
 
 		public T Data
@@ -75,17 +73,17 @@ namespace gitter.Framework
 			}
 		}
 
-		public IProgress<OperationProgress> Progress
+		public System.IProgress<OperationProgress> Progress
 		{
-			get { return _progress; }
-			set { _progress = value; }
+			get;
+			set;
 		}
 
 		#endregion
 
 		#region Methods
 
-		protected abstract Task<T> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		protected abstract Task<T> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		protected abstract void OnFetchCompleted(T data);
 

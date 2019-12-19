@@ -18,6 +18,8 @@
  */
 #endregion
 
+using System;
+
 namespace gitter.Framework
 {
 	public sealed class NullProgress : IProgress<OperationProgress>

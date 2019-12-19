@@ -71,7 +71,7 @@ namespace gitter.Redmine.Gui.ListBoxes
 
 		#region Methods
 
-		protected override Task<LinkedList<Issue>> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		protected override Task<LinkedList<Issue>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.State.IsFalse(IsDisposed, "IssuesListBinding is disposed.");
 
