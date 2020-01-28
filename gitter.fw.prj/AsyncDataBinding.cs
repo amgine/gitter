@@ -83,7 +83,7 @@ namespace gitter.Framework
 
 		#region Methods
 
-		protected abstract Task<T> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		protected abstract Task<T> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		protected abstract void OnFetchCompleted(T data);
 
