@@ -66,18 +66,22 @@ namespace gitter.Git.AccessLayer.CLI
 				output.ThrowOnBadReturnCode();
 			}
 
-			public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
-				return _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken)
-					.ContinueWith(
-					t => TaskUtility.UnwrapResult(t).ThrowOnBadReturnCode(),
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				var gitOutput = await _commandExecutor
+					.ExecuteCommandAsync(command, _flags, cancellationToken);
+				gitOutput.ThrowOnBadReturnCode();
+
+				//return _commandExecutor
+				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
+				//	.ContinueWith(
+				//	t => TaskUtility.UnwrapResult(t).ThrowOnBadReturnCode(),
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			#endregion

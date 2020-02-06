@@ -458,22 +458,30 @@ namespace gitter.Git
 			var task = repository.Accessor
 				.Rebase
 				.InvokeAsync(parameters, progress, CancellationToken.None);
-			await task;
-			block.Dispose();
-			if(oldHead != null)
+			//FIXME: may be to rework the logic
+			try
 			{
-				oldHead.Refresh();
+				await task;
 			}
-			else
+			finally
 			{
-				repository.Head.Refresh();
+				block.Dispose();
+				if(oldHead != null)
+				{
+					oldHead.Refresh();
+				}
+				else
+				{
+					repository.Head.Refresh();
+				}
+				if(task.Status != TaskStatus.RanToCompletion)
+				{
+					repository.OnStateChanged();
+				}
+				repository.OnUpdated();
+				TaskUtility.PropagateFaultedStates(task);
 			}
-			if(task.Status != TaskStatus.RanToCompletion)
-			{
-				repository.OnStateChanged();
-			}
-			repository.OnUpdated();
-			TaskUtility.PropagateFaultedStates(task);
+			
 			//return repository.Accessor
 			//	.Rebase.InvokeAsync(parameters, progress, CancellationToken.None)
 			//	.ContinueWith(
