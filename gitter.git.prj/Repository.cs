@@ -685,21 +685,31 @@ namespace gitter.Git
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-			await Accessor.CherryPick
-				.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
-				.ConfigureAwait(continueOnCapturedContext: false);
-			block.Dispose();
-			if(Head.Pointer is Branch branch && !branch.IsRemote)
+			try
 			{
-				branch.Refresh();
+				await Accessor.CherryPick
+					.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			else
+			catch
 			{
-				Head.Refresh();
+				throw;
 			}
-			_status.Refresh();
-			OnStateChanged();
-			OnUpdated();
+			finally
+			{
+				block.Dispose();
+				if(Head.Pointer is Branch branch && !branch.IsRemote)
+				{
+					branch.Refresh();
+				}
+				else
+				{
+					Head.Refresh();
+				}
+				_status.Refresh();
+				OnStateChanged();
+				OnUpdated();
+			}
 			//return Accessor.CherryPick.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
 			//	.ContinueWith(
 			//	t =>
@@ -749,23 +759,32 @@ namespace gitter.Git
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-
-			await Accessor
-				.Revert
-				.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
-				.ConfigureAwait(continueOnCapturedContext: false);
-			block.Dispose();
-			if(Head.Pointer is Branch branch && !branch.IsRemote)
+			try
 			{
-				branch.Refresh();
+				await Accessor
+					.Revert
+					.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			else
+			catch
 			{
-				Head.Refresh();
+				throw;
 			}
-			_status.Refresh();
-			OnStateChanged();
-			OnUpdated();
+			finally
+			{
+				block.Dispose();
+				if(Head.Pointer is Branch branch && !branch.IsRemote)
+				{
+					branch.Refresh();
+				}
+				else
+				{
+					Head.Refresh();
+				}
+				_status.Refresh();
+				OnStateChanged();
+				OnUpdated();
+			}
 			//return Accessor.Revert.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
 			//	.ContinueWith(
 			//	t =>
@@ -849,19 +868,31 @@ namespace gitter.Git
 				RepositoryNotifications.Checkout,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-			await Accessor
-				.Rebase
-				.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None);
-			block.Dispose();
-			_refs.RefreshBranches();
-			Head.Refresh();
-			if(Head.Pointer is Branch branch && !branch.IsRemote)
+			
+			try
 			{
-				branch.Refresh();
+				await Accessor
+					.Rebase
+					.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None);
 			}
-			_status.Refresh();
-			OnStateChanged();
-			OnUpdated();
+			catch 
+			{
+				throw;
+			}
+			finally
+			{
+				block.Dispose();
+				_refs.RefreshBranches();
+				Head.Refresh();
+				if(Head.Pointer is Branch branch && !branch.IsRemote)
+				{
+					branch.Refresh();
+				}
+				_status.Refresh();
+				OnStateChanged();
+				OnUpdated();
+
+			}
 			//return Accessor.Rebase.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None)
 			//	.ContinueWith(
 			//	t =>
