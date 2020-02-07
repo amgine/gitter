@@ -20,11 +20,6 @@
 
 namespace gitter.Git.Gui.Views
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Text;
-
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 

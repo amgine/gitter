@@ -34,15 +34,10 @@ namespace gitter.Git.Gui
 	{
 		#region Data
 
-		private readonly RepositoryProvider _repositoryProvider;
+		private readonly Notifications _notifications;
+
 		private Repository _repository;
 		private IWorkingEnvironment _environment;
-
-		private readonly GitToolbar _mainToolbar;
-		private readonly ViewFactoriesCollection _viewFactories;
-		private readonly Statusbar _statusbar;
-		private readonly MainGitMenus _menus;
-		private readonly Notifications _notifications;
 		private RepositoryExplorer _explorer;
 
 		#endregion
@@ -53,19 +48,16 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsNotNull(repositoryProvider, nameof(repositoryProvider));
 
-			_repositoryProvider = repositoryProvider;
+			RepositoryProvider = repositoryProvider;
 
-			_mainToolbar	= new GitToolbar(this);
-			_viewFactories	= new ViewFactoriesCollection(this);
-			_statusbar		= new Statusbar(this);
-			_menus			= new MainGitMenus(this);
+			MainToolBar	= new GitToolbar(this);
+			ViewFactories	= new ViewFactoriesCollection(this);
+			Statusbar		= new Statusbar(this);
+			Menus			= new MainGitMenus(this);
 			_notifications	= new Notifications(this);
 		}
 
-		public RepositoryProvider RepositoryProvider
-		{
-			get { return _repositoryProvider; }
-		}
+		public RepositoryProvider RepositoryProvider { get; }
 
 		public Repository Repository
 		{
@@ -75,14 +67,14 @@ namespace gitter.Git.Gui
 				if(_repository != value)
 				{
 					_repository = value;
-					_mainToolbar.Repository		= _repository;
-					_viewFactories.Repository	= _repository;
+					MainToolBar.Repository		= _repository;
+					ViewFactories.Repository	= _repository;
 					if(_explorer != null)
 					{
 						_explorer.Repository = _repository;
 					}
-					_statusbar.Repository		= _repository;
-					_menus.Repository			= _repository;
+					Statusbar.Repository		= _repository;
+					Menus.Repository			= _repository;
 					_notifications.Repository	= _repository;
 				}
 			}
@@ -94,39 +86,21 @@ namespace gitter.Git.Gui
 			set { Repository = value as Repository; }
 		}
 
-		public IWorkingEnvironment Environment
-		{
-			get { return _environment; }
-		}
+		public IWorkingEnvironment Environment => _environment;
 
-		public ViewFactoriesCollection ViewFactories
-		{
-			get { return _viewFactories; }
-		}
+		public ViewFactoriesCollection ViewFactories { get; }
 
-		public RepositoryExplorer RepositoryExplorer
-		{
-			get { return _explorer; }
-		}
+		public RepositoryExplorer RepositoryExplorer { get; }
 
-		public GitToolbar MainToolBar
-		{
-			get { return _mainToolbar; }
-		}
+		public GitToolbar MainToolBar { get; }
 
-		public Statusbar Statusbar
-		{
-			get { return _statusbar; }
-		}
+		public Statusbar Statusbar { get; }
 
-		public MainGitMenus Menus
-		{
-			get { return _menus; }
-		}
+		public MainGitMenus Menus { get; }
 
 		public IRevisionPointer GetFocusedRevisionPointer()
 		{
-			var view = _environment.ViewDockService.ActiveView;
+			var view = Environment.ViewDockService.ActiveView;
 			if(view != null)
 			{
 				var historyView = view as HistoryView;
@@ -167,7 +141,7 @@ namespace gitter.Git.Gui
 			{
 				dlg.StartingRevision.Value = startingRevision;
 				dlg.BranchName.Value = defaultBranchName;
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -192,7 +166,7 @@ namespace gitter.Git.Gui
 				{
 					dlg.Revision.Value = rev.Pointer;
 				}
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -204,7 +178,7 @@ namespace gitter.Git.Gui
 				{
 					dlg.EnableMultipleBrunchesMerge();
 				}
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -212,7 +186,7 @@ namespace gitter.Git.Gui
 		{
 			using(var dlg = new PushDialog(_repository))
 			{
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -220,7 +194,7 @@ namespace gitter.Git.Gui
 		{
 			using(var dlg = new ApplyPatchesDialog(_repository))
 			{
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -230,7 +204,7 @@ namespace gitter.Git.Gui
 			using(var dlg = new CreateTagDialog(_repository))
 			{
 				dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -240,7 +214,7 @@ namespace gitter.Git.Gui
 			using(var dlg = new AddNoteDialog(_repository))
 			{
 				dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -248,7 +222,7 @@ namespace gitter.Git.Gui
 		{
 			using(var dlg = new StageDialog(_repository))
 			{
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -256,7 +230,7 @@ namespace gitter.Git.Gui
 		{
 			using(var dlg = new StashSaveDialog(_repository))
 			{
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -264,7 +238,7 @@ namespace gitter.Git.Gui
 		{
 			using(var dlg = new CleanDialog(_repository))
 			{
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -272,7 +246,7 @@ namespace gitter.Git.Gui
 		{
 			using(var dlg = new ConflictsDialog(_repository))
 			{
-				dlg.Run(_environment.MainForm);
+				dlg.Run(Environment.MainForm);
 			}
 		}
 
@@ -282,7 +256,7 @@ namespace gitter.Git.Gui
 			{
 				if(dlg.Run(Environment.MainForm) == DialogResult.OK)
 				{
-					_statusbar.UpdateUserIdentityLabel();
+					Statusbar.UpdateUserIdentityLabel();
 				}
 			}
 		}
@@ -306,32 +280,32 @@ namespace gitter.Git.Gui
 		public void AttachToEnvironment(IWorkingEnvironment environment)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.State.IsTrue(_environment == null);
+			Verify.State.IsTrue(Environment == null);
 
 			_environment = environment;
 
 			_explorer = new RepositoryExplorer(this);
 
-			foreach(var factory in _viewFactories)
+			foreach(var factory in ViewFactories)
 			{
 				environment.ViewDockService.RegisterFactory(factory);
 			}
 
 			environment.ProvideRepositoryExplorerItem(_explorer.RootItem);
-			environment.ProvideToolbar(_mainToolbar);
-			for(int i = 0; i < _statusbar.LeftAlignedItems.Length; ++i)
+			environment.ProvideToolbar(MainToolBar);
+			for(int i = 0; i < Statusbar.LeftAlignedItems.Length; ++i)
 			{
-				environment.ProvideStatusBarObject(_statusbar.LeftAlignedItems[i], true);
+				environment.ProvideStatusBarObject(Statusbar.LeftAlignedItems[i], true);
 			}
-			for(int i = 0; i < _statusbar.RightAlignedItems.Length; ++i)
+			for(int i = 0; i < Statusbar.RightAlignedItems.Length; ++i)
 			{
-				environment.ProvideStatusBarObject(_statusbar.RightAlignedItems[i], false);
+				environment.ProvideStatusBarObject(Statusbar.RightAlignedItems[i], false);
 			}
-			foreach(var menu in _menus.Menus)
+			foreach(var menu in Menus.Menus)
 			{
 				environment.ProvideMainMenuItem(menu);
 			}
-			foreach(var item in _menus.ViewMenuItems)
+			foreach(var item in Menus.ViewMenuItems)
 			{
 				environment.ProvideViewMenuItem(item);
 			}
@@ -342,29 +316,29 @@ namespace gitter.Git.Gui
 		public void DetachFromEnvironment(IWorkingEnvironment environment)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.Argument.AreNotEqual(_environment, environment, "environment", string.Empty);
+			Verify.Argument.AreNotEqual(Environment, environment, "environment", string.Empty);
 
-			foreach(var factory in _viewFactories)
+			foreach(var factory in ViewFactories)
 			{
 				factory.CloseAllViews();
 				environment.ViewDockService.UnregisterFactory(factory);
 			}
 
 			environment.RemoveRepositoryExplorerItem(_explorer.RootItem);
-			environment.RemoveToolbar(_mainToolbar);
-			for(int i = 0; i < _statusbar.LeftAlignedItems.Length; ++i)
+			environment.RemoveToolbar(MainToolBar);
+			for(int i = 0; i < Statusbar.LeftAlignedItems.Length; ++i)
 			{
-				environment.RemoveStatusBarObject(_statusbar.LeftAlignedItems[i]);
+				environment.RemoveStatusBarObject(Statusbar.LeftAlignedItems[i]);
 			}
-			for(int i = 0; i < _statusbar.RightAlignedItems.Length; ++i)
+			for(int i = 0; i < Statusbar.RightAlignedItems.Length; ++i)
 			{
-				environment.RemoveStatusBarObject(_statusbar.RightAlignedItems[i]);
+				environment.RemoveStatusBarObject(Statusbar.RightAlignedItems[i]);
 			}
-			foreach(var menu in _menus.Menus)
+			foreach(var menu in Menus.Menus)
 			{
 				environment.RemoveMainMenuItem(menu);
 			}
-			foreach(var item in _menus.ViewMenuItems)
+			foreach(var item in Menus.ViewMenuItems)
 			{
 				environment.RemoveViewMenuItem(item);
 			}
@@ -375,16 +349,16 @@ namespace gitter.Git.Gui
 
 		public void ActivateDefaultView()
 		{
-			Verify.State.IsTrue(_environment != null);
+			Verify.State.IsTrue(Environment != null);
 
-			_environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
+			Environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
 		}
 
 		public void Dispose()
 		{
-			_mainToolbar.Dispose();
-			_statusbar.Dispose();
-			_menus.Dispose();
+			MainToolBar.Dispose();
+			Statusbar.Dispose();
+			Menus.Dispose();
 			_notifications.Dispose();
 		}
 	}
