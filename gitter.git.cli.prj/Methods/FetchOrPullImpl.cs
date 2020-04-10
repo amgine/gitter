@@ -52,7 +52,7 @@ namespace gitter.Git.AccessLayer.CLI
 			output.ThrowOnBadReturnCode();
 		}
 
-		public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
@@ -82,27 +82,41 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 			};
 			var command = _commandFactory(parameters, true);
-			return _commandExecutor
+			var exitCode = await _commandExecutor
 				.ExecuteCommandAsync(
 					command,
 					stdOutReceiver,
 					stdErrReceiver,
 					CommandExecutionFlags.None,
-					cancellationToken)
-				.ContinueWith(task =>
-				{
-					int exitCode = TaskUtility.UnwrapResult(task);
-					if(exitCode != 0)
-					{
-						var errorMessage = errorMessages != null && errorMessages.Count != 0
-							? string.Join(Environment.NewLine, errorMessages)
-							: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
-						throw new GitException(errorMessage);
-					}
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+					cancellationToken);
+			if(exitCode != 0)
+			{
+				var errorMessage = errorMessages != null && errorMessages.Count != 0
+					? string.Join(Environment.NewLine, errorMessages)
+					: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
+				throw new GitException(errorMessage);
+			}
+			//return _commandExecutor
+			//	.ExecuteCommandAsync(
+			//		command,
+			//		stdOutReceiver,
+			//		stdErrReceiver,
+			//		CommandExecutionFlags.None,
+			//		cancellationToken)
+			//	.ContinueWith(task =>
+			//	{
+			//		int exitCode = TaskUtility.UnwrapResult(task);
+			//		if(exitCode != 0)
+			//		{
+			//			var errorMessage = errorMessages != null && errorMessages.Count != 0
+			//				? string.Join(Environment.NewLine, errorMessages)
+			//				: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
+			//			throw new GitException(errorMessage);
+			//		}
+			//	},
+			//	cancellationToken,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 	}
 }

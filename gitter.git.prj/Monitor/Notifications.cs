@@ -20,11 +20,6 @@
 
 namespace gitter.Git
 {
-	using System;
-
-	using gitter.Framework;
-	using gitter.Framework.Services;
-
 	using gitter.Git.AccessLayer;
 
 	interface IRepositoryChangedNotification

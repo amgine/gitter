@@ -21,13 +21,11 @@
 namespace gitter.Git
 {
 	using System;
-	using System.IO;
 	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
 
 	using gitter.Git.AccessLayer;
 
@@ -42,24 +40,28 @@ namespace gitter.Git
 
 		#endregion
 
-		public static Task<Tree> GetAsync(Repository repository, string treeHash, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public static async Task<Tree> GetAsync(Repository repository, string treeHash, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			progress?.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
 			var parameters = new QueryTreeContentParameters(treeHash, true, false);
-			return repository.Accessor.QueryTreeContent.InvokeAsync(parameters, progress, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					var treeData = TaskUtility.UnwrapResult(t);
-					var tree = new Tree(repository, treeHash, false);
-					tree.SetContent(treeData);
-					return tree;
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+			var treeData = await repository.Accessor.QueryTreeContent.InvokeAsync(parameters, progress, cancellationToken);
+			var tree = new Tree(repository, treeHash, false);
+			tree.SetContent(treeData);
+			return tree;
+			//return repository.Accessor.QueryTreeContent.InvokeAsync(parameters, progress, cancellationToken)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		var treeData = TaskUtility.UnwrapResult(t);
+			//		var tree = new Tree(repository, treeHash, false);
+			//		tree.SetContent(treeData);
+			//		return tree;
+			//	},
+			//	cancellationToken,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		#region .ctor

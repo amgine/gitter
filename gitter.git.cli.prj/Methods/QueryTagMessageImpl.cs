@@ -99,22 +99,25 @@ namespace gitter.Git.AccessLayer.CLI
 			return ParseTagMessage(command, output);
 		}
 
-		public Task<string> InvokeAsync(QueryTagMessageParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<string> InvokeAsync(QueryTagMessageParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command = _commandFactory(parameters);
-			return _commandExecutor
-				.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					var output = TaskUtility.UnwrapResult(t);
-					return ParseTagMessage(command, output);
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+			var output = await _commandExecutor
+				.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken);
+			return ParseTagMessage(command, output);
+			//return _commandExecutor
+			//	.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		var output = TaskUtility.UnwrapResult(t);
+			//		return ParseTagMessage(command, output);
+			//	},
+			//	cancellationToken,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		#endregion

@@ -20,8 +20,6 @@
 
 namespace gitter.Git
 {
-	using System;
-	using System.Collections.Generic;
 
 	/// <summary>Patch from file.</summary>
 	public sealed class PatchFromFile : IPatchSource

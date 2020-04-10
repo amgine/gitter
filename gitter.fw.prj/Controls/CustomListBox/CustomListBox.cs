@@ -963,7 +963,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Progress monitor for actions which update list contents.</summary>
-		public IProgress<OperationProgress> ProgressMonitor
+		public System.IProgress<OperationProgress> ProgressMonitor
 		{
 			get { return _processOverlay; }
 		}

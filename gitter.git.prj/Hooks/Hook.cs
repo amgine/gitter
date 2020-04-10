@@ -19,11 +19,9 @@
 #endregion
 
 namespace gitter.Git
-{
-	using System;
-	using System.Collections.Generic;
+{	
 	using System.IO;
-	using System.Text;
+	
 
 	/// <summary>Repository hook.</summary>
 	public sealed class Hook : GitNamedObjectWithLifetime

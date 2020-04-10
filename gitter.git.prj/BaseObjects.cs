@@ -24,8 +24,6 @@ namespace gitter.Git
 
 	using gitter.Framework;
 
-	using Resources = gitter.Git.Properties.Resources;
-
 	/// <summary>Base class for all repository-related objects.</summary>
 	public abstract class GitObject
 	{

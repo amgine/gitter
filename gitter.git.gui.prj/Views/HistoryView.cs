@@ -21,17 +21,15 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Windows.Forms;
 
-	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	using gitter.Git.Gui.Controls;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using Resources = Properties.Resources;
 
 	/// <summary>Tool for displaying a sequence of revisions with graph support.</summary>
 	[ToolboxItem(false)]

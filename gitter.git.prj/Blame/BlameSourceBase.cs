@@ -21,16 +21,10 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
 
 	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Git.AccessLayer;
-
-	using Resources = gitter.Git.Properties.Resources;
 
 	abstract class BlameSourceBase : IBlameSource
 	{

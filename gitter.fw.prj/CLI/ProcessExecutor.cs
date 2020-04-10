@@ -94,7 +94,7 @@ namespace gitter.Framework.CLI
 			}
 		}
 
-		public Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, Action<Process> cancellationMethod, CancellationToken cancellationToken)
+		public async Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, Action<Process> cancellationMethod, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(input, nameof(input));
 
@@ -102,7 +102,8 @@ namespace gitter.Framework.CLI
 			if(cancellationToken.IsCancellationRequested)
 			{
 				tcs.SetCanceled();
-				return tcs.Task;
+				return await tcs.Task
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			var process = CreateProcess(input);
 			process.EnableRaisingEvents = true;
@@ -129,27 +130,43 @@ namespace gitter.Framework.CLI
 			var cancellationRegistration = cancellationToken.CanBeCanceled
 				? cancellationToken.Register(() => tcs.TrySetCanceled())
 				: default;
-			return tcs.Task.ContinueWith(
-				task =>
-				{
-					if(task.IsCanceled)
-					{
-						stdErrReceiver?.NotifyCanceled();
-						stdOutReceiver?.NotifyCanceled();
-						cancellationMethod?.Invoke(process);
-					}
-					else
-					{
-						stdErrReceiver?.WaitForEndOfStream();
-						stdOutReceiver?.WaitForEndOfStream();
-					}
-					cancellationRegistration.Dispose();
-					process.Dispose();
-					return TaskUtility.UnwrapResult(task);
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.None,
-				TaskScheduler.Default);
+			var resut = await tcs.Task
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if(tcs.Task.IsCanceled)
+			{
+				stdErrReceiver?.NotifyCanceled();
+				stdOutReceiver?.NotifyCanceled();
+				cancellationMethod?.Invoke(process);
+			}
+			else
+			{
+				stdErrReceiver?.WaitForEndOfStream();
+				stdOutReceiver?.WaitForEndOfStream();
+			}
+			cancellationRegistration.Dispose();
+			process.Dispose();
+			return resut;
+			//return tcs.Task.ContinueWith(
+			//	task =>
+			//	{
+			//		if(task.IsCanceled)
+			//		{
+			//			stdErrReceiver?.NotifyCanceled();
+			//			stdOutReceiver?.NotifyCanceled();
+			//			cancellationMethod?.Invoke(process);
+			//		}
+			//		else
+			//		{
+			//			stdErrReceiver?.WaitForEndOfStream();
+			//			stdOutReceiver?.WaitForEndOfStream();
+			//		}
+			//		cancellationRegistration.Dispose();
+			//		process.Dispose();
+			//		return TaskUtility.UnwrapResult(task);
+			//	},
+			//	CancellationToken.None,
+			//	TaskContinuationOptions.None,
+			//	TaskScheduler.Default);
 		}
 	}
 }

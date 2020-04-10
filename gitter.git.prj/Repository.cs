@@ -660,7 +660,7 @@ namespace gitter.Git
 
 		#region cherry-pick
 
-		public Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress> progress)
+		public async Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress> progress)
 		{
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -685,31 +685,56 @@ namespace gitter.Git
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-			return Accessor.CherryPick.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
-				.ContinueWith(
-				t =>
+			try
+			{
+				await Accessor.CherryPick
+					.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				block.Dispose();
+				if(Head.Pointer is Branch branch && !branch.IsRemote)
 				{
-					block.Dispose();
-					if(Head.Pointer is Branch branch && !branch.IsRemote)
-					{
-						branch.Refresh();
-					}
-					else
-					{
-						Head.Refresh();
-					}
-					_status.Refresh();
-					OnStateChanged();
-					OnUpdated();
-					TaskUtility.PropagateFaultedStates(t);
-				});
+					branch.Refresh();
+				}
+				else
+				{
+					Head.Refresh();
+				}
+				_status.Refresh();
+				OnStateChanged();
+				OnUpdated();
+			}
+			//return Accessor.CherryPick.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		block.Dispose();
+			//		if(Head.Pointer is Branch branch && !branch.IsRemote)
+			//		{
+			//			branch.Refresh();
+			//		}
+			//		else
+			//		{
+			//			Head.Refresh();
+			//		}
+			//		_status.Refresh();
+			//		OnStateChanged();
+			//		OnUpdated();
+			//		TaskUtility.PropagateFaultedStates(t);
+			//	});
 		}
 
 		#endregion
 
 		#region revert
 
-		public Task RevertAsync(RevertControl control, IProgress<OperationProgress> progress)
+		public async Task RevertAsync(RevertControl control, IProgress<OperationProgress> progress)
 		{
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -734,24 +759,50 @@ namespace gitter.Git
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-			return Accessor.Revert.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
-				.ContinueWith(
-				t =>
+			try
+			{
+				await Accessor
+					.Revert
+					.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				block.Dispose();
+				if(Head.Pointer is Branch branch && !branch.IsRemote)
 				{
-					block.Dispose();
-					if(Head.Pointer is Branch branch && !branch.IsRemote)
-					{
-						branch.Refresh();
-					}
-					else
-					{
-						Head.Refresh();
-					}
-					_status.Refresh();
-					OnStateChanged();
-					OnUpdated();
-					TaskUtility.PropagateFaultedStates(t);
-				});
+					branch.Refresh();
+				}
+				else
+				{
+					Head.Refresh();
+				}
+				_status.Refresh();
+				OnStateChanged();
+				OnUpdated();
+			}
+			//return Accessor.Revert.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		block.Dispose();
+			//		if(Head.Pointer is Branch branch && !branch.IsRemote)
+			//		{
+			//			branch.Refresh();
+			//		}
+			//		else
+			//		{
+			//			Head.Refresh();
+			//		}
+			//		_status.Refresh();
+			//		OnStateChanged();
+			//		OnUpdated();
+			//		TaskUtility.PropagateFaultedStates(t);
+			//	});
 		}
 
 		#endregion
@@ -791,7 +842,7 @@ namespace gitter.Git
 
 		/// <summary>Control rebase process.</summary>
 		/// <param name="control">Type of operation.</param>
-		public Task RebaseAsync(RebaseControl control, IProgress<OperationProgress> progress)
+		public async Task RebaseAsync(RebaseControl control, IProgress<OperationProgress> progress)
 		{
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -817,25 +868,50 @@ namespace gitter.Git
 				RepositoryNotifications.Checkout,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-			return Accessor.Rebase.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None)
-				.ContinueWith(
-				t =>
+			
+			try
+			{
+				await Accessor
+					.Rebase
+					.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None);
+			}
+			catch 
+			{
+				throw;
+			}
+			finally
+			{
+				block.Dispose();
+				_refs.RefreshBranches();
+				Head.Refresh();
+				if(Head.Pointer is Branch branch && !branch.IsRemote)
 				{
-					block.Dispose();
-					_refs.RefreshBranches();
-					Head.Refresh();
-					if(Head.Pointer is Branch branch && !branch.IsRemote)
-					{
-						branch.Refresh();
-					}
-					_status.Refresh();
-					OnStateChanged();
-					OnUpdated();
-					TaskUtility.PropagateFaultedStates(t);
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+					branch.Refresh();
+				}
+				_status.Refresh();
+				OnStateChanged();
+				OnUpdated();
+
+			}
+			//return Accessor.Rebase.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		block.Dispose();
+			//		_refs.RefreshBranches();
+			//		Head.Refresh();
+			//		if(Head.Pointer is Branch branch && !branch.IsRemote)
+			//		{
+			//			branch.Refresh();
+			//		}
+			//		_status.Refresh();
+			//		OnStateChanged();
+			//		OnUpdated();
+			//		TaskUtility.PropagateFaultedStates(t);
+			//	},
+			//	CancellationToken.None,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		#endregion

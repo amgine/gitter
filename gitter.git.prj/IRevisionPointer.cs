@@ -20,7 +20,6 @@
 
 namespace gitter.Git
 {
-	using System;
 
 	/// <summary>Object which points to commit.</summary>
 	public interface IRevisionPointer

@@ -240,10 +240,10 @@ namespace gitter.Framework.Controls
 			{
 				if(c.Dock == DockStyle.None)
 				{
-					if((c.Anchor & AnchorStyles.Top) == AnchorStyles.Top)
+					if(c.Anchor.HasFlag(AnchorStyles.Top))
 					{
 						c.Top += toolStrip.Height;
-						if((c.Anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom)
+						if(c.Anchor.HasFlag(AnchorStyles.Bottom))
 						{
 							c.Height -= toolStrip.Height;
 						}
@@ -266,9 +266,9 @@ namespace gitter.Framework.Controls
 			{
 				if(c.Dock == DockStyle.None)
 				{
-					if((c.Anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom)
+					if(c.Anchor.HasFlag(AnchorStyles.Bottom))
 					{
-						if((c.Anchor & AnchorStyles.Top) == AnchorStyles.Top)
+						if(c.Anchor.HasFlag(AnchorStyles.Top))
 						{
 							c.Height -= toolStrip.Height;
 						}
@@ -296,9 +296,9 @@ namespace gitter.Framework.Controls
 					{
 						if(c.Dock == DockStyle.None)
 						{
-							if((c.Anchor & AnchorStyles.Top) == AnchorStyles.Top)
+							if(c.Anchor.HasFlag(AnchorStyles.Top))
 							{
-								if((c.Anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom)
+								if(c.Anchor.HasFlag(AnchorStyles.Bottom))
 								{
 									c.SuspendLayout();
 									c.Top -= toolStrip.Height;
@@ -318,9 +318,9 @@ namespace gitter.Framework.Controls
 					{
 						if(c.Dock == DockStyle.None)
 						{
-							if((c.Anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom)
+							if(c.Anchor.HasFlag(AnchorStyles.Bottom))
 							{
-								if((c.Anchor & AnchorStyles.Top) == AnchorStyles.Top)
+								if(c.Anchor.HasFlag(AnchorStyles.Top))
 								{
 									c.Height += toolStrip.Height;
 								}

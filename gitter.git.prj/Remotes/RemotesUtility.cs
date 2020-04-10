@@ -86,7 +86,7 @@ namespace gitter.Git
 			}
 		}
 
-		public static Task FetchOrPullAsync(
+		public static async Task FetchOrPullAsync(
 			Repository repository, Remote remote, bool pull,
 			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
@@ -117,28 +117,48 @@ namespace gitter.Git
 				}
 				task = repository.Accessor.Fetch.InvokeAsync(p, progress, cancellationToken);
 			}
-			return task.ContinueWith(
-				t =>
-				{
-					progress?.Report(new OperationProgress(Resources.StrRefreshingReferences.AddEllipsis()));
-					repository.Refs.Refresh(affectedReferences);
-					var state2 = RefsState.Capture(repository, affectedReferences);
-					var changes = RefsDiff.Calculate(state1, state2);
-					suppressedNotifications.Dispose();
-					if(changes != null && changes.Length != 0)
-					{
-						repository.OnUpdated();
-					}
-					TaskUtility.PropagateFaultedStates(t);
-					if(pull)
-					{
-						repository.Remotes.OnPullCompleted(remote, changes);
-					}
-					else
-					{
-						repository.Remotes.OnFetchCompleted(remote, changes);
-					}
-				});
+			await task.ConfigureAwait(continueOnCapturedContext: false);
+			
+			progress?.Report(new OperationProgress(Resources.StrRefreshingReferences.AddEllipsis()));
+			repository.Refs.Refresh(affectedReferences);
+			var state2 = RefsState.Capture(repository, affectedReferences);
+			var changes = RefsDiff.Calculate(state1, state2);
+			suppressedNotifications.Dispose();
+			if(changes != null && changes.Length != 0)
+			{
+				repository.OnUpdated();
+			}
+			
+			if(pull)
+			{
+				repository.Remotes.OnPullCompleted(remote, changes);
+			}
+			else
+			{
+				repository.Remotes.OnFetchCompleted(remote, changes);
+			}
+			//return task.ContinueWith(
+			//	t =>
+			//	{
+			//		progress?.Report(new OperationProgress(Resources.StrRefreshingReferences.AddEllipsis()));
+			//		repository.Refs.Refresh(affectedReferences);
+			//		var state2 = RefsState.Capture(repository, affectedReferences);
+			//		var changes = RefsDiff.Calculate(state1, state2);
+			//		suppressedNotifications.Dispose();
+			//		if(changes != null && changes.Length != 0)
+			//		{
+			//			repository.OnUpdated();
+			//		}
+			//		TaskUtility.PropagateFaultedStates(t);
+			//		if(pull)
+			//		{
+			//			repository.Remotes.OnPullCompleted(remote, changes);
+			//		}
+			//		else
+			//		{
+			//			repository.Remotes.OnFetchCompleted(remote, changes);
+			//		}
+			//	});
 		}
 
 		private static PushParameters GetPushParameters(string remoteRepository, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
@@ -159,30 +179,49 @@ namespace gitter.Git
 			return parameters;
 		}
 
-		private static Task PushAsync(Repository repository, PushParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		private static async Task PushAsync(Repository repository, PushParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			var notificationsBlock = repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged);
-			return repository.Accessor
-							 .Push.InvokeAsync(parameters, progress, cancellationToken)
-							 .ContinueWith(task =>
-								{
-									notificationsBlock.Dispose();
-									var res = TaskUtility.UnwrapResult(task);
-									bool changed = false;
-									for(int i = 0; i < res.Count; ++i)
-									{
-										if(res[i].Type != PushResultType.UpToDate && res[i].Type != PushResultType.Rejected)
-										{
-											changed = true;
-											break;
-										}
-									}
-									if(changed)
-									{
-										repository.Refs.Remotes.Refresh();
-									}
-								},
-								cancellationToken);
+			var res = await repository.Accessor
+							 .Push
+							 .InvokeAsync(parameters, progress, cancellationToken)
+							 .ConfigureAwait(continueOnCapturedContext: false);
+			notificationsBlock.Dispose();
+			
+			bool changed = false;
+			for(int i = 0; i < res.Count; ++i)
+			{
+				if(res[i].Type != PushResultType.UpToDate && res[i].Type != PushResultType.Rejected)
+				{
+					changed = true;
+					break;
+				}
+			}
+			if(changed)
+			{
+				repository.Refs.Remotes.Refresh();
+			}
+			//return repository.Accessor
+			//				 .Push.InvokeAsync(parameters, progress, cancellationToken)
+			//				 .ContinueWith(task =>
+			//					{
+			//						notificationsBlock.Dispose();
+			//						var res = TaskUtility.UnwrapResult(task);
+			//						bool changed = false;
+			//						for(int i = 0; i < res.Count; ++i)
+			//						{
+			//							if(res[i].Type != PushResultType.UpToDate && res[i].Type != PushResultType.Rejected)
+			//							{
+			//								changed = true;
+			//								break;
+			//							}
+			//						}
+			//						if(changed)
+			//						{
+			//							repository.Refs.Remotes.Refresh();
+			//						}
+			//					},
+			//					cancellationToken);
 		}
 
 		public static Task PushAsync(Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags, IProgress<OperationProgress> progress, CancellationToken cancellationToken)

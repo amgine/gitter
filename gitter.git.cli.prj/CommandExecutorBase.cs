@@ -137,7 +137,7 @@ namespace gitter.Git.AccessLayer.CLI
 				cancellationToken);
 		}
 
-		private Task<GitOutput> ExecuteCommandAsyncCore(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken)
+		private async Task<GitOutput> ExecuteCommandAsyncCore(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken)
 		{
 			OnCommandExecuting(command);
 
@@ -146,24 +146,34 @@ namespace gitter.Git.AccessLayer.CLI
 			var input              = PrepareInput(command, encoding);
 			var processExecutor    = CreateProcessExecutor();
 			var cancellationMethod = GetCancellationMethod(flags);
-			return processExecutor
+			var exitCode = await processExecutor
 				.ExecuteAsync(
 					input,
 					stdOutReceiver,
 					stdErrReceiver,
 					cancellationMethod,
-					cancellationToken)
-				.ContinueWith(
-					task =>
-					{
-						int exitCode = TaskUtility.UnwrapResult(task);
-						var stdOut   = stdOutReceiver.GetText();
-						var stdErr   = stdErrReceiver.GetText();
-						return new GitOutput(stdOut, stdErr, exitCode);
-					},
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+					cancellationToken);
+			var stdOut = stdOutReceiver.GetText();
+			var stdErr = stdErrReceiver.GetText();
+			return new GitOutput(stdOut, stdErr, exitCode);
+			//return processExecutor
+			//	.ExecuteAsync(
+			//		input,
+			//		stdOutReceiver,
+			//		stdErrReceiver,
+			//		cancellationMethod,
+			//		cancellationToken)
+			//	.ContinueWith(
+			//		task =>
+			//		{
+			//			int exitCode = TaskUtility.UnwrapResult(task);
+			//			var stdOut   = stdOutReceiver.GetText();
+			//			var stdErr   = stdErrReceiver.GetText();
+			//			return new GitOutput(stdOut, stdErr, exitCode);
+			//		},
+			//		cancellationToken,
+			//		TaskContinuationOptions.ExecuteSynchronously,
+			//		TaskScheduler.Default);
 		}
 
 		public Task<GitOutput> ExecuteCommandAsync(Command command, CommandExecutionFlags flags, CancellationToken cancellationToken)

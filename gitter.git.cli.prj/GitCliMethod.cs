@@ -66,18 +66,22 @@ namespace gitter.Git.AccessLayer.CLI
 				output.ThrowOnBadReturnCode();
 			}
 
-			public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
-				return _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken)
-					.ContinueWith(
-					t => TaskUtility.UnwrapResult(t).ThrowOnBadReturnCode(),
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				var gitOutput = await _commandExecutor
+					.ExecuteCommandAsync(command, _flags, cancellationToken);
+				gitOutput.ThrowOnBadReturnCode();
+
+				//return _commandExecutor
+				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
+				//	.ContinueWith(
+				//	t => TaskUtility.UnwrapResult(t).ThrowOnBadReturnCode(),
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -122,18 +126,21 @@ namespace gitter.Git.AccessLayer.CLI
 				_resultHandler(output);
 			}
 
-			public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
-				return _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken)
-					.ContinueWith(
-					t => _resultHandler(TaskUtility.UnwrapResult(t)),
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				var result = await _commandExecutor
+					.ExecuteCommandAsync(command, _flags, cancellationToken);
+				_resultHandler(result);
+				//return _commandExecutor
+				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
+				//	.ContinueWith(
+				//	t => _resultHandler(TaskUtility.UnwrapResult(t)),
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -178,18 +185,21 @@ namespace gitter.Git.AccessLayer.CLI
 				_resultHandler(parameters, output);
 			}
 
-			public Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
-				return _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken)
-					.ContinueWith(
-					t => _resultHandler(parameters, TaskUtility.UnwrapResult(t)),
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				var result = await _commandExecutor
+					.ExecuteCommandAsync(command, _flags, cancellationToken);
+				_resultHandler(parameters, result);
+				//return _commandExecutor
+				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
+				//	.ContinueWith(
+				//	t => _resultHandler(parameters, TaskUtility.UnwrapResult(t)),
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -234,18 +244,21 @@ namespace gitter.Git.AccessLayer.CLI
 				return _resultParser(output);
 			}
 
-			public Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
-				return _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken)
-					.ContinueWith(
-					t => _resultParser(TaskUtility.UnwrapResult(t)),
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				var result = await _commandExecutor
+					.ExecuteCommandAsync(command, _flags, cancellationToken);
+				return _resultParser(result);
+				//return _commandExecutor
+				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
+				//	.ContinueWith(
+				//	t => _resultParser(TaskUtility.UnwrapResult(t)),
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -290,18 +303,21 @@ namespace gitter.Git.AccessLayer.CLI
 				return _resultParser(parameters, output);
 			}
 
-			public Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
-				return _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken)
-					.ContinueWith(
-					t => _resultParser(parameters, TaskUtility.UnwrapResult(t)),
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+				var result = await _commandExecutor
+					.ExecuteCommandAsync(command, _flags, cancellationToken);
+				return _resultParser(parameters, result);
+				//return _commandExecutor
+				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
+				//	.ContinueWith(
+				//	t => _resultParser(parameters, TaskUtility.UnwrapResult(t)),
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -353,33 +369,46 @@ namespace gitter.Git.AccessLayer.CLI
 				return stdInReceiver.GetBytes();
 			}
 
-			public Task<byte[]> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			public async Task<byte[]> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
 				Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 				var command = _commandFactory(parameters);
 				var stdInReceiver = new AsyncBytesReader();
 				var stdErrReceiver = new AsyncTextReader();
-				return _commandExecutor
+				var exitCode = await _commandExecutor
 					.ExecuteCommandAsync(
 						command,
 						stdInReceiver,
 						stdErrReceiver,
 						CommandExecutionFlags.None,
-						cancellationToken)
-					.ContinueWith(
-					t =>
-					{
-						var exitCode = TaskUtility.UnwrapResult(t);
-						if(exitCode != 0)
-						{
-							throw new GitException(stdErrReceiver.GetText());
-						}
-						return stdInReceiver.GetBytes();
-					},
-					cancellationToken,
-					TaskContinuationOptions.ExecuteSynchronously,
-					TaskScheduler.Default);
+						cancellationToken);
+				if(exitCode != 0)
+				{
+					throw new GitException(stdErrReceiver.GetText());
+				}
+				return stdInReceiver.GetBytes();
+
+				//return _commandExecutor
+				//	.ExecuteCommandAsync(
+				//		command,
+				//		stdInReceiver,
+				//		stdErrReceiver,
+				//		CommandExecutionFlags.None,
+				//		cancellationToken)
+				//	.ContinueWith(
+				//	t =>
+				//	{
+				//		var exitCode = TaskUtility.UnwrapResult(t);
+				//		if(exitCode != 0)
+				//		{
+				//			throw new GitException(stdErrReceiver.GetText());
+				//		}
+				//		return stdInReceiver.GetBytes();
+				//	},
+				//	cancellationToken,
+				//	TaskContinuationOptions.ExecuteSynchronously,
+				//	TaskScheduler.Default);
 			}
 
 			#endregion

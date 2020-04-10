@@ -20,7 +20,6 @@
 
 namespace gitter.Git
 {
-	using System;
 	using System.IO;
 
 	/// <summary>Patch from string.</summary>

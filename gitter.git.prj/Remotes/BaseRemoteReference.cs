@@ -57,21 +57,29 @@ namespace gitter.Git
 			MarkAsDeleted();
 		}
 
-		public Task DeleteAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task DeleteAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
-			return DeleteCoreAsync(progress, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					if(t.IsCompleted)
-					{
-						MarkAsDeleted();
-					}
-					TaskUtility.PropagateFaultedStates(t);
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+			var task = DeleteCoreAsync(progress, cancellationToken);
+			await task;
+
+			if(task.IsCompleted)
+			{
+				MarkAsDeleted();
+			}
+			TaskUtility.PropagateFaultedStates(task);
+			//return DeleteCoreAsync(progress, cancellationToken)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		if(t.IsCompleted)
+			//		{
+			//			MarkAsDeleted();
+			//		}
+			//		TaskUtility.PropagateFaultedStates(t);
+			//	},
+			//	CancellationToken.None,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		public void MarkAsDeleted()

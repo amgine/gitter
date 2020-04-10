@@ -20,9 +20,6 @@
 
 namespace gitter.Git
 {
-	using System;
-	using System.Collections.Generic;
-
 	internal sealed class NowherePointer : GitObject, IRevisionPointer
 	{
 		public NowherePointer(Repository repository, string name)

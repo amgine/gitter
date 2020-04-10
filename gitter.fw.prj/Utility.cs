@@ -242,10 +242,12 @@ namespace gitter.Framework
 
 		public static Process CreateProcessFor(string url)
 		{
-			var psi = new ProcessStartInfo()
-				{
-					FileName = url,
-				};
+			var psi = new ProcessStartInfo
+			{
+				UseShellExecute = true,
+				FileName        = url,
+				Verb            = "OPEN",
+			};
 			if(Directory.Exists(url))
 			{
 				psi.WorkingDirectory = url;

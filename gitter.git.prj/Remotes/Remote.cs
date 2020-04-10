@@ -21,7 +21,6 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Globalization;
 	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -516,7 +515,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Deletes all stale tracking branches.</summary>
-		public Task PruneAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task PruneAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -524,20 +523,26 @@ namespace gitter.Git
 			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged);
 			var parameters = GetPruneParameters();
-			return Repository.Accessor.PruneRemote.InvokeAsync(parameters, progress, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					block.Dispose();
-					Repository.Refs.Remotes.Refresh();
-					var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
-					var changes = RefsDiff.Calculate(state1, state2);
-					Repository.Remotes.OnPruneCompleted(this, changes);
-					TaskUtility.PropagateFaultedStates(t);
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+			await Repository.Accessor.PruneRemote.InvokeAsync(parameters, progress, cancellationToken);
+			block.Dispose();
+			Repository.Refs.Remotes.Refresh();
+			var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+			var changes = RefsDiff.Calculate(state1, state2);
+			Repository.Remotes.OnPruneCompleted(this, changes);
+			//return Repository.Accessor.PruneRemote.InvokeAsync(parameters, progress, cancellationToken)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		block.Dispose();
+			//		Repository.Refs.Remotes.Refresh();
+			//		var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+			//		var changes = RefsDiff.Calculate(state1, state2);
+			//		Repository.Remotes.OnPruneCompleted(this, changes);
+			//		TaskUtility.PropagateFaultedStates(t);
+			//	},
+			//	CancellationToken.None,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		#endregion

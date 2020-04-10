@@ -62,8 +62,7 @@ namespace gitter.Git
 		{
 			Assert.IsNotNull(parameter);
 
-			var handler = ParameterCreated;
-			if(handler != null) handler(this, new ConfigParameterEventArgs(parameter));
+			ParameterCreated?.Invoke(this, new ConfigParameterEventArgs(parameter));
 		}
 
 		/// <summary>Invokes <see cref="Deleted"/> & other related events.</summary>
@@ -73,8 +72,7 @@ namespace gitter.Git
 			Assert.IsNotNull(parameter);
 
 			parameter.MarkAsDeleted();
-			var handler = ParameterDeleted;
-			if(handler != null) handler(this, new ConfigParameterEventArgs(parameter));
+			ParameterDeleted?.Invoke(this, new ConfigParameterEventArgs(parameter));
 		}
 
 		#endregion
@@ -335,7 +333,7 @@ namespace gitter.Git
 			{
 				if(_repository != null)
 				{
-					CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
+					CacheUpdater.UpdateObjectDictionary(
 						_parameters,
 						null,
 						null,
@@ -348,7 +346,7 @@ namespace gitter.Git
 				}
 				else
 				{
-					CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
+					CacheUpdater.UpdateObjectDictionary(
 						_parameters,
 						null,
 						null,

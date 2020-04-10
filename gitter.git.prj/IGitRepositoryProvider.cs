@@ -20,7 +20,6 @@
 
 namespace gitter.Git
 {
-	using System;
 	using System.Collections.Generic;
 
 	using gitter.Framework;

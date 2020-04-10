@@ -441,7 +441,7 @@ namespace gitter.Git
 			}
 		}
 
-		public static Task RebaseHeadHereAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress)
+		public static async Task RebaseHeadHereAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
@@ -455,30 +455,57 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated);
 
 			progress?.Report(new OperationProgress(Resources.StrsRebaseIsInProcess.AddEllipsis()));
-			return repository.Accessor
-				.Rebase.InvokeAsync(parameters, progress, CancellationToken.None)
-				.ContinueWith(
-				t =>
+			var task = repository.Accessor
+				.Rebase
+				.InvokeAsync(parameters, progress, CancellationToken.None);
+			//FIXME: may be to rework the logic
+			try
+			{
+				await task;
+			}
+			finally
+			{
+				block.Dispose();
+				if(oldHead != null)
 				{
-					block.Dispose();
-					if(oldHead != null)
-					{
-						oldHead.Refresh();
-					}
-					else
-					{
-						repository.Head.Refresh();
-					}
-					if(t.Status != TaskStatus.RanToCompletion)
-					{
-						repository.OnStateChanged();
-					}
-					repository.OnUpdated();
-					TaskUtility.PropagateFaultedStates(t);
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+					oldHead.Refresh();
+				}
+				else
+				{
+					repository.Head.Refresh();
+				}
+				if(task.Status != TaskStatus.RanToCompletion)
+				{
+					repository.OnStateChanged();
+				}
+				repository.OnUpdated();
+				TaskUtility.PropagateFaultedStates(task);
+			}
+			
+			//return repository.Accessor
+			//	.Rebase.InvokeAsync(parameters, progress, CancellationToken.None)
+			//	.ContinueWith(
+			//	t =>
+			//	{
+			//		block.Dispose();
+			//		if(oldHead != null)
+			//		{
+			//			oldHead.Refresh();
+			//		}
+			//		else
+			//		{
+			//			repository.Head.Refresh();
+			//		}
+			//		if(t.Status != TaskStatus.RanToCompletion)
+			//		{
+			//			repository.OnStateChanged();
+			//		}
+			//		repository.OnUpdated();
+			//		TaskUtility.PropagateFaultedStates(t);
+			//	},
+			//	CancellationToken.None,
+			//	TaskContinuationOptions.ExecuteSynchronously,
+			//	TaskScheduler.Default);
 		}
 
 		#endregion

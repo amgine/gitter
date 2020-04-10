@@ -43,8 +43,7 @@ namespace gitter.Git
 		/// <param name="parameter">New branch.</param>
 		private void InvokeParameterCreated(ConfigParameter parameter)
 		{
-			var handler = ParameterCreated;
-			if(handler != null) handler(this, new ConfigParameterEventArgs(parameter));
+			ParameterCreated?.Invoke(this, new ConfigParameterEventArgs(parameter));
 		}
 
 		/// <summary>Invokes <see cref="Deleted"/> & other related events.</summary>
@@ -52,8 +51,7 @@ namespace gitter.Git
 		private void InvokeParameterDeleted(ConfigParameter parameter)
 		{
 			parameter.MarkAsDeleted();
-			var handler = ParameterDeleted;
-			if(handler != null) handler(this, new ConfigParameterEventArgs(parameter));
+			ParameterDeleted?.Invoke(this, new ConfigParameterEventArgs(parameter));
 		}
 
 		#endregion
