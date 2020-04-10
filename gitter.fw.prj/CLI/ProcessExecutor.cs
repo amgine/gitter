@@ -69,29 +69,23 @@ namespace gitter.Framework.CLI
 		public string ExeFileName { get; }
 
 		protected virtual ProcessStartInfo InitializeStartInfo(TInput input)
-		{
-			return new ProcessStartInfo(ExeFileName);
-		}
+			=> new ProcessStartInfo(ExeFileName);
 
 		protected virtual Process CreateProcess(TInput input)
-		{
-			return new Process { StartInfo = InitializeStartInfo(input) };
-		}
+			=> new Process { StartInfo = InitializeStartInfo(input) };
 
 		public int Execute(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver)
 		{
 			Verify.Argument.IsNotNull(input, nameof(input));
 
-			using(var process = CreateProcess(input))
-			{
-				process.Start();
-				stdOutReceiver?.Initialize(process, process.StandardOutput);
-				stdErrReceiver?.Initialize(process, process.StandardError);
-				process.WaitForExit();
-				stdErrReceiver?.WaitForEndOfStream();
-				stdOutReceiver?.WaitForEndOfStream();
-				return process.ExitCode;
-			}
+			using var process = CreateProcess(input);
+			process.Start();
+			stdOutReceiver?.Initialize(process, process.StandardOutput);
+			stdErrReceiver?.Initialize(process, process.StandardError);
+			process.WaitForExit();
+			stdErrReceiver?.WaitForEndOfStream();
+			stdOutReceiver?.WaitForEndOfStream();
+			return process.ExitCode;
 		}
 
 		public async Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, Action<Process> cancellationMethod, CancellationToken cancellationToken)
@@ -105,7 +99,7 @@ namespace gitter.Framework.CLI
 				return await tcs.Task
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			var process = CreateProcess(input);
+			using var process = CreateProcess(input);
 			process.EnableRaisingEvents = true;
 			process.Exited += (s, e) =>
 				{
@@ -127,10 +121,10 @@ namespace gitter.Framework.CLI
 			process.Start();
 			stdOutReceiver?.Initialize(process, process.StandardOutput);
 			stdErrReceiver?.Initialize(process, process.StandardError);
-			var cancellationRegistration = cancellationToken.CanBeCanceled
+			using var cancellationRegistration = cancellationToken.CanBeCanceled
 				? cancellationToken.Register(() => tcs.TrySetCanceled())
 				: default;
-			var resut = await tcs.Task
+			var processExitCode = await tcs.Task
 				.ConfigureAwait(continueOnCapturedContext: false);
 			if(tcs.Task.IsCanceled)
 			{
@@ -143,30 +137,7 @@ namespace gitter.Framework.CLI
 				stdErrReceiver?.WaitForEndOfStream();
 				stdOutReceiver?.WaitForEndOfStream();
 			}
-			cancellationRegistration.Dispose();
-			process.Dispose();
-			return resut;
-			//return tcs.Task.ContinueWith(
-			//	task =>
-			//	{
-			//		if(task.IsCanceled)
-			//		{
-			//			stdErrReceiver?.NotifyCanceled();
-			//			stdOutReceiver?.NotifyCanceled();
-			//			cancellationMethod?.Invoke(process);
-			//		}
-			//		else
-			//		{
-			//			stdErrReceiver?.WaitForEndOfStream();
-			//			stdOutReceiver?.WaitForEndOfStream();
-			//		}
-			//		cancellationRegistration.Dispose();
-			//		process.Dispose();
-			//		return TaskUtility.UnwrapResult(task);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.None,
-			//	TaskScheduler.Default);
+			return processExitCode;
 		}
 	}
 }

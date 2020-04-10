@@ -108,16 +108,11 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(parameters);
 
-			if(parameters.LoadCommitInfo)
-			{
-				return GetDereferenceByNameCommand(GitConstants.StashFullName);
-			}
-			else
-			{
-				return new ShowRefCommand(
+			return parameters.LoadCommitInfo
+				? GetDereferenceByNameCommand(GitConstants.StashFullName)
+				: new ShowRefCommand(
 					ShowRefCommand.Verify(),
 					new CommandParameter(GitConstants.StashFullName));
-			}
 		}
 
 		public Command GetQueryStatusCommand(QueryStatusParameters parameters)
@@ -203,40 +198,19 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		private ICommandArgument GetReflogFormatArgument()
-		{
-			if(GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI))
-			{
-				return LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B");
-			}
-			else
-			{
-				return LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
-			}
-		}
+			=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
+				? LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B")
+				: LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
 
 		private ICommandArgument GetRevisionFormatArgument()
-		{
-			if(GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI))
-			{
-				return LogCommand.Format("%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B");
-			}
-			else
-			{
-				return LogCommand.Format("%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
-			}
-		}
+			=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
+				? LogCommand.Format("%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B")
+				: LogCommand.Format("%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
 
 		private ICommandArgument GetRevisionDataFormatArgument()
-		{
-			if(GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI))
-			{
-				return LogCommand.Format("%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B");
-			}
-			else
-			{
-				return LogCommand.Format("%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
-			}
-		}
+			=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
+				? LogCommand.Format("%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B")
+				: LogCommand.Format("%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
 
 		private static void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<ICommandArgument> args, ICommandArgument format)
 		{

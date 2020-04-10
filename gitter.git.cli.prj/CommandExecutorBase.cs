@@ -31,29 +31,20 @@ namespace gitter.Git.AccessLayer.CLI
 
 	abstract class CommandExecutorBase : ICommandExecutor
 	{
-		#region Data
-
-		private readonly ICliOptionsProvider _cliOptionsProvider;
-
-		#endregion
-
 		#region .ctor
 
 		protected CommandExecutorBase(ICliOptionsProvider cliOptionsProvider)
 		{
 			Verify.Argument.IsNotNull(cliOptionsProvider, nameof(cliOptionsProvider));
 
-			_cliOptionsProvider = cliOptionsProvider;
+			CliOptionsProvider = cliOptionsProvider;
 		}
 
 		#endregion
 
 		#region Properties
 
-		protected ICliOptionsProvider CliOptionsProvider
-		{
-			get { return _cliOptionsProvider; }
-		}
+		protected ICliOptionsProvider CliOptionsProvider { get; }
 
 		#endregion
 
@@ -62,9 +53,7 @@ namespace gitter.Git.AccessLayer.CLI
 		protected abstract GitInput PrepareInput(Command command, Encoding encoding);
 
 		protected virtual ProcessExecutor<GitInput> CreateProcessExecutor()
-		{
-			return new GitProcessExecutor(CliOptionsProvider.GitExecutablePath);
-		}
+			=> new GitProcessExecutor(CliOptionsProvider.GitExecutablePath);
 
 		protected virtual void OnCommandExecuting(Command command)
 		{
@@ -152,28 +141,11 @@ namespace gitter.Git.AccessLayer.CLI
 					stdOutReceiver,
 					stdErrReceiver,
 					cancellationMethod,
-					cancellationToken);
+					cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 			var stdOut = stdOutReceiver.GetText();
 			var stdErr = stdErrReceiver.GetText();
 			return new GitOutput(stdOut, stdErr, exitCode);
-			//return processExecutor
-			//	.ExecuteAsync(
-			//		input,
-			//		stdOutReceiver,
-			//		stdErrReceiver,
-			//		cancellationMethod,
-			//		cancellationToken)
-			//	.ContinueWith(
-			//		task =>
-			//		{
-			//			int exitCode = TaskUtility.UnwrapResult(task);
-			//			var stdOut   = stdOutReceiver.GetText();
-			//			var stdErr   = stdErrReceiver.GetText();
-			//			return new GitOutput(stdOut, stdErr, exitCode);
-			//		},
-			//		cancellationToken,
-			//		TaskContinuationOptions.ExecuteSynchronously,
-			//		TaskScheduler.Default);
 		}
 
 		public Task<GitOutput> ExecuteCommandAsync(Command command, CommandExecutionFlags flags, CancellationToken cancellationToken)

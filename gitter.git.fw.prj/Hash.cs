@@ -29,47 +29,31 @@ namespace gitter.Git
 	using gitter.Framework;
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, IFormattable
+	public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, IFormattable
 	{
 		#region Helpers
 
 		sealed class HashEqualityComparer : IEqualityComparer<Hash>
 		{
-			public bool Equals(Hash x, Hash y)
-			{
-				return x == y;
-			}
+			public bool Equals(Hash x, Hash y) => x == y;
 
-			public int GetHashCode(Hash hash)
-			{
-				return hash.GetHashCode();
-			}
+			public int GetHashCode(Hash hash) => hash.GetHashCode();
 		}
 
 		sealed class HashComparer : IComparer<Hash>
 		{
-			public int Compare(Hash x, Hash y)
-			{
-				return x.CompareTo(y);
-			}
+			public int Compare(Hash x, Hash y) => x.CompareTo(y);
 		}
 
 		#endregion
 
 		#region Static
 
-		private static readonly HashEqualityComparer _equalityComparer = new HashEqualityComparer();
 		private static readonly HashComparer _comparer = new HashComparer();
 
-		public static IEqualityComparer<Hash> EqualityComparer
-		{
-			get { return _equalityComparer; }
-		}
+		public static IEqualityComparer<Hash> EqualityComparer { get; } = new HashEqualityComparer();
 
-		public static IComparer<Hash> Comparer
-		{
-			get { return _comparer; }
-		}
+		public static IComparer<Hash> Comparer { get; } = new HashComparer();
 
 		#endregion
 
@@ -149,7 +133,7 @@ namespace gitter.Git
 				int digit = TryParseCharToHexDigit(hash[offset + i]);
 				if(digit < 0)
 				{
-					throw new ArgumentException("Argument must contain hexadecimal string representation of the hash.", "hash");
+					throw new ArgumentException("Argument must contain hexadecimal string representation of the hash.", nameof(hash));
 				}
 				result = (result << 4) + (uint)digit;
 			}
@@ -164,7 +148,7 @@ namespace gitter.Git
 				int digit = TryParseCharToHexDigit(hash[offset + i]);
 				if(digit < 0)
 				{
-					throw new ArgumentException("Argument must contain hexadecimal string representation of the hash.", "hash");
+					throw new ArgumentException("Argument must contain hexadecimal string representation of the hash.", nameof(hash));
 				}
 				result = (result << 4) + (uint)digit;
 			}
@@ -257,20 +241,19 @@ namespace gitter.Git
 		{
 			if(str == null || str.Length < 40)
 			{
-				hash = default(Hash);
+				hash = default;
 				return false;
 			}
-			uint part0, part1, part2, part3, part4;
-			if (TryParsePart(str,  0, out part0) &&
-				TryParsePart(str,  8, out part1) &&
-				TryParsePart(str, 16, out part2) &&
-				TryParsePart(str, 24, out part3) &&
-				TryParsePart(str, 32, out part4))
+			if (TryParsePart(str,  0, out var part0) &&
+				TryParsePart(str,  8, out var part1) &&
+				TryParsePart(str, 16, out var part2) &&
+				TryParsePart(str, 24, out var part3) &&
+				TryParsePart(str, 32, out var part4))
 			{
 				hash = new Hash(part0, part1, part2, part3, part4);
 				return true;
 			}
-			hash = default(Hash);
+			hash = default;
 			return false;
 		}
 
@@ -278,7 +261,7 @@ namespace gitter.Git
 		{
 			if(str == null || offset < 0 || str.Length - offset < 40)
 			{
-				hash = default(Hash);
+				hash = default;
 				return false;
 			}
 			uint part0, part1, part2, part3, part4;
@@ -291,7 +274,7 @@ namespace gitter.Git
 				hash = new Hash(part0, part1, part2, part3, part4);
 				return true;
 			}
-			hash = default(Hash);
+			hash = default;
 			return false;
 		}
 
@@ -299,20 +282,19 @@ namespace gitter.Git
 		{
 			if(str == null || str.Length < 40)
 			{
-				hash = default(Hash);
+				hash = default;
 				return false;
 			}
-			uint part0, part1, part2, part3, part4;
-			if (TryParsePart(str,  0, out part0) &&
-				TryParsePart(str,  8, out part1) &&
-				TryParsePart(str, 16, out part2) &&
-				TryParsePart(str, 24, out part3) &&
-				TryParsePart(str, 32, out part4))
+			if (TryParsePart(str,  0, out var part0) &&
+				TryParsePart(str,  8, out var part1) &&
+				TryParsePart(str, 16, out var part2) &&
+				TryParsePart(str, 24, out var part3) &&
+				TryParsePart(str, 32, out var part4))
 			{
 				hash = new Hash(part0, part1, part2, part3, part4);
 				return true;
 			}
-			hash = default(Hash);
+			hash = default;
 			return false;
 		}
 
@@ -320,20 +302,19 @@ namespace gitter.Git
 		{
 			if(str == null || offset < 0 || str.Length - offset < 40)
 			{
-				hash = default(Hash);
+				hash = default;
 				return false;
 			}
-			uint part0, part1, part2, part3, part4;
-			if (TryParsePart(str,  0 + offset, out part0) &&
-				TryParsePart(str,  8 + offset, out part1) &&
-				TryParsePart(str, 16 + offset, out part2) &&
-				TryParsePart(str, 24 + offset, out part3) &&
-				TryParsePart(str, 32 + offset, out part4))
+			if (TryParsePart(str,  0 + offset, out var part0) &&
+				TryParsePart(str,  8 + offset, out var part1) &&
+				TryParsePart(str, 16 + offset, out var part2) &&
+				TryParsePart(str, 24 + offset, out var part3) &&
+				TryParsePart(str, 32 + offset, out var part4))
 			{
 				hash = new Hash(part0, part1, part2, part3, part4);
 				return true;
 			}
-			hash = default(Hash);
+			hash = default;
 			return false;
 		}
 
@@ -353,7 +334,7 @@ namespace gitter.Git
 		public Hash(byte[] hash)
 		{
 			Verify.Argument.IsNotNull(hash, nameof(hash));
-			Verify.Argument.IsTrue(hash.Length >= 20, "hash", "Hash must be at least 20 bytes long.");
+			Verify.Argument.IsTrue(hash.Length >= 20, nameof(hash), "Hash must be at least 20 bytes long.");
 
 			_part0 = ParsePart(hash,  0);
 			_part1 = ParsePart(hash,  4);
@@ -365,7 +346,7 @@ namespace gitter.Git
 		public Hash(byte[] hash, int offset)
 		{
 			Verify.Argument.IsNotNull(hash, nameof(hash));
-			Verify.Argument.IsInRange(0, offset, hash.Length - 20, "hash", "Hash must be at least 20 bytes long after offset.");
+			Verify.Argument.IsInRange(0, offset, hash.Length - 20, nameof(hash), "Hash must be at least 20 bytes long after offset.");
 
 			_part0 = ParsePart(hash,  0 + offset);
 			_part1 = ParsePart(hash,  4 + offset);
@@ -377,7 +358,7 @@ namespace gitter.Git
 		public Hash(string hash)
 		{
 			Verify.Argument.IsNotNull(hash, nameof(hash));
-			Verify.Argument.IsTrue(hash.Length >= 40, "hash", "Hash must be at least 40 characters long.");
+			Verify.Argument.IsTrue(hash.Length >= 40, nameof(hash), "Hash must be at least 40 characters long.");
 
 			_part0 = ParsePart(hash,  0);
 			_part1 = ParsePart(hash,  8);
@@ -389,7 +370,7 @@ namespace gitter.Git
 		public Hash(string hash, int offset)
 		{
 			Verify.Argument.IsNotNull(hash, nameof(hash));
-			Verify.Argument.IsInRange(0, offset, hash.Length - 40, "hash", "Hash must be at least 40 characters long after offset.");
+			Verify.Argument.IsInRange(0, offset, hash.Length - 40, nameof(hash), "Hash must be at least 40 characters long after offset.");
 
 			_part0 = ParsePart(hash,  0 + offset);
 			_part1 = ParsePart(hash,  8 + offset);
@@ -401,7 +382,7 @@ namespace gitter.Git
 		public Hash(char[] hash)
 		{
 			Verify.Argument.IsNotNull(hash, nameof(hash));
-			Verify.Argument.IsTrue(hash.Length >= 40, "hash", "Hash must be at least 40 characters long.");
+			Verify.Argument.IsTrue(hash.Length >= 40, nameof(hash), "Hash must be at least 40 characters long.");
 
 			_part0 = ParsePart(hash,  0);
 			_part1 = ParsePart(hash,  8);
@@ -413,7 +394,7 @@ namespace gitter.Git
 		public Hash(char[] hash, int offset)
 		{
 			Verify.Argument.IsNotNull(hash, nameof(hash));
-			Verify.Argument.IsInRange(0, offset, hash.Length - 40, "hash", "Hash must be at least 40 characters long after offset.");
+			Verify.Argument.IsInRange(0, offset, hash.Length - 40, nameof(hash), "Hash must be at least 40 characters long after offset.");
 
 			_part0 = ParsePart(hash,  0 + offset);
 			_part1 = ParsePart(hash,  8 + offset);
@@ -426,15 +407,9 @@ namespace gitter.Git
 
 		#region Operators
 
-		public static explicit operator string(Hash hash)
-		{
-			return hash.ToString();
-		}
+		public static explicit operator string(Hash hash) => hash.ToString();
 
-		public static explicit operator Hash(string hash)
-		{
-			return new Hash(hash);
-		}
+		public static explicit operator Hash(string hash) => new Hash(hash);
 
 		public static bool operator ==(Hash a, Hash b)
 		{
@@ -512,28 +487,11 @@ namespace gitter.Git
 		#region Methods
 
 		public override int GetHashCode()
-		{
-			return (int)(_part0 ^ _part1 ^ _part2 ^ _part3 ^ _part4);
-		}
+			=> (int)(_part0 ^ _part1 ^ _part2 ^ _part3 ^ _part4);
 
-		public override bool Equals(object obj)
-		{
-			if(obj == null)
-			{
-				return false;
-			}
-			if(!(obj is Hash))
-			{
-				return false;
-			}
-			var other = (Hash)obj;
-			return this == other;
-		}
+		public override bool Equals(object obj) => obj is Hash other && this == other;
 
-		public bool Equals(Hash other)
-		{
-			return this == other;
-		}
+		public bool Equals(Hash other) => this == other;
 
 		public int CompareTo(object other)
 		{
@@ -541,11 +499,11 @@ namespace gitter.Git
 			{
 				return 1;
 			}
-			if(!(other is Hash))
+			if(!(other is Hash hash))
 			{
-				throw new ArgumentException("Argument must be a Hash value.", "other");
+				throw new ArgumentException("Argument must be a Hash value.", nameof(other));
 			}
-			return CompareTo((Hash)other);
+			return CompareTo(hash);
 		}
 
 		public int CompareTo(Hash other)
@@ -581,7 +539,7 @@ namespace gitter.Git
 		public void ToByteArray(byte[] buffer, int offset)
 		{
 			Verify.Argument.IsNotNull(buffer, nameof(buffer));
-			Verify.Argument.IsInRange(0, offset, buffer.Length - 20, "offset");
+			Verify.Argument.IsInRange(0, offset, buffer.Length - 20, nameof(offset));
 
 			unsafe
 			{
@@ -615,7 +573,7 @@ namespace gitter.Git
 
 		public string ToString(int length)
 		{
-			Verify.Argument.IsInRange(0, length, 40, "length");
+			Verify.Argument.IsInRange(0, length, 40, nameof(length));
 
 			if(length == 0)
 			{
@@ -654,7 +612,7 @@ namespace gitter.Git
 		public void ToString(StringBuilder stringBuilder, int length)
 		{
 			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
-			Verify.Argument.IsInRange(0, length, 40, "length");
+			Verify.Argument.IsInRange(0, length, 40, nameof(length));
 
 			DumpPart(_part0, stringBuilder, length);
 			DumpPart(_part1, stringBuilder, length -= 8);

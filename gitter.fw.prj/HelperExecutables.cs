@@ -30,7 +30,7 @@ namespace gitter.Framework
 
 	public static class HelperExecutables
 	{
-		/// <summary>Runs <see cref="action"/> with administrator privileges, requesting them by UAC if necessary.</summary>
+		/// <summary>Runs <paramref name="action"/> with administrator privileges, requesting them by UAC if necessary.</summary>
 		/// <param name="action">Action to execute.</param>
 		public static void ExecuteWithAdministartorRights(Action action)
 		{
@@ -73,12 +73,8 @@ namespace gitter.Framework
 									executor = (IRemoteProcedureExecutor)Activator.GetObject(typeof(IRemoteProcedureExecutor),
 										string.Format(@"ipc://{0}/{1}", RemotingChannelName, RemotingObjectName));
 								}
-								catch(Exception exc)
+								catch(Exception exc) when (!exc.IsCritical())
 								{
-									if(exc.IsCritical())
-									{
-										throw;
-									}
 								}
 								if(executor != null)
 								{
@@ -106,12 +102,8 @@ namespace gitter.Framework
 										executor.Close();
 										allowWaitForExit = true;
 									}
-									catch(Exception exc)
+									catch(Exception exc) when (!exc.IsCritical())
 									{
-										if(exc.IsCritical())
-										{
-											throw;
-										}
 									}
 								}
 							}
@@ -136,12 +128,8 @@ namespace gitter.Framework
 									administratorProcess.Kill();
 								}
 							}
-							catch(Exception exc)
+							catch(Exception exc) when (!exc.IsCritical())
 							{
-								if(exc.IsCritical())
-								{
-									throw;
-								}
 							}
 						}
 					}
@@ -155,10 +143,7 @@ namespace gitter.Framework
 
 		public static bool CheckIfUpdaterIsRunning()
 		{
-			bool singleInstance = false;
-			using(var s = new Semaphore(0, 1, "gitter-updater", out singleInstance))
-			{
-			}
+			using var _ = new Semaphore(0, 1, "gitter-updater", out var singleInstance);
 			return !singleInstance;
 		}
 
@@ -184,18 +169,16 @@ namespace gitter.Framework
 			}
 			File.Copy(Path.Combine(sourcePath, updaterExeName), Path.Combine(targetPath, updaterExeName), true);
 			File.Copy(Path.Combine(sourcePath, updaterConfigName), Path.Combine(targetPath, updaterConfigName), true);
-			using(var process = new Process()
-				{
-					StartInfo = new ProcessStartInfo(Path.Combine(targetPath, updaterExeName), cmdline)
-					{
-						WindowStyle = ProcessWindowStyle.Normal,
-						CreateNoWindow = false,
-						LoadUserProfile = true,
-					},
-				})
+			using var process = new Process
 			{
-				process.Start();
-			}
+				StartInfo = new ProcessStartInfo(Path.Combine(targetPath, updaterExeName), cmdline)
+				{
+					WindowStyle = ProcessWindowStyle.Normal,
+					CreateNoWindow = false,
+					LoadUserProfile = true,
+				},
+			};
+			process.Start();
 		}
 
 		public static void CleanupUpdaterTemporaryFiles()

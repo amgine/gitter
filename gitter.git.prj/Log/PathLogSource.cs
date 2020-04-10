@@ -88,28 +88,11 @@ namespace gitter.Git
 				var revisionData = await Repository
 					.Accessor
 					.QueryRevisions
-					.InvokeAsync(parameters, progress, cancellationToken);
+					.InvokeAsync(parameters, progress, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				progress?.Report(OperationProgress.Completed);
 				var revisions = Repository.Revisions.Resolve(revisionData);
-				var revisionLog = new RevisionLog(Repository, revisions);
-				return revisionLog;
-				//return Repository
-				//	.Accessor
-				//	.QueryRevisions
-				//	.InvokeAsync(parameters, progress, cancellationToken)
-				//	.ContinueWith(
-				//		t =>
-				//		{
-				//			progress?.Report(OperationProgress.Completed);
-				//			var revisionData = TaskUtility.UnwrapResult(t);
-				//			var revisions    = Repository.Revisions.Resolve(revisionData);
-				//			var revisionLog  = new RevisionLog(Repository, revisions);
-
-				//			return revisionLog;
-				//		},
-				//		cancellationToken,
-				//		TaskContinuationOptions.ExecuteSynchronously,
-				//		TaskScheduler.Default);
+				return new RevisionLog(Repository, revisions);
 			}
 		}
 
@@ -137,11 +120,9 @@ namespace gitter.Git
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
 		public override string ToString()
-		{
-			return Revision is Revision
+			=> Revision is Revision
 				? Path + " @ " + Revision.Pointer.Substring(0, 7)
 				: Path + " @ " + Revision.Pointer;
-		}
 
 		#endregion
 	}

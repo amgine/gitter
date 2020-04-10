@@ -61,20 +61,16 @@ namespace gitter.Git.AccessLayer.CLI
 			if(File.Exists(fileName))
 			{
 				string pointer;
-				using(var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+				using var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+				if(fs.Length == 0)
 				{
-					if(fs.Length == 0)
-					{
-						return new SymbolicReferenceData(null, ReferenceType.None);
-					}
-					else
-					{
-						using(var sr = new StreamReader(fs))
-						{
-							pointer = sr.ReadLine();
-							sr.Close();
-						}
-					}
+					return new SymbolicReferenceData(null, ReferenceType.None);
+				}
+				else
+				{
+					using var sr = new StreamReader(fs);
+					pointer = sr.ReadLine();
+					sr.Close();
 				}
 				return Parse(pointer);
 			}

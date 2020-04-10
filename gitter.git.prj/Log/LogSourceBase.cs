@@ -46,9 +46,6 @@ namespace gitter.Git
 		/// <returns>
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
-		public override string ToString()
-		{
-			return "log";
-		}
+		public override string ToString() => "log";
 	}
 }

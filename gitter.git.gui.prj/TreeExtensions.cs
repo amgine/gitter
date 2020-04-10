@@ -88,12 +88,8 @@ namespace gitter.Git.Gui
 					fs.Write(bytes, 0, bytes.Length);
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				GitterApplication.MessageBoxService.Show(
 					null,
 					exc.Message,

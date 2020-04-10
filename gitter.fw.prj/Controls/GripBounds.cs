@@ -28,23 +28,18 @@ namespace gitter.Framework.Controls
 		private const int GripSize = 6;
 		private const int CornerGripSize = GripSize << 1;
 
-		private readonly Rectangle _clientRectangle;
-
 		public GripBounds(Rectangle clientRectangle)
 		{
-			_clientRectangle = clientRectangle;
+			ClientRectangle = clientRectangle;
 		}
 
-		public Rectangle ClientRectangle
-		{
-			get { return _clientRectangle; }
-		}
+		public Rectangle ClientRectangle { get; }
 
 		public Rectangle Bottom
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.Y = rect.Bottom - GripSize + 1;
 				rect.Height = GripSize;
 				return rect;
@@ -55,7 +50,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.Y = rect.Bottom - CornerGripSize + 1;
 				rect.Height = CornerGripSize;
 				rect.X = rect.Width - CornerGripSize + 1;
@@ -68,7 +63,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.Height = GripSize;
 				return rect;
 			}
@@ -78,7 +73,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.Height = CornerGripSize;
 				rect.X = rect.Width - CornerGripSize + 1;
 				rect.Width = CornerGripSize;
@@ -90,7 +85,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.Width = GripSize;
 				return rect;
 			}
@@ -100,7 +95,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.Width = CornerGripSize;
 				rect.Y = rect.Height - CornerGripSize + 1;
 				rect.Height = CornerGripSize;
@@ -112,7 +107,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.X = rect.Right - GripSize + 1;
 				rect.Width = GripSize;
 				return rect;
@@ -123,7 +118,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				var rect = _clientRectangle;
+				var rect = ClientRectangle;
 				rect.Width = CornerGripSize;
 				rect.Height = CornerGripSize;
 				return rect;

@@ -113,32 +113,16 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 			};
 
-			var exitCode = await _commandExecutor
-				.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, CommandExecutionFlags.None, cancellationToken);
-			if(exitCode != 0)
+			var processExitCode = await _commandExecutor
+				.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, CommandExecutionFlags.None, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if(processExitCode != 0)
 			{
 				var errorMessage = errorMessages != null && errorMessages.Count != 0
 					? string.Join(Environment.NewLine, errorMessages)
-					: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
+					: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", processExitCode);
 				throw new GitException(errorMessage);
 			}
-			//return _commandExecutor
-			//	.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, CommandExecutionFlags.None, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		var exitCode = TaskUtility.UnwrapResult(t);
-			//		if(exitCode != 0)
-			//		{
-			//			var errorMessage = errorMessages != null && errorMessages.Count != 0
-			//				? string.Join(Environment.NewLine, errorMessages)
-			//				: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
-			//			throw new GitException(errorMessage);
-			//		}
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 	}
 }

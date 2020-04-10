@@ -55,14 +55,10 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		protected override IParser<StatusData> CreateParser()
-		{
-			return new StatusParser();
-		}
+			=> new StatusParser();
 
 		protected override CommandExecutionFlags GetExecutionFlags()
-		{
-			return CommandExecutionFlags.DoNotKillProcess;
-		}
+			=> CommandExecutionFlags.DoNotKillProcess;
 
 		#endregion
 	}

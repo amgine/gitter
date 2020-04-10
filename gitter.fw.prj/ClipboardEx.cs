@@ -29,7 +29,7 @@ namespace gitter.Framework
 	{
 		public static void SetTextSafe(string text, int attemptsCount = 3, int retryInterval = 50)
 		{
-			const uint CLIPBRD_E_CANT_OPEN = 0x800401D0;
+			const int CLIPBRD_E_CANT_OPEN = unchecked((int)0x800401D0);
 			while(attemptsCount > 0)
 			{
 				try
@@ -37,12 +37,8 @@ namespace gitter.Framework
 					Clipboard.SetText(text);
 					return;
 				}
-				catch(COMException exc)
+				catch(COMException exc) when(exc.ErrorCode == CLIPBRD_E_CANT_OPEN)
 				{
-					if((uint)exc.ErrorCode != CLIPBRD_E_CANT_OPEN)
-					{
-						throw;
-					}
 				}
 				--attemptsCount;
 				Thread.Sleep(retryInterval);

@@ -38,7 +38,7 @@ namespace gitter.Framework.Controls
 					return item;
 				}
 			}
-			return default(T);
+			return default;
 		}
 
 		public static T FindNext<T>(this IList<T> items, int currentIndex, Predicate<T> filter)
@@ -54,7 +54,7 @@ namespace gitter.Framework.Controls
 					return item;
 				}
 			}
-			return default(T);
+			return default;
 		}
 	}
 }

@@ -93,48 +93,43 @@ namespace gitter.Git.Gui
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			using(var brush = new SolidBrush(BackColor))
+			using(var background = new SolidBrush(BackColor))
 			{
-				e.Graphics.FillRectangle(brush, e.ClipRectangle);
+				e.Graphics.FillRectangle(background, e.ClipRectangle);
 			}
 			int x = HorizontalMargin;
 			int y = VerticalMargin;
+			using var brush = new SolidBrush(ForeColor);
 			if(_changes == null || _changes.Length == 0)
 			{
-				using(var brush = new SolidBrush(ForeColor))
-				{
-					GitterApplication.TextRenderer.DrawText(
-						e.Graphics, Resources.StrsEverythingIsUpToDate, Font, brush, new Point(x, y + 2));
-				}
+				GitterApplication.TextRenderer.DrawText(
+					e.Graphics, Resources.StrsEverythingIsUpToDate, Font, brush, new Point(x, y + 2));
 			}
 			else
 			{
-				using(var brush = new SolidBrush(ForeColor))
+				for(int i = 0; i < _changes.Length; ++i)
 				{
-					for(int i = 0; i < _changes.Length; ++i)
+					if(i == MaxItems - 1 && _changes.Length > MaxItems)
 					{
-						if(i == MaxItems - 1 && _changes.Length > MaxItems)
-						{
-							GitterApplication.TextRenderer.DrawText(
-								e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Length - MaxItems + 1),
-								Font, brush, new Point(x, y + 2));
-							break;
-						}
-						var prefix = GetTextPrefix(_changes[i].ChangeType);
-						if(!string.IsNullOrWhiteSpace(prefix))
-						{
-							GitterApplication.TextRenderer.DrawText(
-								e.Graphics, prefix, Font, brush, new Point(x, y + 2));
-						}
-						var icon = GetIcon(_changes[i].ReferenceType);
-						if(icon != null)
-						{
-							e.Graphics.DrawImage(icon, new Rectangle(x + 54, y + (ItemHeight - icon.Height) / 2, icon.Width, icon.Height));
-						}
 						GitterApplication.TextRenderer.DrawText(
-							e.Graphics, _changes[i].Name, Font, brush, new Point(x + 54 + (icon != null ? icon.Width : 0) + 4, y + 2));
-						y += ItemHeight;
+							e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Length - MaxItems + 1),
+							Font, brush, new Point(x, y + 2));
+						break;
 					}
+					var prefix = GetTextPrefix(_changes[i].ChangeType);
+					if(!string.IsNullOrWhiteSpace(prefix))
+					{
+						GitterApplication.TextRenderer.DrawText(
+							e.Graphics, prefix, Font, brush, new Point(x, y + 2));
+					}
+					var icon = GetIcon(_changes[i].ReferenceType);
+					if(icon != null)
+					{
+						e.Graphics.DrawImage(icon, new Rectangle(x + 54, y + (ItemHeight - icon.Height) / 2, icon.Width, icon.Height));
+					}
+					GitterApplication.TextRenderer.DrawText(
+						e.Graphics, _changes[i].Name, Font, brush, new Point(x + 54 + (icon != null ? icon.Width : 0) + 4, y + 2));
+					y += ItemHeight;
 				}
 			}
 		}

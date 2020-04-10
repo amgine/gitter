@@ -34,7 +34,7 @@ namespace gitter.Git.Gui
 		public RepositoryHistoryListItem(IWorkingEnvironment environment)
 			: base(CachedResources.Bitmaps["ImgHistory"], Resources.StrHistory)
 		{
-			if(environment == null) throw new System.ArgumentNullException("environment");
+			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}

@@ -43,8 +43,8 @@ namespace gitter.Git.AccessLayer.CLI
 			Func<string, IList<ReferencePushResult>> resultsParser)
 		{
 			_commandExecutor = commandExecutor;
-			_commandFactory = commandFactory;
-			_resultsParser = resultsParser;
+			_commandFactory  = commandFactory;
+			_resultsParser   = resultsParser;
 		}
 
 		public IList<ReferencePushResult> Invoke(PushParameters parameters)
@@ -90,43 +90,22 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 			};
 
-			var exitCode = await _commandExecutor
+			var processExitCode = await _commandExecutor
 				.ExecuteCommandAsync(
 					command,
 					stdOutReceiver,
 					stdErrReceiver,
 					CommandExecutionFlags.None,
-					cancellationToken);
-			if(exitCode != 0)
+					cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if(processExitCode != 0)
 			{
 				var errorMessage = errorMessages != null && errorMessages.Count != 0
 					? string.Join(Environment.NewLine, errorMessages)
-					: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
+					: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", processExitCode);
 				throw new GitException(errorMessage);
 			}
 			return _resultsParser(stdOutReceiver.GetText());
-			//return _commandExecutor
-			//	.ExecuteCommandAsync(
-			//		command,
-			//		stdOutReceiver,
-			//		stdErrReceiver,
-			//		CommandExecutionFlags.None,
-			//		cancellationToken)
-			//	.ContinueWith(task =>
-			//	{
-			//		int exitCode = TaskUtility.UnwrapResult(task);
-			//		if(exitCode != 0)
-			//		{
-			//			var errorMessage = errorMessages != null && errorMessages.Count != 0
-			//				? string.Join(Environment.NewLine, errorMessages)
-			//				: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", exitCode);
-			//			throw new GitException(errorMessage);
-			//		}
-			//		return _resultsParser(stdOutReceiver.GetText());
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 	}
 }

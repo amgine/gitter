@@ -40,8 +40,6 @@ namespace gitter.Git.Gui
 		{
 			#region Data
 
-			private readonly IRevisionPointer _revision;
-			private readonly CustomListBoxItemsCollection _items;
 			private readonly EventHandler<BoundItemActivatedEventArgs<TreeItem>> _onItemActivated;
 			private readonly EventHandler<ItemContextMenuRequestEventArgs> _onItemContextMenuRequested;
 			private TreeBinding _binding;
@@ -55,22 +53,16 @@ namespace gitter.Git.Gui
 				Verify.Argument.IsNotNull(revision, nameof(revision));
 				Verify.Argument.IsNotNull(items, nameof(items));
 
-				_revision = revision;
-				_items    = items;
+				Revision = revision;
+				Items    = items;
 
 				_onItemActivated = onItemActivated;
 				_onItemContextMenuRequested = onItemContextMenuRequested;
 			}
 
-			public IRevisionPointer Revision
-			{
-				get { return _revision; }
-			}
+			public IRevisionPointer Revision { get; }
 
-			public CustomListBoxItemsCollection Items
-			{
-				get { return _items; }
-			}
+			public CustomListBoxItemsCollection Items { get; }
 
 			protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{

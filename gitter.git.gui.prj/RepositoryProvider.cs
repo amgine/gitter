@@ -89,10 +89,7 @@ namespace gitter.Git
 
 		#endregion
 
-		public IEnumerable<IGitAccessorProvider> GitAccessorProviders
-		{
-			get { return _gitAccessorProviders; }
-		}
+		public IEnumerable<IGitAccessorProvider> GitAccessorProviders => _gitAccessorProviders;
 
 		public IGitAccessorProvider ActiveGitAccessorProvider
 		{
@@ -175,12 +172,8 @@ namespace gitter.Git
 			{
 				gitVersion = _gitAccessor.GitVersion;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when (!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				gitVersion = null;
 			}
 			if(gitVersion == null || gitVersion < MinimumRequiredGitVersion)
@@ -250,25 +243,15 @@ namespace gitter.Git
 		}
 
 		public async Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			return await Repository.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken);
-			//return Repository.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		var repository = TaskUtility.UnwrapResult(t);
-			//		return (IRepository)repository;
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
-		}
+			=> await Repository
+				.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 
 		public void OnRepositoryLoaded(IRepository repository)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			var gitRepository = repository as Repository;
-			Verify.Argument.IsTrue(gitRepository != null, "repository");
+			Verify.Argument.IsTrue(gitRepository != null, nameof(repository));
 
 			if(gitRepository.UserIdentity == null)
 			{
@@ -290,12 +273,8 @@ namespace gitter.Git
 					gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when (!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 			finally
 			{
@@ -315,15 +294,9 @@ namespace gitter.Git
 			}
 		}
 
-		public Control CreateInitDialog()
-		{
-			return new InitDialog(this);
-		}
+		public Control CreateInitDialog() => new InitDialog(this);
 
-		public Control CreateCloneDialog()
-		{
-			return new CloneDialog(this);
-		}
+		public Control CreateCloneDialog() => new CloneDialog(this);
 
 		public DialogResult RunInitDialog()
 		{
@@ -379,9 +352,7 @@ namespace gitter.Git
 		}
 
 		bool IGitRepositoryProvider.RunCloneDialog()
-		{
-			return RunCloneDialog() == DialogResult.OK;
-		}
+			=> RunCloneDialog() == DialogResult.OK;
 
 		public IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory)
 		{

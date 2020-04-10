@@ -157,14 +157,14 @@ namespace gitter.Git.Gui
 					{ Available = false, ToolTipText = Resources.TipRevertAbort },
 			};
 
-			_statusUnmerged.DoubleClick				+= OnConflictsDoubleClick;
-			_statusUnstagedModified.DoubleClick		+= OnUnstagedDoubleClick;
-			_statusUnstagedRemoved.DoubleClick		+= OnUnstagedDoubleClick;
-			_statusUnstagedUntracked.DoubleClick	+= OnUnstagedDoubleClick;
+			_statusUnmerged.DoubleClick          += OnConflictsDoubleClick;
+			_statusUnstagedModified.DoubleClick  += OnUnstagedDoubleClick;
+			_statusUnstagedRemoved.DoubleClick   += OnUnstagedDoubleClick;
+			_statusUnstagedUntracked.DoubleClick += OnUnstagedDoubleClick;
 
 			_rightAlignedItems = new[]
 			{
-				_userLabel = new ToolStripStatusLabel(string.Empty, null),
+				_userLabel   = new ToolStripStatusLabel(string.Empty, null),
 				_remoteLabel = new ToolStripStatusLabel(string.Empty, CachedResources.Bitmaps["ImgRemote"]),
 			};
 

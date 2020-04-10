@@ -1,209 +1,46 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>gitter.Git</RootNamespace>
+    <TargetFrameworks>net48</TargetFrameworks>
     <AssemblyName>gitter.git</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>false</BootstrapperEnabled>
+    <RootNamespace>gitter.Git</RootNamespace>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
-      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
-      <Name>gitter.git.fw</Name>
-    </ProjectReference>
-    <Reference Include="System" />
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
-      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
-      <Name>gitter.fw</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\common\CommonAssemblyInfo.cs">
-      <Link>Properties\CommonAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\shared\Debug.cs">
-      <Link>Shared\Debug.cs</Link>
-    </Compile>
-    <Compile Include="..\shared\Verify.cs">
-      <Link>Shared\Verify.cs</Link>
-    </Compile>
-    <Compile Include="Blame\BlameSourceBase.cs" />
-    <Compile Include="Blame\BlameOptions.cs" />
-    <Compile Include="Blame\RevisionFileBlameSource.cs" />
-    <Compile Include="Blame\IBlameSource.cs" />
-    <Compile Include="BranchHelper.cs" />
-    <Compile Include="Diff\IIndexDiffSource.cs" />
-    <Compile Include="Diff\IRevisionDiffSource.cs" />
-    <Compile Include="Diff\StashedChangesDiffSource.cs" />
-    <Compile Include="Hooks\Hooks.cs" />
-    <Compile Include="IGitRepositoryProvider.cs" />
-    <Compile Include="Log\PathLogSource.cs" />
-    <Compile Include="Configuration\ConfigurationFile.cs" />
-    <Compile Include="ObjectFactories.cs" />
-    <Compile Include="RefrenceChange.cs" />
-    <Compile Include="RefsDiff.cs" />
-    <Compile Include="RefsState.cs" />
-    <Compile Include="Remotes\RemotesUtility.cs" />
-    <Compile Include="Revision\RevisionParentsCollection.cs" />
-    <Compile Include="Revision\RevisionReferencesCollection.cs" />
-    <Compile Include="Tree\CommitResult.cs" />
-    <Compile Include="Tree\CommitResultEventArgs.cs" />
-    <Compile Include="Tree\TreeCommit.cs" />
-    <Compile Include="Tree\RevisionTreeSource.cs" />
-    <Compile Include="Tree\TreeSourceBase.cs" />
-    <Compile Include="Diff\DiffSourceBase.cs" />
-    <Compile Include="Diff\RevisionChangesDiffSource.cs" />
-    <Compile Include="Diff\RevisionCompareDiffSource.cs" />
-    <Compile Include="Diff\DiffOptions.cs" />
-    <Compile Include="Diff\IndexChangesDiffSource.cs" />
-    <Compile Include="Log\LogSourceBase.cs" />
-    <Compile Include="Log\LogOptions.cs" />
-    <Compile Include="Log\LogReferenceFilter.cs" />
-    <Compile Include="Log\RepositoryLogSource.cs" />
-    <Compile Include="Log\RevisionLog.cs" />
-    <Compile Include="MergeStrategy.cs" />
-    <Compile Include="References\BranchBase.cs" />
-    <Compile Include="References\Head.cs" />
-    <Compile Include="References\Reference.cs" />
-    <Compile Include="References\Reflog.cs" />
-    <Compile Include="References\ReflogRecord.cs" />
-    <Compile Include="References\RemoteBranch.cs" />
-    <Compile Include="Monitor\RepositoryNotifications.cs" />
-    <Compile Include="RevisionCache.cs" />
-    <Compile Include="Patch\PatchFromFile.cs" />
-    <Compile Include="Patch\IPatchFile.cs" />
-    <Compile Include="Patch\IPatchSource.cs" />
-    <Compile Include="Patch\PatchFromString.cs" />
-    <Compile Include="Configuration\KnownConfigParameter.cs" />
-    <Compile Include="Hooks\Hook.cs" />
-    <Compile Include="Hooks\HooksCollection.cs" />
-    <Compile Include="Diff\IDiffSource.cs" />
-    <Compile Include="MergeTool.cs" />
-    <Compile Include="Notes\Note.cs" />
-    <Compile Include="Notes\NotesCollection.cs" />
-    <Compile Include="References\RefsCollection.cs" />
-    <Compile Include="References\RefsHeadsCollection.cs" />
-    <Compile Include="References\RefsRemotesCollection.cs" />
-    <Compile Include="Remotes\BaseRemoteReference.cs" />
-    <Compile Include="Remotes\IRemoteReference.cs" />
-    <Compile Include="Remotes\RemoteRepositoryBranch.cs" />
-    <Compile Include="Remotes\RemoteReferenceEventArgs.cs" />
-    <Compile Include="Remotes\RemoteReferencesCollection.cs" />
-    <Compile Include="Remotes\RemoteRepositoryTag.cs" />
-    <Compile Include="GitObjectsCollection.cs" />
-    <Compile Include="RepositoryState.cs" />
-    <Compile Include="Revision\DynamicRevisionPointer.cs" />
-    <Compile Include="Log\ILogSource.cs" />
-    <Compile Include="Revision\NowherePointer.cs" />
-    <Compile Include="Tree\ITreeSource.cs" />
-    <Compile Include="Tree\TreeItemType.cs" />
-    <Compile Include="Monitor\Notifications.cs" />
-    <Compile Include="Monitor\RepositoryMonitor.cs" />
-    <Compile Include="Users\UsersCollection.cs" />
-    <Compile Include="Configuration\ConfigParameter.cs" />
-    <Compile Include="Configuration\ConfigParametersCollection.cs" />
-    <Compile Include="Remotes\RemotesCollection.cs" />
-    <Compile Include="Revision\RevisionPointerExtensions.cs" />
-    <Compile Include="Stash\StashedStatesCollection.cs" />
-    <Compile Include="Submodules\Submodule.cs" />
-    <Compile Include="Submodules\SubmodulesCollection.cs" />
-    <Compile Include="References\RefsTagsCollection.cs" />
-    <Compile Include="Tree\TreeFile.cs" />
-    <Compile Include="Tree\TreeDirectory.cs" />
-    <Compile Include="Tree\TreeItem.cs" />
-    <Compile Include="BaseObjects.cs" />
-    <Compile Include="References\Branch.cs" />
-    <Compile Include="Users\User.cs" />
-    <Compile Include="EventArgs.cs" />
-    <Compile Include="IRevisionPointer.cs" />
-    <Compile Include="Revision\StaticRevisionPointer.cs" />
-    <Compile Include="Stash\StashedState.cs" />
-    <Compile Include="Tree\Status.cs" />
-    <Compile Include="Remotes\Remote.cs" />
-    <Compile Include="Repository.cs" />
-    <Compile Include="Revision\Revision.cs" />
-    <Compile Include="References\Tag.cs" />
-    <Compile Include="Tree\Tree.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
+    <Compile Update="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Include="Verify.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Properties\Resources.resx">
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="..\common\key.snk">
-      <Link>Properties\key.snk</Link>
-    </None>
-    <None Include="References\References.cd" />
+    <None Remove="Shared\.gitignore" />
+    <Compile Include="..\common\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
+    <Compile Include="..\shared\Debug.cs" Link="Shared\Debug.cs" />
+    <Compile Include="..\shared\Verify.cs" Link="Shared\Verify.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj" />
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -30,7 +30,6 @@ namespace gitter.Framework
 
 		private CancellationTokenSource _cancellationTokenSource;
 		private T _data;
-		private bool _isDisposed;
 
 		#endregion
 
@@ -58,10 +57,7 @@ namespace gitter.Framework
 
 		#region Properties
 
-		protected TaskScheduler Scheduler
-		{
-			get;
-		}
+		protected TaskScheduler Scheduler { get; }
 
 		public T Data
 		{
@@ -73,11 +69,7 @@ namespace gitter.Framework
 			}
 		}
 
-		public System.IProgress<OperationProgress> Progress
-		{
-			get;
-			set;
-		}
+		public IProgress<OperationProgress> Progress { get; set; }
 
 		#endregion
 
@@ -137,11 +129,7 @@ namespace gitter.Framework
 
 		#region IDisposable Members
 
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		protected virtual void Dispose(bool disposing)
 		{

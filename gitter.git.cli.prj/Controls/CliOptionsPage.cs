@@ -229,12 +229,8 @@ namespace gitter.Git
 						{
 							version = GitProcess.CheckVersion(path);
 						}
-						catch(Exception exc)
+						catch(Exception exc) when (!exc.IsCritical())
 						{
-							if(exc.IsCritical())
-							{
-								throw;
-							}
 						}
 						if(version != null)
 						{
@@ -250,12 +246,8 @@ namespace gitter.Git
 						_lblVersion.Text = Resources.StrlUnavailable.SurroundWith("<", ">");
 					}
 				}
-				catch(Exception exc)
+				catch(Exception exc) when (!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 					_lblVersion.Text = Resources.StrlUnavailable.SurroundWith("<", ">");
 				}
 			}

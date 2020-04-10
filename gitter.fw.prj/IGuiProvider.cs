@@ -29,11 +29,11 @@ namespace gitter.Framework
 	/// <summary>Interface for gui provider/builder.</summary>
 	public interface IGuiProvider
 	{
-		/// <summary>Build gui inside supplied <paramref name="IWorkingEnvironment"/>.</summary>
+		/// <summary>Build gui inside supplied <paramref name="environment"/>.</summary>
 		/// <param name="environment">Environment for gui elements hosting.</param>
 		void AttachToEnvironment(IWorkingEnvironment environment);
 
-		/// <summary>Remove gui, created by this provider from <paramref name="IWorkingEnvironment"/>.</summary>
+		/// <summary>Remove gui, created by this provider from <paramref name="environment"/>.</summary>
 		/// <param name="environment">Environment for gui elements hosting.</param>
 		void DetachFromEnvironment(IWorkingEnvironment environment);
 

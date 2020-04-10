@@ -174,8 +174,7 @@ namespace gitter.Git
 
 		public bool Execute()
 		{
-			var executableDialog = _gitAccessorOptions as IExecutableDialog;
-			if(executableDialog != null)
+			if(_gitAccessorOptions is IExecutableDialog executableDialog)
 			{
 				if(executableDialog.Execute())
 				{

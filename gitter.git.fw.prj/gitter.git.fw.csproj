@@ -1,258 +1,46 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C2307D21-25F9-47F8-901E-99B07AB66C39}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>gitter.Git.AccessLayer</RootNamespace>
+    <TargetFrameworks>net48</TargetFrameworks>
     <AssemblyName>gitter.git.fw</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <RootNamespace>gitter.Git.AccessLayer</RootNamespace>
+    <LangVersion>8.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\common\CommonAssemblyInfo.cs">
-      <Link>Properties\CommonAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\shared\Debug.cs">
-      <Link>Shared\Debug.cs</Link>
-    </Compile>
-    <Compile Include="..\shared\Verify.cs">
-      <Link>Shared\Verify.cs</Link>
-    </Compile>
-    <Compile Include="Blame\BlameCommit.cs" />
-    <Compile Include="Blame\BlameFile.cs" />
-    <Compile Include="Blame\BlameHunk.cs" />
-    <Compile Include="Blame\BlameLine.cs" />
-    <Compile Include="Data\ObjectCountData.cs" />
-    <Compile Include="Diff\DiffFileEventArgs.cs" />
-    <Compile Include="Enums\RevertControl.cs" />
-    <Compile Include="Data\BlobData.cs" />
-    <Compile Include="Data\BranchData.cs" />
-    <Compile Include="Data\BranchesData.cs" />
-    <Compile Include="Data\ConfigParameterData.cs" />
-    <Compile Include="Data\TreeCommitData.cs" />
-    <Compile Include="Data\RevisionGraphData.cs" />
-    <Compile Include="Diff\Diff.cs" />
-    <Compile Include="Diff\DiffColumnHeader.cs" />
-    <Compile Include="Diff\DiffFile.cs" />
-    <Compile Include="Diff\DiffHunk.cs" />
-    <Compile Include="Diff\DiffLine.cs" />
-    <Compile Include="Diff\DiffStats.cs" />
-    <Compile Include="Enums\CherryPickControl.cs" />
-    <Compile Include="Enums\ConfigFile.cs" />
-    <Compile Include="Enums\DiffColumnAction.cs" />
-    <Compile Include="Enums\DiffLineState.cs" />
-    <Compile Include="Enums\DiffType.cs" />
-    <Compile Include="Enums\FileStatus.cs" />
-    <Compile Include="Enums\MergeSide.cs" />
-    <Compile Include="Data\NoteData.cs" />
-    <Compile Include="Data\PushResult.cs" />
-    <Compile Include="Enums\MergeStrategy.cs" />
-    <Compile Include="Enums\PushResultType.cs" />
-    <Compile Include="Data\ReferencesData.cs" />
-    <Compile Include="Enums\ReferenceType.cs" />
-    <Compile Include="Data\ReflogRecordData.cs" />
-    <Compile Include="Data\RemoteBranchData.cs" />
-    <Compile Include="Data\RemoteData.cs" />
-    <Compile Include="Data\RemoteReferenceData.cs" />
-    <Compile Include="Enums\ResetMode.cs" />
-    <Compile Include="Data\RevisionData.cs" />
-    <Compile Include="Enums\RevisionField.cs" />
-    <Compile Include="Data\StashedStateData.cs" />
-    <Compile Include="Data\StatusData.cs" />
-    <Compile Include="Data\SubmoduleData.cs" />
-    <Compile Include="Data\SymbolicReferenceData.cs" />
-    <Compile Include="Data\TagData.cs" />
-    <Compile Include="Enums\StagedStatus.cs" />
-    <Compile Include="Enums\SubmoduleUpdateMode.cs" />
-    <Compile Include="Enums\TagFetchMode.cs" />
-    <Compile Include="Enums\TagType.cs" />
-    <Compile Include="Data\TreeContentData.cs" />
-    <Compile Include="Enums\TreeContentType.cs" />
-    <Compile Include="Data\TreeData.cs" />
-    <Compile Include="Data\TreeDirectoryData.cs" />
-    <Compile Include="Data\TreeFileData.cs" />
-    <Compile Include="Data\TreeItemData.cs" />
-    <Compile Include="Data\UserData.cs" />
-    <Compile Include="Enums\ConflictResolution.cs" />
-    <Compile Include="Enums\ConflictType.cs" />
-    <Compile Include="Features\GitFeature.cs" />
-    <Compile Include="Features\GitFeatures.cs" />
-    <Compile Include="Features\VersionFeature.cs" />
-    <Compile Include="GitConstants.cs" />
-    <Compile Include="GitEnvironment.cs" />
-    <Compile Include="GitExceptions.cs" />
-    <Compile Include="GitUtils.cs" />
-    <Compile Include="Hash.cs" />
-    <Compile Include="HashStringCache.cs" />
-    <Compile Include="IConfigAccessor.cs" />
-    <Compile Include="IGitAccessor.cs" />
-    <Compile Include="IGitAccessorProvider.cs" />
-    <Compile Include="IGitAction.cs" />
-    <Compile Include="IGitFunction.cs" />
-    <Compile Include="IGitRepository.cs" />
-    <Compile Include="IRepositoryAccessor.cs" />
-    <Compile Include="IRepositoryMonitor.cs" />
-    <Compile Include="Parameters\ApplyPatchParameters.cs" />
-    <Compile Include="Parameters\ApplyPatchTo.cs" />
-    <Compile Include="Parameters\ArchiveParameters.cs" />
-    <Compile Include="Parameters\BaseQueryDiffParameters.cs" />
-    <Compile Include="Parameters\Branch\BranchQueryMode.cs" />
-    <Compile Include="Parameters\Branch\BranchTrackingMode.cs" />
-    <Compile Include="Parameters\Branch\CreateBranchParameters.cs" />
-    <Compile Include="Parameters\Branch\DeleteBranchParameters.cs" />
-    <Compile Include="Parameters\Branch\QueryBranchesParameters.cs" />
-    <Compile Include="Parameters\Branch\QueryBranchParameters.cs" />
-    <Compile Include="Parameters\Branch\QueryBranchRestriction.cs" />
-    <Compile Include="Parameters\Branch\RenameBranchParameters.cs" />
-    <Compile Include="Parameters\Branch\ResetBranchParameters.cs" />
-    <Compile Include="Parameters\CheckoutParameters.cs" />
-    <Compile Include="Parameters\CherryPickParameters.cs" />
-    <Compile Include="Parameters\CloneRepositoryParameters.cs" />
-    <Compile Include="Parameters\Config\AddConfigValueParameters.cs" />
-    <Compile Include="Parameters\Config\BaseConfigParameters.cs" />
-    <Compile Include="Parameters\Config\DeleteConfigSectionParameters.cs" />
-    <Compile Include="Parameters\Config\QueryConfigParameterParameters.cs" />
-    <Compile Include="Parameters\Config\QueryConfigParameters.cs" />
-    <Compile Include="Parameters\Config\RenameConfigSectionParameters.cs" />
-    <Compile Include="Parameters\Config\SetConfigValueParameters.cs" />
-    <Compile Include="Parameters\Config\UnsetConfigValueParameters.cs" />
-    <Compile Include="Parameters\CountObjectsParameters.cs" />
-    <Compile Include="Parameters\DereferenceParameters.cs" />
-    <Compile Include="Parameters\DescribeParameters.cs" />
-    <Compile Include="Parameters\FormatMergeMessageParameters.cs" />
-    <Compile Include="Parameters\GarbageCollectParameters.cs" />
-    <Compile Include="Enums\AddFilesMode.cs" />
-    <Compile Include="Parameters\Index\AddFilesParameters.cs" />
-    <Compile Include="Enums\CleanFilesMode.cs" />
-    <Compile Include="Parameters\Index\CleanFilesParameters.cs" />
-    <Compile Include="Parameters\Index\CommitParameters.cs" />
-    <Compile Include="Parameters\Index\QueryStatusParameters.cs" />
-    <Compile Include="Parameters\Index\RemoveFilesParameters.cs" />
-    <Compile Include="Parameters\Index\ResetFilesParameters.cs" />
-    <Compile Include="Parameters\Index\RunMergeToolParameters.cs" />
-    <Compile Include="Enums\StatusIgnoreSubmodulesMode.cs" />
-    <Compile Include="Enums\StatusUntrackedFilesMode.cs" />
-    <Compile Include="Parameters\InitRepositoryParameters.cs" />
-    <Compile Include="Parameters\MergeParameters.cs" />
-    <Compile Include="Parameters\Notes\AppendNoteParameters.cs" />
-    <Compile Include="Parameters\Notes\PruneNotesParameters.cs" />
-    <Compile Include="Parameters\Notes\QueryNotesParameters.cs" />
-    <Compile Include="Parameters\QueryBlameParameters.cs" />
-    <Compile Include="Parameters\QueryDiffParameters.cs" />
-    <Compile Include="Parameters\QueryObjectsParameters.cs" />
-    <Compile Include="Parameters\QueryReferencesParameters.cs" />
-    <Compile Include="Parameters\QueryReflogParameters.cs" />
-    <Compile Include="Parameters\QueryRevisionDiffParameters.cs" />
-    <Compile Include="Parameters\QueryRevisionParameters.cs" />
-    <Compile Include="Parameters\QueryRevisionsParameters.cs" />
-    <Compile Include="Parameters\QuerySymbolicReferenceParameters.cs" />
-    <Compile Include="Parameters\QueryUsersParameters.cs" />
-    <Compile Include="Enums\RebaseControl.cs" />
-    <Compile Include="Parameters\RebaseParameters.cs" />
-    <Compile Include="Parameters\Remote\AddRemoteParameters.cs" />
-    <Compile Include="Parameters\Remote\FetchParameters.cs" />
-    <Compile Include="Parameters\Remote\PruneRemoteParameters.cs" />
-    <Compile Include="Parameters\Remote\PullParameters.cs" />
-    <Compile Include="Enums\PushMode.cs" />
-    <Compile Include="Parameters\Remote\PushParameters.cs" />
-    <Compile Include="Parameters\Remote\QueryRemoteParameters.cs" />
-    <Compile Include="Parameters\Remote\QueryRemoteReferencesParameters.cs" />
-    <Compile Include="Parameters\Remote\QueryRemotesParameters.cs" />
-    <Compile Include="Parameters\Remote\RemoveRemoteParameters.cs" />
-    <Compile Include="Parameters\Remote\RemoveRemoteReferencesParameters.cs" />
-    <Compile Include="Parameters\Remote\RenameRemoteParameters.cs" />
-    <Compile Include="Parameters\ResetParameters.cs" />
-    <Compile Include="Parameters\RevertParameters.cs" />
-    <Compile Include="Enums\RevisionMergesQueryMode.cs" />
-    <Compile Include="Enums\RevisionQueryOrder.cs" />
-    <Compile Include="Parameters\SimilaritySpecification.cs" />
-    <Compile Include="Parameters\Stash\QueryStashParameters.cs" />
-    <Compile Include="Parameters\Stash\QueryStashTopParameters.cs" />
-    <Compile Include="Parameters\Stash\StashApplyParameters.cs" />
-    <Compile Include="Parameters\Stash\StashClearParameters.cs" />
-    <Compile Include="Parameters\Stash\StashDropParameters.cs" />
-    <Compile Include="Parameters\Stash\StashPopParameters.cs" />
-    <Compile Include="Parameters\Stash\StashSaveParameters.cs" />
-    <Compile Include="Parameters\Stash\StashToBranchParameters.cs" />
-    <Compile Include="Parameters\Submodule\AddSubmoduleParameters.cs" />
-    <Compile Include="Parameters\Submodule\SubmoduleUpdateParameters.cs" />
-    <Compile Include="Parameters\Tag\CreateTagParameters.cs" />
-    <Compile Include="Parameters\Tag\DeleteTagParameters.cs" />
-    <Compile Include="Parameters\Tag\QueryTagMessageParameters.cs" />
-    <Compile Include="Parameters\Tag\QueryTagParameters.cs" />
-    <Compile Include="Parameters\Tag\QueryTagsParameters.cs" />
-    <Compile Include="Parameters\Tag\VerifyTagsParameters.cs" />
-    <Compile Include="Enums\CheckoutFileMode.cs" />
-    <Compile Include="Parameters\Tree\CheckoutFilesParameters.cs" />
-    <Compile Include="Parameters\Tree\QueryBlobBytesParameters.cs" />
-    <Compile Include="Parameters\Tree\QueryTreeContentParameters.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
+    <Compile Update="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\common\key.snk">
-      <Link>Properties\key.snk</Link>
-    </None>
-    <None Include="AccessLayer.cd" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
-      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
-      <Name>gitter.fw</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  
+  <ItemGroup>
+    <None Remove="Shared\.gitignore" />
+    <Compile Include="..\common\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
+    <Compile Include="..\shared\Debug.cs" Link="Shared\Debug.cs" />
+    <Compile Include="..\shared\Verify.cs" Link="Shared\Verify.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
+  </ItemGroup>
+
 </Project>

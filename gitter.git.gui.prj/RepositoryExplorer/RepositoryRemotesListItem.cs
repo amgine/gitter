@@ -36,7 +36,6 @@ namespace gitter.Git.Gui
 	{
 		#region Data
 
-		private readonly IWorkingEnvironment _environment;
 		private RemoteListBinding _binding;
 
 		#endregion
@@ -48,17 +47,14 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
-			_environment = environment;
+			WorkingEnvironment = environment;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private IWorkingEnvironment WorkingEnvironment
-		{
-			get { return _environment; }
-		}
+		private IWorkingEnvironment WorkingEnvironment { get; }
 
 		#endregion
 

@@ -61,9 +61,7 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		protected virtual CommandExecutionFlags GetExecutionFlags()
-		{
-			return CommandExecutionFlags.None;
-		}
+			=> CommandExecutionFlags.None;
 
 		#endregion
 
@@ -95,31 +93,15 @@ namespace gitter.Git.AccessLayer.CLI
 			var stdOutReceiver = new AsyncTextParser(parser);
 			var stdErrReceiver = new AsyncTextReader();
 
-			var exitCode = await _commandExecutor
-				.ExecuteCommandAsync(
-					command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken);
+			var processExitCode = await _commandExecutor
+				.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 
-			if(exitCode != 0)
+			if(processExitCode != 0)
 			{
-				HandleNonZeroExitCode(stdErrReceiver, exitCode);
+				HandleNonZeroExitCode(stdErrReceiver, processExitCode);
 			}
 			return parser.GetResult();
-
-			//return _commandExecutor
-			//	.ExecuteCommandAsync(
-			//		command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken)
-			//	.ContinueWith(task =>
-			//	{
-			//		int exitCode = TaskUtility.UnwrapResult(task);
-			//		if(exitCode != 0)
-			//		{
-			//			HandleNonZeroExitCode(stdErrReceiver, exitCode);
-			//		}
-			//		return parser.GetResult();
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#endregion

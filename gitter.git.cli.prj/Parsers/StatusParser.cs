@@ -166,27 +166,17 @@ namespace gitter.Git.AccessLayer.CLI
 		#region Methods
 
 		private static FileStatus CharToFileStatus(char c)
-		{
-			switch(c)
+			=> c switch
 			{
-				case 'M':
-					return FileStatus.Modified;
-				case 'A':
-					return FileStatus.Added;
-				case 'D':
-					return FileStatus.Removed;
-				case '?':
-					return FileStatus.Added;
-				case 'U':
-					return FileStatus.Unmerged;
-				case ' ':
-					return FileStatus.Unknown;
-				case '!':
-					return FileStatus.Ignored;
-				default:
-					return FileStatus.Unknown;
-			}
-		}
+				'M' => FileStatus.Modified,
+				'A' => FileStatus.Added,
+				'D' => FileStatus.Removed,
+				'?' => FileStatus.Added,
+				'U' => FileStatus.Unmerged,
+				' ' => FileStatus.Unknown,
+				'!' => FileStatus.Ignored,
+				_   => FileStatus.Unknown,
+			};
 
 		private static ConflictType GetConflictType(char x, char y)
 		{

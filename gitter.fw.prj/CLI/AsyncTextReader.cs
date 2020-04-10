@@ -66,10 +66,7 @@ namespace gitter.Framework.CLI
 
 		/// <summary>Gets a value indicating whether this instance is initialized.</summary>
 		/// <value><c>true</c> if this instance is initialized; otherwise, <c>false</c>.</value>
-		public bool IsInitialized
-		{
-			get { return _stream != null; }
-		}
+		public bool IsInitialized => _stream != null;
 
 		/// <summary>Initializes output reader.</summary>
 		/// <param name="process">Process to read from.</param>
@@ -136,34 +133,23 @@ namespace gitter.Framework.CLI
 		#region Public
 
 		/// <summary>Returns the length of composed text.</summary>
-		public int Length
-		{
-			get { return _stringBuilder.Length; }
-		}
+		public int Length => _stringBuilder.Length;
 
 		/// <summary>Returns character at the specified position.</summary>
 		/// <param name="index">Characted index.</param>
 		/// <returns>Characted at the specified position.</returns>
-		public char this[int index]
-		{
-			get { return _stringBuilder[index]; }
-		}
+		public char this[int index] => _stringBuilder[index];
 
 		/// <summary>Returns composed text.</summary>
 		/// <returns>Composed text.</returns>
-		public string GetText()
-		{
-			return _stringBuilder.ToString();
-		}
+		public string GetText() => _stringBuilder.ToString();
 
 		/// <summary>Returns composed text.</summary>
 		/// <param name="startIndex">Index of the first character.</param>
 		/// <param name="length">Length of the returned string.</param>
 		/// <returns>Composed text.</returns>
 		public string GetText(int startIndex, int length)
-		{
-			return _stringBuilder.ToString(startIndex, length);
-		}
+			=> _stringBuilder.ToString(startIndex, length);
 
 		/// <summary>
 		/// Copies the characters from a specified segment of this instance to a specified

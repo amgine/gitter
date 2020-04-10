@@ -55,9 +55,7 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		protected override IParser<IList<RevisionData>> CreateParser()
-		{
-			return new LogParser();
-		}
+			=> new LogParser();
 
 		#endregion
 	}

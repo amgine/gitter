@@ -41,7 +41,7 @@ namespace gitter.Git.AccessLayer.CLI
 		public QueryTagMessageImpl(ICommandExecutor commandExecutor, Func<QueryTagMessageParameters, Command> commandFactory)
 		{
 			_commandExecutor = commandExecutor;
-			_commandFactory = commandFactory;
+			_commandFactory  = commandFactory;
 		}
 
 		#endregion
@@ -105,19 +105,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 			var command = _commandFactory(parameters);
 			var output = await _commandExecutor
-				.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken);
+				.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 			return ParseTagMessage(command, output);
-			//return _commandExecutor
-			//	.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		var output = TaskUtility.UnwrapResult(t);
-			//		return ParseTagMessage(command, output);
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#endregion

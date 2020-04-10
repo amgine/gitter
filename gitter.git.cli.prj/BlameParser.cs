@@ -143,18 +143,18 @@ namespace gitter.Git.AccessLayer.CLI
 				return commit;
 			}
 
-			var author			= ReadStringValue(AuthorHeader);
-			var authorMail		= ReadStringValue(AuthorMailHeader);
-			var authorTime		= ReadDateValue(AuthorTimeHeader);
-			var authorTZ		= ReadStringValue(AuthorTimeZoneHeader);
-			var committer		= ReadStringValue(CommitterHeader);
-			var committerMail	= ReadStringValue(CommitterMailHeader);
-			var committerTime	= ReadDateValue(CommitterTimeHeader);
-			var committerTZ		= ReadStringValue(CommitterTimeZoneHeader);
-			var summary			= ReadStringValue(SummaryHeader);
-			var isBoundary		= ReadBoundaryValue(); /* optional */
-			var previous		= ReadPreviousValue(); /* optional */
-			var fileName		= ReadStringValue(FileNameHeader);
+			var author        = ReadStringValue(AuthorHeader);
+			var authorMail    = ReadStringValue(AuthorMailHeader);
+			var authorTime    = ReadDateValue(AuthorTimeHeader);
+			var authorTZ      = ReadStringValue(AuthorTimeZoneHeader);
+			var committer     = ReadStringValue(CommitterHeader);
+			var committerMail = ReadStringValue(CommitterMailHeader);
+			var committerTime = ReadDateValue(CommitterTimeHeader);
+			var committerTZ   = ReadStringValue(CommitterTimeZoneHeader);
+			var summary       = ReadStringValue(SummaryHeader);
+			var isBoundary    = ReadBoundaryValue(); /* optional */
+			var previous      = ReadPreviousValue(); /* optional */
+			var fileName      = ReadStringValue(FileNameHeader);
 
 			commit = new BlameCommit(hash,
 				author, authorMail, authorTime, authorTZ,

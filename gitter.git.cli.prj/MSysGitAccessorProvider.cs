@@ -28,16 +28,10 @@ namespace gitter.Git.AccessLayer.CLI
 		#region Properties
 
 		/// <summary>Returns string used to identify git accessor.</summary>
-		public string Name
-		{
-			get { return "MSysGit"; }
-		}
+		public string Name => "MSysGit";
 
 		/// <summary>Returns string to represent accessor in GUI.</summary>
-		public string DisplayName
-		{
-			get { return Resources.StrProviderName; }
-		}
+		public string DisplayName => Resources.StrProviderName;
 
 		#endregion
 
@@ -45,10 +39,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		/// <summary>Creates git accessor.</summary>
 		/// <returns>Created git accessor.</returns>
-		public IGitAccessor CreateAccessor()
-		{
-			return new GitCLI(this);
-		}
+		public IGitAccessor CreateAccessor() => new GitCLI(this);
 
 		#endregion
 	}

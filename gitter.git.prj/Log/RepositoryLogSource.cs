@@ -55,25 +55,11 @@ namespace gitter.Git
 				var parameters = options.GetLogParameters();
 				var revisionData = await Repository
 					.Accessor
-					.QueryRevisions.InvokeAsync(parameters, progress, cancellationToken);
+					.QueryRevisions
+					.InvokeAsync(parameters, progress, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				var revisions = Repository.Revisions.Resolve(revisionData);
 				return new RevisionLog(Repository, revisions);
-				//return Repository
-				//	.Accessor
-				//	.QueryRevisions.InvokeAsync(parameters, progress, cancellationToken)
-				//	.ContinueWith(
-				//		t =>
-				//		{
-				//			progress?.Report(OperationProgress.Completed);
-				//			var revisionData = TaskUtility.UnwrapResult(t);
-				//			var revisions    = Repository.Revisions.Resolve(revisionData);
-				//			var revisionLog  = new RevisionLog(Repository, revisions);
-
-				//			return revisionLog;
-				//		},
-				//		cancellationToken,
-				//		TaskContinuationOptions.ExecuteSynchronously,
-				//		TaskScheduler.Default);
 			}
 		}
 	}
