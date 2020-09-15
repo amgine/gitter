@@ -21,7 +21,6 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
@@ -39,18 +38,12 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		protected override SortOrder GetSortOrder()
-		{
-			return SortOrder.Descending;
-		}
+			=> SortOrder.Descending;
 
 		protected override Comparison<CustomListBoxItem> GetComparison()
-		{
-			return UserListItem.CompareByName;
-		}
+			=> UserListItem.CompareByName;
 
 		protected override CustomListBoxItem<User> RepresentObject(User obj)
-		{
-			return new UserListItem(obj);
-		}
+			=> new UserListItem(obj);
 	}
 }

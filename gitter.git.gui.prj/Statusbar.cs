@@ -27,11 +27,9 @@ namespace gitter.Git.Gui
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
 
 	using gitter.Git.Gui.Controls;
-	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 

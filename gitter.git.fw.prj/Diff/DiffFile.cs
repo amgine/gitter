@@ -25,11 +25,11 @@ namespace gitter.Git
 	using System.Collections.Generic;
 
 	/// <summary>Represents changes made to a file.</summary>
-	public sealed class DiffFile : IEnumerable<DiffHunk>, ICloneable
+	public sealed class DiffFile : IReadOnlyList<DiffHunk>, ICloneable
 	{
 		#region Data
 
-		private readonly IList<DiffHunk> _hunks;
+		private readonly IReadOnlyList<DiffHunk> _hunks;
 
 		#endregion
 
@@ -49,7 +49,7 @@ namespace gitter.Git
 		public DiffFile(
 			string oldIndex, string newIndex, int oldMode, int newMode,
 			string sourceFile, string targetFile,
-			FileStatus status, IList<DiffHunk> hunks, bool isBinary, DiffStats stats)
+			FileStatus status, IReadOnlyList<DiffHunk> hunks, bool isBinary, DiffStats stats)
 		{
 			Verify.Argument.IsNotNull(hunks, nameof(hunks));
 			Verify.Argument.IsNotNull(stats, nameof(stats));
@@ -112,6 +112,8 @@ namespace gitter.Git
 		}
 
 		public DiffHunk this[int index] => _hunks[index];
+
+		int IReadOnlyCollection<DiffHunk>.Count => _hunks.Count;
 
 		public int HunkCount => _hunks.Count;
 

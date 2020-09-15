@@ -32,8 +32,6 @@ namespace gitter.Git.Gui.Controls
 	{
 		#region Data
 
-		private readonly IDiffSource _diffSource;
-		private readonly DiffViewer _diffViewer;
 		private DiffOptions _diffOptions;
 		private readonly List<FileDiffPanel> _allDiffPanels;
 		private readonly FlowProgressPanel _progressPanel;
@@ -49,8 +47,8 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(diffViewer, nameof(diffViewer));
 			Verify.Argument.IsNotNull(diffOptions, nameof(diffOptions));
 
-			_diffSource = diffSource;
-			_diffViewer = diffViewer;
+			DiffSource = diffSource;
+			DiffViewer = diffViewer;
 			_diffOptions = diffOptions;
 
 			_allDiffPanels = new List<FileDiffPanel>();
@@ -62,15 +60,9 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public IDiffSource DiffSource
-		{
-			get { return _diffSource; }
-		}
+		public IDiffSource DiffSource { get; }
 
-		public DiffViewer DiffViewer
-		{
-			get { return _diffViewer; }
-		}
+		public DiffViewer DiffViewer { get; }
 
 		public DiffOptions DiffOptions
 		{

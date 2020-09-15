@@ -45,7 +45,6 @@ namespace gitter.Framework
 
 		public AsyncDataBinding()
 		{
-			Scheduler = TaskScheduler.FromCurrentSynchronizationContext();
 		}
 
 		~AsyncDataBinding()
@@ -56,8 +55,6 @@ namespace gitter.Framework
 		#endregion
 
 		#region Properties
-
-		protected TaskScheduler Scheduler { get; }
 
 		public T Data
 		{
@@ -81,9 +78,11 @@ namespace gitter.Framework
 
 		protected abstract void OnFetchFailed(Exception exception);
 
-		public void ReloadData()
+		public async void ReloadData()
 		{
-			var cts = new CancellationTokenSource();
+			if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+			using var cts = new CancellationTokenSource();
 			var currentCts = Interlocked.Exchange(ref _cancellationTokenSource, cts);
 			if(currentCts != null)
 			{
@@ -96,33 +95,24 @@ namespace gitter.Framework
 				}
 			}
 			var progress = Progress;
-			FetchDataAsync(progress, cts.Token).ContinueWith(t =>
-				{
-					cts.Dispose();
-					if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) != cts)
-					{
-						return;
-					}
-					if(t.IsCanceled)
-					{
-						return;
-					}
-					else if(t.IsFaulted)
-					{
-						Data = default;
-						OnFetchFailed(TaskUtility.UnwrapException(t.Exception));
-					}
-					else if(t.IsCompleted)
-					{
-						var data = t.Result;
-						progress?.Report(OperationProgress.Completed);
-						Data = data;
-						OnFetchCompleted(data);
-					}
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.ExecuteSynchronously,
-				Scheduler);
+			T data;
+			try
+			{
+				data = await FetchDataAsync(progress, cts.Token);
+			}
+			catch(OperationCanceledException)
+			{
+				return;
+			}
+			catch(Exception exc)
+			{
+				Data = default;
+				OnFetchFailed(exc);
+				return;
+			}
+			progress?.Report(OperationProgress.Completed);
+			Data = data;
+			OnFetchCompleted(data);
 		}
 
 		#endregion

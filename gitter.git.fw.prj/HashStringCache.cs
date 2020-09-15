@@ -25,7 +25,7 @@ namespace gitter.Git
 	public sealed class HashStringCache
 	{
 		private readonly Func<Hash> _getHash;
-		private readonly WeakReference _ref;
+		private readonly WeakReference<string> _ref;
 		private int _length;
 
 		public HashStringCache(Func<Hash> getHash)
@@ -33,7 +33,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(getHash, nameof(getHash));
 
 			_getHash = getHash;
-			_ref     = new WeakReference(null);
+			_ref     = new WeakReference<string>(null);
 			_length  = -1;
 		}
 
@@ -41,7 +41,7 @@ namespace gitter.Git
 		{
 			var hash = _getHash();
 			var value = length == 40 ? hash.ToString() : hash.ToString(length);
-			_ref.Target = value;
+			_ref.SetTarget(value);
 			return value;
 		}
 
@@ -56,8 +56,9 @@ namespace gitter.Git
 				_length = length;
 				return CreateString(length);
 			}
-			var value = (string)_ref.Target;
-			return value != null ? value : CreateString(length);
+			return _ref.TryGetTarget(out var value)
+				? value
+				: CreateString(length);
 		}
 	}
 }

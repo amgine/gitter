@@ -46,7 +46,7 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>Create <see cref="RevertParameters"/>.</summary>
 		/// <param name="revisions">Revisions to revert.</param>
-		public RevertParameters(IList<string> revisions)
+		public RevertParameters(IReadOnlyList<string> revisions)
 		{
 			Revisions = revisions;
 		}
@@ -57,22 +57,22 @@ namespace gitter.Git.AccessLayer
 		public RevertParameters(string revision, bool noCommit)
 		{
 			Revisions = new string[] { revision };
-			NoCommit = noCommit;
+			NoCommit  = noCommit;
 		}
 
 		/// <summary>Create <see cref="RevertParameters"/>.</summary>
 		/// <param name="revisions">Revisions to revert.</param>
 		/// <param name="noCommit">>Don't create commit.</param>
-		public RevertParameters(IList<string> revisions, bool noCommit)
+		public RevertParameters(IReadOnlyList<string> revisions, bool noCommit)
 		{
 			Revisions = revisions;
-			NoCommit = noCommit;
+			NoCommit  = noCommit;
 		}
 
 		public RevertControl? Control { get; set; }
 
 		/// <summary>Revisions to revert.</summary>
-		public IList<string> Revisions { get; set; }
+		public IReadOnlyList<string> Revisions { get; set; }
 
 		/// <summary>Don't create commit.</summary>
 		public bool NoCommit { get; set; }

@@ -49,18 +49,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public static int CompareByName(CustomListBoxItem item1, CustomListBoxItem item2)
-		{
-			var userListItem1 = item1 as UserListItem;
-			var userListItem2 = item2 as UserListItem;
-			if(userListItem1 != null && userListItem2 != null)
-			{
-				return CompareByName(userListItem1, userListItem2);
-			}
-			else
-			{
-				return 0;
-			}
-		}
+			=> item1 is UserListItem userListItem1 && item2 is UserListItem userListItem2
+				? CompareByName(userListItem1, userListItem2)
+				: 0;
 
 		public static int CompareByEmail(UserListItem item1, UserListItem item2)
 		{
@@ -70,18 +61,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public static int CompareByEmail(CustomListBoxItem item1, CustomListBoxItem item2)
-		{
-			var userListItem1 = item1 as UserListItem;
-			var userListItem2 = item2 as UserListItem;
-			if(userListItem1 != null && userListItem2 != null)
-			{
-				return CompareByEmail(userListItem1, userListItem2);
-			}
-			else
-			{
-				return 0;
-			}
-		}
+			=> item1 is UserListItem userListItem1 && item2 is UserListItem userListItem2
+				? CompareByEmail(userListItem1, userListItem2)
+				: 0;
 
 		public static int CompareByCommitCount(UserListItem item1, UserListItem item2)
 		{
@@ -91,18 +73,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public static int CompareByCommitCount(CustomListBoxItem item1, CustomListBoxItem item2)
-		{
-			var userListItem1 = item1 as UserListItem;
-			var userListItem2 = item2 as UserListItem;
-			if(userListItem1 != null && userListItem2 != null)
-			{
-				return CompareByCommitCount(userListItem1, userListItem2);
-			}
-			else
-			{
-				return 0;
-			}
-		}
+			=> item1 is UserListItem userListItem1 && item2 is UserListItem userListItem2
+				? CompareByCommitCount(userListItem1, userListItem2)
+				: 0;
 
 		#endregion
 

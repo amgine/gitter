@@ -679,6 +679,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to synchronize submodule.
+        /// </summary>
+        internal static string ErrFailedToSyncSubmodule {
+            get {
+                return ResourceManager.GetString("ErrFailedToSyncSubmodule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to unset parameter.
         /// </summary>
         internal static string ErrFailedToUnsetParameter {
@@ -2671,6 +2680,16 @@ namespace gitter.Git.Gui.Properties {
         internal static System.Drawing.Bitmap ImgSubmodules {
             get {
                 object obj = ResourceManager.GetObject("ImgSubmodules", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgSync {
+            get {
+                object obj = ResourceManager.GetObject("ImgSync", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -6846,6 +6865,15 @@ namespace gitter.Git.Gui.Properties {
         internal static string StrsWorkingDirectoryClean {
             get {
                 return ResourceManager.GetString("StrsWorkingDirectoryClean", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Synchronize.
+        /// </summary>
+        internal static string StrSync {
+            get {
+                return ResourceManager.GetString("StrSync", resourceCulture);
             }
         }
         

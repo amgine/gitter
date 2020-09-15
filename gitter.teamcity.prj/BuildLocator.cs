@@ -30,83 +30,31 @@ namespace gitter.TeamCity
 		{
 		}
 
-		public string Id
-		{
-			get;
-			set;
-		}
+		public string Id { get; set; }
 
-		public BuildTypeLocator BuildType
-		{
-			get;
-			set;
-		}
+		public BuildTypeLocator BuildType { get; set; }
 
-		public string Number
-		{
-			get;
-			set;
-		}
+		public string Number { get; set; }
 
-		public UserLocator User
-		{
-			get;
-			set;
-		}
+		public UserLocator User { get; set; }
 
-		public string AgentName
-		{
-			get;
-			set;
-		}
+		public string AgentName { get; set; }
 
-		public BuildStatus BuildStatus
-		{
-			get;
-			set;
-		}
+		public BuildStatus BuildStatus { get; set; }
 
-		public FlagSelector Personal
-		{
-			get;
-			set;
-		}
+		public FlagSelector Personal { get; set; }
 
-		public FlagSelector Pinned
-		{
-			get;
-			set;
-		}
+		public FlagSelector Pinned { get; set; }
 
-		public FlagSelector Running
-		{
-			get;
-			set;
-		}
+		public FlagSelector Running { get; set; }
 
-		public FlagSelector Canceled
-		{
-			get;
-			set;
-		}
+		public FlagSelector Canceled { get; set; }
 
-		public int Start
-		{
-			get;
-			set;
-		}
+		public int Start { get; set; }
 
-		public int Count
-		{
-			get;
-			set;
-		}
+		public int Count { get; set; }
 
-		public BuildLocator SinceBuild
-		{
-			get;
-			set;
-		}
+		public BuildLocator SinceBuild { get; set; }
 
 		public override string ToString()
 		{

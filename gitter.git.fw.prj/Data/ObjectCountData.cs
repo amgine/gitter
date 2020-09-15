@@ -22,8 +22,6 @@ namespace gitter.Git.AccessLayer
 {
 	public sealed class ObjectCountData
 	{
-		#region .ctor
-
 		public ObjectCountData(int count, int size, int inPack, int packs, int sizePack, int prunePackable, int garbage)
 		{
 			Count = count;
@@ -34,10 +32,6 @@ namespace gitter.Git.AccessLayer
 			PrunePackable = prunePackable;
 			Garbage = garbage;
 		}
-
-		#endregion
-
-		#region Properties
 
 		public int Count { get; }
 
@@ -52,7 +46,5 @@ namespace gitter.Git.AccessLayer
 		public int PrunePackable { get; }
 
 		public int Garbage { get; }
-
-		#endregion
 	}
 }

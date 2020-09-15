@@ -316,7 +316,7 @@ namespace gitter.Git.Gui
 		public void DetachFromEnvironment(IWorkingEnvironment environment)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.Argument.AreNotEqual(Environment, environment, "environment", string.Empty);
+			Verify.Argument.AreNotEqual(Environment, environment, nameof(environment), string.Empty);
 
 			foreach(var factory in ViewFactories)
 			{

@@ -44,6 +44,7 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(new ToolStripSeparator());
 
 			Items.Add(GuiItemFactory.GetUpdateSubmoduleItem<ToolStripMenuItem>(submodule));
+			Items.Add(GuiItemFactory.GetSyncSubmoduleItem<ToolStripMenuItem>(submodule));
 
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 

@@ -56,20 +56,14 @@ namespace gitter.Git.Gui.Controls
 
 		public static int CompareByName(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			var i1 = item1 as ITreeItemListItem;
-			if(i1 == null) return 0;
-			var i2 = item2 as ITreeItemListItem;
-			if(i2 == null) return 0;
 			try
 			{
-				return CompareByName(i1, i2);
+				return item1 is ITreeItemListItem i1 && item2 is ITreeItemListItem i2
+					? CompareByName(i1, i2)
+					: 0;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return 0;
 			}
 		}
@@ -99,20 +93,14 @@ namespace gitter.Git.Gui.Controls
 
 		public static int CompareByRelativePath(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			var i1 = item1 as ITreeItemListItem;
-			if(i1 == null) return 0;
-			var i2 = item2 as ITreeItemListItem;
-			if(i2 == null) return 0;
 			try
 			{
-				return CompareByRelativePath(i1, i2);
+				return item1 is ITreeItemListItem i1 && item2 is ITreeItemListItem i2
+					? CompareByRelativePath(i1, i2)
+					: 0;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return 0;
 			}
 		}
@@ -177,15 +165,9 @@ namespace gitter.Git.Gui.Controls
 			RemoveSafe();
 		}
 
-		protected virtual Icon GetIcon()
-		{
-			return null;
-		}
+		protected virtual Icon GetIcon() => null;
 
-		protected virtual Bitmap GetBitmapIcon()
-		{
-			return null;
-		}
+		protected virtual Bitmap GetBitmapIcon() => null;
 
 		protected abstract FileSize? GetSize();
 
@@ -315,10 +297,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region IWorktreeListItem Members
 
-		TreeItem ITreeItemListItem.TreeItem
-		{
-			get { return DataContext; }
-		}
+		TreeItem ITreeItemListItem.TreeItem => DataContext;
 
 		#endregion
 	}

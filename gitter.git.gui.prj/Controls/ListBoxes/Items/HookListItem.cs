@@ -21,9 +21,6 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Drawing;
 
 	using gitter.Framework.Controls;
@@ -60,13 +57,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			throw new NotImplementedException();
-		}
+			=> throw new NotImplementedException();
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			throw new NotImplementedException();
-		}
+			=> throw new NotImplementedException();
 	}
 }

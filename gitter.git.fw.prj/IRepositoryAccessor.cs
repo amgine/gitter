@@ -252,7 +252,10 @@ namespace gitter.Git.AccessLayer
 		IGitAction<StashToBranchParameters> StashToBranch { get; }
 
 		/// <summary>Updates submodule.</summary>
-		IGitAction<SubmoduleUpdateParameters> UpdateSubmodule { get; }
+		IGitAction<UpdateSubmoduleParameters> UpdateSubmodule { get; }
+
+		/// <summary>Synchronizes submodule.</summary>
+		IGitAction<SyncSubmoduleParameters> SyncSubmodule { get; }
 
 		/// <summary>Verify tags GPG signatures.</summary>
 		IGitAction<VerifyTagsParameters> VerifyTags { get; }

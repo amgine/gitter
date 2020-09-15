@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,14 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
-namespace gitter.Framework
+namespace gitter.Git.AccessLayer
 {
-	public sealed class NullProgress : IProgress<OperationProgress>
+	public class SyncSubmoduleParameters
 	{
-		#region Static
+		public bool Recursive { get; set; }
 
-		public static IProgress<OperationProgress> Instance { get; } = new NullProgress();
-
-		#endregion
-
-		#region .ctor
-
-		private NullProgress()
-		{
-		}
-
-		#endregion
-
-		#region IProgress<OperationProgress> Members
-
-		public void Report(OperationProgress progress)
-		{
-		}
-
-		#endregion
+		public IReadOnlyList<string> Submodules { get; set; }
 	}
 }

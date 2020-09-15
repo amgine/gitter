@@ -30,13 +30,6 @@ namespace gitter.Git.Gui.Controls
 
 	sealed class FilesToAddBinding : AsyncDataBinding<IList<TreeFile>>
 	{
-		#region Data
-
-		private readonly Repository _repository;
-		private readonly TreeListBox _treeListBox;
-
-		#endregion
-
 		#region .ctor
 
 		public FilesToAddBinding(Repository repository, TreeListBox treeListBox)
@@ -44,43 +37,24 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(treeListBox, nameof(treeListBox));
 
-			_repository  = repository;
-			_treeListBox = treeListBox;
-
-			Progress = treeListBox.ProgressMonitor;
+			Repository  = repository;
+			TreeListBox = treeListBox;
+			Progress    = treeListBox.ProgressMonitor;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		private TreeListBox TreeListBox
-		{
-			get { return _treeListBox; }
-		}
+		private TreeListBox TreeListBox { get; }
 
-		public string Pattern
-		{
-			get;
-			set;
-		}
+		public string Pattern { get; set; }
 
-		public bool IncludeUntracked
-		{
-			get;
-			set;
-		}
+		public bool IncludeUntracked { get; set; }
 
-		public bool IncludeIgnored
-		{
-			get;
-			set;
-		}
+		public bool IncludeIgnored { get; set; }
 
 		#endregion
 

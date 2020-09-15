@@ -55,14 +55,6 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override bool TestItem(CustomListBoxItem item, T search)
-		{
-			var rli = item as RevisionListItem;
-			if(rli != null)
-			{
-				var revision = rli.DataContext;
-				return TestRevision(revision, search);
-			}
-			return false;
-		}
+			=> item is RevisionListItem rli && TestRevision(rli.DataContext, search);
 	}
 }

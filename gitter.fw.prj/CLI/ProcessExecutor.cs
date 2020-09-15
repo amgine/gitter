@@ -57,8 +57,6 @@ namespace gitter.Framework.CLI
 	{
 		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor&lt;TInput&gt;"/> class.</summary>
 		/// <param name="exeFileName">Path to exe file.</param>
-		/// <param name="stdOutReceiver">STDOUT receiver (can be null).</param>
-		/// <param name="stdErrReceiver">STDERR receiver (can be null).</param>
 		public ProcessExecutor(string exeFileName)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(exeFileName, nameof(exeFileName));

@@ -59,9 +59,7 @@ namespace gitter.Git.Gui
 		}
 
 		private PopupNotificationsStack PopupsStack
-		{
-			get { return _guiProvider.Environment.ViewDockService.Grid.PopupsStack; }
-		}
+			=> _guiProvider.Environment.ViewDockService.Grid.PopupsStack;
 
 		private void AttachToRepository(Repository repository)
 		{

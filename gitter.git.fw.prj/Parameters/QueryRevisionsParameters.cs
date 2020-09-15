@@ -35,7 +35,7 @@ namespace gitter.Git.AccessLayer
 
 		public string Until { get; set; }
 
-		public IList<string> References { get; set; }
+		public IReadOnlyList<string> References { get; set; }
 
 		public string ReferencesGlob { get; set; }
 

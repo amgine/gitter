@@ -105,12 +105,8 @@ namespace gitter.Git.Gui.Dialogs
 					{
 						path = Path.Combine(path, GitUtils.GetHumanishName(url));
 					}
-					catch(Exception exc)
+					catch(Exception exc) when(!exc.IsCritical())
 					{
-						if(exc.IsCritical())
-						{
-							throw;
-						}
 					}
 				}
 				return path;
@@ -285,12 +281,8 @@ namespace gitter.Git.Gui.Dialogs
 				{
 					path = System.IO.Path.Combine(path, GitUtils.GetHumanishName(url));
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 			}
 			return path;

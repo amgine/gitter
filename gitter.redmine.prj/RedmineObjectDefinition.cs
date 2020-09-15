@@ -22,15 +22,11 @@ namespace gitter.Redmine
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Xml;
 
 	public abstract class RedmineObjectDefinition<T>
 		where T : RedmineObject
 	{
-		private bool _isCommitted;
-		
 		protected RedmineObjectDefinition()
 		{
 		}
@@ -44,10 +40,7 @@ namespace gitter.Redmine
 			}
 		}
 
-		public bool IsCommitted
-		{
-			get { return _isCommitted; }
-		}
+		public bool IsCommitted { get; private set; }
 
 		protected abstract void ResetCore();
 
@@ -65,7 +58,7 @@ namespace gitter.Redmine
 			if(IsCommitted) throw new InvalidOperationException();
 
 			CommitCore();
-			_isCommitted = true;
+			IsCommitted = true;
 		}
 	}
 }

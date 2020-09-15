@@ -96,19 +96,10 @@ namespace gitter.Git.Gui.Controls
 			base.OnListBoxDetached();
 		}
 
-		protected override Bitmap GetBitmapIcon()
-		{
-			return ImgIcon;
-		}
+		protected override Bitmap GetBitmapIcon() => ImgIcon;
 
-		protected override FileSize? GetSize()
-		{
-			return null;
-		}
+		protected override FileSize? GetSize() => null;
 
-		protected override string GetItemType()
-		{
-			return "";// Utility.GetFileType(Data.FullPath, true, Data.Status == GitObjectStatus.Removed);
-		}
+		protected override string GetItemType() => "";
 	}
 }

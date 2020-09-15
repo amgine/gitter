@@ -23,7 +23,7 @@ namespace gitter.Git
 	using System;
 	using System.Collections.Generic;
 
-	public sealed class BlameFile : IEnumerable<BlameHunk>
+	public sealed class BlameFile : IReadOnlyList<BlameHunk>
 	{
 		private readonly string _fileName;
 		private readonly List<BlameHunk> _hunks;
@@ -43,15 +43,9 @@ namespace gitter.Git
 			}
 		}
 
-		public string Name
-		{
-			get { return _fileName; }
-		}
+		public string Name => _fileName;
 
-		public BlameHunk this[int index]
-		{
-			get { return _hunks[index]; }
-		}
+		public BlameHunk this[int index] => _hunks[index];
 
 		public BlameLine GetLine(int lineIndex)
 		{
@@ -65,32 +59,19 @@ namespace gitter.Git
 			return _hunks[hunkIndex][lineIndex - c];
 		}
 
-		public int Count
-		{
-			get { return _hunks.Count; }
-		}
+		public int Count => _hunks.Count;
 
-		public int LineCount
-		{
-			get { return _lineCount; }
-		}
+		public int LineCount => _lineCount;
 
-		public override string ToString()
-		{
-			return _fileName;
-		}
+		public override string ToString() => _fileName;
 
 		#region IEnumerable<BlameHunk>
 
 		public IEnumerator<BlameHunk> GetEnumerator()
-		{
-			return _hunks.GetEnumerator();
-		}
+			=> _hunks.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _hunks.GetEnumerator();
-		}
+			=> _hunks.GetEnumerator();
 
 		#endregion
 	}

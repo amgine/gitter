@@ -163,12 +163,8 @@ namespace gitter.Git.Gui.Views
 					{
 						System.Media.SystemSounds.Beep.Play();
 					}
-					catch(Exception exc)
+					catch(Exception exc) when(!exc.IsCritical())
 					{
-						if(exc.IsCritical())
-						{
-							throw;
-						}
 					}
 				}
 				_result = result;

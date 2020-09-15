@@ -47,20 +47,14 @@ namespace gitter.Git.Gui.Controls
 
 		public static int CompareByName(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			var i1 = item1 as RemoteListItem;
-			if(i1 == null) return 0;
-			var i2 = item2 as RemoteListItem;
-			if(i2 == null) return 0;
 			try
 			{
-				return CompareByName(i1, i2);
+				return item1 is RemoteListItem i1 && item2 is RemoteListItem i2
+					? CompareByName(i1, i2)
+					: 0;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return 0;
 			}
 		}
@@ -74,20 +68,14 @@ namespace gitter.Git.Gui.Controls
 
 		public static int CompareByFetchUrl(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			var i1 = item1 as RemoteListItem;
-			if(i1 == null) return 0;
-			var i2 = item2 as RemoteListItem;
-			if(i2 == null) return 0;
 			try
 			{
-				return CompareByFetchUrl(i1, i2);
+				return item1 is RemoteListItem i1 && item2 is RemoteListItem i2
+					? CompareByFetchUrl(i1, i2)
+					: 0;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return 0;
 			}
 		}
@@ -101,20 +89,14 @@ namespace gitter.Git.Gui.Controls
 
 		public static int CompareByPushUrl(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			var i1 = item1 as RemoteListItem;
-			if(i1 == null) return 0;
-			var i2 = item2 as RemoteListItem;
-			if(i2 == null) return 0;
 			try
 			{
-				return CompareByPushUrl(i1, i2);
+				return item1 is RemoteListItem i1 && item2 is RemoteListItem i2
+					? CompareByPushUrl(i1, i2)
+					: 0;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return 0;
 			}
 		}

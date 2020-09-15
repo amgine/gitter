@@ -26,8 +26,6 @@ namespace gitter.Git.AccessLayer
 	/// <summary>Working tree status information.</summary>
 	public sealed class StatusData
 	{
-		#region .ctor
-
 		public StatusData(
 			IDictionary<string, TreeFileData> stagedFiles,
 			IDictionary<string, TreeFileData> unstagedFiles,
@@ -50,10 +48,6 @@ namespace gitter.Git.AccessLayer
 			StagedRemovedCount     = stagedRemovedCount;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public IDictionary<string, TreeFileData> StagedFiles { get; }
 
 		public IDictionary<string, TreeFileData> UnstagedFiles { get; }
@@ -71,7 +65,5 @@ namespace gitter.Git.AccessLayer
 		public int StagedModifiedCount { get; }
 
 		public int StagedRemovedCount { get; }
-
-		#endregion
 	}
 }

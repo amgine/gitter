@@ -21,7 +21,6 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
@@ -30,22 +29,12 @@ namespace gitter.Git.Gui.Controls
 		where TObject : GitNamedObjectWithLifetime
 		where TEventArgs : ObjectEventArgs<TObject>
 	{
-		#region Data
-
-		private readonly GitObjectsCollection<TObject, TEventArgs> _collection;
-		private readonly CustomListBoxItemsCollection _itemHost;
-
-		#endregion
-
 		#region Events
 
 		public event EventHandler<BoundItemActivatedEventArgs<TObject>> ItemActivated;
 
 		private void InvokeItemActivated(CustomListBoxItem item, TObject obj)
-		{
-			var handler = ItemActivated;
-			if(handler != null) handler(this, new BoundItemActivatedEventArgs<TObject>(item, obj));
-		}
+			=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TObject>(item, obj));
 
 		#endregion
 
@@ -56,11 +45,11 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(itemHost, nameof(itemHost));
 			Verify.Argument.IsNotNull(collection, nameof(collection));
 
-			_itemHost = itemHost;
-			_collection = collection;
+			Target = itemHost;
+			Source = collection;
 
-			_itemHost.Comparison = GetComparison();
-			_itemHost.SortOrder = GetSortOrder();
+			Target.Comparison = GetComparison();
+			Target.SortOrder = GetSortOrder();
 
 			lock(collection.SyncRoot)
 			{
@@ -68,7 +57,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					var item = RepresentObject(obj);
 					item.Activated += OnItemActivated;
-					_itemHost.Add(item);
+					Target.Add(item);
 				}
 				collection.ObjectAdded += OnObjectAdded;
 			}
@@ -78,10 +67,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Virtual
 
-		protected virtual SortOrder GetSortOrder()
-		{
-			return SortOrder.Ascending;
-		}
+		protected virtual SortOrder GetSortOrder() => SortOrder.Ascending;
 
 		#endregion
 
@@ -95,15 +81,9 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public GitObjectsCollection<TObject, TEventArgs> Source
-		{
-			get { return _collection; }
-		}
+		public GitObjectsCollection<TObject, TEventArgs> Source { get; }
 
-		public CustomListBoxItemsCollection Target
-		{
-			get { return _itemHost; }
-		}
+		public CustomListBoxItemsCollection Target { get; }
 
 		#endregion
 
@@ -113,7 +93,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			var item = RepresentObject(e.Object);
 			item.Activated += OnItemActivated;
-			_itemHost.AddSafe(item);
+			Target.AddSafe(item);
 		}
 
 		private void OnItemActivated(object sender, EventArgs e)
@@ -128,8 +108,8 @@ namespace gitter.Git.Gui.Controls
 
 		public void Dispose()
 		{
-			_collection.ObjectAdded -= OnObjectAdded;
-			_itemHost.Clear();
+			Source.ObjectAdded -= OnObjectAdded;
+			Target.Clear();
 		}
 
 		#endregion

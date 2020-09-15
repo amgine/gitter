@@ -31,9 +31,9 @@ namespace gitter.Git.AccessLayer
 
 		public InitRepositoryParameters(string path, string template, bool bare)
 		{
-			Path = path;
+			Path     = path;
 			Template = template;
-			Bare = bare;
+			Bare     = bare;
 		}
 
 		public string Path { get; set; }

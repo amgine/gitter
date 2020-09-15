@@ -116,7 +116,8 @@ namespace gitter.Git.AccessLayer
 		private readonly IGitFunction < StashSaveParameters,              bool                       > _stashSave;
 		private readonly IGitAction   < StashToBranchParameters                                      > _stashToBranch;
 		private readonly IGitAction   < UnsetConfigValueParameters                                   > _unsetConfigValue;
-		private readonly IGitAction   < SubmoduleUpdateParameters                                    > _updateSubmodule;
+		private readonly IGitAction   < UpdateSubmoduleParameters                                    > _updateSubmodule;
+		private readonly IGitAction   < SyncSubmoduleParameters                                      > _syncSubmodule;
 		private readonly IGitAction   < VerifyTagsParameters                                         > _verifyTags;
 
 		#endregion
@@ -215,6 +216,7 @@ namespace gitter.Git.AccessLayer
 			GitCliMethod.Create(out _stashToBranch,          CommandExecutor, CommandBuilder.GetStashToBranchCommand);
 			GitCliMethod.Create(out _unsetConfigValue,       CommandExecutor, CommandBuilder.GetUnsetConfigValueCommand,       OutputParser.HandleConfigResults);
 			GitCliMethod.Create(out _updateSubmodule,        CommandExecutor, CommandBuilder.GetUpdateSubmoduleCommand);
+			GitCliMethod.Create(out _syncSubmodule,          CommandExecutor, CommandBuilder.GetSyncSubmoduleCommand);
 			GitCliMethod.Create(out _verifyTags,             CommandExecutor, CommandBuilder.GetVerifyTagsCommand);
 		}
 
@@ -378,7 +380,9 @@ namespace gitter.Git.AccessLayer
 
 		public IGitAction<StashToBranchParameters> StashToBranch => _stashToBranch;
 
-		public IGitAction<SubmoduleUpdateParameters> UpdateSubmodule => _updateSubmodule;
+		public IGitAction<UpdateSubmoduleParameters> UpdateSubmodule => _updateSubmodule;
+
+		public IGitAction<SyncSubmoduleParameters> SyncSubmodule => _syncSubmodule;
 
 		public IGitAction<VerifyTagsParameters> VerifyTags => _verifyTags;
 

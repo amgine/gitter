@@ -27,8 +27,6 @@ namespace gitter.Git.AccessLayer
 	/// <summary>Tag description.</summary>
 	public sealed class TagData : INamedObject
 	{
-		#region .ctor
-
 		public TagData(string name, Hash sha1, TagType tagType)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
@@ -38,19 +36,11 @@ namespace gitter.Git.AccessLayer
 			TagType = tagType;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public string Name { get; }
 
 		public Hash SHA1 { get; }
 
 		public TagType TagType { get; }
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.
@@ -59,7 +49,5 @@ namespace gitter.Git.AccessLayer
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
 		public override string ToString() => Name;
-
-		#endregion
 	}
 }

@@ -30,17 +30,10 @@ namespace gitter.Git.Gui.Controls
 		#region Data
 
 		private readonly CustomListBoxItemsCollection _itemHost;
-		private readonly Repository _repository;
-
 		private readonly bool _groupItems;
 		private readonly bool _groupRemotes;
 		private readonly Predicate<IRevisionPointer> _predicate;
 		private readonly ReferenceType _referenceTypes;
-
-		private readonly ReferenceGroupListItem _refsHeads;
-		private readonly ReferenceGroupListItem _refsRemotes;
-		private readonly ReferenceGroupListItem _refsTags;
-
 		private readonly List<RemoteListItem> _remotes;
 
 		#endregion
@@ -48,10 +41,7 @@ namespace gitter.Git.Gui.Controls
 		public event EventHandler<RevisionPointerEventArgs> ReferenceItemActivated;
 
 		private void InvokeReferenceItemActivated(IRevisionPointer revision)
-		{
-			var handler = ReferenceItemActivated;
-			if(handler != null) handler(this, new RevisionPointerEventArgs(revision));
-		}
+			=> ReferenceItemActivated?.Invoke(this, new RevisionPointerEventArgs(revision));
 
 		#region .ctor
 
@@ -62,7 +52,7 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_itemHost = itemHost;
-			_repository = repository;
+			Repository = repository;
 
 			_groupItems = groupItems;
 			_groupRemotes = groupRemoteBranches;
@@ -72,26 +62,26 @@ namespace gitter.Git.Gui.Controls
 			_itemHost.Clear();
 			if(groupItems)
 			{
-				_refsHeads = new ReferenceGroupListItem(repository, ReferenceType.LocalBranch);
-				_refsHeads.Items.Comparison = BranchListItem.CompareByName;
-				_refsRemotes = new ReferenceGroupListItem(repository, ReferenceType.RemoteBranch);
+				Heads = new ReferenceGroupListItem(repository, ReferenceType.LocalBranch);
+				Heads.Items.Comparison = BranchListItem.CompareByName;
+				Remotes = new ReferenceGroupListItem(repository, ReferenceType.RemoteBranch);
 				if(groupRemoteBranches)
 				{
-					_refsRemotes.Items.Comparison = RemoteListItem.CompareByName;
+					Remotes.Items.Comparison = RemoteListItem.CompareByName;
 				}
 				else
 				{
-					_refsRemotes.Items.Comparison = RemoteBranchListItem.CompareByName;
+					Remotes.Items.Comparison = RemoteBranchListItem.CompareByName;
 				}
-				_refsTags = new ReferenceGroupListItem(repository, ReferenceType.Tag);
-				_refsTags.Items.Comparison = TagListItem.CompareByName;
+				Tags = new ReferenceGroupListItem(repository, ReferenceType.Tag);
+				Tags.Items.Comparison = TagListItem.CompareByName;
 				_itemHost.Comparison = null;
 			}
 			else
 			{
-				_refsHeads = null;
-				_refsRemotes = null;
-				_refsTags = null;
+				Heads = null;
+				Remotes = null;
+				Tags = null;
 				_itemHost.Comparison = ReferenceListItemBase.UniversalComparer;
 			}
 
@@ -99,7 +89,7 @@ namespace gitter.Git.Gui.Controls
 
 			if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
 			{
-				var refs = _repository.Refs.Heads;
+				var refs = Repository.Refs.Heads;
 				lock(refs.SyncRoot)
 				{
 					foreach(var branch in refs)
@@ -110,7 +100,7 @@ namespace gitter.Git.Gui.Controls
 						CustomListBoxItemsCollection host;
 						if(groupItems)
 						{
-							host = _refsHeads.Items;
+							host = Heads.Items;
 						}
 						else
 						{
@@ -130,7 +120,7 @@ namespace gitter.Git.Gui.Controls
 					foreach(var branch in refs)
 					{
 						if(predicate != null && !predicate(branch)) continue;
-						var host = groupItems ? _refsRemotes.Items : _itemHost;
+						var host = groupItems ? Remotes.Items : _itemHost;
 						var item = new RemoteBranchListItem(branch);
 						item.Activated += OnItemActivated;
 						if(groupRemoteBranches)
@@ -160,7 +150,7 @@ namespace gitter.Git.Gui.Controls
 						CustomListBoxItemsCollection host;
 						if(groupItems)
 						{
-							host = _refsTags.Items;
+							host = Tags.Items;
 						}
 						else
 						{
@@ -174,39 +164,27 @@ namespace gitter.Git.Gui.Controls
 
 			if(groupItems)
 			{
-				_itemHost.Add(_refsHeads);
-				_itemHost.Add(_refsRemotes);
-				_itemHost.Add(_refsTags);
+				_itemHost.Add(Heads);
+				_itemHost.Add(Remotes);
+				_itemHost.Add(Tags);
 			}
 		}
 
 		#endregion
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		public ReferenceGroupListItem Heads
-		{
-			get { return _refsHeads; }
-		}
+		public ReferenceGroupListItem Heads { get; }
 
-		public ReferenceGroupListItem Remotes
-		{
-			get { return _refsRemotes; }
-		}
+		public ReferenceGroupListItem Remotes { get; }
 
-		public ReferenceGroupListItem Tags
-		{
-			get { return _refsTags; }
-		}
+		public ReferenceGroupListItem Tags { get; }
 
 		private RemoteListItem GetRemoteListItem(RemoteBranch branch)
 		{
-			lock(_repository.Remotes.SyncRoot)
+			lock(Repository.Remotes.SyncRoot)
 			{
-				foreach(var remote in _repository.Remotes)
+				foreach(var remote in Repository.Remotes)
 				{
 					if(branch.Name.StartsWith(remote.Name + "/"))
 					{
@@ -225,13 +203,13 @@ namespace gitter.Git.Gui.Controls
 							ritem.Items.Comparison = RemoteBranchListItem.CompareByName;
 							_remotes.Add(ritem);
 							CustomListBoxItemsCollection host;
-							if(_refsRemotes == null)
+							if(Remotes == null)
 							{
 								host = _itemHost;
 							}
 							else
 							{
-								host = _refsRemotes.Items;
+								host = Remotes.Items;
 							}
 							host.AddSafe(ritem);
 						}
@@ -254,7 +232,7 @@ namespace gitter.Git.Gui.Controls
 				CustomListBoxItemsCollection host;
 				if(_groupItems)
 				{
-					host = _refsHeads.Items;
+					host = Heads.Items;
 				}
 				else
 				{
@@ -279,7 +257,7 @@ namespace gitter.Git.Gui.Controls
 						var p = GetRemoteListItem(branch);
 						if(p == null)
 						{
-							host = _refsRemotes.Items;
+							host = Remotes.Items;
 						}
 						else
 						{
@@ -288,7 +266,7 @@ namespace gitter.Git.Gui.Controls
 					}
 					else
 					{
-						host = _refsRemotes.Items;
+						host = Remotes.Items;
 					}
 				}
 				else
@@ -324,7 +302,7 @@ namespace gitter.Git.Gui.Controls
 				item.Activated += OnItemActivated;
 				if(_groupItems)
 				{
-					host = _refsTags.Items;
+					host = Tags.Items;
 				}
 				else
 				{
@@ -345,9 +323,9 @@ namespace gitter.Git.Gui.Controls
 
 		public void Dispose()
 		{
-			_repository.Refs.Heads.ObjectAdded -= OnBranchCreated;
-			_repository.Refs.Remotes.ObjectAdded -= OnRemoteBranchCreated;
-			_repository.Refs.Tags.ObjectAdded -= OnTagCreated;
+			Repository.Refs.Heads.ObjectAdded -= OnBranchCreated;
+			Repository.Refs.Remotes.ObjectAdded -= OnRemoteBranchCreated;
+			Repository.Refs.Tags.ObjectAdded -= OnTagCreated;
 			_itemHost.Clear();
 		}
 	}

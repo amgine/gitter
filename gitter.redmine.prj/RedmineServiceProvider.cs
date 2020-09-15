@@ -21,9 +21,6 @@
 namespace gitter.Redmine
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -36,27 +33,13 @@ namespace gitter.Redmine
 
 	public sealed class RedmineServiceProvider : IRepositoryServiceProvider
 	{
-		private static IWorkingEnvironment _environment;
+		public static IWorkingEnvironment Environment { get; private set; }
 
-		public static IWorkingEnvironment Environment
-		{
-			get { return _environment; }
-		}
+		public string Name => "redmine";
 
-		public string Name
-		{
-			get { return "redmine"; }
-		}
+		public string DisplayName => Resources.StrRedmine;
 
-		public string DisplayName
-		{
-			get { return Resources.StrRedmine; }
-		}
-
-		public Image Icon
-		{
-			get { return CachedResources.Bitmaps["ImgRedmine"]; }
-		}
+		public Image Icon => CachedResources.Bitmaps["ImgRedmine"];
 
 		/// <summary>Prepare for working inside specified <paramref name="environment"/>.</summary>
 		/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
@@ -68,7 +51,7 @@ namespace gitter.Redmine
 			environment.ViewDockService.RegisterFactory(new NewsViewFactory());
 			environment.ViewDockService.RegisterFactory(new IssuesViewFactory());
 			environment.ViewDockService.RegisterFactory(new VersionsViewFactory());
-			_environment = environment;
+			Environment = environment;
 			return true;
 		}
 
@@ -98,7 +81,7 @@ namespace gitter.Redmine
 
 		public Control CreateSetupDialog(IRepository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "environment");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			return new ProviderSetupControl(repository);
 		}

@@ -41,20 +41,14 @@ namespace gitter.Git.Gui.Controls
 
 		public static int CompareByIndex(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			var i1 = item1 as StashedStateListItem;
-			if(i1 == null) return 0;
-			var i2 = item2 as StashedStateListItem;
-			if(i2 == null) return 0;
 			try
 			{
-				return CompareByIndex(i1, i2);
+				return item1 is StashedStateListItem i1 && item2 is StashedStateListItem i2
+					? CompareByIndex(i1, i2)
+					: 0;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return 0;
 			}
 		}

@@ -40,12 +40,6 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
-		#region Data
-
-		private readonly Repository _repository;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Create <see cref="ReferenceGroupListItem"/>.</summary>
@@ -54,17 +48,14 @@ namespace gitter.Git.Gui.Controls
 		public ReferenceGroupListItem(Repository repository, ReferenceType referenceTypes)
 			: base(referenceTypes)
 		{
-			_repository = repository;
+			Repository = repository;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
 		#endregion
 

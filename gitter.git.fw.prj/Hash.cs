@@ -23,6 +23,7 @@ namespace gitter.Git
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
 	using System.Text;
 
@@ -49,8 +50,6 @@ namespace gitter.Git
 
 		#region Static
 
-		private static readonly HashComparer _comparer = new HashComparer();
-
 		public static IEqualityComparer<Hash> EqualityComparer { get; } = new HashEqualityComparer();
 
 		public static IComparer<Hash> Comparer { get; } = new HashComparer();
@@ -71,29 +70,15 @@ namespace gitter.Git
 
 		private static int TryParseCharToHexDigit(char ch)
 		{
-			int digit = ch - '0';
-			if(digit < 0 || digit > 9)
-			{
-				digit = ch - 'a';
-				if(digit >= 0 && digit <= 5)
-				{
-					digit += 10;
-				}
-				else
-				{
-					digit = ch - 'A';
-					if(digit >= 0 && digit <= 5)
-					{
-						digit += 10;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-			}
-			return digit;
+			if(ch >= '0' && ch <= '9') return ch - '0';
+			if(ch >= 'a' && ch <= 'f') return 10 + (ch - 'a');
+			if(ch >= 'A' && ch <= 'F') return 10 + (ch - 'A');
+			return -1;
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static char ToHexDigit(uint digit)
+			=> digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
 
 		private static bool TryParsePart(string hash, int offset, out uint part)
 		{
@@ -116,10 +101,7 @@ namespace gitter.Git
 			for(int i = 0; i < 8; ++i)
 			{
 				int digit = TryParseCharToHexDigit(hash[offset + i]);
-				if(digit < 0)
-				{
-					return false;
-				}
+				if(digit < 0) return false;
 				part = (part << 4) + (uint)digit;
 			}
 			return true;
@@ -167,23 +149,14 @@ namespace gitter.Git
 
 		private static unsafe void DumpPart(uint part, char* buffer)
 		{
-			uint digit;
-			digit = (part >> 28) & 0x0f;
-			buffer[0] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
-			digit = (part >> 24) & 0x0f;
-			buffer[1] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
-			digit = (part >> 20) & 0x0f;
-			buffer[2] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
-			digit = (part >> 16) & 0x0f;
-			buffer[3] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
-			digit = (part >> 12) & 0x0f;
-			buffer[4] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
-			digit = (part >>  8) & 0x0f;
-			buffer[5] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
-			digit = (part >>  4) & 0x0f;
-			buffer[6] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
-			digit = (part >>  0) & 0x0f;
-			buffer[7] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[0] = ToHexDigit((part >> 28) & 0x0f);
+			buffer[1] = ToHexDigit((part >> 24) & 0x0f);
+			buffer[2] = ToHexDigit((part >> 20) & 0x0f);
+			buffer[3] = ToHexDigit((part >> 16) & 0x0f);
+			buffer[4] = ToHexDigit((part >> 12) & 0x0f);
+			buffer[5] = ToHexDigit((part >>  8) & 0x0f);
+			buffer[6] = ToHexDigit((part >>  4) & 0x0f);
+			buffer[7] = ToHexDigit((part >>  0) & 0x0f);
 		}
 
 		private static unsafe void DumpPart(uint part, char* buffer, int length)
@@ -191,28 +164,28 @@ namespace gitter.Git
 			uint digit;
 			if(length-- < 0) return;
 			digit = (part >> 28) & 0x0f;
-			buffer[0] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[0] = ToHexDigit(digit);
 			if(length-- < 0) return;
 			digit = (part >> 24) & 0x0f;
-			buffer[1] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[1] = ToHexDigit(digit);
 			if(length-- < 0) return;
 			digit = (part >> 20) & 0x0f;
-			buffer[2] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[2] = ToHexDigit(digit);
 			if(length-- < 0) return;
 			digit = (part >> 16) & 0x0f;
-			buffer[3] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[3] = ToHexDigit(digit);
 			if(length-- < 0) return;
 			digit = (part >> 12) & 0x0f;
-			buffer[4] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[4] = ToHexDigit(digit);
 			if(length-- < 0) return;
 			digit = (part >>  8) & 0x0f;
-			buffer[5] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[5] = ToHexDigit(digit);
 			if(length-- < 0) return;
 			digit = (part >>  4) & 0x0f;
-			buffer[6] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[6] = ToHexDigit(digit);
 			if(length-- < 0) return;
 			digit = (part >>  0) & 0x0f;
-			buffer[7] = digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			buffer[7] = ToHexDigit(digit);
 		}
 
 		private static void DumpPart(uint part, StringBuilder stringBuilder)
@@ -221,8 +194,7 @@ namespace gitter.Git
 
 			for(int i = 28; i >= 0; i -= 4)
 			{
-				uint digit = (part >> i) & 0x0f;
-				stringBuilder.Append(digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit));
+				stringBuilder.Append(ToHexDigit((part >> i) & 0x0f));
 			}
 		}
 
@@ -232,8 +204,7 @@ namespace gitter.Git
 
 			for(int i = 28; i >= 0 && length > 0; i -= 4, --length)
 			{
-				uint digit = (part >> i) & 0x0f;
-				stringBuilder.Append(digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit));
+				stringBuilder.Append(ToHexDigit((part >> i) & 0x0f));
 			}
 		}
 
@@ -264,12 +235,11 @@ namespace gitter.Git
 				hash = default;
 				return false;
 			}
-			uint part0, part1, part2, part3, part4;
-			if (TryParsePart(str,  0 + offset, out part0) &&
-				TryParsePart(str,  8 + offset, out part1) &&
-				TryParsePart(str, 16 + offset, out part2) &&
-				TryParsePart(str, 24 + offset, out part3) &&
-				TryParsePart(str, 32 + offset, out part4))
+			if (TryParsePart(str,  0 + offset, out var part0) &&
+				TryParsePart(str,  8 + offset, out var part1) &&
+				TryParsePart(str, 16 + offset, out var part2) &&
+				TryParsePart(str, 24 + offset, out var part3) &&
+				TryParsePart(str, 32 + offset, out var part4))
 			{
 				hash = new Hash(part0, part1, part2, part3, part4);
 				return true;
@@ -627,26 +597,17 @@ namespace gitter.Git
 			{
 				return ToString();
 			}
-			else
+			if(!int.TryParse(format, NumberStyles.Integer, CultureInfo.InvariantCulture, out int length))
 			{
-				int length;
-				if(!int.TryParse(format, NumberStyles.Integer, CultureInfo.InvariantCulture, out length))
-				{
-					throw new FormatException("Unable to parse hash length.");
-				}
-				if(length < 0 || length > 40)
-				{
-					throw new FormatException("Length must be in [0; 40] range.");
-				}
-				if(length == 40)
-				{
-					return ToString();
-				}
-				else
-				{
-					return ToString(length);
-				}
+				throw new FormatException("Unable to parse hash length.");
 			}
+			if(length < 0 || length > 40)
+			{
+				throw new FormatException("Length must be in [0; 40] range.");
+			}
+			return length == 40
+				? ToString()
+				: ToString(length);
 		}
 
 		#endregion

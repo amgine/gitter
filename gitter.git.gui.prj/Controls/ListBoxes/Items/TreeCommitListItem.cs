@@ -22,10 +22,8 @@ namespace gitter.Git.Gui.Controls
 {
 	using System;
 	using System.Drawing;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -77,19 +75,12 @@ namespace gitter.Git.Gui.Controls
 		//    }
 		//}
 
-		protected override FileSize? GetSize()
-		{
-			return default(FileSize?);
-		}
+		protected override FileSize? GetSize() => default;
 
 		protected override Bitmap GetBitmapIcon()
-		{
-			return CachedResources.Bitmaps["ImgSubmodule"];
-		}
+			=> CachedResources.Bitmaps["ImgSubmodule"];
 
 		protected override string GetItemType()
-		{
-			return string.Empty;
-		}
+			=> string.Empty;
 	}
 }

@@ -40,13 +40,13 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>Create <see cref="MergeParameters"/>.</summary>
 		/// <param name="revisions">Branches to merge with.</param>
-		public MergeParameters(IList<string> revisions)
+		public MergeParameters(IReadOnlyList<string> revisions)
 		{
 			Revisions = revisions;
 		}
 
 		/// <summary>Branches to merge with.</summary>
-		public IList<string> Revisions { get; set; }
+		public IReadOnlyList<string> Revisions { get; set; }
 
 		/// <summary>Commit message.</summary>
 		public string Message { get; set; }

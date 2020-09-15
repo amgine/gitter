@@ -44,13 +44,6 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override bool TestItem(CustomListBoxItem item, T search)
-		{
-			var rrli = item as ReflogRecordListItem;
-			if(rrli != null)
-			{
-				return TestReflogRecord(rrli.DataContext, search);
-			}
-			return false;
-		}
+			=> item is ReflogRecordListItem rrli && TestReflogRecord(rrli.DataContext, search);
 	}
 }

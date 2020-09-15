@@ -22,7 +22,6 @@ namespace gitter.Redmine
 {
 	using System;
 	using System.IO;
-	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Xml;
@@ -32,25 +31,7 @@ namespace gitter.Redmine
 	{
 		#region Data
 
-		private readonly Uri _serviceUri;
 		private readonly string _apiKey;
-
-		private readonly NewsCollection _news;
-		private readonly ProjectsCollection _projects;
-		private readonly IssuesCollection _issues;
-		private readonly UsersCollection _users;
-		private readonly UserRolesCollection _userRoles;
-		private readonly IssueRelationsCollection _relations;
-		private readonly IssueTrackersCollection _trackers;
-		private readonly IssueStatusesCollection _statuses;
-		private readonly IssuePrioritiesCollection _priorities;
-		private readonly IssueCategoriesCollection _categories;
-		private readonly ProjectVersionsCollection _versions;
-		private readonly AttachmentsCollection _attachments;
-		private readonly CustomFieldsCollection _customFields;
-		private readonly QueriesCollection _queries;
-
-		private readonly object _syncRoot;
 
 		#endregion
 
@@ -66,46 +47,36 @@ namespace gitter.Redmine
 
 		public RedmineServiceContext(Uri serviceUri, string apiKey)
 		{
-			_serviceUri		= serviceUri;
+			ServiceUri		= serviceUri;
 			_apiKey			= apiKey;
 
-			_news			= new NewsCollection(this);
-			_projects		= new ProjectsCollection(this);
-			_issues			= new IssuesCollection(this);
-			_users			= new UsersCollection(this);
-			_userRoles		= new UserRolesCollection(this);
-			_relations		= new IssueRelationsCollection(this);
-			_trackers		= new IssueTrackersCollection(this);
-			_statuses		= new IssueStatusesCollection(this);
-			_priorities		= new IssuePrioritiesCollection(this);
-			_categories		= new IssueCategoriesCollection(this);
-			_versions		= new ProjectVersionsCollection(this);
-			_attachments	= new AttachmentsCollection(this);
-			_customFields	= new CustomFieldsCollection(this);
-			_queries		= new QueriesCollection(this);
+			News            = new NewsCollection(this);
+			Projects        = new ProjectsCollection(this);
+			Issues          = new IssuesCollection(this);
+			Users           = new UsersCollection(this);
+			UserRoles       = new UserRolesCollection(this);
+			IssueRelations  = new IssueRelationsCollection(this);
+			Trackers        = new IssueTrackersCollection(this);
+			IssueStatuses   = new IssueStatusesCollection(this);
+			IssuePriorities = new IssuePrioritiesCollection(this);
+			IssueCategories = new IssueCategoriesCollection(this);
+			ProjectVersions = new ProjectVersionsCollection(this);
+			Attachments     = new AttachmentsCollection(this);
+			CustomFields    = new CustomFieldsCollection(this);
+			Queries         = new QueriesCollection(this);
 
-			_syncRoot		= new object();
+			SyncRoot        = new object();
 		}
 
-		public Uri ServiceUri
-		{
-			get { return _serviceUri; }
-		}
+		public Uri ServiceUri { get; }
 
-		public string DefaultProjectId
-		{
-			get;
-			set;
-		}
+		public string DefaultProjectId { get; set; }
 
-		public object SyncRoot
-		{
-			get { return _syncRoot; }
-		}
+		public object SyncRoot { get; }
 
 		internal XmlDocument GetXml(string url)
 		{
-			var request = WebRequest.Create(_serviceUri + url);
+			var request = WebRequest.Create(ServiceUri + url);
 			request.Headers.Add(apiKeyHeader, _apiKey);
 			request.Timeout = 10000;
 			string xml = string.Empty;
@@ -129,7 +100,7 @@ namespace gitter.Redmine
 
 		private void SendData(string relativeUrl, string httpMethod, Action<Stream> send)
 		{
-			var request = WebRequest.Create(_serviceUri + relativeUrl);
+			var request = WebRequest.Create(ServiceUri + relativeUrl);
 			request.Headers.Add(apiKeyHeader, _apiKey);
 			request.Method = httpMethod;
 			using(var stream = request.GetRequestStream())
@@ -208,74 +179,32 @@ namespace gitter.Redmine
 				TaskScheduler.Default);
 		}
 
-		public NewsCollection News
-		{
-			get { return _news; }
-		}
+		public NewsCollection News { get; }
 
-		public ProjectsCollection Projects
-		{
-			get { return _projects; }
-		}
+		public ProjectsCollection Projects { get; }
 
-		public ProjectVersionsCollection ProjectVersions
-		{
-			get { return _versions; }
-		}
+		public ProjectVersionsCollection ProjectVersions { get; }
 
-		public UsersCollection Users
-		{
-			get { return _users; }
-		}
+		public UsersCollection Users { get; }
 
-		public UserRolesCollection UserRoles
-		{
-			get { return _userRoles; }
-		}
+		public UserRolesCollection UserRoles { get; }
 
-		public IssuesCollection Issues
-		{
-			get { return _issues; }
-		}
+		public IssuesCollection Issues { get; }
 
-		public AttachmentsCollection Attachments
-		{
-			get { return _attachments; }
-		}
+		public AttachmentsCollection Attachments { get; }
 
-		public IssueRelationsCollection IssueRelations
-		{
-			get { return _relations; }
-		}
+		public IssueRelationsCollection IssueRelations { get; }
 
-		public IssueTrackersCollection Trackers
-		{
-			get { return _trackers; }
-		}
+		public IssueTrackersCollection Trackers { get; }
 
-		public IssueStatusesCollection IssueStatuses
-		{
-			get { return _statuses; }
-		}
+		public IssueStatusesCollection IssueStatuses { get; }
 
-		public IssueCategoriesCollection IssueCategories
-		{
-			get { return _categories; }
-		}
+		public IssueCategoriesCollection IssueCategories { get; }
 
-		public IssuePrioritiesCollection IssuePriorities
-		{
-			get { return _priorities; }
-		}
+		public IssuePrioritiesCollection IssuePriorities { get; }
 
-		public CustomFieldsCollection CustomFields
-		{
-			get { return _customFields; }
-		}
+		public CustomFieldsCollection CustomFields { get; }
 
-		public QueriesCollection Queries
-		{
-			get { return _queries; }
-		}
+		public QueriesCollection Queries { get; }
 	}
 }

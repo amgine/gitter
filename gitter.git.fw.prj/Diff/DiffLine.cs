@@ -28,11 +28,6 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly string _text;
-		private readonly DiffLineState _state;
-		private readonly DiffLineState[] _states;
-		private readonly int[] _nums;
-		private readonly string _ending;
 		private int _charPositions;
 
 		#endregion
@@ -50,30 +45,45 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(nums, nameof(nums));
 
 			_charPositions = -1;
-			_text	= text;
-			_state	= state;
-			_states	= states;
-			_nums	= nums;
-			_ending	= ending;
+			Text	= text;
+			State	= state;
+			States	= states;
+			Nums	= nums;
+			Ending	= ending;
 		}
 
 		#endregion
 
-		public DiffLineState State => _state;
+		public DiffLineState State { get; }
 
-		public DiffLineState[] States => _states;
+		public DiffLineState[] States { get; }
 
-		public string Text => _text;
+		public string Text { get; }
 
-		public string Ending => _ending;
+		public string Ending { get; }
+
+		public int[] Nums { get; }
+
+		public int MaxLineNum
+		{
+			get
+			{
+				int max = 0;
+				for(int i = 0; i < Nums.Length; ++i)
+				{
+					if(Nums[i] > max) max = Nums[i];
+				}
+				return max;
+			}
+		}
 
 		public int GetCharacterPositions(int tabSize)
 		{
 			if(_charPositions == -1)
 			{
-				for(int i = 0; i < _text.Length; ++i)
+				for(int i = 0; i < Text.Length; ++i)
 				{
-					switch(_text[i])
+					switch(Text[i])
 					{
 						case '\t':
 							_charPositions += tabSize - (_charPositions % tabSize);
@@ -87,35 +97,20 @@ namespace gitter.Git
 			return _charPositions;
 		}
 
-		public int[] Nums => _nums;
-
-		public int MaxLineNum
-		{
-			get
-			{
-				int max = 0;
-				for(int i = 0; i < _nums.Length; ++i)
-				{
-					if(_nums[i] > max) max = _nums[i];
-				}
-				return max;
-			}
-		}
-
 		internal void ToString(StringBuilder sb) => sb.Append(ToString());
 
 		public override string ToString()
 		{
-			switch(_state)
+			switch(State)
 			{
 				case DiffLineState.Added:
-					return "+" + _text;
+					return "+" + Text;
 				case DiffLineState.Removed:
-					return "-" + _text;
+					return "-" + Text;
 				case DiffLineState.Context:
-					return " " + _text;
+					return " " + Text;
 				default:
-					return _text;
+					return Text;
 			}
 		}
 
@@ -124,11 +119,11 @@ namespace gitter.Git
 		public DiffLine Clone()
 		{
 			return new DiffLine(
-				_state,
-				(DiffLineState[])_states.Clone(),
-				(int[])_nums.Clone(),
-				_text,
-				_ending);
+				State,
+				(DiffLineState[])States.Clone(),
+				(int[])Nums.Clone(),
+				Text,
+				Ending);
 		}
 
 		object ICloneable.Clone() => Clone();

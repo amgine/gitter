@@ -42,23 +42,11 @@ namespace gitter.Git.Gui.Controls
 
 		public event EventHandler<BoundItemActivatedEventArgs<TreeItem>> ItemActivated;
 
-		private void InvokeItemContextMenuRequested(ItemContextMenuRequestEventArgs e)
-		{
-			var handler = ItemContextMenuRequested;
-			if(handler != null)
-			{
-				handler(this, e);
-			}
-		}
+		private void OnItemContextMenuRequested(ItemContextMenuRequestEventArgs e)
+			=> ItemContextMenuRequested?.Invoke(this, e);
 
-		private void InvokeItemActivated(CustomListBoxItem item, TreeItem treeItem)
-		{
-			var handler = ItemActivated;
-			if(handler != null)
-			{
-				handler(this, new BoundItemActivatedEventArgs<TreeItem>(item, treeItem));
-			}
-		}
+		private void OnItemActivated(CustomListBoxItem item, TreeItem treeItem)
+			=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TreeItem>(item, treeItem));
 
 		#endregion
 
@@ -179,12 +167,12 @@ namespace gitter.Git.Gui.Controls
 
 		private void OnItemContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
 		{
-			InvokeItemContextMenuRequested(e);
+			OnItemContextMenuRequested(e);
 		}
 
 		private void OnSubItemActivated(object sender, BoundItemActivatedEventArgs<TreeItem> e)
 		{
-			InvokeItemActivated(e.Item, e.Object);
+			OnItemActivated(e.Item, e.Object);
 		}
 
 		public TreeDirectory Root

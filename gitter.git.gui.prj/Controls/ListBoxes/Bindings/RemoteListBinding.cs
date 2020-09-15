@@ -21,7 +21,6 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 
 	using gitter.Framework.Controls;
 

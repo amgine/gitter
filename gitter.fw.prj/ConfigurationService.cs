@@ -57,12 +57,8 @@ namespace gitter.Framework
 				{
 					Directory.CreateDirectory(_configPath);
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 					LoggingService.Global.Error(exc);
 				}
 			}
@@ -162,24 +158,16 @@ namespace gitter.Framework
 								{
 									config = new ConfigurationManager(adapter);
 								}
-								catch(Exception exc)
+								catch(Exception exc) when(!exc.IsCritical())
 								{
-									if(exc.IsCritical())
-									{
-										throw;
-									}
 									LoggingService.Global.Error(exc);
 								}
 							}
 						}
 					}
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 					LoggingService.Global.Error(exc);
 				}
 			}
@@ -200,12 +188,8 @@ namespace gitter.Framework
 					config.Save(adapter);
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				LoggingService.Global.Error(exc);
 			}
 		}

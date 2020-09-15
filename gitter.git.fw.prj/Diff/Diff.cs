@@ -25,7 +25,7 @@ namespace gitter.Git
 	using System.Text;
 
 	/// <summary>Represents patch.</summary>
-	public sealed class Diff : IEnumerable<DiffFile>, ICloneable
+	public sealed class Diff : IReadOnlyList<DiffFile>, ICloneable
 	{
 		#region Data
 
@@ -111,6 +111,8 @@ namespace gitter.Git
 				return null;
 			}
 		}
+
+		int IReadOnlyCollection<DiffFile>.Count => _files.Count;
 
 		public int FilesCount => _files.Count;
 

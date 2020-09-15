@@ -40,6 +40,7 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(new ToolStripSeparator());
 
 			Items.Add(GuiItemFactory.GetUpdateSubmodulesItem<ToolStripMenuItem>(Repository.Submodules));
+			Items.Add(GuiItemFactory.GetSyncSubmodulesItem<ToolStripMenuItem>(Repository.Submodules));
 
 			Items.Add(new ToolStripSeparator());
 

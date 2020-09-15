@@ -36,7 +36,6 @@ namespace gitter.Git.Gui.Dialogs
 		#region Data
 
 		private readonly IWorkingEnvironment _environment;
-		private readonly IGitRepositoryProvider _gitRepositoryProvider;
 		private Version _requiredVersion;
 		private Version _installedVersion;
 		private MSysGitDownloader _downloader;
@@ -54,7 +53,7 @@ namespace gitter.Git.Gui.Dialogs
 			Verify.Argument.IsNotNull(requiredVersion, nameof(requiredVersion));
 
 			_environment = environment;
-			_gitRepositoryProvider = gitRepositoryProvider;
+			GitRepositoryProvider = gitRepositoryProvider;
 			_requiredVersion = requiredVersion;
 			_installedVersion = installedVersion;
 
@@ -89,10 +88,7 @@ namespace gitter.Git.Gui.Dialogs
 			UpdateStatus();
 		}
 
-		private IGitRepositoryProvider GitRepositoryProvider
-		{
-			get { return _gitRepositoryProvider; }
-		}
+		private IGitRepositoryProvider GitRepositoryProvider { get; }
 
 		private void RefreshLatestVersion()
 		{
@@ -108,12 +104,8 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				_downloader = MSysGitDownloader.EndCreate(ar);
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				_downloader = null;
 			}
 			if(!Disposing && !IsDisposed)
@@ -122,12 +114,8 @@ namespace gitter.Git.Gui.Dialogs
 				{
 					BeginInvoke(new MethodInvoker(UpdateLatestVersion));
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 			}
 		}
@@ -142,12 +130,8 @@ namespace gitter.Git.Gui.Dialogs
 					GitRepositoryProvider.GitAccessor.InvalidateGitVersion();
 					currentVersion = GitRepositoryProvider.GitAccessor.GitVersion;
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 				_lnkDownload.Visible =
 					(currentVersion == null) ||
@@ -161,15 +145,9 @@ namespace gitter.Git.Gui.Dialogs
 			_lnkRefreshLatestVersion.Visible = true;
 		}
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrProceed; }
-		}
+		protected override string ActionVerb => Resources.StrProceed;
 
-		public Version InstalledVersion
-		{
-			get { return _installedVersion; }
-		}
+		public Version InstalledVersion => _installedVersion;
 
 		protected override void OnShown()
 		{
@@ -217,12 +195,8 @@ namespace gitter.Git.Gui.Dialogs
 				GitRepositoryProvider.GitAccessor.InvalidateGitVersion();
 				gitVersion = GitRepositoryProvider.GitAccessor.GitVersion;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				gitVersion = null;
 			}
 			_installedVersion = gitVersion;
@@ -241,7 +215,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void OnConfigureClick(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			using(var dlg = new GitOptionsPage(_gitRepositoryProvider))
+			using(var dlg = new GitOptionsPage(GitRepositoryProvider))
 			{
 				if(dlg.Run(this) == DialogResult.OK)
 				{

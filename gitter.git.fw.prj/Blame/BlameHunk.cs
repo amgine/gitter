@@ -22,11 +22,9 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text;
 
-	public sealed class BlameHunk : IEnumerable<BlameLine>
+	public sealed class BlameHunk : IReadOnlyList<BlameLine>
 	{
-		private readonly BlameCommit _commit;
 		private readonly List<BlameLine> _lines;
 
 		public BlameHunk(BlameCommit commit, IEnumerable<BlameLine> lines)
@@ -34,36 +32,23 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(commit, nameof(commit));
 			Verify.Argument.IsNotNull(lines, nameof(lines));
 			
-			_commit = commit;
+			Commit = commit;
 			_lines = new List<BlameLine>(lines);
 		}
 
-		public BlameLine this[int index]
-		{
-			get { return _lines[index]; }
-		}
+		public BlameLine this[int index] => _lines[index];
 
-		public int Count
-		{
-			get { return _lines.Count; }
-		}
+		public int Count => _lines.Count;
 
-		public BlameCommit Commit
-		{
-			get { return _commit; }
-		}
+		public BlameCommit Commit { get; }
 
 		#region IEnumerable<BlameLine>
 
 		public IEnumerator<BlameLine> GetEnumerator()
-		{
-			return _lines.GetEnumerator();
-		}
+			=> _lines.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _lines.GetEnumerator();
-		}
+			=> _lines.GetEnumerator();
 
 		#endregion
 	}

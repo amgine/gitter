@@ -25,104 +25,50 @@ namespace gitter.Git
 	/// <summary>Represents a commit, referenced by a blame output line.</summary>
 	public sealed class BlameCommit
 	{
-		#region Data
-
-		private readonly Hash _hash;
-		private readonly string _author;
-		private readonly string _authorEmail;
-		private readonly DateTime _authorDate;
-		private readonly string _authorTimeZone;
-		private readonly string _committer;
-		private readonly string _committerEmail;
-		private readonly DateTime _commitDate;
-		private readonly string _committerTimeZone;
-		private readonly string _summary;
-		private readonly bool _isBoundary;
-		private readonly string _previous;
-
-		#endregion
-
-		#region .ctor
-
 		public BlameCommit(
 			Hash hash,
 			string author, string authorEmail, DateTime authorDate, string authorTimeZone,
 			string committer, string committerEmail, DateTime commitDate, string committerTimeZone,
 			string summary, bool isBoundary, string previous)
 		{
-			_hash = hash;
-			_author = author;
-			_authorEmail = authorEmail;
-			_authorDate = authorDate;
-			_authorTimeZone = authorTimeZone;
-			_committer = committer;
-			_committerEmail = committerEmail;
-			_commitDate = commitDate;
-			_committerTimeZone = committerTimeZone;
-			_summary = summary;
-			_isBoundary = isBoundary;
-			_previous = previous;
+			Hash              = hash;
+			Author            = author;
+			AuthorEmail       = authorEmail;
+			AuthorDate        = authorDate;
+			AuthorTimeZone    = authorTimeZone;
+			Committer         = committer;
+			CommitterEmail    = committerEmail;
+			CommitDate        = commitDate;
+			CommitterTimeZone = committerTimeZone;
+			Summary           = summary;
+			IsBoundary        = isBoundary;
+			Previous          = previous;
 		}
 
-		#endregion
+		public Hash Hash { get; }
 
-		#region Properties
+		public string Summary { get; }
 
-		public Hash Hash
-		{
-			get { return _hash; }
-		}
+		public string Author { get; }
 
-		public string Summary
-		{
-			get { return _summary; }
-		}
+		public string AuthorTimeZone { get; }
 
-		public string Author
-		{
-			get { return _author; }
-		}
+		public DateTime AuthorDate { get; }
 
-		public DateTime AuthorDate
-		{
-			get { return _authorDate; }
-		}
+		public string AuthorEmail { get; }
 
-		public string AuthorEmail
-		{
-			get { return _authorEmail; }
-		}
+		public string Committer { get; }
 
-		public string Committer
-		{
-			get { return _committer; }
-		}
+		public string CommitterTimeZone { get; }
 
-		public string CommitterEmail
-		{
-			get { return _committerEmail; }
-		}
+		public string CommitterEmail { get; }
 
-		public DateTime CommitDate
-		{
-			get { return _commitDate; }
-		}
+		public DateTime CommitDate { get; }
 
-		public bool IsBoundary
-		{
-			get { return _isBoundary; }
-		}
+		public bool IsBoundary { get; }
 
-		public string Previous
-		{
-			get { return _previous; }
-		}
+		public string Previous { get; }
 
-		#endregion
-
-		public override string ToString()
-		{
-			return _summary;
-		}
+		public override string ToString() =>Summary;
 	}
 }

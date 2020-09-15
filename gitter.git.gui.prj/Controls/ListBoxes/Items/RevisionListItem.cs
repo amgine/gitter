@@ -40,7 +40,6 @@ namespace gitter.Git.Gui.Controls
 		#region Data
 
 		private readonly List<PointerBounds> _drawnPointers;
-		private GraphAtom[] _graph;
 
 		#endregion
 
@@ -58,11 +57,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public GraphAtom[] Graph
-		{
-			get { return _graph; }
-			set { _graph = value; }
-		}
+		public GraphAtom[] Graph { get; set; }
 
 		#endregion
 

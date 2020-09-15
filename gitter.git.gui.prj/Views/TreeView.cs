@@ -412,12 +412,8 @@ namespace gitter.Git.Gui.Views
 			{
 				File.Delete(path);
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				LoggingService.Global.Warning(exc, "Failed to remove temporary file: '{0}'", path);
 			}
 			process.Dispose();

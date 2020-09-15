@@ -51,10 +51,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Overrides
 
-		protected override Image Image
-		{
-			get { return ImgBranchRemote; }
-		}
+		protected override Image Image => ImgBranchRemote;
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{

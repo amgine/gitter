@@ -60,12 +60,8 @@ namespace gitter.Git.Gui.Controls
 							Items.Add(new ToolStripSeparator());
 						}
 					}
-					catch(Exception exc)
+					catch(Exception exc) when(!exc.IsCritical())
 					{
-						if(exc.IsCritical())
-						{
-							throw;
-						}
 					}
 				}
 				if(indexDiff.Cached)

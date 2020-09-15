@@ -35,15 +35,9 @@ namespace gitter.TeamCity
 			_cache = cache;
 		}
 
-		public object SyncRoot
-		{
-			get { return _cache.SyncRoot; }
-		}
+		public object SyncRoot => _cache.SyncRoot;
 
-		protected TeamCityServiceContext Context
-		{
-			get { return _cache.Context; }
-		}
+		protected TeamCityServiceContext Context => _cache.Context;
 
 		public abstract void Refresh();
 

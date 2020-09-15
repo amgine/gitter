@@ -31,62 +31,28 @@ namespace gitter.Git.Gui.Controls
 		{
 			if(item1.GetType() == item2.GetType())
 			{
-				var branchItem = item1 as BranchListItem;
-				if(branchItem != null)
+				switch(item1)
 				{
-					return BranchListItem.CompareByName(branchItem, (BranchListItem)item2);
+					case BranchListItem branchItem:
+						return BranchListItem.CompareByName(branchItem, (BranchListItem)item2);
+					case RemoteBranchListItem remoteBranchItem:
+						return RemoteBranchListItem.CompareByName(remoteBranchItem, (RemoteBranchListItem)item2);
+					case RemoteListItem remoteItem:
+						return RemoteListItem.CompareByName(remoteItem, (RemoteListItem)item2);
+					case TagListItem tagItem:
+						return TagListItem.CompareByName(tagItem, (TagListItem)item2);
+					default: return 0;
 				}
-				var remoeBranchItem = item1 as RemoteBranchListItem;
-				if(remoeBranchItem != null)
-				{
-					return RemoteBranchListItem.CompareByName(branchItem, (RemoteBranchListItem)item2);
-				}
-				var remoteItem = item1 as RemoteListItem;
-				if(remoteItem != null)
-				{
-					return RemoteListItem.CompareByName(remoteItem, (RemoteListItem)item2);
-				}
-				var tagItem = item1 as TagListItem;
-				if(tagItem != null)
-				{
-					return TagListItem.CompareByName(tagItem, (TagListItem)item2);
-				}
-				return 0;
 			}
 			else
 			{
-				var branchItem = item1 as BranchListItem;
-				if(branchItem != null)
+				switch(item1)
 				{
-					return -1;
+					case BranchListItem _:       return -1;
+					case RemoteBranchListItem _: return item2 is BranchListItem ? 1 : -1;
+					case RemoteListItem _:       return item2 is TagListItem ? 1 : -1;
+					default: return 1;
 				}
-				var remoteBranchItem = item1 as RemoteBranchListItem;
-				if(remoteBranchItem != null)
-				{
-					var branchItem2 = item2 as BranchListItem;
-					if(branchItem2 != null)
-					{
-						return 1;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-				var remoteListItem = item1 as RemoteListItem;
-				if(remoteListItem != null)
-				{
-					var tagItem2 = item2 as TagListItem;
-					if(tagItem2 == null)
-					{
-						return -1;
-					}
-					else
-					{
-						return 1;
-					}
-				}
-				return 1;
 			}
 		}
 	}
@@ -104,18 +70,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public static int CompareByName(CustomListBoxItem item1, CustomListBoxItem item2)
-		{
-			var i1 = item1 as ReferenceListItemBase<T>;
-			var i2 = item2 as ReferenceListItemBase<T>;
-			if(i1 != null && i2 != null)
-			{
-				return CompareByName(i1, i2);
-			}
-			else
-			{
-				return 0;
-			}
-		}
+			=> item1 is ReferenceListItemBase<T> i1 && item2 is ReferenceListItemBase<T> i2
+				? CompareByName(i1, i2)
+				: 0;
 
 		public static int CompareByPosition(ReferenceListItemBase<T> item1, ReferenceListItemBase<T> item2)
 		{
@@ -125,18 +82,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public static int CompareByPosition(CustomListBoxItem item1, CustomListBoxItem item2)
-		{
-			var i1 = item1 as ReferenceListItemBase<T>;
-			var i2 = item2 as ReferenceListItemBase<T>;
-			if(i1 != null && i2 != null)
-			{
-				return CompareByPosition(i1, i2);
-			}
-			else
-			{
-				return 0;
-			}
-		}
+			=> item1 is ReferenceListItemBase<T> i1 && item2 is ReferenceListItemBase<T> i2
+				? CompareByPosition(i1, i2)
+				: 0;
 
 		#endregion
 
@@ -186,19 +134,13 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			switch((ColumnId)measureEventArgs.SubItemId)
+			=> (ColumnId)measureEventArgs.SubItemId switch
 			{
-				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(Image, DataContext.Name);
-				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.HashString);
-				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHashString);
-				default:
-					return Size.Empty;
-			}
-		}
+				ColumnId.Name     => measureEventArgs.MeasureImageAndText(Image, DataContext.Name),
+				ColumnId.Hash     => HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.HashString),
+				ColumnId.TreeHash => TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHashString),
+				_ => Size.Empty,
+			};
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{

@@ -1787,4 +1787,13 @@ Proceed?</value>
   <data name="StrsQuitingRevert" xml:space="preserve">
     <value>Quiting revert</value>
   </data>
+  <data name="StrsSynchronizingSubmodule" xml:space="preserve">
+    <value>Synchronizing submodule</value>
+  </data>
+  <data name="StrsSynchronizingSubmodules" xml:space="preserve">
+    <value>Synchronizing submodules</value>
+  </data>
+  <data name="StrSync" xml:space="preserve">
+    <value>Synchronize</value>
+  </data>
 </root>

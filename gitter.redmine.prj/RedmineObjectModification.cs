@@ -27,20 +27,15 @@ namespace gitter.Redmine
 	public abstract class RedmineObjectModification<T> : RedmineObjectDefinition<T>
 		where T : RedmineObject
 	{
-		private readonly T _original;
-
 		protected RedmineObjectModification(T original)
 		{
 			Verify.Argument.IsNotNull(original, nameof(original));
 
-			_original = original;
+			Original = original;
 
 			ResetCore();
 		}
 
-		protected T Original
-		{
-			get { return _original; }
-		}
+		protected T Original { get; }
 	}
 }

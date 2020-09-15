@@ -106,12 +106,8 @@ namespace gitter.Git
 				_gitCLI.InvalidateGitVersion();
 				version = _gitCLI.GitVersion;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 			return version;
 		}
@@ -140,12 +136,8 @@ namespace gitter.Git
 						{
 							BeginInvoke(new MethodInvoker(UpdateLatestVersion));
 						}
-						catch(Exception exc)
+						catch(Exception exc) when(!exc.IsCritical())
 						{
-							if(exc.IsCritical())
-							{
-								throw;
-							}
 						}
 					}
 				});
@@ -264,12 +256,8 @@ namespace gitter.Git
 			{
 				ProgressForm.MonitorTaskAsModalWindow(this, "MSysGit Installation", _downloader.DownloadAndInstallAsync);
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				GitterApplication.MessageBoxService.Show(
 					this, exc.Message, "MSysGit Installation Failed", MessageBoxButton.Close, MessageBoxIcon.Error);
 				return;

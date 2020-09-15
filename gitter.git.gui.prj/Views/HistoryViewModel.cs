@@ -22,42 +22,17 @@ namespace gitter.Git.Gui.Views
 {
 	public class HistoryViewModel
 	{
-		#region .ctor
-
 		public HistoryViewModel(ILogSource logSource)
 		{
 			LogSource = logSource;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public ILogSource LogSource { get; }
 
-		#endregion
-
-		#region Methods
-
 		public override int GetHashCode()
-		{
-			return LogSource == null ? 0 : LogSource.GetHashCode();
-		}
+			=> LogSource == null ? 0 : LogSource.GetHashCode();
 
 		public override bool Equals(object obj)
-		{
-			if(obj == null)
-			{
-				return false;
-			}
-			var other = obj as HistoryViewModel;
-			if(other == null)
-			{
-				return false;
-			}
-			return object.Equals(LogSource, other.LogSource);
-		}
-
-		#endregion
+			=> obj is HistoryViewModel other && Equals(LogSource, other.LogSource);
 	}
 }

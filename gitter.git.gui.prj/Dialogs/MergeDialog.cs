@@ -325,12 +325,8 @@ namespace gitter.Git.Gui.Dialogs
 				{
 					_txtMessage.Text = _repository.Head.FormatMergeMessage(revisions);
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 			}
 			else
@@ -339,12 +335,8 @@ namespace gitter.Git.Gui.Dialogs
 				{
 					_txtMessage.Text = _repository.Head.FormatMergeMessage(revisions[0]);
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 			}
 		}

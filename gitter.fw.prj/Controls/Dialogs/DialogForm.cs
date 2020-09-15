@@ -206,12 +206,8 @@ namespace gitter.Framework
 							{
 								HelperExecutables.ExecuteWithAdministartorRights(action);
 							}
-							catch(Exception exc)
+							catch(Exception exc) when(!exc.IsCritical())
 							{
-								if(exc.IsCritical())
-								{
-									throw;
-								}
 								GitterApplication.MessageBoxService.Show(
 									this,
 									Resources.ErrSomeOptionsCouldNotBeApplied,

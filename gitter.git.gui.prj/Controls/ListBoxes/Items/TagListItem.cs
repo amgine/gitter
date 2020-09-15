@@ -30,14 +30,8 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="Tag"/> object.</summary>
 	public class TagListItem : ReferenceListItemBase<Tag>
 	{
-		#region Static
-
 		private static readonly Bitmap ImgTag = CachedResources.Bitmaps["ImgTag"];
 		private static readonly Bitmap ImgTagAnnotated = CachedResources.Bitmaps["ImgTagAnnotated"];
-
-		#endregion
-
-		#region .ctor
 
 		/// <summary>Create <see cref="TagListItem"/>.</summary>
 		/// <param name="tag">Related <see cref="Tag"/>.</param>
@@ -48,14 +42,8 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(tag, nameof(tag));
 		}
 
-		#endregion
-
-		#region Overrides
-
 		protected override Image Image
-		{
-			get { return (DataContext.TagType == TagType.Annotated) ? ImgTagAnnotated : ImgTag; }
-		}
+			=> DataContext.TagType == TagType.Annotated ? ImgTagAnnotated : ImgTag;
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
@@ -63,7 +51,5 @@ namespace gitter.Git.Gui.Controls
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
-
-		#endregion
 	}
 }

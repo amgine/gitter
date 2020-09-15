@@ -334,12 +334,8 @@ namespace gitter.Git.Gui
 					File.WriteAllBytes(outputPath, patch);
 					return GuiCommandStatus.Completed;
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 					GitterApplication.MessageBoxService.Show(
 						parent,
 						exc.Message,
@@ -693,6 +689,36 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		public static GuiCommandStatus SyncSubmodule(IWin32Window parent, Submodule submodule)
+		{
+			Verify.Argument.IsNotNull(submodule, nameof(submodule));
+
+			if(parent == null)
+			{
+				parent = GitterApplication.MainForm;
+			}
+			try
+			{
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync + ": " + submodule.Name,
+					progress => submodule.SyncAsync(recursive: true, progress: progress));
+				return GuiCommandStatus.Completed;
+			}
+			catch(OperationCanceledException)
+			{
+				return GuiCommandStatus.Canceled;
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					parent,
+					exc.Message,
+					string.Format(Resources.ErrFailedToSyncSubmodule, submodule.Name),
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return GuiCommandStatus.Faulted;
+			}
+		}
+
 		public static GuiCommandStatus UpdateSubmodules(IWin32Window parent, SubmodulesCollection submodules)
 		{
 			Verify.Argument.IsNotNull(submodules, nameof(submodules));
@@ -716,6 +742,36 @@ namespace gitter.Git.Gui
 					parent,
 					exc.Message,
 					Resources.ErrFailedToUpdateSubmodule,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return GuiCommandStatus.Faulted;
+			}
+		}
+
+		public static GuiCommandStatus SyncSubmodules(IWin32Window parent, SubmodulesCollection submodules)
+		{
+			Verify.Argument.IsNotNull(submodules, nameof(submodules));
+
+			if(parent == null)
+			{
+				parent = GitterApplication.MainForm;
+			}
+			try
+			{
+				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync,
+					progress => submodules.SyncAsync(recursive: true, progress: progress));
+				return GuiCommandStatus.Completed;
+			}
+			catch(OperationCanceledException)
+			{
+				return GuiCommandStatus.Canceled;
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					parent,
+					exc.Message,
+					Resources.ErrFailedToSyncSubmodule,
 					MessageBoxButton.Close,
 					MessageBoxIcon.Error);
 				return GuiCommandStatus.Faulted;

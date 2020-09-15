@@ -1460,18 +1460,12 @@ namespace gitter.Git.AccessLayer.CLI
 
 			switch(output.ExitCode)
 			{
-				case 0:
-					return;
-				case 1:
-					throw new InvalidConfigFileException(output.Error);
-				case 2:
-					throw new CannotWriteConfigFileException(output.Error);
-				case 3:
-					throw new NoSectionProvidedException(output.Error);
-				case 4:
-					throw new InvalidSectionOrKeyException(output.Error);
-				case 5:
-					throw new ConfigParameterDoesNotExistException(output.Error);
+				case 0: return;
+				case 1: throw new InvalidConfigFileException(output.Error);
+				case 2: throw new CannotWriteConfigFileException(output.Error);
+				case 3: throw new NoSectionProvidedException(output.Error);
+				case 4: throw new InvalidSectionOrKeyException(output.Error);
+				case 5: throw new ConfigParameterDoesNotExistException(output.Error);
 				default:
 					output.Throw();
 					break;

@@ -27,18 +27,12 @@ namespace gitter.Git.AccessLayer
 	/// <summary>Information about <see cref="Submodule"/>.</summary>
 	public sealed class SubmoduleData : INamedObject
 	{
-		#region .ctor
-
 		/// <summary>Create <see cref="SubmoduleData"/>.</summary>
 		/// <param name="name">Submodule name.</param>
 		public SubmoduleData(string name)
 		{
 			Name = name;
 		}
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>Submodule name.</summary>
 		public string Name { get; }
@@ -48,7 +42,5 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>Submodule URL.</summary>
 		public string Url { get; set; }
-
-		#endregion
 	}
 }

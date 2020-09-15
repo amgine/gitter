@@ -2004,6 +2004,37 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
+		public static T GetSyncSubmoduleItem<T>(Submodule submodule)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsValidGitObject(submodule, nameof(submodule));
+
+			var item = new T()
+			{
+				Text  = Resources.StrSync,
+				Image = CachedResources.Bitmaps["ImgSync"],
+				Tag   = submodule,
+			};
+			item.Click += OnSyncSubmoduleClick;
+			return item;
+		}
+
+		public static T GetSyncSubmodulesItem<T>(SubmodulesCollection submodules)
+			where T : ToolStripItem, new()
+		{
+			Verify.Argument.IsNotNull(submodules, nameof(submodules));
+
+			var item = new T()
+			{
+				Text    = Resources.StrSync,
+				Image   = CachedResources.Bitmaps["ImgSync"],
+				Tag     = submodules,
+				Enabled = submodules.Count != 0,
+			};
+			item.Click += OnSyncSubmodulesClick;
+			return item;
+		}
+
 		public static T GetUpdateSubmodulesItem<T>(SubmodulesCollection submodules)
 			where T : ToolStripItem, new()
 		{
@@ -2049,6 +2080,15 @@ namespace gitter.Git.Gui
 			GuiCommands.UpdateSubmodule(parent, submodule);
 		}
 
+		static void OnSyncSubmoduleClick(object sender, EventArgs e)
+		{
+			var item      = (ToolStripItem)sender;
+			var submodule = (Submodule)item.Tag;
+			var parent    = Utility.GetParentControl(item);
+
+			GuiCommands.SyncSubmodule(parent, submodule);
+		}
+
 		static void OnUpdateSubmodulesClick(object sender, EventArgs e)
 		{
 			var item       = (ToolStripItem)sender;
@@ -2056,6 +2096,15 @@ namespace gitter.Git.Gui
 			var parent     = Utility.GetParentControl(item);
 
 			GuiCommands.UpdateSubmodules(parent, submodules);
+		}
+
+		static void OnSyncSubmodulesClick(object sender, EventArgs e)
+		{
+			var item       = (ToolStripItem)sender;
+			var submodules = (SubmodulesCollection)item.Tag;
+			var parent     = Utility.GetParentControl(item);
+
+			GuiCommands.SyncSubmodules(parent, submodules);
 		}
 
 		#endregion
@@ -2916,12 +2965,8 @@ namespace gitter.Git.Gui
 									ParameterName = parameter.Name,
 								});
 						}
-						catch(Exception exception)
+						catch(Exception exception) when(!exception.IsCritical())
 						{
-							if(exception.IsCritical())
-							{
-								throw;
-							}
 						}
 						try
 						{
@@ -2932,12 +2977,8 @@ namespace gitter.Git.Gui
 									ParameterName = parameter.Name,
 								});
 						}
-						catch(Exception exception)
+						catch(Exception exception) when(!exception.IsCritical())
 						{
-							if(exception.IsCritical())
-							{
-								throw;
-							}
 						}
 						parameter.Refresh();
 					}
@@ -3465,12 +3506,8 @@ namespace gitter.Git.Gui
 					}
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 			process.Dispose();
 		}

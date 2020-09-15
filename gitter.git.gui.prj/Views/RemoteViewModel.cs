@@ -22,42 +22,17 @@ namespace gitter.Git.Gui.Views
 {
 	public class RemoteViewModel
 	{
-		#region .ctor
-
 		public RemoteViewModel(Remote remote)
 		{
 			Remote = remote;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public Remote Remote { get; }
 
-		#endregion
-
-		#region Methods
-
 		public override int GetHashCode()
-		{
-			return Remote != null ? Remote.GetHashCode() : 0;
-		}
+			=> Remote != null ? Remote.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
-		{
-			if(obj == null)
-			{
-				return false;
-			}
-			var other = obj as RemoteViewModel;
-			if(other == null)
-			{
-				return false;
-			}
-			return object.Equals(Remote, other.Remote);
-		}
-
-		#endregion
+			=> obj is RemoteViewModel other && Equals(Remote, other.Remote);
 	}
 }

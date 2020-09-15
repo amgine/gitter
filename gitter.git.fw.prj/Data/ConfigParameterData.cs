@@ -43,7 +43,7 @@ namespace gitter.Git.AccessLayer
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 			Verify.Argument.IsNotNull(value, nameof(value));
-			Verify.Argument.AreNotEqual(ConfigFile.Other, configFile, "configFile", string.Empty);
+			Verify.Argument.AreNotEqual(ConfigFile.Other, configFile, nameof(configFile), string.Empty);
 
 			Name = name;
 			Value = value;

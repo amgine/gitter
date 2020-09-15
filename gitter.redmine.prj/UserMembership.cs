@@ -25,30 +25,17 @@ namespace gitter.Redmine
 
 	public sealed class UserMembership
 	{
-		private readonly User _user;
-		private readonly Project _project;
-		private readonly IEnumerable<UserRole> _userRoles;
-
 		internal UserMembership(User user, Project project, IEnumerable<UserRole> userRoles)
 		{
-			_user = user;
-			_project = project;
-			_userRoles = userRoles;
+			User      = user;
+			Project   = project;
+			UserRoles = userRoles;
 		}
 
-		public User User
-		{
-			get { return _user; }
-		}
+		public User User { get; }
 
-		public Project Project
-		{
-			get { return _project; }
-		}
+		public Project Project { get; }
 
-		public IEnumerable<UserRole> UserRoles
-		{
-			get { return _userRoles; }
-		}
+		public IEnumerable<UserRole> UserRoles { get; }
 	}
 }

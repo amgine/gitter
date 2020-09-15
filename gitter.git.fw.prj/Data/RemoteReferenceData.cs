@@ -24,8 +24,6 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class RemoteReferenceData
 	{
-		#region .ctor
-
 		public RemoteReferenceData(string name, Hash hash)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
@@ -33,10 +31,6 @@ namespace gitter.Git.AccessLayer
 			Name = name;
 			Hash = hash;
 		}
-
-		#endregion
-
-		#region Properties
 
 		public TagType TagType { get; set; }
 
@@ -55,8 +49,6 @@ namespace gitter.Git.AccessLayer
 		public string Name { get; }
 
 		public Hash Hash { get; }
-
-		#endregion
 
 		public override string ToString() => Name;
 	}

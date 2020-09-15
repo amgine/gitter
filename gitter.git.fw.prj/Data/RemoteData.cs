@@ -26,8 +26,6 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class RemoteData : INamedObject
 	{
-		#region .ctor
-
 		public RemoteData(string name, string fetchUrl, string pushUrl)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
@@ -39,17 +37,11 @@ namespace gitter.Git.AccessLayer
 			PushUrl  = pushUrl;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public string Name { get; }
 
 		public string FetchUrl { get; }
 
 		public string PushUrl { get; }
-
-		#endregion
 
 		public override string ToString() => Name;
 	}

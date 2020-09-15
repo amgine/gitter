@@ -49,14 +49,18 @@ namespace gitter.Git
 			return new SubmoduleEventArgs(item);
 		}
 
-		private SubmoduleUpdateParameters GetUpdateParameters()
-		{
-			return new SubmoduleUpdateParameters()
+		private UpdateSubmoduleParameters GetUpdateParameters()
+			=> new UpdateSubmoduleParameters
 			{
 				Recursive = true,
 				Init = true,
 			};
-		}
+
+		private SyncSubmoduleParameters GetSyncParameters(bool recursive)
+			=> new SyncSubmoduleParameters
+			{
+				Recursive = recursive,
+			};
 
 		public void Update()
 		{
@@ -64,11 +68,27 @@ namespace gitter.Git
 			Repository.Accessor.UpdateSubmodule.Invoke(parameters);
 		}
 
-		public Task UpdateAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task UpdateAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			progress?.Report(new OperationProgress(Resources.StrsUpdatingSubmodules.AddEllipsis()));
 			var parameters = GetUpdateParameters();
 			return Repository.Accessor.UpdateSubmodule.InvokeAsync(parameters, progress, cancellationToken);
+		}
+
+		public void Sync(bool recursive = true)
+		{
+			var parameters = GetSyncParameters(recursive);
+			Repository.Accessor.SyncSubmodule.Invoke(parameters);
+		}
+
+		public async Task SyncAsync(bool recursive = true, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		{
+			progress?.Report(new OperationProgress(Resources.StrsSynchronizingSubmodules.AddEllipsis()));
+			var parameters = GetSyncParameters(recursive);
+			await Repository.Accessor.SyncSubmodule
+				.InvokeAsync(parameters, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			Refresh();
 		}
 
 		public bool ExistsPath(string path)
@@ -220,12 +240,8 @@ namespace gitter.Git
 				{
 					cfgFile = new ConfigurationFile(Repository, GitConstants.SubmodulesConfigFile, true);
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 					skipUpdate = true;
 				}
 				if(cfgFile != null)

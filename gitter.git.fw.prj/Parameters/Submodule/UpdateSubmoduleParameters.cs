@@ -22,12 +22,8 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	public sealed class SubmoduleUpdateParameters
+	public sealed class UpdateSubmoduleParameters
 	{
-		public SubmoduleUpdateParameters()
-		{
-		}
-
 		public string Path { get; set; }
 
 		public bool Init { get; set; }

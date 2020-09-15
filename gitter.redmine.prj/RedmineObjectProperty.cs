@@ -24,31 +24,19 @@ namespace gitter.Redmine
 
 	public abstract class RedmineObjectProperty
 	{
-		private readonly string _xmlNodeName;
-		private readonly string _name;
-
 		internal RedmineObjectProperty(string xmlNodeName, string name)
 		{
-			_xmlNodeName = xmlNodeName;
-			_name = name;
+			XmlNodeName = xmlNodeName;
+			Name        = name;
 		}
 
-		public string XmlNodeName
-		{
-			get { return _xmlNodeName; }
-		}
+		public string XmlNodeName { get; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		public abstract Type Type { get; }
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 
 	public sealed class RedmineObjectProperty<T> : RedmineObjectProperty
@@ -58,10 +46,7 @@ namespace gitter.Redmine
 		{
 		}
 
-		public override Type Type
-		{
-			get { return typeof(T); }
-		}
+		public override Type Type => typeof(T);
 
 		public T GetValue(RedmineObject obj)
 		{

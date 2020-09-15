@@ -30,13 +30,6 @@ namespace gitter.Git.Gui.Controls
 
 	sealed class FilesToCleanBinding : AsyncDataBinding<IList<TreeItem>>
 	{
-		#region Data
-
-		private readonly Repository _repository;
-		private readonly TreeListBox _treeListBox;
-
-		#endregion
-
 		#region .ctor
 
 		public FilesToCleanBinding(Repository repository, TreeListBox treeListBox)
@@ -44,8 +37,8 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(treeListBox, nameof(treeListBox));
 
-			_repository  = repository;
-			_treeListBox = treeListBox;
+			Repository  = repository;
+			TreeListBox = treeListBox;
 
 			Progress = treeListBox.ProgressMonitor;
 		}
@@ -54,39 +47,17 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		private TreeListBox TreeListBox
-		{
-			get { return _treeListBox; }
-		}
+		private TreeListBox TreeListBox { get; }
 
-		public string IncludePattern
-		{
-			get;
-			set;
-		}
+		public string IncludePattern { get; set; }
 
-		public string ExcludePattern
-		{
-			get;
-			set;
-		}
+		public string ExcludePattern { get; set; }
 
-		public CleanFilesMode CleanFilesMode
-		{
-			get;
-			set;
-		}
+		public CleanFilesMode CleanFilesMode { get; set; }
 
-		public bool IncludeDirectories
-		{
-			get;
-			set;
-		}
+		public bool IncludeDirectories { get; set; }
 
 		#endregion
 

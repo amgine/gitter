@@ -22,42 +22,17 @@ namespace gitter.Git.Gui.Views
 {
 	public class BlameViewModel
 	{
-		#region .ctor
-
 		public BlameViewModel(IBlameSource blameSource)
 		{
 			BlameSource = blameSource;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public IBlameSource BlameSource { get; }
 
-		#endregion
-
-		#region Methods
-
 		public override int GetHashCode()
-		{
-			return BlameSource != null ? BlameSource.GetHashCode() : 0;
-		}
+			=> BlameSource != null ? BlameSource.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
-		{
-			if(obj == null)
-			{
-				return false;
-			}
-			var other = obj as BlameViewModel;
-			if(other == null)
-			{
-				return false;
-			}
-			return object.Equals(BlameSource, other.BlameSource);
-		}
-
-		#endregion
+			=> obj is BlameViewModel other && Equals(BlameSource, other.BlameSource);
 	}
 }

@@ -25,8 +25,6 @@ namespace gitter.Git.AccessLayer
 
 	public sealed class ReferencesData
 	{
-		#region .ctor
-
 		public ReferencesData(IList<BranchData> heads, IList<BranchData> remotes, IList<TagData> tags, RevisionData stash)
 		{
 			Heads = heads;
@@ -35,10 +33,6 @@ namespace gitter.Git.AccessLayer
 			Stash = stash;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public IList<BranchData> Heads { get; }
 
 		public IList<BranchData> Remotes { get; }
@@ -46,7 +40,5 @@ namespace gitter.Git.AccessLayer
 		public IList<TagData> Tags { get; }
 
 		public RevisionData Stash { get; }
-
-		#endregion
 	}
 }

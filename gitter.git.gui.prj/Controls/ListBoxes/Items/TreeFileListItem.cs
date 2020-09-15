@@ -113,12 +113,8 @@ namespace gitter.Git.Gui.Controls
 					return null;
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				return null;
 			}
 		}
@@ -137,10 +133,8 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		protected override string GetItemType()
-		{
-			return "";// Utility.GetFileType(Data.FullPath, false, Data.Status == GitObjectStatus.Removed);
-		}
+		protected override string GetItemType() => "";
+		// Utility.GetFileType(Data.FullPath, false, Data.Status == GitObjectStatus.Removed);
 	}
 
 	public class WorktreeConflictedFileItem : TreeFileListItem

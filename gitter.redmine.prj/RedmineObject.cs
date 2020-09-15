@@ -33,25 +33,12 @@ namespace gitter.Redmine
 
 		#endregion
 
-		#region Data
-
-		private readonly RedmineServiceContext _context;
-		private readonly int _id;
-
-		#endregion
-
 		#region Events
 
 		public event EventHandler<RedmineObjectPropertyChangedEventArgs> PropertyChanged;
 
 		protected void OnPropertyChanged(RedmineObjectProperty property)
-		{
-			var handler = PropertyChanged;
-			if(handler != null)
-			{
-				handler(this, new RedmineObjectPropertyChangedEventArgs(property));
-			}
-		}
+			=> PropertyChanged?.Invoke(this, new RedmineObjectPropertyChangedEventArgs(property));
 
 		#endregion
 
@@ -61,8 +48,8 @@ namespace gitter.Redmine
 		{
 			Verify.Argument.IsNotNull(context, nameof(context));
 
-			_context = context;
-			_id = id;
+			Context = context;
+			Id      = id;
 		}
 
 		protected RedmineObject(RedmineServiceContext context, XmlNode node)
@@ -70,8 +57,8 @@ namespace gitter.Redmine
 			Verify.Argument.IsNotNull(context, nameof(context));
 			Verify.Argument.IsNotNull(node, nameof(node));
 
-			_context	= context;
-			_id			= RedmineUtility.LoadInt(node[IdProperty.XmlNodeName]);
+			Context	= context;
+			Id      = RedmineUtility.LoadInt(node[IdProperty.XmlNodeName]);
 		}
 
 		#endregion
@@ -83,10 +70,7 @@ namespace gitter.Redmine
 			Verify.Argument.IsNotNull(node, nameof(node));
 		}
 
-		public virtual void Update()
-		{
-			throw new NotSupportedException();
-		}
+		public virtual void Update() => throw new NotSupportedException();
 
 		public object GetValue(RedmineObjectProperty property)
 		{
@@ -108,15 +92,9 @@ namespace gitter.Redmine
 
 		#region Properties
 
-		public int Id
-		{
-			get { return _id; }
-		}
+		public int Id { get; }
 
-		public RedmineServiceContext Context
-		{
-			get { return _context; }
-		}
+		public RedmineServiceContext Context { get; }
 
 		#endregion
 	}

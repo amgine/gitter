@@ -21,8 +21,6 @@
 namespace gitter.TeamCity
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
 	using System.Text;
 	using System.Drawing;
 	using System.Windows.Forms;
@@ -37,27 +35,13 @@ namespace gitter.TeamCity
 
 	public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 	{
-		private static IWorkingEnvironment _environment;
+		public static IWorkingEnvironment Environment { get; private set; }
 
-		public static IWorkingEnvironment Environment
-		{
-			get { return _environment; }
-		}
+		public string Name => "teamcity";
 
-		public string Name
-		{
-			get { return "teamcity"; }
-		}
+		public string DisplayName => Resources.StrTeamCity;
 
-		public string DisplayName
-		{
-			get { return Resources.StrTeamCity; }
-		}
-
-		public Image Icon
-		{
-			get { return CachedResources.Bitmaps["ImgTeamCity"]; }
-		}
+		public Image Icon => CachedResources.Bitmaps["ImgTeamCity"];
 
 		/// <summary>Prepare for working inside specified <paramref name="environment"/>.</summary>
 		/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
@@ -68,7 +52,7 @@ namespace gitter.TeamCity
 
 			environment.ViewDockService.RegisterFactory(new BuildTypeBuildsViewFactory());
 
-			_environment = environment;
+			Environment = environment;
 			return true;
 		}
 
@@ -99,7 +83,7 @@ namespace gitter.TeamCity
 
 		public Control CreateSetupDialog(IRepository repository)
 		{
-			Verify.Argument.IsNotNull(repository, "environment");
+			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			return new ProviderSetupControl(repository);
 		}

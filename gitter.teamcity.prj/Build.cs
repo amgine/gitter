@@ -28,13 +28,13 @@ namespace gitter.TeamCity
 		#region Static
 
 		public static readonly TeamCityObjectProperty<BuildStatus> StatusProperty =
-			new TeamCityObjectProperty<BuildStatus>("status", "Status");
+			new TeamCityObjectProperty<BuildStatus>("status", nameof(Status));
 		public static readonly TeamCityObjectProperty<BuildType> BuildTypeProperty =
-			new TeamCityObjectProperty<BuildType>("buildTypeId", "BuildType");
+			new TeamCityObjectProperty<BuildType>("buildTypeId", nameof(BuildType));
 		public static readonly TeamCityObjectProperty<string> NumberProperty =
-			new TeamCityObjectProperty<string>("number", "Number");
+			new TeamCityObjectProperty<string>("number", nameof(Number));
 		public static readonly TeamCityObjectProperty<DateTime> StartDateProperty =
-			new TeamCityObjectProperty<DateTime>("startDate", "StartDate");
+			new TeamCityObjectProperty<DateTime>("startDate", nameof(StartDate));
 
 		#endregion
 

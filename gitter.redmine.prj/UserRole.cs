@@ -25,8 +25,6 @@ namespace gitter.Redmine
 
 	public sealed class UserRole : NamedRedmineObject
 	{
-		#region .ctor
-
 		internal UserRole(RedmineServiceContext context, int id, string name)
 			: base(context, id, name)
 		{
@@ -36,7 +34,5 @@ namespace gitter.Redmine
 			: base(context, node)
 		{
 		}
-
-		#endregion
 	}
 }

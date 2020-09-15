@@ -63,10 +63,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Overrides
 
-		protected override Image Image
-		{
-			get { return ImgBranch; }
-		}
+		protected override Image Image => ImgBranch;
 
 		protected override void OnListBoxAttached()
 		{

@@ -24,16 +24,11 @@ namespace gitter.TeamCity
 
 	public sealed class TeamCityObjectPropertyChangedEventArgs : EventArgs
 	{
-		private readonly TeamCityObjectProperty _property;
-
 		public TeamCityObjectPropertyChangedEventArgs(TeamCityObjectProperty property)
 		{
-			_property = property;
+			Property = property;
 		}
 
-		public TeamCityObjectProperty Property
-		{
-			get { return _property; }
-		}
+		public TeamCityObjectProperty Property { get; }
 	}
 }

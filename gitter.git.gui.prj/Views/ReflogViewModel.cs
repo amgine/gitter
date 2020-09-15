@@ -22,42 +22,17 @@ namespace gitter.Git.Gui.Views
 {
 	public class ReflogViewModel
 	{
-		#region .ctor
-
 		public ReflogViewModel(Reflog reflog)
 		{
 			Reflog = reflog;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public Reflog Reflog { get; }
 
-		#endregion
-
-		#region Methods
-
 		public override int GetHashCode()
-		{
-			return Reflog != null ? Reflog.GetHashCode() : 0;
-		}
+			=> Reflog != null ? Reflog.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
-		{
-			if(obj == null)
-			{
-				return false;
-			}
-			var other = obj as ReflogViewModel;
-			if(other == null)
-			{
-				return false;
-			}
-			return object.Equals(Reflog, other.Reflog);
-		}
-
-		#endregion
+			=> obj is ReflogViewModel other && Equals(Reflog, other.Reflog);
 	}
 }

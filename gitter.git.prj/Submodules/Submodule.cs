@@ -77,15 +77,12 @@ namespace gitter.Git
 		#region Properties
 
 		/// <summary>Submodule full path.</summary>
-		public string FullPath
-		{
-			get { return System.IO.Path.Combine(Repository.WorkingDirectory, _path); }
-		}
+		public string FullPath => System.IO.Path.Combine(Repository.WorkingDirectory, _path);
 
 		/// <summary>Submodule path.</summary>
 		public string Path
 		{
-			get { return _path; }
+			get => _path;
 			private set
 			{
 				if(_path != value)
@@ -99,7 +96,7 @@ namespace gitter.Git
 		/// <summary>Submodule URL.</summary>
 		public string Url
 		{
-			get { return _url; }
+			get => _url;
 			private set
 			{
 				if(_url != value)
@@ -114,15 +111,20 @@ namespace gitter.Git
 
 		#region Methods
 
-		private SubmoduleUpdateParameters GetUpdateParameters()
-		{
-			return new SubmoduleUpdateParameters()
+		private UpdateSubmoduleParameters GetUpdateParameters()
+			=> new UpdateSubmoduleParameters
 			{
 				Path = _path,
 				Recursive = true,
 				Init = true,
 			};
-		}
+
+		private SyncSubmoduleParameters GetSyncParameters(bool recursive)
+			=> new SyncSubmoduleParameters
+			{
+				Recursive  = recursive,
+				Submodules = new[] { _path },
+			};
 
 		public void Update()
 		{
@@ -132,11 +134,30 @@ namespace gitter.Git
 			Repository.Accessor.UpdateSubmodule.Invoke(parameters);
 		}
 
-		public Task UpdateAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task UpdateAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			progress?.Report(new OperationProgress(Resources.StrsUpdatingSubmodule.AddEllipsis()));
 			var parameters = GetUpdateParameters();
 			return Repository.Accessor.UpdateSubmodule.InvokeAsync(parameters, progress, cancellationToken);
+		}
+
+		public void Sync(bool recursive = true)
+		{
+			Verify.State.IsNotDeleted(this);
+
+			var parameters = GetSyncParameters(recursive);
+			Repository.Accessor.SyncSubmodule.Invoke(parameters);
+			Repository.Submodules.Refresh();
+		}
+
+		public async Task SyncAsync(bool recursive = true, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		{
+			progress?.Report(new OperationProgress(Resources.StrsSynchronizingSubmodule.AddEllipsis()));
+			var parameters = GetSyncParameters(recursive);
+			await Repository.Accessor.SyncSubmodule
+				.InvokeAsync(parameters, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			Repository.Submodules.Refresh();
 		}
 
 		internal void UpdateInfo(string path, string url)

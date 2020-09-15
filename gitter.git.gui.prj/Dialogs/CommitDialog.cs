@@ -95,10 +95,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		public Repository Repository { get; }
 
-		protected override string ActionVerb
-		{
-			get { return Resources.StrCommit; }
-		}
+		protected override string ActionVerb => Resources.StrCommit;
 
 		public IUserInputSource<string> Message { get; }
 

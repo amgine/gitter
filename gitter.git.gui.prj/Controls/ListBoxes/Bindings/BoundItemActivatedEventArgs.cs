@@ -21,29 +21,19 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 
 	using gitter.Framework.Controls;
 
 	public class BoundItemActivatedEventArgs<T> : EventArgs
 	{
-		private readonly CustomListBoxItem _item;
-		private readonly T _object;
-
 		public BoundItemActivatedEventArgs(CustomListBoxItem item, T obj)
 		{
-			_item = item;
-			_object = obj;
+			Item = item;
+			Object = obj;
 		}
 
-		public CustomListBoxItem Item
-		{
-			get { return _item; }
-		}
+		public CustomListBoxItem Item { get; }
 
-		public T Object
-		{
-			get { return _object; }
-		}
+		public T Object { get; }
 	}
 }

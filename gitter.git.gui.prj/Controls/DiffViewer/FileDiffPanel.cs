@@ -21,14 +21,12 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
 	using System.Globalization;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	using gitter.Framework.Options;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
 
@@ -39,7 +37,7 @@ namespace gitter.Git.Gui.Controls
 	{
 		#region Static
 
-		private static readonly Bitmap ImgPlus = CachedResources.Bitmaps["ImgPlus"];
+		private static readonly Bitmap ImgPlus  = CachedResources.Bitmaps["ImgPlus"];
 		private static readonly Bitmap ImgMinus = CachedResources.Bitmaps["ImgMinus"];
 
 		#endregion
@@ -626,12 +624,8 @@ namespace gitter.Git.Gui.Controls
 						longestLineWidth = GitterApplication.TextRenderer.MeasureText(
 							measureEventArgs.Graphics, longestLine.Text, font, int.MaxValue, ContentFormat).Width + CellSize.Width;
 					}
-					catch(Exception exc)
+					catch(Exception exc) when(!exc.IsCritical())
 					{
-						if(exc.IsCritical())
-						{
-							throw;
-						}
 						longestLineWidth = (int)(maxLength * CellSize.Width);
 					}
 					w += longestLineWidth;
@@ -731,50 +725,32 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		private string GetHeaderText()
-		{
-			switch(_diffFile.Status)
+			=> _diffFile.Status switch
 			{
-				case FileStatus.Removed:
-					return _diffFile.SourceFile;
-				case FileStatus.Renamed:
-					return _diffFile.SourceFile + " -> " + _diffFile.TargetFile;
-				case FileStatus.Copied:
-					return _diffFile.SourceFile + " -> " + _diffFile.TargetFile;
-				default:
-					return _diffFile.TargetFile;
-			}
-		}
+				FileStatus.Removed => _diffFile.SourceFile,
+				FileStatus.Renamed => _diffFile.SourceFile + " -> " + _diffFile.TargetFile,
+				FileStatus.Copied  => _diffFile.SourceFile + " -> " + _diffFile.TargetFile,
+				_ => _diffFile.TargetFile,
+			};
 
 		private Bitmap GetHeaderIcon()
-		{
-			return GraphicsUtility.QueryIcon(
+			=> GraphicsUtility.QueryIcon(
 				_diffFile.Status == FileStatus.Removed
 					? _diffFile.SourceFile
 					: _diffFile.TargetFile);
-		}
 
 		private Bitmap GetHeaderIconOverlay()
-		{
-			switch(_diffFile.Status)
+			=> _diffFile.Status switch
 			{
-				case FileStatus.Removed:
-					return CachedResources.Bitmaps["ImgOverlayDel"];
-				case FileStatus.Added:
-					return CachedResources.Bitmaps["ImgOverlayAdd"];
-				case FileStatus.Modified:
-					return CachedResources.Bitmaps["ImgOverlayEdit"];
-				case FileStatus.Unmerged:
-					return CachedResources.Bitmaps["ImgOverlayConflict"];
-				case FileStatus.Renamed:
-					return CachedResources.Bitmaps["ImgOverlayRename"];
-				case FileStatus.Copied:
-					return CachedResources.Bitmaps["ImgOverlayCopy"];
-				case FileStatus.ModeChanged:
-					return CachedResources.Bitmaps["ImgOverlayChmod"];
-				default:
-					return null;
-			}
-		}
+				FileStatus.Removed     => CachedResources.Bitmaps["ImgOverlayDel"],
+				FileStatus.Added       => CachedResources.Bitmaps["ImgOverlayAdd"],
+				FileStatus.Modified    => CachedResources.Bitmaps["ImgOverlayEdit"],
+				FileStatus.Unmerged    => CachedResources.Bitmaps["ImgOverlayConflict"],
+				FileStatus.Renamed     => CachedResources.Bitmaps["ImgOverlayRename"],
+				FileStatus.Copied      => CachedResources.Bitmaps["ImgOverlayCopy"],
+				FileStatus.ModeChanged => CachedResources.Bitmaps["ImgOverlayChmod"],
+				_ => null,
+			};
 
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{

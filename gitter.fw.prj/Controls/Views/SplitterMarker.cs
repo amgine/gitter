@@ -28,8 +28,12 @@ namespace gitter.Framework.Controls
 
 	sealed class SplitterMarker : Form
 	{
+		private readonly Rectangle _initialBounds;
+
 		public SplitterMarker(Rectangle bounds, Orientation orientation)
 		{
+			_initialBounds = bounds;
+
 			SetStyle(
 				ControlStyles.ContainerControl |
 				ControlStyles.Selectable |
@@ -66,23 +70,24 @@ namespace gitter.Framework.Controls
 				default:
 					throw new ArgumentException(
 						"Unknown Orientation value: {0}".UseAsFormat(orientation),
-						"orientation");
+						nameof(orientation));
 			}
 		}
 
 		public new void Show()
 		{
-			User32.ShowWindow(this.Handle, 8);
+			User32.SetWindowPos(Handle, IntPtr.Zero,
+				_initialBounds.X, _initialBounds.Y, _initialBounds.Width, _initialBounds.Height,
+				0x0010 | 0x0040);
 		}
 
 		protected override void DefWndProc(ref Message m)
 		{
-			const int WM_MOUSEACTIVATE = 0x21;
 			const int MA_NOACTIVATE = 0x0003;
 
-			switch(m.Msg)
+			switch((WM)m.Msg)
 			{
-				case WM_MOUSEACTIVATE:
+				case WM.MOUSEACTIVATE:
 					m.Result = (IntPtr)MA_NOACTIVATE;
 					return;
 			}

@@ -305,9 +305,6 @@ namespace gitter.Redmine
 
 		#endregion
 
-		public override string ToString()
-		{
-			return _subject;
-		}
+		public override string ToString() => _subject;
 	}
 }

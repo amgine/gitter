@@ -31,30 +31,24 @@ namespace gitter.TeamCity
 
 		#endregion
 
-		#region Data
-
-		private readonly ProjectBuildTypesCollection _buildTypes;
-
-		#endregion
-
 		#region .ctor
 
 		public Project(TeamCityServiceContext context, string id, string name)
 			: base(context, id, name)
 		{
-			_buildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
+			BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
 		}
 
 		public Project(TeamCityServiceContext context, string id)
 			: base(context, id)
 		{
-			_buildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
+			BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
 		}
 
 		public Project(TeamCityServiceContext context, XmlNode node)
 			: base(context, node)
 		{
-			_buildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
+			BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
 		}
 
 		#endregion
@@ -62,18 +56,13 @@ namespace gitter.TeamCity
 		#region Methods
 
 		public ProjectLocator CreateLocator()
-		{
-			return new ProjectLocator() { Id = Id };
-		}
+			=> new ProjectLocator() { Id = Id };
 
 		#endregion
 
 		#region Properties
 
-		public ProjectBuildTypesCollection BuildTypes
-		{
-			get { return _buildTypes; }
-		}
+		public ProjectBuildTypesCollection BuildTypes { get; }
 
 		#endregion
 	}

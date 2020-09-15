@@ -24,16 +24,11 @@ namespace gitter.Redmine
 
 	public sealed class RedmineObjectPropertyChangedEventArgs : EventArgs
 	{
-		private readonly RedmineObjectProperty _property;
-
 		public RedmineObjectPropertyChangedEventArgs(RedmineObjectProperty property)
 		{
-			_property = property;
+			Property = property;
 		}
 
-		public RedmineObjectProperty Property
-		{
-			get { return _property; }
-		}
+		public RedmineObjectProperty Property { get; }
 	}
 }

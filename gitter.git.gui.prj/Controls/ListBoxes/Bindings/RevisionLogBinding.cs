@@ -32,8 +32,6 @@ namespace gitter.Git.Gui.Controls
 	{
 		#region Data
 
-		private readonly ILogSource _logSource;
-		private readonly RevisionListBox _revisionListBox;
 		private LogOptions _logOptions;
 
 		#endregion
@@ -46,26 +44,20 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(revisionListBox, nameof(revisionListBox));
 			Verify.Argument.IsNotNull(logOptions, nameof(logOptions));
 
-			_logSource = logSource;
-			_revisionListBox = revisionListBox;
+			LogSource = logSource;
+			RevisionListBox = revisionListBox;
 			_logOptions = logOptions;
 
-			Progress = _revisionListBox.ProgressMonitor;
+			Progress = RevisionListBox.ProgressMonitor;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public ILogSource LogSource
-		{
-			get { return _logSource; }
-		}
+		public ILogSource LogSource { get; }
 
-		public RevisionListBox RevisionListBox
-		{
-			get { return _revisionListBox; }
-		}
+		public RevisionListBox RevisionListBox { get; }
 
 		public LogOptions LogOptions
 		{

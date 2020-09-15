@@ -40,12 +40,12 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>Create <see cref="QueryObjectsParameters"/>.</summary>
 		/// <param name="objects">Objects to query.</param>
-		public QueryObjectsParameters(IList<string> objects)
+		public QueryObjectsParameters(IReadOnlyList<string> objects)
 		{
 			Objects = objects;
 		}
 
 		/// <summary>List of requested objects.</summary>
-		public IList<string> Objects { get; set; }
+		public IReadOnlyList<string> Objects { get; set; }
 	}
 }

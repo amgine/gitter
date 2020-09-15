@@ -27,46 +27,25 @@ namespace gitter.Framework.Hooks
 
 	public abstract class WindowsHook : IDisposable
 	{
-		#region Data
-
-		private readonly HookProc _hookProc;
-		private readonly WH _hookType;
-		private IntPtr _hook;
-
-		#endregion
-
 		#region .ctor
 
 		protected WindowsHook(WH hookType)
 		{
-			_hookProc = OnHookTriggered;
-			_hookType = hookType;
+			HookProc = OnHookTriggered;
+			HookType = hookType;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public WH HookType
-		{
-			get { return _hookType; }
-		}
+		public WH HookType { get; }
 
-		public bool IsActive
-		{
-			get { return Handle != IntPtr.Zero; }
-		}
+		public bool IsActive => Handle != IntPtr.Zero;
 
-		protected IntPtr Handle
-		{
-			get { return _hook; }
-			private set { _hook = value; }
-		}
+		protected IntPtr Handle { get; private set; }
 
-		protected HookProc HookProc
-		{
-			get { return _hookProc; }
-		}
+		protected HookProc HookProc { get; }
 
 		#endregion
 

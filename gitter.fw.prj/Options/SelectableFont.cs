@@ -152,12 +152,8 @@ namespace gitter.Framework.Options
 				{
 					font = new Font(name, size, style, GraphicsUnit.Point);
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 				if(font != null)
 				{

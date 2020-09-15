@@ -28,19 +28,14 @@ namespace gitter.Redmine
 	public abstract class RedmineObjectCreation<T> : RedmineObjectDefinition<T>
 		where T : RedmineObject
 	{
-		private readonly RedmineServiceContext _context;
-
 		protected RedmineObjectCreation(RedmineServiceContext context)
 		{
 			Verify.Argument.IsNotNull(context, nameof(context));
 
-			_context = context;
+			Context = context;
 			ResetCore();
 		}
 
-		protected RedmineServiceContext Context
-		{
-			get { return _context; }
-		}
+		protected RedmineServiceContext Context { get; }
 	}
 }

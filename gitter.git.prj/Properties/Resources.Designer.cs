@@ -4322,6 +4322,24 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Synchronizing submodule.
+        /// </summary>
+        internal static string StrsSynchronizingSubmodule {
+            get {
+                return ResourceManager.GetString("StrsSynchronizingSubmodule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Synchronizing submodules.
+        /// </summary>
+        internal static string StrsSynchronizingSubmodules {
+            get {
+                return ResourceManager.GetString("StrsSynchronizingSubmodules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Stage.
         /// </summary>
         internal static string StrStage {
@@ -4570,6 +4588,15 @@ namespace gitter.Git.Properties {
         internal static string StrsWorkingDirectoryClean {
             get {
                 return ResourceManager.GetString("StrsWorkingDirectoryClean", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Synchronize.
+        /// </summary>
+        internal static string StrSync {
+            get {
+                return ResourceManager.GetString("StrSync", resourceCulture);
             }
         }
         

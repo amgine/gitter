@@ -27,8 +27,6 @@ namespace gitter.Git.AccessLayer
 	/// <summary>RemoteBranch description.</summary>
 	public sealed class RemoteBranchData : INamedObject
 	{
-		#region .ctor
-
 		public RemoteBranchData(string name, Hash sha1)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
@@ -36,10 +34,6 @@ namespace gitter.Git.AccessLayer
 			Name = name;
 			SHA1 = sha1;
 		}
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>Branch's name (short format, excluding /refs/remotes/).</summary>
 		public string Name { get; }
@@ -55,8 +49,6 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>This branch is current HEAD.</summary>
 		public bool IsCurrent => false;
-
-		#endregion
 
 		public override string ToString() => Name;
 	}

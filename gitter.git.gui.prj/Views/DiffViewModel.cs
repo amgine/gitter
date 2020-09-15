@@ -22,25 +22,15 @@ namespace gitter.Git.Gui.Views
 {
 	public class DiffViewModel
 	{
-		#region .ctor
-
 		public DiffViewModel(IDiffSource diffSource, DiffOptions diffOptions)
 		{
 			DiffSource  = diffSource;
 			DiffOptions = diffOptions;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public IDiffSource DiffSource { get; }
 
 		public DiffOptions DiffOptions { get; }
-
-		#endregion
-
-		#region Methods
 
 		public override int GetHashCode()
 		{
@@ -66,7 +56,5 @@ namespace gitter.Git.Gui.Views
 				object.Equals(DiffSource,  other.DiffSource) &&
 				object.Equals(DiffOptions, other.DiffOptions);
 		}
-
-		#endregion
 	}
 }

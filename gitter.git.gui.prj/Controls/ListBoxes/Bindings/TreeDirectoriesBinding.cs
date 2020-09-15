@@ -21,7 +21,7 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
+
 	using gitter.Framework.Controls;
 
 	public sealed class TreeDirectoriesBinding : IDisposable
@@ -29,7 +29,6 @@ namespace gitter.Git.Gui.Controls
 		#region Data
 
 		private readonly CustomListBoxItemsCollection _itemHost;
-		private readonly TreeDirectory _root;
 		private TreeDirectoryListItem _rootItem;
 
 		#endregion
@@ -39,11 +38,7 @@ namespace gitter.Git.Gui.Controls
 		public event EventHandler<BoundItemActivatedEventArgs<TreeItem>> ItemActivated;
 
 		private void InvokeItemActivated(CustomListBoxItem listItem, TreeItem treeItem)
-		{
-			var handler = ItemActivated;
-			if(handler != null) handler(this,
-				new BoundItemActivatedEventArgs<TreeItem>(listItem, treeItem));
-		}
+			=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, treeItem));
 
 		#endregion
 
@@ -55,7 +50,7 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(root, nameof(root));
 
 			_itemHost = itemHost;
-			_root = root;
+			Root = root;
 
 			InitTree(showRoot);
 		}
@@ -67,11 +62,11 @@ namespace gitter.Git.Gui.Controls
 			if(showRoot)
 			{
 				_rootItem = new TreeDirectoryListItem(
-					_root,
+					Root,
 					TreeDirectoryListItemType.ShowNothing,
 					OnSubItemActivated);
 				_rootItem.Expand();
-				foreach(var folder in _root.Directories)
+				foreach(var folder in Root.Directories)
 				{
 					var item = new TreeDirectoryListItem(
 						folder,
@@ -81,11 +76,11 @@ namespace gitter.Git.Gui.Controls
 					_rootItem.Items.Add(item);
 				}
 				_itemHost.Add(_rootItem);
-				_root.DirectoryAdded += OnNewFolderAddedRooted;
+				Root.DirectoryAdded += OnNewFolderAddedRooted;
 			}
 			else
 			{
-				foreach(var folder in _root.Directories)
+				foreach(var folder in Root.Directories)
 				{
 					var item = new TreeDirectoryListItem(
 						folder,
@@ -94,7 +89,7 @@ namespace gitter.Git.Gui.Controls
 					item.Activated += OnItemActivated;
 					_itemHost.Add(item);
 				}
-				_root.DirectoryAdded += OnNewFolderAdded;
+				Root.DirectoryAdded += OnNewFolderAdded;
 			}
 		}
 
@@ -114,10 +109,7 @@ namespace gitter.Git.Gui.Controls
 			InvokeItemActivated(e.Item, e.Object);
 		}
 
-		public TreeDirectory Root
-		{
-			get { return _root; }
-		}
+		public TreeDirectory Root { get; }
 
 		private void OnNewFolderAdded(object sender, TreeDirectoryEventArgs e)
 		{
@@ -137,8 +129,8 @@ namespace gitter.Git.Gui.Controls
 
 		public void Dispose()
 		{
-			_root.DirectoryAdded -= OnNewFolderAdded;
-			_root.DirectoryAdded -= OnNewFolderAddedRooted;
+			Root.DirectoryAdded -= OnNewFolderAdded;
+			Root.DirectoryAdded -= OnNewFolderAddedRooted;
 			_itemHost.Clear();
 		}
 	}

@@ -31,16 +31,14 @@ namespace gitter.Git
 
 		private readonly DiffColumnHeader[] _headers;
 		private readonly IList<DiffLine> _lines;
-		private readonly DiffStats _stats;
-		private readonly bool _isBinary;
 
 		#endregion
 
 		#region .ctor
 
 		/// <summary>Create <see cref="DiffHunk"/>.</summary>
+		/// <param name="headers">Column headers.</param>
 		/// <param name="lines">List of diff lines.</param>
-		/// <param name="colCount">Column headers.</param>
 		/// <param name="stats"><see cref="DiffStats"/>.</param>
 		public DiffHunk(DiffColumnHeader[] headers, IList<DiffLine> lines, DiffStats stats, bool isBinary)
 		{
@@ -49,13 +47,13 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(stats, nameof(stats));
 
 			_headers = headers;
-			_lines = lines;
-			_stats = stats;
-			_isBinary = isBinary;
+			_lines   = lines;
+			Stats    = stats;
+			IsBinary = isBinary;
 		}
 
 		/// <summary>Create empty <see cref="DiffHunk"/>.</summary>
-		/// <param name="colCount">Column headers.</param>
+		/// <param name="headers">Column headers.</param>
 		public DiffHunk(DiffColumnHeader[] headers)
 			: this(headers, new List<DiffLine>(), new DiffStats(), false)
 		{
@@ -68,9 +66,9 @@ namespace gitter.Git
 		/// <summary>Hunk is empty.</summary>
 		public bool IsEmpty => _lines.Count == 0;
 
-		public bool IsBinary => _isBinary;
+		public bool IsBinary { get; }
 
-		public DiffStats Stats => _stats;
+		public DiffStats Stats { get; }
 
 		public DiffLine this[int index]
 		{
@@ -80,9 +78,9 @@ namespace gitter.Git
 				Verify.Argument.IsNotNull(value, nameof(value));
 
 				var line = _lines[index];
-				_stats.Decrement(line.State);
+				Stats.Decrement(line.State);
 				_lines[index] = value;
-				_stats.Increment(value.State);
+				Stats.Increment(value.State);
 			}
 		}
 
@@ -122,14 +120,14 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(line, nameof(line));
 
 			_lines.Insert(index, line);
-			_stats.Increment(line.State);
+			Stats.Increment(line.State);
 		}
 
 		public void RemoveAt(int index)
 		{
 			var line = _lines[index];
 			_lines.RemoveAt(index);
-			_stats.Decrement(line.State);
+			Stats.Decrement(line.State);
 		}
 
 		public void Add(DiffLine line)
@@ -137,13 +135,13 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(line, nameof(line));
 
 			_lines.Add(line);
-			_stats.Increment(line.State);
+			Stats.Increment(line.State);
 		}
 
 		public void Clear()
 		{
 			_lines.Clear();
-			_stats.Reset();
+			Stats.Reset();
 		}
 
 		public bool Contains(DiffLine item)
@@ -162,7 +160,7 @@ namespace gitter.Git
 		{
 			if(_lines.Remove(line))
 			{
-				_stats.Decrement(line.State);
+				Stats.Decrement(line.State);
 				return true;
 			}
 			return false;
@@ -170,8 +168,8 @@ namespace gitter.Git
 
 		public DiffHunk Cut(int from, int count)
 		{
-			if((from < 0) || (from == _lines.Count)) throw new ArgumentOutOfRangeException("from");
-			if((count <= 0) || (from + count > _lines.Count)) throw new ArgumentOutOfRangeException("count");
+			if((from < 0) || (from == _lines.Count)) throw new ArgumentOutOfRangeException(nameof(from));
+			if((count <= 0) || (from + count > _lines.Count)) throw new ArgumentOutOfRangeException(nameof(count));
 
 			int to = from + count - 1;
 			// exclude header
@@ -190,7 +188,7 @@ namespace gitter.Git
 				// copy whole hunk
 				var lines = new List<DiffLine>(_lines.Count);
 				lines.AddRange(_lines);
-				return new DiffHunk(_headers, lines, _stats.Clone(), _isBinary);
+				return new DiffHunk(_headers, lines, Stats.Clone(), IsBinary);
 			}
 			else
 			{
@@ -237,7 +235,7 @@ namespace gitter.Git
 					{
 						new DiffColumnHeader(DiffColumnAction.Remove, rf, rc),
 						new DiffColumnHeader(DiffColumnAction.Add, af, ac)
-					}, lines, stats, _isBinary);
+					}, lines, stats, IsBinary);
 			}
 		}
 
@@ -279,8 +277,8 @@ namespace gitter.Git
 			return new DiffHunk(
 				(DiffColumnHeader[])_headers.Clone(),
 				lines,
-				_stats.Clone(),
-				_isBinary);
+				Stats.Clone(),
+				IsBinary);
 		}
 
 		object ICloneable.Clone() => Clone();

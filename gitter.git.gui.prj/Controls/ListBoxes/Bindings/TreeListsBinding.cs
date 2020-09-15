@@ -30,14 +30,6 @@ namespace gitter.Git.Gui.Controls.ListBoxes
 
 	sealed class TreeListsBinding : AsyncDataBinding<Tree>
 	{
-		#region Data
-
-		private readonly ITreeSource _treeSource;
-		private readonly TreeListBox _directoryTreeListBox;
-		private readonly TreeListBox _directoryContentListBox;
-
-		#endregion
-
 		#region .ctor
 
 		public TreeListsBinding(ITreeSource treeSource, TreeListBox directoryTreeListBox, TreeListBox directoryContentListBox)
@@ -46,9 +38,9 @@ namespace gitter.Git.Gui.Controls.ListBoxes
 			Verify.Argument.IsNotNull(directoryTreeListBox, nameof(directoryTreeListBox));
 			Verify.Argument.IsNotNull(directoryContentListBox, nameof(directoryContentListBox));
 
-			_treeSource              = treeSource;
-			_directoryTreeListBox    = directoryTreeListBox;
-			_directoryContentListBox = directoryContentListBox;
+			TreeSource              = treeSource;
+			DirectoryTreeListBox    = directoryTreeListBox;
+			DirectoryContentListBox = directoryContentListBox;
 
 			Progress = directoryTreeListBox.ProgressMonitor;
 		}
@@ -57,20 +49,11 @@ namespace gitter.Git.Gui.Controls.ListBoxes
 
 		#region Properties
 
-		public ITreeSource TreeSource
-		{
-			get { return _treeSource; }
-		}
+		public ITreeSource TreeSource { get; }
 
-		public TreeListBox DirectoryTreeListBox
-		{
-			get { return _directoryTreeListBox; }
-		}
+		public TreeListBox DirectoryTreeListBox { get; }
 
-		public TreeListBox DirectoryContentListBox
-		{
-			get { return _directoryContentListBox; }
-		}
+		public TreeListBox DirectoryContentListBox { get; }
 
 		#endregion
 

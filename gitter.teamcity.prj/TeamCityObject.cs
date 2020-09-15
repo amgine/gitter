@@ -29,16 +29,14 @@ namespace gitter.TeamCity
 		#region Static
 
 		public static readonly TeamCityObjectProperty<string> IdProperty =
-			new TeamCityObjectProperty<string>("id", "Id");
+			new TeamCityObjectProperty<string>("id", nameof(Id));
 		public static readonly TeamCityObjectProperty<string> WebUrlProperty =
-			new TeamCityObjectProperty<string>("webUrl", "WebUrl");
+			new TeamCityObjectProperty<string>("webUrl", nameof(WebUrl));
 
 		#endregion
 
 		#region Data
 
-		private readonly TeamCityServiceContext _context;
-		private readonly string _id;
 		private string _webUrl;
 
 		#endregion
@@ -48,13 +46,7 @@ namespace gitter.TeamCity
 		public event EventHandler<TeamCityObjectPropertyChangedEventArgs> PropertyChanged;
 
 		protected void OnPropertyChanged(TeamCityObjectProperty property)
-		{
-			var handler = PropertyChanged;
-			if(handler != null)
-			{
-				handler(this, new TeamCityObjectPropertyChangedEventArgs(property));
-			}
-		}
+			=> PropertyChanged?.Invoke(this, new TeamCityObjectPropertyChangedEventArgs(property));
 
 		#endregion
 
@@ -64,8 +56,8 @@ namespace gitter.TeamCity
 		{
 			Verify.Argument.IsNotNull(context, nameof(context));
 
-			_context = context;
-			_id = id;
+			Context = context;
+			Id      = id;
 		}
 
 		protected TeamCityObject(TeamCityServiceContext context, XmlNode node)
@@ -73,9 +65,9 @@ namespace gitter.TeamCity
 			Verify.Argument.IsNotNull(context, nameof(context));
 			Verify.Argument.IsNotNull(node, nameof(node));
 
-			_context	= context;
-			_id			= TeamCityUtility.LoadString(node.Attributes[IdProperty.XmlNodeName]);
-			_webUrl		= TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
+			Context = context;
+			Id      = TeamCityUtility.LoadString(node.Attributes[IdProperty.XmlNodeName]);
+			_webUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
 		}
 
 		#endregion
@@ -89,10 +81,7 @@ namespace gitter.TeamCity
 			WebUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
 		}
 
-		public virtual void Update()
-		{
-			throw new NotSupportedException();
-		}
+		public virtual void Update() => throw new NotSupportedException();
 
 		public object GetValue(TeamCityObjectProperty property)
 		{
@@ -114,15 +103,9 @@ namespace gitter.TeamCity
 
 		#region Properties
 
-		public string Id
-		{
-			get { return _id; }
-		}
+		public string Id { get; }
 
-		public TeamCityServiceContext Context
-		{
-			get { return _context; }
-		}
+		public TeamCityServiceContext Context { get; }
 
 		public string WebUrl
 		{

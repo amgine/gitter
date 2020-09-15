@@ -80,10 +80,7 @@ namespace gitter.Git.Gui.Controls
 			_showStatusItems = true;
 		}
 
-		private CustomListBoxColumn GraphColumn
-		{
-			get { return Columns.GetById((int)ColumnId.Graph); }
-		}
+		private CustomListBoxColumn GraphColumn => Columns.GetById((int)ColumnId.Graph);
 
 		private void DetachFromRepository()
 		{
@@ -175,7 +172,7 @@ namespace gitter.Git.Gui.Controls
 
 		public RevisionLog RevisionLog
 		{
-			get { return _revisionLog; }
+			get => _revisionLog;
 			set
 			{
 				if(_repository != null)
@@ -289,20 +286,11 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		public RevisionListItem HeadItem
-		{
-			get { return _currentRevisionItem; }
-		}
+		public RevisionListItem HeadItem => _currentRevisionItem;
 
-		public FakeRevisionListItem StagedItem
-		{
-			get { return _stagedItem; }
-		}
+		public FakeRevisionListItem StagedItem => _stagedItem;
 
-		public FakeRevisionListItem UnstagedItem
-		{
-			get { return _unstagedItem; }
-		}
+		public FakeRevisionListItem UnstagedItem => _unstagedItem;
 
 		private void RefreshCurrentRevisionItem(Revision currentRevision)
 		{
@@ -975,10 +963,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public bool HeadPresented
-		{
-			get { return _currentRevisionItem != null; }
-		}
+		public bool HeadPresented => _currentRevisionItem != null;
 
 		public bool ShowStatusItems
 		{
@@ -987,9 +972,7 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public RevisionListItem this[Revision revision]
-		{
-			get { return _itemLookupTable[revision]; }
-		}
+			=> _itemLookupTable[revision];
 
 		#endregion
 

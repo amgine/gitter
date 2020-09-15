@@ -26,17 +26,9 @@ namespace gitter.TeamCity
 		{
 		}
 
-		public string Id
-		{
-			get;
-			set;
-		}
+		public string Id { get; set; }
 
-		public string Username
-		{
-			get;
-			set;
-		}
+		public string Username { get; set; }
 
 		public override string ToString()
 		{

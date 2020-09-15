@@ -66,11 +66,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Data
 
-		private readonly Repository _repository;
-		private readonly FakeRevisionItemType _type;
 		private readonly FileStatusIconEntry[] _iconEntries;
-		private UnstagedRevisionItemSubtype _subType;
-		private GraphAtom[] _graph;
 
 		#endregion
 
@@ -84,8 +80,8 @@ namespace gitter.Git.Gui.Controls
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
-			_type = type;
+			Repository = repository;
+			Type = type;
 			switch(type)
 			{
 				case FakeRevisionItemType.StagedChanges:
@@ -105,7 +101,7 @@ namespace gitter.Git.Gui.Controls
 				case FakeRevisionItemType.UnstagedChanges:
 					lock(repository.Status.SyncRoot)
 					{
-						_subType = GetSubType(repository.Status);
+						SubType = GetSubType(repository.Status);
 						_iconEntries = new FileStatusIconEntry[]
 						{
 							new FileStatusIconEntry { Image = FileStatusIcons.ImgUnmerged,
@@ -128,26 +124,13 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public Repository Repository
-		{
-			get { return _repository; }
-		}
+		public Repository Repository { get; }
 
-		public FakeRevisionItemType Type
-		{
-			get { return _type; }
-		}
+		public FakeRevisionItemType Type { get; }
 
-		public UnstagedRevisionItemSubtype SubType
-		{
-			get { return _subType; }
-		}
+		public UnstagedRevisionItemSubtype SubType { get; private set; }
 
-		public GraphAtom[] Graph
-		{
-			get { return _graph; }
-			set { _graph = value; }
-		}
+		public GraphAtom[] Graph { get; set; }
 
 		private string SubjectText
 		{
@@ -213,7 +196,7 @@ namespace gitter.Git.Gui.Controls
 					_iconEntries[2].Count = status.StagedModifiedCount;
 					break;
 				case FakeRevisionItemType.UnstagedChanges:
-					_subType = GetSubType(status);
+					SubType = GetSubType(status);
 					_iconEntries[0].Count = status.UnmergedCount;
 					_iconEntries[1].Count = status.UnstagedUntrackedCount;
 					_iconEntries[2].Count = status.UnstagedRemovedCount;
@@ -244,12 +227,12 @@ namespace gitter.Git.Gui.Controls
 			if(alignToGraph && graphColumn != null)
 			{
 				int availWidth;
-				if(_graph != null)
+				if(Graph != null)
 				{
-					availWidth = graphColumn.Width - 21 * _graph.Length;
-					for(int i = _graph.Length - 1; i != -1; --i)
+					availWidth = graphColumn.Width - 21 * Graph.Length;
+					for(int i = Graph.Length - 1; i != -1; --i)
 					{
-						if(_graph[i].Elements != GraphElement.Space)
+						if(Graph[i].Elements != GraphElement.Space)
 						{
 							break;
 						}
@@ -355,13 +338,13 @@ namespace gitter.Git.Gui.Controls
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			_repository.Status.Changed += OnStatusUpdated;
+			Repository.Status.Changed += OnStatusUpdated;
 		}
 
 		protected override void OnListBoxDetached()
 		{
 			base.OnListBoxDetached();
-			_repository.Status.Changed -= OnStatusUpdated;
+			Repository.Status.Changed -= OnStatusUpdated;
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -379,8 +362,8 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.Author:
 				case ColumnId.Committer:
 					{
-						var username = _repository.Configuration.TryGetParameterValue(GitConstants.UserNameParameter);
-						var usermail = _repository.Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
+						var username = Repository.Configuration.TryGetParameterValue(GitConstants.UserNameParameter);
+						var usermail = Repository.Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 						return UserColumn.OnMeasureSubItem(measureEventArgs,
 							username == null ? string.Empty : username, usermail == null ? string.Empty : usermail);
 					}
@@ -388,11 +371,11 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.CommitterEmail:
 				case ColumnId.AuthorEmail:
 					{
-						var usermail = _repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
+						var usermail = Repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
 						return EmailColumn.OnMeasureSubItem(measureEventArgs, usermail == null ? "" : usermail.Value);
 					}
 				case ColumnId.Graph:
-					return GraphColumn.OnMeasureSubItem(measureEventArgs, _graph);
+					return GraphColumn.OnMeasureSubItem(measureEventArgs, Graph);
 				default:
 					return Size.Empty;
 			}

@@ -31,14 +31,14 @@ namespace gitter.Git.AccessLayer
 
 		public RebaseParameters(string onto, string branch, string target)
 		{
-			NewBase = onto;
-			Branch = branch;
+			NewBase  = onto;
+			Branch   = branch;
 			Upstream = target;
 		}
 
 		public RebaseParameters(string branch, string target)
 		{
-			Branch = branch;
+			Branch   = branch;
 			Upstream = target;
 		}
 

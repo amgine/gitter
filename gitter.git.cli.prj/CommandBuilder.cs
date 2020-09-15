@@ -1929,7 +1929,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return new SubmoduleCommand(args);
 		}
 
-		public Command GetUpdateSubmoduleCommand(SubmoduleUpdateParameters parameters)
+		public Command GetUpdateSubmoduleCommand(UpdateSubmoduleParameters parameters)
 		{
 			Assert.IsNotNull(parameters);
 
@@ -1961,6 +1961,28 @@ namespace gitter.Git.AccessLayer.CLI
 				args.Add(SubmoduleCommand.NoMoreOptions());
 				args.Add(new PathCommandArgument(parameters.Path));
 			}
+			return new SubmoduleCommand(args);
+		}
+
+		public Command GetSyncSubmoduleCommand(SyncSubmoduleParameters parameters)
+		{
+			Assert.IsNotNull(parameters);
+
+			var args = new List<ICommandArgument>();
+			args.Add(SubmoduleCommand.Sync());
+			if(parameters.Recursive)
+			{
+				args.Add(SubmoduleCommand.Recursive());
+			}
+			if(parameters.Submodules != null && parameters.Submodules.Count > 0)
+			{
+				args.Add(SubmoduleCommand.NoMoreOptions());
+				foreach(var submodule in parameters.Submodules)
+				{
+					args.Add(new PathCommandArgument(submodule));
+				}
+			}
+
 			return new SubmoduleCommand(args);
 		}
 

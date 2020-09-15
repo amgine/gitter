@@ -97,12 +97,8 @@ namespace gitter.Git
 							_message = Repository.Accessor.QueryTagMessage.Invoke(
 								new QueryTagMessageParameters { TagName = FullName });
 						}
-						catch(Exception exc)
+						catch(Exception exc) when(!exc.IsCritical())
 						{
-							if(exc.IsCritical())
-							{
-								throw;
-							}
 							_message = string.Empty;
 						}
 					}

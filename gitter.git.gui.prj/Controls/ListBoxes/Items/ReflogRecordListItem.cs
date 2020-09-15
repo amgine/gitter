@@ -113,7 +113,6 @@ namespace gitter.Git.Gui.Controls
 		#region Data
 
 		private readonly List<PointerBounds> _drawnPointers;
-		private Image _image;
 
 		#endregion
 
@@ -124,7 +123,6 @@ namespace gitter.Git.Gui.Controls
 		public ReflogRecordListItem(ReflogRecord reflogRecord)
 			: base(reflogRecord)
 		{
-			var revision = reflogRecord.Revision;
 			_drawnPointers = new List<PointerBounds>();
 			UpdateImage();
 		}
@@ -133,11 +131,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public Image Image
-		{
-			get { return _image; }
-			private set { _image = value; }
-		}
+		public Image Image { get; private set; }
 
 		#endregion
 

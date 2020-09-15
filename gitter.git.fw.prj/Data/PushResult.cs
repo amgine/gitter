@@ -42,29 +42,18 @@ namespace gitter.Git.AccessLayer
 		public string Summary { get; }
 
 		private static char TypeToChar(PushResultType type)
-		{
-			switch(type)
+			=> type switch
 			{
-				case PushResultType.ForceUpdated:
-					return '+';
-				case PushResultType.FastForwarded:
-					return ' ';
-				case PushResultType.Rejected:
-					return '!';
-				case PushResultType.UpToDate:
-					return '=';
-				case PushResultType.DeletedReference:
-					return '-';
-				case PushResultType.CreatedReference:
-					return '*';
-				default:
-					throw new ArgumentException("type");
-			}
-		}
+				PushResultType.ForceUpdated => '+',
+				PushResultType.FastForwarded => ' ',
+				PushResultType.Rejected => '!',
+				PushResultType.UpToDate => '=',
+				PushResultType.DeletedReference => '-',
+				PushResultType.CreatedReference => '*',
+				_ => throw new ArgumentException(nameof(type)),
+			};
 
 		public override string ToString()
-		{
-			return string.Format("{0} {1} -> {2} {3}", TypeToChar(Type), LocalRefName, RemoteRefName, Summary);
-		}
+			=> string.Format("{0} {1} -> {2} {3}", TypeToChar(Type), LocalRefName, RemoteRefName, Summary);
 	}
 }

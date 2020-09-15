@@ -79,12 +79,8 @@ namespace gitter.Git.Gui.Controllers
 					Directory.CreateDirectory(repositoryPath);
 				}
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				GitterApplication.MessageBoxService.Show(
 					View as IWin32Window,
 					exc.Message,

@@ -35,13 +35,13 @@ namespace gitter.Git.AccessLayer
 			HeadReference = headRefName;
 		}
 
-		public FormatMergeMessageParameters(IList<string> revisions, string headRefName)
+		public FormatMergeMessageParameters(IReadOnlyList<string> revisions, string headRefName)
 		{
-			Revisions = revisions;
+			Revisions     = revisions;
 			HeadReference = headRefName;
 		}
 
-		public IList<string> Revisions { get; set; }
+		public IReadOnlyList<string> Revisions { get; set; }
 
 		public string HeadReference { get; set; }
 	}
