@@ -105,6 +105,11 @@ namespace gitter
 		{
 			var item = (ToolStripItem)sender;
 			var repository = (RepositoryListItem)item.Tag;
+
+			if(repository.ListBox is LocalRepositoriesListBox list && list.FullList != null)
+			{
+				list.FullList.Remove(repository);
+			}
 			repository.Remove();
 		}
 

@@ -27,17 +27,15 @@ namespace gitter
 
 	class RepositoryMenu : ContextMenuStrip
 	{
-		private readonly RepositoryListItem _repository;
-
 		public RepositoryMenu(RepositoryListItem repository)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 
-			Items.Add(new ToolStripMenuItem(Resources.StrOpen, null, (s, e) => _repository.Activate()));
-			Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, _repository.DataContext.Path));
-			Items.Add(GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, _repository.DataContext.Path));
+			Items.Add(new ToolStripMenuItem(Resources.StrOpen, null, (s, e) => Repository.Activate()));
+			Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.DataContext.Path));
+			Items.Add(GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, Repository.DataContext.Path));
 
 			var actions = GuiItemFactory.GetRepositoryActions<ToolStripMenuItem>(repository.DataContext.Path);
 			if(actions.Count != 0)
@@ -50,12 +48,9 @@ namespace gitter
 			}
 
 			Items.Add(new ToolStripSeparator());
-			Items.Add(GuiItemFactory.GetRemoveRepositoryItem<ToolStripMenuItem>(_repository));
+			Items.Add(GuiItemFactory.GetRemoveRepositoryItem<ToolStripMenuItem>(Repository));
 		}
 
-		public RepositoryListItem Repository
-		{
-			get { return _repository; }
-		}
+		public RepositoryListItem Repository { get; }
 	}
 }

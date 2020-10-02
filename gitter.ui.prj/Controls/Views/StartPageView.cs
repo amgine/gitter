@@ -61,6 +61,7 @@ namespace gitter
 
 			_factory = factory;
 			_repositories = new List<RepositoryListItem>();
+			_lstLocalRepositories.FullList = _repositories;
 
 			Text = Resources.StrStartPage;
 

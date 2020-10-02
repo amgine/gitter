@@ -21,10 +21,11 @@
 namespace gitter
 {
 	using System;
-	using System.Drawing;
+	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
+	using gitter.Framework.Services;
 
 	using Resources = gitter.Properties.Resources;
 
@@ -44,6 +45,8 @@ namespace gitter
 			AllowDrop = true;
 			_dragHelper = new DragHelper();
 		}
+
+		public List<RepositoryListItem> FullList { get; set; }
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
