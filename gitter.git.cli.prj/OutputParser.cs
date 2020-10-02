@@ -1319,33 +1319,29 @@ namespace gitter.Git.AccessLayer.CLI
 			return res;
 		}
 
+		private static PushResultType? GetPushResultType(string output, int pos)
+		{
+			if((output.Length <= pos + 1) || (output[pos + 1] != '\t')) return default;
+			return output[pos] switch
+			{
+				' ' => PushResultType.FastForwarded,
+				'+' => PushResultType.ForceUpdated,
+				'-' => PushResultType.DeletedReference,
+				'*' => PushResultType.CreatedReference,
+				'!' => PushResultType.Rejected,
+				'=' => PushResultType.UpToDate,
+				_ => default,
+			};
+		}
+
 		private static ReferencePushResult ParsePushResult(string output, ref int pos)
 		{
-			PushResultType type;
-			switch(output[pos])
+			var type = GetPushResultType(output, pos);
+			if(!type.HasValue)
 			{
-				case ' ':
-					type = PushResultType.FastForwarded;
-					break;
-				case '+':
-					type = PushResultType.ForceUpdated;
-					break;
-				case '-':
-					type = PushResultType.DeletedReference;
-					break;
-				case '*':
-					type = PushResultType.CreatedReference;
-					break;
-				case '!':
-					type = PushResultType.Rejected;
-					break;
-				case '=':
-					type = PushResultType.UpToDate;
-					break;
-				default:
-					pos = output.IndexOf('\n') + 1;
-					if(pos == 0) pos = output.Length + 1;
-					return null;
+				pos = output.IndexOf('\n', pos) + 1;
+				if(pos == 0) pos = output.Length + 1;
+				return default;
 			}
 			pos += 2;
 			int end = output.IndexOf('\n', pos);
@@ -1356,7 +1352,7 @@ namespace gitter.Git.AccessLayer.CLI
 			var to = output.Substring(c + 1, t - c - 1);
 			var summary = output.Substring(t + 1, end - t - 1);
 			pos = end + 1;
-			return new ReferencePushResult(type, from, to, summary);
+			return new ReferencePushResult(type.Value, from, to, summary);
 		}
 
 		public void HandleCreateTagResult(CreateTagParameters parameters, GitOutput output)
