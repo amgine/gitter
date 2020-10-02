@@ -83,16 +83,12 @@ namespace gitter.Framework
 			if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
 			using var cts = new CancellationTokenSource();
-			var currentCts = Interlocked.Exchange(ref _cancellationTokenSource, cts);
-			if(currentCts != null)
+			try
 			{
-				try
-				{
-					currentCts.Cancel(false);
-				}
-				catch(ObjectDisposedException)
-				{
-				}
+				Interlocked.Exchange(ref _cancellationTokenSource, cts)?.Cancel(false);
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 			var progress = Progress;
 			T data;
@@ -102,17 +98,24 @@ namespace gitter.Framework
 			}
 			catch(OperationCanceledException)
 			{
+				Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts);
 				return;
 			}
 			catch(Exception exc)
 			{
-				Data = default;
-				OnFetchFailed(exc);
+				if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
+				{
+					Data = default;
+					OnFetchFailed(exc);
+				}
 				return;
 			}
-			progress?.Report(OperationProgress.Completed);
-			Data = data;
-			OnFetchCompleted(data);
+			if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
+			{
+				progress?.Report(OperationProgress.Completed);
+				Data = data;
+				OnFetchCompleted(data);
+			}
 		}
 
 		#endregion

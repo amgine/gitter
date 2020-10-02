@@ -164,11 +164,13 @@ namespace gitter.Framework.Controls
 
 		private void InvalidateHostControl()
 		{
-			if(HostControl.InvokeRequired)
+			var hostControl = HostControl;
+			if(hostControl == null || hostControl.IsDisposed) return;
+			if(hostControl.InvokeRequired)
 			{
 				try
 				{
-					HostControl.BeginInvoke(new MethodInvoker(InvalidateHostControl));
+					hostControl.BeginInvoke(new MethodInvoker(InvalidateHostControl));
 				}
 				catch(ObjectDisposedException)
 				{
@@ -176,8 +178,8 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				var rect = (_getOverlayArea == null) ? HostControl.ClientRectangle : _getOverlayArea();
-				HostControl.Invalidate(rect);
+				var rect = (_getOverlayArea == null) ? hostControl.ClientRectangle : _getOverlayArea();
+				hostControl.Invalidate(rect);
 			}
 		}
 
@@ -308,15 +310,16 @@ namespace gitter.Framework.Controls
 
 		public void Report(OperationProgress progress)
 		{
-			if(HostControl.IsDisposed)
+			var hostControl = HostControl;
+			if(hostControl == null || hostControl.IsDisposed)
 			{
 				return;
 			}
-			if(HostControl.InvokeRequired)
+			if(hostControl.InvokeRequired)
 			{
 				try
 				{
-					HostControl.BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
+					hostControl.BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
 				}
 				catch(ObjectDisposedException)
 				{
