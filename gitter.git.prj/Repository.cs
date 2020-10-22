@@ -489,7 +489,7 @@ namespace gitter.Git
 			{
 				state = RepositoryState.Reverting;
 			}
-			else if(Directory.Exists(GetGitFileName("rebase-apply")))
+			else if(Directory.Exists(GetGitFileName("rebase-apply")) || Directory.Exists(GetGitFileName("rebase-merge")))
 			{
 				state = RepositoryState.Rebasing;
 			}
