@@ -68,7 +68,7 @@ namespace gitter.Git.Gui.Dialogs
 
 			GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
 
-			_controller = new RenameRemoteController(remote);
+			_controller = new RenameRemoteController(remote) { View = this };
 		}
 
 		#endregion
