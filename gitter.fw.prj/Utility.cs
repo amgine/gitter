@@ -162,17 +162,12 @@ namespace gitter.Framework
 		{
 			Verify.Argument.IsNotNull(item, nameof(item));
 
-			var cms = item.Owner as ContextMenuStrip;
-			if(cms != null)
+			return item.Owner switch
 			{
-				return cms.SourceControl;
-			}
-			var tsdd = item.Owner as ToolStripDropDown;
-			if(tsdd != null)
-			{
-				return tsdd.Parent;
-			}
-			return item.Owner;
+				ContextMenuStrip  cms  => cms.SourceControl,
+				ToolStripDropDown tsdd => tsdd.Parent,
+				_ => item.Owner,
+			};
 		}
 
 		private static readonly LinkedList<IDisposable> LazyDisposables = new LinkedList<IDisposable>();
@@ -335,11 +330,10 @@ namespace gitter.Framework
 				var pbi = new PROCESS_BASIC_INFORMATION();
 				try
 				{
-					uint bytesWritten;
 					if(NtQueryInformationProcess(
 						process.Handle,
 						0, ref pbi, (uint)Marshal.SizeOf(pbi),
-						out bytesWritten) == 0)
+						out _) == 0)
 					{
 						if(pbi.InheritedFromUniqueProcessId == processID)
 						{

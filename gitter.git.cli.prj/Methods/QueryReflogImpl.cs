@@ -85,7 +85,7 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			if(output.Output.Length < 40)
 			{
-				return new ReflogRecordData[0];
+				return Preallocated<ReflogRecordData>.EmptyArray;
 			}
 			var parser = new GitParser(output.Output);
 			int index = 0;

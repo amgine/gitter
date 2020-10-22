@@ -24,6 +24,8 @@ namespace gitter.Git
 	using System.Collections;
 	using System.Collections.Generic;
 
+	using gitter.Framework;
+
 	public sealed class RevisionReferencesCollection : IEnumerable<Reference>
 	{
 		#region Events
@@ -56,24 +58,12 @@ namespace gitter.Git
 
 		public int Count
 		{
-			get
-			{
-				lock(SyncRoot)
-				{
-					return _container.Count;
-				}
-			}
+			get { lock(SyncRoot) return _container.Count; }
 		}
 
 		public Reference this[string name]
 		{
-			get
-			{
-				lock(SyncRoot)
-				{
-					return _container[name];
-				}
-			}
+			get { lock(SyncRoot) return _container[name]; }
 		}
 
 		#endregion
@@ -98,65 +88,32 @@ namespace gitter.Git
 			}
 		}
 
-		public IList<Branch> GetBranches()
+		private IReadOnlyList<T> GetRefs<T>()
+			where T : Reference
 		{
 			lock(SyncRoot)
 			{
-				if(_container.Count == 0) return new Branch[0];
-				var list = new List<Branch>(_container.Count);
+				if(_container.Count == 0) return Preallocated<T>.EmptyArray;
+				var list = default(List<T>);
 				foreach(var reference in _container.Values)
 				{
-					var branch = reference as Branch;
-					if(branch != null) list.Add(branch);
+					if(reference is T typedRef)
+					{
+						list ??= new List<T>(_container.Count);
+						list.Add(typedRef);
+					}
 				}
-				return list;
+				return list ?? (IReadOnlyList<T>)Preallocated<T>.EmptyArray;
 			}
 		}
 
-		public IList<RemoteBranch> GetRemoteBranches()
-		{
-			lock(SyncRoot)
-			{
-				if(_container.Count == 0) return new RemoteBranch[0];
-				var list = new List<RemoteBranch>(_container.Count);
-				foreach(var reference in _container.Values)
-				{
-					var branch = reference as RemoteBranch;
-					if(branch != null) list.Add(branch);
-				}
-				return list;
-			}
-		}
+		public IReadOnlyList<Branch> GetBranches() => GetRefs<Branch>();
 
-		public IList<BranchBase> GetAllBranches()
-		{
-			lock(SyncRoot)
-			{
-				if(_container.Count == 0) return new BranchBase[0];
-				var list = new List<BranchBase>(_container.Count);
-				foreach(var reference in _container.Values)
-				{
-					var branch = reference as BranchBase;
-					if(branch != null) list.Add(branch);
-				}
-				return list;
-			}
-		}
+		public IReadOnlyList<RemoteBranch> GetRemoteBranches() => GetRefs<RemoteBranch>();
 
-		public IList<Tag> GetTags()
-		{
-			lock(SyncRoot)
-			{
-				if(_container.Count == 0) return new Tag[0];
-				var list = new List<Tag>(_container.Count);
-				foreach(var reference in _container.Values)
-				{
-					var tag = reference as Tag;
-					if(tag != null) list.Add(tag);
-				}
-				return list;
-			}
-		}
+		public IReadOnlyList<BranchBase> GetAllBranches() => GetRefs<BranchBase>();
+
+		public IReadOnlyList<Tag> GetTags() => GetRefs<Tag>();
 
 		#endregion
 

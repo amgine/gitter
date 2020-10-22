@@ -165,13 +165,12 @@ namespace gitter.Git
 
 		#region Get()
 
-		private IList<RemoteBranch> GetRemotes(BranchesData refs)
+		private IReadOnlyList<RemoteBranch> GetRemotes(BranchesData refs)
 		{
-			var heads = refs.Heads;
-			var remotes = refs.Remotes;
+			var heads = refs.Remotes;
 			if(heads.Count == 0)
 			{
-				return new RemoteBranch[0];
+				return Preallocated<RemoteBranch>.EmptyArray;
 			}
 			else
 			{
@@ -190,7 +189,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the list of unmerged remote branches.</summary>
 		/// <returns>List of unmerged remote branches.</returns>
-		public IList<RemoteBranch> GetUnmerged()
+		public IReadOnlyList<RemoteBranch> GetUnmerged()
 		{
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
@@ -199,7 +198,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the list of merged remote branches.</summary>
 		/// <returns>List of merged remote branches.</returns>
-		public IList<RemoteBranch> GetMerged()
+		public IReadOnlyList<RemoteBranch> GetMerged()
 		{
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Merged));
@@ -210,7 +209,7 @@ namespace gitter.Git
 		/// <param name="revision">Revision which must be present in any resulting remote branch.</param>
 		/// <returns>List of remote branches, containing specified <paramref name="revision"/>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
-		public IList<RemoteBranch> GetContaining(IRevisionPointer revision)
+		public IReadOnlyList<RemoteBranch> GetContaining(IRevisionPointer revision)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 

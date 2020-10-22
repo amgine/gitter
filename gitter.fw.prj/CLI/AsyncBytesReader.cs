@@ -45,18 +45,12 @@ namespace gitter.Framework.CLI
 
 		/// <summary>Initializes a new instance of the <see cref="AsyncBytesReader"/> class.</summary>
 		/// <param name="bufferSize">Size of the internal buffer.</param>
-		public AsyncBytesReader(int bufferSize)
+		public AsyncBytesReader(int bufferSize = 0x400)
 		{
 			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
 
 			_bufferSize  = bufferSize;
 			_bufferChain = new LinkedList<byte[]>();
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="AsyncBytesReader"/> class.</summary>
-		public AsyncBytesReader()
-			: this(0x400)
-		{
 		}
 
 		#endregion

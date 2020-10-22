@@ -198,7 +198,7 @@ namespace gitter.Git
 
 			lock(SyncRoot)
 			{
-				Verify.Argument.IsFalse(_parameters.ContainsKey(name), "name",
+				Verify.Argument.IsFalse(_parameters.ContainsKey(name), nameof(name),
 					"Parameter already exists.");
 				switch(_configFile)
 				{

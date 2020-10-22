@@ -341,13 +341,12 @@ namespace gitter.Git
 
 		#region Get()
 
-		private IList<Branch> GetHeads(BranchesData refs)
+		private IReadOnlyList<Branch> GetHeads(BranchesData refs)
 		{
 			var heads = refs.Heads;
-			var remotes = refs.Remotes;
 			if(heads.Count == 0)
 			{
-				return new Branch[0];
+				return Preallocated<Branch>.EmptyArray;
 			}
 			else
 			{
@@ -366,7 +365,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the list of unmerged local branches.</summary>
 		/// <returns>List of unmerged local branches.</returns>
-		public IList<Branch> GetUnmerged()
+		public IReadOnlyList<Branch> GetUnmerged()
 		{
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.NoMerged));
@@ -375,7 +374,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the list of merged local branches.</summary>
 		/// <returns>List of merged local branches.</returns>
-		public IList<Branch> GetMerged()
+		public IReadOnlyList<Branch> GetMerged()
 		{
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.Merged));
@@ -386,7 +385,7 @@ namespace gitter.Git
 		/// <param name="revision">Revision which must be present in any resulting local branch.</param>
 		/// <returns>List of local branches, containing specified <paramref name="revision"/>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
-		public IList<Branch> GetContaining(IRevisionPointer revision)
+		public IReadOnlyList<Branch> GetContaining(IRevisionPointer revision)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 

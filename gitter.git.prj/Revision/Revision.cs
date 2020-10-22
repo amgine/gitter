@@ -21,6 +21,7 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Globalization;
 
 	using gitter.Git.AccessLayer;
 
@@ -73,7 +74,7 @@ namespace gitter.Git
 
 		public Hash TreeHash
 		{
-			get { return _treeHash; }
+			get => _treeHash;
 			internal set
 			{
 				if(!IsLoaded)
@@ -96,7 +97,7 @@ namespace gitter.Git
 
 		public User Author
 		{
-			get { return _author; }
+			get => _author;
 			internal set
 			{
 				if(!IsLoaded)
@@ -140,8 +141,6 @@ namespace gitter.Git
 		#endregion
 
 		public override string ToString()
-		{
-			return string.Format("{0}: {1}", Hash.ToString(7), Subject);
-		}
+			=> string.Format(CultureInfo.InvariantCulture, "{0}: {1}", Hash.ToString(7), Subject);
 	}
 }

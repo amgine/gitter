@@ -66,16 +66,10 @@ namespace gitter.Git
 		{
 			if(Repository.IsEmpty)
 			{
-				var tcs = new TaskCompletionSource<RevisionLog>();
-				if(cancellationToken.IsCancellationRequested)
-				{
-					tcs.SetCanceled();
-				}
-				else
-				{
-					tcs.SetResult(new RevisionLog(Repository, new Revision[0]));
-				}
-				return await tcs.Task.ConfigureAwait(continueOnCapturedContext: false);
+				var task = cancellationToken.IsCancellationRequested
+					? Task.FromCanceled<RevisionLog>(cancellationToken)
+					: Task.FromResult(new RevisionLog(Repository, Preallocated<Revision>.EmptyArray));
+				return await task.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			else
 			{

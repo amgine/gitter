@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +18,10 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Framework
 {
-	using System.Collections.Generic;
-
-	using gitter.Framework;
-	using gitter.Git.AccessLayer;
-
-	public interface IGitRepositoryProvider : IRepositoryProvider
+	public class Preallocated<T>
 	{
-		IEnumerable<IGitAccessorProvider> GitAccessorProviders { get; }
-
-		IGitAccessorProvider ActiveGitAccessorProvider { get; set; }
-
-		IGitAccessor GitAccessor { get; set; }
-
-		bool RunInitDialog();
-
-		bool RunCloneDialog();
+		public static readonly T[] EmptyArray = new T[0];
 	}
 }

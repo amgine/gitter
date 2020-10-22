@@ -24,6 +24,8 @@ namespace gitter.Git.AccessLayer.CLI
 	using System.Collections.Generic;
 	using System.Globalization;
 
+	using gitter.Framework;
+
 	sealed class OutputParser
 	{
 		#region Data
@@ -274,7 +276,7 @@ namespace gitter.Git.AccessLayer.CLI
 				if(numParents == 0)
 				{
 					parser.Position = end + 1;
-					result.Add(new RevisionGraphData(sha1, new string[0]));
+					result.Add(new RevisionGraphData(sha1, Preallocated<string>.EmptyArray));
 				}
 				else
 				{
@@ -1219,7 +1221,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(output.ExitCode != 0)
 			{
-				return new TagData[0];
+				return Preallocated<TagData>.EmptyArray;
 			}
 			var tags = output.Output;
 			int pos = 0;
@@ -1491,7 +1493,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			if(output.ExitCode != 0 && parameters.ConfigFile != ConfigFile.Other)
 			{
-				return new ConfigParameterData[0];
+				return Preallocated<ConfigParameterData>.EmptyArray;
 			}
 			HandleConfigResults(output);
 			var res = new List<ConfigParameterData>();

@@ -361,9 +361,9 @@ namespace gitter.Git
 		{
 			var top = Repository.Accessor.QueryStashTop.Invoke(
 				new QueryStashTopParameters(false));
-			var stash = (top == null)?
-				new StashedStateData[0] :
-				Repository.Accessor.QueryStash.Invoke(new QueryStashParameters());
+			var stash = top == null
+				? Preallocated<StashedStateData>.EmptyArray
+				: Repository.Accessor.QueryStash.Invoke(new QueryStashParameters());
 			lock(SyncRoot)
 			lock(Repository.Revisions.SyncRoot)
 			{

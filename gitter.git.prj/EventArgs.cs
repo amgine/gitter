@@ -252,7 +252,7 @@ namespace gitter.Git
 		}
 	}
 
-	/// <summary><see cref="EventArgs"/> identifying <see cref="Committer"/>.</summary>
+	/// <summary><see cref="EventArgs"/> identifying <see cref="User"/>.</summary>
 	public class UserEventArgs : ObjectEventArgs<User>
 	{
 		/// <summary>Create <see cref="UserEventArgs"/>.</summary>
@@ -316,7 +316,6 @@ namespace gitter.Git
 	/// <summary><see cref="EventArgs"/> identifying <see cref="Note"/>.</summary>
 	public class NoteEventArgs : EventArgs
 	{
-
 		/// <summary>Create <see cref="NoteEventArgs"/>.</summary>
 		/// <param name="note"><see cref="Note"/> which is related to event.</param>
 		public NoteEventArgs(Note note)

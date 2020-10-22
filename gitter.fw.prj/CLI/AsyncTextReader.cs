@@ -46,18 +46,12 @@ namespace gitter.Framework.CLI
 
 		/// <summary>Initializes a new instance of the <see cref="AsyncTextReader"/> class.</summary>
 		/// <param name="bufferSize">Size of the internal buffer.</param>
-		public AsyncTextReader(int bufferSize)
+		public AsyncTextReader(int bufferSize = 0x400)
 		{
 			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
 
 			_bufferSize		= bufferSize;
 			_stringBuilder	= new StringBuilder(bufferSize);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="AsyncTextReader"/> class.</summary>
-		public AsyncTextReader()
-			: this(0x400)
-		{
 		}
 
 		#endregion

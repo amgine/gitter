@@ -77,7 +77,7 @@ namespace gitter.Framework.CLI
 		{
 			get
 			{
-				Verify.Argument.IsValidIndex(0, index, _length, "index");
+				Verify.Argument.IsValidIndex(0, index, _length, nameof(index));
 
 				return _buffer[_offset + index];
 			}

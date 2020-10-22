@@ -28,7 +28,7 @@ namespace gitter.Git.Gui
 	public interface IGraphBuilder<T>
 		where T : class
 	{
-		GraphAtom[][] BuildGraph(IList<T> items, Func<T, IList<T>> getParents);
+		GraphAtom[][] BuildGraph(IReadOnlyList<T> items, Func<T, IReadOnlyList<T>> getParents);
 
 		GraphAtom[] AddGraphLineToTop(GraphAtom[] topLine);
 

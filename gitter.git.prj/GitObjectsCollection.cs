@@ -200,7 +200,7 @@ namespace gitter.Git
 					return value;
 				}
 			}
-			return default(TObject);
+			return default;
 		}
 
 		/// <summary>Get object with the specified <paramref name="name"/>.</summary>

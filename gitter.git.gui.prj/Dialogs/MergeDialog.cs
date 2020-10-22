@@ -235,7 +235,7 @@ namespace gitter.Git.Gui.Dialogs
 		#region Data
 
 		private readonly Repository _repository;
-		private readonly IList<BranchBase> _unmergedBranches;
+		private readonly HashSet<BranchBase> _unmergedBranches;
 		private TextBoxSpellChecker _speller;
 		private readonly RevisionsInput _revisionsInput;
 		private readonly IMergeController _controller;
@@ -271,7 +271,7 @@ namespace gitter.Git.Gui.Dialogs
 
 			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
 
-			_unmergedBranches = _repository.Refs.GetUnmergedBranches();
+			_unmergedBranches = new HashSet<BranchBase>(_repository.Refs.GetUnmergedBranches());
 			_references.DisableContextMenus = true;
 			_references.Style = GitterApplication.DefaultStyle;
 			_references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,

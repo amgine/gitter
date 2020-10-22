@@ -118,8 +118,7 @@ namespace gitter.Git.Gui.Dialogs
 				int index = 0;
 				foreach(var p in _lstCommits.Panels)
 				{
-					var rhp = p as RevisionHeaderPanel;
-					if(rhp != null)
+					if(p is RevisionHeaderPanel rhp)
 					{
 						++index;
 						if(rhp.IsSelected)
@@ -138,8 +137,7 @@ namespace gitter.Git.Gui.Dialogs
 				{
 					foreach(var p in _lstCommits.Panels)
 					{
-						var rhp = p as RevisionHeaderPanel;
-						if(rhp != null)
+						if(p is RevisionHeaderPanel rhp)
 						{
 							rhp.IsSelected = false;
 						}
@@ -150,8 +148,7 @@ namespace gitter.Git.Gui.Dialogs
 					int index = 0;
 					foreach(var p in _lstCommits.Panels)
 					{
-						var rhp = p as RevisionHeaderPanel;
-						if(rhp != null)
+						if(p is RevisionHeaderPanel rhp)
 						{
 							++index;
 							if(index == value)

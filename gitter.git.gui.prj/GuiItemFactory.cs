@@ -25,6 +25,7 @@ namespace gitter.Git.Gui
 	using System.Drawing;
 	using System.Diagnostics;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Text;
 	using System.Windows.Forms;
 
@@ -447,17 +448,12 @@ namespace gitter.Git.Gui
 
 			if(GlobalBehavior.AskOnCommitCheckouts)
 			{
-				bool revIsLocalBranch = (revision is Branch) && !((Branch)revision).IsRemote;
+				bool revIsLocalBranch = (revision is Branch branch) && !branch.IsRemote;
 				if(!revIsLocalBranch)
 				{
 					var rev = revision.Dereference();
 					var branches = rev.References.GetBranches();
-					for(int i = branches.Count - 1; i >= 0; --i)
-					{
-						if(branches[i].IsRemote || branches[i].IsCurrent)
-							branches.RemoveAt(i);
-					}
-					if(branches.Count != 0)
+					if(branches.Count != 0 && branches.Any(b => !b.IsCurrent))
 					{
 						using(var dlg = new ResolveCheckoutDialog())
 						{

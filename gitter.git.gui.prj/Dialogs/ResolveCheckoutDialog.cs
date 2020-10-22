@@ -51,9 +51,10 @@ namespace gitter.Git.Gui.Dialogs
 			_references.BeginUpdate();
 			_references.Style = GitterApplication.DefaultStyle;
 			_references.Items.Clear();
-			Branch first = null;
+			var first = default(Branch);
 			foreach(var branch in branches)
 			{
+				if(branch.IsCurrent) continue;
 				if(first == null) first = branch;
 				_references.Items.Add(new BranchListItem(branch));
 			}

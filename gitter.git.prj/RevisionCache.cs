@@ -62,8 +62,7 @@ namespace gitter.Git
 			{
 				lock(SyncRoot)
 				{
-					Revision revision;
-					if(_revisions.TryGetValue(sha1, out revision))
+					if(_revisions.TryGetValue(sha1, out var revision))
 					{
 						if(!revision.IsLoaded)
 						{
@@ -123,8 +122,7 @@ namespace gitter.Git
 		{
 			lock(SyncRoot)
 			{
-				Revision revision;
-				if(_revisions.TryGetValue(sha1, out revision))
+				if(_revisions.TryGetValue(sha1, out var revision))
 				{
 					if(!revision.IsLoaded)
 					{
@@ -139,19 +137,12 @@ namespace gitter.Git
 		/// <value>Cached revisions count.</value>
 		public int Count
 		{
-			get
-			{
-				lock(SyncRoot)
-				{
-					return _revisions.Count;
-				}
-			}
+			get { lock(SyncRoot) return _revisions.Count; }
 		}
 
 		internal Revision GetOrCreateRevision(Hash sha1)
 		{
-			Revision revision;
-			if(!_revisions.TryGetValue(sha1, out revision))
+			if(!_revisions.TryGetValue(sha1, out var revision))
 			{
 				revision = new Revision(Repository, sha1);
 				_revisions.Add(sha1, revision);
@@ -175,8 +166,7 @@ namespace gitter.Git
 				for(int i = 0; i < data.Count; ++i)
 				{
 					var revisionData = data[i];
-					Revision revision;
-					if(_revisions.TryGetValue(revisionData.SHA1, out revision))
+					if(_revisions.TryGetValue(revisionData.SHA1, out var revision))
 					{
 						if(!revision.IsLoaded)
 						{
@@ -196,14 +186,10 @@ namespace gitter.Git
 		#region IEnumerable<Revision>
 
 		public IEnumerator<Revision> GetEnumerator()
-		{
-			return _revisions.Values.GetEnumerator();
-		}
+			=> _revisions.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _revisions.Values.GetEnumerator();
-		}
+			=> _revisions.Values.GetEnumerator();
 
 		#endregion
 	}

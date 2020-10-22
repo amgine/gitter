@@ -420,7 +420,7 @@ namespace gitter.Framework.Controls
 		{
 			if(!_factories.TryGetValue(guid, out var factory))
 			{
-				return new ViewBase[0];
+				return Preallocated<ViewBase>.EmptyArray;
 			}
 			return factory.CreatedViews;
 		}
@@ -429,7 +429,7 @@ namespace gitter.Framework.Controls
 		{
 			if(!_factories.TryGetValue(guid, out var factory))
 			{
-				return new ViewBase[0];
+				return Preallocated<ViewBase>.EmptyArray;
 			}
 			var list = new List<ViewBase>();
 			foreach(var view in factory.CreatedViews)

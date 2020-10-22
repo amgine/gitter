@@ -23,6 +23,7 @@ namespace gitter.Git
 	using System;
 	using System.Collections.Generic;
 
+	using gitter.Framework;
 	using gitter.Git.AccessLayer;
 
 	/// <summary>Collections of repository's references ("$GIT_DIR/refs/" cache).</summary>
@@ -160,12 +161,12 @@ namespace gitter.Git
 			if(remote != null) return remote;
 			var tag = Tags.TryGetItem(name);
 			if(tag != null) return tag;
-			return null;
+			return default;
 		}
 
 		/// <summary>Gets the list of unmerged branches.</summary>
 		/// <returns>List of unmerged branches.</returns>
-		public IList<BranchBase> GetUnmergedBranches()
+		public IReadOnlyList<BranchBase> GetUnmergedBranches()
 		{
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.NoMerged));
@@ -174,7 +175,7 @@ namespace gitter.Git
 			var count = heads.Count + remotes.Count;
 			if(count == 0)
 			{
-				return new BranchBase[0];
+				return Preallocated<BranchBase>.EmptyArray;
 			}
 			var res = new List<BranchBase>(count);
 			lock(Heads.SyncRoot)
@@ -198,7 +199,7 @@ namespace gitter.Git
 
 		/// <summary>Gets the list of merged branches.</summary>
 		/// <returns>List of merged branches.</returns>
-		public IList<BranchBase> GetMergedBranches()
+		public IReadOnlyList<BranchBase> GetMergedBranches()
 		{
 			var refs = Repository.Accessor.QueryBranches.Invoke(
 				new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.Merged));
@@ -207,7 +208,7 @@ namespace gitter.Git
 			var count = heads.Count + remotes.Count;
 			if(count == 0)
 			{
-				return new BranchBase[0];
+				return Preallocated<BranchBase>.EmptyArray;
 			}
 			var res = new List<BranchBase>(count);
 			lock(Heads.SyncRoot)
@@ -233,7 +234,7 @@ namespace gitter.Git
 		/// <param name="revision">Revision which must be present in any resulting branch.</param>
 		/// <returns>List of branches, containing specified <paramref name="revision"/>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
-		public IList<BranchBase> GetBranchesContaining(IRevisionPointer revision)
+		public IReadOnlyList<BranchBase> GetBranchesContaining(IRevisionPointer revision)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 
@@ -244,7 +245,7 @@ namespace gitter.Git
 			var count = heads.Count + remotes.Count;
 			if(count == 0)
 			{
-				return new BranchBase[0];
+				return Preallocated<BranchBase>.EmptyArray;
 			}
 			var res = new List<BranchBase>(count);
 			lock(Heads.SyncRoot)

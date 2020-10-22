@@ -78,7 +78,7 @@ namespace gitter.Git
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static char ToHexDigit(uint digit)
-			=> digit > 9 ? (char)('a' + digit - 10) : (char)('0' + digit);
+			=> digit > 9 ? (char)('a' + (digit - 10)) : (char)('0' + digit);
 
 		private static bool TryParsePart(string hash, int offset, out uint part)
 		{
@@ -161,31 +161,22 @@ namespace gitter.Git
 
 		private static unsafe void DumpPart(uint part, char* buffer, int length)
 		{
-			uint digit;
 			if(length-- < 0) return;
-			digit = (part >> 28) & 0x0f;
-			buffer[0] = ToHexDigit(digit);
+			buffer[0] = ToHexDigit((part >> 28) & 0x0f);
 			if(length-- < 0) return;
-			digit = (part >> 24) & 0x0f;
-			buffer[1] = ToHexDigit(digit);
+			buffer[1] = ToHexDigit((part >> 24) & 0x0f);
 			if(length-- < 0) return;
-			digit = (part >> 20) & 0x0f;
-			buffer[2] = ToHexDigit(digit);
+			buffer[2] = ToHexDigit((part >> 20) & 0x0f);
 			if(length-- < 0) return;
-			digit = (part >> 16) & 0x0f;
-			buffer[3] = ToHexDigit(digit);
+			buffer[3] = ToHexDigit((part >> 16) & 0x0f);
 			if(length-- < 0) return;
-			digit = (part >> 12) & 0x0f;
-			buffer[4] = ToHexDigit(digit);
+			buffer[4] = ToHexDigit((part >> 12) & 0x0f);
 			if(length-- < 0) return;
-			digit = (part >>  8) & 0x0f;
-			buffer[5] = ToHexDigit(digit);
+			buffer[5] = ToHexDigit((part >>  8) & 0x0f);
 			if(length-- < 0) return;
-			digit = (part >>  4) & 0x0f;
-			buffer[6] = ToHexDigit(digit);
+			buffer[6] = ToHexDigit((part >>  4) & 0x0f);
 			if(length-- < 0) return;
-			digit = (part >>  0) & 0x0f;
-			buffer[7] = ToHexDigit(digit);
+			buffer[7] = ToHexDigit((part >>  0) & 0x0f);
 		}
 
 		private static void DumpPart(uint part, StringBuilder stringBuilder)

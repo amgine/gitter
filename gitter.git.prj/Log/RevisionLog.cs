@@ -23,11 +23,13 @@ namespace gitter.Git
 	using System;
 	using System.Collections.Generic;
 
+	using gitter.Framework;
+
 	public sealed class RevisionLog
 	{
-		private readonly Dictionary<Revision, IList<Revision>> _parents;
+		private readonly Dictionary<Revision, IReadOnlyList<Revision>> _parents;
 
-		public RevisionLog(Repository repository, IList<Revision> revisions)
+		public RevisionLog(Repository repository, IReadOnlyList<Revision> revisions)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(revisions, nameof(revisions));
@@ -36,7 +38,7 @@ namespace gitter.Git
 			Revisions  = revisions;
 		}
 
-		public RevisionLog(Repository repository, IList<Revision> revisions, Dictionary<Revision, IList<Revision>> parents)
+		public RevisionLog(Repository repository, IReadOnlyList<Revision> revisions, Dictionary<Revision, IReadOnlyList<Revision>> parents)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(revisions, nameof(revisions));
@@ -46,7 +48,7 @@ namespace gitter.Git
 			_parents   = parents;
 		}
 
-		public IList<Revision> GetParents(Revision revision)
+		public IReadOnlyList<Revision> GetParents(Revision revision)
 		{
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
@@ -58,13 +60,13 @@ namespace gitter.Git
 			{
 				return _parents.TryGetValue(revision, out var parents)
 					? parents
-					: new Revision[0];
+					: Preallocated<Revision>.EmptyArray;
 			}
 		}
 
 		public Repository Repository { get; }
 
-		public IList<Revision> Revisions { get; }
+		public IReadOnlyList<Revision> Revisions { get; }
 
 		public int RevisionsCount => Revisions.Count;
 	}

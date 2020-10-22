@@ -97,7 +97,7 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		private static GraphAtom[] BuildGraphLine0Child(IList<T> parents, T[] line, int[] linecolors, IGraphColorProvider cprov, ref int lineCount)
+		private static GraphAtom[] BuildGraphLine0Child(IReadOnlyList<T> parents, T[] line, int[] linecolors, IGraphColorProvider cprov, ref int lineCount)
 		{
 			GraphAtom[] res;
 			int lineColor = 0;
@@ -210,7 +210,7 @@ namespace gitter.Git.Gui
 			return res;
 		}
 
-		private static GraphAtom[] BuildGraphLine(IList<T> parents, T[] line, int[] linecolors, IGraphColorProvider cprov, IList<int> pos, int id, ref int lineCount)
+		private static GraphAtom[] BuildGraphLine(IReadOnlyList<T> parents, T[] line, int[] linecolors, IGraphColorProvider cprov, IList<int> pos, int id, ref int lineCount)
 		{
 			GraphAtom[] res;
 			int j = pos[id];
@@ -497,7 +497,7 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		public GraphAtom[][] BuildGraph(IList<T> items, Func<T, IList<T>> getParents)
+		public GraphAtom[][] BuildGraph(IReadOnlyList<T> items, Func<T, IReadOnlyList<T>> getParents)
 		{
 			Verify.Argument.IsNotNull(items, nameof(items));
 			Verify.Argument.IsNotNull(getParents, nameof(getParents));

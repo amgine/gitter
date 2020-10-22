@@ -24,7 +24,7 @@ namespace gitter.Git
 	using System.Collections;
 	using System.Collections.Generic;
 
-	public sealed class RevisionParentsCollection : IList<Revision>
+	public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
 	{
 		#region Data
 
@@ -45,7 +45,7 @@ namespace gitter.Git
 
 		public Revision this[int index]
 		{
-			get { return _container[index]; }
+			get => _container[index];
 			internal set
 			{
 				Assert.IsNotNull(value);
@@ -86,82 +86,32 @@ namespace gitter.Git
 		#region Public Methods
 
 		public int IndexOf(Revision item)
-		{
-			return _container.IndexOf(item);
-		}
+			=> _container.IndexOf(item);
 
 		public bool Contains(Revision item)
-		{
-			return _container.Contains(item);
-		}
+			=>  _container.Contains(item);
 
 		public void CopyTo(Revision[] array, int arrayIndex)
-		{
-			_container.CopyTo(array, arrayIndex);
-		}
+			=> _container.CopyTo(array, arrayIndex);
 
 		#endregion
 
 		#region IList<Revision>
 
-		Revision IList<Revision>.this[int index]
-		{
-			get { return _container[index]; }
-			set { throw new NotSupportedException(); }
-		}
-
-		void IList<Revision>.Insert(int index, Revision item)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList<Revision>.RemoveAt(int index)
-		{
-			throw new NotSupportedException();
-		}
-
-		#endregion
-
-		#region ICollection<Revision>
-
-		void ICollection<Revision>.Add(Revision item)
-		{
-			throw new NotSupportedException();
-		}
-
-		void ICollection<Revision>.Clear()
-		{
-			throw new NotSupportedException();
-		}
-
-		bool ICollection<Revision>.IsReadOnly
-		{
-			get { return true; }
-		}
-
-		bool ICollection<Revision>.Remove(Revision item)
-		{
-			throw new NotSupportedException();
-		}
+		Revision IReadOnlyList<Revision>.this[int index] => _container[index];
 
 		#endregion
 
 		#region IEnumerable<Revision>
 
 		public List<Revision>.Enumerator GetEnumerator()
-		{
-			return _container.GetEnumerator();
-		}
+			=> _container.GetEnumerator();
 
 		IEnumerator<Revision> IEnumerable<Revision>.GetEnumerator()
-		{
-			return _container.GetEnumerator();
-		}
+			=> _container.GetEnumerator();
 
 		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return _container.GetEnumerator();
-		}
+			=> _container.GetEnumerator();
 
 		#endregion
 	}

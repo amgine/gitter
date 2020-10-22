@@ -46,7 +46,7 @@ namespace gitter.Git
 			if(Repository.IsEmpty)
 			{
 				return await TaskUtility
-					.TaskFromResult(new RevisionLog(Repository, new Revision[0]))
+					.TaskFromResult(new RevisionLog(Repository, Preallocated<Revision>.EmptyArray))
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			else

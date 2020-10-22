@@ -79,7 +79,7 @@ namespace gitter.Git.Gui.Dialogs
 		public AddParameterDialog(IWorkingEnvironment environment, ConfigFile configFile)
 			: this(environment)
 		{
-			Verify.Argument.IsFalse(configFile != ConfigFile.System && configFile != ConfigFile.User, "configFile");
+			Verify.Argument.IsFalse(configFile != ConfigFile.System && configFile != ConfigFile.User, nameof(configFile));
 
 			_configFile = configFile;
 		}

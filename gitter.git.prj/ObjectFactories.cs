@@ -31,7 +31,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(branchData, nameof(branchData));
-			Verify.Argument.IsFalse(branchData.IsRemote, "branchData", "Cannot create remote branch.");
+			Verify.Argument.IsFalse(branchData.IsRemote, nameof(branchData), "Cannot create remote branch.");
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -47,7 +47,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(branch, nameof(branch));
 			Verify.Argument.IsNotNull(branchData, nameof(branchData));
-			Verify.Argument.IsFalse(branchData.IsRemote, "branchData", "Cannot update remote branch.");
+			Verify.Argument.IsFalse(branchData.IsRemote, nameof(branchData), "Cannot update remote branch.");
 
 			var repo = branch.Repository;
 			if(branch.Revision.Hash != branchData.SHA1)
@@ -67,7 +67,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			Verify.Argument.IsNotNull(branchData, nameof(branchData));
-			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot create local branch.");
+			Verify.Argument.IsTrue(branchData.IsRemote, nameof(branchData), "Cannot create local branch.");
 
 			Revision revision;
 			lock(repository.Revisions.SyncRoot)
@@ -81,7 +81,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(remoteBranch, nameof(remoteBranch));
 			Verify.Argument.IsNotNull(branchData, nameof(branchData));
-			Verify.Argument.IsTrue(branchData.IsRemote, "branchData", "Cannot update local branch.");
+			Verify.Argument.IsTrue(branchData.IsRemote, nameof(branchData), "Cannot update local branch.");
 
 			if(remoteBranch.Revision.Hash != branchData.SHA1)
 			{

@@ -462,7 +462,7 @@ namespace gitter.Git.Gui.Controls
 
 		public BlameLine[] GetSelectedLines()
 		{
-			if(_selStart == -1) return new BlameLine[0];
+			if(_selStart == -1) return Preallocated<BlameLine>.EmptyArray;
 			int offset = 0;
 			int i = 0;
 			int num = _selStart;

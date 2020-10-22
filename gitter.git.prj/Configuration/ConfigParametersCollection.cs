@@ -169,7 +169,7 @@ namespace gitter.Git
 			ConfigParameter p;
 			lock(SyncRoot)
 			{
-				Verify.Argument.IsFalse(_parameters.ContainsKey(name), "name", "Parameter already exists.");
+				Verify.Argument.IsFalse(_parameters.ContainsKey(name), nameof(name), "Parameter already exists.");
 
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.ConfigUpdated))

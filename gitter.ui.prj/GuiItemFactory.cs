@@ -137,7 +137,7 @@ namespace gitter
 			}
 		}
 
-		public static IList<T> GetRepositoryActions<T>(string workingDirectory)
+		public static IReadOnlyList<T> GetRepositoryActions<T>(string workingDirectory)
 			where T : ToolStripItem, new()
 		{
 			var p = GitterApplication.WorkingEnvironment.FindProviderForDirectory(workingDirectory);
@@ -146,7 +146,7 @@ namespace gitter
 				var commands = new List<GuiCommand>(p.GetRepositoryCommands(workingDirectory));
 				if(commands.Count == 0)
 				{
-					return new T[0];
+					return Preallocated<T>.EmptyArray;
 				}
 				var res = new List<T>(commands.Count);
 				foreach(var cmd in commands)
@@ -163,7 +163,7 @@ namespace gitter
 				}
 				return res;
 			}
-			return new T[0];
+			return Preallocated<T>.EmptyArray;
 		}
 
 		static void OnGuiCommandItemClick(object sender, EventArgs e)

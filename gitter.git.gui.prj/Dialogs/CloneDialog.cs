@@ -120,14 +120,9 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				get
 				{
-					if(_chkAppendUrlToPath.Checked)
-					{
-						return AppendUrlToPath(_txtPath.Text.Trim(), _txtUrl.Text.Trim());
-					}
-					else
-					{
-						return _txtPath.Text;
-					}
+					return _chkAppendUrlToPath.Checked
+						? AppendUrlToPath(_txtPath.Text.Trim(), _txtUrl.Text.Trim())
+						: _txtPath.Text;
 				}
 				set
 				{

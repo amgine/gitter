@@ -512,7 +512,7 @@ namespace gitter.Git.Gui.Controls
 
 		public DiffLine[] GetSelectedLines()
 		{
-			if(_selStart == -1) return new DiffLine[0];
+			if(_selStart == -1) return Preallocated<DiffLine>.EmptyArray;
 			int offset = 0;
 			int i = 0;
 			int num = _selStart;

@@ -28,8 +28,7 @@ namespace gitter.Git
 			{
 				return string.Empty;
 			}
-			var branch = revision as RemoteBranch;
-			if(branch != null)
+			if(revision is RemoteBranch branch)
 			{
 				var branchName = branch.Name;
 				var remote = branch.Remote;

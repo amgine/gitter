@@ -492,7 +492,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Displayed diff.</summary>
 		public Diff Diff
 		{
-			get { return _diff; }
+			get => _diff;
 			set
 			{
 				if(_diff != value)
@@ -525,7 +525,7 @@ namespace gitter.Git.Gui.Controls
 					else
 					{
 						_changesByType[0].Count = 0;
-						_items = new FileItem[0];
+						_items = Preallocated<FileItem>.EmptyArray;
 					}
 					_fileHover.Reset(-1, null);
 				}

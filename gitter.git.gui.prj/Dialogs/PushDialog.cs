@@ -71,14 +71,9 @@ namespace gitter.Git.Gui.Dialogs
 					{
 						if(item.CheckedState == CheckedState.Checked)
 						{
-							var refItem = item as IRevisionPointerListItem;
-							if(refItem != null)
+							if(item is IRevisionPointerListItem refItem && refItem.RevisionPointer is Branch branch)
 							{
-								var branch = refItem.RevisionPointer as Branch;
-								if(branch != null)
-								{
-									list.Add(branch);
-								}
+								list.Add(branch);
 							}
 						}
 					}
@@ -96,15 +91,10 @@ namespace gitter.Git.Gui.Dialogs
 					}
 					foreach(var item in _referencesListBox.Items)
 					{
-						var refItem = item as IRevisionPointerListItem;
-						if(refItem != null)
+						if(item is IRevisionPointerListItem refItem && refItem.RevisionPointer is Branch branch)
 						{
-							var branch = refItem.RevisionPointer as Branch;
-							if(branch != null)
-							{
-								item.CheckedState = value.Contains(branch) ?
-									CheckedState.Checked : CheckedState.Unchecked;
-							}
+							item.CheckedState = value.Contains(branch) ?
+								CheckedState.Checked : CheckedState.Unchecked;
 						}
 					}
 				}

@@ -48,7 +48,7 @@ namespace gitter.Framework.CLI
 		/// <summary>Initializes a new instance of the <see cref="AsyncTextParser"/> class.</summary>
 		/// <param name="parser">Output parser.</param>
 		/// <param name="bufferSize">Size of the internal buffer.</param>
-		public AsyncTextParser(IParser parser, int bufferSize)
+		public AsyncTextParser(IParser parser, int bufferSize = 0x400)
 		{
 			Verify.Argument.IsNotNull(parser, nameof(parser));
 			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
@@ -56,13 +56,6 @@ namespace gitter.Framework.CLI
 			_parser      = parser;
 			_bufferSize  = bufferSize;
 			_textSegment = new CharArrayTextSegment();
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="AsyncTextParser"/> class.</summary>
-		/// <param name="parser">Output parser.</param>
-		public AsyncTextParser(IParser parser)
-			: this(parser, 0x400)
-		{
 		}
 
 		#endregion

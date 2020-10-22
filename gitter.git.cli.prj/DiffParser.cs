@@ -24,6 +24,8 @@ namespace gitter.Git.AccessLayer.CLI
 	using System.Globalization;
 	using System.Collections.Generic;
 
+	using gitter.Framework;
+
 	/// <summary>Parser to use with git diffs.</summary>
 	internal sealed class DiffParser : GitParser
 	{
@@ -290,13 +292,13 @@ namespace gitter.Git.AccessLayer.CLI
 		private DiffHunk ReadBinaryFilesDifferHunk()
 		{
 			return new DiffHunk(
-				new DiffColumnHeader[0],
+				Preallocated<DiffColumnHeader>.EmptyArray,
 				new DiffLine[]
 				{
 					new DiffLine(
 						DiffLineState.Header,
-						new DiffLineState[0],
-						new int[0],
+						Preallocated<DiffLineState>.EmptyArray,
+						Preallocated<int>.EmptyArray,
 						ReadLine())
 				},
 				new DiffStats(0, 0, 0, 1),
@@ -309,21 +311,21 @@ namespace gitter.Git.AccessLayer.CLI
 			int headers = 0;
 			if(CheckValue(BinaryPatchHeader))
 			{
-				lines.Add(new DiffLine(DiffLineState.Header, new DiffLineState[0], new int[0], ReadLine()));
+				lines.Add(new DiffLine(DiffLineState.Header, Preallocated<DiffLineState>.EmptyArray, Preallocated<int>.EmptyArray, ReadLine()));
 				++headers;
 			}
 			var state = CheckValue("literal ") || CheckValue("delta ") ? DiffLineState.Header : DiffLineState.Context;
 			if(state == DiffLineState.Header) ++headers;
 			while(!IsAtEndOfString)
 			{
-				lines.Add(new DiffLine(state, new DiffLineState[0], new int[0], ReadLine()));
+				lines.Add(new DiffLine(state, Preallocated<DiffLineState>.EmptyArray, Preallocated<int>.EmptyArray, ReadLine()));
 				if(IsAtEndOfLine)
 				{
 					Skip();
 					break;
 				}
 			}
-			return new DiffHunk(new DiffColumnHeader[0], lines, new DiffStats(0, 0, lines.Count - headers, headers), true);
+			return new DiffHunk(Preallocated<DiffColumnHeader>.EmptyArray, lines, new DiffStats(0, 0, lines.Count - headers, headers), true);
 		}
 
 		#endregion

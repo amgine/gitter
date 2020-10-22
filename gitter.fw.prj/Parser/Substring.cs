@@ -59,7 +59,7 @@ namespace gitter.Framework
 		/// <param name="string">Base string.</param>
 		public Substring(string @string)
 		{
-			Verify.Argument.IsNotNull(@string, "@string");
+			Verify.Argument.IsNotNull(@string, nameof(@string));
 
 			String = @string;
 			_start = 0;
@@ -71,8 +71,8 @@ namespace gitter.Framework
 		/// <param name="start">Substring start.</param>
 		public Substring(string @string, int start)
 		{
-			Verify.Argument.IsNotNull(@string, "@string");
-			Verify.Argument.IsValidIndex(start, @string.Length, "start");
+			Verify.Argument.IsNotNull(@string, nameof(@string));
+			Verify.Argument.IsValidIndex(start, @string.Length, nameof(start));
 
 			String = @string;
 			_start = start;
@@ -85,9 +85,9 @@ namespace gitter.Framework
 		/// <param name="length">Substring length.</param>
 		public Substring(string @string, int start, int length)
 		{
-			Verify.Argument.IsNotNull(@string, "@string");
-			Verify.Argument.IsValidIndex(start, @string.Length, "start");
-			Verify.Argument.IsValidIndex(length, @string.Length - start + 1, "length");
+			Verify.Argument.IsNotNull(@string, nameof(@string));
+			Verify.Argument.IsValidIndex(start, @string.Length, nameof(start));
+			Verify.Argument.IsValidIndex(length, @string.Length - start + 1, nameof(length));
 
 			String = @string;
 			_start = start;
@@ -107,7 +107,7 @@ namespace gitter.Framework
 			get { return _start; }
 			set
 			{
-				Verify.Argument.IsValidIndex(0, value, String.Length - _length, "value");
+				Verify.Argument.IsValidIndex(0, value, String.Length - _length, nameof(value));
 
 				_start = value;
 			}
@@ -119,7 +119,7 @@ namespace gitter.Framework
 			get { return _length; }
 			set
 			{
-				Verify.Argument.IsValidIndex(0, value, String.Length - _start + 1, "value");
+				Verify.Argument.IsValidIndex(0, value, String.Length - _start + 1, nameof(value));
 
 				_length = value;
 			}
@@ -144,7 +144,7 @@ namespace gitter.Framework
 		{
 			get
 			{
-				Verify.Argument.IsValidIndex(index, _length, "index");
+				Verify.Argument.IsValidIndex(index, _length, nameof(index));
 
 				return String[_start + index];
 			}
@@ -159,8 +159,8 @@ namespace gitter.Framework
 		/// <param name="length">Substring length.</param>
 		public void SetInterval(int start, int length)
 		{
-			Verify.Argument.IsValidIndex(start, String.Length, "start");
-			Verify.Argument.IsValidIndex(length, String.Length - start + 1, "length");
+			Verify.Argument.IsValidIndex(start, String.Length, nameof(start));
+			Verify.Argument.IsValidIndex(length, String.Length - start + 1, nameof(length));
 
 			_start = start;
 			_length = length;
@@ -171,7 +171,7 @@ namespace gitter.Framework
 		/// <returns>Created <see cref="Substring"/>.</returns>
 		public Substring GetSubstring(int start)
 		{
-			Verify.Argument.IsValidIndex(_start, start, _start + _length, "start");
+			Verify.Argument.IsValidIndex(_start, start, _start + _length, nameof(start));
 
 			if(start == 0) return this;
 			int length = _length - start;
@@ -185,8 +185,8 @@ namespace gitter.Framework
 		/// <returns>Created <see cref="Substring"/>.</returns>
 		public Substring GetSubstring(int start, int length)
 		{
-			Verify.Argument.IsValidIndex(_start, start, _length, "start");
-			Verify.Argument.IsValidIndex(length, _length - start + 1, "length");
+			Verify.Argument.IsValidIndex(_start, start, _length, nameof(start));
+			Verify.Argument.IsValidIndex(length, _length - start + 1, nameof(length));
 
 			if(length == 0) return Empty;
 			if(start == 0 && length == _length) return this;
@@ -219,7 +219,7 @@ namespace gitter.Framework
 		/// <returns>Character index or -1 if it was not found.</returns>
 		public int IndexOf(char value, int startIndex)
 		{
-			Verify.Argument.IsValidIndex(startIndex, _length, "startIndex");
+			Verify.Argument.IsValidIndex(startIndex, _length, nameof(startIndex));
 
 			if(_length == 0) return -1;
 			return String.IndexOf(value, _start + startIndex, _length - startIndex);
@@ -232,7 +232,7 @@ namespace gitter.Framework
 		public int IndexOf(string value, int startIndex)
 		{
 			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
-			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, "startIndex");
+			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, nameof(startIndex));
 
 			return String.IndexOf(value, _start + startIndex, _length - startIndex);
 		}
@@ -244,8 +244,8 @@ namespace gitter.Framework
 		/// <returns>Character index or -1 if it was not found.</returns>
 		public int IndexOf(char value, int startIndex, int count)
 		{
-			Verify.Argument.IsValidIndex(startIndex, _length, "startIndex");
-			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, "count");
+			Verify.Argument.IsValidIndex(startIndex, _length, nameof(startIndex));
+			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, nameof(count));
 
 			if(_length == 0) return -1;
 			return String.IndexOf(value, _start + startIndex, count);
@@ -259,8 +259,8 @@ namespace gitter.Framework
 		public int IndexOf(string value, int startIndex, int count)
 		{
 			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
-			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, "startIndex");
-			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, "count");
+			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, nameof(startIndex));
+			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, nameof(count));
 
 			if(count < value.Length) return -1;
 			return String.IndexOf(value, _start + startIndex, count);

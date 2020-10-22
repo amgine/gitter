@@ -710,24 +710,6 @@ namespace gitter.Git
 				OnStateChanged();
 				OnUpdated();
 			}
-			//return Accessor.CherryPick.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		if(Head.Pointer is Branch branch && !branch.IsRemote)
-			//		{
-			//			branch.Refresh();
-			//		}
-			//		else
-			//		{
-			//			Head.Refresh();
-			//		}
-			//		_status.Refresh();
-			//		OnStateChanged();
-			//		OnUpdated();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//	});
 		}
 
 		#endregion
@@ -752,7 +734,7 @@ namespace gitter.Git
 				default:
 					throw new ArgumentException(
 						"Unknown RevertControl value: {0}".UseAsFormat(control),
-						"control");
+						nameof(control));
 			}
 
 			var block = Monitor.BlockNotifications(
