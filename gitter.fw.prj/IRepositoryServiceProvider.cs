@@ -48,7 +48,7 @@ namespace gitter.Framework
 		/// <param name="section">Provider configuration section.</param>
 		bool LoadFor(IWorkingEnvironment environment, Section section);
 
-		/// <summary>Save configuration to <paramref name="node"/>.</summary>
+		/// <summary>Save configuration to <paramref name="section"/>.</summary>
 		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
 		void SaveTo(Section section);
 

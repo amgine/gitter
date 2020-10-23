@@ -401,16 +401,20 @@ namespace gitter.Git
 		}
 
 		/// <summary>Called when this <see cref="Reference"/> is moved away from <paramref name="revision"/>.</summary>
-		/// <param name="pointer"><see cref="Revision"/>, which this <see cref="Reference"/> was pointing to.</param>
+		/// <param name="revision"><see cref="Revision"/>, which this <see cref="Reference"/> was pointing to.</param>
 		protected virtual void LeaveRevision(Revision revision)
 		{
+			Assert.IsNotNull(revision);
+
 			revision.References.Remove(this);
 		}
 
-		/// <summary>Called when this <see cref="Reference"/> is moved to <paramref name="Revision"/>.</summary>
-		/// <param name="pointer"><see cref="Revision"/>, which this <see cref="Reference"/> will be pointing to.</param>
+		/// <summary>Called when this <see cref="Reference"/> is moved to <paramref name="revision"/>.</summary>
+		/// <param name="revision"><see cref="Revision"/>, which this <see cref="Reference"/> will be pointing to.</param>
 		protected virtual void EnterRevision(Revision revision)
 		{
+			Assert.IsNotNull(revision);
+
 			revision.References.Add(this);
 		}
 

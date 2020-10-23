@@ -79,7 +79,6 @@ namespace gitter
 
 			/// <summary>Checks if supplied git object is valid.</summary>
 			/// <param name="gitObject">Git object to validate.</param>
-			/// <param name="repository">Repository associated with caller.</param>
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]

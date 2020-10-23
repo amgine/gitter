@@ -35,8 +35,8 @@ namespace gitter.Git
 		/// <param name="name">Branch name.</param>
 		/// <param name="pointer">Branch position.</param>
 		/// <exception cref="ArgumentNullException">
-		/// <para><paramref name="repository"/> == null or</para>
-		/// <para><paramref name="position"/> == null.</para>
+		/// <para><paramref name="repository"/> == <c>null</c> or</para>
+		/// <para><paramref name="pointer"/> == <c>null</c>.</para>
 		/// </exception>
 		internal RemoteBranch(Repository repository, string name, IRevisionPointer pointer)
 			: base(repository, name, pointer)
@@ -68,7 +68,7 @@ namespace gitter.Git
 						}
 					}
 				}
-				return null;
+				return default;
 			}
 		}
 
@@ -80,16 +80,6 @@ namespace gitter.Git
 		/// <value>Full branch name.</value>
 		public override string FullName => GitConstants.RemoteBranchPrefix + Name;
 
-		/// <summary>Delete branch.</summary>
-		/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted by calling <see cref="Delete(bool)"/> with <paramref name="force"/> == true.</exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to delete <paramref name="branch"/>.</exception>
-		public override void Delete()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Refs.Remotes.Delete(this, false);
-		}
-
 		/// <summary>Delete branch from remote and local repository.</summary>
 		public void DeleteFromRemote()
 		{
@@ -99,8 +89,7 @@ namespace gitter.Git
 			if(remote == null) throw new GitException(string.Format(CultureInfo.InvariantCulture, "Unable to find remote for branch '{0}'", Name));
 			string branchName = Name.Substring(remote.Name.Length + 1);
 			string remoteRefName = GitConstants.LocalBranchPrefix + branchName;
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged))
+			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.RemoveRemoteReferences.Invoke(
 					new AccessLayer.RemoveRemoteReferencesParameters(
@@ -120,34 +109,28 @@ namespace gitter.Git
 			{
 				throw new GitException(string.Format(CultureInfo.InvariantCulture, "Unable to find remote for branch '{0}'", Name));
 			}
-			string branchName = Name.Substring(remote.Name.Length + 1);
+			string branchName    = Name.Substring(remote.Name.Length + 1);
 			string remoteRefName = GitConstants.LocalBranchPrefix + branchName;
 
-
-			var notificationsBlock = Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged);
-			var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
-				remote.Name, remoteRefName);
-			var task = Repository.Accessor.RemoveRemoteReferences.InvokeAsync(parameters, null, cancellationToken);
-			await task;
-			notificationsBlock.Dispose();
-			TaskUtility.PropagateFaultedStates(task);
+			using(var notificationsBlock = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
+			{
+				var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
+					remote.Name, remoteRefName);
+				await Repository
+					.Accessor
+					.RemoveRemoteReferences
+					.InvokeAsync(parameters, null, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			Refresh();
-			//return	Repository.Accessor.RemoveRemoteReferences.InvokeAsync(parameters, null, cancellationToken)
-			//	.ContinueWith(t =>
-			//		{
-			//			notificationsBlock.Dispose();
-			//			TaskUtility.PropagateFaultedStates(t);
-			//			Refresh();
-			//		});
 		}
 
 		/// <summary>Delete branch.</summary>
 		/// <param name="force">Delete branch irrespective of its merged status.</param>
 		/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to delete <paramref name="branch"/>.</exception>
+		/// <exception cref="T:gitter.Git.GitException">Failed to delete this branch.</exception>
 		/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is already deleted.</exception>
-		public override void Delete(bool force)
+		public override void Delete(bool force = false)
 		{
 			Verify.State.IsNotDeleted(this);
 

@@ -537,8 +537,9 @@ namespace gitter.Framework.Controls
 
 		#region PaintImageOverlayAndText()
 
-		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
-		/// <param name="image">Image to paint.</param>
+		/// <summary>Paint <paramref name="icon"/> and <paramref name="text"/> content.</summary>
+		/// <param name="icon">Image to paint.</param>
+		/// <param name="overlay">Image overlay.</param>
 		/// <param name="text">Text to paint.</param>
 		/// <param name="font"><see cref="Font"/> to use for text painting.</param>
 		/// <param name="brush"><see cref="Brush"/> to use for text painting.</param>
@@ -684,8 +685,7 @@ namespace gitter.Framework.Controls
 		/// <param name="overlay">Image overlay to paint.</param>
 		/// <param name="text">Text to paint.</param>
 		/// <param name="stringFormat"><see cref="StringFormat"/> to use for text painting.</param>
-		/// <exception cref="T:System.ArgumentNullException"><paramref name="stringFormat"/> == null.</para>
-		/// </exception>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="stringFormat"/> == <c>null</c>.</exception>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, StringFormat stringFormat)
 		{
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));

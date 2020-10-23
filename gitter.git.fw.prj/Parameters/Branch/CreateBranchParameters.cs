@@ -33,9 +33,10 @@ namespace gitter.Git.AccessLayer
 		/// <summary>Create <see cref="CreateBranchParameters"/>.</summary>
 		/// <param name="branchName">Branch's name</param>
 		/// <param name="startingRevision">Starting revision.</param>
-		/// <param name="tracking">Tracking mode.</param>
+		/// <param name="trackingMode">Tracking mode.</param>
 		/// <param name="checkout">Set to true to checkout branch after creation.</param>
-		/// <param name="createRefLog">Create branch's reflog.</param>
+		/// <param name="orphan">Create orphan branch.</param>
+		/// <param name="createReflog">Create branch's reflog.</param>
 		public CreateBranchParameters(string branchName, string startingRevision, bool checkout, bool orphan, bool createReflog, BranchTrackingMode trackingMode)
 		{
 			BranchName = branchName;

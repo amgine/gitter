@@ -46,8 +46,8 @@ namespace gitter.Git
 			ParameterCreated?.Invoke(this, new ConfigParameterEventArgs(parameter));
 		}
 
-		/// <summary>Invokes <see cref="Deleted"/> & other related events.</summary>
-		/// <param name="branch">Deleted branch.</param>
+		/// <summary>Invokes <see cref="ParameterDeleted"/> &amp; other related events.</summary>
+		/// <param name="parameter">Deleted parameter.</param>
 		private void InvokeParameterDeleted(ConfigParameter parameter)
 		{
 			parameter.MarkAsDeleted();

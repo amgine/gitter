@@ -18,6 +18,8 @@
  */
 #endregion
 
+#define HAS_AGGRESSIVE_INLINING
+
 namespace gitter
 {
 	using System;
@@ -43,7 +45,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNeitherNullNorEmpty(string value, string parameterName)
@@ -66,7 +68,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNeitherNullNorWhitespace(string value, string parameterName)
@@ -90,7 +92,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNotDefault<T>(T obj, string parameterName) where T : struct
@@ -114,7 +116,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNotNull<T>(T obj, string parameterName) where T : class
@@ -133,7 +135,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNull<T>(T obj, string parameterName) where T : class
@@ -154,7 +156,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void HasNoNullItems<T>(IEnumerable<T> sequence, string parameterName)
@@ -175,11 +177,11 @@ namespace gitter
 			/// <summary>
 			/// Verifies that argument is not a negative number. Throws an ArgumentOutOfRangeException if it's not.
 			/// </summary>
-			/// <param name="statement">The statement to be verified as true.</param>
+			/// <param name="value">The statement to be verified as true.</param>
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNotNegative(int value, string parameterName)
@@ -195,11 +197,11 @@ namespace gitter
 			/// <summary>
 			/// Verifies that argument is not a negative number. Throws an ArgumentOutOfRangeException if it's not.
 			/// </summary>
-			/// <param name="statement">The statement to be verified as true.</param>
+			/// <param name="value">The statement to be verified as true.</param>
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNotNegative(float value, string parameterName)
@@ -215,11 +217,11 @@ namespace gitter
 			/// <summary>
 			/// Verifies that argument is not a negative number. Throws an ArgumentOutOfRangeException if it's not.
 			/// </summary>
-			/// <param name="statement">The statement to be verified as true.</param>
+			/// <param name="value">The statement to be verified as true.</param>
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsNotNegative(double value, string parameterName)
@@ -235,11 +237,11 @@ namespace gitter
 			/// <summary>
 			/// Verifies that argument is a positive number (&gt; 0). Throws an ArgumentOutOfRangeException if it's not.
 			/// </summary>
-			/// <param name="statement">The statement to be verified as true.</param>
+			/// <param name="value">The statement to be verified as true.</param>
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsPositive(int value, string parameterName)
@@ -255,11 +257,11 @@ namespace gitter
 			/// <summary>
 			/// Verifies that argument is a positive number (&gt; 0). Throws an ArgumentOutOfRangeException if it's not.
 			/// </summary>
-			/// <param name="statement">The statement to be verified as true.</param>
+			/// <param name="value">The statement to be verified as true.</param>
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsPositive(float value, string parameterName)
@@ -275,11 +277,11 @@ namespace gitter
 			/// <summary>
 			/// Verifies that argument is a positive number (&gt; 0). Throws an ArgumentOutOfRangeException if it's not.
 			/// </summary>
-			/// <param name="statement">The statement to be verified as true.</param>
+			/// <param name="value">The statement to be verified as true.</param>
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsPositive(double value, string parameterName)
@@ -301,7 +303,7 @@ namespace gitter
 			/// <param name="parameterName">Name of the parameter to include in the <see cref="ArgumentException"/>.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsGreaterThan(double value, double minValue, string parameterName)
@@ -327,7 +329,7 @@ namespace gitter
 			/// <param name="parameterName">Name of the parameter to include in the <see cref="ArgumentException"/>.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsLesserThan(double value, double minValue, string parameterName)
@@ -351,7 +353,7 @@ namespace gitter
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsTrue(bool statement, string parameterName)
@@ -372,7 +374,7 @@ namespace gitter
 			/// <param name="message">The message to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsTrue(bool statement, string parameterName, string message)
@@ -392,7 +394,7 @@ namespace gitter
 			/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsFalse(bool statement, string parameterName)
@@ -413,7 +415,7 @@ namespace gitter
 			/// <param name="message">The message to include in the ArgumentException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsFalse(bool statement, string parameterName, string message)
@@ -428,7 +430,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void UriIsAbsolute(Uri uri, string parameterName)
@@ -447,7 +449,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void AreEqual<T>(T expected, T actual, string parameterName, string message)
@@ -470,7 +472,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void AreNotEqual<T>(T notExpected, T actual, string parameterName, string message)
@@ -493,7 +495,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void TypeSupportsInterface(Type type, Type interfaceType, string parameterName)
@@ -513,7 +515,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void FileExists(string filePath, string parameterName)
@@ -534,7 +536,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void DirectoryExists(string directoryPath, string parameterName)
@@ -558,9 +560,10 @@ namespace gitter
 			/// </summary>
 			/// <param name="value">The value to verify.</param>
 			/// <param name="upperBoundExclusive">The upper bound exclusive value.</param>
+			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidIndex(int value, int upperBoundExclusive, string parameterName)
@@ -586,9 +589,10 @@ namespace gitter
 			/// <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
 			/// <param name="value">The value to verify.</param>
 			/// <param name="upperBoundExclusive">The upper bound exclusive value.</param>
+			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidIndex(int lowerBoundInclusive, int value, int upperBoundExclusive, string parameterName)
@@ -610,7 +614,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive, string message, string parameterName)
@@ -626,7 +630,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive, string parameterName)
@@ -648,7 +652,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsInRange(double lowerBoundInclusive, double value, double upperBoundInclusive, string message, string parameterName)
@@ -664,7 +668,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsInRange(float lowerBoundInclusive, float value, float upperBoundInclusive, string parameterName)
@@ -686,7 +690,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsInRange(double lowerBoundInclusive, double value, double upperBoundInclusive, string parameterName)
@@ -708,7 +712,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void ImplementsInterface(object parameter, Type interfaceType, string parameterName)
@@ -757,7 +761,7 @@ namespace gitter
 			/// </exception>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsApartmentState(ApartmentState requiredState, string message)
@@ -770,7 +774,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void PropertyIsNotNull<T>(T obj, string name) where T : class
@@ -787,7 +791,7 @@ namespace gitter
 
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void PropertyIsNull<T>(T obj, string name) where T : class
@@ -808,7 +812,7 @@ namespace gitter
 			/// <param name="statement">The statement to be verified as true.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsTrue(bool statement)
@@ -826,7 +830,7 @@ namespace gitter
 			/// <param name="message">The message to include in the InvalidOperationException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsTrue(bool statement, string message)
@@ -843,7 +847,7 @@ namespace gitter
 			/// <param name="statement">The statement to be verified as false.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsFalse(bool statement)
@@ -861,7 +865,7 @@ namespace gitter
 			/// <param name="message">The message to include in the InvalidOperationException.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if HAS_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsFalse(bool statement, string message)

@@ -41,10 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="NHunspell, Version=1.1.1.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
-    </Reference>
+    <PackageReference Include="NHunspell" Version="1.2.5554.16953" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="System.Runtime.Remoting" />
   </ItemGroup>  
 

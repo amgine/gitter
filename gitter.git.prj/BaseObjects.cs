@@ -98,7 +98,6 @@ namespace gitter.Git
 		}
 
 		/// <summary>Create <see cref="GitNamedObject"/>.</summary>
-		/// <param name="repository">Host repository.</param>
 		/// <param name="name">Object name.</param>
 		protected GitNamedObject(string name)
 			: base(null, true)
@@ -147,14 +146,12 @@ namespace gitter.Git
 	{
 		/// <summary>Create <see cref="GitNamedObject"/>.</summary>
 		/// <param name="repository">Host repository.</param>
-		/// <param name="name">Object name.</param>
 		protected GitDynamicNamedObject(Repository repository)
 			: base(repository)
 		{
 		}
 
 		/// <summary>Create <see cref="GitNamedObject"/>.</summary>
-		/// <param name="repository">Host repository.</param>
 		protected GitDynamicNamedObject()
 			: base(null, true)
 		{
@@ -241,7 +238,6 @@ namespace gitter.Git
 
 		/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 		/// <param name="repository">Host repository.</param>
-		/// <param name="name">Object name.</param>
 		protected GitLifeTimeDynamicNamedObject(Repository repository)
 			: base(repository)
 		{

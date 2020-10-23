@@ -69,8 +69,8 @@ namespace gitter.Git
 		/// <param name="name">Branch name.</param>
 		/// <param name="pointer">Branch position.</param>
 		/// <exception cref="ArgumentNullException">
-		/// <para><paramref name="repository"/> == null or</para>
-		/// <para><paramref name="position"/> == null.</para>
+		/// <para><paramref name="repository"/> == <c>null</c> or</para>
+		/// <para><paramref name="pointer"/> == <c>null</c>.</para>
 		/// </exception>
 		internal Branch(Repository repository, string name, IRevisionPointer pointer)
 			: base(repository, name, pointer)
@@ -106,10 +106,9 @@ namespace gitter.Git
 		/// </summary>
 		/// <param name="revision">New branch position.</param>
 		/// <exception cref="T:System.ArgumentNullException">
-		/// <paramref name="branch"/> == null or <paramref name="revision"/> == null.
+		/// <paramref name="revision"/> == <c>null</c>.
 		/// </exception>
 		/// <exception cref="T:System.ArgumentException">
-		/// <paramref name="branch"/> is not handled by this <see cref="Repository"/> or it is deleted;
 		/// <paramref name="revision"/> is not handled by this <see cref="Repository"/> or it is deleted.
 		/// </exception>
 		/// <exception cref="T:gitter.Git.GitException">
@@ -135,32 +134,17 @@ namespace gitter.Git
 		}
 
 		/// <summary>Delete branch.</summary>
-		/// <exception cref="T:git.BranchIsNotFullyMergedException">
-		/// Branch is not fully merged and can only be deleted by calling <see cref="Delete(bool)"/>
-		/// with <paramref name="force"/> == true.
-		/// </exception>
-		/// <exception cref="T:gitter.Git.GitException">
-		/// Failed to delete <paramref name="branch"/>.
-		/// </exception>
-		public override void Delete()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Refs.Heads.Delete(this, false);
-		}
-
-		/// <summary>Delete branch.</summary>
 		/// <param name="force">Delete branch irrespective of its merged status.</param>
 		/// <exception cref="T:git.BranchIsNotFullyMergedException">
 		/// Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.
 		/// </exception>
 		/// <exception cref="T:gitter.Git.GitException">
-		/// Failed to delete <paramref name="branch"/>.
+		/// Failed to delete this branch.
 		/// </exception>
 		/// <exception cref="InvalidOperationException">
 		/// This <see cref="Branch"/> is already deleted.
 		/// </exception>
-		public override void Delete(bool force)
+		public override void Delete(bool force = false)
 		{
 			Verify.State.IsNotDeleted(this);
 

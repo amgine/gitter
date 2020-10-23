@@ -63,7 +63,7 @@ namespace gitter.Framework.CLI
 
 		/// <summary>Initializes output reader.</summary>
 		/// <param name="process">Process to read from.</param>
-		/// <param name="sr">StreamReader to read from.</param>
+		/// <param name="reader">StreamReader to read from.</param>
 		public void Initialize(Process process, StreamReader reader)
 		{
 			Verify.Argument.IsNotNull(process, nameof(process));

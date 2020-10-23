@@ -30,6 +30,6 @@ namespace gitter.Git.AccessLayer
 	{
 		TOutput Invoke(TParameters parameters);
 
-		Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 	}
 }

@@ -24,7 +24,7 @@ namespace gitter.Framework.Controls
 	using System.Collections.Generic;
 	using System.Windows.Forms;
 
-	/// <summary>Collection with auto-sorting & change notification.</summary>
+	/// <summary>Collection with auto-sorting &amp; change notification.</summary>
 	/// <typeparam name="T">Item type.</typeparam>
 	public class NotifySortedCollection<T> : NotifyCollection<T>
 	{
@@ -37,7 +37,7 @@ namespace gitter.Framework.Controls
 
 		#region .ctor
 
-		/// <summary>Create <see cref="NotifySortedCollection&lt;T&gt;"/>.</summary>
+		/// <summary>Create <see cref="NotifySortedCollection{T}"/>.</summary>
 		public NotifySortedCollection()
 		{
 			_sortOrder = SortOrder.Ascending;

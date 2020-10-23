@@ -68,7 +68,7 @@ namespace gitter.Git.AccessLayer
 		/// <summary>Tool to run.</summary>
 		public string Tool { get; set; }
 
-		/// <param name="files">Files to run merge tool on.</param>
+		/// <summary>Files to run merge tool on.</summary>
 		public IList<string> Files { get; set; }
 	}
 }

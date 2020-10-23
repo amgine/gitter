@@ -45,11 +45,8 @@ namespace gitter.Git
 		public abstract bool IsCurrent { get; }
 
 		/// <summary>Delete branch.</summary>
-		public abstract void Delete();
-
-		/// <summary>Delete branch.</summary>
 		/// <param name="force">Force-remove branch.</param>
-		public abstract void Delete(bool force);
+		public abstract void Delete(bool force = false);
 
 		/// <summary>Refreshes cached information for this <see cref="BranchBase"/>.</summary>
 		public abstract void Refresh();

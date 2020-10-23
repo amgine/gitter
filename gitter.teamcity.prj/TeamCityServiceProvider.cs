@@ -56,7 +56,7 @@ namespace gitter.TeamCity
 			return true;
 		}
 
-		/// <summary>Save configuration to <paramref name="node"/>.</summary>
+		/// <summary>Save configuration to <paramref name="section"/>.</summary>
 		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
 		public void SaveTo(Section section)
 		{

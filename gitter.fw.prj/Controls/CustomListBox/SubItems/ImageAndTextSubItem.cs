@@ -68,7 +68,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
 		/// <param name="id">Subitem id.</param>
-		/// <param name="image">Subitem image.</param>
+		/// <param name="text">Subitem text.</param>
 		public ImageAndTextSubItem(int id, string text)
 			: this(id, null, text)
 		{

@@ -157,7 +157,7 @@ namespace gitter.Git
 		/// <paramref name="tag"/> == null.
 		/// </exception>
 		/// <exception cref="T:System.ArgumentException">
-		/// <paramref name="revision"/> is not handled by this repository or deleted.
+		/// <paramref name="tag"/> is not handled by this repository or deleted.
 		/// </exception>
 		/// <exception cref="T:gitter.Git.GitException">
 		/// Failed to delete <paramref name="tag"/>.

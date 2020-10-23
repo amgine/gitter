@@ -151,8 +151,8 @@ namespace gitter.Git
 		/// <value>Collection of object names.</value>
 		public ICollection<string> Names => _dictionary.Keys;
 
-		/// <summary>Gets the <see cref="TObject"/> with the specified <paramref name="name"/>.</summary>
-		/// <value><see cref="TObject"/> with the specified <paramref name="name"/>.</value>
+		/// <summary>Gets the <typeparamref name="TObject"/> with the specified <paramref name="name"/>.</summary>
+		/// <value><typeparamref name="TObject"/> with the specified <paramref name="name"/>.</value>
 		public TObject this[string name]
 		{
 			get { lock(SyncRoot) return _dictionary[FixInputName(name)]; }

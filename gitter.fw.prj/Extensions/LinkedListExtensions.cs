@@ -23,15 +23,17 @@ namespace gitter.Framework
 	using System;
 	using System.Collections.Generic;
 
-	/// <summary>Extension methods for <see cref="LinkedList&lt;T&gt;"/>.</summary>
+	/// <summary>Extension methods for <see cref="LinkedList{T}"/>.</summary>
 	public static class LinkedListExtensions
 	{
-		/// <summary>Represent <see cref="LinkedList&lt;T&gt;"/> as <see cref="IEnumerable&lt;LinkedListNode&lt;T&gt;&gt;"/>.</summary>
+		/// <summary>Represent <see cref="LinkedList{T}"/> as <see cref="IEnumerable{LinkedListNode{T}}"/>.</summary>
 		/// <typeparam name="T">Type of list elements.</typeparam>
 		/// <param name="list">Linked list.</param>
 		/// <returns>LinkedListNode-enumerable representation of linked list.</returns>
 		public static IEnumerable<LinkedListNode<T>> EnumerateNodes<T>(this LinkedList<T> list)
 		{
+			Verify.Argument.IsNotNull(list, nameof(list));
+
 			var node = list.First;
 			while(node != null)
 			{

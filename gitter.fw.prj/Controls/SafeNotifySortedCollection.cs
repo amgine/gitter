@@ -24,7 +24,7 @@ namespace gitter.Framework.Controls
 	using System.Collections.Generic;
 	using System.ComponentModel;
 
-	/// <summary>Collection with auto-sorting, change notification & thread-safe operations invoked on host control.</summary>
+	/// <summary>Collection with auto-sorting, change notification &amp; thread-safe operations invoked on host control.</summary>
 	/// <typeparam name="T">Item type.</typeparam>
 	public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 	{

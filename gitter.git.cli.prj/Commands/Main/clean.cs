@@ -55,7 +55,7 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		/// <summary>
-		/// Specify special exceptions to not be cleaned. Each <pattern> is the same form as in $GIT_DIR/info/excludes
+		/// Specify special exceptions to not be cleaned. Each &lt;pattern&gt; is the same form as in $GIT_DIR/info/excludes
 		/// and this option can be given multiple times.
 		/// </summary>
 		public static ICommandArgument Exclude(string pattern)

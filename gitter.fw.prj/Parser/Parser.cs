@@ -71,7 +71,7 @@ namespace gitter.Framework
 		/// <summary>Parsed string.</summary>
 		public string String { get; }
 
-		/// <summary>Find next <see cref="value"/>.</summary>
+		/// <summary>Find next <paramref name="value"/>.</summary>
 		/// <param name="value">Character to look for.</param>
 		/// <returns>Character position or string length if it was not found.</returns>
 		public int FindPositionSafe(char value)
@@ -187,7 +187,7 @@ namespace gitter.Framework
 				_position = pos + 1;
 		}
 
-		/// <summary>Find next <see cref="value"/>.</summary>
+		/// <summary>Find next <paramref name="value"/>.</summary>
 		/// <param name="value">String to look for.</param>
 		/// <returns>String position or string length if it was not found.</returns>
 		public int FindPositionSafe(string value)
@@ -288,7 +288,7 @@ namespace gitter.Framework
 
 		/// <summary>Check if current character is <paramref name="value"/>.</summary>
 		/// <param name="value">Character to check for.</param>
-		/// <returns>True if current character is <see cref="value"/>.</returns>
+		/// <returns>True if current character is <paramref name="value"/>.</returns>
 		public bool CheckValue(char value)
 		{
 			return _position < String.Length && String[_position] == value;
@@ -296,7 +296,7 @@ namespace gitter.Framework
 
 		/// <summary>Check if <paramref name="value"/> can be found at currect position.</summary>
 		/// <param name="value">String to check for.</param>
-		/// <returns>True if current string is <see cref="value"/>.</returns>
+		/// <returns>True if current string is <paramref name="value"/>.</returns>
 		public bool CheckValue(string value)
 		{
 			Verify.Argument.IsNotNull(value, nameof(value));
@@ -309,7 +309,7 @@ namespace gitter.Framework
 
 		/// <summary>Check if <paramref name="value"/> can be found at currect position and skips value if it is found.</summary>
 		/// <param name="value">String to check for.</param>
-		/// <returns>True if current string is <see cref="value"/>.</returns>
+		/// <returns>True if current string is <paramref name="value"/>.</returns>
 		public bool CheckValueAndSkip(string value)
 		{
 			Verify.Argument.IsNotNull(value, nameof(value));

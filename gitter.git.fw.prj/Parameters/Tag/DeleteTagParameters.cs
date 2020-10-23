@@ -38,7 +38,7 @@ namespace gitter.Git.AccessLayer
 		}
 
 
-		/// <param name="tagName">Name of tag to delete.</param>
+		/// <summary>Name of tag to delete.</summary>
 		public string TagName { get; set; }
 	}
 }

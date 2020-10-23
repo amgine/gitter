@@ -39,13 +39,13 @@ namespace gitter.Framework.Controls
 
 		#region .ctor
 
-		/// <summary>Create <see cref="NotifyCollection&lt;T&gt;"/>.</summary>
+		/// <summary>Create <see cref="NotifyCollection{T}"/>.</summary>
 		public NotifyCollection()
 			: base()
 		{
 		}
 
-		/// <summary>Create <see cref="NotifyCollection&lt;T&gt;"/>.</summary>
+		/// <summary>Create <see cref="NotifyCollection{T}"/>.</summary>
 		public NotifyCollection(IList<T> list)
 			: base(list)
 		{
@@ -55,7 +55,7 @@ namespace gitter.Framework.Controls
 
 		#region Public Methods
 
-		/// <summary>Sort collection using specified <see cref="comparison"/>.</summary>
+		/// <summary>Sort collection using specified <paramref name="comparison"/>.</summary>
 		/// <param name="comparison">Comparison to use for sorting.</param>
 		/// <exception cref="T:System.NullReferenceException"><paramref name="comparison"/> == <c>null</c>.</exception>
 		public void Sort(Comparison<T> comparison)
@@ -78,7 +78,7 @@ namespace gitter.Framework.Controls
 			RaiseChanged(0, items - 1, NotifyEvent.Insert);
 		}
 
-		/// <summary>Sort collection using specified <see cref="comparer"/>.</summary>
+		/// <summary>Sort collection using specified <paramref name="comparer"/>.</summary>
 		/// <param name="comparer">Comparer to use for sorting.</param>
 		/// <exception cref="T:System.NullReferenceException"><paramref name="comparer"/> == <c>null</c>.</exception>
 		public void Sort(IComparer<T> comparer)

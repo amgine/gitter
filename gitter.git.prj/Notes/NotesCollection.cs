@@ -45,7 +45,7 @@ namespace gitter.Git
 			Created?.Invoke(this, new NoteEventArgs(note));
 		}
 
-		/// <summary>Invokes <see cref="Deleted"/> & other related events.</summary>
+		/// <summary>Invokes <see cref="Deleted"/> &amp; other related events.</summary>
 		/// <param name="note">Deleted <see cref="Note"/>.</param>
 		private void InvokeDeleted(Note note)
 		{

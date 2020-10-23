@@ -76,7 +76,6 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Create new view with specified parameters.</summary>
 		/// <param name="environment">Application working environment.</param>
-		/// <param name="viewModel">View model.</param>
 		/// <returns>Created view.</returns>
 		protected abstract ViewBase CreateViewCore(IWorkingEnvironment environment);
 

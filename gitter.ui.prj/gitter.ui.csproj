@@ -1,277 +1,73 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{5E2FBE20-2DB0-4713-94B3-FD8E4020C33D}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>gitter</RootNamespace>
+    <TargetFrameworks>net48</TargetFrameworks>
     <AssemblyName>gitter</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>false</BootstrapperEnabled>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
     <StartupObject>gitter.Program</StartupObject>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>app.ico</ApplicationIcon>
+    <RootNamespace>gitter</RootNamespace>
+    <LangVersion>8.0</LangVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="NHunspell, Version=0.9.6.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj">
-      <Project>{A3B10F01-35EB-466D-89CE-D3BAA3047344}</Project>
-      <Name>gitter.fw</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.git.cli.prj\gitter.git.cli.csproj">
-      <Project>{7FB6E14E-6A25-44D4-8E57-DE075D301ADC}</Project>
-      <Name>gitter.git.cli</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj">
-      <Project>{C2307D21-25F9-47F8-901E-99B07AB66C39}</Project>
-      <Name>gitter.git.fw</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.git.gui.prj\gitter.git.gui.csproj">
-      <Project>{EED74876-43EB-4EF6-BD27-8F9EB4D29CF9}</Project>
-      <Name>gitter.git.gui</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj">
-      <Project>{03C71F7F-5D27-43C7-9467-2DF533C6C01B}</Project>
-      <Name>gitter.git</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.redmine.prj\gitter.redmine.csproj">
-      <Project>{122AA8B0-795B-4DD8-8650-11675D946F3E}</Project>
-      <Name>gitter.redmine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\gitter.teamcity.prj\gitter.teamcity.csproj">
-      <Project>{F939CB90-A1FD-4A3C-84FA-097BA644F254}</Project>
-      <Name>gitter.teamcity</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\common\CommonAssemblyInfo.cs">
-      <Link>Properties\CommonAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\shared\Debug.cs">
-      <Link>Shared\Debug.cs</Link>
-    </Compile>
-    <Compile Include="..\shared\Verify.cs">
-      <Link>Shared\Verify.cs</Link>
-    </Compile>
-    <Compile Include="Controls\Dialogs\PickerDialog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\ComboBoxes\RepositoryProviderPicker.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\Dialogs\CloneRepositoryDialog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Dialogs\InitRepositoryDialog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Dialogs\AddServiceDialog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\ComboBoxes\ServiceProviderPicker.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\ListBoxes\RecentRepositoryMenu.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\ListBoxes\RecentRepositoryListItem.cs" />
-    <Compile Include="Controls\ListBoxes\RepositoryProviderListItem.cs" />
-    <Compile Include="Controls\ListBoxes\RepositoryGroupBinding.cs" />
-    <Compile Include="Controls\ListBoxes\RepositoryGroupListItem.cs" />
-    <Compile Include="Controls\ListBoxes\ServiceProviderListItem.cs" />
-    <Compile Include="Controls\ListBoxes\RepositoryDragImage.cs" />
-    <Compile Include="Controls\StandardToolbar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Properties\CachedResources.cs" />
-    <Compile Include="Controls\Dialogs\AboutDialog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Dialogs\AboutDialog.Designer.cs">
-      <DependentUpon>AboutDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\AddRepositoryDialog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Dialogs\AddRepositoryDialog.Designer.cs">
-      <DependentUpon>AddRepositoryDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\LinkButton.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\LinkButton.Designer.cs">
-      <DependentUpon>LinkButton.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\ListBoxes\RecentRepositoriesListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\ListBoxes\LocalRepositoriesListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\ListBoxes\RepositoryListItem.cs" />
-    <Compile Include="Controls\ListBoxes\RepositoryExplorerListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\ListBoxes\RepositoryRootItem.cs" />
-    <Compile Include="Controls\Views\Factories.cs" />
-    <Compile Include="Controls\Views\Guids.cs" />
-    <Compile Include="Controls\Views\StartPageView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Views\StartPageView.Designer.cs">
-      <DependentUpon>StartPageView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\RepositoryExplorerView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Views\RepositoryExplorerView.Designer.cs">
-      <DependentUpon>RepositoryExplorerView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GuiItemFactory.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Controls\ListBoxes\RepositoryMenu.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <EmbeddedResource Include="Controls\Dialogs\AboutDialog.resx">
-      <DependentUpon>AboutDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Dialogs\AddRepositoryDialog.resx">
-      <DependentUpon>AddRepositoryDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\LinkButton.resx">
-      <DependentUpon>LinkButton.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Views\StartPageView.resx">
-      <DependentUpon>StartPageView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Views\RepositoryExplorerView.resx">
-      <DependentUpon>RepositoryExplorerView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
+    <Compile Update="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\common\key.snk">
-      <Link>Properties\key.snk</Link>
-    </None>
-    <None Include="app.config">
+    <EmbeddedResource Update="Properties\Resources.resx">
       <SubType>Designer</SubType>
-    </None>
-    <None Include="app.manifest" />
-    <None Include="Properties\postbuild.cmd" />
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="app.ico" />
-    <Content Include="Resources\repositories.png" />
-    <Content Include="Resources\repository-go1.png" />
-    <Content Include="Resources\repository-remove.png" />
-    <Content Include="Resources\repository-add.png" />
-    <Content Include="Resources\repository.png" />
-    <Content Include="Resources\application--arrow.png" />
-    <Content Include="Resources\repository-explorer.png" />
-    <Content Include="Resources\database.png" />
-    <Content Include="Resources\repository-clone.png" />
-    <Content Include="Resources\repository-init.png" />
-    <Content Include="Resources\database.png" />
-    <Content Include="Resources\start-page-logo-gradient-dark.png" />
-    <Content Include="Resources\start-page-logo-dark.png" />
-    <Content Include="Resources\repo-scan.png" />
-    <Content Include="Resources\repo-init.png" />
-    <Content Include="Resources\repo-clone.png" />
-    <Content Include="Resources\repo-add.png" />
-    <Content Include="Resources\start-page-logo-gradient.png" />
-    <Content Include="Resources\start-page-logo.png" />
+    <None Remove="Shared\.gitignore" />
+    <Compile Include="..\common\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
+    <Compile Include="..\shared\Debug.cs" Link="Shared\Debug.cs" />
+    <Compile Include="..\shared\Verify.cs" Link="Shared\Verify.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <ItemGroup>
+    <Content Include="Dictionaries\*.aff">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dictionaries\*.dic">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Hunspell\*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
+    <ProjectReference Include="..\gitter.git.cli.prj\gitter.git.cli.csproj" />
+    <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj" />
+    <ProjectReference Include="..\gitter.git.gui.prj\gitter.git.gui.csproj" />
+    <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj" />
+    <ProjectReference Include="..\gitter.redmine.prj\gitter.redmine.csproj" />
+    <ProjectReference Include="..\gitter.teamcity.prj\gitter.teamcity.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
-    <PostBuildEvent>..\..\Properties\postbuild.cmd $(ConfigurationName)</PostBuildEvent>
+    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration)</PostBuildEvent>
   </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

@@ -25,7 +25,7 @@ namespace gitter.Framework.Controls
 	{
 		/// <summary><see cref="ViewHost"/> is not present in dock model hierarchy and can be safely docked.</summary>
 		Offscreen,
-		/// <summary><see cref="ViewHost"/> is docked inside <see cref="ViewHostGrid"/> or <see cref="ViewSplit"/>.</summary>
+		/// <summary><see cref="ViewHost"/> is docked inside <see cref="ViewDockGrid"/> or <see cref="ViewSplit"/>.</summary>
 		Docked,
 		/// <summary><see cref="ViewHost"/> is docked inside <see cref="FloatingViewForm"/> with other hosts.</summary>
 		DockedOnFloat,
