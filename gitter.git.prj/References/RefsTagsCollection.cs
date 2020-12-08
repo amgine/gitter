@@ -284,9 +284,7 @@ namespace gitter.Git
 		/// <param name="item">Item to create event args for.</param>
 		/// <returns>Created event args.</returns>
 		protected override TagEventArgs CreateEventArgs(Tag item)
-		{
-			return new TagEventArgs(item);
-		}
+			=> new TagEventArgs(item);
 
 		#endregion
 	}

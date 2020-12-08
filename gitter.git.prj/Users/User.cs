@@ -56,7 +56,7 @@ namespace gitter.Git
 		/// <summary>User commit count.</summary>
 		public int Commits
 		{
-			get { return _commits; }
+			get => _commits;
 			internal set
 			{
 				if(_commits != value)

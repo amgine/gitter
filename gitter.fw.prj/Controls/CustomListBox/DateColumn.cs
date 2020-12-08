@@ -33,11 +33,18 @@ namespace gitter.Framework.Controls
 		public const DateFormat DefaultDateFormat = DateFormat.SystemDefault;
 
 		private DateFormat _dateFormat;
+		private bool _convertToLocal;
 		private DateColumnExtender _extender;
 
 		public event EventHandler DateFormatChanged;
 
-		protected virtual void OnDateFormatChanged() => DateFormatChanged?.Invoke(this, EventArgs.Empty);
+		protected virtual void OnDateFormatChanged(EventArgs e)
+			=> DateFormatChanged?.Invoke(this, e);
+
+		public event EventHandler ConvertToLocalChanged;
+
+		protected virtual void OnConvertToLocalChanged(EventArgs e)
+			=> ConvertToLocalChanged?.Invoke(this, e);
 
 		public DateColumn(int id, string name, bool visible)
 			: base(id, name, visible)
@@ -66,27 +73,47 @@ namespace gitter.Framework.Controls
 			base.OnListBoxDetached();
 		}
 
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, DateTime date)
+		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, DateTimeOffset date)
 		{
-			var format = measureEventArgs.Column is DateColumn dc
-				? dc.DateFormat
-				: DateColumn.DefaultDateFormat;
+			bool convertTolocal;
+			DateFormat format;
+			if(measureEventArgs.Column is DateColumn dc)
+			{
+				format = dc.DateFormat;
+				convertTolocal = dc.ConvertToLocal;
+			}
+			else
+			{
+				convertTolocal = false;
+				format = DefaultDateFormat;
+			}
+			if(convertTolocal) date = date.ToLocalTime();
 			var strDate = Utility.FormatDate(date, format);
 			return measureEventArgs.MeasureText(strDate);
 		}
 
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, DateTime date)
+		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, DateTimeOffset date)
 		{
-			var format = paintEventArgs.Column is DateColumn dc
-				? dc.DateFormat
-				: DateColumn.DefaultDateFormat;
+			bool convertTolocal;
+			DateFormat format;
+			if(paintEventArgs.Column is DateColumn dc)
+			{
+				format = dc.DateFormat;
+				convertTolocal = dc.ConvertToLocal;
+			}
+			else
+			{
+				convertTolocal = false;
+				format = DefaultDateFormat;
+			}
+			if(convertTolocal) date = date.ToLocalTime();
 			var strdate = Utility.FormatDate(date, format);
 			paintEventArgs.PaintText(strdate);
 		}
 
 		public DateFormat DateFormat
 		{
-			get { return _dateFormat; }
+			get => _dateFormat;
 			set
 			{
 				if(_dateFormat != value)
@@ -98,7 +125,24 @@ namespace gitter.Framework.Controls
 					{
 						ListBox.Refresh();
 					}
-					OnDateFormatChanged();
+					OnDateFormatChanged(EventArgs.Empty);
+				}
+			}
+		}
+
+		public bool ConvertToLocal
+		{
+			get => _convertToLocal;
+			set
+			{
+				if(_convertToLocal != value)
+				{
+					_convertToLocal = value;
+					if(ListBox != null)
+					{
+						ListBox.Refresh();
+					}
+					OnConvertToLocalChanged(EventArgs.Empty);
 				}
 			}
 		}
@@ -106,13 +150,15 @@ namespace gitter.Framework.Controls
 		protected override void LoadMoreFrom(Section section)
 		{
 			base.LoadMoreFrom(section);
-			DateFormat = section.GetValue("DateFormat", DateFormat);
+			DateFormat     = section.GetValue("DateFormat",     DateFormat);
+			ConvertToLocal = section.GetValue("ConvertToLocal", ConvertToLocal);
 		}
 
 		protected override void SaveMoreTo(Section section)
 		{
 			base.SaveMoreTo(section);
 			section.SetValue("DateFormat", DateFormat);
+			section.SetValue("ConvertToLocal", ConvertToLocal);
 		}
 
 		public override string IdentificationString => "Date";

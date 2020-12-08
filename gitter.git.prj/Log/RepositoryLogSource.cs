@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -39,28 +39,26 @@ namespace gitter.Git
 
 		public override Repository Repository { get; }
 
-		public override async Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public override async Task<RevisionLog> GetRevisionLogAsync(LogOptions options,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 
 			if(Repository.IsEmpty)
 			{
-				return await TaskUtility
-					.TaskFromResult(new RevisionLog(Repository, Preallocated<Revision>.EmptyArray))
+				return await Task
+					.FromResult(new RevisionLog(Repository, Preallocated<Revision>.EmptyArray))
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			else
-			{
-				progress?.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
-				var parameters = options.GetLogParameters();
-				var revisionData = await Repository
-					.Accessor
-					.QueryRevisions
-					.InvokeAsync(parameters, progress, cancellationToken)
-					.ConfigureAwait(continueOnCapturedContext: false);
-				var revisions = Repository.Revisions.Resolve(revisionData);
-				return new RevisionLog(Repository, revisions);
-			}
+			progress?.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
+			var parameters = options.GetLogParameters();
+			var revisionData = await Repository
+				.Accessor
+				.QueryRevisions
+				.InvokeAsync(parameters, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			var revisions = Repository.Revisions.Resolve(revisionData);
+			return new RevisionLog(Repository, revisions);
 		}
 	}
 }

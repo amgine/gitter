@@ -1,22 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net48</TargetFrameworks>
     <AssemblyName>gitter.git.fw</AssemblyName>
     <RootNamespace>gitter.Git.AccessLayer</RootNamespace>
-    <LangVersion>8.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\common\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,13 +19,6 @@
     </EmbeddedResource>
   </ItemGroup>
   
-  <ItemGroup>
-    <None Remove="Shared\.gitignore" />
-    <Compile Include="..\common\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
-    <Compile Include="..\shared\Debug.cs" Link="Shared\Debug.cs" />
-    <Compile Include="..\shared\Verify.cs" Link="Shared\Verify.cs" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
   </ItemGroup>

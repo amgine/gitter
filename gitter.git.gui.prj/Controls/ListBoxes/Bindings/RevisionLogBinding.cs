@@ -61,7 +61,7 @@ namespace gitter.Git.Gui.Controls
 
 		public LogOptions LogOptions
 		{
-			get { return _logOptions; }
+			get => _logOptions;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));

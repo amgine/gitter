@@ -38,7 +38,8 @@ namespace gitter.Git
 
 		public abstract Repository Repository { get; }
 
-		public abstract Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		public abstract Task<RevisionLog> GetRevisionLogAsync(LogOptions options,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.

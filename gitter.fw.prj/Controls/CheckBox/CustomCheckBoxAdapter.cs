@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,17 +38,11 @@ namespace gitter.Framework.Controls
 
 		public event EventHandler CheckStateChanged;
 
-		private void OnIsCheckedChanged()
-		{
-			var handler = IsCheckedChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		private void OnIsCheckedChanged(EventArgs e)
+			=> IsCheckedChanged?.Invoke(this, e);
 
-		private void OnCheckStateChanged()
-		{
-			var handler = CheckStateChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		private void OnCheckStateChanged(EventArgs e)
+			=> CheckStateChanged?.Invoke(this, e);
 
 		#endregion
 
@@ -71,52 +65,45 @@ namespace gitter.Framework.Controls
 		#region Event Handlers
 
 		private void OnCheckBoxIsCheckedChanged(object sender, EventArgs e)
-		{
-			OnIsCheckedChanged();
-		}
+			=> OnIsCheckedChanged(e);
 
 		private void OnCheckBoxCheckStateChanged(object sender, EventArgs e)
-		{
-			OnCheckStateChanged();
-		}
+			=> OnCheckStateChanged(e);
 
 		#endregion
 
 		#region Properties
 
-		public Control Control
-		{
-			get { return _checkBox; }
-		}
+		public Control Control => _checkBox;
 
 		public string Text
 		{
-			get { return _checkBox.Text; }
-			set { _checkBox.Text = value; }
+			get => _checkBox.Text;
+			set => _checkBox.Text = value;
 		}
 
 		public Image Image
 		{
-			get { return _checkBox.Image; }
-			set { _checkBox.Image = value; }
+			get => _checkBox.Image;
+			set => _checkBox.Image = value;
 		}
 
 		public bool IsChecked
 		{
-			get { return _checkBox.IsChecked; }
-			set { _checkBox.IsChecked = value; }
+			get => _checkBox.IsChecked;
+			set => _checkBox.IsChecked = value;
 		}
 
 		public CheckState CheckState
 		{
-			get { return _checkBox.CheckState; }
-			set { _checkBox.CheckState = value; }
+			get => _checkBox.CheckState;
+			set => _checkBox.CheckState = value;
 		}
 
 		public bool ThreeState
 		{
-			get { return _checkBox.ThreeState; }
-			set { _checkBox.ThreeState = value; }
+			get => _checkBox.ThreeState;
+			set => _checkBox.ThreeState = value;
 		}
 
 		#endregion
@@ -125,7 +112,7 @@ namespace gitter.Framework.Controls
 
 		public void Dispose()
 		{
-			_checkBox.IsCheckedChanged -= OnCheckBoxIsCheckedChanged;
+			_checkBox.IsCheckedChanged  -= OnCheckBoxIsCheckedChanged;
 			_checkBox.CheckStateChanged -= OnCheckBoxCheckStateChanged;
 			_checkBox.Dispose();
 		}

@@ -26,7 +26,7 @@ namespace gitter.Git.Gui.Controls
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
-	public sealed class UsresListBox : CustomListBox
+	public sealed class UsersListBox : CustomListBox
 	{
 		#region Data
 
@@ -41,14 +41,14 @@ namespace gitter.Git.Gui.Controls
 
 		#region .ctor
 
-		public UsresListBox()
+		public UsersListBox()
 		{
 			Columns.AddRange(
 				new[]
 				{
-					_colName		= new NameColumn(Resources.StrName),
-					_colEmail		= new EmailColumn(),
-					_colCommits		= new CustomListBoxColumn((int)ColumnId.Commits, Resources.StrCommits) { Width = 80 },
+					_colName    = new NameColumn(Resources.StrName),
+					_colEmail   = new EmailColumn(),
+					_colCommits = new CustomListBoxColumn((int)ColumnId.Commits, Resources.StrCommits) { Width = 80 },
 				});
 		}
 

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,7 +30,7 @@ namespace gitter.Framework.Services
 	{
 		#region Static
 
-		public static readonly LogEventType Debug		= new LogEventType(0, "Debug", "dbg", Resources.ImgLogDebug);
+		public static readonly LogEventType Debug		= new LogEventType( 0, "Debug", "dbg", Resources.ImgLogDebug);
 		public static readonly LogEventType Information = new LogEventType(10, "Information", "inf", Resources.ImgLogInfo);
 		public static readonly LogEventType Warning		= new LogEventType(20, "Warning", "wrn", Resources.ImgLogWarning);
 		public static readonly LogEventType Error		= new LogEventType(30, "Error", "err", Resources.ImgLogError);
@@ -40,13 +40,13 @@ namespace gitter.Framework.Services
 		#region Data
 
 		/// <summary>Event type level.</summary>
-		public int Level { get; private set; }
+		public int Level { get; }
 		/// <summary>Event type name.</summary>
-		public string Name { get; private set; }
+		public string Name { get; }
 		/// <summary>Event type short name.</summary>
-		public string ShortName { get; private set; }
+		public string ShortName { get; }
 		/// <summary>Event type image.</summary>
-		public Bitmap Image { get; private set; }
+		public Bitmap Image { get; }
 
 		#endregion
 
@@ -56,6 +56,7 @@ namespace gitter.Framework.Services
 		{
 			Level = level;
 			Name = name;
+			ShortName = shortName;
 			Image = image;
 		}
 

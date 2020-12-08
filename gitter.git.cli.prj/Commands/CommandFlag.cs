@@ -26,8 +26,6 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Command flag.</summary>
 	public class CommandFlag : ICommandArgument
 	{
-		#region Static
-
 		public static ICommandArgument DryRun() => new CommandFlag("--dry-run");
 
 		public static ICommandArgument Verbose() => CommonArguments.Verbose;
@@ -41,10 +39,6 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <summary>Do not interpret any more arguments as options.</summary>
 		public static ICommandArgument NoMoreOptions() => CommonArguments.NoMoreOptions;
 
-		#endregion
-
-		#region .ctor
-
 		public CommandFlag(string name)
 		{
 			Name     = name;
@@ -57,17 +51,9 @@ namespace gitter.Git.AccessLayer.CLI
 			LongName = longName;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public string Name { get; }
 
 		public string LongName { get; }
-
-		#endregion
-
-		#region Methods
 
 		public void ToString(StringBuilder stringBuilder)
 		{
@@ -76,12 +62,6 @@ namespace gitter.Git.AccessLayer.CLI
 			stringBuilder.Append(Name);
 		}
 
-		#endregion
-
-		#region Overrides
-
 		public override string ToString() => Name;
-
-		#endregion
 	}
 }

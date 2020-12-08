@@ -209,7 +209,7 @@ namespace gitter.Git.Gui.Controls
 			OnPaintSubItem(paintEventArgs, data, graph, null, -1);
 		}
 
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, Revision data, GraphAtom[] graph, IList<PointerBounds> drawnPointers, int hoveredPointer)
+		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, Revision data, GraphAtom[] graph, List<PointerBounds> drawnPointers, int hoveredPointer)
 		{
 			#region get painting options
 

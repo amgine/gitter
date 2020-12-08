@@ -28,24 +28,14 @@ namespace gitter.Git
 
 	public interface IDiffSource : IDisposable
 	{
-		#region Events
-
 		event EventHandler Updated;
-
-		#endregion
-
-		#region Properties
 
 		Repository Repository { get; }
 
-		#endregion
-
-		#region Methods
-
 		Diff GetDiff(DiffOptions options);
 
-		Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
-
-		#endregion
+		Task<Diff> GetDiffAsync(DiffOptions options,
+			IProgress<OperationProgress> progress = default,
+			CancellationToken cancellationToken = default);
 	}
 }

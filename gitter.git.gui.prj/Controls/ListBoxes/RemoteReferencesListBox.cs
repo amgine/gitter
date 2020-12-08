@@ -71,10 +71,10 @@ namespace gitter.Git.Gui.Controls
 		public RemoteReferencesListBox()
 		{
 			Columns.Add(new NameColumn());
-			Columns.Add(new HashColumn() { IsVisible = true, Abbreviate = true, Width = 60 });
+			Columns.Add(new HashColumn { IsVisible = true, Abbreviate = true, Width = 60 });
 
 			_grpBranches = new GroupItem(Resources.StrHeads) { IsExpanded = true };
-			_grpTags     = new GroupItem(Resources.StrTags) { IsExpanded = true };
+			_grpTags     = new GroupItem(Resources.StrTags)  { IsExpanded = true };
 
 			ShowTreeLines = true;
 		}
@@ -85,7 +85,7 @@ namespace gitter.Git.Gui.Controls
 
 		public RemoteReferencesCollection RemoteReferences
 		{
-			get { return _remoteReferences; }
+			get => _remoteReferences;
 			set
 			{
 				if(_remoteReferences != value)

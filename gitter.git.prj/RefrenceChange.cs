@@ -29,8 +29,6 @@ namespace gitter.Git
 
 	public sealed class ReferenceChange
 	{
-		#region .ctor
-
 		public ReferenceChange(
 			ReferenceType referenceType,
 			string fullName, string name,
@@ -45,10 +43,6 @@ namespace gitter.Git
 			ChangeType = changeType;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public ReferenceType ReferenceType { get; }
 
 		public string FullName { get; }
@@ -60,7 +54,5 @@ namespace gitter.Git
 		public Hash NewHash { get; }
 
 		public ReferenceChangeType ChangeType { get; }
-
-		#endregion
 	}
 }

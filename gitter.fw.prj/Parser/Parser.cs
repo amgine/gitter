@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -39,7 +39,7 @@ namespace gitter.Framework
 		/// <param name="string">String to parse.</param>
 		public Parser(string @string)
 		{
-			Verify.Argument.IsNotNull(@string, "@string");
+			Verify.Argument.IsNotNull(@string, nameof(@string));
 
 			String = @string;
 		}

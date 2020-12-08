@@ -23,7 +23,7 @@ namespace gitter.Git.Gui
 	using System;
 
 	[Flags]
-	public enum GraphElement
+	public enum GraphElement : short
 	{
 		/// <summary>
 		/// <para>...</para>

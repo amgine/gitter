@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -37,23 +37,15 @@ namespace gitter.Framework.Controls
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			switch((LogListBoxColumnId)measureEventArgs.SubItemId)
+			=> ((LogListBoxColumnId)measureEventArgs.SubItemId) switch
 			{
-				case LogListBoxColumnId.Type:
-					return new Size(16, 16);
-				case LogListBoxColumnId.Timestamp:
-					return measureEventArgs.MeasureText(DataContext.Timestamp.FormatISO8601());
-				case LogListBoxColumnId.Source:
-					return measureEventArgs.MeasureText(DataContext.Source);
-				case LogListBoxColumnId.Message:
-					return measureEventArgs.MeasureText(DataContext.Message);
-				case LogListBoxColumnId.Exception:
-					return new Size(16, 16);
-				default:
-					return Size.Empty;
-			}
-		}
+				LogListBoxColumnId.Type      => new Size(16, 16),
+				LogListBoxColumnId.Timestamp => measureEventArgs.MeasureText(DataContext.Timestamp.FormatISO8601()),
+				LogListBoxColumnId.Source    => measureEventArgs.MeasureText(DataContext.Source),
+				LogListBoxColumnId.Message   => measureEventArgs.MeasureText(DataContext.Message),
+				LogListBoxColumnId.Exception => new Size(16, 16),
+				_ => Size.Empty,
+			};
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{

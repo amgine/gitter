@@ -28,7 +28,7 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly List<Revision> _container;
+		private readonly List<Revision> _container = new(capacity: 2);
 
 		#endregion
 
@@ -36,7 +36,6 @@ namespace gitter.Git
 
 		internal RevisionParentsCollection()
 		{
-			_container = new List<Revision>(2);
 		}
 
 		#endregion

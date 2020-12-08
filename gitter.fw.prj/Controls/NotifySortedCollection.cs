@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -50,7 +50,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Comparison used when sorting items.</summary>
 		public Comparison<T> Comparison
 		{
-			get { return _comparison; }
+			get => _comparison;
 			set
 			{
 				if(_comparison != value)
@@ -75,7 +75,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Item sort order.</summary>
 		public SortOrder SortOrder
 		{
-			get { return _sortOrder; }
+			get => _sortOrder;
 			set
 			{
 				if(_sortOrder != value)
@@ -114,9 +114,7 @@ namespace gitter.Framework.Controls
 		/// <param name="item2">Second compared item.</param>
 		/// <returns>Comparison result.</returns>
 		private int InvertedComparison(T item1, T item2)
-		{
-			return _comparison(item2, item1);
-		}
+			=> _comparison(item2, item1);
 
 		/// <summary>Inverts item order in collection.</summary>
 		private void InvertOrder()

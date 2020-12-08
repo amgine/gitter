@@ -64,7 +64,7 @@ namespace gitter.Framework.Configuration
 			public XmlNode Push(string name)
 			{
 				var node = Node[name];
-				Verify.Argument.IsTrue(node != null, "name", "Node not found.");
+				Verify.Argument.IsTrue(node != null, nameof(name), "Node not found.");
 				_node.Push(node);
 				return node;
 			}

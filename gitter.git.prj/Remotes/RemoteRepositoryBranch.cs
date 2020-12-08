@@ -37,13 +37,9 @@ namespace gitter.Git
 		public override ReferenceType ReferenceType => ReferenceType.LocalBranch;
 
 		protected override void DeleteCore()
-		{
-			References.RemoveBranch(this);
-		}
+			=> References.RemoveBranch(this);
 
 		protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			return References.RemoveBranchAsync(this, progress, cancellationToken);
-		}
+			=> References.RemoveBranchAsync(this, progress, cancellationToken);
 	}
 }

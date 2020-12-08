@@ -62,7 +62,7 @@ namespace gitter.Git
 
 		public bool IsCurrent => Repository.Head.Revision == this;
 
-		public bool IsLoaded { get; set; }
+		public bool IsLoaded { get; internal set; }
 
 		#endregion
 
@@ -114,11 +114,11 @@ namespace gitter.Git
 			}
 		}
 
-		public DateTime AuthorDate { get; internal set; }
+		public DateTimeOffset AuthorDate { get; internal set; }
 
 		public User Committer { get; internal set; }
 
-		public DateTime CommitDate { get; internal set; }
+		public DateTimeOffset CommitDate { get; internal set; }
 
 		public string Subject { get; internal set; }
 
@@ -140,6 +140,7 @@ namespace gitter.Git
 
 		#endregion
 
+		/// <inheritdoc/>
 		public override string ToString()
 			=> string.Format(CultureInfo.InvariantCulture, "{0}: {1}", Hash.ToString(7), Subject);
 	}

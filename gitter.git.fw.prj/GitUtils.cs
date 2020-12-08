@@ -28,8 +28,8 @@ namespace gitter.Git
 		public static bool IsValidSHA1(string hash)
 		{
 			if(hash == null) return false;
-			if(hash.Length != 40) return false;
-			for(int i = 0; i < 40; ++i)
+			if(hash.Length != Hash.HexStringLength) return false;
+			for(int i = 0; i < hash.Length; ++i)
 			{
 				if(!Uri.IsHexDigit(hash[i])) return false;
 			}

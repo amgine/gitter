@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -62,9 +62,7 @@ namespace gitter
 
 		/// <summary>Surrounds with ( )</summary>
 		public static string SurroundWithBraces(this string str)
-		{
-			return "(" + str + ")";
-		}
+			=> "(" + str + ")";
 
 		/// <summary>Surrounds with " " if necessary.</summary>
 		public static string AssureDoubleQuotes(this string str)

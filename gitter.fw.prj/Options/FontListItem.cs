@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -40,7 +40,7 @@ namespace gitter.Framework.Options
 
 		public Font Font
 		{
-			get { return _font; }
+			get => _font;
 			set
 			{
 				if(_font != value)

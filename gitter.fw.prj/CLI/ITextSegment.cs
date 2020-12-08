@@ -32,7 +32,7 @@ namespace gitter.Framework.CLI
 
 		char ReadChar();
 
-		void Skip(int count);
+		void Skip(int count = 1);
 
 		int IndexOf(char c);
 

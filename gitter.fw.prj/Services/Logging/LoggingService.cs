@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,43 +26,30 @@ namespace gitter.Framework.Services
 
 	public class LoggingService
 	{
-		private static readonly LoggingService _global;
-		public static LoggingService Global { get { return _global; } }
+		public static LoggingService Global { get; } = new("global");
 
-		private readonly string _source;
-
-		private static readonly LogEvent[] _log;
-		private static readonly List<ILogAppender> _appenders;
+		private static readonly LogEvent[] _log = new LogEvent[1000];
+		private static readonly List<ILogAppender> _appenders = new();
 		private static int _start;
 		private static int _count;
 
-		static LoggingService()
-		{
-			_global = new LoggingService("global");
-			_appenders = new List<ILogAppender>();
-			_log = new LogEvent[1000];
-		}
-
 		public LoggingService(string source)
 		{
-			_source = source;
+			Source = source;
 		}
 
 		public LoggingService(Type source)
 		{
-			_source = source.Name;
+			Source = source.Name;
 		}
 
-		public string Source
-		{
-			get { return _source; }
-		}
+		public string Source { get; }
 
 		private void LogCore(LogEventType type, Exception exc, string @event)
 		{
 			Assert.IsNotNull(type);
 
-			var evt = new LogEvent(_source, type, @event, DateTime.Now, exc);
+			var evt = new LogEvent(Source, type, @event, DateTime.Now, exc);
 			lock(_log)
 			{
 				int index;

@@ -28,16 +28,10 @@ namespace gitter.Git
 
 	public interface ILogSource
 	{
-		#region Properties
-
 		Repository Repository { get; }
 
-		#endregion
-
-		#region Methods
-
-		Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
-
-		#endregion
+		Task<RevisionLog> GetRevisionLogAsync(LogOptions options,
+			IProgress<OperationProgress> progress = default,
+			CancellationToken cancellationToken = default);
 	}
 }

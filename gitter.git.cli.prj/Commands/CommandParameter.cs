@@ -26,22 +26,9 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Command parameter.</summary>
 	public class CommandParameter : ICommandArgument
 	{
-		#region .ctor
-
-		public CommandParameter(string value)
-		{
-			Value = value;
-		}
-
-		#endregion
-
-		#region Properties
+		public CommandParameter(string value) => Value = value;
 
 		public string Value { get; }
-
-		#endregion
-
-		#region Methods
 
 		public void ToString(StringBuilder stringBuilder)
 		{
@@ -50,12 +37,6 @@ namespace gitter.Git.AccessLayer.CLI
 			stringBuilder.Append(Value);
 		}
 
-		#endregion
-
-		#region Overrides
-
 		public override string ToString() => Value;
-
-		#endregion
 	}
 }

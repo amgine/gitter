@@ -30,6 +30,8 @@ namespace gitter.Git.AccessLayer.CLI
 
 		protected CommandBuilderBase(string commandName)
 		{
+			Assert.IsNeitherNullNorWhitespace(commandName);
+
 			CommandName = commandName;
 		}
 
@@ -42,10 +44,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void AddArgument(ICommandArgument argument)
 		{
-			if(_args == null)
-			{
-				_args = new List<ICommandArgument>();
-			}
+			_args ??= new List<ICommandArgument>();
 			_args.Add(argument);
 		}
 
@@ -56,10 +55,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public void AddOption(ICommandArgument option)
 		{
-			if(_options == null)
-			{
-				_options = new List<ICommandArgument>();
-			}
+			_options ??= new List<ICommandArgument>();
 			_options.Add(option);
 		}
 

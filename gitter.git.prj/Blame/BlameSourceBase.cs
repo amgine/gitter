@@ -28,25 +28,16 @@ namespace gitter.Git
 
 	abstract class BlameSourceBase : IBlameSource
 	{
-		#region Properties
-
 		public abstract Repository Repository { get; }
-
-		#endregion
-
-		#region .ctor
 
 		protected BlameSourceBase()
 		{
 		}
 
-		#endregion
-
-		#region Methods
-
 		public abstract BlameFile GetBlame(BlameOptions options);
 
-		public abstract Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		public abstract Task<BlameFile> GetBlameAsync(BlameOptions options,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.
@@ -55,7 +46,5 @@ namespace gitter.Git
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
 		public override string ToString() => "blame";
-
-		#endregion
 	}
 }

@@ -26,7 +26,8 @@ namespace gitter.Git
 		/// <summary>Default strategy.</summary>
 		/// <remarks>
 		/// <see cref="MergeStrategy.Recursive"/> if merging single branch,
-		/// <see cref="MergeStrategy.Octopus"/> if merging multiple branches.</remarks>
+		/// <see cref="MergeStrategy.Octopus"/> if merging multiple branches.
+		/// </remarks>
 		Default,
 
 		/// <summary>

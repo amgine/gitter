@@ -107,14 +107,9 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				if(_gitExePath == null)
 				{
-					if(AutodetectGitExePath)
-					{
-						_gitExePath = GitProcess.DetectGitExePath();
-					}
-					else
-					{
-						_gitExePath = ManualGitExePath;
-					}
+					_gitExePath = AutodetectGitExePath
+						? GitProcess.DetectGitExePath()
+						: ManualGitExePath;
 					GitProcess.GitExePath = _gitExePath;
 				}
 				return _gitExePath;

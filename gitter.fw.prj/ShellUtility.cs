@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -150,7 +150,7 @@ namespace gitter.Framework
 			}
 			try
 			{
-				using(var key = Registry.ClassesRoot.OpenSubKey(ext))
+				using(var key = Registry.ClassesRoot.OpenSubKey(ext, writable: false))
 				{
 					var alias = (string)key.GetValue(null);
 					key.Close();
@@ -169,7 +169,7 @@ namespace gitter.Framework
 						}
 						aliasKey.Close();
 						if(file == "%1") file = fileName;
-						IntPtr[] icons = new IntPtr[1];
+						var icons = new IntPtr[1];
 						var c = Shell32.ExtractIconEx(file, id, null, icons, 1);
 						if(c == 1)
 						{

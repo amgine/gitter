@@ -22,60 +22,36 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Drawing;
-	using System.Windows.Forms;
 
 	public class SubItemMeasureEventArgs : EventArgs
 	{
-		#region Data
-
-		private readonly Graphics _graphics;
-		private readonly int _columnIndex;
-		private readonly CustomListBoxColumn _column;
-
-		#endregion
-
 		#region .ctor
 
-		public SubItemMeasureEventArgs(Graphics graphics, int columnIndex, CustomListBoxColumn column)
+		public SubItemMeasureEventArgs(Graphics graphics, CustomListBoxItem item, int columnIndex, CustomListBoxColumn column)
 		{
-			_graphics = graphics;
-			_columnIndex = columnIndex;
-			_column = column;
+			Gaphics     = graphics;
+			Item        = item;
+			ColumnIndex = columnIndex;
+			Column      = column;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public Graphics Gaphics
-		{
-			get { return _graphics; }
-		}
+		public Graphics Gaphics { get; }
 
-		public int SubItemId
-		{
-			get { return _column.Id; }
-		}
+		public CustomListBoxItem Item { get; }
 
-		public CustomListBox ListBox
-		{
-			get { return _column.ListBox; }
-		}
+		public int SubItemId => Column.Id;
 
-		public CustomListBoxColumn Column
-		{
-			get { return _column; }
-		}
+		public CustomListBox ListBox => Column.ListBox;
 
-		public Font Font
-		{
-			get { return _column.ContentFont; }
-		}
+		public CustomListBoxColumn Column { get; }
 
-		public int ColumnIndex
-		{
-			get { return _columnIndex; }
-		}
+		public Font Font => Column.ContentFont;
+
+		public int ColumnIndex { get; }
 
 		#endregion
 
@@ -120,7 +96,7 @@ namespace gitter.Framework.Controls
 		private Size MeasureTextCore(string text, Font font)
 		{
 			var s = GitterApplication.TextRenderer.MeasureText(
-				_graphics, text, font, int.MaxValue);
+				Gaphics, text, font, int.MaxValue);
 
 			return new Size((int)(s.Width + 1 + 2 * ListBoxConstants.ContentSpacing), s.Height);
 		}
@@ -134,7 +110,7 @@ namespace gitter.Framework.Controls
 
 		public Size MeasureText(string text)
 		{
-			return MeasureTextCore(text, _column.ContentFont);
+			return MeasureTextCore(text, Column.ContentFont);
 		}
 
 		#endregion
@@ -144,7 +120,7 @@ namespace gitter.Framework.Controls
 		private Size MeasureImageAndTextCore(Image image, string text, Font font)
 		{
 			var s = GitterApplication.TextRenderer.MeasureText(
-				_graphics, text, font, int.MaxValue);
+				Gaphics, text, font, int.MaxValue);
 			var iconW = (image != null) ? (image.Width) : (ListBoxConstants.DefaultImageWidth);
 			return new Size(s.Width + 1 + 2 * ListBoxConstants.ContentSpacing + (iconW + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage), s.Height);
 		}
@@ -158,7 +134,7 @@ namespace gitter.Framework.Controls
 
 		public Size MeasureImageAndText(Image image, string text)
 		{
-			return MeasureImageAndTextCore(image, text, _column.ContentFont);
+			return MeasureImageAndTextCore(image, text, Column.ContentFont);
 		}
 
 		#endregion
@@ -168,7 +144,7 @@ namespace gitter.Framework.Controls
 		private Size MeasureIconAndTextCore(Icon icon, string text, Font font)
 		{
 			var s = GitterApplication.TextRenderer.MeasureText(
-				_graphics, text, font, int.MaxValue);
+				Gaphics, text, font, int.MaxValue);
 			var iconW = (icon != null) ? (icon.Width) : (ListBoxConstants.DefaultImageWidth);
 			return new Size(s.Width + 1 + 2 * ListBoxConstants.ContentSpacing + (iconW + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage), s.Height);
 		}
@@ -182,7 +158,7 @@ namespace gitter.Framework.Controls
 
 		public Size MeasureIconAndText(Icon icon, string text)
 		{
-			return MeasureIconAndTextCore(icon, text, _column.ContentFont);
+			return MeasureIconAndTextCore(icon, text, Column.ContentFont);
 		}
 
 		#endregion

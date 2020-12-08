@@ -27,13 +27,14 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Input data for git.exe.</summary>
 	internal sealed class GitInput
 	{
-		public GitInput(Command command, Encoding encoding = null)
-			: this(string.Empty, command, encoding, null)
+		public GitInput(Command command, Encoding encoding = null,
+			IReadOnlyDictionary<string, string> environment = null)
+			: this(string.Empty, command, encoding, environment)
 		{
 		}
 
 		public GitInput(string workingDirectory, Command command, Encoding encoding = null,
-			IDictionary<string, string> environment = null)
+			IReadOnlyDictionary<string, string> environment = null)
 		{
 			WorkingDirectory = workingDirectory ?? string.Empty;
 			Command          = command;
@@ -47,7 +48,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public Command Command { get; }
 
-		public IDictionary<string, string> Environment { get; }
+		public IReadOnlyDictionary<string, string> Environment { get; }
 
 		public string GetArguments() => Command?.ToString() ?? string.Empty;
 	}

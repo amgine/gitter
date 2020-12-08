@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -94,7 +94,7 @@ namespace gitter.Framework.Controls
 		[Description("Text to display on unfocused control when no text is entered.")]
 		public string Hint
 		{
-			get { return _hint; }
+			get => _hint;
 			set
 			{
 				_hint = value;
@@ -111,7 +111,7 @@ namespace gitter.Framework.Controls
 		[Description("Current text in the HintTextBox. If no text is entered, hint text is not returned.")]
 		public override string Text
 		{
-			get { return _userTextEntered ? base.Text : string.Empty; }
+			get => _userTextEntered ? base.Text : string.Empty;
 			set
 			{
 				if(TextIsValid(value))

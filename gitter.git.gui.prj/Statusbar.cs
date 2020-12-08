@@ -416,7 +416,7 @@ namespace gitter.Git.Gui
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)
@@ -601,27 +601,6 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		private string GetUserName()
-		{
-			if(Repository != null)
-			{
-				var username = Repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
-				if(username != null)
-				{
-					var useremail = Repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
-					if(useremail != null)
-					{
-						return string.Format("{0} <{1}>", username.Value, useremail.Value);
-					}
-					else
-					{
-						return username.Value;
-					}
-				}
-			}
-			return null;
-		}
-
 		private void UpdateRemoteLabel()
 		{
 			lock(Repository.Remotes.SyncRoot)
@@ -792,23 +771,13 @@ namespace gitter.Git.Gui
 
 		private static string GetHeadString(IRevisionPointer revision)
 		{
-			string headString;
 			if(revision != null)
 			{
-				if(GitUtils.IsValidSHA1(revision.Pointer))
-				{
-					headString = revision.Pointer.Substring(0, 7);
-				}
-				else
-				{
-					headString = revision.Pointer;
-				}
+				return GitUtils.IsValidSHA1(revision.Pointer)
+					? revision.Pointer.Substring(0, 7)
+					: revision.Pointer;
 			}
-			else
-			{
-				headString = string.Empty;
-			}
-			return headString;
+			return string.Empty;
 		}
 
 		private void UpdateState()
@@ -885,19 +854,15 @@ namespace gitter.Git.Gui
 				_headLabel.Image = CachedResources.Bitmaps["ImgBranch"];
 				_headLabel.Text = _repository.Head.Pointer.Pointer;
 			}
+			else if(_repository.Head.Pointer is Branch currentBranch)
+			{
+				_headLabel.Image = CachedResources.Bitmaps["ImgBranch"];
+				_headLabel.Text = currentBranch.Name;
+			}
 			else
 			{
-				var currentBranch = _repository.Head.Pointer as Branch;
-				if(currentBranch != null)
-				{
-					_headLabel.Image = CachedResources.Bitmaps["ImgBranch"];
-					_headLabel.Text = currentBranch.Name;
-				}
-				else
-				{
-					_headLabel.Image = null;
-					_headLabel.Text = Resources.StrNoBranch;
-				}
+				_headLabel.Image = null;
+				_headLabel.Text = Resources.StrNoBranch;
 			}
 		}
 

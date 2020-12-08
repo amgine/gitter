@@ -25,43 +25,26 @@ namespace gitter.Git
 
 	public sealed class KnownConfigParameter
 	{
-		private readonly string _name;
-		private readonly string _defaultValue;
-		private readonly string[] _validValues;
-		private readonly string _description;
-
 		internal KnownConfigParameter(string name, string defaultValue, string[] validValues, string description)
 		{
-			_name = name;
-			_defaultValue = defaultValue;
-			_validValues = validValues;
-			_description = description;
+			Name         = name;
+			DefaultValue = defaultValue;
+			ValidValues  = validValues;
+			Description  = description;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public string DefaultValue
-		{
-			get { return _defaultValue; }
-		}
+		public string DefaultValue { get; }
 
-		public string[] ValidValues
-		{
-			get { return _validValues; }
-		}
+		public string[] ValidValues { get; }
 
-		public string Description
-		{
-			get { return _description; }
-		}
+		public string Description { get; }
 	}
 
 	public static class KnownConfigParameters
 	{
-		private static readonly Dictionary<string, KnownConfigParameter> _knownParameters = new Dictionary<string, KnownConfigParameter>();
+		private static readonly Dictionary<string, KnownConfigParameter> _knownParameters = new();
 		private static readonly string[] _booleanValues = new string[] { "true", "false" };
 		private static readonly string[] _compressionLevels = new string[] { "-1", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 

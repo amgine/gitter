@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -53,16 +53,10 @@ namespace gitter.Framework
 		public event EventHandler Started;
 
 		protected virtual void OnStarted()
-		{
-			var handler = Started;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> Started?.Invoke(this, EventArgs.Empty);
 
 		protected virtual void OnCanceled()
-		{
-			var handler = Canceled;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> Canceled?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -276,10 +270,7 @@ namespace gitter.Framework
 		/// Executing action.
 		/// </summary>
 		/// <value></value>
-		public IAsyncResult CurrentContext
-		{
-			get { return _context; }
-		}
+		public IAsyncResult CurrentContext => _context;
 
 		/// <summary>
 		/// Async action name.
@@ -344,10 +335,7 @@ namespace gitter.Framework
 		}
 
 		/// <summary>Returns <c>true</c> if operation must be terminated.</summary>
-		public bool IsCancelRequested
-		{
-			get { return _isCancelRequested; }
-		}
+		public bool IsCancelRequested => _isCancelRequested;
 
 		/// <summary>Sets the can cancel.</summary>
 		/// <param name="value">if set to <c>true</c> [value].</param>

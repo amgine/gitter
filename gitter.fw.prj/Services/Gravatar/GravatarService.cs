@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,7 +21,6 @@
 namespace gitter.Framework.Services
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Text;
 	using System.Security.Cryptography;
 	using System.Drawing;
@@ -30,7 +29,7 @@ namespace gitter.Framework.Services
 	/// <summary>Service for requesting global avatars.</summary>
 	public static class GravatarService
 	{
-		private static readonly MD5CryptoServiceProvider md5Provider = new MD5CryptoServiceProvider();
+		private static readonly MD5CryptoServiceProvider md5Provider = new();
 		private static readonly char[] Alphabet = new char[] { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
 
 		private const string URL = "http://www.gravatar.com/avatar/{0}?d={1}&s={2}&r={3}";
@@ -56,10 +55,8 @@ namespace gitter.Framework.Services
 		{
 			Assert.IsNotNull(response);
 
-			using(var stream = response.GetResponseStream())
-			{
-				return new Bitmap(stream);
-			}
+			using var stream = response.GetResponseStream();
+			return new Bitmap(stream);
 		}
 
 		public static Bitmap GetGravatar(string email)

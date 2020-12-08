@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -197,10 +197,7 @@ namespace gitter.Framework.Controls
 			base.DefWndProc(ref m);
 		}
 
-		protected override bool ShowWithoutActivation
-		{
-			get { return true; }
-		}
+		protected override bool ShowWithoutActivation => true;
 
 		protected override CreateParams CreateParams
 		{

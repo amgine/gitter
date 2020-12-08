@@ -48,10 +48,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		/// <summary>Throw <see cref="GitException"/>.</summary>
 		[DebuggerHidden]
-		public void Throw()
-		{
-			throw new GitException(Error.Length == 0 ? Output : Error);
-		}
+		public void Throw() => throw new GitException(Error.Length == 0 ? Output : Error);
 
 		/// <summary>Throw <see cref="GitException"/> if stderr output is present.</summary>
 		[DebuggerHidden]

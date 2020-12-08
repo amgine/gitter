@@ -284,7 +284,7 @@ namespace gitter.Framework.Controls
 		protected void RemoveToolStrip(ToolStrip toolStrip)
 		{
 			Verify.Argument.IsNotNull(toolStrip, nameof(toolStrip));
-			Verify.Argument.IsTrue(toolStrip.Parent == this, "toolStrip", "ToolStrip is not hosted in this " + GetType().Name + ".");
+			Verify.Argument.IsTrue(toolStrip.Parent == this, nameof(toolStrip), "ToolStrip is not hosted in this " + GetType().Name + ".");
 
 			var dock = toolStrip.Dock;
 			toolStrip.Parent = null;

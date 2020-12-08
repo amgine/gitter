@@ -30,11 +30,9 @@ namespace gitter.Git
 	{
 		#region Static
 
-		private static readonly Dictionary<Reflog, Delegate> _recordAddedHandlers =
-			new Dictionary<Reflog, Delegate>();
+		private static readonly Dictionary<Reflog, Delegate> _recordAddedHandlers = new();
 
-		private static readonly Dictionary<Reflog, Delegate> _recordRemovedHandlers =
-			new Dictionary<Reflog, Delegate>();
+		private static readonly Dictionary<Reflog, Delegate> _recordRemovedHandlers = new();
 
 		#endregion
 
@@ -52,8 +50,7 @@ namespace gitter.Git
 			{
 				lock(_recordAddedHandlers)
 				{
-					Delegate handler;
-					if(_recordAddedHandlers.TryGetValue(this, out handler))
+					if(_recordAddedHandlers.TryGetValue(this, out var handler))
 					{
 						handler = Delegate.Combine(handler, value);
 						_recordAddedHandlers[this] = handler;
@@ -68,8 +65,7 @@ namespace gitter.Git
 			{
 				lock(_recordAddedHandlers)
 				{
-					Delegate handler;
-					if(_recordAddedHandlers.TryGetValue(this, out handler))
+					if(_recordAddedHandlers.TryGetValue(this, out var handler))
 					{
 						handler = Delegate.Remove(handler, value);
 						if(handler == null || handler.GetInvocationList().Length == 0)
@@ -107,8 +103,7 @@ namespace gitter.Git
 			{
 				lock(_recordRemovedHandlers)
 				{
-					Delegate handler;
-					if(_recordRemovedHandlers.TryGetValue(this, out handler))
+					if(_recordRemovedHandlers.TryGetValue(this, out var handler))
 					{
 						handler = Delegate.Remove(handler, value);
 						if(handler == null || handler.GetInvocationList().Length == 0)

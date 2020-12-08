@@ -41,7 +41,6 @@ namespace gitter.Git
 		private bool _usePatienceAlgorithm;
 		private bool _ignoreWhitespace;
 		private bool _binary;
-		private bool _isFrozen;
 
 		#endregion
 
@@ -58,7 +57,7 @@ namespace gitter.Git
 
 		public int Context
 		{
-			get { return _context; }
+			get => _context;
 			set
 			{
 				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
@@ -69,7 +68,7 @@ namespace gitter.Git
 
 		public bool UsePatienceAlgorithm
 		{
-			get { return _usePatienceAlgorithm; }
+			get => _usePatienceAlgorithm;
 			set
 			{
 				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
@@ -80,7 +79,7 @@ namespace gitter.Git
 
 		public bool IgnoreWhitespace
 		{
-			get { return _ignoreWhitespace; }
+			get => _ignoreWhitespace;
 			set
 			{
 				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
@@ -91,7 +90,7 @@ namespace gitter.Git
 
 		public bool Binary
 		{
-			get { return _binary; }
+			get => _binary;
 			set
 			{
 				Verify.State.IsFalse(IsFrozen, "This DiffOptions instance is frozen.");
@@ -100,20 +99,13 @@ namespace gitter.Git
 			}
 		}
 
-		public bool IsFrozen
-		{
-			get { return _isFrozen; }
-			private set { _isFrozen = value; }
-		}
+		public bool IsFrozen { get; private set; }
 
 		#endregion
 
 		#region Methods
 
-		public void Freeze()
-		{
-			IsFrozen = true;
-		}
+		public void Freeze() => IsFrozen = true;
 
 		#endregion
 	}

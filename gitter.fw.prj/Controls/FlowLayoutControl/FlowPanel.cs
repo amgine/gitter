@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -36,7 +36,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Host <see cref="FlowLayoutControl"/>.</summary>
 		public FlowLayoutControl FlowControl
 		{
-			get { return _flowControl; }
+			get => _flowControl;
 			internal set
 			{
 				if(_flowControl != value)
@@ -54,20 +54,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		protected IGitterStyle Style
-		{
-			get
-			{
-				if(_flowControl != null)
-				{
-					return _flowControl.Style;
-				}
-				else
-				{
-					return GitterApplication.DefaultStyle;
-				}
-			}
-		}
+		protected IGitterStyle Style => _flowControl?.Style ?? GitterApplication.DefaultStyle;
 
 		public virtual FlowPanelHeader Header => null;
 
@@ -81,28 +68,13 @@ namespace gitter.Framework.Controls
 		}
 
 		public virtual void InvalidateSize()
-		{
-			if(_flowControl != null)
-			{
-				_flowControl.InvalidatePanelSize(this);
-			}
-		}
+			=> FlowControl?.InvalidatePanelSize(this);
 
 		public void Invalidate()
-		{
-			if(FlowControl != null)
-			{
-				FlowControl.InvalidatePanel(this);
-			}
-		}
+			=> FlowControl?.InvalidatePanel(this);
 
 		public void Invalidate(Rectangle rect)
-		{
-			if(FlowControl != null)
-			{
-				FlowControl.InvalidatePanel(this, rect);
-			}
-		}
+			=> FlowControl?.InvalidatePanel(this, rect);
 
 		public void InvalidateSafe()
 		{
@@ -149,9 +121,7 @@ namespace gitter.Framework.Controls
 		}
 
 		public void ScrollIntoView()
-		{
-			FlowControl.ScrollIntoView(this);
-		}
+			=> FlowControl?.ScrollIntoView(this);
 
 		public void Remove()
 		{

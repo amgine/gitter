@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,19 +29,17 @@ namespace gitter.Framework
 	/// <summary>Provides additional services for repository.</summary>
 	public interface IRepositoryServiceProvider : INamedObject
 	{
-		#region Properties
-
 		/// <summary>Returns service display name.</summary>
 		/// <value>Service display name.</value>
 		string DisplayName { get; }
 
+		/// <summary>Determines if provider can be manually added for repository.</summary>
+		/// <value><c>true</c>, if can be added, <c>false</c> otherwise.</value>
+		bool CanBeAddedManually { get; }
+
 		/// <summary>Returns service icon.</summary>
 		/// <value>Service icon.</value>
 		Image Icon { get; }
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>Prepare for working inside specified <paramref name="environment"/>.</summary>
 		/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
@@ -52,11 +50,6 @@ namespace gitter.Framework
 		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
 		void SaveTo(Section section);
 
-		/// <summary>Checks if service is configured for specified repository.</summary>
-		/// <param name="repository">Repository to check.</param>
-		/// <returns><c>true</c>, if service is configured for the specified repository, otherwise <c>false</c>.</returns>
-		bool IsValidFor(IRepository repository);
-
 		/// <summary>Creates service setup control for the specified repository.</summary>
 		/// <param name="repository">Repository to configure service for.</param>
 		/// <returns>Setup control for the service.</returns>
@@ -64,9 +57,8 @@ namespace gitter.Framework
 
 		/// <summary>Creates GUI provider to modify application UI.</summary>
 		/// <param name="repository">Specifies repository.</param>
-		/// <returns>GUI provider for the service.</returns>
-		IGuiProvider CreateGuiProvider(IRepository repository);
-
-		#endregion
+		/// <param name="guiProvider">GUI provider for the service.</param>
+		/// <returns><c>true</c> on success, <c>false</c> if incompatible with <paramref name="repository"/>.</returns>
+		bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider);
 	}
 }

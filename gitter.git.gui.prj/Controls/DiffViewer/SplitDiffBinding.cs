@@ -32,9 +32,6 @@ namespace gitter.Git.Gui.Controls
 	{
 		#region Data
 
-		private readonly IDiffSource _diffSource;
-		private readonly DiffViewer _diffViewerHeaders;
-		private readonly DiffViewer _diffViewerFiles;
 		private DiffOptions _diffOptions;
 		private readonly List<FileDiffPanel> _allDiffPanels;
 		private readonly FlowProgressPanel _progressPanel;
@@ -51,10 +48,10 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(diffViewerFiles, nameof(diffViewerFiles));
 			Verify.Argument.IsNotNull(diffOptions, nameof(diffOptions));
 
-			_diffSource = diffSource;
-			_diffViewerHeaders = diffViewerHeaders;
-			_diffViewerFiles = diffViewerFiles;
-			_diffOptions = diffOptions;
+			DiffSource        = diffSource;
+			DiffViewerHeaders = diffViewerHeaders;
+			DiffViewerFiles   = diffViewerFiles;
+			_diffOptions      = diffOptions;
 
 			_allDiffPanels = new List<FileDiffPanel>();
 			_progressPanel = new FlowProgressPanel();
@@ -65,24 +62,15 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public IDiffSource DiffSource
-		{
-			get { return _diffSource; }
-		}
+		public IDiffSource DiffSource { get; }
 
-		public DiffViewer DiffViewerHeaders
-		{
-			get { return _diffViewerHeaders; }
-		}
+		public DiffViewer DiffViewerHeaders { get; }
 
-		public DiffViewer DiffViewerFiles
-		{
-			get { return _diffViewerFiles; }
-		}
+		public DiffViewer DiffViewerFiles { get; }
 
 		public DiffOptions DiffOptions
 		{
-			get { return _diffOptions; }
+			get => _diffOptions;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -97,24 +85,8 @@ namespace gitter.Git.Gui.Controls
 
 		private void AddSourceSpecificPanels()
 		{
-			var revisionSource = DiffSource as IRevisionDiffSource;
-			if(revisionSource != null)
-			{
-				DiffViewerHeaders.Panels.Add(new RevisionHeaderPanel() { Revision = revisionSource.Revision.Dereference() });
-				DiffViewerHeaders.Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
-				return;
-			}
-			var indexSource = DiffSource as IIndexDiffSource;
-			if(indexSource != null && !indexSource.Cached)
-			{
-				var panel = new UntrackedFilesPanel(indexSource.Repository.Status);
-				if(panel.Count != 0)
-				{
-					DiffViewerHeaders.Panels.Add(panel);
-					DiffViewerHeaders.Panels.Add(new FlowPanelSeparator() { Height = 5 });
-				}
-				return;
-			}
+			var panels = DiffHeaderPanelsProvider.GetSourceSpecificPanels(DiffSource);
+			DiffViewerHeaders.Panels.AddRange(panels);
 		}
 
 		protected override Task<Diff> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)

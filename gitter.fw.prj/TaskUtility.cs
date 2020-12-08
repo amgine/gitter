@@ -46,21 +46,8 @@ namespace gitter.Framework
 		{
 			Assert.IsNotNull(task);
 
-			if(task.IsCanceled)
-			{
-				throw new OperationCanceledException();
-			}
-			if(task.IsFaulted)
-			{
-				throw UnwrapException(task.Exception);
-			}
-		}
-
-		public static Task<T> TaskFromResult<T>(T result)
-		{
-			var tcs = new TaskCompletionSource<T>();
-			tcs.SetResult(result);
-			return tcs.Task;
+			if(task.IsCanceled) throw new OperationCanceledException();
+			if(task.IsFaulted)  throw UnwrapException(task.Exception);
 		}
 	}
 }

@@ -37,8 +37,8 @@ namespace gitter.Git.Gui.Controls
 			Columns.AddRange(new CustomListBoxColumn[]
 				{
 					new NameColumn(),
-					new PathColumn() { Width = 280 },
-					new UrlColumn() { Width = 280 }
+					new PathColumn { Width = 280 },
+					new UrlColumn  { Width = 280 },
 				});
 			Items.Comparison = SubmoduleListItem.CompareByName;
 		}

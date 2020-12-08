@@ -28,7 +28,7 @@ namespace gitter.Framework
 	/// <summary>Extension methods for <see cref="System.Windows.Forms.Control"/>.</summary>
 	public static class ControlExtensions
 	{
-		public struct CursorChangeToken : IDisposable
+		public ref struct CursorChangeToken
 		{
 			private readonly Control _control;
 			private readonly Cursor _cursor;

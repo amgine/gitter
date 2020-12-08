@@ -33,10 +33,10 @@ namespace gitter.Git.AccessLayer
 		private RevisionData[] _children;
 		private string _subject;
 		private string _body;
-		private DateTime _commitDate;
+		private DateTimeOffset _commitDate;
 		private string _committerName;
 		private string _committerEmail;
-		private DateTime _authorDate;
+		private DateTimeOffset _authorDate;
 		private string _authorName;
 		private string _authorEmail;
 
@@ -106,7 +106,7 @@ namespace gitter.Git.AccessLayer
 			}
 		}
 
-		public DateTime CommitDate
+		public DateTimeOffset CommitDate
 		{
 			get { return _commitDate; }
 			set
@@ -137,7 +137,7 @@ namespace gitter.Git.AccessLayer
 		}
 
 
-		public DateTime AuthorDate
+		public DateTimeOffset AuthorDate
 		{
 			get { return _authorDate; }
 			set

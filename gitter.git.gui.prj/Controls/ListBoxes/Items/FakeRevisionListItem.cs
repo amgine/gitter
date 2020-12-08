@@ -351,10 +351,6 @@ namespace gitter.Git.Gui.Controls
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
-				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, NoHash);
-				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, NoHash);
 				case ColumnId.AuthorDate:
 				case ColumnId.Date:
 				case ColumnId.CommitDate:
@@ -374,10 +370,8 @@ namespace gitter.Git.Gui.Controls
 						var usermail = Repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
 						return EmailColumn.OnMeasureSubItem(measureEventArgs, usermail == null ? "" : usermail.Value);
 					}
-				case ColumnId.Graph:
-					return GraphColumn.OnMeasureSubItem(measureEventArgs, Graph);
 				default:
-					return Size.Empty;
+					return base.OnMeasureSubItem(measureEventArgs);
 			}
 		}
 
@@ -387,13 +381,6 @@ namespace gitter.Git.Gui.Controls
 			{
 				case ColumnId.Subject:
 					DrawSubjectColumn(paintEventArgs);
-					break;
-				case ColumnId.Graph:
-					{
-						var type = Type == FakeRevisionItemType.StagedChanges ?
-							RevisionGraphItemType.Uncommitted : RevisionGraphItemType.Unstaged;
-						GraphColumn.OnPaintSubItem(paintEventArgs, Graph, type);
-					}
 					break;
 				case ColumnId.User:
 				case ColumnId.Author:
@@ -418,9 +405,8 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.AuthorDate:
 					PaintGrayText(paintEventArgs, Resources.StrUncommitted.SurroundWith('<', '>'));
 					break;
-				case ColumnId.Hash:
-				case ColumnId.TreeHash:
-					PaintGrayText(paintEventArgs, NoHash, HashColumn.OnPaintSubItem);
+				default:
+					base.OnPaintSubItem(paintEventArgs);
 					break;
 			}
 		}

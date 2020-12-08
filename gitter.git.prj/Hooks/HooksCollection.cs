@@ -26,40 +26,33 @@ namespace gitter.Git
 	/// <summary>Repository <see cref="Hook"/> objects collection.</summary>
 	public sealed class HooksCollection : GitObject, IEnumerable<Hook>
 	{
-		#region Data
-
-		private readonly Dictionary<string, Hook> _hooks;
-
-		#endregion
+		private readonly Dictionary<string, Hook> _hooks = new();
 
 		/// <summary>Create <see cref="HooksCollection"/>.</summary>
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
 		internal HooksCollection(Repository repository)
 			: base(repository)
 		{
-			_hooks                      = new Dictionary<string, Hook>();
-			AddHook(ApplyPatchMsg		= new Hook(repository, Hooks.ApplyPatchMsg));
-			AddHook(PreApplyPatch		= new Hook(repository, Hooks.PreApplyPatch));
-			AddHook(PostApplyPatch		= new Hook(repository, Hooks.PostApplyPatch));
-			AddHook(PreCommit			= new Hook(repository, Hooks.PreCommit));
-			AddHook(PrepareCommitMsg	= new Hook(repository, Hooks.PrepareCommitMsg));
-			AddHook(CommitMsg			= new Hook(repository, Hooks.CommitMsg));
-			AddHook(PostCommit			= new Hook(repository, Hooks.PostCommit));
-			AddHook(PreRebase			= new Hook(repository, Hooks.PreRebase));
-			AddHook(PostCheckout		= new Hook(repository, Hooks.PostCheckout));
-			AddHook(PostMerge			= new Hook(repository, Hooks.PostMerge));
-			AddHook(PreReceive			= new Hook(repository, Hooks.PreReceive));
-			AddHook(Update				= new Hook(repository, Hooks.Update));
-			AddHook(PostReceive		    = new Hook(repository, Hooks.PostReceive));
-			AddHook(PostUpdate			= new Hook(repository, Hooks.PostUpdate));
-			AddHook(PreAutoGC			= new Hook(repository, Hooks.PreAutoGC));
-			AddHook(PostRewrite		    = new Hook(repository, Hooks.PostRewrite));
+			AddHook(ApplyPatchMsg    = new Hook(repository, Hooks.ApplyPatchMsg));
+			AddHook(PreApplyPatch    = new Hook(repository, Hooks.PreApplyPatch));
+			AddHook(PostApplyPatch   = new Hook(repository, Hooks.PostApplyPatch));
+			AddHook(PreCommit        = new Hook(repository, Hooks.PreCommit));
+			AddHook(PrepareCommitMsg = new Hook(repository, Hooks.PrepareCommitMsg));
+			AddHook(CommitMsg        = new Hook(repository, Hooks.CommitMsg));
+			AddHook(PostCommit       = new Hook(repository, Hooks.PostCommit));
+			AddHook(PreRebase        = new Hook(repository, Hooks.PreRebase));
+			AddHook(PostCheckout     = new Hook(repository, Hooks.PostCheckout));
+			AddHook(PostMerge        = new Hook(repository, Hooks.PostMerge));
+			AddHook(PreReceive       = new Hook(repository, Hooks.PreReceive));
+			AddHook(Update           = new Hook(repository, Hooks.Update));
+			AddHook(PostReceive      = new Hook(repository, Hooks.PostReceive));
+			AddHook(PostUpdate       = new Hook(repository, Hooks.PostUpdate));
+			AddHook(PreAutoGC        = new Hook(repository, Hooks.PreAutoGC));
+			AddHook(PostRewrite      = new Hook(repository, Hooks.PostRewrite));
 		}
 
 		private void AddHook(Hook hook)
-		{
-			_hooks.Add(hook.Name, hook);
-		}
+			=> _hooks.Add(hook.Name, hook);
 
 		public Hook ApplyPatchMsg { get; }
 
@@ -93,47 +86,22 @@ namespace gitter.Git
 
 		public Hook PostRewrite { get; }
 
-		public int Count
-		{
-			get { return _hooks.Count; }
-		}
+		public int Count => _hooks.Count;
 
-		public Hook this[string name]
-		{
-			get { return _hooks[name]; }
-		}
+		public Hook this[string name] => _hooks[name];
 
 		public bool TryGetHook(string name, out Hook hook)
-		{
-			return _hooks.TryGetValue(name, out hook);
-		}
+			=> _hooks.TryGetValue(name, out hook);
 
 		public Hook TryGetHook(string name)
-		{
-			Hook hook;
-			if(_hooks.TryGetValue(name, out hook))
-			{
-				return hook;
-			}
-			return null;
-		}
-
-		#region IEnumerable<Hook> Members
+			=> _hooks.TryGetValue(name, out var hook)
+				? hook
+				: default;
 
 		public IEnumerator<Hook> GetEnumerator()
-		{
-			return _hooks.Values.GetEnumerator();
-		}
-
-		#endregion
-
-		#region IEnumerable Members
+			=> _hooks.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _hooks.Values.GetEnumerator();
-		}
-
-		#endregion
+			=> _hooks.Values.GetEnumerator();
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,7 +23,7 @@ namespace gitter.Framework.Controls
 	using System;
 	using System.Drawing;
 
-	internal struct GripBounds
+	internal readonly struct GripBounds
 	{
 		private const int GripSize = 6;
 		private const int CornerGripSize = GripSize << 1;

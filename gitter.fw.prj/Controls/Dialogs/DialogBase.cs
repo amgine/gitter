@@ -96,14 +96,12 @@ namespace gitter.Framework
 		/// <returns><see cref="DialogResult"/>.</returns>
 		public DialogResult Run(IWin32Window owner)
 		{
-			using(var form = new DialogForm(this, OptimalButtons)
-				{
-					OKButtonText = ActionVerb,
-					CancelButtonText = CancelVerb,
-				})
+			using var form = new DialogForm(this, OptimalButtons)
 			{
-				return form.ShowDialog(owner);
-			}
+				OKButtonText     = ActionVerb,
+				CancelButtonText = CancelVerb,
+			};
+			return form.ShowDialog(owner);
 		}
 
 		protected virtual string ActionVerb => Resources.StrOk;

@@ -39,9 +39,9 @@ namespace gitter.Git.Gui.Controls
 			Columns.AddRange(
 				new CustomListBoxColumn[]
 				{
-					new NameColumn() { SizeMode = ColumnSizeMode.Sizeable, Width = 200 },
-					new FetchUrlColumn() { SizeMode = ColumnSizeMode.Fill },
-					new PushUrlColumn() { Width = 200 },
+					new NameColumn     { SizeMode = ColumnSizeMode.Sizeable, Width = 200 },
+					new FetchUrlColumn { SizeMode = ColumnSizeMode.Fill },
+					new PushUrlColumn  { Width = 200 },
 				});
 		}
 

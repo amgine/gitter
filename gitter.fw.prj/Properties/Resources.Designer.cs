@@ -421,6 +421,16 @@ namespace gitter.Framework.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgCopyToClipboard {
+            get {
+                object obj = ResourceManager.GetObject("ImgCopyToClipboard", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgFolder {
             get {
                 object obj = ResourceManager.GetObject("ImgFolder", resourceCulture);
@@ -841,6 +851,24 @@ namespace gitter.Framework.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Convert to local time.
+        /// </summary>
+        internal static string StrConvertDateTimeToLocal {
+            get {
+                return ResourceManager.GetString("StrConvertDateTimeToLocal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Link Location.
+        /// </summary>
+        internal static string StrCopyLinkLocation {
+            get {
+                return ResourceManager.GetString("StrCopyLinkLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy to Clipboard.
         /// </summary>
         internal static string StrCopyToClipboard {
@@ -1053,6 +1081,15 @@ namespace gitter.Framework.Properties {
         internal static string StrOk {
             get {
                 return ResourceManager.GetString("StrOk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open in Browser.
+        /// </summary>
+        internal static string StrOpenInBrowser {
+            get {
+                return ResourceManager.GetString("StrOpenInBrowser", resourceCulture);
             }
         }
         

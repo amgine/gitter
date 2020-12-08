@@ -27,22 +27,12 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class GitCommandExecutor : CommandExecutorBase
 	{
-		#region Static
-
-		private static readonly LoggingService Log = new LoggingService("Global CLI");
-
-		#endregion
-
-		#region .ctor
+		private static readonly LoggingService Log = new("Global CLI");
 
 		public GitCommandExecutor(ICliOptionsProvider cliOptionsProvider)
 			: base(cliOptionsProvider)
 		{
 		}
-
-		#endregion
-
-		#region Overrides
 
 		protected override void OnCommandExecuting(Command command)
 		{
@@ -58,13 +48,8 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Assert.IsNotNull(command);
 
-			if(encoding == null)
-			{
-				encoding = CliOptionsProvider.DefaultEncoding;
-			}
+			encoding ??= CliOptionsProvider.DefaultEncoding;
 			return new GitInput(command, encoding);
 		}
-
-		#endregion
 	}
 }

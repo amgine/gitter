@@ -60,16 +60,9 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		private static Action<Process> GetCancellationMethod(CommandExecutionFlags flags)
-		{
-			if((flags & CommandExecutionFlags.DoNotKillProcess) == CommandExecutionFlags.DoNotKillProcess)
-			{
-				return ProcessExecutor.CancellationMethods.AllowToExecute;
-			}
-			else
-			{
-				return ProcessExecutor.CancellationMethods.KillProcess;
-			}
-		}
+			=> (flags & CommandExecutionFlags.DoNotKillProcess) == CommandExecutionFlags.DoNotKillProcess
+				? ProcessExecutor.CancellationMethods.AllowToExecute
+				: ProcessExecutor.CancellationMethods.KillProcess;
 
 		public GitOutput ExecuteCommand(Command command, CommandExecutionFlags flags)
 		{
@@ -111,7 +104,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return exitCode;
 		}
 
-		private Task<int> ExecuteCommandAsyncCore(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken)
+		private Task<int> ExecuteCommandAsyncCore(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 		{
 			OnCommandExecuting(command);
 
@@ -126,8 +119,10 @@ namespace gitter.Git.AccessLayer.CLI
 				cancellationToken);
 		}
 
-		private async Task<GitOutput> ExecuteCommandAsyncCore(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken)
+		private async Task<GitOutput> ExecuteCommandAsyncCore(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 		{
+			Assert.IsNotNull(command);
+
 			OnCommandExecuting(command);
 
 			var stdOutReceiver     = new AsyncTextReader();
@@ -148,28 +143,28 @@ namespace gitter.Git.AccessLayer.CLI
 			return new GitOutput(stdOut, stdErr, exitCode);
 		}
 
-		public Task<GitOutput> ExecuteCommandAsync(Command command, CommandExecutionFlags flags, CancellationToken cancellationToken)
+		public Task<GitOutput> ExecuteCommandAsync(Command command, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(command, nameof(command));
 
 			return ExecuteCommandAsyncCore(command, GitProcess.DefaultEncoding, flags, cancellationToken);
 		}
 
-		public Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken)
+		public Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(command, nameof(command));
 
 			return ExecuteCommandAsyncCore(command, encoding, flags, cancellationToken);
 		}
 
-		public Task<int> ExecuteCommandAsync(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken)
+		public Task<int> ExecuteCommandAsync(Command command, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(command, nameof(command));
 
 			return ExecuteCommandAsyncCore(command, GitProcess.DefaultEncoding, stdOutReceiver, stdErrReceiver, flags, cancellationToken);
 		}
 
-		public Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken)
+		public Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(command, nameof(command));
 

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,24 +29,14 @@ namespace gitter.Framework
 	{
 		protected sealed class BackgroundWithBorder : IBackgroundStyle
 		{
-			#region Data
-
 			private readonly Color _backgroundColor;
 			private readonly Color _borderColor;
-
-			#endregion
-
-			#region .ctor
 
 			public BackgroundWithBorder(Color backgroundColor, Color borderColor)
 			{
 				_backgroundColor = backgroundColor;
 				_borderColor = borderColor;
 			}
-
-			#endregion
-
-			#region Methods
 
 			public void Draw(Graphics graphics, Rectangle rect)
 			{
@@ -61,38 +51,22 @@ namespace gitter.Framework
 					graphics.DrawRectangle(pen, rect);
 				}
 			}
-
-			#endregion
 		}
 
 		protected sealed class SolidBackground : IBackgroundStyle
 		{
-			#region Data
-
 			private readonly Color _backgroundColor;
-
-			#endregion
-
-			#region .ctor
 
 			public SolidBackground(Color backgroundColor)
 			{
 				_backgroundColor = backgroundColor;
 			}
 
-			#endregion
-
-			#region Methods
-
 			public void Draw(Graphics graphics, Rectangle rect)
 			{
-				using(var brush = new SolidBrush(_backgroundColor))
-				{
-					graphics.FillRectangle(brush, rect);
-				}
+				using var brush = new SolidBrush(_backgroundColor);
+				graphics.FillRectangle(brush, rect);
 			}
-
-			#endregion
 		}
 	}
 }

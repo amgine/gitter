@@ -80,15 +80,11 @@ namespace gitter.Git
 		/// <summary><see cref="ReferenceType"/>.</summary>
 		/// <value><see cref="ReferenceType.RemoteBranch"/> or <see cref="ReferenceType.LocalBranch"/>.</value>
 		public override ReferenceType Type
-		{
-			get { return IsRemote ? ReferenceType.RemoteBranch : ReferenceType.LocalBranch; }
-		}
+			=> IsRemote ? ReferenceType.RemoteBranch : ReferenceType.LocalBranch;
 
 		/// <summary>Gets the full branch name.</summary>
 		/// <value>Full barnch name.</value>
 		public override string FullName
-		{
-			get { return (IsRemote ? GitConstants.RemoteBranchPrefix : GitConstants.LocalBranchPrefix) + Name; }
-		}
+			=> (IsRemote ? GitConstants.RemoteBranchPrefix : GitConstants.LocalBranchPrefix) + Name;
 	}
 }

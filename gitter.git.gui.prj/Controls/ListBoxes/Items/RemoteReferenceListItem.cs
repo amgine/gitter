@@ -88,10 +88,8 @@ namespace gitter.Git.Gui.Controls
 							break;
 					}
 					return measureEventArgs.MeasureImageAndText(image, DataContext.Name);
-				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Hash.ToString());
 				default:
-					return Size.Empty;
+					return base.OnMeasureSubItem(measureEventArgs);
 			}
 		}
 
@@ -107,13 +105,14 @@ namespace gitter.Git.Gui.Controls
 							image = ImgBranch;
 							break;
 						case ReferenceType.Tag:
-							var tag = DataContext as RemoteRepositoryTag;
-							if(tag != null && tag.TagType == TagType.Annotated)
+							if(DataContext is RemoteRepositoryTag tag && tag.TagType == TagType.Annotated)
 							{
 								image = ImgTagAnnotated;
 							}
 							else
+							{
 								image = ImgTag;
+							}
 							break;
 						default:
 							image = null;
@@ -121,22 +120,8 @@ namespace gitter.Git.Gui.Controls
 					}
 					paintEventArgs.PaintImageAndText(image, DataContext.Name);
 					break;
-				case ColumnId.Hash:
-					var rhc = paintEventArgs.Column as HashColumn;
-					bool abbreviate;
-					int abbrevLength = HashColumn.DefaultAbbrevLength;
-					if(rhc != null)
-					{
-						abbreviate = rhc.Abbreviate;
-					}
-					else
-					{
-						abbreviate = HashColumn.DefaultAbbreviate;
-					}
-					paintEventArgs.PaintText(abbreviate
-						? DataContext.Hash.ToString(abbrevLength)
-						: DataContext.Hash.ToString(),
-						HashColumn.Font);
+				default:
+					base.OnPaintSubItem(paintEventArgs);
 					break;
 			}
 		}

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -64,11 +64,14 @@ namespace gitter.Framework
 
 			public Region Region
 			{
-				get { return _region; }
+				get => _region;
 				set
 				{
-					_region?.Dispose();
-					_region = value;
+					if(_region != value)
+					{
+						_region?.Dispose();
+						_region = value;
+					}
 				}
 			}
 
@@ -77,12 +80,12 @@ namespace gitter.Framework
 
 		private readonly TrackingService<HyperlinkGlyph> _hoveredLink;
 
-		public TextWithHyperlinks(string text, HyperlinkExtractor extractor = null)
+		public TextWithHyperlinks(string text, IHyperlinkExtractor extractor = null)
 		{
 			Text = text;
 			_sf = (StringFormat)(StringFormat.GenericTypographic.Clone());
 			_sf.FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.MeasureTrailingSpaces;
-			if(extractor == null) extractor = new HyperlinkExtractor();
+			extractor ??= new AbsoluteUrlHyperlinkExtractor();
 			_glyphs = extractor.ExtractHyperlinks(text)
 							   .Select(h => new HyperlinkGlyph(h))
 							   .ToArray();
@@ -94,14 +97,9 @@ namespace gitter.Framework
 		}
 
 		public Hyperlink HoveredHyperlink
-		{
-			get
-			{
-				return _hoveredLink.IsTracked
-					? _hoveredLink.Item.Hyperlink
-					: null;
-			}
-		}
+			=> _hoveredLink.IsTracked
+				? _hoveredLink.Item.Hyperlink
+				: null;
 
 		private void OnHoveredLinkChanged(object sender, TrackingEventArgs<TextWithHyperlinks.HyperlinkGlyph> e)
 		{
@@ -174,7 +172,15 @@ namespace gitter.Framework
 			_cachedRect = rect;
 		}
 
-		private int HitTest(RectangleF rect, Point p)
+		public Hyperlink HitTest(RectangleF rect, Point p)
+		{
+			var index = HitTestCore(rect, p);
+			return index >= 0
+				? _glyphs[index].Hyperlink
+				: default;
+		}
+
+		private int HitTestCore(RectangleF rect, Point p)
 		{
 			p.X += (int)(_cachedRect.X - rect.X);
 			p.Y += (int)(_cachedRect.Y - rect.Y);
@@ -191,7 +197,7 @@ namespace gitter.Framework
 
 		public void OnMouseMove(RectangleF rect, Point p)
 		{
-			var index = HitTest(rect, p);
+			var index = HitTestCore(rect, p);
 			if(index != -1)
 			{
 				_hoveredLink.Track(index, _glyphs[index]);
@@ -204,7 +210,7 @@ namespace gitter.Framework
 
 		public void OnMouseDown(RectangleF rect, Point p)
 		{
-			var index = HitTest(rect, p);
+			var index = HitTestCore(rect, p);
 			if(index != -1) _glyphs[index].Hyperlink.Navigate();
 		}
 

@@ -449,9 +449,7 @@ namespace gitter.Git
 		/// <param name="item">Item to create event args for.</param>
 		/// <returns>Created event args.</returns>
 		protected override BranchEventArgs CreateEventArgs(Branch item)
-		{
-			return new BranchEventArgs(item);
-		}
+			=> new BranchEventArgs(item);
 
 		#endregion
 	}

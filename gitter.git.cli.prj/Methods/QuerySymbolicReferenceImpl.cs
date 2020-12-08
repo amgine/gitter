@@ -43,12 +43,9 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				return new SymbolicReferenceData(value.Substring(16), ReferenceType.LocalBranch);
 			}
-			else
+			if(GitUtils.IsValidSHA1(value))
 			{
-				if(GitUtils.IsValidSHA1(value))
-				{
-					return new SymbolicReferenceData(value, ReferenceType.Revision);
-				}
+				return new SymbolicReferenceData(value, ReferenceType.Revision);
 			}
 			return new SymbolicReferenceData(null, ReferenceType.None);
 		}

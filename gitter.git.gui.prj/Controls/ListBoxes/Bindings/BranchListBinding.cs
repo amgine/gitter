@@ -37,13 +37,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		protected override Comparison<CustomListBoxItem> GetComparison()
-		{
-			return BranchListItem.CompareByName;
-		}
+			=> BranchListItem.CompareByName;
 
 		protected override CustomListBoxItem<Branch> RepresentObject(Branch obj)
-		{
-			return new BranchListItem(obj);
-		}
+			=> new BranchListItem(obj);
 	}
 }

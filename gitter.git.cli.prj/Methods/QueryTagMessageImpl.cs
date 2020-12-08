@@ -99,7 +99,8 @@ namespace gitter.Git.AccessLayer.CLI
 			return ParseTagMessage(command, output);
 		}
 
-		public async Task<string> InvokeAsync(QueryTagMessageParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<string> InvokeAsync(QueryTagMessageParameters parameters,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 

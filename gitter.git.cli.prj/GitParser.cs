@@ -335,18 +335,16 @@ namespace gitter.Git.AccessLayer.CLI
 			};
 		}
 
-		protected DateTime ReadUnixTimestampLine()
+		protected DateTimeOffset ReadUnixTimestampLine()
 		{
 			var timestampStr = ReadLine();
-			long timestamp;
-			if(string.IsNullOrWhiteSpace(timestampStr) || !long.TryParse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture, out timestamp))
+			if(string.IsNullOrWhiteSpace(timestampStr) || !long.TryParse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture, out var timestamp))
 			{
-				return GitConstants.UnixEraStart;
+				return GitConstants.UnixEraStartOffset;
 			}
 			else
 			{
-				var date = GitConstants.UnixEraStart.AddSeconds(timestamp).ToLocalTime();
-				return date;
+				return GitConstants.UnixEraStartOffset.AddSeconds(timestamp).ToLocalTime();
 			}
 		}
 

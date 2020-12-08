@@ -50,10 +50,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Finalizes an instance of the <see cref="DiffSourceBase"/> class.</summary>
-		~DiffSourceBase()
-		{
-			Dispose(false);
-		}
+		~DiffSourceBase() => Dispose(disposing: false);
 
 		#endregion
 
@@ -88,29 +85,16 @@ namespace gitter.Git
 			return GetDiffCore(options);
 		}
 
-		public async Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 			Verify.State.IsFalse(IsDisposed, "Object is disposed.");
 
-			if(progress != null)
-			{
-				progress.Report(new OperationProgress(Resources.StrLoadingDiff.AddEllipsis()));
-				var result = await GetDiffCoreAsync(options, progress, cancellationToken);
-				progress.Report(OperationProgress.Completed);
-				return result;
-				//return GetDiffCoreAsync(options, progress, cancellationToken)
-				//	.ContinueWith(t =>
-				//		{
-				//			progress.Report(OperationProgress.Completed);
-				//			return TaskUtility.UnwrapResult(t);
-				//		},
-				//		cancellationToken, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
-			}
-			else
-			{
-				return await GetDiffCoreAsync(options, progress, cancellationToken);
-			}
+			progress?.Report(new OperationProgress(Resources.StrLoadingDiff.AddEllipsis()));
+			var result = await GetDiffCoreAsync(options, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			progress?.Report(OperationProgress.Completed);
+			return result;
 		}
 
 		/// <summary>Returns a <see cref="System.String" /> that represents this instance.</summary>

@@ -58,7 +58,7 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		public async Task<IList<ReferencePushResult>> InvokeAsync(PushParameters parameters,
-			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 

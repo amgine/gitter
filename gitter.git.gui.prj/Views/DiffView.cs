@@ -84,7 +84,7 @@ namespace gitter.Git.Gui.Views
 
 		public IDiffSource DiffSource
 		{
-			get { return _diffSource; }
+			get => _diffSource;
 			private set
 			{
 				if(_diffSource != value)
@@ -115,7 +115,7 @@ namespace gitter.Git.Gui.Views
 
 		public DiffViewMode ViewMode
 		{
-			get { return _viewMode; }
+			get => _viewMode;
 			set
 			{
 				if(_viewMode != value)
@@ -208,20 +208,14 @@ namespace gitter.Git.Gui.Views
 
 		private AsyncDataBinding<Diff> DiffBinding
 		{
-			get { return _diffBinding; }
+			get => _diffBinding;
 			set
 			{
 				if(_diffBinding != value)
 				{
-					if(_diffBinding != null)
-					{
-						_diffBinding.Dispose();
-					}
+					_diffBinding?.Dispose();
 					_diffBinding = value;
-					if(_diffBinding != null)
-					{
-						_diffBinding.ReloadData();
-					}
+					_diffBinding?.ReloadData();
 				}
 			}
 		}
@@ -352,30 +346,13 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public DiffOptions DiffOptions
-		{
-			get
-			{
-				if(_options == null)
-				{
-					_options = new DiffOptions();
-				}
-				return _options;
-			}
-		}
+		public DiffOptions DiffOptions => _options ??= new DiffOptions();
 
 		private void UpdateText()
 		{
 			if(Guid != Guids.ContextualDiffViewGuid)
 			{
-				if(DiffSource != null)
-				{
-					Text = DiffSource.ToString();
-				}
-				else
-				{
-					Text = Resources.StrDiff;
-				}
+				Text = DiffSource?.ToString() ?? Resources.StrDiff;
 			}
 			else
 			{

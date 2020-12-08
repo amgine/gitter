@@ -110,7 +110,7 @@ namespace gitter.Git
 		/// <summary>Object name.</summary>
 		public string Name
 		{
-			get { return _name; }
+			get => _name;
 			set
 			{
 				Verify.Argument.IsNeitherNullNorWhitespace(value, nameof(value));

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,10 +21,12 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
+	using gitter.Framework.Services;
 
 	/// <summary><see cref="FlowPanel"/> which displays basic commit information: author, hash, date, subject, etc.</summary>
 	public sealed class RevisionHeaderPanel : FlowPanel
@@ -39,7 +41,6 @@ namespace gitter.Git.Gui.Controls
 
 		private RevisionHeaderContent _content;
 		private Revision _revision;
-		private bool _isSelectable;
 		private bool _isSelected;
 
 		#endregion
@@ -49,7 +50,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Create <see cref="RevisionHeaderPanel"/>.</summary>
 		public RevisionHeaderPanel()
 		{
-			_content = new RevisionHeaderContent();
+			_content = new RevisionHeaderContent(AdditionalHyperlinkExtractors);
 			_content.Invalidated += OnContentInvalidated;
 			_content.SizeChanged += OnContentSizeChanged;
 			_content.ContextMenuRequested += OnContentContextMenuRequested;
@@ -62,20 +63,14 @@ namespace gitter.Git.Gui.Controls
 		{
 			int x = e.Position.X;
 			int y = e.Position.Y;
-			if(IsSelectable)
-			{
-				x += SelectionMargin;
-			}
+			if(IsSelectable) x += SelectionMargin;
 			ShowContextMenu(e.ContextMenu, x, y);
 		}
 
 		private void OnContentInvalidated(object sender, ContentInvalidatedEventArgs e)
 		{
 			var bounds = e.Bounds;
-			if(IsSelectable)
-			{
-				bounds.X += SelectionMargin;
-			}
+			if(IsSelectable) bounds.X += SelectionMargin;
 			InvalidateSafe(bounds);
 		}
 
@@ -112,15 +107,11 @@ namespace gitter.Git.Gui.Controls
 			_content.OnMouseLeave();
 		}
 
-		public bool IsSelectable
-		{
-			get { return _isSelectable; }
-			set { _isSelectable = value; }
-		}
+		public bool IsSelectable { get; set; }
 
 		public bool IsSelected
 		{
-			get { return _isSelected; }
+			get => _isSelected;
 			set
 			{
 				if(_isSelected != value)
@@ -131,13 +122,9 @@ namespace gitter.Git.Gui.Controls
 					{
 						foreach(var p in FlowControl.Panels)
 						{
-							if(p != this)
+							if(p != this && p is RevisionHeaderPanel rhp)
 							{
-								var rhp = p as RevisionHeaderPanel;
-								if(rhp != null)
-								{
-									rhp.IsSelected = false;
-								}
+								rhp.IsSelected = false;
 							}
 						}
 					}
@@ -148,7 +135,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Displayed <see cref="T:gitter.Git.Revision"/>.</summary>
 		public Revision Revision
 		{
-			get { return _revision; }
+			get => _revision;
 			set
 			{
 				if(_revision != value)
@@ -161,6 +148,8 @@ namespace gitter.Git.Gui.Controls
 				}
 			}
 		}
+
+		public List<IHyperlinkExtractor> AdditionalHyperlinkExtractors { get; } = new();
 
 		protected override void OnFlowControlAttached()
 		{

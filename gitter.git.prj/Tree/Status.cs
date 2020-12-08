@@ -573,7 +573,7 @@ namespace gitter.Git
 			int id = 0;
 			foreach(var item in items)
 			{
-				Verify.Argument.IsTrue(item.Repository == Repository, "items",
+				Verify.Argument.IsTrue(item.Repository == Repository, nameof(items),
 					Resources.ExcAllObjectsMustBeHandledByThisRepository.UseAsFormat("items"));
 				patterns[id++] = item.RelativePath;
 			}

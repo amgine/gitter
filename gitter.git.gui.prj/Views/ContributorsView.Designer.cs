@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this._lstUsers = new gitter.Git.Gui.Controls.UsresListBox();
+			this._lstUsers = new gitter.Git.Gui.Controls.UsersListBox();
 			this.SuspendLayout();
 			// 
 			// _lstUsers
@@ -54,6 +54,6 @@
 
 		#endregion
 
-		private gitter.Git.Gui.Controls.UsresListBox _lstUsers;
+		private gitter.Git.Gui.Controls.UsersListBox _lstUsers;
 	}
 }

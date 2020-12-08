@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -57,11 +57,9 @@ namespace gitter.Framework
 		public bool AdministratorRightsRequired => false;
 
 		public Action GetEnableAction(bool enable)
-		{
-			return enable ?
+			=> enable ?
 				(Action)GlobalOptions.IntegrateInExplorerContextMenu :
 				(Action)GlobalOptions.RemoveFromExplorerContextMenu;
-		}
 
 		bool IIntegrationFeature.HasConfiguration => false;
 

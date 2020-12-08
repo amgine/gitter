@@ -45,9 +45,7 @@ namespace gitter.Git
 		#endregion
 
 		protected override SubmoduleEventArgs CreateEventArgs(Submodule item)
-		{
-			return new SubmoduleEventArgs(item);
-		}
+			=> new SubmoduleEventArgs(item);
 
 		private UpdateSubmoduleParameters GetUpdateParameters()
 			=> new UpdateSubmoduleParameters
@@ -81,7 +79,9 @@ namespace gitter.Git
 			Repository.Accessor.SyncSubmodule.Invoke(parameters);
 		}
 
-		public async Task SyncAsync(bool recursive = true, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		public async Task SyncAsync(bool recursive = true,
+			IProgress<OperationProgress> progress = default,
+			CancellationToken cancellationToken = default)
 		{
 			progress?.Report(new OperationProgress(Resources.StrsSynchronizingSubmodules.AddEllipsis()));
 			var parameters = GetSyncParameters(recursive);
@@ -182,21 +182,13 @@ namespace gitter.Git
 			{
 				foreach(var s in ObjectStorage.Values)
 				{
-					if(s.Url == url)
-					{
-						return s;
-					}
+					if(s.Url == url) return s;
 				}
 			}
 			return null;
 		}
 
-		public Submodule Create(string path, string url)
-		{
-			return Create(path, url, null);
-		}
-
-		public Submodule Create(string path, string url, string branch)
+		public Submodule Create(string path, string url, string branch = default)
 		{
 			Verify.Argument.IsNotNull(path, nameof(path));
 			Verify.Argument.IsNotNull(url, nameof(url));
@@ -235,10 +227,10 @@ namespace gitter.Git
 			bool skipUpdate = false;
 			if(File.Exists(cfg))
 			{
-				ConfigurationFile cfgFile = null;
+				var cfgFile = default(ConfigurationFile);
 				try
 				{
-					cfgFile = new ConfigurationFile(Repository, GitConstants.SubmodulesConfigFile, true);
+					cfgFile = new ConfigurationFile(Repository, GitConstants.SubmodulesConfigFile, load: true);
 				}
 				catch(Exception exc) when(!exc.IsCritical())
 				{

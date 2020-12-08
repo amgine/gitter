@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,20 +28,20 @@ namespace gitter.Framework.Services
 
 	public sealed class MessageBoxButton
 	{
-		public static readonly MessageBoxButton Yes		= new MessageBoxButton(DialogResult.Yes,	0, Resources.StrYes,	true);
-		public static readonly MessageBoxButton No		= new MessageBoxButton(DialogResult.No,		0, Resources.StrNo,		false);
-		public static readonly MessageBoxButton Ok		= new MessageBoxButton(DialogResult.OK,		0, Resources.StrOk,		true);
-		public static readonly MessageBoxButton Close	= new MessageBoxButton(DialogResult.OK,		0, Resources.StrClose,	true);
-		public static readonly MessageBoxButton Cancel	= new MessageBoxButton(DialogResult.Cancel,	0, Resources.StrCancel,	false);
-		public static readonly MessageBoxButton Abort	= new MessageBoxButton(DialogResult.Abort,	0, Resources.StrAbort,	false);
-		public static readonly MessageBoxButton Retry	= new MessageBoxButton(DialogResult.Retry,	0, Resources.StrRetry,	true);
-		public static readonly MessageBoxButton Ignore	= new MessageBoxButton(DialogResult.Ignore,	0, Resources.StrIgnore,	false);
+		public static readonly MessageBoxButton Yes		= new(DialogResult.Yes,	0, Resources.StrYes,	true);
+		public static readonly MessageBoxButton No		= new(DialogResult.No,		0, Resources.StrNo,		false);
+		public static readonly MessageBoxButton Ok		= new(DialogResult.OK,		0, Resources.StrOk,		true);
+		public static readonly MessageBoxButton Close	= new(DialogResult.OK,		0, Resources.StrClose,	true);
+		public static readonly MessageBoxButton Cancel	= new(DialogResult.Cancel,	0, Resources.StrCancel,	false);
+		public static readonly MessageBoxButton Abort	= new(DialogResult.Abort,	0, Resources.StrAbort,	false);
+		public static readonly MessageBoxButton Retry	= new(DialogResult.Retry,	0, Resources.StrRetry,	true);
+		public static readonly MessageBoxButton Ignore	= new(DialogResult.Ignore,	0, Resources.StrIgnore,	false);
 
-		public static readonly IEnumerable<MessageBoxButton> RetryCancel		= new[] { Retry, Cancel };
-		public static readonly IEnumerable<MessageBoxButton> AbortRetryIgnore	= new[] { Abort, Retry, Ignore };
-		public static readonly IEnumerable<MessageBoxButton> YesNo				= new[] { Yes, No };
-		public static readonly IEnumerable<MessageBoxButton> YesNoCancel		= new[] { Yes, No, Cancel };
-		public static readonly IEnumerable<MessageBoxButton> OkCancel			= new[] { Ok, Cancel };
+		public static readonly IEnumerable<MessageBoxButton> RetryCancel      = new[] { Retry, Cancel };
+		public static readonly IEnumerable<MessageBoxButton> AbortRetryIgnore = new[] { Abort, Retry, Ignore };
+		public static readonly IEnumerable<MessageBoxButton> YesNo            = new[] { Yes, No };
+		public static readonly IEnumerable<MessageBoxButton> YesNoCancel      = new[] { Yes, No, Cancel };
+		public static readonly IEnumerable<MessageBoxButton> OkCancel         = new[] { Ok, Cancel };
 
 		public static MessageBoxButton GetOk(string label)
 		{
@@ -65,62 +65,32 @@ namespace gitter.Framework.Services
 
 		public static IEnumerable<MessageBoxButton> GetButtons(MessageBoxButtons buttons)
 		{
-			switch(buttons)
+			return buttons switch
 			{
-				case MessageBoxButtons.OK:
-					return new MessageBoxButton[] { Ok };
-				case MessageBoxButtons.OKCancel:
-					return new MessageBoxButton[] { Ok, Cancel };
-				case MessageBoxButtons.YesNo:
-					return new MessageBoxButton[] { Yes, No };
-				case MessageBoxButtons.YesNoCancel:
-					return new MessageBoxButton[] { Yes, No, Cancel };
-				case MessageBoxButtons.AbortRetryIgnore:
-					return new MessageBoxButton[] { Abort, Retry, Ignore };
-				case MessageBoxButtons.RetryCancel:
-					return new MessageBoxButton[] { Retry, Cancel };
-				default:
-					throw new ArgumentException(
-						"Unknown MessageBoxButtons value: {0}".UseAsFormat(buttons),
-						"buttons");
-			}
+				MessageBoxButtons.OK               => new[] { Ok },
+				MessageBoxButtons.OKCancel         => new[] { Ok, Cancel },
+				MessageBoxButtons.YesNo            => new[] { Yes, No },
+				MessageBoxButtons.YesNoCancel      => new[] { Yes, No, Cancel },
+				MessageBoxButtons.AbortRetryIgnore => new[] { Abort, Retry, Ignore },
+				MessageBoxButtons.RetryCancel      => new[] { Retry, Cancel },
+				_ => throw new ArgumentException($"Unknown MessageBoxButtons value: {buttons}", nameof(buttons)),
+			};
 		}
-
-		#region Data
-
-		private readonly DialogResult _dialogResult;
-		private readonly int _resultOption;
-		private readonly string _displayLabel;
-		private readonly bool _isDefault;
-
-		#endregion
 
 		public MessageBoxButton(DialogResult dialogResult, int resultOption, string displayLabel, bool isDefault)
 		{
-			_dialogResult = dialogResult;
-			_resultOption = resultOption;
-			_displayLabel = displayLabel;
-			_isDefault = isDefault;
+			DialogResult = dialogResult;
+			ResultOption = resultOption;
+			DisplayLabel = displayLabel;
+			IsDefault    = isDefault;
 		}
 
-		public string DisplayLabel
-		{
-			get { return _displayLabel; }
-		}
+		public string DisplayLabel { get; }
 
-		public int ResultOption
-		{
-			get { return _resultOption; }
-		}
+		public int ResultOption { get; }
 
-		public DialogResult DialogResult
-		{
-			get { return _dialogResult; }
-		}
+		public DialogResult DialogResult { get; }
 
-		public bool IsDefault
-		{
-			get { return _isDefault; }
-		}
+		public bool IsDefault { get; }
 	}
 }

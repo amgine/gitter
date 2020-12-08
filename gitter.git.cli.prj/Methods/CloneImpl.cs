@@ -40,7 +40,7 @@ namespace gitter.Git.AccessLayer.CLI
 		public CloneImpl(ICommandExecutor commandExecutor, Func<CloneRepositoryParameters, bool, Command> commandFactory)
 		{
 			_commandExecutor = commandExecutor;
-			_commandFactory = commandFactory;
+			_commandFactory  = commandFactory;
 		}
 
 		/// <summary>Clone existing repository.</summary>
@@ -74,7 +74,8 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <summary>Clone existing repository.</summary>
 		/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-		public async Task InvokeAsync(CloneRepositoryParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task InvokeAsync(CloneRepositoryParameters parameters,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 

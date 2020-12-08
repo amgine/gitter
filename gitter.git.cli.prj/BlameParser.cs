@@ -95,7 +95,7 @@ namespace gitter.Git.AccessLayer.CLI
 			return ReadLine();
 		}
 
-		private DateTime ReadDateValue(string header)
+		private DateTimeOffset ReadDateValue(string header)
 		{
 			Skip(header.Length + 1);
 			return ReadUnixTimestampLine();

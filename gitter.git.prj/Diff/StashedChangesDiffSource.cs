@@ -31,46 +31,36 @@ namespace gitter.Git
 
 	sealed class StashedChangesDiffSource : DiffSourceBase, IRevisionDiffSource
 	{
-		private readonly StashedState _stashedState;
 		private readonly IList<string> _paths;
 
 		public StashedChangesDiffSource(StashedState stashedState)
 		{
 			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
-			_stashedState = stashedState;
+			StashedState = stashedState;
 		}
 
 		public StashedChangesDiffSource(StashedState stashedState, IList<string> paths)
 		{
 			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
 
-			_stashedState = stashedState;
+			StashedState = stashedState;
 			_paths = paths;
 		}
 
-		public StashedState StashedState
-		{
-			get { return _stashedState; }
-		}
+		public StashedState StashedState { get; }
 
 		#region Overrides
 
-		public override Repository Repository
-		{
-			get { return _stashedState.Repository; }
-		}
+		public override Repository Repository => StashedState.Repository;
 
-		IRevisionPointer IRevisionDiffSource.Revision
-		{
-			get { return _stashedState; }
-		}
+		IRevisionPointer IRevisionDiffSource.Revision => StashedState;
 
 		private QueryRevisionDiffParameters GetParameters(DiffOptions options)
 		{
 			Assert.IsNotNull(options);
 
-			var parameters = new QueryRevisionDiffParameters(_stashedState.Name)
+			var parameters = new QueryRevisionDiffParameters(StashedState.Name)
 			{
 				Paths = _paths,
 			};
@@ -101,9 +91,7 @@ namespace gitter.Git
 		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
 		/// </returns>
 		public override int GetHashCode()
-		{
-			return _stashedState.GetHashCode();
-		}
+			=> StashedState.GetHashCode();
 
 		/// <summary>
 		/// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
@@ -114,10 +102,8 @@ namespace gitter.Git
 		/// </returns>
 		public override bool Equals(object obj)
 		{
-			if(obj == null) return false;
-			var ds = obj as StashedChangesDiffSource;
-			if(ds == null) return false;
-			return _stashedState == ds._stashedState;
+			if(obj is not StashedChangesDiffSource ds) return false;
+			return StashedState == ds.StashedState;
 		}
 
 		/// <summary>
@@ -127,9 +113,7 @@ namespace gitter.Git
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
 		public override string ToString()
-		{
-			return "stash show -p " + _stashedState.Name;
-		}
+			=> "stash show -p " + StashedState.Name;
 
 		#endregion
 	}

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -42,17 +42,12 @@ namespace gitter.Framework.Controls
 
 		public CustomScrollBarAdapter(Orientation orientation, CustomScrollBarRenderer renderer)
 		{
-			switch(orientation)
+			_scrollBar = orientation switch
 			{
-				case Orientation.Vertical:
-					_scrollBar = new CustomVScrollbar() { Renderer = renderer };
-					break;
-				case Orientation.Horizontal:
-					_scrollBar = new CustomHScrollbar() { Renderer = renderer };
-					break;
-				default:
-					throw new ArgumentException("orientation");
-			}
+				Orientation.Vertical   => new CustomVScrollbar { Renderer = renderer },
+				Orientation.Horizontal => new CustomHScrollbar { Renderer = renderer },
+				_ => throw new ArgumentException("Invalid orientation value.", nameof(orientation)),
+			};
 			_scrollBar.Scroll += OnScrollBarScroll;
 			_scrollBar.ValueChanged += OnScrollBarValueChanged;
 		}
@@ -62,69 +57,54 @@ namespace gitter.Framework.Controls
 		#region Event Handlers
 
 		private void OnScrollBarScroll(object sender, ScrollEventArgs e)
-		{
-			var handler = Scroll;
-			if(handler != null) handler(this, e);
-		}
+			=> Scroll?.Invoke(this, e);
 
 		private void OnScrollBarValueChanged(object sender, EventArgs e)
-		{
-			var handler = ValueChanged;
-			if(handler != null) handler(this, e);
-		}
+			=> ValueChanged?.Invoke(this, e);
 
 		#endregion
 
 		#region IScrollBarWidget Members
 
-		public Control Control
-		{
-			get { return _scrollBar; }
-		}
+		public Control Control => _scrollBar;
 
-		public Orientation Orientation
-		{
-			get { return _scrollBar.Orientation; }
-		}
+		public Orientation Orientation => _scrollBar.Orientation;
 
 		public int Value
 		{
-			get { return _scrollBar.Value; }
-			set { _scrollBar.Value = value; }
+			get => _scrollBar.Value;
+			set => _scrollBar.Value = value;
 		}
 
 		public int Minimum
 		{
-			get { return _scrollBar.Minimum; }
-			set { _scrollBar.Minimum = value; }
+			get => _scrollBar.Minimum;
+			set => _scrollBar.Minimum = value;
 		}
 
 		public int Maximum
 		{
-			get { return _scrollBar.Maximum; }
-			set { _scrollBar.Maximum = value; }
+			get => _scrollBar.Maximum;
+			set => _scrollBar.Maximum = value;
 		}
 
 		public int SmallChange
 		{
-			get { return _scrollBar.SmallChange; }
-			set { _scrollBar.SmallChange = value; }
+			get => _scrollBar.SmallChange;
+			set => _scrollBar.SmallChange = value;
 		}
 
 		public int LargeChange
 		{
-			get { return _scrollBar.LargeChange; }
-			set { _scrollBar.LargeChange = value; }
+			get => _scrollBar.LargeChange;
+			set => _scrollBar.LargeChange = value;
 		}
 
 		#endregion
 
 		#region IDisposable Members
 
-		public void Dispose()
-		{
-			_scrollBar.Dispose();
-		}
+		public void Dispose() => _scrollBar.Dispose();
 
 		#endregion
 	}

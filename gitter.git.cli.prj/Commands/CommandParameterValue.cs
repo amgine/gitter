@@ -26,41 +26,20 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Command parameter (param-name = value).</summary>
 	public class CommandParameterValue : ICommandArgument
 	{
-		#region Constants
-
 		protected const char DefaultSeparator = '=';
 
-		#endregion
-
-		#region .ctor
-
-		public CommandParameterValue(string name, string value)
-		{
-			Name      = name;
-			Separator = DefaultSeparator;
-			Value     = value;
-		}
-
-		public CommandParameterValue(string name, string value, char separator)
+		public CommandParameterValue(string name, string value, char separator = DefaultSeparator)
 		{
 			Name      = name;
 			Separator = separator;
 			Value     = value;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public string Name { get; }
 
 		public char Separator { get; }
 
 		public string Value { get; }
-
-		#endregion
-
-		#region Methods
 
 		public void ToString(StringBuilder stringBuilder)
 		{
@@ -71,12 +50,6 @@ namespace gitter.Git.AccessLayer.CLI
 			stringBuilder.Append(Value);
 		}
 
-		#endregion
-
-		#region Overrides
-
 		public override string ToString() => Name + Separator + Value;
-
-		#endregion
 	}
 }

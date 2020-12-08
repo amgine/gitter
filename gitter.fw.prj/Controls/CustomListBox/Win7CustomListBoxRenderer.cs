@@ -521,7 +521,7 @@ namespace gitter.Framework.Controls
 					}
 
 					item.PaintSubItem(new SubItemPaintEventArgs(paintEventArgs.Graphics, clip, subrect, paintEventArgs.Index,
-						paintEventArgs.State, hoveredPart, paintEventArgs.IsHostControlFocused, i, column));
+						paintEventArgs.State, hoveredPart, paintEventArgs.IsHostControlFocused, item, i, column));
 				}
 			}
 		}

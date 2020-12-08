@@ -62,7 +62,7 @@ namespace gitter.Git.Gui.Controls
 
 		public BlameOptions BlameOptions
 		{
-			get { return _blameOptions; }
+			get => _blameOptions;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));

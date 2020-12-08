@@ -28,18 +28,10 @@ namespace gitter.Git
 
 	public interface IBlameSource
 	{
-		#region Properties
-
 		Repository Repository { get; }
-
-		#endregion
-
-		#region Methods
 
 		BlameFile GetBlame(BlameOptions options);
 
-		Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
-
-		#endregion
+		Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 	}
 }

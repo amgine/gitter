@@ -224,6 +224,7 @@ namespace gitter.Framework.Controls
 						itemState,
 						0,
 						Focused,
+						item,
 						0,
 						column);
 					item.PaintSubItem(args);
@@ -238,6 +239,7 @@ namespace gitter.Framework.Controls
 					itemState,
 					0,
 					Focused,
+					item,
 					0,
 					DropDownControl.Columns[0]);
 				item.PaintSubItem(args);

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -87,32 +87,14 @@ namespace gitter.Framework.Controls
 
 		public Font Font
 		{
-			get
-			{
-				if(_font != null)
-				{
-					return _font;
-				}
-				if(HostControl != null)
-				{
-					return HostControl.Font;
-				}
-				return GitterApplication.FontManager.UIFont;
-			}
-			set { _font = value; }
+			get => _font ?? HostControl?.Font ?? GitterApplication.FontManager.UIFont;
+			set => _font = value;
 		}
 
 		public ProcessOverlayRenderer Renderer
 		{
-			get
-			{
-				if(_renderer != null)
-				{
-					return _renderer;
-				}
-				return ProcessOverlayRenderer.Default;
-			}
-			set { _renderer = value; }
+			get => _renderer ?? ProcessOverlayRenderer.Default;
+			set => _renderer = value;
 		}
 
 		public int Minimum { get; set; }
@@ -195,7 +177,7 @@ namespace gitter.Framework.Controls
 
 		public string ActionName
 		{
-			get { return Title; }
+			get => Title;
 			set
 			{
 				Title = value;

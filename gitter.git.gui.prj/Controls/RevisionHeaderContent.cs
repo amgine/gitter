@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,6 +28,7 @@ namespace gitter.Git.Gui
 	using System.Windows.Forms;
 
 	using gitter.Framework;
+	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
 
 	using gitter.Git.Gui.Controls;
@@ -106,7 +107,7 @@ namespace gitter.Git.Gui
 
 			bool IsAvailableFor(Revision revision);
 
-			ContextMenuStrip CreateContextMenu(Revision revision);
+			ContextMenuStrip CreateContextMenu(Revision revision, Rectangle rect, int x, int y);
 
 			Size Measure(Graphics graphics, Revision revision, int width);
 
@@ -140,23 +141,16 @@ namespace gitter.Git.Gui
 
 			public abstract Element Element { get; }
 
-			protected HyperlinkExtractor GetHyperlinkExtractor(Revision revision)
-			{
-				var bugtrackerUrl = revision.Repository.Configuration.TryGetParameterValue("gitter.bugtracker.url");
-				var issueIdRegex = revision.Repository.Configuration.TryGetParameterValue("gitter.bugtracker.issueid");
-				if(bugtrackerUrl != null && issueIdRegex != null)
-				{
-					return new HyperlinkExtractor(issueIdRegex, bugtrackerUrl);
-				}
-				else
-				{
-					return new HyperlinkExtractor();
-				}
-			}
+			protected IHyperlinkExtractor GetHyperlinkExtractor(Revision revision)
+				=> Owner.GetHyperlinkExtractor(revision);
 
 			public virtual bool IsAvailableFor(Revision revision) => true;
 
-			public virtual ContextMenuStrip CreateContextMenu(Revision revision) => null;
+			public virtual ContextMenuStrip CreateContextMenu(Revision revision)
+				=> default;
+
+			public virtual ContextMenuStrip CreateContextMenu(Revision revision, Rectangle rect, int x, int y)
+				=> CreateContextMenu(revision);
 
 			public virtual Size Measure(Graphics graphics, Revision revision, int width)
 			{
@@ -551,8 +545,13 @@ namespace gitter.Git.Gui
 
 			public override Element Element => Element.Subject;
 
-			public override ContextMenuStrip CreateContextMenu(Revision revision)
+			public override ContextMenuStrip CreateContextMenu(Revision revision, Rectangle bounds, int x, int y)
 			{
+				if(_text != null)
+				{
+					var link = _text.HitTest(GetContentRectangle(bounds), new Point(x, y));
+					if(link != null) return new HyperlinkContextMenu(link);
+				}
 				var menu = new ContextMenuStrip();
 				menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
 					revision.Subject, false));
@@ -607,9 +606,14 @@ namespace gitter.Git.Gui
 
 			public override void MouseDown(Rectangle rect, MouseButtons button, int x, int y)
 			{
-				if(_text != null && button == MouseButtons.Left)
+				if(_text != null)
 				{
-					_text.OnMouseDown(GetContentRectangle(rect), new Point(x, y));
+					switch(button)
+					{
+						case MouseButtons.Left:
+							_text.OnMouseDown(GetContentRectangle(rect), new Point(x, y));
+							break;
+					}
 				}
 			}
 		}
@@ -630,8 +634,13 @@ namespace gitter.Git.Gui
 
 			public override Element Element => Element.Body;
 
-			public override ContextMenuStrip CreateContextMenu(Revision revision)
+			public override ContextMenuStrip CreateContextMenu(Revision revision, Rectangle bounds, int x, int y)
 			{
+				if(_text != null)
+				{
+					var link = _text.HitTest(GetContentRectangle(bounds), new Point(x, y));
+					if(link != null) return new HyperlinkContextMenu(link);
+				}
 				var menu = new ContextMenuStrip();
 				menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
 					revision.Body, false));
@@ -795,22 +804,13 @@ namespace gitter.Git.Gui
 							var size = GitterApplication.TextRenderer.MeasureText(
 								graphics, name, font, int.MaxValue, ContentFormat);
 							var r = new Rectangle(r2.X + offset, r2.Y, size.Width + 6, DefaultElementHeight - 1);
-							Brush brush;
-							switch(reference.Type)
+							var brush = reference.Type switch
 							{
-								case ReferenceType.LocalBranch:
-									brush = localBrush;
-									break;
-								case ReferenceType.RemoteBranch:
-									brush = remoteBrush;
-									break;
-								case ReferenceType.Tag:
-									brush = tagBrush;
-									break;
-								default:
-									brush = Brushes.WhiteSmoke;
-									break;
-							}
+								ReferenceType.LocalBranch  => localBrush,
+								ReferenceType.RemoteBranch => remoteBrush,
+								ReferenceType.Tag          => tagBrush,
+								_ => Brushes.WhiteSmoke,
+							};
 							graphics.FillRoundedRectangle(brush, Pens.Black, r, Radius);
 							var textRect = new Rectangle(r2.X + offset + 3, r2.Y, size.Width + 5, size.Height);
 							GitterApplication.TextRenderer.DrawText(
@@ -830,6 +830,7 @@ namespace gitter.Git.Gui
 		private readonly IRevisionHeaderElement[] _elements;
 		private readonly Dictionary<Element, Size> _sizes;
 		private readonly TrackingService _hoverElement;
+		private readonly IEnumerable<IHyperlinkExtractor> _additionalHyperlinkExtractors;
 		private int _measuredWidth;
 		private int _measuredHeight;
 		private Cursor _cursor;
@@ -867,8 +868,9 @@ namespace gitter.Git.Gui
 
 		#endregion
 
-		public RevisionHeaderContent()
+		public RevisionHeaderContent(IEnumerable<IHyperlinkExtractor> additionalHyperlinkExtractors = null)
 		{
+			_additionalHyperlinkExtractors = additionalHyperlinkExtractors;
 			_elements = new IRevisionHeaderElement[]
 			{
 				new HashElement(this),
@@ -882,10 +884,8 @@ namespace gitter.Git.Gui
 			};
 			foreach(var e in _elements)
 			{
-				e.InvalidateRequired +=
-					(sender, eargs) => OnSizeChanged();
-				e.CursorChangeRequired +=
-					(sender, eargs) => Cursor = eargs.Cursor;
+				e.InvalidateRequired   += (sender, eargs) => OnSizeChanged();
+				e.CursorChangeRequired += (sender, eargs) => Cursor = eargs.Cursor;
 			}
 			_cursor = Cursors.Default;
 			_sizes = new Dictionary<Element, Size>(_elements.Length);
@@ -894,7 +894,7 @@ namespace gitter.Git.Gui
 
 		public Revision Revision
 		{
-			get { return _revision; }
+			get => _revision;
 			set
 			{
 				if(_revision != value)
@@ -915,9 +915,28 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		private IHyperlinkExtractor GetHyperlinkExtractor(Revision revision)
+		{
+			var bugtrackerUrl = revision.Repository.Configuration.TryGetParameterValue("gitter.bugtracker.url");
+			var issueIdRegex  = revision.Repository.Configuration.TryGetParameterValue("gitter.bugtracker.issueid");
+			var extractors    = new List<IHyperlinkExtractor>();
+			extractors.Add(new AbsoluteUrlHyperlinkExtractor());
+			if(bugtrackerUrl != null && issueIdRegex != null)
+			{
+				extractors.Add(new RegexHyperlinkExtractor(issueIdRegex, bugtrackerUrl));
+			}
+			if(_additionalHyperlinkExtractors != null)
+			{
+				extractors.AddRange(_additionalHyperlinkExtractors);
+			}
+			return extractors.Count == 1
+				? extractors[0]
+				: new HyperlinkExtractor(extractors);
+		}
+
 		public Cursor Cursor
 		{
-			get { return _cursor; }
+			get => _cursor;
 			set
 			{
 				if(_cursor != value)
@@ -930,21 +949,8 @@ namespace gitter.Git.Gui
 
 		public IGitterStyle Style
 		{
-			get
-			{
-				if(_style != null)
-				{
-					return _style;
-				}
-				else
-				{
-					return GitterApplication.Style;
-				}
-			}
-			set
-			{
-				_style = value;
-			}
+			get => _style ?? GitterApplication.Style;
+			set => _style = value;
 		}
 
 		private void OnAuthorAvatarUpdated(object sender, EventArgs e)
@@ -1054,7 +1060,7 @@ namespace gitter.Git.Gui
 				_elements[index].MouseDown(bounds, button, x, y);
 				if(button == MouseButtons.Right)
 				{
-					var menu = _elements[index].CreateContextMenu(_revision);
+					var menu = _elements[index].CreateContextMenu(_revision, bounds, x, y);
 					if(menu != null)
 					{
 						OnContextMenuRequested(menu, new Point(x, y));

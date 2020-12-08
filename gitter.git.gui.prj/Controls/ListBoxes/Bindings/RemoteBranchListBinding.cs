@@ -37,13 +37,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		protected override Comparison<CustomListBoxItem> GetComparison()
-		{
-			return RemoteBranchListItem.CompareByName;
-		}
+			=> RemoteBranchListItem.CompareByName;
 
 		protected override CustomListBoxItem<RemoteBranch> RepresentObject(RemoteBranch obj)
-		{
-			return new RemoteBranchListItem(obj);
-		}
+			=> new RemoteBranchListItem(obj);
 	}
 }

@@ -46,15 +46,11 @@ namespace gitter.Git
 
 		private static readonly Dictionary<string, MergeTool> _tools;
 
-		public static MergeTool GetByName(string name)
-		{
-			return _tools[name];
-		}
+		public static MergeTool GetByName(string name) => _tools[name];
 
 		public static MergeTool GetCreateByName(string name)
 		{
-			MergeTool res;
-			if(!_tools.TryGetValue(name, out res))
+			if(!_tools.TryGetValue(name, out var res))
 			{
 				res = new MergeTool(name);
 			}
@@ -62,9 +58,7 @@ namespace gitter.Git
 		}
 
 		public static IEnumerable<MergeTool> KnownTools
-		{
-			get { return _tools.Values; }
-		}
+			=> _tools.Values;
 
 		public static int KnownToolsCount => _tools.Count;
 

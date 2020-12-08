@@ -108,5 +108,8 @@ namespace gitter.Git
 
 		/// <summary>1 Jan 1970</summary>
 		public static readonly DateTime UnixEraStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+		/// <summary>1 Jan 1970</summary>
+		public static readonly DateTimeOffset UnixEraStartOffset = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
 	}
 }

@@ -26,13 +26,6 @@ namespace gitter.Framework.Controls
 	/// <summary>SubItem paint event args.</summary>
 	public class SubItemPaintEventArgs : ItemPaintEventArgs
 	{
-		#region Data
-
-		private readonly int _columnIndex;
-		private readonly CustomListBoxColumn _column;
-
-		#endregion
-
 		#region .ctor
 
 		/// <summary>Create <see cref="ItemPaintEventArgs"/>.</summary>
@@ -43,61 +36,44 @@ namespace gitter.Framework.Controls
 		/// <param name="state">State of the item being drawn.</param>
 		/// <param name="hoveredPart">Hovered part of the item.</param>
 		/// <param name="hostControlFocused">Host control is focused.</param>
+		/// <param name="item">Item to paint.</param>
 		public SubItemPaintEventArgs(
 			Graphics graphics, Rectangle clipRectangle, Rectangle bounds, int index,
 			ItemState state, int hoveredPart, bool hostControlFocused,
-			int columnIndex, CustomListBoxColumn column)
+			CustomListBoxItem item, int columnIndex, CustomListBoxColumn column)
 			: base(graphics, clipRectangle, bounds, index, state, hoveredPart, hostControlFocused)
 		{
-			_columnIndex = columnIndex;
-			_column = column;
+			Item        = item;
+			ColumnIndex = columnIndex;
+			Column      = column;
 		}
 
 		#endregion
 
 		#region Properties
 
+		public CustomListBoxItem Item { get; }
+
 		/// <summary>Subitem column index.</summary>
-		public int ColumnIndex
-		{
-			get { return _columnIndex; }
-		}
+		public int ColumnIndex { get; }
 
 		/// <summary>Host listbox.</summary>
-		public CustomListBox ListBox
-		{
-			get { return _column.ListBox; }
-		}
+		public CustomListBox ListBox => Column.ListBox;
 
 		/// <summary>Subitem column.</summary>
-		public CustomListBoxColumn Column
-		{
-			get { return _column; }
-		}
+		public CustomListBoxColumn Column { get; }
 
 		/// <summary>Column id.</summary>
-		public int SubItemId
-		{
-			get { return _column.Id; }
-		}
+		public int SubItemId => Column.Id;
 
 		/// <summary>Font for painting subitem.</summary>
-		public Font Font
-		{
-			get { return _column.ContentFont; }
-		}
+		public Font Font => Column.ContentFont;
 
 		/// <summary>Text brush to use.</summary>
-		public Brush Brush
-		{
-			get { return _column.ContentBrush; }
-		}
+		public Brush Brush => Column.ContentBrush;
 
 		/// <summary>Text horizontal alignment.</summary>
-		public StringAlignment Alignment
-		{
-			get { return _column.ContentAlignment; }
-		}
+		public StringAlignment Alignment => Column.ContentAlignment;
 
 		#endregion
 
@@ -107,19 +83,13 @@ namespace gitter.Framework.Controls
 		/// <param name="alignment">Text horizontal alignment</param>
 		/// <returns></returns>
 		protected static StringFormat GetFormat(StringAlignment alignment)
-		{
-			switch(alignment)
+			=> alignment switch
 			{
-				case StringAlignment.Near:
-					return GitterApplication.TextRenderer.LeftAlign;
-				case StringAlignment.Far:
-					return GitterApplication.TextRenderer.RightAlign;
-				case StringAlignment.Center:
-					return GitterApplication.TextRenderer.CenterAlign;
-				default:
-					return GitterApplication.TextRenderer.LeftAlign;
-			}
-		}
+				StringAlignment.Near   => GitterApplication.TextRenderer.LeftAlign,
+				StringAlignment.Far    => GitterApplication.TextRenderer.RightAlign,
+				StringAlignment.Center => GitterApplication.TextRenderer.CenterAlign,
+				_ => GitterApplication.TextRenderer.LeftAlign,
+			};
 
 		/// <summary>Prepare rectangle <paramref name="rect"/> for painting text by applying text content offsets.</summary>
 		/// <param name="rect">Rectangle to prepare.</param>
@@ -136,7 +106,7 @@ namespace gitter.Framework.Controls
 		/// <param name="rect">Rectangle to prepare.</param>
 		public void PrepareTextRectangle(Font font, ref Rectangle rect)
 		{
-			var h1 = GitterApplication.TextRenderer.GetFontHeight(Graphics, _column.ContentFont);
+			var h1 = GitterApplication.TextRenderer.GetFontHeight(Graphics, Column.ContentFont);
 			var h = GitterApplication.TextRenderer.GetFontHeight(Graphics, font);
 			var d = (int)((rect.Height - h1) / 2.0f + h1 - h);
 			rect.Y += d;
@@ -254,7 +224,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(font, nameof(font));
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintTextCore(text, font, brush, GetFormat(_column.ContentAlignment));
+			PaintTextCore(text, font, brush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint text content.</summary>
@@ -270,7 +240,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintTextCore(text, _column.ContentFont, brush, stringFormat);
+			PaintTextCore(text, Column.ContentFont, brush, stringFormat);
 		}
 
 		/// <summary>Paint text content.</summary>
@@ -282,7 +252,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintTextCore(text, _column.ContentFont, brush, GetFormat(stringAlignment));
+			PaintTextCore(text, Column.ContentFont, brush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint text content.</summary>
@@ -293,7 +263,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintTextCore(text, _column.ContentFont, brush, GetFormat(_column.ContentAlignment));
+			PaintTextCore(text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint text content.</summary>
@@ -309,7 +279,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(font, nameof(font));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintTextCore(text, font, _column.ContentBrush, stringFormat);
+			PaintTextCore(text, font, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint text content.</summary>
@@ -320,7 +290,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			PaintTextCore(text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
+			PaintTextCore(text, font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint text content.</summary>
@@ -330,7 +300,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintTextCore(text, _column.ContentFont, _column.ContentBrush, stringFormat);
+			PaintTextCore(text, Column.ContentFont, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint text content.</summary>
@@ -338,14 +308,14 @@ namespace gitter.Framework.Controls
 		/// <param name="stringAlignment"><see cref="StringAlignment"/> to use.</param>
 		public void PaintText(string text, StringAlignment stringAlignment)
 		{
-			PaintTextCore(text, _column.ContentFont, _column.ContentBrush, GetFormat(stringAlignment));
+			PaintTextCore(text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint text content.</summary>
 		/// <param name="text">Text to paint.</param>
 		public void PaintText(string text)
 		{
-			PaintTextCore(text, _column.ContentFont, _column.ContentBrush, GetFormat(_column.ContentAlignment));
+			PaintTextCore(text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		#endregion
@@ -440,7 +410,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(font, nameof(font));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageAndTextCore(image, text, font, _column.ContentBrush, stringFormat);
+			PaintImageAndTextCore(image, text, font, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -453,7 +423,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			PaintImageAndTextCore(image, text, font, _column.ContentBrush, GetFormat(stringAlignment));
+			PaintImageAndTextCore(image, text, font, Column.ContentBrush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -465,7 +435,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			PaintImageAndTextCore(image, text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
+			PaintImageAndTextCore(image, text, font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -482,14 +452,14 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageAndTextCore(image, text, _column.ContentFont, brush, stringFormat);
+			PaintImageAndTextCore(image, text, Column.ContentFont, brush, stringFormat);
 		}
 
 		public void PaintImageAndText(Image image, string text, Brush brush, StringAlignment stringAlignment)
 		{
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintImageAndTextCore(image, text, _column.ContentFont, brush, GetFormat(stringAlignment));
+			PaintImageAndTextCore(image, text, Column.ContentFont, brush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -501,7 +471,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintImageAndTextCore(image, text, _column.ContentFont, brush, GetFormat(_column.ContentAlignment));
+			PaintImageAndTextCore(image, text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -513,7 +483,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageAndTextCore(image, text, _column.ContentFont, _column.ContentBrush, stringFormat);
+			PaintImageAndTextCore(image, text, Column.ContentFont, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -522,7 +492,7 @@ namespace gitter.Framework.Controls
 		/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
 		public void PaintImageAndText(Image image, string text, StringAlignment stringAlignment)
 		{
-			PaintImageAndTextCore(image, text, _column.ContentFont, _column.ContentBrush, GetFormat(stringAlignment));
+			PaintImageAndTextCore(image, text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -530,7 +500,7 @@ namespace gitter.Framework.Controls
 		/// <param name="text">Text to paint.</param>
 		public void PaintImageAndText(Image image, string text)
 		{
-			PaintImageAndTextCore(image, text, _column.ContentFont, _column.ContentBrush, GetFormat(_column.ContentAlignment));
+			PaintImageAndTextCore(image, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		#endregion
@@ -631,7 +601,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, brush, stringFormat);
+			PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, brush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -645,7 +615,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, brush, GetFormat(stringAlignment));
+			PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, brush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -663,7 +633,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(font, nameof(font));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, stringFormat);
+			PaintImageOverlayAndTextCore(image, overlay, text, font, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -677,7 +647,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, GetFormat(stringAlignment));
+			PaintImageOverlayAndTextCore(image, overlay, text, font, Column.ContentBrush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -690,7 +660,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, _column.ContentBrush, stringFormat);
+			PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -700,7 +670,7 @@ namespace gitter.Framework.Controls
 		/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text, StringAlignment stringAlignment)
 		{
-			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, _column.ContentBrush, GetFormat(stringAlignment));
+			PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -718,7 +688,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(font, nameof(font));
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, GetFormat(_column.ContentAlignment));
+			PaintImageOverlayAndTextCore(image, overlay, text, font, brush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -731,7 +701,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			PaintImageOverlayAndTextCore(image, overlay, text, font, _column.ContentBrush, GetFormat(_column.ContentAlignment));
+			PaintImageOverlayAndTextCore(image, overlay, text, font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -740,7 +710,7 @@ namespace gitter.Framework.Controls
 		/// <param name="text">Text to paint.</param>
 		public void PaintImageOverlayAndText(Image image, Image overlay, string text)
 		{
-			PaintImageOverlayAndTextCore(image, overlay, text, _column.ContentFont, _column.ContentBrush, GetFormat(_column.ContentAlignment));
+			PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		#endregion

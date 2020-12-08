@@ -36,9 +36,7 @@ namespace gitter.Git
 		/// <param name="errorMessage">Error message.</param>
 		/// <returns><c>true</c> if <paramref name="name"/> is a valid tag name; otherwise, <c>false</c>.</returns>
 		public static bool ValidateName(string name, out string errorMessage)
-		{
-			return Reference.ValidateName(name, ReferenceType.Tag, out errorMessage);
-		}
+			=> Reference.ValidateName(name, ReferenceType.Tag, out errorMessage);
 
 		#endregion
 
@@ -84,26 +82,20 @@ namespace gitter.Git
 		{
 			get
 			{
-				if(TagType == Git.TagType.Lightweight)
+				if(TagType == Git.TagType.Lightweight) return default;
+				if(_message == null)
 				{
-					return null;
-				}
-				else
-				{
-					if(_message == null)
+					try
 					{
-						try
-						{
-							_message = Repository.Accessor.QueryTagMessage.Invoke(
-								new QueryTagMessageParameters { TagName = FullName });
-						}
-						catch(Exception exc) when(!exc.IsCritical())
-						{
-							_message = string.Empty;
-						}
+						_message = Repository.Accessor.QueryTagMessage.Invoke(
+							new QueryTagMessageParameters { TagName = FullName });
 					}
-					return _message;
+					catch(Exception exc) when(!exc.IsCritical())
+					{
+						_message = string.Empty;
+					}
 				}
+				return _message;
 			}
 		}
 

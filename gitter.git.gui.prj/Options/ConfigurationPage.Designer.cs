@@ -42,9 +42,11 @@
 			// 
 			// _lstUserConfig
 			// 
-			this._lstUserConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._lstUserConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._lstUserConfig.ForeColor = System.Drawing.SystemColors.WindowText;
+			this._lstUserConfig.ItemHeight = 21;
 			this._lstUserConfig.Location = new System.Drawing.Point(0, 0);
 			this._lstUserConfig.Name = "_lstUserConfig";
 			this._lstUserConfig.Size = new System.Drawing.Size(520, 311);
@@ -52,9 +54,9 @@
 			// 
 			// _tabs
 			// 
-			this._tabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._tabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._tabs.Controls.Add(this._pageUser);
 			this._tabs.Controls.Add(this._pageSystem);
 			this._tabs.Location = new System.Drawing.Point(0, 0);
@@ -78,6 +80,7 @@
 			// _btnAddUserParameter
 			// 
 			this._btnAddUserParameter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this._btnAddUserParameter.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this._btnAddUserParameter.Location = new System.Drawing.Point(384, 317);
 			this._btnAddUserParameter.Name = "_btnAddUserParameter";
 			this._btnAddUserParameter.Size = new System.Drawing.Size(130, 23);
@@ -101,6 +104,7 @@
 			// _btnAddSystemParameter
 			// 
 			this._btnAddSystemParameter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this._btnAddSystemParameter.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this._btnAddSystemParameter.Location = new System.Drawing.Point(384, 317);
 			this._btnAddSystemParameter.Name = "_btnAddSystemParameter";
 			this._btnAddSystemParameter.Size = new System.Drawing.Size(130, 23);
@@ -111,9 +115,11 @@
 			// 
 			// _lstSystemConfig
 			// 
-			this._lstSystemConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this._lstSystemConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._lstSystemConfig.ForeColor = System.Drawing.SystemColors.WindowText;
+			this._lstSystemConfig.ItemHeight = 21;
 			this._lstSystemConfig.Location = new System.Drawing.Point(0, 0);
 			this._lstSystemConfig.Name = "_lstSystemConfig";
 			this._lstSystemConfig.Size = new System.Drawing.Size(520, 311);

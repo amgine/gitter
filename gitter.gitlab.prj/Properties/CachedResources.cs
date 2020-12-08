@@ -1,7 +1,7 @@
 #region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,21 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.GitLab
 {
 	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
 
-	public class SearchTextBox : Control
+	using gitter.Framework;
+
+	using Resources = gitter.GitLab.Properties.Resources;
+
+	static class CachedResources
 	{
+		static CachedResources()
+		{
+			Bitmaps = new CachedBitmapResources(Resources.ResourceManager);
+		}
+
+		public static CachedBitmapResources Bitmaps { get; }
 	}
 }

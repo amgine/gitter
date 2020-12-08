@@ -245,14 +245,11 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public new SubjectColumn Column
-		{
-			get { return (SubjectColumn)base.Column; }
-		}
+		public new SubjectColumn Column => (SubjectColumn)base.Column;
 
 		public bool AlignToGraph
 		{
-			get { return _chkAlignToGraph != null ? _chkAlignToGraph.IsChecked : Column.AlignToGraph; }
+			get => _chkAlignToGraph != null ? _chkAlignToGraph.IsChecked : Column.AlignToGraph;
 			private set
 			{
 				if(_chkAlignToGraph != null)
@@ -266,7 +263,7 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowLocalBranches
 		{
-			get { return _chkLocalBranches != null ? _chkLocalBranches.IsChecked : Column.ShowLocalBranches; }
+			get => _chkLocalBranches != null ? _chkLocalBranches.IsChecked : Column.ShowLocalBranches;
 			private set
 			{
 				if(_chkLocalBranches != null)
@@ -280,7 +277,7 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowRemoteBranches
 		{
-			get { return _chkRemoteBranches != null ? _chkRemoteBranches.IsChecked : Column.ShowRemoteBranches; }
+			get => _chkRemoteBranches != null ? _chkRemoteBranches.IsChecked : Column.ShowRemoteBranches;
 			private set
 			{
 				if(_chkRemoteBranches != null)
@@ -294,7 +291,7 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowTags
 		{
-			get { return _chkTags != null ? _chkTags.IsChecked : Column.ShowTags; }
+			get => _chkTags != null ? _chkTags.IsChecked : Column.ShowTags;
 			private set
 			{
 				if(_chkTags != null)
@@ -308,7 +305,7 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowStash
 		{
-			get { return _chkStash != null ? _chkStash.IsChecked : Column.ShowStash; }
+			get => _chkStash != null ? _chkStash.IsChecked : Column.ShowStash;
 			private set
 			{
 				if(_chkStash != null)

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -63,10 +63,7 @@ namespace gitter.Framework
 			base.WndProc(ref m);
 		}
 
-		protected bool CanUseWin7Api
-		{
-			get { return _canUseWin7Api; }
-		}
+		protected bool CanUseWin7Api => _canUseWin7Api;
 
 		public void SetTaskbarOverlayIcon(Icon icon, string description)
 		{

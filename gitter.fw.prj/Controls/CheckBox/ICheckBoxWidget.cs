@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,15 +26,9 @@ namespace gitter.Framework.Controls
 
 	public interface ICheckBoxWidget : IDisposable
 	{
-		#region Events
-
 		event EventHandler IsCheckedChanged;
 
 		event EventHandler CheckStateChanged;
-
-		#endregion
-
-		#region Properties
 
 		Control Control { get; }
 
@@ -47,7 +41,5 @@ namespace gitter.Framework.Controls
 		CheckState CheckState { get; set; }
 
 		bool ThreeState { get; set; }
-
-		#endregion
 	}
 }

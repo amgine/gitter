@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -103,10 +103,8 @@ namespace gitter.Framework.Services
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle, StringFormat format)
 		{
-			using(var brush = new SolidBrush(color))
-			{
-				graphics.DrawString(text, font, brush, layoutRectangle, format);
-			}
+			using var brush = new SolidBrush(color);
+			graphics.DrawString(text, font, brush, layoutRectangle, format);
 		}
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format)
@@ -119,34 +117,26 @@ namespace gitter.Framework.Services
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format)
 		{
-			using(var brush = new SolidBrush(color))
-			{
-				graphics.DrawString(text, font, brush, x, y, format);
-			}
+			using var brush = new SolidBrush(color);
+			graphics.DrawString(text, font, brush, x, y, format);
 		}
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle)
 		{
-			using(var brush = new SolidBrush(color))
-			{
-				graphics.DrawString(text, font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
-			}
+			using var brush = new SolidBrush(color);
+			graphics.DrawString(text, font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
 		}
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, Point point)
 		{
-			using(var brush = new SolidBrush(color))
-			{
-				graphics.DrawString(text, font, brush, point, DefaultStringFormatLeftAlign);
-			}
+			using var brush = new SolidBrush(color);
+			graphics.DrawString(text, font, brush, point, DefaultStringFormatLeftAlign);
 		}
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y)
 		{
-			using(var brush = new SolidBrush(color))
-			{
-				graphics.DrawString(text, font, brush, x, y, DefaultStringFormatLeftAlign);
-			}
+			using var brush = new SolidBrush(color);
+			graphics.DrawString(text, font, brush, x, y, DefaultStringFormatLeftAlign);
 		}
 
 		public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea, StringFormat format)
@@ -174,8 +164,7 @@ namespace gitter.Framework.Services
 		public float GetFontHeight(Graphics graphics, Font font)
 		{
 			if(graphics == null) graphics = _g;
-			float height;
-			if(!_fontHeight.TryGetValue(font, out height))
+			if(!_fontHeight.TryGetValue(font, out var height))
 			{
 				var size = graphics.MeasureString("0", font, 10000, DefaultStringFormatLeftAlign);
 				height = size.Height;

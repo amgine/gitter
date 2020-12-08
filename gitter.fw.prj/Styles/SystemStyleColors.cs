@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,67 +25,40 @@ namespace gitter.Framework
 
 	public sealed class SystemStyleColors : IGitterStyleColors
 	{
-		public Color WorkArea
-		{
-			get { return Color.FromArgb(41, 57, 85); }
-		}
+		public Color WorkArea => Color.FromArgb(41, 57, 85);
 
-		public Color Window
-		{
-			get { return SystemColors.Window; }
-		}
+		public Color Window => SystemColors.Window;
 
-		public Color ScrollBarSpacing
-		{
-			get { return SystemColors.Window; }
-		}
+		public Color ScrollBarSpacing => SystemColors.Window;
 
-		public Color Separator
-		{
-			get { return Color.FromArgb(209, 226, 252); }
-		}
+		public Color Separator => Color.FromArgb(209, 226, 252);
 
-		public Color Alternate
-		{
-			get { return Color.WhiteSmoke; }
-		}
+		public Color Alternate => Color.WhiteSmoke;
 
-		public Color WindowText
-		{
-			get { return SystemColors.WindowText; }
-		}
+		public Color WindowText => SystemColors.WindowText;
 
-		public Color GrayText
-		{
-			get { return SystemColors.GrayText; }
-		}
+		public Color GrayText => SystemColors.GrayText;
 
-		public Color HyperlinkText
-		{
-			get { return Color.Blue; }
-		}
+		public Color HyperlinkText => Color.Blue;
 
-		public Color HyperlinkTextHotTrack
-		{
-			get { return Color.Blue; }
-		}
+		public Color HyperlinkTextHotTrack => Color.Blue;
 
-		public Color FileHeaderColor1				{ get { return Color.FromArgb(245, 245, 245); } }
-		public Color FileHeaderColor2				{ get { return Color.FromArgb(232, 232, 232); } }
-		public Color FilePanelBorder				{ get { return Color.Gray; } }
-		public Color LineContextForeground			{ get { return Color.FromArgb(0, 0, 0); } }
-		public Color LineContextBackground			{ get { return Color.FromArgb(255, 255, 255); } }
-		public Color LineAddedForeground			{ get { return Color.FromArgb(0, 100, 0); } }
-		public Color LineAddedBackground			{ get { return Color.FromArgb(221, 255, 233); } }
-		public Color LineRemovedForeground			{ get { return Color.FromArgb(200, 0, 0); } }
-		public Color LineRemovedBackground			{ get { return Color.FromArgb(255, 238, 238); } }
-		public Color LineNumberForeground			{ get { return Color.Gray; } }
-		public Color LineNumberBackground			{ get { return Color.FromArgb(247, 247, 247); } }
-		public Color LineNumberBackgroundHover		{ get { return LineNumberBackground.Darker(0.1f); } }
-		public Color LineHeaderForeground			{ get { return Color.Gray; } }
-		public Color LineHeaderBackground			{ get { return Color.FromArgb(247, 247, 247); } }
-		public Color LineSelectedBackground			{ get { return Color.FromArgb(173, 214, 255); } }
-		public Color LineSelectedBackgroundHover	{ get { return LineSelectedBackground.Darker(0.1f); } }
-		public Color LineBackgroundHover			{ get { return LineSelectedBackground.Lighter(0.3f); } }
+		public Color FileHeaderColor1            => Color.FromArgb(245, 245, 245);
+		public Color FileHeaderColor2            => Color.FromArgb(232, 232, 232);
+		public Color FilePanelBorder             => Color.Gray;
+		public Color LineContextForeground       => Color.FromArgb(0, 0, 0);
+		public Color LineContextBackground       => Color.FromArgb(255, 255, 255);
+		public Color LineAddedForeground         => Color.FromArgb(0, 100, 0);
+		public Color LineAddedBackground         => Color.FromArgb(221, 255, 233);
+		public Color LineRemovedForeground       => Color.FromArgb(200, 0, 0);
+		public Color LineRemovedBackground       => Color.FromArgb(255, 238, 238);
+		public Color LineNumberForeground        => Color.Gray;
+		public Color LineNumberBackground        => Color.FromArgb(247, 247, 247);
+		public Color LineNumberBackgroundHover   => LineNumberBackground.Darker(0.1f);
+		public Color LineHeaderForeground        => Color.Gray;
+		public Color LineHeaderBackground        => Color.FromArgb(247, 247, 247);
+		public Color LineSelectedBackground	     => Color.FromArgb(173, 214, 255);
+		public Color LineSelectedBackgroundHover => LineSelectedBackground.Darker(0.1f);
+		public Color LineBackgroundHover         => LineSelectedBackground.Lighter(0.3f);
 	}
 }

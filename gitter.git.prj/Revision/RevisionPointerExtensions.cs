@@ -332,7 +332,7 @@ namespace gitter.Git
 				list.Add(rev.Pointer);
 				repository = rev.Repository;
 			}
-			Verify.Argument.IsTrue(list.Count != 0, "revisions",
+			Verify.Argument.IsTrue(list.Count != 0, nameof(revisions),
 				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
 
 			var oldHeadRev = repository.Head.Revision;

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -51,11 +51,11 @@ namespace gitter.Framework.Controls
 			ForeColor = Style.Colors.WindowText;
 		}
 
-		protected override void OnStyleChanged()
+		protected override void OnStyleChanged(EventArgs e)
 		{
 			BackColor = Style.Colors.Window;
 			ForeColor = Style.Colors.WindowText;
-			base.OnStyleChanged();
+			base.OnStyleChanged(e);
 		}
 
 		internal void InvalidatePanelSize(FlowPanel panel)
@@ -74,7 +74,7 @@ namespace gitter.Framework.Controls
 		internal Rectangle GetPanelBounds(FlowPanel panel)
 		{
 			Verify.Argument.IsNotNull(panel, nameof(panel));
-			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
+			Verify.Argument.IsTrue(panel.FlowControl == this, nameof(panel), "Panel is not owned by this FlowLayoutControl.");
 
 			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y;
@@ -96,7 +96,7 @@ namespace gitter.Framework.Controls
 		internal void InvalidatePanel(FlowPanel panel, Rectangle rect)
 		{
 			Verify.Argument.IsNotNull(panel, nameof(panel));
-			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
+			Verify.Argument.IsTrue(panel.FlowControl == this, nameof(panel), "Panel is not owned by this FlowLayoutControl.");
 
 			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y - VScrollPos;
@@ -130,7 +130,7 @@ namespace gitter.Framework.Controls
 		internal void InvalidatePanel(FlowPanel panel)
 		{
 			Verify.Argument.IsNotNull(panel, nameof(panel));
-			Verify.Argument.IsTrue(panel.FlowControl == this, "panel", "Panel is not owned by this FlowLayoutControl.");
+			Verify.Argument.IsTrue(panel.FlowControl == this, nameof(panel), "Panel is not owned by this FlowLayoutControl.");
 
 			var graphics = GraphicsUtility.MeasurementGraphics;
 			int y = ClientArea.Y - VScrollPos;

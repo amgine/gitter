@@ -73,6 +73,7 @@ namespace gitter.Git
 	{
 		/// <summary>Create <see cref="BranchRenamedEventArgs"/>.</summary>
 		/// <param name="branch"><see cref="Branch"/> which is related to event.</param>
+		/// <param name="oldName">Old branch name.</param>
 		public BranchRenamedEventArgs(Branch branch, string oldName)
 			: base(branch)
 		{

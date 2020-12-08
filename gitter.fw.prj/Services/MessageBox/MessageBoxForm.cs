@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -139,21 +139,14 @@ namespace gitter.Framework.Services
 		}
 
 		private Icon GetSystemIcon(MessageBoxIcon icon)
-		{
-			switch(icon)
+			=> icon switch
 			{
-				case MessageBoxIcon.Information:
-					return SystemIcons.Information;
-				case MessageBoxIcon.Error:
-					return SystemIcons.Error;
-				case MessageBoxIcon.Exclamation:
-					return SystemIcons.Exclamation;
-				case MessageBoxIcon.Question:
-					return SystemIcons.Question;
-				default:
-					return null;
-			}
-		}
+				MessageBoxIcon.Information => SystemIcons.Information,
+				MessageBoxIcon.Error       => SystemIcons.Error,
+				MessageBoxIcon.Exclamation => SystemIcons.Exclamation,
+				MessageBoxIcon.Question    => SystemIcons.Question,
+				_ => null,
+			};
 
 		private void LayoutMessage(string message)
 		{

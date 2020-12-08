@@ -269,7 +269,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsTrue(
 				_factories.TryGetValue(guid, out var factory),
-				"guid",
+				nameof(guid),
 				string.Format(
 					CultureInfo.InvariantCulture,
 					"Unknown view factory GUID: {0}",

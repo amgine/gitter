@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,23 +24,14 @@ namespace gitter.Framework.Services
 
 	public sealed class MessageBoxResult
 	{
-		private readonly DialogResult _dialogResult;
-		private readonly int _resultOption;
-
 		public MessageBoxResult(DialogResult dialogResult, int resultOption)
 		{
-			_dialogResult = dialogResult;
-			_resultOption = resultOption;
+			DialogResult = dialogResult;
+			ResultOption = resultOption;
 		}
 
-		public int ResultOption
-		{
-			get { return _resultOption; }
-		}
+		public int ResultOption { get; }
 
-		public DialogResult DialogResult
-		{
-			get { return _dialogResult; }
-		}
+		public DialogResult DialogResult { get; }
 	}
 }

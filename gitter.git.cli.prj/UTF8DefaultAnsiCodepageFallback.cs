@@ -25,8 +25,6 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class UTF8DefaultAnsiCodepageFallback : DecoderFallback
 	{
-		private static readonly Decoder _decoder = Encoding.Default.GetDecoder();
-
 		private sealed class FallBackBuffer : DecoderFallbackBuffer
 		{
 			private char[] _chars;
@@ -70,10 +68,7 @@ namespace gitter.Git.AccessLayer.CLI
 					--_pos;
 					return true;
 				}
-				else
-				{
-					return false;
-				}
+				return false;
 			}
 
 			public override void Reset()
@@ -87,8 +82,6 @@ namespace gitter.Git.AccessLayer.CLI
 		public override int MaxCharCount => 1;
 
 		public override DecoderFallbackBuffer CreateFallbackBuffer()
-		{
-			return new FallBackBuffer();
-		}
+			=> new FallBackBuffer();
 	}
 }

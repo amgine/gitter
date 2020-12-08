@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -41,10 +41,7 @@ namespace gitter.Framework.Services
 			_toolTip.IsBalloon = true;
 		}
 
-		~BalloonNotificationService()
-		{
-			Dispose(false);
-		}
+		~BalloonNotificationService() => Dispose(disposing: false);
 
 		private void Notify(Control control, int x, int y, NotificationType type, string title, string message, bool focus)
 		{

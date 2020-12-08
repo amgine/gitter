@@ -26,30 +26,21 @@ namespace gitter.Git
 	using System.Threading.Tasks;
 
 	using gitter.Framework;
-	using gitter.Framework.Controls;
 
 	using gitter.Git.AccessLayer;
 
 	sealed class IndexChangesDiffSource : DiffSourceBase, IIndexDiffSource
 	{
-		#region Data
-
-		private readonly Repository _repository;
-		private readonly bool _cached;
-		private readonly IList<string> _paths;
-
-		#endregion
-
 		#region .ctor
 
 		public IndexChangesDiffSource(Repository repository, bool cached, IList<string> paths)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
-			_cached = cached;
-			_paths = paths;
-			_repository.Status.Changed += OnStatusChanged;
+			Repository = repository;
+			Cached = cached;
+			Paths = paths;
+			repository.Status.Changed += OnStatusChanged;
 		}
 
 		public IndexChangesDiffSource(Repository repository, bool cached)
@@ -61,20 +52,11 @@ namespace gitter.Git
 
 		#region Properties
 
-		public override Repository Repository
-		{
-			get { return _repository; }
-		}
+		public override Repository Repository { get; }
 
-		public bool Cached
-		{
-			get { return _cached; }
-		}
+		public bool Cached { get; }
 
-		public IList<string> Paths
-		{
-			get { return _paths; }
-		}
+		public IList<string> Paths { get; }
 
 		#endregion
 
@@ -109,33 +91,29 @@ namespace gitter.Git
 		*/
 
 		public override int GetHashCode()
-		{
-			return _repository.GetHashCode() ^ _paths.GetHashCode() ^ (_cached?1:0);
-		}
+			=> Repository.GetHashCode() ^ Paths.GetHashCode() ^ (Cached?1:0);
 
 		public override bool Equals(object obj)
 		{
-			if(obj == null) return false;
-			var ds = obj as IndexChangesDiffSource;
-			if(ds == null) return false;
-			if(ds._repository != _repository) return false;
-			if(ds._cached != _cached) return false;
-			if(ds._paths == _paths) return true;
-			if(ds._paths == null || ds._paths.Count == 0)
+			if(obj is not IndexChangesDiffSource ds) return false;
+			if(ds.Repository != Repository) return false;
+			if(ds.Cached != Cached) return false;
+			if(ds.Paths == Paths) return true;
+			if(ds.Paths == null || ds.Paths.Count == 0)
 			{
-				return _paths == null || _paths.Count == 0;
+				return Paths == null || Paths.Count == 0;
 			}
-			if(_paths == null || _paths.Count == 0)
+			if(Paths == null || Paths.Count == 0)
 			{
-				return ds._paths == null || ds._paths.Count == 0;
+				return ds.Paths == null || ds.Paths.Count == 0;
 			}
-			if(ds._paths.Count != _paths.Count)
+			if(ds.Paths.Count != Paths.Count)
 			{
 				return false;
 			}
-			foreach(var path in _paths)
+			foreach(var path in Paths)
 			{
-				if(!ds._paths.Contains(path)) return false;
+				if(!ds.Paths.Contains(path)) return false;
 			}
 			return true;
 		}
@@ -144,10 +122,10 @@ namespace gitter.Git
 		{
 			Assert.IsNotNull(options);
 
-			var parameters = new QueryDiffParameters()
+			var parameters = new QueryDiffParameters
 			{
-				Cached = _cached,
-				Paths = _paths,
+				Cached = Cached,
+				Paths  = Paths,
 			};
 			ApplyCommonDiffOptions(parameters, options);
 			return parameters;
@@ -173,21 +151,14 @@ namespace gitter.Git
 		{
 			if(disposing)
 			{
-				_repository.Status.Changed -= OnStatusChanged;
+				Repository.Status.Changed -= OnStatusChanged;
 			}
 		}
 
 		public override string ToString()
-		{
-			if(_cached)
-			{
-				return "diff --cached";
-			}
-			else
-			{
-				return "diff";
-			}
-		}
+			=> Cached
+				? "diff --cached"
+				: "diff";
 
 		#endregion
 	}

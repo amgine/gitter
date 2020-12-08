@@ -72,16 +72,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 				var command = _commandFactory(parameters);
 				var gitOutput = await _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken);
+					.ExecuteCommandAsync(command, _flags, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				gitOutput.ThrowOnBadReturnCode();
-
-				//return _commandExecutor
-				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
-				//	.ContinueWith(
-				//	t => TaskUtility.UnwrapResult(t).ThrowOnBadReturnCode(),
-				//	cancellationToken,
-				//	TaskContinuationOptions.ExecuteSynchronously,
-				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -132,15 +125,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 				var command = _commandFactory(parameters);
 				var result = await _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken);
+					.ExecuteCommandAsync(command, _flags, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				_resultHandler(result);
-				//return _commandExecutor
-				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
-				//	.ContinueWith(
-				//	t => _resultHandler(TaskUtility.UnwrapResult(t)),
-				//	cancellationToken,
-				//	TaskContinuationOptions.ExecuteSynchronously,
-				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -191,15 +178,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 				var command = _commandFactory(parameters);
 				var result = await _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken);
+					.ExecuteCommandAsync(command, _flags, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				_resultHandler(parameters, result);
-				//return _commandExecutor
-				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
-				//	.ContinueWith(
-				//	t => _resultHandler(parameters, TaskUtility.UnwrapResult(t)),
-				//	cancellationToken,
-				//	TaskContinuationOptions.ExecuteSynchronously,
-				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -250,15 +231,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 				var command = _commandFactory(parameters);
 				var result = await _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken);
+					.ExecuteCommandAsync(command, _flags, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				return _resultParser(result);
-				//return _commandExecutor
-				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
-				//	.ContinueWith(
-				//	t => _resultParser(TaskUtility.UnwrapResult(t)),
-				//	cancellationToken,
-				//	TaskContinuationOptions.ExecuteSynchronously,
-				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -309,15 +284,9 @@ namespace gitter.Git.AccessLayer.CLI
 
 				var command = _commandFactory(parameters);
 				var result = await _commandExecutor
-					.ExecuteCommandAsync(command, _flags, cancellationToken);
+					.ExecuteCommandAsync(command, _flags, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				return _resultParser(parameters, result);
-				//return _commandExecutor
-				//	.ExecuteCommandAsync(command, _flags, cancellationToken)
-				//	.ContinueWith(
-				//	t => _resultParser(parameters, TaskUtility.UnwrapResult(t)),
-				//	cancellationToken,
-				//	TaskContinuationOptions.ExecuteSynchronously,
-				//	TaskScheduler.Default);
 			}
 
 			#endregion
@@ -382,33 +351,13 @@ namespace gitter.Git.AccessLayer.CLI
 						stdInReceiver,
 						stdErrReceiver,
 						CommandExecutionFlags.None,
-						cancellationToken);
+						cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
 				if(exitCode != 0)
 				{
 					throw new GitException(stdErrReceiver.GetText());
 				}
 				return stdInReceiver.GetBytes();
-
-				//return _commandExecutor
-				//	.ExecuteCommandAsync(
-				//		command,
-				//		stdInReceiver,
-				//		stdErrReceiver,
-				//		CommandExecutionFlags.None,
-				//		cancellationToken)
-				//	.ContinueWith(
-				//	t =>
-				//	{
-				//		var exitCode = TaskUtility.UnwrapResult(t);
-				//		if(exitCode != 0)
-				//		{
-				//			throw new GitException(stdErrReceiver.GetText());
-				//		}
-				//		return stdInReceiver.GetBytes();
-				//	},
-				//	cancellationToken,
-				//	TaskContinuationOptions.ExecuteSynchronously,
-				//	TaskScheduler.Default);
 			}
 
 			#endregion

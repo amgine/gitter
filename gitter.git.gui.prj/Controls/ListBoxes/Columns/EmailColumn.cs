@@ -21,9 +21,7 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 
 	using gitter.Framework.Controls;
 
@@ -54,19 +52,13 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string email)
-		{
-			return measureEventArgs.MeasureText(email);
-		}
+			=> measureEventArgs.MeasureText(email);
 
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string email)
-		{
-			paintEventArgs.PaintText(email);
-		}
+			=> paintEventArgs.PaintText(email);
 
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string email, Brush textBrush)
-		{
-			paintEventArgs.PaintText(email, textBrush);
-		}
+			=> paintEventArgs.PaintText(email, textBrush);
 
 		public override string IdentificationString => "Email";
 	}

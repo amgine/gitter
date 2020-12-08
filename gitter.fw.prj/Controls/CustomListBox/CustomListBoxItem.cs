@@ -593,16 +593,16 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Override this to paint part of your item.</summary>
 		/// <param name="paintEventArgs">Paint event args.</param>
-		protected abstract void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs);
+		protected virtual void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+			=> paintEventArgs.Column.PaintSubItem(paintEventArgs);
 
 		/// <summary>Override this to provide subitem measurement.</summary>
 		/// <param name="measureEventArgs">Measure event args.</param>
-		protected abstract Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs);
+		protected virtual Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+			=> measureEventArgs.Column.MeasureSubItem(measureEventArgs);
 
 		public Size MeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			return OnMeasureSubItem(measureEventArgs);
-		}
+			=> OnMeasureSubItem(measureEventArgs);
 
 		public virtual void OnMouseDown(MouseButtons button, int x, int y)
 		{
@@ -678,7 +678,7 @@ namespace gitter.Framework.Controls
 	/// <typeparam name="T">Data type.</typeparam>
 	public abstract class CustomListBoxItem<T> : CustomListBoxItem
 	{
-		/// <summary>Create <see cref="CustomListBoxItem&lt;TData&gt;"/></summary>
+		/// <summary>Create <see cref="CustomListBoxItem{TData}"/></summary>
 		/// <param name="dataContext">Associated data.</param>
 		public CustomListBoxItem(T dataContext)
 		{
@@ -688,11 +688,9 @@ namespace gitter.Framework.Controls
 		/// <summary>Item associated data.</summary>
 		public T DataContext { get; set; }
 
-		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem&lt;TData&gt;"/>.</summary>
-		/// <returns><see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem&lt;TData&gt;"/>.</returns>
+		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem{TData}"/>.</summary>
+		/// <returns><see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem{TData}"/>.</returns>
 		public override string ToString()
-		{
-			return "item: " + (DataContext == null?"(null)":DataContext.ToString());
-		}
+			=> "item: " + (DataContext == null?"(null)":DataContext.ToString());
 	}
 }

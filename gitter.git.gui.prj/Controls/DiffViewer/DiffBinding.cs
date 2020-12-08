@@ -66,7 +66,7 @@ namespace gitter.Git.Gui.Controls
 
 		public DiffOptions DiffOptions
 		{
-			get { return _diffOptions; }
+			get => _diffOptions;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -81,24 +81,8 @@ namespace gitter.Git.Gui.Controls
 
 		private void AddSourceSpecificPanels()
 		{
-			var revisionSource = DiffSource as IRevisionDiffSource;
-			if(revisionSource != null)
-			{
-				DiffViewer.Panels.Add(new RevisionHeaderPanel() { Revision = revisionSource.Revision.Dereference() });
-				DiffViewer.Panels.Add(new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Line });
-				return;
-			}
-			var indexSource = DiffSource as IIndexDiffSource;
-			if(indexSource != null && !indexSource.Cached)
-			{
-				var panel = new UntrackedFilesPanel(indexSource.Repository.Status);
-				if(panel.Count != 0)
-				{
-					DiffViewer.Panels.Add(panel);
-					DiffViewer.Panels.Add(new FlowPanelSeparator() { Height = 5 });
-				}
-				return;
-			}
+			var panels = DiffHeaderPanelsProvider.GetSourceSpecificPanels(DiffSource);
+			DiffViewer.Panels.AddRange(panels);
 		}
 
 		protected override Task<Diff> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)

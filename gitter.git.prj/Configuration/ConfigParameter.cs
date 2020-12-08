@@ -21,7 +21,6 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Globalization;
 
 	using gitter.Git.AccessLayer;
 
@@ -52,17 +51,20 @@ namespace gitter.Git
 
 		/// <summary>Create <see cref="ConfigParameter"/>.</summary>
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
+		/// <param name="configFile">Configuration file.</param>
 		/// <param name="name">Paramater name.</param>
 		/// <param name="value">Parameter value.</param>
 		internal ConfigParameter(Repository repository, ConfigFile configFile, string name, string value)
 			: base(repository, name)
 		{
 			_configAccessor = repository.Accessor;
+			_configFile = configFile;
 			_value = value;
 		}
 
 		/// <summary>Create <see cref="ConfigParameter"/>.</summary>
-		/// <param name="repository">Related <see cref="Repository"/>.</param>
+		/// <param name="configAccessor">Configuration accessor.</param>
+		/// <param name="configFile">Configuration file.</param>
 		/// <param name="name">Paramater name.</param>
 		/// <param name="value">Parameter value.</param>
 		internal ConfigParameter(IConfigAccessor configAccessor, ConfigFile configFile, string name, string value)
@@ -76,7 +78,8 @@ namespace gitter.Git
 		}
 
 		/// <summary>Create <see cref="ConfigParameter"/>.</summary>
-		/// <param name="repository">Related <see cref="Repository"/>.</param>
+		/// <param name="configAccessor">Configuration accessor.</param>
+		/// <param name="fileName">Configuration file.</param>
 		/// <param name="name">Paramater name.</param>
 		/// <param name="value">Parameter value.</param>
 		internal ConfigParameter(IConfigAccessor configAccessor, string fileName, string name, string value)
@@ -156,15 +159,9 @@ namespace gitter.Git
 			}
 		}
 
-		public ConfigFile ConfigFile
-		{
-			get { return _configFile; }
-		}
+		public ConfigFile ConfigFile => _configFile;
 
-		public string FileName
-		{
-			get { return _fileName; }
-		}
+		public string FileName => _fileName;
 
 		#endregion
 
@@ -226,8 +223,6 @@ namespace gitter.Git
 		}
 
 		public override string ToString()
-		{
-			return string.Format(CultureInfo.InvariantCulture, "{0} = {1}", Name, _value);
-		}
+			=> $"{Name} = {_value}";
 	}
 }

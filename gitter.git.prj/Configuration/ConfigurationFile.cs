@@ -89,7 +89,7 @@ namespace gitter.Git
 
 		#region .ctor
 
-		private ConfigurationFile(Repository repository, bool load)
+		private ConfigurationFile(Repository repository, bool load = true)
 		{
 			_configAccessor = repository.Accessor;
 			_parameters = new Dictionary<string, ConfigParameter>();
@@ -98,7 +98,7 @@ namespace gitter.Git
 			if(load) Refresh();
 		}
 
-		public ConfigurationFile(Repository repository, string fileName, bool load)
+		public ConfigurationFile(Repository repository, string fileName, bool load = true)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
@@ -110,7 +110,7 @@ namespace gitter.Git
 			if(load) Refresh();
 		}
 
-		private ConfigurationFile(IConfigAccessor configAccessor, ConfigFile configFile, bool load)
+		private ConfigurationFile(IConfigAccessor configAccessor, ConfigFile configFile, bool load = true)
 		{
 			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
 
@@ -122,15 +122,8 @@ namespace gitter.Git
 
 		/// <summary>Create <see cref="ConfigurationFile"/>.</summary>
 		/// <param name="fileName">Name of config file.</param>
-		public ConfigurationFile(IConfigAccessor configAccessor, string fileName)
-			: this(configAccessor, fileName, true)
-		{
-		}
-
-		/// <summary>Create <see cref="ConfigurationFile"/>.</summary>
-		/// <param name="fileName">Name of config file.</param>
 		/// <param name="load">Immediately load file contents.</param>
-		public ConfigurationFile(IConfigAccessor configAccessor, string fileName, bool load)
+		public ConfigurationFile(IConfigAccessor configAccessor, string fileName, bool load = true)
 		{
 			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
 
@@ -145,10 +138,7 @@ namespace gitter.Git
 
 		#region Properties
 
-		public IEnumerable<string> Names
-		{
-			get { return _parameters.Keys; }
-		}
+		public IEnumerable<string> Names => _parameters.Keys;
 
 		public ConfigParameter this[string name]
 		{
@@ -157,7 +147,7 @@ namespace gitter.Git
 				ConfigParameter res;
 				lock(SyncRoot)
 				{
-					Verify.Argument.IsTrue(_parameters.TryGetValue(name, out res), "name",
+					Verify.Argument.IsTrue(_parameters.TryGetValue(name, out res), nameof(name),
 						"Parameter not found.");
 				}
 				return res;
@@ -184,10 +174,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Object used for cross-thread synchronization.</summary>
-		public object SyncRoot
-		{
-			get { return _parameters; }
-		}
+		public object SyncRoot => _parameters;
 
 		#endregion
 

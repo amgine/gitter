@@ -95,8 +95,61 @@ namespace gitter.Framework
 					return date.FormatRFC2822();
 				default:
 					throw new ArgumentException(
-						"Unknown DateFormat value: {0}".UseAsFormat(date),
-						"format");
+						$"Unknown DateFormat value: {format}",
+						nameof(format));
+			}
+		}
+
+		public static string FormatDate(DateTimeOffset date, DateFormat format)
+		{
+			switch(format)
+			{
+				case DateFormat.SystemDefault:
+					return date.ToString(CultureInfo.CurrentCulture);
+				case DateFormat.UnixTimestamp:
+					return ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture);
+				case DateFormat.Relative:
+					{
+						var span = DateTimeOffset.Now - date;
+						if(span.TotalDays >= 365)
+						{
+							var years = (int)(span.TotalDays / 365);
+							return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
+						}
+						if(span.TotalDays >= 30)
+						{
+							var months = (int)(span.TotalDays / 30);
+							return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
+						}
+						if(span.TotalDays >= 7)
+						{
+							var weeks = (int)(span.TotalDays / 7);
+							return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
+						}
+						if(span.TotalDays >= 1)
+						{
+							var days = (int)span.TotalDays;
+							return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
+						}
+						if(span.TotalHours >= 1)
+						{
+							var hours = (int)span.TotalHours;
+							return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
+						}
+						if(span.TotalMinutes >= 1)
+						{
+							var minutes = (int)span.TotalMinutes;
+							return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
+						}
+						var seconds = (int)span.TotalSeconds;
+						return (seconds == 1) ? "1 second ago" : seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago";
+					}
+				case DateFormat.ISO8601: return date.FormatISO8601();
+				case DateFormat.RFC2822: return date.FormatRFC2822();
+				default:
+					throw new ArgumentException(
+						$"Unknown DateFormat value: {format}",
+						nameof(format));
 			}
 		}
 

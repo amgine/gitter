@@ -27,13 +27,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class QueryStatusImpl : ParserBasedFunctionImpl<QueryStatusParameters, StatusData>
 	{
-		#region Data
-
 		private readonly CommandBuilder _commandBuilder;
-
-		#endregion
-
-		#region .ctor
 
 		public QueryStatusImpl(ICommandExecutor commandExecutor, CommandBuilder commandBuilder)
 			: base(commandExecutor)
@@ -42,10 +36,6 @@ namespace gitter.Git.AccessLayer.CLI
 
 			_commandBuilder = commandBuilder;
 		}
-
-		#endregion
-
-		#region Methods
 
 		protected override Command CreateCommand(QueryStatusParameters parameters)
 		{
@@ -59,7 +49,5 @@ namespace gitter.Git.AccessLayer.CLI
 
 		protected override CommandExecutionFlags GetExecutionFlags()
 			=> CommandExecutionFlags.DoNotKillProcess;
-
-		#endregion
 	}
 }

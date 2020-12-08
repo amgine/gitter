@@ -88,7 +88,7 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		public Task<string> InvokeAsync(FormatMergeMessageParameters parameters,
-			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			return Task.Factory.StartNew(
 				() => Invoke(parameters),

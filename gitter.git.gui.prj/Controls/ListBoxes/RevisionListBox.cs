@@ -36,6 +36,13 @@ namespace gitter.Git.Gui.Controls
 	/// <summary><see cref="CustomListBox"/> for displaying <see cref="RevisionListItem"/>.</summary>
 	public class RevisionListBox : CustomListBox
 	{
+		private static Action<RevisionListBox> _onCreated;
+
+		public static void OnCreated(Action<RevisionListBox> onCreated)
+		{
+			_onCreated += onCreated;
+		}
+
 		private Repository _repository;
 		private RevisionListItem _currentRevisionItem;
 		private RevisionLog _revisionLog;
@@ -75,9 +82,11 @@ namespace gitter.Git.Gui.Controls
 					new AuthorColumn(),
 					new AuthorEmailColumn(),
 				});
-			AllowDrop = true;
-			_currentIndex = -1;
+			AllowDrop        = true;
+			_currentIndex    = -1;
 			_showStatusItems = true;
+
+			_onCreated?.Invoke(this);
 		}
 
 		private CustomListBoxColumn GraphColumn => Columns.GetById((int)ColumnId.Graph);
@@ -119,17 +128,18 @@ namespace gitter.Git.Gui.Controls
 				revs = new List<Revision>(SelectedItems.Count);
 				for(int i = 0; i < SelectedItems.Count; ++i)
 				{
-					var revItem = SelectedItems[i] as RevisionListItem;
-					if(revItem != null)
+					if(SelectedItems[i] is RevisionListItem revItem)
+					{
 						revs.Add(revItem.DataContext);
+					}
 				}
 			}
 			var state = new State
 			{
-				StagedSelected = _stagedItem != null && _stagedItem.IsSelected,
-				UnstagedSeleted = _unstagedItem != null && _unstagedItem.IsSelected,
+				StagedSelected    = _stagedItem   != null && _stagedItem.IsSelected,
+				UnstagedSeleted   = _unstagedItem != null && _unstagedItem.IsSelected,
 				SelectedRevisions = revs,
-				VScrollPos = VScrollPos,
+				VScrollPos        = VScrollPos,
 			};
 			return state;
 		}
@@ -154,8 +164,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					foreach(var item in state.SelectedRevisions)
 					{
-						RevisionListItem revItem;
-						if(_itemLookupTable.TryGetValue(item, out revItem))
+						if(_itemLookupTable.TryGetValue(item, out var revItem))
 						{
 							revItem.IsSelected = true;
 						}
@@ -226,8 +235,7 @@ namespace gitter.Git.Gui.Controls
 					for(int i = 0; i < value.RevisionsCount; ++i)
 					{
 						var revision = value.Revisions[i];
-						RevisionListItem revisionListItem;
-						if(oldLookupTable == null || !oldLookupTable.TryGetValue(revision, out revisionListItem))
+						if(oldLookupTable == null || !oldLookupTable.TryGetValue(revision, out var revisionListItem))
 						{
 							revisionListItem = new RevisionListItem(revision);
 						}
@@ -808,8 +816,7 @@ namespace gitter.Git.Gui.Controls
 			var revisions = new List<Revision>(requestEventArgs.Items.Count);
 			foreach(var item in requestEventArgs.Items)
 			{
-				var revItem = item as RevisionListItem;
-				if(revItem != null)
+				if(item is RevisionListItem revItem)
 				{
 					revisions.Add(revItem.DataContext);
 				}
@@ -820,10 +827,7 @@ namespace gitter.Git.Gui.Controls
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
-			else
-			{
-				return null;
-			}
+			return default;
 		}
 
 		#region drag'n'drop support
@@ -842,29 +846,18 @@ namespace gitter.Git.Gui.Controls
 				var htr = HitTest(p.X, p.Y);
 				if(htr.Area == HitTestArea.Item)
 				{
-					var item = Items[htr.ItemIndex] as RevisionListItem;
-					if(item != null)
+					if(Items[htr.ItemIndex] is RevisionListItem item)
 					{
 						var branch = data.GetData<Branch>();
 						if(branch.Repository == item.DataContext.Repository)
 						{
 							drgevent.Effect = DragDropEffects.Move;
-						}
-						else
-						{
-							drgevent.Effect = DragDropEffects.None;
+							return;
 						}
 					}
-					else
-					{
-						drgevent.Effect = DragDropEffects.None;
-					}
-				}
-				else
-				{
-					drgevent.Effect = DragDropEffects.None;
 				}
 			}
+			drgevent.Effect = DragDropEffects.None;
 		}
 
 		protected override void OnDragOver(DragEventArgs drgevent)
@@ -967,8 +960,8 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowStatusItems
 		{
-			get { return _showStatusItems; }
-			set { _showStatusItems = value; }
+			get => _showStatusItems;
+			set => _showStatusItems = value;
 		}
 
 		public RevisionListItem this[Revision revision]
@@ -981,8 +974,7 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			var rev = revision.Dereference();
-			RevisionListItem item;
-			if(_itemLookupTable.TryGetValue(rev, out item))
+			if(_itemLookupTable.TryGetValue(rev, out var item))
 			{
 				item.FocusAndSelect();
 			}
@@ -993,8 +985,7 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
 			if(_itemLookupTable == null) return null;
-			RevisionListItem item;
-			if(_itemLookupTable.TryGetValue(revision, out item))
+			if(_itemLookupTable.TryGetValue(revision, out var item))
 			{
 				return item;
 			}
@@ -1004,66 +995,65 @@ namespace gitter.Git.Gui.Controls
 		public void RebuildGraph()
 		{
 			var graphColumn = GraphColumn;
-			if(graphColumn != null)
+			if(graphColumn == null) return;
+
+			var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
+			int graphLen = 0;
+			if(_itemLookupTable.Count != 0)
 			{
-				var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
-				int graphLen = 0;
-				if(_itemLookupTable.Count != 0)
+				var graph = builder.BuildGraph(_revisionLog.Revisions, rev => rev.Parents);
+				int id = 0;
+				foreach(IRevisionGraphListItem item in Items)
 				{
-					var graph = builder.BuildGraph(_revisionLog.Revisions, rev => rev.Parents);
-					int id = 0;
-					foreach(IRevisionGraphListItem item in Items)
+					if(graph[id].Length > graphLen)
 					{
-						if(graph[id].Length > graphLen)
-						{
-							graphLen = graph[id].Length;
-						}
-						item.Graph = graph[id++];
+						graphLen = graph[id].Length;
+					}
+					item.Graph = graph[id++];
+				}
+			}
+			if(_showStatusItems)
+			{
+				if(_stagedItem != null)
+				{
+					if(_currentRevisionItem != null)
+					{
+						_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
+					}
+					else
+					{
+						_stagedItem.Graph = builder.AddGraphLineToTop(null);
+					}
+					if(_stagedItem.Graph.Length > graphLen)
+					{
+						graphLen = _stagedItem.Graph.Length;
 					}
 				}
-				if(_showStatusItems)
+				if(_unstagedItem != null)
 				{
 					if(_stagedItem != null)
 					{
+						_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
+					}
+					else
+					{
 						if(_currentRevisionItem != null)
 						{
-							_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
+							_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
 						}
 						else
 						{
-							_stagedItem.Graph = builder.AddGraphLineToTop(null);
-						}
-						if(_stagedItem.Graph.Length > graphLen)
-						{
-							graphLen = _stagedItem.Graph.Length;
+							_unstagedItem.Graph = builder.AddGraphLineToTop(null);
 						}
 					}
-					if(_unstagedItem != null)
+					if(_unstagedItem.Graph.Length > graphLen)
 					{
-						if(_stagedItem != null)
-						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
-						}
-						else
-						{
-							if(_currentRevisionItem != null)
-							{
-								_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
-							}
-							else
-							{
-								_unstagedItem.Graph = builder.AddGraphLineToTop(null);
-							}
-						}
-						if(_unstagedItem.Graph.Length > graphLen)
-						{
-							graphLen = _unstagedItem.Graph.Length;
-						}
+						graphLen = _unstagedItem.Graph.Length;
 					}
 				}
-				graphColumn.Width = 21 * graphLen;
-				Invalidate();
 			}
+			graphColumn.Width = 21 * graphLen;
+			Invalidate();
 		}
 	}
 }

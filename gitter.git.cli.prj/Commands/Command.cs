@@ -28,21 +28,19 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Represents git command line command.</summary>
 	public class Command
 	{
-		#region .ctor
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Command"/> class.
 		/// </summary>
 		/// <param name="options">Arguments passed to git before command.</param>
 		/// <param name="name">Command name.</param>
 		/// <param name="arguments">Command arguments.</param>
-		public Command(IEnumerable<ICommandArgument> options, string name, IEnumerable<ICommandArgument> arguments)
+		public Command(IEnumerable<ICommandArgument> options, string name, IEnumerable<ICommandArgument> arguments = null)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			Name      = name;
-			Options   = options   ?? Enumerable.Empty<ICommandArgument>();
-			Arguments = arguments ?? Enumerable.Empty<ICommandArgument>();
+			Options   = options;
+			Arguments = arguments;
 		}
 
 		/// <summary>
@@ -50,13 +48,13 @@ namespace gitter.Git.AccessLayer.CLI
 		/// </summary>
 		/// <param name="name">Command name.</param>
 		/// <param name="arguments">Command arguments.</param>
-		public Command(string name, IEnumerable<ICommandArgument> arguments)
+		public Command(string name, IEnumerable<ICommandArgument> arguments = null)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
 			Name      = name;
-			Options   = Enumerable.Empty<ICommandArgument>();
-			Arguments = arguments ?? Enumerable.Empty<ICommandArgument>();
+			Options   = null;
+			Arguments = arguments;
 		}
 
 		/// <summary>
@@ -67,10 +65,6 @@ namespace gitter.Git.AccessLayer.CLI
 			: this(name, null)
 		{
 		}
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>Returns command name.</summary>
 		/// <value>Command name.</value>
@@ -84,10 +78,6 @@ namespace gitter.Git.AccessLayer.CLI
 		/// <value>Collection of command arguments.</value>
 		public IEnumerable<ICommandArgument> Arguments { get; }
 
-		#endregion
-
-		#region Methods
-
 		/// <summary>Appends command with all arguments to a specified <paramref name="stringBuilder"/>.</summary>
 		/// <param name="stringBuilder"><see cref="StringBuilder"/> which will receive command string representation.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="stringBuilder"/> == <c>null</c>.</exception>
@@ -96,16 +86,22 @@ namespace gitter.Git.AccessLayer.CLI
 			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
 
 			const char ArgumentSeparator = ' ';
-			foreach(var arg in Options)
+			if(Options != null)
 			{
-				arg.ToString(stringBuilder);
-				stringBuilder.Append(ArgumentSeparator);
+				foreach(var arg in Options)
+				{
+					arg.ToString(stringBuilder);
+					stringBuilder.Append(ArgumentSeparator);
+				}
 			}
 			stringBuilder.Append(Name);
-			foreach(var arg in Arguments)
+			if(Arguments != null)
 			{
-				stringBuilder.Append(ArgumentSeparator);
-				arg.ToString(stringBuilder);
+				foreach(var arg in Arguments)
+				{
+					stringBuilder.Append(ArgumentSeparator);
+					arg.ToString(stringBuilder);
+				}
 			}
 		}
 
@@ -117,7 +113,5 @@ namespace gitter.Git.AccessLayer.CLI
 			ToString(sb);
 			return sb.ToString();
 		}
-
-		#endregion
 	}
 }

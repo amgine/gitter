@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,25 +21,14 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Windows.Forms;
 
 	public interface IButtonWidget : IDisposable
 	{
-		#region Events
-
 		event EventHandler Click;
-
-		#endregion
-
-		#region Properties
 
 		Control Control { get; }
 
 		string Text { get; set; }
-
-		#endregion
 	}
 }

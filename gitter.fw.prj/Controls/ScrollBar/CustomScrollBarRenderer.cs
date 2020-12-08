@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,33 +30,12 @@ namespace gitter.Framework.Controls
 		private static CustomScrollBarRenderer _msvs2012Light;
 
 		public static CustomScrollBarRenderer MSVS2012Dark
-		{
-			get
-			{
-				if(_msvs2012Dark == null)
-				{
-					_msvs2012Dark = new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.DarkColor);
-				}
-				return _msvs2012Dark;
-			}
-		}
+			=> _msvs2012Dark ??= new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.DarkColor);
 
 		public static CustomScrollBarRenderer MSVS2012Light
-		{
-			get
-			{
-				if(_msvs2012Light == null)
-				{
-					_msvs2012Light = new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.LightColor);
-				}
-				return _msvs2012Light;
-			}
-		}
+			=> _msvs2012Light ??= new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.LightColor);
 
-		public static CustomScrollBarRenderer Default
-		{
-			get { return MSVS2012Dark; }
-		}
+		public static CustomScrollBarRenderer Default => MSVS2012Dark;
 
 		public virtual void Render(
 			Orientation scrollBarOrientation, bool isEnabled, Graphics graphics, Rectangle clipRectangle,

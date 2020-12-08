@@ -47,10 +47,7 @@ namespace gitter.Framework
 		{
 		}
 
-		~AsyncDataBinding()
-		{
-			Dispose(false);
-		}
+		~AsyncDataBinding() => Dispose(false);
 
 		#endregion
 
@@ -58,7 +55,7 @@ namespace gitter.Framework
 
 		public T Data
 		{
-			get { return _data; }
+			get => _data;
 			private set
 			{
 				_data = value;

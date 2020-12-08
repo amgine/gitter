@@ -33,29 +33,20 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class AddSubmoduleController : ViewControllerBase<IAddSubmoduleView>, IAddSubmoduleController
 	{
-		#region Data
-
-		private readonly Repository _repository;
-
-		#endregion
-
 		#region .ctor
 
 		public AddSubmoduleController(Repository repository)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
-			_repository = repository;
+			Repository = repository;
 		}
 
 		#endregion
 
 		#region properties
 
-		private Repository Repository
-		{
-			get { return _repository; }
-		}
+		private Repository Repository { get; }
 
 		#endregion
 
@@ -88,7 +79,7 @@ namespace gitter.Git.Gui.Controllers
 			{
 				using(View.ChangeCursor(MouseCursor.WaitCursor))
 				{
-					_repository.Submodules.Create(path, url, branch);
+					Repository.Submodules.Create(path, url, branch);
 				}
 			}
 			catch(GitException exc)

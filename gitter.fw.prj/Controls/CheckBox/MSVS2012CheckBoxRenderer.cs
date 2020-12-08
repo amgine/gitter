@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,17 +31,7 @@ namespace gitter.Framework.Controls
 
 		private static IColorTable _darkColors;
 
-		public static IColorTable DarkColors
-		{
-			get
-			{
-				if(_darkColors == null)
-				{
-					_darkColors = new DarkColorTable();
-				}
-				return _darkColors;
-			}
-		}
+		public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
 
 		public interface IColorTable
 		{
@@ -67,52 +57,29 @@ namespace gitter.Framework.Controls
 			private static readonly Color CHECK_BACKGROUND_HIGHLIGHT = Color.FromArgb(70, 70, 70);
 			private static readonly Color CHECK_HIGHLIGHT = Color.FromArgb(85, 170, 255);
 
-			public Color Foreground
-			{
-				get { return FOREGROUND; }
-			}
+			public Color Foreground => FOREGROUND;
 
-			public Color ForegroundHighlight
-			{
-				get { return FOREGROUND_HIGHLIGHT; }
-			}
+			public Color ForegroundHighlight => FOREGROUND_HIGHLIGHT;
 
-			public Color ForegroundDisabled
-			{
-				get { return FOREGROUND_DISABLED; }
-			}
+			public Color ForegroundDisabled => FOREGROUND_DISABLED;
 
-			public Color CheckBackground
-			{
-				get { return CHECK_BACKGROUND; }
-			}
+			public Color CheckBackground => CHECK_BACKGROUND;
 
-			public Color CheckBackgroundHighlight
-			{
-				get { return CHECK_BACKGROUND_HIGHLIGHT; }
-			}
+			public Color CheckBackgroundHighlight => CHECK_BACKGROUND_HIGHLIGHT;
 
-			public Color CheckHighlight
-			{
-				get { return CHECK_HIGHLIGHT; }
-			}
+			public Color CheckHighlight => CHECK_HIGHLIGHT;
 		}
 
 		#endregion
-
-		private readonly IColorTable _colorTable;
 
 		public MSVS2012CheckBoxRenderer(IColorTable colorTable)
 		{
 			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
-			_colorTable = colorTable;
+			ColorTable = colorTable;
 		}
 
-		private IColorTable ColorTable
-		{
-			get { return _colorTable; }
-		}
+		private IColorTable ColorTable { get; }
 
 		public override void Render(Graphics graphics, Rectangle clipRectangle, CustomCheckBox checkBox)
 		{
@@ -144,10 +111,8 @@ namespace gitter.Framework.Controls
 			rcCheckBox.Height += 1;
 			if(highlight)
 			{
-				using(var pen = new Pen(ColorTable.CheckHighlight))
-				{
-					graphics.DrawRectangle(pen, rcCheckBox);
-				}
+				using var pen = new Pen(ColorTable.CheckHighlight);
+				graphics.DrawRectangle(pen, rcCheckBox);
 			}
 			switch(checkBox.CheckState)
 			{

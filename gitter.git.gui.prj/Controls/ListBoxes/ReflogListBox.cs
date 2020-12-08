@@ -42,42 +42,37 @@ namespace gitter.Git.Gui.Controls
 		private readonly CustomListBoxColumn _colAuthor;
 		private readonly CustomListBoxColumn _colAuthorEmail;
 
-		private Reflog _reflog;
-
 		#endregion
 
 		public ReflogListBox()
 		{
 			Columns.AddRange(new[]
 				{
-					_colHash			= new HashColumn()				{ IsVisible = true,  Abbreviate = true, Width = 58 },
-					_colTreeHash		= new TreeHashColumn()			{ IsVisible = false, Abbreviate = true, Width = 58 },
-					_colCommitDate		= new CommitDateColumn()		{ IsVisible = false },
-					_colMessage			= new MessageColumn()			{ IsVisible = true },
-					_colSubject			= new SubjectColumn()			{ IsVisible = false },
-					_colCommitter		= new CommitterColumn()			{ IsVisible = false },
-					_colCommitterEmail	= new CommitterEmailColumn()	{ IsVisible = false },
-					_colAuthorDate		= new AuthorDateColumn()		{ IsVisible = false },
-					_colAuthor			= new AuthorColumn()			{ IsVisible = false },
-					_colAuthorEmail		= new AuthorEmailColumn()		{ IsVisible = false },
+					_colHash           = new HashColumn           { IsVisible = true,  Abbreviate = true, Width = 58 },
+					_colTreeHash       = new TreeHashColumn       { IsVisible = false, Abbreviate = true, Width = 58 },
+					_colCommitDate     = new CommitDateColumn     { IsVisible = false },
+					_colMessage        = new MessageColumn        { IsVisible = true  },
+					_colSubject        = new SubjectColumn        { IsVisible = false },
+					_colCommitter      = new CommitterColumn      { IsVisible = false },
+					_colCommitterEmail = new CommitterEmailColumn { IsVisible = false },
+					_colAuthorDate     = new AuthorDateColumn     { IsVisible = false },
+					_colAuthor         = new AuthorColumn         { IsVisible = false },
+					_colAuthorEmail    = new AuthorEmailColumn    { IsVisible = false },
 				});
 		}
 
-		public Reflog Reflog
-		{
-			get { return _reflog; }
-		}
+		public Reflog Reflog { get; private set; }
 
 		public void Load(Reflog reflog)
 		{
-			if(_reflog != reflog)
+			if(Reflog != reflog)
 			{
-				if(_reflog != null)
+				if(Reflog != null)
 				{
 					DetachFromReflog();
 				}
-				_reflog = reflog;
-				if(_reflog != null)
+				Reflog = reflog;
+				if(Reflog != null)
 				{
 					AttachToReflog();
 				}
@@ -86,19 +81,19 @@ namespace gitter.Git.Gui.Controls
 
 		private void AttachToReflog()
 		{
-			lock(_reflog)
+			lock(Reflog)
 			{
-				foreach(var record in _reflog)
+				foreach(var record in Reflog)
 				{
 					Items.Add(new ReflogRecordListItem(record));
 				}
-				_reflog.RecordAdded += OnRecordAdded;
+				Reflog.RecordAdded += OnRecordAdded;
 			}
 		}
 
 		private void DetachFromReflog()
 		{
-			_reflog.RecordAdded -= OnRecordAdded;
+			Reflog.RecordAdded -= OnRecordAdded;
 			Items.Clear();
 		}
 
@@ -112,10 +107,10 @@ namespace gitter.Git.Gui.Controls
 		{
 			if(disposing)
 			{
-				if(_reflog != null)
+				if(Reflog != null)
 				{
 					DetachFromReflog();
-					_reflog = null;
+					Reflog = null;
 				}
 			}
 			base.Dispose(disposing);

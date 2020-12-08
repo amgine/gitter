@@ -100,8 +100,6 @@ namespace gitter.Git.Gui.Controls
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
-				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.HashString);
 				case ColumnId.Name:
 				case ColumnId.Subject:
 					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Subject);
@@ -120,7 +118,7 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.AuthorEmail:
 					return AuthorEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Author.Email);
 				default:
-					return Size.Empty;
+					return base.OnMeasureSubItem(measureEventArgs);
 			}
 		}
 
@@ -128,9 +126,6 @@ namespace gitter.Git.Gui.Controls
 		{
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
-				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.HashString);
-					break;
 				case ColumnId.Name:
 				case ColumnId.Subject:
 					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision, null, null, -1);
@@ -154,6 +149,9 @@ namespace gitter.Git.Gui.Controls
 					break;
 				case ColumnId.AuthorEmail:
 					AuthorEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Author.Email);
+					break;
+				default:
+					base.OnPaintSubItem(paintEventArgs);
 					break;
 			}
 		}

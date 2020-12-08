@@ -64,8 +64,8 @@ namespace gitter.Framework.Options
 			var size		= section.GetValue<float>("Size", 0);
 			var style		= section.GetValue<FontStyle>("Style", FontStyle.Regular);
 
-			Verify.Argument.IsTrue(fontName != null, "section", "Section does not contain a valid font name.");
-			Verify.Argument.IsTrue(size > 0, "section", "Section contains invalid font size.");
+			Verify.Argument.IsTrue(fontName != null, nameof(section), "Section does not contain a valid font name.");
+			Verify.Argument.IsTrue(size > 0, nameof(section), "Section contains invalid font size.");
 
 			_font	= new Font(fontName, size, style, GraphicsUnit.Point);
 			Id		= id;

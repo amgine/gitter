@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -58,17 +58,7 @@ namespace gitter.Framework.Controls
 
 		public CustomButtonRenderer Renderer
 		{
-			get
-			{
-				if(_renderer == null)
-				{
-					return CustomButtonRenderer.Default;
-				}
-				else
-				{
-					return _renderer;
-				}
-			}
+			get => _renderer ?? CustomButtonRenderer.Default;
 			set
 			{
 				if(_renderer != value)
@@ -87,7 +77,7 @@ namespace gitter.Framework.Controls
 
 		public bool IsPressed
 		{
-			get { return _isPressed; }
+			get => _isPressed;
 			private set
 			{
 				if(_isPressed != value)
@@ -100,7 +90,7 @@ namespace gitter.Framework.Controls
 
 		public bool IsMouseOver
 		{
-			get { return _isMouseOver; }
+			get => _isMouseOver;
 			private set
 			{
 				if(_isMouseOver != value)
@@ -165,7 +155,7 @@ namespace gitter.Framework.Controls
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			if(e.Button == System.Windows.Forms.MouseButtons.Left)
+			if(e.Button == MouseButtons.Left)
 			{
 				IsPressed = true;
 				Focus();
@@ -175,7 +165,7 @@ namespace gitter.Framework.Controls
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
-			if(e.Button == System.Windows.Forms.MouseButtons.Left)
+			if(e.Button == MouseButtons.Left)
 			{
 				IsPressed = false;
 			}

@@ -39,7 +39,7 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
-		public HashColumnExtender(HashColumn column)
+		public HashColumnExtender(HashColumnBase column)
 			: base(column)
 		{
 			InitializeComponent();
@@ -65,10 +65,7 @@ namespace gitter.Git.Gui.Controls
 			_chkAbbreviate.Control.Parent = this;
 		}
 
-		public new HashColumn Column
-		{
-			get { return (HashColumn)base.Column; }
-		}
+		public new HashColumnBase Column => (HashColumnBase)base.Column;
 
 		private void SubscribeToColumnEvents()
 		{

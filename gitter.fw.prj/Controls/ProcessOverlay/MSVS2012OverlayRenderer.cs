@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,11 +21,8 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
-	using System.Linq;
-	using System.Text;
 
 	sealed class MSVS2012OverlayRenderer : ProcessOverlayRenderer
 	{
@@ -39,38 +36,23 @@ namespace gitter.Framework.Controls
 
 		private sealed class DarkColorTable : IColorTable
 		{
-			public Color Text { get { return MSVS2012DarkColors.WINDOW_TEXT; } }
+			public Color Text => MSVS2012DarkColors.WINDOW_TEXT;
 
-			public Color Background { get { return MSVS2012DarkColors.WORK_AREA; } }
+			public Color Background => MSVS2012DarkColors.WORK_AREA;
 		}
 
 		private static IColorTable _darkColors;
 
-		public static IColorTable DarkColors
-		{
-			get
-			{
-				if(_darkColors == null)
-				{
-					_darkColors = new DarkColorTable();
-				}
-				return _darkColors;
-			}
-		}
-
-		private readonly IColorTable _colorTable;
+		public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
 
 		public MSVS2012OverlayRenderer(IColorTable colorTable)
 		{
 			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
-			_colorTable = colorTable;
+			ColorTable = colorTable;
 		}
 
-		private IColorTable ColorTable
-		{
-			get { return _colorTable; }
-		}
+		private IColorTable ColorTable { get; }
 
 		private static Color ColorLERP(Color c1, Color c2, double position)
 		{

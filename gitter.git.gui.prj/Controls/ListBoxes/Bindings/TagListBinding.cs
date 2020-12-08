@@ -37,13 +37,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		protected override Comparison<CustomListBoxItem> GetComparison()
-		{
-			return TagListItem.CompareByName;
-		}
+			=> TagListItem.CompareByName;
 
 		protected override CustomListBoxItem<Tag> RepresentObject(Tag obj)
-		{
-			return new TagListItem(obj);
-		}
+			=> new TagListItem(obj);
 	}
 }

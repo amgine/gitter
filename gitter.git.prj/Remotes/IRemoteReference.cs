@@ -45,7 +45,7 @@ namespace gitter.Git
 		/// <summary>Remove reference from remote repository.</summary>
 		void Delete();
 
-		Task DeleteAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 
 		bool IsDeleted { get; }
 	}

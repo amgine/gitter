@@ -297,7 +297,7 @@ namespace gitter.Git
 				const string ExcMessage = "Invalid stash name format.";
 
 				Verify.Argument.IsNotNull(name, nameof(name));
-				Verify.Argument.IsTrue(name.StartsWith(GitConstants.StashFullName), "name", ExcMessage);
+				Verify.Argument.IsTrue(name.StartsWith(GitConstants.StashFullName), nameof(name), ExcMessage);
 
 				var sfnl = GitConstants.StashFullName.Length;
 				if(name.Length == sfnl)
@@ -309,10 +309,10 @@ namespace gitter.Git
 				}
 				else
 				{
-					Verify.Argument.IsTrue(name.Length - sfnl - 3 >= 1, "name", ExcMessage);
-					Verify.Argument.IsTrue(name[sfnl + 0] == '@', "name", ExcMessage);
-					Verify.Argument.IsTrue(name[sfnl + 1] == '{', "name", ExcMessage);
-					Verify.Argument.IsTrue(name[name.Length - 1] == '}', "name", ExcMessage);
+					Verify.Argument.IsTrue(name.Length - sfnl - 3 >= 1, nameof(name), ExcMessage);
+					Verify.Argument.IsTrue(name[sfnl + 0] == '@', nameof(name), ExcMessage);
+					Verify.Argument.IsTrue(name[sfnl + 1] == '{', nameof(name), ExcMessage);
+					Verify.Argument.IsTrue(name[name.Length - 1] == '}', nameof(name), ExcMessage);
 					var s = name.Substring(sfnl + 2, name.Length - sfnl - 3);
 					int index;
 					Verify.Argument.IsTrue(

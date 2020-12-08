@@ -78,14 +78,11 @@ namespace gitter.Git.Gui.Controls
 			Column.ShowColorsChanged -= OnShowColorsCheckedChanged;
 		}
 
-		public new GraphColumn Column
-		{
-			get { return (GraphColumn)base.Column; }
-		}
+		public new GraphColumn Column => (GraphColumn)base.Column;
 
 		public bool ShowColors
 		{
-			get { return _chkShowColors != null ? _chkShowColors.IsChecked : Column.ShowColors; }
+			get => _chkShowColors != null ? _chkShowColors.IsChecked : Column.ShowColors;
 			private set
 			{
 				if(_chkShowColors != null)

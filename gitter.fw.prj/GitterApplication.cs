@@ -63,7 +63,7 @@ namespace gitter.Framework
 		/// <summary>Returns the selected text renderer for application.</summary>
 		public static ITextRenderer TextRenderer
 		{
-			get { return _defaultTextRenderer; }
+			get => _defaultTextRenderer;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));

@@ -77,7 +77,7 @@ namespace gitter.Git
 			return Repository.Accessor.QueryBlame.Invoke(parameters);
 		}
 
-		public override async Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public override async Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 
@@ -89,20 +89,6 @@ namespace gitter.Git
 				.InvokeAsync(parameters, progress, cancellationToken);
 			progress?.Report(OperationProgress.Completed);
 			return result;
-
-			//return Repository
-			//	.Accessor
-			//	.QueryBlame
-			//	.InvokeAsync(parameters, progress, cancellationToken)
-			//	.ContinueWith(
-			//		t =>
-			//		{
-			//			progress?.Report(OperationProgress.Completed);
-			//			return TaskUtility.UnwrapResult(t);
-			//		},
-			//		cancellationToken,
-			//		TaskContinuationOptions.ExecuteSynchronously,
-			//		TaskScheduler.Default);
 		}
 
 		/// <summary>
@@ -122,9 +108,7 @@ namespace gitter.Git
 		/// </returns>
 		public override bool Equals(object obj)
 		{
-			if(obj == null) return false;
-			var ds = obj as RevisionFileBlameSource;
-			if(ds == null) return false;
+			if(obj is not RevisionFileBlameSource ds) return false;
 			return Revision == ds.Revision && FileName == ds.FileName;
 		}
 

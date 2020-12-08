@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,14 +29,10 @@ namespace gitter.Framework.Configuration
 	{
 		#region Data
 
-		/// <summary>Section name.</summary>
-		private readonly string _name;
 		/// <summary>Subsections dictionary.</summary>
-		private readonly Dictionary<string, Section> _sections;
+		private readonly Dictionary<string, Section> _sections = new();
 		/// <summary>Parameters dictionary.</summary>
-		private readonly Dictionary<string, Parameter> _parameters;
-		/// <summary>Section modification flag.</summary>
-		private bool _isModified;
+		private readonly Dictionary<string, Parameter> _parameters = new();
 
 		#endregion
 
@@ -44,52 +40,33 @@ namespace gitter.Framework.Configuration
 
 		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
 		/// <param name="name">Section name.</param>
-		public Section(string name)
-		{
-			_name = name;
-			_sections = new Dictionary<string, Section>();
-			_parameters = new Dictionary<string, Parameter>();
-		}
+		public Section(string name) => Name = name;
 
 		#endregion
 
 		/// <summary>Gets section name.</summary>
 		/// <value>Section name.</value>
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
 		/// <summary>Gets a value indicating whether this section is modified.</summary>
 		/// <value><c>true</c> if this section is modified; otherwise, <c>false</c>.</value>
-		public bool IsModified
-		{
-			get { return _isModified; }
-		}
+		public bool IsModified { get; private set; }
 
 		#region Sub-section Management
 
 		/// <summary>Gets list of all subsections.</summary>
 		/// <value>List of all subsections.</value>
-		public IEnumerable<Section> Sections
-		{
-			get { return _sections.Values; }
-		}
+		public IEnumerable<Section> Sections => _sections.Values;
 
 		/// <summary>Gets the section count.</summary>
 		/// <value>The section count.</value>
-		public int SectionCount
-		{
-			get { return _sections.Count; }
-		}
+		public int SectionCount => _sections.Count;
 
 		/// <summary>Determines whether this section contains subsection with the specified name.</summary>
 		/// <param name="name">Subsection name.</param>
 		/// <returns><c>true</c> if this section contains subsection with the specified name; otherwise, <c>false</c>.</returns>
 		public bool ContainsSection(string name)
-		{
-			return _sections.ContainsKey(name);
-		}
+			=> _sections.ContainsKey(name);
 
 		/// <summary>Removes all subsections.</summary>
 		public void ClearSections()
@@ -97,7 +74,7 @@ namespace gitter.Framework.Configuration
 			if(_sections.Count != 0)
 			{
 				_sections.Clear();
-				_isModified = true;
+				IsModified = true;
 			}
 		}
 
@@ -110,8 +87,7 @@ namespace gitter.Framework.Configuration
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			Section section;
-			if(!_sections.TryGetValue(name, out section))
+			if(!_sections.TryGetValue(name, out var section))
 			{
 				section = new Section(name);
 				_sections.Add(name, section);
@@ -132,8 +108,7 @@ namespace gitter.Framework.Configuration
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			Section section;
-			if(!_sections.TryGetValue(name, out section))
+			if(!_sections.TryGetValue(name, out var section))
 			{
 				section = new Section(name);
 				_sections.Add(name, section);
@@ -146,22 +121,19 @@ namespace gitter.Framework.Configuration
 		/// <returns>Subsection with the specified name</returns>
 		public Section GetSection(string name)
 		{
-			Section section;
 			Verify.Argument.IsTrue(
-				_sections.TryGetValue(name, out section),
-				"name", "Section not found.");
+				_sections.TryGetValue(name, out var section),
+				nameof(name), "Section not found.");
 			return section;
 		}
 
 		public Section TryGetSection(string name)
-		{
-			Section section;
-			if(!_sections.TryGetValue(name, out section))
-			{
-				return null;
-			}
-			return section;
-		}
+			=> _sections.TryGetValue(name, out var section)
+				? section
+				: default;
+
+		public bool TryGetSection(string name, out Section section)
+			=> _sections.TryGetValue(name, out section);
 
 		public void AddSection(Section section)
 		{
@@ -176,7 +148,7 @@ namespace gitter.Framework.Configuration
 
 			var section = new Section(name);
 			_sections.Add(name, section);
-			_isModified = true;
+			IsModified = true;
 			return section;
 		}
 
@@ -186,22 +158,13 @@ namespace gitter.Framework.Configuration
 
 		/// <summary>Gets list of all parameters of this section.</summary>
 		/// <value>List of all parameters of this section.</value>
-		public IEnumerable<Parameter> Parameters
-		{
-			get { return _parameters.Values; }
-		}
+		public IEnumerable<Parameter> Parameters => _parameters.Values;
 
 		/// <summary>Gets the parameter count.</summary>
 		/// <value>Parameter count.</value>
-		public int ParameterCount
-		{
-			get { return _parameters.Count; }
-		}
+		public int ParameterCount => _parameters.Count;
 
-		public Parameter GetParameter(string name)
-		{
-			return _parameters[name];
-		}
+		public Parameter GetParameter(string name) => _parameters[name];
 
 		public void AddParameter(Parameter parameter)
 		{
@@ -211,9 +174,7 @@ namespace gitter.Framework.Configuration
 		}
 
 		public bool ContainsParameter(string name)
-		{
-			return _parameters.ContainsKey(name);
-		}
+			=> _parameters.ContainsKey(name);
 
 		/// <summary>Removes all parameters in this section.</summary>
 		public void ClearParameters()
@@ -221,65 +182,44 @@ namespace gitter.Framework.Configuration
 			if(_parameters.Count != 0)
 			{
 				_parameters.Clear();
-				_isModified = true;
+				IsModified = true;
 			}
 		}
 
 		public Parameter TryGetParameter(string name)
-		{
-			Parameter p;
-			if(_parameters.TryGetValue(name, out p))
-			{
-				return p;
-			}
-			else
-			{
-				return null;
-			}
-		}
+			=> _parameters.TryGetValue(name, out var parameter)
+				? parameter
+				: default;
 
 		public bool TryGetParameter(string name, out Parameter parameter)
-		{
-			return _parameters.TryGetValue(name, out parameter);
-		}
+			=> _parameters.TryGetValue(name, out parameter);
 
 		public void SetValue<T>(string name, T value)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 
-			Parameter parameter;
-			if(!_parameters.TryGetValue(name, out parameter))
+			if(!_parameters.TryGetValue(name, out var parameter))
 			{
 				parameter = new Parameter(name,
 					TypeHelpers.GetType<T>(value),
 					TypeHelpers.PackValue<T>(value));
 				_parameters.Add(name, parameter);
-				_isModified = true;
+				IsModified = true;
 			}
 			else
 			{
 				parameter.Value = TypeHelpers.PackValue<T>(value);
-				_isModified = true;
+				IsModified = true;
 			}
 		}
 
 		public T GetValue<T>(string name, T defaultValue)
-		{
-			Parameter parameter;
-			if(!_parameters.TryGetValue(name, out parameter))
-			{
-				return defaultValue;
-			}
-			else
-			{
-				return TypeHelpers.UnpackValue<T>(parameter.Value);
-			}
-		}
+			=> _parameters.TryGetValue(name, out var parameter)
+				? TypeHelpers.UnpackValue<T>(parameter.Value)
+				: defaultValue;
 
 		public T GetValue<T>(string name)
-		{
-			return GetValue<T>(name, default(T));
-		}
+			=> GetValue<T>(name, default);
 
 		#endregion
 

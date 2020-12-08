@@ -237,12 +237,12 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			var psi = new ProcessStartInfo()
 			{
-				Arguments = command,
+				Arguments        = command,
 				WorkingDirectory = repository,
-				WindowStyle = ProcessWindowStyle.Normal,
-				LoadUserProfile = true,
-				FileName = _shExePath,
-				ErrorDialog = false,
+				WindowStyle      = ProcessWindowStyle.Normal,
+				LoadUserProfile  = true,
+				FileName         = _shExePath,
+				ErrorDialog      = false,
 			};
 			return Process.Start(psi);
 		}

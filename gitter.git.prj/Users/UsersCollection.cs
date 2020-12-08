@@ -39,9 +39,7 @@ namespace gitter.Git
 		#endregion
 
 		protected override UserEventArgs CreateEventArgs(User item)
-		{
-			return new UserEventArgs(item);
-		}
+			=> new UserEventArgs(item);
 
 		public User this[string name, string email]
 		{
@@ -58,10 +56,9 @@ namespace gitter.Git
 
 		public User TryGetUser(string name, string email)
 		{
-			User user;
 			lock(SyncRoot)
 			{
-				if(ObjectStorage.TryGetValue(name + "\n" + email, out user))
+				if(ObjectStorage.TryGetValue(name + "\n" + email, out var user))
 				{
 					return user;
 				}

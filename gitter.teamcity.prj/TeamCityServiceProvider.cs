@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -40,6 +40,8 @@ namespace gitter.TeamCity
 		public string Name => "teamcity";
 
 		public string DisplayName => Resources.StrTeamCity;
+
+		public bool CanBeAddedManually => true;
 
 		public Image Icon => CachedResources.Bitmaps["ImgTeamCity"];
 
@@ -95,8 +97,14 @@ namespace gitter.TeamCity
 			return Encoding.UTF8.GetString(Convert.FromBase64String(str));
 		}
 
-		public IGuiProvider CreateGuiProvider(IRepository repository)
+		public bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider)
 		{
+			if(!IsValidFor(repository))
+			{
+				guiProvider = default;
+				return false;
+			}
+
 			var section = repository.ConfigSection.GetSection("IssueTrackers").GetSection("TeamCity");
 
 			var uri = section.GetValue<string>("ServiceUri");
@@ -108,7 +116,8 @@ namespace gitter.TeamCity
 				DefaultProjectId = pid,
 			};
 
-			return new TeamCityGuiProvider(repository, svc);
+			guiProvider = new TeamCityGuiProvider(repository, svc);
+			return true;
 		}
 	}
 }

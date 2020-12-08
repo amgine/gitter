@@ -37,23 +37,6 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly string _workingDirectory;
-		private readonly string _gitDirectory;
-		private readonly ConfigurationManager _configurationManager;
-
-		private readonly IRepositoryAccessor _accessor;
-
-		private readonly RevisionCache _revisionCache;
-		private readonly ConfigParametersCollection _configuration;
-		private readonly Status _status;
-		private readonly StashedStatesCollection _stash;
-		private readonly RefsCollection _refs;
-		private readonly NotesCollection _notes;
-		private readonly RemotesCollection _remotes;
-		private readonly UsersCollection _users;
-		private readonly SubmodulesCollection _submodules;
-		private readonly HooksCollection _hooks;
-		private RepositoryMonitor _monitor;
 		private RepositoryState _state;
 		private User _userIdentity;
 
@@ -98,7 +81,7 @@ namespace gitter.Git
 
 		#region Static
 
-		private static void SetProgress(IProgress<OperationProgress> progress, int val, string action)
+		private static void ReportLoadProgress(IProgress<OperationProgress> progress, int val, string action)
 		{
 			if(progress != null)
 			{
@@ -112,14 +95,14 @@ namespace gitter.Git
 			}
 		}
 
-		private static void LoadCore(Repository repository, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		private static void LoadCore(Repository repository, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
-			SetProgress(progress, 0, Resources.StrLoadingConfiguration.AddEllipsis());
+			ReportLoadProgress(progress, 0, Resources.StrLoadingConfiguration.AddEllipsis());
 
 			repository.Configuration.Refresh();
 
 			cancellationToken.ThrowIfCancellationRequested();
-			SetProgress(progress, 1, Resources.StrLoadingReferences.AddEllipsis());
+			ReportLoadProgress(progress, 1, Resources.StrLoadingReferences.AddEllipsis());
 
 			var refs = repository.Accessor.QueryReferences.Invoke(
 				new QueryReferencesParameters(ReferenceType.Branch | ReferenceType.Tag | ReferenceType.Stash));
@@ -128,34 +111,34 @@ namespace gitter.Git
 			if(refs.Stash != null)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				SetProgress(progress, 2, Resources.StrLoadingStash.AddEllipsis());
+				ReportLoadProgress(progress, 2, Resources.StrLoadingStash.AddEllipsis());
 				repository.Stash.Refresh();
 			}
 
 			repository.Notes.Refresh();
 
 			cancellationToken.ThrowIfCancellationRequested();
-			SetProgress(progress, 3, Resources.StrLoadingHEAD.AddEllipsis());
+			ReportLoadProgress(progress, 3, Resources.StrLoadingHEAD.AddEllipsis());
 			repository.Head = new Head(repository);
 
 			cancellationToken.ThrowIfCancellationRequested();
-			SetProgress(progress, 4, Resources.StrLoadingRemotes.AddEllipsis());
+			ReportLoadProgress(progress, 4, Resources.StrLoadingRemotes.AddEllipsis());
 			repository.Remotes.Refresh();
 
 
 			cancellationToken.ThrowIfCancellationRequested();
-			SetProgress(progress, 5, Resources.StrLoadingSubmodules.AddEllipsis());
+			ReportLoadProgress(progress, 5, Resources.StrLoadingSubmodules.AddEllipsis());
 			repository.Submodules.Refresh();
 
 			if(!repository.Head.IsEmpty)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				SetProgress(progress, 6, Resources.StrLoadingUsers.AddEllipsis());
+				ReportLoadProgress(progress, 6, Resources.StrLoadingUsers.AddEllipsis());
 				repository.Users.Refresh();
 			}
 
 			cancellationToken.ThrowIfCancellationRequested();
-			SetProgress(progress, 7, Resources.StrLoadingStatus.AddEllipsis());
+			ReportLoadProgress(progress, 7, Resources.StrLoadingStatus.AddEllipsis());
 			repository.Status.Refresh();
 
 			cancellationToken.ThrowIfCancellationRequested();
@@ -169,7 +152,7 @@ namespace gitter.Git
 			repository.Monitor.IsEnabled = true;
 
 			cancellationToken.ThrowIfCancellationRequested();
-			SetProgress(progress, 8, Resources.StrCompleted.AddPeriod());
+			ReportLoadProgress(progress, 8, Resources.StrCompleted.AddPeriod());
 		}
 
 		public static Repository Load(IGitAccessor gitAccessor, string workingDirectory)
@@ -177,16 +160,17 @@ namespace gitter.Git
 			return new Repository(gitAccessor, workingDirectory, true);
 		}
 
-		public static Task<Repository> LoadAsync(IGitAccessor gitAccessor, string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public static Task<Repository> LoadAsync(IGitAccessor gitAccessor, string workingDirectory,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 			Verify.Argument.IsNotNull(workingDirectory, nameof(workingDirectory));
 
-			return Task.Factory.StartNew(
+			return Task.Run(
 				() =>
 				{
 					progress?.Report(new OperationProgress(Resources.StrLoadingRepository.AddEllipsis()));
-					var repository = new Repository(gitAccessor, workingDirectory, false);
+					var repository = new Repository(gitAccessor, workingDirectory, load: false);
 					try
 					{
 						LoadCore(repository, progress, cancellationToken);
@@ -197,10 +181,7 @@ namespace gitter.Git
 						throw;
 					}
 					return repository;
-				},
-				cancellationToken,
-				TaskCreationOptions.None,
-				TaskScheduler.Default);
+				});
 		}
 
 		private static string GetWorkingDirectory(string workingDirectory)
@@ -220,24 +201,22 @@ namespace gitter.Git
 			var gitDirectory = Path.Combine(workingDirectory, GitConstants.GitDir);
 			if(!Directory.Exists(gitDirectory))
 			{
-				using(var sr = new StreamReader(gitDirectory))
+				using var sr = new StreamReader(gitDirectory);
+				string line = sr.ReadLine();
+				while(line != null)
 				{
-					string line = sr.ReadLine();
-					while(line != null)
+					if(line.StartsWith(GitDirPrefix))
 					{
-						if(line.StartsWith(GitDirPrefix))
+						gitDirectory = line.Substring(GitDirPrefix.Length);
+						if(!Path.IsPathRooted(gitDirectory))
 						{
-							gitDirectory = line.Substring(GitDirPrefix.Length);
-							if(!Path.IsPathRooted(gitDirectory))
-							{
-								gitDirectory = Path.GetFullPath(Path.Combine(
-									workingDirectory,
-									gitDirectory));
-							}
-							break;
+							gitDirectory = Path.GetFullPath(Path.Combine(
+								workingDirectory,
+								gitDirectory));
 						}
-						line = sr.ReadLine();
+						break;
 					}
+					line = sr.ReadLine();
 				}
 			}
 			return gitDirectory;
@@ -245,26 +224,20 @@ namespace gitter.Git
 
 		private static ConfigurationManager GetConfigurationManager(string gitDirectory)
 		{
-			ConfigurationManager configurationManager = null;
+			var configurationManager = default(ConfigurationManager);
 			var cfgFileName = Path.Combine(gitDirectory, "gitter-config");
 			try
 			{
 				if(File.Exists(cfgFileName))
 				{
-					using(var fs = new FileStream(cfgFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-					{
-						configurationManager = new ConfigurationManager(new XmlAdapter(fs));
-					}
+					using var fs = new FileStream(cfgFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+					configurationManager = new ConfigurationManager(new XmlAdapter(fs));
 				}
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
 			}
-			if(configurationManager == null)
-			{
-				configurationManager = new ConfigurationManager("Gitter");
-			}
-			return configurationManager;
+			return configurationManager ?? new ConfigurationManager("Gitter");
 		}
 
 		#endregion
@@ -280,27 +253,27 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 			Verify.Argument.IsNotNull(workingDirectory, nameof(workingDirectory));
 
-			_workingDirectory     = GetWorkingDirectory(workingDirectory);
-			_gitDirectory         = GetGitDirectory(_workingDirectory);
-			_configurationManager = GetConfigurationManager(_gitDirectory);
+			WorkingDirectory     = GetWorkingDirectory(workingDirectory);
+			GitDirectory         = GetGitDirectory(WorkingDirectory);
+			ConfigurationManager = GetConfigurationManager(GitDirectory);
 
-			_accessor      = gitAccessor.CreateRepositoryAccessor(this);
-			_revisionCache = new RevisionCache(this);
-			_configuration = new ConfigParametersCollection(this);
-			_status        = new Status(this);
-			_stash         = new StashedStatesCollection(this);
-			_refs          = new RefsCollection(this);
-			_notes         = new NotesCollection(this);
-			_remotes       = new RemotesCollection(this);
-			_submodules    = new SubmodulesCollection(this);
-			_users         = new UsersCollection(this);
-			_hooks         = new HooksCollection(this);
+			Accessor      = gitAccessor.CreateRepositoryAccessor(this);
+			Revisions     = new RevisionCache(this);
+			Configuration = new ConfigParametersCollection(this);
+			Status        = new Status(this);
+			Stash         = new StashedStatesCollection(this);
+			Refs          = new RefsCollection(this);
+			Notes         = new NotesCollection(this);
+			Remotes       = new RemotesCollection(this);
+			Submodules    = new SubmodulesCollection(this);
+			Users         = new UsersCollection(this);
+			Hooks         = new HooksCollection(this);
 
 			if(load)
 			{
 				try
 				{
-					LoadCore(this, null, CancellationToken.None);
+					LoadCore(this);
 				}
 				catch
 				{
@@ -311,10 +284,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Finalizes an instance of the <see cref="Repository"/> class.</summary>
-		~Repository()
-		{
-			Dispose(false);
-		}
+		~Repository() => Dispose(disposing: false);
 
 		#endregion
 
@@ -331,10 +301,10 @@ namespace gitter.Git
 			}
 			if(Hash.TryParse(revisionExpression, out var hash))
 			{
-				var revision = _revisionCache.TryGetRevision(hash);
+				var revision = Revisions.TryGetRevision(hash);
 				if(revision != null) return revision;
 			}
-			var reference = _refs.TryGetReference(revisionExpression);
+			var reference = Refs.TryGetReference(revisionExpression);
 			if(reference != null) return reference;
 
 			return new DynamicRevisionPointer(this, revisionExpression);
@@ -344,11 +314,7 @@ namespace gitter.Git
 
 		/// <summary>Returns repository monitor.</summary>
 		/// <value>Repository monitor.</value>
-		internal RepositoryMonitor Monitor
-		{
-			get { return _monitor; }
-			private set { _monitor = value; }
-		}
+		internal RepositoryMonitor Monitor { get; private set; }
 
 		/// <summary>Returns repository monitor.</summary>
 		/// <value>Repository monitor.</value>
@@ -360,27 +326,27 @@ namespace gitter.Git
 
 		/// <summary>Returns object which provides raw access to this repository.</summary>
 		/// <value>Object which provides raw access to this repository.</value>
-		public IRepositoryAccessor Accessor => _accessor;
+		public IRepositoryAccessor Accessor { get; }
 
 		/// <summary>Returns repository configuration manager.</summary>
 		/// <value>Repository configuration manager.</value>
-		public ConfigurationManager ConfigurationManager => _configurationManager;
+		public ConfigurationManager ConfigurationManager { get; }
 
 		/// <summary>Returns repository configuration section.</summary>
 		/// <value>Repository configuration section.</value>
-		public Section ConfigSection => _configurationManager.RootSection;
+		public Section ConfigSection => ConfigurationManager.RootSection;
 
 		/// <summary>Returns repository working directory.</summary>
 		/// <value>Repository working directory.</value>
-		public string WorkingDirectory => _workingDirectory;
+		public string WorkingDirectory { get; }
 
 		/// <summary>Returns repository directory (.git by default).</summary>
 		/// <value>Repository directory.</value>
-		public string GitDirectory => _gitDirectory;
+		public string GitDirectory { get; }
 
 		/// <summary>Returns if it's an empty repository.</summary>
 		/// <value><c>true</c>, if this is a an empty repository, <c>false</c> otherwise.</value>
-		public bool IsEmpty => Head.IsEmpty && _refs.Heads.Count == 0;
+		public bool IsEmpty => Head.IsEmpty && Refs.Heads.Count == 0;
 
 		/// <summary>Returns if this repository is a shallow repository.</summary>
 		/// <value><c>true</c>, if this is a shallow repository, <c>false</c> otherwise.</value>
@@ -388,7 +354,7 @@ namespace gitter.Git
 
 		/// <summary>Returns revision cache.</summary>
 		/// <value>Revision cache.</value>
-		public RevisionCache Revisions => _revisionCache;
+		public RevisionCache Revisions { get; }
 
 		/// <summary>Returns HEAD reference.</summary>
 		/// <value>HEAD reference.</value>
@@ -396,39 +362,39 @@ namespace gitter.Git
 
 		/// <summary>Returns references collection.</summary>
 		/// <value>References collection.</value>
-		public RefsCollection Refs => _refs;
+		public RefsCollection Refs { get; }
 
 		/// <summary>Returns stash.</summary>
 		/// <value>Stash.</value>
-		public StashedStatesCollection Stash => _stash;
+		public StashedStatesCollection Stash { get; }
 
 		/// <summary>Returns notes collection.</summary>
 		/// <value>Notes collection.</value>
-		public NotesCollection Notes => _notes;
+		public NotesCollection Notes { get; }
 
 		/// <summary>Returns remotes collection.</summary>
 		/// <value>Remotes collection.</value>
-		public RemotesCollection Remotes => _remotes;
+		public RemotesCollection Remotes { get; }
 
 		/// <summary>Returns submodules collection.</summary>
 		/// <value>Submodules collection.</value>
-		public SubmodulesCollection Submodules => _submodules;
+		public SubmodulesCollection Submodules { get; }
 
 		/// <summary>Returns working directory status.</summary>
 		/// <value>Working directory status.</value>
-		public Status Status => _status;
+		public Status Status { get; }
 
 		/// <summary>Returns repository configuration.</summary>
 		/// <value>Repository configuration.</value>
-		public ConfigParametersCollection Configuration => _configuration;
+		public ConfigParametersCollection Configuration { get; }
 
 		/// <summary>Returns hooks collection.</summary>
 		/// <value>Hooks collection.</value>
-		public HooksCollection Hooks => _hooks;
+		public HooksCollection Hooks { get; }
 
 		/// <summary>Returns users collection.</summary>
 		/// <value>Users collection.</value>
-		public UsersCollection Users => _users;
+		public UsersCollection Users { get; }
 
 		/// <summary>Returns repository state.</summary>
 		/// <value>Repository state.</value>
@@ -450,20 +416,14 @@ namespace gitter.Git
 				fileName = GetGitFileName(fileName);
 				if(File.Exists(fileName))
 				{
-					using(var sr = new StreamReader(fileName))
-					{
-						return GetRevisionPointer(sr.ReadLine());
-					}
-				}
-				else
-				{
-					return null;
+					using var sr = new StreamReader(fileName);
+					return GetRevisionPointer(sr.ReadLine());
 				}
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
-				return null;
 			}
+			return default;
 		}
 
 		public IRevisionPointer MergeHead => RevisionPointerFromGitFile(GitConstants.MERGE_HEAD);
@@ -509,8 +469,8 @@ namespace gitter.Git
 		private void UpdateUserIdentity(bool raiseEvent)
 		{
 			User userIdentity;
-			var name  = _configuration.TryGetParameterValue(GitConstants.UserNameParameter);
-			var email = _configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
+			var name  = Configuration.TryGetParameterValue(GitConstants.UserNameParameter);
+			var email = Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 			if(name == null || email == null)
 			{
 				userIdentity = null;
@@ -519,7 +479,7 @@ namespace gitter.Git
 			{
 				if(_userIdentity == null || _userIdentity.Name != name || _userIdentity.Email != email)
 				{
-					userIdentity = _users.TryGetUser(name, email);
+					userIdentity = Users.TryGetUser(name, email);
 					if(userIdentity == null)
 					{
 						userIdentity = new User(this, name, email, 0);
@@ -556,7 +516,7 @@ namespace gitter.Git
 		/// <returns>Full name for a file in repository directory.</returns>
 		public string GetGitFileName(string file)
 		{
-			return Path.Combine(_gitDirectory, file);
+			return Path.Combine(GitDirectory, file);
 		}
 
 		/// <summary>Returns content of a file in repository directory (.git directory by default).</summary>
@@ -706,7 +666,7 @@ namespace gitter.Git
 				{
 					Head.Refresh();
 				}
-				_status.Refresh();
+				Status.Refresh();
 				OnStateChanged();
 				OnUpdated();
 			}
@@ -748,10 +708,6 @@ namespace gitter.Git
 					.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			catch
-			{
-				throw;
-			}
 			finally
 			{
 				block.Dispose();
@@ -763,28 +719,10 @@ namespace gitter.Git
 				{
 					Head.Refresh();
 				}
-				_status.Refresh();
+				Status.Refresh();
 				OnStateChanged();
 				OnUpdated();
 			}
-			//return Accessor.Revert.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		if(Head.Pointer is Branch branch && !branch.IsRemote)
-			//		{
-			//			branch.Refresh();
-			//		}
-			//		else
-			//		{
-			//			Head.Refresh();
-			//		}
-			//		_status.Refresh();
-			//		OnStateChanged();
-			//		OnUpdated();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//	});
 		}
 
 		#endregion
@@ -809,13 +747,13 @@ namespace gitter.Git
 				}
 				finally
 				{
-					_refs.RefreshBranches();
+					Refs.RefreshBranches();
 					Head.Refresh();
 					if(Head.Pointer is Branch branch && !branch.IsRemote)
 					{
 						branch.Refresh();
 					}
-					_status.Refresh();
+					Status.Refresh();
 					OnStateChanged();
 					OnUpdated();
 				}
@@ -850,50 +788,25 @@ namespace gitter.Git
 				RepositoryNotifications.Checkout,
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.IndexUpdated);
-			
 			try
 			{
 				await Accessor
 					.Rebase
 					.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None);
 			}
-			catch 
-			{
-				throw;
-			}
 			finally
 			{
 				block.Dispose();
-				_refs.RefreshBranches();
+				Refs.RefreshBranches();
 				Head.Refresh();
 				if(Head.Pointer is Branch branch && !branch.IsRemote)
 				{
 					branch.Refresh();
 				}
-				_status.Refresh();
+				Status.Refresh();
 				OnStateChanged();
 				OnUpdated();
-
 			}
-			//return Accessor.Rebase.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		_refs.RefreshBranches();
-			//		Head.Refresh();
-			//		if(Head.Pointer is Branch branch && !branch.IsRemote)
-			//		{
-			//			branch.Refresh();
-			//		}
-			//		_status.Refresh();
-			//		OnStateChanged();
-			//		OnUpdated();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#endregion
@@ -911,17 +824,23 @@ namespace gitter.Git
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
 			var parameters = GetGarbageCollectParameters();
-			Accessor.GarbageCollect.Invoke(parameters);
+			using(Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
+			{
+				Accessor.GarbageCollect.Invoke(parameters);
+			}
 		}
 
 		/// <summary>Perform garbage collection.</summary>
-		public Task GarbageCollectAsync(IProgress<OperationProgress> progress)
+		public Task GarbageCollectAsync(IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
 			progress?.Report(new OperationProgress(Resources.StrOptimizingRepository.AddEllipsis()));
 			var parameters = GetGarbageCollectParameters();
-			return Accessor.GarbageCollect.InvokeAsync(parameters, progress, CancellationToken.None);
+			using(Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
+			{
+				return Accessor.GarbageCollect.InvokeAsync(parameters, progress, CancellationToken.None);
+			}
 		}
 
 		#endregion
@@ -940,7 +859,7 @@ namespace gitter.Git
 		private void Dispose(bool disposing)
 		{
 			Monitor?.Dispose();
-			(_accessor as IDisposable)?.Dispose();
+			(Accessor as IDisposable)?.Dispose();
 		}
 
 		/// <summary>

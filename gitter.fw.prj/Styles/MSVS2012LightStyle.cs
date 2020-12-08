@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -100,10 +100,7 @@ namespace gitter.Framework
 			_itemBackgroundStyles = new MSVS2012LightItemBackgroundStyles();
 		}
 
-		public string Name
-		{
-			get { return "MSVS2012LightStyle"; }
-		}
+		public string Name => "MSVS2012LightStyle";
 
 		public string DisplayName
 		{

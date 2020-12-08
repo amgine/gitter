@@ -488,15 +488,9 @@ namespace gitter.Git.Gui.Controls
 			return res;
 		}
 
-		public int SelectionStart
-		{
-			get { return _selStart; }
-		}
+		public int SelectionStart => _selStart;
 
-		public int SelectionLength
-		{
-			get { return _selStart == -1 ? 0 : _selEnd - _selStart + 1; }
-		}
+		public int SelectionLength => _selStart == -1 ? 0 : _selEnd - _selStart + 1;
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{

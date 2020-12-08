@@ -27,8 +27,8 @@ namespace gitter.Git
 	{
 		public BlameCommit(
 			Hash hash,
-			string author, string authorEmail, DateTime authorDate, string authorTimeZone,
-			string committer, string committerEmail, DateTime commitDate, string committerTimeZone,
+			string author,    string authorEmail,    DateTimeOffset authorDate, string authorTimeZone,
+			string committer, string committerEmail, DateTimeOffset commitDate, string committerTimeZone,
 			string summary, bool isBoundary, string previous)
 		{
 			Hash              = hash;
@@ -53,7 +53,7 @@ namespace gitter.Git
 
 		public string AuthorTimeZone { get; }
 
-		public DateTime AuthorDate { get; }
+		public DateTimeOffset AuthorDate { get; }
 
 		public string AuthorEmail { get; }
 
@@ -63,7 +63,7 @@ namespace gitter.Git
 
 		public string CommitterEmail { get; }
 
-		public DateTime CommitDate { get; }
+		public DateTimeOffset CommitDate { get; }
 
 		public bool IsBoundary { get; }
 

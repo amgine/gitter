@@ -56,8 +56,7 @@ namespace gitter.Framework
 			{
 				if(validateInfo == null || validateInfo(info))
 				{
-					TObject obj;
-					if(!dictionary.TryGetValue(info.Name, out obj))
+					if(!dictionary.TryGetValue(info.Name, out var obj))
 					{
 						obj = factory(info);
 						dictionary.Add(obj.Name, obj);
@@ -69,10 +68,7 @@ namespace gitter.Framework
 						{
 							updater(obj, info);
 						}
-						if(hset != null)
-						{
-							hset.Remove(obj);
-						}
+						hset?.Remove(obj);
 					}
 				}
 			}
@@ -130,10 +126,7 @@ namespace gitter.Framework
 						{
 							updater(obj, info);
 						}
-						if(hset != null)
-						{
-							hset.Remove(obj);
-						}
+						hset?.Remove(obj);
 					}
 				}
 			}
@@ -191,8 +184,7 @@ namespace gitter.Framework
 						{
 							info.Update(obj);
 						}
-
-						if(hset != null) hset.Remove(obj);
+						hset?.Remove(obj);
 					}
 				}
 			}
@@ -287,10 +279,7 @@ namespace gitter.Framework
 							{
 								info.Update(list[id]);
 							}
-							if(hset != null)
-							{
-								hset.Remove(list[id]);
-							}
+							hset?.Remove(list[id]);
 							found = true;
 							break;
 						}

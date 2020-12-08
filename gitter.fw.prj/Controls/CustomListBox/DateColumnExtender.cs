@@ -61,24 +61,34 @@ namespace gitter.Framework.Controls
 			_lblRFC2822.Text		= Utility.FormatDate(date, DateFormat.RFC2822);
 			_lblISO8601.Text		= Utility.FormatDate(date, DateFormat.ISO8601);
 
-			DateFormat = column.DateFormat;
+			_chkConvertToLocal.Text = Resources.StrConvertDateTimeToLocal;
+
+			DateFormat     = column.DateFormat;
+			ConvertToLocal = column.ConvertToLocal;
 
 			SubscribeToColumnEvents();
 		}
 
 		private void SubscribeToColumnEvents()
 		{
-			_column.DateFormatChanged += OnColumnDateFormatChanged;
+			_column.DateFormatChanged     += OnColumnDateFormatChanged;
+			_column.ConvertToLocalChanged += OnConvertToLocalChanged;
 		}
 
 		private void UnsubscribeFromColumnEvents()
 		{
-			_column.DateFormatChanged -= OnColumnDateFormatChanged;
+			_column.DateFormatChanged     -= OnColumnDateFormatChanged;
+			_column.ConvertToLocalChanged -= OnConvertToLocalChanged;
 		}
 
 		private void OnColumnDateFormatChanged(object sender, EventArgs e)
 		{
 			DateFormat = _column.DateFormat;
+		}
+
+		private void OnConvertToLocalChanged(object sender, EventArgs e)
+		{
+			ConvertToLocal = _column.ConvertToLocal;
 		}
 
 		public DateFormat DateFormat
@@ -132,11 +142,36 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		public bool ConvertToLocal
+		{
+			get => _chkConvertToLocal.Checked;
+			set
+			{
+				_disableEvents = true;
+				try
+				{
+					_chkConvertToLocal.Checked = value;
+				}
+				finally
+				{
+					_disableEvents = false;
+				}
+			}
+		}
+
 		private void OnCheckedChanged(object sender, EventArgs e)
 		{
 			if(!_disableEvents && ((RadioButton)sender).Checked)
 			{
 				_column.DateFormat = DateFormat;
+			}
+		}
+
+		private void _chkConvertToLocal_CheckedChanged(object sender, EventArgs e)
+		{
+			if(!_disableEvents)
+			{
+				_column.ConvertToLocal = ConvertToLocal;
 			}
 		}
 	}

@@ -31,7 +31,7 @@ namespace gitter.Framework.Options
 
 	public partial class IntegrationOptionsPage : PropertyPage, IExecutableDialog, IElevatedExecutableDialog
 	{
-		public static readonly new Guid Guid = new Guid("3C8876D2-3F45-438D-AD23-977364DA8922");
+		public static readonly new Guid Guid = new("3C8876D2-3F45-438D-AD23-977364DA8922");
 
 		private sealed class FeatureItem : CustomListBoxItem<IIntegrationFeature>
 		{

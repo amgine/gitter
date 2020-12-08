@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,15 +25,9 @@ namespace gitter.Framework.Controls
 
 	public interface IScrollBarWidget : IDisposable
 	{
-		#region Events
-
 		event EventHandler<ScrollEventArgs> Scroll;
 
 		event EventHandler ValueChanged;
-
-		#endregion
-
-		#region Properties
 
 		Control Control { get; }
 
@@ -48,7 +42,5 @@ namespace gitter.Framework.Controls
 		int SmallChange { get; set; }
 
 		int LargeChange { get; set; }
-
-		#endregion
 	}
 }

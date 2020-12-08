@@ -1,0 +1,26 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFrameworks>net48</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(SolutionDir)\common\key.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(SolutionDir)\common\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
+    <Compile Include="$(SolutionDir)\shared\Debug.cs" Link="Shared\Debug.cs" />
+    <Compile Include="$(SolutionDir)\shared\Verify.cs" Link="Shared\Verify.cs" />
+  </ItemGroup>
+
+</Project>

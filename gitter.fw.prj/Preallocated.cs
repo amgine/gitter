@@ -22,6 +22,8 @@ namespace gitter.Framework
 {
 	public class Preallocated<T>
 	{
+		private Preallocated() { }
+
 		public static readonly T[] EmptyArray = new T[0];
 	}
 }

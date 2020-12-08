@@ -143,10 +143,7 @@ namespace gitter.Git
 
 		/// <summary><see cref="ReferenceType"/>.</summary>
 		/// <value><see cref="ReferenceType.ReflogRecord"/>.</value>
-		public ReferenceType Type
-		{
-			get { return ReferenceType.ReflogRecord; }
-		}
+		public ReferenceType Type => ReferenceType.ReflogRecord;
 
 		/// <summary>Gets the full name of this <see cref="ReflogRecord"/>.</summary>
 		/// <value>Full name of this <see cref="ReflogRecord"/>.</value>

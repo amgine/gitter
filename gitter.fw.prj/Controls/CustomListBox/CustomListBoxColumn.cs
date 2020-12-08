@@ -36,6 +36,7 @@ namespace gitter.Framework.Controls
 		private string _name;
 		private int _width;
 		private ColumnSizeMode _sizeMode;
+		private bool _isAvailable = true;
 		private bool _isVisible;
 		private Font _contentFont;
 		private Brush _contentBrush;
@@ -74,13 +75,13 @@ namespace gitter.Framework.Controls
 
 		public CustomListBoxColumn(int id, string name, bool visible)
 		{
-			Id					= id;
-			_name				= name;
-			_isVisible			= visible;
-			_sizeMode			= ColumnSizeMode.Sizeable;
-			ContentWidth		= -1;
-			_contentAlignment	= StringAlignment.Near;
-			_headerAlignment	= StringAlignment.Near;
+			Id                = id;
+			_name             = name;
+			_isVisible        = visible;
+			_sizeMode         = ColumnSizeMode.Sizeable;
+			ContentWidth      = -1;
+			_contentAlignment = StringAlignment.Near;
+			_headerAlignment  = StringAlignment.Near;
 		}
 
 		public CustomListBoxColumn(int id, string name)
@@ -94,26 +95,13 @@ namespace gitter.Framework.Controls
 
 		public int Id { get; }
 
-		public IGitterStyle Style
-		{
-			get
-			{
-				if(ListBox != null)
-				{
-					return ListBox.Style;
-				}
-				else
-				{
-					return GitterApplication.Style;
-				}
-			}
-		}
+		public IGitterStyle Style => ListBox?.Style ?? GitterApplication.Style;
 
 		public ToolStripDropDown Extender { get; set; }
 
 		public string Name
 		{
-			get { return _name; }
+			get => _name;
 			set
 			{
 				if(_name != value)
@@ -130,14 +118,8 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_contentFont != null)
-				{
-					return _contentFont;
-				}
-				if(IsAttachedToListBox)
-				{
-					return ListBox.Font;
-				}
+				if(_contentFont != null) return _contentFont;
+				if(IsAttachedToListBox)  return ListBox.Font;
 				return GitterApplication.FontManager.UIFont;
 			}
 			set
@@ -154,21 +136,9 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_contentBrush != null)
-				{
-					return _contentBrush;
-				}
-				else
-				{
-					if(IsAttachedToListBox)
-					{
-						return ListBox.Renderer.ForegroundBrush;
-					}
-					else
-					{
-						return CustomListBoxManager.Renderer.ForegroundBrush;
-					}
-				}
+				if(_contentBrush != null) return _contentBrush;
+				if(IsAttachedToListBox)   return ListBox.Renderer.ForegroundBrush;
+				return CustomListBoxManager.Renderer.ForegroundBrush;
 			}
 			set
 			{
@@ -182,7 +152,7 @@ namespace gitter.Framework.Controls
 
 		public StringAlignment ContentAlignment
 		{
-			get { return _contentAlignment; }
+			get => _contentAlignment;
 			set
 			{
 				if(_contentAlignment != value)
@@ -197,14 +167,8 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_headerFont != null)
-				{
-					return _headerFont;
-				}
-				if(IsAttachedToListBox)
-				{
-					return ListBox.Font;
-				}
+				if(_headerFont != null) return _headerFont;
+				if(IsAttachedToListBox) return ListBox.Font;
 				return GitterApplication.FontManager.UIFont;
 			}
 			set
@@ -222,21 +186,9 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_headerBrush != null)
-				{
-					return _headerBrush;
-				}
-				else
-				{
-					if(IsAttachedToListBox)
-					{
-						return ListBox.Renderer.ColumnHeaderForegroundBrush;
-					}
-					else
-					{
-						return CustomListBoxManager.Renderer.ColumnHeaderForegroundBrush;
-					}
-				}
+				if(_headerBrush != null) return _headerBrush;
+				if(IsAttachedToListBox)  return ListBox.Renderer.ColumnHeaderForegroundBrush;
+				return CustomListBoxManager.Renderer.ColumnHeaderForegroundBrush;
 			}
 			set
 			{
@@ -250,7 +202,7 @@ namespace gitter.Framework.Controls
 
 		public StringAlignment HeaderAlignment
 		{
-			get { return _headerAlignment; }
+			get => _headerAlignment;
 			set
 			{
 				if(_headerAlignment != value)
@@ -300,7 +252,7 @@ namespace gitter.Framework.Controls
 
 		public ColumnSizeMode SizeMode
 		{
-			get { return _sizeMode; }
+			get => _sizeMode;
 			set
 			{
 				if(_sizeMode != value)
@@ -315,15 +267,31 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		public bool IsAvailable
+		{
+			get => _isAvailable;
+			set
+			{
+				if(_isAvailable != value)
+				{
+					_isAvailable = value;
+					if(IsAttachedToListBox && IsVisible)
+					{
+						ListBox.NotifyColumnLayoutChanged();
+					}
+				}
+			}
+		}
+
 		public bool IsVisible
 		{
-			get { return _isVisible; }
+			get => _isVisible;
 			set
 			{
 				if(_isVisible != value)
 				{
 					_isVisible = value;
-					if(IsAttachedToListBox)
+					if(IsAttachedToListBox && IsAvailable)
 					{
 						ListBox.NotifyColumnLayoutChanged();
 					}
@@ -333,7 +301,7 @@ namespace gitter.Framework.Controls
 
 		public int Width
 		{
-			get { return _width; }
+			get => _width;
 			set
 			{
 				Verify.State.IsTrue(SizeMode != ColumnSizeMode.Fill);
@@ -425,6 +393,25 @@ namespace gitter.Framework.Controls
 			ListBox.Renderer.OnPaintColumnContent(this, paintEventArgs);
 		}
 
+		protected virtual void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+		}
+
+		protected virtual Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		{
+			return Size.Empty;
+		}
+
+		public void PaintSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
+		{
+			OnPainSubItem(subItemPaintEventArgs);
+		}
+
+		public Size MeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		{
+			return OnMeasureSubItem(measureEventArgs);
+		}
+
 		protected override int OnHitTest(int x, int y)
 		{
 			if(x < ResizerProximity)
@@ -440,12 +427,13 @@ namespace gitter.Framework.Controls
 				int pid = -1;
 				for(int i = 0; i < ListBox.Columns.Count; ++i)
 				{
-					if(ListBox.Columns[i] == this)
+					var column = ListBox.Columns[i];
+					if(column == this)
 					{
 						id = i;
 						break;
 					}
-					if(ListBox.Columns[i].IsVisible)
+					if(column.IsVisible && column.IsAvailable)
 					{
 						pid = i;
 					}
@@ -478,12 +466,13 @@ namespace gitter.Framework.Controls
 				int pid = -1;
 				for(int i = ListBox.Columns.Count - 1; i >= 0; --i)
 				{
-					if(ListBox.Columns[i] == this)
+					var column = ListBox.Columns[i];
+					if(column == this)
 					{
 						id = i;
 						break;
 					}
-					if(ListBox.Columns[i].IsVisible)
+					if(column.IsVisible && column.IsAvailable)
 					{
 						pid = i;
 					}
@@ -536,9 +525,7 @@ namespace gitter.Framework.Controls
 		}
 
 		public virtual string IdentificationString
-		{
-			get { return "Column" + Id.ToString(System.Globalization.CultureInfo.InvariantCulture); }
-		}
+			=> "Column" + Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
 		protected virtual void SaveMoreTo(Section section)
 		{

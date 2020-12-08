@@ -178,14 +178,12 @@ namespace gitter.Git
 			}
 			if(gitVersion == null || gitVersion < MinimumRequiredGitVersion)
 			{
-				using(var dlg = new VersionCheckDialog(environment, this, MinimumRequiredGitVersion, gitVersion))
+				using var dlg = new VersionCheckDialog(environment, this, MinimumRequiredGitVersion, gitVersion);
+				dlg.Run(environment.MainForm);
+				gitVersion = dlg.InstalledVersion;
+				if(gitVersion == null || gitVersion < _minVersion)
 				{
-					dlg.Run(environment.MainForm);
-					gitVersion = dlg.InstalledVersion;
-					if(gitVersion == null || gitVersion < _minVersion)
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 			GlobalOptions.RegisterPropertyPageFactory(

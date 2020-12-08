@@ -294,20 +294,16 @@ namespace gitter.Git.Gui.Controls
 
 		private void OnTagCreated(object sender, TagEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			var tag = e.Object;
 			if(_predicate == null || _predicate(tag))
 			{
-				CustomListBoxItemsCollection host;
 				var item = new TagListItem(tag);
 				item.Activated += OnItemActivated;
-				if(_groupItems)
-				{
-					host = Tags.Items;
-				}
-				else
-				{
-					host = _itemHost;
-				}
+				var host = _groupItems
+					? Tags.Items
+					: _itemHost;
 				host.AddSafe(item);
 			}
 		}

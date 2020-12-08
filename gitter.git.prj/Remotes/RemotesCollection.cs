@@ -216,7 +216,7 @@ namespace gitter.Git
 			RemotesUtility.FetchOrPull(Repository, null, false);
 		}
 
-		public Task FetchAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task FetchAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(progress, nameof(progress));
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
@@ -235,7 +235,7 @@ namespace gitter.Git
 			RemotesUtility.FetchOrPull(Repository, null, true);
 		}
 
-		public Task PullAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task PullAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(progress, nameof(progress));
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
@@ -287,7 +287,8 @@ namespace gitter.Git
 		}
 
 		/// <summary>Send local objects to remote repository.</summary>
-		public Task PushToAsync(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task PushToAsync(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 

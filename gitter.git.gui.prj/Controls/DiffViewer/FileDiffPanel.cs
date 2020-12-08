@@ -46,7 +46,6 @@ namespace gitter.Git.Gui.Controls
 
 		private readonly Repository _repository;
 		private readonly DiffType _diffType;
-		private readonly DiffFile _diffFile;
 		private Size _size;
 		private int _digits;
 		private int _columnWidth;
@@ -68,12 +67,12 @@ namespace gitter.Git.Gui.Controls
 
 			_repository = repository;
 			_diffType = diffType;
-			_diffFile = diffFile;
-			if(_diffFile.HunkCount != 0)
+			DiffFile = diffFile;
+			if(DiffFile.HunkCount != 0)
 			{
-				_digits = GetDecimalDigits(_diffFile.MaxLineNum);
+				_digits = GetDecimalDigits(DiffFile.MaxLineNum);
 				_columnWidth = _lineHeaderWidth = _digits * CellSize.Width;
-				_lineHeaderWidth *= _diffFile[0].ColumnCount;
+				_lineHeaderWidth *= DiffFile[0].ColumnCount;
 			}
 			else
 			{
@@ -89,40 +88,25 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
-		public DiffFile DiffFile
-		{
-			get { return _diffFile; }
-		}
+		public DiffFile DiffFile { get; }
 
 		private Brush GetLineBackgroundBrush(DiffLineState state)
-		{
-			switch(state)
+			=> state switch
 			{
-				case DiffLineState.Added:
-					return new SolidBrush(Style.Colors.LineAddedBackground);
-				case DiffLineState.Removed:
-					return new SolidBrush(Style.Colors.LineRemovedBackground);
-				case DiffLineState.Header:
-					return new SolidBrush(Style.Colors.LineHeaderBackground);
-				default:
-					return new SolidBrush(Style.Colors.LineContextBackground);
-			}
-		}
+				DiffLineState.Added   => new SolidBrush(Style.Colors.LineAddedBackground),
+				DiffLineState.Removed => new SolidBrush(Style.Colors.LineRemovedBackground),
+				DiffLineState.Header  => new SolidBrush(Style.Colors.LineHeaderBackground),
+				_ => new SolidBrush(Style.Colors.LineContextBackground),
+			};
 
 		private Brush GetLineForegroundBrush(DiffLineState state)
-		{
-			switch(state)
+			=> state switch
 			{
-				case DiffLineState.Added:
-					return new SolidBrush(Style.Colors.LineAddedForeground);
-				case DiffLineState.Removed:
-					return new SolidBrush(Style.Colors.LineRemovedForeground);
-				case DiffLineState.Header:
-					return new SolidBrush(Style.Colors.LineHeaderForeground);
-				default:
-					return new SolidBrush(Style.Colors.LineContextForeground);
-			}
-		}
+				DiffLineState.Added   => new SolidBrush(Style.Colors.LineAddedForeground),
+				DiffLineState.Removed => new SolidBrush(Style.Colors.LineRemovedForeground),
+				DiffLineState.Header  => new SolidBrush(Style.Colors.LineHeaderForeground),
+				_ => new SolidBrush(Style.Colors.LineContextForeground),
+			};
 
 		public override void InvalidateSize()
 		{
@@ -281,7 +265,7 @@ namespace gitter.Git.Gui.Controls
 							var menu = new ContextMenuStrip();
 							var lines = GetSelectedLines();
 
-							if(_repository != null && _diffFile.Status == FileStatus.Modified && !_diffFile.IsBinary)
+							if(_repository != null && DiffFile.Status == FileStatus.Modified && !DiffFile.IsBinary)
 							{
 								bool hasModifiedLines = false;
 								foreach(var line in lines)
@@ -334,7 +318,7 @@ namespace gitter.Git.Gui.Controls
 								var viewer = FlowControl as DiffViewer;
 								if(viewer != null)
 								{
-									viewer.OnFileContextMenuRequested(_diffFile);
+									viewer.OnFileContextMenuRequested(DiffFile);
 								}
 							}
 						}
@@ -346,7 +330,7 @@ namespace gitter.Git.Gui.Controls
 
 		private void ApplyPatchFromSelection(bool reverse)
 		{
-			var file = _diffFile.Cut(_selStart, _selEnd - _selStart + 1);
+			var file = DiffFile.Cut(_selStart, _selEnd - _selStart + 1);
 			var diff = new Diff(DiffType.Patch, new[] { file });
 			try
 			{
@@ -383,9 +367,9 @@ namespace gitter.Git.Gui.Controls
 			{
 				line = 0;
 			}
-			else if(line >= _diffFile.LineCount)
+			else if(line >= DiffFile.LineCount)
 			{
-				line = _diffFile.LineCount - 1;
+				line = DiffFile.LineCount - 1;
 			}
 			SetSelection(_selOrigin, line);
 		}
@@ -431,7 +415,7 @@ namespace gitter.Git.Gui.Controls
 		private HitTestResults HitTest(int x, int y)
 		{
 			int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
-			if(_diffFile == null ||
+			if(DiffFile == null ||
 				x < Margin || x > contentWidth - Margin ||
 				y < 0 || y >= _size.Height)
 			{
@@ -453,7 +437,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			y -= HeaderHeight;
 			var line = y / CellSize.Height;
-			if(line < 0 || line >= _diffFile.LineCount) line = -1;
+			if(line < 0 || line >= DiffFile.LineCount) line = -1;
 			if(x < Margin + _lineHeaderWidth)
 			{
 				return new HitTestResults()
@@ -516,9 +500,9 @@ namespace gitter.Git.Gui.Controls
 			int offset = 0;
 			int i = 0;
 			int num = _selStart;
-			while(_diffFile[i].LineCount <= num)
+			while(DiffFile[i].LineCount <= num)
 			{
-				int lc = _diffFile[i].LineCount;
+				int lc = DiffFile[i].LineCount;
 				offset += lc;
 				num -= lc;
 				++i;
@@ -528,8 +512,8 @@ namespace gitter.Git.Gui.Controls
 			int id = 0;
 			while(id != res.Length)
 			{
-				res[id++] = _diffFile[i][num++];
-				if(num >= _diffFile[i].LineCount)
+				res[id++] = DiffFile[i][num++];
+				if(num >= DiffFile[i].LineCount)
 				{
 					++i;
 					num = 0;
@@ -542,39 +526,39 @@ namespace gitter.Git.Gui.Controls
 		{
 			int offset = 0;
 			int i = 0;
-			while(_diffFile[i].LineCount <= num)
+			while(DiffFile[i].LineCount <= num)
 			{
-				int lc = _diffFile[i].LineCount;
+				int lc = DiffFile[i].LineCount;
 				offset += lc;
 				num -= lc;
 				++i;
 			}
-			return _diffFile[i][num];
+			return DiffFile[i][num];
 		}
 
 		private DiffLine GetLine(int num, out DiffHunk hunk)
 		{
 			int offset = 0;
 			int i = 0;
-			if(_diffFile.HunkCount == 0)
+			if(DiffFile.HunkCount == 0)
 			{
 				hunk = null;
 				return null;
 			}
-			while(_diffFile[i].LineCount <= num)
+			while(DiffFile[i].LineCount <= num)
 			{
-				int lc = _diffFile[i].LineCount;
+				int lc = DiffFile[i].LineCount;
 				offset += lc;
 				num -= lc;
 				++i;
 			}
-			hunk = _diffFile[i];
+			hunk = DiffFile[i];
 			return hunk[num];
 		}
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
-			if(_diffFile == null) return Size.Empty;
+			if(DiffFile == null) return Size.Empty;
 			if(_size.IsEmpty)
 			{
 				int maxLength = 0;
@@ -582,7 +566,7 @@ namespace gitter.Git.Gui.Controls
 				DiffLine longestLine = null;
 				int largestNumber = 0;
 				int maxCols = 0;
-				foreach(var hunk in _diffFile)
+				foreach(var hunk in DiffFile)
 				{
 					foreach(var line in hunk)
 					{
@@ -631,7 +615,7 @@ namespace gitter.Git.Gui.Controls
 					w += longestLineWidth;
 				}
 				var h = HeaderHeight + lines * CellSize.Height +
-					(_diffFile.LineCount != 0 ? 1 : 0);
+					(DiffFile.LineCount != 0 ? 1 : 0);
 				_size = new Size(w, h);
 			}
 			return _size;
@@ -725,22 +709,22 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		private string GetHeaderText()
-			=> _diffFile.Status switch
+			=> DiffFile.Status switch
 			{
-				FileStatus.Removed => _diffFile.SourceFile,
-				FileStatus.Renamed => _diffFile.SourceFile + " -> " + _diffFile.TargetFile,
-				FileStatus.Copied  => _diffFile.SourceFile + " -> " + _diffFile.TargetFile,
-				_ => _diffFile.TargetFile,
+				FileStatus.Removed => DiffFile.SourceFile,
+				FileStatus.Renamed => DiffFile.SourceFile + " -> " + DiffFile.TargetFile,
+				FileStatus.Copied  => DiffFile.SourceFile + " -> " + DiffFile.TargetFile,
+				_ => DiffFile.TargetFile,
 			};
 
 		private Bitmap GetHeaderIcon()
 			=> GraphicsUtility.QueryIcon(
-				_diffFile.Status == FileStatus.Removed
-					? _diffFile.SourceFile
-					: _diffFile.TargetFile);
+				DiffFile.Status == FileStatus.Removed
+					? DiffFile.SourceFile
+					: DiffFile.TargetFile);
 
 		private Bitmap GetHeaderIconOverlay()
-			=> _diffFile.Status switch
+			=> DiffFile.Status switch
 			{
 				FileStatus.Removed     => CachedResources.Bitmaps["ImgOverlayDel"],
 				FileStatus.Added       => CachedResources.Bitmaps["ImgOverlayAdd"],
@@ -767,14 +751,14 @@ namespace gitter.Git.Gui.Controls
 			}
 			var x = rect.X + Margin;
 			var y = rcHeader.Bottom;
-			int maxLineNum = _diffFile.MaxLineNum;
+			int maxLineNum = DiffFile.MaxLineNum;
 			int digits = GetDecimalDigits(maxLineNum);
 			var font = GitterApplication.FontManager.ViewerFont.Font;
 			bool reachedEnd = false;
 			int lineIndex = 0;
 			graphics.SetClip(clip);
 			graphics.SmoothingMode = SmoothingMode.Default;
-			foreach(var hunk in _diffFile)
+			foreach(var hunk in DiffFile)
 			{
 				foreach(var line in hunk)
 				{
@@ -796,7 +780,7 @@ namespace gitter.Git.Gui.Controls
 				}
 				if(reachedEnd) break;
 			}
-			if(!reachedEnd && _diffFile.LineCount != 0)
+			if(!reachedEnd && DiffFile.LineCount != 0)
 			{
 				graphics.DrawLine(Pens.Gray, rect.X + Margin, y, rect.X + contentWidth - Margin - 1, y);
 			}

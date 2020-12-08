@@ -27,13 +27,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 	sealed class QueryRevisionsImpl : ParserBasedFunctionImpl<QueryRevisionsParameters, IList<RevisionData>>
 	{
-		#region Data
-
 		private readonly CommandBuilder _commandBuilder;
-
-		#endregion
-
-		#region .ctor
 
 		public QueryRevisionsImpl(ICommandExecutor commandExecutor, CommandBuilder commandBuilder)
 			: base(commandExecutor)
@@ -42,10 +36,6 @@ namespace gitter.Git.AccessLayer.CLI
 
 			_commandBuilder = commandBuilder;
 		}
-
-		#endregion
-
-		#region Methods
 
 		protected override Command CreateCommand(QueryRevisionsParameters parameters)
 		{
@@ -56,7 +46,5 @@ namespace gitter.Git.AccessLayer.CLI
 
 		protected override IParser<IList<RevisionData>> CreateParser()
 			=> new LogParser();
-
-		#endregion
 	}
 }

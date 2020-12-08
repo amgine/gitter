@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,140 +22,75 @@ namespace gitter.Framework.Services
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
 
 	/// <summary>Extracts hyperlinks from plain text.</summary>
-	public sealed class HyperlinkExtractor
+	public sealed class HyperlinkExtractor : IHyperlinkExtractor
 	{
-		private readonly Regex _regex;
-		private readonly string _bugtrackerUrl;
+		private readonly IEnumerable<IHyperlinkExtractor> _extractors;
 
-		private static readonly string[] Protocols = new string[]
-			{
-				@"http://",
-				@"https://",
-				@"ftp://",
-				@"mailto://",
-			};
-
-		public HyperlinkExtractor()
+		public HyperlinkExtractor(IEnumerable<IHyperlinkExtractor> extractors)
 		{
+			_extractors = extractors;
 		}
 
-		public HyperlinkExtractor(string issueIdRegexp, string bugtrackerUrlPattern)
+		public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
 		{
-			_regex = new Regex(issueIdRegexp);
-			_bugtrackerUrl = bugtrackerUrlPattern;
-		}
+			var hyperlinks = default(List<Hyperlink>);
 
-		public IList<Hyperlink> ExtractHyperlinks(string text)
-		{
-			var hyperlinks = new List<Hyperlink>();
-			var parser = new Parser(text);
-			int start = -1;
-
-			// serach inline links
-			while(!parser.IsAtEndOfString)
+			if(_extractors != null)
 			{
-				if(start == -1)
+				foreach(var extractor in _extractors)
 				{
-					bool isLinkStart = false;
-					for(int i = 0; i < Protocols.Length; ++i)
+					if(extractor == null) continue;
+					var variants = extractor.ExtractHyperlinks(text);
+					if(variants == null || variants.Count == 0) continue;
+
+					if(hyperlinks == null)
 					{
-						if(parser.CheckValue(Protocols[i]))
-						{
-							isLinkStart = true;
-							start = parser.Position;
-							parser.Skip(Protocols[i].Length);
-							break;
-						}
+						hyperlinks = new(variants);
 					}
-					if(!isLinkStart)
+					else
 					{
-						parser.Skip();
-					}
-				}
-				else
-				{
-					if(start != -1)
-					{
-						if(char.IsWhiteSpace(parser.CurrentChar))
+						bool added = false;
+						foreach(var b in variants)
 						{
-							var href = new Substring(text, start, parser.Position - start);
-							hyperlinks.Add(new Hyperlink(href, href));
-							start = -1;
-						}
-					}
-					parser.Skip();
-				}
-			}
-			if(start != -1)
-			{
-				var href = new Substring(text, start);
-				hyperlinks.Add(new Hyperlink(href, href));
-			}
-			// search regexp matches which do not intersect already found links
-			if(_regex != null)
-			{
-				int inline_links = hyperlinks.Count;
-
-				var names = _regex.GetGroupNames();
-				var numbers = _regex.GetGroupNumbers();
-
-				foreach(Match match in _regex.Matches(text))
-				{
-					var index = match.Index;
-					var length = match.Length;
-					bool intersects = false;
-
-					for(int i = 0; i < inline_links; ++i)
-					{
-						var link = hyperlinks[i].Text;
-						if(link.Start == index)
-						{
-							intersects = true;
-							break;
-						}
-						if(link.Start > index && link.Start - index < length)
-						{
-							intersects = true;
-							break;
-						}
-						if(link.Start < index && index - link.Start < link.Length)
-						{
-							intersects = true;
-							break;
-						}
-					}
-
-					if(intersects)
-					{
-						continue;
-					}
-
-					var linkText = new Substring(text, index, length);
-					var linkUrl = _bugtrackerUrl;
-
-					if(numbers != null)
-					{
-						// replace url template variables with corresponding regexp group values
-						for(int i = 0; i < numbers.Length; ++i)
-						{
-							var group = match.Groups[numbers[i]];
-							if(group != null && group.Success)
+							for(int i = 0; i < hyperlinks.Count; ++i)
 							{
-								var name = names[i].SurroundWith('%');
-								var value = group.Value;
-
-								linkUrl = linkUrl.Replace(name, value);
+								var a = hyperlinks[i];
+								if(a.Text.Start >= b.Text.Start && a.Text.End <= b.Text.End)
+								{
+									hyperlinks[i] = b;
+									added = true;
+									break;
+								}
+								if(b.Text.Start >= a.Text.Start && b.Text.End <= a.Text.End)
+								{
+									added = true;
+									break;
+								}
+								if(b.Text.Start >= a.Text.Start && b.Text.Start <= a.Text.End)
+								{
+									added = true;
+									break;
+								}
+								if(b.Text.End >= a.Text.Start && b.Text.End <= a.Text.End)
+								{
+									added = true;
+									break;
+								}
+							}
+							if(!added)
+							{
+								hyperlinks.Add(b);
 							}
 						}
 					}
-
-					hyperlinks.Add(new Hyperlink(linkText, linkUrl));
 				}
 			}
-			return hyperlinks;
+
+			return hyperlinks != null
+				? hyperlinks
+				: Preallocated<Hyperlink>.EmptyArray;
 		}
 	}
 }

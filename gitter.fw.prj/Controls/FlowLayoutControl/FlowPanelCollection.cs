@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -41,18 +41,12 @@ namespace gitter.Framework.Controls
 		protected override ISynchronizeInvoke SynchronizeInvoke => FlowLayoutControl;
 
 		protected override void FreeItem(FlowPanel item)
-		{
-			item.FlowControl = null;
-		}
+			=> item.FlowControl = null;
 
 		protected override void AcquireItem(FlowPanel item)
-		{
-			item.FlowControl = FlowLayoutControl;
-		}
+			=> item.FlowControl = FlowLayoutControl;
 
 		protected override bool VerifyItem(FlowPanel item)
-		{
-			return item != null && item.FlowControl == null;
-		}
+			=> item != null && item.FlowControl == null;
 	}
 }

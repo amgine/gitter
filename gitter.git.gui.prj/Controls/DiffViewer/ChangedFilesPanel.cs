@@ -321,37 +321,34 @@ namespace gitter.Git.Gui.Controls
 
 		private sealed class ChangesCountByType
 		{
-			private readonly FileStatus _status;
-			private readonly Bitmap _image;
-			private string _displayText;
 			private Rectangle _displayBounds;
 			private int _count;
 
 			public ChangesCountByType(FileStatus status)
 			{
-				_status = status;
+				Status = status;
 				switch(status)
 				{
 					case FileStatus.Added:
-						_image = FileStatusIcons.ImgUnstagedUntracked;
+						Image = FileStatusIcons.ImgUnstagedUntracked;
 						break;
 					case FileStatus.Modified:
-						_image = FileStatusIcons.ImgUnstagedModified;
+						Image = FileStatusIcons.ImgUnstagedModified;
 						break;
 					case FileStatus.Removed:
-						_image = FileStatusIcons.ImgUnstagedRemoved;
+						Image = FileStatusIcons.ImgUnstagedRemoved;
 						break;
 					case FileStatus.Unmerged:
-						_image = FileStatusIcons.ImgUnmerged;
+						Image = FileStatusIcons.ImgUnmerged;
 						break;
 					case FileStatus.Copied:
-						_image = FileStatusIcons.ImgCopied;
+						Image = FileStatusIcons.ImgCopied;
 						break;
 					case FileStatus.Renamed:
-						_image = FileStatusIcons.ImgRenamed;
+						Image = FileStatusIcons.ImgRenamed;
 						break;
 					case FileStatus.ModeChanged:
-						_image = FileStatusIcons.ImgModeChanged;
+						Image = FileStatusIcons.ImgModeChanged;
 						break;
 				}
 				UpdateDisplayText();
@@ -362,42 +359,36 @@ namespace gitter.Git.Gui.Controls
 				switch(Status)
 				{
 					case StatusFilterAll:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}",
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}",
 							Count == 1 ? Resources.StrlChange : Resources.StrlChanges, Count);
 						break;
 					case FileStatus.Added:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlAdded, Count);
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlAdded, Count);
 						break;
 					case FileStatus.Modified:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlModified, Count);
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlModified, Count);
 						break;
 					case FileStatus.Removed:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRemoved, Count);
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRemoved, Count);
 						break;
 					case FileStatus.Unmerged:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlUnmerged, Count);
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlUnmerged, Count);
 						break;
 					case FileStatus.Copied:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlCopied, Count);
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlCopied, Count);
 						break;
 					case FileStatus.Renamed:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRenamed, Count);
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRenamed, Count);
 						break;
 					case FileStatus.ModeChanged:
-						_displayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlChmod, Count);
+						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlChmod, Count);
 						break;
 				}
 			}
 
-			public Bitmap Image
-			{
-				get { return _image; }
-			}
+			public Bitmap Image { get; }
 
-			public FileStatus Status
-			{
-				get { return _status; }
-			}
+			public FileStatus Status { get; }
 
 			public int Count
 			{
@@ -412,10 +403,7 @@ namespace gitter.Git.Gui.Controls
 				}
 			}
 
-			public string DisplayText
-			{
-				get { return _displayText; }
-			}
+			public string DisplayText { get; private set; }
 
 			public Rectangle DisplayBounds
 			{
@@ -441,27 +429,21 @@ namespace gitter.Git.Gui.Controls
 		public event EventHandler StatusFilterChanged;
 
 		private void OnStatusFilterChanged()
-		{
-			var handler = StatusFilterChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> StatusFilterChanged?.Invoke(this, EventArgs.Empty);
 
 		public event EventHandler<DiffFileEventArgs> FileNavigationRequested;
 
 		private void OnFileNavigationRequested(DiffFile diffFile)
-		{
-			var handler = FileNavigationRequested;
-			if(handler != null) handler(this, new DiffFileEventArgs(diffFile));
-		}
+			=> FileNavigationRequested?.Invoke(this, new DiffFileEventArgs(diffFile));
 
 		#endregion
 
 		/// <summary>Create <see cref="ChangedFilesPanel"/>.</summary>
 		public ChangedFilesPanel()
 		{
-			_fileHover		= new TrackingService<FileItem>(OnFileHoverChanged);
-			_filterHover	= new TrackingService<ChangesCountByType>(OnStatusFilterHoverChanged);
-			_statusFilter	= StatusFilterAll;
+			_fileHover    = new TrackingService<FileItem>(OnFileHoverChanged);
+			_filterHover  = new TrackingService<ChangesCountByType>(OnStatusFilterHoverChanged);
+			_statusFilter = StatusFilterAll;
 
 			_changesByType = new[]
 			{
@@ -534,7 +516,7 @@ namespace gitter.Git.Gui.Controls
 
 		public FileStatus StatusFilter
 		{
-			get { return _statusFilter; }
+			get => _statusFilter;
 			private set
 			{
 				if(_statusFilter != value)
@@ -724,9 +706,9 @@ namespace gitter.Git.Gui.Controls
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{
 			if(_diff == null) return;
-			var graphics	= paintEventArgs.Graphics;
-			var rect		= paintEventArgs.Bounds;
-			var clip		= paintEventArgs.ClipRectangle;
+			var graphics = paintEventArgs.Graphics;
+			var rect     = paintEventArgs.Bounds;
+			var clip     = paintEventArgs.ClipRectangle;
 
 			graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 			if(FontHeight == -1)

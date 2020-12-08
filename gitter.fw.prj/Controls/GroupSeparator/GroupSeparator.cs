@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -49,29 +49,23 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object ExpandedEvent;
+		private static readonly object ExpandedEvent = new();
 		public event EventHandler Expanded
 		{
-			add { Events.AddHandler(ExpandedEvent, value); }
-			remove { Events.RemoveHandler(ExpandedEvent, value); }
+			add    => Events.AddHandler    (ExpandedEvent, value);
+			remove => Events.RemoveHandler (ExpandedEvent, value);
 		}
 
-		private static readonly object CollapsedEvent;
+		private static readonly object CollapsedEvent = new();
 		public event EventHandler Collapsed
 		{
-			add { Events.AddHandler(CollapsedEvent, value); }
-			remove { Events.RemoveHandler(CollapsedEvent, value); }
+			add    => Events.AddHandler    (CollapsedEvent, value);
+			remove => Events.RemoveHandler (CollapsedEvent, value);
 		}
 
 		#endregion
 
 		#region .ctor
-
-		static GroupSeparator()
-		{
-			ExpandedEvent = new object();
-			CollapsedEvent = new object();
-		}
 
 		/// <summary>Create <see cref="GroupSeparator"/>.</summary>
 		public GroupSeparator()

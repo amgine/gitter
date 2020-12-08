@@ -27,7 +27,7 @@ namespace gitter.Framework.Mvc
 
 		public T View
 		{
-			get { return _view; }
+			get => _view;
 			set
 			{
 				if(_view != value)

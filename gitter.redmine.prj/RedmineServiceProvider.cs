@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,6 +38,8 @@ namespace gitter.Redmine
 		public string Name => "redmine";
 
 		public string DisplayName => Resources.StrRedmine;
+
+		public bool CanBeAddedManually => true;
 
 		public Image Icon => CachedResources.Bitmaps["ImgRedmine"];
 
@@ -86,8 +88,14 @@ namespace gitter.Redmine
 			return new ProviderSetupControl(repository);
 		}
 
-		public IGuiProvider CreateGuiProvider(IRepository repository)
+		public bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider)
 		{
+			if(!IsValidFor(repository))
+			{
+				guiProvider = default;
+				return false;
+			}
+
 			var section = repository.ConfigSection.GetSection("IssueTrackers").GetSection("Redmine");
 
 			var uri = section.GetValue<string>("ServiceUri");
@@ -96,7 +104,8 @@ namespace gitter.Redmine
 			var svc = new RedmineServiceContext(new Uri(uri), key);
 			svc.DefaultProjectId = pid;
 
-			return new RedmineGuiProvider(repository, svc);
+			guiProvider = new RedmineGuiProvider(repository, svc);
+			return true;
 		}
 	}
 }

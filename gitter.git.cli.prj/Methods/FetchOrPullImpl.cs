@@ -52,7 +52,8 @@ namespace gitter.Git.AccessLayer.CLI
 			output.ThrowOnBadReturnCode();
 		}
 
-		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task InvokeAsync(TParameters parameters,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 

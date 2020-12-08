@@ -23,6 +23,7 @@ namespace gitter.Framework
 	using System;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Properties;
@@ -35,9 +36,11 @@ namespace gitter.Framework
 
 		private readonly DialogBase _dialog;
 		private readonly IExecutableDialog _executable;
+		private readonly IAsyncExecutableDialog _async;
 		private readonly IElevatedExecutableDialog _elevated;
 		private readonly IExpandableDialog _expandable;
 		private readonly Control _expansionControl;
+		private bool _isExecuting;
 
 		private Bitmap _bmpEH;
 		private Bitmap _bmpCH;
@@ -54,9 +57,9 @@ namespace gitter.Framework
 		{
 			InitializeComponent();
 
-			_btnOK.Text = Resources.StrOk;
+			_btnOK.Text     = Resources.StrOk;
 			_btnCancel.Text = Resources.StrCancel;
-			_btnApply.Text = Resources.StrApply;
+			_btnApply.Text  = Resources.StrApply;
 
 			if(!Application.RenderWithVisualStyles)
 			{
@@ -90,8 +93,9 @@ namespace gitter.Framework
 					_picAdvanced.Visible = true;
 					_expansionControl = exDialog.ExpansionControl;
 				}
-				_elevated = content as IElevatedExecutableDialog;
+				_elevated   = content as IElevatedExecutableDialog;
 				_executable = content as IExecutableDialog;
+				_async      = content as IAsyncExecutableDialog;
 			}
 		}
 
@@ -148,6 +152,12 @@ namespace gitter.Framework
 			UpdateSize();
 		}
 
+		protected override void OnFormClosing(FormClosingEventArgs e)
+		{
+			if(_isExecuting) e.Cancel = true;
+			base.OnFormClosing(e);
+		}
+
 		protected override void OnShown(EventArgs e)
 		{
 			base.OnShown(e);
@@ -189,9 +199,10 @@ namespace gitter.Framework
 			bool applyEnabled = _btnApply.Enabled;
 			if(_executable != null || _elevated != null)
 			{
-				_btnOK.Enabled = false;
+				_btnOK.Enabled     = false;
 				_btnCancel.Enabled = false;
-				_btnApply.Enabled = false;
+				_btnApply.Enabled  = false;
+				_isExecuting       = true;
 			}
 			try
 			{
@@ -227,12 +238,41 @@ namespace gitter.Framework
 			{
 				if(_executable != null || _elevated != null)
 				{
-					_btnOK.Enabled = okEnabled;
+					_btnOK.Enabled     = okEnabled;
 					_btnCancel.Enabled = cancelEnabled;
-					_btnApply.Enabled = applyEnabled;
+					_btnApply.Enabled  = applyEnabled;
+					_isExecuting       = false;
 				}
 			}
 			return true;
+		}
+
+		private async Task<bool> ExecuteAsync()
+		{
+			bool okEnabled     = _btnOK.Enabled;
+			bool cancelEnabled = _btnCancel.Enabled;
+			bool applyEnabled  = _btnApply.Enabled;
+			if(_async != null)
+			{
+				_btnOK.Enabled     = false;
+				_btnCancel.Enabled = false;
+				_btnApply.Enabled  = false;
+				_isExecuting       = true;
+			}
+			try
+			{
+				return await _async.ExecuteAsync();
+			}
+			finally
+			{
+				if(_async != null)
+				{
+					_btnOK.Enabled     = okEnabled;
+					_btnCancel.Enabled = cancelEnabled;
+					_btnApply.Enabled  = applyEnabled;
+					_isExecuting       = false;
+				}
+			}
 		}
 
 		private void _picAdvanced_MouseEnter(object sender, EventArgs e)
@@ -281,7 +321,7 @@ namespace gitter.Framework
 
 		public bool Expanded
 		{
-			get { return _expanded; }
+			get => _expanded;
 			set
 			{
 				if(_expanded != value)
@@ -338,20 +378,11 @@ namespace gitter.Framework
 			set { _btnApply.Text = value; }
 		}
 
-		public void ClickOk()
-		{
-			_btnOK_Click(_btnOK, EventArgs.Empty);
-		}
+		public void ClickOk() => _btnOK_Click(_btnOK, EventArgs.Empty);
 
-		public void ClickCancel()
-		{
-			_btnCancel_Click(_btnCancel, EventArgs.Empty);
-		}
+		public void ClickCancel() => _btnCancel_Click(_btnCancel, EventArgs.Empty);
 
-		public void ClickApply()
-		{
-			_btnApply_Click(_btnApply, EventArgs.Empty);
-		}
+		public void ClickApply() => _btnApply_Click(_btnApply, EventArgs.Empty);
 
 		private static Bitmap RenderChevronButton(string text, Font font, int width, int height, bool expanded, bool hover)
 		{
@@ -400,12 +431,23 @@ namespace gitter.Framework
 			return bmp;
 		}
 
-		private void _btnOK_Click(object sender, EventArgs e)
+		private async void _btnOK_Click(object sender, EventArgs e)
 		{
-			if(Execute())
+			if(_async != null)
 			{
-				DialogResult = DialogResult.OK;
-				Close();
+				if(await ExecuteAsync())
+				{
+					DialogResult = DialogResult.OK;
+					Close();
+				}
+			}
+			else
+			{
+				if(Execute())
+				{
+					DialogResult = DialogResult.OK;
+					Close();
+				}
 			}
 		}
 
@@ -415,18 +457,25 @@ namespace gitter.Framework
 			Close();
 		}
 
-		private void _btnApply_Click(object sender, EventArgs e)
+		private async void _btnApply_Click(object sender, EventArgs e)
 		{
-			Execute();
+			if(_async != null)
+			{
+				await ExecuteAsync();
+			}
+			else
+			{
+				Execute();
+			}
 		}
 
 		/// <summary>Clean up any resources being used.</summary>
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && (components != null))
+			if(disposing)
 			{
-				components.Dispose();
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}

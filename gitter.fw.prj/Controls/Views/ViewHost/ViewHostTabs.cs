@@ -446,15 +446,15 @@ namespace gitter.Framework.Controls
 					if(index1 == -1) break;
 				}
 			}
-			Verify.Argument.IsTrue(index1 != -1, "view1", "View #1 was not found.");
-			Verify.Argument.IsTrue(index2 != -1, "view2", "View #2 was not found.");
+			Verify.Argument.IsTrue(index1 != -1, nameof(view1), "View #1 was not found.");
+			Verify.Argument.IsTrue(index2 != -1, nameof(view2), "View #2 was not found.");
 			SwapTabsCore(index1, index2);
 		}
 
 		public void SwapTabs(int index1, int index2)
 		{
-			Verify.Argument.IsValidIndex(index1, _tabs.Count, "index1");
-			Verify.Argument.IsValidIndex(index2, _tabs.Count, "index2");
+			Verify.Argument.IsValidIndex(index1, _tabs.Count, nameof(index1));
+			Verify.Argument.IsValidIndex(index2, _tabs.Count, nameof(index2));
 
 			SwapTabsCore(index1, index2);
 		}

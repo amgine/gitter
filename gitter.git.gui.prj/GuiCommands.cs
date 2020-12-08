@@ -45,15 +45,9 @@ namespace gitter.Git.Gui
 
 		private static GuiCommandStatus Fetch(IWin32Window parent, Repository repository, Remote remote)
 		{
-			Func<IProgress<OperationProgress>, CancellationToken, Task> func;
-			if(remote == null)
-			{
-				func = repository.Remotes.FetchAsync;
-			}
-			else
-			{
-				func = remote.FetchAsync;
-			}
+			Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
+				? repository.Remotes.FetchAsync
+				: remote.FetchAsync;
 			try
 			{
 				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrFetch, func);
@@ -65,9 +59,9 @@ namespace gitter.Git.Gui
 			}
 			catch(GitException exc)
 			{
-				string messageTitle = remote != null ?
-					string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToFetchFrom, remote.Name) :
-					Resources.ErrFailedToFetch;
+				string messageTitle = remote != null
+					? string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToFetchFrom, remote.Name)
+					: Resources.ErrFailedToFetch;
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					ExtractErrorMessage(exc),
@@ -94,15 +88,9 @@ namespace gitter.Git.Gui
 
 		private static GuiCommandStatus Pull(IWin32Window parent, Repository repository, Remote remote)
 		{
-			Func<IProgress<OperationProgress>, CancellationToken, Task> func;
-			if(remote == null)
-			{
-				func = repository.Remotes.PullAsync;
-			}
-			else
-			{
-				func = remote.PullAsync;
-			}
+			Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
+				? repository.Remotes.PullAsync
+				: remote.PullAsync;
 			try
 			{
 				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrPull, func);
@@ -693,10 +681,7 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsNotNull(submodule, nameof(submodule));
 
-			if(parent == null)
-			{
-				parent = GitterApplication.MainForm;
-			}
+			parent ??= GitterApplication.MainForm;
 			try
 			{
 				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync + ": " + submodule.Name,
@@ -723,10 +708,7 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsNotNull(submodules, nameof(submodules));
 
-			if(parent == null)
-			{
-				parent = GitterApplication.MainForm;
-			}
+			parent ??= GitterApplication.MainForm;
 			try
 			{
 				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate, submodules.UpdateAsync);
@@ -752,10 +734,7 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsNotNull(submodules, nameof(submodules));
 
-			if(parent == null)
-			{
-				parent = GitterApplication.MainForm;
-			}
+			parent ??= GitterApplication.MainForm;
 			try
 			{
 				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync,

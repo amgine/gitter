@@ -1446,9 +1446,7 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		public string ParseObjects(GitOutput output)
-		{
-			return output.Output;
-		}
+			=> output.Output;
 
 		#region Config
 
@@ -1500,16 +1498,11 @@ namespace gitter.Git.AccessLayer.CLI
 			var parser = new GitParser(output.Output);
 			while(!parser.IsAtEndOfString)
 			{
-				var name = parser.ReadStringUpTo(parser.FindNewLineOrEndOfString(), 1);
-				var value = parser.ReadStringUpTo(parser.FindNullOrEndOfString(), 1);
-				if(parameters.ConfigFile != ConfigFile.Other)
-				{
-					res.Add(new ConfigParameterData(name, value, parameters.ConfigFile));
-				}
-				else
-				{
-					res.Add(new ConfigParameterData(name, value, parameters.FileName));
-				}
+				var name  = parser.ReadStringUpTo(parser.FindNewLineOrEndOfString(), skip: 1);
+				var value = parser.ReadStringUpTo(parser.FindNullOrEndOfString(), skip: 1);
+				res.Add(parameters.ConfigFile != ConfigFile.Other
+					? new ConfigParameterData(name, value, parameters.ConfigFile)
+					: new ConfigParameterData(name, value, parameters.FileName));
 			}
 			return res;
 		}

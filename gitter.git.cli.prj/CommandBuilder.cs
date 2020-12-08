@@ -34,7 +34,7 @@ namespace gitter.Git.AccessLayer.CLI
 			_gitCLI = gitCLI;
 		}
 
-		private static readonly Version SubmodulesStatusArgVersion = new Version(1, 7, 2, 3);
+		private static readonly Version SubmodulesStatusArgVersion = new(1, 7, 2, 3);
 
 		public Command GetInitCommand(InitRepositoryParameters parameters)
 		{
@@ -199,18 +199,18 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private ICommandArgument GetReflogFormatArgument()
 			=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-				? LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B")
-				: LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
+				? LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%B")
+				: LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%s%n%n%b");
 
 		private ICommandArgument GetRevisionFormatArgument()
 			=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-				? LogCommand.Format("%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B")
-				: LogCommand.Format("%H%n%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
+				? LogCommand.Format("%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%B")
+				: LogCommand.Format("%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%s%n%n%b");
 
 		private ICommandArgument GetRevisionDataFormatArgument()
 			=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-				? LogCommand.Format("%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%B")
-				: LogCommand.Format("%T%n%P%n%ct%n%cN%n%cE%n%at%n%aN%n%aE%n%s%n%n%b");
+				? LogCommand.Format("%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%B")
+				: LogCommand.Format("%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%s%n%n%b");
 
 		private static void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<ICommandArgument> args, ICommandArgument format)
 		{

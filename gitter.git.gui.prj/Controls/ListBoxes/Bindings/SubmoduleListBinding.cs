@@ -37,13 +37,9 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		protected override Comparison<CustomListBoxItem> GetComparison()
-		{
-			return SubmoduleListItem.CompareByName;
-		}
+			=> SubmoduleListItem.CompareByName;
 
 		protected override CustomListBoxItem<Submodule> RepresentObject(Submodule obj)
-		{
-			return new SubmoduleListItem(obj);
-		}
+			=> new SubmoduleListItem(obj);
 	}
 }

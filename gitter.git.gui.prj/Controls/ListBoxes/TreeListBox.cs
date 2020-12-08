@@ -22,8 +22,6 @@ namespace gitter.Git.Gui.Controls
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -63,23 +61,14 @@ namespace gitter.Git.Gui.Controls
 			}
 			if(root != null)
 			{
-				switch(mode)
+				_binding = mode switch
 				{
-					case TreeListBoxMode.ShowFullTree:
-						_binding = new TreeBinding(Items, root, false);
-						break;
-					case TreeListBoxMode.ShowPlainFileList:
-						_binding = new TreeBinding(Items, root, true);
-						break;
-					case TreeListBoxMode.ShowDirectoryContent:
-						_binding = new TreeBinding(Items, root, false, true);
-						break;
-					case TreeListBoxMode.ShowDirectoryTree:
-						_binding = new TreeDirectoriesBinding(Items, root, true);
-						break;
-					default:
-						throw new ArgumentException("Invalid mode.", "mode");
-				}
+					TreeListBoxMode.ShowFullTree         => new TreeBinding(Items, root, false),
+					TreeListBoxMode.ShowPlainFileList    => new TreeBinding(Items, root, true),
+					TreeListBoxMode.ShowDirectoryContent => new TreeBinding(Items, root, false, true),
+					TreeListBoxMode.ShowDirectoryTree    => new TreeDirectoriesBinding(Items, root, true),
+					_ => throw new ArgumentException("Invalid mode.", "mode"),
+				};
 				_repository = root.Repository;
 			}
 			EndUpdate();
@@ -118,13 +107,11 @@ namespace gitter.Git.Gui.Controls
 		{
 			foreach(var item in items)
 			{
-				var dir = item as TreeDirectory;
-				if(dir != null && HasRevertableItems(dir))
+				if(item is TreeDirectory dir && HasRevertableItems(dir))
 				{
 					return true;
 				}
-				var file = item as TreeFile;
-				if(file != null && (file.Status == FileStatus.Removed || file.Status == FileStatus.Modified))
+				if(item is TreeFile file && (file.Status == FileStatus.Removed || file.Status == FileStatus.Modified))
 				{
 					return true;
 				}

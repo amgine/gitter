@@ -35,26 +35,16 @@ namespace gitter.Git.Gui.Views
 		public override int GetHashCode()
 		{
 			var hashCode = 0;
-			if(DiffSource != null)
-			{
-				hashCode = DiffSource.GetHashCode();
-			}
-			if(DiffOptions != null)
-			{
-				hashCode ^= DiffOptions.GetHashCode();
-			}
+			if(DiffSource != null)  hashCode = DiffSource.GetHashCode();
+			if(DiffOptions != null) hashCode ^= DiffOptions.GetHashCode();
 			return hashCode;
 		}
 
 		public override bool Equals(object obj)
 		{
-			if(!(obj is DiffViewModel other))
-			{
-				return false;
-			}
-			return
-				object.Equals(DiffSource,  other.DiffSource) &&
-				object.Equals(DiffOptions, other.DiffOptions);
+			if(obj is not DiffViewModel other) return false;
+			return Equals(DiffSource,  other.DiffSource)
+				&& Equals(DiffOptions, other.DiffOptions);
 		}
 	}
 }

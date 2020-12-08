@@ -57,8 +57,8 @@ namespace gitter.Git
 
 		#region Data
 
-		private readonly Dictionary<string, RemoteRepositoryBranch> _remoteBranches;
-		private readonly Dictionary<string, RemoteRepositoryTag> _remoteTags;
+		private readonly Dictionary<string, RemoteRepositoryBranch> _remoteBranches = new();
+		private readonly Dictionary<string, RemoteRepositoryTag> _remoteTags = new();
 
 		#endregion
 
@@ -68,11 +68,8 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(remote, nameof(remote));
 
-			Remote          = remote;
-			Repository      = remote.Repository;
-			_remoteBranches = new Dictionary<string, RemoteRepositoryBranch>();
-			_remoteTags     = new Dictionary<string, RemoteRepositoryTag>();
-			SyncRoot        = new object();
+			Remote     = remote;
+			Repository = remote.Repository;
 		}
 
 		#endregion
@@ -91,7 +88,7 @@ namespace gitter.Git
 
 		public Remote Remote { get; }
 
-		public object SyncRoot { get; }
+		public object SyncRoot { get; } = new();
 
 		#endregion
 
@@ -128,20 +125,6 @@ namespace gitter.Git
 			_remoteTags.Remove(tag.Name);
 			tag.MarkAsDeleted();
 			InvokeTagDeleted(tag);
-
-			//return Remote.Repository.Accessor
-			//	.RemoveRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		TaskUtility.PropagateFaultedStates(t);
-			//		_remoteTags.Remove(tag.Name);
-			//		tag.MarkAsDeleted();
-			//		InvokeTagDeleted(tag);
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		internal void RemoveBranch(RemoteRepositoryBranch branch)
@@ -171,19 +154,6 @@ namespace gitter.Git
 			_remoteTags.Remove(branch.Name);
 			branch.MarkAsDeleted();
 			InvokeBranchDeleted(branch);
-			//return Remote.Repository.Accessor
-			//	.RemoveRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		TaskUtility.PropagateFaultedStates(t);
-			//		_remoteTags.Remove(branch.Name);
-			//		branch.MarkAsDeleted();
-			//		InvokeBranchDeleted(branch);
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		private QueryRemoteReferencesParameters GetQueryParameters()
@@ -334,20 +304,6 @@ namespace gitter.Git
 			{
 				OnFetchCompleted(refs);
 			}
-			//return Repository.Accessor
-			//	.QueryRemoteReferences.InvokeAsync(parameters, progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		var refs = TaskUtility.UnwrapResult(t);
-			//		lock(SyncRoot)
-			//		{
-			//			OnFetchCompleted(refs);
-			//		}
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#endregion

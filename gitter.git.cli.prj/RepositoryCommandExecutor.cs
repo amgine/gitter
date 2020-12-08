@@ -28,13 +28,7 @@ namespace gitter.Git.AccessLayer.CLI
 	/// <summary>Executes commands for specific repository.</summary>
 	sealed class RepositoryCommandExecutor : CommandExecutorBase
 	{
-		#region Static
-
-		private static readonly LoggingService Log = new LoggingService("CLI");
-
-		#endregion
-
-		#region .ctor
+		private static readonly LoggingService Log = new("CLI");
 
 		/// <summary>Initializes a new instance of the <see cref="RepositoryCommandExecutor"/> class.</summary>
 		/// <param name="cliOptionsProvider">CLI options provider.</param>
@@ -44,40 +38,23 @@ namespace gitter.Git.AccessLayer.CLI
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(workingDirectory, nameof(workingDirectory));
 
-			WorkingDirectory   = workingDirectory;
+			WorkingDirectory = workingDirectory;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public string WorkingDirectory { get; }
-
-		#endregion
-
-		#region Overrides
 
 		protected override void OnCommandExecuting(Command command)
 		{
 			Assert.IsNotNull(command);
 
-			if(CliOptionsProvider.LogCalls)
-			{
-				Log.Info("git {0}", command);
-			}
+			if(CliOptionsProvider.LogCalls) Log.Info("git {0}", command);
 		}
 
 		protected override GitInput PrepareInput(Command command, Encoding encoding)
 		{
 			Assert.IsNotNull(command);
 
-			if(encoding == null)
-			{
-				encoding = CliOptionsProvider.DefaultEncoding;
-			}
-			return new GitInput(WorkingDirectory, command, encoding);
+			return new GitInput(WorkingDirectory, command, encoding ?? CliOptionsProvider.DefaultEncoding);
 		}
-
-		#endregion
 	}
 }

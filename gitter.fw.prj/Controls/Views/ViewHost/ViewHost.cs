@@ -131,7 +131,7 @@ namespace gitter.Framework.Controls
 			{
 				foreach(var view in views)
 				{
-					Verify.Argument.IsTrue(view != null, "views", "List of views contains invalid arguments.");
+					Verify.Argument.IsTrue(view != null, nameof(views), "List of views contains invalid arguments.");
 
 					_views.Add(view);
 					view.TextChanged += OnViewTextChanged;
@@ -757,7 +757,7 @@ namespace gitter.Framework.Controls
 		public void AddView(ViewBase view)
 		{
 			Verify.Argument.IsNotNull(view, nameof(view));
-			Verify.Argument.IsTrue(view.Host == null, "view", "View is already hosted.");
+			Verify.Argument.IsTrue(view.Host == null, nameof(view), "View is already hosted.");
 
 			_views.Add(view);
 			view.Host = this;
@@ -840,7 +840,7 @@ namespace gitter.Framework.Controls
 		public void SetActiveView(ViewBase view)
 		{
 			Verify.Argument.IsNotNull(view, nameof(view));
-			Verify.Argument.IsTrue(view.Host == this, "view", "View is hosted in another host.");
+			Verify.Argument.IsTrue(view.Host == this, nameof(view), "View is hosted in another host.");
 
 			if(_activeView != view)
 			{
@@ -904,7 +904,7 @@ namespace gitter.Framework.Controls
 		internal void RemoveView(ViewBase view)
 		{
 			Verify.Argument.IsNotNull(view, nameof(view));
-			Verify.Argument.IsTrue(view.Host == this, "view", "View is not hosted in this ViewHost.");
+			Verify.Argument.IsTrue(view.Host == this, nameof(view), "View is not hosted in this ViewHost.");
 			int index = _views.IndexOf(view);
 			Assert.AreNotEqual(index, -1);
 
@@ -1202,7 +1202,7 @@ namespace gitter.Framework.Controls
 		public void Activate(ViewBase view)
 		{
 			Verify.Argument.IsNotNull(view, nameof(view));
-			Verify.Argument.IsTrue(view.Host == this, "view", "View is not hosted in this ViewHost.");
+			Verify.Argument.IsTrue(view.Host == this, nameof(view), "View is not hosted in this ViewHost.");
 
 			SetActiveView(view);
 			_activeView.Focus();
@@ -1504,7 +1504,7 @@ namespace gitter.Framework.Controls
 		internal void DockInto(ViewHost viewHost)
 		{
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
-			Verify.Argument.IsTrue(viewHost != this, "viewHost", "Cannot dock to itself.");
+			Verify.Argument.IsTrue(viewHost != this, nameof(viewHost), "Cannot dock to itself.");
 
 			ReturnFromFloatingMode();
 			PreventActiveViewDispose();

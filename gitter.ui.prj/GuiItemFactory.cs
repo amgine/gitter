@@ -141,29 +141,26 @@ namespace gitter
 			where T : ToolStripItem, new()
 		{
 			var p = GitterApplication.WorkingEnvironment.FindProviderForDirectory(workingDirectory);
-			if(p != null)
+			if(p == null) return Preallocated<T>.EmptyArray;
+			var commands = new List<GuiCommand>(p.GetRepositoryCommands(workingDirectory));
+			if(commands.Count == 0)
 			{
-				var commands = new List<GuiCommand>(p.GetRepositoryCommands(workingDirectory));
-				if(commands.Count == 0)
-				{
-					return Preallocated<T>.EmptyArray;
-				}
-				var res = new List<T>(commands.Count);
-				foreach(var cmd in commands)
-				{
-					var item = new T()
-					{
-						Tag		= cmd,
-						Name	= cmd.Name,
-						Text	= cmd.DisplayName,
-						Image	= cmd.Image,
-					};
-					item.Click += OnGuiCommandItemClick;
-					res.Add(item);
-				}
-				return res;
+				return Preallocated<T>.EmptyArray;
 			}
-			return Preallocated<T>.EmptyArray;
+			var res = new List<T>(commands.Count);
+			foreach(var cmd in commands)
+			{
+				var item = new T()
+				{
+					Tag   = cmd,
+					Name  = cmd.Name,
+					Text  = cmd.DisplayName,
+					Image = cmd.Image,
+				};
+				item.Click += OnGuiCommandItemClick;
+				res.Add(item);
+			}
+			return res;
 		}
 
 		static void OnGuiCommandItemClick(object sender, EventArgs e)

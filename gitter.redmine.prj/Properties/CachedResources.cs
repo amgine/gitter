@@ -28,16 +28,11 @@ namespace gitter.Redmine
 
 	static class CachedResources
 	{
-		private static readonly CachedBitmapResources _bitmaps;
-
 		static CachedResources()
 		{
-			_bitmaps = new CachedBitmapResources(Resources.ResourceManager);
+			Bitmaps = new CachedBitmapResources(Resources.ResourceManager);
 		}
 
-		public static CachedBitmapResources Bitmaps
-		{
-			get { return _bitmaps; }
-		}
+		public static CachedBitmapResources Bitmaps { get; }
 	}
 }

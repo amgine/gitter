@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -62,19 +62,16 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object StyleChangedEvent = new object();
+		private static readonly object StyleChangedEvent = new();
 
 		public new event EventHandler StyleChanged
 		{
-			add { Events.AddHandler(StyleChangedEvent, value); }
-			remove { Events.RemoveHandler(StyleChangedEvent, value); }
+			add    => Events.AddHandler    (StyleChangedEvent, value);
+			remove => Events.RemoveHandler (StyleChangedEvent, value);
 		}
 
-		protected virtual void OnStyleChanged()
-		{
-			var handler = (EventHandler)Events[StyleChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		protected virtual void OnStyleChanged(EventArgs e)
+			=> ((EventHandler)Events[StyleChangedEvent])?.Invoke(this, e);
 
 		#endregion
 
@@ -112,21 +109,14 @@ namespace gitter.Framework.Controls
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IGitterStyle Style
 		{
-			get
-			{
-				if(_style == null)
-				{
-					return GitterApplication.Style;
-				}
-				return _style;
-			}
+			get => _style ?? GitterApplication.Style;
 			set
 			{
 				if(_style != value)
 				{
 					_style = value;
 					CreateScrollBars();
-					OnStyleChanged();
+					OnStyleChanged(EventArgs.Empty);
 					Invalidate();
 				}
 			}
@@ -137,7 +127,7 @@ namespace gitter.Framework.Controls
 		[Description("Control border style.")]
 		public BorderStyle BorderStyle
 		{
-			get { return _borderStyle; }
+			get => _borderStyle;
 			set
 			{
 				if(_borderStyle != value)
@@ -154,8 +144,8 @@ namespace gitter.Framework.Controls
 		[DefaultValue(typeof(Color), "Window")]
 		public override Color BackColor
 		{
-			get { return base.BackColor; }
-			set { base.BackColor = value; }
+			get => base.BackColor;
+			set => base.BackColor = value;
 		}
 
 		/// <summary>Always show vertical scroll bar.</summary>
@@ -163,7 +153,7 @@ namespace gitter.Framework.Controls
 		[Description("Always show vertical scroll bar.")]
 		public bool AlwaysShowVScrollBar
 		{
-			get { return _alwaysShowVScrollBar; }
+			get => _alwaysShowVScrollBar;
 			set
 			{
 				if(value != _alwaysShowVScrollBar)
@@ -181,41 +171,35 @@ namespace gitter.Framework.Controls
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int VScrollPos
 		{
-			get { return _vScrollPos; }
-			set { DoVScroll(value); }
+			get => _vScrollPos;
+			set => DoVScroll(value);
 		}
 
 		/// <summary>Maximum vertical scroll position.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public int MaxVScrollPos
-		{
-			get { return _maxVScrollPos; }
-		}
+		public int MaxVScrollPos => _maxVScrollPos;
 
 		/// <summary>Horizontal scroll position.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int HScrollPos
 		{
-			get { return _hScrollPos; }
-			set { DoHScroll(value); }
+			get => _hScrollPos;
+			set => DoHScroll(value);
 		}
 
 		/// <summary>Maximum horizontal scroll position.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public int MaxHScrollPos
-		{
-			get { return _maxHScrollPos; }
-		}
+		public int MaxHScrollPos => _maxHScrollPos;
 
 		/// <summary>Always show horizontal scroll bar.</summary>
 		[DefaultValue(false)]
 		[Description("Always show horizontal scroll bar.")]
 		public bool AlwaysShowHScrollBar
 		{
-			get { return _alwaysShowHScrollBar; }
+			get => _alwaysShowHScrollBar;
 			set
 			{
 				if(value != _alwaysShowHScrollBar)
@@ -231,90 +215,49 @@ namespace gitter.Framework.Controls
 		/// <summary>Horizontal scrollbar.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public IScrollBarWidget HScrollBar
-		{
-			get { return _hScrollBar; }
-		}
+		public IScrollBarWidget HScrollBar => _hScrollBar;
 
 		/// <summary>Vertical scrollbar.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public IScrollBarWidget VScrollBar
-		{
-			get { return _vScrollBar; }
-		}
+		public IScrollBarWidget VScrollBar => _vScrollBar;
 
 		/// <summary>Client area.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public Rectangle ClientArea
-		{
-			get { return _clientArea; }
-		}
+		public Rectangle ClientArea => _clientArea;
 
 		/// <summary>Content area.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public Rectangle ContentArea
-		{
-			get { return _contentArea; }
-		}
+		public Rectangle ContentArea => _contentArea;
 
 		/// <summary>Part of content which is visible.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public Rectangle ContentWindow
-		{
-			get { return new Rectangle(_hScrollPos, _vScrollPos, _contentArea.Width, _contentArea.Height); }
-		}
+			=> new Rectangle(_hScrollPos, _vScrollPos, _contentArea.Width, _contentArea.Height);
 
 		/// <summary>Content size.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public Size ContentSize
-		{
-			get { return _contentSize; }
-		}
+		public Size ContentSize => _contentSize;
 
 		#endregion
 
-		private int BorderSize
-		{
-			get
-			{
-				if(_borderStyle == BorderStyle.None)
-				{
-					return 0;
-				}
-				else
-				{
-					return 2;
-				}
-			}
-		}
+		private int BorderSize => _borderStyle == BorderStyle.None ? 0 : 1;
 
 		private void CreateScrollBars()
 		{
-			if(_vScrollBar != null)
-			{
-				_vScrollBar.Dispose();
-			}
-			if(_hScrollBar != null)
-			{
-				_hScrollBar.Dispose();
-			}
+			_vScrollBar?.Dispose();
+			_hScrollBar?.Dispose();
 
 			var borderSize = BorderSize;
 
 			var scrollWidth = SystemInformation.VerticalScrollBarWidth;
-			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
-			{
-				_vScrollBar = Style.CreateScrollBar(Orientation.Vertical);
-			}
-			else
-			{
-				_vScrollBar = new SystemScrollBarAdapter(Orientation.Vertical);
-			}
+			_vScrollBar = LicenseManager.UsageMode == LicenseUsageMode.Runtime
+				? Style.CreateScrollBar(Orientation.Vertical)
+				: new SystemScrollBarAdapter(Orientation.Vertical);
 			_vScrollBar.Maximum = 1;
 			_vScrollBar.Minimum = 0;
 			_vScrollBar.SmallChange = 1;
@@ -328,14 +271,9 @@ namespace gitter.Framework.Controls
 			_vScrollBar.Control.MouseDown += OnScrollBarMouseDown;
 
 			var scrollHeight = SystemInformation.HorizontalScrollBarHeight;
-			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
-			{
-				_hScrollBar = Style.CreateScrollBar(Orientation.Horizontal);
-			}
-			else
-			{
-				_hScrollBar = new SystemScrollBarAdapter(Orientation.Horizontal);
-			}
+			_hScrollBar = LicenseManager.UsageMode == LicenseUsageMode.Runtime
+				? Style.CreateScrollBar(Orientation.Horizontal)
+				: new SystemScrollBarAdapter(Orientation.Horizontal);
 			_hScrollBar.Maximum = 1;
 			_hScrollBar.Minimum = 0;
 			_hScrollBar.SmallChange = 1;
@@ -389,15 +327,9 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public void ScrollUp()
-		{
-			ScrollItems(1);
-		}
+		public void ScrollUp() => ScrollItems(1);
 
-		public void ScrollDown()
-		{
-			ScrollItems(-1);
-		}
+		public void ScrollDown() => ScrollItems(-1);
 
 		/// <summary>Disable control redraw events.</summary>
 		public void BeginUpdate()
@@ -429,25 +361,14 @@ namespace gitter.Framework.Controls
 			EndUpdate(true);
 		}
 
-		public bool IsUpdating
-		{
-			get { return _updateCount != 0; }
-		}
+		public bool IsUpdating => _updateCount != 0;
 
-		protected int UpdateCounter
-		{
-			get { return _updateCount; }
-		}
+		protected int UpdateCounter => _updateCount;
 
-		protected bool IsMouseOver
-		{
-			get { return _isMouseOver; }
-		}
+		protected bool IsMouseOver => _isMouseOver;
 
 		private Rectangle GetClientArea()
-		{
-			return GetClientArea(_vScrollBar.Control.Parent != null, _hScrollBar.Control.Parent != null);
-		}
+			=> GetClientArea(_vScrollBar.Control.Parent != null, _hScrollBar.Control.Parent != null);
 
 		private Rectangle GetClientArea(bool vScrollBar, bool hScrollBar)
 		{
@@ -595,25 +516,12 @@ namespace gitter.Framework.Controls
 		{
 		}
 
-		protected virtual int GetVScrollSmallChange()
-		{
-			return 10;
-		}
+		protected virtual int GetVScrollSmallChange() => 10;
 
-		protected virtual int GetHScrollSmallChange()
-		{
-			return 10;
-		}
+		protected virtual int GetHScrollSmallChange() => 10;
 
-		protected bool SetScrollBars()
-		{
-			return SetScrollBars(true);
-		}
-
-		protected bool SetScrollBars(bool allowRedraw)
-		{
-			return SetScrollBars(MeasureContent(_contentArea), allowRedraw);
-		}
+		protected bool SetScrollBars(bool allowRedraw = true)
+			=> SetScrollBars(MeasureContent(_contentArea), allowRedraw);
 
 		protected bool SetScrollBars(Size contentSize, bool allowRedraw)
 		{
@@ -815,50 +723,23 @@ namespace gitter.Framework.Controls
 			return res;
 		}
 
-		protected virtual Rectangle GetContentArea(Rectangle clientArea)
-		{
-			return clientArea;
-		}
+		protected virtual Rectangle GetContentArea(Rectangle clientArea) => clientArea;
 
-		protected virtual bool HScrollAffectsClientArea
-		{
-			get { return true; }
-		}
+		protected virtual bool HScrollAffectsClientArea => true;
 
-		protected virtual bool VScrollAffectsClientArea
-		{
-			get { return false; }
-		}
+		protected virtual bool VScrollAffectsClientArea => false;
 
-		protected virtual Size MeasureContent()
-		{
-			return Size.Empty;
-		}
+		protected virtual Size MeasureContent() => Size.Empty;
 
-		protected virtual Size MeasureContent(Rectangle contentArea)
-		{
-			return MeasureContent();
-		}
+		protected virtual Size MeasureContent(Rectangle contentArea) => MeasureContent();
 
-		protected virtual int TransformVScrollPos(int position)
-		{
-			return position;
-		}
+		protected virtual int TransformVScrollPos(int position) => position;
 
-		protected virtual int TransformHScrollPos(int position)
-		{
-			return position;
-		}
+		protected virtual int TransformHScrollPos(int position) => position;
 
-		protected virtual int TransformMaxVScrollPos(int position)
-		{
-			return position;
-		}
+		protected virtual int TransformMaxVScrollPos(int position) => position;
 
-		protected virtual int TransformMaxHScrollPos(int position)
-		{
-			return position;
-		}
+		protected virtual int TransformMaxHScrollPos(int position) => position;
 
 		protected virtual void OnVScroll(int dy)
 		{

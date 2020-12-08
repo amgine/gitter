@@ -34,7 +34,7 @@ namespace gitter.Git
 		#region Data
 
 		/// <summary>Object cache.</summary>
-		private readonly Dictionary<string, TObject> _dictionary;
+		private readonly Dictionary<string, TObject> _dictionary = new();
 
 		#endregion
 
@@ -87,7 +87,6 @@ namespace gitter.Git
 		protected GitObjectsCollection(Repository repository)
 			: base(repository, false)
 		{
-			_dictionary = new Dictionary<string, TObject>();
 		}
 
 		#endregion
@@ -245,9 +244,7 @@ namespace gitter.Git
 		/// An <see cref="T:System.Collections.IEnumerator&lt;TObject&gt;"/> object that can be used to iterate through the collection.
 		/// </returns>
 		public IEnumerator<TObject> GetEnumerator()
-		{
-			return _dictionary.Values.GetEnumerator();
-		}
+			=> _dictionary.Values.GetEnumerator();
 
 		/// <summary>
 		/// Returns an enumerator that iterates through a collection.
@@ -256,9 +253,7 @@ namespace gitter.Git
 		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
 		/// </returns>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _dictionary.Values.GetEnumerator();
-		}
+			=> _dictionary.Values.GetEnumerator();
 
 		#endregion
 	}

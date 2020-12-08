@@ -66,20 +66,6 @@ namespace gitter.Git
 			{
 				MarkAsDeleted();
 			}
-			TaskUtility.PropagateFaultedStates(task);
-			//return DeleteCoreAsync(progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		if(t.IsCompleted)
-			//		{
-			//			MarkAsDeleted();
-			//		}
-			//		TaskUtility.PropagateFaultedStates(t);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		public void MarkAsDeleted()

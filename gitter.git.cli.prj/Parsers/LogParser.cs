@@ -22,6 +22,7 @@ namespace gitter.Git.AccessLayer.CLI
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Runtime.CompilerServices;
 	using System.Text;
 
 	using gitter.Framework.CLI;
@@ -37,45 +38,60 @@ namespace gitter.Git.AccessLayer.CLI
 			void Reset();
 		}
 
-		sealed class HashField : IField
+		interface IField<out T> : IField
+		{
+			T GetValue();
+		}
+
+		struct CommitMessage
+		{
+			public CommitMessage(string subject, string body)
+			{
+				Subject = subject;
+				Body    = body;
+			}
+
+			public string Subject { get; }
+
+			public string Body { get; }
+		}
+
+		sealed class HashField : IField<Hash>
 		{
 			private readonly char[] _buffer;
 			private int _offset;
 
 			public HashField()
 			{
-				_buffer = new char[40];
+				_buffer = new char[Hash.HexStringLength];
 			}
 
 			public bool Parse(ITextSegment textSegment)
 			{
 				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
-				Verify.State.IsFalse(_offset == 41, "Field is already completed.");
+				Verify.State.IsFalse(_offset > Hash.HexStringLength, "Field is already completed.");
 
-				if(_offset < 40)
+				if(_offset < Hash.HexStringLength)
 				{
-					int c = Math.Min(textSegment.Length, 40 - _offset);
+					int c = Math.Min(textSegment.Length, Hash.HexStringLength - _offset);
 					textSegment.MoveTo(_buffer, _offset, c);
 					_offset += c;
 				}
-				if(_offset == 40 && textSegment.Length > 0)
+				if(_offset == Hash.HexStringLength && textSegment.Length > 0)
 				{
-					_offset = 41;
-					textSegment.Skip(1);
+					_offset = Hash.HexStringLength + 1;
+					textSegment.Skip();
 					return true;
 				}
 				return false;
 			}
 
-			public void Reset()
-			{
-				_offset = 0;
-			}
+			public void Reset() => _offset = 0;
 
 			public Hash GetValue() => new Hash(_buffer);
 		}
 
-		sealed class MultiHashField : IField
+		sealed class MultiHashField : IField<List<Hash>>
 		{
 			private readonly char[] _buffer;
 			private readonly List<Hash> _hashes;
@@ -84,7 +100,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 			public MultiHashField()
 			{
-				_buffer = new char[40];
+				_buffer = new char[Hash.HexStringLength];
 				_hashes = new List<Hash>();
 			}
 
@@ -110,13 +126,13 @@ namespace gitter.Git.AccessLayer.CLI
 						return true;
 					}
 				}
-				if(_offset < 40 && textSegment.Length > 0)
+				if(_offset < Hash.HexStringLength && textSegment.Length > 0)
 				{
-					int c = Math.Min(textSegment.Length, 40 - _offset);
+					int c = Math.Min(textSegment.Length, Hash.HexStringLength - _offset);
 					textSegment.MoveTo(_buffer, _offset, c);
 					_offset += c;
 				}
-				if(_offset == 40 && textSegment.Length > 0)
+				if(_offset == Hash.HexStringLength && textSegment.Length > 0)
 				{
 					_offset = 0;
 					_hashes.Add(new Hash(_buffer));
@@ -133,7 +149,7 @@ namespace gitter.Git.AccessLayer.CLI
 			public List<Hash> GetValue() => _hashes;
 		}
 
-		sealed class UnixTimestampField : IField
+		sealed class UnixTimestampField : IField<DateTimeOffset>
 		{
 			private long _timestamp;
 			private bool _isCompleted;
@@ -160,7 +176,7 @@ namespace gitter.Git.AccessLayer.CLI
 				return false;
 			}
 
-			public DateTime GetValue() => GitConstants.UnixEraStart.AddSeconds(_timestamp).ToLocalTime();
+			public DateTimeOffset GetValue() => DateTimeOffset.FromUnixTimeSeconds(_timestamp).ToLocalTime();
 
 			public void Reset()
 			{
@@ -169,7 +185,193 @@ namespace gitter.Git.AccessLayer.CLI
 			}
 		}
 
-		sealed class StringLineField : IField
+		sealed class ISO8601TimestampField : IField<DateTimeOffset>
+		{
+			// 0123456789012345678901234
+			// 2020-11-17 00:13:52 +0300
+
+			private readonly char[] _buffer;
+			private int _offset;
+
+			public ISO8601TimestampField()
+			{
+				_buffer = new char[25];
+			}
+
+			public bool Parse(ITextSegment textSegment)
+			{
+				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
+				Verify.State.IsFalse(_offset > _buffer.Length, "Field is already completed.");
+
+				if(_offset < _buffer.Length)
+				{
+					int c = Math.Min(textSegment.Length, _buffer.Length - _offset);
+					textSegment.MoveTo(_buffer, _offset, c);
+					_offset += c;
+				}
+				if(_offset == _buffer.Length && textSegment.Length > 0)
+				{
+					_offset = _buffer.Length + 1;
+					textSegment.Skip();
+					return true;
+				}
+				return false;
+			}
+
+			public void Reset() => _offset = 0;
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private static int Digit(char c) => c - '0';
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetYear()
+			{
+				return
+					Digit(_buffer[0]) * 1000 +
+					Digit(_buffer[1]) * 100 +
+					Digit(_buffer[2]) * 10 +
+					Digit(_buffer[3]);
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int Get2Digits(int offset)
+			{
+				return
+					Digit(_buffer[offset + 0]) * 10 +
+					Digit(_buffer[offset + 1]);
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetMonth() => Get2Digits(5);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetDay() => Get2Digits(8);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetHours() => Get2Digits(11);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetMinutes() => Get2Digits(14);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetSeconds() => Get2Digits(17);
+
+			private TimeSpan GetOffset()
+			{
+				var sign = _buffer[20] switch
+				{
+					'+' =>  1,
+					'-' => -1,
+					_ => throw new FormatException(),
+				};
+
+				var h = Get2Digits(21);
+				var m = Get2Digits(23);
+
+				return new TimeSpan(sign * (h * 60 + m) * 60 * 10000000L);
+			}
+
+			public DateTimeOffset GetValue()
+				=> new DateTimeOffset(
+					GetYear(), GetMonth(), GetDay(),
+					GetHours(), GetMinutes(), GetSeconds(),
+					GetOffset());
+		}
+
+		sealed class StrictISO8601TimestampField : IField<DateTimeOffset>
+		{
+			// 0123456789012345678901234
+			// 2020-06-02T16:21:00+03:00
+
+			private readonly char[] _buffer;
+			private int _offset;
+
+			public StrictISO8601TimestampField()
+			{
+				_buffer = new char[25];
+			}
+
+			public bool Parse(ITextSegment textSegment)
+			{
+				Verify.Argument.IsNotNull(textSegment, nameof(textSegment));
+				Verify.State.IsFalse(_offset > _buffer.Length, "Field is already completed.");
+
+				if(_offset < _buffer.Length)
+				{
+					int c = Math.Min(textSegment.Length, _buffer.Length - _offset);
+					textSegment.MoveTo(_buffer, _offset, c);
+					_offset += c;
+				}
+				if(_offset == _buffer.Length && textSegment.Length > 0)
+				{
+					_offset = _buffer.Length + 1;
+					textSegment.Skip();
+					return true;
+				}
+				return false;
+			}
+
+			public void Reset() => _offset = 0;
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private static int Digit(char c) => c - '0';
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetYear()
+			{
+				return
+					Digit(_buffer[0]) * 1000 +
+					Digit(_buffer[1]) * 100 +
+					Digit(_buffer[2]) * 10 +
+					Digit(_buffer[3]);
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int Get2Digits(int offset)
+			{
+				return
+					Digit(_buffer[offset + 0]) * 10 +
+					Digit(_buffer[offset + 1]);
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetMonth() => Get2Digits(5);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetDay() => Get2Digits(8);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetHours() => Get2Digits(11);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetMinutes() => Get2Digits(14);
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetSeconds() => Get2Digits(17);
+
+			private TimeSpan GetOffset()
+			{
+				var sign = _buffer[19] switch
+				{
+					'+' =>  1,
+					'-' => -1,
+					_ => throw new FormatException(),
+				};
+
+				var h = Get2Digits(20);
+				var m = Get2Digits(23);
+
+				return new TimeSpan(sign * (h * 60 + m) * 60 * 10000000L);
+			}
+
+			public DateTimeOffset GetValue()
+				=> new DateTimeOffset(
+					GetYear(), GetMonth(), GetDay(),
+					GetHours(), GetMinutes(), GetSeconds(),
+					GetOffset());
+		}
+
+		sealed class StringLineField : IField<string>
 		{
 			private readonly StringBuilder _line;
 			private bool _isCompleted;
@@ -217,7 +419,7 @@ namespace gitter.Git.AccessLayer.CLI
 			#endregion
 		}
 
-		sealed class SubjectAndBodyField : IField
+		sealed class CommitMessageField : IField<CommitMessage>
 		{
 			sealed class EmptyLineSeparator
 			{
@@ -230,10 +432,7 @@ namespace gitter.Git.AccessLayer.CLI
 					_buffer = new char[4];
 				}
 
-				public int Length
-				{
-					get { return _length; }
-				}
+				public int Length => _length;
 
 				public bool Append(char c)
 				{
@@ -270,7 +469,7 @@ namespace gitter.Git.AccessLayer.CLI
 				}
 			}
 
-			static readonly char[] Separators = new char[] { '\0', '\r', '\n' };
+			static readonly char[] Separators = new[] { '\0', '\r', '\n' };
 
 			private readonly StringBuilder _subject;
 			private readonly StringBuilder _body;
@@ -278,16 +477,14 @@ namespace gitter.Git.AccessLayer.CLI
 			private bool _isSubjectCompleted;
 			private bool _isCompleted;
 
-			public SubjectAndBodyField()
+			public CommitMessageField()
 			{
 				_subject   = new StringBuilder();
 				_body      = new StringBuilder();
 				_separator = new EmptyLineSeparator();
 			}
 
-			public string GetSubject() => _subject.ToString();
-
-			public string GetBody() => _body.ToString();
+			public CommitMessage GetValue() => new CommitMessage(_subject.ToString(), _body.ToString());
 
 			private static void RemoveTrailingWhitespace(StringBuilder stringBuilder)
 			{
@@ -400,16 +597,16 @@ namespace gitter.Git.AccessLayer.CLI
 
 		private readonly Dictionary<Hash, RevisionData> _cache;
 		private readonly List<RevisionData> _log;
-		private readonly HashField _commitHash;
-		private readonly HashField _treeHash;
-		private readonly MultiHashField _parents;
-		private readonly UnixTimestampField _commitDate;
-		private readonly StringLineField _committerName;
-		private readonly StringLineField _committerEmail;
-		private readonly UnixTimestampField _authorDate;
-		private readonly StringLineField _authorName;
-		private readonly StringLineField _authorEmail;
-		private readonly SubjectAndBodyField _subjectAndBody;
+		private readonly IField<Hash> _commitHash;
+		private readonly IField<Hash> _treeHash;
+		private readonly IField<List<Hash>> _parents;
+		private readonly IField<DateTimeOffset> _commitDate;
+		private readonly IField<string> _committerName;
+		private readonly IField<string> _committerEmail;
+		private readonly IField<DateTimeOffset> _authorDate;
+		private readonly IField<string> _authorName;
+		private readonly IField<string> _authorEmail;
+		private readonly IField<CommitMessage> _commitMessage;
 		private readonly IField[] _fields;
 		private int _currentFieldIndex;
 
@@ -417,11 +614,18 @@ namespace gitter.Git.AccessLayer.CLI
 
 		#region .ctor
 
-		public LogParser(Dictionary<Hash, RevisionData> cache)
-		{
-			Verify.Argument.IsNotNull(cache, nameof(cache));
+		private static IField<DateTimeOffset> CreateTimestampParser(TimestampFormat timestampFormat)
+			=> timestampFormat switch
+			{
+				TimestampFormat.Unix          => new UnixTimestampField(),
+				TimestampFormat.ISO8601       => new ISO8601TimestampField(),
+				TimestampFormat.StrictISO8601 => new StrictISO8601TimestampField(),
+				_ => throw new ArgumentException("Unsupported timestamp format.", nameof(timestampFormat)),
+			};
 
-			_cache = cache;
+		public LogParser(Dictionary<Hash, RevisionData> cache = null, TimestampFormat timestampFormat = TimestampFormat.StrictISO8601)
+		{
+			_cache = cache ?? new Dictionary<Hash, RevisionData>(Hash.EqualityComparer);
 			_log   = new List<RevisionData>();
 
 			_fields = new IField[]
@@ -429,19 +633,14 @@ namespace gitter.Git.AccessLayer.CLI
 				_commitHash     = new HashField(),
 				_treeHash       = new HashField(),
 				_parents        = new MultiHashField(),
-				_commitDate     = new UnixTimestampField(),
+				_commitDate     = CreateTimestampParser(timestampFormat),
 				_committerName  = new StringLineField(),
 				_committerEmail = new StringLineField(),
-				_authorDate     = new UnixTimestampField(),
+				_authorDate     = CreateTimestampParser(timestampFormat),
 				_authorName     = new StringLineField(),
 				_authorEmail    = new StringLineField(),
-				_subjectAndBody = new SubjectAndBodyField(),
+				_commitMessage  = new CommitMessageField(),
 			};
-		}
-
-		public LogParser()
-			: this(new Dictionary<Hash, RevisionData>(Hash.EqualityComparer))
-		{
 		}
 
 		#endregion
@@ -481,8 +680,11 @@ namespace gitter.Git.AccessLayer.CLI
 			revisionData.AuthorDate     = _authorDate.GetValue();
 			revisionData.AuthorName     = _authorName.GetValue();
 			revisionData.AuthorEmail    = _authorEmail.GetValue();
-			revisionData.Subject        = _subjectAndBody.GetSubject();
-			revisionData.Body           = _subjectAndBody.GetBody();
+
+			var message = _commitMessage.GetValue();
+
+			revisionData.Subject        = message.Subject;
+			revisionData.Body           = message.Body;
 
 			return revisionData;
 		}

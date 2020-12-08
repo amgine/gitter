@@ -30,7 +30,7 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly Dictionary<Hash, Revision> _revisions;
+		private readonly Dictionary<Hash, Revision> _revisions = new(Hash.EqualityComparer);
 
 		#endregion
 
@@ -41,14 +41,13 @@ namespace gitter.Git
 		public RevisionCache(Repository repository)
 			: base(repository)
 		{
-			_revisions = new Dictionary<Hash, Revision>(Hash.EqualityComparer);
 		}
 
 		#endregion
 
 		/// <summary>Returns cross-thread synchronization object.</summary>
 		/// <value>Cross-thread synchronization object.</value>
-		public object SyncRoot { get; } = new object();
+		public object SyncRoot { get; } = new();
 
 		/// <summary>Returns revision with specified SHA1.</summary>
 		/// <param name="sha1">SHA-1 of required revision.</param>
@@ -88,8 +87,7 @@ namespace gitter.Git
 		{
 			lock(SyncRoot)
 			{
-				Revision revision;
-				if(_revisions.TryGetValue(sha1, out revision))
+				if(_revisions.TryGetValue(sha1, out var revision))
 				{
 					if(!revision.IsLoaded)
 					{
@@ -98,7 +96,7 @@ namespace gitter.Git
 				}
 				else
 				{
-					RevisionData revisionData = null;
+					var revisionData = default(RevisionData);
 					try
 					{
 						revisionData = Repository.Accessor.QueryRevision.Invoke(
@@ -106,7 +104,7 @@ namespace gitter.Git
 					}
 					catch(GitException)
 					{
-						return null;
+						return default;
 					}
 					revision = ObjectFactories.CreateRevision(Repository, revisionData);
 				}

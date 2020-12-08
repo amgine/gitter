@@ -27,6 +27,9 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		public ConfigurationValueOverride(string name, string value)
 		{
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsNotNull(value, nameof(value));
+
 			Name  = name;
 			Value = value;
 		}

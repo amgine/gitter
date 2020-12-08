@@ -1,0 +1,35 @@
+# To learn more about .editorconfig see https://aka.ms/editorconfigdocs
+############################### 
+# Core EditorConfig Options   # 
+############################### 
+# All files 
+[*]
+indent_style=tab
+trim_trailing_whitespace=true
+
+# Code files 
+[*.{cs,csx,vb,vbx}]
+indent_style=tab
+indent_size=4
+insert_final_newline=true
+charset=utf-8-bom
+
+# XML end etc...
+[*.{xml,xsd,appxmanifest,build,config,csproj,dbml,discomap,dtd,jsproj,lsproj,njsproj,nuspec,proj,props,StyleCop,targets,tasks,vbproj}]
+indent_style=space
+indent_size=2
+tab_width=2
+
+[*.{xaml,xamlx,xoml}]
+indent_style=space
+indent_size=4
+tab_width=4
+
+#### .NET Coding Conventions ####
+
+# Organize usings
+dotnet_separate_import_directive_groups = true
+dotnet_sort_system_directives_first = true
+
+# Space preferences
+csharp_space_after_keywords_in_control_flow_statements = false

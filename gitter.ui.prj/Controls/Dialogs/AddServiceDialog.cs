@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -63,7 +63,7 @@ namespace gitter.Controls
 			var hs = new HashSet<IRepositoryServiceProvider>(_environment.ActiveIssueTrackerProviders);
 			foreach(var prov in _environment.IssueTrackerProviders)
 			{
-				if(!hs.Contains(prov))
+				if(prov.CanBeAddedManually && !hs.Contains(prov))
 				{
 					var item = new ServiceProviderListItem(prov);
 					picker.DropDownItems.Add(item);

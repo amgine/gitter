@@ -21,9 +21,6 @@
 namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.IO;
 	using System.Windows.Forms;
 
@@ -66,7 +63,7 @@ namespace gitter.Git.Gui
 			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
 			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
-			byte[] bytes = null;
+			byte[] bytes;
 			try
 			{
 				bytes = tree.GetBlobContent(blobPath);
@@ -83,10 +80,8 @@ namespace gitter.Git.Gui
 			}
 			try
 			{
-				using(var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
-				{
-					fs.Write(bytes, 0, bytes.Length);
-				}
+				using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+				fs.Write(bytes, 0, bytes.Length);
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
@@ -108,7 +103,7 @@ namespace gitter.Git.Gui
 
 			var path = Path.Combine(Path.GetTempPath(), "gitter", tree.TreeHash);
 			var fileName = Path.Combine(path, blobPath);
-			byte[] bytes = null;
+			byte[] bytes;
 			try
 			{
 				bytes = tree.GetBlobContent(blobPath);

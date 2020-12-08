@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -49,76 +49,30 @@ namespace gitter.Framework.Controls
 
 		private sealed class DarkColorTable : IColorTable
 		{
-			public Color Border
-			{
-				get { return Color.FromArgb(84, 84, 92); }
-			}
+			public Color Border => Color.FromArgb(84, 84, 92);
 
-			public Color Background
-			{
-				get { return Color.FromArgb(63, 63, 70); }
-			}
+			public Color Background => Color.FromArgb(63, 63, 70);
 
-			public Color Foreground
-			{
-				get { return MSVS2012DarkColors.WINDOW_TEXT; }
-			}
+			public Color Foreground => MSVS2012DarkColors.WINDOW_TEXT;
 
-			public Color HoverBorder
-			{
-				get { return Color.FromArgb(106, 106, 117); }
-			}
+			public Color HoverBorder => Color.FromArgb(106, 106, 117);
 
-			public Color HoverBackground
-			{
-				get { return Color.FromArgb(84, 84, 92); }
-			}
+			public Color HoverBackground => Color.FromArgb(84, 84, 92);
 
-			public Color PressedBorder
-			{
-				get { return Color.FromArgb(28, 151, 234); }
-			}
+			public Color PressedBorder => Color.FromArgb(28, 151, 234);
 
-			public Color PressedBackground
-			{
-				get { return Color.FromArgb(0, 122, 204); }
-			}
+			public Color PressedBackground => Color.FromArgb(0, 122, 204);
 
-			public Color DisabledBorder
-			{
-				get { return Color.FromArgb(67, 67, 70); }
-			}
+			public Color DisabledBorder => Color.FromArgb(67, 67, 70);
 
-			public Color DisabledBackground
-			{
-				get { return Color.FromArgb(37, 37, 38); }
-			}
+			public Color DisabledBackground => Color.FromArgb(37, 37, 38);
 
-			public Color DisabledForeground
-			{
-				get { return Color.FromArgb(109, 109, 109); }
-			}
+			public Color DisabledForeground => Color.FromArgb(109, 109, 109);
 		}
 
 		private static IColorTable _darkColors;
 
-		public static IColorTable DarkColors
-		{
-			get
-			{
-				if(_darkColors == null)
-				{
-					_darkColors = new DarkColorTable();
-				}
-				return _darkColors;
-			}
-		}
-
-		#endregion
-
-		#region Data
-
-		private readonly IColorTable _colorTable;
+		public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
 
 		#endregion
 
@@ -128,17 +82,14 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
-			_colorTable = colorTable;
+			ColorTable = colorTable;
 		}
 
 		#endregion
 
 		#region Properties
 
-		private IColorTable ColorTable
-		{
-			get { return _colorTable; }
-		}
+		private IColorTable ColorTable { get; }
 
 		#endregion
 

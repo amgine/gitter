@@ -18,5 +18,6 @@
 :msbuildfound
 @echo Building gitter...
 @if exist "output\Release" @rd /s /q "output\Release"
+@%msbuild% master.build /t:Restore %*
 @%msbuild% master.build /t:BuildRelease %*
 @pause

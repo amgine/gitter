@@ -421,7 +421,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Download new objects from remote repository.</summary>
-		public Task FetchAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task FetchAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -437,7 +437,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Download new objects from remote repository and merge tracking branches.</summary>
-		public Task PullAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task PullAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -448,8 +448,8 @@ namespace gitter.Git
 		public void Push(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 		{
 			Verify.State.IsNotDeleted(this);
-			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, "branches");
-			Verify.Argument.IsTrue(branches.Count != 0, "branches",
+			Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, nameof(branches));
+			Verify.Argument.IsTrue(branches.Count != 0, nameof(branches),
 				Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
 			var names = new List<string>(branches.Count);
@@ -484,7 +484,8 @@ namespace gitter.Git
 			}
 		}
 
-		public Task PushAsync(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task PushAsync(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -515,34 +516,25 @@ namespace gitter.Git
 		}
 
 		/// <summary>Deletes all stale tracking branches.</summary>
-		public async Task PruneAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task PruneAsync(IProgress<OperationProgress> progress = null, CancellationToken cancellationToken = default)
 		{
 			Verify.State.IsNotDeleted(this);
 
 			progress?.Report(new OperationProgress(Resources.StrsSearchingStaleBranches.AddEllipsis()));
 			var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
-			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged);
-			var parameters = GetPruneParameters();
-			await Repository.Accessor.PruneRemote.InvokeAsync(parameters, progress, cancellationToken);
-			block.Dispose();
+			using(var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
+			{
+				var parameters = GetPruneParameters();
+				await Repository
+					.Accessor
+					.PruneRemote
+					.InvokeAsync(parameters, progress, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			Repository.Refs.Remotes.Refresh();
 			var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 			var changes = RefsDiff.Calculate(state1, state2);
 			Repository.Remotes.OnPruneCompleted(this, changes);
-			//return Repository.Accessor.PruneRemote.InvokeAsync(parameters, progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		Repository.Refs.Remotes.Refresh();
-			//		var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
-			//		var changes = RefsDiff.Calculate(state1, state2);
-			//		Repository.Remotes.OnPruneCompleted(this, changes);
-			//		TaskUtility.PropagateFaultedStates(t);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#endregion

@@ -24,31 +24,20 @@ namespace gitter.Git
 	/// <summary>Patch from file.</summary>
 	public sealed class PatchFromFile : IPatchSource
 	{
-		private readonly string _displayName;
 		private readonly string _fileName;
 
 		private sealed class PatchFile : IPatchFile
 		{
-			private readonly string _fileName;
+			public PatchFile(string fileName) => FileName = fileName;
 
-			public PatchFile(string fileName)
-			{
-				_fileName = fileName;
-			}
+			public string FileName { get; }
 
-			public string FileName
-			{
-				get { return _fileName; }
-			}
-
-			public void Dispose()
-			{
-			}
+			public void Dispose() { }
 		}
 
 		public PatchFromFile(string displayName, string fileName)
 		{
-			_displayName = displayName;
+			DisplayName = displayName;
 			_fileName = fileName;
 		}
 
@@ -58,13 +47,8 @@ namespace gitter.Git
 		}
 
 		public IPatchFile PreparePatchFile()
-		{
-			return new PatchFile(_fileName);
-		}
+			=> new PatchFile(_fileName);
 
-		public string DisplayName
-		{
-			get { return _displayName; }
-		}
+		public string DisplayName { get; }
 	}
 }

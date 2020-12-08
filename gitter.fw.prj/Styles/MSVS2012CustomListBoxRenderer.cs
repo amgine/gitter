@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -87,55 +87,25 @@ namespace gitter.Framework
 
 			#region IColorTable
 
-			public Color Background
-			{
-				get { return BACKGROUND; }
-			}
+			public Color Background => BACKGROUND;
 
-			public Color Text
-			{
-				get { return TEXT; }
-			}
+			public Color Text => TEXT;
 
-			public Color SelectionBackground
-			{
-				get { return SELECTION_BACKGROUND; }
-			}
+			public Color SelectionBackground => SELECTION_BACKGROUND;
 
-			public Color FocusBorder
-			{
-				get { return FOCUS_BORDER; }
-			}
+			public Color FocusBorder => FOCUS_BORDER;
 
-			public Color SelectionBackgroundNoFocus
-			{
-				get { return SELECTION_BACKGROUND_NO_FOCUS; }
-			}
+			public Color SelectionBackgroundNoFocus => SELECTION_BACKGROUND_NO_FOCUS;
 
-			public Color HoverBackground
-			{
-				get { return HOVER_BACKGROUND; }
-			}
+			public Color HoverBackground => HOVER_BACKGROUND;
 
-			public Color ExtenderForeground
-			{
-				get { return EXTENDER_FOREGROUND; }
-			}
+			public Color ExtenderForeground => EXTENDER_FOREGROUND;
 
-			public Color HoverExtenderForeground
-			{
-				get { return HOVER_EXTENDER_FOREGROUND; }
-			}
+			public Color HoverExtenderForeground => HOVER_EXTENDER_FOREGROUND;
 
-			public Color PlusMinusForeground
-			{
-				get { return PLUS_MINUS_FOREGROUND; }
-			}
+			public Color PlusMinusForeground => PLUS_MINUS_FOREGROUND;
 
-			public Color AccentPlusMinusForeground
-			{
-				get { return ACCENT_PLUS_MINUS_FOREGROUND; }
-			}
+			public Color AccentPlusMinusForeground => ACCENT_PLUS_MINUS_FOREGROUND;
 
 			#endregion
 		}
@@ -155,64 +125,28 @@ namespace gitter.Framework
 
 			#region IColorTable
 
-			public Color Background
-			{
-				get { return BACKGROUND; }
-			}
+			public Color Background => BACKGROUND;
 
-			public Color Text
-			{
-				get { return TEXT; }
-			}
+			public Color Text => TEXT;
 
-			public Color SelectionBackground
-			{
-				get { return SELECTION_BACKGROUND; }
-			}
+			public Color SelectionBackground => SELECTION_BACKGROUND;
 
-			public Color FocusBorder
-			{
-				get { return FOCUS_BORDER; }
-			}
+			public Color FocusBorder => FOCUS_BORDER;
 
-			public Color SelectionBackgroundNoFocus
-			{
-				get { return SELECTION_BACKGROUND_NO_FOCUS; }
-			}
+			public Color SelectionBackgroundNoFocus => SELECTION_BACKGROUND_NO_FOCUS;
 
-			public Color HoverBackground
-			{
-				get { return HOVER_BACKGROUND; }
-			}
+			public Color HoverBackground => HOVER_BACKGROUND;
 
-			public Color ExtenderForeground
-			{
-				get { return EXTENDER_FOREGROUND; }
-			}
+			public Color ExtenderForeground => EXTENDER_FOREGROUND;
 
-			public Color HoverExtenderForeground
-			{
-				get { return HOVER_EXTENDER_FOREGROUND; }
-			}
+			public Color HoverExtenderForeground => HOVER_EXTENDER_FOREGROUND;
 
-			public Color PlusMinusForeground
-			{
-				get { return PLUS_MINUS_FOREGROUND; }
-			}
+			public Color PlusMinusForeground => PLUS_MINUS_FOREGROUND;
 
-			public Color AccentPlusMinusForeground
-			{
-				get { return ACCENT_PLUS_MINUS_FOREGROUND; }
-			}
+			public Color AccentPlusMinusForeground => ACCENT_PLUS_MINUS_FOREGROUND;
 
 			#endregion
 		}
-
-		#endregion
-
-		#region Data
-
-		private readonly IColorTable _colorTable;
 
 		#endregion
 
@@ -222,15 +156,12 @@ namespace gitter.Framework
 		{
 			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
-			_colorTable = colorTable;
+			ColorTable = colorTable;
 		}
 
 		#endregion
 
-		private IColorTable ColorTable
-		{
-			get { return _colorTable; }
-		}
+		private IColorTable ColorTable { get; }
 
 		public override Color BackColor
 		{
@@ -816,7 +747,7 @@ namespace gitter.Framework
 					}
 
 					item.PaintSubItem(new SubItemPaintEventArgs(paintEventArgs.Graphics, clip, subrect, paintEventArgs.Index,
-						paintEventArgs.State, hoveredPart, paintEventArgs.IsHostControlFocused, i, column));
+						paintEventArgs.State, hoveredPart, paintEventArgs.IsHostControlFocused, item, i, column));
 				}
 			}
 		}

@@ -33,8 +33,6 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly IRevisionPointer _revision1;
-		private readonly IRevisionPointer _revision2;
 		private readonly IList<string> _paths;
 
 		#endregion
@@ -48,8 +46,8 @@ namespace gitter.Git
 			Verify.Argument.IsTrue(revision1.Repository == revision2.Repository,
 				"revision2", "Cannot compare objects from different repositories.");
 
-			_revision1 = revision1;
-			_revision2 = revision2;
+			Revision1 = revision1;
+			Revision2 = revision2;
 		}
 
 		public RevisionCompareDiffSource(IRevisionPointer revision1, IRevisionPointer revision2, IList<string> paths)
@@ -62,20 +60,11 @@ namespace gitter.Git
 
 		#region Properties
 
-		public override Repository Repository
-		{
-			get { return _revision1.Repository; }
-		}
+		public override Repository Repository => Revision1.Repository;
 
-		public IRevisionPointer Revision1
-		{
-			get { return _revision1; }
-		}
+		public IRevisionPointer Revision1 { get; }
 
-		public IRevisionPointer Revision2
-		{
-			get { return _revision2; }
-		}
+		public IRevisionPointer Revision2 { get; }
 
 		#endregion
 
@@ -83,7 +72,7 @@ namespace gitter.Git
 
 		public override int GetHashCode()
 		{
-			var res =  _revision1.GetHashCode() ^ _revision2.GetHashCode();
+			var res =  Revision1.GetHashCode() ^ Revision2.GetHashCode();
 			if(_paths != null)
 			{
 				foreach(var path in _paths)
@@ -96,10 +85,8 @@ namespace gitter.Git
 
 		public override bool Equals(object obj)
 		{
-			if(obj == null) return false;
-			var ds = obj as RevisionCompareDiffSource;
-			if(ds == null) return false;
-			if(_revision1 != ds._revision1 || _revision2 != ds._revision2) return false;
+			if(obj is not RevisionCompareDiffSource ds) return false;
+			if(Revision1 != ds.Revision1 || Revision2 != ds.Revision2) return false;
 			var count1 = _paths == null ? 0 : _paths.Count;
 			var count2 = ds._paths == null ? 0 : ds._paths.Count;
 			if(count1 != count2) return false;
@@ -116,8 +103,8 @@ namespace gitter.Git
 
 			var parameters = new QueryDiffParameters()
 			{
-				Revision1 = _revision1.Pointer,
-				Revision2 = _revision2.Pointer,
+				Revision1 = Revision1.Pointer,
+				Revision2 = Revision2.Pointer,
 				Paths = _paths,
 			};
 			ApplyCommonDiffOptions(parameters, options);
@@ -142,8 +129,8 @@ namespace gitter.Git
 
 		public override string ToString()
 		{
-			var r1 = (_revision1 is Revision) ? _revision1.Pointer.Substring(0, 7) : _revision1.Pointer;
-			var r2 = (_revision2 is Revision) ? _revision2.Pointer.Substring(0, 7) : _revision2.Pointer;
+			var r1 = (Revision1 is Revision) ? Revision1.Pointer.Substring(0, 7) : Revision1.Pointer;
+			var r2 = (Revision2 is Revision) ? Revision2.Pointer.Substring(0, 7) : Revision2.Pointer;
 			return "diff " + r1 + ".." + r2;
 		}
 

@@ -39,7 +39,7 @@ namespace gitter.Git
 
 		#region Data
 
-		private readonly SortedDictionary<string, Reference> _container;
+		private readonly SortedDictionary<string, Reference> _container = new();
 
 		#endregion
 
@@ -47,7 +47,6 @@ namespace gitter.Git
 
 		internal RevisionReferencesCollection()
 		{
-			_container = new SortedDictionary<string, Reference>();
 		}
 
 		#endregion
@@ -172,19 +171,13 @@ namespace gitter.Git
 		#region IEnumerable<Reference>
 
 		public SortedDictionary<string, Reference>.ValueCollection.Enumerator GetEnumerator()
-		{
-			return _container.Values.GetEnumerator();
-		}
+			=> _container.Values.GetEnumerator();
 
 		IEnumerator<Reference> IEnumerable<Reference>.GetEnumerator()
-		{
-			return _container.Values.GetEnumerator();
-		}
+			=> _container.Values.GetEnumerator();
 
 		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return _container.Values.GetEnumerator();
-		}
+			=> _container.Values.GetEnumerator();
 
 		#endregion
 	}

@@ -69,10 +69,7 @@ namespace gitter.Git.Gui.Controls
 			CreateControls();
 		}
 
-		public new UserColumn Column
-		{
-			get { return (UserColumn)base.Column; }
-		}
+		public new UserColumn Column => (UserColumn)base.Column;
 
 		private void SubscribeToColumnEvents()
 		{
@@ -91,7 +88,7 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowEmail
 		{
-			get { return _chkShowEmail != null ? _chkShowEmail.IsChecked : Column.ShowEmail; }
+			get => _chkShowEmail != null ? _chkShowEmail.IsChecked : Column.ShowEmail;
 			private set
 			{
 				if(_chkShowEmail != null)

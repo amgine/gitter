@@ -104,14 +104,9 @@ namespace gitter.Git
 							}
 						}
 					}
-					if(branch == null)
-					{
-						return new NowherePointer(repository, head.TargetObject);
-					}
-					else
-					{
-						return branch;
-					}
+					return branch != null
+						? branch
+						: new NowherePointer(repository, head.TargetObject);
 				case ReferenceType.Revision:
 					lock(repository.Revisions.SyncRoot)
 					{
@@ -129,14 +124,11 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(pointer, nameof(pointer));
 
-			switch(pointer.Type)
+			return pointer.Type switch
 			{
-				case ReferenceType.None:
-				case ReferenceType.LocalBranch:
-					return pointer;
-				default:
-					return pointer.Dereference();
-			}
+				ReferenceType.None or ReferenceType.LocalBranch => pointer,
+				_ => pointer.Dereference(),
+			};
 		}
 
 		/// <summary>Gets a value indicating whether HEAD is detached.</summary>
@@ -208,7 +200,7 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">
 		/// Failed to dereference <paramref name="pointer"/> or git reset failed.
 		/// </exception>
-		public void Reset(IRevisionPointer pointer, ResetMode mode)
+		public void Reset(IRevisionPointer pointer, ResetMode mode = ResetMode.Mixed)
 		{
 			Verify.Argument.IsValidRevisionPointer(pointer, Repository, nameof(pointer));
 
@@ -247,23 +239,8 @@ namespace gitter.Git
 			Repository.OnStateChanged();
 		}
 
-		/// <summary>Reset HEAD to <paramref name="pointer"/>.</summary>
-		/// <param name="pointer">HEAD's new position.</param>
-		/// <exception cref="T:System.ArgumentNullException"><paramref name="pointer"/> == <c>null</c>.</exception>
-		/// <exception cref="T:System.ArgumentException">
-		/// <paramref name="pointer"/> is not handled by this <see cref="Repository"/> or it is deleted.
-		/// </exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="pointer"/> or git reset failed.</exception>
-		public void Reset(IRevisionPointer pointer)
-		{
-			Reset(pointer, ResetMode.Mixed);
-		}
-
 		/// <summary>Updates cached information.</summary>
-		public void Refresh()
-		{
-			Pointer = GetHeadPointer(Repository);
-		}
+		public void Refresh() => Pointer = GetHeadPointer(Repository);
 
 		#region merge
 

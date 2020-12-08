@@ -44,6 +44,9 @@ namespace gitter.Git.Gui.Controls
 
 		public event EventHandler ShowColorsChanged;
 
+		private void OnShowColorsChanged(EventArgs e)
+			=> ShowColorsChanged?.Invoke(this, e);
+
 		#endregion
 
 		public GraphColumn()
@@ -73,14 +76,14 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowColors
 		{
-			get { return _showColors; }
+			get => _showColors;
 			set
 			{
 				if(_showColors != value)
 				{
 					_showColors = value;
 					InvalidateContent();
-					ShowColorsChanged?.Invoke(this, EventArgs.Empty);
+					OnShowColorsChanged(EventArgs.Empty);
 				}
 			}
 		}
@@ -88,32 +91,53 @@ namespace gitter.Git.Gui.Controls
 		const int GraphCellWidth = 21;
 		const int GraphCellHeight = 21;
 
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, GraphAtom[] graph, RevisionGraphItemType itemType)
+		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
-			if(graph != null)
+			Assert.IsNotNull(paintEventArgs);
+
+			GraphAtom[] graph;
+			RevisionGraphItemType itemType;
+			switch(paintEventArgs.Item)
 			{
-				bool showColors;
-				var rgc = paintEventArgs.Column as GraphColumn;
-				if(rgc != null)
-				{
-					showColors = rgc.ShowColors;
-				}
-				else
-				{
-					showColors = GraphColumn.DefaultShowColors;
-				}
-				GlobalBehavior.GraphStyle.DrawGraph(
-					paintEventArgs.Graphics,
-					graph,
-					paintEventArgs.Bounds,
-					GraphCellWidth,
-					itemType,
-					showColors);
-			}
+				case RevisionListItem revItem:
+					graph    = revItem.Graph;
+					itemType = revItem.DataContext.IsCurrent
+						? RevisionGraphItemType.Current
+						: RevisionGraphItemType.Generic;
+					break;
+				case FakeRevisionListItem fakeRevItem:
+					graph    = fakeRevItem.Graph;
+					itemType = fakeRevItem.Type == FakeRevisionItemType.StagedChanges
+						? RevisionGraphItemType.Uncommitted
+						: RevisionGraphItemType.Unstaged;
+					break;
+				default: return;
+			};
+			if(graph == null) return;
+			GlobalBehavior.GraphStyle.DrawGraph(
+				paintEventArgs.Graphics,
+				graph,
+				paintEventArgs.Bounds,
+				GraphCellWidth,
+				itemType,
+				ShowColors);
 		}
 
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, GraphAtom[] graph)
+		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
+			GraphAtom[] graph;
+			switch(measureEventArgs.Item)
+			{
+				case RevisionListItem revItem:
+					graph = revItem.Graph;
+					break;
+				case FakeRevisionListItem fakeRevItem:
+					graph = fakeRevItem.Graph;
+					break;
+				default: return Size.Empty;
+			};
 			return new Size((graph != null) ? (graph.Length * GraphCellWidth) : (0), GraphCellHeight);
 		}
 

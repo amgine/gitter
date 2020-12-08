@@ -44,6 +44,7 @@
 			this._lblRFC2822 = new System.Windows.Forms.Label();
 			this._lblDateFormat = new System.Windows.Forms.Label();
 			this._lblExample = new System.Windows.Forms.Label();
+			this._chkConvertToLocal = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// _radUnixTimestamp
@@ -166,13 +167,25 @@
 			this._lblExample.AutoSize = true;
 			this._lblExample.Location = new System.Drawing.Point(137, 4);
 			this._lblExample.Name = "_lblExample";
-			this._lblExample.Size = new System.Drawing.Size(74, 15);
+			this._lblExample.Size = new System.Drawing.Size(75, 15);
 			this._lblExample.TabIndex = 11;
 			this._lblExample.Text = "%Example%:";
+			// 
+			// _chkConvertToLocal
+			// 
+			this._chkConvertToLocal.AutoSize = true;
+			this._chkConvertToLocal.Location = new System.Drawing.Point(6, 127);
+			this._chkConvertToLocal.Name = "_chkConvertToLocal";
+			this._chkConvertToLocal.Size = new System.Drawing.Size(83, 19);
+			this._chkConvertToLocal.TabIndex = 12;
+			this._chkConvertToLocal.Text = "checkBox1";
+			this._chkConvertToLocal.UseVisualStyleBackColor = true;
+			this._chkConvertToLocal.CheckedChanged += new System.EventHandler(this._chkConvertToLocal_CheckedChanged);
 			// 
 			// DateColumnExtender
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.Controls.Add(this._chkConvertToLocal);
 			this.Controls.Add(this._lblExample);
 			this.Controls.Add(this._lblDateFormat);
 			this.Controls.Add(this._lblRFC2822);
@@ -186,7 +199,7 @@
 			this.Controls.Add(this._radRelative);
 			this.Controls.Add(this._radUnixTimestamp);
 			this.Name = "DateColumnExtender";
-			this.Size = new System.Drawing.Size(327, 127);
+			this.Size = new System.Drawing.Size(327, 151);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -206,5 +219,6 @@
 		private System.Windows.Forms.Label _lblRFC2822;
 		private System.Windows.Forms.Label _lblDateFormat;
 		private System.Windows.Forms.Label _lblExample;
+		private System.Windows.Forms.CheckBox _chkConvertToLocal;
 	}
 }

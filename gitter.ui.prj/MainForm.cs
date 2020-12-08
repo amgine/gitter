@@ -46,7 +46,7 @@ namespace gitter
 		private readonly ViewDockService _viewDockService;
 
 		private readonly Dictionary<string, IRepositoryProvider> _repositoryProviders;
-		private readonly Dictionary<string, IRepositoryServiceProvider> _issueTrackerProviders;
+		private readonly Dictionary<string, IRepositoryServiceProvider> _repositoryServiceProviders;
 		private IRepositoryProvider _currentProvider;
 		private HashSet<IRepositoryServiceProvider> _activeIssueTrackerProviders;
 		private IRepository _repository;
@@ -107,7 +107,7 @@ namespace gitter
 			_viewDockService.ShowView(Guids.RepositoryExplorerView);
 
 			_repositoryProviders         = new Dictionary<string, IRepositoryProvider>();
-			_issueTrackerProviders       = new Dictionary<string, IRepositoryServiceProvider>();
+			_repositoryServiceProviders       = new Dictionary<string, IRepositoryServiceProvider>();
 			_activeIssueTrackerProviders = new HashSet<IRepositoryServiceProvider>();
 			_additionalGui               = new LinkedList<IGuiProvider>();
 
@@ -140,38 +140,30 @@ namespace gitter
 		#endregion
 
 		public IEnumerable<IRepositoryProvider> RepositoryProviders
-		{
-			get { return _repositoryProviders.Values; }
-		}
+			=> _repositoryProviders.Values;
 
 		public T GetRepositoryProvider<T>() where T : class, IRepositoryProvider
 		{
 			foreach(var prov in RepositoryProviders)
 			{
-				var p = prov as T;
-				if(p != null) return p;
+				if(prov is T p) return p;
 			}
-			return default(T);
+			return default;
 		}
 
 		public IEnumerable<IRepositoryServiceProvider> IssueTrackerProviders
-		{
-			get { return _issueTrackerProviders.Values; }
-		}
+			=> _repositoryServiceProviders.Values;
 
 		public IEnumerable<IRepositoryServiceProvider> ActiveIssueTrackerProviders
-		{
-			get { return _activeIssueTrackerProviders; }
-		}
+			=> _activeIssueTrackerProviders;
 
 		public bool TryLoadIssueTracker(IRepositoryServiceProvider provider)
 		{
 			Verify.Argument.IsNotNull(provider, nameof(provider));
 			Verify.State.IsTrue(_repository != null);
 
-			if(provider.IsValidFor(_repository) && !_activeIssueTrackerProviders.Contains(provider))
+			if(!_activeIssueTrackerProviders.Contains(provider) && provider.TryCreateGuiProvider(_repository, out var gui))
 			{
-				var gui = provider.CreateGuiProvider(_repository);
 				gui.AttachToEnvironment(this);
 				_additionalGui.AddLast(gui);
 				_activeIssueTrackerProviders.Add(provider);
@@ -194,6 +186,7 @@ namespace gitter
 			}
 			LoadIssueTrackerProvider(new Redmine.RedmineServiceProvider());
 			LoadIssueTrackerProvider(new TeamCity.TeamCityServiceProvider());
+			LoadIssueTrackerProvider(new GitLab.GitLabServiceProvider());
 		}
 
 		private void LoadRepositoryProvider(IRepositoryProvider provider, ref int menuid)
@@ -208,24 +201,20 @@ namespace gitter
 		{
 			if(provider.LoadFor(this, _configurationService.GetSectionForProvider(provider)))
 			{
-				_issueTrackerProviders.Add(provider.Name, provider);
+				_repositoryServiceProviders.Add(provider.Name, provider);
 			}
 		}
 
 		private void OnInitRepositoryClick(object sender, EventArgs e)
 		{
-			using(var dlg = new InitRepositoryDialog(this))
-			{
-				dlg.Run(this);
-			}
+			using var dlg = new InitRepositoryDialog(this);
+			dlg.Run(this);
 		}
 
 		private void OnCloneRepositoryClick(object sender, EventArgs e)
 		{
-			using(var dlg = new CloneRepositoryDialog(this))
-			{
-				dlg.Run(this);
-			}
+			using var dlg = new CloneRepositoryDialog(this);
+			dlg.Run(this);
 		}
 
 		protected override void OnShown(EventArgs e)
@@ -277,19 +266,13 @@ namespace gitter
 		}
 
 		public string RecentRepositoryPath
-		{
-			get { return _recentRepositoryPath; }
-		}
+			=> _recentRepositoryPath;
 
 		public RepositoryManagerService RepositoryManagerService
-		{
-			get { return _repositoryManagerService; }
-		}
+			=> _repositoryManagerService;
 
 		public INotificationService NotificationService
-		{
-			get { return _notificationService; }
-		}
+			=> _notificationService;
 
 		private void _mnuExit_Click(object sender, EventArgs e)
 		{
@@ -298,18 +281,14 @@ namespace gitter
 
 		private void _mnuAbout_Click(object sender, EventArgs e)
 		{
-			using(var dlg = new AboutDialog())
-			{
-				dlg.Run(this);
-			}
+			using var dlg = new AboutDialog();
+			dlg.Run(this);
 		}
 
 		private void StartOptionsDialog()
 		{
-			using(var d = new OptionsDialog(this))
-			{
-				d.Run(this);
-			}
+			using var d = new OptionsDialog(this);
+			d.Run(this);
 		}
 
 		private void _mnuOptions_Click(object sender, EventArgs e)
@@ -328,15 +307,13 @@ namespace gitter
 
 		private static void SaveXml(XmlDocument doc, Stream stream)
 		{
-			using(var writer = XmlWriter.Create(stream, new XmlWriterSettings()
-				{
-					Encoding = Encoding.UTF8,
-					Indent = true,
-					IndentChars = "\t",
-				}))
+			using var writer = XmlWriter.Create(stream, new XmlWriterSettings()
 			{
-				doc.Save(writer);
-			}
+				Encoding = Encoding.UTF8,
+				Indent = true,
+				IndentChars = "\t",
+			});
+			doc.Save(writer);
 		}
 
 		private void LoadGuiView(IRepositoryGuiProvider gui)
@@ -345,6 +322,11 @@ namespace gitter
 		}
 
 		private void SaveRepositoryProvider(IRepositoryProvider provider)
+		{
+			provider.SaveTo(_configurationService.GetSectionForProvider(provider));
+		}
+
+		private void SaveRepositoryServiceProvider(IRepositoryServiceProvider provider)
 		{
 			provider.SaveTo(_configurationService.GetSectionForProvider(provider));
 		}
@@ -437,17 +419,11 @@ namespace gitter
 			}
 			try
 			{
-				using(var stream = _configurationService.CreateFile(cfgName))
-				{
-					SaveXml(newdoc, stream);
-				}
+				using var stream = _configurationService.CreateFile(cfgName);
+				SaveXml(newdoc, stream);
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 			}
 		}
 
@@ -486,6 +462,10 @@ namespace gitter
 			{
 				SaveRepositoryProvider(provider);
 			}
+			foreach(var provider in _repositoryServiceProviders.Values)
+			{
+				SaveRepositoryServiceProvider(provider);
+			}
 			if(_repositoryGui != null)
 			{
 				SaveGuiView(_repositoryGui);
@@ -502,20 +482,11 @@ namespace gitter
 
 		#region IWorkingEnvironment
 
-		public ViewDockService ViewDockService
-		{
-			get { return _viewDockService; }
-		}
+		public ViewDockService ViewDockService => _viewDockService;
 
-		public IRepositoryProvider ActiveRepositoryProvider
-		{
-			get { return _currentProvider; }
-		}
+		public IRepositoryProvider ActiveRepositoryProvider => _currentProvider;
 
-		public IRepository ActiveRepository
-		{
-			get { return _repository; }
-		}
+		public IRepository ActiveRepository => _repository;
 
 		public IRepositoryProvider FindProviderForDirectory(string workingDirectory)
 		{
@@ -559,12 +530,8 @@ namespace gitter
 			{
 				return false;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				GitterApplication.MessageBoxService.Show(
 					this,
 					exc.Message,
@@ -610,7 +577,7 @@ namespace gitter
 						"Repository was removed externally and will be closed.",
 						repository.WorkingDirectory,
 						MessageBoxButton.Close,
-						System.Windows.Forms.MessageBoxIcon.Warning);
+						MessageBoxIcon.Warning);
 					CloseRepository();
 				}), null);
 		}
@@ -622,11 +589,10 @@ namespace gitter
 
 		private void OpenIssueTrackers()
 		{
-			foreach(var prov in _issueTrackerProviders.Values)
+			foreach(var prov in _repositoryServiceProviders.Values)
 			{
-				if(prov.IsValidFor(_repository))
+				if(prov.TryCreateGuiProvider(_repository, out var gui))
 				{
-					var gui = prov.CreateGuiProvider(_repository);
 					gui.AttachToEnvironment(this);
 					_additionalGui.AddLast(gui);
 					_activeIssueTrackerProviders.Add(prov);
@@ -641,6 +607,7 @@ namespace gitter
 
 		public bool OpenRepository(string path, bool allowRecursiveSearch)
 		{
+			path = Path.GetFullPath(path);
 			if(_repository != null && _repository.WorkingDirectory == path)
 			{
 				_repositoryGui.ActivateDefaultView();
@@ -648,14 +615,10 @@ namespace gitter
 			}
 			try
 			{
-				_recentRepositoryPath = Path.GetFullPath(path);
+				_recentRepositoryPath = path;
 			}
-			catch(Exception exc)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(exc.IsCritical())
-				{
-					throw;
-				}
 				_recentRepositoryPath = string.Empty;
 			}
 			var prov = FindProviderForDirectory(path);
@@ -706,8 +669,7 @@ namespace gitter
 			{
 				SaveGuiView(_repositoryGui);
 				_repositoryGui.DetachFromEnvironment(this);
-				var disp = _repositoryGui as IDisposable;
-				if(disp != null) disp.Dispose();
+				(_repositoryGui as IDisposable)?.Dispose();
 				_repositoryGui = null;
 			}
 			if(_currentProvider != null)
@@ -719,8 +681,7 @@ namespace gitter
 			foreach(var gui in _additionalGui)
 			{
 				gui.DetachFromEnvironment(this);
-				var disposable = gui as IDisposable;
-				if(disposable != null) disposable.Dispose();
+				(gui as IDisposable)?.Dispose();
 			}
 			_additionalGui.Clear();
 			_activeIssueTrackerProviders.Clear();
@@ -884,10 +845,7 @@ namespace gitter
 			_statusStrip.Items.Remove(item);
 		}
 
-		Form IWorkingEnvironment.MainForm
-		{
-			get { return this; }
-		}
+		Form IWorkingEnvironment.MainForm => this;
 
 		#endregion
 	}

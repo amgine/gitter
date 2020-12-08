@@ -58,7 +58,7 @@ namespace gitter.Git
 
 		#region Data
 
-		private readonly Dictionary<string, ConfigParameter> _parameters;
+		private readonly Dictionary<string, ConfigParameter> _parameters = new();
 
 		#endregion
 
@@ -69,17 +69,13 @@ namespace gitter.Git
 		internal ConfigParametersCollection(Repository repository)
 			: base(repository)
 		{
-			_parameters = new Dictionary<string, ConfigParameter>();
 		}
 
 		#endregion
 
 		#region Properties
 
-		public IEnumerable<string> Names
-		{
-			get { return _parameters.Keys; }
-		}
+		public IEnumerable<string> Names => _parameters.Keys;
 
 		public ConfigParameter this[string name]
 		{
@@ -118,10 +114,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Object used for cross-thread synchronization.</summary>
-		public object SyncRoot
-		{
-			get { return _parameters; }
-		}
+		public object SyncRoot => _parameters;
 
 		/// <summary>Gets/sets default merge tool.</summary>
 		public MergeTool MergeTool
@@ -129,22 +122,14 @@ namespace gitter.Git
 			get
 			{
 				var toolName = TryGetParameterValue(GitConstants.MergeToolParameter);
-				MergeTool mergeTool;
-				if(toolName == null)
-				{
-					mergeTool = null;
-				}
-				else
-				{
-					mergeTool = MergeTool.GetCreateByName(toolName);
-				}
-				return mergeTool;
+				return toolName != null
+					? MergeTool.GetCreateByName(toolName)
+					: default;
 			}
 			set
 			{
 				var toolName = value == null ? "" : value.Name;
-				ConfigParameter parameter;
-				if(TryGetParameter(GitConstants.MergeToolParameter, out parameter))
+				if(TryGetParameter(GitConstants.MergeToolParameter, out var parameter))
 				{
 					parameter.Value = toolName;
 				}
@@ -166,7 +151,6 @@ namespace gitter.Git
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 			Verify.Argument.IsNotNull(value, nameof(value));
 
-			ConfigParameter p;
 			lock(SyncRoot)
 			{
 				Verify.Argument.IsFalse(_parameters.ContainsKey(name), nameof(name), "Parameter already exists.");
@@ -177,11 +161,11 @@ namespace gitter.Git
 					Repository.Accessor.AddConfigValue.Invoke(
 						new AddConfigValueParameters(name, value));
 				}
-				p = new ConfigParameter(Repository, ConfigFile.Repository, name, value);
-				_parameters.Add(name, p);
-				InvokeParameterCreated(p);
+				var parameter = new ConfigParameter(Repository, ConfigFile.Repository, name, value);
+				_parameters.Add(name, parameter);
+				InvokeParameterCreated(parameter);
+				return parameter;
 			}
-			return p;
 		}
 
 		/// <summary>Set value of a parameter or create a new one if it does not exist.</summary>
@@ -190,19 +174,20 @@ namespace gitter.Git
 		/// <returns>Modified or created parameter.</returns>
 		public ConfigParameter SetValue(string name, string value)
 		{
-			ConfigParameter p;
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+
 			lock(SyncRoot)
 			{
-				if(_parameters.TryGetValue(name, out p))
+				if(_parameters.TryGetValue(name, out var parameter))
 				{
-					p.Value = value;
+					parameter.Value = value;
 				}
 				else
 				{
-					p = CreateParameter(name, value);
+					parameter = CreateParameter(name, value);
 				}
+				return parameter;
 			}
-			return p;
 		}
 
 		public void SetUserIdentity(string userName, string userEmail)
@@ -250,9 +235,7 @@ namespace gitter.Git
 		{
 			lock(SyncRoot)
 			{
-				ConfigParameter parameter;
-				var res = _parameters.TryGetValue(name, out parameter);
-				if(res)
+				if(_parameters.TryGetValue(name, out var parameter))
 				{
 					value = parameter.Value;
 					return true;
@@ -267,28 +250,26 @@ namespace gitter.Git
 
 		public ConfigParameter TryGetParameter(string name)
 		{
-			ConfigParameter parameter;
 			lock(SyncRoot)
 			{
-				if(_parameters.TryGetValue(name, out parameter))
+				if(_parameters.TryGetValue(name, out var parameter))
 				{
 					return parameter;
 				}
 			}
-			return null;
+			return default;
 		}
 
 		public string TryGetParameterValue(string name)
 		{
-			ConfigParameter parameter;
 			lock(SyncRoot)
 			{
-				if(_parameters.TryGetValue(name, out parameter))
+				if(_parameters.TryGetValue(name, out var parameter))
 				{
 					return parameter.Value;
 				}
 			}
-			return null;
+			return default;
 		}
 
 		#region Refresh()
@@ -342,14 +323,10 @@ namespace gitter.Git
 		#region IEnumerable<ConfigParameter>
 
 		public IEnumerator<ConfigParameter> GetEnumerator()
-		{
-			return _parameters.Values.GetEnumerator();
-		}
+			=> _parameters.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _parameters.Values.GetEnumerator();
-		}
+			=> _parameters.Values.GetEnumerator();
 
 		#endregion
 	}

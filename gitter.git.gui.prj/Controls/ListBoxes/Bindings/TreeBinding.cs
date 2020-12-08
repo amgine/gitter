@@ -30,7 +30,6 @@ namespace gitter.Git.Gui.Controls
 		#region Data
 
 		private readonly CustomListBoxItemsCollection _itemHost;
-		private readonly TreeDirectory _root;
 		private HashSet<TreeDirectory> _trackedDirectories;
 		private bool _plain;
 
@@ -58,7 +57,7 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(root, nameof(root));
 
 			_itemHost = itemHost;
-			_root = root;
+			Root = root;
 			_plain = filesOnly;
 
 			if(filesOnly)
@@ -81,7 +80,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			_itemHost.Clear();
 			_itemHost.Comparison = TreeItemListItem.CompareByName;
-			foreach(var folder in _root.Directories)
+			foreach(var folder in Root.Directories)
 			{
 				var item = new TreeDirectoryListItem(
 					folder,
@@ -94,23 +93,23 @@ namespace gitter.Git.Gui.Controls
 				item.ContextMenuRequested += OnItemContextMenuRequested;
 				_itemHost.Add(item);
 			}
-			foreach(var commit in _root.Commits)
+			foreach(var commit in Root.Commits)
 			{
 				var item = new TreeCommitListItem(commit, false);
 				item.Activated += OnItemActivated;
 				item.ContextMenuRequested += OnItemContextMenuRequested;
 				_itemHost.Add(item);
 			}
-			foreach(var file in _root.Files)
+			foreach(var file in Root.Files)
 			{
 				var item = new TreeFileListItem(file, false);
 				item.Activated += OnItemActivated;
 				item.ContextMenuRequested += OnItemContextMenuRequested;
 				_itemHost.Add(item);
 			}
-			_root.DirectoryAdded += OnDirectoryAdded;
-			_root.CommitAdded += OnCommitAdded;
-			_root.FileAdded += OnFileAdded;
+			Root.DirectoryAdded += OnDirectoryAdded;
+			Root.CommitAdded += OnCommitAdded;
+			Root.FileAdded += OnFileAdded;
 		}
 
 		private void InitPlain(bool oneLevel)
@@ -118,7 +117,7 @@ namespace gitter.Git.Gui.Controls
 			_trackedDirectories = new HashSet<TreeDirectory>();
 			_itemHost.Clear();
 			_itemHost.Comparison = TreeItemListItem.CompareByRelativePath;
-			InsertFiles(_root, oneLevel);
+			InsertFiles(Root, oneLevel);
 		}
 
 		private void InsertFiles(TreeDirectory directory, bool oneLevel)
@@ -175,10 +174,7 @@ namespace gitter.Git.Gui.Controls
 			OnItemActivated(e.Item, e.Object);
 		}
 
-		public TreeDirectory Root
-		{
-			get { return _root; }
-		}
+		public TreeDirectory Root { get; }
 
 		private void OnDirectoryDeleted(object sender, EventArgs e)
 		{
@@ -223,11 +219,11 @@ namespace gitter.Git.Gui.Controls
 
 		public void Dispose()
 		{
-			_root.FileAdded -= OnFileAdded;
-			_root.CommitAdded -= OnCommitAdded;
-			_root.DirectoryAdded -= OnDirectoryAdded;
-			_root.DirectoryAdded -= OnDirectoryAdded2;
-			_root.Deleted -= OnDirectoryDeleted;
+			Root.FileAdded -= OnFileAdded;
+			Root.CommitAdded -= OnCommitAdded;
+			Root.DirectoryAdded -= OnDirectoryAdded;
+			Root.DirectoryAdded -= OnDirectoryAdded2;
+			Root.Deleted -= OnDirectoryDeleted;
 			if(_trackedDirectories != null)
 			{
 				foreach(var directory in _trackedDirectories)

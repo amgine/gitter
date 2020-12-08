@@ -20,11 +20,8 @@
 
 namespace gitter.Git
 {
-	
 	public sealed class BlameOptions
 	{
-		#region Static
-
 		public static readonly BlameOptions Default = GetDefault();
 
 		private static BlameOptions GetDefault()
@@ -34,29 +31,12 @@ namespace gitter.Git
 			return options;
 		}
 
-		#endregion
-
-		#region .ctor
-
 		public BlameOptions()
 		{
 		}
 
-		#endregion
-
-		#region Properties
-
 		public bool IsFrozen { get; private set; }
 
-		#endregion
-
-		#region Methods
-
-		public void Freeze()
-		{
-			IsFrozen = true;
-		}
-
-		#endregion
+		public void Freeze() => IsFrozen = true;
 	}
 }

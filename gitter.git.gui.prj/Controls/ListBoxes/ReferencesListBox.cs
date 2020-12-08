@@ -84,17 +84,7 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		public Repository Repository
-		{
-			get
-			{
-				if(_refBinding != null)
-				{
-					return _refBinding.Repository;
-				}
-				return null;
-			}
-		}
+		public Repository Repository => _refBinding?.Repository;
 
 		public void LoadData(Repository repository)
 		{

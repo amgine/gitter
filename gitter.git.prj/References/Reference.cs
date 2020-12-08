@@ -64,12 +64,8 @@ namespace gitter.Git
 		/// <summary>Reference to a reflog record.</summary>
 		private sealed class ReflogReference : IRevisionPointer
 		{
-			#region Data
-
 			/// <summary>Owner reference.</summary>
 			private readonly Reference _reference;
-
-			#endregion
 
 			/// <summary>Initializes a new instance of the <see cref="ReflogReference"/> class.</summary>
 			/// <param name="reference">Owner reference.</param>
@@ -133,21 +129,14 @@ namespace gitter.Git
 		#region Static
 
 		public static string GetReferenceTypeName(ReferenceType referenceType)
-		{
-			switch(referenceType)
+			=> referenceType switch
 			{
-				case ReferenceType.Branch:
-					return Resources.StrBranch;
-				case ReferenceType.Tag:
-					return Resources.StrTag;
-				case ReferenceType.RemoteBranch:
-					return Resources.StrBranch;
-				case ReferenceType.Remote:
-					return Resources.StrRemote;
-				default:
-					return string.Empty;
-			}
-		}
+				ReferenceType.Branch       => Resources.StrBranch,
+				ReferenceType.Tag          => Resources.StrTag,
+				ReferenceType.RemoteBranch => Resources.StrBranch,
+				ReferenceType.Remote       => Resources.StrRemote,
+				_ => string.Empty,
+			};
 
 		/// <summary>Validates the reference name.</summary>
 		/// <param name="name">Reference name.</param>
@@ -296,7 +285,7 @@ namespace gitter.Git
 		/// <summary>Returns object pointed by this <see cref="Reference"/>.</summary>
 		public IRevisionPointer Pointer
 		{
-			get { return _pointer; }
+			get => _pointer;
 			internal set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));

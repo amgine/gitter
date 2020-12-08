@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,11 +35,8 @@ namespace gitter.Framework.Controls
 
 		public event EventHandler Click;
 
-		private void OnClick()
-		{
-			var handler = Click;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		private void OnClick(EventArgs e)
+			=> Click?.Invoke(this, e);
 
 		#endregion
 
@@ -61,23 +58,18 @@ namespace gitter.Framework.Controls
 		#region Event Handlers
 
 		private void OnButtonClick(object sender, EventArgs e)
-		{
-			OnClick();
-		}
+			=> OnClick(e);
 
 		#endregion
 
 		#region Properties
 
-		public Control Control
-		{
-			get { return _button; }
-		}
+		public Control Control => _button;
 
 		public string Text
 		{
-			get { return _button.Text; }
-			set { _button.Text = value; }
+			get => _button.Text;
+			set => _button.Text = value;
 		}
 
 		#endregion

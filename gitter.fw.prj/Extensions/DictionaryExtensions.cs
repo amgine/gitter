@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,11 +38,9 @@ namespace gitter.Framework.Extensions
 		/// if specified key is not present in the dictionary.
 		/// </returns>
 		public static TValue TryGetValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
-		{
-			TValue value;
-			if(dictionary.TryGetValue(key, out value)) return value;
-			return default(TValue);
-		}
+			=> dictionary.TryGetValue(key, out var value)
+				? value
+				: default;
 
 		/// <summary>
 		/// Gets the value associated with the specified key.
@@ -57,10 +55,8 @@ namespace gitter.Framework.Extensions
 		/// if specified key is not present in the dictionary.
 		/// </returns>
 		public static TValue TryGetValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultVaue)
-		{
-			TValue value;
-			if(dictionary.TryGetValue(key, out value)) return value;
-			return defaultVaue;
-		}
+			=> dictionary.TryGetValue(key, out var value)
+				? value
+				: defaultVaue;
 	}
 }

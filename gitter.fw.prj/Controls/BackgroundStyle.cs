@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,8 +31,6 @@ namespace gitter.Framework.Controls
 		{
 			#region Data
 
-			private readonly Pen _outerBorder;
-			private readonly Pen _innerBorder;
 			private readonly Color _topColor;
 			private readonly Color _bottomColor;
 
@@ -42,8 +40,8 @@ namespace gitter.Framework.Controls
 
 			public SolidBackgroundStyle(Color outerColor, Color innerColor, Color innerTop, Color innerBottom)
 			{
-				_outerBorder = new Pen(outerColor);
-				_innerBorder = new Pen(innerColor);
+				OuterBorderPen = new Pen(outerColor);
+				InnerBorderPen = new Pen(innerColor);
 
 				_topColor = innerTop;
 				_bottomColor = innerBottom;
@@ -53,15 +51,9 @@ namespace gitter.Framework.Controls
 
 			#region Properties
 
-			public Pen InnerBorderPen
-			{
-				get { return _innerBorder; }
-			}
+			public Pen InnerBorderPen { get; }
 
-			public Pen OuterBorderPen
-			{
-				get { return _outerBorder; }
-			}
+			public Pen OuterBorderPen { get; }
 
 			#endregion
 
@@ -88,8 +80,8 @@ namespace gitter.Framework.Controls
 
 			public void Dispose()
 			{
-				_outerBorder.Dispose();
-				_innerBorder.Dispose();
+				OuterBorderPen.Dispose();
+				InnerBorderPen.Dispose();
 			}
 
 			#endregion
@@ -97,27 +89,18 @@ namespace gitter.Framework.Controls
 
 		private sealed class SimpleBackgroundStyle : IBackgroundStyle
 		{
-			#region Data
-
-			private readonly Pen _outerBorder;
-
-			#endregion
-
 			#region .ctor
 
 			public SimpleBackgroundStyle(Color outerColor)
 			{
-				_outerBorder = new Pen(outerColor);
+				OuterBorderPen = new Pen(outerColor);
 			}
 
 			#endregion
 
 			#region Properties
 
-			public Pen OuterBorderPen
-			{
-				get { return _outerBorder; }
-			}
+			public Pen OuterBorderPen { get; }
 
 			#endregion
 
@@ -134,7 +117,7 @@ namespace gitter.Framework.Controls
 
 			public void Dispose()
 			{
-				_outerBorder.Dispose();
+				OuterBorderPen.Dispose();
 			}
 
 			#endregion

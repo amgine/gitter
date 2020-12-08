@@ -28,7 +28,6 @@ namespace gitter.Git.Gui.Controls
 	using gitter.Framework;
 	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
-	using gitter.Framework.Options;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -52,7 +51,6 @@ namespace gitter.Git.Gui.Controls
 
 		private sealed class FileItem
 		{
-			private readonly TreeFile _file;
 			private readonly Bitmap _icon;
 			private readonly Bitmap _overlay;
 			private readonly string _text;
@@ -61,16 +59,13 @@ namespace gitter.Git.Gui.Controls
 			{
 				Verify.Argument.IsNotNull(file, nameof(file));
 
-				_file = file;
+				File = file;
 				_text = file.RelativePath;
 				_icon = GraphicsUtility.QueryIcon(file.RelativePath);
 				_overlay = CachedResources.Bitmaps["ImgOverlayAdd"];
 			}
 
-			public TreeFile File
-			{
-				get { return _file; }
-			}
+			public TreeFile File { get; }
 
 			public void Draw(Graphics graphics, Font font, Brush textBrush, Rectangle rect, int index)
 			{
@@ -98,10 +93,7 @@ namespace gitter.Git.Gui.Controls
 		{
 		}
 
-		public int Count
-		{
-			get { return _items.Length; }
-		}
+		public int Count => _items.Length;
 
 		public UntrackedFilesPanel(Status status, IEnumerable<string> paths)
 		{

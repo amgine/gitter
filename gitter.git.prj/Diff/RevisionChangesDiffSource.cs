@@ -33,7 +33,6 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly IRevisionPointer _revision;
 		private readonly IList<string> _paths;
 
 		#endregion
@@ -44,14 +43,14 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
-			_revision = revision;
+			Revision = revision;
 		}
 
 		public RevisionChangesDiffSource(IRevisionPointer revision, IList<string> paths)
 		{
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
-			_revision = revision;
+			Revision = revision;
 			_paths = paths;
 		}
 
@@ -59,36 +58,26 @@ namespace gitter.Git
 
 		#region Properties
 
-		public IRevisionPointer Revision
-		{
-			get { return _revision; }
-		}
+		public IRevisionPointer Revision { get; }
 
-		public override Repository Repository
-		{
-			get { return _revision.Repository; }
-		}
+		public override Repository Repository => Revision.Repository;
 
 		#endregion
 
 		#region Methods
 
 		public override int GetHashCode()
-		{
-			return Revision.GetHashCode();
-		}
+			=> Revision.GetHashCode();
 
 		public override bool Equals(object obj)
 		{
-			if(obj == null) return false;
-			var ds = obj as RevisionChangesDiffSource;
-			if(ds == null) return false;
-			return _revision == ds._revision;
+			if(obj is not RevisionChangesDiffSource ds) return false;
+			return Revision == ds.Revision;
 		}
 
 		private QueryRevisionDiffParameters GetParameters(DiffOptions options)
 		{
-			var parameters = new QueryRevisionDiffParameters(_revision.Pointer)
+			var parameters = new QueryRevisionDiffParameters(Revision.Pointer)
 			{
 				Paths = _paths,
 			};
@@ -113,16 +102,9 @@ namespace gitter.Git
 		}
 
 		public override string ToString()
-		{
-			if(Revision is Revision)
-			{
-				return "log -p " + Revision.Pointer.Substring(0, 7);
-			}
-			else
-			{
-				return "log -p " + Revision.Pointer;
-			}
-		}
+			=> Revision is Revision
+				? "log -p " + Revision.Pointer.Substring(0, 7)
+				: "log -p " + Revision.Pointer;
 
 		#endregion
 	}

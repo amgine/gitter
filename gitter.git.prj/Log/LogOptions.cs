@@ -31,6 +31,9 @@ namespace gitter.Git
 	{
 		public event EventHandler Changed;
 
+		private void OnChanged(EventArgs e)
+			=> Changed?.Invoke(this, e);
+
 		private HashSet<Reference> _allowedReferences;
 		private RevisionQueryOrder _order;
 		private LogReferenceFilter _filter;
@@ -56,7 +59,7 @@ namespace gitter.Git
 			{
 				if(_filter == LogReferenceFilter.Allowed)
 				{
-					Changed?.Invoke(this, EventArgs.Empty);
+					OnChanged(EventArgs.Empty);
 				}
 			}
 		}
@@ -69,59 +72,59 @@ namespace gitter.Git
 			{
 				if(_filter == LogReferenceFilter.Allowed)
 				{
-					Changed?.Invoke(this, EventArgs.Empty);
+					OnChanged(EventArgs.Empty);
 				}
 			}
 		}
 
 		public LogReferenceFilter Filter
 		{
-			get { return _filter; }
+			get => _filter;
 			set
 			{
 				if(_filter != value)
 				{
 					_filter = value;
-					Changed?.Invoke(this, EventArgs.Empty);
+					OnChanged(EventArgs.Empty);
 				}
 			}
 		}
 
 		public RevisionQueryOrder Order
 		{
-			get { return _order; }
+			get => _order;
 			set
 			{
 				if(_order != value)
 				{
 					_order = value;
-					Changed?.Invoke(this, EventArgs.Empty);
+					OnChanged(EventArgs.Empty);
 				}
 			}
 		}
 
 		public int MaxCount
 		{
-			get { return _maxCount; }
+			get => _maxCount;
 			set
 			{
 				if(_maxCount != value)
 				{
 					_maxCount = value;
-					Changed?.Invoke(this, EventArgs.Empty);
+					OnChanged(EventArgs.Empty);
 				}
 			}
 		}
 
 		public int Skip
 		{
-			get { return _skip; }
+			get => _skip;
 			set
 			{
 				if(_skip != value)
 				{
 					_skip = value;
-					Changed?.Invoke(this, EventArgs.Empty);
+					OnChanged(EventArgs.Empty);
 				}
 			}
 		}
@@ -134,7 +137,7 @@ namespace gitter.Git
 			_filter = LogReferenceFilter.All;
 			_maxCount = 0;
 			_skip = 0;
-			Changed?.Invoke(this, EventArgs.Empty);
+			OnChanged(EventArgs.Empty);
 		}
 
 		internal QueryRevisionsParameters GetLogParameters()
@@ -197,7 +200,7 @@ namespace gitter.Git
 				_skip = skip;
 				changed = true;
 			}
-			if(changed) Changed?.Invoke(this, EventArgs.Empty);
+			if(changed) OnChanged(EventArgs.Empty);
 		}
 	}
 }

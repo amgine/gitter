@@ -32,25 +32,17 @@ namespace gitter.TeamCity.Gui
 
 	sealed class TeamCityGuiProvider : IGuiProvider
 	{
-		private readonly IRepository _repository;
-		private readonly TeamCityServiceContext _service;
 		private RepositoryExplorer _repositoryExplorer;
 
 		public TeamCityGuiProvider(IRepository repository, TeamCityServiceContext svc)
 		{
-			_repository = repository;
-			_service = svc;
+			Repository = repository;
+			ServiceContext = svc;
 		}
 
-		public IRepository Repository
-		{
-			get { return _repository; }
-		}
+		public IRepository Repository { get; }
 
-		public TeamCityServiceContext ServiceContext
-		{
-			get { return _service; }
-		}
+		public TeamCityServiceContext ServiceContext { get; }
 
 		public void AttachToEnvironment(IWorkingEnvironment environment)
 		{

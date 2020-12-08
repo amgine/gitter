@@ -51,8 +51,8 @@ namespace gitter.Git.Gui.Views
 
 		public event EventHandler LogOptionsChanged
 		{
-			add { Events.AddHandler(LogOptionsChangedEvent, value); }
-			remove { Events.RemoveHandler(LogOptionsChangedEvent, value); }
+			add    => Events.AddHandler   (LogOptionsChangedEvent, value);
+			remove => Events.RemoveHandler(LogOptionsChangedEvent, value);
 		}
 
 		protected virtual void OnLogOptionsChanged()
@@ -62,8 +62,8 @@ namespace gitter.Git.Gui.Views
 
 		public event EventHandler ShowDetailsChanged
 		{
-			add { Events.AddHandler(ShowDetailsChangedEvent, value); }
-			remove { Events.RemoveHandler(ShowDetailsChangedEvent, value); }
+			add    => Events.AddHandler   (ShowDetailsChangedEvent, value);
+			remove => Events.RemoveHandler(ShowDetailsChangedEvent, value);
 		}
 
 		protected virtual void OnShowDetailsChanged()

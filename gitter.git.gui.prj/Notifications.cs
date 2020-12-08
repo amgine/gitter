@@ -40,7 +40,7 @@ namespace gitter.Git.Gui
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)

@@ -64,10 +64,7 @@ namespace gitter.Git.Gui.Controls
 		#region Methods
 
 		private static bool IsAlignToGraphEnabled(CustomListBoxColumn column)
-		{
-			var subjectColumn = column as SubjectColumn;
-			return subjectColumn != null && subjectColumn.AlignToGraph;
-		}
+			=> column is SubjectColumn subjectColumn && subjectColumn.AlignToGraph;
 
 		private void DrawBranchDragImage(Branch branch, Graphics graphics)
 		{
@@ -134,10 +131,7 @@ namespace gitter.Git.Gui.Controls
 						break;
 				}
 			}
-			if(menu == null)
-			{
-				menu = new RevisionMenu(DataContext);
-			}
+			menu ??= new RevisionMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
@@ -151,8 +145,7 @@ namespace gitter.Git.Gui.Controls
 					var rc = _drawnPointers[i].Bounds;
 					if(rc.X <= x && rc.Right > x)
 					{
-						var branch = _drawnPointers[i].RevisionPointer as Branch;
-						if(branch != null && !branch.IsRemote)
+						if(_drawnPointers[i].RevisionPointer is Branch branch && !branch.IsRemote)
 						{
 							int dx = _drawnPointers[i].Bounds.X - x - 1;
 							int w = 0;
@@ -172,8 +165,7 @@ namespace gitter.Git.Gui.Controls
 						}
 						else
 						{
-							var tag = _drawnPointers[i].RevisionPointer as Tag;
-							if(tag != null && tag.TagType == TagType.Annotated)
+							if(_drawnPointers[i].RevisionPointer is Tag tag && tag.TagType == TagType.Annotated)
 							{
 								//var message = tag.Message;
 								//if(!string.IsNullOrEmpty(message))
@@ -215,12 +207,6 @@ namespace gitter.Git.Gui.Controls
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
-				case ColumnId.Hash:
-					return HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.HashString);
-				case ColumnId.TreeHash:
-					return TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.TreeHashString);
-				case ColumnId.Graph:
-					return GraphColumn.OnMeasureSubItem(measureEventArgs, Graph);
 				case ColumnId.Name:
 				case ColumnId.Subject:
 					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext, Graph);
@@ -239,7 +225,7 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.AuthorEmail:
 					return AuthorEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Author.Email);
 				default:
-					return Size.Empty;
+					return base.OnMeasureSubItem(measureEventArgs);
 			}
 		}
 
@@ -247,15 +233,6 @@ namespace gitter.Git.Gui.Controls
 		{
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
-				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.HashString);
-					break;
-				case ColumnId.TreeHash:
-					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.TreeHashString);
-					break;
-				case ColumnId.Graph:
-					GraphColumn.OnPaintSubItem(paintEventArgs, Graph, DataContext.IsCurrent ? RevisionGraphItemType.Current : RevisionGraphItemType.Generic);
-					break;
 				case ColumnId.Name:
 				case ColumnId.Subject:
 					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext, Graph, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
@@ -279,6 +256,9 @@ namespace gitter.Git.Gui.Controls
 					break;
 				case ColumnId.AuthorEmail:
 					AuthorEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Author.Email);
+					break;
+				default:
+					base.OnPaintSubItem(paintEventArgs);
 					break;
 			}
 		}

@@ -34,7 +34,7 @@ namespace gitter.Git.Gui
 			Elements |= element;
 			if(element != GraphElement.Space)
 			{
-				if(ElementColors == null) ElementColors = new int[13];
+				ElementColors ??= new int[13];
 				int pos = (int)element;
 				int offset = 0;
 				while(pos != 0)
@@ -49,19 +49,7 @@ namespace gitter.Git.Gui
 		public bool IsEmpty => Elements == GraphElement.Space;
 
 		public bool HasElement(GraphElement element)
-		{
-			return (Elements & element) == element;
-		}
-
-		public void Paint(int elementid, int color)
-		{
-			Elements |= (GraphElement)(1<<elementid);
-			if(elementid != 0)
-			{
-				if(ElementColors == null) ElementColors = new int[12];
-				ElementColors[elementid] = color;
-			}
-		}
+			=> (Elements & element) == element;
 
 		public void Erase(GraphElement element)
 		{

@@ -24,10 +24,6 @@ namespace gitter.Git
 	{
 		public static string TryFormatDefaultLocalBranchName(IRevisionPointer revision)
 		{
-			if(revision == null)
-			{
-				return string.Empty;
-			}
 			if(revision is RemoteBranch branch)
 			{
 				var branchName = branch.Name;

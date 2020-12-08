@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -701,7 +701,7 @@ namespace gitter.Framework.Controls
 		public int ItemHeight
 		{
 			get { return _itemHeight; }
-			protected set
+			set
 			{
 				Verify.Argument.IsPositive(value, nameof(value));
 
@@ -1135,7 +1135,7 @@ namespace gitter.Framework.Controls
 		public void EnsureVisible(CustomListBoxItem item)
 		{
 			Verify.Argument.IsNotNull(item, nameof(item));
-			Verify.Argument.IsTrue(item.ListBox == this, "item", "This item is not owned by this list box.");
+			Verify.Argument.IsTrue(item.ListBox == this, nameof(item), "This item is not owned by this list box.");
 
 			var parent = item.Parent;
 			while(parent != null)
@@ -1185,13 +1185,13 @@ namespace gitter.Framework.Controls
 		public int GetOptimalColumnWidth(CustomListBoxColumn column)
 		{
 			Verify.Argument.IsNotNull(column, nameof(column));
-			var index = _columns.IndexOf(column);
-			Verify.Argument.IsTrue(index != -1, "column", "Colum is not present in this collection.");
+			var columnIndex = _columns.IndexOf(column);
+			Verify.Argument.IsTrue(columnIndex != -1, nameof(column), "Column is not present in this collection.");
 
 			int maxw = column.MinWidth;
 			foreach(var item in _itemPlainList)
 			{
-				var s = item.MeasureSubItem(new SubItemMeasureEventArgs(GraphicsUtility.MeasurementGraphics, index, column));
+				var s = item.MeasureSubItem(new SubItemMeasureEventArgs(GraphicsUtility.MeasurementGraphics, item, columnIndex, column));
 				if(s.Width > maxw) maxw = s.Width;
 			}
 			return maxw;
@@ -1279,7 +1279,7 @@ namespace gitter.Framework.Controls
 		internal void FocusAndSelectItem(CustomListBoxItem item)
 		{
 			Verify.Argument.IsNotNull(item, nameof(item));
-			Verify.Argument.IsTrue(item.ListBox == this, "item", "Item is not owned by this ListBox");
+			Verify.Argument.IsTrue(item.ListBox == this, nameof(item), "Item is not owned by this ListBox");
 
 			item.Present();
 			FocusAndSelectItem(_itemPlainList.IndexOf(item));
@@ -2203,6 +2203,7 @@ namespace gitter.Framework.Controls
 
 		private void HandleHeaderMouseDown(int itemIndex, int itemPart, MouseEventArgs e)
 		{
+			if(itemIndex < 0 || itemIndex >= _columns.Count) return;
 			switch(e.Button)
 			{
 				case MouseButtons.Left:
@@ -2432,10 +2433,9 @@ namespace gitter.Framework.Controls
 						if(c.ContentWidth <= 0)
 						{
 							int max = 0;
-							var args = new SubItemMeasureEventArgs(GraphicsUtility.MeasurementGraphics, c.Index, c);
 							foreach(var item in _itemPlainList)
 							{
-								var width = item.MeasureSubItem(args).Width;
+								var width = item.MeasureSubItem(new SubItemMeasureEventArgs(GraphicsUtility.MeasurementGraphics, item, c.Index, c)).Width;
 								if(index == 0 && ShowTreeLines)
 								{
 									var level = item.Level;
@@ -2573,11 +2573,11 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		protected override void OnStyleChanged()
+		protected override void OnStyleChanged(EventArgs e)
 		{
 			Renderer = Style.ListBoxRenderer;
 			_processOverlay.Renderer = Style.OverlayRenderer;
-			base.OnStyleChanged();
+			base.OnStyleChanged(e);
 		}
 
 		protected override Size MeasureContent()

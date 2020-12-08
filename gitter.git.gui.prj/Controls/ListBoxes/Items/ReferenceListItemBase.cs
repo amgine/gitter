@@ -31,28 +31,24 @@ namespace gitter.Git.Gui.Controls
 		{
 			if(item1.GetType() == item2.GetType())
 			{
-				switch(item1)
+				return item1 switch
 				{
-					case BranchListItem branchItem:
-						return BranchListItem.CompareByName(branchItem, (BranchListItem)item2);
-					case RemoteBranchListItem remoteBranchItem:
-						return RemoteBranchListItem.CompareByName(remoteBranchItem, (RemoteBranchListItem)item2);
-					case RemoteListItem remoteItem:
-						return RemoteListItem.CompareByName(remoteItem, (RemoteListItem)item2);
-					case TagListItem tagItem:
-						return TagListItem.CompareByName(tagItem, (TagListItem)item2);
-					default: return 0;
-				}
+					BranchListItem       branchItem       => BranchListItem      .CompareByName(branchItem,       (BranchListItem)item2),
+					RemoteBranchListItem remoteBranchItem => RemoteBranchListItem.CompareByName(remoteBranchItem, (RemoteBranchListItem)item2),
+					RemoteListItem       remoteItem       => RemoteListItem      .CompareByName(remoteItem,       (RemoteListItem)item2),
+					TagListItem          tagItem          => TagListItem         .CompareByName(tagItem,          (TagListItem)item2),
+					_ => 0,
+				};
 			}
 			else
 			{
-				switch(item1)
+				return item1 switch
 				{
-					case BranchListItem _:       return -1;
-					case RemoteBranchListItem _: return item2 is BranchListItem ? 1 : -1;
-					case RemoteListItem _:       return item2 is TagListItem ? 1 : -1;
-					default: return 1;
-				}
+					BranchListItem       _ => -1,
+					RemoteBranchListItem _ => item2 is BranchListItem ? 1 : -1,
+					RemoteListItem       _ => item2 is TagListItem    ? 1 : -1,
+					_ => 1,
+				};
 			}
 		}
 	}
@@ -136,10 +132,8 @@ namespace gitter.Git.Gui.Controls
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 			=> (ColumnId)measureEventArgs.SubItemId switch
 			{
-				ColumnId.Name     => measureEventArgs.MeasureImageAndText(Image, DataContext.Name),
-				ColumnId.Hash     => HashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.HashString),
-				ColumnId.TreeHash => TreeHashColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.TreeHashString),
-				_ => Size.Empty,
+				ColumnId.Name => measureEventArgs.MeasureImageAndText(Image, DataContext.Name),
+				_ => base.OnMeasureSubItem(measureEventArgs),
 			};
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
@@ -149,11 +143,8 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.Name:
 					paintEventArgs.PaintImageAndText(Image, DataContext.Name);
 					break;
-				case ColumnId.Hash:
-					HashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.HashString);
-					break;
-				case ColumnId.TreeHash:
-					TreeHashColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.TreeHashString);
+				default:
+					base.OnPaintSubItem(paintEventArgs);
 					break;
 			}
 		}

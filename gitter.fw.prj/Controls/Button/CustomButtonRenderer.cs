@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,21 +30,9 @@ namespace gitter.Framework.Controls
 		private static CustomButtonRenderer _msvs2012Dark;
 
 		public static CustomButtonRenderer MSVS2012Dark
-		{
-			get
-			{
-				if(_msvs2012Dark == null)
-				{
-					_msvs2012Dark = new MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.DarkColors);
-				}
-				return _msvs2012Dark;
-			}
-		}
+			=>_msvs2012Dark ??= new MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.DarkColors);
 
-		public static CustomButtonRenderer Default
-		{
-			get { return MSVS2012Dark; }
-		}
+		public static CustomButtonRenderer Default => MSVS2012Dark;
 
 		public abstract void Render(Graphics graphics, Rectangle clipRectangle, CustomButton button);
 	}

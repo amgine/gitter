@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -34,30 +34,10 @@ namespace gitter.Framework.Controls
 		private static IColorTable _lightColor;
 
 		/// <summary>Returns dark color table.</summary>
-		public static IColorTable DarkColor
-		{
-			get
-			{
-				if(_darkColor == null)
-				{
-					_darkColor = new DarkColorTable();
-				}
-				return _darkColor;
-			}
-		}
+		public static IColorTable DarkColor => _darkColor ??= new DarkColorTable();
 
 		/// <summary>Returns light color table.</summary>
-		public static IColorTable LightColor
-		{
-			get
-			{
-				if(_lightColor == null)
-				{
-					_lightColor = new LightColorTable();
-				}
-				return _lightColor;
-			}
-		}
+		public static IColorTable LightColor => _lightColor ??= new LightColorTable();
 
 		/// <summary>Defines colors for renderer.</summary>
 		public interface IColorTable
@@ -94,50 +74,23 @@ namespace gitter.Framework.Controls
 
 			#region IColorTable
 
-			public Color Background
-			{
-				get { return BACKGROUND; }
-			}
+			public Color Background => BACKGROUND;
 
-			public Color ArrowNormal
-			{
-				get { return ARROW_NORMAL; }
-			}
+			public Color ArrowNormal => ARROW_NORMAL;
 
-			public Color ArrowHover
-			{
-				get { return ARROW_HOVER; }
-			}
+			public Color ArrowHover => ARROW_HOVER;
 
-			public Color ArrowPressed
-			{
-				get { return ARROW_PRESSED; }
-			}
+			public Color ArrowPressed => ARROW_PRESSED;
 
-			public Color ArrowDisabled
-			{
-				get { return ARROW_DISABLED; }
-			}
+			public Color ArrowDisabled => ARROW_DISABLED;
 
-			public Color ThumbNormal
-			{
-				get { return THUMB_NORMAL; }
-			}
+			public Color ThumbNormal => THUMB_NORMAL;
 
-			public Color ThumbHover
-			{
-				get { return THUMB_HOVER; }
-			}
+			public Color ThumbHover => THUMB_HOVER;
 
-			public Color ThumbPressed
-			{
-				get { return THUMB_PRESSED; }
-			}
+			public Color ThumbPressed => THUMB_PRESSED;
 
-			public Color ThumbDisabled
-			{
-				get { return THUMB_DISABLED; }
-			}
+			public Color ThumbDisabled => THUMB_DISABLED;
 
 			#endregion
 		}
@@ -161,50 +114,23 @@ namespace gitter.Framework.Controls
 
 			#region IColorTable
 
-			public Color Background
-			{
-				get { return BACKGROUND; }
-			}
+			public Color Background => BACKGROUND;
 
-			public Color ArrowNormal
-			{
-				get { return ARROW_NORMAL; }
-			}
+			public Color ArrowNormal => ARROW_NORMAL;
 
-			public Color ArrowHover
-			{
-				get { return ARROW_HOVER; }
-			}
+			public Color ArrowHover => ARROW_HOVER;
 
-			public Color ArrowPressed
-			{
-				get { return ARROW_PRESSED; }
-			}
+			public Color ArrowPressed => ARROW_PRESSED;
 
-			public Color ArrowDisabled
-			{
-				get { return ARROW_DISABLED; }
-			}
+			public Color ArrowDisabled => ARROW_DISABLED;
 
-			public Color ThumbNormal
-			{
-				get { return THUMB_NORMAL; }
-			}
+			public Color ThumbNormal => THUMB_NORMAL;
 
-			public Color ThumbHover
-			{
-				get { return THUMB_HOVER; }
-			}
+			public Color ThumbHover => THUMB_HOVER;
 
-			public Color ThumbPressed
-			{
-				get { return THUMB_PRESSED; }
-			}
+			public Color ThumbPressed => THUMB_PRESSED;
 
-			public Color ThumbDisabled
-			{
-				get { return THUMB_DISABLED; }
-			}
+			public Color ThumbDisabled => THUMB_DISABLED;
 
 			#endregion
 		}
@@ -259,59 +185,23 @@ namespace gitter.Framework.Controls
 
 			#region IColorTable
 
-			public Color Background
-			{
-				get;
-				set;
-			}
+			public Color Background { get; set; }
 
-			public Color ArrowNormal
-			{
-				get;
-				set;
-			}
+			public Color ArrowNormal { get; set; }
 
-			public Color ArrowHover
-			{
-				get;
-				set;
-			}
+			public Color ArrowHover { get; set; }
 
-			public Color ArrowPressed
-			{
-				get;
-				set;
-			}
+			public Color ArrowPressed { get; set; }
 
-			public Color ArrowDisabled
-			{
-				get;
-				set;
-			}
+			public Color ArrowDisabled { get; set; }
 
-			public Color ThumbNormal
-			{
-				get;
-				set;
-			}
+			public Color ThumbNormal { get; set; }
 
-			public Color ThumbHover
-			{
-				get;
-				set;
-			}
+			public Color ThumbHover { get; set; }
 
-			public Color ThumbPressed
-			{
-				get;
-				set;
-			}
+			public Color ThumbPressed { get; set; }
 
-			public Color ThumbDisabled
-			{
-				get;
-				set;
-			}
+			public Color ThumbDisabled { get; set; }
 
 			#endregion
 
@@ -319,17 +209,11 @@ namespace gitter.Framework.Controls
 
 			/// <summary>Creates a cole of this color table.</summary>
 			/// <returns>Clone of this color table.</returns>
-			public CustomColorTable Clone()
-			{
-				return new CustomColorTable(this);
-			}
+			public CustomColorTable Clone() => new CustomColorTable(this);
 
 			/// <summary>Creates a cole of this color table.</summary>
 			/// <returns>Clone of this color table.</returns>
-			object ICloneable.Clone()
-			{
-				return Clone();
-			}
+			object ICloneable.Clone() => Clone();
 
 			#endregion
 
@@ -366,7 +250,6 @@ namespace gitter.Framework.Controls
 
 		#region Data
 
-		private readonly IColorTable _colorTable;
 
 		#endregion
 
@@ -376,7 +259,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
 
-			_colorTable = colorTable;
+			ColorTable = colorTable;
 		}
 
 		#endregion
@@ -436,10 +319,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Returns current color table.</summary>
-		public IColorTable ColorTable
-		{
-			get { return _colorTable; }
-		}
+		public IColorTable ColorTable { get; }
 
 		private Color GetArrowColor(bool isEnabled, bool isHovered, bool isPressed)
 		{
@@ -449,16 +329,13 @@ namespace gitter.Framework.Controls
 				{
 					return ColorTable.ArrowPressed;
 				}
+				else if(isHovered)
+				{
+					return ColorTable.ArrowHover;
+				}
 				else
 				{
-					if(isHovered)
-					{
-						return ColorTable.ArrowHover;
-					}
-					else
-					{
-						return ColorTable.ArrowNormal;
-					}
+					return ColorTable.ArrowNormal;
 				}
 			}
 			else
@@ -475,16 +352,13 @@ namespace gitter.Framework.Controls
 				{
 					return ColorTable.ThumbPressed;
 				}
+				else if(isHovered)
+				{
+					return ColorTable.ThumbHover;
+				}
 				else
 				{
-					if(isHovered)
-					{
-						return ColorTable.ThumbHover;
-					}
-					else
-					{
-						return ColorTable.ThumbNormal;
-					}
+					return ColorTable.ThumbNormal;
 				}
 			}
 			else
