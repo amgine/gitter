@@ -1292,6 +1292,15 @@ namespace gitter.Framework.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show UTC offset.
+        /// </summary>
+        internal static string StrShowUTCOffset {
+            get {
+                return ResourceManager.GetString("StrShowUTCOffset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Integration features.
         /// </summary>
         internal static string StrsIntegrationFeatures {

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -54,7 +54,7 @@ namespace gitter.Framework.Controls
 			_radRFC2822.Text		= Resources.StrRFC2822;
 			_radISO8601.Text		= Resources.StrISO8601;
 
-			var date = DateTime.Now;
+			var date = DateTimeOffset.Now;
 			_lblUnixTimestamp.Text	= Utility.FormatDate(date, DateFormat.UnixTimestamp);
 			_lblRelative.Text		= Utility.FormatDate(date, DateFormat.Relative);
 			_lblSystemDefault.Text	= Utility.FormatDate(date, DateFormat.SystemDefault);
@@ -62,9 +62,11 @@ namespace gitter.Framework.Controls
 			_lblISO8601.Text		= Utility.FormatDate(date, DateFormat.ISO8601);
 
 			_chkConvertToLocal.Text = Resources.StrConvertDateTimeToLocal;
+			_chkShowUTCOffset.Text  = Resources.StrShowUTCOffset;
 
 			DateFormat     = column.DateFormat;
 			ConvertToLocal = column.ConvertToLocal;
+			ShowUTCOffset  = column.ShowUTCOffset;
 
 			SubscribeToColumnEvents();
 		}
@@ -73,48 +75,34 @@ namespace gitter.Framework.Controls
 		{
 			_column.DateFormatChanged     += OnColumnDateFormatChanged;
 			_column.ConvertToLocalChanged += OnConvertToLocalChanged;
+			_column.ShowUTCOffsetChanged  += OnShowUTCOffsetChanged;
 		}
 
 		private void UnsubscribeFromColumnEvents()
 		{
 			_column.DateFormatChanged     -= OnColumnDateFormatChanged;
 			_column.ConvertToLocalChanged -= OnConvertToLocalChanged;
+			_column.ShowUTCOffsetChanged  -= OnShowUTCOffsetChanged;
 		}
 
 		private void OnColumnDateFormatChanged(object sender, EventArgs e)
-		{
-			DateFormat = _column.DateFormat;
-		}
+			=> DateFormat = _column.DateFormat;
 
 		private void OnConvertToLocalChanged(object sender, EventArgs e)
-		{
-			ConvertToLocal = _column.ConvertToLocal;
-		}
+			=> ConvertToLocal = _column.ConvertToLocal;
+
+		private void OnShowUTCOffsetChanged(object sender, EventArgs e)
+			=> ShowUTCOffset = _column.ShowUTCOffset;
 
 		public DateFormat DateFormat
 		{
 			get
 			{
-				if(_radUnixTimestamp.Checked)
-				{
-					return DateFormat.UnixTimestamp;
-				}
-				if(_radRelative.Checked)
-				{
-					return DateFormat.Relative;
-				}
-				if(_radSystemDefault.Checked)
-				{
-					return DateFormat.SystemDefault;
-				}
-				if(_radRFC2822.Checked)
-				{
-					return DateFormat.RFC2822;
-				}
-				if(_radISO8601.Checked)
-				{
-					return DateFormat.ISO8601;
-				}
+				if(_radUnixTimestamp.Checked) return DateFormat.UnixTimestamp;
+				if(_radRelative.Checked)      return DateFormat.Relative;
+				if(_radSystemDefault.Checked) return DateFormat.SystemDefault;
+				if(_radRFC2822.Checked)       return DateFormat.RFC2822;
+				if(_radISO8601.Checked)       return DateFormat.ISO8601;
 				return DateFormat.SystemDefault;
 			}
 			set
@@ -159,6 +147,23 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		public bool ShowUTCOffset
+		{
+			get => _chkShowUTCOffset.Checked;
+			set
+			{
+				_disableEvents = true;
+				try
+				{
+					_chkShowUTCOffset.Checked = value;
+				}
+				finally
+				{
+					_disableEvents = false;
+				}
+			}
+		}
+
 		private void OnCheckedChanged(object sender, EventArgs e)
 		{
 			if(!_disableEvents && ((RadioButton)sender).Checked)
@@ -172,6 +177,14 @@ namespace gitter.Framework.Controls
 			if(!_disableEvents)
 			{
 				_column.ConvertToLocal = ConvertToLocal;
+			}
+		}
+
+		private void _chkShowUTCOffset_CheckedChanged(object sender, EventArgs e)
+		{
+			if(!_disableEvents)
+			{
+				_column.ShowUTCOffset = ShowUTCOffset;
 			}
 		}
 	}

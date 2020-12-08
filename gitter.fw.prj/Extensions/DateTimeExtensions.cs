@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -43,14 +43,15 @@ namespace gitter.Framework
 
 		/// <summary>Formats date in ISO8601 format (1989-10-24 15:22:03 +0200).</summary>
 		/// <param name="date">Date.</param>
+		/// <param name="includeUTCOffset">Include UTC offset.</param>
 		/// <returns>ISO8601-formatted date.</returns>
-		public static string FormatISO8601(this DateTime date)
+		public static string FormatISO8601(this DateTime date, bool includeUTCOffset = true)
 		{
 			var ci = System.Globalization.CultureInfo.InvariantCulture;
 			var offset = TimeZone.CurrentTimeZone.GetUtcOffset(date);
 			bool neg = offset.Ticks < 0;
 			if(neg) offset = offset.Negate();
-			var sb = new StringBuilder(24);
+			var sb = new StringBuilder(25);
 			sb.Append(date.Year.ToString(ci));
 			sb.Append('-');
 			if(date.Month <= 9) sb.Append('0');
@@ -67,12 +68,15 @@ namespace gitter.Framework
 			sb.Append(':');
 			if(date.Second <= 9) sb.Append('0');
 			sb.Append(date.Second.ToString(ci));
-			sb.Append(' ');
-			sb.Append(neg ? '-' : '+');
-			if(offset.Hours <= 9) sb.Append('0');
-			sb.Append(offset.Hours.ToString(ci));
-			if(offset.Minutes <= 9) sb.Append('0');
-			sb.Append(offset.Minutes.ToString(ci));
+			if(includeUTCOffset)
+			{
+				sb.Append(' ');
+				sb.Append(neg ? '-' : '+');
+				if(offset.Hours <= 9) sb.Append('0');
+				sb.Append(offset.Hours.ToString(ci));
+				if(offset.Minutes <= 9) sb.Append('0');
+				sb.Append(offset.Minutes.ToString(ci));
+			}
 			return sb.ToString();
 		}
 
@@ -101,10 +105,11 @@ namespace gitter.Framework
 
 		/// <summary>Formats date in ISO8601 format (1989-10-24 15:22:03 +0200).</summary>
 		/// <param name="date">Date.</param>
+		/// <param name="includeUTCOffset">Include UTC offset.</param>
 		/// <returns>ISO8601-formatted date.</returns>
-		public static string FormatISO8601(this DateTimeOffset date)
+		public static string FormatISO8601(this DateTimeOffset date, bool includeUTCOffset = true)
 		{
-			var str = Utility.FastAllocateString(25);
+			var str = Utility.FastAllocateString(includeUTCOffset ? 25 : 19);
 			unsafe
 			{
 				fixed(char* p = str)
@@ -120,19 +125,22 @@ namespace gitter.Framework
 					Write2Digits(p + 14, date.Minute);
 					p[16] = ':';
 					Write2Digits(p + 17, date.Second);
-					p[19] = ' ';
-					var offset = date.Offset;
-					if(offset.Ticks < 0)
+					if(includeUTCOffset)
 					{
-						p[20] = '-';
-						Write2Digits(p + 21, -offset.Hours);
-						Write2Digits(p + 23, -offset.Minutes);
-					}
-					else
-					{
-						p[20] = '+';
-						Write2Digits(p + 21, offset.Hours);
-						Write2Digits(p + 23, offset.Minutes);
+						p[19] = ' ';
+						var offset = date.Offset;
+						if(offset.Ticks < 0)
+						{
+							p[20] = '-';
+							Write2Digits(p + 21, -offset.Hours);
+							Write2Digits(p + 23, -offset.Minutes);
+						}
+						else
+						{
+							p[20] = '+';
+							Write2Digits(p + 21, offset.Hours);
+							Write2Digits(p + 23, offset.Minutes);
+						}
 					}
 				}
 			}
@@ -142,8 +150,9 @@ namespace gitter.Framework
 
 		/// <summary>Formats date in RFC2822 format (Tue, 7 Dec 2010 21:30:44 +0300).</summary>
 		/// <param name="date">Date.</param>
+		/// <param name="includeUTCOffset">Include UTC offset.</param>
 		/// <returns>RFC2822-formatted date.</returns>
-		public static string FormatRFC2822(this DateTime date)
+		public static string FormatRFC2822(this DateTime date, bool includeUTCOffset = true)
 		{
 			var ci = System.Globalization.CultureInfo.InvariantCulture;
 			var sb = new StringBuilder(3 + 2 + 2 + 1 + 3 + 1 + 4 + 1 + 2 + 1 + 2 + 1 + 2 + 2 + 2 + 2);
@@ -163,25 +172,29 @@ namespace gitter.Framework
 			sb.Append(':');
 			if(date.Second <= 9) sb.Append('0');
 			sb.Append(date.Second.ToString(ci));
-			var offset = TimeZone.CurrentTimeZone.GetUtcOffset(date);
-			if(offset.Ticks < 0)
+			if(includeUTCOffset)
 			{
-				offset = offset.Negate();
-				sb.Append(" -");
+				var offset = TimeZone.CurrentTimeZone.GetUtcOffset(date);
+				if(offset.Ticks < 0)
+				{
+					offset = offset.Negate();
+					sb.Append(" -");
+				}
+				else
+				{
+					sb.Append(" +");
+				}
+				sb.Append(offset.Hours > 10 ? offset.Hours.ToString() : "0" + offset.Hours.ToString());
+				sb.Append(offset.Minutes > 10 ? offset.Minutes.ToString() : "0" + offset.Minutes.ToString());
 			}
-			else
-			{
-				sb.Append(" +");
-			}
-			sb.Append(offset.Hours > 10 ? offset.Hours.ToString() : "0" + offset.Hours.ToString());
-			sb.Append(offset.Minutes > 10 ? offset.Minutes.ToString() : "0" + offset.Minutes.ToString());
 			return sb.ToString();
 		}
 
 		/// <summary>Formats date in RFC2822 format (Tue, 7 Dec 2010 21:30:44 +0300).</summary>
 		/// <param name="date">Date.</param>
+		/// <param name="includeUTCOffset">Include UTC offset.</param>
 		/// <returns>RFC2822-formatted date.</returns>
-		public static string FormatRFC2822(this DateTimeOffset date)
+		public static string FormatRFC2822(this DateTimeOffset date, bool includeUTCOffset = true)
 		{
 			var ci = System.Globalization.CultureInfo.InvariantCulture;
 			var sb = new StringBuilder(3 + 2 + 2 + 1 + 3 + 1 + 4 + 1 + 2 + 1 + 2 + 1 + 2 + 2 + 2 + 2);
@@ -201,18 +214,21 @@ namespace gitter.Framework
 			sb.Append(':');
 			if(date.Second <= 9) sb.Append('0');
 			sb.Append(date.Second.ToString(ci));
-			var offset = date.Offset;
-			if(offset.Ticks < 0)
+			if(includeUTCOffset)
 			{
-				offset = offset.Negate();
-				sb.Append(" -");
+				var offset = date.Offset;
+				if(offset.Ticks < 0)
+				{
+					offset = offset.Negate();
+					sb.Append(" -");
+				}
+				else
+				{
+					sb.Append(" +");
+				}
+				sb.Append(offset.Hours > 10 ? offset.Hours.ToString() : "0" + offset.Hours.ToString());
+				sb.Append(offset.Minutes > 10 ? offset.Minutes.ToString() : "0" + offset.Minutes.ToString());
 			}
-			else
-			{
-				sb.Append(" +");
-			}
-			sb.Append(offset.Hours > 10 ? offset.Hours.ToString() : "0" + offset.Hours.ToString());
-			sb.Append(offset.Minutes > 10 ? offset.Minutes.ToString() : "0" + offset.Minutes.ToString());
 			return sb.ToString();
 		}
 	}

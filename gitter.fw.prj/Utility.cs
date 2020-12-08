@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -45,113 +45,68 @@ namespace gitter.Framework
 
 		public static bool IsOSWindows7OrNewer => _osVersion >= new Version(6, 1);
 
-		public static string FormatDate(DateTime date, DateFormat format)
+		private static string GetRelative(TimeSpan span)
 		{
-			switch(format)
+			if(span.TotalDays >= 365)
 			{
-				case DateFormat.SystemDefault:
-					return date.ToString(CultureInfo.CurrentCulture);
-				case DateFormat.UnixTimestamp:
-					return ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture);
-				case DateFormat.Relative:
-					{
-						var span = DateTime.Now - date;
-						if(span.TotalDays >= 365)
-						{
-							var years = (int)(span.TotalDays / 365);
-							return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
-						}
-						if(span.TotalDays >= 30)
-						{
-							var months = (int)(span.TotalDays / 30);
-							return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
-						}
-						if(span.TotalDays >= 7)
-						{
-							var weeks = (int)(span.TotalDays / 7);
-							return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
-						}
-						if(span.TotalDays >= 1)
-						{
-							var days = (int)span.TotalDays;
-							return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
-						}
-						if(span.TotalHours >= 1)
-						{
-							var hours = (int)span.TotalHours;
-							return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
-						}
-						if(span.TotalMinutes >= 1)
-						{
-							var minutes = (int)span.TotalMinutes;
-							return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
-						}
-						var seconds = (int)span.TotalSeconds;
-						return (seconds == 1) ? "1 second ago" : seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago";
-					}
-				case DateFormat.ISO8601:
-					return date.FormatISO8601();
-				case DateFormat.RFC2822:
-					return date.FormatRFC2822();
-				default:
-					throw new ArgumentException(
-						$"Unknown DateFormat value: {format}",
-						nameof(format));
+				var years = (int)(span.TotalDays / 365);
+				return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
 			}
+			if(span.TotalDays >= 30)
+			{
+				var months = (int)(span.TotalDays / 30);
+				return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
+			}
+			if(span.TotalDays >= 7)
+			{
+				var weeks = (int)(span.TotalDays / 7);
+				return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
+			}
+			if(span.TotalDays >= 1)
+			{
+				var days = (int)span.TotalDays;
+				return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
+			}
+			if(span.TotalHours >= 1)
+			{
+				var hours = (int)span.TotalHours;
+				return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
+			}
+			if(span.TotalMinutes >= 1)
+			{
+				var minutes = (int)span.TotalMinutes;
+				return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
+			}
+			var seconds = (int)span.TotalSeconds;
+			return seconds switch
+			{
+				0 => "just now",
+				1 => "1 second ago",
+				_ => seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago",
+			};
 		}
 
-		public static string FormatDate(DateTimeOffset date, DateFormat format)
-		{
-			switch(format)
+		public static string FormatDate(DateTime date, DateFormat format, bool includeUTCOffset = true)
+			=> format switch
 			{
-				case DateFormat.SystemDefault:
-					return date.ToString(CultureInfo.CurrentCulture);
-				case DateFormat.UnixTimestamp:
-					return ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture);
-				case DateFormat.Relative:
-					{
-						var span = DateTimeOffset.Now - date;
-						if(span.TotalDays >= 365)
-						{
-							var years = (int)(span.TotalDays / 365);
-							return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
-						}
-						if(span.TotalDays >= 30)
-						{
-							var months = (int)(span.TotalDays / 30);
-							return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
-						}
-						if(span.TotalDays >= 7)
-						{
-							var weeks = (int)(span.TotalDays / 7);
-							return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
-						}
-						if(span.TotalDays >= 1)
-						{
-							var days = (int)span.TotalDays;
-							return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
-						}
-						if(span.TotalHours >= 1)
-						{
-							var hours = (int)span.TotalHours;
-							return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
-						}
-						if(span.TotalMinutes >= 1)
-						{
-							var minutes = (int)span.TotalMinutes;
-							return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
-						}
-						var seconds = (int)span.TotalSeconds;
-						return (seconds == 1) ? "1 second ago" : seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago";
-					}
-				case DateFormat.ISO8601: return date.FormatISO8601();
-				case DateFormat.RFC2822: return date.FormatRFC2822();
-				default:
-					throw new ArgumentException(
-						$"Unknown DateFormat value: {format}",
-						nameof(format));
-			}
-		}
+				DateFormat.SystemDefault => includeUTCOffset ? date.ToString(CultureInfo.CurrentCulture) : date.ToString("G", CultureInfo.CurrentCulture),
+				DateFormat.UnixTimestamp => ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture),
+				DateFormat.Relative      => GetRelative(DateTime.Now - date),
+				DateFormat.ISO8601       => date.FormatISO8601(includeUTCOffset),
+				DateFormat.RFC2822       => date.FormatRFC2822(includeUTCOffset),
+				_ => throw new ArgumentException($"Unknown DateFormat value: {format}", nameof(format)),
+			};
+
+		public static string FormatDate(DateTimeOffset date, DateFormat format, bool includeUTCOffset = true)
+			=> format switch
+			{
+				DateFormat.SystemDefault => includeUTCOffset ? date.ToString(CultureInfo.CurrentCulture) : date.ToString("G", CultureInfo.CurrentCulture),
+				DateFormat.UnixTimestamp => ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture),
+				DateFormat.Relative      => GetRelative(DateTimeOffset.Now - date),
+				DateFormat.ISO8601       => date.FormatISO8601(includeUTCOffset),
+				DateFormat.RFC2822       => date.FormatRFC2822(includeUTCOffset),
+				_ => throw new ArgumentException($"Unknown DateFormat value: {format}", nameof(format)),
+			};
 
 		public static string ExpandNewLineCharacters(string text)
 		{

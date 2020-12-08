@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -34,6 +34,7 @@ namespace gitter.Framework.Controls
 
 		private DateFormat _dateFormat;
 		private bool _convertToLocal;
+		private bool _showUTCOffset = true;
 		private DateColumnExtender _extender;
 
 		public event EventHandler DateFormatChanged;
@@ -45,6 +46,11 @@ namespace gitter.Framework.Controls
 
 		protected virtual void OnConvertToLocalChanged(EventArgs e)
 			=> ConvertToLocalChanged?.Invoke(this, e);
+
+		public event EventHandler ShowUTCOffsetChanged;
+
+		protected virtual void OnShowUTCOffsetChanged(EventArgs e)
+			=> ShowUTCOffsetChanged?.Invoke(this, e);
 
 		public DateColumn(int id, string name, bool visible)
 			: base(id, name, visible)
@@ -73,43 +79,32 @@ namespace gitter.Framework.Controls
 			base.OnListBoxDetached();
 		}
 
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, DateTimeOffset date)
+		private static string GetString(CustomListBoxColumn column, DateTimeOffset date)
 		{
 			bool convertTolocal;
 			DateFormat format;
-			if(measureEventArgs.Column is DateColumn dc)
+			bool showUTCOffset;
+			if(column is DateColumn dc)
 			{
-				format = dc.DateFormat;
+				format         = dc.DateFormat;
 				convertTolocal = dc.ConvertToLocal;
+				showUTCOffset  = dc.ShowUTCOffset;
 			}
 			else
 			{
 				convertTolocal = false;
-				format = DefaultDateFormat;
+				format         = DefaultDateFormat;
+				showUTCOffset  = true;
 			}
 			if(convertTolocal) date = date.ToLocalTime();
-			var strDate = Utility.FormatDate(date, format);
-			return measureEventArgs.MeasureText(strDate);
+			return Utility.FormatDate(date, format, showUTCOffset);
 		}
 
+		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, DateTimeOffset date)
+			=> measureEventArgs.MeasureText(GetString(measureEventArgs.Column, date));
+
 		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, DateTimeOffset date)
-		{
-			bool convertTolocal;
-			DateFormat format;
-			if(paintEventArgs.Column is DateColumn dc)
-			{
-				format = dc.DateFormat;
-				convertTolocal = dc.ConvertToLocal;
-			}
-			else
-			{
-				convertTolocal = false;
-				format = DefaultDateFormat;
-			}
-			if(convertTolocal) date = date.ToLocalTime();
-			var strdate = Utility.FormatDate(date, format);
-			paintEventArgs.PaintText(strdate);
-		}
+			=> paintEventArgs.PaintText(GetString(paintEventArgs.Column, date));
 
 		public DateFormat DateFormat
 		{
@@ -138,11 +133,27 @@ namespace gitter.Framework.Controls
 				if(_convertToLocal != value)
 				{
 					_convertToLocal = value;
-					if(ListBox != null)
+					ListBox?.Refresh();
+					OnConvertToLocalChanged(EventArgs.Empty);
+				}
+			}
+		}
+
+		public bool ShowUTCOffset
+		{
+			get => _showUTCOffset;
+			set
+			{
+				if(_showUTCOffset != value)
+				{
+					_showUTCOffset = value;
+					var w = Width;
+					AutoSize(80);
+					if(w != Width && ListBox != null)
 					{
 						ListBox.Refresh();
 					}
-					OnConvertToLocalChanged(EventArgs.Empty);
+					OnShowUTCOffsetChanged(EventArgs.Empty);
 				}
 			}
 		}
@@ -152,13 +163,15 @@ namespace gitter.Framework.Controls
 			base.LoadMoreFrom(section);
 			DateFormat     = section.GetValue("DateFormat",     DateFormat);
 			ConvertToLocal = section.GetValue("ConvertToLocal", ConvertToLocal);
+			ShowUTCOffset  = section.GetValue("ShowUTCOffset",  ShowUTCOffset);
 		}
 
 		protected override void SaveMoreTo(Section section)
 		{
 			base.SaveMoreTo(section);
-			section.SetValue("DateFormat", DateFormat);
+			section.SetValue("DateFormat",     DateFormat);
 			section.SetValue("ConvertToLocal", ConvertToLocal);
+			section.SetValue("ShowUTCOffset",  ShowUTCOffset);
 		}
 
 		public override string IdentificationString => "Date";
