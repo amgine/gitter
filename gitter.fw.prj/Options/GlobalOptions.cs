@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -141,26 +141,24 @@ namespace gitter.Framework
 			{
 				try
 				{
-					using(var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell\gitter\command", false))
+					using var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell\gitter\command", writable: false);
+					if(key != null)
 					{
-						if(key != null)
+						var value = (string)key.GetValue(null, string.Empty);
+						if(value == string.Empty) return false;
+						if(value.EndsWith(" \"%1\""))
 						{
-							var value = (string)key.GetValue(null, string.Empty);
-							if(value == string.Empty) return false;
-							if(value.EndsWith(" \"%1\""))
+							value = value.Substring(0, value.Length - 5);
+							if(value.StartsWith("\"") && value.EndsWith("\""))
 							{
-								value = value.Substring(0, value.Length - 5);
-								if(value.StartsWith("\"") && value.EndsWith("\""))
-								{
-									value = value.Substring(1, value.Length - 2);
-									value = Path.GetFullPath(value);
-									var appPath = System.IO.Path.GetFullPath(Application.ExecutablePath);
-									return value == appPath;
-								}
+								value = value.Substring(1, value.Length - 2);
+								value = Path.GetFullPath(value);
+								var appPath = System.IO.Path.GetFullPath(Application.ExecutablePath);
+								return value == appPath;
 							}
 						}
-						return false;
 					}
+					return false;
 				}
 				catch(Exception exc) when(!exc.IsCritical())
 				{
@@ -171,29 +169,29 @@ namespace gitter.Framework
 
 		public static void IntegrateInExplorerContextMenu()
 		{
-			using(var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", true))
+			try
 			{
-				using(var gitterKey = key.CreateSubKey("gitter", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None))
+				using var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", writable: true);
+				using var gitterKey = key.CreateSubKey("gitter", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None);
+				gitterKey.SetValue(null, @"Open with gitter");
+				using var commandKey = gitterKey.CreateSubKey("command", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None);
+				var appPath = Path.Combine(Path.GetFullPath(Path.GetDirectoryName(Application.ExecutablePath)), "gitter.exe");
+				if(!appPath.StartsWith("\"") || !appPath.EndsWith("\""))
 				{
-					gitterKey.SetValue(null, @"Open With gitter");
-					using(var commandKey = gitterKey.CreateSubKey("command", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None))
-					{
-						var appPath = Path.Combine(Path.GetFullPath(Path.GetDirectoryName(Application.ExecutablePath)), "gitter.exe");
-						if(!appPath.StartsWith("\"") || !appPath.EndsWith("\""))
-							appPath = appPath.SurroundWithDoubleQuotes();
-						appPath += " \"%1\"";
-						commandKey.SetValue(null, appPath);
-					}
+					appPath = appPath.SurroundWithDoubleQuotes();
 				}
+				appPath += " \"%1\"";
+				commandKey.SetValue(null, appPath);
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
 			}
 		}
 
 		public static void RemoveFromExplorerContextMenu()
 		{
-			using(var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", true))
-			{
-				key.DeleteSubKeyTree("gitter", false);
-			}
+			using var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", writable: true);
+			key.DeleteSubKeyTree("gitter", false);
 		}
 
 		public static void LoadFrom(Section section)

@@ -54,7 +54,7 @@ namespace gitter.Framework
 			}
 		}
 
-		public bool AdministratorRightsRequired => false;
+		public bool AdministratorRightsRequired => true;
 
 		public Action GetEnableAction(bool enable)
 			=> enable ?

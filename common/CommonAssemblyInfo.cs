@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,5 +32,5 @@ using System.Reflection;
 
 [assembly: NeutralResourcesLanguage("en-us")]
 
-[assembly: AssemblyFileVersion("1.0.24.0")]
-[assembly: AssemblyVersion("1.0.24.0")] 
+[assembly: AssemblyFileVersion("1.0.25.0")]
+[assembly: AssemblyVersion("1.0.25.0")] 
