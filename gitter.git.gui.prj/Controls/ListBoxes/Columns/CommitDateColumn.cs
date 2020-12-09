@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,7 +21,7 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Windows.Forms;
+	using System.Drawing;
 
 	using gitter.Framework.Controls;
 
@@ -37,5 +37,37 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public override string IdentificationString => "CommitDate";
+
+		private static bool TryGetCommitDate(CustomListBoxItem item, out DateTimeOffset commitDate)
+		{
+			if(item is IRevisionPointerListItem revisionItem)
+			{
+				var revision = revisionItem.RevisionPointer.Dereference();
+				if(revision != null)
+				{
+					commitDate = revision.CommitDate;
+					return true;
+				}
+			}
+			commitDate = default;
+			return false;
+		}
+
+		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		{
+			if(TryGetCommitDate(measureEventArgs.Item, out var commitDate))
+			{
+				return OnMeasureSubItem(measureEventArgs, commitDate);
+			}
+			return base.OnMeasureSubItem(measureEventArgs);
+		}
+
+		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+			if(TryGetCommitDate(paintEventArgs.Item, out var commitDate))
+			{
+				OnPaintSubItem(paintEventArgs, commitDate);
+			}
+		}
 	}
 }

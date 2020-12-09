@@ -83,7 +83,10 @@ namespace gitter.GitLab
 			var api = new Api.ApiEndpoint(serviceUri, key);
 			try
 			{
-				await api.GetVersionAsync();
+				using(View.ChangeCursor(MouseCursor.WaitCursor))
+				{
+					await api.GetVersionAsync();
+				}
 			}
 			catch(UnauthorizedAccessException)
 			{

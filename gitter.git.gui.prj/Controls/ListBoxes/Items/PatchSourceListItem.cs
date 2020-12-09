@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,32 +27,12 @@ namespace gitter.Git.Gui.Controls
 
 	public class PatchSourceListItem : CustomListBoxItem<IPatchSource>
 	{
-		#region Static
-
 		private static readonly Bitmap ImgPatch = CachedResources.Bitmaps["ImgPatch"];
-
-		#endregion
-
-		#region .ctor
 
 		public PatchSourceListItem(IPatchSource patchSource)
 			: base(patchSource)
 		{
 			Verify.Argument.IsNotNull(patchSource, nameof(patchSource));
-		}
-
-		#endregion
-
-		#region Overrides
-
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			switch((ColumnId)paintEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgPatch, DataContext.DisplayName);
-					break;
-			}
 		}
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -66,6 +46,14 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		#endregion
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+			switch((ColumnId)paintEventArgs.SubItemId)
+			{
+				case ColumnId.Name:
+					paintEventArgs.PaintImageAndText(ImgPatch, DataContext.DisplayName);
+					break;
+			}
+		}
 	}
 }

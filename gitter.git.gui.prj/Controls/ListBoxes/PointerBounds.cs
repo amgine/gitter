@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,10 +27,8 @@ namespace gitter.Git.Gui
 
 	using gitter.Git.Gui.Controls;
 
-	public struct PointerBounds
+	public readonly struct PointerBounds
 	{
-		#region Static
-
 		public static ContextMenuStrip GetContextMenu(IEnumerable<PointerBounds> pointers, int x, int y)
 		{
 			if(pointers == null) return null;
@@ -44,27 +42,15 @@ namespace gitter.Git.Gui
 			return null;
 		}
 
-		#endregion
-
-		#region .ctor
-
 		public PointerBounds(IRevisionPointer revisionPointer, Rectangle bounds)
 		{
 			RevisionPointer = revisionPointer;
 			Bounds          = bounds;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public IRevisionPointer RevisionPointer { get; }
 
 		public Rectangle Bounds { get; }
-
-		#endregion
-
-		#region Methods
 
 		public ContextMenuStrip GetContextMenu()
 			=> RevisionPointer switch
@@ -75,7 +61,5 @@ namespace gitter.Git.Gui
 				Head         head   => new HeadMenu(head),
 				_ => default,
 			};
-
-		#endregion
 	}
 }

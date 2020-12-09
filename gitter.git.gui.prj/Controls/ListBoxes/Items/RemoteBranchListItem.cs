@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,13 +30,7 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="RemoteBranch"/> object.</summary>
 	public sealed class RemoteBranchListItem : ReferenceListItemBase<RemoteBranch>
 	{
-		#region Static
-
 		private static readonly Bitmap ImgBranchRemote = CachedResources.Bitmaps["ImgBranchRemote"];
-
-		#endregion
-
-		#region .ctor
 
 		/// <summary>Create <see cref="RemoteBranchListItem"/>.</summary>
 		/// <param name="branch">Related <see cref="RemoteBranch"/>.</param>
@@ -47,10 +41,6 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(branch, nameof(branch));
 		}
 
-		#endregion
-
-		#region Overrides
-
 		protected override Image Image => ImgBranchRemote;
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -58,9 +48,8 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					var rli = Parent as RemoteListItem;
 					return measureEventArgs.MeasureImageAndText(ImgBranchRemote,
-						rli != null ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
+						Parent is RemoteListItem rli ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
 				default:
 					return base.OnMeasureSubItem(measureEventArgs);
 			}
@@ -71,9 +60,8 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					var rli = Parent as RemoteListItem;
 					paintEventArgs.PaintImageAndText(ImgBranchRemote,
-						rli != null ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
+						Parent is RemoteListItem rli ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
 					break;
 				default:
 					base.OnPaintSubItem(paintEventArgs);
@@ -87,7 +75,5 @@ namespace gitter.Git.Gui.Controls
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
-
-		#endregion
 	}
 }

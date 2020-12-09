@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,15 +32,9 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>Item used to group reference-representing items together.</summary>
 	public class ReferenceGroupListItem : CustomListBoxItem<ReferenceType>
 	{
-		#region Static
-
-		private static readonly Image ImgRefsHeads		= CachedResources.Bitmaps["ImgRefsHeads"];
-		private static readonly Image ImgRefsRemotes	= CachedResources.Bitmaps["ImgRefsRemotes"];
-		private static readonly Image ImgRefsTags		= CachedResources.Bitmaps["ImgRefsTags"];
-
-		#endregion
-
-		#region .ctor
+		private static readonly Image ImgRefsHeads   = CachedResources.Bitmaps["ImgRefsHeads"];
+		private static readonly Image ImgRefsRemotes = CachedResources.Bitmaps["ImgRefsRemotes"];
+		private static readonly Image ImgRefsTags    = CachedResources.Bitmaps["ImgRefsTags"];
 
 		/// <summary>Create <see cref="ReferenceGroupListItem"/>.</summary>
 		/// <param name="repository">Related repository.</param>
@@ -51,15 +45,7 @@ namespace gitter.Git.Gui.Controls
 			Repository = repository;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public Repository Repository { get; }
-
-		#endregion
-
-		#region Overrides
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
@@ -130,7 +116,5 @@ namespace gitter.Git.Gui.Controls
 			}
 			return menu;
 		}
-
-		#endregion
 	}
 }

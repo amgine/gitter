@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -58,12 +58,6 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
-		#region Constants
-
-		private const string NoHash = "---------------------------------------";
-
-		#endregion
-
 		#region Data
 
 		private readonly FileStatusIconEntry[] _iconEntries;
@@ -116,7 +110,7 @@ namespace gitter.Git.Gui.Controls
 					}
 					break;
 				default:
-					throw new ArgumentException("Unknown type value.", "type");
+					throw new ArgumentException("Unknown type value.", nameof(type));
 			}
 		}
 
@@ -133,32 +127,19 @@ namespace gitter.Git.Gui.Controls
 		public GraphAtom[] Graph { get; set; }
 
 		private string SubjectText
-		{
-			get
+			=> Type switch
 			{
-				switch(Type)
+				FakeRevisionItemType.StagedChanges   => Resources.StrUncommittedLocalChanges,
+				FakeRevisionItemType.UnstagedChanges => SubType switch
 				{
-					case FakeRevisionItemType.StagedChanges:
-						return Resources.StrUncommittedLocalChanges;
-					case FakeRevisionItemType.UnstagedChanges:
-						switch(SubType)
-						{
-							case UnstagedRevisionItemSubtype.Conflicts:
-								return Resources.StrlUnmergedFilesPresent;
-							case UnstagedRevisionItemSubtype.RemovedFiles:
-								return Resources.StrlUnstagedRemovedFiles;
-							case UnstagedRevisionItemSubtype.UntrackedFiles:
-								return Resources.StrlUnstagedUntrackedFiles;
-							case UnstagedRevisionItemSubtype.Modifications:
-								return Resources.StrUnstagedLocalChanges;
-							default:
-								return Resources.StrUnstagedLocalChanges;
-						}
-					default:
-						return null;
-				}
-			}
-		}
+					UnstagedRevisionItemSubtype.Conflicts      => Resources.StrlUnmergedFilesPresent,
+					UnstagedRevisionItemSubtype.RemovedFiles   => Resources.StrlUnstagedRemovedFiles,
+					UnstagedRevisionItemSubtype.UntrackedFiles => Resources.StrlUnstagedUntrackedFiles,
+					UnstagedRevisionItemSubtype.Modifications  => Resources.StrUnstagedLocalChanges,
+					_ => Resources.StrUnstagedLocalChanges,
+				},
+				_ => default,
+			};
 
 		#endregion
 
@@ -208,17 +189,10 @@ namespace gitter.Git.Gui.Controls
 
 		private void DrawSubjectColumn(SubItemPaintEventArgs paintEventArgs)
 		{
-			bool alignToGraph;
-			var rsc = paintEventArgs.Column as SubjectColumn;
 			var rect = paintEventArgs.Bounds;
-			if(rsc != null)
-			{
-				alignToGraph = rsc.AlignToGraph;
-			}
-			else
-			{
-				alignToGraph = SubjectColumn.DefaultAlignToGraph;
-			}
+			var alignToGraph = paintEventArgs.Column is SubjectColumn rsc
+				? rsc.AlignToGraph
+				: SubjectColumn.DefaultAlignToGraph;
 			var graphColumn = ListBox.GetPrevVisibleColumn(paintEventArgs.ColumnIndex);
 			if(graphColumn != null && graphColumn.Id != (int)ColumnId.Graph)
 			{
@@ -416,16 +390,12 @@ namespace gitter.Git.Gui.Controls
 		/// <returns>Context menu for specified location.</returns>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			ContextMenuStrip menu = null;
-			switch(Type)
+			ContextMenuStrip menu = Type switch
 			{
-				case FakeRevisionItemType.UnstagedChanges:
-					menu = new UnstagedChangesMenu(Repository);
-					break;
-				case FakeRevisionItemType.StagedChanges:
-					menu = new StagedChangesMenu(Repository);
-					break;
-			}
+				FakeRevisionItemType.UnstagedChanges => new UnstagedChangesMenu(Repository),
+				FakeRevisionItemType.StagedChanges   => new StagedChangesMenu(Repository),
+				_ => default,
+			};
 			if(menu != null)
 			{
 				Utility.MarkDropDownForAutoDispose(menu);

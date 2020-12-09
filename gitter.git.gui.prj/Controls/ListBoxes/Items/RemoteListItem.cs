@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,13 +30,7 @@ namespace gitter.Git.Gui.Controls
 	/// <summary><see cref="gitter.Framework.Controls.CustomListBoxItem"/> representing <see cref="gitter.Git.Remote"/>.</summary>
 	public class RemoteListItem : CustomListBoxItem<Remote>
 	{
-		#region Static
-
 		private static readonly Bitmap ImgRemote = CachedResources.Bitmaps["ImgRemote"];
-
-		#endregion
-
-		#region Comparers
 
 		public static int CompareByName(RemoteListItem item1, RemoteListItem item2)
 		{
@@ -101,10 +95,6 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		#endregion
-
-		#region .ctor
-
 		/// <summary>Create <see cref="RemoteListItem"/>.</summary>
 		/// <param name="remote">Related <see cref="Remote"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="remote"/> == <c>null</c>.</exception>
@@ -113,10 +103,6 @@ namespace gitter.Git.Gui.Controls
 		{
 			Verify.Argument.IsNotNull(remote, nameof(remote));
 		}
-
-		#endregion
-
-		#region Event Handlers
 
 		private void OnRemoteDeleted(object sender, EventArgs e)
 		{
@@ -130,10 +116,6 @@ namespace gitter.Git.Gui.Controls
 				InvalidateSubItemSafe((int)ColumnId.Name);
 			}
 		}
-
-		#endregion
-
-		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -188,7 +170,5 @@ namespace gitter.Git.Gui.Controls
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}
-
-		#endregion
 	}
 }

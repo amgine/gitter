@@ -76,7 +76,7 @@ namespace gitter.GitLab.Api
 
         [JsonProperty("parent_ids")]
         [DataMember]
-        public List<string> ParentIds { get; } = new List<string>();
+        public string[] ParentIds { get; set; }
 
         [JsonProperty("web_url")]
         [DataMember]

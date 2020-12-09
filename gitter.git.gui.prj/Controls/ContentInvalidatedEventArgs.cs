@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,10 +25,7 @@ namespace gitter.Git.Gui
 
 	sealed class ContentInvalidatedEventArgs : EventArgs
 	{
-		public ContentInvalidatedEventArgs(Rectangle bounds)
-		{
-			Bounds = bounds;
-		}
+		public ContentInvalidatedEventArgs(Rectangle bounds) => Bounds = bounds;
 
 		public Rectangle Bounds { get; }
 	}

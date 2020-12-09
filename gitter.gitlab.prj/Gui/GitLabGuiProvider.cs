@@ -21,6 +21,7 @@
 namespace gitter.GitLab.Gui
 {
 	using System;
+	using System.Linq;
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;
@@ -88,6 +89,9 @@ namespace gitter.GitLab.Gui
 		public void DetachFromEnvironment(IWorkingEnvironment environment)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
+
+			var views1 = environment.ViewDockService.FindViews(Guids.IssuesViewGuid).ToList();
+			foreach(var view in views1) view.Close();
 
 			DiffHeaderPanelsProvider.CreatingPanels -= OnDiffHeaderPanelsProviderCreatingPanels;
 			//var views1 = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();

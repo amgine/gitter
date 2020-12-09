@@ -35,6 +35,9 @@ namespace gitter.GitLab.Gui
 			: base(env, guiProvider, CachedResources.Bitmaps["ImgGitLab"], Resources.StrGitLab)
 		{
 			ServiceContext = guiProvider.ServiceContext;
+
+			Items.Add(new RepositoryExplorerIssuesListItem(env, guiProvider));
+			Expand();
 		}
 
 		private GitLabServiceContext ServiceContext { get; }

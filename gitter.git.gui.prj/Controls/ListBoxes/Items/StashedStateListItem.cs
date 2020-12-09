@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -103,15 +103,10 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.Name:
 				case ColumnId.Subject:
 					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Subject);
-				case ColumnId.Date:
-				case ColumnId.CommitDate:
-					return CommitDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.CommitDate);
 				case ColumnId.Committer:
 					return CommitterColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Committer);
 				case ColumnId.CommitterEmail:
 					return CommitterEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Committer.Email);
-				case ColumnId.AuthorDate:
-					return AuthorDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.AuthorDate);
 				case ColumnId.User:
 				case ColumnId.Author:
 					return AuthorColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision.Author);
@@ -130,18 +125,11 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.Subject:
 					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision, null, null, -1);
 					break;
-				case ColumnId.Date:
-				case ColumnId.CommitDate:
-					CommitDateColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.CommitDate);
-					break;
 				case ColumnId.Committer:
 					CommitterColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Committer);
 					break;
 				case ColumnId.CommitterEmail:
 					CommitterEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.Committer.Email);
-					break;
-				case ColumnId.AuthorDate:
-					AuthorDateColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision.AuthorDate);
 					break;
 				case ColumnId.User:
 				case ColumnId.Author:

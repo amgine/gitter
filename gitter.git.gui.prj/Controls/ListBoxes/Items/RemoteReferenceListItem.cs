@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -74,19 +74,12 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					Bitmap image;
-					switch(DataContext.ReferenceType)
+					var image = DataContext.ReferenceType switch
 					{
-						case ReferenceType.LocalBranch:
-							image = ImgBranch;
-							break;
-						case ReferenceType.Tag:
-							image = ImgTag;
-							break;
-						default:
-							image = null;
-							break;
-					}
+						ReferenceType.LocalBranch => ImgBranch,
+						ReferenceType.Tag         => ImgTag,
+						_ => null,
+					};
 					return measureEventArgs.MeasureImageAndText(image, DataContext.Name);
 				default:
 					return base.OnMeasureSubItem(measureEventArgs);
@@ -128,20 +121,12 @@ namespace gitter.Git.Gui.Controls
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			ContextMenuStrip menu = null;
-			var branch = DataContext as RemoteRepositoryBranch;
-			if(branch != null)
+			ContextMenuStrip menu = DataContext switch
 			{
-				menu = new RemoteBranchMenu(branch);
-			}
-			else
-			{
-				var tag = DataContext as RemoteRepositoryTag;
-				if(tag != null)
-				{
-					menu = new RemoteTagMenu(tag);
-				}
-			}
+				RemoteRepositoryBranch branch => new RemoteBranchMenu(branch),
+				RemoteRepositoryTag tag       => new RemoteTagMenu(tag),
+				_ => default,
+			};
 			if(menu != null)
 			{
 				Utility.MarkDropDownForAutoDispose(menu);

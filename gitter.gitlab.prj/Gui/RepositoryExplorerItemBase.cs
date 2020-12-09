@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -45,13 +45,13 @@ namespace gitter.GitLab.Gui
 
 		protected GitLabGuiProvider GuiProvider { get; }
 
-		//protected void ShowView(Guid guid)
-		//{
-		//	if(WorkingEnvironment.ViewDockService.ShowView(guid) is GitLabViewBase view)
-		//	{
-		//		view.ServiceContext = GuiProvider.ServiceContext;
-		//	}
-		//}
+		protected void ShowView(Guid guid)
+		{
+			if(WorkingEnvironment.ViewDockService.ShowView(guid) is GitLabViewBase view)
+			{
+				view.ServiceContext = GuiProvider.ServiceContext;
+			}
+		}
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{

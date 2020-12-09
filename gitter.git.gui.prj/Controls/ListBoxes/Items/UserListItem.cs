@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -33,13 +33,7 @@ namespace gitter.Git.Gui.Controls
 	/// <summary><see cref="CustomListBoxItem"/> representing <see cref="User"/>.</summary>
 	public sealed class UserListItem : CustomListBoxItem<User>
 	{
-		#region Static
-
 		private static readonly Bitmap ImgUser = CachedResources.Bitmaps["ImgUser"];
-
-		#endregion
-
-		#region Comparers
 
 		public static int CompareByName(UserListItem item1, UserListItem item2)
 		{
@@ -77,15 +71,7 @@ namespace gitter.Git.Gui.Controls
 				? CompareByCommitCount(userListItem1, userListItem2)
 				: 0;
 
-		#endregion
-
-		#region Data
-
 		private Bitmap _imgAvatar;
-
-		#endregion
-
-		#region .ctor
 
 		/// <summary>Create <see cref="UserListItem"/>.</summary>
 		/// <param name="user">Related <see cref="User"/>.</param>
@@ -96,18 +82,10 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(user, nameof(user));
 		}
 
-		#endregion
-
-		#region Event Handlers
-
 		private void OnDataAvatarUpdated(object sender, EventArgs e)
 		{
 			InvalidateSafe();
 		}
-
-		#endregion
-
-		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -190,7 +168,5 @@ namespace gitter.Git.Gui.Controls
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
-
-		#endregion
 	}
 }

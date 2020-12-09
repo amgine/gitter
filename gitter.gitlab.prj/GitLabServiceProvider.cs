@@ -67,7 +67,7 @@ namespace gitter.GitLab
 				IntegrationOptionsPage.Guid,
 				env => new Options.ConfigurationPage(env, this)));
 
-			Environment = environment;
+			environment.ViewDockService.RegisterFactory(new IssuesViewFactory());
 
 			if(section.TryGetSection("Servers", out var servers))
 			{
@@ -76,6 +76,8 @@ namespace gitter.GitLab
 					Servers.Add(ServerInfo.LoadFrom(server));
 				}
 			}
+
+			Environment = environment;
 
 			return true;
 		}

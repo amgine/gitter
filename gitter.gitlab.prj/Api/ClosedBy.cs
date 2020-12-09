@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,10 +18,34 @@
  */
 #endregion
 
-namespace gitter.GitLab.Gui
+namespace gitter.GitLab.Api
 {
-	enum ColumnId
+	using System;
+	using System.Runtime.Serialization;
+
+	using Newtonsoft.Json;
+
+	[DataContract]
+	sealed class ClosedBy : ModifiableObject
 	{
-		Name = 0,
+		[JsonProperty("active")]
+		[DataMember]
+		public string State;
+
+		[JsonProperty("web_url")]
+		[DataMember]
+		public string WebUrl;
+
+		[JsonProperty("avatar_url")]
+		[DataMember]
+		public string AvatarUrl;
+
+		[JsonProperty("username")]
+		[DataMember]
+		public string Username;
+
+		[JsonProperty("name")]
+		[DataMember]
+		public string Name;
 	}
 }

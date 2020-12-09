@@ -176,6 +176,33 @@ namespace gitter.GitLab.Api
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 
+		public async Task<IReadOnlyList<Issue>> GetProjectIssuesAsync(string projectId, IssueState state = IssueState.All)
+		{
+			using var http = CreateHttpClient();
+
+			var urlBuilder = new StringBuilder();
+			urlBuilder.Append("/api/v4/projects/");
+			urlBuilder.Append(Uri.EscapeDataString(projectId));
+			urlBuilder.Append("/issues");
+
+			if(state != IssueState.All)
+			{
+				urlBuilder.Append('?');
+				switch(state)
+				{
+					case IssueState.Closed:
+						urlBuilder.Append("state=closed");
+						break;
+					case IssueState.Opened:
+						urlBuilder.Append("state=opened");
+						break;
+				}
+			}
+
+			return await ReadPagedResultAsync<Issue>(http, urlBuilder.ToString())
+				.ConfigureAwait(continueOnCapturedContext: false);
+		}
+
 		public async Task<IReadOnlyList<Pipeline>> GetPipelinesAsync(string path, string sha = default)
 		{
 			using var http = CreateHttpClient();

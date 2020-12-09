@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,7 +21,7 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Windows.Forms;
+	using System.Drawing;
 
 	using gitter.Framework.Controls;
 
@@ -37,5 +37,37 @@ namespace gitter.Git.Gui.Controls
 		}
 
 		public override string IdentificationString => "AuthorDate";
+
+		private static bool TryGetAuthorDate(CustomListBoxItem item, out DateTimeOffset authorDate)
+		{
+			if(item is IRevisionPointerListItem revisionItem)
+			{
+				var revision = revisionItem.RevisionPointer.Dereference();
+				if(revision != null)
+				{
+					authorDate = revision.AuthorDate;
+					return true;
+				}
+			}
+			authorDate = default;
+			return false;
+		}
+
+		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		{
+			if(TryGetAuthorDate(measureEventArgs.Item, out var authorDate))
+			{
+				return OnMeasureSubItem(measureEventArgs, authorDate);
+			}
+			return base.OnMeasureSubItem(measureEventArgs);
+		}
+
+		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+			if(TryGetAuthorDate(paintEventArgs.Item, out var authorDate))
+			{
+				OnPaintSubItem(paintEventArgs, authorDate);
+			}
+		}
 	}
 }

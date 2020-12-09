@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -56,8 +56,6 @@ namespace gitter.Git.Gui.Controls
 	public abstract class ReferenceListItemBase<T> : RevisionPointerListItemBase<T>
 		where T : Reference
 	{
-		#region Comparers
-
 		public static int CompareByName(ReferenceListItemBase<T> item1, ReferenceListItemBase<T> item2)
 		{
 			var data1 = item1.DataContext;
@@ -82,24 +80,12 @@ namespace gitter.Git.Gui.Controls
 				? CompareByPosition(i1, i2)
 				: 0;
 
-		#endregion
-
-		#region .ctor
-
 		protected ReferenceListItemBase(T data)
 			: base(data)
 		{
 		}
 
-		#endregion
-
-		#region Properties
-
 		protected abstract Image Image { get; }
-
-		#endregion
-
-		#region Event Handlers
 
 		private void OnPositionChanged(object sender, RevisionChangedEventArgs e)
 		{
@@ -110,10 +96,6 @@ namespace gitter.Git.Gui.Controls
 		{
 			RemoveSafe();
 		}
-
-		#endregion
-
-		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -148,7 +130,5 @@ namespace gitter.Git.Gui.Controls
 					break;
 			}
 		}
-
-		#endregion
 	}
 }

@@ -66,7 +66,7 @@ namespace gitter.GitLab.Gui
 			if(string.IsNullOrWhiteSpace(APIKey)) return;
 			var svc = new GitLabServiceContext(new Uri(ServiceUri), APIKey);
 
-			var projects = await svc.GetProjects();
+			var projects = await svc.GetProjectsAsync();
 
 			_cmbProject.BeginUpdate();
 			_cmbProject.Items.Clear();

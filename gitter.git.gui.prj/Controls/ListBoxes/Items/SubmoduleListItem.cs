@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,13 +29,7 @@ namespace gitter.Git.Gui.Controls
 
 	public class SubmoduleListItem : CustomListBoxItem<Submodule>
 	{
-		#region Static
-
 		private static Bitmap ImgSubmodule = CachedResources.Bitmaps["ImgSubmodule"];
-
-		#endregion
-
-		#region Comparers
 
 		public static int CompareByName(SubmoduleListItem item1, SubmoduleListItem item2)
 		{
@@ -100,27 +94,15 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		#endregion
-
-		#region .ctor
-
 		public SubmoduleListItem(Submodule submodule)
 			: base(submodule)
 		{
 		}
 
-		#endregion
-
-		#region Event Handlers
-
 		private void OnDeleted(object sender, EventArgs e)
 		{
 			RemoveSafe();
 		}
-
-		#endregion
-
-		#region Overrides
 
 		protected override void OnListBoxAttached()
 		{
@@ -171,7 +153,5 @@ namespace gitter.Git.Gui.Controls
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
-
-		#endregion
 	}
 }

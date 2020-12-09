@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -99,8 +99,7 @@ namespace gitter.Redmine.Gui
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as IssueListItem;
-			if(item != null)
+			if(e.Item is IssueListItem item)
 			{
 				ShowIssueDetails(item.DataContext);
 			}

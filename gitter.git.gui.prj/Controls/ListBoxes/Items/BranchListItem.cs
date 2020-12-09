@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,13 +30,7 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="Branch"/> object.</summary>
 	public class BranchListItem : ReferenceListItemBase<Branch>
 	{
-		#region Static
-
 		private static readonly Bitmap ImgBranch = CachedResources.Bitmaps["ImgBranch"];
-
-		#endregion
-
-		#region .ctor
 
 		/// <summary>Create <see cref="BranchListItem"/>.</summary>
 		/// <param name="branch">Related <see cref="Branch"/>.</param>
@@ -47,10 +41,6 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(branch, nameof(branch));
 		}
 
-		#endregion
-
-		#region Event Handlers
-
 		private void OnRenamed(object sender, EventArgs e)
 		{
 			if(EnsureSortOrderSafe())
@@ -58,10 +48,6 @@ namespace gitter.Git.Gui.Controls
 				InvalidateSubItemSafe((int)ColumnId.Name);
 			}
 		}
-
-		#endregion
-
-		#region Overrides
 
 		protected override Image Image => ImgBranch;
 
@@ -86,7 +72,5 @@ namespace gitter.Git.Gui.Controls
 			Utility.MarkDropDownForAutoDispose(mnu);
 			return mnu;
 		}
-
-		#endregion
 	}
 }

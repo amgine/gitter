@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -39,7 +39,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Data
 
-		private readonly List<PointerBounds> _drawnPointers;
+		private readonly List<PointerBounds> _drawnPointers = new();
 
 		#endregion
 
@@ -50,7 +50,6 @@ namespace gitter.Git.Gui.Controls
 		public RevisionListItem(Revision revision)
 			: base(revision)
 		{
-			_drawnPointers = new List<PointerBounds>();
 		}
 
 		#endregion
@@ -96,7 +95,7 @@ namespace gitter.Git.Gui.Controls
 		protected override void OnListBoxDetached()
 		{
 			DataContext.References.Changed -= OnReferenceListChanged;
-			_drawnPointers.Clear();
+			_drawnPointers?.Clear();
 			base.OnListBoxDetached();
 		}
 
@@ -107,7 +106,7 @@ namespace gitter.Git.Gui.Controls
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			ContextMenuStrip menu = null;
+			var menu = default(ContextMenuStrip);
 			if(requestEventArgs.Column != null)
 			{
 				switch((ColumnId)requestEventArgs.SubItemId)
@@ -140,48 +139,47 @@ namespace gitter.Git.Gui.Controls
 		{
 			if(button == MouseButtons.Left)
 			{
-				for(int i = 0; i < _drawnPointers.Count; ++i)
+				if(_drawnPointers != null)
 				{
-					var rc = _drawnPointers[i].Bounds;
-					if(rc.X <= x && rc.Right > x)
+					for(int i = 0; i < _drawnPointers.Count; ++i)
 					{
-						if(_drawnPointers[i].RevisionPointer is Branch branch && !branch.IsRemote)
+						var rc = _drawnPointers[i].Bounds;
+						if(rc.X <= x && rc.Right > x)
 						{
-							int dx = _drawnPointers[i].Bounds.X - x - 1;
-							int w = 0;
-							using(var bmp = new Bitmap(1, 1))
-							using(var gx = Graphics.FromImage(bmp))
+							if(_drawnPointers[i].RevisionPointer is Branch branch && !branch.IsRemote)
 							{
+								int dx = _drawnPointers[i].Bounds.X - x - 1;
+								int w = 0;
 								w = GlobalBehavior.GraphStyle.MeasureBranch(
-									gx, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
+									GraphicsUtility.MeasurementGraphics, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
+								using(var dragImage = new DragImage(new Size(w, 21), -dx, y,
+									eargs => DrawBranchDragImage(branch, eargs.Graphics)))
+								{
+									dragImage.ShowDragVisual(ListBox);
+									ListBox.DoDragDrop(branch, DragDropEffects.None | DragDropEffects.Scroll | DragDropEffects.Move);
+								}
+								return;
 							}
-							using(var dragImage = new DragImage(new Size(w, 21), -dx, y,
-								eargs => DrawBranchDragImage(branch, eargs.Graphics)))
+							else
 							{
-								dragImage.ShowDragVisual(ListBox);
-								ListBox.DoDragDrop(branch, DragDropEffects.None | DragDropEffects.Scroll | DragDropEffects.Move);
-							}
-							return;
-						}
-						else
-						{
-							if(_drawnPointers[i].RevisionPointer is Tag tag && tag.TagType == TagType.Annotated)
-							{
-								//var message = tag.Message;
-								//if(!string.IsNullOrEmpty(message))
-								//{
-								//    var tt = new ToolTip()
-								//    {
-								//        AutomaticDelay = 0,
-								//        AutoPopDelay = 0,
-								//        IsBalloon = false,
-								//        UseAnimation = false,
-								//        UseFading = false,
-								//        InitialDelay = 0,
-								//        StripAmpersands = false,
-								//    };
-								//    tt.Show(message, ListBox);
-								//}
+								if(_drawnPointers[i].RevisionPointer is Tag tag && tag.TagType == TagType.Annotated)
+								{
+									//var message = tag.Message;
+									//if(!string.IsNullOrEmpty(message))
+									//{
+									//    var tt = new ToolTip()
+									//    {
+									//        AutomaticDelay = 0,
+									//        AutoPopDelay = 0,
+									//        IsBalloon = false,
+									//        UseAnimation = false,
+									//        UseFading = false,
+									//        InitialDelay = 0,
+									//        StripAmpersands = false,
+									//    };
+									//    tt.Show(message, ListBox);
+									//}
+								}
 							}
 						}
 					}
@@ -192,12 +190,15 @@ namespace gitter.Git.Gui.Controls
 
 		protected override int OnHitTest(int x, int y)
 		{
-			for(int i = 0; i < _drawnPointers.Count; ++i)
+			if(_drawnPointers != null)
 			{
-				var rc = _drawnPointers[i].Bounds;
-				if(rc.X <= x && rc.Right > x)
+				for(int i = 0; i < _drawnPointers.Count; ++i)
 				{
-					return PointerTagHitOffset + i;
+					var rc = _drawnPointers[i].Bounds;
+					if(rc.X <= x && rc.Right > x)
+					{
+						return PointerTagHitOffset + i;
+					}
 				}
 			}
 			return base.OnHitTest(x, y);
@@ -211,14 +212,10 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.Subject:
 					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext, Graph);
 				case ColumnId.Date:
-				case ColumnId.CommitDate:
-					return CommitDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.CommitDate);
 				case ColumnId.Committer:
 					return CommitterColumn.OnMeasureSubItem(measureEventArgs, DataContext.Committer);
 				case ColumnId.CommitterEmail:
 					return CommitterEmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Committer.Email);
-				case ColumnId.AuthorDate:
-					return AuthorDateColumn.OnMeasureSubItem(measureEventArgs, DataContext.AuthorDate);
 				case ColumnId.User:
 				case ColumnId.Author:
 					return AuthorColumn.OnMeasureSubItem(measureEventArgs, DataContext.Author);
@@ -237,18 +234,11 @@ namespace gitter.Git.Gui.Controls
 				case ColumnId.Subject:
 					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext, Graph, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
 					break;
-				case ColumnId.Date:
-				case ColumnId.CommitDate:
-					CommitDateColumn.OnPaintSubItem(paintEventArgs, DataContext.CommitDate);
-					break;
 				case ColumnId.Committer:
 					CommitterColumn.OnPaintSubItem(paintEventArgs, DataContext.Committer);
 					break;
 				case ColumnId.CommitterEmail:
 					CommitterEmailColumn.OnPaintSubItem(paintEventArgs, DataContext.Committer.Email);
-					break;
-				case ColumnId.AuthorDate:
-					AuthorDateColumn.OnPaintSubItem(paintEventArgs, DataContext.AuthorDate);
 					break;
 				case ColumnId.User:
 				case ColumnId.Author:

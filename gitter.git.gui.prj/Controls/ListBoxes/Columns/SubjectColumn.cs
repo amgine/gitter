@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -103,7 +103,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Align text and tags to graph column, if it is possible.</summary>
 		public bool AlignToGraph
 		{
-			get { return _alignToGraph; }
+			get => _alignToGraph;
 			set
 			{
 				if(_alignToGraph != value)
@@ -123,7 +123,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Draw tags for all local branches, pointing to revision.</summary>
 		public bool ShowLocalBranches
 		{
-			get { return _showLocalBranches; }
+			get => _showLocalBranches;
 			set
 			{
 				if(_showLocalBranches != value)
@@ -138,7 +138,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Draw tags for all remote branches, pointing to revision.</summary>
 		public bool ShowRemoteBranches
 		{
-			get { return _showRemoteBranches; }
+			get => _showRemoteBranches;
 			set
 			{
 				if(_showRemoteBranches != value)
@@ -153,7 +153,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Draw pointers for all tags, pointing to revision.</summary>
 		public bool ShowTags
 		{
-			get { return _showTags; }
+			get => _showTags;
 			set
 			{
 				if(_showTags != value)
@@ -168,7 +168,7 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Draw stash tag, if it is pointing to revision.</summary>
 		public bool ShowStash
 		{
-			get { return _showStash; }
+			get => _showStash;
 			set
 			{
 				if(_showStash != value)

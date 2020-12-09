@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -60,7 +60,8 @@ namespace gitter.Framework.Controls
 
 		public event EventHandler StyleChanged;
 
-		protected virtual void OnStyleChanged() => StyleChanged?.Invoke(this, EventArgs.Empty);
+		protected virtual void OnStyleChanged(EventArgs e)
+			=> StyleChanged?.Invoke(this, e);
 
 		#endregion
 
@@ -213,14 +214,9 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public int Index
-		{
-			get
-			{
-				if(!IsAttachedToListBox) return -1;
-				return ListBox.Columns.IndexOf(this);
-			}
-		}
+		public int Index => IsAttachedToListBox
+			? ListBox.Columns.IndexOf(this)
+			: -1;
 
 		public CustomListBoxColumn PreviousVisibleColumn
 		{
@@ -327,7 +323,7 @@ namespace gitter.Framework.Controls
 			ListBox.StyleChanged += OnListBoxStyleChanged;
 			if(ListBox.Style != GitterApplication.Style)
 			{
-				OnStyleChanged();
+				OnStyleChanged(EventArgs.Empty);
 			}
 		}
 
@@ -339,9 +335,7 @@ namespace gitter.Framework.Controls
 		}
 
 		private void OnListBoxStyleChanged(object sender, EventArgs e)
-		{
-			OnStyleChanged();
-		}
+			=> OnStyleChanged(EventArgs.Empty);
 
 		public virtual void AutoSize()
 		{
@@ -506,15 +500,11 @@ namespace gitter.Framework.Controls
 			if(comparison == null) return;
 			if(ListBox.Items.Comparison == comparison)
 			{
-				switch(ListBox.Items.SortOrder)
+				ListBox.Items.SortOrder = ListBox.Items.SortOrder switch
 				{
-					case SortOrder.Ascending:
-						ListBox.Items.SortOrder = SortOrder.Descending;
-						break;
-					default:
-						ListBox.Items.SortOrder = SortOrder.Ascending;
-						break;
-				}
+					SortOrder.Ascending => SortOrder.Descending,
+					_ => SortOrder.Ascending,
+				};
 			}
 			else
 			{
