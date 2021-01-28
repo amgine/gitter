@@ -28,10 +28,10 @@ namespace gitter.Framework.Services
 		private readonly Regex _regex;
 		private readonly string _expression;
 
-		public RegexHyperlinkExtractor(string regexp, string bugtrackerUrlPattern)
+		public RegexHyperlinkExtractor(string regexp, string urlPattern)
 		{
 			_regex      = new Regex(regexp);
-			_expression = bugtrackerUrlPattern;
+			_expression = urlPattern;
 		}
 
 		public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)

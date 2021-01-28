@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,13 +41,17 @@ namespace gitter.GitLab.Gui
 
 		public GitLabGuiProvider(Repository repository, GitLabServiceContext serviceContext)
 		{
+			const string AllowedProjectNameChars = @"\w\/\.";
+
 			Repository     = repository;
 			ServiceContext = serviceContext;
 
 			IssueUrlExtractor = new RegexHyperlinkExtractor(
-				@"(?<PROJ_NAME>[\w\/]+)\#(?<ID>\d+)", ServiceContext.ServiceUri + "%PROJ_NAME%/-/issues/%ID%");
+				regexp:     @"(?<PROJ_NAME>[" + AllowedProjectNameChars + @"]+)\#(?<ID>\d+)",
+				urlPattern: ServiceContext.ServiceUri + "%PROJ_NAME%/-/issues/%ID%");
 			MergeRequestUrlExtractor = new RegexHyperlinkExtractor(
-				@"(?<PROJ_NAME>[\w\/]+)\!(?<ID>\d+)", ServiceContext.ServiceUri + "%PROJ_NAME%/-/merge_requests/%ID%");
+				regexp:     @"(?<PROJ_NAME>[" + AllowedProjectNameChars + @"]+)\!(?<ID>\d+)",
+				urlPattern: ServiceContext.ServiceUri + "%PROJ_NAME%/-/merge_requests/%ID%");
 		}
 
 		public Repository Repository { get; }
