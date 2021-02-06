@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,8 +21,8 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Globalization;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Git.AccessLayer;
@@ -292,30 +292,8 @@ namespace gitter.Git
 
 		#region Refresh()
 
-		/// <summary>Synchronize cached information with actual data.</summary>
-		public void Refresh()
+		private void Refresh(IList<ConfigParameterData> config)
 		{
-			IList<ConfigParameterData> config;
-			switch(_configFile)
-			{
-				case ConfigFile.Other:
-					config = _configAccessor.QueryConfig.Invoke(
-						new QueryConfigParameters(_fileName));
-					break;
-				case ConfigFile.Repository:
-					config = _configAccessor.QueryConfig.Invoke(
-						new QueryConfigParameters());
-					break;
-				case ConfigFile.System:
-				case ConfigFile.User:
-					config = _configAccessor.QueryConfig.Invoke(
-						new QueryConfigParameters(_configFile));
-					break;
-				default:
-					throw new ApplicationException(
-						string.Format(CultureInfo.InvariantCulture, "Unknown ConfigFile value: {0}", _configFile));
-			}
-
 			lock(SyncRoot)
 			{
 				if(_repository != null)
@@ -347,19 +325,49 @@ namespace gitter.Git
 			}
 		}
 
+		private QueryConfigParameters GetQueryConfigParameters()
+			=> _configFile switch
+			{
+				ConfigFile.Other      => new QueryConfigParameters(_fileName),
+				ConfigFile.Repository => new QueryConfigParameters(),
+				ConfigFile.System     => new QueryConfigParameters(ConfigFile.System),
+				ConfigFile.User       => new QueryConfigParameters(ConfigFile.User),
+				_ => throw new ApplicationException($"Unknown {nameof(ConfigFile)} value: {_configFile}"),
+			};
+
+		/// <summary>Synchronize cached information with actual data.</summary>
+		public void Refresh()
+		{
+			var parameters = GetQueryConfigParameters();
+			var config = _configAccessor.QueryConfig
+				.Invoke(parameters);
+
+			Refresh(config);
+		}
+
+		/// <summary>Synchronize cached information with actual data.</summary>
+		public async Task RefreshAsync()
+		{
+			var parameters = GetQueryConfigParameters();
+			var config = await _configAccessor.QueryConfig
+				.InvokeAsync(parameters)
+				.ConfigureAwait(continueOnCapturedContext: false);
+
+			Refresh(config);
+		}
+
 		#endregion
 
 		#region IEnumerable<ConfigParameter>
 
-		public IEnumerator<ConfigParameter> GetEnumerator()
-		{
-			return _parameters.Values.GetEnumerator();
-		}
+		public Dictionary<string, ConfigParameter>.ValueCollection.Enumerator GetEnumerator()
+			=> _parameters.Values.GetEnumerator();
+
+		IEnumerator<ConfigParameter> IEnumerable<ConfigParameter>.GetEnumerator()
+			=> _parameters.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _parameters.Values.GetEnumerator();
-		}
+			=> _parameters.Values.GetEnumerator();
 
 		#endregion
 	}

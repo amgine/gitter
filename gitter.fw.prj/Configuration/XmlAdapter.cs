@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -43,15 +43,9 @@ namespace gitter.Framework.Configuration
 				_node.Push(_document.DocumentElement);
 			}
 
-			public XmlNode Node
-			{
-				get { return _node.Peek(); }
-			}
+			public XmlNode Node => _node.Peek();
 
-			public string CurrentName
-			{
-				get { return Node.Name; }
-			}
+			public string CurrentName => Node.Name;
 
 			public bool TryPush(string name)
 			{
@@ -131,15 +125,9 @@ namespace gitter.Framework.Configuration
 				_node.Push(document);
 			}
 
-			public XmlDocument Document
-			{
-				get { return _document; }
-			}
+			public XmlDocument Document => _document;
 
-			public XmlNode Node
-			{
-				get { return _node.Peek(); }
-			}
+			public XmlNode Node => _node.Peek();
 
 			public XmlNode Push(string name)
 			{
@@ -182,7 +170,6 @@ namespace gitter.Framework.Configuration
 				Node.AppendChild(node);
 			}
 		}
-
 
 		private static string EncodeTypeName(Type type)
 		{

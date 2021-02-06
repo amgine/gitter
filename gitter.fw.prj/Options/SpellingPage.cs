@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,10 +21,6 @@
 namespace gitter.Framework.Options
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Text;
 	using System.Globalization;
 	using System.Windows.Forms;
 
@@ -35,7 +31,7 @@ namespace gitter.Framework.Options
 
 	public partial class SpellingPage : PropertyPage, IExecutableDialog
 	{
-		public static readonly new Guid Guid = new Guid("ECAC85BA-3093-42E6-8142-EA4EEFC81D16");
+		public static readonly new Guid Guid = new("ECAC85BA-3093-42E6-8142-EA4EEFC81D16");
 
 		private const string NHunspellHomepage = @"http://nhunspell.sourceforge.net/";
 		private const string DownloadUrl = @"http://ftp.osuosl.org/pub/openoffice/contrib/dictionaries/";

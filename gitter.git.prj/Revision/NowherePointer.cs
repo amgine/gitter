@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -20,6 +20,8 @@
 
 namespace gitter.Git
 {
+	using System.Threading.Tasks;
+
 	internal sealed class NowherePointer : GitObject, IRevisionPointer
 	{
 		public NowherePointer(Repository repository, string name)
@@ -35,6 +37,8 @@ namespace gitter.Git
 		string IRevisionPointer.FullName => Pointer;
 
 		Revision IRevisionPointer.Dereference() => null;
+
+		Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(default(Revision));
 
 		bool IRevisionPointer.IsDeleted => false;
 

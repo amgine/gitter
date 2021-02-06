@@ -54,7 +54,7 @@ namespace gitter.GitLab.Gui
 		//	}
 		//}
 
-		protected override void OnPainSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
+		protected override void OnPaintSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
 		{
 			Assert.IsNotNull(subItemPaintEventArgs);
 

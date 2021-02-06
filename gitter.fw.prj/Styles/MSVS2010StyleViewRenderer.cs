@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -545,7 +545,7 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
-		#region  Viwe Host Header Rendering
+		#region  View Host Header Rendering
 
 		private static readonly StringFormat ViewHostHeaderTextFormat =
 			new StringFormat(StringFormat.GenericDefault)

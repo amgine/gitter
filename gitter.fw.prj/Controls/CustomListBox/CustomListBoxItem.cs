@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -43,11 +43,11 @@ namespace gitter.Framework.Controls
 		#region Data
 
 		private CustomListBoxItem _parent;
-		private bool _selected;
-		private bool _expanded;
-		private CheckedState _checkedState;
+		private bool _isSelected;
+		private bool _isExpanded;
+		private CheckedState _checkedState = CheckedState.Unchecked;
 		private bool _threeStateCheckboxMode;
-		private int _cachedLevel;
+		private int _cachedLevel = -1;
 
 		#endregion
 
@@ -56,14 +56,9 @@ namespace gitter.Framework.Controls
 		/// <summary>Initializes a new instance of the <see cref="CustomListBoxItem"/> class.</summary>
 		public CustomListBoxItem()
 		{
-			_cachedLevel = -1;
-
 			Items = new CustomListBoxItemsCollection(null, this);
-
-			_checkedState = CheckedState.Unchecked;
-
 			Items.Changing += OnItemsChanging;
-			Items.Changed += OnItemsChanged;
+			Items.Changed  += OnItemsChanged;
 		}
 
 		#endregion
@@ -93,7 +88,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Parent item. Null if item's root is listbox itself.</summary>
 		public CustomListBoxItem Parent
 		{
-			get { return _parent; }
+			get => _parent;
 			internal set
 			{
 				if(_parent != value)
@@ -108,14 +103,9 @@ namespace gitter.Framework.Controls
 		/// <summary>Gets the collection of items, containing this item.</summary>
 		/// <value>Collection of items, containing this item.</value>
 		private CustomListBoxItemsCollection ParentItems
-		{
-			get
-			{
-				return _parent == null
-					? ListBox?.Items
-					: _parent.Items;
-			}
-		}
+			=> _parent == null
+				? ListBox?.Items
+				: _parent.Items;
 
 		/// <summary>Child items.</summary>
 		public CustomListBoxItemsCollection Items { get; }
@@ -126,7 +116,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Current <see cref="CheckedState"/> of this item.</summary>
 		public CheckedState CheckedState
 		{
-			get { return _checkedState; }
+			get => _checkedState;
 			set
 			{
 				if(_checkedState != value)
@@ -141,15 +131,15 @@ namespace gitter.Framework.Controls
 		/// <summary>Returns true if item is CheckedState == <see cref="CheckedState.Checked"/>.</summary>
 		public bool IsChecked
 		{
-			get { return _checkedState == CheckedState.Checked; }
-			set { CheckedState = value ? CheckedState.Checked : CheckedState.Unchecked; }
+			get => _checkedState == CheckedState.Checked;
+			set => CheckedState = value ? CheckedState.Checked : CheckedState.Unchecked;
 		}
 
 		/// <summary>Item should operate as a three-state checkbox.</summary>
 		public bool ThreeStateCheckboxMode
 		{
-			get { return _threeStateCheckboxMode; }
-			set { _threeStateCheckboxMode = value; }
+			get => _threeStateCheckboxMode;
+			set => _threeStateCheckboxMode = value;
 		}
 
 		/// <summary>Item level.</summary>
@@ -168,10 +158,10 @@ namespace gitter.Framework.Controls
 		/// <summary>Checks if item is selected.</summary>
 		public bool IsSelected
 		{
-			get { return _selected; }
+			get => _isSelected;
 			set
 			{
-				if(_selected != value)
+				if(_isSelected != value)
 				{
 					if(IsAttachedToListBox && IsPresented)
 					{
@@ -187,7 +177,7 @@ namespace gitter.Framework.Controls
 					}
 					else
 					{
-						_selected = value;
+						_isSelected = value;
 					}
 				}
 			}
@@ -199,10 +189,10 @@ namespace gitter.Framework.Controls
 		/// <summary>Gets/sets item expanded state.</summary>
 		public bool IsExpanded
 		{
-			get { return _expanded; }
+			get => _isExpanded;
 			set
 			{
-				if(_expanded != value)
+				if(_isExpanded != value)
 				{
 					if(value)
 					{
@@ -219,10 +209,10 @@ namespace gitter.Framework.Controls
 		/// <summary>Gets/sets item collapsed state.</summary>
 		public bool IsCollapsed
 		{
-			get { return !_expanded; }
+			get => !_isExpanded;
 			set
 			{
-				if(_expanded == value)
+				if(_isExpanded == value)
 				{
 					if(value)
 					{
@@ -301,7 +291,7 @@ namespace gitter.Framework.Controls
 
 		internal void SetSelected(bool selected)
 		{
-			_selected = selected;
+			_isSelected = selected;
 		}
 
 		private static void _expand_all(CustomListBoxItem item)
@@ -331,9 +321,9 @@ namespace gitter.Framework.Controls
 		/// <summary>Expands this item.</summary>
 		public void Expand()
 		{
-			if(!_expanded)
+			if(!_isExpanded)
 			{
-				_expanded = true;
+				_isExpanded = true;
 				if(IsAttachedToListBox && IsPresented && Items.Count != 0)
 				{
 					ListBox.ExpandItem(this);
@@ -361,9 +351,9 @@ namespace gitter.Framework.Controls
 		/// <summary>Collapses this item.</summary>
 		public void Collapse()
 		{
-			if(_expanded)
+			if(_isExpanded)
 			{
-				_expanded = false;
+				_isExpanded = false;
 				if(IsAttachedToListBox && IsPresented && Items.Count != 0)
 				{
 					ListBox.CollapseItem(this);

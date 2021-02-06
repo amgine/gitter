@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,9 +26,7 @@ namespace gitter.Git.AccessLayer.CLI
 	sealed class BlameCommand : Command
 	{
 		public static ICommandArgument Porcelain()
-		{
-			return new CommandFlag("--porcelain");
-		}
+			=> new CommandFlag("--porcelain");
 
 		public BlameCommand()
 			: base("blame")

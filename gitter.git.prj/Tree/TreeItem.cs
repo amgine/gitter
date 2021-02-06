@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -71,7 +71,7 @@ namespace gitter.Git
 
 		public StagedStatus StagedStatus
 		{
-			get { return _stagedStatus; }
+			get => _stagedStatus;
 			internal set
 			{
 				Assert.IsFalse(IsDeleted);
@@ -86,7 +86,7 @@ namespace gitter.Git
 
 		public FileStatus Status
 		{
-			get { return _status; }
+			get => _status;
 			internal set
 			{
 				Assert.IsFalse(IsDeleted);
@@ -131,22 +131,15 @@ namespace gitter.Git
 		{
 			Verify.State.IsNotDeleted(this);
 
-			switch(_stagedStatus)
+			return _stagedStatus switch
 			{
-				case StagedStatus.Staged:
-					return Repository.Status.GetDiffSource(true, new[] { RelativePath });
-				case StagedStatus.Unstaged:
-					return Repository.Status.GetDiffSource(false, new[] { RelativePath });
-			}
-			return null;
+				StagedStatus.Staged   => Repository.Status.GetDiffSource(true,  new[] { RelativePath }),
+				StagedStatus.Unstaged => Repository.Status.GetDiffSource(false, new[] { RelativePath }),
+				_ => null,
+			};
 		}
 
-		public void Remove()
-		{
-			Remove(false);
-		}
-
-		public void Remove(bool force)
+		public void Remove(bool force = false)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -216,8 +209,8 @@ namespace gitter.Git
 
 		public TreeDirectory Parent
 		{
-			get { return _parent; }
-			internal set { _parent = value; }
+			get => _parent;
+			internal set => _parent = value;
 		}
 
 		public string FullPath
@@ -259,14 +252,9 @@ namespace gitter.Git
 			}
 		}
 
-		public string RelativePath
-		{
-			get { return _relativePath; }
-		}
+		public string RelativePath => _relativePath;
 
-		public override string ToString()
-		{
-			return _relativePath;
-		}
+		/// <inheritdoc/>
+		public override string ToString() => RelativePath;
 	}
 }

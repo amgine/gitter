@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -55,8 +55,8 @@ namespace gitter.Framework.CLI
 	public abstract class ProcessExecutor<TInput>
 		where TInput : class
 	{
-		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor&lt;TInput&gt;"/> class.</summary>
-		/// <param name="exeFileName">Path to exe file.</param>
+		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor{TInput}"/> class.</summary>
+		/// <param name="exeFileName">Path to executable file.</param>
 		public ProcessExecutor(string exeFileName)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(exeFileName, nameof(exeFileName));
@@ -86,7 +86,8 @@ namespace gitter.Framework.CLI
 			return process.ExitCode;
 		}
 
-		public async Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, Action<Process> cancellationMethod, CancellationToken cancellationToken)
+		public async Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver,
+			Action<Process> cancellationMethod, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(input, nameof(input));
 

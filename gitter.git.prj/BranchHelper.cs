@@ -24,23 +24,25 @@ namespace gitter.Git
 	{
 		public static string TryFormatDefaultLocalBranchName(IRevisionPointer revision)
 		{
-			if(revision is RemoteBranch branch)
+			switch(revision)
 			{
-				var branchName = branch.Name;
-				var remote = branch.Remote;
-				if(remote == null)
-				{
-					var remoteName = remote.Name;
-					if((branchName.Length > remoteName.Length + 1) && branchName.StartsWith(remoteName))
+				case RemoteBranch remoteBranch:
+					var branchName = remoteBranch.Name;
+					var remote     = remoteBranch.Remote;
+					if(remote != null)
 					{
-						return branchName.Substring(remoteName.Length + 1);
+						var remoteName = remote.Name;
+						if((branchName.Length > remoteName.Length + 1) && branchName.StartsWith(remoteName))
+						{
+							return branchName.Substring(remoteName.Length + 1);
+						}
 					}
-				}
-				var slashPos = branchName.IndexOf('/');
-				if(slashPos >= 0)
-				{
-					return branchName.Substring(slashPos + 1);
-				}
+					var slashPos = branchName.IndexOf('/');
+					if(slashPos >= 0)
+					{
+						return branchName.Substring(slashPos + 1);
+					}
+					break;
 			}
 			return string.Empty;
 		}

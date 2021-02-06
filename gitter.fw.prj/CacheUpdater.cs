@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -87,7 +87,7 @@ namespace gitter.Framework
 			IDictionary<string, TObject> dictionary,
 			Predicate<TObject> validateObject,
 			Predicate<TInfo> validateInfo,
-			IDictionary<string, TInfo> actualDictinary,
+			IDictionary<string, TInfo> actualDictionary,
 			Func<TInfo, TObject> factory,
 			Action<TObject, TInfo> updater,
 			Action<TObject> objectCreated,
@@ -109,7 +109,7 @@ namespace gitter.Framework
 				}
 			}
 
-			foreach(var info in actualDictinary.Values)
+			foreach(var info in actualDictionary.Values)
 			{
 				if(validateInfo == null || validateInfo(info))
 				{

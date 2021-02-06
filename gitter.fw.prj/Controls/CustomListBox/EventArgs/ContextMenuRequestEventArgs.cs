@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,52 +26,25 @@ namespace gitter.Framework.Controls
 
 	public class ContextMenuRequestEventArgs : EventArgs
 	{
-		#region Data
-
-		private readonly CustomListBoxColumn _column;
-		private readonly int _columnIndex;
-		private readonly int _x;
-		private readonly int _y;
-
-		#endregion
-
 		public ContextMenuRequestEventArgs(CustomListBoxColumn column, int columnIndex, int x, int y)
 		{
-			_column = column;
-			_columnIndex = columnIndex;
-			_x = x;
-			_y = y;
+			Column      = column;
+			ColumnIndex = columnIndex;
+			X           = x;
+			Y           = y;
 		}
 
-		public CustomListBoxColumn Column
-		{
-			get { return _column; }
-		}
+		public CustomListBoxColumn Column { get; }
 
-		public int ColumnIndex
-		{
-			get { return _columnIndex; }
-		}
+		public int ColumnIndex { get; }
 
-		public int SubItemId
-		{
-			get { return _column.Id; }
-		}
+		public int SubItemId => Column.Id;
 
-		public Point Location
-		{
-			get { return new Point(_x, _y); }
-		}
+		public Point Location => new Point(X, Y);
 
-		public int X
-		{
-			get { return _x; }
-		}
+		public int X { get; }
 
-		public int Y
-		{
-			get { return _y; }
-		}
+		public int Y { get; }
 
 		public ContextMenuStrip ContextMenu { get; set; }
 

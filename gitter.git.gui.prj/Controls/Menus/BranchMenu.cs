@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,31 +35,46 @@ namespace gitter.Git.Gui.Controls
 
 			Branch = branch;
 
+			AddViewItems();
+			Items.Add(new ToolStripSeparator()); // interactive section
+			AddActionItems();
+			Items.Add(new ToolStripSeparator());
+			AddCopyToClipboardItems();
+			Items.Add(new ToolStripSeparator());
+			AddCreateItems();
+		}
+
+		public BranchBase Branch { get; }
+
+		private void AddViewItems()
+		{
 			Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(Branch));
 			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(Branch));
+		}
 
-			Items.Add(new ToolStripSeparator()); // interactive section
-
+		private void AddActionItems()
+		{
 			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(Branch, "{0} '{1}'"));
 			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(Branch));
 			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(Branch));
 			Items.Add(GuiItemFactory.GetMergeItem<ToolStripMenuItem>(Branch));
-			if(!branch.IsRemote)
+			if(!Branch.IsRemote)
 			{
 				Items.Add(GuiItemFactory.GetRenameBranchItem<ToolStripMenuItem>((Branch)Branch, "{0}"));
 			}
 			Items.Add(GuiItemFactory.GetRemoveBranchItem<ToolStripMenuItem>(Branch));
-			if(!branch.IsRemote)
+			if(!Branch.IsRemote)
 			{
-				lock(branch.Repository.Remotes.SyncRoot)
+				var remotes = Branch.Repository.Remotes;
+				lock(remotes.SyncRoot)
 				{
-					if(branch.Repository.Remotes.Count != 0)
+					if(remotes.Count != 0)
 					{
 						Items.Add(new ToolStripSeparator());
 						var pushTo = new ToolStripMenuItem(Resources.StrPushTo, CachedResources.Bitmaps["ImgPush"]);
-						foreach(var remote in branch.Repository.Remotes)
+						foreach(var remote in remotes)
 						{
-							pushTo.DropDownItems.Add(GuiItemFactory.GetPushBranchToRemoteItem<ToolStripMenuItem>((Branch)branch, remote));
+							pushTo.DropDownItems.Add(GuiItemFactory.GetPushBranchToRemoteItem<ToolStripMenuItem>((Branch)Branch, remote));
 						}
 						Items.Add(pushTo);
 					}
@@ -69,21 +84,22 @@ namespace gitter.Git.Gui.Controls
 			{
 
 			}
-			Items.Add(new ToolStripSeparator()); // copy to clipboard section
+		}
 
+		private void AddCopyToClipboardItems()
+		{
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Branch.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Branch.FullName));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Branch.Revision.HashString));
-
+			var copyItems = item.DropDownItems;
+			copyItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Branch.Name));
+			copyItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Branch.FullName));
+			copyItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Branch.Revision.HashString));
 			Items.Add(item);
+		}
 
-			Items.Add(new ToolStripSeparator());
-
+		private void AddCreateItems()
+		{
 			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Branch));
 			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Branch));
 		}
-
-		public BranchBase Branch { get; }
 	}
 }

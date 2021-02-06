@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,7 +22,7 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	/// <summary>Parameters for <see cref="IBranchAccessor.ResetBranch"/> operation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.ResetBranch"/> operation.</summary>
 	public sealed class ResetBranchParameters
 	{
 		/// <summary>Create <see cref="ResetBranchParameters"/>.</summary>
@@ -42,7 +42,7 @@ namespace gitter.Git.AccessLayer
 		/// <summary>Branch to reset.</summary>
 		public string BranchName { get; set; }
 
-		/// <summary>New branch positiion.</summary>
+		/// <summary>New branch position.</summary>
 		public string Revision { get; set; }
 	}
 }

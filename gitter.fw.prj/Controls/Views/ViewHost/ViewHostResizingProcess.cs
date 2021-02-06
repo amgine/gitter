@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -29,7 +28,6 @@ namespace gitter.Framework.Controls
 	{
 		#region Data
 
-		private readonly ViewHost _viewHost;
 		private SplitterMarker _splitterMarker;
 		private bool _isActive;
 		private int _resizeOffset;
@@ -44,35 +42,29 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
-			_viewHost = viewHost;
+			ViewHost = viewHost;
 		}
 
 		#endregion
 
 		#region Properties
 
-		public ViewHost ViewHost
-		{
-			get { return _viewHost; }
-		}
+		public ViewHost ViewHost { get; }
 
-		public bool IsActive
-		{
-			get { return _isActive; }
-		}
+		public bool IsActive => _isActive;
 
 		#endregion
 
 		public bool Start(Point location)
 		{
 			Verify.State.IsFalse(IsActive);
-			Verify.State.IsTrue(_viewHost.Status == ViewHostStatus.AutoHide);
-			Verify.State.IsTrue(_viewHost.Visible);
+			Verify.State.IsTrue(ViewHost.Status == ViewHostStatus.AutoHide);
+			Verify.State.IsTrue(ViewHost.Visible);
 
 			_isActive = true;
-			var size = _viewHost.Size;
+			var size = ViewHost.Size;
 			Rectangle bounds;
-			var side = _viewHost.DockSide;
+			var side = ViewHost.DockSide;
 			var grid = side.Grid;
 			var rootCtlBounds = grid.RootControl.Bounds;
 			Orientation orientation;
@@ -117,7 +109,7 @@ namespace gitter.Framework.Controls
 				default:
 					throw new ApplicationException();
 			}
-			bounds.Location = _viewHost.PointToClient(bounds.Location);
+			bounds.Location = ViewHost.PointToClient(bounds.Location);
 			SpawnMarker(bounds, orientation);
 			return true;
 		}
@@ -126,7 +118,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.State.IsTrue(IsActive);
 
-			switch(_viewHost.DockSide.Orientation)
+			switch(ViewHost.DockSide.Orientation)
 			{
 				case Orientation.Vertical:
 					{
@@ -157,9 +149,9 @@ namespace gitter.Framework.Controls
 					}
 					break;
 				default:
-					throw new ApplicationException("Unexpected ViewDockSide.Orientation: " + _viewHost.DockSide.Orientation);
+					throw new ApplicationException("Unexpected ViewDockSide.Orientation: " + ViewHost.DockSide.Orientation);
 			}
-			location = _viewHost.PointToScreen(location);
+			location = ViewHost.PointToScreen(location);
 			_splitterMarker.Location = location;
 		}
 
@@ -169,7 +161,7 @@ namespace gitter.Framework.Controls
 
 			KillMarker();
 			_isActive = false;
-			switch(_viewHost.DockSide.Side)
+			switch(ViewHost.DockSide.Side)
 			{
 				case AnchorStyles.Left:
 					{
@@ -182,7 +174,7 @@ namespace gitter.Framework.Controls
 						{
 							x = _maximumPosition;
 						}
-						_viewHost.Width = x + ViewConstants.SideDockPanelBorderSize;
+						ViewHost.Width = x + ViewConstants.SideDockPanelBorderSize;
 					}
 					break;
 				case AnchorStyles.Top:
@@ -196,7 +188,7 @@ namespace gitter.Framework.Controls
 						{
 							y = _maximumPosition;
 						}
-						_viewHost.Height = y + ViewConstants.SideDockPanelBorderSize;
+						ViewHost.Height = y + ViewConstants.SideDockPanelBorderSize;
 					}
 					break;
 				case AnchorStyles.Right:
@@ -210,9 +202,9 @@ namespace gitter.Framework.Controls
 						{
 							x = _maximumPosition;
 						}
-						var w = _viewHost.Width - x;
-						var dw = _viewHost.Width - w;
-						 _viewHost.SetBounds(_viewHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
+						var w = ViewHost.Width - x;
+						var dw = ViewHost.Width - w;
+						 ViewHost.SetBounds(ViewHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
 					}
 					break;
 				case AnchorStyles.Bottom:
@@ -226,13 +218,13 @@ namespace gitter.Framework.Controls
 						{
 							y = _maximumPosition;
 						}
-						var h = _viewHost.Height - y;
-						var dh = _viewHost.Height - h;
-						_viewHost.SetBounds(0, _viewHost.Top + dh, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
+						var h = ViewHost.Height - y;
+						var dh = ViewHost.Height - h;
+						ViewHost.SetBounds(0, ViewHost.Top + dh, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
 					}
 					break;
 				default:
-					throw new ApplicationException("Unexpected ViewDockSide.Side: " + _viewHost.DockSide.Side);
+					throw new ApplicationException("Unexpected ViewDockSide.Side: " + ViewHost.DockSide.Side);
 			}
 		}
 

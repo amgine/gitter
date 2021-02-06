@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,28 +22,16 @@ namespace gitter.Framework.Options
 {
 	public sealed class SelectableColorCategory
 	{
-		private readonly string _id;
-		private readonly string _name;
-
 		public SelectableColorCategory(string id, string name)
 		{
-			_id = id;
-			_name = name;
+			Id   = id;
+			Name = name;
 		}
 
-		public string Id
-		{
-			get { return _id; }
-		}
+		public string Id { get; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		public override string ToString() => Name;
 	}
 }

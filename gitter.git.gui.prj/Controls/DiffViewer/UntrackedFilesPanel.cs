@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -148,22 +148,9 @@ namespace gitter.Git.Gui.Controls
 		{
 			if(x < 5 || x >= FlowControl.ContentArea.Width - 5) return -1;
 			y -= LineHeight;
-			if(y < 0)
-			{
-				return -1;
-			}
-			else
-			{
-				int id = y / LineHeight;
-				if(id >= _items.Length)
-				{
-					return -1;
-				}
-				else
-				{
-					return id;
-				}
-			}
+			if(y < 0) return -1;
+			int id = y / LineHeight;
+			return id < _items.Length ? id : -1;
 		}
 
 		protected override void OnMouseLeave()

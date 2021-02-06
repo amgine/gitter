@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,7 +27,7 @@ namespace gitter.Framework.Services
 	{
 		#region Data
 
-		private int _index;
+		private int _index = -1;
 
 		#endregion
 
@@ -43,7 +43,6 @@ namespace gitter.Framework.Services
 		/// <summary>Create <see cref="TrackingService"/>.</summary>
 		public TrackingService()
 		{
-			_index = -1;
 		}
 
 		/// <summary>Create <see cref="TrackingService"/>.</summary>
@@ -65,16 +64,10 @@ namespace gitter.Framework.Services
 		#region Properties
 
 		/// <summary>Index of currently hovered item.</summary>
-		public int Index
-		{
-			get { return _index; }
-		}
+		public int Index => _index;
 
 		/// <summary>Something is hovered.</summary>
-		public bool IsTracked
-		{
-			get { return _index != -1; }
-		}
+		public bool IsTracked => _index != -1;
 
 		#endregion
 
@@ -168,28 +161,16 @@ namespace gitter.Framework.Services
 		#region Properties
 
 		/// <summary>Index of currently tracked item.</summary>
-		public int Index
-		{
-			get { return _index; }
-		}
+		public int Index =>  _index;
 
 		/// <summary>Currently tracked item.</summary>
-		public T Item
-		{
-			get { return _item; }
-		}
+		public T Item => _item;
 
 		/// <summary>Tracked item part id.</summary>
-		public int PartId
-		{
-			get { return _partId; }
-		}
+		public int PartId => _partId;
 
 		/// <summary>Something is tracked.</summary>
-		public bool IsTracked
-		{
-			get { return _index != -1; }
-		}
+		public bool IsTracked => _index != -1;
 
 		#endregion
 

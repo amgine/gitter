@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,16 +22,16 @@ namespace gitter.Git
 {
 	public static class RepositoryNotifications
 	{
-		public static readonly object Checkout			= new();
-		public static readonly object SubmodulesChanged	= new();
-		public static readonly object RepositoryRemoved	= new();
-		public static readonly object ConfigUpdated		= new();
-		public static readonly object IndexUpdated		= new();
-		public static readonly object WorktreeUpdated	= new();
-		public static readonly object BranchChanged		= new();
-		public static readonly object TagChanged		= new();
-		public static readonly object StashChanged		= new();
-		public static readonly object RemoteRemoved		= new();
-		public static readonly object RemoteCreated		= new();
+		public static readonly object Checkout          = new();
+		public static readonly object SubmodulesChanged = new();
+		public static readonly object RepositoryRemoved = new();
+		public static readonly object ConfigUpdated     = new();
+		public static readonly object IndexUpdated      = new();
+		public static readonly object WorktreeUpdated   = new();
+		public static readonly object BranchChanged     = new();
+		public static readonly object TagChanged        = new();
+		public static readonly object StashChanged      = new();
+		public static readonly object RemoteRemoved     = new();
+		public static readonly object RemoteCreated     = new();
 	}
 }

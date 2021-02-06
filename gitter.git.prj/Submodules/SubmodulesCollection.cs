@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -188,7 +188,15 @@ namespace gitter.Git
 			return null;
 		}
 
-		public Submodule Create(string path, string url, string branch = default)
+		private static AddSubmoduleParameters GetAddSubmoduleParameters(string path, string url, string branch = default)
+			=> new AddSubmoduleParameters
+			{
+				Branch     = branch,
+				Path       = "./" + path,
+				Repository = url,
+			};
+
+		public Submodule Add(string path, string url, string branch = default)
 		{
 			Verify.Argument.IsNotNull(path, nameof(path));
 			Verify.Argument.IsNotNull(url, nameof(url));
@@ -197,22 +205,17 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.SubmodulesChanged))
 			{
+				try
+				{
+					var parameters = GetAddSubmoduleParameters(path, url, branch);
+					Repository.Accessor.AddSubmodule.Invoke(parameters);
+				}
+				finally
+				{
+					Repository.Status.Refresh();
+				}
 				lock(SyncRoot)
 				{
-					try
-					{
-						Repository.Accessor.AddSubmodule.Invoke(
-							new AddSubmoduleParameters()
-							{
-								Branch = branch,
-								Path = "./" + path,
-								Repository = url,
-							});
-					}
-					finally
-					{
-						Repository.Status.Refresh();
-					}
 					var submodule = new Submodule(Repository, path, path, url);
 					AddObject(submodule);
 					return submodule;
@@ -220,9 +223,78 @@ namespace gitter.Git
 			}
 		}
 
-		public void Refresh()
+		public async Task<Submodule> AddAsync(string path, string url, string branch = default)
+		{
+			Verify.Argument.IsNotNull(path, nameof(path));
+			Verify.Argument.IsNotNull(url, nameof(url));
+
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.SubmodulesChanged))
+			{
+				try
+				{
+					var parameters = GetAddSubmoduleParameters(path, url, branch);
+					await Repository.Accessor.AddSubmodule
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+				finally
+				{
+					await Repository.Status
+						.RefreshAsync()
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+				lock(SyncRoot)
+				{
+					var submodule = new Submodule(Repository, path, path, url);
+					AddObject(submodule);
+					return submodule;
+				}
+			}
+		}
+
+		private static Dictionary<string, SubmoduleData> ParseConfig(ConfigurationFile cfgFile)
 		{
 			var submodules = new Dictionary<string, SubmoduleData>();
+			foreach(var param in cfgFile)
+			{
+				if(param.Name.StartsWith("submodule."))
+				{
+					int p = param.Name.LastIndexOf('.', param.Name.Length - 1, param.Name.Length - "submodule.".Length);
+					if(p != -1 && p != param.Name.Length - 1)
+					{
+						var p3 = param.Name.Substring(p + 1);
+						bool valueIsPath = false;
+						bool valueIsUrl = false;
+						switch(p3)
+						{
+							case "path":
+								valueIsPath = true;
+								break;
+							case "url":
+								valueIsUrl = true;
+								break;
+							default:
+								continue;
+						}
+						var name = param.Name.Substring("submodule.".Length, p - "submodule.".Length);
+						if(!submodules.TryGetValue(name, out var info))
+						{
+							info = new SubmoduleData(name);
+							submodules.Add(name, info);
+						}
+						if(valueIsPath) info.Path = param.Value;
+						if(valueIsUrl)  info.Url  = param.Value;
+					}
+				}
+			}
+			return submodules;
+		}
+
+		public void Refresh()
+		{
+			var submodules = default(Dictionary<string, SubmoduleData>);
 			var cfg = Path.Combine(Repository.WorkingDirectory, GitConstants.SubmodulesConfigFile);
 			bool skipUpdate = false;
 			if(File.Exists(cfg))
@@ -238,50 +310,57 @@ namespace gitter.Git
 				}
 				if(cfgFile != null)
 				{
-					foreach(var param in cfgFile)
-					{
-						if(param.Name.StartsWith("submodule."))
-						{
-							int p = param.Name.LastIndexOf('.', param.Name.Length - 1, param.Name.Length - "submodule.".Length);
-							if(p != -1 && p != param.Name.Length - 1)
-							{
-								var p3 = param.Name.Substring(p + 1);
-								bool valueIsPath = false;
-								bool valueIsUrl = false;
-								switch(p3)
-								{
-									case "path":
-										valueIsPath = true;
-										break;
-									case "url":
-										valueIsUrl = true;
-										break;
-									default:
-										continue;
-								}
-								var name = param.Name.Substring("submodule.".Length, p - "submodule.".Length);
-								SubmoduleData info;
-								if(!submodules.TryGetValue(name, out info))
-								{
-									info = new SubmoduleData(name);
-									submodules.Add(name, info);
-								}
-								if(valueIsPath)
-								{
-									info.Path = param.Value;
-								}
-								if(valueIsUrl)
-								{
-									info.Url = param.Value;
-								}
-							}
-						}
-					}
+					submodules = ParseConfig(cfgFile);
 				}
 			}
 
 			if(!skipUpdate)
 			{
+				submodules ??= new();
+				lock(SyncRoot)
+				{
+					CacheUpdater.UpdateObjectDictionary<Submodule, SubmoduleData>(
+						ObjectStorage,
+						null,
+						null,
+						submodules,
+						submoduleData => ObjectFactories.CreateSubmodue(Repository, submoduleData),
+						ObjectFactories.UpdateSubmodule,
+						InvokeObjectAdded,
+						InvokeObjectRemoved,
+						true);
+				}
+			}
+		}
+
+		public async Task RefreshAsync()
+		{
+			var submodules = default(Dictionary<string, SubmoduleData>);
+			var cfg = Path.Combine(Repository.WorkingDirectory, GitConstants.SubmodulesConfigFile);
+			bool skipUpdate = false;
+			if(File.Exists(cfg))
+			{
+				var cfgFile = default(ConfigurationFile);
+				try
+				{
+					cfgFile = new ConfigurationFile(Repository, GitConstants.SubmodulesConfigFile, load: false);
+					await cfgFile
+						.RefreshAsync()
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+				catch(Exception exc) when(!exc.IsCritical())
+				{
+					skipUpdate = true;
+				}
+				if(cfgFile != null)
+				{
+					submodules = ParseConfig(cfgFile);
+				}
+			}
+
+			if(!skipUpdate)
+			{
+				submodules ??= new();
 				lock(SyncRoot)
 				{
 					CacheUpdater.UpdateObjectDictionary<Submodule, SubmoduleData>(

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,9 +27,9 @@ namespace gitter.Git
 	{
 		#region Data
 
-		private readonly List<TreeDirectory> _directories;
-		private readonly List<TreeFile> _files;
-		private readonly List<TreeCommit> _commits;
+		private readonly List<TreeDirectory> _directories = new();
+		private readonly List<TreeFile> _files = new();
+		private readonly List<TreeCommit> _commits = new();
 
 		#endregion
 
@@ -45,43 +45,28 @@ namespace gitter.Git
 		public event EventHandler<TreeCommitEventArgs> CommitDeleted;
 
 		private void InvokeDirectoryAdded(TreeDirectory folder)
-		{
-			DirectoryAdded?.Invoke(this, new TreeDirectoryEventArgs(folder));
-		}
+			=> DirectoryAdded?.Invoke(this, new TreeDirectoryEventArgs(folder));
 
 		private void OnDirectoryDeleted(TreeDirectory folder)
-		{
-			DirectoryDeleted?.Invoke(this, new TreeDirectoryEventArgs(folder));
-		}
+			=> DirectoryDeleted?.Invoke(this, new TreeDirectoryEventArgs(folder));
 
 		private void InvokeFileAdded(TreeFile file)
-		{
-			FileAdded?.Invoke(this, new TreeFileEventArgs(file));
-		}
+			=> FileAdded?.Invoke(this, new TreeFileEventArgs(file));
 
 		private void OnFileDeleted(TreeFile file)
-		{
-			FileDeleted?.Invoke(this, new TreeFileEventArgs(file));
-		}
+			=> FileDeleted?.Invoke(this, new TreeFileEventArgs(file));
 
 		private void OnCommitAdded(TreeCommit commit)
-		{
-			CommitAdded?.Invoke(this, new TreeCommitEventArgs(commit));
-		}
+			=> CommitAdded?.Invoke(this, new TreeCommitEventArgs(commit));
 
 		private void OnCommitDeleted(TreeCommit commit)
-		{
-			CommitDeleted?.Invoke(this, new TreeCommitEventArgs(commit));
-		}
+			=> CommitDeleted?.Invoke(this, new TreeCommitEventArgs(commit));
 
 		#endregion
 
 		public TreeDirectory(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
 			: base(repository, relativePath, parent, status, name)
 		{
-			_directories = new List<TreeDirectory>();
-			_files = new List<TreeFile>();
-			_commits = new List<TreeCommit>();
 		}
 
 		public TreeDirectory(Repository repository, string relativePath, TreeDirectory parent, string name)
@@ -165,9 +150,6 @@ namespace gitter.Git
 
 		public override TreeItemType ItemType => TreeItemType.Tree;
 
-		public bool IsEmpty
-		{
-			get { return _files.Count == 0 && _directories.Count == 0; }
-		}
+		public bool IsEmpty => _files.Count == 0 && _directories.Count == 0;
 	}
 }

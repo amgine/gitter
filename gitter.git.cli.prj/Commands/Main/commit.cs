@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,9 +31,7 @@ namespace gitter.Git.AccessLayer.CLI
 		///	told git about are not affected.
 		/// </summary>
 		public static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		/// <summary>
 		///	Used to amend the tip of the current branch. Prepare the tree object you would want to replace the latest
@@ -42,104 +40,66 @@ namespace gitter.Git.AccessLayer.CLI
 		///	if it was a merge, it will have the parents of the current tip as parents — so the current top commit is discarded. 
 		/// </summary>
 		public static ICommandArgument Amend()
-		{
-			return new CommandFlag("--amend");
-		}
+			=> new CommandFlag("--amend");
 
 		public static ICommandArgument ResetAuthor()
-		{
-			return new CommandFlag("--reset-author");
-		}
+			=> new CommandFlag("--reset-author");
 
 		public static ICommandArgument Author(string author)
-		{
-			return new CommandParameterValue("--author", author.SurroundWithDoubleQuotes(), '=');
-		}
+			=> new CommandParameterValue("--author", author.SurroundWithDoubleQuotes(), '=');
 
 		public static ICommandArgument Date(DateTime date)
-		{
-			return new CommandParameterValue("--date", ((int)(date - GitConstants.UnixEraStart).TotalSeconds).ToString(
+			=> new CommandParameterValue("--date", ((int)(date - GitConstants.UnixEraStart).TotalSeconds).ToString(
 				System.Globalization.CultureInfo.InvariantCulture), '=');
-		}
 
 		public static ICommandArgument Message(string message)
-		{
-			return new CommandParameterValue("--message", message.SurroundWithDoubleQuotes(), '=');
-		}
+			=> new CommandParameterValue("--message", message.SurroundWithDoubleQuotes(), '=');
 
 		/// <summary>
 		///	Take an existing commit object, and reuse the log message and the authorship information (including the timestamp)
 		///	when creating the commit.
 		/// </summary>
 		public static ICommandArgument ReuseMessage(string commit)
-		{
-			return new CommandParameterValue("--reuse-message", commit);
-		}
+			=> new CommandParameterValue("--reuse-message", commit);
 
 		public static ICommandArgument ReeditMessage(string commit)
-		{
-			return new CommandParameterValue("--reedit-message", commit);
-		}
+			=> new CommandParameterValue("--reedit-message", commit);
 
 		public static ICommandArgument File(string file)
-		{
-			return new CommandParameterValue("--file", file.AssureDoubleQuotes());
-		}
+			=> new CommandParameterValue("--file", file.AssureDoubleQuotes());
 
 		public static ICommandArgument Template(string file)
-		{
-			return new CommandParameterValue("--template", file);
-		}
+			=> new CommandParameterValue("--template", file);
 
 		public static ICommandArgument Only()
-		{
-			return new CommandFlag("--only");
-		}
+			=> new CommandFlag("--only");
 
 		public static ICommandArgument Include()
-		{
-			return new CommandFlag("--include");
-		}
+			=> new CommandFlag("--include");
 
 		public static ICommandArgument SignOff()
-		{
-			return CommandFlag.SignOff();
-		}
+			=> CommandFlag.SignOff();
 
 		public static ICommandArgument NoVerify()
-		{
-			return new CommandFlag("--no-verify");
-		}
+			=> new CommandFlag("--no-verify");
 
 		public static ICommandArgument AllowEmpty()
-		{
-			return new CommandFlag("--allow-empty");
-		}
+			=> new CommandFlag("--allow-empty");
 
 		public static ICommandArgument AllowEmptyMessage()
-		{
-			return new CommandFlag("--allow-empty-message");
-		}
+			=> new CommandFlag("--allow-empty-message");
 
 		public static ICommandArgument Edit()
-		{
-			return new CommandFlag("--edit");
-		}
+			=> new CommandFlag("--edit");
 
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public static ICommandArgument Quiet()
-		{
-			return CommandFlag.Quiet();
-		}
+			=> CommandFlag.Quiet();
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public CommitCommand()
 			: base("commit")

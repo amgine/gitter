@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,7 +32,7 @@ namespace gitter.Framework.Options
 	[ToolboxItem(false)]
 	public partial class ColorsPage : PropertyPage
 	{
-		public static readonly new Guid Guid = new Guid("AD2A7C07-6E10-4F0D-B471-F6DA58638660");
+		public static readonly new Guid Guid = new("AD2A7C07-6E10-4F0D-B471-F6DA58638660");
 
 		public ColorsPage()
 			: base(Guid)

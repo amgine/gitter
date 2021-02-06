@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -75,7 +75,8 @@ namespace gitter.Git
 
 		protected abstract Diff GetDiffCore(DiffOptions options);
 
-		protected abstract Task<Diff> GetDiffCoreAsync(DiffOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		protected abstract Task<Diff> GetDiffCoreAsync(DiffOptions options,
+			IProgress<OperationProgress> progress, CancellationToken cancellationToken);
 
 		public Diff GetDiff(DiffOptions options)
 		{
@@ -85,7 +86,8 @@ namespace gitter.Git
 			return GetDiffCore(options);
 		}
 
-		public async Task<Diff> GetDiffAsync(DiffOptions options, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		public async Task<Diff> GetDiffAsync(DiffOptions options,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 			Verify.State.IsFalse(IsDisposed, "Object is disposed.");

@@ -190,8 +190,14 @@ namespace gitter.Framework
 
 		public static void RemoveFromExplorerContextMenu()
 		{
-			using var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", writable: true);
-			key.DeleteSubKeyTree("gitter", false);
+			try
+			{
+				using var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", writable: true);
+				key.DeleteSubKeyTree("gitter", false);
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
+			}
 		}
 
 		public static void LoadFrom(Section section)

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,56 +27,34 @@ namespace gitter.Framework.Controls
 
 	public sealed class ViewButton
 	{
-		private static readonly Bitmap ImgMenu = Resources.ImgViewHostMenu;
-		private static readonly Bitmap ImgNormalize = Resources.ImgNormalize;
-		private static readonly Bitmap ImgMaximize = Resources.ImgMaximize;
-		private static readonly Bitmap ImgPin = Resources.ImgViewHostPin;
-		private static readonly Bitmap ImgClose = Resources.ImgViewHostClose;
-		private static readonly Bitmap ImgScrollLeft = Resources.ImgTabScrollLeft;
+		private static readonly Bitmap ImgMenu        = Resources.ImgViewHostMenu;
+		private static readonly Bitmap ImgNormalize   = Resources.ImgNormalize;
+		private static readonly Bitmap ImgMaximize    = Resources.ImgMaximize;
+		private static readonly Bitmap ImgPin         = Resources.ImgViewHostPin;
+		private static readonly Bitmap ImgClose       = Resources.ImgViewHostClose;
+		private static readonly Bitmap ImgScrollLeft  = Resources.ImgTabScrollLeft;
 		private static readonly Bitmap ImgScrollRight = Resources.ImgTabScrollRight;
-		private static readonly Bitmap ImgTabMenu = Resources.ImgTabMenu;
-		private static readonly Bitmap ImgTabMenuExt = Resources.ImgTabMenuExtends;
+		private static readonly Bitmap ImgTabMenu     = Resources.ImgTabMenu;
+		private static readonly Bitmap ImgTabMenuExt  = Resources.ImgTabMenuExtends;
 
 		internal ViewButton(int offset, ViewButtonType type)
 		{
 			Offset = offset;
 			Type = type;
-			switch(Type)
+			Image = Type switch
 			{
-				case ViewButtonType.Menu:
-					Image = ImgMenu;
-					break;
-				case ViewButtonType.Pin:
-					Image = ImgPin;
-					break;
-				case ViewButtonType.Unpin:
-					Image = ImgPin;
-					break;
-				case ViewButtonType.Normalize:
-					Image = ImgNormalize;
-					break;
-				case ViewButtonType.Maximize:
-					Image = ImgMaximize;
-					break;
-				case ViewButtonType.Close:
-					Image = ImgClose;
-					break;
-				case ViewButtonType.ScrollTabsLeft:
-					Image = ImgScrollLeft;
-					break;
-				case ViewButtonType.ScrollTabsRight:
-					Image = ImgScrollRight;
-					break;
-				case ViewButtonType.TabsMenu:
-					Image = ImgTabMenu;
-					break;
-				case ViewButtonType.TabsScrollMenu:
-					Image = ImgTabMenuExt;
-					break;
-				default:
-					Image = null;
-					break;
-			}
+				ViewButtonType.Menu            => ImgMenu,
+				ViewButtonType.Pin             => ImgPin,
+				ViewButtonType.Unpin           => ImgPin,
+				ViewButtonType.Normalize       => ImgNormalize,
+				ViewButtonType.Maximize        => ImgMaximize,
+				ViewButtonType.Close           => ImgClose,
+				ViewButtonType.ScrollTabsLeft  => ImgScrollLeft,
+				ViewButtonType.ScrollTabsRight => ImgScrollRight,
+				ViewButtonType.TabsMenu        => ImgTabMenu,
+				ViewButtonType.TabsScrollMenu  => ImgTabMenuExt,
+				_ => null,
+			};
 		}
 
 		public int Offset { get; }

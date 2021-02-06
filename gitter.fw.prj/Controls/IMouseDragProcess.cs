@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,7 +23,7 @@ namespace gitter.Framework.Controls
 	using System;
 	using System.Drawing;
 
-	/// <summary>Represents continious drag-by-mouse process.</summary>
+	/// <summary>Represents continuous drag-by-mouse process.</summary>
 	public interface IMouseDragProcess
 	{
 		/// <summary>Action is in process.</summary>
@@ -35,7 +35,7 @@ namespace gitter.Framework.Controls
 		bool Start(Point location);
 
 		/// <summary>Update process status.</summary>
-		/// <param name="location">Mouse cordinates.</param>
+		/// <param name="location">Mouse coordinates.</param>
 		void Update(Point location);
 
 		/// <summary>Perform action associated with this process and complete operation.</summary>

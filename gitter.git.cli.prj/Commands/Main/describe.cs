@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,54 +26,34 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class DescribeCommand : Command
 	{
 		public static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		public static ICommandArgument Always()
-		{
-			return new CommandFlag("--always");
-		}
+			=> new CommandFlag("--always");
 
 		public static ICommandArgument Tags()
-		{
-			return new CommandFlag("--tags");
-		}
+			=> new CommandFlag("--tags");
 
 		public static ICommandArgument Contains()
-		{
-			return new CommandFlag("--contains");
-		}
+			=> new CommandFlag("--contains");
 
 		public static ICommandArgument Abbrev(int n)
-		{
-			return new CommandParameterValue("--abbrev", n.ToString());
-		}
+			=> new CommandParameterValue("--abbrev", n.ToString());
 
 		public static ICommandArgument Candidates(int n)
-		{
-			return new CommandParameterValue("--candidates", n.ToString());
-		}
+			=> new CommandParameterValue("--candidates", n.ToString());
 
 		public static ICommandArgument ExactMatch()
-		{
-			return new CommandFlag("--exact-match");
-		}
+			=> new CommandFlag("--exact-match");
 
 		public static ICommandArgument Long()
-		{
-			return new CommandFlag("--long");
-		}
+			=> new CommandFlag("--long");
 
 		public static ICommandArgument Debug()
-		{
-			return new CommandFlag("--debug");
-		}
+			=> new CommandFlag("--debug");
 
 		public static ICommandArgument Match(string pattern)
-		{
-			return new CommandParameterValue("--match", pattern, ' ');
-		}
+			=> new CommandParameterValue("--match", pattern, ' ');
 
 		public DescribeCommand()
 			: base("describe")

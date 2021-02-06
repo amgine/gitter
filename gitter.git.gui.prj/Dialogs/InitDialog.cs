@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Framework.Mvc;
@@ -33,7 +34,7 @@ namespace gitter.Git.Gui.Dialogs
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class InitDialog : GitDialogBase, IExecutableDialog, IInitView
+	public partial class InitDialog : GitDialogBase, IExecutableDialog, IAsyncExecutableDialog, IInitView
 	{
 		#region Data
 
@@ -46,8 +47,6 @@ namespace gitter.Git.Gui.Dialogs
 		public InitDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
 			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
-
-			GitRepositoryProvider = gitRepositoryProvider;
 
 			InitializeComponent();
 			Localize();
@@ -71,8 +70,6 @@ namespace gitter.Git.Gui.Dialogs
 		#region Properties
 
 		protected override string ActionVerb => Resources.StrInit;
-
-		private IGitRepositoryProvider GitRepositoryProvider { get; }
 
 		public IUserInputSource<string> RepositoryPath { get; }
 
@@ -128,6 +125,8 @@ namespace gitter.Git.Gui.Dialogs
 		#region IExecutableDialog
 
 		public bool Execute() => _controller.TryInit();
+
+		public Task<bool> ExecuteAsync() => _controller.TryInitAsync();
 
 		#endregion
 	}

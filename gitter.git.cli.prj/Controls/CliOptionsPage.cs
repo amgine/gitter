@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -37,10 +37,10 @@ namespace gitter.Git
 	[ToolboxItem(false)]
 	public partial class CliOptionsPage : PropertyPage, IExecutableDialog
 	{
-		public static readonly new Guid Guid = new Guid("EF9DFCAC-FDD1-4B69-AD0E-3783035FA13C");
+		public static readonly new Guid Guid = new("EF9DFCAC-FDD1-4B69-AD0E-3783035FA13C");
 		private string _versionPath;
 
-		private MSysGitDownloader _downloader;
+		private GitDownloader _downloader;
 		private readonly GitCLI _gitCLI;
 
 		public CliOptionsPage(IGitAccessor gitAccessor)
@@ -122,25 +122,13 @@ namespace gitter.Git
 			}
 		}
 
-		private void RefreshLatestVersion()
+		private async void RefreshLatestVersion()
 		{
 			_btnDownload.Enabled = false;
 			_btnRefreshLatestVersion.Enabled = false;
 			_lblLatestVersionValue.Text = Resources.StrsSearching.AddEllipsis();
-			MSysGitDownloader.BeginCreate((ar) =>
-				{
-					_downloader = MSysGitDownloader.EndCreate(ar);
-					if(!Disposing && !IsDisposed)
-					{
-						try
-						{
-							BeginInvoke(new MethodInvoker(UpdateLatestVersion));
-						}
-						catch(Exception exc) when(!exc.IsCritical())
-						{
-						}
-					}
-				});
+			_downloader = await GitDownloader.CreateAsync();
+			UpdateLatestVersion();
 		}
 
 		private void UpdateLatestVersion()
@@ -254,12 +242,12 @@ namespace gitter.Git
 		{
 			try
 			{
-				ProgressForm.MonitorTaskAsModalWindow(this, "MSysGit Installation", _downloader.DownloadAndInstallAsync);
+				ProgressForm.MonitorTaskAsModalWindow(this, "Git Installation", _downloader.DownloadAndInstallAsync);
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
 				GitterApplication.MessageBoxService.Show(
-					this, exc.Message, "MSysGit Installation Failed", MessageBoxButton.Close, MessageBoxIcon.Error);
+					this, exc.Message, "Git Installation Failed", MessageBoxButton.Close, MessageBoxIcon.Error);
 				return;
 			}
 			var version = TryGetVersion();

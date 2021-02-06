@@ -24,7 +24,7 @@ namespace gitter.GitLab.Gui
 
 	public static class Guids
 	{
-		public static readonly Guid IssuesViewGuid =
-			new Guid("C12EB40B-C03A-4FD2-8AAA-F8A3856FDC54");
+		public static readonly Guid IssuesViewGuid    = new("C12EB40B-C03A-4FD2-8AAA-F8A3856FDC54");
+		public static readonly Guid PipelinesViewGuid = new("2AF62E52-B965-4499-931D-2C38052A6141");
 	}
 }

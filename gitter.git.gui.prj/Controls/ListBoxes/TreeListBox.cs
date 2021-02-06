@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -43,7 +43,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			Columns.Add(new NameColumn());
 			Columns.Add(new CustomListBoxColumn((int)ColumnId.Type, Resources.StrType) { Width = 50 });
-			Columns.Add(new CustomListBoxColumn((int)ColumnId.Size, Resources.StrSize) { Width = 50 });
+			Columns.Add(new CustomListBoxColumn((int)ColumnId.Size, Resources.StrSize) { Width = 75 });
 		}
 
 		public void SetTree(TreeDirectory root, TreeListBoxMode mode)
@@ -107,13 +107,12 @@ namespace gitter.Git.Gui.Controls
 		{
 			foreach(var item in items)
 			{
-				if(item is TreeDirectory dir && HasRevertableItems(dir))
+				switch(item)
 				{
-					return true;
-				}
-				if(item is TreeFile file && (file.Status == FileStatus.Removed || file.Status == FileStatus.Modified))
-				{
-					return true;
+					case TreeDirectory dir when HasRevertableItems(dir):
+						return true;
+					case TreeFile file when file.Status == FileStatus.Removed || file.Status == FileStatus.Modified:
+						return true;
 				}
 			}
 			return false;

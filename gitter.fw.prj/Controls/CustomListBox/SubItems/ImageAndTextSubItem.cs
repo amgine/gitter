@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -86,7 +86,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Subitem text.</summary>
 		public override string Text
 		{
-			get { return _text; }
+			get => _text;
 			set
 			{
 				_text = value;
@@ -97,7 +97,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Subitem image.</summary>
 		public override Image Image
 		{
-			get { return _image; }
+			get => _image;
 			set
 			{
 				if(_image != value)
@@ -111,7 +111,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Subitem overlay image.</summary>
 		public override Image OverlayImage
 		{
-			get { return _overlayImage; }
+			get => _overlayImage;
 			set
 			{
 				if(_overlayImage != value)

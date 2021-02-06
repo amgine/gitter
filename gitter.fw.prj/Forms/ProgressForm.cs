@@ -308,7 +308,7 @@ namespace gitter.Framework
 			}
 		}
 
-		/// <summary>Determines if action can be cancelled.</summary>
+		/// <summary>Determines if action can be canceled.</summary>
 		public bool CanCancel
 		{
 			get { return _canCancel; }
@@ -556,7 +556,7 @@ namespace gitter.Framework
 		}
 
 		/// <summary>
-		/// Notifies that action is completed or cancelled and monitor must be shut down.
+		/// Notifies that action is completed or canceled and monitor must be shut down.
 		/// </summary>
 		public void ProcessCompleted()
 		{

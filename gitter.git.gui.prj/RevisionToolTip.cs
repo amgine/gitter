@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -41,8 +41,8 @@ namespace gitter.Git.Gui
 
 		public Revision Revision
 		{
-			get { return _content.Revision; }
-			set { _content.Revision = value; }
+			get => _content.Revision;
+			set => _content.Revision = value;
 		}
 
 		protected override void OnPaint(DrawToolTipEventArgs e)

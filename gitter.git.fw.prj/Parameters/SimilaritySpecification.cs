@@ -20,10 +20,8 @@
 
 namespace gitter.Git.AccessLayer
 {
-	public struct SimilaritySpecification
+	public readonly struct SimilaritySpecification
 	{
-		#region .ctor
-
 		public SimilaritySpecification(bool isSpecified)
 		{
 			IsSpecified = isSpecified;
@@ -38,14 +36,8 @@ namespace gitter.Git.AccessLayer
 			Similarity  = similarity;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public bool IsSpecified { get; }
 
 		public double Similarity { get; }
-
-		#endregion
 	}
 }

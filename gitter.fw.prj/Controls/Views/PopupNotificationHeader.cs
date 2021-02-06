@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -79,10 +79,7 @@ namespace gitter.Framework.Controls
 				viewButtonSize);
 		}
 
-		public ViewButtons Buttons
-		{
-			get { return _buttons; }
-		}
+		public ViewButtons Buttons => _buttons;
 
 		protected override void OnResize(EventArgs e)
 		{

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -63,10 +63,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnAddParameterButtonClick(object sender, EventArgs e)
 		{
-			using(var dlg = new AddParameterDialog(_configView.WorkingEnvironment, _configView.Repository))
-			{
-				dlg.Run(_configView);
-			}
+			using var dlg = new AddParameterDialog(_configView.WorkingEnvironment, _configView.Repository);
+			dlg.Run(_configView);
 		}
 	}
 }

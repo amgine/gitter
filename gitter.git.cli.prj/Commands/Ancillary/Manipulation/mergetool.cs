@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,19 +27,13 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class MergeToolCommand : Command
 	{
 		public static ICommandArgument Tool(string tool)
-		{
-			return new CommandParameterValue("--tool", tool, '=');
-		}
+			=> new CommandParameterValue("--tool", tool, '=');
 
 		public static ICommandArgument Prompt()
-		{
-			return new CommandFlag("--prompt");
-		}
+			=> new CommandFlag("--prompt");
 
 		public static ICommandArgument NoPrompt()
-		{
-			return new CommandFlag("--no-prompt");
-		}
+			=> new CommandFlag("--no-prompt");
 
 		public MergeToolCommand()
 			: base("mergetool")

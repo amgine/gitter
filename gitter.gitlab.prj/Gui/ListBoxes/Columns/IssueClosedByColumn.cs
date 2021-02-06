@@ -58,14 +58,14 @@ namespace gitter.GitLab.Gui
 			return base.OnMeasureSubItem(measureEventArgs);
 		}
 
-		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 			if(TryGetContent(paintEventArgs.Item, out var value))
 			{
 				paintEventArgs.PaintText(value);
 				return;
 			}
-			base.OnPainSubItem(paintEventArgs);
+			base.OnPaintSubItem(paintEventArgs);
 		}
 	}
 }

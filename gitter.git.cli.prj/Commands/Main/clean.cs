@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,61 +29,45 @@ namespace gitter.Git.AccessLayer.CLI
 		/// If the git configuration variable clean.requireForce is not set to false, git clean will refuse to run unless given -f or -n.
 		/// </summary>
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			=> new CommandFlag("--force");
 
 		/// <summary>
 		/// Remove untracked directories in addition to untracked files. If an untracked directory is managed by a different git
 		/// repository, it is not removed by default. Use -f option twice if you really want to remove such a directory.
 		/// </summary>
 		public static ICommandArgument Directories()
-		{
-			return new CommandFlag("-d");
-		}
+			=> new CommandFlag("-d");
 
 		/// <summary>Be quiet, only report errors, but not the files that are successfully removed.</summary>
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("--quiet");
-		}
+			=> new CommandFlag("--quiet");
 
 		/// <summary>Don't actually remove anything, just show what would be done.</summary>
 		public static ICommandArgument DryRun()
-		{
-			return new CommandFlag("--dry-run");
-		}
+			=> new CommandFlag("--dry-run");
 
 		/// <summary>
 		/// Specify special exceptions to not be cleaned. Each &lt;pattern&gt; is the same form as in $GIT_DIR/info/excludes
 		/// and this option can be given multiple times.
 		/// </summary>
 		public static ICommandArgument Exclude(string pattern)
-		{
-			return new CommandParameterValue("--exclude", pattern, '=');
-		}
+			=> new CommandParameterValue("--exclude", pattern, '=');
 
 		/// <summary>
 		/// Don't use the ignore rules. This allows removing all untracked files, including build products.
 		/// This can be used (possibly in conjunction with git reset) to create a pristine working directory to test a clean build.
 		/// </summary>
 		public static ICommandArgument IncludeIgnored()
-		{
-			return new CommandFlag("-x");
-		}
+			=> new CommandFlag("-x");
 
 		/// <summary>
 		/// Remove only files ignored by git. This may be useful to rebuild everything from scratch, but keep manually created files.
 		/// </summary>
 		public static ICommandArgument ExcludeUntracked()
-		{
-			return new CommandFlag("-X");
-		}
+			=> new CommandFlag("-X");
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public CleanCommand()
 			: base("clean")

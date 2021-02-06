@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,98 +27,60 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class MergeCommand : Command
 	{
 		public static ICommandArgument Stat()
-		{
-			return new CommandFlag("--stat");
-		}
+			=> new CommandFlag("--stat");
 
 		public static ICommandArgument NoStat()
-		{
-			return new CommandFlag("--no-stat");
-		}
+			=> new CommandFlag("--no-stat");
 
 		public static ICommandArgument Log()
-		{
-			return new CommandFlag("--log");
-		}
+			=> new CommandFlag("--log");
 
 		public static ICommandArgument NoLog()
-		{
-			return new CommandFlag("--no-log");
-		}
+			=> new CommandFlag("--no-log");
 
 		public static ICommandArgument Commit()
-		{
-			return new CommandFlag("--commit");
-		}
+			=> new CommandFlag("--commit");
 
 		public static ICommandArgument NoCommit()
-		{
-			return new CommandFlag("--no-commit");
-		}
+			=> new CommandFlag("--no-commit");
 
 		public static ICommandArgument Squash()
-		{
-			return new CommandFlag("--squash");
-		}
+			=> new CommandFlag("--squash");
 
 		public static ICommandArgument NoSquash()
-		{
-			return new CommandFlag("--no-squash");
-		}
+			=> new CommandFlag("--no-squash");
 
 		public static ICommandArgument FastForward()
-		{
-			return new CommandFlag("--ff");
-		}
+			=> new CommandFlag("--ff");
 
 		public static ICommandArgument NoFastForward()
-		{
-			return new CommandFlag("--no-ff");
-		}
+			=> new CommandFlag("--no-ff");
 
 		public static ICommandArgument Message(string msg)
-		{
-			return new CommandParameterValue("-m", "\"" + msg + "\"", ' ');
-		}
+			=> new CommandParameterValue("-m", "\"" + msg + "\"", ' ');
 
 		public static ICommandArgument Strategy(string strategy)
-		{
-			return new CommandParameterValue("--strategy", strategy, '=');
-		}
+			=> new CommandParameterValue("--strategy", strategy, '=');
 
 		public static ICommandArgument Strategy(MergeStrategy strategy)
-		{
-			switch(strategy)
+			=> strategy switch
 			{
-				case MergeStrategy.Octopus:
-					return new CommandParameterValue("--strategy", "octopus", '=');
-				case MergeStrategy.Ours:
-					return new CommandParameterValue("--strategy", "ours", '=');
-				case MergeStrategy.Recursive:
-					return new CommandParameterValue("--strategy", "recursive", '=');
-				case MergeStrategy.Resolve:
-					return new CommandParameterValue("--strategy", "resolve", '=');
-				case MergeStrategy.Subtree:
-					return new CommandParameterValue("--strategy", "subtree", '=');
-				default:
-					return null;
-			}
-		}
+				MergeStrategy.Octopus   => new CommandParameterValue("--strategy", "octopus", '='),
+				MergeStrategy.Ours      => new CommandParameterValue("--strategy", "ours", '='),
+				MergeStrategy.Recursive => new CommandParameterValue("--strategy", "recursive", '='),
+				MergeStrategy.Resolve   => new CommandParameterValue("--strategy", "resolve", '='),
+				MergeStrategy.Subtree   => new CommandParameterValue("--strategy", "subtree", '='),
+				_ => null,
+			};
 
 		public static ICommandArgument StrategyOption(string option)
-		{
-			return new CommandParameterValue("--strategy-option", option, '=');
-		}
+			=> new CommandParameterValue("--strategy-option", option, '=');
 
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("--quiet");
-		}
+			=> new CommandFlag("--quiet");
 
 		public static ICommandArgument Verbose()
-		{
-			return new CommandFlag("--verbose");
-		}
+			=> new CommandFlag("--verbose");
 
 		public MergeCommand()
 			: base("merge")

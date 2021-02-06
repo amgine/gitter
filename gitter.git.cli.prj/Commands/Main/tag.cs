@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,59 +26,37 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class TagCommand : Command
 	{
 		public static ICommandArgument Annotate()
-		{
-			return new CommandFlag("-a");
-		}
+			=> new CommandFlag("-a");
 
 		public static ICommandArgument SignByEmail()
-		{
-			return new CommandFlag("-s");
-		}
+			=> new CommandFlag("-s");
 
 		public static ICommandArgument Message(string message)
-		{
-			return new CommandParameterValue("-m", "\"" + message + "\"", ' ');
-		}
+			=> new CommandParameterValue("-m", "\"" + message + "\"", ' ');
 
 		public static ICommandArgument MessageFromFile(string filename)
-		{
-			return new CommandParameterValue("-F", filename, ' ');
-		}
+			=> new CommandParameterValue("-F", filename, ' ');
 
 		public static ICommandArgument SignByKey(string keyid)
-		{
-			return new CommandParameterValue("-u", keyid, ' ');
-		}
+			=> new CommandParameterValue("-u", keyid, ' ');
 
 		public static ICommandArgument Verify()
-		{
-			return new CommandFlag("-v");
-		}
+			=> new CommandFlag("-v");
 
 		public static ICommandArgument List()
-		{
-			return new CommandFlag("-l");
-		}
+			=> new CommandFlag("-l");
 
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("-f");
-		}
+			=> new CommandFlag("-f");
 
 		public static ICommandArgument List(string pattern)
-		{
-			return new CommandParameterValue("-l", pattern, ' ');
-		}
+			=> new CommandParameterValue("-l", pattern, ' ');
 
 		public static ICommandArgument ReplaceExisting()
-		{
-			return new CommandFlag("-f");
-		}
+			=> new CommandFlag("-f");
 
 		public static ICommandArgument Delete()
-		{
-			return new CommandFlag("-d");
-		}
+			=> new CommandFlag("-d");
 
 		public TagCommand()
 			: base("tag")

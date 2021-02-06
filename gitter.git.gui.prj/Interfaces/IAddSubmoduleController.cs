@@ -20,10 +20,14 @@
 
 namespace gitter.Git.Gui.Interfaces
 {
+	using System.Threading.Tasks;
+
 	using gitter.Framework.Mvc;
 
 	interface IAddSubmoduleController : IViewController<IAddSubmoduleView>
 	{
 		bool TryAddSubmodule();
+
+		Task<bool> TryAddSubmoduleAsync();
 	}
 }

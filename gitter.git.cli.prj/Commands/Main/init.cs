@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,24 +26,16 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class InitCommand : Command
 	{
 		public static ICommandArgument Template(string template)
-		{
-			return new CommandParameterValue("--template", template, '=');
-		}
+			=> new CommandParameterValue("--template", template, '=');
 
 		public static ICommandArgument Shared(string permissions)
-		{
-			return new CommandParameterValue("--shared", permissions, '=');
-		}
+			=> new CommandParameterValue("--shared", permissions, '=');
 
 		public static ICommandArgument Bare()
-		{
-			return new CommandFlag("--bare");
-		}
+			=> new CommandFlag("--bare");
 
 		public static ICommandArgument Quiet()
-		{
-			return CommandFlag.Quiet();
-		}
+			=> CommandFlag.Quiet();
 
 		public InitCommand()
 			: base("init")

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,7 +31,7 @@ namespace gitter.Framework.Services
 	{
 		#region Data
 
-		private readonly Dictionary<string, bool> _cache;
+		private static readonly SpellcheckerCache _cache = new();
 		private readonly TextBox _textBox;
 		private readonly List<Substring> _errors;
 		private bool _enabled;
@@ -49,7 +49,6 @@ namespace gitter.Framework.Services
 			Verify.Argument.IsNotNull(textBox, nameof(textBox));
 
 			_textBox = textBox;
-			_cache = new Dictionary<string, bool>();
 			_errors = new List<Substring>();
 			Enabled = enable;
 		}
@@ -57,7 +56,7 @@ namespace gitter.Framework.Services
 		/// <summary>Enable spell checking.</summary>
 		public bool Enabled
 		{
-			get { return _enabled; }
+			get => _enabled;
 			set
 			{
 				if(_enabled != value)
@@ -97,88 +96,93 @@ namespace gitter.Framework.Services
 		}
 
 		protected override void WndProc(ref Message m)  
-		{  
-			switch (m.Msg)  
-			{  
-				case 15:
-					_textBox.Invalidate();  
-					base.WndProc(ref m);  
-					PaintErrors();  
-					break;  
-				default:  
-					base.WndProc(ref m);  
-					break;  
-			}  
+		{
+			if(SpellingService.Enabled)
+			{
+				switch((Native.WM)m.Msg)
+				{
+					case Native.WM.PAINT:
+						_textBox.Invalidate();
+						base.WndProc(ref m);
+						PaintErrors();
+						break;
+					default:
+						base.WndProc(ref m);
+						break;
+				}
+			}
+		}
+
+		private Graphics GetGraphics()
+		{
+			if(_bitmap != null && _bitmap.Size != _textBox.Size)
+			{
+				if(_bufferGraphics != null)
+				{
+					_bufferGraphics.Dispose();
+					_bufferGraphics = null;
+				}
+				_bitmap.Dispose();
+				_bitmap = null;
+			}
+			if(_bitmap == null)
+			{
+				if(_bufferGraphics != null)
+				{
+					_bufferGraphics.Dispose();
+					_bufferGraphics = null;
+				}
+				_bitmap = new Bitmap(_textBox.Width, _textBox.Height);
+			}
+			if(_bufferGraphics == null)
+			{
+				_bufferGraphics = Graphics.FromImage(_bitmap);
+				_bufferGraphics.Clip = new Region(_textBox.ClientRectangle);
+			}
+			return _bufferGraphics;
 		}
 
 		private void PaintErrors()
 		{
-			if(SpellingService.Enabled && _errors.Count != 0)
+			if(!SpellingService.Enabled || _errors.Count == 0) return;
+
+			var graphics = GetGraphics();
+			graphics.Clear(Color.Transparent);
+			using(var pen = new Pen(Color.Red)
+				{
+					Width = 2,
+					DashStyle = DashStyle.Dash,
+				})
 			{
-				if(_bitmap != null && _bitmap.Size != _textBox.Size)
+				for(int i = 0; i < _errors.Count; ++i)
 				{
-					if(_bufferGraphics != null)
+					var err   = _errors[i];
+					int line1 = _textBox.GetLineFromCharIndex(err.Start);
+					int line2 = _textBox.GetLineFromCharIndex(err.End);
+					var pos1  = _textBox.GetPositionFromCharIndex(err.Start);
+					var pos2  = _textBox.GetPositionFromCharIndex(err.End);
+					if(line1 != line2)
 					{
-						_bufferGraphics.Dispose();
-						_bufferGraphics = null;
+						pos2.X += 6;
+						pos1.Y += 15;
+						pos2.Y = pos1.Y;
+						pos2.X = _textBox.ClientSize.Width;
 					}
-					_bitmap.Dispose();
-					_bitmap = null;
-				}
-				if(_bitmap == null)
-				{
-					if(_bufferGraphics != null)
+					else
 					{
-						_bufferGraphics.Dispose();
-						_bufferGraphics = null;
+						pos2.X += 6;
+						pos1.Y += 15;
+						pos2.Y += 15;
 					}
-					_bitmap = new Bitmap(_textBox.Width, _textBox.Height);
+					graphics.DrawLine(pen, pos1, pos2);
 				}
-				if(_bufferGraphics == null)
-				{
-					_bufferGraphics = Graphics.FromImage(_bitmap);
-					_bufferGraphics.Clip = new Region(_textBox.ClientRectangle);
-				}
-				_bufferGraphics.Clear(Color.Transparent);
-				using(var pen = new Pen(Color.Red)
-					{
-						Width = 2,
-						DashStyle = DashStyle.Dash,
-					})
-				{
-					for(int i = 0; i < _errors.Count; ++i)
-					{
-						var err = _errors[i];
-						int line1 = _textBox.GetLineFromCharIndex(err.Start);
-						int line2 = _textBox.GetLineFromCharIndex(err.End);
-						var pos1 = _textBox.GetPositionFromCharIndex(err.Start);
-						var pos2 = _textBox.GetPositionFromCharIndex(err.End);
-						if(line1 != line2)
-						{
-							pos2.X += 6;
-							pos1.Y += 15;
-							pos2.Y = pos1.Y;
-							pos2.X = _textBox.ClientSize.Width;
-						}
-						else
-						{
-							pos2.X += 6;
-							pos1.Y += 15;
-							pos2.Y += 15;
-						}
-						_bufferGraphics.DrawLine(pen, pos1, pos2);
-					}
-				}
-				_textBoxGraphics.DrawImageUnscaled(_bitmap, 0, 0);
 			}
+			_textBoxGraphics.DrawImageUnscaled(_bitmap, 0, 0);
 		}
 
 		private void OnSizeChanged(object sender, EventArgs e)
 		{
-			if(_textBoxGraphics != null)
-			{
-				_textBoxGraphics.Dispose();
-			}
+			_textBoxGraphics?.Dispose();
 			_textBoxGraphics = Graphics.FromHwnd(_textBox.Handle);
 		}
 
@@ -192,11 +196,10 @@ namespace gitter.Framework.Services
 
 		private bool SpellCheck(string word)
 		{
-			bool res;
-			if(!_cache.TryGetValue(word, out res))
+			if(!_cache.TryGetResult(word, out var res))
 			{
 				res = SpellingService.Spell(word);
-				_cache.Add(word, res);
+				_cache.CacheResult(word, res);
 			}
 			return res;
 		}
@@ -211,8 +214,7 @@ namespace gitter.Framework.Services
 				var c = text[i];
 				if(char.IsLetter(c) || c == '\'')
 				{
-					if(start == -1)
-						start = i;
+					if(start == -1) start = i;
 				}
 				else
 				{
@@ -221,7 +223,9 @@ namespace gitter.Framework.Services
 						var word = text.GetSubstring(start, i - start);
 						start = -1;
 						if(!SpellCheck(word))
+						{
 							_errors.Add(word);
+						}
 					}
 				}
 			}
@@ -243,7 +247,6 @@ namespace gitter.Framework.Services
 				_textBox.TextChanged -= OnTextChanged;
 				_textBox.SizeChanged -= OnSizeChanged;
 			}
-			_cache.Clear();
 			ReleaseHandle();
 			if(_textBoxGraphics != null)
 			{

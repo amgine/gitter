@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,15 +32,9 @@ namespace gitter.Framework.Controls
 	{
 		#region Static
 
-		private static readonly LinkedList<ViewHost> _viewHosts;
+		private static readonly LinkedList<ViewHost> _viewHosts = new();
 
 		public static IEnumerable<ViewHost> ViewHosts => _viewHosts;
-
-		/// <summary>Initializes the <see cref="ViewHost"/> class.</summary>
-		static ViewHost()
-		{
-			_viewHosts = new LinkedList<ViewHost>();
-		}
 
 		#endregion
 
@@ -71,36 +65,36 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object ActiveViewChangedEvent = new object();
+		private static readonly object ActiveViewChangedEvent = new();
 		/// <summary>Occurs when active view changes.</summary>
 		public event EventHandler ActiveViewChanged
 		{
-			add { Events.AddHandler(ActiveViewChangedEvent, value); }
-			remove { Events.RemoveHandler(ActiveViewChangedEvent, value); }
+			add    => Events.AddHandler    (ActiveViewChangedEvent, value);
+			remove => Events.RemoveHandler (ActiveViewChangedEvent, value);
 		}
 
-		private static readonly object StatusChangedEvent = new object();
+		private static readonly object StatusChangedEvent = new();
 		/// <summary>Occurs when status changes.</summary>
 		public event EventHandler StatusChanged
 		{
-			add { Events.AddHandler(StatusChangedEvent, value); }
-			remove { Events.RemoveHandler(StatusChangedEvent, value); }
+			add    => Events.AddHandler    (StatusChangedEvent, value);
+			remove => Events.RemoveHandler (StatusChangedEvent, value);
 		}
 
-		private static readonly object ViewAddedEvent = new object();
+		private static readonly object ViewAddedEvent = new();
 		/// <summary>Occurs when view is added to this host.</summary>
 		public event EventHandler<ViewEventArgs> ViewAdded
 		{
-			add { Events.AddHandler(ViewAddedEvent, value); }
-			remove { Events.RemoveHandler(ViewAddedEvent, value); }
+			add    => Events.AddHandler    (ViewAddedEvent, value);
+			remove => Events.RemoveHandler (ViewAddedEvent, value);
 		}
 
-		private static readonly object ViewRemovedEvent = new object();
+		private static readonly object ViewRemovedEvent = new();
 		/// <summary>Occurs when view is removed from this host.</summary>
 		public event EventHandler<ViewEventArgs> ViewRemoved
 		{
-			add { Events.AddHandler(ViewRemovedEvent, value); }
-			remove { Events.RemoveHandler(ViewRemovedEvent, value); }
+			add    => Events.AddHandler    (ViewRemovedEvent, value);
+			remove => Events.RemoveHandler (ViewRemovedEvent, value);
 		}
 
 		#endregion
@@ -1312,7 +1306,7 @@ namespace gitter.Framework.Controls
 								}
 								else
 								{
-									throw new ApplicationException("Unexpeceted ViewHost.Parent: " + parent);
+									throw new ApplicationException("Unexpected ViewHost.Parent: " + parent);
 								}
 							}
 							finally
@@ -1395,7 +1389,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Undock and go floating.</summary>
-		/// <param name="parent">Perent form.</param>
+		/// <param name="parent">Parent form.</param>
 		/// <returns>Floating form.</returns>
 		public Form GoFloatingMode(IWin32Window parent)
 		{

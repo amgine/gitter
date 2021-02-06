@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -50,7 +50,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Subitem font.</summary>
 		public Font Font
 		{
-			get { return _font; }
+			get => _font;
 			set
 			{
 				if(_font != value)
@@ -64,7 +64,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Text brush.</summary>
 		public Brush TextBrush
 		{
-			get { return _textBrush; }
+			get => _textBrush;
 			set
 			{
 				if(_textBrush != value)
@@ -78,7 +78,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Horizontal text alignment.</summary>
 		public StringAlignment? TextAlignment
 		{
-			get { return _alignment; }
+			get => _alignment;
 			set
 			{
 				if(_alignment != value)
@@ -116,10 +116,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="BaseTextSubItem"/>.</summary>
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="BaseTextSubItem"/>.</returns>
-		public override string ToString()
-		{
-			return Text;
-		}
+		public override string ToString() => Text;
 
 		#endregion
 	}

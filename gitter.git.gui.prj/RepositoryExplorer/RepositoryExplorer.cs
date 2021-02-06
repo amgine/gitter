@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,13 +26,9 @@ namespace gitter.Git.Gui
 
 	sealed class RepositoryExplorer
 	{
-		#region Data
-
 		private readonly GuiProvider _guiProvider;
 		private readonly RepositoryRootItem _rootItem;
 		private Repository _repository;
-
-		#endregion
 
 		public RepositoryExplorer(GuiProvider guiProvider)
 		{
@@ -48,14 +44,11 @@ namespace gitter.Git.Gui
 			_rootItem.IsExpanded = true;
 		}
 
-		public CustomListBoxItem RootItem
-		{
-			get { return _rootItem; }
-		}
+		public CustomListBoxItem RootItem => _rootItem;
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)
@@ -74,13 +67,17 @@ namespace gitter.Git.Gui
 
 		private void AttachToRepository(Repository repository)
 		{
-			_repository = repository;
+			Assert.IsNotNull(repository);
+
+			_repository          = repository;
 			_rootItem.Repository = repository;
 		}
 
 		private void DetachFromRepository(Repository repository)
 		{
-			_repository = null;
+			Assert.IsNotNull(repository);
+
+			_repository          = null;
 			_rootItem.Repository = null;
 		}
 	}

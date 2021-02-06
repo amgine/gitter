@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -60,16 +60,16 @@ namespace gitter.Framework.Options
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 			Verify.Argument.IsNotNull(section, nameof(section));
 
-			var fontName	= section.GetValue<string>("Name", null);
-			var size		= section.GetValue<float>("Size", 0);
-			var style		= section.GetValue<FontStyle>("Style", FontStyle.Regular);
+			var fontName = section.GetValue<string>("Name", null);
+			var size     = section.GetValue<float>("Size", 0);
+			var style    = section.GetValue<FontStyle>("Style", FontStyle.Regular);
 
 			Verify.Argument.IsTrue(fontName != null, nameof(section), "Section does not contain a valid font name.");
 			Verify.Argument.IsTrue(size > 0, nameof(section), "Section contains invalid font size.");
 
-			_font	= new Font(fontName, size, style, GraphicsUnit.Point);
-			Id		= id;
-			Name	= name;
+			_font = new Font(fontName, size, style, GraphicsUnit.Point);
+			Id    = id;
+			Name  = name;
 		}
 
 		#endregion
@@ -82,7 +82,7 @@ namespace gitter.Framework.Options
 
 		public Font Font
 		{
-			get { return _font; }
+			get => _font;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));

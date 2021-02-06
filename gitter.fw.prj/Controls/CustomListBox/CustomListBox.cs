@@ -46,67 +46,61 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object ItemActivatedEvent = new object();
+		private static readonly object ItemActivatedEvent = new();
 		/// <summary>Item is activated.</summary>
 		public event EventHandler<ItemEventArgs> ItemActivated
 		{
-			add { Events.AddHandler(ItemActivatedEvent, value); }
-			remove { Events.RemoveHandler(ItemActivatedEvent, value); }
+			add    => Events.AddHandler    (ItemActivatedEvent, value);
+			remove => Events.RemoveHandler (ItemActivatedEvent, value);
 		}
 
 		protected virtual void OnItemActivated(CustomListBoxItem item)
-		{
-			((EventHandler<ItemEventArgs>)Events[ItemActivatedEvent])?.Invoke(this, new ItemEventArgs(item));
-		}
+			=> ((EventHandler<ItemEventArgs>)Events[ItemActivatedEvent])?.Invoke(this, new ItemEventArgs(item));
 
-		private static readonly object ItemCheckedChangedEvent = new object();
-		/// <summary>Item checked status is changed.</summary>
+		private static readonly object ItemCheckedChangedEvent = new();
+		/// <summary>Item checked status is changed.</summar
 		public event EventHandler<ItemEventArgs> ItemCheckedChanged
 		{
-			add { Events.AddHandler(ItemCheckedChangedEvent, value); }
-			remove { Events.RemoveHandler(ItemCheckedChangedEvent, value); }
+			add    => Events.AddHandler    (ItemCheckedChangedEvent, value);
+			remove => Events.RemoveHandler (ItemCheckedChangedEvent, value);
 		}
 
 		protected virtual void OnItemCheckedChanged(CustomListBoxItem item)
-		{
-			((EventHandler<ItemEventArgs>)Events[ItemCheckedChangedEvent])?.Invoke(this, new ItemEventArgs(item));
-		}
+			=> ((EventHandler<ItemEventArgs>)Events[ItemCheckedChangedEvent])?.Invoke(this, new ItemEventArgs(item));
 
-		private static readonly object SelectionChangedEvent = new object();
+		private static readonly object SelectionChangedEvent = new();
 		/// <summary>Selection is changed.</summary>
 		public event EventHandler SelectionChanged
 		{
-			add { Events.AddHandler(SelectionChangedEvent, value); }
-			remove { Events.RemoveHandler(SelectionChangedEvent, value); }
+			add    => Events.AddHandler    (SelectionChangedEvent, value);
+			remove => Events.RemoveHandler (SelectionChangedEvent, value);
 		}
 
 		protected virtual void OnSelectionChanged()
-		{
-			((EventHandler)Events[SelectionChangedEvent])?.Invoke(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[SelectionChangedEvent])?.Invoke(this, EventArgs.Empty);
 
-		private static readonly object ContextMenuRequestedEvent = new object();
+		private static readonly object ContextMenuRequestedEvent = new();
 		/// <summary>Context menu for free space is requested.</summary>
 		public event EventHandler<ContextMenuRequestEventArgs> ContextMenuRequested
 		{
-			add { Events.AddHandler(ContextMenuRequestedEvent, value); }
-			remove { Events.RemoveHandler(ContextMenuRequestedEvent, value); }
+			add    => Events.AddHandler    (ContextMenuRequestedEvent, value);
+			remove => Events.RemoveHandler (ContextMenuRequestedEvent, value);
 		}
 
-		private static readonly object ItemContextMenuRequestedEvent = new object();
+		private static readonly object ItemContextMenuRequestedEvent = new();
 		/// <summary>Context menu for item is requested.</summary>
 		public event EventHandler<ItemContextMenuRequestEventArgs> ItemContextMenuRequested
 		{
-			add { Events.AddHandler(ItemContextMenuRequestedEvent, value); }
-			remove { Events.RemoveHandler(ItemContextMenuRequestedEvent, value); }
+			add    => Events.AddHandler    (ItemContextMenuRequestedEvent, value);
+			remove => Events.RemoveHandler (ItemContextMenuRequestedEvent, value);
 		}
 
-		private static readonly object ItemsContextMenuRequestedEvent = new object();
+		private static readonly object ItemsContextMenuRequestedEvent = new();
 		/// <summary>Context menu for several items is requested.</summary>
 		public event EventHandler<ItemsContextMenuRequestEventArgs> ItemsContextMenuRequested
 		{
-			add { Events.AddHandler(ItemsContextMenuRequestedEvent, value); }
-			remove { Events.RemoveHandler(ItemsContextMenuRequestedEvent, value); }
+			add    => Events.AddHandler    (ItemsContextMenuRequestedEvent, value);
+			remove => Events.RemoveHandler (ItemsContextMenuRequestedEvent, value);
 		}
 
 		#endregion
@@ -175,9 +169,9 @@ namespace gitter.Framework.Controls
 
 			public HitTestResult(HitTestArea area, int itemIndex, int itemPart)
 			{
-				Area = area;
+				Area      = area;
 				ItemIndex = itemIndex;
-				ItemPart = itemPart;
+				ItemPart  = itemPart;
 			}
 
 			public bool Check(HitTestArea area, int itemIndex, int itemPart)
@@ -1099,7 +1093,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Ensures that item with id <paramref name="itemIndex"/> in plain item list is visible to user.</summary>
 		/// <param name="itemIndex">Item index in plain list.</param>
-		/// <returns>amount of scrolling occured.</returns>
+		/// <returns>amount of scrolling occurred.</returns>
 		protected int EnsureVisible(int itemIndex)
 		{
 			int maxScrollPos = itemIndex * _itemHeight;

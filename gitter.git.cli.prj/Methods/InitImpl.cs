@@ -57,23 +57,17 @@ namespace gitter.Git.AccessLayer.CLI
 			output.ThrowOnBadReturnCode();
 		}
 
-		public Task InvokeAsync(InitRepositoryParameters parameters,
+		public async Task InvokeAsync(InitRepositoryParameters parameters,
 			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(parameters, nameof(parameters));
 
 			var command  = _commandFactory(parameters);
 			var executor = new RepositoryCommandExecutor(_cliOptionsProvider, parameters.Path);
-			return executor
+			var output   = await executor
 				.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					TaskUtility.UnwrapResult(t).ThrowOnBadReturnCode();
-				},
-				cancellationToken,
-				TaskContinuationOptions.ExecuteSynchronously,
-				TaskScheduler.Default);
+				.ConfigureAwait(continueOnCapturedContext: false);
+			output.ThrowOnBadReturnCode();
 		}
 
 		#endregion

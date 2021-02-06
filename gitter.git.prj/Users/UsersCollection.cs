@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -20,6 +20,8 @@
 
 namespace gitter.Git
 {
+	using System.Threading.Tasks;
+
 	using gitter.Framework;
 
 	using gitter.Git.AccessLayer;
@@ -84,6 +86,26 @@ namespace gitter.Git
 		{
 			var users = Repository.Accessor.QueryUsers.Invoke(
 				new QueryUsersParameters());
+			lock(SyncRoot)
+			{
+				CacheUpdater.UpdateObjectDictionary<User, UserData>(
+					ObjectStorage,
+					null,
+					null,
+					users,
+					userData => ObjectFactories.CreateUser(Repository, userData),
+					ObjectFactories.UpdateUser,
+					InvokeObjectAdded,
+					InvokeObjectRemoved,
+					true);
+			}
+		}
+
+		public async Task RefreshAsync()
+		{
+			var users = await Repository.Accessor.QueryUsers
+				.InvokeAsync(new QueryUsersParameters())
+				.ConfigureAwait(continueOnCapturedContext: false);
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<User, UserData>(

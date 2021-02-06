@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,25 +27,17 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		/// <summary>Instead of the content, show the object type.</summary>
 		public static ICommandArgument ShowType()
-		{
-			return new CommandFlag("-t");
-		}
+			=> new CommandFlag("-t");
 
 		/// <summary>Instead of the content, show the object size.</summary>
 		public static ICommandArgument ShowSize()
-		{
-			return new CommandFlag("-s");
-		}
+			=> new CommandFlag("-s");
 
 		public static ICommandArgument CheckExists()
-		{
-			return new CommandFlag("-e");
-		}
+			=> new CommandFlag("-e");
 
 		public static ICommandArgument Pretty()
-		{
-			return new CommandFlag("-p");
-		}
+			=> new CommandFlag("-p");
 
 		/// <summary>Initializes a new instance of the <see cref="CatFileCommand"/> class.</summary>
 		public CatFileCommand()

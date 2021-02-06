@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -81,83 +81,24 @@ namespace gitter.Git
 
 		#region Static
 
-		private static void ReportLoadProgress(IProgress<OperationProgress> progress, int val, string action)
+		public static Repository Load(IGitAccessor gitAccessor, string workingDirectory,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
-			if(progress != null)
+			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
+			Verify.Argument.IsNotNull(workingDirectory, nameof(workingDirectory));
+
+			progress?.Report(new OperationProgress(Resources.StrLoadingRepository.AddEllipsis()));
+			var repository = new Repository(gitAccessor, workingDirectory);
+			try
 			{
-				var status = new OperationProgress
-				{
-					ActionName      = action,
-					MaxProgress     = 8,
-					CurrentProgress = val,
-				};
-				progress.Report(status);
+				RepositoryLoader.Load(repository, progress, cancellationToken);
 			}
-		}
-
-		private static void LoadCore(Repository repository, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
-		{
-			ReportLoadProgress(progress, 0, Resources.StrLoadingConfiguration.AddEllipsis());
-
-			repository.Configuration.Refresh();
-
-			cancellationToken.ThrowIfCancellationRequested();
-			ReportLoadProgress(progress, 1, Resources.StrLoadingReferences.AddEllipsis());
-
-			var refs = repository.Accessor.QueryReferences.Invoke(
-				new QueryReferencesParameters(ReferenceType.Branch | ReferenceType.Tag | ReferenceType.Stash));
-			repository.Refs.Load(refs);
-
-			if(refs.Stash != null)
+			catch
 			{
-				cancellationToken.ThrowIfCancellationRequested();
-				ReportLoadProgress(progress, 2, Resources.StrLoadingStash.AddEllipsis());
-				repository.Stash.Refresh();
+				repository.Dispose();
+				throw;
 			}
-
-			repository.Notes.Refresh();
-
-			cancellationToken.ThrowIfCancellationRequested();
-			ReportLoadProgress(progress, 3, Resources.StrLoadingHEAD.AddEllipsis());
-			repository.Head = new Head(repository);
-
-			cancellationToken.ThrowIfCancellationRequested();
-			ReportLoadProgress(progress, 4, Resources.StrLoadingRemotes.AddEllipsis());
-			repository.Remotes.Refresh();
-
-
-			cancellationToken.ThrowIfCancellationRequested();
-			ReportLoadProgress(progress, 5, Resources.StrLoadingSubmodules.AddEllipsis());
-			repository.Submodules.Refresh();
-
-			if(!repository.Head.IsEmpty)
-			{
-				cancellationToken.ThrowIfCancellationRequested();
-				ReportLoadProgress(progress, 6, Resources.StrLoadingUsers.AddEllipsis());
-				repository.Users.Refresh();
-			}
-
-			cancellationToken.ThrowIfCancellationRequested();
-			ReportLoadProgress(progress, 7, Resources.StrLoadingStatus.AddEllipsis());
-			repository.Status.Refresh();
-
-			cancellationToken.ThrowIfCancellationRequested();
-			repository.UpdateState();
-
-			cancellationToken.ThrowIfCancellationRequested();
-			repository.UpdateUserIdentity(false);
-
-			cancellationToken.ThrowIfCancellationRequested();
-			repository.Monitor = new RepositoryMonitor(repository);
-			repository.Monitor.IsEnabled = true;
-
-			cancellationToken.ThrowIfCancellationRequested();
-			ReportLoadProgress(progress, 8, Resources.StrCompleted.AddPeriod());
-		}
-
-		public static Repository Load(IGitAccessor gitAccessor, string workingDirectory)
-		{
-			return new Repository(gitAccessor, workingDirectory, true);
+			return repository;
 		}
 
 		public static Task<Repository> LoadAsync(IGitAccessor gitAccessor, string workingDirectory,
@@ -166,14 +107,16 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 			Verify.Argument.IsNotNull(workingDirectory, nameof(workingDirectory));
 
+			progress?.Report(new OperationProgress(Resources.StrLoadingRepository.AddEllipsis()));
 			return Task.Run(
-				() =>
+				async () =>
 				{
-					progress?.Report(new OperationProgress(Resources.StrLoadingRepository.AddEllipsis()));
-					var repository = new Repository(gitAccessor, workingDirectory, load: false);
+					var repository = new Repository(gitAccessor, workingDirectory);
 					try
 					{
-						LoadCore(repository, progress, cancellationToken);
+						await RepositoryLoader
+							.LoadAsync(repository, progress, cancellationToken)
+							.ConfigureAwait(continueOnCapturedContext: false);
 					}
 					catch
 					{
@@ -247,8 +190,7 @@ namespace gitter.Git
 		/// <summary>Create <see cref="Repository"/>.</summary>
 		/// <param name="gitAccessor">Git repository access provider.</param>
 		/// <param name="workingDirectory">Repository working directory.</param>
-		/// <param name="load"><c>true</c> to load repository; <c>false</c> otherwise.</param>
-		private Repository(IGitAccessor gitAccessor, string workingDirectory, bool load)
+		private Repository(IGitAccessor gitAccessor, string workingDirectory)
 		{
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 			Verify.Argument.IsNotNull(workingDirectory, nameof(workingDirectory));
@@ -256,31 +198,21 @@ namespace gitter.Git
 			WorkingDirectory     = GetWorkingDirectory(workingDirectory);
 			GitDirectory         = GetGitDirectory(WorkingDirectory);
 			ConfigurationManager = GetConfigurationManager(GitDirectory);
+			NullRevisionPointer  = new NowherePointer(this, default);
 
 			Accessor      = gitAccessor.CreateRepositoryAccessor(this);
 			Revisions     = new RevisionCache(this);
 			Configuration = new ConfigParametersCollection(this);
 			Status        = new Status(this);
-			Stash         = new StashedStatesCollection(this);
 			Refs          = new RefsCollection(this);
+			Stash         = new StashedStatesCollection(this);
 			Notes         = new NotesCollection(this);
+			Head          = new Head(this, NullRevisionPointer);
 			Remotes       = new RemotesCollection(this);
 			Submodules    = new SubmodulesCollection(this);
 			Users         = new UsersCollection(this);
 			Hooks         = new HooksCollection(this);
-
-			if(load)
-			{
-				try
-				{
-					LoadCore(this);
-				}
-				catch
-				{
-					Dispose();
-					throw;
-				}
-			}
+			Monitor       = new RepositoryMonitor(this);
 		}
 
 		/// <summary>Finalizes an instance of the <see cref="Repository"/> class.</summary>
@@ -314,7 +246,7 @@ namespace gitter.Git
 
 		/// <summary>Returns repository monitor.</summary>
 		/// <value>Repository monitor.</value>
-		internal RepositoryMonitor Monitor { get; private set; }
+		internal RepositoryMonitor Monitor { get; }
 
 		/// <summary>Returns repository monitor.</summary>
 		/// <value>Repository monitor.</value>
@@ -352,13 +284,15 @@ namespace gitter.Git
 		/// <value><c>true</c>, if this is a shallow repository, <c>false</c> otherwise.</value>
 		public bool IsShallow => File.Exists(GetGitFileName(GitConstants.ShallowFile));
 
+		internal NowherePointer NullRevisionPointer { get; }
+
 		/// <summary>Returns revision cache.</summary>
 		/// <value>Revision cache.</value>
 		public RevisionCache Revisions { get; }
 
 		/// <summary>Returns HEAD reference.</summary>
 		/// <value>HEAD reference.</value>
-		public Head Head { get; private set; }
+		public Head Head { get; }
 
 		/// <summary>Returns references collection.</summary>
 		/// <value>References collection.</value>
@@ -456,7 +390,7 @@ namespace gitter.Git
 			return state;
 		}
 
-		private void UpdateState()
+		internal void UpdateState()
 		{
 			var state = GetState();
 			if(_state != state)
@@ -466,7 +400,7 @@ namespace gitter.Git
 			}
 		}
 
-		private void UpdateUserIdentity(bool raiseEvent)
+		internal void UpdateUserIdentity(bool raiseEvent)
 		{
 			User userIdentity;
 			var name  = Configuration.TryGetParameterValue(GitConstants.UserNameParameter);
@@ -530,100 +464,85 @@ namespace gitter.Git
 
 		#region init
 
-		public static void Init(IGitAccessor gitAccessor, string path, string template, bool bare)
+		private static InitRepositoryParameters GetInitRepositoryParameters(string path, string template = default, bool bare = false)
 		{
-			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
 
-			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, template, bare));
+			return new InitRepositoryParameters(path, template, bare);
 		}
 
-		public static void Init(IGitAccessor gitAccessor, string path, string template)
+		public static void Init(IGitAccessor gitAccessor, string path, string template = default, bool bare = false)
 		{
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
-			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
 
-			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, template, false));
+			var parameters = GetInitRepositoryParameters(path, template, bare);
+			gitAccessor.InitRepository.Invoke(parameters);
 		}
 
-		public static void Init(IGitAccessor gitAccessor, string path, bool bare)
+		public static Task InitAsync(IGitAccessor gitAccessor, string path, string template = default, bool bare = false)
 		{
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
-			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
 
-			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, null, bare));
-		}
-
-		public static void Init(IGitAccessor gitAccessor, string path)
-		{
-			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
-			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
-
-			gitAccessor.InitRepository.Invoke(new InitRepositoryParameters(path, null, false));
+			var parameters = GetInitRepositoryParameters(path, template, bare);
+			return gitAccessor.InitRepository.InvokeAsync(parameters);
 		}
 
 		#endregion
 
 		#region clone
 
+		private static CloneRepositoryParameters GetCloneRepositoryParameters(
+			string url, string path, string template = null, string remoteName = null,
+			bool shallow = false, int depth = -1, bool bare = false, bool mirror = false, bool recursive = true, bool noCheckout = false)
+		{
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
+			Verify.Argument.IsNeitherNullNorWhitespace(path, nameof(path));
+
+			return new CloneRepositoryParameters
+			{
+				Url        = url,
+				Path       = path,
+				Template   = template,
+				RemoteName = remoteName,
+
+				Shallow    = shallow,
+				Depth      = depth,
+				Bare       = bare,
+				Mirror     = mirror,
+				Recursive  = recursive,
+				NoCheckout = noCheckout,
+			};
+		}
+
 		public static void Clone(
 			IGitAccessor gitAccessor,
-			string url, string path, string template, string remoteName,
-			bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
+			string url, string path, string template = null, string remoteName = null,
+			bool shallow = false, int depth = -1, bool bare = false, bool mirror = false, bool recursive = true, bool noCheckout = false)
 		{
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 
-			gitAccessor.CloneRepository.Invoke(
-				new CloneRepositoryParameters()
-				{
-					Url = url,
-					Path = path,
-					Template = template,
-					RemoteName = remoteName,
-
-					Shallow = shallow,
-					Depth = depth,
-					Bare = bare,
-					Mirror = mirror,
-					Recursive = recursive,
-					NoCheckout = noCheckout,
-				});
+			var parameters = GetCloneRepositoryParameters(url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout);
+			gitAccessor.CloneRepository.Invoke(parameters);
 		}
 
 		public static Task CloneAsync(
 			IGitAccessor gitAccessor,
-			string url, string path, string template, string remoteName,
-			bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout,
-			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			string url, string path, string template = null, string remoteName = null,
+			bool shallow = false, int depth = -1, bool bare = false, bool mirror = false, bool recursive = true, bool noCheckout = false,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(gitAccessor, nameof(gitAccessor));
 
-			return gitAccessor.CloneRepository.InvokeAsync(
-				new CloneRepositoryParameters()
-				{
-					Url = url,
-					Path = path,
-					Template = template,
-					RemoteName = remoteName,
-
-					Shallow = shallow,
-					Depth = depth,
-					Bare = bare,
-					Mirror = mirror,
-					Recursive = recursive,
-					NoCheckout = noCheckout,
-				},
-				progress, cancellationToken);
+			var parameters = GetCloneRepositoryParameters(url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout);
+			return gitAccessor.CloneRepository.InvokeAsync(parameters, progress, cancellationToken);
 		}
 
 		#endregion
 
 		#region cherry-pick
 
-		public async Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress> progress)
+		private static void BeforeCherryPick(CherryPickControl control, IProgress<OperationProgress> progress = default)
 		{
-			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
-
 			switch(control)
 			{
 				case CherryPickControl.Abort:
@@ -637,36 +556,44 @@ namespace gitter.Git
 					break;
 				default:
 					throw new ArgumentException(
-						"Unknown CherryPickControl value: {0}".UseAsFormat(control),
+						$"Unknown {nameof(CherryPickControl)} value: {control}",
 						nameof(control));
 			}
+		}
 
-			var block = Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged,
-				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.IndexUpdated);
+		public async Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress> progress = default)
+		{
+			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+
+			BeforeCherryPick(control, progress);
 			try
 			{
-				await Accessor.CherryPick
-					.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
-					.ConfigureAwait(continueOnCapturedContext: false);
-			}
-			catch
-			{
-				throw;
+				using(Monitor.BlockNotifications(
+					RepositoryNotifications.BranchChanged,
+					RepositoryNotifications.WorktreeUpdated,
+					RepositoryNotifications.IndexUpdated))
+				{
+					await Accessor.CherryPick
+						.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
 			}
 			finally
 			{
-				block.Dispose();
 				if(Head.Pointer is Branch branch && !branch.IsRemote)
 				{
-					branch.Refresh();
+					await branch
+						.RefreshAsync()
+						.ConfigureAwait(continueOnCapturedContext: false);
 				}
 				else
 				{
-					Head.Refresh();
+					await Head.RefreshAsync()
+						.ConfigureAwait(continueOnCapturedContext: false);
 				}
-				Status.Refresh();
+				await Status
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
 				OnStateChanged();
 				OnUpdated();
 			}
@@ -676,10 +603,8 @@ namespace gitter.Git
 
 		#region revert
 
-		public async Task RevertAsync(RevertControl control, IProgress<OperationProgress> progress)
+		private static void BeforeRevert(RevertControl control, IProgress<OperationProgress> progress = default)
 		{
-			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
-
 			switch(control)
 			{
 				case RevertControl.Abort:
@@ -693,33 +618,45 @@ namespace gitter.Git
 					break;
 				default:
 					throw new ArgumentException(
-						"Unknown RevertControl value: {0}".UseAsFormat(control),
+						$"Unknown {nameof(RevertControl)} value: {control}",
 						nameof(control));
 			}
+		}
 
-			var block = Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged,
-				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.IndexUpdated);
+		public async Task RevertAsync(RevertControl control, IProgress<OperationProgress> progress = default)
+		{
+			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+
+			BeforeRevert(control, progress);
 			try
 			{
-				await Accessor
-					.Revert
-					.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
-					.ConfigureAwait(continueOnCapturedContext: false);
+				using(Monitor.BlockNotifications(
+					RepositoryNotifications.BranchChanged,
+					RepositoryNotifications.WorktreeUpdated,
+					RepositoryNotifications.IndexUpdated))
+				{
+					await Accessor.Revert
+						.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
 			}
 			finally
 			{
-				block.Dispose();
 				if(Head.Pointer is Branch branch && !branch.IsRemote)
 				{
-					branch.Refresh();
+					await branch
+						.RefreshAsync()
+						.ConfigureAwait(continueOnCapturedContext: false);
 				}
 				else
 				{
-					Head.Refresh();
+					await Head
+						.RefreshAsync()
+						.ConfigureAwait(continueOnCapturedContext: false);
 				}
-				Status.Refresh();
+				await Status
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
 				OnStateChanged();
 				OnUpdated();
 			}
@@ -762,7 +699,7 @@ namespace gitter.Git
 
 		/// <summary>Control rebase process.</summary>
 		/// <param name="control">Type of operation.</param>
-		public async Task RebaseAsync(RebaseControl control, IProgress<OperationProgress> progress)
+		public async Task RebaseAsync(RebaseControl control, IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -779,31 +716,40 @@ namespace gitter.Git
 					break;
 				default:
 					throw new ArgumentException(
-						"Unknown RebaseControl value: {0}".UseAsFormat(control),
+						$"Unknown {nameof(RebaseControl)} value: {control}",
 						nameof(control));
 			}
 
-			var block = Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged,
-				RepositoryNotifications.Checkout,
-				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.IndexUpdated);
 			try
 			{
-				await Accessor
-					.Rebase
-					.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None);
+				using(Monitor.BlockNotifications(
+					RepositoryNotifications.BranchChanged,
+					RepositoryNotifications.Checkout,
+					RepositoryNotifications.WorktreeUpdated,
+					RepositoryNotifications.IndexUpdated))
+				{
+					await Accessor.Rebase
+						.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
 			}
 			finally
 			{
-				block.Dispose();
-				Refs.RefreshBranches();
-				Head.Refresh();
+				await Refs
+					.RefreshBranchesAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
+				await Head
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
 				if(Head.Pointer is Branch branch && !branch.IsRemote)
 				{
-					branch.Refresh();
+					await branch
+						.RefreshAsync()
+						.ConfigureAwait(continueOnCapturedContext: false);
 				}
-				Status.Refresh();
+				await Status
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
 				OnStateChanged();
 				OnUpdated();
 			}
@@ -831,7 +777,7 @@ namespace gitter.Git
 		}
 
 		/// <summary>Perform garbage collection.</summary>
-		public Task GarbageCollectAsync(IProgress<OperationProgress> progress = default)
+		public async Task GarbageCollectAsync(IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -839,7 +785,9 @@ namespace gitter.Git
 			var parameters = GetGarbageCollectParameters();
 			using(Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 			{
-				return Accessor.GarbageCollect.InvokeAsync(parameters, progress, CancellationToken.None);
+				await Accessor.GarbageCollect
+					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
 
@@ -870,7 +818,7 @@ namespace gitter.Git
 			if(!IsDisposed)
 			{
 				GC.SuppressFinalize(this);
-				Dispose(true);
+				Dispose(disposing: true);
 				IsDisposed = true;
 			}
 		}

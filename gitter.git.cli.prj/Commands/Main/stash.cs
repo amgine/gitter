@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,74 +26,46 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class StashCommand : Command
 	{
 		public static ICommandArgument Save()
-		{
-			return new CommandParameter("save");
-		}
+			=> new CommandParameter("save");
 
 		public static ICommandArgument List()
-		{
-			return new CommandParameter("list");
-		}
+			=> new CommandParameter("list");
 
 		public static ICommandArgument Show()
-		{
-			return new CommandParameter("show");
-		}
+			=> new CommandParameter("show");
 
 		public static ICommandArgument Pop()
-		{
-			return new CommandParameter("pop");
-		}
+			=> new CommandParameter("pop");
 
 		public static ICommandArgument Apply()
-		{
-			return new CommandParameter("apply");
-		}
+			=> new CommandParameter("apply");
 
 		public static ICommandArgument Branch()
-		{
-			return new CommandParameter("branch");
-		}
+			=> new CommandParameter("branch");
 
 		public static ICommandArgument Clear()
-		{
-			return new CommandParameter("clear");
-		}
+			=> new CommandParameter("clear");
 
 		public static ICommandArgument Drop()
-		{
-			return new CommandParameter("drop");
-		}
+			=> new CommandParameter("drop");
 
 		public static ICommandArgument Create()
-		{
-			return new CommandParameter("create");
-		}
+			=> new CommandParameter("create");
 
 		public static ICommandArgument NoKeepIndex()
-		{
-			return new CommandFlag("--no-keep-index");
-		}
+			=> new CommandFlag("--no-keep-index");
 
 		public static ICommandArgument KeepIndex()
-		{
-			return new CommandFlag("--keep-index");
-		}
+			=> new CommandFlag("--keep-index");
 
 		public static ICommandArgument Index()
-		{
-			return new CommandFlag("--index");
-		}
+			=> new CommandFlag("--index");
 
 		public static ICommandArgument IncludeUntracked()
-		{
-			return new CommandFlag("--include-untracked");
-		}
+			=> new CommandFlag("--include-untracked");
 
 		public static ICommandArgument Quiet()
-		{
-			return CommandFlag.Quiet();
-		}
+			=> CommandFlag.Quiet();
 
 		public StashCommand()
 			: base("stash")

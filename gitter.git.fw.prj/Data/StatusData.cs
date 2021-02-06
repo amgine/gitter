@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,8 +27,8 @@ namespace gitter.Git.AccessLayer
 	public sealed class StatusData
 	{
 		public StatusData(
-			IDictionary<string, TreeFileData> stagedFiles,
-			IDictionary<string, TreeFileData> unstagedFiles,
+			Dictionary<string, TreeFileData> stagedFiles,
+			Dictionary<string, TreeFileData> unstagedFiles,
 			int unstagedUntrackedCount,
 			int unstagedRemovedCount,
 			int unstagedModifiedCount,
@@ -48,9 +48,9 @@ namespace gitter.Git.AccessLayer
 			StagedRemovedCount     = stagedRemovedCount;
 		}
 
-		public IDictionary<string, TreeFileData> StagedFiles { get; }
+		public Dictionary<string, TreeFileData> StagedFiles { get; }
 
-		public IDictionary<string, TreeFileData> UnstagedFiles { get; }
+		public Dictionary<string, TreeFileData> UnstagedFiles { get; }
 
 		public int UnstagedUntrackedCount { get; }
 

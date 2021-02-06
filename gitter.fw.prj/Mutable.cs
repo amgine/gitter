@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -42,7 +42,7 @@ namespace gitter.Framework
 
 		public static implicit operator T(Mutable<T> mutable)
 		{
-			if(mutable == null) return default(T);
+			if(mutable == null) return default;
 			return mutable.Value;
 		}
 	}

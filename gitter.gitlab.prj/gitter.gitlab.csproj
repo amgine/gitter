@@ -7,20 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Update="Gui\ListBoxes\PipelinesListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="Gui\ListBoxes\IssuesListBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="Gui\ProviderSetupControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Gui\Views\PipelinesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Gui\Views\IssuesView.cs" />
-    <Compile Update="Gui\Views\Toolbars\IssuesSearchToolBar.cs">
+    <Compile Update="Gui\Views\Toolbars\PipelinesSearchToolBar.cs" />
+    <Compile Update="Gui\Views\Toolbars\IssuesSearchToolBar.cs" />
+    <Compile Update="Gui\Views\Toolbars\PipelinesToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="Gui\Views\Toolbars\IssuesToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Gui\Views\Toolbars\SearchToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="Properties\Resources.Designer.cs">

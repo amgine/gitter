@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -65,14 +65,9 @@ namespace gitter.Git.Gui.Controls
 				Heads = new ReferenceGroupListItem(repository, ReferenceType.LocalBranch);
 				Heads.Items.Comparison = BranchListItem.CompareByName;
 				Remotes = new ReferenceGroupListItem(repository, ReferenceType.RemoteBranch);
-				if(groupRemoteBranches)
-				{
-					Remotes.Items.Comparison = RemoteListItem.CompareByName;
-				}
-				else
-				{
-					Remotes.Items.Comparison = RemoteBranchListItem.CompareByName;
-				}
+				Remotes.Items.Comparison = groupRemoteBranches
+					? RemoteListItem.CompareByName
+					: RemoteBranchListItem.CompareByName;
 				Tags = new ReferenceGroupListItem(repository, ReferenceType.Tag);
 				Tags.Items.Comparison = TagListItem.CompareByName;
 				_itemHost.Comparison = null;
@@ -97,15 +92,7 @@ namespace gitter.Git.Gui.Controls
 						if(predicate != null && !predicate(branch)) continue;
 						var item = new BranchListItem(branch);
 						item.Activated += OnItemActivated;
-						CustomListBoxItemsCollection host;
-						if(groupItems)
-						{
-							host = Heads.Items;
-						}
-						else
-						{
-							host = _itemHost;
-						}
+						var host = groupItems ? Heads.Items : _itemHost;
 						host.Add(item);
 					}
 					refs.ObjectAdded += OnBranchCreated;
@@ -147,15 +134,7 @@ namespace gitter.Git.Gui.Controls
 						if(predicate != null && !predicate(tag)) continue;
 						var item = new TagListItem(tag);
 						item.Activated += OnItemActivated;
-						CustomListBoxItemsCollection host;
-						if(groupItems)
-						{
-							host = Tags.Items;
-						}
-						else
-						{
-							host = _itemHost;
-						}
+						var host = groupItems ? Tags.Items : _itemHost;
 						host.Add(item);
 					}
 					refs.ObjectAdded += OnTagCreated;
@@ -202,15 +181,7 @@ namespace gitter.Git.Gui.Controls
 							ritem = new RemoteListItem(remote);
 							ritem.Items.Comparison = RemoteBranchListItem.CompareByName;
 							_remotes.Add(ritem);
-							CustomListBoxItemsCollection host;
-							if(Remotes == null)
-							{
-								host = _itemHost;
-							}
-							else
-							{
-								host = Remotes.Items;
-							}
+							var host = Remotes == null ? _itemHost : Remotes.Items;
 							host.AddSafe(ritem);
 						}
 						return ritem;
@@ -229,15 +200,7 @@ namespace gitter.Git.Gui.Controls
 			{
 				var item = new BranchListItem(branch);
 				item.Activated += OnItemActivated;
-				CustomListBoxItemsCollection host;
-				if(_groupItems)
-				{
-					host = Heads.Items;
-				}
-				else
-				{
-					host = _itemHost;
-				}
+				var host = _groupItems ? Heads.Items: _itemHost;
 				host.AddSafe(item);
 			}
 		}

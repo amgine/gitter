@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,7 +23,7 @@ namespace gitter.Git.AccessLayer
 	using System;
 	using System.Collections.Generic;
 
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.Merge"/> opearation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.Merge"/> operation.</summary>
 	public sealed class MergeParameters
 	{
 		/// <summary>Create <see cref="MergeParameters"/>.</summary>
@@ -60,7 +60,7 @@ namespace gitter.Git.AccessLayer
 		/// <summary>Merge strategy.</summary>
 		public MergeStrategy Strategy { get; set; }
 
-		/// <summary>Starategy option.</summary>
+		/// <summary>Strategy option.</summary>
 		public string StrategyOption { get; set; }
 
 		/// <summary>Perform merge but do not consider this a merge.</summary>

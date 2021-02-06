@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -55,13 +55,7 @@ namespace gitter.Controls
 		}
 
 		protected override Control CreateControl(IRepositoryProvider item)
-		{
-			if(item == null)
-			{
-				return null;
-			}
-			return item.CreateCloneDialog();
-		}
+			=> item?.CreateCloneDialog();
 
 		public override bool Execute()
 		{

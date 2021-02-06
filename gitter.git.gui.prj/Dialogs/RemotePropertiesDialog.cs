@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,7 +31,7 @@ namespace gitter.Git.Gui.Dialogs
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
-	/// <summary>Dialog for diaplaying and/or editing <see cref="Remote"/> object properties.</summary>
+	/// <summary>Dialog for displaying and/or editing <see cref="Remote"/> object properties.</summary>
 	public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 	{
 		private sealed class RefspecItem : CustomListBoxItem<string>
@@ -72,15 +72,9 @@ namespace gitter.Git.Gui.Dialogs
 				}
 			}
 
-			public bool Fetch
-			{
-				get { return _fetch; }
-			}
+			public bool Fetch => _fetch;
 
-			public bool Forced
-			{
-				get { return _forced; }
-			}
+			public bool Forced => _forced;
 
 			protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 			{

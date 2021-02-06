@@ -207,11 +207,11 @@ namespace gitter.Framework.Controls
 
 			#region ICloneable
 
-			/// <summary>Creates a cole of this color table.</summary>
+			/// <summary>Creates a copy of this color table.</summary>
 			/// <returns>Clone of this color table.</returns>
 			public CustomColorTable Clone() => new CustomColorTable(this);
 
-			/// <summary>Creates a cole of this color table.</summary>
+			/// <summary>Creates a copy of this color table.</summary>
 			/// <returns>Clone of this color table.</returns>
 			object ICloneable.Clone() => Clone();
 

@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace gitter.Git.Gui.Controls
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
-	/// <summary><see cref="FlowPanel"/> which displayes changed files.</summary>
+	/// <summary><see cref="FlowPanel"/> which displays changed files.</summary>
 	public class ChangedFilesPanel : FlowPanel
 	{
 		#region Static
@@ -175,10 +175,7 @@ namespace gitter.Git.Gui.Controls
 				return from + " -> " + to;
 			}
 
-			public DiffFile File
-			{
-				get { return _file; }
-			}
+			public DiffFile File => _file;
 
 			private void PaintDiffStats(Graphics graphics, Font font, Brush textBrush, Rectangle rect)
 			{
@@ -321,69 +318,41 @@ namespace gitter.Git.Gui.Controls
 
 		private sealed class ChangesCountByType
 		{
-			private Rectangle _displayBounds;
 			private int _count;
 
 			public ChangesCountByType(FileStatus status)
 			{
 				Status = status;
-				switch(status)
+				Image  = status switch
 				{
-					case FileStatus.Added:
-						Image = FileStatusIcons.ImgUnstagedUntracked;
-						break;
-					case FileStatus.Modified:
-						Image = FileStatusIcons.ImgUnstagedModified;
-						break;
-					case FileStatus.Removed:
-						Image = FileStatusIcons.ImgUnstagedRemoved;
-						break;
-					case FileStatus.Unmerged:
-						Image = FileStatusIcons.ImgUnmerged;
-						break;
-					case FileStatus.Copied:
-						Image = FileStatusIcons.ImgCopied;
-						break;
-					case FileStatus.Renamed:
-						Image = FileStatusIcons.ImgRenamed;
-						break;
-					case FileStatus.ModeChanged:
-						Image = FileStatusIcons.ImgModeChanged;
-						break;
-				}
+					FileStatus.Added       => FileStatusIcons.ImgUnstagedUntracked,
+					FileStatus.Modified    => FileStatusIcons.ImgUnstagedModified,
+					FileStatus.Removed     => FileStatusIcons.ImgUnstagedRemoved,
+					FileStatus.Unmerged    => FileStatusIcons.ImgUnmerged,
+					FileStatus.Copied      => FileStatusIcons.ImgCopied,
+					FileStatus.Renamed     => FileStatusIcons.ImgRenamed,
+					FileStatus.ModeChanged => FileStatusIcons.ImgModeChanged,
+					_ => default,
+				};
 				UpdateDisplayText();
 			}
 
 			private void UpdateDisplayText()
 			{
-				switch(Status)
+				var suffix = Status switch
 				{
-					case StatusFilterAll:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}",
-							Count == 1 ? Resources.StrlChange : Resources.StrlChanges, Count);
-						break;
-					case FileStatus.Added:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlAdded, Count);
-						break;
-					case FileStatus.Modified:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlModified, Count);
-						break;
-					case FileStatus.Removed:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRemoved, Count);
-						break;
-					case FileStatus.Unmerged:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlUnmerged, Count);
-						break;
-					case FileStatus.Copied:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlCopied, Count);
-						break;
-					case FileStatus.Renamed:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlRenamed, Count);
-						break;
-					case FileStatus.ModeChanged:
-						DisplayText = string.Format(CultureInfo.InvariantCulture, "{1} {0}", Resources.StrlChmod, Count);
-						break;
-				}
+					StatusFilterAll when Count > 1 => Resources.StrlChanges,
+					StatusFilterAll        => Resources.StrlChange,
+					FileStatus.Added       => Resources.StrlAdded,
+					FileStatus.Modified    => Resources.StrlModified,
+					FileStatus.Removed     => Resources.StrlRemoved,
+					FileStatus.Unmerged    => Resources.StrlUnmerged,
+					FileStatus.Copied      => Resources.StrlCopied,
+					FileStatus.Renamed     => Resources.StrlRenamed,
+					FileStatus.ModeChanged => Resources.StrlChmod,
+					_ => default,
+				};
+				DisplayText = Count.ToString(CultureInfo.InvariantCulture) + " " + suffix;
 			}
 
 			public Bitmap Image { get; }
@@ -392,7 +361,7 @@ namespace gitter.Git.Gui.Controls
 
 			public int Count
 			{
-				get { return _count; }
+				get => _count;
 				set
 				{
 					if(_count != value)
@@ -405,11 +374,7 @@ namespace gitter.Git.Gui.Controls
 
 			public string DisplayText { get; private set; }
 
-			public Rectangle DisplayBounds
-			{
-				get { return _displayBounds; }
-				set { _displayBounds = value; }
-			}
+			public Rectangle DisplayBounds { get; set; }
 		}
 
 		private readonly TrackingService<FileItem> _fileHover;

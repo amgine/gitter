@@ -21,12 +21,8 @@
 namespace gitter.GitLab.Gui
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Globalization;
-	using System.Linq;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
 
@@ -64,14 +60,14 @@ namespace gitter.GitLab.Gui
 			return base.OnMeasureSubItem(measureEventArgs);
 		}
 
-		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 			if(TryGetContent(paintEventArgs.Item, out var value))
 			{
 				paintEventArgs.PaintText(value, StringAlignment.Far);
 				return;
 			}
-			base.OnPainSubItem(paintEventArgs);
+			base.OnPaintSubItem(paintEventArgs);
 		}
 	}
 }

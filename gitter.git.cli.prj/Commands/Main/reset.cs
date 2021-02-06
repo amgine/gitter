@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,76 +27,54 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class ResetCommand : Command
 	{
 		public static ICommandArgument Mode(ResetMode mode)
-		{
-			switch(mode)
+			=> mode switch
 			{
-				case ResetMode.Mixed:
-					return ResetCommand.Mixed();
-				case ResetMode.Soft:
-					return ResetCommand.Soft();
-				case ResetMode.Hard:
-					return ResetCommand.Hard();
-				case ResetMode.Merge:
-					return ResetCommand.Merge();
-				case ResetMode.Keep:
-					return ResetCommand.Keep();
-				default:
-					throw new ArgumentException("Unknown ResetMode", nameof(mode));
-			}
-		}
+				ResetMode.Mixed => ResetCommand.Mixed(),
+				ResetMode.Soft  => ResetCommand.Soft(),
+				ResetMode.Hard  => ResetCommand.Hard(),
+				ResetMode.Merge => ResetCommand.Merge(),
+				ResetMode.Keep  => ResetCommand.Keep(),
+				_ => throw new ArgumentException("Unknown ResetMode", nameof(mode)),
+			};
 
 		/// <summary>
 		/// Resets the index but not the working tree (i.e., the changed files are preserved but not marked for commit)
 		/// and reports what has not been updated. This is the default action.
 		/// </summary>
 		public static ICommandArgument Mixed()
-		{
-			return new CommandFlag("--mixed");
-		}
+			=> new CommandFlag("--mixed");
 
 		/// <summary>
 		/// Does not touch the index file nor the working tree at all, but requires them to be in a good order.
 		/// This leaves all your changed files "Changes to be committed", as git-status would put it
 		/// </summary>
 		public static ICommandArgument Soft()
-		{
-			return new CommandFlag("--soft");
-		}
+			=> new CommandFlag("--soft");
 
 		/// <summary>
 		/// Matches the working tree and index to that of the tree being switched to. Any changes to
 		/// tracked files in the working tree since "commit" are lost.
 		/// </summary>
 		public static ICommandArgument Hard()
-		{
-			return new CommandFlag("--hard");
-		}
+			=> new CommandFlag("--hard");
 
 		/// <summary>
 		/// Resets the index to match the tree recorded by the named commit, and updates the
 		/// files that are different between the named commit and the current commit in the working tree.
 		/// </summary>
 		public static ICommandArgument Merge()
-		{
-			return new CommandFlag("--merge");
-		}
+			=> new CommandFlag("--merge");
 
 		public static ICommandArgument Keep()
-		{
-			return new CommandFlag("--keep");
-		}
+			=> new CommandFlag("--keep");
 
 		/// <summary>Be quiet, only report errors.</summary>
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("-q");
-		}
+			=> new CommandFlag("-q");
 
-		/// <summary></summary>
+		/// <summary>Do not interpret any more arguments as options.</summary>
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public ResetCommand()
 			: base("reset")

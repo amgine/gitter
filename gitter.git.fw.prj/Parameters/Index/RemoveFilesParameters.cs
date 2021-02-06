@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,7 +23,7 @@ namespace gitter.Git.AccessLayer
 	using System;
 	using System.Collections.Generic;
 
-	/// <summary>Parameters for <see cref="IIndexAccessor.RemoveFiles"/> operation.</summary>
+	/// <summary>Parameters for RemoveFiles operation.</summary>
 	public sealed class RemoveFilesParameters
 	{
 		/// <summary>Create <see cref="RemoveFilesParameters"/>.</summary>
@@ -55,7 +55,7 @@ namespace gitter.Git.AccessLayer
 		/// <summary>Remove file from index only.</summary>
 		public bool Cached { get; set; }
 
-		/// <summary>Dont fail if no files mathc paths.</summary>
+		/// <summary>Don't fail if no files match paths.</summary>
 		public bool IgnoreUnmatch { get; set; }
 	}
 }

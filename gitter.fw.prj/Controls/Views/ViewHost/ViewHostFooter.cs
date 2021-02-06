@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,13 +25,11 @@ namespace gitter.Framework.Controls
 
 	public sealed class ViewHostFooter : Control
 	{
-		private readonly ViewHost _viewHost;
-
 		internal ViewHostFooter(ViewHost viewHost)
 		{
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
-			_viewHost = viewHost;
+			ViewHost = viewHost;
 			SetStyle(
 				ControlStyles.ContainerControl |
 				ControlStyles.Selectable |
@@ -45,10 +43,7 @@ namespace gitter.Framework.Controls
 				true);
 		}
 
-		public ViewHost ViewHost
-		{
-			get { return _viewHost; }
-		}
+		public ViewHost ViewHost { get; }
 
 		protected override void OnPaintBackground(PaintEventArgs pevent)
 		{

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -53,7 +53,7 @@ namespace gitter.Git.Gui.Dialogs
 
 			public bool Multiselect
 			{
-				get { return _multiselect; }
+				get => _multiselect;
 				set
 				{
 					if(_multiselect != value)
@@ -133,20 +133,16 @@ namespace gitter.Git.Gui.Dialogs
 					}
 					else
 					{
-						var item = Control.SelectedItems[0] as IRevisionPointerListItem;
-						if(item == null)
+						if(Control.SelectedItems[0] is not IRevisionPointerListItem item)
 						{
 							return null;
 						}
-						else
+						var revision = item.RevisionPointer;
+						if(revision == null)
 						{
-							var revision = item.RevisionPointer;
-							if(revision == null)
-							{
-								return null;
-							}
-							return new IRevisionPointer[] { revision };
+							return null;
 						}
+						return new IRevisionPointer[] { revision };
 					}
 				}
 			}
@@ -155,8 +151,7 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				if(item.CheckedState != CheckedState.Unavailable)
 				{
-					var revPointerlistItem = item as IRevisionPointerListItem;
-					if(revPointerlistItem != null)
+					if(item is IRevisionPointerListItem revPointerlistItem)
 					{
 						if(list == null || !list.Contains(revPointerlistItem.RevisionPointer))
 						{
@@ -182,8 +177,7 @@ namespace gitter.Git.Gui.Dialogs
 				}
 				foreach(var item in items)
 				{
-					var revItem = item as IRevisionPointerListItem;
-					if(revItem != null)
+					if(item is IRevisionPointerListItem revItem)
 					{
 						if(revItem.RevisionPointer == revisionPointer)
 						{

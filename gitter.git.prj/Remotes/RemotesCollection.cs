@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,9 +38,7 @@ namespace gitter.Git
 		#region Events
 
 		protected override RemoteEventArgs CreateEventArgs(Remote item)
-		{
-			return new RemoteEventArgs(item);
-		}
+			=> new RemoteEventArgs(item);
 
 		/// <summary>Remote renamed.</summary>
 		public event EventHandler<RemoteEventArgs> Renamed;
@@ -93,25 +91,59 @@ namespace gitter.Git
 
 		#region Add()
 
-		public Remote AddRemote(string name, string url, bool fetch, bool mirror, TagFetchMode tagFetchMode)
+		private static AddRemoteParameters GetAddRemoteParameters(string name, string url,
+			bool fetch = false, bool mirror = false, TagFetchMode tagFetchMode = TagFetchMode.Default)
+			=> new AddRemoteParameters(name, url)
+			{
+				Fetch        = fetch,
+				Mirror       = mirror,
+				TagFetchMode = tagFetchMode,
+			};
+
+		public Remote Add(string name, string url, bool fetch = false, bool mirror = false,
+			TagFetchMode tagFetchMode = TagFetchMode.Default)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
-				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Remote"));
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Remote)));
 			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 
-			Repository.Accessor.AddRemote.Invoke(
-				new AddRemoteParameters(name, url)
-				{
-					Fetch = fetch,
-					Mirror = mirror,
-					TagFetchMode = tagFetchMode,
-				});
+			var parameters = GetAddRemoteParameters(name, url, fetch, mirror, tagFetchMode);
+			Repository.Accessor.AddRemote.Invoke(parameters);
 
 			var remote = new Remote(Repository, name, url, url);
 			AddObject(remote);
 
-			Repository.Refs.Remotes.Refresh();
+			if(fetch)
+			{
+				Repository.Refs.Remotes.Refresh();
+			}
+
+			return remote;
+		}
+
+		public async Task<Remote> AddAsync(string name, string url, bool fetch = false, bool mirror = false,
+			TagFetchMode tagFetchMode = TagFetchMode.Default)
+		{
+			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Remote)));
+			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
+
+			var parameters = GetAddRemoteParameters(name, url, fetch, mirror, tagFetchMode);
+			await Repository.Accessor.AddRemote
+				.InvokeAsync(parameters)
+				.ConfigureAwait(continueOnCapturedContext: false);
+
+			var remote = new Remote(Repository, name, url, url);
+			AddObject(remote);
+
+			if(fetch)
+			{
+				await Repository.Refs.Remotes
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 
 			return remote;
 		}
@@ -128,7 +160,7 @@ namespace gitter.Git
 			Verify.Argument.IsValidGitObject(remote, Repository, nameof(remote));
 			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
 			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
-				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Remote"));
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Remote)));
 
 			var oldName = remote.Name;
 			using(Repository.Monitor.BlockNotifications(
@@ -181,15 +213,58 @@ namespace gitter.Git
 			Repository.Refs.Remotes.Refresh();
 		}
 
+		/// <summary>Delete reference to remote repository <paramref name="remote"/>.</summary>
+		/// <param name="remote">Removed remote.</param>
+		internal async Task RemoveRemoteAsync(Remote remote)
+		{
+			Verify.Argument.IsNotNull(remote, nameof(remote));
+			Verify.Argument.IsValidGitObject(remote, Repository, nameof(remote));
+
+			var name = remote.Name;
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.RemoteRemoved,
+				RepositoryNotifications.BranchChanged))
+			{
+				await Repository.Accessor.RemoveRemote
+					.InvokeAsync(new RemoveRemoteParameters(name))
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			RemoveObject(remote);
+			await Repository.Refs.Remotes
+				.RefreshAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
+		}
+
 		#endregion
 
 		#region Refresh()
 
-		/// <summary>Sync information on remotes: removes non-existent, adds new, updates url.</summary>
+		/// <summary>Sync information on remotes: removes non-existent, adds new, updates URL.</summary>
 		public void Refresh()
 		{
 			var remotes = Repository.Accessor.QueryRemotes.Invoke(
 				new QueryRemotesParameters());
+			lock(SyncRoot)
+			{
+				CacheUpdater.UpdateObjectDictionary<Remote, RemoteData>(
+					ObjectStorage,
+					null,
+					null,
+					remotes,
+					remoteData => ObjectFactories.CreateRemote(Repository, remoteData),
+					ObjectFactories.UpdateRemote,
+					InvokeObjectAdded,
+					InvokeObjectRemoved,
+					true);
+			}
+		}
+
+		/// <summary>Sync information on remotes: removes non-existent, adds new, updates URL.</summary>
+		public async Task RefreshAsync()
+		{
+			var remotes = await Repository.Accessor.QueryRemotes
+				.InvokeAsync(new QueryRemotesParameters())
+				.ConfigureAwait(continueOnCapturedContext: false);
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<Remote, RemoteData>(
@@ -216,9 +291,8 @@ namespace gitter.Git
 			RemotesUtility.FetchOrPull(Repository, null, false);
 		}
 
-		public Task FetchAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken = default)
+		public Task FetchAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
-			Verify.Argument.IsNotNull(progress, nameof(progress));
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			return RemotesUtility.FetchOrPullAsync(Repository, null, false, progress, cancellationToken);
@@ -235,9 +309,8 @@ namespace gitter.Git
 			RemotesUtility.FetchOrPull(Repository, null, true);
 		}
 
-		public Task PullAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken = default)
+		public Task PullAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
-			Verify.Argument.IsNotNull(progress, nameof(progress));
 			Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
 			return RemotesUtility.FetchOrPullAsync(Repository, null, true, progress, cancellationToken);

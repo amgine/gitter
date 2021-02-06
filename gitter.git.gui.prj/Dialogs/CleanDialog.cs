@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -33,10 +34,10 @@ namespace gitter.Git.Gui.Dialogs
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class CleanDialog : DialogBase, IExecutableDialog
+	public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 	{
-
 		#region Data
+
 		private FilesToCleanBinding _dataBinding;
 
 		#endregion
@@ -101,20 +102,14 @@ namespace gitter.Git.Gui.Dialogs
 
 		private FilesToCleanBinding DataBinding
 		{
-			get { return _dataBinding; }
+			get => _dataBinding;
 			set
 			{
 				if(_dataBinding != value)
 				{
-					if(_dataBinding != null)
-					{
-						_dataBinding.Dispose();
-					}
+					_dataBinding?.Dispose();
 					_dataBinding = value;
-					if(_dataBinding != null)
-					{
-						_dataBinding.ReloadData();
-					}
+					_dataBinding?.ReloadData();
 				}
 			}
 		}
@@ -182,33 +177,23 @@ namespace gitter.Git.Gui.Dialogs
 						_radIncludeBoth.Checked = true;
 						break;
 					default:
-						throw new ArgumentException("value");
+						throw new ArgumentException(nameof(value));
 				}
 			}
 		}
 
 		public string IncludePattern
 		{
-			get { return _txtPattern.Text.Trim(); }
-			set { _txtPattern.Text = value; }
+			get => _txtPattern.Text.Trim();
+			set => _txtPattern.Text = value;
 		}
 
 		public string ExcludePattern
 		{
-			get
-			{
-				if(_txtExclude.Enabled)
-				{
-					return _txtExclude.Text.Trim();
-				}
-				else
-				{
-					return string.Empty;
-				}
-			}
+			get =>  _txtExclude.Enabled ? _txtExclude.Text.Trim() : string.Empty;
 			set
 			{
-				Verify.State.IsTrue(_txtExclude.Enabled, "Excluide pattern is not supported.");
+				Verify.State.IsTrue(_txtExclude.Enabled, "Exclude pattern is not supported.");
 
 				_txtExclude.Text = value;
 			}
@@ -216,21 +201,15 @@ namespace gitter.Git.Gui.Dialogs
 
 		public bool RemoveDirectories
 		{
-			get { return _chkRemoveDirectories.Checked; }
-			set { _chkRemoveDirectories.Checked = value; }
+			get => _chkRemoveDirectories.Checked;
+			set => _chkRemoveDirectories.Checked = value;
 		}
 
 		private void UpdateList()
 		{
-			if(IsDisposed)
-			{
-				return;
-			}
+			if(IsDisposed) return;
 
-			if(DataBinding == null)
-			{
-				DataBinding = new FilesToCleanBinding(Repository, _lstFilesToClear);
-			}
+			DataBinding ??= new FilesToCleanBinding(Repository, _lstFilesToClear);
 			DataBinding.IncludePattern = IncludePattern;
 			DataBinding.ExcludePattern = ExcludePattern;
 			DataBinding.CleanFilesMode = Mode;
@@ -258,8 +237,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void OnFilesToClearItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as ITreeItemListItem;
-			if(item != null)
+			if(e.Item is ITreeItemListItem item)
 			{
 				Utility.OpenUrl(System.IO.Path.Combine(
 					item.TreeItem.Repository.WorkingDirectory, item.TreeItem.RelativePath));
@@ -267,12 +245,12 @@ namespace gitter.Git.Gui.Dialogs
 		}
 
 		/// <summary>Execute dialog associated action.</summary>
-		/// <returns><c>true</c>, if action succeded</returns>
-		public bool Execute()
+		/// <returns><c>true</c>, if action succeeded</returns>
+		public async Task<bool> ExecuteAsync()
 		{
 			try
 			{
-				Repository.Status.Clean(IncludePattern, ExcludePattern, Mode, RemoveDirectories);
+				await Repository.Status.CleanAsync(IncludePattern, ExcludePattern, Mode, RemoveDirectories);
 			}
 			catch(GitException exc)
 			{

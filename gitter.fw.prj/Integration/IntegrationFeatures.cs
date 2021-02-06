@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -81,18 +81,10 @@ namespace gitter.Framework
 		#region IEnumerable<IIntegrationFeature> Members
 
 		public IEnumerator<IIntegrationFeature> GetEnumerator()
-		{
-			return _features.Values.GetEnumerator();
-		}
-
-		#endregion
-
-		#region IEnumerable Members
+			=> _features.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _features.Values.GetEnumerator();
-		}
+			=> _features.Values.GetEnumerator();
 
 		#endregion
 	}

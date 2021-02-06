@@ -20,10 +20,14 @@
 
 namespace gitter.Git.Gui.Interfaces
 {
+	using System.Threading.Tasks;
+
 	using gitter.Framework.Mvc;
 
 	interface ICommitController : IViewController<ICommitView>
 	{
 		bool TryCommit();
+
+		Task<bool> TryCommitAsync();
 	}
 }

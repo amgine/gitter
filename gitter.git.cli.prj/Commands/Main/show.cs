@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,9 +26,7 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class ShowCommand : Command
 	{
 		public ICommandArgument AbbrevCommit()
-		{
-			return new CommandFlag("--abbrev-commit");
-		}
+			=> new CommandFlag("--abbrev-commit");
 
 		public ShowCommand()
 			: base("show")

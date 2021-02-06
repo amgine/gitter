@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -116,7 +116,7 @@ namespace gitter.Git.Gui
 
 		private AsyncTreeDataSource DataSource
 		{
-			get { return _dataSource; }
+			get => _dataSource;
 			set
 			{
 				if(_dataSource != value)
@@ -196,85 +196,98 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		private ContextMenuStrip CreateFileContextMenu(TreeFile file)
+		{
+			Assert.IsNotNull(file);
+
+			var menu = new ContextMenuStrip();
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, file.FullPath),
+					GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, file.FullPath),
+					GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(file.FullPath)),
+					new ToolStripSeparator(),
+					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
+						}),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
+					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
+				});
+			return menu;
+		}
+
+		private ContextMenuStrip CreateDirectoryContextMenu(CustomListBoxItem item, TreeDirectory directory)
+		{
+			Assert.IsNotNull(item);
+			Assert.IsNotNull(directory);
+
+			var menu = new ContextMenuStrip();
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, directory.FullPath),
+					GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, directory.FullPath),
+				});
+			if(item.Items.Count > 0)
+			{
+				menu.Items.AddRange(
+					new ToolStripItem[]
+					{
+						new ToolStripSeparator(),
+						GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(item),
+						GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(item),
+					});
+			}
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					new ToolStripSeparator(),
+					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, directory.RelativePath + "/"),
+				});
+			return menu;
+		}
+
+		private ContextMenuStrip CreateCommitContextMenu(TreeCommit commit)
+		{
+			Assert.IsNotNull(commit);
+
+			var menu = new ContextMenuStrip();
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetOpenAppItem<ToolStripMenuItem>(
+						Resources.StrOpenWithGitter, null, Application.ExecutablePath, commit.FullPath.SurroundWithDoubleQuotes()),
+					GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, commit.FullPath),
+					GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, commit.FullPath),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, commit.RelativePath),
+				});
+			return menu;
+		}
+
 		private void OnItemContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
 		{
-			var item = e.Item as ITreeItemListItem;
-			if(item != null)
+			Assert.IsNotNull(e);
+
+			if(e.Item is not ITreeItemListItem item) return;
+
+			var menu = item.TreeItem switch
 			{
-				var file = item.TreeItem as TreeFile;
-				if(file != null)
-				{
-					var menu = new ContextMenuStrip();
-					menu.Items.AddRange(
-						new ToolStripItem[]
-						{
-							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, file.FullPath),
-							GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, file.FullPath),
-							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(file.FullPath)),
-							new ToolStripSeparator(),
-							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-								new ToolStripItem[]
-								{
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
-								}),
-							new ToolStripSeparator(),
-							GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
-						});
-					Utility.MarkDropDownForAutoDispose(menu);
-					e.ContextMenu = menu;
-					return;
-				}
-				var directory = item.TreeItem as TreeDirectory;
-				if(directory != null)
-				{
-					var menu = new ContextMenuStrip();
-					menu.Items.AddRange(
-						new ToolStripItem[]
-						{
-							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, directory.FullPath),
-							GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, directory.FullPath),
-						});
-					if(e.Item.Items.Count != 0)
-					{
-						menu.Items.AddRange(
-							new ToolStripItem[]
-							{
-								new ToolStripSeparator(),
-								GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(e.Item),
-								GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(e.Item),
-							});
-					}
-					menu.Items.AddRange(
-						new ToolStripItem[]
-						{
-							new ToolStripSeparator(),
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, directory.RelativePath + "/"),
-						});
-					Utility.MarkDropDownForAutoDispose(menu);
-					e.ContextMenu = menu;
-					return;
-				}
-				var commit = item.TreeItem as TreeCommit;
-				if(commit != null)
-				{
-					var menu = new ContextMenuStrip();
-					menu.Items.AddRange(
-						new ToolStripItem[]
-						{
-							GuiItemFactory.GetOpenAppItem<ToolStripMenuItem>(
-								Resources.StrOpenWithGitter, null, Application.ExecutablePath, commit.FullPath.SurroundWithDoubleQuotes()),
-							GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, commit.FullPath),
-							GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, commit.FullPath),
-							new ToolStripSeparator(),
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, commit.RelativePath),
-						});
-					Utility.MarkDropDownForAutoDispose(menu);
-					e.ContextMenu = menu;
-					return;
-				}
+				TreeFile      file      => CreateFileContextMenu(file),
+				TreeDirectory directory => CreateDirectoryContextMenu(e.Item, directory),
+				TreeCommit    commit    => CreateCommitContextMenu(commit),
+				_ => default,
+			};
+			if(menu != null)
+			{
+				Utility.MarkDropDownForAutoDispose(menu);
+				e.ContextMenu = menu;
 			}
 		}
 
@@ -283,25 +296,22 @@ namespace gitter.Git.Gui
 		/// <returns>Context menu for specified location.</returns>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new ContextMenuStrip();
-				menu.Items.AddRange(
-					new ToolStripItem[]
-					{
-						GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.WorkingDirectory),
-						GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, Repository.WorkingDirectory),
-						new ToolStripSeparator(),
-						GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(requestEventArgs.Item),
-						GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(requestEventArgs.Item),
-					});
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository == null) return default;
+
+			var menu = new ContextMenuStrip();
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.WorkingDirectory),
+					GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, Repository.WorkingDirectory),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(requestEventArgs.Item),
+					GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(requestEventArgs.Item),
+				});
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

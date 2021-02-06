@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -33,35 +33,17 @@ namespace gitter.Framework
 
 		private sealed class SystemItemBackgroundStyles : IItemBackgroundStyles
 		{
-			public IBackgroundStyle Focused
-			{
-				get { return BackgroundStyle.Focused; }
-			}
+			public IBackgroundStyle Focused => BackgroundStyle.Focused;
 
-			public IBackgroundStyle SelectedFocused
-			{
-				get { return BackgroundStyle.SelectedFocused; }
-			}
+			public IBackgroundStyle SelectedFocused => BackgroundStyle.SelectedFocused;
 
-			public IBackgroundStyle Selected
-			{
-				get { return BackgroundStyle.Selected; }
-			}
+			public IBackgroundStyle Selected => BackgroundStyle.Selected;
 
-			public IBackgroundStyle SelectedNoFocus
-			{
-				get { return BackgroundStyle.SelectedNoFocus; }
-			}
+			public IBackgroundStyle SelectedNoFocus => BackgroundStyle.SelectedNoFocus;
 
-			public IBackgroundStyle Hovered
-			{
-				get { return BackgroundStyle.Hovered; }
-			}
+			public IBackgroundStyle Hovered => BackgroundStyle.Hovered;
 
-			public IBackgroundStyle HoveredFocused
-			{
-				get { return BackgroundStyle.HoveredFocused; }
-			}
+			public IBackgroundStyle HoveredFocused => BackgroundStyle.HoveredFocused;
 		}
 
 		public MSVS2010Style()
@@ -70,71 +52,35 @@ namespace gitter.Framework
 			_itemBackgroundStyles = new SystemItemBackgroundStyles();
 		}
 
-		public string Name
-		{
-			get { return "MSVS2010Style"; }
-		}
+		public string Name => "MSVS2010Style";
 
-		public string DisplayName
-		{
-			get { return "Microsoft Visual Studio 2010"; }
-		}
+		public string DisplayName => "Microsoft Visual Studio 2010";
 
-		public GitterStyleType Type
-		{
-			get { return GitterStyleType.LightBackground; }
-		}
+		public GitterStyleType Type => GitterStyleType.LightBackground;
 
-		public IGitterStyleColors Colors
-		{
-			get { return _colors; }
-		}
+		public IGitterStyleColors Colors => _colors;
 
 		public IItemBackgroundStyles ItemBackgroundStyles
-		{
-			get { return _itemBackgroundStyles; }
-		}
+			=> _itemBackgroundStyles;
 
 		public IScrollBarWidget CreateScrollBar(Orientation orientation)
-		{
-			return new SystemScrollBarAdapter(orientation);
-		}
+			=> new SystemScrollBarAdapter(orientation);
 
 		public ICheckBoxWidget CreateCheckBox()
-		{
-			return new SystemCheckBoxAdapter();
-		}
+			=> new SystemCheckBoxAdapter();
 
 		public IButtonWidget CreateButton()
-		{
-			return new SystemButtonAdapter();
-		}
+			=> new SystemButtonAdapter();
 
 		public CustomListBoxRenderer ListBoxRenderer
-		{
-			get { return CustomListBoxManager.Win7Renderer; }
-		}
+			=> CustomListBoxManager.Win7Renderer;
 
 		public ProcessOverlayRenderer OverlayRenderer
-		{
-			get { return ProcessOverlayRenderer.Default; }
-		}
+			=> ProcessOverlayRenderer.Default;
 
 		public ToolStripRenderer ToolStripRenderer
-		{
-			get
-			{
-				if(_toolStriprenderer == null)
-				{
-					_toolStriprenderer = new MSVS2010StyleToolStripRenderer();
-				}
-				return _toolStriprenderer;
-			}
-		}
+			=> _toolStriprenderer ??= new MSVS2010StyleToolStripRenderer();
 
-		public ViewRenderer ViewRenderer
-		{
-			get { return ViewManager.MSVS2010StyleRenderer; }
-		}
+		public ViewRenderer ViewRenderer => ViewManager.MSVS2010StyleRenderer;
 	}
 }

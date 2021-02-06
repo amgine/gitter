@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Globalization;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -35,7 +36,7 @@ namespace gitter.Git
 		/// <summary>Object pointed by this <see cref="Reference"/>.</summary>
 		private IRevisionPointer _pointer;
 		/// <summary><see cref="WeakReference"/> to this <see cref="Reference"/>'s <see cref="Reflog"/>.</summary>
-		private WeakReference _reflogRef;
+		private WeakReference<Reflog> _reflogRef;
 		/// <summary>Reflog access sync object.</summary>
 		private readonly object _reflogSync;
 
@@ -102,12 +103,7 @@ namespace gitter.Git
 			/// </summary>
 			public string FullName => _reference.FullName + "@{" + ReflogSelector + "}";
 
-			/// <summary>
-			/// Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.
-			/// </summary>
-			/// <returns>
-			/// Commit which is pointed by this <see cref="IRevisionPointer"/>.
-			/// </returns>
+			/// <inheritdoc/>
 			public Revision Dereference()
 			{
 				var revisionData = _reference.Repository.Accessor.Dereference.Invoke(
@@ -115,6 +111,17 @@ namespace gitter.Git
 					{
 						LoadRevisionData = true,
 					});
+				return ObjectFactories.CreateRevision(_reference.Repository, revisionData);
+			}
+
+			/// <inheritdoc/>
+			public async Task<Revision> DereferenceAsync()
+			{
+				var revisionData = await _reference.Repository.Accessor.Dereference.InvokeAsync(
+					new DereferenceParameters(FullName)
+					{
+						LoadRevisionData = true,
+					}).ConfigureAwait(continueOnCapturedContext: false);
 				return ObjectFactories.CreateRevision(_reference.Repository, revisionData);
 			}
 
@@ -128,6 +135,9 @@ namespace gitter.Git
 
 		#region Static
 
+		/// <summary>Returns reference type name.</summary>
+		/// <param name="referenceType">Reference type.</param>
+		/// <returns>Reference type name.</returns>
 		public static string GetReferenceTypeName(ReferenceType referenceType)
 			=> referenceType switch
 			{
@@ -172,7 +182,7 @@ namespace gitter.Git
 			{
 				bool lastchar = i == name.Length - 1;
 				var c = name[i];
-				if(c < 32 || c == 127)
+				if(char.IsControl(c))
 				{
 					errorMessage = string.Format(CultureInfo.InvariantCulture,
 						Resources.ErrNameCannotContainASCIIControlCharacters, GetReferenceTypeName(referenceType));
@@ -240,14 +250,7 @@ namespace gitter.Git
 							return false;
 						}
 						break;
-					case ' ':
-					case '\\':
-					case '~':
-					case '^':
-					case ':':
-					case '?':
-					case '*':
-					case '[':
+					case ' ' or '\\' or '~' or '^' or ':' or '?' or '*' or '[':
 						errorMessage = string.Format(CultureInfo.InvariantCulture,
 							Resources.ErrNameCannotContainCharacter, referenceType, c);
 						return false;
@@ -352,20 +355,12 @@ namespace gitter.Git
 					if(_reflogRef == null)
 					{
 						reflog = new Reflog(this);
-						_reflogRef = new WeakReference(reflog);
+						_reflogRef = new WeakReference<Reflog>(reflog);
 					}
-					else
+					else if(!_reflogRef.TryGetTarget(out reflog))
 					{
-						var obj = _reflogRef.Target;
-						if(obj == null)
-						{
-							reflog = new Reflog(this);
-							_reflogRef = new WeakReference(reflog);
-						}
-						else
-						{
-							reflog = (Reflog)obj;
-						}
+						reflog = new Reflog(this);
+						_reflogRef.SetTarget(reflog);
 					}
 				}
 				return reflog;
@@ -423,18 +418,9 @@ namespace gitter.Git
 		{
 			lock(_reflogSync)
 			{
-				if(_reflogRef != null)
+				if(_reflogRef != null && _reflogRef.TryGetTarget(out var reflog))
 				{
-					var obj = _reflogRef.Target;
-					if(obj == null)
-					{
-						_reflogRef = null;
-					}
-					else
-					{
-						var reflog = (Reflog)obj;
-						reflog.NotifyRecordAdded();
-					}
+					reflog.NotifyRecordAdded();
 				}
 			}
 		}
@@ -453,12 +439,10 @@ namespace gitter.Git
 		/// <value>Revision expression.</value>
 		string IRevisionPointer.Pointer => Name;
 
-		/// <summary>
-		/// Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.
-		/// </summary>
-		/// <returns>
-		/// Commit which is pointed by this <see cref="IRevisionPointer"/>.
-		/// </returns>
+		/// <inheritdoc/>
 		Revision IRevisionPointer.Dereference() => _pointer.Dereference();
+
+		/// <inheritdoc/>
+		Task<Revision> IRevisionPointer.DereferenceAsync() => _pointer.DereferenceAsync();
 	}
 }

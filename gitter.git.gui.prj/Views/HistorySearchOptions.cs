@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -20,8 +20,9 @@
 
 namespace gitter.Git.Gui.Views
 {
+	using gitter.Framework.Controls;
+
 	class HistorySearchOptions : SearchOptions
 	{
-		public bool MatchCase { get; set; }
 	}
 }

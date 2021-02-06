@@ -85,7 +85,8 @@ namespace gitter.Git.Gui.Controls
 			DiffViewer.Panels.AddRange(panels);
 		}
 
-		protected override Task<Diff> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		protected override Task<Diff> FetchDataAsync(
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.State.IsFalse(IsDisposed, "DiffBinding is disposed.");
 

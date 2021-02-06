@@ -387,7 +387,7 @@ namespace gitter.Framework.Controls
 			ListBox.Renderer.OnPaintColumnContent(this, paintEventArgs);
 		}
 
-		protected virtual void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		protected virtual void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 		}
 
@@ -398,7 +398,7 @@ namespace gitter.Framework.Controls
 
 		public void PaintSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
 		{
-			OnPainSubItem(subItemPaintEventArgs);
+			OnPaintSubItem(subItemPaintEventArgs);
 		}
 
 		public Size MeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

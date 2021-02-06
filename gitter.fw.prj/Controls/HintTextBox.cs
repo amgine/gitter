@@ -25,7 +25,7 @@ using System.ComponentModel;
 
 namespace gitter.Framework.Controls
 {
-	/// <summary>TextBox which dispays grayed hint text if no text is entered.</summary>
+	/// <summary>TextBox which displays grayed hint text if no text is entered.</summary>
 	public class HintTextBox : TextBox
 	{
 		private bool _userTextEntered;

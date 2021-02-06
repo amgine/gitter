@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -42,43 +42,21 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void OnRevisionInputBoxKeyPress(object sender, KeyPressEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			var textBox = (TextBox)sender;
-			var refType = (ReferenceType)textBox.Tag;
-			string refTypeName;
-			switch(refType)
+			string refTypeName = (ReferenceType)textBox.Tag switch
 			{
-				case ReferenceType.LocalBranch:
-					refTypeName = Resources.StrBranch;
-					break;
-				case ReferenceType.Tag:
-					refTypeName = Resources.StrTag;
-					break;
-				case ReferenceType.Remote:
-					refTypeName = Resources.StrRemote;
-					break;
-				default:
-					refTypeName = Resources.StrReference;
-					break;
-			}
-			if((e.KeyChar != 8) && (e.KeyChar < 32 || e.KeyChar == 127))
-			{
-				e.Handled = true;
-				NotificationService.NotifyInputError(
-					textBox, string.Empty,
-					Resources.ErrNameCannotContainASCIIControlCharacters.UseAsFormat(refTypeName));
-			}
-			else
+				ReferenceType.LocalBranch => Resources.StrBranch,
+				ReferenceType.Tag         => Resources.StrTag,
+				ReferenceType.Remote      => Resources.StrRemote,
+				_ => Resources.StrReference,
+			};
+			if(!char.IsControl(e.KeyChar))
 			{
 				switch(e.KeyChar)
 				{
-					case ' ':
-					case '~':
-					case ':':
-					case '?':
-					case '^':
-					case '*':
-					case '[':
-					case '\\':
+					case ' ' or '~' or ':' or '?' or '^' or '*' or '[' or '\\':
 						e.Handled = true;
 						NotificationService.NotifyInputError(
 							textBox, string.Empty, Resources.ErrNameCannotContainCharacter.UseAsFormat(

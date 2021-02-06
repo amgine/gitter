@@ -62,7 +62,7 @@ namespace gitter.Git.Gui.Controls
 			return base.OnMeasureSubItem(measureEventArgs);
 		}
 
-		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 			if(TryGetAuthorDate(paintEventArgs.Item, out var authorDate))
 			{

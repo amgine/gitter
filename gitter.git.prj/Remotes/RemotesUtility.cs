@@ -86,9 +86,32 @@ namespace gitter.Git
 			}
 		}
 
+		private static Task GetFetchOrPullTask(Repository repository, Remote remote, bool pull,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		{
+			if(pull)
+			{
+				var p = new PullParameters();
+				if(remote != null)
+				{
+					p.Repository = remote.Name;
+				}
+				return repository.Accessor.Pull.InvokeAsync(p, progress, cancellationToken);
+			}
+			else
+			{
+				var p = new FetchParameters();
+				if(remote != null)
+				{
+					p.Repository = remote.Name;
+				}
+				return repository.Accessor.Fetch.InvokeAsync(p, progress, cancellationToken);
+			}
+		}
+
 		public static async Task FetchOrPullAsync(
 			Repository repository, Remote remote, bool pull,
-			IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			var affectedReferences = ReferenceType.RemoteBranch | ReferenceType.Tag;
 			if(pull)
@@ -98,26 +121,8 @@ namespace gitter.Git
 			var suppressedNotifications = repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged, RepositoryNotifications.TagChanged);
 			var state1 = RefsState.Capture(repository, affectedReferences);
-			Task task;
-			if(pull)
-			{
-				var p = new PullParameters();
-				if(remote != null)
-				{
-					p.Repository = remote.Name;
-				}
-				task = repository.Accessor.Pull.InvokeAsync(p, progress, cancellationToken);
-			}
-			else
-			{
-				var p = new FetchParameters();
-				if(remote != null)
-				{
-					p.Repository = remote.Name;
-				}
-				task = repository.Accessor.Fetch.InvokeAsync(p, progress, cancellationToken);
-			}
-			await task.ConfigureAwait(continueOnCapturedContext: false);
+			await GetFetchOrPullTask(repository, remote, pull, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 			
 			progress?.Report(new OperationProgress(Resources.StrRefreshingReferences.AddEllipsis()));
 			repository.Refs.Refresh(affectedReferences);
@@ -137,28 +142,6 @@ namespace gitter.Git
 			{
 				repository.Remotes.OnFetchCompleted(remote, changes);
 			}
-			//return task.ContinueWith(
-			//	t =>
-			//	{
-			//		progress?.Report(new OperationProgress(Resources.StrRefreshingReferences.AddEllipsis()));
-			//		repository.Refs.Refresh(affectedReferences);
-			//		var state2 = RefsState.Capture(repository, affectedReferences);
-			//		var changes = RefsDiff.Calculate(state1, state2);
-			//		suppressedNotifications.Dispose();
-			//		if(changes != null && changes.Length != 0)
-			//		{
-			//			repository.OnUpdated();
-			//		}
-			//		TaskUtility.PropagateFaultedStates(t);
-			//		if(pull)
-			//		{
-			//			repository.Remotes.OnPullCompleted(remote, changes);
-			//		}
-			//		else
-			//		{
-			//			repository.Remotes.OnFetchCompleted(remote, changes);
-			//		}
-			//	});
 		}
 
 		private static PushParameters GetPushParameters(string remoteRepository, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
@@ -170,11 +153,11 @@ namespace gitter.Git
 			}
 			var parameters = new PushParameters
 			{
-				Repository	= remoteRepository,
-				PushMode	= sendTags ? PushMode.Tags : PushMode.Default,
-				Force		= forceOverwrite,
-				ThinPack	= thinPack,
-				Refspecs	= names,
+				Repository = remoteRepository,
+				PushMode   = sendTags ? PushMode.Tags : PushMode.Default,
+				Force      = forceOverwrite,
+				ThinPack   = thinPack,
+				Refspecs   = names,
 			};
 			return parameters;
 		}
@@ -206,13 +189,15 @@ namespace gitter.Git
 			}
 		}
 
-		public static Task PushAsync(Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public static Task PushAsync(Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			var parameters = GetPushParameters(url, branches, forceOverwrite, thinPack, sendTags);
 			return PushAsync(repository, parameters, progress, cancellationToken);
 		}
 
-		public static Task PushAsync(Repository repository, Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public static Task PushAsync(Repository repository, Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			var parameters = GetPushParameters(remote.Name, branches, forceOverwrite, thinPack, sendTags);
 			return PushAsync(repository, parameters, progress, cancellationToken);

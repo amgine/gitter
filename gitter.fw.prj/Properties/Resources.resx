@@ -389,7 +389,7 @@
     <value>Unable to execute some actions</value>
   </data>
   <data name="ErrSomeOptionsCouldNotBeApplied" xml:space="preserve">
-    <value>Some options could not be applied because gitter was uable to start an elevated process.</value>
+    <value>Some options could not be applied because gitter was unable to start an elevated process.</value>
   </data>
   <data name="StrSpelling" xml:space="preserve">
     <value>Spell Checking</value>
@@ -576,5 +576,26 @@
   </data>
   <data name="StrShowUTCOffset" xml:space="preserve">
     <value>Show UTC offset</value>
+  </data>
+  <data name="StrFind" xml:space="preserve">
+    <value>Find</value>
+  </data>
+  <data name="StrNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="StrPrevious" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="StrMatchCase" xml:space="preserve">
+    <value>Match Case</value>
+  </data>
+  <data name="ImgSearchClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\search-close.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgSearchNext" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\search-next.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgSearchPrevious" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\search-prevous.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

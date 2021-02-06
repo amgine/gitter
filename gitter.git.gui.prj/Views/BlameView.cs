@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -58,20 +58,14 @@ namespace gitter.Git.Gui.Views
 
 		private BlameFileBinding BlameFileBinding
 		{
-			get { return _blameFileBinding; }
+			get => _blameFileBinding;
 			set
 			{
 				if(_blameFileBinding != value)
 				{
-					if(_blameFileBinding != null)
-					{
-						_blameFileBinding.Dispose();
-					}
+					_blameFileBinding?.Dispose();
 					_blameFileBinding = value;
-					if(_blameFileBinding != null)
-					{
-						_blameFileBinding.ReloadData();
-					}
+					_blameFileBinding?.ReloadData();
 				}
 			}
 		}
@@ -84,20 +78,18 @@ namespace gitter.Git.Gui.Views
 		{
 			base.AttachViewModel(viewModel);
 
-			var vm = viewModel as BlameViewModel;
-			if(vm != null)
+			if(viewModel is not BlameViewModel vm) return;
+
+			var blameSource = vm.BlameSource;
+			if(blameSource != null)
 			{
-				var blameSource = vm.BlameSource;
-				if(blameSource != null)
-				{
-					Text = Resources.StrBlame + ": " + blameSource.ToString();
-					BlameFileBinding = new BlameFileBinding(blameSource, _blamePanel, BlameOptions.Default);
-				}
-				else
-				{
-					Text = Resources.StrBlame;
-					BlameFileBinding = null;
-				}
+				Text = Resources.StrBlame + ": " + blameSource.ToString();
+				BlameFileBinding = new BlameFileBinding(blameSource, _blamePanel, BlameOptions.Default);
+			}
+			else
+			{
+				Text = Resources.StrBlame;
+				BlameFileBinding = null;
 			}
 		}
 

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -41,14 +41,10 @@ namespace gitter.Git.Gui.Controls
 				{
 					case TreeItemType.Blob:
 						return 1;
-					case TreeItemType.Commit:
-						if(data2.ItemType == TreeItemType.Blob)
-							return -1;
-						break;
-					case TreeItemType.Tree:
-						if(data2.ItemType == TreeItemType.Blob)
-							return -1;
-						break;
+					case TreeItemType.Commit when data2.ItemType == TreeItemType.Blob:
+						return -1;
+					case TreeItemType.Tree   when data2.ItemType == TreeItemType.Blob:
+						return -1;
 				}
 			}
 			return string.Compare(data1.Name, data2.Name);
@@ -78,14 +74,10 @@ namespace gitter.Git.Gui.Controls
 				{
 					case TreeItemType.Blob:
 						return 1;
-					case TreeItemType.Commit:
-						if(data2.ItemType == TreeItemType.Blob)
-							return -1;
-						break;
-					case TreeItemType.Tree:
-						if(data2.ItemType == TreeItemType.Blob)
-							return -1;
-						break;
+					case TreeItemType.Commit when data2.ItemType == TreeItemType.Blob:
+						return -1;
+					case TreeItemType.Tree   when data2.ItemType == TreeItemType.Blob:
+						return -1;
 				}
 			}
 			return string.Compare(data1.RelativePath, data2.RelativePath);
@@ -174,26 +166,17 @@ namespace gitter.Git.Gui.Controls
 		protected abstract string GetItemType();
 
 		private string GetItemText()
-		{
-			return _showFullPath ? DataContext.RelativePath : DataContext.Name;
-		}
+			=> _showFullPath ? DataContext.RelativePath : DataContext.Name;
 
 		private Bitmap GetItemOverlay()
-		{
-			switch(DataContext.Status)
+			=> DataContext.Status switch
 			{
-				case FileStatus.Modified:
-					return (DataContext.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayEdit : ImgOverlayEditStaged;
-				case FileStatus.Added:
-					return (DataContext.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayAdd : ImgOverlayAddStaged;
-				case FileStatus.Removed:
-					return (DataContext.StagedStatus == StagedStatus.Unstaged) ? ImgOverlayDel : ImgOverlayDelStaged;
-				case FileStatus.Unmerged:
-					return ImgOverlayConflict;
-				default:
-					return null;
-			}
-		}
+				FileStatus.Modified => DataContext.StagedStatus == StagedStatus.Unstaged ? ImgOverlayEdit : ImgOverlayEditStaged,
+				FileStatus.Added    => DataContext.StagedStatus == StagedStatus.Unstaged ? ImgOverlayAdd  : ImgOverlayAddStaged,
+				FileStatus.Removed  => DataContext.StagedStatus == StagedStatus.Unstaged ? ImgOverlayDel  : ImgOverlayDelStaged,
+				FileStatus.Unmerged => ImgOverlayConflict,
+				_ => null,
+			};
 
 		/// <summary>
 		/// Override this to provide subitem measurement.
@@ -280,13 +263,15 @@ namespace gitter.Git.Gui.Controls
 		/// <returns>Context menu for specified location.</returns>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			if(DataContext.StagedStatus == StagedStatus.Staged)
 			{
 				var menu = new StagedItemMenu(DataContext);
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
-			else if(DataContext.StagedStatus == StagedStatus.Unstaged)
+			if(DataContext.StagedStatus == StagedStatus.Unstaged)
 			{
 				var menu = new UnstagedItemMenu(DataContext);
 				Utility.MarkDropDownForAutoDispose(menu);

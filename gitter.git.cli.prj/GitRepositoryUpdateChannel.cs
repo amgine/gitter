@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -44,7 +44,7 @@ namespace gitter.Git
 			_branch = branch;
 		}
 
-		/// <summary>Check latest gitter version on this chanel.</summary>
+		/// <summary>Check latest gitter version on this channel.</summary>
 		/// <returns>Latest gitter version.</returns>
 		public Version CheckVersion()
 		{

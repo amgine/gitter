@@ -32,8 +32,8 @@ namespace gitter.Framework.Mvc.WinForms
 
 		public override bool IsReadOnly
 		{
-			get { return Control.ReadOnly; }
-			set { Control.ReadOnly = value; }
+			get => Control.ReadOnly;
+			set => Control.ReadOnly = value;
 		}
 
 		protected override string FetchValue() => Control.Text;

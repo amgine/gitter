@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -36,18 +36,17 @@ namespace gitter.Git
 	[ToolboxItem(false)]
 	public partial class GitOptionsPage : PropertyPage, IExecutableDialog
 	{
-		public static readonly new Guid Guid = new Guid("22102F21-350D-426A-AE8A-685928EAABE5");
+		public static readonly new Guid Guid = new("22102F21-350D-426A-AE8A-685928EAABE5");
 
 		private DialogBase _gitAccessorOptions;
 
 		private static Dictionary<Type, Func<IGitAccessor, DialogBase>> _gitAcessorSetupControls =
-			new Dictionary<Type, Func<IGitAccessor, DialogBase>>()
+			new()
 			{
-				{ typeof(MSysGitAccessorProvider), accessor => new CliOptionsPage(accessor) },
+				[typeof(GitCLIAccessorProvider)] = accessor => new CliOptionsPage(accessor),
 			};
 
-		private Dictionary<Type, Tuple<IGitAccessor, DialogBase>> _cachedControls =
-			new Dictionary<Type, Tuple<IGitAccessor, DialogBase>>();
+		private Dictionary<Type, Tuple<IGitAccessor, DialogBase>> _cachedControls = new();
 
 		private readonly IGitRepositoryProvider _repositoryProvider;
 		private IGitAccessorProvider _selectedAccessorProvder;
@@ -108,32 +107,26 @@ namespace gitter.Git
 
 		private void ShowGitAccessorSetupControl(IGitAccessorProvider accessorProvider, IGitAccessor accessor)
 		{
-			if(accessorProvider != null)
+			if(accessorProvider == null) return;
+
+			var type = accessorProvider.GetType();
+			if(_cachedControls.TryGetValue(type, out var cachedControl))
 			{
-				var type = accessorProvider.GetType();
-				Tuple<IGitAccessor, DialogBase> cachedControl;
-				if(_cachedControls.TryGetValue(type, out cachedControl))
+				ShowGitAccessorSetupControl(cachedControl.Item2);
+				_selectedAccessorProvder = accessorProvider;
+				_selectedAccessor = cachedControl.Item1;
+			}
+			else
+			{
+				accessor ??= accessorProvider.CreateAccessor();
+				if(_gitAcessorSetupControls.TryGetValue(type, out var setupControlFactory))
 				{
-					ShowGitAccessorSetupControl(cachedControl.Item2);
-					_selectedAccessorProvder = accessorProvider;
-					_selectedAccessor = cachedControl.Item1;
+					var setupControl = setupControlFactory(accessor);
+					ShowGitAccessorSetupControl(setupControl);
+					_cachedControls.Add(type, Tuple.Create(accessor, setupControl));
 				}
-				else
-				{
-					if(accessor == null)
-					{
-						accessor = accessorProvider.CreateAccessor();
-					}
-					Func<IGitAccessor, DialogBase> setupControlFactory;
-					if(_gitAcessorSetupControls.TryGetValue(type, out setupControlFactory))
-					{
-						var setupControl = setupControlFactory(accessor);
-						ShowGitAccessorSetupControl(setupControl);
-						_cachedControls.Add(type, Tuple.Create(accessor, setupControl));
-					}
-					_selectedAccessorProvder = accessorProvider;
-					_selectedAccessor = accessor;
-				}
+				_selectedAccessorProvder = accessorProvider;
+				_selectedAccessor = accessor;
 			}
 		}
 
@@ -174,22 +167,14 @@ namespace gitter.Git
 
 		public bool Execute()
 		{
-			if(_gitAccessorOptions is IExecutableDialog executableDialog)
+			if(_gitAccessorOptions is not IExecutableDialog executableDialog) return true;
+
+			if(executableDialog.Execute())
 			{
-				if(executableDialog.Execute())
-				{
-					_repositoryProvider.GitAccessor = _selectedAccessor;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			else
-			{
+				_repositoryProvider.GitAccessor = _selectedAccessor;
 				return true;
 			}
+			return false;
 		}
 
 		#endregion

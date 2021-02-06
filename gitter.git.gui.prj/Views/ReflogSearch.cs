@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -37,10 +37,9 @@ namespace gitter.Git.Gui.Views
 		protected static bool TestReflogRecord(ReflogRecord record, T search)
 		{
 			Assert.IsNotNull(record);
+			Assert.IsNotNull(search);
 
-			var comparison = search.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-			if(record.Message.IndexOf(search.Text, comparison) != -1) return true;
-			return TestRevision(record.Revision, search);
+			return TestString(record.Message, search) || TestRevision(record.Revision, search);
 		}
 
 		protected override bool TestItem(CustomListBoxItem item, T search)

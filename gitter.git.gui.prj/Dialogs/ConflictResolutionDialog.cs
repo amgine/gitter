@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -33,51 +33,32 @@ namespace gitter.Git.Gui.Dialogs
 		private readonly ConflictResolution _resolution2;
 
 		private static string StatusToString(FileStatus status)
-		{
-			switch(status)
+			=> status switch
 			{
-				case FileStatus.Added:
-					return Resources.StrlAdded;
-				case FileStatus.Removed:
-					return Resources.StrlDeleted;
-				case FileStatus.Modified:
-					return Resources.StrlModified;
-				default:
-					throw new ArgumentException(nameof(status));
-			}
-		}
+				FileStatus.Added    => Resources.StrlAdded,
+				FileStatus.Removed  => Resources.StrlDeleted,
+				FileStatus.Modified => Resources.StrlModified,
+				_ => throw new ArgumentException(nameof(status)),
+			};
 
 		private static Color StatusToColor(FileStatus status)
-		{
-			switch(status)
+			=> status switch
 			{
-				case FileStatus.Added:
-					return Color.Green;
-				case FileStatus.Removed:
-					return Color.Red;
-				case FileStatus.Modified:
-					return Color.Yellow;
-				default:
-					throw new ArgumentException(nameof(status));
-			}
-		}
+				FileStatus.Added    => Color.Green,
+				FileStatus.Removed  => Color.Red,
+				FileStatus.Modified => Color.Yellow,
+				_ => throw new ArgumentException(nameof(status)),
+			};
 
 		private static string ConflictResolutionToString(ConflictResolution conflictResolution)
-		{
-			switch(conflictResolution)
+			=> conflictResolution switch
 			{
-				case ConflictResolution.KeepModifiedFile:
-					return Resources.StrsKeepModifiedFile;
-				case ConflictResolution.DeleteFile:
-					return Resources.StrsDeleteFile;
-				case ConflictResolution.UseOurs:
-					return Resources.StrsUseOursVersion;
-				case ConflictResolution.UseTheirs:
-					return Resources.StrsUseTheirsVersion;
-				default:
-					throw new ArgumentException(nameof(conflictResolution));
-			}
-		}
+				ConflictResolution.KeepModifiedFile => Resources.StrsKeepModifiedFile,
+				ConflictResolution.DeleteFile       => Resources.StrsDeleteFile,
+				ConflictResolution.UseOurs          => Resources.StrsUseOursVersion,
+				ConflictResolution.UseTheirs        => Resources.StrsUseTheirsVersion,
+				_ => throw new ArgumentException(nameof(conflictResolution)),
+			};
 
 		public ConflictResolutionDialog(string fileName, FileStatus oursStatus, FileStatus theirsStatus,
 			ConflictResolution resolution1, ConflictResolution resolution2)

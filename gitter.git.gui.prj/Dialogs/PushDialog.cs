@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -66,8 +66,8 @@ namespace gitter.Git.Gui.Dialogs
 			{
 				get
 				{
-					var list = new List<Branch>(_referencesListBox.Items.Count);
-					foreach(BranchListItem item in _referencesListBox.Items)
+					var list = new List<Branch>(capacity: _referencesListBox.Items.Count);
+					foreach(var item in _referencesListBox.Items)
 					{
 						if(item.CheckedState == CheckedState.Checked)
 						{
@@ -106,8 +106,8 @@ namespace gitter.Git.Gui.Dialogs
 
 			public bool IsReadOnly
 			{
-				get { return !_referencesListBox.Enabled; }
-				set { _referencesListBox.Enabled = !value; }
+				get => !_referencesListBox.Enabled;
+				set => _referencesListBox.Enabled = !value;
 			}
 
 			#endregion
@@ -174,17 +174,7 @@ namespace gitter.Git.Gui.Dialogs
 			}
 
 			_remotePicker.LoadData(repository);
-			Remote remote = null;
-			lock(repository.Remotes.SyncRoot)
-			{
-				foreach(var r in repository.Remotes)
-				{
-					remote = r;
-					break;
-				}
-			}
-			_remotePicker.SelectedValue = remote;
-
+			_remotePicker.SelectedValue = PickDefaultRemote(repository);
 			_controller = new PushController(repository) { View = this };
 		}
 
@@ -215,6 +205,26 @@ namespace gitter.Git.Gui.Dialogs
 		#endregion
 
 		#region Methods
+
+		private static Remote PickDefaultRemote(Repository repository)
+		{
+			Assert.IsNotNull(repository);
+
+			var remotes = repository.Remotes;
+			lock(remotes.SyncRoot)
+			{
+				if(remotes.Count != 0)
+				{
+					var remote = remotes.TryGetItem(GitConstants.DefaultRemoteName);
+					if(remote != null) return remote;
+					foreach(var r in remotes)
+					{
+						return r;
+					}
+				}
+			}
+			return default;
+		}
 
 		private void Localize()
 		{

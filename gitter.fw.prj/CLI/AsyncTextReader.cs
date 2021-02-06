@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -130,8 +130,8 @@ namespace gitter.Framework.CLI
 		public int Length => _stringBuilder.Length;
 
 		/// <summary>Returns character at the specified position.</summary>
-		/// <param name="index">Characted index.</param>
-		/// <returns>Characted at the specified position.</returns>
+		/// <param name="index">Character index.</param>
+		/// <returns>Character at the specified position.</returns>
 		public char this[int index] => _stringBuilder[index];
 
 		/// <summary>Returns composed text.</summary>

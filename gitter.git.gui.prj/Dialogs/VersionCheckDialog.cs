@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,14 +31,14 @@ namespace gitter.Git.Gui.Dialogs
 	[ToolboxItem(false)]
 	internal partial class VersionCheckDialog : GitDialogBase
 	{
-		private const string _downloadUrl = @"http://code.google.com/p/msysgit/downloads/list";
+		private const string _downloadUrl = @"https://git-scm.com/download/win";
 
 		#region Data
 
 		private readonly IWorkingEnvironment _environment;
 		private Version _requiredVersion;
 		private Version _installedVersion;
-		private MSysGitDownloader _downloader;
+		private GitDownloader _downloader;
 
 		#endregion
 
@@ -90,34 +90,13 @@ namespace gitter.Git.Gui.Dialogs
 
 		private IGitRepositoryProvider GitRepositoryProvider { get; }
 
-		private void RefreshLatestVersion()
+		private async void RefreshLatestVersion()
 		{
 			_lnkRefreshLatestVersion.Visible = false;
 			_lnkDownload.Visible = false;
 			_lblLatestVersionValue.Text = Resources.StrsSearching.AddEllipsis();
-			MSysGitDownloader.BeginCreate(OnMSysGitDownloaderCreated);
-		}
-
-		private void OnMSysGitDownloaderCreated(IAsyncResult ar)
-		{
-			try
-			{
-				_downloader = MSysGitDownloader.EndCreate(ar);
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-				_downloader = null;
-			}
-			if(!Disposing && !IsDisposed)
-			{
-				try
-				{
-					BeginInvoke(new MethodInvoker(UpdateLatestVersion));
-				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-				}
-			}
+			_downloader = await GitDownloader.CreateAsync();
+			UpdateLatestVersion();
 		}
 
 		private void UpdateLatestVersion()
@@ -215,12 +194,10 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void OnConfigureClick(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			using(var dlg = new GitOptionsPage(GitRepositoryProvider))
+			using var dlg = new GitOptionsPage(GitRepositoryProvider);
+			if(dlg.Run(this) == DialogResult.OK)
 			{
-				if(dlg.Run(this) == DialogResult.OK)
-				{
-					RefreshVersion();
-				}
+				RefreshVersion();
 			}
 		}
 

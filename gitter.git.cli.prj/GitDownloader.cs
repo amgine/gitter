@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,132 +24,68 @@ namespace gitter.Git
 	using System.Diagnostics;
 	using System.IO;
 	using System.Net;
+	using System.Net.Http;
+	using System.Text.RegularExpressions;
 	using System.Threading;
 	using System.Threading.Tasks;
-	using System.Xml;
 
 	using gitter.Framework;
 
-	public sealed class MSysGitDownloader
+	public sealed class GitDownloader
 	{
-		private Version _latestVersion;
-		private bool _isAvailable;
-		private string _downloadUrl;
+		private const string VersionPageUrl  = @"https://git-scm.com/";
+		private const string DownloadPageUrl = @"https://git-scm.com/download/win";
 
-		private const string MsysgitFeedUrl = @"http://code.google.com/feeds/p/msysgit/downloads/basic";
-		private const string DownloadURL = @"http://msysgit.googlecode.com/files/";
+		private static readonly Regex _regexVersion = new Regex("\\<span\\s+class\\s*\\=\\s*\"version\"\\s*\\>\\s*(?<version>\\d+\\.\\d+\\.\\d+)\\s*\\<\\/span\\>");
+		private static readonly Regex _regexUrl     = new Regex("\\<a\\s+id\\s*\\=\\s*\"auto\\-download\\-link\"\\s+href\\s*\\=\\s*\"(?<url>[\\w\\.\\:\\/\\-]+)\"\\s*\\>");
 
-		public static MSysGitDownloader Create()
+		public static async Task<GitDownloader> CreateAsync()
 		{
-			return new MSysGitDownloader();
-		}
+			var version     = default(Version);
+			var downloadUrl = default(string);
 
-		public static IAsyncResult BeginCreate(AsyncCallback callback)
-		{
-			var func = new Func<MSysGitDownloader>(Create);
-			return func.BeginInvoke(callback, func);
-		}
-
-		public static MSysGitDownloader EndCreate(IAsyncResult ar)
-		{
-			var func = (Func<MSysGitDownloader>)ar.AsyncState;
-			return func.EndInvoke(ar);
-		}
-
-		private MSysGitDownloader()
-		{
-			var feed = DownloadFeed();
-			if(feed != null)
-			{
-				try
-				{
-					ExtractFeedData(feed);
-				}
-				catch
-				{
-				}
-			}
-		}
-
-		private void ExtractFeedData(XmlDocument feed)
-		{
-			Version version = null;
-			var rootNode = feed.DocumentElement;
-			foreach(XmlNode node in rootNode.ChildNodes)
-			{
-				if(node.Name == "entry")
-				{
-					var id = node["id"].InnerText;
-					if(id.EndsWith(".exe"))
-					{
-						var pos = id.LastIndexOf("/");
-						if(pos != -1)
-						{
-							var fileName = id.Substring(pos + 1);
-							if(fileName.StartsWith("Git-"))
-							{
-								var parser = new Parser(fileName);
-								try
-								{
-									var v = parser.ReadVersion();
-									if(version == null || v > version)
-									{
-										version = v;
-										_downloadUrl = DownloadURL + fileName;
-										_isAvailable = true;
-									}
-								}
-								catch
-								{
-									continue;
-								}
-							}
-						}
-					}
-				}
-			}
-			_latestVersion = version;
-		}
-
-		private XmlDocument DownloadFeed()
-		{
-			var doc = new XmlDocument();
+			using var http = new HttpClient();
 			try
 			{
-				var request = HttpWebRequest.Create(MsysgitFeedUrl);
-				using(var response = request.GetResponse())
+				var versionPage = await http
+					.GetStringAsync(VersionPageUrl)
+					.ConfigureAwait(continueOnCapturedContext: false);
+				var versionMatch = _regexVersion.Match(versionPage);
+				if(versionMatch != null && versionMatch.Success
+					&& Version.TryParse(versionMatch.Groups["version"].Value, out version))
 				{
-					using(var stream = response.GetResponseStream())
+					var downloadPage = await http
+						.GetStringAsync(DownloadPageUrl)
+						.ConfigureAwait(continueOnCapturedContext: false);
+					var urlMatch = _regexUrl.Match(downloadPage);
+					if(urlMatch != null && urlMatch.Success)
 					{
-						doc.Load(stream);
+						downloadUrl = urlMatch.Groups["url"].Value;
 					}
 				}
-				return doc;
 			}
 			catch
 			{
-				return null;
 			}
+			return new GitDownloader(version, downloadUrl);
 		}
 
-		public Version LatestVersion
+		private GitDownloader(Version version, string downloadUrl)
 		{
-			get { return _latestVersion; }
+			LatestVersion = version;
+			DownloadUrl   = downloadUrl;
+			IsAvailable   = version != null && DownloadUrl != null;
 		}
 
-		public bool IsAvailable
-		{
-			get { return _isAvailable; }
-		}
+		public Version LatestVersion { get; }
 
-		public string DownloadUrl
-		{
-			get { return _downloadUrl; }
-		}
+		public bool IsAvailable { get; }
+
+		public string DownloadUrl { get; }
 
 		public void Download()
 		{
-			Utility.OpenUrl(_downloadUrl);
+			Utility.OpenUrl(DownloadUrl);
 		}
 
 		private sealed class DownloadAndInstallProcess : IDisposable
@@ -224,35 +160,30 @@ namespace gitter.Git
 			}
 		}
 
-		public Task DownloadAndInstallAsync(IProgress<OperationProgress> progress)
+		public Task DownloadAndInstallAsync(IProgress<OperationProgress> progress = default)
 		{
-			return Task.Factory.StartNew(
+			return Task.Run(
 				() =>
 				{
 					progress?.Report(new OperationProgress("Initializing..."));
-					using(var evt = new ManualResetEvent(false))
+					using var evt = new ManualResetEvent(false);
+					var process = new DownloadAndInstallProcess(evt)
 					{
-						var process = new DownloadAndInstallProcess(evt)
-						{
-							Monitor    = progress,
-							WebRequest = WebRequest.Create(DownloadUrl),
-						};
-						progress?.Report(new OperationProgress("Connecting to MSysGit download server..."));
-						process.WebRequest.BeginGetResponse(OnGotResponse, process);
-						evt.WaitOne();
-						if(process.Exception != null)
-						{
-							throw process.Exception;
-						}
-						if(process.InstallerExitCode != 0)
-						{
-							throw new ApplicationException("Installer returned exit code " + process.InstallerExitCode);
-						}
+						Monitor = progress,
+						WebRequest = WebRequest.Create(DownloadUrl),
+					};
+					progress?.Report(new OperationProgress("Connecting to MSysGit download server..."));
+					process.WebRequest.BeginGetResponse(OnGotResponse, process);
+					evt.WaitOne();
+					if(process.Exception != null)
+					{
+						throw process.Exception;
 					}
-				},
-				CancellationToken.None,
-				TaskCreationOptions.None,
-				TaskScheduler.Default);
+					if(process.InstallerExitCode != 0)
+					{
+						throw new ApplicationException("Installer returned exit code " + process.InstallerExitCode);
+					}
+				});
 		}
 
 		private static void OnGotResponse(IAsyncResult ar)
@@ -394,7 +325,7 @@ namespace gitter.Git
 				CurrentProgress = 0,
 				MaxProgress     = 0,
 				IsIndeterminate = true,
-				ActionName      = "Installing MSysGit...",
+				ActionName      = "Installing Git...",
 			};
 			process.Monitor?.Report(state);
 			try
@@ -418,6 +349,6 @@ namespace gitter.Git
 			}
 		}
 
-		public override string ToString() => _downloadUrl;
+		public override string ToString() => DownloadUrl;
 	}
 }

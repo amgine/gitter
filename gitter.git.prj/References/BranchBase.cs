@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,6 +21,7 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -48,8 +49,15 @@ namespace gitter.Git
 		/// <param name="force">Force-remove branch.</param>
 		public abstract void Delete(bool force = false);
 
+		/// <summary>Delete branch.</summary>
+		/// <param name="force">Force-remove branch.</param>
+		public abstract Task DeleteAsync(bool force = false);
+
 		/// <summary>Refreshes cached information for this <see cref="BranchBase"/>.</summary>
 		public abstract void Refresh();
+
+		/// <summary>Refreshes cached information for this <see cref="BranchBase"/>.</summary>
+		public abstract Task RefreshAsync();
 
 		/// <summary>Notifies about external branch reset.</summary>
 		/// <param name="branchInformation">Updated branch information.</param>
@@ -83,7 +91,7 @@ namespace gitter.Git
 			=> IsRemote ? ReferenceType.RemoteBranch : ReferenceType.LocalBranch;
 
 		/// <summary>Gets the full branch name.</summary>
-		/// <value>Full barnch name.</value>
+		/// <value>Full branch name.</value>
 		public override string FullName
 			=> (IsRemote ? GitConstants.RemoteBranchPrefix : GitConstants.LocalBranchPrefix) + Name;
 	}

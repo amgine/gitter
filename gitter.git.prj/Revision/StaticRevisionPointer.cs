@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,6 +21,7 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -42,7 +43,7 @@ namespace gitter.Git
 			Verify.Argument.IsNeitherNullNorWhitespace(pointer, nameof(pointer));
 
 			Repository = repository;
-			_pointer = pointer;
+			_pointer   = pointer;
 		}
 
 		#endregion
@@ -63,12 +64,29 @@ namespace gitter.Git
 
 		#region Methods
 
+		/// <inheritdoc/>
 		public virtual Revision Dereference()
 		{
 			if(_revision == null)
 			{
-				var rev = Repository.Accessor.Dereference.Invoke(
-					new DereferenceParameters(Pointer));
+				var rev = Repository.Accessor.Dereference
+					.Invoke(new DereferenceParameters(Pointer));
+				lock(Repository.Revisions.SyncRoot)
+				{
+					_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+				}
+			}
+			return _revision;
+		}
+
+		/// <inheritdoc/>
+		public virtual async Task<Revision> DereferenceAsync()
+		{
+			if(_revision == null)
+			{
+				var rev = await Repository.Accessor.Dereference
+					.InvokeAsync(new DereferenceParameters(Pointer))
+					.ConfigureAwait(continueOnCapturedContext: false);
 				lock(Repository.Revisions.SyncRoot)
 				{
 					_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);

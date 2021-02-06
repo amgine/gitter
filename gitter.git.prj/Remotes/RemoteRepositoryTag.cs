@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -40,14 +40,9 @@ namespace gitter.Git
 
 		public TagType TagType { get; internal set; }
 
-		protected override void DeleteCore()
-		{
-			References.RemoveTag(this);
-		}
+		protected override void DeleteCore() => References.RemoveTag(this);
 
-		protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			return References.RemoveTagAsync(this, progress, cancellationToken);
-		}
+		protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+			=> References.RemoveTagAsync(this, progress, cancellationToken);
 	}
 }

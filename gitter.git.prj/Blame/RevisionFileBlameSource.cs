@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -77,7 +77,8 @@ namespace gitter.Git
 			return Repository.Accessor.QueryBlame.Invoke(parameters);
 		}
 
-		public override async Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		public override async Task<BlameFile> GetBlameAsync(BlameOptions options,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(options, nameof(options));
 
@@ -115,11 +116,9 @@ namespace gitter.Git
 		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
 		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
 		public override string ToString()
-		{
-			return Revision is Revision
+			=> Revision is Revision
 				? FileName + " @ " + Revision.Pointer.Substring(0, 7)
 				: FileName + " @ " + Revision.Pointer;
-		}
 
 		#endregion
 	}

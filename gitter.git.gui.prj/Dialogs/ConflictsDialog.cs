@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -113,8 +113,7 @@ namespace gitter.Git.Gui.Dialogs
 
 		private void OnItemActivated(object sender, gitter.Framework.Controls.ItemEventArgs e)
 		{
-			var item = e.Item as TreeFileListItem;
-			if(item != null)
+			if(e.Item is TreeFileListItem item)
 			{
 				var file = item.DataContext;
 				if(file.Status == FileStatus.Unmerged)

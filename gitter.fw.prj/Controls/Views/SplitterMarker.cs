@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -59,19 +59,12 @@ namespace gitter.Framework.Controls
 			AllowTransparency = true;
 			BackColor = Color.Black;
 			Opacity = ViewConstants.SplitterOpacity;
-			switch(orientation)
+			Cursor = orientation switch
 			{
-				case Orientation.Horizontal:
-					Cursor = Cursors.SizeWE;
-					break;
-				case Orientation.Vertical:
-					Cursor = Cursors.SizeNS;
-					break;
-				default:
-					throw new ArgumentException(
-						"Unknown Orientation value: {0}".UseAsFormat(orientation),
-						nameof(orientation));
-			}
+				Orientation.Horizontal => Cursors.SizeWE,
+				Orientation.Vertical   => Cursors.SizeNS,
+				_ => throw new ArgumentException($"Unknown Orientation value: {orientation}", nameof(orientation)),
+			};
 		}
 
 		public new void Show()

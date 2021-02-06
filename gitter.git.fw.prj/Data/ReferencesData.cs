@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,10 +27,10 @@ namespace gitter.Git.AccessLayer
 	{
 		public ReferencesData(IList<BranchData> heads, IList<BranchData> remotes, IList<TagData> tags, RevisionData stash)
 		{
-			Heads = heads;
+			Heads   = heads;
 			Remotes = remotes;
-			Tags = tags;
-			Stash = stash;
+			Tags    = tags;
+			Stash   = stash;
 		}
 
 		public IList<BranchData> Heads { get; }

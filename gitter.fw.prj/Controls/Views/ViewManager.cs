@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,46 +24,19 @@ namespace gitter.Framework.Controls
 
 	public static class ViewManager
 	{
-		#region Data
-
 		private static ViewRenderer _msvs2010StyleRender;
 		private static ViewRenderer _msvs2012DarkStyleRender;
 		private static ViewRenderer _msvs2012LightStyleRender;
 		private static ViewRenderer _viewRenderer;
 
-		#endregion
-
-		#region Events
-
 		public static event EventHandler RendererChanged;
 
 		private static void OnRendererChanged()
-		{
-			RendererChanged?.Invoke(null, EventArgs.Empty);
-		}
-
-		#endregion
-
-		#region .ctor
-
-		static ViewManager()
-		{
-		}
-
-		#endregion
-
-		#region Properties
+			=> RendererChanged?.Invoke(null, EventArgs.Empty);
 
 		public static ViewRenderer Renderer
 		{
-			get
-			{
-				if(_viewRenderer == null)
-				{
-					_viewRenderer = MSVS2010StyleRenderer;
-				}
-				return _viewRenderer;
-			}
+			get => _viewRenderer ??= MSVS2010StyleRenderer;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -77,41 +50,12 @@ namespace gitter.Framework.Controls
 		}
 
 		public static ViewRenderer MSVS2010StyleRenderer
-		{
-			get
-			{
-				if(_msvs2010StyleRender == null)
-				{
-					_msvs2010StyleRender = new MSVS2010StyleViewRenderer();
-				}
-				return _msvs2010StyleRender;
-			}
-		}
+			=> _msvs2010StyleRender ??= new MSVS2010StyleViewRenderer();
 
 		public static ViewRenderer MSVS2012DarkStyleRenderer
-		{
-			get
-			{
-				if(_msvs2012DarkStyleRender == null)
-				{
-					_msvs2012DarkStyleRender = new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.DarkColors);
-				}
-				return _msvs2012DarkStyleRender;
-			}
-		}
+			=> _msvs2012DarkStyleRender ??= new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.DarkColors);
 
 		public static ViewRenderer MSVS2012LightStyleRenderer
-		{
-			get
-			{
-				if(_msvs2012LightStyleRender == null)
-				{
-					_msvs2012LightStyleRender = new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.LightColors);
-				}
-				return _msvs2012LightStyleRender;
-			}
-		}
-
-		#endregion
+			=> _msvs2012LightStyleRender ??= new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.LightColors);
 	}
 }

@@ -157,7 +157,7 @@
 			this._grpOptions.Name = "_grpOptions";
 			this._grpOptions.Size = new System.Drawing.Size(397, 19);
 			this._grpOptions.TabIndex = 5;
-			this._grpOptions.Text = "%Default Bahaviour%";
+			this._grpOptions.Text = "%Default Behavior%";
 			// 
 			// _grpUpdatedReferences
 			// 

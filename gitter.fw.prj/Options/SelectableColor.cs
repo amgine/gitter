@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -48,10 +48,7 @@ namespace gitter.Framework.Options
 			Pen = new Pen(color);
 		}
 
-		~SelectableColor()
-		{
-			Dispose(false);
-		}
+		~SelectableColor() => Dispose(disposing: false);
 
 		public string Id { get; }
 
@@ -61,7 +58,7 @@ namespace gitter.Framework.Options
 
 		public Color Color
 		{
-			get { return _color; }
+			get => _color;
 			set
 			{
 				if(_color != value)
@@ -90,10 +87,8 @@ namespace gitter.Framework.Options
 
 		private void Dispose(bool disposing)
 		{
-			if(Brush != null)
-				Brush.Dispose();
-			if(Pen != null)
-				Pen.Dispose();
+			Brush?.Dispose();
+			Pen?.Dispose();
 			if(disposing)
 			{
 				Brush = null;
@@ -104,7 +99,7 @@ namespace gitter.Framework.Options
 		public void Dispose()
 		{
 			GC.SuppressFinalize(this);
-			Dispose(true);
+			Dispose(disposing: true);
 		}
 	}
 }

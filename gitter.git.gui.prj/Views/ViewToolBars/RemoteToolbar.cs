@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -84,11 +84,9 @@ namespace gitter.Git.Gui.Views
 			var remote = _remoteView.Remote;
 			if(remote != null && !remote.IsDeleted)
 			{
-				using(var dlg = new PushDialog(_remoteView.Repository))
-				{
-					dlg.Remote.Value = remote;
-					dlg.Run(_remoteView);
-				}
+				using var dlg = new PushDialog(_remoteView.Repository);
+				dlg.Remote.Value = remote;
+				dlg.Run(_remoteView);
 			}
 		}
 

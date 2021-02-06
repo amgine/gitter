@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -37,8 +37,7 @@ namespace gitter.Git.Gui.Views
 		#region Data
 
 		private readonly ReflogToolbar _toolbar;
-		private ReflogSearchToolBar<ReflogView> _searchToolbar;
-		private ISearch<ReflogSearchOptions> _search;
+		private ISearchToolBarController _searchToolbar;
 		private Reflog _reflog;
 		private Reference _reference;
 
@@ -55,7 +54,8 @@ namespace gitter.Git.Gui.Views
 			_lstReflog.ItemActivated += OnReflogItemActivated;
 			_lstReflog.PreviewKeyDown += OnKeyDown;
 
-			_search = new ReflogSearch<ReflogSearchOptions>(_lstReflog);
+			Search = new ReflogSearch<ReflogSearchOptions>(_lstReflog);
+			_searchToolbar = CreateSearchToolbarController<ReflogView, ReflogSearchToolBar, ReflogSearchOptions>(this);
 
 			AddTopToolStrip(_toolbar = new ReflogToolbar(this));
 		}
@@ -67,45 +67,34 @@ namespace gitter.Git.Gui.Views
 		public override bool IsDocument => true;
 
 		public override Image Image
-		{
-			get
-			{
-				if(Reflog != null && Reflog.Reference.Type == ReferenceType.RemoteBranch)
-				{
-					return CachedResources.Bitmaps["ImgViewReflogRemote"];
-				}
-				else
-				{
-					return CachedResources.Bitmaps["ImgViewReflog"];
-				}
-			}
-		}
+			=> Reflog != null && Reflog.Reference.Type == ReferenceType.RemoteBranch
+				? CachedResources.Bitmaps["ImgViewReflogRemote"]
+				: CachedResources.Bitmaps["ImgViewReflog"];
 
 		public Reflog Reflog
 		{
-			get { return _reflog; }
+			get => _reflog;
 			private set
 			{
 				if(_reflog != value)
 				{
 					_reflog = value;
 					_lstReflog.Load(value);
-					Reference = value != null ? value.Reference : null;
+					Reference = value?.Reference;
 				}
 			}
 		}
 
 		public Reference Reference
 		{
-			get { return _reference; }
+			get => _reference;
 			private set
 			{
 				if(_reference != value)
 				{
 					if(_reference != null)
 					{
-						var branch = _reference as Branch;
-						if(branch != null)
+						if(_reference is Branch branch)
 						{
 							branch.Renamed -= OnBranchRenamed;
 						}
@@ -113,8 +102,7 @@ namespace gitter.Git.Gui.Views
 					_reference = value;
 					if(_reference != null)
 					{
-						var branch = _reference as Branch;
-						if(branch != null)
+						if(_reference is Branch branch)
 						{
 							branch.Renamed += OnBranchRenamed;
 						}
@@ -124,25 +112,12 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public ISearch<ReflogSearchOptions> Search
-		{
-			get { return _search; }
-		}
+		public ISearch<ReflogSearchOptions> Search { get; }
 
 		public bool SearchToolBarVisible
 		{
-			get { return _searchToolbar != null && _searchToolbar.Visible; }
-			set
-			{
-				if(value)
-				{
-					ShowSearchToolBar();
-				}
-				else
-				{
-					HideSearchToolBar();
-				}
-			}
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
 		}
 
 		#endregion
@@ -153,8 +128,7 @@ namespace gitter.Git.Gui.Views
 			{
 				case 1:
 					{
-						var item = _lstReflog.SelectedItems[0] as ReflogRecordListItem;
-						if(item != null)
+						if(_lstReflog.SelectedItems[0] is ReflogRecordListItem item)
 						{
 							ShowContextualDiffView(item.DataContext.Revision.GetDiffSource());
 						}
@@ -178,8 +152,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.AttachViewModel(viewModel);
 
-			var vm = viewModel as ReflogViewModel;
-			if(vm != null)
+			if(viewModel is ReflogViewModel vm)
 			{
 				Reflog = vm.Reflog;
 			}
@@ -189,48 +162,21 @@ namespace gitter.Git.Gui.Views
 		{
 			base.DetachViewModel(viewModel);
 
-			var vm = viewModel as ReflogViewModel;
-			if(vm != null)
+			if(viewModel is ReflogViewModel)
 			{
 				Reflog = null;
 			}
 		}
 
 		private void UpdateText()
-		{
-			if(Reference != null)
-			{
-				Text = Resources.StrReflog + ": " + Reference.Name;
-			}
-			else
-			{
-				Text = Resources.StrReflog;
-			}
-		}
+			=> Text = Reference != null
+				? Resources.StrReflog + ": " + Reference.Name
+				: Resources.StrReflog;
 
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{
 			OnKeyDown(this, e);
 			base.OnPreviewKeyDown(e);
-		}
-
-		private void ShowSearchToolBar()
-		{
-			if(_searchToolbar == null)
-			{
-				AddBottomToolStrip(_searchToolbar = new ReflogSearchToolBar<ReflogView>(this));
-			}
-			_searchToolbar.FocusSearchTextBox();
-		}
-
-		private void HideSearchToolBar()
-		{
-			if(_searchToolbar != null)
-			{
-				RemoveToolStrip(_searchToolbar);
-				_searchToolbar.Dispose();
-				_searchToolbar = null;
-			}
 		}
 
 		#region Event Handlers
@@ -242,8 +188,7 @@ namespace gitter.Git.Gui.Views
 
 		private void OnReflogItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as ReflogRecordListItem;
-			if(item != null)
+			if(e.Item is ReflogRecordListItem item)
 			{
 				var reflogRecord = item.DataContext;
 				ShowDiffView(reflogRecord.Revision.GetDiffSource());
@@ -273,14 +218,13 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
-				case Keys.F:
-					if(e.Modifiers == Keys.Control)
-					{
-						ShowSearchToolBar();
-						e.IsInputKey = true;
-					}
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					e.IsInputKey = true;
 					break;
 				case Keys.F5:
 					RefreshContent();

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,21 +26,13 @@ namespace gitter.Git.Gui.Views
 	using gitter.Framework.Controls;
 
 	[ToolboxItem(false)]
-	internal sealed class HistorySearchToolBar<T> : SearchToolBar<T, HistorySearchOptions>
-		where T : GitViewBase, ISearchableView<HistorySearchOptions>
+	internal sealed class HistorySearchToolBar : SearchToolBar<HistorySearchOptions>
 	{
-		public HistorySearchToolBar(T view)
-			: base(view)
-		{
-		}
-
 		protected override HistorySearchOptions CreateSearchOptions()
-		{
-			return new HistorySearchOptions()
+			=> new HistorySearchOptions
 			{
 				Text		= SearchText,
 				MatchCase	= MatchCase,
 			};
-		}
 	}
 }

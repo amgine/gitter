@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -40,7 +40,7 @@ namespace gitter.Framework.Controls
 		/// <summary><see cref="CustomListBox"/> which hosts this collection or <see cref="CustomListBoxItem"/> owning this collection.</summary>
 		internal CustomListBox ListBox
 		{
-			get { return _listBox; }
+			get => _listBox;
 			set
 			{
 				if(_listBox != value)

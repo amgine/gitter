@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,15 +31,9 @@ namespace gitter.Framework.Controls
 	{
 		#region Static
 
-		private static readonly LinkedList<ViewDockGrid> _grids;
+		private static readonly LinkedList<ViewDockGrid> _grids = new();
 
 		internal static IEnumerable<ViewDockGrid> Grids => _grids;
-
-		/// <summary>Initializes the <see cref="ViewDockGrid"/> class.</summary>
-		static ViewDockGrid()
-		{
-			_grids = new LinkedList<ViewDockGrid>();
-		}
 
 		#endregion
 
@@ -91,8 +85,8 @@ namespace gitter.Framework.Controls
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public override Color BackColor
 		{
-			get { return base.BackColor; }
-			set { base.BackColor = value; }
+			get => base.BackColor;
+			set => base.BackColor = value;
 		}
 
 		internal ViewHost RootHost { get; }
@@ -100,14 +94,9 @@ namespace gitter.Framework.Controls
 		internal Control RootControl { get; set; }
 
 		internal IEnumerable<FloatingViewForm> FloatingViewForms
-		{
-			get { return _floatingViewForms; }
-		}
+			=> _floatingViewForms;
 
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
+		private ViewRenderer Renderer => ViewManager.Renderer;
 
 		#endregion
 
@@ -769,10 +758,7 @@ namespace gitter.Framework.Controls
 		#region IDockHost
 
 		/// <summary>Provides dock helper markers to determine dock position (<see cref="DockResult"/>).</summary>
-		public IDockMarkerProvider DockMarkers
-		{
-			get { return _dockMarkers; }
-		}
+		public IDockMarkerProvider DockMarkers => _dockMarkers;
 
 		/// <summary>Determines if <see cref="ViewHost"/> cn be docked into this <see cref="IDockHost"/>.</summary>
 		/// <param name="viewHost"><see cref="ViewHost"/> to dock.</param>
@@ -840,7 +826,7 @@ namespace gitter.Framework.Controls
 				default:
 					throw new ArgumentException(
 						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
-						"dockResult");
+						nameof(dockResult));
 			}
 		}
 
@@ -890,8 +876,8 @@ namespace gitter.Framework.Controls
 					break;
 				default:
 					throw new ArgumentException(
-						"Unsuported DockResult value: {0}".UseAsFormat(dockResult),
-						"dockResult");
+						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
+						nameof(dockResult));
 			}
 			bounds.Offset(rootBounds.X, rootBounds.Y);
 			return RectangleToScreen(bounds);

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -34,19 +34,13 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		public static ICommandArgument Heads()
-		{
-			return new CommandFlag("--heads");
-		}
+			=> new CommandFlag("--heads");
 
 		public static ICommandArgument Tags()
-		{
-			return new CommandFlag("--tags");
-		}
+			=> new CommandFlag("--tags");
 
 		public static ICommandArgument UploadPack(string path)
-		{
-			return new CommandParameterValue("--upload-pack", path, '=');
-		}
+			=> new CommandParameterValue("--upload-pack", path, '=');
 
 		public LsRemoteCommand()
 			: base("ls-remote")

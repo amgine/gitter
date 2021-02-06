@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,6 +21,7 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -32,9 +33,7 @@ namespace gitter.Git
 		public event EventHandler ValueChanged;
 
 		private void InvokeValueChanged()
-		{
-			ValueChanged?.Invoke(this, EventArgs.Empty);
-		}
+			=> ValueChanged?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -52,7 +51,7 @@ namespace gitter.Git
 		/// <summary>Create <see cref="ConfigParameter"/>.</summary>
 		/// <param name="repository">Related <see cref="Repository"/>.</param>
 		/// <param name="configFile">Configuration file.</param>
-		/// <param name="name">Paramater name.</param>
+		/// <param name="name">Parameter name.</param>
 		/// <param name="value">Parameter value.</param>
 		internal ConfigParameter(Repository repository, ConfigFile configFile, string name, string value)
 			: base(repository, name)
@@ -65,7 +64,7 @@ namespace gitter.Git
 		/// <summary>Create <see cref="ConfigParameter"/>.</summary>
 		/// <param name="configAccessor">Configuration accessor.</param>
 		/// <param name="configFile">Configuration file.</param>
-		/// <param name="name">Paramater name.</param>
+		/// <param name="name">Parameter name.</param>
 		/// <param name="value">Parameter value.</param>
 		internal ConfigParameter(IConfigAccessor configAccessor, ConfigFile configFile, string name, string value)
 			: base(name)
@@ -80,7 +79,7 @@ namespace gitter.Git
 		/// <summary>Create <see cref="ConfigParameter"/>.</summary>
 		/// <param name="configAccessor">Configuration accessor.</param>
 		/// <param name="fileName">Configuration file.</param>
-		/// <param name="name">Paramater name.</param>
+		/// <param name="name">Parameter name.</param>
 		/// <param name="value">Parameter value.</param>
 		internal ConfigParameter(IConfigAccessor configAccessor, string fileName, string name, string value)
 			: base(name)
@@ -101,7 +100,7 @@ namespace gitter.Git
 		/// <value>Parameter value.</value>
 		public string Value
 		{
-			get { return _value; }
+			get => _value;
 			set
 			{
 				Verify.State.IsNotDeleted(this);
@@ -194,13 +193,48 @@ namespace gitter.Git
 				ConfigParameterData configParameterData;
 				if(_configFile == ConfigFile.Other)
 				{
-					configParameterData = _configAccessor.QueryConfigParameter.Invoke(
-						new QueryConfigParameterParameters(_fileName, Name));
+					configParameterData = _configAccessor.QueryConfigParameter
+						.Invoke(new QueryConfigParameterParameters(_fileName, Name));
 				}
 				else
 				{
-					configParameterData = _configAccessor.QueryConfigParameter.Invoke(
-						new QueryConfigParameterParameters(_configFile, Name));
+					configParameterData = _configAccessor.QueryConfigParameter
+						.Invoke(new QueryConfigParameterParameters(_configFile, Name));
+				}
+				if(configParameterData == null)
+				{
+					MarkAsDeleted();
+				}
+				else
+				{
+					ObjectFactories.UpdateConfigParameter(this, configParameterData);
+				}
+			}
+		}
+
+		/// <summary>Update parameter value.</summary>
+		public async Task RefreshAsync()
+		{
+			if(_configFile == ConfigFile.Repository)
+			{
+				await Repository.Configuration
+					.RefreshAsync(this)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			else
+			{
+				ConfigParameterData configParameterData;
+				if(_configFile == ConfigFile.Other)
+				{
+					configParameterData = await _configAccessor.QueryConfigParameter
+						.InvokeAsync(new QueryConfigParameterParameters(_fileName, Name))
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+				else
+				{
+					configParameterData = await _configAccessor.QueryConfigParameter
+						.InvokeAsync(new QueryConfigParameterParameters(_configFile, Name))
+						.ConfigureAwait(continueOnCapturedContext: false);
 				}
 				if(configParameterData == null)
 				{
@@ -222,7 +256,7 @@ namespace gitter.Git
 			}
 		}
 
-		public override string ToString()
-			=> $"{Name} = {_value}";
+		/// <inheritdoc/>
+		public override string ToString() => $"{Name} = {_value}";
 	}
 }

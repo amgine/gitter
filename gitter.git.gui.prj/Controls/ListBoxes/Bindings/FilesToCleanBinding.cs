@@ -28,7 +28,7 @@ namespace gitter.Git.Gui.Controls
 
 	using gitter.Framework;
 
-	sealed class FilesToCleanBinding : AsyncDataBinding<IList<TreeItem>>
+	sealed class FilesToCleanBinding : AsyncDataBinding<IReadOnlyList<TreeItem>>
 	{
 		#region .ctor
 
@@ -63,7 +63,8 @@ namespace gitter.Git.Gui.Controls
 
 		#region Methods
 
-		protected override Task<IList<TreeItem>> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		protected override Task<IReadOnlyList<TreeItem>> FetchDataAsync(
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.State.IsFalse(IsDisposed, "FilesToCleanBinding is disposed.");
 
@@ -73,7 +74,7 @@ namespace gitter.Git.Gui.Controls
 				progress, cancellationToken);
 		}
 
-		protected override void OnFetchCompleted(IList<TreeItem> data)
+		protected override void OnFetchCompleted(IReadOnlyList<TreeItem> data)
 		{
 			if(TreeListBox.IsDisposed)
 			{

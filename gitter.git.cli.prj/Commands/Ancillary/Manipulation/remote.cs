@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -61,84 +61,52 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public static ICommandArgument Fetch()
-		{
-			return new CommandFlag("-f");
-		}
+			=> new CommandFlag("-f");
 
 		public static ICommandArgument Cached()
-		{
-			return new CommandFlag("-n");
-		}
+			=> new CommandFlag("-n");
 
 		public static ICommandArgument Tags()
-		{
-			return new CommandFlag("--tags");
-		}
+			=> new CommandFlag("--tags");
 
 		public static ICommandArgument NoTags()
-		{
-			return new CommandFlag("--no-tags");
-		}
+			=> new CommandFlag("--no-tags");
 
 		public static ICommandArgument Mirror()
-		{
-			return new CommandFlag("--mirror");
-		}
+			=> new CommandFlag("--mirror");
 
 		public static ICommandArgument Master(string branch)
-		{
-			return new CommandParameterValue("-m", branch, ' ');
-		}
+			=> new CommandParameterValue("-m", branch, ' ');
 
 		public static ICommandArgument TrackBranch(string branch)
-		{
-			return new CommandParameterValue("-t", branch, ' ');
-		}
+			=> new CommandParameterValue("-t", branch, ' ');
 
 		public static ICommandArgument Show()
-		{
-			return new CommandParameter("show");
-		}
+			=> new CommandParameter("show");
 
 		public static ICommandArgument Add()
-		{
-			return new CommandParameter("add");
-		}
+			=> new CommandParameter("add");
 
 		public static ICommandArgument Remove()
-		{
-			return new CommandParameter("rm");
-		}
+			=> new CommandParameter("rm");
 
 		public static ICommandArgument Rename()
-		{
-			return new CommandParameter("rename");
-		}
+			=> new CommandParameter("rename");
 
 		public static ICommandArgument SetHead()
-		{
-			return new CommandParameter("set-head");
-		}
+			=> new CommandParameter("set-head");
 
 		public static ICommandArgument Prune()
-		{
-			return new CommandParameter("prune");
-		}
+			=> new CommandParameter("prune");
 
 		public static ICommandArgument Update()
-		{
-			return new CommandParameter("update");
-		}
+			=> new CommandParameter("update");
 
 		public static ICommandArgument DryRun()
-		{
-			return new CommandFlag("--dry-run");
-		}
+			=> new CommandFlag("--dry-run");
 
 		public RemoteCommand()
 			: base("remote")

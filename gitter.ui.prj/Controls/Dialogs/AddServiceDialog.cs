@@ -72,13 +72,7 @@ namespace gitter.Controls
 		}
 
 		protected override Control CreateControl(IRepositoryServiceProvider item)
-		{
-			if(item == null)
-			{
-				return null;
-			}
-			return item.CreateSetupDialog(_environment.ActiveRepository);
-		}
+			=> item?.CreateSetupDialog(_environment.ActiveRepository);
 
 		public override bool Execute()
 		{

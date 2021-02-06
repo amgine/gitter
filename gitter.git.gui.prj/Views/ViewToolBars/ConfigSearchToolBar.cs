@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,21 @@
  */
 #endregion
 
-namespace gitter.GitLab.Gui
+namespace gitter.Git.Gui.Views
 {
-	internal class SearchOptions
+	using System;
+	using System.ComponentModel;
+
+	using gitter.Framework.Controls;
+
+	[ToolboxItem(false)]
+	internal sealed class ConfigSearchToolBar : SearchToolBar<ConfigSearchOptions>
 	{
-		public string Text { get; set; }
+		protected override ConfigSearchOptions CreateSearchOptions()
+			=> new ConfigSearchOptions
+			{
+				Text      = SearchText,
+				MatchCase = MatchCase,
+			};
 	}
 }

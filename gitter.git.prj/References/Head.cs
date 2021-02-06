@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,6 +21,7 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -82,7 +83,7 @@ namespace gitter.Git
 		/// <summary>Returns object pointed by HEAD.</summary>
 		/// <param name="repository">Repository to get HEAD from.</param>
 		/// <returns>Object pointed by HEAD of the specified repository.</returns>
-		private static IRevisionPointer GetHeadPointer(Repository repository)
+		internal static IRevisionPointer GetHeadPointer(Repository repository)
 		{
 			var head = repository.Accessor.QuerySymbolicReference.Invoke(
 				new QuerySymbolicReferenceParameters(GitConstants.HEAD));
@@ -99,6 +100,49 @@ namespace gitter.Git
 							var info = repository.Accessor.QueryBranch.Invoke(
 								new QueryBranchParameters(head.TargetObject, false));
 							if(info != null)
+							{
+								branch = repository.Refs.Heads.NotifyCreated(info);
+							}
+						}
+					}
+					return branch != null
+						? branch
+						: new NowherePointer(repository, head.TargetObject);
+				case ReferenceType.Revision:
+					lock(repository.Revisions.SyncRoot)
+					{
+						return repository.Revisions.GetOrCreateRevision(new Hash(head.TargetObject));
+					}
+				default:
+					return new NowherePointer(repository, head.TargetObject);
+			}
+		}
+
+		/// <summary>Returns object pointed by HEAD.</summary>
+		/// <param name="repository">Repository to get HEAD from.</param>
+		/// <returns>Object pointed by HEAD of the specified repository.</returns>
+		internal static async Task<IRevisionPointer> GetHeadPointerAsync(Repository repository)
+		{
+			var head = await repository.Accessor.QuerySymbolicReference
+				.InvokeAsync(new QuerySymbolicReferenceParameters(GitConstants.HEAD))
+				.ConfigureAwait(continueOnCapturedContext: false);
+
+			switch(head.TargetType)
+			{
+				case ReferenceType.LocalBranch:
+					Branch branch;
+					lock(repository.Refs.Heads.SyncRoot)
+					{
+						branch = repository.Refs.Heads.TryGetItem(head.TargetObject);
+					}
+					if(branch == null)
+					{
+						var info = await repository.Accessor.QueryBranch
+							.InvokeAsync(new QueryBranchParameters(head.TargetObject, false))
+							.ConfigureAwait(continueOnCapturedContext: false);
+						if(info != null)
+						{
+							lock(repository.Refs.Heads.SyncRoot)
 							{
 								branch = repository.Refs.Heads.NotifyCreated(info);
 							}
@@ -137,7 +181,7 @@ namespace gitter.Git
 
 		/// <summary>Gets a value indicating whether HEAD is pointing to non-existent object.</summary>
 		/// <value><c>true</c> if HEAD is pointing to non-existent object; otherwise, <c>false</c>.</value>
-		/// <remarks>It is typical to newly created repository whith Head.IsEmpty == <c>true</c>.</remarks>
+		/// <remarks>It is typical to newly created repository with Head.IsEmpty == <c>true</c>.</remarks>
 		public bool IsEmpty => Pointer.Type == ReferenceType.None;
 
 		/// <summary>Called when this <see cref="Reference"/> is moved away from <paramref name="pointer"/>.</summary>
@@ -179,8 +223,7 @@ namespace gitter.Git
 		internal override void NotifyRelogRecordAdded()
 		{
 			base.NotifyRelogRecordAdded();
-			var reference = Pointer as Reference;
-			if(reference != null) reference.NotifyRelogRecordAdded();
+			(Pointer as Reference)?.NotifyRelogRecordAdded();
 		}
 
 		private void OnBranchPositionChanged(object sender, RevisionChangedEventArgs e)
@@ -216,8 +259,8 @@ namespace gitter.Git
 				RepositoryNotifications.WorktreeUpdated,
 				RepositoryNotifications.SubmodulesChanged))
 			{
-				Repository.Accessor.Reset.Invoke(
-					new ResetParameters(rev.Hash.ToString(), mode));
+				Repository.Accessor.Reset
+					.Invoke(new ResetParameters(rev.Hash.ToString(), mode));
 			}
 
 			if(currentBranch != null)
@@ -239,8 +282,71 @@ namespace gitter.Git
 			Repository.OnStateChanged();
 		}
 
+		/// <summary>Reset HEAD to <paramref name="pointer"/>.</summary>
+		/// <param name="mode">Reset mode</param>
+		/// <param name="pointer">HEAD's new position.</param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="pointer"/> == <c>null</c>.</exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="pointer"/> is not handled by this <see cref="Repository"/> or it is deleted.
+		/// </exception>
+		/// <exception cref="T:gitter.Git.GitException">
+		/// Failed to dereference <paramref name="pointer"/> or git reset failed.
+		/// </exception>
+		public async Task ResetAsync(IRevisionPointer pointer, ResetMode mode = ResetMode.Mixed)
+		{
+			Verify.Argument.IsValidRevisionPointer(pointer, Repository, nameof(pointer));
+
+			var pos = await Pointer
+				.DereferenceAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
+
+			var rev = await pointer
+				.DereferenceAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
+
+			var currentBranch = Pointer as Branch;
+
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout,
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated,
+				RepositoryNotifications.SubmodulesChanged))
+			{
+				await Repository.Accessor.Reset
+					.InvokeAsync(new ResetParameters(rev.Hash.ToString(), mode))
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+
+			if(currentBranch != null)
+			{
+				currentBranch.Pointer = rev;
+			}
+			else
+			{
+				Pointer = rev;
+			}
+
+			if(pos != rev)
+			{
+				NotifyRelogRecordAdded();
+			}
+
+			await Repository.Status
+				.RefreshAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
+			await Repository.Submodules
+				.RefreshAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
+			Repository.OnStateChanged();
+		}
+
 		/// <summary>Updates cached information.</summary>
 		public void Refresh() => Pointer = GetHeadPointer(Repository);
+
+		/// <summary>Updates cached information.</summary>
+		public async Task RefreshAsync() => Pointer = await GetHeadPointerAsync(Repository)
+			.ConfigureAwait(continueOnCapturedContext: false);
 
 		#region merge
 

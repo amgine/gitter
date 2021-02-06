@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,7 +23,7 @@ namespace gitter.Git.AccessLayer
 	using System;
 	using System.Collections.Generic;
 
-	/// <summary>Parameters for <see cref="IRemoteAccessor.AddRemote"/> operation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.AddRemote"/> operation.</summary>
 	public sealed class AddRemoteParameters
 	{
 		/// <summary>Create <see cref="AddRemoteParameters"/>.</summary>

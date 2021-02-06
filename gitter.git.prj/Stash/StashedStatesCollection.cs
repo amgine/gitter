@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -44,18 +44,22 @@ namespace gitter.Git
 		public event EventHandler<StashedStateEventArgs> StashedStateDeleted;
 
 		/// <summary>Invokes <see cref="StashedStateCreated"/> event.</summary>
-		/// <param name="state">Created stash.</param>
-		private void InvokeStashedStateCreated(StashedState state)
+		/// <param name="stashedState">Created stash.</param>
+		private void InvokeStashedStateCreated(StashedState stashedState)
 		{
-			StashedStateCreated?.Invoke(this, new StashedStateEventArgs(state));
+			Assert.IsNotNull(stashedState);
+
+			StashedStateCreated?.Invoke(this, new StashedStateEventArgs(stashedState));
 		}
 
 		/// <summary>Invokes <see cref="StashedStateDeleted"/> event.</summary>
-		/// <param name="state">Dropped state.</param>
-		private void InvokeStashedStateDeleted(StashedState state)
+		/// <param name="stashedState">Dropped state.</param>
+		private void InvokeStashedStateDeleted(StashedState stashedState)
 		{
-			state.MarkAsDeleted();
-			StashedStateDeleted?.Invoke(this, new StashedStateEventArgs(state));
+			Assert.IsNotNull(stashedState);
+
+			stashedState.MarkAsDeleted();
+			StashedStateDeleted?.Invoke(this, new StashedStateEventArgs(stashedState));
 		}
 
 		#endregion
@@ -127,7 +131,7 @@ namespace gitter.Git
 
 		internal void Drop(StashedState stashedState)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
 			var parameters = GetStashDropParameters(stashedState);
 			using(Repository.Monitor.BlockNotifications(
@@ -138,30 +142,19 @@ namespace gitter.Git
 			OnStashedStateDropped(stashedState);
 		}
 
-		internal async Task DropAsync(StashedState stashedState, IProgress<OperationProgress> progress)
+		internal async Task DropAsync(StashedState stashedState, IProgress<OperationProgress> progress = default)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
 			progress?.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
-			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			var parameters = GetStashDropParameters(stashedState);
-
-			await Repository.Accessor.StashDrop
-				.InvokeAsync(parameters, progress, CancellationToken.None);
-			block.Dispose();
-			
+			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged))
+			{
+				await Repository.Accessor.StashDrop
+					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			OnStashedStateDropped(stashedState);
-			//return Repository.Accessor.StashDrop.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//		t =>
-			//		{
-			//			block.Dispose();
-			//			TaskUtility.PropagateFaultedStates(t);
-			//			OnStashedStateDropped(stashedState);
-			//		},
-			//		CancellationToken.None,
-			//		TaskContinuationOptions.ExecuteSynchronously,
-			//		TaskScheduler.Default);
 		}
 
 		public void Drop()
@@ -177,30 +170,19 @@ namespace gitter.Git
 			OnStashedStateDropped();
 		}
 
-		public async Task DropAsync(IProgress<OperationProgress> progress)
+		public async Task DropAsync(IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsTrue(_stash.Count != 0);
 
 			progress?.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
-			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
 			var parameters = GetStashDropParameters();
-
-			await Repository.Accessor.StashDrop
-				.InvokeAsync(parameters, progress, CancellationToken.None);
-			
-			block.Dispose();
+			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged))
+			{
+				await Repository.Accessor.StashDrop
+					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			OnStashedStateDropped();
-			//return Repository.Accessor.StashDrop.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//		t =>
-			//		{
-			//			block.Dispose();
-			//			TaskUtility.PropagateFaultedStates(t);
-			//			OnStashedStateDropped();
-			//		},
-			//		CancellationToken.None,
-			//		TaskContinuationOptions.ExecuteSynchronously,
-			//		TaskScheduler.Default);
 		}
 
 		#endregion
@@ -239,30 +221,17 @@ namespace gitter.Git
 			OnStashCleared();
 		}
 
-		public async Task ClearAsync(IProgress<OperationProgress> progress)
+		public async Task ClearAsync(IProgress<OperationProgress> progress = default)
 		{
 			progress?.Report(new OperationProgress(Resources.StrsCleaningStash.AddEllipsis()));
 			var parameters = GetClearStashParameters();
-			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged);
-
-			await Repository.Accessor
-				.StashClear
-				.InvokeAsync(parameters, progress, CancellationToken.None);
-			block.Dispose();
-			
+			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged))
+			{
+				await Repository.Accessor.StashClear
+					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			OnStashCleared();
-			//return Repository.Accessor
-			//	.StashClear.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//		OnStashCleared();
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#endregion
@@ -314,10 +283,9 @@ namespace gitter.Git
 					Verify.Argument.IsTrue(name[sfnl + 1] == '{', nameof(name), ExcMessage);
 					Verify.Argument.IsTrue(name[name.Length - 1] == '}', nameof(name), ExcMessage);
 					var s = name.Substring(sfnl + 2, name.Length - sfnl - 3);
-					int index;
 					Verify.Argument.IsTrue(
-						int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out index),
-						"name", ExcMessage);
+						int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out int index),
+						nameof(name), ExcMessage);
 					lock(SyncRoot)
 					{
 						return _stash[index];
@@ -351,19 +319,10 @@ namespace gitter.Git
 		}
 
 		/// <summary>Object used for cross-thread synchronization.</summary>
-		public object SyncRoot
-		{
-			get { return _stash; }
-		}
+		public object SyncRoot => _stash;
 
-		/// <summary>Refresh stash content.</summary>
-		public void Refresh()
+		private void Refresh(IList<StashedStateData> stash)
 		{
-			var top = Repository.Accessor.QueryStashTop.Invoke(
-				new QueryStashTopParameters(false));
-			var stash = top == null
-				? Preallocated<StashedStateData>.EmptyArray
-				: Repository.Accessor.QueryStash.Invoke(new QueryStashParameters());
 			lock(SyncRoot)
 			lock(Repository.Revisions.SyncRoot)
 			{
@@ -388,8 +347,7 @@ namespace gitter.Git
 						_stash.Clear();
 						foreach(var ssinfo in stash)
 						{
-							StashedState stashedState;
-							if(!d.TryGetValue(ssinfo.Revision.SHA1, out stashedState))
+							if(!d.TryGetValue(ssinfo.Revision.SHA1, out var stashedState))
 							{
 								stashedState = ObjectFactories.CreateStashedState(Repository, ssinfo);
 								_stash.Add(stashedState);
@@ -426,6 +384,36 @@ namespace gitter.Git
 			}
 		}
 
+		/// <summary>Refresh stash content.</summary>
+		public void Refresh()
+		{
+			var top = Repository.Accessor.QueryStashTop
+				.Invoke(new QueryStashTopParameters(false));
+			var stash = top == null
+				? Preallocated<StashedStateData>.EmptyArray
+				: Repository.Accessor.QueryStash.Invoke(new QueryStashParameters());
+			Refresh(stash);
+		}
+
+		/// <summary>Refresh stash content.</summary>
+		public async Task RefreshAsync()
+		{
+			var top = await Repository.Accessor.QueryStashTop
+				.InvokeAsync(new QueryStashTopParameters(false))
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if(top == null)
+			{
+				Refresh(Preallocated<StashedStateData>.EmptyArray);
+			}
+			else
+			{
+				var stash = await Repository.Accessor.QueryStash
+					.InvokeAsync(new QueryStashParameters())
+					.ConfigureAwait(continueOnCapturedContext: false);
+				Refresh(stash);
+			}
+		}
+
 		internal void NotifyCleared()
 		{
 			lock(SyncRoot)
@@ -456,7 +444,7 @@ namespace gitter.Git
 
 		internal void Apply(StashedState stashedState, bool restoreIndex)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
 			var parameters = GetStashApplyParameters(stashedState, restoreIndex);
 			using(Repository.Monitor.BlockNotifications(
@@ -470,35 +458,30 @@ namespace gitter.Git
 			Repository.Status.Refresh();
 		}
 
-		internal async Task ApplyAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress> progress)
+		internal async Task ApplyAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress> progress = default)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
 			progress?.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
-			var block = Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.StashChanged,
-				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.IndexUpdated);
 			var parameters = GetStashApplyParameters(stashedState, restoreIndex);
-
-			await Repository.Accessor
-				.StashApply
-				.InvokeAsync(parameters, progress, CancellationToken.None);
-			block.Dispose();
-			Repository.Status.Refresh();
-
-			//return Repository.Accessor
-			//	.StashApply.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		Repository.Status.Refresh();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
+			try
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.StashChanged,
+					RepositoryNotifications.WorktreeUpdated,
+					RepositoryNotifications.IndexUpdated))
+				{
+					await Repository.Accessor.StashApply
+						.InvokeAsync(parameters, progress, CancellationToken.None)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			finally
+			{
+				await Repository.Status
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 		}
 
 		public void Apply(bool restoreIndex)
@@ -517,32 +500,30 @@ namespace gitter.Git
 			Repository.Status.Refresh();
 		}
 
-		public async Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress)
+		public async Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsTrue(_stash.Count != 0);
 
 			progress?.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
-			var block = Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.StashChanged,
-				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.IndexUpdated);
 			var parameters = GetStashApplyParameters(restoreIndex);
-			await Repository.Accessor
-			   .StashApply.InvokeAsync(parameters, progress, CancellationToken.None);
-			block.Dispose();
-			Repository.Status.Refresh();
-			//return Repository.Accessor
-			//	.StashApply.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		Repository.Status.Refresh();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
+			try
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.StashChanged,
+					RepositoryNotifications.WorktreeUpdated,
+					RepositoryNotifications.IndexUpdated))
+				{
+					await Repository.Accessor.StashApply
+						.InvokeAsync(parameters, progress, CancellationToken.None)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			finally
+			{
+				await Repository.Status
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 		}
 
 		#endregion
@@ -594,37 +575,27 @@ namespace gitter.Git
 			Repository.Status.Refresh();
 		}
 
-		internal async Task PopAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress> progress)
+		internal async Task PopAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress> progress = default)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 			Verify.State.IsTrue(_stash.Count != 0);
 
-			var block = Repository.Monitor.BlockNotifications(
+			var parameters = GetStashPopParameters(stashedState, restoreIndex);
+			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged,
 				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.IndexUpdated);
-			var parameters = GetStashPopParameters(stashedState, restoreIndex);
-			await Repository.Accessor.StashPop
-				.InvokeAsync(parameters, progress, CancellationToken.None);
-			block.Dispose();
-			
+				RepositoryNotifications.IndexUpdated))
+			{
+				await Repository.Accessor.StashPop
+					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			OnStashPopCompleted(stashedState);
-			//return Repository.Accessor.StashPop.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//		OnStashPopCompleted(stashedState);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		internal void Pop(StashedState stashedState, bool restoreIndex)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 			Verify.State.IsTrue(_stash.Count != 0);
 
 			var parameters = GetStashPopParameters(stashedState, restoreIndex);
@@ -635,34 +606,24 @@ namespace gitter.Git
 			{
 				Repository.Accessor.StashPop.Invoke(parameters);
 			}
-
 			OnStashPopCompleted(stashedState);
 		}
 
-		public async Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress)
+		public async Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsTrue(_stash.Count != 0);
 
-			var block = Repository.Monitor.BlockNotifications(
+			var parameters = GetStashPopParameters(restoreIndex);
+			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.StashChanged,
 				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.IndexUpdated);
-			var parameters = GetStashPopParameters(restoreIndex);
-			await Repository.Accessor.StashPop.InvokeAsync(parameters, progress, CancellationToken.None);
-			block.Dispose();
-			
+				RepositoryNotifications.IndexUpdated))
+			{
+				await Repository.Accessor.StashPop
+					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			OnStashPopCompleted();
-			//return Repository.Accessor.StashPop.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		TaskUtility.PropagateFaultedStates(t);
-			//		OnStashPopCompleted();
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		public void Pop(bool restoreIndex)
@@ -687,7 +648,7 @@ namespace gitter.Git
 
 		internal Branch ToBranch(StashedState stashedState, string name)
 		{
-			Verify.Argument.IsValidGitObject(stashedState, Repository, "stashedState");
+			Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged,
@@ -736,37 +697,32 @@ namespace gitter.Git
 
 		private StashedState OnStashSaveCompleted(bool created)
 		{
-			if(created)
+			if(!created) return default;
+
+			var stashTopData = Repository.Accessor.QueryStashTop.Invoke(
+				new QueryStashTopParameters(true));
+			Revision revision;
+			lock(Repository.Revisions.SyncRoot)
 			{
-				var stashTopData = Repository.Accessor.QueryStashTop.Invoke(
-					new QueryStashTopParameters(true));
-				Revision revision;
-				lock(Repository.Revisions.SyncRoot)
-				{
-					revision = ObjectFactories.CreateRevision(Repository, stashTopData);
-				}
-				var res = new StashedState(Repository, 0, revision);
+				revision = ObjectFactories.CreateRevision(Repository, stashTopData);
+			}
+			var res = new StashedState(Repository, 0, revision);
 
-				lock(SyncRoot)
+			lock(SyncRoot)
+			{
+				_stash.Insert(0, res);
+				for(int i = 1; i < _stash.Count; ++i)
 				{
-					_stash.Insert(0, res);
-					for(int i = 1; i < _stash.Count; ++i)
-					{
-						++_stash[i].Index;
-					}
-
-					InvokeStashedStateCreated(res);
+					++_stash[i].Index;
 				}
 
-				Repository.OnCommitCreated(res.Revision);
-				Repository.Status.Refresh();
+				InvokeStashedStateCreated(res);
+			}
 
-				return res;
-			}
-			else
-			{
-				return null;
-			}
+			Repository.OnCommitCreated(res.Revision);
+			Repository.Status.Refresh();
+
+			return res;
 		}
 
 		public StashedState Save(bool keepIndex, bool includeUntracked, string message)
@@ -786,52 +742,40 @@ namespace gitter.Git
 			return OnStashSaveCompleted(created);
 		}
 
-		public async Task<StashedState> SaveAsync(bool keepIndex, bool includeUntracked, string message, IProgress<OperationProgress> progress)
+		public async Task<StashedState> SaveAsync(bool keepIndex, bool includeUntracked, string message,
+			IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsFalse(Repository.IsEmpty,
 				Resources.ExcCantDoOnEmptyRepository.UseAsFormat("stash save"));
 
+			bool created;
+
 			progress?.Report(new OperationProgress(Resources.StrPerformingStashSave.AddEllipsis()));
 			var parameters = GetStashSaveParameters(keepIndex, includeUntracked, message);
-			var block = Repository.Monitor.BlockNotifications(
+			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.WorktreeUpdated,
-				RepositoryNotifications.StashChanged);
-			var created = await Repository
-				.Accessor
-				.StashSave
-				.InvokeAsync(parameters, progress, CancellationToken.None);
+				RepositoryNotifications.StashChanged))
+			{
+				created = await Repository.Accessor.StashSave
+					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
 			return OnStashSaveCompleted(created);
-			//return Repository.Accessor.StashSave.InvokeAsync(parameters, progress, CancellationToken.None)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		var created = TaskUtility.UnwrapResult(t);
-			//		return OnStashSaveCompleted(created);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#endregion
 
 		#region IEnumerable<StashedState> Members
 
-		public IEnumerator<StashedState> GetEnumerator()
-		{
-			return _stash.GetEnumerator();
-		}
+		public List<StashedState>.Enumerator GetEnumerator()
+			=> _stash.GetEnumerator();
 
-		#endregion
-
-		#region IEnumerable Members
+		IEnumerator<StashedState> IEnumerable<StashedState>.GetEnumerator()
+			=> _stash.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _stash.GetEnumerator();
-		}
+			=> _stash.GetEnumerator();
 
 		#endregion
 	}

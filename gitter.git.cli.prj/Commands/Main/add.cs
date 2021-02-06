@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,48 +28,36 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		/// <summary>Don't actually add the file(s), just show if they exist.</summary>
 		public static ICommandArgument DryRun()
-		{
-			return CommandFlag.DryRun();
-		}
+			=> CommandFlag.DryRun();
 
 		/// <summary>Be verbose.</summary>
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		/// <summary>Allow adding otherwise ignored files.</summary>
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			=> new CommandFlag("--force");
 
 		/// <summary>
 		///	Add modified contents in the working tree interactively to the index. Optional path arguments
 		///	may be supplied to limit operation to a subset of the working tree. See “Interactive mode” for details.
 		/// </summary>
 		public static ICommandArgument Interactive()
-		{
-			return CommandFlag.Interactive();
-		}
+			=> CommandFlag.Interactive();
 
 		/// <summary>
 		/// Similar to Interactive mode but the initial command loop is bypassed and the patch subcommand
 		/// is invoked using each of the specified filepatterns before exiting.
 		/// </summary>
 		public static ICommandArgument Patch()
-		{
-			return new CommandFlag("--patch");
-		}
+			=> new CommandFlag("--patch");
 
 		/// <summary>
 		///	Open the diff vs. the index in an editor and let the user edit it. After the editor was closed,
 		///	adjust the hunk headers and apply the patch to the index. 
 		/// </summary>
 		public static ICommandArgument Edit()
-		{
-			return new CommandFlag("--edit");
-		}
+			=> new CommandFlag("--edit");
 
 		/// <summary>
 		///	Update only files that git already knows about, staging modified content for commit and marking
@@ -78,18 +66,14 @@ namespace gitter.Git.AccessLayer.CLI
 		///	specified, all tracked files in the current directory and its subdirectories are updated.
 		/// </summary>
 		public static ICommandArgument Update()
-		{
-			return new CommandFlag("--update");
-		}
+			=> new CommandFlag("--update");
 
 		/// <summary>
 		///	Update files that git already knows about (same as --update) and add all untracked files that are
 		///	not ignored by .gitignore  mechanism.
 		/// </summary>
 		public static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		/// <summary>
 		///	Record only the fact that the path will be added later. An entry for the path is placed in the
@@ -97,33 +81,25 @@ namespace gitter.Git.AccessLayer.CLI
 		///	files with git diff and committing them with git commit -a.
 		/// </summary>
 		public static ICommandArgument IntentToAdd()
-		{
-			return new CommandFlag("--intent-to-add");
-		}
+			=> new CommandFlag("--intent-to-add");
 
 		/// <summary>Don't add the file(s), but only refresh their stat() information in the index.</summary>
 		public static ICommandArgument Refresh()
-		{
-			return new CommandFlag("--refresh");
-		}
+			=> new CommandFlag("--refresh");
 
 		/// <summary>
 		///	If some files could not be added because of errors indexing them, do not abort the operation,
 		///	but continue adding the others. The command shall still exit with non-zero status.
 		/// </summary>
 		public static ICommandArgument IgnoreErrors()
-		{
-			return new CommandFlag("--ignore-errors");
-		}
+			=> new CommandFlag("--ignore-errors");
 
 		/// <summary>
 		///	This option can be used to separate command-line options from the list of files,
 		///	(useful when filenames might be mistaken for command-line options).
 		/// </summary>
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public AddCommand()
 			: base("add")

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,16 +29,16 @@ namespace gitter.Framework
 		/// <summary>No buttons.</summary>
 		None = 0,
 
-		/// <summary>Ok button.</summary>
+		/// <summary>OK button.</summary>
 		Ok = (1 << 0),
 		/// <summary>Cancel button.</summary>
 		Cancel = (1 << 1),
 		/// <summary>Apply button.</summary>
 		Apply = (1 << 2),
 
-		/// <summary>Ok &amp; Cancel.</summary>
+		/// <summary>OK &amp; Cancel.</summary>
 		OkCancel = Ok | Cancel,
-		/// <summary>Ok, Cancel &amp; Apply.</summary>
+		/// <summary>OK, Cancel &amp; Apply.</summary>
 		All = Ok | Cancel | Apply,
 	}
 }

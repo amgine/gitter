@@ -20,18 +20,9 @@
 
 namespace gitter.GitLab.Gui
 {
-	using System;
-	using System.Collections.Generic;
+	using gitter.Framework.Controls;
 
-	interface ISearchableView<T>
-		where T : SearchOptions
+	sealed class PipelinesSearchOptions : SearchOptions
 	{
-		bool SearchToolBarVisible { get; set; }
-
-		bool SearchFirst(T options);
-
-		bool SearchNext(T options);
-
-		bool SearchPrevious(T options);
 	}
 }

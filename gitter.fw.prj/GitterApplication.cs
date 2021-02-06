@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -102,7 +102,7 @@ namespace gitter.Framework
 
 		public static IGitterStyle StyleOnNextStartup
 		{
-			get { return _styleOnNextStartup; }
+			get => _styleOnNextStartup;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -138,16 +138,13 @@ namespace gitter.Framework
 
 		private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
-			var exc = e.ExceptionObject as Exception;
-			if(exc != null)
+			if(e.ExceptionObject is Exception exc)
 			{
 				LoggingService.Global.Error(exc, "Application error");
 				try
 				{
-					using(var dlg = new ExceptionDialog(exc))
-					{
-						dlg.Run(null);
-					}
+					using var dlg = new ExceptionDialog(exc);
+					dlg.Run(null);
 				}
 				catch
 				{
@@ -165,10 +162,8 @@ namespace gitter.Framework
 			LoggingService.Global.Error(exception, "Application error");
 			try
 			{
-				using(var dlg = new ExceptionDialog(exception))
-				{
-					dlg.Run(null);
-				}
+				using var dlg = new ExceptionDialog(exception);
+				dlg.Run(null);
 			}
 			catch
 			{
@@ -179,10 +174,7 @@ namespace gitter.Framework
 		{
 			var styleName = _configurationService.GuiSection.GetValue<string>("Style", string.Empty);
 			var style = Styles.FirstOrDefault(s => s.Name == styleName);
-			if(style == null)
-			{
-				style = Styles.First();
-			}
+			style ??= Styles.First();
 			_styleOnNextStartup = style;
 			Style = style;
 		}

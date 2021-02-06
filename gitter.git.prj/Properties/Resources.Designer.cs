@@ -2439,6 +2439,15 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Loading contributors.
+        /// </summary>
+        internal static string StrLoadingContributors {
+            get {
+                return ResourceManager.GetString("StrLoadingContributors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading Diff.
         /// </summary>
         internal static string StrLoadingDiff {
@@ -3717,7 +3726,7 @@ namespace gitter.Git.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Aboring cherry-pick.
+        ///   Looks up a localized string similar to Aborting cherry-pick.
         /// </summary>
         internal static string StrsAbortingCherryPick {
             get {

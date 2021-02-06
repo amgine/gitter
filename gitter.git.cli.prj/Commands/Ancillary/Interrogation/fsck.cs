@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,74 +26,46 @@ namespace gitter.Git.AccessLayer.CLI
 	sealed class FsckCommand : Command
 	{
 		public static ICommandArgument Tags()
-		{
-			return new CommandFlag("--tags");
-		}
+			=> new CommandFlag("--tags");
 
 		public static ICommandArgument Root()
-		{
-			return new CommandFlag("--root");
-		}
+			=> new CommandFlag("--root");
 
 		public static ICommandArgument Unreachable()
-		{
-			return new CommandFlag("--unreachable");
-		}
+			=> new CommandFlag("--unreachable");
 
 		public static ICommandArgument Cache()
-		{
-			return new CommandFlag("--cache");
-		}
+			=> new CommandFlag("--cache");
 
 		public static ICommandArgument NoReflogs()
-		{
-			return new CommandFlag("--no-reflogs");
-		}
+			=> new CommandFlag("--no-reflogs");
 
 		public static ICommandArgument Full()
-		{
-			return new CommandFlag("--full");
-		}
+			=> new CommandFlag("--full");
 
 		public static ICommandArgument NoFull()
-		{
-			return new CommandFlag("--no-full");
-		}
+			=> new CommandFlag("--no-full");
 
 		public static ICommandArgument Strict()
-		{
-			return new CommandFlag("--strict");
-		}
+			=> new CommandFlag("--strict");
 
 		public static ICommandArgument LostFound()
-		{
-			return new CommandFlag("--lost-found");
-		}
+			=> new CommandFlag("--lost-found");
 
 		public static ICommandArgument Dangling()
-		{
-			return new CommandFlag("--dangling");
-		}
+			=> new CommandFlag("--dangling");
 
 		public static ICommandArgument NoDangling()
-		{
-			return new CommandFlag("--no-dangling");
-		}
+			=> new CommandFlag("--no-dangling");
 
 		public static ICommandArgument Progress()
-		{
-			return new CommandFlag("--progress");
-		}
+			=> new CommandFlag("--progress");
 
 		public static ICommandArgument NoProgress()
-		{
-			return new CommandFlag("--no-progress");
-		}
+			=> new CommandFlag("--no-progress");
 
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public FsckCommand()
 			: base("fsck")

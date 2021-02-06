@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -534,48 +534,11 @@ namespace gitter.Git
 		/// <summary>Create <see cref="Branch"/>, starting at this revision.</summary>
 		/// <param name="revision">Revision to start branch from.</param>
 		/// <param name="name">Branch name.</param>
-		/// <returns>Created <see cref="Branch"/>.</returns>
-		public static Branch CreateBranch(this IRevisionPointer revision, string name)
-		{
-			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
-
-			var repository = revision.Repository;
-			return repository.Refs.Heads.Create(name, revision);
-		}
-
-		/// <summary>Create <see cref="Branch"/>, starting at this revision.</summary>
-		/// <param name="revision">Revision to start branch from.</param>
-		/// <param name="name">Branch name.</param>
-		/// <param name="checkout">Checkout branch after creation.</param>
-		/// <returns>Created <see cref="Branch"/>.</returns>
-		public static Branch CreateBranch(this IRevisionPointer revision, string name, bool checkout)
-		{
-			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
-
-			var repository = revision.Repository;
-			return repository.Refs.Heads.Create(name, revision, checkout);
-		}
-
-		/// <summary>Create <see cref="Branch"/>, starting at this revision.</summary>
-		/// <param name="revision">Revision to start branch from.</param>
-		/// <param name="name">Branch name.</param>
-		/// <param name="tracking">Branch tracking mode.</param>
-		/// <returns>Created <see cref="Branch"/>.</returns>
-		public static Branch CreateBranch(this IRevisionPointer revision, string name, BranchTrackingMode tracking)
-		{
-			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
-
-			var repository = revision.Repository;
-			return repository.Refs.Heads.Create(name, revision, tracking);
-		}
-
-		/// <summary>Create <see cref="Branch"/>, starting at this revision.</summary>
-		/// <param name="revision">Revision to start branch from.</param>
-		/// <param name="name">Branch name.</param>
 		/// <param name="tracking">Branch tracking mode.</param>
 		/// <param name="checkout">Checkout branch after creation.</param>
 		/// <returns>Created <see cref="Branch"/>.</returns>
-		public static Branch CreateBranch(this IRevisionPointer revision, string name, BranchTrackingMode tracking, bool checkout)
+		public static Branch CreateBranch(this IRevisionPointer revision, string name,
+			BranchTrackingMode tracking = BranchTrackingMode.Default, bool checkout = false)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 

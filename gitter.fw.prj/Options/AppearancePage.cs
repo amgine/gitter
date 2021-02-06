@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,10 +21,7 @@
 namespace gitter.Framework.Options
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using Resources = gitter.Framework.Properties.Resources;
@@ -81,7 +78,7 @@ namespace gitter.Framework.Options
 
 		private IGitterStyle SelectedStyle
 		{
-			get { return _selectedStyle; }
+			get => _selectedStyle;
 			set
 			{
 				if(_selectedStyle != value)

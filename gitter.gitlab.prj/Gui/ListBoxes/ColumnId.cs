@@ -32,5 +32,8 @@ namespace gitter.GitLab.Gui
 		Assignee,
 		ClosedBy,
 		Author,
+		Ref,
+		Hash,
+		Status,
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,114 +27,70 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class NotesCommand : Command
 	{
 		public static ICommandArgument List()
-		{
-			return new CommandParameter("list");
-		}
+			=> new CommandParameter("list");
 
 		public static ICommandArgument List(string @object)
-		{
-			return new CommandParameterValue("list", @object, ' ');
-		}
+			=> new CommandParameterValue("list", @object, ' ');
 
 		public static ICommandArgument Add()
-		{
-			return new CommandParameter("add");
-		}
+			=> new CommandParameter("add");
 
 		public static ICommandArgument Copy()
-		{
-			return new CommandParameter("copy");
-		}
+			=> new CommandParameter("copy");
 
 		public static ICommandArgument Append()
-		{
-			return new CommandParameter("append");
-		}
+			=> new CommandParameter("append");
 
 		public static ICommandArgument Edit()
-		{
-			return new CommandParameter("edit");
-		}
+			=> new CommandParameter("edit");
 
 		public static ICommandArgument Edit(string @object)
-		{
-			return new CommandParameterValue("edit", @object, ' ');
-		}
+			=> new CommandParameterValue("edit", @object, ' ');
 
 		public static ICommandArgument Show()
-		{
-			return new CommandParameter("show");
-		}
+			=> new CommandParameter("show");
 
 		public static ICommandArgument Show(string @object)
-		{
-			return new CommandParameterValue("show", @object, ' ');
-		}
+			=> new CommandParameterValue("show", @object, ' ');
 
 		public static ICommandArgument Remove()
-		{
-			return new CommandParameter("remove");
-		}
+			=> new CommandParameter("remove");
 
 		public static ICommandArgument Remove(string @object)
-		{
-			return new CommandParameterValue("remove", @object, ' ');
-		}
+			=> new CommandParameterValue("remove", @object, ' ');
 
 		public static ICommandArgument Prune()
-		{
-			return new CommandParameter("prune");
-		}
+			=> new CommandParameter("prune");
 
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			=> new CommandFlag("--force");
 
 		public static ICommandArgument Stdin()
-		{
-			return new CommandFlag("--stdin");
-		}
+			=> new CommandFlag("--stdin");
 
 		public static ICommandArgument File(string file)
-		{
-			return new CommandParameterValue("--file", file.SurroundWith("\"", "\""), '=');
-		}
+			=> new CommandParameterValue("--file", file.SurroundWith("\"", "\""), '=');
 
 		public static ICommandArgument Message(string message)
-		{
-			return new CommandParameterValue("--message", message.SurroundWith("\"", "\""));
-		}
+			=> new CommandParameterValue("--message", message.SurroundWith("\"", "\""));
 
 		public static ICommandArgument ReuseMessage(string @object)
-		{
-			return new CommandParameterValue("--reuse-message", @object, '=');
-		}
+			=> new CommandParameterValue("--reuse-message", @object, '=');
 
 		public static ICommandArgument ReeditMessage(string @object)
-		{
-			return new CommandParameterValue("--reedit-message", @object, '=');
-		}
+			=> new CommandParameterValue("--reedit-message", @object, '=');
 
 		public static ICommandArgument Ref(string @ref)
-		{
-			return new CommandParameterValue("--ref", @ref, ' ');
-		}
+			=> new CommandParameterValue("--ref", @ref, ' ');
 
 		public static ICommandArgument DoNotRemove()
-		{
-			return new CommandFlag("-n");
-		}
+			=> new CommandFlag("-n");
 
 		public static ICommandArgument VerboseRemove()
-		{
-			return new CommandFlag("-v");
-		}
+			=> new CommandFlag("-v");
 
 		public static ICommandArgument GetRef()
-		{
-			return new CommandFlag("get-ref");
-		}
+			=> new CommandFlag("get-ref");
 
 		public NotesCommand()
 			: base("notes")

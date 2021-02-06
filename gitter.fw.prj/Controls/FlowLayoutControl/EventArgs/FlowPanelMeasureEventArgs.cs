@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,35 +25,14 @@ namespace gitter.Framework.Controls
 
 	public class FlowPanelMeasureEventArgs : EventArgs
 	{
-		#region Data
-
-		private readonly Graphics _graphics;
-		private readonly int _width;
-
-		#endregion
-
-		#region .ctor
-
 		public FlowPanelMeasureEventArgs(Graphics graphics, int width)
 		{
-			_graphics = graphics;
-			_width = width;
+			Graphics = graphics;
+			Width    = width;
 		}
 
-		#endregion
+		public Graphics Graphics { get; }
 
-		#region Properties
-
-		public Graphics Graphics
-		{
-			get { return _graphics; }
-		}
-
-		public int Width
-		{
-			get { return _width; }
-		}
-
-		#endregion
+		public int Width { get; }
 	}
 }

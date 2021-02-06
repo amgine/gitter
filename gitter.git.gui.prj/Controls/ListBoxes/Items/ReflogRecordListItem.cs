@@ -248,10 +248,7 @@ namespace gitter.Git.Gui.Controls
 					menu = PointerBounds.GetContextMenu(_drawnPointers, requestEventArgs.X, requestEventArgs.Y);
 					break;
 			}
-			if(menu == null)
-			{
-				menu = new ReflogRecordMenu(DataContext);
-			}
+			menu ??= new ReflogRecordMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

@@ -46,7 +46,7 @@ namespace gitter.Framework.Mvc.WinForms
 						return _valueMappings[i].Item2;
 					}
 				}
-				return default(T);
+				return default;
 			}
 			set
 			{
@@ -68,7 +68,7 @@ namespace gitter.Framework.Mvc.WinForms
 
 		public bool IsReadOnly
 		{
-			get { return _isReadonly; }
+			get => _isReadonly;
 			set
 			{
 				if(_isReadonly != value)

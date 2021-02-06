@@ -70,7 +70,7 @@ namespace gitter.Framework.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Some options could not be applied because gitter was uable to start an elevated process..
+        ///   Looks up a localized string similar to Some options could not be applied because gitter was unable to start an elevated process..
         /// </summary>
         internal static string ErrSomeOptionsCouldNotBeApplied {
             get {
@@ -591,6 +591,36 @@ namespace gitter.Framework.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgSearchClose {
+            get {
+                object obj = ResourceManager.GetObject("ImgSearchClose", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgSearchNext {
+            get {
+                object obj = ResourceManager.GetObject("ImgSearchNext", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgSearchPrevious {
+            get {
+                object obj = ResourceManager.GetObject("ImgSearchPrevious", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgTabMenu {
             get {
                 object obj = ResourceManager.GetObject("ImgTabMenu", resourceCulture);
@@ -950,6 +980,15 @@ namespace gitter.Framework.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Find.
+        /// </summary>
+        internal static string StrFind {
+            get {
+                return ResourceManager.GetString("StrFind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Font.
         /// </summary>
         internal static string StrFont {
@@ -1049,6 +1088,15 @@ namespace gitter.Framework.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Match Case.
+        /// </summary>
+        internal static string StrMatchCase {
+            get {
+                return ResourceManager.GetString("StrMatchCase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Message.
         /// </summary>
         internal static string StrMessage {
@@ -1063,6 +1111,15 @@ namespace gitter.Framework.Properties {
         internal static string StrName {
             get {
                 return ResourceManager.GetString("StrName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Next.
+        /// </summary>
+        internal static string StrNext {
+            get {
+                return ResourceManager.GetString("StrNext", resourceCulture);
             }
         }
         
@@ -1135,6 +1192,15 @@ namespace gitter.Framework.Properties {
         internal static string StrPageUp {
             get {
                 return ResourceManager.GetString("StrPageUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Previous.
+        /// </summary>
+        internal static string StrPrevious {
+            get {
+                return ResourceManager.GetString("StrPrevious", resourceCulture);
             }
         }
         

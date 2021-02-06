@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,12 +28,13 @@ namespace gitter.Git.Gui.Views
 	using System.Windows.Forms;
 
 	using gitter.Framework;
-	
+	using gitter.Framework.Controls;
+
 	using gitter.Git.Gui.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
-	partial class RemoteView : GitViewBase
+	partial class RemoteView : GitViewBase, ISearchableView<RemoteSearchOptions>
 	{
 		private sealed class RemoteReferencesDataSource : AsyncDataBinding<RemoteReferencesCollection>
 		{
@@ -66,16 +67,6 @@ namespace gitter.Git.Gui.Views
 				ListBox.Cursor = Cursors.WaitCursor;
 				await _remoteReferences.RefreshAsync(progress, cancellationToken);
 				return _remoteReferences;
-				//return _remoteReferences.RefreshAsync(progress, cancellationToken)
-				//	.ContinueWith(
-				//	t =>
-				//	{
-				//		TaskUtility.PropagateFaultedStates(t);
-				//		return _remoteReferences;
-				//	},
-				//	cancellationToken,
-				//	TaskContinuationOptions.ExecuteSynchronously,
-				//	TaskScheduler.Default);
 			}
 
 			protected override void OnFetchCompleted(RemoteReferencesCollection data)
@@ -118,6 +109,7 @@ namespace gitter.Git.Gui.Views
 		#region Data
 
 		private RemoteToolbar _toolbar;
+		private readonly ISearchToolBarController _searchToolbar;
 		private Remote _remote;
 		private RemoteReferencesDataSource _dataSource;
 
@@ -130,7 +122,12 @@ namespace gitter.Git.Gui.Views
 		{
 			InitializeComponent();
 
-			Text = Resources.StrRemote;
+			Text   = Resources.StrRemote;
+			Search = new RemoteSearch(_lstRemoteReferences);
+
+			_searchToolbar = CreateSearchToolbarController<RemoteView, RemoteSearchToolBar, RemoteSearchOptions>(this);
+
+			_lstRemoteReferences.PreviewKeyDown += OnKeyDown;
 
 			AddTopToolStrip(_toolbar = new RemoteToolbar(this));
 		}
@@ -145,7 +142,7 @@ namespace gitter.Git.Gui.Views
 
 		public Remote Remote
 		{
-			get { return _remote; }
+			get => _remote;
 			private set
 			{
 				if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
@@ -172,7 +169,7 @@ namespace gitter.Git.Gui.Views
 
 		private RemoteReferencesDataSource DataSource
 		{
-			get { return _dataSource; }
+			get => _dataSource;
 			set
 			{
 				if(_dataSource != value)
@@ -188,6 +185,14 @@ namespace gitter.Git.Gui.Views
 					}
 				}
 			}
+		}
+
+		public ISearch<RemoteSearchOptions> Search { get; }
+
+		public bool SearchToolBarVisible
+		{
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
 		}
 
 		#endregion
@@ -280,6 +285,26 @@ namespace gitter.Git.Gui.Views
 				{
 					Close();
 				}
+			}
+		}
+
+		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+		{
+			OnKeyDown(this, e);
+			base.OnPreviewKeyDown(e);
+		}
+
+		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			switch(e.KeyCode)
+			{
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					break;
+				case Keys.F5:
+					RefreshContent();
+					e.IsInputKey = true;
+					break;
 			}
 		}
 

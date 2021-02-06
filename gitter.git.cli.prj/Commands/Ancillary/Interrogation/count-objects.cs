@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,9 +26,7 @@ namespace gitter.Git.AccessLayer.CLI
 	sealed class CountObjectsCommand : Command
 	{
 		public static ICommandArgument Verbose()
-		{
-			return new CommandFlag("--verbose");
-		}
+			=> new CommandFlag("--verbose");
 
 		public CountObjectsCommand()
 			: base("count-objects")

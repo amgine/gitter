@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,26 +18,24 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Views
+namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Drawing;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using Resources = gitter.Framework.Properties.Resources;
 
 	[ToolboxItem(false)]
-	internal abstract class SearchToolBar<TView, TOptions> : ToolStrip
-		where TView : GitViewBase, ISearchableView<TOptions>
+	public abstract class SearchToolBar<TOptions> : ToolStrip
 		where TOptions : SearchOptions
 	{
 		#region Data
 
-		private readonly TView _view;
+		private ISearchableView<TOptions> _view;
 		private readonly ToolStripTextBox _textBox;
 		private readonly ToolStripButton _btnNext;
 		private readonly ToolStripButton _btnPrev;
@@ -47,11 +45,8 @@ namespace gitter.Git.Gui.Views
 
 		#endregion
 
-		protected SearchToolBar(TView view)
+		protected SearchToolBar()
 		{
-			Verify.Argument.IsNotNull(view, nameof(view));
-
-			_view = view;
 			_result = true;
 
 			Items.AddRange(new ToolStripItem[]
@@ -83,40 +78,82 @@ namespace gitter.Git.Gui.Views
 					},
 				});
 			_textBox.TextBox.PreviewKeyDown += OnSearchTextBoxPreviewKeyDown;
-			_textBox.TextChanged += OnSearchTextChanged;
-			_btnMatchCase.CheckedChanged += OnMatchCaseCheckedChanged;
+			_textBox.TextBox.KeyDown        += OnSearchTextBoxKeyDown;
+			_textBox.TextChanged            += OnSearchTextChanged;
+			_btnMatchCase.CheckedChanged    += OnMatchCaseCheckedChanged;
 		}
 
 		private void OnCloseButtonClick(object sender, EventArgs e)
 		{
-			_view.SearchToolBarVisible = false;
+			if(View == null) return;
+			View.SearchToolBarVisible = false;
 		}
 
 		private void OnSearchTextChanged(object sender, EventArgs e)
 		{
-			Options = CreateSearchOptions();
-			HandleSearchResult(_view.Search.Current(Options));
+			if(View != null)
+			{
+				Options = CreateSearchOptions();
+				HandleSearchResult(View.Search.Current(Options));
+			}
 			_btnNext.Enabled = _textBox.TextLength > 0;
 			_btnPrev.Enabled = _textBox.TextLength > 0;
 		}
 
 		private void OnSearchTextBoxPreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
-			if(e.KeyCode == Keys.Escape)
+			Assert.IsNotNull(e);
+
+			if(View == null) return;
+
+			switch(e.KeyCode)
 			{
-				_view.SearchToolBarVisible = false;
-				e.IsInputKey = true;
+				case Keys.Enter:
+				case Keys.F3 when e.Modifiers == Keys.Shift:
+				case Keys.F3 when e.Modifiers == Keys.None:
+				case Keys.Escape:
+					e.IsInputKey = true;
+					break;
+			}
+		}
+
+		private void OnSearchTextBoxKeyDown(object sender, KeyEventArgs e)
+		{
+			Assert.IsNotNull(e);
+
+			if(View == null) return;
+
+			switch(e.KeyCode)
+			{
+				case Keys.Enter:
+					HandleSearchResult(View.Search.Current(Options));
+					e.Handled = true;
+					break;
+				case Keys.F3 when e.Modifiers == Keys.Shift:
+					HandleSearchResult(View.Search.Previous(Options));
+					e.Handled = true;
+					break;
+				case Keys.F3 when e.Modifiers == Keys.None:
+					HandleSearchResult(View.Search.Next(Options));
+					e.Handled = true;
+					break;
+				case Keys.Escape:
+					View.SearchToolBarVisible = false;
+					e.Handled = true;
+					break;
 			}
 		}
 
 		private void OnNextClick(object sender, EventArgs e)
 		{
-			HandleSearchResult(_view.Search.Next(Options));
+			if(View == null) return;
+			HandleSearchResult(View.Search.Next(Options));
 		}
 
 		private void OnPreviousClick(object sender, EventArgs e)
 		{
-			HandleSearchResult(_view.Search.Previous(Options));
+			if(View == null) return;
+			HandleSearchResult(View.Search.Previous(Options));
 		}
 
 		private void OnMatchCaseClick(object sender, EventArgs e)
@@ -126,21 +163,26 @@ namespace gitter.Git.Gui.Views
 
 		private void OnMatchCaseCheckedChanged(object sender, EventArgs e)
 		{
+			if(View == null) return;
 			Options = CreateSearchOptions();
-			HandleSearchResult(_view.Search.Current(Options));
+			HandleSearchResult(View.Search.Current(Options));
 		}
 
-		private TOptions Options
+		public TOptions Options
 		{
-			get
+			get => _options ??= CreateSearchOptions();
+			set
 			{
-				if(_options == null)
+				if(_options != value)
 				{
-					_options = CreateSearchOptions();
+					_options = value;
+					if(value != null)
+					{
+						SearchText = value.Text;
+						MatchCase  = value.MatchCase;
+					}
 				}
-				return _options;
 			}
-			set { _options = value; }
 		}
 
 		protected abstract TOptions CreateSearchOptions();
@@ -171,9 +213,16 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public TView View
+		public ISearchableView<TOptions> View
 		{
-			get { return _view; }
+			get => _view;
+			set
+			{
+				if(_view != value)
+				{
+					_view = value;
+				}
+			}
 		}
 
 		public void FocusSearchTextBox()
@@ -184,29 +233,20 @@ namespace gitter.Git.Gui.Views
 
 		public string SearchText
 		{
-			get { return _textBox.Text; }
-			set { _textBox.Text = value; }
+			get => _textBox.Text;
+			set => _textBox.Text = value;
 		}
 
 		public bool MatchCase
 		{
-			get { return _btnMatchCase.Checked; }
-			set { _btnMatchCase.Checked = value; }
+			get => _btnMatchCase.Checked;
+			set => _btnMatchCase.Checked = value;
 		}
 
-		public ToolStripButton NextButton
-		{
-			get { return _btnNext; }
-		}
+		public ToolStripButton NextButton => _btnNext;
 
-		public ToolStripButton PrevButton
-		{
-			get { return _btnNext; }
-		}
+		public ToolStripButton PrevButton => _btnNext;
 
-		public ToolStripButton MatchCaseButton
-		{
-			get { return _btnMatchCase; }
-		}
+		public ToolStripButton MatchCaseButton => _btnMatchCase;
 	}
 }

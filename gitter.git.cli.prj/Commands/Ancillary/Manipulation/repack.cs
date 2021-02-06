@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,24 +27,16 @@ namespace gitter.Git.AccessLayer.CLI
 	sealed class RepackCommand : Command
 	{
 		public static ICommandArgument Window(int window)
-		{
-			return new CommandParameterValue("--window", window.ToString(CultureInfo.InvariantCulture), '=');
-		}
+			=> new CommandParameterValue("--window", window.ToString(CultureInfo.InvariantCulture), '=');
 
 		public static ICommandArgument WindowMemory(int windowMemory)
-		{
-			return new CommandParameterValue("--window-memory", windowMemory.ToString(CultureInfo.InvariantCulture), '=');
-		}
+			=> new CommandParameterValue("--window-memory", windowMemory.ToString(CultureInfo.InvariantCulture), '=');
 
 		public static ICommandArgument Depth(int depth)
-		{
-			return new CommandParameterValue("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
-		}
+			=> new CommandParameterValue("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
 
 		public static ICommandArgument MaxPackSize(int maxPackSize)
-		{
-			return new CommandParameterValue("--max-pack-size", maxPackSize.ToString(CultureInfo.InvariantCulture), '=');
-		}
+			=> new CommandParameterValue("--max-pack-size", maxPackSize.ToString(CultureInfo.InvariantCulture), '=');
 
 		public RepackCommand()
 			: base("repack")

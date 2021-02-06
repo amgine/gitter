@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -72,29 +72,20 @@ namespace gitter.Framework
 			RepositoryManagerSection = RootSection.GetCreateSection("RepositoryManager");
 		}
 
-		~ConfigurationService()
-		{
-			Dispose(false);
-		}
+		~ConfigurationService() => Dispose(disposing: false);
 
 		#endregion
 
 		public ConfigurationManager Configuration { get; }
 
 		public Stream CreateFile(string fileName)
-		{
-			return new FileStream(Path.Combine(_configPath, fileName), FileMode.Create, FileAccess.Write, FileShare.None);
-		}
+			=> new FileStream(Path.Combine(_configPath, fileName), FileMode.Create, FileAccess.Write, FileShare.None);
 
 		public Stream OpenFile(string fileName)
-		{
-			return new FileStream(Path.Combine(_configPath, fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
-		}
+			=> new FileStream(Path.Combine(_configPath, fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
 
 		public bool FileExists(string fileName)
-		{
-			return File.Exists(Path.Combine(_configPath, fileName));
-		}
+			=> File.Exists(Path.Combine(_configPath, fileName));
 
 		public Section RootSection { get; }
 
@@ -143,26 +134,22 @@ namespace gitter.Framework
 
 		private ConfigurationManager LoadConfig(string configFile, string configName)
 		{
-			ConfigurationManager config = null;
+			var config = default(ConfigurationManager);
 			if(FileExists(configFile))
 			{
 				try
 				{
-					using(var stream = OpenFile(configFile))
+					using var stream = OpenFile(configFile);
+					if(stream.Length != 0)
 					{
-						if(stream.Length != 0)
+						using var adapter = new XmlAdapter(stream);
+						try
 						{
-							using(var adapter = new XmlAdapter(stream))
-							{
-								try
-								{
-									config = new ConfigurationManager(adapter);
-								}
-								catch(Exception exc) when(!exc.IsCritical())
-								{
-									LoggingService.Global.Error(exc);
-								}
-							}
+							config = new ConfigurationManager(adapter);
+						}
+						catch(Exception exc) when(!exc.IsCritical())
+						{
+							LoggingService.Global.Error(exc);
 						}
 					}
 				}
@@ -171,22 +158,16 @@ namespace gitter.Framework
 					LoggingService.Global.Error(exc);
 				}
 			}
-			if(config == null)
-			{
-				config = new ConfigurationManager(configName);
-			}
-			return config;
+			return config ?? new ConfigurationManager(configName);
 		}
 
 		private void SaveConfig(string configFile, ConfigurationManager config)
 		{
 			try
 			{
-				using(var stream = CreateFile(configFile))
-				using(var adapter = new XmlAdapter(stream))
-				{
-					config.Save(adapter);
-				}
+				using var stream  = CreateFile(configFile);
+				using var adapter = new XmlAdapter(stream);
+				config.Save(adapter);
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
@@ -210,7 +191,7 @@ namespace gitter.Framework
 			if(!IsDisposed)
 			{
 				GC.SuppressFinalize(this);
-				Dispose(true);
+				Dispose(disposing: true);
 				IsDisposed = true;
 			}
 		}

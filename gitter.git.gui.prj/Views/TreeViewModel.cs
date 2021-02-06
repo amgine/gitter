@@ -22,42 +22,17 @@ namespace gitter.Git.Gui.Views
 {
 	public class TreeViewModel
 	{
-		#region .ctor
-
 		public TreeViewModel(ITreeSource treeSource)
 		{
 			TreeSource = treeSource;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public ITreeSource TreeSource { get; }
 
-		#endregion
-
-		#region Methods
-
 		public override int GetHashCode()
-		{
-			return TreeSource != null ? TreeSource.GetHashCode() : 0;
-		}
+			=> TreeSource != null ? TreeSource.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
-		{
-			if(obj == null)
-			{
-				return false;
-			}
-			var other = obj as TreeViewModel;
-			if(other == null)
-			{
-				return false;
-			}
-			return object.Equals(TreeSource, other.TreeSource);
-		}
-
-		#endregion
+			=> obj is TreeViewModel other && Equals(TreeSource, other.TreeSource);
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,20 +25,14 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class DiffIndexCommand : Command
 	{
 		public static ICommandArgument NameStatus()
-		{
-			return new CommandFlag("--name-status");
-		}
+			=> new CommandFlag("--name-status");
 
 		public static ICommandArgument Cached()
-		{
-			return new CommandFlag("--cached");
-		}
+			=> new CommandFlag("--cached");
 
 		/// <summary>\0 line termination on output.</summary>
 		public static ICommandArgument ZeroLineTermination()
-		{
-			return new CommandFlag("-z");
-		}
+			=> new CommandFlag("-z");
 
 		public DiffIndexCommand()
 			: base("diff-index")

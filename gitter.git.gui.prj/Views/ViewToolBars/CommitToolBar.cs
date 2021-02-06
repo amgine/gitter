@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -160,9 +160,6 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		public ToolStripButton TreeModeButton
-		{
-			get { return _btnTreeMode; }
-		}
+		public ToolStripButton TreeModeButton => _btnTreeMode;
 	}
 }

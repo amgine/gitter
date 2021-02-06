@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,7 +22,7 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	/// <summary>Parameters for <see cref="IStashAccessor.StashPop()"/> operation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.StashPop"/> operation.</summary>
 	public sealed class StashPopParameters
 	{
 		/// <summary>Create <see cref="StashPopParameters"/>.</summary>
@@ -32,6 +32,7 @@ namespace gitter.Git.AccessLayer
 
 		/// <summary>Create <see cref="StashPopParameters"/>.</summary>
 		/// <param name="stashName">Stash to pop.</param>
+		/// <param name="restoreIndex">Restore index state.</param>
 		public StashPopParameters(string stashName, bool restoreIndex)
 		{
 			StashName = stashName;

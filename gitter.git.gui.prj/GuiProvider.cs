@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -50,40 +50,40 @@ namespace gitter.Git.Gui
 
 			RepositoryProvider = repositoryProvider;
 
-			MainToolBar	= new GitToolbar(this);
-			ViewFactories	= new ViewFactoriesCollection(this);
-			Statusbar		= new Statusbar(this);
-			Menus			= new MainGitMenus(this);
-			_notifications	= new Notifications(this);
+			MainToolBar    = new GitToolbar(this);
+			ViewFactories  = new ViewFactoriesCollection(this);
+			Statusbar      = new Statusbar(this);
+			Menus          = new MainGitMenus(this);
+			_notifications = new Notifications(this);
 		}
 
 		public RepositoryProvider RepositoryProvider { get; }
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)
 				{
 					_repository = value;
-					MainToolBar.Repository		= _repository;
-					ViewFactories.Repository	= _repository;
+					MainToolBar.Repository    = _repository;
+					ViewFactories.Repository  = _repository;
 					if(_explorer != null)
 					{
-						_explorer.Repository = _repository;
+						_explorer.Repository  = _repository;
 					}
-					Statusbar.Repository		= _repository;
-					Menus.Repository			= _repository;
-					_notifications.Repository	= _repository;
+					Statusbar.Repository      = _repository;
+					Menus.Repository          = _repository;
+					_notifications.Repository = _repository;
 				}
 			}
 		}
 
 		IRepository IRepositoryGuiProvider.Repository
 		{
-			get { return Repository; }
-			set { Repository = value as Repository; }
+			get => Repository;
+			set => Repository = value as Repository;
 		}
 
 		public IWorkingEnvironment Environment => _environment;
@@ -99,25 +99,14 @@ namespace gitter.Git.Gui
 		public MainGitMenus Menus { get; }
 
 		public IRevisionPointer GetFocusedRevisionPointer()
-		{
-			var view = Environment.ViewDockService.ActiveView;
-			if(view != null)
+			=> Environment.ViewDockService.ActiveView switch
 			{
-				var historyView = view as HistoryView;
-				if(historyView != null)
-				{
-					return historyView.SelectedRevision;
-				}
-				var referencesView = view as ReferencesView;
-				if(referencesView != null)
-				{
-					return referencesView.SelectedReference;
-				}
-			}
-			return null;
-		}
+				HistoryView    historyView    => historyView.SelectedRevision,
+				ReferencesView referencesView => referencesView.SelectedReference,
+				_ => default,
+			};
 
-		public void StartCreateBranchDialog()
+		public DialogResult StartCreateBranchDialog()
 		{
 			var revision = GetFocusedRevisionPointer();
 			string startingRevision;
@@ -132,24 +121,21 @@ namespace gitter.Git.Gui
 				startingRevision  = GitConstants.HEAD;
 				defaultBranchName = string.Empty;
 			}
-			StartCreateBranchDialog(startingRevision, defaultBranchName);
+			return StartCreateBranchDialog(startingRevision, defaultBranchName);
 		}
 
-		public void StartCreateBranchDialog(string startingRevision, string defaultBranchName)
+		public DialogResult StartCreateBranchDialog(string startingRevision, string defaultBranchName)
 		{
-			using(var dlg = new CreateBranchDialog(_repository))
-			{
-				dlg.StartingRevision.Value = startingRevision;
-				dlg.BranchName.Value = defaultBranchName;
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new CreateBranchDialog(_repository);
+			dlg.StartingRevision.Value = startingRevision;
+			dlg.BranchName.Value       = defaultBranchName;
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartCheckoutDialog()
+		public DialogResult StartCheckoutDialog()
 		{
 			var rev = GetFocusedRevisionPointer();
-			var revision = rev as Revision;
-			if(revision != null)
+			if(rev is Revision revision)
 			{
 				foreach(var branch in revision.References.GetBranches())
 				{
@@ -160,113 +146,91 @@ namespace gitter.Git.Gui
 					}
 				}
 			}
-			using(var dlg = new CheckoutDialog(_repository))
+			using var dlg = new CheckoutDialog(_repository);
+			if(rev != null)
 			{
-				if(rev != null)
-				{
-					dlg.Revision.Value = rev.Pointer;
-				}
-				dlg.Run(Environment.MainForm);
+				dlg.Revision.Value = rev.Pointer;
 			}
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartMergeDialog(bool multiMerge)
+		public DialogResult StartMergeDialog(bool multiMerge = false)
 		{
-			using(var dlg = new MergeDialog(_repository))
+			using var dlg = new MergeDialog(_repository);
+			if(multiMerge)
 			{
-				if(multiMerge)
-				{
-					dlg.EnableMultipleBrunchesMerge();
-				}
-				dlg.Run(Environment.MainForm);
+				dlg.EnableMultipleBrunchesMerge();
 			}
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartPushDialog()
+		public DialogResult StartPushDialog()
 		{
-			using(var dlg = new PushDialog(_repository))
-			{
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new PushDialog(_repository);
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartApplyPatchesDialog()
+		public DialogResult StartApplyPatchesDialog()
 		{
-			using(var dlg = new ApplyPatchesDialog(_repository))
-			{
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new ApplyPatchesDialog(_repository);
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartCreateTagDialog()
+		public DialogResult StartCreateTagDialog()
 		{
 			var rev = GetFocusedRevisionPointer();
-			using(var dlg = new CreateTagDialog(_repository))
-			{
-				dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new CreateTagDialog(_repository);
+			dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartAddNoteDialog()
+		public DialogResult StartAddNoteDialog()
 		{
 			var rev = GetFocusedRevisionPointer();
-			using(var dlg = new AddNoteDialog(_repository))
-			{
-				dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new AddNoteDialog(_repository);
+			dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartStageFilesDialog()
+		public DialogResult StartStageFilesDialog()
 		{
-			using(var dlg = new StageDialog(_repository))
-			{
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new StageDialog(_repository);
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartStashSaveDialog()
+		public DialogResult StartStashSaveDialog()
 		{
-			using(var dlg = new StashSaveDialog(_repository))
-			{
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new StashSaveDialog(_repository);
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartCleanDialog()
+		public DialogResult StartCleanDialog()
 		{
-			using(var dlg = new CleanDialog(_repository))
-			{
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new CleanDialog(_repository);
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartResolveConflictsDialog()
+		public DialogResult StartResolveConflictsDialog()
 		{
-			using(var dlg = new ConflictsDialog(_repository))
-			{
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new ConflictsDialog(_repository);
+			return dlg.Run(Environment.MainForm);
 		}
 
-		public void StartUserIdentificationDialog()
+		public DialogResult StartUserIdentificationDialog()
 		{
-			using(var dlg = new UserIdentificationDialog(Environment, Repository))
+			using var dlg = new UserIdentificationDialog(Environment, Repository);
+			var result = dlg.Run(Environment.MainForm);
+			if(result == DialogResult.OK)
 			{
-				if(dlg.Run(Environment.MainForm) == DialogResult.OK)
-				{
-					Statusbar.UpdateUserIdentityLabel();
-				}
+				Statusbar.UpdateUserIdentityLabel();
 			}
+			return result;
 		}
 
-		public void StartAddRemoteDialog()
+		public DialogResult StartAddRemoteDialog()
 		{
-			using(var dlg = new AddRemoteDialog(Repository))
-			{
-				dlg.Run(Environment.MainForm);
-			}
+			using var dlg = new AddRemoteDialog(Repository);
+			return dlg.Run(Environment.MainForm);
 		}
 
 		public void SaveTo(Section section)

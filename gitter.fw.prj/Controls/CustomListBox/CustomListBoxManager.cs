@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,20 +29,9 @@ namespace gitter.Framework.Controls
 		private static CustomListBoxRenderer _msvs2012LightRenderer;
 		private static CustomListBoxRenderer _msvs2012DarkRenderer;
 
-		static CustomListBoxManager()
-		{
-		}
-
 		public static CustomListBoxRenderer Renderer
 		{
-			get
-			{
-				if(_renderer == null)
-				{
-					return Win7Renderer;
-				}
-				return _renderer;
-			}
+			get => _renderer ?? Win7Renderer;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -52,39 +41,12 @@ namespace gitter.Framework.Controls
 		}
 
 		public static CustomListBoxRenderer Win7Renderer
-		{
-			get
-			{
-				if(_win7Renderer == null)
-				{
-					_win7Renderer = new Win7CustomListBoxRenderer();
-				}
-				return _win7Renderer;
-			}
-		}
+			=> _win7Renderer ??= new Win7CustomListBoxRenderer();
 
 		public static CustomListBoxRenderer MSVS2012LightRenderer
-		{
-			get
-			{
-				if(_msvs2012LightRenderer == null)
-				{
-					_msvs2012LightRenderer = new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.LightColors);
-				}
-				return _msvs2012LightRenderer;
-			}
-		}
+			=> _msvs2012LightRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.LightColors);
 
 		public static CustomListBoxRenderer MSVS2012DarkRenderer
-		{
-			get
-			{
-				if(_msvs2012DarkRenderer == null)
-				{
-					_msvs2012DarkRenderer = new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.DarkColors);
-				}
-				return _msvs2012DarkRenderer;
-			}
-		}
+			=> _msvs2012DarkRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.DarkColors);
 	}
 }

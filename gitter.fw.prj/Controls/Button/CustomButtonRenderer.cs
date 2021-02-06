@@ -30,7 +30,7 @@ namespace gitter.Framework.Controls
 		private static CustomButtonRenderer _msvs2012Dark;
 
 		public static CustomButtonRenderer MSVS2012Dark
-			=>_msvs2012Dark ??= new MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.DarkColors);
+			=> _msvs2012Dark ??= new MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.DarkColors);
 
 		public static CustomButtonRenderer Default => MSVS2012Dark;
 

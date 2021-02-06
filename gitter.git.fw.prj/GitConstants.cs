@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -111,5 +111,8 @@ namespace gitter.Git
 
 		/// <summary>1 Jan 1970</summary>
 		public static readonly DateTimeOffset UnixEraStartOffset = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+		/// <summary>Minimum commit message length.</summary>
+		public const int MinCommitMessageLength = 2;
 	}
 }

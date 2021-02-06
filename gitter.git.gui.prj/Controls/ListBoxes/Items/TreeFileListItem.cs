@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -80,14 +80,9 @@ namespace gitter.Git.Gui.Controls
 		protected override Bitmap GetBitmapIcon()
 		{
 			var path = DataContext.RelativePath;
-			if(path.EndsWith('/'))
-			{
-				return CachedResources.Bitmaps["ImgSubmodule"];
-			}
-			else
-			{
-				return GraphicsUtility.QueryIcon(DataContext.FullPath);
-			}
+			return path.EndsWith('/')
+				? CachedResources.Bitmaps["ImgSubmodule"]
+				: GraphicsUtility.QueryIcon(DataContext.FullPath);
 		}
 
 		protected override FileSize? GetSize()
@@ -108,29 +103,22 @@ namespace gitter.Git.Gui.Controls
 					var size = fi.Length;
 					return new FileSize(size);
 				}
-				else
-				{
-					return null;
-				}
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
-				return null;
 			}
+			return null;
 		}
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			if(DataContext.Status == FileStatus.Unmerged)
 			{
-				var mnu = new ConflictedFileMenu(DataContext);
-				Utility.MarkDropDownForAutoDispose(mnu);
-				return mnu;
+				var menu = new ConflictedFileMenu(DataContext);
+				Utility.MarkDropDownForAutoDispose(menu);
+				return menu;
 			}
-			else
-			{
-				return base.GetContextMenu(requestEventArgs);
-			}
+			return base.GetContextMenu(requestEventArgs);
 		}
 
 		protected override string GetItemType() => "";

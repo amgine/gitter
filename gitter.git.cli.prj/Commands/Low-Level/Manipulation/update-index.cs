@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,99 +26,61 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class UpdateIndexCommand : Command
 	{
 		public static ICommandArgument Add()
-		{
-			return new CommandFlag("--add");
-		}
+			=> new CommandFlag("--add");
 
 		public static ICommandArgument Remove()
-		{
-			return new CommandFlag("--remove");
-		}
+			=> new CommandFlag("--remove");
 
 		public static ICommandArgument Refresh()
-		{
-			return new CommandFlag("--refresh");
-		}
+			=> new CommandFlag("--refresh");
 
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("-q");
-		}
+			=> new CommandFlag("-q");
 
 		public static ICommandArgument IgnoreSubmodules()
-		{
-			return new CommandFlag("--ignore-submodules");
-		}
+			=> new CommandFlag("--ignore-submodules");
 
 		public static ICommandArgument Unmerged()
-		{
-			return new CommandFlag("--unmerged");
-		}
+			=> new CommandFlag("--unmerged");
 
 		public static ICommandArgument IgnoreMissing()
-		{
-			return new CommandFlag("--ignore-missing");
-		}
+			=> new CommandFlag("--ignore-missing");
 
 		public static ICommandArgument IndexInfo()
-		{
-			return new CommandFlag("--index-info");
-		}
+			=> new CommandFlag("--index-info");
 
 		public static ICommandArgument AssumeUnchanged()
-		{
-			return new CommandFlag("--assume-unchanged");
-		}
+			=> new CommandFlag("--assume-unchanged");
 
 		public static ICommandArgument NoAssumeUnchanged()
-		{
-			return new CommandFlag("--no-assume-unchanged");
-		}
+			=> new CommandFlag("--no-assume-unchanged");
 
 		public static ICommandArgument Again()
-		{
-			return new CommandFlag("--again");
-		}
+			=> new CommandFlag("--again");
 
 		public static ICommandArgument Unresolve()
-		{
-			return new CommandFlag("--unresolve");
-		}
+			=> new CommandFlag("--unresolve");
 
 		public static ICommandArgument InfoOnly()
-		{
-			return new CommandFlag("--info-only");
-		}
+			=> new CommandFlag("--info-only");
 
 		public static ICommandArgument ForceRemove()
-		{
-			return new CommandFlag("--force-remove");
-		}
+			=> new CommandFlag("--force-remove");
 
 		public static ICommandArgument Replace()
-		{
-			return new CommandFlag("--replace");
-		}
+			=> new CommandFlag("--replace");
 
 		public static ICommandArgument Stdin()
-		{
-			return new CommandFlag("--stdin");
-		}
+			=> new CommandFlag("--stdin");
 
 		public static ICommandArgument NullTerminate()
-		{
-			return new CommandFlag("-z");
-		}
+			=> new CommandFlag("-z");
 
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public UpdateIndexCommand()
 			: base("update-index")

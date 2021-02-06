@@ -1770,7 +1770,7 @@ Proceed?</value>
     <value>You cannot create HEAD manually</value>
   </data>
   <data name="StrsAbortingCherryPick" xml:space="preserve">
-    <value>Aboring cherry-pick</value>
+    <value>Aborting cherry-pick</value>
   </data>
   <data name="StrsContinuingCherryPick" xml:space="preserve">
     <value>Continuing cherry-pick</value>
@@ -1795,5 +1795,8 @@ Proceed?</value>
   </data>
   <data name="StrSync" xml:space="preserve">
     <value>Synchronize</value>
+  </data>
+  <data name="StrLoadingContributors" xml:space="preserve">
+    <value>Loading contributors</value>
   </data>
 </root>

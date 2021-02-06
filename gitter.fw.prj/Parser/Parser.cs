@@ -46,27 +46,19 @@ namespace gitter.Framework
 
 		/// <summary>Parser is at the start of string.</summary>
 		public bool IsAtStartOfString
-		{
-			get { return _position == 0; }
-		}
+			=> _position == 0;
 
 		/// <summary>Parser is at the start of line.</summary>
 		public bool IsAtStartOfLine
-		{
-			get { return _position == 0 || (_position < String.Length && String[_position - 1] == '\n'); }
-		}
+			=> _position == 0 || (_position < String.Length && String[_position - 1] == '\n');
 
 		/// <summary>Parser is at the end of line.</summary>
 		public bool IsAtEndOfLine
-		{
-			get { return _position >= String.Length || String[_position] == '\n'; }
-		}
+			=> _position >= String.Length || String[_position] == '\n';
 
 		/// <summary>Parser is at the end of string.</summary>
 		public bool IsAtEndOfString
-		{
-			get { return _position >= String.Length; }
-		}
+			=> _position >= String.Length;
 
 		/// <summary>Parsed string.</summary>
 		public string String { get; }
@@ -95,10 +87,9 @@ namespace gitter.Framework
 		public void FindNullAndSkip()
 		{
 			int pos = String.IndexOf('\0', _position);
-			if(pos == -1)
-				_position = String.Length;
-			else
-				_position = pos + 1;
+			_position = pos == -1
+				? String.Length
+				: pos + 1;
 		}
 
 		/// <summary>Find next \n.</summary>
@@ -294,7 +285,7 @@ namespace gitter.Framework
 			return _position < String.Length && String[_position] == value;
 		}
 
-		/// <summary>Check if <paramref name="value"/> can be found at currect position.</summary>
+		/// <summary>Check if <paramref name="value"/> can be found at current position.</summary>
 		/// <param name="value">String to check for.</param>
 		/// <returns>True if current string is <paramref name="value"/>.</returns>
 		public bool CheckValue(string value)
@@ -307,7 +298,7 @@ namespace gitter.Framework
 			return String.IndexOf(value, _position, vl) != -1;
 		}
 
-		/// <summary>Check if <paramref name="value"/> can be found at currect position and skips value if it is found.</summary>
+		/// <summary>Check if <paramref name="value"/> can be found at current position and skips value if it is found.</summary>
 		/// <param name="value">String to check for.</param>
 		/// <returns>True if current string is <paramref name="value"/>.</returns>
 		public bool CheckValueAndSkip(string value)
@@ -604,17 +595,15 @@ namespace gitter.Framework
 			PushPosition();
 			Skip();
 			int parts = 0;
-			int[] values = new int[4];
+			var values = new int[4];
 			while(!IsAtEndOfLine && parts < 4)
 			{
 				if(CheckValue('.'))
 				{
 					var pos = Position;
 					PopPosition();
-					values[parts++] = int.Parse(
-						ReadStringUpTo(pos, 1),
-						NumberStyles.None,
-						CultureInfo.InvariantCulture);
+					if(!int.TryParse(ReadStringUpTo(pos, 1), NumberStyles.None, CultureInfo.InvariantCulture, out values[parts])) break;
+					++parts;
 					PushPosition();
 				}
 				else
@@ -625,10 +614,8 @@ namespace gitter.Framework
 						PopPosition();
 						if(pos != Position)
 						{
-							values[parts++] = int.Parse(
-								ReadStringUpTo(pos, 0),
-								NumberStyles.None,
-								CultureInfo.InvariantCulture);
+							if(!int.TryParse(ReadStringUpTo(pos, 0), NumberStyles.None, CultureInfo.InvariantCulture, out values[parts])) break;
+							++parts;
 						}
 						break;
 					}
@@ -638,11 +625,13 @@ namespace gitter.Framework
 					}
 				}
 			}
-			if(parts > 2)
+			return parts switch
 			{
-				return new Version(values[0], values[1], values[2], values[3]);
-			}
-			throw new Exception("Unable to read version.");
+				2 => new Version(values[0], values[1]),
+				3 => new Version(values[0], values[1], values[2]),
+				4 => new Version(values[0], values[1], values[2], values[3]),
+				_ => throw new Exception("Unable to read version."),
+			};
 		}
 
 		public override string ToString() => String;

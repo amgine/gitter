@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,20 +28,25 @@ namespace gitter.Git.Gui.Views
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class ContributorsView : GitViewBase
+	partial class ContributorsView : GitViewBase, ISearchableView<ContributorsSearchOptions>
 	{
 		private ContributorsToolBar _toolbar;
+		private readonly ISearchToolBarController _searchToolbar;
 
 		public ContributorsView(GuiProvider gui)
 			: base(Guids.ContributorsViewGuid, gui)
 		{
 			InitializeComponent();
 
-			Text = Resources.StrContributors;
+			Text   = Resources.StrContributors;
+			Search = new ContributorsSearch(_lstUsers);
+
+			_searchToolbar = CreateSearchToolbarController<ContributorsView, ContributorsSearchToolBar, ContributorsSearchOptions>(this);
 
 			_lstUsers.Text = Resources.StrsNoContributorsToDisplay;
 			_lstUsers.PreviewKeyDown += OnKeyDown;
@@ -89,6 +94,10 @@ namespace gitter.Git.Gui.Views
 		{
 			switch(e.KeyCode)
 			{
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					e.IsInputKey = true;
+					break;
 				case Keys.F5:
 					RefreshContent();
 					e.IsInputKey = true;
@@ -112,5 +121,17 @@ namespace gitter.Git.Gui.Views
 				_lstUsers.LoadViewFrom(listNode);
 			}
 		}
+
+		#region ISearchableView<ContributorsSearchOptions>
+
+		public ISearch<ContributorsSearchOptions> Search { get; }
+
+		public bool SearchToolBarVisible
+		{
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
+		}
+
+		#endregion
 	}
 }

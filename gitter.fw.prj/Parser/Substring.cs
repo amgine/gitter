@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -104,7 +104,7 @@ namespace gitter.Framework
 		/// <summary>Substring start.</summary>
 		public int Start
 		{
-			get { return _start; }
+			get => _start;
 			set
 			{
 				Verify.Argument.IsValidIndex(0, value, String.Length - _length, nameof(value));
@@ -116,7 +116,7 @@ namespace gitter.Framework
 		/// <summary>Substring length.</summary>
 		public int Length
 		{
-			get { return _length; }
+			get => _length;
 			set
 			{
 				Verify.Argument.IsValidIndex(0, value, String.Length - _start + 1, nameof(value));
@@ -475,19 +475,15 @@ namespace gitter.Framework
 
 		#region IEnumerable<char> Members
 
-		private struct Enumerator : IEnumerator<char>
+		public struct Enumerator : IEnumerator<char>
 		{
-			#region Data
-
 			private readonly Substring _substring;
 			private readonly string _string;
 			private int _maxPosition;
 			private int _position;
 			private char _current;
 
-			#endregion
-
-			public Enumerator(Substring substring)
+			internal Enumerator(Substring substring)
 			{
 				Assert.IsNotNull(substring);
 
@@ -498,59 +494,47 @@ namespace gitter.Framework
 				_current = _string[_position];
 			}
 
-			#region IEnumerator<char> Members
+			public char Current => _current;
 
-			char IEnumerator<char>.Current
-			{
-				get { return _current; }
-			}
+			object System.Collections.IEnumerator.Current => _current;
 
-			#endregion
-
-			#region IDisposable Members
-
-			void IDisposable.Dispose()
-			{
-			}
-
-			#endregion
-
-			#region IEnumerator Members
-
-			object System.Collections.IEnumerator.Current
-			{
-				get { return _current; }
-			}
-
-			bool System.Collections.IEnumerator.MoveNext()
+			public bool MoveNext()
 			{
 				++_position;
-				return _position < _maxPosition;
+				if(_position < _maxPosition)
+				{
+					_current = _string[_position];
+					return true;
+				}
+				return false;
 			}
 
-			void System.Collections.IEnumerator.Reset()
+			public void Reset()
 			{
 				_position = _substring._start;
 				_current = _string[_position];
 			}
 
-			#endregion
+			public void Dispose() { }
 		}
 
 		/// <summary>
 		/// Returns an enumerator that iterates through a collection.
 		/// </summary>
 		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator&lt;char&gt;"/> object that can be used to iterate through the collection.
+		/// An <see cref="T:System.Collections.IEnumerator{char}"/> object that can be used to iterate through the collection.
 		/// </returns>
-		public IEnumerator<char> GetEnumerator()
-		{
-			return new Enumerator(this);
-		}
+		public Enumerator GetEnumerator()
+			=> new Enumerator(this);
 
-		#endregion
-
-		#region IEnumerable Members
+		/// <summary>
+		/// Returns an enumerator that iterates through a collection.
+		/// </summary>
+		/// <returns>
+		/// An <see cref="T:System.Collections.IEnumerator{char}"/> object that can be used to iterate through the collection.
+		/// </returns>
+		IEnumerator<char> IEnumerable<char>.GetEnumerator()
+			=> new Enumerator(this);
 
 		/// <summary>
 		/// Returns an enumerator that iterates through a collection.
@@ -559,9 +543,7 @@ namespace gitter.Framework
 		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
 		/// </returns>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return new Enumerator(this);
-		}
+			=> new Enumerator(this);
 
 		#endregion
 	}

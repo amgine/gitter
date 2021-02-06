@@ -25,13 +25,7 @@ namespace gitter.Framework
 
 	public sealed class GuiCommand : INamedObject
 	{
-		#region Data
-
 		private readonly Action<IWorkingEnvironment> _execute;
-
-		#endregion
-
-		#region .ctor
 
 		public GuiCommand(string name, string displayName, Image image, Action<IWorkingEnvironment> execute)
 		{
@@ -41,22 +35,12 @@ namespace gitter.Framework
 			_execute    = execute;
 		}
 
-		#endregion
-
-		#region Properties
-
 		public string Name { get; }
 
 		public string DisplayName { get; }
 
 		public Image Image { get; }
 
-		#endregion
-
-		#region Methods
-
 		public void Execute(IWorkingEnvironment env) => _execute(env);
-
-		#endregion
 	}
 }

@@ -35,7 +35,9 @@ namespace gitter.GitLab.Gui.ListBoxes
 
 	sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 	{
-		public IssuesListBinding(GitLabServiceContext serviceContext, IssuesListBox issuesListBox)
+		private IssueState _issueState;
+
+		public IssuesListBinding(GitLabServiceContext serviceContext, CustomListBox issuesListBox, IssueState issueState = IssueState.Opened)
 		{
 			Verify.Argument.IsNotNull(serviceContext, nameof(serviceContext));
 			Verify.Argument.IsNotNull(issuesListBox, nameof(issuesListBox));
@@ -44,11 +46,26 @@ namespace gitter.GitLab.Gui.ListBoxes
 			IssuesListBox  = issuesListBox;
 
 			Progress = issuesListBox.ProgressMonitor;
+
+			_issueState = issueState;
 		}
 
 		public GitLabServiceContext ServiceContext { get; }
 
-		public IssuesListBox IssuesListBox { get; }
+		public CustomListBox IssuesListBox { get; }
+
+		public IssueState IssueState
+		{
+			get => _issueState;
+			set
+			{
+				if(_issueState != value)
+				{
+					_issueState = value;
+					ReloadData();
+				}
+			}
+		}
 
 		protected override Task<IReadOnlyList<Issue>> FetchDataAsync(
 			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
@@ -57,18 +74,15 @@ namespace gitter.GitLab.Gui.ListBoxes
 
 			IssuesListBox.Cursor = Cursors.WaitCursor;
 
-			return ServiceContext.GetIssuesAsync(state: IssueState.Opened);
+			return ServiceContext.GetIssuesAsync(state: IssueState);
 		}
 
 		protected override void OnFetchCompleted(IReadOnlyList<Issue> issues)
 		{
 			Assert.IsNotNull(issues);
 
-			if(IsDisposed || IssuesListBox.IsDisposed)
-			{
-				return;
-			}
-
+			if(IsDisposed || IssuesListBox.IsDisposed) return;
+			 
 			IssuesListBox.BeginUpdate();
 			IssuesListBox.Items.Clear();
 			if(issues.Count != 0)

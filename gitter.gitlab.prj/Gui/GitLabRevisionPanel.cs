@@ -270,55 +270,7 @@ namespace gitter.GitLab.Gui
 				iconBounds.Size = SystemInformation.SmallIconSize;
 				iconBounds.Y   += (textBounds.Height - iconBounds.Height) / 2;
 
-				Bitmap image;
-				string status;
-				switch(_pipeline.Status)
-				{
-					case PipelineStatus.Success:
-						image  = CachedResources.Bitmaps["ImgStatusSuccess"];
-						status = "success";
-						break;
-					case PipelineStatus.Running:
-						image  = CachedResources.Bitmaps["ImgStatusRunning"];
-						status = "running...";
-						break;
-					case PipelineStatus.Pending:
-						image  = CachedResources.Bitmaps["ImgStatusPending"];
-						status = "pending...";
-						break;
-					case PipelineStatus.Failed:
-						image  = CachedResources.Bitmaps["ImgStatusFailed"];
-						status = "failed";
-						break;
-					case PipelineStatus.Canceled:
-						image  = CachedResources.Bitmaps["ImgStatusCanceled"];
-						status = "canceled";
-						break;
-					case PipelineStatus.Skipped:
-						image  = CachedResources.Bitmaps["ImgStatusSkipped"];
-						status = "skipped";
-						break;
-					case PipelineStatus.Preparing:
-						image  = CachedResources.Bitmaps["ImgStatusPreparing"];
-						status = "preparing";
-						break;
-					case PipelineStatus.Scheduled:
-						image  = CachedResources.Bitmaps["ImgStatusScheduled"];
-						status = "scheduled";
-						break;
-					case PipelineStatus.Created:
-						image  = CachedResources.Bitmaps["ImgStatusCreated"];
-						status = "created";
-						break;
-					case PipelineStatus.Manual:
-						image  = CachedResources.Bitmaps["ImgStatusManual"];
-						status = "manual";
-						break;
-					default:
-						image = default;
-						status = default;
-						break;
-				};
+				GuiUtils.GetPipelineStatusIconAndName(_pipeline.Status, out var image, out var status);
 
 				if(image != null)
 				{

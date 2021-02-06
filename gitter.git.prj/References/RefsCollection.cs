@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Git.AccessLayer;
@@ -35,7 +36,7 @@ namespace gitter.Git
 		/// <param name="repository">Host repository.</param>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 		internal RefsCollection(Repository repository)
-			: base(repository, false)
+			: base(repository)
 		{
 			Heads   = new RefsHeadsCollection(repository);
 			Remotes = new RefsRemotesCollection(repository);
@@ -99,6 +100,20 @@ namespace gitter.Git
 			Tags.Refresh(refs.Tags);
 		}
 
+		/// <summary>Updates all cached references.</summary>
+		public async Task RefreshAsync()
+		{
+			var refs = await Repository.Accessor.QueryReferences
+				.InvokeAsync(new QueryReferencesParameters(
+					ReferenceType.LocalBranch |
+					ReferenceType.RemoteBranch |
+					ReferenceType.Tag))
+				.ConfigureAwait(continueOnCapturedContext: false);
+			Heads.Refresh(refs.Heads);
+			Remotes.Refresh(refs.Remotes);
+			Tags.Refresh(refs.Tags);
+		}
+
 		/// <summary>Updates cached references of specified types.</summary>
 		/// <param name="referenceTypes">Reference types to update.</param>
 		public void Refresh(ReferenceType referenceTypes)
@@ -119,29 +134,48 @@ namespace gitter.Git
 			}
 		}
 
+		/// <summary>Updates cached references of specified types.</summary>
+		/// <param name="referenceTypes">Reference types to update.</param>
+		public async Task RefreshAsync(ReferenceType referenceTypes)
+		{
+			var refs = await Repository.Accessor.QueryReferences
+				.InvokeAsync(new QueryReferencesParameters(referenceTypes))
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
+			{
+				Heads.Refresh(refs.Heads);
+			}
+			if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
+			{
+				Remotes.Refresh(refs.Remotes);
+			}
+			if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
+			{
+				Tags.Refresh(refs.Tags);
+			}
+		}
+
 		/// <summary>
 		/// Updates all references of <see cref="ReferenceType.LocalBranch"/> or
 		/// <see cref="ReferenceType.RemoteBranch"/> type.
 		/// </summary>
-		public void RefreshBranches()
-		{
-			var refs = Repository.Accessor.QueryReferences.Invoke(
-				new QueryReferencesParameters(
-					ReferenceType.LocalBranch |
-					ReferenceType.RemoteBranch));
-			Heads.Refresh(refs.Heads);
-			Remotes.Refresh(refs.Remotes);
-		}
+		public void RefreshBranches() => Refresh(ReferenceType.Branch);
+
+		/// <summary>
+		/// Updates all references of <see cref="ReferenceType.LocalBranch"/> or
+		/// <see cref="ReferenceType.RemoteBranch"/> type.
+		/// </summary>
+		public Task RefreshBranchesAsync() => RefreshAsync(ReferenceType.Branch);
 
 		/// <summary>
 		/// Updates all references of <see cref="ReferenceType.Tag"/> type.
 		/// </summary>
-		public void RefreshTags()
-		{
-			var refs = Repository.Accessor.QueryReferences.Invoke(
-				new QueryReferencesParameters(ReferenceType.Tag));
-			Tags.Refresh(refs.Tags);
-		}
+		public void RefreshTags() => Refresh(ReferenceType.Tag);
+
+		/// <summary>
+		/// Updates all references of <see cref="ReferenceType.Tag"/> type.
+		/// </summary>
+		public Task RefreshTagsAsync() => RefreshAsync(ReferenceType.Tag);
 
 		#endregion
 
@@ -154,15 +188,7 @@ namespace gitter.Git
 		/// <param name="name">Reference name.</param>
 		/// <returns>Reference with a given name or <c>null</c>, if such reference does not exist</returns>
 		public Reference TryGetReference(string name)
-		{
-			var head = Heads.TryGetItem(name);
-			if(head != null) return head;
-			var remote = Remotes.TryGetItem(name);
-			if(remote != null) return remote;
-			var tag = Tags.TryGetItem(name);
-			if(tag != null) return tag;
-			return default;
-		}
+			=> (Reference)Heads.TryGetItem(name) ?? (Reference)Remotes.TryGetItem(name) ?? (Reference)Tags.TryGetItem(name);
 
 		/// <summary>Gets the list of unmerged branches.</summary>
 		/// <returns>List of unmerged branches.</returns>
@@ -280,18 +306,9 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(refs, nameof(refs));
 
-			if(refs.Heads != null)
-			{
-				Heads.Load(refs.Heads);
-			}
-			if(refs.Remotes != null)
-			{
-				Remotes.Load(refs.Remotes);
-			}
-			if(refs.Tags != null)
-			{
-				Tags.Load(refs.Tags);
-			}
+			if(refs.Heads != null)   Heads.Load(refs.Heads);
+			if(refs.Remotes != null) Remotes.Load(refs.Remotes);
+			if(refs.Tags != null)    Tags.Load(refs.Tags);
 		}
 
 		#endregion
@@ -304,18 +321,9 @@ namespace gitter.Git
 		/// </returns>
 		public IEnumerator<Reference> GetEnumerator()
 		{
-			foreach(var head in Heads)
-			{
-				yield return head;
-			}
-			foreach(var remote in Remotes)
-			{
-				yield return remote;
-			}
-			foreach(var tag in Tags)
-			{
-				yield return tag;
-			}
+			foreach(var head in Heads)     yield return head;
+			foreach(var remote in Remotes) yield return remote;
+			foreach(var tag in Tags)       yield return tag;
 		}
 
 		/// <summary>

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -40,32 +40,26 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object IsCheckedChangedEvent = new object();
-		private static readonly object CheckStateChangedEvent = new object();
+		private static readonly object IsCheckedChangedEvent  = new();
+		private static readonly object CheckStateChangedEvent = new();
 
 		public event EventHandler IsCheckedChanged
 		{
-			add { Events.AddHandler(IsCheckedChangedEvent, value); }
-			remove { Events.RemoveHandler(IsCheckedChangedEvent, value); }
+			add    => Events.AddHandler    (IsCheckedChangedEvent, value);
+			remove => Events.RemoveHandler (IsCheckedChangedEvent, value);
 		}
 
 		public event EventHandler CheckStateChanged
 		{
-			add { Events.AddHandler(CheckStateChangedEvent, value); }
-			remove { Events.RemoveHandler(CheckStateChangedEvent, value); }
+			add    => Events.AddHandler    (CheckStateChangedEvent, value);
+			remove => Events.RemoveHandler (CheckStateChangedEvent, value);
 		}
 
 		protected virtual void OnIsCheckedChanged()
-		{
-			var handler = (EventHandler)Events[IsCheckedChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[IsCheckedChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 		protected virtual void OnCheckStateChanged()
-		{
-			var handler = (EventHandler)Events[CheckStateChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[CheckStateChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -94,10 +88,10 @@ namespace gitter.Framework.Controls
 
 		public CustomCheckBoxRenderer Renderer
 		{
-			get { return _renderer; }
+			get => _renderer;
 			set
 			{
-				if(value == null) throw new ArgumentNullException("value");
+				Verify.Argument.IsNotNull(value, nameof(value));
 
 				if(_renderer != value)
 				{
@@ -110,7 +104,7 @@ namespace gitter.Framework.Controls
 		[DefaultValue(CheckState.Unchecked)]
 		public CheckState CheckState
 		{
-			get { return _checkState; }
+			get => _checkState;
 			set
 			{
 				if(_checkState != value)
@@ -130,7 +124,7 @@ namespace gitter.Framework.Controls
 		[DefaultValue(null)]
 		public Image Image
 		{
-			get { return _image; }
+			get => _image;
 			set
 			{
 				if(_image != value)
@@ -144,14 +138,14 @@ namespace gitter.Framework.Controls
 		[DefaultValue(false)]
 		public bool IsChecked
 		{
-			get { return CheckState == CheckState.Checked; }
-			set { CheckState = value ? CheckState.Checked : CheckState.Unchecked; }
+			get => CheckState == CheckState.Checked;
+			set => CheckState = value ? CheckState.Checked : CheckState.Unchecked;
 		}
 
 		[DefaultValue(false)]
 		public bool ThreeState
 		{
-			get { return _threeState; }
+			get => _threeState;
 			set
 			{
 				if(_threeState != value)
@@ -165,15 +159,9 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public bool IsMouseOver
-		{
-			get { return _isMouseOver; }
-		}
+		public bool IsMouseOver => _isMouseOver;
 
-		public bool IsPressed
-		{
-			get { return _isPressed; }
-		}
+		public bool IsPressed => _isPressed;
 
 		#endregion
 
@@ -183,21 +171,13 @@ namespace gitter.Framework.Controls
 		{
 			if(ThreeState)
 			{
-				switch(CheckState)
+				CheckState = CheckState switch
 				{
-					case CheckState.Checked:
-						CheckState = CheckState.Indeterminate;
-						break;
-					case CheckState.Indeterminate:
-						CheckState = CheckState.Unchecked;
-						break;
-					case CheckState.Unchecked:
-						CheckState = CheckState.Checked;
-						break;
-					default:
-						CheckState = CheckState.Checked;
-						break;
-				}
+					CheckState.Checked       => CheckState.Indeterminate,
+					CheckState.Indeterminate => CheckState.Unchecked,
+					CheckState.Unchecked     => CheckState.Checked,
+					_ => CheckState.Checked,
+				};
 			}
 			else
 			{

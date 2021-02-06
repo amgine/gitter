@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -157,8 +157,8 @@ namespace gitter.Framework
 
 		public static void LaunchUpdater(string cmdline)
 		{
-			const string tempPathName = @"gitter-updater";
-			const string updaterExeName = @"gitter.updater.exe";
+			const string tempPathName      = @"gitter-updater";
+			const string updaterExeName    = @"gitter.updater.exe";
 			const string updaterConfigName = @"gitter.updater.exe.config";
 
 			var sourcePath = Path.GetDirectoryName(typeof(HelperExecutables).Assembly.Location);

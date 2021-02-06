@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -58,20 +58,20 @@ namespace gitter
 
 		public string Path
 		{
-			get { return _txtPath.Text; }
-			set { _txtPath.Text = value; }
+			get => _txtPath.Text;
+			set => _txtPath.Text = value;
 		}
 
 		public bool AllowChangePath
 		{
-			get { return !_txtPath.ReadOnly; }
-			set { _txtPath.ReadOnly = !value; }
+			get => !_txtPath.ReadOnly;
+			set => _txtPath.ReadOnly = !value;
 		}
 
 		public string Description
 		{
-			get { return _txtDescription.Text; }
-			set { _txtDescription.Text = value; }
+			get => _txtDescription.Text;
+			set => _txtDescription.Text = value;
 		}
 
 		private void _btnSelectDirectory_Click(object sender, EventArgs e)

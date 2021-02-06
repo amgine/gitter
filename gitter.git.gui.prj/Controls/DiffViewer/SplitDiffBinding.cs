@@ -125,15 +125,14 @@ namespace gitter.Git.Gui.Controls
 			_progressPanel.Remove();
 			if(diff != null)
 			{
-				FlowPanelSeparator separator = null;
-				var changedFilesPanel = new ChangedFilesPanel() { Diff = diff };
+				var separator = default(FlowPanelSeparator);
+				var changedFilesPanel = new ChangedFilesPanel { Diff = diff };
 				changedFilesPanel.FileNavigationRequested +=
 					(s, e) =>
 					{
 						foreach(var panel in DiffViewerFiles.Panels)
 						{
-							var diffpanel = panel as FileDiffPanel;
-							if(diffpanel != null && diffpanel.DiffFile == e.DiffFile)
+							if(panel is FileDiffPanel diffpanel && diffpanel.DiffFile == e.DiffFile)
 							{
 								diffpanel.ScrollIntoView();
 								break;
@@ -147,7 +146,7 @@ namespace gitter.Git.Gui.Controls
 					var fileDiffPanel = new FileDiffPanel(DiffSource.Repository, file, diff.Type);
 					_allDiffPanels.Add(fileDiffPanel);
 					DiffViewerFiles.Panels.Add(fileDiffPanel);
-					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
+					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 				}
 				if(separator != null)
 				{
@@ -185,7 +184,7 @@ namespace gitter.Git.Gui.Controls
 				if((_allDiffPanels[i].DiffFile.Status & changedFilesPanel.StatusFilter) != FileStatus.Unknown)
 				{
 					DiffViewerFiles.Panels.Add(_allDiffPanels[i]);
-					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
+					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 				}
 			}
 			if(separator != null)
@@ -205,7 +204,7 @@ namespace gitter.Git.Gui.Controls
 			_progressPanel.Remove();
 			if(exception != null && !string.IsNullOrWhiteSpace(exception.Message))
 			{
-				DiffViewerHeaders.Panels.Add(new FlowProgressPanel() { Message = exception.Message });
+				DiffViewerHeaders.Panels.Add(new FlowProgressPanel { Message = exception.Message });
 			}
 			DiffViewerHeaders.EndUpdate();
 		}

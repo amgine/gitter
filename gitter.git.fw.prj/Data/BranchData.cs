@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -49,7 +49,7 @@ namespace gitter.Git.AccessLayer
 
 		#region Properties
 
-		/// <summary>Branche's name (short format, excluding refs/heads/ or /refs/%remote%/).</summary>
+		/// <summary>Branch name (short format, excluding refs/heads/ or /refs/%remote%/).</summary>
 		public string Name { get; }
 
 		/// <summary>SHA1 of commit, which is pointed by branch.</summary>

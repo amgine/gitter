@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -69,7 +69,7 @@ namespace gitter.Git.Gui
 			repository.Remotes.PullCompleted  += OnPullCompleted;
 			repository.Remotes.PruneCompleted += OnPruneCompleted;
 
-			//repository.Status.Committed += OnCommitted;
+			repository.Status.Committed += OnCommitted;
 		}
 
 		private void DetachFromRepository(Repository repository)
@@ -142,6 +142,9 @@ namespace gitter.Git.Gui
 
 		private void OnCommitted(object sender, CommitResultEventArgs e)
 		{
+			var message = e.CommitResult.Message;
+			if(string.IsNullOrWhiteSpace(message)) return;
+
 			if(_guiProvider.Environment.InvokeRequired)
 			{
 				try
@@ -191,7 +194,10 @@ namespace gitter.Git.Gui
 			var message = e.CommitResult.Message;
 			if(!string.IsNullOrWhiteSpace(message))
 			{
-				PopupsStack.PushNotification(new PlainTextNotificationContent(message) { Text = Resources.StrCommit });
+				if(!PopupsStack.IsDisposed)
+				{
+					PopupsStack.PushNotification(new PlainTextNotificationContent(message) { Text = Resources.StrCommit });
+				}
 			}
 		}
 

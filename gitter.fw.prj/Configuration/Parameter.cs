@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,13 +25,8 @@ namespace gitter.Framework.Configuration
 	/// <summary>Configuration parameter.</summary>
 	public sealed class Parameter : INamedObject
 	{
-
-		#region Data
-
 		/// <summary>Parameter value.</summary>
 		private object _value;
-
-		#endregion
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="name">Parameter name.</param>
@@ -43,8 +38,6 @@ namespace gitter.Framework.Configuration
 			Type = type;
 			_value = value;
 		}
-
-		#region Properties
 
 		/// <summary>Gets parameter name.</summary>
 		/// <value>Parameter name.</value>
@@ -58,7 +51,7 @@ namespace gitter.Framework.Configuration
 		/// <value>Parameter value.</value>
 		public object Value
 		{
-			get { return _value; }
+			get => _value;
 			set
 			{
 				_value = value;
@@ -70,18 +63,12 @@ namespace gitter.Framework.Configuration
 		/// <value><c>true</c> if this parameter is modified; otherwise, <c>false</c>.</value>
 		public bool IsModified { get; private set; }
 
-		#endregion
-
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this instance.
 		/// </summary>
 		/// <returns>
 		/// A <see cref="System.String"/> that represents this instance.
 		/// </returns>
-		public override string ToString()
-		{
-			return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-				"{0} = {1}", Name, _value);
-		}
+		public override string ToString() => $"{Name} = {Value}";
 	}
 }

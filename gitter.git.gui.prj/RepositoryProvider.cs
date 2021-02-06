@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -46,7 +46,7 @@ namespace gitter.Git
 
 		private static readonly IGitAccessorProvider[] _gitAccessorProviders = new[]
 			{
-				new gitter.Git.AccessLayer.CLI.MSysGitAccessorProvider(),
+				new gitter.Git.AccessLayer.CLI.GitCLIAccessorProvider(),
 			};
 
 		private static readonly Version _minVersion = new Version(1,7,0,2);
@@ -93,7 +93,7 @@ namespace gitter.Git
 
 		public IGitAccessorProvider ActiveGitAccessorProvider
 		{
-			get { return _gitAccessorProvider; }
+			get => _gitAccessorProvider;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -120,7 +120,7 @@ namespace gitter.Git
 
 		public IGitAccessor GitAccessor
 		{
-			get { return _gitAccessor; }
+			get => _gitAccessor;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -224,16 +224,7 @@ namespace gitter.Git
 		}
 
 		public bool IsValidFor(string workingDirectory)
-		{
-			if(GitAccessor != null)
-			{
-				return GitAccessor.IsValidRepository(workingDirectory);
-			}
-			else
-			{
-				return false;
-			}
-		}
+			=> GitAccessor != null && GitAccessor.IsValidRepository(workingDirectory);
 
 		public IRepository OpenRepository(string workingDirectory)
 		{
@@ -253,10 +244,8 @@ namespace gitter.Git
 
 			if(gitRepository.UserIdentity == null)
 			{
-				using(var dlg = new UserIdentificationDialog(_environment, gitRepository))
-				{
-					dlg.Run(_environment.MainForm);
-				}
+				using var dlg = new UserIdentificationDialog(_environment, gitRepository);
+				dlg.Run(_environment.MainForm);
 			}
 		}
 
@@ -266,10 +255,8 @@ namespace gitter.Git
 			try
 			{
 				var cfgFileName = Path.Combine(gitRepository.GitDirectory, "gitter-config");
-				using(var fs = new FileStream(cfgFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-				{
-					gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
-				}
+				using var fs = new FileStream(cfgFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+				gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
 			}
 			catch(Exception exc) when (!exc.IsCritical())
 			{
@@ -281,16 +268,7 @@ namespace gitter.Git
 		}
 
 		public IRepositoryGuiProvider GuiProvider
-		{
-			get
-			{
-				if(_guiProvider == null)
-				{
-					_guiProvider = new GuiProvider(this);
-				}
-				return _guiProvider;
-			}
-		}
+			=> _guiProvider ??= new GuiProvider(this);
 
 		public Control CreateInitDialog() => new InitDialog(this);
 

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,7 +22,7 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	/// <summary>Parameters for <see cref="IStashAccessor.StashSave()"/> operation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.StashSave"/> operation.</summary>
 	public sealed class StashSaveParameters
 	{
 		/// <summary>Create <see cref="StashSaveParameters"/>.</summary>
@@ -36,8 +36,8 @@ namespace gitter.Git.AccessLayer
 		/// <param name="includeUntracked">Include untracked files in stash.</param>
 		public StashSaveParameters(string message, bool keepIndex, bool includeUntracked)
 		{
-			Message = message;
-			KeepIndex = keepIndex;
+			Message          = message;
+			KeepIndex        = keepIndex;
 			IncludeUntracked = includeUntracked;
 		}
 

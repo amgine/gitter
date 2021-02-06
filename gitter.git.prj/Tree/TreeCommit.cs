@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,14 +23,10 @@ namespace gitter.Git
 	/// <summary>Represents a submodule commit.</summary>
 	public sealed class TreeCommit : TreeItem
 	{
-		#region .ctor
-
 		public TreeCommit(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
 			: base(repository, relativePath, parent, status, name)
 		{
 		}
-
-		#endregion
 
 		public override TreeItemType ItemType => TreeItemType.Commit;
 	}

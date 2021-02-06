@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,18 +32,14 @@ namespace gitter.Git.AccessLayer.CLI
 		/// This option causes branch tips to be packed as well. Useful for a repository with many branches of historical interests.
 		/// </summary>
 		public static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		/// <summary>
 		/// The command usually removes loose refs under $GIT_DIR/refs hierarchy after packing them.
 		/// This option tells it not to.
 		/// </summary>
 		public static ICommandArgument NoPrune()
-		{
-			return new CommandFlag("--no-prune");
-		}
+			=> new CommandFlag("--no-prune");
 
 		public PackRefsCommand()
 			: base("pack-refs")

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,11 +21,8 @@
 namespace gitter.Git
 {
 	using System;
-	using System.Globalization;
 	using System.Threading;
 	using System.Threading.Tasks;
-
-	using gitter.Framework;
 
 	/// <summary>Git remote tracking branch.</summary>
 	public sealed class RemoteBranch : BranchBase
@@ -85,18 +82,21 @@ namespace gitter.Git
 		{
 			Verify.State.IsNotDeleted(this);
 
-			var remote = Remote;
-			if(remote == null) throw new GitException(string.Format(CultureInfo.InvariantCulture, "Unable to find remote for branch '{0}'", Name));
-			string branchName = Name.Substring(remote.Name.Length + 1);
-			string remoteRefName = GitConstants.LocalBranchPrefix + branchName;
+			var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
+			var branchName    = Name.Substring(remote.Name.Length + 1);
+			var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
+
 			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.RemoveRemoteReferences.Invoke(
-					new AccessLayer.RemoveRemoteReferencesParameters(
-						remote.Name,
-						remoteRefName));
+				var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
+					remote.Name, remoteRefName);
+				Repository.Accessor.RemoveRemoteReferences
+					.Invoke(parameters);
 			}
-			Refresh();
+			if(!IsDeleted)
+			{
+				Refresh();
+			}
 		}
 
 		/// <summary>Delete branch from remote and local repository.</summary>
@@ -104,25 +104,22 @@ namespace gitter.Git
 		{
 			Verify.State.IsNotDeleted(this);
 
-			var remote = Remote;
-			if(remote == null)
-			{
-				throw new GitException(string.Format(CultureInfo.InvariantCulture, "Unable to find remote for branch '{0}'", Name));
-			}
-			string branchName    = Name.Substring(remote.Name.Length + 1);
-			string remoteRefName = GitConstants.LocalBranchPrefix + branchName;
+			var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
+			var branchName    = Name.Substring(remote.Name.Length + 1);
+			var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
 
 			using(var notificationsBlock = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 			{
 				var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
 					remote.Name, remoteRefName);
-				await Repository
-					.Accessor
-					.RemoveRemoteReferences
+				await Repository.Accessor.RemoveRemoteReferences
 					.InvokeAsync(parameters, null, cancellationToken)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			Refresh();
+			if(!IsDeleted)
+			{
+				await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+			}
 		}
 
 		/// <summary>Delete branch.</summary>
@@ -137,13 +134,32 @@ namespace gitter.Git
 			Repository.Refs.Remotes.Delete(this, force);
 		}
 
-		/// <summary>Makes shure that this <see cref="Branch"/> exists and <see cref="M:Position"/> is correct.</summary>
-		/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is deleted.</exception>
+		/// <summary>Delete branch.</summary>
+		/// <param name="force">Delete branch irrespective of its merged status.</param>
+		/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
+		/// <exception cref="T:gitter.Git.GitException">Failed to delete this branch.</exception>
+		/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is already deleted.</exception>
+		public override Task DeleteAsync(bool force = false)
+		{
+			Verify.State.IsNotDeleted(this);
+
+			return Repository.Refs.Remotes.DeleteAsync(this, force);
+		}
+
+		/// <inheritdoc/>
 		public override void Refresh()
 		{
 			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Remotes.Refresh(this);
+		}
+
+		/// <inheritdoc/>
+		public override Task RefreshAsync()
+		{
+			Verify.State.IsNotDeleted(this);
+
+			return Repository.Refs.Remotes.RefreshAsync(this);
 		}
 	}
 }

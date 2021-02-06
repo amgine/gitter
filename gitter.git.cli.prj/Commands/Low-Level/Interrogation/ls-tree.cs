@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,54 +26,34 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class LsTreeCommand : Command
 	{
 		public static ICommandArgument Directories()
-		{
-			return new CommandFlag("-d");
-		}
+			=> new CommandFlag("-d");
 
 		public static ICommandArgument Recurse()
-		{
-			return new CommandFlag("-r");
-		}
+			=> new CommandFlag("-r");
 
 		public static ICommandArgument Tree()
-		{
-			return new CommandFlag("-t");
-		}
+			=> new CommandFlag("-t");
 
 		public static ICommandArgument Long()
-		{
-			return new CommandFlag("--long");
-		}
+			=> new CommandFlag("--long");
 
 		public static ICommandArgument NameOnly()
-		{
-			return new CommandFlag("--name-only");
-		}
+			=> new CommandFlag("--name-only");
 
 		public static ICommandArgument FullName()
-		{
-			return new CommandFlag("--full-name");
-		}
+			=> new CommandFlag("--full-name");
 
 		public static ICommandArgument FullTree()
-		{
-			return new CommandFlag("--full-tree");
-		}
+			=> new CommandFlag("--full-tree");
 
 		public static ICommandArgument Abbrev()
-		{
-			return new CommandFlag("--abbrev");
-		}
+			=> new CommandFlag("--abbrev");
 
 		public static ICommandArgument Abbrev(int n)
-		{
-			return new CommandParameterValue("--abbrev", n.ToString(System.Globalization.CultureInfo.InvariantCulture), '=');
-		}
+			=> new CommandParameterValue("--abbrev", n.ToString(System.Globalization.CultureInfo.InvariantCulture), '=');
 
 		public static ICommandArgument NullTerminate()
-		{
-			return new CommandFlag("-z");
-		}
+			=> new CommandFlag("-z");
 
 		public LsTreeCommand()
 			: base("ls-tree")

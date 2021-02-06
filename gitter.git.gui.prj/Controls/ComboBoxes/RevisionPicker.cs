@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -54,10 +54,7 @@ namespace gitter.Git.Gui.Controls
 			DropDownControl = _lstReferences;
 		}
 
-		public ReferencesListBox References
-		{
-			get { return _lstReferences; }
-		}
+		public ReferencesListBox References => _lstReferences;
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
@@ -136,8 +133,8 @@ namespace gitter.Git.Gui.Controls
 
 		public override int DropDownHeight
 		{
-			get { return _lstReferences.Height; }
-			set { _lstReferences.Height = value; }
+			get => _lstReferences.Height;
+			set => _lstReferences.Height = value;
 		}
 	}
 }

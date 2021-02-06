@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Globalization;
+	using System.Threading.Tasks;
 
 	/// <summary>Represents historical change of <see cref="Reference"/>'s position.</summary>
 	public sealed class ReflogRecord : GitLifeTimeDynamicNamedObject, IRevisionPointer
@@ -94,7 +95,7 @@ namespace gitter.Git
 		/// <value>Revision, pointed by this <see cref="ReflogRecord"/>.</value>
 		public Revision Revision
 		{
-			get { return _revision; }
+			get => _revision;
 			internal set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -111,7 +112,7 @@ namespace gitter.Git
 		/// <value>Reflog record message.</value>
 		public string Message
 		{
-			get { return _message; }
+			get => _message;
 			internal set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -128,7 +129,7 @@ namespace gitter.Git
 		/// <value>Reflog record index.</value>
 		public int Index
 		{
-			get { return _index; }
+			get => _index;
 			internal set
 			{
 				Verify.Argument.IsNotNegative(value, nameof(value));
@@ -148,23 +149,19 @@ namespace gitter.Git
 		/// <summary>Gets the full name of this <see cref="ReflogRecord"/>.</summary>
 		/// <value>Full name of this <see cref="ReflogRecord"/>.</value>
 		public string FullName
-		{
-			get { return Reflog.Reference.FullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
-		}
+			=> Reflog.Reference.FullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
 		#endregion
 
 		protected override string GetName()
-		{
-			return Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
-		}
+			=> Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
 		string IRevisionPointer.Pointer
-		{
-			get { return Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
-		}
+			=> Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; 
 
 		Revision IRevisionPointer.Dereference() => _revision;
+
+		Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(_revision);
 
 		/// <summary>Returns a <see cref="System.String"/> that represents this <see cref="ReflogRecord"/>.</summary>
 		/// <returns>A <see cref="System.String"/> that represents this <see cref="ReflogRecord"/>.</returns>

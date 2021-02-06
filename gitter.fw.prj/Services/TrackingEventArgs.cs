@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,76 +24,30 @@ namespace gitter.Framework.Services
 
 	public sealed class TrackingEventArgs : EventArgs
 	{
-		#region Data
-
-		private readonly int _index;
-		private readonly bool _tracked;
-
-		#endregion
-
-		#region .ctor
-
 		public TrackingEventArgs(bool tracked, int index)
 		{
-			_tracked = tracked;
-			_index = index;
+			IsTracked = tracked;
+			Index = index;
 		}
 
-		#endregion
+		public bool IsTracked { get; }
 
-		#region Properties
-
-		public bool IsTracked
-		{
-			get { return _tracked; }
-		}
-
-		public int Index
-		{
-			get { return _index; }
-		}
-
-		#endregion
+		public int Index { get; }
 	}
 
 	public sealed class TrackingEventArgs<T> : EventArgs
 	{
-		#region Data
-
-		private readonly int _index;
-		private readonly T _element;
-		private readonly bool _tracked;
-
-		#endregion
-
-		#region .ctor
-
 		public TrackingEventArgs(bool tracked, int index, T element)
 		{
-			_tracked = tracked;
-			_index = index;
-			_element = element;
+			IsTracked = tracked;
+			Index = index;
+			Item = element;
 		}
 
-		#endregion
+		public bool IsTracked { get; }
 
-		#region Properties
+		public int Index { get; }
 
-		public bool IsTracked
-		{
-			get { return _tracked; }
-		}
-
-		public int Index
-		{
-			get { return _index; }
-		}
-
-		public T Item
-		{
-			get { return _element; }
-		}
-
-		#endregion
+		public T Item { get; }
 	}
 }

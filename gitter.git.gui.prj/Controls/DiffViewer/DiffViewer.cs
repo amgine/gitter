@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,20 +32,20 @@ namespace gitter.Git.Gui.Controls
 	{
 		#region Events
 
-		private static readonly object DiffFileContextMenuRequestedEvent = new object();
+		private static readonly object DiffFileContextMenuRequestedEvent = new();
 
 		public event EventHandler<DiffFileContextMenuRequestedEventArgs> DiffFileContextMenuRequested
 		{
-			add { Events.AddHandler(DiffFileContextMenuRequestedEvent, value); }
-			remove { Events.RemoveHandler(DiffFileContextMenuRequestedEvent, value); }
+			add    => Events.AddHandler    (DiffFileContextMenuRequestedEvent, value);
+			remove => Events.RemoveHandler (DiffFileContextMenuRequestedEvent, value);
 		}
 
-		private static readonly object UntrackedFileContextMenuRequestedEvent = new object();
+		private static readonly object UntrackedFileContextMenuRequestedEvent = new();
 
 		public event EventHandler<UntrackedFileContextMenuRequestedEventArgs> UntrackedFileContextMenuRequested
 		{
-			add { Events.AddHandler(UntrackedFileContextMenuRequestedEvent, value); }
-			remove { Events.RemoveHandler(UntrackedFileContextMenuRequestedEvent, value); }
+			add    => Events.AddHandler    (UntrackedFileContextMenuRequestedEvent, value);
+			remove => Events.RemoveHandler (UntrackedFileContextMenuRequestedEvent, value);
 		}
 
 		internal void OnFileContextMenuRequested(DiffFile file)
@@ -55,10 +55,7 @@ namespace gitter.Git.Gui.Controls
 			{
 				var args = new DiffFileContextMenuRequestedEventArgs(file);
 				handler(this, args);
-				if(args.ContextMenu != null)
-				{
-					args.ContextMenu.Show(this, PointToClient(Cursor.Position));
-				}
+				args.ContextMenu?.Show(this, PointToClient(Cursor.Position));
 			}
 		}
 
@@ -69,10 +66,7 @@ namespace gitter.Git.Gui.Controls
 			{
 				var args = new UntrackedFileContextMenuRequestedEventArgs(file);
 				handler(this, args);
-				if(args.ContextMenu != null)
-				{
-					args.ContextMenu.Show(this, PointToClient(Cursor.Position));
-				}
+				args.ContextMenu?.Show(this, PointToClient(Cursor.Position));
 			}
 		}
 
@@ -95,8 +89,7 @@ namespace gitter.Git.Gui.Controls
 			{
 				if(p != panel)
 				{
-					var filePanel = p as FileDiffPanel;
-					if(filePanel != null) filePanel.DropSelection();
+					(p as FileDiffPanel)?.DropSelection();
 				}
 			}
 			base.OnPanelMouseDown(panel, x, y, button);
@@ -106,8 +99,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			foreach(var p in Panels)
 			{
-				var filePanel = p as FileDiffPanel;
-				if(filePanel != null) filePanel.DropSelection();
+				(p as FileDiffPanel)?.DropSelection();
 			}
 			base.OnFreeSpaceMouseDown(x, y, button);
 		}

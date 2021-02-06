@@ -21,6 +21,7 @@
 namespace gitter.Git.Gui.Controllers
 {
 	using System;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -33,8 +34,6 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class CommitController : ViewControllerBase<ICommitView>, ICommitController
 	{
-		#region .ctor
-
 		public CommitController(Repository repository)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
@@ -42,22 +41,12 @@ namespace gitter.Git.Gui.Controllers
 			Repository = repository;
 		}
 
-		#endregion
-
-		#region Properties
-
 		private Repository Repository { get; }
 
-		#endregion
-
-		#region ICommitController Members
-
-		public bool TryCommit()
+		private bool ValidateInput(out string message, out bool amend)
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var message = View.Message.Value;
-			var amend   = View.Amend.Value;
+			message = View.Message.Value;
+			amend   = View.Amend.Value;
 
 			if(!amend)
 			{
@@ -84,14 +73,31 @@ namespace gitter.Git.Gui.Controllers
 				return false;
 			}
 			message = message.Trim();
-			if(message.Length < 2)
+			if(message.Length < GitConstants.MinCommitMessageLength)
 			{
 				View.ErrorNotifier.NotifyError(View.Message,
 					new UserInputError(
 						Resources.ErrShortCommitMessage,
-						Resources.ErrEnterLongerCommitMessage.UseAsFormat(2)));
+						Resources.ErrEnterLongerCommitMessage.UseAsFormat(GitConstants.MinCommitMessageLength)));
 				return false;
 			}
+			return true;
+		}
+
+		private void OnCommitFailed(Exception exc)
+			=> GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				Resources.ErrFailedToCommit,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+
+		public bool TryCommit()
+		{
+			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+
+			if(!ValidateInput(out var message, out var amend)) return false;
+
 			try
 			{
 				using(View.ChangeCursor(MouseCursor.WaitCursor))
@@ -101,17 +107,31 @@ namespace gitter.Git.Gui.Controllers
 			}
 			catch(GitException exc)
 			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					Resources.ErrFailedToCommit,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
+				OnCommitFailed(exc);
 				return false;
 			}
 			return true;
 		}
 
-		#endregion
+		public async Task<bool> TryCommitAsync()
+		{
+			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+
+			if(!ValidateInput(out var message, out var amend)) return false;
+
+			try
+			{
+				using(View.ChangeCursor(MouseCursor.WaitCursor))
+				{
+					await Repository.Status.CommitAsync(message, amend);
+				}
+			}
+			catch(GitException exc)
+			{
+				OnCommitFailed(exc);
+				return false;
+			}
+			return true;
+		}
 	}
 }

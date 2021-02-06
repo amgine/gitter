@@ -86,7 +86,7 @@ namespace gitter.Framework.Controls
 					}
 
 				default:
-					throw new ArgumentException("Invalid column resize side.", "side");
+					throw new ArgumentException("Invalid column resize side.", nameof(side));
 			}
 		}
 

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -79,13 +79,6 @@ namespace gitter.Git.Gui.Dialogs
 			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 			SetupReferenceNameInputBox(_txtName, ReferenceType.LocalBranch);
-
-			var logallrefupdates = _repository.Configuration.TryGetParameterValue(GitConstants.CoreLogAllRefUpdatesParameter);
-			if(logallrefupdates != null && logallrefupdates == "true")
-			{
-				_chkCreateReflog.Checked = true;
-				_chkCreateReflog.Enabled = false;
-			}
 
 			ToolTipService.Register(_chkCheckoutAfterCreation, Resources.TipCheckoutAfterCreation);
 			ToolTipService.Register(_chkOrphan, Resources.TipOrphan);

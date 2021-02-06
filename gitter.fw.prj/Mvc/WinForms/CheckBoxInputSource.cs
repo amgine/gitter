@@ -25,16 +25,10 @@ namespace gitter.Framework.Mvc.WinForms
 
 	public class CheckBoxInputSource : ControlInputSource<CheckBox, bool>
 	{
-		#region .ctor
-
 		public CheckBoxInputSource(CheckBox checkBox)
 			: base(checkBox)
 		{
 		}
-
-		#endregion
-
-		#region Methods
 
 		protected override bool FetchValue() => Control.Checked;
 
@@ -52,7 +46,5 @@ namespace gitter.Framework.Mvc.WinForms
 		{
 			Control.CheckedChanged -= OnControlValueChanged;
 		}
-
-		#endregion
 	}
 }

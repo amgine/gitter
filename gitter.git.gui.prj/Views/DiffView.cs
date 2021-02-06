@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -49,12 +49,12 @@ namespace gitter.Git.Gui.Views
 
 		#region Events
 
-		private static readonly object ViewModeChangedEvent = new object();
+		private static readonly object ViewModeChangedEvent = new();
 
 		public event EventHandler ViewModeChanged
 		{
-			add { Events.AddHandler(ViewModeChangedEvent, value); }
-			remove { Events.RemoveHandler(ViewModeChangedEvent, value); }
+			add    => Events.AddHandler    (ViewModeChangedEvent, value);
+			remove => Events.RemoveHandler (ViewModeChangedEvent, value);
 		}
 
 		protected virtual void OnViewModeChanged(EventArgs e)
@@ -184,7 +184,7 @@ namespace gitter.Git.Gui.Views
 
 		private DiffViewer DiffViewerFiles
 		{
-			get { return _diffViewerFiles; }
+			get => _diffViewerFiles;
 			set
 			{
 				if(_diffViewerFiles != value)
@@ -350,14 +350,9 @@ namespace gitter.Git.Gui.Views
 
 		private void UpdateText()
 		{
-			if(Guid != Guids.ContextualDiffViewGuid)
-			{
-				Text = DiffSource?.ToString() ?? Resources.StrDiff;
-			}
-			else
-			{
-				Text = Resources.StrContextualDiff;
-			}
+			Text = Guid != Guids.ContextualDiffViewGuid
+				? DiffSource?.ToString() ?? Resources.StrDiff
+				: Resources.StrContextualDiff;
 		}
 
 		public override Image Image => CachedResources.Bitmaps["ImgDiff"];

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -60,7 +60,7 @@ namespace gitter
 		/// Verifies that two generic type data are equal.  The assertion fails if they are not.
 		/// </summary>
 		/// <typeparam name="T">The generic type to compare for equality.</typeparam>
-		/// <param name="expected">The first generic type data to compare.  This is is the expected value.</param>
+		/// <param name="expected">The first generic type data to compare.  This is the expected value.</param>
 		/// <param name="actual">The second generic type data to compare.  This is the actual value.</param>
 		/// <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
 		[Conditional("DEBUG")]
@@ -84,7 +84,7 @@ namespace gitter
 		/// Verifies that two generic type data are not equal.  The assertion fails if they are.
 		/// </summary>
 		/// <typeparam name="T">The generic type to compare for inequality.</typeparam>
-		/// <param name="notExpected">The first generic type data to compare.  This is is the value that's not expected.</param>
+		/// <param name="notExpected">The first generic type data to compare.  This is the value that's not expected.</param>
 		/// <param name="actual">The second generic type data to compare.  This is the actual value.</param>
 		/// <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
 		[Conditional("DEBUG")]

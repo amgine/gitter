@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -78,7 +78,7 @@ namespace gitter.Framework.Controls
 
 		#region Methods
 
-		/// <summary>Prepare rectangle <paramref name="rect"/> for painting by applying content ofsets.</summary>
+		/// <summary>Prepare rectangle <paramref name="rect"/> for painting by applying content offsets.</summary>
 		/// <param name="rect">Rectangle to prepare.</param>
 		public static void PrepareContentRectangle(ref Rectangle rect)
 		{
@@ -87,7 +87,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Prepare rectangle <paramref name="rect"/> for painting text by applying text offsets.</summary>
-		/// <param name="listBoxFont">Fonf of hosing <see cref="CustomListBox"/>.</param>
+		/// <param name="listBoxFont">Font of hosing <see cref="CustomListBox"/>.</param>
 		/// <param name="itemFont">Text font.</param>
 		/// <param name="rect">Rectangle to prepare.</param>
 		public void PrepareTextRectangle(Font listBoxFont, Font itemFont, ref Rectangle rect)

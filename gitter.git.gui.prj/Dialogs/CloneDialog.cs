@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -158,7 +158,6 @@ namespace gitter.Git.Gui.Dialogs
 
 		#region Data
 
-		private readonly IGitRepositoryProvider _gitRepositoryProvider;
 		private readonly IUserInputSource<string> _urlInput;
 		private readonly RepositoryPathInput _repositoryPathInput;
 		private readonly IUserInputSource<string> _remoteNameInput;
@@ -180,8 +179,6 @@ namespace gitter.Git.Gui.Dialogs
 		public CloneDialog(IGitRepositoryProvider gitRepositoryProvider)
 		{
 			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
-
-			_gitRepositoryProvider = gitRepositoryProvider;
 
 			InitializeComponent();
 			Localize();
@@ -215,8 +212,6 @@ namespace gitter.Git.Gui.Dialogs
 		#region Properties
 
 		protected override string ActionVerb => Resources.StrClone;
-
-		private IGitRepositoryProvider GitRepositoryProvider => _gitRepositoryProvider;
 
 		public IUserInputSource<string> Url => _urlInput;
 

@@ -21,6 +21,7 @@
 namespace gitter.Git.Gui.Controllers
 {
 	using System;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -33,8 +34,6 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class AddSubmoduleController : ViewControllerBase<IAddSubmoduleView>, IAddSubmoduleController
 	{
-		#region .ctor
-
 		public AddSubmoduleController(Repository repository)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
@@ -42,31 +41,22 @@ namespace gitter.Git.Gui.Controllers
 			Repository = repository;
 		}
 
-		#endregion
-
-		#region properties
-
 		private Repository Repository { get; }
 
-		#endregion
-
-		#region IAddSubmoduleController Members
-
-		public bool TryAddSubmodule()
+		private bool ValidateInput(out string path, out string url, out string branch)
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+			path   = View.Path.Value.Trim();
+			url    = View.Url.Value.Trim();
+			branch = default;
 
-			var path = View.Path.Value.Trim();
 			if(!GitControllerUtility.ValidateRelativePath(path, View.Path, View.ErrorNotifier))
 			{
 				return false;
 			}
-			var url = View.Url.Value.Trim();
 			if(!GitControllerUtility.ValidateUrl(url, View.Url, View.ErrorNotifier))
 			{
 				return false;
 			}
-			string branch = null;
 			if(View.UseCustomBranch.Value)
 			{
 				branch = View.BranchName.Value.Trim();
@@ -75,26 +65,59 @@ namespace gitter.Git.Gui.Controllers
 					return false;
 				}
 			}
+			return true;
+		}
+
+		private void OnCreateFailed(Exception exc, string path)
+			=> GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				string.Format(Resources.ErrFailedToAddSubmodule, path),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+
+		public bool TryAddSubmodule()
+		{
+			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+
+			if(!ValidateInput(out var path, out var url, out var branch)) return false;
+
 			try
 			{
 				using(View.ChangeCursor(MouseCursor.WaitCursor))
 				{
-					Repository.Submodules.Create(path, url, branch);
+					Repository.Submodules.Add(path, url, branch);
 				}
 			}
 			catch(GitException exc)
 			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					string.Format(Resources.ErrFailedToAddSubmodule, path),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
+				OnCreateFailed(exc, path);
 				return false;
 			}
 			return true;
 		}
 
-		#endregion
+		public async Task<bool> TryAddSubmoduleAsync()
+		{
+			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+
+			if(!ValidateInput(out var path, out var url, out var branch)) return false;
+
+			try
+			{
+				using(View.ChangeCursor(MouseCursor.WaitCursor))
+				{
+					await Repository.Submodules
+						.AddAsync(path, url, branch)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			catch(GitException exc)
+			{
+				OnCreateFailed(exc, path);
+				return false;
+			}
+			return true;
+		}
 	}
 }

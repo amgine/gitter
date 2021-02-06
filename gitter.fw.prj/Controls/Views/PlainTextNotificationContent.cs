@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -38,6 +37,8 @@ namespace gitter.Framework.Controls
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			using(var brush = new SolidBrush(BackColor))
 			{
 				e.Graphics.FillRectangle(brush, e.ClipRectangle);
@@ -45,12 +46,9 @@ namespace gitter.Framework.Controls
 			var text = Message;
 			if(!string.IsNullOrWhiteSpace(text))
 			{
-				using(var brush = new SolidBrush(ForeColor))
-				{
-					GitterApplication.TextRenderer.DrawText(
-						e.Graphics, text,
-						Font, brush, ClientRectangle);
-				}
+				GitterApplication.TextRenderer.DrawText(
+					e.Graphics, text,
+					Font, ForeColor, ClientRectangle);
 			}
 		}
 	}

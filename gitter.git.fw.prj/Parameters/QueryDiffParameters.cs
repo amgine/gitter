@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,7 +22,7 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryDiff"/> opearation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryDiff"/> operation.</summary>
 	public class QueryDiffParameters : BaseQueryDiffParameters
 	{
 		/// <summary>Create <see cref="QueryDiffParameters"/>.</summary>

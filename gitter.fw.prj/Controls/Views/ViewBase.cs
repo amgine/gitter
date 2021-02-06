@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,6 +32,78 @@ namespace gitter.Framework.Controls
 	[ToolboxItem(false)]
 	public class ViewBase : UserControl
 	{
+		protected static ISearchToolBarController CreateSearchToolbarController<TView, TBar, TOptions>(TView view)
+			where TView    : ViewBase, ISearchableView<TOptions>
+			where TOptions : SearchOptions
+			where TBar : SearchToolBar<TOptions>, new()
+			=> new SearchToolBarController<TView, TBar, TOptions>(view);
+
+		protected interface ISearchToolBarController
+		{
+			bool IsVisible { get; set; }
+
+			void Show();
+
+			void Hide();
+		}
+
+		sealed class SearchToolBarController<TView, TBar, TOptions> : ISearchToolBarController
+			where TView    : ViewBase, ISearchableView<TOptions>
+			where TBar     : SearchToolBar<TOptions>, new()
+			where TOptions : SearchOptions
+		{
+			private readonly TView _view;
+			private TOptions _options;
+			private TBar _toolbar;
+
+			public SearchToolBarController(TView view)
+			{
+				_view = view;
+			}
+
+			public bool IsVisible
+			{
+				get => _toolbar != null && _toolbar.Visible;
+				set
+				{
+					if(value)
+					{
+						Show();
+					}
+					else
+					{
+						Hide();
+					}
+				}
+			}
+
+			public void Show()
+			{
+				if(_toolbar == null)
+				{
+					_toolbar = new TBar
+					{
+						Options = _options,
+						View    = _view,
+					};
+					_view.AddBottomToolStrip(_toolbar);
+				}
+				_toolbar.Visible = true;
+				_toolbar.FocusSearchTextBox();
+			}
+
+			public void Hide()
+			{
+				if(_toolbar != null)
+				{
+					_options = _toolbar.Options;
+					_view.RemoveToolStrip(_toolbar);
+					_toolbar.Dispose();
+					_toolbar = default;
+				}
+			}
+		}
+
 		#region Data
 
 		private object _viewModel;
@@ -42,23 +114,21 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object ClosingEvent = new object();
+		private static readonly object ClosingEvent = new();
 		public event EventHandler Closing
 		{
-			add { Events.AddHandler(ClosingEvent, value); }
-			remove { Events.RemoveHandler(ClosingEvent, value); }
+			add    => Events.AddHandler    (ClosingEvent, value);
+			remove => Events.RemoveHandler (ClosingEvent, value);
 		}
 
 		public new event EventHandler TextChanged
 		{
-			add { base.TextChanged += value; }
-			remove { base.TextChanged -= value; }
+			add    => base.TextChanged += value;
+			remove => base.TextChanged -= value;
 		}
 
 		protected virtual void OnClosing()
-		{
-			((EventHandler)Events[ClosingEvent])?.Invoke(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[ClosingEvent])?.Invoke(this, EventArgs.Empty);
 
 		#endregion
 
@@ -97,28 +167,10 @@ namespace gitter.Framework.Controls
 		public IWorkingEnvironment WorkingEnvironment { get; }
 
 		protected INotificationService NotificationService
-		{
-			get
-			{
-				if(_notificationService == null)
-				{
-					_notificationService = new BalloonNotificationService();
-				}
-				return _notificationService;
-			}
-		}
+			=> _notificationService ??= new BalloonNotificationService();
 
 		protected IToolTipService ToolTipService
-		{
-			get
-			{
-				if(_toolTipService == null)
-				{
-					_toolTipService = new DefaultToolTipService();
-				}
-				return _toolTipService;
-			}
-		}
+			=> _toolTipService ??= new DefaultToolTipService();
 
 		//protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		//{
@@ -152,7 +204,7 @@ namespace gitter.Framework.Controls
 
 		public object ViewModel
 		{
-			get { return _viewModel; }
+			get => _viewModel;
 			set
 			{
 				if(!object.Equals(_viewModel, value))
@@ -219,8 +271,8 @@ namespace gitter.Framework.Controls
 		/// <summary>View's text.</summary>
 		public override string Text
 		{
-			get { return base.Text; }
-			set { base.Text = value; }
+			get => base.Text;
+			set => base.Text = value;
 		}
 
 		/// <summary>View's image.</summary>
@@ -333,7 +385,7 @@ namespace gitter.Framework.Controls
 					}
 					break;
 				default:
-					throw new ArgumentException("toolStrip");
+					throw new ArgumentException("Invalid ToolStrip.Dock value.", nameof(toolStrip));
 			}
 		}
 

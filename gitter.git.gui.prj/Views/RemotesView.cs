@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -33,16 +33,20 @@ namespace gitter.Git.Gui.Views
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class RemotesView : GitViewBase
+	partial class RemotesView : GitViewBase, ISearchableView<RemotesSearchOptions>
 	{
 		private RemotesToolbar _toolbar;
+		private readonly ISearchToolBarController _searchToolbar;
 
 		public RemotesView(GuiProvider gui)
 			: base(Guids.RemotesViewGuid, gui)
 		{
 			InitializeComponent();
 
-			Text = Resources.StrRemotes;
+			Text   = Resources.StrRemotes;
+			Search = new RemotesSearch(_lstRemotes);
+
+			_searchToolbar = CreateSearchToolbarController<RemotesView, RemotesSearchToolBar, RemotesSearchOptions>(this);
 
 			_lstRemotes.Text = Resources.StrsNoRemotes;
 
@@ -50,6 +54,14 @@ namespace gitter.Git.Gui.Views
 			_lstRemotes.PreviewKeyDown += OnKeyDown;
 
 			AddTopToolStrip(_toolbar = new RemotesToolbar(this));
+		}
+
+		public ISearch<RemotesSearchOptions> Search { get; }
+
+		public bool SearchToolBarVisible
+		{
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = false;
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
@@ -98,6 +110,9 @@ namespace gitter.Git.Gui.Views
 		{
 			switch(e.KeyCode)
 			{
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					break;
 				case Keys.F5:
 					RefreshContent();
 					e.IsInputKey = true;

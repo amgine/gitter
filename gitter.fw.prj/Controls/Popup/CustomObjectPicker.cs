@@ -89,23 +89,17 @@ namespace gitter.Framework.Controls
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public new TListBox DropDownControl
-		{
-			get { return base.DropDownControl as TListBox; }
-		}
+		public new TListBox DropDownControl => base.DropDownControl as TListBox;
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public CustomListBoxItemsCollection DropDownItems
-		{
-			get { return DropDownControl.Items; }
-		}
+		public CustomListBoxItemsCollection DropDownItems => DropDownControl.Items;
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new TItem SelectedItem
 		{
-			get { return _selectedItem; }
+			get => _selectedItem;
 			set
 			{
 				if(_selectedItem != value)
@@ -136,7 +130,7 @@ namespace gitter.Framework.Controls
 				{
 					return GetValue(selectedItem);
 				}
-				return default(TValue);
+				return default;
 			}
 			set
 			{

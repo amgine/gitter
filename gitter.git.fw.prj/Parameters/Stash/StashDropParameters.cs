@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,7 +22,7 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	/// <summary>Parameters for <see cref="IStashAccessor.StashDrop()"/> operation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.StashDrop"/> operation.</summary>
 	public sealed class StashDropParameters
 	{
 		/// <summary>Create <see cref="StashDropParameters"/>.</summary>

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -101,7 +101,6 @@ namespace gitter.Git
 
 		#region Data
 
-		private readonly object _syncRoot = new object();
 		private readonly Dictionary<string, TreeFile> _unstagedPlainList;
 		private readonly Dictionary<string, TreeFile> _stagedPlainList;
 
@@ -142,70 +141,34 @@ namespace gitter.Git
 
 		#region Properties
 
-		public ICollection<TreeFile> StagedFiles
-		{
-			get { return _stagedPlainList.Values; }
-		}
+		public ICollection<TreeFile> StagedFiles => _stagedPlainList.Values;
 
-		public TreeDirectory StagedRoot
-		{
-			get { return _stagedRoot; }
-		}
+		public TreeDirectory StagedRoot => _stagedRoot;
 
-		public ICollection<TreeFile> UnstagedFiles
-		{
-			get { return _unstagedPlainList.Values; }
-		}
+		public ICollection<TreeFile> UnstagedFiles => _unstagedPlainList.Values;
 
-		public TreeDirectory UnstagedRoot
-		{
-			get { return _unstagedRoot; }
-		}
+		public TreeDirectory UnstagedRoot => _unstagedRoot;
 
-		public int UnstagedUntrackedCount
-		{
-			get { return _unstagedUntrackedCount; }
-		}
+		public int UnstagedUntrackedCount => _unstagedUntrackedCount;
 
-		public int UnstagedModifiedCount
-		{
-			get { return _unstagedModifiedCount; }
-		}
+		public int UnstagedModifiedCount => _unstagedModifiedCount;
 
-		public int UnstagedRemovedCount
-		{
-			get { return _unstagedRemovedCount; }
-		}
+		public int UnstagedRemovedCount => _unstagedRemovedCount;
 
-		public int UnmergedCount
-		{
-			get { return _unmergedCount; }
-		}
+		public int UnmergedCount => _unmergedCount;
 
-		public int StagedAddedCount
-		{
-			get { return _stagedAddedCount; }
-		}
+		public int StagedAddedCount => _stagedAddedCount;
 
-		public int StagedModifiedCount
-		{
-			get { return _stagedModifiedCount; }
-		}
+		public int StagedModifiedCount => _stagedModifiedCount;
 
-		public int StagedRemovedCount
-		{
-			get { return _stagedRemovedCount; }
-		}
+		public int StagedRemovedCount => _stagedRemovedCount;
 
 		/// <summary>Object used for cross-thread synchronization.</summary>
-		public object SyncRoot
-		{
-			get { return _syncRoot; }
-		}
+		public object SyncRoot { get; } = new();
 
 		#endregion
 
-		private static TreeDirectoryData BreakIntoTree(IDictionary<string, TreeFileData> files, StagedStatus stagedStatus)
+		private static TreeDirectoryData BreakIntoTree(IReadOnlyDictionary<string, TreeFileData> files, StagedStatus stagedStatus)
 		{
 			var root = new TreeDirectoryData("", "", null, FileStatus.Cached, stagedStatus);
 			var dirs = new Dictionary<string, TreeDirectoryData>();
@@ -252,8 +215,7 @@ namespace gitter.Git
 						path.Append(partName);
 						path.Append('/');
 						string currentPath = path.ToString();
-						TreeDirectoryData wtDirectory;
-						if(!dirs.TryGetValue(currentPath, out wtDirectory))
+						if(!dirs.TryGetValue(currentPath, out var wtDirectory))
 						{
 							wtDirectory = new TreeDirectoryData(currentPath, partName, parent, FileStatus.Cached, stagedStatus);
 							dirs.Add(currentPath, wtDirectory);
@@ -268,33 +230,16 @@ namespace gitter.Git
 			return root;
 		}
 
-		/// <summary>Update status.</summary>
-		public void Refresh()
+		private void Refresh(StatusData status)
 		{
-			StatusData status;
-			var parameters = new QueryStatusParameters();
-			if(Repository.Monitor != null)
-			{
-				using(Repository.Monitor.BlockNotifications(
-					RepositoryNotifications.IndexUpdated,
-					RepositoryNotifications.WorktreeUpdated))
-				{
-					status = Repository.Accessor.QueryStatus.Invoke(parameters);
-				}
-			}
-			else
-			{
-				status = Repository.Accessor.QueryStatus.Invoke(parameters);
-			}
-
 			var stagedRoot   = BreakIntoTree(status.StagedFiles,   StagedStatus.Staged);
 			var unstagedRoot = BreakIntoTree(status.UnstagedFiles, StagedStatus.Unstaged);
 
 			bool m1, m2, m3;
 			lock(SyncRoot)
 			{
-				m1 = Merge(_stagedPlainList,	_stagedRoot,	status.StagedFiles,		stagedRoot);
-				m2 = Merge(_unstagedPlainList,	_unstagedRoot,	status.UnstagedFiles,	unstagedRoot);
+				m1 = Merge(_stagedPlainList,   _stagedRoot,   status.StagedFiles,   stagedRoot);
+				m2 = Merge(_unstagedPlainList, _unstagedRoot, status.UnstagedFiles, unstagedRoot);
 				m3 = _stagedAddedCount			!= status.StagedAddedCount ||
 					 _stagedModifiedCount		!= status.StagedModifiedCount ||
 					 _stagedRemovedCount		!= status.StagedRemovedCount ||
@@ -318,6 +263,37 @@ namespace gitter.Git
 					InvokeChanged();
 				}
 			}
+		}
+
+		/// <summary>Update status.</summary>
+		public void Refresh()
+		{
+			StatusData status;
+			var parameters = new QueryStatusParameters();
+			using(Repository.Monitor?.BlockNotifications(
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
+			{
+				status = Repository.Accessor.QueryStatus
+					.Invoke(parameters);
+			}
+			Refresh(status);
+		}
+
+		/// <summary>Update status.</summary>
+		public async Task RefreshAsync()
+		{
+			StatusData status;
+			var parameters = new QueryStatusParameters();
+			using(Repository.Monitor?.BlockNotifications(
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.WorktreeUpdated))
+			{
+				status = await Repository.Accessor.QueryStatus
+					.InvokeAsync(parameters)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			Refresh(status);
 		}
 
 		private static void Remove(TreeFile file)
@@ -433,16 +409,15 @@ namespace gitter.Git
 		}
 
 		private bool Merge(
-			IDictionary<string, TreeFile>	  oldPlainList, TreeDirectory	  oldRoot,
-			IDictionary<string, TreeFileData> newPlainList,	TreeDirectoryData newRoot)
+			Dictionary<string, TreeFile>	  oldPlainList, TreeDirectory	  oldRoot,
+			Dictionary<string, TreeFileData> newPlainList,	TreeDirectoryData newRoot)
 		{
 			bool res = false;
 			var removeList = new List<string>();
 
 			foreach(var oldFileKvp in oldPlainList)
 			{
-				TreeFileData file;
-				if(newPlainList.TryGetValue(oldFileKvp.Key, out file))
+				if(newPlainList.TryGetValue(oldFileKvp.Key, out var file))
 				{
 					newPlainList.Remove(oldFileKvp.Key);
 					ObjectFactories.UpdateTreeFile(oldFileKvp.Value, file);
@@ -474,10 +449,9 @@ namespace gitter.Git
 
 		public TreeFile TryGetStaged(string path)
 		{
-			TreeFile file;
 			lock(SyncRoot)
 			{
-				if(_stagedPlainList.TryGetValue(path, out file))
+				if(_stagedPlainList.TryGetValue(path, out var file))
 				{
 					return file;
 				}
@@ -487,10 +461,9 @@ namespace gitter.Git
 
 		public TreeFile TryGetUnstaged(string path)
 		{
-			TreeFile file;
 			lock(SyncRoot)
 			{
-				if(_unstagedPlainList.TryGetValue(path, out file))
+				if(_unstagedPlainList.TryGetValue(path, out var file))
 				{
 					return file;
 				}
@@ -525,14 +498,9 @@ namespace gitter.Git
 
 		#region add
 
-		internal void Stage(TreeItem item)
+		internal void Stage(TreeItem item, AddFilesMode mode = AddFilesMode.All)
 		{
-			Stage(item, AddFilesMode.All);
-		}
-
-		internal void Stage(TreeItem item, AddFilesMode mode)
-		{
-			Verify.Argument.IsValidGitObject(item, Repository, "item");
+			Verify.Argument.IsValidGitObject(item, Repository, nameof(item));
 
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated))
@@ -540,8 +508,21 @@ namespace gitter.Git
 				Repository.Accessor.AddFiles.Invoke(
 					new AddFilesParameters(mode, item.RelativePath));
 			}
-
 			Refresh();
+		}
+
+		internal async Task StageAsync(TreeItem item, AddFilesMode mode = AddFilesMode.All)
+		{
+			Verify.Argument.IsValidGitObject(item, Repository, nameof(item));
+
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.IndexUpdated))
+			{
+				await Repository.Accessor.AddFiles
+					.InvokeAsync(new AddFilesParameters(mode, item.RelativePath))
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
 		}
 
 		public void Stage(string pattern = null, bool includeUntracked = false, bool includeIgnored = false)
@@ -564,7 +545,29 @@ namespace gitter.Git
 			}
 		}
 
-		private string[] GetPatterns(ICollection<TreeItem> items)
+		public async Task StageAsync(string pattern = null, bool includeUntracked = false, bool includeIgnored = false)
+		{
+			try
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated))
+				{
+					var parameters = new AddFilesParameters(includeUntracked ? AddFilesMode.All : AddFilesMode.Update, pattern)
+					{
+						Force = includeIgnored,
+					};
+					await Repository.Accessor.AddFiles
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			finally
+			{
+				await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+			}
+		}
+
+		private string[] GetPatterns(IReadOnlyList<TreeItem> items)
 		{
 			Verify.Argument.IsNotNull(items, nameof(items));
 			if(items.Count == 0) return null;
@@ -574,16 +577,15 @@ namespace gitter.Git
 			foreach(var item in items)
 			{
 				Verify.Argument.IsTrue(item.Repository == Repository, nameof(items),
-					Resources.ExcAllObjectsMustBeHandledByThisRepository.UseAsFormat("items"));
+					Resources.ExcAllObjectsMustBeHandledByThisRepository.UseAsFormat(nameof(items)));
 				patterns[id++] = item.RelativePath;
 			}
 			return patterns;
 		}
 
-		public void Stage(ICollection<TreeItem> items)
+		public void Stage(IReadOnlyList<TreeItem> items)
 		{
-			var patterns = GetPatterns(items);
-			if(patterns != null)
+			if(GetPatterns(items) is { Length: > 0 } patterns)
 			{
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.IndexUpdated))
@@ -595,6 +597,22 @@ namespace gitter.Git
 			Refresh();
 		}
 
+		public async Task StageAsync(IReadOnlyList<TreeItem> items)
+		{
+			if(GetPatterns(items) is { Length: > 0 } patterns)
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated))
+				{
+					var parameters = new AddFilesParameters(AddFilesMode.All, patterns);
+					await Repository.Accessor.AddFiles
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+		}
+
 		public void StageAll()
 		{
 			using(Repository.Monitor.BlockNotifications(
@@ -603,8 +621,19 @@ namespace gitter.Git
 				Repository.Accessor.AddFiles.Invoke(
 					new AddFilesParameters(AddFilesMode.All, "."));
 			}
-
 			Refresh();
+		}
+
+		public async Task StageAllAsync()
+		{
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.IndexUpdated))
+			{
+				await Repository.Accessor.AddFiles
+					.InvokeAsync(new AddFilesParameters(AddFilesMode.All, "."))
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
 		}
 
 		public void StageUpdated()
@@ -615,29 +644,40 @@ namespace gitter.Git
 				Repository.Accessor.AddFiles.Invoke(
 					new AddFilesParameters(AddFilesMode.Update, "."));
 			}
-
 			Refresh();
 		}
 
-		private static AddFilesParameters GetAddFilesParameters(string pattern, bool includeUntracked, bool includeIgnored)
+		public async Task StageUpdatedAsync()
 		{
-			return new AddFilesParameters(includeUntracked ? AddFilesMode.All : AddFilesMode.Update, pattern)
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.IndexUpdated))
+			{
+				await Repository.Accessor.AddFiles
+					.InvokeAsync(new AddFilesParameters(AddFilesMode.Update, "."))
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+		}
+
+		private static AddFilesParameters GetAddFilesParameters(string pattern, bool includeUntracked, bool includeIgnored)
+			=> new AddFilesParameters(includeUntracked ? AddFilesMode.All : AddFilesMode.Update, pattern)
 			{
 				Force = includeIgnored,
 			};
-		}
 
-		public async Task<IList<TreeFile>> GetFilesToAddAsync(string pattern, bool includeUntracked, bool includeIgnored, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<IList<TreeFile>> GetFilesToAddAsync(string pattern, bool includeUntracked, bool includeIgnored,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			progress?.Report(new OperationProgress(Resources.StrLookingForFiles.AddEllipsis()));
+			IList<TreeFileData> files;
 			var parameters = GetAddFilesParameters(pattern, includeUntracked, includeIgnored);
-			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
-			var files = await Repository
-				.Accessor
-				.QueryFilesToAdd
-				.InvokeAsync(parameters, progress, cancellationToken);
-			block.Dispose();
-			var result = new List<TreeFile>(files.Count);
+			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
+			{
+				files = await Repository.Accessor.QueryFilesToAdd
+					.InvokeAsync(parameters, progress, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+			var result = new List<TreeFile>(capacity: files.Count);
 			foreach(var treeFileData in files)
 			{
 				result.Add(ObjectFactories.CreateTreeFile(Repository, treeFileData));
@@ -669,8 +709,34 @@ namespace gitter.Git
 						});
 				}
 			}
-
 			Refresh();
+		}
+
+		public async Task UnstageAllAsync()
+		{
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.IndexUpdated))
+			{
+				if(!Repository.IsEmpty)
+				{
+					var parameters = new ResetFilesParameters(".");
+					await Repository.Accessor.ResetFiles
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+				else
+				{
+					var parameters = new RemoveFilesParameters(".")
+					{
+						Cached    = true,
+						Recursive = true,
+					};
+					await Repository.Accessor.RemoveFiles
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
 		}
 
 		internal void Unstage(TreeItem item)
@@ -695,14 +761,41 @@ namespace gitter.Git
 						});
 				}
 			}
-
 			Refresh();
 		}
 
-		public void Unstage(ICollection<TreeItem> items)
+		internal async Task UnstageAsync(TreeItem item)
 		{
-			var patterns = GetPatterns(items);
-			if(patterns != null)
+			Verify.Argument.IsValidGitObject(item, Repository, nameof(item));
+
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.IndexUpdated))
+			{
+				if(!Repository.IsEmpty)
+				{
+					var parameters = new ResetFilesParameters(item.RelativePath);
+					await Repository.Accessor.ResetFiles
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+				else
+				{
+					var parameters = new RemoveFilesParameters(item.RelativePath)
+					{
+						Cached    = true,
+						Recursive = true,
+					};
+					await Repository.Accessor.RemoveFiles
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+		}
+
+		public void Unstage(IReadOnlyList<TreeItem> items)
+		{
+			if(GetPatterns(items) is { Length: > 0 } patterns)
 			{
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.IndexUpdated))
@@ -722,8 +815,38 @@ namespace gitter.Git
 							});
 					}
 				}
+				Refresh();
 			}
-			Refresh();
+		}
+
+		public async Task UnstageAsync(IReadOnlyList<TreeItem> items)
+		{
+			if(GetPatterns(items) is { Length: > 0 } patterns)
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated))
+				{
+					if(!Repository.Head.IsEmpty)
+					{
+						var parameters = new ResetFilesParameters(patterns);
+						await Repository.Accessor.ResetFiles
+							.InvokeAsync(parameters)
+							.ConfigureAwait(continueOnCapturedContext: false);
+					}
+					else
+					{
+						var parameters = new RemoveFilesParameters(patterns)
+						{
+							Cached    = true,
+							Recursive = true,
+						};
+						await Repository.Accessor.RemoveFiles
+							.InvokeAsync(parameters)
+							.ConfigureAwait(continueOnCapturedContext: false);
+					}
+				}
+				await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+			}
 		}
 
 		#endregion
@@ -751,28 +874,49 @@ namespace gitter.Git
 			}
 		}
 
+		/// <summary>Reset changes in working tree.</summary>
+		/// <param name="mode">Reset mode</param>
+		/// <exception cref="T:gitter.Git.GitException">git reset failed.</exception>
+		public async Task ResetAsync(ResetMode mode)
+		{
+			try
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated))
+				{
+					await Repository.Accessor.Reset
+						.InvokeAsync(new ResetParameters(mode))
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			finally
+			{
+				await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+			}
+		}
+
 		#endregion
 
 		#region clean
 
 		private static CleanFilesParameters GetCleanFilesParameters(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories, bool force = false)
-		{
-			return new CleanFilesParameters(includePattern)
+			=> new CleanFilesParameters(includePattern)
 			{
-				ExcludePatterns   = new string[] { excludePattern },
+				ExcludePatterns   = new[] { excludePattern },
 				Mode              = mode,
 				RemoveDirectories = removeDirectories,
 				Force             = force,
 			};
-		}
 
-		private IList<TreeItem> RestoreFilesToCleanList(IList<string> files)
+		private IReadOnlyList<TreeItem> RestoreFilesToCleanList(IList<string> files)
 		{
 			Assert.IsNotNull(files);
 
-			var result = new List<TreeItem>(files.Count);
-			foreach(var item in files)
+			var result = new TreeItem[files.Count];
+			for(int i = 0; i < result.Length; ++i)
 			{
+				var item = files[i];
 				if(item.EndsWith("/"))
 				{
 					var name = item;
@@ -780,63 +924,55 @@ namespace gitter.Git
 					{
 						name = name.Substring(0, name.Length - 1);
 					}
-					result.Add(new TreeDirectory(Repository,
-						item, null, FileStatus.Cached, name));
+					result[i] = new TreeDirectory(Repository,
+						item, null, FileStatus.Cached, name);
 				}
 				else
 				{
-					result.Add(new TreeFile(Repository,
-						item, null, FileStatus.Cached, item));
+					result[i] = new TreeFile(Repository,
+						item, null, FileStatus.Cached, item);
 				}
 			}
 			return result;
 		}
 
-		/// <summary>Returns a list of files which will be removed by a clean funciton.</summary>
+		/// <summary>Returns a list of files which will be removed by a clean function.</summary>
 		/// <param name="includePattern">Files to clean.</param>
 		/// <param name="excludePattern">Files to save.</param>
 		/// <param name="mode">Clean mode.</param>
 		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
 		/// <returns>Files that will be removed by a Clean() call.</returns>
-		public IList<TreeItem> GetFilesToClean(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
+		public IReadOnlyList<TreeItem> GetFilesToClean(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
 		{
 			IList<string> files;
 			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
-			using(var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
+			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
 			{
 				files = Repository.Accessor.QueryFilesToClean.Invoke(parameters);
 			}
 			return RestoreFilesToCleanList(files);
 		}
 
-		/// <summary>Returns a list of files which will be removed by a clean funciton.</summary>
+		/// <summary>Returns a list of files which will be removed by a clean function.</summary>
 		/// <param name="includePattern">Files to clean.</param>
 		/// <param name="excludePattern">Files to save.</param>
 		/// <param name="mode">Clean mode.</param>
 		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
 		/// <returns>Files that will be removed by a Clean() call.</returns>
-		public async Task<IList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<IReadOnlyList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
+			IList<string> files;
 			progress?.Report(new OperationProgress(Resources.StrsLookingForFiles.AddEllipsis()));
 			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories);
-			var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated);
-			var files = await Repository
-				.Accessor
-				.QueryFilesToClean
-				.InvokeAsync(parameters, progress, cancellationToken);
-			block.Dispose();
+			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
+			{
+				files = await Repository
+					.Accessor
+					.QueryFilesToClean
+					.InvokeAsync(parameters, progress, cancellationToken);
+			}
 			return RestoreFilesToCleanList(files);
-			//return Repository.Accessor.QueryFilesToClean.InvokeAsync(parameters, progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		block.Dispose();
-			//		var files = TaskUtility.UnwrapResult(t);
-			//		return RestoreFilesToCleanList(files);
-			//	},
-			//	CancellationToken.None,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		/// <summary>Remove untracked and/or ignored files and (optionally) directories.</summary>
@@ -846,7 +982,7 @@ namespace gitter.Git
 		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
 		public void Clean(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
 		{
-			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories, true);
+			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories, force: true);
 			try
 			{
 				using(Repository.Monitor.BlockNotifications(
@@ -859,6 +995,31 @@ namespace gitter.Git
 			finally
 			{
 				Refresh();
+			}
+		}
+
+		/// <summary>Remove untracked and/or ignored files and (optionally) directories.</summary>
+		/// <param name="includePattern">Files to clean.</param>
+		/// <param name="excludePattern">Files to save.</param>
+		/// <param name="mode">Clean mode.</param>
+		/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
+		public async Task CleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories)
+		{
+			var parameters = GetCleanFilesParameters(includePattern, excludePattern, mode, removeDirectories, force: true);
+			try
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.IndexUpdated,
+					RepositoryNotifications.WorktreeUpdated))
+				{
+					await Repository.Accessor.CleanFiles
+						.InvokeAsync(parameters)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			finally
+			{
+				await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
 
@@ -881,7 +1042,7 @@ namespace gitter.Git
 				using(var patch = patchSource.PreparePatchFile())
 				{
 					Repository.Accessor.ApplyPatch.Invoke(
-						new ApplyPatchParameters()
+						new ApplyPatchParameters
 						{
 							Patches = new[] { patch.FileName },
 							ApplyTo = applyTo,
@@ -919,7 +1080,7 @@ namespace gitter.Git
 							fileNames[i] = files[i].FileName;
 						}
 						Repository.Accessor.ApplyPatch.Invoke(
-							new ApplyPatchParameters()
+							new ApplyPatchParameters
 							{
 								Patches = fileNames,
 								ApplyTo = applyTo,
@@ -952,7 +1113,7 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(message, nameof(message));
 
 			var currentBranch = Repository.Head.Pointer as Branch;
-			var output = default(string);
+			var output        = default(string);
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.BranchChanged,
@@ -962,34 +1123,27 @@ namespace gitter.Git
 					Repository.GitDirectory,
 					GitConstants.CommitMessageFileName);
 				File.WriteAllText(fileName, message);
-				bool commitSuccess = false;
+				output = Repository.Accessor.Commit.Invoke(
+					new CommitParameters
+					{
+						MessageFileName = Path.Combine(
+							Repository.GitDirectory, GitConstants.CommitMessageFileName),
+						Amend = amend,
+					});
 				try
 				{
-					output = Repository.Accessor.Commit.Invoke(
-						new CommitParameters
-						{
-							MessageFileName = Path.Combine(
-								Repository.GitDirectory, GitConstants.CommitMessageFileName),
-							Amend = amend,
-						});
-					commitSuccess = true;
+					File.Delete(fileName);
 				}
-				finally
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(commitSuccess)
-					{
-						try
-						{
-							File.Delete(fileName);
-						}
-						catch(Exception exc) when(!exc.IsCritical())
-						{
-						}
-					}
 				}
 			}
+			return AfterCommit(currentBranch, output);
+		}
 
-			Revision commit = null;
+		private CommitResult AfterCommit(Branch currentBranch, string output)
+		{
+			Revision commit;
 			if(currentBranch != null)
 			{
 				var oldHeadRev = currentBranch.Revision;
@@ -1018,6 +1172,78 @@ namespace gitter.Git
 			return result;
 		}
 
+		public async Task<CommitResult> CommitAsync(string message, bool amend = false,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		{
+			Verify.Argument.IsNotNull(message, nameof(message));
+
+			var currentBranch = Repository.Head.Pointer as Branch;
+			var output        = default(string);
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.IndexUpdated,
+				RepositoryNotifications.BranchChanged,
+				RepositoryNotifications.Checkout))
+			{
+				var fileName = Path.Combine(
+					Repository.GitDirectory,
+					GitConstants.CommitMessageFileName);
+				File.WriteAllText(fileName, message);
+				var parameters = new CommitParameters
+				{
+					MessageFileName = Path.Combine(Repository.GitDirectory, GitConstants.CommitMessageFileName),
+					Amend           = amend,
+				};
+				output = await Repository.Accessor.Commit
+					.InvokeAsync(parameters, progress, cancellationToken)
+					.ConfigureAwait(continueOnCapturedContext: false);
+				try
+				{
+					File.Delete(fileName);
+				}
+				catch(Exception exc) when(!exc.IsCritical())
+				{
+				}
+			}
+			return await AfterCommitAsync(currentBranch, output)
+				.ConfigureAwait(continueOnCapturedContext: false);
+		}
+
+		private async Task<CommitResult> AfterCommitAsync(Branch currentBranch, string output)
+		{
+			Revision commit;
+			if(currentBranch != null)
+			{
+				var oldHeadRev = currentBranch.Revision;
+				await currentBranch
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
+				commit = currentBranch.Revision;
+				if(commit != oldHeadRev)
+				{
+					Repository.OnCommitCreated(commit);
+				}
+			}
+			else
+			{
+				var oldHeadRev = Repository.Head.Revision;
+				await Repository.Head
+					.RefreshAsync()
+					.ConfigureAwait(continueOnCapturedContext: false);
+				commit = Repository.Head.Revision;
+				if(commit != oldHeadRev)
+				{
+					Repository.OnCommitCreated(commit);
+				}
+			}
+			Repository.Head.NotifyRelogRecordAdded();
+			Repository.OnStateChanged();
+			await RefreshAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
+			var result = new CommitResult(commit, output);
+			OnCommitted(result);
+			return result;
+		}
+
 		public string LoadCommitMessage()
 		{
 			var fileName = Path.Combine(
@@ -1025,14 +1251,9 @@ namespace gitter.Git
 				GitConstants.CommitMessageFileName);
 			try
 			{
-				if(File.Exists(fileName))
-				{
-					return File.ReadAllText(fileName);
-				}
-				else
-				{
-					return string.Empty;
-				}
+				return File.Exists(fileName)
+					? File.ReadAllText(fileName)
+					: string.Empty;
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
@@ -1066,16 +1287,9 @@ namespace gitter.Git
 		#region diff
 
 		public IIndexDiffSource GetDiffSource(bool cached, IEnumerable<string> paths = null)
-		{
-			if(paths == null)
-			{
-				return new IndexChangesDiffSource(Repository, cached);
-			}
-			else
-			{
-				return new IndexChangesDiffSource(Repository, cached, paths.ToList());
-			}
-		}
+			=> paths == null
+				? new IndexChangesDiffSource(Repository, cached)
+				: new IndexChangesDiffSource(Repository, cached, paths.ToList());
 
 		#endregion
 	}

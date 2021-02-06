@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -58,9 +58,6 @@ namespace gitter.Git.Gui.Views
 			_view.RefreshContent();
 		}
 
-		public ToolStripButton RefreshButton
-		{
-			get { return _btnRefresh; }
-		}
+		public ToolStripButton RefreshButton => _btnRefresh;
 	}
 }

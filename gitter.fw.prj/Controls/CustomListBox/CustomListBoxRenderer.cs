@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -33,29 +33,11 @@ namespace gitter.Framework.Controls
 
 		private Brush _foregroundBrush;
 		public Brush ForegroundBrush
-		{
-			get
-			{
-				if(_foregroundBrush == null)
-				{
-					_foregroundBrush = new SolidBrush(ForeColor);
-				}
-				return _foregroundBrush;
-			}
-		}
+			=> _foregroundBrush ??= new SolidBrush(ForeColor);
 
 		private Brush _columnHeaderForegroundBrush;
 		public Brush ColumnHeaderForegroundBrush
-		{
-			get
-			{
-				if(_columnHeaderForegroundBrush == null)
-				{
-					_columnHeaderForegroundBrush = new SolidBrush(ColumnHeaderForeColor);
-				}
-				return _columnHeaderForegroundBrush;
-			}
-		}
+			=> _columnHeaderForegroundBrush ??= new SolidBrush(ColumnHeaderForeColor);
 
 		public abstract void OnPaintColumnBackground(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs);
 

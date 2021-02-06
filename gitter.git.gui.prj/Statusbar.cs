@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -174,14 +174,14 @@ namespace gitter.Git.Gui
 				AttachToRepository(guiProvider.Repository);
 			}
 
-			_statusToolTip					= new StatusToolTip();
-			_statusUnmergedToolTip			= new FileListToolTip();
-			_statusStagedAddedToolTip		= new FileListToolTip();
-			_statusStagedModifiedToolTip	= new FileListToolTip();
-			_statusStagedRemovedToolTip		= new FileListToolTip();
-			_statusUnstagedUntrackedToolTip	= new FileListToolTip();
-			_statusUnstagedModifiedToolTip	= new FileListToolTip();
-			_statusUnstagedRemovedToolTip	= new FileListToolTip();
+			_statusToolTip                  = new StatusToolTip();
+			_statusUnmergedToolTip          = new FileListToolTip();
+			_statusStagedAddedToolTip       = new FileListToolTip();
+			_statusStagedModifiedToolTip    = new FileListToolTip();
+			_statusStagedRemovedToolTip	    = new FileListToolTip();
+			_statusUnstagedUntrackedToolTip = new FileListToolTip();
+			_statusUnstagedModifiedToolTip  = new FileListToolTip();
+			_statusUnstagedRemovedToolTip   = new FileListToolTip();
 
 			SetToolTips();
 

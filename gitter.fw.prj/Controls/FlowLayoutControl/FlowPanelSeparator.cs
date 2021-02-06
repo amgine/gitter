@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,7 +38,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Separator height.</summary>
 		public int Height
 		{
-			get { return _height; }
+			get => _height;
 			set
 			{
 				if(_height != value)
@@ -50,7 +50,7 @@ namespace gitter.Framework.Controls
 
 		public FlowPanelSeparatorStyle SeparatorStyle
 		{
-			get { return _style; }
+			get => _style;
 			set
 			{
 				if(_style != value)

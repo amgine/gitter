@@ -57,7 +57,7 @@ namespace gitter.GitLab.Gui
 			return base.OnMeasureSubItem(measureEventArgs);
 		}
 
-		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 			var text = GetContent(paintEventArgs.Item);
 			if(!string.IsNullOrWhiteSpace(text))
@@ -65,7 +65,7 @@ namespace gitter.GitLab.Gui
 				paintEventArgs.PaintText(text);
 				return;
 			}
-			base.OnPainSubItem(paintEventArgs);
+			base.OnPaintSubItem(paintEventArgs);
 		}
 	}
 }

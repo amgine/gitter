@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -63,7 +63,7 @@ namespace gitter.Git
 
 		#region Methods
 
-		public Task DropAsync(IProgress<OperationProgress> progress)
+		public Task DropAsync(IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -77,7 +77,7 @@ namespace gitter.Git
 			Repository.Stash.Drop(this);
 		}
 
-		public Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress)
+		public Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -112,7 +112,7 @@ namespace gitter.Git
 			Repository.Stash.Apply(this, restoreIndex);
 		}
 
-		public Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress)
+		public Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
 		{
 			Verify.State.IsNotDeleted(this);
 
@@ -126,25 +126,13 @@ namespace gitter.Git
 			return Repository.Stash.ToBranch(this, name);
 		}
 
-		public IRevisionDiffSource GetDiffSource()
+		public IRevisionDiffSource GetDiffSource(IEnumerable<string> paths = null)
 		{
 			Verify.State.IsNotDeleted(this);
 
-			return new StashedChangesDiffSource(this);
-		}
-
-		public IRevisionDiffSource GetDiffSource(IEnumerable<string> paths)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			if(paths == null)
-			{
-				return new StashedChangesDiffSource(this);
-			}
-			else
-			{
-				return new StashedChangesDiffSource(this, paths.ToList());
-			}
+			return paths == null
+				? new StashedChangesDiffSource(this)
+				: new StashedChangesDiffSource(this, paths.ToList());
 		}
 
 		#endregion
@@ -155,7 +143,7 @@ namespace gitter.Git
 		/// <value>Stash index.</value>
 		public int Index
 		{
-			get { return _index; }
+			get => _index;
 			internal set
 			{
 				Verify.Argument.IsNotNegative(value, nameof(value));
@@ -177,16 +165,14 @@ namespace gitter.Git
 		ReferenceType IRevisionPointer.Type => ReferenceType.Stash;
 
 		string IRevisionPointer.Pointer
-		{
-			get { return GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
-		}
+			=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
 		string IRevisionPointer.FullName
-		{
-			get { return GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; }
-		}
+			=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
-		public Revision Dereference() => Revision;
+		Revision IRevisionPointer.Dereference() => Revision;
+
+		Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(Revision);
 
 		#endregion
 	}

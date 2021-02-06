@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -179,10 +180,8 @@ namespace gitter.Git
 
 		#endregion
 
-		public void Refresh()
+		private void Refresh(IList<ReflogRecordData> reflog)
 		{
-			var reflog = Repository.Accessor.QueryReflog.Invoke(
-				new QueryReflogParameters(Reference.FullName));
 			lock(SyncRoot)
 			{
 				if(reflog.Count < _reflog.Count)
@@ -204,6 +203,21 @@ namespace gitter.Git
 					InvokeRecordAdded(reflogRecord);
 				}
 			}
+		}
+
+		public void Refresh()
+		{
+			var reflog = Repository.Accessor.QueryReflog
+				.Invoke(new QueryReflogParameters(Reference.FullName));
+			Refresh(reflog);
+		}
+
+		public async Task RefreshAsync()
+		{
+			var reflog = await Repository.Accessor.QueryReflog
+				.InvokeAsync(new QueryReflogParameters(Reference.FullName))
+				.ConfigureAwait(continueOnCapturedContext: false);
+			Refresh(reflog);
 		}
 
 		internal void NotifyRecordAdded()
@@ -236,15 +250,14 @@ namespace gitter.Git
 
 		#region IEnumerable<ReflogRecord>
 
-		public IEnumerator<ReflogRecord> GetEnumerator()
-		{
-			return _reflog.GetEnumerator();
-		}
+		public List<ReflogRecord>.Enumerator GetEnumerator()
+			=> _reflog.GetEnumerator();
+
+		IEnumerator<ReflogRecord> IEnumerable<ReflogRecord>.GetEnumerator()
+			=> _reflog.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _reflog.GetEnumerator();
-		}
+			=> _reflog.GetEnumerator();
 
 		#endregion
 	}

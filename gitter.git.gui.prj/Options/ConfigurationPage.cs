@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,7 +35,7 @@ namespace gitter.Git
 	[ToolboxItem(false)]
 	public partial class ConfigurationPage : PropertyPage
 	{
-		public static readonly new Guid Guid = new Guid("AE583E68-3D3E-4A89-AE92-7A89527EDAA3");
+		public static readonly new Guid Guid = new("AE583E68-3D3E-4A89-AE92-7A89527EDAA3");
 
 		private readonly IWorkingEnvironment _environment;
 		private readonly ConfigurationFile _systemCfg;
@@ -72,23 +72,19 @@ namespace gitter.Git
 
 		private void _addUserParameter_Click(object sender, EventArgs e)
 		{
-			using(var dlg = new AddParameterDialog(_environment, ConfigFile.User))
+			using var dlg = new AddParameterDialog(_environment, ConfigFile.User);
+			if(dlg.Run(this) == DialogResult.OK)
 			{
-				if(dlg.Run(this) == DialogResult.OK)
-				{
-					_userCfg.Refresh();
-				}
+				_userCfg.Refresh();
 			}
 		}
 
 		private void _addSystemParameter_Click(object sender, EventArgs e)
 		{
-			using(var dlg = new AddParameterDialog(_environment, ConfigFile.System))
+			using var dlg = new AddParameterDialog(_environment, ConfigFile.System);
+			if(dlg.Run(this) == DialogResult.OK)
 			{
-				if(dlg.Run(this) == DialogResult.OK)
-				{
-					_systemCfg.Refresh();
-				}
+				_systemCfg.Refresh();
 			}
 		}
 	}

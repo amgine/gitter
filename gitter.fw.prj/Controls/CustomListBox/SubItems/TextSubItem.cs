@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -50,7 +50,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Subitem text.</summary>
 		public override string Text
 		{
-			get { return _text; }
+			get => _text;
 			set
 			{
 				_text = value;

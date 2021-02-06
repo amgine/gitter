@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -241,9 +241,16 @@ namespace gitter.Git
 
 		/// <summary>Returns an enumerator that iterates through a collection.</summary>
 		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator&lt;TObject&gt;"/> object that can be used to iterate through the collection.
+		/// An <see cref="T:System.Collections.IEnumerator{TObject}"/> object that can be used to iterate through the collection.
 		/// </returns>
-		public IEnumerator<TObject> GetEnumerator()
+		public Dictionary<string, TObject>.ValueCollection.Enumerator GetEnumerator()
+			=> _dictionary.Values.GetEnumerator();
+
+		/// <summary>Returns an enumerator that iterates through a collection.</summary>
+		/// <returns>
+		/// An <see cref="T:System.Collections.IEnumerator{TObject}"/> object that can be used to iterate through the collection.
+		/// </returns>
+		IEnumerator<TObject> IEnumerable<TObject>.GetEnumerator()
 			=> _dictionary.Values.GetEnumerator();
 
 		/// <summary>

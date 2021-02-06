@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -1055,21 +1055,15 @@ namespace gitter.Framework.Controls
 		/// An <see cref="T:System.Collections.IEnumerator&lt;ViewHostTab&gt;"/> object
 		/// that can be used to iterate through the collection.
 		/// </returns>
-		public IEnumerator<ViewHostTab> GetEnumerator()
-		{
-			return _tabs.GetEnumerator();
-		}
+		public List<ViewHostTab>.Enumerator GetEnumerator()
+			=> _tabs.GetEnumerator();
 
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator"/> object that
-		/// can be used to iterate through the collection.
-		/// </returns>
+		/// <inheritdoc/>
+		IEnumerator<ViewHostTab> IEnumerable<ViewHostTab>.GetEnumerator()
+			=> _tabs.GetEnumerator();
+
+		/// <inheritdoc/>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _tabs.GetEnumerator();
-		}
+			=> _tabs.GetEnumerator();
 	}
 }

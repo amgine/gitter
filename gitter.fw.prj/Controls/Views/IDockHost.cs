@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,7 +29,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Provides dock helper markers to determine dock position (<see cref="DockResult"/>).</summary>
 		IDockMarkerProvider DockMarkers { get; }
 
-		/// <summary>Determines if <see cref="ViewHost"/> cn be docked into this <see cref="IDockHost"/>.</summary>
+		/// <summary>Determines if <see cref="ViewHost"/> can be docked into this <see cref="IDockHost"/>.</summary>
 		/// <param name="host"><see cref="ViewHost"/> to dock.</param>
 		/// <param name="dockResult">Position for docking.</param>
 		/// <returns>true if docking is possible.</returns>

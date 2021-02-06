@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -20,6 +20,7 @@
 
 namespace gitter.Git
 {
+	using System.Threading.Tasks;
 
 	/// <summary>Object which points to commit.</summary>
 	public interface IRevisionPointer
@@ -39,6 +40,10 @@ namespace gitter.Git
 		/// <summary>Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.</summary>
 		/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
 		Revision Dereference();
+
+		/// <summary>Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.</summary>
+		/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
+		Task<Revision> DereferenceAsync();
 
 		/// <summary>Object is deleted and not valid anymore.</summary>
 		bool IsDeleted { get; }

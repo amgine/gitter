@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -46,21 +46,16 @@ namespace gitter.Framework.Options
 			section = section.TryGetSection(id);
 			if(section != null)
 			{
-				SelectableFont font;
 				try
 				{
-					font = new SelectableFont(id, name, section);
+					return new SelectableFont(id, name, section);
 				}
 				catch
 				{
-					font = new SelectableFont(id, name, defaultFont());
+					return new SelectableFont(id, name, defaultFont());
 				}
-				return font;
 			}
-			else
-			{
-				return new SelectableFont(id, name, defaultFont());
-			}
+			return new SelectableFont(id, name, defaultFont());
 		}
 
 		internal SelectableFontManager(Section section)
@@ -82,33 +77,20 @@ namespace gitter.Framework.Options
 
 		public SelectableFont RegisterFont(string id, string name, Func<Font> defaultFont)
 		{
-			SelectableFont font;
-			if(!_fonts.TryGetValue(id, out font))
+			if(!_fonts.TryGetValue(id, out var font))
 			{
 				font = TryLoadFont(_section, id, name, defaultFont);
 			}
 			return font;
 		}
 
-		public SelectableFont UIFont
-		{
-			get { return _uiFont; }
-		}
+		public SelectableFont UIFont => _uiFont;
 
-		public SelectableFont InputFont
-		{
-			get { return _inputFont; }
-		}
+		public SelectableFont InputFont => _inputFont;
 
-		public SelectableFont ViewerFont
-		{
-			get { return _viewerFont; }
-		}
+		public SelectableFont ViewerFont => _viewerFont;
 
-		public SelectableFont this[string name]
-		{
-			get { return _fonts[name]; }
-		}
+		public SelectableFont this[string name] => _fonts[name];
 
 		internal void Save()
 		{
@@ -120,13 +102,9 @@ namespace gitter.Framework.Options
 		}
 
 		public IEnumerator<SelectableFont> GetEnumerator()
-		{
-			return _fonts.Values.GetEnumerator();
-		}
+			=> _fonts.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _fonts.Values.GetEnumerator();
-		}
+			=> _fonts.Values.GetEnumerator();
 	}
 }

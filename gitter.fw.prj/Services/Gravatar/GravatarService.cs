@@ -70,10 +70,8 @@ namespace gitter.Framework.Services
 		{
 			var url = string.Format(URL, MD5(email), defaultType, size, rating);
 			var http = HttpWebRequest.Create(url);
-			using(var response = http.GetResponse())
-			{
-				return ExtractGravatar(response);
-			}
+			using var response = http.GetResponse();
+			return ExtractGravatar(response);
 		}
 
 		public static IAsyncResult BeginGetGravatar(AsyncCallback callback, string email)

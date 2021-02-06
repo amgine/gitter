@@ -137,7 +137,7 @@ namespace gitter.Framework
 			var method = typeof(string).GetMethod("FastAllocateString", BindingFlags.Static | BindingFlags.NonPublic);
 			if(method == null)
 			{
-				return new Func<int, string>(length => new string(' ', length));
+				return new Func<int, string>(static length => new string(' ', length));
 			}
 			else
 			{

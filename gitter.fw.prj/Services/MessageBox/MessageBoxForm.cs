@@ -256,11 +256,9 @@ namespace gitter.Framework.Services
 
 		public static DialogResult Show(IWin32Window owner, string text, string caption, IEnumerable<MessageBoxButton> buttons, MessageBoxIcon icon)
 		{
-			using(var form = new MessageBoxForm(buttons, icon, text, caption))
-			{
-				form.ShowDialog(owner);
-				return form.DialogResult;
-			}
+			using var form = new MessageBoxForm(buttons, icon, text, caption);
+			form.ShowDialog(owner);
+			return form.DialogResult;
 		}
 
 		private void OnIconPaint(object sender, PaintEventArgs e)

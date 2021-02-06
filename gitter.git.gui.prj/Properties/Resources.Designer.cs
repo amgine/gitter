@@ -2497,36 +2497,6 @@ namespace gitter.Git.Gui.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ImgSearchClose {
-            get {
-                object obj = ResourceManager.GetObject("ImgSearchClose", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgSearchNext {
-            get {
-                object obj = ResourceManager.GetObject("ImgSearchNext", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgSearchPrevious {
-            get {
-                object obj = ResourceManager.GetObject("ImgSearchPrevious", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ImgSplitPanelHorizontal {
             get {
                 object obj = ResourceManager.GetObject("ImgSplitPanelHorizontal", resourceCulture);

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -44,15 +44,45 @@ namespace gitter.Git.Gui.Controls
 		{
 		}
 
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string value)
+		private static bool TryGetContent(CustomListBoxItem item, out string value)
 		{
-			return measureEventArgs.MeasureText(value);
+			if(item is ConfigParameterListItem cpli)
+			{
+				value = cpli.DataContext.Value;
+				return true;
+			}
+			value = default;
+			return false;
 		}
 
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string value)
+		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
-			paintEventArgs.PaintText(value);
+			Assert.IsNotNull(measureEventArgs);
+
+			if(TryGetContent(measureEventArgs.Item, out var content))
+			{
+				return measureEventArgs.MeasureText(content);
+			}
+			return base.OnMeasureSubItem(measureEventArgs);
 		}
+
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+		{
+			Assert.IsNotNull(paintEventArgs);
+
+			if(TryGetContent(paintEventArgs.Item, out var content))
+			{
+				paintEventArgs.PaintText(content);
+				return;
+			}
+			base.OnPaintSubItem(paintEventArgs);
+		}
+
+		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string value)
+			=> measureEventArgs.MeasureText(value);
+
+		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string value)
+			=> paintEventArgs.PaintText(value);
 
 		public override string IdentificationString => "Value";
 	}

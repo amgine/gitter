@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,22 +22,17 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
-	/*
-	[ToolboxItem(false)]
-	sealed class ReferencesSearchToolBar : SearchToolBar<ReferencesView, SearchOptions>
-	{
-		public ReferencesSearchToolBar(ReferencesView tool)
-			: base(tool)
-		{
-		}
 
-		protected override SearchOptions CreateSearchOptions()
-		{
-			return new SearchOptions()
+	using gitter.Framework.Controls;
+
+	[ToolboxItem(false)]
+	sealed class ReferencesSearchToolBar : SearchToolBar<ReferencesSearchOptions>
+	{
+		protected override ReferencesSearchOptions CreateSearchOptions()
+			=> new ReferencesSearchOptions
 			{
-				Text = SearchText,
+				Text      = SearchText,
+				MatchCase = MatchCase,
 			};
-		}
 	}
-	*/
 }

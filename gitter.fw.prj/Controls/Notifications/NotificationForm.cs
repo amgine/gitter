@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,11 +21,7 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Drawing;
-	using System.Linq;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Native;
@@ -37,10 +33,7 @@ namespace gitter.Framework.Controls
 			InitializeComponent();
 		}
 
-		protected override bool ShowWithoutActivation
-		{
-			get { return true; }
-		}
+		protected override bool ShowWithoutActivation => true;
 
 		protected override CreateParams CreateParams
 		{

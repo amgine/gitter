@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,21 +28,15 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		/// <summary>Add a Signed-off-by: line to the commit message, using the committer identity of yourself.</summary>
 		public static ICommandArgument SignOff()
-		{
-			return CommandFlag.SignOff();
-		}
+			=> CommandFlag.SignOff();
 
 		/// <summary>Pass -k flag to git-mailinfo (see git-mailinfo(1)).</summary>
 		public static ICommandArgument Keep()
-		{
-			return new CommandFlag("--keep");
-		}
+			=> new CommandFlag("--keep");
 
 		/// <summary>Be quiet. Only print error messages.</summary>
 		public static ICommandArgument Quiet()
-		{
-			return CommandFlag.Quiet();
-		}
+			=> CommandFlag.Quiet();
 
 		/// <summary>
 		///	Pass -u flag to git-mailinfo (see git-mailinfo(1)). The proposed commit log message taken from the e-mail
@@ -50,32 +44,24 @@ namespace gitter.Git.AccessLayer.CLI
 		///	preferred encoding if it is not UTF-8). 
 		/// </summary>
 		public static ICommandArgument Utf8()
-		{
-			return new CommandFlag("--utf8");
-		}
+			=> new CommandFlag("--utf8");
 
 		/// <summary>
 		///	Pass -n flag to git-mailinfo (see git-mailinfo(1)).
 		/// </summary>
 		public static ICommandArgument NoUtf8()
-		{
-			return new CommandFlag("--no-utf8");
-		}
+			=> new CommandFlag("--no-utf8");
 
 		/// <summary>
 		///	When the patch does not apply cleanly, fall back on 3-way merge if the patch records the identity of blobs it
 		///	is supposed to apply to and we have those blobs available locally.
 		/// </summary>
 		public static ICommandArgument FallbackOn3WayMerge()
-		{
-			return new CommandFlag("--3way");
-		}
+			=> new CommandFlag("--3way");
 
 		/// <summary>Run interactively.</summary>
 		public static ICommandArgument Interactive()
-		{
-			return new CommandFlag("--interactive");
-		}
+			=> new CommandFlag("--interactive");
 
 		public AmCommand()
 			: base("am")

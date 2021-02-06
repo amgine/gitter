@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,93 +27,63 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		/// <summary>Show cached files in the output (default).</summary>
 		public static ICommandArgument Cached()
-		{
-			return new CommandFlag("--cached");
-		}
+			=> new CommandFlag("--cached");
 
 		/// <summary>Show deleted files in the output.</summary>
 		public static ICommandArgument Deleted()
-		{
-			return new CommandFlag("--deleted");
-		}
+			=> new CommandFlag("--deleted");
 
 		/// <summary>Show modified files in the output.</summary>
 		public static ICommandArgument Modified()
-		{
-			return new CommandFlag("--modified");
-		}
+			=> new CommandFlag("--modified");
 
 		/// <summary>Show other files in the output.</summary>
 		public static ICommandArgument Others()
-		{
-			return new CommandFlag("--others");
-		}
+			=> new CommandFlag("--others");
 
 		/// <summary>Show ignored files in the output. Note that this also reverses any exclude list present.</summary>
 		public static ICommandArgument Ignored()
-		{
-			return new CommandFlag("--ignored");
-		}
+			=> new CommandFlag("--ignored");
 
 		/// <summary>Show staged contents' object name, mode bits and stage number in the output.</summary>
 		public static ICommandArgument Stage()
-		{
-			return new CommandFlag("--stage");
-		}
+			=> new CommandFlag("--stage");
 
 		/// <summary>If a whole directory is classified as "other", show just its name (with a trailing slash) and not its whole contents.</summary>
 		public static ICommandArgument Directory()
-		{
-			return new CommandFlag("--directory");
-		}
+			=> new CommandFlag("--directory");
 
 		/// <summary>Do not list empty directories. Has no effect without --directory.</summary>
 		public static ICommandArgument NoEmptyDirectory()
-		{
-			return new CommandFlag("--no-empty-directory");
-		}
+			=> new CommandFlag("--no-empty-directory");
 
 		/// <summary>Show unmerged files in the output (forces --stage).</summary>
 		public static ICommandArgument Unmerged()
-		{
-			return new CommandFlag("--unmerged");
-		}
+			=> new CommandFlag("--unmerged");
 
 		/// <summary>Show files on the filesystem that need to be removed due to file/directory conflicts for checkout-index to succeed.</summary>
 		public static ICommandArgument Killed()
-		{
-			return new CommandFlag("--killed");
-		}
+			=> new CommandFlag("--killed");
 
 		/// <summary>\0 line termination on output.</summary>
 		public static ICommandArgument ZeroLineTermination()
-		{
-			return new CommandFlag("-z");
-		}
+			=> new CommandFlag("-z");
 
 		/// <summary>Skips files matching pattern. Note that pattern is a shell wildcard pattern.</summary>
 		public static ICommandArgument Exclude(string pattern)
-		{
-			return new CommandParameterValue("--exclude", "\"" + pattern + "\"");
-		}
+			=> new CommandParameterValue("--exclude", "\"" + pattern + "\"");
 
 		/// <summary>Exclude patterns are read from <paramref name="file"/>; 1 per line.</summary>
 		public static ICommandArgument ExcludeFrom(string file)
-		{
-			return new CommandParameterValue("--exclude-from", "\"" + file + "\"");
-		}
+			=> new CommandParameterValue("--exclude-from", "\"" + file + "\"");
 
 		/// <summary>Add the standard git exclusions: .git/info/exclude, .gitignore in each directory, and the user's global exclusion file.</summary>
 		public static ICommandArgument ExcludeStandard()
-		{
-			return new CommandFlag("--exclude-standard");
-		}
+			=> new CommandFlag("--exclude-standard");
 
-		/// <summary>If any file does not appear in the index, treat this as an error (return 1).</summary>
+		/// <summary>If any file does not appear in the index, treat this as an error (=> 1).</summary>
 		public static ICommandArgument ErrorUnmatch()
-		{
-			return new CommandFlag("--error-unmatch");
-		}
+			=> new CommandFlag("--error-unmatch");
 
 		/// <summary>
 		/// When using --error-unmatch to expand the user supplied file (i.e. path pattern) arguments to paths,
@@ -121,27 +91,19 @@ namespace gitter.Git.AccessLayer.CLI
 		/// Using this option with -s or -u options does not make any sense.
 		/// </summary>
 		public static ICommandArgument WithTree(string tree)
-		{
-			return new CommandParameterValue("--with-tree", tree);
-		}
+			=> new CommandParameterValue("--with-tree", tree);
 
 		/// <summary>Identify the file status with tags (followed by a space) at the start of each line.</summary>
 		public static ICommandArgument ShowStatus()
-		{
-			return new CommandFlag("-t");
-		}
+			=> new CommandFlag("-t");
 
 		/// <summary>When run from a subdirectory, the command usually outputs paths relative to the current directory. This option forces paths to be output relative to the project top directory.</summary>
 		public static ICommandArgument FullName()
-		{
-			return new CommandFlag("--full-name");
-		}
+			=> new CommandFlag("--full-name");
 
 		/// <summary>Do not interpret any more arguments as options.</summary>
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public LsFilesCommand()
 			: base("ls-files")

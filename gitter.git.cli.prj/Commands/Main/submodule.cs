@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,89 +26,55 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class SubmoduleCommand : Command
 	{
 		public static ICommandArgument Add()
-		{
-			return new CommandParameter("add");
-		}
+			=> new CommandParameter("add");
 
 		public static ICommandArgument Init()
-		{
-			return new CommandParameter("init");
-		}
+			=> new CommandParameter("init");
 
 		public static ICommandArgument Update()
-		{
-			return new CommandParameter("update");
-		}
+			=> new CommandParameter("update");
 
 		public static ICommandArgument Sync()
-		{
-			return new CommandParameter("sync");
-		}
+			=> new CommandParameter("sync");
 
 		public static ICommandArgument Foreach()
-		{
-			return new CommandParameter("foreach");
-		}
+			=> new CommandParameter("foreach");
 
 		public static ICommandArgument Status()
-		{
-			return new CommandParameter("status");
-		}
+			=> new CommandParameter("status");
 
 		public static ICommandArgument Summary()
-		{
-			return new CommandParameter("summary");
-		}
+			=> new CommandParameter("summary");
 
 		public static ICommandArgument InitFlag()
-		{
-			return new CommandFlag("--init");
-		}
+			=> new CommandFlag("--init");
 
 		public static ICommandArgument NoFetch()
-		{
-			return new CommandFlag("--no-fetch");
-		}
+			=> new CommandFlag("--no-fetch");
 
 		public static ICommandArgument Rebase()
-		{
-			return new CommandFlag("--rebase");
-		}
+			=> new CommandFlag("--rebase");
 
 		public static ICommandArgument Recursive()
-		{
-			return new CommandFlag("--recursive");
-		}
+			=> new CommandFlag("--recursive");
 
 		public static ICommandArgument Merge()
-		{
-			return new CommandFlag("--merge");
-		}
+			=> new CommandFlag("--merge");
 
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("--quiet");
-		}
+			=> new CommandFlag("--quiet");
 
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			=> new CommandFlag("--force");
 
 		public static ICommandArgument Reference(string repository)
-		{
-			return new CommandParameterValue("--reference", repository, ' ');
-		}
+			=> new CommandParameterValue("--reference", repository, ' ');
 
 		public static ICommandArgument Branch(string name)
-		{
-			return new CommandParameterValue("-b" , name, ' ');
-		}
+			=> new CommandParameterValue("-b" , name, ' ');
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public SubmoduleCommand()
 			: base("submodule")

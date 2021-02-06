@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -62,9 +62,16 @@ namespace gitter.Git.Gui.Views
 
 		public override void RefreshContent()
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new MethodInvoker(RefreshContent));
+				try
+				{
+					BeginInvoke(new MethodInvoker(RefreshContent));
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{

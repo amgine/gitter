@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,94 +26,58 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class ConfigCommand : Command
 	{
 		public static ICommandArgument List()
-		{
-			return new CommandFlag("--list");
-		}
+			=> new CommandFlag("--list");
 
 		public static ICommandArgument NullTerminate()
-		{
-			return new CommandFlag("--null");
-		}
+			=> new CommandFlag("--null");
 
 		public static ICommandArgument Add()
-		{
-			return new CommandFlag("--add");
-		}
+			=> new CommandFlag("--add");
 
 		public static ICommandArgument Unset()
-		{
-			return new CommandFlag("--unset");
-		}
+			=> new CommandFlag("--unset");
 
 		public static ICommandArgument UnsetAll()
-		{
-			return new CommandFlag("--unset-all");
-		}
+			=> new CommandFlag("--unset-all");
 
 		public static ICommandArgument Get(string name)
-		{
-			return new CommandParameterValue("--get", name, ' ');
-		}
+			=> new CommandParameterValue("--get", name, ' ');
 
 		public static ICommandArgument GetAll(string name)
-		{
-			return new CommandParameterValue("--get-all", name, ' ');
-		}
+			=> new CommandParameterValue("--get-all", name, ' ');
 
 		public static ICommandArgument GetRegexp(string nameregex)
-		{
-			return new CommandParameterValue("--get-regexp", nameregex, ' ');
-		}
+			=> new CommandParameterValue("--get-regexp", nameregex, ' ');
 
 		public static ICommandArgument Global()
-		{
-			return new CommandFlag("--global");
-		}
+			=> new CommandFlag("--global");
 
 		public static ICommandArgument System()
-		{
-			return new CommandFlag("--system");
-		}
+			=> new CommandFlag("--system");
 
 		public static ICommandArgument Int()
-		{
-			return new CommandFlag("--int");
-		}
+			=> new CommandFlag("--int");
 
 		public static ICommandArgument Path()
-		{
-			return new CommandFlag("--path");
-		}
+			=> new CommandFlag("--path");
 
 		public static ICommandArgument Edit()
-		{
-			return new CommandFlag("--edit");
-		}
+			=> new CommandFlag("--edit");
 
 		public static ICommandArgument Bool()
-		{
-			return new CommandFlag("--bool");
-		}
+			=> new CommandFlag("--bool");
 
 		public static ICommandArgument BoolOrInt()
-		{
-			return new CommandFlag("--bool-or-int");
-		}
+			=> new CommandFlag("--bool-or-int");
 
 		public static ICommandArgument File(string fileName)
-		{
-			return new CommandParameterValue("--file", fileName, ' ');
-		}
+			=> new CommandParameterValue("--file", fileName, ' ');
 
 		public static ICommandArgument RemoveSection(string name)
-		{
-			return new CommandParameterValue("--remove-section", name, ' ');
-		}
+			=> new CommandParameterValue("--remove-section", name, ' ');
 
 		public static ICommandArgument RenameSection(string oldName, string newName)
-		{
-			return new CommandParameterValue("--rename-section", oldName + " " + newName, ' ');
-		}
+			=> new CommandParameterValue("--rename-section", oldName + " " + newName, ' ');
 
 		public ConfigCommand()
 			: base("config")

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -116,7 +116,7 @@ namespace gitter.Git.AccessLayer
 		/// <summary>Query branch list.</summary>
 		IGitFunction<QueryBranchesParameters, BranchesData> QueryBranches { get; }
 
-		/// <summary>Get list of stale remote tracking branches that are subject to pruninig.</summary>
+		/// <summary>Get list of stale remote tracking branches that are subject to pruning.</summary>
 		IGitFunction<PruneRemoteParameters, IList<string>> QueryBranchesToPrune { get; }
 
 		/// <summary>Get <see cref="Diff"/>, representing difference between specified objects.</summary>

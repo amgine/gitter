@@ -236,5 +236,18 @@ namespace gitter.GitLab.Api
 			return await ReadPagedResultAsync<Job>(http, urlBuilder.ToString())
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
+
+		public async Task<IReadOnlyList<Milestone>> GetMilestonesAsync(string path)
+		{
+			using var http = CreateHttpClient();
+
+			var urlBuilder = new StringBuilder();
+			urlBuilder.Append("/api/v4/projects/");
+			urlBuilder.Append(Uri.EscapeDataString(path));
+			urlBuilder.Append("/milestones");
+
+			return await ReadPagedResultAsync<Milestone>(http, urlBuilder.ToString())
+				.ConfigureAwait(continueOnCapturedContext: false);
+		}
 	}
 }

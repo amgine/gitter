@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -455,18 +455,16 @@ namespace gitter.Git.Gui
 					var branches = rev.References.GetBranches();
 					if(branches.Count != 0 && branches.Any(b => !b.IsCurrent))
 					{
-						using(var dlg = new ResolveCheckoutDialog())
+						using var dlg = new ResolveCheckoutDialog();
+						dlg.SetAvailableBranches(branches);
+						if(dlg.Run(parent) == DialogResult.Cancel) return;
+						if(!dlg.CheckoutCommit)
 						{
-							dlg.SetAvailableBranches(branches);
-							if(dlg.Run(parent) == DialogResult.Cancel) return;
-							if(!dlg.CheckoutCommit)
-							{
-								revision = dlg.SelectedBranch;
-							}
-							if(!force)
-							{
-								force = Control.ModifierKeys == Keys.Shift;
-							}
+							revision = dlg.SelectedBranch;
+						}
+						if(!force)
+						{
+							force = Control.ModifierKeys == Keys.Shift;
 						}
 					}
 				}
@@ -552,10 +550,8 @@ namespace gitter.Git.Gui
 			var parent = Utility.GetParentControl(item);
 			if(Control.ModifierKeys == Keys.Shift)
 			{
-				using(var dlg = new RevertDialog(revision))
-				{
-					dlg.Run(parent);
-				}
+				using var dlg = new RevertDialog(revision);
+				dlg.Run(parent);
 			}
 			else
 			{
@@ -580,13 +576,12 @@ namespace gitter.Git.Gui
 
 		private static void OnRevertMergeClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item     = (ToolStripItem)sender;
 			var revision = (IRevisionPointer)item.Tag;
-			var parent = Utility.GetParentControl(item);
-			using(var dlg = new RevertDialog(revision))
-			{
-				dlg.Run(parent);
-			}
+			var parent   = Utility.GetParentControl(item);
+
+			using var dlg = new RevertDialog(revision);
+			dlg.Run(parent);
 		}
 
 		private static void OnMultipleRevertClick(object sender, EventArgs e)
@@ -614,30 +609,28 @@ namespace gitter.Git.Gui
 
 		private static void OnResetClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
-			var data = (Tuple<Repository, ResetMode>)item.Tag;
+			var item   = (ToolStripItem)sender;
+			var data   = (Tuple<Repository, ResetMode>)item.Tag;
 			var parent = Utility.GetParentControl(item);
 
-			using(var dlg = new SelectResetModeDialog(data.Item2))
+			using var dlg = new SelectResetModeDialog(data.Item2);
+			if(dlg.Run(parent) == DialogResult.OK)
 			{
-				if(dlg.Run(parent) == DialogResult.OK)
+				try
 				{
-					try
+					using(parent.ChangeCursor(Cursors.WaitCursor))
 					{
-						using(parent.ChangeCursor(Cursors.WaitCursor))
-						{
-							data.Item1.Status.Reset(dlg.ResetMode);
-						}
+						data.Item1.Status.Reset(dlg.ResetMode);
 					}
-					catch(GitException exc)
-					{
-						GitterApplication.MessageBoxService.Show(
-							parent,
-							exc.Message,
-							Resources.ErrFailedToReset,
-							MessageBoxButton.Close,
-							MessageBoxIcon.Error);
-					}
+				}
+				catch(GitException exc)
+				{
+					GitterApplication.MessageBoxService.Show(
+						parent,
+						exc.Message,
+						Resources.ErrFailedToReset,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Error);
 				}
 			}
 		}
@@ -692,10 +685,8 @@ namespace gitter.Git.Gui
 
 			if(Control.ModifierKeys == Keys.Shift)
 			{
-				using(var dlg = new CherryPickDialog(revision))
-				{
-					dlg.Run(parent);
-				}
+				using var dlg = new CherryPickDialog(revision);
+				dlg.Run(parent);
 			}
 			else
 			{
@@ -726,10 +717,8 @@ namespace gitter.Git.Gui
 				}
 				catch(AutomaticCherryPickFailedException)
 				{
-					using(var dlg = new ConflictsDialog(revision.Repository))
-					{
-						dlg.Run(parent);
-					}
+					using var dlg = new ConflictsDialog(revision.Repository);
+					dlg.Run(parent);
 				}
 				catch(GitException exc)
 				{
@@ -745,13 +734,12 @@ namespace gitter.Git.Gui
 
 		private static void OnCherryPickMergeClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item     = (ToolStripItem)sender;
 			var revision = (IRevisionPointer)item.Tag;
-			var parent = Utility.GetParentControl(item);
-			using(var dlg = new CherryPickDialog(revision))
-			{
-				dlg.Run(parent);
-			}
+			var parent   = Utility.GetParentControl(item);
+
+			using var dlg = new CherryPickDialog(revision);
+			dlg.Run(parent);
 		}
 
 		private static void OnMultipleCherryPickClick(object sender, EventArgs e)
@@ -1019,10 +1007,8 @@ namespace gitter.Git.Gui
 			var repository = (Repository)item.Tag;
 			var parent     = Utility.GetParentControl(item);
 
-			using(var dlg = new StashSaveDialog(repository))
-			{
-				dlg.Run(parent);
-			}
+			using var dlg = new StashSaveDialog(repository);
+			dlg.Run(parent);
 		}
 
 		private static void OnStashSaveKeepIndexItemClick(object sender, EventArgs e)
@@ -1031,13 +1017,11 @@ namespace gitter.Git.Gui
 			var repository = (Repository)item.Tag;
 			var parent     = Utility.GetParentControl(item);
 
-			using(var dlg = new StashSaveDialog(repository)
-				{
-					KeepIndex = true,
-				})
+			using var dlg = new StashSaveDialog(repository)
 			{
-				dlg.Run(parent);
-			}
+				KeepIndex = true,
+			};
+			dlg.Run(parent);
 		}
 
 		private static void OnStashPopClick(object sender, EventArgs e)
@@ -1103,10 +1087,8 @@ namespace gitter.Git.Gui
 			var item         = (ToolStripItem)sender;
 			var stashedState = (StashedState)item.Tag;
 
-			using(var dlg = new StashToBranchDialog(stashedState))
-			{
-				dlg.Run(Utility.GetParentControl(item));
-			}
+			using var dlg = new StashToBranchDialog(stashedState);
+			dlg.Run(Utility.GetParentControl(item));
 		}
 
 		#endregion
@@ -1121,8 +1103,8 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Image = CachedResources.Bitmaps["ImgNoteAdd"],
-				Text = Resources.StrAddNote.AddEllipsis(),
-				Tag = revision,
+				Text  = Resources.StrAddNote.AddEllipsis(),
+				Tag   = revision,
 			};
 			item.Click += OnAddNoteClick;
 			return item;
@@ -1134,11 +1116,9 @@ namespace gitter.Git.Gui
 			var revision = (IRevisionPointer)item.Tag;
 			var parent = Utility.GetParentControl(item);
 
-			using(var dlg = new AddNoteDialog(revision.Repository))
-			{
-				dlg.Revision.Value = revision.Pointer;
-				dlg.Run(parent);
-			}
+			using var dlg = new AddNoteDialog(revision.Repository);
+			dlg.Revision.Value = revision.Pointer;
+			dlg.Run(parent);
 		}
 
 		#endregion
@@ -1153,8 +1133,8 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Image = CachedResources.Bitmaps["ImgBranchAdd"],
-				Text = Resources.StrCreateBranch.AddEllipsis(),
-				Tag = repository,
+				Text  = Resources.StrCreateBranch.AddEllipsis(),
+				Tag   = repository,
 			};
 			item.Click += OnCreateBranchClick;
 			return item;
@@ -1171,8 +1151,8 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Image = CachedResources.Bitmaps["ImgBranchAdd"],
-				Text = Resources.StrCreateBranch.AddEllipsis(),
-				Tag = revision,
+				Text  = Resources.StrCreateBranch.AddEllipsis(),
+				Tag   = revision,
 			};
 			item.Click += OnCreateBranchAtClick;
 			return item;
@@ -1260,13 +1240,12 @@ namespace gitter.Git.Gui
 
 		private static void OnCreateBranchClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item       = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
-			using(var dlg = new CreateBranchDialog(repository))
-			{
-				dlg.StartingRevision.Value = GitConstants.HEAD;
-				dlg.Run(Utility.GetParentControl(item));
-			}
+
+			using var dlg = new CreateBranchDialog(repository);
+			dlg.StartingRevision.Value = GitConstants.HEAD;
+			dlg.Run(Utility.GetParentControl(item));
 		}
 
 		private static void OnCreateBranchAtClick(object sender, EventArgs e)
@@ -1285,15 +1264,14 @@ namespace gitter.Git.Gui
 				startingRevision  = string.Empty;
 				defaultBranchName = string.Empty;
 			}
-			using(var dlg = new CreateBranchDialog(revision.Repository))
+
+			using var dlg = new CreateBranchDialog(revision.Repository);
+			dlg.StartingRevision.Value = startingRevision;
+			if(!string.IsNullOrWhiteSpace(defaultBranchName))
 			{
-				dlg.StartingRevision.Value = startingRevision;
-				if(defaultBranchName != string.Empty)
-				{
-					dlg.BranchName.Value = defaultBranchName;
-				}
-				dlg.Run(Utility.GetParentControl(item));
+				dlg.BranchName.Value = defaultBranchName;
 			}
+			dlg.Run(Utility.GetParentControl(item));
 		}
 
 		private static void OnRemoveBranchClick(object sender, EventArgs e)
@@ -1502,24 +1480,22 @@ namespace gitter.Git.Gui
 
 		private static void OnCreateTagClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item       = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
-			using(var dlg = new CreateTagDialog(repository))
-			{
-				dlg.Revision.Value = GitConstants.HEAD;
-				dlg.Run(Utility.GetParentControl(item));
-			}
+
+			using var dlg = new CreateTagDialog(repository);
+			dlg.Revision.Value = GitConstants.HEAD;
+			dlg.Run(Utility.GetParentControl(item));
 		}
 
 		private static void OnCreateTagAtClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item     = (ToolStripItem)sender;
 			var revision = (IRevisionPointer)item.Tag;
-			using(var dlg = new CreateTagDialog(revision.Repository))
-			{
-				dlg.Revision.Value = (revision != null) ? revision.Pointer : GitConstants.HEAD;
-				dlg.Run(Utility.GetParentControl(item));
-			}
+
+			using var dlg = new CreateTagDialog(revision.Repository);
+			dlg.Revision.Value = (revision != null) ? revision.Pointer : GitConstants.HEAD;
+			dlg.Run(Utility.GetParentControl(item));
 		}
 
 		private static void OnRemoveTagClick(object sender, EventArgs e)
@@ -1783,13 +1759,12 @@ namespace gitter.Git.Gui
 
 		private static void OnEditRemotePropertiesClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item   = (ToolStripItem)sender;
 			var remote = (Remote)item.Tag;
 			var parent = Utility.GetParentControl(item);
-			using(var d = new RemotePropertiesDialog(remote))
-			{
-				d.Run(parent);
-			}
+
+			using var d = new RemotePropertiesDialog(remote);
+			d.Run(parent);
 		}
 
 		private static void OnShowRemoteClick(object sender, EventArgs e)
@@ -1897,20 +1872,16 @@ namespace gitter.Git.Gui
 		{
 			var item = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
-			using(var dlg = new AddRemoteDialog(repository))
-			{
-				dlg.Run(Utility.GetParentControl(item));
-			}
+			using var dlg = new AddRemoteDialog(repository);
+			dlg.Run(Utility.GetParentControl(item));
 		}
 
 		private static void OnRenameRemoteClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
 			var remote = (Remote)item.Tag;
-			using(var dlg = new RenameRemoteDialog(remote))
-			{
-				dlg.Run(Utility.GetParentControl(item));
-			}
+			using var dlg = new RenameRemoteDialog(remote);
+			dlg.Run(Utility.GetParentControl(item));
 		}
 
 		private static void OnRemoveRemoteClick(object sender, EventArgs e)
@@ -2061,10 +2032,8 @@ namespace gitter.Git.Gui
 			var repository = (Repository)item.Tag;
 			var parent = Utility.GetParentControl(item);
 
-			using(var dlg = new AddSubmoduleDialog(repository))
-			{
-				dlg.Run(parent);
-			}
+			using var dlg = new AddSubmoduleDialog(repository);
+			dlg.Run(parent);
 		}
 
 		static void OnUpdateSubmoduleClick(object sender, EventArgs e)
@@ -2295,8 +2264,8 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Image = null,
-				Text = text,
-				Tag = Tuple.Create(file, mergeTool),
+				Text  = text,
+				Tag   = Tuple.Create(file, mergeTool),
 			};
 			item.Click += OnMergeToolClick;
 			return item;
@@ -2307,30 +2276,19 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsValidGitObject(file, nameof(file));
 
-			string text;
-			switch(resolution)
+			var text = resolution switch
 			{
-				case ConflictResolution.DeleteFile:
-					text = Resources.StrDeleteFile;
-					break;
-				case ConflictResolution.KeepModifiedFile:
-					text = Resources.StrKeepFile;
-					break;
-				case ConflictResolution.UseOurs:
-					text = Resources.StrUseOurs;
-					break;
-				case ConflictResolution.UseTheirs:
-					text = Resources.StrUseTheirs;
-					break;
-				default:
-					throw new ArgumentException("resolution");
-			}
-
+				ConflictResolution.DeleteFile       => Resources.StrDeleteFile,
+				ConflictResolution.KeepModifiedFile => Resources.StrKeepFile,
+				ConflictResolution.UseOurs          => Resources.StrUseOurs,
+				ConflictResolution.UseTheirs        => Resources.StrUseTheirs,
+				_ => throw new ArgumentException("Unknown conflict resolution.", nameof(resolution)),
+			};
 			var item = new T()
 			{
 				Image = null,
-				Text = text,
-				Tag = Tuple.Create(file, resolution),
+				Text  = text,
+				Tag   = Tuple.Create(file, resolution),
 			};
 			item.Click += OnResolveConflictItemClick;
 			return item;
@@ -2481,9 +2439,9 @@ namespace gitter.Git.Gui
 
 		private static void OnResolveConflictItemClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item   = (ToolStripItem)sender;
 			var parent = Utility.GetParentControl(item);
-			var data = (Tuple<TreeFile, ConflictResolution>)item.Tag;
+			var data   = (Tuple<TreeFile, ConflictResolution>)item.Tag;
 			try
 			{
 				using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -2516,9 +2474,9 @@ namespace gitter.Git.Gui
 
 		private static void OnUnstageAllClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item       = (ToolStripItem)sender;
 			var repository = (Repository)item.Tag;
-			var parent = Utility.GetParentControl(item);
+			var parent     = Utility.GetParentControl(item);
 			try
 			{
 				using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -2539,9 +2497,9 @@ namespace gitter.Git.Gui
 
 		private static void OnDeletePathClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item     = (ToolStripItem)sender;
 			var treeItem = (TreeItem)item.Tag;
-			var parent = Utility.GetParentControl(item);
+			var parent   = Utility.GetParentControl(item);
 			try
 			{
 				if(GitterApplication.MessageBoxService.Show(
@@ -3013,7 +2971,7 @@ namespace gitter.Git.Gui
 			bool enabled = false;
 			foreach(var line in lines)
 			{
-				if(line == null) throw new ArgumentException("lines");
+				if(line == null) throw new ArgumentException("Cannot contain null items.", nameof(lines));
 				if((line.State & state) != DiffLineState.Invalid)
 				{
 					enabled = true;
@@ -3109,7 +3067,7 @@ namespace gitter.Git.Gui
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(tree, nameof(tree));
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
 			var item = new T()
 			{
@@ -3124,7 +3082,7 @@ namespace gitter.Git.Gui
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(tree, nameof(tree));
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
 			var item = new T()
 			{
@@ -3139,7 +3097,7 @@ namespace gitter.Git.Gui
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(tree, nameof(tree));
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, "fieName");
+			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
 
 			var item = new T()
 			{
@@ -3526,11 +3484,8 @@ namespace gitter.Git.Gui
 			{
 				WorkingDirectory = path,
 			};
-			using(var p = new Process())
-			{
-				p.StartInfo = psi;
-				p.Start();
-			}
+			using var p = new Process { StartInfo = psi };
+			p.Start();
 		}
 
 		private static void OnSendEmailClick(object sender, EventArgs e)
@@ -3570,10 +3525,8 @@ namespace gitter.Git.Gui
 			var repository = (Repository)item.Tag;
 			var parent = Utility.GetParentControl(item);
 
-			using(var dlg = new ConflictsDialog(repository))
-			{
-				dlg.Run(parent);
-			}
+			using var dlg = new ConflictsDialog(repository);
+			dlg.Run(parent);
 		}
 
 		private static void OnCleanClick(object sender, EventArgs e)
@@ -3582,10 +3535,8 @@ namespace gitter.Git.Gui
 			var repository = (Repository)item.Tag;
 			var parent = Utility.GetParentControl(item);
 
-			using(var dlg = new CleanDialog(repository))
-			{
-				dlg.Run(parent);
-			}
+			using var dlg = new CleanDialog(repository);
+			dlg.Run(parent);
 		}
 
 		private static void OnOpenUrlItemClick(object sender, EventArgs e)
@@ -3603,11 +3554,11 @@ namespace gitter.Git.Gui
 
 			if(data.Item2 != null)
 			{
-				System.Diagnostics.Process.Start(data.Item1, data.Item2);
+				Process.Start(data.Item1, data.Item2)?.Dispose();
 			}
 			else
 			{
-				System.Diagnostics.Process.Start(data.Item1);
+				Process.Start(data.Item1)?.Dispose();
 			}
 		}
 
@@ -3622,23 +3573,25 @@ namespace gitter.Git.Gui
 		private static void OnCopyToClipboardClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
-			var text = item.Tag as string;
-			if(text == null)
+			var text = item.Tag switch
 			{
-				text = ((Func<string>)item.Tag)();
-			}
+				string       x => x,
+				Func<string> f => f(),
+				_ => throw new InvalidOperationException(),
+			};
 			ClipboardEx.SetTextSafe(text);
 		}
 
 		private static void OnCopyHashToClipboardClick(object sender, EventArgs e)
 		{
 			var item = (ToolStripItem)sender;
-			var text = item.Tag as string;
-			if(text == null)
+			var text = item.Tag switch
 			{
-				text = ((Func<string>)item.Tag)();
-			}
-			if(Control.ModifierKeys == Keys.Shift)
+				string       x => x,
+				Func<string> f => f(),
+				_ => throw new InvalidOperationException(),
+			};
+			if((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
 			{
 				text = text.Substring(0, 7);
 			}

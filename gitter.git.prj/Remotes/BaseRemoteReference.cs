@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -49,7 +49,7 @@ namespace gitter.Git
 
 		protected abstract void DeleteCore();
 
-		protected abstract Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		protected abstract Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 
 		public void Delete()
 		{
@@ -57,15 +57,11 @@ namespace gitter.Git
 			MarkAsDeleted();
 		}
 
-		public async Task DeleteAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
-			var task = DeleteCoreAsync(progress, cancellationToken);
-			await task;
-
-			if(task.IsCompleted)
-			{
-				MarkAsDeleted();
-			}
+			await DeleteCoreAsync(progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			MarkAsDeleted();
 		}
 
 		public void MarkAsDeleted()
@@ -85,21 +81,12 @@ namespace gitter.Git
 
 		public string Name { get; }
 
-		public string FullName
-		{
-			get
+		public string FullName => ReferenceType switch
 			{
-				switch(ReferenceType)
-				{
-					case ReferenceType.LocalBranch:
-						return GitConstants.LocalBranchPrefix + Name;
-					case ReferenceType.Tag:
-						return GitConstants.TagPrefix + Name;
-					default:
-						return Name;
-				}
-			}
-		}
+				ReferenceType.LocalBranch => GitConstants.LocalBranchPrefix + Name,
+				ReferenceType.Tag         => GitConstants.TagPrefix + Name,
+				_ => Name,
+			};
 
 		public Hash Hash { get; }
 

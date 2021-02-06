@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,6 +21,7 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -121,12 +122,28 @@ namespace gitter.Git
 			Repository.Refs.Tags.Delete(this);
 		}
 
+		/// <summary>Deletes this <see cref="Tag"/>.</summary>
+		public Task DeleteAsync()
+		{
+			Verify.State.IsNotDeleted(this);
+
+			return Repository.Refs.Tags.DeleteAsync(this);
+		}
+
 		/// <summary>Refreshes this instance's cached data.</summary>
 		public void Refresh()
 		{
 			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Tags.Refresh(this);
+		}
+
+		/// <summary>Refreshes this instance's cached data.</summary>
+		public Task RefreshAsync()
+		{
+			Verify.State.IsNotDeleted(this);
+
+			return Repository.Refs.Tags.RefreshAsync(this);
 		}
 
 		#endregion

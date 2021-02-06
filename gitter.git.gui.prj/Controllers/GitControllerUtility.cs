@@ -234,8 +234,7 @@ namespace gitter.Git.Gui.Controllers
 						Resources.ErrBranchNameCannotBeEmpty));
 				return false;
 			}
-			string errmsg;
-			if(!Branch.ValidateName(branchName, out errmsg))
+			if(!Branch.ValidateName(branchName, out var errmsg))
 			{
 				inputErrorNotifier.NotifyError(userInputSource,
 					new UserInputError(
@@ -281,8 +280,7 @@ namespace gitter.Git.Gui.Controllers
 						Resources.ErrTagNameCannotBeEmpty));
 				return false;
 			}
-			string errmsg;
-			if(!Tag.ValidateName(tagName, out errmsg))
+			if(!Tag.ValidateName(tagName, out var errmsg))
 			{
 				inputErrorNotifier.NotifyError(userInputSource,
 					new UserInputError(
@@ -390,8 +388,7 @@ namespace gitter.Git.Gui.Controllers
 						Resources.ErrRemoteNameCannotBeEmpty));
 				return false;
 			}
-			string errorMessage;
-			if(!Reference.ValidateName(remoteName, ReferenceType.Remote, out errorMessage))
+			if(!Reference.ValidateName(remoteName, ReferenceType.Remote, out var errorMessage))
 			{
 				inputErrorNotifier.NotifyError(userInputSource,
 					new UserInputError(

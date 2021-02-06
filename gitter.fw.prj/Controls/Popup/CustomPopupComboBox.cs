@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -60,8 +60,10 @@ namespace gitter.Framework.Controls
 		protected override void OnHandleCreated(EventArgs e)
 		{
 			base.OnHandleCreated(e);
-			var x = new COMBOBOXINFO();
-			x.cbSize = (uint)Marshal.SizeOf(typeof(COMBOBOXINFO));
+			var x = new COMBOBOXINFO
+			{
+				cbSize = (uint)Marshal.SizeOf(typeof(COMBOBOXINFO))
+			};
 			var b = User32.GetComboBoxInfo(Handle, ref x);
 			_listBoxDefaultWndProc = NativeUtility.SetWindowProc(x.hwndList, _listBoxWndProc);
 		}
@@ -122,14 +124,11 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
-		protected new Popup DropDown
-		{
-			get { return _dropDown; }
-		}
+		protected new Popup DropDown => _dropDown;
 
 		public Control DropDownControl
 		{
-			get { return _dropDownControl; }
+			get => _dropDownControl;
 			set
 			{
 				if(_dropDownControl != value)
@@ -157,7 +156,7 @@ namespace gitter.Framework.Controls
 
 		public new bool DroppedDown
 		{
-			get { return _dropDown != null?_dropDown.Visible:false; }
+			get => _dropDown != null?_dropDown.Visible:false;
 			set
 			{
 				if(value)
@@ -173,18 +172,12 @@ namespace gitter.Framework.Controls
 
 		private void ShowDropDownCore()
 		{
-			if(_dropDown != null)
-			{
-				_dropDown.Show(this);
-			}
+			_dropDown?.Show(this);
 		}
 
 		private void HideDropDownCore()
 		{
-			if(_dropDown != null)
-			{
-				_dropDown.Close(ToolStripDropDownCloseReason.ItemClicked);
-			}
+			_dropDown?.Close(ToolStripDropDownCloseReason.ItemClicked);
 		}
 
 		public void ShowDropDown()
@@ -205,8 +198,8 @@ namespace gitter.Framework.Controls
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new int DropDownWidth
 		{
-			get { return base.DropDownWidth; }
-			set { base.DropDownWidth = value; }
+			get => base.DropDownWidth;
+			set => base.DropDownWidth = value;
 		}
 
 		/// <summary>This property is not relevant for this class.</summary>
@@ -215,8 +208,8 @@ namespace gitter.Framework.Controls
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual new int DropDownHeight
 		{
-			get { return base.DropDownHeight; }
-			set { base.DropDownHeight = value; }
+			get => base.DropDownHeight;
+			set => base.DropDownHeight = value;
 		}
 
 		/// <summary>This property is not relevant for this class.</summary>
@@ -225,18 +218,15 @@ namespace gitter.Framework.Controls
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new bool IntegralHeight
 		{
-			get { return base.IntegralHeight; }
-			set { base.IntegralHeight = value; }
+			get => base.IntegralHeight;
+			set => base.IntegralHeight = value;
 		}
 
 		/// <summary>This property is not relevant for this class.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public new ObjectCollection Items
-		{
-			get { return base.Items; }
-		}
+		public new ObjectCollection Items => base.Items;
 
 		/// <summary>This property is not relevant for this class.</summary>
 		[Browsable(false)]
@@ -244,8 +234,8 @@ namespace gitter.Framework.Controls
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new int ItemHeight
 		{
-			get { return base.ItemHeight; }
-			set { base.ItemHeight = value; }
+			get => base.ItemHeight;
+			set => base.ItemHeight = value;
 		}
 
 		#endregion

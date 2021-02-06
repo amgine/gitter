@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,27 +26,19 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class ShortLogCommand : Command
 	{
 		internal static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		/// <summary>Suppress commit description and provide a commit count summary only.</summary>
 		public static ICommandArgument Summary()
-		{
-			return new CommandFlag("--summary");
-		}
+			=> new CommandFlag("--summary");
 
 		/// <summary>Sort output according to the number of commits per author instead of author alphabetic order.</summary>
 		public static ICommandArgument Numbered()
-		{
-			return new CommandFlag("--numbered");
-		}
+			=> new CommandFlag("--numbered");
 
 		/// <summary>Show the email address of each author.</summary>
 		public static ICommandArgument Email()
-		{
-			return new CommandFlag("--email");
-		}
+			=> new CommandFlag("--email");
 
 		public ShortLogCommand()
 			: base("shortlog")

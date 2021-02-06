@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,9 +25,9 @@ namespace gitter.Git.Gui
 
 	internal static class ColorScheme
 	{
-		public static readonly Color TagBackColor = Color.FromArgb(255, 255, 155);
-		public static readonly Color LocalBranchBackColor = Color.FromArgb(155, 255, 155);
+		public static readonly Color TagBackColor          = Color.FromArgb(255, 255, 155);
+		public static readonly Color LocalBranchBackColor  = Color.FromArgb(155, 255, 155);
 		public static readonly Color RemoteBranchBackColor = Color.FromArgb(255, 155, 155);
-		public static readonly Color StashBackColor = Color.FromArgb(200, 200, 255);
+		public static readonly Color StashBackColor        = Color.FromArgb(200, 200, 255);
 	}
 }

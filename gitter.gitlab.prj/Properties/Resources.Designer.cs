@@ -228,6 +228,16 @@ namespace gitter.GitLab.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgPipelines {
+            get {
+                object obj = ResourceManager.GetObject("ImgPipelines", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgRefresh {
             get {
                 object obj = ResourceManager.GetObject("ImgRefresh", resourceCulture);
@@ -384,6 +394,15 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        internal static string StrAll {
+            get {
+                return ResourceManager.GetString("StrAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to API Key.
         /// </summary>
         internal static string StrAPIKey {
@@ -416,6 +435,15 @@ namespace gitter.GitLab.Properties {
         internal static string StrClose {
             get {
                 return ResourceManager.GetString("StrClose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Closed.
+        /// </summary>
+        internal static string StrClosed {
+            get {
+                return ResourceManager.GetString("StrClosed", resourceCulture);
             }
         }
         
@@ -456,6 +484,15 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hash.
+        /// </summary>
+        internal static string StrHash {
+            get {
+                return ResourceManager.GetString("StrHash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ID.
         /// </summary>
         internal static string StrId {
@@ -470,6 +507,15 @@ namespace gitter.GitLab.Properties {
         internal static string StrIssues {
             get {
                 return ResourceManager.GetString("StrIssues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Jobs.
+        /// </summary>
+        internal static string StrJobs {
+            get {
+                return ResourceManager.GetString("StrJobs", resourceCulture);
             }
         }
         
@@ -537,6 +583,24 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open.
+        /// </summary>
+        internal static string StrOpen {
+            get {
+                return ResourceManager.GetString("StrOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pipelines.
+        /// </summary>
+        internal static string StrPipelines {
+            get {
+                return ResourceManager.GetString("StrPipelines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Previous.
         /// </summary>
         internal static string StrPrevious {
@@ -551,6 +615,15 @@ namespace gitter.GitLab.Properties {
         internal static string StrProject {
             get {
                 return ResourceManager.GetString("StrProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reference.
+        /// </summary>
+        internal static string StrReference {
+            get {
+                return ResourceManager.GetString("StrReference", resourceCulture);
             }
         }
         
@@ -600,11 +673,38 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to fetch pipelines.
+        /// </summary>
+        internal static string StrsFailedToFetchPipelines {
+            get {
+                return ResourceManager.GetString("StrsFailedToFetchPipelines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No issues to display.
         /// </summary>
         internal static string StrsNoIssuesToDisplay {
             get {
                 return ResourceManager.GetString("StrsNoIssuesToDisplay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No pipelines to display.
+        /// </summary>
+        internal static string StrsNoPipelinesToDisplay {
+            get {
+                return ResourceManager.GetString("StrsNoPipelinesToDisplay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        internal static string StrStatus {
+            get {
+                return ResourceManager.GetString("StrStatus", resourceCulture);
             }
         }
         

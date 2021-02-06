@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -65,7 +65,7 @@ namespace gitter.Framework
 
 		/// <summary>Checks if provider can create repository for <paramref name="workingDirectory"/>.</summary>
 		/// <param name="workingDirectory">Repository working directory.</param>
-		/// <returns>true, if <see cref="OpenRepository()"/> can succeed for <paramref name="workingDirectory"/>.</returns>
+		/// <returns>true, if <see cref="OpenRepository"/> can succeed for <paramref name="workingDirectory"/>.</returns>
 		bool IsValidFor(string workingDirectory);
 
 		/// <summary>Opens repository specified by <paramref name="workingDirectory"/>.</summary>
@@ -78,7 +78,8 @@ namespace gitter.Framework
 		/// <param name="workingDirectory">Working directory of repository.</param>
 		/// <returns>Opened repository.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="workingDirectory"/> == <c>null</c>.</exception>
-		Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		Task<IRepository> OpenRepositoryAsync(string workingDirectory,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 
 		/// <summary>Called after repository is successfully loaded by environment.</summary>
 		/// <param name="repository">Loaded repository.</param>

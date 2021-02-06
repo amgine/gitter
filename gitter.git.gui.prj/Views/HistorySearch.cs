@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -34,21 +34,30 @@ namespace gitter.Git.Gui.Views
 		{
 		}
 
+		protected static bool TestHash(string hash, T search)
+		{
+			return hash != null && hash.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase);
+		}
+
 		protected static bool TestRevision(Revision revision, T search)
 		{
-			if(revision.HashString.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase)) return true;
-			if(!revision.IsLoaded) return false;
-			var comparison = search.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-			if(revision.Subject.IndexOf(search.Text, comparison) != -1) return true;
-			if(revision.Body.IndexOf(search.Text, comparison) != -1) return true;
-			if(revision.Author.Name.IndexOf(search.Text, comparison) != -1) return true;
-			if(revision.Committer.Name.IndexOf(search.Text, comparison) != -1) return true;
-			if(revision.TreeHashString.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase)) return true;
+			Assert.IsNotNull(revision);
+			Assert.IsNotNull(search);
+
+			if(TestHash(revision.HashString, search)) return true;
+			if(revision.IsLoaded)
+			{
+				if(TestString(revision.Subject, search)) return true;
+				if(TestString(revision.Body, search)) return true;
+				if(TestString(revision.Author.Name, search)) return true;
+				if(TestString(revision.Committer.Name, search)) return true;
+				if(TestHash(revision.TreeHashString, search)) return true;
+			}
 			lock(revision.References.SyncRoot)
 			{
 				foreach(var reference in revision.References)
 				{
-					if(reference.FullName.IndexOf(search.Text, comparison) != -1) return true;
+					if(TestString(reference.FullName, search)) return true;
 				}
 			}
 			return false;

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,11 +25,8 @@ namespace gitter.Git.Gui
 
 	public sealed class DefaultGraphBuilderFactory : IGraphBuilderFactory
 	{
-		public IGraphBuilder<T> CreateGraphBuilder<T>()
-			where T : class
-		{
-			return new DefaultGraphBuilder<T>();
-		}
+		public IGraphBuilder<T> CreateGraphBuilder<T>() where T : class
+			=> new DefaultGraphBuilder<T>();
 	}
 
 	internal sealed class DefaultGraphBuilder<T> : IGraphBuilder<T>
@@ -205,7 +202,7 @@ namespace gitter.Git.Gui
 					}
 					break;
 			}
-			// continue lines from previos graph lines, preserving color
+			// continue lines from previous graph lines, preserving color
 			ContinueVerticalLines(res, line, linecolors, 0, j - 1);
 			return res;
 		}

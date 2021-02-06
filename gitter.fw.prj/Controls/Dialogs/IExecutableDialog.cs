@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,7 +26,7 @@ namespace gitter.Framework
 	public interface IExecutableDialog
 	{
 		/// <summary>Execute dialog associated action.</summary>
-		/// <returns><c>true</c>, if action succeded</returns>
+		/// <returns><c>true</c>, if action succeeded</returns>
 		bool Execute();
 	}
 }

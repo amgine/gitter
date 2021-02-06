@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,7 +23,7 @@ namespace gitter.Git.AccessLayer
 	using System;
 	using System.Collections.Generic;
 	
-	/// <summary>Parameters for <see cref="IIndexAccessor.AddFiles"/> operation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.AddFiles"/> operation.</summary>
 	public sealed class AddFilesParameters
 	{
 		/// <summary>Create <see cref="AddFilesParameters"/>.</summary>
@@ -62,7 +62,7 @@ namespace gitter.Git.AccessLayer
 		}
 
 		/// <summary>Create <see cref="AddFilesParameters"/>.</summary>
-		/// <pparam name="mode">Add files mode.</pparam>
+		/// <param name="mode">Add files mode.</param>
 		/// <param name="paths">Paths to add.</param>
 		public AddFilesParameters(AddFilesMode mode, IList<string> paths)
 		{

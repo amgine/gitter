@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -124,6 +124,8 @@ namespace gitter.Git.Gui.Views
 
 		protected override void AttachToRepository(Repository repository)
 		{
+			Assert.IsNotNull(repository);
+
 			lock(repository.Status.SyncRoot)
 			{
 				_lstUnstaged.SetTree(Repository.Status.UnstagedRoot, _treeMode ?
@@ -139,6 +141,8 @@ namespace gitter.Git.Gui.Views
 
 		protected override void DetachFromRepository(Repository repository)
 		{
+			Assert.IsNotNull(repository);
+
 			SaveCommitMessage();
 			_lstStaged.Clear();
 			_lstUnstaged.Clear();
@@ -149,7 +153,7 @@ namespace gitter.Git.Gui.Views
 
 		public bool TreeMode
 		{
-			get { return _treeMode; }
+			get => _treeMode;
 			set
 			{
 				if(_treeMode != value)
@@ -168,8 +172,8 @@ namespace gitter.Git.Gui.Views
 
 		public string Message
 		{
-			get { return _txtMessage.Text; }
-			set { _txtMessage.Text = value; }
+			get => _txtMessage.Text;
+			set => _txtMessage.Text = value;
 		}
 
 		public override Image Image => CachedResources.Bitmaps["ImgCommit"];
@@ -187,9 +191,16 @@ namespace gitter.Git.Gui.Views
 
 		public override void RefreshContent()
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new MethodInvoker(RefreshContent));
+				try
+				{
+					BeginInvoke(new MethodInvoker(RefreshContent));
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -294,12 +305,16 @@ namespace gitter.Git.Gui.Views
 
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			OnKeyDown(this, e);
 			base.OnPreviewKeyDown(e);
 		}
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F5:
@@ -311,47 +326,49 @@ namespace gitter.Git.Gui.Views
 
 		private void OnStagedItemActivated(object sender, ItemEventArgs e)
 		{
-			if(e.Item is TreeFileListItem item)
+			Assert.IsNotNull(e);
+
+			if(e.Item is not TreeFileListItem item) return;
+
+			try
 			{
-				try
+				using(this.ChangeCursor(Cursors.WaitCursor))
 				{
-					using(this.ChangeCursor(Cursors.WaitCursor))
-					{
-						item.DataContext.Unstage();
-					}
+					item.DataContext.Unstage();
 				}
-				catch(GitException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						this,
-						exc.Message,
-						Resources.ErrFailedToUnstage,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-				}
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					exc.Message,
+					Resources.ErrFailedToUnstage,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
 			}
 		}
 
 		private void OnUnstagedItemActivated(object sender, ItemEventArgs e)
 		{
-			if(e.Item is TreeFileListItem item)
+			Assert.IsNotNull(e);
+
+			if(e.Item is not TreeFileListItem item) return;
+
+			try
 			{
-				try
+				using(this.ChangeCursor(Cursors.WaitCursor))
 				{
-					using(this.ChangeCursor(Cursors.WaitCursor))
-					{
-						item.DataContext.Stage();
-					}
+					item.DataContext.Stage();
 				}
-				catch(GitException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						this,
-						exc.Message,
-						Resources.ErrFailedToStage,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-				}
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					exc.Message,
+					Resources.ErrFailedToStage,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
 			}
 		}
 
@@ -376,7 +393,7 @@ namespace gitter.Git.Gui.Views
 					Resources.ErrEnterCommitMessage);
 				return;
 			}
-			else if(message.Length < 2)
+			if(message.Length < 2)
 			{
 				NotificationService.NotifyInputError(
 					_txtMessage,

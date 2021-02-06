@@ -43,4 +43,20 @@ namespace gitter.GitLab.Gui
 			return new IssuesView(environment);
 		}
 	}
+
+	sealed class PipelinesViewFactory : ViewFactoryBase
+	{
+		public PipelinesViewFactory()
+			: base(Guids.PipelinesViewGuid, Resources.StrPipelines, CachedResources.Bitmaps["ImgPipelines"])
+		{
+		}
+
+		/// <summary>Create new view with specified parameters.</summary>
+		/// <param name="environment">Application working environment.</param>
+		/// <returns>Created view.</returns>
+		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+		{
+			return new PipelinesView(environment);
+		}
+	}
 }

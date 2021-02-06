@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,6 +21,7 @@
 namespace gitter.Git.Gui.Dialogs
 {
 	using System;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -36,7 +37,7 @@ namespace gitter.Git.Gui.Dialogs
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Dialog for creating commit.</summary>
-	public partial class CommitDialog : GitDialogBase, IExecutableDialog, ICommitView
+	public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExecutableDialog, ICommitView
 	{
 		#region Data
 
@@ -119,14 +120,9 @@ namespace gitter.Git.Gui.Dialogs
 
 		protected override void OnClosed(DialogResult result)
 		{
-			if(result != DialogResult.OK)
-			{
-				Repository.Status.SaveCommitMessage(_txtMessage.Text);
-			}
-			else
-			{
-				Repository.Status.SaveCommitMessage(string.Empty);
-			}
+			Repository.Status.SaveCommitMessage(result != DialogResult.OK
+				? _txtMessage.Text
+				: string.Empty);
 		}
 
 		private void OnAmendCheckedChanged(object sender, EventArgs e)
@@ -150,6 +146,8 @@ namespace gitter.Git.Gui.Dialogs
 		#region IExecutableDialog Members
 
 		public bool Execute() => _controller.TryCommit();
+
+		public Task<bool> ExecuteAsync() => _controller.TryCommitAsync();
 
 		#endregion
 	}

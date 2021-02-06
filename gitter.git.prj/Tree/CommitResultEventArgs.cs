@@ -24,10 +24,7 @@ namespace gitter.Git
 
 	public class CommitResultEventArgs : EventArgs
 	{
-		public CommitResultEventArgs(CommitResult commitResult)
-		{
-			CommitResult = commitResult;
-		}
+		public CommitResultEventArgs(CommitResult commitResult) => CommitResult = commitResult;
 
 		public CommitResult CommitResult { get; }
 	}

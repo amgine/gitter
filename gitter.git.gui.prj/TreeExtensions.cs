@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,6 +35,7 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsNotNull(tree, nameof(tree));
 			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
+
 			string fileName = null;
 			using(var dlg = new SaveFileDialog()
 			{
@@ -47,14 +48,9 @@ namespace gitter.Git.Gui
 				}
 				fileName = dlg.FileName;
 			}
-			if(ExtractBlobToFile(tree, blobPath, fileName))
-			{
-				return fileName;
-			}
-			else
-			{
-				return null;
-			}
+			return ExtractBlobToFile(tree, blobPath, fileName)
+				? fileName
+				: default;
 		}
 
 		public static bool ExtractBlobToFile(this Tree tree, string blobPath, string fileName)
@@ -122,11 +118,8 @@ namespace gitter.Git.Gui
 			{
 				path = Path.GetDirectoryName(fileName);
 				if(!Directory.Exists(path)) Directory.CreateDirectory(path);
-				using(var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
-				{
-					fs.Write(bytes, 0, bytes.Length);
-					fs.Close();
-				}
+				using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+				fs.Write(bytes, 0, bytes.Length);
 			}
 			return fileName;
 		}

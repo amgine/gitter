@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,7 +27,7 @@ namespace gitter.Git
 	using gitter.Framework;
 
 	/// <summary>Represents a branch on remote repository (not a remote tracking branch).</summary>
-	public sealed class RemoteRepositoryBranch: BaseRemoteReference
+	public sealed class RemoteRepositoryBranch : BaseRemoteReference
 	{
 		internal RemoteRepositoryBranch(RemoteReferencesCollection refs, string name, Hash hash)
 			: base(refs, name, hash)

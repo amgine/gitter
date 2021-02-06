@@ -70,10 +70,7 @@ namespace gitter.Git.AccessLayer.CLI
 					progress?.Report(operationProgress);
 					if(operationProgress.IsIndeterminate)
 					{
-						if(errorMessages == null)
-						{
-							errorMessages = new List<string>();
-						}
+						errorMessages ??= new List<string>();
 						errorMessages.Add(operationProgress.ActionName);
 					}
 					else

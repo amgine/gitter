@@ -113,10 +113,8 @@ namespace gitter.Framework.Controls
 					}
 				}
 
-				using(var pen = new Pen(color, 2.0f))
-				{
-					graphics.DrawLine(pen, x1, y1, x2, y2);
-				}
+				using var pen = new Pen(color, 2.0f);
+				graphics.DrawLine(pen, x1, y1, x2, y2);
 			}
 		}
 

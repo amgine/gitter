@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,7 +26,7 @@ namespace gitter.Framework.Options
 	public sealed class PropertyPageFactory
 	{
 		public static readonly Guid RootGroupGuid		= Guid.Empty;
-		public static readonly Guid AppearanceGroupGuid = new Guid("F1F07910-1105-4928-9B7C-F62657601747");
+		public static readonly Guid AppearanceGroupGuid = new("F1F07910-1105-4928-9B7C-F62657601747");
 
 		private readonly Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
 

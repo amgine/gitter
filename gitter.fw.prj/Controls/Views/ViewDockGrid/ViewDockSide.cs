@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -36,12 +36,6 @@ namespace gitter.Framework.Controls
 	[ToolboxItem(false)]
 	public sealed class ViewDockSide : Control, IEnumerable<ViewHost>
 	{
-		#region Static Data
-
-		private static readonly Color BackgroundColor = Color.FromArgb(41, 57, 85);
-
-		#endregion
-
 		#region Data
 
 		private readonly ViewDockGrid _grid;
@@ -80,7 +74,7 @@ namespace gitter.Framework.Controls
 				default:
 					throw new ArgumentException(
 						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
-						"side");
+						nameof(side));
 			}
 			_grid = grid;
 			_side = side;
@@ -115,55 +109,30 @@ namespace gitter.Framework.Controls
 		#region Properties
 
 		public override Size GetPreferredSize(Size proposedSize)
-		{
-			switch(Orientation)
+			=> Orientation switch
 			{
-				case Orientation.Horizontal:
-					return new Size(_size, Renderer.SideTabHeight);
-				case Orientation.Vertical:
-					return new Size(Renderer.SideTabHeight, _size);
-				default:
-					throw new ApplicationException(string.Format(
-						CultureInfo.InvariantCulture,
-						"Unexpected {0}.Orientation: {1}", GetType().Name, Orientation));
-			}
-		}
+				Orientation.Horizontal => new Size(_size, Renderer.SideTabHeight),
+				Orientation.Vertical   => new Size(Renderer.SideTabHeight, _size),
+				_ => throw new ApplicationException($"Unexpected {GetType().Name}.Orientation: {Orientation}"),
+			};
 
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
+		private ViewRenderer Renderer => ViewManager.Renderer;
 
 		/// <summary>Host <see cref="ViewDockGrid"/>.</summary>
-		public ViewDockGrid Grid
-		{
-			get { return _grid; }
-		}
+		public ViewDockGrid Grid => _grid;
 
 		/// <summary>Align side.</summary>
 		/// <value>Align side.</value>
-		public AnchorStyles Side
-		{
-			get { return _side; }
-		}
+		public AnchorStyles Side => _side;
 
-		/// <summary>Optiomal control length.</summary>
-		public int OptimalLength
-		{
-			get { return _size + Renderer.SideTabSpacing * (_tabs.Count - 1); }
-		}
+		/// <summary>Optional control length.</summary>
+		public int OptimalLength => _size + Renderer.SideTabSpacing * (_tabs.Count - 1);
 
 		/// <summary>Gets control orientation.</summary>
 		/// <value>Control orientation.</value>
-		public Orientation Orientation
-		{
-			get { return _orientation; }
-		}
+		public Orientation Orientation => _orientation;
 
-		public ViewHost this[int index]
-		{
-			get { return _dockedHosts[index]; }
-		}
+		public ViewHost this[int index] => _dockedHosts[index];
 
 		/// <summary>Adds <see cref="ViewHost"/> to this <see cref="ViewDockSide"/>.</summary>
 		/// <param name="viewHost"><see cref="ViewHost"/> to add.</param>
@@ -402,16 +371,10 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Gets the count of docked <see cref="ViewHost"/>s.</summary>
-		public int Count
-		{
-			get { return _dockedHosts.Count; }
-		}
+		public int Count => _dockedHosts.Count;
 
 		/// <summary>Gets the count of <see cref="ViewDockSideTab"/>s.</summary>
-		public int TabCount
-		{
-			get { return _tabs.Count; }
-		}
+		public int TabCount => _tabs.Count;
 
 		#endregion
 
@@ -456,7 +419,7 @@ namespace gitter.Framework.Controls
 
 		private Rectangle GetTabBounds(int index)
 		{
-			Verify.Argument.IsValidIndex(index, _tabs.Count, "index");
+			Verify.Argument.IsValidIndex(index, _tabs.Count, nameof(index));
 
 			var bounds = Rectangle.Empty;
 			switch(_orientation)
@@ -596,7 +559,7 @@ namespace gitter.Framework.Controls
 					return;
 				}
 			}
-			throw new ArgumentException("View was not found", "view");
+			throw new ArgumentException("View was not found", nameof(view));
 		}
 
 		internal void KillPanel()
@@ -812,15 +775,14 @@ namespace gitter.Framework.Controls
 
 		#region IEnumerable<ViewHost>
 
-		public IEnumerator<ViewHost> GetEnumerator()
-		{
-			return _dockedHosts.GetEnumerator();
-		}
+		public List<ViewHost>.Enumerator GetEnumerator()
+			=> _dockedHosts.GetEnumerator();
+
+		IEnumerator<ViewHost> IEnumerable<ViewHost>.GetEnumerator()
+			=> _dockedHosts.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _dockedHosts.GetEnumerator();
-		}
+			=> _dockedHosts.GetEnumerator();
 
 		#endregion
 	}

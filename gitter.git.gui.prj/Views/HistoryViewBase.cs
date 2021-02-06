@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,30 +40,30 @@ namespace gitter.Git.Gui.Views
 		private ILogSource _logSource;
 		private LogOptions _options;
 		private RevisionLogBinding _dataSource;
-		private HistorySearchToolBar<HistoryViewBase> _searchToolbar;
+		protected readonly ISearchToolBarController _searchToolbar;
 		private bool _showDetails;
 
 		#endregion
 
 		#region Events
 
-		private static readonly object LogOptionsChangedEvent = new object();
+		private static readonly object LogOptionsChangedEvent = new();
 
 		public event EventHandler LogOptionsChanged
 		{
-			add    => Events.AddHandler   (LogOptionsChangedEvent, value);
-			remove => Events.RemoveHandler(LogOptionsChangedEvent, value);
+			add    => Events.AddHandler    (LogOptionsChangedEvent, value);
+			remove => Events.RemoveHandler (LogOptionsChangedEvent, value);
 		}
 
 		protected virtual void OnLogOptionsChanged()
 			=> ((EventHandler)Events[LogOptionsChangedEvent])?.Invoke(this, EventArgs.Empty);
 
-		private static readonly object ShowDetailsChangedEvent = new object();
+		private static readonly object ShowDetailsChangedEvent = new();
 
 		public event EventHandler ShowDetailsChanged
 		{
-			add    => Events.AddHandler   (ShowDetailsChangedEvent, value);
-			remove => Events.RemoveHandler(ShowDetailsChangedEvent, value);
+			add    => Events.AddHandler    (ShowDetailsChangedEvent, value);
+			remove => Events.RemoveHandler (ShowDetailsChangedEvent, value);
 		}
 
 		protected virtual void OnShowDetailsChanged()
@@ -88,12 +88,13 @@ namespace gitter.Git.Gui.Views
 			};
 			RevisionListBox.SelectionChanged += OnSelectionChanged;
 			RevisionListBox.ItemActivated += OnItemActivated;
-			AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			AutoScaleDimensions = new SizeF(96F, 96F);
 			Controls.Add(RevisionListBox);
 			ResumeLayout(false);
 			PerformLayout();
 			_showDetails = true;
 			Search = new HistorySearch<HistorySearchOptions>(RevisionListBox);
+			_searchToolbar = CreateSearchToolbarController<HistoryViewBase, HistorySearchToolBar, HistorySearchOptions>(this);
 			_options = new LogOptions();
 			_options.Changed += OnLogOptionsChanged;
 		}
@@ -110,27 +111,22 @@ namespace gitter.Git.Gui.Views
 
 		protected ILogSource LogSource
 		{
-			get { return _logSource; }
+			get => _logSource;
 			set
 			{
 				if(_logSource != value)
 				{
 					_logSource = value;
-					if(value != null)
-					{
-						RevisionLogBinding = new RevisionLogBinding(value, RevisionListBox, LogOptions);
-					}
-					else
-					{
-						RevisionLogBinding = null;
-					}
+					RevisionLogBinding = value != null
+						? new RevisionLogBinding(value, RevisionListBox, LogOptions)
+						: default;
 				}
 			}
 		}
 
 		public LogOptions LogOptions
 		{
-			get { return _options; }
+			get => _options;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -154,7 +150,7 @@ namespace gitter.Git.Gui.Views
 
 		public bool ShowDetails
 		{
-			get { return _showDetails; }
+			get => _showDetails;
 			set
 			{
 				if(value != _showDetails)
@@ -174,8 +170,7 @@ namespace gitter.Git.Gui.Views
 			get
 			{
 				if(RevisionListBox.SelectedItems.Count == 0) return null;
-				var item = RevisionListBox.SelectedItems[0] as RevisionListItem;
-				if(item == null) return null;
+				if(RevisionListBox.SelectedItems[0] is not RevisionListItem item) return null;
 				return item.DataContext;
 			}
 		}
@@ -186,8 +181,7 @@ namespace gitter.Git.Gui.Views
 			{
 				foreach(var item in RevisionListBox.SelectedItems)
 				{
-					var rli = item as RevisionListItem;
-					if(rli != null)
+					if(item is RevisionListItem rli)
 					{
 						yield return rli.DataContext;
 					}
@@ -197,20 +191,14 @@ namespace gitter.Git.Gui.Views
 
 		private RevisionLogBinding RevisionLogBinding
 		{
-			get { return _dataSource; }
+			get => _dataSource;
 			set
 			{
 				if(_dataSource != value)
 				{
-					if(_dataSource != null)
-					{
-						_dataSource.Dispose();
-					}
+					_dataSource?.Dispose();
 					_dataSource = value;
-					if(_dataSource != null)
-					{
-						_dataSource.ReloadData();
-					}
+					_dataSource?.ReloadData();
 				}
 			}
 		}
@@ -250,114 +238,54 @@ namespace gitter.Git.Gui.Views
 
 		public bool SearchToolBarVisible
 		{
-			get { return _searchToolbar != null && _searchToolbar.Visible; }
-			set
-			{
-				if(value)
-				{
-					ShowSearchToolBar();
-				}
-				else
-				{
-					HideSearchToolBar();
-				}
-			}
-		}
-
-		protected void ShowSearchToolBar()
-		{
-			if(_searchToolbar == null)
-			{
-				AddBottomToolStrip(_searchToolbar = new HistorySearchToolBar<HistoryViewBase>(this));
-			}
-			_searchToolbar.FocusSearchTextBox();
-		}
-
-		protected void HideSearchToolBar()
-		{
-			if(_searchToolbar != null)
-			{
-				RemoveToolStrip(_searchToolbar);
-				_searchToolbar.Dispose();
-				_searchToolbar = null;
-			}
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
 		}
 
 		#endregion
 
 		protected void ReloadRevisionLog()
 		{
-			if(RevisionLogBinding != null)
-			{
-				RevisionLogBinding.ReloadData();
-			}
+			RevisionLogBinding?.ReloadData();
 		}
 
 		protected void ShowSelectedCommitDetails()
 		{
-			switch(RevisionListBox.SelectedItems.Count)
+			var diffSource = RevisionListBox.SelectedItems.Count switch
 			{
-				case 1:
-					{
-						var item = RevisionListBox.SelectedItems[0];
-						var diffSource = GetDiffSourceFromItem(item);
-						if(diffSource != null)
-						{
-							ShowContextualDiffView(diffSource);
-						}
-					}
-					break;
-				case 2:
-					{
-						var item1 = RevisionListBox.SelectedItems[0];
-						var item2 = RevisionListBox.SelectedItems[1];
-						var diffSource = GetDiffSourceFromItems(item1, item2);
-						if(diffSource != null)
-						{
-							ShowContextualDiffView(diffSource);
-						}
-					}
-					break;
+				1 => GetDiffSourceFromItem(RevisionListBox.SelectedItems[0]),
+				2 => GetDiffSourceFromItems(RevisionListBox.SelectedItems[0], RevisionListBox.SelectedItems[1]),
+				_ => default,
+			};
+			if(diffSource != null)
+			{
+				ShowContextualDiffView(diffSource);
 			}
 		}
 
 		protected virtual IEnumerable<string> GetPaths()
-		{
-			var pathLogSource = LogSource as PathLogSource;
-			if(pathLogSource != null)
+			=> LogSource switch
 			{
-				return new[] { pathLogSource.Path };
-			}
-			return null;
-		}
+				PathLogSource pathLogSource => new[] { pathLogSource.Path },
+				_ => default,
+			};
 
 		protected virtual IDiffSource GetDiffSourceFromItem(CustomListBoxItem item)
-		{
-			var revisionItem = item as RevisionListItem;
-			if(revisionItem != null)
+			=> item switch
 			{
-				return revisionItem.DataContext.GetDiffSource(GetPaths());
-			}
-			var fakeItem = item as FakeRevisionListItem;
-			if(fakeItem != null)
-			{
-				switch(fakeItem.Type)
-				{
-					case FakeRevisionItemType.StagedChanges:
-						return Repository.Status.GetDiffSource(true, GetPaths());
-					case FakeRevisionItemType.UnstagedChanges:
-						return Repository.Status.GetDiffSource(false, GetPaths());
-				}
-			}
-			return null;
-		}
+				RevisionListItem revisionItem
+					=> revisionItem.DataContext.GetDiffSource(GetPaths()),
+				FakeRevisionListItem fakeItem when fakeItem.Type == FakeRevisionItemType.StagedChanges
+					=> Repository.Status.GetDiffSource(true, GetPaths()),
+				FakeRevisionListItem fakeItem when fakeItem.Type == FakeRevisionItemType.UnstagedChanges
+					=> Repository.Status.GetDiffSource(false, GetPaths()),
+				_ => default,
+			};
 
 		protected virtual IDiffSource GetDiffSourceFromItems(CustomListBoxItem item1, CustomListBoxItem item2)
 		{
-			var revisionItem1 = item1 as RevisionListItem;
-			if(revisionItem1 == null) return null;
-			var revisionItem2 = item2 as RevisionListItem;
-			if(revisionItem2 == null) return null;
+			if(item1 is not RevisionListItem revisionItem1) return null;
+			if(item2 is not RevisionListItem revisionItem2) return null;
 			var rev1 = revisionItem1.DataContext;
 			var rev2 = revisionItem2.DataContext;
 			return rev1.GetCompareDiffSource(rev2, GetPaths());

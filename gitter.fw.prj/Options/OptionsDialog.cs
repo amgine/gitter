@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,8 +23,6 @@ namespace gitter.Framework.Options
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
@@ -53,9 +51,7 @@ namespace gitter.Framework.Options
 		}
 
 		public override DialogButtons OptimalButtons
-		{
-			get { return DialogButtons.All; }
-		}
+			=>  DialogButtons.All;
 
 		protected override void OnShown()
 		{
@@ -70,25 +66,20 @@ namespace gitter.Framework.Options
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
 			var desc = (e.Item as PropertyPageItem).DataContext;
-			PropertyPage page;
 			if(_activePage != null)
 			{
 				if(_activePage.Guid == desc.Guid) return;
 			}
-			if(!_propertyPages.TryGetValue(desc.Guid, out page))
+			if(!_propertyPages.TryGetValue(desc.Guid, out var page))
 			{
 				page = desc.CreatePropertyPage(_environment);
 				bool raiseElevatedChanged = false;
-				if(page != null)
+				if(page is IElevatedExecutableDialog elevated)
 				{
-					var elevated = page as IElevatedExecutableDialog;
-					if(elevated != null)
+					elevated.RequireElevationChanged += OnRequireElevationChanged;
+					if(!RequireElevation && elevated.RequireElevation)
 					{
-						elevated.RequireElevationChanged += OnRequireElevationChanged;
-						if(!RequireElevation && elevated.RequireElevation)
-						{
-							raiseElevatedChanged = true;
-						}
+						raiseElevatedChanged = true;
 					}
 				}
 				_propertyPages.Add(desc.Guid, page);
@@ -117,8 +108,7 @@ namespace gitter.Framework.Options
 			{
 				if(page != null && page != sender)
 				{
-					var elevated = page as IElevatedExecutableDialog;
-					if(elevated != null)
+					if(page is IElevatedExecutableDialog elevated)
 					{
 						if(elevated.RequireElevation)
 						{
@@ -141,8 +131,7 @@ namespace gitter.Framework.Options
 			{
 				if(page != null)
 				{
-					var executable = page as IExecutableDialog;
-					if(executable != null)
+					if(page is IExecutableDialog executable)
 					{
 						if(!executable.Execute())
 						{

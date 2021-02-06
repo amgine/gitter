@@ -53,70 +53,78 @@ namespace gitter.Git.Gui.Controllers
 
 		#region Methods
 
-		private bool TryResetExistingBranch(string branchName, string refspec, bool checkout, Branch existent)
+		protected override void OnViewAttached()
+		{
+			base.OnViewAttached();
+			var logallrefupdates = Repository.Configuration.TryGetParameterValue(GitConstants.CoreLogAllRefUpdatesParameter);
+			if(logallrefupdates != null && logallrefupdates == "true")
+			{
+				View.CreateReflog.Value      = true;
+				View.CreateReflog.IsReadOnly = true;
+			}
+		}
+
+		private bool TryResetExistingBranch(string branchName, string refspec, bool checkout, Branch existing)
 		{
 			if(GitterApplication.MessageBoxService.Show(
 				View as IWin32Window,
 				Resources.StrAskBranchExists.UseAsFormat(branchName),
 				Resources.StrBranch,
 				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question) == DialogResult.Yes)
-			{
-				var ptr = Repository.GetRevisionPointer(refspec);
-				try
-				{
-					if(existent.IsCurrent)
-					{
-						ResetMode mode;
-						using(var dlg = new SelectResetModeDialog())
-						{
-							if(dlg.Run(View as IWin32Window) != DialogResult.OK)
-							{
-								return false;
-							}
-							mode = dlg.ResetMode;
-						}
-						using(View.ChangeCursor(MouseCursor.WaitCursor))
-						{
-							Repository.Head.Reset(ptr, mode);
-						}
-					}
-					else
-					{
-						using(View.ChangeCursor(MouseCursor.WaitCursor))
-						{
-							existent.Reset(ptr);
-							if(checkout)
-							{
-								existent.Checkout(true);
-							}
-						}
-					}
-				}
-				catch(UnknownRevisionException)
-				{
-					View.ErrorNotifier.NotifyError(View.StartingRevision,
-						new UserInputError(
-							Resources.ErrInvalidRevisionExpression,
-							Resources.ErrRevisionIsUnknown));
-					return false;
-				}
-				catch(GitException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						View as IWin32Window,
-						exc.Message,
-						Resources.ErrFailedToReset,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-					return false;
-				}
-				return true;
-			}
-			else
+				MessageBoxIcon.Question) != DialogResult.Yes)
 			{
 				return false;
 			}
+			var ptr = Repository.GetRevisionPointer(refspec);
+			try
+			{
+				if(existing.IsCurrent)
+				{
+					ResetMode mode;
+					using(var dlg = new SelectResetModeDialog())
+					{
+						if(dlg.Run(View as IWin32Window) != DialogResult.OK)
+						{
+							return false;
+						}
+						mode = dlg.ResetMode;
+					}
+					using(View.ChangeCursor(MouseCursor.WaitCursor))
+					{
+						Repository.Head.Reset(ptr, mode);
+					}
+				}
+				else
+				{
+					using(View.ChangeCursor(MouseCursor.WaitCursor))
+					{
+						existing.Reset(ptr);
+						if(checkout)
+						{
+							existing.Checkout(true);
+						}
+					}
+				}
+			}
+			catch(UnknownRevisionException)
+			{
+				View.ErrorNotifier.NotifyError(View.StartingRevision,
+					new UserInputError(
+						Resources.ErrInvalidRevisionExpression,
+						Resources.ErrRevisionIsUnknown));
+				return false;
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					View as IWin32Window,
+					exc.Message,
+					Resources.ErrFailedToReset,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return false;
+			}
+			return true;
 		}
 
 		private bool TryCreateNewBranch(string branchName, string refspec, bool checkout, bool orphan, bool reflog)
@@ -192,26 +200,28 @@ namespace gitter.Git.Gui.Controllers
 			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
 
 			var branchName = View.BranchName.Value.Trim();
-			var refspec    = View.StartingRevision.Value.Trim();
-			var checkout   = View.Checkout.Value;
-			var orphan     = checkout && View.Orphan.Value && GitFeatures.CheckoutOrphan.IsAvailableFor(Repository);
-			var reflog     = View.CreateReflog.Value;
-			var existent   = Repository.Refs.Heads.TryGetItem(branchName);
-
 			if(!GitControllerUtility.ValidateBranchName(branchName, View.BranchName, View.ErrorNotifier))
 			{
 				return false;
 			}
+			var refspec = View.StartingRevision.Value.Trim();
 			if(!GitControllerUtility.ValidateRefspec(refspec, View.StartingRevision, View.ErrorNotifier))
 			{
 				return false;
 			}
-			if(existent != null)
+
+			var checkout = View.Checkout.Value;
+			var existing = Repository.Refs.Heads.TryGetItem(branchName);
+
+			if(existing != null)
 			{
-				return TryResetExistingBranch(branchName, refspec, checkout, existent);
+				return TryResetExistingBranch(branchName, refspec, checkout, existing);
 			}
 			else
 			{
+				var orphan = checkout && View.Orphan.Value && GitFeatures.CheckoutOrphan.IsAvailableFor(Repository);
+				var reflog = View.CreateReflog.Value;
+
 				return TryCreateNewBranch(branchName, refspec, checkout, orphan, reflog);
 			}
 		}

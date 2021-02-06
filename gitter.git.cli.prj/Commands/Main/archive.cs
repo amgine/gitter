@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,51 +28,35 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		/// <summary>Format of the resulting archive.</summary>
 		public static ICommandArgument Format(string format)
-		{
-			return new CommandParameterValue("--format", format);
-		}
+			=> new CommandParameterValue("--format", format);
 
 		/// <summary>Show all available formats.</summary>
 		public static ICommandArgument List()
-		{
-			return new CommandFlag("--list");
-		}
+			=> new CommandFlag("--list");
 
 		/// <summary>Report progress to stderr.</summary>
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		/// <summary>Prepend prefix to each filename in the archive.</summary>
 		public static ICommandArgument Prefix(string prefix)
-		{
-			return new CommandParameterValue("--prefix", prefix);
-		}
+			=> new CommandParameterValue("--prefix", prefix);
 
 		/// <summary>Write the archive to file instead of stdout.</summary>
 		public static ICommandArgument Output(string file)
-		{
-			return new CommandParameterValue("--output", file.AssureDoubleQuotes());
-		}
+			=> new CommandParameterValue("--output", file.AssureDoubleQuotes());
 
 		/// <summary>Look for attributes in .gitattributes in working directory too.</summary>
 		public static ICommandArgument WorktreeAttributes()
-		{
-			return new CommandFlag("--worktree-attributes");
-		}
+			=> new CommandFlag("--worktree-attributes");
 
 		/// <summary>Instead of making a tar archive from the local repository, retrieve a tar archive from a remote repository.</summary>
 		public static ICommandArgument Remote(string repo)
-		{
-			return new CommandParameterValue("--remote", repo);
-		}
+			=> new CommandParameterValue("--remote", repo);
 
 		/// <summary>Used with --remote to specify the path to the git-upload-archive on the remote side.</summary>
 		public static ICommandArgument Exec(string gitUploadArchive)
-		{
-			return new CommandParameterValue("--exec", gitUploadArchive);
-		}
+			=> new CommandParameterValue("--exec", gitUploadArchive);
 
 		public ArchiveCommand()
 			: base("archive")

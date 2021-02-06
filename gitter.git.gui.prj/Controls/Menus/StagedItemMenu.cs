@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,7 +32,7 @@ namespace gitter.Git.Gui.Controls
 		public StagedItemMenu(TreeItem item)
 		{
 			Verify.Argument.IsValidGitObject(item, nameof(item));
-			Verify.Argument.AreEqual(StagedStatus.Staged, item.StagedStatus & StagedStatus.Staged, "item",
+			Verify.Argument.AreEqual(StagedStatus.Staged, item.StagedStatus & StagedStatus.Staged, nameof(item),
 				"This item is not staged.");
 
 			Item = item;

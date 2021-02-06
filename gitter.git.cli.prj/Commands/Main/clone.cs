@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,20 +38,14 @@ namespace gitter.Git.AccessLayer.CLI
 		/// the related configuration variables are created.
 		/// </summary>
 		public static ICommandArgument Bare()
-		{
-			return new CommandFlag("--bare");
-		}
+			=> new CommandFlag("--bare");
 
 		public static ICommandArgument NoCheckout()
-		{
-			return new CommandFlag("--no-checkout");
-		}
+			=> new CommandFlag("--no-checkout");
 
 		/// <summary>Instead of using the remote name origin to keep track of the upstream repository, use <paramref name="name"/>.</summary>
 		public static ICommandArgument Origin(string name)
-		{
-			return new CommandParameterValue("--origin", name, ' ');
-		}
+			=> new CommandParameterValue("--origin", name, ' ');
 
 		/// <summary>
 		///	Create a shallow clone with a history truncated to the specified number of revisions. A shallow repository has a
@@ -59,41 +53,27 @@ namespace gitter.Git.AccessLayer.CLI
 		///	only interested in the recent history of a large project with a long history, and would want to send in fixes as patches.
 		/// </summary>
 		public static ICommandArgument Depth(int depth)
-		{
-			return new CommandParameterValue("--depth", depth.ToString(), ' ');
-		}
+			=> new CommandParameterValue("--depth", depth.ToString(), ' ');
 
 		/// <summary>Display the progressbar, even in case the standard output is not a terminal.</summary>
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		/// <summary>Set up a mirror of the remote repository. This implies --bare.</summary>
 		public static ICommandArgument Mirror()
-		{
-			return new CommandFlag("--mirror");
-		}
+			=> new CommandFlag("--mirror");
 
 		public static ICommandArgument Recursive()
-		{
-			return new CommandFlag("--recursive");
-		}
+			=> new CommandFlag("--recursive");
 
 		public static ICommandArgument Progress()
-		{
-			return new CommandFlag("--progress");
-		}
+			=> new CommandFlag("--progress");
 
 		public static ICommandArgument Template(string template)
-		{
-			return new CommandParameterValue("--template", template.AssureDoubleQuotes(), '=');
-		}
+			=> new CommandParameterValue("--template", template.AssureDoubleQuotes(), '=');
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public CloneCommand()
 			: base("clone")

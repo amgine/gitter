@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -50,7 +50,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Notifies that mouse no longer hovers any docking markers associated with this instance.</summary>
 		void Unhover();
 
-		/// <summary>Checks docking position at current mose position.</summary>
+		/// <summary>Checks docking position at current mouse position.</summary>
 		/// <returns>Position for docking client control.</returns>
 		DockResult HitTest();
 

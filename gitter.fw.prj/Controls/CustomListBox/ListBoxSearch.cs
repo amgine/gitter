@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2019  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Views
+namespace gitter.Framework.Controls
 {
 	using System;
 
-	using gitter.Framework.Controls;
-
-	abstract class ListBoxSearch<T> : ISearch<T>
+	/// <summary>Implements search for <see cref="CustomListBox"/>.</summary>
+	/// <typeparam name="T">Search options type.</typeparam>
+	public abstract class ListBoxSearch<T> : SearchBase, ISearch<T>
 		where T : SearchOptions
 	{
 		protected ListBoxSearch(CustomListBox listBox)
@@ -43,22 +43,19 @@ namespace gitter.Git.Gui.Views
 			if(search.Text.Length == 0) return true;
 			int count = ListBox.Items.Count;
 			if(count == 0) return false;
-			int end;
 			if(direction == 1)
 			{
 				start = (start + 1) % count;
-				end = start - 1;
-				if(end < 0) end += count;
 			}
 			else
 			{
-				start = (start - 1);
-				if(start < 0) start += count;
-				end = (start + 1) % count;
+				start = start - 1;
+				if(start < 0) start = count - 1;
 			}
-			while(start != end)
+			var current = start;
+			do
 			{
-				var item = ListBox.Items[start];
+				var item = ListBox.Items[current];
 				if(TestItem(item, search))
 				{
 					item.FocusAndSelect();
@@ -66,14 +63,14 @@ namespace gitter.Git.Gui.Views
 				}
 				if(direction == 1)
 				{
-					start = (start + 1) % count;
+					current = (current + 1) % count;
 				}
 				else
 				{
-					--start;
-					if(start < 0) start = count - 1;
+					--current;
+					if(current < 0) current = count - 1;
 				}
-			}
+			} while(current != start);
 			return false;
 		}
 

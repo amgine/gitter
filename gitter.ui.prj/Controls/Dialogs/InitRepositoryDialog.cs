@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -66,10 +66,7 @@ namespace gitter.Controls
 		public override bool Execute()
 		{
 			var provider = SelectedValue;
-			if(provider == null)
-			{
-				return false;
-			}
+			if(provider == null) return false;
 			if(!base.Execute())
 			{
 				return false;

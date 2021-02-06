@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,34 +28,22 @@ namespace gitter.Git.AccessLayer.CLI
 	sealed class RerereCommand : Command
 	{
 		public static ICommandArgument Clear()
-		{
-			return new CommandParameter("clear");
-		}
+			=> new CommandParameter("clear");
 
 		public static ICommandArgument Forget(string pathspec)
-		{
-			return new CommandParameterValue("forget", pathspec, ' ');
-		}
+			=> new CommandParameterValue("forget", pathspec, ' ');
 
 		public static ICommandArgument Diff()
-		{
-			return new CommandParameter("diff");
-		}
+			=> new CommandParameter("diff");
 
 		public static ICommandArgument Remaining()
-		{
-			return new CommandParameter("remaining");
-		}
+			=> new CommandParameter("remaining");
 
 		public static ICommandArgument Status()
-		{
-			return new CommandParameter("status");
-		}
+			=> new CommandParameter("status");
 
 		public static ICommandArgument Gc()
-		{
-			return new CommandParameter("gc");
-		}
+			=> new CommandParameter("gc");
 
 		public RerereCommand()
 			: base("rerere")

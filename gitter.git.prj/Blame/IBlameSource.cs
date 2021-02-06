@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,6 +32,7 @@ namespace gitter.Git
 
 		BlameFile GetBlame(BlameOptions options);
 
-		Task<BlameFile> GetBlameAsync(BlameOptions options, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
+		Task<BlameFile> GetBlameAsync(BlameOptions options,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 	}
 }

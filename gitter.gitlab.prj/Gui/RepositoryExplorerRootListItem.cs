@@ -37,6 +37,7 @@ namespace gitter.GitLab.Gui
 			ServiceContext = guiProvider.ServiceContext;
 
 			Items.Add(new RepositoryExplorerIssuesListItem(env, guiProvider));
+			Items.Add(new RepositoryExplorerPipelinesListItem(env, guiProvider));
 			Expand();
 		}
 

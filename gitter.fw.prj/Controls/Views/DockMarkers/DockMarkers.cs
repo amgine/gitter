@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,7 +32,7 @@ namespace gitter.Framework.Controls
 	{
 		private T[] _markers;
 
-		/// <summary>Initializes a new instance of the <see cref="DockMarkers&lt;T&gt;"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="DockMarkers{T}"/> class.</summary>
 		protected DockMarkers()
 		{
 		}
@@ -124,7 +124,7 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>
-		/// Checks docking position at current mose position.
+		/// Checks docking position at current mouse position.
 		/// </summary>
 		/// <returns>Position for docking client control.</returns>
 		public DockResult HitTest() => HitTest(Control.MousePosition);
@@ -154,9 +154,7 @@ namespace gitter.Framework.Controls
 		/// An <see cref="T:System.Collections.IEnumerator&lt;DockMarker&gt;"/> object that can be used to iterate through the collection.
 		/// </returns>
 		public IEnumerator<DockMarker> GetEnumerator()
-		{
-			return ((IEnumerable<DockMarker>)_markers).GetEnumerator();
-		}
+			=> ((IEnumerable<DockMarker>)_markers).GetEnumerator();
 
 		/// <summary>
 		/// Returns an enumerator that iterates through a collection.
@@ -165,16 +163,11 @@ namespace gitter.Framework.Controls
 		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
 		/// </returns>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _markers.GetEnumerator();
-		}
+			=> _markers.GetEnumerator();
 
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>
-		public void Dispose()
-		{
-			Hide();
-		}
+		public void Dispose() => Hide();
 	}
 }

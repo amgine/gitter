@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,7 +25,7 @@ namespace gitter
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
-
+	using System.Runtime.CompilerServices;
 	using gitter.Git;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -45,7 +45,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, Repository repository, string parameterName)
@@ -82,7 +82,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, string parameterName)
@@ -110,7 +110,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidRevisionPointer(IRevisionPointer revision, Repository repository, string parameterName)
@@ -148,7 +148,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidRevisionPointer(IRevisionPointer revision, string parameterName)
@@ -193,7 +193,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidRevisionPointerSequence(
@@ -240,7 +240,7 @@ namespace gitter
 			/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidRevisionPointerSequence(
@@ -301,7 +301,7 @@ namespace gitter
 			/// </exception>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidReferenceName(string referenceName, ReferenceType referenceType, string parameterName)
@@ -330,7 +330,7 @@ namespace gitter
 			/// </exception>
 			[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 			[DebuggerStepThrough]
-			#if FW_4_5
+			#if !NO_AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			#endif
 			public static void IsValidSHA1(string value, string parameterName)

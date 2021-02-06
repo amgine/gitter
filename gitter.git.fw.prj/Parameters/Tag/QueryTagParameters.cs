@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,7 +22,7 @@ namespace gitter.Git.AccessLayer
 {
 	using System;
 
-	/// <summary>Parameters for <see cref="ITagAccessor.QueryTag"/> operation.</summary>
+	/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryTag"/> operation.</summary>
 	public sealed class QueryTagParameters
 	{
 		/// <summary>Create <see cref="QueryTagParameters"/>.</summary>

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -54,7 +54,7 @@ namespace gitter.Git.Gui.Views
 
 		public LogOptions LogOptions
 		{
-			get { return _logOptions; }
+			get => _logOptions;
 			set
 			{
 				if(_logOptions != value)
@@ -84,20 +84,15 @@ namespace gitter.Git.Gui.Views
 
 		private void OnItemCheckedChanged(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as IRevisionPointerListItem;
-			if(item != null)
+			if(e.Item is IRevisionPointerListItem item && item.RevisionPointer is Reference reference)
 			{
-				var reference = item.RevisionPointer as Reference;
-				if(reference != null)
+				if(e.Item.IsChecked)
 				{
-					if(e.Item.IsChecked)
-					{
-						_logOptions.AllowReference(reference);
-					}
-					else
-					{
-						_logOptions.DisallowReference(reference);
-					}
+					_logOptions.AllowReference(reference);
+				}
+				else
+				{
+					_logOptions.DisallowReference(reference);
 				}
 			}
 		}
@@ -114,11 +109,9 @@ namespace gitter.Git.Gui.Views
 		{
 			foreach(var item in items)
 			{
-				var refItem = item as IRevisionPointerListItem;
-				if(refItem != null)
+				if(item is IRevisionPointerListItem refItem)
 				{
-					var reference = refItem.RevisionPointer as Reference;
-					if(reference != null)
+					if(refItem.RevisionPointer is Reference reference)
 					{
 						item.IsChecked = _logOptions.AllowedReferences.Contains(reference);
 					}

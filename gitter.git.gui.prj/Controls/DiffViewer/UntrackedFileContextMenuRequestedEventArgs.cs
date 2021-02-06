@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,28 +21,14 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	public sealed class UntrackedFileContextMenuRequestedEventArgs : EventArgs
 	{
-		private readonly TreeFile _file;
-		private ContextMenuStrip _contextMenu;
+		public UntrackedFileContextMenuRequestedEventArgs(TreeFile file) => File = file;
 
-		public UntrackedFileContextMenuRequestedEventArgs(TreeFile file)
-		{
-			_file = file;
-		}
+		public TreeFile File { get; }
 
-		public TreeFile File
-		{
-			get { return _file; }
-		}
-
-		public ContextMenuStrip ContextMenu
-		{
-			get { return _contextMenu; }
-			set { _contextMenu = value; }
-		}
+		public ContextMenuStrip ContextMenu { get; set; }
 	}
 }

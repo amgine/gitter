@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,21 +26,13 @@ namespace gitter.Git.Gui.Views
 	using gitter.Framework.Controls;
 
 	[ToolboxItem(false)]
-	internal sealed class ReflogSearchToolBar<T> : SearchToolBar<T, ReflogSearchOptions>
-		where T : GitViewBase, ISearchableView<ReflogSearchOptions>
+	internal sealed class ReflogSearchToolBar : SearchToolBar<ReflogSearchOptions>
 	{
-		public ReflogSearchToolBar(T view)
-			: base(view)
-		{
-		}
-
 		protected override ReflogSearchOptions CreateSearchOptions()
-		{
-			return new ReflogSearchOptions()
+			=> new ReflogSearchOptions
 			{
-				Text		= SearchText,
-				MatchCase	= MatchCase,
+				Text      = SearchText,
+				MatchCase = MatchCase,
 			};
-		}
 	}
 }

@@ -16,10 +16,7 @@
 			if(disposing)
 			{
 				UnsubscribeFromColumnEvents();
-				if(components != null)
-				{
-					components.Dispose();
-				}
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}

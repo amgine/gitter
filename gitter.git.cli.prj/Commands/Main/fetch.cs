@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,44 +27,28 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class FetchCommand : Command
 	{
 		public static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		public static ICommandArgument Append()
-		{
-			return new CommandFlag("--append");
-		}
+			=> new CommandFlag("--append");
 
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			=> new CommandFlag("--force");
 
 		public static ICommandArgument Progress()
-		{
-			return new CommandFlag("--progress");
-		}
+			=> new CommandFlag("--progress");
 
 		public static ICommandArgument Prune()
-		{
-			return new CommandFlag("--prune");
-		}
+			=> new CommandFlag("--prune");
 
 		public static ICommandArgument Depth(int depth)
-		{
-			return new CommandParameterValue("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
-		}
+			=> new CommandParameterValue("--depth", depth.ToString(CultureInfo.InvariantCulture), '=');
 
 		public static ICommandArgument Tags()
-		{
-			return new CommandFlag("--tags");
-		}
+			=> new CommandFlag("--tags");
 
 		public static ICommandArgument NoTags()
-		{
-			return new CommandFlag("--no-tags");
-		}
+			=> new CommandFlag("--no-tags");
 
 		/// <summary>
 		///	By default git-fetch refuses to update the head which corresponds to the current branch.
@@ -73,29 +57,19 @@ namespace gitter.Git.AccessLayer.CLI
 		///	not supposed to use it.
 		/// </summary>
 		public static ICommandArgument UpdateHeadOk()
-		{
-			return new CommandFlag("--update-head-ok");
-		}
+			=> new CommandFlag("--update-head-ok");
 
 		public static ICommandArgument UploadPack(string uploadPack)
-		{
-			return new CommandParameterValue("--upload-pack", uploadPack, ' ');
-		}
+			=> new CommandParameterValue("--upload-pack", uploadPack, ' ');
 
 		public static ICommandArgument Keep()
-		{
-			return new CommandFlag("--keep");
-		}
+			=> new CommandFlag("--keep");
 
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("--quiet");
-		}
+			=> new CommandFlag("--quiet");
 
 		public static ICommandArgument Verbose()
-		{
-			return new CommandFlag("--verbose");
-		}
+			=> new CommandFlag("--verbose");
 
 		public FetchCommand()
 			: base("fetch")

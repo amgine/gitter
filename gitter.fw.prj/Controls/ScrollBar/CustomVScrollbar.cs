@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -140,10 +140,7 @@ namespace gitter.Framework.Controls
 
 		#region CustomScrollBar Overrides
 
-		public override Orientation Orientation
-		{
-			get { return Orientation.Vertical; }
-		}
+		public override Orientation Orientation => Orientation.Vertical;
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{

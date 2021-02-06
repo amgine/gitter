@@ -41,7 +41,7 @@ namespace gitter.GitLab.Gui
 
 		public GitLabGuiProvider(Repository repository, GitLabServiceContext serviceContext)
 		{
-			const string AllowedProjectNameChars = @"\w\/\.";
+			const string AllowedProjectNameChars = @"\w\/\._\-";
 
 			Repository     = repository;
 			ServiceContext = serviceContext;

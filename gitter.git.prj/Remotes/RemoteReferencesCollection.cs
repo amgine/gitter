@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -68,7 +68,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(remote, nameof(remote));
 
-			Remote     = remote;
+			Remote = remote;
 			Repository = remote.Repository;
 		}
 
@@ -99,61 +99,72 @@ namespace gitter.Git
 			return new RemoveRemoteReferencesParameters(Remote.Name, remoteReference.FullName);
 		}
 
+		private void OnTagRemoved(RemoteRepositoryTag tag)
+		{
+			Assert.IsNotNull(tag);
+
+			_remoteTags.Remove(tag.Name);
+			tag.MarkAsDeleted();
+			InvokeTagDeleted(tag);
+		}
+
 		internal void RemoveTag(RemoteRepositoryTag tag)
 		{
 			Verify.Argument.IsNotNull(tag, nameof(tag));
 			Verify.Argument.IsFalse(tag.IsDeleted, nameof(tag),
-				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(tag)));
 
 			var parameters = GetRemoveRemoteReferenceParameters(tag);
 			Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
-
-			_remoteTags.Remove(tag.Name);
-			tag.MarkAsDeleted();
-			InvokeTagDeleted(tag);
+			OnTagRemoved(tag);
 		}
 
-		internal async Task RemoveTagAsync(RemoteRepositoryTag tag, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		internal async Task RemoveTagAsync(RemoteRepositoryTag tag,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(tag, nameof(tag));
 			Verify.Argument.IsFalse(tag.IsDeleted, nameof(tag),
-				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("tag"));
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(tag)));
 
 			var parameters = GetRemoveRemoteReferenceParameters(tag);
-			await Remote.Repository.Accessor
-				.RemoveRemoteReferences.InvokeAsync(parameters, progress, cancellationToken);
-			_remoteTags.Remove(tag.Name);
-			tag.MarkAsDeleted();
-			InvokeTagDeleted(tag);
+			await Remote.Repository.Accessor.RemoveRemoteReferences
+				.InvokeAsync(parameters, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			OnTagRemoved(tag);
 		}
 
-		internal void RemoveBranch(RemoteRepositoryBranch branch)
+		private void OnBranchRemoved(RemoteRepositoryBranch branch)
 		{
-			Verify.Argument.IsNotNull(branch, nameof(branch));
-			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
-				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
-
-			var parameters = GetRemoveRemoteReferenceParameters(branch);
-			Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
+			Assert.IsNotNull(branch);
 
 			_remoteBranches.Remove(branch.Name);
 			branch.MarkAsDeleted();
 			InvokeBranchDeleted(branch);
 		}
 
-		internal async Task RemoveBranchAsync(RemoteRepositoryBranch branch, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		internal void RemoveBranch(RemoteRepositoryBranch branch)
 		{
 			Verify.Argument.IsNotNull(branch, nameof(branch));
 			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
-				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat("branch"));
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(branch)));
 
 			var parameters = GetRemoveRemoteReferenceParameters(branch);
-			await Remote.Repository.Accessor
-				.RemoveRemoteReferences
-				.InvokeAsync(parameters, progress, cancellationToken);
-			_remoteTags.Remove(branch.Name);
-			branch.MarkAsDeleted();
-			InvokeBranchDeleted(branch);
+			Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
+			OnBranchRemoved(branch);
+		}
+
+		internal async Task RemoveBranchAsync(RemoteRepositoryBranch branch,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		{
+			Verify.Argument.IsNotNull(branch, nameof(branch));
+			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
+				Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(branch)));
+
+			var parameters = GetRemoveRemoteReferenceParameters(branch);
+			await Remote.Repository.Accessor.RemoveRemoteReferences
+				.InvokeAsync(parameters, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			OnBranchRemoved(branch);
 		}
 
 		private QueryRemoteReferencesParameters GetQueryParameters()
@@ -292,7 +303,7 @@ namespace gitter.Git
 			}
 		}
 
-		public async Task RefreshAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task RefreshAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			progress?.Report(new OperationProgress(Resources.StrFetchingDataFromRemoteRepository));
 			var parameters = GetQueryParameters();

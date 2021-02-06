@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -91,7 +91,7 @@ namespace gitter.Git.Gui.Controls
 		const int GraphCellWidth = 21;
 		const int GraphCellHeight = 21;
 
-		protected override void OnPainSubItem(SubItemPaintEventArgs paintEventArgs)
+		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 			Assert.IsNotNull(paintEventArgs);
 

@@ -142,68 +142,37 @@ namespace gitter.Framework.Mvc.WinForms
 		}
 
 		public static Cursor Convert(MouseCursor cursor)
-		{
-			switch(cursor)
+			=> cursor switch
 			{
-				case MouseCursor.Default:
-					return Cursors.Default;
-				case MouseCursor.AppStarting:
-					return Cursors.AppStarting;
-				case MouseCursor.Arrow:
-					return Cursors.Arrow;
-				case MouseCursor.Cross:
-					return Cursors.Cross;
-				case MouseCursor.Hand:
-					return Cursors.Hand;
-				case MouseCursor.Help:
-					return Cursors.Help;
-				case MouseCursor.HSplit:
-					return Cursors.HSplit;
-				case MouseCursor.IBeam:
-					return Cursors.IBeam;
-				case MouseCursor.No:
-					return Cursors.No;
-				case MouseCursor.NoMove2D:
-					return Cursors.NoMove2D;
-				case MouseCursor.NoMoveHoriz:
-					return Cursors.NoMoveHoriz;
-				case MouseCursor.NoMoveVert:
-					return Cursors.NoMoveVert;
-				case MouseCursor.PanEast:
-					return Cursors.PanEast;
-				case MouseCursor.PanNE:
-					return Cursors.PanNE;
-				case MouseCursor.PanNorth:
-					return Cursors.PanNorth;
-				case MouseCursor.PanNW:
-					return Cursors.PanNW;
-				case MouseCursor.PanSE:
-					return Cursors.PanSE;
-				case MouseCursor.PanSouth:
-					return Cursors.PanSouth;
-				case MouseCursor.PanSW:
-					return Cursors.PanSW;
-				case MouseCursor.PanWest:
-					return Cursors.PanWest;
-				case MouseCursor.SizeAll:
-					return Cursors.SizeAll;
-				case MouseCursor.SizeNESW:
-					return Cursors.SizeNESW;
-				case MouseCursor.SizeNS:
-					return Cursors.SizeNS;
-				case MouseCursor.SizeNWSE:
-					return Cursors.SizeNWSE;
-				case MouseCursor.SizeWE:
-					return Cursors.SizeWE;
-				case MouseCursor.UpArrow:
-					return Cursors.UpArrow;
-				case MouseCursor.VSplit:
-					return Cursors.VSplit;
-				case MouseCursor.WaitCursor:
-					return Cursors.WaitCursor;
-				default:
-					return Cursors.Default;
-			}
-		}
+				MouseCursor.Default     => Cursors.Default,
+				MouseCursor.AppStarting => Cursors.AppStarting,
+				MouseCursor.Arrow       => Cursors.Arrow,
+				MouseCursor.Cross       => Cursors.Cross,
+				MouseCursor.Hand        => Cursors.Hand,
+				MouseCursor.Help        => Cursors.Help,
+				MouseCursor.HSplit      => Cursors.HSplit,
+				MouseCursor.IBeam       => Cursors.IBeam,
+				MouseCursor.No          => Cursors.No,
+				MouseCursor.NoMove2D    => Cursors.NoMove2D,
+				MouseCursor.NoMoveHoriz => Cursors.NoMoveHoriz,
+				MouseCursor.NoMoveVert  => Cursors.NoMoveVert,
+				MouseCursor.PanEast     => Cursors.PanEast,
+				MouseCursor.PanNE       => Cursors.PanNE,
+				MouseCursor.PanNorth    => Cursors.PanNorth,
+				MouseCursor.PanNW       => Cursors.PanNW,
+				MouseCursor.PanSE       => Cursors.PanSE,
+				MouseCursor.PanSouth    => Cursors.PanSouth,
+				MouseCursor.PanSW       => Cursors.PanSW,
+				MouseCursor.PanWest     => Cursors.PanWest,
+				MouseCursor.SizeAll     => Cursors.SizeAll,
+				MouseCursor.SizeNESW    => Cursors.SizeNESW,
+				MouseCursor.SizeNS      => Cursors.SizeNS,
+				MouseCursor.SizeNWSE    => Cursors.SizeNWSE,
+				MouseCursor.SizeWE      => Cursors.SizeWE,
+				MouseCursor.UpArrow     => Cursors.UpArrow,
+				MouseCursor.VSplit      => Cursors.VSplit,
+				MouseCursor.WaitCursor  => Cursors.WaitCursor,
+				_ => Cursors.Default,
+			};
 	}
 }

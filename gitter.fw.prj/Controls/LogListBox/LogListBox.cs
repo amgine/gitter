@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,9 +22,6 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.ComponentModel;
-	using System.Collections.Generic;
-	using System.Windows.Forms;
-	using System.Drawing;
 
 	using gitter.Framework.Services;
 
@@ -38,7 +35,8 @@ namespace gitter.Framework.Controls
 		/// <summary>Initializes a new instance of the <see cref="LogListBox"/> class.</summary>
 		public LogListBox()
 		{
-			Columns.AddRange(new CustomListBoxColumn[]
+			Columns.AddRange(
+				new CustomListBoxColumn[]
 				{
 					new LogListBoxTypeColumn(),
 					new LogListBoxTimestampColumn(),
@@ -67,8 +65,8 @@ namespace gitter.Framework.Controls
 		[DefaultValue(DefaultMessageLimit)]
 		public int MessageLimit
 		{
-			get { return _messageLimit; }
-			set { _messageLimit = value; }
+			get => _messageLimit;
+			set => _messageLimit = value;
 		}
 
 		public void AppendEvent(LogEvent logEvent)
@@ -99,9 +97,16 @@ namespace gitter.Framework.Controls
 
 		void IObserver<LogEvent>.OnNext(LogEvent value)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new Action<LogEvent>(AppendEvent), new object[] { value });
+				try
+				{
+					BeginInvoke(new Action<LogEvent>(AppendEvent), new object[] { value });
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{

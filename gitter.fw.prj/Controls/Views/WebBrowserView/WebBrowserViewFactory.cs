@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,7 +27,7 @@ namespace gitter.Framework.Controls
 
 	public class WebBrowserViewFactory : ViewFactoryBase
 	{
-		public static readonly new Guid Guid = new Guid("BF80569F-4544-4B0F-8C5B-213215E053AA");
+		public static readonly new Guid Guid = new("BF80569F-4544-4B0F-8C5B-213215E053AA");
 
 		public WebBrowserViewFactory()
 			: base(Guid, Resources.StrWebBrowser, Resources.ImgWebBrowser, true)

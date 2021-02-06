@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Git.AccessLayer;
@@ -144,7 +145,7 @@ namespace gitter.Git
 
 		/// <summary>Create new configuration parameter.</summary>
 		/// <param name="name">Parameter name.</param>
-		/// <param name="value">Praameter value.</param>
+		/// <param name="value">Parameter value.</param>
 		/// <returns>Created parameter.</returns>
 		public ConfigParameter CreateParameter(string name, string value)
 		{
@@ -276,8 +277,8 @@ namespace gitter.Git
 
 		public void Refresh()
 		{
-			var config = Repository.Accessor.QueryConfig.Invoke(
-				new QueryConfigParameters());
+			var config = Repository.Accessor.QueryConfig
+				.Invoke(new QueryConfigParameters());
 
 			lock(SyncRoot)
 			{
@@ -294,17 +295,36 @@ namespace gitter.Git
 			}
 		}
 
-		internal void Refresh(ConfigParameter configParameter)
+		public async Task RefreshAsync()
 		{
-			Verify.Argument.IsNotNull(configParameter, nameof(configParameter));
+			var config = await Repository.Accessor.QueryConfig
+				.InvokeAsync(new QueryConfigParameters())
+				.ConfigureAwait(continueOnCapturedContext: false);
 
-			string name = configParameter.Name;
-			var configParameterData = Repository.Accessor.QueryConfigParameter.Invoke(
-				new QueryConfigParameterParameters(configParameter.Name));
+			lock(SyncRoot)
+			{
+				CacheUpdater.UpdateObjectDictionary<ConfigParameter, ConfigParameterData>(
+					_parameters,
+					null,
+					null,
+					config,
+					configParameterData => ObjectFactories.CreateConfigParameter(Repository, configParameterData),
+					ObjectFactories.UpdateConfigParameter,
+					InvokeParameterCreated,
+					InvokeParameterDeleted,
+					true);
+			}
+		}
+
+		private void Refresh(ConfigParameter configParameter, ConfigParameterData configParameterData)
+		{
+			Assert.IsNotNull(configParameter);
+
 			if(configParameterData == null)
 			{
 				lock(SyncRoot)
 				{
+					var name = configParameter.Name;
 					_parameters.Remove(name.ToLowerInvariant());
 					InvokeParameterDeleted(configParameter);
 				}
@@ -318,11 +338,33 @@ namespace gitter.Git
 			}
 		}
 
+		internal void Refresh(ConfigParameter configParameter)
+		{
+			Verify.Argument.IsNotNull(configParameter, nameof(configParameter));
+
+			var configParameterData = Repository.Accessor.QueryConfigParameter
+				.Invoke(new QueryConfigParameterParameters(configParameter.Name));
+			Refresh(configParameter, configParameterData);
+		}
+
+		internal async Task RefreshAsync(ConfigParameter configParameter)
+		{
+			Verify.Argument.IsNotNull(configParameter, nameof(configParameter));
+
+			var configParameterData = await Repository.Accessor.QueryConfigParameter
+				.InvokeAsync(new QueryConfigParameterParameters(configParameter.Name))
+				.ConfigureAwait(continueOnCapturedContext: false);
+			Refresh(configParameter, configParameterData);
+		}
+
 		#endregion
 
 		#region IEnumerable<ConfigParameter>
 
-		public IEnumerator<ConfigParameter> GetEnumerator()
+		public Dictionary<string, ConfigParameter>.ValueCollection.Enumerator GetEnumerator()
+			=> _parameters.Values.GetEnumerator();
+
+		IEnumerator<ConfigParameter> IEnumerable<ConfigParameter>.GetEnumerator()
 			=> _parameters.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

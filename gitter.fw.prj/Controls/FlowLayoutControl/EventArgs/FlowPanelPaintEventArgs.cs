@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,42 +25,17 @@ namespace gitter.Framework.Controls
 
 	public class FlowPanelPaintEventArgs : EventArgs
 	{
-		#region Data
-
-		private readonly Graphics _graphics;
-		private readonly Rectangle _bounds;
-		private readonly Rectangle _clipRectangle;
-
-		#endregion
-
-		#region .ctor
-
 		public FlowPanelPaintEventArgs(Graphics graphics, Rectangle clipRectangle, Rectangle bounds)
 		{
-			_graphics = graphics;
-			_clipRectangle = clipRectangle;
-			_bounds = bounds;
+			Graphics      = graphics;
+			ClipRectangle = clipRectangle;
+			Bounds        = bounds;
 		}
 
-		#endregion
+		public Graphics Graphics { get; }
 
-		#region Properties
+		public Rectangle Bounds { get; }
 
-		public Graphics Graphics
-		{
-			get { return _graphics; }
-		}
-
-		public Rectangle Bounds
-		{
-			get { return _bounds; }
-		}
-
-		public Rectangle ClipRectangle
-		{
-			get { return _clipRectangle; }
-		}
-
-		#endregion
+		public Rectangle ClipRectangle { get; }
 	}
 }

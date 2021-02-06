@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,99 +26,61 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class RebaseCommand : Command
 	{
 		public static ICommandArgument Abort()
-		{
-			return new CommandFlag("--abort");
-		}
+			=> new CommandFlag("--abort");
 
 		public static ICommandArgument Skip()
-		{
-			return new CommandFlag("--skip");
-		}
+			=> new CommandFlag("--skip");
 
 		public static ICommandArgument Continue()
-		{
-			return new CommandFlag("--continue");
-		}
+			=> new CommandFlag("--continue");
 
 		public static ICommandArgument Onto(string branch)
-		{
-			return new CommandParameterValue("--onto", branch, ' ');
-		}
+			=> new CommandParameterValue("--onto", branch, ' ');
 
 		public static ICommandArgument Root()
-		{
-			return new CommandFlag("--root");
-		}
+			=> new CommandFlag("--root");
 
 		public static ICommandArgument Interactive()
-		{
-			return new CommandFlag("--interactive");
-		}
+			=> new CommandFlag("--interactive");
 
 		public static ICommandArgument Merge()
-		{
-			return new CommandFlag("--merge");
-		}
+			=> new CommandFlag("--merge");
 
 		public static ICommandArgument Strategy(string strategy)
-		{
-			return new CommandParameterValue("--strategy", strategy, '=');
-		}
+			=> new CommandParameterValue("--strategy", strategy, '=');
 
 		public static ICommandArgument StrategyOption(string strategyOption)
-		{
-			return new CommandParameterValue("--strategy-option", strategyOption, '=');
-		}
+			=> new CommandParameterValue("--strategy-option", strategyOption, '=');
 
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("--quiet");
-		}
+			=> new CommandFlag("--quiet");
 
 		public static ICommandArgument Verbose()
-		{
-			return new CommandFlag("--verbose");
-		}
+			=> new CommandFlag("--verbose");
 
 		public static ICommandArgument Stat()
-		{
-			return new CommandFlag("--stat");
-		}
+			=> new CommandFlag("--stat");
 
 		public static ICommandArgument NoStat()
-		{
-			return new CommandFlag("--no-stat");
-		}
+			=> new CommandFlag("--no-stat");
 
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force-rebase");
-		}
+			=> new CommandFlag("--force-rebase");
 
 		public static ICommandArgument IgnoreWhitespace()
-		{
-			return new CommandFlag("--ignore-whitespace");
-		}
+			=> new CommandFlag("--ignore-whitespace");
 
 		public static ICommandArgument PreserveMerges()
-		{
-			return new CommandFlag("--preserve-merges");
-		}
+			=> new CommandFlag("--preserve-merges");
 
 		public static ICommandArgument Autosquash()
-		{
-			return new CommandFlag("--autosquash");
-		}
+			=> new CommandFlag("--autosquash");
 
 		public static ICommandArgument NoAutosquash()
-		{
-			return new CommandFlag("--no-autosquash");
-		}
+			=> new CommandFlag("--no-autosquash");
 
 		public static ICommandArgument NoFF()
-		{
-			return new CommandFlag("--no-ff");
-		}
+			=> new CommandFlag("--no-ff");
 
 		public RebaseCommand()
 			: base("rebase")

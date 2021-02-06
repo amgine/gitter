@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,8 +25,6 @@ namespace gitter.Framework.Options
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Linq;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
 
@@ -35,7 +33,7 @@ namespace gitter.Framework.Options
 	[ToolboxItem(false)]
 	internal partial class FontsPage : PropertyPage, IExecutableDialog
 	{
-		public static readonly new Guid Guid = new Guid("EF348DA8-DC3E-4E23-A1EF-A5F9E37DA1E2");
+		public static readonly new Guid Guid = new("EF348DA8-DC3E-4E23-A1EF-A5F9E37DA1E2");
 		private FontFamily[] _families;
 		private bool _blockSampleUpdate;
 

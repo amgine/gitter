@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -51,76 +51,28 @@ namespace gitter
 
 		#region Assembly Attribute Accessors
 
+		private static T GetAssemblyAttribute<T>() where T : Attribute
+			=> Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false) is { Length: > 0 } attributes
+				? attributes[0] as T
+				: default;
+
 		public string AssemblyTitle
-		{
-			get
-			{
-				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
-				if(attributes.Length > 0)
-				{
-					var titleAttribute = (AssemblyTitleAttribute)attributes[0];
-					if(titleAttribute.Title != string.Empty)
-					{
-						return titleAttribute.Title;
-					}
-				}
-				return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
-			}
-		}
+			=> GetAssemblyAttribute<AssemblyTitleAttribute>()?.Title
+			?? System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
 
 		public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
 		public string AssemblyDescription
-		{
-			get
-			{
-				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
-				if(attributes.Length == 0)
-				{
-					return string.Empty;
-				}
-				return ((AssemblyDescriptionAttribute)attributes[0]).Description;
-			}
-		}
+			=> GetAssemblyAttribute<AssemblyDescriptionAttribute>()?.Description ?? string.Empty;
 
 		public string AssemblyProduct
-		{
-			get
-			{
-				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
-				if(attributes.Length == 0)
-				{
-					return string.Empty;
-				}
-				return ((AssemblyProductAttribute)attributes[0]).Product;
-			}
-		}
+			=> GetAssemblyAttribute<AssemblyProductAttribute>()?.Product ?? string.Empty;
 
 		public string AssemblyCopyright
-		{
-			get
-			{
-				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-				if(attributes.Length == 0)
-				{
-					return string.Empty;
-				}
-				return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
-			}
-		}
+			=> GetAssemblyAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? string.Empty;
 
 		public string AssemblyCompany
-		{
-			get
-			{
-				object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-				if(attributes.Length == 0)
-				{
-					return string.Empty;
-				}
-				return ((AssemblyCompanyAttribute)attributes[0]).Company;
-			}
-		}
+			=> GetAssemblyAttribute<AssemblyCompanyAttribute>()?.Company ?? string.Empty;
 
 		#endregion
 

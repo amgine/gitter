@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -72,7 +72,7 @@ namespace gitter.Framework.Controls
 					orientation = Orientation.Vertical;
 					break;
 				default:
-					throw new ArgumentException("side");
+					throw new ArgumentException($"Invalid value: {side}", nameof(side));
 			}
 			parent.DisableRedraw();
 			parent.SuspendLayout();
@@ -372,7 +372,7 @@ namespace gitter.Framework.Controls
 						singleItem.Dock = DockStyle.Fill;
 						break;
 					default:
-						throw new ApplicationException("Unexpeceted ViewSplit.Parent: " + parent);
+						throw new ApplicationException("Unexpected ViewSplit.Parent: " + parent);
 				}
 				ResumeLayout(false);
 				Dispose();

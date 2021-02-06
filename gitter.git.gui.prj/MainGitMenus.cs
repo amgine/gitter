@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -154,9 +154,7 @@ namespace gitter.Git.Gui
 			{
 				WorkingDirectory = Repository.WorkingDirectory,
 			};
-			using(System.Diagnostics.Process.Start(psi))
-			{
-			}
+			System.Diagnostics.Process.Start(psi)?.Dispose();
 		}
 
 		private void OnShowViewItemClick(object sender, EventArgs e)
@@ -167,7 +165,7 @@ namespace gitter.Git.Gui
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)

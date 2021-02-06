@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -69,18 +69,12 @@ namespace gitter.Git.Gui.Views
 		{
 			base.AttachViewModel(viewModel);
 
-			var vm = viewModel as HistoryViewModel;
-			if(vm != null)
+			if(viewModel is HistoryViewModel vm)
 			{
 				LogSource = vm.LogSource as PathLogSource;
-				if(LogSource != null)
-				{
-					Text = Resources.StrHistory + ": " + LogSource.ToString();
-				}
-				else
-				{
-					Text = Resources.StrHistory;
-				}
+				Text = LogSource != null
+					? Resources.StrHistory + ": " + LogSource.ToString()
+					: Resources.StrHistory;
 			}
 		}
 
@@ -88,18 +82,17 @@ namespace gitter.Git.Gui.Views
 		{
 			base.DetachViewModel(viewModel);
 
-			var vm = viewModel as HistoryViewModel;
-			if(vm != null)
+			if(viewModel is HistoryViewModel)
 			{
 				LogSource = null;
-				Text      = Resources.StrHistory;
+				Text = Resources.StrHistory;
 			}
 		}
 
 		protected new PathLogSource LogSource
 		{
-			get { return (PathLogSource)base.LogSource; }
-			set { base.LogSource = value; }
+			get => (PathLogSource)base.LogSource;
+			set => base.LogSource = value;
 		}
 
 		public override Image Image
@@ -151,7 +144,7 @@ namespace gitter.Git.Gui.Views
 				case Keys.F:
 					if(e.Modifiers == Keys.Control)
 					{
-						ShowSearchToolBar();
+						_searchToolbar.Show();
 						e.IsInputKey = true;
 					}
 					break;

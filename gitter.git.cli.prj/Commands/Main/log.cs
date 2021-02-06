@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,180 +28,112 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class LogCommand : Command
 	{
 		public static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		public static ICommandArgument Not()
-		{
-			return new CommandFlag("--not");
-		}
+			=> new CommandFlag("--not");
 
 		public static ICommandArgument Branches(string pattern)
-		{
-			return new CommandParameterValue("--branches", pattern, '=');
-		}
+			=> new CommandParameterValue("--branches", pattern, '=');
 
 		public static ICommandArgument Tags(string pattern)
-		{
-			return new CommandParameterValue("--tags", pattern, '=');
-		}
+			=> new CommandParameterValue("--tags", pattern, '=');
 
 		public static ICommandArgument Glob(string pattern)
-		{
-			return new CommandParameterValue("--glob", pattern, '=');
-		}
+			=> new CommandParameterValue("--glob", pattern, '=');
 
 		public static ICommandArgument Remotes(string pattern)
-		{
-			return new CommandParameterValue("--remotes", pattern, '=');
-		}
+			=> new CommandParameterValue("--remotes", pattern, '=');
 
 		public static ICommandArgument Author(string pattern)
-		{
-			return new CommandParameterValue("--author", pattern, '=');
-		}
+			=> new CommandParameterValue("--author", pattern, '=');
 
 		public static ICommandArgument SimplifyByDecoration()
-		{
-			return new CommandFlag("--simplify-by-decoration");
-		}
+			=> new CommandFlag("--simplify-by-decoration");
 
 		public static ICommandArgument Committer(string pattern)
-		{
-			return new CommandParameterValue("--committer", pattern, '=');
-		}
+			=> new CommandParameterValue("--committer", pattern, '=');
 
 		public static ICommandArgument Grep(string pattern)
-		{
-			return new CommandParameterValue("--grep", pattern, '=');
-		}
+			=> new CommandParameterValue("--grep", pattern, '=');
 
 		public static ICommandArgument RegexpIgnoreCase()
-		{
-			return new CommandFlag("--regexp-ignore-case");
-		}
+			=> new CommandFlag("--regexp-ignore-case");
 
 		public static ICommandArgument ExtendedRegexp()
-		{
-			return new CommandFlag("--extended-regexp");
-		}
+			=> new CommandFlag("--extended-regexp");
 
 		public static ICommandArgument FixedStrings()
-		{
-			return new CommandFlag("--fixed-strings");
-		}
+			=> new CommandFlag("--fixed-strings");
 
 		public static ICommandArgument AllMatch()
-		{
-			return new CommandFlag("--all-match");
-		}
+			=> new CommandFlag("--all-match");
 
 		/// <summary>Follow only the first parent commit upon seeing a merge commit.</summary>
 		public static ICommandArgument FirstParent()
-		{
-			return new CommandFlag("--first-parent");
-		}
+			=> new CommandFlag("--first-parent");
 
 		/// <summary>Print also the parents of the commit (in the form "commit parent..."). Also enables parent rewriting.</summary>
 		public static ICommandArgument Parents()
-		{
-			return new CommandFlag("--parents");
-		}
+			=> new CommandFlag("--parents");
 
 		/// <summary>Print only merge commits.</summary>
 		public static ICommandArgument Merges()
-		{
-			return new CommandFlag("--merges");
-		}
+			=> new CommandFlag("--merges");
 
 		/// <summary>Do not print commits with more than one parent.</summary>
 		public static ICommandArgument NoMerges()
-		{
-			return new CommandFlag("--no-merges");
-		}
+			=> new CommandFlag("--no-merges");
 
 		public static ICommandArgument Graph()
-		{
-			return new CommandFlag("--graph");
-		}
+			=> new CommandFlag("--graph");
 
 		public static ICommandArgument WalkReflogs()
-		{
-			return new CommandFlag("--walk-reflogs");
-		}
+			=> new CommandFlag("--walk-reflogs");
 
 		/// <summary>Continue listing the history of a file beyond renames (works only for a single file).</summary>
 		public static ICommandArgument Follow()
-		{
-			return new CommandFlag("--follow");
-		}
+			=> new CommandFlag("--follow");
 
 		/// <summary>Stop when a given path disappears from the tree.</summary>
 		public static ICommandArgument RemoveEmpty()
-		{
-			return new CommandFlag("--remove-empty");
-		}
+			=> new CommandFlag("--remove-empty");
 
 		public static ICommandArgument MaxCount(int limit)
-		{
-			return new CommandParameterValue("--max-count", limit.ToString(CultureInfo.InvariantCulture));
-		}
+			=> new CommandParameterValue("--max-count", limit.ToString(CultureInfo.InvariantCulture));
 
 		public static ICommandArgument Skip(int skip)
-		{
-			return new CommandParameterValue("--skip", skip.ToString(CultureInfo.InvariantCulture));
-		}
+			=> new CommandParameterValue("--skip", skip.ToString(CultureInfo.InvariantCulture));
 
 		public static ICommandArgument Format(string format)
-		{
-			return new CommandParameterValue("--format", "format:\"" + format + "\"", '=');
-		}
+			=> new CommandParameterValue("--format", "format:\"" + format + "\"", '=');
 
 		public static ICommandArgument FormatRaw()
-		{
-			return new CommandParameterValue("--format", "raw", '=');
-		}
+			=> new CommandParameterValue("--format", "raw", '=');
 
 		public static ICommandArgument TFormat(string format)
-		{
-			return new CommandParameterValue("--format", "tformat:\"" + format + "\"");
-		}
+			=> new CommandParameterValue("--format", "tformat:\"" + format + "\"");
 
 		public static ICommandArgument OneLine()
-		{
-			return new CommandFlag("--oneline");
-		}
+			=> new CommandFlag("--oneline");
 
 		public static ICommandArgument Reverse()
-		{
-			return new CommandFlag("--reverse");
-		}
+			=> new CommandFlag("--reverse");
 
 		public static ICommandArgument TopoOrder()
-		{
-			return new CommandFlag("--topo-order");
-		}
+			=> new CommandFlag("--topo-order");
 
 		public static ICommandArgument DateOrder()
-		{
-			return new CommandFlag("--date-order");
-		}
+			=> new CommandFlag("--date-order");
 
 		public static ICommandArgument Since(DateTime dateTime)
-		{
-			return new CommandParameterValue("--since", dateTime.ToString(CultureInfo.InvariantCulture));
-		}
+			=> new CommandParameterValue("--since", dateTime.ToString(CultureInfo.InvariantCulture));
 
 		public static ICommandArgument Until(DateTime dateTime)
-		{
-			return new CommandParameterValue("--until", dateTime.ToString(CultureInfo.InvariantCulture));
-		}
+			=> new CommandParameterValue("--until", dateTime.ToString(CultureInfo.InvariantCulture));
 
 		public static ICommandArgument NullTerminate()
-		{
-			return new CommandFlag("-z");
-		}
+			=> new CommandFlag("-z");
 
 		public LogCommand()
 			: base("log")

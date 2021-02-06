@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,9 +31,11 @@ namespace gitter.Git.Gui
 		/// <param name="maxColors">Maximum colors.</param>
 		public GraphColorProvider(int maxColors)
 		{
+			Verify.Argument.IsPositive(maxColors, nameof(maxColors));
+
 			_maxColors = maxColors;
-			_colors = new bool[maxColors];
-			_pointer = 0;
+			_colors    = new bool[maxColors];
+			_pointer   = 0;
 		}
 
 		/// <summary>Create <see cref="GraphColorProvider"/>.</summary>
@@ -42,7 +44,7 @@ namespace gitter.Git.Gui
 		{
 		}
 
-		/// <summary>Aquire a unique color.</summary>
+		/// <summary>Acquire a unique color.</summary>
 		/// <returns>Unique color.</returns>
 		public int AcquireColor()
 		{

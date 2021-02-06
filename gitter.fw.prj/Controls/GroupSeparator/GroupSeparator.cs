@@ -87,7 +87,7 @@ namespace gitter.Framework.Controls
 		[Localizable(true)]
 		public override string Text
 		{
-			get { return base.Text; }
+			get => base.Text;
 			set
 			{
 				base.Text = value;
@@ -100,8 +100,8 @@ namespace gitter.Framework.Controls
 		[DefaultValue(typeof(Size), "0, 19")]
 		public override Size MinimumSize
 		{
-			get { return base.MinimumSize; }
-			set { base.MinimumSize = value; }
+			get => base.MinimumSize;
+			set => base.MinimumSize = value;
 		}
 
 		[Browsable(false)]
@@ -109,8 +109,8 @@ namespace gitter.Framework.Controls
 		[DefaultValue(typeof(Size), "9999, 19")]
 		public override Size MaximumSize
 		{
-			get { return base.MaximumSize; }
-			set { base.MaximumSize = value; }
+			get => base.MaximumSize;
+			set => base.MaximumSize = value;
 		}
 
 		[DefaultValue(false)]
@@ -118,7 +118,7 @@ namespace gitter.Framework.Controls
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public bool ShowChevron
 		{
-			get { return _showChevron; }
+			get => _showChevron;
 			set
 			{
 				if(_showChevron != value)
@@ -136,7 +136,7 @@ namespace gitter.Framework.Controls
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool IsExpanded
 		{
-			get { return _expanded; }
+			get => _expanded;
 			set
 			{
 				if(_expanded != value)

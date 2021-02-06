@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -64,52 +64,52 @@ namespace gitter.Framework.Controls
 
 		public PopupAnimations PopupAnimation
 		{
-			get { return _popupAnimation; }
-			set { _popupAnimation = value; }
+			get => _popupAnimation;
+			set => _popupAnimation = value;
 		}
 
 		public PopupAnimations CloseAnimation
 		{
-			get { return _closeAnimation; }
-			set { _closeAnimation = value; }
+			get => _closeAnimation;
+			set => _closeAnimation = value;
 		}
 
 		public int AnimationDuration
 		{
-			get { return _animationDuration; }
-			set { _animationDuration = value; }
+			get => _animationDuration;
+			set => _animationDuration = value;
 		}
 
 		[DefaultValue(true)]
 		public bool FocusOnPopup
 		{
-			get { return _focusOnPopup; }
-			set { _focusOnPopup = value; }
+			get => _focusOnPopup;
+			set => _focusOnPopup = value;
 		}
 
 		[DefaultValue(true)]
 		public bool AcceptAlt
 		{
-			get { return _acceptAlt; }
-			set { _acceptAlt = value; }
+			get => _acceptAlt;
+			set => _acceptAlt = value;
 		}
 
 		public bool Resizable
 		{
-			get { return _resizable && !_isChildPopupOpened; }
-			set { _resizable = value; }
+			get => _resizable && !_isChildPopupOpened;
+			set => _resizable = value;
 		}
 
 		public new Size MinimumSize
 		{
-			get { return _minimumSize; }
-			set { _minimumSize = value; }
+			get => _minimumSize;
+			set => _minimumSize = value;
 		}
 
 		public new Size MaximumSize
 		{
-			get { return _maximumSize; }
-			set { _maximumSize = value; }
+			get => _maximumSize;
+			set => _maximumSize = value;
 		}
 
 		#endregion
@@ -288,6 +288,7 @@ namespace gitter.Framework.Controls
 
 		protected void UpdateRegion()
 		{
+			return;
 			if(this.Region != null)
 			{
 				this.Region.Dispose();
@@ -344,8 +345,7 @@ namespace gitter.Framework.Controls
 			{
 				return;
 			}
-			Popup popupControl = control as Popup;
-			if(popupControl != null)
+			if(control is Popup popupControl)
 			{
 				_ownerPopup = popupControl;
 				_ownerPopup._childPopup = this;

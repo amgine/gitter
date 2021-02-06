@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Globalization;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -49,8 +50,16 @@ namespace gitter.Git
 
 		public void Load()
 		{
-			var revisionData = Repository.Accessor.QueryRevision.Invoke(
-				new QueryRevisionParameters(Hash));
+			var revisionData = Repository.Accessor.QueryRevision
+				.Invoke(new QueryRevisionParameters(Hash));
+			ObjectFactories.UpdateRevision(this, revisionData);
+		}
+
+		public async Task LoadAsync()
+		{
+			var revisionData = await Repository.Accessor.QueryRevision
+				.InvokeAsync(new QueryRevisionParameters(Hash))
+				.ConfigureAwait(continueOnCapturedContext: false);
 			ObjectFactories.UpdateRevision(this, revisionData);
 		}
 
@@ -137,6 +146,8 @@ namespace gitter.Git
 		bool IRevisionPointer.IsDeleted => false;
 
 		Revision IRevisionPointer.Dereference() => this;
+
+		Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(this);
 
 		#endregion
 

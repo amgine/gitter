@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,30 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 
-	interface ISearchableView<T>
-		where T : SearchOptions
+	using gitter.Framework.Controls;
+
+	using gitter.Git.Gui.Controls;
+
+	class ContributorsSearch : ListBoxSearch<ContributorsSearchOptions>
 	{
-		ISearch<T> Search { get; }
+		public ContributorsSearch(CustomListBox listBox)
+			: base(listBox)
+		{
+		}
 
-		bool SearchToolBarVisible { get; set; }
+		protected static bool TestUser(User user, ContributorsSearchOptions search)
+		{
+			Assert.IsNotNull(user);
+			Assert.IsNotNull(search);
+
+			if(TestString(user.Name, search)) return true;
+			if(TestString(user.Email, search)) return true;
+
+			return false;
+		}
+
+		protected override bool TestItem(CustomListBoxItem item, ContributorsSearchOptions search)
+			=> item is UserListItem uli && TestUser(uli.DataContext, search);
 	}
 }

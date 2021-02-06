@@ -94,9 +94,9 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		protected abstract string GetHash(Revision revision);
+		protected virtual string GetHash(Revision revision) => revision.HashString;
 
-		private string GetHash(CustomListBoxItem item)
+		protected virtual string GetHash(CustomListBoxItem item)
 		{
 			switch(item)
 			{
@@ -110,7 +110,7 @@ namespace gitter.Git.Gui.Controls
 			return NoHash;
 		}
 
-		protected override void OnPainSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
+		protected override void OnPaintSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
 		{
 			Assert.IsNotNull(subItemPaintEventArgs);
 

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -41,16 +41,13 @@ namespace gitter.Framework.Controls
 			{
 				return null;
 			}
-			else
+			return new GridDockMarker[]
 			{
-				return new GridDockMarker[]
-				{
-					new GridDockMarker(Grid, dockClient, AnchorStyles.Left),
-					new GridDockMarker(Grid, dockClient, AnchorStyles.Top),
-					new GridDockMarker(Grid, dockClient, AnchorStyles.Right),
-					new GridDockMarker(Grid, dockClient, AnchorStyles.Bottom),
-				};
-			}
+				new GridDockMarker(Grid, dockClient, AnchorStyles.Left),
+				new GridDockMarker(Grid, dockClient, AnchorStyles.Top),
+				new GridDockMarker(Grid, dockClient, AnchorStyles.Right),
+				new GridDockMarker(Grid, dockClient, AnchorStyles.Bottom),
+			};
 		}
 	}
 }

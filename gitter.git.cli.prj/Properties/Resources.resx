@@ -166,7 +166,7 @@
     <value>unknown</value>
   </data>
   <data name="StrProviderName" xml:space="preserve">
-    <value>MSysGit command line interface</value>
+    <value>Command Line Interface</value>
   </data>
   <data name="StrInstall" xml:space="preserve">
     <value>Install</value>

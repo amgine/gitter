@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -129,7 +129,13 @@ namespace gitter.Git.Gui.Views
 		{
 			if(InvokeRequired)
 			{
-				BeginInvoke(new MethodInvoker(RefreshContentSync));
+				try
+				{
+					BeginInvoke(new MethodInvoker(RefreshContentSync));
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -139,6 +145,7 @@ namespace gitter.Git.Gui.Views
 
 		private void RefreshContentSync()
 		{
+			if(IsDisposed) return;
 			if(Repository != null && LogSource != null)
 			{
 				Repository.Status.Refresh();
@@ -154,20 +161,16 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
-				case Keys.F:
-					if(e.Modifiers == Keys.Control)
-					{
-						ShowSearchToolBar();
-						e.IsInputKey = true;
-					}
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					e.IsInputKey = true;
 					break;
-				case Keys.F5:
-					if(e.Modifiers == Keys.None)
-					{
-						RefreshContent();
-					}
+				case Keys.F5 when e.Modifiers == Keys.None:
+					RefreshContent();
 					break;
 			}
 		}

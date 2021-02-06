@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -70,8 +70,8 @@ namespace gitter.Git
 					}
 					else
 					{
-						var revisionData = Repository.Accessor.QueryRevision.Invoke(
-							new QueryRevisionParameters(sha1));
+						var revisionData = Repository.Accessor.QueryRevision
+							.Invoke(new QueryRevisionParameters(sha1));
 						revision = ObjectFactories.CreateRevision(Repository, revisionData);
 					}
 					return revision;

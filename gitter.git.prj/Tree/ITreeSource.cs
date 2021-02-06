@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,22 +28,16 @@ namespace gitter.Git
 
 	public interface ITreeSource
 	{
-		#region Properties
-
 		string DisplayName { get; }
 
 		Repository Repository { get; }
 
 		IRevisionPointer Revision { get; }
 
-		#endregion
-
-		#region Methods
-
 		Tree GetTree();
 
-		Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
-
-		#endregion
+		Task<Tree> GetTreeAsync(
+			IProgress<OperationProgress> progress = default,
+			CancellationToken cancellationToken = default);
 	}
 }

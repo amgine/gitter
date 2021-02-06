@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,7 +30,6 @@ namespace gitter.Git.Gui.Controls
 	[ToolboxItem(false)]
 	public sealed class RemoteBranchMenu : ContextMenuStrip
 	{
-
 		/// <summary>Create <see cref="RemoteBranchMenu"/>.</summary>
 		/// <param name="remoteBranch">Remote branch, for which menu is generated.</param>
 		public RemoteBranchMenu(RemoteRepositoryBranch remoteBranch)

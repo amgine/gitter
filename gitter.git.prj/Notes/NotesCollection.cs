@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -109,10 +110,8 @@ namespace gitter.Git
 			return note;
 		}
 
-		public void Refresh()
+		private void Refresh(IList<NoteData> notes)
 		{
-			var notes = Repository.Accessor.QueryNotes.Invoke(
-				new QueryNotesParameters());
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<Note, NoteData>(
@@ -126,6 +125,21 @@ namespace gitter.Git
 					InvokeDeleted,
 					true);
 			}
+		}
+
+		public void Refresh()
+		{
+			var notes = Repository.Accessor.QueryNotes
+				.Invoke(new QueryNotesParameters());
+			Refresh(notes);
+		}
+
+		public async Task RefreshAsync()
+		{
+			var notes = await Repository.Accessor.QueryNotes
+				.InvokeAsync(new QueryNotesParameters())
+				.ConfigureAwait(continueOnCapturedContext: false);
+			Refresh(notes);
 		}
 
 		internal Note Add(IRevisionPointer revision, string message)

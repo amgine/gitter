@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -57,69 +57,43 @@ namespace gitter.Git.AccessLayer.CLI
 		}
 
 		public static ICommandArgument All()
-		{
-			return new CommandFlag("--all");
-		}
+			=> new CommandFlag("--all");
 
 		public static ICommandArgument Mirror()
-		{
-			return new CommandFlag("--mirror");
-		}
+			=> new CommandFlag("--mirror");
 
 		public static ICommandArgument Delete()
-		{
-			return new CommandFlag("--delete");
-		}
+			=> new CommandFlag("--delete");
 
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			=> new CommandFlag("--force");
 
 		public static ICommandArgument Tags()
-		{
-			return new CommandFlag("--tags");
-		}
+			=> new CommandFlag("--tags");
 
 		public static ICommandArgument Thin()
-		{
-			return new CommandFlag("--thin");
-		}
+			=> new CommandFlag("--thin");
 
 		public static ICommandArgument NoThin()
-		{
-			return new CommandFlag("--no-thin");
-		}
+			=> new CommandFlag("--no-thin");
 
 		public static ICommandArgument Porcelain()
-		{
-			return new CommandFlag("--porcelain");
-		}
+			=> new CommandFlag("--porcelain");
 
 		public static ICommandArgument Progress()
-		{
-			return new CommandFlag("--progress");
-		}
+			=> new CommandFlag("--progress");
 
 		public static ICommandArgument SetUpstream()
-		{
-			return new CommandFlag("--set-upstream");
-		}
+			=> new CommandFlag("--set-upstream");
 
 		public static ICommandArgument ReceivePack(string receivePack)
-		{
-			return new CommandParameterValue("--receive-pack", receivePack, '=');
-		}
+			=> new CommandParameterValue("--receive-pack", receivePack, '=');
 
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public static ICommandArgument Quiet()
-		{
-			return CommandFlag.Quiet();
-		}
+			=> CommandFlag.Quiet();
 
 		public PushCommand()
 			: base("push")

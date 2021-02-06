@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -55,32 +55,26 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object ScrollEvent = new object();
-		private static readonly object ValueChangedEvent = new object();
+		private static readonly object ScrollEvent = new();
+		private static readonly object ValueChangedEvent = new();
 
 		public event EventHandler<ScrollEventArgs> Scroll
 		{
-			add { Events.AddHandler(ScrollEvent, value); }
-			remove { Events.RemoveHandler(ScrollEvent, value); }
+			add    => Events.AddHandler    (ScrollEvent, value);
+			remove => Events.RemoveHandler (ScrollEvent, value);
 		}
 
 		public event EventHandler ValueChanged
 		{
-			add { Events.AddHandler(ValueChangedEvent, value); }
-			remove { Events.RemoveHandler(ValueChangedEvent, value); }
+			add    => Events.AddHandler    (ValueChangedEvent, value);
+			remove => Events.RemoveHandler (ValueChangedEvent, value);
 		}
 
 		protected virtual void OnValueChanged()
-		{
-			var handler = (EventHandler)Events[ValueChangedEvent];
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> ((EventHandler)Events[ValueChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 		protected virtual void OnScroll(ScrollEventType eventType, int oldValue, int newValue)
-		{
-			var handler = (EventHandler<ScrollEventArgs>)Events[ScrollEvent];
-			if(handler != null) handler(this, new ScrollEventArgs(eventType, oldValue, newValue, ScrollOrientation));
-		}
+			=> ((EventHandler<ScrollEventArgs>)Events[ScrollEvent])?.Invoke(this, new ScrollEventArgs(eventType, oldValue, newValue, ScrollOrientation));
 
 		#endregion
 
@@ -133,20 +127,12 @@ namespace gitter.Framework.Controls
 		protected abstract int ThumbPositionToValue();
 
 		public ScrollOrientation ScrollOrientation
-		{
-			get
+			=> Orientation switch
 			{
-				switch(Orientation)
-				{
-					case Orientation.Vertical:
-						return ScrollOrientation.VerticalScroll;
-					case Orientation.Horizontal:
-						return ScrollOrientation.HorizontalScroll;
-					default:
-						throw new ApplicationException();
-				}
-			}
-		}
+				Orientation.Vertical   => ScrollOrientation.VerticalScroll,
+				Orientation.Horizontal => ScrollOrientation.HorizontalScroll,
+				_ => throw new ApplicationException(),
+			};
 
 		protected int ClampValue(int value)
 		{
@@ -157,7 +143,7 @@ namespace gitter.Framework.Controls
 
 		public CustomScrollBarRenderer Renderer
 		{
-			get { return _renderer; }
+			get => _renderer;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -349,7 +335,7 @@ namespace gitter.Framework.Controls
 
 		private CustomScrollBarPart HoveredPart
 		{
-			get { return _hoveredPart; }
+			get => _hoveredPart;
 			set
 			{
 				if(_hoveredPart != value)
@@ -363,7 +349,7 @@ namespace gitter.Framework.Controls
 
 		private CustomScrollBarPart PressedPart
 		{
-			get { return _pressedPart; }
+			get => _pressedPart;
 			set
 			{
 				if(_pressedPart != value)
@@ -407,7 +393,7 @@ namespace gitter.Framework.Controls
 		[DefaultValue(0)]
 		public int Value
 		{
-			get { return _value; }
+			get => _value;
 			set
 			{
 				Verify.Argument.IsInRange(Minimum, value, Maximum, "value");
@@ -426,7 +412,7 @@ namespace gitter.Framework.Controls
 		[DefaultValue(100)]
 		public int Maximum
 		{
-			get { return _maximum; }
+			get => _maximum;
 			set
 			{
 				if(_maximum != value)
@@ -450,7 +436,7 @@ namespace gitter.Framework.Controls
 		[DefaultValue(0)]
 		public int Minimum
 		{
-			get { return _minimum; }
+			get => _minimum;
 			set
 			{
 				if(_minimum != value)
@@ -474,7 +460,7 @@ namespace gitter.Framework.Controls
 		[DefaultValue(1)]
 		public int SmallChange
 		{
-			get { return _smallChange; }
+			get => _smallChange;
 			set
 			{
 				Verify.Argument.IsNotNegative(value, nameof(value));
@@ -486,7 +472,7 @@ namespace gitter.Framework.Controls
 		[DefaultValue(10)]
 		public int LargeChange
 		{
-			get { return _largeChange; }
+			get => _largeChange;
 			set
 			{
 				Verify.Argument.IsNotNegative(value, nameof(value));

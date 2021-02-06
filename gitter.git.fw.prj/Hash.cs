@@ -73,20 +73,22 @@ namespace gitter.Git
 		#region Static
 
 		private static int TryParseCharToHexDigit(char ch)
-		{
-			if(ch >= '0' && ch <= '9') return ch - '0';
-			if(ch >= 'a' && ch <= 'f') return 10 + (ch - 'a');
-			if(ch >= 'A' && ch <= 'F') return 10 + (ch - 'A');
-			return -1;
-		}
+			=> ch switch
+			{
+				>= '0' and <= '9' => ch - '0',
+				>= 'a' and <= 'f' => 10 + (ch - 'a'),
+				>= 'A' and <= 'F' => 10 + (ch - 'A'),
+				_ => -1,
+			};
 
 		private static int TryParseByteToHexDigit(byte ch)
-		{
-			if(ch >= '0' && ch <= '9') return ch - '0';
-			if(ch >= 'a' && ch <= 'f') return 10 + (ch - 'a');
-			if(ch >= 'A' && ch <= 'F') return 10 + (ch - 'A');
-			return -1;
-		}
+			=> ch switch
+			{
+				>= (byte)'0' and <= (byte)'9' => ch - '0',
+				>= (byte)'a' and <= (byte)'f' => 10 + (ch - 'a'),
+				>= (byte)'A' and <= (byte)'F' => 10 + (ch - 'A'),
+				_ => -1,
+			};
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static char ToHexDigit(uint digit)
@@ -531,6 +533,30 @@ namespace gitter.Git
 			if(_part4 < other._part4) return -1;
 			if(_part4 > other._part4) return  1;
 			return 0;
+		}
+
+		public bool StartsWith(string text)
+		{
+			if(text == null || text.Length == 0) return true;
+			if(text.Length > 40) return false;
+
+			for(int i = 0; i < text.Length; ++i)
+			{
+				var sd = TryParseCharToHexDigit(text[i]);
+				if(sd < 0) return false;
+				var p = (i / 8) switch
+				{
+					0 => _part0,
+					1 => _part1,
+					2 => _part2,
+					3 => _part3,
+					4 => _part4,
+					_ => (uint)0,
+				};
+				var hd = (p >> 4 * (7 - (i % 8))) & 0xf;
+				if(sd != hd) return false;
+			}
+			return true;
 		}
 
 		public byte[] ToByteArray()

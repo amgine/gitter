@@ -30,13 +30,16 @@ namespace gitter
 		{
 			Assert.IsNotNull(exception);
 
-			if(exception is NullReferenceException) return true;
-			if(exception is StackOverflowException) return true;
-			if(exception is OutOfMemoryException) return true;
-			if(exception is ThreadAbortException) return true;
-			if(exception is IndexOutOfRangeException) return true;
-			if(exception is AccessViolationException) return true;
-			return false;
+			return exception switch
+			{
+				NullReferenceException   => true,
+				StackOverflowException   => true,
+				OutOfMemoryException     => true,
+				ThreadAbortException     => true,
+				IndexOutOfRangeException => true,
+				AccessViolationException => true,
+				_ => false,
+			};
 		}
 
 		public static IEnumerable<Exception> AsEnumerable(this Exception exception)
@@ -44,13 +47,14 @@ namespace gitter
 			while(exception != null)
 			{
 				yield return exception;
-				var aggregate = exception as AggregateException;
-				if(aggregate != null)
+				if(exception is AggregateException aggregate)
 				{
 					foreach(var innerException in aggregate.InnerExceptions)
-					foreach(var exc in innerException.AsEnumerable())
 					{
-						yield return exc;
+						foreach(var exc in innerException.AsEnumerable())
+						{
+							yield return exc;
+						}
 					}
 				}
 				else

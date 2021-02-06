@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Dialogs
 {
 	using System;
 	using System.ComponentModel;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 	using gitter.Framework.Mvc;
@@ -33,7 +34,7 @@ namespace gitter.Git.Gui.Dialogs
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	public partial class AddRemoteDialog : GitDialogBase, IExecutableDialog, IAddRemoteView
+	public partial class AddRemoteDialog : GitDialogBase, IAsyncExecutableDialog, IAddRemoteView
 	{
 		#region Data
 
@@ -127,9 +128,9 @@ namespace gitter.Git.Gui.Dialogs
 
 		#endregion
 
-		#region IExecutableDialog
+		#region IAsyncExecutableDialog
 
-		public bool Execute() => _controller.TryAddRemote();
+		public Task<bool> ExecuteAsync() => _controller.TryAddRemoteAsync();
 
 		#endregion
 	}

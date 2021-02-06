@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,39 +26,25 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class ApplyCommand : Command
 	{
 		public static ICommandArgument Cached()
-		{
-			return new CommandFlag("--cached");
-		}
+			=> new CommandFlag("--cached");
 
 		public static ICommandArgument Index()
-		{
-			return new CommandFlag("--index");
-		}
+			=> new CommandFlag("--index");
 
 		public static ICommandArgument Check()
-		{
-			return new CommandFlag("--check");
-		}
+			=> new CommandFlag("--check");
 
 		public static ICommandArgument Reverse()
-		{
-			return new CommandFlag("--reverse");
-		}
+			=> new CommandFlag("--reverse");
 
 		public static ICommandArgument FromStdin()
-		{
-			return new CommandFlag("-");
-		}
+			=> new CommandFlag("-");
 
 		public static ICommandArgument Whitespace(string action)
-		{
-			return new CommandParameterValue("--whitespace", action, '=');
-		}
+			=> new CommandParameterValue("--whitespace", action, '=');
 
 		public static ICommandArgument UnidiffZero()
-		{
-			return new CommandFlag("--unidiff-zero");
-		}
+			=> new CommandFlag("--unidiff-zero");
 
 		public ApplyCommand()
 			: base("apply")

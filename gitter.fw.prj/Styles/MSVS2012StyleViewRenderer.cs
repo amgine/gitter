@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
@@ -123,47 +122,47 @@ namespace gitter.Framework.Controls
 
 			#region IColorTable
 
-			public Color BackgroundColor { get { return _BackgroundColor; } }
-			public Color ViewHostTabsBackground { get { return _ViewHostTabsBackground; } }
+			public Color BackgroundColor => _BackgroundColor;
+			public Color ViewHostTabsBackground => _ViewHostTabsBackground;
 
-			public Color DocTabsFooterActive { get { return _DocTabsFooterActive; } }
-			public Color DocTabsFooterNormal { get { return _DocTabsFooterNormal; } }
-			public Color DocTabBackground { get { return _DocTabBackground; } }
-			public Color DocTabBackgroundHover { get { return _DocTabBackgroundHover; } }
-			public Color DocTabBackgroundSelectedActive { get { return _DocTabBackgroundSelectedActive; } }
-			public Color DocTabBackgroundSelected { get { return _DocTabBackgroundSelected; } }
+			public Color DocTabsFooterActive => _DocTabsFooterActive;
+			public Color DocTabsFooterNormal => _DocTabsFooterNormal;
+			public Color DocTabBackground => _DocTabBackground;
+			public Color DocTabBackgroundHover => _DocTabBackgroundHover;
+			public Color DocTabBackgroundSelectedActive => _DocTabBackgroundSelectedActive;
+			public Color DocTabBackgroundSelected => _DocTabBackgroundSelected;
 
-			public Color ToolTabBackgroundActive { get { return _ToolTabBackgroundActive; } }
-			public Color ToolTabBackgroundHover { get { return _ToolTabBackgroundHover; } }
-			public Color ToolTabSeparator { get { return _ToolTabSeparator; } }
-			public Color ToolTabForeground { get { return _ToolTabForeground; } }
-			public Color ToolTabForegroundActive { get { return _ToolTabForegroundActive; } }
-			public Color ToolTabForegroundHover { get { return _ToolTabForegroundHover; } }
+			public Color ToolTabBackgroundActive => _ToolTabBackgroundActive;
+			public Color ToolTabBackgroundHover => _ToolTabBackgroundHover;
+			public Color ToolTabSeparator => _ToolTabSeparator;
+			public Color ToolTabForeground => _ToolTabForeground;
+			public Color ToolTabForegroundActive => _ToolTabForegroundActive;
+			public Color ToolTabForegroundHover => _ToolTabForegroundHover;
 
-			public Color DockSideBackground { get { return _DockSideBackground; } }
-			public Color DockSideTabOutline { get { return _DockSideTabOutline; } }
-			public Color DockSideTabOutlineHover { get { return _DockSideTabOutlineHover; } }
-			public Color DockSideTabForeground { get { return _DockSideTabForeground; } }
-			public Color DockSideTabForegroundHover { get { return _DockSideTabForegroundHover; } }
+			public Color DockSideBackground => _DockSideBackground;
+			public Color DockSideTabOutline => _DockSideTabOutline;
+			public Color DockSideTabOutlineHover => _DockSideTabOutlineHover;
+			public Color DockSideTabForeground => _DockSideTabForeground;
+			public Color DockSideTabForegroundHover => _DockSideTabForegroundHover;
 
-			public Color ViewButtonPressedBackground { get { return _ViewButtonPressedBackground; } }
-			public Color ViewButtonHoverBackgroundActive { get { return _ViewButtonHoverBackgroundActive; } }
-			public Color ViewButtonHoverBackgroundInactive { get { return _ViewButtonHoverBackgroundInactive; } }
-			public Color ViewButtonForeground { get { return _ViewButtonForeground; } }
+			public Color ViewButtonPressedBackground => _ViewButtonPressedBackground;
+			public Color ViewButtonHoverBackgroundActive => _ViewButtonHoverBackgroundActive;
+			public Color ViewButtonHoverBackgroundInactive => _ViewButtonHoverBackgroundInactive;
+			public Color ViewButtonForeground => _ViewButtonForeground;
 
-			public Color ViewHostHeaderBackgroundNormal { get { return _ViewHostHeaderBackgroundNormal; } }
-			public Color ViewHostHeaderBackgroundFocused { get { return _ViewHostHeaderBackgroundFocused; } }
-			public Color ViewHostHeaderAccentNormal { get { return _ViewHostHeaderAccentNormal; } }
-			public Color ViewHostHeaderAccentFocused { get { return _ViewHostHeaderAccentFocused; } }
+			public Color ViewHostHeaderBackgroundNormal => _ViewHostHeaderBackgroundNormal;
+			public Color ViewHostHeaderBackgroundFocused => _ViewHostHeaderBackgroundFocused;
+			public Color ViewHostHeaderAccentNormal => _ViewHostHeaderAccentNormal;
+			public Color ViewHostHeaderAccentFocused => _ViewHostHeaderAccentFocused;
 
-			public Color ViewHostHeaderTextNormal { get { return _ViewHostHeaderTextNormal; } }
-			public Color ViewHostHeaderTextFocused { get { return _ViewHostHeaderTextFocused; } }
+			public Color ViewHostHeaderTextNormal => _ViewHostHeaderTextNormal;
+			public Color ViewHostHeaderTextFocused => _ViewHostHeaderTextFocused;
 
-			public Color DockMarkerBackground { get { return _DockMarkerBackground; } }
-			public Color DockMarkerBorder { get { return _DockMarkerBorder; } }
-			public Color DockMarkerButtonBackground { get { return _DockMarkerBackground; } }
-			public Color DockMarkerButtonContentBorder { get { return _DockMarkerButtonContentBorder; } }
-			public Color DockMarkerButtonContentArrow { get { return _DockMarkerButtonContentArrow; } }
+			public Color DockMarkerBackground => _DockMarkerBackground;
+			public Color DockMarkerBorder => _DockMarkerBorder;
+			public Color DockMarkerButtonBackground => _DockMarkerBackground;
+			public Color DockMarkerButtonContentBorder => _DockMarkerButtonContentBorder;
+			public Color DockMarkerButtonContentArrow => _DockMarkerButtonContentArrow;
 
 			#endregion
 		}
@@ -214,47 +213,47 @@ namespace gitter.Framework.Controls
 
 			#region IColorTable
 
-			public Color BackgroundColor { get { return _BackgroundColor; } }
-			public Color ViewHostTabsBackground { get { return _ViewHostTabsBackground; } }
+			public Color BackgroundColor => _BackgroundColor;
+			public Color ViewHostTabsBackground => _ViewHostTabsBackground;
 
-			public Color DocTabsFooterActive { get { return _DocTabsFooterActive; } }
-			public Color DocTabsFooterNormal { get { return _DocTabsFooterNormal; } }
-			public Color DocTabBackground { get { return _DocTabBackground; } }
-			public Color DocTabBackgroundHover { get { return _DocTabBackgroundHover; } }
-			public Color DocTabBackgroundSelectedActive { get { return _DocTabBackgroundSelectedActive; } }
-			public Color DocTabBackgroundSelected { get { return _DocTabBackgroundSelected; } }
+			public Color DocTabsFooterActive => _DocTabsFooterActive;
+			public Color DocTabsFooterNormal => _DocTabsFooterNormal;
+			public Color DocTabBackground => _DocTabBackground;
+			public Color DocTabBackgroundHover => _DocTabBackgroundHover;
+			public Color DocTabBackgroundSelectedActive => _DocTabBackgroundSelectedActive;
+			public Color DocTabBackgroundSelected => _DocTabBackgroundSelected;
 
-			public Color ToolTabBackgroundActive { get { return _ToolTabBackgroundActive; } }
-			public Color ToolTabBackgroundHover { get { return _ToolTabBackgroundHover; } }
-			public Color ToolTabSeparator { get { return _ToolTabSeparator; } }
-			public Color ToolTabForeground { get { return _ToolTabForeground; } }
-			public Color ToolTabForegroundActive { get { return _ToolTabForegroundActive; } }
-			public Color ToolTabForegroundHover { get { return _ToolTabForegroundHover; } }
+			public Color ToolTabBackgroundActive => _ToolTabBackgroundActive;
+			public Color ToolTabBackgroundHover => _ToolTabBackgroundHover;
+			public Color ToolTabSeparator => _ToolTabSeparator;
+			public Color ToolTabForeground => _ToolTabForeground;
+			public Color ToolTabForegroundActive => _ToolTabForegroundActive;
+			public Color ToolTabForegroundHover => _ToolTabForegroundHover;
 
-			public Color DockSideBackground { get { return _DockSideBackground; } }
-			public Color DockSideTabOutline { get { return _DockSideTabOutline; } }
-			public Color DockSideTabOutlineHover { get { return _DockSideTabOutlineHover; } }
-			public Color DockSideTabForeground { get { return _DockSideTabForeground; } }
-			public Color DockSideTabForegroundHover { get { return _DockSideTabForegroundHover; } }
+			public Color DockSideBackground => _DockSideBackground;
+			public Color DockSideTabOutline => _DockSideTabOutline;
+			public Color DockSideTabOutlineHover => _DockSideTabOutlineHover;
+			public Color DockSideTabForeground => _DockSideTabForeground;
+			public Color DockSideTabForegroundHover => _DockSideTabForegroundHover;
 
-			public Color ViewButtonPressedBackground { get { return _ViewButtonPressedBackground; } }
-			public Color ViewButtonHoverBackgroundActive { get { return _ViewButtonHoverBackgroundActive; } }
-			public Color ViewButtonHoverBackgroundInactive { get { return _ViewButtonHoverBackgroundInactive; } }
-			public Color ViewButtonForeground { get { return _ViewButtonForeground; } }
+			public Color ViewButtonPressedBackground => _ViewButtonPressedBackground;
+			public Color ViewButtonHoverBackgroundActive => _ViewButtonHoverBackgroundActive;
+			public Color ViewButtonHoverBackgroundInactive => _ViewButtonHoverBackgroundInactive;
+			public Color ViewButtonForeground => _ViewButtonForeground;
 
-			public Color ViewHostHeaderBackgroundNormal { get { return _ViewHostHeaderBackgroundNormal; } }
-			public Color ViewHostHeaderBackgroundFocused { get { return _ViewHostHeaderBackgroundFocused; } }
-			public Color ViewHostHeaderAccentNormal { get { return _ViewHostHeaderAccentNormal; } }
-			public Color ViewHostHeaderAccentFocused { get { return _ViewHostHeaderAccentFocused; } }
+			public Color ViewHostHeaderBackgroundNormal => _ViewHostHeaderBackgroundNormal;
+			public Color ViewHostHeaderBackgroundFocused => _ViewHostHeaderBackgroundFocused;
+			public Color ViewHostHeaderAccentNormal => _ViewHostHeaderAccentNormal;
+			public Color ViewHostHeaderAccentFocused => _ViewHostHeaderAccentFocused;
 
-			public Color ViewHostHeaderTextNormal { get { return _ViewHostHeaderTextNormal; } }
-			public Color ViewHostHeaderTextFocused { get { return _ViewHostHeaderTextFocused; } }
+			public Color ViewHostHeaderTextNormal => _ViewHostHeaderTextNormal;
+			public Color ViewHostHeaderTextFocused => _ViewHostHeaderTextFocused;
 
-			public Color DockMarkerBackground { get { return _DockMarkerBackground; } }
-			public Color DockMarkerBorder { get { return _DockMarkerBorder; } }
-			public Color DockMarkerButtonBackground { get { return _DockMarkerBackground; } }
-			public Color DockMarkerButtonContentBorder { get { return _DockMarkerButtonContentBorder; } }
-			public Color DockMarkerButtonContentArrow { get { return _DockMarkerButtonContentArrow; } }
+			public Color DockMarkerBackground => _DockMarkerBackground;
+			public Color DockMarkerBorder => _DockMarkerBorder;
+			public Color DockMarkerButtonBackground => _DockMarkerBackground;
+			public Color DockMarkerButtonContentBorder => _DockMarkerButtonContentBorder;
+			public Color DockMarkerButtonContentArrow => _DockMarkerButtonContentArrow;
 
 			#endregion
 		}
@@ -262,29 +261,9 @@ namespace gitter.Framework.Controls
 		private static IColorTable _darkColors;
 		private static IColorTable _lightColors;
 
-		public static IColorTable DarkColors
-		{
-			get
-			{
-				if(_darkColors == null)
-				{
-					_darkColors = new DarkColorTable();
-				}
-				return _darkColors;
-			}
-		}
+		public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
 
-		public static IColorTable LightColors
-		{
-			get
-			{
-				if(_lightColors == null)
-				{
-					_lightColors = new LightColorTable();
-				}
-				return _lightColors;
-			}
-		}
+		public static IColorTable LightColors => _lightColors ??= new LightColorTable();
 
 		#endregion
 
@@ -324,75 +303,33 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
-		private IColorTable ColorTable
-		{
-			get { return _colorTable; }
-		}
+		private IColorTable ColorTable => _colorTable;
 
-		public override Color BackgroundColor
-		{
-			get { return ColorTable.BackgroundColor; }
-		}
+		public override Color BackgroundColor => ColorTable.BackgroundColor;
 
-		public override Color DockMarkerBackgroundColor
-		{
-			get { return ColorTable.DockMarkerBackground; }
-		}
+		public override Color DockMarkerBackgroundColor => ColorTable.DockMarkerBackground;
 
-		public override Color DockMarkerBorderColor
-		{
-			get { return ColorTable.DockMarkerBorder; }
-		}
+		public override Color DockMarkerBorderColor => ColorTable.DockMarkerBorder;
 
-		public override int TabHeight
-		{
-			get { return Constants.TabHeight; }
-		}
+		public override int TabHeight => Constants.TabHeight;
 
-		public override int TabFooterHeight
-		{
-			get { return Constants.TabFooterHeight; }
-		}
+		public override int TabFooterHeight => Constants.TabFooterHeight;
 
-		public override int HeaderHeight
-		{
-			get { return Constants.HeaderHeight; }
-		}
+		public override int HeaderHeight => Constants.HeaderHeight;
 
-		public override int FooterHeight
-		{
-			get { return Constants.FooterHeight; }
-		}
+		public override int FooterHeight => Constants.FooterHeight;
 
-		public override int ViewButtonSize
-		{
-			get { return Constants.ViewButtonSize; }
-		}
+		public override int ViewButtonSize => Constants.ViewButtonSize;
 
-		public override int SideTabSpacing
-		{
-			get { return Constants.SideTabSpacing; }
-		}
+		public override int SideTabSpacing => Constants.SideTabSpacing;
 
-		public override int SideTabHeight
-		{
-			get { return Constants.SideTabHeight; }
-		}
+		public override int SideTabHeight => Constants.SideTabHeight;
 
-		public override int FloatBorderSize
-		{
-			get { return Constants.FloatBorderSize; }
-		}
+		public override int FloatBorderSize => Constants.FloatBorderSize;
 
-		public override int FloatCornerRadius
-		{
-			get { return Constants.FloatCornerRadius; }
-		}
+		public override int FloatCornerRadius => Constants.FloatCornerRadius;
 
-		public override int FloatTitleHeight
-		{
-			get { return Constants.FloatTitleHeight; }
-		}
+		public override int FloatTitleHeight => Constants.FloatTitleHeight;
 
 		#region Tabs Rendering
 
@@ -460,7 +397,6 @@ namespace gitter.Framework.Controls
 				default:
 					throw new ApplicationException();
 			}
-			var host = tab.View.Host;
 			var image = tab.Image;
 			if(image != null)
 			{
@@ -481,8 +417,7 @@ namespace gitter.Framework.Controls
 						bounds.Y += imageRect.Height + 3;
 						break;
 					default:
-						throw new ApplicationException(
-							string.Format("Unexpected ViewTabBase.Orientation value: {0}", tab.Orientation));
+						throw new ApplicationException($"Unexpected ViewTabBase.Orientation value: {tab.Orientation}");
 				}
 			}
 			using(var textBrush = new SolidBrush(foregroundColor))
@@ -503,8 +438,7 @@ namespace gitter.Framework.Controls
 							graphics, tab.Text, GitterApplication.FontManager.UIFont, textBrush, bounds, stringFormat);
 						break;
 					default:
-						throw new ApplicationException(
-							string.Format("Unexpected ViewTabBase.Orientation value: {0}", tab.Orientation));
+						throw new ApplicationException($"Unexpected ViewTabBase.Orientation value: {tab.Orientation}");
 				}
 			}
 		}
@@ -529,16 +463,13 @@ namespace gitter.Framework.Controls
 					rcOutline.Height  = Constants.SideTabOutline;
 					break;
 				default:
-					throw new ApplicationException(
-						string.Format("Unexpected DockSide.Side value: {0}", tab.Side.Anchor));
+					throw new ApplicationException($"Unexpected DockSide.Side value: {tab.Side.Anchor}");
 			}
 			var color = tab.IsMouseOver ?
 				ColorTable.DockSideTabOutlineHover :
 				ColorTable.DockSideTabOutline;
-			using(var brush = new SolidBrush(color))
-			{
-				graphics.FillRectangle(brush, rcOutline);
-			}
+			using var brush = new SolidBrush(color);
+			graphics.FillRectangle(brush, rcOutline);
 		}
 
 		public override void RenderViewDockSideTabContent(ViewDockSideTab tab, Graphics graphics, Rectangle bounds)
@@ -576,46 +507,37 @@ namespace gitter.Framework.Controls
 			{
 				if(tab.IsActive)
 				{
-					using(var brush = new SolidBrush(host.IsActive ?
-						ColorTable.DocTabBackgroundSelectedActive :
-						ColorTable.DocTabBackgroundSelected))
-					{
-						graphics.FillRectangle(brush, bounds);
-					}
+					var color = host.IsActive
+						? ColorTable.DocTabBackgroundSelectedActive
+						: ColorTable.DocTabBackgroundSelected;
+					using var brush = new SolidBrush(color);
+					graphics.FillRectangle(brush, bounds);
 				}
 				else if(tab.IsMouseOver)
 				{
-					using(var brush = new SolidBrush(ColorTable.DocTabBackgroundHover))
-					{
-						graphics.FillRectangle(brush, bounds);
-					}
+					using var brush = new SolidBrush(ColorTable.DocTabBackgroundHover);
+					graphics.FillRectangle(brush, bounds);
 				}
 			}
 			else
 			{
 				if(tab.IsActive)
 				{
-					using(var brush = new SolidBrush(ColorTable.ToolTabBackgroundActive))
-					{
-						graphics.FillRectangle(brush, bounds);
-					}
+					using var brush = new SolidBrush(ColorTable.ToolTabBackgroundActive);
+					graphics.FillRectangle(brush, bounds);
 				}
 				else
 				{
 					if(tab.IsMouseOver)
 					{
-						using(var brush = new SolidBrush(ColorTable.ToolTabBackgroundHover))
-						{
-							graphics.FillRectangle(brush, bounds);
-						}
+						using var brush = new SolidBrush(ColorTable.ToolTabBackgroundHover);
+						graphics.FillRectangle(brush, bounds);
 					}
 				}
 				if(tab.Tabs[0] != tab)
 				{
-					using(var pen = new Pen(ColorTable.ToolTabSeparator))
-					{
-						graphics.DrawLine(pen, bounds.X, bounds.Y, bounds.X, bounds.Bottom - 1);
-					}
+					using var pen = new Pen(ColorTable.ToolTabSeparator);
+					graphics.DrawLine(pen, bounds.X, bounds.Y, bounds.X, bounds.Bottom - 1);
 				}
 			}
 		}
@@ -663,10 +585,8 @@ namespace gitter.Framework.Controls
 				var tabsFooterColor = tabs.ViewHost.IsActive ?
 					ColorTable.DocTabsFooterActive :
 					ColorTable.DocTabsFooterNormal;
-				using(var brush = new SolidBrush(tabsFooterColor))
-				{
-					graphics.FillRectangle(brush, 0, Constants.TabHeight, tabs.Width, Constants.TabFooterHeight);
-				}
+				using var brush = new SolidBrush(tabsFooterColor);
+				graphics.FillRectangle(brush, 0, Constants.TabHeight, tabs.Width, Constants.TabFooterHeight);
 			}
 		}
 
@@ -958,10 +878,8 @@ namespace gitter.Framework.Controls
 
 		public override void RenderViewDockSide(ViewDockSide side, PaintEventArgs e)
 		{
-			using(var brush = new SolidBrush(ColorTable.DockSideBackground))
-			{
-				e.Graphics.FillRectangle(brush, e.ClipRectangle);
-			}
+			using var brush = new SolidBrush(ColorTable.DockSideBackground);
+			e.Graphics.FillRectangle(brush, e.ClipRectangle);
 		}
 
 		#endregion
@@ -993,14 +911,14 @@ namespace gitter.Framework.Controls
 		{
 			if(hover)
 			{
-				arrow	= ColorTable.DockMarkerButtonContentArrow;
-				border	= ColorTable.DockMarkerButtonContentBorder;
+				arrow  = ColorTable.DockMarkerButtonContentArrow;
+				border = ColorTable.DockMarkerButtonContentBorder;
 			}
 			else
 			{
 				var alpha = (byte)(ViewConstants.OpacityNormal * 255);
-				arrow	= Color.FromArgb(alpha, ColorTable.DockMarkerButtonContentArrow);
-				border	= Color.FromArgb(alpha, ColorTable.DockMarkerButtonContentBorder);
+				arrow  = Color.FromArgb(alpha, ColorTable.DockMarkerButtonContentArrow);
+				border = Color.FromArgb(alpha, ColorTable.DockMarkerButtonContentBorder);
 			}
 			content	= ColorTable.DockMarkerButtonBackground;
 		}
@@ -1121,8 +1039,8 @@ namespace gitter.Framework.Controls
 
 		private void PaintDockMarkerFillButton(Graphics graphics, Rectangle rect, bool hover)
 		{
-			Color arrowColor, contentColor, borderColor;
-			InitDockMarkerButtonContentColors(hover, out arrowColor, out contentColor, out borderColor);
+			InitDockMarkerButtonContentColors(hover,
+				out _, out var contentColor, out var borderColor);
 			var rc = new Rectangle(rect.X + 4, rect.Y + 4, 24, 24);
 			using(var brush = new SolidBrush(borderColor))
 			{
@@ -1140,8 +1058,8 @@ namespace gitter.Framework.Controls
 
 		private void PaintDockMarkerRightButton(Graphics graphics, Rectangle rect, bool hover)
 		{
-			Color arrowColor, contentColor, borderColor;
-			InitDockMarkerButtonContentColors(hover, out arrowColor, out contentColor, out borderColor);
+			InitDockMarkerButtonContentColors(hover,
+				out var arrowColor, out var contentColor, out var borderColor);
 			var rc = new Rectangle(rect.X + 16, rect.Y + 4, 12, 24);
 			var arrow = new PointF[]
 				{
@@ -1170,8 +1088,8 @@ namespace gitter.Framework.Controls
 
 		private void PaintDockMarkerDocumentRightButton(Graphics graphics, Rectangle rect, bool hover)
 		{
-			Color arrowColor, contentColor, borderColor;
-			InitDockMarkerButtonContentColors(hover, out arrowColor, out contentColor, out borderColor);
+			InitDockMarkerButtonContentColors(hover,
+				out _, out var contentColor, out var borderColor);
 			var rc = new Rectangle(rect.X + 4, rect.Y + 4, 24, 24);
 			using(var brush = new SolidBrush(borderColor))
 			{
@@ -1198,8 +1116,8 @@ namespace gitter.Framework.Controls
 
 		private void PaintDockMarkerBottomButton(Graphics graphics, Rectangle rect, bool hover)
 		{
-			Color arrowColor, contentColor, borderColor;
-			InitDockMarkerButtonContentColors(hover, out arrowColor, out contentColor, out borderColor);
+			InitDockMarkerButtonContentColors(hover,
+				out var arrowColor, out var contentColor, out var borderColor);
 			var rc = new Rectangle(rect.X + 4, rect.Y + 16, 24, 12);
 			var arrow = new PointF[]
 				{
@@ -1228,8 +1146,8 @@ namespace gitter.Framework.Controls
 
 		private void PaintDockMarkerDocumentBottomButton(Graphics graphics, Rectangle rect, bool hover)
 		{
-			Color arrowColor, contentColor, borderColor;
-			InitDockMarkerButtonContentColors(hover, out arrowColor, out contentColor, out borderColor);
+			InitDockMarkerButtonContentColors(hover,
+				out _, out var contentColor, out var borderColor);
 			var rc = new Rectangle(rect.X + 4, rect.Y + 4, 24, 24);
 			using(var brush = new SolidBrush(borderColor))
 			{

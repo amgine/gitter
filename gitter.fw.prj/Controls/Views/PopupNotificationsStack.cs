@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -41,7 +41,6 @@ namespace gitter.Framework.Controls
 		private readonly List<PopupNotificationForm> _windows;
 		private readonly Queue<NotificationContent> _queue;
 		private Point _origin;
-		private bool _isDisposed;
 		private int _maximumVisibleNotifications;
 		private TimeSpan _defaultNotificationDuration;
 
@@ -75,7 +74,7 @@ namespace gitter.Framework.Controls
 
 		public int MaximumVisibleNotifications
 		{
-			get { return _maximumVisibleNotifications; }
+			get => _maximumVisibleNotifications;
 			set
 			{
 				if(value < 1) throw new ArgumentOutOfRangeException();
@@ -86,7 +85,7 @@ namespace gitter.Framework.Controls
 
 		public TimeSpan DefaultNotificationDuration
 		{
-			get { return _defaultNotificationDuration; }
+			get => _defaultNotificationDuration;
 			set
 			{
 				if(value.Ticks < 1) throw new ArgumentOutOfRangeException();
@@ -185,11 +184,7 @@ namespace gitter.Framework.Controls
 
 		#region IDisposable
 
-		public bool IsDisposed
-		{
-			get { return _isDisposed; }
-			private set { _isDisposed = value; }
-		}
+		public bool IsDisposed { get; private set; }
 
 		public void Dispose()
 		{

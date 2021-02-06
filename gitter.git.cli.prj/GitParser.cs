@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -114,33 +114,19 @@ namespace gitter.Git.AccessLayer.CLI
 				_buffer[_length++] = @byte;
 			}
 
-			public bool IsEmpty
-			{
-				get { return _length == 0; }
-			}
+			public bool IsEmpty => _length == 0;
 
-			public int Length
-			{
-				get { return _length; }
-			}
+			public int Length => _length;
 
-			public void Clear()
-			{
-				_length = 0;
-			}
+			public void Clear() => _length = 0;
 
 			public string GetString(Encoding encoding)
 			{
 				Verify.Argument.IsNotNull(encoding, nameof(encoding));
 
-				if(_length == 0)
-				{
-					return string.Empty;
-				}
-				else
-				{
-					return encoding.GetString(_buffer, 0, _length);
-				}
+				return _length != 0
+					? encoding.GetString(_buffer, 0, _length)
+					: string.Empty;
 			}
 		}
 
@@ -164,7 +150,7 @@ namespace gitter.Git.AccessLayer.CLI
 							{
 								var bufferSize = end - Position;
 								if(bufferSize < 1) bufferSize = 1;
-								bs = new ByteString(end - Position);
+								bs = new ByteString(bufferSize);
 							}
 							int len = 1;
 							int start = Position;
@@ -205,7 +191,7 @@ namespace gitter.Git.AccessLayer.CLI
 
 		public BranchesData ParseBranches(QueryBranchRestriction restriction, bool allowFakeBranch)
 		{
-			var heads = new List<BranchData>();
+			var heads   = new List<BranchData>();
 			var remotes = new List<BranchData>();
 			while(!IsAtEndOfString)
 			{
@@ -308,13 +294,11 @@ namespace gitter.Git.AccessLayer.CLI
 			int p2 = String.IndexOf(')', s);
 			if(p2 == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
 
-			int max = 0;
-			int cur = 0;
-			if(!int.TryParse(String.Substring(p1 + 1, s - p1 - 1), NumberStyles.None, CultureInfo.InvariantCulture, out cur))
+			if(!int.TryParse(String.Substring(p1 + 1, s - p1 - 1), NumberStyles.None, CultureInfo.InvariantCulture, out int cur))
 			{
 				return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
 			}
-			if(!int.TryParse(String.Substring(s + 1, p2 - s - 1), NumberStyles.None, CultureInfo.InvariantCulture, out max))
+			if(!int.TryParse(String.Substring(s + 1, p2 - s - 1), NumberStyles.None, CultureInfo.InvariantCulture, out int max))
 			{
 				return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
 			}
@@ -338,14 +322,11 @@ namespace gitter.Git.AccessLayer.CLI
 		protected DateTimeOffset ReadUnixTimestampLine()
 		{
 			var timestampStr = ReadLine();
-			if(string.IsNullOrWhiteSpace(timestampStr) || !long.TryParse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture, out var timestamp))
-			{
-				return GitConstants.UnixEraStartOffset;
-			}
-			else
+			if(!string.IsNullOrWhiteSpace(timestampStr) && long.TryParse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture, out var timestamp))
 			{
 				return GitConstants.UnixEraStartOffset.AddSeconds(timestamp).ToLocalTime();
 			}
+			return GitConstants.UnixEraStartOffset;
 		}
 
 		public void ParseCommitParentsFromRaw(IEnumerable<RevisionData> revs, Dictionary<Hash, RevisionData> cache)

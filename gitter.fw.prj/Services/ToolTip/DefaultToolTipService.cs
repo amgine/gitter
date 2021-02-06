@@ -36,14 +36,10 @@ namespace gitter.Framework.Services
 		}
 
 		public void Register(Control control, string text)
-		{
-			_toolTip.SetToolTip(control, text);
-		}
+			=> _toolTip.SetToolTip(control, text);
 
 		public void Unregister(Control control)
-		{
-			_toolTip.SetToolTip(control, string.Empty);
-		}
+			=> _toolTip.SetToolTip(control, string.Empty);
 
 		~DefaultToolTipService() => Dispose(disposing: false);
 
@@ -62,7 +58,7 @@ namespace gitter.Framework.Services
 
 		public void Dispose()
 		{
-			Dispose(true);
+			Dispose(disposing: true);
 			GC.SuppressFinalize(this);
 		}
 	}

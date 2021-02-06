@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,13 +28,15 @@ namespace gitter.Git.Gui.Views
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class ConfigView : GitViewBase
+	partial class ConfigView : GitViewBase, ISearchableView<ConfigSearchOptions>
 	{
 		private readonly ConfigToolBar _toolBar;
+		private ISearchToolBarController _searchToolbar;
 
 		public ConfigView(GuiProvider gui)
 			: base(Guids.ConfigViewGuid, gui)
@@ -43,7 +45,10 @@ namespace gitter.Git.Gui.Views
 
 			_lstConfig.PreviewKeyDown += OnKeyDown;
 
-			Text = Resources.StrConfig;
+			Text   = Resources.StrConfig;
+			Search = new ConfigSearch(_lstConfig);
+
+			_searchToolbar = CreateSearchToolbarController<ConfigView, ConfigSearchToolBar, ConfigSearchOptions>(this);
 
 			AddTopToolStrip(_toolBar = new ConfigToolBar(this));
 		}
@@ -64,9 +69,16 @@ namespace gitter.Git.Gui.Views
 
 		public override void RefreshContent()
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new MethodInvoker(RefreshContent));
+				try
+				{
+					BeginInvoke(new MethodInvoker(RefreshContent));
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -88,11 +100,16 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
-				case Keys.F5:
-					RefreshContent();
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
 					e.IsInputKey = true;
+					break;
+				case Keys.F5 when e.Modifiers == Keys.None:
+					RefreshContent();
 					break;
 			}
 		}
@@ -113,5 +130,17 @@ namespace gitter.Git.Gui.Views
 				_lstConfig.LoadViewFrom(listSection);
 			}
 		}
+
+		#region ISearchableView<ConfigSearchOptions>
+
+		public ISearch<ConfigSearchOptions> Search { get; }
+
+		public bool SearchToolBarVisible
+		{
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
+		}
+
+		#endregion
 	}
 }

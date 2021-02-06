@@ -109,10 +109,8 @@ namespace gitter.Framework.Services
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format)
 		{
-			using(var brush = new SolidBrush(color))
-			{
-				graphics.DrawString(text, font, brush, point, format);
-			}
+			using var brush = new SolidBrush(color);
+			graphics.DrawString(text, font, brush, point, format);
 		}
 
 		public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format)

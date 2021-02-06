@@ -25,89 +25,46 @@ namespace gitter.Framework.Mvc.WinForms
 
 	public class ControlInputSource : IUserInputSource<string>, IWin32ControlInputSource
 	{
-		#region Data
-
-		private readonly Control _control;
-
-		#endregion
-
-		#region .ctor
-
 		public ControlInputSource(Control control)
 		{
 			Verify.Argument.IsNotNull(control, nameof(control));
 
-			_control = control;
+			Control = control;
 		}
-
-		#endregion
-
-		#region IUserInputSource<string> Members
 
 		public string Value
 		{
-			get { return Control.Text; }
-			set { Control.Text = value; }
+			get => Control.Text;
+			set => Control.Text = value;
 		}
 
-		#endregion
-
-		#region IUserInputSource Members
-
-		public bool IsReadOnly
+		public virtual bool IsReadOnly
 		{
-			get { return !Control.Enabled; }
-			set { Control.Enabled = !value; }
+			get => !Control.Enabled;
+			set => Control.Enabled = !value;
 		}
 
-		#endregion
-
-		#region IWin32ControlInputSource Members
-
-		public Control Control
-		{
-			get { return _control; }
-		}
-
-		#endregion
+		public Control Control { get; }
 	}
 
 	public abstract class ControlInputSource<TControl, TValue> : IUserInputSource<TValue>, IWin32ControlInputSource
 		where TControl : Control
 	{
-		#region Data
-
-		private readonly TControl _control;
 		private TValue _value;
 		private bool _isValueValid;
-
-		#endregion
-
-		#region .ctor
 
 		public ControlInputSource(TControl control)
 		{
 			Verify.Argument.IsNotNull(control, nameof(control));
 
-			_control = control;
+			Control = control;
 			if(!control.IsDisposed)
 			{
 				SubscribeToValueChangeEvent();
 			}
 		}
 
-		#endregion
-
-		#region Properties
-
-		public TControl Control
-		{
-			get { return _control; }
-		}
-
-		#endregion
-
-		#region Methods
+		public TControl Control { get; }
 
 		protected abstract TValue FetchValue();
 
@@ -126,10 +83,6 @@ namespace gitter.Framework.Mvc.WinForms
 		{
 			_isValueValid = false;
 		}
-
-		#endregion
-
-		#region IUserInputSource<string> Members
 
 		public TValue Value
 		{
@@ -159,25 +112,12 @@ namespace gitter.Framework.Mvc.WinForms
 			}
 		}
 
-		#endregion
-
-		#region IUserInputSource Members
-
 		public virtual bool IsReadOnly
 		{
-			get { return !Control.Enabled; }
-			set { Control.Enabled = !value; }
+			get => !Control.Enabled;
+			set => Control.Enabled = !value;
 		}
 
-		#endregion
-
-		#region IWin32ControlInputSource Members
-
-		Control IWin32ControlInputSource.Control
-		{
-			get { return Control; }
-		}
-
-		#endregion
+		Control IWin32ControlInputSource.Control => Control;
 	}
 }

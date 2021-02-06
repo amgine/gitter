@@ -61,5 +61,48 @@ namespace gitter.GitLab.Gui
 		protected virtual void OnContextAttached(GitLabServiceContext serviceContext)
 		{
 		}
+
+		protected static bool Search<TItem, TOptions>(CustomListBoxItemsCollection items, Func<TItem, TOptions, bool> test, int start, TOptions search, int direction)
+			where TItem    : CustomListBoxItem
+			where TOptions : SearchOptions
+		{
+			if(search.Text.Length == 0) return true;
+			int count = items.Count;
+			if(count == 0) return false;
+			int end;
+			if(direction == 1)
+			{
+				start = (start + 1) % count;
+				end = start - 1;
+				if(end < 0) end += count;
+			}
+			else
+			{
+				start = (start - 1);
+				if(start < 0) start += count;
+				end = (start + 1) % count;
+			}
+			while(start != end)
+			{
+				if(items[start] is TItem item)
+				{
+					if(test(item, search))
+					{
+						item.FocusAndSelect();
+						return true;
+					}
+				}
+				if(direction == 1)
+				{
+					start = (start + 1) % count;
+				}
+				else
+				{
+					--start;
+					if(start < 0) start = count - 1;
+				}
+			}
+			return false;
+		}
 	}
 }

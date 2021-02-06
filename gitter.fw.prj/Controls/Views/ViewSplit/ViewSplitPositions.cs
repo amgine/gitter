@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -388,7 +388,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		/// <summary>Enforce control bounds according to splitters realtive positions.</summary>
+		/// <summary>Enforce control bounds according to splitters relative positions.</summary>
 		/// <remarks>Use this to resize and shift child controls according to splitter positions after host control resize.</remarks>
 		public void Apply()
 		{

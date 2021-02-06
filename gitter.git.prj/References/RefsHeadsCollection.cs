@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -59,6 +60,24 @@ namespace gitter.Git
 
 		#region Create()
 
+		private static CreateBranchParameters GetCreateBranchParameters(string name, IRevisionPointer startingRevision,
+			BranchTrackingMode tracking = BranchTrackingMode.Default, bool createRefLog = false, bool checkout = false, bool orphan = false)
+			=> new CreateBranchParameters(name, startingRevision.Pointer, checkout, orphan, createRefLog, tracking);
+
+		private Branch OnBranchCreated(string name, Revision rev, bool checkout)
+		{
+			Assert.IsNeitherNullNorWhitespace(name);
+			Assert.IsNotNull(rev);
+
+			var branch = new Branch(Repository, name, rev);
+			AddObject(branch);
+			if(checkout)
+			{
+				Repository.Head.Pointer = branch;
+			}
+			return branch;
+		}
+
 		/// <summary>Create branch.</summary>
 		/// <param name="name">Branch name.</param>
 		/// <param name="startingRevision">Starting revision.</param>
@@ -70,28 +89,49 @@ namespace gitter.Git
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 		private Branch CreateBranchCore(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool createRefLog, bool checkout, bool orphan)
 		{
-			var rev = startingRevision.Dereference();
+			var rev = startingRevision.Dereference()
+				?? throw new ArgumentException($"Unable to dereference {startingRevision}.", nameof(startingRevision));
 
 			var notifications = checkout ?
 				new[] { RepositoryNotifications.Checkout, RepositoryNotifications.BranchChanged } :
 				new[] { RepositoryNotifications.BranchChanged };
 
+			var parameters = GetCreateBranchParameters(name, startingRevision, tracking, createRefLog, checkout, orphan);
 			using(Repository.Monitor.BlockNotifications(notifications))
 			{
-				Repository.Accessor.CreateBranch.Invoke(new CreateBranchParameters(
-					name, startingRevision.Pointer, checkout, orphan, createRefLog, tracking));
+				Repository.Accessor.CreateBranch.Invoke(parameters);
 			}
+			return OnBranchCreated(name, rev, checkout);
+		}
 
-			var branch = new Branch(Repository, name, rev);
+		/// <summary>Create branch.</summary>
+		/// <param name="name">Branch name.</param>
+		/// <param name="startingRevision">Starting revision.</param>
+		/// <param name="tracking">Tracking mode.</param>
+		/// <param name="createRefLog">Create branch's reflog.</param>
+		/// <param name="checkout">Set to <c>true</c> to checkout branch after creation.</param>
+		/// <param name="orphan">Set to <c>true</c> to create orphan branch.</param>
+		/// <returns>Created branch.</returns>
+		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
+		private async Task<Branch> CreateBranchCoreAsync(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool createRefLog, bool checkout, bool orphan)
+		{
+			var rev = await startingRevision
+				.DereferenceAsync()
+				.ConfigureAwait(continueOnCapturedContext: false)
+				?? throw new ArgumentException($"Unable to dereference {startingRevision}.", nameof(startingRevision));
 
-			AddObject(branch);
+			var notifications = checkout ?
+				new[] { RepositoryNotifications.Checkout, RepositoryNotifications.BranchChanged } :
+				new[] { RepositoryNotifications.BranchChanged };
 
-			if(checkout)
+			var parameters = GetCreateBranchParameters(name, startingRevision, tracking, createRefLog, checkout, orphan);
+			using(Repository.Monitor.BlockNotifications(notifications))
 			{
-				Repository.Head.Pointer = branch;
+				await Repository.Accessor.CreateBranch
+					.InvokeAsync(parameters)
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-
-			return branch;
+			return OnBranchCreated(name, rev, checkout);
 		}
 
 		/// <summary>Create orphan branch and checkout.</summary>
@@ -107,14 +147,39 @@ namespace gitter.Git
 		/// Branch '<paramref name="name"/>' already exists.
 		/// </exception>
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-		public Branch CreateOrphan(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool createRefLog)
+		public Branch CreateOrphan(string name, IRevisionPointer startingRevision,
+			BranchTrackingMode tracking = BranchTrackingMode.Default, bool createRefLog = false)
 		{
 			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
 			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
 			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
-				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
 			return CreateBranchCore(name, startingRevision, tracking, createRefLog, true, true);
+		}
+
+		/// <summary>Create orphan branch and checkout.</summary>
+		/// <param name="name">Branch name.</param>
+		/// <param name="startingRevision">Starting revision.</param>
+		/// <param name="tracking">Tracking mode.</param>
+		/// <param name="createRefLog">Create branch's reflog.</param>
+		/// <returns>Created branch.</returns>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="name"/> == null or <paramref name="startingRevision"/> == <c>null</c>.</exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="startingRevision"/> is not handled by this repository or deleted.
+		/// <paramref name="name"/> is not a valid reference name.
+		/// Branch '<paramref name="name"/>' already exists.
+		/// </exception>
+		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
+		public Task<Branch> CreateOrphanAsync(string name, IRevisionPointer startingRevision,
+			BranchTrackingMode tracking = BranchTrackingMode.Default, bool createRefLog = false)
+		{
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
+			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
+
+			return CreateBranchCoreAsync(name, startingRevision, tracking, createRefLog, true, true);
 		}
 
 		/// <summary>Create local branch.</summary>
@@ -131,12 +196,13 @@ namespace gitter.Git
 		/// Branch '<paramref name="name"/>' already exists.
 		/// </exception>
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-		public Branch Create(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool checkout, bool createRefLog)
+		public Branch Create(string name, IRevisionPointer startingRevision,
+			BranchTrackingMode tracking = BranchTrackingMode.Default, bool checkout = false, bool createRefLog = false)
 		{
 			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
 			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
 			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
-				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
 			return CreateBranchCore(name, startingRevision, tracking, createRefLog, checkout, false);
 		}
@@ -145,7 +211,8 @@ namespace gitter.Git
 		/// <param name="name">Branch name.</param>
 		/// <param name="startingRevision">Starting revision.</param>
 		/// <param name="tracking">Tracking mode.</param>
-		/// <param name="checkout">Set to true to checkout branch after creation.</param>
+		/// <param name="checkout">Set to <c>true</c> to checkout branch after creation.</param>
+		/// <param name="createRefLog">Create branch's reflog.</param>
 		/// <returns>Created branch.</returns>
 		/// <exception cref="T:System.ArgumentNullException"><paramref name="name"/> == null or <paramref name="startingRevision"/> == <c>null</c>.</exception>
 		/// <exception cref="T:System.ArgumentException">
@@ -154,59 +221,15 @@ namespace gitter.Git
 		/// Branch '<paramref name="name"/>' already exists.
 		/// </exception>
 		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-		public Branch Create(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool checkout)
+		public Task<Branch> CreateAsync(string name, IRevisionPointer startingRevision,
+			BranchTrackingMode tracking = BranchTrackingMode.Default, bool checkout = false, bool createRefLog = false)
 		{
-			return Create(name, startingRevision, tracking, checkout, false);
-		}
+			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
+			Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
-		/// <summary>Create local branch.</summary>
-		/// <param name="name">Branch name.</param>
-		/// <param name="startingRevision">Starting revision.</param>
-		/// <param name="tracking">Tracking mode.</param>
-		/// <returns>Created branch.</returns>
-		/// <exception cref="T:System.ArgumentNullException"><paramref name="name"/> == null or <paramref name="startingRevision"/> == <c>null</c>.</exception>
-		/// <exception cref="T:System.ArgumentException">
-		/// <paramref name="startingRevision"/> is not handled by this repository or deleted.
-		/// <paramref name="name"/> is not a valid reference name.
-		/// Branch '<paramref name="name"/>' already exists.
-		/// </exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-		public Branch Create(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking)
-		{
-			return Create(name, startingRevision, tracking, false, false);
-		}
-
-		/// <summary>Create local branch.</summary>
-		/// <param name="name">Branch name.</param>
-		/// <param name="startingRevision">Starting revision.</param>
-		/// <param name="checkout">Set to true to checkout branch after creation.</param>
-		/// <returns>Created branch.</returns>
-		/// <exception cref="T:System.ArgumentNullException"><paramref name="name"/> == null or <paramref name="startingRevision"/> == <c>null</c>.</exception>
-		/// <exception cref="T:System.ArgumentException">
-		/// <paramref name="startingRevision"/> is not handled by this repository or deleted.
-		/// <paramref name="name"/> is not a valid reference name.
-		/// Branch '<paramref name="name"/>' already exists.
-		/// </exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-		public Branch Create(string name, IRevisionPointer startingRevision, bool checkout)
-		{
-			return Create(name, startingRevision, BranchTrackingMode.Default, checkout, false);
-		}
-
-		/// <summary>Create local branch.</summary>
-		/// <param name="name">Branch name.</param>
-		/// <param name="startingRevision">Starting revision.</param>
-		/// <returns>Created branch.</returns>
-		/// <exception cref="T:System.ArgumentNullException"><paramref name="name"/> == null or <paramref name="startingRevision"/> == <c>null</c>.</exception>
-		/// <exception cref="T:System.ArgumentException">
-		/// <paramref name="startingRevision"/> is not handled by this repository or deleted.
-		/// <paramref name="name"/> is not a valid reference name.
-		/// Branch '<paramref name="name"/>' already exists.
-		/// </exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-		public Branch Create(string name, IRevisionPointer startingRevision)
-		{
-			return Create(name, startingRevision, BranchTrackingMode.Default, false, false);
+			return CreateBranchCoreAsync(name, startingRevision, tracking, createRefLog, checkout, false);
 		}
 
 		#endregion
@@ -228,7 +251,7 @@ namespace gitter.Git
 			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
 			Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
 			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
-				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Branch"));
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
 			string oldName = branch.Name;
 			using(Repository.Monitor.BlockNotifications(
@@ -274,8 +297,29 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.DeleteBranch.Invoke(
-					new DeleteBranchParameters(branch.Name, false, force));
+				Repository.Accessor.DeleteBranch
+					.Invoke(new DeleteBranchParameters(branch.Name, false, force));
+			}
+			RemoveObject(branch);
+		}
+
+		/// <summary>Delete branch.</summary>
+		/// <param name="branch">Branch to delete.</param>
+		/// <param name="force">Delete branch irrespective of its merged status.</param>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="branch"/> == <c>null</c>.</exception>
+		/// <exception cref="T:System.ArgumentException"><paramref name="branch"/> is not handled by this repository or deleted.</exception>
+		/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
+		/// <exception cref="T:gitter.Git.GitException">Failed to delete <paramref name="branch"/>.</exception>
+		internal async Task DeleteAsync(Branch branch, bool force)
+		{
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.BranchChanged))
+			{
+				await Repository.Accessor.DeleteBranch
+					.InvokeAsync(new DeleteBranchParameters(branch.Name, false, force))
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			RemoveObject(branch);
 		}
@@ -325,8 +369,27 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
 
-			var branchData = Repository.Accessor.QueryBranch.Invoke(
-				new QueryBranchParameters(branch.Name, branch.IsRemote));
+			var branchData = Repository.Accessor.QueryBranch
+				.Invoke(new QueryBranchParameters(branch.Name, branch.IsRemote));
+			if(branchData != null)
+			{
+				ObjectFactories.UpdateBranch(branch, branchData);
+			}
+			else
+			{
+				RemoveObject(branch);
+			}
+		}
+
+		/// <summary>Refresh branch's position (and remove branch if it doesn't exist anymore).</summary>
+		/// <param name="branch">Branch to refresh.</param>
+		internal async Task RefreshAsync(Branch branch)
+		{
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+			var branchData = await Repository.Accessor.QueryBranch
+				.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
+				.ConfigureAwait(continueOnCapturedContext: false);
 			if(branchData != null)
 			{
 				ObjectFactories.UpdateBranch(branch, branchData);

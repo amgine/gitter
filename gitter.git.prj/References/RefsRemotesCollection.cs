@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -69,8 +70,38 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
-				Repository.Accessor.DeleteBranch.Invoke(
-					new DeleteBranchParameters(name, true, force));
+				Repository.Accessor.DeleteBranch
+					.Invoke(new DeleteBranchParameters(name, true, force));
+			}
+			RemoveObject(branch);
+		}
+
+		/// <summary>Delete branch.</summary>
+		/// <param name="branch">Branch to delete.</param>
+		/// <param name="force">Delete branch irrespective of its merged status.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="branch"/> == <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="branch"/> is not handled by this repository or deleted.
+		/// </exception>
+		/// <exception cref="BranchIsNotFullyMergedException">
+		/// Branch is not fully merged and can only be deleted if <paramref name="force"/> == <c>true</c>.
+		/// </exception>
+		/// <exception cref="GitException">
+		/// Failed to delete <paramref name="branch"/>.
+		/// </exception>
+		internal async Task DeleteAsync(RemoteBranch branch, bool force)
+		{
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+			var name = branch.Name;
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.BranchChanged))
+			{
+				await Repository.Accessor.DeleteBranch
+					.InvokeAsync(new DeleteBranchParameters(name, true, force))
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			RemoveObject(branch);
 		}
@@ -125,6 +156,15 @@ namespace gitter.Git
 			RefreshInternal(refs.Remotes);
 		}
 
+		/// <summary>Refresh remote branches.</summary>
+		public async Task RefreshAsync()
+		{
+			var refs = await Repository.Accessor.QueryBranches
+				.InvokeAsync(new QueryBranchesParameters(QueryBranchRestriction.Remote))
+				.ConfigureAwait(continueOnCapturedContext: false);
+			RefreshInternal(refs.Remotes);
+		}
+
 		/// <summary>Refreshes the specified branches.</summary>
 		/// <param name="branches">Actual remote branch data.</param>
 		internal void Refresh(IEnumerable<RemoteBranchData> branches)
@@ -151,6 +191,25 @@ namespace gitter.Git
 
 			var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
+			if(remoteBranchData != null)
+			{
+				ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
+			}
+			else
+			{
+				RemoveObject(branch);
+			}
+		}
+
+		/// <summary>Refresh branch's position (and remove branch if it doesn't exist anymore).</summary>
+		/// <param name="branch">Branch to refresh.</param>
+		internal async Task RefreshAsync(RemoteBranch branch)
+		{
+			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+			var remoteBranchData = await Repository.Accessor.QueryBranch
+				.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
+				.ConfigureAwait(continueOnCapturedContext: false);
 			if(remoteBranchData != null)
 			{
 				ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);

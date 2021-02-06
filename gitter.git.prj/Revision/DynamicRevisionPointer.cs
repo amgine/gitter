@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -20,7 +20,9 @@
 
 namespace gitter.Git
 {
-	
+	using System;
+	using System.Threading.Tasks;
+
 	using gitter.Git.AccessLayer;
 
 	/// <summary>Dynamic revision pointer.</summary>
@@ -60,12 +62,23 @@ namespace gitter.Git
 
 		#region Methods
 
-		/// <summary>Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.</summary>
-		/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
+		/// <inheritdoc/>
 		public Revision Dereference()
 		{
 			var rev = Repository.Accessor.Dereference.Invoke(
 				new DereferenceParameters(Pointer));
+			lock(Repository.Revisions.SyncRoot)
+			{
+				return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+			}
+		}
+
+		/// <inheritdoc/>
+		public async Task<Revision> DereferenceAsync()
+		{
+			var rev = await Repository.Accessor.Dereference
+				.InvokeAsync(new DereferenceParameters(Pointer))
+				.ConfigureAwait(continueOnCapturedContext: false);
 			lock(Repository.Revisions.SyncRoot)
 			{
 				return Repository.Revisions.GetOrCreateRevision(rev.SHA1);

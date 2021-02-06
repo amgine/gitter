@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -40,28 +40,19 @@ namespace gitter.Git
 
 		#endregion
 
-		public static async Task<Tree> GetAsync(Repository repository, string treeHash, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public static async Task<Tree> GetAsync(Repository repository, string treeHash,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			progress?.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
 			var parameters = new QueryTreeContentParameters(treeHash, true, false);
-			var treeData = await repository.Accessor.QueryTreeContent.InvokeAsync(parameters, progress, cancellationToken);
+			var treeData = await repository.Accessor.QueryTreeContent
+				.InvokeAsync(parameters, progress, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 			var tree = new Tree(repository, treeHash, false);
 			tree.SetContent(treeData);
 			return tree;
-			//return repository.Accessor.QueryTreeContent.InvokeAsync(parameters, progress, cancellationToken)
-			//	.ContinueWith(
-			//	t =>
-			//	{
-			//		var treeData = TaskUtility.UnwrapResult(t);
-			//		var tree = new Tree(repository, treeHash, false);
-			//		tree.SetContent(treeData);
-			//		return tree;
-			//	},
-			//	cancellationToken,
-			//	TaskContinuationOptions.ExecuteSynchronously,
-			//	TaskScheduler.Default);
 		}
 
 		#region .ctor
@@ -100,15 +91,9 @@ namespace gitter.Git
 
 		#region Properties
 
-		public string TreeHash
-		{
-			get { return _treeHash; }
-		}
+		public string TreeHash => _treeHash;
 
-		public TreeDirectory Root
-		{
-			get { return _root; }
-		}
+		public TreeDirectory Root => _root;
 
 		#endregion
 
@@ -186,7 +171,8 @@ namespace gitter.Git
 				});
 		}
 
-		public Task<byte[]> GetBlobContentAsync(string blobPath, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public Task<byte[]> GetBlobContentAsync(string blobPath,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
 			progress?.Report(new OperationProgress(Resources.StrsFetchingBlob.AddEllipsis()));
 			return Repository.Accessor.QueryBlobBytes.InvokeAsync(

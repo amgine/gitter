@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,16 +32,14 @@ namespace gitter.Framework.Controls
 
 		public event EventHandler<ViewButtonClickEventArgs> HeaderButtonClick
 		{
-			add { _buttons.ButtonClick += value; }
-			remove { _buttons.ButtonClick -= value; }
+			add    => Buttons.ButtonClick += value;
+			remove => Buttons.ButtonClick -= value;
 		}
 
 		#endregion
 
 		#region Data
 
-		private readonly ViewButtons _buttons;
-		private ViewHost _viewHost;
 		private bool _buttonsHovered;
 
 		#endregion
@@ -51,7 +49,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
 
-			_viewHost = viewHost;
+			ViewHost = viewHost;
 			SetStyle(
 				ControlStyles.ContainerControl |
 				ControlStyles.Selectable |
@@ -64,33 +62,24 @@ namespace gitter.Framework.Controls
 				ControlStyles.OptimizedDoubleBuffer,
 				true);
 
-			_buttons = new ViewButtons(this);
+			Buttons = new ViewButtons(this);
 		}
 
-		public ViewHost ViewHost
-		{
-			get { return _viewHost; }
-		}
+		public ViewHost ViewHost { get; }
 
-		public ViewButtons Buttons
-		{
-			get { return _buttons; }
-		}
+		public ViewButtons Buttons { get; }
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public override string Text
 		{
-			get { return ViewHost.Text; }
-			set
-			{
-				throw new InvalidOperationException();
-			}
+			get => ViewHost.Text;
+			set => throw new InvalidOperationException();
 		}
 
 		public void SetAvailableButtons(params ViewButtonType[] buttons)
 		{
-			_buttons.SetAvailableButtons(buttons);
+			Buttons.SetAvailableButtons(buttons);
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
@@ -104,14 +93,14 @@ namespace gitter.Framework.Controls
 
 		protected override void OnResize(EventArgs e)
 		{
-			_buttons.Height = Height;
+			Buttons.Height = Height;
 			base.OnResize(e);
 		}
 
 		private Rectangle GetButtonsRect()
 		{
 			var rc = ClientRectangle;
-			var w = _buttons.Width;
+			var w = Buttons.Width;
 			return new Rectangle(rc.Width - w - 2, 0, w, rc.Height);
 		}
 

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -62,37 +62,27 @@ namespace gitter.Git.Gui
 		}
 
 		private static Bitmap GetIcon(ReferenceType referenceType)
-		{
-			switch(referenceType)
+			=> referenceType switch
 			{
-				case ReferenceType.RemoteBranch:
-					return CachedResources.Bitmaps["ImgBranchRemote"];
-				case ReferenceType.LocalBranch:
-					return CachedResources.Bitmaps["ImgBranch"];
-				case ReferenceType.Tag:
-					return CachedResources.Bitmaps["ImgTag"];
-				default:
-					return null;
-			}
-		}
+				ReferenceType.RemoteBranch => CachedResources.Bitmaps["ImgBranchRemote"],
+				ReferenceType.LocalBranch  => CachedResources.Bitmaps["ImgBranch"],
+				ReferenceType.Tag          => CachedResources.Bitmaps["ImgTag"],
+				_ => null,
+			};
 
 		private static string GetTextPrefix(ReferenceChangeType change)
-		{
-			switch(change)
+			=> change switch
 			{
-				case ReferenceChangeType.Added:
-					return Resources.StrAdded;
-				case ReferenceChangeType.Moved:
-					return Resources.StrUpdated;
-				case ReferenceChangeType.Removed:
-					return Resources.StrRemoved;
-				default:
-					return string.Empty;
-			}
-		}
+				ReferenceChangeType.Added   => Resources.StrAdded,
+				ReferenceChangeType.Moved   => Resources.StrUpdated,
+				ReferenceChangeType.Removed => Resources.StrRemoved,
+				_ => string.Empty,
+			};
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			using(var background = new SolidBrush(BackColor))
 			{
 				e.Graphics.FillRectangle(background, e.ClipRectangle);

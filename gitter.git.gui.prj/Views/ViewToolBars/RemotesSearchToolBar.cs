@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,29 +18,21 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer.CLI
+namespace gitter.Git.Gui.Views
 {
-	using Resources = gitter.Git.AccessLayer.CLI.Properties.Resources;
+	using System;
+	using System.ComponentModel;
 
-	/// <summary>Provides accessor which works through MSysGit command line interface.</summary>
-	public sealed class MSysGitAccessorProvider : IGitAccessorProvider
+	using gitter.Framework.Controls;
+
+	[ToolboxItem(false)]
+	internal sealed class RemotesSearchToolBar : SearchToolBar<RemotesSearchOptions>
 	{
-		#region Properties
-
-		/// <summary>Returns string used to identify git accessor.</summary>
-		public string Name => "MSysGit";
-
-		/// <summary>Returns string to represent accessor in GUI.</summary>
-		public string DisplayName => Resources.StrProviderName;
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>Creates git accessor.</summary>
-		/// <returns>Created git accessor.</returns>
-		public IGitAccessor CreateAccessor() => new GitCLI(this);
-
-		#endregion
+		protected override RemotesSearchOptions CreateSearchOptions()
+			=> new RemotesSearchOptions
+			{
+				Text      = SearchText,
+				MatchCase = MatchCase,
+			};
 	}
 }

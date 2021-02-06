@@ -26,10 +26,6 @@ namespace gitter.Git.AccessLayer
 		{
 		}
 
-		public string TagName
-		{
-			get;
-			set;
-		}
+		public string TagName { get; set; }
 	}
 }

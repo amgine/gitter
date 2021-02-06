@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Controllers
 {
 	using System;
 	using System.IO;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -34,8 +35,6 @@ namespace gitter.Git.Gui.Controllers
 
 	sealed class InitController : ViewControllerBase<IInitView>, IInitController
 	{
-		#region .ctor
-
 		public InitController(IGitRepositoryProvider gitRepositoryProvider)
 		{
 			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
@@ -43,26 +42,17 @@ namespace gitter.Git.Gui.Controllers
 			GitRepositoryProvider = gitRepositoryProvider;
 		}
 
-		#endregion
-
-		#region Properties
-
 		private IGitRepositoryProvider GitRepositoryProvider { get; }
 
-		#endregion
-
-		#region IInitController Members
-
-		public bool TryInit()
+		private bool ValidateInput(out string path, out string template, out bool bare)
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var repositoryPath = View.RepositoryPath.Value.Trim();
-			if(!GitControllerUtility.ValidateAbsolutePath(repositoryPath, View.RepositoryPath, View.ErrorNotifier))
+			path     = View.RepositoryPath.Value.Trim();
+			template = null;
+			bare     = View.Bare.Value;
+			if(!GitControllerUtility.ValidateAbsolutePath(path, View.RepositoryPath, View.ErrorNotifier))
 			{
 				return false;
 			}
-			string template = null;
 			if(View.UseCustomTemplate.Value)
 			{
 				template = View.Template.Value.Trim();
@@ -71,44 +61,91 @@ namespace gitter.Git.Gui.Controllers
 					return false;
 				}
 			}
-			bool bare = View.Bare.Value;
+			return true;
+		}
+
+		private void OnCreateDirectoryFailed(Exception exc)
+			=> GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				Resources.ErrFailedToCreateDirectory,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+
+		private void OnInitFailed(Exception exc)
+			=> GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				Resources.ErrFailedToInit,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+
+		public bool TryInit()
+		{
+			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+
+			if(!ValidateInput(out var path, out var template, out var bare)) return false;
+
 			try
 			{
-				if(!Directory.Exists(repositoryPath))
+				if(!Directory.Exists(path))
 				{
-					Directory.CreateDirectory(repositoryPath);
+					Directory.CreateDirectory(path);
 				}
 			}
 			catch(Exception exc) when(!exc.IsCritical())
 			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					Resources.ErrFailedToCreateDirectory,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
+				OnCreateDirectoryFailed(exc);
 				return false;
 			}
 			try
 			{
 				using(View.ChangeCursor(MouseCursor.WaitCursor))
 				{
-					Repository.Init(GitRepositoryProvider.GitAccessor, repositoryPath, template, bare);
+					Repository.Init(GitRepositoryProvider.GitAccessor, path, template, bare);
 				}
 			}
 			catch(GitException exc)
 			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					Resources.ErrFailedToInit,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
+				OnInitFailed(exc);
 				return false;
 			}
 			return true;
 		}
 
-		#endregion
+		public async Task<bool> TryInitAsync()
+		{
+			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+
+			if(!ValidateInput(out var path, out var template, out var bare)) return false;
+
+			try
+			{
+				if(!Directory.Exists(path))
+				{
+					Directory.CreateDirectory(path);
+				}
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
+				OnCreateDirectoryFailed(exc);
+				return false;
+			}
+			try
+			{
+				using(View.ChangeCursor(MouseCursor.WaitCursor))
+				{
+					await Repository
+						.InitAsync(GitRepositoryProvider.GitAccessor, path, template, bare)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+			}
+			catch(GitException exc)
+			{
+				OnInitFailed(exc);
+				return false;
+			}
+			return true;
+		}
 	}
 }

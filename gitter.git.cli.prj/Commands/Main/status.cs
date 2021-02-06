@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -31,78 +31,52 @@ namespace gitter.Git.AccessLayer.CLI
 		/// This implies the --porcelain output format if no other format is given.
 		/// </summary>
 		public static ICommandArgument NullTerminate()
-		{
-			return new CommandFlag("-z");
-		}
+			=> new CommandFlag("-z");
 
 		/// <summary>Give the output in the short-format.</summary>
 		public static ICommandArgument Short()
-		{
-			return new CommandFlag("--short");
-		}
+			=> new CommandFlag("--short");
 
 		/// <summary>
 		/// Give the output in a stable, easy-to-parse format for scripts. Currently this is identical to --short output,
 		/// but is guaranteed not to change in the future, making it safe for scripts.
 		/// </summary>
 		public static ICommandArgument Porcelain()
-		{
-			return new CommandFlag("--porcelain");
-		}
+			=> new CommandFlag("--porcelain");
 
 		/// <summary>Show the branch and tracking info even in short-format.</summary>
 		public static ICommandArgument Branch()
-		{
-			return new CommandFlag("--branch");
-		}
+			=> new CommandFlag("--branch");
 
 		/// <summary>Show untracked files (Default: all).</summary>
 		public static ICommandArgument UntrackedFiles(StatusUntrackedFilesMode mode)
-		{
-			switch(mode)
+			=> mode switch
 			{
-				case StatusUntrackedFilesMode.No:
-					return new CommandParameterValue("--untracked-files", "no", '=');
-				case StatusUntrackedFilesMode.Normal:
-					return new CommandParameterValue("--untracked-files", "normal", '=');
-				case StatusUntrackedFilesMode.All:
-					return new CommandParameterValue("--untracked-files", "all", '=');
-				default:
-					throw new ArgumentException("mode");
-			}
-		}
+				StatusUntrackedFilesMode.No     => new CommandParameterValue("--untracked-files", "no", '='),
+				StatusUntrackedFilesMode.Normal => new CommandParameterValue("--untracked-files", "normal", '='),
+				StatusUntrackedFilesMode.All    => new CommandParameterValue("--untracked-files", "all", '='),
+				_ => throw new ArgumentException($"Unknown {nameof(StatusUntrackedFilesMode)}", nameof(mode)),
+			};
 
 		/// <summary>Ignore changes to submodules when looking for changes.</summary>
 		public static ICommandArgument IgnoreSubmodules()
-		{
-			return new CommandFlag("--ignore-submodules");
-		}
+			=> new CommandFlag("--ignore-submodules");
 
 		/// <summary>Ignore changes to submodules when looking for changes.</summary>
 		public static ICommandArgument IgnoreSubmodules(StatusIgnoreSubmodulesMode mode)
-		{
-			switch(mode)
+			=> mode switch
 			{
-				case StatusIgnoreSubmodulesMode.All:
-					return new CommandParameterValue("--ignore-submodules", "all", '=');
-				case StatusIgnoreSubmodulesMode.Dirty:
-					return new CommandParameterValue("--ignore-submodules", "dirty", '=');
-				case StatusIgnoreSubmodulesMode.Untracked:
-					return new CommandParameterValue("--ignore-submodules", "untracked", '=');
-				default:
-					throw new ArgumentException("mode");
-			}
-		}
+				StatusIgnoreSubmodulesMode.All       => new CommandParameterValue("--ignore-submodules", "all", '='),
+				StatusIgnoreSubmodulesMode.Dirty     => new CommandParameterValue("--ignore-submodules", "dirty", '='),
+				StatusIgnoreSubmodulesMode.Untracked => new CommandParameterValue("--ignore-submodules", "untracked", '='),
+				_ => throw new ArgumentException($"Unknown {nameof(StatusIgnoreSubmodulesMode)}", nameof(mode)),
+			};
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public StatusCommand()
 			: base("status")

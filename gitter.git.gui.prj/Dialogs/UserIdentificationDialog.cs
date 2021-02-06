@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -93,19 +93,19 @@ namespace gitter.Git.Gui.Dialogs
 
 		public string Username
 		{
-			get { return _txtUsername.Text; }
-			set { _txtUsername.Text = value; }
+			get => _txtUsername.Text;
+			set => _txtUsername.Text = value;
 		}
 
 		public string Email
 		{
-			get { return _txtEmail.Text; }
-			set { _txtEmail.Text = value; }
+			get => _txtEmail.Text;
+			set => _txtEmail.Text = value;
 		}
 
 		public bool SetGlobally
 		{
-			get { return _radSetUserGlobally.Checked; }
+			get => _radSetUserGlobally.Checked;
 			set
 			{
 				if(value)

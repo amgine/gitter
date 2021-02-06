@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,6 +21,7 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
@@ -125,8 +126,43 @@ namespace gitter.Git
 				using(Repository.Monitor.BlockNotifications(
 					RepositoryNotifications.BranchChanged))
 				{
-					Repository.Accessor.ResetBranch.Invoke(
-						new ResetBranchParameters(Name, revision.Pointer));
+					Repository.Accessor.ResetBranch
+						.Invoke(new ResetBranchParameters(Name, revision.Pointer));
+				}
+				Pointer = rev;
+				NotifyRelogRecordAdded();
+			}
+		}
+
+		/// <summary>
+		/// Reset this branch to position specified by <paramref name="revision"/>.
+		/// </summary>
+		/// <param name="revision">New branch position.</param>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="revision"/> == <c>null</c>.
+		/// </exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="revision"/> is not handled by this <see cref="Repository"/> or it is deleted.
+		/// </exception>
+		/// <exception cref="T:gitter.Git.GitException">
+		/// Failed to dereference <paramref name="revision"/> or git reset failed.
+		/// </exception>
+		public async Task ResetAsync(IRevisionPointer revision)
+		{
+			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+			Verify.State.IsNotDeleted(this);
+
+			var rev = await revision
+				.DereferenceAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if(Revision != rev)
+			{
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.BranchChanged))
+				{
+					await Repository.Accessor.ResetBranch
+						.InvokeAsync(new ResetBranchParameters(Name, revision.Pointer))
+						.ConfigureAwait(continueOnCapturedContext: false);
 				}
 				Pointer = rev;
 				NotifyRelogRecordAdded();
@@ -151,17 +187,38 @@ namespace gitter.Git
 			Repository.Refs.Heads.Delete(this, force);
 		}
 
-		/// <summary>
-		/// Makes shure that this <see cref="Branch"/> exists and <see cref="M:Position"/> is correct.
-		/// </summary>
-		/// <exception cref="InvalidOperationException">
-		/// This <see cref="Branch"/> is deleted.
+		/// <summary>Delete branch.</summary>
+		/// <param name="force">Delete branch irrespective of its merged status.</param>
+		/// <exception cref="T:git.BranchIsNotFullyMergedException">
+		/// Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.
 		/// </exception>
+		/// <exception cref="T:gitter.Git.GitException">
+		/// Failed to delete this branch.
+		/// </exception>
+		/// <exception cref="InvalidOperationException">
+		/// This <see cref="Branch"/> is already deleted.
+		/// </exception>
+		public override Task DeleteAsync(bool force = false)
+		{
+			Verify.State.IsNotDeleted(this);
+
+			return Repository.Refs.Heads.DeleteAsync(this, force);
+		}
+
+		/// <inheritdoc/>
 		public override void Refresh()
 		{
 			Verify.State.IsNotDeleted(this);
 
 			Repository.Refs.Heads.Refresh(this);
+		}
+
+		/// <inheritdoc/>
+		public override Task RefreshAsync()
+		{
+			Verify.State.IsNotDeleted(this);
+
+			return Repository.Refs.Heads.RefreshAsync(this);
 		}
 
 		#endregion

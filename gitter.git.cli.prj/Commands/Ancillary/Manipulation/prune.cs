@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,24 +29,16 @@ namespace gitter.Git.AccessLayer.CLI
 	sealed class PruneCommand : Command
 	{
 		public static ICommandArgument DryRun()
-		{
-			return CommandFlag.DryRun();
-		}
+			=> CommandFlag.DryRun();
 
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public static ICommandArgument Expire(DateTime expire)
-		{
-			return new CommandParameterValue("--expire", Utility.FormatDate(expire, DateFormat.UnixTimestamp), ' ');
-		}
+			=> new CommandParameterValue("--expire", Utility.FormatDate(expire, DateFormat.UnixTimestamp), ' ');
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public PruneCommand()
 			: base("prune")

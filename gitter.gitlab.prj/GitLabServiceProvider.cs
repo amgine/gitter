@@ -67,7 +67,9 @@ namespace gitter.GitLab
 				IntegrationOptionsPage.Guid,
 				env => new Options.ConfigurationPage(env, this)));
 
-			environment.ViewDockService.RegisterFactory(new IssuesViewFactory());
+			var dock = environment.ViewDockService;
+			dock.RegisterFactory(new IssuesViewFactory());
+			dock.RegisterFactory(new PipelinesViewFactory());
 
 			if(section.TryGetSection("Servers", out var servers))
 			{

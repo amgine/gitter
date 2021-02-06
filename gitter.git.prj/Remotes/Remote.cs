@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -63,7 +63,7 @@ namespace gitter.Git
 			: base(repository, name)
 		{
 			_fetchUrl = fetchUrl;
-			_pushUrl = pushUrl;
+			_pushUrl  = pushUrl;
 		}
 
 		/// <summary>Create <see cref="Remote"/> object.</summary>
@@ -109,7 +109,7 @@ namespace gitter.Git
 		/// <summary>Url used by push command.</summary>
 		public string PushUrl
 		{
-			get { return _pushUrl; }
+			get => _pushUrl;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -368,19 +368,12 @@ namespace gitter.Git
 			}
 			set
 			{
-				string strvalue;
-				switch(value)
+				var strvalue = value switch
 				{
-					case TagFetchMode.AllTags:
-						strvalue = "--tags";
-						break;
-					case TagFetchMode.NoTags:
-						strvalue = "--no-tags";
-						break;
-					default:
-						strvalue = "";
-						break;
-				}
+					TagFetchMode.AllTags => "--tags",
+					TagFetchMode.NoTags  => "--no-tags",
+					_ => "",
+				};
 				var pname = "remote." + Name + ".tagopt";
 				var p = Repository.Configuration.TryGetParameter(pname);
 				if(p != null)
@@ -410,6 +403,13 @@ namespace gitter.Git
 			Verify.State.IsNotDeleted(this);
 
 			Repository.Remotes.RemoveRemote(this);
+		}
+
+		public Task DeleteAsync()
+		{
+			Verify.State.IsNotDeleted(this);
+
+			return Repository.Remotes.RemoveRemoteAsync(this);
 		}
 
 		/// <summary>Download new objects from remote repository.</summary>

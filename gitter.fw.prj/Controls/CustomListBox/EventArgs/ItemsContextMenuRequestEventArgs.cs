@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,26 +22,15 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
 
 	public class ItemsContextMenuRequestEventArgs : ContextMenuRequestEventArgs
 	{
-		#region Data
-
-		private readonly ICollection<CustomListBoxItem> _items;
-
-		#endregion
-
 		public ItemsContextMenuRequestEventArgs(ICollection<CustomListBoxItem> items, CustomListBoxColumn column, int columnIndex, int x, int y)
 			: base(column, columnIndex, x, y)
 		{
-			_items = items;
+			Items = items;
 		}
 
-		public ICollection<CustomListBoxItem> Items
-		{
-			get { return _items; }
-		}
+		public ICollection<CustomListBoxItem> Items { get; }
 	}
 }

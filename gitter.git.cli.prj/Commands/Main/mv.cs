@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,9 +27,7 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		/// <summary>Force renaming or moving of a file even if the target exists.</summary>
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("-f");
-		}
+			=> new CommandFlag("-f");
 
 		/// <summary>
 		/// Skip move or rename actions which would lead to an error condition. An error happens when
@@ -37,15 +35,11 @@ namespace gitter.Git.AccessLayer.CLI
 		/// file unless -f is given. 
 		/// </summary>
 		public static ICommandArgument SkipErrors()
-		{
-			return new CommandFlag("-k");
-		}
+			=> new CommandFlag("-k");
 
 		/// <summary>Do nothing; only show what would happen.</summary>
 		public static ICommandArgument DryRun()
-		{
-			return CommandFlag.DryRun();
-		}
+			=> CommandFlag.DryRun();
 
 		public MvCommand()
 			: base("mv")

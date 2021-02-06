@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,23 +21,23 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Controls;
 
 	using gitter.Git.Gui.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class ReferencesView : GitViewBase //, ISearchableView<SearchOptions>
+	partial class ReferencesView : GitViewBase, ISearchableView<ReferencesSearchOptions>
 	{
 		private ReferencesToolbar _toolbar;
-		//private ReferencesSearchToolBar _searchToolbar;
+		private ISearchToolBarController _searchToolbar;
 
 		public ReferencesView(GuiProvider gui)
 			: base(Guids.ReferencesViewGuid, gui)
@@ -46,18 +46,20 @@ namespace gitter.Git.Gui.Views
 			_lstReferences.Columns.ShowAll((c) => c.Id != (int)ColumnId.TreeHash);
 			_lstReferences.PreviewKeyDown += OnKeyDown;
 
-			Text = Resources.StrReferences;
+			Text   = Resources.StrReferences;
+			Search = new ReferencesSearch(_lstReferences);
+
+			_searchToolbar = CreateSearchToolbarController<ReferencesView, ReferencesSearchToolBar, ReferencesSearchOptions>(this);
 
 			AddTopToolStrip(_toolbar = new ReferencesToolbar(this));
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgBranch"]; }
-		}
+		public override Image Image => CachedResources.Bitmaps["ImgBranch"];
 
 		protected override void AttachToRepository(Repository repository)
 		{
+			Assert.IsNotNull(repository);
+
 			_lstReferences.LoadData(Repository);
 			_lstReferences.Items[0].IsExpanded = true;
 			_lstReferences.Items[1].ExpandAll();
@@ -66,6 +68,8 @@ namespace gitter.Git.Gui.Views
 
 		protected override void DetachFromRepository(Repository repository)
 		{
+			Assert.IsNotNull(repository);
+
 			_lstReferences.LoadData(null);
 		}
 
@@ -74,11 +78,7 @@ namespace gitter.Git.Gui.Views
 			get
 			{
 				if(_lstReferences.SelectedItems.Count == 0) return null;
-				var branchItem = _lstReferences.SelectedItems[0] as BranchListItem;
-				if(branchItem != null) return branchItem.DataContext;
-				var tagItem = _lstReferences.SelectedItems[0] as TagListItem;
-				if(tagItem != null) return tagItem.DataContext;
-				return null;
+				return (_lstReferences.SelectedItems[0] as IRevisionPointerListItem)?.RevisionPointer;
 			}
 		}
 
@@ -106,14 +106,9 @@ namespace gitter.Git.Gui.Views
 		{
 			switch(e.KeyCode)
 			{
-				case Keys.F:
-					if(e.Modifiers == Keys.Control)
-					{
-						/*
-						ShowSearchToolBar();
-						e.IsInputKey = true;
-						*/
-					}
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					e.IsInputKey = true;
 					break;
 				case Keys.F5:
 					RefreshContent();
@@ -122,123 +117,13 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		private bool TestItem(IRevisionPointerListItem item, SearchOptions search)
-		{
-			var rev = item.RevisionPointer;
-			if(rev.FullName.Contains(search.Text)) return true;
-			if(rev.Dereference().HashString.Contains(search.Text)) return true;
-			return false;
-		}
-
-		/*
-		private bool Search(int start, SearchOptions search, int direction)
-		{
-			if(search.Text.Length == 0) return true;
-			int count = _lstReferences.Items.Count;
-			if(count == 0) return false;
-			int end;
-			if(direction == 1)
-			{
-				start = (start + 1) % count;
-				end = start - 1;
-				if(end < 0) end += count;
-			}
-			else
-			{
-				start = (start - 1);
-				if(start < 0) start += count;
-				end = (start + 1) % count;
-			}
-			while(start != end)
-			{
-				var item = _lstReferences.Items[start];
-				var revItem = item as IRevisionPointerListItem;
-				if(revItem != null)
-				{
-					if(TestItem(revItem, search))
-					{
-						item.FocusAndSelect();
-						return true;
-					}
-				}
-				if(direction == 1)
-				{
-					start = (start + 1) % count;
-				}
-				else
-				{
-					--start;
-					if(start < 0) start = count - 1;
-				}
-			}
-			return false;
-		}
-
-		public bool SearchFirst(SearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			return Search(-1, search, 1);
-		}
-
-		public bool SearchNext(SearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(_lstReferences.SelectedItems.Count == 0)
-			{
-				return Search(-1, search, 1);
-			}
-			var start = _lstReferences.Items.IndexOf(_lstReferences.SelectedItems[0]);
-			return Search(start, search, 1);
-		}
-
-		public bool SearchPrevious(SearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(_lstReferences.SelectedItems.Count == 0) return Search(-1, search, 1);
-			var start = _lstReferences.Items.IndexOf(_lstReferences.SelectedItems[0]);
-			return Search(start, search, -1);
-		}
+		public ISearch<ReferencesSearchOptions> Search { get; }
 
 		public bool SearchToolBarVisible
 		{
-			get { return _searchToolbar != null && _searchToolbar.Visible; }
-			set
-			{
-				if(value)
-				{
-					ShowSearchToolBar();
-				}
-				else
-				{
-					HideSearchToolBar();
-				}
-			}
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
 		}
-
-		private void ShowSearchToolBar()
-		{
-			if(_searchToolbar == null)
-			{
-				AddBottomToolStrip(_searchToolbar = new ReferencesSearchToolBar(this));
-			}
-			_searchToolbar.FocusSearchTextBox();
-		}
-
-		private void HideSearchToolBar()
-		{
-			if(_searchToolbar != null)
-			{
-				RemoveToolStrip(_searchToolbar);
-				_searchToolbar.Dispose();
-				_searchToolbar = null;
-			}
-		}
-		*/
 
 		protected override void SaveMoreViewTo(Section section)
 		{

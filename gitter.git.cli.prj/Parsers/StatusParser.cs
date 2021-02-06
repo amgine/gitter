@@ -184,39 +184,17 @@ namespace gitter.Git.AccessLayer.CLI
 			{
 				return ConflictType.None;
 			}
-			if(x == y)
+			return (x, y) switch
 			{
-				if(x == 'A') return ConflictType.BothAdded;
-				if(x == 'D') return ConflictType.BothDeleted;
-				if(x == 'U') return ConflictType.BothModified;
-				return ConflictType.Unknown;
-			}
-			else
-			{
-				switch(x)
-				{
-					case 'U':
-						switch(y)
-						{
-							case 'A': return ConflictType.AddedByThem;
-							case 'D': return ConflictType.DeletedByThem;
-							default: return ConflictType.Unknown;
-						}
-					case 'A':
-						switch(y)
-						{
-							case 'U': return ConflictType.AddedByUs;
-							default: return ConflictType.Unknown;
-						}
-					case 'D':
-						switch(y)
-						{
-							case 'U': return ConflictType.DeletedByUs;
-							default: return ConflictType.Unknown;
-						}
-					default: return ConflictType.Unknown;
-				}
-			}
+				('U', 'U') => ConflictType.BothModified,
+				('U', 'A') => ConflictType.AddedByThem,
+				('U', 'D') => ConflictType.DeletedByThem,
+				('A', 'U') => ConflictType.AddedByUs,
+				('A', 'A') => ConflictType.BothAdded,
+				('D', 'U') => ConflictType.DeletedByUs,
+				('D', 'D') => ConflictType.BothDeleted,
+				_ => ConflictType.Unknown,
+			};
 		}
 
 		private static bool IsUnmergedState(char x, char y)
@@ -297,7 +275,7 @@ namespace gitter.Git.AccessLayer.CLI
 					var y  = _line.Y;
 					var to = _line.To;
 
-					if(x == '?')
+					if(x is '?')
 					{
 						staged             = false;
 						unstaged           = true;
@@ -306,10 +284,10 @@ namespace gitter.Git.AccessLayer.CLI
 					}
 					else
 					{
-						if(x == 'C' || x == 'R')
+						if(x is 'C' or 'R')
 						{
 							var from = _line.From;
-							if(x == 'C')
+							if(x is 'C')
 							{
 								x = 'A';
 								stagedFileStatus = FileStatus.Added;
@@ -336,13 +314,13 @@ namespace gitter.Git.AccessLayer.CLI
 						}
 						else
 						{
-							if(x != ' ')
+							if(x is not ' ')
 							{
 								staged = true;
 								stagedFileStatus = CharToFileStatus(x);
 								AddStagedStats(stagedFileStatus, 1);
 							}
-							if(y != ' ')
+							if(y is not ' ')
 							{
 								unstaged = true;
 								unstagedFileStatus = CharToFileStatus(y);

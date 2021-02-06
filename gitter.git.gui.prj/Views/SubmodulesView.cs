@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,19 +21,20 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
-	partial class SubmodulesView : GitViewBase
+	partial class SubmodulesView : GitViewBase, ISearchableView<SubmodulesSearchOptions>
 	{
 		private readonly SubmodulesToolbar _toolBar;
+		private ISearchToolBarController _searchToolbar;
 
 		#region .ctor
 
@@ -42,7 +43,11 @@ namespace gitter.Git.Gui.Views
 		{
 			InitializeComponent();
 
-			Text = Resources.StrSubmodules;
+			Text   = Resources.StrSubmodules;
+			Search = new SubmodulesSearch(_lstSubmodules);
+
+			_searchToolbar = CreateSearchToolbarController<SubmodulesView, SubmodulesSearchToolBar, SubmodulesSearchOptions>(this);
+
 			_lstSubmodules.Text = Resources.StrsNoSubmodules;
 			_lstSubmodules.PreviewKeyDown += OnKeyDown;
 
@@ -67,6 +72,14 @@ namespace gitter.Git.Gui.Views
 
 		public override Image Image => CachedResources.Bitmaps["ImgSubmodule"];
 
+		public ISearch<SubmodulesSearchOptions> Search { get; }
+
+		public bool SearchToolBarVisible
+		{
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
+		}
+
 		public override void RefreshContent()
 		{
 			if(Repository != null)
@@ -85,6 +98,9 @@ namespace gitter.Git.Gui.Views
 		{
 			switch(e.KeyCode)
 			{
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					break;
 				case Keys.F5:
 					RefreshContent();
 					e.IsInputKey = true;

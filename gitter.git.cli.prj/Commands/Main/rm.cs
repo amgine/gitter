@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,39 +26,25 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class RmCommand : Command
 	{
 		public static ICommandArgument Recursive()
-		{
-			return new CommandFlag("-r");
-		}
+			=> new CommandFlag("-r");
 
 		public static ICommandArgument IgnoreUnmatch()
-		{
-			return new CommandFlag("--ignore-unmatch");
-		}
+			=> new CommandFlag("--ignore-unmatch");
 
 		public static ICommandArgument Cached()
-		{
-			return new CommandFlag("--cached");
-		}
+			=> new CommandFlag("--cached");
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public static ICommandArgument Force()
-		{
-			return new CommandFlag("--force");
-		}
+			=> new CommandFlag("--force");
 
 		public static ICommandArgument Quiet()
-		{
-			return CommandFlag.Quiet();
-		}
+			=> CommandFlag.Quiet();
 
 		public static ICommandArgument DryRun()
-		{
-			return CommandFlag.DryRun();
-		}
+			=> CommandFlag.DryRun();
 
 		public RmCommand()
 			: base("rm")

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,19 +35,19 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(content, nameof(content));
 
-			_content		= content;
-			Text			= content.Text;
-			Font			= GitterApplication.FontManager.UIFont;
-			BackColor		= GitterApplication.Style.ViewRenderer.BackgroundColor;
-			FormBorderStyle	= FormBorderStyle.None;
-			StartPosition	= FormStartPosition.Manual;
-			Padding			= new Padding(Renderer.FloatBorderSize);
-			ShowInTaskbar	= false;
-			ShowIcon		= false;
-			ControlBox		= false;
-			MinimizeBox		= false;
-			MaximizeBox		= false;
-			TopMost			= false;
+			_content        = content;
+			Text            = content.Text;
+			Font            = GitterApplication.FontManager.UIFont;
+			BackColor       = GitterApplication.Style.ViewRenderer.BackgroundColor;
+			FormBorderStyle = FormBorderStyle.None;
+			StartPosition   = FormStartPosition.Manual;
+			Padding         = new Padding(Renderer.FloatBorderSize);
+			ShowInTaskbar   = false;
+			ShowIcon        = false;
+			ControlBox      = false;
+			MinimizeBox     = false;
+			MaximizeBox     = false;
+			TopMost         = false;
 
 			var header = new PopupNotificationHeader()
 			{

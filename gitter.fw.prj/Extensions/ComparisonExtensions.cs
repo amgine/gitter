@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -34,10 +34,7 @@ namespace gitter.Framework.Extensions
 				_comparison = comparison;
 			}
 
-			int IComparer<T>.Compare(T x, T y)
-			{
-				return _comparison(x, y);
-			}
+			int IComparer<T>.Compare(T x, T y) => _comparison(x, y);
 		}
 
 		public static IComparer<T> AsComparer<T>(this Comparison<T> comparison)

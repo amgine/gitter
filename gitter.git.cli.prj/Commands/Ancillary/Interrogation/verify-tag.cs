@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,9 +28,7 @@ namespace gitter.Git.AccessLayer.CLI
 	{
 		/// <summary>Print the contents of the tag object before validating it.</summary>
 		public static ICommandArgument Verbose()
-		{
-			return CommandFlag.Verbose();
-		}
+			=> CommandFlag.Verbose();
 
 		public VerifyTagCommand()
 			: base("verify-tag")

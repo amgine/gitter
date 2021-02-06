@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -129,22 +129,16 @@ namespace gitter.Git.Gui
 			_rowHeight = 0;
 			var font = gitter.Framework.GitterApplication.FontManager.UIFont;
 			int maxW = 0;
-			using(var b = new Bitmap(1, 1))
+			foreach(var entry in textEntries)
 			{
-				using(var gx = Graphics.FromImage(b))
-				{
-					foreach(var entry in textEntries)
-					{
-						var mainSize = GitterApplication.TextRenderer.MeasureText(
-							gx, entry.Text, font, int.MaxValue, StringFormat.GenericTypographic);
-						int entryW1 = entry.Image != null ? entry.Image.Width + 3 : 0;
-						int entryW2 = (int)(mainSize.Width + .5f);
-						int entryH = (int)(mainSize.Height + .5f);
-						if(entryH > _rowHeight) _rowHeight = entryH;
-						int w = entryW1 + entryW2;
-						if(w > maxW) maxW = w;
-					}
-				}
+				var mainSize = GitterApplication.TextRenderer.MeasureText(
+					GraphicsUtility.MeasurementGraphics, entry.Text, font, int.MaxValue, StringFormat.GenericTypographic);
+				int entryW1 = entry.Image != null ? entry.Image.Width + 3 : 0;
+				int entryW2 = (int)(mainSize.Width + .5f);
+				int entryH = (int)(mainSize.Height + .5f);
+				if(entryH > _rowHeight) _rowHeight = entryH;
+				int w = entryW1 + entryW2;
+				if(w > maxW) maxW = w;
 			}
 			_size = new Size(HorizontalMargin * 2 + maxW, VerticalMargin * 2 + textEntries.Count * (_rowHeight + VerticalSpacing));
 		}

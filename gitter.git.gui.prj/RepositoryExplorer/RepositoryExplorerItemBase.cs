@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,7 +38,7 @@ namespace gitter.Git.Gui
 		protected RepositoryExplorerItemBase(Bitmap image, string text)
 		{
 			_image = image;
-			_text = text;
+			_text  = text;
 		}
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
@@ -64,7 +64,7 @@ namespace gitter.Git.Gui
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)

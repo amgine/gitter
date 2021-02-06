@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,6 +22,7 @@ namespace gitter.Git
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	using gitter.Framework;
 
@@ -96,7 +97,7 @@ namespace gitter.Git
 			Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, nameof(name));
 			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 			Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
-				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
+				Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Tag)));
 			Verify.Argument.IsNotNull(message, nameof(message));
 
 			var rev = revision.Dereference();
@@ -169,8 +170,32 @@ namespace gitter.Git
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.TagChanged))
 			{
-				Repository.Accessor.DeleteTag.Invoke(
-					new DeleteTagParameters(tag.Name));
+				Repository.Accessor.DeleteTag
+					.Invoke(new DeleteTagParameters(tag.Name));
+			}
+			RemoveObject(tag);
+		}
+
+		/// <summary>Delete tag.</summary>
+		/// <param name="tag">Tag to delete.</param>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="tag"/> == null.
+		/// </exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="tag"/> is not handled by this repository or deleted.
+		/// </exception>
+		/// <exception cref="T:gitter.Git.GitException">
+		/// Failed to delete <paramref name="tag"/>.
+		/// </exception>
+		internal async Task DeleteAsync(Tag tag)
+		{
+			Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
+
+			using(Repository.Monitor.BlockNotifications(
+				RepositoryNotifications.TagChanged))
+			{
+				await Repository.Accessor.DeleteTag
+					.InvokeAsync(new DeleteTagParameters(tag.Name));
 			}
 			RemoveObject(tag);
 		}
@@ -215,10 +240,29 @@ namespace gitter.Git
 		/// <param name="tag">Tag to refresh.</param>
 		internal void Refresh(Tag tag)
 		{
-			Verify.Argument.IsValidGitObject(tag, Repository, "tag");
+			Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
 
-			var tagData = Repository.Accessor.QueryTag.Invoke(
-				new QueryTagParameters(tag.Name));
+			var tagData = Repository.Accessor.QueryTag
+				.Invoke(new QueryTagParameters(tag.Name));
+			if(tagData != null)
+			{
+				ObjectFactories.UpdateTag(tag, tagData);
+			}
+			else
+			{
+				RemoveObject(tag);
+			}
+		}
+
+		/// <summary>Refresh tag's position (remove tag if it doesn't exist anymore and recreate if position differs).</summary>
+		/// <param name="tag">Tag to refresh.</param>
+		internal async Task RefreshAsync(Tag tag)
+		{
+			Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
+
+			var tagData = await Repository.Accessor.QueryTag
+				.InvokeAsync(new QueryTagParameters(tag.Name))
+				.ConfigureAwait(continueOnCapturedContext: false);
 			if(tagData != null)
 			{
 				ObjectFactories.UpdateTag(tag, tagData);

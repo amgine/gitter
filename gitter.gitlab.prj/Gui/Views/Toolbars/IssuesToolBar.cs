@@ -30,7 +30,10 @@ namespace gitter.GitLab.Gui
 	internal sealed class IssuesToolbar : ToolStrip
 	{
 		private readonly IssuesView _view;
-		private ToolStripButton _btnRefresh;
+		private readonly ToolStripButton _btnRefresh;
+		private readonly ToolStripButton _btnOpen;
+		private readonly ToolStripButton _btnClosed;
+		private readonly ToolStripButton _btnAll;
 
 		public IssuesToolbar(IssuesView view)
 		{
@@ -44,8 +47,44 @@ namespace gitter.GitLab.Gui
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
 			});
-
 			Items.Add(new ToolStripSeparator());
+			Items.Add(_btnOpen = new ToolStripButton(Resources.StrOpen)
+			{
+				Checked = view.IssueState == Api.IssueState.Opened,
+				AutoToolTip = false,
+			});
+			Items.Add(_btnClosed = new ToolStripButton(Resources.StrClosed)
+			{
+				Checked = view.IssueState == Api.IssueState.Closed,
+				AutoToolTip = false,
+			});
+			Items.Add(_btnAll = new ToolStripButton(Resources.StrAll)
+			{
+				Checked = view.IssueState == Api.IssueState.All,
+				AutoToolTip = false,
+			});
+
+			_btnOpen.Click += (s, e) =>
+			{
+				_btnClosed.Checked = false;
+				_btnAll.Checked    = false;
+				_btnOpen.Checked   = true;
+				_view.IssueState   = Api.IssueState.Opened;
+			};
+			_btnClosed.Click += (s, e) =>
+			{
+				_btnAll.Checked    = false;
+				_btnOpen.Checked   = false;
+				_btnClosed.Checked = true;
+				_view.IssueState   = Api.IssueState.Closed;
+			};
+			_btnAll.Click += (s, e) =>
+			{
+				_btnClosed.Checked = false;
+				_btnOpen.Checked   = false;
+				_btnAll.Checked    = true;
+				_view.IssueState   = Api.IssueState.All;
+			};
 		}
 
 		public ToolStripButton RefreshButton => _btnRefresh;

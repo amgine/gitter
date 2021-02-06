@@ -22,16 +22,11 @@ namespace gitter.Framework.Controls
 {
 	public class WebBrowserViewModel
 	{
-		private string _url;
-
 		public WebBrowserViewModel(string url)
 		{
-			_url = url;
+			Url = url;
 		}
 
-		public string Url
-		{
-			get { return _url; }
-		}
+		public string Url { get; }
 	}
 }

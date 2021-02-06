@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -139,14 +139,11 @@ namespace gitter.Framework.Options
 		public event EventHandler RequireElevationChanged;
 
 		private void OnRequireElevationChanged()
-		{
-			var handler = RequireElevationChanged;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+			=> RequireElevationChanged?.Invoke(this, EventArgs.Empty);
 
 		public bool RequireElevation
 		{
-			get { return _adminFeaturesChanged != 0; }
+			get => _adminFeaturesChanged != 0;
 		}
 
 		public Action ElevatedExecutionAction

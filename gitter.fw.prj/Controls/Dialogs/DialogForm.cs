@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -249,6 +249,12 @@ namespace gitter.Framework
 
 		private async Task<bool> ExecuteAsync()
 		{
+			var task = _async.ExecuteAsync();
+			if(task.IsCompleted)
+			{
+				return task.Result;
+			}
+
 			bool okEnabled     = _btnOK.Enabled;
 			bool cancelEnabled = _btnCancel.Enabled;
 			bool applyEnabled  = _btnApply.Enabled;
@@ -261,7 +267,7 @@ namespace gitter.Framework
 			}
 			try
 			{
-				return await _async.ExecuteAsync();
+				return await task;
 			}
 			finally
 			{
@@ -344,38 +350,38 @@ namespace gitter.Framework
 
 		public bool OkButtonEnabled
 		{
-			get { return _btnOK.Enabled; }
-			set { _btnOK.Enabled = value; }
+			get => _btnOK.Enabled;
+			set => _btnOK.Enabled = value;
 		}
 
 		public bool CancelButtonEnabled
 		{
-			get { return _btnCancel.Enabled; }
-			set { _btnCancel.Enabled = value; }
+			get => _btnCancel.Enabled;
+			set => _btnCancel.Enabled = value;
 		}
 
 		public bool ApplyButtonEnabled
 		{
-			get { return _btnApply.Enabled; }
-			set { _btnApply.Enabled = value; }
+			get => _btnApply.Enabled;
+			set => _btnApply.Enabled = value;
 		}
 
 		public string OKButtonText
 		{
-			get { return _btnOK.Text; }
-			set { _btnOK.Text = value; }
+			get => _btnOK.Text;
+			set => _btnOK.Text = value;
 		}
 
 		public string CancelButtonText
 		{
-			get { return _btnCancel.Text; }
-			set { _btnCancel.Text = value; }
+			get => _btnCancel.Text;
+			set => _btnCancel.Text = value;
 		}
 
 		public string ApplyButtonText
 		{
-			get { return _btnApply.Text; }
-			set { _btnApply.Text = value; }
+			get => _btnApply.Text;
+			set => _btnApply.Text = value;
 		}
 
 		public void ClickOk() => _btnOK_Click(_btnOK, EventArgs.Empty);
@@ -389,39 +395,34 @@ namespace gitter.Framework
 			var bmp = new Bitmap(width, height);
 			try
 			{
-				using(var g = Graphics.FromImage(bmp))
+				using var g = Graphics.FromImage(bmp);
+				g.Clear(SystemColors.Control);
+				g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+				var rc = new Rectangle(2, 2, width - 4, height - 4);
+				g.SmoothingMode = SmoothingMode.HighQuality;
+				if(hover)
 				{
-					g.Clear(SystemColors.Control);
-					g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-					var rc = new Rectangle(2, 2, width - 4, height - 4);
-					g.SmoothingMode = SmoothingMode.HighQuality;
-					using(var sf = new StringFormat(StringFormat.GenericTypographic)
+					using(var img = expanded ? Resources.ImgChevronCollapseHover : Resources.ImgChevronExpandHover)
 					{
-						LineAlignment = StringAlignment.Center,
-						Alignment = StringAlignment.Near,
-					})
-					{
-						if(hover)
-						{
-							using(var img = expanded?Resources.ImgChevronCollapseHover:Resources.ImgChevronExpandHover)
-							{
-								g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
-							}
-						}
-						else
-						{
-							using(var img = expanded?Resources.ImgChevronCollapse:Resources.ImgChevronExpand)
-							{
-								g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
-							}
-						}
-						rc.X += height + 2;
-						rc.Width -= height + 2;
-
-						GitterApplication.TextRenderer.DrawText(
-							g, text, font, SystemBrushes.WindowText, rc, sf);
+						g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
 					}
 				}
+				else
+				{
+					using(var img = expanded ? Resources.ImgChevronCollapse : Resources.ImgChevronExpand)
+					{
+						g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
+					}
+				}
+				rc.X += height + 2;
+				rc.Width -= height + 2;
+				using var sf = new StringFormat(StringFormat.GenericTypographic)
+				{
+					LineAlignment = StringAlignment.Center,
+					Alignment = StringAlignment.Near,
+				};
+				GitterApplication.TextRenderer.DrawText(
+					g, text, font, SystemBrushes.WindowText, rc, sf);
 			}
 			catch
 			{

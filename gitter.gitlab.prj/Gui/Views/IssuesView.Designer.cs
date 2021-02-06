@@ -45,7 +45,6 @@
 			this._lstIssues.Name = "_lstIssues";
 			this._lstIssues.Size = new System.Drawing.Size(615, 407);
 			this._lstIssues.TabIndex = 0;
-			this._lstIssues.Text = "No issues to display";
 			// 
 			// IssuesView
 			// 

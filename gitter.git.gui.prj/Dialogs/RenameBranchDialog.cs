@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -51,7 +51,7 @@ namespace gitter.Git.Gui.Dialogs
 		{
 			Verify.Argument.IsNotNull(branch, nameof(branch));
 			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
-				Resources.ExcObjectIsDeleted.UseAsFormat("Branch"));
+				Resources.ExcObjectIsDeleted.UseAsFormat(nameof(Branch)));
 
 			Branch = branch;
 

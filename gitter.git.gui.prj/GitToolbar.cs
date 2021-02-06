@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,9 +24,6 @@ namespace gitter.Git.Gui
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
-	
 	using gitter.Git.Gui.Dialogs;
 	using gitter.Git.Gui.Views;
 
@@ -129,7 +126,7 @@ namespace gitter.Git.Gui
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)
@@ -148,6 +145,8 @@ namespace gitter.Git.Gui
 
 		private void AttachToRepository(Repository repository)
 		{
+			Assert.IsNotNull(repository);
+
 			_repository = repository;
 			_mergeButton.Enabled = !repository.Head.IsDetached;
 			if(repository.Remotes.Count != 0)
@@ -194,6 +193,8 @@ namespace gitter.Git.Gui
 
 		private void DetachFromRepository(Repository repository)
 		{
+			Assert.IsNotNull(repository);
+
 			_fetchButton.DropDown.Items.Clear();
 			_pullButton.DropDown.Items.Clear();
 
@@ -359,10 +360,8 @@ namespace gitter.Git.Gui
 			bool advanced = Control.ModifierKeys == Keys.Shift;
 			if(advanced)
 			{
-				using(var dlg = new StashSaveDialog(_repository))
-				{
-					dlg.Run(this);
-				}
+				using var dlg = new StashSaveDialog(_repository);
+				dlg.Run(this);
 			}
 			else
 			{
@@ -418,60 +417,27 @@ namespace gitter.Git.Gui
 
 		#region Buttons
 
-		public ToolStripItem FetchButton
-		{
-			get { return _fetchButton; }
-		}
+		public ToolStripItem FetchButton => _fetchButton;
 
-		public ToolStripItem PullButton
-		{
-			get { return _pullButton; }
-		}
+		public ToolStripItem PullButton => _pullButton;
 
-		public ToolStripItem PushButton
-		{
-			get { return _pushButton; }
-		}
+		public ToolStripItem PushButton => _pushButton;
 
-		public ToolStripItem HistoryButton
-		{
-			get { return _historyButton; }
-		}
+		public ToolStripItem HistoryButton => _historyButton;
 
-		public ToolStripItem CommitButton
-		{
-			get { return _commitButton; }
-		}
+		public ToolStripItem CommitButton => _commitButton;
 
-		public ToolStripItem StashButton
-		{
-			get { return _stashButton; }
-		}
+		public ToolStripItem StashButton => _stashButton;
 
-		public ToolStripItem CleanButton
-		{
-			get { return _cleanButton; }
-		}
+		public ToolStripItem CleanButton => _cleanButton;
 
-		public ToolStripItem CheckoutButton
-		{
-			get { return _checkoutButton; }
-		}
+		public ToolStripItem CheckoutButton => _checkoutButton;
 
-		public ToolStripItem BranchButton
-		{
-			get { return _branchButton; }
-		}
+		public ToolStripItem BranchButton => _branchButton;
 
-		public ToolStripItem MergeButton
-		{
-			get { return _mergeButton; }
-		}
+		public ToolStripItem MergeButton => _mergeButton;
 
-		public ToolStripItem TagButton
-		{
-			get { return _tagButton; }
-		}
+		public ToolStripItem TagButton => _tagButton;
 
 		#endregion
 	}

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -20,7 +20,7 @@
 
 namespace gitter.Framework.Controls
 {
-	/// <summary>Determines whem <see cref="CustomListBox"/> raises <see cref="CustomListBox.ItemActivated"/> event.</summary>
+	/// <summary>Determines when <see cref="CustomListBox"/> raises <see cref="CustomListBox.ItemActivated"/> event.</summary>
 	public enum ItemActivation
 	{
 		/// <summary>Item is activated by double click.</summary>

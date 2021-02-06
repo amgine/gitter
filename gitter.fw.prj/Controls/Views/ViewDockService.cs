@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -42,9 +42,7 @@ namespace gitter.Framework.Controls
 		public event EventHandler ActiveViewChanged;
 
 		private void InvokeActiveViewChanged()
-		{
-			ActiveViewChanged?.Invoke(this, EventArgs.Empty);
-		}
+			=> ActiveViewChanged?.Invoke(this, EventArgs.Empty);
 
 		public ViewDockService(IWorkingEnvironment environment, ViewDockGrid grid, Section section)
 		{
@@ -63,9 +61,7 @@ namespace gitter.Framework.Controls
 		public ViewDockGrid Grid { get; }
 
 		public ICollection<IViewFactory> ViewFactories
-		{
-			get { return _factories.Values; }
-		}
+			=> _factories.Values;
 
 		public ViewBase ActiveView
 		{
@@ -104,7 +100,7 @@ namespace gitter.Framework.Controls
 			{
 				if(factory is T res) return res;
 			}
-			return default(T);
+			return default;
 		}
 
 		public void RegisterFactory(IViewFactory factory)

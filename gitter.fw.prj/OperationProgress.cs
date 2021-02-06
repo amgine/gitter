@@ -2,7 +2,7 @@
 {
 	public struct OperationProgress
 	{
-		public static readonly OperationProgress Completed = new OperationProgress() { ActionName = "Completed.", IsCompleted = true };
+		public static readonly OperationProgress Completed = new() { ActionName = "Completed.", IsCompleted = true };
 
 		public OperationProgress(string actionName)
 		{

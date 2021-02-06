@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -315,11 +315,7 @@ namespace gitter.Git.Gui.Controls
 						{
 							if(htr.Area == 0)
 							{
-								var viewer = FlowControl as DiffViewer;
-								if(viewer != null)
-								{
-									viewer.OnFileContextMenuRequested(DiffFile);
-								}
+								(FlowControl as DiffViewer)?.OnFileContextMenuRequested(DiffFile);
 							}
 						}
 					}
@@ -561,11 +557,11 @@ namespace gitter.Git.Gui.Controls
 			if(DiffFile == null) return Size.Empty;
 			if(_size.IsEmpty)
 			{
-				int maxLength = 0;
-				int lines = 0;
-				DiffLine longestLine = null;
+				int maxLength     = 0;
+				int lines         = 0;
+				var longestLine   = default(DiffLine);
 				int largestNumber = 0;
-				int maxCols = 0;
+				int maxCols       = 0;
 				foreach(var hunk in DiffFile)
 				{
 					foreach(var line in hunk)
@@ -589,15 +585,9 @@ namespace gitter.Git.Gui.Controls
 						}
 					}
 				}
-				int digits;
-				if(maxCols != 0)
-				{
-					digits = GetDecimalDigits(largestNumber);
-				}
-				else
-				{
-					digits = 0;
-				}
+				var digits = maxCols != 0
+					? GetDecimalDigits(largestNumber)
+					: 0;
 				var font = GitterApplication.FontManager.ViewerFont.Font;
 				int w = CellSize.Width * maxCols * digits + 2 * Margin;
 				if(longestLine != null)
@@ -738,6 +728,8 @@ namespace gitter.Git.Gui.Controls
 
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			var graphics = paintEventArgs.Graphics;
 			var rect = paintEventArgs.Bounds;
 			var clip = paintEventArgs.ClipRectangle;

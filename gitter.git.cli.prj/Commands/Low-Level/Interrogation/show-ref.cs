@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,49 +26,31 @@ namespace gitter.Git.AccessLayer.CLI
 	public sealed class ShowRefCommand : Command
 	{
 		public static ICommandArgument Head()
-		{
-			return new CommandFlag("--head");
-		}
+			=> new CommandFlag("--head");
 
 		public static ICommandArgument Dereference()
-		{
-			return new CommandFlag("--dereference");
-		}
+			=> new CommandFlag("--dereference");
 
 		public static ICommandArgument Tags()
-		{
-			return new CommandFlag("--tags");
-		}
+			=> new CommandFlag("--tags");
 
 		public static ICommandArgument Hash()
-		{
-			return new CommandFlag("--hash");
-		}
+			=> new CommandFlag("--hash");
 
 		public static ICommandArgument Hash(int n)
-		{
-			return new CommandParameterValue("--hash", n.ToString());
-		}
+			=> new CommandParameterValue("--hash", n.ToString());
 
 		public static ICommandArgument Heads()
-		{
-			return new CommandFlag("--heads");
-		}
+			=> new CommandFlag("--heads");
 
 		public static ICommandArgument Quiet()
-		{
-			return new CommandFlag("--quiet");
-		}
+			=> new CommandFlag("--quiet");
 
 		public static ICommandArgument Verify()
-		{
-			return new CommandFlag("--verify");
-		}
+			=> new CommandFlag("--verify");
 
 		public static ICommandArgument NoMoreOptions()
-		{
-			return CommandFlag.NoMoreOptions();
-		}
+			=> CommandFlag.NoMoreOptions();
 
 		public ShowRefCommand()
 			: base("show-ref")

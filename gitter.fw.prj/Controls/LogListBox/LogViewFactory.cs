@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,7 +26,7 @@ namespace gitter.Framework.Controls
 
 	public sealed class LogViewFactory : ViewFactoryBase
 	{
-		public static readonly new Guid Guid = new Guid("216F243F-0E79-4739-A88F-C2342E5975B6");
+		public static readonly new Guid Guid = new("216F243F-0E79-4739-A88F-C2342E5975B6");
 
 		/// <summary>Initializes a new instance of the <see cref="LogViewFactory"/> class.</summary>
 		public LogViewFactory()
@@ -39,8 +39,6 @@ namespace gitter.Framework.Controls
 		/// <param name="environment">Application working environment.</param>
 		/// <returns>Created view.</returns>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new LogView(environment);
-		}
+			=> new LogView(environment);
 	}
 }

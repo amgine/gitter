@@ -22,7 +22,6 @@ namespace gitter.GitLab.Gui
 {
 	using System;
 	using System.Drawing;
-	using System.Globalization;
 	using System.Windows.Forms;
 	
 	using gitter.Framework;
@@ -38,9 +37,9 @@ namespace gitter.GitLab.Gui
 		#region Data
 
 		private readonly IssuesToolbar _toolbar;
-		private GitLabServiceContext _serviceContext;
-		private IssuesSearchToolBar _searchToolbar;
+		private ISearchToolBarController _searchToolbar;
 		private IssuesListBinding _dataSource;
+		private IssueState _issueState;
 
 		#endregion
 
@@ -50,13 +49,19 @@ namespace gitter.GitLab.Gui
 			: base(Guids.IssuesViewGuid, environment)
 		{
 			InitializeComponent();
+			_lstIssues.Text = Resources.StrsNoIssuesToDisplay;
 
-			Text = Resources.StrIssues;
+			Text   = Resources.StrIssues;
+			Search = new IssuesSearch(_lstIssues);
+
+			_searchToolbar = CreateSearchToolbarController<IssuesView, IssuesSearchToolBar, IssuesSearchOptions>(this);
 
 			AddTopToolStrip(_toolbar = new IssuesToolbar(this));
 
 			_lstIssues.ItemActivated += OnItemActivated;
 			_lstIssues.PreviewKeyDown += OnKeyDown;
+
+			_toolbar.RefreshButton.Click += (s, e) => DataSource?.ReloadData();
 		}
 
 		#endregion
@@ -79,6 +84,22 @@ namespace gitter.GitLab.Gui
 			}
 		}
 
+		public IssueState IssueState
+		{
+			get => _issueState;
+			set
+			{
+				if(_issueState != value)
+				{
+					_issueState = value;
+					if(DataSource != null)
+					{
+						DataSource.IssueState = value;
+					}
+				}
+			}
+		}
+
 		#endregion
 
 		#region Methods
@@ -90,7 +111,7 @@ namespace gitter.GitLab.Gui
 
 		protected override void OnContextAttached(GitLabServiceContext serviceContext)
 		{
-			DataSource = new IssuesListBinding(serviceContext, _lstIssues);
+			DataSource = new IssuesListBinding(serviceContext, _lstIssues, IssueState);
 		}
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
@@ -103,6 +124,8 @@ namespace gitter.GitLab.Gui
 
 		private void ShowIssueDetails(Issue issue)
 		{
+			Assert.IsNotNull(issue);
+
 			Utility.OpenUrl(issue.WebUrl);
 		}
 
@@ -131,12 +154,9 @@ namespace gitter.GitLab.Gui
 		{
 			switch(e.KeyCode)
 			{
-				case Keys.F:
-					if(e.Modifiers == Keys.Control)
-					{
-						ShowSearchToolBar();
-						e.IsInputKey = true;
-					}
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					e.IsInputKey = true;
 					break;
 				case Keys.F5:
 					RefreshContent();
@@ -156,122 +176,12 @@ namespace gitter.GitLab.Gui
 
 		#region ISearchableView
 
-		private bool TestItem(IssueListItem item, IssuesSearchOptions search)
-		{
-			var issue = item.DataContext;
-			if(issue.Title.Contains(search.Text)) return true;
-			if(int.TryParse(search.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
-			{
-				if(issue.Iid == id) return true;
-			}
-			return false;
-		}
-
-		private bool Search(int start, IssuesSearchOptions search, int direction)
-		{
-			if(search.Text.Length == 0) return true;
-			int count = _lstIssues.Items.Count;
-			if(count == 0) return false;
-			int end;
-			if(direction == 1)
-			{
-				start = (start + 1) % count;
-				end = start - 1;
-				if(end < 0) end += count;
-			}
-			else
-			{
-				start = (start - 1);
-				if(start < 0) start += count;
-				end = (start + 1) % count;
-			}
-			while(start != end)
-			{
-				var item = _lstIssues.Items[start] as IssueListItem;
-				if(item != null)
-				{
-					if(TestItem(item, search))
-					{
-						item.FocusAndSelect();
-						return true;
-					}
-				}
-				if(direction == 1)
-				{
-					start = (start + 1) % count;
-				}
-				else
-				{
-					--start;
-					if(start < 0) start = count - 1;
-				}
-			}
-			return false;
-		}
-
-		public bool SearchFirst(IssuesSearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			return Search(-1, search, 1);
-		}
-
-		public bool SearchNext(IssuesSearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(_lstIssues.SelectedItems.Count == 0)
-			{
-				return Search(-1, search, 1);
-			}
-			var start = _lstIssues.Items.IndexOf(_lstIssues.SelectedItems[0]);
-			return Search(start, search, 1);
-		}
-
-		public bool SearchPrevious(IssuesSearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(_lstIssues.SelectedItems.Count == 0) return Search(-1, search, 1);
-			var start = _lstIssues.Items.IndexOf(_lstIssues.SelectedItems[0]);
-			return Search(start, search, -1);
-		}
+		public ISearch<IssuesSearchOptions> Search { get; }
 
 		public bool SearchToolBarVisible
 		{
-			get => _searchToolbar != null && _searchToolbar.Visible;
-			set
-			{
-				if(value)
-				{
-					ShowSearchToolBar();
-				}
-				else
-				{
-					HideSearchToolBar();
-				}
-			}
-		}
-
-		private void ShowSearchToolBar()
-		{
-			if(_searchToolbar == null)
-			{
-				AddBottomToolStrip(_searchToolbar = new IssuesSearchToolBar(this));
-			}
-			_searchToolbar.FocusSearchTextBox();
-		}
-
-		private void HideSearchToolBar()
-		{
-			if(_searchToolbar != null)
-			{
-				RemoveToolStrip(_searchToolbar);
-				_searchToolbar.Dispose();
-				_searchToolbar = null;
-			}
+			get => _searchToolbar.IsVisible;
+			set => _searchToolbar.IsVisible = value;
 		}
 
 		#endregion

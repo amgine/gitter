@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,20 +23,16 @@ namespace gitter.GitLab.Gui
 	using System;
 	using System.ComponentModel;
 
-	[ToolboxItem(false)]
-	internal sealed class IssuesSearchToolBar : SearchToolBar<IssuesView, IssuesSearchOptions>
-	{
-		public IssuesSearchToolBar(IssuesView view)
-			: base(view)
-		{
-		}
+	using gitter.Framework.Controls;
 
+	[ToolboxItem(false)]
+	internal sealed class IssuesSearchToolBar : SearchToolBar<IssuesSearchOptions>
+	{
 		protected override IssuesSearchOptions CreateSearchOptions()
-		{
-			return new IssuesSearchOptions()
+			=> new IssuesSearchOptions
 			{
-				Text = SearchText,
+				Text      = SearchText,
+				MatchCase = MatchCase,
 			};
-		}
 	}
 }

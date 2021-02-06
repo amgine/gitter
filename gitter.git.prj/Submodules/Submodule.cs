@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -136,6 +136,8 @@ namespace gitter.Git
 
 		public Task UpdateAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
+			Verify.State.IsNotDeleted(this);
+
 			progress?.Report(new OperationProgress(Resources.StrsUpdatingSubmodule.AddEllipsis()));
 			var parameters = GetUpdateParameters();
 			return Repository.Accessor.UpdateSubmodule.InvokeAsync(parameters, progress, cancellationToken);
@@ -150,14 +152,19 @@ namespace gitter.Git
 			Repository.Submodules.Refresh();
 		}
 
-		public async Task SyncAsync(bool recursive = true, IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		public async Task SyncAsync(bool recursive = true,
+			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 		{
+			Verify.State.IsNotDeleted(this);
+
 			progress?.Report(new OperationProgress(Resources.StrsSynchronizingSubmodule.AddEllipsis()));
 			var parameters = GetSyncParameters(recursive);
 			await Repository.Accessor.SyncSubmodule
 				.InvokeAsync(parameters, progress, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
-			Repository.Submodules.Refresh();
+			await Repository.Submodules
+				.RefreshAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 
 		internal void UpdateInfo(string path, string url)

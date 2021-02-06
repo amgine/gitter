@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -52,16 +52,16 @@ namespace gitter.Git.Gui.Views
 
 		#region Events
 
-		private static readonly object CurrentDirectoryChangedEvent = new object();
+		private static readonly object CurrentDirectoryChangedEvent = new();
 
 		public event EventHandler CurrentDirectoryChanged
 		{
-			add { Events.AddHandler(CurrentDirectoryChangedEvent, value); }
-			remove { Events.RemoveHandler(CurrentDirectoryChangedEvent, value); }
+			add    => Events.AddHandler    (CurrentDirectoryChangedEvent, value);
+			remove => Events.RemoveHandler (CurrentDirectoryChangedEvent, value);
 		}
 
-		protected virtual void OnCurrentDirectoryChanged()
-			=> ((EventHandler)Events[CurrentDirectoryChangedEvent])?.Invoke(this, EventArgs.Empty);
+		protected virtual void OnCurrentDirectoryChanged(EventArgs e)
+			=> ((EventHandler)Events[CurrentDirectoryChangedEvent])?.Invoke(this, e);
 
 		#endregion
 
@@ -132,7 +132,7 @@ namespace gitter.Git.Gui.Views
 
 		private TreeListsBinding DataSource
 		{
-			get { return _dataSource; }
+			get => _dataSource;
 			set
 			{
 				if(_dataSource != value)
@@ -160,7 +160,7 @@ namespace gitter.Git.Gui.Views
 
 		public TreeDirectory CurrentDirectory
 		{
-			get { return _currentDirectory; }
+			get => _currentDirectory;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -171,7 +171,7 @@ namespace gitter.Git.Gui.Views
 					if(item == null) throw new ArgumentException(nameof(value));
 					item.FocusAndSelect();
 					_currentDirectory = value;
-					OnCurrentDirectoryChanged();
+					OnCurrentDirectoryChanged(EventArgs.Empty);
 				}
 			}
 		}
@@ -198,83 +198,95 @@ namespace gitter.Git.Gui.Views
 			//}
 		}
 
+		private ContextMenuStrip GetFileContextMenu(IRevisionPointer revision, TreeFile file)
+		{
+			Assert.IsNotNull(revision);
+			Assert.IsNotNull(file);
+
+			var menu = new ContextMenuStrip();
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
+					GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
+					GuiItemFactory.GetSaveAsItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
+					new ToolStripSeparator(),
+					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
+						}),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetBlameItem<ToolStripMenuItem>(revision, file),
+					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(revision, file),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(revision, file),
+				});
+			return menu;
+		}
+
+		private ContextMenuStrip GetDirectoryContextMenu(CustomListBoxItem item, IRevisionPointer revision, TreeDirectory directory)
+		{
+			Assert.IsNotNull(revision);
+			Assert.IsNotNull(directory);
+
+			var menu = new ContextMenuStrip();
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					new ToolStripMenuItem(Resources.StrOpen, null, (_, _) => item.Activate()),
+					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(revision, directory),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(revision, directory),
+				});
+			return menu;
+		}
+
+		private ContextMenuStrip GetCommitContextMenu(IRevisionPointer revision, TreeCommit commit)
+		{
+			Assert.IsNotNull(revision);
+			Assert.IsNotNull(commit);
+
+			var menu = new ContextMenuStrip();
+			menu.Items.AddRange(
+				new ToolStripItem[]
+				{
+					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(revision, commit),
+					new ToolStripSeparator(),
+					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+						new ToolStripItem[]
+						{
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, commit.Name),
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, commit.RelativePath),
+							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, commit.FullPath),
+						}),
+					new ToolStripSeparator(),
+					GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(revision, commit),
+				});
+			return menu;
+		}
+
 		private void OnContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
 		{
-			var vm = ViewModel as TreeViewModel;
-			var rts = vm != null ? vm.TreeSource : null;
-			if(rts != null)
+			Assert.IsNotNull(e);
+
+			var rts = (ViewModel as TreeViewModel)?.TreeSource;
+			if(rts == null) return;
+
+			var menu = ((ITreeItemListItem)e.Item).TreeItem switch
 			{
-				var item = ((ITreeItemListItem)e.Item);
-				var file = item.TreeItem as TreeFile;
-				if(file != null)
-				{
-					var menu = new ContextMenuStrip();
-					menu.Items.AddRange(
-						new ToolStripItem[]
-						{
-							GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
-							GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
-							GuiItemFactory.GetSaveAsItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
-							new ToolStripSeparator(),
-							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-								new ToolStripItem[]
-								{
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
-								}),
-							new ToolStripSeparator(),
-							GuiItemFactory.GetBlameItem<ToolStripMenuItem>(rts.Revision, file),
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, file),
-							new ToolStripSeparator(),
-							GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, file),
-						});
-					Utility.MarkDropDownForAutoDispose(menu);
-					e.ContextMenu = menu;
-					e.OverrideDefaultMenu = true;
-					return;
-				}
-				var directory = item.TreeItem as TreeDirectory;
-				if(directory != null)
-				{
-					var menu = new ContextMenuStrip();
-					menu.Items.AddRange(
-						new ToolStripItem[]
-						{
-							new ToolStripMenuItem(Resources.StrOpen, null, (s, args) => e.Item.Activate()),
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, directory),
-							new ToolStripSeparator(),
-							GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, directory),
-						});
-					Utility.MarkDropDownForAutoDispose(menu);
-					e.ContextMenu = menu;
-					e.OverrideDefaultMenu = true;
-					return;
-				}
-				var commit = ((ITreeItemListItem)e.Item).TreeItem as TreeCommit;
-				if(commit != null)
-				{
-					var menu = new ContextMenuStrip();
-					menu.Items.AddRange(
-						new ToolStripItem[]
-						{
-							GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(rts.Revision, commit),
-							new ToolStripSeparator(),
-							new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-								new ToolStripItem[]
-								{
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, commit.Name),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, commit.RelativePath),
-									GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, commit.FullPath),
-								}),
-							new ToolStripSeparator(),
-							GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(rts.Revision, commit),
-						});
-					Utility.MarkDropDownForAutoDispose(menu);
-					e.ContextMenu = menu;
-					e.OverrideDefaultMenu = true;
-					return;
-				}
+				TreeFile      file      => GetFileContextMenu(rts.Revision, file),
+				TreeDirectory directory => GetDirectoryContextMenu(e.Item, rts.Revision, directory),
+				TreeCommit    commit    => GetCommitContextMenu(rts.Revision, commit),
+				_ => default,
+			};
+			if(menu != null)
+			{
+				Utility.MarkDropDownForAutoDispose(menu);
+				e.ContextMenu = menu;
+				e.OverrideDefaultMenu = true;
 			}
 		}
 
@@ -283,7 +295,7 @@ namespace gitter.Git.Gui.Views
 			if(_currentDirectory != directory)
 			{
 				_currentDirectory = directory;
-				OnCurrentDirectoryChanged();
+				OnCurrentDirectoryChanged(EventArgs.Empty);
 			}
 		}
 
@@ -291,12 +303,12 @@ namespace gitter.Git.Gui.Views
 		{
 			if(_directoryTree.SelectedItems.Count != 0)
 			{
-				var treeItem = (_directoryTree.SelectedItems[0] as TreeDirectoryListItem);
+				var treeItem = (TreeDirectoryListItem)_directoryTree.SelectedItems[0];
 				if(_currentDirectory != treeItem.DataContext)
 				{
 					_currentDirectory = treeItem.DataContext;
 					_treeContent.SetTree(_currentDirectory, TreeListBoxMode.ShowDirectoryContent);
-					OnCurrentDirectoryChanged();
+					OnCurrentDirectoryChanged(EventArgs.Empty);
 				}
 			}
 		}
@@ -305,8 +317,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.AttachViewModel(viewModel);
 
-			var vm = viewModel as TreeViewModel;
-			if(vm != null)
+			if(viewModel is TreeViewModel vm)
 			{
 				_treeSource = vm.TreeSource;
 				if(_treeSource != null)
@@ -326,8 +337,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.DetachViewModel(viewModel);
 
-			var vm = viewModel as TreeViewModel;
-			if(vm != null)
+			if(viewModel is TreeViewModel)
 			{
 				_treeSource = null;
 				Text = Resources.StrTree;
@@ -337,14 +347,7 @@ namespace gitter.Git.Gui.Views
 
 		private void OnTreeChanged(object sender, EventArgs e)
 		{
-			if(DataSource != null && DataSource.Data != null)
-			{
-				UpdateCurrentDirectory(DataSource.Data.Root);
-			}
-			else
-			{
-				UpdateCurrentDirectory(null);
-			}
+			UpdateCurrentDirectory(DataSource?.Data?.Root);
 		}
 
 		private TreeDirectoryListItem FindDirectoryEntry(TreeDirectory folder)
@@ -365,29 +368,27 @@ namespace gitter.Git.Gui.Views
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
-			var item = e.Item as TreeFileListItem;
-			if(item != null)
+			Assert.IsNotNull(e);
+
+			switch(e.Item)
 			{
-				var fileName = DataSource.Data.ExtractBlobToTemporaryFile(item.DataContext.RelativePath);
-				if(!string.IsNullOrWhiteSpace(fileName))
-				{
-					var process = Utility.CreateProcessFor(fileName);
-					process.EnableRaisingEvents = true;
-					process.Exited += OnFileViewerProcessExited;
-					process.Start();
-				}
-			}
-			else
-			{
-				var folderItem = e.Item as TreeDirectoryListItem;
-				if(folderItem != null)
-				{
-					var directoryEntry = FindDirectoryEntry(folderItem.DataContext);
+				case TreeFileListItem fileItem:
+					var fileName = DataSource.Data.ExtractBlobToTemporaryFile(fileItem.DataContext.RelativePath);
+					if(!string.IsNullOrWhiteSpace(fileName))
+					{
+						var process = Utility.CreateProcessFor(fileName);
+						process.EnableRaisingEvents = true;
+						process.Exited += OnFileViewerProcessExited;
+						process.Start();
+					}
+					break;
+				case TreeDirectoryListItem directoryItem:
+					var directoryEntry = FindDirectoryEntry(directoryItem.DataContext);
 					if(directoryEntry != null)
 					{
 						if(directoryEntry.IsSelected)
 						{
-							_treeContent.SetTree(folderItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
+							_treeContent.SetTree(directoryItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
 						}
 						else
 						{
@@ -396,11 +397,11 @@ namespace gitter.Git.Gui.Views
 					}
 					else
 					{
-						_treeContent.SetTree(folderItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
+						_treeContent.SetTree(directoryItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
 					}
-					_currentDirectory = folderItem.DataContext;
-					OnCurrentDirectoryChanged();
-				}
+					_currentDirectory = directoryItem.DataContext;
+					OnCurrentDirectoryChanged(EventArgs.Empty);
+					break;
 			}
 		}
 
@@ -425,13 +426,7 @@ namespace gitter.Git.Gui.Views
 			_treeContent.Clear();
 		}
 
-		public override void RefreshContent()
-		{
-			if(DataSource != null)
-			{
-				DataSource.ReloadData();
-			}
-		}
+		public override void RefreshContent() => DataSource?.ReloadData();
 
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{

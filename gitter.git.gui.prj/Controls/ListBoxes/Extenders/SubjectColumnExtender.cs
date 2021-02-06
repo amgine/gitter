@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -66,7 +66,7 @@ namespace gitter.Git.Gui.Controls
 			int width = Width - hmargin * 2;
 			int yoffset = 0;
 
-			if(_chkAlignToGraph != null) _chkAlignToGraph.Dispose();
+			_chkAlignToGraph?.Dispose();
 			_chkAlignToGraph = Style.CreateCheckBox();
 			_chkAlignToGraph.Text = Resources.StrAlignToGraph;
 			_chkAlignToGraph.Image = CachedResources.Bitmaps["ImgAlignToGraph"];
@@ -87,7 +87,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			yoffset += height + vspacing;
 
-			if(_chkLocalBranches != null) _chkLocalBranches.Dispose();
+			_chkLocalBranches?.Dispose();
 			_chkLocalBranches = Style.CreateCheckBox();
 			_chkLocalBranches.Text = Resources.StrLocalBranches;
 			_chkLocalBranches.Image = CachedResources.Bitmaps["ImgBranch"];
@@ -97,7 +97,7 @@ namespace gitter.Git.Gui.Controls
 			_chkLocalBranches.IsCheckedChanged += OnLocalBranchesCheckedChanged;
 			yoffset += height + vspacing;
 
-			if(_chkRemoteBranches != null) _chkRemoteBranches.Dispose();
+			_chkRemoteBranches?.Dispose();
 			_chkRemoteBranches = Style.CreateCheckBox();
 			_chkRemoteBranches.Text = Resources.StrRemoteBranches;
 			_chkRemoteBranches.Image = CachedResources.Bitmaps["ImgBranchRemote"];
@@ -107,7 +107,7 @@ namespace gitter.Git.Gui.Controls
 			_chkRemoteBranches.IsCheckedChanged += OnRemoteBranchesCheckedChanged;
 			yoffset += height + vspacing;
 
-			if(_chkTags != null) _chkTags.Dispose();
+			_chkTags?.Dispose();
 			_chkTags = Style.CreateCheckBox();
 			_chkTags.Text = Resources.StrTags;
 			_chkTags.Image = CachedResources.Bitmaps["ImgTag"];
@@ -117,7 +117,7 @@ namespace gitter.Git.Gui.Controls
 			_chkTags.IsCheckedChanged += OnTagsCheckedChanged;
 			yoffset += height + vspacing;
 
-			if(_chkStash != null) _chkStash.Dispose();
+			_chkStash?.Dispose();
 			_chkStash = Style.CreateCheckBox();
 			_chkStash.Text = Resources.StrStash;
 			_chkStash.Image = CachedResources.Bitmaps["ImgStash"];

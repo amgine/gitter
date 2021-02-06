@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -39,7 +39,7 @@ namespace gitter.Git
 		public RevisionTreeSource(IRevisionPointer revision)
 		{
 			Verify.Argument.IsNotNull(revision, nameof(revision));
-			Verify.Argument.IsFalse(revision.IsDeleted, nameof(revision));
+			Verify.Argument.IsFalse(revision.IsDeleted, nameof(revision), "Specified revision is deleted.");
 
 			_revision = revision;
 		}
@@ -76,44 +76,19 @@ namespace gitter.Git
 		#region Methods
 
 		public override Tree GetTree()
-		{
-			return new Tree(Revision.Repository, Revision.FullName);
-		}
+			=> new Tree(Revision.Repository, Revision.FullName);
 
 		public override Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			return Tree.GetAsync(Revision.Repository, Revision.FullName, progress, cancellationToken);
-		}
+			=> Tree.GetAsync(Revision.Repository, Revision.FullName, progress, cancellationToken);
 
-		/// <summary>
-		/// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-		/// </summary>
-		/// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
-		/// <returns>
-		///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-		/// </returns>
+		/// <inheritdoc/>
 		public override bool Equals(object obj)
-		{
-			if(obj == null) return false;
-			var rts = obj as RevisionTreeSource;
-			if(rts == null) return false;
-			return (rts._revision == _revision);
-		}
+			=> obj is RevisionTreeSource other && _revision == other._revision;
 
-		/// <summary>
-		/// Returns a hash code for this instance.
-		/// </summary>
-		/// <returns>
-		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-		/// </returns>
+		/// <inheritdoc/>
 		public override int GetHashCode() => _revision.GetHashCode();
 
-		/// <summary>
-		/// Returns a <see cref="System.String"/> that represents this instance.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="System.String"/> that represents this instance.
-		/// </returns>
+		/// <inheritdoc/>
 		public override string ToString() => _revision.Pointer;
 
 		#endregion
