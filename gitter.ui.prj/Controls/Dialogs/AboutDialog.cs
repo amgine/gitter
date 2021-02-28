@@ -32,6 +32,7 @@ namespace gitter
 	public partial class AboutDialog : DialogBase
 	{
 		private readonly IUpdateChannel _updateChannel;
+		private IUpdateVersion _latestVersion;
 
 		public AboutDialog()
 		{
@@ -42,7 +43,7 @@ namespace gitter
 
 			_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
 
-			_updateChannel = new gitter.Git.GitRepositoryUpdateChannel("git://github.com/amgine/gitter.git", "master");
+			_updateChannel = new GithubReleasesUpdateChannel();
 
 			Margin = new Padding(0, 0, 0, 0);
 		}
@@ -81,43 +82,30 @@ namespace gitter
 			Utility.OpenUrl(@"mailto://" + ((LinkLabel)sender).Text);
 		}
 
-		private void OnVersionCheckCompleted(IAsyncResult ar)
+		private async void OnCheckForUpdatesClick(object sender, EventArgs e)
 		{
-			var f = (Func<Version>)ar.AsyncState;
-			Version version = null;
+			_btnCheckForUpdates.Visible = false;
+			_lblUpdateStatus.Text = Resources.StrsCheckingForUpdates.AddEllipsis();
+			_lblUpdateStatus.Visible = true;
+			_latestVersion = default;
 			try
 			{
-				version = f.EndInvoke(ar);
+				_latestVersion = await _updateChannel.GetLatestVersionAsync();
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch
 			{
 			}
-			if(IsDisposed)
-			{
-				return;
-			}
-			try
-			{
-				BeginInvoke(new Action<Version>(OnVersionCheckCompleted), version);
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-			}
-		}
-
-		private void OnVersionCheckCompleted(Version version)
-		{
 			if(IsDisposed) return;
-			if(version != null)
+			if(_latestVersion != null)
 			{
 				var asmVersion = Assembly.GetExecutingAssembly().GetName().Version;
-				if(version <= asmVersion)
+				if(_latestVersion.Version <= asmVersion)
 				{
 					_lblUpdateStatus.Text = Resources.StrsYourVersionIsUpToDate;
 				}
 				else
 				{
-					_lblUpdateStatus.Text = Resources.StrsVersionIsAvailable.UseAsFormat(version);
+					_lblUpdateStatus.Text = Resources.StrsVersionIsAvailable.UseAsFormat(_latestVersion.Version);
 					_btnUpdate.Visible = true;
 				}
 			}
@@ -127,22 +115,13 @@ namespace gitter
 			}
 		}
 
-		private void OnCheckForUpdatesClick(object sender, EventArgs e)
-		{
-			_btnCheckForUpdates.Visible = false;
-			_lblUpdateStatus.Text = Resources.StrsCheckingForUpdates.AddEllipsis();
-			_lblUpdateStatus.Visible = true;
-			var f = new Func<Version>(_updateChannel.CheckVersion);
-			f.BeginInvoke(OnVersionCheckCompleted, f);
-		}
-
 		private void OnUpdateClick(object sender, EventArgs e)
 		{
 			if(!HelperExecutables.CheckIfUpdaterIsRunning())
 			{
 				try
 				{
-					_updateChannel.Update();
+					_latestVersion?.Update();
 					_btnUpdate.Enabled = false;
 				}
 				catch(Exception exc) when(!exc.IsCritical())

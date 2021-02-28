@@ -29,7 +29,7 @@ namespace gitter.Framework.CLI
 	{
 		public static class CancellationMethods
 		{
-			public static void KillProcess(Process process)
+			public static Action<Process> KillProcess { get; } = static process =>
 			{
 				Verify.Argument.IsNotNull(process, nameof(process));
 
@@ -40,13 +40,12 @@ namespace gitter.Framework.CLI
 				catch(Exception exc) when(!exc.IsCritical())
 				{
 				}
-			}
+			};
 
-			public static void AllowToExecute(Process process)
+			public static Action<Process> AllowToExecute { get; } = static process =>
 			{
 				Verify.Argument.IsNotNull(process, nameof(process));
-
-			}
+			};
 		}
 	}
 

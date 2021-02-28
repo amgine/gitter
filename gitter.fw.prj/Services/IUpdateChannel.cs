@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,18 +18,16 @@
  */
 #endregion
 
-using System;
-
 namespace gitter.Framework.Services
 {
+	using System;
+	using System.Threading.Tasks;
+
 	/// <summary>gitter update channel.</summary>
 	public interface IUpdateChannel
 	{
 		/// <summary>Check latest gitter version on this channel.</summary>
 		/// <returns>Latest gitter version.</returns>
-		Version CheckVersion();
-
-		/// <summary>Update gitter using this channel.</summary>
-		void Update();
+		Task<IUpdateVersion> GetLatestVersionAsync();
 	}
 }

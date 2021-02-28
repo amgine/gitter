@@ -694,7 +694,7 @@ namespace gitter.Framework.Controls
 
 		public int ItemHeight
 		{
-			get { return _itemHeight; }
+			get => _itemHeight;
 			set
 			{
 				Verify.Argument.IsPositive(value, nameof(value));

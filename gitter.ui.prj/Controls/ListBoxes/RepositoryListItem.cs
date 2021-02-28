@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,10 +35,13 @@ namespace gitter
 
 	internal sealed class RepositoryListItem : CustomListBoxItem<RepositoryLink>
 	{
-		private static readonly Bitmap ImgRepositorySmall = CachedResources.Bitmaps["ImgRepository"];
-		private static readonly Bitmap ImgRepositoryLarge = CachedResources.Bitmaps["ImgRepositoryLarge"];
+		private static readonly Bitmap ImgRepositorySmall            = CachedResources.Bitmaps["ImgRepository"];
+		private static readonly Bitmap ImgRepositoryLarge            = CachedResources.Bitmaps["ImgRepositoryLarge"];
+		private static readonly Bitmap ImgRepositoryUnavailableLarge = CachedResources.Bitmaps["ImgRepositoryUnavailableLarge"];
 
 		private static readonly StringFormat PathStringFormat;
+
+		private bool? _exists;
 
 		static RepositoryListItem()
 		{
@@ -51,6 +54,30 @@ namespace gitter
 			: base(rlink)
 		{
 			Verify.Argument.IsNotNull(rlink, nameof(rlink));
+		}
+
+		private bool CheckExists()
+		{
+			try
+			{
+				return Directory.Exists(DataContext.Path);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		private bool Exists
+		{
+			get
+			{
+				if(!_exists.HasValue)
+				{
+					_exists = CheckExists();
+				}
+				return _exists.Value;
+			}
 		}
 
 		private string Name
@@ -74,6 +101,8 @@ namespace gitter
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
@@ -87,13 +116,18 @@ namespace gitter
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
 					paintEventArgs.PaintImageAndText(ImgRepositorySmall, DataContext.Path, paintEventArgs.Brush, PathStringFormat);
 					break;
 				case 1:
-					paintEventArgs.PaintImage(ImgRepositoryLarge);
+					var icon = Exists
+						? ImgRepositoryLarge
+						: ImgRepositoryUnavailableLarge;
+					paintEventArgs.PaintImage(icon);
 					var cy = paintEventArgs.Bounds.Y + 2;
 					GitterApplication.TextRenderer.DrawText(
 						paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, 36, cy);
@@ -118,6 +152,8 @@ namespace gitter
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			var menu = new RepositoryMenu(this);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;

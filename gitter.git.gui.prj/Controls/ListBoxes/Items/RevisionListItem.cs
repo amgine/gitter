@@ -65,21 +65,16 @@ namespace gitter.Git.Gui.Controls
 		private static bool IsAlignToGraphEnabled(CustomListBoxColumn column)
 			=> column is SubjectColumn subjectColumn && subjectColumn.AlignToGraph;
 
-		private void DrawBranchDragImage(Branch branch, Graphics graphics)
+		private void DrawBranchDragImage(Branch branch, Graphics graphics, Size size)
 		{
-			int width = GlobalBehavior.GraphStyle.MeasureBranch(
-				graphics, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
-			if(width > 0)
-			{
-				graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-				graphics.TextContrast      = GraphicsUtility.TextContrast;
-				GlobalBehavior.GraphStyle.DrawBranch(
-					graphics,
-					ListBox.Font,
-					GitterApplication.TextRenderer.LeftAlign,
-					0, 0, width, 21,
-					true, branch);
-			}
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+			graphics.TextContrast      = GraphicsUtility.TextContrast;
+			GlobalBehavior.GraphStyle.DrawBranch(
+				graphics,
+				ListBox.Font,
+				GitterApplication.TextRenderer.LeftAlign,
+				0, 0, size.Width, size.Height,
+				true, branch);
 		}
 
 		#endregion
@@ -149,11 +144,12 @@ namespace gitter.Git.Gui.Controls
 							if(_drawnPointers[i].RevisionPointer is Branch branch && !branch.IsRemote)
 							{
 								int dx = _drawnPointers[i].Bounds.X - x - 1;
-								int w = 0;
-								w = GlobalBehavior.GraphStyle.MeasureBranch(
+								var w = GlobalBehavior.GraphStyle.MeasureBranch(
 									GraphicsUtility.MeasurementGraphics, ListBox.Font, GitterApplication.TextRenderer.LeftAlign, branch);
-								using(var dragImage = new DragImage(new Size(w, 21), -dx, y,
-									eargs => DrawBranchDragImage(branch, eargs.Graphics)))
+								var h = ListBox.ItemHeight;
+								var size = new Size(w, h);
+								using(var dragImage = new DragImage(size, -dx, y,
+									eargs => DrawBranchDragImage(branch, eargs.Graphics, size)))
 								{
 									dragImage.ShowDragVisual(ListBox);
 									ListBox.DoDragDrop(branch, DragDropEffects.None | DragDropEffects.Scroll | DragDropEffects.Move);

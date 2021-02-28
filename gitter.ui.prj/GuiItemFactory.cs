@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -152,10 +152,11 @@ namespace gitter
 			{
 				var item = new T()
 				{
-					Tag   = cmd,
-					Name  = cmd.Name,
-					Text  = cmd.DisplayName,
-					Image = cmd.Image,
+					Tag     = cmd,
+					Name    = cmd.Name,
+					Text    = cmd.DisplayName,
+					Image   = cmd.Image,
+					Enabled = cmd.IsEnabled,
 				};
 				item.Click += OnGuiCommandItemClick;
 				res.Add(item);

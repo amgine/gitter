@@ -27,8 +27,8 @@ namespace gitter.Framework.Controls
 
 	using Resources = gitter.Framework.Properties.Resources;
 
-	[DefaultEvent("Scroll")]
-	[DefaultProperty("Value")]
+	[DefaultEvent(nameof(Scroll))]
+	[DefaultProperty(nameof(Value))]
 	public abstract class CustomScrollBar : Control
 	{
 		#region Constants
@@ -55,7 +55,7 @@ namespace gitter.Framework.Controls
 
 		#region Events
 
-		private static readonly object ScrollEvent = new();
+		private static readonly object ScrollEvent       = new();
 		private static readonly object ValueChangedEvent = new();
 
 		public event EventHandler<ScrollEventArgs> Scroll
@@ -80,7 +80,7 @@ namespace gitter.Framework.Controls
 
 		#region .ctor
 
-		public CustomScrollBar()
+		protected CustomScrollBar()
 		{
 			SetStyle(
 				ControlStyles.AllPaintingInWmPaint |
@@ -133,6 +133,8 @@ namespace gitter.Framework.Controls
 				Orientation.Horizontal => ScrollOrientation.HorizontalScroll,
 				_ => throw new ApplicationException(),
 			};
+
+		protected override void ScaleControl(SizeF factor, BoundsSpecified specified) { }
 
 		protected int ClampValue(int value)
 		{
@@ -396,7 +398,7 @@ namespace gitter.Framework.Controls
 			get => _value;
 			set
 			{
-				Verify.Argument.IsInRange(Minimum, value, Maximum, "value");
+				Verify.Argument.IsInRange(Minimum, value, Maximum, nameof(value));
 
 				if(_value != value)
 				{

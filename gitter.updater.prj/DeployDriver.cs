@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,10 +29,7 @@ namespace gitter.Updater
 
 	sealed class DeployDriver : IUpdateDriver
 	{
-		public string Name
-		{
-			get { return "deploy"; }
-		}
+		public string Name => "deploy";
 
 		public IUpdateProcess CreateProcess(CommandLine cmdline)
 		{
@@ -85,7 +82,7 @@ namespace gitter.Updater
 					_monitor.ReportCancelled();
 					return;
 				}
-				_monitor.Stage = "Closing running app instances...";
+				_monitor.Stage = "Closing running application instances...";
 				Utility.KillAllGitterProcesses(_target);
 				_monitor.CurrentProgress = 3;
 				if(_monitor.CancelRequested)
@@ -105,10 +102,7 @@ namespace gitter.Updater
 			}
 		}
 
-		public bool IsUpdating
-		{
-			get { return _currentProcess != null; }
-		}
+		public bool IsUpdating => _currentProcess != null;
 
 		private void UpdateProcCallback(IAsyncResult ar)
 		{

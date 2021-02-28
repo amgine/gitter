@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,9 +21,6 @@
 namespace gitter.Updater
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
 	public sealed class UpdateProcessMonitor
 	{
@@ -47,65 +44,58 @@ namespace gitter.Updater
 
 		public string Stage
 		{
-			get { return _stage; }
+			get => _stage;
 			set
 			{
 				_stage = value;
-				var handler = StageChanged;
-				if(handler != null) handler(this, EventArgs.Empty);
+				StageChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
 		public int MaximumProgress
 		{
-			get { return _maximumProgress; }
+			get => _maximumProgress;
 			set
 			{
 				_maximumProgress = value;
-				var handler = MaximumProgressChanged;
-				if(handler != null) handler(this, EventArgs.Empty);
+				MaximumProgressChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
 		public int CurrentProgress
 		{
-			get { return _currentProgress; }
+			get => _currentProgress;
 			set
 			{
 				_currentProgress = value;
-				var handler = CurrentProgressChanged;
-				if(handler != null) handler(this, EventArgs.Empty);
+				CurrentProgressChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
 		public void ReportFailure(string error)
 		{
-			var handler = UpdateFailed;
-			if(handler != null) handler(this, new UpdateFailedEventArgs(error));
+			UpdateFailed?.Invoke(this, new UpdateFailedEventArgs(error));
 		}
 
 		public void ReportSuccess()
 		{
-			var handler = UpdateSuccessful;
-			if(handler != null) handler(this, EventArgs.Empty);
+			UpdateSuccessful?.Invoke(this, EventArgs.Empty);
 		}
 
 		public void ReportCancelled()
 		{
-			var handler = UpdateCancelled;
-			if(handler != null) handler(this, EventArgs.Empty);
+			UpdateCancelled?.Invoke(this, EventArgs.Empty);
 		}
 
 		public bool CanCancel
 		{
-			get { return _canCancel; }
+			get => _canCancel;
 			set
 			{
 				if(_canCancel != value)
 				{
 					_canCancel = value;
-					var handler = CanCancelChanged;
-					if(handler != null) handler(this, EventArgs.Empty);
+					CanCancelChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 		}
@@ -119,16 +109,11 @@ namespace gitter.Updater
 
 	public sealed class UpdateFailedEventArgs : EventArgs
 	{
-		private readonly string _message;
-
 		public UpdateFailedEventArgs(string message)
 		{
-			_message = message;
+			Message = message;
 		}
 
-		public string Message
-		{
-			get { return _message; }
-		}
+		public string Message { get; }
 	}
 }

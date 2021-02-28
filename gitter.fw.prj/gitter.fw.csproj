@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Reference Include="System.Runtime.Remoting" />
-  </ItemGroup>  
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
 
 </Project>

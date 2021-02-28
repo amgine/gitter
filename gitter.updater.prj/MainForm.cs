@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -57,9 +57,16 @@ namespace gitter.Updater
 
 		private void OnUpdateSuccessful(object sender, EventArgs e)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler(OnUpdateSuccessful), sender, e);
+				try
+				{
+					BeginInvoke(new EventHandler(OnUpdateSuccessful), sender, e);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -69,9 +76,16 @@ namespace gitter.Updater
 
 		private void OnUpdateFailed(object sender, UpdateFailedEventArgs e)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler<UpdateFailedEventArgs>(OnUpdateFailed), sender, e);
+				try
+				{
+					BeginInvoke(new EventHandler<UpdateFailedEventArgs>(OnUpdateFailed), sender, e);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -82,9 +96,16 @@ namespace gitter.Updater
 
 		private void OnUpdateCancelled(object sender, EventArgs e)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler(OnUpdateCancelled), sender, e);
+				try
+				{
+					BeginInvoke(new EventHandler(OnUpdateCancelled), sender, e);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -94,9 +115,16 @@ namespace gitter.Updater
 
 		private void OnCurrentProgressChanged(object sender, EventArgs e)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler(OnCurrentProgressChanged), sender, e);
+				try
+				{
+					BeginInvoke(new EventHandler(OnCurrentProgressChanged), sender, e);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -106,9 +134,16 @@ namespace gitter.Updater
 
 		private void OnMaximumProgressChanged(object sender, EventArgs e)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler(OnMaximumProgressChanged), sender, e);
+				try
+				{
+					BeginInvoke(new EventHandler(OnMaximumProgressChanged), sender, e);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -118,9 +153,16 @@ namespace gitter.Updater
 
 		private void OnStageChanged(object sender, EventArgs e)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler(OnStageChanged), sender, e);
+				try
+				{
+					BeginInvoke(new EventHandler(OnStageChanged), sender, e);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
@@ -130,9 +172,16 @@ namespace gitter.Updater
 
 		private void OnCanCancelChanged(object sender, EventArgs e)
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new EventHandler(OnCanCancelChanged), sender, e);
+				try
+				{
+					BeginInvoke(new EventHandler(OnCanCancelChanged), sender, e);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{

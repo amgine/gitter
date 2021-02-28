@@ -247,6 +247,13 @@ namespace gitter.Framework.Controls
 
 		private int BorderSize => _borderStyle == BorderStyle.None ? 0 : 1;
 
+		private IScrollBarWidget CreateScrollBar(Orientation orientation)
+			=> LicenseManager.UsageMode == LicenseUsageMode.Runtime
+				? Style.CreateScrollBar(orientation)
+				: new SystemScrollBarAdapter(orientation);
+
+		protected override bool ScaleChildren => false;
+
 		private void CreateScrollBars()
 		{
 			_vScrollBar?.Dispose();
@@ -255,9 +262,7 @@ namespace gitter.Framework.Controls
 			var borderSize = BorderSize;
 
 			var scrollWidth = SystemInformation.VerticalScrollBarWidth;
-			_vScrollBar = LicenseManager.UsageMode == LicenseUsageMode.Runtime
-				? Style.CreateScrollBar(Orientation.Vertical)
-				: new SystemScrollBarAdapter(Orientation.Vertical);
+			_vScrollBar = CreateScrollBar(Orientation.Vertical);
 			_vScrollBar.Maximum = 1;
 			_vScrollBar.Minimum = 0;
 			_vScrollBar.SmallChange = 1;
@@ -271,9 +276,7 @@ namespace gitter.Framework.Controls
 			_vScrollBar.Control.MouseDown += OnScrollBarMouseDown;
 
 			var scrollHeight = SystemInformation.HorizontalScrollBarHeight;
-			_hScrollBar = LicenseManager.UsageMode == LicenseUsageMode.Runtime
-				? Style.CreateScrollBar(Orientation.Horizontal)
-				: new SystemScrollBarAdapter(Orientation.Horizontal);
+			_hScrollBar = CreateScrollBar(Orientation.Horizontal);
 			_hScrollBar.Maximum = 1;
 			_hScrollBar.Minimum = 0;
 			_hScrollBar.SmallChange = 1;

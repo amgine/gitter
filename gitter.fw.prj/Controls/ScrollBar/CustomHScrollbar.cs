@@ -54,6 +54,14 @@ namespace gitter.Framework.Controls
 
 		#region Methods
 
+		private void EnsureArranged()
+		{
+			if(!_isArranged)
+			{
+				Arrange();
+			}
+		}
+
 		private void Arrange()
 		{
 			var size = Size;
@@ -104,10 +112,7 @@ namespace gitter.Framework.Controls
 
 		private void OnScrollHereClick(object sender, EventArgs e)
 		{
-			if(!_isArranged)
-			{
-				Arrange();
-			}
+			EnsureArranged();
 			var x = _mouseDownLocation.X - _decreaseButtonBounds.Width;
 			var thumbPosition = x - _thumbBounds.Width / 2;
 			Value = ClampValue(ThumbPositionToValue(thumbPosition));
@@ -177,10 +182,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _decreaseButtonBounds;
 			}
 		}
@@ -189,10 +191,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _decreaseTrackBarBounds;
 			}
 		}
@@ -201,10 +200,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _thumbBounds;
 			}
 		}
@@ -213,10 +209,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _increaseTrackBarBounds;
 			}
 		}
@@ -225,10 +218,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _increaseButtonBounds;
 			}
 		}
@@ -240,10 +230,7 @@ namespace gitter.Framework.Controls
 
 		protected override void BeginScroll(Point from)
 		{
-			if(!_isArranged)
-			{
-				Arrange();
-			}
+			EnsureArranged();
 			_initialScrollX = _thumbBounds.X;
 		}
 
@@ -283,10 +270,7 @@ namespace gitter.Framework.Controls
 
 		protected override int ThumbPositionToValue()
 		{
-			if(!_isArranged)
-			{
-				Arrange();
-			}
+			EnsureArranged();
 			return ThumbPositionToValue(_decreaseTrackBarBounds.Width);
 		}
 

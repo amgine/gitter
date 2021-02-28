@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,12 +27,10 @@ namespace gitter.Updater
 
 	public sealed class CommandLine
 	{
-		private readonly Dictionary<string, CommandLineParameter> _parameters;
+		private readonly Dictionary<string, CommandLineParameter> _parameters = new();
 
 		public CommandLine()
 		{
-			_parameters = new Dictionary<string, CommandLineParameter>();
-
 			var args = Environment.GetCommandLineArgs();
 			for(int i = 1; i < args.Length; ++i)
 			{
@@ -67,43 +65,24 @@ namespace gitter.Updater
 		}
 
 		public string this[string name]
-		{
-			get
-			{
-				CommandLineParameter p;
-				if(_parameters.TryGetValue(name, out p))
-				{
-					return p.Value;
-				}
-				return null;
-			}
-		}
+			=> _parameters.TryGetValue(name, out var p)
+				? p.Value
+				: default;
 
 		public bool IsDefined(string name)
-		{
-			return _parameters.ContainsKey(name);
-		}
+			=> _parameters.ContainsKey(name);
 	}
 
 	public sealed class CommandLineParameter
 	{
-		private readonly string _value;
-		private readonly string _name;
-
 		public CommandLineParameter(string name, string value)
 		{
-			_name = name;
-			_value = value;
+			Name  = name;
+			Value = value;
 		}
 
-		public string Name
-		{
-			get { return _name; }
-		}
+		public string Name { get; }
 
-		public string Value
-		{
-			get { return _value; }
-		}
+		public string Value { get; }
 	}
 }

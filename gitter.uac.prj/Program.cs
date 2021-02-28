@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -37,37 +37,33 @@ namespace gitter.UAC
 		[STAThread]
 		private static void Main()
 		{
-			bool isFirstInstance;
-			using(var mutex = new Mutex(true, "gitter-uac-instance", out isFirstInstance))
-			{
-				if(isFirstInstance)
-				{
-					var args = Environment.GetCommandLineArgs();
-					if(args == null || args.Length < 2 || args[1] != "--remoting")
-						return;
+			var args = Environment.GetCommandLineArgs();
+			if(args == null || args.Length < 2 || args[1] != "--remoting")
+				return;
 
-					ChannelServices.RegisterChannel(
-						new IpcChannel(
-							new Dictionary<string, string>
-							{
-								{ "portName", RemotingChannelName }
-							},
-							new BinaryClientFormatterSinkProvider(),
-							new BinaryServerFormatterSinkProvider()
-							{
-								TypeFilterLevel = System.Runtime.Serialization.Formatters.TypeFilterLevel.Full,
-							}),
-						false);
+			using var mutex = new Mutex(true, "gitter-uac-instance", out var isFirstInstance);
+			if(!isFirstInstance) return;
 
-					RemotingConfiguration.RegisterWellKnownServiceType(
-						typeof(RemoteExecutor), RemotingObjectName, WellKnownObjectMode.Singleton);
+			ChannelServices.RegisterChannel(
+				new IpcChannel(
+					new Dictionary<string, string>
+					{
+						["portName"] = RemotingChannelName,
+					},
+					new BinaryClientFormatterSinkProvider(),
+					new BinaryServerFormatterSinkProvider()
+					{
+						TypeFilterLevel = System.Runtime.Serialization.Formatters.TypeFilterLevel.Full,
+					}),
+				false);
 
-					_executor = (RemoteExecutor)Activator.GetObject(typeof(RemoteExecutor),
-						string.Format(@"ipc://{0}/{1}", RemotingChannelName, RemotingObjectName));
-					_executor.ExitEvent.WaitOne();
-					_executor.ExitEvent.Close();
-				}
-			}
+			RemotingConfiguration.RegisterWellKnownServiceType(
+				typeof(RemoteExecutor), RemotingObjectName, WellKnownObjectMode.Singleton);
+
+			_executor = (RemoteExecutor)Activator.GetObject(typeof(RemoteExecutor),
+				string.Format(@"ipc://{0}/{1}", RemotingChannelName, RemotingObjectName));
+			_executor.ExitEvent.WaitOne();
+			_executor.ExitEvent.Close();
 		}
 	}
 }

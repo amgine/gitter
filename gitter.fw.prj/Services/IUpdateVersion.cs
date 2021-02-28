@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,19 +18,15 @@
  */
 #endregion
 
-using System;
-using System.Resources;
-using System.Reflection;
+namespace gitter.Framework.Services
+{
+	using System;
 
-[assembly: AssemblyCompany("amgine")]
-[assembly: AssemblyProduct("gitter")]
-[assembly: AssemblyCopyright("Copyright © amgine 2021")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+	public interface IUpdateVersion
+	{
+		Version Version { get; }
 
-[assembly: CLSCompliant(true)]
-
-[assembly: NeutralResourcesLanguage("en-us")]
-
-[assembly: AssemblyFileVersion("1.0.26.0")]
-[assembly: AssemblyVersion("1.0.26.0")] 
+		/// <summary>Update gitter to this version.</summary>
+		void Update();
+	}
+}

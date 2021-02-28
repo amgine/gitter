@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -131,19 +131,13 @@ namespace gitter
 
 		#region Methods
 
-		private static Bitmap GetLogo()
-		{
-			return GitterApplication.Style.Type == GitterStyleType.DarkBackground
-				? Resources.ImgStartPageLogoDark
-				: Resources.ImgStartPageLogo;
-		}
+		private static Bitmap GetLogo() => GitterApplication.Style.Type == GitterStyleType.DarkBackground
+			? Resources.ImgStartPageLogoDark
+			: Resources.ImgStartPageLogo;
 
-		private static Bitmap GetGradient()
-		{
-			return GitterApplication.Style.Type == GitterStyleType.DarkBackground
-				? Resources.ImgStartPageLogoGradientDark
-				: Resources.ImgStartPageLogoGradient;
-		}
+		private static Bitmap GetGradient() => GitterApplication.Style.Type == GitterStyleType.DarkBackground
+			? Resources.ImgStartPageLogoGradientDark
+			: Resources.ImgStartPageLogoGradient;
 
 		private void OnLocalRepositoriesKeyDown(object sender, KeyEventArgs e)
 		{
@@ -416,18 +410,14 @@ namespace gitter
 
 		private void _btnInitLocalRepo_LinkClicked(object sender, EventArgs e)
 		{
-			using(var dlg = new InitRepositoryDialog(WorkingEnvironment))
-			{
-				dlg.Run(WorkingEnvironment.MainForm);
-			}
+			using var dlg = new InitRepositoryDialog(WorkingEnvironment);
+			dlg.Run(WorkingEnvironment.MainForm);
 		}
 
 		private void _btnCloneRemoteRepo_LinkClicked(object sender, EventArgs e)
 		{
-			using(var dlg = new CloneRepositoryDialog(WorkingEnvironment))
-			{
-				dlg.Run(WorkingEnvironment.MainForm);
-			}
+			using var dlg = new CloneRepositoryDialog(WorkingEnvironment);
+			dlg.Run(WorkingEnvironment.MainForm);
 		}
 
 		private void _chkClosePageAfterRepositoryLoad_CheckedChanged(object sender, EventArgs e)

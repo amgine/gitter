@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,23 +29,22 @@ namespace gitter.Updater
 	static class Program
 	{
 		/// <summary>Available updaters.</summary>
-		private static IEnumerable<IUpdateDriver> UpdateDrivers =
+		private static readonly IReadOnlyList<IUpdateDriver> UpdateDrivers =
 			new IUpdateDriver[]
 			{
 				new GitUpdateDriver(),
 				new DeployDriver(),
+				new DownloadAndUnzipDriver(),
 			};
 
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
+		/// <summary>The main entry point for the application.</summary>
 		[STAThread]
 		static void Main()
 		{
 			var cmdline = new CommandLine();
 			bool singleInstance;
-			Semaphore s = null;
-			if(!cmdline.IsDefined("forcenewinstance"))
+			var s = default(Semaphore);
+			if(!cmdline.IsDefined(@"forcenewinstance"))
 			{
 				s = new Semaphore(0, 1, "gitter-updater", out singleInstance);
 			}
@@ -57,37 +56,28 @@ namespace gitter.Updater
 			{
 				if(singleInstance)
 				{
-					var driverName = cmdline["driver"];
-					if(!string.IsNullOrEmpty(driverName))
+					if(cmdline[@"driver"] is { Length: > 0 } driverName)
 					{
-						var driver = UpdateDrivers.FirstOrDefault(d => d.Name == driverName);
-						if(driver != null)
+						var process = UpdateDrivers.FirstOrDefault(d => d.Name == driverName)?.CreateProcess(cmdline);
+						if(process == null) return;
+
+						if(cmdline.IsDefined(@"hidden"))
 						{
-							var process = driver.CreateProcess(cmdline);
-							if(process != null)
-							{
-								if(cmdline.IsDefined("hidden"))
-								{
-									var monitor = new UpdateProcessMonitor();
-									process.Update(monitor);
-								}
-								else
-								{
-									Application.EnableVisualStyles();
-									Application.SetCompatibleTextRenderingDefault(false);
-									Application.Run(new MainForm(process));
-								}
-							}
+							var monitor = new UpdateProcessMonitor();
+							process.Update(monitor);
+						}
+						else
+						{
+							Application.EnableVisualStyles();
+							Application.SetCompatibleTextRenderingDefault(false);
+							Application.Run(new MainForm(process));
 						}
 					}
 				}
 			}
 			finally
 			{
-				if(s != null)
-				{
-					s.Dispose();
-				}
+				s?.Dispose();
 			}
 		}
 	}

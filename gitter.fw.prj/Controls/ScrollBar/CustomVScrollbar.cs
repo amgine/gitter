@@ -54,6 +54,14 @@ namespace gitter.Framework.Controls
 
 		#region Methods
 
+		private void EnsureArranged()
+		{
+			if(!_isArranged)
+			{
+				Arrange();
+			}
+		}
+
 		private void Arrange()
 		{
 			var size = Size;
@@ -97,10 +105,7 @@ namespace gitter.Framework.Controls
 
 		private void OnScrollHereClick(object sender, EventArgs e)
 		{
-			if(!_isArranged)
-			{
-				Arrange();
-			}
+			EnsureArranged();
 			var y = _mouseDownLocation.Y - _decreaseButtonBounds.Height;
 			var thumbPosition = y - _thumbBounds.Height / 2;
 			Value = ClampValue(ThumbPositionToValue(thumbPosition));
@@ -177,10 +182,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _decreaseButtonBounds;
 			}
 		}
@@ -189,10 +191,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _decreaseTrackBarBounds;
 			}
 		}
@@ -201,10 +200,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _thumbBounds;
 			}
 		}
@@ -213,10 +209,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(!_isArranged)
-				{
-					Arrange();
-				}
+				EnsureArranged();
 				return _increaseTrackBarBounds;
 			}
 		}
@@ -240,19 +233,13 @@ namespace gitter.Framework.Controls
 
 		protected override void BeginScroll(Point from)
 		{
-			if(!_isArranged)
-			{
-				Arrange();
-			}
+			EnsureArranged();
 			_initialScrollY = _thumbBounds.Y;
 		}
 
 		protected override bool PerformScroll(Point from, Point to)
 		{
-			if(!_isArranged)
-			{
-				Arrange();
-			}
+			EnsureArranged();
 			var dy = to.Y - from.Y;
 			if(dy == 0) return false;
 			int y = _initialScrollY + dy;
@@ -287,10 +274,7 @@ namespace gitter.Framework.Controls
 
 		protected override int ThumbPositionToValue()
 		{
-			if(!_isArranged)
-			{
-				Arrange();
-			}
+			EnsureArranged();
 			return ThumbPositionToValue(_decreaseTrackBarBounds.Height);
 		}
 

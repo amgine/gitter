@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,17 +24,12 @@ namespace gitter.Updater
 	using System.IO;
 	using System.Text;
 	using System.Diagnostics;
-	using System.Security;
-	using System.Runtime.InteropServices;
 
 	using Resources = gitter.Updater.Properties.Resources;
 
 	class GitUpdateDriver : IUpdateDriver
 	{
-		public string Name
-		{
-			get { return "git"; }
-		}
+		public string Name => "git";
 
 		private static string GetFullPath(string filename)
 		{
@@ -110,7 +105,7 @@ namespace gitter.Updater
 	}
 
 	/// <summary>Updates gitter directly from git repository.</summary>
-	class UpdateFromGitRepositoryProcess : IUpdateProcess
+	class UpdateFromGitRepositoryProcess : UpdateProcessBase
 	{
 		#region Const
 
@@ -118,23 +113,14 @@ namespace gitter.Updater
 		const string buildFileName = @"master.build";
 		const string buildFileTaskName = @"BuildRelease";
 		const string buildOutputPath = @"Output\Release";
-		const string mainBinaryName = "gitter.exe";
 
 		#endregion
 
 		private readonly Version _currentVersion;
 		private readonly string _repoDownloadPath;
 		private readonly string _repoUrl;
-		private readonly string _targetDirectory;
 		private readonly string _gitExePath;
 		private readonly bool _skipVersionCheck;
-
-		private IAsyncResult _currentProcess;
-		private UpdateProcessMonitor _monitor;
-
-		[DllImport("user32.dll")]
-		[SuppressUnmanagedCodeSecurity]
-		private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
 		private Version GetRemoteMasterVersion()
 		{
@@ -245,8 +231,8 @@ namespace gitter.Updater
 				}
 				git.StartInfo = psi;
 				git.Start();
-				var stderr = git.StandardError.ReadToEnd();
-				var stdout = git.StandardOutput.ReadToEnd();
+				_ = git.StandardError.ReadToEnd();
+				_ = git.StandardOutput.ReadToEnd();
 				git.WaitForExit();
 				return git.ExitCode == 0;
 			}
@@ -275,57 +261,7 @@ namespace gitter.Updater
 			}
 		}
 
-		private void KillAllGitterProcesses()
-		{
-			Utility.KillAllGitterProcesses(_targetDirectory);
-		}
-
-		private bool DeployBuildResults()
-		{
-			var source = new DirectoryInfo(Path.Combine(_repoDownloadPath, buildOutputPath));
-			if(Utility.IsRunningWithAdministratorRights || Utility.HasWriteAccess(_targetDirectory))
-			{
-				Utility.CopyDirectoryContent(source, _targetDirectory);
-				return true;
-			}
-			else
-			{
-				var cmdline = new StringBuilder();
-				cmdline.Append("/forcenewinstance");
-				cmdline.Append(' ');
-				cmdline.Append("/hidden");
-				cmdline.Append(' ');
-				cmdline.Append("/driver:deploy");
-				cmdline.Append(' ');
-				cmdline.Append('\"');
-				cmdline.Append("/source:" + source);
-				cmdline.Append('\"');
-				cmdline.Append(' ');
-				cmdline.Append('\"');
-				cmdline.Append("/target:" + _targetDirectory);
-				cmdline.Append('\"');
-				string exeFileName;
-				using(var p = Process.GetCurrentProcess())
-				{
-					exeFileName = p.MainModule.FileName;
-				}
-				using(var p = new Process()
-					{
-						StartInfo = new ProcessStartInfo(exeFileName, cmdline.ToString())
-						{
-							CreateNoWindow = true,
-							Verb = "runas",
-						},
-					})
-				{
-					p.Start();
-					p.WaitForExit();
-					return p.ExitCode == 0;
-				}
-			}
-		}
-
-		private void CleanUp()
+		protected override void Cleanup()
 		{
 			try
 			{
@@ -336,165 +272,76 @@ namespace gitter.Updater
 			}
 		}
 
-		private void StartApplication()
-		{
-			try
-			{
-				var exeName = Path.Combine(_targetDirectory, mainBinaryName);
-				Utility.StartApplication(exeName);
-			}
-			catch
-			{
-			}
-		}
-
 		public UpdateFromGitRepositoryProcess(Version currentVersion, string gitExePath, string repoUrl, string targetDirectory, bool skipVersionCheck = false)
+			: base(targetDirectory)
 		{
 			_currentVersion = currentVersion;
 			_repoDownloadPath = Path.Combine(Path.GetTempPath(), "gitter-updater", "src-download"); /*Path.Combine(typeof(UpdateFromGitRepositoryProcess).Assembly.Location, "src-download");*/
 			_gitExePath = gitExePath;
 			_repoUrl = repoUrl;
-			_targetDirectory = targetDirectory;
 			_skipVersionCheck = skipVersionCheck;
 		}
 
-		public void BeginUpdate(UpdateProcessMonitor monitor)
+		protected override void NotifyInitializing(UpdateProcessMonitor monitor)
 		{
-			if(_currentProcess != null) throw new InvalidOperationException();
-
-			monitor.Stage = Resources.StrInitializing + "...";
+			base.NotifyInitializing(monitor);
 			monitor.MaximumProgress = 10;
-			Action proc = UpdateProc;
-
-			_monitor = monitor;
-			_currentProcess = proc.BeginInvoke(UpdateProcCallback, proc);
 		}
 
-		public void Update(UpdateProcessMonitor monitor)
+		protected override void UpdateProc()
 		{
-			_monitor = monitor;
-			UpdateProc();
-			_monitor = null;
-		}
-
-		private void UpdateProc()
-		{
-			try
+			if(Monitor.CancelRequested)
 			{
-				if(_monitor.CancelRequested)
+				Monitor.ReportCancelled();
+				return;
+			}
+			if(!_skipVersionCheck)
+			{
+				Monitor.Stage = "Checking for new version...";
+				var ver = GetRemoteMasterVersion();
+				if(ver == null)
 				{
-					_monitor.ReportCancelled();
+					Monitor.ReportFailure("Failed to check for new version");
 					return;
 				}
-				if(!_skipVersionCheck)
+				else if(ver <= _currentVersion)
 				{
-					_monitor.Stage = "Checking for new version...";
-					var ver = GetRemoteMasterVersion();
-					if(ver == null)
-					{
-						_monitor.ReportFailure("Failed to check for new version");
-						return;
-					}
-					else if(ver <= _currentVersion)
-					{
-						_monitor.Stage = "Your version is up to date";
-						_monitor.CurrentProgress = _monitor.MaximumProgress;
-						_monitor.ReportSuccess();
-						return;
-					}
-					if(_monitor.CancelRequested)
-					{
-						_monitor.ReportCancelled();
-						return;
-					}
+					Monitor.Stage = "Your version is up to date";
+					Monitor.CurrentProgress = Monitor.MaximumProgress;
+					Monitor.ReportSuccess();
+					return;
 				}
-				_monitor.Stage = "Downloading source code from " + _repoUrl + "...";
-				_monitor.CurrentProgress = 1;
-				if(DownloadSourceCode())
+				if(Monitor.CancelRequested)
 				{
-					if(_monitor.CancelRequested)
-					{
-						_monitor.ReportCancelled();
-						return;
-					}
-					_monitor.Stage = "Compiling program...";
-					_monitor.CurrentProgress = 4;
-					if(BuildSourceCode())
-					{
-						if(_monitor.CancelRequested)
-						{
-							_monitor.ReportCancelled();
-							return;
-						}
-						_monitor.Stage = "Installing program...";
-						_monitor.CurrentProgress = 8;
-						KillAllGitterProcesses();
-						if(_monitor.CancelRequested)
-						{
-							_monitor.ReportCancelled();
-							return;
-						}
-						_monitor.CanCancel = false;
-						if(DeployBuildResults())
-						{
-							_monitor.Stage = "Cleaning up temporary files...";
-							_monitor.CurrentProgress = 9;
-							CleanUp();
-							_monitor.CurrentProgress = 10;
-							_monitor.Stage = "Launching program...";
-							StartApplication();
-							_monitor.ReportSuccess();
-						}
-						else
-						{
-							_monitor.ReportFailure("Failed to deploy build results.");
-						}
-					}
-					else
-					{
-						_monitor.ReportFailure("Failed to build source code.");
-					}
-				}
-				else
-				{
-					_monitor.ReportFailure("Failed to download source code.");
+					Monitor.ReportCancelled();
+					return;
 				}
 			}
-			catch(Exception exc)
+			Monitor.Stage = "Downloading source code from " + _repoUrl + "...";
+			Monitor.CurrentProgress = 1;
+			if(!DownloadSourceCode())
 			{
-				if(_monitor.CancelRequested)
-				{
-					_monitor.ReportCancelled();
-				}
-				else
-				{
-					_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
-				}
+				Monitor.ReportFailure("Failed to download source code.");
+				return;
 			}
-			finally
+			if(Monitor.CancelRequested)
 			{
-				CleanUp();
+				Monitor.ReportCancelled();
+				return;
 			}
-		}
-
-		public bool IsUpdating
-		{
-			get { return _currentProcess != null; }
-		}
-
-		private void UpdateProcCallback(IAsyncResult ar)
-		{
-			var proc = (Action)ar.AsyncState;
-			try
+			Monitor.Stage = "Compiling program...";
+			Monitor.CurrentProgress = 4;
+			if(!BuildSourceCode())
 			{
-				proc.EndInvoke(ar);
+				Monitor.ReportFailure("Failed to build source code.");
+				return;
 			}
-			catch(Exception exc)
+			if(Monitor.CancelRequested)
 			{
-				_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+				Monitor.ReportCancelled();
+				return;
 			}
-			_monitor = null;
-			_currentProcess = null;
+			InstallApplication(from: Path.Combine(_repoDownloadPath, buildOutputPath));
 		}
 	}
 }

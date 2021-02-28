@@ -17,11 +17,8 @@
 			{
 				_chkAmend.Dispose();
 				_btnCommit.Dispose();
-				_speller.Dispose();
-				if(components != null)
-				{
-					components.Dispose();
-				}
+				_speller?.Dispose();
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}

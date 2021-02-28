@@ -276,7 +276,7 @@ namespace gitter.Git
 
 		public DialogResult RunInitDialog()
 		{
-			Verify.State.IsTrue(IsLoaded, string.Format("{0} is not loaded.", GetType().FullName));
+			Verify.State.IsTrue(IsLoaded, $"{GetType().FullName} is not loaded.");
 
 			DialogResult res;
 			string path = "";
@@ -332,6 +332,8 @@ namespace gitter.Git
 
 		public IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory)
 		{
+			Verify.Argument.IsNotNull(workingDirectory, nameof(workingDirectory));
+
 			yield return new GuiCommand(
 				"gui",
 				Resources.StrlGui,
@@ -341,12 +343,18 @@ namespace gitter.Git
 				"gitk",
 				Resources.StrlGitk,
 				CachedResources.Bitmaps["ImgGit"],
-				env => StandardTools.StartGitk(workingDirectory));
+				env => StandardTools.StartGitk(workingDirectory))
+			{
+				IsEnabled = StandardTools.CanStartGitk,
+			};
 			yield return new GuiCommand(
 				"bash",
 				Resources.StrlBash,
 				CachedResources.Bitmaps["ImgTerminal"],
-				env => StandardTools.StartBash(workingDirectory));
+				env => StandardTools.StartBash(workingDirectory))
+			{
+				IsEnabled = StandardTools.CanStartBash,
+			};
 		}
 	}
 }

@@ -25,6 +25,8 @@ namespace gitter.Git.AccessLayer.CLI
 	using System.IO;
 	using System.Reflection;
 	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using gitter.Framework.CLI;
 
@@ -290,6 +292,22 @@ namespace gitter.Git.AccessLayer.CLI
 			var stdErrReader = new AsyncTextReader();
 			var executor = new GitProcessExecutor(GitExePath);
 			var exitCode = executor.Execute(input, stdOutReader, stdErrReader);
+			return new GitOutput(
+				stdOutReader.GetText(),
+				stdErrReader.GetText(),
+				exitCode);
+		}
+
+		public static async Task<GitOutput> ExecuteAsync(GitInput input, CancellationToken cancellatioToken = default)
+		{
+			Verify.Argument.IsNotNull(input, nameof(input));
+
+			var stdOutReader = new AsyncTextReader();
+			var stdErrReader = new AsyncTextReader();
+			var executor = new GitProcessExecutor(GitExePath);
+			var exitCode = await executor
+				.ExecuteAsync(input, stdOutReader, stdErrReader, ProcessExecutor.CancellationMethods.KillProcess, cancellatioToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 			return new GitOutput(
 				stdOutReader.GetText(),
 				stdErrReader.GetText(),

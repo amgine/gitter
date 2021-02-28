@@ -95,6 +95,7 @@ namespace gitter.Framework.Services
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void WndProc(ref Message m)  
 		{
 			if(SpellingService.Enabled)
@@ -102,15 +103,12 @@ namespace gitter.Framework.Services
 				switch((Native.WM)m.Msg)
 				{
 					case Native.WM.PAINT:
-						_textBox.Invalidate();
 						base.WndProc(ref m);
 						PaintErrors();
-						break;
-					default:
-						base.WndProc(ref m);
-						break;
+						return;
 				}
 			}
+			base.WndProc(ref m);
 		}
 
 		private Graphics GetGraphics()

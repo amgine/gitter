@@ -28,54 +28,37 @@ namespace gitter.Framework.Services
 	{
 		public event EventHandler Deleted;
 
-		private readonly string _path;
-		private readonly string _type;
-		private string _description;
+		internal void InvokeDeleted()
+			=> Deleted?.Invoke(this, EventArgs.Empty);
 
 		public RepositoryLink(Section section)
 		{
 			Verify.Argument.IsNotNull(section, nameof(section));
 
-			_path = section.GetValue("Path", string.Empty);
-			_type = section.GetValue("Type", string.Empty);
-			_description = section.GetValue("Description", string.Empty);
+			Path        = section.GetValue("Path", string.Empty);
+			Type        = section.GetValue("Type", string.Empty);
+			Description = section.GetValue("Description", string.Empty);
 		}
 
 		public RepositoryLink(string path, string type)
 		{
-			_path = path;
-			_type = type;
+			Path = path;
+			Type = type;
 		}
 
-		internal void InvokeDeleted()
-		{
-			var handler = Deleted;
-			if(handler != null) handler(this, EventArgs.Empty);
-		}
+		public string Path { get; }
 
-		public string Path
-		{
-			get { return _path; }
-		}
+		public string Type { get; }
 
-		public string Type
-		{
-			get { return _type; }
-		}
-
-		public string Description
-		{
-			get { return _description; }
-			set { _description = value; }
-		}
+		public string Description { get; set; }
 
 		public void SaveTo(Section section)
 		{
 			Verify.Argument.IsNotNull(section, nameof(section));
 
-			section.SetValue("Path", _path);
-			section.SetValue("Type", _type);
-			section.SetValue("Description", _description);
+			section.SetValue("Path", Path);
+			section.SetValue("Type", Type);
+			section.SetValue("Description", Description);
 		}
 	}
 }

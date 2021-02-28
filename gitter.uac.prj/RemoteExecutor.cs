@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -34,24 +34,12 @@ namespace gitter.UAC
 			_evExit = new ManualResetEvent(false);
 		}
 
-		public void Execute(Action action)
-		{
-			action();
-		}
+		public void Execute(Action action) => action();
 
-		public T Execute<T>(Func<T> func)
-		{
-			return func();
-		}
+		public T Execute<T>(Func<T> func) => func();
 
-		public WaitHandle ExitEvent
-		{
-			get { return _evExit; }
-		}
+		public WaitHandle ExitEvent => _evExit;
 
-		public void Close()
-		{
-			_evExit.Set();
-		}
+		public void Close() => _evExit.Set();
 	}
 }

@@ -26,6 +26,11 @@
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
   <PropertyGroup>
     <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration)</PostBuildEvent>
   </PropertyGroup>

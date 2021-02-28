@@ -185,7 +185,7 @@ namespace gitter.Framework
 		{
 			const string tempPathName = @"gitter-updater";
 			var path = Path.Combine(Path.GetTempPath(), tempPathName);
-			Directory.Delete(path, true);
+			Directory.Delete(path, recursive: true);
 		}
 	}
 }

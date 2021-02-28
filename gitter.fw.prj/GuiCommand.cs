@@ -41,6 +41,8 @@ namespace gitter.Framework
 
 		public Image Image { get; }
 
+		public bool IsEnabled { get; set; } = true;
+
 		public void Execute(IWorkingEnvironment env) => _execute(env);
 	}
 }

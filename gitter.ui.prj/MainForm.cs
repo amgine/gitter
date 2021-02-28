@@ -107,7 +107,7 @@ namespace gitter
 			_viewDockService.ShowView(Guids.RepositoryExplorerView);
 
 			_repositoryProviders         = new Dictionary<string, IRepositoryProvider>();
-			_repositoryServiceProviders       = new Dictionary<string, IRepositoryServiceProvider>();
+			_repositoryServiceProviders  = new Dictionary<string, IRepositoryServiceProvider>();
 			_activeIssueTrackerProviders = new HashSet<IRepositoryServiceProvider>();
 			_additionalGui               = new LinkedList<IGuiProvider>();
 

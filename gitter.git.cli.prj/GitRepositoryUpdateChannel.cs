@@ -18,35 +18,83 @@
  */
 #endregion
 
-using System;
-using System.IO;
-using System.Text;
-using System.Reflection;
-
-using gitter.Framework;
-using gitter.Framework.Services;
-
-using gitter.Git.AccessLayer.CLI;
-
 namespace gitter.Git
 {
+	using System;
+	using System.IO;
+	using System.Text;
+	using System.Threading.Tasks;
+	using System.Reflection;
+
+	using gitter.Framework;
+	using gitter.Framework.Services;
+
+	using gitter.Git.AccessLayer.CLI;
+
 	public sealed class GitRepositoryUpdateChannel : IUpdateChannel
 	{
 		private readonly string _url;
 		private readonly string _branch;
+
+		sealed class UpdateVersion : IUpdateVersion
+		{
+			public UpdateVersion(string url, Version version)
+			{
+				Url     = url;
+				Version = version;
+			}
+
+			public string Url { get; }
+
+			public Version Version { get; }
+
+			private string FormatUpdaterCommand()
+			{
+				var sb = new StringBuilder();
+				// update driver
+				sb.Append(@"/driver:git");
+				sb.Append(' ');
+				// git exe path
+				sb.Append('"');
+				sb.Append(@"/git:");
+				sb.Append(GitProcess.GitExePath);
+				sb.Append('"');
+				sb.Append(' ');
+				// skip version check
+				sb.Append(@"/skipversioncheck");
+				sb.Append(' ');
+				// remote url
+				sb.Append(@"/url:");
+				sb.Append(Url);
+				sb.Append(' ');
+				// install directory
+				sb.Append('"');
+				sb.Append(@"/target:");
+				sb.Append(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+				sb.Append('"');
+
+				return sb.ToString();
+			}
+
+			public void Update()
+			{
+				var command = FormatUpdaterCommand();
+				HelperExecutables.LaunchUpdater(command);
+			}
+		}
 
 		public GitRepositoryUpdateChannel(string url, string branch)
 		{
 			Verify.Argument.IsNeitherNullNorWhitespace(url, nameof(url));
 			Verify.Argument.IsNeitherNullNorWhitespace(branch, nameof(branch));
 
-			_url = url;
+			_url    = url;
 			_branch = branch;
 		}
 
 		/// <summary>Check latest gitter version on this channel.</summary>
 		/// <returns>Latest gitter version.</returns>
-		public Version CheckVersion()
+		public async Task<IUpdateVersion> GetLatestVersionAsync()
 		{
 			Version result = null;
 			var cmd = new LsRemoteCommand(
@@ -57,7 +105,9 @@ namespace gitter.Git
 			GitOutput output;
 			try
 			{
-				output = GitProcess.Execute(new GitInput(cmd));
+				output = await GitProcess
+					.ExecuteAsync(new GitInput(cmd))
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			catch
 			{
@@ -102,42 +152,9 @@ namespace gitter.Git
 					}
 				}
 			}
-			return result;
-		}
-
-		private string FormatUpdaterCommand()
-		{
-			var sb = new StringBuilder();
-			// update driver
-			sb.Append(@"/driver:git");
-			sb.Append(' ');
-			// git exe path
-			sb.Append('"');
-			sb.Append(@"/git:");
-			sb.Append(GitProcess.GitExePath);
-			sb.Append('"');
-			sb.Append(' ');
-			// skip version check
-			sb.Append(@"/skipversioncheck");
-			sb.Append(' ');
-			// remote url
-			sb.Append(@"/url:");
-			sb.Append(_url);
-			sb.Append(' ');
-			// install directory
-			sb.Append('"');
-			sb.Append(@"/target:");
-			sb.Append(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-			sb.Append('"');
-
-			return sb.ToString();
-		}
-
-		/// <summary>Update gitter using this channel.</summary>
-		public void Update()
-		{
-			var command = FormatUpdaterCommand();
-			HelperExecutables.LaunchUpdater(command);
+			return result != null
+				? new UpdateVersion(_url, result)
+				: default;
 		}
 	}
 }

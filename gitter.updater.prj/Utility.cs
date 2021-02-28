@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,8 +35,16 @@ namespace gitter.Updater
 		{
 			get
 			{
-				var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-				return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
+				try
+				{
+					using var identity = WindowsIdentity.GetCurrent();
+					var pricipal = new WindowsPrincipal(identity);
+					return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
+				}
+				catch
+				{
+					return false;
+				}
 			}
 		}
 
@@ -193,7 +201,7 @@ namespace gitter.Updater
 
 		public static bool HasWriteAccess(string directory)
 		{
-			const string FileName = "write-test";
+			const string FileName = ".write-test";
 			var fullPath = Path.Combine(directory, FileName);
 			try
 			{
@@ -207,6 +215,51 @@ namespace gitter.Updater
 			catch
 			{
 				return false;
+			}
+		}
+
+		public static bool Deploy(string from, string to)
+		{
+			if(IsRunningWithAdministratorRights || HasWriteAccess(to))
+			{
+				var source = new DirectoryInfo(from);
+				Utility.CopyDirectoryContent(source, to);
+				return true;
+			}
+			else
+			{
+				var cmdline = new StringBuilder();
+				cmdline.Append(@"/forcenewinstance");
+				cmdline.Append(' ');
+				cmdline.Append(@"/hidden");
+				cmdline.Append(' ');
+				cmdline.Append(@"/driver:deploy");
+				cmdline.Append(' ');
+				cmdline.Append('\"');
+				cmdline.Append(@"/source:" + from);
+				cmdline.Append('\"');
+				cmdline.Append(' ');
+				cmdline.Append('\"');
+				cmdline.Append(@"/target:" + to);
+				cmdline.Append('\"');
+				string exeFileName;
+				using(var p = Process.GetCurrentProcess())
+				{
+					exeFileName = p.MainModule.FileName;
+				}
+				using(var p = new Process()
+					{
+						StartInfo = new ProcessStartInfo(exeFileName, cmdline.ToString())
+						{
+							CreateNoWindow = true,
+							Verb = "runas",
+						},
+					})
+				{
+					p.Start();
+					p.WaitForExit();
+					return p.ExitCode == 0;
+				}
 			}
 		}
 	}
