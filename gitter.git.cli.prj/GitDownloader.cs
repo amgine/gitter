@@ -172,7 +172,7 @@ namespace gitter.Git
 						Monitor = progress,
 						WebRequest = WebRequest.Create(DownloadUrl),
 					};
-					progress?.Report(new OperationProgress("Connecting to MSysGit download server..."));
+					progress?.Report(new OperationProgress("Connecting to Git download server..."));
 					process.WebRequest.BeginGetResponse(OnGotResponse, process);
 					evt.WaitOne();
 					if(process.Exception != null)
@@ -194,7 +194,7 @@ namespace gitter.Git
 				CurrentProgress = 0,
 				MaxProgress     = 0,
 				IsIndeterminate = true,
-				ActionName      = "Downloading MSysGit...",
+				ActionName      = "Downloading Git...",
 			};
 			process.Monitor?.Report(state);
 			process.WebResponse = process.WebRequest.EndGetResponse(ar);
@@ -288,7 +288,7 @@ namespace gitter.Git
 					CurrentProgress = (int)process.DownloadedBytes,
 					MaxProgress     = (int)process.WebResponse.ContentLength,
 					IsIndeterminate = false,
-					ActionName      = "Downloading MSysGit...",
+					ActionName      = "Downloading Git...",
 				};
 				process.Monitor.Report(state);
 			}
@@ -301,7 +301,7 @@ namespace gitter.Git
 				try
 				{
 					process.InstallerFileName = Path.Combine(
-						Path.GetTempPath(), "msysgit-installer.exe");
+						Path.GetTempPath(), "git-installer.exe");
 					process.InstallerFileStream = new FileStream(
 						process.InstallerFileName,
 						FileMode.Create,

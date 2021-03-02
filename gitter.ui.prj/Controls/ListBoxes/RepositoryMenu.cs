@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -37,7 +37,7 @@ namespace gitter
 			Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.DataContext.Path));
 			Items.Add(GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, Repository.DataContext.Path));
 
-			var actions = GuiItemFactory.GetRepositoryActions<ToolStripMenuItem>(repository.DataContext.Path);
+			var actions = GuiItemFactory.GetRepositoryActions(repository.DataContext.Path);
 			if(actions.Count != 0)
 			{
 				Items.Add(new ToolStripSeparator());

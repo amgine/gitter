@@ -2574,6 +2574,15 @@ namespace gitter.Framework.Controls
 			base.OnStyleChanged(e);
 		}
 
+		protected override void OnTextChanged(EventArgs e)
+		{
+			base.OnTextChanged(e);
+			if(Items.Count == 0)
+			{
+				Invalidate();
+			}
+		}
+
 		protected override Size MeasureContent()
 		{
 			int w = 0;

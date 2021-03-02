@@ -328,4 +328,16 @@
   <data name="ImgRepositoryUnavailableLarge" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\database-ghost.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ImgSln" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\sln.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgVSCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\vscode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StrOpenInVSCode" xml:space="preserve">
+    <value>Open in Visual Studio Code</value>
+  </data>
+  <data name="StrOpenVisualStudioSolutions" xml:space="preserve">
+    <value>Open Visual Studio Solutions</value>
+  </data>
 </root>

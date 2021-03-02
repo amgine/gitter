@@ -24,6 +24,7 @@ namespace gitter
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Drawing;
+	using System.IO;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -33,6 +34,115 @@ namespace gitter
 
 	static class GuiItemFactory
 	{
+		private static readonly IPathCommandsProvider[] _pathCommandsProviders =
+			new IPathCommandsProvider[]
+			{
+				new OpenWithVisualStudioCodeProvider(),
+				new OpenVisualStudioSolutionsProvider(),
+			};
+
+		interface IPathCommandsProvider
+		{
+			bool Nested { get; }
+
+			string DisplayName { get; }
+
+			IEnumerable<GuiCommand> GetPathCommands(string path);
+		}
+
+		class OpenWithVisualStudioCodeProvider : IPathCommandsProvider
+		{
+			private string _vsCodePath;
+			private bool _vsCodeSearched;
+
+			private static string FindVSCode()
+			{
+				var path0 = Path.Combine(
+					Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+					@"Programs\Microsoft VS Code\Code.exe");
+
+				if(File.Exists(path0)) return path0;
+
+				var path1 = Path.Combine(
+					Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+					@"Microsoft VS Code\Code.exe");
+
+				if(File.Exists(path1)) return path1;
+
+				if(Environment.Is64BitOperatingSystem)
+				{
+					var path2 = Path.Combine(
+						Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+						@"Microsoft VS Code\Code.exe");
+
+					if(File.Exists(path2)) return path2;
+				}
+
+				return default;
+			}
+
+			public bool Nested => false;
+
+			public string DisplayName => Resources.StrOpenInVSCode;
+
+			public IEnumerable<GuiCommand> GetPathCommands(string path)
+			{
+				if(!_vsCodeSearched)
+				{
+					_vsCodePath = FindVSCode();
+					_vsCodeSearched = true;
+				}
+
+				if(_vsCodePath == null) yield break;
+
+				yield return new GuiCommand("OpenVSCode", DisplayName, CachedResources.Bitmaps["ImgVSCode"], e =>
+				{
+					Process.Start(new ProcessStartInfo
+					{
+						FileName  = _vsCodePath,
+						Arguments = path.AssureDoubleQuotes(),
+					})?.Dispose();
+				});
+			}
+		}
+
+		class OpenVisualStudioSolutionsProvider : IPathCommandsProvider
+		{
+			public bool Nested => true;
+
+			public string DisplayName => Resources.StrOpenVisualStudioSolutions;
+
+			static string GetFileName(string path, string fullFileName)
+			{
+				var len = path.Length;
+				if(!path.EndsWith(Path.DirectorySeparatorChar) && !path.EndsWith(Path.AltDirectorySeparatorChar))
+				{
+					++len;
+				}
+				if(fullFileName.Length > len)
+				{
+					fullFileName = fullFileName.Substring(len);
+				}
+				return fullFileName;
+			}
+
+			public IEnumerable<GuiCommand> GetPathCommands(string path)
+			{
+				path = Path.GetFullPath(path);
+				foreach(var sln in Directory.EnumerateFiles(path, "*.sln", SearchOption.TopDirectoryOnly))
+				{
+					yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CachedResources.Bitmaps["ImgSln"], e => Utility.OpenUrl(sln));
+				}
+				foreach(var dir in Directory.EnumerateDirectories(path))
+				{
+					foreach(var sln in Directory.EnumerateFiles(dir, "*.sln", SearchOption.TopDirectoryOnly))
+					{
+						yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CachedResources.Bitmaps["ImgSln"], e => Utility.OpenUrl(sln));
+					}
+				}
+			}
+		}
+
 		public static T GetRemoveRecentRepositoryItem<T>(RepositoryLink repository)
 			where T : ToolStripItem, new()
 		{
@@ -137,30 +247,63 @@ namespace gitter
 			}
 		}
 
-		public static IReadOnlyList<T> GetRepositoryActions<T>(string workingDirectory)
+		private static T WrapCommand<T>(GuiCommand command)
 			where T : ToolStripItem, new()
 		{
-			var p = GitterApplication.WorkingEnvironment.FindProviderForDirectory(workingDirectory);
-			if(p == null) return Preallocated<T>.EmptyArray;
-			var commands = new List<GuiCommand>(p.GetRepositoryCommands(workingDirectory));
-			if(commands.Count == 0)
+			var item = new T()
 			{
-				return Preallocated<T>.EmptyArray;
-			}
-			var res = new List<T>(commands.Count);
-			foreach(var cmd in commands)
+				Tag     = command,
+				Name    = command.Name,
+				Text    = command.DisplayName,
+				Image   = command.Image,
+				Enabled = command.IsEnabled,
+			};
+			item.Click += OnGuiCommandItemClick;
+			return item;
+		}
+
+		public static IReadOnlyList<ToolStripItem> GetRepositoryActions(string workingDirectory)
+		{
+			if(!Directory.Exists(workingDirectory)) return Preallocated<ToolStripItem>.EmptyArray;
+
+			var res = new List<ToolStripItem>();
+
+			foreach(var provider in _pathCommandsProviders)
 			{
-				var item = new T()
+				var parent = default(ToolStripMenuItem);
+				foreach(var command in provider.GetPathCommands(workingDirectory))
 				{
-					Tag     = cmd,
-					Name    = cmd.Name,
-					Text    = cmd.DisplayName,
-					Image   = cmd.Image,
-					Enabled = cmd.IsEnabled,
-				};
-				item.Click += OnGuiCommandItemClick;
-				res.Add(item);
+					if(provider.Nested)
+					{
+						if(parent == null)
+						{
+							parent = new ToolStripMenuItem(provider.DisplayName);
+							res.Add(parent);
+						}
+						parent.DropDownItems.Add(WrapCommand<ToolStripMenuItem>(command));
+					}
+					else
+					{
+						res.Add(WrapCommand<ToolStripMenuItem>(command));
+					}
+				}
 			}
+
+			var p = GitterApplication.WorkingEnvironment.FindProviderForDirectory(workingDirectory);
+			if(p != null)
+			{
+				bool separatorAdded = res.Count == 0;
+				foreach(var command in p.GetRepositoryCommands(workingDirectory))
+				{
+					if(!separatorAdded)
+					{
+						res.Add(new ToolStripSeparator());
+						separatorAdded = true;
+					}
+					res.Add(WrapCommand<ToolStripMenuItem>(command));
+				}
+			}
+
 			return res;
 		}
 

@@ -248,6 +248,16 @@ namespace gitter.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgSln {
+            get {
+                object obj = ResourceManager.GetObject("ImgSln", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgStartPage {
             get {
                 object obj = ResourceManager.GetObject("ImgStartPage", resourceCulture);
@@ -291,6 +301,16 @@ namespace gitter.Properties {
         internal static System.Drawing.Bitmap ImgStartPageLogoGradientDark {
             get {
                 object obj = ResourceManager.GetObject("ImgStartPageLogoGradientDark", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ImgVSCode {
+            get {
+                object obj = ResourceManager.GetObject("ImgVSCode", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -467,11 +487,29 @@ namespace gitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open in Visual Studio Code.
+        /// </summary>
+        internal static string StrOpenInVSCode {
+            get {
+                return ResourceManager.GetString("StrOpenInVSCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open in Windows Explorer.
         /// </summary>
         internal static string StrOpenInWindowsExplorer {
             get {
                 return ResourceManager.GetString("StrOpenInWindowsExplorer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open Visual Studio Solutions.
+        /// </summary>
+        internal static string StrOpenVisualStudioSolutions {
+            get {
+                return ResourceManager.GetString("StrOpenVisualStudioSolutions", resourceCulture);
             }
         }
         
