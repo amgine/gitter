@@ -102,6 +102,7 @@ namespace gitter.Framework.Services
 			{
 				switch((Native.WM)m.Msg)
 				{
+					case (Native.WM)0xB0:
 					case Native.WM.PAINT:
 						base.WndProc(ref m);
 						PaintErrors();
@@ -147,18 +148,18 @@ namespace gitter.Framework.Services
 			var graphics = GetGraphics();
 			graphics.Clear(Color.Transparent);
 			using(var pen = new Pen(Color.Red)
-				{
-					Width = 2,
-					DashStyle = DashStyle.Dash,
-				})
+			{
+				Width = 2,
+				DashStyle = DashStyle.Dash,
+			})
 			{
 				for(int i = 0; i < _errors.Count; ++i)
 				{
-					var err   = _errors[i];
+					var err = _errors[i];
 					int line1 = _textBox.GetLineFromCharIndex(err.Start);
 					int line2 = _textBox.GetLineFromCharIndex(err.End);
-					var pos1  = _textBox.GetPositionFromCharIndex(err.Start);
-					var pos2  = _textBox.GetPositionFromCharIndex(err.End);
+					var pos1 = _textBox.GetPositionFromCharIndex(err.Start);
+					var pos2 = _textBox.GetPositionFromCharIndex(err.End);
 					if(line1 != line2)
 					{
 						pos2.X += 6;
