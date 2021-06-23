@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -39,12 +41,15 @@ namespace gitter.Git.Gui.Controls
 			_listItem = listItem;
 			ConfigParameter = listItem.DataContext;
 
-			Items.Add(new ToolStripMenuItem(Resources.StrEditValue, CachedResources.Bitmaps["ImgConfigEdit"], (s, e) => listItem.StartValueEditor()));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(new ToolStripMenuItem(Resources.StrEditValue, CachedResources.Bitmaps["ImgConfigEdit"], (_, _) => listItem.StartValueEditor()));
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(ConfigParameter));
 			Items.Add(new ToolStripSeparator());
 			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ConfigParameter.Name),
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, ConfigParameter.Value)));
+				factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ConfigParameter.Name),
+				factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, ConfigParameter.Value)));
 		}
 
 		public ConfigParameterMenu(ConfigParameter parameter)
@@ -52,11 +57,15 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsValidGitObject(parameter, nameof(parameter));
 
 			ConfigParameter = parameter;
+
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			Items.Add(GuiItemFactory.GetUnsetParameterItem<ToolStripMenuItem>(parameter));
 			Items.Add(new ToolStripSeparator());
 			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ConfigParameter.Name),
-				GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, ConfigParameter.Value)));
+				factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ConfigParameter.Name),
+				factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrValue, ConfigParameter.Value)));
 		}
 
 		public ConfigParameter ConfigParameter { get; }

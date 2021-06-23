@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,6 +35,7 @@ namespace gitter.Git.Gui.Views
 		#region Data
 
 		private readonly SubmodulesView _submodulesView;
+		private readonly ToolStripButton _btnRefresh;
 		private readonly ToolStripButton _btnAddSubmodule;
 
 		#endregion
@@ -47,26 +48,36 @@ namespace gitter.Git.Gui.Views
 
 			_submodulesView = submodulesView;
 
-			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) =>
-				{
-					_submodulesView.RefreshContent();
-				})
+			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, default,
+				(_, _) => _submodulesView.RefreshContent())
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.Image,
 				});
 			Items.Add(new ToolStripSeparator());
 			Items.Add(_btnAddSubmodule = new ToolStripButton(Resources.StrAddSubmodule, CachedResources.Bitmaps["ImgSubmoduleAdd"],
-				(sender, e) =>
+				(_, _) =>
 				{
-					using(var dlg = new AddSubmoduleDialog(_submodulesView.Repository))
-					{
-						dlg.Run(_submodulesView);
-					}
+					using var dlg = new AddSubmoduleDialog(_submodulesView.Repository);
+					dlg.Run(_submodulesView);
 				})
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
 				});
+
+			UpdateIcons(DeviceDpi);
+		}
+
+		private void UpdateIcons(int dpi)
+		{
+			var iconSize = dpi * 16 / 96;
+
+			_btnRefresh.Image = CachedResources.ScaledBitmaps[@"refresh", iconSize];
+		}
+
+		protected override void RescaleConstantsForDpi(int deviceDpiOld, int deviceDpiNew)
+		{
+			base.RescaleConstantsForDpi(deviceDpiOld, deviceDpiNew);
+			UpdateIcons(deviceDpiNew);
 		}
 	}
 }

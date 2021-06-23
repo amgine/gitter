@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,7 +21,6 @@
 namespace gitter.Redmine.Gui
 {
 	using System;
-	using System.Collections.Generic;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -31,48 +30,36 @@ namespace gitter.Redmine.Gui
 	sealed class IssuesViewFactory : ViewFactoryBase
 	{
 		public IssuesViewFactory()
-			: base(Guids.IssuesViewGuid, Resources.StrIssues, CachedResources.Bitmaps["ImgBug"])
+			: base(Guids.IssuesViewGuid, Resources.StrIssues, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues"), singleton: true)
 		{
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new IssuesView(environment);
-		}
+			=> new IssuesView(environment);
 	}
 
 	sealed class NewsViewFactory : ViewFactoryBase
 	{
 		public NewsViewFactory()
-			: base(Guids.NewsViewGuid, Resources.StrNews, CachedResources.Bitmaps["ImgNews"])
+			: base(Guids.NewsViewGuid, Resources.StrNews, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"news"), singleton: true)
 		{
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new NewsView(environment);
-		}
+			=> new NewsView(environment);
 	}
 
 	sealed class VersionsViewFactory : ViewFactoryBase
 	{
 		public VersionsViewFactory()
-			: base(Guids.VersionsViewGuid, Resources.StrVersions, CachedResources.Bitmaps["ImgVersion"])
+			: base(Guids.VersionsViewGuid, Resources.StrVersions, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"versions"), singleton: true)
 		{
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new VersionsView(environment);
-		}
+			=> new VersionsView(environment);
 	}
 }

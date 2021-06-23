@@ -55,7 +55,7 @@ namespace gitter.Framework.CLI
 			Verify.State.IsFalse(IsInitialized);
 
 			_stream	= reader.BaseStream;
-			_eof	= new ManualResetEvent(false);
+			_eof	= new ManualResetEvent(initialState: false);
 
 			BeginReadAsync();
 		}

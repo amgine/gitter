@@ -25,10 +25,7 @@ namespace gitter.Framework.Controls
 
 	sealed class GridDockMarkers : DockMarkers<GridDockMarker>
 	{
-		public GridDockMarkers(ViewDockGrid grid)
-		{
-			Grid = grid;
-		}
+		public GridDockMarkers(ViewDockGrid grid) => Grid = grid;
 
 		public ViewDockGrid Grid { get; }
 
@@ -41,7 +38,7 @@ namespace gitter.Framework.Controls
 			{
 				return null;
 			}
-			return new GridDockMarker[]
+			return new[]
 			{
 				new GridDockMarker(Grid, dockClient, AnchorStyles.Left),
 				new GridDockMarker(Grid, dockClient, AnchorStyles.Top),

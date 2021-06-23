@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -52,14 +52,15 @@ namespace gitter.Git.Gui.Views
 			}
 			var stack = new Stack<TreeDirectory>();
 			var folder = _treeView.CurrentDirectory;
-			if(folder != null)
+			if(folder is not null)
 			{
-				while(folder != null)
+				do
 				{
 					stack.Push(folder);
 					folder = folder.Parent;
 				}
-				TreeDirectory prev = null;
+				while(folder is not null);
+				var prev = default(TreeDirectory);
 				while(stack.Count != 0)
 				{
 					folder = stack.Pop();
@@ -77,7 +78,7 @@ namespace gitter.Git.Gui.Views
 								Tag = subFolder,
 								Checked = subFolder == prev,
 							};
-							subItem.Click += (sender, e) =>
+							subItem.Click += (sender, _) =>
 							{
 								_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
 							};
@@ -91,7 +92,7 @@ namespace gitter.Git.Gui.Views
 								Enabled = false,
 							});
 					}
-					item.ButtonClick += (sender, e) =>
+					item.ButtonClick += (sender, _) =>
 					{
 						_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
 					};
@@ -120,6 +121,20 @@ namespace gitter.Git.Gui.Views
 					DisplayStyle = ToolStripItemDisplayStyle.Image,
 				});
 			Items.Add(new ToolStripSeparator());
+
+			UpdateIcons(DeviceDpi);
+		}
+
+		private void UpdateIcons(int dpi)
+		{
+			var iconSize = dpi * 16 / 96;
+
+		}
+
+		protected override void RescaleConstantsForDpi(int deviceDpiOld, int deviceDpiNew)
+		{
+			base.RescaleConstantsForDpi(deviceDpiOld, deviceDpiNew);
+			UpdateIcons(deviceDpiNew);
 		}
 
 		private void OnCurrentDirectoryChanged(object sender, EventArgs e)

@@ -187,7 +187,7 @@ namespace gitter.Git.Gui.Controls
 					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 				}
 			}
-			if(separator != null)
+			if(separator is not null)
 			{
 				separator.Height = 6;
 			}
@@ -202,7 +202,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			DiffViewerHeaders.BeginUpdate();
 			_progressPanel.Remove();
-			if(exception != null && !string.IsNullOrWhiteSpace(exception.Message))
+			if(exception is not null && !string.IsNullOrWhiteSpace(exception.Message))
 			{
 				DiffViewerHeaders.Panels.Add(new FlowProgressPanel { Message = exception.Message });
 			}

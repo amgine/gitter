@@ -57,6 +57,7 @@ namespace gitter.Framework.Controls
 		private readonly WNDPROC _listBoxWndProc;
 		private IntPtr _listBoxDefaultWndProc;
 
+		/// <inheritdoc/>
 		protected override void OnHandleCreated(EventArgs e)
 		{
 			base.OnHandleCreated(e);
@@ -68,15 +69,17 @@ namespace gitter.Framework.Controls
 			_listBoxDefaultWndProc = NativeUtility.SetWindowProc(x.hwndList, _listBoxWndProc);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
-			if(DropDown != null)
+			if(DropDown is not null)
 			{
 				DropDown.Width = Width;
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
@@ -104,6 +107,7 @@ namespace gitter.Framework.Controls
 			return User32.CallWindowProc(_listBoxDefaultWndProc, hWnd, msg, wParam, lParam);
 		}
 
+		/// <inheritdoc/>
 		protected override void WndProc(ref Message m)
 		{
 			switch(m.Msg)
@@ -156,7 +160,7 @@ namespace gitter.Framework.Controls
 
 		public new bool DroppedDown
 		{
-			get => _dropDown != null?_dropDown.Visible:false;
+			get => _dropDown is not null ? _dropDown.Visible : false;
 			set
 			{
 				if(value)

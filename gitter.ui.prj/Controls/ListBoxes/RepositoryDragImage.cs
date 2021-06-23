@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,40 +18,44 @@
  */
 #endregion
 
-using System;
-using System.Drawing;
-using System.Windows.Forms;
-
-using gitter.Framework;
-using gitter.Framework.Controls;
-
 namespace gitter
 {
+	using System;
+	using System.Drawing;
+	using System.Windows.Forms;
+
+	using gitter.Framework;
+	using gitter.Framework.Controls;
+
 	static class RepositoryDragImage
 	{
-		private static readonly Bitmap ImgRepository = CachedResources.Bitmaps["ImgRepository"];
-
-		public static DragImage Create(string path)
+		public static DragImage Create(string path, Dpi dpi)
 		{
+			var conv = DpiConverter.FromDefaultTo(dpi);
 			var size = GitterApplication.TextRenderer.MeasureText(
 				GraphicsUtility.MeasurementGraphics,
 				path,
 				GitterApplication.FontManager.UIFont,
 				int.MaxValue / 2);
-			size = new Size(16 + 4 + size.Width + 4, 16 + 6);
+			size = new Size(conv.ConvertX(16) + 2 * conv.ConvertX(4) + size.Width, conv.ConvertY(16) + 2 * conv.ConvertY(3));
 			return new DragImage(size, 9, 9, e => PaintImage(e, size, path));
 		}
 
 		private static void PaintImage(PaintEventArgs e, Size size, string path)
 		{
-			var rc = new Rectangle(Point.Empty, size);
+			var rc   = new Rectangle(Point.Empty, size);
+			var conv = new DpiConverter(e.Graphics);
 			BackgroundStyle.Selected.Draw(e.Graphics, rc);
-			e.Graphics.DrawImage(ImgRepository, 2, 3);
+			var icon = CachedResources.ScaledBitmaps[@"repository", conv.ConvertX(16)];
+			if(icon is not null)
+			{
+				e.Graphics.DrawImage(icon, conv.ConvertX(2), conv.ConvertY(3));
+			}
 			GitterApplication.TextRenderer.DrawText(
 				e.Graphics,
 				path,
 				GitterApplication.FontManager.UIFont,
-				SystemBrushes.WindowText, 16 + 4, 4);
+				SystemBrushes.WindowText, conv.ConvertX(16) + conv.ConvertX(4), conv.ConvertY(4));
 		}
 	}
 }

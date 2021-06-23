@@ -24,7 +24,7 @@ namespace gitter.Framework.Controls
 
 	public abstract class ProcessOverlayRenderer
 	{
-		protected static readonly StringFormat StringFormat = new StringFormat()
+		protected static readonly StringFormat StringFormat = new()
 		{
 			Alignment = StringAlignment.Center,
 			LineAlignment = StringAlignment.Center,
@@ -32,7 +32,7 @@ namespace gitter.Framework.Controls
 			FormatFlags = StringFormatFlags.FitBlackBox,
 		};
 
-		protected static readonly StringFormat TitleStringFormat = new StringFormat(StringFormat.GenericTypographic)
+		protected static readonly StringFormat TitleStringFormat = new(StringFormat.GenericTypographic)
 		{
 			Alignment = StringAlignment.Near,
 			LineAlignment = StringAlignment.Center,

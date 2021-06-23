@@ -77,27 +77,35 @@ namespace gitter.Git.Gui.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
 			DataContext.Deleted += OnDeleted;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
 			DataContext.Deleted -= OnDeleted;
 			base.OnListBoxDetached();
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNull(requestEventArgs);
+
 			var menu = new StashedStateMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
 
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
@@ -117,8 +125,11 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:

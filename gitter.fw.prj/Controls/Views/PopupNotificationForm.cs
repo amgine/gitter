@@ -29,6 +29,7 @@ namespace gitter.Framework.Controls
 	public sealed class PopupNotificationForm : Form
 	{
 		private readonly NotificationContent _content;
+		private readonly PopupNotificationHeader _header;
 		private Timer _timer;
 
 		public PopupNotificationForm(NotificationContent content)
@@ -49,7 +50,7 @@ namespace gitter.Framework.Controls
 			MaximizeBox     = false;
 			TopMost         = false;
 
-			var header = new PopupNotificationHeader()
+			_header = new PopupNotificationHeader()
 			{
 				Text = content.Text,
 				Bounds = new Rectangle(
@@ -76,8 +77,8 @@ namespace gitter.Framework.Controls
 		{
 			foreach(Control ctl in control.Controls)
 			{
-				ctl.MouseEnter += (s, e) => PreventAutoClose();
-				ctl.MouseLeave += (s, e) => AllowAutoClose();
+				ctl.MouseEnter += (_, _) => PreventAutoClose();
+				ctl.MouseLeave += (_, _) => AllowAutoClose();
 
 				if(ctl.HasChildren)
 				{
@@ -102,25 +103,43 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseEnter(EventArgs e)
 		{
 			PreventAutoClose();
 			base.OnMouseEnter(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			AllowAutoClose();
 			base.OnMouseLeave(e);
 		}
 
-		public new void Show()
+		public void Prepare()
 		{
-			Owner = GitterApplication.MainForm;
 			if(!IsHandleCreated)
 			{
 				CreateControl();
 			}
+			if(DeviceDpi != 96)
+			{
+				var conv = new DpiConverter(this);
+				var cr = ClientRectangle;
+				_content.Width = conv.ConvertX(ViewConstants.PopupWidth) - Renderer.FloatBorderSize * 2;
+				_content.Top   = cr.Top + Renderer.HeaderHeight + Renderer.FloatBorderSize;
+				ClientSize = new Size(conv.ConvertX(ViewConstants.PopupWidth), _content.Height + Renderer.HeaderHeight + Renderer.FloatBorderSize * 2);
+				_content.Left = Renderer.FloatBorderSize;
+
+				_header.Size = new Size(_content.Width, Renderer.HeaderHeight);
+			}
+		}
+
+		public new void Show()
+		{
+			Owner = GitterApplication.MainForm;
+
 			User32.ShowWindow(this.Handle, 4);
 			User32.SetWindowPos(this.Handle, new IntPtr(-1), 0, 0, 0, 0, 0x0010 | 0x0002 | 0x0001);
 			if(_content.Timeout != TimeSpan.MaxValue)
@@ -132,6 +151,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void DefWndProc(ref Message m)
 		{
 			const int MA_NOACTIVATE = 0x0003;
@@ -151,8 +171,10 @@ namespace gitter.Framework.Controls
 			Close();
 		}
 
+		/// <inheritdoc/>
 		protected override bool ShowWithoutActivation => true;
 
+		/// <inheritdoc/>
 		protected override CreateParams CreateParams
 		{
 			get
@@ -165,6 +187,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnResize(EventArgs e)
 		{
 			var cornerRadius = Renderer.FloatCornerRadius;
@@ -175,6 +198,7 @@ namespace gitter.Framework.Controls
 			base.OnResize(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)

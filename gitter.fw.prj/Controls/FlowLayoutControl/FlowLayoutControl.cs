@@ -181,13 +181,13 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		protected override void EndUpdate(bool refresh)
+		public override void EndUpdate(bool redraw = true)
 		{
-			if(UpdateCounter == 1 && refresh)
+			if(UpdateCounter == 1 && redraw)
 			{
 				NotifyContentSizeChanged();
 			}
-			base.EndUpdate(refresh);
+			base.EndUpdate(redraw);
 		}
 
 		/// <summary>Collection of hosted <see cref="FlowPanel"/>'s.</summary>

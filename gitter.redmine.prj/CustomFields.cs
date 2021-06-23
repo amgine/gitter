@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,7 +28,7 @@ namespace gitter.Redmine
 	{
 		#region Data
 
-		private readonly Dictionary<int, CustomFieldValue> _values;
+		private readonly Dictionary<int, CustomFieldValue> _values = new();
 
 		#endregion
 
@@ -41,15 +41,13 @@ namespace gitter.Redmine
 
 		internal CustomFields()
 		{
-			_values = new Dictionary<int, CustomFieldValue>();
 		}
 
 		internal CustomFields(XmlNode node, Func<int, string, CustomField> initializer)
 		{
 			Verify.Argument.IsNotNull(initializer, nameof(initializer));
 
-			_values = new Dictionary<int, CustomFieldValue>();
-			if(node != null)
+			if(node is not null)
 			{
 				foreach(XmlNode childNode in node.ChildNodes)
 				{
@@ -62,7 +60,7 @@ namespace gitter.Redmine
 
 		internal void Update(XmlNode node, Func<int, string, CustomField> initializer)
 		{
-			if(node == null || node.ChildNodes.Count == 0)
+			if(node is null || node.ChildNodes.Count == 0)
 			{
 				_values.Clear();
 			}
@@ -107,8 +105,7 @@ namespace gitter.Redmine
 		{
 			get
 			{
-				CustomFieldValue res;
-				if(_values.TryGetValue(id, out res)) return res.Value;
+				if(_values.TryGetValue(id, out var res)) return res.Value;
 				return null;
 			}
 		}
@@ -122,19 +119,12 @@ namespace gitter.Redmine
 			}
 		}
 
-		public int Count
-		{
-			get { return _values.Count; }
-		}
+		public int Count => _values.Count;
 
 		public IEnumerator<CustomFieldValue> GetEnumerator()
-		{
-			return _values.Values.GetEnumerator();
-		}
+			=> _values.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _values.Values.GetEnumerator();
-		}
+			=> _values.Values.GetEnumerator();
 	}
 }

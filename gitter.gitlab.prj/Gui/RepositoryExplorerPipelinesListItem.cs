@@ -29,7 +29,7 @@ namespace gitter.GitLab.Gui
 	sealed class RepositoryExplorerPipelinesListItem : RepositoryExplorerItemBase
 	{
 		public RepositoryExplorerPipelinesListItem(IWorkingEnvironment env, GitLabGuiProvider guiProvider)
-			: base(env, guiProvider, CachedResources.Bitmaps["ImgPipelines"], Resources.StrPipelines)
+			: base(env, guiProvider, @"pipelines", Resources.StrPipelines)
 		{
 		}
 

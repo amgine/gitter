@@ -136,7 +136,7 @@ namespace gitter.Git.Gui.Views
 
 		#region Properties
 
-		public override Image Image => CachedResources.Bitmaps["ImgRemote"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"remote");
 
 		public override bool IsDocument => true;
 
@@ -149,18 +149,18 @@ namespace gitter.Git.Gui.Views
 
 				if(_remote != value)
 				{
-					if(_remote != null)
+					if(_remote is not null)
 					{
 						DetachRemote(_remote);
 					}
 					_remote = value;
-					if(_remote != null)
+					if(_remote is not null)
 					{
 						AttachRemote(_remote);
 					}
 
 					UpdateText();
-					DataSource = value != null
+					DataSource = value is not null
 						? new RemoteReferencesDataSource(value, _lstRemoteReferences)
 						: null;
 				}
@@ -174,12 +174,12 @@ namespace gitter.Git.Gui.Views
 			{
 				if(_dataSource != value)
 				{
-					if(_dataSource != null)
+					if(_dataSource is not null)
 					{
 						_dataSource.Dispose();
 					}
 					_dataSource = value;
-					if(_dataSource != null)
+					if(_dataSource is not null)
 					{
 						_dataSource.ReloadData();
 					}
@@ -240,7 +240,7 @@ namespace gitter.Git.Gui.Views
 		{
 			if(!IsDisposed)
 			{
-				Text = Remote != null
+				Text = Remote is not null
 					? Remote.Name
 					: Resources.StrRemote;
 			}
@@ -248,43 +248,39 @@ namespace gitter.Git.Gui.Views
 
 		private void OnRemoteRenamed(object sender, NameChangeEventArgs e)
 		{
-			if(!IsDisposed)
+			if(IsDisposed) return;
+			if(InvokeRequired)
 			{
-				if(InvokeRequired)
+				try
 				{
-					try
-					{
-						BeginInvoke(new MethodInvoker(UpdateText));
-					}
-					catch(ObjectDisposedException)
-					{
-					}
+					BeginInvoke(new MethodInvoker(UpdateText));
 				}
-				else
+				catch
 				{
-					UpdateText();
 				}
+			}
+			else
+			{
+				UpdateText();
 			}
 		}
 
 		private void OnRemoteDeleted(object sender, EventArgs e)
 		{
-			if(!IsDisposed)
+			if(IsDisposed) return;
+			if(InvokeRequired)
 			{
-				if(InvokeRequired)
+				try
 				{
-					try
-					{
-						BeginInvoke(new MethodInvoker(Close));
-					}
-					catch(ObjectDisposedException)
-					{
-					}
+					BeginInvoke(new MethodInvoker(Close));
 				}
-				else
+				catch
 				{
-					Close();
 				}
+			}
+			else
+			{
+				Close();
 			}
 		}
 
@@ -296,6 +292,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F when e.Modifiers == Keys.Control:

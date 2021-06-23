@@ -24,7 +24,7 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using gitter.Framework;
 
 	[ToolboxItem(false)]
 	public sealed class RemotesMenu : ContextMenuStrip
@@ -35,13 +35,16 @@ namespace gitter.Git.Gui.Controls
 
 			Repository = repository;
 
-			Items.Add(GuiItemFactory.GetShowRemotesViewItem<ToolStripMenuItem>());
-			Items.Add(GuiItemFactory.GetRefreshRemotesItem<ToolStripMenuItem>(repository));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetShowRemotesViewItem<ToolStripMenuItem>());
+			Items.Add(factory.GetRefreshRemotesItem<ToolStripMenuItem>(repository));
 			Items.Add(new ToolStripSeparator());
-			Items.Add(GuiItemFactory.GetFetchItem<ToolStripMenuItem>(repository));
-			Items.Add(GuiItemFactory.GetPullItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetFetchItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetPullItem<ToolStripMenuItem>(repository));
 			Items.Add(new ToolStripSeparator());
-			Items.Add(GuiItemFactory.GetAddRemoteItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetAddRemoteItem<ToolStripMenuItem>(repository));
 		}
 
 		public Repository Repository { get; }

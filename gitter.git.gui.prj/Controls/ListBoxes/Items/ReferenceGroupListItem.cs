@@ -32,10 +32,6 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>Item used to group reference-representing items together.</summary>
 	public class ReferenceGroupListItem : CustomListBoxItem<ReferenceType>
 	{
-		private static readonly Image ImgRefsHeads   = CachedResources.Bitmaps["ImgRefsHeads"];
-		private static readonly Image ImgRefsRemotes = CachedResources.Bitmaps["ImgRefsRemotes"];
-		private static readonly Image ImgRefsTags    = CachedResources.Bitmaps["ImgRefsTags"];
-
 		/// <summary>Create <see cref="ReferenceGroupListItem"/>.</summary>
 		/// <param name="repository">Related repository.</param>
 		/// <param name="referenceTypes">Reference types to group.</param>
@@ -47,70 +43,81 @@ namespace gitter.Git.Gui.Controls
 
 		public Repository Repository { get; }
 
+		private Bitmap GetIcon(Dpi dpi)
+		{
+			var name = DataContext switch
+			{
+				ReferenceType.LocalBranch  => @"branches",
+				ReferenceType.RemoteBranch => @"rbranches",
+				ReferenceType.Tag          => @"tags",
+				_ => default,
+			};
+			if(name is null) return default;
+			return CachedResources.ScaledBitmaps[name, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+		}
+
+		private string GetText()
+			=> DataContext switch
+			{
+				ReferenceType.LocalBranch  => Resources.StrHeads,
+				ReferenceType.RemoteBranch => Resources.StrRemotes,
+				ReferenceType.Tag          => Resources.StrTags,
+				_ => default,
+			};
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					switch(DataContext)
-					{
-						case ReferenceType.LocalBranch:
-							return measureEventArgs.MeasureImageAndText(ImgRefsHeads, Resources.StrHeads);
-						case ReferenceType.RemoteBranch:
-							return measureEventArgs.MeasureImageAndText(ImgRefsRemotes, Resources.StrRemotes);
-						case ReferenceType.Tag:
-							return measureEventArgs.MeasureImageAndText(ImgRefsTags, Resources.StrTags);
-						default:
-							return Size.Empty;
-					}
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), GetText());
 				default:
 					return Size.Empty;
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			if(paintEventArgs.SubItemId == (int)ColumnId.Name)
 			{
-				switch(DataContext)
-				{
-					case ReferenceType.LocalBranch:
-						paintEventArgs.PaintImageAndText(ImgRefsHeads, Resources.StrHeads);
-						break;
-					case ReferenceType.RemoteBranch:
-						paintEventArgs.PaintImageAndText(ImgRefsRemotes, Resources.StrRemotes);
-						break;
-					case ReferenceType.Tag:
-						paintEventArgs.PaintImageAndText(ImgRefsTags, Resources.StrTags);
-						break;
-				}
+				paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), GetText());
 			}
 		}
 
-		/// <summary>Gets the context menu.</summary>
-		/// <param name="requestEventArgs">Request parameters.</param>
-		/// <returns>Context menu for specified location.</returns>
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			ContextMenuStrip menu = null;
-			if(Repository != null)
+			Assert.IsNotNull(requestEventArgs);
+
+			var menu = default(ContextMenuStrip);
+			if(Repository is not null)
 			{
 				menu = new ContextMenuStrip();
-				menu.Items.Add(GuiItemFactory.GetRefreshReferencesItem<ToolStripMenuItem>(Repository, DataContext, Resources.StrRefresh));
+
+				var dpiBindings = new DpiBindings(menu);
+				var factory     = new GuiItemFactory(dpiBindings);
+
+				menu.Items.Add(factory.GetRefreshReferencesItem<ToolStripMenuItem>(Repository, DataContext, Resources.StrRefresh));
 				switch(DataContext)
 				{
 					case ReferenceType.LocalBranch:
-						menu.Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Repository));
+						menu.Items.Add(factory.GetCreateBranchItem<ToolStripMenuItem>(Repository));
 						break;
 					case ReferenceType.RemoteBranch:
-						menu.Items.Add(GuiItemFactory.GetAddRemoteItem<ToolStripMenuItem>(Repository));
+						menu.Items.Add(factory.GetAddRemoteItem<ToolStripMenuItem>(Repository));
 						break;
 					case ReferenceType.Tag:
-						menu.Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Repository));
+						menu.Items.Add(factory.GetCreateTagItem<ToolStripMenuItem>(Repository));
 						break;
 				}
 			}
-			if(menu != null)
+			if(menu is not null)
 			{
 				Utility.MarkDropDownForAutoDispose(menu);
 			}

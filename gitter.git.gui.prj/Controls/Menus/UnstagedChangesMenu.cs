@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Context menu for unstaged changes item.</summary>
@@ -36,25 +38,28 @@ namespace gitter.Git.Gui.Controls
 
 			Repository = repository;
 
-			Items.Add(GuiItemFactory.GetStashSaveKeepIndexItem<ToolStripMenuItem>(repository));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetStashSaveKeepIndexItem<ToolStripMenuItem>(repository));
 
 			if(repository.Status.UnmergedCount != 0)
 			{
 				Items.Add(new ToolStripSeparator());
 
-				Items.Add(GuiItemFactory.GetResolveConflictsItem<ToolStripMenuItem>(repository));
+				Items.Add(factory.GetResolveConflictsItem<ToolStripMenuItem>(repository));
 			}
 			
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetStageAllItem<ToolStripMenuItem>(repository, Resources.StrStageAll));
-			Items.Add(GuiItemFactory.GetUpdateItem<ToolStripMenuItem>(repository, Resources.StrUpdate));
-			Items.Add(GuiItemFactory.GetManualStageItem<ToolStripMenuItem>(repository, Resources.StrManualStage.AddEllipsis()));
+			Items.Add(factory.GetStageAllItem<ToolStripMenuItem>(repository, Resources.StrStageAll));
+			Items.Add(factory.GetUpdateItem<ToolStripMenuItem>(repository, Resources.StrUpdate));
+			Items.Add(factory.GetManualStageItem<ToolStripMenuItem>(repository, Resources.StrManualStage.AddEllipsis()));
 			
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetCleanItem<ToolStripMenuItem>(repository));
-			Items.Add(GuiItemFactory.GetResetItem<ToolStripMenuItem>(repository, ResetMode.Mixed | ResetMode.Hard));
+			Items.Add(factory.GetCleanItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetResetItem<ToolStripMenuItem>(repository, ResetMode.Mixed | ResetMode.Hard));
 		}
 
 		public Repository Repository { get; }

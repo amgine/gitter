@@ -53,11 +53,11 @@ namespace gitter.Git.Gui
 			{
 				if(_repository != value)
 				{
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						DetachFromRepository(_repository);
 					}
-					if(value != null)
+					if(value is not null)
 					{
 						AttachToRepository(value);
 					}

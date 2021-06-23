@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -32,13 +32,11 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class StashToolbar : ToolStrip
 	{
-		#region Data
-
 		private readonly StashView _stashView;
 
-		private readonly ToolStripButton _saveButton;
+		private readonly ToolStripButton _btnRefresh;
 
-		#endregion
+		private readonly ToolStripButton _saveButton;
 
 		/// <summary>Initializes a new instance of the <see cref="StashToolbar"/> class.</summary>
 		/// <param name="stashView">Stash view.</param>
@@ -48,9 +46,9 @@ namespace gitter.Git.Gui.Views
 
 			_stashView = stashView;
 			Items.Add(
-				new ToolStripButton(
+				_btnRefresh = new ToolStripButton(
 					Resources.StrRefresh,
-					CachedResources.Bitmaps["ImgRefresh"],
+					default,
 					OnRefreshButtonClick)
 					{
 						DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -66,6 +64,21 @@ namespace gitter.Git.Gui.Views
 					{
 						ToolTipText = Resources.TipStashSave,
 					});
+
+			UpdateIcons(DeviceDpi);
+		}
+
+		private void UpdateIcons(int dpi)
+		{
+			var iconSize = dpi * 16 / 96;
+
+			_btnRefresh.Image = CachedResources.ScaledBitmaps[@"refresh", iconSize];
+		}
+
+		protected override void RescaleConstantsForDpi(int deviceDpiOld, int deviceDpiNew)
+		{
+			base.RescaleConstantsForDpi(deviceDpiOld, deviceDpiNew);
+			UpdateIcons(deviceDpiNew);
 		}
 
 		private void OnRefreshButtonClick(object sender, EventArgs e)

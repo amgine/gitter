@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,12 +21,6 @@
 namespace gitter.Redmine.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Linq;
-	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
 
@@ -49,35 +43,31 @@ namespace gitter.Redmine.Gui
 			_lblApiKey.Text = Resources.StrApiKey.AddColon();
 			_lblProject.Text = Resources.StrProject.AddColon();
 
-			var section = _repository.ConfigSection.TryGetSection("IssueTrackers");
-			if(section != null)
-			{
-				section = section.TryGetSection("Redmine");
-			}
-			if(section != null)
+			var section = _repository.ConfigSection.TryGetSection("IssueTrackers")?.TryGetSection("Redmine");
+			if(section is not null)
 			{
 				_txtServiceUri.Text = section.GetValue<string>("ServiceUri", string.Empty);
-				_txtApiKey.Text = section.GetValue<string>("ApiKey", string.Empty);
-				_cmbProject.Text = section.GetValue<string>("ProjectId", string.Empty);
+				_txtApiKey.Text     = section.GetValue<string>("ApiKey", string.Empty);
+				_cmbProject.Text    = section.GetValue<string>("ProjectId", string.Empty);
 			}
 		}
 
 		public string ServiceUri
 		{
-			get { return _txtServiceUri.Text.Trim(); }
-			set { _txtServiceUri.Text = value; }
+			get => _txtServiceUri.Text.Trim();
+			set => _txtServiceUri.Text = value;
 		}
 
 		public string ApiKey
 		{
-			get { return _txtApiKey.Text.Trim(); }
-			set { _txtApiKey.Text = value; }
+			get => _txtApiKey.Text.Trim();
+			set => _txtApiKey.Text = value;
 		}
 
 		public string ProjectId
 		{
-			get { return _cmbProject.Text.Trim(); }
-			set { _cmbProject.Text = value; }
+			get => _cmbProject.Text.Trim();
+			set => _cmbProject.Text = value;
 		}
 
 		private bool ValidateServiceUri(string uri)
@@ -90,8 +80,7 @@ namespace gitter.Redmine.Gui
 					Resources.ErrServiceUriCannotBeEmpty);
 				return false;
 			}
-			Uri dummy;
-			if(!Uri.TryCreate(uri, UriKind.Absolute, out dummy))
+			if(!Uri.TryCreate(uri, UriKind.Absolute, out _))
 			{
 				NotificationService.NotifyInputError(
 					_txtServiceUri,

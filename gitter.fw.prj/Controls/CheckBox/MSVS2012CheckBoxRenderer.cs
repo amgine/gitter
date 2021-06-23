@@ -81,12 +81,13 @@ namespace gitter.Framework.Controls
 
 		private IColorTable ColorTable { get; }
 
-		public override void Render(Graphics graphics, Rectangle clipRectangle, CustomCheckBox checkBox)
+		public override void Render(Graphics graphics, Dpi dpi, Rectangle clipRectangle, CustomCheckBox checkBox)
 		{
-			const int CheckBoxSize = 16;
-			using(var brush = new SolidBrush(checkBox.BackColor))
+			var conv         = DpiConverter.FromDefaultTo(dpi);
+			var checkBoxSize = conv.Convert(new Size(16, 16));
+			if(checkBox.BackColor != Color.Transparent)
 			{
-				graphics.FillRectangle(brush, clipRectangle);
+				graphics.GdiFill(checkBox.BackColor, clipRectangle);
 			}
 			bool highlight;
 			Color foregroundColor;
@@ -100,7 +101,7 @@ namespace gitter.Framework.Controls
 				highlight = false;
 				foregroundColor = ColorTable.ForegroundDisabled;
 			}
-			var rcCheckBox = new Rectangle(1, 1 + (checkBox.Height - CheckBoxSize) / 2, CheckBoxSize - 2, CheckBoxSize - 2);
+			var rcCheckBox = new Rectangle(1, 1 + (checkBox.Height - checkBoxSize.Height) / 2, checkBoxSize.Height - 2, checkBoxSize.Height - 2);
 			using(var brush = new SolidBrush(highlight ? ColorTable.CheckBackgroundHighlight : ColorTable.CheckBackground))
 			{
 				graphics.FillRectangle(brush, rcCheckBox);
@@ -120,22 +121,24 @@ namespace gitter.Framework.Controls
 					{
 						var path = new Point[]
 						{
-							new Point(4,   7 + rcCheckBox.Y),
-							new Point(6,  10 + rcCheckBox.Y),
-							new Point(11,  3 + rcCheckBox.Y),
+							new Point(conv.ConvertX( 4), conv.ConvertY( 7) + rcCheckBox.Y),
+							new Point(conv.ConvertX( 6), conv.ConvertY(10) + rcCheckBox.Y),
+							new Point(conv.ConvertX(11), conv.ConvertY( 3) + rcCheckBox.Y),
 						};
-						var mode = graphics.SmoothingMode;
-						graphics.SmoothingMode = SmoothingMode.HighQuality;
-						using(var pen = new Pen(foregroundColor, 1.7f))
+						using(var pen = new Pen(foregroundColor, conv.ConvertX(1.7f)))
+						using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 						{
 							graphics.DrawLines(pen, path);
 						}
-						graphics.SmoothingMode = mode;
 					}
 					break;
 				case CheckState.Indeterminate:
 					{
-						var rect = new Rectangle(rcCheckBox.X + 5, rcCheckBox.Y + 5, rcCheckBox.Width - 9, rcCheckBox.Height - 9);
+						var rect = new Rectangle(
+							rcCheckBox.X + conv.ConvertX(5),
+							rcCheckBox.Y + conv.ConvertY(5),
+							rcCheckBox.Width  - conv.ConvertX(9),
+							rcCheckBox.Height - conv.ConvertY(9));
 						using(var brush = new SolidBrush(foregroundColor))
 						{
 							graphics.FillRectangle(brush, rect);
@@ -143,12 +146,13 @@ namespace gitter.Framework.Controls
 					}
 					break;
 			}
-			int textOffset = 16;
-			if(checkBox.Image != null)
+			int textOffset = checkBoxSize.Width;
+			if(checkBox.Image is not null)
 			{
-				var image = checkBox.Image;
-				textOffset += image.Width + 4;
-				graphics.DrawImage(image, new Rectangle(16 + 3, (checkBox.Height - image.Height) / 2, image.Width, image.Height));
+				var image     = checkBox.Image;
+				var imageSize = conv.Convert(new Size(16, 16));
+				textOffset += imageSize.Width + conv.ConvertX(4);
+				graphics.DrawImage(image, new Rectangle(checkBoxSize.Width + conv.ConvertX(3), (checkBox.Height - image.Height) / 2, imageSize.Width, imageSize.Height));
 			}
 			var text = checkBox.Text;
 			if(!string.IsNullOrWhiteSpace(text))

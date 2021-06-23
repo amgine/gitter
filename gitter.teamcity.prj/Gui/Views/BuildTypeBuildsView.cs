@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -56,10 +56,7 @@ namespace gitter.TeamCity.Gui.Views
 			_lstBuilds.Parent = this;
 		}
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgBuildType"]; }
-		}
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"builds");
 
 		protected override void AttachViewModel(object viewModel)
 		{

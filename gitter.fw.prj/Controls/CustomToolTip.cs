@@ -38,12 +38,12 @@ namespace gitter.Framework.Controls
 			Draw += DrawHandler;
 		}
 
-		public abstract Size Size { get; }
+		public abstract Size Measure(Control associatedControl);
 
 		private static void PopupHandler(object sender, PopupEventArgs e)
 		{
 			var toolTip = (CustomToolTip)sender;
-			e.ToolTipSize = toolTip.Size;
+			e.ToolTipSize = toolTip.Measure(e.AssociatedControl);
 			toolTip.OnPopup(e);
 		}
 

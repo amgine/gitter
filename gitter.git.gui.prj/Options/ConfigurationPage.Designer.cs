@@ -13,9 +13,9 @@
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && (components != null))
+			if(disposing)
 			{
-				components.Dispose();
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}
@@ -46,11 +46,21 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._lstUserConfig.ForeColor = System.Drawing.SystemColors.WindowText;
-			this._lstUserConfig.ItemHeight = 21;
 			this._lstUserConfig.Location = new System.Drawing.Point(0, 0);
 			this._lstUserConfig.Name = "_lstUserConfig";
 			this._lstUserConfig.Size = new System.Drawing.Size(520, 311);
 			this._lstUserConfig.TabIndex = 0;
+			// 
+			// _lstSystemConfig
+			// 
+			this._lstSystemConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._lstSystemConfig.ForeColor = System.Drawing.SystemColors.WindowText;
+			this._lstSystemConfig.Location = new System.Drawing.Point(0, 0);
+			this._lstSystemConfig.Name = "_lstSystemConfig";
+			this._lstSystemConfig.Size = new System.Drawing.Size(520, 311);
+			this._lstSystemConfig.TabIndex = 1;
 			// 
 			// _tabs
 			// 
@@ -113,21 +123,10 @@
 			this._btnAddSystemParameter.UseVisualStyleBackColor = true;
 			this._btnAddSystemParameter.Click += new System.EventHandler(this._addSystemParameter_Click);
 			// 
-			// _lstSystemConfig
-			// 
-			this._lstSystemConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this._lstSystemConfig.ForeColor = System.Drawing.SystemColors.WindowText;
-			this._lstSystemConfig.ItemHeight = 21;
-			this._lstSystemConfig.Location = new System.Drawing.Point(0, 0);
-			this._lstSystemConfig.Name = "_lstSystemConfig";
-			this._lstSystemConfig.Size = new System.Drawing.Size(520, 311);
-			this._lstSystemConfig.TabIndex = 1;
-			// 
 			// ConfigurationPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.Controls.Add(this._tabs);
 			this.Name = "ConfigurationPage";
 			this.Size = new System.Drawing.Size(528, 374);

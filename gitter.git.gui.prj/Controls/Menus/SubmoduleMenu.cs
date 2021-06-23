@@ -21,8 +21,9 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-
 	using System.Windows.Forms;
+
+	using gitter.Framework;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -33,6 +34,9 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsValidGitObject(submodule, nameof(submodule));
 
 			Submodule = submodule;
+
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
 
 			Items.Add(GuiItemFactory.GetOpenAppItem<ToolStripMenuItem>(
 				Resources.StrOpenWithGitter, null, Application.ExecutablePath, Submodule.FullPath.SurroundWithDoubleQuotes()));
@@ -49,9 +53,9 @@ namespace gitter.Git.Gui.Controls
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Submodule.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPath, Submodule.Path));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrUrl, Submodule.Url));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Submodule.Name));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPath, Submodule.Path));
+			item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrUrl, Submodule.Url));
 
 			Items.Add(item);
 		}

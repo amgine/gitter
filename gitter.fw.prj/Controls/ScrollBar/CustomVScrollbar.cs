@@ -112,34 +112,22 @@ namespace gitter.Framework.Controls
 		}
 
 		private void OnTopClick(object sender, EventArgs e)
-		{
-			Value = ClampValue(Minimum);
-		}
+			=> Value = ClampValue(Minimum);
 
 		private void OnBottomClick(object sender, EventArgs e)
-		{
-			Value = ClampValue(Maximum);
-		}
+			=> Value = ClampValue(Maximum);
 
 		private void OnScrollUpClick(object sender, EventArgs e)
-		{
-			Value = ClampValue(Value - SmallChange);
-		}
+			=> Value = ClampValue(Value - SmallChange);
 
 		private void OnScrollDownClick(object sender, EventArgs e)
-		{
-			Value = ClampValue(Value + SmallChange);
-		}
+			=> Value = ClampValue(Value + SmallChange);
 
 		private void OnPageUpClick(object sender, EventArgs e)
-		{
-			Value = ClampValue(Value - LargeChange);
-		}
+			=> Value = ClampValue(Value - LargeChange);
 
 		private void OnPageDownClick(object sender, EventArgs e)
-		{
-			Value = ClampValue(Value + LargeChange);
-		}
+			=> Value = ClampValue(Value + LargeChange);
 
 		#endregion
 

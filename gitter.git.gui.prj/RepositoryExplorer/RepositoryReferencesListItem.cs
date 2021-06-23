@@ -37,7 +37,7 @@ namespace gitter.Git.Gui
 		private ReferenceTreeBinding _refsBinding;
 
 		public RepositoryReferencesListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgBranch"], Resources.StrReferences)
+			: base(@"branch", Resources.StrReferences)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -50,9 +50,7 @@ namespace gitter.Git.Gui
 			_environment.ViewDockService.ShowView(Guids.ReferencesViewGuid);
 		}
 
-		public override void OnDoubleClick(int x, int y)
-		{
-		}
+		public override void OnDoubleClick(int x, int y) { }
 
 		protected override void AttachToRepository()
 		{
@@ -78,16 +76,13 @@ namespace gitter.Git.Gui
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new ReferencesMenu(Repository);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository is null) return default;
+
+			var menu = new ReferencesMenu(Repository);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

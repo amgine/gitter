@@ -443,14 +443,12 @@ namespace gitter.Framework
 				rc.Offset(1, 1);
 				rc.Width -= 2;
 				rc.Height -= 2;
-				var oldSmoothingMode = graphics.SmoothingMode;
-				graphics.SmoothingMode = SmoothingMode.HighQuality;
-				using(Pen p = new Pen(ColorTable.ToolStripBorder))
+				using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
+				using(var p = new Pen(ColorTable.ToolStripBorder))
 				using(var b = new SolidBrush(ColorTable.ToolStripBackground))
 				{
 					graphics.FillRoundedRectangle(b, p, rc, 3);
 				}
-				graphics.SmoothingMode = oldSmoothingMode;
 			}
 		}
 

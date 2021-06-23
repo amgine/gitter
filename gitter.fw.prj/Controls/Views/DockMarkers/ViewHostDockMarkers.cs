@@ -36,19 +36,14 @@ namespace gitter.Framework.Controls
 		/// <value>Source of dock markers.</value>
 		public ViewHost ViewHost { get; }
 
-		/// <summary>Creates the markers.</summary>
-		/// <param name="dockClient">The dock client.</param>
-		/// <returns>Created markers.</returns>
+		/// <inheritdoc/>
 		protected override ViewHostDockMarker[] CreateMarkers(ViewHost dockClient)
 		{
 			if(ViewHost.IsDocumentWell || (!dockClient.IsDocumentWell && !(dockClient.ViewsCount == 1 && dockClient.GetView(0).IsDocument)))
 			{
-				return new ViewHostDockMarker[] { new ViewHostDockMarker(ViewHost, dockClient) };
+				return new[] { new ViewHostDockMarker(ViewHost, dockClient) };
 			}
-			else
-			{
-				return null;
-			}
+			return default;
 		}
 	}
 }

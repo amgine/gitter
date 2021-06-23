@@ -22,35 +22,45 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
+	using System.Drawing;
 	using System.Windows.Forms;
+
+	using gitter.Framework;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
 	internal sealed class ReflogToolbar : ToolStrip
 	{
-		#region Data
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static readonly IDpiBoundValue<Bitmap> Refresh = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"refresh", Size);
+		}
 
 		private readonly ReflogView _view;
-		private ToolStripButton _btnRefresh;
-
-		#endregion
+		private readonly ToolStripButton _btnRefresh;
+		private readonly DpiBindings _bindings;
 
 		/// <summary>Initializes a new instance of the <see cref="ReflogToolbar"/> class.</summary>
 		/// <param name="view">Host reflog view.</param>
 		public ReflogToolbar(ReflogView view)
 		{
 			_view = view;
+			_bindings = new DpiBindings(this);
 
 			Items.AddRange(
 				new ToolStripItem[]
 				{
 					// left-aligned
-					_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"], OnRefreshButtonClick)
+					_btnRefresh = new ToolStripButton(Resources.StrRefresh, default, OnRefreshButtonClick)
 						{
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 				});
+
+			_bindings.BindImage(_btnRefresh, Icons.Refresh);
 		}
 
 		private void OnRefreshButtonClick(object sender, EventArgs e)

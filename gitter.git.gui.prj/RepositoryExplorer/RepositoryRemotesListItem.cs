@@ -21,7 +21,6 @@
 namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -43,7 +42,7 @@ namespace gitter.Git.Gui
 		#region .ctor
 
 		public RepositoryRemotesListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgRemotes"], Resources.StrRemotes)
+			: base(@"remotes", Resources.StrRemotes)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -71,9 +70,7 @@ namespace gitter.Git.Gui
 			WorkingEnvironment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(e.Object));
 		}
 
-		public override void OnDoubleClick(int x, int y)
-		{
-		}
+		public override void OnDoubleClick(int x, int y) { }
 
 		protected override void DetachFromRepository()
 		{
@@ -90,16 +87,13 @@ namespace gitter.Git.Gui
 
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new RemotesMenu(Repository);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository is null) return default;
+
+			var menu = new RemotesMenu(Repository);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 
 		#endregion

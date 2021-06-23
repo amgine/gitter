@@ -40,6 +40,16 @@ namespace gitter
 	/// <summary>Main application form.</summary>
 	public partial class MainForm : FormEx, IWorkingEnvironment
 	{
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static readonly IDpiBoundValue<Bitmap> Init           = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"init",            Size);
+			public static readonly IDpiBoundValue<Bitmap> Clone          = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"clone",           Size);
+			public static readonly IDpiBoundValue<Bitmap> Repository     = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"repository",      Size);
+			public static readonly IDpiBoundValue<Bitmap> RepositoryOpen = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"repository.open", Size);
+		}
+
 		#region Data
 
 		private INotificationService _notificationService;
@@ -61,6 +71,7 @@ namespace gitter
 
 		private readonly ConfigurationService _configurationService;
 		private readonly RepositoryManagerService _repositoryManagerService;
+		private readonly DpiBindings _bindings;
 
 		#endregion
 
@@ -81,17 +92,22 @@ namespace gitter
 			_repositoryManagerService = new RepositoryManagerService(SavedRecentRepositories);
 			_viewDockService          = new ViewDockService(this, _toolDockGrid, _configurationService.ViewsSection);
 			_notificationService      = new BalloonNotificationService();
+			_bindings                 = new DpiBindings(this);
 
 			_repositoryManagerService.RecentRepositories.Changed += OnRecentRepositoriesChanged;
 
 			ProvideToolbar(new StandardToolbar(this));
 
-			_mnuRepository.DropDownItems.Insert(0,
-				new ToolStripMenuItem(Resources.StrInit.AddEllipsis(), CachedResources.Bitmaps["ImgRepositoryInitSmall"], OnInitRepositoryClick));
-			_mnuRepository.DropDownItems.Insert(1,
-				new ToolStripMenuItem(Resources.StrClone.AddEllipsis(), CachedResources.Bitmaps["ImgRepositoryCloneSmall"], OnCloneRepositoryClick));
-			_mnuRepository.DropDownItems.Insert(2,
-				new ToolStripSeparator());
+			var init  = new ToolStripMenuItem(Resources.StrInit.AddEllipsis(),  default, OnInitRepositoryClick);
+			var clone = new ToolStripMenuItem(Resources.StrClone.AddEllipsis(), default, OnCloneRepositoryClick);
+
+			_bindings.BindImage(init,               Icons.Init);
+			_bindings.BindImage(clone,              Icons.Clone);
+			_bindings.BindImage(_mnuOpenRepository, Icons.RepositoryOpen);
+
+			_mnuRepository.DropDownItems.Insert(0, init);
+			_mnuRepository.DropDownItems.Insert(1, clone);
+			_mnuRepository.DropDownItems.Insert(2, new ToolStripSeparator());
 
 			_viewDockService = new ViewDockService(this, _toolDockGrid, _configurationService.ViewsSection);
 			_viewDockService.RegisterFactory(
@@ -120,18 +136,18 @@ namespace gitter
 			_mnuView.DropDownItems.Add(new ToolStripSeparator());
 			_mnuView.DropDownItems.Add(new ViewMenuItem(_logFactory, this));
 
-			_mnuRepository.Text = Resources.StrRepository;
-			_mnuExit.Text = Resources.StrExit;
-			_mnuOpenRepository.Text = Resources.StrOpen.AddEllipsis();
+			_mnuRepository.Text         = Resources.StrRepository;
+			_mnuExit.Text               = Resources.StrExit;
+			_mnuOpenRepository.Text     = Resources.StrOpen.AddEllipsis();
 			_mnuRecentRepositories.Text = Resources.StrRecent;
 
-			_mnuView.Text = Resources.StrView;
+			_mnuView.Text     = Resources.StrView;
 			_mnuToolbars.Text = Resources.StrToolbars;
 
-			_mnuTools.Text = Resources.StrTools;
+			_mnuTools.Text   = Resources.StrTools;
 			_mnuOptions.Text = Resources.StrOptions.AddEllipsis();
 
-			_mnuHelp.Text = Resources.StrHelp;
+			_mnuHelp.Text  = Resources.StrHelp;
 			_mnuAbout.Text = Resources.StrAbout.AddEllipsis();
 
 			_recentRepositoryPath = string.Empty;
@@ -231,7 +247,7 @@ namespace gitter
 			catch(NotSupportedException)
 			{
 			}
-			if(args == null || args.Length <= 1)
+			if(args is not { Length: > 1 })
 			{
 				if(!cd.EndsWith("\\")) cd += "\\";
 				if(!appPath.EndsWith("\\")) appPath += "\\";
@@ -395,12 +411,8 @@ namespace gitter
 						}
 					}
 				}
-				catch(Exception exc)
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					if(exc.IsCritical())
-					{
-						throw;
-					}
 				}
 			}
 			_repositoryManagerService.RecentRepositories.Changed += OnRecentRepositoriesChanged;
@@ -429,7 +441,14 @@ namespace gitter
 
 		private void UpdateRecentRepositoriesMenu()
 		{
-			_mnuRecentRepositories.DropDownItems.Clear();
+			while(_mnuRecentRepositories.DropDownItems.Count > 0)
+			{
+				var index = _mnuRecentRepositories.DropDownItems.Count - 1;
+				var item  = _mnuRecentRepositories.DropDownItems[index];
+				_mnuRecentRepositories.DropDownItems.RemoveAt(index);
+				_bindings.BindImage(item, null);
+				item.Dispose();
+			}
 			if(_repositoryManagerService.RecentRepositories.Count == 0)
 			{
 				_mnuRecentRepositories.DropDownItems.Add(new ToolStripMenuItem(Resources.StrlNoAvailable.SurroundWith("<", ">"))
@@ -441,11 +460,13 @@ namespace gitter
 			{
 				foreach(var repo in _repositoryManagerService.RecentRepositories)
 				{
-					_mnuRecentRepositories.DropDownItems.Add(new ToolStripMenuItem(
-						repo.Path, CachedResources.Bitmaps["ImgRepository"], OnRecentRepositoryClick)
+					var item = new ToolStripMenuItem(
+						repo.Path, default, OnRecentRepositoryClick)
 					{
 						Tag = repo,
-					});
+					};
+					_bindings.BindImage(item, Icons.Repository);
+					_mnuRecentRepositories.DropDownItems.Add(item);
 				}
 			}
 		}
@@ -846,6 +867,8 @@ namespace gitter
 		}
 
 		Form IWorkingEnvironment.MainForm => this;
+
+		DpiBindings IWorkingEnvironment.MainFormDpiBindings => _bindings;
 
 		#endregion
 	}

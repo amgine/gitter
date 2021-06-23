@@ -333,26 +333,27 @@ namespace gitter.Framework.Controls
 
 		#region Tabs Rendering
 
-		protected static readonly StringFormat NormalStringFormat = new StringFormat(StringFormat.GenericTypographic)
+		protected static readonly StringFormat NormalStringFormat = new(StringFormat.GenericTypographic)
 		{
 			LineAlignment = StringAlignment.Center,
 			Trimming = StringTrimming.EllipsisCharacter,
 		};
 
-		protected static readonly StringFormat VerticalStringFormat = new StringFormat(NormalStringFormat)
+		protected static readonly StringFormat VerticalStringFormat = new(NormalStringFormat)
 		{
 			FormatFlags = StringFormatFlags.DirectionVertical,
 		};
 
 		private static int MeasureTabLength(ViewTabBase tab, Graphics graphics)
 		{
+			var conv   = new DpiConverter(tab.ViewHost);
 			var length = GitterApplication.TextRenderer.MeasureText(
 				graphics, tab.Text, GitterApplication.FontManager.UIFont, int.MaxValue, NormalStringFormat).Width;
-			if(tab.Image != null)
+			if(tab.ImageProvider?.GetImage(conv.ConvertX(16)) is not null)
 			{
-				length += 16 + ViewConstants.ImageSpacing;
+				length += conv.ConvertX(16) + conv.ConvertX(ViewConstants.ImageSpacing);
 			}
-			length += ViewConstants.BeforeTabContent + ViewConstants.AfterTabContent;
+			length += conv.ConvertX(ViewConstants.BeforeTabContent) + conv.ConvertX(ViewConstants.AfterTabContent);
 			return length;
 		}
 
@@ -376,36 +377,31 @@ namespace gitter.Framework.Controls
 			int h = bounds.Height;
 			Rectangle imageRect;
 			StringFormat stringFormat;
+			var conv     = new DpiConverter(tab.ViewHost);
+			var iconSize = conv.Convert(new Size(16, 16));
 			switch(tab.Anchor)
 			{
-				case AnchorStyles.Right:
-					imageRect = new Rectangle(x + (w - 16) / 2, y + 3, 16, 16);
+				case AnchorStyles.Right or AnchorStyles.Left:
+					imageRect = new Rectangle(x + (w - iconSize.Width) / 2, y + conv.ConvertY(3), iconSize.Height, iconSize.Width);
 					stringFormat = VerticalStringFormat;
 					break;
-				case AnchorStyles.Left:
-					imageRect = new Rectangle(x + (w - 16) / 2, y + 3, 16, 16);
-					stringFormat = VerticalStringFormat;
-					break;
-				case AnchorStyles.Top:
-					imageRect = new Rectangle(x + 3, y + (h - 16) / 2, 16, 16);
-					stringFormat = NormalStringFormat;
-					break;
-				case AnchorStyles.Bottom:
-					imageRect = new Rectangle(x + 3, y + (h - 16) / 2, 16, 16);
+				case AnchorStyles.Top or AnchorStyles.Bottom:
+					imageRect = new Rectangle(x + conv.ConvertX(3), y + (h - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
 					stringFormat = NormalStringFormat;
 					break;
 				default:
 					throw new ApplicationException();
 			}
-			var image = tab.Image;
-			if(image != null)
+			var image = tab.ImageProvider?.GetImage(iconSize.Width);
+			if(image is not null)
 			{
 				switch(tab.Orientation)
 				{
 					case Orientation.Horizontal:
 						graphics.DrawImage(image, imageRect);
-						bounds.Width -= imageRect.Width + 3;
-						bounds.X += imageRect.Width + 3;
+						var dx = imageRect.Width + conv.ConvertX(3);
+						bounds.Width -= dx;
+						bounds.X     += dx;
 						break;
 					case Orientation.Vertical:
 						using(var rotatedImage = (Image)image.Clone())
@@ -413,8 +409,9 @@ namespace gitter.Framework.Controls
 							rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 							graphics.DrawImage(rotatedImage, imageRect);
 						}
-						bounds.Height -= imageRect.Height + 3;
-						bounds.Y += imageRect.Height + 3;
+						var dy = imageRect.Height + conv.ConvertY(3);
+						bounds.Height -= dy;
+						bounds.Y      += dy;
 						break;
 					default:
 						throw new ApplicationException($"Unexpected ViewTabBase.Orientation value: {tab.Orientation}");
@@ -425,14 +422,14 @@ namespace gitter.Framework.Controls
 				switch(tab.Orientation)
 				{
 					case Orientation.Horizontal:
-						bounds.X += ViewConstants.BeforeTabContent;
-						bounds.Width -= ViewConstants.BeforeTabContent + ViewConstants.AfterTabContent - 1;
+						bounds.X     += conv.ConvertX(ViewConstants.BeforeTabContent);
+						bounds.Width -= conv.ConvertX(ViewConstants.BeforeTabContent) + conv.ConvertX(ViewConstants.AfterTabContent) - 1;
 						GitterApplication.TextRenderer.DrawText(
 							graphics, tab.Text, GitterApplication.FontManager.UIFont, textBrush, bounds, stringFormat);
 						break;
 					case Orientation.Vertical:
-						bounds.Y += ViewConstants.BeforeTabContent;
-						bounds.Height -= ViewConstants.BeforeTabContent + ViewConstants.AfterTabContent - 1;
+						bounds.Y      += conv.ConvertY(ViewConstants.BeforeTabContent);
+						bounds.Height -= conv.ConvertY(ViewConstants.BeforeTabContent) + conv.ConvertY(ViewConstants.AfterTabContent) - 1;
 						bounds.Height += 10;
 						GitterApplication.GdiPlusTextRenderer.DrawText(
 							graphics, tab.Text, GitterApplication.FontManager.UIFont, textBrush, bounds, stringFormat);
@@ -565,7 +562,7 @@ namespace gitter.Framework.Controls
 				}
 				RenderTabContent(tab, bounds, graphics, foregroundColor);
 			}
-			if(tab.Buttons != null && tab.Buttons.Count != 0)
+			if(tab.Buttons is { Count: > 0 })
 			{
 				var buttonsBounds = new Rectangle(bounds.Right - tab.Buttons.Width - 2, 0, tab.Buttons.Width, bounds.Height);
 				tab.Buttons.OnPaint(graphics, buttonsBounds, !tab.IsActive || tab.View.Host.IsActive);
@@ -789,10 +786,14 @@ namespace gitter.Framework.Controls
 
 		public override void RenderViewHostHeader(ViewHostHeader header, PaintEventArgs e)
 		{
+			Assert.IsNotNull(header);
+			Assert.IsNotNull(e);
+
 			const int BetweenTextAndButtons = 2;
 			const int BeforeContent = 2;
 
 			var graphics = e.Graphics;
+			var conv     = new DpiConverter(header);
 
 			Color textColor, backgroundColor, accentColor;
 			if(header.ViewHost.IsActive)
@@ -808,45 +809,41 @@ namespace gitter.Framework.Controls
 				accentColor		= ColorTable.ViewHostHeaderAccentNormal;
 			}
 
-			using(var brush = new SolidBrush(backgroundColor))
-			{
-				graphics.FillRectangle(brush, e.ClipRectangle);
-			}
+			graphics.GdiFill(backgroundColor, e.ClipRectangle);
+
+			int dx = conv.ConvertX(BeforeContent);
 
 			var client = header.ClientRectangle;
-			client.X += BeforeContent;
-			client.Width -= BeforeContent;
+			client.X     += dx;
+			client.Width -= dx;
 			if(header.Buttons.Count != 0)
 			{
-				client.Width -= header.Buttons.Width + BetweenTextAndButtons;
+				client.Width -= header.Buttons.Width + conv.ConvertX(BetweenTextAndButtons);
 			}
 			if(client.Width > 1)
 			{
-				int textWidth;
-				using(var brush = new SolidBrush(textColor))
-				{
-					graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-					graphics.TextContrast      = GraphicsUtility.TextContrast;
-					textWidth = GitterApplication.TextRenderer.MeasureText(
-						graphics,
-						header.Text,
-						GitterApplication.FontManager.UIFont,
-						client.Width).Width;
-					GitterApplication.TextRenderer.DrawText(
-						graphics,
-						header.Text,
-						GitterApplication.FontManager.UIFont,
-						brush,
-						client,
-						ViewHostHeaderTextFormat);
-				}
-				client.X += textWidth + 6;
-				client.Width -= textWidth + 6;
+				graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+				graphics.TextContrast      = GraphicsUtility.TextContrast;
+				var textWidth = GitterApplication.TextRenderer.MeasureText(
+					graphics,
+					header.Text,
+					GitterApplication.FontManager.UIFont,
+					client.Width).Width;
+				GitterApplication.TextRenderer.DrawText(
+					graphics,
+					header.Text,
+					GitterApplication.FontManager.UIFont,
+					textColor,
+					client,
+					ViewHostHeaderTextFormat);
+				dx = textWidth + conv.ConvertX(6);
+				client.X     += dx;
+				client.Width -= dx;
 				if(client.Width > 1)
 				{
-					const int AccentHeight = 5;
-					client.Y = (client.Height - AccentHeight) / 2;
-					client.Height = AccentHeight;
+					int accentHeight = conv.ConvertY(5);
+					client.Y      = (client.Height - accentHeight) / 2;
+					client.Height = accentHeight;
 
 					using(var brush = new HatchBrush(HatchStyle.Percent20, accentColor, backgroundColor))
 					{
@@ -898,13 +895,11 @@ namespace gitter.Framework.Controls
 				backgroundColor = Color.FromArgb((byte)(ViewConstants.OpacityNormal * 255),
 					ColorTable.DockMarkerButtonBackground);
 			}
-			var oldMode = graphics.SmoothingMode;
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
+			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 			using(var brush = new SolidBrush(backgroundColor))
 			{
 				graphics.FillRoundedRectangle(brush, bounds, 2);
 			}
-			graphics.SmoothingMode = oldMode;
 		}
 
 		private void InitDockMarkerButtonContentColors(bool hover, out Color arrow, out Color content, out Color border)

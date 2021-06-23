@@ -25,6 +25,7 @@ namespace gitter.Git.Gui.Controls
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
 
@@ -187,7 +188,7 @@ namespace gitter.Git.Gui.Controls
 				width -= SelectionMargin;
 			}
 			_content.Style = Style;
-			var size = _content.OnMeasure(measureEventArgs.Graphics, width);
+			var size = _content.OnMeasure(measureEventArgs.Graphics, new Dpi(FlowControl.DeviceDpi), width);
 			if(IsSelectable)
 			{
 				size.Width += SelectionMargin;
@@ -199,25 +200,26 @@ namespace gitter.Git.Gui.Controls
 		{
 			Assert.IsNotNull(paintEventArgs);
 
-			var bounds		= paintEventArgs.Bounds;
-			var graphics	= paintEventArgs.Graphics;
+			var bounds   = paintEventArgs.Bounds;
+			var graphics = paintEventArgs.Graphics;
 			graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
 			if(IsSelectable)
 			{
 				if(IsSelected)
 				{
-					graphics.FillRectangle(
-						SystemBrushes.Highlight, new Rectangle(bounds.X, bounds.Y, SelectionMargin, bounds.Height));
+					var rcFill = Rectangle.Intersect(paintEventArgs.ClipRectangle,
+						new Rectangle(bounds.X, bounds.Y, SelectionMargin, bounds.Height));
+					graphics.GdiFill(SystemColors.Highlight, rcFill);
 				}
 				bounds.Width -= SelectionMargin;
-				bounds.X += SelectionMargin;
+				bounds.X     += SelectionMargin;
 			}
 			_content.Style = Style;
 			var clip = Rectangle.Intersect(paintEventArgs.ClipRectangle, bounds);
-			if(clip.Width > 0 && clip.Height > 0)
+			if(clip is { Width: > 0, Height: > 0 })
 			{
 				graphics.SetClip(clip);
-				_content.OnPaint(graphics, bounds);
+				_content.OnPaint(graphics, new Dpi(FlowControl.DeviceDpi), bounds, clip);
 			}
 		}
 	}

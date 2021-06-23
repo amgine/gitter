@@ -54,7 +54,7 @@ namespace gitter.Framework.Controls
 			Text = _webBrowser.DocumentTitle;
 		}
 
-		public override Image Image => _image;
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"web.browser");
 
 		internal protected WebBrowser WebBrowser => _webBrowser;
 

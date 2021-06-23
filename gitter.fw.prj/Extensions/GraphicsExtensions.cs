@@ -21,12 +21,77 @@
 namespace gitter
 {
 	using System.Drawing;
+	using System.Drawing.Drawing2D;
 
 	using gitter.Framework;
 
 	/// <summary>Extension methods for <see cref="System.Drawing.Graphics"/>.</summary>
 	public static class GraphicsExtensions
 	{
+		public ref struct SmoothingModeSwitch
+		{
+			private readonly Graphics _graphics;
+			private readonly SmoothingMode _smoothingMode;
+
+			public SmoothingModeSwitch(Graphics graphics, SmoothingMode smoothingMode)
+			{
+				_graphics      = graphics;
+				_smoothingMode = graphics.SmoothingMode;
+
+				graphics.SmoothingMode = smoothingMode;
+			}
+
+			public void Dispose()
+			{
+				_graphics.SmoothingMode = _smoothingMode;
+			}
+		}
+
+		public static SmoothingModeSwitch SwitchSmoothingMode(this Graphics graphics, SmoothingMode smoothingMode)
+			=> new SmoothingModeSwitch(graphics, smoothingMode);
+
+		public static void GdiFill(this Graphics graphics, Color color, Rectangle bounds)
+		{
+			Verify.Argument.IsNotNull(graphics, nameof(graphics));
+
+			static Native.StockObject GetStockBrush(Color color)
+			{
+				if(color == Color.White) return Native.StockObject.WHITE_BRUSH;
+				if(color == Color.Black) return Native.StockObject.BLACK_BRUSH;
+				return Native.StockObject.NULL_BRUSH;
+			}
+
+			var hdc = graphics.GetHdc();
+			try
+			{
+				var stockBrush = GetStockBrush(color);
+				if(stockBrush != Native.StockObject.NULL_BRUSH)
+				{
+					Native.Gdi32.SelectObject(hdc, Native.Gdi32.GetStockObject(stockBrush));
+					Native.Gdi32.SelectObject(hdc, Native.Gdi32.GetStockObject(Native.StockObject.NULL_PEN));
+					Native.Gdi32.Rectangle(hdc, bounds.X, bounds.Y, bounds.Right + 1, bounds.Bottom + 1);
+				}
+				else
+				{
+					var brush = Native.Gdi32.CreateSolidBrush(Native.Macro.RGB(color.R, color.G, color.B));
+					try
+					{
+						Native.Gdi32.SelectObject(hdc, brush);
+						Native.Gdi32.SelectObject(hdc, Native.Gdi32.GetStockObject(Native.StockObject.NULL_PEN));
+						Native.Gdi32.Rectangle(hdc, bounds.X, bounds.Y, bounds.Right + 1, bounds.Bottom + 1);
+					}
+					finally
+					{
+						Native.Gdi32.DeleteObject(brush);
+					}
+				}
+			}
+			finally
+			{
+				graphics.ReleaseHdc(hdc);
+			}
+		}
+
 		public static void DrawRoundedRectangle(this Graphics g, Pen pen, RectangleF rect, float cornerRadius)
 		{
 			using var gp = GraphicsUtility.GetRoundedRectangle(rect, cornerRadius);

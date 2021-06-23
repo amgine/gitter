@@ -133,15 +133,23 @@ namespace gitter.Git.Gui.Controls
 			switch(stagedStatus)
 			{
 				case StagedStatus.Staged:
-					menu = new ContextMenuStrip();
-					menu.Items.Add(GuiItemFactory.GetUnstageItem<ToolStripMenuItem>(_repository, items));
+					{
+						menu            = new ContextMenuStrip();
+						var dpiBindings = new DpiBindings(menu);
+						var factory     = new GuiItemFactory(dpiBindings);
+						menu.Items.Add(factory.GetUnstageItem<ToolStripMenuItem>(_repository, items));
+					}
 					break;
 				case StagedStatus.Unstaged:
-					menu = new ContextMenuStrip();
-					menu.Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(_repository, items));
-					if(HasRevertableItems(items))
 					{
-						menu.Items.Add(GuiItemFactory.GetRevertPathsItem<ToolStripMenuItem>(items));
+						menu            = new ContextMenuStrip();
+						var dpiBindings = new DpiBindings(menu);
+						var factory     = new GuiItemFactory(dpiBindings);
+						menu.Items.Add(factory.GetStageItem<ToolStripMenuItem>(_repository, items));
+						if(HasRevertableItems(items))
+						{
+							menu.Items.Add(factory.GetRevertPathsItem<ToolStripMenuItem>(items));
+						}
 					}
 					break;
 				default:

@@ -21,7 +21,6 @@
 namespace gitter.GitLab.Gui
 {
 	using System;
-	using System.Drawing;
 	using System.Windows.Forms;
 	
 	using gitter.Framework;
@@ -68,7 +67,7 @@ namespace gitter.GitLab.Gui
 
 		#region Properties
 
-		public override Image Image => CachedResources.Bitmaps["ImgIssues"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues");
 
 		private IssuesListBinding DataSource
 		{
@@ -92,7 +91,7 @@ namespace gitter.GitLab.Gui
 				if(_issueState != value)
 				{
 					_issueState = value;
-					if(DataSource != null)
+					if(DataSource is not null)
 					{
 						DataSource.IssueState = value;
 					}
@@ -152,6 +151,8 @@ namespace gitter.GitLab.Gui
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F when e.Modifiers == Keys.Control:
@@ -166,7 +167,7 @@ namespace gitter.GitLab.Gui
 
 		public void RefreshContent()
 		{
-			if(DataSource != null)
+			if(DataSource is not null)
 			{
 				DataSource.ReloadData();
 			}

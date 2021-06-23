@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,12 +21,7 @@
 namespace gitter.TeamCity.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Linq;
 	using System.Text;
-	using System.Windows.Forms;
 
 	using gitter.Framework;
 
@@ -46,21 +41,21 @@ namespace gitter.TeamCity.Gui
 
 			Text = Resources.StrTeamCity;
 			_lblServiceUri.Text = Resources.StrServiceUri.AddColon();
-			_lblUsername.Text = Resources.StrUsername.AddColon();
-			_lblPassword.Text = Resources.StrPassword.AddColon();
-			_lblProject.Text = Resources.StrProject.AddColon();
+			_lblUsername.Text   = Resources.StrUsername.AddColon();
+			_lblPassword.Text   = Resources.StrPassword.AddColon();
+			_lblProject.Text    = Resources.StrProject.AddColon();
 
 			var section = _repository.ConfigSection.TryGetSection("IssueTrackers");
-			if(section != null)
+			if(section is not null)
 			{
 				section = section.TryGetSection("TeamCity");
 			}
-			if(section != null)
+			if(section is not null)
 			{
 				_txtServiceUri.Text = section.GetValue<string>("ServiceUri", string.Empty);
-				_txtUsername.Text = Unmask(section.GetValue<string>("Username", string.Empty));
-				_txtPassword.Text = Unmask(section.GetValue<string>("Password", string.Empty));
-				_cmbProject.Text = section.GetValue<string>("ProjectId", string.Empty);
+				_txtUsername.Text   = Unmask(section.GetValue<string>("Username", string.Empty));
+				_txtPassword.Text   = Unmask(section.GetValue<string>("Password", string.Empty));
+				_cmbProject.Text    = section.GetValue<string>("ProjectId", string.Empty);
 			}
 		}
 
@@ -80,26 +75,26 @@ namespace gitter.TeamCity.Gui
 
 		public string ServiceUri
 		{
-			get { return _txtServiceUri.Text.Trim(); }
-			set { _txtServiceUri.Text = value; }
+			get => _txtServiceUri.Text.Trim();
+			set => _txtServiceUri.Text = value;
 		}
 
 		public string Username
 		{
-			get { return _txtUsername.Text.Trim(); }
-			set { _txtUsername.Text = value; }
+			get => _txtUsername.Text.Trim();
+			set => _txtUsername.Text = value;
 		}
 
 		public string Password
 		{
-			get { return _txtPassword.Text; }
-			set { _txtPassword.Text = value; }
+			get => _txtPassword.Text;
+			set => _txtPassword.Text = value;
 		}
 
 		public string ProjectId
 		{
-			get { return _cmbProject.Text.Trim(); }
-			set { _cmbProject.Text = value; }
+			get => _cmbProject.Text.Trim();
+			set => _cmbProject.Text = value;
 		}
 
 		private bool ValidateServiceUri(string uri)
@@ -151,14 +146,14 @@ namespace gitter.TeamCity.Gui
 
 		public bool Execute()
 		{
-			var uri = ServiceUri;
+			var uri      = ServiceUri;
 			var username = Username;
 			var password = Password;
-			var pid = ProjectId;
+			var pid      = ProjectId;
 
-			if(!ValidateServiceUri(uri)) return false;
+			if(!ValidateServiceUri(uri))    return false;
 			if(!ValidateUsername(username)) return false;
-			if(!ValidateProjectId(pid)) return false;
+			if(!ValidateProjectId(pid))     return false;
 
 			var section = _repository.ConfigSection
 									 .GetCreateSection("IssueTrackers")

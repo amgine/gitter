@@ -29,8 +29,6 @@ namespace gitter.Git.Gui.Controls
 
 	public class SubmoduleListItem : CustomListBoxItem<Submodule>
 	{
-		private static Bitmap ImgSubmodule = CachedResources.Bitmaps["ImgSubmodule"];
-
 		public static int CompareByName(SubmoduleListItem item1, SubmoduleListItem item2)
 		{
 			var data1 = item1.DataContext.Name;
@@ -116,12 +114,15 @@ namespace gitter.Git.Gui.Controls
 			base.OnListBoxDetached();
 		}
 
+		private static Image GetImage(Dpi dpi)
+			=> CachedResources.ScaledBitmaps["submodule", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgSubmodule, DataContext.Name);
+					return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), DataContext.Name);
 				case ColumnId.Path:
 					return measureEventArgs.MeasureText(DataContext.Path);
 				case ColumnId.Url:
@@ -136,7 +137,7 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgSubmodule, DataContext.Name);
+					paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), DataContext.Name);
 					break;
 				case ColumnId.Path:
 					paintEventArgs.PaintText(DataContext.Path);

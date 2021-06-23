@@ -25,12 +25,11 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using gitter.Framework;
 
 	[ToolboxItem(false)]
 	public sealed class RevisionsMenu : ContextMenuStrip
 	{
-
 		/// <summary>Create <see cref="RevisionsMenu"/>.</summary>
 		/// <param name="revisions">List of related revisions.</param>
 		public RevisionsMenu(IList<Revision> revisions)
@@ -39,12 +38,15 @@ namespace gitter.Git.Gui.Controls
 
 			Revisions = revisions;
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			//Items.Add(GuiItemFactory.GetCherryPickItem<ToolStripMenuItem>(revisions));
 			//Items.Add(GuiItemFactory.GetRevertItem<ToolStripMenuItem>(revisions));
 
 			if(revisions.Count == 2)
 			{
-				Items.Add(GuiItemFactory.GetCompareWithItem<ToolStripMenuItem>(revisions[0], revisions[1]));
+				Items.Add(factory.GetCompareWithItem<ToolStripMenuItem>(revisions[0], revisions[1]));
 			}
 		}
 

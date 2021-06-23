@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -39,19 +39,14 @@ namespace gitter.TeamCity
 			{
 				if(!Cache.TryGetValue(id, out obj))
 				{
-					if(name != null)
-					{
-						obj = Create(id, name);
-					}
-					else
-					{
-						obj = Create(id);
-					}
+					obj = name is not null
+						? Create(id, name)
+						: Create(id);
 					Cache.Add(id, obj);
 				}
 				else
 				{
-					if(name != null)
+					if(name is not null)
 					{
 						obj.Name = name;
 					}

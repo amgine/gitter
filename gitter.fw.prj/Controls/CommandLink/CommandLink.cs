@@ -108,6 +108,7 @@ namespace gitter.Framework.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void OnMouseEnter(EventArgs e)
 		{
 			base.OnMouseEnter(e);
@@ -118,6 +119,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			base.OnMouseLeave(e);
@@ -128,6 +130,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			if(_pressed)
@@ -152,25 +155,28 @@ namespace gitter.Framework.Controls
 			base.OnMouseMove(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnGotFocus(EventArgs e)
 		{
 			base.OnGotFocus(e);
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnResize(EventArgs e)
 		{
 			base.OnResize(e);
-
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
@@ -179,6 +185,7 @@ namespace gitter.Framework.Controls
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			base.OnMouseUp(e);
@@ -186,6 +193,7 @@ namespace gitter.Framework.Controls
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{
 			switch(e.KeyCode)
@@ -198,16 +206,19 @@ namespace gitter.Framework.Controls
 			base.OnPreviewKeyDown(e);
 		}
 
+		/// <inheritdoc/>
 		protected sealed override void OnPaintBackground(PaintEventArgs pevent)
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override void OnTextChanged(EventArgs e)
 		{
 			Invalidate();
 			base.OnTextChanged(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			var rc = e.ClipRectangle;
@@ -215,7 +226,7 @@ namespace gitter.Framework.Controls
 			var graphics = e.Graphics;
 			graphics.Clear(BackColor);
 			graphics.SetClip(e.ClipRectangle);
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+			graphics.SmoothingMode = SmoothingMode.HighQuality;
 			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
 			var k = (graphics.DpiY / 96f);
 			if(Focused)
@@ -224,16 +235,13 @@ namespace gitter.Framework.Controls
 				{
 					BackgroundStyle.SelectedFocused.Draw(graphics, ClientRectangle);
 				}
+				else if(_hovered)
+				{
+					BackgroundStyle.SelectedFocused.Draw(graphics, ClientRectangle);
+				}
 				else
 				{
-					if(_hovered)
-					{
-						BackgroundStyle.SelectedFocused.Draw(graphics, ClientRectangle);
-					}
-					else
-					{
-						BackgroundStyle.SelectedNoFocus.Draw(graphics, ClientRectangle);
-					}
+					BackgroundStyle.SelectedNoFocus.Draw(graphics, ClientRectangle);
 				}
 			}
 			else
@@ -247,7 +255,7 @@ namespace gitter.Framework.Controls
 			{
 				var loc = new Point(5, 15);
 				if(_hovered && _pressed) loc.Offset(1, 1);
-				if(_image == null)
+				if(_image is null)
 				{
 					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
 				}
@@ -270,7 +278,7 @@ namespace gitter.Framework.Controls
 			{
 				var loc = new Point(5, (Height - 16) / 2);
 				if(_hovered && _pressed) loc.Offset(1, 1);
-				if(_image == null)
+				if(_image is null)
 				{
 					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
 				}

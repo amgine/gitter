@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -25,8 +25,6 @@ namespace gitter.Redmine
 
 	public sealed class CustomField : NamedRedmineObject
 	{
-		#region .ctor
-
 		internal CustomField(RedmineServiceContext context, int id, string name)
 			: base(context, id, name)
 		{
@@ -36,7 +34,5 @@ namespace gitter.Redmine
 			: base(context, node)
 		{
 		}
-
-		#endregion
 	}
 }

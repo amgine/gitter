@@ -24,7 +24,7 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using gitter.Framework;
 
 	[ToolboxItem(false)]
 	public sealed class HeadMenu : ContextMenuStrip
@@ -35,7 +35,10 @@ namespace gitter.Git.Gui.Controls
 
 			Head = head;
 
-			Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(head));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetViewReflogItem<ToolStripMenuItem>(head));
 		}
 
 		public Head Head { get; }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -48,7 +48,7 @@ namespace gitter.Redmine.Gui
 
 		public static void PaintOptionalContent(NamedRedmineObject data, SubItemPaintEventArgs paintEventArgs)
 		{
-			if(data == null)
+			if(data is null)
 			{
 				PaintGrayText(Resources.StrsUnassigned.SurroundWith('<', '>'), paintEventArgs);
 			}
@@ -72,7 +72,7 @@ namespace gitter.Redmine.Gui
 
 		public static void PaintOptionalContent(string data, SubItemPaintEventArgs paintEventArgs)
 		{
-			if(data == null)
+			if(data is null)
 			{
 				PaintGrayText(Resources.StrsUnassigned.SurroundWith('<', '>'), paintEventArgs);
 			}

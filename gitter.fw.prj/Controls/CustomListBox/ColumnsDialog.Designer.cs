@@ -110,9 +110,10 @@
 			this._btnDown.Click += new System.EventHandler(this._btnDown_Click);
 			// 
 			// ColumnsDialog
-			// 
-			this.Controls.Add(this._lblVisibleColumns);
+			//
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.Controls.Add(this._lstColumns);
+			this.Controls.Add(this._lblVisibleColumns);
 			this.Controls.Add(this._btnHide);
 			this.Controls.Add(this._btnUp);
 			this.Controls.Add(this._btnShow);

@@ -63,7 +63,7 @@ namespace gitter.GitLab.Gui
 				return;
 			}
 			var revision = revItem.RevisionPointer?.Dereference();
-			if(revision == null) return;
+			if(revision is null) return;
 
 			if(_pipelines.TryGetValue(revision.Hash, out var list) && list.Count > 0)
 			{

@@ -62,7 +62,7 @@ namespace gitter.Git.Gui
 				ReflogViewFactory         = new ReflogViewFactory(guiProvider),
 			};
 
-			if(guiProvider.Repository != null)
+			if(guiProvider.Repository is not null)
 			{
 				AttachToRepository(guiProvider.Repository);
 			}
@@ -87,11 +87,11 @@ namespace gitter.Git.Gui
 			{
 				if(_repository != value)
 				{
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						DetachFromRepository(_repository);
 					}
-					if(value != null)
+					if(value is not null)
 					{
 						AttachToRepository(value);
 					}
@@ -169,18 +169,14 @@ namespace gitter.Git.Gui
 		#region IEnumerable<IViewFactory> Members
 
 		public IEnumerator<IViewFactory> GetEnumerator()
-		{
-			return ((IEnumerable<IViewFactory>)_viewFactories).GetEnumerator();
-		}
+			=> ((IEnumerable<IViewFactory>)_viewFactories).GetEnumerator();
 
 		#endregion
 
 		#region IEnumerable Members
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _viewFactories.GetEnumerator();
-		}
+			=> _viewFactories.GetEnumerator();
 
 		#endregion
 	}

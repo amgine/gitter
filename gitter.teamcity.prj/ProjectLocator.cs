@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,22 +22,11 @@ namespace gitter.TeamCity
 {
 	public sealed class ProjectLocator : ObjectLocator
 	{
-		public ProjectLocator()
-		{
-		}
+		public string Id { get; set; }
 
-		public string Id
-		{
-			get;
-			set;
-		}
+		public string Name { get; set; }
 
-		public string Name
-		{
-			get;
-			set;
-		}
-
+		/// <inheritdoc/>
 		public override string ToString()
 		{
 			if(!string.IsNullOrWhiteSpace(Id))

@@ -241,11 +241,15 @@ namespace gitter.Framework
 
 		protected override void InitializeItem(ToolStripItem item)
 		{
-			if(item is ToolStripTextBox tsTextBox)
+			Assert.IsNotNull(item);
+
+			switch(item)
 			{
-				tsTextBox.BorderStyle = BorderStyle.FixedSingle;
-				tsTextBox.BackColor = ColorTable.TextBoxBackground;
-				tsTextBox.ForeColor = ColorTable.Text;
+				case ToolStripTextBox tsTextBox:
+					tsTextBox.BorderStyle = BorderStyle.FixedSingle;
+					tsTextBox.BackColor = ColorTable.TextBoxBackground;
+					tsTextBox.ForeColor = ColorTable.Text;
+					break;
 			}
 		}
 
@@ -507,25 +511,30 @@ namespace gitter.Framework
 		{
 			Assert.IsNotNull(e);
 
-			if(e.Image != null)
+			if(e.Image is null) return;
+
+			var bounds = e.ImageRectangle;
+
+			if(e.Item is ToolStripMenuItem { Checked: true } item)
 			{
-				if(e.Item is ToolStripMenuItem item && item.Checked)
-				{
-					RenderItemBackgroundInternal(e.Graphics,
-						e.ImageRectangle.X - 2,
-						e.ImageRectangle.Y - 2,
-						e.ImageRectangle.Width + 4,
-						e.ImageRectangle.Height + 4,
-						true, false);
-				}
-				if(!e.Item.Enabled)
-				{
-					base.OnRenderItemImage(e);
-				}
-				else
-				{
-					e.Graphics.DrawImage(e.Image, e.ImageRectangle);
-				}
+				var conv = new DpiConverter(e.ToolStrip);
+				var dx = conv.ConvertX(2);
+				var dy = conv.ConvertY(2);
+				RenderItemBackgroundInternal(e.Graphics,
+					bounds.X - dx,
+					bounds.Y - dy,
+					bounds.Width  + dx * 2,
+					bounds.Height + dy * 2,
+					true, false);
+			}
+			if(!e.Item.Enabled)
+			{
+				using var image = CreateDisabledImage(e.Image);
+				e.Graphics.DrawImage(image, bounds);
+			}
+			else
+			{
+				e.Graphics.DrawImage(e.Image, bounds);
 			}
 		}
 
@@ -547,6 +556,7 @@ namespace gitter.Framework
 			}
 			var graphics = e.Graphics;
 			var rect = e.ImageRectangle;
+			var conv = new DpiConverter(e.ToolStrip);
 			using(var brush = new SolidBrush(checkboxBackground))
 			{
 				graphics.FillRectangle(brush, rect);
@@ -564,18 +574,16 @@ namespace gitter.Framework
 				graphics.DrawRectangle(pen, rc1);
 				graphics.DrawRectangle(pen, rc2);
 			}
-			using(var pen = new Pen(checkboxForeground, 1.7f))
+			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
+			using(var pen = new Pen(checkboxForeground, conv.ConvertX(1.7f)))
 			{
 				var path = new Point[]
 					{
-						new Point(rc2.X + 3,  6 + rc2.Y),
-						new Point(rc2.X + 5,  9 + rc2.Y),
-						new Point(rc2.X + 10, 2 + rc2.Y),
+						new Point(rc2.X + conv.ConvertX( 3), conv.ConvertY(6) + rc2.Y),
+						new Point(rc2.X + conv.ConvertX( 5), conv.ConvertY(9) + rc2.Y),
+						new Point(rc2.X + conv.ConvertX(10), conv.ConvertY(2) + rc2.Y),
 					};
-				var oldMode = graphics.SmoothingMode;
-				graphics.SmoothingMode = SmoothingMode.HighQuality;
 				graphics.DrawLines(pen, path);
-				graphics.SmoothingMode = oldMode;
 			}
 		}
 
@@ -585,14 +593,9 @@ namespace gitter.Framework
 
 			if(e.Item.Enabled)
 			{
-				if(e.Item.Selected)
-				{
-					e.ArrowColor = ColorTable.ArrowHighlight;
-				}
-				else
-				{
-					e.ArrowColor = ColorTable.ArrowNormal;
-				}
+				e.ArrowColor = e.Item.Selected
+					? ColorTable.ArrowHighlight
+					: ColorTable.ArrowNormal;
 			}
 			else
 			{
@@ -633,7 +636,6 @@ namespace gitter.Framework
 		{
 			Assert.IsNotNull(e);
 
-			var strip = e.ToolStrip;
 			using var brush = new SolidBrush(ColorTable.MenuStripBackground);
 			e.Graphics.FillRectangle(brush, e.AffectedBounds);
 		}

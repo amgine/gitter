@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -35,11 +37,14 @@ namespace gitter.Git.Gui.Controls
 
 			StashedState = stashedState;
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			Items.AddRange(
 				new ToolStripItem[]
 				{
-					GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(StashedState.GetDiffSource()),
-					GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(StashedState),
+					factory.GetViewDiffItem<ToolStripMenuItem>(StashedState.GetDiffSource()),
+					factory.GetViewTreeItem<ToolStripMenuItem>(StashedState),
 					GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(StashedState),
 					new ToolStripSeparator(),
 					GuiItemFactory.GetStashPopItem<ToolStripMenuItem>(StashedState),
@@ -51,9 +56,9 @@ namespace gitter.Git.Gui.Controls
 					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 						new ToolStripItem[]
 						{
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ((IRevisionPointer)StashedState).Pointer),
-							GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, StashedState.Revision.Hash.ToString()),
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, StashedState.Revision.Subject),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, ((IRevisionPointer)StashedState).Pointer),
+							factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, StashedState.Revision.Hash.ToString()),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, StashedState.Revision.Subject),
 						}),
 				});
 		}

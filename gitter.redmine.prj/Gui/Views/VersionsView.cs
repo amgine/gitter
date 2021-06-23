@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -65,10 +65,7 @@ namespace gitter.Redmine.Gui
 
 		#region Properties
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgVersion"]; }
-		}
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"versions");
 
 		private VersionsListBinding DataSource
 		{

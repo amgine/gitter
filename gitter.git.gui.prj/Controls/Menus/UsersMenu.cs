@@ -21,8 +21,9 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-
 	using System.Windows.Forms;
+
+	using gitter.Framework;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -34,8 +35,11 @@ namespace gitter.Git.Gui.Controls
 
 			Repository = repository;
 
-			Items.Add(GuiItemFactory.GetShowContributorsViewItem<ToolStripMenuItem>());
-			Items.Add(GuiItemFactory.GetRefreshContributorsItem<ToolStripMenuItem>(Repository));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetShowContributorsViewItem<ToolStripMenuItem>());
+			Items.Add(factory.GetRefreshContributorsItem<ToolStripMenuItem>(Repository));
 		}
 
 		public Repository Repository { get; }

@@ -169,26 +169,27 @@ namespace gitter.Framework.Controls
 
 		#region Tabs Rendering
 
-		protected static readonly StringFormat NormalStringFormat = new StringFormat(StringFormat.GenericTypographic)
+		protected static readonly StringFormat NormalStringFormat = new(StringFormat.GenericTypographic)
 		{
 			LineAlignment = StringAlignment.Center,
 			Trimming = StringTrimming.EllipsisCharacter,
 		};
 
-		protected static readonly StringFormat VerticalStringFormat = new StringFormat(NormalStringFormat)
+		protected static readonly StringFormat VerticalStringFormat = new(NormalStringFormat)
 		{
 			FormatFlags = StringFormatFlags.DirectionVertical,
 		};
 
 		private static int MeasureTabLength(ViewTabBase tab, Graphics graphics)
 		{
+			var conv   = new DpiConverter(tab.ViewHost);
 			var length = GitterApplication.TextRenderer.MeasureText(
 				graphics, tab.Text, GitterApplication.FontManager.UIFont, int.MaxValue, NormalStringFormat).Width;
-			if(tab.Image != null)
+			if(tab.ImageProvider is not null)
 			{
-				length += 16 + ViewConstants.ImageSpacing;
+				length += conv.ConvertX(16) + conv.ConvertX(ViewConstants.ImageSpacing);
 			}
-			length += ViewConstants.BeforeTabContent + ViewConstants.AfterTabContent;
+			length += conv.ConvertX(ViewConstants.BeforeTabContent) + conv.ConvertX(ViewConstants.AfterTabContent);
 			return length;
 		}
 
@@ -351,53 +352,39 @@ namespace gitter.Framework.Controls
 
 		private static void RenderTabContent(ViewTabBase tab, Rectangle bounds, Graphics graphics)
 		{
+			var conv = new DpiConverter(tab.ViewHost);
 			int x = bounds.X;
 			int y = bounds.Y;
 			int w = bounds.Width;
 			int h = bounds.Height;
-			Brush textBrush;
 			Rectangle imageRect;
 			StringFormat stringFormat;
+			var iconSize = conv.Convert(new Size(16, 16));
 			switch(tab.Anchor)
 			{
-				case AnchorStyles.Right:
-					imageRect = new Rectangle(x + (w - 16) / 2, y + 3, 16, 16);
+				case AnchorStyles.Right or AnchorStyles.Left:
+					imageRect = new Rectangle(x + (w - iconSize.Width) / 2, y + conv.ConvertY(3), iconSize.Width, iconSize.Height);
 					stringFormat = VerticalStringFormat;
 					break;
-				case AnchorStyles.Left:
-					imageRect = new Rectangle(x + (w - 16) / 2, y + 3, 16, 16);
-					stringFormat = VerticalStringFormat;
-					break;
-				case AnchorStyles.Top:
-					imageRect = new Rectangle(x + 3, y + (h - 16) / 2, 16, 16);
-					stringFormat = NormalStringFormat;
-					break;
-				case AnchorStyles.Bottom:
-					imageRect = new Rectangle(x + 3, y + (h - 16) / 2, 16, 16);
+				case AnchorStyles.Top or AnchorStyles.Bottom:
+					imageRect = new Rectangle(x + conv.ConvertX(3), y + (h - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
 					stringFormat = NormalStringFormat;
 					break;
 				default:
 					throw new ApplicationException();
 			}
-			var host = tab.View.Host;
-			if(tab.IsActive)
-			{
-				textBrush = Brushes.Black;
-			}
-			else
-			{
-				textBrush = Brushes.White;
-			}
-			var image = tab.Image;
-			if(image != null)
+			var textBrush = tab.IsActive ? Brushes.Black : Brushes.White;
+			var image = tab.ImageProvider?.GetImage(iconSize.Width);
+			if(image is not null)
 			{
 				switch(tab.Orientation)
 				{
 					case Orientation.Horizontal:
 						{
 							graphics.DrawImage(image, imageRect);
-							bounds.Width -= imageRect.Width + 3;
-							bounds.X += imageRect.Width + 3;
+							var dx = imageRect.Width + conv.ConvertX(3);
+							bounds.Width -= dx;
+							bounds.X     += dx;
 						}
 						break;
 					case Orientation.Vertical:
@@ -405,8 +392,9 @@ namespace gitter.Framework.Controls
 						{
 							rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 							graphics.DrawImage(rotatedImage, imageRect);
-							bounds.Height -= imageRect.Height + 3;
-							bounds.Y += imageRect.Height + 3;
+							var dy = imageRect.Height + conv.ConvertY(3);
+							bounds.Height -= dy;
+							bounds.Y      += dy;
 						}
 						break;
 					default:
@@ -416,14 +404,14 @@ namespace gitter.Framework.Controls
 			switch(tab.Orientation)
 			{
 				case Orientation.Horizontal:
-					bounds.X += ViewConstants.BeforeTabContent;
-					bounds.Width -= ViewConstants.BeforeTabContent + ViewConstants.AfterTabContent - 1;
+					bounds.X     += conv.ConvertX(ViewConstants.BeforeTabContent);
+					bounds.Width -= conv.ConvertX(ViewConstants.BeforeTabContent) + conv.ConvertX(ViewConstants.AfterTabContent) - 1;
 					GitterApplication.TextRenderer.DrawText(
 						graphics, tab.Text, GitterApplication.FontManager.UIFont, textBrush, bounds, stringFormat);
 					break;
 				case Orientation.Vertical:
-					bounds.Y += ViewConstants.BeforeTabContent;
-					bounds.Height -= ViewConstants.BeforeTabContent + ViewConstants.AfterTabContent - 1;
+					bounds.Y      += conv.ConvertY(ViewConstants.BeforeTabContent);
+					bounds.Height -= conv.ConvertY(ViewConstants.BeforeTabContent) + conv.ConvertY(ViewConstants.AfterTabContent) - 1;
 					bounds.Height += 10;
 					GitterApplication.GdiPlusTextRenderer.DrawText(
 						graphics, tab.Text, GitterApplication.FontManager.UIFont, textBrush, bounds, stringFormat);
@@ -592,7 +580,7 @@ namespace gitter.Framework.Controls
 			if(header.ViewHost.Status == ViewHostStatus.Floating &&
 				((Form)header.ViewHost.TopLevelControl).WindowState == FormWindowState.Maximized)
 			{
-				graphics.SmoothingMode = SmoothingMode.HighQuality;
+				using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 				using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, Constants.HeaderHeight), backgroundStart, backgroundEnd))
 				{
 					graphics.FillRectangle(brush, rect);
@@ -604,7 +592,7 @@ namespace gitter.Framework.Controls
 				{
 					graphics.FillRectangle(brush, e.ClipRectangle);
 				}
-				graphics.SmoothingMode = SmoothingMode.HighQuality;
+				using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 				using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, Constants.HeaderHeight), backgroundStart, backgroundEnd))
 				{
 					graphics.FillRoundedRectangle(brush, rect, 2, 2, 0, 0);

@@ -24,9 +24,7 @@ namespace gitter.Framework.Controls
 	using System.ComponentModel;
 	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
 	using System.Windows.Forms;
-	using System.Xml;
 
 	using gitter.Framework.Services;
 	using gitter.Framework.Configuration;
@@ -175,14 +173,10 @@ namespace gitter.Framework.Controls
 			}
 
 			public bool Check(HitTestArea area, int itemIndex, int itemPart)
-			{
-				return ItemIndex == itemIndex && Area == area && ItemPart == itemPart;
-			}
+				=> ItemIndex == itemIndex && Area == area && ItemPart == itemPart;
 
 			public bool Check(HitTestArea area, int itemPart)
-			{
-				return Area == area && ItemPart == itemPart;
-			}
+				=> Area == area && ItemPart == itemPart;
 		}
 
 		protected enum HitTestArea
@@ -268,7 +262,7 @@ namespace gitter.Framework.Controls
 			switch(e.Event)
 			{
 				case NotifyEvent.Clear:
-					if(item == null)
+					if(item is null)
 					{
 						_lastClickedItemIndex = -1;
 						_itemFocus.Drop();
@@ -304,7 +298,7 @@ namespace gitter.Framework.Controls
 					}
 					break;
 				case NotifyEvent.Set:
-					if((item == null) || (item.IsPresented && item.IsExpanded))
+					if((item is null) || (item.IsPresented && item.IsExpanded))
 					{
 						_oldItem = items[e.StartIndex];
 						_setItemPos = _itemPlainList.IndexOf(_oldItem);
@@ -336,7 +330,7 @@ namespace gitter.Framework.Controls
 			switch(e.Event)
 			{
 				case NotifyEvent.Clear:
-					if(_oldItem != null)
+					if(_oldItem is not null)
 					{
 						InvalidateItem(_oldItem);
 						_oldItem = null;
@@ -428,8 +422,6 @@ namespace gitter.Framework.Controls
 									id = _itemPlainList.IndexOf(sitem) + 1;
 								}
 							}
-							int startId = id;
-							bool renderAll = id != _itemPlainList.Count;
 							for(int i = start; i <= end; ++i)
 							{
 								id = InsertItem(id, items[i]);
@@ -459,7 +451,6 @@ namespace gitter.Framework.Controls
 										}
 										id = _itemPlainList.IndexOf(sitem) + 1;
 									}
-									int startid = id;
 									for(int i = start; i <= end; ++i)
 									{
 										id = InsertItem(id, items[i]);
@@ -518,6 +509,7 @@ namespace gitter.Framework.Controls
 
 		internal void InvalidateItem(CustomListBoxItem item)
 		{
+			if(IsDisposed) return;
 			int index = _itemPlainList.IndexOf(item);
 			var rc = GetItemDisplayRect(index);
 			Invalidate(rc);
@@ -578,6 +570,7 @@ namespace gitter.Framework.Controls
 
 		internal void InvalidateSubItem(CustomListBoxItem item, int columnId)
 		{
+			if(IsDisposed) return;
 			int columnIndex = -1;
 			for(int i = 0; i < _columns.Count; ++i)
 			{
@@ -818,8 +811,8 @@ namespace gitter.Framework.Controls
 		[Description("A method of activating an item")]
 		public ItemActivation ItemActivation
 		{
-			get { return _itemActivation; }
-			set { _itemActivation = value; }
+			get => _itemActivation;
+			set => _itemActivation = value;
 		}
 
 		/// <summary>Behave as a TreeView control.</summary>
@@ -827,7 +820,7 @@ namespace gitter.Framework.Controls
 		[Description("Behave as a TreeView control")]
 		public bool ShowTreeLines
 		{
-			get { return _showTreeLines; }
+			get => _showTreeLines;
 			set
 			{
 				if(_showTreeLines != value)
@@ -846,7 +839,7 @@ namespace gitter.Framework.Controls
 		[Description("Show tree lines for zero-level items")]
 		public bool ShowRootTreeLines
 		{
-			get { return _showRootTreeLines; }
+			get => _showRootTreeLines;
 			set
 			{
 				if(_showRootTreeLines != value)
@@ -865,8 +858,8 @@ namespace gitter.Framework.Controls
 		[Description("Allow user to move column headers")]
 		public bool AllowColumnReorder
 		{
-			get { return _allowColumnReorder; }
-			set { _allowColumnReorder = value; }
+			get => _allowColumnReorder;
+			set => _allowColumnReorder = value;
 		}
 
 		/// <summary>Show checkboxes for items which support them.</summary>
@@ -874,7 +867,7 @@ namespace gitter.Framework.Controls
 		[Description("Show checkboxes for items which support them")]
 		public bool ShowCheckBoxes
 		{
-			get { return _showCheckBoxes; }
+			get => _showCheckBoxes;
 			set
 			{
 				if(_showCheckBoxes != value)
@@ -893,8 +886,8 @@ namespace gitter.Framework.Controls
 		[Description("Allow user to select multiple items")]
 		public bool Multiselect
 		{
-			get { return _multiselect; }
-			set { _multiselect = value; }
+			get => _multiselect;
+			set => _multiselect = value;
 		}
 
 		/// <summary>Disable all context menus.</summary>
@@ -902,8 +895,8 @@ namespace gitter.Framework.Controls
 		[Description("Disable all context menus")]
 		public bool DisableContextMenus
 		{
-			get { return _disableContextMenus; }
-			set { _disableContextMenus = value; }
+			get => _disableContextMenus;
+			set => _disableContextMenus = value;
 		}
 
 		/// <summary>Column headers style.</summary>
@@ -911,7 +904,7 @@ namespace gitter.Framework.Controls
 		[Description("Column headers style")]
 		public HeaderStyle HeaderStyle
 		{
-			get { return _headerStyle; }
+			get => _headerStyle;
 			set
 			{
 				if(_headerStyle != value)
@@ -926,41 +919,26 @@ namespace gitter.Framework.Controls
 		[MergableProperty(false)]
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public CustomListBoxColumnsCollection Columns
-		{
-			get { return _columns; }
-		}
+		public CustomListBoxColumnsCollection Columns => _columns;
 
 		/// <summary>Items collection.</summary>
 		[MergableProperty(false)]
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public CustomListBoxItemsCollection Items
-		{
-			get { return _items; }
-		}
+		public CustomListBoxItemsCollection Items => _items;
 
 		/// <summary>Selected items collection.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public CustomListBoxSelectedItemsCollection SelectedItems
-		{
-			get { return _selectedItems; }
-		}
+		public CustomListBoxSelectedItemsCollection SelectedItems => _selectedItems;
 
 		/// <summary>Returns currently focused item.</summary>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public CustomListBoxItem FocusedItem
-		{
-			get { return _itemFocus.Item; }
-		}
+		public CustomListBoxItem FocusedItem => _itemFocus.Item;
 
 		/// <summary>Progress monitor for actions which update list contents.</summary>
-		public System.IProgress<OperationProgress> ProgressMonitor
-		{
-			get { return _processOverlay; }
-		}
+		public IProgress<OperationProgress> ProgressMonitor => _processOverlay;
 
 		internal void NotifyItemActivated(CustomListBoxItem item)
 		{
@@ -1063,14 +1041,10 @@ namespace gitter.Framework.Controls
 		}
 
 		protected int GetItemY1Offset(int itemIndex)
-		{
-			return itemIndex * _itemHeight - VScrollPos;
-		}
+			=> itemIndex * _itemHeight - VScrollPos;
 
 		protected int GetItemY2Offset(int itemIndex)
-		{
-			return (itemIndex + 1) * _itemHeight - VScrollPos - 1;
-		}
+			=> GetItemY1Offset(itemIndex) + _itemHeight - 1;
 
 		protected Rectangle GetItemDisplayRect(int itemIndex)
 		{

@@ -39,27 +39,80 @@ namespace gitter.Git.Gui
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Factory for creating buttons or menu items.</summary>
-	public static class GuiItemFactory
+	public class GuiItemFactory
 	{
+		static class Icons
+		{
+			static IDpiBoundValue<Bitmap> Init(string name, int size = 16)
+				=> DpiBoundValue.Icon(CachedResources.ScaledBitmaps, name, size);
+
+			public static readonly IDpiBoundValue<Bitmap> Archive            = Init(@"archive");
+			public static readonly IDpiBoundValue<Bitmap> Refresh            = Init(@"refresh");
+			public static readonly IDpiBoundValue<Bitmap> FolderTree         = Init(@"folder.tree");
+			public static readonly IDpiBoundValue<Bitmap> Diff               = Init(@"diff");
+			public static readonly IDpiBoundValue<Bitmap> Checkout           = Init(@"checkout");
+			public static readonly IDpiBoundValue<Bitmap> Revert             = Init(@"revert");
+			public static readonly IDpiBoundValue<Bitmap> Reset              = Init(@"reset");
+			public static readonly IDpiBoundValue<Bitmap> Rebase             = Init(@"rebase");
+			public static readonly IDpiBoundValue<Bitmap> Merge              = Init(@"merge");
+			public static readonly IDpiBoundValue<Bitmap> CherryPick         = Init(@"cherry.pick");
+			public static readonly IDpiBoundValue<Bitmap> Delete             = Init(@"delete");
+			public static readonly IDpiBoundValue<Bitmap> BranchAdd          = Init(@"branch.add");
+			public static readonly IDpiBoundValue<Bitmap> BranchRename       = Init(@"branch.rename");
+			public static readonly IDpiBoundValue<Bitmap> BranchReflog       = Init(@"branch.reflog");
+			public static readonly IDpiBoundValue<Bitmap> RemoteBranchReflog = Init(@"rbranch.reflog");
+			public static readonly IDpiBoundValue<Bitmap> TagAdd             = Init(@"tag.add");
+			public static readonly IDpiBoundValue<Bitmap> TagDelete          = Init(@"tag.delete");
+			public static readonly IDpiBoundValue<Bitmap> Clean              = Init(@"clean");
+			public static readonly IDpiBoundValue<Bitmap> GarbageCollect     = Init(@"gc");
+			public static readonly IDpiBoundValue<Bitmap> Remote             = Init(@"remote");
+			public static readonly IDpiBoundValue<Bitmap> RemoteAdd          = Init(@"remote.add");
+			public static readonly IDpiBoundValue<Bitmap> RemoteDelete       = Init(@"remote.delete");
+			public static readonly IDpiBoundValue<Bitmap> RemoteRename       = Init(@"remote.rename");
+			public static readonly IDpiBoundValue<Bitmap> RemoteProperties   = Init(@"remote.properties");
+			public static readonly IDpiBoundValue<Bitmap> Fetch              = Init(@"fetch");
+			public static readonly IDpiBoundValue<Bitmap> Pull               = Init(@"pull");
+			public static readonly IDpiBoundValue<Bitmap> Push               = Init(@"push");
+			public static readonly IDpiBoundValue<Bitmap> Prune              = Init(@"prune");
+			public static readonly IDpiBoundValue<Bitmap> ClipboardCopy      = Init(@"clipboard.copy");
+			public static readonly IDpiBoundValue<Bitmap> Stage              = Init(@"stage");
+			public static readonly IDpiBoundValue<Bitmap> StageAll           = Init(@"stage.all");
+			public static readonly IDpiBoundValue<Bitmap> Unstage            = Init(@"unstage");
+			public static readonly IDpiBoundValue<Bitmap> UnstageAll         = Init(@"unstage.all");
+			public static readonly IDpiBoundValue<Bitmap> Commit             = Init(@"commit");
+			public static readonly IDpiBoundValue<Bitmap> MarkResolved       = Init(@"mark.resolved");
+			public static readonly IDpiBoundValue<Bitmap> StashSave          = Init(@"stash.save");
+		}
+
+		private readonly DpiBindings _dpiBindings;
+
+		public GuiItemFactory(DpiBindings dpiBindings)
+		{
+			Verify.Argument.IsNotNull(dpiBindings, nameof(dpiBindings));
+
+			_dpiBindings = dpiBindings;
+		}
+
 		#region Universal Items
 
-		public static T GetViewReflogItem<T>(Reference reference)
+		public T GetViewReflogItem<T>(Reference reference)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(reference, nameof(reference));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps[reference.Type == ReferenceType.RemoteBranch?
-					"ImgViewReflogRemote":"ImgViewReflog"],
 				Text = Resources.StrViewReflog,
-				Tag = reference,
+				Tag  = reference,
 			};
+			_dpiBindings.BindImage(item, reference.Type == ReferenceType.RemoteBranch
+				? Icons.RemoteBranchReflog
+				: Icons.BranchReflog);
 			item.Click += OnViewReflogClick;
 			return item;
 		}
 
-		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeFile file)
+		public T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeFile file)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(file, nameof(file));
@@ -67,7 +120,7 @@ namespace gitter.Git.Gui
 			return GetCheckoutPathItem<T>(revision, file.RelativePath);
 		}
 
-		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeCommit commit)
+		public T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeCommit commit)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(commit, nameof(commit));
@@ -75,7 +128,7 @@ namespace gitter.Git.Gui
 			return GetCheckoutPathItem<T>(revision, commit.RelativePath);
 		}
 
-		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeDirectory directory)
+		public T GetCheckoutPathItem<T>(IRevisionPointer revision, TreeDirectory directory)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(directory, nameof(directory));
@@ -83,7 +136,7 @@ namespace gitter.Git.Gui
 			return GetCheckoutPathItem<T>(revision, directory.RelativePath + "/");
 		}
 
-		public static T GetCheckoutPathItem<T>(IRevisionPointer revision, string path)
+		public T GetCheckoutPathItem<T>(IRevisionPointer revision, string path)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
@@ -91,30 +144,30 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgCheckout"],
 				Text = Resources.StrCheckout,
-				Tag = Tuple.Create(revision, path),
+				Tag  = Tuple.Create(revision, path),
 			};
+			_dpiBindings.BindImage(item, Icons.Checkout);
 			item.Click += OnCheckoutPathClick;
 			return item;
 		}
 
-		public static T GetCheckoutRevisionItem<T>(Repository repository, string nameFormat)
+		public T GetCheckoutRevisionItem<T>(Repository repository, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgCheckout"],
 				Text = string.Format(nameFormat, Resources.StrCheckout),
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.Checkout);
 			item.Click += OnCheckoutClick;
 			return item;
 		}
 
-		public static T GetCheckoutRevisionItem<T>(IRevisionPointer revision, string nameFormat)
+		public T GetCheckoutRevisionItem<T>(IRevisionPointer revision, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
@@ -127,7 +180,7 @@ namespace gitter.Git.Gui
 			}
 			else
 			{
-				if((head != null) &&
+				if((head is not null) &&
 					(head.Type != ReferenceType.LocalBranch) &&
 					(revision.Type != ReferenceType.LocalBranch) &&
 					(revision.Dereference() == head))
@@ -138,16 +191,16 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgCheckout"],
-				Text = string.Format(nameFormat, Resources.StrCheckout, revision==null?string.Empty:revision.Pointer),
-				Tag = revision,
+				Text    = string.Format(nameFormat, Resources.StrCheckout, revision is null ? string.Empty : revision.Pointer),
+				Tag     = revision,
 				Enabled = enabled,
 			};
+			_dpiBindings.BindImage(item, Icons.Checkout);
 			item.Click += OnCheckoutRevisionClick;
 			return item;
 		}
 
-		public static T GetRevertItem<T>(IRevisionPointer revision)
+		public T GetRevertItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
@@ -157,53 +210,46 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image	= CachedResources.Bitmaps["ImgRevert"],
 				Text	= isMerge ? Resources.StrRevert.AddEllipsis() : Resources.StrRevert,
 				Enabled	= isEnabled,
 				Tag		= revision,
 			};
-			if(isMerge)
-			{
-				item.Click += OnRevertMergeClick;
-			}
-			else
-			{
-				item.Click += OnRevertClick;
-			}
+			_dpiBindings.BindImage(item, Icons.Revert);
+			item.Click += isMerge ? OnRevertMergeClick : OnRevertClick;
 			return item;
 		}
 
-		public static T GetRevertItem<T>(IEnumerable<IRevisionPointer> revisions)
+		public T GetRevertItem<T>(IEnumerable<IRevisionPointer> revisions)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRevert"],
 				Text = Resources.StrRevert,
-				Tag = revisions,
+				Tag  = revisions,
 			};
+			_dpiBindings.BindImage(item, Icons.Revert);
 			item.Click += OnMultipleRevertClick;
 			return item;
 		}
 
-		public static T GetResetItem<T>(Repository repository, ResetMode resetModes = ResetMode.Mixed | ResetMode.Hard)
+		public T GetResetItem<T>(Repository repository, ResetMode resetModes = ResetMode.Mixed | ResetMode.Hard)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgDelete"],
-				Text = Resources.StrReset.AddEllipsis(),
-				Tag = Tuple.Create(repository, resetModes),
+				Text  = Resources.StrReset.AddEllipsis(),
+				Tag   = Tuple.Create(repository, resetModes),
 			};
+			_dpiBindings.BindImage(item, Icons.Delete);
 			item.Click += OnResetClick;
 			return item;
 		}
 
-		public static T GetResetHeadHereItem<T>(IRevisionPointer revision)
+		public T GetResetHeadHereItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
@@ -211,17 +257,17 @@ namespace gitter.Git.Gui
 			var currentBranch = revision.Repository.Head.CurrentBranch;
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgReset"],
-				Text = currentBranch != null ?
+				Text = currentBranch is not null ?
 					string.Format(Resources.StrResetBranchHere, currentBranch.Name).AddEllipsis():
 					Resources.StrResetHere.AddEllipsis(),
 				Tag = revision,
 			};
+			_dpiBindings.BindImage(item, Icons.Reset);
 			item.Click += OnResetHeadClick;
 			return item;
 		}
 
-		public static T GetRebaseHeadHereItem<T>(IRevisionPointer revision)
+		public T GetRebaseHeadHereItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
@@ -229,17 +275,17 @@ namespace gitter.Git.Gui
 			var currentBranch = revision.Repository.Head.CurrentBranch;
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRebase"],
-				Text = currentBranch != null ?
+				Text = currentBranch is not null ?
 					string.Format(Resources.StrRebaseBranchHere, currentBranch.Name) : Resources.StrRebaseHere,
 				Enabled = revision.Dereference() != revision.Repository.Head.Revision,
 				Tag = revision,
 			};
+			_dpiBindings.BindImage(item, Icons.Rebase);
 			item.Click += OnRebaseHeadHereClick;
 			return item;
 		}
 
-		public static T GetCherryPickItem<T>(IRevisionPointer revision, string nameFormat)
+		public T GetCherryPickItem<T>(IRevisionPointer revision, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
@@ -249,33 +295,26 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image	= CachedResources.Bitmaps["ImgCherryPick"],
 				Text	= string.Format(nameFormat, isMerge ? Resources.StrCherryPick.AddEllipsis() : Resources.StrCherryPick),
 				Tag		= revision,
 				Enabled	= isEnabled,
 			};
-			if(isMerge)
-			{
-				item.Click += OnCherryPickMergeClick;
-			}
-			else
-			{
-				item.Click += OnCherryPickClick;
-			}
+			_dpiBindings.BindImage(item, Icons.CherryPick);
+			item.Click += isMerge ? OnCherryPickMergeClick : OnCherryPickClick;
 			return item;
 		}
 
-		public static T GetCherryPickItem<T>(IEnumerable<IRevisionPointer> revisions)
+		public T GetCherryPickItem<T>(IEnumerable<IRevisionPointer> revisions)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgCherryPick"],
 				Text = Resources.StrCherryPick,
 				Tag = revisions,
 			};
+			_dpiBindings.BindImage(item, Icons.CherryPick);
 			item.Click += OnMultipleCherryPickClick;
 			return item;
 		}
@@ -295,32 +334,32 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetArchiveItem<T>(IRevisionPointer revision)
+		public T GetArchiveItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
-				Image	= CachedResources.Bitmaps["ImgArchive"],
-				Text	= Resources.StrArchive.AddEllipsis(),
-				Tag		= revision,
+				Text = Resources.StrArchive.AddEllipsis(),
+				Tag  = revision,
 			};
+			_dpiBindings.BindImage(item, Icons.Archive);
 			item.Click += OnArchiveClick;
 			return item;
 		}
 
-		public static T GetCompareWithItem<T>(IRevisionPointer revision1, IRevisionPointer revision2)
+		public T GetCompareWithItem<T>(IRevisionPointer revision1, IRevisionPointer revision2)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.AreValidRevisionPointers(revision1, revision2);
 
 			var item = new T()
 			{
-				Image	= CachedResources.Bitmaps["ImgDiff"],
-				Text	= Resources.StrCompare.AddEllipsis(),
-				Tag		= Tuple.Create(revision1, revision2),
+				Text = Resources.StrCompare.AddEllipsis(),
+				Tag  = Tuple.Create(revision1, revision2),
 			};
+			_dpiBindings.BindImage(item, Icons.Diff);
 			item.Click += OnCompareWithClick;
 			return item;
 		}
@@ -744,9 +783,9 @@ namespace gitter.Git.Gui
 
 		private static void OnMultipleCherryPickClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item      = (ToolStripItem)sender;
 			var revisions = (IEnumerable<IRevisionPointer>)item.Tag;
-			var parent = Utility.GetParentControl(item);
+			var parent    = Utility.GetParentControl(item);
 			try
 			{
 				using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -808,7 +847,7 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetRefreshStashItem<T>(Repository repository)
+		public T GetRefreshStashItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
@@ -816,9 +855,9 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = Resources.StrRefresh,
-				Image = CachedResources.Bitmaps["ImgRefresh"],
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.Refresh);
 			item.Click += OnRefreshStashClick;
 			return item;
 		}
@@ -950,36 +989,34 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetStashSaveKeepIndexItem<T>(Repository repository)
+		public T GetStashSaveKeepIndexItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgStashSave"],
 				Text = Resources.StrStash.AddEllipsis(),
-				Tag = repository,
+				Tag  = repository,
 				Enabled = !repository.IsEmpty && repository.Status.UnmergedCount == 0,
 			};
-
+			_dpiBindings.BindImage(item, Icons.StashSave);
 			item.Click += OnStashSaveKeepIndexItemClick;
 			return item;
 		}
 
-		public static T GetStashSaveItem<T>(Repository repository)
+		public T GetStashSaveItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image   = CachedResources.Bitmaps["ImgStashSave"],
 				Text    = Resources.StrStash.AddEllipsis(),
 				Tag     = repository,
 				Enabled = !repository.IsEmpty && repository.Status.UnmergedCount == 0,
 			};
-
+			_dpiBindings.BindImage(item, Icons.StashSave);
 			item.Click += OnStashSaveItemClick;
 			return item;
 		}
@@ -1125,22 +1162,22 @@ namespace gitter.Git.Gui
 
 		#region Branch Items
 
-		public static T GetCreateBranchItem<T>(Repository repository)
+		public T GetCreateBranchItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgBranchAdd"],
-				Text  = Resources.StrCreateBranch.AddEllipsis(),
-				Tag   = repository,
+				Text = Resources.StrCreateBranch.AddEllipsis(),
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.BranchAdd);
 			item.Click += OnCreateBranchClick;
 			return item;
 		}
 
-		public static T GetCreateBranchItem<T>(IRevisionPointer revision)
+		public T GetCreateBranchItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			if(revision != null)
@@ -1150,10 +1187,10 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgBranchAdd"],
-				Text  = Resources.StrCreateBranch.AddEllipsis(),
-				Tag   = revision,
+				Text = Resources.StrCreateBranch.AddEllipsis(),
+				Tag  = revision,
 			};
+			_dpiBindings.BindImage(item, Icons.BranchAdd);
 			item.Click += OnCreateBranchAtClick;
 			return item;
 		}
@@ -1180,38 +1217,38 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetRenameBranchItem<T>(Branch branch, string nameFormat)
+		public T GetRenameBranchItem<T>(Branch branch, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(branch, nameof(branch));
 
 			var item = new T()
 			{
-				Image	= CachedResources.Bitmaps["ImgBranchRename"],
-				Text	= string.Format(nameFormat, Resources.StrRename.AddEllipsis(), branch.Name),
-				Tag		= branch,
+				Text = string.Format(nameFormat, Resources.StrRename.AddEllipsis(), branch.Name),
+				Tag  = branch,
 			};
+			_dpiBindings.BindImage(item, Icons.BranchRename);
 			item.Click += OnRenameBranchClick;
 			return item;
 		}
 
-		public static T GetMergeItem<T>(IRevisionPointer revision)
+		public T GetMergeItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
-				Image	= CachedResources.Bitmaps["ImgMerge"],
 				Text	= Resources.StrMerge,
 				Tag		= revision,
 				Enabled	= revision != revision.Repository.Head.Pointer,
 			};
+			_dpiBindings.BindImage(item, Icons.Merge);
 			item.Click += OnMergeBranchClick;
 			return item;
 		}
 
-		public static T GetPushBranchToRemoteItem<T>(Branch branch, Remote remote)
+		public T GetPushBranchToRemoteItem<T>(Branch branch, Remote remote)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(branch, nameof(branch));
@@ -1219,10 +1256,10 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image	= CachedResources.Bitmaps["ImgRemote"],
-				Text	= remote.Name,
-				Tag		= Tuple.Create(branch, remote),
+				Text = remote.Name,
+				Tag  = Tuple.Create(branch, remote),
 			};
+			_dpiBindings.BindImage(item, Icons.Remote);
 			item.Click += new EventHandler(OnPushBranchToRemoteClick);
 			return item;
 		}
@@ -1430,50 +1467,50 @@ namespace gitter.Git.Gui
 
 		#region Tag Items
 
-		public static T GetCreateTagItem<T>(Repository repository)
+		public T GetCreateTagItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgTagAdd"],
 				Text = Resources.StrCreateTag.AddEllipsis(),
 				Tag = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.TagAdd);
 			item.Click += OnCreateTagClick;
 			return item;
 		}
 
-		public static T GetCreateTagItem<T>(IRevisionPointer revision)
+		public T GetCreateTagItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
-			if(revision != null)
+			if(revision is not null)
 			{
 				Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 			}
 			
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgTagAdd"],
 				Text = Resources.StrCreateTag.AddEllipsis(),
-				Tag = revision,
+				Tag  = revision,
 			};
+			_dpiBindings.BindImage(item, Icons.TagAdd);
 			item.Click += OnCreateTagAtClick;
 			return item;
 		}
 
-		public static T GetRemoveTagItem<T>(Tag tag, string nameFormat)
+		public T GetRemoveTagItem<T>(Tag tag, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(tag, nameof(tag));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgTagDel"],
 				Text = string.Format(nameFormat, Resources.StrRemoveTag, tag.Name),
-				Tag = tag,
+				Tag  = tag,
 			};
+			_dpiBindings.BindImage(item, Icons.TagDelete);
 			item.Click += OnRemoveTagClick;
 			return item;
 		}
@@ -1558,66 +1595,56 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetFetchItem<T>(Repository repository)
-			where T : ToolStripItem, new()
-		{
-			return GetFetchItem<T>(repository, "{0}");
-		}
-
-		public static T GetFetchItem<T>(Repository repository, string nameFormat)
+		public T GetFetchItem<T>(Repository repository, string nameFormat = "{0}")
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgFetch"],
-				Text = string.Format(nameFormat, Resources.StrFetch),
-				Tag = repository,
+				Text    = string.Format(nameFormat, Resources.StrFetch),
+				Tag     = repository,
 				Enabled = repository.Remotes.Count != 0,
 			};
+			_dpiBindings.BindImage(item, Icons.Fetch);
 			item.Click += OnFetchClick;
 			return item;
 		}
 
-		public static T GetFetchFromItem<T>(Remote remote, string nameFormat)
+		public T GetFetchFromItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 			
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps[nameFormat=="{1}"?"ImgRemote":"ImgFetch"],
 				Text = string.Format(nameFormat, Resources.StrFetch, remote.Name),
-				Tag = remote,
+				Tag  = remote,
 			};
+			_dpiBindings.BindImage(item, nameFormat == "{1}"
+				? Icons.Remote
+				: Icons.Fetch);
 			item.Click += OnFetchFromClick;
 			return item;
 		}
 
-		public static T GetPullItem<T>(Repository repository)
-			where T : ToolStripItem, new()
-		{
-			return GetPullItem<T>(repository, "{0}");
-		}
-
-		public static T GetPullItem<T>(Repository repository, string nameFormat)
+		public T GetPullItem<T>(Repository repository, string nameFormat = "{0}")
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgPull"],
-				Text = string.Format(nameFormat, Resources.StrPull),
-				Tag = repository,
+				Text    = string.Format(nameFormat, Resources.StrPull),
+				Tag     = repository,
 				Enabled = repository.Remotes.Count != 0,
 			};
+			_dpiBindings.BindImage(item, Icons.Pull);
 			item.Click += OnPullClick;
 			return item;
 		}
 
-		public static T GetPullFromItem<T>(Remote remote, string nameFormat)
+		public T GetPullFromItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(remote, nameof(remote));
@@ -1625,58 +1652,59 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps[nameFormat=="{1}"?"ImgRemote":"ImgPull"],
 				Text = string.Format(nameFormat, Resources.StrPull, remote.Name),
-				Tag = remote,
+				Tag  = remote,
 			};
+			_dpiBindings.BindImage(item, nameFormat == "{1}"
+				? Icons.Remote
+				: Icons.Pull);
 			item.Click += OnPullFromClick;
 			return item;
 		}
 
-		public static T GetRefreshRemotesItem<T>(Repository repository)
+		public T GetRefreshRemotesItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRefresh"],
 				Text = Resources.StrRefresh,
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.Refresh);
 			item.Click += OnRefreshRemotesClick;
 			return item;
 		}
 
-		public static T GetShowRemotesViewItem<T>()
+		public T GetShowRemotesViewItem<T>()
 			where T : ToolStripItem, new()
 		{
 			var item = new T()
 			{
-				//Image = CachedResources.Bitmaps["ImgRemotes"],
 				Text = Resources.StrManage,
-				Tag = Views.Guids.RemotesViewGuid,
+				Tag  = Views.Guids.RemotesViewGuid,
 			};
 			item.Click += OnShowViewItemClick;
 			return item;
 		}
 
-		public static T GetAddRemoteItem<T>(Repository repository)
+		public T GetAddRemoteItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRemoteAdd"],
 				Text = Resources.StrAddRemote.AddEllipsis(),
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.RemoteAdd);
 			item.Click += OnAddRemoteClick;
 			return item;
 		}
 
-		public static T GetRemoveRemoteItem<T>(Remote remote, string nameFormat)
+		public T GetRemoveRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(remote, nameof(remote));
@@ -1684,30 +1712,30 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRemoteRemove"],
 				Text = string.Format(nameFormat, Resources.StrRemove, remote.Name),
-				Tag = remote,
+				Tag  = remote,
 			};
+			_dpiBindings.BindImage(item, Icons.RemoteDelete);
 			item.Click += OnRemoveRemoteClick;
 			return item;
 		}
 
-		public static T GetRenameRemoteItem<T>(Remote remote, string nameFormat)
+		public T GetRenameRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(remote, nameof(remote));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRemoteRename"],
 				Text = string.Format(nameFormat, Resources.StrRename.AddEllipsis(), remote.Name),
-				Tag = remote,
+				Tag  = remote,
 			};
+			_dpiBindings.BindImage(item, Icons.RemoteRename);
 			item.Click += OnRenameRemoteClick;
 			return item;
 		}
 
-		public static T GetPruneRemoteItem<T>(Remote remote, string nameFormat)
+		public T GetPruneRemoteItem<T>(Remote remote, string nameFormat)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(remote, nameof(remote));
@@ -1715,10 +1743,10 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgClean"],
 				Text = string.Format(nameFormat, Resources.StrPruneRemote, remote.Name),
-				Tag = remote,
+				Tag  = remote,
 			};
+			_dpiBindings.BindImage(item, Icons.Prune);
 			item.Click += OnPruneRemoteClick;
 			return item;
 		}
@@ -2076,37 +2104,37 @@ namespace gitter.Git.Gui
 
 		#region Working Tree Items
 
-		public static T GetMarkAsResolvedItem<T>(TreeItem treeItem)
+		public T GetMarkAsResolvedItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgMarkAsResolved"],
 				Text = Resources.StrMarkAsResolved,
-				Tag = treeItem,
+				Tag  = treeItem,
 			};
+			_dpiBindings.BindImage(item, Icons.MarkResolved);
 			item.Click += OnStageClick;
 			return item;
 		}
 
-		public static T GetStageItem<T>(TreeItem treeItem)
+		public T GetStageItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgStage"],
 				Text = Resources.StrStage,
-				Tag = treeItem,
+				Tag  = treeItem,
 			};
+			_dpiBindings.BindImage(item, Icons.Stage);
 			item.Click += OnStageClick;
 			return item;
 		}
 
-		public static T GetStageItem<T>(Repository repository, TreeItem[] treeItems)
+		public T GetStageItem<T>(Repository repository, TreeItem[] treeItems)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(treeItems, nameof(treeItems));
@@ -2114,96 +2142,94 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgStage"],
 				Text = Resources.StrStage,
-				Tag = Tuple.Create(repository, treeItems),
+				Tag  = Tuple.Create(repository, treeItems),
 			};
+			_dpiBindings.BindImage(item, Icons.Stage);
 			item.Click += OnStageSeveralClick;
 			return item;
 		}
 
-		public static T GetManualStageItem<T>(Repository repository)
+		public T GetManualStageItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			return GetManualStageItem<T>(repository, Resources.StrManual.AddEllipsis());
 		}
 
-		public static T GetManualStageItem<T>(Repository repository, string name)
+		public T GetManualStageItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = null,
 				Text = name,
-				Tag = repository,
+				Tag  = repository,
 			};
 			item.Click += OnManualStageClick;
 			return item;
 		}
 
-		public static T GetStageAllItem<T>(Repository repository, string name)
+		public T GetStageAllItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgStage"],
 				Text = name,
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.StageAll);
 			item.Click += OnStageAllClick;
 			return item;
 		}
 
-		public static T GetUpdateItem<T>(Repository repository, string name)
+		public T GetUpdateItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = null,
 				Text = name,
-				Tag = repository,
+				Tag  = repository,
 			};
 			item.Click += OnUpdateClick;
 			return item;
 		}
 
-		public static T GetCommitItem<T>(Repository repository)
+		public T GetCommitItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgCommit"],
 				Text = Resources.StrCommit.AddEllipsis(),
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.Commit);
 			item.Click += OnCommitClick;
 			return item;
 		}
 
-		public static T GetUnstageItem<T>(TreeItem treeItem)
+		public T GetUnstageItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgUnstage"],
 				Text = Resources.StrUnstage,
-				Tag = treeItem,
+				Tag  = treeItem,
 			};
+			_dpiBindings.BindImage(item, Icons.Unstage);
 			item.Click += OnUnstageClick;
 			return item;
 		}
 
-		public static T GetUnstageItem<T>(Repository repository, TreeItem[] treeItems)
+		public T GetUnstageItem<T>(Repository repository, TreeItem[] treeItems)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(treeItems, nameof(treeItems));
@@ -2211,36 +2237,36 @@ namespace gitter.Git.Gui
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgUnstage"],
 				Text = Resources.StrUnstage,
-				Tag = Tuple.Create(repository, treeItems),
+				Tag  = Tuple.Create(repository, treeItems),
 			};
+			_dpiBindings.BindImage(item, Icons.Unstage);
 			item.Click += OnUnstageSeveralClick;
 			return item;
 		}
 
-		public static T GetUnstageAllItem<T>(Repository repository)
+		public T GetUnstageAllItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			return GetUnstageAllItem<T>(repository, Resources.StrUnstageAll);
 		}
 
-		public static T GetUnstageAllItem<T>(Repository repository, string name)
+		public T GetUnstageAllItem<T>(Repository repository, string name)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgUnstage"],
 				Text = name,
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.UnstageAll);
 			item.Click += OnUnstageAllClick;
 			return item;
 		}
 
-		public static T GetMergeToolItem<T>(TreeFile file, MergeTool mergeTool)
+		public T GetMergeToolItem<T>(TreeFile file, MergeTool mergeTool = null)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(file, nameof(file));
@@ -2271,7 +2297,7 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetResolveConflictItem<T>(TreeFile file, ConflictResolution resolution)
+		public T GetResolveConflictItem<T>(TreeFile file, ConflictResolution resolution)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(file, nameof(file));
@@ -2286,21 +2312,14 @@ namespace gitter.Git.Gui
 			};
 			var item = new T()
 			{
-				Image = null,
-				Text  = text,
-				Tag   = Tuple.Create(file, resolution),
+				Text = text,
+				Tag  = Tuple.Create(file, resolution),
 			};
 			item.Click += OnResolveConflictItemClick;
 			return item;
 		}
 
-		public static T GetMergeToolItem<T>(TreeFile file)
-			where T : ToolStripItem, new()
-		{
-			return GetMergeToolItem<T>(file, null);
-		}
-
-		public static T GetRevertPathItem<T>(TreeItem treeItem)
+		public T GetRevertPathItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
@@ -2308,14 +2327,14 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = Resources.StrRevert,
-				Image = CachedResources.Bitmaps["ImgRevert"],
-				Tag = treeItem,
+				Tag  = treeItem,
 			};
+			_dpiBindings.BindImage(item, Icons.Revert);
 			item.Click += OnRevertPathClick;
 			return item;
 		}
 
-		public static T GetRevertPathsItem<T>(IEnumerable<TreeItem> treeItems)
+		public T GetRevertPathsItem<T>(IEnumerable<TreeItem> treeItems)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(treeItems, nameof(treeItems));
@@ -2323,14 +2342,14 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = Resources.StrRevert,
-				Image = CachedResources.Bitmaps["ImgRevert"],
-				Tag = treeItems,
+				Tag  = treeItems,
 			};
+			_dpiBindings.BindImage(item, Icons.Revert);
 			item.Click += OnRevertPathsClick;
 			return item;
 		}
 
-		public static T GetRemovePathItem<T>(TreeItem treeItem)
+		public T GetRemovePathItem<T>(TreeItem treeItem)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
@@ -2338,9 +2357,9 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = Resources.StrDelete,
-				Image = CachedResources.Bitmaps["ImgDelete"],
-				Tag = treeItem,
+				Tag  = treeItem,
 			};
+			_dpiBindings.BindImage(item, Icons.Delete);
 			item.Click += OnDeletePathClick;
 			return item;
 		}
@@ -3036,19 +3055,19 @@ namespace gitter.Git.Gui
 
 		#region Misc Items
 
-		public static T GetShowContributorsViewItem<T>()
+		public T GetShowContributorsViewItem<T>()
 			where T : ToolStripItem, new()
 		{
 			var item = new T()
 			{
 				Text = Resources.StrManage,
-				Tag = Views.Guids.ContributorsViewGuid,
+				Tag  = Views.Guids.ContributorsViewGuid,
 			};
 			item.Click += OnShowViewItemClick;
 			return item;
 		}
 
-		public static T GetRefreshContributorsItem<T>(Repository repository)
+		public T GetRefreshContributorsItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
@@ -3056,9 +3075,9 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = Resources.StrRefresh,
-				Image = CachedResources.Bitmaps["ImgRefresh"],
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.Refresh);
 			item.Click += OnRefreshContributorsClick;
 			return item;
 		}
@@ -3146,8 +3165,8 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Image = image,
-				Text = name != null ? name : url,
-				Tag = url,
+				Text  = name ?? url,
+				Tag   = url,
 			};
 			item.Click += OnOpenUrlWithItemClick;
 			return item;
@@ -3161,59 +3180,59 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Image = image,
-				Text = name != null ? name : path,
-				Tag = path,
+				Text  = name ?? path,
+				Tag   = path,
 			};
 			item.Click += OnOpenCmdAtItemClick;
 			return item;
 		}
 
-		public static T GetCleanItem<T>(Repository repository)
+		public T GetCleanItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgClean"],
 				Text = Resources.StrClean.AddEllipsis(),
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.Clean);
 			item.Click += OnCleanClick;
 			return item;
 		}
 
-		public static T GetViewDiffItem<T>(IDiffSource diffSource)
+		public T GetViewDiffItem<T>(IDiffSource diffSource)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(diffSource, nameof(diffSource));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgDiff"],
 				Text = Resources.StrViewDiff,
-				Tag = diffSource,
+				Tag  = diffSource,
 			};
+			_dpiBindings.BindImage(item, Icons.Diff);
 			item.Click += OnViewDiffItemClick;
 			return item;
 		}
 
-		public static T GetViewTreeItem<T>(IRevisionPointer revision)
+		public T GetViewTreeItem<T>(IRevisionPointer revision)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgFolderTree"],
 				Text = Resources.StrViewTree,
-				Tag = revision,
+				Tag  = revision,
 			};
+			_dpiBindings.BindImage(item, Icons.FolderTree);
 			item.Click += OnViewTreeItemClick;
 			return item;
 		}
 
-		public static T GetShowReferencesViewItem<T>()
+		public T GetShowReferencesViewItem<T>()
 			where T : ToolStripItem, new()
 		{
 			var item = new T()
@@ -3225,22 +3244,22 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetRefreshAllReferencesListItem<T>(Repository repository)
+		public T GetRefreshAllReferencesListItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			var item = new T()
 			{
-				Image = CachedResources.Bitmaps["ImgRefresh"],
 				Text = Resources.StrRefresh,
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.Refresh);
 			item.Click += OnRefreshAllReferencesClick;
 			return item;
 		}
 
-		public static T GetCopyToClipboardItem<T>(string name, Func<string> text)
+		public T GetCopyToClipboardItem<T>(string name, Func<string> text)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(text, nameof(text));
@@ -3248,54 +3267,42 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = name,
-				Image = CachedResources.Bitmaps["ImgCopyToClipboard"],
 				Tag = text,
 			};
+			_dpiBindings.BindImage(item, Icons.ClipboardCopy);
 			item.Click += OnCopyToClipboardClick;
 			return item;
 		}
 
-		public static T GetCopyToClipboardItem<T>(string name, string text)
-			where T : ToolStripItem, new()
-		{
-			return GetCopyToClipboardItem<T>(name, text, true);
-		}
-
-		public static T GetCopyHashToClipboardItem<T>(string name, string text)
-			where T : ToolStripItem, new()
-		{
-			return GetCopyHashToClipboardItem<T>(name, text, true);
-		}
-
-		public static T GetCopyToClipboardItem<T>(string name, string text, bool enableToolTip)
+		public T GetCopyToClipboardItem<T>(string name, string text, bool enableToolTip = true)
 			where T : ToolStripItem, new()
 		{
 			var item = new T()
 			{
 				Text = name,
-				Image = CachedResources.Bitmaps["ImgCopyToClipboard"],
-				Tag = text,
+				Tag  = text,
 			};
 			if(enableToolTip && name != text) item.ToolTipText = text;
+			_dpiBindings.BindImage(item, Icons.ClipboardCopy);
 			item.Click += OnCopyToClipboardClick;
 			return item;
 		}
 
-		public static T GetCopyHashToClipboardItem<T>(string name, string text, bool enableToolTip)
+		public T GetCopyHashToClipboardItem<T>(string name, string text, bool enableToolTip = true)
 			where T : ToolStripItem, new()
 		{
 			var item = new T()
 			{
 				Text = name,
-				Image = CachedResources.Bitmaps["ImgCopyToClipboard"],
-				Tag = text,
+				Tag  = text,
 			};
 			if(enableToolTip && name != text) item.ToolTipText = text;
+			_dpiBindings.BindImage(item, Icons.ClipboardCopy);
 			item.Click += OnCopyHashToClipboardClick;
 			return item;
 		}
 
-		public static T GetRefreshReferencesItem<T>(Repository repository, ReferenceType referenceTypes, string name)
+		public T GetRefreshReferencesItem<T>(Repository repository, ReferenceType referenceTypes, string name)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
@@ -3303,14 +3310,14 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = name,
-				Image = CachedResources.Bitmaps["ImgRefresh"],
-				Tag = Tuple.Create(repository, referenceTypes),
+				Tag  = Tuple.Create(repository, referenceTypes),
 			};
+			_dpiBindings.BindImage(item, Icons.Refresh);
 			item.Click += OnRefreshReferencesClick;
 			return item;
 		}
 
-		public static T GetResolveConflictsItem<T>(Repository repository)
+		public T GetResolveConflictsItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
@@ -3318,8 +3325,7 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = Resources.StrResolveConflicts.AddEllipsis(),
-				Image = null,
-				Tag = repository,
+				Tag  = repository,
 			};
 			item.Click += OnResolveConflictsClick;
 			return item;
@@ -3374,7 +3380,7 @@ namespace gitter.Git.Gui
 			return item;
 		}
 
-		public static T GetCompressRepositoryItem<T>(Repository repository)
+		public T GetCompressRepositoryItem<T>(Repository repository)
 			where T : ToolStripItem, new()
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
@@ -3382,9 +3388,9 @@ namespace gitter.Git.Gui
 			var item = new T()
 			{
 				Text = Resources.StrCompressRepository,
-				Image = CachedResources.Bitmaps["ImgGC"],
-				Tag = repository,
+				Tag  = repository,
 			};
+			_dpiBindings.BindImage(item, Icons.GarbageCollect);
 			item.Click += OnCompressRepositoryClick;
 			return item;
 		}
@@ -3480,7 +3486,7 @@ namespace gitter.Git.Gui
 			var item = (ToolStripItem)sender;
 			var path = (string)item.Tag;
 
-			var psi = new ProcessStartInfo("cmd")
+			var psi = new ProcessStartInfo(@"cmd")
 			{
 				WorkingDirectory = path,
 			};
@@ -3501,7 +3507,7 @@ namespace gitter.Git.Gui
 
 		private static void OnViewDiffItemClick(object sender, EventArgs e)
 		{
-			var item = (ToolStripItem)sender;
+			var item       = (ToolStripItem)sender;
 			var diffSource = (IDiffSource)item.Tag;
 
 			GitterApplication.WorkingEnvironment.ViewDockService.ShowView(

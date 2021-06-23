@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,7 +30,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public CommitViewFactory(GuiProvider guiProvider)
-			: base(Guids.CommitViewGuid, Resources.StrCommit, CachedResources.Bitmaps["ImgCommit"])
+			: base(Guids.CommitViewGuid, Resources.StrCommit, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"commit"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -38,9 +38,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new CommitView(_guiProvider);
-		}
+			=> new CommitView(_guiProvider);
 	}
 
 	sealed class ConfigViewFactory : ViewFactoryBase
@@ -48,7 +46,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public ConfigViewFactory(GuiProvider guiProvider)
-			: base(Guids.ConfigViewGuid, Resources.StrConfig, CachedResources.Bitmaps["ImgConfiguration"])
+			: base(Guids.ConfigViewGuid, Resources.StrConfig, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"configuration"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -56,9 +54,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new ConfigView(_guiProvider);
-		}
+			=> new ConfigView(_guiProvider);
 	}
 
 	sealed class GitViewFactory : ViewFactoryBase
@@ -66,7 +62,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public GitViewFactory(GuiProvider guiProvider)
-			: base(Guids.GitViewGuid, Resources.StrGit, CachedResources.Bitmaps["ImgGit"])
+			: base(Guids.GitViewGuid, Resources.StrGit, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"git"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -74,9 +70,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new GitView(_guiProvider);
-		}
+			=> new GitView(_guiProvider);
 	}
 
 	sealed class HistoryViewFactory : ViewFactoryBase
@@ -84,7 +78,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public HistoryViewFactory(GuiProvider guiProvider)
-			: base(Guids.HistoryViewGuid, Resources.StrHistory, CachedResources.Bitmaps["ImgHistory"], true)
+			: base(Guids.HistoryViewGuid, Resources.StrHistory, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"history"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -92,9 +86,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new HistoryView(_guiProvider);
-		}
+			=> new HistoryView(_guiProvider);
 	}
 
 	sealed class PathHistoryViewFactory : ViewFactoryBase
@@ -102,7 +94,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public PathHistoryViewFactory(GuiProvider guiProvider)
-			: base(Guids.PathHistoryViewGuid, Resources.StrHistory, CachedResources.Bitmaps["ImgFileHistory"], false)
+			: base(Guids.PathHistoryViewGuid, Resources.StrHistory, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"file.history"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -110,9 +102,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new PathHistoryView(_guiProvider);
-		}
+			=> new PathHistoryView(_guiProvider);
 	}
 
 	sealed class ReflogViewFactory : ViewFactoryBase
@@ -120,7 +110,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public ReflogViewFactory(GuiProvider guiProvider)
-			: base(Guids.ReflogViewGuid, Resources.StrReflog, CachedResources.Bitmaps["ImgViewReflog"], false)
+			: base(Guids.ReflogViewGuid, Resources.StrReflog, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"branch.reflog"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -128,27 +118,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new ReflogView(_guiProvider);
-		}
-	}
-
-	sealed class MaintenanceToolFactory : ViewFactoryBase
-	{
-		private readonly GuiProvider _guiProvider;
-
-		public MaintenanceToolFactory(GuiProvider guiProvider)
-			: base(Guids.MaintenanceViewGuid, Resources.StrMaintenance, CachedResources.Bitmaps["ImgMaintenance"])
-		{
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
-
-			_guiProvider = guiProvider;
-		}
-
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new MaintenanceView(_guiProvider);
-		}
+			=> new ReflogView(_guiProvider);
 	}
 
 	sealed class ReferencesViewFactory : ViewFactoryBase
@@ -156,7 +126,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public ReferencesViewFactory(GuiProvider guiProvider)
-			: base(Guids.ReferencesViewGuid, Resources.StrReferences, CachedResources.Bitmaps["ImgBranch"], true)
+			: base(Guids.ReferencesViewGuid, Resources.StrReferences, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"branch"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -165,9 +135,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new ReferencesView(_guiProvider);
-		}
+			=> new ReferencesView(_guiProvider);
 	}
 
 	sealed class RemotesViewFactory : ViewFactoryBase
@@ -175,7 +143,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public RemotesViewFactory(GuiProvider guiProvider)
-			: base(Guids.RemotesViewGuid, Resources.StrRemotes, CachedResources.Bitmaps["ImgRemote"], true)
+			: base(Guids.RemotesViewGuid, Resources.StrRemotes, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"remotes"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -184,9 +152,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new RemotesView(_guiProvider);
-		}
+			=> new RemotesView(_guiProvider);
 	}
 
 	sealed class RemoteViewFactory : ViewFactoryBase
@@ -194,7 +160,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public RemoteViewFactory(GuiProvider guiProvider)
-			: base(Guids.RemoteViewGuid, Resources.StrRemote, CachedResources.Bitmaps["ImgRemote"], false)
+			: base(Guids.RemoteViewGuid, Resources.StrRemote, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"remote"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -203,9 +169,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new RemoteView(_guiProvider);
-		}
+			=> new RemoteView(_guiProvider);
 	}
 
 	sealed class StashViewFactory : ViewFactoryBase
@@ -213,7 +177,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public StashViewFactory(GuiProvider guiProvider)
-			: base(Guids.StashViewGuid, Resources.StrStash, CachedResources.Bitmaps["ImgStash"], true)
+			: base(Guids.StashViewGuid, Resources.StrStash, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"stash"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -222,9 +186,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new StashView(_guiProvider);
-		}
+			=> new StashView(_guiProvider);
 	}
 
 	sealed class SubmodulesViewFactory : ViewFactoryBase
@@ -232,7 +194,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public SubmodulesViewFactory(GuiProvider guiProvider)
-			: base(Guids.SubmodulesViewGuid, Resources.StrSubmodules, CachedResources.Bitmaps["ImgSubmodule"], true)
+			: base(Guids.SubmodulesViewGuid, Resources.StrSubmodules, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"submodules"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -241,9 +203,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new SubmodulesView(_guiProvider);
-		}
+			=> new SubmodulesView(_guiProvider);
 	}
 
 	sealed class ContributorsViewFactory : ViewFactoryBase
@@ -251,7 +211,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public ContributorsViewFactory(GuiProvider guiProvider)
-			: base(Guids.ContributorsViewGuid, Resources.StrContributors, CachedResources.Bitmaps["ImgUsers"], true)
+			: base(Guids.ContributorsViewGuid, Resources.StrContributors, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"users"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -259,9 +219,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new ContributorsView(_guiProvider);
-		}
+			=> new ContributorsView(_guiProvider);
 	}
 
 	sealed class TreeViewFactory : ViewFactoryBase
@@ -269,7 +227,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public TreeViewFactory(GuiProvider guiProvider)
-			: base(Guids.TreeViewGuid, Resources.StrWorkingTree, CachedResources.Bitmaps["ImgFolder"], false)
+			: base(Guids.TreeViewGuid, Resources.StrWorkingTree, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"folder"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -277,9 +235,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new TreeView(_guiProvider);
-		}
+			=> new TreeView(_guiProvider);
 	}
 
 	sealed class DiffViewFactory : ViewFactoryBase
@@ -287,7 +243,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public DiffViewFactory(GuiProvider guiProvider)
-			: base(Guids.DiffViewGuid, Resources.StrDiff, CachedResources.Bitmaps["ImgDiff"], false)
+			: base(Guids.DiffViewGuid, Resources.StrDiff, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"diff"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -295,9 +251,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new DiffView(Guids.DiffViewGuid, _guiProvider);
-		}
+			=> new DiffView(Guids.DiffViewGuid, _guiProvider);
 	}
 
 	sealed class BlameViewFactory : ViewFactoryBase
@@ -305,7 +259,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public BlameViewFactory(GuiProvider guiProvider)
-			: base(Guids.BlameViewGuid, Resources.StrBlame, CachedResources.Bitmaps["ImgBlame"], false)
+			: base(Guids.BlameViewGuid, Resources.StrBlame, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"blame"))
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -313,9 +267,7 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new BlameView(_guiProvider);
-		}
+			=> new BlameView(_guiProvider);
 	}
 
 	sealed class ContextualDiffViewFactory : ViewFactoryBase
@@ -323,7 +275,7 @@ namespace gitter.Git.Gui.Views
 		private readonly GuiProvider _guiProvider;
 
 		public ContextualDiffViewFactory(GuiProvider guiProvider)
-			: base(Guids.ContextualDiffViewGuid, Resources.StrContextualDiff, CachedResources.Bitmaps["ImgDiff"], true)
+			: base(Guids.ContextualDiffViewGuid, Resources.StrContextualDiff, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"diff"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
@@ -332,8 +284,6 @@ namespace gitter.Git.Gui.Views
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new DiffView(Guids.ContextualDiffViewGuid, _guiProvider);
-		}
+			=> new DiffView(Guids.ContextualDiffViewGuid, _guiProvider);
 	}
 }

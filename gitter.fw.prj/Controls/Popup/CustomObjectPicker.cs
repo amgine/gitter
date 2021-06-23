@@ -35,7 +35,7 @@ namespace gitter.Framework.Controls
 	{
 		#region Static
 
-		protected static readonly StringFormat DefaultStringFormat = new StringFormat(StringFormat.GenericTypographic)
+		protected static readonly StringFormat DefaultStringFormat = new(StringFormat.GenericTypographic)
 		{
 			LineAlignment = StringAlignment.Center,
 		};
@@ -126,7 +126,7 @@ namespace gitter.Framework.Controls
 			get
 			{
 				var selectedItem = SelectedItem;
-				if(selectedItem != null)
+				if(selectedItem is not null)
 				{
 					return GetValue(selectedItem);
 				}
@@ -148,8 +148,7 @@ namespace gitter.Framework.Controls
 
 			foreach(var item in items)
 			{
-				var i = item as TItem;
-				if(i != null)
+				if(item is TItem i)
 				{
 					var v = GetValue(i);
 					if(EqualityComparer<TValue>.Default.Equals(v, value))
@@ -160,7 +159,7 @@ namespace gitter.Framework.Controls
 				if(item.Items.Count != 0)
 				{
 					var subItem = FindItemByValue(item.Items, value);
-					if(subItem != null)
+					if(subItem is not null)
 					{
 						return subItem;
 					}
@@ -169,6 +168,7 @@ namespace gitter.Framework.Controls
 			return null;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnDrawItem(DrawItemEventArgs e)
 		{
 			Assert.IsNotNull(e);
@@ -178,7 +178,7 @@ namespace gitter.Framework.Controls
 			e.Graphics.TextContrast      = GraphicsUtility.TextContrast;
 
 			var selectedItem = SelectedItem;
-			if(selectedItem == null)
+			if(selectedItem is null)
 			{
 				OnPaintNullItem(e);
 			}
@@ -194,22 +194,22 @@ namespace gitter.Framework.Controls
 			Assert.IsNotNull(e);
 
 			var itemState = ItemState.None;
-			bool isSelected = false;
 			if((e.State & DrawItemState.Selected) == DrawItemState.Selected)
 			{
 				itemState |= ItemState.Selected;
-				isSelected = true;
 			}
 			if((e.State & DrawItemState.Focus) == DrawItemState.Focus)
 			{
 				itemState |= ItemState.Focused;
 			}
 
-			if(isSelected)
+			var column = DropDownControl.Columns[0];
+			if((e.State & DrawItemState.Selected) == DrawItemState.Selected)
 			{
-				var column = new CustomListBoxColumn(0, string.Empty);
-				using(var brush = new SolidBrush(e.ForeColor))
+				var oldBrush = column.ContentBrush;
+				try
 				{
+					using var brush = new SolidBrush(e.ForeColor);
 					column.ContentBrush = brush;
 					var args = new SubItemPaintEventArgs(e.Graphics,
 						e.Bounds,
@@ -223,6 +223,10 @@ namespace gitter.Framework.Controls
 						column);
 					item.PaintSubItem(args);
 				}
+				finally
+				{
+					column.ContentBrush = oldBrush;
+				}
 			}
 			else
 			{
@@ -235,7 +239,7 @@ namespace gitter.Framework.Controls
 					Focused,
 					item,
 					0,
-					DropDownControl.Columns[0]);
+					column);
 				item.PaintSubItem(args);
 			}
 		}
@@ -267,14 +271,15 @@ namespace gitter.Framework.Controls
 			HideDropDown();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			var items = DropDownItems;
-			if(items == null || items.Count <= 1)
+			if(items is null || items.Count <= 1)
 			{
 				return;
 			}
-			var index = SelectedItem == null ? -1 : items.IndexOf(SelectedItem);
+			var index = SelectedItem is null ? -1 : items.IndexOf(SelectedItem);
 			if(e.Delta > 0)
 			{
 				if(--index < 0)
@@ -296,6 +301,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseWheel(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)

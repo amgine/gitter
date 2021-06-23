@@ -59,7 +59,7 @@ namespace gitter.Framework
 
 			_lblExceptionName.Text = exception.GetType().FullName;
 			_lblMessage.Text = exception.Message;
-			string stackTrace = null;
+			string stackTrace;
 			if(exception.Data.Contains("OriginalStackTrace"))
 			{
 				stackTrace = (string)exception.Data["OriginalStackTrace"];

@@ -23,35 +23,43 @@ namespace gitter.Git.Gui.Controls
 	using System;
 	using System.Drawing;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	public class PatchSourceListItem : CustomListBoxItem<IPatchSource>
 	{
-		private static readonly Bitmap ImgPatch = CachedResources.Bitmaps["ImgPatch"];
-
 		public PatchSourceListItem(IPatchSource patchSource)
 			: base(patchSource)
 		{
 			Verify.Argument.IsNotNull(patchSource, nameof(patchSource));
 		}
 
+		private static Bitmap GetIcon(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[@"patch", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgPatch, DataContext.DisplayName);
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.DisplayName);
 				default:
 					return Size.Empty;
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgPatch, DataContext.DisplayName);
+					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.DisplayName);
 					break;
 			}
 		}

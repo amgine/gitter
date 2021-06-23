@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,9 +21,7 @@
 namespace gitter.TeamCity.Gui
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;
@@ -56,8 +54,8 @@ namespace gitter.TeamCity.Gui
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
-			var views1 = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();
-			foreach(var view in views1) view.Close();
+			var views = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();
+			foreach(var view in views) view.Close();
 			environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
 			_repositoryExplorer = null;
 		}

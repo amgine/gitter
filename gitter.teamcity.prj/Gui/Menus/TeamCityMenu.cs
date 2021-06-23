@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -48,10 +48,8 @@ namespace gitter.TeamCity.Gui
 
 		private void OnSetupClick(object sender, EventArgs e)
 		{
-			using(var dlg = new ProviderSetupControl(_guiProvider.Repository))
-			{
-				dlg.Run(GitterApplication.MainForm);
-			}
+			using var dlg = new ProviderSetupControl(_guiProvider.Repository);
+			dlg.Run(GitterApplication.MainForm);
 		}
 	}
 }

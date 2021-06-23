@@ -15,16 +15,13 @@
 		{
 			if(disposing)
 			{
-				if(_chkShowColors != null)
+				if(_chkShowColors is not null)
 				{
 					_chkShowColors.Dispose();
 					_chkShowColors = null;
 				}
 				UnsubscribeFromColumnEvents();
-				if(components != null)
-				{
-					components.Dispose();
-				}
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}

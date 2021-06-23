@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Windows.Forms;
 
@@ -36,8 +35,9 @@ namespace gitter.Framework.Controls
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-			=> ((LogListBoxColumnId)measureEventArgs.SubItemId) switch
+			=> (LogListBoxColumnId)measureEventArgs.SubItemId switch
 			{
 				LogListBoxColumnId.Type      => new Size(16, 16),
 				LogListBoxColumnId.Timestamp => measureEventArgs.MeasureText(DataContext.Timestamp.FormatISO8601()),
@@ -47,8 +47,11 @@ namespace gitter.Framework.Controls
 				_ => Size.Empty,
 			};
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((LogListBoxColumnId)paintEventArgs.SubItemId)
 			{
 				case LogListBoxColumnId.Type:
@@ -69,10 +72,13 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			var menu = new ContextMenuStrip();
-			menu.Items.Add(new ToolStripMenuItem("Copy to Clipboard", null, (s, e) => ClipboardEx.SetTextSafe(DataContext.Message)));
+			menu.Items.Add(new ToolStripMenuItem("Copy to Clipboard", null, (_, _) => ClipboardEx.SetTextSafe(DataContext.Message)));
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}

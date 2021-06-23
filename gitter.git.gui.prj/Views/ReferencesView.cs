@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -54,7 +53,7 @@ namespace gitter.Git.Gui.Views
 			AddTopToolStrip(_toolbar = new ReferencesToolbar(this));
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgBranch"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"branch");
 
 		protected override void AttachToRepository(Repository repository)
 		{
@@ -86,11 +85,18 @@ namespace gitter.Git.Gui.Views
 		{
 			if(InvokeRequired)
 			{
-				BeginInvoke(new MethodInvoker(RefreshContent));
+				try
+				{
+					BeginInvoke(new MethodInvoker(RefreshContent));
+				}
+				catch
+				{
+				}
 			}
 			else
 			{
-				if(Repository != null)
+				if(IsDisposed) return;
+				if(Repository is not null)
 				{
 					using(this.ChangeCursor(Cursors.WaitCursor))
 					{
@@ -136,7 +142,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("ReferenceList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				_lstReferences.LoadViewFrom(listNode);
 			}

@@ -199,6 +199,7 @@ namespace gitter.Framework
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
+			Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
 
 			SelectStyle();
 

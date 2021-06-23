@@ -30,8 +30,6 @@ namespace gitter.Git.Gui.Controls
 	/// <summary><see cref="gitter.Framework.Controls.CustomListBoxItem"/> representing <see cref="gitter.Git.Remote"/>.</summary>
 	public class RemoteListItem : CustomListBoxItem<Remote>
 	{
-		private static readonly Bitmap ImgRemote = CachedResources.Bitmaps["ImgRemote"];
-
 		public static int CompareByName(RemoteListItem item1, RemoteListItem item2)
 		{
 			var data1 = item1.DataContext.Name;
@@ -131,12 +129,18 @@ namespace gitter.Git.Gui.Controls
 			base.OnListBoxDetached();
 		}
 
+		private static Image GetImage(Dpi dpi)
+			=> CachedResources.ScaledBitmaps["remote", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgRemote, DataContext.Name);
+					return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), DataContext.Name);
 				case ColumnId.Url:
 				case ColumnId.FetchUrl:
 					return measureEventArgs.MeasureText(DataContext.FetchUrl);
@@ -147,12 +151,15 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgRemote, DataContext.Name);
+					paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), DataContext.Name);
 					break;
 				case ColumnId.Url:
 				case ColumnId.FetchUrl:
@@ -164,6 +171,7 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			var mnu = new RemoteMenu(DataContext);

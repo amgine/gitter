@@ -22,6 +22,8 @@ namespace gitter.Framework.Controls
 {
 	using System;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Framework.Properties.Resources;
 
 	public sealed class LogViewFactory : ViewFactoryBase
@@ -30,14 +32,12 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Initializes a new instance of the <see cref="LogViewFactory"/> class.</summary>
 		public LogViewFactory()
-			: base(Guid, Resources.StrLog, Resources.ImgLog, true)
+			: base(Guid, Resources.StrLog, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"log.view"), singleton: true)
 		{
 			DefaultViewPosition = ViewPosition.Float;
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 			=> new LogView(environment);
 	}

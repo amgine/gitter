@@ -70,7 +70,7 @@ namespace gitter.Framework.Controls
 			remove => Events.RemoveHandler (StyleChangedEvent, value);
 		}
 
-		protected virtual void OnStyleChanged(EventArgs e)
+		protected new virtual void OnStyleChanged(EventArgs e)
 			=> ((EventHandler)Events[StyleChangedEvent])?.Invoke(this, e);
 
 		#endregion
@@ -346,7 +346,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Enable control redraw events.</summary>
 		/// <param name="redraw">Repaint control.</param>
-		protected virtual void EndUpdate(bool redraw)
+		public virtual void EndUpdate(bool redraw = true)
 		{
 			Verify.State.IsTrue(_updateCount > 0);
 
@@ -356,12 +356,6 @@ namespace gitter.Framework.Controls
 				this.EnableRedraw();
 				if(redraw) this.RedrawWindow();
 			}
-		}
-
-		/// <summary>Enable control redraw events.</summary>
-		public void EndUpdate()
-		{
-			EndUpdate(true);
 		}
 
 		public bool IsUpdating => _updateCount != 0;
@@ -951,6 +945,7 @@ namespace gitter.Framework.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected sealed override void OnPaintBackground(PaintEventArgs pevent)
 		{
 		}
@@ -965,10 +960,8 @@ namespace gitter.Framework.Controls
 			{
 				if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
 				{
-					using(var pen = new Pen(BackColor))
-					{
-						graphics.DrawRectangle(pen, 0, 0, w - 1, h - 1);
-					}
+					using var pen = new Pen(BackColor);
+					graphics.DrawRectangle(pen, 0, 0, w - 1, h - 1);
 				}
 			}
 			else
@@ -978,10 +971,8 @@ namespace gitter.Framework.Controls
 					if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
 					{
 						graphics.DrawRectangle(SystemPens.ControlDark, 0, 0, w - 1, h - 1);
-						using(var pen = new Pen(BackColor))
-						{
-							graphics.DrawRectangle(pen, 1, 1, w - 3, h - 3);
-						}
+						using var pen = new Pen(BackColor);
+						graphics.DrawRectangle(pen, 1, 1, w - 3, h - 3);
 					}
 				}
 				else
@@ -1000,16 +991,13 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			if(_vScrollBar.Control.Parent != null && _hScrollBar.Control.Parent != null)
+			if(_vScrollBar.Control.Parent is not null && _hScrollBar.Control.Parent is not null)
 			{
 				var rcSpacing = Rectangle.Intersect(clip,
 					new Rectangle(_vScrollBar.Control.Left, _vScrollBar.Control.Bottom, _vScrollBar.Control.Width, _hScrollBar.Control.Height));
-				if(rcSpacing.Width > 0 && rcSpacing.Height > 0)
+				if(rcSpacing is { Width: > 0, Height: > 0 })
 				{
-					using(var brush = new SolidBrush(Style.Colors.ScrollBarSpacing))
-					{
-						graphics.FillRectangle(brush, rcSpacing);
-					}
+					graphics.GdiFill(Style.Colors.ScrollBarSpacing, rcSpacing);
 				}
 			}
 		}
@@ -1020,16 +1008,15 @@ namespace gitter.Framework.Controls
 		{
 		}
 
+		/// <inheritdoc/>
 		protected sealed override void OnPaint(PaintEventArgs e)
 		{
-			using(var brush = new SolidBrush(BackColor))
-			{
-				e.Graphics.FillRectangle(brush, e.ClipRectangle);
-			}
+			e.Graphics.GdiFill(BackColor, e.ClipRectangle);
 			PaintNonClient(e);
 			OnPaintClientArea(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnHandleCreated(EventArgs e)
 		{
 			base.OnHandleCreated(e);
@@ -1041,6 +1028,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnVisibleChanged(EventArgs e)
 		{
 			base.OnVisibleChanged(e);
@@ -1052,24 +1040,28 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseEnter(EventArgs e)
 		{
 			_isMouseOver = true;
 			base.OnMouseEnter(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			_isMouseOver = false;
 			base.OnMouseLeave(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
 			Focus();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if(ClientRectangle.Contains(e.Location))
@@ -1099,6 +1091,7 @@ namespace gitter.Framework.Controls
 			_vScrollBar.Value = scrollpos;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnResize(EventArgs e)
 		{
 			base.OnResize(e);
@@ -1110,6 +1103,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)

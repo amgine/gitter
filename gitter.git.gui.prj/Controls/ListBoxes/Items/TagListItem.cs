@@ -30,9 +30,6 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="Tag"/> object.</summary>
 	public class TagListItem : ReferenceListItemBase<Tag>
 	{
-		private static readonly Bitmap ImgTag = CachedResources.Bitmaps["ImgTag"];
-		private static readonly Bitmap ImgTagAnnotated = CachedResources.Bitmaps["ImgTagAnnotated"];
-
 		/// <summary>Create <see cref="TagListItem"/>.</summary>
 		/// <param name="tag">Related <see cref="Tag"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="tag"/> == <c>null</c>.</exception>
@@ -42,9 +39,13 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(tag, nameof(tag));
 		}
 
-		protected override Image Image
-			=> DataContext.TagType == TagType.Annotated ? ImgTagAnnotated : ImgTag;
+		protected override Image GetImage(Dpi dpi)
+		{
+			var name = DataContext.TagType == TagType.Annotated ? "atag" : "tag";
+			return CachedResources.ScaledBitmaps[name, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			var menu = new TagMenu(DataContext);

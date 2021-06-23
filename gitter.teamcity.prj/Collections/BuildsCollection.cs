@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -61,13 +61,9 @@ namespace gitter.TeamCity
 		}
 
 		protected override Build Create(string id)
-		{
-			return new Build(Context, id);
-		}
+			=> new Build(Context, id);
 
 		protected override Build Create(XmlNode node)
-		{
-			return new Build(Context, node);
-		}
+			=> new Build(Context, node);
 	}
 }

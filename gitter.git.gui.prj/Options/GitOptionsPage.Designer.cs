@@ -15,17 +15,14 @@
 		{
 			if(disposing)
 			{
-				if(_cachedControls != null)
+				if(_cachedControls is not null)
 				{
 					foreach(var pair in _cachedControls.Values)
 					{
 						pair.Item2.Dispose();
 					}
 				}
-				if(components != null)
-				{
-					components.Dispose();
-				}
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}
@@ -78,6 +75,7 @@
 			// GitOptionsPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.Controls.Add(this._lblAccessmethod);
 			this.Controls.Add(this._cmbAccessorProvider);
 			this.Controls.Add(this._grpRepositoryAccessor);

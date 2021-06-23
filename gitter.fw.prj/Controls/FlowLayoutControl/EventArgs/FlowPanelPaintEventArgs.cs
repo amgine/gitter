@@ -37,5 +37,7 @@ namespace gitter.Framework.Controls
 		public Rectangle Bounds { get; }
 
 		public Rectangle ClipRectangle { get; }
+
+		public Dpi Dpi => new(Graphics);
 	}
 }

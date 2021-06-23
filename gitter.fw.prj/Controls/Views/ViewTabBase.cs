@@ -33,28 +33,18 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(view, nameof(view));
 
-			switch(anchor)
+			Orientation = anchor switch
 			{
-				case AnchorStyles.Left:
-				case AnchorStyles.Right:
-					Orientation = Orientation.Vertical;
-					break;
-				case AnchorStyles.Top:
-				case AnchorStyles.Bottom:
-					Orientation = Orientation.Horizontal;
-					break;
-				default:
-					throw new ArgumentException("Invalid anchor value.", nameof(anchor));
-			}
+				AnchorStyles.Left or AnchorStyles.Right  => Orientation.Vertical,
+				AnchorStyles.Top  or AnchorStyles.Bottom => Orientation.Horizontal,
+				_ => throw new ArgumentException("Invalid anchor value.", nameof(anchor)),
+			};
 			Anchor = anchor;
 			View = view;
 		}
 
 		/// <summary>Finalizes an instance of the <see cref="ViewTabBase"/> class.</summary>
-		~ViewTabBase()
-		{
-			Dispose(false);
-		}
+		~ViewTabBase() => Dispose(disposing: false);
 
 		protected ViewRenderer Renderer => ViewManager.Renderer;
 
@@ -62,9 +52,11 @@ namespace gitter.Framework.Controls
 
 		public Orientation Orientation { get; }
 
+		public abstract ViewHost ViewHost { get; }
+
 		public ViewBase View { get; }
 
-		public Image Image => View.Image;
+		public IImageProvider ImageProvider => View.ImageProvider;
 
 		public int Length { get; private set; }
 
@@ -84,15 +76,9 @@ namespace gitter.Framework.Controls
 			Length = Measure(graphics);
 		}
 
-		protected internal virtual void OnMouseLeave()
-		{
-			IsMouseOver = false;
-		}
+		protected internal virtual void OnMouseLeave() => IsMouseOver = false;
 
-		protected internal virtual void OnMouseEnter()
-		{
-			IsMouseOver = true;
-		}
+		protected internal virtual void OnMouseEnter() => IsMouseOver = true;
 
 		public virtual void OnMouseDown(int x, int y, MouseButtons button)
 		{
@@ -118,9 +104,7 @@ namespace gitter.Framework.Controls
 		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
 		public bool IsDisposed { get; private set; }
 
-		/// <summary>
-		/// Releases unmanaged and - optionally - managed resources
-		/// </summary>
+		/// <summary>Releases unmanaged and - optionally - managed resources</summary>
 		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
 		protected virtual void Dispose(bool disposing)
 		{
@@ -132,7 +116,7 @@ namespace gitter.Framework.Controls
 			if(!IsDisposed)
 			{
 				GC.SuppressFinalize(this);
-				Dispose(true);
+				Dispose(disposing: true);
 				IsDisposed = true;
 			}
 		}

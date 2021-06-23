@@ -22,24 +22,17 @@ namespace gitter
 {
 	using System;
 	using System.IO;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 	using gitter.Framework.Services;
 
-	using Resources = gitter.Properties.Resources;
-
 	internal sealed class RepositoryListItem : CustomListBoxItem<RepositoryLink>
 	{
-		private static readonly Bitmap ImgRepositorySmall            = CachedResources.Bitmaps["ImgRepository"];
-		private static readonly Bitmap ImgRepositoryLarge            = CachedResources.Bitmaps["ImgRepositoryLarge"];
-		private static readonly Bitmap ImgRepositoryUnavailableLarge = CachedResources.Bitmaps["ImgRepositoryUnavailableLarge"];
-
 		private static readonly StringFormat PathStringFormat;
+		private static readonly StringFormat NameStringFormat;
 
 		private bool? _exists;
 
@@ -48,6 +41,10 @@ namespace gitter
 			PathStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
 			PathStringFormat.Trimming = StringTrimming.EllipsisPath;
 			PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
+			PathStringFormat.LineAlignment = StringAlignment.Center;
+
+			NameStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
+			NameStringFormat.LineAlignment = StringAlignment.Center;
 		}
 
 		public RepositoryListItem(RepositoryLink rlink)
@@ -99,6 +96,11 @@ namespace gitter
 			}
 		}
 
+		private static Bitmap GetIcon(bool available, int size, Dpi dpi)
+			=> CachedResources.ScaledBitmaps[
+				available ? @"repository" : @"repository.unavailable",
+				DpiConverter.FromDefaultTo(dpi).ConvertX(size)];
+
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
 			Assert.IsNotNull(measureEventArgs);
@@ -106,9 +108,9 @@ namespace gitter
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					return measureEventArgs.MeasureImageAndText(ImgRepositorySmall, DataContext.Path);
+					return measureEventArgs.MeasureImageAndText(GetIcon(true, 16, measureEventArgs.Dpi), DataContext.Path);
 				case 1:
-					return measureEventArgs.MeasureImageAndText(ImgRepositoryLarge, DataContext.Path);
+					return measureEventArgs.MeasureImageAndText(GetIcon(true, 32, measureEventArgs.Dpi), DataContext.Path);
 				default:
 					return Size.Empty;
 			}
@@ -121,30 +123,36 @@ namespace gitter
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
-					paintEventArgs.PaintImageAndText(ImgRepositorySmall, DataContext.Path, paintEventArgs.Brush, PathStringFormat);
+					paintEventArgs.PaintImageAndText(GetIcon(Exists, 16, paintEventArgs.Dpi), DataContext.Path, paintEventArgs.Brush, PathStringFormat);
 					break;
 				case 1:
-					var icon = Exists
-						? ImgRepositoryLarge
-						: ImgRepositoryUnavailableLarge;
-					paintEventArgs.PaintImage(icon);
-					var cy = paintEventArgs.Bounds.Y + 2;
+					paintEventArgs.PaintImage(GetIcon(Exists, 32, paintEventArgs.Dpi));
+
+					var conv = paintEventArgs.DpiConverter;
+
+					var dx = conv.ConvertX(36);
+					var dy = conv.ConvertY(2);
+
+					var b1 = paintEventArgs.Bounds;
+					b1.Height -= dy * 2;
+					b1.Y      += dy;
+					b1.X      += dx;
+					b1.Width  -= dx;
+					b1.Height /= 2;
+					var b2 = b1;
+					b2.Y += b1.Height;
+
 					GitterApplication.TextRenderer.DrawText(
-						paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, 36, cy);
-					cy += 16;
-					var rc = new Rectangle(36, cy, paintEventArgs.Bounds.Width - 42, 16);
+						paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, b1, NameStringFormat);
 					if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
 					{
 						GitterApplication.TextRenderer.DrawText(
-							paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, paintEventArgs.Brush, rc, PathStringFormat);
+							paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, paintEventArgs.Brush, b2, PathStringFormat);
 					}
 					else
 					{
-						using(var textBrush = new SolidBrush(GitterApplication.Style.Colors.GrayText))
-						{
-							GitterApplication.TextRenderer.DrawText(
-								paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, textBrush, rc, PathStringFormat);
-						}
+						GitterApplication.TextRenderer.DrawText(
+							paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, GitterApplication.Style.Colors.GrayText, b2, PathStringFormat);
 					}
 					break;
 			}

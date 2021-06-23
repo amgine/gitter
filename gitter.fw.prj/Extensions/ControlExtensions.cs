@@ -36,12 +36,12 @@ namespace gitter.Framework
 			internal CursorChangeToken(Control control, Cursor cursor)
 			{
 				_control = control;
-				_cursor = cursor;
+				_cursor  = cursor;
 			}
 
 			public void Dispose()
 			{
-				if(_control != null)
+				if(_control is not null)
 				{
 					_control.Cursor = _cursor;
 				}
@@ -85,7 +85,7 @@ namespace gitter.Framework
 		/// <returns>Cursor token, disposing which cursor is restored.</returns>
 		public static CursorChangeToken ChangeCursor(this Control control, Cursor cursor)
 		{
-			if(control != null)
+			if(control is not null)
 			{
 				var oldCursor = control.Cursor;
 				control.Cursor = cursor;

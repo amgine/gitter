@@ -69,6 +69,7 @@ namespace gitter.Framework.Controls
 
 		public ViewButtons Buttons { get; }
 
+		/// <inheritdoc/>
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public override string Text
@@ -82,8 +83,11 @@ namespace gitter.Framework.Controls
 			Buttons.SetAvailableButtons(buttons);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			ViewManager.Renderer.RenderViewHostHeader(this, e);
 			if(Buttons.Count != 0)
 			{
@@ -91,6 +95,12 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
+		protected override void OnPaintBackground(PaintEventArgs pevent)
+		{
+		}
+
+		/// <inheritdoc/>
 		protected override void OnResize(EventArgs e)
 		{
 			Buttons.Height = Height;
@@ -104,8 +114,11 @@ namespace gitter.Framework.Controls
 			return new Rectangle(rc.Width - w - 2, 0, w, rc.Height);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			if(Buttons.Count != 0)
 			{
 				var rc = GetButtonsRect();
@@ -123,7 +136,7 @@ namespace gitter.Framework.Controls
 						Buttons.OnMouseLeave();
 						_buttonsHovered = false;
 					}
-					if(Buttons.PressedButton == null)
+					if(Buttons.PressedButton is null)
 					{
 						base.OnMouseMove(e);
 					}
@@ -135,6 +148,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			if(_buttonsHovered)
@@ -145,6 +159,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseLeave(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			ViewHost.Activate();
@@ -161,6 +176,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseDown(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			if(Buttons.Count != 0)

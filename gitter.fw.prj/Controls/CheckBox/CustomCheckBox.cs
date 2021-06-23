@@ -189,6 +189,7 @@ namespace gitter.Framework.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
 			if(e.Button == MouseButtons.Left)
@@ -198,6 +199,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseClick(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{
 			switch(e.KeyCode)
@@ -211,6 +213,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
 			base.OnKeyDown(e);
@@ -223,6 +226,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnKeyUp(KeyEventArgs e)
 		{
 			base.OnKeyUp(e);
@@ -235,21 +239,27 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			Renderer.Render(e.Graphics, e.ClipRectangle, this);
+			Assert.IsNotNull(e);
+
+			Renderer.Render(e.Graphics, new Dpi(DeviceDpi), e.ClipRectangle, this);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintBackground(PaintEventArgs pevent)
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override void OnGotFocus(EventArgs e)
 		{
 			base.OnGotFocus(e);
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
@@ -257,6 +267,7 @@ namespace gitter.Framework.Controls
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseEnter(EventArgs e)
 		{
 			_isMouseOver = true;
@@ -264,6 +275,7 @@ namespace gitter.Framework.Controls
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			_isMouseOver = false;
@@ -271,6 +283,7 @@ namespace gitter.Framework.Controls
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			_isPressed = true;
@@ -279,6 +292,7 @@ namespace gitter.Framework.Controls
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			_isPressed = false;

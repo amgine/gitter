@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,16 +24,8 @@ namespace gitter.Redmine
 
 	public sealed class CustomFieldEventArgs : EventArgs
 	{
-		private readonly CustomField _customField;
+		public CustomFieldEventArgs(CustomField customField) => CustomField = customField;
 
-		public CustomFieldEventArgs(CustomField customField)
-		{
-			_customField = customField;
-		}
-
-		public CustomField CustomField
-		{
-			get { return _customField; }
-		}
+		public CustomField CustomField { get; }
 	}
 }

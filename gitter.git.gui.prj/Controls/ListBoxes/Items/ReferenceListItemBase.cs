@@ -23,6 +23,7 @@ namespace gitter.Git.Gui.Controls
 	using System;
 	using System.Drawing;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	public static class ReferenceListItemBase
@@ -85,7 +86,7 @@ namespace gitter.Git.Gui.Controls
 		{
 		}
 
-		protected abstract Image Image { get; }
+		protected abstract Image GetImage(Dpi dpi);
 
 		private void OnPositionChanged(object sender, RevisionChangedEventArgs e)
 		{
@@ -114,7 +115,7 @@ namespace gitter.Git.Gui.Controls
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 			=> (ColumnId)measureEventArgs.SubItemId switch
 			{
-				ColumnId.Name => measureEventArgs.MeasureImageAndText(Image, DataContext.Name),
+				ColumnId.Name => measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), DataContext.Name),
 				_ => base.OnMeasureSubItem(measureEventArgs),
 			};
 
@@ -123,7 +124,7 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(Image, DataContext.Name);
+					paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), DataContext.Name);
 					break;
 				default:
 					base.OnPaintSubItem(paintEventArgs);

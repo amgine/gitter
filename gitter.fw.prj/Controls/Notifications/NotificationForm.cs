@@ -33,8 +33,10 @@ namespace gitter.Framework.Controls
 			InitializeComponent();
 		}
 
+		/// <inheritdoc/>
 		protected override bool ShowWithoutActivation => true;
 
+		/// <inheritdoc/>
 		protected override CreateParams CreateParams
 		{
 			get
@@ -64,9 +66,7 @@ namespace gitter.Framework.Controls
 				0x0010 | 0x0002 | 0x001);
 		}
 
-		/// <summary>
-		/// </summary>
-		/// <param name="m">The Windows <see cref="T:System.Windows.Forms.Message"/> to process.</param>
+		/// <inheritdoc/>
 		protected override void WndProc(ref Message m)
 		{
 			bool processed = false;
@@ -79,7 +79,7 @@ namespace gitter.Framework.Controls
 				case WM.MOUSEACTIVATE:
 					m.Result = (IntPtr)4;
 					processed = true;
-					return;
+					break;
 			}
 			if(!processed)
 			{

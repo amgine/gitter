@@ -15,14 +15,8 @@
 		{
 			if(disposing)
 			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-				if(_underlineFont != null)
-				{
-					_underlineFont.Dispose();
-				}
+				components?.Dispose();
+				_underlineFont?.Dispose();
 			}
 			base.Dispose(disposing);
 		}
@@ -41,15 +35,12 @@
 			this.SuspendLayout();
 			// 
 			// _lblText
-			// 
-			this._lblText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+			//
 			this._lblText.AutoSize = true;
 			this._lblText.Cursor = System.Windows.Forms.Cursors.Hand;
 			this._lblText.Location = new System.Drawing.Point(27, 0);
 			this._lblText.Name = "_lblText";
-			this._lblText.Size = new System.Drawing.Size(41, 13);
+			this._lblText.Size = new System.Drawing.Size(256, 13);
 			this._lblText.TabIndex = 1;
 			this._lblText.Text = "[TEXT]";
 			this._lblText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;

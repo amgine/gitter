@@ -33,38 +33,63 @@ namespace gitter.Git.Gui.Views
 	{
 		private readonly RemoteView _remoteView;
 
+		private readonly ToolStripButton _btnRefresh;
+		private readonly ToolStripButton _btnFetch;
+		private readonly ToolStripButton _btnPull;
+		private readonly ToolStripButton _btnPush;
+		private readonly ToolStripButton _btnPrune;
+
 		public RemoteToolbar(RemoteView remoteView)
 		{
 			Verify.Argument.IsNotNull(remoteView, nameof(remoteView));
 
 			_remoteView = remoteView;
 
-			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) => _remoteView.RefreshContent())
+			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, default,
+				(_, _) => _remoteView.RefreshContent())
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
 			});
 			Items.Add(new ToolStripSeparator());
-			Items.Add(new ToolStripButton(Resources.StrFetch, CachedResources.Bitmaps["ImgFetch"], OnFetchClick)
+			Items.Add(_btnFetch = new ToolStripButton(Resources.StrFetch, default, OnFetchClick)
 				{
 					ToolTipText = Resources.TipFetch,
 				});
-			Items.Add(new ToolStripButton(Resources.StrPull, CachedResources.Bitmaps["ImgPull"], OnPullClick)
+			Items.Add(_btnPull = new ToolStripButton(Resources.StrPull, default, OnPullClick)
 				{
 					ToolTipText = Resources.TipPull,
 				});
-			Items.Add(new ToolStripButton(Resources.StrPush, CachedResources.Bitmaps["ImgPush"], OnPushClick)
+			Items.Add(_btnPush = new ToolStripButton(Resources.StrPush, default, OnPushClick)
 				{
 					ToolTipText = Resources.TipPush,
 				});
 			Items.Add(new ToolStripSeparator());
-			Items.Add(new ToolStripButton(Resources.StrPrune, CachedResources.Bitmaps["ImgClean"], OnPruneClick));
+			Items.Add(_btnPrune = new ToolStripButton(Resources.StrPrune, default, OnPruneClick));
+
+			UpdateIcons(DeviceDpi);
+		}
+
+		private void UpdateIcons(int dpi)
+		{
+			var iconSize = dpi * 16 / 96;
+
+			_btnRefresh.Image = CachedResources.ScaledBitmaps[@"refresh", iconSize];
+			_btnFetch.Image   = CachedResources.ScaledBitmaps[@"fetch",   iconSize];
+			_btnPull.Image    = CachedResources.ScaledBitmaps[@"pull",    iconSize];
+			_btnPush.Image    = CachedResources.ScaledBitmaps[@"push",    iconSize];
+			_btnPrune.Image   = CachedResources.ScaledBitmaps[@"prune",   iconSize];
+		}
+
+		protected override void RescaleConstantsForDpi(int deviceDpiOld, int deviceDpiNew)
+		{
+			base.RescaleConstantsForDpi(deviceDpiOld, deviceDpiNew);
+			UpdateIcons(deviceDpiNew);
 		}
 
 		private void OnFetchClick(object sender, EventArgs e)
 		{
 			var remote = _remoteView.Remote;
-			if(remote != null && !remote.IsDeleted)
+			if(remote is { IsDeleted: false })
 			{
 				GuiCommands.Fetch(_remoteView, remote);
 			}
@@ -73,7 +98,7 @@ namespace gitter.Git.Gui.Views
 		private void OnPullClick(object sender, EventArgs e)
 		{
 			var remote = _remoteView.Remote;
-			if(remote != null && !remote.IsDeleted)
+			if(remote is { IsDeleted: false })
 			{
 				GuiCommands.Pull(_remoteView, remote);
 			}
@@ -82,7 +107,7 @@ namespace gitter.Git.Gui.Views
 		private void OnPushClick(object sender, EventArgs e)
 		{
 			var remote = _remoteView.Remote;
-			if(remote != null && !remote.IsDeleted)
+			if(remote is { IsDeleted: false })
 			{
 				using var dlg = new PushDialog(_remoteView.Repository);
 				dlg.Remote.Value = remote;
@@ -93,7 +118,7 @@ namespace gitter.Git.Gui.Views
 		private void OnPruneClick(object sender, EventArgs e)
 		{
 			var remote = _remoteView.Remote;
-			if(remote != null && !remote.IsDeleted)
+			if(remote is { IsDeleted: false })
 			{
 				GuiCommands.Prune(_remoteView, remote);
 			}

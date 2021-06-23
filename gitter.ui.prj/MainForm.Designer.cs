@@ -135,7 +135,6 @@
 			// 
 			// _mnuOpenRepository
 			// 
-			this._mnuOpenRepository.Image = global::gitter.Properties.Resources.ImgRepositoryOpen;
 			this._mnuOpenRepository.Name = "_mnuOpenRepository";
 			this._mnuOpenRepository.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
 			this._mnuOpenRepository.Size = new System.Drawing.Size(175, 22);

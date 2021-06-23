@@ -31,12 +31,6 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="ConfigParameter"/> object.</summary>
 	public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 	{
-		#region Static
-
-		private static readonly Bitmap ImgConfig = CachedResources.Bitmaps["ImgConfig"];
-
-		#endregion
-
 		#region Comparers
 
 		public static int CompareByName(ConfigParameterListItem item1, ConfigParameterListItem item2)
@@ -121,10 +115,14 @@ namespace gitter.Git.Gui.Controls
 			DataContext.Value = editor.Text.Trim();
 		}
 
+		private static Bitmap GetIcon(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[@"config", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
 		#endregion
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
@@ -132,6 +130,7 @@ namespace gitter.Git.Gui.Controls
 			DataContext.ValueChanged += OnValueChanged;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
 			base.OnListBoxDetached();
@@ -139,6 +138,7 @@ namespace gitter.Git.Gui.Controls
 			DataContext.ValueChanged -= OnValueChanged;
 		}
 
+		/// <inheritdoc/>
 		public override void OnDoubleClick(int x, int y)
 		{
 			base.OnDoubleClick(x, y);
@@ -150,12 +150,15 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgConfig, DataContext.Name);
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Name);
 				case ColumnId.Value:
 					return ConfigParameterValueColumn.OnMeasureSubItem(measureEventArgs, DataContext.Value);
 				default:
@@ -163,12 +166,15 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgConfig, DataContext.Name);
+					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.Name);
 					break;
 				case ColumnId.Value:
 					ConfigParameterValueColumn.OnPaintSubItem(paintEventArgs, DataContext.Value);
@@ -176,8 +182,11 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			var menu = new ConfigParameterMenu(this);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;

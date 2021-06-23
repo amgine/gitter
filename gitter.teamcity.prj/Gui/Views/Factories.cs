@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,9 +21,6 @@
 namespace gitter.TeamCity.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -33,13 +30,11 @@ namespace gitter.TeamCity.Gui.Views
 	sealed class BuildTypeBuildsViewFactory : ViewFactoryBase
 	{
 		public BuildTypeBuildsViewFactory()
-			: base(Guids.BuildTypeBuildsViewGuid, Resources.StrBuilds, CachedResources.Bitmaps["ImgBuildType"], false)
+			: base(Guids.BuildTypeBuildsViewGuid, Resources.StrBuilds, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"builds"), singleton: false)
 		{
 		}
 
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new BuildTypeBuildsView(environment);
-		}
+			=> new BuildTypeBuildsView(environment);
 	}
 }

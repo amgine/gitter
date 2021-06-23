@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,14 +27,10 @@ namespace gitter.TeamCity
 	{
 		#region Static
 
-		public static readonly TeamCityObjectProperty<BuildStatus> StatusProperty =
-			new TeamCityObjectProperty<BuildStatus>("status", nameof(Status));
-		public static readonly TeamCityObjectProperty<BuildType> BuildTypeProperty =
-			new TeamCityObjectProperty<BuildType>("buildTypeId", nameof(BuildType));
-		public static readonly TeamCityObjectProperty<string> NumberProperty =
-			new TeamCityObjectProperty<string>("number", nameof(Number));
-		public static readonly TeamCityObjectProperty<DateTime> StartDateProperty =
-			new TeamCityObjectProperty<DateTime>("startDate", nameof(StartDate));
+		public static readonly TeamCityObjectProperty<BuildStatus> StatusProperty    = new("status",      nameof(Status));
+		public static readonly TeamCityObjectProperty<BuildType>   BuildTypeProperty = new("buildTypeId", nameof(BuildType));
+		public static readonly TeamCityObjectProperty<string>      NumberProperty    = new("number",      nameof(Number));
+		public static readonly TeamCityObjectProperty<DateTime>    StartDateProperty = new("startDate",   nameof(StartDate));
 
 		#endregion
 
@@ -75,10 +71,7 @@ namespace gitter.TeamCity
 			BuildType	= Context.BuildTypes.Lookup(node.Attributes[BuildTypeProperty.XmlNodeName].InnerText);
 		}
 
-		public BuildLocator CreateLocator()
-		{
-			return new BuildLocator() { Id = Id };
-		}
+		public BuildLocator CreateLocator() => new() { Id = Id };
 
 		private string ReadSingleField(string fieldName)
 		{
@@ -91,26 +84,26 @@ namespace gitter.TeamCity
 
 		public BuildStatus Status
 		{
-			get { return _status; }
-			private set { UpdatePropertyValue(ref _status, value, StatusProperty); }
+			get => _status;
+			private set => UpdatePropertyValue(ref _status, value, StatusProperty);
 		}
 
 		public string Number
 		{
-			get { return _number; }
-			private set { UpdatePropertyValue(ref _number, value, NumberProperty); }
+			get => _number;
+			private set => UpdatePropertyValue(ref _number, value, NumberProperty);
 		}
 
 		public DateTime StartDate
 		{
-			get { return _startDate; }
-			private set { UpdatePropertyValue(ref _startDate, value, StartDateProperty); }
+			get => _startDate;
+			private set => UpdatePropertyValue(ref _startDate, value, StartDateProperty);
 		}
 
 		public BuildType BuildType
 		{
-			get { return _buildtype; }
-			private set { UpdatePropertyValue(ref _buildtype, value, BuildTypeProperty); }
+			get => _buildtype;
+			private set => UpdatePropertyValue(ref _buildtype, value, BuildTypeProperty);
 		}
 
 		#endregion

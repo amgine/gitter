@@ -38,7 +38,7 @@ namespace gitter.Framework.Controls
 		public static CustomScrollBarRenderer Default => MSVS2012Dark;
 
 		public virtual void Render(
-			Orientation scrollBarOrientation, bool isEnabled, Graphics graphics, Rectangle clipRectangle,
+			Orientation scrollBarOrientation, bool isEnabled, Graphics graphics, Dpi dpi, Rectangle clipRectangle,
 			Rectangle decreaseButtonBounds, Rectangle decreaseTrackBarBounds, Rectangle thumbBounds, Rectangle increaseTrackBarBounds, Rectangle increaseButtonBounds,
 			CustomScrollBarPart hoveredPart, CustomScrollBarPart pressedPart)
 		{
@@ -51,7 +51,7 @@ namespace gitter.Framework.Controls
 				RenderPart(
 					CustomScrollBarPart.DecreaseButton,
 					scrollBarOrientation,
-					graphics,
+					graphics, dpi,
 					decreaseButtonBounds,
 					isEnabled,
 					hoveredPart == CustomScrollBarPart.DecreaseButton,
@@ -62,7 +62,7 @@ namespace gitter.Framework.Controls
 				RenderPart(
 					CustomScrollBarPart.DecreaseTrackBar,
 					scrollBarOrientation,
-					graphics,
+					graphics, dpi,
 					decreaseTrackBarBounds,
 					isEnabled,
 					hoveredPart == CustomScrollBarPart.DecreaseTrackBar,
@@ -73,7 +73,7 @@ namespace gitter.Framework.Controls
 				RenderPart(
 					CustomScrollBarPart.Thumb,
 					scrollBarOrientation,
-					graphics,
+					graphics, dpi,
 					thumbBounds,
 					isEnabled,
 					hoveredPart == CustomScrollBarPart.Thumb,
@@ -84,7 +84,7 @@ namespace gitter.Framework.Controls
 				RenderPart(
 					CustomScrollBarPart.IncreaseTrackBar,
 					scrollBarOrientation,
-					graphics,
+					graphics, dpi,
 					increaseTrackBarBounds,
 					isEnabled,
 					hoveredPart == CustomScrollBarPart.IncreaseTrackBar,
@@ -95,7 +95,7 @@ namespace gitter.Framework.Controls
 				RenderPart(
 					CustomScrollBarPart.IncreaseButton,
 					scrollBarOrientation,
-					graphics,
+					graphics, dpi,
 					increaseButtonBounds,
 					isEnabled,
 					hoveredPart == CustomScrollBarPart.IncreaseButton,
@@ -103,6 +103,9 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		protected abstract void RenderPart(CustomScrollBarPart part, Orientation scrollBarOrientation, Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed);
+		protected abstract void RenderPart(
+			CustomScrollBarPart part, Orientation scrollBarOrientation,
+			Graphics graphics, Dpi dpi, Rectangle bounds,
+			bool isEnabled, bool isHovered, bool isPressed);
 	}
 }

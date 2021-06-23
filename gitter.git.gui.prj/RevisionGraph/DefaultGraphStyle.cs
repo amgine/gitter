@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,10 +35,10 @@ namespace gitter.Git.Gui
 		private static readonly Brush RemoteBranchBrush = new SolidBrush(ColorScheme.RemoteBranchBackColor);
 		private static readonly Brush StashBrush = new SolidBrush(ColorScheme.StashBackColor);
 
-		private static readonly Brush TagBrushHovered = new SolidBrush(ColorScheme.TagBackColor.Lighter(HoverLightAmount));
-		private static readonly Brush LocalBranchBrushHovered = new SolidBrush(ColorScheme.LocalBranchBackColor.Lighter(HoverLightAmount));
+		private static readonly Brush TagBrushHovered          = new SolidBrush(ColorScheme.TagBackColor.Lighter(HoverLightAmount));
+		private static readonly Brush LocalBranchBrushHovered  = new SolidBrush(ColorScheme.LocalBranchBackColor.Lighter(HoverLightAmount));
 		private static readonly Brush RemoteBranchBrushHovered = new SolidBrush(ColorScheme.RemoteBranchBackColor.Lighter(HoverLightAmount));
-		private static readonly Brush StashBrushHovered = new SolidBrush(ColorScheme.StashBackColor.Lighter(HoverLightAmount));
+		private static readonly Brush StashBrushHovered        = new SolidBrush(ColorScheme.StashBackColor.Lighter(HoverLightAmount));
 
 		private static readonly Point[] TagPoints = new Point[6];
 		private static readonly PointF[] CurrentIndicator = new PointF[3];
@@ -47,128 +47,128 @@ namespace gitter.Git.Gui
 		{
 			Verify.Argument.IsNotNull(graphics, nameof(graphics));
 
-			if(graphLine != null)
-			{
-				int x = bounds.X;
-				int y = bounds.Y;
-				int w = cellWidth;
-				int hw = w / 2;
-				int h = bounds.Height;
-				int hh = h / 2;
-				int r = bounds.Right;
-				for(int i = 0; (i < graphLine.Length) && (x < r); ++i, x += w)
-				{
-					var atom = graphLine[i];
-					var colors = atom.ElementColors;
+			if(graphLine is not { Length: > 0 }) return;
 
-					if(!atom.IsEmpty)
+			int x = bounds.X;
+			int y = bounds.Y;
+			int w = cellWidth;
+			int hw = w / 2;
+			int h = bounds.Height;
+			int hh = h / 2;
+			int r = bounds.Right;
+			for(int i = 0; (i < graphLine.Length) && (x < r); ++i, x += w)
+			{
+				var atom = graphLine[i];
+
+				if(atom.IsEmpty) continue;
+
+				var colors = atom.ElementColors;
+
+				var lightBackground = GitterApplication.Style.Type == GitterStyleType.LightBackground;
+				var pens = lightBackground ? GraphColors.PensForLightBackground : GraphColors.PensForDarkBackground;
+				if(atom.HasElement(GraphElement.VerticalTop))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.VerticalTop] : 0];
+					graphics.DrawLine(pen, x + hw, y, x + hw, y + hh);
+				}
+				if(atom.HasElement(GraphElement.VerticalBottom))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.VerticalBottom] : 0];
+					graphics.DrawLine(pen, x + hw, y + hh, x + hw, y + h);
+				}
+				if(atom.HasElement(GraphElement.HorizontalLeft))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.HorizontalLeft] : 0];
+					graphics.DrawLine(pen, x, y + hh, x + hw, y + hh);
+				}
+				if(atom.HasElement(GraphElement.HorizontalRight))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.HorizontalRight] : 0];
+					graphics.DrawLine(pen, x + hw, y + hh, x + w, y + hh);
+				}
+				if(atom.HasElement(GraphElement.LeftTopCorner))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.LeftTopCorner] : 0];
+					graphics.DrawLine(pen, x, y + hh, x + hw, y);
+				}
+				if(atom.HasElement(GraphElement.LeftTop))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.LeftTop] : 0];
+					graphics.DrawLine(pen, x + hw, y + hh, x, y);
+				}
+				if(atom.HasElement(GraphElement.RightTopCorner))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.RightTopCorner] : 0];
+					graphics.DrawLine(pen, x + w - 1, y + hh, x + hw, y);
+				}
+				if(atom.HasElement(GraphElement.RightTop))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.RightTop] : 0];
+					graphics.DrawLine(pen, x + hw, y + hh, x + w, y);
+				}
+				if(atom.HasElement(GraphElement.RightBottomCorner))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.RightBottomCorner] : 0];
+					graphics.DrawLine(pen, x + w - 1, y + hh, x + hw, y + h - 1);
+				}
+				if(atom.HasElement(GraphElement.RightBottom))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.RightBottom] : 0];
+					graphics.DrawLine(pen, x + w, y + h, x + hw, y + hh);
+				}
+				if(atom.HasElement(GraphElement.LeftBottomCorner))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.LeftBottomCorner] : 0];
+					graphics.DrawLine(pen, x + hw, y + h - 1, x, y + hh);
+				}
+				if(atom.HasElement(GraphElement.LeftBottom))
+				{
+					var pen = pens[useColors ? colors[GraphElementId.LeftBottom] : 0];
+					graphics.DrawLine(pen, x + hw, y + hh, x, y + h);
+				}
+				if(atom.HasElement(GraphElement.Dot))
+				{
+					const int cr = 3;
+					var cdw = graphics.DpiX * cr * 2 / 96.0f;
+					var cdh = graphics.DpiY * cr * 2 / 96.0f;
+					var cx = x + hw - cdw / 2;
+					var cy = y + hh - cdh / 2;
+					var oldSmoothingMode = graphics.SmoothingMode;
+					graphics.SmoothingMode = SmoothingMode.HighQuality;
+					switch(type)
 					{
-						var lightBackground = GitterApplication.Style.Type == GitterStyleType.LightBackground;
-						var pens = lightBackground ? GraphColors.PensForLightBackground : GraphColors.PensForDarkBackground;
-						if(atom.HasElement(GraphElement.VerticalTop))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.VerticalTop] : 0];
-							graphics.DrawLine(pen, x + hw, y, x + hw, y + hh);
-						}
-						if(atom.HasElement(GraphElement.VerticalBottom))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.VerticalBottom] : 0];
-							graphics.DrawLine(pen, x + hw, y + hh, x + hw, y + h);
-						}
-						if(atom.HasElement(GraphElement.HorizontalLeft))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.HorizontalLeft] : 0];
-							graphics.DrawLine(pen, x, y + hh, x + hw, y + hh);
-						}
-						if(atom.HasElement(GraphElement.HorizontalRight))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.HorizontalRight] : 0];
-							graphics.DrawLine(pen, x + hw, y + hh, x + w, y + hh);
-						}
-						if(atom.HasElement(GraphElement.LeftTopCorner))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.LeftTopCorner] : 0];
-							graphics.DrawLine(pen, x, y + hh, x + hw, y);
-						}
-						if(atom.HasElement(GraphElement.LeftTop))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.LeftTop] : 0];
-							graphics.DrawLine(pen, x + hw, y + hh, x, y);
-						}
-						if(atom.HasElement(GraphElement.RightTopCorner))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.RightTopCorner] : 0];
-							graphics.DrawLine(pen, x + w - 1, y + hh, x + hw, y);
-						}
-						if(atom.HasElement(GraphElement.RightTop))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.RightTop] : 0];
-							graphics.DrawLine(pen, x + hw, y + hh, x + w, y);
-						}
-						if(atom.HasElement(GraphElement.RightBottomCorner))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.RightBottomCorner] : 0];
-							graphics.DrawLine(pen, x + w - 1, y + hh, x + hw, y + h - 1);
-						}
-						if(atom.HasElement(GraphElement.RightBottom))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.RightBottom] : 0];
-							graphics.DrawLine(pen, x + w, y + h, x + hw, y + hh);
-						}
-						if(atom.HasElement(GraphElement.LeftBottomCorner))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.LeftBottomCorner] : 0];
-							graphics.DrawLine(pen, x + hw, y + h - 1, x, y + hh);
-						}
-						if(atom.HasElement( GraphElement.LeftBottom))
-						{
-							var pen = pens[useColors ? colors[GraphElementId.LeftBottom] : 0];
-							graphics.DrawLine(pen, x + hw, y + hh, x, y + h);
-						}
-						if(atom.HasElement(GraphElement.Dot))
-						{
-							const int cr = 3;
-							const int cd = cr * 2;
-							int cx = x + hw - cr;
-							int cy = y + hh - cr;
-							var oldSmoothingMode = graphics.SmoothingMode;
-							graphics.SmoothingMode = SmoothingMode.AntiAlias;
-							switch(type)
+						case RevisionGraphItemType.Generic:
 							{
-								case RevisionGraphItemType.Generic:
-									{
-										var brush = lightBackground ? GraphColors.DotBrushForLightBackground : GraphColors.DotBrushForDarkBackground;
-										graphics.FillEllipse(brush, cx, cy, cd, cd);
-									}
-									break;
-								case RevisionGraphItemType.Current:
-									{
-										var brush = Brushes.LightGreen;
-										graphics.FillEllipse(brush, cx, cy, cd, cd);
-										var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
-										graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cd - 1, cd - 1);
-									}
-									break;
-								case RevisionGraphItemType.Uncommitted:
-									{
-										var brush = SystemBrushes.Window;
-										graphics.FillEllipse(brush, cx, cy, cd, cd);
-										var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
-										graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cd - 1, cd - 1);
-									}
-									break;
-								case RevisionGraphItemType.Unstaged:
-									{
-										var brush = Brushes.Red;
-										graphics.FillEllipse(brush, cx, cy, cd, cd);
-										var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
-										graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cd - 1, cd - 1);
-									}
-									break;
+								var brush = lightBackground ? GraphColors.DotBrushForLightBackground : GraphColors.DotBrushForDarkBackground;
+								graphics.FillEllipse(brush, cx, cy, cdw, cdh);
 							}
-							graphics.SmoothingMode = oldSmoothingMode;
-						}
+							break;
+						case RevisionGraphItemType.Current:
+							{
+								var brush = Brushes.LightGreen;
+								graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+								var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
+								graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
+							}
+							break;
+						case RevisionGraphItemType.Uncommitted:
+							{
+								var brush = Brushes.Cyan;
+								graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+								var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
+								graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
+							}
+							break;
+						case RevisionGraphItemType.Unstaged:
+							{
+								var brush = Brushes.Red;
+								graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+								var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
+								graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
+							}
+							break;
 					}
+					graphics.SmoothingMode = oldSmoothingMode;
 				}
 			}
 		}
@@ -191,10 +191,13 @@ namespace gitter.Git.Gui
 				int cx = graphX + revisionPos * cellWidth + cellWidth / 2;
 				int cy = y + h / 2;
 				var oldSmoothingMode = graphics.SmoothingMode;
-				graphics.SmoothingMode = SmoothingMode.AntiAlias;
-				graphics.DrawEllipse(pen, cx - 5, cy - 5, 10, 10);
+				var conv = new DpiConverter(graphics);
+				var cw = conv.ConvertX(5.0f);
+				var ch = conv.ConvertX(5.0f);
+				graphics.SmoothingMode = SmoothingMode.HighQuality;
+				graphics.DrawEllipse(pen, cx - cw, cy - ch, cw * 2, ch * 2);
 				graphics.SmoothingMode = oldSmoothingMode;
-				graphics.DrawLine(pen, cx + 6, cy, refX, cy);
+				graphics.DrawLine(pen, cx + (int)(cw + 1), cy, refX, cy);
 			}
 		}
 
@@ -216,8 +219,11 @@ namespace gitter.Git.Gui
 				int cx = graphX + revisionPos * cellWidth + cellWidth / 2;
 				int cy = y + h / 2;
 				var oldSmoothingMode = graphics.SmoothingMode;
-				graphics.SmoothingMode = SmoothingMode.AntiAlias;
-				graphics.DrawEllipse(pen, cx - 5, cy - 5, 10, 10);
+				var conv = new DpiConverter(graphics);
+				var cw = conv.ConvertX(5.0f);
+				var ch = conv.ConvertX(5.0f);
+				graphics.SmoothingMode = SmoothingMode.HighQuality;
+				graphics.DrawEllipse(pen, cx - cw, cy - ch, cw * 2, ch * 2);
 				graphics.SmoothingMode = oldSmoothingMode;
 			}
 		}
@@ -236,29 +242,36 @@ namespace gitter.Git.Gui
 
 		private static int DrawInlineTag(Graphics graphics, Font font, Brush backBrush, StringFormat format, string text, int x, int y, int right, int h)
 		{
+			Assert.IsNotNull(graphics);
+			Assert.IsNotNull(font);
+
+			var conv = new DpiConverter(graphics);
+
+			int spacing = conv.ConvertX(4);
+
 			var size = GitterApplication.TextRenderer.MeasureText(
 				graphics, text, font, right - x, format);
-			int w = size.Width + 1 + 6;
+			int w = size.Width + 1 + conv.ConvertX(6);
 			int texth = size.Height;
-			right -= 4;
+			right -= spacing;
 			if(w > right - x)
 			{
 				w = right - x;
 			}
 			if(w <= 5) return 0;
-			SetTagPoints(x, y + 2, w + 4, h - 5);
+			SetTagPoints(x, y + 2, w + conv.ConvertX(4), h - 5);
 			graphics.FillPolygon(backBrush, TagPoints);
 			var lightBackground = GitterApplication.Style.Type == GitterStyleType.LightBackground;
 			var pen = lightBackground ? GraphColors.TagBorderPenForLightBackground : GraphColors.TagBorderPenForDarkBackground;
 			graphics.DrawPolygon(pen, TagPoints);
-			if(w >= 7)
+			if(w >= conv.ConvertX(7))
 			{
 				int d = (h - texth) / 2;
-				var rc = new Rectangle(x + 4 + 3, y + d, w - 6, h - d);
+				var rc = new Rectangle(x + conv.ConvertX(4 + 3), y + d, w - conv.ConvertX(6), h - d);
 				GitterApplication.TextRenderer.DrawText(
 					graphics, text, font, SystemBrushes.WindowText, rc, format);
 			}
-			return w + 4;
+			return w + spacing;
 		}
 
 		public int DrawTag(Graphics graphics, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, Tag tag)
@@ -307,9 +320,8 @@ namespace gitter.Git.Gui
 		{
 			var size = GitterApplication.TextRenderer.MeasureText(
 				graphics, text, font, int.MaxValue, format);
-			int w = size.Width + 1 + 6;
-			int texth = size.Height;
-			return w + 5;
+			var conv = new DpiConverter(graphics);
+			return size.Width + 1 + conv.ConvertX(6 + 5);
 		}
 
 		public int MeasureTag(Graphics graphics, Font font, StringFormat format, Tag tag)

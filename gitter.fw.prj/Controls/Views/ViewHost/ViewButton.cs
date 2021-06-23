@@ -68,6 +68,7 @@ namespace gitter.Framework.Controls
 			ViewManager.Renderer.RenderViewButton(this, graphics, bounds, focus, hover, pressed);
 		}
 
+		/// <inheritdoc/>
 		public override string ToString() => Type.ToString();
 	}
 }

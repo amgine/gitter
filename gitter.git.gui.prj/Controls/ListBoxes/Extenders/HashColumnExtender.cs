@@ -25,6 +25,7 @@ namespace gitter.Git.Gui.Controls
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -55,12 +56,14 @@ namespace gitter.Git.Gui.Controls
 
 		private void CreateControls()
 		{
-			if(_chkAbbreviate != null) _chkAbbreviate.Dispose();
+			var conv = new DpiConverter(this);
+
+			_chkAbbreviate?.Dispose();
 			_chkAbbreviate = Style.CreateCheckBox();
 			_chkAbbreviate.IsChecked = Column.Abbreviate;
 			_chkAbbreviate.IsCheckedChanged += OnAbbreviateCheckedChanged;
 			_chkAbbreviate.Text = Resources.StrAbbreviate;
-			_chkAbbreviate.Control.Bounds = new Rectangle(6, 0, 127, 27);
+			_chkAbbreviate.Control.Bounds = new Rectangle(conv.ConvertX(6), 0, Width - conv.ConvertX(6) * 2, conv.ConvertY(27));
 			_chkAbbreviate.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
 			_chkAbbreviate.Control.Parent = this;
 		}

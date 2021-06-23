@@ -82,7 +82,7 @@ namespace gitter.Framework.Controls
 				if(value != _checkBox.Image)
 				{
 					_checkBox.Image = value;
-					if(value == null)
+					if(value is null)
 					{
 						_checkBox.FlatStyle = FlatStyle.System;
 					}

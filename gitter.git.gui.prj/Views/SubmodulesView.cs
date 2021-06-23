@@ -21,10 +21,10 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Drawing;
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Configuration;
 	using gitter.Framework.Controls;
 
@@ -70,7 +70,7 @@ namespace gitter.Git.Gui.Views
 			base.DetachFromRepository(repository);
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgSubmodule"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"submodule");
 
 		public ISearch<SubmodulesSearchOptions> Search { get; }
 
@@ -82,7 +82,7 @@ namespace gitter.Git.Gui.Views
 
 		public override void RefreshContent()
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				Repository.Submodules.Refresh();
 			}
@@ -96,6 +96,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F when e.Modifiers == Keys.Control:
@@ -119,7 +121,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("SubmodulesList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				_lstSubmodules.LoadViewFrom(listNode);
 			}

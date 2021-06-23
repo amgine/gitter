@@ -49,11 +49,12 @@ namespace gitter.Framework.Controls
 			_observerToken = LogListBoxAppender.Instance.Subscribe(this);
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
 			{
-				if(_observerToken != null)
+				if(_observerToken is not null)
 				{
 					_observerToken.Dispose();
 					_observerToken = null;
@@ -104,7 +105,7 @@ namespace gitter.Framework.Controls
 				{
 					BeginInvoke(new Action<LogEvent>(AppendEvent), new object[] { value });
 				}
-				catch(ObjectDisposedException)
+				catch
 				{
 				}
 			}

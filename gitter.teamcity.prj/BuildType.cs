@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,8 +30,7 @@ namespace gitter.TeamCity
 	{
 		#region Static
 
-		public static readonly TeamCityObjectProperty<Project> ProjectProperty =
-			new TeamCityObjectProperty<Project>("projectId", "Project");
+		public static readonly TeamCityObjectProperty<Project> ProjectProperty = new("projectId", nameof(Project));
 
 		#endregion
 
@@ -75,24 +74,18 @@ namespace gitter.TeamCity
 				TeamCityUtility.LoadString(node.Attributes["projectName"]));
 		}
 
-		public BuildTypeLocator CreateLocator()
-		{
-			return new BuildTypeLocator() { Id = Id };
-		}
+		public BuildTypeLocator CreateLocator() => new() { Id = Id };
 
 		#endregion
 
 		#region Properties
 
-		public BuildTypeBuildsCollection Builds
-		{
-			get { return _builds; }
-		}
+		public BuildTypeBuildsCollection Builds => _builds;
 
 		public Project Project
 		{
-			get { return _project; }
-			private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
+			get => _project;
+			private set => UpdatePropertyValue(ref _project, value, ProjectProperty);
 		}
 
 		#endregion

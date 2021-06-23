@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -53,14 +53,13 @@ namespace gitter.Redmine
 			get
 			{
 				Verify.Argument.IsNotNull(field, nameof(field));
-				CustomFieldValue value;
-				if(_values.TryGetValue(field.Id, out value)) return value.Value;
+				if(_values.TryGetValue(field.Id, out var value)) return value.Value;
 				return null;
 			}
 			set
 			{
 				Verify.Argument.IsNotNull(field, nameof(field));
-				if(value == null)
+				if(value is null)
 				{
 					_values.Remove(field.Id);
 				}
@@ -112,19 +111,12 @@ namespace gitter.Redmine
 			}
 		}
 
-		public int Count
-		{
-			get { return _values.Count; }
-		}
+		public int Count => _values.Count;
 
 		public IEnumerator<CustomFieldValue> GetEnumerator()
-		{
-			return _values.Values.GetEnumerator();
-		}
+			=> _values.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _values.Values.GetEnumerator();
-		}
+			=> _values.Values.GetEnumerator();
 	}
 }

@@ -24,6 +24,8 @@ namespace gitter.Git.Gui
 	using System.Collections.Generic;
 	using System.Windows.Forms;
 
+	using gitter.Framework.Controls;
+
 	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -96,12 +98,12 @@ namespace gitter.Git.Gui
 			{
 				if(factory.IsSingleton)
 				{
-					var item = new ToolStripMenuItem(factory.Name, factory.Image, OnShowViewItemClick) { Tag = factory.Guid };
+					var item = new ViewMenuItem(factory, guiProvider.Environment);
 					_viewMenuItems.Add(item);
 				}
 			}
 
-			if(repository != null)
+			if(repository is not null)
 			{
 				AttachToRepository(repository);
 			}

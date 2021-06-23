@@ -22,51 +22,17 @@ namespace gitter.TeamCity.Gui.Views
 {
 	public class BuildTypeBuildsViewModel
 	{
-		#region Data
-
-		private readonly BuildType _buildType;
-
-		#endregion
-
-		#region .ctor
-
 		public BuildTypeBuildsViewModel(BuildType buildType)
 		{
-			_buildType = buildType;
+			BuildType = buildType;
 		}
 
-		#endregion
-
-		#region Properties
-
-		public BuildType BuildType
-		{
-			get { return _buildType; }
-		}
-
-		#endregion
-
-		#region Methods
+		public BuildType BuildType { get; }
 
 		public override int GetHashCode()
-		{
-			return BuildType != null ? BuildType.GetHashCode() : 0;
-		}
+			=> BuildType is not null ? BuildType.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
-		{
-			if(obj == null)
-			{
-				return false;
-			}
-			var other = obj as BuildTypeBuildsViewModel;
-			if(other == null)
-			{
-				return false;
-			}
-			return object.Equals(BuildType, other.BuildType);
-		}
-
-		#endregion
+			=> obj is BuildTypeBuildsViewModel other && other.BuildType == BuildType;
 	}
 }

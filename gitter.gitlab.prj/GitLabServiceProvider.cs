@@ -191,10 +191,10 @@ namespace gitter.GitLab
 						break;
 					}
 				}
-				if(server != null) break;
+				if(server is not null) break;
 			}
 
-			if(server == null)
+			if(server is null)
 			{
 				guiProvider = default;
 				return false;

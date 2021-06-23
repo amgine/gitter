@@ -28,7 +28,6 @@ namespace gitter.Git.Gui.Controls
 	using gitter.Framework;
 	using gitter.Framework.Services;
 	using gitter.Framework.Controls;
-	using gitter.Framework.Options;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -37,7 +36,7 @@ namespace gitter.Git.Gui.Controls
 	{
 		#region Static
 
-		private static readonly StringFormat HeaderFormat = new StringFormat(StringFormat.GenericTypographic)
+		private static readonly StringFormat HeaderFormat = new(StringFormat.GenericTypographic)
 		{
 			Alignment = StringAlignment.Near,
 			FormatFlags =
@@ -47,7 +46,7 @@ namespace gitter.Git.Gui.Controls
 			Trimming = StringTrimming.None,
 		};
 
-		private static readonly StringFormat ContentFormat = new StringFormat(StringFormat.GenericTypographic)
+		private static readonly StringFormat ContentFormat = new(StringFormat.GenericTypographic)
 		{
 			Alignment = StringAlignment.Near,
 			FormatFlags =
@@ -57,7 +56,7 @@ namespace gitter.Git.Gui.Controls
 			Trimming = StringTrimming.EllipsisPath,
 		};
 
-		private static readonly StringFormat DiffStatFormat = new StringFormat(StringFormat.GenericDefault)
+		private static readonly StringFormat DiffStatFormat = new(StringFormat.GenericDefault)
 		{
 			Alignment = StringAlignment.Far,
 			FormatFlags =
@@ -68,7 +67,7 @@ namespace gitter.Git.Gui.Controls
 			Trimming = StringTrimming.None,
 		};
 
-		private static readonly StringFormat DiffStatCenterFormat = new StringFormat(StringFormat.GenericDefault)
+		private static readonly StringFormat DiffStatCenterFormat = new(StringFormat.GenericDefault)
 		{
 			Alignment = StringAlignment.Center,
 			FormatFlags =
@@ -91,11 +90,23 @@ namespace gitter.Git.Gui.Controls
 		private FileItem[] _items;
 		private ChangesCountByType[] _changesByType;
 
+		private static string GetOverlayName(FileStatus fileStatus)
+			=> fileStatus switch
+			{
+				FileStatus.Removed     => @"overlays.delete",
+				FileStatus.Added       => @"overlays.add",
+				FileStatus.Modified    => @"overlays.edit",
+				FileStatus.Unmerged    => @"overlays.conflict",
+				FileStatus.Copied      => @"overlays.copy",
+				FileStatus.Renamed     => @"overlays.rename",
+				FileStatus.ModeChanged => @"overlays.chmod",
+				_ => default,
+			};
+
 		private sealed class FileItem
 		{
 			private readonly DiffFile _file;
-			private readonly Bitmap _icon;
-			private readonly Bitmap _overlay;
+			private readonly string _fileName;
 			private readonly string _text;
 
 			public FileItem(DiffFile file)
@@ -107,36 +118,17 @@ namespace gitter.Git.Gui.Controls
 				if(file.Status == FileStatus.Removed)
 				{
 					_text = file.SourceFile;
+					_fileName = _text;
 				}
 				else
 				{
 					_text = file.TargetFile;
+					_fileName = _text;
 				}
-				_icon = GraphicsUtility.QueryIcon(_text);
 				switch(file.Status)
 				{
-					case FileStatus.Removed:
-						_overlay = CachedResources.Bitmaps["ImgOverlayDel"];
-						break;
-					case FileStatus.Added:
-						_overlay = CachedResources.Bitmaps["ImgOverlayAdd"];
-						break;
-					case FileStatus.Modified:
-						_overlay = CachedResources.Bitmaps["ImgOverlayEdit"];
-						break;
-					case FileStatus.Unmerged:
-						_overlay = CachedResources.Bitmaps["ImgOverlayConflict"];
-						break;
-					case FileStatus.Copied:
-						_overlay = CachedResources.Bitmaps["ImgOverlayCopy"];
+					case FileStatus.Copied or FileStatus.Renamed:
 						_text = GetRenamedOrCopiedText(file.SourceFile, file.TargetFile);
-						break;
-					case FileStatus.Renamed:
-						_overlay = CachedResources.Bitmaps["ImgOverlayRename"];
-						_text = GetRenamedOrCopiedText(file.SourceFile, file.TargetFile);
-						break;
-					case FileStatus.ModeChanged:
-						_overlay = CachedResources.Bitmaps["ImgOverlayChmod"];
 						break;
 				}
 			}
@@ -177,12 +169,12 @@ namespace gitter.Git.Gui.Controls
 
 			public DiffFile File => _file;
 
-			private void PaintDiffStats(Graphics graphics, Font font, Brush textBrush, Rectangle rect)
+			private void PaintDiffStats(Graphics graphics, Font font, DpiConverter conv, Brush textBrush, Rectangle rect)
 			{
 				const int squares = 10;
-				const int squareWidth = 4;
-				const int squareHeight = 13;
-				const int squareSpacing = 1;
+				int squareWidth   = conv.ConvertX(4);
+				int squareHeight  = conv.ConvertY(13);
+				int squareSpacing = conv.ConvertX(1);
 				const float radius = 1.5f;
 				var oldMode = graphics.SmoothingMode;
 				graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
@@ -246,7 +238,7 @@ namespace gitter.Git.Gui.Controls
 						}
 						else
 						{
-							n1 = added * squares / changed;
+							n1 = added   * squares / changed;
 							n2 = removed * squares / changed;
 						}
 						int n3 = squares - n1 - n2;
@@ -272,12 +264,12 @@ namespace gitter.Git.Gui.Controls
 							graphics.FillRoundedRectangle(brush, rc, radius);
 							rc.X -= squareWidth + squareSpacing;
 						}
-						rect.Width -= (squareWidth + squareSpacing) * squares + 2;
+						rect.Width -= (squareWidth + squareSpacing) * squares + conv.ConvertX(2);
 						if(rect.Width > 2)
 						{
 							GitterApplication.TextRenderer.DrawText(
 								graphics,
-								changed.ToString(System.Globalization.CultureInfo.InvariantCulture),
+								changed.ToString(CultureInfo.InvariantCulture),
 								font,
 								textBrush,
 								rect,
@@ -288,28 +280,38 @@ namespace gitter.Git.Gui.Controls
 				graphics.SmoothingMode = oldMode;
 			}
 
-			public void Draw(Graphics graphics, Font font, Brush textBrush, Rectangle rect)
+			public void Draw(Graphics graphics, Font font, DpiConverter conv, Brush textBrush, Rectangle rect)
 			{
-				const int IconSize = 16;
-				const int StatSize = (9 + 1) * 5 + 20;
+				var iconSize = conv.Convert(new Size(16, 16));
+				var statSize = conv.ConvertX((9 + 1) * 5 + 20);
 
-				int d = (rect.Height - 16) / 2;
-				var iconRect = new Rectangle(rect.X + d, rect.Y + d, IconSize, IconSize);
-				graphics.DrawImage(_icon, iconRect, 0, 0, IconSize, IconSize, GraphicsUnit.Pixel);
-				if(_overlay != null)
+				int dy = (rect.Height - iconSize.Height) / 2;
+				var iconRect = new Rectangle(rect.X + dy, rect.Y + dy, iconSize.Width, iconSize.Height);
+				var icon = GraphicsUtility.QueryIcon(_fileName, conv.To);
+				if(icon is not null)
 				{
-					graphics.DrawImage(_overlay, iconRect, 0, 0, IconSize, IconSize, GraphicsUnit.Pixel);
+					graphics.DrawImage(icon, iconRect);
+					var overlayName = GetOverlayName(File.Status);
+					if(overlayName is not null)
+					{
+						var overlay = CachedResources.ScaledBitmaps[overlayName, conv.ConvertX(16)];
+						if(overlay is not null)
+						{
+							graphics.DrawImage(overlay, iconRect);
+						}
+					}
 				}
-				rect.X += d + IconSize + 3;
-				rect.Width -= d + IconSize + 3;
-				d = (LineHeight - FontHeight) / 2;
-				rect.Y += d;
-				rect.Height -= d;
-				var statRect = new Rectangle(rect.Right - StatSize - 3, rect.Y, StatSize, rect.Height);
-				if(rect.Width > StatSize * 2)
+				var dx = dy + iconSize.Width + conv.ConvertX(3);
+				rect.X     += dx;
+				rect.Width -= dx;
+				dy = (LineHeight - FontHeight) / 2;
+				rect.Y      += dy;
+				rect.Height -= dy;
+				var statRect = new Rectangle(rect.Right - statSize - conv.ConvertX(3), rect.Y, statSize, rect.Height);
+				if(rect.Width > statSize * 2)
 				{
-					PaintDiffStats(graphics, font, textBrush, statRect);
-					rect.Width -= StatSize + 3;
+					PaintDiffStats(graphics, font, conv, textBrush, statRect);
+					rect.Width -= statSize + conv.ConvertX(3);
 				}
 				GitterApplication.TextRenderer.DrawText(
 					graphics, _text, font, textBrush, rect, ContentFormat);
@@ -323,17 +325,7 @@ namespace gitter.Git.Gui.Controls
 			public ChangesCountByType(FileStatus status)
 			{
 				Status = status;
-				Image  = status switch
-				{
-					FileStatus.Added       => FileStatusIcons.ImgUnstagedUntracked,
-					FileStatus.Modified    => FileStatusIcons.ImgUnstagedModified,
-					FileStatus.Removed     => FileStatusIcons.ImgUnstagedRemoved,
-					FileStatus.Unmerged    => FileStatusIcons.ImgUnmerged,
-					FileStatus.Copied      => FileStatusIcons.ImgCopied,
-					FileStatus.Renamed     => FileStatusIcons.ImgRenamed,
-					FileStatus.ModeChanged => FileStatusIcons.ImgModeChanged,
-					_ => default,
-				};
+				ImageOverlayName = GetOverlayName(status);
 				UpdateDisplayText();
 			}
 
@@ -355,7 +347,7 @@ namespace gitter.Git.Gui.Controls
 				DisplayText = Count.ToString(CultureInfo.InvariantCulture) + " " + suffix;
 			}
 
-			public Bitmap Image { get; }
+			public string ImageOverlayName { get; }
 
 			public FileStatus Status { get; }
 
@@ -493,6 +485,7 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave()
 		{
 			_fileHover.Drop();
@@ -576,8 +569,7 @@ namespace gitter.Git.Gui.Controls
 							bool found = false;
 							foreach(var panel in FlowControl.Panels)
 							{
-								var diffpanel = panel as FileDiffPanel;
-								if(diffpanel != null && diffpanel.DiffFile == file)
+								if(panel is FileDiffPanel diffpanel && diffpanel.DiffFile == file)
 								{
 									diffpanel.ScrollIntoView();
 									found = true;
@@ -605,8 +597,7 @@ namespace gitter.Git.Gui.Controls
 						if(id != -1)
 						{
 							var file = _items[id].File;
-							var viewer = (FlowControl as DiffViewer);
-							if(viewer != null)
+							if(FlowControl is DiffViewer viewer)
 							{
 								viewer.OnFileContextMenuRequested(file);
 							}
@@ -642,9 +633,12 @@ namespace gitter.Git.Gui.Controls
 			base.OnMouseMove(x, y);
 		}
 
+		/// <inheritdoc/>
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
-			if(_diff == null) return Size.Empty;
+			Assert.IsNotNull(measureEventArgs);
+
+			if(_diff is null) return Size.Empty;
 			if(FontHeight == -1)
 			{
 				FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(measureEventArgs.Graphics, Font) + 0.5f);
@@ -668,12 +662,16 @@ namespace gitter.Git.Gui.Controls
 			return new Size(0, HeaderHeight + (lineCount == 0 ? 0 : HeaderBottomMargin) + lineCount * LineHeight);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{
-			if(_diff == null) return;
+			Assert.IsNotNull(paintEventArgs);
+
+			if(_diff is null) return;
 			var graphics = paintEventArgs.Graphics;
 			var rect     = paintEventArgs.Bounds;
 			var clip     = paintEventArgs.ClipRectangle;
+			var conv     = new DpiConverter(FlowControl);
 
 			graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 			if(FontHeight == -1)
@@ -684,109 +682,121 @@ namespace gitter.Git.Gui.Controls
 			var rcClip = Rectangle.Intersect(rcHeader, clip);
 			if(_diff.FilesCount == 0)
 			{
-				if(rcClip.Width <= 0 || rcClip.Height <= 0)
+				if(rcClip is not { Width: > 0, Height: > 0 })
 				{
 					return;
 				}
-				using(var brush = new SolidBrush(Style.Colors.GrayText))
-				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, Resources.StrNoChangedFiles, Font, brush, rcHeader, ContentFormat);
-				}
+				GitterApplication.TextRenderer.DrawText(
+					graphics, Resources.StrNoChangedFiles, Font, Style.Colors.GrayText, rcHeader, ContentFormat);
 			}
 			else
 			{
-				using(var textBrush = new SolidBrush(Style.Colors.WindowText))
+				using var textBrush = new SolidBrush(Style.Colors.WindowText);
+
+				if(rcClip is { Width: > 0, Height: > 0 })
 				{
-					if(rcClip.Width > 0 || rcClip.Height > 0)
+					var headerBounds = rcHeader;
+
+					var dx = conv.ConvertX(5);
+					headerBounds.X     += dx;
+					headerBounds.Width -= dx;
+
+					var iconSize = conv.Convert(new Size(16, 16));
+
+					for(int i = 0; i < _changesByType.Length; ++i)
 					{
-						var headerBounds = rcHeader;
+						if(headerBounds.Width <= 0) break;
 
-						headerBounds.X += 5;
-						headerBounds.Width -= 5;
-
-						for(int i = 0; i < _changesByType.Length; ++i)
+						if(_changesByType[i].Count != 0)
 						{
+							// prepare
+							var headerText = _changesByType[i].DisplayText;
+							var headerTextSize = GitterApplication.TextRenderer.MeasureText(
+								graphics, headerText, Font, short.MaxValue, ContentFormat);
+							var headerWidth = headerTextSize.Width;
+							var overlayName = _changesByType[i].ImageOverlayName;
+							var displayBounds = new Rectangle(
+								headerBounds.X - HeaderContentPadding,
+								headerBounds.Y,
+								headerWidth + (overlayName is not null ? iconSize.Width + conv.ConvertX(3) : 0) + HeaderContentPadding * 2,
+								headerBounds.Height);
+							_changesByType[i].DisplayBounds = new Rectangle(
+								displayBounds.X - rect.X, displayBounds.Y - rect.Y, displayBounds.Width, displayBounds.Height);
+							// background
+							if(StatusFilter == _changesByType[i].Status)
+							{
+								Style.ItemBackgroundStyles.Selected.Draw(graphics, displayBounds);
+							}
+							else if(_filterHover.Index == i)
+							{
+								Style.ItemBackgroundStyles.Hovered.Draw(graphics, displayBounds);
+							}
+							// header icon
+							if(overlayName is not null)
+							{
+								var image = CachedResources.ScaledBitmaps[@"file", iconSize.Width];
+								if(image is not null)
+								{
+									var imageBounds = new Rectangle(
+										headerBounds.X,
+										headerBounds.Y + (headerBounds.Height - iconSize.Height) / 2,
+										iconSize.Width, iconSize.Height);
+									graphics.DrawImage(image, imageBounds);
+									var overlay = CachedResources.ScaledBitmaps[overlayName, iconSize.Width];
+									if(overlay is not null)
+									{
+										graphics.DrawImage(overlay, imageBounds);
+									}
+									dx = iconSize.Width + conv.ConvertX(3);
+									headerBounds.X     += dx;
+									headerBounds.Width -= dx;
+								}
+							}
+
 							if(headerBounds.Width <= 0) break;
+							// header text
+							GitterApplication.TextRenderer.DrawText(
+								graphics, headerText, Font, textBrush, headerBounds, HeaderFormat);
 
-							if(_changesByType[i].Count != 0)
+							dx = headerWidth + conv.ConvertX(HeaderSpacing);
+							headerBounds.X     += dx;
+							headerBounds.Width -= dx;
+							if(i == 0)
 							{
-								// prepare
-								var headerText = _changesByType[i].DisplayText;
-								var headerTextSize = GitterApplication.TextRenderer.MeasureText(
-									graphics, headerText, Font, short.MaxValue, ContentFormat);
-								var headerWidth = headerTextSize.Width;
-								var image = _changesByType[i].Image;
-								var displayBounds = new Rectangle(
-									headerBounds.X - HeaderContentPadding,
-									headerBounds.Y,
-									headerWidth + (image != null ? image.Width + 3 : 0) + HeaderContentPadding * 2,
-									headerBounds.Height);
-								_changesByType[i].DisplayBounds = new Rectangle(
-									displayBounds.X - rect.X, displayBounds.Y - rect.Y, displayBounds.Width, displayBounds.Height);
-								// background
-								if(StatusFilter == _changesByType[i].Status)
-								{
-									Style.ItemBackgroundStyles.Selected.Draw(graphics, displayBounds);
-								}
-								else if(_filterHover.Index == i)
-								{
-									Style.ItemBackgroundStyles.Hovered.Draw(graphics, displayBounds);
-								}
-								// header icon
-								if(image != null)
-								{
-									graphics.DrawImage(image, headerBounds.X, headerBounds.Y + (headerBounds.Height - image.Height) / 2);
-									headerBounds.X += image.Width + 3;
-									headerBounds.Width -= image.Width + 3;
-								}
-
-								if(headerBounds.Width <= 0) break;
-								// header text
-								GitterApplication.TextRenderer.DrawText(
-									graphics, headerText, Font, textBrush, headerBounds, HeaderFormat);
-
-								headerBounds.X += headerWidth + HeaderSpacing;
-								headerBounds.Width -= headerWidth + HeaderSpacing;
-								if(i == 0)
-								{
-									headerBounds.X += HeaderSpacing;
-									headerBounds.Width -= HeaderSpacing;
-								}
+								dx = conv.ConvertX(HeaderSpacing);
+								headerBounds.X     += dx;
+								headerBounds.Width -= dx;
 							}
-							else
-							{
-								_changesByType[i].DisplayBounds = Rectangle.Empty;
-							}
+						}
+						else
+						{
+							_changesByType[i].DisplayBounds = Rectangle.Empty;
 						}
 					}
-					var rcLine = rcHeader;
-					rcLine.Y += HeaderBottomMargin + HeaderHeight;
-					rcLine.Height = LineHeight;
-					using(var alternateBackgroundBrush = new SolidBrush(Style.Colors.Alternate))
+				}
+				var rcLine = rcHeader;
+				rcLine.Y += HeaderBottomMargin + HeaderHeight;
+				rcLine.Height = LineHeight;
+				bool alternate = false;
+				for(int i = 0; i < _items.Length; ++i)
+				{
+					if((_items[i].File.Status & StatusFilter) != FileStatus.Unknown)
 					{
-						bool alternate = false;
-						for(int i = 0; i < _items.Length; ++i)
+						rcClip = Rectangle.Intersect(rcLine, clip);
+						if(rcClip.Height > 0 && rcClip.Width > 0)
 						{
-							if((_items[i].File.Status & StatusFilter) != FileStatus.Unknown)
+							if(alternate)
 							{
-								rcClip = Rectangle.Intersect(rcLine, clip);
-								if(rcClip.Height > 0 && rcClip.Width > 0)
-								{
-									if(alternate)
-									{
-										graphics.FillRectangle(alternateBackgroundBrush, rcClip);
-									}
-									if(i == _fileHover.Index)
-									{
-										Style.ItemBackgroundStyles.Hovered.Draw(graphics, rcLine);
-									}
-									_items[i].Draw(graphics, Font, textBrush, rcLine);
-								}
-								alternate = !alternate;
-								rcLine.Y += LineHeight;
+								graphics.GdiFill(Style.Colors.Alternate, rcClip);
 							}
+							if(i == _fileHover.Index)
+							{
+								Style.ItemBackgroundStyles.Hovered.Draw(graphics, rcLine);
+							}
+							_items[i].Draw(graphics, Font, conv, textBrush, rcLine);
 						}
+						alternate = !alternate;
+						rcLine.Y += LineHeight;
 					}
 				}
 			}

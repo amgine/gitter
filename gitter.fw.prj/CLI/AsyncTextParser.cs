@@ -64,7 +64,7 @@ namespace gitter.Framework.CLI
 
 		/// <summary>Gets a value indicating whether this instance is initialized.</summary>
 		/// <value><c>true</c> if this instance is initialized; otherwise, <c>false</c>.</value>
-		public bool IsInitialized => _stream != null;
+		public bool IsInitialized => _stream is not null;
 
 		/// <summary>Initializes output reader.</summary>
 		/// <param name="process">Process to read from.</param>
@@ -80,7 +80,7 @@ namespace gitter.Framework.CLI
 			_decoder     = encoding.GetDecoder();
 			_byteBuffer  = new byte[_bufferSize];
 			_charBuffer  = new char[encoding.GetMaxCharCount(_bufferSize) + 1];
-			_eof         = new ManualResetEvent(false);
+			_eof         = new ManualResetEvent(initialState: false);
 
 			BeginReadAsync();
 		}
@@ -93,7 +93,7 @@ namespace gitter.Framework.CLI
 
 			_isCanceled = true;
 			var eof = _eof;
-			if(eof != null)
+			if(eof is not null)
 			{
 				_eof = null;
 				eof.Dispose();
@@ -106,7 +106,7 @@ namespace gitter.Framework.CLI
 			Verify.State.IsTrue(IsInitialized);
 
 			var eof = _eof;
-			if(eof != null)
+			if(eof is not null)
 			{
 				try
 				{
@@ -118,11 +118,11 @@ namespace gitter.Framework.CLI
 				}
 			}
 
-			_stream = null;
+			_stream     = null;
 			_byteBuffer = null;
 			_charBuffer = null;
-			_decoder = null;
-			_eof = null;
+			_decoder    = null;
+			_eof        = null;
 		}
 
 		#endregion
@@ -204,7 +204,7 @@ namespace gitter.Framework.CLI
 				}
 				if(!isReading)
 				{
-					if(eof != null)
+					if(eof is not null)
 					{
 						try
 						{

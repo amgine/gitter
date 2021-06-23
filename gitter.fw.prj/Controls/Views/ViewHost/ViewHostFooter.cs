@@ -45,15 +45,14 @@ namespace gitter.Framework.Controls
 
 		public ViewHost ViewHost { get; }
 
-		protected override void OnPaintBackground(PaintEventArgs pevent)
-		{
-		}
+		/// <inheritdoc/>
+		protected override void OnPaintBackground(PaintEventArgs pevent) { }
 
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
-		{
-			ViewManager.Renderer.RenderViewHostFooter(this, e);
-		}
+			=> ViewManager.Renderer.RenderViewHostFooter(this, e);
 
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			ViewHost.Activate();

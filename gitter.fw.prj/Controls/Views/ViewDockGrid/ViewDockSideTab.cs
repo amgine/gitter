@@ -37,21 +37,26 @@ namespace gitter.Framework.Controls
 
 		public ViewDockSide Side { get; }
 
-		public ViewHost ViewHost { get; }
+		public override ViewHost ViewHost { get; }
 
+		/// <inheritdoc/>
 		public override bool IsActive => false;
 
+		/// <inheritdoc/>
 		protected override int Measure(Graphics graphics)
 		{
 			return Renderer.MeasureViewDockSideTabLength(this, graphics);
 		}
 
+		/// <inheritdoc/>
 		internal override void OnPaint(Graphics graphics, Rectangle bounds)
 		{
-			if(bounds.Width > 0 && bounds.Height > 0)
+			Assert.IsNotNull(graphics);
+
+			if(bounds is { Width: > 0, Height: > 0 })
 			{
 				Renderer.RenderViewDockSideTabBackground(this, graphics, bounds);
-				Renderer.RenderViewDockSideTabContent(this, graphics, bounds);
+				Renderer.RenderViewDockSideTabContent   (this, graphics, bounds);
 			}
 		}
 	}

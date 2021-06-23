@@ -60,7 +60,7 @@ namespace gitter.Framework.Controls
 			Verify.State.IsFalse(MarkersVisible);
 
 			_markers = CreateMarkers(dockClient);
-			if(_markers != null)
+			if(_markers is not null)
 			{
 				for(int i = 0; i < _markers.Length; ++i)
 				{
@@ -147,21 +147,14 @@ namespace gitter.Framework.Controls
 			return DockResult.None;
 		}
 
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
+		/// <summary>Returns an enumerator that iterates through a collection.</summary>
 		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator&lt;DockMarker&gt;"/> object that can be used to iterate through the collection.
+		/// An <see cref="IEnumerator{DockMarker}"/> object that can be used to iterate through the collection.
 		/// </returns>
 		public IEnumerator<DockMarker> GetEnumerator()
-			=> ((IEnumerable<DockMarker>)_markers).GetEnumerator();
+			=> ((IEnumerable<T>)_markers).GetEnumerator();
 
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-		/// </returns>
+		/// <inheritdoc/>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 			=> _markers.GetEnumerator();
 

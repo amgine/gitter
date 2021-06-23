@@ -1014,9 +1014,9 @@ namespace gitter.Git.Gui.Controls
 			}
 			if(_showStatusItems)
 			{
-				if(_stagedItem != null)
+				if(_stagedItem is not null)
 				{
-					if(_currentRevisionItem != null)
+					if(_currentRevisionItem is not null)
 					{
 						_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
 					}
@@ -1029,15 +1029,15 @@ namespace gitter.Git.Gui.Controls
 						graphLen = _stagedItem.Graph.Length;
 					}
 				}
-				if(_unstagedItem != null)
+				if(_unstagedItem is not null)
 				{
-					if(_stagedItem != null)
+					if(_stagedItem is not null)
 					{
 						_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
 					}
 					else
 					{
-						if(_currentRevisionItem != null)
+						if(_currentRevisionItem is not null)
 						{
 							_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
 						}

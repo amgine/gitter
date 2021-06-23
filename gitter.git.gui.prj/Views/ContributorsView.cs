@@ -21,9 +21,7 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -54,7 +52,7 @@ namespace gitter.Git.Gui.Views
 			AddTopToolStrip(_toolbar = new ContributorsToolBar(this));
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgUser"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"user");
 
 		protected override void AttachToRepository(Repository repository)
 		{
@@ -74,7 +72,7 @@ namespace gitter.Git.Gui.Views
 			}
 			else
 			{
-				if(Repository != null)
+				if(Repository is not null)
 				{
 					using(this.ChangeCursor(Cursors.WaitCursor))
 					{
@@ -92,6 +90,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F when e.Modifiers == Keys.Control:
@@ -116,7 +116,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("UsersList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				_lstUsers.LoadViewFrom(listNode);
 			}

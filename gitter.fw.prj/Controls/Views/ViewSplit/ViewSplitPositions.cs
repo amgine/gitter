@@ -25,6 +25,32 @@ namespace gitter.Framework.Controls
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	public enum ViewSplitSlotType
+	{
+		Fixed,
+		Relative,
+	}
+
+	sealed class ViewSplitSlot
+	{
+		public ViewSplitSlot(ViewSplit viewSplit, int index, Control content)
+		{
+			ViewSplit = viewSplit;
+			Index     = index;
+			Content   = content;
+		}
+
+		private ViewSplit ViewSplit { get; }
+
+		public int Index { get; }
+
+		public Control Content { get; }
+
+		public ViewSplitSlotType Type { get; private set; }
+
+		public bool HasDocumentWell { get; private set; }
+	}
+
 	/// <summary>Collection of splitter positions.</summary>
 	sealed class ViewSplitPositions : IEnumerable<double>, IDisposable
 	{
@@ -67,11 +93,7 @@ namespace gitter.Framework.Controls
 			while(first > 0)
 			{
 				var item = _viewSplit[first];
-				if(item is ViewHost viewHost && !viewHost.IsDocumentWell)
-				{
-					break;
-				}
-				if(item is ViewSplit viewSplit && !viewSplit.ContainsDocumentWell)
+				if(item is ViewHost { IsDocumentWell: false } or ViewSplit { ContainsDocumentWell: false })
 				{
 					break;
 				}
@@ -81,11 +103,7 @@ namespace gitter.Framework.Controls
 			while(last <= _positions.Count)
 			{
 				var item = _viewSplit[last];
-				if(item is ViewHost viewHost && !viewHost.IsDocumentWell)
-				{
-					break;
-				}
-				if(item is ViewSplit viewSplit && !viewSplit.ContainsDocumentWell)
+				if(item is ViewHost { IsDocumentWell: false } or ViewSplit { ContainsDocumentWell: false })
 				{
 					break;
 				}
@@ -143,19 +161,12 @@ namespace gitter.Framework.Controls
 		/// <returns>Splitter absolute position.</returns>
 		private int GetSplitterPosition(double value)
 		{
-			int size;
-			switch(_viewSplit.Orientation)
+			var size = _viewSplit.Orientation switch
 			{
-				case Orientation.Horizontal:
-					size = _viewSplit.Width;
-					break;
-				case Orientation.Vertical:
-					size = _viewSplit.Height;
-					break;
-				default:
-					throw new ApplicationException(
-						"Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation);
-			}
+				Orientation.Horizontal => _viewSplit.Width,
+				Orientation.Vertical   => _viewSplit.Height,
+				_ => throw new ApplicationException("Unexpected ToolSplit.Orientation value: " + _viewSplit.Orientation),
+			};
 			return (int)(size * value);
 		}
 
@@ -167,12 +178,16 @@ namespace gitter.Framework.Controls
 
 			_movingSplitMarker = new SplitterMarker(bounds, _viewSplit.Orientation);
 			_movingSplitMarker.Show();
+			if(_viewSplit.TopLevelControl is Form form)
+			{
+				form.Activate();
+			}
 		}
 
 		/// <summary>Hide and dispose split marker.</summary>
 		private void KillSplitMarker()
 		{
-			if(_movingSplitMarker != null)
+			if(_movingSplitMarker is not null)
 			{
 				_movingSplitMarker.Dispose();
 				_movingSplitMarker = null;
@@ -480,12 +495,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Removes splitter at specified <paramref name="index"/>.</summary>
 		/// <param name="index">Index of splitter to remove.</param>
-		public void RemoveAt(int index)
-		{
-			RemoveAt(index, false);
-		}
-
-		public void RemoveAt(int index, bool recalc)
+		public void RemoveAt(int index, bool recalc = false)
 		{
 			if(recalc)
 			{
@@ -504,9 +514,7 @@ namespace gitter.Framework.Controls
 		}
 
 		public IEnumerator<double> GetEnumerator()
-		{
-			return _positions.GetEnumerator();
-		}
+			=> _positions.GetEnumerator();
 
 		/// <summary>
 		/// Returns an enumerator that iterates through a collection.
@@ -515,9 +523,7 @@ namespace gitter.Framework.Controls
 		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
 		/// </returns>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _positions.GetEnumerator();
-		}
+			=> _positions.GetEnumerator();
 
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

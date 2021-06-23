@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,10 +21,12 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Text;
 	using System.ComponentModel;
+	using System.Drawing;
+	using System.Text;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -32,6 +34,17 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class HistoryToolbar : ToolStrip
 	{
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static readonly IDpiBoundValue<Bitmap> Refresh   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, "refresh",   Size);
+			public static readonly IDpiBoundValue<Bitmap> OrderDate = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, "order.date",Size);
+			public static readonly IDpiBoundValue<Bitmap> OrderTopo = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, "order.topo",Size);
+			public static readonly IDpiBoundValue<Bitmap> Filter    = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, "filter",    Size);
+			public static readonly IDpiBoundValue<Bitmap> Diff      = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, "diff",      Size);
+		}
+
 		#region Data
 
 		private readonly HistoryView _view;
@@ -42,6 +55,7 @@ namespace gitter.Git.Gui.Views
 		private ToolStripDropDownButton _btnLimit;
 		private ToolStripDropDownButton _btnFilter;
 		private HistoryFilterDropDown _filterDropDown;
+		private readonly DpiBindings _bindings;
 
 		#endregion
 
@@ -60,23 +74,23 @@ namespace gitter.Git.Gui.Views
 				new ToolStripItem[]
 				{
 					// left-aligned
-					_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"], OnRefreshButtonClick)
+					_btnRefresh = new ToolStripButton(Resources.StrRefresh, default, OnRefreshButtonClick)
 						{
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 					new ToolStripSeparator(),
-					_btnDateOrder = new ToolStripButton(Resources.StrDateOrder, CachedResources.Bitmaps["ImgDateOrder"], OnDateOrderButtonClick)
+					_btnDateOrder = new ToolStripButton(Resources.StrDateOrder, default, OnDateOrderButtonClick)
 						{
 							Checked = _view.LogOptions.Order == RevisionQueryOrder.DateOrder,
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
-					_btnTopoOrder = new ToolStripButton(Resources.StrTopoOrder, CachedResources.Bitmaps["ImgTopoOrder"], OnTopoOrderButtonClick)
+					_btnTopoOrder = new ToolStripButton(Resources.StrTopoOrder, default, OnTopoOrderButtonClick)
 						{
 							Checked = _view.LogOptions.Order == RevisionQueryOrder.TopoOrder,
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 					new ToolStripSeparator(),
-					_btnFilter = new ToolStripDropDownButton(GetFilterButtonText(), CachedResources.Bitmaps["ImgFilter"])
+					_btnFilter = new ToolStripDropDownButton(GetFilterButtonText(), default)
 						{
 							DropDown = new Popup(
 								_filterDropDown = new HistoryFilterDropDown()
@@ -93,8 +107,8 @@ namespace gitter.Git.Gui.Views
 						new ToolStripItem[]
 						{
 							new ToolStripMenuItem(Resources.StrlUnlimited, null, OnLimitOptionClick) { Tag = 0 },
-							new ToolStripMenuItem( "100 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 100 },
-							new ToolStripMenuItem( "500 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 500 },
+							new ToolStripMenuItem( "100 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag =  100 },
+							new ToolStripMenuItem( "500 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag =  500 },
 							new ToolStripMenuItem("1000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 1000 },
 							new ToolStripMenuItem("2000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 2000 },
 							new ToolStripMenuItem("5000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 5000 },
@@ -110,6 +124,14 @@ namespace gitter.Git.Gui.Views
 							Alignment = ToolStripItemAlignment.Right,
 						}
 				});
+
+			_bindings = new DpiBindings(this);
+			_bindings.BindImage(_btnRefresh,     Icons.Refresh);
+			_bindings.BindImage(_btnDateOrder,   Icons.OrderDate);
+			_bindings.BindImage(_btnTopoOrder,   Icons.OrderTopo);
+			_bindings.BindImage(_btnFilter,      Icons.Filter);
+			_bindings.BindImage(_btnShowDetails, Icons.Diff);
+
 			UpdateLimitButtonText();
 		}
 

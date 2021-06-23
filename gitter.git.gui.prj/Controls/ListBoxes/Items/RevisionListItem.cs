@@ -81,12 +81,14 @@ namespace gitter.Git.Gui.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			DataContext.References.Changed += OnReferenceListChanged;
 			base.OnListBoxAttached();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
 			DataContext.References.Changed -= OnReferenceListChanged;
@@ -99,8 +101,11 @@ namespace gitter.Git.Gui.Controls
 			InvalidateSafe();
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			var menu = default(ContextMenuStrip);
 			if(requestEventArgs.Column != null)
 			{
@@ -130,11 +135,12 @@ namespace gitter.Git.Gui.Controls
 			return menu;
 		}
 
+		/// <inheritdoc/>
 		public override void OnMouseDown(MouseButtons button, int x, int y)
 		{
 			if(button == MouseButtons.Left)
 			{
-				if(_drawnPointers != null)
+				if(_drawnPointers is not null)
 				{
 					for(int i = 0; i < _drawnPointers.Count; ++i)
 					{
@@ -158,7 +164,7 @@ namespace gitter.Git.Gui.Controls
 							}
 							else
 							{
-								if(_drawnPointers[i].RevisionPointer is Tag tag && tag.TagType == TagType.Annotated)
+								if(_drawnPointers[i].RevisionPointer is Tag { TagType: TagType.Annotated } tag)
 								{
 									//var message = tag.Message;
 									//if(!string.IsNullOrEmpty(message))
@@ -184,9 +190,10 @@ namespace gitter.Git.Gui.Controls
 			base.OnMouseDown(button, x, y);
 		}
 
+		/// <inheritdoc/>
 		protected override int OnHitTest(int x, int y)
 		{
-			if(_drawnPointers != null)
+			if(_drawnPointers is not null)
 			{
 				for(int i = 0; i < _drawnPointers.Count; ++i)
 				{
@@ -200,8 +207,11 @@ namespace gitter.Git.Gui.Controls
 			return base.OnHitTest(x, y);
 		}
 
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
@@ -222,8 +232,11 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:

@@ -29,12 +29,9 @@ namespace gitter.Git.Gui.Controls
 
 	public class TreeCommitListItem : TreeItemListItem<TreeCommit>
 	{
-		private bool _showFullPath;
-
 		public TreeCommitListItem(TreeCommit commit, bool showFullPath)
 			: base(commit, showFullPath)
 		{
-			_showFullPath = showFullPath;
 		}
 
 		/// <summary>Called when item is attached to listbox.</summary>
@@ -42,43 +39,27 @@ namespace gitter.Git.Gui.Controls
 		{
 			base.OnListBoxAttached();
 			DataContext.StagedStatusChanged += OnStagedStatusChanged;
-			DataContext.StatusChanged += OnStatusChanged; 
+			DataContext.StatusChanged       += OnStatusChanged; 
 		}
 
 		/// <summary>Called when item is detached from listbox.</summary>
 		protected override void OnListBoxDetached()
 		{
 			DataContext.StagedStatusChanged -= OnStagedStatusChanged;
-			DataContext.StatusChanged -= OnStatusChanged;
+			DataContext.StatusChanged       -= OnStatusChanged;
 			base.OnListBoxDetached();
 		}
 
 		protected virtual void OnStatusChanged(object sender, EventArgs e)
-		{
-			InvalidateSubItemSafe((int)ColumnId.Name);
-		}
+			=> InvalidateSubItemSafe((int)ColumnId.Name);
 
 		protected virtual void OnStagedStatusChanged(object sender, EventArgs e)
-		{
-			InvalidateSubItemSafe((int)ColumnId.Name);
-		}
-
-		//protected override Icon GetIcon()
-		//{
-		//    if(Data.Status == FileStatus.Removed)
-		//    {
-		//        return Utility.ExtractAssociatedFileIcon16ByExt(Data.FullPath);
-		//    }
-		//    else
-		//    {
-		//        return Utility.ExtractAssociatedFileIcon16(Data.FullPath);
-		//    }
-		//}
+			=> InvalidateSubItemSafe((int)ColumnId.Name);
 
 		protected override FileSize? GetSize() => default;
 
-		protected override Bitmap GetBitmapIcon()
-			=> CachedResources.Bitmaps["ImgSubmodule"];
+		protected override Bitmap GetBitmapIcon(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[@"submodule", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
 
 		protected override string GetItemType()
 			=> string.Empty;

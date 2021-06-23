@@ -31,7 +31,7 @@ namespace gitter.Git.Gui.Controls
 
 	public abstract class FilePanel : FlowPanel
 	{
-		protected static readonly StringFormat HeaderFormat = new StringFormat(StringFormat.GenericDefault)
+		protected static readonly StringFormat HeaderFormat = new(StringFormat.GenericDefault)
 		{
 			Alignment = StringAlignment.Near,
 			FormatFlags =
@@ -42,7 +42,7 @@ namespace gitter.Git.Gui.Controls
 			Trimming = StringTrimming.None,
 		};
 
-		protected static readonly StringFormat ContentFormat = new StringFormat(StringFormat.GenericTypographic)
+		protected static readonly StringFormat ContentFormat = new(StringFormat.GenericTypographic)
 		{
 			Alignment = StringAlignment.Near,
 			FormatFlags =
@@ -55,39 +55,8 @@ namespace gitter.Git.Gui.Controls
 			Trimming = StringTrimming.None,
 		};
 
-		protected Brush GetLineHoverBackground()
-		{
-			return new SolidBrush(Style.Colors.LineBackgroundHover);
-		}
-
-		protected Brush GetLineSelectedBackground()
-		{
-			return new SolidBrush(Style.Colors.LineSelectedBackground);
-		}
-
-		protected Brush GetLineSelectedHoverBackground()
-		{
-			return new SolidBrush(Style.Colors.LineSelectedBackgroundHover);
-		}
-
-		protected Brush GetLineNumberText()
-		{
-			return new SolidBrush(Style.Colors.LineNumberForeground);
-		}
-
-		protected Brush GetLineNumberBackground()
-		{
-			return new SolidBrush(Style.Colors.LineNumberBackground);
-		}
-
-		protected Brush GetLineNumberHoverBackground()
-		{
-			return new SolidBrush(Style.Colors.LineNumberBackgroundHover);
-		}
-
 		protected static readonly Size CellSize;
 
-		protected const int HeaderHeight = 35;
 		protected const int Margin = 5;
 		protected const int MinDigits = 4;
 
@@ -107,13 +76,24 @@ namespace gitter.Git.Gui.Controls
 
 		protected virtual bool ShowHeader => true;
 
-		protected static int TabSize
+		protected int HeaderHeight
 		{
 			get
 			{
-				return (GitterApplication.TextRenderer == GitterApplication.GdiPlusTextRenderer) ? 4 : 8;
+				const int BaseValue = 35;
+
+				if(FlowControl is not null)
+				{
+					var conv = new DpiConverter(FlowControl);
+					return conv.ConvertY(BaseValue);
+				}
+
+				return BaseValue;
 			}
 		}
+
+		protected static int TabSize
+			=> GitterApplication.TextRenderer == GitterApplication.GdiPlusTextRenderer ? 4 : 8;
 
 		protected Rectangle GetLineBounds(int line)
 		{
@@ -133,14 +113,24 @@ namespace gitter.Git.Gui.Controls
 			return new Rectangle(x, yOffset + line * CellSize.Height, w, CellSize.Height * count);
 		}
 
-		protected void PaintHeader(Graphics graphics, Rectangle rcHeader, Image icon, Image overlay, string text)
+		protected void PaintHeader(Graphics graphics, Rectangle rcHeader, Rectangle clipRectangle,
+			Image icon, Image overlay, string text)
 		{
-			using(var brush = new LinearGradientBrush(
-				rcHeader,
-				Style.Colors.FileHeaderColor1,
-				Style.Colors.FileHeaderColor2,
-				LinearGradientMode.Vertical))
+			if(Style.Colors.FileHeaderColor1 == Style.Colors.FileHeaderColor2)
 			{
+				var rcBackground = Rectangle.Intersect(rcHeader, clipRectangle);
+				if(rcBackground is { Width: > 0, Height: > 0 })
+				{
+					graphics.GdiFill(Style.Colors.FileHeaderColor1, rcBackground);
+				}
+			}
+			else
+			{
+				using var brush = new LinearGradientBrush(
+					rcHeader,
+					Style.Colors.FileHeaderColor1,
+					Style.Colors.FileHeaderColor2,
+					LinearGradientMode.Vertical);
 				graphics.FillRectangle(brush, rcHeader);
 			}
 
@@ -152,38 +142,33 @@ namespace gitter.Git.Gui.Controls
 				graphics.DrawRectangle(pen, rcBorder);
 			}
 
-			var rcImage = new Rectangle(0, 0, 16, 16);
-			const int offset = (HeaderHeight - 16) / 2;
-			var rcStatus = new Rectangle(rcHeader.X + offset, rcHeader.Y + offset, 16, 16);
-			graphics.DrawImage(icon, rcStatus, rcImage, GraphicsUnit.Pixel);
-			if(overlay != null)
+			var iconSize = new Size(icon.Width, icon.Height);
+			var offset   = (HeaderHeight - iconSize.Height) / 2;
+			var rcStatus = new Rectangle(rcHeader.X + offset, rcHeader.Y + offset, iconSize.Width, iconSize.Height);
+			graphics.DrawImage(icon, rcStatus);
+			if(overlay is not null)
 			{
-				graphics.DrawImage(overlay, rcStatus, rcImage, GraphicsUnit.Pixel);
+				graphics.DrawImage(overlay, rcStatus);
 			}
 
 			var font = GitterApplication.FontManager.ViewerFont.Font;
-			rcHeader.X += offset * 2 + rcImage.Width;
-			rcHeader.Width -= offset * 2 + rcImage.Width;
+			rcHeader.X     += offset * 2 + iconSize.Width;
+			rcHeader.Width -= offset * 2 + iconSize.Width;
 			GitterApplication.TextRenderer.DrawText(
 				graphics, text, font, Style.Colors.WindowText, rcHeader, HeaderFormat);
 		}
 
 		protected static int GetDecimalDigits(int num)
 		{
-			if(num < 1000)
+			if(num < 1000) return MinDigits;
+
+			var digits = 1;
+			while(num != 0)
 			{
-				return MinDigits;
+				num /= 10;
+				++digits;
 			}
-			else
-			{
-				var digits = 1;
-				while(num != 0)
-				{
-					num /= 10;
-					++digits;
-				}
-				return digits;
-			}
+			return digits;
 		}
 	}
 }

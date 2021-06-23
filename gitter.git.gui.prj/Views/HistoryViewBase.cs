@@ -246,6 +246,7 @@ namespace gitter.Git.Gui.Views
 
 		protected void ReloadRevisionLog()
 		{
+			if(IsDisposed) return;
 			RevisionLogBinding?.ReloadData();
 		}
 

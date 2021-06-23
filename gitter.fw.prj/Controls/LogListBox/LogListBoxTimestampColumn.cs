@@ -31,8 +31,7 @@ namespace gitter.Framework.Controls
 			Width = 155;
 		}
 
-		/// <summary>Gets the identification string.</summary>
-		/// <value>The identification string.</value>
+		/// <inheritdoc/>
 		public override string IdentificationString => "Timestamp";
 	}
 }

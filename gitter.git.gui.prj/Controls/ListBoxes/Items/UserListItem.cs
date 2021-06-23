@@ -33,8 +33,6 @@ namespace gitter.Git.Gui.Controls
 	/// <summary><see cref="CustomListBoxItem"/> representing <see cref="User"/>.</summary>
 	public sealed class UserListItem : CustomListBoxItem<User>
 	{
-		private static readonly Bitmap ImgUser = CachedResources.Bitmaps["ImgUser"];
-
 		public static int CompareByName(UserListItem item1, UserListItem item2)
 		{
 			var data1 = item1.DataContext.Name;
@@ -71,8 +69,6 @@ namespace gitter.Git.Gui.Controls
 				? CompareByCommitCount(userListItem1, userListItem2)
 				: 0;
 
-		private Bitmap _imgAvatar;
-
 		/// <summary>Create <see cref="UserListItem"/>.</summary>
 		/// <param name="user">Related <see cref="User"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="user"/> == <c>null</c>.</exception>
@@ -99,13 +95,19 @@ namespace gitter.Git.Gui.Controls
 			base.OnListBoxDetached();
 		}
 
+		private static Bitmap GetIcon(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[@"user", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
 				case ColumnId.Committer:
-					return measureEventArgs.MeasureImageAndText(ImgUser, DataContext.Name);
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Name);
 				case ColumnId.Email:
 				case ColumnId.CommitterEmail:
 					return EmailColumn.OnMeasureSubItem(measureEventArgs, DataContext.Email);
@@ -116,40 +118,36 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
 				case ColumnId.Author:
 				case ColumnId.Committer:
-					Bitmap image;
+					Image image;
 					if(GitterApplication.IntegrationFeatures.Gravatar.IsEnabled)
 					{
-						if(_imgAvatar != null)
+						var avatar   = DataContext.Avatar;
+						var imgAvatar = avatar.Image;
+						if(imgAvatar is null)
 						{
-							image = _imgAvatar;
+							avatar.BeginUpdate();
+							image = GetIcon(paintEventArgs.Dpi);
 						}
 						else
 						{
-							var avatar = DataContext.Avatar;
-							var imgAvatar = avatar.Image;
-							if(imgAvatar == null)
-							{
-								avatar.BeginUpdate();
-								image = ImgUser;
-							}
-							else
-							{
-								_imgAvatar = image = new Bitmap(imgAvatar, new Size(16, 16));
-							}
+							image = imgAvatar;
 						}
 					}
 					else
 					{
-						image = ImgUser;
+						image = GetIcon(paintEventArgs.Dpi);
 					}
-					paintEventArgs.PaintImageAndText(image, DataContext.Name);
+					paintEventArgs.PaintImageAndText(image, paintEventArgs.DpiConverter.Convert(new Size(16, 16)), DataContext.Name);
 					break;
 				case ColumnId.Email:
 				case ColumnId.AuthorEmail:
@@ -162,8 +160,11 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			var menu = new UserMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;

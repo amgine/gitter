@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,11 +21,9 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
+
+	using gitter.Framework;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -40,7 +38,7 @@ namespace gitter.Git.Gui.Views
 			Text = Resources.StrGit;
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgGit"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"git");
 
 		public override bool IsDocument => true;
 	}

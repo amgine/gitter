@@ -39,7 +39,7 @@ namespace gitter
 			InitializeComponent();
 
 			this.Text = Resources.StrAbout;
-			this.labelVersion.Text = string.Format("v{0}", AssemblyVersion);
+			this.labelVersion.Text = $"v{AssemblyVersion}";
 
 			_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
 

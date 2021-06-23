@@ -77,12 +77,12 @@ namespace gitter.Git.Gui.Controls
 		//    }
 		//}
 
-		protected override Bitmap GetBitmapIcon()
+		protected override Bitmap GetBitmapIcon(Dpi dpi)
 		{
 			var path = DataContext.RelativePath;
 			return path.EndsWith('/')
-				? CachedResources.Bitmaps["ImgSubmodule"]
-				: GraphicsUtility.QueryIcon(DataContext.FullPath);
+				? CachedResources.ScaledBitmaps[@"submodule", DpiConverter.FromDefaultTo(dpi).ConvertX(16)]
+				: GraphicsUtility.QueryIcon(DataContext.FullPath, dpi);
 		}
 
 		protected override FileSize? GetSize()

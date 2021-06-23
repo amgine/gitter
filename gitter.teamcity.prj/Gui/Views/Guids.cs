@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,7 +24,6 @@ namespace gitter.TeamCity.Gui.Views
 
 	internal static class Guids
 	{
-		public static readonly Guid BuildTypeBuildsViewGuid
-			= new Guid("C25C5611-47F2-4187-87A6-8981DB7B3A34");
+		public static readonly Guid BuildTypeBuildsViewGuid = new("C25C5611-47F2-4187-87A6-8981DB7B3A34");
 	}
 }

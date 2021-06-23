@@ -20,7 +20,7 @@
 
 namespace gitter.Framework
 {
-	public struct FileSize
+	public readonly struct FileSize
 	{
 		private static readonly string[] KnownUnits = new[]
 		{

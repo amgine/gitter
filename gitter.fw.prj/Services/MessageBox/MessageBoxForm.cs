@@ -64,8 +64,11 @@ namespace gitter.Framework.Services
 			_title = title;
 			_message = message;
 
+			var conv = new DpiConverter(this);
+			MinClientSize = conv.Convert(MinClientSize);
+
 			var s = ClientSize;
-			s.Width = MaxClientWidth;
+			s.Width = conv.ConvertX(MaxClientWidth);
 			ClientSize = s;
 
 			Text = title;
@@ -77,6 +80,7 @@ namespace gitter.Framework.Services
 
 		private void LayoutButtons(IEnumerable<MessageBoxButton> buttons)
 		{
+			var conv = new DpiConverter(this);
 			var minW = 0;
 			var list = new List<Button>();
 			int tabIndex = 0;
@@ -94,16 +98,16 @@ namespace gitter.Framework.Services
 				list.Add(control);
 			}
 			var cs = ClientSize;
-			var size1 = new Size(75, 23);
-			var size2 = new Size(106, 23);
-			int x = cs.Width - 1;
-			int y = cs.Height - size1.Height - 8;
+			var size1 = conv.Convert(new Size(75, 23));
+			var size2 = conv.Convert(new Size(106, 23));
+			int x = cs.Width  - 1;
+			int y = cs.Height - size1.Height - conv.ConvertY(8);
 			minW = 1;
 			for(int i = list.Count - 1; i >= 0; --i)
 			{
-				var size = (TextRenderer.MeasureText(list[i].Text, Font).Width > size1.Width - 8) ?
+				var size = (TextRenderer.MeasureText(list[i].Text, Font).Width > size1.Width - conv.ConvertX(8)) ?
 					size2 : size1;
-				x -= size.Width + 6;
+				x -= size.Width + conv.ConvertX(6);
 				list[i].SetBounds(x, y, size.Width, size.Height);
 				list[i].Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
 				list[i].Parent = this;
@@ -123,13 +127,13 @@ namespace gitter.Framework.Services
 				{
 					CancelButton = list[i];
 				}
-				minW += size.Width + 6;
+				minW += size.Width + conv.ConvertX(6);
 			}
-			if(list.Count == 1 && CancelButton == null)
+			if(list.Count == 1 && CancelButton is null)
 			{
 				CancelButton = list[0];
 			}
-			minW += 42 - 6;
+			minW += conv.ConvertX(42) - conv.ConvertX(6);
 			if(MinClientSize.Width < minW)
 			{
 				MinClientSize.Width = minW;
@@ -138,7 +142,7 @@ namespace gitter.Framework.Services
 			_buttonCount = list.Count;
 		}
 
-		private Icon GetSystemIcon(MessageBoxIcon icon)
+		private static Icon GetSystemIcon(MessageBoxIcon icon)
 			=> icon switch
 			{
 				MessageBoxIcon.Information => SystemIcons.Information,
@@ -150,7 +154,7 @@ namespace gitter.Framework.Services
 
 		private void LayoutMessage(string message)
 		{
-			if(_icon == null)
+			if(_icon is null)
 			{
 				_picIcon.Visible = false;
 			}
@@ -182,7 +186,7 @@ namespace gitter.Framework.Services
 					BoundsSpecified.X | BoundsSpecified.Width);
 			}
 
-			var minMessageWidth = MinClientSize.Width - (ClientSize.Width - _lblMessage.Width);
+			var minMessageWidth  = MinClientSize.Width - (ClientSize.Width - _lblMessage.Width);
 			var minMessageHeight = MinClientSize.Height - (ClientSize.Height - _lblMessage.Height);
 			if(minMessageHeight < 32) minMessageHeight = 32;
 
@@ -263,7 +267,7 @@ namespace gitter.Framework.Services
 
 		private void OnIconPaint(object sender, PaintEventArgs e)
 		{
-			if(_icon != null)
+			if(_icon is not null)
 			{
 				e.Graphics.DrawIcon(_icon, 0, 0);
 			}
@@ -291,14 +295,13 @@ namespace gitter.Framework.Services
 
 		private void MessageBoxForm_KeyDown(object sender, KeyEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
-				case Keys.C:
-					if(e.Modifiers == Keys.Control)
-					{
-						CopyToClipboard();
-						SystemSounds.Beep.Play();
-					}
+				case Keys.C when e.Modifiers == Keys.Control:
+					CopyToClipboard();
+					SystemSounds.Beep.Play();
 					break;
 			}
 		}

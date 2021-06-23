@@ -48,7 +48,7 @@ namespace gitter.Framework.Controls
 			var bounds = origin.Bounds;
 			var anchor = origin.Anchor;
 			var parent = origin.Parent;
-			if(parent == null) return null;
+			if(parent is null) return null;
 			switch(side)
 			{
 				case AnchorStyles.Left:
@@ -109,12 +109,12 @@ namespace gitter.Framework.Controls
 
 				item1.Parent = split;
 				item2.Parent = split;
-				split.ResumeLayout(false);
+				split.ResumeLayout(performLayout: false);
 				return split;
 			}
 			finally
 			{
-				parent.ResumeLayout(false);
+				parent.ResumeLayout(performLayout: false);
 				parent.EnableRedraw();
 				parent.RedrawWindow();
 			}
@@ -175,13 +175,10 @@ namespace gitter.Framework.Controls
 		/// <returns>Result of comparing <paramref name="c1"/> and <paramref name="c2"/>.</returns>
 		private static int ComparePriority(Control c1, Control c2)
 		{
-			var dw1 = (c1 is ViewHost host1 && host1.IsDocumentWell)
-			       || (c1 is ViewSplit ts1 && ts1.ContainsDocumentWell);
-			var dw2 = (c2 is ViewHost host2 && host2.IsDocumentWell)
-			       || (c2 is ViewSplit ts2 && ts2.ContainsDocumentWell);
+			var dw1 = c1 is ViewHost { IsDocumentWell: true } or ViewSplit { ContainsDocumentWell: true };
+			var dw2 = c2 is ViewHost { IsDocumentWell: true } or ViewSplit { ContainsDocumentWell: true };
 			if(dw1 == dw2) return 0;
-			if(dw1) return -1;
-			return 1;
+			return dw1 ? -1 : 1;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ViewSplit"/> class.</summary>
@@ -204,27 +201,24 @@ namespace gitter.Framework.Controls
 			_size = bounds.Size;
 			Rectangle bounds1, bounds2;
 			AnchorStyles anchor1, anchor2;
-			int prioroty = ComparePriority(item1, item2);
+			int priority = ComparePriority(item1, item2);
 			switch(orientation)
 			{
 				case Orientation.Horizontal:
-					if(prioroty == 0)
+					if(priority == 0)
 					{
 						anchor1 = ViewConstants.AnchorDockLeft;
 						anchor2 = ViewConstants.AnchorDockLeft;
 					}
+					else if(priority == 1)
+					{
+						anchor1 = ViewConstants.AnchorDockLeft;
+						anchor2 = ViewConstants.AnchorAll;
+					}
 					else
 					{
-						if(prioroty == 1)
-						{
-							anchor1 = ViewConstants.AnchorDockLeft;
-							anchor2 = ViewConstants.AnchorAll;
-						}
-						else
-						{
-							anchor1 = ViewConstants.AnchorAll;
-							anchor2 = ViewConstants.AnchorDockRight;
-						}
+						anchor1 = ViewConstants.AnchorAll;
+						anchor2 = ViewConstants.AnchorDockRight;
 					}
 					int w1 = item1.Width;
 					int w2 = item2.Width;
@@ -235,23 +229,20 @@ namespace gitter.Framework.Controls
 						(double)(w1 + ViewConstants.Spacing / 2) / (double)bounds.Width);
 					break;
 				case Orientation.Vertical:
-					if(prioroty == 0)
+					if(priority == 0)
 					{
 						anchor1 = ViewConstants.AnchorDockTop;
 						anchor2 = ViewConstants.AnchorDockTop;
 					}
+					else if(priority == 1)
+					{
+						anchor1 = ViewConstants.AnchorDockTop;
+						anchor2 = ViewConstants.AnchorAll;
+					}
 					else
 					{
-						if(prioroty == 1)
-						{
-							anchor1 = ViewConstants.AnchorDockTop;
-							anchor2 = ViewConstants.AnchorAll;
-						}
-						else
-						{
-							anchor1 = ViewConstants.AnchorAll;
-							anchor2 = ViewConstants.AnchorDockBottom;
-						}
+						anchor1 = ViewConstants.AnchorAll;
+						anchor2 = ViewConstants.AnchorDockBottom;
 					}
 					int h1 = item1.Height;
 					int h2 = item2.Height;
@@ -262,9 +253,7 @@ namespace gitter.Framework.Controls
 						(double)(h1 + ViewConstants.Spacing / 2) / (double)bounds.Height);
 					break;
 				default:
-					throw new ArgumentException(
-						string.Format("Unknown Orientation value: {0}", orientation),
-						"orientation");
+					throw new ArgumentException($"Unknown Orientation value: {orientation}", nameof(orientation));
 			}
 			item1.Dock = DockStyle.None;
 			item1.Anchor = anchor1;
@@ -277,11 +266,11 @@ namespace gitter.Framework.Controls
 		/// <summary>Layout orientation.</summary>
 		public Orientation Orientation { get; }
 
-		/// <summary>Gets or sets hosted <see cref="System.Windows.Forms.Control"/> at the specified index.</summary>
+		/// <summary>Gets or sets hosted <see cref="Control"/> at the specified index.</summary>
 		public Control this[int index]
 		{
-			get { return _items[index]; }
-			set { _items[index] = value; }
+			get => _items[index];
+			set => _items[index] = value;
 		}
 
 		/// <summary>Gets the hosted control count.</summary>
@@ -310,12 +299,8 @@ namespace gitter.Framework.Controls
 				{
 					switch(ctl)
 					{
-						case ViewHost host:
-							if(host.IsDocumentWell) return true;
-							break;
-						case ViewSplit split:
-							if(split.ContainsDocumentWell) return true;
-							break;
+						case ViewHost  host  when host.IsDocumentWell:        return true;
+						case ViewSplit split when split.ContainsDocumentWell: return true;
 					}
 				}
 				return false;
@@ -372,9 +357,9 @@ namespace gitter.Framework.Controls
 						singleItem.Dock = DockStyle.Fill;
 						break;
 					default:
-						throw new ApplicationException("Unexpected ViewSplit.Parent: " + parent);
+						throw new ApplicationException($"Unexpected ViewSplit.Parent: {parent}");
 				}
-				ResumeLayout(false);
+				ResumeLayout(performLayout: false);
 				Dispose();
 				return removedItem;
 			}
@@ -387,43 +372,37 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Control.MouseEnter"/> event.
-		/// </summary>
-		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
+		/// <inheritdoc/>
 		protected override void OnMouseEnter(EventArgs e)
 		{
-			switch(Orientation)
+			Cursor = Orientation switch
 			{
-				case Orientation.Horizontal:
-					Cursor = Cursors.SizeWE;
-					break;
-				case Orientation.Vertical:
-					Cursor = Cursors.SizeNS;
-					break;
-				default:
-					throw new ApplicationException();
-			}
+				Orientation.Horizontal => Cursors.SizeWE,
+				Orientation.Vertical   => Cursors.SizeNS,
+				_ => throw new ApplicationException(),
+			};
 			base.OnMouseEnter(e);
 		}
 
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Control.MouseLeave"/> event.
-		/// </summary>
-		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			Cursor = Cursors.Default;
 			base.OnMouseLeave(e);
 		}
 
-		/// <summary>
-		/// Raises the <see cref="E:Resize"/> event.
-		/// </summary>
-		/// <param name="eventargs">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+		/// <inheritdoc/>
+		protected override void OnDpiChangedAfterParent(EventArgs e)
+		{
+			base.OnDpiChangedAfterParent(e);
+			_positions.Apply();
+		}
+
+		/// <inheritdoc/>
 		protected override void OnResize(EventArgs eventargs)
 		{
 			base.OnResize(eventargs);
+
 			var size = Size;
 			bool enforceChildSizes = true;
 			switch(Orientation)
@@ -458,12 +437,11 @@ namespace gitter.Framework.Controls
 			_size = size;
 		}
 
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Control.MouseDown"/> event.
-		/// </summary>
-		/// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data.</param>
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			if(e.Button == MouseButtons.Left)
 			{
 				_positions.StartMoving(e.Location);
@@ -471,10 +449,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseDown(e);
 		}
 
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Control.MouseMove"/> event.
-		/// </summary>
-		/// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data.</param>
+		/// <inheritdoc/>
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			if(_positions.IsMoving)
@@ -484,10 +459,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseMove(e);
 		}
 
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Control.MouseUp"/> event.
-		/// </summary>
-		/// <param name="e">A <see cref="T:System.Windows.Forms.MouseEventArgs"/> that contains the event data.</param>
+		/// <inheritdoc/>
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			if(_positions.IsMoving)
@@ -497,10 +469,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseUp(e);
 		}
 
-		/// <summary>
-		/// Releases the unmanaged resources used by the <see cref="T:System.Windows.Forms.Control"/> and its child controls and optionally releases the managed resources.
-		/// </summary>
-		/// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
@@ -510,26 +479,17 @@ namespace gitter.Framework.Controls
 			base.Dispose(disposing);
 		}
 
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator&lt;Control&gt;"/> object that can be used to iterate through the collection.
-		/// </returns>
-		public IEnumerator<Control> GetEnumerator()
-		{
-			return _items.GetEnumerator();
-		}
+		/// <summary>Returns an enumerator that iterates through a collection.</summary>
+		/// <returns>An <see cref="IEnumerator{Control}"/> object that can be used to iterate through the collection.</returns>
+		public List<Control>.Enumerator GetEnumerator()
+			=> _items.GetEnumerator();
 
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-		/// </returns>
+		/// <inheritdoc/>
+		IEnumerator<Control> IEnumerable<Control>.GetEnumerator()
+			=> _items.GetEnumerator();
+
+		/// <inheritdoc/>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _items.GetEnumerator();
-		}
+			=> _items.GetEnumerator();
 	}
 }

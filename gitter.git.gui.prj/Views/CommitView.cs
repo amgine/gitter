@@ -106,7 +106,7 @@ namespace gitter.Git.Gui.Views
 
 		private void LoadCommitMessage()
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				Message = Repository.Status.LoadCommitMessage();
 			}
@@ -114,7 +114,7 @@ namespace gitter.Git.Gui.Views
 
 		private void SaveCommitMessage()
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				Repository.Status.SaveCommitMessage(Message);
 			}
@@ -176,7 +176,7 @@ namespace gitter.Git.Gui.Views
 			set => _txtMessage.Text = value;
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgCommit"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"commit");
 
 		public override void OnActivated()
 		{
@@ -287,7 +287,7 @@ namespace gitter.Git.Gui.Views
 				if(_txtMessage.TextLength == 0)
 				{
 					var head = Repository.Head;
-					if(head != null)
+					if(head is not null)
 					{
 						var rev = head.Revision;
 						_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));

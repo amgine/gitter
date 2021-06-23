@@ -31,9 +31,9 @@ namespace gitter.Framework
 
 		public static Graphics MeasurementGraphics { get; } = Graphics.FromImage(_dummyImage);
 
-		public static Bitmap QueryIcon(string fileName)
+		public static Bitmap QueryIcon(string fileName, Dpi dpi)
 		{
-			return IconCache.GetIcon(fileName);
+			return IconCache.GetIcon(fileName, DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 		}
 
 		public const TextRenderingHint TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;

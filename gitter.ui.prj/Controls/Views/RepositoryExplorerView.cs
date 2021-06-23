@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -38,10 +38,13 @@ namespace gitter
 			Text = Resources.StrRepositoryExplorer;
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgRepositoryExplorer"];
+		/// <inheritdoc/>
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"repository.explorer");
 
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			if(e.Item is ViewListItem item)
 			{
 				WorkingEnvironment.ViewDockService.ShowView(item.DataContext.Guid);
@@ -49,13 +52,9 @@ namespace gitter
 		}
 
 		public void AddItem(CustomListBoxItem item)
-		{
-			_lstRepositoryExplorer.Items.Add(item);
-		}
+			=> _lstRepositoryExplorer.Items.Add(item);
 
 		public void RemoveItem(CustomListBoxItem item)
-		{
-			_lstRepositoryExplorer.Items.Remove(item);
-		}
+			=> _lstRepositoryExplorer.Items.Remove(item);
 	}
 }

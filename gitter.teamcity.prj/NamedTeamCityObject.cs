@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,8 +27,7 @@ namespace gitter.TeamCity
 	{
 		#region Static
 
-		public static readonly TeamCityObjectProperty<string> NameProperty =
-			new TeamCityObjectProperty<string>("name", "Name");
+		public static readonly TeamCityObjectProperty<string> NameProperty = new("name", nameof(Name));
 
 		#endregion
 
@@ -63,8 +62,8 @@ namespace gitter.TeamCity
 
 		public string Name
 		{
-			get { return _name; }
-			internal set { UpdatePropertyValue(ref _name, value, NameProperty); }
+			get => _name;
+			internal set => UpdatePropertyValue(ref _name, value, NameProperty);
 		}
 
 		#endregion
@@ -77,10 +76,8 @@ namespace gitter.TeamCity
 			Name = TeamCityUtility.LoadString(node.Attributes[NameProperty.XmlNodeName]);
 		}
 
-		public override string ToString()
-		{
-			return _name;
-		}
+		/// <inheritdoc/>
+		public override string ToString() => Name;
 
 		#endregion
 	}

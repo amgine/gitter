@@ -28,10 +28,10 @@ namespace gitter.Framework.Controls
 	{
 		private static readonly Point[] Border = new Point[]
 		{
-			new Point(0, 0),
-			new Point(39, 0),
+			new Point( 0,  0),
+			new Point(39,  0),
 			new Point(39, 39),
-			new Point(0, 39),
+			new Point( 0, 39),
 		};
 
 		private static Rectangle GetPositionBounds(ViewDockGrid grid, AnchorStyles side)
@@ -67,21 +67,14 @@ namespace gitter.Framework.Controls
 		private static DockMarkerButton GetButton(AnchorStyles side)
 		{
 			var bounds = new Rectangle(4, 4, 32, 32);
-			switch(side)
+			return side switch
 			{
-				case AnchorStyles.Left:
-					return new DockMarkerButton(bounds, DockResult.Left);
-				case AnchorStyles.Top:
-					return new DockMarkerButton(bounds, DockResult.Top);
-				case AnchorStyles.Right:
-					return new DockMarkerButton(bounds, DockResult.Right);
-				case AnchorStyles.Bottom:
-					return new DockMarkerButton(bounds, DockResult.Bottom);
-				default:
-					throw new ArgumentException(
-						"Unknown AnchorStyles value: {0}".UseAsFormat(side),
-						"side");
-			}
+				AnchorStyles.Left   => new DockMarkerButton(bounds, DockResult.Left),
+				AnchorStyles.Top    => new DockMarkerButton(bounds, DockResult.Top),
+				AnchorStyles.Right  => new DockMarkerButton(bounds, DockResult.Right),
+				AnchorStyles.Bottom => new DockMarkerButton(bounds, DockResult.Bottom),
+				_ => throw new ArgumentException($"Unknown AnchorStyles value: {side}", nameof(side)),
+			};
 		}
 
 		public GridDockMarker(ViewDockGrid grid, ViewHost viewHost, AnchorStyles side)

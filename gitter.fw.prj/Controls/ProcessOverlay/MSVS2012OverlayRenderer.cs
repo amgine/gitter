@@ -128,10 +128,10 @@ namespace gitter.Framework.Controls
 			var font = processOverlay.Font;
 			var tw = GitterApplication.TextRenderer.MeasureText(
 				graphics, processOverlay.Title, font, bounds.Width, TitleStringFormat).Width;
-			var oldMode = graphics.SmoothingMode;
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
-			DrawIndeterminateProgress(graphics, bounds.X + (bounds.Width - tw) / 2 - 14 - 5, bounds.Y + (bounds.Height - 14) / 2, 14, 14);
-			graphics.SmoothingMode = oldMode;
+			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
+			{
+				DrawIndeterminateProgress(graphics, bounds.X + (bounds.Width - tw) / 2 - 14 - 5, bounds.Y + (bounds.Height - 14) / 2, 14, 14);
+			}
 			var titleRect = new Rectangle(bounds.X + (bounds.Width - tw) / 2, bounds.Y, bounds.Width - spacing * 2 - 5 - 14, bounds.Height);
 			if(!string.IsNullOrWhiteSpace(processOverlay.Title))
 			{

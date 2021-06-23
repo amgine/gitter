@@ -21,9 +21,7 @@
 namespace gitter.GitLab.Gui
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -31,9 +29,9 @@ namespace gitter.GitLab.Gui
 	abstract class RepositoryExplorerItemBase : CustomListBoxItem
 	{
 		private readonly string _text;
-		private Bitmap _image;
+		private readonly string _image;
 
-		protected RepositoryExplorerItemBase(IWorkingEnvironment env, GitLabGuiProvider guiProvider, Bitmap image, string text)
+		protected RepositoryExplorerItemBase(IWorkingEnvironment env, GitLabGuiProvider guiProvider, string image, string text)
 		{
 			WorkingEnvironment = env;
 			GuiProvider = guiProvider;
@@ -53,12 +51,15 @@ namespace gitter.GitLab.Gui
 			}
 		}
 
+		private Bitmap GetIcon(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[_image, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(_image, _text);
+					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), _text);
 					break;
 			}
 		}
@@ -68,7 +69,7 @@ namespace gitter.GitLab.Gui
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(_image, _text);
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), _text);
 				default:
 					return Size.Empty;
 			}

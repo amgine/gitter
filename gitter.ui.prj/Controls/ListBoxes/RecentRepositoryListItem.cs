@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -35,7 +35,6 @@ namespace gitter
 
 	internal sealed class RecentRepositoryListItem : CustomListBoxItem<RepositoryLink>
 	{
-		private static readonly Bitmap ImgRepositorySmall = CachedResources.Bitmaps["ImgRepository"];
 		private static readonly StringFormat PathStringFormat;
 
 		static RecentRepositoryListItem()
@@ -51,29 +50,41 @@ namespace gitter
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 		}
 
+		private static Bitmap GetIcon(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[@"repository", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
-					return measureEventArgs.MeasureImageAndText(ImgRepositorySmall, DataContext.Path);
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Path);
 				default:
 					return Size.Empty;
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
-					paintEventArgs.PaintImageAndText(ImgRepositorySmall, DataContext.Path, paintEventArgs.Brush, PathStringFormat);
+					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.Path, paintEventArgs.Brush, PathStringFormat);
 					break;
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			var menu = new RecentRepositoryMenu(this);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;

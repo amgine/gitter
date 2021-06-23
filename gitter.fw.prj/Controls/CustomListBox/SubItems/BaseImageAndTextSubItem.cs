@@ -42,19 +42,15 @@ namespace gitter.Framework.Controls
 		/// <summary>Paint event handler.</summary>
 		/// <param name="paintEventArgs">Paint event args.</param>
 		protected override void OnPaint(SubItemPaintEventArgs paintEventArgs)
-		{
-			paintEventArgs.PaintImageOverlayAndText(Image, OverlayImage, Text,
-				Font ?? paintEventArgs.Font,
-				TextBrush ?? paintEventArgs.Brush,
+			=> paintEventArgs.PaintImageOverlayAndText(Image, OverlayImage, Text,
+				Font          ?? paintEventArgs.Font,
+				TextBrush     ?? paintEventArgs.Brush,
 				TextAlignment ?? paintEventArgs.Alignment);
-		}
 
 		/// <summary>Measure event handler.</summary>
 		/// <param name="measureEventArgs">Measure event args.</param>
 		/// <returns>Subitem content size.</returns>
 		protected override Size OnMeasure(SubItemMeasureEventArgs measureEventArgs)
-		{
-			return measureEventArgs.MeasureImageAndText(Image, Text);
-		}
+			=> measureEventArgs.MeasureImageAndText(Image, Text);
 	}
 }

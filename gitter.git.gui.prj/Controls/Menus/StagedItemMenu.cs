@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -37,7 +39,10 @@ namespace gitter.Git.Gui.Controls
 
 			Item = item;
 
-			Items.Add(GuiItemFactory.GetUnstageItem<ToolStripMenuItem>(Item));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetUnstageItem<ToolStripMenuItem>(Item));
 		}
 
 		public TreeItem Item { get; }

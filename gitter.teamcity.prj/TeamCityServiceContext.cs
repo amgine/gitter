@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,7 +30,6 @@ namespace gitter.TeamCity
 	{
 		#region Data
 
-		private readonly object _syncRoot;
 		private Uri _serviceUri;
 		private string _passphrase;
 
@@ -57,7 +56,6 @@ namespace gitter.TeamCity
 
 		public TeamCityServiceContext(Uri serviceUri, string username, string password)
 		{
-			_syncRoot = new object();
 			_serviceUri = serviceUri;
 			_passphrase = GetPassphrase(username, password);
 
@@ -70,38 +68,20 @@ namespace gitter.TeamCity
 
 		#region Properties
 
-		internal object SyncRoot
-		{
-			get { return _syncRoot; }
-		}
+		internal object SyncRoot { get; } = new();
 
-		public ProjectsCollection Projects
-		{
-			get { return _projects; }
-		}
+		public ProjectsCollection Projects => _projects;
 
-		public BuildTypesCollection BuildTypes
-		{
-			get { return _buildTypes; }
-		}
+		public BuildTypesCollection BuildTypes => _buildTypes;
 
-		public BuildsCollection Builds
-		{
-			get { return _builds; }
-		}
+		public BuildsCollection Builds => _builds;
 
-		public string DefaultProjectId
-		{
-			get;
-			set;
-		}
+		public string DefaultProjectId { get; set; }
 
 		#endregion
 
 		private Uri GetUri(string relativeUri)
-		{
-			return new Uri(_serviceUri, @"/httpAuth/app/rest/" + relativeUri);
-		}
+			=> new Uri(_serviceUri, @"/httpAuth/app/rest/" + relativeUri);
 
 		private void SetupHttpBasicAuth(WebRequest request)
 		{
@@ -113,13 +93,13 @@ namespace gitter.TeamCity
 			switch(contentType)
 			{
 				case ResponseContentType.PlainText:
-					request.ContentType = "text/plain";
+					request.ContentType = @"text/plain";
 					break;
 				case ResponseContentType.Xml:
-					request.ContentType = "application/xml";
+					request.ContentType = @"application/xml";
 					break;
 				case ResponseContentType.Json:
-					request.ContentType = "application/json";
+					request.ContentType = @"application/json";
 					break;
 			}
 		}
@@ -135,23 +115,19 @@ namespace gitter.TeamCity
 
 		internal XmlDocument GetXml(string relativeUri)
 		{
-			using(var response = GetResponse(relativeUri, ResponseContentType.Xml))
-			using(var stream = response.GetResponseStream())
-			{
-				var xml = new XmlDocument();
-				xml.Load(stream);
-				return xml;
-			}
+			using var response = GetResponse(relativeUri, ResponseContentType.Xml);
+			using var stream   = response.GetResponseStream();
+			var xml = new XmlDocument();
+			xml.Load(stream);
+			return xml;
 		}
 
 		internal string GetPlainText(string relativeUri)
 		{
-			using(var response = GetResponse(relativeUri, ResponseContentType.PlainText))
-			using(var stream = response.GetResponseStream())
-			using(var streamReader = new StreamReader(stream))
-			{
-				return streamReader.ReadToEnd();
-			}
+			using var response     = GetResponse(relativeUri, ResponseContentType.PlainText);
+			using var stream       = response.GetResponseStream();
+			using var streamReader = new StreamReader(stream);
+			return streamReader.ReadToEnd();
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace gitter.Git.Gui
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using gitter.Framework;
 
 	[ToolboxItem(false)]
 	sealed class RepositoryMenu : ContextMenuStrip
@@ -37,7 +37,10 @@ namespace gitter.Git.Gui
 
 			_repository = repository;
 
-			Items.Add(GuiItemFactory.GetCompressRepositoryItem<ToolStripMenuItem>(_repository));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetCompressRepositoryItem<ToolStripMenuItem>(_repository));
 		}
 	}
 }

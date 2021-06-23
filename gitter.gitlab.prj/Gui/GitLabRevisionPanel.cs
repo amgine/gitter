@@ -38,9 +38,9 @@ namespace gitter.GitLab.Gui
 		const int PipelineId   = 1;
 		const int ViewOnGitLab = 2;
 
-		private static readonly StringFormat F1 = new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
+		private static readonly StringFormat F1 = new() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
 
-		private static readonly StringFormat F2 = new StringFormat() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
+		private static readonly StringFormat F2 = new() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
 
 		private Pipeline _pipeline;
 		private bool _isUpdating;
@@ -50,6 +50,7 @@ namespace gitter.GitLab.Gui
 		private Rectangle _viewOnGitLabBounds;
 
 		private int _hoveredItem;
+		private int _height = -1;
 
 		public GitLabRevisionPanel(GitLabServiceContext serviceContext, Revision revision)
 		{
@@ -90,7 +91,11 @@ namespace gitter.GitLab.Gui
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
-			return new Size(measureEventArgs.Width, 18);
+			if(_height < 0)
+			{
+				_height = TextRenderer.MeasureText(measureEventArgs.Graphics, "W", GitterApplication.FontManager.UIFont.Font).Height;
+			}
+			return new Size(measureEventArgs.Width, _height);
 		}
 
 		private int GetHoverItemId(int x, int y)
@@ -193,6 +198,7 @@ namespace gitter.GitLab.Gui
 			int w;
 
 			var graphics = paintEventArgs.Graphics;
+			var conv = new DpiConverter(FlowControl);
 			var font = GitterApplication.FontManager.UIFont.Font;
 
 			using var grayText   = new SolidBrush(Style.Colors.GrayText);
@@ -200,13 +206,14 @@ namespace gitter.GitLab.Gui
 			using var linkText   = new SolidBrush(Style.Colors.HyperlinkText);
 
 			textBounds = paintEventArgs.Bounds;
-			textBounds.Width = 66;
+			textBounds.Width = conv.ConvertX(66);
 			GitterApplication.TextRenderer.DrawText(
 				graphics, HeaderText, font, grayText, textBounds, F1);
 
 			textBounds = paintEventArgs.Bounds;
-			textBounds.Width -= 70;
-			textBounds.X += 70;
+			var dx = conv.ConvertX(70);
+			textBounds.Width -= dx;
+			textBounds.X     += dx;
 
 			if(_pipeline == null)
 			{

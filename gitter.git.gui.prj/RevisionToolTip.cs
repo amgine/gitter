@@ -29,8 +29,6 @@ namespace gitter.Git.Gui
 
 	sealed class RevisionToolTip : CustomToolTip
 	{
-		private static readonly int MaxWidth = (int)((SystemInformation.SmallIconSize.Width / 16.0) * 450);
-
 		private RevisionHeaderContent _content;
 
 		public RevisionToolTip()
@@ -48,15 +46,24 @@ namespace gitter.Git.Gui
 		protected override void OnPaint(DrawToolTipEventArgs e)
 		{
 			base.OnPaint(e);
-			_content.OnPaint(e.Graphics, e.Bounds);
+			_content.OnPaint(e.Graphics,
+				e.AssociatedControl is not null ? new Dpi(e.AssociatedControl.DeviceDpi) : Dpi.System,
+				e.Bounds, e.Bounds);
 		}
 
-		public override Size Size
+		public override Size Measure(Control associatedControl)
 		{
-			get
+			if(associatedControl is null)
 			{
-				var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, MaxWidth);
+				var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, Dpi.System, 450);
 				size.Height += 3;
+				return size;
+			}
+			else
+			{
+				var conv = new DpiConverter(associatedControl);
+				var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, conv.To, conv.ConvertX(450));
+				size.Height += conv.ConvertY(3);
 				return size;
 			}
 		}

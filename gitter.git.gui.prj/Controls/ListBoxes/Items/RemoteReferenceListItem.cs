@@ -29,89 +29,66 @@ namespace gitter.Git.Gui.Controls
 
 	public class RemoteReferenceListItem : CustomListBoxItem<IRemoteReference>
 	{
-		#region Static
-
-		private static readonly Bitmap ImgBranch		= CachedResources.Bitmaps["ImgBranch"];
-		private static readonly Bitmap ImgTag			= CachedResources.Bitmaps["ImgTag"];
-		private static readonly Bitmap ImgTagAnnotated	= CachedResources.Bitmaps["ImgTagAnnotated"];
-
-		#endregion
-
-		#region .ctor
-
 		public RemoteReferenceListItem(IRemoteReference reference)
 			: base(reference)
 		{
 		}
-
-		#endregion
-
-		#region Event Handlers
 
 		private void OnDeleted(object sender, EventArgs e)
 		{
 			RemoveSafe();
 		}
 
-		#endregion
-
-		#region Overrides
-
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
 			DataContext.Deleted += OnDeleted;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
 			DataContext.Deleted -= OnDeleted;
 			base.OnListBoxDetached();
 		}
 
+		private Bitmap GetIcon(Dpi dpi)
+		{
+			var name = DataContext switch
+			{
+				RemoteRepositoryBranch => @"branch",
+				RemoteRepositoryTag tag when tag.TagType == TagType.Annotated => @"atag",
+				RemoteRepositoryTag => @"tag",
+				_ => null,
+			};
+			if(name is null) return default;
+			return CachedResources.ScaledBitmaps[name, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+		}
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					var image = DataContext.ReferenceType switch
-					{
-						ReferenceType.LocalBranch => ImgBranch,
-						ReferenceType.Tag         => ImgTag,
-						_ => null,
-					};
-					return measureEventArgs.MeasureImageAndText(image, DataContext.Name);
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Name);
 				default:
 					return base.OnMeasureSubItem(measureEventArgs);
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					Bitmap image;
-					switch(DataContext.ReferenceType)
-					{
-						case ReferenceType.LocalBranch:
-							image = ImgBranch;
-							break;
-						case ReferenceType.Tag:
-							if(DataContext is RemoteRepositoryTag tag && tag.TagType == TagType.Annotated)
-							{
-								image = ImgTagAnnotated;
-							}
-							else
-							{
-								image = ImgTag;
-							}
-							break;
-						default:
-							image = null;
-							break;
-					}
-					paintEventArgs.PaintImageAndText(image, DataContext.Name);
+					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.Name);
 					break;
 				default:
 					base.OnPaintSubItem(paintEventArgs);
@@ -119,21 +96,22 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			ContextMenuStrip menu = DataContext switch
 			{
 				RemoteRepositoryBranch branch => new RemoteBranchMenu(branch),
 				RemoteRepositoryTag tag       => new RemoteTagMenu(tag),
 				_ => default,
 			};
-			if(menu != null)
+			if(menu is not null)
 			{
 				Utility.MarkDropDownForAutoDispose(menu);
 			}
 			return menu;
 		}
-
-		#endregion
 	}
 }

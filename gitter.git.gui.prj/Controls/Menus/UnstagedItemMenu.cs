@@ -25,6 +25,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -38,11 +40,14 @@ namespace gitter.Git.Gui.Controls
 
 			Item = item;
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			var dir = Item as TreeDirectory;
 			if(Item.Status != FileStatus.Removed)
 			{
 				var fullPath = Item.FullPath;
-				if(dir == null)
+				if(dir is null)
 				{
 					Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, fullPath));
 					Items.Add(GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, fullPath));
@@ -54,23 +59,23 @@ namespace gitter.Git.Gui.Controls
 				}
 				Items.Add(new ToolStripSeparator());
 			}
-			Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(Item));
-			if(dir != null)
+			Items.Add(factory.GetStageItem<ToolStripMenuItem>(Item));
+			if(dir is not null)
 			{
 				if(HasRevertableItems(dir))
 				{
-					Items.Add(GuiItemFactory.GetRevertPathItem<ToolStripMenuItem>(Item));
+					Items.Add(factory.GetRevertPathItem<ToolStripMenuItem>(Item));
 				}
 			}
 			else
 			{
 				if(Item.Status == FileStatus.Removed || Item.Status == FileStatus.Modified)
 				{
-					Items.Add(GuiItemFactory.GetRevertPathItem<ToolStripMenuItem>(Item));
+					Items.Add(factory.GetRevertPathItem<ToolStripMenuItem>(Item));
 				}
 				if(Item.Status == FileStatus.Modified || Item.Status == FileStatus.Added)
 				{
-					Items.Add(GuiItemFactory.GetRemovePathItem<ToolStripMenuItem>(Item));
+					Items.Add(factory.GetRemovePathItem<ToolStripMenuItem>(Item));
 				}
 			}
 		}

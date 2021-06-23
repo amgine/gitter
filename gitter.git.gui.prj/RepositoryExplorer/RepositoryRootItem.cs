@@ -32,7 +32,7 @@ namespace gitter.Git.Gui
 	sealed class RepositoryRootItem : RepositoryExplorerItemBase
 	{
 		public RepositoryRootItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgGit"], Resources.StrGit)
+			: base(@"git", Resources.StrGit)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -51,6 +51,7 @@ namespace gitter.Git.Gui
 				});
 		}
 
+		/// <inheritdoc/>
 		protected override void AttachToRepository()
 		{
 			foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
@@ -59,6 +60,7 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void DetachFromRepository()
 		{
 			foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
@@ -67,18 +69,16 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new RepositoryMenu(Repository);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository is null) return default;
+
+			var menu = new RepositoryMenu(Repository);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

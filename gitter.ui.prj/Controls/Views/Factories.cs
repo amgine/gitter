@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -30,7 +30,7 @@ namespace gitter
 	sealed class RepositoryExplorerViewFactory : ViewFactoryBase
 	{
 		public RepositoryExplorerViewFactory(IWorkingEnvironment environment)
-			: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, CachedResources.Bitmaps["ImgRepositoryExplorer"], true)
+			: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"repository.explorer"), singleton: true)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -52,9 +52,7 @@ namespace gitter
 			RootItem.Items.Remove(item);
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
 			var view = new RepositoryExplorerView(environment);
@@ -66,15 +64,13 @@ namespace gitter
 	sealed class StartPageViewFactory : ViewFactoryBase
 	{
 		public StartPageViewFactory()
-			: base(Guids.StartPageView, Resources.StrStartPage, CachedResources.Bitmaps["ImgStartPage"], true)
+			: base(Guids.StartPageView, Resources.StrStartPage, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"start.page"), singleton: true)
 		{
 			DefaultViewPosition = ViewPosition.RootDocumentHost;
 			ShowOnStartup = true;
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
 			return new StartPageView(environment, this);

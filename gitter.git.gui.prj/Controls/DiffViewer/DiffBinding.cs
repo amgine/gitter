@@ -115,7 +115,7 @@ namespace gitter.Git.Gui.Controls
 			DiffViewer.BeginUpdate();
 			_allDiffPanels.Clear();
 			_progressPanel.Remove();
-			if(diff != null)
+			if(diff is not null)
 			{
 				FlowPanelSeparator separator = null;
 				var changedFilesPanel = new ChangedFilesPanel() { Diff = diff };

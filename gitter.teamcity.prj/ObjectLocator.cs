@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,6 +27,9 @@ namespace gitter.TeamCity
 	{
 		protected static void BeginArgument(StringBuilder sb, string argname)
 		{
+			Assert.IsNotNull(sb);
+			Assert.IsNeitherNullNorWhitespace(argname);
+
 			if(sb.Length != 0) sb.Append(',');
 			sb.Append(argname);
 			sb.Append(':');
@@ -34,28 +37,27 @@ namespace gitter.TeamCity
 
 		protected static void AppendArgument(StringBuilder sb, string argname, BuildStatus value)
 		{
-			if(value != BuildStatus.Unknown)
+			Assert.IsNotNull(sb);
+			Assert.IsNeitherNullNorWhitespace(argname);
+
+			if(value == BuildStatus.Unknown) return;
+
+			var strValue = value switch
 			{
-				BeginArgument(sb, argname);
-				switch(value)
-				{
-					case BuildStatus.Error:
-						sb.Append("ERROR");
-						break;
-					case BuildStatus.Failure:
-						sb.Append("FAILURE");
-						break;
-					case BuildStatus.Success:
-						sb.Append("SUCCESS");
-						break;
-					default:
-						throw new ApplicationException();
-				}
-			}
+				BuildStatus.Error   => "ERROR",
+				BuildStatus.Failure => "FAILURE",
+				BuildStatus.Success => "SUCCESS",
+				_ => throw new ApplicationException(),
+			};
+			BeginArgument(sb, argname);
+			sb.Append(strValue);
 		}
 
 		protected static void AppendArgument(StringBuilder sb, string argname, string value)
 		{
+			Assert.IsNotNull(sb);
+			Assert.IsNeitherNullNorWhitespace(argname);
+
 			if(!string.IsNullOrWhiteSpace(value))
 			{
 				BeginArgument(sb, argname);
@@ -74,6 +76,9 @@ namespace gitter.TeamCity
 
 		protected static void AppendArgument(StringBuilder sb, string argname, int value)
 		{
+			Assert.IsNotNull(sb);
+			Assert.IsNeitherNullNorWhitespace(argname);
+
 			if(value != 0)
 			{
 				BeginArgument(sb, argname);
@@ -83,29 +88,28 @@ namespace gitter.TeamCity
 
 		protected static void AppendArgument(StringBuilder sb, string argname, FlagSelector value)
 		{
-			if(value != FlagSelector.Unspecified)
+			Assert.IsNotNull(sb);
+			Assert.IsNeitherNullNorWhitespace(argname);
+
+			if(value == FlagSelector.Unspecified) return;
+
+			var strValue = value switch
 			{
-				BeginArgument(sb, argname);
-				switch(value)
-				{
-					case FlagSelector.True:
-						sb.Append("true");
-						break;
-					case FlagSelector.False:
-						sb.Append("false");
-						break;
-					case FlagSelector.Any:
-						sb.Append("any");
-						break;
-					default:
-						throw new ApplicationException();
-				}
-			}
+				FlagSelector.True  => "true",
+				FlagSelector.False => "false",
+				FlagSelector.Any   => "any",
+				_ => throw new ApplicationException(),
+			};
+			BeginArgument(sb, argname);
+			sb.Append(strValue);
 		}
 
 		protected static void AppendArgument(StringBuilder sb, string argname, ObjectLocator locator)
 		{
-			if(locator == null) return;
+			Assert.IsNotNull(sb);
+			Assert.IsNeitherNullNorWhitespace(argname);
+
+			if(locator is null) return;
 			var value = locator.ToString();
 			if(!string.IsNullOrWhiteSpace(value))
 			{

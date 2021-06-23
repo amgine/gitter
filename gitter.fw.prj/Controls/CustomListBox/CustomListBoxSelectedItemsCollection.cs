@@ -42,13 +42,9 @@ namespace gitter.Framework.Controls
 		}
 
 		protected override void AcquireItem(CustomListBoxItem item)
-		{
-			item.SetSelected(true);
-		}
+			=> item.SetSelected(true);
 
 		protected override bool VerifyItem(CustomListBoxItem item)
-		{
-			return item != null && item.ListBox == ListBox;
-		}
+			=> item is not null && item.ListBox == ListBox;
 	}
 }

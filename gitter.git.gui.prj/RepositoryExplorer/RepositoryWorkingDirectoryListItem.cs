@@ -66,7 +66,7 @@ namespace gitter.Git.Gui
 
 			protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 			{
-				if(_binding != null)
+				if(_binding is not null)
 				{
 					_binding.ItemActivated -= _onItemActivated;
 					_binding.ItemContextMenuRequested -= _onItemContextMenuRequested;
@@ -78,7 +78,7 @@ namespace gitter.Git.Gui
 
 			protected override void OnFetchCompleted(Tree tree)
 			{
-				if(tree != null)
+				if(tree is not null)
 				{
 					_binding = new TreeBinding(Items, tree.Root, false);
 					_binding.ItemActivated += _onItemActivated;
@@ -95,7 +95,7 @@ namespace gitter.Git.Gui
 			{
 				if(disposing)
 				{
-					if(_binding != null)
+					if(_binding is not null)
 					{
 						_binding.ItemActivated -= _onItemActivated;
 						_binding.ItemContextMenuRequested -= _onItemContextMenuRequested;
@@ -110,7 +110,7 @@ namespace gitter.Git.Gui
 		private AsyncTreeDataSource _dataSource;
 
 		public RepositoryWorkingDirectoryListItem()
-			: base(CachedResources.Bitmaps["ImgFolder"], Resources.StrWorkingDirectory)
+			: base(@"folder", Resources.StrWorkingDirectory)
 		{
 		}
 
@@ -177,7 +177,7 @@ namespace gitter.Git.Gui
 		private void OnHeadPositionChanged(object sender, RevisionChangedEventArgs e)
 		{
 			var listBox = ListBox;
-			if(listBox != null && listBox.InvokeRequired)
+			if(listBox is not null && listBox.InvokeRequired)
 			{
 				listBox.BeginInvoke(new MethodInvoker(Refresh), null);
 			}
@@ -200,7 +200,9 @@ namespace gitter.Git.Gui
 		{
 			Assert.IsNotNull(file);
 
-			var menu = new ContextMenuStrip();
+			var menu        = new ContextMenuStrip();
+			var dpiBindings = new DpiBindings(menu);
+			var factory     = new GuiItemFactory(dpiBindings);
 			menu.Items.AddRange(
 				new ToolStripItem[]
 				{
@@ -211,9 +213,9 @@ namespace gitter.Git.Gui
 					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 						new ToolStripItem[]
 						{
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
 						}),
 					new ToolStripSeparator(),
 					GuiItemFactory.GetBlameItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
@@ -284,16 +286,14 @@ namespace gitter.Git.Gui
 				TreeCommit    commit    => CreateCommitContextMenu(commit),
 				_ => default,
 			};
-			if(menu != null)
+			if(menu is not null)
 			{
 				Utility.MarkDropDownForAutoDispose(menu);
 				e.ContextMenu = menu;
 			}
 		}
 
-		/// <summary>Gets the context menu.</summary>
-		/// <param name="requestEventArgs">Request parameters.</param>
-		/// <returns>Context menu for specified location.</returns>
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			Assert.IsNotNull(requestEventArgs);

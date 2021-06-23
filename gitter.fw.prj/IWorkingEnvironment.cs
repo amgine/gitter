@@ -33,6 +33,8 @@ namespace gitter.Framework
 	{
 		Form MainForm { get; }
 
+		DpiBindings MainFormDpiBindings { get; }
+
 		string RecentRepositoryPath { get; }
 
 		RepositoryManagerService RepositoryManagerService { get; }

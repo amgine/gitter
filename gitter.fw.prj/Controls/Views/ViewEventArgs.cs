@@ -24,10 +24,7 @@ namespace gitter.Framework.Controls
 
 	public class ViewEventArgs : EventArgs
 	{
-		public ViewEventArgs(ViewBase view)
-		{
-			View = view;
-		}
+		public ViewEventArgs(ViewBase view) => View = view;
 
 		public ViewBase View { get; }
 	}

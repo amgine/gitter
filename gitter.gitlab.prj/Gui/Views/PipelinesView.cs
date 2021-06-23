@@ -21,8 +21,6 @@
 namespace gitter.GitLab.Gui
 {
 	using System;
-	using System.Drawing;
-	using System.Globalization;
 	using System.Windows.Forms;
 	
 	using gitter.Framework;
@@ -68,7 +66,7 @@ namespace gitter.GitLab.Gui
 
 		#region Properties
 
-		public override Image Image => CachedResources.Bitmaps["ImgPipelines"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"pipelines");
 
 		private PipelinesListBinding DataSource
 		{
@@ -122,7 +120,7 @@ namespace gitter.GitLab.Gui
 		protected override void LoadMoreViewFrom(Section section)
 		{
 			var listNode = section.TryGetSection("PipelinesList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				_lstPipelines.LoadViewFrom(listNode);
 			}
@@ -136,6 +134,8 @@ namespace gitter.GitLab.Gui
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F when e.Modifiers == Keys.Control:

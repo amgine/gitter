@@ -24,7 +24,7 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using gitter.Framework;
 
 	[ToolboxItem(false)]
 	public sealed class StashMenu : ContextMenuStrip
@@ -35,8 +35,11 @@ namespace gitter.Git.Gui.Controls
 
 			Repository = repository;
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			Items.Add(GuiItemFactory.GetShowStashViewItem<ToolStripMenuItem>());
-			Items.Add(GuiItemFactory.GetRefreshStashItem<ToolStripMenuItem>(Repository));
+			Items.Add(factory.GetRefreshStashItem<ToolStripMenuItem>(Repository));
 		}
 
 		public Repository Repository { get; }

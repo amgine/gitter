@@ -56,7 +56,7 @@ namespace gitter
 			
 			InitializeComponent();
 
-			_picLogo.Image = GetLogo();
+			_picLogo.Image  = GetLogo();
 			_picLogo2.Image = GetGradient();
 
 			_factory = factory;
@@ -69,7 +69,7 @@ namespace gitter
 			_txtFilter.HintForeColor = GitterApplication.Style.Colors.GrayText;
 			_txtFilter.TextForeColor = GitterApplication.Style.Colors.WindowText;
 
-			_lstLocalRepositories.SizeChanged += (s, e) =>
+			_lstLocalRepositories.SizeChanged += (_, _) =>
 			{
 				var x = _lstLocalRepositories.Width + _lstLocalRepositories.Left - _txtFilter.Width;
 				if(x > _lblLocalRepositories.Left + _lblLocalRepositories.Width)
@@ -85,18 +85,20 @@ namespace gitter
 
 			_txtFilter.TextChanged += OnFilterTextChanged;
 
-			_lstLocalRepositories.ItemActivated += OnLocalRepositoriesListItemActivated;
+			_lstLocalRepositories.ItemActivated  += OnLocalRepositoriesListItemActivated;
 			_lstRecentRepositories.ItemActivated += OnRecentRepositoriesListItemActivated;
 
 			_lstLocalRepositories.DragEnter += OnLocalRepositoriesDragEnter;
-			_lstLocalRepositories.DragDrop += OnLocalRepositoriesDragDrop;
+			_lstLocalRepositories.DragDrop  += OnLocalRepositoriesDragDrop;
 
-			_lstLocalRepositories.KeyDown += OnLocalRepositoriesKeyDown;
+			_lstLocalRepositories.KeyDown  += OnLocalRepositoriesKeyDown;
 			_lstRecentRepositories.KeyDown += OnRecentRepositoriesKeyDown;
+
+			var conv = new DpiConverter(this);
 
 			_chkClosePageAfterRepositoryLoad = GitterApplication.Style.CreateCheckBox();
 			_chkClosePageAfterRepositoryLoad.Text = Resources.StrsClosePageAfterRepositoryLoad;
-			_chkClosePageAfterRepositoryLoad.Control.Bounds = new Rectangle(9, 491, 199, 20);
+			_chkClosePageAfterRepositoryLoad.Control.Bounds = conv.Convert(new Rectangle(9, 491, 199, 20));
 			_chkClosePageAfterRepositoryLoad.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
 			_chkClosePageAfterRepositoryLoad.Control.Parent = this;
 			_chkClosePageAfterRepositoryLoad.IsChecked = _factory.CloseAfterRepositoryLoad;
@@ -104,7 +106,7 @@ namespace gitter
 
 			_chkShowPageAtStartup = GitterApplication.Style.CreateCheckBox();
 			_chkShowPageAtStartup.Text = Resources.StrsShowPageOnStartup;
-			_chkShowPageAtStartup.Control.Bounds = new Rectangle(9, 511, 199, 20);
+			_chkShowPageAtStartup.Control.Bounds = conv.Convert(new Rectangle(9, 511, 199, 20));
 			_chkShowPageAtStartup.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
 			_chkShowPageAtStartup.Control.Parent = this;
 			_chkShowPageAtStartup.IsChecked = _factory.ShowOnStartup;
@@ -125,7 +127,7 @@ namespace gitter
 
 		public override bool IsDocument => true;
 
-		public override Image Image => CachedResources.Bitmaps["ImgStartPage"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"start.page");
 
 		#endregion
 

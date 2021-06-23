@@ -681,7 +681,7 @@ namespace gitter.Framework.Controls
 						foreach(var tab in _tabs)
 						{
 							menu.Items.Add(
-								new ToolStripMenuItem(tab.Text, tab.Image,
+								new ToolStripMenuItem(tab.Text, tab.ImageProvider?.GetImage(DeviceDpi * 16 / 96),
 									(item, args) =>
 									{
 										var view = (ViewBase)((ToolStripMenuItem)item).Tag;

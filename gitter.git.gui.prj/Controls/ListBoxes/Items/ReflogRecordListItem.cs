@@ -31,9 +31,29 @@ namespace gitter.Git.Gui.Controls
 	/// <summary><see cref="CustomListBoxItem"/>, representing <see cref="ReflogRecord"/>.</summary>
 	public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 	{
+		static class Icons
+		{
+			static IImageProvider Init(string imageName)
+				=> new ScaledImageProvider(CachedResources.ScaledBitmaps, imageName);
+
+			public static readonly IImageProvider Fetch        = Init(@"fetch");
+			public static readonly IImageProvider Pull         = Init(@"pull");
+			public static readonly IImageProvider Push         = Init(@"push");
+			public static readonly IImageProvider Branch       = Init(@"branch");
+			public static readonly IImageProvider BranchRename = Init(@"branch.rename");
+			public static readonly IImageProvider Reset        = Init(@"reset");
+			public static readonly IImageProvider Commit       = Init(@"commit");
+			public static readonly IImageProvider Merge        = Init(@"merge");
+			public static readonly IImageProvider Rebase       = Init(@"rebase");
+			public static readonly IImageProvider Checkout     = Init(@"checkout");
+			public static readonly IImageProvider CherryPick   = Init(@"cherry.pick");
+			public static readonly IImageProvider Revert       = Init(@"revert");
+			public static readonly IImageProvider Clone        = Init(@"clone");
+		}
+
 		#region Static
 
-		private static Image GetImage(string message)
+		private static IImageProvider GetImage(string message)
 		{
 			if(string.IsNullOrWhiteSpace(message))
 			{
@@ -41,63 +61,63 @@ namespace gitter.Git.Gui.Controls
 			}
 			if(message.StartsWith("fetch"))
 			{
-				return CachedResources.Bitmaps["ImgFetch"];
+				return Icons.Fetch;
 			}
 			if(message.StartsWith("pull"))
 			{
-				return CachedResources.Bitmaps["ImgPull"];
+				return Icons.Pull;
 			}
 			if(message.StartsWith("branch: Created "))
 			{
-				return CachedResources.Bitmaps["ImgBranch"];
+				return Icons.Branch;
 			}
 			if(message.StartsWith("Branch: renamed "))
 			{
-				return CachedResources.Bitmaps["ImgBranchRename"];
+				return Icons.BranchRename;
 			}
 			if(message.StartsWith("branch: Reset "))
 			{
-				return CachedResources.Bitmaps["ImgReset"];
+				return Icons.Reset;
 			}
 			if(message.StartsWith("reset:"))
 			{
-				return CachedResources.Bitmaps["ImgReset"];
+				return Icons.Reset;
 			}
 			if(message.StartsWith("update by push"))
 			{
-				return CachedResources.Bitmaps["ImgPush"];
+				return Icons.Push;
 			}
 			if(message.StartsWith("commit"))
 			{
-				return CachedResources.Bitmaps["ImgCommit"];
+				return Icons.Commit;
 			}
 			if(message.StartsWith("merge"))
 			{
-				return CachedResources.Bitmaps["ImgMerge"];
+				return Icons.Merge;
 			}
 			if(message.StartsWith("rebase"))
 			{
-				return CachedResources.Bitmaps["ImgRebase"];
+				return Icons.Rebase;
 			}
 			if(message.StartsWith("checkout:"))
 			{
-				return CachedResources.Bitmaps["ImgCheckout"];
+				return Icons.Checkout;
 			}
 			if(message.StartsWith("cherry-pick"))
 			{
-				return CachedResources.Bitmaps["ImgCherryPick"];
+				return Icons.CherryPick;
 			}
 			if(message.StartsWith("revert"))
 			{
-				return CachedResources.Bitmaps["ImgRevert"];
+				return Icons.Revert;
 			}
 			if(message.EndsWith(": updating HEAD"))
 			{
-				return CachedResources.Bitmaps["ImgReset"];
+				return Icons.Reset;
 			}
 			if(message.StartsWith("clone:"))
 			{
-				return CachedResources.Bitmaps["ImgClone"];
+				return Icons.Clone;
 			}
 			return null;
 		}
@@ -130,16 +150,13 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public Image Image { get; private set; }
+		public IImageProvider ImageProvider { get; private set; }
 
 		#endregion
 
 		#region Methods
 
-		private void UpdateImage()
-		{
-			Image = GetImage(DataContext.Message);
-		}
+		private void UpdateImage() => ImageProvider = GetImage(DataContext.Message);
 
 		private void OnDeleted(object sender, EventArgs e)
 		{
@@ -156,20 +173,23 @@ namespace gitter.Git.Gui.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
-			DataContext.Deleted += OnDeleted;
+			DataContext.Deleted        += OnDeleted;
 			DataContext.MessageChanged += OnMessageChanged;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
-			DataContext.Deleted -= OnDeleted;
+			DataContext.Deleted        -= OnDeleted;
 			DataContext.MessageChanged -= OnMessageChanged;
 			base.OnListBoxDetached();
 		}
 
+		/// <inheritdoc/>
 		protected override int OnHitTest(int x, int y)
 		{
 			for(int i = 0; i < _drawnPointers.Count; ++i)
@@ -183,13 +203,17 @@ namespace gitter.Git.Gui.Controls
 			return base.OnHitTest(x, y);
 		}
 
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
 				case ColumnId.Message:
-					return measureEventArgs.MeasureImageAndText(Image, DataContext.Message);
+					var iconSize = measureEventArgs.DpiConverter.ConvertX(16);
+					return measureEventArgs.MeasureImageAndText(ImageProvider?.GetImage(iconSize), DataContext.Message);
 				case ColumnId.Subject:
 					return SubjectColumn.OnMeasureSubItem(measureEventArgs, DataContext.Revision, null);
 				case ColumnId.Committer:
@@ -206,13 +230,17 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
 				case ColumnId.Message:
-					paintEventArgs.PaintImageAndText(Image, DataContext.Message);
+					var iconSize = paintEventArgs.DpiConverter.ConvertX(16);
+					paintEventArgs.PaintImageAndText(ImageProvider?.GetImage(iconSize), DataContext.Message);
 					break;
 				case ColumnId.Subject:
 					SubjectColumn.OnPaintSubItem(paintEventArgs, DataContext.Revision, null, _drawnPointers, paintEventArgs.HoveredPart - PointerTagHitOffset);
@@ -236,9 +264,7 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		/// <summary>Gets the context menu.</summary>
-		/// <param name="requestEventArgs">Request parameters.</param>
-		/// <returns>Context menu for specified location.</returns>
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
 			ContextMenuStrip menu = null;

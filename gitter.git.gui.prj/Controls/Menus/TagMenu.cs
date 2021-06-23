@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Context menu for <see cref="Tag"/> object.</summary>
@@ -36,43 +38,54 @@ namespace gitter.Git.Gui.Controls
 
 			Tag = tag;
 
-			AddViewItems();
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			AddViewItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddActionItems();
+			AddActionItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddCopyToClipboardItems();
+			AddCopyToClipboardItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddCreateItems();
+			AddCreateItems(factory);
 		}
 
 		public new Tag Tag { get; }
 
-		private void AddViewItems()
+		private void AddViewItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(Tag));
-			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(Tag));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetViewTreeItem<ToolStripMenuItem>(Tag));
+			Items.Add(factory.GetArchiveItem<ToolStripMenuItem>(Tag));
 		}
 
-		private void AddActionItems()
+		private void AddActionItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(Tag, "{0} '{1}'"));
-			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(Tag));
-			Items.Add(GuiItemFactory.GetRemoveTagItem<ToolStripMenuItem>(Tag, Resources.StrDelete));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetCheckoutRevisionItem<ToolStripMenuItem>(Tag, "{0} '{1}'"));
+			Items.Add(factory.GetResetHeadHereItem<ToolStripMenuItem>(Tag));
+			Items.Add(factory.GetRemoveTagItem<ToolStripMenuItem>(Tag, Resources.StrDelete));
 		}
 
-		private void AddCopyToClipboardItems()
+		private void AddCopyToClipboardItems(GuiItemFactory factory)
 		{
+			Assert.IsNotNull(factory);
+
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Tag.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Tag.FullName));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Tag.Revision.Hash.ToString()));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Tag.Name));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Tag.FullName));
+			item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Tag.Revision.Hash.ToString()));
 			Items.Add(item);
 		}
 
-		private void AddCreateItems()
+		private void AddCreateItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Tag));
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Tag));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetCreateBranchItem<ToolStripMenuItem>(Tag));
+			Items.Add(factory.GetCreateTagItem<ToolStripMenuItem>(Tag));
 		}
 	}
 }

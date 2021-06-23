@@ -21,10 +21,9 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-
 	using System.Windows.Forms;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using gitter.Framework;
 
 	public sealed class ReferencesMenu : ContextMenuStrip
 	{
@@ -34,11 +33,14 @@ namespace gitter.Git.Gui.Controls
 
 			Repository = repository;
 
-			Items.Add(GuiItemFactory.GetShowReferencesViewItem<ToolStripMenuItem>());
-			Items.Add(GuiItemFactory.GetRefreshAllReferencesListItem<ToolStripMenuItem>(repository));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetShowReferencesViewItem<ToolStripMenuItem>());
+			Items.Add(factory.GetRefreshAllReferencesListItem<ToolStripMenuItem>(repository));
 			Items.Add(new ToolStripSeparator());
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(repository));
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetCreateBranchItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetCreateTagItem<ToolStripMenuItem>(repository));
 		}
 
 		public Repository Repository { get; }

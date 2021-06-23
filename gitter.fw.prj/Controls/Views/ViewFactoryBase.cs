@@ -22,34 +22,26 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Drawing;
 
 	public abstract class ViewFactoryBase : IViewFactory
 	{
-		private readonly bool _singleton;
-		private readonly LinkedList<ViewBase> _createdViews;
+		private readonly LinkedList<ViewBase> _createdViews = new();
 
-		protected ViewFactoryBase(Guid guid, string name, Image image, bool singleton)
+		protected ViewFactoryBase(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
 		{
-			Guid = guid;
-			Name = name;
-			Image = image;
-			_singleton = singleton;
-			_createdViews = new LinkedList<ViewBase>();
-		}
-
-		protected ViewFactoryBase(Guid guid, string name, Image image)
-			: this(guid, name, image, false)
-		{
+			Guid          = guid;
+			Name          = name;
+			ImageProvider = imageProvider;
+			IsSingleton   = singleton;
 		}
 
 		public Guid Guid { get; }
 
 		public string Name { get; }
 
-		public Image Image { get; }
+		public IImageProvider ImageProvider { get; }
 
-		public virtual bool IsSingleton => _singleton;
+		public bool IsSingleton { get; }
 
 		public IEnumerable<ViewBase> CreatedViews => _createdViews;
 
@@ -87,7 +79,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			var view = CreateViewCore(environment);
-			if(view != null)
+			if(view is not null)
 			{
 				lock(_createdViews)
 				{

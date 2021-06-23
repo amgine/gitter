@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,10 +22,6 @@ namespace gitter.TeamCity
 {
 	public sealed class UserLocator : ObjectLocator
 	{
-		public UserLocator()
-		{
-		}
-
 		public string Id { get; set; }
 
 		public string Username { get; set; }

@@ -65,41 +65,69 @@ namespace gitter.Framework.Controls
 			User32.ShowWindow(this.Handle, 8);
 		}
 
-		/// <summary>
-		/// </summary>
-		/// <param name="m">The Windows <see cref="T:System.Windows.Forms.Message"/> to process.</param>
+		/// <inheritdoc/>
+		protected override void ScaleCore(float x, float y) { }
+
+		/// <inheritdoc/>
+		protected override void SetClientSizeCore(int x, int y) { }
+
+		/// <inheritdoc/>
+		protected override void Select(bool directed, bool forward) { }
+
+		/// <inheritdoc/>
+		protected override void ScaleControl(SizeF factor, BoundsSpecified specified) { }
+
+		/// <inheritdoc/>
+		protected override Size SizeFromClientSize(Size clientSize) => clientSize;
+
+		/// <inheritdoc/>
+		protected override bool ScaleChildren => false;
+
+		/// <inheritdoc/>
+		protected override Rectangle GetScaledBounds(Rectangle bounds, SizeF factor, BoundsSpecified specified) => bounds;
+
+		/// <inheritdoc/>
+		protected override bool CanEnableIme => false;
+
+		/// <inheritdoc/>
+		protected override bool CanRaiseEvents => false;
+
+		/// <inheritdoc/>
+		protected override bool OnGetDpiScaledSize(int deviceDpiOld, int deviceDpiNew, ref Size desiredSize) => true;
+
+		/// <inheritdoc/>
+		protected override void OnDpiChanged(DpiChangedEventArgs e) { }
+
+		/// <inheritdoc/>
+		protected override void OnDpiChangedAfterParent(EventArgs e) { }
+
+		/// <inheritdoc/>
+		protected override void OnDpiChangedBeforeParent(EventArgs e) { }
+
+		/// <inheritdoc/>
 		protected override void DefWndProc(ref Message m)
 		{
-			const int WM_MOUSEACTIVATE = 0x21;
 			const int MA_NOACTIVATE = 0x0003;
 
-			switch(m.Msg)
+			switch((WM)m.Msg)
 			{
-				case WM_MOUSEACTIVATE:
+				case WM.MOUSEACTIVATE:
 					m.Result = (IntPtr)MA_NOACTIVATE;
 					return;
 			}
 			base.DefWndProc(ref m);
 		}
 
-		/// <summary>Raises the <see cref="E:System.Windows.Forms.Form.Shown"/> event.</summary>
-		/// <param name="e">A <see cref="T:System.EventArgs"/> that contains the event data.</param>
+		/// <inheritdoc/>
 		protected override void OnShown(EventArgs e)
 		{
 			TopMost = true;
 		}
 
-		/// <summary>
-		/// Gets a value indicating whether the window will be activated when it is shown.
-		/// </summary>
-		/// <value></value>
-		/// <returns>True if the window will not be activated when it is shown; otherwise, false. The default is false.</returns>
+		/// <inheritdoc/>
 		protected override bool ShowWithoutActivation => true;
 
-		/// <summary>
-		/// </summary>
-		/// <value></value>
-		/// <returns>A <see cref="T:System.Windows.Forms.CreateParams"/> that contains the required creation parameters when the handle to the control is created.</returns>
+		/// <inheritdoc/>
 		protected override CreateParams CreateParams
 		{
 			get

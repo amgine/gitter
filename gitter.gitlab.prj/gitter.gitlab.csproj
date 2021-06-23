@@ -40,6 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\icons\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
     <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj" />
     <ProjectReference Include="..\gitter.git.gui.prj\gitter.git.gui.csproj" />

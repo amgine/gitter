@@ -33,7 +33,7 @@ namespace gitter.Git.Gui.Controls
 
 	sealed class UntrackedFilesPanel : FlowPanel
 	{
-		private static readonly StringFormat ContentFormat = new StringFormat(StringFormat.GenericTypographic)
+		private static readonly StringFormat ContentFormat = new(StringFormat.GenericTypographic)
 		{
 			Alignment = StringAlignment.Near,
 			FormatFlags =
@@ -42,8 +42,7 @@ namespace gitter.Git.Gui.Controls
 			Trimming = StringTrimming.EllipsisPath,
 		};
 
-		private const int LineSpacing = 4;
-		private const int LineHeight = 20;
+		private static readonly int LineHeight = SystemInformation.SmallIconSize.Height + 4;
 		private static readonly Font Font = GitterApplication.FontManager.UIFont.Font;
 		private static int FontHeight = -1;
 		private FileItem[] _items;
@@ -51,38 +50,39 @@ namespace gitter.Git.Gui.Controls
 
 		private sealed class FileItem
 		{
-			private readonly Bitmap _icon;
-			private readonly Bitmap _overlay;
 			private readonly string _text;
 
 			public FileItem(TreeFile file)
 			{
 				Verify.Argument.IsNotNull(file, nameof(file));
 
-				File = file;
+				File  = file;
 				_text = file.RelativePath;
-				_icon = GraphicsUtility.QueryIcon(file.RelativePath);
-				_overlay = CachedResources.Bitmaps["ImgOverlayAdd"];
 			}
 
 			public TreeFile File { get; }
 
-			public void Draw(Graphics graphics, Font font, Brush textBrush, Rectangle rect, int index)
+			public void Draw(Graphics graphics, Font font, DpiConverter conv, Brush textBrush, Rectangle rect, int index)
 			{
-				const int IconSize = 16;
-
-				int d = (rect.Height - 16) / 2;
-				var iconRect = new Rectangle(rect.X + d, rect.Y + d, IconSize, IconSize);
-				graphics.DrawImage(_icon, iconRect, 0, 0, IconSize, IconSize, GraphicsUnit.Pixel);
-				if(_overlay != null)
+				var iconSize = conv.Convert(new Size(16, 16));
+				int dy = (rect.Height - iconSize.Height) / 2;
+				var iconRect = new Rectangle(rect.X + dy, rect.Y + dy, iconSize.Width, iconSize.Height);
+				var icon = GraphicsUtility.QueryIcon(_text, conv.To);
+				if(icon is not null)
 				{
-					graphics.DrawImage(_overlay, iconRect, 0, 0, IconSize, IconSize, GraphicsUnit.Pixel);
+					graphics.DrawImage(icon, iconRect);
 				}
-				rect.X += d + IconSize + 3;
-				rect.Width -= d + IconSize + 3;
-				d = (LineHeight - FontHeight) / 2;
-				rect.Y += d;
-				rect.Height -= d;
+				var overlay = CachedResources.ScaledBitmaps[@"overlays.add", conv.ConvertX(16)];
+				if(overlay is not null)
+				{
+					graphics.DrawImage(overlay, iconRect);
+				}
+				var dx = dy + iconSize.Width + conv.ConvertX(3);
+				rect.X     += dx;
+				rect.Width -= dx;
+				dy = (LineHeight - FontHeight) / 2;
+				rect.Y      += dy;
+				rect.Height -= dy;
 				GitterApplication.TextRenderer.DrawText(
 					graphics, _text, font, textBrush, rect, ContentFormat);
 			}
@@ -178,8 +178,7 @@ namespace gitter.Git.Gui.Controls
 			base.OnMouseDown(x, y, button);
 			if(button == MouseButtons.Right)
 			{
-				var p = FlowControl as DiffViewer;
-				if(p != null)
+				if(FlowControl is DiffViewer p)
 				{
 					var htr = HitTest(x, y);
 					if(htr >= 0 && htr < _items.Length)
@@ -192,49 +191,50 @@ namespace gitter.Git.Gui.Controls
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
-			if(_items == null || _items.Length == 0) return Size.Empty;
+			Assert.IsNotNull(measureEventArgs);
+
+			if(_items is not { Length: > 0 }) return Size.Empty;
 			var font = FlowControl.Font;
 			if(FontHeight == -1) FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(measureEventArgs.Graphics, font) + 0.5);
-			return new Size(0, (_items.Length + 1) * (LineHeight));
+			return new Size(0, (_items.Length + 1) * LineHeight);
 		}
 
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{
-			if(_items == null || _items.Length == 0) return;
+			Assert.IsNotNull(paintEventArgs);
+
+			if(_items is not { Length: > 0 }) return;
 			var graphics = paintEventArgs.Graphics;
+			var conv = new DpiConverter(FlowControl);
 			var rect = paintEventArgs.Bounds;
 			var clip = paintEventArgs.ClipRectangle;
-			int y = rect.Y;
 			if(FontHeight == -1)
 			{
 				FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(graphics, Font) + 0.5);
 			}
-			var rc = new Rectangle(rect.X + 5, rect.Y, FlowControl.ContentArea.Width - 10, LineHeight);
+			var rc     = new Rectangle(rect.X + 5, rect.Y, FlowControl.ContentArea.Width - 10, LineHeight);
 			var rcClip = Rectangle.Intersect(rc, clip);
-			using(var textBrush = new SolidBrush(FlowControl.Style.Colors.WindowText))
-			using(var alternateBackgroundBrush = new SolidBrush(FlowControl.Style.Colors.Alternate))
+			using var textBrush = new SolidBrush(FlowControl.Style.Colors.WindowText);
+			if(rcClip is { Width: > 0, Height: > 0 })
 			{
-				if(rcClip.Width > 0 && rcClip.Height > 0)
+				GitterApplication.TextRenderer.DrawText(
+					graphics, Resources.StrUntrackedFiles.AddColon(), Font, textBrush, rc, ContentFormat);
+			}
+			for(int i = 0; i < _items.Length; ++i)
+			{
+				rc.Y += LineHeight;
+				rcClip = Rectangle.Intersect(rc, clip);
+				if(rcClip is { Width: > 0, Height: > 0 })
 				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, Resources.StrUntrackedFiles.AddColon(), Font, textBrush, rc, ContentFormat);
-				}
-				for(int i = 0; i < _items.Length; ++i)
-				{
-					rc.Y += LineHeight;
-					rcClip = Rectangle.Intersect(rc, clip);
-					if(rcClip.Width > 0 && rcClip.Height > 0)
+					if(i % 2 == 1)
 					{
-						if(i % 2 == 1)
-						{
-							graphics.FillRectangle(alternateBackgroundBrush, rcClip);
-						}
-						if(i == _fileHover.Index)
-						{
-							FlowControl.Style.ItemBackgroundStyles.Hovered.Draw(graphics, rc);
-						}
-						_items[i].Draw(graphics, Font, textBrush, rc, i);
+						graphics.GdiFill(FlowControl.Style.Colors.Alternate, rcClip);
 					}
+					if(i == _fileHover.Index)
+					{
+						FlowControl.Style.ItemBackgroundStyles.Hovered.Draw(graphics, rc);
+					}
+					_items[i].Draw(graphics, Font, conv, textBrush, rc, i);
 				}
 			}
 		}

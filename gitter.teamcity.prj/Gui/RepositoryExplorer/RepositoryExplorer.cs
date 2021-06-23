@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -21,9 +21,6 @@
 namespace gitter.TeamCity.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 
 	using gitter.Framework;
 	using gitter.Framework.Controls;
@@ -41,12 +38,9 @@ namespace gitter.TeamCity.Gui
 			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
 
 			_service = guiProvider.ServiceContext;
-			_rootItem = new RepositoryExplorerRootListItem(environment, guiProvider);
+			RootItem = new RepositoryExplorerRootListItem(environment, guiProvider);
 		}
 
-		public CustomListBoxItem RootItem
-		{
-			get { return _rootItem; }
-		}
+		public CustomListBoxItem RootItem { get; }
 	}
 }

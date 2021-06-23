@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -33,14 +33,15 @@ namespace gitter.Controls
 	{
 		private Font _underlineFont;
 
-		private static readonly object LinkClickedEvent = new object();
+		private static readonly object LinkClickedEvent = new();
 		public event EventHandler LinkClicked
 		{
-			add { Events.AddHandler(LinkClickedEvent, value); }
-			remove { Events.RemoveHandler(LinkClickedEvent, value); }
+			add    => Events.AddHandler   (LinkClickedEvent, value);
+			remove => Events.RemoveHandler(LinkClickedEvent, value);
 		}
 
-		protected virtual void OnLinkClicked() => ((EventHandler)Events[LinkClickedEvent])?.Invoke(this, EventArgs.Empty);
+		protected virtual void OnLinkClicked()
+			=> ((EventHandler)Events[LinkClickedEvent])?.Invoke(this, EventArgs.Empty);
 
 		public LinkButton()
 		{
@@ -51,7 +52,7 @@ namespace gitter.Controls
 
 			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
 			{
-				Font = SystemFonts.MessageBoxFont;
+				Font = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
 			}
 			else
 			{
@@ -59,12 +60,16 @@ namespace gitter.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnResize(EventArgs e)
 		{
 			base.OnResize(e);
-			_lblText.Top = (Height - _lblText.Height) / 2;
+			var conv = new DpiConverter(this);
+			var x = _picImage.Right + conv.ConvertX(3);
+			_lblText.SetBounds(x, 0, Width - x, Height);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnFontChanged(EventArgs e)
 		{
 			base.OnFontChanged(e);
@@ -73,7 +78,7 @@ namespace gitter.Controls
 
 		private void RefreshUnderlineFont()
 		{
-			if(_underlineFont != null)
+			if(_underlineFont is not null)
 			{
 				_underlineFont.Dispose();
 				_underlineFont = null;
@@ -90,15 +95,15 @@ namespace gitter.Controls
 
 		public Image Image
 		{
-			get { return _picImage.Image; }
-			set { _picImage.Image = value; }
+			get => _picImage.Image;
+			set => _picImage.Image = value;
 		}
 
 		[Browsable(true)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public override string Text
 		{
-			get { return base.Text; }
+			get => base.Text;
 			set
 			{
 				base.Text = value;
@@ -118,7 +123,7 @@ namespace gitter.Controls
 
 		private void OnInteractivePartMouseEnter(object sender, EventArgs e)
 		{
-			if(_underlineFont == null)
+			if(_underlineFont is null)
 			{
 				RefreshUnderlineFont();
 			}

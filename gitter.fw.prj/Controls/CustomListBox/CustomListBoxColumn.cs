@@ -168,7 +168,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_headerFont != null) return _headerFont;
+				if(_headerFont is not null) return _headerFont;
 				if(IsAttachedToListBox) return ListBox.Font;
 				return GitterApplication.FontManager.UIFont;
 			}
@@ -187,7 +187,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_headerBrush != null) return _headerBrush;
+				if(_headerBrush is not null) return _headerBrush;
 				if(IsAttachedToListBox)  return ListBox.Renderer.ColumnHeaderForegroundBrush;
 				return CustomListBoxManager.Renderer.ColumnHeaderForegroundBrush;
 			}
@@ -408,11 +408,16 @@ namespace gitter.Framework.Controls
 
 		protected override int OnHitTest(int x, int y)
 		{
-			if(x < ResizerProximity)
+			var proximity = ResizerProximity;
+			if(ListBox is not null)
+			{
+				proximity = proximity * ListBox.DeviceDpi / 96;
+			}
+			if(x < proximity)
 			{
 				if(_sizeMode == ColumnSizeMode.Sizeable)
 				{
-					if(PreviousVisibleColumn != null)
+					if(PreviousVisibleColumn is not null)
 					{
 						return ColumnHitTestResults.LeftResizer;
 					}
@@ -440,7 +445,7 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			else if(_width - x < ResizerProximity)
+			else if(_width - x < proximity)
 			{
 				if(_sizeMode == ColumnSizeMode.Sizeable)
 				{
@@ -479,7 +484,7 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			if(Extender != null)
+			if(Extender is not null)
 			{
 				if(_width - x < ExtenderButtonWidth)
 				{
@@ -497,7 +502,7 @@ namespace gitter.Framework.Controls
 		protected virtual void OnClick()
 		{
 			var comparison = SortComparison;
-			if(comparison == null) return;
+			if(comparison is null) return;
 			if(ListBox.Items.Comparison == comparison)
 			{
 				ListBox.Items.SortOrder = ListBox.Items.SortOrder switch
@@ -508,9 +513,9 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				ListBox.Items.SortOrder = SortOrder.None;
+				ListBox.Items.SortOrder  = SortOrder.None;
 				ListBox.Items.Comparison = comparison;
-				ListBox.Items.SortOrder = SortOrder.Ascending;
+				ListBox.Items.SortOrder  = SortOrder.Ascending;
 			}
 		}
 

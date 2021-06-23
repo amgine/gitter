@@ -48,7 +48,7 @@ namespace gitter.Framework.Controls
 				Orientation.Horizontal => new CustomHScrollbar { Renderer = renderer },
 				_ => throw new ArgumentException("Invalid orientation value.", nameof(orientation)),
 			};
-			_scrollBar.Scroll += OnScrollBarScroll;
+			_scrollBar.Scroll       += OnScrollBarScroll;
 			_scrollBar.ValueChanged += OnScrollBarValueChanged;
 		}
 

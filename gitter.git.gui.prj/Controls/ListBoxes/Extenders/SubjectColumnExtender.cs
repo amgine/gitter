@@ -24,9 +24,10 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Drawing;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
+	using gitter.Framework;
 	using gitter.Framework.Controls;
+
+	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
 	partial class SubjectColumnExtender : ExtenderBase
@@ -60,11 +61,12 @@ namespace gitter.Git.Gui.Controls
 
 		private void CreateControls()
 		{
-			const int height = 27;
-			const int hmargin = 6;
-			const int vspacing = -4;
-			int width = Width - hmargin * 2;
-			int yoffset = 0;
+			var conv = new DpiConverter(this);
+			int height   = conv.ConvertY(27);
+			int hmargin  = conv.ConvertX(6);
+			int vspacing = conv.ConvertY(-4);
+			int width    = Width - hmargin * 2;
+			int yoffset  = 0;
 
 			_chkAlignToGraph?.Dispose();
 			_chkAlignToGraph = Style.CreateCheckBox();
@@ -89,7 +91,7 @@ namespace gitter.Git.Gui.Controls
 
 			_chkLocalBranches?.Dispose();
 			_chkLocalBranches = Style.CreateCheckBox();
-			_chkLocalBranches.Text = Resources.StrLocalBranches;
+			_chkLocalBranches.Text  = Resources.StrLocalBranches;
 			_chkLocalBranches.Image = CachedResources.Bitmaps["ImgBranch"];
 			_chkLocalBranches.Control.Bounds = new Rectangle(hmargin, yoffset, width, height);
 			_chkLocalBranches.Control.Parent = this;

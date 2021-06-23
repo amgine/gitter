@@ -149,7 +149,14 @@ namespace gitter.Framework.Controls
 			{
 				if(_cachedLevel == -1)
 				{
-					_cachedLevel = (_parent == null) ? (0) : (_parent.Level + 1);
+					var level = 0;
+					var p = _parent;
+					while(p is not null)
+					{
+						++level;
+						p = p.Parent;
+					}
+					_cachedLevel = level;
 				}
 				return _cachedLevel;
 			}
@@ -231,8 +238,13 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(_parent == null) return true;
-				return _parent.IsExpanded && _parent.IsPresented;
+				var p = _parent;
+				while(p is not null)
+				{
+					if(!p.IsExpanded) return false;
+					p = p.Parent;
+				}
+				return true;
 			}
 		}
 
@@ -405,10 +417,10 @@ namespace gitter.Framework.Controls
 		/// <summary>Removes item from listbox.</summary>
 		public void Remove()
 		{
-			if(_parent == null)
+			if(_parent is null)
 			{
 				var ctl = ListBox;
-				if(ctl != null)
+				if(ctl is not null)
 				{
 					ctl.Items.Remove(this);
 				}
@@ -422,10 +434,10 @@ namespace gitter.Framework.Controls
 		/// <summary>Removes item from listbox thread-safe.</summary>
 		public void RemoveSafe()
 		{
-			if(_parent == null)
+			if(_parent is null)
 			{
 				var ctl = ListBox;
-				if(ctl != null)
+				if(ctl is not null)
 				{
 					ctl.Items.RemoveSafe(this);
 				}
@@ -442,10 +454,10 @@ namespace gitter.Framework.Controls
 		{
 			bool keepPosition = true;
 			var items = ParentItems;
-			if(items != null && items.Count != 1 && items.SortOrder != SortOrder.None)
+			if(items is { Count: > 1, SortOrder: not SortOrder.None })
 			{
 				var comparison = items.Comparison;
-				if(comparison != null)
+				if(comparison is not null)
 				{
 					int order = items.SortOrder == SortOrder.Ascending ? 1 : -1;
 					var index = items.IndexOf(this);
@@ -487,7 +499,7 @@ namespace gitter.Framework.Controls
 		private void Reinsert()
 		{
 			var items = ParentItems;
-			if(items != null)
+			if(items is not null)
 			{
 				items.Remove(this);
 				items.Add(this);
@@ -507,12 +519,18 @@ namespace gitter.Framework.Controls
 		public void InvalidateSafe()
 		{
 			var listBox = ListBox;
-			if(listBox != null)
+			if(listBox is not null)
 			{
 				if(listBox.InvokeRequired)
 				{
 					Action<CustomListBoxItem> action = listBox.InvalidateItem;
-					listBox.BeginInvoke(action, new object[] { this });
+					try
+					{
+						listBox.BeginInvoke(action, new object[] { this });
+					}
+					catch
+					{
+					}
 				}
 				else
 				{
@@ -534,12 +552,18 @@ namespace gitter.Framework.Controls
 		public void InvalidateSubItemSafe(int id)
 		{
 			var listBox = ListBox;
-			if(listBox != null && IsPresented)
+			if(listBox is not null && IsPresented)
 			{
 				if(listBox.InvokeRequired)
 				{
 					Action<CustomListBoxItem, int> action = listBox.InvalidateSubItem;
-					listBox.BeginInvoke(action, this, id);
+					try
+					{
+						listBox.BeginInvoke(action, this, id);
+					}
+					catch
+					{
+					}
 				}
 				else
 				{
@@ -548,38 +572,30 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		/// <summary>Called when item is attached to listbox.</summary>
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
 			Items.ListBox = ListBox;
 		}
 
-		/// <summary>Called when item is detached from listbox.</summary>
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
 			Items.ListBox = null;
 			base.OnListBoxDetached();
 		}
 
-		/// <summary>Paints item background.</summary>
-		/// <param name="paintEventArgs">Painting options.</param>
+		/// <inheritdoc/>
 		protected override void OnPaintBackground(ItemPaintEventArgs paintEventArgs)
-		{
-			ListBox.Renderer.OnPaintItemBackground(this, paintEventArgs);
-		}
+			=> ListBox.Renderer.OnPaintItemBackground(this, paintEventArgs);
 
-		/// <summary>Paint item content.</summary>
-		/// <param name="paintEventArgs">Painting options.</param>
+		/// <inheritdoc/>
 		protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
-		{
-			ListBox.Renderer.OnPaintItemContent(this, paintEventArgs);
-		}
+			=> ListBox.Renderer.OnPaintItemContent(this, paintEventArgs);
 
 		internal void PaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			OnPaintSubItem(paintEventArgs);
-		}
+			=> OnPaintSubItem(paintEventArgs);
 
 		/// <summary>Override this to paint part of your item.</summary>
 		/// <param name="paintEventArgs">Paint event args.</param>
@@ -609,10 +625,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		/// <summary>Perform item hit-testing.</summary>
-		/// <param name="x">X coordinate.</param>
-		/// <param name="y">Y coordinate.</param>
-		/// <returns>Hit area id.</returns>
+		/// <inheritdoc/>
 		protected override int OnHitTest(int x, int y)
 		{
 			var listBox = ListBox;
@@ -658,7 +671,7 @@ namespace gitter.Framework.Controls
 		/// <returns>Context menu for specified location.</returns>
 		public virtual ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(requestEventArgs == null) return null;
+			if(requestEventArgs is null) return null;
 			ContextMenuRequested?.Invoke(this, requestEventArgs);
 			return requestEventArgs.ContextMenu;
 		}
@@ -678,9 +691,8 @@ namespace gitter.Framework.Controls
 		/// <summary>Item associated data.</summary>
 		public T DataContext { get; set; }
 
-		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem{TData}"/>.</summary>
-		/// <returns><see cref="T:System.String"/> representation of this <see cref="CustomListBoxItem{TData}"/>.</returns>
+		/// <inheritdoc/>
 		public override string ToString()
-			=> "item: " + (DataContext == null?"(null)":DataContext.ToString());
+			=> "item: " + DataContext is null ? "(null)" : DataContext.ToString();
 	}
 }

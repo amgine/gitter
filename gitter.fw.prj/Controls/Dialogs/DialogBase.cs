@@ -50,9 +50,9 @@ namespace gitter.Framework
 			}
 			AutoScaleMode = AutoScaleMode.Dpi;
 			AutoScaleDimensions = new SizeF(96F, 96F);
-			ResumeLayout(false);
-
 			Margin = new Padding(10);
+			ResumeLayout(false);
+			PerformLayout();
 		}
 
 		protected override void Dispose(bool disposing)

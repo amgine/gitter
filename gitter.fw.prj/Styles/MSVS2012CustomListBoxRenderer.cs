@@ -34,19 +34,19 @@ namespace gitter.Framework
 		#region Static Data
 
 		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedState =
-			new Dictionary<CheckedState, Bitmap>()
+			new()
 			{
-				{ CheckedState.Checked,			CachedResources.Bitmaps["ImgChecked"]					},
-				{ CheckedState.Unchecked,		CachedResources.Bitmaps["ImgUnchecked"]					},
-				{ CheckedState.Indeterminate,	CachedResources.Bitmaps["ImgCheckIndeterminate"]		},
+				[CheckedState.Checked]       = CachedResources.Bitmaps["ImgChecked"],
+				[CheckedState.Unchecked]     = CachedResources.Bitmaps["ImgUnchecked"],
+				[CheckedState.Indeterminate] = CachedResources.Bitmaps["ImgCheckIndeterminate"],
 			};
 
 		private static readonly Dictionary<CheckedState, Bitmap> ImgCheckedStateHovered =
-			new Dictionary<CheckedState, Bitmap>()
+			new()
 			{
-				{ CheckedState.Checked,			CachedResources.Bitmaps["ImgCheckedHover"]				},
-				{ CheckedState.Unchecked,		CachedResources.Bitmaps["ImgUncheckedHover"]			},
-				{ CheckedState.Indeterminate,	CachedResources.Bitmaps["ImgCheckIndeterminateHover"]	},
+				[CheckedState.Checked]       = CachedResources.Bitmaps["ImgCheckedHover"],
+				[CheckedState.Unchecked]     = CachedResources.Bitmaps["ImgUncheckedHover"],
+				[CheckedState.Indeterminate] = CachedResources.Bitmaps["ImgCheckIndeterminateHover"],
 			};
 
 		private static readonly PointF[] _triangle = new PointF[3];
@@ -55,7 +55,7 @@ namespace gitter.Framework
 
 		#region Color Tables
 
-		public static readonly IColorTable DarkColors = new DarkColorTable();
+		public static readonly IColorTable DarkColors  = new DarkColorTable();
 		public static readonly IColorTable LightColors = new LightColorTable();
 
 		public interface IColorTable
@@ -85,8 +85,6 @@ namespace gitter.Framework
 			private static readonly Color PLUS_MINUS_FOREGROUND			= Color.FromArgb(255, 255, 255);
 			private static readonly Color ACCENT_PLUS_MINUS_FOREGROUND	= Color.FromArgb(0, 122, 204);
 
-			#region IColorTable
-
 			public Color Background => BACKGROUND;
 
 			public Color Text => TEXT;
@@ -106,8 +104,6 @@ namespace gitter.Framework
 			public Color PlusMinusForeground => PLUS_MINUS_FOREGROUND;
 
 			public Color AccentPlusMinusForeground => ACCENT_PLUS_MINUS_FOREGROUND;
-
-			#endregion
 		}
 
 		private sealed class LightColorTable : IColorTable
@@ -123,8 +119,6 @@ namespace gitter.Framework
 			private static readonly Color PLUS_MINUS_FOREGROUND			= Color.FromArgb(255, 255, 255);
 			private static readonly Color ACCENT_PLUS_MINUS_FOREGROUND	= Color.FromArgb(0, 122, 204);
 
-			#region IColorTable
-
 			public Color Background => BACKGROUND;
 
 			public Color Text => TEXT;
@@ -144,8 +138,6 @@ namespace gitter.Framework
 			public Color PlusMinusForeground => PLUS_MINUS_FOREGROUND;
 
 			public Color AccentPlusMinusForeground => ACCENT_PLUS_MINUS_FOREGROUND;
-
-			#endregion
 		}
 
 		#endregion
@@ -163,20 +155,11 @@ namespace gitter.Framework
 
 		private IColorTable ColorTable { get; }
 
-		public override Color BackColor
-		{
-			get { return ColorTable.Background; }
-		}
+		public override Color BackColor => ColorTable.Background;
 
-		public override Color ForeColor
-		{
-			get { return ColorTable.Text; }
-		}
+		public override Color ForeColor => ColorTable.Text;
 
-		public override Color ColumnHeaderForeColor
-		{
-			get { return ColorTable.Text; }
-		}
+		public override Color ColumnHeaderForeColor => ColorTable.Text;
 
 		public override void OnPaintColumnBackground(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs)
 		{
@@ -247,13 +230,10 @@ namespace gitter.Framework
 				graphics.DrawLine(pen, bounds.Right - 1, 0, bounds.Right - 1, bounds.Bottom - 1);
 				graphics.DrawLine(pen, bounds.X, bounds.Bottom - 1, bounds.Right, bounds.Bottom - 1);
 			}
-			using(var brush = new SolidBrush(c2))
-			{
-				var rc = bounds;
-				rc.Width -= 1;
-				rc.Height -= 1;
-				graphics.FillRectangle(brush, rc);
-			}
+			var rc = bounds;
+			rc.Width -= 1;
+			rc.Height -= 1;
+			graphics.GdiFill(c2, rc);
 			PaintColumnExtender(column, paintEventArgs);
 		}
 
@@ -268,13 +248,10 @@ namespace gitter.Framework
 				graphics.DrawLine(pen, bounds.Right - 1, 0, bounds.Right - 1, bounds.Bottom - 1);
 				graphics.DrawLine(pen, bounds.X, bounds.Bottom - 1, bounds.Right, bounds.Bottom - 1);
 			}
-			using(var brush = new SolidBrush(c2))
-			{
-				var rc = bounds;
-				rc.Width -= 1;
-				rc.Height -= 1;
-				graphics.FillRectangle(brush, rc);
-			}
+			var rc = bounds;
+			rc.Width -= 1;
+			rc.Height -= 1;
+			graphics.GdiFill(c2, rc);
 			PaintColumnExtender(column, paintEventArgs);
 		}
 
@@ -284,29 +261,20 @@ namespace gitter.Framework
 			var rect = paintEventArgs.Bounds;
 			var font = column.HeaderFont;
 
-			ItemPaintEventArgs.PrepareContentRectangle(ref rect);
+			paintEventArgs.PrepareContentRectangle(ref rect);
 			paintEventArgs.PrepareTextRectangle(font, font, ref rect);
-			if(column.Extender != null && ((paintEventArgs.State & (ItemState.Hovered | ItemState.Pressed)) != ItemState.None))
+			if(column.Extender is not null && ((paintEventArgs.State & (ItemState.Hovered | ItemState.Pressed)) != ItemState.None))
 			{
 				rect.Width -= CustomListBoxColumn.ExtenderButtonWidth;
 				if(rect.Width <= 0) return;
 			}
-			StringFormat format;
-			switch(column.HeaderAlignment)
+			var format = column.HeaderAlignment switch
 			{
-				case StringAlignment.Near:
-					format = GitterApplication.TextRenderer.LeftAlign;
-					break;
-				case StringAlignment.Far:
-					format = GitterApplication.TextRenderer.RightAlign;
-					break;
-				case StringAlignment.Center:
-					format = GitterApplication.TextRenderer.CenterAlign;
-					break;
-				default:
-					format = GitterApplication.TextRenderer.LeftAlign;
-					break;
-			}
+				StringAlignment.Near   => GitterApplication.TextRenderer.LeftAlign,
+				StringAlignment.Far    => GitterApplication.TextRenderer.RightAlign,
+				StringAlignment.Center => GitterApplication.TextRenderer.CenterAlign,
+				_ => GitterApplication.TextRenderer.LeftAlign,
+			};
 			GitterApplication.TextRenderer.DrawText(graphics, column.Name, font, column.HeaderBrush, rect, format);
 		}
 
@@ -319,72 +287,39 @@ namespace gitter.Framework
 			bool isHovered	= (state & ItemState.Hovered) == ItemState.Hovered;
 			bool isSelected	= (state & ItemState.Selected) == ItemState.Selected;
 			bool isFocused	= (state & ItemState.Focused) == ItemState.Focused;
-			Brush brush = null;
-			Pen pen = null;
+
+			var backColor = Color.Transparent;
+			var pen = default(Pen);
+
 			if(isSelected)
 			{
-				if(paintEventArgs.IsHostControlFocused)
-				{
-					if(isHovered)
-					{
-						brush = new SolidBrush(ColorTable.SelectionBackground);
-					}
-					else if(isFocused)
-					{
-						brush = new SolidBrush(ColorTable.SelectionBackground);
-					}
-					else
-					{
-						brush = new SolidBrush(ColorTable.SelectionBackground);
-					}
-				}
-				else
-				{
-					if(isHovered)
-					{
-						brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus);
-					}
-					else
-					{
-						brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus);
-					}
-				}
+				backColor = paintEventArgs.IsHostControlFocused
+					? ColorTable.SelectionBackground
+					: ColorTable.SelectionBackgroundNoFocus;
 			}
 			else
 			{
 				if(isHovered)
 				{
-					if(isFocused && paintEventArgs.IsHostControlFocused)
-					{
-						brush = new SolidBrush(ColorTable.HoverBackground);
-						pen = new Pen(ColorTable.FocusBorder);
-					}
-					else
-					{
-						brush = new SolidBrush(ColorTable.HoverBackground);
-					}
+					backColor = ColorTable.HoverBackground;
 				}
-				else if(isFocused)
+				if(isFocused && paintEventArgs.IsHostControlFocused)
 				{
-					if(paintEventArgs.IsHostControlFocused)
-					{
-						pen = new Pen(ColorTable.FocusBorder);
-					}
+					pen = new Pen(ColorTable.FocusBorder);
 				}
 			}
-			if(brush != null)
+			if(backColor != Color.Transparent)
 			{
 				var itemBounds = Rectangle.Intersect(paintEventArgs.ClipRectangle, paintEventArgs.Bounds);
-				if(itemBounds.Width > 0 && itemBounds.Height > 0)
+				if(itemBounds is { Width: > 0, Height: > 0 })
 				{
-					paintEventArgs.Graphics.FillRectangle(brush, itemBounds);
+					paintEventArgs.Graphics.GdiFill(backColor, itemBounds);
 				}
-				brush.Dispose();
 			}
-			if(pen != null)
+			if(pen is not null)
 			{
 				var rect = paintEventArgs.Bounds;
-				rect.Width -= 1;
+				rect.Width  -= 1;
 				rect.Height -= 1;
 				paintEventArgs.Graphics.DrawRectangle(pen, rect);
 				pen.Dispose();
@@ -425,59 +360,81 @@ namespace gitter.Framework
 
 		private void RenderPlusMinus(Graphics graphics, int x, int y, bool isExpanded, bool isSelected, bool isPlusMinusHovered, bool isHostControlFocused)
 		{
-			var oldMode = graphics.SmoothingMode;
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			if(isExpanded)
+			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 			{
-				if(isPlusMinusHovered)
+				if(isExpanded)
 				{
-					if(isHostControlFocused && isSelected)
+					if(isPlusMinusHovered)
 					{
-						CacheMinusTrianglePolygon1(x, y);
-						using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
+						if(isHostControlFocused && isSelected)
 						{
-							graphics.FillPolygon(brush, _triangle);
+							CacheMinusTrianglePolygon1(x, y);
+							using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
+							{
+								graphics.FillPolygon(brush, _triangle);
+							}
+							CacheMinusTrianglePolygon2(x, y);
+							using(var brush = new SolidBrush(ColorTable.SelectionBackground))
+							{
+								graphics.FillPolygon(brush, _triangle);
+							}
 						}
-						CacheMinusTrianglePolygon2(x, y);
-						using(var brush = new SolidBrush(ColorTable.SelectionBackground))
+						else
 						{
+							CacheMinusTrianglePolygon1(x, y);
+							using var brush = new SolidBrush(ColorTable.AccentPlusMinusForeground);
 							graphics.FillPolygon(brush, _triangle);
 						}
 					}
 					else
 					{
 						CacheMinusTrianglePolygon1(x, y);
-						using(var brush = new SolidBrush(ColorTable.AccentPlusMinusForeground))
-						{
-							graphics.FillPolygon(brush, _triangle);
-						}
+						using var brush = new SolidBrush(ColorTable.PlusMinusForeground);
+						graphics.FillPolygon(brush, _triangle);
 					}
 				}
 				else
 				{
-					CacheMinusTrianglePolygon1(x, y);
-					using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
+					if(isPlusMinusHovered)
 					{
-						graphics.FillPolygon(brush, _triangle);
-					}
-				}
-			}
-			else
-			{
-				if(isPlusMinusHovered)
-				{
-					if(isHostControlFocused && isSelected)
-					{
-						CachePlusTrianglePolygon1(x, y);
-						using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
+						if(isHostControlFocused && isSelected)
 						{
+							CachePlusTrianglePolygon1(x, y);
+							using var brush = new SolidBrush(ColorTable.PlusMinusForeground);
 							graphics.FillPolygon(brush, _triangle);
+						}
+						else
+						{
+							CachePlusTrianglePolygon1(x, y);
+							using(var brush = new SolidBrush(ColorTable.AccentPlusMinusForeground))
+							{
+								graphics.FillPolygon(brush, _triangle);
+							}
+							CachePlusTrianglePolygon2(x, y);
+							if(isSelected)
+							{
+								if(isHostControlFocused)
+								{
+									using var brush = new SolidBrush(ColorTable.SelectionBackground);
+									graphics.FillPolygon(brush, _triangle);
+								}
+								else
+								{
+									using var brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus);
+									graphics.FillPolygon(brush, _triangle);
+								}
+							}
+							else
+							{
+								using var brush = new SolidBrush(ColorTable.Background);
+								graphics.FillPolygon(brush, _triangle);
+							}
 						}
 					}
 					else
 					{
 						CachePlusTrianglePolygon1(x, y);
-						using(var brush = new SolidBrush(ColorTable.AccentPlusMinusForeground))
+						using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
 						{
 							graphics.FillPolygon(brush, _triangle);
 						}
@@ -486,69 +443,30 @@ namespace gitter.Framework
 						{
 							if(isHostControlFocused)
 							{
-								using(var brush = new SolidBrush(ColorTable.SelectionBackground))
-								{
-									graphics.FillPolygon(brush, _triangle);
-								}
+								using var brush = new SolidBrush(ColorTable.SelectionBackground);
+								graphics.FillPolygon(brush, _triangle);
 							}
 							else
 							{
-								using(var brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus))
-								{
-									graphics.FillPolygon(brush, _triangle);
-								}
-							}
-						}
-						else
-						{
-							using(var brush = new SolidBrush(ColorTable.Background))
-							{
-								graphics.FillPolygon(brush, _triangle);
-							}
-						}
-					}
-				}
-				else
-				{
-					CachePlusTrianglePolygon1(x, y);
-					using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
-					{
-						graphics.FillPolygon(brush, _triangle);
-					}
-					CachePlusTrianglePolygon2(x, y);
-					if(isSelected)
-					{
-						if(isHostControlFocused)
-						{
-							using(var brush = new SolidBrush(ColorTable.SelectionBackground))
-							{
+								using var brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus);
 								graphics.FillPolygon(brush, _triangle);
 							}
 						}
 						else
 						{
-							using(var brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus))
-							{
-								graphics.FillPolygon(brush, _triangle);
-							}
-						}
-					}
-					else
-					{
-						using(var brush = new SolidBrush(ColorTable.Background))
-						{
+							using var brush = new SolidBrush(ColorTable.Background);
 							graphics.FillPolygon(brush, _triangle);
 						}
 					}
 				}
 			}
-			graphics.SmoothingMode = oldMode;
 		}
 
 		public override void OnPaintItemContent(CustomListBoxItem item, ItemPaintEventArgs paintEventArgs)
 		{
 			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
+			var rect     = paintEventArgs.Bounds;
+			//var conv     = new DpiConverter(graphics);
 
 			#region clip invisible subitems
 
@@ -690,7 +608,7 @@ namespace gitter.Framework
 
 						if(listBox.ShowCheckBoxes && item.CheckedState != CheckedState.Unavailable)
 						{
-							Bitmap checkedStateImage = null;
+							Bitmap checkedStateImage;
 							if(hoveredPart == ItemHitTestResults.CheckBox)
 							{
 								ImgCheckedStateHovered.TryGetValue(item.CheckedState, out checkedStateImage);
@@ -699,7 +617,7 @@ namespace gitter.Framework
 							{
 								ImgCheckedState.TryGetValue(item.CheckedState, out checkedStateImage);
 							}
-							if(checkedStateImage != null && w2 > ListBoxConstants.SpaceBeforeCheckbox)
+							if(checkedStateImage is not null && w2 > ListBoxConstants.SpaceBeforeCheckbox)
 							{
 								Rectangle destRect, srcRect;
 								if(w2 < ListBoxConstants.CheckboxImageWidth + ListBoxConstants.SpaceBeforeCheckbox)
@@ -729,7 +647,7 @@ namespace gitter.Framework
 								graphics.DrawImage(checkedStateImage, destRect, srcRect, GraphicsUnit.Pixel);
 							}
 							offset += ListBoxConstants.CheckBoxAreaWidth;
-							w2 -= ListBoxConstants.CheckBoxAreaWidth;
+							w2     -= ListBoxConstants.CheckBoxAreaWidth;
 						}
 
 						#endregion

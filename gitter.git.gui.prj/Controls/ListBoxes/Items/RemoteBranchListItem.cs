@@ -30,8 +30,6 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="RemoteBranch"/> object.</summary>
 	public sealed class RemoteBranchListItem : ReferenceListItemBase<RemoteBranch>
 	{
-		private static readonly Bitmap ImgBranchRemote = CachedResources.Bitmaps["ImgBranchRemote"];
-
 		/// <summary>Create <see cref="RemoteBranchListItem"/>.</summary>
 		/// <param name="branch">Related <see cref="RemoteBranch"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="branch"/> == <c>null</c>.</exception>
@@ -41,26 +39,33 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(branch, nameof(branch));
 		}
 
-		protected override Image Image => ImgBranchRemote;
+		protected override Image GetImage(Dpi dpi)
+			=> CachedResources.ScaledBitmaps["rbranch", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
 
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(ImgBranchRemote,
+					return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi),
 						Parent is RemoteListItem rli ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
 				default:
 					return base.OnMeasureSubItem(measureEventArgs);
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(ImgBranchRemote,
+					paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi),
 						Parent is RemoteListItem rli ? DataContext.Name.Substring(rli.DataContext.Name.Length + 1) : DataContext.Name);
 					break;
 				default:
@@ -69,8 +74,11 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
+			Assert.IsNotNull(requestEventArgs);
+
 			var menu = new BranchMenu(DataContext);
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;

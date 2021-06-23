@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,16 +28,8 @@ namespace gitter
 
 	static class CachedResources
 	{
-		private static readonly CachedBitmapResources _bitmaps;
+		public static CachedBitmapResources Bitmaps { get; } = new(Resources.ResourceManager);
 
-		static CachedResources()
-		{
-			_bitmaps = new CachedBitmapResources(Resources.ResourceManager);
-		}
-
-		public static CachedBitmapResources Bitmaps
-		{
-			get { return _bitmaps; }
-		}
+		public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.Resources.icons");
 	}
 }

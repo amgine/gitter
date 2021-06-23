@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Menu for <see cref="RemoteTag"/> object.</summary>
@@ -40,14 +42,17 @@ namespace gitter.Git.Gui.Controls
 
 			RemoteTag = remoteTag;
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			Items.Add(GuiItemFactory.GetRemoveRemoteTagItem<ToolStripMenuItem>(RemoteTag, "{0}"));
 
 			var copyToClipboardItem = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
+			copyToClipboardItem.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(
 				Resources.StrName, RemoteTag.Name));
-			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
+			copyToClipboardItem.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(
 				Resources.StrFullName, RemoteTag.FullName));
-			copyToClipboardItem.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(
+			copyToClipboardItem.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(
 				Resources.StrPosition, RemoteTag.Hash.ToString()));
 			Items.Add(copyToClipboardItem);
 		}

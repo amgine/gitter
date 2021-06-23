@@ -134,9 +134,8 @@ namespace gitter.Framework.Controls
 		public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
 		{
 			using(var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding))
+			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 			{
-				var oldMode = graphics.SmoothingMode;
-				graphics.SmoothingMode = SmoothingMode.HighQuality;
 				using(var brush = new SolidBrush(BackgroundColor))
 				{
 					graphics.FillPath(brush, path);
@@ -145,7 +144,6 @@ namespace gitter.Framework.Controls
 				{
 					graphics.DrawPath(pen, path);
 				}
-				graphics.SmoothingMode = oldMode;
 			}
 			if(!string.IsNullOrWhiteSpace(status))
 			{

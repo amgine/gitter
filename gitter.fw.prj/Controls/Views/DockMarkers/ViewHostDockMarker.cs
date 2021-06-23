@@ -199,25 +199,23 @@ namespace gitter.Framework.Controls
 
 		private static Region GetRegion(ViewHost dockHost, ViewHost dockClient)
 		{
-			using(var gp = new GraphicsPath())
+			using var gp = new GraphicsPath();
+			if(dockHost.IsDocumentWell)
 			{
-				if(dockHost.IsDocumentWell)
-				{
-					if(dockClient.IsDocumentWell || (dockClient.ViewsCount == 1 && dockClient.GetView(0).IsDocument))
-					{
-						gp.AddPolygon(RegionSmallCrossPolygon);
-					}
-					else
-					{
-						gp.AddPolygon(RegionLargeCrossPolygon);
-					}
-				}
-				else
+				if(dockClient.IsDocumentWell || (dockClient.ViewsCount == 1 && dockClient.GetView(0).IsDocument))
 				{
 					gp.AddPolygon(RegionSmallCrossPolygon);
 				}
-				return new Region(gp);
+				else
+				{
+					gp.AddPolygon(RegionLargeCrossPolygon);
+				}
 			}
+			else
+			{
+				gp.AddPolygon(RegionSmallCrossPolygon);
+			}
+			return new Region(gp);
 		}
 
 		public ViewHost Host { get; }
@@ -230,6 +228,7 @@ namespace gitter.Framework.Controls
 				bounds.Y + (bounds.Height - 112) / 2);
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)

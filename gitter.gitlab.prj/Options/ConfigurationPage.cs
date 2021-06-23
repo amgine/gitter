@@ -40,11 +40,10 @@ namespace gitter.GitLab.Options
 
 		sealed class Item : CustomListBoxItem<ServerInfo>
 		{
-			private static Bitmap Icon = CachedResources.Bitmaps["ImgGitLab32"];
-			private static readonly StringFormat TextStringFormat = new StringFormat(StringFormat.GenericTypographic)
+			private static readonly StringFormat TextStringFormat = new(StringFormat.GenericTypographic)
 			{
-				FormatFlags = StringFormatFlags.LineLimit,
-				Trimming = StringTrimming.EllipsisCharacter,
+				FormatFlags   = StringFormatFlags.LineLimit | StringFormatFlags.NoClip,
+				Trimming      = StringTrimming.EllipsisCharacter,
 				LineAlignment = StringAlignment.Center,
 			};
 
@@ -55,9 +54,12 @@ namespace gitter.GitLab.Options
 
 			protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 			{
+				Assert.IsNotNull(paintEventArgs);
+
 				if(paintEventArgs.Column.Id != 0) return;
 
-				var iconSize = SystemInformation.IconSize;
+				var conv     = paintEventArgs.DpiConverter;
+				var iconSize = conv.Convert(new Size(32, 32));
 
 				var graphics = paintEventArgs.Graphics;
 				var bounds   = paintEventArgs.Bounds;
@@ -65,25 +67,24 @@ namespace gitter.GitLab.Options
 				var d = (bounds.Height - iconSize.Height) / 2;
 				var iconBounds = new Rectangle(bounds.X + d, bounds.Y + d, iconSize.Height, iconSize.Width);
 
-				graphics.DrawImage(Icon, iconBounds);
+				graphics.DrawImage(CachedResources.ScaledBitmaps[@"gitlab", iconSize.Width], iconBounds);
 
-				bounds.Y += 3;
-				bounds.Height -= 6;
+				var dy = conv.ConvertY(3);
+				bounds.Y      += dy;
+				bounds.Height -= dy * 2;
 
-				var textBounds1 = new Rectangle(bounds.X + iconBounds.Right + 4, bounds.Y, bounds.Width - iconBounds.Right - 8, bounds.Height / 2);
-				var textBounds2 = new Rectangle(bounds.X + iconBounds.Right + 4, bounds.Y + textBounds1.Height, bounds.Width - iconBounds.Right - 8, bounds.Height - textBounds1.Height);
+				var x = bounds.X + iconBounds.Right + conv.ConvertX(4);
+				var textBounds1 = new Rectangle(x, bounds.Y, bounds.Width - iconBounds.Right - conv.ConvertX(4) * 2, bounds.Height / 2);
+				var textBounds2 = new Rectangle(x, bounds.Y + textBounds1.Height, textBounds1.Width, bounds.Height - textBounds1.Height);
 
-				GitterApplication.TextRenderer.DrawText(graphics, DataContext.Name.ToString(), paintEventArgs.Font, SystemBrushes.WindowText, textBounds1, TextStringFormat);
-				GitterApplication.TextRenderer.DrawText(graphics, DataContext.ServiceUrl.ToString(), paintEventArgs.Font, SystemBrushes.GrayText, textBounds2, TextStringFormat);
+				GitterApplication.TextRenderer.DrawText(graphics, DataContext.Name.ToString(),       paintEventArgs.Font, SystemBrushes.WindowText, textBounds1, TextStringFormat);
+				GitterApplication.TextRenderer.DrawText(graphics, DataContext.ServiceUrl.ToString(), paintEventArgs.Font, SystemBrushes.GrayText,   textBounds2, TextStringFormat);
 			}
 		}
 
 		sealed class Column : CustomListBoxColumn
 		{
-			public Column() : base(0, "", visible: true)
-			{
-				SizeMode = ColumnSizeMode.Fill;
-			}
+			public Column() : base(0, "", visible: true) => SizeMode = ColumnSizeMode.Fill;
 		}
 
 		public ConfigurationPage(IWorkingEnvironment workingEnvironment, GitLabServiceProvider serviceProvider)
@@ -111,9 +112,9 @@ namespace gitter.GitLab.Options
 			_serverListBinding = new NotifyCollectionBinding<ServerInfo>(
 				_lstServers.Items, _servers, serverInfo => new Item(serverInfo));
 
-			_lstServers.SelectionChanged += (s, e) => _btnRemove.Enabled = _lstServers.SelectedItems.Count > 0;
+			_lstServers.SelectionChanged += (_, _) => _btnRemove.Enabled = _lstServers.SelectedItems.Count > 0;
 
-			_lstServers.KeyDown += (s, e) =>
+			_lstServers.KeyDown += (_, e) =>
 			{
 				switch(e.KeyCode)
 				{
@@ -162,10 +163,7 @@ namespace gitter.GitLab.Options
 			return true;
 		}
 
-		/// <summary> 
-		/// Clean up any resources being used.
-		/// </summary>
-		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)

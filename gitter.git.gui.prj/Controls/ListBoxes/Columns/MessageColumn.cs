@@ -43,8 +43,10 @@ namespace gitter.Git.Gui.Controls
 			SizeMode = ColumnSizeMode.Fill;
 		}
 
+		/// <inheritdoc/>
 		public override int MinWidth => 22;
 
+		/// <inheritdoc/>
 		public override string IdentificationString => "Message";
 	}
 }

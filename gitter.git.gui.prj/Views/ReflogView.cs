@@ -21,8 +21,6 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -66,10 +64,13 @@ namespace gitter.Git.Gui.Views
 
 		public override bool IsDocument => true;
 
-		public override Image Image
-			=> Reflog != null && Reflog.Reference.Type == ReferenceType.RemoteBranch
-				? CachedResources.Bitmaps["ImgViewReflogRemote"]
-				: CachedResources.Bitmaps["ImgViewReflog"];
+		private static readonly IImageProvider _branchReflogIcon = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"branch.reflog");
+		private static readonly IImageProvider _remoteReflogIcon = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"rbranch.reflog");
+
+		public override IImageProvider ImageProvider
+			=> Reflog is not null && Reflog.Reference.Type == ReferenceType.RemoteBranch
+				? _remoteReflogIcon
+				: _branchReflogIcon;
 
 		public Reflog Reflog
 		{

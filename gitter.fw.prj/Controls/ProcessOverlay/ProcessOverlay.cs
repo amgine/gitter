@@ -147,7 +147,7 @@ namespace gitter.Framework.Controls
 		private void InvalidateHostControl()
 		{
 			var hostControl = HostControl;
-			if(hostControl == null || hostControl.IsDisposed) return;
+			if(hostControl is null || hostControl.IsDisposed) return;
 			if(hostControl.InvokeRequired)
 			{
 				try
@@ -160,7 +160,7 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				var rect = (_getOverlayArea == null) ? hostControl.ClientRectangle : _getOverlayArea();
+				var rect = _getOverlayArea is null ? hostControl.ClientRectangle : _getOverlayArea();
 				hostControl.Invalidate(rect);
 			}
 		}
@@ -254,7 +254,7 @@ namespace gitter.Framework.Controls
 			CurrentContext = null;
 			IsVisible = false;
 			var timer = _timer;
-			if(timer != null)
+			if(timer is not null)
 			{
 				timer.Enabled = false;
 			}
@@ -293,7 +293,7 @@ namespace gitter.Framework.Controls
 		public void Report(OperationProgress progress)
 		{
 			var hostControl = HostControl;
-			if(hostControl == null || hostControl.IsDisposed)
+			if(hostControl is null || hostControl.IsDisposed)
 			{
 				return;
 			}
@@ -350,7 +350,7 @@ namespace gitter.Framework.Controls
 
 		public void Dispose()
 		{
-			if(_timer != null)
+			if(_timer is not null)
 			{
 				_timer.Dispose();
 				_timer = null;

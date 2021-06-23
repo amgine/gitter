@@ -22,7 +22,10 @@ namespace gitter.Git.Gui
 {
 	using System;
 	using System.ComponentModel;
+	using System.Drawing;
 	using System.Windows.Forms;
+
+	using gitter.Framework;
 
 	using gitter.Git.Gui.Dialogs;
 	using gitter.Git.Gui.Views;
@@ -32,6 +35,34 @@ namespace gitter.Git.Gui
 	[ToolboxItem(false)]
 	internal sealed class GitToolbar : ToolStrip
 	{
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static readonly IDpiBoundValue<Bitmap> Fetch    = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"fetch",    Size);
+			public static readonly IDpiBoundValue<Bitmap> Pull     = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"pull",     Size);
+			public static readonly IDpiBoundValue<Bitmap> Push     = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"push",     Size);
+			public static readonly IDpiBoundValue<Bitmap> Remote   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"remote",   Size);
+
+			public static readonly IDpiBoundValue<Bitmap> History  = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"history",  Size);
+
+			public static readonly IDpiBoundValue<Bitmap> Commit   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"commit",      Size);
+			public static readonly IDpiBoundValue<Bitmap> Patch    = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"patch.apply", Size);
+			public static readonly IDpiBoundValue<Bitmap> Stash    = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"stash",       Size);
+			public static readonly IDpiBoundValue<Bitmap> StashSave  = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"stash.save",  Size);
+			public static readonly IDpiBoundValue<Bitmap> StashPop   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"stash.pop",   Size);
+			public static readonly IDpiBoundValue<Bitmap> StashApply = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"stash.apply", Size);
+			public static readonly IDpiBoundValue<Bitmap> Clean    = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"clean",       Size);
+
+			public static readonly IDpiBoundValue<Bitmap> Checkout = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"checkout", Size);
+			public static readonly IDpiBoundValue<Bitmap> Branch   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"branch",   Size);
+			public static readonly IDpiBoundValue<Bitmap> Merge    = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"merge",    Size);
+
+			public static readonly IDpiBoundValue<Bitmap> Tag      = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"tag",      Size);
+
+			public static readonly IDpiBoundValue<Bitmap> Note     = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"note",     Size);
+		}
+
 		private readonly ToolStripSplitButton _fetchButton;
 		private readonly ToolStripSplitButton _pullButton;
 		private readonly ToolStripButton _pushButton;
@@ -42,6 +73,7 @@ namespace gitter.Git.Gui
 		private readonly ToolStripButton _applyPatchButton;
 		private readonly ToolStripSplitButton _stashButton;
 		private readonly ToolStripButton _cleanButton;
+		private readonly ToolStripMenuItem _stashSaveItem;
 		private readonly ToolStripMenuItem _stashPopItem;
 		private readonly ToolStripMenuItem _stashApplyItem;
 
@@ -54,6 +86,7 @@ namespace gitter.Git.Gui
 		private readonly ToolStripButton _noteButton;
 
 		private readonly GuiProvider _guiProvider;
+		private readonly DpiBindings _bindings;
 		private Repository _repository;
 
 		public GitToolbar(GuiProvider guiProvider)
@@ -69,35 +102,35 @@ namespace gitter.Git.Gui
 
 			Items.AddRange(new ToolStripItem[]
 				{
-					_fetchButton = new ToolStripSplitButton(Resources.StrFetch, CachedResources.Bitmaps["ImgFetch"])
+					_fetchButton = new ToolStripSplitButton(Resources.StrFetch)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipFetch },
-					_pullButton = new ToolStripSplitButton(Resources.StrPull, CachedResources.Bitmaps["ImgPull"])
+					_pullButton = new ToolStripSplitButton(Resources.StrPull)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipPull },
-					_pushButton = new ToolStripButton(Resources.StrPush, CachedResources.Bitmaps["ImgPush"])
+					_pushButton = new ToolStripButton(Resources.StrPush)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipPush },
 					new ToolStripSeparator(),
-					_historyButton = new ToolStripButton(Resources.StrHistory, CachedResources.Bitmaps["ImgHistory"], OnHistoryClick)
+					_historyButton = new ToolStripButton(Resources.StrHistory, default, OnHistoryClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipHistory },
 					new ToolStripSeparator(),
-					_commitButton = new ToolStripButton(Resources.StrCommit, CachedResources.Bitmaps["ImgCommit"], OnCommitClick)
+					_commitButton = new ToolStripButton(Resources.StrCommit, default, OnCommitClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCommit },
-					_applyPatchButton = new ToolStripButton(Resources.StrPatch, CachedResources.Bitmaps["ImgPatchApply"], OnApplyPatchClick)
+					_applyPatchButton = new ToolStripButton(Resources.StrPatch, default, OnApplyPatchClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipApplyPatches },
-					_stashButton = new ToolStripSplitButton(Resources.StrStash, CachedResources.Bitmaps["ImgStash"])
+					_stashButton = new ToolStripSplitButton(Resources.StrStash)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipStash },
-					_cleanButton = new ToolStripButton(Resources.StrClean, CachedResources.Bitmaps["ImgClean"], OnCleanClick)
+					_cleanButton = new ToolStripButton(Resources.StrClean, default, OnCleanClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipClean },
 					new ToolStripSeparator(),
-					_checkoutButton = new ToolStripButton(Resources.StrCheckout, CachedResources.Bitmaps["ImgCheckout"], OnCheckoutClick)
+					_checkoutButton = new ToolStripButton(Resources.StrCheckout, default, OnCheckoutClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCheckoutBranch },
-					_branchButton = new ToolStripButton(Resources.StrBranch, CachedResources.Bitmaps["ImgBranch"], OnBranchClick)
+					_branchButton = new ToolStripButton(Resources.StrBranch, default, OnBranchClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCreateBranch },
-					_mergeButton = new ToolStripSplitButton(Resources.StrMerge, CachedResources.Bitmaps["ImgMerge"])
+					_mergeButton = new ToolStripSplitButton(Resources.StrMerge)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipMerge },
 					new ToolStripSeparator(),
-					_tagButton = new ToolStripButton(Resources.StrTag, CachedResources.Bitmaps["ImgTag"], OnTagClick)
+					_tagButton = new ToolStripButton(Resources.StrTag, default, OnTagClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipCreateTag },
-					_noteButton = new ToolStripButton(Resources.StrNote, CachedResources.Bitmaps["ImgNote"], OnNoteClick)
+					_noteButton = new ToolStripButton(Resources.StrNote, default, OnNoteClick)
 						{ TextImageRelation = tir, DisplayStyle = ds, Available = false /* GitFeatures.AdvancedNotesCommands.IsAvailable */ },
 				});
 
@@ -112,13 +145,31 @@ namespace gitter.Git.Gui
 
 			_stashButton.ButtonClick += OnStashClick;
 			_stashButton.DropDown.Items.Add(
-				_stashPopItem = new ToolStripMenuItem(Resources.StrSave, CachedResources.Bitmaps["ImgStashSave"], OnStashSaveClick));
+				_stashSaveItem = new ToolStripMenuItem(Resources.StrSave, default, OnStashSaveClick));
 			_stashButton.DropDown.Items.Add(
-				_stashPopItem = new ToolStripMenuItem(Resources.StrPop, CachedResources.Bitmaps["ImgStashPop"], OnStashPopClick));
+				_stashPopItem = new ToolStripMenuItem(Resources.StrPop, default, OnStashPopClick));
 			_stashButton.DropDown.Items.Add(
-				_stashApplyItem = new ToolStripMenuItem(Resources.StrApply, CachedResources.Bitmaps["ImgStashApply"], OnStashApplyClick));
+				_stashApplyItem = new ToolStripMenuItem(Resources.StrApply, default, OnStashApplyClick));
 
-			if(guiProvider.Repository != null)
+			_bindings = new DpiBindings(this);
+			_bindings.BindImage(_fetchButton,      Icons.Fetch);
+			_bindings.BindImage(_pullButton,       Icons.Pull);
+			_bindings.BindImage(_pushButton,       Icons.Push);
+			_bindings.BindImage(_historyButton,    Icons.History);
+			_bindings.BindImage(_commitButton,     Icons.Commit);
+			_bindings.BindImage(_applyPatchButton, Icons.Patch);
+			_bindings.BindImage(_stashButton,      Icons.Stash);
+			_bindings.BindImage(_stashSaveItem,    Icons.StashSave);
+			_bindings.BindImage(_stashPopItem,     Icons.StashPop);
+			_bindings.BindImage(_stashApplyItem,   Icons.StashApply);
+			_bindings.BindImage(_cleanButton,      Icons.Clean);
+			_bindings.BindImage(_checkoutButton,   Icons.Checkout);
+			_bindings.BindImage(_branchButton,     Icons.Branch);
+			_bindings.BindImage(_mergeButton,      Icons.Merge);
+			_bindings.BindImage(_tagButton,        Icons.Tag);
+			_bindings.BindImage(_noteButton,       Icons.Note);
+
+			if(guiProvider.Repository is not null)
 			{
 				AttachToRepository(guiProvider.Repository);
 			}
@@ -131,11 +182,11 @@ namespace gitter.Git.Gui
 			{
 				if(_repository != value)
 				{
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						DetachFromRepository(_repository);
 					}
-					if(value != null)
+					if(value is not null)
 					{
 						AttachToRepository(value);
 					}
@@ -149,22 +200,29 @@ namespace gitter.Git.Gui
 
 			_repository = repository;
 			_mergeButton.Enabled = !repository.Head.IsDetached;
-			if(repository.Remotes.Count != 0)
+			lock(repository.Remotes.SyncRoot)
 			{
-				foreach(var remote in repository.Remotes)
+				if(repository.Remotes.Count != 0)
 				{
-					_fetchButton.DropDown.Items.Add(GuiItemFactory.GetFetchFromItem<ToolStripMenuItem>(remote, "{1}"));
-					_pullButton.DropDown.Items.Add(GuiItemFactory.GetPullFromItem<ToolStripMenuItem>(remote, "{1}"));
+					foreach(var remote in repository.Remotes)
+					{
+						ToolStripMenuItem item;
+						var factory = new GuiItemFactory(_bindings);
+						item = factory.GetFetchFromItem<ToolStripMenuItem>(remote, "{1}");
+						_fetchButton.DropDown.Items.Add(item);
+						item = factory.GetPullFromItem<ToolStripMenuItem>(remote, "{1}");
+						_pullButton.DropDown.Items.Add(item);
+					}
+					_fetchButton.Enabled = true;
+					_pullButton.Enabled = true;
+					_pushButton.Enabled = true;
 				}
-				_fetchButton.Enabled = true;
-				_pullButton.Enabled = true;
-				_pushButton.Enabled = true;
-			}
-			else
-			{
-				_fetchButton.Enabled = false;
-				_pullButton.Enabled = false;
-				_pushButton.Enabled = false;
+				else
+				{
+					_fetchButton.Enabled = false;
+					_pullButton.Enabled = false;
+					_pushButton.Enabled = false;
+				}
 			}
 
 			if(repository.Stash.Count != 0)
@@ -191,12 +249,24 @@ namespace gitter.Git.Gui
 			Enabled = true;
 		}
 
+		private void RemoveAll(ToolStripItemCollection collection)
+		{
+			while(collection.Count > 0)
+			{
+				var index = collection.Count - 1;
+				var item = collection[index];
+				_bindings.BindImage(item, null);
+				collection.RemoveAt(index);
+				item.Dispose();
+			}
+		}
+
 		private void DetachFromRepository(Repository repository)
 		{
 			Assert.IsNotNull(repository);
 
-			_fetchButton.DropDown.Items.Clear();
-			_pullButton.DropDown.Items.Clear();
+			RemoveAll(_fetchButton.DropDown.Items);
+			RemoveAll(_pullButton.DropDown.Items);
 
 			repository.Head.PointerChanged -= OnHeadChanged;
 			repository.Remotes.ObjectAdded -= OnRemoteAdded;
@@ -222,18 +292,50 @@ namespace gitter.Git.Gui
 
 		private void OnRemoteAdded(object sender, RemoteEventArgs e)
 		{
-			_fetchButton.DropDown.Items.Add(GuiItemFactory.GetFetchFromItem<ToolStripMenuItem>(e.Object, "{1}"));
-			_pullButton.DropDown.Items.Add(GuiItemFactory.GetPullFromItem<ToolStripMenuItem>(e.Object, "{1}"));
-			if(_repository.Remotes.Count == 1)
+			if(IsDisposed) return;
+			if(InvokeRequired)
+			{
+				try
+				{
+					BeginInvoke(new EventHandler<RemoteEventArgs>(OnRemoteAdded), sender, e);
+				}
+				catch
+				{
+				}
+				return;
+			}
+
+			var factory = new GuiItemFactory(_bindings);
+			var fetch = factory.GetFetchFromItem<ToolStripMenuItem>(e.Object, "{1}");
+			var pull  = factory.GetPullFromItem<ToolStripMenuItem>(e.Object, "{1}");
+
+			_bindings.BindImage(fetch, Icons.Remote);
+			_bindings.BindImage(pull, Icons.Remote);
+
+			_fetchButton.DropDown.Items.Add(fetch);
+			_pullButton.DropDown.Items.Add(pull);
+			if(_repository.Remotes.Count >= 1)
 			{
 				_fetchButton.Enabled = true;
-				_pullButton.Enabled = true;
-				_pushButton.Enabled = true;
+				_pullButton.Enabled  = true;
+				_pushButton.Enabled  = true;
 			}
 		}
 
 		private void OnRemoteRenamed(object sender, RemoteEventArgs e)
 		{
+			if(IsDisposed) return;
+			if(InvokeRequired)
+			{
+				try
+				{
+					BeginInvoke(new EventHandler<RemoteEventArgs>(OnRemoteRenamed), sender, e);
+				}
+				catch
+				{
+				}
+				return;
+			}
 			foreach(ToolStripItem item in _fetchButton.DropDownItems)
 			{
 				if(item.Tag == e.Object)
@@ -252,38 +354,60 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		private void OnRemoteRemoved(object sender, RemoteEventArgs e)
+		private void RemoveRemote(ToolStripItemCollection collection, Remote remote)
 		{
-			if(_repository.Remotes.Count == 0)
-			{
-				_fetchButton.Enabled = false;
-				_pullButton.Enabled = false;
-				_pushButton.Enabled = false;
-			}
 			int id = 0;
-			foreach(ToolStripItem item in _fetchButton.DropDown.Items)
+			foreach(ToolStripItem item in collection)
 			{
-				if(item.Tag == e.Object)
+				if(item.Tag == remote)
 				{
-					_fetchButton.DropDown.Items.RemoveAt(id);
-					break;
-				}
-				++id;
-			}
-			id = 0;
-			foreach(ToolStripItem item in _pullButton.DropDown.Items)
-			{
-				if(item.Tag == e.Object)
-				{
-					_pullButton.DropDown.Items.RemoveAt(id);
+					collection.RemoveAt(id);
+					_bindings.BindImage(item, null);
+					item.Dispose();
 					break;
 				}
 				++id;
 			}
 		}
 
+		private void OnRemoteRemoved(object sender, RemoteEventArgs e)
+		{
+			if(IsDisposed) return;
+			if(InvokeRequired)
+			{
+				try
+				{
+					BeginInvoke(new EventHandler<RemoteEventArgs>(OnRemoteRemoved), sender, e);
+				}
+				catch
+				{
+				}
+				return;
+			}
+			if(_repository.Remotes.Count == 0)
+			{
+				_fetchButton.Enabled = false;
+				_pullButton.Enabled  = false;
+				_pushButton.Enabled  = false;
+			}
+			RemoveRemote(_fetchButton.DropDown.Items, e.Object);
+			RemoveRemote(_pullButton.DropDown.Items, e.Object);
+		}
+
 		private void OnStashCreated(object sender, StashedStateEventArgs e)
 		{
+			if(IsDisposed) return;
+			if(InvokeRequired)
+			{
+				try
+				{
+					BeginInvoke(new EventHandler<StashedStateEventArgs>(OnStashCreated), sender, e);
+				}
+				catch
+				{
+				}
+				return;
+			}
 			if(_repository.Stash.Count == 1)
 			{
 				_stashPopItem.Enabled = true;
@@ -293,9 +417,21 @@ namespace gitter.Git.Gui
 
 		private void OnStashDeleted(object sender, StashedStateEventArgs e)
 		{
+			if(IsDisposed) return;
+			if(InvokeRequired)
+			{
+				try
+				{
+					BeginInvoke(new EventHandler<StashedStateEventArgs>(OnStashDeleted), sender, e);
+				}
+				catch
+				{
+				}
+				return;
+			}
 			if(_repository.Stash.Count == 0)
 			{
-				_stashPopItem.Enabled = false;
+				_stashPopItem.Enabled   = false;
 				_stashApplyItem.Enabled = false;
 			}
 		}

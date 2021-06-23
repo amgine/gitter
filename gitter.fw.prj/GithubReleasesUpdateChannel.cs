@@ -112,7 +112,7 @@ namespace gitter
 			{
 				if(Version.TryParse(match.Groups[@"version"].Value, out var v))
 				{
-					if(version == null || version < v)
+					if(version is null || version < v)
 					{
 						version = v;
 						url     = match.Groups[@"url"].Value;
@@ -120,7 +120,7 @@ namespace gitter
 				}
 			}
 
-			return version != null
+			return version is not null
 				? new UpdateVersion(MakeAbsoluteUrl(url), version)
 				: default;
 		}

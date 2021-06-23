@@ -115,8 +115,6 @@ namespace gitter.Git.Gui.Controls
 
 		#region Data
 
-		private Icon _icon;
-		private Bitmap _bmpIcon;
 		private string _type;
 		private FileSize? _size;
 		private bool _cachedInfo;
@@ -159,7 +157,7 @@ namespace gitter.Git.Gui.Controls
 
 		protected virtual Icon GetIcon() => null;
 
-		protected virtual Bitmap GetBitmapIcon() => null;
+		protected virtual Bitmap GetBitmapIcon(Dpi dpi) => null;
 
 		protected abstract FileSize? GetSize();
 
@@ -168,30 +166,33 @@ namespace gitter.Git.Gui.Controls
 		private string GetItemText()
 			=> _showFullPath ? DataContext.RelativePath : DataContext.Name;
 
-		private Bitmap GetItemOverlay()
-			=> DataContext.Status switch
+		private Bitmap GetItemOverlay(Dpi dpi)
+		{
+			var name = DataContext.Status switch
 			{
-				FileStatus.Modified => DataContext.StagedStatus == StagedStatus.Unstaged ? ImgOverlayEdit : ImgOverlayEditStaged,
-				FileStatus.Added    => DataContext.StagedStatus == StagedStatus.Unstaged ? ImgOverlayAdd  : ImgOverlayAddStaged,
-				FileStatus.Removed  => DataContext.StagedStatus == StagedStatus.Unstaged ? ImgOverlayDel  : ImgOverlayDelStaged,
-				FileStatus.Unmerged => ImgOverlayConflict,
+				FileStatus.Modified => DataContext.StagedStatus == StagedStatus.Unstaged ? @"edit"   : @"edit.staged",
+				FileStatus.Added    => DataContext.StagedStatus == StagedStatus.Unstaged ? @"add"    : @"add.staged",
+				FileStatus.Removed  => DataContext.StagedStatus == StagedStatus.Unstaged ? @"delete" : @"delete.staged",
+				FileStatus.Unmerged => @"conflict",
 				_ => null,
 			};
+			if(name is null) return default;
 
-		/// <summary>
-		/// Override this to provide subitem measurement.
-		/// </summary>
-		/// <param name="measureEventArgs">Measure event args.</param>
-		/// <returns></returns>
+			return CachedResources.ScaledBitmaps[name, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+		}
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
 					{
 						if(_cachedSize.IsEmpty)
 						{
-							_cachedSize = measureEventArgs.MeasureImageAndText(_bmpIcon, GetItemText());
+							_cachedSize = measureEventArgs.MeasureImageAndText(GetBitmapIcon(measureEventArgs.Dpi), GetItemText());
 						}
 						return _cachedSize;
 					}
@@ -213,19 +214,13 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		/// <summary>
-		/// Override this to paint part of your item.
-		/// </summary>
-		/// <param name="paintEventArgs">Paint event args.</param>
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			if(!_cachedInfo)
 			{
-				_icon = GetIcon();
-				if(_icon == null)
-				{
-					_bmpIcon = GetBitmapIcon();
-				}
 				_size = GetSize();
 				_type = GetItemType();
 				_cachedInfo = true;
@@ -233,27 +228,25 @@ namespace gitter.Git.Gui.Controls
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageOverlayAndText(_bmpIcon, GetItemOverlay(), GetItemText());
+					paintEventArgs.PaintImageOverlayAndText(GetBitmapIcon(paintEventArgs.Dpi), GetItemOverlay(paintEventArgs.Dpi), GetItemText());
 					break;
 				case ColumnId.Type:
 					paintEventArgs.PaintText(_type);
 					break;
-				case ColumnId.Size:
-					if(_size.HasValue)
-					{
-						var rect = paintEventArgs.Bounds;
-						var graphics = paintEventArgs.Graphics;
-						SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
-						paintEventArgs.PrepareTextRectangle(paintEventArgs.Font, ref rect);
-						var r2 = rect;
-						rect.Width -= 23;
-						r2.X = r2.Right - 20;
-						r2.Width = 20;
-						GitterApplication.TextRenderer.DrawText(
-							graphics, _size.Value.ShortSize, paintEventArgs.Font, paintEventArgs.Brush, rect, GitterApplication.TextRenderer.RightAlign);
-						GitterApplication.TextRenderer.DrawText(
-							graphics, _size.Value.ShortSizeUnits, paintEventArgs.Font, paintEventArgs.Brush, r2);
-					}
+				case ColumnId.Size when _size.HasValue:
+					var rect     = paintEventArgs.Bounds;
+					var graphics = paintEventArgs.Graphics;
+					var conv     = paintEventArgs.DpiConverter;
+					paintEventArgs.PrepareContentRectangle(ref rect);
+					paintEventArgs.PrepareTextRectangle(paintEventArgs.Font, ref rect);
+					var r2 = rect;
+					rect.Width -= conv.ConvertX(23);
+					r2.X = r2.Right - conv.ConvertX(20);
+					r2.Width = conv.ConvertX(20);
+					GitterApplication.TextRenderer.DrawText(
+						graphics, _size.Value.ShortSize, paintEventArgs.Font, paintEventArgs.Brush, rect, GitterApplication.TextRenderer.RightAlign);
+					GitterApplication.TextRenderer.DrawText(
+						graphics, _size.Value.ShortSizeUnits, paintEventArgs.Font, paintEventArgs.Brush, r2);
 					break;
 			}
 		}

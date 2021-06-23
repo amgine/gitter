@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -26,11 +26,25 @@ namespace gitter.Git.Gui.Views
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
 	internal sealed class DiffToolbar : ToolStrip
 	{
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static IDpiBoundValue<Bitmap> Refresh     = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"refresh",      Size);
+			public static IDpiBoundValue<Bitmap> ContextLess = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"context.less", Size);
+			public static IDpiBoundValue<Bitmap> ContextMore = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"context.more", Size);
+			public static IDpiBoundValue<Bitmap> Options     = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"config",       Size);
+			public static IDpiBoundValue<Bitmap> DiffSingle  = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"diff.single",  Size);
+			public static IDpiBoundValue<Bitmap> DiffSplit   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"diff.split",   Size);
+		}
+
 		#region Constants
 
 		private const int MinimumContext = 0;
@@ -42,12 +56,16 @@ namespace gitter.Git.Gui.Views
 
 		private readonly DiffView _diffView;
 		private readonly ToolStripTextBox _contextTextBox;
+		private readonly ToolStripButton _btnRefresh;
+		private readonly ToolStripButton _btnMoreContext;
+		private readonly ToolStripButton _btnLessContext;
 		private readonly ToolStripDropDownButton _ddbOptions;
 		private readonly ToolStripMenuItem _mnuIgnoreWhitespace;
 		private readonly ToolStripMenuItem _mnuUsePatienceAlgorithm;
 		private readonly ToolStripMenuItem _mnuBinaryDiff;
 		private readonly ToolStripButton _btnSingleMode;
 		private readonly ToolStripButton _btnSplitMode;
+		private readonly DpiBindings _bindings;
 
 		#endregion
 
@@ -57,17 +75,14 @@ namespace gitter.Git.Gui.Views
 
 			_diffView = diffView;
 
-			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) =>
-				{
-					_diffView.RefreshContent();
-				})
+			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, default,
+				(_, _) => _diffView.RefreshContent())
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
 			});
 			Items.Add(new ToolStripSeparator());
 			Items.Add(new ToolStripLabel(Resources.StrContext.AddColon(), null));
-			Items.Add(new ToolStripButton(Resources.StrLessContext, CachedResources.Bitmaps["ImgLessContext"], (sender, e) => DecrementContext())
+			Items.Add(_btnLessContext = new ToolStripButton(Resources.StrLessContext, default, (_, _) => DecrementContext())
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.Image,
 				});
@@ -81,12 +96,12 @@ namespace gitter.Git.Gui.Views
 					MaxLength = 4,
 					ShortcutsEnabled = false,
 				});
-			Items.Add(new ToolStripButton(Resources.StrMoreContext, CachedResources.Bitmaps["ImgMoreContext"], (sender, e) => IncrementContext())
+			Items.Add(_btnMoreContext = new ToolStripButton(Resources.StrMoreContext, default, (_, _) => IncrementContext())
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.Image,
 				});
 			Items.Add(new ToolStripSeparator());
-			Items.Add(_ddbOptions = new ToolStripDropDownButton(Resources.StrOptions, CachedResources.Bitmaps["ImgConfig"])
+			Items.Add(_ddbOptions = new ToolStripDropDownButton(Resources.StrOptions)
 				{
 				});
 			_ddbOptions.DropDownItems.Add(_mnuIgnoreWhitespace = new ToolStripMenuItem(Resources.StrsIgnoreWhitespace, null, OnIgnoreWhitespaceClick)
@@ -102,13 +117,13 @@ namespace gitter.Git.Gui.Views
 					Checked = _diffView.DiffOptions.Binary,
 				});
 
-			Items.Add(_btnSplitMode = new ToolStripButton(Resources.StrDiffSplitView, CachedResources.Bitmaps["ImgDiffSplitView"], (s, e) => _diffView.ViewMode = DiffViewMode.Split)
+			Items.Add(_btnSplitMode = new ToolStripButton(Resources.StrDiffSplitView, default, (_, _) => _diffView.ViewMode = DiffViewMode.Split)
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.Image,
 					Alignment = ToolStripItemAlignment.Right,
 					Checked = _diffView.ViewMode == DiffViewMode.Split,
 				});
-			Items.Add(_btnSingleMode = new ToolStripButton(Resources.StrDiffSingleView, CachedResources.Bitmaps["ImgDiffSingleView"], (s, e) => _diffView.ViewMode = DiffViewMode.Single)
+			Items.Add(_btnSingleMode = new ToolStripButton(Resources.StrDiffSingleView, default, (_, _) => _diffView.ViewMode = DiffViewMode.Single)
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.Image,
 					Alignment = ToolStripItemAlignment.Right,
@@ -116,8 +131,16 @@ namespace gitter.Git.Gui.Views
 				});
 
 			_contextTextBox.TextChanged += OnContextTextChanged;
-			_contextTextBox.KeyPress += (sender, e) => e.Handled = !char.IsNumber(e.KeyChar);
+			_contextTextBox.KeyPress += static (_, e) => e.Handled = !char.IsNumber(e.KeyChar);
 			_diffView.ViewModeChanged += OnDiffViewViewModeChanged;
+
+			_bindings = new DpiBindings(this);
+			_bindings.BindImage(_btnRefresh,     Icons.Refresh);
+			_bindings.BindImage(_btnLessContext, Icons.ContextLess);
+			_bindings.BindImage(_btnMoreContext, Icons.ContextMore);
+			_bindings.BindImage(_ddbOptions,     Icons.Options);
+			_bindings.BindImage(_btnSingleMode,  Icons.DiffSingle);
+			_bindings.BindImage(_btnSplitMode,   Icons.DiffSplit);
 		}
 
 		private void OnDiffViewViewModeChanged(object sender, EventArgs e)

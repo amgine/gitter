@@ -31,13 +31,11 @@ namespace gitter.GitLab.Gui
 	sealed class IssuesViewFactory : ViewFactoryBase
 	{
 		public IssuesViewFactory()
-			: base(Guids.IssuesViewGuid, Resources.StrIssues, CachedResources.Bitmaps["ImgIssues"])
+			: base(Guids.IssuesViewGuid, Resources.StrIssues, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues"), singleton: true)
 		{
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
 			return new IssuesView(environment);
@@ -47,13 +45,11 @@ namespace gitter.GitLab.Gui
 	sealed class PipelinesViewFactory : ViewFactoryBase
 	{
 		public PipelinesViewFactory()
-			: base(Guids.PipelinesViewGuid, Resources.StrPipelines, CachedResources.Bitmaps["ImgPipelines"])
+			: base(Guids.PipelinesViewGuid, Resources.StrPipelines, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"pipelines"), singleton: true)
 		{
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 		{
 			return new PipelinesView(environment);

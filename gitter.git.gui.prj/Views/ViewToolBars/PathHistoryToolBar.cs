@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -52,7 +52,7 @@ namespace gitter.Git.Gui.Views
 				new ToolStripItem[]
 				{
 					// left-aligned
-					_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"], OnRefreshButtonClick)
+					_btnRefresh = new ToolStripButton(Resources.StrRefresh, default, OnRefreshButtonClick)
 						{
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
@@ -87,6 +87,20 @@ namespace gitter.Git.Gui.Views
 						}
 				});
 			UpdateLimitButtonText();
+			UpdateIcons(DeviceDpi);
+		}
+
+		private void UpdateIcons(int dpi)
+		{
+			var iconSize = dpi * 16 / 96;
+
+			_btnRefresh.Image = CachedResources.ScaledBitmaps[@"refresh", iconSize];
+		}
+
+		protected override void RescaleConstantsForDpi(int deviceDpiOld, int deviceDpiNew)
+		{
+			base.RescaleConstantsForDpi(deviceDpiOld, deviceDpiNew);
+			UpdateIcons(deviceDpiNew);
 		}
 
 		private void OnRefreshButtonClick(object sender, EventArgs e)

@@ -75,6 +75,7 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
@@ -82,6 +83,7 @@ namespace gitter.Git.Gui.Controls
 			Extender = new Popup(_extender);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
 			base.OnListBoxDetached();
@@ -93,7 +95,7 @@ namespace gitter.Git.Gui.Controls
 
 		public bool ShowEmail
 		{
-			get { return _showEmail; }
+			get => _showEmail;
 			set
 			{
 				if(_showEmail != value)
@@ -145,18 +147,21 @@ namespace gitter.Git.Gui.Controls
 				: (userName), textBrush);
 		}
 
+		/// <inheritdoc/>
 		protected override void SaveMoreTo(Section section)
 		{
 			base.SaveMoreTo(section);
 			section.SetValue("ShowEmail", ShowEmail);
 		}
 
+		/// <inheritdoc/>
 		protected override void LoadMoreFrom(Section section)
 		{
 			base.LoadMoreFrom(section);
 			ShowEmail = section.GetValue("ShowEmail", ShowEmail);
 		}
 
+		/// <inheritdoc/>
 		public override string IdentificationString => "User";
 	}
 }

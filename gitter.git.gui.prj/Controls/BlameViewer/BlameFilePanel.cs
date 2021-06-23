@@ -300,9 +300,12 @@ namespace gitter.Git.Gui.Controls
 								SetSelection(htr.Line);
 							}
 
-							var menu = new ContextMenuStrip();
+							var menu        = new ContextMenuStrip();
+							var dpiBindings = new DpiBindings(menu);
+							var factory     = new GuiItemFactory(dpiBindings);
+
 							var lines = GetSelectedLines();
-							menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(
+							menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(
 								Resources.StrCopyToClipboard,
 								() => LinesToString(lines)));
 							bool sameCommit = true;
@@ -318,12 +321,12 @@ namespace gitter.Git.Gui.Controls
 							{
 								var commit = lines[0].Commit;
 								menu.Items.Add(new ToolStripSeparator());
-								menu.Items.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash.ToString()));
-								menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, commit.Summary));
-								menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author));
+								menu.Items.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash.ToString()));
+								menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, commit.Summary));
+								menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author));
 								if(commit.Author != commit.Committer)
 								{
-									menu.Items.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, commit.Committer));
+									menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, commit.Committer));
 								}
 							}
 							Utility.MarkDropDownForAutoDispose(menu);
@@ -561,17 +564,21 @@ namespace gitter.Git.Gui.Controls
 			return _size;
 		}
 
-		private void PaintLine(int lineIndex, BlameHunk hunk, BlameLine line, bool paintHeader, int digits, Graphics graphics, Font font, bool hover, bool selected, bool alternate, int x, int y, int width)
+		private void PaintLine(int lineIndex, BlameHunk hunk, BlameLine line, bool paintHeader, int digits, Graphics graphics, Font font, bool hover, bool selected, bool alternate,
+			int x, int y, int width,
+			Rectangle clipRectangle)
 		{
-			Brush backgroundBrush;
-
 			var rcColNumbers = new Rectangle(x, y, (digits + 1) * CellSize.Width + 2, CellSize.Height);
-			graphics.SmoothingMode = SmoothingMode.Default;
-			using(backgroundBrush = hover ?
-				GetLineNumberHoverBackground() :
-				GetLineNumberBackground())
+			var rcColNumbersBackground = Rectangle.Intersect(clipRectangle, rcColNumbers);
+			if(rcColNumbersBackground is { Width: > 0, Height: > 0 })
 			{
-				graphics.FillRectangle(backgroundBrush, rcColNumbers);
+				var backgroundColor = hover
+					? Style.Colors.LineNumberBackgroundHover
+					: Style.Colors.LineNumberBackground;
+				if(backgroundColor != Color.Transparent)
+				{
+					graphics.GdiFill(backgroundColor, rcColNumbersBackground);
+				}
 			}
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			var num = line.Number;
@@ -582,17 +589,14 @@ namespace gitter.Git.Gui.Controls
 				temp /= 10;
 				++d;
 			}
-			int lx = x + ((digits - d)) * CellSize.Width + CellSize.Width / 2;
-			using(var brush = GetLineNumberText())
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics,
-					num.ToString(CultureInfo.InvariantCulture),
-					font,
-					brush,
-					lx, y,
-					ContentFormat);
-			}
+			int lx = x + (digits - d) * CellSize.Width + CellSize.Width / 2;
+			GitterApplication.TextRenderer.DrawText(
+				graphics,
+				num.ToString(CultureInfo.InvariantCulture),
+				font,
+				Style.Colors.LineNumberForeground,
+				lx, y,
+				ContentFormat);
 			int lineX = x;
 			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
 			lineX = x + (digits + 1) * CellSize.Width + 1;
@@ -603,24 +607,25 @@ namespace gitter.Git.Gui.Controls
 				x + rcColNumbers.Width, y,
 				width - 2 * Margin - rcColNumbers.Width, CellSize.Height);
 			graphics.SmoothingMode = SmoothingMode.Default;
-			if(hover)
+
+			var rcBackground = Rectangle.Intersect(clipRectangle, rcLine);
+			if(rcBackground is { Width: > 0, Height: > 0 })
 			{
-				backgroundBrush = selected ?
-					GetLineSelectedHoverBackground() :
-					GetLineHoverBackground();
+				var backgroundColor = hover
+					? selected
+						? Style.Colors.LineSelectedBackgroundHover
+						: Style.Colors.LineBackgroundHover
+					: selected
+						? Style.Colors.LineSelectedBackground
+						: alternate
+							? Style.Colors.Alternate
+							: Style.Colors.LineContextBackground;
+				if(backgroundColor != Color.Transparent)
+				{
+					graphics.GdiFill(backgroundColor, rcLine);
+				}
 			}
-			else
-			{
-				backgroundBrush = selected ?
-					GetLineSelectedBackground() :
-					(alternate ?
-						new SolidBrush(Style.Colors.Alternate) :
-						new SolidBrush(Style.Colors.LineContextBackground));
-			}
-			using(backgroundBrush)
-			{
-				graphics.FillRectangle(backgroundBrush, rcLine);
-			}
+
 			lineX = x + digits * CellSize.Width + _hashColumnWidth + _autorColumnWidth + 1;
 			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
 			using(var brush = new SolidBrush(Style.Colors.WindowText))
@@ -637,8 +642,9 @@ namespace gitter.Git.Gui.Controls
 						rcAuthor.X + CellSize.Width / 2, rcAuthor.Y, ContentFormat);
 				}
 
-				rcLine.X += _hashColumnWidth + _autorColumnWidth;
-				rcLine.Width -= _hashColumnWidth + _autorColumnWidth;
+				var dx = _hashColumnWidth + _autorColumnWidth;
+				rcLine.X     += dx;
+				rcLine.Width -= dx;
 				GitterApplication.TextRenderer.DrawText(
 					graphics, line.Text, font, brush,
 					rcLine.X, rcLine.Y, ContentFormat);
@@ -659,8 +665,11 @@ namespace gitter.Git.Gui.Controls
 			_revisionToolTip = null;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			var graphics = paintEventArgs.Graphics;
 			var rect = paintEventArgs.Bounds;
 			var clip = paintEventArgs.ClipRectangle;
@@ -673,7 +682,8 @@ namespace gitter.Git.Gui.Controls
 				var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
 				if(rcHeaderClip.Width != 0 && rcHeaderClip.Height != 0)
 				{
-					PaintHeader(graphics, rcHeader, GraphicsUtility.QueryIcon(BlameFile.Name), null, BlameFile.Name);
+					PaintHeader(graphics, rcHeader, paintEventArgs.ClipRectangle,
+						GraphicsUtility.QueryIcon(BlameFile.Name, new Dpi(FlowControl.DeviceDpi)), null, BlameFile.Name);
 				}
 				y += rcHeader.Bottom;
 			}
@@ -709,7 +719,7 @@ namespace gitter.Git.Gui.Controls
 							graphics, font, lineIndex == _lineHover.Index,
 							lineIndex >= _selStart && lineIndex <= _selEnd,
 							alternate,
-							x, y, contentWidth);
+							x, y, contentWidth, paintEventArgs.ClipRectangle);
 					}
 					y += CellSize.Height;
 					++lineIndex;

@@ -22,7 +22,10 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
+	using System.Drawing;
 	using System.Windows.Forms;
+
+	using gitter.Framework;
 
 	using gitter.Git.Gui.Dialogs;
 
@@ -31,35 +34,38 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class ConfigToolBar : ToolStrip
 	{
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static readonly IDpiBoundValue<Bitmap> Refresh   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"refresh",    Size);
+			public static readonly IDpiBoundValue<Bitmap> ConfigAdd = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"config.add", Size);
+		}
+
 		private readonly ConfigView _configView;
+		private readonly ToolStripButton _btnRefresh;
+		private readonly ToolStripButton _btnConfigAdd;
+		private readonly DpiBindings _bindings;
 
 		public ConfigToolBar(ConfigView configView)
 		{
 			Verify.Argument.IsNotNull(configView, nameof(configView));
 
 			_configView = configView;
-			Items.Add(
-				new ToolStripButton(
-					Resources.StrRefresh,
-					CachedResources.Bitmaps["ImgRefresh"],
-					OnRefreshButtonClick)
-					{
-						DisplayStyle = ToolStripItemDisplayStyle.Image,
-					});
-
+			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, default, OnRefreshButtonClick)
+				{
+					DisplayStyle = ToolStripItemDisplayStyle.Image,
+				});
 			Items.Add(new ToolStripSeparator());
+			Items.Add(_btnConfigAdd = new ToolStripButton(Resources.StrAddParameter, default, OnAddParameterButtonClick));
 
-			Items.Add(
-				new ToolStripButton(
-					Resources.StrAddParameter,
-					CachedResources.Bitmaps["ImgConfigAdd"],
-					OnAddParameterButtonClick));
+			_bindings = new DpiBindings(this);
+			_bindings.BindImage(_btnRefresh,   Icons.Refresh);
+			_bindings.BindImage(_btnConfigAdd, Icons.ConfigAdd);
 		}
 
 		private void OnRefreshButtonClick(object sender, EventArgs e)
-		{
-			_configView.RefreshContent();
-		}
+			=> _configView.RefreshContent();
 
 		private void OnAddParameterButtonClick(object sender, EventArgs e)
 		{

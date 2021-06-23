@@ -21,9 +21,9 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
+
+	using gitter.Framework;
 
 	using gitter.Git.Gui.Controls;
 
@@ -52,7 +52,7 @@ namespace gitter.Git.Gui.Views
 
 		#region Properties
 
-		public override Image Image => CachedResources.Bitmaps["ImgBlame"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"blame");
 
 		public override bool IsDocument => true;
 

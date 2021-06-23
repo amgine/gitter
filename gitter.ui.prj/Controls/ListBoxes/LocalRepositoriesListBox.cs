@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -24,8 +24,8 @@ namespace gitter
 	using System.Collections.Generic;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
 
 	using Resources = gitter.Properties.Resources;
 
@@ -74,7 +74,7 @@ namespace gitter
 				if(SelectedItems.Count != 1) return;
 				var item = SelectedItems[0];
 				using(var dragImage = RepositoryDragImage.Create(
-					((RepositoryListItem)item).DataContext.Path))
+					((RepositoryListItem)item).DataContext.Path, new Dpi(DeviceDpi)))
 				{
 					dragImage.ShowDragVisual(this);
 					DoDragDrop(item, DragDropEffects.Move);

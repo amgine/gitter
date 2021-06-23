@@ -21,9 +21,6 @@
 namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -39,7 +36,7 @@ namespace gitter.Git.Gui
 		private readonly IWorkingEnvironment _environment;
 
 		public RepositoryContributorsListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgUsers"], Resources.StrContributors)
+			: base(@"users", Resources.StrContributors)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -52,22 +49,18 @@ namespace gitter.Git.Gui
 			_environment.ViewDockService.ShowView(Guids.ContributorsViewGuid);
 		}
 
-		public override void OnDoubleClick(int x, int y)
-		{
-		}
+		public override void OnDoubleClick(int x, int y) { }
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new UsersMenu(Repository);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository is null) return default;
+
+			var menu = new UsersMenu(Repository);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -29,19 +29,19 @@ namespace gitter.Redmine
 		#region Static
 
 		public static readonly RedmineObjectProperty<string> FileNameProperty =
-			new RedmineObjectProperty<string>("filename", "FileName");
+			new("filename", nameof(FileName));
 		public static readonly RedmineObjectProperty<int> FileSizeProperty =
-			new RedmineObjectProperty<int>("filesize", "FileSize");
+			new("filesize", nameof(FileSize));
 		public static readonly RedmineObjectProperty<string> DescriptionProperty =
-			new RedmineObjectProperty<string>("description", "Description");
+			new("description", nameof(Description));
 		public static readonly RedmineObjectProperty<string> ContentTypeProperty =
-			new RedmineObjectProperty<string>("content_type", "ContentType");
+			new("content_type", nameof(ContentType));
 		public static readonly RedmineObjectProperty<string> ContentUrlProperty =
-			new RedmineObjectProperty<string>("content_url", "ContentUrl");
+			new("content_url", nameof(ContentUrl));
 		public static readonly RedmineObjectProperty<User> AuthorProperty =
-			new RedmineObjectProperty<User>("author", "Author");
+			new("author", nameof(Author));
 		public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
-			new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+			new("created_on", nameof(CreatedOn));
 
 		#endregion
 
@@ -106,44 +106,44 @@ namespace gitter.Redmine
 
 		public string FileName
 		{
-			get { return _fileName; }
-			private set { UpdatePropertyValue(ref _fileName, value, FileNameProperty); }
+			get => _fileName;
+			private set => UpdatePropertyValue(ref _fileName, value, FileNameProperty);
 		}
 
 		public int FileSize
 		{
-			get { return _fileSize; }
-			private set { UpdatePropertyValue(ref _fileSize, value, FileSizeProperty); }
+			get => _fileSize;
+			private set => UpdatePropertyValue(ref _fileSize, value, FileSizeProperty);
 		}
 
 		public string ContentType
 		{
-			get { return _contentType; }
-			private set { UpdatePropertyValue(ref _contentType, value, ContentTypeProperty); }
+			get => _contentType;
+			private set => UpdatePropertyValue(ref _contentType, value, ContentTypeProperty);
 		}
 
 		public string Description
 		{
-			get { return _description; }
-			private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
+			get => _description;
+			private set => UpdatePropertyValue(ref _description, value, DescriptionProperty);
 		}
 
 		public string ContentUrl
 		{
-			get { return _contentUrl; }
-			private set { UpdatePropertyValue(ref _contentUrl, value, ContentUrlProperty); }
+			get => _contentUrl;
+			private set => UpdatePropertyValue(ref _contentUrl, value, ContentUrlProperty);
 		}
 
 		public User Author
 		{
-			get { return _author; }
-			private set { UpdatePropertyValue(ref _author, value, AuthorProperty); }
+			get => _author;
+			private set => UpdatePropertyValue(ref _author, value, AuthorProperty);
 		}
 
 		public DateTime CreatedOn
 		{
-			get { return _createdOn; }
-			private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
+			get => _createdOn;
+			private set => UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty);
 		}
 
 		#endregion

@@ -71,7 +71,7 @@ namespace gitter.Framework.Controls
 					if(activeColumn.SizeMode != ColumnSizeMode.Sizeable || activeIndex > autoSizeId)
 					{
 						var nextColumn = columns.FindNext(activeIndex, column => column.IsVisible);
-						if(nextColumn != null)
+						if(nextColumn is not null)
 						{
 							return new ColumnResizeProcess(nextColumn, -1, mouseDownLocation);
 						}

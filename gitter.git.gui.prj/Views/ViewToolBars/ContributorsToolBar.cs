@@ -29,12 +29,8 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class ContributorsToolBar : ToolStrip
 	{
-		#region Data
-
 		private readonly ContributorsView _view;
-		private ToolStripButton _btnRefresh;
-
-		#endregion
+		private readonly ToolStripButton _btnRefresh;
 
 		/// <summary>Initializes a new instance of the <see cref="ContributorsToolBar"/> class.</summary>
 		/// <param name="view">Host contributors view.</param>
@@ -46,17 +42,30 @@ namespace gitter.Git.Gui.Views
 				new ToolStripItem[]
 				{
 					// left-aligned
-					_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"], OnRefreshButtonClick)
+					_btnRefresh = new ToolStripButton(Resources.StrRefresh, default, OnRefreshButtonClick)
 						{
 							DisplayStyle = ToolStripItemDisplayStyle.Image,
 						},
 				});
+
+			UpdateIcons(DeviceDpi);
+		}
+
+		private void UpdateIcons(int dpi)
+		{
+			var iconSize = dpi * 16 / 96;
+
+			_btnRefresh.Image = CachedResources.ScaledBitmaps[@"refresh", iconSize];
+		}
+
+		protected override void RescaleConstantsForDpi(int deviceDpiOld, int deviceDpiNew)
+		{
+			base.RescaleConstantsForDpi(deviceDpiOld, deviceDpiNew);
+			UpdateIcons(deviceDpiNew);
 		}
 
 		private void OnRefreshButtonClick(object sender, EventArgs e)
-		{
-			_view.RefreshContent();
-		}
+			=> _view.RefreshContent();
 
 		public ToolStripButton RefreshButton => _btnRefresh;
 	}

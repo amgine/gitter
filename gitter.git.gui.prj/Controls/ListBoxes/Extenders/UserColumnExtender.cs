@@ -25,6 +25,7 @@ namespace gitter.Git.Gui.Controls
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -52,13 +53,17 @@ namespace gitter.Git.Gui.Controls
 
 		private void CreateControls()
 		{
+			var conv = new DpiConverter(this);
+
+			var iconSize = conv.ConvertX(16);
+
 			_chkShowEmail?.Dispose();
 			_chkShowEmail = Style.CreateCheckBox();
 			_chkShowEmail.IsChecked = Column.ShowEmail;
 			_chkShowEmail.IsCheckedChanged += OnShowEmailCheckedChanged;
-			_chkShowEmail.Image = CachedResources.Bitmaps["ImgMail"];
+			_chkShowEmail.Image = CachedResources.ScaledBitmaps["mail", iconSize];
 			_chkShowEmail.Text = Resources.StrShowEmail;
-			_chkShowEmail.Control.Bounds = new Rectangle(6, 0, 127, 27);
+			_chkShowEmail.Control.Bounds = new Rectangle(conv.ConvertX(6), 0, Width - conv.ConvertX(6) * 2, conv.ConvertY(27));
 			_chkShowEmail.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
 			_chkShowEmail.Control.Parent = this;
 		}

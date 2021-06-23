@@ -44,8 +44,8 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(hostControl, nameof(hostControl));
 
 			Host = hostControl;
-			_buttonHover = new TrackingService<ViewButton>((e) => Host.Invalidate());
-			_buttonPress = new TrackingService<ViewButton>((e) => Host.Invalidate());
+			_buttonHover = new TrackingService<ViewButton>(_ => Host.Invalidate());
+			_buttonPress = new TrackingService<ViewButton>(_ => Host.Invalidate());
 		}
 
 		public void SetAvailableButtons(params ViewButtonType[] buttons)
@@ -184,13 +184,9 @@ namespace gitter.Framework.Controls
 		public void OnMouseLeave() => _buttonHover.Drop();
 
 		public IEnumerator<ViewButton> GetEnumerator()
-		{
-			return ((IEnumerable<ViewButton>)_buttons).GetEnumerator();
-		}
+			=> ((IEnumerable<ViewButton>)_buttons).GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _buttons.GetEnumerator();
-		}
+			=> _buttons.GetEnumerator();
 	}
 }

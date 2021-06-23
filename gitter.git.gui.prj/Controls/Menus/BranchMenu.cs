@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -33,34 +35,41 @@ namespace gitter.Git.Gui.Controls
 		{
 			Verify.Argument.IsValidGitObject(branch, nameof(branch));
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			Branch = branch;
 
-			AddViewItems();
+			AddViewItems(factory);
 			Items.Add(new ToolStripSeparator()); // interactive section
-			AddActionItems();
+			AddActionItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddCopyToClipboardItems();
+			AddCopyToClipboardItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddCreateItems();
+			AddCreateItems(factory);
 		}
 
 		public BranchBase Branch { get; }
 
-		private void AddViewItems()
+		private void AddViewItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(Branch));
-			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(Branch));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetViewReflogItem<ToolStripMenuItem>(Branch));
+			Items.Add(factory.GetViewTreeItem<ToolStripMenuItem>(Branch));
 		}
 
-		private void AddActionItems()
+		private void AddActionItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(Branch, "{0} '{1}'"));
-			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(Branch));
-			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(Branch));
-			Items.Add(GuiItemFactory.GetMergeItem<ToolStripMenuItem>(Branch));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetCheckoutRevisionItem<ToolStripMenuItem>(Branch, "{0} '{1}'"));
+			Items.Add(factory.GetResetHeadHereItem<ToolStripMenuItem>(Branch));
+			Items.Add(factory.GetRebaseHeadHereItem<ToolStripMenuItem>(Branch));
+			Items.Add(factory.GetMergeItem<ToolStripMenuItem>(Branch));
 			if(!Branch.IsRemote)
 			{
-				Items.Add(GuiItemFactory.GetRenameBranchItem<ToolStripMenuItem>((Branch)Branch, "{0}"));
+				Items.Add(factory.GetRenameBranchItem<ToolStripMenuItem>((Branch)Branch, "{0}"));
 			}
 			Items.Add(GuiItemFactory.GetRemoveBranchItem<ToolStripMenuItem>(Branch));
 			if(!Branch.IsRemote)
@@ -74,7 +83,7 @@ namespace gitter.Git.Gui.Controls
 						var pushTo = new ToolStripMenuItem(Resources.StrPushTo, CachedResources.Bitmaps["ImgPush"]);
 						foreach(var remote in remotes)
 						{
-							pushTo.DropDownItems.Add(GuiItemFactory.GetPushBranchToRemoteItem<ToolStripMenuItem>((Branch)Branch, remote));
+							pushTo.DropDownItems.Add(factory.GetPushBranchToRemoteItem<ToolStripMenuItem>((Branch)Branch, remote));
 						}
 						Items.Add(pushTo);
 					}
@@ -86,20 +95,24 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		private void AddCopyToClipboardItems()
+		private void AddCopyToClipboardItems(GuiItemFactory factory)
 		{
+			Assert.IsNotNull(factory);
+
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 			var copyItems = item.DropDownItems;
-			copyItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Branch.Name));
-			copyItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Branch.FullName));
-			copyItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Branch.Revision.HashString));
+			copyItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Branch.Name));
+			copyItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Branch.FullName));
+			copyItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Branch.Revision.HashString));
 			Items.Add(item);
 		}
 
-		private void AddCreateItems()
+		private void AddCreateItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Branch));
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Branch));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetCreateBranchItem<ToolStripMenuItem>(Branch));
+			Items.Add(factory.GetCreateTagItem<ToolStripMenuItem>(Branch));
 		}
 	}
 }

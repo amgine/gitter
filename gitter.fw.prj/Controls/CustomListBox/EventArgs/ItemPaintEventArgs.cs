@@ -80,10 +80,13 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Prepare rectangle <paramref name="rect"/> for painting by applying content offsets.</summary>
 		/// <param name="rect">Rectangle to prepare.</param>
-		public static void PrepareContentRectangle(ref Rectangle rect)
+		public void PrepareContentRectangle(ref Rectangle rect)
 		{
-			rect.X     += ListBoxConstants.ContentSpacing;
-			rect.Width -= ListBoxConstants.ContentSpacing * 2;
+			var conv    = new DpiConverter(Graphics);
+			var spacing = conv.ConvertX(ListBoxConstants.ContentSpacing);
+
+			rect.X     += spacing;
+			rect.Width -= spacing * 2;
 		}
 
 		/// <summary>Prepare rectangle <paramref name="rect"/> for painting text by applying text offsets.</summary>
@@ -102,9 +105,9 @@ namespace gitter.Framework.Controls
 			else
 			{
 				var h1 = GitterApplication.TextRenderer.GetFontHeight(Graphics, listBoxFont);
-				var h = GitterApplication.TextRenderer.GetFontHeight(Graphics, itemFont);
-				var d = (int)((rect.Height - h1) / 2.0f + h1 - h);
-				rect.Y += d;
+				var h  = GitterApplication.TextRenderer.GetFontHeight(Graphics, itemFont);
+				var d  = (int)((rect.Height - h1) / 2.0f + h1 - h);
+				rect.Y      += d;
 				rect.Height -= d;
 			}
 		}

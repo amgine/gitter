@@ -47,6 +47,6 @@ namespace gitter.Framework.Controls
 			=> item.FlowControl = FlowLayoutControl;
 
 		protected override bool VerifyItem(FlowPanel item)
-			=> item != null && item.FlowControl == null;
+			=> item is { FlowControl: null };
 	}
 }

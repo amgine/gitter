@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Context menu for staged changes item.</summary>
@@ -36,13 +38,16 @@ namespace gitter.Git.Gui.Controls
 
 			Repository = repository;
 
-			Items.Add(GuiItemFactory.GetCommitItem<ToolStripMenuItem>(repository));
-			Items.Add(GuiItemFactory.GetStashSaveItem<ToolStripMenuItem>(repository));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetCommitItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetStashSaveItem<ToolStripMenuItem>(repository));
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetUnstageAllItem<ToolStripMenuItem>(repository));
-			Items.Add(GuiItemFactory.GetResetItem<ToolStripMenuItem>(repository, ResetMode.Mixed | ResetMode.Hard));
+			Items.Add(factory.GetUnstageAllItem<ToolStripMenuItem>(repository));
+			Items.Add(factory.GetResetItem<ToolStripMenuItem>(repository, ResetMode.Mixed | ResetMode.Hard));
 		}
 
 		public Repository Repository { get; }

@@ -66,12 +66,12 @@ namespace gitter.TeamCity
 
 		public bool IsValidFor(IRepository repository)
 		{
-			if(repository == null) return false;
+			if(repository is null) return false;
 			var issueTrackers = repository.ConfigSection.TryGetSection("IssueTrackers");
-			if(issueTrackers != null)
+			if(issueTrackers is not null)
 			{
 				var section = issueTrackers.TryGetSection("TeamCity");
-				if(section != null)
+				if(section is not null)
 				{
 					if(!section.ContainsParameter("ServiceUri")) return false;
 					if(!section.ContainsParameter("Username")) return false;

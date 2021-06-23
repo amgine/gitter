@@ -209,7 +209,7 @@ namespace gitter.Framework.Controls
 
 			/// <summary>Creates a copy of this color table.</summary>
 			/// <returns>Clone of this color table.</returns>
-			public CustomColorTable Clone() => new CustomColorTable(this);
+			public CustomColorTable Clone() => new(this);
 
 			/// <summary>Creates a copy of this color table.</summary>
 			/// <returns>Clone of this color table.</returns>
@@ -226,15 +226,15 @@ namespace gitter.Framework.Controls
 			{
 				Verify.Argument.IsNotNull(section, nameof(section));
 
-				section.SetValue<Color>("Background",		Background);
-				section.SetValue<Color>("ArrowNormal",		ArrowNormal);
-				section.SetValue<Color>("ArrowHover",		ArrowHover);
-				section.SetValue<Color>("ArrowPressed",		ArrowPressed);
-				section.SetValue<Color>("ArrowDisabled",	ArrowDisabled);
-				section.SetValue<Color>("ThumbNormal",		ThumbNormal);
-				section.SetValue<Color>("ThumbHover",		ThumbHover);
-				section.SetValue<Color>("ThumbPressed",		ThumbPressed);
-				section.SetValue<Color>("ThumbDisabled",	ThumbDisabled);
+				section.SetValue<Color>("Background",    Background);
+				section.SetValue<Color>("ArrowNormal",   ArrowNormal);
+				section.SetValue<Color>("ArrowHover",    ArrowHover);
+				section.SetValue<Color>("ArrowPressed",  ArrowPressed);
+				section.SetValue<Color>("ArrowDisabled", ArrowDisabled);
+				section.SetValue<Color>("ThumbNormal",   ThumbNormal);
+				section.SetValue<Color>("ThumbHover",    ThumbHover);
+				section.SetValue<Color>("ThumbPressed",  ThumbPressed);
+				section.SetValue<Color>("ThumbDisabled", ThumbDisabled);
 			}
 
 			#endregion
@@ -264,56 +264,38 @@ namespace gitter.Framework.Controls
 
 		#endregion
 
-		protected override void RenderPart(CustomScrollBarPart part, Orientation scrollBarOrientation, Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
+		protected override void RenderPart(
+			CustomScrollBarPart part, Orientation scrollBarOrientation,
+			Graphics graphics, Dpi dpi, Rectangle bounds,
+			bool isEnabled, bool isHovered, bool isPressed)
 		{
-			if(bounds.Width <= 0 || bounds.Height <= 0) return;
+			if(bounds is not { Width: > 0, Height: > 0 }) return;
 
 			switch(part)
 			{
-				case CustomScrollBarPart.DecreaseButton:
-					switch(scrollBarOrientation)
-					{
-						case Orientation.Horizontal:
-							RenderLeftArrow(graphics, bounds, isEnabled, isHovered, isPressed);
-							break;
-						case Orientation.Vertical:
-							RenderUpArrow(graphics, bounds, isEnabled, isHovered, isPressed);
-							break;
-						default:
-							throw new ArgumentException();
-					}
+				case CustomScrollBarPart.DecreaseButton when scrollBarOrientation == Orientation.Vertical:
+					RenderUpArrow(graphics, dpi, bounds, isEnabled, isHovered, isPressed);
+					break;
+				case CustomScrollBarPart.DecreaseButton when scrollBarOrientation == Orientation.Horizontal:
+					RenderLeftArrow(graphics, dpi, bounds, isEnabled, isHovered, isPressed);
 					break;
 				case CustomScrollBarPart.DecreaseTrackBar:
 					RenderTrackBar(graphics, bounds);
 					break;
-				case CustomScrollBarPart.Thumb:
-					switch(scrollBarOrientation)
-					{
-						case Orientation.Horizontal:
-							RenderHorizontalThumb(graphics, bounds, isEnabled, isHovered, isPressed);
-							break;
-						case Orientation.Vertical:
-							RenderVerticalThumb(graphics, bounds, isEnabled, isHovered, isPressed);
-							break;
-						default:
-							throw new ArgumentException();
-					}
+				case CustomScrollBarPart.Thumb when scrollBarOrientation == Orientation.Vertical:
+					RenderVerticalThumb(graphics, bounds, isEnabled, isHovered, isPressed);
+					break;
+				case CustomScrollBarPart.Thumb when scrollBarOrientation == Orientation.Horizontal:
+					RenderHorizontalThumb(graphics, bounds, isEnabled, isHovered, isPressed);
 					break;
 				case CustomScrollBarPart.IncreaseTrackBar:
 					RenderTrackBar(graphics, bounds);
 					break;
-				case CustomScrollBarPart.IncreaseButton:
-					switch(scrollBarOrientation)
-					{
-						case Orientation.Horizontal:
-							RenderRightArrow(graphics, bounds, isEnabled, isHovered, isPressed);
-							break;
-						case Orientation.Vertical:
-							RenderDownArrow(graphics, bounds, isEnabled, isHovered, isPressed);
-							break;
-						default:
-							throw new ArgumentException();
-					}
+				case CustomScrollBarPart.IncreaseButton when scrollBarOrientation == Orientation.Vertical:
+					RenderDownArrow(graphics, dpi, bounds, isEnabled, isHovered, isPressed);
+					break;
+				case CustomScrollBarPart.IncreaseButton when scrollBarOrientation == Orientation.Horizontal:
+					RenderRightArrow(graphics, dpi, bounds, isEnabled, isHovered, isPressed);
 					break;
 			}
 		}
@@ -323,117 +305,90 @@ namespace gitter.Framework.Controls
 
 		private Color GetArrowColor(bool isEnabled, bool isHovered, bool isPressed)
 		{
-			if(isEnabled)
-			{
-				if(isPressed)
-				{
-					return ColorTable.ArrowPressed;
-				}
-				else if(isHovered)
-				{
-					return ColorTable.ArrowHover;
-				}
-				else
-				{
-					return ColorTable.ArrowNormal;
-				}
-			}
-			else
-			{
-				return ColorTable.ArrowDisabled;
-			}
+			if(!isEnabled) return ColorTable.ArrowDisabled;
+			if(isPressed)  return ColorTable.ArrowPressed;
+			if(isHovered)  return ColorTable.ArrowHover;
+			return ColorTable.ArrowNormal;
 		}
 
 		private Color GetThumbColor(bool isEnabled, bool isHovered, bool isPressed)
 		{
-			if(isEnabled)
-			{
-				if(isPressed)
-				{
-					return ColorTable.ThumbPressed;
-				}
-				else if(isHovered)
-				{
-					return ColorTable.ThumbHover;
-				}
-				else
-				{
-					return ColorTable.ThumbNormal;
-				}
-			}
-			else
-			{
-				return ColorTable.ThumbDisabled;
-			}
+			if(!isEnabled) return ColorTable.ThumbDisabled;
+			if(isPressed)  return ColorTable.ThumbPressed;
+			if(isHovered)  return ColorTable.ThumbHover;
+			return ColorTable.ThumbNormal;
 		}
 
 		private void RenderTrackBar(Graphics graphics, Rectangle bounds)
 		{
-			using(var brush = new SolidBrush(ColorTable.Background))
-			{
-				graphics.FillRectangle(brush, bounds);
-			}
+			Assert.IsNotNull(graphics);
+
+			graphics.GdiFill(ColorTable.Background, bounds);
 		}
 
-		private void RenderUpArrow(Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
+		private void RenderUpArrow(Graphics graphics, Dpi dpi, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
 		{
-			using(var brush = new SolidBrush(ColorTable.Background))
-			{
-				graphics.FillRectangle(brush, bounds);
-			}
+			Assert.IsNotNull(graphics);
+
+			graphics.GdiFill(ColorTable.Background, bounds);
 			using(var brush = new SolidBrush(GetArrowColor(isEnabled, isHovered, isPressed)))
 			{
-				var p1 = new Point(bounds.X + bounds.Width / 2, bounds.Y + (bounds.Height - ArrowSize - 1) / 2);
-				var p2 = new Point(p1.X + ArrowSize, p1.Y + ArrowSize + 1);
-				var p3 = new Point(p1.X - ArrowSize, p1.Y + ArrowSize + 1);
+				var conv      = DpiConverter.FromDefaultTo(dpi);
+				var arrowSize = conv.Convert(new Size(ArrowSize, ArrowSize));
+				var p1 = new Point(bounds.X + bounds.Width / 2, bounds.Y + (bounds.Height - arrowSize.Height - 1) / 2);
+				var p2 = new Point(p1.X + arrowSize.Width, p1.Y + arrowSize.Height + 1);
+				var p3 = new Point(p1.X - arrowSize.Width, p1.Y + arrowSize.Height + 1);
 				var triangle = new[] { p1, p2, p3 };
 				graphics.FillPolygon(brush, triangle);
 			}
 		}
 
-		private void RenderDownArrow(Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
+		private void RenderDownArrow(Graphics graphics, Dpi dpi, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
 		{
-			using(var brush = new SolidBrush(ColorTable.Background))
-			{
-				graphics.FillRectangle(brush, bounds);
-			}
+			Assert.IsNotNull(graphics);
+
+			graphics.GdiFill(ColorTable.Background, bounds);
 			using(var brush = new SolidBrush(GetArrowColor(isEnabled, isHovered, isPressed)))
 			{
-				var p1 = new Point(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height - (bounds.Height - ArrowSize) / 2);
-				var p2 = new Point(p1.X + ArrowSize, p1.Y - ArrowSize);
-				var p3 = new Point(p1.X - ArrowSize + 1, p1.Y - ArrowSize);
+				var conv      = DpiConverter.FromDefaultTo(dpi);
+				var arrowSize = conv.Convert(new Size(ArrowSize, ArrowSize));
+				var p1 = new Point(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height - (bounds.Height - arrowSize.Height) / 2);
+				var p2 = new Point(p1.X + arrowSize.Width, p1.Y - arrowSize.Height);
+				var p3 = new Point(p1.X - arrowSize.Width + 1, p1.Y - arrowSize.Height);
 				var triangle = new[] { p1, p2, p3 };
 				graphics.FillPolygon(brush, triangle);
 			}
 		}
 
-		private void RenderLeftArrow(Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
+		private void RenderLeftArrow(Graphics graphics, Dpi dpi, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
 		{
-			using(var brush = new SolidBrush(ColorTable.Background))
-			{
-				graphics.FillRectangle(brush, bounds);
-			}
+			Assert.IsNotNull(graphics);
+
+			graphics.GdiFill(ColorTable.Background, bounds);
 			using(var brush = new SolidBrush(GetArrowColor(isEnabled, isHovered, isPressed)))
 			{
-				var p1 = new Point(bounds.X + (bounds.Width - ArrowSize) / 2, bounds.Y + bounds.Height / 2);
-				var p2 = new Point(p1.X + ArrowSize, p1.Y - ArrowSize);
-				var p3 = new Point(p1.X + ArrowSize, p1.Y + ArrowSize);
+				var conv      = DpiConverter.FromDefaultTo(dpi);
+				var arrowSize = conv.Convert(new Size(ArrowSize, ArrowSize));
+				var p1 = new Point(bounds.X + (bounds.Width - arrowSize.Width) / 2, bounds.Y + bounds.Height / 2);
+				var p2 = new Point(p1.X + arrowSize.Width, p1.Y - arrowSize.Height);
+				var p3 = new Point(p1.X + arrowSize.Width, p1.Y + arrowSize.Height);
 				var triangle = new[] { p1, p2, p3 };
 				graphics.FillPolygon(brush, triangle);
 			}
 		}
 
-		private void RenderRightArrow(Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
+		private void RenderRightArrow(Graphics graphics, Dpi dpi, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
 		{
-			using(var brush = new SolidBrush(ColorTable.Background))
-			{
-				graphics.FillRectangle(brush, bounds);
-			}
+			Assert.IsNotNull(graphics);
+
+			graphics.GdiFill(ColorTable.Background, bounds);
 			using(var brush = new SolidBrush(GetArrowColor(isEnabled, isHovered, isPressed)))
 			{
-				var p1 = new Point(bounds.X + bounds.Width - (bounds.Width - ArrowSize) / 2, bounds.Y + bounds.Height / 2);
-				var p2 = new Point(p1.X - ArrowSize, p1.Y - ArrowSize);
-				var p3 = new Point(p1.X - ArrowSize, p1.Y + ArrowSize);
+				var conv      = DpiConverter.FromDefaultTo(dpi);
+				var arrowSize = conv.Convert(new Size(ArrowSize, ArrowSize));
+				var p1 = new Point(bounds.X + bounds.Width - (bounds.Width - arrowSize.Width) / 2, bounds.Y + bounds.Height / 2);
+				var p2 = new Point(p1.X - arrowSize.Width, p1.Y - arrowSize.Height);
+				var p3 = new Point(p1.X - arrowSize.Width, p1.Y + arrowSize.Height);
 				var triangle = new[] { p1, p2, p3 };
 				graphics.FillPolygon(brush, triangle);
 			}
@@ -441,38 +396,46 @@ namespace gitter.Framework.Controls
 
 		private void RenderHorizontalThumb(Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
 		{
-			var backgroundSize = bounds.Height / 2;
-			var thumbSize = bounds.Height - backgroundSize;
-			var backgroundSize1 = backgroundSize / 2;
-			var backgroundSize2 = backgroundSize - backgroundSize1;
+			Assert.IsNotNull(graphics);
 
-			using(var brush = new SolidBrush(ColorTable.Background))
-			{
-				graphics.FillRectangle(brush, bounds.X, bounds.Y, bounds.Width, backgroundSize1);
-				graphics.FillRectangle(brush, bounds.X, bounds.Bottom - backgroundSize2, bounds.Width, backgroundSize2);
-			}
-			using(var brush = new SolidBrush(GetThumbColor(isEnabled, isHovered, isPressed)))
-			{
-				graphics.FillRectangle(brush, bounds.X, bounds.Y + backgroundSize1, bounds.Width, thumbSize);
-			}
+			var backgroundSize = bounds.Height / 4;
+			var thumbSize      = bounds.Height - backgroundSize * 2;
+
+			bounds.Height = backgroundSize;
+
+			graphics.GdiFill(ColorTable.Background, bounds);
+
+			bounds.Y     += backgroundSize;
+			bounds.Height = thumbSize;
+
+			graphics.GdiFill(GetThumbColor(isEnabled, isHovered, isPressed), bounds);
+
+			bounds.Y     += thumbSize;
+			bounds.Height = backgroundSize;
+
+			graphics.GdiFill(ColorTable.Background, bounds);
 		}
 
 		private void RenderVerticalThumb(Graphics graphics, Rectangle bounds, bool isEnabled, bool isHovered, bool isPressed)
 		{
-			var backgroundSize = bounds.Width / 2;
-			var thumbSize = bounds.Width - backgroundSize;
-			var backgroundSize1 = backgroundSize / 2;
-			var backgroundSize2 = backgroundSize - backgroundSize1;
+			Assert.IsNotNull(graphics);
 
-			using(var brush = new SolidBrush(ColorTable.Background))
-			{
-				graphics.FillRectangle(brush, bounds.X, bounds.Y, backgroundSize1, bounds.Height);
-				graphics.FillRectangle(brush, bounds.Right - backgroundSize2, bounds.Y, backgroundSize2, bounds.Height);
-			}
-			using(var brush = new SolidBrush(GetThumbColor(isEnabled, isHovered, isPressed)))
-			{
-				graphics.FillRectangle(brush, bounds.X + backgroundSize1, bounds.Y, thumbSize, bounds.Height);
-			}
+			var backgroundSize = bounds.Width / 4;
+			var thumbSize      = bounds.Width - backgroundSize * 2;
+
+			bounds.Width = backgroundSize;
+
+			graphics.GdiFill(ColorTable.Background, bounds);
+
+			bounds.X    += backgroundSize;
+			bounds.Width = thumbSize;
+
+			graphics.GdiFill(GetThumbColor(isEnabled, isHovered, isPressed), bounds);
+
+			bounds.X    += thumbSize;
+			bounds.Width = backgroundSize;
+
+			graphics.GdiFill(ColorTable.Background, bounds);
 		}
 	}
 }

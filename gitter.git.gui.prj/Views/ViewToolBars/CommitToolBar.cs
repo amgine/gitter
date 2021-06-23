@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
+	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -34,6 +35,17 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class CommitToolbar : ToolStrip
 	{
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static readonly IDpiBoundValue<Bitmap> Refresh    = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"refresh",     Size);
+			public static readonly IDpiBoundValue<Bitmap> TreeMode   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"folder.tree", Size);
+			public static readonly IDpiBoundValue<Bitmap> StageAll   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"stage.all",   Size);
+			public static readonly IDpiBoundValue<Bitmap> UnstageAll = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"unstage.all", Size);
+			public static readonly IDpiBoundValue<Bitmap> Reset      = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"delete",      Size);
+		}
+
 		#region Data
 
 		private readonly CommitView _commitView;
@@ -42,6 +54,7 @@ namespace gitter.Git.Gui.Views
 		private readonly ToolStripSplitButton _stageAll;
 		private readonly ToolStripItem _unstageAll;
 		private readonly ToolStripSplitButton _btnReset;
+		private readonly DpiBindings _bindings;
 
 		#endregion
 
@@ -50,16 +63,13 @@ namespace gitter.Git.Gui.Views
 			Verify.Argument.IsNotNull(commitView, nameof(commitView));
 
 			_commitView = commitView;
-			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) =>
-				{
-					_commitView.RefreshContent();
-				})
+			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, default,
+				(_, _) => _commitView.RefreshContent())
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
 			});
-			Items.Add(_btnTreeMode = new ToolStripButton(Resources.StrShowDirectoryTree, CachedResources.Bitmaps["ImgFolderTree"],
-				(sender, e) =>
+			Items.Add(_btnTreeMode = new ToolStripButton(Resources.StrShowDirectoryTree, default,
+				(sender, _) =>
 				{
 					var button = (ToolStripButton)sender;
 					_commitView.TreeMode = button.Checked = !button.Checked;
@@ -69,58 +79,55 @@ namespace gitter.Git.Gui.Views
 				Checked = commitView.TreeMode,
 			});
 			Items.Add(new ToolStripSeparator());
-			Items.Add(_stageAll = new ToolStripSplitButton(Resources.StrStageAll, CachedResources.Bitmaps["ImgStageAll"])
+			Items.Add(_stageAll = new ToolStripSplitButton(Resources.StrStageAll, default)
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
 					DropDownDirection = ToolStripDropDownDirection.BelowRight
 				});
-			Items.Add(_unstageAll = new ToolStripButton(Resources.StrUnstageAll, CachedResources.Bitmaps["ImgUnstageAll"])
+			Items.Add(_unstageAll = new ToolStripButton(Resources.StrUnstageAll, default)
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
 				});
 			Items.Add(new ToolStripSeparator());
-			Items.Add(_btnReset = new ToolStripSplitButton(Resources.StrReset, CachedResources.Bitmaps["ImgDelete"])
+			Items.Add(_btnReset = new ToolStripSplitButton(Resources.StrReset, default)
 				{
 					DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
 				});
 
-			_stageAll.ButtonClick += (sender, e) =>
-				{
-					_commitView.Repository.Status.StageAll();
-				};
+			_stageAll.ButtonClick += (_, _) => _commitView.Repository.Status.StageAll();
 
-			_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrUpdate, null, (s, e) => _commitView.Repository.Status.StageUpdated()));
+			_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrUpdate, null, (_, _) => _commitView.Repository.Status.StageUpdated()));
 			_stageAll.DropDown.Items.Add(new ToolStripSeparator());
 			_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrManual.AddEllipsis(), null,
-				(sender, e) =>
+				(_, _) =>
 				{
-					using(var dlg = new StageDialog(_commitView.Repository))
-					{
-						dlg.Run(_commitView);
-					}
+					using var dlg = new StageDialog(_commitView.Repository);
+					dlg.Run(_commitView);
 				}));
 
-			_unstageAll.Click += (sender, e) =>
-				{
-					_commitView.Repository.Status.UnstageAll();
-				};
+			_unstageAll.Click += (_, _) => _commitView.Repository.Status.UnstageAll();
 
-			_btnReset.ButtonClick += (s, e) =>
+			_btnReset.ButtonClick += (_, _) =>
 				{
-					using(var dlg = new SelectResetModeDialog(ResetMode.Mixed | ResetMode.Hard)
-						{
-							ResetMode = ResetMode.Mixed,
-						})
+					using var dlg = new SelectResetModeDialog(ResetMode.Mixed | ResetMode.Hard)
 					{
-						if(dlg.Run(this) == DialogResult.OK)
-						{
-							Reset(dlg.ResetMode);
-						}
+						ResetMode = ResetMode.Mixed,
+					};
+					if(dlg.Run(this) == DialogResult.OK)
+					{
+						Reset(dlg.ResetMode);
 					}
 				};
 
-			_btnReset.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrMixed, null, (s, e) => AskAndReset(ResetMode.Mixed)));
-			_btnReset.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrHard, null, (s, e) => AskAndReset(ResetMode.Hard)));
+			_btnReset.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrMixed, null, (_, _) => AskAndReset(ResetMode.Mixed)));
+			_btnReset.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrHard,  null, (_, _) => AskAndReset(ResetMode.Hard)));
+
+			_bindings = new DpiBindings(this);
+			_bindings.BindImage(_btnRefresh,  Icons.Refresh);
+			_bindings.BindImage(_btnTreeMode, Icons.TreeMode);
+			_bindings.BindImage(_stageAll,    Icons.StageAll);
+			_bindings.BindImage(_unstageAll,  Icons.UnstageAll);
+			_bindings.BindImage(_btnReset,    Icons.Reset);
 		}
 
 		private void AskAndReset(ResetMode mode)

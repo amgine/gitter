@@ -105,6 +105,7 @@ namespace gitter.Framework.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{
 			switch(e.KeyCode)
@@ -118,6 +119,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
 			base.OnKeyDown(e);
@@ -129,6 +131,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnKeyUp(KeyEventArgs e)
 		{
 			base.OnKeyUp(e);
@@ -141,18 +144,21 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnGotFocus(EventArgs e)
 		{
 			base.OnGotFocus(e);
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
 			Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			if(e.Button == MouseButtons.Left)
@@ -163,6 +169,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseDown(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			if(e.Button == MouseButtons.Left)
@@ -172,22 +179,26 @@ namespace gitter.Framework.Controls
 			base.OnMouseUp(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			IsMouseOver = false;
 			base.OnMouseLeave(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseEnter(EventArgs e)
 		{
 			IsMouseOver = true;
 			base.OnMouseEnter(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintBackground(PaintEventArgs pevent)
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			Renderer.Render(e.Graphics, e.ClipRectangle, this);

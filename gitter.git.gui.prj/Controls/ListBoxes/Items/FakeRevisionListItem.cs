@@ -189,28 +189,31 @@ namespace gitter.Git.Gui.Controls
 
 		private void DrawSubjectColumn(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			var rect = paintEventArgs.Bounds;
+			var conv = paintEventArgs.DpiConverter;
 			var alignToGraph = paintEventArgs.Column is SubjectColumn rsc
 				? rsc.AlignToGraph
 				: SubjectColumn.DefaultAlignToGraph;
 			var graphColumn = ListBox.GetPrevVisibleColumn(paintEventArgs.ColumnIndex);
-			if(graphColumn != null && graphColumn.Id != (int)ColumnId.Graph)
+			if(graphColumn is not null && graphColumn.Id != (int)ColumnId.Graph)
 			{
 				graphColumn = null;
 			}
-			if(alignToGraph && graphColumn != null)
+			if(alignToGraph && graphColumn is not null)
 			{
 				int availWidth;
-				if(Graph != null)
+				if(Graph is not null)
 				{
-					availWidth = graphColumn.Width - 21 * Graph.Length;
+					availWidth = graphColumn.Width - paintEventArgs.ListBox.ItemHeight * Graph.Length;
 					for(int i = Graph.Length - 1; i != -1; --i)
 					{
 						if(Graph[i].Elements != GraphElement.Space)
 						{
 							break;
 						}
-						availWidth += 21;
+						availWidth += paintEventArgs.ListBox.ItemHeight;
 					}
 				}
 				else
@@ -219,16 +222,16 @@ namespace gitter.Git.Gui.Controls
 				}
 				if(availWidth != 0)
 				{
-					rect.X -= availWidth;
+					rect.X     -= availWidth;
 					rect.Width += availWidth;
 				}
 			}
-			SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
+			paintEventArgs.PrepareContentRectangle(ref rect);
 			if(rect.Width > 1)
 			{
-				string text = SubjectText;
+				var text = SubjectText;
 				paintEventArgs.PrepareTextRectangle(ref rect);
-				bool useDefaultBrush = (paintEventArgs.State & ItemState.Selected) == ItemState.Selected && paintEventArgs.ListBox.Style.Type == GitterStyleType.DarkBackground;
+				var useDefaultBrush = (paintEventArgs.State & ItemState.Selected) == ItemState.Selected && paintEventArgs.ListBox.Style.Type == GitterStyleType.DarkBackground;
 				var textBrush = useDefaultBrush ? paintEventArgs.Brush : new SolidBrush(paintEventArgs.ListBox.Style.Colors.GrayText);
 				if(!string.IsNullOrWhiteSpace(text))
 				{
@@ -236,19 +239,21 @@ namespace gitter.Git.Gui.Controls
 						paintEventArgs.Graphics, text, paintEventArgs.Font, int.MaxValue).Width;
 						GitterApplication.TextRenderer.DrawText(
 							paintEventArgs.Graphics, text, paintEventArgs.Font, textBrush, rect);
-					w += 3;
-					rect.X += w;
+					w += conv.ConvertX(3);
+					rect.X     += w;
 					rect.Width -= w;
 				}
+				var iconSize = conv.Convert(new Size(16, 16));
 				for(int i = 0; i < _iconEntries.Length; ++i)
 				{
 					if(rect.Width <= 0) break;
 					if(_iconEntries[i].Count != 0)
 					{
 						var image = _iconEntries[i].Image;
-						var imageRect = new Rectangle(rect.X, rect.Y - 1 + (rect.Height - image.Height) / 2, image.Width, image.Height);
-						rect.X += imageRect.Width + 2;
-						rect.Width -= imageRect.Width + 2;
+						var imageRect = new Rectangle(rect.X, rect.Y - 1 + (rect.Height - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
+						var dx = imageRect.Width + conv.ConvertX(2);
+						rect.X     += dx;
+						rect.Width -= dx;
 						if(rect.Width <= 0) break;
 						paintEventArgs.Graphics.DrawImage(image, imageRect);
 						var countText = _iconEntries[i].Count.ToString(CultureInfo.CurrentCulture);
@@ -256,8 +261,8 @@ namespace gitter.Git.Gui.Controls
 							paintEventArgs.Graphics, countText, paintEventArgs.Font, int.MaxValue).Width;
 						GitterApplication.TextRenderer.DrawText(
 							paintEventArgs.Graphics, countText, paintEventArgs.Font, textBrush, rect);
-						textW += 2;
-						rect.X += textW;
+						textW += conv.ConvertX(2);
+						rect.X     += textW;
 						rect.Width -= textW;
 					}
 				}
@@ -280,10 +285,8 @@ namespace gitter.Git.Gui.Controls
 			}
 			else
 			{
-				using(var textBrush = new SolidBrush(style.Colors.GrayText))
-				{
-					paintMethod(paintEventArgs, value, textBrush);
-				}
+				using var textBrush = new SolidBrush(style.Colors.GrayText);
+				paintMethod(paintEventArgs, value, textBrush);
 			}
 		}
 
@@ -298,10 +301,8 @@ namespace gitter.Git.Gui.Controls
 			}
 			else
 			{
-				using(var textBrush = new SolidBrush(style.Colors.GrayText))
-				{
-					paintEventArgs.PaintText(text, textBrush);
-				}
+				using var textBrush = new SolidBrush(style.Colors.GrayText);
+				paintEventArgs.PaintText(text, textBrush);
 			}
 		}
 
@@ -396,7 +397,7 @@ namespace gitter.Git.Gui.Controls
 				FakeRevisionItemType.StagedChanges   => new StagedChangesMenu(Repository),
 				_ => default,
 			};
-			if(menu != null)
+			if(menu is not null)
 			{
 				Utility.MarkDropDownForAutoDispose(menu);
 			}

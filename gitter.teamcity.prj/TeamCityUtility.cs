@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -98,14 +98,14 @@ namespace gitter.TeamCity
 
 		public static BuildStatus LoadBuildStatus(XmlNode node)
 		{
-			if(node == null) return BuildStatus.Unknown;
-			switch(node.InnerText)
+			if(node is null) return BuildStatus.Unknown;
+			return node.InnerText switch
 			{
-				case "ERROR":   return BuildStatus.Error;
-				case "FAILURE": return BuildStatus.Failure;
-				case "SUCCESS": return BuildStatus.Success;
-				default: return BuildStatus.Unknown;
-			}
+				"ERROR"   => BuildStatus.Error,
+				"FAILURE" => BuildStatus.Failure,
+				"SUCCESS" => BuildStatus.Success,
+				_ => BuildStatus.Unknown,
+			};
 		}
 
 		#endregion

@@ -108,6 +108,7 @@ namespace gitter.Framework.Controls
 
 		#region Properties
 
+		/// <inheritdoc/>
 		public override Size GetPreferredSize(Size proposedSize)
 			=> Orientation switch
 			{
@@ -519,21 +520,21 @@ namespace gitter.Framework.Controls
 							CultureInfo.InvariantCulture,
 							"Unexpected {0}.Side: {1}", GetType().Name, Side));
 				}
-				if(_side != AnchorStyles.Left && _grid.LeftSide != null)
+				if(_side != AnchorStyles.Left)
 				{
-					_grid.LeftSide.DespawnPanel();
+					_grid.LeftSide?.DespawnPanel();
 				}
-				if(_side != AnchorStyles.Top && _grid.TopSide != null)
+				if(_side != AnchorStyles.Top)
 				{
-					_grid.TopSide.DespawnPanel();
+					_grid.TopSide?.DespawnPanel();
 				}
-				if(_side != AnchorStyles.Right && _grid.RightSide != null)
+				if(_side != AnchorStyles.Right)
 				{
-					_grid.RightSide.DespawnPanel();
+					_grid.RightSide?.DespawnPanel();
 				}
-				if(_side != AnchorStyles.Bottom && _grid.BottomSide != null)
+				if(_side != AnchorStyles.Bottom)
 				{
-					_grid.BottomSide.DespawnPanel();
+					_grid.BottomSide?.DespawnPanel();
 				}
 				_visibleHost.SetActiveView(tab.View);
 				_visibleHost.Bounds = bounds;
@@ -629,29 +630,28 @@ namespace gitter.Framework.Controls
 
 		private void OnAutoHideTimerTick(object sender, EventArgs e)
 		{
-			if(_visibleHost == null)
+			if(_visibleHost is null)
 			{
 				_autoHideTimer.Enabled = false;
+				return;
 			}
-			else
+			if(!_visibleHost.IsActive && !_visibleHost.IsResizing)
 			{
-				if(!_visibleHost.IsActive && !_visibleHost.IsResizing)
+				var position = Control.MousePosition;
+				var pos1 = PointToClient(position);
+				if(!ClientRectangle.Contains(pos1))
 				{
-					var position = Control.MousePosition;
-					var pos1 = PointToClient(position);
-					if(!ClientRectangle.Contains(pos1))
+					var pos2 = _visibleHost.PointToClient(position);
+					if(!_visibleHost.ClientRectangle.Contains(pos2))
 					{
-						var pos2 = _visibleHost.PointToClient(position);
-						if(!_visibleHost.ClientRectangle.Contains(pos2))
-						{
-							DespawnPanel();
-							_autoHideTimer.Enabled = false;
-						}
+						DespawnPanel();
+						_autoHideTimer.Enabled = false;
 					}
 				}
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
@@ -662,12 +662,14 @@ namespace gitter.Framework.Controls
 				_tabHover.Drop();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			base.OnMouseLeave(e);
 			_tabHover.Drop();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
 			base.OnMouseClick(e);
@@ -688,10 +690,12 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintBackground(PaintEventArgs pevent)
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			ViewManager.Renderer.RenderViewDockSide(this, e);
@@ -748,6 +752,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
@@ -778,9 +783,11 @@ namespace gitter.Framework.Controls
 		public List<ViewHost>.Enumerator GetEnumerator()
 			=> _dockedHosts.GetEnumerator();
 
+		/// <inheritdoc/>
 		IEnumerator<ViewHost> IEnumerable<ViewHost>.GetEnumerator()
 			=> _dockedHosts.GetEnumerator();
 
+		/// <inheritdoc/>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 			=> _dockedHosts.GetEnumerator();
 

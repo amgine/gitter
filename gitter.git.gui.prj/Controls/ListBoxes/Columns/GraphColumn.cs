@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Controls
 {
 	using System;
 	using System.Drawing;
+	using System.Windows.Forms;
 
 	using gitter.Framework.Controls;
 	using gitter.Framework.Configuration;
@@ -52,7 +53,7 @@ namespace gitter.Git.Gui.Controls
 		public GraphColumn()
 			: base((int)ColumnId.Graph, Resources.StrGraph, true)
 		{
-			Width = 21;
+			Width = SystemInformation.SmallIconSize.Height + 5;
 			SizeMode = ColumnSizeMode.Fixed;
 
 			_showColors = DefaultShowColors;
@@ -88,9 +89,6 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		const int GraphCellWidth = 21;
-		const int GraphCellHeight = 21;
-
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
 			Assert.IsNotNull(paintEventArgs);
@@ -112,13 +110,13 @@ namespace gitter.Git.Gui.Controls
 						: RevisionGraphItemType.Unstaged;
 					break;
 				default: return;
-			};
-			if(graph == null) return;
+			}
+			if(graph is null) return;
 			GlobalBehavior.GraphStyle.DrawGraph(
 				paintEventArgs.Graphics,
 				graph,
 				paintEventArgs.Bounds,
-				GraphCellWidth,
+				paintEventArgs.ListBox.ItemHeight,
 				itemType,
 				ShowColors);
 		}
@@ -137,8 +135,9 @@ namespace gitter.Git.Gui.Controls
 					graph = fakeRevItem.Graph;
 					break;
 				default: return Size.Empty;
-			};
-			return new Size((graph != null) ? (graph.Length * GraphCellWidth) : (0), GraphCellHeight);
+			}
+			var h = measureEventArgs.ListBox.ItemHeight;
+			return new Size(graph is not null ? graph.Length * h : 0, h);
 		}
 
 		protected override void SaveMoreTo(Section section)

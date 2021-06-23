@@ -21,10 +21,8 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics;
-	using System.Drawing;
 	using System.IO;
 	using System.Windows.Forms;
 
@@ -73,15 +71,18 @@ namespace gitter.Git.Gui.Views
 			{
 				Verify.Argument.IsNotNull(item, nameof(item));
 
+				var dpiBindings = new DpiBindings(this);
+				var factory     = new GuiItemFactory(dpiBindings);
+
 				Items.Add(GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(item));
 				Items.Add(GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(item));
 
-				if(treeSource != null)
+				if(treeSource is not null)
 				{
 					Items.Add(new ToolStripSeparator());
 					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(treeSource.Revision, item.DataContext));
 					Items.Add(new ToolStripSeparator());
-					Items.Add(GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(treeSource.Revision, item.DataContext));
+					Items.Add(factory.GetCheckoutPathItem<ToolStripMenuItem>(treeSource.Revision, item.DataContext));
 				}
 			}
 		}
@@ -152,11 +153,10 @@ namespace gitter.Git.Gui.Views
 			}
 		}
 
-		/// <summary>Gets a value indicating whether this instance is document.</summary>
-		/// <value><c>true</c> if this instance is document; otherwise, <c>false</c>.</value>
+		/// <inheritdoc/>
 		public override bool IsDocument => true;
 
-		public override Image Image => CachedResources.Bitmaps["ImgFolderTree"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"folder.tree");
 
 		public TreeDirectory CurrentDirectory
 		{
@@ -203,7 +203,9 @@ namespace gitter.Git.Gui.Views
 			Assert.IsNotNull(revision);
 			Assert.IsNotNull(file);
 
-			var menu = new ContextMenuStrip();
+			var menu        = new ContextMenuStrip();
+			var dpiBindings = new DpiBindings(menu);
+			var factory     = new GuiItemFactory(dpiBindings);
 			menu.Items.AddRange(
 				new ToolStripItem[]
 				{
@@ -214,15 +216,15 @@ namespace gitter.Git.Gui.Views
 					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 						new ToolStripItem[]
 						{
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
 						}),
 					new ToolStripSeparator(),
 					GuiItemFactory.GetBlameItem<ToolStripMenuItem>(revision, file),
 					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(revision, file),
 					new ToolStripSeparator(),
-					GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(revision, file),
+					factory.GetCheckoutPathItem<ToolStripMenuItem>(revision, file),
 				});
 			return menu;
 		}
@@ -232,14 +234,16 @@ namespace gitter.Git.Gui.Views
 			Assert.IsNotNull(revision);
 			Assert.IsNotNull(directory);
 
-			var menu = new ContextMenuStrip();
+			var menu        = new ContextMenuStrip();
+			var dpiBindings = new DpiBindings(menu);
+			var factory     = new GuiItemFactory(dpiBindings);
 			menu.Items.AddRange(
 				new ToolStripItem[]
 				{
 					new ToolStripMenuItem(Resources.StrOpen, null, (_, _) => item.Activate()),
 					GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(revision, directory),
 					new ToolStripSeparator(),
-					GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(revision, directory),
+					factory.GetCheckoutPathItem<ToolStripMenuItem>(revision, directory),
 				});
 			return menu;
 		}
@@ -249,7 +253,9 @@ namespace gitter.Git.Gui.Views
 			Assert.IsNotNull(revision);
 			Assert.IsNotNull(commit);
 
-			var menu = new ContextMenuStrip();
+			var menu        = new ContextMenuStrip();
+			var dpiBindings = new DpiBindings(menu);
+			var factory     = new GuiItemFactory(dpiBindings);
 			menu.Items.AddRange(
 				new ToolStripItem[]
 				{
@@ -258,12 +264,12 @@ namespace gitter.Git.Gui.Views
 					new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 						new ToolStripItem[]
 						{
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, commit.Name),
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, commit.RelativePath),
-							GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, commit.FullPath),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, commit.Name),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, commit.RelativePath),
+							factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, commit.FullPath),
 						}),
 					new ToolStripSeparator(),
-					GuiItemFactory.GetCheckoutPathItem<ToolStripMenuItem>(revision, commit),
+					factory.GetCheckoutPathItem<ToolStripMenuItem>(revision, commit),
 				});
 			return menu;
 		}
@@ -361,7 +367,7 @@ namespace gitter.Git.Gui.Views
 			foreach(TreeDirectoryListItem item in root.Items)
 			{
 				var subSearch = FindDirectoryEntry(item, folder);
-				if(subSearch != null) return subSearch;
+				if(subSearch is not null) return subSearch;
 			}
 			return null;
 		}
@@ -436,6 +442,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F5:
@@ -456,7 +464,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("TreeList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				_treeContent.LoadViewFrom(listNode);
 			}

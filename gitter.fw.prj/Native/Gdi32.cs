@@ -76,5 +76,20 @@ namespace gitter.Native
 
 		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern int GetBkColor(IntPtr hDC);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern bool Rectangle([In] IntPtr hdc, [In] int nLeftRect, [In] int nTopRect, [In] int nRightRect, [In] int nBottomRect);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr GetStockObject([In] StockObject fnObject);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr CreateSolidBrush([In] uint crColor);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int GetDeviceCaps(IntPtr hdc, DeviceCaps nIndex);
+
+		[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern bool DeleteDC([In] IntPtr hDC);
 	}
 }

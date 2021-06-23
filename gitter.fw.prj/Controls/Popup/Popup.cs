@@ -150,16 +150,16 @@ namespace gitter.Framework.Controls
 
 			Items.Add(_host);
 
-			content.Disposed += (sender, e) =>
+			content.Disposed += (_, _) =>
 				{
 					content = null;
-					Dispose(true);
+					Dispose(disposing: true);
 				};
-			content.RegionChanged += (sender, e) =>
+			content.RegionChanged += (_, e) =>
 				{
 					UpdateRegion();
 				};
-			content.Paint += (sender, e) =>
+			content.Paint += (_, e) =>
 				{
 					PaintSizeGrip(e);
 				};
@@ -171,11 +171,12 @@ namespace gitter.Framework.Controls
 
 		#region Overrides
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
 			{
-				if(Content != null)
+				if(Content is not null)
 				{
 					var c = Content;
 					Content = null;
@@ -185,6 +186,7 @@ namespace gitter.Framework.Controls
 			base.Dispose(disposing);
 		}
 
+		/// <inheritdoc/>
 		protected override CreateParams CreateParams
 		{
 			get
@@ -199,6 +201,7 @@ namespace gitter.Framework.Controls
 
 		#region Methods
 
+		/// <inheritdoc/>
 		protected override void OnVisibleChanged(EventArgs e)
 		{
 			base.OnVisibleChanged(e);
@@ -256,13 +259,7 @@ namespace gitter.Framework.Controls
 			NativeUtility.AnimateWindow(this, AnimationDuration, flags);
 		}
 
-		/// <summary>
-		/// Processes a dialog box key.
-		/// </summary>
-		/// <param name="keyData">One of the <see cref="T:System.Windows.Forms.Keys" /> values that represents the key to process.</param>
-		/// <returns>
-		/// true if the key was processed by the control; otherwise, false.
-		/// </returns>
+		/// <inheritdoc/>
 		[UIPermission(SecurityAction.LinkDemand, Window = UIPermissionWindow.AllWindows)]
 		protected override bool ProcessDialogKey(Keys keyData)
 		{
@@ -341,7 +338,7 @@ namespace gitter.Framework.Controls
 
 		private void SetOwnerItem(Control control)
 		{
-			if(control == null)
+			if(control is null)
 			{
 				return;
 			}
@@ -352,19 +349,20 @@ namespace gitter.Framework.Controls
 				OwnerItem = popupControl.Items[0];
 				return;
 			}
-			else if(_ownerControl == null)
+			else if(_ownerControl is null)
 			{
 				_ownerControl = control;
 			}
-			if(control.Parent != null)
+			if(control.Parent is not null)
 			{
 				SetOwnerItem(control.Parent);
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnSizeChanged(EventArgs e)
 		{
-			if(Content != null)
+			if(Content is not null)
 			{
 				Content.MinimumSize = Size;
 				Content.MaximumSize = Size;
@@ -374,9 +372,10 @@ namespace gitter.Framework.Controls
 			base.OnSizeChanged(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnOpening(CancelEventArgs e)
 		{
-			if(Content == null || Content.IsDisposed || Content.Disposing)
+			if(Content is null || Content.IsDisposed || Content.Disposing)
 			{
 				e.Cancel = true;
 				return;
@@ -385,9 +384,10 @@ namespace gitter.Framework.Controls
 			base.OnOpening(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnOpened(EventArgs e)
 		{
-			if(_ownerPopup != null)
+			if(_ownerPopup is not null)
 			{
 				_ownerPopup._isChildPopupOpened = true;
 			}
@@ -398,10 +398,11 @@ namespace gitter.Framework.Controls
 			base.OnOpened(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnClosed(ToolStripDropDownClosedEventArgs e)
 		{
 			_ownerControl = null;
-			if(_ownerPopup != null)
+			if(_ownerPopup is not null)
 			{
 				_ownerPopup._isChildPopupOpened = false;
 			}
@@ -412,6 +413,7 @@ namespace gitter.Framework.Controls
 
 		#region Resizing
 
+		/// <inheritdoc/>
 		protected override void WndProc(ref Message m)
 		{
 			if(InternalProcessResizing(ref m, false))
@@ -530,46 +532,44 @@ namespace gitter.Framework.Controls
 				return;
 
 			var clientSize = Content.ClientSize;
-			using(var gripImage = new Bitmap(gripWidth, gripHeight))
+			using var gripImage = new Bitmap(gripWidth, gripHeight);
+			using(var graphics = Graphics.FromImage(gripImage))
 			{
-				using(var graphics = Graphics.FromImage(gripImage))
+				if(Application.RenderWithVisualStyles)
 				{
-					if(Application.RenderWithVisualStyles)
+					if(_sizeGripRenderer == null)
 					{
-						if(_sizeGripRenderer == null)
-						{
-							_sizeGripRenderer = new VisualStyleRenderer(VisualStyleElement.Status.Gripper.Normal);
-						}
-						_sizeGripRenderer.DrawBackground(graphics, new Rectangle(0, 0, gripWidth, gripHeight));
+						_sizeGripRenderer = new VisualStyleRenderer(VisualStyleElement.Status.Gripper.Normal);
 					}
-					else
-					{
-						ControlPaint.DrawSizeGrip(graphics, Content.BackColor, 0, 0, gripWidth, gripHeight);
-					}
+					_sizeGripRenderer.DrawBackground(graphics, new Rectangle(0, 0, gripWidth, gripHeight));
 				}
-				var gs = e.Graphics.Save();
-				e.Graphics.ResetTransform();
-				if(_resizableTop)
+				else
 				{
-					if(_resizableLeft)
-					{
-						e.Graphics.RotateTransform(180);
-						e.Graphics.TranslateTransform(-clientSize.Width, -clientSize.Height);
-					}
-					else
-					{
-						e.Graphics.ScaleTransform(1, -1);
-						e.Graphics.TranslateTransform(0, -clientSize.Height);
-					}
+					ControlPaint.DrawSizeGrip(graphics, Content.BackColor, 0, 0, gripWidth, gripHeight);
 				}
-				else if(_resizableLeft)
-				{
-					e.Graphics.ScaleTransform(-1, 1);
-					e.Graphics.TranslateTransform(-clientSize.Width, 0);
-				}
-				e.Graphics.DrawImage(gripImage, clientSize.Width - gripWidth, clientSize.Height - gripHeight + 1, gripWidth, gripHeight);
-				e.Graphics.Restore(gs);
 			}
+			var gs = e.Graphics.Save();
+			e.Graphics.ResetTransform();
+			if(_resizableTop)
+			{
+				if(_resizableLeft)
+				{
+					e.Graphics.RotateTransform(180);
+					e.Graphics.TranslateTransform(-clientSize.Width, -clientSize.Height);
+				}
+				else
+				{
+					e.Graphics.ScaleTransform(1, -1);
+					e.Graphics.TranslateTransform(0, -clientSize.Height);
+				}
+			}
+			else if(_resizableLeft)
+			{
+				e.Graphics.ScaleTransform(-1, 1);
+				e.Graphics.TranslateTransform(-clientSize.Width, 0);
+			}
+			e.Graphics.DrawImage(gripImage, clientSize.Width - gripWidth, clientSize.Height - gripHeight + 1, gripWidth, gripHeight);
+			e.Graphics.Restore(gs);
 		}
 
 		#endregion

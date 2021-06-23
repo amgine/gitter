@@ -21,9 +21,6 @@
 namespace gitter.Framework.Controls
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using Resources = gitter.Framework.Properties.Resources;
@@ -47,7 +44,7 @@ namespace gitter.Framework.Controls
 			Items.Add(_btnGoBack = new ToolStripButton(
 				Resources.StrBack,
 				Resources.ImgGoBack,
-				(s, e) =>
+				(_, _) =>
 				{
 					if(_view.WebBrowser.CanGoBack)
 					{
@@ -61,7 +58,7 @@ namespace gitter.Framework.Controls
 			Items.Add(_btnGoForward = new ToolStripButton(
 				Resources.StrForward,
 				Resources.ImgGoForward,
-				(s, e) =>
+				(_, _) =>
 				{
 					if(_view.WebBrowser.CanGoForward)
 					{

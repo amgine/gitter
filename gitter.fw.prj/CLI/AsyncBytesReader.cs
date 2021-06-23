@@ -249,7 +249,6 @@ namespace gitter.Framework.CLI
 						}
 					}
 				}
-
 			}
 		}
 

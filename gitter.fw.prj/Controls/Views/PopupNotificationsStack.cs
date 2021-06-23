@@ -23,8 +23,6 @@ namespace gitter.Framework.Controls
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Linq;
-	using System.Text;
 	using System.Windows.Forms;
 
 	public sealed class PopupNotificationsStack : IDisposable
@@ -38,11 +36,11 @@ namespace gitter.Framework.Controls
 
 		#region Data
 
-		private readonly List<PopupNotificationForm> _windows;
-		private readonly Queue<NotificationContent> _queue;
+		private readonly List<PopupNotificationForm> _windows = new();
+		private readonly Queue<NotificationContent> _queue = new();
 		private Point _origin;
-		private int _maximumVisibleNotifications;
-		private TimeSpan _defaultNotificationDuration;
+		private int _maximumVisibleNotifications = 5;
+		private TimeSpan _defaultNotificationDuration = TimeSpan.FromSeconds(10.0);
 
 		#endregion
 
@@ -50,10 +48,6 @@ namespace gitter.Framework.Controls
 
 		public PopupNotificationsStack(Point origin)
 		{
-			_maximumVisibleNotifications = 5;
-			_defaultNotificationDuration = TimeSpan.FromSeconds(10.0);
-			_windows = new List<PopupNotificationForm>();
-			_queue = new Queue<NotificationContent>();
 			_origin = origin;
 		}
 
@@ -64,10 +58,11 @@ namespace gitter.Framework.Controls
 
 		private static Point GetDefaultOrigin()
 		{
+			var conv = new DpiConverter(GraphicsUtility.MeasurementGraphics);
 			var area = Screen.PrimaryScreen.WorkingArea;
 			var w = area.Right;
 			var h = area.Bottom;
-			return new Point(w - ViewConstants.PopupWidth - 5, h - 5);
+			return new Point(w - conv.ConvertX(ViewConstants.PopupWidth) - conv.ConvertX(5), h - conv.ConvertY(5));
 		}
 
 		#endregion
@@ -77,7 +72,7 @@ namespace gitter.Framework.Controls
 			get => _maximumVisibleNotifications;
 			set
 			{
-				if(value < 1) throw new ArgumentOutOfRangeException();
+				Verify.Argument.IsPositive(value, nameof(value));
 
 				_maximumVisibleNotifications = value;
 			}
@@ -88,7 +83,7 @@ namespace gitter.Framework.Controls
 			get => _defaultNotificationDuration;
 			set
 			{
-				if(value.Ticks < 1) throw new ArgumentOutOfRangeException();
+				Verify.Argument.IsPositive(value.Ticks, nameof(value));
 
 				_defaultNotificationDuration = value;
 			}
@@ -112,6 +107,9 @@ namespace gitter.Framework.Controls
 		private void PushForce(NotificationContent notification)
 		{
 			var window = new PopupNotificationForm(notification);
+			window.Left = _origin.X;
+			window.Top  = _origin.Y - window.Height;
+			window.Prepare();
 			var h = window.Height;
 			var x = _origin.X;
 			var y = _origin.Y - h;

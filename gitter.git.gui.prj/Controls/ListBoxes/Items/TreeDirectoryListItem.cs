@@ -30,8 +30,6 @@ namespace gitter.Git.Gui.Controls
 
 	public sealed class TreeDirectoryListItem : TreeItemListItem<TreeDirectory>
 	{
-		private static readonly Bitmap ImgIcon = CachedResources.Bitmaps["ImgFolder"];
-
 		private IDisposable _binding;
 		private TreeDirectoryListItemType _includeFiles;
 		private EventHandler<BoundItemActivatedEventArgs<TreeItem>> _itemActivated;
@@ -64,9 +62,9 @@ namespace gitter.Git.Gui.Controls
 				case TreeDirectoryListItemType.ShowFilesAndFolders:
 					{
 						var binding = new TreeBinding(Items, DataContext, false);
-						if(_itemActivated != null)
+						if(_itemActivated is not null)
 						{
-							binding.ItemActivated += _itemActivated;
+							binding.ItemActivated            += _itemActivated;
 							binding.ItemContextMenuRequested += _itemContextMenuRequested;
 						}
 						_binding = binding;
@@ -75,7 +73,7 @@ namespace gitter.Git.Gui.Controls
 				case TreeDirectoryListItemType.ShowFoldersOnly:
 					{
 						var binding = new TreeDirectoriesBinding(Items, DataContext, false);
-						if(_itemActivated != null)
+						if(_itemActivated is not null)
 						{
 							binding.ItemActivated += _itemActivated;
 						}
@@ -88,7 +86,7 @@ namespace gitter.Git.Gui.Controls
 
 		protected override void OnListBoxDetached()
 		{
-			if(_binding != null)
+			if(_binding is not null)
 			{
 				_binding.Dispose();
 				_binding = null;
@@ -96,10 +94,11 @@ namespace gitter.Git.Gui.Controls
 			base.OnListBoxDetached();
 		}
 
-		protected override Bitmap GetBitmapIcon() => ImgIcon;
+		protected override Bitmap GetBitmapIcon(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[@"folder", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
 
 		protected override FileSize? GetSize() => null;
 
-		protected override string GetItemType() => "";
+		protected override string GetItemType() => string.Empty;
 	}
 }

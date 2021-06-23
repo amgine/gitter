@@ -21,10 +21,9 @@
 namespace gitter.Git.Gui.Controls
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -33,18 +32,19 @@ namespace gitter.Git.Gui.Controls
 	{
 		private sealed class GroupItem : CustomListBoxItem<string>
 		{
-			private static readonly Bitmap ImgFolder = CachedResources.Bitmaps["ImgFolder"];
-
 			public GroupItem(string name)
 				: base(name)
 			{
 			}
 
+			private static Bitmap GetIcon(Dpi dpi)
+				=> CachedResources.ScaledBitmaps[@"folder", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
 			protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 			{
 				if(measureEventArgs.ColumnIndex == 0)
 				{
-					return measureEventArgs.MeasureImageAndText(ImgFolder, DataContext);
+					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext);
 				}
 				return Size.Empty;
 			}
@@ -53,7 +53,7 @@ namespace gitter.Git.Gui.Controls
 			{
 				if(paintEventArgs.ColumnIndex == 0)
 				{
-					paintEventArgs.PaintImageAndText(ImgFolder, DataContext);
+					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext);
 				}
 			}
 		}

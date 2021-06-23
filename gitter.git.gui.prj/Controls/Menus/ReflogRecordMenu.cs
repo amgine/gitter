@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -33,40 +35,43 @@ namespace gitter.Git.Gui.Controls
 		{
 			Verify.Argument.IsNotNull(reflogRecord, nameof(reflogRecord));
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			var revision = reflogRecord.Revision;
 
-			Items.Add(GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(revision.GetDiffSource()));
-			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(revision));
+			Items.Add(factory.GetViewDiffItem<ToolStripMenuItem>(revision.GetDiffSource()));
+			Items.Add(factory.GetViewTreeItem<ToolStripMenuItem>(revision));
 			Items.Add(GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(revision));
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(revision, "{0}"));
-			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(revision));
-			Items.Add(GuiItemFactory.GetCherryPickItem<ToolStripMenuItem>(revision, "{0}"));
+			Items.Add(factory.GetCheckoutRevisionItem<ToolStripMenuItem>(revision, "{0}"));
+			Items.Add(factory.GetResetHeadHereItem<ToolStripMenuItem>(revision));
+			Items.Add(factory.GetCherryPickItem<ToolStripMenuItem>(revision, "{0}"));
 
 			Items.Add(new ToolStripSeparator()); // copy to clipboard section
 
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, revision.Hash.ToString()));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, revision.TreeHash.ToString()));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrMessage, reflogRecord.Message));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, revision.Subject));
+			item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, revision.Hash.ToString()));
+			item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, revision.TreeHash.ToString()));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrMessage, reflogRecord.Message));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, revision.Subject));
 			if(!string.IsNullOrEmpty(revision.Body))
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrBody, revision.Body));
+				item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrBody, revision.Body));
 			if(revision.Committer != revision.Author)
 			{
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, revision.Committer.Name));
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitterEmail, revision.Committer.Email));
+				item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, revision.Committer.Name));
+				item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitterEmail, revision.Committer.Email));
 			}
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, revision.Author.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthorEmail, revision.Author.Email));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, revision.Author.Name));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthorEmail, revision.Author.Email));
 			Items.Add(item);
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(reflogRecord.Revision));
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(reflogRecord.Revision));
+			Items.Add(factory.GetCreateBranchItem<ToolStripMenuItem>(reflogRecord.Revision));
+			Items.Add(factory.GetCreateTagItem<ToolStripMenuItem>(reflogRecord.Revision));
 		}
 	}
 }

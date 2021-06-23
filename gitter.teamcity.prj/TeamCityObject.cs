@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -28,10 +28,8 @@ namespace gitter.TeamCity
 	{
 		#region Static
 
-		public static readonly TeamCityObjectProperty<string> IdProperty =
-			new TeamCityObjectProperty<string>("id", nameof(Id));
-		public static readonly TeamCityObjectProperty<string> WebUrlProperty =
-			new TeamCityObjectProperty<string>("webUrl", nameof(WebUrl));
+		public static readonly TeamCityObjectProperty<string> IdProperty     = new("id",     nameof(Id));
+		public static readonly TeamCityObjectProperty<string> WebUrlProperty = new("webUrl", nameof(WebUrl));
 
 		#endregion
 
@@ -109,8 +107,8 @@ namespace gitter.TeamCity
 
 		public string WebUrl
 		{
-			get { return _webUrl; }
-			private set { UpdatePropertyValue(ref _webUrl, value, WebUrlProperty); }
+			get => _webUrl;
+			private set => UpdatePropertyValue(ref _webUrl, value, WebUrlProperty);
 		}
 
 		#endregion

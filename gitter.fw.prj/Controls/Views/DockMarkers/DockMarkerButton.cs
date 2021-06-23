@@ -49,8 +49,6 @@ namespace gitter.Framework.Controls
 		/// <param name="graphics">The graphics surface to draw on.</param>
 		/// <param name="hover">Indicates whether this button is hovered.</param>
 		internal void OnPaint(Graphics graphics, bool hover)
-		{
-			Renderer.RenderDockMarkerButton(this, graphics, hover);
-		}
+			=>Renderer.RenderDockMarkerButton(this, graphics, hover);
 	}
 }

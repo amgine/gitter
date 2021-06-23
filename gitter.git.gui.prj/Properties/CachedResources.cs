@@ -28,6 +28,8 @@ namespace gitter.Git.Gui
 	{
 		public static CachedBitmapResources Bitmaps { get; } = new(Resources.ResourceManager);
 
+		public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.Git.Gui.Resources.icons");
+
 		public static CachedIconResources Icons { get; } = new(Resources.ResourceManager);
 	}
 }

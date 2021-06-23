@@ -41,12 +41,12 @@ namespace gitter.Framework.Controls
 			{
 				if(_flowControl != value)
 				{
-					if(_flowControl != null)
+					if(_flowControl is not null)
 					{
 						OnFlowControlDetached();
 					}
 					_flowControl = value;
-					if(_flowControl != null)
+					if(_flowControl is not null)
 					{
 						OnFlowControlAttached();
 					}
@@ -62,7 +62,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				if(FlowControl == null) return Rectangle.Empty;
+				if(FlowControl is null) return Rectangle.Empty;
 				return FlowControl.GetPanelBounds(this);
 			}
 		}
@@ -79,7 +79,7 @@ namespace gitter.Framework.Controls
 		public void InvalidateSafe()
 		{
 			var control = FlowControl;
-			if(control != null && control.Created && !control.IsDisposed)
+			if(control is { Created: true, IsDisposed: false })
 			{
 				if(control.InvokeRequired)
 				{
@@ -101,7 +101,7 @@ namespace gitter.Framework.Controls
 		public void InvalidateSafe(Rectangle rect)
 		{
 			var control = FlowControl;
-			if(control != null && control.Created && !control.IsDisposed)
+			if(control is { Created: true, IsDisposed: false })
 			{
 				if(control.InvokeRequired)
 				{

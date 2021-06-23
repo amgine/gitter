@@ -27,7 +27,7 @@ namespace gitter.Framework.Controls
 
 	sealed class LogListBoxAppender : ILogAppender, IObservable<LogEvent>
 	{
-		public static readonly LogListBoxAppender Instance = new LogListBoxAppender();
+		public static readonly LogListBoxAppender Instance = new();
 
 		private sealed class SubscriberToken : IDisposable
 		{

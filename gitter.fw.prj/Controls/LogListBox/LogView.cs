@@ -22,7 +22,6 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using Resources = gitter.Framework.Properties.Resources;
@@ -30,8 +29,6 @@ namespace gitter.Framework.Controls
 	[ToolboxItem(false)]
 	internal sealed class LogView : ViewBase
 	{
-		private static readonly Bitmap ImgLog = Resources.ImgLog;
-
 		private readonly LogListBox _logListBox;
 
 		/// <summary>Initializes a new instance of the <see cref="LogView"/> class.</summary>
@@ -50,6 +47,6 @@ namespace gitter.Framework.Controls
 			Text = Resources.StrLog;
 		}
 
-		public override Image Image => ImgLog;
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"log.view");
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -44,20 +44,11 @@ namespace gitter.TeamCity
 
 		protected abstract T Create(XmlNode node);
 
-		protected Dictionary<string, T> Cache
-		{
-			get { return _cache; }
-		}
+		protected Dictionary<string, T> Cache => _cache;
 
-		protected internal TeamCityServiceContext Context
-		{
-			get { return _context; }
-		}
+		protected internal TeamCityServiceContext Context => _context;
 
-		public object SyncRoot
-		{
-			get { return _context.SyncRoot; }
-		}
+		public object SyncRoot => _context.SyncRoot;
 
 		internal T Lookup(XmlNode node)
 		{
@@ -107,15 +98,9 @@ namespace gitter.TeamCity
 			}
 		}
 
-		public T this[string id]
-		{
-			get { return _cache[id]; }
-		}
+		public T this[string id] => _cache[id];
 
-		public int Count
-		{
-			get { return _cache.Count; }
-		}
+		public int Count => _cache.Count;
 
 		internal bool Remove(T item)
 		{
@@ -146,14 +131,10 @@ namespace gitter.TeamCity
 		#region IEnumerable
 
 		public IEnumerator<T> GetEnumerator()
-		{
-			return _cache.Values.GetEnumerator();
-		}
+			=> _cache.Values.GetEnumerator();
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _cache.Values.GetEnumerator();
-		}
+			=> _cache.Values.GetEnumerator();
 
 		#endregion
 	}

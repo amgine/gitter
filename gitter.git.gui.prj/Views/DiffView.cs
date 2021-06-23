@@ -355,7 +355,7 @@ namespace gitter.Git.Gui.Views
 				: Resources.StrContextualDiff;
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgDiff"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"diff");
 
 		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 		{
@@ -365,6 +365,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F5:

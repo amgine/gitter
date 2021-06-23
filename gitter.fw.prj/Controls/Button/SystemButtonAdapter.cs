@@ -25,22 +25,12 @@ namespace gitter.Framework.Controls
 
 	public sealed class SystemButtonAdapter : IButtonWidget
 	{
-		#region Data
-
 		private readonly Button _button;
-
-		#endregion
-
-		#region Events
 
 		public event EventHandler Click;
 
 		private void OnClick(EventArgs e)
 			=> Click?.Invoke(this, e);
-
-		#endregion
-
-		#region .ctor
 
 		public SystemButtonAdapter()
 		{
@@ -51,16 +41,8 @@ namespace gitter.Framework.Controls
 			_button.Click += OnButtonClick;
 		}
 
-		#endregion
-
-		#region Event Handlers
-
 		private void OnButtonClick(object sender, EventArgs e)
 			=> OnClick(e);
-
-		#endregion
-
-		#region Properties
 
 		public Control Control => _button;
 
@@ -70,16 +52,10 @@ namespace gitter.Framework.Controls
 			set => _button.Text = value;
 		}
 
-		#endregion
-
-		#region IDisposable
-
 		public void Dispose()
 		{
 			_button.Click -= OnButtonClick;
 			_button.Dispose();
 		}
-
-		#endregion
 	}
 }

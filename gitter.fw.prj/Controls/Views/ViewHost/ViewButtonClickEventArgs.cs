@@ -24,10 +24,7 @@ namespace gitter.Framework.Controls
 
 	public sealed class ViewButtonClickEventArgs : EventArgs
 	{
-		public ViewButtonClickEventArgs(ViewButtonType button)
-		{
-			Button = button;
-		}
+		public ViewButtonClickEventArgs(ViewButtonType button) => Button = button;
 
 		public ViewButtonType Button { get; }
 	}

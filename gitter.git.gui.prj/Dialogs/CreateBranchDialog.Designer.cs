@@ -208,6 +208,7 @@
 			// CreateBranchDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this._txtRevision);
 			this.Controls.Add(this._pnlOptions);
@@ -222,7 +223,6 @@
 			this.panel1.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
-
 		}
 
 		#endregion

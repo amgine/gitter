@@ -166,7 +166,7 @@ namespace gitter.Git.Gui
 				_remoteLabel = new ToolStripStatusLabel(string.Empty, CachedResources.Bitmaps["ImgRemote"]),
 			};
 
-			_userLabel.MouseDown += OnUserLabelMouseDown;
+			_userLabel.MouseDown   += OnUserLabelMouseDown;
 			_remoteLabel.MouseDown += OnRemoteLabelMouseDown;
 
 			if(guiProvider.Repository != null)
@@ -200,7 +200,7 @@ namespace gitter.Git.Gui
 		private static Point GetToolTipPosition(CustomToolTip toolTip, ToolStripItem label)
 		{
 			var b = label.Bounds;
-			var s = toolTip.Size;
+			var s = toolTip.Measure(GitterApplication.MainForm);
 			var x = b.X + (b.Width - s.Width) / 2;
 			var y = b.Y - s.Height - 5;
 			var clientCoords = new Point(x, y);
@@ -215,7 +215,7 @@ namespace gitter.Git.Gui
 
 		private void ShowToolTip(FileListToolTip toolTip, ToolStripItem label, bool staged, FileStatus fileStatus)
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				toolTip.Update(_repository.Status, staged, fileStatus);
 				toolTip.Show(label.Owner, GetToolTipPosition(toolTip, label));
@@ -248,7 +248,7 @@ namespace gitter.Git.Gui
 
 		private void OnStatusLabelMouseEnter(object sender, EventArgs e)
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				_statusToolTip.Update(Repository.Status);
 				_statusToolTip.Show(_statusLabel.Owner, GetToolTipPosition(_statusToolTip, _statusLabel));
@@ -264,7 +264,7 @@ namespace gitter.Git.Gui
 		{
 			if(e.Button == MouseButtons.Right)
 			{
-				if(_repository != null)
+				if(_repository is not null)
 				{
 					var item = (ToolStripItem)sender;
 					var menu = new ContextMenuStrip();
@@ -370,10 +370,14 @@ namespace gitter.Git.Gui
 			{
 				var item = (ToolStripItem)sender;
 				var menu = new ContextMenuStrip();
+
+				var dpiBindings = new DpiBindings(menu);
+				var factory     = new GuiItemFactory(dpiBindings);
+
 				menu.Items.Add(new ToolStripMenuItem(
 					Resources.StrSwitchBranch.AddEllipsis(), CachedResources.Bitmaps["ImgCheckout"],
-					(s, eargs) => _guiProvider.StartCheckoutDialog()));
-				menu.Items.Add(GuiItemFactory.GetViewReflogItem<ToolStripMenuItem>(Repository.Head));
+					(_, _) => _guiProvider.StartCheckoutDialog()));
+				menu.Items.Add(factory.GetViewReflogItem<ToolStripMenuItem>(Repository.Head));
 				Utility.MarkDropDownForAutoDispose(menu);
 				var parent = Utility.GetParentControl(item);
 				var x = item.Bounds.X + e.X;
@@ -384,7 +388,7 @@ namespace gitter.Git.Gui
 
 		private void OnHeadLabelDoubleClick(object sender, EventArgs e)
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				_guiProvider.StartCheckoutDialog();
 			}
@@ -392,7 +396,7 @@ namespace gitter.Git.Gui
 
 		private void OnUnstagedDoubleClick(object sender, EventArgs e)
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				_guiProvider.StartStageFilesDialog();
 			}
@@ -400,7 +404,7 @@ namespace gitter.Git.Gui
 
 		private void OnConflictsDoubleClick(object sender, EventArgs e)
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				_guiProvider.StartResolveConflictsDialog();
 			}
@@ -408,7 +412,7 @@ namespace gitter.Git.Gui
 
 		private void OnUserDoubleClick(object sender, EventArgs e)
 		{
-			if(Repository != null)
+			if(Repository is not null)
 			{
 				_guiProvider.StartUserIdentificationDialog();
 			}
@@ -421,11 +425,11 @@ namespace gitter.Git.Gui
 			{
 				if(_repository != value)
 				{
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						DetachFromRepository(_repository);
 					}
-					if(value != null)
+					if(value is not null)
 					{
 						AttachToRepository(value);
 					}
@@ -587,7 +591,7 @@ namespace gitter.Git.Gui
 
 		private void OnRemoteAdded(Remote remote)
 		{
-			if(_remoteLabel.Tag == null)
+			if(_remoteLabel.Tag is null)
 			{
 				UpdateRemoteLabel();
 			}
@@ -608,7 +612,7 @@ namespace gitter.Git.Gui
 				if(Repository.Remotes.Count != 0)
 				{
 					var remote = Repository.Remotes.TryGetItem(GitConstants.DefaultRemoteName);
-					if(remote == null)
+					if(remote is null)
 					{
 						foreach(var item in Repository.Remotes)
 						{
@@ -869,15 +873,15 @@ namespace gitter.Git.Gui
 		public void UpdateUserIdentityLabel()
 		{
 			var user = _repository.UserIdentity;
-			if(user == null)
+			if(user is null)
 			{
 				_userLabel.Image = CachedResources.Bitmaps["ImgUserUnknown"];
-				_userLabel.Text = Resources.StrlUserIdentityNotConfigured.SurroundWith('<', '>');
+				_userLabel.Text  = Resources.StrlUserIdentityNotConfigured.SurroundWith('<', '>');
 			}
 			else
 			{
 				_userLabel.Image = CachedResources.Bitmaps["ImgUser"];
-				_userLabel.Text = user.Name + " <" + user.Email + ">";
+				_userLabel.Text  = user.Name + " <" + user.Email + ">";
 			}
 		}
 

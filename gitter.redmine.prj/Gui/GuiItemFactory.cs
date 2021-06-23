@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -82,17 +82,22 @@ namespace gitter.Redmine.Gui
 
 		private static void OnCopyToClipboardClick(object sender, EventArgs e)
 		{
+			Assert.IsNotNull(sender);
+
 			var item = (ToolStripItem)sender;
-			var text = item.Tag as string;
-			if(text == null)
+			var text = item.Tag switch
 			{
-				text = ((Func<string>)item.Tag)();
-			}
+				string       str  => str,
+				Func<string> func => func(),
+				_ => default,
+			};
 			ClipboardEx.SetTextSafe(text);
 		}
 
 		private static void OnUpdateRedmineObjectClick(object sender, EventArgs e)
 		{
+			Assert.IsNotNull(sender);
+
 			var item = (ToolStripItem)sender;
 			var obj = (RedmineObject)item.Tag;
 			try

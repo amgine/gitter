@@ -33,6 +33,7 @@ namespace gitter.Git.Gui.Controls
 
 		protected override string GetHash(Revision revision) => revision.TreeHashString;
 
+		/// <inheritdoc/>
 		public override string IdentificationString => "TreeHash";
 	}
 }

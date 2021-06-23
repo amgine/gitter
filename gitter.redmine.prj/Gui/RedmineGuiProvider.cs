@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,7 +23,6 @@ namespace gitter.Redmine.Gui
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;
@@ -40,15 +39,9 @@ namespace gitter.Redmine.Gui
 			_service = svc;
 		}
 
-		public IRepository Repository
-		{
-			get { return _repository; }
-		}
+		public IRepository Repository => _repository;
 
-		public RedmineServiceContext ServiceContext
-		{
-			get { return _service; }
-		}
+		public RedmineServiceContext ServiceContext => _service;
 
 		public void AttachToEnvironment(IWorkingEnvironment environment)
 		{

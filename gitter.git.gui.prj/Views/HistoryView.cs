@@ -22,9 +22,9 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	using gitter.Git.Gui.Controls;
@@ -53,9 +53,8 @@ namespace gitter.Git.Gui.Views
 
 		#endregion
 
-		/// <summary>Gets view image.</summary>
-		/// <value>This view image.</value>
-		public override Image Image => CachedResources.Bitmaps["ImgHistory"];
+		/// <inheritdoc/>
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"history");
 
 		protected override void AttachToRepository(Repository repository)
 		{
@@ -89,7 +88,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadRepositoryConfig(section);
 			var logOptionsNode = section.TryGetSection("LogOptions");
-			if(logOptionsNode != null)
+			if(logOptionsNode is not null)
 			{
 				LogOptions.LoadFrom(logOptionsNode);
 			}
@@ -146,7 +145,7 @@ namespace gitter.Git.Gui.Views
 		private void RefreshContentSync()
 		{
 			if(IsDisposed) return;
-			if(Repository != null && LogSource != null)
+			if(Repository is not null && LogSource is not null)
 			{
 				Repository.Status.Refresh();
 				ReloadRevisionLog();
@@ -188,12 +187,12 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var layoutNode = section.TryGetSection("Layout");
-			if(layoutNode != null)
+			if(layoutNode is not null)
 			{
 				_toolbar.ShowDiffButton.Checked = ShowDetails = layoutNode.GetValue("ShowDetails", ShowDetails);
 			}
 			var listNode = section.TryGetSection("RevisionList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				RevisionListBox.LoadViewFrom(listNode);
 			}

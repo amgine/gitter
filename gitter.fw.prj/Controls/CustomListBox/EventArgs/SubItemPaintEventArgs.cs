@@ -24,7 +24,7 @@ namespace gitter.Framework.Controls
 	using System.Drawing;
 
 	/// <summary>SubItem paint event args.</summary>
-	public class SubItemPaintEventArgs : ItemPaintEventArgs
+	public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	{
 		#region .ctor
 
@@ -75,6 +75,10 @@ namespace gitter.Framework.Controls
 		/// <summary>Text horizontal alignment.</summary>
 		public StringAlignment Alignment => Column.ContentAlignment;
 
+		public Dpi Dpi => new(ListBox.DeviceDpi);
+
+		public DpiConverter DpiConverter => DpiConverter.FromDefaultTo(Dpi);
+
 		#endregion
 
 		#region Methods
@@ -119,19 +123,18 @@ namespace gitter.Framework.Controls
 		/// <param name="image"><see cref="Image"/> to paint.</param>
 		public void PaintImage(Image image)
 		{
-			if(image != null)
-			{
-				var rect = Bounds;
-				rect.X += ListBoxConstants.ContentSpacing;
-				var graphics = Graphics;
-				int w = image.Width;
-				int h = image.Height;
-				if(w + ListBoxConstants.SpaceBeforeImage > rect.Width)
-					w = rect.Width - ListBoxConstants.SpaceBeforeImage;
-				graphics.DrawImage(image,
-					new Rectangle(rect.X + ListBoxConstants.SpaceBeforeImage, rect.Y + (rect.Height - h) / 2, w, h),
-					new Rectangle(0, 0, w, h), GraphicsUnit.Pixel);
-			}
+			if(image is null) return;
+
+			var rect = Bounds;
+			rect.X += ListBoxConstants.ContentSpacing;
+			var graphics = Graphics;
+			int w = image.Width;
+			int h = image.Height;
+			if(w + ListBoxConstants.SpaceBeforeImage > rect.Width)
+				w = rect.Width - ListBoxConstants.SpaceBeforeImage;
+			graphics.DrawImage(image,
+				new Rectangle(rect.X + ListBoxConstants.SpaceBeforeImage, rect.Y + (rect.Height - h) / 2, w, h),
+				new Rectangle(0, 0, w, h), GraphicsUnit.Pixel);
 		}
 
 		/// <summary>Paint image with overlay content.</summary>
@@ -139,21 +142,20 @@ namespace gitter.Framework.Controls
 		/// <param name="overlay">Overlay to paint.</param>
 		public void PaintImage(Image image, Image overlay)
 		{
-			if(image != null)
-			{
-				var rect = Bounds;
-				rect.X += ListBoxConstants.ContentSpacing;
-				var graphics = Graphics;
-				int w = image.Width;
-				int h = image.Height;
-				if(w + ListBoxConstants.SpaceBeforeImage > rect.Width)
-					w = rect.Width - ListBoxConstants.SpaceBeforeImage;
-				var dest = new Rectangle(rect.X + ListBoxConstants.SpaceBeforeImage, rect.Y + (rect.Height - h) / 2, w, h);
-				var src = new Rectangle(0, 0, w, h);
-				graphics.DrawImage(image, dest, src, GraphicsUnit.Pixel);
-				if(overlay != null)
-					graphics.DrawImage(overlay, dest, src, GraphicsUnit.Pixel);
-			}
+			if(image is null) return;
+
+			var rect = Bounds;
+			rect.X += ListBoxConstants.ContentSpacing;
+			var graphics = Graphics;
+			int w = image.Width;
+			int h = image.Height;
+			if(w + ListBoxConstants.SpaceBeforeImage > rect.Width)
+				w = rect.Width - ListBoxConstants.SpaceBeforeImage;
+			var dest = new Rectangle(rect.X + ListBoxConstants.SpaceBeforeImage, rect.Y + (rect.Height - h) / 2, w, h);
+			var src = new Rectangle(0, 0, w, h);
+			graphics.DrawImage(image, dest, src, GraphicsUnit.Pixel);
+			if(overlay is not null)
+				graphics.DrawImage(overlay, dest, src, GraphicsUnit.Pixel);
 		}
 
 		#endregion
@@ -324,37 +326,49 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
 		/// <param name="image">Image to paint.</param>
+		/// <param name="imageDrawSize">Drawn image size.</param>
 		/// <param name="text">Text to paint.</param>
 		/// <param name="font">Font to use for text painting.</param>
 		/// <param name="brush">Brush to use for text painting.</param>
 		/// <param name="stringFormat"><see cref="StringFormat"/> to use for text painting.</param>
-		private void PaintImageAndTextCore(Image image, string text, Font font, Brush brush, StringFormat stringFormat)
+		private void PaintImageAndTextCore(Image image, Size imageDrawSize, string text, Font font, Brush brush, StringFormat stringFormat)
 		{
 			var rect = Bounds;
-			var graphics = Graphics;
+			var conv = DpiConverter;
 			PrepareContentRectangle(ref rect);
-			if(image != null)
+			if(image is not null)
 			{
-				int w = image.Width;
-				int h = image.Height;
-				if(w + ListBoxConstants.SpaceBeforeImage > rect.Width)
-					w = rect.Width - ListBoxConstants.SpaceBeforeImage;
-				graphics.DrawImage(image,
-					new Rectangle(rect.X + ListBoxConstants.SpaceBeforeImage, rect.Y + (rect.Height - h) / 2, w, h),
-					new Rectangle(0, 0, w, h), GraphicsUnit.Pixel);
-				rect.X     += w + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
-				rect.Width -= w + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
+				int w = imageDrawSize.Width;
+				int h = imageDrawSize.Height;
+				if(w == 0 || h == 0)
+				{
+					w = image.Width;
+					h = image.Height;
+				}
+				var before = conv.ConvertX(ListBoxConstants.SpaceBeforeImage);
+				if(w + before > rect.Width)
+				{
+					w = rect.Width - before;
+				}
+				Graphics.DrawImage(image, new Rectangle(rect.X + before, rect.Y + (rect.Height - h) / 2, w, h));
+				var dx = w + before + conv.ConvertX(ListBoxConstants.SpaceAfterImage);
+				rect.X     += dx;
+				rect.Width -= dx;
 			}
 			else
 			{
-				rect.X     += ListBoxConstants.DefaultImageWidth + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
-				rect.Width -= ListBoxConstants.DefaultImageWidth + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
+				var dx =
+					conv.ConvertX(ListBoxConstants.DefaultImageWidth) +
+					conv.ConvertX(ListBoxConstants.SpaceBeforeImage) +
+					conv.ConvertX(ListBoxConstants.SpaceAfterImage);
+				rect.X     += dx;
+				rect.Width -= dx;
 			}
 			if(rect.Width > 0)
 			{
 				PrepareTextRectangle(font, ref rect);
 				GitterApplication.TextRenderer.DrawText(
-					graphics, text, font, brush, rect, stringFormat);
+					Graphics, text, font, brush, rect, stringFormat);
 			}
 		}
 
@@ -375,7 +389,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageAndTextCore(image, text, font, brush, stringFormat);
+			PaintImageAndTextCore(image, default, text, font, brush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -393,7 +407,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(font, nameof(font));
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintImageAndTextCore(image, text, font, brush, GetFormat(stringAlignment));
+			PaintImageAndTextCore(image, default, text, font, brush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -410,7 +424,7 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(font, nameof(font));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageAndTextCore(image, text, font, Column.ContentBrush, stringFormat);
+			PaintImageAndTextCore(image, default, text, font, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -423,7 +437,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			PaintImageAndTextCore(image, text, font, Column.ContentBrush, GetFormat(stringAlignment));
+			PaintImageAndTextCore(image, default, text, font, Column.ContentBrush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -435,7 +449,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(font, nameof(font));
 
-			PaintImageAndTextCore(image, text, font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+			PaintImageAndTextCore(image, default, text, font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -452,14 +466,14 @@ namespace gitter.Framework.Controls
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageAndTextCore(image, text, Column.ContentFont, brush, stringFormat);
+			PaintImageAndTextCore(image, default, text, Column.ContentFont, brush, stringFormat);
 		}
 
 		public void PaintImageAndText(Image image, string text, Brush brush, StringAlignment stringAlignment)
 		{
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintImageAndTextCore(image, text, Column.ContentFont, brush, GetFormat(stringAlignment));
+			PaintImageAndTextCore(image, default, text, Column.ContentFont, brush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -471,7 +485,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(brush, nameof(brush));
 
-			PaintImageAndTextCore(image, text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
+			PaintImageAndTextCore(image, default, text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -483,7 +497,7 @@ namespace gitter.Framework.Controls
 		{
 			Verify.Argument.IsNotNull(stringFormat, nameof(stringFormat));
 
-			PaintImageAndTextCore(image, text, Column.ContentFont, Column.ContentBrush, stringFormat);
+			PaintImageAndTextCore(image, default, text, Column.ContentFont, Column.ContentBrush, stringFormat);
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -492,7 +506,7 @@ namespace gitter.Framework.Controls
 		/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
 		public void PaintImageAndText(Image image, string text, StringAlignment stringAlignment)
 		{
-			PaintImageAndTextCore(image, text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
+			PaintImageAndTextCore(image, default, text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
 		}
 
 		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -500,7 +514,16 @@ namespace gitter.Framework.Controls
 		/// <param name="text">Text to paint.</param>
 		public void PaintImageAndText(Image image, string text)
 		{
-			PaintImageAndTextCore(image, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+			PaintImageAndTextCore(image, default, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		}
+
+		/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
+		/// <param name="image">Image to paint.</param>
+		/// <param name="imageDrawSize">Drawn image size.</param>
+		/// <param name="text">Text to paint.</param>
+		public void PaintImageAndText(Image image, Size imageDrawSize, string text)
+		{
+			PaintImageAndTextCore(image, imageDrawSize, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 		}
 
 		#endregion
@@ -517,32 +540,41 @@ namespace gitter.Framework.Controls
 		private void PaintImageOverlayAndTextCore(Image icon, Image overlay, string text, Font font, Brush brush, StringFormat stringFormat)
 		{
 			var rect = Bounds;
-			var graphics = Graphics;
+			var conv = DpiConverter;
 			PrepareContentRectangle(ref rect);
-			if(icon != null)
+			if(icon is not null)
 			{
 				int w = icon.Width;
 				int h = icon.Height;
-				if(w + ListBoxConstants.SpaceBeforeImage > rect.Width)
-					w = rect.Width - ListBoxConstants.SpaceBeforeImage;
-				var destRect = new Rectangle(rect.X + ListBoxConstants.SpaceBeforeImage, rect.Y + (rect.Height - w) / 2, w, h);
-				var srcRect = new Rectangle(0, 0, w, h);
-				graphics.DrawImage(icon, destRect, srcRect, GraphicsUnit.Pixel);
-				if(overlay != null)
-					graphics.DrawImage(overlay, destRect, srcRect, GraphicsUnit.Pixel);
-				rect.X += w + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
-				rect.Width -= w + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
+				var before = conv.ConvertX(ListBoxConstants.SpaceBeforeImage);
+				if(w + before > rect.Width)
+				{
+					w = rect.Width - before;
+				}
+				var destRect = new Rectangle(rect.X + before, rect.Y + (rect.Height - w) / 2, w, h);
+				Graphics.DrawImage(icon, destRect);
+				if(overlay is not null)
+				{
+					Graphics.DrawImage(overlay, destRect);
+				}
+				var dx = w + before + conv.ConvertX(ListBoxConstants.SpaceAfterImage);
+				rect.X     += dx;
+				rect.Width -= dx;
 			}
 			else
 			{
-				rect.X += ListBoxConstants.DefaultImageWidth + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
-				rect.Width -= ListBoxConstants.DefaultImageWidth + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
+				var dx =
+					conv.ConvertX(ListBoxConstants.DefaultImageWidth) +
+					conv.ConvertX(ListBoxConstants.SpaceBeforeImage) +
+					conv.ConvertX(ListBoxConstants.SpaceAfterImage);
+				rect.X     += dx;
+				rect.Width -= dx;
 			}
 			if(rect.Width > 0)
 			{
 				PrepareTextRectangle(font, ref rect);
 				GitterApplication.TextRenderer.DrawText(
-					graphics, text, font, brush, rect, stringFormat);
+					Graphics, text, font, brush, rect, stringFormat);
 			}
 		}
 

@@ -22,10 +22,7 @@ namespace gitter.Framework.Controls
 {
 	public class WebBrowserViewModel
 	{
-		public WebBrowserViewModel(string url)
-		{
-			Url = url;
-		}
+		public WebBrowserViewModel(string url) => Url = url;
 
 		public string Url { get; }
 	}

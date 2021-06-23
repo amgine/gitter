@@ -137,9 +137,7 @@ namespace gitter.Framework.Controls
 		/// <summary>To keep designer happy.</summary>
 		public ViewBase()
 		{
-			Size				= new Size(555, 362);
-			AutoScaleDimensions	= new SizeF(96F, 96F);
-			AutoScaleMode		= AutoScaleMode.Dpi;
+			Size = new Size(555, 362);
 			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 			{
 				Font      = GitterApplication.FontManager.UIFont;
@@ -148,7 +146,7 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				Font = SystemFonts.MessageBoxFont;
+				Font = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
 			}
 		}
 
@@ -275,8 +273,8 @@ namespace gitter.Framework.Controls
 			set => base.Text = value;
 		}
 
-		/// <summary>View's image.</summary>
-		public virtual Image Image => null;
+		/// <summary>View's image provider.</summary>
+		public virtual IImageProvider ImageProvider => default;
 
 		protected void AddTopToolStrip(ToolStrip toolStrip)
 		{

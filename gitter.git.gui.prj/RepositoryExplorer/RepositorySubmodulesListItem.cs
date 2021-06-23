@@ -37,7 +37,7 @@ namespace gitter.Git.Gui
 		private SubmoduleListBinding _binding;
 
 		public RepositorySubmodulesListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgSubmodules"], Resources.StrSubmodules)
+			: base(@"submodules", Resources.StrSubmodules)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -66,18 +66,16 @@ namespace gitter.Git.Gui
 			_binding = new SubmoduleListBinding(Items, Repository);
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new SubmodulesMenu(Repository);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository is null) return default;
+
+			var menu = new SubmodulesMenu(Repository);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -33,12 +33,6 @@ namespace gitter
 
 	public sealed class RepositoryRootItem : CustomListBoxItem
 	{
-		#region Static
-
-		private static readonly Image ImgRepository = CachedResources.Bitmaps["ImgRepository"];
-
-		#endregion
-
 		#region Data
 
 		private readonly IWorkingEnvironment _environment;
@@ -61,7 +55,7 @@ namespace gitter
 
 		public string RepositoryDisplayName
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				_repository = value;
@@ -69,53 +63,61 @@ namespace gitter
 			}
 		}
 
+		private static Bitmap GetImage(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[@"repository", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch(measureEventArgs.SubItemId)
 			{
 				case 0:
 					return _repository == null
 						? measureEventArgs.MeasureText("<no repository>")
-						: measureEventArgs.MeasureImageAndText(ImgRepository, _repository);
+						: measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), _repository);
 				default:
 					return Size.Empty;
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch(paintEventArgs.SubItemId)
 			{
 				case 0:
 					if(_repository == null)
 						paintEventArgs.PaintText("<no repository>");
 					else
-						paintEventArgs.PaintImageAndText(ImgRepository, _repository);
+						paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), _repository);
 					break;
 			}
 		}
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(_repository != null)
-			{
-				var menu = new ContextMenuStrip();
-				var item = new ToolStripMenuItem(
-					Resources.StrAddService.AddEllipsis(), null,
-					(s, e) => ShowAddServiceDialog());
-				menu.Items.Add(item);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			return base.GetContextMenu(requestEventArgs);
+			Assert.IsNotNull(requestEventArgs);
+
+			if(_repository is null) return default;
+
+			var menu = new ContextMenuStrip();
+			var item = new ToolStripMenuItem(
+				Resources.StrAddService.AddEllipsis(), null,
+				(_, _) => ShowAddServiceDialog());
+			menu.Items.Add(item);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 
 		private void ShowAddServiceDialog()
 		{
-			using(var d = new AddServiceDialog(_environment))
-			{
-				d.Run(ListBox);
-			}
+			using var d = new AddServiceDialog(_environment);
+			d.Run(ListBox);
 		}
 	}
 }

@@ -105,6 +105,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void DefWndProc(ref Message m)
 		{
 			const int WM_MOUSEACTIVATE = 0x21;
@@ -119,13 +120,52 @@ namespace gitter.Framework.Controls
 			base.DefWndProc(ref m);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnShown(EventArgs e)
 		{
 			TopMost = true;
 		}
 
-		protected override bool ShowWithoutActivation => true;
+		/// <inheritdoc/>
+		protected override void ScaleCore(float x, float y) { }
 
+		/// <inheritdoc/>
+		protected override void SetClientSizeCore(int x, int y) { }
+
+		/// <inheritdoc/>
+		protected override void Select(bool directed, bool forward) { }
+
+		/// <inheritdoc/>
+		protected override void ScaleControl(SizeF factor, BoundsSpecified specified) { }
+
+		/// <inheritdoc/>
+		protected override Size SizeFromClientSize(Size clientSize) => clientSize;
+
+		/// <inheritdoc/>
+		protected override bool ScaleChildren => false;
+
+		/// <inheritdoc/>
+		protected override Rectangle GetScaledBounds(Rectangle bounds, SizeF factor, BoundsSpecified specified) => bounds;
+
+		/// <inheritdoc/>
+		protected override bool CanEnableIme => false;
+
+		/// <inheritdoc/>
+		protected override bool CanRaiseEvents => false;
+
+		/// <inheritdoc/>
+		protected override bool OnGetDpiScaledSize(int deviceDpiOld, int deviceDpiNew, ref Size desiredSize) => true;
+
+		/// <inheritdoc/>
+		protected override void OnDpiChanged(DpiChangedEventArgs e) { }
+
+		/// <inheritdoc/>
+		protected override void OnDpiChangedAfterParent(EventArgs e) { }
+
+		/// <inheritdoc/>
+		protected override void OnDpiChangedBeforeParent(EventArgs e) { }
+
+		/// <inheritdoc/>
 		protected override CreateParams CreateParams
 		{
 			get
@@ -137,18 +177,12 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		/// <summary>
-		/// Paints the background of the control.
-		/// </summary>
-		/// <param name="pevent">A <see cref="T:System.Windows.Forms.PaintEventArgs"/> that contains information about the control to paint.</param>
+		/// <inheritdoc/>
 		protected override void OnPaintBackground(PaintEventArgs pevent)
 		{
 		}
 
-		/// <summary>
-		/// Paints the control.
-		/// </summary>
-		/// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs"/> that contains the event data.</param>
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			var graphics = e.Graphics;

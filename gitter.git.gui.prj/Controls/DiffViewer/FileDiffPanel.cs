@@ -35,10 +35,30 @@ namespace gitter.Git.Gui.Controls
 	/// <summary><see cref="FlowPanel"/> which displays diff of a single file.</summary>
 	public class FileDiffPanel : FilePanel
 	{
-		#region Static
+		static class Icons
+		{
+			private static IImageProvider Init(string name)
+				=> new ScaledImageProvider(CachedResources.ScaledBitmaps, name);
 
-		private static readonly Bitmap ImgPlus  = CachedResources.Bitmaps["ImgPlus"];
-		private static readonly Bitmap ImgMinus = CachedResources.Bitmaps["ImgMinus"];
+			public static readonly IImageProvider Plus  = Init(@"plus");
+			public static readonly IImageProvider Minus = Init(@"minus");
+
+			public static class Overlays
+			{
+				private static IImageProvider Init(string name)
+					=> new ScaledImageProvider(CachedResources.ScaledBitmaps, "overlays." + name);
+
+				public static readonly IImageProvider Delete   = Init(@"delete");
+				public static readonly IImageProvider Add      = Init(@"add");
+				public static readonly IImageProvider Edit     = Init(@"edit");
+				public static readonly IImageProvider Conflict = Init(@"conflict");
+				public static readonly IImageProvider Rename   = Init(@"rename");
+				public static readonly IImageProvider Copy     = Init(@"copy");
+				public static readonly IImageProvider Chmod    = Init(@"chmod");
+			}
+		}
+
+		#region Static
 
 		#endregion
 
@@ -90,24 +110,25 @@ namespace gitter.Git.Gui.Controls
 
 		public DiffFile DiffFile { get; }
 
-		private Brush GetLineBackgroundBrush(DiffLineState state)
+		private Color GetLineBackgroundColor(DiffLineState state)
 			=> state switch
 			{
-				DiffLineState.Added   => new SolidBrush(Style.Colors.LineAddedBackground),
-				DiffLineState.Removed => new SolidBrush(Style.Colors.LineRemovedBackground),
-				DiffLineState.Header  => new SolidBrush(Style.Colors.LineHeaderBackground),
-				_ => new SolidBrush(Style.Colors.LineContextBackground),
+				DiffLineState.Added   => Style.Colors.LineAddedBackground,
+				DiffLineState.Removed => Style.Colors.LineRemovedBackground,
+				DiffLineState.Header  => Style.Colors.LineHeaderBackground,
+				_ => Style.Colors.LineContextBackground,
 			};
 
-		private Brush GetLineForegroundBrush(DiffLineState state)
+		private Color GetLineForegroundColor(DiffLineState state)
 			=> state switch
 			{
-				DiffLineState.Added   => new SolidBrush(Style.Colors.LineAddedForeground),
-				DiffLineState.Removed => new SolidBrush(Style.Colors.LineRemovedForeground),
-				DiffLineState.Header  => new SolidBrush(Style.Colors.LineHeaderForeground),
-				_ => new SolidBrush(Style.Colors.LineContextForeground),
+				DiffLineState.Added   => Style.Colors.LineAddedForeground,
+				DiffLineState.Removed => Style.Colors.LineRemovedForeground,
+				DiffLineState.Header  => Style.Colors.LineHeaderForeground,
+				_ => Style.Colors.LineContextForeground,
 			};
 
+		/// <inheritdoc/>
 		public override void InvalidateSize()
 		{
 			_size = Size.Empty;
@@ -119,6 +140,7 @@ namespace gitter.Git.Gui.Controls
 			Invalidate(GetLineBounds(e.Index, false));
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseMove(int x, int y)
 		{
 			var htr = HitTest(x, y);
@@ -383,8 +405,7 @@ namespace gitter.Git.Gui.Controls
 				var htr = HitTest(x, y);
 				if(htr.Line != -1)
 				{
-					DiffHunk hunk;
-					var line = GetLine(htr.Line, out hunk);
+					var line = GetLine(htr.Line, out var hunk);
 					if(line.State == DiffLineState.Header)
 					{
 						SetSelection(htr.Line, htr.Line + hunk.LineCount - 1);
@@ -480,15 +501,9 @@ namespace gitter.Git.Gui.Controls
 			return new Rectangle(x, HeaderHeight + line * CellSize.Height, w, CellSize.Height * count);
 		}
 
-		public int SelectionStart
-		{
-			get { return _selStart; }
-		}
+		public int SelectionStart => _selStart;
 
-		public int SelectionLength
-		{
-			get { return _selStart == -1 ? 0 : _selEnd - _selStart + 1; }
-		}
+		public int SelectionLength => _selStart == -1 ? 0 : _selEnd - _selStart + 1;
 
 		public DiffLine[] GetSelectedLines()
 		{
@@ -554,7 +569,7 @@ namespace gitter.Git.Gui.Controls
 
 		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 		{
-			if(DiffFile == null) return Size.Empty;
+			if(DiffFile is null) return Size.Empty;
 			if(_size.IsEmpty)
 			{
 				int maxLength     = 0;
@@ -590,7 +605,7 @@ namespace gitter.Git.Gui.Controls
 					: 0;
 				var font = GitterApplication.FontManager.ViewerFont.Font;
 				int w = CellSize.Width * maxCols * digits + 2 * Margin;
-				if(longestLine != null)
+				if(longestLine is not null)
 				{
 					int longestLineWidth;
 					try
@@ -613,53 +628,55 @@ namespace gitter.Git.Gui.Controls
 
 		private static void PaintLineColumnImage(Graphics graphics, int column, int digits, Image image, int x, int y)
 		{
-			int imageX = x + ((column + 1) * digits) * CellSize.Width - ImgPlus.Width;
-			int imageY = y + (CellSize.Height - ImgPlus.Height) / 2;
-			graphics.DrawImage(image, imageX, imageY);
+			var bounds = new Rectangle(x, y, image.Width, image.Height);
+			bounds.X += (column + 1) * digits * CellSize.Width - image.Width;
+			bounds.Y += (CellSize.Height - image.Height) / 2;
+			graphics.DrawImage(image, bounds);
 		}
 
-		private static void PaintLineColumnText(Graphics graphics, Font font, Brush brush, int column, int digits, int x, int y, string text)
+		private static void PaintLineColumnText(Graphics graphics, Font font, Color color, int column, int digits, int x, int y, string text)
 		{
 			int lx = x + ((column * digits) + (digits - text.Length)) * CellSize.Width;
 			GitterApplication.TextRenderer.DrawText(
 				graphics,
 				text,
 				font,
-				brush,
+				color,
 				lx, y,
 				ContentFormat);
 		}
 
 		private void PaintLine(
 			int lineIndex, DiffLine line, int digits, Graphics graphics, Font font,
-			bool isHovered, bool isSelected, int x, int y, int width)
+			bool isHovered, bool isSelected, int x, int y, int width, Rectangle clipRectangle)
 		{
 			int cols = line.Nums.Length;
 			var rcColNumbers = new Rectangle(x, y, digits * CellSize.Width * cols + 2, CellSize.Height);
-			Brush backgroundBrush;
-			if(cols != 0)
+			if(cols > 0)
 			{
-				using(backgroundBrush = isHovered ? GetLineNumberHoverBackground() : GetLineNumberBackground())
+				var rcColNumbersBackground = Rectangle.Intersect(rcColNumbers, clipRectangle);
+				if(rcColNumbersBackground is { Width: > 0, Height: > 0 })
 				{
-					graphics.FillRectangle(backgroundBrush, rcColNumbers);
-				}
-				using(var brush = GetLineNumberText())
-				{
+					var backgroundColor = isHovered
+						? Style.Colors.LineNumberBackgroundHover
+						: Style.Colors.LineNumberBackground;
+					graphics.GdiFill(backgroundColor, rcColNumbersBackground);
+					var iconSize = new DpiConverter(FlowControl).ConvertX(16);
 					for(int i = 0; i < cols; ++i)
 					{
 						switch(line.States[i])
 						{
 							case DiffLineState.Added:
-								PaintLineColumnImage(graphics, i, digits, ImgPlus, x, y);
+								PaintLineColumnImage(graphics, i, digits, Icons.Plus.GetImage(iconSize), x, y);
 								break;
 							case DiffLineState.Removed:
-								PaintLineColumnImage(graphics, i, digits, ImgMinus, x, y);
+								PaintLineColumnImage(graphics, i, digits, Icons.Minus.GetImage(iconSize), x, y);
 								break;
 							case DiffLineState.Header:
-								PaintLineColumnText(graphics, font, brush, i, digits, x, y, "...");
+								PaintLineColumnText(graphics, font, Style.Colors.LineNumberForeground, i, digits, x, y, "...");
 								break;
 							default:
-								PaintLineColumnText(graphics, font, brush, i, digits, x, y,
+								PaintLineColumnText(graphics, font, Style.Colors.LineNumberForeground, i, digits, x, y,
 									line.Nums[i].ToString(CultureInfo.InvariantCulture));
 								break;
 						}
@@ -676,26 +693,24 @@ namespace gitter.Git.Gui.Controls
 			}
 			var rcLine = new Rectangle(
 				x + rcColNumbers.Width, y,
-				width - 2*Margin - rcColNumbers.Width- 1, CellSize.Height);
-			if(isHovered)
+				width - 2*Margin - rcColNumbers.Width - 1, CellSize.Height);
+			var rcBackground = Rectangle.Intersect(rcLine, clipRectangle);
+			if(rcBackground is { Width: > 0, Height: > 0 })
 			{
-				backgroundBrush = isSelected ?
-					GetLineSelectedHoverBackground() : GetLineHoverBackground();
-			}
-			else
-			{
-				backgroundBrush = isSelected ?
-					GetLineSelectedBackground() : GetLineBackgroundBrush(line.State);
-			}
-			using(backgroundBrush)
-			{
-				graphics.FillRectangle(backgroundBrush, rcLine);
-				using(var foregroundBrush = GetLineForegroundBrush(line.State))
+				var backgroundColor = isHovered
+					? isSelected
+						? Style.Colors.LineSelectedBackgroundHover
+						: Style.Colors.LineBackgroundHover
+					: isSelected
+						? Style.Colors.LineSelectedBackground
+						: GetLineBackgroundColor(line.State);
+				if(backgroundColor != Color.Transparent)
 				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, line.Text, font, foregroundBrush, rcLine.X + CellSize.Width / 2, rcLine.Y, ContentFormat);
+					graphics.GdiFill(backgroundColor, rcBackground);
 				}
 			}
+			GitterApplication.TextRenderer.DrawText(
+				graphics, line.Text, font, GetLineForegroundColor(line.State), rcLine.X + CellSize.Width / 2, rcLine.Y, ContentFormat);
 		}
 
 		private string GetHeaderText()
@@ -711,21 +726,22 @@ namespace gitter.Git.Gui.Controls
 			=> GraphicsUtility.QueryIcon(
 				DiffFile.Status == FileStatus.Removed
 					? DiffFile.SourceFile
-					: DiffFile.TargetFile);
+					: DiffFile.TargetFile, Dpi.FromControl(FlowControl));
 
-		private Bitmap GetHeaderIconOverlay()
+		private IImageProvider GetHeaderIconOverlay()
 			=> DiffFile.Status switch
 			{
-				FileStatus.Removed     => CachedResources.Bitmaps["ImgOverlayDel"],
-				FileStatus.Added       => CachedResources.Bitmaps["ImgOverlayAdd"],
-				FileStatus.Modified    => CachedResources.Bitmaps["ImgOverlayEdit"],
-				FileStatus.Unmerged    => CachedResources.Bitmaps["ImgOverlayConflict"],
-				FileStatus.Renamed     => CachedResources.Bitmaps["ImgOverlayRename"],
-				FileStatus.Copied      => CachedResources.Bitmaps["ImgOverlayCopy"],
-				FileStatus.ModeChanged => CachedResources.Bitmaps["ImgOverlayChmod"],
+				FileStatus.Removed     => Icons.Overlays.Delete,
+				FileStatus.Added       => Icons.Overlays.Add,
+				FileStatus.Modified    => Icons.Overlays.Edit,
+				FileStatus.Unmerged    => Icons.Overlays.Conflict,
+				FileStatus.Renamed     => Icons.Overlays.Rename,
+				FileStatus.Copied      => Icons.Overlays.Copy,
+				FileStatus.ModeChanged => Icons.Overlays.Chmod,
 				_ => null,
 			};
 
+		/// <inheritdoc/>
 		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 		{
 			Assert.IsNotNull(paintEventArgs);
@@ -736,10 +752,11 @@ namespace gitter.Git.Gui.Controls
 			var contentWidth = Math.Max(_size.Width, FlowControl.ContentArea.Width);
 			var rcHeader = new Rectangle(rect.X + Margin, rect.Y, contentWidth - 2 * Margin, HeaderHeight);
 			var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
-			if(rcHeaderClip.Width > 0 && rcHeaderClip.Height > 0)
+			if(rcHeaderClip is { Width: > 0, Height: > 0 })
 			{
 				graphics.SetClip(rcHeaderClip);
-				PaintHeader(graphics, rcHeader, GetHeaderIcon(), GetHeaderIconOverlay(), GetHeaderText());
+				var overlay = GetHeaderIconOverlay()?.GetImage(new DpiConverter(FlowControl).ConvertX(16));
+				PaintHeader(graphics, rcHeader, rcHeaderClip, GetHeaderIcon(), overlay, GetHeaderText());
 			}
 			var x = rect.X + Margin;
 			var y = rcHeader.Bottom;
@@ -765,7 +782,7 @@ namespace gitter.Git.Gui.Controls
 							lineIndex, line, digits,
 							graphics, font, lineIndex == _lineHover.Index,
 							lineIndex >= _selStart && lineIndex <= _selEnd,
-							rect.X + Margin, y, contentWidth);
+							x, y, contentWidth, paintEventArgs.ClipRectangle);
 					}
 					y += CellSize.Height;
 					++lineIndex;
@@ -774,7 +791,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			if(!reachedEnd && DiffFile.LineCount != 0)
 			{
-				graphics.DrawLine(Pens.Gray, rect.X + Margin, y, rect.X + contentWidth - Margin - 1, y);
+				graphics.DrawLine(Pens.Gray, x, y, rect.X + contentWidth - Margin - 1, y);
 			}
 			graphics.ResetClip();
 		}

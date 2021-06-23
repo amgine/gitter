@@ -53,7 +53,7 @@ namespace gitter.Framework.Controls
 			var bounds = ClientRectangle;
 			bounds.X += ViewConstants.Spacing;
 			bounds.Y += ViewConstants.Spacing;
-			bounds.Width -= ViewConstants.Spacing * 2;
+			bounds.Width  -= ViewConstants.Spacing * 2;
 			bounds.Height -= ViewConstants.Spacing * 2;
 			RootHost = new ViewHost(this, true, true, null)
 			{
@@ -790,8 +790,8 @@ namespace gitter.Framework.Controls
 		public void PerformDock(ViewHost viewHost, DockResult dockResult)
 		{
 			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
-			Verify.Argument.IsFalse(viewHost.IsDocumentWell, "viewHost");
-			Verify.Argument.IsFalse(viewHost.ViewsCount == 1 && viewHost.GetView(0).IsDocument, "viewHost");
+			Verify.Argument.IsFalse(viewHost.IsDocumentWell, nameof(viewHost));
+			Verify.Argument.IsFalse(viewHost.ViewsCount == 1 && viewHost.GetView(0).IsDocument, nameof(viewHost));
 
 			switch(dockResult)
 			{
@@ -876,7 +876,7 @@ namespace gitter.Framework.Controls
 					break;
 				default:
 					throw new ArgumentException(
-						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
+						$"Unsupported DockResult value: {dockResult}",
 						nameof(dockResult));
 			}
 			bounds.Offset(rootBounds.X, rootBounds.Y);

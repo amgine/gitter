@@ -198,7 +198,7 @@ namespace gitter.Framework.Controls
 			var rect = paintEventArgs.Bounds;
 			var font = column.HeaderFont;
 
-			ItemPaintEventArgs.PrepareContentRectangle(ref rect);
+			paintEventArgs.PrepareContentRectangle(ref rect);
 			paintEventArgs.PrepareTextRectangle(font, font, ref rect);
 			if(column.Extender != null && ((paintEventArgs.State & (ItemState.Hovered | ItemState.Pressed)) != ItemState.None))
 			{

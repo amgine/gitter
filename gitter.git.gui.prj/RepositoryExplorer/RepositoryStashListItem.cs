@@ -21,9 +21,6 @@
 namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Text;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -39,35 +36,33 @@ namespace gitter.Git.Gui
 		private readonly IWorkingEnvironment _environment;
 
 		public RepositoryStashListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgStash"], Resources.StrStash)
+			: base(@"stash", Resources.StrStash)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
 			_environment = environment;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnActivate()
 		{
 			base.OnActivate();
 			_environment.ViewDockService.ShowView(Guids.StashViewGuid);
 		}
 
-		public override void OnDoubleClick(int x, int y)
-		{
-		}
+		/// <inheritdoc/>
+		public override void OnDoubleClick(int x, int y) { }
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new StashMenu(Repository);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository is null) return default;
+
+			var menu = new StashMenu(Repository);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -22,8 +22,10 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
+	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Git.Gui.Dialogs;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -31,9 +33,19 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	internal sealed class RemotesToolbar : ToolStrip
 	{
+		static class Icons
+		{
+			const int Size = 16;
+
+			public static readonly IDpiBoundValue<Bitmap> Refresh   = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"refresh",    Size);
+			public static readonly IDpiBoundValue<Bitmap> RemoteAdd = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"remote.add", Size);
+		}
+
 		private readonly RemotesView _remotesView;
 
+		private readonly ToolStripButton _btnRefresh;
 		private readonly ToolStripButton _btnAddRemote;
+		private readonly DpiBindings _bindings;
 
 		public RemotesToolbar(RemotesView remotesView)
 		{
@@ -41,23 +53,22 @@ namespace gitter.Git.Gui.Views
 
 			_remotesView = remotesView;
 
-			Items.Add(new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) =>
-				{
-					_remotesView.RefreshContent();
-				})
+			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, default,
+				(_, _) => _remotesView.RefreshContent())
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.Image,
 			});
 			Items.Add(new ToolStripSeparator());
-			Items.Add(_btnAddRemote = new ToolStripButton(Resources.StrAddRemote, CachedResources.Bitmaps["ImgRemoteAdd"],
-				(sender, e) =>
+			Items.Add(_btnAddRemote = new ToolStripButton(Resources.StrAddRemote, default,
+				(_, _) =>
 				{
-					using(var dlg = new AddRemoteDialog(_remotesView.Repository))
-					{
-						dlg.Run(_remotesView);
-					}
+					using var dlg = new AddRemoteDialog(_remotesView.Repository);
+					dlg.Run(_remotesView);
 				}));
+
+			_bindings = new DpiBindings(this);
+			_bindings.BindImage(_btnRefresh,   Icons.Refresh);
+			_bindings.BindImage(_btnAddRemote, Icons.RemoteAdd);
 		}
 	}
 }

@@ -21,11 +21,10 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -58,7 +57,7 @@ namespace gitter.Git.Gui.Views
 			_lstStash.LoadData(null);
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgStash"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"stash");
 
 		public override void RefreshContent()
 		{
@@ -69,13 +68,13 @@ namespace gitter.Git.Gui.Views
 				{
 					BeginInvoke(new MethodInvoker(RefreshContent));
 				}
-				catch(ObjectDisposedException)
+				catch
 				{
 				}
 			}
 			else
 			{
-				if(Repository != null)
+				if(Repository is not null)
 				{
 					Repository.Stash.Refresh();
 				}
@@ -90,6 +89,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F5:
@@ -110,7 +111,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("StashList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				_lstStash.LoadViewFrom(listNode);
 			}

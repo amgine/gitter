@@ -36,7 +36,7 @@ namespace gitter.Git.Gui
 		private readonly IWorkingEnvironment _environment;
 
 		public RepositoryConfigurationListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgConfiguration"], Resources.StrConfig)
+			: base(@"configuration", Resources.StrConfig)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -49,22 +49,18 @@ namespace gitter.Git.Gui
 			_environment.ViewDockService.ShowView(Guids.ConfigViewGuid);
 		}
 
-		public override void OnDoubleClick(int x, int y)
-		{
-		}
+		public override void OnDoubleClick(int x, int y) { }
 
+		/// <inheritdoc/>
 		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 		{
-			if(Repository != null)
-			{
-				var menu = new ConfigurationMenu(Repository);
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-			else
-			{
-				return null;
-			}
+			Assert.IsNotNull(requestEventArgs);
+
+			if(Repository is null) return default;
+
+			var menu = new ConfigurationMenu(Repository);
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 }

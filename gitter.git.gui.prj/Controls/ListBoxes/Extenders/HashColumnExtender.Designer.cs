@@ -15,16 +15,13 @@
 		{
 			if(disposing)
 			{
-				if(_chkAbbreviate != null)
+				if(_chkAbbreviate is not null)
 				{
 					_chkAbbreviate.Dispose();
 					_chkAbbreviate = null;
 				}
 				UnsubscribeFromColumnEvents();
-				if(components != null)
-				{
-					components.Dispose();
-				}
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}

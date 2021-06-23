@@ -69,7 +69,7 @@ namespace gitter.Framework.Controls
 		protected override void FreeItem(CustomListBoxItem item)
 		{
 			item.ListBox = null;
-			if(item.Parent != null && item.Parent.ListBox == _listBox)
+			if(item.Parent is not null && item.Parent.ListBox == _listBox)
 			{
 				item.Parent = null;
 			}
@@ -87,8 +87,6 @@ namespace gitter.Framework.Controls
 		/// <param name="item">The item.</param>
 		/// <returns>true if item can be added to this <see cref="CustomListBoxItemsCollection"/>.</returns>
 		protected override bool VerifyItem(CustomListBoxItem item)
-		{
-			return item != null && item.ListBox == null;
-		}
+			=> item is { ListBox: null };
 	}
 }

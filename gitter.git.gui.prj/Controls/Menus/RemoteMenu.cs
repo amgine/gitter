@@ -24,6 +24,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -35,27 +37,30 @@ namespace gitter.Git.Gui.Controls
 
 			Remote = remote;
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			Items.Add(GuiItemFactory.GetShowRemoteItem<ToolStripMenuItem>(remote));
 			Items.Add(GuiItemFactory.GetEditRemotePropertiesItem<ToolStripMenuItem>(remote));
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetFetchFromItem<ToolStripMenuItem>(remote, "{0}"));
-			Items.Add(GuiItemFactory.GetPullFromItem<ToolStripMenuItem>(remote, "{0}"));
-			Items.Add(GuiItemFactory.GetPruneRemoteItem<ToolStripMenuItem>(remote, "{0}"));
+			Items.Add(factory.GetFetchFromItem<ToolStripMenuItem>(remote, "{0}"));
+			Items.Add(factory.GetPullFromItem<ToolStripMenuItem>(remote, "{0}"));
+			Items.Add(factory.GetPruneRemoteItem<ToolStripMenuItem>(remote, "{0}"));
 
 			Items.Add(new ToolStripSeparator());
 
-			Items.Add(GuiItemFactory.GetRemoveRemoteItem<ToolStripMenuItem>(remote, "{0}"));
-			Items.Add(GuiItemFactory.GetRenameRemoteItem<ToolStripMenuItem>(remote, "{0}"));
+			Items.Add(factory.GetRemoveRemoteItem<ToolStripMenuItem>(remote, "{0}"));
+			Items.Add(factory.GetRenameRemoteItem<ToolStripMenuItem>(remote, "{0}"));
 			
 			Items.Add(new ToolStripSeparator());
 
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, remote.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFetchUrl, remote.FetchUrl));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPushUrl, remote.PushUrl));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, remote.Name));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFetchUrl, remote.FetchUrl));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPushUrl, remote.PushUrl));
 
 			Items.Add(item);
 		}

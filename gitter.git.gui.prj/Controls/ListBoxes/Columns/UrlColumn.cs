@@ -41,6 +41,7 @@ namespace gitter.Git.Gui.Controls
 		{
 		}
 
+		/// <inheritdoc/>
 		public override string IdentificationString => "Url";
 	}
 }

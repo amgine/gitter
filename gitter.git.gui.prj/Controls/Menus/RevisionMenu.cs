@@ -25,6 +25,8 @@ namespace gitter.Git.Gui.Controls
 	using System.Text;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	/// <summary>Context menu for <see cref="Revision"/>.</summary>
@@ -38,16 +40,19 @@ namespace gitter.Git.Gui.Controls
 		{
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
 			Revision = revision;
 
-			AddViewItems();
+			AddViewItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddActionItems();
+			AddActionItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddCopyToClipboardItems();
+			AddCopyToClipboardItems(factory);
 			Items.Add(new ToolStripSeparator());
-			AddBranchItems();
-			AddTagItems();
+			AddBranchItems(factory);
+			AddTagItems(factory);
 			/*
 			Items.Add(new ToolStripSeparator());
 			AddNoteItems();
@@ -57,47 +62,55 @@ namespace gitter.Git.Gui.Controls
 		/// <summary>Associated revision.</summary>
 		public Revision Revision { get; }
 
-		private void AddViewItems()
+		private void AddViewItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetViewDiffItem<ToolStripMenuItem>(Revision.GetDiffSource()));
-			Items.Add(GuiItemFactory.GetViewTreeItem<ToolStripMenuItem>(Revision));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetViewDiffItem<ToolStripMenuItem>(Revision.GetDiffSource()));
+			Items.Add(factory.GetViewTreeItem<ToolStripMenuItem>(Revision));
 			Items.Add(GuiItemFactory.GetSavePatchItem<ToolStripMenuItem>(Revision));
-			Items.Add(GuiItemFactory.GetArchiveItem<ToolStripMenuItem>(Revision));
+			Items.Add(factory.GetArchiveItem<ToolStripMenuItem>(Revision));
 		}
 
-		private void AddActionItems()
+		private void AddActionItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetCheckoutRevisionItem<ToolStripMenuItem>(Revision, "{0}"));
-			Items.Add(GuiItemFactory.GetResetHeadHereItem<ToolStripMenuItem>(Revision));
-			Items.Add(GuiItemFactory.GetRebaseHeadHereItem<ToolStripMenuItem>(Revision));
-			Items.Add(GuiItemFactory.GetRevertItem<ToolStripMenuItem>(Revision));
-			Items.Add(GuiItemFactory.GetCherryPickItem<ToolStripMenuItem>(Revision, "{0}"));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetCheckoutRevisionItem<ToolStripMenuItem>(Revision, "{0}"));
+			Items.Add(factory.GetResetHeadHereItem<ToolStripMenuItem>(Revision));
+			Items.Add(factory.GetRebaseHeadHereItem<ToolStripMenuItem>(Revision));
+			Items.Add(factory.GetRevertItem<ToolStripMenuItem>(Revision));
+			Items.Add(factory.GetCherryPickItem<ToolStripMenuItem>(Revision, "{0}"));
 		}
 
-		private void AddCopyToClipboardItems()
+		private void AddCopyToClipboardItems(GuiItemFactory factory)
 		{
+			Assert.IsNotNull(factory);
+
 			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, Revision.HashString));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, Revision.TreeHashString));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, Revision.Subject));
+			item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, Revision.HashString));
+			item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, Revision.TreeHashString));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, Revision.Subject));
 			if(!string.IsNullOrEmpty(Revision.Body))
 			{
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrBody, Revision.Body));
+				item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrBody, Revision.Body));
 			}
 			if(Revision.Committer != Revision.Author)
 			{
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, Revision.Committer.Name));
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitterEmail, Revision.Committer.Email));
+				item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, Revision.Committer.Name));
+				item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitterEmail, Revision.Committer.Email));
 			}
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, Revision.Author.Name));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthorEmail, Revision.Author.Email));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPatch, () => Encoding.UTF8.GetString(Revision.FormatPatch())));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, Revision.Author.Name));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthorEmail, Revision.Author.Email));
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrPatch, () => Encoding.UTF8.GetString(Revision.FormatPatch())));
 			Items.Add(item);
 		}
 
-		private void AddBranchItems()
+		private void AddBranchItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetCreateBranchItem<ToolStripMenuItem>(Revision));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetCreateBranchItem<ToolStripMenuItem>(Revision));
 
 			var branches = Revision.References.GetAllBranches();
 			switch(branches.Count)
@@ -116,29 +129,33 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		private void AddTagItems()
+		private void AddTagItems(GuiItemFactory factory)
 		{
-			Items.Add(GuiItemFactory.GetCreateTagItem<ToolStripMenuItem>(Revision));
+			Assert.IsNotNull(factory);
+
+			Items.Add(factory.GetCreateTagItem<ToolStripMenuItem>(Revision));
 
 			var tags = Revision.References.GetTags();
 			switch(tags.Count)
 			{
 				case 1:
-					Items.Add(GuiItemFactory.GetRemoveTagItem<ToolStripMenuItem>(tags[0], "{0} '{1}'"));
+					Items.Add(factory.GetRemoveTagItem<ToolStripMenuItem>(tags[0], "{0} '{1}'"));
 					break;
 				case > 1:
 					var submenu = new ToolStripMenuItem(Resources.StrRemoveTag);
 					foreach(var tag in tags)
 					{
-						submenu.DropDownItems.Add(GuiItemFactory.GetRemoveTagItem<ToolStripMenuItem>(tag, "{1}"));
+						submenu.DropDownItems.Add(factory.GetRemoveTagItem<ToolStripMenuItem>(tag, "{1}"));
 					}
 					Items.Add(submenu);
 					break;
 			}
 		}
 
-		private void AddNoteItems()
+		private void AddNoteItems(GuiItemFactory factory)
 		{
+			Assert.IsNotNull(factory);
+
 			Items.Add(GuiItemFactory.GetAddNoteItem<ToolStripMenuItem>(Revision));
 		}
 	}

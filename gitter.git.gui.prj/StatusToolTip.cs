@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -36,11 +36,13 @@ namespace gitter.Git.Gui
 		{
 			public string Text1;
 			public string Text2;
-			public Bitmap Image;
+			public string Image;
+			public string ImageOverlay;
 		}
 
 		private List<TextEntry> _textEntries;
-		private Size _size;
+		private Dpi _cachedDpi;
+		private Size _cachedSize;
 		private int _rowHeight;
 		private int _colWidth;
 
@@ -53,18 +55,20 @@ namespace gitter.Git.Gui
 				{
 					textEntries.Add(new TextEntry
 					{
-						Text1 = Resources.StrConflictingFiles.AddColon(),
-						Image = FileStatusIcons.ImgUnmerged,
-						Text2 = status.UnmergedCount.ToString()
+						Text1        = Resources.StrConflictingFiles.AddColon(),
+						Image        = @"file",
+						ImageOverlay = @"overlays.conflict",
+						Text2        = status.UnmergedCount.ToString()
 					});
 				}
 				if(status.UnstagedUntrackedCount != 0)
 				{
 					textEntries.Add(new TextEntry
 					{
-						Text1 = Resources.StrUntrackedFiles.AddColon(),
-						Image = FileStatusIcons.ImgUnstagedUntracked,
-						Text2 = status.UnstagedUntrackedCount.ToString()
+						Text1        = Resources.StrUntrackedFiles.AddColon(),
+						Image        = @"file",
+						ImageOverlay = @"overlays.add",
+						Text2        = status.UnstagedUntrackedCount.ToString()
 					});
 				}
 				if(status.UnstagedModifiedCount != 0 || status.UnstagedRemovedCount != 0)
@@ -77,18 +81,20 @@ namespace gitter.Git.Gui
 					{
 						textEntries.Add(new TextEntry
 						{
-							Text1 = Resources.StrRemovedFiles.AddColon(),
-							Image = FileStatusIcons.ImgUnstagedRemoved,
-							Text2 = status.UnstagedRemovedCount.ToString()
+							Text1        = Resources.StrRemovedFiles.AddColon(),
+							Image        = @"file",
+							ImageOverlay = @"overlays.delete",
+							Text2        = status.UnstagedRemovedCount.ToString()
 						});
 					}
 					if(status.UnstagedModifiedCount != 0)
 					{
 						textEntries.Add(new TextEntry
 						{
-							Text1 = Resources.StrModifiedFiles.AddColon(),
-							Image = FileStatusIcons.ImgUnstagedModified,
-							Text2 = status.UnstagedModifiedCount.ToString()
+							Text1        = Resources.StrModifiedFiles.AddColon(),
+							Image        = @"file",
+							ImageOverlay = @"overlays.edit",
+							Text2        = status.UnstagedModifiedCount.ToString()
 						});
 					}
 				}
@@ -103,7 +109,8 @@ namespace gitter.Git.Gui
 						textEntries.Add(new TextEntry
 						{
 							Text1 = Resources.StrAddedFiles.AddColon(),
-							Image = FileStatusIcons.ImgStagedAdded,
+							Image = @"file",
+							ImageOverlay = @"add.staged",
 							Text2 = status.StagedAddedCount.ToString()
 						});
 					}
@@ -112,7 +119,8 @@ namespace gitter.Git.Gui
 						textEntries.Add(new TextEntry
 						{
 							Text1 = Resources.StrRemovedFiles.AddColon(),
-							Image = FileStatusIcons.ImgStagedRemoved,
+							Image = @"file",
+							ImageOverlay = @"delete.staged",
 							Text2 = status.StagedRemovedCount.ToString()
 						});
 					}
@@ -121,7 +129,8 @@ namespace gitter.Git.Gui
 						textEntries.Add(new TextEntry
 						{
 							Text1 = Resources.StrModifiedFiles.AddColon(),
-							Image = FileStatusIcons.ImgStagedModified,
+							Image = @"file",
+							ImageOverlay = "edit.staged",
 							Text2 = status.StagedModifiedCount.ToString()
 						});
 					}
@@ -134,46 +143,54 @@ namespace gitter.Git.Gui
 			return textEntries;
 		}
 
-		private void Measure(List<TextEntry> textEntries)
+		public override Size Measure(Control control)
 		{
+			var dpi = control is not null
+				? new Dpi(control.DeviceDpi)
+				: Dpi.Default;
+
+			if(dpi == _cachedDpi)
+			{
+				return _cachedSize;
+			}
+
+			if(_textEntries is not { Count: > 0 })
+			{
+				_cachedDpi  = dpi;
+				_cachedSize = default;
+				return default;
+			}
+
+			var conv = DpiConverter.FromDefaultTo(dpi);
+
 			_rowHeight = 0;
 			_colWidth = 0;
 			var font = gitter.Framework.GitterApplication.FontManager.UIFont;
 			int maxW = 0;
-			using(var b = new Bitmap(1, 1))
+			foreach(var entry in _textEntries)
 			{
-				using(var gx = Graphics.FromImage(b))
+				var mainSize = GitterApplication.TextRenderer.MeasureText(
+					GraphicsUtility.MeasurementGraphics, entry.Text1, font, int.MaxValue, StringFormat.GenericTypographic);
+				int entryW1 = entry.Image is not null ? conv.ConvertX(16) + conv.ConvertX(3) : 0;
+				int entryW2 = mainSize.Width;
+				int entryW3 = entry.Text2 is not null ?
+					GitterApplication.TextRenderer.MeasureText(GraphicsUtility.MeasurementGraphics, entry.Text2, font, int.MaxValue, StringFormat.GenericTypographic).Width + conv.ConvertX(15) :
+					0;
+				int entryH = mainSize.Height;
+				if(entryH > _rowHeight) _rowHeight = entryH;
+				int w = entryW1 + entryW2 + entryW3;
+				if(entryW3 != 0)
 				{
-					foreach(var entry in textEntries)
-					{
-						var mainSize = GitterApplication.TextRenderer.MeasureText(
-							gx, entry.Text1, font, int.MaxValue, StringFormat.GenericTypographic);
-						int entryW1 = entry.Image != null ? entry.Image.Width + 3 : 0;
-						int entryW2 = mainSize.Width;
-						int entryW3 = entry.Text2 != null ?
-							GitterApplication.TextRenderer.MeasureText(gx, entry.Text2, font, int.MaxValue, StringFormat.GenericTypographic).Width + 15 :
-							0;
-						int entryH = mainSize.Height;
-						if(entryH > _rowHeight) _rowHeight = entryH;
-						int w = entryW1 + entryW2 + entryW3;
-						if(entryW3 != 0)
-						{
-							var cw = entryW1 + entryW2 + 10;
-							if(cw > _colWidth) _colWidth = cw;
-						}
-						if(w > maxW)
-						{
-							maxW = w;
-						}
-					}
+					var cw = entryW1 + entryW2 + conv.ConvertX(10);
+					if(cw > _colWidth) _colWidth = cw;
 				}
+				if(w > maxW) maxW = w;
 			}
-			_size = new Size(HorizontalMargin * 2 + maxW, VerticalMargin * 2 + textEntries.Count * (_rowHeight + VerticalSpacing) - 1);
-		}
-
-		public override Size Size
-		{
-			get { return _size; }
+			_cachedDpi  = dpi;
+			_cachedSize = new Size(
+				conv.ConvertX(HorizontalMargin) * 2 + maxW,
+				conv.ConvertY(VerticalMargin)   * 2 + _textEntries.Count * (_rowHeight + conv.ConvertY(VerticalSpacing)) - 1);
+			return _cachedSize;
 		}
 
 		public StatusToolTip()
@@ -184,34 +201,54 @@ namespace gitter.Git.Gui
 		public void Update(Status status)
 		{
 			_textEntries = CaptureData(status);
-			Measure(_textEntries);
+			_cachedDpi   = default;
+			_cachedSize  = default;
 		}
 
 		protected override void OnPaint(DrawToolTipEventArgs e)
 		{
-			if(_textEntries != null)
+			Assert.IsNotNull(e);
+
+			if(_textEntries is not { Count: > 0 }) return;
+
+			var conv = e.AssociatedControl is not null
+				? new DpiConverter(e.AssociatedControl)
+				: DpiConverter.FromDefaultTo(Dpi.System);
+
+			var gx       = e.Graphics;
+			var font     = e.Font;
+			var y        = VerticalMargin;
+			var iconSize = conv.ConvertX(16);
+			foreach(var entry in _textEntries)
 			{
-				var gx = e.Graphics;
-				var font = e.Font;
-				var y = VerticalMargin;
-				foreach(var entry in _textEntries)
+				var x = HorizontalMargin;
+				if(entry.Image is not null)
 				{
-					var x = HorizontalMargin;
-					if(entry.Image != null)
+					var image = CachedResources.ScaledBitmaps[entry.Image, iconSize];
+					if(image is not null)
 					{
-						gx.DrawImage(entry.Image, x, y + (entry.Image.Height - _rowHeight) / 2);
-						x += entry.Image.Width + 3;
+						gx.DrawImage(image, x, y + (image.Height - _rowHeight) / 2);
+						if(entry.ImageOverlay is not null)
+						{
+							var overlay = CachedResources.ScaledBitmaps[entry.ImageOverlay, iconSize];
+							if(overlay is not null)
+							{
+								gx.DrawImage(overlay, x, y + (image.Height - _rowHeight) / 2);
+							}
+						}
+
+						x += image.Width + conv.ConvertX(3);
 					}
-					GitterApplication.TextRenderer.DrawText(
-						gx, entry.Text1, font, SystemBrushes.InfoText, x, y, StringFormat.GenericTypographic);
-					if(entry.Text2 != null)
-					{
-						x = HorizontalMargin + _colWidth;
-						GitterApplication.TextRenderer.DrawText(
-							gx, entry.Text2, font, SystemBrushes.InfoText, x, y, StringFormat.GenericTypographic);
-					}
-					y += _rowHeight + VerticalSpacing;
 				}
+				GitterApplication.TextRenderer.DrawText(
+					gx, entry.Text1, font, SystemBrushes.InfoText, x, y, StringFormat.GenericTypographic);
+				if(entry.Text2 != null)
+				{
+					x = HorizontalMargin + _colWidth;
+					GitterApplication.TextRenderer.DrawText(
+						gx, entry.Text2, font, SystemBrushes.InfoText, x, y, StringFormat.GenericTypographic);
+				}
+				y += _rowHeight + VerticalSpacing;
 			}
 		}
 	}

@@ -15,16 +15,13 @@
 		{
 			if(disposing)
 			{
-				if(_chkShowEmail != null)
+				if(_chkShowEmail is not null)
 				{
 					_chkShowEmail.Dispose();
 					_chkShowEmail = null;
 				}
 				UnsubscribeFromColumnEvents();
-				if(components != null)
-				{
-					components.Dispose();
-				}
+				components?.Dispose();
 			}
 			base.Dispose(disposing);
 		}

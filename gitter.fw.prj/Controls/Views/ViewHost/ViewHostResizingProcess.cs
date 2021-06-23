@@ -66,7 +66,6 @@ namespace gitter.Framework.Controls
 			Rectangle bounds;
 			var side = ViewHost.DockSide;
 			var grid = side.Grid;
-			var rootCtlBounds = grid.RootControl.Bounds;
 			Orientation orientation;
 			switch(side.Side)
 			{
@@ -114,6 +113,13 @@ namespace gitter.Framework.Controls
 			return true;
 		}
 
+		private int ClampPosition(int position)
+		{
+			if(position <= _minimumPosition) return _minimumPosition;
+			if(position >= _maximumPosition) return _maximumPosition;
+			return position;
+		}
+
 		public void Update(Point location)
 		{
 			Verify.State.IsTrue(IsActive);
@@ -122,34 +128,18 @@ namespace gitter.Framework.Controls
 			{
 				case Orientation.Vertical:
 					{
-						var x = location.X - _resizeOffset;
-						if(x < _minimumPosition)
-						{
-							x = _minimumPosition;
-						}
-						else if(x > _maximumPosition)
-						{
-							x = _maximumPosition;
-						}
+						var x = ClampPosition(location.X - _resizeOffset);
 						location = new Point(x, 0);
 					}
 					break;
 				case Orientation.Horizontal:
 					{
-						var y = location.Y - _resizeOffset;
-						if(y < _minimumPosition)
-						{
-							y = _minimumPosition;
-						}
-						else if(y > _maximumPosition)
-						{
-							y = _maximumPosition;
-						}
+						var y = ClampPosition(location.Y - _resizeOffset);
 						location = new Point(0, y);
 					}
 					break;
 				default:
-					throw new ApplicationException("Unexpected ViewDockSide.Orientation: " + ViewHost.DockSide.Orientation);
+					throw new ApplicationException($"Unexpected ViewDockSide.Orientation: {ViewHost.DockSide.Orientation}");
 			}
 			location = ViewHost.PointToScreen(location);
 			_splitterMarker.Location = location;
@@ -165,66 +155,34 @@ namespace gitter.Framework.Controls
 			{
 				case AnchorStyles.Left:
 					{
-						var x = e.X - _resizeOffset;
-						if(x < _minimumPosition)
-						{
-							x = _minimumPosition;
-						}
-						else if(x > _maximumPosition)
-						{
-							x = _maximumPosition;
-						}
+						var x = ClampPosition(e.X - _resizeOffset);
 						ViewHost.Width = x + ViewConstants.SideDockPanelBorderSize;
 					}
 					break;
 				case AnchorStyles.Top:
 					{
-						var y = e.Y - _resizeOffset;
-						if(y < _minimumPosition)
-						{
-							y = _minimumPosition;
-						}
-						else if(y > _maximumPosition)
-						{
-							y = _maximumPosition;
-						}
+						var y = ClampPosition(e.Y - _resizeOffset);
 						ViewHost.Height = y + ViewConstants.SideDockPanelBorderSize;
 					}
 					break;
 				case AnchorStyles.Right:
 					{
-						var x = e.X - _resizeOffset;
-						if(x < _minimumPosition)
-						{
-							x = _minimumPosition;
-						}
-						else if(x > _maximumPosition)
-						{
-							x = _maximumPosition;
-						}
-						var w = ViewHost.Width - x;
+						var x  = ClampPosition(e.X - _resizeOffset);
+						var w  = ViewHost.Width - x;
 						var dw = ViewHost.Width - w;
-						 ViewHost.SetBounds(ViewHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
+						ViewHost.SetBounds(ViewHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
 					}
 					break;
 				case AnchorStyles.Bottom:
 					{
-						var y = e.Y - _resizeOffset;
-						if(y < _minimumPosition)
-						{
-							y = _minimumPosition;
-						}
-						else if(y > _maximumPosition)
-						{
-							y = _maximumPosition;
-						}
-						var h = ViewHost.Height - y;
+						var y  = ClampPosition(e.Y - _resizeOffset);
+						var h  = ViewHost.Height - y;
 						var dh = ViewHost.Height - h;
 						ViewHost.SetBounds(0, ViewHost.Top + dh, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
 					}
 					break;
 				default:
-					throw new ApplicationException("Unexpected ViewDockSide.Side: " + ViewHost.DockSide.Side);
+					throw new ApplicationException($"Unexpected ViewDockSide.Side: {ViewHost.DockSide.Side}");
 			}
 		}
 
@@ -238,7 +196,7 @@ namespace gitter.Framework.Controls
 
 		private void SpawnMarker(Rectangle bounds, Orientation orientation)
 		{
-			Verify.State.IsTrue(_splitterMarker == null);
+			Verify.State.IsTrue(_splitterMarker is null);
 
 			_splitterMarker = new SplitterMarker(bounds, orientation);
 			_splitterMarker.Show();
@@ -246,7 +204,7 @@ namespace gitter.Framework.Controls
 
 		private void KillMarker()
 		{
-			if(_splitterMarker != null)
+			if(_splitterMarker is not null)
 			{
 				_splitterMarker.Close();
 				_splitterMarker.Dispose();
@@ -256,7 +214,7 @@ namespace gitter.Framework.Controls
 
 		public void Dispose()
 		{
-			if(_splitterMarker != null)
+			if(_splitterMarker is not null)
 			{
 				_splitterMarker.Dispose();
 				_splitterMarker = null;

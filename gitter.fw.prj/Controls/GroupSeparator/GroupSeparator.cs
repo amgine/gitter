@@ -179,6 +179,7 @@ namespace gitter.Framework.Controls
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
+			_lblText.Top = (Height - _lblText.Height) / 2;
 			UpdateLineBounds();
 		}
 

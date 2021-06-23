@@ -29,7 +29,7 @@ namespace gitter.GitLab.Gui
 	sealed class RepositoryExplorerIssuesListItem : RepositoryExplorerItemBase
 	{
 		public RepositoryExplorerIssuesListItem(IWorkingEnvironment env, GitLabGuiProvider guiProvider)
-			: base(env, guiProvider, CachedResources.Bitmaps["ImgIssues"], Resources.StrIssues)
+			: base(env, guiProvider, @"issues", Resources.StrIssues)
 		{
 		}
 

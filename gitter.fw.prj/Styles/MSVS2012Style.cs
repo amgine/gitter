@@ -65,7 +65,7 @@ namespace gitter.Framework
 			public void Draw(Graphics graphics, Rectangle rect)
 			{
 				using var brush = new SolidBrush(_backgroundColor);
-				graphics.FillRectangle(brush, rect);
+				graphics.GdiFill(_backgroundColor, rect);
 			}
 		}
 	}

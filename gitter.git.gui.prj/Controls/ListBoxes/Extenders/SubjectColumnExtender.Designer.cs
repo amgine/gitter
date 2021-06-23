@@ -34,6 +34,7 @@
 			// SubjectColumnExtender
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.Name = "SubjectColumnExtender";
 			this.Size = new System.Drawing.Size(214, 143);
 			this.ResumeLayout(false);

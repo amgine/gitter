@@ -32,7 +32,7 @@ namespace gitter.Git.Gui
 		private readonly IWorkingEnvironment _environment;
 
 		public RepositoryHistoryListItem(IWorkingEnvironment environment)
-			: base(CachedResources.Bitmaps["ImgHistory"], Resources.StrHistory)
+			: base(@"history", Resources.StrHistory)
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
@@ -45,8 +45,6 @@ namespace gitter.Git.Gui
 			_environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
 		}
 
-		public override void OnDoubleClick(int x, int y)
-		{
-		}
+		public override void OnDoubleClick(int x, int y) { }
 	}
 }

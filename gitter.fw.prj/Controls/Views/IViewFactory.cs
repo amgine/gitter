@@ -22,7 +22,6 @@ namespace gitter.Framework.Controls
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Drawing;
 
 	/// <summary>Factory for <see cref="ViewBase"/> objects.</summary>
 	public interface IViewFactory
@@ -34,7 +33,7 @@ namespace gitter.Framework.Controls
 		string Name { get; }
 
 		/// <summary>View icon.</summary>
-		Image Image { get; }
+		IImageProvider ImageProvider { get; }
 
 		/// <summary>Only one instance of view should be maintained.</summary>
 		bool IsSingleton { get; }

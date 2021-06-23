@@ -32,6 +32,6 @@ namespace gitter.Framework.Controls
 
 		public static CustomCheckBoxRenderer Default => MSVS2012Dark;
 
-		public abstract void Render(Graphics graphics, Rectangle clipRectangle, CustomCheckBox checkBox);
+		public abstract void Render(Graphics graphics, Dpi dpi, Rectangle clipRectangle, CustomCheckBox checkBox);
 	}
 }

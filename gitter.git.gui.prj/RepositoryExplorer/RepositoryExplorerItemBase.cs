@@ -21,42 +21,50 @@
 namespace gitter.Git.Gui
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Text;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using gitter.Git.Gui.Controls;
 
 	public abstract class RepositoryExplorerItemBase : CustomListBoxItem
 	{
+		private readonly string _imageName;
 		private readonly string _text;
-		private Bitmap _image;
 		private Repository _repository;
 
-		protected RepositoryExplorerItemBase(Bitmap image, string text)
+		protected RepositoryExplorerItemBase(string imageName, string text)
 		{
-			_image = image;
-			_text  = text;
+			_imageName = imageName;
+			_text      = text;
 		}
 
+		private Image GetImage(Dpi dpi)
+			=> CachedResources.ScaledBitmaps[_imageName, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+
+		/// <inheritdoc/>
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
+			Assert.IsNotNull(paintEventArgs);
+
 			switch((ColumnId)paintEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(_image, _text);
+					paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), _text);
 					break;
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		{
+			Assert.IsNotNull(measureEventArgs);
+
 			switch((ColumnId)measureEventArgs.SubItemId)
 			{
 				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(_image, _text);
+					return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), _text);
 				default:
 					return Size.Empty;
 			}
@@ -69,12 +77,12 @@ namespace gitter.Git.Gui
 			{
 				if(_repository != value)
 				{
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						DetachFromRepository();
 					}
 					_repository = value;
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						AttachToRepository();
 					}

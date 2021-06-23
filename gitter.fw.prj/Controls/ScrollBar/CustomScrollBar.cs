@@ -134,6 +134,7 @@ namespace gitter.Framework.Controls
 				_ => throw new ApplicationException(),
 			};
 
+		/// <inheritdoc/>
 		protected override void ScaleControl(SizeF factor, BoundsSpecified specified) { }
 
 		protected int ClampValue(int value)
@@ -155,12 +156,15 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			Renderer.Render(
 				Orientation,
 				Enabled,
-				e.Graphics,
+				e.Graphics, new Dpi(DeviceDpi),
 				e.ClipRectangle,
 				DecreaseButtonBounds,
 				DecreaseTrackBarBounds,
@@ -171,22 +175,26 @@ namespace gitter.Framework.Controls
 				PressedPart);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnResize(EventArgs e)
 		{
 			ArrangeInvalidate();
 			base.OnResize(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPaintBackground(PaintEventArgs pevent)
 		{
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			HoveredPart = CustomScrollBarPart.None;
 			base.OnMouseLeave(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			if(PressedPart != CustomScrollBarPart.None)
@@ -218,6 +226,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseMove(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			switch(e.Button)
@@ -246,6 +255,7 @@ namespace gitter.Framework.Controls
 			base.OnMouseDown(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			if(PressedPart != CustomScrollBarPart.None)
@@ -492,6 +502,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)

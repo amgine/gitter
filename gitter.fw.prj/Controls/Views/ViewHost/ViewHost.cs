@@ -121,11 +121,11 @@ namespace gitter.Framework.Controls
 			_isDocumentWell = isDocumentWell;
 			_views = new List<ViewBase>();
 			var size = new Size(ViewConstants.MinimumHostWidth, ViewConstants.MinimumHostHeight);
-			if(views != null)
+			if(views is not null)
 			{
 				foreach(var view in views)
 				{
-					Verify.Argument.IsTrue(view != null, nameof(views), "List of views contains invalid arguments.");
+					Verify.Argument.IsTrue(view is not null, nameof(views), "List of views contains invalid arguments.");
 
 					_views.Add(view);
 					view.TextChanged += OnViewTextChanged;
@@ -159,57 +159,38 @@ namespace gitter.Framework.Controls
 				}
 			}
 
-			_dockMarkers = new ViewHostDockMarkers(this);
-			_dockingProcess = new ViewHostDockingProcess(this);
+			_dockMarkers     = new ViewHostDockMarkers    (this);
+			_dockingProcess  = new ViewHostDockingProcess (this);
 			_resizingProcess = new ViewHostResizingProcess(this);
 
 			BackColor = Renderer.BackgroundColor;
 
 			SuspendLayout();
 
-			int bottomOffset;
-			int topOffset;
 			if(_views.Count != 0)
 			{
 				_activeView = _views[0];
 				if(isDocumentWell)
 				{
-					SpawnTabs(size);
-					topOffset = _tabs.Height;
-					SpawnFooter(size);
-					bottomOffset = Renderer.FooterHeight;
+					SpawnTabs();
+					SpawnFooter();
 				}
 				else
 				{
-					SpawnHeader(size);
-					topOffset = _header.Height;
+					SpawnHeader();
 					if(_views.Count > 1)
 					{
-						SpawnTabs(size);
-						bottomOffset = _tabs.Height;
-					}
-					else
-					{
-						bottomOffset = 0;
+						SpawnTabs();
 					}
 				}
 			}
-			else
-			{
-				topOffset = 0;
-				bottomOffset = 0;
-			}
 
-			_viewContainer = new Panel()
-			{
-				Bounds = new Rectangle(0, topOffset, size.Width, size.Height - topOffset - bottomOffset),
-				Anchor = ViewConstants.AnchorAll,
-			};
+			_viewContainer = new Panel();
 
-			if(_activeView != null)
+			if(_activeView is not null)
 			{
-				_activeView.Bounds = new Rectangle(Point.Empty, _viewContainer.Size);
-				_activeView.Anchor = ViewConstants.AnchorAll;
+				_activeView.Bounds = _viewContainer.ClientRectangle;
+				_activeView.Dock   = DockStyle.Fill;
 				_activeView.Parent = _viewContainer;
 			}
 
@@ -223,6 +204,8 @@ namespace gitter.Framework.Controls
 			{
 				_viewHosts.AddLast(this);
 			}
+
+			UpdateChildBounds();
 		}
 
 		#endregion
@@ -243,7 +226,7 @@ namespace gitter.Framework.Controls
 			{
 				if(_ownerForm != form)
 				{
-					if(_ownerForm != null)
+					if(_ownerForm is not null)
 					{
 						_ownerForm.Activated -= OnOwnerFormActivated;
 						_ownerForm.Deactivate -= OnOwnerFormDeactivated;
@@ -256,9 +239,9 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				if(_ownerForm != null)
+				if(_ownerForm is not null)
 				{
-					_ownerForm.Activated -= OnOwnerFormActivated;
+					_ownerForm.Activated  -= OnOwnerFormActivated;
 					_ownerForm.Deactivate -= OnOwnerFormDeactivated;
 					_ownerForm = null;
 					_isActive = false;
@@ -310,17 +293,12 @@ namespace gitter.Framework.Controls
 			base.OnMouseEnter(e);
 			if(Status == ViewHostStatus.AutoHide)
 			{
-				switch(DockSide.Orientation)
+				Cursor = DockSide.Orientation switch
 				{
-					case Orientation.Vertical:
-						Cursor = Cursors.SizeWE;
-						break;
-					case Orientation.Horizontal:
-						Cursor = Cursors.SizeNS;
-						break;
-					default:
-						throw new ApplicationException("Unexpected ViewDockSide.Orientation: " + DockSide.Orientation);
-				}
+					Orientation.Vertical   => Cursors.SizeWE,
+					Orientation.Horizontal => Cursors.SizeNS,
+					_ => throw new ApplicationException($"Unexpected ViewDockSide.Orientation: {DockSide.Orientation}"),
+				};
 			}
 		}
 
@@ -360,19 +338,82 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		/// <summary>Creates <see cref="ViewHostHeader"/> control.</summary>
-		/// <param name="size">Control size.</param>
-		private void SpawnHeader(Size size)
+		private void UpdateChildBounds()
 		{
-			Verify.State.IsTrue(_header == null, "Header is already spawned.");
+			//var converter = new DpiConverter(this);
+			var cb = ClientRectangle;
 
-			var headerHeight = Renderer.HeaderHeight;
-			if(headerHeight > 0)
+			if(DockSide is not null)
+			{
+				var delta = ViewConstants.SideDockPanelBorderSize;
+				//delta = converter.ConvertY(delta);
+				switch(DockSide.Side)
+				{
+					case AnchorStyles.Top:
+						cb.Height -= delta;
+						break;
+					case AnchorStyles.Bottom:
+						cb.Y      += delta;
+						cb.Height -= delta;
+						break;
+					case AnchorStyles.Left:
+						cb.Width -= delta;
+						break;
+					case AnchorStyles.Right:
+						cb.X     += delta;
+						cb.Width -= delta;
+						break;
+				}
+			}
+			if(_header is not null)
+			{
+				var headerHeight = Renderer.HeaderHeight;
+				//headerHeight = converter.ConvertY(headerHeight);
+				_header.Bounds = new Rectangle(cb.X, cb.Y, cb.Width, headerHeight);
+				cb.Y      += headerHeight;
+				cb.Height -= headerHeight;
+			}
+			if(_tabs is not null)
+			{
+				var tabHeight = Renderer.TabHeight;
+				//tabHeight = converter.ConvertY(tabHeight);
+				if(_isDocumentWell)
+				{
+					tabHeight += Renderer.TabFooterHeight;
+					_tabs.Bounds = new Rectangle(
+						cb.X, cb.Y,
+						cb.Width, tabHeight);
+					cb.Y += tabHeight;
+				}
+				else
+				{
+					_tabs.Bounds = new Rectangle(
+						cb.X, cb.Y + cb.Height - tabHeight,
+						cb.Width, tabHeight);
+				}
+				cb.Height -= tabHeight;
+			}
+			if(_footer is not null)
+			{
+				var footerHeight = Renderer.FooterHeight;
+				//footerHeight = converter.ConvertY(footerHeight);
+				_footer.Bounds = new Rectangle(
+					cb.X, cb.Y + cb.Height - footerHeight,
+					cb.Width, footerHeight);
+				cb.Height -= footerHeight;
+			}
+			_viewContainer.Bounds = cb;
+		}
+
+		/// <summary>Creates <see cref="ViewHostHeader"/> control.</summary>
+		private void SpawnHeader()
+		{
+			Verify.State.IsTrue(_header is null, "Header is already spawned.");
+
+			if(Renderer.HeaderHeight > 0)
 			{
 				_header = new ViewHostHeader(this)
 				{
-					Bounds = new Rectangle(0, 0, size.Width, headerHeight),
-					Anchor = ViewConstants.AnchorDockTop,
 					Parent = this,
 				};
 				ResetHeaderButtons();
@@ -387,7 +428,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Destroy header control.</summary>
 		private void RemoveHeader()
 		{
-			if(_header != null)
+			if(_header is not null)
 			{
 				_header.Parent = null;
 				_header.MouseDown -= OnHeaderMouseDown;
@@ -401,20 +442,15 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Creates <see cref="ViewHostFooter"/> control.</summary>
-		/// <param name="size">Control size.</param>
-		private void SpawnFooter(Size size)
+		private void SpawnFooter()
 		{
-			Verify.State.IsTrue(_footer == null, "Footer is already spawned.");
+			Verify.State.IsTrue(_footer is null, "Footer is already spawned.");
 
 			var footerHeight = Renderer.FooterHeight;
 			if(footerHeight > 0)
 			{
 				_footer = new ViewHostFooter(this)
 				{
-					Bounds = new Rectangle(
-						0, size.Height - footerHeight,
-						size.Width, footerHeight),
-					Anchor = ViewConstants.AnchorDockBottom,
 					Parent = this,
 				};
 			}
@@ -423,7 +459,7 @@ namespace gitter.Framework.Controls
 		/// <summary>Destroys footer control.</summary>
 		private void RemoveFooter()
 		{
-			if(_footer != null)
+			if(_footer is not null)
 			{
 				_footer.Parent = null;
 				_footer.Dispose();
@@ -434,32 +470,19 @@ namespace gitter.Framework.Controls
 		private static AnchorStyles GetRelativeSide(ViewSplit viewSplit, int index, int side)
 		{
 			var item = viewSplit[index];
-			bool isDw;
-			switch(item)
+			var isDw = item switch
 			{
-				case ViewHost th:
-					isDw = th.IsDocumentWell;
-					break;
-				case ViewSplit ts:
-					isDw = ts.ContainsDocumentWell;
-					break;
-				default:
-					isDw = false;
-					break;
-			}
-			if(isDw)
+				ViewHost  th => th.IsDocumentWell,
+				ViewSplit ts => ts.ContainsDocumentWell,
+				_ => false,
+			};
+			if(!isDw) return AnchorStyles.None;
+			return viewSplit.Orientation switch
 			{
-				switch(viewSplit.Orientation)
-				{
-					case Orientation.Horizontal:
-						return side == -1 ? AnchorStyles.Right : AnchorStyles.Left;
-					case Orientation.Vertical:
-						return side == -1 ? AnchorStyles.Bottom : AnchorStyles.Top;
-					default:
-						throw new ApplicationException();
-				}
-			}
-			return AnchorStyles.None;
+				Orientation.Horizontal => side == -1 ? AnchorStyles.Right  : AnchorStyles.Left,
+				Orientation.Vertical   => side == -1 ? AnchorStyles.Bottom : AnchorStyles.Top,
+				_ => throw new ApplicationException(),
+			};
 		}
 
 		private static AnchorStyles GetRelativeSide(ViewSplit viewSplit, Control control)
@@ -486,14 +509,9 @@ namespace gitter.Framework.Controls
 		{
 			if(_isDocumentWell) return AnchorStyles.None;
 			if(_status == ViewHostStatus.Floating) return AnchorStyles.None;
-			if(Parent is ViewSplit parent)
-			{
-				return GetRelativeSide(parent, this);
-			}
-			else
-			{
-				return AnchorStyles.None;
-			}
+			return Parent is ViewSplit parent
+				? GetRelativeSide(parent, this)
+				: AnchorStyles.None;
 		}
 
 		/// <summary>Pins this <see cref="ViewHost"/>.</summary>
@@ -505,24 +523,14 @@ namespace gitter.Framework.Controls
 			var side = _dockSide.Side;
 			var grid = _dockSide.Grid;
 			Undock();
-			DockResult dockResult;
-			switch(side)
+			var dockResult = side switch
 			{
-				case AnchorStyles.Left:
-					dockResult = DockResult.Left;
-					break;
-				case AnchorStyles.Top:
-					dockResult = DockResult.Top;
-					break;
-				case AnchorStyles.Right:
-					dockResult = DockResult.Right;
-					break;
-				case AnchorStyles.Bottom:
-					dockResult = DockResult.Bottom;
-					break;
-				default:
-					throw new ApplicationException("Unexpected ViewDockGridSide.Side: " + side);
-			}
+				AnchorStyles.Left   => DockResult.Left,
+				AnchorStyles.Top    => DockResult.Top,
+				AnchorStyles.Right  => DockResult.Right,
+				AnchorStyles.Bottom => DockResult.Bottom,
+				_ => throw new ApplicationException($"Unexpected ViewDockGridSide.Side: {side}"),
+			};
 			grid.PerformDock(this, dockResult);
 		}
 
@@ -735,16 +743,10 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>This host should not be destroyed if all hosted views are removed.</summary>
-		public bool IsRoot
-		{
-			get { return _isRoot; }
-		}
+		public bool IsRoot => _isRoot;
 
 		/// <summary>This is a document well - advanced view host which has tabs instead of title bar.</summary>
-		public bool IsDocumentWell
-		{
-			get { return _isDocumentWell; }
-		}
+		public bool IsDocumentWell => _isDocumentWell;
 
 		/// <summary>Host specified view.</summary>
 		/// <param name="view">View to host.</param>
@@ -759,16 +761,12 @@ namespace gitter.Framework.Controls
 			{
 				if(_views.Count == 1)
 				{
-					var size = Size;
-					SuspendLayout();
-					SpawnTabs(size);
-					SpawnFooter(size);
-					UpdateContentPanelBounds();
+					SpawnTabs();
+					SpawnFooter();
 					_activeView = view;
-					_activeView.Bounds = new Rectangle(Point.Empty, _viewContainer.Size);
-					_activeView.Anchor = ViewConstants.AnchorAll;
+					_activeView.Bounds = _viewContainer.ClientRectangle;
+					_activeView.Dock   = DockStyle.Fill;
 					_activeView.Parent = _viewContainer;
-					ResumeLayout(true);
 					Events.Raise(ActiveViewChangedEvent, this);
 				}
 				else
@@ -780,30 +778,23 @@ namespace gitter.Framework.Controls
 			{
 				if(_views.Count == 1)
 				{
-					var size = Size;
-					SuspendLayout();
-					SpawnHeader(size);
-					UpdateContentPanelBounds();
+					SpawnHeader();
 					_activeView = view;
-					_activeView.Bounds = new Rectangle(Point.Empty, _viewContainer.Size);
-					_activeView.Anchor = ViewConstants.AnchorAll;
+					_activeView.Bounds = _viewContainer.ClientRectangle;
+					_activeView.Dock   = DockStyle.Fill;
 					_activeView.Parent = _viewContainer;
-					ResumeLayout(true);
 					Events.Raise(ActiveViewChangedEvent, this);
 				}
 				else if(_views.Count == 2)
 				{
-					var size = Size;
-					SuspendLayout();
-					SpawnTabs(size);
-					UpdateContentPanelBounds();
-					ResumeLayout(true);
+					SpawnTabs();
 				}
 				else
 				{
 					_tabs.AddView(view);
 				}
 			}
+			UpdateChildBounds();
 			view.TextChanged += OnViewTextChanged;
 			Events.Raise(ViewAddedEvent, this, new ViewEventArgs(view));
 		}
@@ -814,20 +805,11 @@ namespace gitter.Framework.Controls
 		/// <summary>Returns hosted view.</summary>
 		/// <param name="index">View index.</param>
 		/// <returns>Hosted view with specified index.</returns>
-		public ViewBase GetView(int index)
-		{
-			return _views[index];
-		}
+		public ViewBase GetView(int index) => _views[index];
 
-		public bool Contains(ViewBase view)
-		{
-			return _views.Contains(view);
-		}
+		public bool Contains(ViewBase view) => _views.Contains(view);
 
-		public int IndexOf(ViewBase view)
-		{
-			return _views.IndexOf(view);
-		}
+		public int IndexOf(ViewBase view) => _views.IndexOf(view);
 
 		/// <summary>Set active view.</summary>
 		/// <param name="view">View to activate.</param>
@@ -840,18 +822,15 @@ namespace gitter.Framework.Controls
 			{
 				var old = _activeView;
 				_activeView = view;
-				_activeView.Bounds = new Rectangle(Point.Empty, _viewContainer.Size);
-				_activeView.Anchor = ViewConstants.AnchorAll;
+				_activeView.Bounds = _viewContainer.ClientRectangle;
+				_activeView.Dock   = DockStyle.Fill;
 				_activeView.Parent = _viewContainer;
-				if(old != null)
+				if(old is not null)
 				{
 					old.Parent = null;
 				}
-				if(_header != null)
-				{
-					_header.Invalidate();
-				}
-				if(_tabs != null)
+				_header?.Invalidate();
+				if(_tabs is not null)
 				{
 					_tabs.EnsureVisible(view);
 					_tabs.Invalidate();
@@ -862,30 +841,9 @@ namespace gitter.Framework.Controls
 
 		private void PreventActiveViewDispose()
 		{
-			if(_activeView != null)
+			if(_activeView is not null)
 			{
 				_activeView.Parent = null;
-			}
-		}
-
-		/// <summary>Recalculate bounds of view hosting panel.</summary>
-		private void UpdateContentPanelBounds()
-		{
-			var size = Size;
-			if(_isDocumentWell)
-			{
-				int topOffset = _tabs != null ? _tabs.Height : 0;
-				int bottomOffset = _footer != null ? _footer.Height : 0;
-				_viewContainer.Bounds = new Rectangle(0, topOffset, size.Width, size.Height - topOffset - bottomOffset);
-			}
-			else
-			{
-				if(_status == ViewHostStatus.AutoHide)
-				{
-				}
-				int topOffset = _header != null ? _header.Height : 0;
-				int bottomOffset = _tabs != null ? _tabs.Height : 0;
-				_viewContainer.Bounds = new Rectangle(0, topOffset, size.Width, size.Height - topOffset - bottomOffset);
 			}
 		}
 
@@ -924,8 +882,8 @@ namespace gitter.Framework.Controls
 						SuspendLayout();
 						RemoveTabs();
 						RemoveFooter();
-						ResumeLayout(true);
-						UpdateContentPanelBounds();
+						UpdateChildBounds();
+						ResumeLayout(performLayout: false);
 					}
 				}
 				else
@@ -967,7 +925,7 @@ namespace gitter.Framework.Controls
 					else
 					{
 						RemoveHeader();
-						UpdateContentPanelBounds();
+						UpdateChildBounds();
 					}
 				}
 				else
@@ -977,7 +935,7 @@ namespace gitter.Framework.Controls
 						if(_views.Count == 1)
 						{
 							RemoveTabs();
-							UpdateContentPanelBounds();
+							UpdateChildBounds();
 						}
 						else
 						{
@@ -1007,39 +965,20 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Creates <see cref="ViewHostTabs"/> control.</summary>
-		/// <param name="size">Control size.</param>
-		private void SpawnTabs(Size size)
+		private void SpawnTabs()
 		{
-			Verify.State.IsTrue(_tabs == null, "Tabs are already spawned.");
+			Verify.State.IsTrue(_tabs is null, "Tabs are already spawned.");
 
-			var tabHeight = Renderer.TabHeight;
-			if(_isDocumentWell)
+			_tabs = new ViewHostTabs(this, _isDocumentWell ? AnchorStyles.Top : AnchorStyles.Bottom)
 			{
-				_tabs = new ViewHostTabs(this, AnchorStyles.Top)
-				{
-					Bounds = new Rectangle(
-						0, 0,
-						size.Width, tabHeight + Renderer.TabFooterHeight),
-					Anchor = ViewConstants.AnchorDockTop,
-				};
-			}
-			else
-			{
-				_tabs = new ViewHostTabs(this, AnchorStyles.Bottom)
-				{
-					Bounds = new Rectangle(
-						0, size.Height - tabHeight,
-						size.Width, tabHeight),
-					Anchor = ViewConstants.AnchorDockBottom,
-				};
-			}
-			_tabs.Parent = this;
+				Parent = this
+			};
 		}
 
 		/// <summary>Destroy tabs control.</summary>
 		private void RemoveTabs()
 		{
-			if(_tabs != null)
+			if(_tabs is not null)
 			{
 				_tabs.Parent = null;
 				_tabs.Dispose();
@@ -1127,30 +1066,15 @@ namespace gitter.Framework.Controls
 		private void OnViewTextChanged(object sender, EventArgs e)
 		{
 			var view = (ViewBase)sender;
-			if(_header != null)
-			{
-				_header.Invalidate();
-			}
-			if(_tabs != null)
-			{
-				_tabs.InvalidateTab(view);
-			}
+			_header?.Invalidate();
+			_tabs?.InvalidateTab(view);
 		}
 
 		private void InvalidateHelpers()
 		{
-			if(_tabs != null)
-			{
-				_tabs.Invalidate();
-			}
-			if(_footer != null)
-			{
-				_footer.Invalidate();
-			}
-			if(_header != null)
-			{
-				_header.Invalidate();
-			}
+			_tabs?.Invalidate();
+			_footer?.Invalidate();
+			_header?.Invalidate();
 		}
 
 		/// <summary>Raises the <see cref="E:System.Windows.Forms.Control.Enter"/> event.</summary>
@@ -1176,7 +1100,8 @@ namespace gitter.Framework.Controls
 		protected override void OnResize(EventArgs e)
 		{
 			base.OnResize(e);
-			if(_tabs != null && _activeView != null)
+			UpdateChildBounds();
+			if(_tabs is not null && _activeView is not null)
 			{
 				_tabs.EnsureVisible(_activeView);
 			}
@@ -1184,7 +1109,7 @@ namespace gitter.Framework.Controls
 
 		public void Activate()
 		{
-			if(_activeView != null)
+			if(_activeView is not null)
 			{
 				if(_activeView.Focus())
 				{
@@ -1215,86 +1140,25 @@ namespace gitter.Framework.Controls
 						_dockSide.RemoveHost(this);
 						switch(_dockSide.Side)
 						{
-							case AnchorStyles.Left:
-								{
-									var w = Width - ViewConstants.SideDockPanelBorderSize;
-									var h = Height;
-									Width = w;
-									_header.Width = w;
-									if(_views.Count > 1)
-									{
-										SpawnTabs(new Size(w, h));
-										_viewContainer.SetBounds(
-											0, 0, w, h - Renderer.TabHeight - Renderer.HeaderHeight,
-											BoundsSpecified.Width | BoundsSpecified.Height);
-									}
-									else
-									{
-										_viewContainer.Width = w;
-									}
-								}
+							case AnchorStyles.Left or AnchorStyles.Right:
+								Width -= ViewConstants.SideDockPanelBorderSize;
 								break;
-							case AnchorStyles.Top:
-								{
-									var w = Width;
-									var h = Height - ViewConstants.SideDockPanelBorderSize;
-									Height = h;
-									if(_views.Count > 1)
-									{
-										SpawnTabs(new Size(w, h));
-										UpdateContentPanelBounds();
-									}
-									else
-									{
-										_viewContainer.Height = h - Renderer.HeaderHeight;
-									}
-								}
-								break;
-							case AnchorStyles.Right:
-								{
-									var w = Width - ViewConstants.SideDockPanelBorderSize;
-									var h = Height;
-									Width = w;
-									_header.SetBounds(0, 0, w, Renderer.HeaderHeight, BoundsSpecified.X | BoundsSpecified.Width);
-									if(_views.Count > 1)
-									{
-										SpawnTabs(new Size(w, h));
-										UpdateContentPanelBounds();
-									}
-									else
-									{
-										_viewContainer.SetBounds(0, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
-									}
-								}
-								break;
-							case AnchorStyles.Bottom:
-								{
-									var w = Width;
-									var h = Height - ViewConstants.SideDockPanelBorderSize;
-									Height = h;
-									_header.Top = 0;
-									if(_views.Count > 1)
-									{
-										SpawnTabs(new Size(w, h));
-										UpdateContentPanelBounds();
-									}
-									else
-									{
-										_viewContainer.SetBounds(0, Renderer.HeaderHeight, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
-									}
-								}
+							case AnchorStyles.Top or AnchorStyles.Bottom:
+								Height -= ViewConstants.SideDockPanelBorderSize;
 								break;
 							default:
-								throw new ApplicationException("Unexpected ViewDockSide.Side: " + _dockSide.Side);
+								throw new ApplicationException($"Unexpected ViewDockSide.Side: {_dockSide.Side}");
 						}
 						_dockSide = null;
+						if(_views.Count > 1) SpawnTabs();
+						UpdateChildBounds();
 					}
 					break;
 				case ViewHostStatus.DockedOnFloat:
 				case ViewHostStatus.Docked:
 					{
 						var parent = Parent;
-						if(parent != null)
+						if(parent is not null)
 						{
 							parent.DisableRedraw();
 							try
@@ -1306,7 +1170,7 @@ namespace gitter.Framework.Controls
 								}
 								else
 								{
-									throw new ApplicationException("Unexpected ViewHost.Parent: " + parent);
+									throw new ApplicationException($"Unexpected ViewHost.Parent: {parent}");
 								}
 							}
 							finally
@@ -1346,16 +1210,15 @@ namespace gitter.Framework.Controls
 
 		public void StartMoving(int dx, int dy)
 		{
-			if(_header != null)
-			{
-				var pos = Control.MousePosition;
-				pos.Offset(-dx, -dy);
-				_mdX = dx - Renderer.FloatBorderSize;
-				_mdY = dy - Renderer.FloatBorderSize;
-				Parent.Location = pos;
-				_dockingProcess.Start(new Point(dx, dy));
-				_header.Capture = true;
-			}
+			if(_header is null) return;
+
+			var pos = Control.MousePosition;
+			pos.Offset(-dx, -dy);
+			_mdX = dx - Renderer.FloatBorderSize;
+			_mdY = dy - Renderer.FloatBorderSize;
+			Parent.Location = pos;
+			_dockingProcess.Start(new Point(dx, dy));
+			_header.Capture = true;
 		}
 
 		/// <summary>Undock and embed into floating form.</summary>
@@ -1379,7 +1242,7 @@ namespace gitter.Framework.Controls
 		{
 			if(TopLevelControl is Form form)
 			{
-				while(form.Owner != null)
+				while(form.Owner is not null)
 				{
 					form = form.Owner;
 				}
@@ -1400,10 +1263,7 @@ namespace gitter.Framework.Controls
 
 		/// <summary>Undock and go floating.</summary>
 		/// <returns>Floating form.</returns>
-		public Form GoFloatingMode()
-		{
-			return GoFloatingMode(GetRootOwnerForm());
-		}
+		public Form GoFloatingMode() => GoFloatingMode(GetRootOwnerForm());
 
 		/// <summary>Destroy floating host form and get ready to dock.</summary>
 		private void ReturnFromFloatingMode()
@@ -1426,13 +1286,13 @@ namespace gitter.Framework.Controls
 		/// <summary>Host dock status.</summary>
 		public ViewHostStatus Status
 		{
-			get { return _status; }
+			get => _status;
 			internal set
 			{
 				if(_status != value)
 				{
 					_status = value;
-					if(_header != null) ResetHeaderButtons();
+					if(_header is not null) ResetHeaderButtons();
 					Events.Raise(StatusChangedEvent, this);
 				}
 			}
@@ -1440,7 +1300,7 @@ namespace gitter.Framework.Controls
 
 		private void ResetHeaderButtons()
 		{
-			if(_header == null) return;
+			if(_header is null) return;
 			switch(Status)
 			{
 				case ViewHostStatus.AutoHide:
@@ -1467,27 +1327,21 @@ namespace gitter.Framework.Controls
 		}
 
 		/// <summary>Returns collection of hosted views.</summary>
-		public IEnumerable<ViewBase> Views
-		{
-			get { return _views; }
-		}
+		public IEnumerable<ViewBase> Views => _views;
 
 		/// <summary>Active view.</summary>
 		/// <remarks>
 		/// Host can have only one active view.
 		/// Root host has no active view if it hosts no views.
 		/// </remarks>
-		public ViewBase ActiveView
-		{
-			get { return _activeView; }
-		}
+		public ViewBase ActiveView => _activeView;
 
 		/// <summary>Active view's caption.</summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public override string Text
 		{
-			get { return _activeView != null ? _activeView.Text : string.Empty; }
-			set { throw new InvalidOperationException(); }
+			get => _activeView is not null ? _activeView.Text : string.Empty;
+			set => throw new InvalidOperationException();
 		}
 
 		/// <summary>Dock inside another host as tabbed views.</summary>
@@ -1520,8 +1374,8 @@ namespace gitter.Framework.Controls
 		/// <value><see cref="ViewDockSide"/> which hosts this <see cref="ViewHost"/> in auto-hide state.</value>
 		internal ViewDockSide DockSide
 		{
-			get { return _dockSide; }
-			set { _dockSide = value; }
+			get => _dockSide;
+			set => _dockSide = value;
 		}
 
 		/// <summary>Dock to side of specified host.</summary>
@@ -1549,10 +1403,10 @@ namespace gitter.Framework.Controls
 				RemoveHeader();
 				RemoveTabs();
 				var size = Size;
-				SpawnTabs(size);
-				SpawnFooter(size);
-				UpdateContentPanelBounds();
-				ResumeLayout(true);
+				SpawnTabs();
+				SpawnFooter();
+				UpdateChildBounds();
+				ResumeLayout(performLayout: true);
 			}
 		}
 
@@ -1582,7 +1436,7 @@ namespace gitter.Framework.Controls
 			{
 				if(_ownerForm != null)
 				{
-					_ownerForm.Activated -= OnOwnerFormActivated;
+					_ownerForm.Activated  -= OnOwnerFormActivated;
 					_ownerForm.Deactivate -= OnOwnerFormDeactivated;
 					_ownerForm = null;
 				}
@@ -1610,13 +1464,10 @@ namespace gitter.Framework.Controls
 		#region IDockHost
 
 		/// <summary>Provides dock helper markers.</summary>
-		public IDockMarkerProvider DockMarkers
-		{
-			get { return _dockMarkers; }
-		}
+		public IDockMarkerProvider DockMarkers => _dockMarkers;
 
 		/// <summary>
-		/// Determines if <see cref="ViewHost"/> cn be docked into this <see cref="IDockHost"/>.
+		/// Determines if <see cref="ViewHost"/> can be docked into this <see cref="IDockHost"/>.
 		/// </summary>
 		/// <param name="viewHost"><see cref="ViewHost"/> to dock.</param>
 		/// <param name="dockResult">Position for docking.</param>
@@ -1699,9 +1550,7 @@ namespace gitter.Framework.Controls
 					Activate();
 					break;
 				default:
-					throw new ArgumentException(
-						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
-						"dockResult");
+					throw new ArgumentException($"Unsupported DockResult value: {dockResult}", nameof(dockResult));
 			}
 		}
 
@@ -1758,9 +1607,7 @@ namespace gitter.Framework.Controls
 					bounds.Intersect(_viewContainer.Bounds);
 					break;
 				default:
-					throw new ArgumentException(
-						"Unsupported DockResult value: {0}".UseAsFormat(dockResult),
-						"dockResult");
+					throw new ArgumentException($"Unsupported DockResult value: {dockResult}", nameof(dockResult));
 			}
 			return RectangleToScreen(bounds);
 		}

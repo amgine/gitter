@@ -138,11 +138,12 @@ namespace gitter.Framework.Controls
 			{
 				foreach(var v in factory.CreatedViews)
 				{
-					if(v.Host != null && v.Host.IsDocumentWell)
+					if(v.Host is { IsDocumentWell: true })
 					{
 						host = v.Host;
 					}
 				}
+				view.Size = DpiConverter.FromDefaultTo(new Dpi(host.DeviceDpi)).Convert(view.Size);
 				host.AddView(view);
 			}
 			else
@@ -161,6 +162,7 @@ namespace gitter.Framework.Controls
 								}
 							}
 						}
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, true, new[] { view })
 						{
 							Size = Grid.RootHost.Size
@@ -169,40 +171,49 @@ namespace gitter.Framework.Controls
 						break;
 
 					case ViewPosition.Left:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						Grid.PerformDock(host, DockResult.Left);
 						break;
 					case ViewPosition.Top:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						Grid.PerformDock(host, DockResult.Top);
 						break;
 					case ViewPosition.Right:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						Grid.PerformDock(host, DockResult.Right);
 						break;
 					case ViewPosition.Bottom:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						Grid.PerformDock(host, DockResult.Bottom);
 						break;
 
 					case ViewPosition.LeftAutoHide:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromLeft();
 						break;
 					case ViewPosition.TopAutoHide:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromTop();
 						break;
 					case ViewPosition.RightAutoHide:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromRight();
 						break;
 					case ViewPosition.BottomAutoHide:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						host.UnpinFromBottom();
 						break;
 
 					case ViewPosition.Float:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						host = new ViewHost(Grid, false, false, new[] { view });
 						var form = host.PrepareFloatingMode();
 						form.Location = Grid.PointToScreen(new Point(20, 20));
@@ -210,6 +221,7 @@ namespace gitter.Framework.Controls
 						break;
 
 					default:
+						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
 						Grid.RootHost.AddView(view);
 						break;
 				}
@@ -227,7 +239,7 @@ namespace gitter.Framework.Controls
 			if(activate)
 			{
 				view.Activate();
-				if(_activeView != null)
+				if(_activeView is not null)
 				{
 
 				}
@@ -256,11 +268,6 @@ namespace gitter.Framework.Controls
 				activate);
 		}
 
-		public ViewBase ShowView(Guid guid)
-		{
-			return ShowView(guid, true);
-		}
-
 		private IViewFactory GetViewFactoryByGuid(Guid guid)
 		{
 			Verify.Argument.IsTrue(
@@ -273,22 +280,22 @@ namespace gitter.Framework.Controls
 			return factory;
 		}
 
-		public ViewBase ShowView(Guid guid, bool activate)
+		public ViewBase ShowView(Guid guid, bool activate = true)
 		{
 			var factory = GetViewFactoryByGuid(guid);
 			if(factory.IsSingleton)
 			{
-				ViewBase existing = null;
+				var existing = default(ViewBase);
 				foreach(var view in factory.CreatedViews)
 				{
 					existing = view;
 					break;
 				}
-				if(existing == null)
+				if(existing is null)
 				{
 					existing = factory.CreateView(_environment);
 					var section = _section.TryGetSection(GetViewConfigId(existing));
-					if(section != null)
+					if(section is not null)
 					{
 						existing.LoadViewFrom(section);
 					}
@@ -304,7 +311,7 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				ViewBase existing = null;
+				var existing = default(ViewBase);
 				foreach(var view in factory.CreatedViews)
 				{
 					if(object.Equals(view.ViewModel, null))
@@ -313,11 +320,11 @@ namespace gitter.Framework.Controls
 						break;
 					}
 				}
-				if(existing == null)
+				if(existing is null)
 				{
 					existing = factory.CreateView(_environment);
 					var section = _section.TryGetSection(GetViewConfigId(existing));
-					if(section != null)
+					if(section is not null)
 					{
 						existing.LoadViewFrom(section);
 					}
@@ -337,13 +344,13 @@ namespace gitter.Framework.Controls
 			var factory = GetViewFactoryByGuid(guid);
 			if(factory.IsSingleton)
 			{
-				ViewBase existing = null;
+				var existing = default(ViewBase);
 				foreach(var view in factory.CreatedViews)
 				{
 					existing = view;
 					break;
 				}
-				if(existing == null)
+				if(existing is null)
 				{
 					existing = factory.CreateView(_environment);
 					existing.ViewModel = viewModel;
@@ -359,7 +366,7 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				ViewBase existing = null;
+				var existing = default(ViewBase);
 				foreach(var view in factory.CreatedViews)
 				{
 					if(object.Equals(view.ViewModel, viewModel))
@@ -368,7 +375,7 @@ namespace gitter.Framework.Controls
 						break;
 					}
 				}
-				if(existing == null)
+				if(existing is null)
 				{
 					existing = factory.CreateView(_environment);
 					existing.ViewModel = viewModel;

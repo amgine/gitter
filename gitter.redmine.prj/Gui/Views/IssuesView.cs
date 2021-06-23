@@ -63,10 +63,7 @@ namespace gitter.Redmine.Gui
 
 		#region Properties
 
-		public override Image Image
-		{
-			get { return CachedResources.Bitmaps["ImgBug"]; }
-		}
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues");
 
 		private IssuesListBinding DataSource
 		{

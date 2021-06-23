@@ -21,9 +21,7 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -65,7 +63,7 @@ namespace gitter.Git.Gui.Views
 			_lstConfig.Clear();
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgConfig"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"config");
 
 		public override void RefreshContent()
 		{
@@ -125,7 +123,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var listSection = section.TryGetSection("ConfigParameterList");
-			if(listSection != null)
+			if(listSection is not null)
 			{
 				_lstConfig.LoadViewFrom(listSection);
 			}

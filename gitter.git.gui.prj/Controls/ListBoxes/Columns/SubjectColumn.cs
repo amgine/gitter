@@ -41,7 +41,6 @@ namespace gitter.Git.Gui.Controls
 		public const bool DefaultShowRemoteBranches = true;
 		public const bool DefaultShowStash = true;
 
-		private const int GraphCellWidth = 21;
 		private const int TagSpacing = 2;
 
 		#endregion
@@ -222,7 +221,7 @@ namespace gitter.Git.Gui.Controls
 			if(drawnPointers != null)
 			{
 				drawnPointers.Clear();
-				if(rsc != null)
+				if(rsc is not null)
 				{
 					alignToGraph		= rsc.AlignToGraph;
 					showLocalBranches	= rsc.ShowLocalBranches;
@@ -241,7 +240,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			else
 			{
-				alignToGraph = (rsc != null) ? rsc.AlignToGraph : SubjectColumn.DefaultAlignToGraph;
+				alignToGraph = rsc is not null ? rsc.AlignToGraph : SubjectColumn.DefaultAlignToGraph;
 				showLocalBranches = false;
 				showRemoteBranches = false;
 				showTags = false;
@@ -256,7 +255,7 @@ namespace gitter.Git.Gui.Controls
 			var rect = paintEventArgs.Bounds;
 			var graphColumn = paintEventArgs.Column.PreviousVisibleColumn;
 			int graphColumnX = 0;
-			if(graphColumn != null)
+			if(graphColumn is not null)
 			{
 				if(graphColumn.Id != (int)ColumnId.Graph)
 				{
@@ -267,16 +266,16 @@ namespace gitter.Git.Gui.Controls
 					graphColumnX = rect.X - graphColumn.Width;
 				}
 			}
-			if(graphColumn != null && alignToGraph)
+			if(graphColumn is not null && alignToGraph)
 			{
-				int availWidth = graphColumn.Width - GraphCellWidth * graph.Length;
+				int availWidth = graphColumn.Width - paintEventArgs.ListBox.ItemHeight * graph.Length;
 				for(int i = graph.Length - 1; i >= 0; --i)
 				{
 					if(graph[i].Elements != GraphElement.Space)
 					{
 						break;
 					}
-					availWidth += GraphCellWidth;
+					availWidth += paintEventArgs.ListBox.ItemHeight;
 				}
 				if(availWidth != 0)
 				{
@@ -292,7 +291,7 @@ namespace gitter.Git.Gui.Controls
 			int drawnRefs = 0;
 			int xoffset = 0;
 			var font = paintEventArgs.Column.ContentFont;
-			SubItemPaintEventArgs.PrepareContentRectangle(ref rect);
+			paintEventArgs.PrepareContentRectangle(ref rect);
 
 			#endregion
 
@@ -309,50 +308,41 @@ namespace gitter.Git.Gui.Controls
 						int w = 0;
 						switch(reference.Type)
 						{
-							case ReferenceType.LocalBranch:
-								if(showLocalBranches)
-								{
-									w = graphStyle.DrawBranch(
-										paintEventArgs.Graphics,
-										font,
-										GitterApplication.TextRenderer.LeftAlign,
-										rect.Left + xoffset,
-										rect.Top,
-										rect.Right,
-										rect.Height,
-										drawnRefs == hoveredPointer,
-										(Branch)reference);
-								}
+							case ReferenceType.LocalBranch when showLocalBranches:
+								w = graphStyle.DrawBranch(
+									paintEventArgs.Graphics,
+									font,
+									GitterApplication.TextRenderer.LeftAlign,
+									rect.Left + xoffset,
+									rect.Top,
+									rect.Right,
+									rect.Height,
+									drawnRefs == hoveredPointer,
+									(Branch)reference);
 								break;
-							case ReferenceType.RemoteBranch:
-								if(showRemoteBranches)
-								{
-									w = graphStyle.DrawBranch(
-										paintEventArgs.Graphics,
-										font,
-										GitterApplication.TextRenderer.LeftAlign,
-										rect.Left + xoffset,
-										rect.Top,
-										rect.Right,
-										rect.Height,
-										drawnRefs == hoveredPointer,
-										(RemoteBranch)reference);
-								}
+							case ReferenceType.RemoteBranch when showRemoteBranches:
+								w = graphStyle.DrawBranch(
+									paintEventArgs.Graphics,
+									font,
+									GitterApplication.TextRenderer.LeftAlign,
+									rect.Left + xoffset,
+									rect.Top,
+									rect.Right,
+									rect.Height,
+									drawnRefs == hoveredPointer,
+									(RemoteBranch)reference);
 								break;
-							case ReferenceType.Tag:
-								if(showTags)
-								{
-									w = graphStyle.DrawTag(
-										paintEventArgs.Graphics,
-										font,
-										GitterApplication.TextRenderer.LeftAlign,
-										rect.Left + xoffset,
-										rect.Top,
-										rect.Right,
-										rect.Height,
-										drawnRefs == hoveredPointer,
-										(Tag)reference);
-								}
+							case ReferenceType.Tag when showTags:
+								w = graphStyle.DrawTag(
+									paintEventArgs.Graphics,
+									font,
+									GitterApplication.TextRenderer.LeftAlign,
+									rect.Left + xoffset,
+									rect.Top,
+									rect.Right,
+									rect.Height,
+									drawnRefs == hoveredPointer,
+									(Tag)reference);
 								break;
 						}
 						if(w != 0)
@@ -399,11 +389,11 @@ namespace gitter.Git.Gui.Controls
 
 			if(drawnRefs != 0)
 			{
-				if(graph != null && graph.Length != 0)
+				if(graph is { Length: > 0 })
 				{
-					if(graphColumn != null)
+					if(graphColumn is not null)
 					{
-						graphStyle.DrawReferenceConnector(paintEventArgs.Graphics, graph, graphColumnX, 21, rect.X, rect.Y, rect.Height);
+						graphStyle.DrawReferenceConnector(paintEventArgs.Graphics, graph, graphColumnX, paintEventArgs.ListBox.ItemHeight, rect.X, rect.Y, rect.Height);
 					}
 				}
 				xoffset += 2;
@@ -412,9 +402,9 @@ namespace gitter.Git.Gui.Controls
 			{
 				if(refsPresent || stashPresent)
 				{
-					if(graph != null && graph.Length != 0 && graphColumn != null)
+					if(graph is { Length: > 0 } && graphColumn is not null)
 					{
-						graphStyle.DrawReferencePresenceIndicator(paintEventArgs.Graphics, graph, graphColumnX, 21, rect.Y, rect.Height);
+						graphStyle.DrawReferencePresenceIndicator(paintEventArgs.Graphics, graph, graphColumnX, paintEventArgs.ListBox.ItemHeight, rect.Y, rect.Height);
 					}
 				}
 			}
@@ -477,7 +467,7 @@ namespace gitter.Git.Gui.Controls
 			AlignToGraph = section.GetValue("AlignToGraph", AlignToGraph);
 			ShowLocalBranches = section.GetValue("ShowLocalBranches", ShowLocalBranches);
 			ShowRemoteBranches = section.GetValue("ShowRemoteBranches", ShowRemoteBranches);
-			ShowTags = section.GetValue("ShowTags", ShowTags);
+			ShowTags  = section.GetValue("ShowTags", ShowTags);
 			ShowStash = section.GetValue("ShowStash", ShowStash);
 		}
 

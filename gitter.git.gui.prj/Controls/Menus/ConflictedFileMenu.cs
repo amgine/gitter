@@ -24,7 +24,7 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	using gitter.Framework;
 
 	[ToolboxItem(false)]
 	public sealed class ConflictedFileMenu : ContextMenuStrip
@@ -39,7 +39,10 @@ namespace gitter.Git.Gui.Controls
 
 			File = file;
 
-			Items.Add(GuiItemFactory.GetMergeToolItem<ToolStripMenuItem>(File));
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
+
+			Items.Add(factory.GetMergeToolItem<ToolStripMenuItem>(File));
 			if( File.ConflictType != ConflictType.DeletedByUs &&
 				File.ConflictType != ConflictType.DeletedByThem &&
 				File.ConflictType != ConflictType.AddedByThem &&
@@ -50,7 +53,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					if(tool.SupportsWin)
 					{
-						mergeTools.DropDownItems.Add(GuiItemFactory.GetMergeToolItem<ToolStripMenuItem>(File, tool));
+						mergeTools.DropDownItems.Add(factory.GetMergeToolItem<ToolStripMenuItem>(File, tool));
 					}
 				}
 				Items.Add(mergeTools);
@@ -62,18 +65,18 @@ namespace gitter.Git.Gui.Controls
 			{
 				case ConflictType.DeletedByThem:
 				case ConflictType.DeletedByUs:
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.KeepModifiedFile));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.DeleteFile));
+					Items.Add(factory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.KeepModifiedFile));
+					Items.Add(factory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.DeleteFile));
 					break;
 				case ConflictType.AddedByThem:
 				case ConflictType.AddedByUs:
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.KeepModifiedFile));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.DeleteFile));
+					Items.Add(factory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.KeepModifiedFile));
+					Items.Add(factory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.DeleteFile));
 					break;
 				default:
-					Items.Add(GuiItemFactory.GetMarkAsResolvedItem<ToolStripMenuItem>(File));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.UseOurs));
-					Items.Add(GuiItemFactory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.UseTheirs));
+					Items.Add(factory.GetMarkAsResolvedItem<ToolStripMenuItem>(File));
+					Items.Add(factory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.UseOurs));
+					Items.Add(factory.GetResolveConflictItem<ToolStripMenuItem>(File, ConflictResolution.UseTheirs));
 					break;
 			}
 		}

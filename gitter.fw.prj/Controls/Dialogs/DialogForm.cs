@@ -77,7 +77,7 @@ namespace gitter.Framework
 			: this()
 		{
 			_dialog = content;
-			if(content != null)
+			if(content is not null)
 			{
 				UpdateSize();
 				ShowContent();
@@ -85,7 +85,7 @@ namespace gitter.Framework
 				content.SizeChanged += OnContentSizeChanged;
 
 				_expandable = content as IExpandableDialog;
-				if(_expandable != null)
+				if(_expandable is not null)
 				{
 					_expanded = true;
 					var exDialog = (IExpandableDialog)content;
@@ -102,9 +102,9 @@ namespace gitter.Framework
 		public DialogForm(DialogBase content, DialogButtons buttons)
 			: this(content)
 		{
-			bool btnOK = (buttons & DialogButtons.Ok) == DialogButtons.Ok;
+			bool btnOK     = (buttons & DialogButtons.Ok)     == DialogButtons.Ok;
 			bool btnCancel = (buttons & DialogButtons.Cancel) == DialogButtons.Cancel;
-			bool btnApply = (buttons & DialogButtons.Apply) == DialogButtons.Apply;
+			bool btnApply  = (buttons & DialogButtons.Apply)  == DialogButtons.Apply;
 
 			if(!btnApply)
 			{
@@ -152,17 +152,19 @@ namespace gitter.Framework
 			UpdateSize();
 		}
 
+		/// <inheritdoc/>
 		protected override void OnFormClosing(FormClosingEventArgs e)
 		{
 			if(_isExecuting) e.Cancel = true;
 			base.OnFormClosing(e);
 		}
 
+		/// <inheritdoc/>
 		protected override void OnShown(EventArgs e)
 		{
 			base.OnShown(e);
 			_dialog.InvokeOnShown();
-			if(_elevated != null && !Utility.IsRunningWithAdministratorRights)
+			if(_elevated is not null && !Utility.IsRunningWithAdministratorRights)
 			{
 				if(_elevated.RequireElevation)
 				{
@@ -173,9 +175,10 @@ namespace gitter.Framework
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnClosed(EventArgs e)
 		{
-			if(_dialog != null)
+			if(_dialog is not null)
 			{
 				_dialog.SizeChanged -= OnContentSizeChanged;
 				_dialog.InvokeOnClosed(DialogResult);
@@ -184,9 +187,9 @@ namespace gitter.Framework
 
 		private void CreateBitmaps(string strname)
 		{
-			_bmpEH = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, true, true);
+			_bmpEH = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, true,  true);
 			_bmpCH = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, false, true);
-			_bmpEN = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, true, false);
+			_bmpEN = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, true,  false);
 			_bmpCN = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, false, false);
 
 			_picAdvanced.Image = _expanded?_bmpEN:_bmpCN;
@@ -194,10 +197,10 @@ namespace gitter.Framework
 
 		private bool Execute()
 		{
-			bool okEnabled = _btnOK.Enabled;
+			bool okEnabled     = _btnOK.Enabled;
 			bool cancelEnabled = _btnCancel.Enabled;
-			bool applyEnabled = _btnApply.Enabled;
-			if(_executable != null || _elevated != null)
+			bool applyEnabled  = _btnApply.Enabled;
+			if(_executable is not null || _elevated is not null)
 			{
 				_btnOK.Enabled     = false;
 				_btnCancel.Enabled = false;
@@ -206,37 +209,34 @@ namespace gitter.Framework
 			}
 			try
 			{
-				if(_elevated != null)
+				if(_elevated is { RequireElevation: true })
 				{
-					if(_elevated.RequireElevation)
+					var action = _elevated.ElevatedExecutionAction;
+					if(action is not null)
 					{
-						var action = _elevated.ElevatedExecutionAction;
-						if(action != null)
+						try
 						{
-							try
-							{
-								HelperExecutables.ExecuteWithAdministartorRights(action);
-							}
-							catch(Exception exc) when(!exc.IsCritical())
-							{
-								GitterApplication.MessageBoxService.Show(
-									this,
-									Resources.ErrSomeOptionsCouldNotBeApplied,
-									Resources.ErrFailedToRunElevatedProcess,
-									MessageBoxButton.Close,
-									MessageBoxIcon.Exclamation);
-							}
+							HelperExecutables.ExecuteWithAdministartorRights(action);
+						}
+						catch(Exception exc) when(!exc.IsCritical())
+						{
+							GitterApplication.MessageBoxService.Show(
+								this,
+								Resources.ErrSomeOptionsCouldNotBeApplied,
+								Resources.ErrFailedToRunElevatedProcess,
+								MessageBoxButton.Close,
+								MessageBoxIcon.Exclamation);
 						}
 					}
 				}
-				if(_executable != null)
+				if(_executable is not null)
 				{
 					return _executable.Execute();
 				}
 			}
 			finally
 			{
-				if(_executable != null || _elevated != null)
+				if(_executable is not null || _elevated is not null)
 				{
 					_btnOK.Enabled     = okEnabled;
 					_btnCancel.Enabled = cancelEnabled;
@@ -258,7 +258,7 @@ namespace gitter.Framework
 			bool okEnabled     = _btnOK.Enabled;
 			bool cancelEnabled = _btnCancel.Enabled;
 			bool applyEnabled  = _btnApply.Enabled;
-			if(_async != null)
+			if(_async is not null)
 			{
 				_btnOK.Enabled     = false;
 				_btnCancel.Enabled = false;
@@ -271,7 +271,7 @@ namespace gitter.Framework
 			}
 			finally
 			{
-				if(_async != null)
+				if(_async is not null)
 				{
 					_btnOK.Enabled     = okEnabled;
 					_btnCancel.Enabled = cancelEnabled;
@@ -434,7 +434,7 @@ namespace gitter.Framework
 
 		private async void _btnOK_Click(object sender, EventArgs e)
 		{
-			if(_async != null)
+			if(_async is not null)
 			{
 				if(await ExecuteAsync())
 				{
@@ -460,7 +460,7 @@ namespace gitter.Framework
 
 		private async void _btnApply_Click(object sender, EventArgs e)
 		{
-			if(_async != null)
+			if(_async is not null)
 			{
 				await ExecuteAsync();
 			}
@@ -470,8 +470,7 @@ namespace gitter.Framework
 			}
 		}
 
-		/// <summary>Clean up any resources being used.</summary>
-		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)

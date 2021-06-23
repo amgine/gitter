@@ -80,17 +80,24 @@ namespace gitter.Git.Gui.Views
 			_lstRemotes.LoadData(null);
 		}
 
-		public override Image Image => CachedResources.Bitmaps["ImgRemote"];
+		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"remote");
 
 		public override void RefreshContent()
 		{
 			if(InvokeRequired)
 			{
-				BeginInvoke(new MethodInvoker(RefreshContent));
+				try
+				{
+					BeginInvoke(new MethodInvoker(RefreshContent));
+				}
+				catch
+				{
+				}
 			}
 			else
 			{
-				if(Repository != null)
+				if(IsDisposed) return;
+				if(Repository is not null)
 				{
 					using(this.ChangeCursor(Cursors.WaitCursor))
 					{
@@ -108,6 +115,8 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
 				case Keys.F when e.Modifiers == Keys.Control:
@@ -131,7 +140,7 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var listNode = section.TryGetSection("RemoteList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				_lstRemotes.LoadViewFrom(listNode);
 			}

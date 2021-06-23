@@ -25,6 +25,8 @@ namespace gitter.Git.Gui.Controls
 	using System.ComponentModel;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
+
 	using Resources = gitter.Git.Gui.Properties.Resources;
 
 	[ToolboxItem(false)]
@@ -36,14 +38,15 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(diffFile, nameof(diffFile));
 
 			DiffSource = diffSource;
-			DiffFile = diffFile;
+			DiffFile   = diffFile;
+
+			var dpiBindings = new DpiBindings(this);
+			var factory     = new GuiItemFactory(dpiBindings);
 
 			string fileName = diffFile.Status != FileStatus.Removed ? diffFile.TargetFile : diffFile.SourceFile;
 
-			var indexDiff = diffSource as IIndexDiffSource;
-			if(indexDiff != null)
+			if(diffSource is IIndexDiffSource indexDiff)
 			{
-				var repository = indexDiff.Repository;
 				if(diffFile.Status != FileStatus.Removed)
 				{
 					try
@@ -67,9 +70,9 @@ namespace gitter.Git.Gui.Controls
 				if(indexDiff.Cached)
 				{
 					var item = indexDiff.Repository.Status.TryGetStaged(fileName);
-					if(item != null)
+					if(item is not null)
 					{
-						Items.Add(GuiItemFactory.GetUnstageItem<ToolStripMenuItem>(item));
+						Items.Add(factory.GetUnstageItem<ToolStripMenuItem>(item));
 						Items.Add(new ToolStripSeparator());
 					}
 				}
@@ -78,7 +81,7 @@ namespace gitter.Git.Gui.Controls
 					var item = indexDiff.Repository.Status.TryGetUnstaged(fileName);
 					if(item != null)
 					{
-						Items.Add(GuiItemFactory.GetStageItem<ToolStripMenuItem>(item));
+						Items.Add(factory.GetStageItem<ToolStripMenuItem>(item));
 						Items.Add(new ToolStripSeparator());
 					}
 				}
@@ -90,30 +93,26 @@ namespace gitter.Git.Gui.Controls
 				Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
 					indexDiff.Repository.Head, fileName));
 			}
-			else
+			else if(diffSource is IRevisionDiffSource revisionDiff)
 			{
-				var revisionDiff = diffSource as IRevisionDiffSource;
-				if(revisionDiff != null)
+				if(diffFile.Status != FileStatus.Removed)
 				{
-					if(diffFile.Status != FileStatus.Removed)
-					{
-						Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
-							revisionDiff.Revision, diffFile.TargetFile));
-						Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
-							revisionDiff.Revision, diffFile.TargetFile));
-					}
-					else
-					{
-						Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
-							revisionDiff.Revision, diffFile.SourceFile));
-					}
+					Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
+						revisionDiff.Revision, diffFile.TargetFile));
+					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
+						revisionDiff.Revision, diffFile.TargetFile));
+				}
+				else
+				{
+					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
+						revisionDiff.Revision, diffFile.SourceFile));
 				}
 			}
 			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 				new ToolStripItem[]
 				{
-					GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSourceFileName, diffFile.SourceFile),
-					GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrDestinationFileName, diffFile.TargetFile),
+					factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSourceFileName, diffFile.SourceFile),
+					factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrDestinationFileName, diffFile.TargetFile),
 				}));
 		}
 

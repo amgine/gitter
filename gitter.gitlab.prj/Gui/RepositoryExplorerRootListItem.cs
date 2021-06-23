@@ -32,7 +32,7 @@ namespace gitter.GitLab.Gui
 	sealed class RepositoryExplorerRootListItem : RepositoryExplorerItemBase
 	{
 		public RepositoryExplorerRootListItem(IWorkingEnvironment env, GitLabGuiProvider guiProvider)
-			: base(env, guiProvider, CachedResources.Bitmaps["ImgGitLab"], Resources.StrGitLab)
+			: base(env, guiProvider, @"gitlab", Resources.StrGitLab)
 		{
 			ServiceContext = guiProvider.ServiceContext;
 

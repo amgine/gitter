@@ -30,8 +30,6 @@ namespace gitter.Git.Gui.Controls
 	/// <summary>A <see cref="CustomListBoxItem"/> representing <see cref="Branch"/> object.</summary>
 	public class BranchListItem : ReferenceListItemBase<Branch>
 	{
-		private static readonly Bitmap ImgBranch = CachedResources.Bitmaps["ImgBranch"];
-
 		/// <summary>Create <see cref="BranchListItem"/>.</summary>
 		/// <param name="branch">Related <see cref="Branch"/>.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="branch"/> == <c>null</c>.</exception>
@@ -49,14 +47,17 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
-		protected override Image Image => ImgBranch;
+		protected override Image GetImage(Dpi dpi)
+			=> CachedResources.ScaledBitmaps["branch", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
 
+		/// <inheritdoc/>
 		protected override void OnListBoxAttached()
 		{
 			base.OnListBoxAttached();
 			DataContext.Renamed += OnRenamed;
 		}
 
+		/// <inheritdoc/>
 		protected override void OnListBoxDetached()
 		{
 			base.OnListBoxDetached();

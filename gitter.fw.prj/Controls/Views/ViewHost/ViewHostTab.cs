@@ -47,6 +47,8 @@ namespace gitter.Framework.Controls
 
 		private void OnButtonClick(object sender, ViewButtonClickEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.Button)
 			{
 				case ViewButtonType.Close:
@@ -55,29 +57,31 @@ namespace gitter.Framework.Controls
 			}
 		}
 
-		public void EnsureVisible()
-		{
-			Tabs.EnsureVisible(this);
-		}
+		public void EnsureVisible() => Tabs.EnsureVisible(this);
 
 		public ViewHostTabs Tabs { get; }
 
+		public override ViewHost ViewHost => Tabs.ViewHost;
+
 		public ViewButtons Buttons { get; }
 
+		/// <inheritdoc/>
 		protected override int Measure(Graphics graphics)
-		{
-			return ViewManager.Renderer.MeasureViewHostTabLength(this, graphics);
-		}
+			=> ViewManager.Renderer.MeasureViewHostTabLength(this, graphics);
 
+		/// <inheritdoc/>
 		internal override void OnPaint(Graphics graphics, Rectangle bounds)
 		{
-			if(bounds.Width > 0 && bounds.Height > 0)
+			Assert.IsNotNull(graphics);
+
+			if(bounds is { Width: > 0, Height: > 0 })
 			{
 				ViewManager.Renderer.RenderViewHostTabBackground(this, graphics, bounds);
-				ViewManager.Renderer.RenderViewHostTabContent(this, graphics, bounds);
+				ViewManager.Renderer.RenderViewHostTabContent   (this, graphics, bounds);
 			}
 		}
 
+		/// <inheritdoc/>
 		protected internal override void OnMouseLeave()
 		{
 			base.OnMouseLeave();
@@ -85,12 +89,14 @@ namespace gitter.Framework.Controls
 			Tabs.Invalidate();
 		}
 
+		/// <inheritdoc/>
 		protected internal override void OnMouseEnter()
 		{
 			base.OnMouseEnter();
 			Tabs.Invalidate();
 		}
 
+		/// <inheritdoc/>
 		public override void OnMouseDown(int x, int y, MouseButtons button)
 		{
 			base.OnMouseDown(x, y, button);
@@ -109,12 +115,13 @@ namespace gitter.Framework.Controls
 				y -= buttonsBounds.Y;
 				Buttons.OnMouseDown(x, y, button);
 			}
-			if(Buttons.PressedButton == null)
+			if(Buttons.PressedButton is null)
 			{
 				View.Activate();
 			}
 		}
 
+		/// <inheritdoc/>
 		public override void OnMouseMove(int x, int y, MouseButtons button)
 		{
 			base.OnMouseMove(x, y, button);
@@ -136,6 +143,7 @@ namespace gitter.Framework.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		public override void OnMouseUp(int x, int y, MouseButtons button)
 		{
 			base.OnMouseUp(x, y, button);

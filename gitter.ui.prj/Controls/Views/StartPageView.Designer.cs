@@ -120,7 +120,6 @@
 			this._lstRecentRepositories.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstRecentRepositories.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstRecentRepositories.Location = new System.Drawing.Point(3, 247);
-			this._lstRecentRepositories.MaximumSize = new System.Drawing.Size(500, 9000);
 			this._lstRecentRepositories.Name = "_lstRecentRepositories";
 			this._lstRecentRepositories.Size = new System.Drawing.Size(225, 241);
 			this._lstRecentRepositories.TabIndex = 4;
@@ -135,7 +134,6 @@
 			this._lstLocalRepositories.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstLocalRepositories.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
 			this._lstLocalRepositories.Location = new System.Drawing.Point(234, 119);
-			this._lstLocalRepositories.MaximumSize = new System.Drawing.Size(500, 9000);
 			this._lstLocalRepositories.Name = "_lstLocalRepositories";
 			this._lstLocalRepositories.Size = new System.Drawing.Size(457, 417);
 			this._lstLocalRepositories.TabIndex = 1;
@@ -143,7 +141,6 @@
 			// 
 			// _btnAddLocalRepo
 			// 
-			this._btnAddLocalRepo.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this._btnAddLocalRepo.Image = global::gitter.Properties.Resources.ImgRepoAddMedium;
 			this._btnAddLocalRepo.Location = new System.Drawing.Point(20, 121);
 			this._btnAddLocalRepo.Margin = new System.Windows.Forms.Padding(1);
@@ -155,7 +152,6 @@
 			// 
 			// _btnScanLocalRepo
 			// 
-			this._btnScanLocalRepo.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this._btnScanLocalRepo.Image = global::gitter.Properties.Resources.ImgRepoScanMedium;
 			this._btnScanLocalRepo.Location = new System.Drawing.Point(20, 93);
 			this._btnScanLocalRepo.Margin = new System.Windows.Forms.Padding(1);
@@ -168,7 +164,6 @@
 			// 
 			// _btnInitLocalRepo
 			// 
-			this._btnInitLocalRepo.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this._btnInitLocalRepo.Image = global::gitter.Properties.Resources.ImgRepoInitMedium;
 			this._btnInitLocalRepo.Location = new System.Drawing.Point(20, 151);
 			this._btnInitLocalRepo.Margin = new System.Windows.Forms.Padding(1);
@@ -180,7 +175,6 @@
 			// 
 			// _btnCloneRemoteRepo
 			// 
-			this._btnCloneRemoteRepo.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this._btnCloneRemoteRepo.Image = global::gitter.Properties.Resources.ImgRepoCloneMedium;
 			this._btnCloneRemoteRepo.Location = new System.Drawing.Point(20, 181);
 			this._btnCloneRemoteRepo.Margin = new System.Windows.Forms.Padding(1);
@@ -201,8 +195,9 @@
 			this._txtFilter.TabIndex = 11;
 			// 
 			// StartPageView
-			// 
+			//
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.Controls.Add(this._txtFilter);
 			this.Controls.Add(this._separator2);
 			this.Controls.Add(this._picLogo);

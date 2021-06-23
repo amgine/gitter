@@ -30,17 +30,13 @@ namespace gitter.Framework.Controls
 		public static readonly new Guid Guid = new("BF80569F-4544-4B0F-8C5B-213215E053AA");
 
 		public WebBrowserViewFactory()
-			: base(Guid, Resources.StrWebBrowser, Resources.ImgWebBrowser, true)
+			: base(Guid, Resources.StrWebBrowser, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"web.browser"), singleton: true)
 		{
 			this.DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
 		}
 
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
+		/// <inheritdoc/>
 		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new WebBrowserView(Guid, environment);
-		}
+			=> new WebBrowserView(Guid, environment);
 	}
 }

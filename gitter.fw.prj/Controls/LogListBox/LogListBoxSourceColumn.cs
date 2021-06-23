@@ -32,8 +32,7 @@ namespace gitter.Framework.Controls
 			SizeMode = ColumnSizeMode.Sizeable;
 		}
 
-		/// <summary>Gets the identification string.</summary>
-		/// <value>The identification string.</value>
+		/// <inheritdoc/>
 		public override string IdentificationString => "Source";
 	}
 }

@@ -45,9 +45,7 @@ namespace gitter.Framework.Controls
 		public ViewDockGrid HoveredDockGrid { get; private set; }
 
 		private static int ZOrderComparison(Control control1, Control control2)
-		{
-			return ZOrderComparison(control1.TopLevelControl.Handle, control2.TopLevelControl.Handle);
-		}
+			=> ZOrderComparison(control1.TopLevelControl.Handle, control2.TopLevelControl.Handle);
 
 		private static int ZOrderComparison(IntPtr hWnd1, IntPtr hWnd2)
 		{
@@ -87,14 +85,8 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			if(candidates.Count == 0)
-			{
-				return null;
-			}
-			if(candidates.Count == 1)
-			{
-				return candidates[0];
-			}
+			if(candidates.Count == 0) return null;
+			if(candidates.Count == 1) return candidates[0];
 			candidates.Sort(ZOrderComparison);
 			return candidates[0];
 		}
@@ -120,14 +112,8 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			if(candidates.Count == 0)
-			{
-				return null;
-			}
-			if(candidates.Count == 1)
-			{
-				return candidates[0];
-			}
+			if(candidates.Count == 0) return null;
+			if(candidates.Count == 1) return candidates[0];
 			candidates.Sort(ZOrderComparison);
 			return candidates[0];
 		}
@@ -139,14 +125,14 @@ namespace gitter.Framework.Controls
 			IsActive = true;
 			location = ViewHost.PointToScreen(location);
 			var grid = HitTestGrid(location);
-			if(grid != null)
+			if(grid is not null)
 			{
 				HoveredDockGrid = grid;
 				grid.DockMarkers.Show(ViewHost);
 				grid.DockMarkers.UpdateHover(location);
 			}
 			var host = HitTestViewHost(location);
-			if(host != null)
+			if(host is not null)
 			{
 				HoveredViewHost = host;
 				host.DockMarkers.Show(ViewHost);
@@ -162,9 +148,9 @@ namespace gitter.Framework.Controls
 			bool gridHit = false;
 			location = ViewHost.PointToScreen(location);
 			var grid = HitTestGrid(location);
-			if(grid != null)
+			if(grid is not null)
 			{
-				if(HoveredDockGrid != null)
+				if(HoveredDockGrid is not null)
 				{
 					if(HoveredDockGrid != grid)
 					{
@@ -182,16 +168,16 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				if(HoveredDockGrid != null)
+				if(HoveredDockGrid is not null)
 				{
 					HoveredDockGrid.DockMarkers.Hide();
 					HoveredDockGrid = null;
 				}
 			}
 			var host = HitTestViewHost(location);
-			if(host != null)
+			if(host is not null)
 			{
-				if(HoveredViewHost != null)
+				if(HoveredViewHost is not null)
 				{
 					if(HoveredViewHost != host)
 					{
@@ -216,7 +202,7 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				if(HoveredViewHost != null)
+				if(HoveredViewHost is not null)
 				{
 					HoveredViewHost.DockMarkers.Hide();
 					HoveredViewHost = null;
@@ -231,7 +217,7 @@ namespace gitter.Framework.Controls
 			IsActive = false;
 			bool docking = false;
 			location = ViewHost.PointToScreen(location);
-			if(HoveredDockGrid != null)
+			if(HoveredDockGrid is not null)
 			{
 				var dockResult = HoveredDockGrid.DockMarkers.HitTest(location);
 				if(HoveredDockGrid.CanDock(ViewHost, dockResult))
@@ -242,7 +228,7 @@ namespace gitter.Framework.Controls
 				HoveredDockGrid.DockMarkers.Hide();
 				HoveredDockGrid = null;
 			}
-			if(HoveredViewHost != null)
+			if(HoveredViewHost is not null)
 			{
 				var host = HoveredViewHost;
 				if(!docking)
@@ -262,12 +248,12 @@ namespace gitter.Framework.Controls
 			Verify.State.IsTrue(IsActive);
 
 			IsActive = false;
-			if(HoveredDockGrid != null)
+			if(HoveredDockGrid is not null)
 			{
 				HoveredDockGrid.DockMarkers.Hide();
 				HoveredDockGrid = null;
 			}
-			if(HoveredViewHost != null)
+			if(HoveredViewHost is not null)
 			{
 				HoveredViewHost.DockMarkers.Hide();
 				HoveredViewHost = null;
@@ -276,12 +262,12 @@ namespace gitter.Framework.Controls
 
 		public void Dispose()
 		{
-			if(HoveredDockGrid != null)
+			if(HoveredDockGrid is not null)
 			{
 				HoveredDockGrid.DockMarkers.Hide();
 				HoveredDockGrid = null;
 			}
-			if(HoveredViewHost != null)
+			if(HoveredViewHost is not null)
 			{
 				HoveredViewHost.DockMarkers.Hide();
 				HoveredViewHost = null;

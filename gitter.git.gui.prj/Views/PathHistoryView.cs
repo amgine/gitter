@@ -21,11 +21,11 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	using gitter.Framework;
 	using gitter.Framework.Configuration;
 
 	using gitter.Git.Gui.Controls;
@@ -72,7 +72,7 @@ namespace gitter.Git.Gui.Views
 			if(viewModel is HistoryViewModel vm)
 			{
 				LogSource = vm.LogSource as PathLogSource;
-				Text = LogSource != null
+				Text = LogSource is not null
 					? Resources.StrHistory + ": " + LogSource.ToString()
 					: Resources.StrHistory;
 			}
@@ -95,20 +95,13 @@ namespace gitter.Git.Gui.Views
 			set => base.LogSource = value;
 		}
 
-		public override Image Image
-		{
-			get
-			{
-				if(LogSource != null)
-				{
-					if(LogSource.Path.EndsWith('/'))
-					{
-						return CachedResources.Bitmaps["ImgFolderHistory"];
-					}
-				}
-				return CachedResources.Bitmaps["ImgFileHistory"];
-			}
-		}
+		private static readonly IImageProvider _fileHistoryicon   = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"file.history");
+		private static readonly IImageProvider _folderHistoryicon = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"folder.history");
+
+		public override IImageProvider ImageProvider
+			=> LogSource is not null && LogSource.Path.EndsWith('/')
+				? _folderHistoryicon
+				: _fileHistoryicon;
 
 		protected override void DetachFromRepository(Repository repository)
 		{
@@ -123,7 +116,13 @@ namespace gitter.Git.Gui.Views
 		{
 			if(InvokeRequired)
 			{
-				BeginInvoke(new MethodInvoker(ReloadRevisionLog));
+				try
+				{
+					BeginInvoke(new MethodInvoker(ReloadRevisionLog));
+				}
+				catch
+				{
+				}
 			}
 			else
 			{
@@ -139,20 +138,16 @@ namespace gitter.Git.Gui.Views
 
 		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
+			Assert.IsNotNull(e);
+
 			switch(e.KeyCode)
 			{
-				case Keys.F:
-					if(e.Modifiers == Keys.Control)
-					{
-						_searchToolbar.Show();
-						e.IsInputKey = true;
-					}
+				case Keys.F when e.Modifiers == Keys.Control:
+					_searchToolbar.Show();
+					e.IsInputKey = true;
 					break;
-				case Keys.F5:
-					if(e.Modifiers == Keys.None)
-					{
-						RefreshContent();
-					}
+				case Keys.F5 when e.Modifiers == Keys.None:
+					RefreshContent();
 					break;
 			}
 		}
@@ -170,12 +165,12 @@ namespace gitter.Git.Gui.Views
 		{
 			base.LoadMoreViewFrom(section);
 			var layoutNode = section.TryGetSection("Layout");
-			if(layoutNode != null)
+			if(layoutNode is not null)
 			{
 				//_toolbar.ShowDiffButton.Checked = ShowDetails = layoutNode.GetValue("ShowDetails", ShowDetails);
 			}
 			var listNode = section.TryGetSection("RevisionList");
-			if(listNode != null)
+			if(listNode is not null)
 			{
 				RevisionListBox.LoadViewFrom(listNode);
 			}
