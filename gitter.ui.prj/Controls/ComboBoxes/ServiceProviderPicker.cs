@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -23,6 +23,7 @@ namespace gitter.Controls
 	using gitter.Framework;
 	using gitter.Framework.Controls;
 
+	[System.ComponentModel.DesignerCategory("")]
 	public sealed class ServiceProviderPicker : CustomObjectPicker<CustomListBox, ServiceProviderListItem, IRepositoryServiceProvider>
 	{
 		/// <summary>Initializes a new instance of the <see cref="ServiceProviderPicker"/> class.</summary>

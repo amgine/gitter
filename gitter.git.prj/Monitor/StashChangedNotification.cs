@@ -18,31 +18,28 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter.Git
 {
-	using System;
+	using gitter.Git.AccessLayer;
 
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	public sealed class RepositoryExplorerListBox : CustomListBox
+	/// <summary>Stash removed/updated.</summary>
+	sealed class StashChangedNotification : RepositoryChangedNotification
 	{
-		private readonly CustomListBoxColumn _nameColumn;
+		public override object NotificationType => RepositoryNotifications.StashChanged;
 
-		/// <summary>Create <see cref="RepositoryExplorerListBox"/>.</summary>
-		public RepositoryExplorerListBox()
+		public override bool Apply(Repository repository)
 		{
-			_nameColumn = new CustomListBoxColumn(0, Resources.StrName)
+			var top = repository.Accessor.QueryStashTop.Invoke(
+				new QueryStashTopParameters(false));
+			if(top is null)
 			{
-				SizeMode = ColumnSizeMode.Auto
-			};
-			Columns.Add(_nameColumn);
-
-			ShowTreeLines = true;
-			HeaderStyle = HeaderStyle.Hidden;
-			ShowRootTreeLines = false;
+				repository.Stash.NotifyCleared();
+			}
+			else
+			{
+				repository.Stash.Refresh();
+			}
+			return true;
 		}
 	}
 }

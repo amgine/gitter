@@ -30,6 +30,7 @@ namespace gitter.Framework.Controls
 
 	/// <summary>Extender for <see cref="DateColumn"/>.</summary>
 	[ToolboxItem(false)]
+	[DesignerCategory("")]
 	public partial class DateColumnExtender : ExtenderBase
 	{
 		private readonly DateColumn _column;

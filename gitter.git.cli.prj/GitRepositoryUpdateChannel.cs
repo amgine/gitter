@@ -152,7 +152,7 @@ namespace gitter.Git
 					}
 				}
 			}
-			return result != null
+			return result is not null
 				? new UpdateVersion(_url, result)
 				: default;
 		}

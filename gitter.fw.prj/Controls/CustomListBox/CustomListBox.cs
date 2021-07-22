@@ -33,7 +33,8 @@ namespace gitter.Framework.Controls
 
 	/// <summary>Highly customizable user-drawn list box with tree view capabilities.</summary>
 	[ToolboxBitmap(typeof(CustomListBox), "gitter.Framework.Resources.ui-list-box.png")]
-	[DefaultEvent("ItemActivated"), DefaultProperty("Items")]
+	[DefaultEvent(nameof(ItemActivated)), DefaultProperty(nameof(Items))]
+	[DesignerCategory("")]
 	public class CustomListBox : ScrollableControl
 	{
 		#region Constants
@@ -56,7 +57,7 @@ namespace gitter.Framework.Controls
 			=> ((EventHandler<ItemEventArgs>)Events[ItemActivatedEvent])?.Invoke(this, new ItemEventArgs(item));
 
 		private static readonly object ItemCheckedChangedEvent = new();
-		/// <summary>Item checked status is changed.</summar
+		/// <summary>Item checked status is changed.</summary>
 		public event EventHandler<ItemEventArgs> ItemCheckedChanged
 		{
 			add    => Events.AddHandler    (ItemCheckedChangedEvent, value);
@@ -305,7 +306,7 @@ namespace gitter.Framework.Controls
 					}
 					break;
 				case NotifyEvent.Remove:
-					if((item == null) || (item.IsPresented && item.IsExpanded))
+					if((item is null) || (item.IsPresented && item.IsExpanded))
 					{
 						RemoveItems(items, e.StartIndex, e.EndIndex);
 						plainListChanged = true;
@@ -401,7 +402,7 @@ namespace gitter.Framework.Controls
 				case NotifyEvent.Insert:
 					{
 						bool noitems = _itemPlainList.Count == 0;
-						if(item == null)
+						if(item is null)
 						{
 							int start = e.StartIndex;
 							int end = e.EndIndex;
@@ -792,7 +793,7 @@ namespace gitter.Framework.Controls
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public CustomListBoxRenderer Renderer
 		{
-			get { return _renderer; }
+			get => _renderer;
 			set
 			{
 				Verify.Argument.IsNotNull(value, nameof(value));
@@ -1398,7 +1399,7 @@ namespace gitter.Framework.Controls
 						}
 						else
 						{
-							if(item.Parent == null) return;
+							if(item.Parent is null) return;
 							FocusAndSelectItem(_itemPlainList.IndexOf(item.Parent));
 						}
 					}
@@ -2938,6 +2939,7 @@ namespace gitter.Framework.Controls
 			EndUpdate();
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
@@ -2951,7 +2953,7 @@ namespace gitter.Framework.Controls
 
 				_columns.Clear();
 
-				if(_textEditor != null)
+				if(_textEditor is not null)
 				{
 					_textEditor.Dispose();
 					_textEditor = null;

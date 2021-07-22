@@ -33,7 +33,7 @@ namespace gitter.Git.Gui.Controls
 		public const bool DefaultAbbreviate = true;
 		public const int  DefaultAbbrevLength = 7;
 
-		public static readonly Font Font = new Font("Consolas", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
+		public static readonly Font Font = new("Consolas", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
 
 		private const string NoHash = "----------------------------------------";
 

@@ -32,6 +32,7 @@ namespace gitter.Framework
 	using Resources = gitter.Framework.Properties.Resources;
 
 	[ToolboxItem(false)]
+	[DesignerCategory("")]
 	public partial class DialogBase : UserControl
 	{
 		/// <summary>Initializes a new instance of the <see cref="DialogBase"/> class.</summary>

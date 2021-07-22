@@ -24,6 +24,7 @@ namespace gitter.Framework.Controls
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	[System.ComponentModel.DesignerCategory("")]
 	public sealed class CustomButton : Control
 	{
 		#region Data
@@ -64,8 +65,8 @@ namespace gitter.Framework.Controls
 				if(_renderer != value)
 				{
 					bool needsInvalidate =
-						!(_renderer == null && value == CustomButtonRenderer.Default) &&
-						!(_renderer == CustomButtonRenderer.Default && value == null);
+						!(_renderer is null && value == CustomButtonRenderer.Default) &&
+						!(_renderer == CustomButtonRenderer.Default && value is null);
 					_renderer = value;
 					if(needsInvalidate)
 					{

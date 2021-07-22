@@ -30,6 +30,7 @@ namespace gitter.Framework.Controls
 
 	/// <summary>Command button with WinVista/Win7 Command Link style.</summary>
 	[ToolboxBitmap(typeof(CommandLink), "gitter.Framework.Properties.ui-button.png")]
+	[DesignerCategory("")]
 	public class CommandLink : Control
 	{
 		#region Static
@@ -228,7 +229,7 @@ namespace gitter.Framework.Controls
 			graphics.SetClip(e.ClipRectangle);
 			graphics.SmoothingMode = SmoothingMode.HighQuality;
 			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-			var k = (graphics.DpiY / 96f);
+			var k = (DeviceDpi / 96f);
 			if(Focused)
 			{
 				if(_pressed)

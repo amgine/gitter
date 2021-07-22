@@ -7,15 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="Gui\ListBoxes\PipelinesListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Gui\ListBoxes\IssuesListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Gui\ProviderSetupControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Update="Gui\ListBoxes\PipelinesListBox.cs" />
+    <Compile Update="Gui\ListBoxes\IssuesListBox.cs" />
+    <Compile Update="Gui\ProviderSetupControl.cs" />
     <Compile Update="Gui\Views\PipelinesView.cs">
       <SubType>UserControl</SubType>
     </Compile>

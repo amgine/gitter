@@ -28,6 +28,7 @@ namespace gitter.Controls
 
 	using Resources = gitter.Properties.Resources;
 
+	[System.ComponentModel.DesignerCategory("")]
 	sealed class StandardToolbar : ToolStrip
 	{
 		static class Icons

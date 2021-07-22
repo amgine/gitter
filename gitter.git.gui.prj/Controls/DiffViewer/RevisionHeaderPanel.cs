@@ -119,7 +119,7 @@ namespace gitter.Git.Gui.Controls
 				{
 					_isSelected = value;
 					Invalidate();
-					if(value && FlowControl != null)
+					if(value && FlowControl is not null)
 					{
 						foreach(var p in FlowControl.Panels)
 						{
@@ -142,7 +142,7 @@ namespace gitter.Git.Gui.Controls
 				if(_revision != value)
 				{
 					_revision = value;
-					if(FlowControl != null)
+					if(FlowControl is not null)
 					{
 						_content.Revision = _revision;
 					}

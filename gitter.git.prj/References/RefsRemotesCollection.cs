@@ -191,7 +191,7 @@ namespace gitter.Git
 
 			var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
 				new QueryBranchParameters(branch.Name, branch.IsRemote));
-			if(remoteBranchData != null)
+			if(remoteBranchData is not null)
 			{
 				ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
 			}
@@ -239,7 +239,7 @@ namespace gitter.Git
 					foreach(var head in heads)
 					{
 						var branch = TryGetItem(head.Name);
-						if(branch != null) res.Add(branch);
+						if(branch is not null) res.Add(branch);
 					}
 				}
 				return res;
@@ -286,7 +286,7 @@ namespace gitter.Git
 		internal void Load(IEnumerable<RemoteBranchData> branchDataList)
 		{
 			ObjectStorage.Clear();
-			if(branchDataList != null)
+			if(branchDataList is not null)
 			{
 				foreach(var remoteBranchData in branchDataList)
 				{
@@ -300,7 +300,7 @@ namespace gitter.Git
 		internal void Load(IEnumerable<BranchData> branchDataList)
 		{
 			ObjectStorage.Clear();
-			if(branchDataList != null)
+			if(branchDataList is not null)
 			{
 				foreach(var remoteBranchData in branchDataList)
 				{

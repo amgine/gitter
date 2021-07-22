@@ -254,36 +254,53 @@ namespace gitter.Framework.Controls
 
 		protected override bool ScaleChildren => false;
 
+		private int _vscrollWidth;
+		private int _hscrollHeight;
+
+		/// <inheritdoc/>
+		protected override void OnDpiChangedAfterParent(EventArgs e)
+		{
+			_hscrollHeight = SystemInformation.GetHorizontalScrollBarHeightForDpi(DeviceDpi);
+			_vscrollWidth  = SystemInformation.GetVerticalScrollBarWidthForDpi(DeviceDpi);
+
+			if(_vScrollBar is not null)
+			{
+				_vScrollBar.Control.Bounds = GetVScrollBounds();
+			}
+			if(_hScrollBar is not null)
+			{
+				_hScrollBar.Control.Bounds = GetHScrollBounds();
+			}
+			base.OnDpiChangedAfterParent(e);
+		}
+
 		private void CreateScrollBars()
 		{
+			_hscrollHeight = SystemInformation.GetHorizontalScrollBarHeightForDpi(DeviceDpi);
+			_vscrollWidth  = SystemInformation.GetVerticalScrollBarWidthForDpi(DeviceDpi);
+
 			_vScrollBar?.Dispose();
 			_hScrollBar?.Dispose();
 
-			var borderSize = BorderSize;
-
-			var scrollWidth = SystemInformation.VerticalScrollBarWidth;
 			_vScrollBar = CreateScrollBar(Orientation.Vertical);
 			_vScrollBar.Maximum = 1;
 			_vScrollBar.Minimum = 0;
 			_vScrollBar.SmallChange = 1;
 			_vScrollBar.LargeChange = 1;
 			_vScrollBar.Control.Enabled = false;
-			_vScrollBar.Control.Bounds = new Rectangle(Width - scrollWidth - borderSize, borderSize, scrollWidth, Height - borderSize * 2);
-			_vScrollBar.Control.Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
+			_vScrollBar.Control.Bounds = GetVScrollBounds();
 			_vScrollBar.ValueChanged += OnVScrollBarValueChanged;
 			_vScrollBar.Scroll += OnVScrollBarScroll;
 			_vScrollBar.Control.MouseCaptureChanged += OnScrollBarCaptureChanged;
 			_vScrollBar.Control.MouseDown += OnScrollBarMouseDown;
 
-			var scrollHeight = SystemInformation.HorizontalScrollBarHeight;
 			_hScrollBar = CreateScrollBar(Orientation.Horizontal);
 			_hScrollBar.Maximum = 1;
 			_hScrollBar.Minimum = 0;
 			_hScrollBar.SmallChange = 1;
 			_hScrollBar.LargeChange = 1;
 			_hScrollBar.Control.Enabled = false;
-			_hScrollBar.Control.Bounds = new Rectangle(borderSize, Height - borderSize - scrollHeight, Width - borderSize * 2, scrollHeight);
-			_hScrollBar.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
+			_hScrollBar.Control.Bounds = GetHScrollBounds();
 			_hScrollBar.ValueChanged += OnHScrollBarValueChanged;
 			_hScrollBar.Scroll += OnHScrollBarScroll;
 			_hScrollBar.Control.MouseCaptureChanged += OnScrollBarCaptureChanged;
@@ -536,29 +553,27 @@ namespace gitter.Framework.Controls
 		private Rectangle GetVScrollBounds()
 		{
 			int borderSize = BorderSize;
-			var size = Size;
-			var bounds = new Rectangle(
-				size.Width - _vScrollBar.Control.Width - borderSize, borderSize,
-				_vScrollBar.Control.Width, size.Height - borderSize * 2);
+			var size       = Size;
 			if(_needHScroll || _alwaysShowHScrollBar)
 			{
-				bounds.Height -= _hScrollBar.Control.Height;
+				size.Height -= _hscrollHeight;
 			}
-			return bounds;
+			return new Rectangle(
+				size.Width - _vscrollWidth - borderSize, borderSize,
+				_vscrollWidth, size.Height - borderSize * 2);
 		}
 
 		private Rectangle GetHScrollBounds()
 		{
 			int borderSize = BorderSize;
-			var size = Size;
-			var bounds = new Rectangle(
-				borderSize, size.Height - _hScrollBar.Control.Height - borderSize,
-				size.Width - borderSize * 2, _hScrollBar.Control.Height);
+			var size       = Size;
 			if(_needVScroll || _alwaysShowVScrollBar)
 			{
-				bounds.Width -= _vScrollBar.Control.Width;
+				size.Width -= _vscrollWidth;
 			}
-			return bounds;
+			return new Rectangle(
+				borderSize, size.Height - _hscrollHeight - borderSize,
+				size.Width - borderSize * 2, _hscrollHeight);
 		}
 
 		protected bool SetVScrollBar(Size contentSize, bool allowRedraw)
@@ -654,7 +669,7 @@ namespace gitter.Framework.Controls
 				_maxHScrollPos = msp;
 				var lc = _contentArea.Width;
 				if(lc < 0) lc = 0;
-				if(_hScrollBar.Control.Parent == null)
+				if(_hScrollBar.Control.Parent is null)
 				{
 					_hScrollBar.Control.Bounds = GetHScrollBounds();
 					_hScrollBar.Control.Parent = this;
@@ -682,7 +697,7 @@ namespace gitter.Framework.Controls
 			}
 			else
 			{
-				if((_hScrollBar.Control.Parent == null && _alwaysShowHScrollBar) || (_hScrollBar.Control.Parent != null && !_alwaysShowHScrollBar))
+				if((_hScrollBar.Control.Parent is null && _alwaysShowHScrollBar) || (_hScrollBar.Control.Parent is not null && !_alwaysShowHScrollBar))
 				{
 					_hScrollPos = 0;
 					if(_alwaysShowHScrollBar)

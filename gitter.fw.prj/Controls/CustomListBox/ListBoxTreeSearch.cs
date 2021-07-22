@@ -68,7 +68,7 @@ namespace gitter.Framework.Controls
 			do
 			{
 				var items = GetParentItems(item);
-				if(items != null)
+				if(items is not null)
 				{
 					var index = items.IndexOf(item);
 					if(index < items.Count - 1)
@@ -86,7 +86,7 @@ namespace gitter.Framework.Controls
 			Assert.IsNotNull(item);
 
 			var items = GetParentItems(item);
-			if(items != null)
+			if(items is not null)
 			{
 				var index = items.IndexOf(item);
 				if(index > 0)
@@ -109,7 +109,7 @@ namespace gitter.Framework.Controls
 				 _ => throw new ArgumentException("Invalid direction", nameof(direction)),
 			};
 
-			if(start == null) return false;
+			if(start is null) return false;
 
 			var current = start;
 			do

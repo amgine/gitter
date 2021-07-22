@@ -244,7 +244,7 @@ namespace gitter.Git
 
 			var tagData = Repository.Accessor.QueryTag
 				.Invoke(new QueryTagParameters(tag.Name));
-			if(tagData != null)
+			if(tagData is not null)
 			{
 				ObjectFactories.UpdateTag(tag, tagData);
 			}
@@ -263,7 +263,7 @@ namespace gitter.Git
 			var tagData = await Repository.Accessor.QueryTag
 				.InvokeAsync(new QueryTagParameters(tag.Name))
 				.ConfigureAwait(continueOnCapturedContext: false);
-			if(tagData != null)
+			if(tagData is not null)
 			{
 				ObjectFactories.UpdateTag(tag, tagData);
 			}
@@ -282,7 +282,7 @@ namespace gitter.Git
 		internal void Load(IEnumerable<TagData> tagDataList)
 		{
 			ObjectStorage.Clear();
-			if(tagDataList != null)
+			if(tagDataList is not null)
 			{
 				foreach(var tagData in tagDataList)
 				{

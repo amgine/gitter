@@ -87,7 +87,7 @@ namespace gitter.Framework
 			_sf.FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.MeasureTrailingSpaces;
 			extractor ??= new AbsoluteUrlHyperlinkExtractor();
 			_glyphs = extractor.ExtractHyperlinks(text)
-							   .Select(h => new HyperlinkGlyph(h))
+							   .Select(static h => new HyperlinkGlyph(h))
 							   .ToArray();
 			_sf.SetMeasurableCharacterRanges(
 				_glyphs.Select(l => new CharacterRange(l.Start, l.Length)).ToArray());
@@ -152,21 +152,17 @@ namespace gitter.Framework
 			}
 			if(clipIsSet)
 			{
-				using(var linkTextBrush = new SolidBrush(style.Colors.HyperlinkText))
-				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, Text, font, linkTextBrush, rect, _sf);
-				}
+				using var linkTextBrush = new SolidBrush(style.Colors.HyperlinkText);
+				GitterApplication.TextRenderer.DrawText(
+					graphics, Text, font, linkTextBrush, rect, _sf);
 			}
 			if(_hoveredLink.IsTracked)
 			{
 				graphics.Clip = _hoveredLink.Item.Region;
-				using(var f = new Font(font, FontStyle.Underline))
-				using(var linkTextBrush = new SolidBrush(style.Colors.HyperlinkTextHotTrack))
-				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, Text, f, linkTextBrush, rect, _sf);
-				}
+				using var f = new Font(font, FontStyle.Underline);
+				using var linkTextBrush = new SolidBrush(style.Colors.HyperlinkTextHotTrack);
+				GitterApplication.TextRenderer.DrawText(
+					graphics, Text, f, linkTextBrush, rect, _sf);
 			}
 			graphics.ResetClip();
 			_cachedRect = rect;
@@ -187,7 +183,7 @@ namespace gitter.Framework
 			for(int i = 0; i < _glyphs.Length; ++i)
 			{
 				var glyph = _glyphs[i];
-				if(glyph.Region != null && glyph.Region.IsVisible(p))
+				if(glyph.Region is not null && glyph.Region.IsVisible(p))
 				{
 					return i;
 				}

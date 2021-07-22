@@ -21,12 +21,12 @@
 namespace gitter.Git
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Threading.Tasks;
 
 	using gitter.Git.AccessLayer;
 
 	using Resources = gitter.Git.Properties.Resources;
-	using System.Collections.Generic;
 
 	/// <summary>Repository's HEAD reference.</summary>
 	public sealed class Head : Reference
@@ -95,19 +95,17 @@ namespace gitter.Git
 					lock(repository.Refs.Heads.SyncRoot)
 					{
 						branch = repository.Refs.Heads.TryGetItem(head.TargetObject);
-						if(branch == null)
+						if(branch is null)
 						{
 							var info = repository.Accessor.QueryBranch.Invoke(
 								new QueryBranchParameters(head.TargetObject, false));
-							if(info != null)
+							if(info is not null)
 							{
 								branch = repository.Refs.Heads.NotifyCreated(info);
 							}
 						}
 					}
-					return branch != null
-						? branch
-						: new NowherePointer(repository, head.TargetObject);
+					return branch is not null ? branch : new NowherePointer(repository, head.TargetObject);
 				case ReferenceType.Revision:
 					lock(repository.Revisions.SyncRoot)
 					{
@@ -135,12 +133,12 @@ namespace gitter.Git
 					{
 						branch = repository.Refs.Heads.TryGetItem(head.TargetObject);
 					}
-					if(branch == null)
+					if(branch is null)
 					{
 						var info = await repository.Accessor.QueryBranch
 							.InvokeAsync(new QueryBranchParameters(head.TargetObject, false))
 							.ConfigureAwait(continueOnCapturedContext: false);
-						if(info != null)
+						if(info is not null)
 						{
 							lock(repository.Refs.Heads.SyncRoot)
 							{
@@ -148,9 +146,7 @@ namespace gitter.Git
 							}
 						}
 					}
-					return branch != null
-						? branch
-						: new NowherePointer(repository, head.TargetObject);
+					return branch is not null ? branch : new NowherePointer(repository, head.TargetObject);
 				case ReferenceType.Revision:
 					lock(repository.Revisions.SyncRoot)
 					{
@@ -189,8 +185,8 @@ namespace gitter.Git
 		protected override void LeavePointer(IRevisionPointer pointer)
 		{
 			var branch = pointer as Branch;
-			_wasDetached = branch == null;
-			if(branch != null)
+			_wasDetached = branch is null;
+			if(branch is not null)
 			{
 				branch.PositionChanged -= OnBranchPositionChanged;
 			}
@@ -201,7 +197,7 @@ namespace gitter.Git
 		protected override void EnterPointer(IRevisionPointer pointer)
 		{
 			var branch = pointer as Branch;
-			bool detached = branch == null;
+			bool detached = branch is null;
 			if(_wasDetached != detached)
 			{
 				if(detached)
@@ -213,7 +209,7 @@ namespace gitter.Git
 					OnAttached();
 				}
 			}
-			if(branch != null)
+			if(branch is not null)
 			{
 				branch.PositionChanged += OnBranchPositionChanged;
 			}
@@ -263,7 +259,7 @@ namespace gitter.Git
 					.Invoke(new ResetParameters(rev.Hash.ToString(), mode));
 			}
 
-			if(currentBranch != null)
+			if(currentBranch is not null)
 			{
 				currentBranch.Pointer = rev;
 			}
@@ -318,7 +314,7 @@ namespace gitter.Git
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 
-			if(currentBranch != null)
+			if(currentBranch is not null)
 			{
 				currentBranch.Pointer = rev;
 			}
@@ -410,7 +406,7 @@ namespace gitter.Git
 				}
 			}
 
-			if(currentBranch != null)
+			if(currentBranch is not null)
 			{
 				currentBranch.Refresh();
 			}
@@ -495,7 +491,7 @@ namespace gitter.Git
 				}
 			}
 
-			if(currentBranch != null)
+			if(currentBranch is not null)
 			{
 				currentBranch.Refresh();
 			}

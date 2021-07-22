@@ -76,7 +76,7 @@ namespace gitter.Framework.Services
 				hyperlinks ??= new();
 				hyperlinks.Add(new Hyperlink(href, href));
 			}
-			return hyperlinks != null
+			return hyperlinks is not null
 				? hyperlinks
 				: Preallocated<Hyperlink>.EmptyArray;
 		}

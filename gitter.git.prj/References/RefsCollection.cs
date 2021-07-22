@@ -279,7 +279,7 @@ namespace gitter.Git
 				foreach(var head in heads)
 				{
 					var branch = Heads.TryGetItem(head.Name);
-					if(branch != null)
+					if(branch is not null)
 					{
 						res.Add(branch);
 					}
@@ -290,7 +290,7 @@ namespace gitter.Git
 				foreach(var remote in remotes)
 				{
 					var branch = Remotes.TryGetItem(remote.Name);
-					if(branch != null) res.Add(branch);
+					if(branch is not null) res.Add(branch);
 				}
 			}
 			return res;
@@ -306,9 +306,9 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(refs, nameof(refs));
 
-			if(refs.Heads != null)   Heads.Load(refs.Heads);
-			if(refs.Remotes != null) Remotes.Load(refs.Remotes);
-			if(refs.Tags != null)    Tags.Load(refs.Tags);
+			if(refs.Heads   is not null) Heads.Load  (refs.Heads);
+			if(refs.Remotes is not null) Remotes.Load(refs.Remotes);
+			if(refs.Tags    is not null) Tags.Load   (refs.Tags);
 		}
 
 		#endregion

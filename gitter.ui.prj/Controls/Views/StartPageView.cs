@@ -35,6 +35,7 @@ namespace gitter
 
 	using Resources = gitter.Properties.Resources;
 
+	[System.ComponentModel.DesignerCategory("")]
 	internal partial class StartPageView : ViewBase
 	{
 		#region Data

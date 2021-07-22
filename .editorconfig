@@ -30,6 +30,7 @@ tab_width=4
 # Organize usings
 dotnet_separate_import_directive_groups = true
 dotnet_sort_system_directives_first = true
+csharp_using_directive_placement=inside_namespace:silent
 
 # Space preferences
 csharp_space_after_keywords_in_control_flow_statements = false

@@ -29,6 +29,7 @@ namespace gitter.Controls
 
 	[DefaultEvent("LinkClicked")]
 	[DefaultProperty("Text")]
+	[DesignerCategory("")]
 	public partial class LinkButton : UserControl
 	{
 		private Font _underlineFont;

@@ -946,7 +946,7 @@ namespace gitter.Git.Gui.Controls
 
 		#endregion
 
-		public void SelectRevision(IRevisionPointer revision)
+		public bool SelectRevision(IRevisionPointer revision)
 		{
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
@@ -954,7 +954,9 @@ namespace gitter.Git.Gui.Controls
 			if(_itemLookupTable.TryGetValue(rev, out var item))
 			{
 				item.FocusAndSelect();
+				return true;
 			}
+			return false;
 		}
 
 		public RevisionListItem TryGetItem(Revision revision)

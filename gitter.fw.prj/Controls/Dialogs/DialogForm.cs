@@ -30,6 +30,7 @@ namespace gitter.Framework
 	using gitter.Framework.Services;
 
 	/// <summary>Form which hosts <see cref="DialogBase"/>.</summary>
+	[System.ComponentModel.DesignerCategory("")]
 	public partial class DialogForm : Form
 	{
 		#region Data
@@ -402,17 +403,13 @@ namespace gitter.Framework
 				g.SmoothingMode = SmoothingMode.HighQuality;
 				if(hover)
 				{
-					using(var img = expanded ? Resources.ImgChevronCollapseHover : Resources.ImgChevronExpandHover)
-					{
-						g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
-					}
+					using var img = expanded ? Resources.ImgChevronCollapseHover : Resources.ImgChevronExpandHover;
+					g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
 				}
 				else
 				{
-					using(var img = expanded ? Resources.ImgChevronCollapse : Resources.ImgChevronExpand)
-					{
-						g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
-					}
+					using var img = expanded ? Resources.ImgChevronCollapse : Resources.ImgChevronExpand;
+					g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
 				}
 				rc.X += height + 2;
 				rc.Width -= height + 2;

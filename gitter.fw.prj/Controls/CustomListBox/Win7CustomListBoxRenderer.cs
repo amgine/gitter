@@ -205,22 +205,13 @@ namespace gitter.Framework.Controls
 				rect.Width -= CustomListBoxColumn.ExtenderButtonWidth;
 				if(rect.Width <= 0) return;
 			}
-			StringFormat format;
-			switch(column.HeaderAlignment)
+			var format = column.HeaderAlignment switch
 			{
-				case StringAlignment.Near:
-					format = GitterApplication.TextRenderer.LeftAlign;
-					break;
-				case StringAlignment.Far:
-					format = GitterApplication.TextRenderer.RightAlign;
-					break;
-				case StringAlignment.Center:
-					format = GitterApplication.TextRenderer.CenterAlign;
-					break;
-				default:
-					format = GitterApplication.TextRenderer.LeftAlign;
-					break;
-			}
+				StringAlignment.Near   => GitterApplication.TextRenderer.LeftAlign,
+				StringAlignment.Far    => GitterApplication.TextRenderer.RightAlign,
+				StringAlignment.Center => GitterApplication.TextRenderer.CenterAlign,
+				_ => GitterApplication.TextRenderer.LeftAlign,
+			};
 			GitterApplication.TextRenderer.DrawText(graphics, column.Name, font, column.HeaderBrush, rect, format);
 		}
 
@@ -230,9 +221,9 @@ namespace gitter.Framework.Controls
 
 			if(state == ItemState.None) return;
 
-			bool hovered = (state & ItemState.Hovered) == ItemState.Hovered;
+			bool hovered  = (state & ItemState.Hovered)  == ItemState.Hovered;
 			bool selected = (state & ItemState.Selected) == ItemState.Selected;
-			bool focused = (state & ItemState.Focused) == ItemState.Focused;
+			bool focused  = (state & ItemState.Focused)  == ItemState.Focused;
 			IBackgroundStyle background = null;
 			if(selected)
 			{
@@ -284,10 +275,7 @@ namespace gitter.Framework.Controls
 					}
 				}
 			}
-			if(background != null)
-			{
-				background.Draw(paintEventArgs.Graphics, paintEventArgs.Bounds);
-			}
+			background?.Draw(paintEventArgs.Graphics, paintEventArgs.Bounds);
 		}
 
 		public override void OnPaintItemContent(CustomListBoxItem item, ItemPaintEventArgs paintEventArgs)

@@ -27,6 +27,7 @@ namespace gitter.Framework.Controls
 
 	/// <summary>Base class or column header extenders.</summary>
 	[ToolboxItem(false)]
+	[DesignerCategory("")]
 	public partial class ExtenderBase : UserControl
 	{
 		/// <summary>Create <see cref="ExtenderBase"/>.</summary>
@@ -76,7 +77,7 @@ namespace gitter.Framework.Controls
 		{
 			get
 			{
-				return Column != null
+				return Column is not null
 					? Column.Style
 					: GitterApplication.Style;
 			}
@@ -99,7 +100,7 @@ namespace gitter.Framework.Controls
 		{
 			if(disposing)
 			{
-				if(Column != null)
+				if(Column is not null)
 				{
 					Column.StyleChanged -= OnColumnStyleChanged;
 				}

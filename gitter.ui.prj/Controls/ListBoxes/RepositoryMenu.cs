@@ -25,6 +25,7 @@ namespace gitter
 
 	using Resources = gitter.Properties.Resources;
 
+	[System.ComponentModel.DesignerCategory("")]
 	class RepositoryMenu : ContextMenuStrip
 	{
 		public RepositoryMenu(RepositoryListItem repository)

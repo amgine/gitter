@@ -48,12 +48,12 @@ namespace gitter.Framework.Controls
 			{
 				if(_listBox != value)
 				{
-					if(_listBox != null)
+					if(_listBox is not null)
 					{
 						OnListBoxDetached();
 					}
 					_listBox = value;
-					if(_listBox != null)
+					if(_listBox is not null)
 					{
 						OnListBoxAttached();
 					}

@@ -18,31 +18,16 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter.Git
 {
-	using System;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	public sealed class RepositoryExplorerListBox : CustomListBox
+	abstract class RepositoryChangedNotification : IRepositoryChangedNotification
 	{
-		private readonly CustomListBoxColumn _nameColumn;
-
-		/// <summary>Create <see cref="RepositoryExplorerListBox"/>.</summary>
-		public RepositoryExplorerListBox()
+		protected RepositoryChangedNotification()
 		{
-			_nameColumn = new CustomListBoxColumn(0, Resources.StrName)
-			{
-				SizeMode = ColumnSizeMode.Auto
-			};
-			Columns.Add(_nameColumn);
-
-			ShowTreeLines = true;
-			HeaderStyle = HeaderStyle.Hidden;
-			ShowRootTreeLines = false;
 		}
+
+		public abstract object NotificationType { get; }
+
+		public abstract bool Apply(Repository repository);
 	}
 }

@@ -30,6 +30,7 @@ namespace gitter.Framework.Controls
 
 	/// <summary>Control which hosts <see cref="FlowPanel"/>'s.</summary>
 	[DefaultProperty("Panels")]
+	[DesignerCategory("")]
 	public class FlowLayoutControl : ScrollableControl
 	{
 		private readonly Dictionary<FlowPanel, Size> _sizes;

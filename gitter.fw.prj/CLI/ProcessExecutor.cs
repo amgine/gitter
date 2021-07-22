@@ -90,7 +90,7 @@ namespace gitter.Framework.CLI
 		{
 			Verify.Argument.IsNotNull(input, nameof(input));
 
-			var tcs = new TaskCompletionSource<int>();
+			var tcs = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 			if(cancellationToken.IsCancellationRequested)
 			{
 				tcs.SetCanceled();

@@ -65,7 +65,7 @@ namespace gitter.Framework.CLI
 			Verify.State.IsTrue(IsInitialized);
 
 			var eof = _eof;
-			if(eof != null)
+			if(eof is not null)
 			{
 				_eof = null;
 				eof.Dispose();
@@ -77,7 +77,7 @@ namespace gitter.Framework.CLI
 			Verify.State.IsTrue(IsInitialized);
 
 			var eof = _eof;
-			if(eof != null)
+			if(eof is not null)
 			{
 				try
 				{
@@ -120,7 +120,7 @@ namespace gitter.Framework.CLI
 			else
 			{
 				var eof = (EventWaitHandle)ar.AsyncState;
-				if(eof != null)
+				if(eof is not null)
 				{
 					try
 					{
@@ -152,7 +152,7 @@ namespace gitter.Framework.CLI
 			}
 			if(!isReading)
 			{
-				if(eof != null)
+				if(eof is not null)
 				{
 					try
 					{

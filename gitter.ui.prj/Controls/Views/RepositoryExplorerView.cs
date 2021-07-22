@@ -28,6 +28,7 @@ namespace gitter
 
 	using Resources = gitter.Properties.Resources;
 
+	[System.ComponentModel.DesignerCategory("")]
 	public partial class RepositoryExplorerView : ViewBase
 	{
 		public RepositoryExplorerView(IWorkingEnvironment environment)

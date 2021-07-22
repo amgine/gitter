@@ -116,9 +116,9 @@ namespace gitter.Framework.Controls
 					_dateFormat = value;
 					var w = Width;
 					AutoSize(80);
-					if(w != Width && ListBox != null)
+					if(w != Width)
 					{
-						ListBox.Refresh();
+						ListBox?.Refresh();
 					}
 					OnDateFormatChanged(EventArgs.Empty);
 				}
@@ -149,9 +149,9 @@ namespace gitter.Framework.Controls
 					_showUTCOffset = value;
 					var w = Width;
 					AutoSize(80);
-					if(w != Width && ListBox != null)
+					if(w != Width)
 					{
-						ListBox.Refresh();
+						ListBox?.Refresh();
 					}
 					OnShowUTCOffsetChanged(EventArgs.Empty);
 				}

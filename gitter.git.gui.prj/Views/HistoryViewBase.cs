@@ -292,9 +292,9 @@ namespace gitter.Git.Gui.Views
 			return rev1.GetCompareDiffSource(rev2, GetPaths());
 		}
 
-		public void SelectRevision(IRevisionPointer revision)
+		public bool SelectRevision(IRevisionPointer revision)
 		{
-			RevisionListBox.SelectRevision(revision);
+			return RevisionListBox.SelectRevision(revision);
 		}
 
 		protected override void Dispose(bool disposing)

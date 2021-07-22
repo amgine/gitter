@@ -43,10 +43,11 @@ namespace gitter.Git
 		private FileSystemWatcher _fswWorkDir;
 		private FileSystemWatcher _fswGitDir;
 
-		private readonly List<NotificationBlock> _blockedNotifications;
-		private readonly Queue<IRepositoryChangedNotification> _pendingNotifications;
-		private readonly Queue<IRepositoryChangedNotification> _delayedNotifications;
-		private readonly Queue<NotificationDelayedUnblock> _delayedUnblocks;
+		private readonly List<NotificationBlock>               _blockedNotifications = new();
+		private readonly Queue<IRepositoryChangedNotification> _pendingNotifications = new();
+		private readonly Queue<IRepositoryChangedNotification> _delayedNotifications = new();
+		private readonly Queue<NotificationDelayedUnblock>     _delayedUnblocks      = new();
+
 		private AutoResetEvent _evGotNotification;
 		private AutoResetEvent _evGotDelayedNotification;
 		private AutoResetEvent _evGotDelayedUnblock;
@@ -104,7 +105,7 @@ namespace gitter.Git
 
 			public void Dispose()
 			{
-				if(_notifications != null && _notifications.Length != 0)
+				if(_notifications is { Length: > 0 })
 				{
 					_monitor.UnblockNotifications(_key, _notifications);
 				}
@@ -149,11 +150,6 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_repository = repository;
-
-			_blockedNotifications = new List<NotificationBlock>();
-			_pendingNotifications = new Queue<IRepositoryChangedNotification>();
-			_delayedNotifications = new Queue<IRepositoryChangedNotification>();
-			_delayedUnblocks      = new Queue<NotificationDelayedUnblock>();
 		}
 
 		private void ApplyProc()
@@ -169,7 +165,7 @@ namespace gitter.Git
 						notification = _pendingNotifications.Dequeue();
 					}
 				}
-				if(notification == null)
+				if(notification is null)
 				{
 					if(WaitHandle.WaitAny(wh) == 0) return;
 					continue;
@@ -193,7 +189,9 @@ namespace gitter.Git
 				lock(_delayedNotifications)
 				{
 					while(_delayedNotifications.Count != 0)
+					{
 						notifications.Add(_delayedNotifications.Dequeue());
+					}
 				}
 				if(notifications.Count == 0)
 				{
@@ -207,7 +205,7 @@ namespace gitter.Git
 					case 1:
 						continue;
 					case WaitHandle.WaitTimeout:
-						WorktreeUpdatedNotification globalwtn = null;
+						var globalwtn = default(WorktreeUpdatedNotification);
 						int count = 0;
 						foreach(var n in notifications)
 						{
@@ -230,7 +228,7 @@ namespace gitter.Git
 							}
 						}
 						notifications.Clear();
-						if(globalwtn != null)
+						if(globalwtn is not null)
 						{
 							EmitNotification(globalwtn);
 						}
@@ -244,7 +242,7 @@ namespace gitter.Git
 			var wh = new WaitHandle[] { _evExit, _evGotDelayedUnblock };
 			while(true)
 			{
-				NotificationDelayedUnblock unblock = null;
+				var unblock = default(NotificationDelayedUnblock);
 				lock(_delayedUnblocks)
 				{
 					if(_delayedUnblocks.Count != 0)
@@ -252,7 +250,7 @@ namespace gitter.Git
 						unblock = _delayedUnblocks.Dequeue();
 					}
 				}
-				if(unblock == null)
+				if(unblock is null)
 				{
 					if(WaitHandle.WaitAny(wh) == 0) return;
 					continue;
@@ -265,16 +263,11 @@ namespace gitter.Git
 			}
 		}
 
-		private ChangedPath GetChangedPath(string path)
+		private static ChangedPath GetChangedPath(string path)
 		{
-			if(path == GitConstants.GitDir || path.StartsWith(GitConstants.GitDir + Path.DirectorySeparatorChar))
-			{
-				return ChangedPath.GitDir;
-			}
-			else
-			{
-				return ChangedPath.WorkDir;
-			}
+			return path == GitConstants.GitDir || path.StartsWith(GitConstants.GitDir + Path.DirectorySeparatorChar)
+				? ChangedPath.GitDir
+				: ChangedPath.WorkDir;
 		}
 
 		private static bool CheckValue(string path, string test, int pos)
@@ -370,24 +363,20 @@ namespace gitter.Git
 		{
 			switch(GetSubdirectory(e.Name))
 			{
-				case GitSubdirectory.Refs:
-					if(e.Name == @"refs\stash" + GitConstants.LockPostfix)
+				case GitSubdirectory.Refs when e.Name == @"refs\stash" + GitConstants.LockPostfix:
+					#if TRACE_FS_EVENTS
+					Log.Debug("Detected possible stash change");
+					#endif
+					if(!IsBlocked(RepositoryNotifications.StashChanged))
 					{
-						#if TRACE_FS_EVENTS
-						Log.Debug("Detected possible stash change");
-						#endif
-						if(!IsBlocked(RepositoryNotifications.StashChanged))
-						{
-							EmitNotification(new StashChangedNotification());
-						}
+						EmitNotification(new StashChangedNotification());
 					}
 					break;
-				case GitSubdirectory.RefsHeads:
-					if(e.Name.EndsWith(GitConstants.LockPostfix))
+				case GitSubdirectory.RefsHeads when e.Name.EndsWith(GitConstants.LockPostfix):
 					{
 						int pos = GitConstants.LocalBranchPrefix.Length;
 						var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
-										 .Replace(Path.DirectorySeparatorChar, '/');
+											.Replace(Path.DirectorySeparatorChar, '/');
 						#if TRACE_FS_EVENTS
 						Log.Debug(string.Format("Detected possible branch change: {0}", name));
 						#endif
@@ -397,8 +386,7 @@ namespace gitter.Git
 						}
 					}
 					break;
-				case GitSubdirectory.RefsRemotes:
-					if(e.Name.EndsWith(GitConstants.LockPostfix))
+				case GitSubdirectory.RefsRemotes when e.Name.EndsWith(GitConstants.LockPostfix):
 					{
 						int pos = GitConstants.RemoteBranchPrefix.Length;
 						var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
@@ -412,8 +400,7 @@ namespace gitter.Git
 						}
 					}
 					break;
-				case GitSubdirectory.RefsTags:
-					if(e.Name.EndsWith(GitConstants.LockPostfix))
+				case GitSubdirectory.RefsTags when e.Name.EndsWith(GitConstants.LockPostfix):
 					{
 						var tagFileName = e.FullPath.Substring(0, e.FullPath.Length - GitConstants.LockPostfix.Length);
 						if(!File.Exists(tagFileName))
@@ -463,6 +450,7 @@ namespace gitter.Git
 										EmitNotification(new ConfigUpdatedNotification());
 									}
 									break;
+								case "index":
 								case "index" + GitConstants.LockPostfix:
 									#if TRACE_FS_EVENTS
 									Log.Debug("Index update detected");
@@ -504,7 +492,7 @@ namespace gitter.Git
 
 		private void OnGitDirRenamed(object sender, RenamedEventArgs e)
 		{
-			if(e == null || e.OldName == null)
+			if(e is null || e.OldName is null)
 			{
 				return;
 			}
@@ -569,7 +557,7 @@ namespace gitter.Git
 
 		private void OnWorkDirRenamed(object sender, RenamedEventArgs e)
 		{
-			if(e == null || e.OldName == null)
+			if(e is null || e.OldName is null)
 			{
 				return;
 			}
@@ -790,9 +778,9 @@ namespace gitter.Git
 					_delayedUnblocks.Enqueue(new NotificationDelayedUnblock(time, key, notification));
 					hadAny = true;
 				}
-				if(hadAny && _evGotDelayedUnblock != null)
+				if(hadAny)
 				{
-					_evGotDelayedUnblock.Set();
+					_evGotDelayedUnblock?.Set();
 				}
 			}
 		}

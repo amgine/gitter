@@ -25,6 +25,7 @@ namespace gitter.Framework.Controls
 	using System.Drawing;
 	using System.Windows.Forms;
 
+	[DesignerCategory("")]
 	public class CustomCheckBox : Control
 	{
 		#region Data

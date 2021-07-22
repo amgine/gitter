@@ -20,7 +20,6 @@
 
 namespace gitter.Git.AccessLayer
 {
-	using gitter.Framework;
 	using gitter.Git.AccessLayer.CLI;
 
 	public static class StandardTools

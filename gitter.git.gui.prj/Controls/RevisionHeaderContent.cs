@@ -23,7 +23,6 @@ namespace gitter.Git.Gui
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
-	using System.Drawing.Drawing2D;
 	using System.Text;
 	using System.Windows.Forms;
 
@@ -106,9 +105,9 @@ namespace gitter.Git.Gui
 
 			ContextMenuStrip CreateContextMenu(Revision revision, Rectangle rect, int x, int y);
 
-			Size Measure(Graphics graphics, Revision revision, int width);
+			Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width);
 
-			void Paint(Graphics graphics, Revision revision, Rectangle rect);
+			void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect);
 
 			void MouseMove(Rectangle rect, Point point);
 
@@ -151,28 +150,28 @@ namespace gitter.Git.Gui
 			public virtual ContextMenuStrip CreateContextMenu(Revision revision, Rectangle rect, int x, int y)
 				=> CreateContextMenu(revision);
 
-			public virtual Size Measure(Graphics graphics, Revision revision, int width)
+			public virtual Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
 			{
-				var conv = new DpiConverter(graphics);
+				var conv = DpiConverter.FromDefaultTo(dpi);
 				return new Size(width, conv.ConvertY(DefaultElementHeight));
 			}
 
-			protected static Size Measure(Graphics graphics, Font font, string text, int width)
+			protected static Size Measure(Graphics graphics, Dpi dpi, Font font, string text, int width)
 			{
-				var conv = new DpiConverter(graphics);
+				var conv = DpiConverter.FromDefaultTo(dpi);
 				var w = conv.ConvertX(HeaderWidth) + GitterApplication.TextRenderer.MeasureText(graphics, text, font, width, ContentFormat).Width;
 				return new Size(w, conv.ConvertY(DefaultElementHeight));
 			}
 
-			protected static Size MeasureMultilineContent(Graphics graphics, string content, int width)
+			protected static Size MeasureMultilineContent(Graphics graphics, Dpi dpi, string content, int width)
 			{
 				var font = GitterApplication.FontManager.UIFont.Font;
-				return MeasureMultilineContent(graphics, font, content, width);
+				return MeasureMultilineContent(graphics, dpi, font, content, width);
 			}
 
-			protected static Size MeasureMultilineContent(Graphics graphics, Font font, string content, int width)
+			protected static Size MeasureMultilineContent(Graphics graphics, Dpi dpi, Font font, string content, int width)
 			{
-				var conv = new DpiConverter(graphics);
+				var conv = DpiConverter.FromDefaultTo(dpi);
 				var s    = GitterApplication.TextRenderer.MeasureText(graphics, content, font, width - conv.ConvertX(HeaderWidth), ContentFormat);
 				var min  = conv.ConvertY(DefaultElementHeight);
 				if(s.Height < min) s.Height = min;
@@ -194,9 +193,9 @@ namespace gitter.Git.Gui
 				return offset;
 			}
 
-			protected void PaintHeader(Graphics graphics, string header, Rectangle rect)
+			protected void PaintHeader(Graphics graphics, Dpi dpi, string header, Rectangle rect)
 			{
-				var conv = new DpiConverter(graphics);
+				var conv = DpiConverter.FromDefaultTo(dpi);
 				var font = GitterApplication.FontManager.UIFont.Font;
 				var r1   = new Rectangle(rect.X, rect.Y, conv.ConvertX(HeaderWidth) - conv.ConvertX(4), conv.ConvertY(DefaultElementHeight));
 				r1.Y += GetYOffset(conv.To, font);
@@ -207,32 +206,32 @@ namespace gitter.Git.Gui
 				}
 			}
 
-			protected void DefaultPaint(Graphics graphics, string header, string content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, Dpi dpi, string header, string content, Rectangle rect)
 			{
 				var font = GitterApplication.FontManager.UIFont.Font;
-				DefaultPaint(graphics, font, header, content, rect);
+				DefaultPaint(graphics, dpi, font, header, content, rect);
 			}
 
-			protected void DefaultPaint(Graphics graphics, string header, TextWithHyperlinks content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, Dpi dpi, string header, TextWithHyperlinks content, Rectangle rect)
 			{
 				var font = GitterApplication.FontManager.UIFont.Font;
-				DefaultPaint(graphics, font, header, content, rect);
+				DefaultPaint(graphics, dpi, font, header, content, rect);
 			}
 
 			protected Rectangle GetContentRectangle(Rectangle rect)
 			{
-				var r2 = new Rectangle(rect.X + HeaderWidth, rect.Y, rect.Width - HeaderWidth, rect.Height);
+				var headerWidth = (int)(HeaderWidth * _lastDpi.X / 96 + 0.5f);
+				var r2 = new Rectangle(rect.X + headerWidth, rect.Y, rect.Width - headerWidth, rect.Height);
 				r2.Y += GetYOffset(_lastDpi, GitterApplication.FontManager.UIFont);
 				return r2;
 			}
 
-			protected void DefaultPaint(Graphics graphics, Font font, string header, string content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, Dpi dpi, Font font, string header, string content, Rectangle rect)
 			{
-				var conv = new DpiConverter(graphics);
+				var conv = DpiConverter.FromDefaultTo(dpi);
 				var r1 = new Rectangle(rect.X, rect.Y, conv.ConvertX(HeaderWidth) - conv.ConvertX(4), conv.ConvertY(DefaultElementHeight));
 				var r2 = new Rectangle(rect.X + conv.ConvertX(HeaderWidth), rect.Y, rect.Width - conv.ConvertX(HeaderWidth), rect.Height);
 				var headerFont = GitterApplication.FontManager.UIFont.Font;
-				var dpi = new Dpi(graphics);
 				r1.Y += GetYOffset(dpi, headerFont);
 				r2.Y += GetYOffset(dpi, font);
 				GitterApplication.TextRenderer.DrawText(
@@ -242,13 +241,12 @@ namespace gitter.Git.Gui
 				_lastDpi = conv.To;
 			}
 
-			protected void DefaultPaint(Graphics graphics, Font font, string header, TextWithHyperlinks content, Rectangle rect)
+			protected void DefaultPaint(Graphics graphics, Dpi dpi, Font font, string header, TextWithHyperlinks content, Rectangle rect)
 			{
-				var conv = new DpiConverter(graphics);
+				var conv = DpiConverter.FromDefaultTo(dpi);
 				var r1 = new Rectangle(rect.X, rect.Y, conv.ConvertX(HeaderWidth) - conv.ConvertX(4), conv.ConvertY(DefaultElementHeight));
 				var r2 = new Rectangle(rect.X + conv.ConvertX(HeaderWidth), rect.Y, rect.Width - conv.ConvertX(HeaderWidth), rect.Height);
 				var headerFont = GitterApplication.FontManager.UIFont.Font;
-				var dpi = new Dpi(graphics);
 				r1.Y += GetYOffset(dpi, headerFont);
 				r2.Y += GetYOffset(dpi, font);
 				GitterApplication.TextRenderer.DrawText(
@@ -257,7 +255,7 @@ namespace gitter.Git.Gui
 				_lastDpi = conv.To;
 			}
 
-			public abstract void Paint(Graphics graphics, Revision revision, Rectangle rect);
+			public abstract void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect);
 
 			public virtual void MouseMove(Rectangle rect, Point point)
 			{
@@ -297,11 +295,11 @@ namespace gitter.Git.Gui
 				return menu;
 			}
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-				=> Measure(graphics, TreeHashColumn.Font, revision.HashString, width);
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
+				=> Measure(graphics, dpi, TreeHashColumn.Font, revision.HashString, width);
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
-				=> DefaultPaint(graphics, HashColumn.Font, Resources.StrHash.AddColon(), revision.HashString, rect);
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
+				=> DefaultPaint(graphics, dpi, HashColumn.Font, Resources.StrHash.AddColon(), revision.HashString, rect);
 		}
 
 		sealed class TreeHashElement : BaseElement
@@ -323,11 +321,11 @@ namespace gitter.Git.Gui
 				return menu;
 			}
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-				=> Measure(graphics, TreeHashColumn.Font, revision.TreeHashString, width);
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
+				=> Measure(graphics, dpi, TreeHashColumn.Font, revision.TreeHashString, width);
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
-				=> DefaultPaint(graphics, TreeHashColumn.Font, Resources.StrTreeHash.AddColon(), revision.TreeHashString, rect);
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
+				=> DefaultPaint(graphics, dpi, TreeHashColumn.Font, Resources.StrTreeHash.AddColon(), revision.TreeHashString, rect);
 		}
 
 		sealed class ParentsElement : BaseElement
@@ -356,14 +354,14 @@ namespace gitter.Git.Gui
 				return menu;
 			}
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
 			{
 				switch(revision.Parents.Count)
 				{
 					case 0:
 						return Size.Empty;
 					case 1:
-						return Measure(graphics, HashColumn.Font, revision.Parents[0].HashString, width);
+						return Measure(graphics, dpi, HashColumn.Font, revision.Parents[0].HashString, width);
 					default:
 						var sb = new StringBuilder(41 * revision.Parents.Count);
 						bool first = true;
@@ -374,15 +372,15 @@ namespace gitter.Git.Gui
 							else first = false;
 							sb.Append(p.Hash);
 						}
-						return MeasureMultilineContent(graphics, HashColumn.Font, sb.ToString(), width);
+						return MeasureMultilineContent(graphics, dpi, HashColumn.Font, sb.ToString(), width);
 				}
 			}
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
 			{
 				if(revision.Parents.Count == 1)
 				{
-					DefaultPaint(graphics, HashColumn.Font, Resources.StrParent.AddColon(), revision.Parents[0].HashString, rect);
+					DefaultPaint(graphics, dpi, HashColumn.Font, Resources.StrParent.AddColon(), revision.Parents[0].HashString, rect);
 				}
 				else
 				{
@@ -392,7 +390,7 @@ namespace gitter.Git.Gui
 						sb.Append(p.Hash);
 						sb.Append('\n');
 					}
-					DefaultPaint(graphics, HashColumn.Font, Resources.StrParents.AddColon(), sb.ToString(), rect);
+					DefaultPaint(graphics, dpi, HashColumn.Font, Resources.StrParents.AddColon(), sb.ToString(), rect);
 				}
 			}
 		}
@@ -418,11 +416,11 @@ namespace gitter.Git.Gui
 				return menu;
 			}
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-				=> Measure(graphics, GitterApplication.FontManager.UIFont, string.Format("{0} <{1}>", revision.Author.Name, revision.Author.Email), width);
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
+				=> Measure(graphics, dpi, GitterApplication.FontManager.UIFont, string.Format("{0} <{1}>", revision.Author.Name, revision.Author.Email), width);
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
-				=> DefaultPaint(graphics, Resources.StrAuthor.AddColon(), string.Format("{0} <{1}>", revision.Author.Name, revision.Author.Email), rect);
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
+				=> DefaultPaint(graphics, dpi, Resources.StrAuthor.AddColon(), string.Format("{0} <{1}>", revision.Author.Name, revision.Author.Email), rect);
 		}
 
 		sealed class CommitterElement : BaseElement
@@ -449,11 +447,11 @@ namespace gitter.Git.Gui
 				return menu;
 			}
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-				=> Measure(graphics, GitterApplication.FontManager.UIFont, string.Format("{0} <{1}>", revision.Committer.Name, revision.Committer.Email), width);
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
+				=> Measure(graphics, dpi, GitterApplication.FontManager.UIFont, string.Format("{0} <{1}>", revision.Committer.Name, revision.Committer.Email), width);
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
-				=> DefaultPaint(graphics, Resources.StrCommitter.AddColon(), string.Format("{0} <{1}>", revision.Committer.Name, revision.Committer.Email), rect);
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
+				=> DefaultPaint(graphics, dpi, Resources.StrCommitter.AddColon(), string.Format("{0} <{1}>", revision.Committer.Name, revision.Committer.Email), rect);
 		}
 
 		sealed class CommitDateElement : BaseElement
@@ -479,11 +477,11 @@ namespace gitter.Git.Gui
 
 			public override Element Element => Element.CommitDate;
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-				=> Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.CommitDate, DateFormat), width);
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
+				=> Measure(graphics, dpi, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.CommitDate, DateFormat), width);
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
-				=> DefaultPaint(graphics, GitterApplication.FontManager.UIFont, Resources.StrDate.AddColon(), Utility.FormatDate(revision.CommitDate, DateFormat), rect);
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
+				=> DefaultPaint(graphics, dpi, GitterApplication.FontManager.UIFont, Resources.StrDate.AddColon(), Utility.FormatDate(revision.CommitDate, DateFormat), rect);
 		}
 
 		sealed class AuthorDateElement : BaseElement
@@ -509,23 +507,25 @@ namespace gitter.Git.Gui
 
 			public override Element Element => Element.AuthorDate;
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-				=> Measure(graphics, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.AuthorDate, DateFormat), width);
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
+				=> Measure(graphics, dpi, GitterApplication.FontManager.UIFont, Utility.FormatDate(revision.AuthorDate, DateFormat), width);
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
-				=> DefaultPaint(graphics, GitterApplication.FontManager.UIFont, Resources.StrDate.AddColon(), Utility.FormatDate(revision.AuthorDate, DateFormat), rect);
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
+				=> DefaultPaint(graphics, dpi, GitterApplication.FontManager.UIFont, Resources.StrDate.AddColon(), Utility.FormatDate(revision.AuthorDate, DateFormat), rect);
 		}
 
-		sealed class SubjectElement : BaseElement
+		abstract class TextWithHyperlinksElementBase : BaseElement
 		{
-			public SubjectElement(RevisionHeaderContent owner)
-				: base(owner)
-			{
-			}
-
+			private readonly string _headerText;
 			private TextWithHyperlinks _text;
 
-			public override Element Element => Element.Subject;
+			protected TextWithHyperlinksElementBase(RevisionHeaderContent owner, string headerText)
+				: base(owner)
+			{
+				_headerText = headerText;
+			}
+
+			protected abstract string GetText(Revision revision);
 
 			public override ContextMenuStrip CreateContextMenu(Revision revision, Rectangle bounds, int x, int y)
 			{
@@ -538,23 +538,24 @@ namespace gitter.Git.Gui
 				var dpiBindings = new DpiBindings(menu);
 				var factory     = new GuiItemFactory(dpiBindings);
 				menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
-					revision.Subject, false));
+					GetText(revision), false));
 				Utility.MarkDropDownForAutoDispose(menu);
 				return menu;
 			}
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-				=> MeasureMultilineContent(graphics, revision.Subject, width);
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
+				=> MeasureMultilineContent(graphics, dpi, GetText(revision), width);
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
 			{
-				if(_text is null || _text.Text != revision.Subject)
+				var text = GetText(revision);
+				if(_text is null || _text.Text != text)
 				{
-					_text = new TextWithHyperlinks(revision.Subject, GetHyperlinkExtractor(revision));
+					_text = new TextWithHyperlinks(text, GetHyperlinkExtractor(revision));
 					_text.InvalidateRequired += OnTextInvalidateRequired;
 				}
 
-				DefaultPaint(graphics, Resources.StrSubject.AddColon(), _text, rect);
+				DefaultPaint(graphics, dpi, _headerText, _text, rect);
 			}
 
 			private void OnTextInvalidateRequired(object sender, EventArgs e)
@@ -590,12 +591,22 @@ namespace gitter.Git.Gui
 			}
 		}
 
-		sealed class BodyElement : BaseElement
+		sealed class SubjectElement : TextWithHyperlinksElementBase
 		{
-			private TextWithHyperlinks _text;
+			public SubjectElement(RevisionHeaderContent owner)
+				: base(owner, Resources.StrSubject.AddColon())
+			{
+			}
 
+			public override Element Element => Element.Subject;
+
+			protected override string GetText(Revision revision) => revision.Subject;
+		}
+
+		sealed class BodyElement : TextWithHyperlinksElementBase
+		{
 			public BodyElement(RevisionHeaderContent owner)
-				: base(owner)
+				: base(owner, Resources.StrBody.AddColon())
 			{
 			}
 
@@ -606,75 +617,7 @@ namespace gitter.Git.Gui
 
 			public override Element Element => Element.Body;
 
-			public override ContextMenuStrip CreateContextMenu(Revision revision, Rectangle bounds, int x, int y)
-			{
-				if(_text is not null)
-				{
-					var link = _text.HitTest(GetContentRectangle(bounds), new Point(x, y));
-					if(link is not null) return new HyperlinkContextMenu(link);
-				}
-				var menu         = new ContextMenuStrip();
-				var dpiBindings = new DpiBindings(menu);
-				var factory     = new GuiItemFactory(dpiBindings);
-				menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
-					revision.Body, false));
-				Utility.MarkDropDownForAutoDispose(menu);
-				return menu;
-			}
-
-			public override Size Measure(Graphics graphics, Revision revision, int width)
-			{
-				if(string.IsNullOrEmpty(revision.Body)) return Size.Empty;
-				return MeasureMultilineContent(graphics, revision.Body, width);
-			}
-
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
-			{
-				if(_text is null || _text.Text != revision.Body)
-				{
-					_text = new TextWithHyperlinks(revision.Body, GetHyperlinkExtractor(revision));
-					_text.InvalidateRequired += OnTextInvalidateRequired;
-				}
-
-				DefaultPaint(graphics, Resources.StrBody.AddColon(), _text, rect);
-			}
-
-			private void OnTextInvalidateRequired(object sender, EventArgs e)
-			{
-				OnInvalidateRequired();
-				if(_text.HoveredHyperlink is null)
-				{
-					ChangeCursor(Cursors.Default);
-				}
-				else
-				{
-					ChangeCursor(Cursors.Hand);
-				}
-			}
-
-			public override void MouseMove(Rectangle rect, Point point)
-			{
-				if(_text is not null)
-				{
-					_text.OnMouseMove(GetContentRectangle(rect), point);
-				}
-			}
-
-			public override void MouseLeave()
-			{
-				if(_text is not null)
-				{
-					_text.OnMouseLeave();
-				}
-			}
-
-			public override void MouseDown(Rectangle rect, MouseButtons button, int x, int y)
-			{
-				if(_text is not null && button == MouseButtons.Left)
-				{
-					_text.OnMouseDown(GetContentRectangle(rect), new Point(x, y));
-				}
-			}
+			protected override string GetText(Revision revision) => revision.Body;
 		}
 
 		sealed class ReferencesElement : BaseElement
@@ -730,9 +673,9 @@ namespace gitter.Git.Gui
 				}
 			}
 
-			public override Size Measure(Graphics graphics, Revision revision, int width)
+			public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
 			{
-				var conv = new DpiConverter(graphics);
+				var conv = DpiConverter.FromDefaultTo(dpi);
 				var font = GitterApplication.FontManager.UIFont.Font;
 				lock(revision.References.SyncRoot)
 				{
@@ -748,12 +691,12 @@ namespace gitter.Git.Gui
 				}
 			}
 
-			public override void Paint(Graphics graphics, Revision revision, Rectangle rect)
+			public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
 			{
 				const float Radius = 3;
 
 				_drawnReferences.Clear();
-				PaintHeader(graphics, Resources.StrRefs.AddColon(), rect);
+				PaintHeader(graphics, dpi, Resources.StrRefs.AddColon(), rect);
 				var font = GitterApplication.FontManager.UIFont.Font;
 				int offset = 0;
 				using var tagBrush    = new SolidBrush(ColorScheme.TagBackColor);
@@ -761,7 +704,7 @@ namespace gitter.Git.Gui
 				using var remoteBrush = new SolidBrush(ColorScheme.RemoteBranchBackColor);
 				lock(revision.References.SyncRoot)
 				{
-					var conv = new DpiConverter(graphics);
+					var conv = DpiConverter.FromDefaultTo(dpi);
 					var r2 = new Rectangle(rect.X + conv.ConvertX(HeaderWidth), rect.Y, rect.Width - conv.ConvertX(HeaderWidth), rect.Height);
 					r2.Y += GetYOffset(conv.To, font);
 					foreach(var reference in revision.References)
@@ -894,6 +837,7 @@ namespace gitter.Git.Gui
 			{
 				extractors.AddRange(_additionalHyperlinkExtractors);
 			}
+			extractors.Add(new HashHyperlinkExtractor());
 			return extractors.Count == 1
 				? extractors[0]
 				: new HyperlinkExtractor(extractors);
@@ -989,14 +933,14 @@ namespace gitter.Git.Gui
 			return -1;
 		}
 
-		private void Measure(Graphics graphics, int width)
+		private void Measure(Graphics graphics, Dpi dpi, int width)
 		{
 			int h = 0;
 			for(int i = 0; i < _elements.Length; ++i)
 			{
 				if(_elements[i].IsAvailableFor(_revision))
 				{
-					var s = _elements[i].Measure(graphics, _revision, width);
+					var s = _elements[i].Measure(graphics, dpi, _revision, width);
 					h += s.Height;
 					_sizes[_elements[i].Element] = s;
 				}
@@ -1045,7 +989,7 @@ namespace gitter.Git.Gui
 			var conv = DpiConverter.FromDefaultTo(dpi);
 			var min  = conv.ConvertX(MinWidth);
 			if(width < min) width = min;
-			if(_measuredWidth != width) Measure(graphics, width);
+			if(_measuredWidth != width) Measure(graphics, dpi, width);
 			return new Size(width, _measuredHeight);
 		}
 
@@ -1054,7 +998,7 @@ namespace gitter.Git.Gui
 			if(_revision is null) return;
 			var conv  = DpiConverter.FromDefaultTo(dpi);
 			var width = bounds.Width;
-			if(_measuredWidth != width) Measure(graphics, width);
+			if(_measuredWidth != width) Measure(graphics, dpi, width);
 			if(GitterApplication.IntegrationFeatures.Gravatar.IsEnabled)
 			{
 				var avatar = _revision.Author.Avatar;
@@ -1126,7 +1070,7 @@ namespace gitter.Git.Gui
 							}
 						}
 					}
-					element.Paint(graphics, Revision, elementBounds);
+					element.Paint(graphics, dpi, Revision, elementBounds);
 					elementBounds.Y += size.Height;
 				}
 			}

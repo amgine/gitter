@@ -301,7 +301,7 @@ namespace gitter.Git
 					var oldPos = oldPointer.Dereference();
 					var newPos = newPointer.Dereference();
 
-					if(oldPos != null && oldPos != newPos)
+					if(oldPos is not null && oldPos != newPos)
 					{
 						LeaveRevision(oldPos);
 					}
@@ -311,7 +311,7 @@ namespace gitter.Git
 					EnterPointer(newPointer);
 					InvokePointerChanged(oldPointer, newPointer);
 
-					if(newPos != null && oldPos != newPos)
+					if(newPos is not null && oldPos != newPos)
 					{
 						EnterRevision(newPos);
 					}
@@ -352,7 +352,7 @@ namespace gitter.Git
 				Reflog reflog;
 				lock(_reflogSync)
 				{
-					if(_reflogRef == null)
+					if(_reflogRef is null)
 					{
 						reflog = new Reflog(this);
 						_reflogRef = new WeakReference<Reflog>(reflog);
@@ -407,7 +407,7 @@ namespace gitter.Git
 		{
 			var rev = _pointer.Dereference();
 			LeavePointer(_pointer);
-			if(rev != null)
+			if(rev is not null)
 			{
 				LeaveRevision(rev);
 			}
@@ -418,7 +418,7 @@ namespace gitter.Git
 		{
 			lock(_reflogSync)
 			{
-				if(_reflogRef != null && _reflogRef.TryGetTarget(out var reflog))
+				if(_reflogRef is not null && _reflogRef.TryGetTarget(out var reflog))
 				{
 					reflog.NotifyRecordAdded();
 				}

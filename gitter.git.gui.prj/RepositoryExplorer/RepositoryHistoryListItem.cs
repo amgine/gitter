@@ -20,7 +20,6 @@
 
 namespace gitter.Git.Gui
 {
-
 	using gitter.Framework;
 
 	using gitter.Git.Gui.Views;

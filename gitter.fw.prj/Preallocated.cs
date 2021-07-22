@@ -20,10 +20,12 @@
 
 namespace gitter.Framework
 {
+	using System;
+
 	public class Preallocated<T>
 	{
 		private Preallocated() { }
 
-		public static readonly T[] EmptyArray = new T[0];
+		public static readonly T[] EmptyArray = Array.Empty<T>();
 	}
 }

@@ -449,7 +449,7 @@ namespace gitter.Framework.Controls
 			{
 				if(_sizeMode == ColumnSizeMode.Sizeable)
 				{
-					if(NextVisibleColumn == null)
+					if(NextVisibleColumn is null)
 					{
 						if(!ListBox.Columns.HasFillModeVisibleColumn)
 						{

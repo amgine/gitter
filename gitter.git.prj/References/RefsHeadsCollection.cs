@@ -371,7 +371,7 @@ namespace gitter.Git
 
 			var branchData = Repository.Accessor.QueryBranch
 				.Invoke(new QueryBranchParameters(branch.Name, branch.IsRemote));
-			if(branchData != null)
+			if(branchData is not null)
 			{
 				ObjectFactories.UpdateBranch(branch, branchData);
 			}
@@ -390,7 +390,7 @@ namespace gitter.Git
 			var branchData = await Repository.Accessor.QueryBranch
 				.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
 				.ConfigureAwait(continueOnCapturedContext: false);
-			if(branchData != null)
+			if(branchData is not null)
 			{
 				ObjectFactories.UpdateBranch(branch, branchData);
 			}
@@ -466,7 +466,7 @@ namespace gitter.Git
 		internal void Load(IEnumerable<BranchData> branchDataList)
 		{
 			ObjectStorage.Clear();
-			if(branchDataList != null)
+			if(branchDataList is not null)
 			{
 				foreach(var branchData in branchDataList)
 				{

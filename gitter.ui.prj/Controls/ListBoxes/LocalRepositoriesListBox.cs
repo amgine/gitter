@@ -29,6 +29,7 @@ namespace gitter
 
 	using Resources = gitter.Properties.Resources;
 
+	[System.ComponentModel.DesignerCategory("")]
 	internal sealed class LocalRepositoriesListBox : CustomListBox
 	{
 		private readonly DragHelper _dragHelper;
