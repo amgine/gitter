@@ -129,12 +129,12 @@ namespace gitter
 
 			LoadProviders();
 
-			_mnuView.DropDownItems.Insert(0, new ViewMenuItem(_repositoryExplorerFactory, this));
-			_mnuView.DropDownItems.Insert(1, new ViewMenuItem(_startPageFactory, this));
+			_mnuView.DropDownItems.Insert(0, new ViewMenuItem(_repositoryExplorerFactory) { Environment = this });
+			_mnuView.DropDownItems.Insert(1, new ViewMenuItem(_startPageFactory) { Environment = this });
 			_mnuView.DropDownItems.Insert(2, new ToolStripSeparator());
 
 			_mnuView.DropDownItems.Add(new ToolStripSeparator());
-			_mnuView.DropDownItems.Add(new ViewMenuItem(_logFactory, this));
+			_mnuView.DropDownItems.Add(new ViewMenuItem(_logFactory) { Environment = this });
 
 			_mnuRepository.Text         = Resources.StrRepository;
 			_mnuExit.Text               = Resources.StrExit;

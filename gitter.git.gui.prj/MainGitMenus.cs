@@ -37,7 +37,7 @@ namespace gitter.Git.Gui
 		private Repository _repository;
 		private ToolStripMenuItem[] _menus;
 		private ToolStripMenuItem _gitMenu;
-		private List<ToolStripMenuItem> _viewMenuItems;
+		private readonly List<ViewMenuItem> _viewMenuItems = new();
 
 		public MainGitMenus(GuiProvider guiProvider)
 		{
@@ -93,12 +93,11 @@ namespace gitter.Git.Gui
 					ShortcutKeys = Keys.F8,
 				});
 
-			_viewMenuItems = new List<ToolStripMenuItem>();
 			foreach(var factory in Gui.ViewFactories)
 			{
 				if(factory.IsSingleton)
 				{
-					var item = new ViewMenuItem(factory, guiProvider.Environment);
+					var item = new ViewMenuItem(factory);
 					_viewMenuItems.Add(item);
 				}
 			}
@@ -111,7 +110,7 @@ namespace gitter.Git.Gui
 
 		public IEnumerable<ToolStripMenuItem> Menus => _menus;
 
-		public IEnumerable<ToolStripMenuItem> ViewMenuItems => _viewMenuItems;
+		public IEnumerable<ViewMenuItem> ViewMenuItems => _viewMenuItems;
 
 		public GuiProvider Gui => _guiProvider;
 
@@ -152,7 +151,7 @@ namespace gitter.Git.Gui
 
 		private void OnCmdClick(object sender, EventArgs e)
 		{
-			var psi = new System.Diagnostics.ProcessStartInfo("cmd")
+			var psi = new System.Diagnostics.ProcessStartInfo(@"cmd")
 			{
 				WorkingDirectory = Repository.WorkingDirectory,
 			};

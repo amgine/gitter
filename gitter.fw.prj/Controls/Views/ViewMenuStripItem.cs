@@ -25,27 +25,31 @@ namespace gitter.Framework.Controls
 
 	public class ViewMenuItem : ToolStripMenuItem
 	{
-		private readonly IWorkingEnvironment _environment;
-		private readonly IViewFactory _factory;
 		private ToolStrip _owner;
 
-		public ViewMenuItem(IViewFactory factory, IWorkingEnvironment environment)
+		public ViewMenuItem(IViewFactory factory)
 			: base(factory.Name, null, OnClick)
 		{
-			_factory = factory;
-			_environment = environment;
+			Factory = factory;
 		}
+
+		public IViewFactory Factory { get; }
+
+		public IWorkingEnvironment Environment { get; set; }
 
 		protected override void OnOwnerChanged(EventArgs e)
 		{
-			if(_factory.ImageProvider is not null)
+			if(Factory.ImageProvider is not null)
 			{
 				if(_owner is not null)
 				{
 					_owner.DpiChangedAfterParent -= OnOwnerDpiChangedAfterParent;
 					_owner = null;
 				}
-				if(Owner is null) Image = null;
+				if(Owner is null)
+				{
+					Image = null;
+				}
 				else
 				{
 					UpdateImage();
@@ -61,13 +65,17 @@ namespace gitter.Framework.Controls
 		private void UpdateImage()
 		{
 			var iconSize = new DpiConverter(Owner).ConvertX(16);
-			Image = _factory.ImageProvider.GetImage(iconSize);
+			Image = Factory.ImageProvider.GetImage(iconSize);
 		}
 
 		private static void OnClick(object sender, EventArgs e)
 		{
 			var item = (ViewMenuItem)sender;
-			item._environment.ViewDockService.ShowView(item._factory.Guid, activate: true);
+			var environment = item.Environment;
+			if(environment is not null)
+			{
+				environment.ViewDockService.ShowView(item.Factory.Guid, activate: true);
+			}
 		}
 	}
 }

@@ -271,6 +271,7 @@ namespace gitter.Git.Gui
 			}
 			foreach(var item in Menus.ViewMenuItems)
 			{
+				item.Environment = environment;
 				environment.ProvideViewMenuItem(item);
 			}
 
@@ -304,6 +305,7 @@ namespace gitter.Git.Gui
 			}
 			foreach(var item in Menus.ViewMenuItems)
 			{
+				item.Environment = null;
 				environment.RemoveViewMenuItem(item);
 			}
 
