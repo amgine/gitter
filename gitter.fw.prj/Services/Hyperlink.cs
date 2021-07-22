@@ -20,9 +20,62 @@
 
 namespace gitter.Framework.Services
 {
+	using System;
+	using System.Collections.Generic;
+
 	/// <summary>Represents a hyperlink in text.</summary>
 	public sealed class Hyperlink
 	{
+		private static readonly List<NavigationHandler> _handlers = new();
+
+		private sealed class NavigationHandler : IDisposable
+		{
+			private readonly Func<string, bool> _handler;
+
+			public NavigationHandler(Func<string, bool> handler)
+			{
+				_handler = handler;
+			}
+
+			public bool Navigate(string url) => _handler(url);
+
+			public bool IsDisposed { get; private set; }
+
+			public void Dispose()
+			{
+				if(IsDisposed) return;
+				lock(_handlers)
+				{
+					if(IsDisposed) return;
+					_handlers.Remove(this);
+					IsDisposed = true;
+				}
+			}
+		}
+
+		public static IDisposable RegisterInternalHandler(Func<string, bool> onNavigate)
+		{
+			Verify.Argument.IsNotNull(onNavigate, nameof(onNavigate));
+
+			var handler = new NavigationHandler(onNavigate);
+			lock(_handlers)
+			{
+				_handlers.Add(handler);
+			}
+			return handler;
+		}
+
+		private static void NavigateInternal(string url)
+		{
+			lock(_handlers)
+			{
+				foreach(var handler in _handlers)
+				{
+					if(handler.Navigate(url)) break;
+				}
+			}
+		}
+
 		/// <summary>Create <see cref="Hyperlink"/>.</summary>
 		/// <param name="text">Link text.</param>
 		/// <param name="url">Link URL.</param>
@@ -39,7 +92,17 @@ namespace gitter.Framework.Services
 		public string Url { get; }
 
 		/// <summary>Navigate the hyperlink.</summary>
-		public void Navigate() => Utility.OpenUrl(Url);
+		public void Navigate()
+		{
+			if(Url.StartsWith("gitter://"))
+			{
+				NavigateInternal(Url);
+			}
+			else
+			{
+				Utility.OpenUrl(Url);
+			}
+		}
 
 		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</summary>
 		/// <returns><see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</returns>

@@ -26,6 +26,7 @@ namespace gitter.Git.Gui.Views
 
 	using gitter.Framework;
 	using gitter.Framework.Configuration;
+	using gitter.Framework.Services;
 
 	using gitter.Git.Gui.Controls;
 
@@ -35,13 +36,8 @@ namespace gitter.Git.Gui.Views
 	[ToolboxItem(false)]
 	partial class HistoryView : HistoryViewBase
 	{
-		#region Data
-
 		private readonly HistoryToolbar _toolbar;
-
-		#endregion
-
-		#region .ctor
+		private IDisposable _urlHandler;
 
 		public HistoryView(GuiProvider gui)
 			: base(Guids.HistoryViewGuid, gui)
@@ -49,9 +45,37 @@ namespace gitter.Git.Gui.Views
 			RevisionListBox.PreviewKeyDown += OnKeyDown;
 			Text = Resources.StrHistory;
 			AddTopToolStrip(_toolbar = new HistoryToolbar(this));
+
+			_urlHandler = Hyperlink.RegisterInternalHandler(OnNavigate);
 		}
 
-		#endregion
+		protected override void Dispose(bool disposing)
+		{
+			if(_urlHandler is not null)
+			{
+				_urlHandler.Dispose();
+				_urlHandler = null;
+			}
+			base.Dispose(disposing);
+		}
+
+		private bool OnNavigate(string url)
+		{
+			const string prefix = @"gitter://history/";
+
+			if(!url.StartsWith(prefix)) return false;
+			if(Repository is null) return false;
+
+			try
+			{
+				var ptr = Repository.GetRevisionPointer(url.Substring(prefix.Length));
+				return SelectRevision(ptr);
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
+				return false;
+			}
+		}
 
 		/// <inheritdoc/>
 		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"history");
