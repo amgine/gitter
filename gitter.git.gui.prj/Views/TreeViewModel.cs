@@ -30,7 +30,7 @@ namespace gitter.Git.Gui.Views
 		public ITreeSource TreeSource { get; }
 
 		public override int GetHashCode()
-			=> TreeSource != null ? TreeSource.GetHashCode() : 0;
+			=> TreeSource is not null ? TreeSource.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
 			=> obj is TreeViewModel other && Equals(TreeSource, other.TreeSource);

@@ -53,7 +53,7 @@ namespace gitter.Git.Gui.Controls
 		protected HashColumnBase(int id, string name, bool visible)
 			: base(id, name, visible)
 		{
-			Width = 56;
+			Width = DpiConverter.FromDefaultTo(Dpi.System).ConvertX(56);
 			ContentFont = Font;
 
 			_abbreviate = DefaultAbbreviate;

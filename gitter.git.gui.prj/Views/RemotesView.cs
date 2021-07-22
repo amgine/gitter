@@ -84,11 +84,12 @@ namespace gitter.Git.Gui.Views
 
 		public override void RefreshContent()
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
 				try
 				{
-					BeginInvoke(new MethodInvoker(RefreshContent));
+					BeginInvoke(new MethodInvoker(RefreshContentSync));
 				}
 				catch
 				{
@@ -96,14 +97,18 @@ namespace gitter.Git.Gui.Views
 			}
 			else
 			{
-				if(IsDisposed) return;
-				if(Repository is not null)
-				{
-					using(this.ChangeCursor(Cursors.WaitCursor))
-					{
-						Repository.Remotes.Refresh();
-					}
-				}
+				RefreshContentSync();
+			}
+		}
+
+		private void RefreshContentSync()
+		{
+			if(IsDisposed) return;
+			if(Repository is null) return;
+
+			using(this.ChangeCursor(Cursors.WaitCursor))
+			{
+				Repository.Remotes.Refresh();
 			}
 		}
 

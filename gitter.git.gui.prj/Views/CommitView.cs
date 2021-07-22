@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Views
 {
 	using System;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Windows.Forms;
 
 	using gitter.Framework;
@@ -196,7 +195,7 @@ namespace gitter.Git.Gui.Views
 			{
 				try
 				{
-					BeginInvoke(new MethodInvoker(RefreshContent));
+					BeginInvoke(new MethodInvoker(RefreshContentSync));
 				}
 				catch(ObjectDisposedException)
 				{
@@ -204,17 +203,22 @@ namespace gitter.Git.Gui.Views
 			}
 			else
 			{
-				if(Repository != null)
-				{
-					using(this.ChangeCursor(Cursors.WaitCursor))
-					{
-						_lstStaged.BeginUpdate();
-						_lstUnstaged.BeginUpdate();
-						Repository.Status.Refresh();
-						_lstStaged.EndUpdate();
-						_lstUnstaged.EndUpdate();
-					}
-				}
+				RefreshContentSync();
+			}
+		}
+
+		private void RefreshContentSync()
+		{
+			if(IsDisposed) return;
+			if(Repository is null) return;
+
+			using(this.ChangeCursor(Cursors.WaitCursor))
+			{
+				_lstStaged.BeginUpdate();
+				_lstUnstaged.BeginUpdate();
+				Repository.Status.Refresh();
+				_lstStaged.EndUpdate();
+				_lstUnstaged.EndUpdate();
 			}
 		}
 
@@ -439,12 +443,12 @@ namespace gitter.Git.Gui.Views
 
 			_toolbar.TreeModeButton.Checked = _treeMode = section.GetValue<bool>("TreeMode", true);
 			var stagedListSection = section.TryGetSection("StagedList");
-			if(stagedListSection != null)
+			if(stagedListSection is not null)
 			{
 				_lstStaged.LoadViewFrom(stagedListSection);
 			}
 			var unstagedListSection = section.TryGetSection("UnstagedList");
-			if(unstagedListSection != null)
+			if(unstagedListSection is not null)
 			{
 				_lstUnstaged.LoadViewFrom(unstagedListSection);
 			}

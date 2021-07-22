@@ -33,7 +33,7 @@ namespace gitter.Framework.Services
 
 		private static readonly SpellcheckerCache _cache = new();
 		private readonly TextBox _textBox;
-		private readonly List<Substring> _errors;
+		private readonly List<Substring> _errors = new();
 		private bool _enabled;
 		private Bitmap _bitmap;
 		private Graphics _textBoxGraphics;  
@@ -49,7 +49,6 @@ namespace gitter.Framework.Services
 			Verify.Argument.IsNotNull(textBox, nameof(textBox));
 
 			_textBox = textBox;
-			_errors = new List<Substring>();
 			Enabled = enable;
 		}
 
@@ -75,17 +74,17 @@ namespace gitter.Framework.Services
 						_textBox.TextChanged -= OnTextChanged;
 						_textBox.SizeChanged -= OnSizeChanged;
 						ReleaseHandle();
-						if(_textBoxGraphics != null)
+						if(_textBoxGraphics is not null)
 						{
 							_textBoxGraphics.Dispose();
 							_textBoxGraphics = null;
 						}
-						if(_bufferGraphics != null)
+						if(_bufferGraphics is not null)
 						{
 							_bufferGraphics.Dispose();
 							_bufferGraphics = null;
 						}
-						if(_bitmap != null)
+						if(_bitmap is not null)
 						{
 							_bitmap.Dispose();
 							_bitmap = null;
@@ -114,9 +113,9 @@ namespace gitter.Framework.Services
 
 		private Graphics GetGraphics()
 		{
-			if(_bitmap != null && _bitmap.Size != _textBox.Size)
+			if(_bitmap is not null && _bitmap.Size != _textBox.Size)
 			{
-				if(_bufferGraphics != null)
+				if(_bufferGraphics is not null)
 				{
 					_bufferGraphics.Dispose();
 					_bufferGraphics = null;
@@ -124,16 +123,16 @@ namespace gitter.Framework.Services
 				_bitmap.Dispose();
 				_bitmap = null;
 			}
-			if(_bitmap == null)
+			if(_bitmap is null)
 			{
-				if(_bufferGraphics != null)
+				if(_bufferGraphics is not null)
 				{
 					_bufferGraphics.Dispose();
 					_bufferGraphics = null;
 				}
 				_bitmap = new Bitmap(_textBox.Width, _textBox.Height);
 			}
-			if(_bufferGraphics == null)
+			if(_bufferGraphics is null)
 			{
 				_bufferGraphics = Graphics.FromImage(_bitmap);
 				_bufferGraphics.Clip = new Region(_textBox.ClientRectangle);
@@ -153,6 +152,10 @@ namespace gitter.Framework.Services
 				DashStyle = DashStyle.Dash,
 			})
 			{
+				var c = new DpiConverter(_textBox);
+				var xoffset = c.ConvertX(6);
+				var yoffset = c.ConvertX(15);
+
 				for(int i = 0; i < _errors.Count; ++i)
 				{
 					var err = _errors[i];
@@ -162,16 +165,16 @@ namespace gitter.Framework.Services
 					var pos2 = _textBox.GetPositionFromCharIndex(err.End);
 					if(line1 != line2)
 					{
-						pos2.X += 6;
-						pos1.Y += 15;
+						pos2.X += xoffset;
+						pos1.Y += yoffset;
 						pos2.Y = pos1.Y;
 						pos2.X = _textBox.ClientSize.Width;
 					}
 					else
 					{
-						pos2.X += 6;
-						pos1.Y += 15;
-						pos2.Y += 15;
+						pos2.X += xoffset;
+						pos1.Y += yoffset;
+						pos2.Y += yoffset;
 					}
 					graphics.DrawLine(pen, pos1, pos2);
 				}
@@ -247,17 +250,17 @@ namespace gitter.Framework.Services
 				_textBox.SizeChanged -= OnSizeChanged;
 			}
 			ReleaseHandle();
-			if(_textBoxGraphics != null)
+			if(_textBoxGraphics is not null)
 			{
 				_textBoxGraphics.Dispose();
 				_textBoxGraphics = null;
 			}
-			if(_bufferGraphics != null)
+			if(_bufferGraphics is not null)
 			{
 				_bufferGraphics.Dispose();
 				_bufferGraphics = null;
 			}
-			if(_bitmap != null)
+			if(_bitmap is not null)
 			{
 				_bitmap.Dispose();
 				_bitmap = null;

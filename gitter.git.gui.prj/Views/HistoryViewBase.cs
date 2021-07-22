@@ -117,7 +117,7 @@ namespace gitter.Git.Gui.Views
 				if(_logSource != value)
 				{
 					_logSource = value;
-					RevisionLogBinding = value != null
+					RevisionLogBinding = value is not null
 						? new RevisionLogBinding(value, RevisionListBox, LogOptions)
 						: default;
 				}
@@ -137,7 +137,7 @@ namespace gitter.Git.Gui.Views
 					_options = value;
 					_options.Changed += OnLogOptionsChanged;
 
-					if(RevisionLogBinding != null)
+					if(RevisionLogBinding is not null)
 					{
 						RevisionLogBinding.LogOptions = value;
 					}
@@ -224,7 +224,7 @@ namespace gitter.Git.Gui.Views
 		private void OnItemActivated(object sender, ItemEventArgs e)
 		{
 			var diffSource = GetDiffSourceFromItem(e.Item);
-			if(diffSource != null)
+			if(diffSource is not null)
 			{
 				ShowDiffView(diffSource);
 			}
@@ -258,7 +258,7 @@ namespace gitter.Git.Gui.Views
 				2 => GetDiffSourceFromItems(RevisionListBox.SelectedItems[0], RevisionListBox.SelectedItems[1]),
 				_ => default,
 			};
-			if(diffSource != null)
+			if(diffSource is not null)
 			{
 				ShowContextualDiffView(diffSource);
 			}

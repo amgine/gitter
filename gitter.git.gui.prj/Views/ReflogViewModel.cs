@@ -30,7 +30,7 @@ namespace gitter.Git.Gui.Views
 		public Reflog Reflog { get; }
 
 		public override int GetHashCode()
-			=> Reflog != null ? Reflog.GetHashCode() : 0;
+			=> Reflog is not null ? Reflog.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
 			=> obj is ReflogViewModel other && Equals(Reflog, other.Reflog);

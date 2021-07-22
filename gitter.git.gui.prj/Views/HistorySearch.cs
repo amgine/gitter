@@ -36,7 +36,7 @@ namespace gitter.Git.Gui.Views
 
 		protected static bool TestHash(string hash, T search)
 		{
-			return hash != null && hash.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase);
+			return hash is not null && hash.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase);
 		}
 
 		protected static bool TestRevision(Revision revision, T search)

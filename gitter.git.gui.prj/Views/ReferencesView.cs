@@ -42,7 +42,7 @@ namespace gitter.Git.Gui.Views
 			: base(Guids.ReferencesViewGuid, gui)
 		{
 			InitializeComponent();
-			_lstReferences.Columns.ShowAll((c) => c.Id != (int)ColumnId.TreeHash);
+			_lstReferences.Columns.ShowAll(static c => c.Id != (int)ColumnId.TreeHash);
 			_lstReferences.PreviewKeyDown += OnKeyDown;
 
 			Text   = Resources.StrReferences;
@@ -83,11 +83,12 @@ namespace gitter.Git.Gui.Views
 
 		public override void RefreshContent()
 		{
+			if(IsDisposed) return;
 			if(InvokeRequired)
 			{
 				try
 				{
-					BeginInvoke(new MethodInvoker(RefreshContent));
+					BeginInvoke(new MethodInvoker(RefreshContentSync));
 				}
 				catch
 				{
@@ -95,16 +96,20 @@ namespace gitter.Git.Gui.Views
 			}
 			else
 			{
-				if(IsDisposed) return;
-				if(Repository is not null)
-				{
-					using(this.ChangeCursor(Cursors.WaitCursor))
-					{
-						_lstReferences.BeginUpdate();
-						Repository.Refs.Refresh();
-						_lstReferences.EndUpdate();
-					}
-				}
+				RefreshContentSync();
+			}
+		}
+
+		private void RefreshContentSync()
+		{
+			if(IsDisposed) return;
+			if(Repository is null) return;
+
+			using(this.ChangeCursor(Cursors.WaitCursor))
+			{
+				_lstReferences.BeginUpdate();
+				Repository.Refs.Refresh();
+				_lstReferences.EndUpdate();
 			}
 		}
 

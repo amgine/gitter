@@ -51,21 +51,23 @@ namespace gitter.Git
 			InitializeComponent();
 
 			_lstSystemConfig.Style = GitterApplication.DefaultStyle;
-			_lstUserConfig.Style = GitterApplication.DefaultStyle;
+			_lstUserConfig.Style   = GitterApplication.DefaultStyle;
 
-			_pageUser.Text = Resources.StrCurrentUser;
+			_pageUser.Text   = Resources.StrCurrentUser;
 			_pageSystem.Text = Resources.StrSystem;
 
-			_btnAddUserParameter.Text = Resources.StrAddParameter;
+			_btnAddUserParameter.Text   = Resources.StrAddParameter;
 			_btnAddSystemParameter.Text = Resources.StrAddParameter;
 
-			var gitAccessor = environment.RepositoryProviders
-										 .OfType<IGitRepositoryProvider>()
-										 .First()
-										 .GitAccessor;
+			var gitAccessor = environment
+				.RepositoryProviders
+				.OfType<IGitRepositoryProvider>()
+				.First()
+				.GitAccessor;
 
 			_userCfg	= ConfigurationFile.OpenCurrentUserFile(gitAccessor);
-			_systemCfg	= ConfigurationFile.OpenSystemFile(gitAccessor);
+			_systemCfg	= ConfigurationFile.OpenSystemFile     (gitAccessor);
+
 			_lstUserConfig.LoadData(_userCfg);
 			_lstSystemConfig.LoadData(_systemCfg);
 		}

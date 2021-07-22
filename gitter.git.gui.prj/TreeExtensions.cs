@@ -114,7 +114,7 @@ namespace gitter.Git.Gui
 					MessageBoxIcon.Error);
 				return null;
 			}
-			if(bytes != null)
+			if(bytes is not null)
 			{
 				path = Path.GetDirectoryName(fileName);
 				if(!Directory.Exists(path)) Directory.CreateDirectory(path);

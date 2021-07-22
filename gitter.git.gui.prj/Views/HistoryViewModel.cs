@@ -30,7 +30,7 @@ namespace gitter.Git.Gui.Views
 		public ILogSource LogSource { get; }
 
 		public override int GetHashCode()
-			=> LogSource is null ? 0 : LogSource.GetHashCode();
+			=> LogSource is not null ? LogSource.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
 			=> obj is HistoryViewModel other && Equals(LogSource, other.LogSource);

@@ -633,6 +633,19 @@ namespace gitter.Git.Gui
 			}
 		}
 
+		private static void SetItemText(ToolStripItem item, int count)
+		{
+			if(count != 0)
+			{
+				item.Text = count.ToString(CultureInfo.CurrentCulture);
+				item.Available = true;
+			}
+			else
+			{
+				item.Available = false;
+			}
+		}
+
 		private void UpdateStatus()
 		{
 			var status = Repository.Status;
@@ -647,8 +660,8 @@ namespace gitter.Git.Gui
 					_statusStagedModified.Available = false;
 					_statusStagedRemoved.Available = false;
 					_statusUnstagedUntracked.Available = false;
-					_statusUnstagedRemoved.Available = false;
 					_statusUnstagedModified.Available = false;
+					_statusUnstagedRemoved.Available = false;
 
 					GitterApplication.MainForm.RemoveTaskbarOverlayIcon();
 				}
@@ -656,69 +669,13 @@ namespace gitter.Git.Gui
 				{
 					_statusClean.Available = false;
 
-					if(status.UnmergedCount != 0)
-					{
-						_statusUnmerged.Text = status.UnmergedCount.ToString(CultureInfo.CurrentCulture);
-						_statusUnmerged.Available = true;
-					}
-					else
-					{
-						_statusUnmerged.Available = false;
-					}
-					if(status.StagedAddedCount != 0)
-					{
-						_statusStagedAdded.Text = status.StagedAddedCount.ToString(CultureInfo.CurrentCulture);
-						_statusStagedAdded.Available = true;
-					}
-					else
-					{
-						_statusStagedAdded.Available = false;
-					}
-					if(status.StagedModifiedCount != 0)
-					{
-						_statusStagedModified.Text = status.StagedModifiedCount.ToString(CultureInfo.CurrentCulture);
-						_statusStagedModified.Available = true;
-					}
-					else
-					{
-						_statusStagedModified.Available = false;
-					}
-					if(status.StagedRemovedCount != 0)
-					{
-						_statusStagedRemoved.Text = status.StagedRemovedCount.ToString(CultureInfo.CurrentCulture);
-						_statusStagedRemoved.Available = true;
-					}
-					else
-					{
-						_statusStagedRemoved.Available = false;
-					}
-					if(status.UnstagedUntrackedCount != 0)
-					{
-						_statusUnstagedUntracked.Text = status.UnstagedUntrackedCount.ToString(CultureInfo.CurrentCulture);
-						_statusUnstagedUntracked.Available = true;
-					}
-					else
-					{
-						_statusUnstagedUntracked.Available = false;
-					}
-					if(status.UnstagedModifiedCount != 0)
-					{
-						_statusUnstagedModified.Text = status.UnstagedModifiedCount.ToString(CultureInfo.CurrentCulture);
-						_statusUnstagedModified.Available = true;
-					}
-					else
-					{
-						_statusUnstagedModified.Available = false;
-					}
-					if(status.UnstagedRemovedCount != 0)
-					{
-						_statusUnstagedRemoved.Text = status.UnstagedRemovedCount.ToString(CultureInfo.CurrentCulture);
-						_statusUnstagedRemoved.Available = true;
-					}
-					else
-					{
-						_statusUnstagedRemoved.Available = false;
-					}
+					SetItemText(_statusUnmerged,          status.UnmergedCount);
+					SetItemText(_statusStagedAdded,       status.StagedAddedCount);
+					SetItemText(_statusStagedModified,    status.StagedModifiedCount);
+					SetItemText(_statusStagedRemoved,     status.StagedRemovedCount);
+					SetItemText(_statusUnstagedUntracked, status.UnstagedUntrackedCount);
+					SetItemText(_statusUnstagedModified,  status.UnstagedModifiedCount);
+					SetItemText(_statusUnstagedRemoved,   status.UnstagedRemovedCount);
 
 					int count =
 						status.StagedAddedCount +
@@ -728,24 +685,17 @@ namespace gitter.Git.Gui
 						status.UnstagedModifiedCount +
 						status.UnstagedRemovedCount +
 						status.UnstagedUntrackedCount;
-					string resName;
-					if(count < 1)
+					var resName = count switch
 					{
-						resName = null;
-					}
-					else if(count > 9)
-					{
-						resName = "9p";
-					}
-					else
-					{
-						resName = count.ToString(CultureInfo.InvariantCulture);
-					}
-					if(resName != null)
+						< 1 => null,
+						> 9 => "9p",
+						_   => count.ToString(CultureInfo.InvariantCulture),
+					};
+					if(resName is not null)
 					{
 						GitterApplication.MainForm.SetTaskbarOverlayIcon(
 							CachedResources.Icons["IcoStatusGreen" + resName],
-							string.Format("{0} modifications", count));
+							$"{count} modifications");
 					}
 				}
 			}

@@ -27,8 +27,10 @@ namespace gitter.Git.Gui
 
 	sealed class HashHyperlinkExtractor : IHyperlinkExtractor
 	{
+		const int MinLength = Hash.HexStringLength;
+
 		static bool IsHashChar(char value)
-			=> (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f');
+			=> (value is >= '0' and <= '9') || (value is >= 'a' and <= 'f');
 
 		ref struct State
 		{
@@ -59,7 +61,7 @@ namespace gitter.Git.Gui
 				if(Start >= 0 && !NonHashSeq)
 				{
 					var len = position - Start;
-					if(len >= 7 && len <= Hash.HexStringLength)
+					if(len >= MinLength && len <= Hash.HexStringLength)
 					{
 						var hash = Text.Substring(Start, len);
 						Hyperlinks ??= new();
@@ -100,7 +102,7 @@ namespace gitter.Git.Gui
 			for(int i = 0; i < text.Length; ++i)
 			{
 				var c = text[i];
-				if(char.IsWhiteSpace(c) || c == ')')
+				if(char.IsWhiteSpace(c) || c is ')' or ',' or '.' or ':' or ';')
 				{
 					state.Commit(i);
 				}

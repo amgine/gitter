@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Controls
 {
 	using System;
 
+	using gitter.Framework;
 	using gitter.Framework.Controls;
 
 	using Resources = gitter.Git.Gui.Properties.Resources;
@@ -46,10 +47,11 @@ namespace gitter.Git.Gui.Controls
 
 		public ReflogListBox()
 		{
+			var c = new DpiConverter(this);
 			Columns.AddRange(new[]
 				{
-					_colHash           = new HashColumn           { IsVisible = true,  Abbreviate = true, Width = 58 },
-					_colTreeHash       = new TreeHashColumn       { IsVisible = false, Abbreviate = true, Width = 58 },
+					_colHash           = new HashColumn           { IsVisible = true,  Abbreviate = true, Width = c.ConvertX(58) },
+					_colTreeHash       = new TreeHashColumn       { IsVisible = false, Abbreviate = true, Width = c.ConvertX(58) },
 					_colCommitDate     = new CommitDateColumn     { IsVisible = false },
 					_colMessage        = new MessageColumn        { IsVisible = true  },
 					_colSubject        = new SubjectColumn        { IsVisible = false },

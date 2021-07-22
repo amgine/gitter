@@ -86,9 +86,9 @@ namespace gitter.Git.Gui.Views
 
 			base.AttachToRepository(repository);
 
-			Repository.CommitCreated += OnCommitCreated;
-			Repository.Updated += OnRepositoryUpdated;
-			Repository.Stash.StashedStateDeleted += OnStashDeleted;
+			repository.CommitCreated += OnCommitCreated;
+			repository.Updated += OnRepositoryUpdated;
+			repository.Stash.StashedStateDeleted += OnStashDeleted;
 
 			LogSource = new RepositoryLogSource(repository);
 		}
@@ -104,7 +104,7 @@ namespace gitter.Git.Gui.Views
 			repository.CommitCreated -= OnCommitCreated;
 			repository.Updated -= OnRepositoryUpdated;
 			repository.Stash.StashedStateDeleted -= OnStashDeleted;
-	
+
 			LogOptions.Reset();
 		}
 
@@ -140,7 +140,7 @@ namespace gitter.Git.Gui.Views
 			if(e.Object.Index == 0)
 			{
 				var item = RevisionListBox.TryGetItem(e.Object.Revision);
-				if(item != null)
+				if(item is not null)
 				{
 					RefreshContent();
 				}

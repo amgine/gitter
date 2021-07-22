@@ -101,18 +101,6 @@ namespace gitter.Git.Gui.Controls
 	public abstract class TreeItemListItem<T> : CustomListBoxItem<T>, ITreeItemListItem
 		where T : TreeItem
 	{
-		#region Static Data
-
-		private static readonly Bitmap ImgOverlayEdit		= CachedResources.Bitmaps["ImgOverlayEdit"];
-		private static readonly Bitmap ImgOverlayEditStaged	= CachedResources.Bitmaps["ImgOverlayEditStaged"];
-		private static readonly Bitmap ImgOverlayAdd		= CachedResources.Bitmaps["ImgOverlayAdd"];
-		private static readonly Bitmap ImgOverlayAddStaged	= CachedResources.Bitmaps["ImgOverlayAddStaged"];
-		private static readonly Bitmap ImgOverlayDel		= CachedResources.Bitmaps["ImgOverlayDel"];
-		private static readonly Bitmap ImgOverlayDelStaged	= CachedResources.Bitmaps["ImgOverlayDelStaged"];
-		private static readonly Bitmap ImgOverlayConflict	= CachedResources.Bitmaps["ImgOverlayConflict"];
-
-		#endregion
-
 		#region Data
 
 		private string _type;
@@ -170,10 +158,10 @@ namespace gitter.Git.Gui.Controls
 		{
 			var name = DataContext.Status switch
 			{
-				FileStatus.Modified => DataContext.StagedStatus == StagedStatus.Unstaged ? @"edit"   : @"edit.staged",
-				FileStatus.Added    => DataContext.StagedStatus == StagedStatus.Unstaged ? @"add"    : @"add.staged",
-				FileStatus.Removed  => DataContext.StagedStatus == StagedStatus.Unstaged ? @"delete" : @"delete.staged",
-				FileStatus.Unmerged => @"conflict",
+				FileStatus.Modified => DataContext.StagedStatus == StagedStatus.Unstaged ? @"overlays.edit"   : @"overlays.edit.staged",
+				FileStatus.Added    => DataContext.StagedStatus == StagedStatus.Unstaged ? @"overlays.add"    : @"overlays.add.staged",
+				FileStatus.Removed  => DataContext.StagedStatus == StagedStatus.Unstaged ? @"overlays.delete" : @"overlays.delete.staged",
+				FileStatus.Unmerged => @"overlays.conflict",
 				_ => null,
 			};
 			if(name is null) return default;

@@ -35,7 +35,7 @@ namespace gitter.Git.AccessLayer
 		/// <param name="parameterValue">Parameter value.</param>
 		public SetConfigValueParameters(string parameterName, string parameterValue)
 		{
-			ParameterName = parameterName;
+			ParameterName  = parameterName;
 			ParameterValue = parameterValue;
 		}
 

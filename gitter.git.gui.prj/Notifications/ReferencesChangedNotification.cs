@@ -41,14 +41,15 @@ namespace gitter.Git.Gui
 		public ReferencesChangedNotification(ReferenceChange[] changes)
 		{
 			_changes = changes;
-			Height = Measure(changes);
+			Height = Measure(changes, new Dpi(DeviceDpi));
 		}
 
-		private static int Measure(ReferenceChange[] changes)
+		private static int Measure(ReferenceChange[] changes, Dpi dpi)
 		{
-			if(changes == null || changes.Length == 0)
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			if(changes is not { Length: > 0 })
 			{
-				return VerticalMargin * 2 + ItemHeight;
+				return conv.ConvertY(VerticalMargin) * 2 + conv.ConvertY(ItemHeight);
 			}
 			else
 			{
@@ -57,16 +58,16 @@ namespace gitter.Git.Gui
 				{
 					count = MaxItems;
 				}
-				return VerticalMargin * 2 + count * ItemHeight;
+				return conv.ConvertY(VerticalMargin) * 2 + count * conv.ConvertY(ItemHeight);
 			}
 		}
 
-		private static Bitmap GetIcon(ReferenceType referenceType)
+		private static Bitmap GetIcon(ReferenceType referenceType, int size)
 			=> referenceType switch
 			{
-				ReferenceType.RemoteBranch => CachedResources.Bitmaps["ImgBranchRemote"],
-				ReferenceType.LocalBranch  => CachedResources.Bitmaps["ImgBranch"],
-				ReferenceType.Tag          => CachedResources.Bitmaps["ImgTag"],
+				ReferenceType.RemoteBranch => CachedResources.ScaledBitmaps[@"rbranch", size],
+				ReferenceType.LocalBranch  => CachedResources.ScaledBitmaps[@"branch",  size],
+				ReferenceType.Tag          => CachedResources.ScaledBitmaps[@"tag",     size],
 				_ => null,
 			};
 
@@ -87,16 +88,20 @@ namespace gitter.Git.Gui
 			{
 				e.Graphics.FillRectangle(background, e.ClipRectangle);
 			}
-			int x = HorizontalMargin;
-			int y = VerticalMargin;
+			var conv = new DpiConverter(this);
+			int x = conv.ConvertX(HorizontalMargin);
+			int y = conv.ConvertY(VerticalMargin);
 			using var brush = new SolidBrush(ForeColor);
-			if(_changes == null || _changes.Length == 0)
+			if(_changes is not { Length: > 0 })
 			{
 				GitterApplication.TextRenderer.DrawText(
 					e.Graphics, Resources.StrsEverythingIsUpToDate, Font, brush, new Point(x, y + 2));
 			}
 			else
 			{
+				var itemHeight = conv.ConvertY(ItemHeight);
+				var v = conv.ConvertX(54);
+				var spacing = conv.ConvertX(4);
 				for(int i = 0; i < _changes.Length; ++i)
 				{
 					if(i == MaxItems - 1 && _changes.Length > MaxItems)
@@ -112,14 +117,14 @@ namespace gitter.Git.Gui
 						GitterApplication.TextRenderer.DrawText(
 							e.Graphics, prefix, Font, brush, new Point(x, y + 2));
 					}
-					var icon = GetIcon(_changes[i].ReferenceType);
-					if(icon != null)
+					var icon = GetIcon(_changes[i].ReferenceType, conv.ConvertX(16));
+					if(icon is not null)
 					{
-						e.Graphics.DrawImage(icon, new Rectangle(x + 54, y + (ItemHeight - icon.Height) / 2, icon.Width, icon.Height));
+						e.Graphics.DrawImage(icon, new Rectangle(x + v, y + (itemHeight - icon.Height) / 2, icon.Width, icon.Height));
 					}
 					GitterApplication.TextRenderer.DrawText(
-						e.Graphics, _changes[i].Name, Font, brush, new Point(x + 54 + (icon != null ? icon.Width : 0) + 4, y + 2));
-					y += ItemHeight;
+						e.Graphics, _changes[i].Name, Font, brush, new Point(x + v + (icon is not null ? icon.Width : 0) + spacing, y + 2));
+					y += itemHeight;
 				}
 			}
 		}

@@ -85,7 +85,7 @@ namespace gitter.Git
 
 		public Image Icon => CachedResources.Bitmaps["ImgGit"];
 
-		public bool IsLoaded => _environment != null;
+		public bool IsLoaded => _environment is not null;
 
 		#endregion
 
@@ -100,7 +100,7 @@ namespace gitter.Git
 
 				if(_gitAccessorProvider != value)
 				{
-					if(_gitAccessorProvider != null && _gitAccessor != null && _configSection != null)
+					if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
 					{
 						var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
 						_gitAccessor.SaveTo(gitAccessorSection);
@@ -109,7 +109,7 @@ namespace gitter.Git
 					_gitAccessorProvider = value;
 					_gitAccessor = value.CreateAccessor();
 
-					if(_gitAccessor != null && _configSection != null)
+					if(_gitAccessor is not null && _configSection is not null)
 					{
 						var gitAccessorSection = _configSection.TryGetSection(value.Name);
 						_gitAccessor.LoadFrom(gitAccessorSection);
@@ -127,7 +127,7 @@ namespace gitter.Git
 
 				if(_gitAccessor != value)
 				{
-					if(_gitAccessorProvider != null && _gitAccessor != null && _configSection != null)
+					if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
 					{
 						var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
 						_gitAccessor.SaveTo(gitAccessorSection);
@@ -145,7 +145,7 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(environment, nameof(environment));
 
-			if(section != null)
+			if(section is not null)
 			{
 				var providerName = section.GetValue<string>("AccessorProvider", string.Empty);
 				if(!string.IsNullOrWhiteSpace(providerName))
@@ -176,12 +176,12 @@ namespace gitter.Git
 			{
 				gitVersion = null;
 			}
-			if(gitVersion == null || gitVersion < MinimumRequiredGitVersion)
+			if(gitVersion is null || gitVersion < MinimumRequiredGitVersion)
 			{
 				using var dlg = new VersionCheckDialog(environment, this, MinimumRequiredGitVersion, gitVersion);
 				dlg.Run(environment.MainForm);
 				gitVersion = dlg.InstalledVersion;
-				if(gitVersion == null || gitVersion < _minVersion)
+				if(gitVersion is null || gitVersion < _minVersion)
 				{
 					return false;
 				}
@@ -192,14 +192,14 @@ namespace gitter.Git
 					Resources.StrGit,
 					null,
 					PropertyPageFactory.RootGroupGuid,
-					env => new GitOptionsPage(env)));
+					static env => new GitOptionsPage(env)));
 			GlobalOptions.RegisterPropertyPageFactory(
 				new PropertyPageFactory(
 					ConfigurationPage.Guid,
 					Resources.StrConfig,
 					null,
 					GitOptionsPage.Guid,
-					env => new ConfigurationPage(env)));
+					static env => new ConfigurationPage(env)));
 			_environment = environment;
 			_configSection = section;
 			return true;
@@ -211,10 +211,10 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(section, nameof(section));
 
-			if(ActiveGitAccessorProvider != null)
+			if(ActiveGitAccessorProvider is not null)
 			{
 				section.SetValue<string>("AccessorProvider", ActiveGitAccessorProvider.Name);
-				if(GitAccessor != null)
+				if(GitAccessor is not null)
 				{
 					var gitAccessorSection = section.GetCreateSection(ActiveGitAccessorProvider.Name);
 					GitAccessor.SaveTo(gitAccessorSection);
@@ -240,9 +240,9 @@ namespace gitter.Git
 		{
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 			var gitRepository = repository as Repository;
-			Verify.Argument.IsTrue(gitRepository != null, nameof(repository));
+			Verify.Argument.IsTrue(gitRepository is not null, nameof(repository));
 
-			if(gitRepository.UserIdentity == null)
+			if(gitRepository.UserIdentity is null)
 			{
 				using var dlg = new UserIdentificationDialog(_environment, gitRepository);
 				dlg.Run(_environment.MainForm);

@@ -45,7 +45,7 @@ namespace gitter.Git.Gui
 		{
 			for(int i = from; i <= to; ++i)
 			{
-				if(line[i] != null)
+				if(line[i] is not null)
 				{
 					graphLine[i].Paint(GraphElement.Vertical, linecolors[i]);
 				}
@@ -100,7 +100,7 @@ namespace gitter.Git.Gui
 			int lineColor = 0;
 			// find position to insert dot
 			int j = lineCount;
-			while((j != 0) && (line[j - 1] == null))
+			while((j != 0) && (line[j - 1] is null))
 			{
 				--j;
 			}

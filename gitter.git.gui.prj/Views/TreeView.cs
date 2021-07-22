@@ -109,8 +109,7 @@ namespace gitter.Git.Gui.Views
 			_directoryTree.ItemContextMenuRequested +=
 				(sender, e) =>
 				{
-					var vm = ViewModel as TreeViewModel;
-					if(vm != null && vm.TreeSource != null)
+					if(ViewModel is TreeViewModel vm && vm.TreeSource is not null)
 					{
 						var menu = new TreeMenu(vm.TreeSource, (TreeDirectoryListItem)e.Item);
 						Utility.MarkDropDownForAutoDispose(menu);
@@ -168,7 +167,7 @@ namespace gitter.Git.Gui.Views
 				if(_currentDirectory != value)
 				{
 					var item = FindDirectoryEntry(value);
-					if(item == null) throw new ArgumentException(nameof(value));
+					if(item is null) throw new ArgumentException(nameof(value));
 					item.FocusAndSelect();
 					_currentDirectory = value;
 					OnCurrentDirectoryChanged(EventArgs.Empty);
@@ -390,7 +389,7 @@ namespace gitter.Git.Gui.Views
 					break;
 				case TreeDirectoryListItem directoryItem:
 					var directoryEntry = FindDirectoryEntry(directoryItem.DataContext);
-					if(directoryEntry != null)
+					if(directoryEntry is not null)
 					{
 						if(directoryEntry.IsSelected)
 						{

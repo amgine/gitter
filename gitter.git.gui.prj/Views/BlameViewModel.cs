@@ -30,7 +30,7 @@ namespace gitter.Git.Gui.Views
 		public IBlameSource BlameSource { get; }
 
 		public override int GetHashCode()
-			=> BlameSource != null ? BlameSource.GetHashCode() : 0;
+			=> BlameSource is not null ? BlameSource.GetHashCode() : 0;
 
 		public override bool Equals(object obj)
 			=> obj is BlameViewModel other && Equals(BlameSource, other.BlameSource);

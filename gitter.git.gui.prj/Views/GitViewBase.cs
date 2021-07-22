@@ -21,7 +21,6 @@
 namespace gitter.Git.Gui.Views
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 
 	using gitter.Framework;
@@ -61,7 +60,7 @@ namespace gitter.Git.Gui.Views
 		protected override void OnCreateControl()
 		{
 			base.OnCreateControl();
-			if(_repository != null)
+			if(_repository is not null)
 			{
 				AttachToRepository(_repository);
 			}
@@ -99,17 +98,29 @@ namespace gitter.Git.Gui.Views
 			{
 				if(value != _repository)
 				{
-					if(_repository != null)
-					{
-						DetachFromRepository(_repository);
-					}
-					_repository = value;
-					if(_repository != null)
-					{
-						AttachToRepository(_repository);
-					}
+					DetachRepository();
+					AttachRepository(value);
 					RepositoryChanged?.Invoke(this, EventArgs.Empty);
 				}
+			}
+		}
+
+		private void DetachRepository()
+		{
+			var repository = _repository;
+			_repository = null;
+			if(repository is not null)
+			{
+				DetachFromRepository(repository);
+			}
+		}
+
+		private void AttachRepository(Repository repository)
+		{
+			_repository = repository;
+			if(repository is not null)
+			{
+				AttachToRepository(repository);
 			}
 		}
 

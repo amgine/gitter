@@ -290,7 +290,7 @@ namespace gitter
 			}
 
 			var p = GitterApplication.WorkingEnvironment.FindProviderForDirectory(workingDirectory);
-			if(p != null)
+			if(p is not null)
 			{
 				bool separatorAdded = res.Count == 0;
 				foreach(var command in p.GetRepositoryCommands(workingDirectory))

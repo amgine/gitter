@@ -99,7 +99,7 @@ namespace gitter.Git.Gui.Views
 
 		private void UpdateCheckStatuses()
 		{
-			if(_logOptions != null)
+			if(_logOptions is not null)
 			{
 				UpdateCheckStatuses(_lstReferences.Items);
 			}
@@ -122,7 +122,7 @@ namespace gitter.Git.Gui.Views
 
 		public Repository Repository
 		{
-			get { return _repository; }
+			get => _repository;
 			set
 			{
 				if(_repository != value)

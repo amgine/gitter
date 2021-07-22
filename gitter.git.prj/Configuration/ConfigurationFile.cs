@@ -34,17 +34,15 @@ namespace gitter.Git
 
 		/// <summary>Open config file with system-wide settings.</summary>
 		/// <param name="configAccessor">Configuration file accessor.</param>
-		public static ConfigurationFile OpenSystemFile(IConfigAccessor configAccessor)
-		{
-			return new ConfigurationFile(configAccessor, ConfigFile.System, true);
-		}
+		/// <param name="load">Immediately load file contents.</param>
+		public static ConfigurationFile OpenSystemFile(IConfigAccessor configAccessor, bool load = true)
+			=> new(configAccessor, ConfigFile.System, load);
 
 		/// <summary>Open config file with user-specific settings.</summary>
 		/// <param name="configAccessor">Configuration file accessor.</param>
-		public static ConfigurationFile OpenCurrentUserFile(IConfigAccessor configAccessor)
-		{
-			return new ConfigurationFile(configAccessor, ConfigFile.User, true);
-		}
+		/// <param name="load">Immediately load file contents.</param>
+		public static ConfigurationFile OpenCurrentUserFile(IConfigAccessor configAccessor, bool load = true)
+			=> new(configAccessor, ConfigFile.User, load);
 
 		#endregion
 
@@ -65,7 +63,7 @@ namespace gitter.Git
 			ParameterCreated?.Invoke(this, new ConfigParameterEventArgs(parameter));
 		}
 
-		/// <summary>Invokes <see cref="Deleted"/> &amp; other related events.</summary>
+		/// <summary>Invokes <see cref="ParameterDeleted"/> &amp; other related events.</summary>
 		/// <param name="parameter">Deleted parameter.</param>
 		private void InvokeDeleted(ConfigParameter parameter)
 		{
@@ -83,7 +81,7 @@ namespace gitter.Git
 		private readonly Repository _repository;
 		private readonly string _fileName;
 		private readonly ConfigFile _configFile;
-		private readonly Dictionary<string, ConfigParameter> _parameters;
+		private readonly Dictionary<string, ConfigParameter> _parameters = new();
 
 		#endregion
 
@@ -92,7 +90,6 @@ namespace gitter.Git
 		private ConfigurationFile(Repository repository, bool load = true)
 		{
 			_configAccessor = repository.Accessor;
-			_parameters = new Dictionary<string, ConfigParameter>();
 			_repository = repository;
 			_configFile = ConfigFile.Repository;
 			if(load) Refresh();
@@ -103,7 +100,6 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(repository, nameof(repository));
 
 			_configAccessor = repository.Accessor;
-			_parameters = new Dictionary<string, ConfigParameter>();
 			_repository = repository;
 			_configFile = ConfigFile.Other;
 			_fileName = fileName;
@@ -115,12 +111,12 @@ namespace gitter.Git
 			Verify.Argument.IsNotNull(configAccessor, nameof(configAccessor));
 
 			_configAccessor = configAccessor;
-			_parameters = new Dictionary<string, ConfigParameter>();
-			_configFile = configFile;
+			_configFile     = configFile;
 			if(load) Refresh();
 		}
 
 		/// <summary>Create <see cref="ConfigurationFile"/>.</summary>
+		/// <param name="configAccessor">Configuration file accessor.</param>
 		/// <param name="fileName">Name of config file.</param>
 		/// <param name="load">Immediately load file contents.</param>
 		public ConfigurationFile(IConfigAccessor configAccessor, string fileName, bool load = true)
@@ -129,7 +125,6 @@ namespace gitter.Git
 
 			_configAccessor = configAccessor;
 			_fileName = fileName;
-			_parameters = new Dictionary<string, ConfigParameter>();
 			_configFile = ConfigFile.Other;
 			if(load) Refresh();
 		}
@@ -296,7 +291,7 @@ namespace gitter.Git
 		{
 			lock(SyncRoot)
 			{
-				if(_repository != null)
+				if(_repository is not null)
 				{
 					CacheUpdater.UpdateObjectDictionary(
 						_parameters,

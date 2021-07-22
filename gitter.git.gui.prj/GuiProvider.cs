@@ -111,7 +111,7 @@ namespace gitter.Git.Gui
 			var revision = GetFocusedRevisionPointer();
 			string startingRevision;
 			string defaultBranchName;
-			if(revision != null)
+			if(revision is not null)
 			{
 				startingRevision  = revision.Pointer;
 				defaultBranchName = BranchHelper.TryFormatDefaultLocalBranchName(revision);
@@ -147,7 +147,7 @@ namespace gitter.Git.Gui
 				}
 			}
 			using var dlg = new CheckoutDialog(_repository);
-			if(rev != null)
+			if(rev is not null)
 			{
 				dlg.Revision.Value = rev.Pointer;
 			}
@@ -180,7 +180,7 @@ namespace gitter.Git.Gui
 		{
 			var rev = GetFocusedRevisionPointer();
 			using var dlg = new CreateTagDialog(_repository);
-			dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
+			dlg.Revision.Value = rev is not null ? rev.Pointer : GitConstants.HEAD;
 			return dlg.Run(Environment.MainForm);
 		}
 
@@ -188,7 +188,7 @@ namespace gitter.Git.Gui
 		{
 			var rev = GetFocusedRevisionPointer();
 			using var dlg = new AddNoteDialog(_repository);
-			dlg.Revision.Value = rev != null ? rev.Pointer : GitConstants.HEAD;
+			dlg.Revision.Value = rev is not null ? rev.Pointer : GitConstants.HEAD;
 			return dlg.Run(Environment.MainForm);
 		}
 
@@ -315,7 +315,7 @@ namespace gitter.Git.Gui
 
 		public void ActivateDefaultView()
 		{
-			Verify.State.IsTrue(Environment != null);
+			Verify.State.IsTrue(Environment is not null);
 
 			Environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
 		}

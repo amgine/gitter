@@ -45,12 +45,12 @@ namespace gitter.Git.Gui
 			{
 				if(_repository != value)
 				{
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						DetachFromRepository(_repository);
 					}
 					_repository = value;
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						AttachToRepository(_repository);
 					}
@@ -166,7 +166,7 @@ namespace gitter.Git.Gui
 		{
 			var notification = new ReferencesChangedNotification(e.Changes)
 			{
-				Text = e.Remote == null ? Resources.StrFetch : Resources.StrFetch + ": " + e.Remote.Name,
+				Text = e.Remote is null ? Resources.StrFetch : Resources.StrFetch + ": " + e.Remote.Name,
 			};
 			PopupsStack.PushNotification(notification);
 		}
@@ -175,7 +175,7 @@ namespace gitter.Git.Gui
 		{
 			var notification = new ReferencesChangedNotification(e.Changes)
 			{
-				Text = e.Remote == null ? Resources.StrPull : Resources.StrPull + ": " + e.Remote.Name,
+				Text = e.Remote is null ? Resources.StrPull : Resources.StrPull + ": " + e.Remote.Name,
 			};
 			PopupsStack.PushNotification(notification);
 		}
@@ -184,7 +184,7 @@ namespace gitter.Git.Gui
 		{
 			var notification = new ReferencesChangedNotification(e.Changes)
 			{
-				Text = e.Remote == null ? Resources.StrPrune : Resources.StrPrune + ": " + e.Remote.Name,
+				Text = e.Remote is null ? Resources.StrPrune : Resources.StrPrune + ": " + e.Remote.Name,
 			};
 			PopupsStack.PushNotification(notification);
 		}
@@ -203,7 +203,7 @@ namespace gitter.Git.Gui
 
 		public void Dispose()
 		{
-			if(_repository != null)
+			if(_repository is not null)
 			{
 				DetachFromRepository(_repository);
 				_repository = null;

@@ -171,11 +171,11 @@ namespace gitter.Git.Gui
 			{
 				if(_repository != value)
 				{
-					if(_repository != null)
+					if(_repository is not null)
 					{
 						DetachFromRepository(_repository);
 					}
-					if(value != null)
+					if(value is not null)
 					{
 						AttachToRepository(value);
 					}
@@ -199,7 +199,7 @@ namespace gitter.Git.Gui
 
 		public void Dispose()
 		{
-			if(_gitMenu != null)
+			if(_gitMenu is not null)
 			{
 				_gitMenu.Dispose();
 				_gitMenu = null;

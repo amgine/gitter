@@ -18,7 +18,7 @@
  */
 #endregion
 
-//#define TRACE_FS_EVENTS
+#define TRACE_FS_EVENTS
 
 namespace gitter.Git
 {
@@ -34,7 +34,7 @@ namespace gitter.Git
 		private const int _unblockDelayTime = 750;
 
 		#if TRACE_FS_EVENTS
-		private static readonly LoggingService Log = new LoggingService("Monitor");
+		private static readonly Framework.Services.LoggingService Log = new("Monitor");
 		#endif
 
 		#region Data
@@ -378,7 +378,7 @@ namespace gitter.Git
 						var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
 											.Replace(Path.DirectorySeparatorChar, '/');
 						#if TRACE_FS_EVENTS
-						Log.Debug(string.Format("Detected possible branch change: {0}", name));
+						Log.Debug($"Detected possible branch change: {name}");
 						#endif
 						if(!IsBlocked(RepositoryNotifications.BranchChanged))
 						{
@@ -392,7 +392,7 @@ namespace gitter.Git
 						var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
 										 .Replace(Path.DirectorySeparatorChar, '/');
 						#if TRACE_FS_EVENTS
-						Log.Debug(string.Format("Detected possible remote branch change: {0}", name));
+						Log.Debug($"Detected possible remote branch change: {name}");
 						#endif
 						if(!IsBlocked(RepositoryNotifications.BranchChanged))
 						{
@@ -409,7 +409,7 @@ namespace gitter.Git
 							var name = e.Name.Substring(pos, e.Name.Length - pos - GitConstants.LockPostfix.Length)
 											 .Replace(Path.DirectorySeparatorChar, '/');
 							#if TRACE_FS_EVENTS
-							Log.Debug(string.Format("Detected possible tag removal: {0}", name));
+							Log.Debug($"Detected possible tag removal: {name}");
 							#endif
 							if(!IsBlocked(RepositoryNotifications.TagChanged))
 							{

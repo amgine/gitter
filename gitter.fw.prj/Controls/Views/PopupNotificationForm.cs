@@ -62,9 +62,10 @@ namespace gitter.Framework.Controls
 			};
 
 			var cr = ClientRectangle;
-			content.Width	= ViewConstants.PopupWidth - Renderer.FloatBorderSize * 2;
-			content.Top		= cr.Top + ViewManager.Renderer.HeaderHeight + Renderer.FloatBorderSize;
-			ClientSize		= new Size(ViewConstants.PopupWidth, content.Height + Renderer.HeaderHeight + Renderer.FloatBorderSize * 2);
+			var conv = DpiConverter.FromDefaultTo(Dpi.System);
+			content.Width	= conv.ConvertX(ViewConstants.PopupWidth) - Renderer.FloatBorderSize * 2;
+			content.Top		= cr.Top + conv.ConvertY(Renderer.HeaderHeight) + Renderer.FloatBorderSize;
+			ClientSize		= new Size(ViewConstants.PopupWidth, content.Height + conv.ConvertY(Renderer.HeaderHeight) + Renderer.FloatBorderSize * 2);
 			content.Left	= Renderer.FloatBorderSize;
 			content.Parent	= this;
 

@@ -35,8 +35,8 @@ namespace gitter.Git.Gui.Views
 		public override int GetHashCode()
 		{
 			var hashCode = 0;
-			if(DiffSource  != null) hashCode  = DiffSource.GetHashCode();
-			if(DiffOptions != null) hashCode ^= DiffOptions.GetHashCode();
+			if(DiffSource  is not null) hashCode  = DiffSource.GetHashCode();
+			if(DiffOptions is not null) hashCode ^= DiffOptions.GetHashCode();
 			return hashCode;
 		}
 
