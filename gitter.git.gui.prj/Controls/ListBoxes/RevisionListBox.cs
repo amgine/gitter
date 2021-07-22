@@ -95,13 +95,12 @@ namespace gitter.Git.Gui.Controls
 		{
 			_repository.Head.PointerChanged -= OnHeadChanged;
 			_repository.Status.Changed -= OnStatusUpdated;
-			if(_currentBranch != null)
+			if(_currentBranch is not null)
 			{
 				_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
 			}
 			_currentBranch = null;
 			_currentRevisionItem = null;
-			_itemLookupTable = null;
 			_currentIndex = -1;
 		}
 
@@ -110,7 +109,7 @@ namespace gitter.Git.Gui.Controls
 			_repository.Head.PointerChanged += OnHeadChanged;
 			_repository.Status.Changed += OnStatusUpdated;
 			_currentBranch = _repository.Head.CurrentBranch;
-			if(_currentBranch != null)
+			if(_currentBranch is not null)
 			{
 				_currentBranch.PositionChanged += OnCurrentBranchPositionChanged;
 			}
@@ -136,8 +135,8 @@ namespace gitter.Git.Gui.Controls
 			}
 			var state = new State
 			{
-				StagedSelected    = _stagedItem   != null && _stagedItem.IsSelected,
-				UnstagedSeleted   = _unstagedItem != null && _unstagedItem.IsSelected,
+				StagedSelected    = _stagedItem   is { IsSelected: true },
+				UnstagedSeleted   = _unstagedItem is { IsSelected: true },
 				SelectedRevisions = revs,
 				VScrollPos        = VScrollPos,
 			};
@@ -146,21 +145,21 @@ namespace gitter.Git.Gui.Controls
 
 		public void SetState(State state)
 		{
-			if(state == null)
+			if(state is null)
 			{
 				SelectedItems.Clear();
 			}
 			else
 			{
-				if(state.UnstagedSeleted && _unstagedItem != null)
+				if(state.UnstagedSeleted && _unstagedItem is not null)
 				{
 					_unstagedItem.IsSelected = true;
 				}
-				if(state.StagedSelected && _stagedItem != null)
+				if(state.StagedSelected && _stagedItem is not null)
 				{
 					_stagedItem.IsSelected = true;
 				}
-				if(state.SelectedRevisions != null)
+				if(state.SelectedRevisions is not null)
 				{
 					foreach(var item in state.SelectedRevisions)
 					{
@@ -170,13 +169,94 @@ namespace gitter.Git.Gui.Controls
 						}
 					}
 				}
-				var scrollPos = state.VScrollPos;
-				if(scrollPos > MaxVScrollPos)
-				{
-					scrollPos = MaxVScrollPos;
-				}
-				VScrollBar.Value = scrollPos;
+				VScrollBar.Value = Math.Min(state.VScrollPos, MaxVScrollPos);
 			}
+		}
+
+		private void UpdateRevisionLog(RevisionLog value)
+		{
+			var state = GetState();
+
+			_currentIndex = -1;
+			_currentRevisionItem = null;
+			_repository = value.Repository;
+			_revisionLog = value;
+			var oldLookupTable = _itemLookupTable;
+			_itemLookupTable = new Dictionary<Revision, RevisionListItem>(capacity: value.RevisionsCount);
+
+			var head = _repository.Head.Revision;
+
+			BeginUpdate();
+			Items.Clear();
+			var graphColumn = GraphColumn;
+			if(graphColumn is not null)
+			{
+				var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
+				var graph   = builder.BuildGraph(value.Revisions, value.GetParents);
+
+				int graphSize = 0;
+				int currentIndex = -1;
+				var currentRevisionItem = default(RevisionListItem);
+				_stagedItem = null;
+				_unstagedItem = null;
+				for(int i = 0; i < value.RevisionsCount; ++i)
+				{
+					var revision = value.Revisions[i];
+					if(oldLookupTable is null || !oldLookupTable.TryGetValue(revision, out var revisionListItem))
+					{
+						revisionListItem = new RevisionListItem(revision);
+					}
+					_itemLookupTable.Add(revision, revisionListItem);
+
+					if(graph[i].Length > graphSize)
+					{
+						graphSize = graph[i].Length;
+					}
+					revisionListItem.Graph = graph[i];
+					if(revision == head)
+					{
+						currentRevisionItem = revisionListItem;
+						currentIndex = i;
+					}
+					Items.Add(revisionListItem);
+				}
+				_currentIndex = currentIndex;
+				_currentRevisionItem = currentRevisionItem;
+				graphColumn.Width = DpiConverter.FromDefaultTo(Dpi.FromControl(this)).ConvertX(21) * graphSize;
+				lock(value.Repository.Status.SyncRoot)
+				{
+					CheckNeedOfFakeItems();
+					ReinsertFakeItems(builder);
+					AttachToRepository();
+				}
+			}
+			else
+			{
+				int currentIndex = -1;
+				var currentRevisionItem = default(RevisionListItem);
+				_stagedItem = null;
+				_unstagedItem = null;
+				for(int i = 0; i < value.RevisionsCount; ++i)
+				{
+					var revision = value.Revisions[i];
+					if(oldLookupTable is null || !oldLookupTable.TryGetValue(revision, out var revisionListItem))
+					{
+						revisionListItem = new RevisionListItem(revision);
+					}
+					_itemLookupTable.Add(revision, revisionListItem);
+					if(revision == head)
+					{
+						currentRevisionItem = revisionListItem;
+						currentIndex = i;
+					}
+					Items.Add(revisionListItem);
+				}
+				_currentIndex = currentIndex;
+				_currentRevisionItem = currentRevisionItem;
+			}
+			RecomputeHeaderSizes();
+			SetState(state);
+			EndUpdate();
 		}
 
 		public RevisionLog RevisionLog
@@ -184,18 +264,18 @@ namespace gitter.Git.Gui.Controls
 			get => _revisionLog;
 			set
 			{
-				if(_repository != null)
+				if(_repository is not null)
 				{
 					DetachFromRepository();
 				}
 
-				if(_currentBranch != null)
+				if(_currentBranch is not null)
 				{
 					_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
 					_currentBranch = null;
 				}
 
-				if(value == null)
+				if(value is null)
 				{
 					_repository = null;
 					_revisionLog = null;
@@ -208,89 +288,7 @@ namespace gitter.Git.Gui.Controls
 					return;
 				}
 
-				var state = GetState();
-
-				_currentIndex = -1;
-				_currentRevisionItem = null;
-				_repository = value.Repository;
-				_revisionLog = value;
-				var oldLookupTable = _itemLookupTable;
-				_itemLookupTable = new Dictionary<Revision, RevisionListItem>(value.RevisionsCount);
-
-				var head = _repository.Head.Revision;
-
-				BeginUpdate();
-				Items.Clear();
-				var graphColumn = GraphColumn;
-				if(graphColumn != null)
-				{
-					var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
-					var graph   = builder.BuildGraph(value.Revisions, value.GetParents);
-
-					int graphSize = 0;
-					int currentIndex = -1;
-					RevisionListItem currentRevisionItem = null;
-					_stagedItem = null;
-					_unstagedItem = null;
-					for(int i = 0; i < value.RevisionsCount; ++i)
-					{
-						var revision = value.Revisions[i];
-						if(oldLookupTable == null || !oldLookupTable.TryGetValue(revision, out var revisionListItem))
-						{
-							revisionListItem = new RevisionListItem(revision);
-						}
-						_itemLookupTable.Add(revision, revisionListItem);
-
-						if(graph[i].Length > graphSize)
-						{
-							graphSize = graph[i].Length;
-						}
-						revisionListItem.Graph = graph[i];
-						if(revision == head)
-						{
-							currentRevisionItem = revisionListItem;
-							currentIndex = i;
-						}
-						Items.Add(revisionListItem);
-					}
-					_currentIndex = currentIndex;
-					_currentRevisionItem = currentRevisionItem;
-					graphColumn.Width = 21 * graphSize;
-					lock(value.Repository.Status.SyncRoot)
-					{
-						CheckNeedOfFakeItems();
-						ReinsertFakeItems(builder);
-						AttachToRepository();
-					}
-				}
-				else
-				{
-					int currentIndex = -1;
-					RevisionListItem currentRevisionItem = null;
-					_stagedItem = null;
-					_unstagedItem = null;
-					for(int i = 0; i < value.RevisionsCount; ++i)
-					{
-						var revision = value.Revisions[i];
-						RevisionListItem revisionListItem;
-						if(oldLookupTable == null || !oldLookupTable.TryGetValue(revision, out revisionListItem))
-						{
-							revisionListItem = new RevisionListItem(revision);
-						}
-						_itemLookupTable.Add(revision, revisionListItem);
-						if(revision == head)
-						{
-							currentRevisionItem = revisionListItem;
-							currentIndex = i;
-						}
-						Items.Add(revisionListItem);
-					}
-					_currentIndex = currentIndex;
-					_currentRevisionItem = currentRevisionItem;
-				}
-				RecomputeHeaderSizes();
-				SetState(state);
-				EndUpdate();
+				UpdateRevisionLog(value);
 			}
 		}
 
@@ -304,10 +302,10 @@ namespace gitter.Git.Gui.Controls
 		{
 			int id = 0;
 			var currentIndex = -1;
-			RevisionListItem currentRevisionItem = null;
+			var currentRevisionItem = default(RevisionListItem);
 			foreach(CustomListBoxItem<Revision> item in Items)
 			{
-				if(item.DataContext == currentRevision && item.DataContext != null)
+				if(item.DataContext == currentRevision && item.DataContext is not null)
 				{
 					currentRevisionItem = (RevisionListItem)item;
 					currentIndex = id;
@@ -323,7 +321,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			if(_showStatusItems)
 			{
-				if(_stagedItem != null)
+				if(_stagedItem is not null)
 				{
 					_stagedItem.Remove();
 					if(_currentIndex != -1)
@@ -331,7 +329,7 @@ namespace gitter.Git.Gui.Controls
 						--_currentIndex;
 					}
 				}
-				if(_unstagedItem != null)
+				if(_unstagedItem is not null)
 				{
 					_unstagedItem.Remove();
 					if(_currentIndex != -1)
@@ -339,7 +337,7 @@ namespace gitter.Git.Gui.Controls
 						--_currentIndex;
 					}
 				}
-				if(_currentRevisionItem != null)
+				if(_currentRevisionItem is not null)
 				{
 					if(_currentIndex == 0)
 					{
@@ -359,27 +357,18 @@ namespace gitter.Git.Gui.Controls
 		{
 			bool needStaged = false;
 			bool needUnstaged = false;
-			if(_repository != null && _showStatusItems)
+			if(_repository is not null && _showStatusItems)
 			{
-				if(_currentRevisionItem != null || _repository.IsEmpty)
+				if(_currentRevisionItem is not null || _repository.IsEmpty)
 				{
-					if(_repository.Status.StagedFiles.Count != 0)
-					{
-						needStaged = true;
-					}
-					if(_repository.Status.UnstagedFiles.Count != 0)
-					{
-						needUnstaged = true;
-					}
+					needStaged   = _repository.Status.StagedFiles.Count   != 0;
+					needUnstaged = _repository.Status.UnstagedFiles.Count != 0;
 				}
 			}
 			int count = 0;
 			if(needStaged)
 			{
-				if(_stagedItem == null)
-				{
-					_stagedItem = new FakeRevisionListItem(_repository, FakeRevisionItemType.StagedChanges);
-				}
+				_stagedItem ??= new FakeRevisionListItem(_repository, FakeRevisionItemType.StagedChanges);
 				++count;
 			}
 			else
@@ -388,10 +377,7 @@ namespace gitter.Git.Gui.Controls
 			}
 			if(needUnstaged)
 			{
-				if(_unstagedItem == null)
-				{
-					_unstagedItem = new FakeRevisionListItem(_repository, FakeRevisionItemType.UnstagedChanges);
-				}
+				_unstagedItem ??= new FakeRevisionListItem(_repository, FakeRevisionItemType.UnstagedChanges);
 				++count;
 			}
 			else
@@ -405,7 +391,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			int fakeItems = 0;
 			int graphLength = 0;
-			if(_stagedItem != null)
+			if(_stagedItem is not null)
 			{
 				if(_currentIndex != -1)
 				{
@@ -427,11 +413,11 @@ namespace gitter.Git.Gui.Controls
 					_stagedItem = null;
 				}
 			}
-			if(_unstagedItem != null)
+			if(_unstagedItem is not null)
 			{
 				if(_currentIndex != -1)
 				{
-					if(_stagedItem != null)
+					if(_stagedItem is not null)
 					{
 						Items.Insert(_currentIndex - 1, _unstagedItem);
 					}
@@ -440,20 +426,15 @@ namespace gitter.Git.Gui.Controls
 						Items.Insert(_currentIndex, _unstagedItem);
 					}
 					++_currentIndex;
-					if(_unstagedItem != null && _stagedItem != null)
+					if(_unstagedItem is not null && _stagedItem is not null)
 					{
 						_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
 					}
 					else
 					{
-						if(_currentRevisionItem != null)
-						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
-						}
-						else
-						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(null);
-						}
+						_unstagedItem.Graph = _currentRevisionItem is not null
+							? builder.AddGraphLineToTop(_currentRevisionItem.Graph)
+							: builder.AddGraphLineToTop(null);
 					}
 					if(_unstagedItem.Graph.Length > graphLength)
 					{
@@ -464,20 +445,15 @@ namespace gitter.Git.Gui.Controls
 				else if(_repository.IsEmpty)
 				{
 					Items.Insert(0, _unstagedItem);
-					if(_unstagedItem != null && _stagedItem != null)
+					if(_unstagedItem is not null && _stagedItem is not null)
 					{
 						_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
 					}
 					else
 					{
-						if(_currentRevisionItem != null)
-						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
-						}
-						else
-						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(null);
-						}
+						_unstagedItem.Graph = _currentRevisionItem is not null
+							? builder.AddGraphLineToTop(_currentRevisionItem.Graph)
+							: builder.AddGraphLineToTop(null);
 					}
 					if(_unstagedItem.Graph.Length > graphLength)
 					{
@@ -492,9 +468,9 @@ namespace gitter.Git.Gui.Controls
 			}
 			if(fakeItems != 0)
 			{
-				graphLength *= 21;
+				graphLength *= DpiConverter.FromDefaultTo(Dpi.FromControl(this)).ConvertX(21);
 				var graphColumn = GraphColumn;
-				if(graphColumn != null)
+				if(graphColumn is not null)
 				{
 					if(graphColumn.Width < graphLength)
 					{
@@ -510,7 +486,7 @@ namespace gitter.Git.Gui.Controls
 
 		public void Clear()
 		{
-			if(_repository != null)
+			if(_repository is not null)
 			{
 				_repository.Head.PointerChanged -= OnHeadChanged;
 				_repository.Status.Changed -= OnStatusUpdated;
@@ -528,15 +504,16 @@ namespace gitter.Git.Gui.Controls
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
 			{
-				if(_repository != null)
+				if(_repository is not null)
 				{
 					_repository.Head.PointerChanged -= OnHeadChanged;
 					_repository.Status.Changed -= OnStatusUpdated;
-					if(_currentBranch != null)
+					if(_currentBranch is not null)
 					{
 						_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
 						_currentBranch = null;
@@ -583,10 +560,17 @@ namespace gitter.Git.Gui.Controls
 			var status = (Status)sender;
 			if(InvokeRequired)
 			{
-				BeginInvoke(new Action<Status>(VerifyFakeItemsAfterStatusUpdate), status);
+				try
+				{
+					BeginInvoke(new Action<Status>(VerifyFakeItemsAfterStatusUpdate), status);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
 			}
 			else
 			{
+				if(IsDisposed) return;
 				VerifyFakeItemsAfterStatusUpdate(status);
 			}
 		}
@@ -615,16 +599,16 @@ namespace gitter.Git.Gui.Controls
 			if(!repository.Head.IsEmpty)
 			{
 				var headRev = repository.Head.Revision;
-				if(_currentRevisionItem != null)
+				if(_currentRevisionItem is not null)
 				{
 					_currentRevisionItem.InvalidateSafe();
 				}
-				if(_currentBranch != null)
+				if(_currentBranch is not null)
 				{
 					_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
 				}
 				_currentBranch = _repository.Head.Pointer as Branch;
-				if(_currentBranch != null)
+				if(_currentBranch is not null)
 				{
 					_currentBranch.PositionChanged += OnCurrentBranchPositionChanged;
 				}
@@ -633,11 +617,11 @@ namespace gitter.Git.Gui.Controls
 			}
 			else
 			{
-				if(_currentRevisionItem != null)
+				if(_currentRevisionItem is not null)
 				{
 					_currentRevisionItem.InvalidateSafe();
 				}
-				if(_currentBranch != null)
+				if(_currentBranch is not null)
 				{
 					_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
 				}
@@ -659,26 +643,26 @@ namespace gitter.Git.Gui.Controls
 				int changes = 0;
 				if(showUnstaged)
 				{
-					if(_unstagedItem == null) ++changes;
+					if(_unstagedItem is null) ++changes;
 				}
 				else
 				{
-					if(_unstagedItem != null) ++changes;
+					if(_unstagedItem is not null) ++changes;
 				}
 				if(showStaged)
 				{
-					if(_stagedItem == null) ++changes;
+					if(_stagedItem is null) ++changes;
 				}
 				else
 				{
-					if(_stagedItem != null) ++changes;
+					if(_stagedItem is not null) ++changes;
 				}
 				if(changes != 0)
 				{
 					BeginUpdate();
 					if(showStaged)
 					{
-						if(_stagedItem == null)
+						if(_stagedItem is null)
 						{
 							_stagedItem = new FakeRevisionListItem(status.Repository, FakeRevisionItemType.StagedChanges);
 							if(_currentIndex >= 0)
@@ -688,7 +672,7 @@ namespace gitter.Git.Gui.Controls
 							}
 							else
 							{
-								if(showUnstaged && _unstagedItem != null)
+								if(showUnstaged && _unstagedItem is not null)
 								{
 									Items.Insert(1, _stagedItem);
 								}
@@ -700,7 +684,7 @@ namespace gitter.Git.Gui.Controls
 						}
 						if(showUnstaged)
 						{
-							if(_unstagedItem == null)
+							if(_unstagedItem is null)
 							{
 								_unstagedItem = new FakeRevisionListItem(status.Repository, FakeRevisionItemType.UnstagedChanges);
 								if(_currentIndex >= 0)
@@ -716,7 +700,7 @@ namespace gitter.Git.Gui.Controls
 						}
 						else
 						{
-							if(_unstagedItem != null)
+							if(_unstagedItem is not null)
 							{
 								_unstagedItem.Remove();
 								_unstagedItem = null;
@@ -729,7 +713,7 @@ namespace gitter.Git.Gui.Controls
 					}
 					else
 					{
-						if(_stagedItem != null)
+						if(_stagedItem is not null)
 						{
 							_stagedItem.Remove();
 							_stagedItem = null;
@@ -740,7 +724,7 @@ namespace gitter.Git.Gui.Controls
 						}
 						if(showUnstaged)
 						{
-							if(_unstagedItem == null)
+							if(_unstagedItem is null)
 							{
 								_unstagedItem = new FakeRevisionListItem(status.Repository, FakeRevisionItemType.UnstagedChanges);
 								if(_currentIndex >= 0)
@@ -756,7 +740,7 @@ namespace gitter.Git.Gui.Controls
 						}
 						else
 						{
-							if(_unstagedItem != null)
+							if(_unstagedItem is not null)
 							{
 								_unstagedItem.Remove();
 								_unstagedItem = null;
@@ -768,8 +752,8 @@ namespace gitter.Git.Gui.Controls
 						}
 					}
 					int fakeitems = 0;
-					if(_stagedItem != null) ++fakeitems;
-					if(_unstagedItem != null) ++fakeitems;
+					if(_stagedItem is not null) ++fakeitems;
+					if(_unstagedItem is not null) ++fakeitems;
 					if(_currentIndex != -1)
 					{
 						if(_currentIndex == fakeitems)
@@ -783,28 +767,22 @@ namespace gitter.Git.Gui.Controls
 							builder.CleanGraph(prev, next);
 						}
 					}
-					if(_stagedItem != null)
+					if(_stagedItem is not null)
 					{
-						_stagedItem.Graph = builder.AddGraphLineToTop(
-							_currentRevisionItem == null ? null : _currentRevisionItem.Graph);
-						if(_unstagedItem != null)
+						_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem?.Graph);
+						if(_unstagedItem is not null)
 						{
 							_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
 						}
 					}
 					else
 					{
-						if(_unstagedItem != null)
+						if(_unstagedItem is not null)
 						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(
-								_currentRevisionItem == null ? null : _currentRevisionItem.Graph);
+							_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem?.Graph);
 						}
 					}
-					var graphColumn = GraphColumn;
-					if(graphColumn != null)
-					{
-						graphColumn.AutoSize();
-					}
+					GraphColumn?.AutoSize();
 					EndUpdate();
 				}
 			}
@@ -887,8 +865,7 @@ namespace gitter.Git.Gui.Controls
 				var htr = HitTest(p.X, p.Y);
 				if(htr.Area == HitTestArea.Item)
 				{
-					var revItem = Items[htr.ItemIndex] as RevisionListItem;
-					if(revItem != null)
+					if(Items[htr.ItemIndex] is RevisionListItem revItem)
 					{
 						var branch = data.GetData<Branch>();
 						if(branch.Revision != revItem.DataContext)
@@ -956,7 +933,7 @@ namespace gitter.Git.Gui.Controls
 
 		#region Properties
 
-		public bool HeadPresented => _currentRevisionItem != null;
+		public bool HeadPresented => _currentRevisionItem is not null;
 
 		public bool ShowStatusItems
 		{
@@ -984,7 +961,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			Verify.Argument.IsNotNull(revision, nameof(revision));
 
-			if(_itemLookupTable == null) return null;
+			if(_itemLookupTable is null) return null;
 			if(_itemLookupTable.TryGetValue(revision, out var item))
 			{
 				return item;
@@ -995,7 +972,7 @@ namespace gitter.Git.Gui.Controls
 		public void RebuildGraph()
 		{
 			var graphColumn = GraphColumn;
-			if(graphColumn == null) return;
+			if(graphColumn is null) return;
 
 			var builder = GlobalBehavior.GraphBuilderFactory.CreateGraphBuilder<Revision>();
 			int graphLen = 0;
@@ -1016,14 +993,7 @@ namespace gitter.Git.Gui.Controls
 			{
 				if(_stagedItem is not null)
 				{
-					if(_currentRevisionItem is not null)
-					{
-						_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
-					}
-					else
-					{
-						_stagedItem.Graph = builder.AddGraphLineToTop(null);
-					}
+					_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem?.Graph);
 					if(_stagedItem.Graph.Length > graphLen)
 					{
 						graphLen = _stagedItem.Graph.Length;
@@ -1031,28 +1001,16 @@ namespace gitter.Git.Gui.Controls
 				}
 				if(_unstagedItem is not null)
 				{
-					if(_stagedItem is not null)
-					{
-						_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
-					}
-					else
-					{
-						if(_currentRevisionItem is not null)
-						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
-						}
-						else
-						{
-							_unstagedItem.Graph = builder.AddGraphLineToTop(null);
-						}
-					}
+					_unstagedItem.Graph = _stagedItem is not null
+						? builder.AddGraphLineToTop(_stagedItem.Graph)
+						: builder.AddGraphLineToTop(_currentRevisionItem?.Graph);
 					if(_unstagedItem.Graph.Length > graphLen)
 					{
 						graphLen = _unstagedItem.Graph.Length;
 					}
 				}
 			}
-			graphColumn.Width = 21 * graphLen;
+			graphColumn.Width = DpiConverter.FromDefaultTo(Dpi.FromControl(this)).ConvertX(21) * graphLen;
 			Invalidate();
 		}
 	}
