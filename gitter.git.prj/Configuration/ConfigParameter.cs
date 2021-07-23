@@ -107,7 +107,7 @@ namespace gitter.Git
 
 				if(_value != value)
 				{
-					if(Repository != null)
+					if(Repository is not null)
 					{
 						using(Repository.Monitor.BlockNotifications(
 							RepositoryNotifications.ConfigUpdated))
@@ -127,35 +127,12 @@ namespace gitter.Git
 
 		private void CallGitSetValue(string value)
 		{
-			switch(_configFile)
+			var parameters = new SetConfigValueParameters(Name, value)
 			{
-				case ConfigFile.Other:
-					{
-						_configAccessor.SetConfigValue.Invoke(
-							new SetConfigValueParameters(Name, value)
-							{
-								FileName = _fileName,
-								ConfigFile = ConfigFile.Other,
-							});
-					}
-					break;
-				case ConfigFile.Repository:
-					{
-						_configAccessor.SetConfigValue.Invoke(
-							new SetConfigValueParameters(Name, value));
-					}
-					break;
-				default:
-					{
-						_configAccessor.SetConfigValue.Invoke(
-							new SetConfigValueParameters(Name, value)
-							{
-								FileName = _fileName,
-								ConfigFile = Git.ConfigFile.Other,
-							});
-					}
-					break;
-			}
+				FileName   = _fileName,
+				ConfigFile = _configFile,
+			};
+			_configAccessor.SetConfigValue.Invoke(parameters);
 		}
 
 		public ConfigFile ConfigFile => _configFile;
