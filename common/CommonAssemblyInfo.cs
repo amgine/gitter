@@ -32,5 +32,5 @@ using System.Reflection;
 
 [assembly: NeutralResourcesLanguage("en-us")]
 
-[assembly: AssemblyFileVersion("1.0.27.0")]
-[assembly: AssemblyVersion("1.0.27.0")] 
+[assembly: AssemblyFileVersion("1.0.28.0")]
+[assembly: AssemblyVersion("1.0.28.0")] 

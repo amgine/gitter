@@ -93,7 +93,7 @@ namespace gitter
 					_vsCodeSearched = true;
 				}
 
-				if(_vsCodePath == null) yield break;
+				if(_vsCodePath is null) yield break;
 
 				yield return new GuiCommand("OpenVSCode", DisplayName, CachedResources.Bitmaps["ImgVSCode"], e =>
 				{
@@ -275,7 +275,7 @@ namespace gitter
 				{
 					if(provider.Nested)
 					{
-						if(parent == null)
+						if(parent is null)
 						{
 							parent = new ToolStripMenuItem(provider.DisplayName);
 							res.Add(parent);
