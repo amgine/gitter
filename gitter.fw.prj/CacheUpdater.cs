@@ -18,359 +18,355 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Helper class to update data cached in dictionary or list.</summary>
+public static class CacheUpdater
 {
-	using System;
-	using System.Collections.Generic;
-
-	/// <summary>Helper class to update data cached in dictionary or list.</summary>
-	public static class CacheUpdater
+	public static void UpdateObjectDictionary<TObject, TInfo>(
+		IDictionary<string, TObject> dictionary,
+		Predicate<TObject> validateObject,
+		Predicate<TInfo> validateInfo,
+		IEnumerable<TInfo> actualList,
+		Func<TInfo, TObject> factory,
+		Action<TObject, TInfo> updater,
+		Action<TObject> objectCreated,
+		Action<TObject> objectDeleted,
+		bool callUpdate)
+		where TObject : INamedObject
+		where TInfo : INamedObject
 	{
-		public static void UpdateObjectDictionary<TObject, TInfo>(
-			IDictionary<string, TObject> dictionary,
-			Predicate<TObject> validateObject,
-			Predicate<TInfo> validateInfo,
-			IEnumerable<TInfo> actualList,
-			Func<TInfo, TObject> factory,
-			Action<TObject, TInfo> updater,
-			Action<TObject> objectCreated,
-			Action<TObject> objectDeleted,
-			bool callUpdate)
-			where TObject : INamedObject
-			where TInfo : INamedObject
+		var hset = default(HashSet<TObject>);
+		if(dictionary.Count != 0)
 		{
-			HashSet<TObject> hset = null;
-			if(dictionary.Count != 0)
+			hset = new HashSet<TObject>();
+			foreach(var kvp in dictionary)
 			{
-				hset = new HashSet<TObject>();
-				foreach(var kvp in dictionary)
+				if(validateObject is null || validateObject(kvp.Value))
 				{
-					if(validateObject == null || validateObject(kvp.Value))
+					hset.Add(kvp.Value);
+				}
+			}
+		}
+
+		foreach(var info in actualList)
+		{
+			if(validateInfo is null || validateInfo(info))
+			{
+				if(!dictionary.TryGetValue(info.Name, out var obj))
+				{
+					obj = factory(info);
+					dictionary.Add(obj.Name, obj);
+					objectCreated?.Invoke(obj);
+				}
+				else
+				{
+					if(callUpdate)
 					{
-						hset.Add(kvp.Value);
+						updater(obj, info);
+					}
+					hset?.Remove(obj);
+				}
+			}
+		}
+
+		if(hset is { Count: not 0 })
+		{
+			foreach(var obj in hset)
+			{
+				dictionary.Remove(obj.Name);
+				objectDeleted?.Invoke(obj);
+			}
+		}
+	}
+
+	public static void UpdateObjectDictionary<TObject, TInfo>(
+		IDictionary<string, TObject> dictionary,
+		Predicate<TObject> validateObject,
+		Predicate<TInfo> validateInfo,
+		IDictionary<string, TInfo> actualDictionary,
+		Func<TInfo, TObject> factory,
+		Action<TObject, TInfo> updater,
+		Action<TObject> objectCreated,
+		Action<TObject> objectDeleted,
+		bool callUpdate)
+		where TObject : INamedObject
+		where TInfo : INamedObject
+	{
+		var hset = default(HashSet<TObject>);
+		if(dictionary.Count != 0)
+		{
+			hset = new HashSet<TObject>();
+			foreach(var kvp in dictionary)
+			{
+				if(validateObject is null || validateObject(kvp.Value))
+				{
+					hset.Add(kvp.Value);
+				}
+			}
+		}
+
+		foreach(var info in actualDictionary.Values)
+		{
+			if(validateInfo is null || validateInfo(info))
+			{
+				if(!dictionary.TryGetValue(info.Name, out var obj))
+				{
+					obj = factory(info);
+					dictionary.Add(obj.Name, obj);
+					objectCreated?.Invoke(obj);
+				}
+				else
+				{
+					if(callUpdate)
+					{
+						updater(obj, info);
+					}
+					hset?.Remove(obj);
+				}
+			}
+		}
+
+		if(hset is { Count: not 0 })
+		{
+			foreach(var obj in hset)
+			{
+				dictionary.Remove(obj.Name);
+				objectDeleted?.Invoke(obj);
+			}
+		}
+	}
+
+	public static void UpdateObjectDictionary<TObject, TInfo>(
+		IRepository repository,
+		IDictionary<string, TObject> dictionary,
+		Predicate<TObject> validateObject,
+		Predicate<TInfo> validateInfo,
+		IDictionary<string, TInfo> actualDictinary,
+		Action<TObject> objectCreated,
+		Action<TObject> objectDeleted,
+		bool callUpdate
+		)
+		where TObject : INamedObject
+		where TInfo : INamedObject, IObjectData<TObject>
+	{
+		var hset = default(HashSet<TObject>);
+		if(dictionary.Count != 0)
+		{
+			hset = new HashSet<TObject>();
+			foreach(var kvp in dictionary)
+			{
+				if(validateObject is null || validateObject(kvp.Value))
+				{
+					hset.Add(kvp.Value);
+				}
+			}
+		}
+
+		foreach(var info in actualDictinary.Values)
+		{
+			if(validateInfo is null || validateInfo(info))
+			{
+				if(!dictionary.TryGetValue(info.Name, out var obj))
+				{
+					obj = info.Construct(repository);
+					dictionary.Add(obj.Name, obj);
+					objectCreated?.Invoke(obj);
+				}
+				else
+				{
+					if(callUpdate)
+					{
+						info.Update(obj);
+					}
+					hset?.Remove(obj);
+				}
+			}
+		}
+
+		if(hset is { Count: not 0 })
+		{
+			foreach(var obj in hset)
+			{
+				dictionary.Remove(obj.Name);
+				objectDeleted?.Invoke(obj);
+			}
+		}
+	}
+
+	public static void UpdateObjectDictionaryNoRemove<TObject, TInfo>(
+		IRepository repository,
+		IDictionary<string, TObject> dictionary,
+		Predicate<TObject> validateObject,
+		Predicate<TInfo> validateInfo,
+		IEnumerable<TInfo> actualList,
+		Action<TObject> objectCreated,
+		bool callUpdate
+		)
+		where TObject : INamedObject
+		where TInfo : INamedObject, IObjectData<TObject>
+	{
+		foreach(var info in actualList)
+		{
+			if(validateInfo is null || validateInfo(info))
+			{
+				if(!dictionary.TryGetValue(info.Name, out var obj))
+				{
+					obj = info.Construct(repository);
+					dictionary[obj.Name] = obj;
+					objectCreated?.Invoke(obj);
+				}
+				else
+				{
+					if(callUpdate)
+					{
+						info.Update(obj);
 					}
 				}
 			}
+		}
+	}
 
-			foreach(var info in actualList)
+	public static void UpdateObjectList<TObject, TInfo>(
+		IRepository repository,
+		IList<TObject> list,
+		Predicate<TObject> validateObject,
+		Predicate<TInfo> validateInfo,
+		IEnumerable<TInfo> actualList,
+		Action<TObject> objectCreated,
+		Action<TObject> objectDeleted,
+		bool callUpdate
+		)
+		where TObject : INamedObject
+		where TInfo : INamedObject, IObjectData<TObject>
+	{
+		var hset = default(HashSet<TObject>);
+		if(list.Count != 0)
+		{
+			hset = new HashSet<TObject>();
+			foreach(var obj in list)
 			{
-				if(validateInfo == null || validateInfo(info))
+				if(validateObject == null || validateObject(obj))
 				{
-					if(!dictionary.TryGetValue(info.Name, out var obj))
+					hset.Add(obj);
+				}
+			}
+		}
+
+		int id = 0;
+		foreach(var info in actualList)
+		{
+			if(validateInfo is null || validateInfo(info))
+			{
+				bool found = false;
+				for(int i = id; i < list.Count; ++i)
+				{
+					if(list[i].Name == info.Name)
 					{
-						obj = factory(info);
-						dictionary.Add(obj.Name, obj);
-						objectCreated?.Invoke(obj);
-					}
-					else
-					{
+						if(i != id)
+						{
+							var temp = list[i];
+							list[i] = list[id];
+							list[id] = temp;
+						}
 						if(callUpdate)
 						{
-							updater(obj, info);
+							info.Update(list[id]);
 						}
-						hset?.Remove(obj);
+						hset?.Remove(list[id]);
+						found = true;
+						break;
 					}
 				}
-			}
-
-			if(hset != null && hset.Count != 0)
-			{
-				foreach(var obj in hset)
+				if(!found)
 				{
-					dictionary.Remove(obj.Name);
-					objectDeleted?.Invoke(obj);
+					var obj = info.Construct(repository);
+					list.Insert(id, obj);
+					objectCreated?.Invoke(obj);
 				}
+				++id;
 			}
 		}
 
-		public static void UpdateObjectDictionary<TObject, TInfo>(
-			IDictionary<string, TObject> dictionary,
-			Predicate<TObject> validateObject,
-			Predicate<TInfo> validateInfo,
-			IDictionary<string, TInfo> actualDictionary,
-			Func<TInfo, TObject> factory,
-			Action<TObject, TInfo> updater,
-			Action<TObject> objectCreated,
-			Action<TObject> objectDeleted,
-			bool callUpdate)
-			where TObject : INamedObject
-			where TInfo : INamedObject
+		if(hset is { Count: not 0 })
 		{
-			HashSet<TObject> hset = null;
-			if(dictionary.Count != 0)
+			foreach(var obj in hset)
 			{
-				hset = new HashSet<TObject>();
-				foreach(var kvp in dictionary)
-				{
-					if(validateObject == null || validateObject(kvp.Value))
-					{
-						hset.Add(kvp.Value);
-					}
-				}
+				list.Remove(obj);
+				objectDeleted?.Invoke(obj);
 			}
+		}
+	}
 
-			foreach(var info in actualDictionary.Values)
+	public static void UpdateObjectListNoRemove<TObject, TInfo>(
+		IRepository repository,
+		IList<TObject> list,
+		Predicate<TObject> validateObject,
+		Predicate<TInfo> validateInfo,
+		IEnumerable<TInfo> actualList,
+		Action<TObject> objectCreated,
+		bool callUpdate
+		)
+		where TObject : INamedObject
+		where TInfo : INamedObject, IObjectData<TObject>
+	{
+		int id = 0;
+		foreach(var info in actualList)
+		{
+			if(validateInfo is null || validateInfo(info))
 			{
-				if(validateInfo == null || validateInfo(info))
+				bool found = false;
+				for(int i = id; i < list.Count; ++i)
 				{
-					TObject obj;
-					if(!dictionary.TryGetValue(info.Name, out obj))
+					if(list[i].Name == info.Name)
 					{
-						obj = factory(info);
-						dictionary.Add(obj.Name, obj);
-						objectCreated?.Invoke(obj);
-					}
-					else
-					{
+						if(i != id)
+						{
+							var temp = list[i];
+							list[i] = list[id];
+							list[id] = temp;
+						}
 						if(callUpdate)
 						{
-							updater(obj, info);
+							info.Update(list[id]);
 						}
-						hset?.Remove(obj);
+						found = true;
+						break;
 					}
 				}
-			}
-
-			if(hset != null && hset.Count != 0)
-			{
-				foreach(var obj in hset)
+				if(!found)
 				{
-					dictionary.Remove(obj.Name);
-					objectDeleted?.Invoke(obj);
+					var obj = info.Construct(repository);
+					list.Insert(id, obj);
+					objectCreated?.Invoke(obj);
 				}
+				++id;
 			}
 		}
+	}
 
-		public static void UpdateObjectDictionary<TObject, TInfo>(
-			IRepository repository,
-			IDictionary<string, TObject> dictionary,
-			Predicate<TObject> validateObject,
-			Predicate<TInfo> validateInfo,
-			IDictionary<string, TInfo> actualDictinary,
-			Action<TObject> objectCreated,
-			Action<TObject> objectDeleted,
-			bool callUpdate
-			)
-			where TObject : INamedObject
-			where TInfo : INamedObject, IObjectData<TObject>
+	public static TObject[] TransformToArray<TObject, TInfo>(IRepository repository, IList<TInfo> list)
+		where TInfo : IObjectData<TObject>
+	{
+		var res = new TObject[list.Count];
+		for(int i = 0; i < list.Count; ++i)
 		{
-			HashSet<TObject> hset = null;
-			if(dictionary.Count != 0)
-			{
-				hset = new HashSet<TObject>();
-				foreach(var kvp in dictionary)
-				{
-					if(validateObject == null || validateObject(kvp.Value))
-					{
-						hset.Add(kvp.Value);
-					}
-				}
-			}
-
-			foreach(var info in actualDictinary.Values)
-			{
-				if(validateInfo == null || validateInfo(info))
-				{
-					TObject obj;
-					if(!dictionary.TryGetValue(info.Name, out obj))
-					{
-						obj = info.Construct(repository);
-						dictionary.Add(obj.Name, obj);
-						objectCreated?.Invoke(obj);
-					}
-					else
-					{
-						if(callUpdate)
-						{
-							info.Update(obj);
-						}
-						hset?.Remove(obj);
-					}
-				}
-			}
-
-			if(hset != null && hset.Count != 0)
-			{
-				foreach(var obj in hset)
-				{
-					dictionary.Remove(obj.Name);
-					objectDeleted?.Invoke(obj);
-				}
-			}
+			res[i] = list[i].Construct(repository);
 		}
+		return res;
+	}
 
-		public static void UpdateObjectDictionaryNoRemove<TObject, TInfo>(
-			IRepository repository,
-			IDictionary<string, TObject> dictionary,
-			Predicate<TObject> validateObject,
-			Predicate<TInfo> validateInfo,
-			IEnumerable<TInfo> actualList,
-			Action<TObject> objectCreated,
-			bool callUpdate
-			)
-			where TObject : INamedObject
-			where TInfo : INamedObject, IObjectData<TObject>
+	public static Dictionary<string, TObject> TransformToDictionary<TObject, TInfo>(IRepository repository, IList<TInfo> list)
+		where TInfo : INamedObject, IObjectData<TObject>
+	{
+		var res = new Dictionary<string, TObject>();
+		for(int i = 0; i < list.Count; ++i)
 		{
-			foreach(var info in actualList)
-			{
-				if(validateInfo == null || validateInfo(info))
-				{
-					TObject obj;
-					if(!dictionary.TryGetValue(info.Name, out obj))
-					{
-						obj = info.Construct(repository);
-						dictionary[obj.Name] = obj;
-						objectCreated?.Invoke(obj);
-					}
-					else
-					{
-						if(callUpdate)
-						{
-							info.Update(obj);
-						}
-					}
-				}
-			}
+			res.Add(list[i].Name, list[i].Construct(repository));
 		}
-
-		public static void UpdateObjectList<TObject, TInfo>(
-			IRepository repository,
-			IList<TObject> list,
-			Predicate<TObject> validateObject,
-			Predicate<TInfo> validateInfo,
-			IEnumerable<TInfo> actualList,
-			Action<TObject> objectCreated,
-			Action<TObject> objectDeleted,
-			bool callUpdate
-			)
-			where TObject : INamedObject
-			where TInfo : INamedObject, IObjectData<TObject>
-		{
-			HashSet<TObject> hset = null;
-			if(list.Count != 0)
-			{
-				hset = new HashSet<TObject>();
-				foreach(var obj in list)
-				{
-					if(validateObject == null || validateObject(obj))
-					{
-						hset.Add(obj);
-					}
-				}
-			}
-
-			int id = 0;
-			foreach(var info in actualList)
-			{
-				if(validateInfo == null || validateInfo(info))
-				{
-					bool found = false;
-					for(int i = id; i < list.Count; ++i)
-					{
-						if(list[i].Name == info.Name)
-						{
-							if(i != id)
-							{
-								var temp = list[i];
-								list[i] = list[id];
-								list[id] = temp;
-							}
-							if(callUpdate)
-							{
-								info.Update(list[id]);
-							}
-							hset?.Remove(list[id]);
-							found = true;
-							break;
-						}
-					}
-					if(!found)
-					{
-						var obj = info.Construct(repository);
-						list.Insert(id, obj);
-						objectCreated?.Invoke(obj);
-					}
-					++id;
-				}
-			}
-
-			if(hset != null && hset.Count != 0)
-			{
-				foreach(var obj in hset)
-				{
-					list.Remove(obj);
-					objectDeleted?.Invoke(obj);
-				}
-			}
-		}
-
-		public static void UpdateObjectListNoRemove<TObject, TInfo>(
-			IRepository repository,
-			IList<TObject> list,
-			Predicate<TObject> validateObject,
-			Predicate<TInfo> validateInfo,
-			IEnumerable<TInfo> actualList,
-			Action<TObject> objectCreated,
-			bool callUpdate
-			)
-			where TObject : INamedObject
-			where TInfo : INamedObject, IObjectData<TObject>
-		{
-			int id = 0;
-			foreach(var info in actualList)
-			{
-				if(validateInfo == null || validateInfo(info))
-				{
-					bool found = false;
-					for(int i = id; i < list.Count; ++i)
-					{
-						if(list[i].Name == info.Name)
-						{
-							if(i != id)
-							{
-								var temp = list[i];
-								list[i] = list[id];
-								list[id] = temp;
-							}
-							if(callUpdate)
-							{
-								info.Update(list[id]);
-							}
-							found = true;
-							break;
-						}
-					}
-					if(!found)
-					{
-						var obj = info.Construct(repository);
-						list.Insert(id, obj);
-						objectCreated?.Invoke(obj);
-					}
-					++id;
-				}
-			}
-		}
-
-		public static TObject[] TransformToArray<TObject, TInfo>(IRepository repository, IList<TInfo> list)
-			where TInfo : IObjectData<TObject>
-		{
-			var res = new TObject[list.Count];
-			for(int i = 0; i < list.Count; ++i)
-			{
-				res[i] = list[i].Construct(repository);
-			}
-			return res;
-		}
-
-		public static Dictionary<string, TObject> TransformToDictionary<TObject, TInfo>(IRepository repository, IList<TInfo> list)
-			where TInfo : INamedObject, IObjectData<TObject>
-		{
-			var res = new Dictionary<string, TObject>();
-			for(int i = 0; i < list.Count; ++i)
-			{
-				res.Add(list[i].Name, list[i].Construct(repository));
-			}
-			return res;
-		}
+		return res;
 	}
 }

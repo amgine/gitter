@@ -18,72 +18,71 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+
+public sealed class RepositoryGroup
 {
-	using System;
+	#region Data
 
-	public sealed class RepositoryGroup
+	private string _name;
+	private readonly RepositoryCollection _repositories;
+	private readonly RepositoryGroupCollection _groups;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler NameChanged;
+
+	private void OnNameChanged()
+		=> NameChanged?.Invoke(this, EventArgs.Empty);
+
+	public event EventHandler Deleted;
+
+	internal void OnDeleted()
+		=> Deleted?.Invoke(this, EventArgs.Empty);
+
+	#endregion
+
+	#region .ctor
+
+	public RepositoryGroup(string name)
 	{
-		#region Data
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
-		private string _name;
-		private readonly RepositoryCollection _repositories;
-		private readonly RepositoryGroupCollection _groups;
+		_name         = name;
+		_repositories = new RepositoryCollection();
+		_groups       = new RepositoryGroupCollection();
+	}
 
-		#endregion
+	#endregion
 
-		#region Events
+	#region Properties
 
-		public event EventHandler NameChanged;
-
-		private void OnNameChanged()
-			=> NameChanged?.Invoke(this, EventArgs.Empty);
-
-		public event EventHandler Deleted;
-
-		internal void OnDeleted()
-			=> Deleted?.Invoke(this, EventArgs.Empty);
-
-		#endregion
-
-		#region .ctor
-
-		public RepositoryGroup(string name)
+	public string Name
+	{
+		get => _name;
+		set
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-
-			_name         = name;
-			_repositories = new RepositoryCollection();
-			_groups       = new RepositoryGroupCollection();
-		}
-
-		#endregion
-
-		#region Properties
-
-		public string Name
-		{
-			get { return _name; }
-			set
+			if(_name != value)
 			{
-				if(_name != value)
-				{
-					_name = value;
-					OnNameChanged();
-				}
+				_name = value;
+				OnNameChanged();
 			}
 		}
-
-		public RepositoryGroupCollection Groups => _groups;
-
-		public RepositoryCollection Respositories => _repositories;
-
-		#endregion
-
-		#region Methods
-
-		public override string ToString() => Name;
-
-		#endregion
 	}
+
+	public RepositoryGroupCollection Groups => _groups;
+
+	public RepositoryCollection Respositories => _repositories;
+
+	#endregion
+
+	#region Methods
+
+	public override string ToString() => Name;
+
+	#endregion
 }

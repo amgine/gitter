@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,62 +18,61 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+public sealed class ConfigParameterData : INamedObject
 {
-	using System;
+	#region .ctor
 
-	using gitter.Framework;
-
-	public sealed class ConfigParameterData : INamedObject
+	public ConfigParameterData(string name, string value, ConfigFile configFile, string fileName)
 	{
-		#region .ctor
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(value);
 
-		public ConfigParameterData(string name, string value, ConfigFile configFile, string fileName)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-			Verify.Argument.IsNotNull(value, nameof(value));
-
-			Name = name;
-			Value = value;
-			ConfigFile = configFile;
-			SpecifiedFile = fileName;
-		}
-
-		public ConfigParameterData(string name, string value, ConfigFile configFile)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-			Verify.Argument.IsNotNull(value, nameof(value));
-			Verify.Argument.AreNotEqual(ConfigFile.Other, configFile, nameof(configFile), string.Empty);
-
-			Name = name;
-			Value = value;
-			ConfigFile = configFile;
-		}
-
-		public ConfigParameterData(string name, string value, string fileName)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-			Verify.Argument.IsNotNull(value, nameof(value));
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
-
-			Name = name;
-			Value = value;
-			ConfigFile = ConfigFile.Other;
-			SpecifiedFile = fileName;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public string Name { get; }
-
-		public string Value { get; }
-
-		public ConfigFile ConfigFile { get; }
-
-		public string SpecifiedFile { get; }
-
-		#endregion
+		Name = name;
+		Value = value;
+		ConfigFile = configFile;
+		SpecifiedFile = fileName;
 	}
+
+	public ConfigParameterData(string name, string value, ConfigFile configFile)
+	{
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(value);
+		Verify.Argument.AreNotEqual(ConfigFile.Other, configFile, nameof(configFile), string.Empty);
+
+		Name = name;
+		Value = value;
+		ConfigFile = configFile;
+	}
+
+	public ConfigParameterData(string name, string value, string fileName)
+	{
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(value);
+		Verify.Argument.IsNeitherNullNorWhitespace(fileName);
+
+		Name = name;
+		Value = value;
+		ConfigFile = ConfigFile.Other;
+		SpecifiedFile = fileName;
+	}
+
+	#endregion
+
+	#region Properties
+
+	public string Name { get; }
+
+	public string Value { get; }
+
+	public ConfigFile ConfigFile { get; }
+
+	public string SpecifiedFile { get; }
+
+	#endregion
 }

@@ -18,196 +18,203 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class Notifications : IDisposable
 {
-	using System;
+	private readonly GuiProvider _guiProvider;
+	private Repository _repository;
 
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class Notifications : IDisposable
+	public Notifications(GuiProvider guiProvider)
 	{
-		private readonly GuiProvider _guiProvider;
-		private Repository _repository;
+		Verify.Argument.IsNotNull(guiProvider);
 
-		public Notifications(GuiProvider guiProvider)
+		_guiProvider = guiProvider;
+	}
+
+	public Repository Repository
+	{
+		get => _repository;
+		set
 		{
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
-
-			_guiProvider = guiProvider;
-		}
-
-		public Repository Repository
-		{
-			get => _repository;
-			set
+			if(_repository != value)
 			{
-				if(_repository != value)
+				if(_repository is not null)
 				{
-					if(_repository is not null)
-					{
-						DetachFromRepository(_repository);
-					}
-					_repository = value;
-					if(_repository is not null)
-					{
-						AttachToRepository(_repository);
-					}
+					DetachFromRepository(_repository);
+				}
+				_repository = value;
+				if(_repository is not null)
+				{
+					AttachToRepository(_repository);
 				}
 			}
 		}
+	}
 
-		private PopupNotificationsStack PopupsStack
-			=> _guiProvider.Environment.ViewDockService.Grid.PopupsStack;
+	private PopupNotificationsStack PopupsStack
+		=> _guiProvider.Environment.ViewDockService.DockPanel.PopupsStack;
 
-		private void AttachToRepository(Repository repository)
+	private void AttachToRepository(Repository repository)
+	{
+		Assert.IsNotNull(repository);
+
+		repository.Remotes.FetchCompleted += OnFetchCompleted;
+		repository.Remotes.PullCompleted  += OnPullCompleted;
+		repository.Remotes.PruneCompleted += OnPruneCompleted;
+
+		repository.Status.Committed += OnCommitted;
+	}
+
+	private void DetachFromRepository(Repository repository)
+	{
+		Assert.IsNotNull(repository);
+
+		repository.Remotes.FetchCompleted -= OnFetchCompleted;
+		repository.Remotes.PullCompleted  -= OnPullCompleted;
+		repository.Remotes.PruneCompleted -= OnPruneCompleted;
+
+		repository.Status.Committed -= OnCommitted;
+	}
+
+	private void OnFetchCompleted(object sender, FetchCompletedEventArgs e)
+	{
+		if(_guiProvider.Environment.InvokeRequired)
 		{
-			Assert.IsNotNull(repository);
-
-			repository.Remotes.FetchCompleted += OnFetchCompleted;
-			repository.Remotes.PullCompleted  += OnPullCompleted;
-			repository.Remotes.PruneCompleted += OnPruneCompleted;
-
-			repository.Status.Committed += OnCommitted;
-		}
-
-		private void DetachFromRepository(Repository repository)
-		{
-			Assert.IsNotNull(repository);
-
-			repository.Remotes.FetchCompleted -= OnFetchCompleted;
-			repository.Remotes.PullCompleted  -= OnPullCompleted;
-			repository.Remotes.PruneCompleted -= OnPruneCompleted;
-
-			repository.Status.Committed -= OnCommitted;
-		}
-
-		private void OnFetchCompleted(object sender, FetchCompletedEventArgs e)
-		{
-			if(_guiProvider.Environment.InvokeRequired)
+			try
 			{
-				try
-				{
-					_guiProvider.Environment.BeginInvoke(
-						new Action<FetchCompletedEventArgs>(OnFetchCompleted), new object[] { e }); 
-				}
-				catch(ObjectDisposedException)
-				{
-				}
+				_guiProvider.Environment.BeginInvoke(
+					new Action<FetchCompletedEventArgs>(OnFetchCompleted), new object[] { e }); 
 			}
-			else
+			catch(ObjectDisposedException)
 			{
-				OnFetchCompleted(e);
 			}
 		}
-
-		private void OnPullCompleted(object sender, PullCompletedEventArgs e)
+		else
 		{
-			if(_guiProvider.Environment.InvokeRequired)
+			OnFetchCompleted(e);
+		}
+	}
+
+	private void OnPullCompleted(object sender, PullCompletedEventArgs e)
+	{
+		if(_guiProvider.Environment.InvokeRequired)
+		{
+			try
 			{
-				try
-				{
-					_guiProvider.Environment.BeginInvoke(
-						new Action<PullCompletedEventArgs>(OnPullCompleted), new object[] { e }); 
-				}
-				catch(ObjectDisposedException)
-				{
-				}
+				_guiProvider.Environment.BeginInvoke(
+					new Action<PullCompletedEventArgs>(OnPullCompleted), new object[] { e }); 
 			}
-			else
+			catch(ObjectDisposedException)
 			{
-				OnPullCompleted(e);
 			}
 		}
-
-		private void OnPruneCompleted(object sender, PruneCompletedEventArgs e)
+		else
 		{
-			if(_guiProvider.Environment.InvokeRequired)
-			{
-				try
-				{
-					_guiProvider.Environment.BeginInvoke(
-						new Action<PruneCompletedEventArgs>(OnPruneCompleted), new object[] { e }); 
-				}
-				catch(ObjectDisposedException)
-				{
-				}
-			}
-			else
-			{
-				OnPruneCompleted(e);
-			}
+			OnPullCompleted(e);
 		}
+	}
 
-		private void OnCommitted(object sender, CommitResultEventArgs e)
+	private void OnPruneCompleted(object sender, PruneCompletedEventArgs e)
+	{
+		if(_guiProvider.Environment.InvokeRequired)
 		{
-			var message = e.CommitResult.Message;
-			if(string.IsNullOrWhiteSpace(message)) return;
-
-			if(_guiProvider.Environment.InvokeRequired)
+			try
 			{
-				try
-				{
-					_guiProvider.Environment.BeginInvoke(
-						new Action<CommitResultEventArgs>(OnCommitted), new object[] { e });
-				}
-				catch(ObjectDisposedException)
-				{
-				}
+				_guiProvider.Environment.BeginInvoke(
+					new Action<PruneCompletedEventArgs>(OnPruneCompleted), new object[] { e }); 
 			}
-			else
+			catch(ObjectDisposedException)
 			{
-				OnCommitted(e);
 			}
 		}
-
-		private void OnFetchCompleted(FetchCompletedEventArgs e)
+		else
 		{
-			var notification = new ReferencesChangedNotification(e.Changes)
-			{
-				Text = e.Remote is null ? Resources.StrFetch : Resources.StrFetch + ": " + e.Remote.Name,
-			};
-			PopupsStack.PushNotification(notification);
+			OnPruneCompleted(e);
 		}
+	}
 
-		private void OnPullCompleted(PullCompletedEventArgs e)
-		{
-			var notification = new ReferencesChangedNotification(e.Changes)
-			{
-				Text = e.Remote is null ? Resources.StrPull : Resources.StrPull + ": " + e.Remote.Name,
-			};
-			PopupsStack.PushNotification(notification);
-		}
+	private void OnCommitted(object sender, CommitResultEventArgs e)
+	{
+		var message = e.CommitResult.Message;
+		if(string.IsNullOrWhiteSpace(message)) return;
 
-		private void OnPruneCompleted(PruneCompletedEventArgs e)
+		if(_guiProvider.Environment.InvokeRequired)
 		{
-			var notification = new ReferencesChangedNotification(e.Changes)
+			try
 			{
-				Text = e.Remote is null ? Resources.StrPrune : Resources.StrPrune + ": " + e.Remote.Name,
-			};
-			PopupsStack.PushNotification(notification);
-		}
-
-		private void OnCommitted(CommitResultEventArgs e)
-		{
-			var message = e.CommitResult.Message;
-			if(!string.IsNullOrWhiteSpace(message))
+				_guiProvider.Environment.BeginInvoke(
+					new Action<CommitResultEventArgs>(OnCommitted), new object[] { e });
+			}
+			catch(ObjectDisposedException)
 			{
-				if(!PopupsStack.IsDisposed)
-				{
-					PopupsStack.PushNotification(new PlainTextNotificationContent(message) { Text = Resources.StrCommit });
-				}
 			}
 		}
-
-		public void Dispose()
+		else
 		{
-			if(_repository is not null)
+			OnCommitted(e);
+		}
+	}
+
+	private void OnFetchCompleted(FetchCompletedEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		var notification = new ReferencesChangedNotification(e.Changes)
+		{
+			Text = e.Remote is null ? Resources.StrFetch : Resources.StrFetch + ": " + e.Remote.Name,
+		};
+		PopupsStack.PushNotification(notification);
+	}
+
+	private void OnPullCompleted(PullCompletedEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		var notification = new ReferencesChangedNotification(e.Changes)
+		{
+			Text = e.Remote is null ? Resources.StrPull : Resources.StrPull + ": " + e.Remote.Name,
+		};
+		PopupsStack.PushNotification(notification);
+	}
+
+	private void OnPruneCompleted(PruneCompletedEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		var notification = new ReferencesChangedNotification(e.Changes)
+		{
+			Text = e.Remote is null ? Resources.StrPrune : Resources.StrPrune + ": " + e.Remote.Name,
+		};
+		PopupsStack.PushNotification(notification);
+	}
+
+	private void OnCommitted(CommitResultEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		var message = e.CommitResult.Message;
+		if(!string.IsNullOrWhiteSpace(message))
+		{
+			if(!PopupsStack.IsDisposed)
 			{
-				DetachFromRepository(_repository);
-				_repository = null;
+				PopupsStack.PushNotification(new PlainTextNotificationContent(message) { Text = Resources.StrCommit });
 			}
+		}
+	}
+
+	public void Dispose()
+	{
+		if(_repository is not null)
+		{
+			DetachFromRepository(_repository);
+			_repository = null;
 		}
 	}
 }

@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc.WinForms
+namespace gitter.Framework.Mvc.WinForms;
+
+using System.Windows.Forms;
+
+public class RadioButtonInputSource : ControlInputSource<RadioButton, bool>
 {
-	using System.Windows.Forms;
-
-	public class RadioButtonInputSource : ControlInputSource<RadioButton, bool>
+	public RadioButtonInputSource(RadioButton radionButton)
+		: base(radionButton)
 	{
-		public RadioButtonInputSource(RadioButton radionButton)
-			: base(radionButton)
-		{
-		}
+	}
 
-		protected override bool FetchValue() => Control.Checked;
+	protected override bool FetchValue() => Control.Checked;
 
-		protected override void SetValue(bool value) => Control.Checked = value;
+	protected override void SetValue(bool value) => Control.Checked = value;
 
-		protected override void SubscribeToValueChangeEvent()
-		{
-			Control.CheckedChanged += OnControlValueChanged;
-		}
+	protected override void SubscribeToValueChangeEvent()
+	{
+		Control.CheckedChanged += OnControlValueChanged;
+	}
 
-		protected override void UnsubscribeToValueChangeEvent()
-		{
-			Control.CheckedChanged -= OnControlValueChanged;
-		}
+	protected override void UnsubscribeToValueChangeEvent()
+	{
+		Control.CheckedChanged -= OnControlValueChanged;
 	}
 }

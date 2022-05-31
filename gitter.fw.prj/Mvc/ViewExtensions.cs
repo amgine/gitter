@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
+namespace gitter.Framework.Mvc;
+
+using System;
+
+public static class ViewExtensions
 {
-	using System;
-
-	public static class ViewExtensions
+	public struct CursorChangeToken : IDisposable
 	{
-		public struct CursorChangeToken : IDisposable
+		private readonly IView _view;
+		private readonly MouseCursor _cursor;
+
+		internal CursorChangeToken(IView view, MouseCursor cursor)
 		{
-			private readonly IView _view;
-			private readonly MouseCursor _cursor;
-
-			internal CursorChangeToken(IView view, MouseCursor cursor)
-			{
-				_view = view;
-				_cursor = cursor;
-			}
-
-			public void Dispose()
-			{
-				_view.MouseCursor = _cursor;
-			}
+			_view = view;
+			_cursor = cursor;
 		}
 
-		public static CursorChangeToken ChangeCursor(this IView view, MouseCursor cursor)
+		public void Dispose()
 		{
-			Verify.Argument.IsNotNull(view, nameof(view));
-
-			var oldCursor = view.MouseCursor;
-			view.MouseCursor = cursor;
-			return new CursorChangeToken(view, oldCursor);
+			_view.MouseCursor = _cursor;
 		}
+	}
+
+	public static CursorChangeToken ChangeCursor(this IView view, MouseCursor cursor)
+	{
+		Verify.Argument.IsNotNull(view);
+
+		var oldCursor = view.MouseCursor;
+		view.MouseCursor = cursor;
+		return new CursorChangeToken(view, oldCursor);
 	}
 }

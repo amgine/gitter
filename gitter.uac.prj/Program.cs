@@ -18,52 +18,29 @@
  */
 #endregion
 
-namespace gitter.UAC
+namespace gitter.UAC;
+
+using System;
+
+using gitter.Framework;
+
+static class Program
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Runtime.Remoting;
-	using System.Runtime.Remoting.Channels;
-	using System.Runtime.Remoting.Channels.Ipc;
-
-	static class Program
+	/// <summary>The main entry point for the application.</summary>
+	[STAThread]
+	private static void Main(string[] args)
 	{
-		private static RemoteExecutor _executor;
-		private const string RemotingChannelName = "gitter.UAC";
-		private const string RemotingObjectName = "RemoteExecutor.rem";
-
-		/// <summary>The main entry point for the application.</summary>
-		[STAThread]
-		private static void Main()
+		foreach(var arg in args)
 		{
-			var args = Environment.GetCommandLineArgs();
-			if(args == null || args.Length < 2 || args[1] != "--remoting")
-				return;
-
-			using var mutex = new Mutex(true, "gitter-uac-instance", out var isFirstInstance);
-			if(!isFirstInstance) return;
-
-			ChannelServices.RegisterChannel(
-				new IpcChannel(
-					new Dictionary<string, string>
-					{
-						["portName"] = RemotingChannelName,
-					},
-					new BinaryClientFormatterSinkProvider(),
-					new BinaryServerFormatterSinkProvider()
-					{
-						TypeFilterLevel = System.Runtime.Serialization.Formatters.TypeFilterLevel.Full,
-					}),
-				false);
-
-			RemotingConfiguration.RegisterWellKnownServiceType(
-				typeof(RemoteExecutor), RemotingObjectName, WellKnownObjectMode.Singleton);
-
-			_executor = (RemoteExecutor)Activator.GetObject(typeof(RemoteExecutor),
-				string.Format(@"ipc://{0}/{1}", RemotingChannelName, RemotingObjectName));
-			_executor.ExitEvent.WaitOne();
-			_executor.ExitEvent.Close();
+			switch(arg)
+			{
+				case @"--explorer-context-menu=enabled":
+					WindowsExplorer.IntegrateInExplorerContextMenu();
+					break;
+				case @"--explorer-context-menu=disabled":
+					WindowsExplorer.RemoveFromExplorerContextMenu();
+					break;
+			}
 		}
 	}
 }

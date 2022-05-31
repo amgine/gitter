@@ -18,147 +18,164 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+public sealed class RegexHyperlinkExtractor : IHyperlinkExtractor
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
+	private readonly Regex _regex;
+	private readonly IReadOnlyList<IToken> _tokens;
+	private readonly string _linkGroupName;
 
-	public sealed class RegexHyperlinkExtractor : IHyperlinkExtractor
+	interface IToken
 	{
-		private readonly Regex _regex;
-		private readonly IReadOnlyList<IToken> _tokens;
+		string FetchValue(Match match);
+	}
 
-		interface IToken
+	sealed class ConstantToken : IToken
+	{
+		public ConstantToken(string value) => Value = value;
+
+		public string Value { get; }
+
+		public string FetchValue(Match match) => Value;
+
+		public override string ToString() => Value;
+	}
+
+	sealed class MatchGroupValueToken : IToken
+	{
+		public MatchGroupValueToken(int groupNumber) => GroupNumber = groupNumber;
+
+		private int GroupNumber { get; }
+
+		public string FetchValue(Match match)
 		{
-			string FetchValue(Match match);
+			var group = match.Groups[GroupNumber];
+			return group != null && group.Success
+				? group.Value
+				: string.Empty;
 		}
 
-		sealed class ConstantToken : IToken
+		public override string ToString() => $"<group: {GroupNumber}>";
+	}
+
+	private static IReadOnlyList<IToken> Tokenize(Regex regex, string pattern)
+	{
+		Assert.IsNotNull(regex);
+		Assert.IsNotNull(pattern);
+
+		var names   = regex.GetGroupNames();
+		var numbers = regex.GetGroupNumbers();
+
+		if(names == null || numbers == null || names.Length == 0 || numbers.Length == 0 || names.Length != numbers.Length || pattern.Length == 0)
 		{
-			public ConstantToken(string value) => Value = value;
-
-			public string Value { get; }
-
-			public string FetchValue(Match match) => Value;
-
-			public override string ToString() => Value;
+			return new[] { new ConstantToken(pattern) };
 		}
 
-		sealed class MatchGroupValueToken : IToken
+		var tokens = new List<IToken>();
+		int start  = 0;
+		for(int i = 0; i < pattern.Length; ++i)
 		{
-			public MatchGroupValueToken(int groupNumber) => GroupNumber = groupNumber;
-
-			private int GroupNumber { get; }
-
-			public string FetchValue(Match match)
+			switch(pattern[i])
 			{
-				var group = match.Groups[GroupNumber];
-				return group != null && group.Success
-					? group.Value
-					: string.Empty;
-			}
-
-			public override string ToString() => $"<group: {GroupNumber}>";
-		}
-
-		private static IReadOnlyList<IToken> Tokenize(Regex regex, string pattern)
-		{
-			Assert.IsNotNull(regex);
-			Assert.IsNotNull(pattern);
-
-			var names   = regex.GetGroupNames();
-			var numbers = regex.GetGroupNumbers();
-
-			if(names == null || numbers == null || names.Length == 0 || numbers.Length == 0 || names.Length != numbers.Length || pattern.Length == 0)
-			{
-				return new[] { new ConstantToken(pattern) };
-			}
-
-			var tokens = new List<IToken>();
-			int start  = 0;
-			for(int i = 0; i < pattern.Length; ++i)
-			{
-				switch(pattern[i])
-				{
-					case '%':
-						int end = i;
-						++i;
-						while(i < pattern.Length)
+				case '%':
+					int end = i;
+					++i;
+					while(i < pattern.Length)
+					{
+						if(pattern[i] == '%')
 						{
-							if(pattern[i] == '%')
+							var nameLength = i - end - 1;
+							if(nameLength > 0)
 							{
-								var nameLength = i - end - 1;
-								if(nameLength > 0)
+								for(int j = 0; j < names.Length; ++j)
 								{
-									for(int j = 0; j < names.Length; ++j)
+									if(names[j] != null && names[j].Length == nameLength
+										&& string.Compare(pattern, end + 1, names[j], 0, nameLength, ignoreCase: false) == 0)
 									{
-										if(names[j] != null && names[j].Length == nameLength
-											&& string.Compare(pattern, end + 1, names[j], 0, nameLength, ignoreCase: false) == 0)
+										var len = end - start;
+										if(len > 0)
 										{
-											var len = end - start;
-											if(len > 0)
-											{
-												tokens.Add(new ConstantToken(pattern.Substring(start, len)));
-											}
-											tokens.Add(new MatchGroupValueToken(numbers[j]));
-											start = i + 1;
+											tokens.Add(new ConstantToken(pattern.Substring(start, len)));
 										}
+										tokens.Add(new MatchGroupValueToken(numbers[j]));
+										start = i + 1;
 									}
 								}
-								break;
 							}
-							++i;
+							break;
 						}
-						break;
-				}
+						++i;
+					}
+					break;
 			}
-			if(start < pattern.Length)
-			{
-				var len = pattern.Length - start;
-				if(len > 0)
-				{
-					tokens.Add(new ConstantToken(pattern.Substring(start, len)));
-				}
-			}
-			return tokens;
 		}
-
-		public RegexHyperlinkExtractor(string regexp, string urlPattern)
+		if(start < pattern.Length)
 		{
-			Verify.Argument.IsNotNull(regexp, nameof(regexp));
-			Verify.Argument.IsNotNull(urlPattern, nameof(urlPattern));
-
-			_regex  = new Regex(regexp);
-			_tokens = Tokenize(_regex, urlPattern);
-		}
-
-		public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
-		{
-			if(text == null || text.Length == 0) return default;
-
-			var hyperlinks = default(List<Hyperlink>);
-			var values     = default(string[]);
-
-			foreach(Match match in _regex.Matches(text))
+			var len = pattern.Length - start;
+			if(len > 0)
 			{
-				var index  = match.Index;
-				var length = match.Length;
-
-				var linkText = new Substring(text, index, length);
-
-				values ??= new string[_tokens.Count];
-				for(int i = 0; i < values.Length; ++i)
-				{
-					values[i] = _tokens[i].FetchValue(match);
-				}
-
-				var linkUrl = string.Concat(values);
-
-				hyperlinks ??= new();
-				hyperlinks.Add(new Hyperlink(linkText, linkUrl));
+				tokens.Add(new ConstantToken(pattern.Substring(start, len)));
 			}
-			return hyperlinks;
 		}
+		return tokens;
+	}
+
+	public RegexHyperlinkExtractor(string regexp, string urlPattern, string linkGroupName = null)
+	{
+		Verify.Argument.IsNotNull(regexp);
+		Verify.Argument.IsNotNull(urlPattern);
+
+		_regex         = new Regex(regexp);
+		_tokens        = Tokenize(_regex, urlPattern);
+		_linkGroupName = linkGroupName;
+	}
+
+	private Substring GetLinkText(string text, Match match)
+	{
+		Assert.IsNotNull(text);
+		Assert.IsNotNull(match);
+
+		Capture c = _linkGroupName is null
+			? match
+			: match.Groups[_linkGroupName];
+		return new Substring(text, c.Index, c.Length);
+	}
+
+	private string GetLinkUrl(Match match, string[] values)
+	{
+		Assert.IsNotNull(match);
+		Assert.IsNotNull(values);
+
+		for(int i = 0; i < values.Length; ++i)
+		{
+			values[i] = _tokens[i].FetchValue(match);
+		}
+		return string.Concat(values);
+	}
+
+	public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
+	{
+		if(text is not { Length: not 0 }) return default;
+
+		var matches = _regex.Matches(text);
+		if(matches.Count == 0) return default;
+
+		var hyperlinks = new Hyperlink[matches.Count];
+		var values     = new string[_tokens.Count];
+
+		for(int i = 0; i < hyperlinks.Length; ++i)
+		{
+			var match = matches[i];
+			hyperlinks[i] = new Hyperlink(
+				GetLinkText(text, match),
+				GetLinkUrl(match, values));
+		}
+
+		return hyperlinks;
 	}
 }

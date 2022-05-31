@@ -18,48 +18,47 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+public class ViewListItem : CustomListBoxItem<IViewFactory>
 {
-	using System;
-	using System.Drawing;
-
-	public class ViewListItem : CustomListBoxItem<IViewFactory>
+	/// <summary>Initializes a new instance of the <see cref="ViewListItem"/> class.</summary>
+	/// <param name="viewFactory">View factory.</param>
+	public ViewListItem(IViewFactory viewFactory)
+		: base(viewFactory)
 	{
-		/// <summary>Initializes a new instance of the <see cref="ViewListItem"/> class.</summary>
-		/// <param name="viewFactory">View factory.</param>
-		public ViewListItem(IViewFactory viewFactory)
-			: base(viewFactory)
+		Verify.Argument.IsNotNull(viewFactory);
+	}
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch(measureEventArgs.SubItemId)
 		{
-			Verify.Argument.IsNotNull(viewFactory, nameof(viewFactory));
+			case 0:
+				var iconSize = measureEventArgs.DpiConverter.ConvertX(16);
+				return measureEventArgs.MeasureImageAndText(DataContext.ImageProvider?.GetImage(iconSize), DataContext.Name);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		/// <inheritdoc/>
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch(paintEventArgs.SubItemId)
 		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					var iconSize = measureEventArgs.DpiConverter.ConvertX(16);
-					return measureEventArgs.MeasureImageAndText(DataContext.ImageProvider?.GetImage(iconSize), DataContext.Name);
-				default:
-					return Size.Empty;
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			Assert.IsNotNull(paintEventArgs);
-
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					var iconSize = paintEventArgs.DpiConverter.ConvertX(16);
-					paintEventArgs.PaintImageAndText(DataContext.ImageProvider?.GetImage(iconSize), DataContext.Name);
-					break;
-			}
+			case 0:
+				var iconSize = paintEventArgs.DpiConverter.ConvertX(16);
+				paintEventArgs.PaintImageAndText(DataContext.ImageProvider?.GetImage(iconSize), DataContext.Name);
+				break;
 		}
 	}
 }

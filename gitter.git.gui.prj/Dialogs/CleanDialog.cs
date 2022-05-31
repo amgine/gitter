@@ -18,252 +18,258 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 {
-	using System;
-	using System.ComponentModel;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
+	private FilesToCleanBinding _dataBinding;
 
-	using gitter.Git.Gui.Controls;
+	#endregion
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#region .ctor
 
-	[ToolboxItem(false)]
-	public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
+	/// <summary>Create <see cref="CleanDialog"/>.</summary>
+	/// <param name="repository">Related <see cref="Repository"/>.</param>
+	public CleanDialog(Repository repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(repository);
 
-		private FilesToCleanBinding _dataBinding;
+		Repository = repository;
 
-		#endregion
+		InitializeComponent();
 
-		#region .ctor
+		Localize();
 
-		/// <summary>Create <see cref="CleanDialog"/>.</summary>
-		/// <param name="repository">Related <see cref="Repository"/>.</param>
-		public CleanDialog(Repository repository)
+		for(int i = 0; i < _lstFilesToClear.Columns.Count; ++i)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
-
-			InitializeComponent();
-
-			Localize();
-
-			for(int i = 0; i < _lstFilesToClear.Columns.Count; ++i)
-			{
-				var col = _lstFilesToClear.Columns[i];
-				col.IsVisible = col.Id == (int)ColumnId.Name;
-			}
-
-			_lstFilesToClear.Style = GitterApplication.DefaultStyle;
-			_lstFilesToClear.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
-			_lstFilesToClear.ShowTreeLines = false;
-
-			if(!GitFeatures.CleanExcludeOption.IsAvailableFor(repository))
-			{
-				_lblExcludePattern.Enabled = false;
-				_txtExclude.Enabled = false;
-				_txtExclude.Text = Resources.StrlRequiredVersionIs.UseAsFormat(
-					GitFeatures.CleanExcludeOption.RequiredVersion);
-			}
-
-			GitterApplication.FontManager.InputFont.Apply(_txtPattern, _txtExclude);
-
-			LoadConfig();
+			var col = _lstFilesToClear.Columns[i];
+			col.IsVisible = col.Id == (int)ColumnId.Name;
 		}
 
-		#endregion
+		_lstFilesToClear.Style = GitterApplication.DefaultStyle;
+		_lstFilesToClear.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
+		_lstFilesToClear.ShowTreeLines = false;
 
-		private void Localize()
+		if(!GitFeatures.CleanExcludeOption.IsAvailableFor(repository))
 		{
-			Text = Resources.StrClean;
-
-			_lblIncludePattern.Text = Resources.StrsIncludePattern.AddColon();
-			_lblExcludePattern.Text = Resources.StrsExcludePattern.AddColon();
-
-			_lblType.Text = Resources.StrType.AddColon();
-
-			_radIncludeUntracked.Text = Resources.StrUntracked;
-			_radIncludeIgnored.Text = Resources.StrIgnored;
-			_radIncludeBoth.Text = Resources.StrBoth;
-
-			_chkRemoveDirectories.Text = Resources.StrsAlsoRemoveDirectories;
-
-			_lblObjectList.Text = Resources.StrsObjectsThatWillBeRemoved.AddColon();
-			_lstFilesToClear.Text = Resources.StrsNoFilesToRemove;
+			_lblExcludePattern.Enabled = false;
+			_txtExclude.Enabled = false;
+			_txtExclude.Text = Resources.StrlRequiredVersionIs.UseAsFormat(
+				GitFeatures.CleanExcludeOption.RequiredVersion);
 		}
 
-		private FilesToCleanBinding DataBinding
+		GitterApplication.FontManager.InputFont.Apply(_txtPattern, _txtExclude);
+
+		LoadConfig();
+	}
+
+	#endregion
+
+	private void Localize()
+	{
+		Text = Resources.StrClean;
+
+		_lblIncludePattern.Text = Resources.StrsIncludePattern.AddColon();
+		_lblExcludePattern.Text = Resources.StrsExcludePattern.AddColon();
+
+		_lblType.Text = Resources.StrType.AddColon();
+
+		_radIncludeUntracked.Text = Resources.StrUntracked;
+		_radIncludeIgnored.Text = Resources.StrIgnored;
+		_radIncludeBoth.Text = Resources.StrBoth;
+
+		_chkRemoveDirectories.Text = Resources.StrsAlsoRemoveDirectories;
+
+		_lblObjectList.Text = Resources.StrsObjectsThatWillBeRemoved.AddColon();
+		_lstFilesToClear.Text = Resources.StrsNoFilesToRemove;
+	}
+
+	private FilesToCleanBinding DataBinding
+	{
+		get => _dataBinding;
+		set
 		{
-			get => _dataBinding;
-			set
+			if(_dataBinding != value)
 			{
-				if(_dataBinding != value)
-				{
-					_dataBinding?.Dispose();
-					_dataBinding = value;
-					_dataBinding?.ReloadData();
-				}
+				_dataBinding?.Dispose();
+				_dataBinding = value;
+				_dataBinding?.ReloadData();
 			}
 		}
+	}
 
-		public Repository Repository { get; }
+	public Repository Repository { get; }
 
-		protected override void OnClosed(DialogResult result)
+	/// <inheritdoc/>
+	protected override void OnClosed(DialogResult result)
+	{
+		SaveConfig();
+		base.OnClosed(result);
+	}
+
+	private void LoadConfig()
+	{
+		var section = Repository.ConfigSection.TryGetSection("CleanDialog");
+		if(section != null)
 		{
-			SaveConfig();
-			base.OnClosed(result);
+			_txtPattern.Text = section.GetValue<string>("Pattern", string.Empty);
+			_txtExclude.Text = section.GetValue<string>("Exclude", string.Empty);
+			RemoveDirectories = section.GetValue<bool>("RemoveDirectories", false);
+			Mode = section.GetValue<CleanFilesMode>("Mode", CleanFilesMode.Default);
 		}
+	}
 
-		private void LoadConfig()
+	private void SaveConfig()
+	{
+		var section = Repository.ConfigSection.GetCreateSection("CleanDialog");
+		section.SetValue<string>("Pattern", _txtPattern.Text);
+		section.SetValue<string>("Exclude", _txtExclude.Text);
+		section.SetValue<bool>("RemoveDirectories", RemoveDirectories);
+		section.SetValue<CleanFilesMode>("Mode", Mode);
+	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(437, 359));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrClean;
+
+	/// <inheritdoc/>
+	protected override void OnShown()
+	{
+		base.OnShown();
+		UpdateList();
+	}
+
+	public CleanFilesMode Mode
+	{
+		get
 		{
-			var section = Repository.ConfigSection.TryGetSection("CleanDialog");
-			if(section != null)
-			{
-				_txtPattern.Text = section.GetValue<string>("Pattern", string.Empty);
-				_txtExclude.Text = section.GetValue<string>("Exclude", string.Empty);
-				RemoveDirectories = section.GetValue<bool>("RemoveDirectories", false);
-				Mode = section.GetValue<CleanFilesMode>("Mode", CleanFilesMode.Default);
-			}
-		}
-
-		private void SaveConfig()
-		{
-			var section = Repository.ConfigSection.GetCreateSection("CleanDialog");
-			section.SetValue<string>("Pattern", _txtPattern.Text);
-			section.SetValue<string>("Exclude", _txtExclude.Text);
-			section.SetValue<bool>("RemoveDirectories", RemoveDirectories);
-			section.SetValue<CleanFilesMode>("Mode", Mode);
-		}
-
-		protected override string ActionVerb => Resources.StrClean;
-
-		protected override void OnShown()
-		{
-			base.OnShown();
-			UpdateList();
-		}
-
-		public CleanFilesMode Mode
-		{
-			get
-			{
-				if(_radIncludeUntracked.Checked)
-					return CleanFilesMode.Default;
-				if(_radIncludeIgnored.Checked)
-					return CleanFilesMode.OnlyIgnored;
-				if(_radIncludeBoth.Checked)
-					return CleanFilesMode.IncludeIgnored;
+			if(_radIncludeUntracked.Checked)
 				return CleanFilesMode.Default;
-			}
-			set
+			if(_radIncludeIgnored.Checked)
+				return CleanFilesMode.OnlyIgnored;
+			if(_radIncludeBoth.Checked)
+				return CleanFilesMode.IncludeIgnored;
+			return CleanFilesMode.Default;
+		}
+		set
+		{
+			switch(value)
 			{
-				switch(value)
-				{
-					case CleanFilesMode.Default:
-						_radIncludeUntracked.Checked = true;
-						break;
-					case CleanFilesMode.OnlyIgnored:
-						_radIncludeIgnored.Checked = true;
-						break;
-					case CleanFilesMode.IncludeIgnored:
-						_radIncludeBoth.Checked = true;
-						break;
-					default:
-						throw new ArgumentException(nameof(value));
-				}
+				case CleanFilesMode.Default:
+					_radIncludeUntracked.Checked = true;
+					break;
+				case CleanFilesMode.OnlyIgnored:
+					_radIncludeIgnored.Checked = true;
+					break;
+				case CleanFilesMode.IncludeIgnored:
+					_radIncludeBoth.Checked = true;
+					break;
+				default:
+					throw new ArgumentException(nameof(value));
 			}
 		}
+	}
 
-		public string IncludePattern
+	public string IncludePattern
+	{
+		get => _txtPattern.Text.Trim();
+		set => _txtPattern.Text = value;
+	}
+
+	public string ExcludePattern
+	{
+		get =>  _txtExclude.Enabled ? _txtExclude.Text.Trim() : string.Empty;
+		set
 		{
-			get => _txtPattern.Text.Trim();
-			set => _txtPattern.Text = value;
+			Verify.State.IsTrue(_txtExclude.Enabled, "Exclude pattern is not supported.");
+
+			_txtExclude.Text = value;
 		}
+	}
 
-		public string ExcludePattern
-		{
-			get =>  _txtExclude.Enabled ? _txtExclude.Text.Trim() : string.Empty;
-			set
-			{
-				Verify.State.IsTrue(_txtExclude.Enabled, "Exclude pattern is not supported.");
+	public bool RemoveDirectories
+	{
+		get => _chkRemoveDirectories.Checked;
+		set => _chkRemoveDirectories.Checked = value;
+	}
 
-				_txtExclude.Text = value;
-			}
-		}
+	private void UpdateList()
+	{
+		if(IsDisposed) return;
 
-		public bool RemoveDirectories
-		{
-			get => _chkRemoveDirectories.Checked;
-			set => _chkRemoveDirectories.Checked = value;
-		}
+		DataBinding ??= new FilesToCleanBinding(Repository, _lstFilesToClear);
+		DataBinding.IncludePattern = IncludePattern;
+		DataBinding.ExcludePattern = ExcludePattern;
+		DataBinding.CleanFilesMode = Mode;
+		DataBinding.IncludeDirectories = RemoveDirectories;
+		DataBinding.ReloadData();
+	}
 
-		private void UpdateList()
-		{
-			if(IsDisposed) return;
+	private void OnPatternTextChanged(object sender, EventArgs e)
+	{
+		UpdateList();
+	}
 
-			DataBinding ??= new FilesToCleanBinding(Repository, _lstFilesToClear);
-			DataBinding.IncludePattern = IncludePattern;
-			DataBinding.ExcludePattern = ExcludePattern;
-			DataBinding.CleanFilesMode = Mode;
-			DataBinding.IncludeDirectories = RemoveDirectories;
-			DataBinding.ReloadData();
-		}
-
-		private void OnPatternTextChanged(object sender, EventArgs e)
+	private void OnRadioButtonCheckedChanged(object sender, EventArgs e)
+	{
+		if(((RadioButton)sender).Checked)
 		{
 			UpdateList();
 		}
+	}
 
-		private void OnRadioButtonCheckedChanged(object sender, EventArgs e)
+	private void OnRemoveDirectoriesCheckedChanged(object sender, EventArgs e)
+	{
+		UpdateList();
+	}
+
+	private void OnFilesToClearItemActivated(object sender, ItemEventArgs e)
+	{
+		if(e.Item is ITreeItemListItem item)
 		{
-			if(((RadioButton)sender).Checked)
-			{
-				UpdateList();
-			}
+			Utility.OpenUrl(System.IO.Path.Combine(
+				item.TreeItem.Repository.WorkingDirectory, item.TreeItem.RelativePath));
 		}
+	}
 
-		private void OnRemoveDirectoriesCheckedChanged(object sender, EventArgs e)
+	/// <summary>Execute dialog associated action.</summary>
+	/// <returns><c>true</c>, if action succeeded</returns>
+	public async Task<bool> ExecuteAsync()
+	{
+		try
 		{
+			await Repository.Status.CleanAsync(IncludePattern, ExcludePattern, Mode, RemoveDirectories);
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				this,
+				exc.Message,
+				Resources.ErrCleanFailed,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
 			UpdateList();
+			return false;
 		}
-
-		private void OnFilesToClearItemActivated(object sender, ItemEventArgs e)
-		{
-			if(e.Item is ITreeItemListItem item)
-			{
-				Utility.OpenUrl(System.IO.Path.Combine(
-					item.TreeItem.Repository.WorkingDirectory, item.TreeItem.RelativePath));
-			}
-		}
-
-		/// <summary>Execute dialog associated action.</summary>
-		/// <returns><c>true</c>, if action succeeded</returns>
-		public async Task<bool> ExecuteAsync()
-		{
-			try
-			{
-				await Repository.Status.CleanAsync(IncludePattern, ExcludePattern, Mode, RemoveDirectories);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrCleanFailed,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				UpdateList();
-				return false;
-			}
-			return true;
-		}
+		return true;
 	}
 }

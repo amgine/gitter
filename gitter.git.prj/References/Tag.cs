@@ -18,134 +18,133 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading.Tasks;
+
+using gitter.Git.AccessLayer;
+
+using Resources = gitter.Git.Properties.Resources;
+
+/// <summary>git tag object.</summary>
+public sealed class Tag : Reference
 {
-	using System;
-	using System.Threading.Tasks;
+	#region Static
 
-	using gitter.Git.AccessLayer;
+	/// <summary>Validates the tag name.</summary>
+	/// <param name="name">Tag name.</param>
+	/// <param name="errorMessage">Error message.</param>
+	/// <returns><c>true</c> if <paramref name="name"/> is a valid tag name; otherwise, <c>false</c>.</returns>
+	public static bool ValidateName(string name, out string errorMessage)
+		=> Reference.ValidateName(name, ReferenceType.Tag, out errorMessage);
 
-	using Resources = gitter.Git.Properties.Resources;
+	#endregion
 
-	/// <summary>git tag object.</summary>
-	public sealed class Tag : Reference
+	#region Data
+
+	/// <summary>Annotated tag message.</summary>
+	private string _message;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Initializes a new instance of the <see cref="Tag"/> class.</summary>
+	/// <param name="repository">Host repository.</param>
+	/// <param name="name">Tag name.</param>
+	/// <param name="pointer">Commit which is pointed by tag.</param>
+	/// <param name="type">The type.</param>
+	internal Tag(Repository repository, string name, IRevisionPointer pointer, TagType type)
+		: base(repository, name, pointer)
 	{
-		#region Static
-
-		/// <summary>Validates the tag name.</summary>
-		/// <param name="name">Tag name.</param>
-		/// <param name="errorMessage">Error message.</param>
-		/// <returns><c>true</c> if <paramref name="name"/> is a valid tag name; otherwise, <c>false</c>.</returns>
-		public static bool ValidateName(string name, out string errorMessage)
-			=> Reference.ValidateName(name, ReferenceType.Tag, out errorMessage);
-
-		#endregion
-
-		#region Data
-
-		/// <summary>Annotated tag message.</summary>
-		private string _message;
-
-		#endregion
-
-		#region .ctor
-
-		/// <summary>Initializes a new instance of the <see cref="Tag"/> class.</summary>
-		/// <param name="repository">Host repository.</param>
-		/// <param name="name">Tag name.</param>
-		/// <param name="pointer">Commit which is pointed by tag.</param>
-		/// <param name="type">The type.</param>
-		internal Tag(Repository repository, string name, IRevisionPointer pointer, TagType type)
-			: base(repository, name, pointer)
-		{
-			TagType = type;
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary><see cref="ReferenceType"/>.</summary>
-		/// <value><see cref="ReferenceType.Tag"/>.</value>
-		public override ReferenceType Type => ReferenceType.Tag;
-
-		/// <summary>Gets the full tag name.</summary>
-		/// <value>Full tag name.</value>
-		public override string FullName => GitConstants.TagPrefix + Name;
-
-		/// <summary>Gets or sets the type of this tag.</summary>
-		/// <value>Type of this tag.</value>
-		public TagType TagType { get; internal set; }
-
-		/// <summary>Gets the message of annotated tag.</summary>
-		/// <value>Message of annotated tag.</value>
-		public string Message
-		{
-			get
-			{
-				if(TagType == Git.TagType.Lightweight) return default;
-				if(_message == null)
-				{
-					try
-					{
-						_message = Repository.Accessor.QueryTagMessage.Invoke(
-							new QueryTagMessageParameters { TagName = FullName });
-					}
-					catch(Exception exc) when(!exc.IsCritical())
-					{
-						_message = string.Empty;
-					}
-				}
-				return _message;
-			}
-		}
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>Filter <see cref="IRevisionPointer"/> to types supported by this <see cref="Reference"/>.</summary>
-		/// <param name="pointer">Raw pointer.</param>
-		/// <returns>Valid pointer.</returns>
-		protected override IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
-		{
-			Verify.Argument.IsNotNull(pointer, nameof(pointer));
-
-			return pointer.Dereference();
-		}
-
-		/// <summary>Deletes this <see cref="Tag"/>.</summary>
-		public void Delete()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Refs.Tags.Delete(this);
-		}
-
-		/// <summary>Deletes this <see cref="Tag"/>.</summary>
-		public Task DeleteAsync()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return Repository.Refs.Tags.DeleteAsync(this);
-		}
-
-		/// <summary>Refreshes this instance's cached data.</summary>
-		public void Refresh()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Refs.Tags.Refresh(this);
-		}
-
-		/// <summary>Refreshes this instance's cached data.</summary>
-		public Task RefreshAsync()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return Repository.Refs.Tags.RefreshAsync(this);
-		}
-
-		#endregion
+		TagType = type;
 	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary><see cref="ReferenceType"/>.</summary>
+	/// <value><see cref="ReferenceType.Tag"/>.</value>
+	public override ReferenceType Type => ReferenceType.Tag;
+
+	/// <summary>Gets the full tag name.</summary>
+	/// <value>Full tag name.</value>
+	public override string FullName => GitConstants.TagPrefix + Name;
+
+	/// <summary>Gets or sets the type of this tag.</summary>
+	/// <value>Type of this tag.</value>
+	public TagType TagType { get; internal set; }
+
+	/// <summary>Gets the message of annotated tag.</summary>
+	/// <value>Message of annotated tag.</value>
+	public string Message
+	{
+		get
+		{
+			if(TagType == Git.TagType.Lightweight) return default;
+			if(_message == null)
+			{
+				try
+				{
+					_message = Repository.Accessor.QueryTagMessage.Invoke(
+						new QueryTagMessageParameters { TagName = FullName });
+				}
+				catch(Exception exc) when(!exc.IsCritical())
+				{
+					_message = string.Empty;
+				}
+			}
+			return _message;
+		}
+	}
+
+	#endregion
+
+	#region Methods
+
+	/// <summary>Filter <see cref="IRevisionPointer"/> to types supported by this <see cref="Reference"/>.</summary>
+	/// <param name="pointer">Raw pointer.</param>
+	/// <returns>Valid pointer.</returns>
+	protected override IRevisionPointer PrepareInputPointer(IRevisionPointer pointer)
+	{
+		Verify.Argument.IsNotNull(pointer);
+
+		return pointer.Dereference();
+	}
+
+	/// <summary>Deletes this <see cref="Tag"/>.</summary>
+	public void Delete()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Refs.Tags.Delete(this);
+	}
+
+	/// <summary>Deletes this <see cref="Tag"/>.</summary>
+	public Task DeleteAsync()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return Repository.Refs.Tags.DeleteAsync(this);
+	}
+
+	/// <summary>Refreshes this instance's cached data.</summary>
+	public void Refresh()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Refs.Tags.Refresh(this);
+	}
+
+	/// <summary>Refreshes this instance's cached data.</summary>
+	public Task RefreshAsync()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return Repository.Refs.Tags.RefreshAsync(this);
+	}
+
+	#endregion
 }

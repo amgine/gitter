@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2022  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,32 +18,29 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+/// <summary>Dock markers of <see cref="ViewHost"/>.</summary>
+sealed class ViewHostDockMarkers : DockMarkers<ViewHostDockMarker>
 {
-	/// <summary>Dock markers of <see cref="ViewHost"/>.</summary>
-	sealed class ViewHostDockMarkers : DockMarkers<ViewHostDockMarker>
+	/// <summary>Initializes a new instance of the <see cref="ViewHostDockMarkers"/> class.</summary>
+	/// <param name="dockHost"><see cref="ViewHost"/> which is the source of dock markers.</param>
+	public ViewHostDockMarkers(ViewHost dockHost)
 	{
-		/// <summary>Initializes a new instance of the <see cref="ViewHostDockMarkers"/> class.</summary>
-		/// <param name="dockHost"><see cref="ViewHost"/> which is the source of dock markers.</param>
-		public ViewHostDockMarkers(ViewHost dockHost)
-		{
-			Verify.Argument.IsNotNull(dockHost, nameof(dockHost));
+		Verify.Argument.IsNotNull(dockHost);
 
-			ViewHost = dockHost;
-		}
-
-		/// <summary><see cref="ViewHost"/> which is the source of dock markers.</summary>
-		/// <value>Source of dock markers.</value>
-		public ViewHost ViewHost { get; }
-
-		/// <inheritdoc/>
-		protected override ViewHostDockMarker[] CreateMarkers(ViewHost dockClient)
-		{
-			if(ViewHost.IsDocumentWell || (!dockClient.IsDocumentWell && !(dockClient.ViewsCount == 1 && dockClient.GetView(0).IsDocument)))
-			{
-				return new[] { new ViewHostDockMarker(ViewHost, dockClient) };
-			}
-			return default;
-		}
+		ViewHost = dockHost;
 	}
+
+	/// <summary><see cref="ViewHost"/> which is the source of dock markers.</summary>
+	/// <value>Source of dock markers.</value>
+	public ViewHost ViewHost { get; }
+
+	/// <summary>Creates the markers.</summary>
+	/// <param name="dockClient">The dock client.</param>
+	/// <returns>Created markers.</returns>
+	protected override ViewHostDockMarker[]? CreateMarkers(ViewHost dockClient)
+		=> ViewHost.IsDocumentWell || !dockClient.IsDocumentWell
+			? new[] { new ViewHostDockMarker(ViewHost, dockClient) }
+			: default;
 }

@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+public sealed class GarbageCollectParameters
 {
-	using System;
-
-	using gitter.Framework;
-
-	public sealed class GarbageCollectParameters
+	public GarbageCollectParameters()
 	{
-		public GarbageCollectParameters()
-		{
-		}
 	}
 }

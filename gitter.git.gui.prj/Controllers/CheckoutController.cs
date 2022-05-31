@@ -18,138 +18,137 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutController
 {
-	using System;
-	using System.Windows.Forms;
+	#region .ctor
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutController
+	public CheckoutController(Repository repository)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(repository);
 
-		public CheckoutController(Repository repository)
+		Repository = repository;
+	}
+
+	#endregion
+
+	#region Properties
+
+	private Repository Repository { get; }
+
+	#endregion
+
+	#region ICheckoutController Members
+
+	private void ProceedCheckout(IRevisionPointer revision)
+	{
+		try
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
-		}
-
-		#endregion
-
-		#region Properties
-
-		private Repository Repository { get; }
-
-		#endregion
-
-		#region ICheckoutController Members
-
-		private void ProceedCheckout(IRevisionPointer revision)
-		{
-			try
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					revision.Checkout(true);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCheckout, revision.Pointer),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
+				revision.Checkout(true);
 			}
 		}
-
-		public bool TryCheckout()
+		catch(GitException exc)
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+			GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				string.Format(Resources.ErrFailedToCheckout, revision.Pointer),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+		}
+	}
 
-			var revision = View.Revision.Value;
-			if(string.IsNullOrWhiteSpace(revision))
-			{
-				return true;
-			}
-			revision = revision.Trim();
+	public bool TryCheckout()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
 
-			var pointer = Repository.GetRevisionPointer(revision);
-			bool force = Control.ModifierKeys == Keys.Shift;
-
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					pointer.Checkout(force);
-				}
-			}
-			catch(UnknownRevisionException)
-			{
-				View.ErrorNotifier.NotifyError(View.Revision,
-					new UserInputError(
-						Resources.ErrInvalidRevisionExpression,
-						Resources.ErrRevisionIsUnknown));
-				return false;
-			}
-			catch(UntrackedFileWouldBeOverwrittenException)
-			{
-				if(GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					string.Format(Resources.AskOverwriteUntracked, revision),
-					Resources.StrCheckout,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.Yes)
-				{
-					ProceedCheckout(pointer);
-				}
-			}
-			catch(HaveLocalChangesException)
-			{
-				if(GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					string.Format(Resources.AskThrowAwayLocalChanges, revision),
-					Resources.StrCheckout,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.Yes)
-				{
-					ProceedCheckout(pointer);
-				}
-			}
-			catch(HaveConflictsException)
-			{
-				if(GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					string.Format(Resources.AskThrowAwayConflictedChanges, revision),
-					Resources.StrCheckout,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.Yes)
-				{
-					ProceedCheckout(pointer);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCheckout, revision),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
+		var revision = View.Revision.Value;
+		if(string.IsNullOrWhiteSpace(revision))
+		{
 			return true;
 		}
+		revision = revision.Trim();
 
-		#endregion
+		var pointer = Repository.GetRevisionPointer(revision);
+		bool force = Control.ModifierKeys == Keys.Shift;
+
+		try
+		{
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			{
+				pointer.Checkout(force);
+			}
+		}
+		catch(UnknownRevisionException)
+		{
+			View.ErrorNotifier.NotifyError(View.Revision,
+				new UserInputError(
+					Resources.ErrInvalidRevisionExpression,
+					Resources.ErrRevisionIsUnknown));
+			return false;
+		}
+		catch(UntrackedFileWouldBeOverwrittenException)
+		{
+			if(GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				string.Format(Resources.AskOverwriteUntracked, revision),
+				Resources.StrCheckout,
+				MessageBoxButtons.YesNo,
+				MessageBoxIcon.Warning) == DialogResult.Yes)
+			{
+				ProceedCheckout(pointer);
+			}
+		}
+		catch(HaveLocalChangesException)
+		{
+			if(GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				string.Format(Resources.AskThrowAwayLocalChanges, revision),
+				Resources.StrCheckout,
+				MessageBoxButtons.YesNo,
+				MessageBoxIcon.Warning) == DialogResult.Yes)
+			{
+				ProceedCheckout(pointer);
+			}
+		}
+		catch(HaveConflictsException)
+		{
+			if(GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				string.Format(Resources.AskThrowAwayConflictedChanges, revision),
+				Resources.StrCheckout,
+				MessageBoxButtons.YesNo,
+				MessageBoxIcon.Warning) == DialogResult.Yes)
+			{
+				ProceedCheckout(pointer);
+			}
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				string.Format(Resources.ErrFailedToCheckout, revision),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
+		}
+		return true;
 	}
+
+	#endregion
 }

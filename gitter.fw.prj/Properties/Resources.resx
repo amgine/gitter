@@ -126,127 +126,6 @@
   <data name="StrOk" xml:space="preserve">
     <value>OK</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ImgCheckIndeterminate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\intermediate.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgMinus" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\minus.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgMinusHovered" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\minus_hovered.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPlus" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\plus.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPlusHovered" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\plus_hovered.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgChecked" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\checked.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgUnchecked" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\unchecked.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgCheckedHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\checked_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgCheckIndeterminateHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\intermediate_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgUncheckedHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\unchecked_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgAction" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\action.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgActionHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\action_hover.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgColumnExtender" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\column_extender.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgChevronCollapse" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\chevron.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgChevronCollapseHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\chevron-hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgChevronExpand" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\chevron-expand.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgChevronExpandHover" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\chevron-expand-hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoApplication" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\application.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoApplicationTerminal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\application-terminal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocument" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentAccess" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-access.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentBinary" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-binary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-code.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentExcel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-excel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentExcelCsv" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-excel-csv.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentFilm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-film.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentFlashMovie" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-flash-movie.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentGlobe" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-globe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentImage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentMusic" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-music.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentOffice" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-office.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentOutlook" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-outlook.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentPdf" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-pdf.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentPhotoshop" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-photoshop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentPhp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-php.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentPowerpoint" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-powerpoint.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentText" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-text.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentVisualStudio" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-visual-studio.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentWord" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-word.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IcoDocumentXaml" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\document-xaml.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrName" xml:space="preserve">
     <value>Name</value>
   </data>
@@ -394,27 +273,6 @@
   <data name="StrSpelling" xml:space="preserve">
     <value>Spell Checking</value>
   </data>
-  <data name="ImgViewHostClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cross-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgViewHostMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\arrow-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgViewHostPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\pin-small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTabMenu" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tab-menu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTabMenuExtends" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tab-menu-extends.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTabScrollLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tab-scroll-left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgTabScrollRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tab-scroll-right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrException" xml:space="preserve">
     <value>Exception</value>
   </data>
@@ -430,35 +288,8 @@
   <data name="StrType" xml:space="preserve">
     <value>Type</value>
   </data>
-  <data name="ImgLog" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\log.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgLogDebug" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\system-monitor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgLogError" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cross-circle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgLogInfo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\information-frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgLogWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\exclamation--frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrSource" xml:space="preserve">
     <value>Source</value>
-  </data>
-  <data name="ImgMaximize" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\maximize.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgNormalize" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\normalize.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgMenuCheck" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ImgMenuCheck.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgWebBrowser" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\globe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrWebBrowser" xml:space="preserve">
     <value>Web Browser</value>
@@ -474,12 +305,6 @@
   </data>
   <data name="StrStop" xml:space="preserve">
     <value>Stop</value>
-  </data>
-  <data name="ImgGoBack" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\arrow-curve-180-left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgGoForward" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\arrow-curve-000-left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrDate" xml:space="preserve">
     <value>Date</value>
@@ -505,9 +330,6 @@
   <data name="StrUNIXTimestamp" xml:space="preserve">
     <value>UNIX Timestamp</value>
   </data>
-  <data name="ImgGravatar" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gravatar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrsGravatarDisplayText" xml:space="preserve">
     <value>Download and show user avatars using gravatar.com</value>
   </data>
@@ -516,9 +338,6 @@
   </data>
   <data name="StrsExplorerContextMenuFeature" xml:space="preserve">
     <value>Add "Run gitter" item to folder menu in Windows Explorer</value>
-  </data>
-  <data name="ImgFolder" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrsIntegrationFeatures" xml:space="preserve">
     <value>Integration features</value>
@@ -571,9 +390,6 @@
   <data name="StrOpenInBrowser" xml:space="preserve">
     <value>Open in Browser</value>
   </data>
-  <data name="ImgCopyToClipboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clipboard-sign.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrShowUTCOffset" xml:space="preserve">
     <value>Show UTC offset</value>
   </data>
@@ -588,14 +404,5 @@
   </data>
   <data name="StrMatchCase" xml:space="preserve">
     <value>Match Case</value>
-  </data>
-  <data name="ImgSearchClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-close.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearchNext" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-next.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearchPrevious" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-prevous.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

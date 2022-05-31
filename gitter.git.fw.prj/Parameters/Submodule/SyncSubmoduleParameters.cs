@@ -18,15 +18,14 @@
  */
 #endregion
 
+namespace gitter.Git.AccessLayer;
+
 using System;
 using System.Collections.Generic;
 
-namespace gitter.Git.AccessLayer
+public class SyncSubmoduleParameters
 {
-	public class SyncSubmoduleParameters
-	{
-		public bool Recursive { get; set; }
+	public bool Recursive { get; set; }
 
-		public IReadOnlyList<string> Submodules { get; set; }
-	}
+	public IReadOnlyList<string> Submodules { get; set; }
 }

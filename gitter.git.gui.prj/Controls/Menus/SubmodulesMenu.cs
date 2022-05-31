@@ -18,35 +18,41 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class SubmodulesMenu : ContextMenuStrip
 {
-	using System;
-
-	using System.Windows.Forms;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	public sealed class SubmodulesMenu : ContextMenuStrip
+	public SubmodulesMenu(Repository repository)
 	{
-		public SubmodulesMenu(Repository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+		Verify.Argument.IsNotNull(repository);
 
-			Repository = repository;
+		Repository = repository;
 
-			Items.Add(GuiItemFactory.GetShowSubmodulesViewItem<ToolStripMenuItem>());
-			Items.Add(GuiItemFactory.GetRefreshSubmodulesItem<ToolStripMenuItem>(Repository));
+		var dpiBindings = new DpiBindings(this);
+		var factory     = new GuiItemFactory(dpiBindings);
 
-			Items.Add(new ToolStripSeparator());
+		Items.Add(GuiItemFactory.GetShowSubmodulesViewItem<ToolStripMenuItem>());
+		Items.Add(factory.GetRefreshSubmodulesItem<ToolStripMenuItem>(Repository));
 
-			Items.Add(GuiItemFactory.GetUpdateSubmodulesItem<ToolStripMenuItem>(Repository.Submodules));
-			Items.Add(GuiItemFactory.GetSyncSubmodulesItem<ToolStripMenuItem>(Repository.Submodules));
+		Items.Add(new ToolStripSeparator());
 
-			Items.Add(new ToolStripSeparator());
+		Items.Add(factory.GetUpdateSubmodulesItem<ToolStripMenuItem>(Repository.Submodules));
+		Items.Add(factory.GetSyncSubmodulesItem<ToolStripMenuItem>(Repository.Submodules));
 
-			Items.Add(GuiItemFactory.GetAddSubmoduleItem<ToolStripMenuItem>(Repository));
-		}
+		Items.Add(new ToolStripSeparator());
 
-		public Repository Repository { get; }
+		Items.Add(factory.GetAddSubmoduleItem<ToolStripMenuItem>(Repository));
 	}
+
+	public Repository Repository { get; }
 }

@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+/// <summary>Item's checkbox state.</summary>
+public enum CheckedState
 {
-	/// <summary>Item's checkbox state.</summary>
-	public enum CheckedState
-	{
-		/// <summary>No checkbox.</summary>
-		Unavailable,
-		/// <summary>Checked.</summary>
-		Checked,
-		/// <summary>Unchecked.</summary>
-		Unchecked,
-		/// <summary>Intermediate.</summary>
-		Indeterminate,
-	}
+	/// <summary>No checkbox.</summary>
+	Unavailable,
+	/// <summary>Checked.</summary>
+	Checked,
+	/// <summary>Unchecked.</summary>
+	Unchecked,
+	/// <summary>Intermediate.</summary>
+	Indeterminate,
 }

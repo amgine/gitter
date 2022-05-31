@@ -19,18 +19,20 @@
 #endregion
 
 using System;
-using System.Resources;
 using System.Reflection;
+using System.Resources;
 
 [assembly: AssemblyCompany("amgine")]
 [assembly: AssemblyProduct("gitter")]
-[assembly: AssemblyCopyright("Copyright © amgine 2021")]
+[assembly: AssemblyCopyright("Copyright © amgine 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: CLSCompliant(true)]
-
 [assembly: NeutralResourcesLanguage("en-us")]
 
-[assembly: AssemblyFileVersion("1.0.28.0")]
-[assembly: AssemblyVersion("1.0.28.0")] 
+[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+
+#if NET6_0_OR_GREATER
+[module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif

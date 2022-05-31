@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
-{
-	using gitter.Framework.Mvc;
+namespace gitter.Git.Gui.Interfaces;
 
-	interface ICheckoutController : IViewController<ICheckoutView>
-	{
-		bool TryCheckout();
-	}
+using gitter.Framework.Mvc;
+
+interface ICheckoutController : IViewController<ICheckoutView>
+{
+	bool TryCheckout();
 }

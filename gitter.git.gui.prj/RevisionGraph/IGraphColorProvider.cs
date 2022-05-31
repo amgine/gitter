@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+
+/// <summary>Object for unique color allocation.</summary>
+public interface IGraphColorProvider
 {
-	using System;
+	int AcquireColor();
 
-	/// <summary>Object for unique color allocation.</summary>
-	public interface IGraphColorProvider
-	{
-		int AcquireColor();
-
-		void ReleaseColor(int color);
-	}
+	void ReleaseColor(int color);
 }

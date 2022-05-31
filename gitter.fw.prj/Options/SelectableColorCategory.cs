@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+public sealed class SelectableColorCategory
 {
-	public sealed class SelectableColorCategory
+	public SelectableColorCategory(string id, string name)
 	{
-		public SelectableColorCategory(string id, string name)
-		{
-			Id   = id;
-			Name = name;
-		}
-
-		public string Id { get; }
-
-		public string Name { get; }
-
-		public override string ToString() => Name;
+		Id   = id;
+		Name = name;
 	}
+
+	public string Id { get; }
+
+	public string Name { get; }
+
+	public override string ToString() => Name;
 }

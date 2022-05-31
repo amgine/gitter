@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git
-{
-	/// <summary>Represents a submodule commit.</summary>
-	public sealed class TreeCommit : TreeItem
-	{
-		public TreeCommit(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
-			: base(repository, relativePath, parent, status, name)
-		{
-		}
+namespace gitter.Git;
 
-		public override TreeItemType ItemType => TreeItemType.Commit;
+/// <summary>Represents a submodule commit.</summary>
+public sealed class TreeCommit : TreeItem
+{
+	public TreeCommit(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
+		: base(repository, relativePath, parent, status, name)
+	{
 	}
+
+	public override TreeItemType ItemType => TreeItemType.Commit;
 }

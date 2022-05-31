@@ -18,54 +18,53 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+/// <summary>Branch description.</summary>
+public sealed class BranchData : INamedObject
 {
-	using System;
+	#region .ctor
 
-	using gitter.Framework;
-
-	/// <summary>Branch description.</summary>
-	public sealed class BranchData : INamedObject
+	public BranchData(string name, Hash sha1, bool isFake, bool isRemote, bool isCurrent)
 	{
-		#region .ctor
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
-		public BranchData(string name, Hash sha1, bool isFake, bool isRemote, bool isCurrent)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-
-			Name = name;
-			SHA1 = sha1;
-			IsFake = isFake;
-			IsRemote = isRemote;
-			IsCurrent = isCurrent;
-		}
-
-		public BranchData(string name, Hash sha1, bool remote, bool current)
-			: this(name, sha1, false, remote, current)
-		{
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Branch name (short format, excluding refs/heads/ or /refs/%remote%/).</summary>
-		public string Name { get; }
-
-		/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-		public Hash SHA1 { get; }
-
-		/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
-		public bool IsFake { get; }
-
-		/// <summary>It is a remote tracking branch.</summary>
-		public bool IsRemote { get; }
-
-		/// <summary>This branch is current HEAD.</summary>
-		public bool IsCurrent { get; }
-
-		#endregion
-
-		public override string ToString() => Name;
+		Name = name;
+		SHA1 = sha1;
+		IsFake = isFake;
+		IsRemote = isRemote;
+		IsCurrent = isCurrent;
 	}
+
+	public BranchData(string name, Hash sha1, bool remote, bool current)
+		: this(name, sha1, false, remote, current)
+	{
+	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary>Branch name (short format, excluding refs/heads/ or /refs/%remote%/).</summary>
+	public string Name { get; }
+
+	/// <summary>SHA1 of commit, which is pointed by branch.</summary>
+	public Hash SHA1 { get; }
+
+	/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
+	public bool IsFake { get; }
+
+	/// <summary>It is a remote tracking branch.</summary>
+	public bool IsRemote { get; }
+
+	/// <summary>This branch is current HEAD.</summary>
+	public bool IsCurrent { get; }
+
+	#endregion
+
+	public override string ToString() => Name;
 }

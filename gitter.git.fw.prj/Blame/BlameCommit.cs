@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,57 +18,56 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+/// <summary>Represents a commit, referenced by a blame output line.</summary>
+public sealed class BlameCommit
 {
-	using System;
-
-	/// <summary>Represents a commit, referenced by a blame output line.</summary>
-	public sealed class BlameCommit
+	public BlameCommit(
+		Hash hash,
+		string author,    string authorEmail,    DateTimeOffset authorDate, string authorTimeZone,
+		string committer, string committerEmail, DateTimeOffset commitDate, string committerTimeZone,
+		string summary, bool isBoundary, string previous)
 	{
-		public BlameCommit(
-			Hash hash,
-			string author,    string authorEmail,    DateTimeOffset authorDate, string authorTimeZone,
-			string committer, string committerEmail, DateTimeOffset commitDate, string committerTimeZone,
-			string summary, bool isBoundary, string previous)
-		{
-			Hash              = hash;
-			Author            = author;
-			AuthorEmail       = authorEmail;
-			AuthorDate        = authorDate;
-			AuthorTimeZone    = authorTimeZone;
-			Committer         = committer;
-			CommitterEmail    = committerEmail;
-			CommitDate        = commitDate;
-			CommitterTimeZone = committerTimeZone;
-			Summary           = summary;
-			IsBoundary        = isBoundary;
-			Previous          = previous;
-		}
-
-		public Hash Hash { get; }
-
-		public string Summary { get; }
-
-		public string Author { get; }
-
-		public string AuthorTimeZone { get; }
-
-		public DateTimeOffset AuthorDate { get; }
-
-		public string AuthorEmail { get; }
-
-		public string Committer { get; }
-
-		public string CommitterTimeZone { get; }
-
-		public string CommitterEmail { get; }
-
-		public DateTimeOffset CommitDate { get; }
-
-		public bool IsBoundary { get; }
-
-		public string Previous { get; }
-
-		public override string ToString() =>Summary;
+		Hash              = hash;
+		Author            = author;
+		AuthorEmail       = authorEmail;
+		AuthorDate        = authorDate;
+		AuthorTimeZone    = authorTimeZone;
+		Committer         = committer;
+		CommitterEmail    = committerEmail;
+		CommitDate        = commitDate;
+		CommitterTimeZone = committerTimeZone;
+		Summary           = summary;
+		IsBoundary        = isBoundary;
+		Previous          = previous;
 	}
+
+	public Hash Hash { get; }
+
+	public string Summary { get; }
+
+	public string Author { get; }
+
+	public string AuthorTimeZone { get; }
+
+	public DateTimeOffset AuthorDate { get; }
+
+	public string AuthorEmail { get; }
+
+	public string Committer { get; }
+
+	public string CommitterTimeZone { get; }
+
+	public string CommitterEmail { get; }
+
+	public DateTimeOffset CommitDate { get; }
+
+	public bool IsBoundary { get; }
+
+	public string Previous { get; }
+
+	public override string ToString() =>Summary;
 }

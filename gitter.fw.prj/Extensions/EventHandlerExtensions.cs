@@ -18,65 +18,64 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.ComponentModel;
+
+/// <summary>Extension methods for raising events.</summary>
+public static class EventHandlerExtensions
 {
-	using System;
-	using System.ComponentModel;
-
-	/// <summary>Extension methods for raising events.</summary>
-	public static class EventHandlerExtensions
+	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
+	///	<param name="evhList">Event list.</param>
+	///	<param name="event">Event handler key.</param>
+	/// <param name="sender">Event sender.</param>
+	public static void Raise(this EventHandlerList evhList, object @event, object sender)
 	{
-		/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
-		///	<param name="evhList">Event list.</param>
-		///	<param name="event">Event handler key.</param>
-		/// <param name="sender">Event sender.</param>
-		public static void Raise(this EventHandlerList evhList, object @event, object sender)
-		{
-			((EventHandler)evhList[@event])?.Invoke(sender, EventArgs.Empty);
-		}
+		((EventHandler)evhList[@event])?.Invoke(sender, EventArgs.Empty);
+	}
 
-		/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
-		///	<param name="evhList">Event list.</param>
-		///	<param name="event">Event handler key.</param>
-		///	<param name="args">Event args.</param>
-		/// <param name="sender">Event sender.</param>
-		public static void Raise(this EventHandlerList evhList, object @event, object sender, EventArgs args)
-		{
-			((EventHandler)evhList[@event])?.Invoke(sender, args);
-		}
+	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
+	///	<param name="evhList">Event list.</param>
+	///	<param name="event">Event handler key.</param>
+	///	<param name="args">Event args.</param>
+	/// <param name="sender">Event sender.</param>
+	public static void Raise(this EventHandlerList evhList, object @event, object sender, EventArgs args)
+	{
+		((EventHandler)evhList[@event])?.Invoke(sender, args);
+	}
 
-		/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
-		///	<param name="evhList">Event list.</param>
-		///	<param name="event">Event handler key.</param>
-		/// <param name="args">Function, returning event args (not called if event handler is not set).</param>
-		/// <param name="sender">Event sender.</param>
-		public static void Raise(this EventHandlerList evhList, object @event, object sender, Func<EventArgs> args)
-		{
-			((EventHandler)evhList[@event])?.Invoke(sender, args());
-		}
+	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
+	///	<param name="evhList">Event list.</param>
+	///	<param name="event">Event handler key.</param>
+	/// <param name="args">Function, returning event args (not called if event handler is not set).</param>
+	/// <param name="sender">Event sender.</param>
+	public static void Raise(this EventHandlerList evhList, object @event, object sender, Func<EventArgs> args)
+	{
+		((EventHandler)evhList[@event])?.Invoke(sender, args());
+	}
 
-		/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
-		/// <typeparam name="T">Type of event args.</typeparam>
-		///	<param name="evhList">Event list.</param>
-		///	<param name="event">Event handler key.</param>
-		/// <param name="args">Event args.</param>
-		/// <param name="sender">Event sender.</param>
-		public static void Raise<T>(this EventHandlerList evhList, object @event, object sender, T args)
-			where T : EventArgs
-		{
-			((EventHandler<T>)evhList[@event])?.Invoke(sender, args);
-		}
+	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
+	/// <typeparam name="T">Type of event args.</typeparam>
+	///	<param name="evhList">Event list.</param>
+	///	<param name="event">Event handler key.</param>
+	/// <param name="args">Event args.</param>
+	/// <param name="sender">Event sender.</param>
+	public static void Raise<T>(this EventHandlerList evhList, object @event, object sender, T args)
+		where T : EventArgs
+	{
+		((EventHandler<T>)evhList[@event])?.Invoke(sender, args);
+	}
 
-		/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
-		/// <typeparam name="T">Type of event args.</typeparam>
-		///	<param name="evhList">Event list.</param>
-		///	<param name="event">Event handler key.</param>
-		/// <param name="args">Function, returning event args (not called if event handler is not set).</param>
-		/// <param name="sender">Event sender.</param>
-		public static void Raise<T>(this EventHandlerList evhList, object @event, object sender, Func<T> args)
-			where T : EventArgs
-		{
-			((EventHandler<T>)evhList[@event])?.Invoke(sender, args());
-		}
+	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
+	/// <typeparam name="T">Type of event args.</typeparam>
+	///	<param name="evhList">Event list.</param>
+	///	<param name="event">Event handler key.</param>
+	/// <param name="args">Function, returning event args (not called if event handler is not set).</param>
+	/// <param name="sender">Event sender.</param>
+	public static void Raise<T>(this EventHandlerList evhList, object @event, object sender, Func<T> args)
+		where T : EventArgs
+	{
+		((EventHandler<T>)evhList[@event])?.Invoke(sender, args());
 	}
 }

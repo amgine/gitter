@@ -18,23 +18,22 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+public enum ViewPosition
 {
-	public enum ViewPosition
-	{
-		RootDocumentHost,
-		SecondaryDocumentHost,
+	RootDocumentHost,
+	SecondaryDocumentHost,
 
-		Left,
-		Top,
-		Right,
-		Bottom,
+	Left,
+	Top,
+	Right,
+	Bottom,
 
-		LeftAutoHide,
-		TopAutoHide,
-		RightAutoHide,
-		BottomAutoHide,
+	LeftAutoHide,
+	TopAutoHide,
+	RightAutoHide,
+	BottomAutoHide,
 
-		Float,
-	}
+	Float,
 }

@@ -18,89 +18,76 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class AddNoteController : ViewControllerBase<IAddNoteView>, IAddNoteController
 {
-	using System;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class AddNoteController : ViewControllerBase<IAddNoteView>, IAddNoteController
+	public AddNoteController(Repository repository)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(repository);
 
-		public AddNoteController(Repository repository)
+		Repository = repository;
+	}
+
+	private Repository Repository { get; }
+
+	public bool TryAddNote()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		var revision = View.Revision.Value;
+		var message  = View.Message.Value;
+		if(!GitControllerUtility.ValidateRefspec(revision, View.Revision, View.ErrorNotifier))
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
+			return false;
 		}
-
-		#endregion
-
-		#region Properties
-
-		private Repository Repository { get; }
-
-		#endregion
-
-		#region IAddNoteController Members
-
-		public bool TryAddNote()
+		if(string.IsNullOrWhiteSpace(message))
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var revision = View.Revision.Value;
-			var message  = View.Message.Value;
-			if(!GitControllerUtility.ValidateRefspec(revision, View.Revision, View.ErrorNotifier))
-			{
-				return false;
-			}
-			if(string.IsNullOrWhiteSpace(message))
-			{
-				View.ErrorNotifier.NotifyError(View.Message,
-					new UserInputError(
-						Resources.ErrInvalidMessage,
-						Resources.ErrMessageCannotBeEmpty));
-				return false;
-			}
-			revision = revision.Trim();
-			message  = message.Trim();
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					var ptr = Repository.GetRevisionPointer(revision);
-					ptr.AddNote(message);
-				}
-			}
-			catch(UnknownRevisionException)
-			{
-				View.ErrorNotifier.NotifyError(View.Revision,
-					new UserInputError(
-						Resources.ErrInvalidRevisionExpression,
-						Resources.ErrRevisionIsUnknown));
-				return false;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					Resources.ErrFailedToAddNote,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
+			View.ErrorNotifier.NotifyError(View.Message,
+				new UserInputError(
+					Resources.ErrInvalidMessage,
+					Resources.ErrMessageCannotBeEmpty));
+			return false;
 		}
-
-		#endregion
+		revision = revision.Trim();
+		message  = message.Trim();
+		try
+		{
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			{
+				var ptr = Repository.GetRevisionPointer(revision);
+				ptr.AddNote(message);
+			}
+		}
+		catch(UnknownRevisionException)
+		{
+			View.ErrorNotifier.NotifyError(View.Revision,
+				new UserInputError(
+					Resources.ErrInvalidRevisionExpression,
+					Resources.ErrRevisionIsUnknown));
+			return false;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				Resources.ErrFailedToAddNote,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
+		}
+		return true;
 	}
 }

@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+using System.Resources;
+
+public class CachedResources<T>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Resources;
+	private readonly Dictionary<string, T> _cache;
+	private readonly ResourceManager _manager;
 
-	public class CachedResources<T>
+	public CachedResources(ResourceManager manager)
 	{
-		private readonly Dictionary<string, T> _cache;
-		private readonly ResourceManager _manager;
+		Verify.Argument.IsNotNull(manager);
 
-		public CachedResources(ResourceManager manager)
+		_manager = manager;
+		_cache   = new Dictionary<string, T>();
+	}
+
+	public T this[string name]
+	{
+		get
 		{
-			Verify.Argument.IsNotNull(manager, nameof(manager));
-
-			_manager = manager;
-			_cache   = new Dictionary<string, T>();
-		}
-
-		public T this[string name]
-		{
-			get
+			if(!_cache.TryGetValue(name, out var resource))
 			{
-				if(!_cache.TryGetValue(name, out var resource))
-				{
-					resource = (T)_manager.GetObject(name);
-					_cache.Add(name, resource);
-				}
-				return resource;
+				resource = (T)_manager.GetObject(name);
+				_cache.Add(name, resource);
 			}
+			return resource;
 		}
 	}
 }

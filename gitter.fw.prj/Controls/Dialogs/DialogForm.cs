@@ -18,463 +18,490 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework.Properties;
+using gitter.Framework.Services;
+using gitter.Framework.Layout;
+using gitter.Framework.Controls;
+
+/// <summary>Form which hosts <see cref="DialogBase"/>.</summary>
+[System.ComponentModel.DesignerCategory("")]
+public partial class DialogForm : Form
 {
-	using System;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	private readonly IButtonWidget _btnOK;
+	private readonly IButtonWidget _btnCancel;
+	private readonly IButtonWidget _btnApply;
 
-	using gitter.Framework.Properties;
-	using gitter.Framework.Services;
+	private readonly DialogBase _dialog;
+	private readonly IExecutableDialog _executable;
+	private readonly IAsyncExecutableDialog _async;
+	private readonly IElevatedExecutableDialog _elevated;
+	private bool _isExecuting;
+	private bool _btnHover;
 
-	/// <summary>Form which hosts <see cref="DialogBase"/>.</summary>
-	[System.ComponentModel.DesignerCategory("")]
-	public partial class DialogForm : Form
+	/// <summary>Create <see cref="DialogForm"/>.</summary>
+	public DialogForm(DialogBase content, DialogButtons buttons = DialogButtons.All)
 	{
-		#region Data
+		AutoScaleDimensions = new SizeF(96F, 96F);
+		AutoScaleMode = AutoScaleMode.Dpi;
+		Font = GitterApplication.FontManager.UIFont;
+		FormBorderStyle = FormBorderStyle.FixedDialog;
+		MaximizeBox = false;
+		MinimizeBox = false;
+		Name = nameof(DialogForm);
+		ShowIcon = false;
+		ShowInTaskbar = false;
+		StartPosition = FormStartPosition.CenterParent;
 
-		private readonly DialogBase _dialog;
-		private readonly IExecutableDialog _executable;
-		private readonly IAsyncExecutableDialog _async;
-		private readonly IElevatedExecutableDialog _elevated;
-		private readonly IExpandableDialog _expandable;
-		private readonly Control _expansionControl;
-		private bool _isExecuting;
+		var noMargin = DpiBoundValue.Constant(Padding.Empty);
 
-		private Bitmap _bmpEH;
-		private Bitmap _bmpCH;
-		private Bitmap _bmpEN;
-		private Bitmap _bmpCN;
+		_dialog = content;
 
-		private bool _btnHover;
-		private bool _expanded;
+		Panel pnlButtons;
 
-		#endregion
-
-		/// <summary>Create <see cref="DialogForm"/>.</summary>
-		public DialogForm()
+		BackColor = Application.RenderWithVisualStyles
+			? SystemColors.Window
+			: SystemColors.Control;
+		_ = new ControlLayout(this)
 		{
-			InitializeComponent();
+			Content = new Grid(
+				rows: new[]
+				{
+					SizeSpec.Everything(),
+					Application.RenderWithVisualStyles ? SizeSpec.Absolute(1) : SizeSpec.Nothing(),
+					SizeSpec.Absolute(39),
+				},
+				content: new[]
+				{
+					new GridContent(new ControlContent(new Panel
+					{
+						BackColor = Application.RenderWithVisualStyles
+							? SystemColors.ControlLight
+							: SystemColors.Control,
+						Parent    = this,
+					},
+					marginOverride: noMargin,
+					horizontalContentAlignment: HorizontalContentAlignment.Stretch,
+					verticalContentAlignment:   VerticalContentAlignment.Stretch),
+					row: 1),
+					new GridContent(new ControlContent(pnlButtons = new Panel
+					{
+						BackColor = SystemColors.Control,
+						Parent    = this,
+					},
+					marginOverride: noMargin,
+					horizontalContentAlignment: HorizontalContentAlignment.Stretch,
+					verticalContentAlignment:   VerticalContentAlignment.Stretch),
+					row: 2),
+				}),
+		};
 
-			_btnOK.Text     = Resources.StrOk;
-			_btnCancel.Text = Resources.StrCancel;
-			_btnApply.Text  = Resources.StrApply;
+		var btnOK     = (buttons & DialogButtons.Ok)     == DialogButtons.Ok;
+		var btnCancel = (buttons & DialogButtons.Cancel) == DialogButtons.Cancel;
+		var btnApply  = (buttons & DialogButtons.Apply)  == DialogButtons.Apply;
+		var btnCount  = (btnOK ? 1 : 0) + (btnCancel ? 1 : 0) + (btnApply ? 1 : 0);
 
-			if(!Application.RenderWithVisualStyles)
+		const int ButtonHeight  = 23;
+		const int TopMargin     =  8;
+		const int RightMargin   =  6;
+
+		var buttonWidth   = SizeSpec.Absolute(75);
+		var buttonSpacing = SizeSpec.Absolute(6);
+
+		const int firstOffset = 1;
+
+		var columns = new ISizeSpec[2 + btnCount * 2 - 1];
+		columns[0] = SizeSpec.Everything();
+		for(var i = 0; i < btnCount; ++i)
+		{
+			columns[i * 2 + firstOffset + 0] = buttonWidth;
+			if(i < btnCount - 1)
 			{
-				_pnlContainer.BackColor = SystemColors.Control;
-				_pnlLine.BackColor = SystemColors.Control;
-
-				int d = _btnOK.Top - _pnlContainer.Bottom;
-
-				_pnlContainer.Height += d;
-				Height -= d;
+				columns[i * 2 + firstOffset + 1] = buttonSpacing;
 			}
 		}
+		columns[columns.Length - 1] = SizeSpec.Absolute(RightMargin);
 
-		private DialogForm(DialogBase content)
-			: this()
+		if(btnOK)
 		{
-			_dialog = content;
-			if(content is not null)
+			_btnOK = new SystemButtonAdapter
 			{
-				UpdateSize();
-				ShowContent();
-
-				content.SizeChanged += OnContentSizeChanged;
-
-				_expandable = content as IExpandableDialog;
-				if(_expandable is not null)
-				{
-					_expanded = true;
-					var exDialog = (IExpandableDialog)content;
-					CreateBitmaps(exDialog.ExpansionName);
-					_picAdvanced.Visible = true;
-					_expansionControl = exDialog.ExpansionControl;
-				}
-				_elevated   = content as IElevatedExecutableDialog;
-				_executable = content as IExecutableDialog;
-				_async      = content as IAsyncExecutableDialog;
-			}
+				Text = Resources.StrOk,
+			};
+			_btnOK.Control.Parent = pnlButtons;
+			_btnOK.Click += _btnOK_Click;
+			AcceptButton = _btnOK;
 		}
-
-		public DialogForm(DialogBase content, DialogButtons buttons)
-			: this(content)
+		if(btnCancel)
 		{
-			bool btnOK     = (buttons & DialogButtons.Ok)     == DialogButtons.Ok;
-			bool btnCancel = (buttons & DialogButtons.Cancel) == DialogButtons.Cancel;
-			bool btnApply  = (buttons & DialogButtons.Apply)  == DialogButtons.Apply;
-
-			if(!btnApply)
+			_btnCancel = new SystemButtonAdapter
 			{
-				if(!btnCancel)
-				{
-					_btnOK.Left = _btnApply.Left;
-				}
-				else
-				{
-					_btnOK.Left = _btnCancel.Left;
-					_btnCancel.Left = _btnApply.Left;
-				}
-			}
-			else
+				Text = Resources.StrCancel,
+			};
+			_btnCancel.Control.Parent = pnlButtons;
+			_btnCancel.Click += _btnCancel_Click;
+			CancelButton = _btnCancel;
+		}
+		if(btnApply)
+		{
+			_btnApply = new SystemButtonAdapter
 			{
-				if(!btnCancel)
+				Text = Resources.StrApply,
+			};
+			_btnApply.Control.Parent = pnlButtons;
+			_btnApply.Click += _btnApply_Click;
+		}
+
+		GridContent WrapButton(IButtonWidget button, int index)
+			=> new GridContent(new ControlContent(button.Control,
+				marginOverride: noMargin,
+				horizontalContentAlignment: HorizontalContentAlignment.Stretch,
+				verticalContentAlignment: VerticalContentAlignment.Stretch),
+				row: 1, column: index * 2 + firstOffset);
+
+		var buttonsContent = new GridContent[btnCount];
+		var index = 0;
+		if(btnOK)
+		{
+			buttonsContent[index] = WrapButton(_btnOK, index);
+			++index;
+		}
+		if(btnCancel)
+		{
+			buttonsContent[index] = WrapButton(_btnCancel, index);
+			++index;
+		}
+		if(btnApply)
+		{
+			buttonsContent[index] = WrapButton(_btnApply, index);
+			++index;
+		}
+
+		_ = new ControlLayout(pnlButtons)
+		{
+			Content = new Grid(
+				rows: new[]
 				{
-					_btnOK.Left = _btnCancel.Left;
-				}
-			}
-			_btnOK.Visible = btnOK;
-			_btnCancel.Visible = btnCancel;
-			_btnApply.Visible = btnApply;
-		}
+					SizeSpec.Absolute(TopMargin),
+					SizeSpec.Absolute(ButtonHeight),
+					SizeSpec.Everything(),
+				},
+				columns: columns,
+				content: buttonsContent),
+		};
 
-		private void ShowContent()
+		if(content is not null)
 		{
-			var margin = _dialog.Margin;
-			_dialog.Location = new Point(margin.Left, margin.Right);
-			_dialog.Parent = _pnlContainer;
-			Text = _dialog.Text;
-		}
+			SuspendLayout();
+			UpdateSize();
+			ShowContent();
+			ResumeLayout();
 
-		private void UpdateSize()
-		{
-			var margin = _dialog.Margin;
-			var dx = _pnlContainer.Width - _dialog.Width - margin.Left - margin.Right;
-			var dy = _pnlContainer.Height - 1 - _dialog.Height - margin.Top - margin.Bottom;
-			Width -= dx;
-			Height -= dy;
+			_elevated   = content as IElevatedExecutableDialog;
+			_executable = content as IExecutableDialog;
+			_async      = content as IAsyncExecutableDialog;
 		}
+	}
 
-		private void OnContentSizeChanged(object sender, EventArgs e)
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		if(_dialog is not null)
 		{
 			UpdateSize();
+			_dialog.ScalableSizeChanged += OnContentSizeChanged;
 		}
+		base.OnLoad(e);
+	}
 
-		/// <inheritdoc/>
-		protected override void OnFormClosing(FormClosingEventArgs e)
-		{
-			if(_isExecuting) e.Cancel = true;
-			base.OnFormClosing(e);
-		}
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
-		/// <inheritdoc/>
-		protected override void OnShown(EventArgs e)
+	private void ShowContent()
+	{
+		_dialog.Parent = this;
+		Text = _dialog.Text;
+	}
+
+	private void UpdateSize()
+	{
+		var dpi = Dpi.FromControl(this);
+
+		var size   = _dialog.ScalableSize.GetValue(dpi);
+		var margin = _dialog.ScalableMargin.GetValue(dpi);
+
+		_dialog.Bounds = new Rectangle(
+			margin.Left, margin.Right,
+			size.Width,  size.Height);
+	
+		size.Width  += margin.Horizontal;
+		size.Height += margin.Vertical;
+		size.Height += 40 * dpi.Y / 96;
+
+		ClientSize = size;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnDpiChanged(DpiChangedEventArgs e)
+	{
+		base.OnDpiChanged(e);
+		UpdateSize();
+	}
+
+	private void OnContentSizeChanged(object sender, EventArgs e)
+	{
+		UpdateSize();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnFormClosing(FormClosingEventArgs e)
+	{
+		if(_isExecuting) e.Cancel = true;
+		base.OnFormClosing(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnShown(EventArgs e)
+	{
+		base.OnShown(e);
+		_dialog.InvokeOnShown();
+		if(_elevated is not null && !Utility.IsRunningWithAdministratorRights)
 		{
-			base.OnShown(e);
-			_dialog.InvokeOnShown();
-			if(_elevated is not null && !Utility.IsRunningWithAdministratorRights)
+			if(_elevated.RequireElevation)
 			{
-				if(_elevated.RequireElevation)
+				if(_btnOK is not null    && _btnOK.Control.Visible)    (_btnOK    as Button)?.ShowUACShield();
+				if(_btnApply is not null && _btnApply.Control.Visible) (_btnApply as Button)?.ShowUACShield();
+			}
+			_elevated.RequireElevationChanged += OnRequireElevationExecutionChanged;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnClosed(EventArgs e)
+	{
+		if(_dialog is not null)
+		{
+			_dialog.SizeChanged -= OnContentSizeChanged;
+			_dialog.InvokeOnClosed(DialogResult);
+		}
+	}
+
+	private bool Execute()
+	{
+		bool okEnabled     = _btnOK     is not null && _btnOK.Control.Enabled;
+		bool cancelEnabled = _btnCancel is not null && _btnCancel.Control.Enabled;
+		bool applyEnabled  = _btnApply  is not null && _btnApply.Control.Enabled;
+		if(_executable is not null || _elevated is not null)
+		{
+			if(okEnabled)     _btnOK.Control.Enabled     = false;
+			if(cancelEnabled) _btnCancel.Control.Enabled = false;
+			if(applyEnabled)  _btnApply.Control.Enabled  = false;
+			_isExecuting = true;
+		}
+		try
+		{
+			if(_elevated is { RequireElevation: true, ElevatedExecutionActions: { Length: not 0 } actions })
+			{
+				try
 				{
-					if(_btnOK.Visible) _btnOK.ShowUACShield();
-					if(_btnApply.Visible) _btnApply.ShowUACShield();
+					HelperExecutables.ExecuteWithAdministartorRights(actions);
 				}
-				_elevated.RequireElevationChanged += OnRequireElevationExecutionChanged;
+				catch(Exception exc) when(!exc.IsCritical())
+				{
+					GitterApplication.MessageBoxService.Show(
+						this,
+						Resources.ErrSomeOptionsCouldNotBeApplied,
+						Resources.ErrFailedToRunElevatedProcess,
+						MessageBoxButton.Close,
+						MessageBoxIcon.Exclamation);
+				}
 			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnClosed(EventArgs e)
-		{
-			if(_dialog is not null)
+			if(_executable is not null)
 			{
-				_dialog.SizeChanged -= OnContentSizeChanged;
-				_dialog.InvokeOnClosed(DialogResult);
+				return _executable.Execute();
 			}
 		}
-
-		private void CreateBitmaps(string strname)
+		finally
 		{
-			_bmpEH = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, true,  true);
-			_bmpCH = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, false, true);
-			_bmpEN = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, true,  false);
-			_bmpCN = RenderChevronButton(strname, Font, _picAdvanced.Width, _picAdvanced.Height, false, false);
-
-			_picAdvanced.Image = _expanded?_bmpEN:_bmpCN;
-		}
-
-		private bool Execute()
-		{
-			bool okEnabled     = _btnOK.Enabled;
-			bool cancelEnabled = _btnCancel.Enabled;
-			bool applyEnabled  = _btnApply.Enabled;
 			if(_executable is not null || _elevated is not null)
 			{
-				_btnOK.Enabled     = false;
-				_btnCancel.Enabled = false;
-				_btnApply.Enabled  = false;
-				_isExecuting       = true;
-			}
-			try
-			{
-				if(_elevated is { RequireElevation: true })
-				{
-					var action = _elevated.ElevatedExecutionAction;
-					if(action is not null)
-					{
-						try
-						{
-							HelperExecutables.ExecuteWithAdministartorRights(action);
-						}
-						catch(Exception exc) when(!exc.IsCritical())
-						{
-							GitterApplication.MessageBoxService.Show(
-								this,
-								Resources.ErrSomeOptionsCouldNotBeApplied,
-								Resources.ErrFailedToRunElevatedProcess,
-								MessageBoxButton.Close,
-								MessageBoxIcon.Exclamation);
-						}
-					}
-				}
-				if(_executable is not null)
-				{
-					return _executable.Execute();
-				}
-			}
-			finally
-			{
-				if(_executable is not null || _elevated is not null)
-				{
-					_btnOK.Enabled     = okEnabled;
-					_btnCancel.Enabled = cancelEnabled;
-					_btnApply.Enabled  = applyEnabled;
-					_isExecuting       = false;
-				}
-			}
-			return true;
-		}
-
-		private async Task<bool> ExecuteAsync()
-		{
-			var task = _async.ExecuteAsync();
-			if(task.IsCompleted)
-			{
-				return task.Result;
-			}
-
-			bool okEnabled     = _btnOK.Enabled;
-			bool cancelEnabled = _btnCancel.Enabled;
-			bool applyEnabled  = _btnApply.Enabled;
-			if(_async is not null)
-			{
-				_btnOK.Enabled     = false;
-				_btnCancel.Enabled = false;
-				_btnApply.Enabled  = false;
-				_isExecuting       = true;
-			}
-			try
-			{
-				return await task;
-			}
-			finally
-			{
-				if(_async is not null)
-				{
-					_btnOK.Enabled     = okEnabled;
-					_btnCancel.Enabled = cancelEnabled;
-					_btnApply.Enabled  = applyEnabled;
-					_isExecuting       = false;
-				}
+				if(okEnabled)     _btnOK.Control.Enabled     = okEnabled;
+				if(cancelEnabled) _btnCancel.Control.Enabled = cancelEnabled;
+				if(applyEnabled)  _btnApply.Control.Enabled  = applyEnabled;
+				_isExecuting = false;
 			}
 		}
+		return true;
+	}
 
-		private void _picAdvanced_MouseEnter(object sender, EventArgs e)
+	private async Task<bool> ExecuteAsync()
+	{
+		var task = _async.ExecuteAsync();
+		if(task.IsCompleted)
 		{
-			_btnHover = true;
-			UpdateButtonState();
+			return task.Result;
 		}
 
-		private void _picAdvanced_MouseLeave(object sender, EventArgs e)
+		bool okEnabled     = _btnOK     is not null && _btnOK.Control.Enabled;
+		bool cancelEnabled = _btnCancel is not null && _btnCancel.Control.Enabled;
+		bool applyEnabled  = _btnApply  is not null && _btnApply.Control.Enabled;
+		if(_async is not null)
 		{
-			_btnHover = false;
-			UpdateButtonState();
+			if(okEnabled)     _btnOK.Control.Enabled     = false;
+			if(cancelEnabled) _btnCancel.Control.Enabled = false;
+			if(applyEnabled)  _btnApply.Control.Enabled  = false;
+			_isExecuting = true;
 		}
-
-		private void _picAdvanced_Click(object sender, EventArgs e)
+		try
 		{
-			Expanded = !Expanded;
+			return await task;
 		}
-
-		private void OnRequireElevationExecutionChanged(object sender, EventArgs e)
-		{
-			bool require = _elevated.RequireElevation;
-			if(require)
-			{
-				if(_btnOK.Visible) _btnOK.ShowUACShield();
-				if(_btnApply.Visible) _btnApply.ShowUACShield();
-			}
-			else
-			{
-				if(_btnOK.Visible) _btnOK.HideUACShield();
-				if(_btnApply.Visible) _btnApply.HideUACShield();
-			}
-		}
-
-		private void UpdateButtonState()
-		{
-			if(_btnHover)
-			{
-				_picAdvanced.Image = _expanded?_bmpEH:_bmpCH;
-			}
-			else
-			{
-				_picAdvanced.Image = _expanded?_bmpEN:_bmpCN;
-			}
-		}
-
-		public bool Expanded
-		{
-			get => _expanded;
-			set
-			{
-				if(_expanded != value)
-				{
-					_expanded = value;
-					UpdateButtonState();
-					if(value)
-					{
-						_expansionControl.Visible = true;
-						Height += _expansionControl.Height + _expansionControl.Margin.Vertical;
-					}
-					else
-					{
-						_expansionControl.Visible = false;
-						Height -= _expansionControl.Height + _expansionControl.Margin.Vertical;
-					}
-				}
-			}
-		}
-
-		public bool OkButtonEnabled
-		{
-			get => _btnOK.Enabled;
-			set => _btnOK.Enabled = value;
-		}
-
-		public bool CancelButtonEnabled
-		{
-			get => _btnCancel.Enabled;
-			set => _btnCancel.Enabled = value;
-		}
-
-		public bool ApplyButtonEnabled
-		{
-			get => _btnApply.Enabled;
-			set => _btnApply.Enabled = value;
-		}
-
-		public string OKButtonText
-		{
-			get => _btnOK.Text;
-			set => _btnOK.Text = value;
-		}
-
-		public string CancelButtonText
-		{
-			get => _btnCancel.Text;
-			set => _btnCancel.Text = value;
-		}
-
-		public string ApplyButtonText
-		{
-			get => _btnApply.Text;
-			set => _btnApply.Text = value;
-		}
-
-		public void ClickOk() => _btnOK_Click(_btnOK, EventArgs.Empty);
-
-		public void ClickCancel() => _btnCancel_Click(_btnCancel, EventArgs.Empty);
-
-		public void ClickApply() => _btnApply_Click(_btnApply, EventArgs.Empty);
-
-		private static Bitmap RenderChevronButton(string text, Font font, int width, int height, bool expanded, bool hover)
-		{
-			var bmp = new Bitmap(width, height);
-			try
-			{
-				using var g = Graphics.FromImage(bmp);
-				g.Clear(SystemColors.Control);
-				g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-				var rc = new Rectangle(2, 2, width - 4, height - 4);
-				g.SmoothingMode = SmoothingMode.HighQuality;
-				if(hover)
-				{
-					using var img = expanded ? Resources.ImgChevronCollapseHover : Resources.ImgChevronExpandHover;
-					g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
-				}
-				else
-				{
-					using var img = expanded ? Resources.ImgChevronCollapse : Resources.ImgChevronExpand;
-					g.DrawImage(img, (height - img.Width) / 2, (height - img.Height) / 2, img.Width, img.Height);
-				}
-				rc.X += height + 2;
-				rc.Width -= height + 2;
-				using var sf = new StringFormat(StringFormat.GenericTypographic)
-				{
-					LineAlignment = StringAlignment.Center,
-					Alignment = StringAlignment.Near,
-				};
-				GitterApplication.TextRenderer.DrawText(
-					g, text, font, SystemBrushes.WindowText, rc, sf);
-			}
-			catch
-			{
-				bmp.Dispose();
-				throw;
-			}
-			return bmp;
-		}
-
-		private async void _btnOK_Click(object sender, EventArgs e)
+		finally
 		{
 			if(_async is not null)
 			{
-				if(await ExecuteAsync())
-				{
-					DialogResult = DialogResult.OK;
-					Close();
-				}
-			}
-			else
-			{
-				if(Execute())
-				{
-					DialogResult = DialogResult.OK;
-					Close();
-				}
+				if(okEnabled)     _btnOK.Control.Enabled     = okEnabled;
+				if(cancelEnabled) _btnCancel.Control.Enabled = cancelEnabled;
+				if(applyEnabled)  _btnApply.Control.Enabled  = applyEnabled;
+				_isExecuting = false;
 			}
 		}
+	}
 
-		private void _btnCancel_Click(object sender, EventArgs e)
+	private void OnRequireElevationExecutionChanged(object sender, EventArgs e)
+	{
+		bool require = _elevated.RequireElevation;
+		if(require)
 		{
-			DialogResult = DialogResult.Cancel;
-			Close();
+			if(_btnOK    is not null && _btnOK.Control.Visible)    (_btnOK.Control    as Button)?.ShowUACShield();
+			if(_btnApply is not null && _btnApply.Control.Visible) (_btnApply.Control as Button)?.ShowUACShield();
 		}
-
-		private async void _btnApply_Click(object sender, EventArgs e)
+		else
 		{
-			if(_async is not null)
+			if(_btnOK    is not null && _btnOK.Control.Visible)    (_btnOK.Control    as Button)?.HideUACShield();
+			if(_btnApply is not null && _btnApply.Control.Visible) (_btnApply.Control as Button)?.HideUACShield();
+		}
+	}
+
+	public bool OkButtonEnabled
+	{
+		get => _btnOK is not null && _btnOK.Control.Enabled;
+		set
+		{
+			if(_btnOK is not null)
 			{
-				await ExecuteAsync();
-			}
-			else
-			{
-				Execute();
+				_btnOK.Control.Enabled = value;
 			}
 		}
+	}
 
-		/// <inheritdoc/>
-		protected override void Dispose(bool disposing)
+	public bool CancelButtonEnabled
+	{
+		get => _btnCancel is not null && _btnCancel.Control.Enabled;
+		set
 		{
-			if(disposing)
+			if(_btnCancel is not null)
 			{
-				components?.Dispose();
+				_btnCancel.Control.Enabled = value;
 			}
-			base.Dispose(disposing);
+		}
+	}
+
+	public bool ApplyButtonEnabled
+	{
+		get => _btnApply is not null && _btnApply.Control.Enabled;
+		set
+		{
+			if(_btnApply is not null)
+			{
+				_btnApply.Control.Enabled = value;
+			}
+		}
+	}
+
+	public string OKButtonText
+	{
+		get => _btnOK?.Text;
+		set
+		{
+			if(_btnOK is not null)
+			{
+				_btnOK.Text = value;
+			}
+		}
+	}
+
+	public string CancelButtonText
+	{
+		get => _btnCancel?.Text;
+		set
+		{
+			if(_btnCancel is not null)
+			{
+				_btnCancel.Text = value;
+			}
+		}
+	}
+
+	public string ApplyButtonText
+	{
+		get => _btnApply?.Text;
+		set
+		{
+			if(_btnApply is not null)
+			{
+				_btnApply.Text = value;
+			}
+		}
+	}
+
+	public void ClickOk() => _btnOK_Click(_btnOK, EventArgs.Empty);
+
+	public void ClickCancel() => _btnCancel_Click(_btnCancel, EventArgs.Empty);
+
+	public void ClickApply() => _btnApply_Click(_btnApply, EventArgs.Empty);
+
+	private async void _btnOK_Click(object sender, EventArgs e)
+	{
+		if(_async is not null)
+		{
+			if(await ExecuteAsync())
+			{
+				DialogResult = DialogResult.OK;
+				Close();
+			}
+		}
+		else
+		{
+			if(Execute())
+			{
+				DialogResult = DialogResult.OK;
+				Close();
+			}
+		}
+	}
+
+	private void _btnCancel_Click(object sender, EventArgs e)
+	{
+		DialogResult = DialogResult.Cancel;
+		Close();
+	}
+
+	private async void _btnApply_Click(object sender, EventArgs e)
+	{
+		if(_async is not null)
+		{
+			await ExecuteAsync();
+		}
+		else
+		{
+			Execute();
 		}
 	}
 }

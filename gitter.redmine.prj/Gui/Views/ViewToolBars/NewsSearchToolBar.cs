@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,25 +18,25 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.ComponentModel;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+internal sealed class NewsSearchToolBar : SearchToolBar<NewsView, NewsSearchOptions>
 {
-	using System;
-	using System.ComponentModel;
-
-	[ToolboxItem(false)]
-	internal sealed class NewsSearchToolBar : SearchToolBar<NewsView, NewsSearchOptions>
+	public NewsSearchToolBar(NewsView view)
+		: base(view)
 	{
-		public NewsSearchToolBar(NewsView view)
-			: base(view)
-		{
-		}
+	}
 
-		protected override NewsSearchOptions CreateSearchOptions()
+	protected override NewsSearchOptions CreateSearchOptions()
+	{
+		return new NewsSearchOptions()
 		{
-			return new NewsSearchOptions()
-			{
-				Text = SearchText,
-			};
-		}
+			Text = SearchText,
+		};
 	}
 }

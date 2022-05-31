@@ -18,81 +18,59 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public readonly record struct Dpi(int X, int Y) : IEquatable<Dpi>
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	public static readonly Dpi Default = new(96);
 
-	public readonly struct Dpi : IEquatable<Dpi>
+	public static readonly Dpi System = GetSystemDpi();
+
+	public static Dpi FromControl(Control control)
+		=> new(control.DeviceDpi);
+
+	private static Dpi GetSystemDpi()
 	{
-		public static readonly Dpi Default = new(96);
-
-		public static readonly Dpi System = GetSystemDpi();
-
-		public static Dpi FromControl(Control control)
-			=> new Dpi(control.DeviceDpi);
-
-		private static Dpi GetSystemDpi()
+		switch(Environment.OSVersion.Platform)
 		{
-			switch(Environment.OSVersion.Platform)
-			{
-				case PlatformID.Win32NT:
-					var hdc = Native.User32.GetDC(IntPtr.Zero);
-					if(hdc != IntPtr.Zero)
+			case PlatformID.Win32NT:
+				var hdc = Native.User32.GetDC(IntPtr.Zero);
+				if(hdc != IntPtr.Zero)
+				{
+					try
 					{
-						try
-						{
-							var x = Native.Gdi32.GetDeviceCaps(hdc, Native.DeviceCaps.LOGPIXELSX);
-							var y = Native.Gdi32.GetDeviceCaps(hdc, Native.DeviceCaps.LOGPIXELSY);
+						var x = Native.Gdi32.GetDeviceCaps(hdc, Native.DeviceCaps.LOGPIXELSX);
+						var y = Native.Gdi32.GetDeviceCaps(hdc, Native.DeviceCaps.LOGPIXELSY);
 
-							return new Dpi(x, y);
-						}
-						finally
-						{
-							Native.Gdi32.DeleteDC(hdc);
-						}
+						return new Dpi(x, y);
 					}
-					break;
-			}
-			return Dpi.Default;
+					finally
+					{
+						Native.Gdi32.DeleteDC(hdc);
+					}
+				}
+				break;
 		}
-
-		public Dpi(float dpi)
-		{
-			X = dpi;
-			Y = dpi;
-		}
-
-		public Dpi(float x, float y)
-		{
-			X = x;
-			Y = y;
-		}
-
-		public Dpi(Graphics graphics)
-		{
-			X = graphics.DpiX;
-			Y = graphics.DpiY;
-		}
-
-		public float X { get; }
-
-		public float Y { get; }
-
-		public static bool operator ==(Dpi a, Dpi b)
-			=> a.X == b.X && a.Y == b.Y;
-
-		public static bool operator !=(Dpi a, Dpi b)
-			=> a.X != b.X || a.Y != b.Y;
-
-		public override bool Equals(object obj)
-			=> obj is Dpi other && this == other;
-
-		public bool Equals(Dpi other)
-			=> this == other;
-
-		public override int GetHashCode()
-			=> X.GetHashCode() * 23 ^ Y.GetHashCode();
+		return Dpi.Default;
 	}
+
+	public Dpi(int dpi) : this(dpi, dpi)
+	{
+	}
+
+	public Dpi(Graphics graphics) : this((int)graphics.DpiX, (int)graphics.DpiY)
+	{
+	}
+
+	public int GetValue(Orientation orientation)
+		=> orientation switch
+		{
+			Orientation.Horizontal => X,
+			Orientation.Vertical   => Y,
+			_ => throw new ArgumentException($"Unknown orientation: {orientation}", nameof(orientation)),
+		};
 }

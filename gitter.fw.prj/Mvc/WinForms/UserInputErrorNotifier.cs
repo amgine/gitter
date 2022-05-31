@@ -18,53 +18,49 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc.WinForms
+namespace gitter.Framework.Mvc.WinForms;
+
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+using gitter.Framework.Services;
+
+public class UserInputErrorNotifier : IUserInputErrorNotifier
 {
-	using System.Collections.Generic;
-	using System.Windows.Forms;
+	private readonly INotificationService _notificationService;
+	private readonly IEnumerable<IUserInputSource> _inputSources;
 
-	using gitter.Framework.Services;
-
-	public class UserInputErrorNotifier : IUserInputErrorNotifier
+	public UserInputErrorNotifier(INotificationService notificationService, IEnumerable<IUserInputSource> inputSources)
 	{
-		private readonly INotificationService _notificationService;
-		private readonly IEnumerable<IUserInputSource> _inputSources;
+		Verify.Argument.IsNotNull(notificationService);
+		Verify.Argument.IsNotNull(inputSources);
 
-		public UserInputErrorNotifier(INotificationService notificationService, IEnumerable<IUserInputSource> inputSources)
+		_notificationService = notificationService;
+		_inputSources = inputSources;
+	}
+
+	private Control GetControlFromInputSource(IUserInputSource userInputSource)
+	{
+		if(userInputSource is null) return null;
+
+		foreach(var inputSource in _inputSources)
 		{
-			Verify.Argument.IsNotNull(notificationService, nameof(notificationService));
-			Verify.Argument.IsNotNull(inputSources, nameof(inputSources));
-
-			_notificationService = notificationService;
-			_inputSources = inputSources;
+			if(inputSource == userInputSource)
+			{
+				return (inputSource as IWin32ControlInputSource)?.Control;
+			}
 		}
+		return null;
+	}
 
-		private Control GetControlFromInputSource(IUserInputSource userInputSource)
-		{
-			if(userInputSource == null)
-			{
-				return null;
-			}
-			foreach(var inputSource in _inputSources)
-			{
-				if(inputSource == userInputSource)
-				{
-					return (inputSource as IWin32ControlInputSource)?.Control;
-				}
-			}
-			return null;
-		}
+	public void NotifyError(IUserInputSource userInputSource, UserInputError userInputError)
+	{
+		if(userInputError is null) return;
 
-		public void NotifyError(IUserInputSource userInputSource, UserInputError userInputError)
+		var control = GetControlFromInputSource(userInputSource);
+		if(control is not null)
 		{
-			if(userInputError != null)
-			{
-				var control = GetControlFromInputSource(userInputSource);
-				if(control != null)
-				{
-					_notificationService.NotifyInputError(control, userInputError.Title, userInputError.Message);
-				}
-			}
+			_notificationService.NotifyInputError(control, userInputError.Title, userInputError.Message);
 		}
 	}
 }

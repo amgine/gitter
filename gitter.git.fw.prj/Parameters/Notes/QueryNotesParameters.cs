@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryNotes"/> operation.</summary>
+public sealed class QueryNotesParameters
 {
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryNotes"/> operation.</summary>
-	public sealed class QueryNotesParameters
+	/// <summary>Create <see cref="QueryNotesParameters"/>.</summary>
+	public QueryNotesParameters()
 	{
-		/// <summary>Create <see cref="QueryNotesParameters"/>.</summary>
-		public QueryNotesParameters()
-		{
-		}
 	}
 }

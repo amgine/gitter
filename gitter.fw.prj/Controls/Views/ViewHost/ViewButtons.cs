@@ -18,175 +18,181 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework.Services;
+
+public sealed class ViewButtons : IEnumerable<ViewButton>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework.Services;
+	private ViewButton[] _buttons;
+	private readonly TrackingService<ViewButton> _buttonHover;
+	private readonly TrackingService<ViewButton> _buttonPress;
 
-	public sealed class ViewButtons : IEnumerable<ViewButton>
+	#endregion
+
+	public event EventHandler<ViewButtonClickEventArgs> ButtonClick;
+
+	internal ViewButtons(Control hostControl)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(hostControl);
 
-		private ViewButton[] _buttons;
-		private readonly TrackingService<ViewButton> _buttonHover;
-		private readonly TrackingService<ViewButton> _buttonPress;
+		Host = hostControl;
+		_buttonHover = new TrackingService<ViewButton>(_ => Host.Invalidate());
+		_buttonPress = new TrackingService<ViewButton>(_ => Host.Invalidate());
+	}
 
-		#endregion
-
-		public event EventHandler<ViewButtonClickEventArgs> ButtonClick;
-
-		internal ViewButtons(Control hostControl)
+	public void SetAvailableButtons(params ViewButtonType[] buttons)
+	{
+		var dpi = Dpi.FromControl(Host);
+		var viewButtonSize = ViewManager.Renderer.ViewButtonSize.GetValue(dpi);
+		_buttonHover.Reset(-1, null);
+		_buttonPress.Reset(-1, null);
+		if(buttons is not { Length: not 0 })
 		{
-			Verify.Argument.IsNotNull(hostControl, nameof(hostControl));
-
-			Host = hostControl;
-			_buttonHover = new TrackingService<ViewButton>(_ => Host.Invalidate());
-			_buttonPress = new TrackingService<ViewButton>(_ => Host.Invalidate());
+			_buttons = null;
 		}
-
-		public void SetAvailableButtons(params ViewButtonType[] buttons)
+		else
 		{
-			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
-			_buttonHover.Reset(-1, null);
-			_buttonPress.Reset(-1, null);
-			if(buttons == null || buttons.Length == 0)
-			{
-				_buttons = null;
-			}
-			else
+			if(_buttons is null || _buttons.Length != buttons.Length)
 			{
 				_buttons = new ViewButton[buttons.Length];
-				int x = buttons.Length * viewButtonSize + 2;
-				for(int i = 0; i < buttons.Length; ++i)
-				{
-					_buttons[i] = new ViewButton(x, buttons[i]);
-					x -= viewButtonSize;
-				}
 			}
-			Host.Invalidate();
-		}
-
-		public void Clear()
-		{
-			_buttonHover.Reset(-1, null);
-			_buttonPress.Reset(-1, null);
-			_buttons = null;
-			Host.Invalidate();
-		}
-
-		public int ButtonSpacing { get; set; }
-
-		public Control Host { get; }
-
-		public ViewButton PressedButton => _buttonPress.Item;
-
-		public ViewButton HoveredButton => _buttonHover.Item;
-
-		public int Count => _buttons != null ? _buttons.Length : 0;
-
-		public int Width
-		{
-			get
+			int x = buttons.Length * viewButtonSize + 2;
+			for(int i = 0; i < buttons.Length; ++i)
 			{
-				if(_buttons == null || _buttons.Length == 0)
-				{
-					return 0;
-				}
-				var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
-				return viewButtonSize + (_buttons.Length - 1) * (viewButtonSize + ButtonSpacing);
+				_buttons[i] = new ViewButton(x, buttons[i]);
+				x -= viewButtonSize;
 			}
 		}
-
-		public int Height { get; set; }
-
-		public ViewButton this[int index] => _buttons[index];
-
-		private int HitTest(int x, int y)
-		{
-			if(_buttons == null || _buttons.Length == 0) return -1;
-			if(x < 0) return -1;
-			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
-			int y1 = (Height - viewButtonSize) / 2;
-			if(y < y1) return -1;
-			if(y >= y1 + viewButtonSize) return -1;
-			int id = x / (viewButtonSize + ButtonSpacing);
-			if(id >= _buttons.Length) return -1;
-			return id;
-		}
-
-		public void OnPaint(Graphics graphics, Rectangle bounds, bool focus)
-		{
-			if(_buttons == null || _buttons.Length == 0) return;
-			var viewButtonSize = ViewManager.Renderer.ViewButtonSize;
-			var y = bounds.Y + (Height - viewButtonSize) / 2;
-			var rc = new Rectangle(bounds.X, y, viewButtonSize, viewButtonSize);
-			for(int i = 0; i < _buttons.Length; ++i)
-			{
-				bool hovered = _buttonHover.Index == i;
-				bool pressed = _buttonPress.Index == i;
-				if(hovered && _buttonPress.IsTracked)
-				{
-					hovered = _buttonPress.Index == i;
-				}
-				if(pressed && !hovered)
-				{
-					pressed = false;
-					hovered = true;
-				}
-				_buttons[i].OnPaint(graphics, rc, focus, hovered, pressed);
-				rc.X += viewButtonSize + ButtonSpacing;
-			}
-		}
-
-		public void OnMouseDown(int x, int y, MouseButtons button)
-		{
-			int id = HitTest(x, y);
-			if(id == -1)
-			{
-				_buttonPress.Drop();
-			}
-			else
-			{
-				_buttonPress.Track(id, _buttons[id]);
-			}
-		}
-
-		public void OnMouseMove(int x, int y, MouseButtons button)
-		{
-			int id = HitTest(x, y);
-			if(id == -1)
-			{
-				_buttonHover.Drop();
-			}
-			else
-			{
-				_buttonHover.Track(id, _buttons[id]);
-			}
-		}
-
-		public void OnMouseUp(int x, int y, MouseButtons button)
-		{
-			if(_buttonPress.IsTracked)
-			{
-				int id = HitTest(x, y);
-				if(id == _buttonPress.Index)
-				{
-					ButtonClick?.Invoke(this, new ViewButtonClickEventArgs(_buttonPress.Item.Type));
-				}
-				_buttonPress.Drop();
-			}
-		}
-
-		public void OnMouseLeave() => _buttonHover.Drop();
-
-		public IEnumerator<ViewButton> GetEnumerator()
-			=> ((IEnumerable<ViewButton>)_buttons).GetEnumerator();
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			=> _buttons.GetEnumerator();
+		Host.Invalidate();
 	}
+
+	public void Clear()
+	{
+		_buttonHover.Reset(-1, null);
+		_buttonPress.Reset(-1, null);
+		_buttons = null;
+		Host.Invalidate();
+	}
+
+	public int ButtonSpacing { get; set; }
+
+	public Control Host { get; }
+
+	public ViewButton PressedButton => _buttonPress.Item;
+
+	public ViewButton HoveredButton => _buttonHover.Item;
+
+	public int Count => _buttons != null ? _buttons.Length : 0;
+
+	public int Width
+	{
+		get
+		{
+			if(_buttons is not { Length: not 0 })
+			{
+				return 0;
+			}
+			var dpi = Dpi.FromControl(Host);
+			var viewButtonSize = ViewManager.Renderer.ViewButtonSize.GetValue(dpi);
+			return viewButtonSize + (_buttons.Length - 1) * (viewButtonSize + ButtonSpacing);
+		}
+	}
+
+	public int Height { get; set; }
+
+	public ViewButton this[int index] => _buttons[index];
+
+	private int HitTest(int x, int y)
+	{
+		if(_buttons is not { Length: not 0 }) return -1;
+		if(x < 0) return -1;
+		var dpi = Dpi.FromControl(Host);
+		var viewButtonSize = ViewManager.Renderer.ViewButtonSize.GetValue(dpi);
+		int y1 = (Height - viewButtonSize) / 2;
+		if(y < y1) return -1;
+		if(y >= y1 + viewButtonSize) return -1;
+		int id = x / (viewButtonSize + ButtonSpacing);
+		if(id >= _buttons.Length) return -1;
+		return id;
+	}
+
+	public void OnPaint(Graphics graphics, Rectangle bounds, bool focus)
+	{
+		if(_buttons is not { Length: not 0 }) return;
+		var dpi = Dpi.FromControl(Host);
+		var viewButtonSize = ViewManager.Renderer.ViewButtonSize.GetValue(dpi);
+		var y = bounds.Y + (Height - viewButtonSize) / 2;
+		var rc = new Rectangle(bounds.X, y, viewButtonSize, viewButtonSize);
+		for(int i = 0; i < _buttons.Length; ++i)
+		{
+			bool hovered = _buttonHover.Index == i;
+			bool pressed = _buttonPress.Index == i;
+			if(hovered && _buttonPress.IsTracked)
+			{
+				hovered = _buttonPress.Index == i;
+			}
+			if(pressed && !hovered)
+			{
+				pressed = false;
+				hovered = true;
+			}
+			_buttons[i].OnPaint(graphics, dpi, rc, focus, hovered, pressed);
+			rc.X += viewButtonSize + ButtonSpacing;
+		}
+	}
+
+	public void OnMouseDown(int x, int y, MouseButtons button)
+	{
+		int id = HitTest(x, y);
+		if(id == -1)
+		{
+			_buttonPress.Drop();
+		}
+		else
+		{
+			_buttonPress.Track(id, _buttons[id]);
+		}
+	}
+
+	public void OnMouseMove(int x, int y, MouseButtons button)
+	{
+		int id = HitTest(x, y);
+		if(id == -1)
+		{
+			_buttonHover.Drop();
+		}
+		else
+		{
+			_buttonHover.Track(id, _buttons[id]);
+		}
+	}
+
+	public void OnMouseUp(int x, int y, MouseButtons button)
+	{
+		if(_buttonPress.IsTracked)
+		{
+			int id = HitTest(x, y);
+			if(id == _buttonPress.Index)
+			{
+				ButtonClick?.Invoke(this, new ViewButtonClickEventArgs(_buttonPress.Item.Type));
+			}
+			_buttonPress.Drop();
+		}
+	}
+
+	public void OnMouseLeave() => _buttonHover.Drop();
+
+	public IEnumerator<ViewButton> GetEnumerator()
+		=> ((IEnumerable<ViewButton>)_buttons).GetEnumerator();
+
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		=> _buttons.GetEnumerator();
 }

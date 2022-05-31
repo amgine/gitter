@@ -18,94 +18,93 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Represents a hyperlink in text.</summary>
+public sealed class Hyperlink
 {
-	using System;
-	using System.Collections.Generic;
+	private static readonly List<NavigationHandler> _handlers = new();
 
-	/// <summary>Represents a hyperlink in text.</summary>
-	public sealed class Hyperlink
+	private sealed class NavigationHandler : IDisposable
 	{
-		private static readonly List<NavigationHandler> _handlers = new();
+		private readonly Func<string, bool> _handler;
 
-		private sealed class NavigationHandler : IDisposable
+		public NavigationHandler(Func<string, bool> handler)
 		{
-			private readonly Func<string, bool> _handler;
+			_handler = handler;
+		}
 
-			public NavigationHandler(Func<string, bool> handler)
-			{
-				_handler = handler;
-			}
+		public bool Navigate(string url) => _handler(url);
 
-			public bool Navigate(string url) => _handler(url);
+		public bool IsDisposed { get; private set; }
 
-			public bool IsDisposed { get; private set; }
-
-			public void Dispose()
+		public void Dispose()
+		{
+			if(IsDisposed) return;
+			lock(_handlers)
 			{
 				if(IsDisposed) return;
-				lock(_handlers)
-				{
-					if(IsDisposed) return;
-					_handlers.Remove(this);
-					IsDisposed = true;
-				}
+				_handlers.Remove(this);
+				IsDisposed = true;
 			}
 		}
-
-		public static IDisposable RegisterInternalHandler(Func<string, bool> onNavigate)
-		{
-			Verify.Argument.IsNotNull(onNavigate, nameof(onNavigate));
-
-			var handler = new NavigationHandler(onNavigate);
-			lock(_handlers)
-			{
-				_handlers.Add(handler);
-			}
-			return handler;
-		}
-
-		private static void NavigateInternal(string url)
-		{
-			lock(_handlers)
-			{
-				foreach(var handler in _handlers)
-				{
-					if(handler.Navigate(url)) break;
-				}
-			}
-		}
-
-		/// <summary>Create <see cref="Hyperlink"/>.</summary>
-		/// <param name="text">Link text.</param>
-		/// <param name="url">Link URL.</param>
-		public Hyperlink(Substring text, string url)
-		{
-			Text = text;
-			Url = url;
-		}
-
-		/// <summary>Link text.</summary>
-		public Substring Text { get; }
-
-		/// <summary>Link URL.</summary>
-		public string Url { get; }
-
-		/// <summary>Navigate the hyperlink.</summary>
-		public void Navigate()
-		{
-			if(Url.StartsWith("gitter://"))
-			{
-				NavigateInternal(Url);
-			}
-			else
-			{
-				Utility.OpenUrl(Url);
-			}
-		}
-
-		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</summary>
-		/// <returns><see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</returns>
-		public override string ToString() => Url;
 	}
+
+	public static IDisposable RegisterInternalHandler(Func<string, bool> onNavigate)
+	{
+		Verify.Argument.IsNotNull(onNavigate);
+
+		var handler = new NavigationHandler(onNavigate);
+		lock(_handlers)
+		{
+			_handlers.Add(handler);
+		}
+		return handler;
+	}
+
+	private static void NavigateInternal(string url)
+	{
+		lock(_handlers)
+		{
+			foreach(var handler in _handlers)
+			{
+				if(handler.Navigate(url)) break;
+			}
+		}
+	}
+
+	/// <summary>Create <see cref="Hyperlink"/>.</summary>
+	/// <param name="text">Link text.</param>
+	/// <param name="url">Link URL.</param>
+	public Hyperlink(Substring text, string url)
+	{
+		Text = text;
+		Url = url;
+	}
+
+	/// <summary>Link text.</summary>
+	public Substring Text { get; }
+
+	/// <summary>Link URL.</summary>
+	public string Url { get; }
+
+	/// <summary>Navigate the hyperlink.</summary>
+	public void Navigate()
+	{
+		if(Url.StartsWith("gitter://"))
+		{
+			NavigateInternal(Url);
+		}
+		else
+		{
+			Utility.OpenUrl(Url);
+		}
+	}
+
+	/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</summary>
+	/// <returns><see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</returns>
+	public override string ToString() => Url;
 }

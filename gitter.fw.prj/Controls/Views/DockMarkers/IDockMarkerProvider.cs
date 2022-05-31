@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2022  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,45 +18,44 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+/// <summary>Interface for interacting with dock markers.</summary>
+public interface IDockMarkerProvider : IEnumerable<DockMarker>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
+	/// <summary>Gets a value indicating whether markers are visible.</summary>
+	/// <value><c>true</c> if markers are visible; otherwise, <c>false</c>.</value>
+	bool MarkersVisible { get; }
 
-	/// <summary>Interface for interacting with dock markers.</summary>
-	public interface IDockMarkerProvider : IEnumerable<DockMarker>
-	{
-		/// <summary>Gets a value indicating whether markers are visible.</summary>
-		/// <value><c>true</c> if markers are visible; otherwise, <c>false</c>.</value>
-		bool MarkersVisible { get; }
+	/// <summary>Shows markers to assist docking process.</summary>
+	/// <param name="dockClient">Tool host which is being docked.</param>
+	void Show(ViewHost dockClient);
 
-		/// <summary>Shows markers to assist docking process.</summary>
-		/// <param name="dockClient">Tool host which is being docked.</param>
-		void Show(ViewHost dockClient);
+	/// <summary>Hides and disposes all dock markers associated with this instance.</summary>
+	void Hide();
 
-		/// <summary>Hides and disposes all dock markers associated with this instance.</summary>
-		void Hide();
+	/// <summary>Updates hover status of dock markers.</summary>
+	/// <returns>true if mouse is hovering docking button.</returns>
+	bool UpdateHover();
 
-		/// <summary>Updates hover status of dock markers.</summary>
-		/// <returns>true if mouse is hovering docking button.</returns>
-		bool UpdateHover();
+	/// <summary>Updates hover status of dock markers.</summary>
+	/// <param name="position">Mouse position.</param>
+	/// <returns>true if mouse is hovering docking button.</returns>
+	bool UpdateHover(Point position);
 
-		/// <summary>Updates hover status of dock markers.</summary>
-		/// <param name="position">Mouse position.</param>
-		/// <returns>true if mouse is hovering docking button.</returns>
-		bool UpdateHover(Point position);
+	/// <summary>Notifies that mouse no longer hovers any docking markers associated with this instance.</summary>
+	void Unhover();
 
-		/// <summary>Notifies that mouse no longer hovers any docking markers associated with this instance.</summary>
-		void Unhover();
+	/// <summary>Checks docking position at current mouse position.</summary>
+	/// <returns>Position for docking client control.</returns>
+	DockResult HitTest();
 
-		/// <summary>Checks docking position at current mouse position.</summary>
-		/// <returns>Position for docking client control.</returns>
-		DockResult HitTest();
-
-		/// <summary>Checks docking position at specified <paramref name="position"/>.</summary>
-		/// <param name="position">Mouse position.</param>
-		/// <returns>Position for docking client control.</returns>
-		DockResult HitTest(Point position);
-	}
+	/// <summary>Checks docking position at specified <paramref name="position"/>.</summary>
+	/// <param name="position">Mouse position.</param>
+	/// <returns>Position for docking client control.</returns>
+	DockResult HitTest(Point position);
 }

@@ -9,6 +9,7 @@
     <RootNamespace>gitter</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +27,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\icons\**" />
+    <EmbeddedResource Include="Resources\images\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,8 +53,16 @@
     <ProjectReference Include="..\gitter.gitlab.prj\gitter.gitlab.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net48'))">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
   <PropertyGroup>
-    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration)</PostBuildEvent>
+    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration) $(TargetFramework)</PostBuildEvent>
   </PropertyGroup>
 
 </Project>

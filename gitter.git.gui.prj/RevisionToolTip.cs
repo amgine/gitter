@@ -18,63 +18,68 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+[System.ComponentModel.DesignerCategory("")]
+sealed class RevisionToolTip : CustomToolTip
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private RevisionHeaderContent _content;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	sealed class RevisionToolTip : CustomToolTip
+	public RevisionToolTip()
 	{
-		private RevisionHeaderContent _content;
+		_content = new RevisionHeaderContent();
+		_content.Style = GitterApplication.DefaultStyle;
+	}
 
-		public RevisionToolTip()
-		{
-			_content = new RevisionHeaderContent();
-			_content.Style = GitterApplication.DefaultStyle;
-		}
+	public Revision Revision
+	{
+		get => _content.Revision;
+		set => _content.Revision = value;
+	}
 
-		public Revision Revision
-		{
-			get => _content.Revision;
-			set => _content.Revision = value;
-		}
+	protected override void OnPaint(DrawToolTipEventArgs e)
+	{
+		base.OnPaint(e);
+		_content.OnPaint(e.Graphics,
+			e.AssociatedControl is not null ? Dpi.FromControl(e.AssociatedControl) : Dpi.System,
+			e.Bounds, e.Bounds);
+	}
 
-		protected override void OnPaint(DrawToolTipEventArgs e)
-		{
-			base.OnPaint(e);
-			_content.OnPaint(e.Graphics,
-				e.AssociatedControl is not null ? new Dpi(e.AssociatedControl.DeviceDpi) : Dpi.System,
-				e.Bounds, e.Bounds);
-		}
+	public override Size Measure(Control associatedControl)
+	{
+		const int HPadding     = 3;
+		const int DefaultWidth = 450;
 
-		public override Size Measure(Control associatedControl)
+		if(associatedControl is null)
 		{
-			if(associatedControl is null)
-			{
-				var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, Dpi.System, 450);
-				size.Height += 3;
-				return size;
-			}
-			else
-			{
-				var conv = new DpiConverter(associatedControl);
-				var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, conv.To, conv.ConvertX(450));
-				size.Height += conv.ConvertY(3);
-				return size;
-			}
+			var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, Dpi.System, DefaultWidth);
+			size.Height += HPadding;
+			return size;
 		}
+		else
+		{
+			var dpi  = Dpi.FromControl(associatedControl);
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			var size = _content.OnMeasure(GraphicsUtility.MeasurementGraphics, dpi, conv.ConvertX(DefaultWidth));
+			size.Height += conv.ConvertY(HPadding);
+			return size;
+		}
+	}
 
-		protected override void Dispose(bool disposing)
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			if(disposing)
-			{
-				_content.Revision = null;
-			}
-			base.Dispose(disposing);
+			_content.Revision = null;
 		}
+		base.Dispose(disposing);
 	}
 }

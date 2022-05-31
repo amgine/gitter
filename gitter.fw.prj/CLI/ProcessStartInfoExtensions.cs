@@ -18,33 +18,33 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System.Diagnostics;
+using System.Collections.Specialized;
+
+/// <summary>Extensions for <see cref="ProcessStartInfo"/>.</summary>
+public static class ProcessStartInfoExtensions
 {
-	using System.Diagnostics;
-	using System.Collections.Specialized;
-
-	public static class ProcessStartInfoExtensions
+	public static void EnsureEnvironmentVariableExists(this ProcessStartInfo psi, string variable, string value, bool resetIfExists = false)
 	{
-		public static void EnsureEnvironmentVariableExists(this ProcessStartInfo psi, string variable, string value, bool resetIfExists = false)
-		{
-			Verify.Argument.IsNotNull(psi, nameof(psi));
-			Verify.Argument.IsNeitherNullNorWhitespace(variable, nameof(variable));
+		Verify.Argument.IsNotNull(psi);
+		Verify.Argument.IsNeitherNullNorWhitespace(variable);
 
-			EnsureEnvironmentVariableExists(psi.EnvironmentVariables, variable, value, resetIfExists);
+		EnsureEnvironmentVariableExists(psi.EnvironmentVariables, variable, value, resetIfExists);
+	}
+
+	private static void EnsureEnvironmentVariableExists(StringDictionary dictionary, string variable, string value, bool resetIfExists = false)
+	{
+		if(resetIfExists)
+		{
+			dictionary[variable] = value;
 		}
-
-		private static void EnsureEnvironmentVariableExists(StringDictionary dictionary, string variable, string value, bool resetIfExists = false)
+		else
 		{
-			if(resetIfExists)
+			if(!dictionary.ContainsKey(variable))
 			{
-				dictionary[variable] = value;
-			}
-			else
-			{
-				if(!dictionary.ContainsKey(variable))
-				{
-					dictionary.Add(variable, value);
-				}
+				dictionary.Add(variable, value);
 			}
 		}
 	}

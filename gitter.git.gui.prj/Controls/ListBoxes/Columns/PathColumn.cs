@@ -18,30 +18,47 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Drawing;
+using System.Text;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>"Path" column.</summary>
+public class PathColumn : CustomListBoxColumn
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	/// <summary>"Path" column.</summary>
-	public class PathColumn : CustomListBoxColumn
+	public PathColumn()
+		: base((int)ColumnId.Path, Resources.StrPath, true)
 	{
-		public PathColumn()
-			: base((int)ColumnId.Path, Resources.StrPath, true)
-		{
-		}
+	}
 
-		public PathColumn(int columnId, string name, bool visible)
-			: base(columnId, name, visible)
-		{
-		}
+	public PathColumn(int columnId, string name, bool visible)
+		: base(columnId, name, visible)
+	{
+	}
 
-		/// <inheritdoc/>
-		public override string IdentificationString => "Path";
+	/// <inheritdoc/>
+	public override string IdentificationString => "Path";
+
+	protected virtual string GetPath(CustomListBoxItem item) => default;
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		return measureEventArgs.MeasureText(GetPath(measureEventArgs.Item));
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		paintEventArgs.PaintText(GetPath(paintEventArgs.Item));
 	}
 }

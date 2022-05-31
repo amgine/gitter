@@ -18,134 +18,133 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class InitController : ViewControllerBase<IInitView>, IInitController
 {
-	using System;
-	using System.IO;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class InitController : ViewControllerBase<IInitView>, IInitController
+	public InitController(IGitRepositoryProvider gitRepositoryProvider)
 	{
-		public InitController(IGitRepositoryProvider gitRepositoryProvider)
+		Verify.Argument.IsNotNull(gitRepositoryProvider);
+
+		GitRepositoryProvider = gitRepositoryProvider;
+	}
+
+	private IGitRepositoryProvider GitRepositoryProvider { get; }
+
+	private bool ValidateInput(out string path, out string template, out bool bare)
+	{
+		path     = View.RepositoryPath.Value.Trim();
+		template = null;
+		bare     = View.Bare.Value;
+		if(!GitControllerUtility.ValidateAbsolutePath(path, View.RepositoryPath, View.ErrorNotifier))
 		{
-			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
-
-			GitRepositoryProvider = gitRepositoryProvider;
+			return false;
 		}
-
-		private IGitRepositoryProvider GitRepositoryProvider { get; }
-
-		private bool ValidateInput(out string path, out string template, out bool bare)
+		if(View.UseCustomTemplate.Value)
 		{
-			path     = View.RepositoryPath.Value.Trim();
-			template = null;
-			bare     = View.Bare.Value;
-			if(!GitControllerUtility.ValidateAbsolutePath(path, View.RepositoryPath, View.ErrorNotifier))
+			template = View.Template.Value.Trim();
+			if(!GitControllerUtility.ValidateAbsolutePath(template, View.Template, View.ErrorNotifier))
 			{
 				return false;
 			}
-			if(View.UseCustomTemplate.Value)
-			{
-				template = View.Template.Value.Trim();
-				if(!GitControllerUtility.ValidateAbsolutePath(template, View.Template, View.ErrorNotifier))
-				{
-					return false;
-				}
-			}
-			return true;
 		}
+		return true;
+	}
 
-		private void OnCreateDirectoryFailed(Exception exc)
-			=> GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
-				exc.Message,
-				Resources.ErrFailedToCreateDirectory,
-				MessageBoxButton.Close,
-				MessageBoxIcon.Error);
+	private void OnCreateDirectoryFailed(Exception exc)
+		=> GitterApplication.MessageBoxService.Show(
+			View as IWin32Window,
+			exc.Message,
+			Resources.ErrFailedToCreateDirectory,
+			MessageBoxButton.Close,
+			MessageBoxIcon.Error);
 
-		private void OnInitFailed(Exception exc)
-			=> GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
-				exc.Message,
-				Resources.ErrFailedToInit,
-				MessageBoxButton.Close,
-				MessageBoxIcon.Error);
+	private void OnInitFailed(Exception exc)
+		=> GitterApplication.MessageBoxService.Show(
+			View as IWin32Window,
+			exc.Message,
+			Resources.ErrFailedToInit,
+			MessageBoxButton.Close,
+			MessageBoxIcon.Error);
 
-		public bool TryInit()
+	public bool TryInit()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		if(!ValidateInput(out var path, out var template, out var bare)) return false;
+
+		try
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			if(!ValidateInput(out var path, out var template, out var bare)) return false;
-
-			try
+			if(!Directory.Exists(path))
 			{
-				if(!Directory.Exists(path))
-				{
-					Directory.CreateDirectory(path);
-				}
+				Directory.CreateDirectory(path);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-				OnCreateDirectoryFailed(exc);
-				return false;
-			}
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					Repository.Init(GitRepositoryProvider.GitAccessor, path, template, bare);
-				}
-			}
-			catch(GitException exc)
-			{
-				OnInitFailed(exc);
-				return false;
-			}
-			return true;
 		}
-
-		public async Task<bool> TryInitAsync()
+		catch(Exception exc) when(!exc.IsCritical())
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			if(!ValidateInput(out var path, out var template, out var bare)) return false;
-
-			try
-			{
-				if(!Directory.Exists(path))
-				{
-					Directory.CreateDirectory(path);
-				}
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-				OnCreateDirectoryFailed(exc);
-				return false;
-			}
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					await Repository
-						.InitAsync(GitRepositoryProvider.GitAccessor, path, template, bare)
-						.ConfigureAwait(continueOnCapturedContext: false);
-				}
-			}
-			catch(GitException exc)
-			{
-				OnInitFailed(exc);
-				return false;
-			}
-			return true;
+			OnCreateDirectoryFailed(exc);
+			return false;
 		}
+		try
+		{
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			{
+				Repository.Init(GitRepositoryProvider.GitAccessor, path, template, bare);
+			}
+		}
+		catch(GitException exc)
+		{
+			OnInitFailed(exc);
+			return false;
+		}
+		return true;
+	}
+
+	public async Task<bool> TryInitAsync()
+	{
+		Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+
+		if(!ValidateInput(out var path, out var template, out var bare)) return false;
+
+		try
+		{
+			if(!Directory.Exists(path))
+			{
+				Directory.CreateDirectory(path);
+			}
+		}
+		catch(Exception exc) when(!exc.IsCritical())
+		{
+			OnCreateDirectoryFailed(exc);
+			return false;
+		}
+		try
+		{
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			{
+				await Repository
+					.InitAsync(GitRepositoryProvider.GitAccessor, path, template, bare)
+					.ConfigureAwait(continueOnCapturedContext: false);
+			}
+		}
+		catch(GitException exc)
+		{
+			OnInitFailed(exc);
+			return false;
+		}
+		return true;
 	}
 }

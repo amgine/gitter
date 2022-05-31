@@ -18,55 +18,50 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework.Controls;
+
+abstract class MSVS2012Style
 {
-	using System;
-	using System.Drawing;
-
-	using gitter.Framework.Controls;
-
-	abstract class MSVS2012Style
+	protected sealed class BackgroundWithBorder : IBackgroundStyle
 	{
-		protected sealed class BackgroundWithBorder : IBackgroundStyle
+		private readonly Color _backgroundColor;
+		private readonly Color _borderColor;
+
+		public BackgroundWithBorder(Color backgroundColor, Color borderColor)
 		{
-			private readonly Color _backgroundColor;
-			private readonly Color _borderColor;
-
-			public BackgroundWithBorder(Color backgroundColor, Color borderColor)
-			{
-				_backgroundColor = backgroundColor;
-				_borderColor = borderColor;
-			}
-
-			public void Draw(Graphics graphics, Rectangle rect)
-			{
-				using(var brush = new SolidBrush(_backgroundColor))
-				{
-					graphics.FillRectangle(brush, rect);
-				}
-				using(var pen = new Pen(_borderColor))
-				{
-					rect.Width -= 1;
-					rect.Height -= 1;
-					graphics.DrawRectangle(pen, rect);
-				}
-			}
+			_backgroundColor = backgroundColor;
+			_borderColor     = borderColor;
 		}
 
-		protected sealed class SolidBackground : IBackgroundStyle
+		public void Draw(Graphics graphics, Dpi dpi, Rectangle rect)
 		{
-			private readonly Color _backgroundColor;
-
-			public SolidBackground(Color backgroundColor)
+			graphics.GdiFill(_backgroundColor, rect);
+			using(var pen = new Pen(_borderColor))
 			{
-				_backgroundColor = backgroundColor;
+				rect.Width  -= 1;
+				rect.Height -= 1;
+				graphics.DrawRectangle(pen, rect);
 			}
+		}
+	}
 
-			public void Draw(Graphics graphics, Rectangle rect)
-			{
-				using var brush = new SolidBrush(_backgroundColor);
-				graphics.GdiFill(_backgroundColor, rect);
-			}
+	protected sealed class SolidBackground : IBackgroundStyle
+	{
+		private readonly Color _backgroundColor;
+
+		public SolidBackground(Color backgroundColor)
+		{
+			_backgroundColor = backgroundColor;
+		}
+
+		public void Draw(Graphics graphics, Dpi dpi, Rectangle rect)
+		{
+			graphics.GdiFill(_backgroundColor, rect);
 		}
 	}
 }

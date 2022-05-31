@@ -18,103 +18,102 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+/// <summary>Implements search for <see cref="CustomListBox"/>.</summary>
+/// <typeparam name="T">Search options type.</typeparam>
+public abstract class ListBoxSearch<T> : SearchBase, ISearch<T>
+	where T : SearchOptions
 {
-	using System;
-
-	/// <summary>Implements search for <see cref="CustomListBox"/>.</summary>
-	/// <typeparam name="T">Search options type.</typeparam>
-	public abstract class ListBoxSearch<T> : SearchBase, ISearch<T>
-		where T : SearchOptions
+	protected ListBoxSearch(CustomListBox listBox)
 	{
-		protected ListBoxSearch(CustomListBox listBox)
-		{
-			Verify.Argument.IsNotNull(listBox, nameof(listBox));
+		Verify.Argument.IsNotNull(listBox);
 
-			ListBox = listBox;
+		ListBox = listBox;
+	}
+
+	protected CustomListBox ListBox { get; }
+
+	protected abstract bool TestItem(CustomListBoxItem item, T search);
+
+	private bool Search(int start, T search, int direction)
+	{
+		if(search.Text.Length == 0) return true;
+		int count = ListBox.Items.Count;
+		if(count == 0) return false;
+		if(direction == 1)
+		{
+			start = (start + 1) % count;
 		}
-
-		protected CustomListBox ListBox { get; }
-
-		protected abstract bool TestItem(CustomListBoxItem item, T search);
-
-		private bool Search(int start, T search, int direction)
+		else
 		{
-			if(search.Text.Length == 0) return true;
-			int count = ListBox.Items.Count;
-			if(count == 0) return false;
+			start = start - 1;
+			if(start < 0) start = count - 1;
+		}
+		var current = start;
+		do
+		{
+			var item = ListBox.Items[current];
+			if(TestItem(item, search))
+			{
+				item.FocusAndSelect();
+				return true;
+			}
 			if(direction == 1)
 			{
-				start = (start + 1) % count;
+				current = (current + 1) % count;
 			}
 			else
 			{
-				start = start - 1;
-				if(start < 0) start = count - 1;
+				--current;
+				if(current < 0) current = count - 1;
 			}
-			var current = start;
-			do
-			{
-				var item = ListBox.Items[current];
-				if(TestItem(item, search))
-				{
-					item.FocusAndSelect();
-					return true;
-				}
-				if(direction == 1)
-				{
-					current = (current + 1) % count;
-				}
-				else
-				{
-					--current;
-					if(current < 0) current = count - 1;
-				}
-			} while(current != start);
-			return false;
-		}
+		} while(current != start);
+		return false;
+	}
 
-		public bool First(T search)
+	public bool First(T search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		return Search(-1, search, 1);
+	}
+
+	public bool Current(T search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		if(search.Text.Length == 0) return true;
+		if(ListBox.SelectedItems.Count == 0)
 		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
 			return Search(-1, search, 1);
 		}
+		var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
+		return Search(start - 1, search, 1);
+	}
 
-		public bool Current(T search)
+	public bool Next(T search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		if(search.Text.Length == 0) return true;
+		if(ListBox.SelectedItems.Count == 0)
 		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(ListBox.SelectedItems.Count == 0)
-			{
-				return Search(-1, search, 1);
-			}
-			var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
-			return Search(start - 1, search, 1);
+			return Search(-1, search, 1);
 		}
+		var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
+		return Search(start, search, 1);
+	}
 
-		public bool Next(T search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
+	public bool Previous(T search)
+	{
+		Verify.Argument.IsNotNull(search);
 
-			if(search.Text.Length == 0) return true;
-			if(ListBox.SelectedItems.Count == 0)
-			{
-				return Search(-1, search, 1);
-			}
-			var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
-			return Search(start, search, 1);
-		}
-
-		public bool Previous(T search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(ListBox.SelectedItems.Count == 0) return Search(-1, search, 1);
-			var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
-			return Search(start, search, -1);
-		}
+		if(search.Text.Length == 0) return true;
+		if(ListBox.SelectedItems.Count == 0) return Search(-1, search, 1);
+		var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
+		return Search(start, search, -1);
 	}
 }

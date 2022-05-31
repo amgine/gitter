@@ -18,134 +18,132 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+public abstract class AsyncDataBinding<T> : IDisposable
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	#region Data
 
-	public abstract class AsyncDataBinding<T> : IDisposable
+	private CancellationTokenSource _cancellationTokenSource;
+	private T _data;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler DataChanged;
+
+	protected virtual void OnDataChanged() => DataChanged?.Invoke(this, EventArgs.Empty);
+
+	#endregion
+
+	#region .ctor & finalizer
+
+	public AsyncDataBinding()
 	{
-		#region Data
+	}
 
-		private CancellationTokenSource _cancellationTokenSource;
-		private T _data;
+	~AsyncDataBinding() => Dispose(disposing: false);
 
-		#endregion
+	#endregion
 
-		#region Events
+	#region Properties
 
-		public event EventHandler DataChanged;
+	public T Data
+	{
+		get => _data;
+		private set
+		{
+			_data = value;
+			OnDataChanged();
+		}
+	}
 
-		protected virtual void OnDataChanged() => DataChanged?.Invoke(this, EventArgs.Empty);
+	public IProgress<OperationProgress> Progress { get; set; }
 
-		#endregion
+	#endregion
 
-		#region .ctor & finalizer
+	#region Methods
 
-		public AsyncDataBinding()
+	protected abstract Task<T> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+
+	protected abstract void OnFetchCompleted(T data);
+
+	protected abstract void OnFetchFailed(Exception exception);
+
+	public async void ReloadData()
+	{
+		if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+		using var cts = new CancellationTokenSource();
+		try
+		{
+			Interlocked.Exchange(ref _cancellationTokenSource, cts)?.Cancel(false);
+		}
+		catch(ObjectDisposedException)
 		{
 		}
-
-		~AsyncDataBinding() => Dispose(false);
-
-		#endregion
-
-		#region Properties
-
-		public T Data
+		var progress = Progress;
+		T data;
+		try
 		{
-			get => _data;
-			private set
+			data = await FetchDataAsync(progress, cts.Token);
+		}
+		catch(OperationCanceledException)
+		{
+			Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts);
+			return;
+		}
+		catch(Exception exc)
+		{
+			if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
 			{
-				_data = value;
-				OnDataChanged();
+				Data = default;
+				OnFetchFailed(exc);
 			}
+			return;
 		}
-
-		public IProgress<OperationProgress> Progress { get; set; }
-
-		#endregion
-
-		#region Methods
-
-		protected abstract Task<T> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
-
-		protected abstract void OnFetchCompleted(T data);
-
-		protected abstract void OnFetchFailed(Exception exception);
-
-		public async void ReloadData()
+		if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
 		{
-			if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
+			progress?.Report(OperationProgress.Completed);
+			Data = data;
+			OnFetchCompleted(data);
+		}
+	}
 
-			using var cts = new CancellationTokenSource();
+	#endregion
+
+	#region IDisposable Members
+
+	public bool IsDisposed { get; private set; }
+
+	protected virtual void Dispose(bool disposing)
+	{
+		var cts = Interlocked.Exchange(ref _cancellationTokenSource, null);
+		if(cts is not null)
+		{
 			try
 			{
-				Interlocked.Exchange(ref _cancellationTokenSource, cts)?.Cancel(false);
+				cts.Cancel(false);
 			}
 			catch(ObjectDisposedException)
 			{
 			}
-			var progress = Progress;
-			T data;
-			try
-			{
-				data = await FetchDataAsync(progress, cts.Token);
-			}
-			catch(OperationCanceledException)
-			{
-				Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts);
-				return;
-			}
-			catch(Exception exc)
-			{
-				if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
-				{
-					Data = default;
-					OnFetchFailed(exc);
-				}
-				return;
-			}
-			if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
-			{
-				progress?.Report(OperationProgress.Completed);
-				Data = data;
-				OnFetchCompleted(data);
-			}
 		}
-
-		#endregion
-
-		#region IDisposable Members
-
-		public bool IsDisposed { get; private set; }
-
-		protected virtual void Dispose(bool disposing)
-		{
-			var cts = Interlocked.Exchange(ref _cancellationTokenSource, null);
-			if(cts != null)
-			{
-				try
-				{
-					cts.Cancel(false);
-				}
-				catch(ObjectDisposedException)
-				{
-				}
-			}
-		}
-
-		public void Dispose()
-		{
-			if(!IsDisposed)
-			{
-				GC.SuppressFinalize(this);
-				Dispose(true);
-				IsDisposed = true;
-			}
-		}
-
-		#endregion
 	}
+
+	public void Dispose()
+	{
+		if(IsDisposed) return;
+
+		GC.SuppressFinalize(this);
+		Dispose(true);
+		IsDisposed = true;
+	}
+
+	#endregion
 }

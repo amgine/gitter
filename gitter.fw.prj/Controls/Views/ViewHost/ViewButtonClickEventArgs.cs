@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+public sealed class ViewButtonClickEventArgs : EventArgs
 {
-	using System;
+	public ViewButtonClickEventArgs(ViewButtonType button) => Button = button;
 
-	public sealed class ViewButtonClickEventArgs : EventArgs
-	{
-		public ViewButtonClickEventArgs(ViewButtonType button) => Button = button;
-
-		public ViewButtonType Button { get; }
-	}
+	public ViewButtonType Button { get; }
 }

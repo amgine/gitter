@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+/// <summary>Tag type.</summary>
+public enum TagType
 {
-	/// <summary>Tag type.</summary>
-	public enum TagType
-	{
-		/// <summary>Tag which points directly to a <see cref="Revision"/>.</summary>
-		Lightweight,
-		/// <summary>Tag which points to git tag object.</summary>
-		Annotated,
-	}
+	/// <summary>Tag which points directly to a <see cref="Revision"/>.</summary>
+	Lightweight,
+	/// <summary>Tag which points to git tag object.</summary>
+	Annotated,
 }

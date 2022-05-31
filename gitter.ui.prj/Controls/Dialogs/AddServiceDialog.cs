@@ -18,80 +18,79 @@
  */
 #endregion
 
-namespace gitter.Controls
+namespace gitter.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Properties.Resources;
+
+public partial class AddServiceDialog : PickerDialog<ServiceProviderPicker, IRepositoryServiceProvider>, IExecutableDialog
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
+	private readonly IWorkingEnvironment _environment;
 
-	using Resources = gitter.Properties.Resources;
+	#endregion
 
-	public partial class AddServiceDialog : PickerDialog<ServiceProviderPicker, IRepositoryServiceProvider>, IExecutableDialog
+	#region .ctor
+
+	public AddServiceDialog(IWorkingEnvironment environment)
+		: base(Resources.StrProvider.AddColon())
 	{
-		#region Data
+		Verify.Argument.IsNotNull(environment);
 
-		private readonly IWorkingEnvironment _environment;
+		_environment = environment;
 
-		#endregion
-
-		#region .ctor
-
-		public AddServiceDialog(IWorkingEnvironment environment)
-			: base(Resources.StrProvider.AddColon())
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			_environment = environment;
-
-			Text = Resources.StrAddService;
-		}
-
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb => Resources.StrAdd;
-
-		#endregion
-
-		#region Methods
-
-		protected override void LoadItems(ServiceProviderPicker picker)
-		{
-			var hs = new HashSet<IRepositoryServiceProvider>(_environment.ActiveIssueTrackerProviders);
-			foreach(var prov in _environment.IssueTrackerProviders)
-			{
-				if(prov.CanBeAddedManually && !hs.Contains(prov))
-				{
-					var item = new ServiceProviderListItem(prov);
-					picker.DropDownItems.Add(item);
-				}
-			}
-		}
-
-		protected override Control CreateControl(IRepositoryServiceProvider item)
-			=> item?.CreateSetupDialog(_environment.ActiveRepository);
-
-		public override bool Execute()
-		{
-			var provider = SelectedValue;
-			if(provider == null)
-			{
-				return false;
-			}
-			if(!base.Execute())
-			{
-				return false;
-			}
-			if(!_environment.TryLoadIssueTracker(provider))
-			{
-				return false;
-			}
-			return true;
-		}
-
-		#endregion
+		Text = Resources.StrAddService;
 	}
+
+	#endregion
+
+	#region Properties
+
+	protected override string ActionVerb => Resources.StrAdd;
+
+	#endregion
+
+	#region Methods
+
+	protected override void LoadItems(ServiceProviderPicker picker)
+	{
+		var hs = new HashSet<IRepositoryServiceProvider>(_environment.ActiveIssueTrackerProviders);
+		foreach(var prov in _environment.IssueTrackerProviders)
+		{
+			if(prov.CanBeAddedManually && !hs.Contains(prov))
+			{
+				var item = new ServiceProviderListItem(prov);
+				picker.DropDownItems.Add(item);
+			}
+		}
+	}
+
+	protected override Control CreateControl(IRepositoryServiceProvider item)
+		=> item?.CreateSetupDialog(_environment.ActiveRepository);
+
+	public override bool Execute()
+	{
+		var provider = SelectedValue;
+		if(provider is null)
+		{
+			return false;
+		}
+		if(!base.Execute())
+		{
+			return false;
+		}
+		if(!_environment.TryLoadIssueTracker(provider))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	#endregion
 }

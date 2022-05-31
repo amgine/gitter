@@ -18,21 +18,20 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+public sealed class DescribeParameters
 {
-	using System;
-
-	public sealed class DescribeParameters
+	public DescribeParameters()
 	{
-		public DescribeParameters()
-		{
-		}
-
-		public DescribeParameters(string revision)
-		{
-			Revision = revision;
-		}
-
-		public string Revision { get; set; }
 	}
+
+	public DescribeParameters(string revision)
+	{
+		Revision = revision;
+	}
+
+	public string Revision { get; set; }
 }

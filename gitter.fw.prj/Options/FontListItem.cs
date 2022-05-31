@@ -18,68 +18,73 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+using gitter.Framework.Controls;
+
+public sealed class FontListItem : CustomListBoxItem<SelectableFont>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
+	private Font _font;
 
-	using gitter.Framework.Controls;
-
-	public sealed class FontListItem : CustomListBoxItem<SelectableFont>
+	public FontListItem(SelectableFont font)
+		: base(font)
 	{
-		private Font _font;
+		Verify.Argument.IsNotNull(font);
 
-		public FontListItem(SelectableFont font)
-			: base(font)
+		_font = font.Font;
+	}
+
+	public Font Font
+	{
+		get => _font;
+		set
 		{
-			Verify.Argument.IsNotNull(font, nameof(font));
-
-			_font = font.Font;
-		}
-
-		public Font Font
-		{
-			get => _font;
-			set
+			if(_font != value)
 			{
-				if(_font != value)
+				_font = value;
+				InvalidateSubItem(1);
+			}
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch(measureEventArgs.SubItemId)
+		{
+			case 0:
+				return measureEventArgs.MeasureText(DataContext.Name);
+			case 1:
+				return _font != null
+					? measureEventArgs.MeasureText(_font.Name, _font)
+					: Size.Empty;
+			default:
+				return Size.Empty;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch(paintEventArgs.SubItemId)
+		{
+			case 0:
+				paintEventArgs.PaintText(DataContext.Name);
+				break;
+			case 1:
+				if(_font is not null)
 				{
-					_font = value;
-					InvalidateSubItem(1);
+					paintEventArgs.PaintText(_font.Name, _font);
 				}
-			}
-		}
-
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return measureEventArgs.MeasureText(DataContext.Name);
-				case 1:
-					return _font != null
-						? measureEventArgs.MeasureText(_font.Name, _font)
-						: Size.Empty;
-				default:
-					return Size.Empty;
-			}
-		}
-
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					paintEventArgs.PaintText(DataContext.Name);
-					break;
-				case 1:
-					if(_font != null)
-					{
-						paintEventArgs.PaintText(_font.Name, _font);
-					}
-					break;
-			}
+				break;
 		}
 	}
 }

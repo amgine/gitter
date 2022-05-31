@@ -18,22 +18,21 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+
+using gitter.Framework.Controls;
+
+public class BoundItemActivatedEventArgs<T> : EventArgs
 {
-	using System;
-
-	using gitter.Framework.Controls;
-
-	public class BoundItemActivatedEventArgs<T> : EventArgs
+	public BoundItemActivatedEventArgs(CustomListBoxItem item, T obj)
 	{
-		public BoundItemActivatedEventArgs(CustomListBoxItem item, T obj)
-		{
-			Item = item;
-			Object = obj;
-		}
-
-		public CustomListBoxItem Item { get; }
-
-		public T Object { get; }
+		Item = item;
+		Object = obj;
 	}
+
+	public CustomListBoxItem Item { get; }
+
+	public T Object { get; }
 }

@@ -28,7 +28,6 @@ namespace gitter.GitLab.Options
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._lstServers.ForeColor = System.Drawing.SystemColors.WindowText;
-			this._lstServers.ItemHeight = 21;
 			this._lstServers.Location = new System.Drawing.Point(0, 18);
 			this._lstServers.Name = "_lstServers";
 			this._lstServers.Size = new System.Drawing.Size(617, 495);

@@ -18,22 +18,21 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+sealed class ContentContextMenuEventArgs : EventArgs
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	sealed class ContentContextMenuEventArgs : EventArgs
+	public ContentContextMenuEventArgs(ContextMenuStrip contextMenu, Point position)
 	{
-		public ContentContextMenuEventArgs(ContextMenuStrip contextMenu, Point position)
-		{
-			ContextMenu = contextMenu;
-			Position    = position;
-		}
-
-		public ContextMenuStrip ContextMenu { get; }
-
-		public Point Position { get; }
+		ContextMenu = contextMenu;
+		Position    = position;
 	}
+
+	public ContextMenuStrip ContextMenu { get; }
+
+	public Point Position { get; }
 }

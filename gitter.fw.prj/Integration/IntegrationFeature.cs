@@ -18,86 +18,85 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework.Configuration;
+
+public abstract class IntegrationFeature : IIntegrationFeature
 {
-	using System;
-	using System.Drawing;
+	#region Data
 
-	using gitter.Framework.Configuration;
+	private readonly bool _defaultEnabled;
+	private bool _enabled;
 
-	public abstract class IntegrationFeature : IIntegrationFeature
+	#endregion
+
+	#region Events
+
+	public event EventHandler IsEnabledChanged;
+
+	protected virtual void OnIsEnabledChanged() => IsEnabledChanged?.Invoke(this, EventArgs.Empty);
+
+	#endregion
+
+	protected IntegrationFeature(string name, string displayText, IImageProvider icon, bool defaultEnabled)
 	{
-		#region Data
+		Name = name;
+		DisplayText = displayText;
+		Icon = icon;
+		_defaultEnabled = defaultEnabled;
+		_enabled = defaultEnabled;
+	}
 
-		private readonly bool _defaultEnabled;
-		private bool _enabled;
+	public string Name { get; }
 
-		#endregion
+	public string DisplayText { get; }
 
-		#region Events
+	public IImageProvider Icon { get; }
 
-		public event EventHandler IsEnabledChanged;
-
-		protected virtual void OnIsEnabledChanged() => IsEnabledChanged?.Invoke(this, EventArgs.Empty);
-
-		#endregion
-
-		protected IntegrationFeature(string name, string displayText, Bitmap icon, bool defaultEnabled)
+	public bool IsEnabled
+	{
+		get => _enabled;
+		set
 		{
-			Name = name;
-			DisplayText = displayText;
-			Icon = icon;
-			_defaultEnabled = defaultEnabled;
-			_enabled = defaultEnabled;
-		}
-
-		public string Name { get; }
-
-		public string DisplayText { get; }
-
-		public Bitmap Icon { get; }
-
-		public bool IsEnabled
-		{
-			get => _enabled;
-			set
+			if(_enabled != value)
 			{
-				if(_enabled != value)
-				{
-					_enabled = value;
-					OnIsEnabledChanged();
-				}
+				_enabled = value;
+				OnIsEnabledChanged();
 			}
 		}
+	}
 
-		public virtual bool AdministratorRightsRequired => false;
+	public virtual bool AdministratorRightsRequired => false;
 
-		public Action GetEnableAction(bool enable) => () => IsEnabled = enable;
+	public string GetEnableAction(bool enable) => default;
 
-		public bool HasConfiguration => true;
+	public bool HasConfiguration => true;
 
-		public void SaveTo(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
+	public void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
 
-			section.SetValue("Enabled", _enabled);
-			SaveMoreTo(section);
-		}
+		section.SetValue("Enabled", _enabled);
+		SaveMoreTo(section);
+	}
 
-		protected virtual void SaveMoreTo(Section section)
-		{
-		}
+	protected virtual void SaveMoreTo(Section section)
+	{
+	}
 
-		public void LoadFrom(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
+	public void LoadFrom(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
 
-			IsEnabled = section.GetValue("Enabled", _defaultEnabled);
-			LoadMoreFrom(section);
-		}
+		IsEnabled = section.GetValue("Enabled", _defaultEnabled);
+		LoadMoreFrom(section);
+	}
 
-		protected virtual void LoadMoreFrom(Section section)
-		{
-		}
+	protected virtual void LoadMoreFrom(Section section)
+	{
 	}
 }

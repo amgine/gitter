@@ -18,62 +18,259 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework.Controls;
+
+public class DpiBindings
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	public class DpiBindings
+	abstract class ImageControllerBase<T> : IImageController
+		where T : class
 	{
-		private readonly Dictionary<ToolStripItem, IDpiBoundValue<Bitmap>> _bindings = new();
+		private IImageProvider _image;
+		private Dpi _dpi;
 
-		public DpiBindings(Control toolStrip)
+		protected ImageControllerBase(T target, int size)
 		{
-			Verify.Argument.IsNotNull(toolStrip, nameof(toolStrip));
+			Assert.IsNotNull(target);
 
-			Control = toolStrip;
-			if(!Control.IsDisposed)
+			Target = target;
+			Size   = size;
+		}
+
+		protected int Size { get; }
+
+		protected T Target { get; }
+
+		public IImageProvider Image
+		{
+			get => _image;
+			set
+			{
+				if(_image != value)
+				{
+					_image = value;
+					if(_dpi != default)
+					{
+						SetImage(value?.GetImage(Size * _dpi.X / 96));
+					}
+				}
+			}
+		}
+
+		protected abstract void SetImage(Image image);
+
+		public void UpdateImage(Dpi dpi)
+		{
+			_dpi = dpi;
+			SetImage(Image?.GetImage(Size * dpi.X / 96));
+		}
+
+		public void RemoveImage()
+			=> SetImage(default);
+	}
+
+	class ToolStripItemController : ImageControllerBase<ToolStripItem>
+	{
+		public ToolStripItemController(ToolStripItem item, int size)
+			: base(item, size)
+		{
+		}
+
+		protected override void SetImage(Image image)
+			=> Target.Image = image;
+	}
+
+	class PictureBoxController : ImageControllerBase<PictureBox>
+	{
+		public PictureBoxController(PictureBox control, int size)
+			: base(control, size)
+		{
+		}
+
+		protected override void SetImage(Image image)
+			=> Target.Image = image;
+	}
+
+	class ImageWidgetController : ImageControllerBase<IImageWidget>
+	{
+		public ImageWidgetController(IImageWidget widget, int size)
+			: base(widget, size)
+		{
+		}
+
+		protected override void SetImage(Image image)
+			=> Target.Image = image;
+	}
+
+	class LinkButtonController : ImageControllerBase<LinkButton>
+	{
+		public LinkButtonController(LinkButton linkButton, int size)
+			: base(linkButton, size)
+		{
+		}
+
+		protected override void SetImage(Image image)
+			=> Target.Image = image;
+	}
+
+	private readonly Dictionary<object, IImageController> _bindings = new();
+	private Control _control;
+
+	public DpiBindings()
+	{
+	}
+
+	public DpiBindings(Control toolStrip)
+	{
+		Verify.Argument.IsNotNull(toolStrip);
+
+		Control = toolStrip;
+		if(!Control.IsDisposed)
+		{
+			Control.Disposed               += OnControlDisposed;
+			Control.DpiChangedBeforeParent += OnControlDpiChangedBeforeParent;
+		}
+	}
+
+	private void OnControlDpiChangedBeforeParent(object sender, EventArgs e)
+	{
+		if(sender != Control) return;
+		var dpi = Dpi.FromControl(Control);
+		foreach(var controller in _bindings.Values)
+		{
+			controller.UpdateImage(dpi);
+		}
+	}
+
+	private void OnControlDisposed(object sender, EventArgs e)
+	{
+		Control.Disposed               -= OnControlDisposed;
+		Control.DpiChangedBeforeParent -= OnControlDpiChangedBeforeParent;
+	}
+
+	public Control Control
+	{
+		get => _control;
+		set
+		{
+			if(_control == value) return;
+			if(_control is not null)
+			{
+				Control.Disposed               -= OnControlDisposed;
+				Control.DpiChangedBeforeParent -= OnControlDpiChangedBeforeParent;
+			}
+			_control = value;
+			if(_control is { IsDisposed: false })
 			{
 				Control.Disposed               += OnControlDisposed;
 				Control.DpiChangedBeforeParent += OnControlDpiChangedBeforeParent;
+
+				var dpi = Dpi.FromControl(Control);
+				foreach(var controller in _bindings.Values)
+				{
+					controller.UpdateImage(dpi);
+				}
 			}
 		}
+	}
 
-		private void OnControlDpiChangedBeforeParent(object sender, EventArgs e)
+	private static IImageController CreateController(ToolStripItem item, int size)
+		=> new ToolStripItemController(item, size);
+
+	private static IImageController CreateController(PictureBox control, int size)
+		=> new PictureBoxController(control, size);
+
+	private static IImageController CreateController(IImageWidget widget, int size)
+		=> new ImageWidgetController(widget, size);
+
+	private static IImageController CreateController(LinkButton linkButton, int size)
+		=> new LinkButtonController(linkButton, size);
+
+	private IImageController BindImageCore<T>(T target, Func<T, int, IImageController> controllerFactory, IImageProvider image, int size)
+		where T : class
+	{
+		if(!_bindings.TryGetValue(target, out var controller))
 		{
-			var dpi = new Dpi(Control.DeviceDpi);
-			foreach(var binding in _bindings)
+			_bindings.Add(target, controller = controllerFactory(target, size));
+			controller.Image = image;
+			if(Control is not null)
 			{
-				binding.Key.Image = binding.Value.GetValue(dpi);
+				controller.UpdateImage(Dpi.FromControl(Control));
 			}
 		}
-
-		private void OnControlDisposed(object sender, EventArgs e)
+		else
 		{
-			Control.Disposed               -= OnControlDisposed;
-			Control.DpiChangedBeforeParent -= OnControlDpiChangedBeforeParent;
-			_bindings.Clear();
+			controller.Image = image;
 		}
+		return controller;
+	}
 
-		private Control Control { get; }
 
-		public void BindImage(ToolStripItem item, IDpiBoundValue<Bitmap> image)
+	public IImageController BindImage(ToolStripItem item, IImageProvider image, int size = 16)
+	{
+		Verify.Argument.IsNotNull(item);
+
+		return BindImageCore(item, CreateController, image, size);
+	}
+
+	public IImageController BindImage(PictureBox pictureBox, IImageProvider image, int size = 16)
+	{
+		Verify.Argument.IsNotNull(pictureBox);
+
+		return BindImageCore(pictureBox, CreateController, image, size);
+	}
+
+	public IImageController BindImage(IImageWidget widget, IImageProvider image, int size = 16)
+	{
+		Verify.Argument.IsNotNull(widget);
+
+		return BindImageCore(widget, CreateController, image, size);
+	}
+
+	public IImageController BindImage(LinkButton linkbutton, IImageProvider image, int size = 16)
+	{
+		Verify.Argument.IsNotNull(linkbutton);
+
+		return BindImageCore(linkbutton, CreateController, image, size);
+	}
+
+	private void UnbindCore(object item)
+	{
+		Assert.IsNotNull(item);
+
+#if NETCOREAPP
+		if(_bindings.Remove(item, out var controller))
 		{
-			Verify.Argument.IsNotNull(item, nameof(item));
-			Verify.State.IsFalse(Control.IsDisposed);
-
-			if(image is not null)
-			{
-				_bindings[item] = image;
-				item.Image = image.GetValue(new Dpi(Control.DeviceDpi));
-			}
-			else
-			{
-				_bindings.Remove(item);
-				item.Image = default;
-			}
+			controller.RemoveImage();
 		}
+#else
+		if(_bindings.TryGetValue(item, out var controller))
+		{
+			_bindings.Remove(item);
+			controller.RemoveImage();
+		}
+#endif
+	}
+
+	public void UnbindImage(ToolStripItem item)
+	{
+		Verify.Argument.IsNotNull(item);
+
+		UnbindCore(item);
+	}
+
+	public void UnbindAll()
+	{
+		foreach(var controller in _bindings.Values)
+		{
+			controller.RemoveImage();
+		}
+		_bindings.Clear();
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,61 +18,60 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections.Generic;
+
+public sealed class BlameFile : IReadOnlyList<BlameHunk>
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly string _fileName;
+	private readonly List<BlameHunk> _hunks;
+	private readonly int _lineCount;
 
-	public sealed class BlameFile : IReadOnlyList<BlameHunk>
+	public BlameFile(string fileName, List<BlameHunk> hunks)
 	{
-		private readonly string _fileName;
-		private readonly List<BlameHunk> _hunks;
-		private readonly int _lineCount;
+		Verify.Argument.IsNeitherNullNorWhitespace(fileName);
+		Verify.Argument.IsNotNull(hunks);
 
-		public BlameFile(string fileName, List<BlameHunk> hunks)
+		_fileName = fileName;
+		_hunks = hunks;
+
+		foreach(var hunk in _hunks)
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
-			Verify.Argument.IsNotNull(hunks, nameof(hunks));
-
-			_fileName = fileName;
-			_hunks = hunks;
-
-			foreach(var hunk in _hunks)
-			{
-				_lineCount += hunk.Count;
-			}
+			_lineCount += hunk.Count;
 		}
-
-		public string Name => _fileName;
-
-		public BlameHunk this[int index] => _hunks[index];
-
-		public BlameLine GetLine(int lineIndex)
-		{
-			int c = 0;
-			int hunkIndex = 0;
-			while(c + _hunks[hunkIndex].Count <= lineIndex)
-			{
-				c += _hunks[hunkIndex].Count;
-				++hunkIndex;
-			}
-			return _hunks[hunkIndex][lineIndex - c];
-		}
-
-		public int Count => _hunks.Count;
-
-		public int LineCount => _lineCount;
-
-		public override string ToString() => _fileName;
-
-		#region IEnumerable<BlameHunk>
-
-		public IEnumerator<BlameHunk> GetEnumerator()
-			=> _hunks.GetEnumerator();
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			=> _hunks.GetEnumerator();
-
-		#endregion
 	}
+
+	public string Name => _fileName;
+
+	public BlameHunk this[int index] => _hunks[index];
+
+	public BlameLine GetLine(int lineIndex)
+	{
+		int c = 0;
+		int hunkIndex = 0;
+		while(c + _hunks[hunkIndex].Count <= lineIndex)
+		{
+			c += _hunks[hunkIndex].Count;
+			++hunkIndex;
+		}
+		return _hunks[hunkIndex][lineIndex - c];
+	}
+
+	public int Count => _hunks.Count;
+
+	public int LineCount => _lineCount;
+
+	public override string ToString() => _fileName;
+
+	#region IEnumerable<BlameHunk>
+
+	public IEnumerator<BlameHunk> GetEnumerator()
+		=> _hunks.GetEnumerator();
+
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		=> _hunks.GetEnumerator();
+
+	#endregion
 }

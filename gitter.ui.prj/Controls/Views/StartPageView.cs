@@ -18,476 +18,495 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Windows.Forms;
+
+using gitter.Controls;
+using gitter.Framework;
+using gitter.Framework.Configuration;
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+using Resources = gitter.Properties.Resources;
+
+[System.ComponentModel.DesignerCategory("")]
+internal partial class StartPageView : ViewBase
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Globalization;
-	using System.IO;
-	using System.Windows.Forms;
-
-	using gitter.Controls;
-	using gitter.Framework;
-	using gitter.Framework.Configuration;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	internal partial class StartPageView : ViewBase
+	private static Bitmap LoadImage(string name)
 	{
-		#region Data
+		using var stream = typeof(StartPageView)
+			.Assembly
+			.GetManifestResourceStream("gitter.Resources.images." + name + ".png");
+		if(stream is null) return default;
+		return new Bitmap(stream);
+	}
 
-		private readonly StartPageViewFactory _factory;
-		private readonly NotifyCollectionBinding<RepositoryLink> _recentRepositoriesBinding;
-		private readonly ICheckBoxWidget _chkShowPageAtStartup;
-		private readonly ICheckBoxWidget _chkClosePageAfterRepositoryLoad;
-		private readonly List<RepositoryListItem> _repositories;
+	private static readonly Lazy<Bitmap> ImgStartPageLogoDark         = new(() => LoadImage(@"start-page-logo-dark"));
+	private static readonly Lazy<Bitmap> ImgStartPageLogo             = new(() => LoadImage(@"start-page-logo"));
+	private static readonly Lazy<Bitmap> ImgStartPageLogoGradientDark = new(() => LoadImage(@"start-page-logo-gradient-dark"));
+	private static readonly Lazy<Bitmap> ImgStartPageLogoGradient     = new(() => LoadImage(@"start-page-logo-gradient"));
 
-		#endregion
+	private static Bitmap GetLogo() => GitterApplication.Style.Type == GitterStyleType.DarkBackground
+		? ImgStartPageLogoDark.Value
+		: ImgStartPageLogo.Value;
 
-		#region .ctor
+	private static Bitmap GetGradient() => GitterApplication.Style.Type == GitterStyleType.DarkBackground
+		? ImgStartPageLogoGradientDark.Value
+		: ImgStartPageLogoGradient.Value;
 
-		public StartPageView(IWorkingEnvironment environment, StartPageViewFactory factory)
-			: base(Guids.StartPageView, environment)
-		{
-			Verify.Argument.IsNotNull(factory, nameof(factory));
+	#region Data
+
+	private readonly StartPageViewFactory _factory;
+	private readonly NotifyCollectionBinding<RepositoryLink> _recentRepositoriesBinding;
+	private readonly ICheckBoxWidget _chkShowPageAtStartup;
+	private readonly ICheckBoxWidget _chkClosePageAfterRepositoryLoad;
+	private readonly List<RepositoryListItem> _repositories;
+
+	#endregion
+
+	#region .ctor
+
+	public StartPageView(IWorkingEnvironment environment, StartPageViewFactory factory)
+		: base(Guids.StartPageView, environment)
+	{
+		Verify.Argument.IsNotNull(factory);
 			
-			InitializeComponent();
+		InitializeComponent();
 
-			_picLogo.Image  = GetLogo();
-			_picLogo2.Image = GetGradient();
+		var dpiBindings = new DpiBindings(this);
+		dpiBindings.BindImage(_btnAddLocalRepo,    Icons.RepositoryAdd);
+		dpiBindings.BindImage(_btnCloneRemoteRepo, Icons.RepositoryClone);
+		dpiBindings.BindImage(_btnInitLocalRepo,   Icons.RepositoryInit);
+		dpiBindings.BindImage(_btnScanLocalRepo,   Icons.RepositoryScan);
 
-			_factory = factory;
-			_repositories = new List<RepositoryListItem>();
-			_lstLocalRepositories.FullList = _repositories;
+		_picLogo.Image  = GetLogo();
+		_picLogo2.Image = GetGradient();
 
-			Text = Resources.StrStartPage;
+		_factory = factory;
+		_repositories = new List<RepositoryListItem>();
+		_lstLocalRepositories.FullList = _repositories;
 
-			_txtFilter.BackColor     = GitterApplication.Style.Colors.Window;
-			_txtFilter.HintForeColor = GitterApplication.Style.Colors.GrayText;
-			_txtFilter.TextForeColor = GitterApplication.Style.Colors.WindowText;
+		Text = Resources.StrStartPage;
 
-			_lstLocalRepositories.SizeChanged += (_, _) =>
-			{
-				var x = _lstLocalRepositories.Width + _lstLocalRepositories.Left - _txtFilter.Width;
-				if(x > _lblLocalRepositories.Left + _lblLocalRepositories.Width)
-				{
-					_txtFilter.Left = x;
-					_txtFilter.Visible = true;
-				}
-				else
-				{
-					_txtFilter.Visible = false;
-				}
-			};
+		_txtFilter.BackColor     = GitterApplication.Style.Colors.Window;
+		_txtFilter.HintForeColor = GitterApplication.Style.Colors.GrayText;
+		_txtFilter.TextForeColor = GitterApplication.Style.Colors.WindowText;
 
-			_txtFilter.TextChanged += OnFilterTextChanged;
-
-			_lstLocalRepositories.ItemActivated  += OnLocalRepositoriesListItemActivated;
-			_lstRecentRepositories.ItemActivated += OnRecentRepositoriesListItemActivated;
-
-			_lstLocalRepositories.DragEnter += OnLocalRepositoriesDragEnter;
-			_lstLocalRepositories.DragDrop  += OnLocalRepositoriesDragDrop;
-
-			_lstLocalRepositories.KeyDown  += OnLocalRepositoriesKeyDown;
-			_lstRecentRepositories.KeyDown += OnRecentRepositoriesKeyDown;
-
-			var conv = new DpiConverter(this);
-
-			_chkClosePageAfterRepositoryLoad = GitterApplication.Style.CreateCheckBox();
-			_chkClosePageAfterRepositoryLoad.Text = Resources.StrsClosePageAfterRepositoryLoad;
-			_chkClosePageAfterRepositoryLoad.Control.Bounds = conv.Convert(new Rectangle(9, 491, 199, 20));
-			_chkClosePageAfterRepositoryLoad.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
-			_chkClosePageAfterRepositoryLoad.Control.Parent = this;
-			_chkClosePageAfterRepositoryLoad.IsChecked = _factory.CloseAfterRepositoryLoad;
-			_chkClosePageAfterRepositoryLoad.IsCheckedChanged += _chkClosePageAfterRepositoryLoad_CheckedChanged;
-
-			_chkShowPageAtStartup = GitterApplication.Style.CreateCheckBox();
-			_chkShowPageAtStartup.Text = Resources.StrsShowPageOnStartup;
-			_chkShowPageAtStartup.Control.Bounds = conv.Convert(new Rectangle(9, 511, 199, 20));
-			_chkShowPageAtStartup.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
-			_chkShowPageAtStartup.Control.Parent = this;
-			_chkShowPageAtStartup.IsChecked = _factory.ShowOnStartup;
-			_chkShowPageAtStartup.IsCheckedChanged += _chkShowPageAtStartup_CheckedChanged;
-
-			_separator1.BackColor = GitterApplication.Style.Colors.Separator;
-			_separator2.BackColor = GitterApplication.Style.Colors.Separator;
-
-			_recentRepositoriesBinding = new NotifyCollectionBinding<RepositoryLink>(
-				_lstRecentRepositories.Items,
-				WorkingEnvironment.RepositoryManagerService.RecentRepositories,
-				repo => new RecentRepositoryListItem(repo));
-		}
-
-		#endregion
-
-		#region Properties
-
-		public override bool IsDocument => true;
-
-		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"start.page");
-
-		#endregion
-
-		#region Methods
-
-		private static Bitmap GetLogo() => GitterApplication.Style.Type == GitterStyleType.DarkBackground
-			? Resources.ImgStartPageLogoDark
-			: Resources.ImgStartPageLogo;
-
-		private static Bitmap GetGradient() => GitterApplication.Style.Type == GitterStyleType.DarkBackground
-			? Resources.ImgStartPageLogoGradientDark
-			: Resources.ImgStartPageLogoGradient;
-
-		private void OnLocalRepositoriesKeyDown(object sender, KeyEventArgs e)
+		_lstLocalRepositories.SizeChanged += (_, _) =>
 		{
-			switch(e.KeyCode)
+			var x = _lstLocalRepositories.Width + _lstLocalRepositories.Left - _txtFilter.Width;
+			if(x > _lblLocalRepositories.Left + _lblLocalRepositories.Width)
 			{
-				case Keys.Delete:
-					while(_lstLocalRepositories.SelectedItems.Count != 0)
+				_txtFilter.Left = x;
+				_txtFilter.Visible = true;
+			}
+			else
+			{
+				_txtFilter.Visible = false;
+			}
+		};
+
+		_txtFilter.TextChanged += OnFilterTextChanged;
+
+		_lstLocalRepositories.ItemActivated  += OnLocalRepositoriesListItemActivated;
+		_lstRecentRepositories.ItemActivated += OnRecentRepositoriesListItemActivated;
+
+		_lstLocalRepositories.DragEnter += OnLocalRepositoriesDragEnter;
+		_lstLocalRepositories.DragDrop  += OnLocalRepositoriesDragDrop;
+
+		_lstLocalRepositories.KeyDown  += OnLocalRepositoriesKeyDown;
+		_lstRecentRepositories.KeyDown += OnRecentRepositoriesKeyDown;
+
+		var conv = new DpiConverter(this);
+
+		_chkClosePageAfterRepositoryLoad = GitterApplication.Style.CreateCheckBox();
+		_chkClosePageAfterRepositoryLoad.Text = Resources.StrsClosePageAfterRepositoryLoad;
+		_chkClosePageAfterRepositoryLoad.Control.Bounds = conv.Convert(new Rectangle(9, 491, 199, 20));
+		_chkClosePageAfterRepositoryLoad.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+		_chkClosePageAfterRepositoryLoad.Control.Parent = this;
+		_chkClosePageAfterRepositoryLoad.IsChecked = _factory.CloseAfterRepositoryLoad;
+		_chkClosePageAfterRepositoryLoad.IsCheckedChanged += _chkClosePageAfterRepositoryLoad_CheckedChanged;
+
+		_chkShowPageAtStartup = GitterApplication.Style.CreateCheckBox();
+		_chkShowPageAtStartup.Text = Resources.StrsShowPageOnStartup;
+		_chkShowPageAtStartup.Control.Bounds = conv.Convert(new Rectangle(9, 511, 199, 20));
+		_chkShowPageAtStartup.Control.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+		_chkShowPageAtStartup.Control.Parent = this;
+		_chkShowPageAtStartup.IsChecked = _factory.ShowOnStartup;
+		_chkShowPageAtStartup.IsCheckedChanged += _chkShowPageAtStartup_CheckedChanged;
+
+		_separator1.BackColor = GitterApplication.Style.Colors.Separator;
+		_separator2.BackColor = GitterApplication.Style.Colors.Separator;
+
+		_recentRepositoriesBinding = new NotifyCollectionBinding<RepositoryLink>(
+			_lstRecentRepositories.Items,
+			WorkingEnvironment.RepositoryManagerService.RecentRepositories,
+			repo => new RecentRepositoryListItem(repo));
+	}
+
+	#endregion
+
+	#region Properties
+
+	public override bool IsDocument => true;
+
+	public override IImageProvider ImageProvider => Icons.StartPage;
+
+	#endregion
+
+	#region Methods
+
+	private void OnLocalRepositoriesKeyDown(object sender, KeyEventArgs e)
+	{
+		switch(e.KeyCode)
+		{
+			case Keys.Delete:
+				while(_lstLocalRepositories.SelectedItems.Count != 0)
+				{
+					var item = (RepositoryListItem)_lstLocalRepositories.SelectedItems[0];
+					_repositories.Remove(item);
+					item.Remove();
+				}
+				break;
+		}
+	}
+
+	private void OnRecentRepositoriesKeyDown(object sender, KeyEventArgs e)
+	{
+		switch(e.KeyCode)
+		{
+			case Keys.Delete:
+				while(_lstRecentRepositories.SelectedItems.Count != 0)
+				{
+					var item = (RecentRepositoryListItem)_lstRecentRepositories.SelectedItems[0];
+					WorkingEnvironment.RepositoryManagerService.RecentRepositories.Remove(item.DataContext);
+					if(item.ListBox != null)
 					{
-						var item = (RepositoryListItem)_lstLocalRepositories.SelectedItems[0];
-						_repositories.Remove(item);
 						item.Remove();
 					}
-					break;
-			}
+				}
+				break;
 		}
+	}
 
-		private void OnRecentRepositoriesKeyDown(object sender, KeyEventArgs e)
+	private void OnLocalRepositoriesDragEnter(object sender, DragEventArgs e)
+	{
+		if(e.Data.GetDataPresent(DataFormats.FileDrop))
 		{
-			switch(e.KeyCode)
+			var data = (string[])(e.Data.GetData(DataFormats.FileDrop));
+			for(int i = 0; i < data.Length; ++i)
 			{
-				case Keys.Delete:
-					while(_lstRecentRepositories.SelectedItems.Count != 0)
-					{
-						var item = (RecentRepositoryListItem)_lstRecentRepositories.SelectedItems[0];
-						WorkingEnvironment.RepositoryManagerService.RecentRepositories.Remove(item.DataContext);
-						if(item.ListBox != null)
-						{
-							item.Remove();
-						}
-					}
-					break;
+				if(Directory.Exists(data[i]))
+				{
+					e.Effect = DragDropEffects.Link;
+				}
 			}
 		}
+		else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
+		{
+			if(string.IsNullOrWhiteSpace(_txtFilter.Text))
+			{
+				e.Effect = DragDropEffects.Move;
+			}
+		}
+		else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
+		{
+			var data = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
+			if(!IsPresentInLocalRepositoryList(data.DataContext.Path))
+			{
+				e.Effect = DragDropEffects.Copy;
+			}
+		}
+	}
 
-		private void OnLocalRepositoriesDragEnter(object sender, DragEventArgs e)
+	private bool IsPresentInLocalRepositoryList(string path)
+	{
+		foreach(var item in _repositories)
+		{
+			if(item.DataContext.Path == path)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void OnLocalRepositoriesDragDrop(object sender, DragEventArgs e)
+	{
+		if(e.Effect != DragDropEffects.None)
 		{
 			if(e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
 				var data = (string[])(e.Data.GetData(DataFormats.FileDrop));
 				for(int i = 0; i < data.Length; ++i)
 				{
-					if(Directory.Exists(data[i]))
+					var di = new DirectoryInfo(data[i]);
+					if(di.Exists)
 					{
-						e.Effect = DragDropEffects.Link;
-					}
-				}
-			}
-			else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
-			{
-				if(string.IsNullOrWhiteSpace(_txtFilter.Text))
-				{
-					e.Effect = DragDropEffects.Move;
-				}
-			}
-			else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
-			{
-				var data = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
-				if(!IsPresentInLocalRepositoryList(data.DataContext.Path))
-				{
-					e.Effect = DragDropEffects.Copy;
-				}
-			}
-		}
-
-		private bool IsPresentInLocalRepositoryList(string path)
-		{
-			foreach(var item in _repositories)
-			{
-				if(item.DataContext.Path == path)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private void OnLocalRepositoriesDragDrop(object sender, DragEventArgs e)
-		{
-			if(e.Effect != DragDropEffects.None)
-			{
-				if(e.Data.GetDataPresent(DataFormats.FileDrop))
-				{
-					var data = (string[])(e.Data.GetData(DataFormats.FileDrop));
-					for(int i = 0; i < data.Length; ++i)
-					{
-						var di = new DirectoryInfo(data[i]);
-						if(di.Exists)
+						var path = di.FullName;
+						if(!IsPresentInLocalRepositoryList(path))
 						{
-							var path = di.FullName;
-							if(!IsPresentInLocalRepositoryList(path))
+							var provider = WorkingEnvironment.FindProviderForDirectory(data[i]);
+							if(provider != null)
 							{
-								var provider = WorkingEnvironment.FindProviderForDirectory(data[i]);
-								if(provider != null)
+								var link = new RepositoryLink(path, provider.Name);
+								var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
+								var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
+								if(index != -1)
 								{
-									var link = new RepositoryLink(path, provider.Name);
-									var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
-									var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
-									if(index != -1)
-									{
-										var itemToInsert = new RepositoryListItem(link);
-										InsertRepositoryItem(index, itemsCollection, itemToInsert);
-									}
+									var itemToInsert = new RepositoryListItem(link);
+									InsertRepositoryItem(index, itemsCollection, itemToInsert);
 								}
 							}
 						}
 					}
 				}
-				else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
-				{
-					if(!string.IsNullOrWhiteSpace(_txtFilter.Text))
-					{
-						return;
-					}
-					var itemToMove = (RepositoryListItem)e.Data.GetData(typeof(RepositoryListItem));
-					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
-					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
-					if(index == -1) return;
-					var currentIndex = _lstLocalRepositories.Items.IndexOf(itemToMove);
-					if(index == currentIndex) return;
-					if(currentIndex == -1)
-					{
-						_repositories.Insert(index, itemToMove);
-						itemsCollection.Insert(index, itemToMove);
-					}
-					else
-					{
-						if(index > _lstLocalRepositories.Items.Count - 1)
-						{
-							--index;
-						}
-						_repositories.Remove(itemToMove);
-						itemToMove.Remove();
-						_repositories.Insert(index, itemToMove);
-						itemsCollection.Insert(index, itemToMove);
-					}
-				}
-				else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
-				{
-					var itemToMove = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
-					var path = itemToMove.DataContext.Path;
-					if(IsPresentInLocalRepositoryList(path)) return;
-					var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
-					var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
-					if(index != -1)
-					{
-						var itemToInsert = new RepositoryListItem(new RepositoryLink(path, string.Empty));
-						InsertRepositoryItem(index, itemsCollection, itemToInsert);
-					}
-				}
 			}
-		}
-
-		private void InsertRepositoryItem(int index, CustomListBoxItemsCollection target, RepositoryListItem itemToInsert)
-		{
-			if(!string.IsNullOrWhiteSpace(_txtFilter.Text))
+			else if(e.Data.GetDataPresent(typeof(RepositoryListItem)))
 			{
-				if(index == 0)
+				if(!string.IsNullOrWhiteSpace(_txtFilter.Text))
 				{
-					_repositories.Insert(0, itemToInsert);
+					return;
+				}
+				var itemToMove = (RepositoryListItem)e.Data.GetData(typeof(RepositoryListItem));
+				var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
+				var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
+				if(index == -1) return;
+				var currentIndex = _lstLocalRepositories.Items.IndexOf(itemToMove);
+				if(index == currentIndex) return;
+				if(currentIndex == -1)
+				{
+					_repositories.Insert(index, itemToMove);
+					itemsCollection.Insert(index, itemToMove);
 				}
 				else
 				{
-					var dst = _repositories.IndexOf((RepositoryListItem)_lstLocalRepositories.Items[index - 1]);
-					_repositories.Insert(dst + 1, itemToInsert);
+					if(index > _lstLocalRepositories.Items.Count - 1)
+					{
+						--index;
+					}
+					_repositories.Remove(itemToMove);
+					itemToMove.Remove();
+					_repositories.Insert(index, itemToMove);
+					itemsCollection.Insert(index, itemToMove);
 				}
-				if(FilterItem(itemToInsert))
+			}
+			else if(e.Data.GetDataPresent(typeof(RecentRepositoryListItem)))
+			{
+				var itemToMove = (RecentRepositoryListItem)e.Data.GetData(typeof(RecentRepositoryListItem));
+				var path = itemToMove.DataContext.Path;
+				if(IsPresentInLocalRepositoryList(path)) return;
+				var point = _lstLocalRepositories.PointToClient(new Point(e.X, e.Y));
+				var index = _lstLocalRepositories.GetInsertIndexFormPoint(point.X, point.Y, false, out var itemsCollection);
+				if(index != -1)
 				{
-					target.Insert(index, itemToInsert);
+					var itemToInsert = new RepositoryListItem(new RepositoryLink(path, string.Empty));
+					InsertRepositoryItem(index, itemsCollection, itemToInsert);
 				}
+			}
+		}
+	}
+
+	private void InsertRepositoryItem(int index, CustomListBoxItemsCollection target, RepositoryListItem itemToInsert)
+	{
+		if(!string.IsNullOrWhiteSpace(_txtFilter.Text))
+		{
+			if(index == 0)
+			{
+				_repositories.Insert(0, itemToInsert);
 			}
 			else
 			{
-				_repositories.Insert(index, itemToInsert);
+				var dst = _repositories.IndexOf((RepositoryListItem)_lstLocalRepositories.Items[index - 1]);
+				_repositories.Insert(dst + 1, itemToInsert);
+			}
+			if(FilterItem(itemToInsert))
+			{
 				target.Insert(index, itemToInsert);
 			}
 		}
-
-		private void OnLocalRepositoriesListItemActivated(object sender, ItemEventArgs e)
+		else
 		{
-			if(e.Item is RepositoryListItem item)
+			_repositories.Insert(index, itemToInsert);
+			target.Insert(index, itemToInsert);
+		}
+	}
+
+	private void OnLocalRepositoriesListItemActivated(object sender, ItemEventArgs e)
+	{
+		if(e.Item is RepositoryListItem item)
+		{
+			if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
 			{
-				if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
+				if(_factory.CloseAfterRepositoryLoad)
 				{
-					if(_factory.CloseAfterRepositoryLoad)
-					{
-						Close();
-					}
+					Close();
 				}
 			}
 		}
+	}
 
-		private void OnRecentRepositoriesListItemActivated(object sender, ItemEventArgs e)
+	private void OnRecentRepositoriesListItemActivated(object sender, ItemEventArgs e)
+	{
+		if(e.Item is RecentRepositoryListItem item)
 		{
-			if(e.Item is RecentRepositoryListItem item)
+			if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
 			{
-				if(WorkingEnvironment.OpenRepository(item.DataContext.Path))
+				if(_factory.CloseAfterRepositoryLoad)
 				{
-					if(_factory.CloseAfterRepositoryLoad)
-					{
-						Close();
-					}
+					Close();
 				}
 			}
 		}
+	}
 
-		protected override void SaveMoreViewTo(Section section)
+	protected override void SaveMoreViewTo(Section section)
+	{
+		base.SaveMoreViewTo(section);
+		var listNode = section.GetCreateSection("RepositoryList");
+		_lstLocalRepositories.SaveViewTo(listNode);
+		var itemsNode = listNode.GetCreateEmptySection("Items");
+		int id = 0;
+		foreach(var item in _repositories)
 		{
-			base.SaveMoreViewTo(section);
-			var listNode = section.GetCreateSection("RepositoryList");
-			_lstLocalRepositories.SaveViewTo(listNode);
-			var itemsNode = listNode.GetCreateEmptySection("Items");
-			int id = 0;
-			foreach(var item in _repositories)
-			{
-				var link = item.DataContext;
-				link.SaveTo(itemsNode.GetCreateSection("Repository" + id.ToString(CultureInfo.InvariantCulture)));
-				++id;
-			}
+			var link = item.DataContext;
+			link.SaveTo(itemsNode.GetCreateSection("Repository" + id.ToString(CultureInfo.InvariantCulture)));
+			++id;
 		}
+	}
 
-		protected override void LoadMoreViewFrom(Section section)
+	protected override void LoadMoreViewFrom(Section section)
+	{
+		base.LoadMoreViewFrom(section);
+		var listNode = section.TryGetSection("RepositoryList");
+		if(listNode != null)
 		{
-			base.LoadMoreViewFrom(section);
-			var listNode = section.TryGetSection("RepositoryList");
-			if(listNode != null)
-			{
-				_lstLocalRepositories.LoadViewFrom(listNode);
-				_lstLocalRepositories.BeginUpdate();
-				_lstLocalRepositories.Items.Clear();
-				_lstLocalRepositories.LoadViewFrom(listNode);
-				_repositories.Clear();
-				var itemsNode = listNode.TryGetSection("Items");
-				if(itemsNode != null)
-				{
-					foreach(var s in itemsNode.Sections)
-					{
-						var link = new RepositoryLink(s);
-						var item = new RepositoryListItem(link);
-						_repositories.Add(item);
-						_lstLocalRepositories.Items.Add(item);
-					}
-				}
-				_lstLocalRepositories.EndUpdate();
-			}
-		}
-
-		public LocalRepositoriesListBox Repositories => _lstLocalRepositories;
-
-		private void _btnAddLocalRepo_LinkClicked(object sender, EventArgs e)
-		{
-			var path = Utility.ShowPickFolderDialog(this);
-			if(!string.IsNullOrWhiteSpace(path))
-			{
-				var prov = WorkingEnvironment.FindProviderForDirectory(path);
-				if(prov == null)
-				{
-					GitterApplication.MessageBoxService.Show(
-						this,
-						Resources.ErrPathIsNotValidRepository.UseAsFormat(path),
-						Resources.ErrInvalidPath,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-					return;
-				}
-				var item = new RepositoryListItem(new RepositoryLink(path, prov.Name));
-				_repositories.Add(item);
-				_lstLocalRepositories.Items.Add(item);
-			}
-		}
-
-		private void _btnInitLocalRepo_LinkClicked(object sender, EventArgs e)
-		{
-			using var dlg = new InitRepositoryDialog(WorkingEnvironment);
-			dlg.Run(WorkingEnvironment.MainForm);
-		}
-
-		private void _btnCloneRemoteRepo_LinkClicked(object sender, EventArgs e)
-		{
-			using var dlg = new CloneRepositoryDialog(WorkingEnvironment);
-			dlg.Run(WorkingEnvironment.MainForm);
-		}
-
-		private void _chkClosePageAfterRepositoryLoad_CheckedChanged(object sender, EventArgs e)
-		{
-			_factory.CloseAfterRepositoryLoad = _chkClosePageAfterRepositoryLoad.IsChecked;
-		}
-
-		private void _chkShowPageAtStartup_CheckedChanged(object sender, EventArgs e)
-		{
-			_factory.ShowOnStartup = _chkShowPageAtStartup.IsChecked;
-		}
-
-		private void OnLogoClick(object sender, EventArgs e)
-		{
-			Focus();
-		}
-
-		private void _btnScanLocalRepo_LinkClicked(object sender, EventArgs e)
-		{
-			//var x = new NotificationForm();
-			//var n = new gitter.Git.Gui.FetchNotification();
-			//x.ClientSize = n.Size;
-			//n.Parent = x;
-			//x.Show();
-		}
-
-		private bool FilterItem(RepositoryListItem item) => FilterItem(item, _txtFilter.Text);
-
-		private static bool FilterItem(RepositoryListItem item, string filter)
-		{
-			if(string.IsNullOrWhiteSpace(filter)) return true;
-			var index = item.DataContext.Path.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase);
-			return index >= 0;
-		}
-
-		private void RefillLocalRepositories()
-		{
-			var filter = _txtFilter.Text;
+			_lstLocalRepositories.LoadViewFrom(listNode);
 			_lstLocalRepositories.BeginUpdate();
-			int index1 = 0;
-			for(int index = 0; index < _repositories.Count; ++index)
+			_lstLocalRepositories.Items.Clear();
+			_lstLocalRepositories.LoadViewFrom(listNode);
+			_repositories.Clear();
+			var itemsNode = listNode.TryGetSection("Items");
+			if(itemsNode != null)
 			{
-				var item = _repositories[index];
-				if(FilterItem(item, filter))
+				foreach(var s in itemsNode.Sections)
 				{
-					if(!item.IsAttachedToListBox)
-					{
-						_lstLocalRepositories.Items.Insert(index1, item);
-					}
-					++index1;
-				}
-				else
-				{
-					if(item.IsAttachedToListBox)
-					{
-						item.Remove();
-					}
+					var link = new RepositoryLink(s);
+					var item = new RepositoryListItem(link);
+					_repositories.Add(item);
+					_lstLocalRepositories.Items.Add(item);
 				}
 			}
 			_lstLocalRepositories.EndUpdate();
 		}
-
-		private void OnFilterTextChanged(object sender, EventArgs e)
-		{
-			RefillLocalRepositories();
-		}
-
-		#endregion
 	}
+
+	public LocalRepositoriesListBox Repositories => _lstLocalRepositories;
+
+	private void _btnAddLocalRepo_LinkClicked(object sender, EventArgs e)
+	{
+		var path = Utility.ShowPickFolderDialog(this);
+		if(!string.IsNullOrWhiteSpace(path))
+		{
+			var prov = WorkingEnvironment.FindProviderForDirectory(path);
+			if(prov == null)
+			{
+				GitterApplication.MessageBoxService.Show(
+					this,
+					Resources.ErrPathIsNotValidRepository.UseAsFormat(path),
+					Resources.ErrInvalidPath,
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
+				return;
+			}
+			var item = new RepositoryListItem(new RepositoryLink(path, prov.Name));
+			_repositories.Add(item);
+			_lstLocalRepositories.Items.Add(item);
+		}
+	}
+
+	private void _btnInitLocalRepo_LinkClicked(object sender, EventArgs e)
+	{
+		using var dlg = new InitRepositoryDialog(WorkingEnvironment);
+		dlg.Run(WorkingEnvironment.MainForm);
+	}
+
+	private void _btnCloneRemoteRepo_LinkClicked(object sender, EventArgs e)
+	{
+		using var dlg = new CloneRepositoryDialog(WorkingEnvironment);
+		dlg.Run(WorkingEnvironment.MainForm);
+	}
+
+	private void _chkClosePageAfterRepositoryLoad_CheckedChanged(object sender, EventArgs e)
+	{
+		_factory.CloseAfterRepositoryLoad = _chkClosePageAfterRepositoryLoad.IsChecked;
+	}
+
+	private void _chkShowPageAtStartup_CheckedChanged(object sender, EventArgs e)
+	{
+		_factory.ShowOnStartup = _chkShowPageAtStartup.IsChecked;
+	}
+
+	private void OnLogoClick(object sender, EventArgs e)
+	{
+		Focus();
+	}
+
+	private void _btnScanLocalRepo_LinkClicked(object sender, EventArgs e)
+	{
+		//var x = new NotificationForm();
+		//var n = new gitter.Git.Gui.FetchNotification();
+		//x.ClientSize = n.Size;
+		//n.Parent = x;
+		//x.Show();
+	}
+
+	private bool FilterItem(RepositoryListItem item) => FilterItem(item, _txtFilter.Text);
+
+	private static bool FilterItem(RepositoryListItem item, string filter)
+	{
+		if(string.IsNullOrWhiteSpace(filter)) return true;
+		var index = item.DataContext.Path.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase);
+		return index >= 0;
+	}
+
+	private void RefillLocalRepositories()
+	{
+		var filter = _txtFilter.Text;
+		_lstLocalRepositories.BeginUpdate();
+		int index1 = 0;
+		for(int index = 0; index < _repositories.Count; ++index)
+		{
+			var item = _repositories[index];
+			if(FilterItem(item, filter))
+			{
+				if(!item.IsAttachedToListBox)
+				{
+					_lstLocalRepositories.Items.Insert(index1, item);
+				}
+				++index1;
+			}
+			else
+			{
+				if(item.IsAttachedToListBox)
+				{
+					item.Remove();
+				}
+			}
+		}
+		_lstLocalRepositories.EndUpdate();
+	}
+
+	private void OnFilterTextChanged(object sender, EventArgs e)
+	{
+		RefillLocalRepositories();
+	}
+
+	#endregion
 }

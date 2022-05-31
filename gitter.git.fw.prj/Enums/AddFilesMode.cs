@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+/// <summary>Add files mode.</summary>
+public enum AddFilesMode
 {
-	/// <summary>Add files mode.</summary>
-	public enum AddFilesMode
-	{
-		/// <summary>Default mode.</summary>
-		Default,
-		/// <summary>Add untracked files.</summary>
-		All,
-		/// <summary>Add tracked modified files.</summary>
-		Update,
-	}
+	/// <summary>Default mode.</summary>
+	Default,
+	/// <summary>Add untracked files.</summary>
+	All,
+	/// <summary>Add tracked modified files.</summary>
+	Update,
 }

@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+public class CommitResult
 {
-	public class CommitResult
+	public CommitResult(Revision revision, string message)
 	{
-		public CommitResult(Revision revision, string message)
-		{
-			Revision = revision;
-			Message  = message;
-		}
-
-		public Revision Revision { get; }
-
-		public string Message { get; }
+		Revision = revision;
+		Message  = message;
 	}
+
+	public Revision Revision { get; }
+
+	public string Message { get; }
 }

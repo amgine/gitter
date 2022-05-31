@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
-{
-	public class WebBrowserViewModel
-	{
-		public WebBrowserViewModel(string url) => Url = url;
+namespace gitter.Framework.Controls;
 
-		public string Url { get; }
-	}
+public class WebBrowserViewModel
+{
+	public WebBrowserViewModel(string url) => Url = url;
+
+	public string Url { get; }
 }

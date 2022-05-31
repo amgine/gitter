@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+public sealed class PruneNotesParameters
 {
-	public sealed class PruneNotesParameters
+	public PruneNotesParameters()
 	{
-		public PruneNotesParameters()
-		{
-		}
 	}
 }

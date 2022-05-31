@@ -18,32 +18,33 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using gitter.Framework;
+
+using gitter.Git.Gui.Views;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RepositoryCommitListItem : RepositoryExplorerItemBase
 {
-	using gitter.Framework;
+	private readonly IWorkingEnvironment _environment;
 
-	using gitter.Git.Gui.Views;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RepositoryCommitListItem : RepositoryExplorerItemBase
+	public RepositoryCommitListItem(IWorkingEnvironment environment)
+		: base(Icons.Commit, Resources.StrCommit)
 	{
-		private readonly IWorkingEnvironment _environment;
+		Verify.Argument.IsNotNull(environment);
 
-		public RepositoryCommitListItem(IWorkingEnvironment environment)
-			: base(@"commit", Resources.StrCommit)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			_environment = environment;
-		}
-
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-			_environment.ViewDockService.ShowView(Guids.CommitViewGuid);
-		}
-
-		public override void OnDoubleClick(int x, int y) { }
+		_environment = environment;
 	}
+
+	/// <inheritdoc/>
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		_environment.ViewDockService.ShowView(Guids.CommitViewGuid);
+	}
+
+	/// <inheritdoc/>
+	public override void OnDoubleClick(int x, int y) { }
 }

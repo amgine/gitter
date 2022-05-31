@@ -18,104 +18,103 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class AddRemoteController : ViewControllerBase<IAddRemoteView>, IAddRemoteController
 {
-	using System;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class AddRemoteController : ViewControllerBase<IAddRemoteView>, IAddRemoteController
+	public AddRemoteController(Repository repository)
 	{
-		public AddRemoteController(Repository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+		Verify.Argument.IsNotNull(repository);
 
-			Repository = repository;
+		Repository = repository;
+	}
+
+	private Repository Repository { get; }
+
+	private bool ValidateInput(out string name, out string url)
+	{
+		name = View.RemoteName.Value.Trim();
+		url  = View.Url.Value.Trim();
+
+		if(!GitControllerUtility.ValidateNewRemoteName(name, Repository, View.RemoteName, View.ErrorNotifier))
+		{
+			return false;
+		}
+		if(!GitControllerUtility.ValidateUrl(url, View.Url, View.ErrorNotifier))
+		{
+			return false;
 		}
 
-		private Repository Repository { get; }
+		return true;
+	}
 
-		private bool ValidateInput(out string name, out string url)
+	private void OnAddFailed(Exception exc)
+		=> GitterApplication.MessageBoxService.Show(
+			View as IWin32Window,
+			exc.Message,
+			Resources.ErrFailedToAddRemote,
+			MessageBoxButton.Close,
+			MessageBoxIcon.Error);
+
+	public bool TryAddRemote()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		if(!ValidateInput(out var name, out var url)) return false;
+
+		var fetch        = View.Fetch.Value;
+		var mirror       = View.Mirror.Value;
+		var tagFetchMode = View.TagFetchMode.Value;
+
+		try
 		{
-			name = View.RemoteName.Value.Trim();
-			url  = View.Url.Value.Trim();
-
-			if(!GitControllerUtility.ValidateNewRemoteName(name, Repository, View.RemoteName, View.ErrorNotifier))
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				return false;
+				Repository.Remotes.Add(name, url, fetch, mirror, tagFetchMode);
 			}
-			if(!GitControllerUtility.ValidateUrl(url, View.Url, View.ErrorNotifier))
-			{
-				return false;
-			}
-
-			return true;
 		}
-
-		private void OnAddFailed(Exception exc)
-			=> GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
-				exc.Message,
-				Resources.ErrFailedToAddRemote,
-				MessageBoxButton.Close,
-				MessageBoxIcon.Error);
-
-		public bool TryAddRemote()
+		catch(GitException exc)
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			if(!ValidateInput(out var name, out var url)) return false;
-
-			var fetch        = View.Fetch.Value;
-			var mirror       = View.Mirror.Value;
-			var tagFetchMode = View.TagFetchMode.Value;
-
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					Repository.Remotes.Add(name, url, fetch, mirror, tagFetchMode);
-				}
-			}
-			catch(GitException exc)
-			{
-				OnAddFailed(exc);
-				return false;
-			}
-			return true;
+			OnAddFailed(exc);
+			return false;
 		}
+		return true;
+	}
 
-		public async Task<bool> TryAddRemoteAsync()
+	public async Task<bool> TryAddRemoteAsync()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		if(!ValidateInput(out var name, out var url)) return false;
+
+		var fetch        = View.Fetch.Value;
+		var mirror       = View.Mirror.Value;
+		var tagFetchMode = View.TagFetchMode.Value;
+
+		try
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			if(!ValidateInput(out var name, out var url)) return false;
-
-			var fetch        = View.Fetch.Value;
-			var mirror       = View.Mirror.Value;
-			var tagFetchMode = View.TagFetchMode.Value;
-
-			try
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					await Repository.Remotes.AddAsync(name, url, fetch, mirror, tagFetchMode);
-				}
+				await Repository.Remotes.AddAsync(name, url, fetch, mirror, tagFetchMode);
 			}
-			catch(GitException exc)
-			{
-				OnAddFailed(exc);
-				return false;
-			}
-			return true;
 		}
+		catch(GitException exc)
+		{
+			OnAddFailed(exc);
+			return false;
+		}
+		return true;
 	}
 }

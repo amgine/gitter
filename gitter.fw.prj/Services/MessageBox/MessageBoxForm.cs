@@ -18,292 +18,293 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Media;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+public partial class MessageBoxForm : Form
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Media;
-	using System.Drawing;
-	using System.Linq;
-	using System.Text;
-	using System.Windows.Forms;
+	private Size MinClientSize = new(138, 124);
+	private const int MaxClientWidth = 481;
 
-	using Resources = gitter.Framework.Properties.Resources;
+	private readonly string _title;
+	private readonly string _message;
+	private readonly MessageBoxIcon _mbIcon;
+	private readonly Icon _icon;
+	private bool _buttonClick;
+	private bool _hasCancelButton;
+	private int _buttonCount;
+	private IEnumerable<Button> _buttons;
 
-	public partial class MessageBoxForm : Form
+	public MessageBoxForm()
 	{
-		private Size MinClientSize = new Size(138, 124);
-		private const int MaxClientWidth = 481;
+		InitializeComponent();
+		Font = SystemFonts.MessageBoxFont;
+	}
 
-		private readonly string _title;
-		private readonly string _message;
-		private readonly MessageBoxIcon _mbIcon;
-		private readonly Icon _icon;
-		private bool _buttonClick;
-		private bool _hasCancelButton;
-		private int _buttonCount;
-		private IEnumerable<Button> _buttons;
+	public MessageBoxForm(MessageBoxButton button, MessageBoxIcon icon, string message, string caption)
+		: this(Enumerable.Repeat(button, 1), icon, message, caption)
+	{
+	}
 
-		public MessageBoxForm()
+	public MessageBoxForm(IEnumerable<MessageBoxButton> buttons, MessageBoxIcon icon, string message, string title)
+	{
+		InitializeComponent();
+		Font = SystemFonts.MessageBoxFont;
+
+		_title = title;
+		_message = message;
+
+		var conv = new DpiConverter(this);
+		MinClientSize = conv.Convert(MinClientSize);
+
+		var s = ClientSize;
+		s.Width = conv.ConvertX(MaxClientWidth);
+		ClientSize = s;
+
+		Text = title;
+		_mbIcon = icon;
+		_icon = GetSystemIcon(icon);
+		LayoutButtons(buttons);
+		LayoutMessage(message);
+	}
+
+	private void LayoutButtons(IEnumerable<MessageBoxButton> buttons)
+	{
+		var conv = new DpiConverter(this);
+		var minW = 0;
+		var list = new List<Button>();
+		int tabIndex = 0;
+		foreach(var btn in buttons)
 		{
-			InitializeComponent();
-
-			Font = SystemFonts.MessageBoxFont;
-		}
-
-		public MessageBoxForm(MessageBoxButton button, MessageBoxIcon icon, string message, string caption)
-			: this(Enumerable.Repeat(button, 1), icon, message, caption)
-		{
-		}
-
-		public MessageBoxForm(IEnumerable<MessageBoxButton> buttons, MessageBoxIcon icon, string message, string title)
-		{
-			InitializeComponent();
-
-			_title = title;
-			_message = message;
-
-			var conv = new DpiConverter(this);
-			MinClientSize = conv.Convert(MinClientSize);
-
-			var s = ClientSize;
-			s.Width = conv.ConvertX(MaxClientWidth);
-			ClientSize = s;
-
-			Text = title;
-			_mbIcon = icon;
-			_icon = GetSystemIcon(icon);
-			LayoutButtons(buttons);
-			LayoutMessage(message);
-		}
-
-		private void LayoutButtons(IEnumerable<MessageBoxButton> buttons)
-		{
-			var conv = new DpiConverter(this);
-			var minW = 0;
-			var list = new List<Button>();
-			int tabIndex = 0;
-			foreach(var btn in buttons)
+			var control = new Button()
 			{
-				var control = new Button()
-				{
-					FlatStyle = FlatStyle.System,
-					Text = btn.DisplayLabel,
-					Name = btn.DisplayLabel,
-					TabIndex = tabIndex++,
-					Tag = btn,
-				};
-				control.Click += OnButtonClick;
-				list.Add(control);
-			}
-			var cs = ClientSize;
-			var size1 = conv.Convert(new Size(75, 23));
-			var size2 = conv.Convert(new Size(106, 23));
-			int x = cs.Width  - 1;
-			int y = cs.Height - size1.Height - conv.ConvertY(8);
-			minW = 1;
-			for(int i = list.Count - 1; i >= 0; --i)
-			{
-				var size = (TextRenderer.MeasureText(list[i].Text, Font).Width > size1.Width - conv.ConvertX(8)) ?
-					size2 : size1;
-				x -= size.Width + conv.ConvertX(6);
-				list[i].SetBounds(x, y, size.Width, size.Height);
-				list[i].Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
-				list[i].Parent = this;
-				var btn = (MessageBoxButton)(list[i].Tag);
-				if(btn.IsDefault)
-				{
-					AcceptButton = list[i];
-				}
-				if(btn.DialogResult == DialogResult.Cancel)
-				{
-					_hasCancelButton = true;
-				}
-				if(CancelButton == null && (
-					btn.DialogResult == DialogResult.Abort ||
-					btn.DialogResult == DialogResult.Cancel ||
-					btn.DialogResult == DialogResult.No))
-				{
-					CancelButton = list[i];
-				}
-				minW += size.Width + conv.ConvertX(6);
-			}
-			if(list.Count == 1 && CancelButton is null)
-			{
-				CancelButton = list[0];
-			}
-			minW += conv.ConvertX(42) - conv.ConvertX(6);
-			if(MinClientSize.Width < minW)
-			{
-				MinClientSize.Width = minW;
-			}
-			_buttons = list;
-			_buttonCount = list.Count;
-		}
-
-		private static Icon GetSystemIcon(MessageBoxIcon icon)
-			=> icon switch
-			{
-				MessageBoxIcon.Information => SystemIcons.Information,
-				MessageBoxIcon.Error       => SystemIcons.Error,
-				MessageBoxIcon.Exclamation => SystemIcons.Exclamation,
-				MessageBoxIcon.Question    => SystemIcons.Question,
-				_ => null,
+				FlatStyle = FlatStyle.System,
+				Text = btn.DisplayLabel,
+				Name = btn.DisplayLabel,
+				TabIndex = tabIndex++,
+				Tag = btn,
 			};
-
-		private void LayoutMessage(string message)
+			control.Click += OnButtonClick;
+			list.Add(control);
+		}
+		var cs = ClientSize;
+		var size1 = conv.Convert(new Size(75, 23));
+		var size2 = conv.Convert(new Size(106, 23));
+		int x = cs.Width  - 1;
+		int y = cs.Height - size1.Height - conv.ConvertY(8);
+		minW = 1;
+		for(int i = list.Count - 1; i >= 0; --i)
 		{
-			if(_icon is null)
+			var size = (TextRenderer.MeasureText(list[i].Text, Font).Width > size1.Width - conv.ConvertX(8)) ?
+				size2 : size1;
+			x -= size.Width + conv.ConvertX(6);
+			list[i].SetBounds(x, y, size.Width, size.Height);
+			list[i].Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+			list[i].Parent = this;
+			var btn = (MessageBoxButton)(list[i].Tag);
+			if(btn.IsDefault)
 			{
-				_picIcon.Visible = false;
+				AcceptButton = list[i];
 			}
-			_lblMessage.Text = message;
+			if(btn.DialogResult == DialogResult.Cancel)
+			{
+				_hasCancelButton = true;
+			}
+			if(CancelButton == null && (
+				btn.DialogResult == DialogResult.Abort ||
+				btn.DialogResult == DialogResult.Cancel ||
+				btn.DialogResult == DialogResult.No))
+			{
+				CancelButton = list[i];
+			}
+			minW += size.Width + conv.ConvertX(6);
+		}
+		if(list.Count == 1 && CancelButton is null)
+		{
+			CancelButton = list[0];
+		}
+		minW += conv.ConvertX(42) - conv.ConvertX(6);
+		if(MinClientSize.Width < minW)
+		{
+			MinClientSize.Width = minW;
+		}
+		_buttons = list;
+		_buttonCount = list.Count;
+	}
+
+	private static Icon GetSystemIcon(MessageBoxIcon icon)
+		=> icon switch
+		{
+			MessageBoxIcon.Information => SystemIcons.Information,
+			MessageBoxIcon.Error       => SystemIcons.Error,
+			MessageBoxIcon.Exclamation => SystemIcons.Exclamation,
+			MessageBoxIcon.Question    => SystemIcons.Question,
+			_ => null,
+		};
+
+	private void LayoutMessage(string message)
+	{
+		if(_icon is null)
+		{
+			_picIcon.Visible = false;
+		}
+		_lblMessage.Text = message;
+	}
+
+	private void OnButtonClick(object sender, EventArgs e)
+	{
+		var btn = (MessageBoxButton)((Button)sender).Tag;
+		this.DialogResult = btn.DialogResult;
+		_buttonClick = true;
+		Close();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnClosing(CancelEventArgs e)
+	{
+		base.OnClosing(e);
+		if(!_buttonClick)
+		{
+			DialogResult = DialogResult.Cancel;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		if(_mbIcon == MessageBoxIcon.None)
+		{
+			_lblMessage.SetBounds(_lblMessage.Left - 53, 0, _lblMessage.Width + 53, 0,
+				BoundsSpecified.X | BoundsSpecified.Width);
 		}
 
-		private void OnButtonClick(object sender, EventArgs e)
+		var minMessageWidth  = MinClientSize.Width - (ClientSize.Width - _lblMessage.Width);
+		var minMessageHeight = MinClientSize.Height - (ClientSize.Height - _lblMessage.Height);
+		if(minMessageHeight < 32) minMessageHeight = 32;
+
+		bool centerMessage = false;
+
+		var size = TextRenderer.MeasureText(_message, _lblMessage.Font, _lblMessage.Size, TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak);
+		var h = size.Height;
+		int maxMessageHeight = Screen.GetBounds(this).Height * 3 / 4;
+		if(h < minMessageHeight)
 		{
-			var btn = (MessageBoxButton)((Button)sender).Tag;
-			this.DialogResult = btn.DialogResult;
-			_buttonClick = true;
-			Close();
+			if(h < 32)
+			{
+				centerMessage = true;
+			}
+			h = minMessageHeight;
+		}
+		else if(h > maxMessageHeight)
+		{
+			h = maxMessageHeight;
+		}
+		var d = _lblMessage.Height - h;
+		Height -= d;
+		if(size.Width < _lblMessage.Width)
+		{
+			d = _lblMessage.Width - size.Width;
+			if(_lblMessage.Width - d < minMessageWidth)
+			{
+				d = _lblMessage.Width - minMessageWidth;
+			}
+			Width -= d;
 		}
 
-		protected override void OnClosing(CancelEventArgs e)
+		if(centerMessage)
 		{
-			base.OnClosing(e);
-			if(!_buttonClick)
-			{
-				DialogResult = DialogResult.Cancel;
-			}
+			_lblMessage.Top = _picIcon.Top + (31 - size.Height) / 2;
 		}
 
-		protected override void OnLoad(EventArgs e)
+		PlaySystemSound();
+
+		base.OnLoad(e);
+
+		if(!_hasCancelButton && _buttonCount > 1)
 		{
-			if(_mbIcon == MessageBoxIcon.None)
-			{
-				_lblMessage.SetBounds(_lblMessage.Left - 53, 0, _lblMessage.Width + 53, 0,
-					BoundsSpecified.X | BoundsSpecified.Width);
-			}
-
-			var minMessageWidth  = MinClientSize.Width - (ClientSize.Width - _lblMessage.Width);
-			var minMessageHeight = MinClientSize.Height - (ClientSize.Height - _lblMessage.Height);
-			if(minMessageHeight < 32) minMessageHeight = 32;
-
-			bool centerMessage = false;
-
-			var size = TextRenderer.MeasureText(_message, _lblMessage.Font, _lblMessage.Size, TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak);
-			var h = size.Height;
-			int maxMessageHeight = Screen.GetBounds(this).Height * 3 / 4;
-			if(h < minMessageHeight)
-			{
-				if(h < 32)
-				{
-					centerMessage = true;
-				}
-				h = minMessageHeight;
-			}
-			else if(h > maxMessageHeight)
-			{
-				h = maxMessageHeight;
-			}
-			var d = _lblMessage.Height - h;
-			Height -= d;
-			if(size.Width < _lblMessage.Width)
-			{
-				d = _lblMessage.Width - size.Width;
-				if(_lblMessage.Width - d < minMessageWidth)
-				{
-					d = _lblMessage.Width - minMessageWidth;
-				}
-				Width -= d;
-			}
-
-			if(centerMessage)
-			{
-				_lblMessage.Top = _picIcon.Top + (31 - size.Height) / 2;
-			}
-
-			PlaySystemSound();
-
-			base.OnLoad(e);
-
-			if(!_hasCancelButton && _buttonCount > 1)
-			{
-				this.DisableCloseButton();
-			}
+			this.DisableCloseButton();
 		}
+	}
 
-		private void PlaySystemSound()
+	private void PlaySystemSound()
+	{
+		switch(_mbIcon)
 		{
-			switch(_mbIcon)
-			{
-				case MessageBoxIcon.Information:
-					SystemSounds.Asterisk.Play();
-					break;
-				case MessageBoxIcon.Error:
-					SystemSounds.Hand.Play();
-					break;
-				case MessageBoxIcon.Exclamation:
-					SystemSounds.Exclamation.Play();
-					break;
-				case MessageBoxIcon.Question:
-					SystemSounds.Question.Play();
-					break;
-			}
+			case MessageBoxIcon.Information:
+				SystemSounds.Asterisk.Play();
+				break;
+			case MessageBoxIcon.Error:
+				SystemSounds.Hand.Play();
+				break;
+			case MessageBoxIcon.Exclamation:
+				SystemSounds.Exclamation.Play();
+				break;
+			case MessageBoxIcon.Question:
+				SystemSounds.Question.Play();
+				break;
 		}
+	}
 
-		public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButton button, MessageBoxIcon icon)
+	public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButton button, MessageBoxIcon icon)
+	{
+		return Show(owner, text, caption, new[] { button }, icon);
+	}
+
+	public static DialogResult Show(IWin32Window owner, string text, string caption, IEnumerable<MessageBoxButton> buttons, MessageBoxIcon icon)
+	{
+		using var form = new MessageBoxForm(buttons, icon, text, caption);
+		form.ShowDialog(owner);
+		return form.DialogResult;
+	}
+
+	private void OnIconPaint(object sender, PaintEventArgs e)
+	{
+		if(_icon is not null)
 		{
-			return Show(owner, text, caption, new[] { button }, icon);
+			e.Graphics.DrawIcon(_icon, new Rectangle(0, 0, _picIcon.Width, _picIcon.Height));
 		}
+	}
 
-		public static DialogResult Show(IWin32Window owner, string text, string caption, IEnumerable<MessageBoxButton> buttons, MessageBoxIcon icon)
+	private void CopyToClipboard()
+	{
+		const string separator = "---------------------------";
+
+		var sb = new StringBuilder();
+		sb.AppendLine(separator);
+		sb.AppendLine(_title);
+		sb.AppendLine(separator);
+		sb.AppendLine(_message);
+		sb.AppendLine(separator);
+		foreach(var button in _buttons)
 		{
-			using var form = new MessageBoxForm(buttons, icon, text, caption);
-			form.ShowDialog(owner);
-			return form.DialogResult;
+			sb.Append(button.Text);
+			sb.Append("   ");
 		}
+		sb.AppendLine();
+		sb.AppendLine(separator);
+		ClipboardEx.SetTextSafe(sb.ToString());
+	}
 
-		private void OnIconPaint(object sender, PaintEventArgs e)
+	private void MessageBoxForm_KeyDown(object sender, KeyEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		switch(e.KeyCode)
 		{
-			if(_icon is not null)
-			{
-				e.Graphics.DrawIcon(_icon, 0, 0);
-			}
-		}
-
-		private void CopyToClipboard()
-		{
-			const string separator = "---------------------------";
-
-			var sb = new StringBuilder();
-			sb.AppendLine(separator);
-			sb.AppendLine(_title);
-			sb.AppendLine(separator);
-			sb.AppendLine(_message);
-			sb.AppendLine(separator);
-			foreach(var button in _buttons)
-			{
-				sb.Append(button.Text);
-				sb.Append("   ");
-			}
-			sb.AppendLine();
-			sb.AppendLine(separator);
-			ClipboardEx.SetTextSafe(sb.ToString());
-		}
-
-		private void MessageBoxForm_KeyDown(object sender, KeyEventArgs e)
-		{
-			Assert.IsNotNull(e);
-
-			switch(e.KeyCode)
-			{
-				case Keys.C when e.Modifiers == Keys.Control:
-					CopyToClipboard();
-					SystemSounds.Beep.Play();
-					break;
-			}
+			case Keys.C when e.Modifiers == Keys.Control:
+				CopyToClipboard();
+				SystemSounds.Beep.Play();
+				break;
 		}
 	}
 }

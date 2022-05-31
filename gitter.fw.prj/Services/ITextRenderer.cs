@@ -18,52 +18,92 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Drawing;
+
+public interface ITextRenderer
 {
-	using System.Drawing;
+	StringFormat LeftAlign { get; }
 
-	public interface ITextRenderer
-	{
-		StringFormat LeftAlign { get; }
+	StringFormat RightAlign { get; }
 
-		StringFormat RightAlign { get; }
+	StringFormat CenterAlign { get; }
 
-		StringFormat CenterAlign { get; }
+	void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format);
 
-		void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format);
+	void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point, StringFormat format);
 
-		void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point, StringFormat format);
+	void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y, StringFormat format);
 
-		void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y, StringFormat format);
+	void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle);
 
-		void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle);
+	void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point);
 
-		void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point);
+	void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y);
 
-		void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y);
+	void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle, StringFormat format);
 
-		void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle, StringFormat format);
+	void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format);
 
-		void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format);
+	void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format);
 
-		void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format);
+	void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle);
 
-		void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle);
+	void DrawText(Graphics graphics, string text, Font font, Color color, Point point);
 
-		void DrawText(Graphics graphics, string text, Font font, Color color, Point point);
+	void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y);
 
-		void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y);
+#if NET5_0_OR_GREATER
 
-		Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea, StringFormat format);
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format);
 
-		Size MeasureText(Graphics graphics, string text, Font font, int width, StringFormat format);
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Point point, StringFormat format);
 
-		Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea);
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, int x, int y, StringFormat format);
 
-		Size MeasureText(Graphics graphics, string text, Font font, int width);
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Rectangle layoutRectangle);
 
-		float GetFontHeight(Font font);
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Point point);
 
-		float GetFontHeight(Graphics graphics, Font font);
-	}
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, int x, int y);
+
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Rectangle layoutRectangle, StringFormat format);
+
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Point point, StringFormat format);
+
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, int x, int y, StringFormat format);
+
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Rectangle layoutRectangle);
+
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Point point);
+
+	void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, int x, int y);
+
+#endif
+
+	Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea, StringFormat format);
+
+	Size MeasureText(Graphics graphics, string text, Font font, int width, StringFormat format);
+
+	Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea);
+
+	Size MeasureText(Graphics graphics, string text, Font font, int width);
+
+#if NET5_0_OR_GREATER
+
+	Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, Size layoutArea, StringFormat format);
+
+	Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, int width, StringFormat format);
+
+	Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, Size layoutArea);
+
+	Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, int width);
+
+#endif
+
+	float GetFontHeight(Font font);
+
+	float GetFontHeight(Graphics graphics, Font font);
 }

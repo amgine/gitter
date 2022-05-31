@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+
+public interface IUpdateVersion
 {
-	using System;
+	Version Version { get; }
 
-	public interface IUpdateVersion
-	{
-		Version Version { get; }
-
-		/// <summary>Update gitter to this version.</summary>
-		void Update();
-	}
+	/// <summary>Update gitter to this version.</summary>
+	void Update();
 }

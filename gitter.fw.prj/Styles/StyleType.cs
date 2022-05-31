@@ -18,11 +18,10 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+public enum GitterStyleType
 {
-	public enum GitterStyleType
-	{
-		LightBackground,
-		DarkBackground,
-	}
+	LightBackground,
+	DarkBackground,
 }

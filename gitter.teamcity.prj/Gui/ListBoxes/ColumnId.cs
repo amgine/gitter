@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+enum ColumnId
 {
-	enum ColumnId
-	{
-		Name = 0,
-		Id,
-		Number,
-		StartDate,
-		WebUrl,
-		Status,
-		BuildType,
-		Project,
-	}
+	Name = 0,
+	Id,
+	Number,
+	StartDate,
+	WebUrl,
+	Status,
+	BuildType,
+	Project,
 }

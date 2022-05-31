@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,57 +18,56 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework.Configuration;
+
+/// <summary>Defines repository-independent git operations.</summary>
+public interface IGitAccessor : IConfigAccessor
 {
-	using System;
+	#region Properties
 
-	using gitter.Framework.Configuration;
+	/// <summary>Returns provider of this accessor.</summary>
+	/// <value>Provider of this accessor</value>
+	IGitAccessorProvider Provider { get; }
 
-	/// <summary>Defines repository-independent git operations.</summary>
-	public interface IGitAccessor : IConfigAccessor
-	{
-		#region Properties
+	/// <summary>Returns git version.</summary>
+	/// <value>git version.</value>
+	Version GitVersion { get; }
 
-		/// <summary>Returns provider of this accessor.</summary>
-		/// <value>Provider of this accessor</value>
-		IGitAccessorProvider Provider { get; }
+	/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
+	IGitAction<InitRepositoryParameters> InitRepository { get; }
 
-		/// <summary>Returns git version.</summary>
-		/// <value>git version.</value>
-		Version GitVersion { get; }
+	/// <summary>Clone existing repository.</summary>
+	IGitAction<CloneRepositoryParameters> CloneRepository { get; }
 
-		/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
-		IGitAction<InitRepositoryParameters> InitRepository { get; }
+	#endregion
 
-		/// <summary>Clone existing repository.</summary>
-		IGitAction<CloneRepositoryParameters> CloneRepository { get; }
+	#region Methods
 
-		#endregion
+	/// <summary>Forces re-check of git version.</summary>
+	void InvalidateGitVersion();
 
-		#region Methods
+	/// <summary>Create <see cref="IRepositoryAccessor"/> for specified <paramref name="repository"/>.</summary>
+	/// <param name="repository">git repository to get accessor for.</param>
+	/// <returns>git repository accessor.</returns>
+	/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
+	IRepositoryAccessor CreateRepositoryAccessor(IGitRepository repository);
 
-		/// <summary>Forces re-check of git version.</summary>
-		void InvalidateGitVersion();
+	/// <summary>Checks if specified path is a valid repository.</summary>
+	/// <param name="path">Path to check.</param>
+	/// <returns><c>true</c> if specified path is a valid repository, <c>false</c> otherwise.</returns>
+	bool IsValidRepository(string path);
 
-		/// <summary>Create <see cref="IRepositoryAccessor"/> for specified <paramref name="repository"/>.</summary>
-		/// <param name="repository">git repository to get accessor for.</param>
-		/// <returns>git repository accessor.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
-		IRepositoryAccessor CreateRepositoryAccessor(IGitRepository repository);
+	/// <summary>Save parameters to the specified <paramref name="section"/>.</summary>
+	/// <param name="section">Section to store parameters.</param>
+	void SaveTo(Section section);
 
-		/// <summary>Checks if specified path is a valid repository.</summary>
-		/// <param name="path">Path to check.</param>
-		/// <returns><c>true</c> if specified path is a valid repository, <c>false</c> otherwise.</returns>
-		bool IsValidRepository(string path);
+	/// <summary>Load parameters from the specified <paramref name="section"/>.</summary>
+	/// <param name="section">Section to look for parameters.</param>
+	void LoadFrom(Section section);
 
-		/// <summary>Save parameters to the specified <paramref name="section"/>.</summary>
-		/// <param name="section">Section to store parameters.</param>
-		void SaveTo(Section section);
-
-		/// <summary>Load parameters from the specified <paramref name="section"/>.</summary>
-		/// <param name="section">Section to look for parameters.</param>
-		void LoadFrom(Section section);
-
-		#endregion
-	}
+	#endregion
 }

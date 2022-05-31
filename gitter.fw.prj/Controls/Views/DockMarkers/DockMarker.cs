@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2022  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,299 +18,277 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+#nullable enable
+
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework.Services;
+
+[System.ComponentModel.DesignerCategory("")]
+[System.ComponentModel.ToolboxItem(defaultType: false)]
+public abstract class DockMarker : Form
 {
-	using System;
-	using System.Windows.Forms;
-	using System.Drawing;
+	private readonly DockMarkerButton[] _buttons;
+	private readonly TrackingService<DockMarkerButton> _buttonHover;
+	private readonly IDpiBoundValue<Point[]> _borderPolygon;
+	private readonly IDockHost _dockHost;
+	private readonly ViewHost _viewHost;
+	private DockPositionMarker? _positionMarker;
+	private bool _isHovered;
 
-	using gitter.Native;
-	using gitter.Framework.Services;
-
-	public abstract class DockMarker : Form
+	protected DockMarker(IDockHost dockHost, ViewHost viewHost, DockMarkerButton[] buttons, IDpiBoundValue<Point[]> border, Rectangle bounds)
 	{
-		private readonly DockMarkerButton[] _buttons;
-		private readonly TrackingService<DockMarkerButton> _buttonHover;
-		private readonly Point[] _borderPolygon;
-		private bool _isHovered;
-		private DockPositionMarker _positionMarker;
-		private IDockHost _dockHost;
-		private ViewHost _dockClient;
+		Verify.Argument.IsNotNull(dockHost);
+		Verify.Argument.IsNotNull(viewHost);
+		Verify.Argument.IsNotNull(buttons);
+		Verify.Argument.IsNotNull(border);
 
-		protected DockMarker(IDockHost dockHost, ViewHost dockClient, DockMarkerButton[] buttons, Point[] border, Rectangle bounds)
+		SetStyle(
+			ControlStyles.ContainerControl |
+			ControlStyles.Selectable |
+			ControlStyles.ResizeRedraw |
+			ControlStyles.SupportsTransparentBackColor,
+			false);
+		SetStyle(
+			ControlStyles.UserPaint |
+			ControlStyles.AllPaintingInWmPaint |
+			ControlStyles.OptimizedDoubleBuffer,
+			true);
+
+		_dockHost         = dockHost;
+		_viewHost         = viewHost;
+
+		MinimumSize       = new Size(1, 1);
+		StartPosition     = FormStartPosition.Manual;
+		FormBorderStyle   = FormBorderStyle.None;
+		ControlBox        = false;
+		MaximizeBox       = false;
+		MinimizeBox       = false;
+		Text              = string.Empty;
+		ShowIcon          = false;
+		ShowInTaskbar     = false;
+		Enabled           = false;
+		ImeMode           = ImeMode.Disable;
+		BackColor         = Renderer.DockMarkerBackgroundColor;
+		Bounds            = bounds;
+		AllowTransparency = true;
+		Opacity           = ViewConstants.OpacityNormal;
+
+		_borderPolygon    = border;
+		_buttons          = buttons;
+		_buttonHover      = new TrackingService<DockMarkerButton>(OnButtonHoverChanged);
+	}
+
+	private ViewRenderer Renderer => ViewManager.Renderer;
+
+	/// <summary>Displays the control to the user.</summary>
+	public new void Show()
+	{
+		var handle = Handle;
+
+		const int SW_SHOWNA     = 8;
+
+		_ = Native.User32.ShowWindow(handle, SW_SHOWNA);
+		_ = Native.User32.RedrawWindow(handle, IntPtr.Zero, IntPtr.Zero, Native.RedrawWindowFlags.UpdateNow);
+	}
+
+	private void OnButtonHoverChanged(object? sender, TrackingEventArgs<DockMarkerButton> e)
+	{
+		Invalidate(e.Item!.Bounds);
+		if(e.IsTracked)
 		{
-			Verify.Argument.IsNotNull(dockHost, nameof(dockHost));
-			Verify.Argument.IsNotNull(dockClient, nameof(dockClient));
-
-			SetStyle(
-				ControlStyles.ContainerControl |
-				ControlStyles.Selectable |
-				ControlStyles.ResizeRedraw |
-				ControlStyles.SupportsTransparentBackColor,
-				false);
-			SetStyle(
-				ControlStyles.UserPaint |
-				ControlStyles.AllPaintingInWmPaint |
-				ControlStyles.OptimizedDoubleBuffer,
-				true);
-
-			_dockHost         = dockHost;
-			_dockClient       = dockClient;
-
-			MinimumSize       = new Size(1, 1);
-			StartPosition     = FormStartPosition.Manual;
-			FormBorderStyle   = FormBorderStyle.None;
-			ControlBox        = false;
-			MaximizeBox       = false;
-			MinimizeBox       = false;
-			Text              = string.Empty;
-			ShowIcon          = false;
-			ShowInTaskbar     = false;
-			Enabled           = false;
-			ImeMode           = ImeMode.Disable;
-			BackColor         = Renderer.DockMarkerBackgroundColor;
-			Bounds            = bounds;
-			AllowTransparency = true;
-			Opacity           = ViewConstants.OpacityNormal;
-
-			_borderPolygon    = border;
-			_buttons          = buttons;
-			_buttonHover      = new TrackingService<DockMarkerButton>(OnButtonHoverChanged);
-		}
-
-		private ViewRenderer Renderer => ViewManager.Renderer;
-
-		/// <summary>
-		/// Displays the control to the user.
-		/// </summary>
-		public new void Show()
-		{
-			User32.ShowWindow(this.Handle, 8);
-		}
-
-		private void OnButtonHoverChanged(object sender, TrackingEventArgs<DockMarkerButton> e)
-		{
-			Invalidate(e.Item.Bounds);
-			if(e.IsTracked)
-			{
-				var rect = _dockHost.GetDockBounds(_dockClient, e.Item.Type);
-				if(rect.Width != 0 && rect.Height != 0)
-				{
-					SpawnDockPositionMarker(rect);
-				}
-			}
-			else
-			{
-				KillDockPositionMarker();
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void DefWndProc(ref Message m)
-		{
-			const int WM_MOUSEACTIVATE = 0x21;
-			const int MA_NOACTIVATE = 0x0003;
-
-			switch(m.Msg)
-			{
-				case WM_MOUSEACTIVATE:
-					m.Result = (IntPtr)MA_NOACTIVATE;
-					return;
-			}
-			base.DefWndProc(ref m);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnShown(EventArgs e)
-		{
-			TopMost = true;
-		}
-
-		/// <inheritdoc/>
-		protected override void ScaleCore(float x, float y) { }
-
-		/// <inheritdoc/>
-		protected override void SetClientSizeCore(int x, int y) { }
-
-		/// <inheritdoc/>
-		protected override void Select(bool directed, bool forward) { }
-
-		/// <inheritdoc/>
-		protected override void ScaleControl(SizeF factor, BoundsSpecified specified) { }
-
-		/// <inheritdoc/>
-		protected override Size SizeFromClientSize(Size clientSize) => clientSize;
-
-		/// <inheritdoc/>
-		protected override bool ScaleChildren => false;
-
-		/// <inheritdoc/>
-		protected override Rectangle GetScaledBounds(Rectangle bounds, SizeF factor, BoundsSpecified specified) => bounds;
-
-		/// <inheritdoc/>
-		protected override bool CanEnableIme => false;
-
-		/// <inheritdoc/>
-		protected override bool CanRaiseEvents => false;
-
-		/// <inheritdoc/>
-		protected override bool OnGetDpiScaledSize(int deviceDpiOld, int deviceDpiNew, ref Size desiredSize) => true;
-
-		/// <inheritdoc/>
-		protected override void OnDpiChanged(DpiChangedEventArgs e) { }
-
-		/// <inheritdoc/>
-		protected override void OnDpiChangedAfterParent(EventArgs e) { }
-
-		/// <inheritdoc/>
-		protected override void OnDpiChangedBeforeParent(EventArgs e) { }
-
-		/// <inheritdoc/>
-		protected override CreateParams CreateParams
-		{
-			get
-			{
-				const int WS_EX_NOACTIVATE = 0x08000000;
-				var baseParams = base.CreateParams;
-				baseParams.ExStyle |= WS_EX_NOACTIVATE;
-				return baseParams;
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaintBackground(PaintEventArgs pevent)
-		{
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			var graphics = e.Graphics;
-			var reg = Region;
-			graphics.Clear(Renderer.DockMarkerBackgroundColor);
-			using(var pen = new Pen(Renderer.DockMarkerBorderColor))
-			{
-				graphics.DrawPolygon(pen, _borderPolygon);
-			}
-			for(int i = 0; i < _buttons.Length; ++i)
-			{
-				_buttons[i].OnPaint(graphics, !_isHovered || _buttonHover.Index == i);
-			}
-		}
-
-		private int HitTestIndex(Point point)
-		{
-			for(int i = 0; i < _buttons.Length; ++i)
-			{
-				if(_buttons[i].Bounds.Contains(point))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		public DockResult HitTest() => HitTest(Control.MousePosition);
-
-		public DockResult HitTest(Point point)
-		{
-			point = PointToClient(point);
-			for(int i = 0; i < _buttons.Length; ++i)
-			{
-				if(_buttons[i].Bounds.Contains(point))
-					return _buttons[i].Type;
-			}
-			return DockResult.None;
-		}
-
-		public DockResult HitTest(int x, int y)
-		{
-			for(int i = 0; i < _buttons.Length; ++i)
-			{
-				if(_buttons[i].Bounds.Contains(x, y))
-					return _buttons[i].Type;
-			}
-			return DockResult.None;
-		}
-
-		public bool UpdateHover(Point point)
-		{
-			point = PointToClient(point);
-			var rgn = Region;
-			if(ClientRectangle.Contains(point) && (rgn == null || rgn.IsVisible(point)))
-			{
-				if(!_isHovered)
-				{
-					Opacity = ViewConstants.OpacityHover;
-					Invalidate();
-					_isHovered = true;
-				}
-				var index = HitTestIndex(point);
-				if(index == -1)
-				{
-					_buttonHover.Drop();
-					return false;
-				}
-				else
-				{
-					_buttonHover.Track(index, _buttons[index]);
-					return true;
-				}
-			}
-			else
-			{
-				Unhover();
-				return false;
-			}
-		}
-
-		public void UpdateHover() => UpdateHover(Control.MousePosition);
-
-		public void Unhover()
-		{
-			if(_isHovered)
-			{
-				Opacity = ViewConstants.OpacityNormal;
-				Invalidate();
-				_isHovered = false;
-				_buttonHover.Drop();
-			}
-		}
-
-		private void SpawnDockPositionMarker(Rectangle bounds)
-		{
-			_positionMarker = new DockPositionMarker(bounds);
-			_positionMarker.Show();
-		}
-
-		private void UpdateDockPositionMarker(Rectangle bounds)
-		{
-			if(_positionMarker == null)
+			var bounds = _dockHost.GetDockBounds(_viewHost, e.Item.Type);
+			if(bounds is { Width: > 0, Height: > 0 })
 			{
 				SpawnDockPositionMarker(bounds);
 			}
+		}
+		else
+		{
+			KillDockPositionMarker();
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void DefWndProc(ref Message m)
+	{
+		const int MA_NOACTIVATE = 0x0003;
+
+		switch((Native.WM)m.Msg)
+		{
+			case Native.WM.MOUSEACTIVATE:
+				m.Result = (IntPtr)MA_NOACTIVATE;
+				return;
+		}
+		base.DefWndProc(ref m);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnShown(EventArgs e)
+	{
+		TopMost = true;
+	}
+
+	/// <inheritdoc/>
+	protected override bool ShowWithoutActivation => true;
+
+	/// <inheritdoc/>
+	protected override CreateParams CreateParams
+	{
+		get
+		{
+			const int WS_EX_NOACTIVATE = 0x08000000;
+
+			var baseParams = base.CreateParams;
+			baseParams.ExStyle |= WS_EX_NOACTIVATE;
+			return baseParams;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaintBackground(PaintEventArgs pevent)
+	{
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		var graphics = e.Graphics;
+		using(var brush = new SolidBrush(Renderer.DockMarkerBackgroundColor))
+		{
+			graphics.FillRectangle(brush, e.ClipRectangle);
+		}
+		var control = (Control)_dockHost;
+		using(var pen = new Pen(Renderer.DockMarkerBorderColor))
+		{
+			var dpi  = Dpi.FromControl(control);
+			graphics.DrawPolygon(pen, _borderPolygon.GetValue(dpi));
+		}
+		for(int i = 0; i < _buttons.Length; ++i)
+		{
+			_buttons[i].OnPaint(control, graphics, !_isHovered || _buttonHover.Index == i);
+		}
+	}
+
+	private int HitTestIndex(Point point)
+	{
+		for(int i = 0; i < _buttons.Length; ++i)
+		{
+			if(_buttons[i].Bounds.Contains(point))
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public DockResult HitTest() => HitTest(Control.MousePosition);
+
+	public DockResult HitTest(Point point)
+	{
+		point = PointToClient(point);
+		for(int i = 0; i < _buttons.Length; ++i)
+		{
+			if(_buttons[i].Bounds.Contains(point))
+				return _buttons[i].Type;
+		}
+		return DockResult.None;
+	}
+
+	public DockResult HitTest(int x, int y)
+	{
+		for(int i = 0; i < _buttons.Length; ++i)
+		{
+			if(_buttons[i].Bounds.Contains(x, y))
+				return _buttons[i].Type;
+		}
+		return DockResult.None;
+	}
+
+	public bool UpdateHover(Point point)
+	{
+		point = PointToClient(point);
+		var rgn = Region;
+		if(ClientRectangle.Contains(point) && (rgn is null || rgn.IsVisible(point)))
+		{
+			if(!_isHovered)
+			{
+				Opacity = ViewConstants.OpacityHover;
+				Invalidate();
+				_isHovered = true;
+			}
+			var index = HitTestIndex(point);
+			if(index == -1)
+			{
+				_buttonHover.Drop();
+				return false;
+			}
 			else
 			{
-				_positionMarker.Bounds = bounds;
+				_buttonHover.Track(index, _buttons[index]);
+				return true;
 			}
 		}
-
-		private void KillDockPositionMarker()
+		else
 		{
-			if(_positionMarker != null)
-			{
-				_positionMarker.Dispose();
-				_positionMarker = null;
-			}
+			Unhover();
+			return false;
 		}
+	}
 
-		protected override void Dispose(bool disposing)
+	public void UpdateHover() => UpdateHover(Control.MousePosition);
+
+	public void Unhover()
+	{
+		if(_isHovered)
 		{
-			if(disposing)
-			{
-				KillDockPositionMarker();
-			}
-			base.Dispose(disposing);
+			Opacity = ViewConstants.OpacityNormal;
+			Invalidate();
+			_isHovered = false;
+			_buttonHover.Drop();
 		}
+	}
+
+	private void SpawnDockPositionMarker(Rectangle bounds)
+	{
+		_positionMarker = new DockPositionMarker(bounds);
+		_positionMarker.Show();
+	}
+
+	private void UpdateDockPositionMarker(Rectangle bounds)
+	{
+		if(_positionMarker is null)
+		{
+			SpawnDockPositionMarker(bounds);
+		}
+		else
+		{
+			_positionMarker.Bounds = bounds;
+		}
+	}
+
+	private void KillDockPositionMarker()
+	{
+		if(_positionMarker is not null)
+		{
+			_positionMarker.Dispose();
+			_positionMarker = null;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			KillDockPositionMarker();
+		}
+		base.Dispose(disposing);
 	}
 }

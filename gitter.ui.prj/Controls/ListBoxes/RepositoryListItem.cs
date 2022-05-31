@@ -18,153 +18,152 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.IO;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+internal sealed class RepositoryListItem : CustomListBoxItem<RepositoryLink>
 {
-	using System;
-	using System.IO;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private static readonly StringFormat PathStringFormat;
+	private static readonly StringFormat NameStringFormat;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
+	private bool? _exists;
 
-	internal sealed class RepositoryListItem : CustomListBoxItem<RepositoryLink>
+	static RepositoryListItem()
 	{
-		private static readonly StringFormat PathStringFormat;
-		private static readonly StringFormat NameStringFormat;
+		PathStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
+		PathStringFormat.Trimming = StringTrimming.EllipsisPath;
+		PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
+		PathStringFormat.LineAlignment = StringAlignment.Center;
 
-		private bool? _exists;
+		NameStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
+		NameStringFormat.LineAlignment = StringAlignment.Center;
+	}
 
-		static RepositoryListItem()
+	public RepositoryListItem(RepositoryLink rlink)
+		: base(rlink)
+	{
+		Verify.Argument.IsNotNull(rlink);
+	}
+
+	private bool CheckExists()
+	{
+		try
 		{
-			PathStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
-			PathStringFormat.Trimming = StringTrimming.EllipsisPath;
-			PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
-			PathStringFormat.LineAlignment = StringAlignment.Center;
-
-			NameStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
-			NameStringFormat.LineAlignment = StringAlignment.Center;
+			return Directory.Exists(DataContext.Path);
 		}
-
-		public RepositoryListItem(RepositoryLink rlink)
-			: base(rlink)
+		catch
 		{
-			Verify.Argument.IsNotNull(rlink, nameof(rlink));
+			return false;
 		}
+	}
 
-		private bool CheckExists()
+	private bool Exists
+	{
+		get
 		{
-			try
+			if(!_exists.HasValue)
 			{
-				return Directory.Exists(DataContext.Path);
+				_exists = CheckExists();
 			}
-			catch
-			{
-				return false;
-			}
+			return _exists.Value;
 		}
+	}
 
-		private bool Exists
+	private string Name
+	{
+		get
 		{
-			get
+			if(string.IsNullOrEmpty(DataContext.Description))
 			{
-				if(!_exists.HasValue)
+				if(DataContext.Path.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
 				{
-					_exists = CheckExists();
+					return Path.GetFileName(DataContext.Path.Substring(0, DataContext.Path.Length - 1));
 				}
-				return _exists.Value;
-			}
-		}
-
-		private string Name
-		{
-			get
-			{
-				if(string.IsNullOrEmpty(DataContext.Description))
+				else
 				{
-					if(DataContext.Path.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
-					{
-						return Path.GetFileName(DataContext.Path.Substring(0, DataContext.Path.Length - 1));
-					}
-					else
-					{
-						return Path.GetFileName(DataContext.Path);
-					}
+					return Path.GetFileName(DataContext.Path);
 				}
-				return DataContext.Description;
 			}
+			return DataContext.Description;
 		}
+	}
 
-		private static Bitmap GetIcon(bool available, int size, Dpi dpi)
-			=> CachedResources.ScaledBitmaps[
-				available ? @"repository" : @"repository.unavailable",
-				DpiConverter.FromDefaultTo(dpi).ConvertX(size)];
+	private static Bitmap GetIcon(bool available, int size, Dpi dpi)
+		=> CachedResources.ScaledBitmaps[
+			available ? @"repository" : @"repository.unavailable",
+			DpiConverter.FromDefaultTo(dpi).ConvertX(size)];
 
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch(measureEventArgs.SubItemId)
 		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return measureEventArgs.MeasureImageAndText(GetIcon(true, 16, measureEventArgs.Dpi), DataContext.Path);
-				case 1:
-					return measureEventArgs.MeasureImageAndText(GetIcon(true, 32, measureEventArgs.Dpi), DataContext.Path);
-				default:
-					return Size.Empty;
-			}
+			case 0:
+				return measureEventArgs.MeasureImageAndText(GetIcon(true, 16, measureEventArgs.Dpi), DataContext.Path);
+			case 1:
+				return measureEventArgs.MeasureImageAndText(GetIcon(true, 32, measureEventArgs.Dpi), DataContext.Path);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch(paintEventArgs.SubItemId)
 		{
-			Assert.IsNotNull(paintEventArgs);
+			case 0:
+				paintEventArgs.PaintImageAndText(GetIcon(Exists, 16, paintEventArgs.Dpi), DataContext.Path, paintEventArgs.Brush, PathStringFormat);
+				break;
+			case 1:
+				paintEventArgs.PaintImage(GetIcon(Exists, 32, paintEventArgs.Dpi));
 
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					paintEventArgs.PaintImageAndText(GetIcon(Exists, 16, paintEventArgs.Dpi), DataContext.Path, paintEventArgs.Brush, PathStringFormat);
-					break;
-				case 1:
-					paintEventArgs.PaintImage(GetIcon(Exists, 32, paintEventArgs.Dpi));
+				var conv = paintEventArgs.DpiConverter;
 
-					var conv = paintEventArgs.DpiConverter;
+				var dx = conv.ConvertX(36);
+				var dy = conv.ConvertY(2);
 
-					var dx = conv.ConvertX(36);
-					var dy = conv.ConvertY(2);
+				var b1 = paintEventArgs.Bounds;
+				b1.Height -= dy * 2;
+				b1.Y      += dy;
+				b1.X      += dx;
+				b1.Width  -= dx;
+				b1.Height /= 2;
+				var b2 = b1;
+				b2.Y += b1.Height;
 
-					var b1 = paintEventArgs.Bounds;
-					b1.Height -= dy * 2;
-					b1.Y      += dy;
-					b1.X      += dx;
-					b1.Width  -= dx;
-					b1.Height /= 2;
-					var b2 = b1;
-					b2.Y += b1.Height;
-
+				GitterApplication.TextRenderer.DrawText(
+					paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, b1, NameStringFormat);
+				if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+				{
 					GitterApplication.TextRenderer.DrawText(
-						paintEventArgs.Graphics, Name, paintEventArgs.Font, paintEventArgs.Brush, b1, NameStringFormat);
-					if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-					{
-						GitterApplication.TextRenderer.DrawText(
-							paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, paintEventArgs.Brush, b2, PathStringFormat);
-					}
-					else
-					{
-						GitterApplication.TextRenderer.DrawText(
-							paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, GitterApplication.Style.Colors.GrayText, b2, PathStringFormat);
-					}
-					break;
-			}
+						paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, paintEventArgs.Brush, b2, PathStringFormat);
+				}
+				else
+				{
+					GitterApplication.TextRenderer.DrawText(
+						paintEventArgs.Graphics, DataContext.Path, paintEventArgs.Font, GitterApplication.Style.Colors.GrayText, b2, PathStringFormat);
+				}
+				break;
 		}
+	}
 
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
 
-			var menu = new RepositoryMenu(this);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
-		}
+		var menu = new RepositoryMenu(this);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

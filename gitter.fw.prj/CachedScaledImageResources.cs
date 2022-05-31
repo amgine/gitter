@@ -18,174 +18,173 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.Reflection;
+
+public class CachedScaledImageResources
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Globalization;
-	using System.Reflection;
-
-	public class CachedScaledImageResources
+	readonly struct Key : IEquatable<Key>
 	{
-		readonly struct Key : IEquatable<Key>
+		sealed class EqualityComparerImpl : IEqualityComparer<Key>
 		{
-			sealed class EqualityComparerImpl : IEqualityComparer<Key>
-			{
-				public bool Equals(Key x, Key y) => x == y;
+			public bool Equals(Key x, Key y) => x == y;
 
-				public int GetHashCode(Key obj) => obj.GetHashCode();
+			public int GetHashCode(Key obj) => obj.GetHashCode();
+		}
+
+		public static IEqualityComparer<Key> EqualityComparer { get; } = new EqualityComparerImpl();
+
+		public Key(string name, int size)
+		{
+			Name = name;
+			Size = size;
+		}
+
+		public string Name { get; }
+
+		public int Size { get; }
+
+		public override int GetHashCode()
+			=> Name.GetHashCode() ^ Size;
+
+		public override bool Equals(object obj)
+			=> obj is Key other && this == other;
+
+		public bool Equals(Key other)
+			=> this == other;
+
+		public static bool operator ==(Key a, Key b)
+			=> a.Size == b.Size && a.Name == b.Name;
+
+		public static bool operator !=(Key a, Key b)
+			=> a.Size != b.Size && a.Name != b.Name;
+	}
+
+	private static readonly int[] Sizes =
+		{
+			16, 24, 32, 48, 64, 128, 256
+		};
+
+	private readonly Dictionary<Key, Bitmap> _cache = new(Key.EqualityComparer);
+
+	public CachedScaledImageResources(Assembly assembly, string root)
+	{
+		Assembly = assembly;
+		Root     = root;
+	}
+
+	private Assembly Assembly { get; }
+
+	private string Root { get; }
+
+	private static Bitmap Rescale(Bitmap original, int size)
+	{
+		var rescaled = new Bitmap(size, size);
+		using var graphics = Graphics.FromImage(rescaled);
+		graphics.Clear(Color.Transparent);
+		graphics.DrawImage(original, new Rectangle(0, 0, size, size));
+		return rescaled;
+	}
+
+	private Bitmap TryLoadExact(Key key)
+	{
+		var name = Root + "." + key.Name + "." + key.Size.ToString(CultureInfo.InvariantCulture) + ".png";
+		using var stream = Assembly.GetManifestResourceStream(name);
+		if(stream is null) return default;
+		return new Bitmap(stream);
+	}
+
+	private Bitmap LoadBitmap(Key key)
+	{
+		var bitmap = TryLoadExact(key);
+		if(bitmap is not null)
+		{
+			_cache.Add(key, bitmap);
+			return bitmap;
+		}
+
+		int a = -1, b = Sizes.Length;
+		for(int i = 0; i < Sizes.Length; ++i)
+		{
+			if(Sizes[i] == key.Size)
+			{
+				a = i - 1;
+				b = i + 1;
+				break;
 			}
-
-			public static IEqualityComparer<Key> EqualityComparer { get; } = new EqualityComparerImpl();
-
-			public Key(string name, int size)
+			if(Sizes[i] < key.Size)
 			{
-				Name = name;
-				Size = size;
+				a = i;
 			}
-
-			public string Name { get; }
-
-			public int Size { get; }
-
-			public override int GetHashCode()
-				=> Name.GetHashCode() ^ Size;
-
-			public override bool Equals(object obj)
-				=> obj is Key other && this == other;
-
-			public bool Equals(Key other)
-				=> this == other;
-
-			public static bool operator ==(Key a, Key b)
-				=> a.Size == b.Size && a.Name == b.Name;
-
-			public static bool operator !=(Key a, Key b)
-				=> a.Size != b.Size && a.Name != b.Name;
-		}
-
-		private static readonly int[] Sizes = new int[]
+			if(Sizes[i] > key.Size)
 			{
-				16, 24, 32, 48, 64, 128, 256
-			};
-
-		private readonly Dictionary<Key, Bitmap> _cache = new(Key.EqualityComparer);
-
-		public CachedScaledImageResources(Assembly assembly, string root)
-		{
-			Assembly = assembly;
-			Root     = root;
+				b = i;
+				break;
+			}
 		}
 
-		private Assembly Assembly { get; }
-
-		private string Root { get; }
-
-		private static Bitmap Rescale(Bitmap original, int size)
+		for(int i = b; i < Sizes.Length; ++i)
 		{
-			var rescaled = new Bitmap(size, size);
-			using var graphics = Graphics.FromImage(rescaled);
-			graphics.Clear(Color.Transparent);
-			graphics.DrawImage(original, new Rectangle(0, 0, size, size));
-			return rescaled;
-		}
-
-		private Bitmap TryLoadExact(Key key)
-		{
-			var name = Root + "." + key.Name + "." + key.Size.ToString(CultureInfo.InvariantCulture) + ".png";
-			using var stream = Assembly.GetManifestResourceStream(name);
-			if(stream is null) return default;
-			return new Bitmap(stream);
-		}
-
-		private Bitmap LoadBitmap(Key key)
-		{
-			var bitmap = TryLoadExact(key);
+			var sub = new Key(key.Name, Sizes[i]);
+			if(_cache.TryGetValue(sub, out bitmap))
+			{
+				break;
+			}
+			bitmap = TryLoadExact(sub);
 			if(bitmap is not null)
 			{
-				_cache.Add(key, bitmap);
-				return bitmap;
+				_cache.Add(sub, bitmap);
+				break;
 			}
-
-			int a = -1, b = Sizes.Length;
-			for(int i = 0; i < Sizes.Length; ++i)
-			{
-				if(Sizes[i] == key.Size)
-				{
-					a = i - 1;
-					b = i + 1;
-					break;
-				}
-				if(Sizes[i] < key.Size)
-				{
-					a = i;
-				}
-				if(Sizes[i] > key.Size)
-				{
-					b = i;
-					break;
-				}
-			}
-
-			for(int i = b; i < Sizes.Length; ++i)
-			{
-				var sub = new Key(key.Name, Sizes[i]);
-				if(_cache.TryGetValue(sub, out bitmap))
-				{
-					break;
-				}
-				bitmap = TryLoadExact(sub);
-				if(bitmap is not null)
-				{
-					_cache.Add(sub, bitmap);
-					break;
-				}
-			}
-
-			if(bitmap is not null)
-			{
-				bitmap = Rescale(bitmap, key.Size);
-				_cache.Add(key, bitmap);
-				return bitmap;
-			}
-
-			for(int i = a; i >= 0; --i)
-			{
-				var sub = new Key(key.Name, Sizes[i]);
-				if(_cache.TryGetValue(sub, out bitmap))
-				{
-					break;
-				}
-				bitmap = TryLoadExact(sub);
-				if(bitmap is not null)
-				{
-					_cache.Add(sub, bitmap);
-					break;
-				}
-			}
-
-			if(bitmap is not null)
-			{
-				bitmap = Rescale(bitmap, key.Size);
-				_cache.Add(key, bitmap);
-				return bitmap;
-			}
-
-			return default;
 		}
 
-		public Bitmap this[string name, int size]
+		if(bitmap is not null)
 		{
-			get
+			bitmap = Rescale(bitmap, key.Size);
+			_cache.Add(key, bitmap);
+			return bitmap;
+		}
+
+		for(int i = a; i >= 0; --i)
+		{
+			var sub = new Key(key.Name, Sizes[i]);
+			if(_cache.TryGetValue(sub, out bitmap))
 			{
-				var key = new Key(name, size);
-				if(!_cache.TryGetValue(key, out var bitmap))
-				{
-					bitmap = LoadBitmap(key);
-				}
-				return bitmap;
+				break;
 			}
+			bitmap = TryLoadExact(sub);
+			if(bitmap is not null)
+			{
+				_cache.Add(sub, bitmap);
+				break;
+			}
+		}
+
+		if(bitmap is not null)
+		{
+			bitmap = Rescale(bitmap, key.Size);
+			_cache.Add(key, bitmap);
+			return bitmap;
+		}
+
+		return default;
+	}
+
+	public Bitmap this[string name, int size]
+	{
+		get
+		{
+			var key = new Key(name, size);
+			if(!_cache.TryGetValue(key, out var bitmap))
+			{
+				bitmap = LoadBitmap(key);
+			}
+			return bitmap;
 		}
 	}
 }

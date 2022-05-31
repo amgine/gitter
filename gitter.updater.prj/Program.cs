@@ -18,67 +18,66 @@
  */
 #endregion
 
-namespace gitter.Updater
+namespace gitter.Updater;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+using System.Threading;
+
+static class Program
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Windows.Forms;
-	using System.Threading;
-
-	static class Program
-	{
-		/// <summary>Available updaters.</summary>
-		private static readonly IReadOnlyList<IUpdateDriver> UpdateDrivers =
-			new IUpdateDriver[]
-			{
-				new GitUpdateDriver(),
-				new DeployDriver(),
-				new DownloadAndUnzipDriver(),
-			};
-
-		/// <summary>The main entry point for the application.</summary>
-		[STAThread]
-		static void Main()
+	/// <summary>Available updaters.</summary>
+	private static readonly IReadOnlyList<IUpdateDriver> UpdateDrivers =
+		new IUpdateDriver[]
 		{
-			var cmdline = new CommandLine();
-			bool singleInstance;
-			var s = default(Semaphore);
-			if(!cmdline.IsDefined(@"forcenewinstance"))
-			{
-				s = new Semaphore(0, 1, "gitter-updater", out singleInstance);
-			}
-			else
-			{
-				singleInstance = true;
-			}
-			try
-			{
-				if(singleInstance)
-				{
-					if(cmdline[@"driver"] is { Length: > 0 } driverName)
-					{
-						var process = UpdateDrivers.FirstOrDefault(d => d.Name == driverName)?.CreateProcess(cmdline);
-						if(process == null) return;
+			new GitUpdateDriver(),
+			new DeployDriver(),
+			new DownloadAndUnzipDriver(),
+		};
 
-						if(cmdline.IsDefined(@"hidden"))
-						{
-							var monitor = new UpdateProcessMonitor();
-							process.Update(monitor);
-						}
-						else
-						{
-							Application.EnableVisualStyles();
-							Application.SetCompatibleTextRenderingDefault(false);
-							Application.Run(new MainForm(process));
-						}
+	/// <summary>The main entry point for the application.</summary>
+	[STAThread]
+	static void Main()
+	{
+		var cmdline = new CommandLine();
+		bool singleInstance;
+		var s = default(Semaphore);
+		if(!cmdline.IsDefined(@"forcenewinstance"))
+		{
+			s = new Semaphore(0, 1, "gitter-updater", out singleInstance);
+		}
+		else
+		{
+			singleInstance = true;
+		}
+		try
+		{
+			if(singleInstance)
+			{
+				if(cmdline[@"driver"] is { Length: > 0 } driverName)
+				{
+					var process = UpdateDrivers.FirstOrDefault(d => d.Name == driverName)?.CreateProcess(cmdline);
+					if(process is null) return;
+
+					if(cmdline.IsDefined(@"hidden"))
+					{
+						var monitor = new UpdateProcessMonitor();
+						process.Update(monitor);
+					}
+					else
+					{
+						Application.EnableVisualStyles();
+						Application.SetCompatibleTextRenderingDefault(false);
+						Application.Run(new MainForm(process));
 					}
 				}
 			}
-			finally
-			{
-				s?.Dispose();
-			}
+		}
+		finally
+		{
+			s?.Dispose();
 		}
 	}
 }

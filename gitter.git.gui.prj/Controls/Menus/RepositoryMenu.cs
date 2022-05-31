@@ -18,29 +18,29 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+sealed class RepositoryMenu : ContextMenuStrip
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	private readonly Repository _repository;
 
-	using gitter.Framework;
-
-	[ToolboxItem(false)]
-	sealed class RepositoryMenu : ContextMenuStrip
+	public RepositoryMenu(Repository repository)
 	{
-		private readonly Repository _repository;
+		Verify.Argument.IsNotNull(repository);
 
-		public RepositoryMenu(Repository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+		_repository = repository;
 
-			_repository = repository;
+		var dpiBindings = new DpiBindings(this);
+		var factory     = new GuiItemFactory(dpiBindings);
 
-			var dpiBindings = new DpiBindings(this);
-			var factory     = new GuiItemFactory(dpiBindings);
-
-			Items.Add(factory.GetCompressRepositoryItem<ToolStripMenuItem>(_repository));
-		}
+		Items.Add(factory.GetCompressRepositoryItem<ToolStripMenuItem>(_repository));
 	}
 }

@@ -1,483 +1,507 @@
 ﻿#region Copyright Notice
 /*
- * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+* gitter - VCS repository management tool
+* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+* 
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #endregion
 
-namespace gitter.Git.AccessLayer.CLI
+namespace gitter.Git.AccessLayer.CLI;
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Globalization;
+
+using gitter.Framework;
+
+/// <summary>Parser for git output.</summary>
+internal class GitParser : Parser
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text;
-	using System.Globalization;
-
-	using gitter.Framework;
-
-	/// <summary>Parser for git output.</summary>
-	internal class GitParser : Parser
+	/// <summary>Create <see cref="GitParser"/>.</summary>
+	/// <param name="string">String to parse.</param>
+	public GitParser(string @string)
+		: base(@string)
 	{
-		/// <summary>Create <see cref="GitParser"/>.</summary>
-		/// <param name="string">String to parse.</param>
-		public GitParser(string @string)
-			: base(@string)
-		{
-		}
+	}
 
-		private static byte ByteFromOctString(string str, int offset, int length)
+	private static bool TryParseByteFromOctString(string str, int offset, int length, out byte value)
+	{
+		int res = 0;
+		for(int i = offset + length - 1, n = 1; i >= offset; --i)
 		{
-			int res = 0;
-			for(int i = offset + length - 1, n = 1; i >= offset; --i)
+			var digit = str[i] - '0';
+			if(digit is >= 0 and <= 8)
 			{
-				res += (str[i] - '0') * n;
+				res += digit * n;
 				n *= 8;
 			}
-			return (byte)res;
-		}
-
-		public string DecodeEscapedString(int end)
-		{
-			return DecodeEscapedString(end, 0, GitProcess.DefaultEncoding);
-		}
-
-		public string DecodeEscapedString(int end, Encoding encoding)
-		{
-			return DecodeEscapedString(end, 0, encoding);
-		}
-
-		public string DecodeEscapedString(int end, int skip)
-		{
-			return DecodeEscapedString(end, skip, GitProcess.DefaultEncoding);
-		}
-
-		private static void HandleEscapeCode(StringBuilder sb, char nc)
-		{
-			switch(nc)
+			else
 			{
-				case '\\':
-					sb.Append('\\');
-					break;
-				case '\"':
-					sb.Append('\"');
-					break;
-				case 't':
-					sb.Append('\t');
-					break;
-				default:
-					sb.Append(nc);
-					break;
+				value = default;
+				return false;
+			}
+		}
+		if(res > byte.MaxValue)
+		{
+			value = default;
+			return false;
+		}
+		value = (byte)res;
+		return true;
+	}
+
+	public string DecodeEscapedString(int end)
+	{
+		return DecodeEscapedString(end, 0, GitProcess.DefaultEncoding);
+	}
+
+	public string DecodeEscapedString(int end, Encoding encoding)
+	{
+		return DecodeEscapedString(end, 0, encoding);
+	}
+
+	public string DecodeEscapedString(int end, int skip)
+	{
+		return DecodeEscapedString(end, skip, GitProcess.DefaultEncoding);
+	}
+
+	private static void HandleEscapeCode(StringBuilder sb, char nc)
+	{
+		switch(nc)
+		{
+			case '\\':
+				sb.Append('\\');
+				break;
+			case '\"':
+				sb.Append('\"');
+				break;
+			case 't':
+				sb.Append('\t');
+				break;
+			default:
+				sb.Append(nc);
+				break;
+		}
+	}
+
+	private sealed class ByteString
+	{
+		private byte[] _buffer;
+		private int _length;
+
+		public static void Dump(ByteString str, StringBuilder sb, Encoding encoding)
+		{
+			if(str is { IsEmpty: false })
+			{
+				sb.Append(str.GetString(encoding));
+				str.Clear();
 			}
 		}
 
-		private sealed class ByteString
+		public ByteString(int bufferSize)
 		{
-			private byte[] _buffer;
-			private int _length;
+			Verify.Argument.IsPositive(bufferSize);
 
-			public static void Dump(ByteString str, StringBuilder sb, Encoding encoding)
+			_buffer = new byte[bufferSize];
+		}
+
+		public void AppendByte(byte @byte)
+		{
+			if(_length == _buffer.Length)
 			{
-				if(str != null && !str.IsEmpty)
+				var buffer = new byte[_buffer.Length * 2];
+				Array.Copy(_buffer, buffer, _buffer.Length);
+				_buffer = buffer;
+			}
+			_buffer[_length++] = @byte;
+		}
+
+		public bool IsEmpty => _length == 0;
+
+		public int Length => _length;
+
+		public void Clear() => _length = 0;
+
+		public string GetString(Encoding encoding)
+		{
+			Verify.Argument.IsNotNull(encoding);
+
+			return _length != 0
+				? encoding.GetString(_buffer, 0, _length)
+				: string.Empty;
+		}
+	}
+
+	public string DecodeEscapedString(int end, int skip, Encoding encoding)
+	{
+		if(CheckValue('\"'))
+		{
+			var sb = new StringBuilder(end - Position);
+			ByteString bs = null;
+			Skip();
+			while(Position < end)
+			{
+				var c = ReadChar();
+				if(c == '\\')
 				{
-					sb.Append(str.GetString(encoding));
-					str.Clear();
-				}
-			}
-
-			public ByteString(int bufferSize)
-			{
-				Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
-
-				_buffer = new byte[bufferSize];
-			}
-
-			public void AppendByte(byte @byte)
-			{
-				if(_length == _buffer.Length)
-				{
-					var buffer = new byte[_buffer.Length * 2];
-					Array.Copy(_buffer, buffer, _buffer.Length);
-					_buffer = buffer;
-				}
-				_buffer[_length++] = @byte;
-			}
-
-			public bool IsEmpty => _length == 0;
-
-			public int Length => _length;
-
-			public void Clear() => _length = 0;
-
-			public string GetString(Encoding encoding)
-			{
-				Verify.Argument.IsNotNull(encoding, nameof(encoding));
-
-				return _length != 0
-					? encoding.GetString(_buffer, 0, _length)
-					: string.Empty;
-			}
-		}
-
-		public string DecodeEscapedString(int end, int skip, Encoding encoding)
-		{
-			if(CheckValue('\"'))
-			{
-				var sb = new StringBuilder(end - Position);
-				ByteString bs = null;
-				var bytes = new byte[end - Position + 1];
-				Skip();
-				while(Position < end)
-				{
-					var c = ReadChar();
-					if(c == '\\')
+					var nc = CurrentChar;
+					if(nc.IsOctDigit())
 					{
-						var nc = CurrentChar;
-						if(nc.IsOctDigit())
+						int len = 1;
+						int start = Position;
+						Skip();
+						while(CurrentChar.IsOctDigit() && len < 3)
 						{
-							if(bs == null)
+							Skip();
+							++len;
+						}
+						if(TryParseByteFromOctString(String, start, len, out byte value))
+						{
+							if(bs is null)
 							{
-								var bufferSize = end - Position;
+								var bufferSize = end - start;
 								if(bufferSize < 1) bufferSize = 1;
 								bs = new ByteString(bufferSize);
 							}
-							int len = 1;
-							int start = Position;
-							Skip();
-							while(CurrentChar.IsOctDigit())
-							{
-								Skip();
-								++len;
-							}
-							bs.AppendByte(ByteFromOctString(String, start, len));
+							bs.AppendByte(value);
 						}
 						else
 						{
-							ByteString.Dump(bs, sb, encoding);
-							HandleEscapeCode(sb, nc);
-							Skip();
+							sb.Append(String, start, Position - start);
 						}
 					}
-					else if(c == '\"')
-					{
-						ByteString.Dump(bs, sb, encoding);
-						break;
-					}
 					else
 					{
 						ByteString.Dump(bs, sb, encoding);
-						sb.Append(c);
+						HandleEscapeCode(sb, nc);
+						Skip();
 					}
 				}
-				Position = end + skip;
-				return sb.ToString();
-			}
-			else
-			{
-				return ReadStringUpTo(end, skip);
-			}
-		}
-
-		public BranchesData ParseBranches(QueryBranchRestriction restriction, bool allowFakeBranch)
-		{
-			var heads   = new List<BranchData>();
-			var remotes = new List<BranchData>();
-			while(!IsAtEndOfString)
-			{
-				var branch = ParseBranch(restriction);
-				if(branch != null && (allowFakeBranch || !branch.IsFake))
+				else if(c == '\"')
 				{
-					if(branch.IsRemote)
-					{
-						remotes.Add(branch);
-					}
-					else
-					{
-						heads.Add(branch);
-					}
-				}
-			}
-			return new BranchesData(heads, remotes);
-		}
-
-		public BranchData ParseBranch(QueryBranchRestriction restriction)
-		{
-			BranchData res;
-			bool current = CheckValue('*');
-			Skip(2);
-			int eol = FindNewLineOrEndOfString();
-			int space = FindSpace();
-			if(current && (space == Position + 3) && CheckValue(GitConstants.NoBranch))
-			{
-				Skip(GitConstants.NoBranch.Length);
-				Skip(' ');
-				var sha1 = new Hash(String, Position);
-				res = new BranchData(GitConstants.NoBranch, sha1, true, false, true);
-			}
-			else
-			{
-				var name = ReadStringUpTo(space, 1);
-				Skip(' ');
-				if(!(restriction == QueryBranchRestriction.Local) && CheckValue('-')) // it's a remote head indicator, skip it
-				{
-					res = null;
+					ByteString.Dump(bs, sb, encoding);
+					break;
 				}
 				else
 				{
-					var sha1 = new Hash(String, Position);
-					bool remote;
-					switch(restriction)
+					ByteString.Dump(bs, sb, encoding);
+					sb.Append(c);
+				}
+			}
+			Position = end + skip;
+			return sb.ToString();
+		}
+		else
+		{
+			return ReadStringUpTo(end, skip);
+		}
+	}
+
+	public BranchesData ParseBranches(QueryBranchRestriction restriction, bool allowFakeBranch)
+	{
+		var heads   = default(List<BranchData>);
+		var remotes = default(List<BranchData>);
+		while(!IsAtEndOfString)
+		{
+			var branch = ParseBranch(restriction);
+			if(branch is not null && (allowFakeBranch || !branch.IsFake))
+			{
+				if(branch.IsRemote)
+				{
+					remotes ??= new();
+					remotes.Add(branch);
+				}
+				else
+				{
+					heads ??= new();
+					heads.Add(branch);
+				}
+			}
+		}
+		return new BranchesData(
+			heads   ?? (IReadOnlyList<BranchData>)Array.Empty<BranchData>(),
+			remotes ?? (IReadOnlyList<BranchData>)Array.Empty<BranchData>());
+	}
+
+	public BranchData ParseBranch(QueryBranchRestriction restriction)
+	{
+		BranchData res;
+		bool current = CheckValue('*');
+		Skip(2);
+		int eol = FindNewLineOrEndOfString();
+		int space = FindSpace();
+		if(current && (space == Position + 3) && CheckValue(GitConstants.NoBranch))
+		{
+			Skip(GitConstants.NoBranch.Length);
+			Skip(' ');
+			var sha1 = new Hash(String, Position);
+			res = new BranchData(GitConstants.NoBranch, sha1, true, false, true);
+		}
+		else
+		{
+			var name = ReadStringUpTo(space, 1);
+			Skip(' ');
+			if(!(restriction == QueryBranchRestriction.Local) && CheckValue('-')) // it's a remote head indicator, skip it
+			{
+				res = null;
+			}
+			else
+			{
+				var sha1 = new Hash(String, Position);
+				bool remote;
+				switch(restriction)
+				{
+					case QueryBranchRestriction.All:
+						remote = !current && name.StartsWith(GitConstants.RemoteBranchShortPrefix);
+						if(remote) name = name.Substring(8);
+						break;
+					case QueryBranchRestriction.Local:
+						remote = false;
+						break;
+					case QueryBranchRestriction.Remote:
+						remote = true;
+						break;
+					default:
+						throw new ArgumentException(nameof(restriction));
+				}
+				res = new BranchData(name, sha1, remote, current);
+			}
+		}
+		Position = eol + 1;
+		return res;
+	}
+
+	private void TrimProgressMessageEnd(ref int p, ref int trimEnd)
+	{
+		if(p - Position + 1 > 3)
+		{
+			if(String[p] == 'K' && String[p - 1] == '[' && String[p - 2] == '\u001B')
+			{
+				p -= 3;
+				trimEnd += 3;
+			}
+		}
+		if(p < Length)
+		{
+			while(p > Position && char.IsWhiteSpace(String[p]))
+			{
+				--p;
+				++trimEnd;
+			}
+		}
+	}
+
+	public OperationProgress ParseProgress()
+	{
+		int trimEnd = 1;
+		int p = FindNewLineOrEndOfString() - trimEnd;
+		TrimProgressMessageEnd(ref p, ref trimEnd);
+
+		int c = String.LastIndexOf(':', p);
+		if(c == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
+		int p1 = String.IndexOf('(', c);
+		if(p1 == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
+		int s = String.IndexOf('/', p1);
+		if(s == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
+		int p2 = String.IndexOf(')', s);
+		if(p2 == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
+
+		if(!int.TryParse(String.Substring(p1 + 1, s - p1 - 1), NumberStyles.None, CultureInfo.InvariantCulture, out int cur))
+		{
+			return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
+		}
+		if(!int.TryParse(String.Substring(s + 1, p2 - s - 1), NumberStyles.None, CultureInfo.InvariantCulture, out int max))
+		{
+			return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
+		}
+		if(cur > max)
+		{
+			return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
+		}
+
+		var stage = ReadStringUpToNoAdvance(p1).Trim();
+		Position = p + trimEnd;
+		return new OperationProgress
+		{
+			ActionName		= stage,
+			CurrentProgress	= cur,
+			MaxProgress		= max,
+			IsIndeterminate	= false,
+			IsCompleted		= false,
+		};
+	}
+
+	protected DateTimeOffset ReadUnixTimestampLine()
+	{
+		var timestampStr = ReadLine();
+		if(!string.IsNullOrWhiteSpace(timestampStr) && long.TryParse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture, out var timestamp))
+		{
+			return DateTimeOffset.FromUnixTimeSeconds(timestamp).ToLocalTime();
+		}
+		return GitConstants.UnixEraStartOffset;
+	}
+
+	public void ParseCommitParentsFromRaw(IEnumerable<RevisionData> revs, Dictionary<Hash, RevisionData> cache)
+	{
+		var parents = new List<RevisionData>();
+		foreach(var rev in revs)
+		{
+			parents.Clear();
+			int start = Position;
+			int eoc = FindNullOrEndOfString();
+			SkipLine();
+			while(Position < eoc)
+			{
+				bool hasParents = false;
+				while(CheckValue("parent ") && Position < eoc)
+				{
+					Skip(7);
+					var p = ReadHash();
+					SkipLine();
+					RevisionData prd;
+					if(cache != null)
 					{
-						case QueryBranchRestriction.All:
-							remote = !current && name.StartsWith(GitConstants.RemoteBranchShortPrefix);
-							if(remote) name = name.Substring(8);
-							break;
-						case QueryBranchRestriction.Local:
-							remote = false;
-							break;
-						case QueryBranchRestriction.Remote:
-							remote = true;
-							break;
-						default:
-							throw new ArgumentException(nameof(restriction));
-					}
-					res = new BranchData(name, sha1, remote, current);
-				}
-			}
-			Position = eol + 1;
-			return res;
-		}
-
-		private void TrimProgressMessageEnd(ref int p, ref int trimEnd)
-		{
-			if(p - Position + 1 > 3)
-			{
-				if(String[p] == 'K' && String[p - 1] == '[' && String[p - 2] == '\u001B')
-				{
-					p -= 3;
-					trimEnd += 3;
-				}
-			}
-			if(p < Length)
-			{
-				while(p > Position && char.IsWhiteSpace(String[p]))
-				{
-					--p;
-					++trimEnd;
-				}
-			}
-		}
-
-		public OperationProgress ParseProgress()
-		{
-			int trimEnd = 1;
-			int p = FindNewLineOrEndOfString() - trimEnd;
-			TrimProgressMessageEnd(ref p, ref trimEnd);
-
-			int c = String.LastIndexOf(':', p);
-			if(c == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
-			int p1 = String.IndexOf('(', c);
-			if(p1 == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
-			int s = String.IndexOf('/', p1);
-			if(s == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
-			int p2 = String.IndexOf(')', s);
-			if(p2 == -1) return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
-
-			if(!int.TryParse(String.Substring(p1 + 1, s - p1 - 1), NumberStyles.None, CultureInfo.InvariantCulture, out int cur))
-			{
-				return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
-			}
-			if(!int.TryParse(String.Substring(s + 1, p2 - s - 1), NumberStyles.None, CultureInfo.InvariantCulture, out int max))
-			{
-				return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
-			}
-			if(cur > max)
-			{
-				return new OperationProgress(ReadStringUpTo(p + 1, trimEnd));
-			}
-
-			var stage = ReadStringUpToNoAdvance(p1).Trim();
-			Position = p + trimEnd;
-			return new OperationProgress
-			{
-				ActionName		= stage,
-				CurrentProgress	= cur,
-				MaxProgress		= max,
-				IsIndeterminate	= false,
-				IsCompleted		= false,
-			};
-		}
-
-		protected DateTimeOffset ReadUnixTimestampLine()
-		{
-			var timestampStr = ReadLine();
-			if(!string.IsNullOrWhiteSpace(timestampStr) && long.TryParse(timestampStr, NumberStyles.None, CultureInfo.InvariantCulture, out var timestamp))
-			{
-				return GitConstants.UnixEraStartOffset.AddSeconds(timestamp).ToLocalTime();
-			}
-			return GitConstants.UnixEraStartOffset;
-		}
-
-		public void ParseCommitParentsFromRaw(IEnumerable<RevisionData> revs, Dictionary<Hash, RevisionData> cache)
-		{
-			var parents = new List<RevisionData>();
-			foreach(var rev in revs)
-			{
-				parents.Clear();
-				int start = Position;
-				int eoc = FindNullOrEndOfString();
-				SkipLine();
-				while(Position < eoc)
-				{
-					bool hasParents = false;
-					while(CheckValue("parent ") && Position < eoc)
-					{
-						Skip(7);
-						var p = ReadHash();
-						SkipLine();
-						RevisionData prd;
-						if(cache != null)
-						{
-							if(!cache.TryGetValue(p, out prd))
-							{
-								prd = new RevisionData(p);
-								cache.Add(p, prd);
-							}
-						}
-						else
+						if(!cache.TryGetValue(p, out prd))
 						{
 							prd = new RevisionData(p);
+							cache.Add(p, prd);
 						}
-						parents.Add(prd);
-						hasParents = true;
-					}
-					SkipLine();
-					if(hasParents) break;
-				}
-				rev.Parents = parents.ToArray();
-				Position = eoc + 1;
-			}
-		}
-
-		public RevisionData ParseRevision()
-		{
-			var hash     = ReadHash(skip: 1);
-			var revision = new RevisionData(hash);
-			ParseRevisionData(revision, null);
-			return revision;
-		}
-
-		private RevisionData[] ReadRevisionParents(Dictionary<Hash, RevisionData> cache)
-		{
-			int end = FindNewLineOrEndOfString();
-			int numParents = (end - Position + 1) / 41;
-			var parents = new RevisionData[numParents];
-			if(numParents == 0)
-			{
-				Position = end + 1;
-			}
-			else
-			{
-				for(int i = 0; i < numParents; ++i)
-				{
-					var sha1 = ReadHash(skip: 1);
-					if(cache == null)
-					{
-						parents[i] = new RevisionData(sha1);
 					}
 					else
 					{
-						if(!cache.TryGetValue(sha1, out parents[i]))
-						{
-							parents[i] = new RevisionData(sha1);
-							cache.Add(sha1, parents[i]);
-						}
+						prd = new RevisionData(p);
+					}
+					parents.Add(prd);
+					hasParents = true;
+				}
+				SkipLine();
+				if(hasParents) break;
+			}
+			rev.Parents = parents.ToArray();
+			Position = eoc + 1;
+		}
+	}
+
+	public RevisionData ParseRevision()
+	{
+		var hash     = ReadHash(skip: 1);
+		var revision = new RevisionData(hash);
+		ParseRevisionData(revision, null);
+		return revision;
+	}
+
+	private RevisionData[] ReadRevisionParents(Dictionary<Hash, RevisionData> cache)
+	{
+		int end = FindNewLineOrEndOfString();
+		int numParents = (end - Position + 1) / 41;
+		var parents = new RevisionData[numParents];
+		if(numParents == 0)
+		{
+			Position = end + 1;
+		}
+		else
+		{
+			for(int i = 0; i < numParents; ++i)
+			{
+				var sha1 = ReadHash(skip: 1);
+				if(cache == null)
+				{
+					parents[i] = new RevisionData(sha1);
+				}
+				else
+				{
+					if(!cache.TryGetValue(sha1, out parents[i]))
+					{
+						parents[i] = new RevisionData(sha1);
+						cache.Add(sha1, parents[i]);
 					}
 				}
 			}
-			return parents;
 		}
+		return parents;
+	}
 
-		public Hash ReadHash()
+	public Hash ReadHash()
+	{
+		var hash = new Hash(String, Position);
+		Skip(40);
+		return hash;
+	}
+
+	public Hash ReadHash(int skip)
+	{
+		Verify.Argument.IsNotNegative(skip);
+
+		var hash = new Hash(String, Position);
+		Skip(40 + skip);
+		return hash;
+	}
+
+	public void ParseRevisionData(RevisionData rev, Dictionary<Hash, RevisionData> cache, TimestampFormat timestampFormat = TimestampFormat.StrictISO8601)
+	{
+		rev.TreeHash       = ReadHash(skip: 1);
+		rev.Parents        = ReadRevisionParents(cache);
+		rev.CommitDate     = ReadUnixTimestampLine();
+		rev.CommitterName  = ReadLine();
+		rev.CommitterEmail = ReadLine();
+		rev.AuthorDate     = ReadUnixTimestampLine();
+		rev.AuthorName     = ReadLine();
+		rev.AuthorEmail    = ReadLine();
+
+		// Subject + Body
+		int eoc = FindNullOrEndOfString();
+		int bodyStart;
+		int subjectEnd = FindSeparatingEmptyLine(eoc, out bodyStart);
+		if(subjectEnd == -1)
 		{
-			var hash = new Hash(String, Position);
-			Skip(40);
-			return hash;
-		}
-
-		public Hash ReadHash(int skip)
-		{
-			Verify.Argument.IsNotNegative(skip, nameof(skip));
-
-			var hash = new Hash(String, Position);
-			Skip(40 + skip);
-			return hash;
-		}
-
-		public void ParseRevisionData(RevisionData rev, Dictionary<Hash, RevisionData> cache)
-		{
-			rev.TreeHash       = ReadHash(skip: 1);
-			rev.Parents        = ReadRevisionParents(cache);
-			rev.CommitDate     = ReadUnixTimestampLine();
-			rev.CommitterName  = ReadLine();
-			rev.CommitterEmail = ReadLine();
-			rev.AuthorDate     = ReadUnixTimestampLine();
-			rev.AuthorName     = ReadLine();
-			rev.AuthorEmail    = ReadLine();
-
-			// Subject + Body
-			int eoc = FindNullOrEndOfString();
-			int bodyStart;
-			int subjectEnd = FindSeparatingEmptyLine(eoc, out bodyStart);
-			if(subjectEnd == -1)
+			int eos = eoc - 1;
+			char c = String[eos];
+			while((c == '\r') || (c == '\n'))
 			{
-				int eos = eoc - 1;
-				char c = String[eos];
-				while((c == '\r') || (c == '\n'))
-				{
-					c = String[--eos];
-				}
-				if(eos > Position)
-				{
-					rev.Subject = ReadStringUpToNoAdvance(eos + 1);
-				}
-				else
-				{
-					rev.Subject = string.Empty;
-				}
-				rev.Body = string.Empty;
+				c = String[--eos];
+			}
+			if(eos > Position)
+			{
+				rev.Subject = ReadStringUpToNoAdvance(eos + 1);
 			}
 			else
 			{
-				rev.Subject = ReadStringUpToNoAdvance(subjectEnd);
-				Position = bodyStart;
-				int eob = eoc - 1;
-				char c = String[eob];
-				while((c == '\r') || (c == '\n'))
-				{
-					c = String[--eob];
-				}
-				if(eob > Position)
-				{
-					rev.Body = ReadStringUpToNoAdvance(eob + 1);
-				}
-				else
-				{
-					rev.Body = string.Empty;
-				}
+				rev.Subject = string.Empty;
 			}
-			Position = eoc + 1;
+			rev.Body = string.Empty;
 		}
+		else
+		{
+			rev.Subject = ReadStringUpToNoAdvance(subjectEnd);
+			Position = bodyStart;
+			int eob = eoc - 1;
+			char c = String[eob];
+			while((c == '\r') || (c == '\n'))
+			{
+				c = String[--eob];
+			}
+			if(eob > Position)
+			{
+				rev.Body = ReadStringUpToNoAdvance(eob + 1);
+			}
+			else
+			{
+				rev.Body = string.Empty;
+			}
+		}
+		Position = eoc + 1;
 	}
 }

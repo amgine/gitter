@@ -18,122 +18,108 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui.ListBoxes
+namespace gitter.Redmine.Gui.ListBoxes;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+sealed class VersionsListBinding : AsyncDataBinding<LinkedList<ProjectVersion>>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	#region .ctor
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	sealed class VersionsListBinding : AsyncDataBinding<LinkedList<ProjectVersion>>
+	public VersionsListBinding(RedmineServiceContext serviceContext, VersionsListBox versionsListBox)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(serviceContext);
+		Verify.Argument.IsNotNull(versionsListBox);
 
-		private readonly RedmineServiceContext _serviceContext;
-		private readonly VersionsListBox _versionsListBox;
+		ServiceContext  = serviceContext;
+		VersionsListBox = versionsListBox;
 
-		#endregion
+		Progress = versionsListBox.ProgressMonitor;
+	}
 
-		#region .ctor
+	#endregion
 
-		public VersionsListBinding(RedmineServiceContext serviceContext, VersionsListBox versionsListBox)
+	#region Properties
+
+	public RedmineServiceContext ServiceContext { get; }
+
+	public VersionsListBox VersionsListBox { get; }
+
+	#endregion
+
+	#region Methods
+
+	protected override Task<LinkedList<ProjectVersion>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(IsDisposed, "VersionsListBinding is disposed.");
+
+		VersionsListBox.Cursor = Cursors.WaitCursor;
+
+		return ServiceContext.ProjectVersions.FetchAsync(ServiceContext.DefaultProjectId,
+			progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(LinkedList<ProjectVersion> versions)
+	{
+		Assert.IsNotNull(versions);
+
+		if(IsDisposed || VersionsListBox.IsDisposed)
 		{
-			Verify.Argument.IsNotNull(serviceContext, nameof(serviceContext));
-			Verify.Argument.IsNotNull(versionsListBox, nameof(versionsListBox));
-
-			_serviceContext  = serviceContext;
-			_versionsListBox = versionsListBox;
-
-			Progress = versionsListBox.ProgressMonitor;
+			return;
 		}
 
-		#endregion
-
-		#region Properties
-
-		public RedmineServiceContext ServiceContext
+		VersionsListBox.BeginUpdate();
+		VersionsListBox.Items.Clear();
+		if(versions.Count != 0)
 		{
-			get { return _serviceContext; }
-		}
-
-		public VersionsListBox VersionsListBox
-		{
-			get { return _versionsListBox; }
-		}
-
-		#endregion
-
-		#region Methods
-
-		protected override Task<LinkedList<ProjectVersion>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.State.IsFalse(IsDisposed, "VersionsListBinding is disposed.");
-
-			VersionsListBox.Cursor = Cursors.WaitCursor;
-
-			return ServiceContext.ProjectVersions.FetchAsync(ServiceContext.DefaultProjectId,
-				progress, cancellationToken);
-		}
-
-		protected override void OnFetchCompleted(LinkedList<ProjectVersion> versions)
-		{
-			Assert.IsNotNull(versions);
-
-			if(IsDisposed || VersionsListBox.IsDisposed)
+			foreach(var version in versions)
 			{
-				return;
+				VersionsListBox.Items.Add(new VersionListItem(version));
 			}
+			VersionsListBox.Text = string.Empty;
+		}
+		else
+		{
+			VersionsListBox.Text = Resources.StrsNoVersionsToDisplay;
+		}
+		VersionsListBox.EndUpdate();
+		VersionsListBox.Cursor = Cursors.Default;
+	}
 
-			VersionsListBox.BeginUpdate();
-			VersionsListBox.Items.Clear();
-			if(versions.Count != 0)
-			{
-				foreach(var version in versions)
-				{
-					VersionsListBox.Items.Add(new VersionListItem(version));
-				}
-				VersionsListBox.Text = string.Empty;
-			}
-			else
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(IsDisposed || VersionsListBox.IsDisposed)
+		{
+			return;
+		}
+
+		VersionsListBox.ProgressMonitor.Report(OperationProgress.Completed);
+		VersionsListBox.Text = Resources.StrsFailedToFetchVersions;
+		VersionsListBox.Items.Clear();
+		VersionsListBox.Cursor = Cursors.Default;
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(!VersionsListBox.IsDisposed)
 			{
 				VersionsListBox.Text = Resources.StrsNoVersionsToDisplay;
+				VersionsListBox.Items.Clear();
 			}
-			VersionsListBox.EndUpdate();
-			VersionsListBox.Cursor = Cursors.Default;
 		}
-
-		protected override void OnFetchFailed(Exception exception)
-		{
-			if(IsDisposed || VersionsListBox.IsDisposed)
-			{
-				return;
-			}
-
-			VersionsListBox.ProgressMonitor.Report(OperationProgress.Completed);
-			VersionsListBox.Text = Resources.StrsFailedToFetchVersions;
-			VersionsListBox.Items.Clear();
-			VersionsListBox.Cursor = Cursors.Default;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!VersionsListBox.IsDisposed)
-				{
-					VersionsListBox.Text = Resources.StrsNoVersionsToDisplay;
-					VersionsListBox.Items.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
+		base.Dispose(disposing);
 	}
+
+	#endregion
 }

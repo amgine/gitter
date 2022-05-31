@@ -18,10 +18,7 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
-{
-	using System;
-	using System.Windows.Forms;
+namespace gitter.Git.Gui;
 
-
-}
+using System;
+using System.Windows.Forms;

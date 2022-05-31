@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework.Mvc;
+
+interface IAddSubmoduleView : IView
 {
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> Path { get; }
 
-	interface IAddSubmoduleView : IView
-	{
-		IUserInputSource<string> Path { get; }
+	IUserInputSource<string> Url { get; }
 
-		IUserInputSource<string> Url { get; }
+	IUserInputSource<bool> UseCustomBranch { get; }
 
-		IUserInputSource<bool> UseCustomBranch { get; }
+	IUserInputSource<string> BranchName { get; }
 
-		IUserInputSource<string> BranchName { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

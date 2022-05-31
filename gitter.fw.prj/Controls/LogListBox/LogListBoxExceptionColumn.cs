@@ -18,25 +18,24 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+sealed class LogListBoxExceptionColumn : CustomListBoxColumn
 {
-	using Resources = gitter.Framework.Properties.Resources;
-
-	sealed class LogListBoxExceptionColumn : CustomListBoxColumn
+	/// <summary>Initializes a new instance of the <see cref="LogListBoxExceptionColumn"/> class.</summary>
+	public LogListBoxExceptionColumn()
+		: base((int)LogListBoxColumnId.Exception, Resources.StrException)
 	{
-		/// <summary>Initializes a new instance of the <see cref="LogListBoxExceptionColumn"/> class.</summary>
-		public LogListBoxExceptionColumn()
-			: base((int)LogListBoxColumnId.Exception, Resources.StrException)
-		{
-			Width = 16 + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
-			SizeMode = ColumnSizeMode.Fixed;
-		}
-
-		protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
-		{
-		}
-
-		/// <inheritdoc/>
-		public override string IdentificationString => "Exception";
+		Width    = new(16 + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage, Dpi.Default);
+		SizeMode = ColumnSizeMode.Fixed;
 	}
+
+	protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
+	{
+	}
+
+	/// <inheritdoc/>
+	public override string IdentificationString => "Exception";
 }

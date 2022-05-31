@@ -18,100 +18,99 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class MergeController : ViewControllerBase<IMergeView>, IMergeController
 {
-	using System;
-	using System.Windows.Forms;
+	#region .ctor
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class MergeController : ViewControllerBase<IMergeView>, IMergeController
+	public MergeController(Repository repository)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(repository);
 
-		public MergeController(Repository repository)
+		Repository = repository;
+	}
+
+	#endregion
+
+	#region Properties
+
+	private Repository Repository { get; }
+
+	#endregion
+
+	#region IMergeController Members
+
+	public bool TryMerge()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		var noCommit      = View.NoCommit.Value;
+		var noFastForward = View.NoFastForward.Value;
+		var squash        = View.Squash.Value;
+		var message       = View.Message.Value;
+
+		if(!string.IsNullOrWhiteSpace(message))
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
+			message = message.Trim();
+		}
+		else
+		{
+			message = null;
 		}
 
-		#endregion
-
-		#region Properties
-
-		private Repository Repository { get; }
-
-		#endregion
-
-		#region IMergeController Members
-
-		public bool TryMerge()
+		var revisions = View.Revisions.Value;
+		if(revisions is not { Count: not 0 })
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var noCommit      = View.NoCommit.Value;
-			var noFastForward = View.NoFastForward.Value;
-			var squash        = View.Squash.Value;
-			var message       = View.Message.Value;
-
-			if(!string.IsNullOrWhiteSpace(message))
+			View.ErrorNotifier.NotifyError(View.Revisions,
+				new UserInputError(
+					Resources.ErrNoBranchNameSpecified,
+					Resources.ErrYouMustSpecifyBranchToMergeWith));
+			return false;
+		}
+		try
+		{
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				message = message.Trim();
+				Repository.Head.Merge(revisions, noCommit, noFastForward, squash, message);
 			}
-			else
-			{
-				message = null;
-			}
-
-			var revisions = View.Revisions.Value;
-			if(revisions == null || revisions.Count == 0)
-			{
-				View.ErrorNotifier.NotifyError(View.Revisions,
-					new UserInputError(
-						Resources.ErrNoBranchNameSpecified,
-						Resources.ErrYouMustSpecifyBranchToMergeWith));
-				return false;
-			}
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					Repository.Head.Merge(revisions, noCommit, noFastForward, squash, message);
-				}
-			}
-			catch(AutomaticMergeFailedException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					Resources.StrMerge,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Information);
-				return true;
-			}
-			catch(GitException exc)
-			{
-				var title = revisions.Count == 1 ?
-					string.Format(Resources.ErrFailedToMergeWith, revisions[0].Pointer) :
-					Resources.ErrFailedToMerge;
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					title,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
+		}
+		catch(AutomaticMergeFailedException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				Resources.StrMerge,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Information);
 			return true;
 		}
-
-		#endregion
+		catch(GitException exc)
+		{
+			var title = revisions.Count == 1 ?
+				string.Format(Resources.ErrFailedToMergeWith, revisions[0].Pointer) :
+				Resources.ErrFailedToMerge;
+			GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				title,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
+		}
+		return true;
 	}
+
+	#endregion
 }

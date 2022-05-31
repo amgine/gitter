@@ -18,120 +18,119 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+
+using gitter.Framework.Controls;
+
+public sealed class TreeDirectoriesBinding : IDisposable
 {
-	using System;
+	#region Data
 
-	using gitter.Framework.Controls;
+	private readonly CustomListBoxItemsCollection _itemHost;
+	private TreeDirectoryListItem _rootItem;
 
-	public sealed class TreeDirectoriesBinding : IDisposable
+	#endregion
+
+	#region Events
+
+	public event EventHandler<BoundItemActivatedEventArgs<TreeItem>> ItemActivated;
+
+	private void InvokeItemActivated(CustomListBoxItem listItem, TreeItem treeItem)
+		=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, treeItem));
+
+	#endregion
+
+	#region .ctor
+
+	public TreeDirectoriesBinding(CustomListBoxItemsCollection itemHost, TreeDirectory root, bool showRoot)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(itemHost);
+		Verify.Argument.IsNotNull(root);
 
-		private readonly CustomListBoxItemsCollection _itemHost;
-		private TreeDirectoryListItem _rootItem;
+		_itemHost = itemHost;
+		Root = root;
 
-		#endregion
+		InitTree(showRoot);
+	}
 
-		#region Events
-
-		public event EventHandler<BoundItemActivatedEventArgs<TreeItem>> ItemActivated;
-
-		private void InvokeItemActivated(CustomListBoxItem listItem, TreeItem treeItem)
-			=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, treeItem));
-
-		#endregion
-
-		#region .ctor
-
-		public TreeDirectoriesBinding(CustomListBoxItemsCollection itemHost, TreeDirectory root, bool showRoot)
+	private void InitTree(bool showRoot)
+	{
+		_itemHost.Clear();
+		_itemHost.Comparison = TreeItemListItem.CompareByName;
+		if(showRoot)
 		{
-			Verify.Argument.IsNotNull(itemHost, nameof(itemHost));
-			Verify.Argument.IsNotNull(root, nameof(root));
-
-			_itemHost = itemHost;
-			Root = root;
-
-			InitTree(showRoot);
-		}
-
-		private void InitTree(bool showRoot)
-		{
-			_itemHost.Clear();
-			_itemHost.Comparison = TreeItemListItem.CompareByName;
-			if(showRoot)
+			_rootItem = new TreeDirectoryListItem(
+				Root,
+				TreeDirectoryListItemType.ShowNothing,
+				OnSubItemActivated);
+			_rootItem.Expand();
+			foreach(var folder in Root.Directories)
 			{
-				_rootItem = new TreeDirectoryListItem(
-					Root,
-					TreeDirectoryListItemType.ShowNothing,
+				var item = new TreeDirectoryListItem(
+					folder,
+					TreeDirectoryListItemType.ShowFoldersOnly,
 					OnSubItemActivated);
-				_rootItem.Expand();
-				foreach(var folder in Root.Directories)
-				{
-					var item = new TreeDirectoryListItem(
-						folder,
-						TreeDirectoryListItemType.ShowFoldersOnly,
-						OnSubItemActivated);
-					item.Activated += OnItemActivated;
-					_rootItem.Items.Add(item);
-				}
-				_itemHost.Add(_rootItem);
-				Root.DirectoryAdded += OnNewFolderAddedRooted;
+				item.Activated += OnItemActivated;
+				_rootItem.Items.Add(item);
 			}
-			else
+			_itemHost.Add(_rootItem);
+			Root.DirectoryAdded += OnNewFolderAddedRooted;
+		}
+		else
+		{
+			foreach(var folder in Root.Directories)
 			{
-				foreach(var folder in Root.Directories)
-				{
-					var item = new TreeDirectoryListItem(
-						folder,
-						TreeDirectoryListItemType.ShowFoldersOnly,
-						OnSubItemActivated);
-					item.Activated += OnItemActivated;
-					_itemHost.Add(item);
-				}
-				Root.DirectoryAdded += OnNewFolderAdded;
+				var item = new TreeDirectoryListItem(
+					folder,
+					TreeDirectoryListItemType.ShowFoldersOnly,
+					OnSubItemActivated);
+				item.Activated += OnItemActivated;
+				_itemHost.Add(item);
 			}
+			Root.DirectoryAdded += OnNewFolderAdded;
 		}
+	}
 
-		private void OnItemActivated(object sender, EventArgs e)
+	private void OnItemActivated(object sender, EventArgs e)
+	{
+		var handler = ItemActivated;
+		if(handler != null)
 		{
-			var handler = ItemActivated;
-			if(handler != null)
-			{
-				var listItem = (CustomListBoxItem)(sender);
-				var data = ((ITreeItemListItem)listItem).TreeItem;
-				handler(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, data));
-			}
+			var listItem = (CustomListBoxItem)(sender);
+			var data = ((ITreeItemListItem)listItem).TreeItem;
+			handler(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, data));
 		}
+	}
 
-		private void OnSubItemActivated(object sender, BoundItemActivatedEventArgs<TreeItem> e)
-		{
-			InvokeItemActivated(e.Item, e.Object);
-		}
+	private void OnSubItemActivated(object sender, BoundItemActivatedEventArgs<TreeItem> e)
+	{
+		InvokeItemActivated(e.Item, e.Object);
+	}
 
-		public TreeDirectory Root { get; }
+	public TreeDirectory Root { get; }
 
-		private void OnNewFolderAdded(object sender, TreeDirectoryEventArgs e)
-		{
-			var item = new TreeDirectoryListItem(e.Folder, TreeDirectoryListItemType.ShowFoldersOnly);
-			_itemHost.AddSafe(item);
-			item.Activated += OnItemActivated;
-		}
+	private void OnNewFolderAdded(object sender, TreeDirectoryEventArgs e)
+	{
+		var item = new TreeDirectoryListItem(e.Folder, TreeDirectoryListItemType.ShowFoldersOnly);
+		_itemHost.AddSafe(item);
+		item.Activated += OnItemActivated;
+	}
 
-		private void OnNewFolderAddedRooted(object sender, TreeDirectoryEventArgs e)
-		{
-			var item = new TreeDirectoryListItem(e.Folder, TreeDirectoryListItemType.ShowFoldersOnly);
-			_rootItem.Items.AddSafe(item);
-			item.Activated += OnItemActivated;
-		}
+	private void OnNewFolderAddedRooted(object sender, TreeDirectoryEventArgs e)
+	{
+		var item = new TreeDirectoryListItem(e.Folder, TreeDirectoryListItemType.ShowFoldersOnly);
+		_rootItem.Items.AddSafe(item);
+		item.Activated += OnItemActivated;
+	}
 
-		#endregion
+	#endregion
 
-		public void Dispose()
-		{
-			Root.DirectoryAdded -= OnNewFolderAdded;
-			Root.DirectoryAdded -= OnNewFolderAddedRooted;
-			_itemHost.Clear();
-		}
+	public void Dispose()
+	{
+		Root.DirectoryAdded -= OnNewFolderAdded;
+		Root.DirectoryAdded -= OnNewFolderAddedRooted;
+		_itemHost.Clear();
 	}
 }

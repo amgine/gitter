@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+public abstract class CustomButtonRenderer
 {
-	using System;
-	using System.Drawing;
+	private static CustomButtonRenderer _msvs2012Dark;
 
-	public abstract class CustomButtonRenderer
-	{
-		private static CustomButtonRenderer _msvs2012Dark;
+	public static CustomButtonRenderer MSVS2012Dark
+		=> _msvs2012Dark ??= new MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.DarkColors);
 
-		public static CustomButtonRenderer MSVS2012Dark
-			=> _msvs2012Dark ??= new MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.DarkColors);
+	public static CustomButtonRenderer Default => MSVS2012Dark;
 
-		public static CustomButtonRenderer Default => MSVS2012Dark;
-
-		public abstract void Render(Graphics graphics, Rectangle clipRectangle, CustomButton button);
-	}
+	public abstract void Render(Graphics graphics, Rectangle clipRectangle, CustomButton button);
 }

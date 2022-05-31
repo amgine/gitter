@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+
+public interface IRemoteProcedureExecutor
 {
-	using System;
+	void Execute(Action action);
 
-	public interface IRemoteProcedureExecutor
-	{
-		void Execute(Action action);
+	T Execute<T>(Func<T> func);
 
-		T Execute<T>(Func<T> func);
-
-		void Close();
-	}
+	void Close();
 }

@@ -18,89 +18,73 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog, IRenameRemoteView
 {
-	using System;
-	using System.ComponentModel;
+	private readonly IRenameRemoteController _controller;
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog, IRenameRemoteView
+	public RenameRemoteDialog(Remote remote)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(remote);
+		Verify.Argument.IsFalse(remote.IsDeleted, nameof(remote),
+			Resources.ExcObjectIsDeleted.UseAsFormat(nameof(Remote)));
 
-		private readonly IRenameRemoteController _controller;
+		Remote = remote;
 
-		#endregion
+		InitializeComponent();
+		Localize();
 
-		#region .ctor
+		SetupReferenceNameInputBox(_txtNewName, ReferenceType.Remote);
 
-		public RenameRemoteDialog(Remote remote)
+		_txtOldName.Text = remote.Name;
+		_txtNewName.Text = remote.Name;
+		_txtNewName.SelectAll();
+
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(remote, nameof(remote));
-			Verify.Argument.IsFalse(remote.IsDeleted, nameof(remote),
-				Resources.ExcObjectIsDeleted.UseAsFormat(nameof(Remote)));
+			NewName = new TextBoxInputSource(_txtNewName),
+		};
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			Remote = remote;
+		GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
 
-			InitializeComponent();
-			Localize();
-
-			SetupReferenceNameInputBox(_txtNewName, ReferenceType.Remote);
-
-			_txtOldName.Text = remote.Name;
-			_txtNewName.Text = remote.Name;
-			_txtNewName.SelectAll();
-
-			var inputs = new IUserInputSource[]
-			{
-				NewName = new TextBoxInputSource(_txtNewName),
-			};
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
-
-			GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
-
-			_controller = new RenameRemoteController(remote) { View = this };
-		}
-
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb => Resources.StrRename;
-
-		public Remote Remote { get; }
-
-		public IUserInputSource<string> NewName { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region Methods
-
-		private void Localize()
-		{
-			Text = Resources.StrRenameRemote;
-
-			_lblOldName.Text = Resources.StrRemote.AddColon();
-			_lblNewName.Text = Resources.StrNewName.AddColon();
-		}
-
-		#endregion
-
-		#region IExecutableDialog Members
-
-		public bool Execute() => _controller.TryRename();
-
-		#endregion
+		_controller = new RenameRemoteController(remote) { View = this };
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrRename;
+
+	public Remote Remote { get; }
+
+	public IUserInputSource<string> NewName { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	private void Localize()
+	{
+		Text = Resources.StrRenameRemote;
+
+		_lblOldName.Text = Resources.StrRemote.AddColon();
+		_lblNewName.Text = Resources.StrNewName.AddColon();
+	}
+
+	public bool Execute() => _controller.TryRename();
 }

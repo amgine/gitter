@@ -18,44 +18,43 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc.WinForms
+namespace gitter.Framework.Mvc.WinForms;
+
+using System;
+using System.Windows.Forms;
+
+public class NumericUpDownInputSource<T> : ControlInputSource<NumericUpDown, T>
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly Converter<decimal, T> _convert;
+	private readonly Converter<T, decimal> _convertBack;
 
-	public class NumericUpDownInputSource<T> : ControlInputSource<NumericUpDown, T>
+	public NumericUpDownInputSource(NumericUpDown numericUpDown, Converter<decimal, T> convert, Converter<T, decimal> convertBack)
+		: base(numericUpDown)
 	{
-		private readonly Converter<decimal, T> _convert;
-		private readonly Converter<T, decimal> _convertBack;
+		Verify.Argument.IsNotNull(convert);
+		Verify.Argument.IsNotNull(convertBack);
 
-		public NumericUpDownInputSource(NumericUpDown numericUpDown, Converter<decimal, T> convert, Converter<T, decimal> convertBack)
-			: base(numericUpDown)
-		{
-			Verify.Argument.IsNotNull(convert, nameof(convert));
-			Verify.Argument.IsNotNull(convertBack, nameof(convertBack));
+		_convert = convert;
+		_convertBack = convertBack;
+	}
 
-			_convert = convert;
-			_convertBack = convertBack;
-		}
+	public override bool IsReadOnly
+	{
+		get => Control.ReadOnly;
+		set => Control.ReadOnly = value;
+	}
 
-		public override bool IsReadOnly
-		{
-			get { return Control.ReadOnly; }
-			set { Control.ReadOnly = value; }
-		}
+	protected override T FetchValue() => _convert(Control.Value);
 
-		protected override T FetchValue() => _convert(Control.Value);
+	protected override void SetValue(T value) => Control.Value = _convertBack(value);
 
-		protected override void SetValue(T value) => Control.Value = _convertBack(value);
+	protected override void SubscribeToValueChangeEvent()
+	{
+		Control.ValueChanged +=	OnControlValueChanged;
+	}
 
-		protected override void SubscribeToValueChangeEvent()
-		{
-			Control.ValueChanged +=	OnControlValueChanged;
-		}
-
-		protected override void UnsubscribeToValueChangeEvent()
-		{
-			Control.ValueChanged -= OnControlValueChanged;
-		}
+	protected override void UnsubscribeToValueChangeEvent()
+	{
+		Control.ValueChanged -= OnControlValueChanged;
 	}
 }

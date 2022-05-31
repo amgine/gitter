@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Git
-{
-	using System;
+namespace gitter.Git;
 
-	/// <summary>Reset modes.</summary>
-	[Flags]
-	public enum ResetMode
-	{
-		Mixed	= (1 << 1),
-		Soft	= (1 << 2),
-		Hard	= (1 << 3),
-		Merge	= (1 << 4),
-		Keep	= (1 << 5),
-	}
+using System;
+
+/// <summary>Reset modes.</summary>
+[Flags]
+public enum ResetMode
+{
+	Mixed = (1 << 1),
+	Soft  = (1 << 2),
+	Hard  = (1 << 3),
+	Merge = (1 << 4),
+	Keep  = (1 << 5),
 }

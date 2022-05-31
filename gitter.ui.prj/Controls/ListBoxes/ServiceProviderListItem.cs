@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,40 +18,47 @@
  */
 #endregion
 
-namespace gitter.Controls
+namespace gitter.Controls;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+public sealed class ServiceProviderListItem : CustomListBoxItem<IRepositoryServiceProvider>
 {
-	using System;
-	using System.Drawing;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	public sealed class ServiceProviderListItem : CustomListBoxItem<IRepositoryServiceProvider>
+	public ServiceProviderListItem(IRepositoryServiceProvider data)
+		: base(data)
 	{
-		public ServiceProviderListItem(IRepositoryServiceProvider data)
-			: base(data)
-		{
-		}
+	}
 
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.DisplayName);
-					break;
-			}
-		}
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
 
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		switch(paintEventArgs.SubItemId)
 		{
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.DisplayName);
-				default:
-					return Size.Empty;
-			}
+			case 0:
+				var icon = DataContext.Icon?.GetImage(16 * paintEventArgs.Dpi.X / 96);
+				paintEventArgs.PaintImageAndText(icon, DataContext.DisplayName);
+				break;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch(measureEventArgs.SubItemId)
+		{
+			case 0:
+				var icon = DataContext.Icon?.GetImage(16 * measureEventArgs.Dpi.X / 96);
+				return measureEventArgs.MeasureImageAndText(icon, DataContext.DisplayName);
+			default:
+				return Size.Empty;
 		}
 	}
 }

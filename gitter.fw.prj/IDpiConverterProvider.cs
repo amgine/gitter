@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+public interface IDpiConverterProvider
 {
-	public interface IDpiConverterProvider
-	{
-		DpiConverter DpiConverter { get; }
-	}
+	DpiConverter DpiConverter { get; }
 }

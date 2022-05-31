@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
+namespace gitter.Framework.Mvc;
+
+public interface IUserInputErrorNotifier
 {
-	public interface IUserInputErrorNotifier
-	{
-		void NotifyError(IUserInputSource userInputSource, UserInputError userInputError);
-	}
+	void NotifyError(IUserInputSource userInputSource, UserInputError userInputError);
 }

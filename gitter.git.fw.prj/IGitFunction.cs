@@ -18,20 +18,21 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+#nullable enable
+
+public interface IGitFunction<in TParameters, TOutput>
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	TOutput Invoke(TParameters parameters);
 
-	using gitter.Framework;
-
-	public interface IGitFunction<in TParameters, TOutput>
-	{
-		TOutput Invoke(TParameters parameters);
-
-		Task<TOutput> InvokeAsync(TParameters parameters,
-			IProgress<OperationProgress> progress = default,
-			CancellationToken cancellationToken = default);
-	}
+	Task<TOutput> InvokeAsync(TParameters parameters,
+		IProgress<OperationProgress>? progress = default,
+		CancellationToken cancellationToken = default);
 }

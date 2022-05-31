@@ -18,97 +18,82 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class AddSubmoduleDialog : GitDialogBase, IAsyncExecutableDialog, IAddSubmoduleView
 {
-	using System;
-	using System.ComponentModel;
-	using System.Threading.Tasks;
+	private readonly Repository _repository;
+	private readonly IAddSubmoduleController _controller;
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class AddSubmoduleDialog : GitDialogBase, IAsyncExecutableDialog, IAddSubmoduleView
+	/// <summary>Create <see cref="AddSubmoduleDialog"/>.</summary>
+	public AddSubmoduleDialog(Repository repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(repository);
 
-		private Repository _repository;
-		private readonly IAddSubmoduleController _controller;
+		_repository = repository;
 
-		#endregion
+		InitializeComponent();
+		Localize();
 
-		#region .ctor
-
-		/// <summary>Create <see cref="AddSubmoduleDialog"/>.</summary>
-		public AddSubmoduleDialog(Repository repository)
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Path            = new TextBoxInputSource(_txtPath),
+			Url             = new TextBoxInputSource(_txtRepository),
+			UseCustomBranch = new CheckBoxInputSource(_chkBranch),
+			BranchName      = new TextBoxInputSource(_txtBranch),
+		};
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			_repository = repository;
+		GitterApplication.FontManager.InputFont.Apply(_txtBranch, _txtRepository, _txtPath);
 
-			InitializeComponent();
-			Localize();
-
-			var inputs = new IUserInputSource[]
-			{
-				Path            = new TextBoxInputSource(_txtPath),
-				Url             = new TextBoxInputSource(_txtRepository),
-				UseCustomBranch = new CheckBoxInputSource(_chkBranch),
-				BranchName      = new TextBoxInputSource(_txtBranch),
-			};
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
-
-			GitterApplication.FontManager.InputFont.Apply(_txtBranch, _txtRepository, _txtPath);
-
-			_controller = new AddSubmoduleController(repository) { View = this };
-		}
-
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb => Resources.StrAdd;
-
-		public IUserInputSource<string> Path { get; }
-
-		public IUserInputSource<string> Url { get; }
-
-		public IUserInputSource<bool> UseCustomBranch { get; }
-
-		public IUserInputSource<string> BranchName { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region Methods
-
-		private void Localize()
-		{
-			Text = Resources.StrAddSubmodule;
-
-			_lblPath.Text   = Resources.StrPath.AddColon();
-			_lblUrl.Text    = Resources.StrUrl.AddColon();
-			_chkBranch.Text = Resources.StrBranch.AddColon();
-		}
-
-		private void _chkBranch_CheckedChanged(object sender, EventArgs e)
-		{
-			_txtBranch.Enabled = _chkBranch.Checked;
-		}
-
-		#endregion
-
-		#region IAsyncExecutableDialog
-
-		public Task<bool> ExecuteAsync() => _controller.TryAddSubmoduleAsync();
-
-		#endregion
+		_controller = new AddSubmoduleController(repository) { View = this };
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(414, 82));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrAdd;
+
+	public IUserInputSource<string> Path { get; }
+
+	public IUserInputSource<string> Url { get; }
+
+	public IUserInputSource<bool> UseCustomBranch { get; }
+
+	public IUserInputSource<string> BranchName { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	private void Localize()
+	{
+		Text = Resources.StrAddSubmodule;
+
+		_lblPath.Text   = Resources.StrPath.AddColon();
+		_lblUrl.Text    = Resources.StrUrl.AddColon();
+		_chkBranch.Text = Resources.StrBranch.AddColon();
+	}
+
+	private void _chkBranch_CheckedChanged(object sender, EventArgs e)
+	{
+		_txtBranch.Enabled = _chkBranch.Checked;
+	}
+
+	/// <inheritdoc/>
+	public Task<bool> ExecuteAsync() => _controller.TryAddSubmoduleAsync();
 }

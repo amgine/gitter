@@ -18,35 +18,33 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+internal sealed class LogView : ViewBase
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-
-	using Resources = gitter.Framework.Properties.Resources;
-
-	[ToolboxItem(false)]
-	internal sealed class LogView : ViewBase
+	/// <summary>Initializes a new instance of the <see cref="LogView"/> class.</summary>
+	public LogView(IWorkingEnvironment environment)
+		: base(LogViewFactory.Guid, environment)
 	{
-		private readonly LogListBox _logListBox;
+		Height = 200;
 
-		/// <summary>Initializes a new instance of the <see cref="LogView"/> class.</summary>
-		public LogView(IWorkingEnvironment environment)
-			: base(LogViewFactory.Guid, environment)
+		_ = new LogListBox()
 		{
-			Height = 200;
+			BorderStyle = BorderStyle.None,
+			Dock = DockStyle.Fill,
+			Parent = this,
+		};
 
-			_logListBox = new LogListBox()
-			{
-				BorderStyle = BorderStyle.None,
-				Dock = DockStyle.Fill,
-				Parent = this,
-			};
-
-			Text = Resources.StrLog;
-		}
-
-		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"log.view");
+		Text = Resources.StrLog;
 	}
+
+	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"log.view");
 }

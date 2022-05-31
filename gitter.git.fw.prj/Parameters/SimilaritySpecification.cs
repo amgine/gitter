@@ -18,26 +18,25 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+public readonly struct SimilaritySpecification
 {
-	public readonly struct SimilaritySpecification
+	public SimilaritySpecification(bool isSpecified)
 	{
-		public SimilaritySpecification(bool isSpecified)
-		{
-			IsSpecified = isSpecified;
-			Similarity  = 0.0;
-		}
-
-		public SimilaritySpecification(double similarity)
-		{
-			Verify.Argument.IsInRange(0.0, similarity, 1.0, nameof(similarity));
-
-			IsSpecified = true;
-			Similarity  = similarity;
-		}
-
-		public bool IsSpecified { get; }
-
-		public double Similarity { get; }
+		IsSpecified = isSpecified;
+		Similarity  = 0.0;
 	}
+
+	public SimilaritySpecification(double similarity)
+	{
+		Verify.Argument.IsInRange(0.0, similarity, 1.0, nameof(similarity));
+
+		IsSpecified = true;
+		Similarity  = similarity;
+	}
+
+	public bool IsSpecified { get; }
+
+	public double Similarity { get; }
 }

@@ -18,27 +18,26 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework.Controls;
+
+public class BlameViewer : FlowLayoutControl
 {
-	using System;
-	using System.Windows.Forms;
-
-	using gitter.Framework.Controls;
-
-	public class BlameViewer : FlowLayoutControl
+	public BlameViewer()
 	{
-		public BlameViewer()
-		{
-		}
+	}
 
-		protected override void OnFreeSpaceMouseDown(int x, int y, MouseButtons button)
+	protected override void OnFreeSpaceMouseDown(int x, int y, MouseButtons button)
+	{
+		foreach(var p in Panels)
 		{
-			foreach(var p in Panels)
-			{
-				var filePanel = p as BlameFilePanel;
-				if(filePanel != null) filePanel.DropSelection();
-			}
-			base.OnFreeSpaceMouseDown(x, y, button);
+			var filePanel = p as BlameFilePanel;
+			if(filePanel is not null) filePanel.DropSelection();
 		}
+		base.OnFreeSpaceMouseDown(x, y, button);
 	}
 }

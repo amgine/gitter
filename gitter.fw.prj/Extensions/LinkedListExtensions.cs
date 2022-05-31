@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Extension methods for <see cref="LinkedList{T}"/>.</summary>
+public static class LinkedListExtensions
 {
-	using System;
-	using System.Collections.Generic;
-
-	/// <summary>Extension methods for <see cref="LinkedList{T}"/>.</summary>
-	public static class LinkedListExtensions
+	/// <summary>Represent <see cref="LinkedList{T}"/> as <see cref="IEnumerable{LinkedListNode{T}}"/>.</summary>
+	/// <typeparam name="T">Type of list elements.</typeparam>
+	/// <param name="list">Linked list.</param>
+	/// <returns>LinkedListNode-enumerable representation of linked list.</returns>
+	public static IEnumerable<LinkedListNode<T>> EnumerateNodes<T>(this LinkedList<T> list)
 	{
-		/// <summary>Represent <see cref="LinkedList{T}"/> as <see cref="IEnumerable{LinkedListNode{T}}"/>.</summary>
-		/// <typeparam name="T">Type of list elements.</typeparam>
-		/// <param name="list">Linked list.</param>
-		/// <returns>LinkedListNode-enumerable representation of linked list.</returns>
-		public static IEnumerable<LinkedListNode<T>> EnumerateNodes<T>(this LinkedList<T> list)
-		{
-			Verify.Argument.IsNotNull(list, nameof(list));
+		Verify.Argument.IsNotNull(list);
 
-			var node = list.First;
-			while(node != null)
-			{
-				yield return node;
-				node = node.Next;
-			}
+		var node = list.First;
+		while(node is not null)
+		{
+			yield return node;
+			node = node.Next;
 		}
 	}
 }

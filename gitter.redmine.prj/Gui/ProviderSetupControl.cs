@@ -18,141 +18,144 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 {
-	using System;
+	private IRepository _repository;
 
-	using gitter.Framework;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	public partial class ProviderSetupControl : DialogBase, IExecutableDialog
+	public ProviderSetupControl(IRepository repository)
 	{
-		private IRepository _repository;
+		InitializeComponent();
 
-		public ProviderSetupControl(IRepository repository)
+		GitterApplication.FontManager.InputFont.Apply(_txtApiKey);
+
+		_repository = repository;
+
+		Text = Resources.StrRedmine;
+		_lblServiceUri.Text = Resources.StrServiceUri.AddColon();
+		_lblApiKey.Text = Resources.StrApiKey.AddColon();
+		_lblProject.Text = Resources.StrProject.AddColon();
+
+		var section = _repository.ConfigSection.TryGetSection("IssueTrackers")?.TryGetSection("Redmine");
+		if(section is not null)
 		{
-			InitializeComponent();
-
-			GitterApplication.FontManager.InputFont.Apply(_txtApiKey);
-
-			_repository = repository;
-
-			Text = Resources.StrRedmine;
-			_lblServiceUri.Text = Resources.StrServiceUri.AddColon();
-			_lblApiKey.Text = Resources.StrApiKey.AddColon();
-			_lblProject.Text = Resources.StrProject.AddColon();
-
-			var section = _repository.ConfigSection.TryGetSection("IssueTrackers")?.TryGetSection("Redmine");
-			if(section is not null)
-			{
-				_txtServiceUri.Text = section.GetValue<string>("ServiceUri", string.Empty);
-				_txtApiKey.Text     = section.GetValue<string>("ApiKey", string.Empty);
-				_cmbProject.Text    = section.GetValue<string>("ProjectId", string.Empty);
-			}
+			_txtServiceUri.Text = section.GetValue<string>("ServiceUri", string.Empty);
+			_txtApiKey.Text     = section.GetValue<string>("ApiKey", string.Empty);
+			_cmbProject.Text    = section.GetValue<string>("ProjectId", string.Empty);
 		}
+	}
 
-		public string ServiceUri
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 87));
+
+	public string ServiceUri
+	{
+		get => _txtServiceUri.Text.Trim();
+		set => _txtServiceUri.Text = value;
+	}
+
+	public string ApiKey
+	{
+		get => _txtApiKey.Text.Trim();
+		set => _txtApiKey.Text = value;
+	}
+
+	public string ProjectId
+	{
+		get => _cmbProject.Text.Trim();
+		set => _cmbProject.Text = value;
+	}
+
+	private bool ValidateServiceUri(string uri)
+	{
+		if(string.IsNullOrWhiteSpace(uri))
 		{
-			get => _txtServiceUri.Text.Trim();
-			set => _txtServiceUri.Text = value;
+			NotificationService.NotifyInputError(
+				_txtServiceUri,
+				Resources.ErrNoServiceUriSpecified,
+				Resources.ErrServiceUriCannotBeEmpty);
+			return false;
 		}
-
-		public string ApiKey
+		if(!Uri.TryCreate(uri, UriKind.Absolute, out _))
 		{
-			get => _txtApiKey.Text.Trim();
-			set => _txtApiKey.Text = value;
+			NotificationService.NotifyInputError(
+				_txtServiceUri,
+				Resources.ErrInvalidServiceUri,
+				Resources.ErrServiceUriIsNotValid);
 		}
+		return true;
+	}
 
-		public string ProjectId
+	private bool ValidateApiKey(string apiKey)
+	{
+		if(string.IsNullOrWhiteSpace(apiKey))
 		{
-			get => _cmbProject.Text.Trim();
-			set => _cmbProject.Text = value;
+			NotificationService.NotifyInputError(
+				_txtApiKey,
+				Resources.ErrNoApiKeySpecified,
+				Resources.ErrApiKeyCannotBeEmpty);
+			return false;
 		}
-
-		private bool ValidateServiceUri(string uri)
+		if(apiKey.Length != 40)
 		{
-			if(string.IsNullOrWhiteSpace(uri))
-			{
-				NotificationService.NotifyInputError(
-					_txtServiceUri,
-					Resources.ErrNoServiceUriSpecified,
-					Resources.ErrServiceUriCannotBeEmpty);
-				return false;
-			}
-			if(!Uri.TryCreate(uri, UriKind.Absolute, out _))
-			{
-				NotificationService.NotifyInputError(
-					_txtServiceUri,
-					Resources.ErrInvalidServiceUri,
-					Resources.ErrServiceUriIsNotValid);
-			}
-			return true;
+			NotificationService.NotifyInputError(
+				_txtApiKey,
+				Resources.ErrInvalidApiKey,
+				Resources.ErrApiKeyMustContain40Characters);
+			return false;
 		}
-
-		private bool ValidateApiKey(string apiKey)
+		for(int i = 0; i < apiKey.Length; ++i)
 		{
-			if(string.IsNullOrWhiteSpace(apiKey))
-			{
-				NotificationService.NotifyInputError(
-					_txtApiKey,
-					Resources.ErrNoApiKeySpecified,
-					Resources.ErrApiKeyCannotBeEmpty);
-				return false;
-			}
-			if(apiKey.Length != 40)
+			if(!Uri.IsHexDigit(apiKey[i]))
 			{
 				NotificationService.NotifyInputError(
 					_txtApiKey,
 					Resources.ErrInvalidApiKey,
-					Resources.ErrApiKeyMustContain40Characters);
+					Resources.ErrApiKeyContainsInvalidCharacters);
 				return false;
 			}
-			for(int i = 0; i < apiKey.Length; ++i)
-			{
-				if(!Uri.IsHexDigit(apiKey[i]))
-				{
-					NotificationService.NotifyInputError(
-						_txtApiKey,
-						Resources.ErrInvalidApiKey,
-						Resources.ErrApiKeyContainsInvalidCharacters);
-					return false;
-				}
-			}
-			return true;
 		}
+		return true;
+	}
 
-		private bool ValidateProjectId(string projectId)
+	private bool ValidateProjectId(string projectId)
+	{
+		if(string.IsNullOrWhiteSpace(projectId))
 		{
-			if(string.IsNullOrWhiteSpace(projectId))
-			{
-				NotificationService.NotifyInputError(
-					_cmbProject,
-					Resources.ErrNoProjectNameSpecified,
-					Resources.ErrProjectNameCannotBeEmpty);
-				return false;
-			}
-			return true;
+			NotificationService.NotifyInputError(
+				_cmbProject,
+				Resources.ErrNoProjectNameSpecified,
+				Resources.ErrProjectNameCannotBeEmpty);
+			return false;
 		}
+		return true;
+	}
 
-		public bool Execute()
-		{
-			var uri = ServiceUri;
-			var key = ApiKey;
-			var pid = ProjectId;
+	public bool Execute()
+	{
+		var uri = ServiceUri;
+		var key = ApiKey;
+		var pid = ProjectId;
 
-			if(!ValidateServiceUri(uri)) return false;
-			if(!ValidateApiKey(key)) return false;
-			if(!ValidateProjectId(pid)) return false;
+		if(!ValidateServiceUri(uri)) return false;
+		if(!ValidateApiKey(key)) return false;
+		if(!ValidateProjectId(pid)) return false;
 
-			var section = _repository.ConfigSection
-									 .GetCreateSection("IssueTrackers")
-									 .GetCreateSection("Redmine");
-			section.SetValue<string>("ServiceUri", uri);
-			section.SetValue<string>("ApiKey", key);
-			section.SetValue<string>("ProjectId", pid);
+		var section = _repository.ConfigSection
+								 .GetCreateSection("IssueTrackers")
+								 .GetCreateSection("Redmine");
+		section.SetValue<string>("ServiceUri", uri);
+		section.SetValue<string>("ApiKey", key);
+		section.SetValue<string>("ProjectId", pid);
 
-			return true;
-		}
+		return true;
 	}
 }

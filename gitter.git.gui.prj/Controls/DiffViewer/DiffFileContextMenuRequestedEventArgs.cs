@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Windows.Forms;
+
+public sealed class DiffFileContextMenuRequestedEventArgs : EventArgs
 {
-	using System;
-	using System.Windows.Forms;
+	public DiffFileContextMenuRequestedEventArgs(DiffFile file) => File = file;
 
-	public sealed class DiffFileContextMenuRequestedEventArgs : EventArgs
-	{
-		public DiffFileContextMenuRequestedEventArgs(DiffFile file) => File = file;
+	public DiffFile File { get; }
 
-		public DiffFile File { get; }
-
-		public ContextMenuStrip ContextMenu { get; set; }
-	}
+	public ContextMenuStrip ContextMenu { get; set; }
 }

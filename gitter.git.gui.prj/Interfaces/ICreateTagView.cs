@@ -18,26 +18,25 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework.Mvc;
+
+interface ICreateTagView : IView
 {
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> TagName { get; }
 
-	interface ICreateTagView : IView
-	{
-		IUserInputSource<string> TagName { get; }
+	IUserInputSource<string> Revision { get; }
 
-		IUserInputSource<string> Revision { get; }
+	IUserInputSource<string> Message { get; }
 
-		IUserInputSource<string> Message { get; }
+	IUserInputSource<bool> Signed { get; }
 
-		IUserInputSource<bool> Signed { get; }
+	IUserInputSource<bool> Annotated { get; }
 
-		IUserInputSource<bool> Annotated { get; }
+	IUserInputSource<bool> UseKeyId { get; }
 
-		IUserInputSource<bool> UseKeyId { get; }
+	IUserInputSource<string> KeyId { get; }
 
-		IUserInputSource<string> KeyId { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

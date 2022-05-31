@@ -18,94 +18,88 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+/// <summary>Base class or column header extenders.</summary>
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public abstract class ExtenderBase : UserControl
 {
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	/// <summary>Base class or column header extenders.</summary>
-	[ToolboxItem(false)]
-	[DesignerCategory("")]
-	public partial class ExtenderBase : UserControl
+	/// <summary>Create <see cref="ExtenderBase"/>.</summary>
+	public ExtenderBase()
 	{
-		/// <summary>Create <see cref="ExtenderBase"/>.</summary>
-		public ExtenderBase()
+		AutoScaleDimensions	= new SizeF(96F, 96F);
+		AutoScaleMode		= AutoScaleMode.Dpi;
+		BorderStyle			= BorderStyle.FixedSingle;
+		if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
 		{
-			AutoScaleDimensions	= new SizeF(96F, 96F);
-			AutoScaleMode		= AutoScaleMode.Dpi;
-			BorderStyle			= BorderStyle.FixedSingle;
-			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
-			{
-				Font      = SystemFonts.MessageBoxFont;
-				BackColor = SystemColors.Window;
-			}
-			else
-			{
-				Font      = GitterApplication.FontManager.UIFont;
-				BackColor = GitterApplication.Style.Colors.Window;
-				ForeColor = GitterApplication.Style.Colors.WindowText;
-			}
+			Font      = SystemFonts.MessageBoxFont;
+			BackColor = SystemColors.Window;
+		}
+		else
+		{
+			Font      = GitterApplication.FontManager.UIFont;
+			BackColor = GitterApplication.Style.Colors.Window;
+			ForeColor = GitterApplication.Style.Colors.WindowText;
+		}
+	}
+
+	protected ExtenderBase(CustomListBoxColumn column)
+	{
+		Verify.Argument.IsNotNull(column);
+
+		Column = column;
+
+		AutoScaleDimensions	= new SizeF(96F, 96F);
+		AutoScaleMode		= AutoScaleMode.Dpi;
+		BorderStyle			= BorderStyle.FixedSingle;
+		if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+		{
+			Font      = SystemFonts.MessageBoxFont;
+			BackColor = SystemColors.Window;
+		}
+		else
+		{
+			Font      = GitterApplication.FontManager.UIFont;
+			BackColor = Column.Style.Colors.Window;
+			ForeColor = Column.Style.Colors.WindowText;
 		}
 
-		protected ExtenderBase(CustomListBoxColumn column)
+		Column.StyleChanged += OnColumnStyleChanged;
+	}
+
+	public abstract IDpiBoundValue<Size> ScalableSize { get; }
+
+	protected IGitterStyle Style => Column?.Style ?? GitterApplication.Style;
+
+	public CustomListBoxColumn Column { get; }
+
+	private void OnColumnStyleChanged(object sender, EventArgs e)
+	{
+		OnStyleChanged();
+	}
+
+	protected virtual void OnStyleChanged()
+	{
+		BackColor = Style.Colors.Window;
+		ForeColor = Style.Colors.WindowText;
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			Verify.Argument.IsNotNull(column, nameof(column));
-
-			Column = column;
-
-			AutoScaleDimensions	= new SizeF(96F, 96F);
-			AutoScaleMode		= AutoScaleMode.Dpi;
-			BorderStyle			= BorderStyle.FixedSingle;
-			if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+			if(Column is not null)
 			{
-				Font      = SystemFonts.MessageBoxFont;
-				BackColor = SystemColors.Window;
-			}
-			else
-			{
-				Font      = GitterApplication.FontManager.UIFont;
-				BackColor = Column.Style.Colors.Window;
-				ForeColor = Column.Style.Colors.WindowText;
-			}
-
-			Column.StyleChanged += OnColumnStyleChanged;
-		}
-
-		protected IGitterStyle Style
-		{
-			get
-			{
-				return Column is not null
-					? Column.Style
-					: GitterApplication.Style;
+				Column.StyleChanged -= OnColumnStyleChanged;
 			}
 		}
-
-		public CustomListBoxColumn Column { get; }
-
-		private void OnColumnStyleChanged(object sender, EventArgs e)
-		{
-			OnStyleChanged();
-		}
-
-		protected virtual void OnStyleChanged()
-		{
-			BackColor = Style.Colors.Window;
-			ForeColor = Style.Colors.WindowText;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(Column is not null)
-				{
-					Column.StyleChanged -= OnColumnStyleChanged;
-				}
-			}
-			base.Dispose(disposing);
-		}
+		base.Dispose(disposing);
 	}
 }

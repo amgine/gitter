@@ -18,70 +18,69 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Properties.Resources;
+
+[System.ComponentModel.DesignerCategory("")]
+internal sealed class LocalRepositoriesListBox : CustomListBox
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Windows.Forms;
+	private readonly DragHelper _dragHelper;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	internal sealed class LocalRepositoriesListBox : CustomListBox
+	public LocalRepositoriesListBox()
 	{
-		private readonly DragHelper _dragHelper;
-
-		public LocalRepositoriesListBox()
+		Columns.Add(new CustomListBoxColumn(1, Resources.StrName, true)
 		{
-			Columns.Add(new CustomListBoxColumn(1, Resources.StrName, true)
-			{
-				SizeMode = ColumnSizeMode.Fill
-			});
+			SizeMode = ColumnSizeMode.Fill
+		});
 
-			HeaderStyle = HeaderStyle.Hidden;
-			ItemHeight = SystemInformation.IconSize.Height + 4;
-			AllowDrop = true;
-			_dragHelper = new DragHelper();
+		HeaderStyle = HeaderStyle.Hidden;
+		BaseItemHeight = 32 + 4;
+		AllowDrop = true;
+		_dragHelper = new DragHelper();
+	}
+
+	public List<RepositoryListItem> FullList { get; set; }
+
+	protected override void OnMouseDown(MouseEventArgs e)
+	{
+		base.OnMouseDown(e);
+		if(e.Button == MouseButtons.Left && SelectedItems.Count != 0)
+		{
+			_dragHelper.Start(e.X, e.Y);
 		}
+	}
 
-		public List<RepositoryListItem> FullList { get; set; }
-
-		protected override void OnMouseDown(MouseEventArgs e)
+	protected override void OnMouseUp(MouseEventArgs e)
+	{
+		base.OnMouseUp(e);
+		if(_dragHelper.IsTracking)
 		{
-			base.OnMouseDown(e);
-			if(e.Button == MouseButtons.Left && SelectedItems.Count != 0)
-			{
-				_dragHelper.Start(e.X, e.Y);
-			}
+			_dragHelper.Stop();
 		}
+	}
 
-		protected override void OnMouseUp(MouseEventArgs e)
+	protected override void OnMouseMove(MouseEventArgs e)
+	{
+		base.OnMouseMove(e);
+		if(_dragHelper.IsTracking && _dragHelper.Update(e.X, e.Y))
 		{
-			base.OnMouseUp(e);
-			if(_dragHelper.IsTracking)
+			if(SelectedItems.Count != 1) return;
+			var item = SelectedItems[0];
+			using(var dragImage = RepositoryDragImage.Create(
+				((RepositoryListItem)item).DataContext.Path, new Dpi(DeviceDpi)))
 			{
-				_dragHelper.Stop();
+				dragImage.ShowDragVisual(this);
+				DoDragDrop(item, DragDropEffects.Move);
 			}
-		}
-
-		protected override void OnMouseMove(MouseEventArgs e)
-		{
-			base.OnMouseMove(e);
-			if(_dragHelper.IsTracking && _dragHelper.Update(e.X, e.Y))
-			{
-				if(SelectedItems.Count != 1) return;
-				var item = SelectedItems[0];
-				using(var dragImage = RepositoryDragImage.Create(
-					((RepositoryListItem)item).DataContext.Path, new Dpi(DeviceDpi)))
-				{
-					dragImage.ShowDragVisual(this);
-					DoDragDrop(item, DragDropEffects.Move);
-				}
-				_dragHelper.Stop();
-			}
+			_dragHelper.Stop();
 		}
 	}
 }

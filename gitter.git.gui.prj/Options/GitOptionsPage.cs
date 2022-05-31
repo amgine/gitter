@@ -18,165 +18,160 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Options;
+
+using gitter.Git.AccessLayer;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+partial class GitOptionsPage : PropertyPage, IExecutableDialog
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	public static readonly new Guid Guid = new("22102F21-350D-426A-AE8A-685928EAABE5");
 
-	using gitter.Framework;
-	using gitter.Framework.Options;
+	private DialogBase _gitAccessorOptions;
 
-	using gitter.Git.AccessLayer;
-	using gitter.Git.AccessLayer.CLI;
+	private readonly Dictionary<Type, Tuple<IGitAccessor, DialogBase>> _cachedControls = new();
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	private readonly IGitRepositoryProvider _repositoryProvider;
+	private IGitAccessorProvider _selectedAccessorProvder;
+	private IGitAccessor _selectedAccessor;
 
-	[ToolboxItem(false)]
-	public partial class GitOptionsPage : PropertyPage, IExecutableDialog
+	private GitOptionsPage()
+		: base(Guid)
 	{
-		public static readonly new Guid Guid = new("22102F21-350D-426A-AE8A-685928EAABE5");
+		InitializeComponent();
 
-		private DialogBase _gitAccessorOptions;
-
-		private static Dictionary<Type, Func<IGitAccessor, DialogBase>> _gitAcessorSetupControls =
-			new()
-			{
-				[typeof(GitCLIAccessorProvider)] = accessor => new CliOptionsPage(accessor),
-			};
-
-		private Dictionary<Type, Tuple<IGitAccessor, DialogBase>> _cachedControls = new();
-
-		private readonly IGitRepositoryProvider _repositoryProvider;
-		private IGitAccessorProvider _selectedAccessorProvder;
-		private IGitAccessor _selectedAccessor;
-
-		private GitOptionsPage()
-			: base(Guid)
-		{
-			InitializeComponent();
-
-			Text = Resources.StrGit;
-			_grpRepositoryAccessor.Text = Resources.StrsRepositoryAccessMethod;
-			_lblAccessmethod.Text = Resources.StrAccessMethod.AddColon();
-		}
-
-		public GitOptionsPage(IWorkingEnvironment environment)
-			: this()
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			_repositoryProvider = environment.GetRepositoryProvider<RepositoryProvider>();
-			ShowGitAccessorProviders();
-		}
-
-		public GitOptionsPage(IGitRepositoryProvider repositoryProvider)
-			: this()
-		{
-			Verify.Argument.IsNotNull(repositoryProvider, nameof(repositoryProvider));
-
-			_repositoryProvider = repositoryProvider;
-			ShowGitAccessorProviders();
-		}
-
-		private void ShowGitAccessorProviders()
-		{
-			_cmbAccessorProvider.SelectedIndexChanged -= OnGitAccessorChanged;
-			_cmbAccessorProvider.BeginUpdate();
-			_cmbAccessorProvider.Items.Clear();
-			int index = 0;
-			int selectedIndex = -1;
-			foreach(var accessorProvider in _repositoryProvider.GitAccessorProviders)
-			{
-				_cmbAccessorProvider.Items.Add(accessorProvider);
-				if(accessorProvider == _repositoryProvider.ActiveGitAccessorProvider)
-				{
-					selectedIndex = index;
-				}
-				++index;
-			}
-			_cmbAccessorProvider.DisplayMember = "DisplayName";
-			_cmbAccessorProvider.SelectedIndex = selectedIndex;
-			_cmbAccessorProvider.EndUpdate();
-			_cmbAccessorProvider.SelectedIndexChanged += OnGitAccessorChanged;
-			ShowGitAccessorSetupControl(
-				_repositoryProvider.ActiveGitAccessorProvider,
-				_repositoryProvider.GitAccessor);
-		}
-
-		private void ShowGitAccessorSetupControl(IGitAccessorProvider accessorProvider, IGitAccessor accessor)
-		{
-			if(accessorProvider == null) return;
-
-			var type = accessorProvider.GetType();
-			if(_cachedControls.TryGetValue(type, out var cachedControl))
-			{
-				ShowGitAccessorSetupControl(cachedControl.Item2);
-				_selectedAccessorProvder = accessorProvider;
-				_selectedAccessor = cachedControl.Item1;
-			}
-			else
-			{
-				accessor ??= accessorProvider.CreateAccessor();
-				if(_gitAcessorSetupControls.TryGetValue(type, out var setupControlFactory))
-				{
-					var setupControl = setupControlFactory(accessor);
-					ShowGitAccessorSetupControl(setupControl);
-					_cachedControls.Add(type, Tuple.Create(accessor, setupControl));
-				}
-				_selectedAccessorProvder = accessorProvider;
-				_selectedAccessor = accessor;
-			}
-		}
-
-		private void ShowGitAccessorSetupControl(DialogBase setupControl)
-		{
-			if(setupControl != _gitAccessorOptions)
-			{
-				if(setupControl != null)
-				{
-					setupControl.SetBounds(0, _cmbAccessorProvider.Bottom + 9, Width, 0,
-						BoundsSpecified.X | BoundsSpecified.Y | BoundsSpecified.Width);
-					setupControl.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
-					setupControl.Parent = this;
-				}
-				if(_gitAccessorOptions != null)
-				{
-					_gitAccessorOptions.Parent = null;
-				}
-				_gitAccessorOptions = setupControl;
-			}
-		}
-
-		private void OnGitAccessorChanged(object sender, EventArgs e)
-		{
-			var selectedAccessor = (IGitAccessorProvider)_cmbAccessorProvider.SelectedItem;
-
-			ShowGitAccessorSetupControl(selectedAccessor, null);
-		}
-
-		protected override void OnShown()
-		{
-			base.OnShown();
-
-			_gitAccessorOptions.InvokeOnShown();
-		}
-
-		#region IExecutableDialog Members
-
-		public bool Execute()
-		{
-			if(_gitAccessorOptions is not IExecutableDialog executableDialog) return true;
-
-			if(executableDialog.Execute())
-			{
-				_repositoryProvider.GitAccessor = _selectedAccessor;
-				return true;
-			}
-			return false;
-		}
-
-		#endregion
+		Text = Resources.StrGit;
+		_grpRepositoryAccessor.Text = Resources.StrsRepositoryAccessMethod;
+		_lblAccessmethod.Text = Resources.StrAccessMethod.AddColon();
 	}
+
+	public GitOptionsPage(
+		IGitRepositoryProvider         repositoryProvider,
+		IAccessLayerOptionsPageFactory accessLayerOptionsPageFactory)
+		: this()
+	{
+		Verify.Argument.IsNotNull(repositoryProvider);
+		Verify.Argument.IsNotNull(accessLayerOptionsPageFactory);
+
+		_repositoryProvider           = repositoryProvider;
+		AccessLayerOptionsPageFactory = accessLayerOptionsPageFactory;
+
+		ShowGitAccessorProviders();
+	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(479, 218));
+
+	private IAccessLayerOptionsPageFactory AccessLayerOptionsPageFactory { get; }
+
+	private void ShowGitAccessorProviders()
+	{
+		_cmbAccessorProvider.SelectedIndexChanged -= OnGitAccessorChanged;
+		_cmbAccessorProvider.BeginUpdate();
+		_cmbAccessorProvider.Items.Clear();
+		int index = 0;
+		int selectedIndex = -1;
+		foreach(var accessorProvider in _repositoryProvider.GitAccessorProviders)
+		{
+			_cmbAccessorProvider.Items.Add(accessorProvider);
+			if(accessorProvider == _repositoryProvider.ActiveGitAccessorProvider)
+			{
+				selectedIndex = index;
+			}
+			++index;
+		}
+		_cmbAccessorProvider.DisplayMember = "DisplayName";
+		_cmbAccessorProvider.SelectedIndex = selectedIndex;
+		_cmbAccessorProvider.EndUpdate();
+		_cmbAccessorProvider.SelectedIndexChanged += OnGitAccessorChanged;
+		ShowGitAccessorSetupControl(
+			_repositoryProvider.ActiveGitAccessorProvider,
+			_repositoryProvider.GitAccessor);
+	}
+
+	private void ShowGitAccessorSetupControl(IGitAccessorProvider accessorProvider, IGitAccessor accessor)
+	{
+		if(accessorProvider is null) return;
+
+		var type = accessorProvider.GetType();
+		if(_cachedControls.TryGetValue(type, out var cachedControl))
+		{
+			ShowGitAccessorSetupControl(cachedControl.Item2);
+			_selectedAccessorProvder = accessorProvider;
+			_selectedAccessor = cachedControl.Item1;
+		}
+		else
+		{
+			accessor ??= accessorProvider.CreateAccessor();
+
+			var setupControl = AccessLayerOptionsPageFactory.Create(type, accessor);
+			if(setupControl is not null)
+			{
+				ShowGitAccessorSetupControl(setupControl);
+				_cachedControls.Add(type, Tuple.Create(accessor, setupControl));
+			}
+			_selectedAccessorProvder = accessorProvider;
+			_selectedAccessor = accessor;
+		}
+	}
+
+	private void ShowGitAccessorSetupControl(DialogBase setupControl)
+	{
+		if(setupControl != _gitAccessorOptions)
+		{
+			if(setupControl is not null)
+			{
+				setupControl.SetBounds(0, _cmbAccessorProvider.Bottom + 9, Width, 0,
+					BoundsSpecified.X | BoundsSpecified.Y | BoundsSpecified.Width);
+				setupControl.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+				setupControl.Parent = this;
+			}
+			if(_gitAccessorOptions is not null)
+			{
+				_gitAccessorOptions.Parent = null;
+			}
+			_gitAccessorOptions = setupControl;
+		}
+	}
+
+	private void OnGitAccessorChanged(object sender, EventArgs e)
+	{
+		var selectedAccessor = (IGitAccessorProvider)_cmbAccessorProvider.SelectedItem;
+
+		ShowGitAccessorSetupControl(selectedAccessor, null);
+	}
+
+	protected override void OnShown()
+	{
+		base.OnShown();
+
+		_gitAccessorOptions.InvokeOnShown();
+	}
+
+	#region IExecutableDialog Members
+
+	public bool Execute()
+	{
+		if(_gitAccessorOptions is not IExecutableDialog executableDialog) return true;
+
+		if(executableDialog.Execute())
+		{
+			_repositoryProvider.GitAccessor = _selectedAccessor;
+			return true;
+		}
+		return false;
+	}
+
+	#endregion
 }

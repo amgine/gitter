@@ -18,39 +18,38 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+/// <summary>Atomic listbox element - single cell.</summary>
+public abstract class CustomListBoxSubItem
 {
-	using System;
-	using System.Drawing;
-
-	/// <summary>Atomic listbox element - single cell.</summary>
-	public abstract class CustomListBoxSubItem
+	protected CustomListBoxSubItem(int id)
 	{
-		protected CustomListBoxSubItem(int id)
-		{
-			Id = id;
-		}
-
-		public int Id { get; }
-
-		public CustomListBoxItem Item { get; internal set; }
-
-		public void Invalidate() => Item?.InvalidateSubItem(Id);
-
-		public void InvalidateSafe() => Item?.InvalidateSubItemSafe(Id);
-
-		public void Paint(SubItemPaintEventArgs paintEventArgs)
-		{
-			OnPaint(paintEventArgs);
-		}
-
-		public Size Measure(SubItemMeasureEventArgs measureEventArgs)
-		{
-			return OnMeasure(measureEventArgs);
-		}
-
-		protected abstract void OnPaint(SubItemPaintEventArgs paintEventArgs);
-
-		protected abstract Size OnMeasure(SubItemMeasureEventArgs measureEventArgs);
+		Id = id;
 	}
+
+	public int Id { get; }
+
+	public CustomListBoxItem Item { get; internal set; }
+
+	public void Invalidate() => Item?.InvalidateSubItem(Id);
+
+	public void InvalidateSafe() => Item?.InvalidateSubItemSafe(Id);
+
+	public void Paint(SubItemPaintEventArgs paintEventArgs)
+	{
+		OnPaint(paintEventArgs);
+	}
+
+	public Size Measure(SubItemMeasureEventArgs measureEventArgs)
+	{
+		return OnMeasure(measureEventArgs);
+	}
+
+	protected abstract void OnPaint(SubItemPaintEventArgs paintEventArgs);
+
+	protected abstract Size OnMeasure(SubItemMeasureEventArgs measureEventArgs);
 }

@@ -18,220 +18,223 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+using gitter.Git.AccessLayer;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
+	private readonly IWorkingEnvironment _environment;
+	private RepositoryProvider _repositoryProvider;
+	private Repository _repository;
+	private string _oldUserName;
+	private string _oldUserEmail;
 
-	using gitter.Git.AccessLayer;
+	#endregion
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
+	public UserIdentificationDialog(IWorkingEnvironment environment, Repository repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(environment);
 
-		private readonly IWorkingEnvironment _environment;
-		private RepositoryProvider _repositoryProvider;
-		private Repository _repository;
-		private string _oldUserName;
-		private string _oldUserEmail;
+		_environment = environment;
+		_repository = repository;
+		_repositoryProvider = environment.GetRepositoryProvider<RepositoryProvider>();
 
-		#endregion
+		InitializeComponent();
 
-		public UserIdentificationDialog(IWorkingEnvironment environment, Repository repository)
+		Text = Resources.StrUserIdentification;
+
+		_lblUser.Text = Resources.StrUsername.AddColon();
+		_lblEmail.Text = Resources.StrEmail.AddColon();
+		_lblUseThisUserNameAndEmail.Text = Resources.StrsUseThisUserNameAndEmail.AddColon();
+		_radSetUserGlobally.Text = Resources.StrsForCurrentWindowsUser;
+		_radSetUserForRepositoryOnly.Text = Resources.StrsForCurrentRepositoryOnly;
+
+		if(repository is not null)
 		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			_environment = environment;
-			_repository = repository;
-			_repositoryProvider = environment.GetRepositoryProvider<RepositoryProvider>();
-
-			InitializeComponent();
-
-			Text = Resources.StrUserIdentification;
-
-			_lblUser.Text = Resources.StrUsername.AddColon();
-			_lblEmail.Text = Resources.StrEmail.AddColon();
-			_lblUseThisUserNameAndEmail.Text = Resources.StrsUseThisUserNameAndEmail.AddColon();
-			_radSetUserGlobally.Text = Resources.StrsForCurrentWindowsUser;
-			_radSetUserForRepositoryOnly.Text = Resources.StrsForCurrentRepositoryOnly;
-
-			if(repository != null)
+			var userName = repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
+			if(userName is not null)
 			{
-				var userName = repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
-				if(userName != null)
+				_txtUsername.Text = _oldUserName = userName.Value;
+			}
+			else
+			{
+				_txtUsername.Text = Environment.UserName;
+			}
+			var userEmail = repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
+			if(userEmail is not null)
+			{
+				_txtEmail.Text = _oldUserEmail = userEmail.Value;
+			}
+			else
+			{
+				_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
+			}
+		}
+		else
+		{
+			_radSetUserForRepositoryOnly.Enabled = false;
+		}
+
+		GitterApplication.FontManager.InputFont.Apply(_txtUsername, _txtEmail);
+	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 128));
+
+	public string Username
+	{
+		get => _txtUsername.Text;
+		set => _txtUsername.Text = value;
+	}
+
+	public string Email
+	{
+		get => _txtEmail.Text;
+		set => _txtEmail.Text = value;
+	}
+
+	public bool SetGlobally
+	{
+		get => _radSetUserGlobally.Checked;
+		set
+		{
+			if(value)
+			{
+				_radSetUserGlobally.Checked = true;
+			}
+			else
+			{
+				if(!_radSetUserForRepositoryOnly.Enabled)
 				{
-					_txtUsername.Text = _oldUserName = userName.Value;
+					throw new InvalidOperationException();
 				}
-				else
+				_radSetUserForRepositoryOnly.Checked = true;
+			}
+		}
+	}
+
+	public void SetDefaults()
+	{
+		_txtUsername.Text = Environment.UserName;
+		_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
+	}
+
+	#region IExecutableDialog Members
+
+	public bool Execute()
+	{
+		string userName = _txtUsername.Text.Trim();
+		string userEmail = _txtEmail.Text.Trim();
+		if(userName.Length == 0)
+		{
+			NotificationService.NotifyInputError(
+				_txtUsername,
+				Resources.ErrInvalidUserName,
+				Resources.ErrUserNameCannotBeEmpty);
+			return false;
+		}
+		if(userEmail.Length == 0)
+		{
+			NotificationService.NotifyInputError(
+				_txtEmail,
+				Resources.ErrInvalidEmail,
+				Resources.ErrEmailCannotBeEmpty);
+			return false;
+		}
+		try
+		{
+			if(_radSetUserGlobally.Checked)
+			{
+				if(_oldUserName != userName || _oldUserEmail != userEmail)
 				{
-					_txtUsername.Text = Environment.UserName;
+					if(_repository is not null)
+					{
+						var cpUserName = _repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
+						if(cpUserName is not null)
+						{
+							try
+							{
+								cpUserName.Unset();
+							}
+							catch(GitException)
+							{
+							}
+						}
+						var cpUserEmail = _repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
+						if(cpUserEmail is not null)
+						{
+							try
+							{
+								cpUserEmail.Unset();
+							}
+							catch(GitException)
+							{
+							}
+						}
+					}
+					try
+					{
+						_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
+							new SetConfigValueParameters(GitConstants.UserEmailParameter, userEmail)
+							{
+								ConfigFile = ConfigFile.User,
+							});
+					}
+					catch(ConfigParameterDoesNotExistException)
+					{
+					}
+					try
+					{
+						_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
+							new SetConfigValueParameters(GitConstants.UserNameParameter, userName)
+							{
+								ConfigFile = ConfigFile.User,
+							});
+					}
+					catch(ConfigParameterDoesNotExistException)
+					{
+					}
+					if(_repository is not null)
+					{
+						_repository.Configuration.Refresh();
+					}
 				}
-				var userEmail = repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
-				if(userEmail != null)
+				if(_repository is not null)
 				{
-					_txtEmail.Text = _oldUserEmail = userEmail.Value;
-				}
-				else
-				{
-					_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
+					_repository.OnUserIdentityChanged();
 				}
 			}
 			else
 			{
-				_radSetUserForRepositoryOnly.Enabled = false;
+				_repository.Configuration.SetUserIdentity(userName, userEmail);
 			}
-
-			GitterApplication.FontManager.InputFont.Apply(_txtUsername, _txtEmail);
 		}
-
-		public string Username
+		catch(GitException exc)
 		{
-			get => _txtUsername.Text;
-			set => _txtUsername.Text = value;
+			GitterApplication.MessageBoxService.Show(
+				this,
+				exc.Message,
+				Resources.ErrFailedToSetParameter,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
 		}
-
-		public string Email
-		{
-			get => _txtEmail.Text;
-			set => _txtEmail.Text = value;
-		}
-
-		public bool SetGlobally
-		{
-			get => _radSetUserGlobally.Checked;
-			set
-			{
-				if(value)
-				{
-					_radSetUserGlobally.Checked = true;
-				}
-				else
-				{
-					if(!_radSetUserForRepositoryOnly.Enabled)
-					{
-						throw new InvalidOperationException();
-					}
-					_radSetUserForRepositoryOnly.Checked = true;
-				}
-			}
-		}
-
-		public void SetDefaults()
-		{
-			_txtUsername.Text = Environment.UserName;
-			_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
-		}
-
-		#region IExecutableDialog Members
-
-		public bool Execute()
-		{
-			string userName = _txtUsername.Text.Trim();
-			string userEmail = _txtEmail.Text.Trim();
-			if(userName.Length == 0)
-			{
-				NotificationService.NotifyInputError(
-					_txtUsername,
-					Resources.ErrInvalidUserName,
-					Resources.ErrUserNameCannotBeEmpty);
-				return false;
-			}
-			if(userEmail.Length == 0)
-			{
-				NotificationService.NotifyInputError(
-					_txtEmail,
-					Resources.ErrInvalidEmail,
-					Resources.ErrEmailCannotBeEmpty);
-				return false;
-			}
-			try
-			{
-				if(_radSetUserGlobally.Checked)
-				{
-					if(_oldUserName != userName || _oldUserEmail != userEmail)
-					{
-						if(_repository != null)
-						{
-							var cpUserName = _repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
-							if(cpUserName != null)
-							{
-								try
-								{
-									cpUserName.Unset();
-								}
-								catch(GitException)
-								{
-								}
-							}
-							var cpUserEmail = _repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
-							if(cpUserEmail != null)
-							{
-								try
-								{
-									cpUserEmail.Unset();
-								}
-								catch(GitException)
-								{
-								}
-							}
-						}
-						try
-						{
-							_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
-								new SetConfigValueParameters(GitConstants.UserEmailParameter, userEmail)
-								{
-									ConfigFile = ConfigFile.User,
-								});
-						}
-						catch(ConfigParameterDoesNotExistException)
-						{
-						}
-						try
-						{
-							_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
-								new SetConfigValueParameters(GitConstants.UserNameParameter, userName)
-								{
-									ConfigFile = ConfigFile.User,
-								});
-						}
-						catch(ConfigParameterDoesNotExistException)
-						{
-						}
-						if(_repository != null)
-						{
-							_repository.Configuration.Refresh();
-						}
-					}
-					if(_repository != null)
-					{
-						_repository.OnUserIdentityChanged();
-					}
-				}
-				else
-				{
-					_repository.Configuration.SetUserIdentity(userName, userEmail);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToSetParameter,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
-		}
-
-		#endregion
+		return true;
 	}
+
+	#endregion
 }

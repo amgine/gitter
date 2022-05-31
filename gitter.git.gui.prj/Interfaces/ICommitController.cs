@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using System.Threading.Tasks;
+
+using gitter.Framework.Mvc;
+
+interface ICommitController : IViewController<ICommitView>
 {
-	using System.Threading.Tasks;
+	bool TryCommit();
 
-	using gitter.Framework.Mvc;
-
-	interface ICommitController : IViewController<ICommitView>
-	{
-		bool TryCommit();
-
-		Task<bool> TryCommitAsync();
-	}
+	Task<bool> TryCommitAsync();
 }

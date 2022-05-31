@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,24 +18,23 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+
+public sealed class UserMembership
 {
-	using System;
-	using System.Collections.Generic;
-
-	public sealed class UserMembership
+	internal UserMembership(User user, Project project, IEnumerable<UserRole> userRoles)
 	{
-		internal UserMembership(User user, Project project, IEnumerable<UserRole> userRoles)
-		{
-			User      = user;
-			Project   = project;
-			UserRoles = userRoles;
-		}
-
-		public User User { get; }
-
-		public Project Project { get; }
-
-		public IEnumerable<UserRole> UserRoles { get; }
+		User      = user;
+		Project   = project;
+		UserRoles = userRoles;
 	}
+
+	public User User { get; }
+
+	public Project Project { get; }
+
+	public IEnumerable<UserRole> UserRoles { get; }
 }

@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+public enum GuiCommandStatus
 {
-	public enum GuiCommandStatus
-	{
-		Completed,
-		Canceled,
-		Faulted,
-	}
+	Completed,
+	Canceled,
+	Faulted,
 }

@@ -18,49 +18,50 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Git.Gui.Controls;
+using gitter.Git.Gui.Views;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RepositoryContributorsListItem : RepositoryExplorerItemBase
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly IWorkingEnvironment _environment;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Git.Gui.Controls;
-	using gitter.Git.Gui.Views;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RepositoryContributorsListItem : RepositoryExplorerItemBase
+	public RepositoryContributorsListItem(IWorkingEnvironment environment)
+		: base(Icons.Users, Resources.StrContributors)
 	{
-		private readonly IWorkingEnvironment _environment;
+		Verify.Argument.IsNotNull(environment);
 
-		public RepositoryContributorsListItem(IWorkingEnvironment environment)
-			: base(@"users", Resources.StrContributors)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		_environment = environment;
+	}
 
-			_environment = environment;
-		}
+	/// <inheritdoc/>
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		_environment.ViewDockService.ShowView(Guids.ContributorsViewGuid);
+	}
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-			_environment.ViewDockService.ShowView(Guids.ContributorsViewGuid);
-		}
+	/// <inheritdoc/>
+	public override void OnDoubleClick(int x, int y) { }
 
-		public override void OnDoubleClick(int x, int y) { }
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
 
-		/// <inheritdoc/>
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
+		if(Repository is null) return default;
 
-			if(Repository is null) return default;
-
-			var menu = new UsersMenu(Repository);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
-		}
+		var menu = new UsersMenu(Repository);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

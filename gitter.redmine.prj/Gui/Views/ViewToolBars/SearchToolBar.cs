@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,145 +18,154 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Drawing;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+internal abstract class SearchToolBar<TView, TOptions> : ToolStrip
+	where TView : RedmineViewBase, ISearchableView<TOptions>
+	where TOptions : SearchOptions
 {
-	using System;
-	using System.Drawing;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
+	private readonly TView _view;
+	private readonly ToolStripTextBox _textBox;
+	private readonly ToolStripButton _btnNext;
+	private readonly ToolStripButton _btnPrev;
+	private bool _result;
 
-	using Resources = gitter.Redmine.Properties.Resources;
+	#endregion
 
-	[ToolboxItem(false)]
-	internal abstract class SearchToolBar<TView, TOptions> : ToolStrip
-		where TView : RedmineViewBase, ISearchableView<TOptions>
-		where TOptions : SearchOptions
+	protected SearchToolBar(TView view)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(view);
 
-		private readonly TView _view;
-		private readonly ToolStripTextBox _textBox;
-		private readonly ToolStripButton _btnNext;
-		private readonly ToolStripButton _btnPrev;
-		private bool _result;
+		_view = view;
 
-		#endregion
+		_result = true;
 
-		protected SearchToolBar(TView view)
+		var btnClose = new ToolStripButton(Resources.StrClose, null, (_, _) =>
 		{
-			Verify.Argument.IsNotNull(view, nameof(view));
+			_view.SearchToolBarVisible = false;
+		})
+		{
+			DisplayStyle = ToolStripItemDisplayStyle.Image,
+		};
+		var btnNext = new ToolStripButton(Resources.StrNext, null, (_, _) =>
+		{
+			_view.SearchNext(CreateSearchOptions());
+		})
+		{
+			DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+			Enabled = false,
+		};
+		var btnPrev = new ToolStripButton(Resources.StrPrevious, null, (_, _) =>
+		{
+			_view.SearchPrevious(CreateSearchOptions());
+		})
+		{
+			DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+			Enabled = false,
+		};
 
-			_view = view;
+		Items.Add(btnClose);
+		Items.Add(new ToolStripLabel(Resources.StrFind.AddColon(), null));
+		Items.Add(_textBox = new ToolStripTextBox()
+		{
+			AutoSize = false,
+			Width = 200,
+		});
+		Items.Add(_btnNext = btnNext);
+		Items.Add(_btnPrev = btnPrev);
+		/*
+		Items.Add(new ToolStripButton(Resources.StrMatchCase));
+		*/
 
-			_result = true;
+		var dpiBindings = new DpiBindings();
+		dpiBindings.BindImage(btnClose, CommonIcons.SearchClose);
+		dpiBindings.BindImage(btnNext,  CommonIcons.SearchNext);
+		dpiBindings.BindImage(btnPrev,  CommonIcons.SearchPrev);
 
-			Items.Add(new ToolStripButton(Resources.StrClose, CachedResources.Bitmaps["ImgSearchClose"], (sender, e) =>
+		_textBox.TextBox.PreviewKeyDown += (_, e) =>
+		{
+			if(e.KeyCode == Keys.Escape)
 			{
 				_view.SearchToolBarVisible = false;
-			})
-			{
-				DisplayStyle = ToolStripItemDisplayStyle.Image,
-			});
-			Items.Add(new ToolStripLabel(Resources.StrFind.AddColon(), null));
-			Items.Add(_textBox = new ToolStripTextBox()
-			{
-				AutoSize = false,
-				Width = 200,
-			});
-			Items.Add(_btnNext = new ToolStripButton(Resources.StrNext, CachedResources.Bitmaps["ImgSearchNext"], (sender, e) =>
-			{
-				_view.SearchNext(CreateSearchOptions());
-			})
-			{
-				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
-				Enabled = false,
-			});
-			Items.Add(_btnPrev = new ToolStripButton(Resources.StrPrevious, CachedResources.Bitmaps["ImgSearchPrevious"], (sender, e) =>
-			{
-				_view.SearchPrevious(CreateSearchOptions());
-			})
-			{
-				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
-				Enabled = false,
-			});
-			/*
-			Items.Add(new ToolStripButton(Resources.StrMatchCase));
-			*/
-
-			_textBox.TextBox.PreviewKeyDown += (sender, e) =>
-			{
-				if(e.KeyCode == Keys.Escape)
-				{
-					_view.SearchToolBarVisible = false;
-					e.IsInputKey = true;
-				}
-			};
-
-			_textBox.TextChanged += (sender, e) =>
-			{
-				var result = _view.SearchFirst(CreateSearchOptions());
-				HandleSearchResult(result);
-				_btnNext.Enabled = _textBox.TextLength > 0;
-				_btnPrev.Enabled = _textBox.TextLength > 0;
-			};
-		}
-
-		protected abstract TOptions CreateSearchOptions();
-
-		private void HandleSearchResult(bool result)
-		{
-			if(result != _result)
-			{
-				if(result)
-				{
-					_textBox.TextBox.BackColor = GitterApplication.Style.Colors.Window;
-				}
-				else
-				{
-					var color = GitterApplication.Style.Colors.Window;
-					int r = color.R + 50;
-					if(r > 255) r = 255;
-					_textBox.TextBox.BackColor = Color.FromArgb(r, color.G, color.B);
-					try
-					{
-						System.Media.SystemSounds.Beep.Play();
-					}
-					catch
-					{
-					}
-				}
-				_result = result;
+				e.IsInputKey = true;
 			}
-		}
+		};
 
-		public TView View
+		_textBox.TextChanged += (sender, e) =>
 		{
-			get { return _view; }
-		}
+			var result = _view.SearchFirst(CreateSearchOptions());
+			HandleSearchResult(result);
+			_btnNext.Enabled = _textBox.TextLength > 0;
+			_btnPrev.Enabled = _textBox.TextLength > 0;
+		};
+	}
 
-		public void FocusSearchTextBox()
-		{
-			_textBox.SelectAll();
-			_textBox.Focus();
-		}
+	protected abstract TOptions CreateSearchOptions();
 
-		public string SearchText
+	private void HandleSearchResult(bool result)
+	{
+		if(result != _result)
 		{
-			get { return _textBox.Text; }
-			set { _textBox.Text = value; }
+			if(result)
+			{
+				_textBox.TextBox.BackColor = GitterApplication.Style.Colors.Window;
+			}
+			else
+			{
+				var color = GitterApplication.Style.Colors.Window;
+				int r = color.R + 50;
+				if(r > 255) r = 255;
+				_textBox.TextBox.BackColor = Color.FromArgb(r, color.G, color.B);
+				try
+				{
+					System.Media.SystemSounds.Beep.Play();
+				}
+				catch
+				{
+				}
+			}
+			_result = result;
 		}
+	}
 
-		public ToolStripButton NextButton
-		{
-			get { return _btnNext; }
-		}
+	public TView View
+	{
+		get { return _view; }
+	}
 
-		public ToolStripButton PrevButton
-		{
-			get { return _btnNext; }
-		}
+	public void FocusSearchTextBox()
+	{
+		_textBox.SelectAll();
+		_textBox.Focus();
+	}
+
+	public string SearchText
+	{
+		get { return _textBox.Text; }
+		set { _textBox.Text = value; }
+	}
+
+	public ToolStripButton NextButton
+	{
+		get { return _btnNext; }
+	}
+
+	public ToolStripButton PrevButton
+	{
+		get { return _btnNext; }
 	}
 }

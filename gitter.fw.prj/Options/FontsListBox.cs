@@ -18,33 +18,29 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+internal sealed class FontsListBox : CustomListBox
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Framework.Properties.Resources;
-
-	internal sealed class FontsListBox : CustomListBox
+	public FontsListBox()
 	{
-		public FontsListBox()
+		Columns.Add(new CustomListBoxColumn(0, Resources.StrName, true) { SizeMode = ColumnSizeMode.Fill });
+		Columns.Add(new CustomListBoxColumn(1, Resources.StrFont, true) { Width = new(200, Dpi.Default) });
+
+		if(GitterApplication.FontManager is not null)
 		{
-			Columns.Add(new CustomListBoxColumn(0, Resources.StrName, true) { SizeMode = ColumnSizeMode.Fill });
-			Columns.Add(new CustomListBoxColumn(1, Resources.StrFont, true) { Width = 200 });
-
-			if(GitterApplication.FontManager != null)
+			foreach(var f in GitterApplication.FontManager)
 			{
-				foreach(var f in GitterApplication.FontManager)
-				{
-					Items.Add(new FontListItem(f));
-				}
+				Items.Add(new FontListItem(f));
 			}
-
-			ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick;
 		}
+
+		ItemActivation = ItemActivation.SingleClick;
 	}
 }

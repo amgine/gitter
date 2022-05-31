@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+/// <summary>Determines when <see cref="CustomListBox"/> raises <see cref="CustomListBox.ItemActivated"/> event.</summary>
+public enum ItemActivation
 {
-	/// <summary>Determines when <see cref="CustomListBox"/> raises <see cref="CustomListBox.ItemActivated"/> event.</summary>
-	public enum ItemActivation
-	{
-		/// <summary>Item is activated by double click.</summary>
-		DoubleClick,
-		/// <summary>Item is activated by single click.</summary>
-		SingleClick,
-	}
+	/// <summary>Item is activated by double click.</summary>
+	DoubleClick,
+	/// <summary>Item is activated by single click.</summary>
+	SingleClick,
 }

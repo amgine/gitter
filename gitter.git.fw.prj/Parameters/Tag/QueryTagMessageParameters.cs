@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
-{
-	public sealed class QueryTagMessageParameters
-	{
-		public QueryTagMessageParameters()
-		{
-		}
+namespace gitter.Git.AccessLayer;
 
-		public string TagName { get; set; }
+public sealed class QueryTagMessageParameters
+{
+	public QueryTagMessageParameters()
+	{
 	}
+
+	public string TagName { get; set; }
 }

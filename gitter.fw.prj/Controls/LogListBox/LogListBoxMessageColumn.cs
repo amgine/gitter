@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+sealed class LogListBoxMessageColumn : CustomListBoxColumn
 {
-	using Resources = gitter.Framework.Properties.Resources;
-
-	sealed class LogListBoxMessageColumn : CustomListBoxColumn
+	/// <summary>Initializes a new instance of the <see cref="LogListBoxMessageColumn"/> class.</summary>
+	public LogListBoxMessageColumn()
+		: base((int)LogListBoxColumnId.Message, Resources.StrMessage)
 	{
-		/// <summary>Initializes a new instance of the <see cref="LogListBoxMessageColumn"/> class.</summary>
-		public LogListBoxMessageColumn()
-			: base((int)LogListBoxColumnId.Message, Resources.StrMessage)
-		{
-			SizeMode = ColumnSizeMode.Fill;
-		}
-
-		/// <inheritdoc/>
-		public override string IdentificationString => "Message";
+		SizeMode = ColumnSizeMode.Fill;
 	}
+
+	/// <inheritdoc/>
+	public override string IdentificationString => "Message";
 }

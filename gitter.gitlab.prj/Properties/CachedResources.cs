@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.GitLab
+namespace gitter.GitLab;
+
+using System;
+
+using gitter.Framework;
+
+using Resources = gitter.GitLab.Properties.Resources;
+
+static class CachedResources
 {
-	using System;
+	public static CachedBitmapResources Bitmaps { get; } = new(Resources.ResourceManager);
 
-	using gitter.Framework;
-
-	using Resources = gitter.GitLab.Properties.Resources;
-
-	static class CachedResources
-	{
-		public static CachedBitmapResources Bitmaps { get; } = new CachedBitmapResources(Resources.ResourceManager);
-
-		public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.GitLab.Resources.icons");
-	}
+	public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.GitLab.Resources.icons");
 }

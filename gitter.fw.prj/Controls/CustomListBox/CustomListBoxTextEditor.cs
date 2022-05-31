@@ -18,69 +18,68 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Windows.Forms;
+using System.ComponentModel;
+
+public sealed class CustomListBoxTextEditor
 {
-	using System;
-	using System.Windows.Forms;
-	using System.ComponentModel;
+	public event EventHandler<CancelEventArgs> Validating;
 
-	public sealed class CustomListBoxTextEditor
+	private readonly TextBox _textBox;
+
+	internal CustomListBoxTextEditor(CustomListBox listBox, TextBox textBox)
 	{
-		public event EventHandler<CancelEventArgs> Validating;
+		ListBox = listBox;
+		_textBox = textBox;
+		_textBox.Validating += OnValidating;
+		_textBox.KeyDown += OnKeyDown;
+	}
 
-		private readonly TextBox _textBox;
-
-		internal CustomListBoxTextEditor(CustomListBox listBox, TextBox textBox)
+	public void OnKeyDown(object sender, KeyEventArgs e)
+	{
+		switch(e.KeyCode)
 		{
-			ListBox = listBox;
-			_textBox = textBox;
-			_textBox.Validating += OnValidating;
-			_textBox.KeyDown += OnKeyDown;
-		}
-
-		public void OnKeyDown(object sender, KeyEventArgs e)
-		{
-			switch(e.KeyCode)
-			{
-				case Keys.Escape:
-					Stop();
-					break;
-				case Keys.Enter:
-					var args = new CancelEventArgs(false);
-					OnValidating(_textBox, args);
-					break;
-			}
-		}
-
-		private void OnValidating(object sender, CancelEventArgs e)
-		{
-			var handler = Validating;
-			if(handler != null)
-			{
+			case Keys.Escape:
+				Stop();
+				break;
+			case Keys.Enter:
 				var args = new CancelEventArgs(false);
-				handler(this, args);
-				if(args.Cancel)
-				{
-					e.Cancel = true;
-					return;
-				}
+				OnValidating(_textBox, args);
+				break;
+		}
+	}
+
+	private void OnValidating(object sender, CancelEventArgs e)
+	{
+		var handler = Validating;
+		if(handler != null)
+		{
+			var args = new CancelEventArgs(false);
+			handler(this, args);
+			if(args.Cancel)
+			{
+				e.Cancel = true;
+				return;
 			}
-			Stop();
 		}
+		Stop();
+	}
 
-		public CustomListBox ListBox { get; }
+	public CustomListBox ListBox { get; }
 
-		public string Text
-		{
-			get => _textBox.Text;
-			set => _textBox.Text = value;
-		}
+	public string Text
+	{
+		get => _textBox.Text;
+		set => _textBox.Text = value;
+	}
 
-		public void Stop()
-		{
-			_textBox.Validating -= OnValidating;
-			_textBox.KeyDown -= OnKeyDown;
-			ListBox.StopTextEditor();
-		}
+	public void Stop()
+	{
+		_textBox.Validating -= OnValidating;
+		_textBox.KeyDown -= OnKeyDown;
+		ListBox.StopTextEditor();
 	}
 }

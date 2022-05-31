@@ -18,243 +18,242 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.IO;
+using System.Text;
+using System.Collections.Generic;
+
+using gitter.Git.AccessLayer;
+
+public abstract class TreeItem : GitNamedObjectWithLifetime
 {
-	using System;
-	using System.IO;
-	using System.Text;
-	using System.Collections.Generic;
+	#region Data
 
-	using gitter.Git.AccessLayer;
+	private TreeDirectory _parent;
+	private FileStatus _status;
+	private string _relativePath;
+	private StagedStatus _stagedStatus;
 
-	public abstract class TreeItem : GitNamedObjectWithLifetime
+	#endregion
+
+	#region Events
+
+	public event EventHandler StatusChanged;
+
+	public event EventHandler StagedStatusChanged;
+
+	#endregion
+
+	#region .ctor
+
+	protected TreeItem(Repository repository, string relativePath,
+		TreeDirectory parent, FileStatus status, string name)
+		: base(repository, name)
 	{
-		#region Data
-
-		private TreeDirectory _parent;
-		private FileStatus _status;
-		private string _relativePath;
-		private StagedStatus _stagedStatus;
-
-		#endregion
-
-		#region Events
-
-		public event EventHandler StatusChanged;
-
-		public event EventHandler StagedStatusChanged;
-
-		#endregion
-
-		#region .ctor
-
-		protected TreeItem(Repository repository, string relativePath,
-			TreeDirectory parent, FileStatus status, string name)
-			: base(repository, name)
+		_parent = parent;
+		if(parent != null)
 		{
-			_parent = parent;
-			if(parent != null)
+			_stagedStatus = parent._stagedStatus;
+		}
+		_status = status;
+		_relativePath = relativePath;
+	}
+
+	protected TreeItem(Repository repository, string relativePath,
+		TreeDirectory parent, string name)
+		: this(repository, relativePath, parent, FileStatus.Unknown, name)
+	{
+	}
+
+	#endregion
+
+	public StagedStatus StagedStatus
+	{
+		get => _stagedStatus;
+		internal set
+		{
+			Assert.IsFalse(IsDeleted);
+
+			if(_stagedStatus != value)
 			{
-				_stagedStatus = parent._stagedStatus;
+				_stagedStatus = value;
+				StagedStatusChanged?.Invoke(this, EventArgs.Empty);
 			}
-			_status = status;
-			_relativePath = relativePath;
 		}
+	}
 
-		protected TreeItem(Repository repository, string relativePath,
-			TreeDirectory parent, string name)
-			: this(repository, relativePath, parent, FileStatus.Unknown, name)
+	public FileStatus Status
+	{
+		get => _status;
+		internal set
 		{
-		}
+			Assert.IsFalse(IsDeleted);
 
-		#endregion
-
-		public StagedStatus StagedStatus
-		{
-			get => _stagedStatus;
-			internal set
+			if(_status != value)
 			{
-				Assert.IsFalse(IsDeleted);
+				_status = value;
+				StatusChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
+	}
 
-				if(_stagedStatus != value)
+	public abstract TreeItemType ItemType { get; }
+
+	#region Methods
+
+	public void Stage()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Status.Stage(this);
+		StagedStatus = StagedStatus.Staged;
+	}
+
+	public void Stage(AddFilesMode mode)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Status.Stage(this, mode);
+		StagedStatus = StagedStatus.Staged;
+	}
+
+	public void Unstage()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Status.Unstage(this);
+		StagedStatus = StagedStatus.Unstaged;
+	}
+
+	public IDiffSource GetDiffSource()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return _stagedStatus switch
+		{
+			StagedStatus.Staged   => Repository.Status.GetDiffSource(true,  new[] { RelativePath }),
+			StagedStatus.Unstaged => Repository.Status.GetDiffSource(false, new[] { RelativePath }),
+			_ => null,
+		};
+	}
+
+	public void Remove(bool force = false)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		using(Repository.Monitor.BlockNotifications(
+			RepositoryNotifications.IndexUpdated))
+		{
+			Repository.Accessor.RemoveFiles.Invoke(
+				new RemoveFilesParameters(RelativePath)
 				{
-					_stagedStatus = value;
-					StagedStatusChanged?.Invoke(this, EventArgs.Empty);
-				}
-			}
+					Cached = _stagedStatus == Git.StagedStatus.Staged,
+					Force = force,
+				});
 		}
+		Repository.Status.Refresh();
+	}
 
-		public FileStatus Status
+	public void RemoveFromWorkingTree()
+	{
+		using(Repository.Monitor.BlockNotifications(
+			RepositoryNotifications.WorktreeUpdated))
 		{
-			get => _status;
-			internal set
-			{
-				Assert.IsFalse(IsDeleted);
+			System.IO.File.Delete(FullPath);
+		}
+		Repository.Status.Refresh();
+	}
 
-				if(_status != value)
+	public void Revert()
+	{
+		Verify.State.IsNotDeleted(this);
+		Verify.State.IsTrue((_stagedStatus & StagedStatus.Unstaged) == StagedStatus.Unstaged);
+
+		switch(ItemType)
+		{
+			case TreeItemType.Tree:
+				RevertCore();
+				break;
+			case TreeItemType.Commit:
+			case TreeItemType.Blob:
+				switch(Status)
 				{
-					_status = value;
-					StatusChanged?.Invoke(this, EventArgs.Empty);
+					case FileStatus.Removed:
+					case FileStatus.Modified:
+						RevertCore();
+						break;
+					default:
+						throw new InvalidOperationException("Inappropriate status.");
 				}
+				break;
+		}
+	}
+
+	private void RevertCore()
+	{
+		using(Repository.Monitor.BlockNotifications(
+			RepositoryNotifications.WorktreeUpdated))
+		{
+			Repository.Accessor.CheckoutFiles.Invoke(
+				new CheckoutFilesParameters(RelativePath)
+				{
+					Mode = CheckoutFileMode.IgnoreUnmergedEntries,
+				});
+		}
+		Repository.Status.Refresh();
+	}
+
+	#endregion
+
+	public TreeDirectory Parent
+	{
+		get => _parent;
+		internal set => _parent = value;
+	}
+
+	public string FullPath
+	{
+		get
+		{
+			var sb = new StringBuilder();
+			var root = Repository.WorkingDirectory;
+			sb.Append(root);
+			if(!root.EndsWith(Path.DirectorySeparatorChar) && !root.EndsWith(Path.AltDirectorySeparatorChar))
+			{
+				sb.Append(Path.DirectorySeparatorChar);
 			}
-		}
-
-		public abstract TreeItemType ItemType { get; }
-
-		#region Methods
-
-		public void Stage()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Status.Stage(this);
-			StagedStatus = StagedStatus.Staged;
-		}
-
-		public void Stage(AddFilesMode mode)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Status.Stage(this, mode);
-			StagedStatus = StagedStatus.Staged;
-		}
-
-		public void Unstage()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Status.Unstage(this);
-			StagedStatus = StagedStatus.Unstaged;
-		}
-
-		public IDiffSource GetDiffSource()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return _stagedStatus switch
+			if(_parent != null)
 			{
-				StagedStatus.Staged   => Repository.Status.GetDiffSource(true,  new[] { RelativePath }),
-				StagedStatus.Unstaged => Repository.Status.GetDiffSource(false, new[] { RelativePath }),
-				_ => null,
-			};
-		}
-
-		public void Remove(bool force = false)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdated))
-			{
-				Repository.Accessor.RemoveFiles.Invoke(
-					new RemoveFilesParameters(RelativePath)
+				var stack = new Stack<string>();
+				var p = _parent;
+				while(p != null && p.Parent != null)
+				{
+					if(!string.IsNullOrWhiteSpace(p.Name))
 					{
-						Cached = _stagedStatus == Git.StagedStatus.Staged,
-						Force = force,
-					});
-			}
-			Repository.Status.Refresh();
-		}
-
-		public void RemoveFromWorkingTree()
-		{
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.WorktreeUpdated))
-			{
-				System.IO.File.Delete(FullPath);
-			}
-			Repository.Status.Refresh();
-		}
-
-		public void Revert()
-		{
-			Verify.State.IsNotDeleted(this);
-			Verify.State.IsTrue((_stagedStatus & StagedStatus.Unstaged) == StagedStatus.Unstaged);
-
-			switch(ItemType)
-			{
-				case TreeItemType.Tree:
-					RevertCore();
-					break;
-				case TreeItemType.Commit:
-				case TreeItemType.Blob:
-					switch(Status)
-					{
-						case FileStatus.Removed:
-						case FileStatus.Modified:
-							RevertCore();
-							break;
-						default:
-							throw new InvalidOperationException("Inappropriate status.");
+						stack.Push(p.Name);
 					}
-					break;
-			}
-		}
-
-		private void RevertCore()
-		{
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.WorktreeUpdated))
-			{
-				Repository.Accessor.CheckoutFiles.Invoke(
-					new CheckoutFilesParameters(RelativePath)
-					{
-						Mode = CheckoutFileMode.IgnoreUnmergedEntries,
-					});
-			}
-			Repository.Status.Refresh();
-		}
-
-		#endregion
-
-		public TreeDirectory Parent
-		{
-			get => _parent;
-			internal set => _parent = value;
-		}
-
-		public string FullPath
-		{
-			get
-			{
-				var sb = new StringBuilder();
-				var root = Repository.WorkingDirectory;
-				sb.Append(root);
-				if(!root.EndsWith(Path.DirectorySeparatorChar) && !root.EndsWith(Path.AltDirectorySeparatorChar))
+					p = p.Parent;
+				}
+				while(stack.Count != 0)
 				{
+					var name = stack.Pop();
+					sb.Append(name);
 					sb.Append(Path.DirectorySeparatorChar);
 				}
-				if(_parent != null)
-				{
-					var stack = new Stack<string>();
-					var p = _parent;
-					while(p != null && p.Parent != null)
-					{
-						if(!string.IsNullOrWhiteSpace(p.Name))
-						{
-							stack.Push(p.Name);
-						}
-						p = p.Parent;
-					}
-					while(stack.Count != 0)
-					{
-						var name = stack.Pop();
-						sb.Append(name);
-						sb.Append(Path.DirectorySeparatorChar);
-					}
-					sb.Append(Name);
-				}
-				else
-				{
-					sb.Append(RelativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
-				}
-				return sb.ToString();
+				sb.Append(Name);
 			}
+			else
+			{
+				sb.Append(RelativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+			}
+			return sb.ToString();
 		}
-
-		public string RelativePath => _relativePath;
-
-		/// <inheritdoc/>
-		public override string ToString() => RelativePath;
 	}
+
+	public string RelativePath => _relativePath;
+
+	/// <inheritdoc/>
+	public override string ToString() => RelativePath;
 }

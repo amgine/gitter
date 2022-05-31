@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
-{
-	public interface IUserInputSource
-	{
-		bool IsReadOnly { get; set; }
-	}
+namespace gitter.Framework.Mvc;
 
-	public interface IUserInputSource<T> : IUserInputSource
-	{
-		T Value { get; set; }
-	}
+public interface IUserInputSource
+{
+	bool IsReadOnly { get; set; }
+}
+
+public interface IUserInputSource<T> : IUserInputSource
+{
+	T Value { get; set; }
 }

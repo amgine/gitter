@@ -18,32 +18,33 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using gitter.Framework;
+
+using gitter.Git.Gui.Views;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RepositoryHistoryListItem : RepositoryExplorerItemBase
 {
-	using gitter.Framework;
+	private readonly IWorkingEnvironment _environment;
 
-	using gitter.Git.Gui.Views;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RepositoryHistoryListItem : RepositoryExplorerItemBase
+	public RepositoryHistoryListItem(IWorkingEnvironment environment)
+		: base(Icons.History, Resources.StrHistory)
 	{
-		private readonly IWorkingEnvironment _environment;
+		Verify.Argument.IsNotNull(environment);
 
-		public RepositoryHistoryListItem(IWorkingEnvironment environment)
-			: base(@"history", Resources.StrHistory)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			_environment = environment;
-		}
-
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-			_environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
-		}
-
-		public override void OnDoubleClick(int x, int y) { }
+		_environment = environment;
 	}
+
+	/// <inheritdoc/>
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		_environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
+	}
+
+	/// <inheritdoc/>
+	public override void OnDoubleClick(int x, int y) { }
 }

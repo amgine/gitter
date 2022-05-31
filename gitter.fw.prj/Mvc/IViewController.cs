@@ -18,11 +18,10 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
+namespace gitter.Framework.Mvc;
+
+public interface IViewController<T>
+	where T : class, IView
 {
-	public interface IViewController<T>
-		where T : class, IView
-	{
-		T View { get; set; }
-	}
+	T View { get; set; }
 }

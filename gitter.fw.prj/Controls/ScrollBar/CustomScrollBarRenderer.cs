@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2022  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,94 +18,93 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public abstract class CustomScrollBarRenderer : ICustomScrollBarRenderer
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private static ICustomScrollBarRenderer _msvs2012Dark;
+	private static ICustomScrollBarRenderer _msvs2012Light;
 
-	public abstract class CustomScrollBarRenderer
+	public static ICustomScrollBarRenderer MSVS2012Dark
+		=> _msvs2012Dark ??= new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.DarkColor);
+
+	public static ICustomScrollBarRenderer MSVS2012Light
+		=> _msvs2012Light ??= new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.LightColor);
+
+	public static ICustomScrollBarRenderer Default => MSVS2012Dark;
+
+	public virtual void Render(
+		Orientation scrollBarOrientation, bool isEnabled, Graphics graphics, Dpi dpi, Rectangle clipRectangle,
+		Rectangle decreaseButtonBounds, Rectangle decreaseTrackBarBounds, Rectangle thumbBounds, Rectangle increaseTrackBarBounds, Rectangle increaseButtonBounds,
+		CustomScrollBarPart hoveredPart, CustomScrollBarPart pressedPart)
 	{
-		private static CustomScrollBarRenderer _msvs2012Dark;
-		private static CustomScrollBarRenderer _msvs2012Light;
-
-		public static CustomScrollBarRenderer MSVS2012Dark
-			=> _msvs2012Dark ??= new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.DarkColor);
-
-		public static CustomScrollBarRenderer MSVS2012Light
-			=> _msvs2012Light ??= new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.LightColor);
-
-		public static CustomScrollBarRenderer Default => MSVS2012Dark;
-
-		public virtual void Render(
-			Orientation scrollBarOrientation, bool isEnabled, Graphics graphics, Dpi dpi, Rectangle clipRectangle,
-			Rectangle decreaseButtonBounds, Rectangle decreaseTrackBarBounds, Rectangle thumbBounds, Rectangle increaseTrackBarBounds, Rectangle increaseButtonBounds,
-			CustomScrollBarPart hoveredPart, CustomScrollBarPart pressedPart)
+		if(pressedPart != CustomScrollBarPart.None)
 		{
-			if(pressedPart != CustomScrollBarPart.None)
-			{
-				hoveredPart = pressedPart;
-			}
-			if(decreaseButtonBounds.IntersectsWith(clipRectangle))
-			{
-				RenderPart(
-					CustomScrollBarPart.DecreaseButton,
-					scrollBarOrientation,
-					graphics, dpi,
-					decreaseButtonBounds,
-					isEnabled,
-					hoveredPart == CustomScrollBarPart.DecreaseButton,
-					pressedPart == CustomScrollBarPart.DecreaseButton);
-			}
-			if(decreaseTrackBarBounds.IntersectsWith(clipRectangle))
-			{
-				RenderPart(
-					CustomScrollBarPart.DecreaseTrackBar,
-					scrollBarOrientation,
-					graphics, dpi,
-					decreaseTrackBarBounds,
-					isEnabled,
-					hoveredPart == CustomScrollBarPart.DecreaseTrackBar,
-					pressedPart == CustomScrollBarPart.DecreaseTrackBar);
-			}
-			if(thumbBounds.IntersectsWith(clipRectangle))
-			{
-				RenderPart(
-					CustomScrollBarPart.Thumb,
-					scrollBarOrientation,
-					graphics, dpi,
-					thumbBounds,
-					isEnabled,
-					hoveredPart == CustomScrollBarPart.Thumb,
-					pressedPart == CustomScrollBarPart.Thumb);
-			}
-			if(increaseTrackBarBounds.IntersectsWith(clipRectangle))
-			{
-				RenderPart(
-					CustomScrollBarPart.IncreaseTrackBar,
-					scrollBarOrientation,
-					graphics, dpi,
-					increaseTrackBarBounds,
-					isEnabled,
-					hoveredPart == CustomScrollBarPart.IncreaseTrackBar,
-					pressedPart == CustomScrollBarPart.IncreaseTrackBar);
-			}
-			if(increaseButtonBounds.IntersectsWith(clipRectangle))
-			{
-				RenderPart(
-					CustomScrollBarPart.IncreaseButton,
-					scrollBarOrientation,
-					graphics, dpi,
-					increaseButtonBounds,
-					isEnabled,
-					hoveredPart == CustomScrollBarPart.IncreaseButton,
-					pressedPart == CustomScrollBarPart.IncreaseButton);
-			}
+			hoveredPart = pressedPart;
 		}
-
-		protected abstract void RenderPart(
-			CustomScrollBarPart part, Orientation scrollBarOrientation,
-			Graphics graphics, Dpi dpi, Rectangle bounds,
-			bool isEnabled, bool isHovered, bool isPressed);
+		if(decreaseButtonBounds.IntersectsWith(clipRectangle))
+		{
+			RenderPart(
+				CustomScrollBarPart.DecreaseButton,
+				scrollBarOrientation,
+				graphics, dpi,
+				decreaseButtonBounds,
+				isEnabled,
+				hoveredPart == CustomScrollBarPart.DecreaseButton,
+				pressedPart == CustomScrollBarPart.DecreaseButton);
+		}
+		if(decreaseTrackBarBounds.IntersectsWith(clipRectangle))
+		{
+			RenderPart(
+				CustomScrollBarPart.DecreaseTrackBar,
+				scrollBarOrientation,
+				graphics, dpi,
+				decreaseTrackBarBounds,
+				isEnabled,
+				hoveredPart == CustomScrollBarPart.DecreaseTrackBar,
+				pressedPart == CustomScrollBarPart.DecreaseTrackBar);
+		}
+		if(thumbBounds.IntersectsWith(clipRectangle))
+		{
+			RenderPart(
+				CustomScrollBarPart.Thumb,
+				scrollBarOrientation,
+				graphics, dpi,
+				thumbBounds,
+				isEnabled,
+				hoveredPart == CustomScrollBarPart.Thumb,
+				pressedPart == CustomScrollBarPart.Thumb);
+		}
+		if(increaseTrackBarBounds.IntersectsWith(clipRectangle))
+		{
+			RenderPart(
+				CustomScrollBarPart.IncreaseTrackBar,
+				scrollBarOrientation,
+				graphics, dpi,
+				increaseTrackBarBounds,
+				isEnabled,
+				hoveredPart == CustomScrollBarPart.IncreaseTrackBar,
+				pressedPart == CustomScrollBarPart.IncreaseTrackBar);
+		}
+		if(increaseButtonBounds.IntersectsWith(clipRectangle))
+		{
+			RenderPart(
+				CustomScrollBarPart.IncreaseButton,
+				scrollBarOrientation,
+				graphics, dpi,
+				increaseButtonBounds,
+				isEnabled,
+				hoveredPart == CustomScrollBarPart.IncreaseButton,
+				pressedPart == CustomScrollBarPart.IncreaseButton);
+		}
 	}
+
+	protected abstract void RenderPart(
+		CustomScrollBarPart part, Orientation scrollBarOrientation,
+		Graphics graphics, Dpi dpi, Rectangle bounds,
+		bool isEnabled, bool isHovered, bool isPressed);
 }

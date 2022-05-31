@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,162 +18,146 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>Dialog for creating <see cref="Tag"/> object.</summary>
+[ToolboxItem(false)]
+public partial class CreateTagDialog : GitDialogBase, IExecutableDialog, ICreateTagView
 {
-	using System;
-	using System.ComponentModel;
+	private Repository _repository;
+	private TextBoxSpellChecker _speller;
+	private readonly ICreateTagController _controller;
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	/// <summary>Dialog for creating <see cref="Tag"/> object.</summary>
-	[ToolboxItem(false)]
-	public partial class CreateTagDialog : GitDialogBase, IExecutableDialog, ICreateTagView
+	/// <summary>Create <see cref="CreateTagDialog"/>.</summary>
+	/// <param name="repository"><see cref="Repository"/> to create <see cref="Tag"/> in.</param>
+	/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
+	public CreateTagDialog(Repository repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(repository);
 
-		private Repository _repository;
-		private TextBoxSpellChecker _speller;
-		private readonly ICreateTagController _controller;
+		_repository = repository;
 
-		#endregion
+		InitializeComponent();
+		Localize();
 
-		#region .ctor
-
-		/// <summary>Create <see cref="CreateTagDialog"/>.</summary>
-		/// <param name="repository"><see cref="Repository"/> to create <see cref="Tag"/> in.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
-		public CreateTagDialog(Repository repository)
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			TagName   = new TextBoxInputSource(_txtName),
+			Revision  = new ControlInputSource(_txtRevision),
+			Message   = new TextBoxInputSource(_txtMessage),
+			Annotated = new RadioButtonInputSource(_radAnnotated),
+			Signed    = new RadioButtonInputSource(_radSigned),
+			UseKeyId  = new RadioButtonInputSource(_radUseKeyId),
+			KeyId     = new TextBoxInputSource(_txtKeyId),
+		};
 
-			_repository = repository;
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			InitializeComponent();
-			Localize();
+		SetupReferenceNameInputBox(_txtName, ReferenceType.Tag);
 
-			var inputs = new IUserInputSource[]
-			{
-				TagName   = new TextBoxInputSource(_txtName),
-				Revision  = new ControlInputSource(_txtRevision),
-				Message   = new TextBoxInputSource(_txtMessage),
-				Annotated = new RadioButtonInputSource(_radAnnotated),
-				Signed    = new RadioButtonInputSource(_radSigned),
-				UseKeyId  = new RadioButtonInputSource(_radUseKeyId),
-				KeyId     = new TextBoxInputSource(_txtKeyId),
-			};
+		_txtRevision.References.LoadData(
+			_repository,
+			ReferenceType.Reference,
+			GlobalBehavior.GroupReferences,
+			GlobalBehavior.GroupRemoteBranches);
+		_txtRevision.References.Items[0].IsExpanded = true;
 
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
-
-			SetupReferenceNameInputBox(_txtName, ReferenceType.Tag);
-
-			_txtRevision.References.LoadData(
-				_repository,
-				ReferenceType.Reference,
-				GlobalBehavior.GroupReferences,
-				GlobalBehavior.GroupRemoteBranches);
-			_txtRevision.References.Items[0].IsExpanded = true;
-
-			GitterApplication.FontManager.InputFont.Apply(_txtKeyId, _txtMessage, _txtName, _txtRevision);
-			GlobalBehavior.SetupAutoCompleteSource(_txtRevision, _repository, ReferenceType.Branch);
-			if(SpellingService.Enabled)
-			{
-				_speller = new TextBoxSpellChecker(_txtMessage, true);
-			}
-
-			_controller = new CreateTagController(repository) { View = this };
+		GitterApplication.FontManager.InputFont.Apply(_txtKeyId, _txtMessage, _txtName, _txtRevision);
+		GlobalBehavior.SetupAutoCompleteSource(_txtRevision, _repository, ReferenceType.Branch);
+		if(SpellingService.Enabled)
+		{
+			_speller = new TextBoxSpellChecker(_txtMessage, true);
 		}
 
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb => Resources.StrCreate;
-
-		public IUserInputSource<string> TagName { get; }
-
-		public IUserInputSource<string> Revision { get; }
-
-		public IUserInputSource<string> Message { get; }
-
-		public IUserInputSource<bool> Signed { get; }
-
-		public IUserInputSource<bool> Annotated { get; }
-
-		public IUserInputSource<bool> UseKeyId { get; }
-
-		public IUserInputSource<string> KeyId { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region Methods
-
-		private void Localize()
-		{
-			Text				= Resources.StrCreateTag;
-
-			_lblName.Text		= Resources.StrName.AddColon();
-			_lblRevision.Text	= Resources.StrRevision.AddColon();
-
-			_grpOptions.Text	= Resources.StrType;
-			_radSimple.Text		= Resources.StrSimpleTag;
-			_radAnnotated.Text	= Resources.StrAnnotatedTag;
-			_radSigned.Text		= Resources.StrSigned;
-			
-			_grpMessage.Text	= Resources.StrMessage;
-			
-			_grpSigning.Text	= Resources.StrSigning;
-			_radUseDefaultEmailKey.Text = Resources.StrUseDefaultEmailKey;
-			_radUseKeyId.Text	= Resources.StrUseKeyId.AddColon();
-		}
-
-		private void SetControlStates()
-		{
-			bool signed = _radSigned.Checked;
-			bool annotated = signed || _radAnnotated.Checked;
-			_txtMessage.Enabled = annotated;
-			_radUseDefaultEmailKey.Enabled = signed;
-			_radUseKeyId.Enabled = signed;
-			_txtKeyId.Enabled = signed & _radUseKeyId.Checked;
-		}
-
-		private void _radSimple_CheckedChanged(object sender, EventArgs e)
-		{
-			SetControlStates();
-		}
-
-		private void _radAnnotated_CheckedChanged(object sender, EventArgs e)
-		{
-			SetControlStates();
-		}
-
-		private void _radSigned_CheckedChanged(object sender, EventArgs e)
-		{
-			SetControlStates();
-		}
-
-		private void _radUseKeyId_CheckedChanged(object sender, EventArgs e)
-		{
-			_txtKeyId.Enabled = _radUseKeyId.Checked;
-		}
-
-		#endregion
-
-		#region IExecutableDialog
-
-		/// <summary>Create <see cref="Tag"/>.</summary>
-		/// <returns>true, if <see cref="Tag"/> was created successfully.</returns>
-		public bool Execute() => _controller.TryCreateTag();
-
-		#endregion
+		_controller = new CreateTagController(repository) { View = this };
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 364));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrCreate;
+
+	public IUserInputSource<string> TagName { get; }
+
+	public IUserInputSource<string> Revision { get; }
+
+	public IUserInputSource<string> Message { get; }
+
+	public IUserInputSource<bool> Signed { get; }
+
+	public IUserInputSource<bool> Annotated { get; }
+
+	public IUserInputSource<bool> UseKeyId { get; }
+
+	public IUserInputSource<string> KeyId { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	private void Localize()
+	{
+		Text				= Resources.StrCreateTag;
+
+		_lblName.Text		= Resources.StrName.AddColon();
+		_lblRevision.Text	= Resources.StrRevision.AddColon();
+
+		_grpOptions.Text	= Resources.StrType;
+		_radSimple.Text		= Resources.StrSimpleTag;
+		_radAnnotated.Text	= Resources.StrAnnotatedTag;
+		_radSigned.Text		= Resources.StrSigned;
+			
+		_grpMessage.Text	= Resources.StrMessage;
+			
+		_grpSigning.Text	= Resources.StrSigning;
+		_radUseDefaultEmailKey.Text = Resources.StrUseDefaultEmailKey;
+		_radUseKeyId.Text	= Resources.StrUseKeyId.AddColon();
+	}
+
+	private void SetControlStates()
+	{
+		bool signed = _radSigned.Checked;
+		bool annotated = signed || _radAnnotated.Checked;
+		_txtMessage.Enabled = annotated;
+		_radUseDefaultEmailKey.Enabled = signed;
+		_radUseKeyId.Enabled = signed;
+		_txtKeyId.Enabled = signed & _radUseKeyId.Checked;
+	}
+
+	private void _radSimple_CheckedChanged(object sender, EventArgs e)
+	{
+		SetControlStates();
+	}
+
+	private void _radAnnotated_CheckedChanged(object sender, EventArgs e)
+	{
+		SetControlStates();
+	}
+
+	private void _radSigned_CheckedChanged(object sender, EventArgs e)
+	{
+		SetControlStates();
+	}
+
+	private void _radUseKeyId_CheckedChanged(object sender, EventArgs e)
+	{
+		_txtKeyId.Enabled = _radUseKeyId.Checked;
+	}
+
+	/// <summary>Create <see cref="Tag"/>.</summary>
+	/// <returns>true, if <see cref="Tag"/> was created successfully.</returns>
+	public bool Execute() => _controller.TryCreateTag();
 }

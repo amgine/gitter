@@ -18,35 +18,34 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+public static class CustomListBoxManager
 {
-	using System;
+	private static CustomListBoxRenderer _renderer;
+	private static CustomListBoxRenderer _win7Renderer;
+	private static CustomListBoxRenderer _msvs2012LightRenderer;
+	private static CustomListBoxRenderer _msvs2012DarkRenderer;
 
-	public static class CustomListBoxManager
+	public static CustomListBoxRenderer Renderer
 	{
-		private static CustomListBoxRenderer _renderer;
-		private static CustomListBoxRenderer _win7Renderer;
-		private static CustomListBoxRenderer _msvs2012LightRenderer;
-		private static CustomListBoxRenderer _msvs2012DarkRenderer;
-
-		public static CustomListBoxRenderer Renderer
+		get => _renderer ?? Win7Renderer;
+		set
 		{
-			get => _renderer ?? Win7Renderer;
-			set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
+			Verify.Argument.IsNotNull(value);
 
-				_renderer = value;
-			}
+			_renderer = value;
 		}
-
-		public static CustomListBoxRenderer Win7Renderer
-			=> _win7Renderer ??= new Win7CustomListBoxRenderer();
-
-		public static CustomListBoxRenderer MSVS2012LightRenderer
-			=> _msvs2012LightRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.LightColors);
-
-		public static CustomListBoxRenderer MSVS2012DarkRenderer
-			=> _msvs2012DarkRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.DarkColors);
 	}
+
+	public static CustomListBoxRenderer Win7Renderer
+		=> _win7Renderer ??= new Win7CustomListBoxRenderer();
+
+	public static CustomListBoxRenderer MSVS2012LightRenderer
+		=> _msvs2012LightRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.LightColors);
+
+	public static CustomListBoxRenderer MSVS2012DarkRenderer
+		=> _msvs2012DarkRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.DarkColors);
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,96 +18,95 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.TeamCity.Properties.Resources;
+
+sealed class RepositoryExplorerRootListItem : RepositoryExplorerItemBase
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Windows.Forms;
+	private Project _project;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.TeamCity.Properties.Resources;
-
-	sealed class RepositoryExplorerRootListItem : RepositoryExplorerItemBase
+	public RepositoryExplorerRootListItem(IWorkingEnvironment env, TeamCityGuiProvider guiProvider)
+		: base(env, guiProvider, Icons.TeamCity, Resources.StrTeamCity)
 	{
-		private Project _project;
+		Expand();
+	}
 
-		public RepositoryExplorerRootListItem(IWorkingEnvironment env, TeamCityGuiProvider guiProvider)
-			: base(env, guiProvider, CachedResources.Bitmaps["ImgTeamCity"], Resources.StrTeamCity)
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		var menu = new TeamCityMenu(WorkingEnvironment, GuiProvider);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
+	}
+
+	private void OnProjectBuildTypesUpdated(IAsyncResult ar)
+	{
+		var action = (Action)ar.AsyncState;
+		try
 		{
-			Expand();
+			action.EndInvoke(ar);
 		}
-
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+		catch
 		{
-			var menu = new TeamCityMenu(WorkingEnvironment, GuiProvider);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
+			return;
 		}
-
-		private void OnProjectBuildTypesUpdated(IAsyncResult ar)
+		var listBox = ListBox;
+		if(listBox != null)
 		{
-			var action = (Action)ar.AsyncState;
-			try
-			{
-				action.EndInvoke(ar);
-			}
-			catch
-			{
-				return;
-			}
-			var listBox = ListBox;
-			if(listBox != null)
-			{
-				listBox.BeginInvoke(new MethodInvoker(AddBuildTypes));
-			}
+			listBox.BeginInvoke(new MethodInvoker(AddBuildTypes));
 		}
+	}
 
-		private void AddBuildTypes()
+	private void AddBuildTypes()
+	{
+		Items.Clear();
+		lock(_project.BuildTypes.SyncRoot)
 		{
-			Items.Clear();
-			lock(_project.BuildTypes.SyncRoot)
+			foreach(var buildType in _project.BuildTypes)
 			{
-				foreach(var buildType in _project.BuildTypes)
-				{
-					var item = new BuildTypeListItem(buildType);
-					Items.Add(item);
-					item.Activated += OnBuildTypeItemActivated;
-				}
+				var item = new BuildTypeListItem(buildType);
+				Items.Add(item);
+				item.Activated += OnBuildTypeItemActivated;
 			}
 		}
+	}
 
-		private void OnBuildTypeItemActivated(object sender, EventArgs e)
+	private void OnBuildTypeItemActivated(object sender, EventArgs e)
+	{
+		var item = (BuildTypeListItem)sender;
+		var buildType = item.DataContext;
+
+		var view = WorkingEnvironment.ViewDockService.ShowView(
+			Views.Guids.BuildTypeBuildsViewGuid,
+			new Views.BuildTypeBuildsViewModel(buildType),
+			true) as TeamCityViewBase;
+		if(view != null)
 		{
-			var item = (BuildTypeListItem)sender;
-			var buildType = item.DataContext;
-
-			var view = WorkingEnvironment.ViewDockService.ShowView(
-				Views.Guids.BuildTypeBuildsViewGuid,
-				new Views.BuildTypeBuildsViewModel(buildType),
-				true) as TeamCityViewBase;
-			if(view != null)
-			{
-				view.ServiceContext = ServiceContext;
-			}
+			view.ServiceContext = ServiceContext;
 		}
+	}
 
-		protected override void OnListBoxAttached()
-		{
-			base.OnListBoxAttached();
+	protected override void OnListBoxAttached()
+	{
+		base.OnListBoxAttached();
 
-			Items.Clear();
-			_project = ServiceContext.Projects.Lookup(ServiceContext.DefaultProjectId);
-			var action = new Action(_project.BuildTypes.Refresh);
-			action.BeginInvoke(OnProjectBuildTypesUpdated, action);
-		}
+		Items.Clear();
+		_project = ServiceContext.Projects.Lookup(ServiceContext.DefaultProjectId);
+		var action = new Action(_project.BuildTypes.Refresh);
+		action.BeginInvoke(OnProjectBuildTypesUpdated, action);
+	}
 
-		protected override void OnListBoxDetached()
-		{
-			base.OnListBoxDetached();
+	protected override void OnListBoxDetached()
+	{
+		base.OnListBoxDetached();
 
-			Items.Clear();
-		}
+		Items.Clear();
 	}
 }

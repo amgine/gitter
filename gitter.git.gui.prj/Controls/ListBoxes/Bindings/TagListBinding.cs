@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+
+using gitter.Framework.Controls;
+
+public sealed class TagListBinding : BaseListBinding<Tag, TagEventArgs>
 {
-	using System;
-
-	using gitter.Framework.Controls;
-
-	public sealed class TagListBinding : BaseListBinding<Tag, TagEventArgs>
+	public TagListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
+		: base(itemHost, repository.Refs.Tags)
 	{
-		public TagListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
-			: base(itemHost, repository.Refs.Tags)
-		{
-		}
-
-		public TagListBinding(CustomListBoxItemsCollection itemHost, RefsTagsCollection tags)
-			: base(itemHost, tags)
-		{
-		}
-
-		protected override Comparison<CustomListBoxItem> GetComparison()
-			=> TagListItem.CompareByName;
-
-		protected override CustomListBoxItem<Tag> RepresentObject(Tag obj)
-			=> new TagListItem(obj);
 	}
+
+	public TagListBinding(CustomListBoxItemsCollection itemHost, RefsTagsCollection tags)
+		: base(itemHost, tags)
+	{
+	}
+
+	protected override Comparison<CustomListBoxItem> GetComparison()
+		=> TagListItem.CompareByName;
+
+	protected override CustomListBoxItem<Tag> RepresentObject(Tag obj)
+		=> new TagListItem(obj);
 }

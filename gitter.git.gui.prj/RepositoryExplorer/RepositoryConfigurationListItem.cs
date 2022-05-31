@@ -18,49 +18,50 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Git.Gui.Controls;
+using gitter.Git.Gui.Views;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RepositoryConfigurationListItem : RepositoryExplorerItemBase
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly IWorkingEnvironment _environment;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Git.Gui.Controls;
-	using gitter.Git.Gui.Views;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RepositoryConfigurationListItem : RepositoryExplorerItemBase
+	public RepositoryConfigurationListItem(IWorkingEnvironment environment)
+		: base(Icons.Configuration, Resources.StrConfig)
 	{
-		private readonly IWorkingEnvironment _environment;
+		Verify.Argument.IsNotNull(environment);
 
-		public RepositoryConfigurationListItem(IWorkingEnvironment environment)
-			: base(@"configuration", Resources.StrConfig)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		_environment = environment;
+	}
 
-			_environment = environment;
-		}
+	/// <inheritdoc/>
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		_environment.ViewDockService.ShowView(Guids.ConfigViewGuid);
+	}
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-			_environment.ViewDockService.ShowView(Guids.ConfigViewGuid);
-		}
+	/// <inheritdoc/>
+	public override void OnDoubleClick(int x, int y) { }
 
-		public override void OnDoubleClick(int x, int y) { }
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
 
-		/// <inheritdoc/>
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
+		if(Repository is null) return default;
 
-			if(Repository is null) return default;
-
-			var menu = new ConfigurationMenu(Repository);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
-		}
+		var menu = new ConfigurationMenu(Repository);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

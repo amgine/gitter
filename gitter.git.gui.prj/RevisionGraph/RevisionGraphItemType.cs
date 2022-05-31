@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+public enum RevisionGraphItemType
 {
-	public enum RevisionGraphItemType
-	{
-		/// <summary>Generic revision.</summary>
-		Generic,
-		/// <summary>Current revision.</summary>
-		Current,
-		/// <summary>Uncommitted staged changes (fake item).</summary>
-		Uncommitted,
-		/// <summary>Unstaged local changes (fake item).</summary>
-		Unstaged,
-	}
+	/// <summary>Generic revision.</summary>
+	Generic,
+	/// <summary>Current revision.</summary>
+	Current,
+	/// <summary>Uncommitted staged changes (fake item).</summary>
+	Uncommitted,
+	/// <summary>Unstaged local changes (fake item).</summary>
+	Unstaged,
 }

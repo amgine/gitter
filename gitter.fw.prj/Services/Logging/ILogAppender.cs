@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+public interface ILogAppender
 {
-	public interface ILogAppender
-	{
-		void Append(LogEvent @event);
-	}
+	void Append(LogEvent @event);
 }

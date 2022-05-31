@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\gitter.fw.prj\ExceptionExtensions.cs" Link="ExceptionExtensions.cs" />
+    <Compile Include="..\gitter.fw.prj\Options\WindowsExplorer.cs" Link="WindowsExplorer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -20,16 +25,12 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net48'))">
     <Reference Include="System.Runtime.Remoting" />
   </ItemGroup>
   
-  <ItemGroup>
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
-    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration)</PostBuildEvent>
+    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration) $(TargetFramework)</PostBuildEvent>
   </PropertyGroup>
 
 </Project>

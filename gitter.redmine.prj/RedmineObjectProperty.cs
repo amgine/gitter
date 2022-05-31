@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,41 +18,40 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+
+public abstract class RedmineObjectProperty
 {
-	using System;
-
-	public abstract class RedmineObjectProperty
+	internal RedmineObjectProperty(string xmlNodeName, string name)
 	{
-		internal RedmineObjectProperty(string xmlNodeName, string name)
-		{
-			XmlNodeName = xmlNodeName;
-			Name        = name;
-		}
-
-		public string XmlNodeName { get; }
-
-		public string Name { get; }
-
-		public abstract Type Type { get; }
-
-		public override string ToString() => Name;
+		XmlNodeName = xmlNodeName;
+		Name        = name;
 	}
 
-	public sealed class RedmineObjectProperty<T> : RedmineObjectProperty
+	public string XmlNodeName { get; }
+
+	public string Name { get; }
+
+	public abstract Type Type { get; }
+
+	public override string ToString() => Name;
+}
+
+public sealed class RedmineObjectProperty<T> : RedmineObjectProperty
+{
+	internal RedmineObjectProperty(string xmlNodeName, string name)
+		: base(xmlNodeName, name)
 	{
-		internal RedmineObjectProperty(string xmlNodeName, string name)
-			: base(xmlNodeName, name)
-		{
-		}
+	}
 
-		public override Type Type => typeof(T);
+	public override Type Type => typeof(T);
 
-		public T GetValue(RedmineObject obj)
-		{
-			Verify.Argument.IsNotNull(obj, nameof(obj));
+	public T GetValue(RedmineObject obj)
+	{
+		Verify.Argument.IsNotNull(obj);
 
-			return (T)obj.GetType().GetProperty(Name).GetValue(obj, null);
-		}
+		return (T)obj.GetType().GetProperty(Name).GetValue(obj, null);
 	}
 }

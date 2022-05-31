@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,32 +18,41 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+
+/// <summary>Graph painter.</summary>
+public interface IGraphStyle
 {
-	using System;
-	using System.Drawing;
-
-	/// <summary>Graph painter.</summary>
-	public interface IGraphStyle
-	{
-		void DrawGraph(Graphics graphics, GraphAtom[] graphLine, Rectangle bounds, int cellWidth, RevisionGraphItemType type, bool useColors);
-
-		void DrawReferenceConnector(Graphics graphics, GraphAtom[] graphLine, int graphX, int cellWidth, int refX, int y, int h);
-
-		void DrawReferencePresenceIndicator(Graphics graphics, GraphAtom[] graphLine, int graphX, int cellWidth, int y, int h);
+	event EventHandler Changed;
 
 
-		int DrawTag(Graphics graphics, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, Tag tag);
+	void DrawBackground(Graphics graphics, Dpi dpi, GraphCell[] graphLine, Rectangle bounds, Rectangle clip, int cellWidth, bool useColors);
 
-		int DrawBranch(Graphics graphics, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, BranchBase branch);
+	void DrawGraph(Graphics graphics, Dpi dpi, GraphCell[] graphLine, Rectangle bounds, Rectangle clip, int cellWidth, RevisionGraphItemType type, bool useColors);
 
-		int DrawStash(Graphics graphics, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, StashedState stash);
+	void DrawReferenceConnector(Graphics graphics, Dpi dpi, GraphCell[] graphLine, int graphX, int cellWidth, int refX, int y, int h);
+
+	void DrawReferencePresenceIndicator(Graphics graphics, Dpi dpi, GraphCell[] graphLine, int graphX, int cellWidth, int y, int h);
 
 
-		int MeasureTag(Graphics graphics, Font font, StringFormat format, Tag tag);
+	Rectangle DrawTag(Graphics graphics, Dpi dpi, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, Tag tag);
 
-		int MeasureBranch(Graphics graphics, Font font, StringFormat format, Branch branch);
+	Rectangle DrawBranch(Graphics graphics, Dpi dpi, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, BranchBase branch);
 
-		int MeasureStash(Graphics graphics, Font font, StringFormat format, StashedState stash);
-	}
+	Rectangle DrawStash(Graphics graphics, Dpi dpi, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, StashedState stash);
+
+
+	bool HitTestReference(Rectangle bounds, int x, int y);
+
+
+	int MeasureTag(Graphics graphics, Dpi dpi, Font font, StringFormat format, Tag tag);
+
+	int MeasureBranch(Graphics graphics, Dpi dpi, Font font, StringFormat format, Branch branch);
+
+	int MeasureStash(Graphics graphics, Dpi dpi, Font font, StringFormat format, StashedState stash);
 }

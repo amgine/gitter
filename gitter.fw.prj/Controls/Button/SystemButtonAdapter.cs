@@ -18,44 +18,56 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Windows.Forms;
+
+public sealed class SystemButtonAdapter : IButtonWidget
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly Button _button;
 
-	public sealed class SystemButtonAdapter : IButtonWidget
+	public event EventHandler Click;
+
+	private void OnClick(EventArgs e)
+		=> Click?.Invoke(this, e);
+
+	public SystemButtonAdapter()
 	{
-		private readonly Button _button;
-
-		public event EventHandler Click;
-
-		private void OnClick(EventArgs e)
-			=> Click?.Invoke(this, e);
-
-		public SystemButtonAdapter()
+		_button = new Button()
 		{
-			_button = new Button()
-			{
-				FlatStyle = FlatStyle.System,
-			};
-			_button.Click += OnButtonClick;
-		}
+			FlatStyle = FlatStyle.System,
+			UseVisualStyleBackColor = true,
+		};
+		_button.Click += OnButtonClick;
+	}
 
-		private void OnButtonClick(object sender, EventArgs e)
-			=> OnClick(e);
+	private void OnButtonClick(object sender, EventArgs e)
+		=> OnClick(e);
 
-		public Control Control => _button;
+	public Control Control => _button;
 
-		public string Text
-		{
-			get => _button.Text;
-			set => _button.Text = value;
-		}
+	public string Text
+	{
+		get => _button.Text;
+		set => _button.Text = value;
+	}
 
-		public void Dispose()
-		{
-			_button.Click -= OnButtonClick;
-			_button.Dispose();
-		}
+	public DialogResult DialogResult
+	{
+		get => _button.DialogResult;
+		set => _button.DialogResult = value;
+	}
+
+	public void NotifyDefault(bool value)
+		=> _button.NotifyDefault(value);
+
+	public void PerformClick()
+		=> _button.PerformClick();
+
+	public void Dispose()
+	{
+		_button.Click -= OnButtonClick;
+		_button.Dispose();
 	}
 }

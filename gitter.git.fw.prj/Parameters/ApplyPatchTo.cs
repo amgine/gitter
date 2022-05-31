@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+public enum ApplyPatchTo
 {
-	public enum ApplyPatchTo
-	{
-		WorkingDirectory,
-		Index,
-		IndexAndWorkingDirectory,
-	}
+	WorkingDirectory,
+	Index,
+	IndexAndWorkingDirectory,
 }

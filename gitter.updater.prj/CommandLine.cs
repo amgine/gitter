@@ -18,71 +18,70 @@
  */
 #endregion
 
-namespace gitter.Updater
+namespace gitter.Updater;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+public sealed class CommandLine
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
+	private readonly Dictionary<string, CommandLineParameter> _parameters = new();
 
-	public sealed class CommandLine
+	public CommandLine()
 	{
-		private readonly Dictionary<string, CommandLineParameter> _parameters = new();
-
-		public CommandLine()
+		var args = Environment.GetCommandLineArgs();
+		for(int i = 1; i < args.Length; ++i)
 		{
-			var args = Environment.GetCommandLineArgs();
-			for(int i = 1; i < args.Length; ++i)
+			var arg = args[i].Trim('"');
+			if(arg.Length > 1 && arg.StartsWith("/"))
 			{
-				var arg = args[i].Trim('"');
-				if(arg.Length > 1 && arg.StartsWith("/"))
+				var colonIndex = arg.IndexOf(':');
+				if(colonIndex != -1)
 				{
-					var colonIndex = arg.IndexOf(':');
-					if(colonIndex != -1)
+					if(colonIndex > 1)
 					{
-						if(colonIndex > 1)
+						string value;
+						var name = arg.Substring(1, colonIndex - 1);
+						if(colonIndex < arg.Length - 1)
 						{
-							string value;
-							var name = arg.Substring(1, colonIndex - 1);
-							if(colonIndex < arg.Length - 1)
-							{
-								value = arg.Substring(colonIndex + 1);
-							}
-							else
-							{
-								value = string.Empty;
-							}
-							_parameters[name] = new CommandLineParameter(name, value);
+							value = arg.Substring(colonIndex + 1);
 						}
+						else
+						{
+							value = string.Empty;
+						}
+						_parameters[name] = new CommandLineParameter(name, value);
 					}
-					else
-					{
-						var name = arg.Substring(1);
-						_parameters[name] = new CommandLineParameter(name, null);
-					}
+				}
+				else
+				{
+					var name = arg.Substring(1);
+					_parameters[name] = new CommandLineParameter(name, null);
 				}
 			}
 		}
-
-		public string this[string name]
-			=> _parameters.TryGetValue(name, out var p)
-				? p.Value
-				: default;
-
-		public bool IsDefined(string name)
-			=> _parameters.ContainsKey(name);
 	}
 
-	public sealed class CommandLineParameter
+	public string this[string name]
+		=> _parameters.TryGetValue(name, out var p)
+			? p.Value
+			: default;
+
+	public bool IsDefined(string name)
+		=> _parameters.ContainsKey(name);
+}
+
+public sealed class CommandLineParameter
+{
+	public CommandLineParameter(string name, string value)
 	{
-		public CommandLineParameter(string name, string value)
-		{
-			Name  = name;
-			Value = value;
-		}
-
-		public string Name { get; }
-
-		public string Value { get; }
+		Name  = name;
+		Value = value;
 	}
+
+	public string Name { get; }
+
+	public string Value { get; }
 }

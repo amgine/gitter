@@ -18,114 +18,116 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[DesignerCategory("")]
+sealed class ReferencesChangedNotification : NotificationContent
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private readonly ReferenceChange[] _changes;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
+	private const int HorizontalMargin = 2;
+	private const int VerticalMargin = 2;
+	private const int ItemHeight = 18;
+	private const int MaxItems = 10;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class ReferencesChangedNotification : NotificationContent
+	public ReferencesChangedNotification(ReferenceChange[] changes)
 	{
-		private readonly ReferenceChange[] _changes;
+		_changes = changes;
+		Height = Measure(changes, Dpi.FromControl(this));
+	}
 
-		private const int HorizontalMargin = 2;
-		private const int VerticalMargin = 2;
-		private const int ItemHeight = 18;
-		private const int MaxItems = 10;
-
-		public ReferencesChangedNotification(ReferenceChange[] changes)
+	private static int Measure(ReferenceChange[] changes, Dpi dpi)
+	{
+		var conv = DpiConverter.FromDefaultTo(dpi);
+		if(changes is not { Length: > 0 })
 		{
-			_changes = changes;
-			Height = Measure(changes, new Dpi(DeviceDpi));
+			return conv.ConvertY(VerticalMargin) * 2 + conv.ConvertY(ItemHeight);
 		}
-
-		private static int Measure(ReferenceChange[] changes, Dpi dpi)
+		else
 		{
-			var conv = DpiConverter.FromDefaultTo(dpi);
-			if(changes is not { Length: > 0 })
+			int count = changes.Length;
+			if(count > MaxItems)
 			{
-				return conv.ConvertY(VerticalMargin) * 2 + conv.ConvertY(ItemHeight);
+				count = MaxItems;
 			}
-			else
-			{
-				int count = changes.Length;
-				if(count > MaxItems)
-				{
-					count = MaxItems;
-				}
-				return conv.ConvertY(VerticalMargin) * 2 + count * conv.ConvertY(ItemHeight);
-			}
+			return conv.ConvertY(VerticalMargin) * 2 + count * conv.ConvertY(ItemHeight);
 		}
+	}
 
-		private static Bitmap GetIcon(ReferenceType referenceType, int size)
-			=> referenceType switch
-			{
-				ReferenceType.RemoteBranch => CachedResources.ScaledBitmaps[@"rbranch", size],
-				ReferenceType.LocalBranch  => CachedResources.ScaledBitmaps[@"branch",  size],
-				ReferenceType.Tag          => CachedResources.ScaledBitmaps[@"tag",     size],
-				_ => null,
-			};
-
-		private static string GetTextPrefix(ReferenceChangeType change)
-			=> change switch
-			{
-				ReferenceChangeType.Added   => Resources.StrAdded,
-				ReferenceChangeType.Moved   => Resources.StrUpdated,
-				ReferenceChangeType.Removed => Resources.StrRemoved,
-				_ => string.Empty,
-			};
-
-		protected override void OnPaint(PaintEventArgs e)
+	private static Image GetIcon(ReferenceType referenceType, int size)
+	{
+		var icon = referenceType switch
 		{
-			Assert.IsNotNull(e);
+			ReferenceType.RemoteBranch => Icons.RemoteBranch,
+			ReferenceType.LocalBranch  => Icons.Branch,
+			ReferenceType.Tag          => Icons.Tag,
+			_ => null,
+		};
+		return icon?.GetImage(size);
+	}
 
-			using(var background = new SolidBrush(BackColor))
+	private static string GetTextPrefix(ReferenceChangeType change)
+		=> change switch
+		{
+			ReferenceChangeType.Added   => Resources.StrAdded,
+			ReferenceChangeType.Moved   => Resources.StrUpdated,
+			ReferenceChangeType.Removed => Resources.StrRemoved,
+			_ => string.Empty,
+		};
+
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		e.Graphics.GdiFill(BackColor, e.ClipRectangle);
+		var conv = new DpiConverter(this);
+		int x = conv.ConvertX(HorizontalMargin);
+		int y = conv.ConvertY(VerticalMargin);
+		using var brush = new SolidBrush(ForeColor);
+		if(_changes is not { Length: > 0 })
+		{
+			GitterApplication.TextRenderer.DrawText(
+				e.Graphics, Resources.StrsEverythingIsUpToDate, Font, brush, new Point(x, y + 2));
+		}
+		else
+		{
+			var itemHeight = conv.ConvertY(ItemHeight);
+			var v = conv.ConvertX(54);
+			var spacing = conv.ConvertX(4);
+			for(int i = 0; i < _changes.Length; ++i)
 			{
-				e.Graphics.FillRectangle(background, e.ClipRectangle);
-			}
-			var conv = new DpiConverter(this);
-			int x = conv.ConvertX(HorizontalMargin);
-			int y = conv.ConvertY(VerticalMargin);
-			using var brush = new SolidBrush(ForeColor);
-			if(_changes is not { Length: > 0 })
-			{
-				GitterApplication.TextRenderer.DrawText(
-					e.Graphics, Resources.StrsEverythingIsUpToDate, Font, brush, new Point(x, y + 2));
-			}
-			else
-			{
-				var itemHeight = conv.ConvertY(ItemHeight);
-				var v = conv.ConvertX(54);
-				var spacing = conv.ConvertX(4);
-				for(int i = 0; i < _changes.Length; ++i)
+				if(i == MaxItems - 1 && _changes.Length > MaxItems)
 				{
-					if(i == MaxItems - 1 && _changes.Length > MaxItems)
-					{
-						GitterApplication.TextRenderer.DrawText(
-							e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Length - MaxItems + 1),
-							Font, brush, new Point(x, y + 2));
-						break;
-					}
-					var prefix = GetTextPrefix(_changes[i].ChangeType);
-					if(!string.IsNullOrWhiteSpace(prefix))
-					{
-						GitterApplication.TextRenderer.DrawText(
-							e.Graphics, prefix, Font, brush, new Point(x, y + 2));
-					}
-					var icon = GetIcon(_changes[i].ReferenceType, conv.ConvertX(16));
-					if(icon is not null)
-					{
-						e.Graphics.DrawImage(icon, new Rectangle(x + v, y + (itemHeight - icon.Height) / 2, icon.Width, icon.Height));
-					}
 					GitterApplication.TextRenderer.DrawText(
-						e.Graphics, _changes[i].Name, Font, brush, new Point(x + v + (icon is not null ? icon.Width : 0) + spacing, y + 2));
-					y += itemHeight;
+						e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Length - MaxItems + 1),
+						Font, brush, new Point(x, y + 2));
+					break;
 				}
+				var prefix = GetTextPrefix(_changes[i].ChangeType);
+				if(!string.IsNullOrWhiteSpace(prefix))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						e.Graphics, prefix, Font, brush, new Point(x, y + 2));
+				}
+				var icon = GetIcon(_changes[i].ReferenceType, conv.ConvertX(16));
+				if(icon is not null)
+				{
+					e.Graphics.DrawImage(icon, new Rectangle(x + v, y + (itemHeight - icon.Height) / 2, icon.Width, icon.Height));
+				}
+				GitterApplication.TextRenderer.DrawText(
+					e.Graphics, _changes[i].Name, Font, brush, new Point(x + v + (icon is not null ? icon.Width : 0) + spacing, y + 2));
+				y += itemHeight;
 			}
 		}
 	}

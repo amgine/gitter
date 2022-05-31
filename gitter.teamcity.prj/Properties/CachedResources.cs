@@ -18,18 +18,13 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+
+using gitter.Framework;
+
+static class CachedResources
 {
-	using System;
-
-	using gitter.Framework;
-
-	using Resources = gitter.TeamCity.Properties.Resources;
-
-	static class CachedResources
-	{
-		public static CachedBitmapResources Bitmaps { get; } = new CachedBitmapResources(Resources.ResourceManager);
-
-		public static CachedScaledImageResources ScaledBitmaps { get; } = new CachedScaledImageResources(typeof(CachedResources).Assembly, @"gitter.Redmine.Resources.icons");
-	}
+	public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.TeamCity.Resources.icons");
 }

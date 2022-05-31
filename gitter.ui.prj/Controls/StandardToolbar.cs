@@ -18,66 +18,57 @@
  */
 #endregion
 
-namespace gitter.Controls
+namespace gitter.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Properties.Resources;
+
+[System.ComponentModel.DesignerCategory("")]
+sealed class StandardToolbar : ToolStrip
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private readonly IWorkingEnvironment _environment;
+	private readonly ToolStripButton _initRepositoryButton;
+	private readonly ToolStripButton _cloneRepositoryButton;
+	private readonly DpiBindings _bindings;
 
-	using gitter.Framework;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	sealed class StandardToolbar : ToolStrip
+	public StandardToolbar(IWorkingEnvironment environment)
 	{
-		static class Icons
-		{
-			const int Size = 16;
+		Verify.Argument.IsNotNull(environment);
 
-			public static readonly IDpiBoundValue<Bitmap> Init  = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"init",  Size);
-			public static readonly IDpiBoundValue<Bitmap> Clone = DpiBoundValue.Icon(CachedResources.ScaledBitmaps, @"clone", Size);
-		}
+		_environment = environment;
 
-		private readonly IWorkingEnvironment _environment;
-		private readonly ToolStripButton _initRepositoryButton;
-		private readonly ToolStripButton _cloneRepositoryButton;
-		private readonly DpiBindings _bindings;
+		Text = Resources.StrStandard;
 
-		public StandardToolbar(IWorkingEnvironment environment)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		const TextImageRelation         tir = TextImageRelation.ImageAboveText;
+		const ToolStripItemDisplayStyle ds  = ToolStripItemDisplayStyle.ImageAndText;
 
-			_environment = environment;
+		Items.AddRange(new ToolStripItem[]
+			{
+				_initRepositoryButton = new ToolStripButton(Resources.StrInit, default, OnInitRepositoryClick)
+					{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipInit },
+				_cloneRepositoryButton = new ToolStripButton(Resources.StrClone, default, OnCloneRepositoryClick)
+					{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipClone },
+			});
 
-			Text = Resources.StrStandard;
+		_bindings = new DpiBindings(this);
+		_bindings.BindImage(_initRepositoryButton,  CommonIcons.Init);
+		_bindings.BindImage(_cloneRepositoryButton, CommonIcons.Clone);
+	}
 
-			const TextImageRelation         tir = TextImageRelation.ImageAboveText;
-			const ToolStripItemDisplayStyle ds  = ToolStripItemDisplayStyle.ImageAndText;
+	private void OnInitRepositoryClick(object sender, EventArgs e)
+	{
+		using var dlg = new InitRepositoryDialog(_environment);
+		dlg.Run(_environment.MainForm);
+	}
 
-			Items.AddRange(new ToolStripItem[]
-				{
-					_initRepositoryButton = new ToolStripButton(Resources.StrInit, default, OnInitRepositoryClick)
-						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipInit },
-					_cloneRepositoryButton = new ToolStripButton(Resources.StrClone, default, OnCloneRepositoryClick)
-						{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipClone },
-				});
-
-			_bindings = new DpiBindings(this);
-			_bindings.BindImage(_initRepositoryButton,  Icons.Init);
-			_bindings.BindImage(_cloneRepositoryButton, Icons.Clone);
-		}
-
-		private void OnInitRepositoryClick(object sender, EventArgs e)
-		{
-			using var dlg = new InitRepositoryDialog(_environment);
-			dlg.Run(_environment.MainForm);
-		}
-
-		private void OnCloneRepositoryClick(object sender, EventArgs e)
-		{
-			using var dlg = new CloneRepositoryDialog(_environment);
-			dlg.Run(_environment.MainForm);
-		}
+	private void OnCloneRepositoryClick(object sender, EventArgs e)
+	{
+		using var dlg = new CloneRepositoryDialog(_environment);
+		dlg.Run(_environment.MainForm);
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,40 +18,38 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Globalization;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+sealed class RedmineMenu : ContextMenuStrip
 {
-	using System;
-	using System.Globalization;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	private readonly IWorkingEnvironment _workingEnvironment;
+	private readonly RedmineGuiProvider _guiProvider;
 
-	using gitter.Framework;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	[ToolboxItem(false)]
-	sealed class RedmineMenu : ContextMenuStrip
+	public RedmineMenu(IWorkingEnvironment environment, RedmineGuiProvider guiProvider)
 	{
-		private readonly IWorkingEnvironment _workingEnvironment;
-		private readonly RedmineGuiProvider _guiProvider;
+		Verify.Argument.IsNotNull(environment);
+		Verify.Argument.IsNotNull(guiProvider);
 
-		public RedmineMenu(IWorkingEnvironment environment, RedmineGuiProvider guiProvider)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
+		_workingEnvironment = environment;
+		_guiProvider = guiProvider;
 
-			_workingEnvironment = environment;
-			_guiProvider = guiProvider;
+		Items.Add(new ToolStripMenuItem("Setup...", null, OnSetupClick));
+	}
 
-			Items.Add(new ToolStripMenuItem("Setup...", null, OnSetupClick));
-		}
-
-		private void OnSetupClick(object sender, EventArgs e)
-		{
-			using(var dlg = new ProviderSetupControl(_guiProvider.Repository))
-			{
-				dlg.Run(GitterApplication.MainForm);
-			}
-		}
+	private void OnSetupClick(object sender, EventArgs e)
+	{
+		using var dlg = new ProviderSetupControl(_guiProvider.Repository);
+		dlg.Run(GitterApplication.MainForm);
 	}
 }

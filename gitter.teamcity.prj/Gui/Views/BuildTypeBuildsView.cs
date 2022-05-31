@@ -18,111 +18,110 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui.Views
+namespace gitter.TeamCity.Gui.Views;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.TeamCity.Properties.Resources;
+
+sealed class BuildTypeBuildsView : TeamCityViewBase
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Linq;
-	using System.Text;
+	private BuildType _buildType;
+	private CustomListBox _lstBuilds;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.TeamCity.Properties.Resources;
-
-	sealed class BuildTypeBuildsView : TeamCityViewBase
+	public BuildTypeBuildsView(IWorkingEnvironment environment)
+		: base(Guids.BuildTypeBuildsViewGuid, environment)
 	{
-		private BuildType _buildType;
-		private CustomListBox _lstBuilds;
-
-		public BuildTypeBuildsView(IWorkingEnvironment environment)
-			: base(Guids.BuildTypeBuildsViewGuid, environment)
-		{
-			_lstBuilds = new CustomListBox();
-			_lstBuilds.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			_lstBuilds.Columns.AddRange(new CustomListBoxColumn[]
-				{
-					new CustomListBoxColumn((int)ColumnId.Id, Resources.StrId) { Width = 50 },
-					new CustomListBoxColumn((int)ColumnId.Number, Resources.StrNumber) { Width = 150 },
-					new DateColumn((int)ColumnId.StartDate, Resources.StrStartDate, true) { Width = 150 },
-					new CustomListBoxColumn((int)ColumnId.Status, Resources.StrStatus) { Width = 100 },
-				});
-			_lstBuilds.Bounds = this.ClientRectangle;
-			_lstBuilds.Anchor = System.Windows.Forms.AnchorStyles.Left |
-								System.Windows.Forms.AnchorStyles.Top |
-								System.Windows.Forms.AnchorStyles.Right |
-								System.Windows.Forms.AnchorStyles.Bottom;
-			_lstBuilds.Parent = this;
-		}
-
-		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"builds");
-
-		protected override void AttachViewModel(object viewModel)
-		{
-			base.AttachViewModel(viewModel);
-
-			var vm = viewModel as BuildTypeBuildsViewModel;
-			if(vm != null)
+		_lstBuilds = new CustomListBox();
+		_lstBuilds.BorderStyle = System.Windows.Forms.BorderStyle.None;
+		_lstBuilds.Columns.AddRange(new CustomListBoxColumn[]
 			{
-				_buildType = vm.BuildType;
-				if(_buildType != null)
+				new CustomListBoxColumn((int)ColumnId.Id, Resources.StrId) { Width = 50 },
+				new CustomListBoxColumn((int)ColumnId.Number, Resources.StrNumber) { Width = 150 },
+				new DateColumn((int)ColumnId.StartDate, Resources.StrStartDate, true) { Width = 150 },
+				new CustomListBoxColumn((int)ColumnId.Status, Resources.StrStatus) { Width = 100 },
+			});
+		_lstBuilds.Bounds = this.ClientRectangle;
+		_lstBuilds.Anchor = System.Windows.Forms.AnchorStyles.Left |
+							System.Windows.Forms.AnchorStyles.Top |
+							System.Windows.Forms.AnchorStyles.Right |
+							System.Windows.Forms.AnchorStyles.Bottom;
+		_lstBuilds.Parent = this;
+	}
+
+	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"builds");
+
+	protected override void AttachViewModel(object viewModel)
+	{
+		base.AttachViewModel(viewModel);
+
+		var vm = viewModel as BuildTypeBuildsViewModel;
+		if(vm != null)
+		{
+			_buildType = vm.BuildType;
+			if(_buildType != null)
+			{
+				Text = _buildType.Name;
+				if(ServiceContext != null)
 				{
-					Text = _buildType.Name;
-					if(ServiceContext != null)
-					{
-						RefreshContent();
-					}
+					RefreshContent();
 				}
 			}
 		}
+	}
 
-		protected override void DetachViewModel(object viewModel)
+	protected override void DetachViewModel(object viewModel)
+	{
+		base.DetachViewModel(viewModel);
+
+		var vm = viewModel as BuildTypeBuildsViewModel;
+		if(vm != null)
 		{
-			base.DetachViewModel(viewModel);
+			_buildType = null;
+			Text = string.Empty;
+		}
+	}
 
-			var vm = viewModel as BuildTypeBuildsViewModel;
-			if(vm != null)
+	protected override void OnContextAttached()
+	{
+		base.OnContextAttached();
+		RefreshContent();
+	}
+
+	protected override void OnContextDetached()
+	{
+		base.OnContextDetached();
+		RefreshContent();
+	}
+
+	public override void RefreshContent()
+	{
+		base.RefreshContent();
+
+		if(ServiceContext is not null && _buildType is not null)
+		{
+			_lstBuilds.BeginUpdate();
+			_lstBuilds.Items.Clear();
+			_buildType.Builds.Refresh();
+			lock(_buildType.Builds.SyncRoot)
 			{
-				_buildType = null;
-				Text = string.Empty;
-			}
-		}
-
-		protected override void OnContextAttached()
-		{
-			base.OnContextAttached();
-			RefreshContent();
-		}
-
-		protected override void OnContextDetached()
-		{
-			base.OnContextDetached();
-			RefreshContent();
-		}
-
-		public override void RefreshContent()
-		{
-			base.RefreshContent();
-
-			if(ServiceContext != null && _buildType != null)
-			{
-				_lstBuilds.BeginUpdate();
-				_lstBuilds.Items.Clear();
-				_buildType.Builds.Refresh();
-				lock(_buildType.Builds.SyncRoot)
+				foreach(var build in _buildType.Builds)
 				{
-					foreach(var build in _buildType.Builds)
-					{
-						_lstBuilds.Items.Add(new BuildListItem(build));
-					}
+					_lstBuilds.Items.Add(new BuildListItem(build));
 				}
-				_lstBuilds.EndUpdate();
 			}
-			else
-			{
-				_lstBuilds.Items.Clear();
-			}
+			_lstBuilds.EndUpdate();
+		}
+		else
+		{
+			_lstBuilds.Items.Clear();
 		}
 	}
 }

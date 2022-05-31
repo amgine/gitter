@@ -18,76 +18,70 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+internal sealed class RecentRepositoryListItem : CustomListBoxItem<RepositoryLink>
 {
-	using System;
-	using System.IO;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
+	private static readonly StringFormat PathStringFormat;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
-
-	using Resources = gitter.Properties.Resources;
-
-	internal sealed class RecentRepositoryListItem : CustomListBoxItem<RepositoryLink>
+	static RecentRepositoryListItem()
 	{
-		private static readonly StringFormat PathStringFormat;
+		PathStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
+		PathStringFormat.Trimming = StringTrimming.EllipsisPath;
+		PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
+	}
 
-		static RecentRepositoryListItem()
+	public RecentRepositoryListItem(RepositoryLink repository)
+		: base(repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+	}
+
+	private static Image GetIcon(Dpi dpi)
+		=> Icons.Repository.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch(measureEventArgs.SubItemId)
 		{
-			PathStringFormat = new StringFormat(GitterApplication.TextRenderer.LeftAlign);
-			PathStringFormat.Trimming = StringTrimming.EllipsisPath;
-			PathStringFormat.FormatFlags |= StringFormatFlags.NoClip;
+			case 0:
+				return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Path);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		public RecentRepositoryListItem(RepositoryLink repository)
-			: base(repository)
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch(paintEventArgs.SubItemId)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			case 0:
+				paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.Path, paintEventArgs.Brush, PathStringFormat);
+				break;
 		}
+	}
 
-		private static Bitmap GetIcon(Dpi dpi)
-			=> CachedResources.ScaledBitmaps[@"repository", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
 
-		/// <inheritdoc/>
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Path);
-				default:
-					return Size.Empty;
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			Assert.IsNotNull(paintEventArgs);
-
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.Path, paintEventArgs.Brush, PathStringFormat);
-					break;
-			}
-		}
-
-		/// <inheritdoc/>
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
-
-			var menu = new RecentRepositoryMenu(this);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
-		}
+		var menu = new RecentRepositoryMenu(this);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

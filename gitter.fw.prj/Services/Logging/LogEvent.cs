@@ -18,43 +18,37 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+
+public readonly struct LogEvent
 {
-	using System;
+	public readonly string Source;
+	public readonly LogEventType Type;
+	public readonly string Message;
+	public readonly DateTime Timestamp;
+	public readonly Exception Exception;
 
-	public struct LogEvent
+	public LogEvent(string source, LogEventType type, string message, DateTime timestamp)
 	{
-		#region Data
-
-		public readonly string Source;
-		public readonly LogEventType Type;
-		public readonly string Message;
-		public readonly DateTime Timestamp;
-		public readonly Exception Exception;
-
-		#endregion
-
-		public LogEvent(string source, LogEventType type, string message, DateTime timestamp)
-		{
-			Source = source;
-			Type = type;
-			Message = message;
-			Timestamp = timestamp;
-			Exception = null;
-		}
-
-		public LogEvent(string source, LogEventType type, string message, DateTime timestamp, Exception exception)
-		{
-			Source = source;
-			Type = type;
-			Message = message;
-			Timestamp = timestamp;
-			Exception = exception;
-		}
-
-		public override string ToString()
-		{
-			return string.Format("({0}->) [{1}] {2}: {3}", Source, Type.ShortName, Message, Timestamp);
-		}
+		Source = source;
+		Type = type;
+		Message = message;
+		Timestamp = timestamp;
+		Exception = null;
 	}
+
+	public LogEvent(string source, LogEventType type, string message, DateTime timestamp, Exception exception)
+	{
+		Source = source;
+		Type = type;
+		Message = message;
+		Timestamp = timestamp;
+		Exception = exception;
+	}
+
+	/// <inheritdoc/>
+	public override string ToString()
+		=> string.Format("({0}->) [{1}] {2}: {3}", Source, Type.ShortName, Message, Timestamp);
 }

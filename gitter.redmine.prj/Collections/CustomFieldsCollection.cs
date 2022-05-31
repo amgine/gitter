@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,22 +18,21 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Xml;
+
+public sealed class CustomFieldsCollection : NamedRedmineObjectsCache<CustomField>
 {
-	using System;
-	using System.Xml;
-
-	public sealed class CustomFieldsCollection : NamedRedmineObjectsCache<CustomField>
+	internal CustomFieldsCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal CustomFieldsCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
-
-		protected override CustomField Create(int id, string name)
-			=> new CustomField(Context, id, name);
-
-		protected override CustomField Create(XmlNode node)
-			=> new CustomField(Context, node);
 	}
+
+	protected override CustomField Create(int id, string name)
+		=> new CustomField(Context, id, name);
+
+	protected override CustomField Create(XmlNode node)
+		=> new CustomField(Context, node);
 }

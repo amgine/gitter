@@ -18,72 +18,78 @@
  */
 #endregion
 
-namespace gitter.GitLab
+namespace gitter.GitLab;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+
+using Resources = gitter.GitLab.Properties.Resources;
+
+partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerView
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading.Tasks;
-
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-
-	using Resources = gitter.GitLab.Properties.Resources;
-
-	partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerView
+	public AddServerDialog(HttpMessageInvoker httpMessageInvoker, IList<ServerInfo> servers)
 	{
-		public AddServerDialog(IList<ServerInfo> servers)
+		Verify.Argument.IsNotNull(httpMessageInvoker);
+		Verify.Argument.IsNotNull(servers);
+
+		InitializeComponent();
+
+		Text = Resources.StrAddServer;
+
+		_lblName.Text       = Resources.StrName.AddColon();
+		_lblAPIKey.Text     = Resources.StrAPIKey.AddColon();
+		_lblServiceUrl.Text = Resources.StrServiceUri.AddColon();
+
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(servers, nameof(servers));
+			ServerName = new TextBoxInputSource(_txtName),
+			ServiceUrl = new TextBoxInputSource(_txtServiceUrl),
+			APIKey     = new TextBoxInputSource(_txtAPIKey),
+		};
+		UserInputErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			InitializeComponent();
+		GitterApplication.FontManager.InputFont.Apply(_txtName, _txtServiceUrl, _txtAPIKey);
 
-			Text = Resources.StrAddServer;
+		Controller = new AddServerController(httpMessageInvoker, servers) { View = this, };
+	}
 
-			_lblName.Text       = Resources.StrName.AddColon();
-			_lblAPIKey.Text     = Resources.StrAPIKey.AddColon();
-			_lblServiceUrl.Text = Resources.StrServiceUri.AddColon();
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(356, 88));
 
-			var inputs = new IUserInputSource[]
-			{
-				ServerName = new TextBoxInputSource(_txtName),
-				ServiceUrl = new TextBoxInputSource(_txtServiceUrl),
-				APIKey     = new TextBoxInputSource(_txtAPIKey),
-			};
-			UserInputErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+	public IUserInputSource<string> ServerName { get; }
 
-			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtServiceUrl, _txtAPIKey);
+	public IUserInputSource<string> ServiceUrl { get; }
 
-			Controller = new AddServerController(servers) { View = this, };
+	public IUserInputSource<string> APIKey { get; }
+
+	public IUserInputErrorNotifier UserInputErrorNotifier { get; }
+
+	private AddServerController Controller { get; }
+
+	protected override string ActionVerb => Resources.StrAdd;
+
+	/// <inheritdoc/>
+	public async Task<bool> ExecuteAsync()
+	{
+		_txtName.Enabled       = false;
+		_txtServiceUrl.Enabled = false;
+		_txtAPIKey.Enabled     = false;
+		try
+		{
+			return await Controller.TryAddServerAsync();
 		}
-
-		public IUserInputSource<string> ServerName { get; }
-
-		public IUserInputSource<string> ServiceUrl { get; }
-
-		public IUserInputSource<string> APIKey { get; }
-
-		public IUserInputErrorNotifier UserInputErrorNotifier { get; }
-
-		private AddServerController Controller { get; }
-
-		protected override string ActionVerb => Resources.StrAdd;
-
-		public async Task<bool> ExecuteAsync()
+		finally
 		{
-			_txtName.Enabled       = false;
-			_txtServiceUrl.Enabled = false;
-			_txtAPIKey.Enabled     = false;
-			try
-			{
-				return await Controller.TryAddServerAsync();
-			}
-			finally
-			{
-				_txtName.Enabled       = true;
-				_txtServiceUrl.Enabled = true;
-				_txtAPIKey.Enabled     = true;
-			}
+			_txtName.Enabled       = true;
+			_txtServiceUrl.Enabled = true;
+			_txtAPIKey.Enabled     = true;
 		}
 	}
 }

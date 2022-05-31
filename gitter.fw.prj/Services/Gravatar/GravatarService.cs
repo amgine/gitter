@@ -18,94 +18,92 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Text;
+using System.Drawing;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.IO;
+
+/// <summary>Service for requesting global avatars.</summary>
+public static class GravatarService
 {
-	using System;
-	using System.Text;
-	using System.Security.Cryptography;
-	using System.Drawing;
-	using System.Net;
+	private static readonly char[] Alphabet = { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
 
-	/// <summary>Service for requesting global avatars.</summary>
-	public static class GravatarService
+	private const string URL = "http://www.gravatar.com/avatar/{0}?d={1}&s={2}&r={3}";
+
+	public const int DefaultSize = 80;
+
+	private static readonly HttpClient _client = new();
+
+	private static unsafe string MD5(string email)
 	{
-		private static readonly MD5CryptoServiceProvider md5Provider = new();
-		private static readonly char[] Alphabet = new char[] { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
+		Assert.IsNotNull(email);
 
-		private const string URL = "http://www.gravatar.com/avatar/{0}?d={1}&s={2}&r={3}";
+		var src = Encoding.ASCII.GetBytes(email.ToLower());
 
-		public const int DefaultSize = 80;
-
-		private static string MD5(string email)
+#if NET5_0_OR_GREATER
+		const int MD5_SIZE = 16;
+		Span<byte> hash = stackalloc byte[MD5_SIZE];
+		if(!System.Security.Cryptography.MD5.TryHashData(src, hash, out var bytesWritten) || bytesWritten != MD5_SIZE)
 		{
-			Assert.IsNotNull(email);
-
-			var hash = md5Provider.ComputeHash(Encoding.ASCII.GetBytes(email.ToLower()));
-			var arr = new char[hash.Length * 2];
-			for(int i = 0, j = 0; i < hash.Length; ++i)
-			{
-				var h = hash[i];
-				arr[j++] = Alphabet[h >> 4];
-				arr[j++] = Alphabet[h & 0x0f];
-			}
-			return new string(arr);
+			return ToHexString(System.Security.Cryptography.MD5.HashData(src));
 		}
-
-		private static Bitmap ExtractGravatar(WebResponse response)
-		{
-			Assert.IsNotNull(response);
-
-			using var stream = response.GetResponseStream();
-			return new Bitmap(stream);
-		}
-
-		public static Bitmap GetGravatar(string email)
-		{
-			Verify.Argument.IsNotNull(email, nameof(email));
-
-			return GetGravatar(email, DefaultGravatarType.wavatar, GravatarRating.g, 80);
-		}
-
-		public static Bitmap GetGravatar(string email, DefaultGravatarType defaultType, GravatarRating rating, int size)
-		{
-			var url = string.Format(URL, MD5(email), defaultType, size, rating);
-			var http = HttpWebRequest.Create(url);
-			using var response = http.GetResponse();
-			return ExtractGravatar(response);
-		}
-
-		public static IAsyncResult BeginGetGravatar(AsyncCallback callback, string email)
-		{
-			return BeginGetGravatar(callback, email, DefaultGravatarType.wavatar, GravatarRating.g, 80);
-		}
-
-		public static IAsyncResult BeginGetGravatar(AsyncCallback callback, string email, DefaultGravatarType defaultType, GravatarRating rating, int size)
-		{
-			var func = new Func<string, DefaultGravatarType, GravatarRating, int, Bitmap>(GetGravatar);
-			return func.BeginInvoke(email, defaultType, rating, size, callback, func);
-		}
-
-		public static Bitmap EndGetGravatar(IAsyncResult result)
-		{
-			Verify.Argument.IsNotNull(result, nameof(result));
-
-			var func = (Func<string, DefaultGravatarType, GravatarRating, int, Bitmap>)result.AsyncState;
-			return func.EndInvoke(result);
-		}
+#else
+		using var md5 = System.Security.Cryptography.MD5.Create();
+		var hash = md5.ComputeHash(src);
+#endif
+		return ToHexString(hash);
 	}
 
-	public enum DefaultGravatarType
+#if NET5_0_OR_GREATER
+
+	private static unsafe string ToHexString(ReadOnlySpan<byte> bytes)
 	{
-		identicon,
-		monsterid,
-		wavatar
+		var chars = stackalloc char[bytes.Length * 2];
+		for(int i = 0; i < bytes.Length; ++i)
+		{
+			int h = bytes[i];
+			chars[(i << 1)    ] = Alphabet[h >> 4];
+			chars[(i << 1) | 1] = Alphabet[h & 0x0f];
+		}
+		return new string(chars);
 	}
 
-	public enum GravatarRating
+#else
+
+	private static unsafe string ToHexString(byte[] bytes)
 	{
-		g,
-		pg,
-		r,
-		x
+		var chars = stackalloc char[bytes.Length * 2];
+		for(int i = 0; i < bytes.Length; ++i)
+		{
+			int h = bytes[i];
+			chars[(i << 1)    ] = Alphabet[h >> 4];
+			chars[(i << 1) | 1] = Alphabet[h & 0x0f];
+		}
+		return new string(chars);
+	}
+
+#endif
+
+	public static async Task<Bitmap> GetGravatarAsync(string email,
+		DefaultGravatarType defaultType = DefaultGravatarType.wavatar,
+		GravatarRating      rating      = GravatarRating.g,
+		int                 size        = DefaultSize)
+	{
+		Verify.Argument.IsInRange(1, size, 2048, nameof(size));
+
+		var url = string.Format(URL, MD5(email), defaultType, size, rating);
+		using var response = await _client
+			.GetAsync(url)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		response.EnsureSuccessStatusCode();
+		var data = await response.Content
+			.ReadAsByteArrayAsync()
+			.ConfigureAwait(continueOnCapturedContext: false);
+		var ms = new MemoryStream(data, writable: false);
+		return new Bitmap(ms);
 	}
 }

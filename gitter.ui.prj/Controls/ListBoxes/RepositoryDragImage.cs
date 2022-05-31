@@ -18,44 +18,43 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+static class RepositoryDragImage
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	static class RepositoryDragImage
+	public static DragImage Create(string path, Dpi dpi)
 	{
-		public static DragImage Create(string path, Dpi dpi)
-		{
-			var conv = DpiConverter.FromDefaultTo(dpi);
-			var size = GitterApplication.TextRenderer.MeasureText(
-				GraphicsUtility.MeasurementGraphics,
-				path,
-				GitterApplication.FontManager.UIFont,
-				int.MaxValue / 2);
-			size = new Size(conv.ConvertX(16) + 2 * conv.ConvertX(4) + size.Width, conv.ConvertY(16) + 2 * conv.ConvertY(3));
-			return new DragImage(size, 9, 9, e => PaintImage(e, size, path));
-		}
+		var conv = DpiConverter.FromDefaultTo(dpi);
+		var size = GitterApplication.TextRenderer.MeasureText(
+			GraphicsUtility.MeasurementGraphics,
+			path,
+			GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi),
+			int.MaxValue / 2);
+		size = new Size(conv.ConvertX(16) + 2 * conv.ConvertX(4) + size.Width, conv.ConvertY(16) + 2 * conv.ConvertY(3));
+		return new DragImage(size, 9, 9, e => PaintImage(e, dpi, size, path));
+	}
 
-		private static void PaintImage(PaintEventArgs e, Size size, string path)
+	private static void PaintImage(PaintEventArgs e, Dpi dpi, Size size, string path)
+	{
+		var rc   = new Rectangle(Point.Empty, size);
+		var conv = DpiConverter.FromDefaultTo(dpi);
+		BackgroundStyle.Selected.Draw(e.Graphics, conv.To, rc);
+		var icon = Icons.Repository.GetImage(conv.ConvertX(16));
+		if(icon is not null)
 		{
-			var rc   = new Rectangle(Point.Empty, size);
-			var conv = new DpiConverter(e.Graphics);
-			BackgroundStyle.Selected.Draw(e.Graphics, rc);
-			var icon = CachedResources.ScaledBitmaps[@"repository", conv.ConvertX(16)];
-			if(icon is not null)
-			{
-				e.Graphics.DrawImage(icon, conv.ConvertX(2), conv.ConvertY(3));
-			}
-			GitterApplication.TextRenderer.DrawText(
-				e.Graphics,
-				path,
-				GitterApplication.FontManager.UIFont,
-				SystemBrushes.WindowText, conv.ConvertX(16) + conv.ConvertX(4), conv.ConvertY(4));
+			e.Graphics.DrawImage(icon, conv.ConvertX(2), conv.ConvertY(3));
 		}
+		GitterApplication.TextRenderer.DrawText(
+			e.Graphics,
+			path,
+			GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi),
+			SystemBrushes.WindowText, conv.ConvertX(16) + conv.ConvertX(4), conv.ConvertY(4));
 	}
 }

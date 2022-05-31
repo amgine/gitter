@@ -18,84 +18,83 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Git.Gui.Controls;
+
+public abstract class RepositoryExplorerItemBase : CustomListBoxItem
 {
-	using System;
-	using System.Drawing;
+	private readonly IImageProvider _icon;
+	private readonly string _text;
+	private Repository _repository;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Git.Gui.Controls;
-
-	public abstract class RepositoryExplorerItemBase : CustomListBoxItem
+	protected RepositoryExplorerItemBase(IImageProvider icon, string text)
 	{
-		private readonly string _imageName;
-		private readonly string _text;
-		private Repository _repository;
+		_icon = icon;
+		_text = text;
+	}
 
-		protected RepositoryExplorerItemBase(string imageName, string text)
+	private Image GetImage(Dpi dpi)
+		=> _icon.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
+
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch((ColumnId)paintEventArgs.SubItemId)
 		{
-			_imageName = imageName;
-			_text      = text;
+			case ColumnId.Name:
+				paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), _text);
+				break;
 		}
+	}
 
-		private Image GetImage(Dpi dpi)
-			=> CachedResources.ScaledBitmaps[_imageName, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
 
-		/// <inheritdoc/>
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+		switch((ColumnId)measureEventArgs.SubItemId)
 		{
-			Assert.IsNotNull(paintEventArgs);
-
-			switch((ColumnId)paintEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), _text);
-					break;
-			}
+			case ColumnId.Name:
+				return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), _text);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		/// <inheritdoc/>
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	public Repository Repository
+	{
+		get => _repository;
+		set
 		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch((ColumnId)measureEventArgs.SubItemId)
+			if(_repository != value)
 			{
-				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), _text);
-				default:
-					return Size.Empty;
-			}
-		}
-
-		public Repository Repository
-		{
-			get => _repository;
-			set
-			{
-				if(_repository != value)
+				if(_repository is not null)
 				{
-					if(_repository is not null)
-					{
-						DetachFromRepository();
-					}
-					_repository = value;
-					if(_repository is not null)
-					{
-						AttachToRepository();
-					}
+					DetachFromRepository();
+				}
+				_repository = value;
+				if(_repository is not null)
+				{
+					AttachToRepository();
 				}
 			}
 		}
+	}
 
-		protected virtual void DetachFromRepository()
-		{
-		}
+	protected virtual void DetachFromRepository()
+	{
+	}
 
-		protected virtual void AttachToRepository()
-		{
-		}
+	protected virtual void AttachToRepository()
+	{
 	}
 }

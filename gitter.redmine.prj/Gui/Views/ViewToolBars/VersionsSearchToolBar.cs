@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,25 +18,25 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.ComponentModel;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+internal sealed class VersionsSearchToolBar : SearchToolBar<VersionsView, VersionsSearchOptions>
 {
-	using System;
-	using System.ComponentModel;
-
-	[ToolboxItem(false)]
-	internal sealed class VersionsSearchToolBar : SearchToolBar<VersionsView, VersionsSearchOptions>
+	public VersionsSearchToolBar(VersionsView view)
+		: base(view)
 	{
-		public VersionsSearchToolBar(VersionsView view)
-			: base(view)
-		{
-		}
+	}
 
-		protected override VersionsSearchOptions CreateSearchOptions()
+	protected override VersionsSearchOptions CreateSearchOptions()
+	{
+		return new VersionsSearchOptions()
 		{
-			return new VersionsSearchOptions()
-			{
-				Text = SearchText,
-			};
-		}
+			Text = SearchText,
+		};
 	}
 }

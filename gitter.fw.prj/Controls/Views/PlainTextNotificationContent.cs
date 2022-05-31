@@ -18,38 +18,37 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+[DesignerCategory("")]
+public class PlainTextNotificationContent : NotificationContent
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	public class PlainTextNotificationContent : NotificationContent
+	public PlainTextNotificationContent(string message)
 	{
-		public PlainTextNotificationContent(string message)
+		Message = message;
+
+		Height = Math.Min(GitterApplication.TextRenderer.MeasureText(GraphicsUtility.MeasurementGraphics, message, Font, new Size(Dpi.System.X * ViewConstants.PopupWidth / 96, 0)).Height, 400 * Dpi.System.Y / 96);
+	}
+
+	public string Message { get; }
+
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		e.Graphics.GdiFill(BackColor, e.ClipRectangle);
+		var text = Message;
+		if(!string.IsNullOrWhiteSpace(text))
 		{
-			Message = message;
-
-			Height = GitterApplication.TextRenderer.MeasureText(GraphicsUtility.MeasurementGraphics, message, Font, new Size(ViewConstants.PopupWidth, 0)).Height;
-		}
-
-		public string Message { get; }
-
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			Assert.IsNotNull(e);
-
-			using(var brush = new SolidBrush(BackColor))
-			{
-				e.Graphics.FillRectangle(brush, e.ClipRectangle);
-			}
-			var text = Message;
-			if(!string.IsNullOrWhiteSpace(text))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					e.Graphics, text,
-					Font, ForeColor, ClientRectangle);
-			}
+			GitterApplication.TextRenderer.DrawText(
+				e.Graphics, text,
+				Font, ForeColor, ClientRectangle);
 		}
 	}
 }

@@ -18,22 +18,21 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework.Mvc;
+
+interface IAddRemoteView : IView
 {
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> RemoteName { get; }
 
-	interface IAddRemoteView : IView
-	{
-		IUserInputSource<string> RemoteName { get; }
+	IUserInputSource<string> Url { get; }
 
-		IUserInputSource<string> Url { get; }
+	IUserInputSource<bool> Fetch { get; }
 
-		IUserInputSource<bool> Fetch { get; }
+	IUserInputSource<bool> Mirror { get; }
 
-		IUserInputSource<bool> Mirror { get; }
+	IUserInputSource<TagFetchMode> TagFetchMode { get; }
 
-		IUserInputSource<TagFetchMode> TagFetchMode { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

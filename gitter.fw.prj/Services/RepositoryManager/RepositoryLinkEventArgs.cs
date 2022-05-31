@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+
+public sealed class RepositoryLinkEventArgs : EventArgs
 {
-	using System;
-
-	public sealed class RepositoryLinkEventArgs : EventArgs
+	public RepositoryLinkEventArgs(RepositoryLink repository)
 	{
-		public RepositoryLinkEventArgs(RepositoryLink repository)
-		{
-			Repository = repository;
-		}
-
-		public RepositoryLink Repository { get; }
+		Repository = repository;
 	}
+
+	public RepositoryLink Repository { get; }
 }

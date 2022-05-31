@@ -18,15 +18,30 @@
  */
 #endregion
 
-namespace gitter.Native
-{
-	using System;
-	using System.Runtime.CompilerServices;
+namespace gitter.Native;
 
-	static class Macro
-	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint RGB(byte byRed, byte byGreen, byte byBlue)
-			=> ((uint)byRed) | ((uint)byGreen << 8) | ((uint)byBlue << 16);
-	}
+using System;
+using System.Runtime.CompilerServices;
+
+static class Macro
+{
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static uint RGB(byte byRed, byte byGreen, byte byBlue)
+		=> ((uint)byRed) | ((uint)byGreen << 8) | ((uint)byBlue << 16);
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int HIWORD(int n)
+		=> (n >> 16) & 0xffff;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int HIWORD(IntPtr n)
+		=> HIWORD(unchecked((int)(long)n));
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int LOWORD(int n)
+		=> n & 0xffff;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int LOWORD(IntPtr n)
+		=> LOWORD(unchecked((int)(long)n));
 }

@@ -18,99 +18,86 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+sealed class FilesToAddBinding : AsyncDataBinding<IList<TreeFile>>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-
-	sealed class FilesToAddBinding : AsyncDataBinding<IList<TreeFile>>
+	public FilesToAddBinding(Repository repository, TreeListBox treeListBox)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(treeListBox);
 
-		public FilesToAddBinding(Repository repository, TreeListBox treeListBox)
+		Repository  = repository;
+		TreeListBox = treeListBox;
+		Progress    = treeListBox.ProgressMonitor;
+	}
+
+	public Repository Repository { get; }
+
+	private TreeListBox TreeListBox { get; }
+
+	public string Pattern { get; set; }
+
+	public bool IncludeUntracked { get; set; }
+
+	public bool IncludeIgnored { get; set; }
+
+	protected override Task<IList<TreeFile>> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(IsDisposed, "FilesToAddBinding is disposed.");
+
+		TreeListBox.Cursor = Cursors.WaitCursor;
+		return Repository.Status.GetFilesToAddAsync(Pattern, IncludeUntracked, IncludeIgnored,
+			progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(IList<TreeFile> data)
+	{
+		if(TreeListBox.IsDisposed)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNotNull(treeListBox, nameof(treeListBox));
-
-			Repository  = repository;
-			TreeListBox = treeListBox;
-			Progress    = treeListBox.ProgressMonitor;
+			return;
 		}
 
-		#endregion
-
-		#region Properties
-
-		public Repository Repository { get; }
-
-		private TreeListBox TreeListBox { get; }
-
-		public string Pattern { get; set; }
-
-		public bool IncludeUntracked { get; set; }
-
-		public bool IncludeIgnored { get; set; }
-
-		#endregion
-
-		#region Methods
-
-		protected override Task<IList<TreeFile>> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		TreeListBox.BeginUpdate();
+		TreeListBox.Items.Clear();
+		foreach(var item in data)
 		{
-			Verify.State.IsFalse(IsDisposed, "FilesToAddBinding is disposed.");
+			TreeListBox.Items.Add(new TreeFileListItem(item, true));
+		}
+		TreeListBox.EndUpdate();
+		TreeListBox.Cursor = Cursors.Default;
+	}
 
-			TreeListBox.Cursor = Cursors.WaitCursor;
-			return Repository.Status.GetFilesToAddAsync(Pattern, IncludeUntracked, IncludeIgnored,
-				progress, cancellationToken);
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(TreeListBox.IsDisposed)
+		{
+			return;
 		}
 
-		protected override void OnFetchCompleted(IList<TreeFile> data)
+		TreeListBox.BeginUpdate();
+		TreeListBox.Items.Clear();
+		TreeListBox.EndUpdate();
+		TreeListBox.Cursor = Cursors.Default;
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			if(TreeListBox.IsDisposed)
+			if(!TreeListBox.IsDisposed)
 			{
-				return;
+				TreeListBox.Items.Clear();
 			}
-
-			TreeListBox.BeginUpdate();
-			TreeListBox.Items.Clear();
-			foreach(var item in data)
-			{
-				TreeListBox.Items.Add(new TreeFileListItem(item, true));
-			}
-			TreeListBox.EndUpdate();
-			TreeListBox.Cursor = Cursors.Default;
 		}
-
-		protected override void OnFetchFailed(Exception exception)
-		{
-			if(TreeListBox.IsDisposed)
-			{
-				return;
-			}
-
-			TreeListBox.BeginUpdate();
-			TreeListBox.Items.Clear();
-			TreeListBox.EndUpdate();
-			TreeListBox.Cursor = Cursors.Default;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!TreeListBox.IsDisposed)
-				{
-					TreeListBox.Items.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
+		base.Dispose(disposing);
 	}
 }

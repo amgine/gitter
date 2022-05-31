@@ -18,31 +18,34 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+[DesignerCategory("")]
+public partial class ProcessOverlayControl : UserControl
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly ProcessOverlay _overlay;
 
-	public partial class ProcessOverlayControl : UserControl
+	public ProcessOverlayControl()
 	{
-		private readonly ProcessOverlay _overlay;
+		InitializeComponent();
 
-		public ProcessOverlayControl()
-		{
-			InitializeComponent();
+		_overlay = new ProcessOverlay(this);
+	}
 
-			_overlay = new ProcessOverlay(this);
-		}
+	/// <inheritdoc/>
+	protected override void OnPaintBackground(PaintEventArgs e)
+	{
+	}
 
-		protected override void OnPaintBackground(PaintEventArgs e)
-		{
-		}
-
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			e.Graphics.Clear(BackColor);
-			e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-			_overlay.DrawMessage(e.Graphics, ClientRectangle, "Test status");
-		}
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		e.Graphics.Clear(BackColor);
+		e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+		_overlay.DrawMessage(e.Graphics, ClientRectangle, "Test status");
 	}
 }

@@ -18,101 +18,169 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>Extender for <see cref="UserColumn"/>.</summary>
+[ToolboxItem(false)]
+partial class UserColumnExtender : ExtenderBase
 {
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private ICheckBoxWidget _chkShowEmail;
+	private ICheckBoxWidget _chkShowAvatar;
+	private bool _disableEvents;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	/// <summary>Extender for <see cref="UserColumn"/>.</summary>
-	[ToolboxItem(false)]
-	partial class UserColumnExtender : ExtenderBase
+	/// <summary>Create <see cref="UserColumnExtender"/>.</summary>
+	/// <param name="column">Related column.</param>
+	public UserColumnExtender(UserColumn column)
+		: base(column)
 	{
-		#region Data
+		SuspendLayout();
+		Name = nameof(UserColumnExtender);
+		Size = new(138, 52);
+		ResumeLayout();
 
-		private ICheckBoxWidget _chkShowEmail;
-		private bool _disableEvents;
+		CreateControls();
+		SubscribeToColumnEvents();
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(138, 52));
 
-		/// <summary>Create <see cref="UserColumnExtender"/>.</summary>
-		/// <param name="column">Related column.</param>
-		public UserColumnExtender(UserColumn column)
-			: base(column)
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			InitializeComponent();
-			CreateControls();
-			SubscribeToColumnEvents();
-		}
-
-		private void CreateControls()
-		{
-			var conv = new DpiConverter(this);
-
-			var iconSize = conv.ConvertX(16);
-
-			_chkShowEmail?.Dispose();
-			_chkShowEmail = Style.CreateCheckBox();
-			_chkShowEmail.IsChecked = Column.ShowEmail;
-			_chkShowEmail.IsCheckedChanged += OnShowEmailCheckedChanged;
-			_chkShowEmail.Image = CachedResources.ScaledBitmaps["mail", iconSize];
-			_chkShowEmail.Text = Resources.StrShowEmail;
-			_chkShowEmail.Control.Bounds = new Rectangle(conv.ConvertX(6), 0, Width - conv.ConvertX(6) * 2, conv.ConvertY(27));
-			_chkShowEmail.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
-			_chkShowEmail.Control.Parent = this;
-		}
-
-		protected override void OnStyleChanged()
-		{
-			base.OnStyleChanged();
-			CreateControls();
-		}
-
-		public new UserColumn Column => (UserColumn)base.Column;
-
-		private void SubscribeToColumnEvents()
-		{
-			Column.ShowEmailChanged += OnColumnShowEmailChanged;
-		}
-
-		private void UnsubscribeFromColumnEvents()
-		{
-			Column.ShowEmailChanged -= OnColumnShowEmailChanged;
-		}
-
-		private void OnColumnShowEmailChanged(object sender, EventArgs e)
-		{
-			ShowEmail = Column.ShowEmail;
-		}
-
-		public bool ShowEmail
-		{
-			get => _chkShowEmail != null ? _chkShowEmail.IsChecked : Column.ShowEmail;
-			private set
+			if(_chkShowEmail is not null)
 			{
-				if(_chkShowEmail != null)
-				{
-					_disableEvents = true;
-					_chkShowEmail.IsChecked = value;
-					_disableEvents = false;
-				}
+				_chkShowEmail.Dispose();
+				_chkShowEmail = null;
 			}
+			if(_chkShowAvatar is not null)
+			{
+				_chkShowAvatar.Dispose();
+				_chkShowAvatar = null;
+			}
+			UnsubscribeFromColumnEvents();
 		}
+		base.Dispose(disposing);
+	}
 
-		private void OnShowEmailCheckedChanged(object sender, EventArgs e)
+	private void CreateControls()
+	{
+		var conv = new DpiConverter(this);
+
+		var iconSize = conv.ConvertX(16);
+
+		var height  = conv.ConvertY(27);
+		var spacing = conv.ConvertY(-4);
+
+		_chkShowEmail?.Dispose();
+		_chkShowEmail = Style.CreateCheckBox();
+		_chkShowEmail.IsChecked = Column.ShowEmail;
+		_chkShowEmail.IsCheckedChanged += OnShowEmailCheckedChanged;
+		_chkShowEmail.Image = CachedResources.ScaledBitmaps[@"mail", iconSize];
+		_chkShowEmail.Text = Resources.StrShowEmail;
+		_chkShowEmail.Control.Bounds = new Rectangle(conv.ConvertX(6), 0, Width - conv.ConvertX(6) * 2, height);
+		_chkShowEmail.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+		_chkShowEmail.Control.Parent = this;
+
+		_chkShowAvatar?.Dispose();
+		_chkShowAvatar = Style.CreateCheckBox();
+		_chkShowAvatar.IsChecked = Column.ShowAvatar;
+		_chkShowAvatar.IsCheckedChanged += OnShowAvatarCheckedChanged;
+		_chkShowAvatar.Image = CommonIcons.Gravatar.GetImage(iconSize);
+		_chkShowAvatar.Text = Resources.StrShowAvatar;
+		_chkShowAvatar.Control.Bounds = new Rectangle(conv.ConvertX(6), spacing + height, Width - conv.ConvertX(6) * 2, height);
+		_chkShowAvatar.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+		_chkShowAvatar.Control.Parent = this;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnStyleChanged()
+	{
+		base.OnStyleChanged();
+		CreateControls();
+	}
+
+	public new UserColumn Column => (UserColumn)base.Column;
+
+	private void SubscribeToColumnEvents()
+	{
+		Column.ShowEmailChanged  += OnColumnShowEmailChanged;
+		Column.ShowAvatarChanged += OnColumnShowAvatarChanged;
+	}
+
+	private void UnsubscribeFromColumnEvents()
+	{
+		Column.ShowEmailChanged  -= OnColumnShowEmailChanged;
+		Column.ShowAvatarChanged -= OnColumnShowAvatarChanged;
+	}
+
+	private void OnColumnShowEmailChanged(object sender, EventArgs e)
+	{
+		ShowEmail = Column.ShowEmail;
+	}
+
+	private void OnColumnShowAvatarChanged(object sender, EventArgs e)
+	{
+		ShowAvatar = Column.ShowAvatar;
+	}
+
+	public bool ShowEmail
+	{
+		get => _chkShowEmail is not null ? _chkShowEmail.IsChecked : Column.ShowEmail;
+		private set
 		{
-			if(!_disableEvents)
+			if(_chkShowEmail is not null)
 			{
 				_disableEvents = true;
-				Column.ShowEmail = _chkShowEmail.IsChecked;
+				_chkShowEmail.IsChecked = value;
 				_disableEvents = false;
 			}
+		}
+	}
+
+	public bool ShowAvatar
+	{
+		get => _chkShowAvatar is not null ? _chkShowAvatar.IsChecked : Column.ShowAvatar;
+		private set
+		{
+			if(_chkShowAvatar is not null)
+			{
+				_disableEvents = true;
+				_chkShowAvatar.IsChecked = value;
+				_disableEvents = false;
+			}
+		}
+	}
+
+	private void OnShowEmailCheckedChanged(object sender, EventArgs e)
+	{
+		if(!_disableEvents)
+		{
+			_disableEvents = true;
+			Column.ShowEmail = _chkShowEmail.IsChecked;
+			_disableEvents = false;
+		}
+	}
+
+	private void OnShowAvatarCheckedChanged(object sender, EventArgs e)
+	{
+		if(!_disableEvents)
+		{
+			_disableEvents = true;
+			Column.ShowAvatar = _chkShowAvatar.IsChecked;
+			_disableEvents = false;
 		}
 	}
 }

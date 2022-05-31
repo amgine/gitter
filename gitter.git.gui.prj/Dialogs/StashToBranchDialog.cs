@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,87 +18,91 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, IStashToBranchView
 {
-	using System;
-	using System.ComponentModel;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
+	private readonly IStashToBranchController _controller;
 
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Interfaces;
+	#endregion
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#region .ctor
 
-	[ToolboxItem(false)]
-	public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, IStashToBranchView
+	public StashToBranchDialog(StashedState stashedState)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(stashedState);
+		Verify.Argument.IsFalse(stashedState.IsDeleted, nameof(stashedState),
+			Resources.ExcObjectIsDeleted.UseAsFormat(stashedState.GetType().Name));
 
-		private readonly IStashToBranchController _controller;
+		StashedState = stashedState;
 
-		#endregion
+		InitializeComponent();
+		Localize();
 
-		#region .ctor
-
-		public StashToBranchDialog(StashedState stashedState)
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
-			Verify.Argument.IsFalse(stashedState.IsDeleted, nameof(stashedState),
-				Resources.ExcObjectIsDeleted.UseAsFormat(stashedState.GetType().Name));
+			BranchName = new TextBoxInputSource(_txtBranchName),
+		};
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			StashedState = stashedState;
+		SetupReferenceNameInputBox(_txtBranchName, ReferenceType.LocalBranch);
 
-			InitializeComponent();
-			Localize();
+		_txtStashName.Text = ((IRevisionPointer)StashedState).Pointer;
 
-			var inputs = new IUserInputSource[]
-			{
-				BranchName = new TextBoxInputSource(_txtBranchName),
-			};
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+		GitterApplication.FontManager.InputFont.Apply(_txtBranchName, _txtStashName);
 
-			SetupReferenceNameInputBox(_txtBranchName, ReferenceType.LocalBranch);
-
-			_txtStashName.Text = ((IRevisionPointer)StashedState).Pointer;
-
-			GitterApplication.FontManager.InputFont.Apply(_txtBranchName, _txtStashName);
-
-			_controller = new StashToBranchController(stashedState) { View = this };
-		}
-
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb => Resources.StrCreate;
-
-		public StashedState StashedState { get; }
-
-		public IUserInputSource<string> BranchName { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region Methods
-
-		private void Localize()
-		{
-			Text = Resources.StrStashToBranch;
-
-			_lblBranchName.Text = Resources.StrBranch.AddColon();
-			_lblStash.Text = Resources.StrStash.AddColon();
-		}
-
-		#endregion
-
-		#region IExecutableDialog Members
-
-		public bool Execute() => _controller.TryCreateBranch();
-
-		#endregion
+		_controller = new StashToBranchController(stashedState) { View = this };
 	}
+
+	#endregion
+
+	#region Properties
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrCreate;
+
+	public StashedState StashedState { get; }
+
+	public IUserInputSource<string> BranchName { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	#endregion
+
+	#region Methods
+
+	private void Localize()
+	{
+		Text = Resources.StrStashToBranch;
+
+		_lblBranchName.Text = Resources.StrBranch.AddColon();
+		_lblStash.Text = Resources.StrStash.AddColon();
+	}
+
+	#endregion
+
+	#region IExecutableDialog Members
+
+	public bool Execute() => _controller.TryCreateBranch();
+
+	#endregion
 }

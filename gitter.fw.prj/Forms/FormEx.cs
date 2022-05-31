@@ -18,117 +18,140 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework.Options;
+
+/// <summary>Form with Windows7 taskbar support.</summary>
+[DesignerCategory("")]
+public partial class FormEx : Form
 {
-	using System;
-	using System.Drawing;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	private bool _canUseWin7Api;
 
-	using gitter.Framework.Options;
-
-	/// <summary>Form with Windows7 taskbar support.</summary>
-	public partial class FormEx : Form
+	/// <summary>Create <see cref="FormEx"/>.</summary>
+	public FormEx()
 	{
-		private bool _canUseWin7Api;
-
-		/// <summary>Create <see cref="FormEx"/>.</summary>
-		public FormEx()
+		SuspendLayout();
+		AutoScaleDimensions = new SizeF(96F, 96F);
+		AutoScaleMode = AutoScaleMode.Dpi;
+		ClientSize = new Size(624, 435);
+		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 		{
-			SuspendLayout();
-			AutoScaleDimensions = new SizeF(96F, 96F);
-			AutoScaleMode = AutoScaleMode.Dpi;
-			ClientSize = new Size(624, 435);
-			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
-			{
-				Font = GitterApplication.FontManager.UIFont;
-			}
-			else
-			{
-				Font = SystemFonts.MessageBoxFont;
-			}
-			Name = "FormEx";
-			ResumeLayout(false);
+			Font = GitterApplication.FontManager.UIFont;
 		}
-
-		protected override void WndProc(ref Message m)
+#if !NET6_0_OR_GREATER
+		else
 		{
-			if(Utility.TaskBarList != null)
-			{
-				if(m.Msg == Utility.WM_TASKBAR_BUTTON_CREATED)
-				{
-					_canUseWin7Api = true;
-				}
-			}
-			base.WndProc(ref m);
+			Font = SystemFonts.MessageBoxFont;
 		}
+#endif
+		Name = nameof(FormEx);
+		ResumeLayout(false);
+	}
 
-		protected bool CanUseWin7Api => _canUseWin7Api;
-
-		public void SetTaskbarOverlayIcon(Icon icon, string description)
+	/// <inheritdoc/>
+	protected override void WndProc(ref Message m)
+	{
+		if(Utility.TaskBarList is not null)
 		{
-			Verify.Argument.IsNotNull(icon, nameof(icon));
-
-			if(CanUseWin7Api)
+			if(m.Msg == Utility.WM_TASKBAR_BUTTON_CREATED)
 			{
-				if(InvokeRequired)
-				{
-					BeginInvoke(new MethodInvoker(
-						() => Utility.TaskBarList.SetOverlayIcon(Handle, icon.Handle, description)));
-				}
-				else
-				{
-					Utility.TaskBarList.SetOverlayIcon(Handle, icon.Handle, description);
-				}
+				_canUseWin7Api = true;
 			}
 		}
+		base.WndProc(ref m);
+	}
 
-		public void RemoveTaskbarOverlayIcon()
+	protected bool CanUseWin7Api => _canUseWin7Api;
+
+	public void SetTaskbarOverlayIcon(Icon icon, string description)
+	{
+		Verify.Argument.IsNotNull(icon);
+
+		if(!CanUseWin7Api || IsDisposed) return;
+
+		if(InvokeRequired)
 		{
-			if(CanUseWin7Api)
+			try
 			{
-				if(InvokeRequired)
-				{
-					BeginInvoke(new MethodInvoker(
-						() => Utility.TaskBarList.SetOverlayIcon(Handle, IntPtr.Zero, null)));
-				}
-				else
-				{
-					Utility.TaskBarList.SetOverlayIcon(Handle, IntPtr.Zero, null);
-				}
+				BeginInvoke(new MethodInvoker(
+					() => SetTaskbarOverlayIcon(icon, description)));
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		public void SetTaskbarProgressState(TbpFlag state)
+		else
 		{
-			if(CanUseWin7Api)
+			Utility.TaskBarList.SetOverlayIcon(Handle, icon.Handle, description);
+		}
+	}
+
+	public void RemoveTaskbarOverlayIcon()
+	{
+		if(!CanUseWin7Api || IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
 			{
-				if(InvokeRequired)
-				{
-					BeginInvoke(new MethodInvoker(
-						() => Utility.TaskBarList.SetProgressState(Handle, state)));
-				}
-				else
-				{
-					Utility.TaskBarList.SetProgressState(Handle, state);
-				}
+				BeginInvoke(new MethodInvoker(
+					() => RemoveTaskbarOverlayIcon()));
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		public void SetTaskbarProgressValue(long current, long total)
+		else
 		{
-			if(CanUseWin7Api)
+			Utility.TaskBarList.SetOverlayIcon(Handle, IntPtr.Zero, null);
+		}
+	}
+
+	public void SetTaskbarProgressState(TbpFlag state)
+	{
+		if(!CanUseWin7Api || IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
 			{
-				if(InvokeRequired)
-				{
-					BeginInvoke(new MethodInvoker(
-						() => Utility.TaskBarList.SetProgressValue(Handle, (ulong)current, (ulong)total)));
-				}
-				else
-				{
-					Utility.TaskBarList.SetProgressValue(Handle, (ulong)current, (ulong)total);
-				}
+				BeginInvoke(new MethodInvoker(
+					() => SetTaskbarProgressState(state)));
 			}
+			catch
+			{
+			}
+		}
+		else
+		{
+			Utility.TaskBarList.SetProgressState(Handle, state);
+		}
+	}
+
+	public void SetTaskbarProgressValue(long current, long total)
+	{
+		if(!CanUseWin7Api || IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
+			{
+				BeginInvoke(new MethodInvoker(
+					() => SetTaskbarProgressValue(current, total)));
+			}
+			catch
+			{
+			}
+		}
+		else
+		{
+			Utility.TaskBarList.SetProgressValue(Handle, (ulong)current, (ulong)total);
 		}
 	}
 }

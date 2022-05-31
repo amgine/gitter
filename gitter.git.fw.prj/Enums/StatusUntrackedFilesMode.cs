@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+/// <summary>Determines how untracked files are represented in status.</summary>
+public enum StatusUntrackedFilesMode
 {
-	/// <summary>Determines how untracked files are represented in status.</summary>
-	public enum StatusUntrackedFilesMode
-	{
-		/// <summary>Show no untracked files.</summary>
-		No,
-		/// <summary>Shows untracked files and directories.</summary>
-		Normal,
-		/// <summary>Show individual files in untracked directories.</summary>
-		All,
-	}
+	/// <summary>Show no untracked files.</summary>
+	No,
+	/// <summary>Shows untracked files and directories.</summary>
+	Normal,
+	/// <summary>Show individual files in untracked directories.</summary>
+	All,
 }

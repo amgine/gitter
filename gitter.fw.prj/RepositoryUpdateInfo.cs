@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+
+public sealed class RepositoryUpdateInfo
 {
-	using System;
-	using System.Drawing;
-
-	public sealed class RepositoryUpdateInfo
+	public RepositoryUpdateInfo(string name, Image icon)
 	{
-		public RepositoryUpdateInfo(string name, Image icon)
-		{
-			Name = name;
-			Icon = icon;
-		}
-
-		public Image Icon { get; }
-
-		public string Name { get; }
+		Name = name;
+		Icon = icon;
 	}
 
-	public sealed class UpdatedItem
+	public Image Icon { get; }
+
+	public string Name { get; }
+}
+
+public sealed class UpdatedItem
+{
+	public UpdatedItem(string name, Image icon)
 	{
-		public UpdatedItem(string name, Image icon)
-		{
-			Name = name;
-			Icon = icon;
-		}
-
-		public Image Icon { get; }
-
-		public string Name { get; }
-
-		public override string ToString() => Name;
+		Name = name;
+		Icon = icon;
 	}
+
+	public Image Icon { get; }
+
+	public string Name { get; }
+
+	public override string ToString() => Name;
 }

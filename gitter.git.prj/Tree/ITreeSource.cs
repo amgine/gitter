@@ -18,26 +18,25 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+public interface ITreeSource
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	string DisplayName { get; }
 
-	using gitter.Framework;
+	Repository Repository { get; }
 
-	public interface ITreeSource
-	{
-		string DisplayName { get; }
+	IRevisionPointer Revision { get; }
 
-		Repository Repository { get; }
+	Tree GetTree();
 
-		IRevisionPointer Revision { get; }
-
-		Tree GetTree();
-
-		Task<Tree> GetTreeAsync(
-			IProgress<OperationProgress> progress = default,
-			CancellationToken cancellationToken = default);
-	}
+	Task<Tree> GetTreeAsync(
+		IProgress<OperationProgress> progress = default,
+		CancellationToken cancellationToken = default);
 }

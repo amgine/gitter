@@ -18,18 +18,11 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using gitter.Framework;
+
+static class CachedResources
 {
-	using System;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	static class CachedResources
-	{
-		public static CachedBitmapResources Bitmaps { get; } = new CachedBitmapResources(Resources.ResourceManager);
-
-		public static CachedScaledImageResources ScaledBitmaps { get; } = new CachedScaledImageResources(typeof(CachedResources).Assembly, @"gitter.Redmine.Resources.icons");
-	}
+	public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.Redmine.Resources.icons");
 }

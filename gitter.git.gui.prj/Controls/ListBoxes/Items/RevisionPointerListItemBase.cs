@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using gitter.Framework.Controls;
+
+public abstract class RevisionPointerListItemBase<T> : CustomListBoxItem<T>, IRevisionPointerListItem
+	where T : IRevisionPointer
 {
-	using gitter.Framework.Controls;
-
-	public abstract class RevisionPointerListItemBase<T> : CustomListBoxItem<T>, IRevisionPointerListItem
-		where T : IRevisionPointer
+	protected RevisionPointerListItemBase(T data)
+		: base(data)
 	{
-		protected RevisionPointerListItemBase(T data)
-			: base(data)
-		{
-		}
-
-		IRevisionPointer IRevisionPointerListItem.RevisionPointer => DataContext;
 	}
+
+	IRevisionPointer IRevisionPointerListItem.RevisionPointer => DataContext;
 }

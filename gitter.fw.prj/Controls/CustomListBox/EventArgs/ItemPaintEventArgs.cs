@@ -18,100 +18,104 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+/// <summary>Item paint event args.</summary>
+public class ItemPaintEventArgs : EventArgs
 {
-	using System;
-	using System.Drawing;
+	#region .ctor
 
-	/// <summary>Item paint event args.</summary>
-	public class ItemPaintEventArgs : EventArgs
+	/// <summary>Create <see cref="ItemPaintEventArgs"/>.</summary>
+	/// <param name="graphics">Graphics surface to draw the item on.</param>
+	/// <param name="dpi">DPI.</param>
+	/// <param name="clipRectangle">Clipping rectangle.</param>
+	/// <param name="bounds">Rectangle that represents the bounds of the item that is being drawn.</param>
+	/// <param name="index">Index value of the item that is being drawn.</param>
+	/// <param name="state">State of the item being drawn.</param>
+	/// <param name="hoveredPart">Hovered part of the item.</param>
+	/// <param name="hostControlFocused">Host control is focused.</param>
+	public ItemPaintEventArgs(
+		Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds, int index,
+		ItemState state, int hoveredPart, bool hostControlFocused)
 	{
-		#region .ctor
-
-		/// <summary>Create <see cref="ItemPaintEventArgs"/>.</summary>
-		/// <param name="graphics">Graphics surface to draw the item on.</param>
-		/// <param name="clipRectangle">Clipping rectangle.</param>
-		/// <param name="bounds">Rectangle that represents the bounds of the item that is being drawn.</param>
-		/// <param name="index">Index value of the item that is being drawn.</param>
-		/// <param name="state">State of the item being drawn.</param>
-		/// <param name="hoveredPart">Hovered part of the item.</param>
-		/// <param name="hostControlFocused">Host control is focused.</param>
-		public ItemPaintEventArgs(
-			Graphics graphics, Rectangle clipRectangle, Rectangle bounds, int index,
-			ItemState state, int hoveredPart, bool hostControlFocused)
-		{
-			Graphics             = graphics;
-			ClipRectangle        = clipRectangle;
-			Bounds               = bounds;
-			Index                = index;
-			State                = state;
-			HoveredPart          = hoveredPart;
-			IsHostControlFocused = hostControlFocused;
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Gets the graphics surface to draw the item on.</summary>
-		public Graphics Graphics { get; }
-
-		/// <summary>Clipping rectangle.</summary>
-		public Rectangle ClipRectangle { get; }
-
-		/// <summary>Gets the rectangle that represents the bounds of the item that is being drawn.</summary>
-		public Rectangle Bounds { get; }
-
-		/// <summary>Gets the index value of the item that is being drawn.</summary>
-		public int Index { get; }
-
-		/// <summary>Gets the state of the item being drawn.</summary>
-		public ItemState State { get; }
-
-		/// <summary>Hovered part of the item.</summary>
-		public int HoveredPart { get; }
-
-		/// <summary>Host control is focused.</summary>
-		public bool IsHostControlFocused { get; }
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>Prepare rectangle <paramref name="rect"/> for painting by applying content offsets.</summary>
-		/// <param name="rect">Rectangle to prepare.</param>
-		public void PrepareContentRectangle(ref Rectangle rect)
-		{
-			var conv    = new DpiConverter(Graphics);
-			var spacing = conv.ConvertX(ListBoxConstants.ContentSpacing);
-
-			rect.X     += spacing;
-			rect.Width -= spacing * 2;
-		}
-
-		/// <summary>Prepare rectangle <paramref name="rect"/> for painting text by applying text offsets.</summary>
-		/// <param name="listBoxFont">Font of hosing <see cref="CustomListBox"/>.</param>
-		/// <param name="itemFont">Text font.</param>
-		/// <param name="rect">Rectangle to prepare.</param>
-		public void PrepareTextRectangle(Font listBoxFont, Font itemFont, ref Rectangle rect)
-		{
-			if(listBoxFont == itemFont)
-			{
-				var h = GitterApplication.TextRenderer.GetFontHeight(Graphics, listBoxFont);
-				var d = (int)((rect.Height - h) / 2.0f);
-				rect.Y += d;
-				rect.Height -= d;
-			}
-			else
-			{
-				var h1 = GitterApplication.TextRenderer.GetFontHeight(Graphics, listBoxFont);
-				var h  = GitterApplication.TextRenderer.GetFontHeight(Graphics, itemFont);
-				var d  = (int)((rect.Height - h1) / 2.0f + h1 - h);
-				rect.Y      += d;
-				rect.Height -= d;
-			}
-		}
-
-		#endregion
+		Graphics             = graphics;
+		Dpi                  = dpi;
+		ClipRectangle        = clipRectangle;
+		Bounds               = bounds;
+		Index                = index;
+		State                = state;
+		HoveredPart          = hoveredPart;
+		IsHostControlFocused = hostControlFocused;
 	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary>Gets the graphics surface to draw the item on.</summary>
+	public Graphics Graphics { get; }
+
+	/// <summary>DPI.</summary>
+	public Dpi Dpi { get; }
+
+	/// <summary>Clipping rectangle.</summary>
+	public Rectangle ClipRectangle { get; }
+
+	/// <summary>Gets the rectangle that represents the bounds of the item that is being drawn.</summary>
+	public Rectangle Bounds { get; }
+
+	/// <summary>Gets the index value of the item that is being drawn.</summary>
+	public int Index { get; }
+
+	/// <summary>Gets the state of the item being drawn.</summary>
+	public ItemState State { get; }
+
+	/// <summary>Hovered part of the item.</summary>
+	public int HoveredPart { get; }
+
+	/// <summary>Host control is focused.</summary>
+	public bool IsHostControlFocused { get; }
+
+	#endregion
+
+	#region Methods
+
+	/// <summary>Prepare rectangle <paramref name="rect"/> for painting by applying content offsets.</summary>
+	/// <param name="rect">Rectangle to prepare.</param>
+	public void PrepareContentRectangle(ref Rectangle rect)
+	{
+		var conv    = DpiConverter.FromDefaultTo(Dpi);
+		var spacing = conv.ConvertX(ListBoxConstants.ContentSpacing);
+
+		rect.X     += spacing;
+		rect.Width -= spacing * 2;
+	}
+
+	/// <summary>Prepare rectangle <paramref name="rect"/> for painting text by applying text offsets.</summary>
+	/// <param name="listBoxFont">Font of hosing <see cref="CustomListBox"/>.</param>
+	/// <param name="itemFont">Text font.</param>
+	/// <param name="rect">Rectangle to prepare.</param>
+	public void PrepareTextRectangle(Font listBoxFont, Font itemFont, ref Rectangle rect)
+	{
+		if(listBoxFont == itemFont)
+		{
+			var h = GitterApplication.TextRenderer.GetFontHeight(Graphics, listBoxFont);
+			var d = (int)((rect.Height - h) / 2.0f);
+			rect.Y += d;
+			rect.Height -= d;
+		}
+		else
+		{
+			var h1 = GitterApplication.TextRenderer.GetFontHeight(Graphics, listBoxFont);
+			var h  = GitterApplication.TextRenderer.GetFontHeight(Graphics, itemFont);
+			var d  = (int)((rect.Height - h1) / 2.0f + h1 - h);
+			rect.Y      += d;
+			rect.Height -= d;
+		}
+	}
+
+	#endregion
 }

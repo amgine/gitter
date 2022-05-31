@@ -18,120 +18,114 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System;
+
+public class NotifyingAsyncTextReader : AsyncTextReader
 {
-	using System;
+	#region Data
 
-	public class NotifyingAsyncTextReader : AsyncTextReader
+	private int _lastEolIndex;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler<TextLineReceivedEventArgs> TextLineReceived;
+
+	private void OnTextLineReceived(string text)
+		=> TextLineReceived?.Invoke(this, new TextLineReceivedEventArgs(text));
+
+	private void OnTextLineReceived(char[] buffer, int startIndex, int count)
+		=> TextLineReceived?.Invoke(this, new TextLineReceivedEventArgs(new string(buffer, startIndex, count)));
+
+	#endregion
+
+	#region .ctor
+
+	public NotifyingAsyncTextReader()
 	{
-		#region Data
+	}
 
-		private int _lastEolIndex;
+	public NotifyingAsyncTextReader(int bufferSize)
+		: base(bufferSize)
+	{
+	}
 
-		#endregion
+	#endregion
 
-		#region Events
+	#region Overrides
 
-		public event EventHandler<TextLineReceivedEventArgs> TextLineReceived;
-
-		private void OnTextLineReceived(string text) => TextLineReceived?.Invoke(this, new TextLineReceivedEventArgs(text));
-
-		private void OnTextLineReceived(char[] buffer, int startIndex, int count)
+	protected override void OnStringDecoded(char[] buffer, int startIndex, int length)
+	{
+		int bufferedLineChars = Length - _lastEolIndex - 1;
+		int bufferEolIndex = -1;
+		bool isEol = false;
+		bool hadR = false;
+		for(int i = startIndex; i < startIndex + length; ++i)
 		{
-			var handler = TextLineReceived;
-			if(handler != null)
+			char current = buffer[i];
+			if(current == '\r')
 			{
-				var str = new string(buffer, startIndex, count);
-				handler(this, new TextLineReceivedEventArgs(str));
+				isEol = true;
+				hadR = true;
 			}
-		}
-
-		#endregion
-
-		#region .ctor
-
-		public NotifyingAsyncTextReader()
-		{
-		}
-
-		public NotifyingAsyncTextReader(int bufferSize)
-			: base(bufferSize)
-		{
-		}
-
-		#endregion
-
-		#region Overrides
-
-		protected override void OnStringDecoded(char[] buffer, int startIndex, int length)
-		{
-			int bufferedLineChars = Length - _lastEolIndex - 1;
-			int bufferEolIndex = -1;
-			bool isEol = false;
-			bool hadR = false;
-			for(int i = startIndex; i < startIndex + length; ++i)
+			else if(current == '\n')
 			{
-				char current = buffer[i];
-				if(current == '\r')
+				if(!hadR)
 				{
 					isEol = true;
-					hadR = true;
-				}
-				else if(current == '\n')
-				{
-					if(!hadR)
-					{
-						isEol = true;
-					}
-					else
-					{
-						bufferEolIndex = i;
-						hadR = false;
-						continue;
-					}
 				}
 				else
 				{
-					hadR = false;
-				}
-				if(isEol)
-				{
-					if(bufferedLineChars > 0)
-					{
-						var temp = new char[bufferedLineChars + i - startIndex];
-						bufferedLineChars = 0;
-						CopyTo(_lastEolIndex + 1, temp, 0, bufferedLineChars);
-						Array.Copy(buffer, startIndex, temp, bufferedLineChars, i - startIndex);
-						int offset = temp[0] != '\n' ? 0 : 1;
-						OnTextLineReceived(temp, offset, temp.Length - offset);
-					}
-					else
-					{
-						OnTextLineReceived(buffer, bufferEolIndex + 1, i - bufferEolIndex - 1);
-					}
 					bufferEolIndex = i;
-					isEol = false;
+					hadR = false;
+					continue;
 				}
 			}
-			if(bufferEolIndex != -1)
+			else
 			{
-				_lastEolIndex = Length + bufferEolIndex - startIndex;
+				hadR = false;
 			}
-			base.OnStringDecoded(buffer, startIndex, length);
-		}
-
-		protected override void OnStringCompleted()
-		{
-			if(TextLineReceived != null)
+			if(isEol)
 			{
-				if(_lastEolIndex + 1 < Length - 1)
+				if(bufferedLineChars > 0)
 				{
-					OnTextLineReceived(GetText(_lastEolIndex + 1, Length - (_lastEolIndex + 1)));
+					var temp = new char[bufferedLineChars + i - startIndex];
+					bufferedLineChars = 0;
+					CopyTo(_lastEolIndex + 1, temp, 0, bufferedLineChars);
+					Array.Copy(buffer, startIndex, temp, bufferedLineChars, i - startIndex);
+					int offset = temp[0] != '\n' ? 0 : 1;
+					OnTextLineReceived(temp, offset, temp.Length - offset);
 				}
+				else
+				{
+					OnTextLineReceived(buffer, bufferEolIndex + 1, i - bufferEolIndex - 1);
+				}
+				bufferEolIndex = i;
+				isEol = false;
 			}
-			base.OnStringCompleted();
 		}
-
-		#endregion
+		if(bufferEolIndex != -1)
+		{
+			_lastEolIndex = Length + bufferEolIndex - startIndex;
+		}
+		base.OnStringDecoded(buffer, startIndex, length);
 	}
+
+	/// <inheritdoc/>
+	protected override void Complete()
+	{
+		if(TextLineReceived is not null)
+		{
+			if(_lastEolIndex + 1 < Length - 1)
+			{
+				OnTextLineReceived(GetText(_lastEolIndex + 1, Length - (_lastEolIndex + 1)));
+			}
+		}
+		base.Complete();
+	}
+
+	#endregion
 }

@@ -18,27 +18,26 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.DeleteTag"/> operation.</summary>
+public sealed class DeleteTagParameters
 {
-	using System;
-
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.DeleteTag"/> operation.</summary>
-	public sealed class DeleteTagParameters
+	/// <summary>Create <see cref="DeleteTagParameters"/>.</summary>
+	public DeleteTagParameters()
 	{
-		/// <summary>Create <see cref="DeleteTagParameters"/>.</summary>
-		public DeleteTagParameters()
-		{
-		}
-
-		/// <summary>Create <see cref="DeleteTagParameters"/>.</summary>
-		/// <param name="tagName">Name of tag to delete.</param>
-		public DeleteTagParameters(string tagName)
-		{
-			TagName = tagName;
-		}
-
-
-		/// <summary>Name of tag to delete.</summary>
-		public string TagName { get; set; }
 	}
+
+	/// <summary>Create <see cref="DeleteTagParameters"/>.</summary>
+	/// <param name="tagName">Name of tag to delete.</param>
+	public DeleteTagParameters(string tagName)
+	{
+		TagName = tagName;
+	}
+
+
+	/// <summary>Name of tag to delete.</summary>
+	public string TagName { get; set; }
 }

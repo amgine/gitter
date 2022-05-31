@@ -18,30 +18,55 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Text;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>"Url" column.</summary>
+public class UrlColumn : CustomListBoxColumn
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	/// <summary>"Url" column.</summary>
-	public class UrlColumn : CustomListBoxColumn
+	public UrlColumn(int id, string name, bool visible)
+		: base(id, name, visible)
 	{
-		public UrlColumn(int id, string name, bool visible)
-			: base(id, name, visible)
-		{
-		}
+	}
 
-		public UrlColumn()
-			: this((int)ColumnId.Url, Resources.StrUrl, true)
-		{
-		}
+	public UrlColumn()
+		: this((int)ColumnId.Url, Resources.StrUrl, true)
+	{
+	}
 
-		/// <inheritdoc/>
-		public override string IdentificationString => "Url";
+	/// <inheritdoc/>
+	public override string IdentificationString => "Url";
+
+	protected virtual string GetUrl(CustomListBoxItem item) => null;
+
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		if(GetUrl(paintEventArgs.Item) is { Length: not 0 } url)
+		{
+			paintEventArgs.PaintText(url);
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		if(GetUrl(measureEventArgs.Item) is { Length: not 0 } url)
+		{
+			return measureEventArgs.MeasureText(url);
+		}
+		return Size.Empty;
 	}
 }

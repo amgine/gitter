@@ -18,322 +18,486 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+#nullable enable
+
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
+/// <summary>Hosts floating views.</summary>
+[System.ComponentModel.ToolboxItem(defaultType: false)]
+[System.ComponentModel.DesignerCategory("")]
+public class FloatingViewForm : Form
 {
-	using System;
-	using System.Windows.Forms;
-	using System.Drawing;
-
-	using gitter.Native;
-
-	/// <summary>Hosts floating views.</summary>
-	internal sealed class FloatingViewForm : Form
+	static class Constants
 	{
-		#region Data
+		public const int HTTRANSPARENT = -1;
 
-		private readonly ViewDockGrid _dockGrid;
-		private bool _isInMulticontrolMode;
-		private Control _rootControl;
+		public const int HTCAPTION = 2;
+		public const int HTLEFT = 10;
+		public const int HTRIGHT = 11;
+		public const int HTTOP = 12;
+		public const int HTTOPLEFT = 13;
+		public const int HTTOPRIGHT = 14;
+		public const int HTBOTTOM = 15;
+		public const int HTBOTTOMLEFT = 16;
+		public const int HTBOTTOMRIGHT = 17;
 
-		#endregion
+		public const int GA_ROOT = 2;
+	}
 
-		/// <summary>Initializes a new instance of the <see cref="FloatingViewForm"/> class.</summary>
-		/// <param name="viewHost">Floating <see cref="ViewHost"/>.</param>
-		public FloatingViewForm(ViewDockGrid dockGrid, ViewHost viewHost)
+	const int SC_MOUSEMOVE = 0xF012;
+
+	private bool _isForceClosing;
+
+	private ViewHostDockingProcess? _dockingProcess;
+
+	internal static Point GetLocationFor(Control control)
+	{
+		var loc        = control.PointToScreen(Point.Empty);
+		var borderSize = ViewManager.Renderer.FloatBorderSize.GetValue(Dpi.FromControl(control));
+		loc.X -= borderSize.Width;
+		loc.Y -= borderSize.Height;
+		return loc;
+	}
+
+	/// <summary>Initializes a new instance of the <see cref="FloatingViewForm"/> class.</summary>
+	/// <param name="control">Control to display.</param>
+	public FloatingViewForm(Control control)
+	{
+		Verify.Argument.IsNotNull(control);
+
+		var dpi = Dpi.FromControl(this);
+
+		var minSize = new Size(
+			width:  ViewConstants.MinimumHostWidth.GetValue(dpi),
+			height: ViewConstants.MinimumHostHeight.GetValue(dpi));
+
+		var borderSize = Renderer.FloatBorderSize.GetValue(dpi);
+
+		if(control is ViewSplit)
 		{
-			Verify.Argument.IsNotNull(dockGrid, nameof(dockGrid));
-			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
+			EnterMulticontrolMode();
+		}
 
-			Font			= GitterApplication.FontManager.UIFont;
-			Text			= viewHost.Text;
-			FormBorderStyle	= FormBorderStyle.None;
-			BackColor		= Renderer.BackgroundColor;
-			StartPosition	= FormStartPosition.Manual;
-			Padding			= new Padding(Renderer.FloatBorderSize);
-			Bounds			= GetBoundsForControl(viewHost);
-			if(viewHost.Width < ViewConstants.MinimumHostWidth)
+#if !NET5_0_OR_GREATER
+		Font			= GitterApplication.FontManager.UIFont.Font;
+#endif
+		Text			= control.Text;
+		FormBorderStyle	= FormBorderStyle.None;
+		BackColor		= Renderer.BackgroundColor;
+		StartPosition	= FormStartPosition.Manual;
+		Padding			= new Padding(borderSize.Width, borderSize.Height, borderSize.Width, borderSize.Height);
+		Bounds			= GetBoundsForControl(control, dpi);
+		if(control.Width < minSize.Width)
+		{
+			if(control.Height < minSize.Height)
 			{
-				if(viewHost.Height < ViewConstants.MinimumHostHeight)
-				{
-					viewHost.Size = new Size(ViewConstants.MinimumHostWidth, ViewConstants.MinimumHostHeight);
-				}
-				else
-				{
-					viewHost.Width = ViewConstants.MinimumHostWidth;
-				}
-			}
-			else if(viewHost.Height < ViewConstants.MinimumHostHeight)
-			{
-				viewHost.Height = ViewConstants.MinimumHostHeight;
-			};
-			MinimumSize		= new Size(
-				ViewConstants.MinimumHostWidth + Renderer.FloatBorderSize * 2,
-				ViewConstants.MinimumHostHeight + Renderer.FloatBorderSize * 2);
-			ShowInTaskbar	= false;
-			ShowIcon		= false;
-			ControlBox		= false;
-			MinimizeBox		= false;
-			MaximizeBox		= true;
-			_rootControl	= viewHost;
-			_dockGrid		= dockGrid;
-
-			_dockGrid.AddFloatingForm(this);
-		}
-
-		private ViewRenderer Renderer
-		{
-			get { return ViewManager.Renderer; }
-		}
-
-		private Rectangle GetBoundsForControl(Control control)
-		{
-			var loc = control.PointToScreen(Point.Empty);
-			var size = control.Size;
-			loc.X -= Renderer.FloatBorderSize;
-			loc.Y -= Renderer.FloatBorderSize;
-			size.Width += Renderer.FloatBorderSize * 2;
-			size.Height += Renderer.FloatBorderSize * 2;
-			return new Rectangle(loc, size);
-		}
-
-		internal bool IsInMulticontrolMode
-		{
-			get { return _isInMulticontrolMode; }
-		}
-
-		internal void EnterMulticontrolMode()
-		{
-			Verify.State.IsFalse(IsInMulticontrolMode);
-
-			if(WindowState == FormWindowState.Maximized)
-			{
-				Padding = new Padding(
-					0,
-					0 + Renderer.FloatTitleHeight,
-					0,
-					0);
+				control.Size = minSize;
 			}
 			else
 			{
-				Padding = new Padding(
-					Renderer.FloatBorderSize,
-					Renderer.FloatBorderSize + Renderer.FloatTitleHeight,
-					Renderer.FloatBorderSize,
-					Renderer.FloatBorderSize);
-			}
-			_isInMulticontrolMode = true;
-		}
-
-		internal void LeaveMulticontrolMode()
-		{
-			Verify.State.IsTrue(IsInMulticontrolMode);
-
-			if(WindowState == FormWindowState.Maximized)
-			{
-				Padding = new Padding(
-					0,
-					0,
-					0,
-					0);
-			}
-			else
-			{
-				Padding = new Padding(
-					Renderer.FloatBorderSize,
-					Renderer.FloatBorderSize,
-					Renderer.FloatBorderSize,
-					Renderer.FloatBorderSize);
-			}
-			_isInMulticontrolMode = false;
-		}
-
-		public Control RootControl
-		{
-			get { return _rootControl; }
-			internal set { _rootControl = value; }
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <value></value>
-		/// <returns>A <see cref="T:System.Windows.Forms.CreateParams"/> that contains the required creation parameters when the handle to the control is created.</returns>
-		protected override CreateParams CreateParams
-		{
-			get
-			{
-				//const int WS_SIZEBOX = 0x00040000;
-				const int WS_EX_TOOLWINDOW = 0x80;
-				var cp = base.CreateParams;
-				//cp.Style |= WS_SIZEBOX;
-				cp.ExStyle |= WS_EX_TOOLWINDOW;
-				return cp;
+				control.Width = minSize.Width;
 			}
 		}
-
-		/// <summary>
-		/// </summary>
-		/// <param name="m">The Windows <see cref="T:System.Windows.Forms.Message"/> to process.</param>
-		protected override void WndProc(ref Message m)
+		else if(control.Height < minSize.Height)
 		{
-			bool processed = false;
-			switch((WM)m.Msg)
-			{
-				case WM.NCHITTEST:
-					processed = OnNcHitTest(ref m);
-					break;
-			}
-			if(!processed)
-			{
-				base.WndProc(ref m);
-			}
+			control.Height = minSize.Height;
 		}
+		MinimumSize		= new Size(
+			minSize.Width  + borderSize.Width  * 2,
+			minSize.Height + borderSize.Height * 2);
+		ShowInTaskbar	= false;
+		ShowIcon		= false;
+		ControlBox      = false;
+		MinimizeBox		= false;
+		MaximizeBox		= true;
+		RootControl	    = control;
+		UpdateLayout();
 
-		private bool OnNcHitTest(ref Message m)
+		DockElements<FloatingViewForm>.Add(this);
+	}
+
+	private ViewRenderer Renderer => ViewManager.Renderer;
+
+	/// <inheritdoc/>
+	protected override void OnActivated(EventArgs e)
+	{
+		base.OnActivated(e);
+		BackColor = Renderer.AccentColor;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnDeactivate(EventArgs e)
+	{
+		base.OnDeactivate(e);
+		BackColor = Renderer.BackgroundColor;
+	}
+
+	private Rectangle GetBoundsForControl(Control control, Dpi dpi)
+	{
+		Assert.IsNotNull(control);
+
+		var loc        = control.PointToScreen(Point.Empty);
+		var size       = control.Size;
+		var borderSize = Renderer.FloatBorderSize.GetValue(dpi);
+		loc.X -= borderSize.Width;
+		loc.Y -= borderSize.Height;
+		size.Width  += borderSize.Width  * 2;
+		size.Height += borderSize.Height * 2;
+		if(IsInMulticontrolMode)
 		{
-			int x = NativeUtility.LOWORD(m.LParam);
-			int y = NativeUtility.HIWORD(m.LParam);
+			var dy = Renderer.FloatTitleHeight.GetValue(dpi);
+			loc.Y       -= dy;
+			size.Height += dy;
+		}
+		return new Rectangle(loc, size);
+	}
 
-			var point = PointToClient(new Point(x, y));
-			var rc = ClientRectangle;
-			bool isMaximized = WindowState == FormWindowState.Maximized;
+	internal bool IsInMulticontrolMode { get; private set; }
 
-			if(_isInMulticontrolMode)
-			{
-				if(isMaximized)
+	internal void EnterMulticontrolMode()
+	{
+		Verify.State.IsFalse(IsInMulticontrolMode);
+
+		var dpi = Dpi.FromControl(this);
+		SuspendLayout();
+		if(WindowState == FormWindowState.Maximized)
+		{
+			Padding = new Padding(
+				0,
+				0 + Renderer.FloatTitleHeight.GetValue(dpi),
+				0,
+				0);
+		}
+		else
+		{
+			var borderSize = Renderer.FloatBorderSize.GetValue(dpi);
+			Padding = new Padding(
+				borderSize.Width,
+				borderSize.Height + Renderer.FloatTitleHeight.GetValue(dpi),
+				borderSize.Width,
+				borderSize.Height);
+		}
+		IsInMulticontrolMode = true;
+		ResumeLayout(performLayout: true);
+	}
+
+	internal void LeaveMulticontrolMode()
+	{
+		Verify.State.IsTrue(IsInMulticontrolMode);
+
+		var dpi = Dpi.FromControl(this);
+		if(WindowState == FormWindowState.Maximized)
+		{
+			Padding = new Padding(
+				0,
+				0,
+				0,
+				0);
+		}
+		else
+		{
+			var borderSize = Renderer.FloatBorderSize.GetValue(dpi);
+			Padding = new Padding(
+				borderSize.Width,
+				borderSize.Height,
+				borderSize.Width,
+				borderSize.Height);
+		}
+		IsInMulticontrolMode = false;
+	}
+
+	/// <summary>Returns the root control of this <see cref="FloatingViewForm"/>.</summary>
+	/// <value>Root control of this <see cref="FloatingViewForm"/>.</value>
+	public Control? RootControl { get; internal set; }
+
+	/// <inheritdoc/>
+	protected override CreateParams CreateParams
+	{
+		get
+		{
+			const int CS_DROPSHADOW    = 0x00020000;
+			const int WS_EX_TOOLWINDOW = 0x00000080;
+
+			var cp = base.CreateParams;
+			//cp.Style |= WS_SIZEBOX;
+			cp.ClassStyle |= CS_DROPSHADOW;
+			cp.ExStyle    |= WS_EX_TOOLWINDOW;
+			return cp;
+		}
+	}
+
+	/// <summary>Returns a sequence of all contained view hosts.</summary>
+	/// <returns>Sequence of all contained view hosts.</returns>
+	public IEnumerable<ViewHost> GetViewHosts()
+		=> RootControl is not null
+			? new ViewHostsSequence(RootControl)
+			: Enumerable.Empty<ViewHost>();
+
+	internal void UpdateMaximizeBounds()
+	{
+		var bounds = Screen.FromControl(this).WorkingArea;
+		bounds.X = 0;
+		bounds.Y = 0;
+		MaximizedBounds = bounds;
+	}
+
+	/// <inheritdoc/>
+	protected override void WndProc(ref Message m)
+	{
+		bool processed = false;
+		switch((Native.WM)m.Msg)
+		{
+			case Native.WM.NCHITTEST:
+				processed = OnNcHitTest(ref m);
+				break;
+			case Native.WM.SYSCOMMAND when m.WParam == (IntPtr)SC_MOUSEMOVE:
+				if(!IsInMulticontrolMode && RootControl is ViewHost viewHost)
 				{
-					if((new Rectangle(
-						rc.X, rc.Y,
-						rc.Width, Renderer.FloatTitleHeight)).Contains(point))
+					if(_dockingProcess is null)
 					{
-						m.Result = (IntPtr)Constants.HTCAPTION;
-						return true;
+						_dockingProcess = new(viewHost);
 					}
-				}
-				else
-				{
-					if((new Rectangle(
-						rc.X + Renderer.FloatBorderSize,
-						rc.Y + Renderer.FloatBorderSize,
-						rc.Width - Renderer.FloatBorderSize * 2,
-						Renderer.FloatTitleHeight)).Contains(point))
+					else if(_dockingProcess.IsActive)
 					{
-						m.Result = (IntPtr)Constants.HTCAPTION;
-						return true;
+						_dockingProcess.Cancel();
 					}
+					_dockingProcess.Start(Point.Empty);
 				}
-			}
-
-			if(isMaximized) return false;
-
-			var grip = new GripBounds(rc);
-			if(grip.TopLeft.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTTOPLEFT;
-				return true;
-			}
-			if(grip.TopRight.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTTOPRIGHT;
-				return true;
-			}
-			if(grip.Top.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTTOP;
-				return true;
-			}
-			if(grip.BottomLeft.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTBOTTOMLEFT;
-				return true;
-			}
-			if(grip.BottomRight.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTBOTTOMRIGHT;
-				return true;
-			}
-			if(grip.Bottom.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTBOTTOM;
-				return true;
-			}
-			if(grip.Left.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTLEFT;
-				return true;
-			}
-			if(grip.Right.Contains(point))
-			{
-				m.Result = (IntPtr)Constants.HTRIGHT;
-				return true;
-			}
-			return false;
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
-		protected override void OnStyleChanged(EventArgs e)
-		{
-			MaximizedBounds = Screen.GetWorkingArea(this);
-			base.OnStyleChanged(e);
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
-		protected override void OnResize(EventArgs e)
-		{
-			if(WindowState == FormWindowState.Maximized)
-			{
-				if(_isInMulticontrolMode)
+				break;
+			case Native.WM.MOVE:
+				if(_dockingProcess is not null)
 				{
-					Padding = new Padding(
-						0,
-						0 + Renderer.FloatTitleHeight,
-						0,
-						0);
+					_dockingProcess.Update(Point.Empty);
 				}
-				else
+				break;
+			case Native.WM.EXITSIZEMOVE:
+				if(_dockingProcess is not null)
 				{
-					Padding = new Padding(0);
+					_dockingProcess.Commit(Point.Empty);
+					_dockingProcess.Dispose();
+					_dockingProcess = null;
 				}
-				Region = null;
+				else if(!IsDisposed)
+				{
+					UpdateMaximizeBounds();
+				}
+				break;
+		}
+		if(!processed)
+		{
+			base.WndProc(ref m);
+		}
+	}
+
+	/// <summary>Starts window move process.</summary>
+	public void DragMove()
+	{
+		if(!IsHandleCreated) return;
+		_ = Native.User32.SendMessage(Handle, Native.WM.SYSCOMMAND, (IntPtr)SC_MOUSEMOVE, IntPtr.Zero);
+		if(!IsHandleCreated) return;
+		_ = Native.User32.SendMessage(Handle, Native.WM.LBUTTONUP, IntPtr.Zero, IntPtr.Zero);
+	}
+
+	private Point _originalMousePosition;
+
+	/// <summary>Start window move process after it was displayed.</summary>
+	public void DragOnShown()
+	{
+		_originalMousePosition = Control.MousePosition;
+		VisibleChanged += OnVisibleChanged;
+	}
+
+	private void OnVisibleChanged(object? sender, EventArgs e)
+	{
+		if(sender is not FloatingViewForm { Visible: true } f) return;
+		f.VisibleChanged -= OnVisibleChanged;
+		f.BeginInvoke(() =>
+		{
+			var p1 = Control.MousePosition;
+			var dx = p1.X - _originalMousePosition.X;
+			var dy = p1.Y - _originalMousePosition.Y;
+			if(dx != 0 || dy != 0)
+			{
+				var location = f.Location;
+				location.X += dx;
+				location.Y += dy;
+				f.Location = location;
+			}
+			f.RootControl?.Focus();
+			f.DragMove();
+		});
+	}
+
+	private bool OnNcHitTest(ref Message m)
+	{
+		int x = (short)Native.Macro.LOWORD(m.LParam);
+		int y = (short)Native.Macro.HIWORD(m.LParam);
+
+		var point = PointToClient(new Point(x, y));
+		var rc = ClientRectangle;
+		bool isMaximized = WindowState == FormWindowState.Maximized;
+
+		if(IsInMulticontrolMode)
+		{
+			var dpi = Dpi.FromControl(this);
+			if(isMaximized)
+			{
+				if((new Rectangle(
+					rc.X, rc.Y,
+					rc.Width, Renderer.FloatTitleHeight.GetValue(dpi))).Contains(point))
+				{
+					m.Result = (IntPtr)Constants.HTCAPTION;
+					return true;
+				}
 			}
 			else
 			{
-				if(_isInMulticontrolMode)
+				var borderSize = Renderer.FloatBorderSize.GetValue(dpi);
+				if((new Rectangle(
+					rc.X + borderSize.Width,
+					rc.Y + borderSize.Height,
+					rc.Width - borderSize.Width * 2,
+					Renderer.FloatTitleHeight.GetValue(dpi))).Contains(point))
 				{
-					Padding = new Padding(
-						Renderer.FloatBorderSize,
-						Renderer.FloatBorderSize + Renderer.FloatTitleHeight,
-						Renderer.FloatBorderSize,
-						Renderer.FloatBorderSize);
-				}
-				else
-				{
-					Padding = new Padding(Renderer.FloatBorderSize);
-				}
-				var cornderRadius = Renderer.FloatCornerRadius;
-				if(cornderRadius != 0)
-				{
-					Region = GraphicsUtility.GetRoundedRegion(ClientRectangle, Renderer.FloatCornerRadius);
+					m.Result = (IntPtr)Constants.HTCAPTION;
+					return true;
 				}
 			}
-			base.OnResize(e);
 		}
 
-		/// <summary>
-		/// Disposes of the resources (other than memory) used by the <see cref="T:FloatingViewForm"/>.
-		/// </summary>
-		/// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-		protected override void Dispose(bool disposing)
+		if(isMaximized) return false;
+
+		var grip = new GripBounds(rc);
+		if(grip.TopLeft.Contains(point))
 		{
-			if(disposing)
-			{
-				_dockGrid.RemoveFloatingForm(this);
-				_rootControl = null;
-			}
-			base.Dispose(disposing);
+			m.Result = (IntPtr)Constants.HTTOPLEFT;
+			return true;
 		}
+		if(grip.TopRight.Contains(point))
+		{
+			m.Result = (IntPtr)Constants.HTTOPRIGHT;
+			return true;
+		}
+		if(grip.Top.Contains(point))
+		{
+			m.Result = (IntPtr)Constants.HTTOP;
+			return true;
+		}
+		if(grip.BottomLeft.Contains(point))
+		{
+			m.Result = (IntPtr)Constants.HTBOTTOMLEFT;
+			return true;
+		}
+		if(grip.BottomRight.Contains(point))
+		{
+			m.Result = (IntPtr)Constants.HTBOTTOMRIGHT;
+			return true;
+		}
+		if(grip.Bottom.Contains(point))
+		{
+			m.Result = (IntPtr)Constants.HTBOTTOM;
+			return true;
+		}
+		if(grip.Left.Contains(point))
+		{
+			m.Result = (IntPtr)Constants.HTLEFT;
+			return true;
+		}
+		if(grip.Right.Contains(point))
+		{
+			m.Result = (IntPtr)Constants.HTRIGHT;
+			return true;
+		}
+		return false;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnStyleChanged(EventArgs e)
+	{
+		MaximizedBounds = Screen.GetWorkingArea(this);
+		base.OnStyleChanged(e);
+	}
+
+	private Rectangle GetRootControlBounds(Dpi dpi)
+	{
+		var rc = ClientRectangle;
+		if(IsInMulticontrolMode)
+		{
+			var dy = Renderer.FloatTitleHeight.GetValue(dpi);
+			rc.Y      += dy;
+			rc.Height -= dy;
+		}
+		if(WindowState != FormWindowState.Maximized)
+		{
+			var borderSize = Renderer.FloatBorderSize.GetValue(dpi);
+			rc.X += borderSize.Width;
+			rc.Y += borderSize.Height;
+			rc.Width  -= borderSize.Width  * 2;
+			rc.Height -= borderSize.Height * 2;
+		}
+		return rc;
+	}
+
+	internal void UpdateLayout()
+	{
+		var dpi = Dpi.FromControl(this);
+		if(RootControl is not null)
+		{
+			RootControl.Bounds = GetRootControlBounds(dpi);
+		}
+		if(WindowState != FormWindowState.Maximized)
+		{
+			if(Renderer.FloatCornerRadius is not null)
+			{
+				var cornderRadius = Renderer.FloatCornerRadius.GetValue(dpi);
+				if(cornderRadius is { Width: > 0, Height: > 0 })
+				{
+					Region = GraphicsUtility.GetRoundedRegion(ClientRectangle, cornderRadius.Width);
+				}
+			}
+		}
+	}
+
+#if NETCOREAPP || NET48_OR_GREATER
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
+	/// <inheritdoc/>
+	protected override void OnDpiChangedAfterParent(EventArgs e)
+	{
+		UpdateLayout();
+		base.OnDpiChangedAfterParent(e);
+	}
+#endif
+
+	/// <inheritdoc/>
+	protected override void OnResize(EventArgs e)
+	{
+		UpdateLayout();
+		base.OnResize(e);
+	}
+
+	internal void ForceClose()
+	{
+		_isForceClosing = true;
+		Close();
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			DockElements<FloatingViewForm>.Remove(this);
+			_dockingProcess?.Dispose();
+			RootControl = null;
+		}
+		base.Dispose(disposing);
 	}
 }

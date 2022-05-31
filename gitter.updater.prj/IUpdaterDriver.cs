@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,21 +18,20 @@
  */
 #endregion
 
-namespace gitter.Updater
+namespace gitter.Updater;
+
+using System;
+
+public interface IUpdateDriver
 {
-	using System;
+	string Name { get; }
 
-	public interface IUpdateDriver
-	{
-		string Name { get; }
+	IUpdateProcess CreateProcess(CommandLine cmdline);
+}
 
-		IUpdateProcess CreateProcess(CommandLine cmdline);
-	}
+public interface IUpdateProcess
+{
+	void BeginUpdate(UpdateProcessMonitor monitor);
 
-	public interface IUpdateProcess
-	{
-		void BeginUpdate(UpdateProcessMonitor monitor);
-
-		void Update(UpdateProcessMonitor monitor);
-	}
+	void Update(UpdateProcessMonitor monitor);
 }

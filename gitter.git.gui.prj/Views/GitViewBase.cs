@@ -18,124 +18,124 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Views
+namespace gitter.Git.Gui.Views;
+
+using System;
+using System.ComponentModel;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Configuration;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+partial class GitViewBase : ViewBase
 {
-	using System;
-	using System.ComponentModel;
+	private Repository _repository;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Configuration;
+	public event EventHandler RepositoryChanged;
 
-	[ToolboxItem(false)]
-	partial class GitViewBase : ViewBase
+	public GitViewBase()
 	{
-		private Repository _repository;
+	}
 
-		public event EventHandler RepositoryChanged;
+	public GitViewBase(Guid guid, GuiProvider guiProvider)
+		: base(guid, guiProvider.Environment)
+	{
+		Verify.Argument.IsNotNull(guiProvider);
 
-		public GitViewBase()
+		Gui = guiProvider;
+		_repository = guiProvider.Repository;
+	}
+
+	protected void ShowDiffView(IDiffSource diffSource)
+	{
+		WorkingEnvironment.ViewDockService.ShowView(Guids.DiffViewGuid, new DiffViewModel(diffSource, null));
+	}
+
+	protected void ShowContextualDiffView(IDiffSource diffSource)
+	{
+		WorkingEnvironment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid, new DiffViewModel(diffSource, null), false);
+	}
+
+	protected override void OnCreateControl()
+	{
+		base.OnCreateControl();
+		if(_repository is not null)
 		{
+			AttachToRepository(_repository);
 		}
+	}
 
-		public GitViewBase(Guid guid, GuiProvider guiProvider)
-			: base(guid, guiProvider.Environment)
-		{
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
-
-			Gui = guiProvider;
-			_repository = guiProvider.Repository;
-		}
-
-		protected void ShowDiffView(IDiffSource diffSource)
-		{
-			WorkingEnvironment.ViewDockService.ShowView(Guids.DiffViewGuid, new DiffViewModel(diffSource, null));
-		}
-
-		protected void ShowContextualDiffView(IDiffSource diffSource)
-		{
-			WorkingEnvironment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid, new DiffViewModel(diffSource, null), false);
-		}
-
-		protected override void OnCreateControl()
-		{
-			base.OnCreateControl();
-			if(_repository is not null)
-			{
-				AttachToRepository(_repository);
-			}
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				Repository = null;
-			}
-			base.Dispose(disposing);
-		}
-
-		protected override void OnClosing()
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
 			Repository = null;
-			base.OnClosing();
 		}
+		base.Dispose(disposing);
+	}
 
-		protected virtual void AttachToRepository(Repository repository)
-		{
-			LoadRepositoryConfig(repository.ConfigSection);
-		}
+	protected override void OnClosing()
+	{
+		Repository = null;
+		base.OnClosing();
+	}
 
-		protected virtual void DetachFromRepository(Repository repository)
-		{
-			SaveRepositoryConfig(repository.ConfigSection);
-		}
+	protected virtual void AttachToRepository(Repository repository)
+	{
+		LoadRepositoryConfig(repository.ConfigSection);
+	}
 
-		public Repository Repository
+	protected virtual void DetachFromRepository(Repository repository)
+	{
+		SaveRepositoryConfig(repository.ConfigSection);
+	}
+
+	public Repository Repository
+	{
+		get => _repository;
+		set
 		{
-			get => _repository;
-			set
+			if(value != _repository)
 			{
-				if(value != _repository)
-				{
-					DetachRepository();
-					AttachRepository(value);
-					RepositoryChanged?.Invoke(this, EventArgs.Empty);
-				}
+				DetachRepository();
+				AttachRepository(value);
+				RepositoryChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
+	}
 
-		private void DetachRepository()
+	private void DetachRepository()
+	{
+		var repository = _repository;
+		_repository = null;
+		if(repository is not null)
 		{
-			var repository = _repository;
-			_repository = null;
-			if(repository is not null)
-			{
-				DetachFromRepository(repository);
-			}
+			DetachFromRepository(repository);
 		}
+	}
 
-		private void AttachRepository(Repository repository)
+	private void AttachRepository(Repository repository)
+	{
+		_repository = repository;
+		if(repository is not null)
 		{
-			_repository = repository;
-			if(repository is not null)
-			{
-				AttachToRepository(repository);
-			}
+			AttachToRepository(repository);
 		}
+	}
 
-		protected virtual void LoadRepositoryConfig(Section section)
-		{
-		}
+	protected virtual void LoadRepositoryConfig(Section section)
+	{
+	}
 
-		protected virtual void SaveRepositoryConfig(Section section)
-		{
-		}
+	protected virtual void SaveRepositoryConfig(Section section)
+	{
+	}
 
-		public GuiProvider Gui { get; }
+	public GuiProvider Gui { get; }
 
-		public virtual void RefreshContent()
-		{
-		}
+	public virtual void RefreshContent()
+	{
 	}
 }

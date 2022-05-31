@@ -18,27 +18,26 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+public sealed class ReferencesData
 {
-	using System;
-	using System.Collections.Generic;
-
-	public sealed class ReferencesData
+	public ReferencesData(IList<BranchData> heads, IList<BranchData> remotes, IList<TagData> tags, RevisionData stash)
 	{
-		public ReferencesData(IList<BranchData> heads, IList<BranchData> remotes, IList<TagData> tags, RevisionData stash)
-		{
-			Heads   = heads;
-			Remotes = remotes;
-			Tags    = tags;
-			Stash   = stash;
-		}
-
-		public IList<BranchData> Heads { get; }
-
-		public IList<BranchData> Remotes { get; }
-
-		public IList<TagData> Tags { get; }
-
-		public RevisionData Stash { get; }
+		Heads   = heads;
+		Remotes = remotes;
+		Tags    = tags;
+		Stash   = stash;
 	}
+
+	public IList<BranchData> Heads { get; }
+
+	public IList<BranchData> Remotes { get; }
+
+	public IList<TagData> Tags { get; }
+
+	public RevisionData Stash { get; }
 }

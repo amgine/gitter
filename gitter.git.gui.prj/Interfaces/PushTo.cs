@@ -18,11 +18,10 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+public enum PushTo
 {
-	public enum PushTo
-	{
-		Remote,
-		Url,
-	}
+	Remote,
+	Url,
 }

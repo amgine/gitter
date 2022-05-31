@@ -18,44 +18,39 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+/// <summary>Simple plain text subitem.</summary>
+public class TextSubItem : BaseTextSubItem
 {
-	using System;
+	private string _text;
 
-	/// <summary>Simple plain text subitem.</summary>
-	public class TextSubItem : BaseTextSubItem
+	/// <summary>Create <see cref="TextSubItem"/>.</summary>
+	/// <param name="id">Subitem id.</param>
+	/// <param name="text">Subitem text.</param>
+	public TextSubItem(int id, string text)
+		: base(id)
 	{
-		private string _text;
+		_text = text;
+	}
 
-		#region .ctor
+	/// <summary>Create <see cref="TextSubItem"/>.</summary>
+	/// <param name="id">Subitem id.</param>
+	public TextSubItem(int id)
+		: this(id, null)
+	{
+	}
 
-		/// <summary>Create <see cref="TextSubItem"/>.</summary>
-		/// <param name="id">Subitem id.</param>
-		/// <param name="text">Subitem text.</param>
-		public TextSubItem(int id, string text)
-			: base(id)
+	/// <summary>Subitem text.</summary>
+	public override string Text
+	{
+		get => _text;
+		set
 		{
-			_text = text;
-		}
-
-		/// <summary>Create <see cref="TextSubItem"/>.</summary>
-		/// <param name="id">Subitem id.</param>
-		public TextSubItem(int id)
-			: this(id, null)
-		{
-		}
-
-		#endregion
-
-		/// <summary>Subitem text.</summary>
-		public override string Text
-		{
-			get => _text;
-			set
-			{
-				_text = value;
-				Invalidate();
-			}
+			_text = value;
+			Invalidate();
 		}
 	}
 }

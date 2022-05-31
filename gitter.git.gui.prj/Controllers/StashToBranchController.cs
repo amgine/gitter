@@ -18,72 +18,59 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class StashToBranchController : ViewControllerBase<IStashToBranchView>, IStashToBranchController
 {
-	using System;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class StashToBranchController : ViewControllerBase<IStashToBranchView>, IStashToBranchController
+	public StashToBranchController(StashedState stashedState)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(stashedState);
 
-		public StashToBranchController(StashedState stashedState)
+		StashedState = stashedState;
+	}
+
+	private StashedState StashedState { get; }
+
+	public bool TryCreateBranch()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		var branchName = View.BranchName.Value.Trim();
+
+		if(!GitControllerUtility.ValidateNewBranchName(branchName, StashedState.Repository, View.BranchName, View.ErrorNotifier))
 		{
-			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
-
-			StashedState = stashedState;
+			return false;
 		}
 
-		#endregion
-
-		#region Properties
-
-		private StashedState StashedState { get; }
-
-		#endregion
-
-		#region IStashToBranchController Members
-
-		public bool TryCreateBranch()
+		try
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var branchName = View.BranchName.Value.Trim();
-
-			if(!GitControllerUtility.ValidateNewBranchName(branchName, StashedState.Repository, View.BranchName, View.ErrorNotifier))
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				return false;
+				StashedState.ToBranch(branchName);
 			}
-
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					StashedState.ToBranch(branchName);
-				}
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					string.Format(Resources.ErrFailedToCreateBranch, branchName),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-
-			return true;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				string.Format(Resources.ErrFailedToCreateBranch, branchName),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
 		}
 
-		#endregion
+		return true;
 	}
 }

@@ -18,100 +18,99 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework.Controls;
+
+public abstract class BaseListBinding<TObject, TEventArgs> : IDisposable
+	where TObject : GitNamedObjectWithLifetime
+	where TEventArgs : ObjectEventArgs<TObject>
 {
-	using System;
-	using System.Windows.Forms;
+	#region Events
 
-	using gitter.Framework.Controls;
+	public event EventHandler<BoundItemActivatedEventArgs<TObject>> ItemActivated;
 
-	public abstract class BaseListBinding<TObject, TEventArgs> : IDisposable
-		where TObject : GitNamedObjectWithLifetime
-		where TEventArgs : ObjectEventArgs<TObject>
+	private void InvokeItemActivated(CustomListBoxItem item, TObject obj)
+		=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TObject>(item, obj));
+
+	#endregion
+
+	#region .ctor
+
+	protected BaseListBinding(CustomListBoxItemsCollection itemHost, GitObjectsCollection<TObject, TEventArgs> collection)
 	{
-		#region Events
+		Verify.Argument.IsNotNull(itemHost);
+		Verify.Argument.IsNotNull(collection);
 
-		public event EventHandler<BoundItemActivatedEventArgs<TObject>> ItemActivated;
+		Target = itemHost;
+		Source = collection;
 
-		private void InvokeItemActivated(CustomListBoxItem item, TObject obj)
-			=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TObject>(item, obj));
+		Target.Comparison = GetComparison();
+		Target.SortOrder = GetSortOrder();
 
-		#endregion
-
-		#region .ctor
-
-		protected BaseListBinding(CustomListBoxItemsCollection itemHost, GitObjectsCollection<TObject, TEventArgs> collection)
+		lock(collection.SyncRoot)
 		{
-			Verify.Argument.IsNotNull(itemHost, nameof(itemHost));
-			Verify.Argument.IsNotNull(collection, nameof(collection));
-
-			Target = itemHost;
-			Source = collection;
-
-			Target.Comparison = GetComparison();
-			Target.SortOrder = GetSortOrder();
-
-			lock(collection.SyncRoot)
+			foreach(var obj in collection)
 			{
-				foreach(var obj in collection)
-				{
-					var item = RepresentObject(obj);
-					item.Activated += OnItemActivated;
-					Target.Add(item);
-				}
-				collection.ObjectAdded += OnObjectAdded;
+				var item = RepresentObject(obj);
+				item.Activated += OnItemActivated;
+				Target.Add(item);
 			}
+			collection.ObjectAdded += OnObjectAdded;
 		}
-
-		#endregion
-
-		#region Virtual
-
-		protected virtual SortOrder GetSortOrder() => SortOrder.Ascending;
-
-		#endregion
-
-		#region Abstract
-
-		protected abstract CustomListBoxItem<TObject> RepresentObject(TObject obj);
-
-		protected abstract Comparison<CustomListBoxItem> GetComparison();
-
-		#endregion
-
-		#region Properties
-
-		public GitObjectsCollection<TObject, TEventArgs> Source { get; }
-
-		public CustomListBoxItemsCollection Target { get; }
-
-		#endregion
-
-		#region Event Handlers
-
-		private void OnObjectAdded(object sender, TEventArgs e)
-		{
-			var item = RepresentObject(e.Object);
-			item.Activated += OnItemActivated;
-			Target.AddSafe(item);
-		}
-
-		private void OnItemActivated(object sender, EventArgs e)
-		{
-			var item = (CustomListBoxItem<TObject>)sender;
-			InvokeItemActivated(item, item.DataContext);
-		}
-
-		#endregion
-
-		#region IDisposable
-
-		public void Dispose()
-		{
-			Source.ObjectAdded -= OnObjectAdded;
-			Target.Clear();
-		}
-
-		#endregion
 	}
+
+	#endregion
+
+	#region Virtual
+
+	protected virtual SortOrder GetSortOrder() => SortOrder.Ascending;
+
+	#endregion
+
+	#region Abstract
+
+	protected abstract CustomListBoxItem<TObject> RepresentObject(TObject obj);
+
+	protected abstract Comparison<CustomListBoxItem> GetComparison();
+
+	#endregion
+
+	#region Properties
+
+	public GitObjectsCollection<TObject, TEventArgs> Source { get; }
+
+	public CustomListBoxItemsCollection Target { get; }
+
+	#endregion
+
+	#region Event Handlers
+
+	private void OnObjectAdded(object sender, TEventArgs e)
+	{
+		var item = RepresentObject(e.Object);
+		item.Activated += OnItemActivated;
+		Target.AddSafe(item);
+	}
+
+	private void OnItemActivated(object sender, EventArgs e)
+	{
+		var item = (CustomListBoxItem<TObject>)sender;
+		InvokeItemActivated(item, item.DataContext);
+	}
+
+	#endregion
+
+	#region IDisposable
+
+	public void Dispose()
+	{
+		Source.ObjectAdded -= OnObjectAdded;
+		Target.Clear();
+	}
+
+	#endregion
 }

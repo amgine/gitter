@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+public class CommitResultEventArgs : EventArgs
 {
-	using System;
+	public CommitResultEventArgs(CommitResult commitResult) => CommitResult = commitResult;
 
-	public class CommitResultEventArgs : EventArgs
-	{
-		public CommitResultEventArgs(CommitResult commitResult) => CommitResult = commitResult;
-
-		public CommitResult CommitResult { get; }
-	}
+	public CommitResult CommitResult { get; }
 }

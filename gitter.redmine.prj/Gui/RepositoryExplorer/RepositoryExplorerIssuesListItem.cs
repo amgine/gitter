@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,30 +18,29 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+sealed class RepositoryExplorerIssuesListItem : RepositoryExplorerItemBase
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Drawing;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	sealed class RepositoryExplorerIssuesListItem : RepositoryExplorerItemBase
+	public RepositoryExplorerIssuesListItem(IWorkingEnvironment env, RedmineGuiProvider guiProvider)
+		: base(env, guiProvider, Icons.Issues, Resources.StrIssues)
 	{
-		public RepositoryExplorerIssuesListItem(IWorkingEnvironment env, RedmineGuiProvider guiProvider)
-			: base(env, guiProvider, CachedResources.Bitmaps["ImgBug"], Resources.StrIssues)
-		{
-		}
+	}
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-			ShowView(Guids.IssuesViewGuid);
-		}
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		ShowView(Guids.IssuesViewGuid);
 	}
 }

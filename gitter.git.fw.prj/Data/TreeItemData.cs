@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,45 +18,44 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+using gitter.Framework;
+
+public abstract class TreeItemData : INamedObject
 {
-	using System;
+	private string _shortName;
 
-	using gitter.Framework;
-
-	public abstract class TreeItemData : INamedObject
+	protected TreeItemData(string name, FileStatus fileStatus, StagedStatus stagedStatus)
 	{
-		private string _shortName;
-
-		protected TreeItemData(string name, FileStatus fileStatus, StagedStatus stagedStatus)
-		{
-			Name         = name;
-			FileStatus   = fileStatus;
-			StagedStatus = stagedStatus;
-		}
-
-		public string ShortName
-		{
-			get
-			{
-				if(!string.IsNullOrEmpty(_shortName))
-					return _shortName;
-				var pos = Name.LastIndexOf('/');
-				if(pos == -1)
-					_shortName = Name;
-				else
-					_shortName = Name.Substring(pos + 1);
-				return _shortName;
-			}
-			set { _shortName = value; }
-		}
-
-		public FileStatus FileStatus { get; set; }
-
-		public StagedStatus StagedStatus { get; set; }
-
-		public string Name { get; }
-
-		public override string ToString() => Name;
+		Name         = name;
+		FileStatus   = fileStatus;
+		StagedStatus = stagedStatus;
 	}
+
+	public string ShortName
+	{
+		get
+		{
+			if(!string.IsNullOrEmpty(_shortName))
+				return _shortName;
+			var pos = Name.LastIndexOf('/');
+			if(pos == -1)
+				_shortName = Name;
+			else
+				_shortName = Name.Substring(pos + 1);
+			return _shortName;
+		}
+		set { _shortName = value; }
+	}
+
+	public FileStatus FileStatus { get; set; }
+
+	public StagedStatus StagedStatus { get; set; }
+
+	public string Name { get; }
+
+	public override string ToString() => Name;
 }

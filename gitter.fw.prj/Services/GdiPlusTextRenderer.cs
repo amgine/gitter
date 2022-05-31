@@ -18,158 +18,231 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Drawing;
+using System.Drawing.Text;
+using System.Collections.Generic;
+
+public sealed class GdiPlusTextRenderer : ITextRenderer
 {
-	using System;
-	using System.Drawing;
-	using System.Drawing.Text;
-	using System.Collections.Generic;
+	private static readonly Bitmap _dummy = new(1, 1);
+	private static readonly Graphics _g = Graphics.FromImage(_dummy);
 
-	public sealed class GdiPlusTextRenderer : ITextRenderer
+	private static readonly Dictionary<Font, float> _fontHeight = new();
+
+	private static Size TruncateSize(SizeF size)
 	{
-		private static readonly Bitmap _dummy = new Bitmap(1, 1);
-		private static readonly Graphics _g = Graphics.FromImage(_dummy);
+		int w = (int)(size.Width + .5f);
+		int h = (int)(size.Height + .5f);
+		return new Size(w, h);
+	}
 
-		private static readonly Dictionary<Font, float> _fontHeight = new Dictionary<Font, float>();
-
-		private static Size TruncateSize(SizeF size)
+	private static readonly StringFormat DefaultStringFormatLeftAlign =
+		new(StringFormat.GenericTypographic)
 		{
-			int w = (int)(size.Width + .5f);
-			int h = (int)(size.Height + .5f);
-			return new Size(w, h);
-		}
+			FormatFlags =
+				StringFormatFlags.LineLimit |
+				StringFormatFlags.DisplayFormatControl |
+				StringFormatFlags.MeasureTrailingSpaces |
+				StringFormatFlags.FitBlackBox |
+				StringFormatFlags.NoWrap,
+			HotkeyPrefix = HotkeyPrefix.None,
+			LineAlignment = StringAlignment.Near,
+			Trimming = StringTrimming.None,
+		};
 
-		private static readonly StringFormat DefaultStringFormatLeftAlign =
-			new StringFormat(StringFormat.GenericTypographic)
-			{
-				FormatFlags =
-					StringFormatFlags.LineLimit |
-					StringFormatFlags.DisplayFormatControl |
-					StringFormatFlags.MeasureTrailingSpaces |
-					StringFormatFlags.FitBlackBox |
-					StringFormatFlags.NoWrap,
-				HotkeyPrefix = HotkeyPrefix.None,
-				LineAlignment = StringAlignment.Near,
-				Trimming = StringTrimming.None,
-			};
-
-		private static readonly StringFormat DefaultStringFormatRightAlign =
-			new StringFormat(DefaultStringFormatLeftAlign)
-			{
-				Alignment = StringAlignment.Far,
-			};
-
-		private static readonly StringFormat DefaultStringFormatCenterAlign =
-			new StringFormat(DefaultStringFormatLeftAlign)
-			{
-				Alignment = StringAlignment.Center,
-			};
-
-		public StringFormat LeftAlign => DefaultStringFormatLeftAlign;
-
-		public StringFormat RightAlign => DefaultStringFormatRightAlign;
-
-		public StringFormat CenterAlign => DefaultStringFormatCenterAlign;
-
-		public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
+	private static readonly StringFormat DefaultStringFormatRightAlign =
+		new(DefaultStringFormatLeftAlign)
 		{
-			graphics.DrawString(text, font, brush, layoutRectangle, format);
-		}
+			Alignment = StringAlignment.Far,
+		};
 
-		public void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point, StringFormat format)
+	private static readonly StringFormat DefaultStringFormatCenterAlign =
+		new(DefaultStringFormatLeftAlign)
 		{
-			graphics.DrawString(text, font, brush, point, format);
-		}
+			Alignment = StringAlignment.Center,
+		};
 
-		public void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y, StringFormat format)
+	public StringFormat LeftAlign => DefaultStringFormatLeftAlign;
+
+	public StringFormat RightAlign => DefaultStringFormatRightAlign;
+
+	public StringFormat CenterAlign => DefaultStringFormatCenterAlign;
+
+	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
+	{
+		graphics.DrawString(text, font, brush, layoutRectangle, format);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point, StringFormat format)
+	{
+		graphics.DrawString(text, font, brush, point, format);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y, StringFormat format)
+	{
+		graphics.DrawString(text, font, brush, x, y, format);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle)
+	{
+		graphics.DrawString(text, font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point)
+	{
+		graphics.DrawString(text, font, brush, point, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y)
+	{
+		graphics.DrawString(text, font, brush, x, y, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle, StringFormat format)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text, font, brush, layoutRectangle, format);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text, font, brush, point, format);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text, font, brush, x, y, format);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text, font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Color color, Point point)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text, font, brush, point, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text, font, brush, x, y, DefaultStringFormatLeftAlign);
+	}
+
+	public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea, StringFormat format)
+		=> TruncateSize(graphics.MeasureString(text, font, layoutArea, format));
+
+	public Size MeasureText(Graphics graphics, string text, Font font, int width, StringFormat format)
+		=> TruncateSize(graphics.MeasureString(text, font, width, format));
+
+	public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea)
+		=> TruncateSize(graphics.MeasureString(text, font, layoutArea, DefaultStringFormatLeftAlign));
+
+	public Size MeasureText(Graphics graphics, string text, Font font, int width)
+		=> TruncateSize(graphics.MeasureString(text, font, width, DefaultStringFormatLeftAlign));
+
+#if NET5_0_OR_GREATER
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
+	{
+		graphics.DrawString(text.ToString(), font, brush, layoutRectangle, format);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Point point, StringFormat format)
+	{
+		graphics.DrawString(text.ToString(), font, brush, point, format);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, int x, int y, StringFormat format)
+	{
+		graphics.DrawString(text.ToString(), font, brush, x, y, format);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Rectangle layoutRectangle)
+	{
+		graphics.DrawString(text.ToString(), font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, Point point)
+	{
+		graphics.DrawString(text.ToString(), font, brush, point, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Brush brush, int x, int y)
+	{
+		graphics.DrawString(text.ToString(), font, brush, x, y, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Rectangle layoutRectangle, StringFormat format)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text.ToString(), font, brush, layoutRectangle, format);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Point point, StringFormat format)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text.ToString(), font, brush, point, format);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, int x, int y, StringFormat format)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text.ToString(), font, brush, x, y, format);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Rectangle layoutRectangle)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text.ToString(), font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, Point point)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text.ToString(), font, brush, point, DefaultStringFormatLeftAlign);
+	}
+
+	public void DrawText(Graphics graphics, ReadOnlySpan<char> text, Font font, Color color, int x, int y)
+	{
+		using var brush = new SolidBrush(color);
+		graphics.DrawString(text.ToString(), font, brush, x, y, DefaultStringFormatLeftAlign);
+	}
+
+	public Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, Size layoutArea, StringFormat format)
+		=> TruncateSize(graphics.MeasureString(text.ToString(), font, layoutArea, format));
+
+	public Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, int width, StringFormat format)
+		=> TruncateSize(graphics.MeasureString(text.ToString(), font, width, format));
+
+	public Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, Size layoutArea)
+		=> TruncateSize(graphics.MeasureString(text.ToString(), font, layoutArea, DefaultStringFormatLeftAlign));
+
+	public Size MeasureText(Graphics graphics, ReadOnlySpan<char> text, Font font, int width)
+		=> TruncateSize(graphics.MeasureString(text.ToString(), font, width, DefaultStringFormatLeftAlign));
+
+#endif
+
+	public float GetFontHeight(Font font) => GetFontHeight(null, font);
+
+	public float GetFontHeight(Graphics graphics, Font font)
+	{
+		if(graphics == null) graphics = _g;
+		if(!_fontHeight.TryGetValue(font, out var height))
 		{
-			graphics.DrawString(text, font, brush, x, y, format);
+			var size = graphics.MeasureString("0", font, 10000, DefaultStringFormatLeftAlign);
+			height = size.Height;
+			if(font.Name != "Consolas") ++height;
+			_fontHeight.Add(font, height);
 		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle)
-		{
-			graphics.DrawString(text, font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point)
-		{
-			graphics.DrawString(text, font, brush, point, DefaultStringFormatLeftAlign);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y)
-		{
-			graphics.DrawString(text, font, brush, x, y, DefaultStringFormatLeftAlign);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle, StringFormat format)
-		{
-			using var brush = new SolidBrush(color);
-			graphics.DrawString(text, font, brush, layoutRectangle, format);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format)
-		{
-			using var brush = new SolidBrush(color);
-			graphics.DrawString(text, font, brush, point, format);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format)
-		{
-			using var brush = new SolidBrush(color);
-			graphics.DrawString(text, font, brush, x, y, format);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle)
-		{
-			using var brush = new SolidBrush(color);
-			graphics.DrawString(text, font, brush, layoutRectangle, DefaultStringFormatLeftAlign);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Color color, Point point)
-		{
-			using var brush = new SolidBrush(color);
-			graphics.DrawString(text, font, brush, point, DefaultStringFormatLeftAlign);
-		}
-
-		public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y)
-		{
-			using var brush = new SolidBrush(color);
-			graphics.DrawString(text, font, brush, x, y, DefaultStringFormatLeftAlign);
-		}
-
-		public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea, StringFormat format)
-		{
-			return TruncateSize(graphics.MeasureString(text, font, layoutArea, format));
-		}
-
-		public Size MeasureText(Graphics graphics, string text, Font font, int width, StringFormat format)
-		{
-			return TruncateSize(graphics.MeasureString(text, font, width, format));
-		}
-
-		public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea)
-		{
-			return TruncateSize(graphics.MeasureString(text, font, layoutArea, DefaultStringFormatLeftAlign));
-		}
-
-		public Size MeasureText(Graphics graphics, string text, Font font, int width)
-		{
-			return TruncateSize(graphics.MeasureString(text, font, width, DefaultStringFormatLeftAlign));
-		}
-
-		public float GetFontHeight(Font font) => GetFontHeight(null, font);
-
-		public float GetFontHeight(Graphics graphics, Font font)
-		{
-			if(graphics == null) graphics = _g;
-			if(!_fontHeight.TryGetValue(font, out var height))
-			{
-				var size = graphics.MeasureString("0", font, 10000, DefaultStringFormatLeftAlign);
-				height = size.Height;
-				if(font.Name != "Consolas") ++height;
-				_fontHeight.Add(font, height);
-			}
-			return height;
-		}
+		return height;
 	}
 }

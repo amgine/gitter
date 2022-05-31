@@ -15,10 +15,8 @@
 		{
 			if(disposing)
 			{
-				if(_speller != null)
-					_speller.Dispose();
-				if(components != null)
-					components.Dispose();
+				_speller?.Dispose();
+				components?.Dispose();
 			}
 			_repository = null;
 			base.Dispose(disposing);

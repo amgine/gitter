@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,43 +18,45 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+internal sealed class VersionsToolbar : ToolStrip
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	#region Data
 
-	using Resources = gitter.Redmine.Properties.Resources;
+	private readonly VersionsView _view;
+	private ToolStripButton _btnRefresh;
 
-	[ToolboxItem(false)]
-	internal sealed class VersionsToolbar : ToolStrip
+	#endregion
+
+	public VersionsToolbar(VersionsView view)
 	{
-		#region Data
+		_view = view;
 
-		private readonly VersionsView _view;
-		private ToolStripButton _btnRefresh;
+		var dpiBindings = new DpiBindings(this);
 
-		#endregion
-
-		public VersionsToolbar(VersionsView view)
-		{
-			_view = view;
-
-			Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, CachedResources.Bitmaps["ImgRefresh"],
-				(sender, e) =>
-				{
-					_view.RefreshContent();
-				})
+		Items.Add(_btnRefresh = new ToolStripButton(Resources.StrRefresh, null,
+			(sender, e) =>
 			{
-				DisplayStyle = ToolStripItemDisplayStyle.Image,
-			});
-
-			Items.Add(new ToolStripSeparator());
-		}
-
-		public ToolStripButton RefreshButton
+				_view.RefreshContent();
+			})
 		{
-			get { return _btnRefresh; }
-		}
+			DisplayStyle = ToolStripItemDisplayStyle.Image,
+		});
+		dpiBindings.BindImage(_btnRefresh, CommonIcons.Refresh);
+
+		Items.Add(new ToolStripSeparator());
 	}
+
+	public ToolStripButton RefreshButton => _btnRefresh;
 }

@@ -18,57 +18,51 @@
  */
 #endregion
 
-namespace gitter.Framework.Configuration
+namespace gitter.Framework.Configuration;
+
+using System;
+
+/// <summary>Configuration parameter.</summary>
+public sealed class Parameter : INamedObject
 {
-	using System;
+	/// <summary>Parameter value.</summary>
+	private object _value;
 
-	/// <summary>Configuration parameter.</summary>
-	public sealed class Parameter : INamedObject
+	/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
+	/// <param name="name">Parameter name.</param>
+	/// <param name="type">Parameter type.</param>
+	/// <param name="value">Parameter value.</param>
+	public Parameter(string name, Type type, object value)
 	{
-		/// <summary>Parameter value.</summary>
-		private object _value;
-
-		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
-		/// <param name="name">Parameter name.</param>
-		/// <param name="type">Parameter type.</param>
-		/// <param name="value">Parameter value.</param>
-		public Parameter(string name, Type type, object value)
-		{
-			Name = name;
-			Type = type;
-			_value = value;
-		}
-
-		/// <summary>Gets parameter name.</summary>
-		/// <value>Parameter name.</value>
-		public string Name { get; }
-
-		/// <summary>Gets parameter type.</summary>
-		/// <value>Parameter type.</value>
-		public Type Type { get; }
-
-		/// <summary>Gets or sets parameter value.</summary>
-		/// <value>Parameter value.</value>
-		public object Value
-		{
-			get => _value;
-			set
-			{
-				_value = value;
-				IsModified = true;
-			}
-		}
-
-		/// <summary>Gets a value indicating whether this parameter is modified.</summary>
-		/// <value><c>true</c> if this parameter is modified; otherwise, <c>false</c>.</value>
-		public bool IsModified { get; private set; }
-
-		/// <summary>
-		/// Returns a <see cref="System.String"/> that represents this instance.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="System.String"/> that represents this instance.
-		/// </returns>
-		public override string ToString() => $"{Name} = {Value}";
+		Name   = name;
+		Type   = type;
+		_value = value;
 	}
+
+	/// <summary>Gets parameter name.</summary>
+	/// <value>Parameter name.</value>
+	public string Name { get; }
+
+	/// <summary>Gets parameter type.</summary>
+	/// <value>Parameter type.</value>
+	public Type Type { get; }
+
+	/// <summary>Gets or sets parameter value.</summary>
+	/// <value>Parameter value.</value>
+	public object Value
+	{
+		get => _value;
+		set
+		{
+			_value = value;
+			IsModified = true;
+		}
+	}
+
+	/// <summary>Gets a value indicating whether this parameter is modified.</summary>
+	/// <value><c>true</c> if this parameter is modified; otherwise, <c>false</c>.</value>
+	public bool IsModified { get; private set; }
+
+	/// <inheritdoc/>
+	public override string ToString() => $"{Name} = {Value}";
 }

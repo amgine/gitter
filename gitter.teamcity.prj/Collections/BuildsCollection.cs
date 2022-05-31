@@ -18,52 +18,51 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+public sealed class BuildsCollection : TeamCityObjectsCache<Build>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Xml;
+	const string QUERY = @"builds/?locator=";
 
-	public sealed class BuildsCollection : TeamCityObjectsCache<Build>
+	internal BuildsCollection(TeamCityServiceContext context)
+		: base(context)
 	{
-		const string QUERY = @"builds/?locator=";
-
-		internal BuildsCollection(TeamCityServiceContext context)
-			: base(context)
-		{
-		}
-
-		public Build[] Query(BuildLocator locator)
-		{
-			Verify.Argument.IsNotNull(locator, nameof(locator));
-
-			var xml = Context.GetXml(QUERY + locator.ToString());
-			var root = xml["builds"];
-			var result = new Build[TeamCityUtility.LoadInt(root.Attributes["count"])];
-			int id = 0;
-			foreach(XmlElement node in root.ChildNodes)
-			{
-				result[id++] = Lookup(node);
-			}
-			return result;
-		}
-
-		public void UpdateCache(BuildLocator locator)
-		{
-			Verify.Argument.IsNotNull(locator, nameof(locator));
-
-			var xml = Context.GetXml(QUERY + locator.ToString());
-			var root = xml["builds"];
-			foreach(XmlElement node in root.ChildNodes)
-			{
-				Lookup(node);
-			}
-		}
-
-		protected override Build Create(string id)
-			=> new Build(Context, id);
-
-		protected override Build Create(XmlNode node)
-			=> new Build(Context, node);
 	}
+
+	public Build[] Query(BuildLocator locator)
+	{
+		Verify.Argument.IsNotNull(locator);
+
+		var xml = Context.GetXml(QUERY + locator.ToString());
+		var root = xml["builds"];
+		var result = new Build[TeamCityUtility.LoadInt(root.Attributes["count"])];
+		int id = 0;
+		foreach(XmlElement node in root.ChildNodes)
+		{
+			result[id++] = Lookup(node);
+		}
+		return result;
+	}
+
+	public void UpdateCache(BuildLocator locator)
+	{
+		Verify.Argument.IsNotNull(locator);
+
+		var xml = Context.GetXml(QUERY + locator.ToString());
+		var root = xml["builds"];
+		foreach(XmlElement node in root.ChildNodes)
+		{
+			Lookup(node);
+		}
+	}
+
+	protected override Build Create(string id)
+		=> new Build(Context, id);
+
+	protected override Build Create(XmlNode node)
+		=> new Build(Context, node);
 }

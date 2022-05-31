@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+public enum IssueRelationType
 {
-	public enum IssueRelationType
-	{
-		Relates,
-		Duplicates,
-		Duplicated,
-		Blocks,
-		Blocked,
-		Precedes,
-		Follows
-	}
+	Relates,
+	Duplicates,
+	Duplicated,
+	Blocks,
+	Blocked,
+	Precedes,
+	Follows
 }

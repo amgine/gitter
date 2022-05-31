@@ -18,34 +18,65 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
+namespace gitter.GitLab.Api;
+
+using System;
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#elif NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
+
+[DataContract]
+sealed class ClosedBy : ModifiableObject
 {
-	using System;
-	using System.Runtime.Serialization;
-
-	using Newtonsoft.Json;
-
-	[DataContract]
-	sealed class ClosedBy : ModifiableObject
+	static class Names
 	{
-		[JsonProperty("active")]
-		[DataMember]
-		public string State;
-
-		[JsonProperty("web_url")]
-		[DataMember]
-		public string WebUrl;
-
-		[JsonProperty("avatar_url")]
-		[DataMember]
-		public string AvatarUrl;
-
-		[JsonProperty("username")]
-		[DataMember]
-		public string Username;
-
-		[JsonProperty("name")]
-		[DataMember]
-		public string Name;
+		public const string State     = @"active";
+		public const string WebUrl    = @"web_url";
+		public const string AvatarUrl = @"avatar_url";
+		public const string Username  = @"username";
+		public const string Name      = @"name";
 	}
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.State)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.State)]
+#endif
+	public string State { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.WebUrl)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.WebUrl)]
+#endif
+	public string WebUrl { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.AvatarUrl)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.AvatarUrl)]
+#endif
+	public string AvatarUrl { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Username)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Username)]
+#endif
+	public string Username { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Name)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Name)]
+#endif
+	public string Name { get; set; }
 }

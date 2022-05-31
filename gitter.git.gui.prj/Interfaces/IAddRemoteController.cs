@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using System.Threading.Tasks;
+
+using gitter.Framework.Mvc;
+
+interface IAddRemoteController : IViewController<IAddRemoteView>
 {
-	using System.Threading.Tasks;
+	bool TryAddRemote();
 
-	using gitter.Framework.Mvc;
-
-	interface IAddRemoteController : IViewController<IAddRemoteView>
-	{
-		bool TryAddRemote();
-
-		Task<bool> TryAddRemoteAsync();
-	}
+	Task<bool> TryAddRemoteAsync();
 }

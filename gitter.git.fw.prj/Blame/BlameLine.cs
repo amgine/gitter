@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,54 +18,53 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+public sealed class BlameLine
 {
-	public sealed class BlameLine
+	private int _charPositions;
+
+	public BlameLine(BlameCommit commit, int number, string text, string ending = LineEnding.Lf)
 	{
-		private int _charPositions;
+		Verify.Argument.IsNotNull(commit);
+		Verify.Argument.IsNotNull(text);
 
-		public BlameLine(BlameCommit commit, int number, string text, string ending = LineEnding.Lf)
+		Commit = commit;
+		Text = text;
+		Ending = ending;
+		Number = number;
+		_charPositions = -1;
+	}
+
+	public int Number { get; }
+
+	public BlameCommit Commit { get; }
+
+	public string Text { get; }
+
+	public string Ending { get; }
+
+	public int GetCharacterPositions(int tabSize)
+	{
+		if(_charPositions == -1)
 		{
-			Verify.Argument.IsNotNull(commit, nameof(commit));
-			Verify.Argument.IsNotNull(text, nameof(text));
-
-			Commit = commit;
-			Text = text;
-			Ending = ending;
-			Number = number;
-			_charPositions = -1;
-		}
-
-		public int Number { get; }
-
-		public BlameCommit Commit { get; }
-
-		public string Text { get; }
-
-		public string Ending { get; }
-
-		public int GetCharacterPositions(int tabSize)
-		{
-			if(_charPositions == -1)
+			for(int i = 0; i < Text.Length; ++i)
 			{
-				for(int i = 0; i < Text.Length; ++i)
+				switch(Text[i])
 				{
-					switch(Text[i])
-					{
-						case '\t':
-							_charPositions += tabSize - (_charPositions % tabSize);
-							break;
-						case '\r':
-							break;
-						default:
-							++_charPositions;
-							break;
-					}
+					case '\t':
+						_charPositions += tabSize - (_charPositions % tabSize);
+						break;
+					case '\r':
+						break;
+					default:
+						++_charPositions;
+						break;
 				}
 			}
-			return _charPositions;
 		}
-
-		public override string ToString() => Text;
+		return _charPositions;
 	}
+
+	public override string ToString() => Text;
 }

@@ -18,31 +18,29 @@
  */
 #endregion
 
-namespace gitter.Framework
-{
-	using System;
-	using System.Drawing;
+namespace gitter.Framework;
+
+using System;
 	
-	using gitter.Framework.Configuration;
+using gitter.Framework.Configuration;
 
-	public interface IIntegrationFeature : INamedObject
-	{
-		event EventHandler IsEnabledChanged;
+public interface IIntegrationFeature : INamedObject
+{
+	event EventHandler IsEnabledChanged;
 
-		string DisplayText { get; }
+	string DisplayText { get; }
 
-		Bitmap Icon { get; }
+	IImageProvider Icon { get; }
 
-		bool IsEnabled { get; set; }
+	bool IsEnabled { get; set; }
 
-		bool AdministratorRightsRequired { get; }
+	bool AdministratorRightsRequired { get; }
 
-		Action GetEnableAction(bool enable);
+	string GetEnableAction(bool enable);
 
-		bool HasConfiguration { get; }
+	bool HasConfiguration { get; }
 
-		void SaveTo(Section section);
+	void SaveTo(Section section);
 
-		void LoadFrom(Section section);
-	}
+	void LoadFrom(Section section);
 }

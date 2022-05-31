@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+
+public sealed class RepositoryGroupEventArgs : EventArgs
 {
-	using System;
-
-	public sealed class RepositoryGroupEventArgs : EventArgs
+	public RepositoryGroupEventArgs(RepositoryGroup repositoryGroup)
 	{
-		public RepositoryGroupEventArgs(RepositoryGroup repositoryGroup)
-		{
-			RepositoryGroup = repositoryGroup;
-		}
-
-		public RepositoryGroup RepositoryGroup { get; }
+		RepositoryGroup = repositoryGroup;
 	}
+
+	public RepositoryGroup RepositoryGroup { get; }
 }

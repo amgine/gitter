@@ -18,111 +18,110 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+internal readonly struct GripBounds
 {
-	using System;
-	using System.Drawing;
+	private const int GripSize = 6;
+	private const int CornerGripSize = GripSize << 1;
 
-	internal readonly struct GripBounds
+	public GripBounds(Rectangle clientRectangle)
 	{
-		private const int GripSize = 6;
-		private const int CornerGripSize = GripSize << 1;
+		ClientRectangle = clientRectangle;
+	}
 
-		public GripBounds(Rectangle clientRectangle)
+	public Rectangle ClientRectangle { get; }
+
+	public Rectangle Bottom
+	{
+		get
 		{
-			ClientRectangle = clientRectangle;
+			var rect = ClientRectangle;
+			rect.Y = rect.Bottom - GripSize + 1;
+			rect.Height = GripSize;
+			return rect;
 		}
+	}
 
-		public Rectangle ClientRectangle { get; }
-
-		public Rectangle Bottom
+	public Rectangle BottomRight
+	{
+		get
 		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.Y = rect.Bottom - GripSize + 1;
-				rect.Height = GripSize;
-				return rect;
-			}
+			var rect = ClientRectangle;
+			rect.Y = rect.Bottom - CornerGripSize + 1;
+			rect.Height = CornerGripSize;
+			rect.X = rect.Width - CornerGripSize + 1;
+			rect.Width = CornerGripSize;
+			return rect;
 		}
+	}
 
-		public Rectangle BottomRight
+	public Rectangle Top
+	{
+		get
 		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.Y = rect.Bottom - CornerGripSize + 1;
-				rect.Height = CornerGripSize;
-				rect.X = rect.Width - CornerGripSize + 1;
-				rect.Width = CornerGripSize;
-				return rect;
-			}
+			var rect = ClientRectangle;
+			rect.Height = GripSize;
+			return rect;
 		}
+	}
 
-		public Rectangle Top
+	public Rectangle TopRight
+	{
+		get
 		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.Height = GripSize;
-				return rect;
-			}
+			var rect = ClientRectangle;
+			rect.Height = CornerGripSize;
+			rect.X = rect.Width - CornerGripSize + 1;
+			rect.Width = CornerGripSize;
+			return rect;
 		}
+	}
 
-		public Rectangle TopRight
+	public Rectangle Left
+	{
+		get
 		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.Height = CornerGripSize;
-				rect.X = rect.Width - CornerGripSize + 1;
-				rect.Width = CornerGripSize;
-				return rect;
-			}
+			var rect = ClientRectangle;
+			rect.Width = GripSize;
+			return rect;
 		}
+	}
 
-		public Rectangle Left
+	public Rectangle BottomLeft
+	{
+		get
 		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.Width = GripSize;
-				return rect;
-			}
+			var rect = ClientRectangle;
+			rect.Width = CornerGripSize;
+			rect.Y = rect.Height - CornerGripSize + 1;
+			rect.Height = CornerGripSize;
+			return rect;
 		}
+	}
 
-		public Rectangle BottomLeft
+	public Rectangle Right
+	{
+		get
 		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.Width = CornerGripSize;
-				rect.Y = rect.Height - CornerGripSize + 1;
-				rect.Height = CornerGripSize;
-				return rect;
-			}
+			var rect = ClientRectangle;
+			rect.X = rect.Right - GripSize + 1;
+			rect.Width = GripSize;
+			return rect;
 		}
+	}
 
-		public Rectangle Right
+	public Rectangle TopLeft
+	{
+		get
 		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.X = rect.Right - GripSize + 1;
-				rect.Width = GripSize;
-				return rect;
-			}
-		}
-
-		public Rectangle TopLeft
-		{
-			get
-			{
-				var rect = ClientRectangle;
-				rect.Width = CornerGripSize;
-				rect.Height = CornerGripSize;
-				return rect;
-			}
+			var rect = ClientRectangle;
+			rect.Width = CornerGripSize;
+			rect.Height = CornerGripSize;
+			return rect;
 		}
 	}
 }

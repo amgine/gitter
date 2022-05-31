@@ -18,79 +18,68 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+public sealed class MessageBoxButton
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Windows.Forms;
+	public static MessageBoxButton Yes    { get; } = new(DialogResult.Yes,    0, Resources.StrYes,    true);
+	public static MessageBoxButton No     { get; } = new(DialogResult.No,     0, Resources.StrNo,     false);
+	public static MessageBoxButton Ok     { get; } = new(DialogResult.OK,     0, Resources.StrOk,     true);
+	public static MessageBoxButton Close  { get; } = new(DialogResult.OK,     0, Resources.StrClose,  true);
+	public static MessageBoxButton Cancel { get; } = new(DialogResult.Cancel, 0, Resources.StrCancel, false);
+	public static MessageBoxButton Abort  { get; } = new(DialogResult.Abort,  0, Resources.StrAbort,  false);
+	public static MessageBoxButton Retry  { get; } = new(DialogResult.Retry,  0, Resources.StrRetry,  true);
+	public static MessageBoxButton Ignore { get; } = new(DialogResult.Ignore, 0, Resources.StrIgnore, false);
 
-	using Resources = gitter.Framework.Properties.Resources;
+	public static IReadOnlyList<MessageBoxButton> RetryCancel      { get; } = new[] { Retry, Cancel };
+	public static IReadOnlyList<MessageBoxButton> AbortRetryIgnore { get; } = new[] { Abort, Retry, Ignore };
+	public static IReadOnlyList<MessageBoxButton> YesNo            { get; } = new[] { Yes, No };
+	public static IReadOnlyList<MessageBoxButton> YesNoCancel      { get; } = new[] { Yes, No, Cancel };
+	public static IReadOnlyList<MessageBoxButton> OkCancel         { get; } = new[] { Ok, Cancel };
 
-	public sealed class MessageBoxButton
+	public static MessageBoxButton GetOk(string label)
+		=> GetOk(label, 0);
+
+	public static MessageBoxButton GetOk(string label, int resultOption)
+		=> new(DialogResult.OK, resultOption, label, isDefault: true);
+
+	public static MessageBoxButton GetYes(string label)
+		=> GetYes(label, 0);
+
+	public static MessageBoxButton GetYes(string label, int resultOption)
+		=> new(DialogResult.Yes, resultOption, label, isDefault: true);
+
+	public static IReadOnlyList<MessageBoxButton> GetButtons(MessageBoxButtons buttons)
+		=> buttons switch
+		{
+			MessageBoxButtons.OK               => new[] { Ok },
+			MessageBoxButtons.OKCancel         => OkCancel,
+			MessageBoxButtons.YesNo            => YesNo,
+			MessageBoxButtons.YesNoCancel      => YesNoCancel,
+			MessageBoxButtons.AbortRetryIgnore => AbortRetryIgnore,
+			MessageBoxButtons.RetryCancel      => RetryCancel,
+			_ => throw new ArgumentException($"Unknown MessageBoxButtons value: {buttons}", nameof(buttons)),
+		};
+
+	public MessageBoxButton(DialogResult dialogResult, int resultOption, string displayLabel, bool isDefault)
 	{
-		public static readonly MessageBoxButton Yes		= new(DialogResult.Yes,	0, Resources.StrYes,	true);
-		public static readonly MessageBoxButton No		= new(DialogResult.No,		0, Resources.StrNo,		false);
-		public static readonly MessageBoxButton Ok		= new(DialogResult.OK,		0, Resources.StrOk,		true);
-		public static readonly MessageBoxButton Close	= new(DialogResult.OK,		0, Resources.StrClose,	true);
-		public static readonly MessageBoxButton Cancel	= new(DialogResult.Cancel,	0, Resources.StrCancel,	false);
-		public static readonly MessageBoxButton Abort	= new(DialogResult.Abort,	0, Resources.StrAbort,	false);
-		public static readonly MessageBoxButton Retry	= new(DialogResult.Retry,	0, Resources.StrRetry,	true);
-		public static readonly MessageBoxButton Ignore	= new(DialogResult.Ignore,	0, Resources.StrIgnore,	false);
-
-		public static readonly IEnumerable<MessageBoxButton> RetryCancel      = new[] { Retry, Cancel };
-		public static readonly IEnumerable<MessageBoxButton> AbortRetryIgnore = new[] { Abort, Retry, Ignore };
-		public static readonly IEnumerable<MessageBoxButton> YesNo            = new[] { Yes, No };
-		public static readonly IEnumerable<MessageBoxButton> YesNoCancel      = new[] { Yes, No, Cancel };
-		public static readonly IEnumerable<MessageBoxButton> OkCancel         = new[] { Ok, Cancel };
-
-		public static MessageBoxButton GetOk(string label)
-		{
-			return GetOk(label, 0);
-		}
-
-		public static MessageBoxButton GetOk(string label, int resultOption)
-		{
-			return new MessageBoxButton(DialogResult.OK, resultOption, label, true);
-		}
-
-		public static MessageBoxButton GetYes(string label)
-		{
-			return GetYes(label, 0);
-		}
-
-		public static MessageBoxButton GetYes(string label, int resultOption)
-		{
-			return new MessageBoxButton(DialogResult.OK, resultOption, label, true);
-		}
-
-		public static IEnumerable<MessageBoxButton> GetButtons(MessageBoxButtons buttons)
-		{
-			return buttons switch
-			{
-				MessageBoxButtons.OK               => new[] { Ok },
-				MessageBoxButtons.OKCancel         => new[] { Ok, Cancel },
-				MessageBoxButtons.YesNo            => new[] { Yes, No },
-				MessageBoxButtons.YesNoCancel      => new[] { Yes, No, Cancel },
-				MessageBoxButtons.AbortRetryIgnore => new[] { Abort, Retry, Ignore },
-				MessageBoxButtons.RetryCancel      => new[] { Retry, Cancel },
-				_ => throw new ArgumentException($"Unknown MessageBoxButtons value: {buttons}", nameof(buttons)),
-			};
-		}
-
-		public MessageBoxButton(DialogResult dialogResult, int resultOption, string displayLabel, bool isDefault)
-		{
-			DialogResult = dialogResult;
-			ResultOption = resultOption;
-			DisplayLabel = displayLabel;
-			IsDefault    = isDefault;
-		}
-
-		public string DisplayLabel { get; }
-
-		public int ResultOption { get; }
-
-		public DialogResult DialogResult { get; }
-
-		public bool IsDefault { get; }
+		DialogResult = dialogResult;
+		ResultOption = resultOption;
+		DisplayLabel = displayLabel;
+		IsDefault    = isDefault;
 	}
+
+	public string DisplayLabel { get; }
+
+	public int ResultOption { get; }
+
+	public DialogResult DialogResult { get; }
+
+	public bool IsDefault { get; }
 }

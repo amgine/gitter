@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,170 +18,167 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class StageDialog : DialogBase, IExecutableDialog
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
+	private FilesToAddBinding _dataBinding;
 
-	using gitter.Git.Gui.Controls;
+	#endregion
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#region .ctor
 
-	[ToolboxItem(false)]
-	public partial class StageDialog : DialogBase, IExecutableDialog
+	/// <summary>Create <see cref="StageDialog"/>.</summary>
+	/// <param name="repository">Related <see cref="Repository"/>.</param>
+	public StageDialog(Repository repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(repository);
 
-		private FilesToAddBinding _dataBinding;
+		Repository = repository;
 
-		#endregion
+		InitializeComponent();
 
-		#region .ctor
+		Text = Resources.StrStageFiles;
 
-		/// <summary>Create <see cref="StageDialog"/>.</summary>
-		/// <param name="repository">Related <see cref="Repository"/>.</param>
-		public StageDialog(Repository repository)
+		_lblPattern.Text = Resources.StrPattern.AddColon();
+		_chkIncludeUntracked.Text = Resources.StrIncludeUntracked;
+		_chkIncludeIgnored.Text = Resources.StrIncludeIgnored;
+		_lstUnstaged.Style = GitterApplication.DefaultStyle;
+		_lstUnstaged.Text = Resources.StrsNoUnstagedChanges;
+
+		for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
-
-			InitializeComponent();
-
-			Text = Resources.StrStageFiles;
-
-			_lblPattern.Text = Resources.StrPattern.AddColon();
-			_chkIncludeUntracked.Text = Resources.StrIncludeUntracked;
-			_chkIncludeIgnored.Text = Resources.StrIncludeIgnored;
-			_lstUnstaged.Style = GitterApplication.DefaultStyle;
-			_lstUnstaged.Text = Resources.StrsNoUnstagedChanges;
-
-			for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)
-			{
-				var col = _lstUnstaged.Columns[i];
-				col.IsVisible = col.Id == (int)ColumnId.Name;
-			}
-			_lstUnstaged.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
-			_lstUnstaged.ShowTreeLines = false;
-
-			GitterApplication.FontManager.InputFont.Apply(_txtPattern);
+			var col = _lstUnstaged.Columns[i];
+			col.IsVisible = col.Id == (int)ColumnId.Name;
 		}
+		_lstUnstaged.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
+		_lstUnstaged.ShowTreeLines = false;
 
-		#endregion
-
-		#region Properties
-
-		public Repository Repository { get; }
-
-		private FilesToAddBinding DataBinding
-		{
-			get { return _dataBinding; }
-			set
-			{
-				if(_dataBinding != value)
-				{
-					if(_dataBinding != null)
-					{
-						_dataBinding.Dispose();
-					}
-					_dataBinding = value;
-				}
-			}
-		}
-
-		protected override string ActionVerb => Resources.StrStage;
-
-		public string Pattern
-		{
-			get { return _txtPattern.Text.Trim(); }
-			set { _txtPattern.Text = value; }
-		}
-
-		public bool IncludeUntracked
-		{
-			get { return _chkIncludeUntracked.Checked; }
-			set { _chkIncludeUntracked.Checked = value; }
-		}
-
-		public bool IncludeIgnored
-		{
-			get { return _chkIncludeIgnored.Checked; }
-			set { _chkIncludeIgnored.Checked = value; }
-		}
-
-		#endregion
-
-		#region Methods
-
-		protected override void OnShown()
-		{
-			base.OnShown();
-			UpdateList();
-		}
-
-		private void UpdateList()
-		{
-			if(DataBinding == null)
-			{
-				DataBinding = new FilesToAddBinding(Repository, _lstUnstaged);
-			}
-			DataBinding.Pattern          = Pattern;
-			DataBinding.IncludeUntracked = IncludeUntracked;
-			DataBinding.IncludeIgnored   = IncludeIgnored;
-			DataBinding.ReloadData();
-		}
-
-		private void OnPatternTextChanged(object sender, EventArgs e)
-		{
-			UpdateList();
-		}
-
-		private void OnIncludeUntrackedCheckedChanged(object sender, EventArgs e)
-		{
-			UpdateList();
-		}
-
-		private void OnIncludeIgnoredCheckedChanged(object sender, EventArgs e)
-		{
-			UpdateList();
-		}
-
-		private void OnFilesItemActivated(object sender, Framework.Controls.ItemEventArgs e)
-		{
-			var item = e.Item as ITreeItemListItem;
-			if(item.TreeItem.Status != FileStatus.Removed)
-			{
-				if(item != null) Utility.OpenUrl(System.IO.Path.Combine(
-					item.TreeItem.Repository.WorkingDirectory, item.TreeItem.RelativePath));
-			}
-		}
-
-		public bool Execute()
-		{
-			try
-			{
-				if(_lstUnstaged.Items.Count == 0) return true;
-				var pattern = _txtPattern.Text.Trim();
-				bool addIgnored = _chkIncludeIgnored.Checked;
-				bool addUntracked = _chkIncludeUntracked.Checked;
-				Repository.Status.Stage(pattern, addUntracked, addIgnored);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					this,
-					exc.Message,
-					Resources.ErrFailedToStage,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
-			return true;
-		}
-
-		#endregion
+		GitterApplication.FontManager.InputFont.Apply(_txtPattern);
 	}
+
+	#endregion
+
+	#region Properties
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 325));
+
+	public Repository Repository { get; }
+
+	private FilesToAddBinding DataBinding
+	{
+		get => _dataBinding;
+		set
+		{
+			if(_dataBinding != value)
+			{
+				_dataBinding?.Dispose();
+				_dataBinding = value;
+			}
+		}
+	}
+
+	protected override string ActionVerb => Resources.StrStage;
+
+	public string Pattern
+	{
+		get => _txtPattern.Text.Trim();
+		set => _txtPattern.Text = value;
+	}
+
+	public bool IncludeUntracked
+	{
+		get => _chkIncludeUntracked.Checked;
+		set => _chkIncludeUntracked.Checked = value;
+	}
+
+	public bool IncludeIgnored
+	{
+		get => _chkIncludeIgnored.Checked;
+		set => _chkIncludeIgnored.Checked = value;
+	}
+
+	#endregion
+
+	#region Methods
+
+	protected override void OnShown()
+	{
+		base.OnShown();
+		UpdateList();
+	}
+
+	private void UpdateList()
+	{
+		DataBinding ??= new FilesToAddBinding(Repository, _lstUnstaged);
+		DataBinding.Pattern          = Pattern;
+		DataBinding.IncludeUntracked = IncludeUntracked;
+		DataBinding.IncludeIgnored   = IncludeIgnored;
+		DataBinding.ReloadData();
+	}
+
+	private void OnPatternTextChanged(object sender, EventArgs e)
+	{
+		UpdateList();
+	}
+
+	private void OnIncludeUntrackedCheckedChanged(object sender, EventArgs e)
+	{
+		UpdateList();
+	}
+
+	private void OnIncludeIgnoredCheckedChanged(object sender, EventArgs e)
+	{
+		UpdateList();
+	}
+
+	private void OnFilesItemActivated(object sender, Framework.Controls.ItemEventArgs e)
+	{
+		var item = e.Item as ITreeItemListItem;
+		if(item.TreeItem.Status != FileStatus.Removed)
+		{
+			if(item is not null) Utility.OpenUrl(System.IO.Path.Combine(
+				item.TreeItem.Repository.WorkingDirectory, item.TreeItem.RelativePath));
+		}
+	}
+
+	public bool Execute()
+	{
+		try
+		{
+			if(_lstUnstaged.Items.Count == 0) return true;
+			var pattern = _txtPattern.Text.Trim();
+			bool addIgnored = _chkIncludeIgnored.Checked;
+			bool addUntracked = _chkIncludeUntracked.Checked;
+			Repository.Status.Stage(pattern, addUntracked, addIgnored);
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				this,
+				exc.Message,
+				Resources.ErrFailedToStage,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+		}
+		return true;
+	}
+
+	#endregion
 }

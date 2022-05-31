@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,88 +18,91 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Git.Gui.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class ResolveCheckoutDialog : GitDialogBase
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Git.Gui.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class ResolveCheckoutDialog : GitDialogBase
+	public ResolveCheckoutDialog()
 	{
-		public ResolveCheckoutDialog()
-		{
-			InitializeComponent();
+		InitializeComponent();
 
-			Text = Resources.StrCheckout;
+		Text = Resources.StrCheckout;
+	}
+
+	public override DialogButtons OptimalButtons => DialogButtons.Cancel;
+
+	public void SetAvailableBranches(IEnumerable<Branch> branches)
+	{
+		Verify.Argument.IsNotNull(branches);
+		Verify.Argument.HasNoNullItems(branches);
+
+		_references.BeginUpdate();
+		_references.Style = GitterApplication.DefaultStyle;
+		_references.Items.Clear();
+		var first = default(Branch);
+		foreach(var branch in branches)
+		{
+			if(branch.IsCurrent) continue;
+			if(first == null) first = branch;
+			_references.Items.Add(new BranchListItem(branch));
 		}
-
-		public override DialogButtons OptimalButtons => DialogButtons.Cancel;
-
-		public void SetAvailableBranches(IEnumerable<Branch> branches)
+		if(first is not null)
 		{
-			Verify.Argument.IsNotNull(branches, nameof(branches));
-			Verify.Argument.HasNoNullItems(branches, nameof(branches));
-
-			_references.BeginUpdate();
-			_references.Style = GitterApplication.DefaultStyle;
-			_references.Items.Clear();
-			var first = default(Branch);
-			foreach(var branch in branches)
-			{
-				if(branch.IsCurrent) continue;
-				if(first == null) first = branch;
-				_references.Items.Add(new BranchListItem(branch));
-			}
-			if(first != null)
-			{
-				SelectedBranch = first;
-				UpdateButton();
-			}
-			_references.EndUpdate();
-			if(_references.Items.Count <= 1)
-			{
-				_references.Visible = false;
-				_lblSelectOther.Visible = false;
-				Height -= _references.Height + _lblSelectOther.Height;
-			}
-		}
-
-		public bool CheckoutCommit { get; private set; } = true;
-
-		public Branch SelectedBranch { get; private set; }
-
-		private void UpdateButton()
-		{
-			_btnCheckoutBranch.Text = string.Format("{0} '{1}'", Resources.StrCheckout, SelectedBranch.Name);
-		}
-
-		private void OnItemActivated(object sender, ItemEventArgs e)
-		{
-			var b = ((BranchListItem)e.Item).DataContext;
-			SelectedBranch = b;
+			SelectedBranch = first;
 			UpdateButton();
 		}
-
-		private void _btnCheckoutCommit_Click(object sender, EventArgs e)
+		_references.EndUpdate();
+		if(_references.Items.Count <= 1)
 		{
-			CheckoutCommit = true;
-			GlobalBehavior.AskOnCommitCheckouts = !_chkDontShowAgain.Checked;
-			ClickOk();
+			_references.Visible = false;
+			_lblSelectOther.Visible = false;
+			Height -= _references.Height + _lblSelectOther.Height;
 		}
+	}
 
-		private void _btnCheckoutBranch_Click(object sender, EventArgs e)
-		{
-			CheckoutCommit = false;
-			GlobalBehavior.AskOnCommitCheckouts = !_chkDontShowAgain.Checked;
-			ClickOk();
-		}
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(350, 284));
+
+	public bool CheckoutCommit { get; private set; } = true;
+
+	public Branch SelectedBranch { get; private set; }
+
+	private void UpdateButton()
+	{
+		_btnCheckoutBranch.Text = string.Format("{0} '{1}'", Resources.StrCheckout, SelectedBranch.Name);
+	}
+
+	private void OnItemActivated(object sender, ItemEventArgs e)
+	{
+		var b = ((BranchListItem)e.Item).DataContext;
+		SelectedBranch = b;
+		UpdateButton();
+	}
+
+	private void _btnCheckoutCommit_Click(object sender, EventArgs e)
+	{
+		CheckoutCommit = true;
+		GlobalBehavior.AskOnCommitCheckouts = !_chkDontShowAgain.Checked;
+		ClickOk();
+	}
+
+	private void _btnCheckoutBranch_Click(object sender, EventArgs e)
+	{
+		CheckoutCommit = false;
+		GlobalBehavior.AskOnCommitCheckouts = !_chkDontShowAgain.Checked;
+		ClickOk();
 	}
 }

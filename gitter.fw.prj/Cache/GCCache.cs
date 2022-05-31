@@ -18,66 +18,65 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+
+public class GCCache<T> : Cache<T>
+	where T : class
 {
-	using System;
+	private readonly Func<T> _onReevaluate;
+	private WeakReference _weakRef;
 
-	public class GCCache<T> : Cache<T>
-		where T : class
+	public GCCache(Func<T> onReevaluate)
 	{
-		private readonly Func<T> _onReevaluate;
-		private WeakReference _weakRef;
+		Verify.Argument.IsNotNull(onReevaluate);
 
-		public GCCache(Func<T> onReevaluate)
+		_onReevaluate = onReevaluate;
+	}
+
+	public GCCache(Func<T> onReevaluate, T value)
+	{
+		Verify.Argument.IsNotNull(onReevaluate);
+
+		_onReevaluate = onReevaluate;
+		if(value != null) _weakRef = new WeakReference(value);
+	}
+
+	public override bool IsCached => _weakRef != null && _weakRef.IsAlive;
+
+	public override T Value
+	{
+		get
 		{
-			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
-
-			_onReevaluate = onReevaluate;
-		}
-
-		public GCCache(Func<T> onReevaluate, T value)
-		{
-			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
-
-			_onReevaluate = onReevaluate;
-			if(value != null) _weakRef = new WeakReference(value);
-		}
-
-		public override bool IsCached => _weakRef != null && _weakRef.IsAlive;
-
-		public override T Value
-		{
-			get
+			if(_weakRef is null)
 			{
-				if(_weakRef == null)
+				return Reevaluate();
+			}
+			else
+			{
+				var value = (T)_weakRef.Target;
+				if(value is null)
 				{
 					return Reevaluate();
 				}
 				else
 				{
-					var value = (T)_weakRef.Target;
-					if(value == null)
-					{
-						return Reevaluate();
-					}
-					else
-					{
-						return value;
-					}
+					return value;
 				}
 			}
 		}
+	}
 
-		public override void Invalidate()
-		{
-			_weakRef = null;
-		}
+	public override void Invalidate()
+	{
+		_weakRef = null;
+	}
 
-		private T Reevaluate()
-		{
-			var value = _onReevaluate();
-			_weakRef = new WeakReference(value);
-			return value;
-		}
+	private T Reevaluate()
+	{
+		var value = _onReevaluate();
+		_weakRef = new WeakReference(value);
+		return value;
 	}
 }

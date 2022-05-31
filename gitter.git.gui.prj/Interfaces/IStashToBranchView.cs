@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework.Mvc;
+
+interface IStashToBranchView : IView
 {
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> BranchName { get; }
 
-	interface IStashToBranchView : IView
-	{
-		IUserInputSource<string> BranchName { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

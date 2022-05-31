@@ -18,39 +18,38 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+
+using gitter.Framework.Controls;
+
+public static class DiffHeaderPanelsProvider
 {
-	using System;
-	using System.Collections.Generic;
+	public static event EventHandler<CreatingPanelsEventArgs> CreatingPanels;
 
-	using gitter.Framework.Controls;
-
-	public static class DiffHeaderPanelsProvider
+	internal static IReadOnlyList<FlowPanel> GetSourceSpecificPanels(IDiffSource diffSource)
 	{
-		public static event EventHandler<CreatingPanelsEventArgs> CreatingPanels;
+		Assert.IsNotNull(diffSource);
 
-		internal static IReadOnlyList<FlowPanel> GetSourceSpecificPanels(IDiffSource diffSource)
+		var panels = new List<FlowPanel>();
+		switch(diffSource)
 		{
-			Assert.IsNotNull(diffSource);
-
-			var panels = new List<FlowPanel>();
-			switch(diffSource)
-			{
-				case IRevisionDiffSource revisionSource:
-					panels.Add(new RevisionHeaderPanel { Revision = revisionSource.Revision.Dereference() });
-					panels.Add(new FlowPanelSeparator  { SeparatorStyle = FlowPanelSeparatorStyle.Line });
-					break;
-				case IIndexDiffSource indexSource when !indexSource.Cached:
-					var panel = new UntrackedFilesPanel(indexSource.Repository.Status);
-					if(panel.Count != 0)
-					{
-						panels.Add(panel);
-						panels.Add(new FlowPanelSeparator { Height = 5 });
-					}
-					break;
-			}
-			CreatingPanels?.Invoke(null, new CreatingPanelsEventArgs(diffSource, panels));
-			return panels;
+			case IRevisionDiffSource revisionSource:
+				panels.Add(new RevisionHeaderPanel { Revision = revisionSource.Revision.Dereference() });
+				panels.Add(new FlowPanelSeparator  { SeparatorStyle = FlowPanelSeparatorStyle.Line });
+				break;
+			case IIndexDiffSource indexSource when !indexSource.Cached:
+				var panel = new UntrackedFilesPanel(indexSource.Repository.Status);
+				if(panel.Count != 0)
+				{
+					panels.Add(panel);
+					panels.Add(new FlowPanelSeparator { Height = 5 });
+				}
+				break;
 		}
+		CreatingPanels?.Invoke(null, new CreatingPanelsEventArgs(diffSource, panels));
+		return panels;
 	}
 }

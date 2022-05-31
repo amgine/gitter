@@ -16,23 +16,22 @@
       <AutoGen>True</AutoGen>
     </Compile>
     <EmbeddedResource Update="Properties\Resources.resx">
-      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
+    <EmbeddedResource Include="Resources\icons\**" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net48'))">
     <Reference Include="System.Net.Http" />
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
   <PropertyGroup>
-    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration)</PostBuildEvent>
+    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration) $(TargetFramework)</PostBuildEvent>
   </PropertyGroup>
 
 </Project>

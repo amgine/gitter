@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
-{
-	using System;
+namespace gitter.Git.AccessLayer;
 
-	public sealed class QueryUsersParameters
+using System;
+
+public sealed class QueryUsersParameters
+{
+	/// <summary>Create <see cref="QueryUsersParameters"/>.</summary>
+	public QueryUsersParameters()
 	{
-		/// <summary>Create <see cref="QueryUsersParameters"/>.</summary>
-		public QueryUsersParameters()
-		{
-		}
 	}
 }

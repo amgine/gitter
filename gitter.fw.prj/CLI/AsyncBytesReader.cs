@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,240 +18,164 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+
+/// <summary>Reads bytes from stdio/stderr.</summary>
+public class AsyncBytesReader : OutputReceiverBase, IOutputReceiver
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Diagnostics;
-	using System.IO;
-
-	/// <summary>Reads bytes from stdio/stderr.</summary>
-	public class AsyncBytesReader : IOutputReceiver
+	private static byte[] AllocateArray(int length)
 	{
-		#region Data
+#if NET5_0_OR_GREATER
+		return GC.AllocateUninitializedArray<byte>(length);
+#else
+		return new byte[length];
+#endif
+	}
 
-		private readonly int _bufferSize;
-		private Stream _stream;
-		private LinkedList<byte[]> _bufferChain;
-		private ManualResetEvent _eof;
-		private int _offset;
-		private int _length;
-		private volatile bool _isCanceled;
+	private readonly LinkedList<byte[]> _bufferChain;
+	private readonly int _bufferSize;
+	private Stream _stream;
+	private int _offset;
+	private int _length;
 
-		#endregion
+	/// <summary>Initializes a new instance of the <see cref="AsyncBytesReader"/> class.</summary>
+	/// <param name="bufferSize">Size of the internal buffer.</param>
+	public AsyncBytesReader(int bufferSize = 0x400)
+	{
+		Verify.Argument.IsPositive(bufferSize);
 
-		#region .ctor
+		_bufferSize  = bufferSize;
+		_bufferChain = new LinkedList<byte[]>();
+	}
 
-		/// <summary>Initializes a new instance of the <see cref="AsyncBytesReader"/> class.</summary>
-		/// <param name="bufferSize">Size of the internal buffer.</param>
-		public AsyncBytesReader(int bufferSize = 0x400)
+	/// <inheritdoc/>
+	public override bool IsInitialized => _stream is not null;
+
+	/// <inheritdoc/>
+	public void Initialize(Process process, StreamReader reader)
+	{
+		Verify.Argument.IsNotNull(process);
+		Verify.Argument.IsNotNull(reader);
+		Verify.State.IsFalse(IsInitialized);
+
+		_stream = reader.BaseStream;
+		_offset = 0;
+		_length = 0;
+
+		_bufferChain.Clear();
+		_bufferChain.AddLast(AllocateArray(_bufferSize));
+
+		BeginReadAsync();
+	}
+
+	/// <inheritdoc/>
+	public void WaitForEndOfStream()
+	{
+		Verify.State.IsTrue(IsInitialized);
+
+		WaitForCompleted();
+
+		_stream = null;
+	}
+
+	/// <summary>Returns the number of collected bytes.</summary>
+	public int Length => _length;
+
+	/// <summary>Returns collected bytes.</summary>
+	/// <returns>Collected bytes.</returns>
+	public byte[] GetBytes()
+	{
+		if(_length == 0) return Preallocated<byte>.EmptyArray;
+
+		var length = _length;
+		var res    = AllocateArray(length);
+		int offset = 0;
+		foreach(var buffer in _bufferChain)
 		{
-			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
-
-			_bufferSize  = bufferSize;
-			_bufferChain = new LinkedList<byte[]>();
+			var partLength = Math.Min(length, _bufferSize);
+			Array.Copy(buffer, 0, res, offset, partLength);
+			offset += partLength;
+			length -= partLength;
 		}
+		return res;
+	}
 
-		#endregion
+	/// <summary>Removes all collected byte buffers.</summary>
+	public void Clear()
+	{
+		Verify.State.IsFalse(IsInitialized);
 
-		#region IOutputReceiver
+		_bufferChain.Clear();
+		_length = 0;
+	}
 
-		/// <summary>Gets a value indicating whether this instance is initialized.</summary>
-		/// <value><c>true</c> if this instance is initialized; otherwise, <c>false</c>.</value>
-		public bool IsInitialized => _stream != null;
-
-		/// <summary>Initializes output reader.</summary>
-		/// <param name="process">Process to read from.</param>
-		/// <param name="reader">StreamReader to read from.</param>
-		public void Initialize(Process process, StreamReader reader)
+	private void OnStreamRead(IAsyncResult ar)
+	{
+		int bytesCount;
+		try
 		{
-			Verify.Argument.IsNotNull(process, nameof(process));
-			Verify.Argument.IsNotNull(reader, nameof(reader));
-			Verify.State.IsFalse(IsInitialized);
-
-			_stream = reader.BaseStream;
-			_eof    = new ManualResetEvent(false);
-			_offset = 0;
-			_length = 0;
-
-			_bufferChain.Clear();
-			_bufferChain.AddLast(new byte[_bufferSize]);
-
+			bytesCount = _stream.EndRead(ar);
+		}
+		catch(IOException)
+		{
+			bytesCount = 0;
+		}
+		catch(OperationCanceledException)
+		{
+			bytesCount = 0;
+		}
+		if(bytesCount != 0)
+		{
+			if(!IsCanceled)
+			{
+				_offset += bytesCount;
+				_length += bytesCount;
+				if(_offset >= _bufferSize)
+				{
+					_offset = 0;
+					_bufferChain.AddLast(AllocateArray(_bufferSize));
+				}
+			}
 			BeginReadAsync();
 		}
-
-		/// <summary>Notifies receiver that output is no longer required.</summary>
-		/// <remarks>Reader should still receive bytes, but disable any stream processing.</remarks>
-		public void NotifyCanceled()
+		else
 		{
-			Verify.State.IsTrue(IsInitialized);
-
-			_isCanceled = true;
-			var eof = _eof;
-			if(eof != null)
-			{
-				_eof = null;
-				eof.Dispose();
-			}
+			NotifyCompleted();
 		}
+	}
 
-		/// <summary>Closes the reader.</summary>
-		public void WaitForEndOfStream()
+	private void BeginReadAsync()
+	{
+		bool isReading;
+		var buffer = _bufferChain.Last.Value;
+		try
 		{
-			Verify.State.IsTrue(IsInitialized);
-
-			_eof.WaitOne();
-			_eof.Dispose();
-
-			_stream = null;
-			_eof = null;
-		}
-
-		#endregion
-
-		#region Public
-
-		/// <summary>Returns the number of collected bytes.</summary>
-		public int Length => _length;
-
-		/// <summary>Returns collected bytes.</summary>
-		/// <returns>Collected bytes.</returns>
-		public byte[] GetBytes()
-		{
-			var res = new byte[_length];
-			int offset = 0;
-			foreach(var buffer in _bufferChain)
+			if(IsCanceled)
 			{
-				var partLength = _length;
-				if(partLength > _bufferSize)
-				{
-					partLength = _bufferSize;
-				}
-				Array.Copy(buffer, 0, res, offset, partLength);
-				offset += partLength;
-				_length -= partLength;
-			}
-			return res;
-		}
-
-		/// <summary>Removes all collected byte buffers.</summary>
-		public void Clear()
-		{
-			Verify.State.IsFalse(IsInitialized);
-
-			_bufferChain.Clear();
-			_length = 0;
-		}
-
-		#endregion
-
-		#region Private
-
-		private void OnStreamRead(IAsyncResult ar)
-		{
-			int bytesCount;
-			try
-			{
-				bytesCount = _stream.EndRead(ar);
-			}
-			catch(IOException)
-			{
-				bytesCount = 0;
-			}
-			catch(OperationCanceledException)
-			{
-				bytesCount = 0;
-			}
-			if(bytesCount != 0)
-			{
-				if(!_isCanceled)
-				{
-					_offset += bytesCount;
-					_length += bytesCount;
-					if(_offset >= _bufferSize)
-					{
-						_offset = 0;
-						_bufferChain.AddLast(new byte[_bufferSize]);
-					}
-				}
-				BeginReadAsync();
+				_stream.BeginRead(buffer, 0, buffer.Length, OnStreamRead, this);
 			}
 			else
 			{
-				if(_isCanceled)
-				{
-					return;
-				}
-				var eof = (EventWaitHandle)ar.AsyncState;
-				if(eof != null)
-				{
-					try
-					{
-						eof.Set();
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
+				_stream.BeginRead(buffer, _offset, buffer.Length - _offset, OnStreamRead, this);
 			}
+			isReading = true;
 		}
-
-		private void BeginReadAsync()
+		catch(IOException)
 		{
-			if(_isCanceled)
-			{
-				while(_bufferChain.Count > 1)
-				{
-					_bufferChain.RemoveLast();
-				}
-				if(_bufferChain.Count == 0)
-				{
-					_bufferChain.AddLast(new byte[_bufferSize]);
-				}
-				var buffer = _bufferChain.Last.Value;
-				try
-				{
-					_stream.BeginRead(buffer, 0, buffer.Length, OnStreamRead, null);
-				}
-				catch(ObjectDisposedException)
-				{
-				}
-			}
-			else
-			{
-				bool isReading;
-				var eof = _eof;
-				var buffer = _bufferChain.Last.Value;
-				try
-				{
-					_stream.BeginRead(buffer, _offset, buffer.Length - _offset, OnStreamRead, eof);
-					isReading = true;
-				}
-				catch(IOException)
-				{
-					isReading = false;
-				}
-				catch(ObjectDisposedException)
-				{
-					isReading = false;
-				}
-				if(!isReading)
-				{
-					if(eof != null)
-					{
-						try
-						{
-							eof.Set();
-						}
-						catch(ObjectDisposedException)
-						{
-						}
-					}
-				}
-			}
+			isReading = false;
 		}
-
-		#endregion
+		catch(ObjectDisposedException)
+		{
+			isReading = false;
+		}
+		if(!isReading)
+		{
+			NotifyCompleted();
+		}
 	}
 }

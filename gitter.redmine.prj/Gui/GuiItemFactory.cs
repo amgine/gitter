@@ -18,95 +18,100 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+class GuiItemFactory
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Windows.Forms;
+	private readonly DpiBindings _dpiBindings;
 
-	using gitter.Framework;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	static class GuiItemFactory
+	public GuiItemFactory(DpiBindings dpiBindings)
 	{
-		public static T GetCopyToClipboardItem<T>(string name, Func<string> text)
-			where T : ToolStripItem, new()
+		Verify.Argument.IsNotNull(dpiBindings);
+
+		_dpiBindings = dpiBindings;
+	}
+
+	public T GetCopyToClipboardItem<T>(string name, Func<string> text)
+		where T : ToolStripItem, new()
+	{
+		var item = new T()
 		{
-			var item = new T()
-			{
-				Text = name,
-				Image = CachedResources.Bitmaps["ImgCopyToClipboard"],
-				Tag = text,
-			};
-			item.Click += OnCopyToClipboardClick;
-			return item;
+			Text = name,
+			Tag = text,
+		};
+		_dpiBindings.BindImage(item, CommonIcons.ClipboardCopy);
+		item.Click += OnCopyToClipboardClick;
+		return item;
+	}
+
+	public T GetCopyToClipboardItem<T>(string name, string text)
+		where T : ToolStripItem, new()
+	{
+		return GetCopyToClipboardItem<T>(name, text, true);
+	}
+
+	public T GetCopyToClipboardItem<T>(string name, string text, bool enableToolTip)
+		where T : ToolStripItem, new()
+	{
+		var item = new T()
+		{
+			Text = name,
+			Tag = text,
+		};
+		_dpiBindings.BindImage(item, CommonIcons.ClipboardCopy);
+		if(enableToolTip && name != text) item.ToolTipText = text;
+		item.Click += OnCopyToClipboardClick;
+		return item;
+	}
+
+	public T GetUpdateRedmineObjectItem<T>(RedmineObject obj)
+		where T : ToolStripItem, new()
+	{
+		Verify.Argument.IsNotNull(obj);
+
+		var item = new T()
+		{
+			Text = Resources.StrRefresh,
+			Tag = obj,
+		};
+		_dpiBindings.BindImage(item, CommonIcons.Refresh);
+		item.Click += OnUpdateRedmineObjectClick;
+		return item;
+	}
+
+	private static void OnCopyToClipboardClick(object sender, EventArgs e)
+	{
+		Assert.IsNotNull(sender);
+
+		var item = (ToolStripItem)sender;
+		var text = item.Tag switch
+		{
+			string       str  => str,
+			Func<string> func => func(),
+			_ => default,
+		};
+		ClipboardEx.SetTextSafe(text);
+	}
+
+	private static void OnUpdateRedmineObjectClick(object sender, EventArgs e)
+	{
+		Assert.IsNotNull(sender);
+
+		var item = (ToolStripItem)sender;
+		var obj = (RedmineObject)item.Tag;
+		try
+		{
+			obj.Update();
 		}
-
-		public static T GetCopyToClipboardItem<T>(string name, string text)
-			where T : ToolStripItem, new()
+		catch
 		{
-			return GetCopyToClipboardItem<T>(name, text, true);
-		}
-
-		public static T GetCopyToClipboardItem<T>(string name, string text, bool enableToolTip)
-			where T : ToolStripItem, new()
-		{
-			var item = new T()
-			{
-				Text = name,
-				Image = CachedResources.Bitmaps["ImgCopyToClipboard"],
-				Tag = text,
-			};
-			if(enableToolTip && name != text) item.ToolTipText = text;
-			item.Click += OnCopyToClipboardClick;
-			return item;
-		}
-
-		public static T GetUpdateRedmineObjectItem<T>(RedmineObject obj)
-			where T : ToolStripItem, new()
-		{
-			Verify.Argument.IsNotNull(obj, nameof(obj));
-
-			var item = new T()
-			{
-				Text = Resources.StrRefresh,
-				Image = CachedResources.Bitmaps["ImgRefresh"],
-				Tag = obj,
-			};
-			item.Click += OnUpdateRedmineObjectClick;
-			return item;
-		}
-
-		private static void OnCopyToClipboardClick(object sender, EventArgs e)
-		{
-			Assert.IsNotNull(sender);
-
-			var item = (ToolStripItem)sender;
-			var text = item.Tag switch
-			{
-				string       str  => str,
-				Func<string> func => func(),
-				_ => default,
-			};
-			ClipboardEx.SetTextSafe(text);
-		}
-
-		private static void OnUpdateRedmineObjectClick(object sender, EventArgs e)
-		{
-			Assert.IsNotNull(sender);
-
-			var item = (ToolStripItem)sender;
-			var obj = (RedmineObject)item.Tag;
-			try
-			{
-				obj.Update();
-			}
-			catch
-			{
-			}
 		}
 	}
 }

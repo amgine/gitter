@@ -1,9 +1,8 @@
-﻿namespace gitter.Git.AccessLayer.CLI
+﻿namespace gitter.Git.AccessLayer.CLI;
+
+enum TimestampFormat
 {
-	enum TimestampFormat
-	{
-		Unix,
-		ISO8601,
-		StrictISO8601,
-	}
+	Unix,
+	ISO8601,
+	StrictISO8601,
 }

@@ -18,21 +18,20 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+public sealed class QueryRevisionParameters
 {
-	using System;
-
-	public sealed class QueryRevisionParameters
+	public QueryRevisionParameters()
 	{
-		public QueryRevisionParameters()
-		{
-		}
-
-		public QueryRevisionParameters(Hash sha1)
-		{
-			SHA1 = sha1;
-		}
-
-		public Hash SHA1 { get; set; }
 	}
+
+	public QueryRevisionParameters(Hash sha1)
+	{
+		SHA1 = sha1;
+	}
+
+	public Hash SHA1 { get; set; }
 }

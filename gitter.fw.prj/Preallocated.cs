@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+
+public class Preallocated<T>
 {
-	using System;
+	private Preallocated() { }
 
-	public class Preallocated<T>
-	{
-		private Preallocated() { }
-
-		public static readonly T[] EmptyArray = Array.Empty<T>();
-	}
+	public static readonly T[] EmptyArray = Array.Empty<T>();
 }

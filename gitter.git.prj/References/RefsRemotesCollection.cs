@@ -18,346 +18,345 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+using gitter.Git.AccessLayer;
+
+using Resources = gitter.Git.Properties.Resources;
+
+/// <summary>Repository remote branches collection ($GIT_DIR/refs/remotes cache).</summary>
+public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, RemoteBranchEventArgs>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading.Tasks;
+	#region .ctor
 
-	using gitter.Framework;
-
-	using gitter.Git.AccessLayer;
-
-	using Resources = gitter.Git.Properties.Resources;
-
-	/// <summary>Repository remote branches collection ($GIT_DIR/refs/remotes cache).</summary>
-	public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, RemoteBranchEventArgs>
+	/// <summary>Initializes a new instance of the <see cref="RefsRemotesCollection"/> class.</summary>
+	/// <param name="repository">Host repository.</param>
+	/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
+	internal RefsRemotesCollection(Repository repository)
+		: base(repository)
 	{
-		#region .ctor
-
-		/// <summary>Initializes a new instance of the <see cref="RefsRemotesCollection"/> class.</summary>
-		/// <param name="repository">Host repository.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
-		internal RefsRemotesCollection(Repository repository)
-			: base(repository)
-		{
-		}
-
-		#endregion
-
-		#region Delete()
-
-		/// <summary>Delete branch.</summary>
-		/// <param name="branch">Branch to delete.</param>
-		/// <param name="force">Delete branch irrespective of its merged status.</param>
-		/// <exception cref="ArgumentNullException">
-		/// <paramref name="branch"/> == <c>null</c>.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// <paramref name="branch"/> is not handled by this repository or deleted.
-		/// </exception>
-		/// <exception cref="BranchIsNotFullyMergedException">
-		/// Branch is not fully merged and can only be deleted if <paramref name="force"/> == <c>true</c>.
-		/// </exception>
-		/// <exception cref="GitException">
-		/// Failed to delete <paramref name="branch"/>.
-		/// </exception>
-		internal void Delete(RemoteBranch branch, bool force)
-		{
-			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
-
-			var name = branch.Name;
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged))
-			{
-				Repository.Accessor.DeleteBranch
-					.Invoke(new DeleteBranchParameters(name, true, force));
-			}
-			RemoveObject(branch);
-		}
-
-		/// <summary>Delete branch.</summary>
-		/// <param name="branch">Branch to delete.</param>
-		/// <param name="force">Delete branch irrespective of its merged status.</param>
-		/// <exception cref="ArgumentNullException">
-		/// <paramref name="branch"/> == <c>null</c>.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// <paramref name="branch"/> is not handled by this repository or deleted.
-		/// </exception>
-		/// <exception cref="BranchIsNotFullyMergedException">
-		/// Branch is not fully merged and can only be deleted if <paramref name="force"/> == <c>true</c>.
-		/// </exception>
-		/// <exception cref="GitException">
-		/// Failed to delete <paramref name="branch"/>.
-		/// </exception>
-		internal async Task DeleteAsync(RemoteBranch branch, bool force)
-		{
-			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
-
-			var name = branch.Name;
-			using(Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.BranchChanged))
-			{
-				await Repository.Accessor.DeleteBranch
-					.InvokeAsync(new DeleteBranchParameters(name, true, force))
-					.ConfigureAwait(continueOnCapturedContext: false);
-			}
-			RemoveObject(branch);
-		}
-
-		#endregion
-
-		#region Refresh()
-
-		/// <summary>Updates remote branch cache.</summary>
-		/// <param name="branches">Actual remote branch data.</param>
-		private void RefreshInternal(IEnumerable<BranchData> branches)
-		{
-			lock(SyncRoot)
-			{
-				CacheUpdater.UpdateObjectDictionary<RemoteBranch, BranchData>(
-					ObjectStorage,
-					null,
-					branchData => branchData.IsRemote,
-					branches,
-					remoteBranchData => ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData),
-					ObjectFactories.UpdateRemoteBranch,
-					InvokeObjectAdded,
-					InvokeObjectRemoved,
-					true);
-			}
-		}
-
-		/// <summary>Updates remote branch cache.</summary>
-		/// <param name="branches">Actual remote branch data.</param>
-		private void RefreshInternal(IEnumerable<RemoteBranchData> branches)
-		{
-			lock(SyncRoot)
-			{
-				CacheUpdater.UpdateObjectDictionary<RemoteBranch, RemoteBranchData>(
-					ObjectStorage,
-					null,
-					null,
-					branches,
-					remoteBranchData => ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData),
-					ObjectFactories.UpdateRemoteBranch,
-					InvokeObjectAdded,
-					InvokeObjectRemoved,
-					true);
-			}
-		}
-
-		/// <summary>Refresh remote branches.</summary>
-		public void Refresh()
-		{
-			var refs = Repository.Accessor.QueryBranches.Invoke(
-				new QueryBranchesParameters(QueryBranchRestriction.Remote));
-			RefreshInternal(refs.Remotes);
-		}
-
-		/// <summary>Refresh remote branches.</summary>
-		public async Task RefreshAsync()
-		{
-			var refs = await Repository.Accessor.QueryBranches
-				.InvokeAsync(new QueryBranchesParameters(QueryBranchRestriction.Remote))
-				.ConfigureAwait(continueOnCapturedContext: false);
-			RefreshInternal(refs.Remotes);
-		}
-
-		/// <summary>Refreshes the specified branches.</summary>
-		/// <param name="branches">Actual remote branch data.</param>
-		internal void Refresh(IEnumerable<RemoteBranchData> branches)
-		{
-			Verify.Argument.IsNotNull(branches, nameof(branches));
-
-			RefreshInternal(branches);
-		}
-
-		/// <summary>Refreshes the specified branches.</summary>
-		/// <param name="branches">Actual remote branch data.</param>
-		internal void Refresh(IEnumerable<BranchData> branches)
-		{
-			Verify.Argument.IsNotNull(branches, nameof(branches));
-
-			RefreshInternal(branches);
-		}
-
-		/// <summary>Refresh branch's position (and remove branch if it doesn't exist anymore).</summary>
-		/// <param name="branch">Branch to refresh.</param>
-		internal void Refresh(RemoteBranch branch)
-		{
-			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
-
-			var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
-				new QueryBranchParameters(branch.Name, branch.IsRemote));
-			if(remoteBranchData is not null)
-			{
-				ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
-			}
-			else
-			{
-				RemoveObject(branch);
-			}
-		}
-
-		/// <summary>Refresh branch's position (and remove branch if it doesn't exist anymore).</summary>
-		/// <param name="branch">Branch to refresh.</param>
-		internal async Task RefreshAsync(RemoteBranch branch)
-		{
-			Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
-
-			var remoteBranchData = await Repository.Accessor.QueryBranch
-				.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
-				.ConfigureAwait(continueOnCapturedContext: false);
-			if(remoteBranchData != null)
-			{
-				ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
-			}
-			else
-			{
-				RemoveObject(branch);
-			}
-		}
-
-		#endregion
-
-		#region Get()
-
-		private IReadOnlyList<RemoteBranch> GetRemotes(BranchesData refs)
-		{
-			var heads = refs.Remotes;
-			if(heads.Count == 0)
-			{
-				return Preallocated<RemoteBranch>.EmptyArray;
-			}
-			else
-			{
-				var res = new List<RemoteBranch>(heads.Count);
-				lock(SyncRoot)
-				{
-					foreach(var head in heads)
-					{
-						var branch = TryGetItem(head.Name);
-						if(branch is not null) res.Add(branch);
-					}
-				}
-				return res;
-			}
-		}
-
-		/// <summary>Gets the list of unmerged remote branches.</summary>
-		/// <returns>List of unmerged remote branches.</returns>
-		public IReadOnlyList<RemoteBranch> GetUnmerged()
-		{
-			var refs = Repository.Accessor.QueryBranches.Invoke(
-				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
-			return GetRemotes(refs);
-		}
-
-		/// <summary>Gets the list of merged remote branches.</summary>
-		/// <returns>List of merged remote branches.</returns>
-		public IReadOnlyList<RemoteBranch> GetMerged()
-		{
-			var refs = Repository.Accessor.QueryBranches.Invoke(
-				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Merged));
-			return GetRemotes(refs);
-		}
-
-		/// <summary>Gets the list of remote branches, containing specified <paramref name="revision"/>.</summary>
-		/// <param name="revision">Revision which must be present in any resulting remote branch.</param>
-		/// <returns>List of remote branches, containing specified <paramref name="revision"/>.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
-		public IReadOnlyList<RemoteBranch> GetContaining(IRevisionPointer revision)
-		{
-			Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
-
-			var refs = Repository.Accessor.QueryBranches.Invoke(
-				new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
-			return GetRemotes(refs);
-		}
-
-		#endregion
-
-		#region Load()
-
-		/// <summary>Perform initial load of remote branches.</summary>
-		/// <param name="branchDataList">List of remote branch data containers.</param>
-		internal void Load(IEnumerable<RemoteBranchData> branchDataList)
-		{
-			ObjectStorage.Clear();
-			if(branchDataList is not null)
-			{
-				foreach(var remoteBranchData in branchDataList)
-				{
-					AddObject(ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData));
-				}
-			}
-		}
-
-		/// <summary>Perform initial load of remote branches.</summary>
-		/// <param name="branchDataList">List of remote branch data containers.</param>
-		internal void Load(IEnumerable<BranchData> branchDataList)
-		{
-			ObjectStorage.Clear();
-			if(branchDataList is not null)
-			{
-				foreach(var remoteBranchData in branchDataList)
-				{
-					AddObject(ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData));
-				}
-			}
-		}
-
-		#endregion
-
-		#region Notify()
-
-		/// <summary>Notifies that remote branch was created externally.</summary>
-		/// <param name="remoteBranchData">Created remote branch data.</param>
-		/// <returns>Created remote branch.</returns>
-		internal RemoteBranch NotifyCreated(RemoteBranchData remoteBranchData)
-		{
-			var branch = ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData);
-			AddObject(branch);
-			return branch;
-		}
-
-		/// <summary>Notifies that remote branch was created externally.</summary>
-		/// <param name="branchData">Created remote branch data.</param>
-		/// <returns>Created remote branch.</returns>
-		internal RemoteBranch NotifyCreated(BranchData branchData)
-		{
-			var branch = ObjectFactories.CreateRemoteBranch(Repository, branchData);
-			AddObject(branch);
-			return branch;
-		}
-
-		#endregion
-
-		#region Overrides
-
-		/// <summary>Fixes the input branch name.</summary>
-		/// <param name="name">Input value.</param>
-		/// <returns>Fixed name value.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="name"/> == <c>null</c>.</exception>
-		protected override string FixInputName(string name)
-		{
-			Verify.Argument.IsNotNull(name, nameof(name));
-
-			if(name.StartsWith(GitConstants.RemoteBranchPrefix) && !ContainsObjectName(name))
-			{
-				return name.Substring(GitConstants.RemoteBranchPrefix.Length);
-			}
-			return name;
-		}
-
-		/// <summary>Creates the event args for specified <paramref name="item"/>.</summary>
-		/// <param name="item">Item to create event args for.</param>
-		/// <returns>Created event args.</returns>
-		protected override RemoteBranchEventArgs CreateEventArgs(RemoteBranch item)
-			=> new RemoteBranchEventArgs(item);
-
-		#endregion
 	}
+
+	#endregion
+
+	#region Delete()
+
+	/// <summary>Delete branch.</summary>
+	/// <param name="branch">Branch to delete.</param>
+	/// <param name="force">Delete branch irrespective of its merged status.</param>
+	/// <exception cref="ArgumentNullException">
+	/// <paramref name="branch"/> == <c>null</c>.
+	/// </exception>
+	/// <exception cref="ArgumentException">
+	/// <paramref name="branch"/> is not handled by this repository or deleted.
+	/// </exception>
+	/// <exception cref="BranchIsNotFullyMergedException">
+	/// Branch is not fully merged and can only be deleted if <paramref name="force"/> == <c>true</c>.
+	/// </exception>
+	/// <exception cref="GitException">
+	/// Failed to delete <paramref name="branch"/>.
+	/// </exception>
+	internal void Delete(RemoteBranch branch, bool force)
+	{
+		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+		var name = branch.Name;
+		using(Repository.Monitor.BlockNotifications(
+			RepositoryNotifications.BranchChanged))
+		{
+			Repository.Accessor.DeleteBranch
+				.Invoke(new DeleteBranchParameters(name, true, force));
+		}
+		RemoveObject(branch);
+	}
+
+	/// <summary>Delete branch.</summary>
+	/// <param name="branch">Branch to delete.</param>
+	/// <param name="force">Delete branch irrespective of its merged status.</param>
+	/// <exception cref="ArgumentNullException">
+	/// <paramref name="branch"/> == <c>null</c>.
+	/// </exception>
+	/// <exception cref="ArgumentException">
+	/// <paramref name="branch"/> is not handled by this repository or deleted.
+	/// </exception>
+	/// <exception cref="BranchIsNotFullyMergedException">
+	/// Branch is not fully merged and can only be deleted if <paramref name="force"/> == <c>true</c>.
+	/// </exception>
+	/// <exception cref="GitException">
+	/// Failed to delete <paramref name="branch"/>.
+	/// </exception>
+	internal async Task DeleteAsync(RemoteBranch branch, bool force)
+	{
+		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+		var name = branch.Name;
+		using(Repository.Monitor.BlockNotifications(
+			RepositoryNotifications.BranchChanged))
+		{
+			await Repository.Accessor.DeleteBranch
+				.InvokeAsync(new DeleteBranchParameters(name, true, force))
+				.ConfigureAwait(continueOnCapturedContext: false);
+		}
+		RemoveObject(branch);
+	}
+
+	#endregion
+
+	#region Refresh()
+
+	/// <summary>Updates remote branch cache.</summary>
+	/// <param name="branches">Actual remote branch data.</param>
+	private void RefreshInternal(IEnumerable<BranchData> branches)
+	{
+		lock(SyncRoot)
+		{
+			CacheUpdater.UpdateObjectDictionary<RemoteBranch, BranchData>(
+				ObjectStorage,
+				null,
+				branchData => branchData.IsRemote,
+				branches,
+				remoteBranchData => ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData),
+				ObjectFactories.UpdateRemoteBranch,
+				InvokeObjectAdded,
+				InvokeObjectRemoved,
+				true);
+		}
+	}
+
+	/// <summary>Updates remote branch cache.</summary>
+	/// <param name="branches">Actual remote branch data.</param>
+	private void RefreshInternal(IEnumerable<RemoteBranchData> branches)
+	{
+		lock(SyncRoot)
+		{
+			CacheUpdater.UpdateObjectDictionary<RemoteBranch, RemoteBranchData>(
+				ObjectStorage,
+				null,
+				null,
+				branches,
+				remoteBranchData => ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData),
+				ObjectFactories.UpdateRemoteBranch,
+				InvokeObjectAdded,
+				InvokeObjectRemoved,
+				true);
+		}
+	}
+
+	/// <summary>Refresh remote branches.</summary>
+	public void Refresh()
+	{
+		var refs = Repository.Accessor.QueryBranches.Invoke(
+			new QueryBranchesParameters(QueryBranchRestriction.Remote));
+		RefreshInternal(refs.Remotes);
+	}
+
+	/// <summary>Refresh remote branches.</summary>
+	public async Task RefreshAsync()
+	{
+		var refs = await Repository.Accessor.QueryBranches
+			.InvokeAsync(new QueryBranchesParameters(QueryBranchRestriction.Remote))
+			.ConfigureAwait(continueOnCapturedContext: false);
+		RefreshInternal(refs.Remotes);
+	}
+
+	/// <summary>Refreshes the specified branches.</summary>
+	/// <param name="branches">Actual remote branch data.</param>
+	internal void Refresh(IEnumerable<RemoteBranchData> branches)
+	{
+		Verify.Argument.IsNotNull(branches);
+
+		RefreshInternal(branches);
+	}
+
+	/// <summary>Refreshes the specified branches.</summary>
+	/// <param name="branches">Actual remote branch data.</param>
+	internal void Refresh(IEnumerable<BranchData> branches)
+	{
+		Verify.Argument.IsNotNull(branches);
+
+		RefreshInternal(branches);
+	}
+
+	/// <summary>Refresh branch's position (and remove branch if it doesn't exist anymore).</summary>
+	/// <param name="branch">Branch to refresh.</param>
+	internal void Refresh(RemoteBranch branch)
+	{
+		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+		var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
+			new QueryBranchParameters(branch.Name, branch.IsRemote));
+		if(remoteBranchData is not null)
+		{
+			ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
+		}
+		else
+		{
+			RemoveObject(branch);
+		}
+	}
+
+	/// <summary>Refresh branch's position (and remove branch if it doesn't exist anymore).</summary>
+	/// <param name="branch">Branch to refresh.</param>
+	internal async Task RefreshAsync(RemoteBranch branch)
+	{
+		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+
+		var remoteBranchData = await Repository.Accessor.QueryBranch
+			.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
+			.ConfigureAwait(continueOnCapturedContext: false);
+		if(remoteBranchData != null)
+		{
+			ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
+		}
+		else
+		{
+			RemoveObject(branch);
+		}
+	}
+
+	#endregion
+
+	#region Get()
+
+	private IReadOnlyList<RemoteBranch> GetRemotes(BranchesData refs)
+	{
+		var heads = refs.Remotes;
+		if(heads.Count == 0)
+		{
+			return Preallocated<RemoteBranch>.EmptyArray;
+		}
+		else
+		{
+			var res = new List<RemoteBranch>(heads.Count);
+			lock(SyncRoot)
+			{
+				foreach(var head in heads)
+				{
+					var branch = TryGetItem(head.Name);
+					if(branch is not null) res.Add(branch);
+				}
+			}
+			return res;
+		}
+	}
+
+	/// <summary>Gets the list of unmerged remote branches.</summary>
+	/// <returns>List of unmerged remote branches.</returns>
+	public IReadOnlyList<RemoteBranch> GetUnmerged()
+	{
+		var refs = Repository.Accessor.QueryBranches.Invoke(
+			new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
+		return GetRemotes(refs);
+	}
+
+	/// <summary>Gets the list of merged remote branches.</summary>
+	/// <returns>List of merged remote branches.</returns>
+	public IReadOnlyList<RemoteBranch> GetMerged()
+	{
+		var refs = Repository.Accessor.QueryBranches.Invoke(
+			new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Merged));
+		return GetRemotes(refs);
+	}
+
+	/// <summary>Gets the list of remote branches, containing specified <paramref name="revision"/>.</summary>
+	/// <param name="revision">Revision which must be present in any resulting remote branch.</param>
+	/// <returns>List of remote branches, containing specified <paramref name="revision"/>.</returns>
+	/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
+	public IReadOnlyList<RemoteBranch> GetContaining(IRevisionPointer revision)
+	{
+		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+
+		var refs = Repository.Accessor.QueryBranches.Invoke(
+			new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
+		return GetRemotes(refs);
+	}
+
+	#endregion
+
+	#region Load()
+
+	/// <summary>Perform initial load of remote branches.</summary>
+	/// <param name="branchDataList">List of remote branch data containers.</param>
+	internal void Load(IEnumerable<RemoteBranchData> branchDataList)
+	{
+		ObjectStorage.Clear();
+		if(branchDataList is not null)
+		{
+			foreach(var remoteBranchData in branchDataList)
+			{
+				AddObject(ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData));
+			}
+		}
+	}
+
+	/// <summary>Perform initial load of remote branches.</summary>
+	/// <param name="branchDataList">List of remote branch data containers.</param>
+	internal void Load(IEnumerable<BranchData> branchDataList)
+	{
+		ObjectStorage.Clear();
+		if(branchDataList is not null)
+		{
+			foreach(var remoteBranchData in branchDataList)
+			{
+				AddObject(ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData));
+			}
+		}
+	}
+
+	#endregion
+
+	#region Notify()
+
+	/// <summary>Notifies that remote branch was created externally.</summary>
+	/// <param name="remoteBranchData">Created remote branch data.</param>
+	/// <returns>Created remote branch.</returns>
+	internal RemoteBranch NotifyCreated(RemoteBranchData remoteBranchData)
+	{
+		var branch = ObjectFactories.CreateRemoteBranch(Repository, remoteBranchData);
+		AddObject(branch);
+		return branch;
+	}
+
+	/// <summary>Notifies that remote branch was created externally.</summary>
+	/// <param name="branchData">Created remote branch data.</param>
+	/// <returns>Created remote branch.</returns>
+	internal RemoteBranch NotifyCreated(BranchData branchData)
+	{
+		var branch = ObjectFactories.CreateRemoteBranch(Repository, branchData);
+		AddObject(branch);
+		return branch;
+	}
+
+	#endregion
+
+	#region Overrides
+
+	/// <summary>Fixes the input branch name.</summary>
+	/// <param name="name">Input value.</param>
+	/// <returns>Fixed name value.</returns>
+	/// <exception cref="ArgumentNullException"><paramref name="name"/> == <c>null</c>.</exception>
+	protected override string FixInputName(string name)
+	{
+		Verify.Argument.IsNotNull(name);
+
+		if(name.StartsWith(GitConstants.RemoteBranchPrefix) && !ContainsObjectName(name))
+		{
+			return name.Substring(GitConstants.RemoteBranchPrefix.Length);
+		}
+		return name;
+	}
+
+	/// <summary>Creates the event args for specified <paramref name="item"/>.</summary>
+	/// <param name="item">Item to create event args for.</param>
+	/// <returns>Created event args.</returns>
+	protected override RemoteBranchEventArgs CreateEventArgs(RemoteBranch item)
+		=> new RemoteBranchEventArgs(item);
+
+	#endregion
 }

@@ -18,152 +18,124 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+
+/// <summary>Helper class for drawing item backgrounds.</summary>
+public static class BackgroundStyle
 {
-	using System;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
+	const float cornerRadius = 2.0f;
 
-	/// <summary>Helper class for drawing item backgrounds.</summary>
-	public static class BackgroundStyle
+	private sealed class SolidBackgroundStyle : IBackgroundStyle
 	{
-		private sealed class SolidBackgroundStyle : IBackgroundStyle
+		private readonly Color _topColor;
+		private readonly Color _bottomColor;
+
+		public SolidBackgroundStyle(Color outerColor, Color innerColor, Color innerTop, Color innerBottom)
 		{
-			#region Data
+			OuterBorderPen = new Pen(outerColor);
+			InnerBorderPen = new Pen(innerColor);
 
-			private readonly Color _topColor;
-			private readonly Color _bottomColor;
-
-			#endregion
-
-			#region .ctor
-
-			public SolidBackgroundStyle(Color outerColor, Color innerColor, Color innerTop, Color innerBottom)
-			{
-				OuterBorderPen = new Pen(outerColor);
-				InnerBorderPen = new Pen(innerColor);
-
-				_topColor = innerTop;
-				_bottomColor = innerBottom;
-			}
-
-			#endregion
-
-			#region Properties
-
-			public Pen InnerBorderPen { get; }
-
-			public Pen OuterBorderPen { get; }
-
-			#endregion
-
-			#region Methods
-
-			public Brush GetBackgroundBrush(int y1, int y2)
-			{
-				return new LinearGradientBrush(new Point(0, y1), new Point(0, y2), _topColor, _bottomColor);
-			}
-
-			public void Draw(Graphics g, Rectangle rect)
-			{
-				using(var b = GetBackgroundBrush(rect.Y + 1, rect.Bottom - 2))
-				{
-					g.FillRectangle(b, rect.X + 1, rect.Y + 1, rect.Width - 2, rect.Height - 2);
-				}
-				g.DrawRectangle(InnerBorderPen, rect.X + 1, rect.Y + 1, rect.Width - 3, rect.Height - 3);
-				g.DrawRoundedRectangle(OuterBorderPen, rect, 2);
-			}
-
-			#endregion
-
-			#region IDisposable Members
-
-			public void Dispose()
-			{
-				OuterBorderPen.Dispose();
-				InnerBorderPen.Dispose();
-			}
-
-			#endregion
+			_topColor    = innerTop;
+			_bottomColor = innerBottom;
 		}
 
-		private sealed class SimpleBackgroundStyle : IBackgroundStyle
+		public Pen InnerBorderPen { get; }
+
+		public Pen OuterBorderPen { get; }
+
+		public Brush GetBackgroundBrush(int y1, int y2)
+			=> new LinearGradientBrush(new Point(0, y1), new Point(0, y2), _topColor, _bottomColor);
+
+		public void Draw(Graphics graphics, Dpi dpi, Rectangle bounds)
 		{
-			#region .ctor
+			const int PaddingX = 1;
+			const int PaddingY = 1;
 
-			public SimpleBackgroundStyle(Color outerColor)
+			var paddingX = PaddingX * dpi.X / 96;
+			var paddingY = PaddingY * dpi.Y / 96;
+			using(var brush = GetBackgroundBrush(bounds.Y + paddingY, bounds.Bottom - paddingY * 2))
 			{
-				OuterBorderPen = new Pen(outerColor);
+				graphics.FillRectangle(brush,
+					bounds.X +      paddingX,
+					bounds.Y +      paddingY,
+					bounds.Width  - paddingX * 2,
+					bounds.Height - paddingY * 2);
 			}
-
-			#endregion
-
-			#region Properties
-
-			public Pen OuterBorderPen { get; }
-
-			#endregion
-
-			#region Methods
-
-			public void Draw(Graphics g, Rectangle rect)
-			{
-				g.DrawRoundedRectangle(OuterBorderPen, rect, 2);
-			}
-
-			#endregion
-
-			#region IDisposable Members
-
-			public void Dispose()
-			{
-				OuterBorderPen.Dispose();
-			}
-
-			#endregion
+			graphics.DrawRectangle(InnerBorderPen, bounds.X + paddingX, bounds.Y + paddingY, bounds.Width - paddingX * 2 - 1, bounds.Height - paddingY * 2 - 1);
+			graphics.DrawRoundedRectangle(OuterBorderPen, bounds, cornerRadius * dpi.X / 96.0f);
 		}
 
-		#region Static
-
-		/// <summary>Focused item style.</summary>
-		public static readonly IBackgroundStyle Focused = new SimpleBackgroundStyle(
-				Color.FromArgb(125, 162, 206));
-
-		/// <summary>Focused+Selected item style.</summary>
-		public static readonly IBackgroundStyle SelectedFocused = new SolidBackgroundStyle(
-				Color.FromArgb(125, 162, 206),
-				Color.FromArgb(235, 244, 253),
-				Color.FromArgb(220, 235, 252),
-				Color.FromArgb(193, 219, 252));
-
-		/// <summary>Selected item style.</summary>
-		public static readonly IBackgroundStyle Selected = new SolidBackgroundStyle(
-				Color.FromArgb(132, 172, 221),
-				Color.FromArgb(235, 244, 253),
-				Color.FromArgb(235, 244, 254),
-				Color.FromArgb(207, 228, 254));
-
-		/// <summary>Selected without control focus.</summary>
-		public static readonly IBackgroundStyle SelectedNoFocus = new SolidBackgroundStyle(
-				Color.FromArgb(217, 217, 217),
-				Color.FromArgb(250, 250, 251),
-				Color.FromArgb(248, 248, 248),
-				Color.FromArgb(229, 229, 229));
-
-		/// <summary>Hovered item status.</summary>
-		public static readonly IBackgroundStyle Hovered = new SolidBackgroundStyle(
-				Color.FromArgb(184, 214, 251),
-				Color.FromArgb(252, 253, 254),
-				Color.FromArgb(250, 251, 253),
-				Color.FromArgb(242, 247, 254));
-
-		/// <summary>Hovered+Focused item status.</summary>
-		public static readonly IBackgroundStyle HoveredFocused = new SolidBackgroundStyle(
-				Color.FromArgb(125, 162, 206),
-				Color.FromArgb(252, 253, 254),
-				Color.FromArgb(250, 251, 253),
-				Color.FromArgb(242, 247, 254));
-
-		#endregion
+		public void Dispose()
+		{
+			OuterBorderPen.Dispose();
+			InnerBorderPen.Dispose();
+		}
 	}
+
+	private sealed class SimpleBackgroundStyle : IBackgroundStyle
+	{
+		public SimpleBackgroundStyle(Pen pen)
+		{
+			OuterBorderPen = pen;
+		}
+
+		public SimpleBackgroundStyle(Color outerColor) : this(new Pen(outerColor))
+		{
+		}
+
+		public Pen OuterBorderPen { get; }
+
+		public void Draw(Graphics graphics, Dpi dpi, Rectangle bounds)
+		{
+			graphics.DrawRoundedRectangle(OuterBorderPen, bounds, cornerRadius * dpi.X / 96.0f);
+		}
+
+		public void Dispose()
+		{
+			OuterBorderPen.Dispose();
+		}
+	}
+
+	/// <summary>Focused item style.</summary>
+	public static readonly IBackgroundStyle Focused = new SimpleBackgroundStyle(
+			Color.FromArgb(125, 162, 206));
+
+	/// <summary>Focused+Selected item style.</summary>
+	public static readonly IBackgroundStyle SelectedFocused = new SolidBackgroundStyle(
+			Color.FromArgb(125, 162, 206),
+			Color.FromArgb(235, 244, 253),
+			Color.FromArgb(220, 235, 252),
+			Color.FromArgb(193, 219, 252));
+
+	/// <summary>Selected item style.</summary>
+	public static readonly IBackgroundStyle Selected = new SolidBackgroundStyle(
+			Color.FromArgb(132, 172, 221),
+			Color.FromArgb(235, 244, 253),
+			Color.FromArgb(235, 244, 254),
+			Color.FromArgb(207, 228, 254));
+
+	/// <summary>Selected without control focus.</summary>
+	public static readonly IBackgroundStyle SelectedNoFocus = new SolidBackgroundStyle(
+			Color.FromArgb(217, 217, 217),
+			Color.FromArgb(250, 250, 251),
+			Color.FromArgb(248, 248, 248),
+			Color.FromArgb(229, 229, 229));
+
+	/// <summary>Hovered item status.</summary>
+	public static readonly IBackgroundStyle Hovered = new SolidBackgroundStyle(
+			Color.FromArgb(184, 214, 251),
+			Color.FromArgb(252, 253, 254),
+			Color.FromArgb(250, 251, 253),
+			Color.FromArgb(242, 247, 254));
+
+	/// <summary>Hovered+Focused item status.</summary>
+	public static readonly IBackgroundStyle HoveredFocused = new SolidBackgroundStyle(
+			Color.FromArgb(125, 162, 206),
+			Color.FromArgb(252, 253, 254),
+			Color.FromArgb(250, 251, 253),
+			Color.FromArgb(242, 247, 254));
 }

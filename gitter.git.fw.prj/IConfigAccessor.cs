@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,32 +18,31 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System.Collections.Generic;
+
+/// <summary>Object which can perform various operations on git configuration.</summary>
+public interface IConfigAccessor
 {
-	using System.Collections.Generic;
+	/// <summary>Query configuration parameter list.</summary>
+	IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig { get; }
 
-	/// <summary>Object which can perform various operations on git configuration.</summary>
-	public interface IConfigAccessor
-	{
-		/// <summary>Query configuration parameter list.</summary>
-		IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig { get; }
+	/// <summary>Query config parameter.</summary>
+	IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter { get; }
 
-		/// <summary>Query config parameter.</summary>
-		IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter { get; }
+	/// <summary>Add config value.</summary>
+	IGitAction<AddConfigValueParameters> AddConfigValue { get; }
 
-		/// <summary>Add config value.</summary>
-		IGitAction<AddConfigValueParameters> AddConfigValue { get; }
+	/// <summary>Set config value.</summary>
+	IGitAction<SetConfigValueParameters> SetConfigValue { get; }
 
-		/// <summary>Set config value.</summary>
-		IGitAction<SetConfigValueParameters> SetConfigValue { get; }
+	/// <summary>Unset config parameter value.</summary>
+	IGitAction<UnsetConfigValueParameters> UnsetConfigValue { get; }
 
-		/// <summary>Unset config parameter value.</summary>
-		IGitAction<UnsetConfigValueParameters> UnsetConfigValue { get; }
+	/// <summary>Rename configuration section.</summary>
+	IGitAction<RenameConfigSectionParameters> RenameConfigSection { get; }
 
-		/// <summary>Rename configuration section.</summary>
-		IGitAction<RenameConfigSectionParameters> RenameConfigSection { get; }
-
-		/// <summary>Delete configuration section.</summary>
-		IGitAction<DeleteConfigSectionParameters> DeleteConfigSection { get; }
-	}
+	/// <summary>Delete configuration section.</summary>
+	IGitAction<DeleteConfigSectionParameters> DeleteConfigSection { get; }
 }

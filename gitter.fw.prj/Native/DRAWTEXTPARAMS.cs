@@ -18,25 +18,24 @@
  */
 #endregion
 
-namespace gitter.Native
+namespace gitter.Native;
+
+using System.Runtime.InteropServices;
+
+[StructLayout(LayoutKind.Sequential)]
+public struct DRAWTEXTPARAMS
 {
-	using System.Runtime.InteropServices;
-
-	[StructLayout(LayoutKind.Sequential)]
-	public struct DRAWTEXTPARAMS
+	public static DRAWTEXTPARAMS Create()
 	{
-		public static DRAWTEXTPARAMS Create()
+		return new DRAWTEXTPARAMS
 		{
-			return new DRAWTEXTPARAMS
-			{
-				cbSize = Marshal.SizeOf(typeof(DRAWTEXTPARAMS)),
-			};
-		}
-
-		public int cbSize;
-		public int iTabLength;
-		public int iLeftMargin;
-		public int iRightMargin;
-		public int uiLengthDrawn;
+			cbSize = Marshal.SizeOf(typeof(DRAWTEXTPARAMS)),
+		};
 	}
+
+	public int cbSize;
+	public int iTabLength;
+	public int iLeftMargin;
+	public int iRightMargin;
+	public int uiLengthDrawn;
 }

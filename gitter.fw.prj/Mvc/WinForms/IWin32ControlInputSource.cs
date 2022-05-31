@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc.WinForms
-{
-	using System.Windows.Forms;
+namespace gitter.Framework.Mvc.WinForms;
 
-	public interface IWin32ControlInputSource
-	{
-		Control Control { get; }
-	}
+using System.Windows.Forms;
+
+public interface IWin32ControlInputSource
+{
+	Control Control { get; }
 }

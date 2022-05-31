@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,25 +18,24 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+public sealed class NoteData : INamedObject
 {
-	using System;
-
-	using gitter.Framework;
-
-	public sealed class NoteData : INamedObject
+	public NoteData(string name, string objectName, string message)
 	{
-		public NoteData(string name, string objectName, string message)
-		{
-			Name       = name;
-			ObjectName = objectName;
-			Message    = message;
-		}
-
-		public string Name { get; }
-
-		public string ObjectName { get; }
-
-		public string Message { get; set; }
+		Name       = name;
+		ObjectName = objectName;
+		Message    = message;
 	}
+
+	public string Name { get; }
+
+	public string ObjectName { get; }
+
+	public string Message { get; set; }
 }

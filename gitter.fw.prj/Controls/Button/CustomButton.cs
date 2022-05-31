@@ -18,193 +18,198 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+[System.ComponentModel.DesignerCategory("")]
+public sealed class CustomButton : Control
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Data
 
-	[System.ComponentModel.DesignerCategory("")]
-	public sealed class CustomButton : Control
+	private CustomButtonRenderer _renderer;
+	private bool _isPressed;
+	private bool _isMouseOver;
+
+	#endregion
+
+	#region .ctor
+
+	public CustomButton()
 	{
-		#region Data
-
-		private CustomButtonRenderer _renderer;
-		private bool _isPressed;
-		private bool _isMouseOver;
-
-		#endregion
-
-		#region .ctor
-
-		public CustomButton()
-		{
-			SetStyle(
-				ControlStyles.AllPaintingInWmPaint |
-				ControlStyles.OptimizedDoubleBuffer |
-				ControlStyles.Opaque |
-				ControlStyles.Selectable |
-				ControlStyles.ResizeRedraw |
-				ControlStyles.UserPaint, true);
-			SetStyle(
-				ControlStyles.ContainerControl |
-				ControlStyles.SupportsTransparentBackColor, false);
-			Size = new Size(86, 18);
-			TabStop = true;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public CustomButtonRenderer Renderer
-		{
-			get => _renderer ?? CustomButtonRenderer.Default;
-			set
-			{
-				if(_renderer != value)
-				{
-					bool needsInvalidate =
-						!(_renderer is null && value == CustomButtonRenderer.Default) &&
-						!(_renderer == CustomButtonRenderer.Default && value is null);
-					_renderer = value;
-					if(needsInvalidate)
-					{
-						Invalidate();
-					}
-				}
-			}
-		}
-
-		public bool IsPressed
-		{
-			get => _isPressed;
-			private set
-			{
-				if(_isPressed != value)
-				{
-					_isPressed = value;
-					Invalidate();
-				}
-			}
-		}
-
-		public bool IsMouseOver
-		{
-			get => _isMouseOver;
-			private set
-			{
-				if(_isMouseOver != value)
-				{
-					_isMouseOver = value;
-					Invalidate();
-				}
-			}
-		}
-
-		#endregion
-
-		#region Overrides
-
-		/// <inheritdoc/>
-		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
-		{
-			switch(e.KeyCode)
-			{
-				case Keys.Space:
-					e.IsInputKey = true;
-					break;
-				default:
-					base.OnPreviewKeyDown(e);
-					break;
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnKeyDown(KeyEventArgs e)
-		{
-			base.OnKeyDown(e);
-			switch(e.KeyCode)
-			{
-				case Keys.Space:
-					IsPressed = true;
-					break;
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnKeyUp(KeyEventArgs e)
-		{
-			base.OnKeyUp(e);
-			switch(e.KeyCode)
-			{
-				case Keys.Space:
-					IsPressed = false;
-					base.OnClick(EventArgs.Empty);
-					break;
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnGotFocus(EventArgs e)
-		{
-			base.OnGotFocus(e);
-			Invalidate();
-		}
-
-		/// <inheritdoc/>
-		protected override void OnLostFocus(EventArgs e)
-		{
-			base.OnLostFocus(e);
-			Invalidate();
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseDown(MouseEventArgs e)
-		{
-			if(e.Button == MouseButtons.Left)
-			{
-				IsPressed = true;
-				Focus();
-			}
-			base.OnMouseDown(e);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			if(e.Button == MouseButtons.Left)
-			{
-				IsPressed = false;
-			}
-			base.OnMouseUp(e);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseLeave(EventArgs e)
-		{
-			IsMouseOver = false;
-			base.OnMouseLeave(e);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseEnter(EventArgs e)
-		{
-			IsMouseOver = true;
-			base.OnMouseEnter(e);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaintBackground(PaintEventArgs pevent)
-		{
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			Renderer.Render(e.Graphics, e.ClipRectangle, this);
-		}
-
-		#endregion
+		SetStyle(
+			ControlStyles.AllPaintingInWmPaint |
+			ControlStyles.OptimizedDoubleBuffer |
+			ControlStyles.Opaque |
+			ControlStyles.Selectable |
+			ControlStyles.ResizeRedraw |
+			ControlStyles.UserPaint, true);
+		SetStyle(
+			ControlStyles.ContainerControl |
+			ControlStyles.SupportsTransparentBackColor, false);
+		Size = new Size(86, 18);
+		TabStop = true;
 	}
+
+	#endregion
+
+	#region Properties
+
+	public CustomButtonRenderer Renderer
+	{
+		get => _renderer ?? CustomButtonRenderer.Default;
+		set
+		{
+			if(_renderer != value)
+			{
+				bool needsInvalidate =
+					!(_renderer is null && value == CustomButtonRenderer.Default) &&
+					!(_renderer == CustomButtonRenderer.Default && value is null);
+				_renderer = value;
+				if(needsInvalidate)
+				{
+					Invalidate();
+				}
+			}
+		}
+	}
+
+	public bool IsPressed
+	{
+		get => _isPressed;
+		private set
+		{
+			if(_isPressed != value)
+			{
+				_isPressed = value;
+				Invalidate();
+			}
+		}
+	}
+
+	public bool IsMouseOver
+	{
+		get => _isMouseOver;
+		private set
+		{
+			if(_isMouseOver != value)
+			{
+				_isMouseOver = value;
+				Invalidate();
+			}
+		}
+	}
+
+	#endregion
+
+	#region Overrides
+
+	/// <inheritdoc/>
+	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		switch(e.KeyCode)
+		{
+			case Keys.Space:
+				e.IsInputKey = true;
+				break;
+			default:
+				base.OnPreviewKeyDown(e);
+				break;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnKeyDown(KeyEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		base.OnKeyDown(e);
+		switch(e.KeyCode)
+		{
+			case Keys.Space:
+				IsPressed = true;
+				break;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnKeyUp(KeyEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		base.OnKeyUp(e);
+		switch(e.KeyCode)
+		{
+			case Keys.Space:
+				IsPressed = false;
+				base.OnClick(EventArgs.Empty);
+				break;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnGotFocus(EventArgs e)
+	{
+		base.OnGotFocus(e);
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnLostFocus(EventArgs e)
+	{
+		base.OnLostFocus(e);
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseDown(MouseEventArgs e)
+	{
+		if(e.Button == MouseButtons.Left)
+		{
+			IsPressed = true;
+			Focus();
+		}
+		base.OnMouseDown(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseUp(MouseEventArgs e)
+	{
+		if(e.Button == MouseButtons.Left)
+		{
+			IsPressed = false;
+		}
+		base.OnMouseUp(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseLeave(EventArgs e)
+	{
+		IsMouseOver = false;
+		base.OnMouseLeave(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseEnter(EventArgs e)
+	{
+		IsMouseOver = true;
+		base.OnMouseEnter(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaintBackground(PaintEventArgs pevent)
+	{
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		Renderer.Render(e.Graphics, e.ClipRectangle, this);
+	}
+
+	#endregion
 }

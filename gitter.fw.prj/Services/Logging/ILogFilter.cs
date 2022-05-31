@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+interface ILogFilter
 {
-	interface ILogFilter
-	{
-		bool Filter(LogEvent @event);
-	}
+	bool Filter(LogEvent @event);
 }

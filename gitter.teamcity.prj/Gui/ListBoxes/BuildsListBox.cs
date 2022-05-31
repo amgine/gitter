@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,23 +18,22 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using gitter.Framework.Controls;
+
+public class BuildsListBox : CustomListBox
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	public class BuildsListBox : CustomListBox
+	public BuildsListBox()
 	{
-		public BuildsListBox()
-		{
-			Columns.AddRange(
-				new CustomListBoxColumn[]
-				{
-				});
-		}
+		Columns.AddRange(
+			new CustomListBoxColumn[]
+			{
+			});
 	}
 }

@@ -18,52 +18,51 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Working tree status information.</summary>
+public sealed class StatusData
 {
-	using System;
-	using System.Collections.Generic;
-
-	/// <summary>Working tree status information.</summary>
-	public sealed class StatusData
+	public StatusData(
+		Dictionary<string, TreeFileData> stagedFiles,
+		Dictionary<string, TreeFileData> unstagedFiles,
+		int unstagedUntrackedCount,
+		int unstagedRemovedCount,
+		int unstagedModifiedCount,
+		int unmergedCount,
+		int stagedAddedCount,
+		int stagedModifiedCount,
+		int stagedRemovedCount)
 	{
-		public StatusData(
-			Dictionary<string, TreeFileData> stagedFiles,
-			Dictionary<string, TreeFileData> unstagedFiles,
-			int unstagedUntrackedCount,
-			int unstagedRemovedCount,
-			int unstagedModifiedCount,
-			int unmergedCount,
-			int stagedAddedCount,
-			int stagedModifiedCount,
-			int stagedRemovedCount)
-		{
-			StagedFiles            = stagedFiles;
-			UnstagedFiles          = unstagedFiles;
-			UnstagedUntrackedCount = unstagedUntrackedCount;
-			UnstagedRemovedCount   = unstagedRemovedCount;
-			UnstagedModifiedCount  = unstagedModifiedCount;
-			UnmergedCount          = unmergedCount;
-			StagedAddedCount       = stagedAddedCount;
-			StagedModifiedCount    = stagedModifiedCount;
-			StagedRemovedCount     = stagedRemovedCount;
-		}
-
-		public Dictionary<string, TreeFileData> StagedFiles { get; }
-
-		public Dictionary<string, TreeFileData> UnstagedFiles { get; }
-
-		public int UnstagedUntrackedCount { get; }
-
-		public int UnstagedModifiedCount { get; }
-
-		public int UnstagedRemovedCount { get; }
-
-		public int UnmergedCount { get; }
-
-		public int StagedAddedCount { get; }
-
-		public int StagedModifiedCount { get; }
-
-		public int StagedRemovedCount { get; }
+		StagedFiles            = stagedFiles;
+		UnstagedFiles          = unstagedFiles;
+		UnstagedUntrackedCount = unstagedUntrackedCount;
+		UnstagedRemovedCount   = unstagedRemovedCount;
+		UnstagedModifiedCount  = unstagedModifiedCount;
+		UnmergedCount          = unmergedCount;
+		StagedAddedCount       = stagedAddedCount;
+		StagedModifiedCount    = stagedModifiedCount;
+		StagedRemovedCount     = stagedRemovedCount;
 	}
+
+	public Dictionary<string, TreeFileData> StagedFiles { get; }
+
+	public Dictionary<string, TreeFileData> UnstagedFiles { get; }
+
+	public int UnstagedUntrackedCount { get; }
+
+	public int UnstagedModifiedCount { get; }
+
+	public int UnstagedRemovedCount { get; }
+
+	public int UnmergedCount { get; }
+
+	public int StagedAddedCount { get; }
+
+	public int StagedModifiedCount { get; }
+
+	public int StagedRemovedCount { get; }
 }

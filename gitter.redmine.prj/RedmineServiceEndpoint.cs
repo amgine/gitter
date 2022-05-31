@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+
+using gitter.Framework;
+
+public sealed class RedmineServiceEndpoint
 {
-	using System;
+	private readonly GCCache<RedmineServiceContext> _context;
+	private string _url;
+	private string _apiKey;
 
-	using gitter.Framework;
-
-	public sealed class RedmineServiceEndpoint
+	public RedmineServiceEndpoint(string name, string url, string apiKey)
 	{
-		private readonly GCCache<RedmineServiceContext> _context;
-		private string _url;
-		private string _apiKey;
-
-		public RedmineServiceEndpoint(string name, string url, string apiKey)
-		{
-			Name = name;
-			_url = url;
-			_apiKey = apiKey;
-			_context = new GCCache<RedmineServiceContext>(
-				() => new RedmineServiceContext(new Uri(_url), _apiKey));
-		}
-
-		public string Name { get; }
-
-		public RedmineServiceContext Context => _context.Value;
+		Name = name;
+		_url = url;
+		_apiKey = apiKey;
+		_context = new GCCache<RedmineServiceContext>(
+			() => new RedmineServiceContext(new Uri(_url), _apiKey));
 	}
+
+	public string Name { get; }
+
+	public RedmineServiceContext Context => _context.Value;
 }

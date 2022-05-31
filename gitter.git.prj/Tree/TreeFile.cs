@@ -18,169 +18,168 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+using gitter.Git.AccessLayer;
+
+using Resources = gitter.Git.Properties.Resources;
+
+/// <summary>Represents a file in a directory.</summary>
+public sealed class TreeFile : TreeItem
 {
-	using System;
-	using System.IO;
-	using System.Threading;
-	using System.Threading.Tasks;
+	#region .ctor
 
-	using gitter.Framework;
-
-	using gitter.Git.AccessLayer;
-
-	using Resources = gitter.Git.Properties.Resources;
-
-	/// <summary>Represents a file in a directory.</summary>
-	public sealed class TreeFile : TreeItem
+	public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
+		: base(repository, relativePath, parent, status, name)
 	{
-		#region .ctor
+	}
 
-		public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
-			: base(repository, relativePath, parent, status, name)
+	public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name, long size)
+		: base(repository, relativePath, parent, status, name)
+	{
+		Size = size;
+	}
+
+	#endregion
+
+	public override TreeItemType ItemType => TreeItemType.Blob;
+
+	public ConflictType ConflictType { get; internal set; }
+
+	public long Size { get; }
+
+	public void ResolveConflict(ConflictResolution resolution)
+	{
+		Verify.State.IsFalse(ConflictType == Git.ConflictType.None);
+
+		using(Repository.Monitor.BlockNotifications(
+			RepositoryNotifications.IndexUpdated,
+			RepositoryNotifications.WorktreeUpdated))
 		{
+			switch(resolution)
+			{
+				case ConflictResolution.DeleteFile:
+					Remove(true);
+					break;
+				case ConflictResolution.KeepModifiedFile:
+					Stage(AddFilesMode.Default);
+					break;
+				case ConflictResolution.UseOurs:
+					UseOurs();
+					Stage(AddFilesMode.Default);
+					break;
+				case ConflictResolution.UseTheirs:
+					UseTheirs();
+					Stage(AddFilesMode.Default);
+					break;
+				default:
+					throw new ArgumentException(
+						"Unknown ConflictResolution value: {0}".UseAsFormat(resolution),
+						nameof(resolution));
+			}
 		}
+	}
 
-		public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name, long size)
-			: base(repository, relativePath, parent, status, name)
+	private void UseTheirs()
+	{
+		Repository.Accessor.CheckoutFiles.Invoke(
+			new CheckoutFilesParameters(RelativePath)
+			{
+				Mode = CheckoutFileMode.Theirs
+			});
+	}
+
+	private void UseOurs()
+	{
+		Repository.Accessor.CheckoutFiles.Invoke(
+			new CheckoutFilesParameters(RelativePath)
+			{
+				Mode = CheckoutFileMode.Ours
+			});
+	}
+
+	#region mergetool
+
+	private void RunMergeToolCore(MergeTool mergeTool)
+	{
+		try
 		{
-			Size = size;
-		}
-
-		#endregion
-
-		public override TreeItemType ItemType => TreeItemType.Blob;
-
-		public ConflictType ConflictType { get; internal set; }
-
-		public long Size { get; }
-
-		public void ResolveConflict(ConflictResolution resolution)
-		{
-			Verify.State.IsFalse(ConflictType == Git.ConflictType.None);
-
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.IndexUpdated,
 				RepositoryNotifications.WorktreeUpdated))
 			{
-				switch(resolution)
-				{
-					case ConflictResolution.DeleteFile:
-						Remove(true);
-						break;
-					case ConflictResolution.KeepModifiedFile:
-						Stage(AddFilesMode.Default);
-						break;
-					case ConflictResolution.UseOurs:
-						UseOurs();
-						Stage(AddFilesMode.Default);
-						break;
-					case ConflictResolution.UseTheirs:
-						UseTheirs();
-						Stage(AddFilesMode.Default);
-						break;
-					default:
-						throw new ArgumentException(
-							"Unknown ConflictResolution value: {0}".UseAsFormat(resolution),
-							nameof(resolution));
-				}
-			}
-		}
-
-		private void UseTheirs()
-		{
-			Repository.Accessor.CheckoutFiles.Invoke(
-				new CheckoutFilesParameters(RelativePath)
-				{
-					Mode = CheckoutFileMode.Theirs
-				});
-		}
-
-		private void UseOurs()
-		{
-			Repository.Accessor.CheckoutFiles.Invoke(
-				new CheckoutFilesParameters(RelativePath)
-				{
-					Mode = CheckoutFileMode.Ours
-				});
-		}
-
-		#region mergetool
-
-		private void RunMergeToolCore(MergeTool mergeTool)
-		{
-			try
-			{
-				using(Repository.Monitor.BlockNotifications(
-					RepositoryNotifications.IndexUpdated,
-					RepositoryNotifications.WorktreeUpdated))
-				{
-					Repository.Accessor.RunMergeTool.Invoke(
-						new RunMergeToolParameters(RelativePath)
-						{
-							Tool = mergeTool == null ? null : mergeTool.Name,
-						});
-				}
-			}
-			finally
-			{
-				Repository.Status.Refresh();
-			}
-		}
-
-		private Task RunMergeToolAsyncCore(MergeTool mergeTool, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			progress?.Report(new OperationProgress(Resources.StrWaitingMergeTool.AddEllipsis()));
-			var blockedNotifications = Repository.Monitor.BlockNotifications(
-				RepositoryNotifications.IndexUpdated,
-				RepositoryNotifications.WorktreeUpdated);
-			return Repository.Accessor
-				.RunMergeTool.InvokeAsync(
+				Repository.Accessor.RunMergeTool.Invoke(
 					new RunMergeToolParameters(RelativePath)
 					{
 						Tool = mergeTool == null ? null : mergeTool.Name,
-					},
-					progress,
-					cancellationToken)
-				.ContinueWith(
-				t =>
-				{
-					blockedNotifications.Dispose();
-					Repository.Status.Refresh();
-				},
-				CancellationToken.None,
-				TaskContinuationOptions.None,
-				TaskScheduler.Default);
+					});
+			}
 		}
-
-		public void RunMergeTool()
+		finally
 		{
-			Verify.State.IsFalse(ConflictType == ConflictType.None);
-
-			RunMergeToolCore(null);
+			Repository.Status.Refresh();
 		}
-
-		public void RunMergeTool(MergeTool mergeTool)
-		{
-			Verify.State.IsFalse(ConflictType == ConflictType.None);
-
-			RunMergeToolCore(mergeTool);
-		}
-
-		public Task RunMergeToolAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.State.IsFalse(ConflictType == ConflictType.None);
-
-			return RunMergeToolAsyncCore(null, progress, cancellationToken);
-		}
-
-		public Task RunMergeToolAsync(MergeTool mergeTool, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.State.IsFalse(ConflictType == ConflictType.None);
-
-			return RunMergeToolAsyncCore(mergeTool, progress, cancellationToken);
-		}
-
-		#endregion
 	}
+
+	private Task RunMergeToolAsyncCore(MergeTool mergeTool, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		progress?.Report(new OperationProgress(Resources.StrWaitingMergeTool.AddEllipsis()));
+		var blockedNotifications = Repository.Monitor.BlockNotifications(
+			RepositoryNotifications.IndexUpdated,
+			RepositoryNotifications.WorktreeUpdated);
+		return Repository.Accessor
+			.RunMergeTool.InvokeAsync(
+				new RunMergeToolParameters(RelativePath)
+				{
+					Tool = mergeTool == null ? null : mergeTool.Name,
+				},
+				progress,
+				cancellationToken)
+			.ContinueWith(
+			t =>
+			{
+				blockedNotifications.Dispose();
+				Repository.Status.Refresh();
+			},
+			CancellationToken.None,
+			TaskContinuationOptions.None,
+			TaskScheduler.Default);
+	}
+
+	public void RunMergeTool()
+	{
+		Verify.State.IsFalse(ConflictType == ConflictType.None);
+
+		RunMergeToolCore(null);
+	}
+
+	public void RunMergeTool(MergeTool mergeTool)
+	{
+		Verify.State.IsFalse(ConflictType == ConflictType.None);
+
+		RunMergeToolCore(mergeTool);
+	}
+
+	public Task RunMergeToolAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(ConflictType == ConflictType.None);
+
+		return RunMergeToolAsyncCore(null, progress, cancellationToken);
+	}
+
+	public Task RunMergeToolAsync(MergeTool mergeTool, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(ConflictType == ConflictType.None);
+
+		return RunMergeToolAsyncCore(mergeTool, progress, cancellationToken);
+	}
+
+	#endregion
 }

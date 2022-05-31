@@ -18,120 +18,119 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class CommitController : ViewControllerBase<ICommitView>, ICommitController
 {
-	using System;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class CommitController : ViewControllerBase<ICommitView>, ICommitController
+	public CommitController(Repository repository)
 	{
-		public CommitController(Repository repository)
+		Verify.Argument.IsNotNull(repository);
+
+		Repository = repository;
+	}
+
+	private Repository Repository { get; }
+
+	private bool ValidateInput(out string message, out bool amend)
+	{
+		message = View.Message.Value;
+		amend   = View.Amend.Value;
+
+		if(!amend)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
-		}
-
-		private Repository Repository { get; }
-
-		private bool ValidateInput(out string message, out bool amend)
-		{
-			message = View.Message.Value;
-			amend   = View.Amend.Value;
-
-			if(!amend)
+			bool hasStagedItems;
+			lock(Repository.Status.SyncRoot)
 			{
-				bool hasStagedItems;
-				lock(Repository.Status.SyncRoot)
-				{
-					hasStagedItems = Repository.Status.StagedFiles.Count != 0;
-				}
-				if(!hasStagedItems)
-				{
-					View.ErrorNotifier.NotifyError(View.StagedItems,
-						new UserInputError(
-							Resources.ErrNothingToCommit,
-							Resources.ErrNofilesStagedForCommit));
-					return false;
-				}
+				hasStagedItems = Repository.Status.StagedFiles.Count != 0;
 			}
-			if(string.IsNullOrWhiteSpace(message))
+			if(!hasStagedItems)
 			{
-				View.ErrorNotifier.NotifyError(View.Message,
+				View.ErrorNotifier.NotifyError(View.StagedItems,
 					new UserInputError(
-						Resources.ErrEmptyCommitMessage,
-						Resources.ErrEnterCommitMessage));
+						Resources.ErrNothingToCommit,
+						Resources.ErrNofilesStagedForCommit));
 				return false;
 			}
-			message = message.Trim();
-			if(message.Length < GitConstants.MinCommitMessageLength)
-			{
-				View.ErrorNotifier.NotifyError(View.Message,
-					new UserInputError(
-						Resources.ErrShortCommitMessage,
-						Resources.ErrEnterLongerCommitMessage.UseAsFormat(GitConstants.MinCommitMessageLength)));
-				return false;
-			}
-			return true;
 		}
-
-		private void OnCommitFailed(Exception exc)
-			=> GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
-				exc.Message,
-				Resources.ErrFailedToCommit,
-				MessageBoxButton.Close,
-				MessageBoxIcon.Error);
-
-		public bool TryCommit()
+		if(string.IsNullOrWhiteSpace(message))
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			if(!ValidateInput(out var message, out var amend)) return false;
-
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					Repository.Status.Commit(message, amend);
-				}
-			}
-			catch(GitException exc)
-			{
-				OnCommitFailed(exc);
-				return false;
-			}
-			return true;
+			View.ErrorNotifier.NotifyError(View.Message,
+				new UserInputError(
+					Resources.ErrEmptyCommitMessage,
+					Resources.ErrEnterCommitMessage));
+			return false;
 		}
-
-		public async Task<bool> TryCommitAsync()
+		message = message.Trim();
+		if(message.Length < GitConstants.MinCommitMessageLength)
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			if(!ValidateInput(out var message, out var amend)) return false;
-
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					await Repository.Status.CommitAsync(message, amend);
-				}
-			}
-			catch(GitException exc)
-			{
-				OnCommitFailed(exc);
-				return false;
-			}
-			return true;
+			View.ErrorNotifier.NotifyError(View.Message,
+				new UserInputError(
+					Resources.ErrShortCommitMessage,
+					Resources.ErrEnterLongerCommitMessage.UseAsFormat(GitConstants.MinCommitMessageLength)));
+			return false;
 		}
+		return true;
+	}
+
+	private void OnCommitFailed(Exception exc)
+		=> GitterApplication.MessageBoxService.Show(
+			View as IWin32Window,
+			exc.Message,
+			Resources.ErrFailedToCommit,
+			MessageBoxButton.Close,
+			MessageBoxIcon.Error);
+
+	public bool TryCommit()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		if(!ValidateInput(out var message, out var amend)) return false;
+
+		try
+		{
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			{
+				Repository.Status.Commit(message, amend);
+			}
+		}
+		catch(GitException exc)
+		{
+			OnCommitFailed(exc);
+			return false;
+		}
+		return true;
+	}
+
+	public async Task<bool> TryCommitAsync()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		if(!ValidateInput(out var message, out var amend)) return false;
+
+		try
+		{
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			{
+				await Repository.Status.CommitAsync(message, amend);
+			}
+		}
+		catch(GitException exc)
+		{
+			OnCommitFailed(exc);
+			return false;
+		}
+		return true;
 	}
 }

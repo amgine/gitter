@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,21 +18,20 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Xml;
+
+public sealed class UserRole : NamedRedmineObject
 {
-	using System;
-	using System.Xml;
-
-	public sealed class UserRole : NamedRedmineObject
+	internal UserRole(RedmineServiceContext context, int id, string name)
+		: base(context, id, name)
 	{
-		internal UserRole(RedmineServiceContext context, int id, string name)
-			: base(context, id, name)
-		{
-		}
+	}
 
-		internal UserRole(RedmineServiceContext context, XmlNode node)
-			: base(context, node)
-		{
-		}
+	internal UserRole(RedmineServiceContext context, XmlNode node)
+		: base(context, node)
+	{
 	}
 }

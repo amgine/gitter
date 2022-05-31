@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Xml;
+
+public sealed class IssuePrioritiesCollection : NamedRedmineObjectsCache<IssuePriority>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Xml;
-
-	public sealed class IssuePrioritiesCollection : NamedRedmineObjectsCache<IssuePriority>
+	internal IssuePrioritiesCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal IssuePrioritiesCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override IssuePriority Create(int id, string name)
-		{
-			return new IssuePriority(Context, id, name);
-		}
+	protected override IssuePriority Create(int id, string name)
+	{
+		return new IssuePriority(Context, id, name);
+	}
 
-		protected override IssuePriority Create(XmlNode node)
-		{
-			return new IssuePriority(Context, node);
-		}
+	protected override IssuePriority Create(XmlNode node)
+	{
+		return new IssuePriority(Context, node);
 	}
 }

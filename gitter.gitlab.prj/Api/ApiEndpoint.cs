@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,236 +18,214 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
+namespace gitter.GitLab.Api;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+#if SYSTEM_TEXT_JSON
+using System.Text.Json;
+#elif NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
+
+using gitter.Framework;
+
+partial class ApiEndpoint
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Net.Http;
-	using System.Net.Http.Headers;
-	using System.Threading.Tasks;
-
-	using Newtonsoft.Json;
-
-	using gitter.Framework;
-	using System.Text;
-	using System.Globalization;
-
-	class ApiEndpoint
+	private static string GetNextPageUrl(HttpResponseHeaders headers)
 	{
-		private static string GetNextPageUrl(HttpResponseHeaders headers)
-		{
-			Assert.IsNotNull(headers);
+		Assert.IsNotNull(headers);
 
-			if(headers.TryGetValues("Link", out var links))
+		if(headers.TryGetValues("Link", out var links))
+		{
+			foreach(var link in links)
 			{
-				foreach(var link in links)
+				if(string.IsNullOrWhiteSpace(link)) continue;
+				foreach(var part in link.Split(','))
 				{
-					if(string.IsNullOrWhiteSpace(link)) continue;
-					foreach(var part in link.Split(','))
+					if(part.EndsWith("rel=\"next\""))
 					{
-						if(part.EndsWith("rel=\"next\""))
+						var s = part.IndexOf('<');
+						var e = part.IndexOf('>');
+						if(s >= 0 && e > s)
 						{
-							var s = part.IndexOf('<');
-							var e = part.IndexOf('>');
-							if(s >= 0 && e > s)
-							{
-								return part.Substring(s + 1, e - s - 1);
-							}
+							return part.Substring(s + 1, e - s - 1);
 						}
 					}
 				}
 			}
-			return default;
 		}
+		return default;
+	}
 
-		private static async Task<T> ReadReponseAsync<T>(HttpResponseMessage response)
+	private static async Task<T> ReadReponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken = default)
+	{
+		Assert.IsNotNull(response);
+
+		using var stream = await response.Content
+			#if NETCOREAPP
+			.ReadAsStreamAsync(cancellationToken)
+			#else
+			.ReadAsStreamAsync()
+			#endif
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+#if SYSTEM_TEXT_JSON
+		return await JsonSerializer
+			.DeserializeAsync<T>(stream, cancellationToken: cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+#elif NEWTONSOFT_JSON
+		using var textReader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 1024*4, leaveOpen: true);
+		var jsonReader = new JsonTextReader(textReader);
+		var serializer = JsonSerializer.CreateDefault();
+		return serializer.Deserialize<T>(jsonReader);
+#else
+#error Undefined serializer library
+#endif
+	}
+
+	private async Task<IReadOnlyList<T>> ReadPagedResultAsync<T>(string url, CancellationToken cancellationToken = default)
+	{
+		Assert.IsNeitherNullNorWhitespace(url);
+
+		var result = default(List<T>);
+		while(true)
 		{
-			Assert.IsNotNull(response);
+			cancellationToken.ThrowIfCancellationRequested();
 
-			using var stream     = await response.Content.ReadAsStreamAsync().ConfigureAwait(continueOnCapturedContext: false);
+			using var message = CreateRequest(HttpMethod.Get, url);
 
-			using var ms = new MemoryStream();
-			await stream.CopyToAsync(ms);
-			ms.Seek(0, SeekOrigin.Begin);
-
-			using var textReader = new StreamReader(ms, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 1024*4, leaveOpen: true);
-
-			var resp = await textReader.ReadToEndAsync();
-			ms.Seek(0, SeekOrigin.Begin);
-
-			var jsonReader = new JsonTextReader(textReader);
-			var serializer = JsonSerializer.CreateDefault();
-
-			return serializer.Deserialize<T>(jsonReader);
-		}
-
-		static async Task<IReadOnlyList<T>> ReadPagedResultAsync<T>(HttpClient http, string url)
-		{
-			Assert.IsNotNull(http);
-			Assert.IsNeitherNullNorWhitespace(url);
-
-			var result = default(List<T>);
-			while(true)
-			{
-				using var response = await http
-					.GetAsync(url)
-					.ConfigureAwait(continueOnCapturedContext: false);
-
-				response.EnsureSuccessStatusCode();
-
-				var page = await ReadReponseAsync<T[]>(response)
-					.ConfigureAwait(continueOnCapturedContext: false);
-
-				if(page == null || page.Length == 0) break;
-
-				url = GetNextPageUrl(response.Headers);
-				if(url == null)
-				{
-					if(result == null) return page;
-				}
-
-				result ??= new List<T>();
-				result.AddRange(page);
-
-				if(url == null) break;
-			}
-			return result ?? (IReadOnlyList<T>)Preallocated<T>.EmptyArray;
-		}
-
-		static async Task<T> ReadResultAsync<T>(HttpClient http, string url)
-		{
-			Assert.IsNotNull(http);
-			Assert.IsNeitherNullNorWhitespace(url);
-
-			using var response = await http
-				.GetAsync(url)
+			using var response = await HttpMessageInvoker
+				.SendAsync(message, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
 
-			if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-			{
-				throw new UnauthorizedAccessException();
-			}
 			response.EnsureSuccessStatusCode();
 
-			return await ReadReponseAsync<T>(response)
+			var page = await ReadReponseAsync<T[]>(response, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
-		}
 
-		public ApiEndpoint(Uri serviceUri, string accessToken)
-		{
-			Verify.Argument.IsNotNull(serviceUri, nameof(serviceUri));
+			if(page is not { Length: not 0 }) break;
 
-			ServiceUri  = serviceUri;
-			AccessToken = accessToken;
-		}
-
-		private Uri ServiceUri { get; }
-
-		private string AccessToken { get; }
-
-		private HttpClient CreateHttpClient()
-		{
-			var http = new HttpClient { BaseAddress = ServiceUri };
-
-			if(!string.IsNullOrEmpty(AccessToken))
+			url = GetNextPageUrl(response.Headers);
+			if(url is null)
 			{
-				http.DefaultRequestHeaders.Add("PRIVATE-TOKEN", AccessToken);
+				if(result is null) return page;
 			}
 
-			return http;
-		}
+			result ??= new List<T>();
+			result.AddRange(page);
 
-		public async Task<GitLabVersion> GetVersionAsync()
+			if(url is null) break;
+		}
+		return result ?? (IReadOnlyList<T>)Preallocated<T>.EmptyArray;
+	}
+
+	private async Task<T> ReadResultAsync<T>(string url, CancellationToken cancellationToken = default)
+	{
+		Assert.IsNeitherNullNorWhitespace(url);
+
+		using var message = CreateRequest(HttpMethod.Get, url);
+
+		using var response = await HttpMessageInvoker
+			.SendAsync(message, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 		{
-			using var http = CreateHttpClient();
-			return await ReadResultAsync<GitLabVersion>(http, "/api/v4/version")
-				.ConfigureAwait(continueOnCapturedContext: false);
+			throw new UnauthorizedAccessException();
 		}
+		response.EnsureSuccessStatusCode();
 
-		public async Task<IReadOnlyList<Project>> GetProjectsAsync()
+		return await ReadReponseAsync<T>(response, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+	}
+
+	private async Task DeleteAsync(string url, CancellationToken cancellationToken = default)
+	{
+		using var request = CreateRequest(HttpMethod.Delete, url);
+		using var response = await HttpMessageInvoker
+			.SendAsync(request, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		response.EnsureSuccessStatusCode();
+	}
+
+	public ApiEndpoint(HttpMessageInvoker httpMessageInvoker, Uri serviceUri, string accessToken)
+	{
+		Verify.Argument.IsNotNull(httpMessageInvoker);
+		Verify.Argument.IsNotNull(serviceUri);
+
+		HttpMessageInvoker = httpMessageInvoker;
+		ServiceUri         = serviceUri;
+		AccessToken        = accessToken;
+	}
+
+	private HttpMessageInvoker HttpMessageInvoker { get; }
+
+	private Uri ServiceUri { get; }
+
+	private string AccessToken { get; }
+
+	private HttpRequestMessage CreateRequest(HttpMethod method, string relativeUri)
+	{
+		var message = new HttpRequestMessage(method, new Uri(ServiceUri, relativeUri));
+		message.Headers.Add("PRIVATE-TOKEN", AccessToken);
+		return message;
+	}
+
+	public Task<GitLabVersion> GetVersionAsync(CancellationToken cancellationToken = default)
+	{
+		return ReadResultAsync<GitLabVersion>("/api/v4/version", cancellationToken);
+	}
+
+	public Task<IReadOnlyList<Project>> GetProjectsAsync()
+	{
+		var urlBuilder = new StringBuilder();
+		urlBuilder.Append("/api/v4/projects/");
+
+		return ReadPagedResultAsync<Project>(urlBuilder.ToString());
+	}
+
+	private static void AppendProjectUrl(StringBuilder urlBuilder, NameOrNumericId projectId, string path = null)
+	{
+		urlBuilder.Append(@"/api/v4/projects/");
+		projectId.AppendTo(urlBuilder);
+		if(path is not null)
 		{
-			using var http = CreateHttpClient();
-
-			var urlBuilder = new StringBuilder();
-			urlBuilder.Append("/api/v4/projects/");
-
-			return await ReadPagedResultAsync<Project>(http, urlBuilder.ToString())
-				.ConfigureAwait(continueOnCapturedContext: false);
+			urlBuilder.Append('/');
+			urlBuilder.Append(path);
 		}
+	}
 
-		public async Task<IReadOnlyList<Issue>> GetProjectIssuesAsync(string projectId, IssueState state = IssueState.All)
+	private static string SortToString(SortOrder order)
+		=> order switch
 		{
-			using var http = CreateHttpClient();
+			SortOrder.Descending => @"desc",
+			SortOrder.Ascending  => @"asc",
+			_ => throw new ArgumentException("Unknown order.", nameof(order)),
+		};
 
-			var urlBuilder = new StringBuilder();
-			urlBuilder.Append("/api/v4/projects/");
-			urlBuilder.Append(Uri.EscapeDataString(projectId));
-			urlBuilder.Append("/issues");
+	private static void AppendParameter(StringBuilder query, ref char sep, string name, string value)
+	{
+		query.Append(sep);
+		query.Append(name);
+		query.Append('=');
+		query.Append(value);
+		sep = '&';
+	}
 
-			if(state != IssueState.All)
-			{
-				urlBuilder.Append('?');
-				switch(state)
-				{
-					case IssueState.Closed:
-						urlBuilder.Append("state=closed");
-						break;
-					case IssueState.Opened:
-						urlBuilder.Append("state=opened");
-						break;
-				}
-			}
+	public Task<IReadOnlyList<Milestone>> GetMilestonesAsync(NameOrNumericId projectId,
+		CancellationToken cancellationToken)
+	{
+		var urlBuilder = new StringBuilder();
+		AppendProjectUrl(urlBuilder, projectId, @"milestones");
 
-			return await ReadPagedResultAsync<Issue>(http, urlBuilder.ToString())
-				.ConfigureAwait(continueOnCapturedContext: false);
-		}
-
-		public async Task<IReadOnlyList<Pipeline>> GetPipelinesAsync(string path, string sha = default)
-		{
-			using var http = CreateHttpClient();
-
-			var urlBuilder = new StringBuilder();
-			urlBuilder.Append("/api/v4/projects/");
-			urlBuilder.Append(Uri.EscapeDataString(path));
-			urlBuilder.Append("/pipelines");
-
-			if(sha != null)
-			{
-				urlBuilder.Append("?sha=");
-				urlBuilder.Append(sha);
-			}
-
-			return await ReadPagedResultAsync<Pipeline>(http, urlBuilder.ToString())
-				.ConfigureAwait(continueOnCapturedContext: false);
-		}
-
-		public async Task<IReadOnlyList<Job>> GetJobsAsync(string path, long pipelineId)
-		{
-			using var http = CreateHttpClient();
-
-			var urlBuilder = new StringBuilder();
-			urlBuilder.Append("/api/v4/projects/");
-			urlBuilder.Append(Uri.EscapeDataString(path));
-			urlBuilder.Append("/pipelines/");
-			urlBuilder.Append(pipelineId.ToString(CultureInfo.InvariantCulture));
-			urlBuilder.Append("/jobs");
-
-			return await ReadPagedResultAsync<Job>(http, urlBuilder.ToString())
-				.ConfigureAwait(continueOnCapturedContext: false);
-		}
-
-		public async Task<IReadOnlyList<Milestone>> GetMilestonesAsync(string path)
-		{
-			using var http = CreateHttpClient();
-
-			var urlBuilder = new StringBuilder();
-			urlBuilder.Append("/api/v4/projects/");
-			urlBuilder.Append(Uri.EscapeDataString(path));
-			urlBuilder.Append("/milestones");
-
-			return await ReadPagedResultAsync<Milestone>(http, urlBuilder.ToString())
-				.ConfigureAwait(continueOnCapturedContext: false);
-		}
+		return ReadPagedResultAsync<Milestone>(urlBuilder.ToString(), cancellationToken);
 	}
 }

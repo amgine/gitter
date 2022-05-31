@@ -18,64 +18,67 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Git.Gui.Controls;
+using gitter.Git.Gui.Views;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RepositorySubmodulesListItem : RepositoryExplorerItemBase
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly IWorkingEnvironment _environment;
+	private SubmoduleListBinding _binding;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Git.Gui.Controls;
-	using gitter.Git.Gui.Views;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RepositorySubmodulesListItem : RepositoryExplorerItemBase
+	public RepositorySubmodulesListItem(IWorkingEnvironment environment)
+		: base(Icons.Submodules, Resources.StrSubmodules)
 	{
-		private readonly IWorkingEnvironment _environment;
-		private SubmoduleListBinding _binding;
+		Verify.Argument.IsNotNull(environment);
 
-		public RepositorySubmodulesListItem(IWorkingEnvironment environment)
-			: base(@"submodules", Resources.StrSubmodules)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		_environment = environment;
+	}
 
-			_environment = environment;
-		}
+	/// <inheritdoc/>
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		_environment.ViewDockService.ShowView(Guids.SubmodulesViewGuid);
+	}
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-			_environment.ViewDockService.ShowView(Guids.SubmodulesViewGuid);
-		}
+	/// <inheritdoc/>
+	public override void OnDoubleClick(int x, int y)
+	{
+	}
 
-		public override void OnDoubleClick(int x, int y)
-		{
-		}
+	/// <inheritdoc/>
+	protected override void DetachFromRepository()
+	{
+		_binding.Dispose();
+		_binding = null;
+		Collapse();
+	}
 
-		protected override void DetachFromRepository()
-		{
-			_binding.Dispose();
-			_binding = null;
-			Collapse();
-		}
+	/// <inheritdoc/>
+	protected override void AttachToRepository()
+	{
+		_binding = new SubmoduleListBinding(Items, Repository);
+	}
 
-		protected override void AttachToRepository()
-		{
-			_binding = new SubmoduleListBinding(Items, Repository);
-		}
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
 
-		/// <inheritdoc/>
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
+		if(Repository is null) return default;
 
-			if(Repository is null) return default;
-
-			var menu = new SubmodulesMenu(Repository);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
-		}
+		var menu = new SubmodulesMenu(Repository);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

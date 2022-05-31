@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,26 +18,25 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using gitter.Git.AccessLayer;
+
+public abstract class GitFeature
 {
-	using gitter.Git.AccessLayer;
-
-	public abstract class GitFeature
+	protected GitFeature(string name)
 	{
-		protected GitFeature(string name)
-		{
-			Name = name;
-		}
+		Name = name;
+	}
 
-		public string Name { get; }
+	public string Name { get; }
 
-		public abstract bool IsAvailableFor(IGitAccessor gitAccessor);
+	public abstract bool IsAvailableFor(IGitAccessor gitAccessor);
 
-		public virtual bool IsAvailableFor(IGitRepository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+	public virtual bool IsAvailableFor(IGitRepository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
 
-			return IsAvailableFor(repository.Accessor.GitAccessor);
-		}
+		return IsAvailableFor(repository.Accessor.GitAccessor);
 	}
 }

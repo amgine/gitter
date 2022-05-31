@@ -18,18 +18,41 @@
  */
 #endregion
 
-namespace gitter.Framework
-{
-	using System;
-	using System.Resources;
-	using System.Drawing;
+namespace gitter.Framework;
 
-	/// <summary>Provides cached icon resources.</summary>
-	public sealed class CachedIconResources : CachedResources<Icon>
+using System;
+using System.Drawing;
+using System.Collections.Generic;
+using System.Reflection;
+
+/// <summary>Provides cached icon resources.</summary>
+public sealed class CachedIconResources
+{
+	private readonly Dictionary<string, Icon> _cache = new();
+	private readonly Assembly _assembly;
+	private readonly string _prefix;
+
+	public CachedIconResources(Assembly assembly, string prefix)
 	{
-		public CachedIconResources(ResourceManager resourceManager)
-			: base(resourceManager)
+		Verify.Argument.IsNotNull(assembly);
+
+		_assembly = assembly;
+		_prefix   = prefix;
+	}
+
+	public Icon this[string name]
+	{
+		get
 		{
+			if(!_cache.TryGetValue(name, out var icon))
+			{
+				using(var stream = _assembly.GetManifestResourceStream(_prefix + "." + name + ".ico"))
+				{
+					icon = stream is not null ? new Icon(stream) : default;
+				}
+				_cache.Add(name, icon);
+			}
+			return icon;
 		}
 	}
 }

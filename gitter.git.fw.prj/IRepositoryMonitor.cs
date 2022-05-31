@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+/// <summary>Returns repository monitor.</summary>
+/// <value>Repository monitor.</value>
+public interface IRepositoryMonitor
 {
-	using System;
+	IDisposable BlockNotifications(params object[] notifications);
 
-	/// <summary>Returns repository monitor.</summary>
-	/// <value>Repository monitor.</value>
-	public interface IRepositoryMonitor
-	{
-		IDisposable BlockNotifications(params object[] notifications);
-
-		bool IsEnabled { get; set; }
-	}
+	bool IsEnabled { get; set; }
 }

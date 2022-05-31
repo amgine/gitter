@@ -18,365 +18,283 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+public partial class ProgressForm : Form, IProgress<OperationProgress>
 {
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	#region Data
 
-	using Resources = gitter.Framework.Properties.Resources;
+	private bool _canCancel;
+	private IAsyncResult _context;
+	private volatile bool _isCancelRequested;
+	private CancellationTokenSource _cancellationTokenSource;
 
-	public partial class ProgressForm : Form, IProgress<OperationProgress>
+	#endregion
+
+	#region Events
+
+	/// <summary>
+	/// Monitor raises this event to stop monitored action execution.
+	/// </summary>
+	public event EventHandler Canceled;
+
+	/// <summary>
+	/// Monitor raises this event when it is ready to receive Set() calls after Start() call.
+	/// </summary>
+	public event EventHandler Started;
+
+	protected virtual void OnStarted()
+		=> Started?.Invoke(this, EventArgs.Empty);
+
+	protected virtual void OnCanceled()
+		=> Canceled?.Invoke(this, EventArgs.Empty);
+
+	#endregion
+
+	/// <summary>Initializes a new instance of the <see cref="ProgressForm"/> class.</summary>
+	public ProgressForm()
 	{
-		#region Data
+		InitializeComponent();
 
-		private bool _canCancel;
-		private IAsyncResult _context;
-		private volatile bool _isCancelRequested;
-		private CancellationTokenSource _cancellationTokenSource;
-
-		#endregion
-
-		#region Events
-
-		/// <summary>
-		/// Monitor raises this event to stop monitored action execution.
-		/// </summary>
-		public event EventHandler Canceled;
-
-		/// <summary>
-		/// Monitor raises this event when it is ready to receive Set() calls after Start() call.
-		/// </summary>
-		public event EventHandler Started;
-
-		protected virtual void OnStarted()
-			=> Started?.Invoke(this, EventArgs.Empty);
-
-		protected virtual void OnCanceled()
-			=> Canceled?.Invoke(this, EventArgs.Empty);
-
-		#endregion
-
-		/// <summary>Initializes a new instance of the <see cref="ProgressForm"/> class.</summary>
-		public ProgressForm()
+		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 		{
-			InitializeComponent();
-
-			if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
-			{
-				Font = GitterApplication.FontManager.UIFont;
-			}
-			else
-			{
-				Font = SystemFonts.MessageBoxFont;
-			}
-
-			ClientSize = new Size(ClientSize.Width, _pnlContainer.Height + panel1.Height);
-
-			_btnCancel.Text = Resources.StrCancel;
-
-			_lblAction.Text = string.Empty;
-			_canCancel = true;
-
-			if(!Application.RenderWithVisualStyles)
-			{
-				_pnlContainer.BackColor = SystemColors.Control;
-				_pnlLine.BackColor = SystemColors.Control;
-
-				int d = _btnCancel.Top - _pnlContainer.Bottom;
-
-				_pnlContainer.Height += d;
-				ClientSize = new Size(ClientSize.Width, ClientSize.Height - d);
-			}
+			Font = GitterApplication.FontManager.UIFont;
+		}
+		else
+		{
+			Font = SystemFonts.MessageBoxFont;
 		}
 
-		private static void RunAsModalWithTask(IWin32Window parent, Form dialog, Task task)
-		{
-			Assert.IsNotNull(task);
+		ClientSize = new Size(ClientSize.Width, _pnlContainer.Height + panel1.Height);
 
-			if(task.IsCompleted || task.IsFaulted || task.IsCanceled)
+		_btnCancel.Text = Resources.StrCancel;
+
+		_lblAction.Text = string.Empty;
+		_canCancel = true;
+
+		if(!Application.RenderWithVisualStyles)
+		{
+			_pnlContainer.BackColor = SystemColors.Control;
+			_pnlLine.BackColor = SystemColors.Control;
+
+			int d = _btnCancel.Top - _pnlContainer.Bottom;
+
+			_pnlContainer.Height += d;
+			ClientSize = new Size(ClientSize.Width, ClientSize.Height - d);
+		}
+	}
+
+	private static void RunAsModalWithTask(IWin32Window parent, Form dialog, Task task)
+	{
+		Assert.IsNotNull(task);
+
+		if(task.IsCompleted || task.IsFaulted || task.IsCanceled)
+		{
+			if(!dialog.IsDisposed)
 			{
-				if(!dialog.IsDisposed)
-				{
-					dialog.Dispose();
-				}
-				TaskUtility.PropagateFaultedStates(task);
+				dialog.Dispose();
 			}
-			var continuation = task.ContinueWith(
-				t =>
-				{
-					if(!dialog.IsDisposed)
-					{
-						dialog.Close();
-						dialog.Dispose();
-					}
-					TaskUtility.PropagateFaultedStates(t);
-				},
-				TaskScheduler.FromCurrentSynchronizationContext());
-			dialog.ShowDialog(parent);
 			TaskUtility.PropagateFaultedStates(task);
 		}
-
-		private static T RunAsModalWithTask<T>(IWin32Window parent, Form dialog, Task<T> task)
-		{
-			Assert.IsNotNull(task);
-
-			if(task.IsCompleted || task.IsFaulted || task.IsCanceled)
+		var continuation = task.ContinueWith(
+			t =>
 			{
 				if(!dialog.IsDisposed)
 				{
+					dialog.Close();
+					dialog.Dispose();
+				}
+				TaskUtility.PropagateFaultedStates(t);
+			},
+			TaskScheduler.FromCurrentSynchronizationContext());
+		dialog.ShowDialog(parent);
+		TaskUtility.PropagateFaultedStates(task);
+	}
+
+	private static T RunAsModalWithTask<T>(IWin32Window parent, Form dialog, Task<T> task)
+	{
+		Assert.IsNotNull(task);
+
+		if(task.IsCompleted || task.IsFaulted || task.IsCanceled)
+		{
+			if(!dialog.IsDisposed)
+			{
+				dialog.Dispose();
+			}
+			return TaskUtility.UnwrapResult(task);
+		}
+		var continuation = task.ContinueWith(
+			t =>
+			{
+				if(!dialog.IsDisposed)
+				{
+					dialog.Close();
 					dialog.Dispose();
 				}
 				return TaskUtility.UnwrapResult(task);
-			}
-			var continuation = task.ContinueWith(
-				t =>
-				{
-					if(!dialog.IsDisposed)
-					{
-						dialog.Close();
-						dialog.Dispose();
-					}
-					return TaskUtility.UnwrapResult(task);
-				},
-				TaskScheduler.FromCurrentSynchronizationContext());
-			dialog.ShowDialog(parent);
-			return TaskUtility.UnwrapResult(task);
-		}
+			},
+			TaskScheduler.FromCurrentSynchronizationContext());
+		dialog.ShowDialog(parent);
+		return TaskUtility.UnwrapResult(task);
+	}
 
-		public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, Task> func)
+	public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, Task> func)
+	{
+		Verify.Argument.IsNotNull(func);
+
+		var dialog = new ProgressForm()
 		{
-			Verify.Argument.IsNotNull(func, nameof(func));
+			Text = windowTitle,
+		};
+		dialog.SetCanCancel(false);
+		var task = func(dialog);
+		RunAsModalWithTask(parent, dialog, task);
+	}
 
-			var dialog = new ProgressForm()
+	public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
+	{
+		Verify.Argument.IsNotNull(func);
+
+		var dialog = new ProgressForm()
+		{
+			Text = windowTitle,
+		};
+		dialog.SetCanCancel(true);
+		var task = func(dialog, dialog.CancellationToken);
+		RunAsModalWithTask(parent, dialog, task);
+	}
+
+	public static T MonitorTaskAsModalWindow<T>(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
+	{
+		Verify.Argument.IsNotNull(func);
+
+		var dialog = new ProgressForm()
+		{
+			Text = windowTitle,
+		};
+		dialog.SetCanCancel(true);
+		var task = func(dialog, dialog.CancellationToken);
+		return RunAsModalWithTask(parent, dialog, task);
+	}
+
+	private void UpdateWin7ProgressBar()
+	{
+		var form = GitterApplication.MainForm;
+		if(form is { IsDisposed: false })
+		{
+			if(_progressBar.Style == ProgressBarStyle.Marquee)
 			{
-				Text = windowTitle,
-			};
-			dialog.SetCanCancel(false);
-			var task = func(dialog);
-			RunAsModalWithTask(parent, dialog, task);
-		}
-
-		public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
-		{
-			Verify.Argument.IsNotNull(func, nameof(func));
-
-			var dialog = new ProgressForm()
-			{
-				Text = windowTitle,
-			};
-			dialog.SetCanCancel(true);
-			var task = func(dialog, dialog.CancellationToken);
-			RunAsModalWithTask(parent, dialog, task);
-		}
-
-		public static T MonitorTaskAsModalWindow<T>(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
-		{
-			Verify.Argument.IsNotNull(func, nameof(func));
-
-			var dialog = new ProgressForm()
-			{
-				Text = windowTitle,
-			};
-			dialog.SetCanCancel(true);
-			var task = func(dialog, dialog.CancellationToken);
-			return RunAsModalWithTask(parent, dialog, task);
-		}
-
-		private void UpdateWin7ProgressBar()
-		{
-			var form = GitterApplication.MainForm;
-			if(form != null && !form.IsDisposed)
-			{
-				if(_progressBar.Style == ProgressBarStyle.Marquee)
-				{
-					form.SetTaskbarProgressState(TbpFlag.Indeterminate);
-				}
-				else
-				{
-					form.SetTaskbarProgressState(TbpFlag.Normal);
-					form.SetTaskbarProgressValue(
-						(long)(_progressBar.Value - _progressBar.Minimum),
-						(long)(_progressBar.Maximum - _progressBar.Minimum));
-				}
-			}
-		}
-
-		private void StopWin7ProgressBar()
-		{
-			var form = GitterApplication.MainForm;
-			if(form != null && !form.IsDisposed)
-			{
-				form.SetTaskbarProgressState(TbpFlag.NoProgress);
-			}
-		}
-
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Form.Shown"/> event.
-		/// </summary>
-		/// <param name="e">A <see cref="T:System.EventArgs"/> that contains the event data.</param>
-		protected override void OnShown(EventArgs e)
-		{
-			base.OnShown(e);
-			OnStarted();
-			UpdateWin7ProgressBar();
-		}
-
-		/// <summary>
-		/// Raises the <see cref="E:System.Windows.Forms.Form.Closed" /> event.
-		/// </summary>
-		/// <param name="e">The <see cref="T:System.EventArgs" /> that contains the event data.</param>
-		protected override void OnClosed(EventArgs e)
-		{
-			StopWin7ProgressBar();
-			base.OnClosed(e);
-		}
-
-		/// <summary>
-		/// Starts monitor.
-		/// </summary>
-		/// <param name="parent">Reference to parent window which is related to executing action.</param>
-		/// <param name="context">Execution context.</param>
-		/// <param name="blocking">Block calling thread until ProcessCompleted() is called.</param>
-		public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
-		{
-			_context = context;
-			if(blocking)
-			{
-				ShowDialog(parent);
+				form.SetTaskbarProgressState(TbpFlag.Indeterminate);
 			}
 			else
 			{
-				Show(parent);
+				form.SetTaskbarProgressState(TbpFlag.Normal);
+				form.SetTaskbarProgressValue(
+					(long)(_progressBar.Value - _progressBar.Minimum),
+					(long)(_progressBar.Maximum - _progressBar.Minimum));
 			}
 		}
+	}
 
-		private CancellationToken CancellationToken
+	private void StopWin7ProgressBar()
+	{
+		var form = GitterApplication.MainForm;
+		if(form is { IsDisposed: false })
 		{
-			get
-			{
-				if(_cancellationTokenSource == null)
-				{
-					return CancellationToken.None;
-				}
-				return _cancellationTokenSource.Token;
-			}
+			form.SetTaskbarProgressState(TbpFlag.NoProgress);
 		}
+	}
 
-		/// <summary>
-		/// Executing action.
-		/// </summary>
-		/// <value></value>
-		public IAsyncResult CurrentContext => _context;
+	/// <summary>
+	/// Raises the <see cref="E:System.Windows.Forms.Form.Shown"/> event.
+	/// </summary>
+	/// <param name="e">A <see cref="T:System.EventArgs"/> that contains the event data.</param>
+	protected override void OnShown(EventArgs e)
+	{
+		base.OnShown(e);
+		OnStarted();
+		UpdateWin7ProgressBar();
+	}
 
-		/// <summary>
-		/// Async action name.
-		/// </summary>
-		/// <value></value>
-		public string ActionName
+	/// <summary>
+	/// Raises the <see cref="E:System.Windows.Forms.Form.Closed" /> event.
+	/// </summary>
+	/// <param name="e">The <see cref="T:System.EventArgs" /> that contains the event data.</param>
+	protected override void OnClosed(EventArgs e)
+	{
+		StopWin7ProgressBar();
+		base.OnClosed(e);
+	}
+
+	/// <summary>
+	/// Starts monitor.
+	/// </summary>
+	/// <param name="parent">Reference to parent window which is related to executing action.</param>
+	/// <param name="context">Execution context.</param>
+	/// <param name="blocking">Block calling thread until ProcessCompleted() is called.</param>
+	public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
+	{
+		_context = context;
+		if(blocking)
 		{
-			get { return Text; }
-			set
+			ShowDialog(parent);
+		}
+		else
+		{
+			Show(parent);
+		}
+	}
+
+	private CancellationToken CancellationToken
+	{
+		get
+		{
+			if(_cancellationTokenSource is null)
 			{
-				if(!IsDisposed)
+				return CancellationToken.None;
+			}
+			return _cancellationTokenSource.Token;
+		}
+	}
+
+	/// <summary>
+	/// Executing action.
+	/// </summary>
+	/// <value></value>
+	public IAsyncResult CurrentContext => _context;
+
+	/// <summary>
+	/// Async action name.
+	/// </summary>
+	/// <value></value>
+	public string ActionName
+	{
+		get => Text;
+		set
+		{
+			if(!IsDisposed)
+			{
+				if(InvokeRequired)
 				{
-					if(InvokeRequired)
+					try
 					{
-						try
-						{
-							BeginInvoke(new Action<string>(
-								text =>
+						BeginInvoke(new Action<string>(
+							text =>
+							{
+								if(!IsDisposed)
 								{
-									if(!IsDisposed)
-									{
-										Text = text;
-									}
-								}), value);
-						}
-						catch(ObjectDisposedException)
-						{
-						}
-					}
-					else
-					{
-						Text = value;
-					}
-				}
-			}
-		}
-
-		/// <summary>Determines if action can be canceled.</summary>
-		public bool CanCancel
-		{
-			get { return _canCancel; }
-			set
-			{
-				if(!IsDisposed)
-				{
-					if(InvokeRequired)
-					{
-						try
-						{
-							BeginInvoke(new Action<bool>(SetCanCancel), value);
-						}
-						catch(ObjectDisposedException)
-						{
-						}
-					}
-					else
-					{
-						SetCanCancel(value);
-					}
-				}
-			}
-		}
-
-		/// <summary>Returns <c>true</c> if operation must be terminated.</summary>
-		public bool IsCancelRequested => _isCancelRequested;
-
-		/// <summary>Sets the can cancel.</summary>
-		/// <param name="value">if set to <c>true</c> [value].</param>
-		private void SetCanCancel(bool value)
-		{
-			if(!IsDisposed)
-			{
-				if(_canCancel != value)
-				{
-					_btnCancel.Enabled = value;
-					_canCancel = value;
-					if(value)
-					{
-						if(_cancellationTokenSource == null)
-						{
-							_cancellationTokenSource = new CancellationTokenSource();
-						}
-					}
-					else
-					{
-						if(_cancellationTokenSource != null)
-						{
-							_cancellationTokenSource.Dispose();
-							_cancellationTokenSource = null;
-						}
-					}
-				}
-			}
-		}
-
-		/// <summary>Sets the name of currently executed step.</summary>
-		/// <param name="action">Step name.</param>
-		public void SetAction(string action)
-		{
-			if(!IsDisposed)
-			{
-				if(InvokeRequired)
-				{
-					try
-					{
-						BeginInvoke(new Action<string>(SetAction), action);
+									Text = text;
+								}
+							}), value);
 					}
 					catch(ObjectDisposedException)
 					{
@@ -384,17 +302,17 @@ namespace gitter.Framework
 				}
 				else
 				{
-					_lblAction.Text = action;
+					Text = value;
 				}
 			}
 		}
+	}
 
-		/// <summary>
-		/// Sets progress range information.
-		/// </summary>
-		/// <param name="min">Minimum.</param>
-		/// <param name="max">Maximum.</param>
-		public void SetProgressRange(int min, int max)
+	/// <summary>Determines if action can be canceled.</summary>
+	public bool CanCancel
+	{
+		get => _canCancel;
+		set
 		{
 			if(!IsDisposed)
 			{
@@ -402,7 +320,7 @@ namespace gitter.Framework
 				{
 					try
 					{
-						BeginInvoke(new Action<int, int>(SetProgressRange), min, max);
+						BeginInvoke(new Action<bool>(SetCanCancel), value);
 					}
 					catch(ObjectDisposedException)
 					{
@@ -410,224 +328,294 @@ namespace gitter.Framework
 				}
 				else
 				{
-					_progressBar.Style = ProgressBarStyle.Continuous;
-					_progressBar.Minimum = min;
-					_progressBar.Maximum = max;
-					UpdateWin7ProgressBar();
+					SetCanCancel(value);
 				}
 			}
 		}
+	}
 
-		/// <summary>
-		/// Sets progress range information and current step name.
-		/// </summary>
-		/// <param name="min">Minimum.</param>
-		/// <param name="max">Maximum.</param>
-		/// <param name="action">Step name.</param>
-		public void SetProgressRange(int min, int max, string action)
+	/// <summary>Returns <c>true</c> if operation must be terminated.</summary>
+	public bool IsCancelRequested => _isCancelRequested;
+
+	/// <summary>Sets the can cancel.</summary>
+	/// <param name="value">if set to <c>true</c> [value].</param>
+	private void SetCanCancel(bool value)
+	{
+		if(IsDisposed) return;
+		if(_canCancel == value) return;
+
+		_btnCancel.Enabled = value;
+		_canCancel = value;
+		if(value)
 		{
-			if(!IsDisposed)
+			_cancellationTokenSource ??= new CancellationTokenSource();
+		}
+		else
+		{
+			if(_cancellationTokenSource is not null)
 			{
-				if(InvokeRequired)
-				{
-					try
-					{
-						BeginInvoke(new Action<int, int, string>(SetProgressRange), min, max, action);
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-				else
-				{
-					_progressBar.Minimum = min;
-					_progressBar.Maximum = max;
-					_lblAction.Text = action;
-					UpdateWin7ProgressBar();
-				}
+				_cancellationTokenSource.Dispose();
+				_cancellationTokenSource = null;
 			}
 		}
+	}
 
-		/// <summary>
-		/// Sets current progress.
-		/// </summary>
-		/// <param name="val">Progress.</param>
-		public void SetProgress(int val)
+	/// <summary>Sets the name of currently executed step.</summary>
+	/// <param name="action">Step name.</param>
+	public void SetAction(string action)
+	{
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
 		{
-			if(!IsDisposed)
+			try
 			{
-				if(InvokeRequired)
-				{
-					try
-					{
-						BeginInvoke(new Action<int>(SetProgress), val);
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-				else
-				{
-					_progressBar.Value = val;
-					UpdateWin7ProgressBar();
-				}
+				BeginInvoke(new Action<string>(SetAction), action);
 			}
-		}
-
-		/// <summary>
-		/// Sets current progress and step name.
-		/// </summary>
-		/// <param name="val">Progress.</param>
-		/// <param name="action">Step name.</param>
-		public void SetProgress(int val, string action)
-		{
-			if(!IsDisposed)
+			catch(ObjectDisposedException)
 			{
-				if(InvokeRequired)
-				{
-					try
-					{
-						BeginInvoke(new Action<int, string>(SetProgress), val, action);
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-				else
-				{
-					_progressBar.Value = val;
-					_lblAction.Text = action;
-					UpdateWin7ProgressBar();
-				}
 			}
 		}
-
-		private void SetProgressCore(int current, int maximum)
+		else
 		{
-			if(IsDisposed) return;
+			_lblAction.Text = action;
+		}
+	}
 
+	/// <summary>
+	/// Sets progress range information.
+	/// </summary>
+	/// <param name="min">Minimum.</param>
+	/// <param name="max">Maximum.</param>
+	public void SetProgressRange(int min, int max)
+	{
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
+			{
+				BeginInvoke(new Action<int, int>(SetProgressRange), min, max);
+			}
+			catch(ObjectDisposedException)
+			{
+			}
+		}
+		else
+		{
 			_progressBar.Style = ProgressBarStyle.Continuous;
-			_progressBar.Minimum = 0;
-			_progressBar.Maximum = maximum;
-			_progressBar.Value = current;
+			_progressBar.Minimum = min;
+			_progressBar.Maximum = max;
 			UpdateWin7ProgressBar();
 		}
+	}
 
-		/// <summary>
-		/// Sets progress as unknown.
-		/// </summary>
-		public void SetProgressIndeterminate()
+	/// <summary>
+	/// Sets progress range information and current step name.
+	/// </summary>
+	/// <param name="min">Minimum.</param>
+	/// <param name="max">Maximum.</param>
+	/// <param name="action">Step name.</param>
+	public void SetProgressRange(int min, int max, string action)
+	{
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
 		{
-			if(!IsDisposed)
+			try
 			{
-				if(InvokeRequired)
-				{
-					try
-					{
-						BeginInvoke(new Action(SetProgressIndeterminateCore));
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-				else
-				{
-					SetProgressIndeterminateCore();
-				}
+				BeginInvoke(new Action<int, int, string>(SetProgressRange), min, max, action);
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		private void SetProgressIndeterminateCore()
+		else
 		{
-			if(IsDisposed) return;
+			_progressBar.Minimum = min;
+			_progressBar.Maximum = max;
+			_lblAction.Text = action;
+			UpdateWin7ProgressBar();
+		}
+	}
 
-			if(_progressBar.Style != ProgressBarStyle.Marquee)
+	/// <summary>
+	/// Sets current progress.
+	/// </summary>
+	/// <param name="val">Progress.</param>
+	public void SetProgress(int val)
+	{
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
 			{
-				_progressBar.Style = ProgressBarStyle.Marquee;
-				UpdateWin7ProgressBar();
+				BeginInvoke(new Action<int>(SetProgress), val);
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		private void SetActionNameCore(string actionName)
+		else
 		{
-			if(IsDisposed) return;
-
-			_lblAction.Text = actionName;
+			_progressBar.Value = val;
+			UpdateWin7ProgressBar();
 		}
+	}
 
-		/// <summary>
-		/// Notifies that action is completed or canceled and monitor must be shut down.
-		/// </summary>
-		public void ProcessCompleted()
+	/// <summary>
+	/// Sets current progress and step name.
+	/// </summary>
+	/// <param name="val">Progress.</param>
+	/// <param name="action">Step name.</param>
+	public void SetProgress(int val, string action)
+	{
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
 		{
-			_context = null;
-			if(!IsDisposed)
+			try
 			{
-				if(InvokeRequired)
-				{
-					try
-					{
-						BeginInvoke(new Action(ProcessCompleted));
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-				else
-				{
-					Close();
-				}
+				BeginInvoke(new Action<int, string>(SetProgress), val, action);
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		public void Report(OperationProgress progress)
+		else
 		{
-			if(!IsDisposed)
+			_progressBar.Value = val;
+			_lblAction.Text = action;
+			UpdateWin7ProgressBar();
+		}
+	}
+
+	private void SetProgressCore(int current, int maximum)
+	{
+		if(IsDisposed) return;
+
+		_progressBar.Style = ProgressBarStyle.Continuous;
+		_progressBar.Minimum = 0;
+		_progressBar.Maximum = maximum;
+		_progressBar.Value = current;
+		UpdateWin7ProgressBar();
+	}
+
+	/// <summary>
+	/// Sets progress as unknown.
+	/// </summary>
+	public void SetProgressIndeterminate()
+	{
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
 			{
-				if(InvokeRequired)
-				{
-					try
-					{
-						BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-				else
-				{
-					ReportCore(progress);
-				}
+				BeginInvoke(new Action(SetProgressIndeterminateCore));
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		private void ReportCore(OperationProgress progress)
+		else
 		{
-			if(IsDisposed) return;
+			SetProgressIndeterminateCore();
+		}
+	}
 
-			SetActionNameCore(progress.ActionName);
-			if(progress.IsIndeterminate)
+	private void SetProgressIndeterminateCore()
+	{
+		if(IsDisposed) return;
+
+		if(_progressBar.Style != ProgressBarStyle.Marquee)
+		{
+			_progressBar.Style = ProgressBarStyle.Marquee;
+			UpdateWin7ProgressBar();
+		}
+	}
+
+	private void SetActionNameCore(string actionName)
+	{
+		if(IsDisposed) return;
+
+		_lblAction.Text = actionName;
+	}
+
+	/// <summary>
+	/// Notifies that action is completed or canceled and monitor must be shut down.
+	/// </summary>
+	public void ProcessCompleted()
+	{
+		_context = null;
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
 			{
-				SetProgressIndeterminate();
+				BeginInvoke(new Action(ProcessCompleted));
 			}
-			else
+			catch(ObjectDisposedException)
 			{
-				SetProgressCore(progress.CurrentProgress, progress.MaxProgress);
 			}
 		}
-
-		private void OnCancelClick(object sender, EventArgs e)
+		else
 		{
-			if(!_isCancelRequested)
+			Close();
+		}
+	}
+
+	public void Report(OperationProgress progress)
+	{
+		if(IsDisposed) return;
+
+		if(InvokeRequired)
+		{
+			try
 			{
-				_btnCancel.Enabled = false;
-				_isCancelRequested = true;
-				if(_cancellationTokenSource != null)
-				{
-					_cancellationTokenSource.Cancel();
-				}
-				OnCanceled();
+				BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
 			}
+			catch(ObjectDisposedException)
+			{
+			}
+		}
+		else
+		{
+			ReportCore(progress);
+		}
+	}
+
+	private void ReportCore(OperationProgress progress)
+	{
+		if(IsDisposed) return;
+
+		SetActionNameCore(progress.ActionName);
+		if(progress.IsIndeterminate)
+		{
+			SetProgressIndeterminate();
+		}
+		else
+		{
+			SetProgressCore(progress.CurrentProgress, progress.MaxProgress);
+		}
+	}
+
+	private void OnCancelClick(object sender, EventArgs e)
+	{
+		if(!_isCancelRequested)
+		{
+			_btnCancel.Enabled = false;
+			_isCancelRequested = true;
+			try
+			{
+				_cancellationTokenSource?.Cancel();
+			}
+			catch(ObjectDisposedException)
+			{
+			}
+			OnCanceled();
 		}
 	}
 }

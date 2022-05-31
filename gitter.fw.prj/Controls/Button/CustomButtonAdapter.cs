@@ -18,46 +18,54 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Windows.Forms;
+
+public sealed class CustomButtonAdapter : IButtonWidget
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly CustomButton _button;
 
-	public sealed class CustomButtonAdapter : IButtonWidget
+	public event EventHandler Click;
+
+	private void OnClick(EventArgs e)
+		=> Click?.Invoke(this, e);
+
+	public CustomButtonAdapter(CustomButtonRenderer renderer)
 	{
-		private readonly CustomButton _button;
+		Verify.Argument.IsNotNull(renderer);
 
-		public event EventHandler Click;
-
-		private void OnClick(EventArgs e)
-			=> Click?.Invoke(this, e);
-
-		public CustomButtonAdapter(CustomButtonRenderer renderer)
+		_button = new CustomButton()
 		{
-			Verify.Argument.IsNotNull(renderer, nameof(renderer));
+			Renderer = renderer,
+		};
+		_button.Click += OnButtonClick;
+	}
 
-			_button = new CustomButton()
-			{
-				Renderer = renderer,
-			};
-			_button.Click += OnButtonClick;
-		}
+	private void OnButtonClick(object sender, EventArgs e)
+		=> OnClick(e);
 
-		private void OnButtonClick(object sender, EventArgs e)
-			=> OnClick(e);
+	public Control Control => _button;
 
-		public Control Control => _button;
+	public string Text
+	{
+		get => _button.Text;
+		set => _button.Text = value;
+	}
 
-		public string Text
-		{
-			get => _button.Text;
-			set => _button.Text = value;
-		}
+	public DialogResult DialogResult { get; set; }
 
-		public void Dispose()
-		{
-			_button.Click -= OnButtonClick;
-			_button.Dispose();
-		}
+	public void NotifyDefault(bool value)
+	{
+	}
+
+	public void PerformClick()
+		=> OnButtonClick(this, EventArgs.Empty);
+
+	public void Dispose()
+	{
+		_button.Click -= OnButtonClick;
+		_button.Dispose();
 	}
 }

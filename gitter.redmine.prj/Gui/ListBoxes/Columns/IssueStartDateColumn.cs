@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,33 +18,32 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+public class IssueStartDateColumn : DateColumn
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	public class IssueStartDateColumn : DateColumn
+	public IssueStartDateColumn()
+		: base((int)ColumnId.StartDate, Resources.StrStartDate, false)
 	{
-		public IssueStartDateColumn()
-			: base((int)ColumnId.StartDate, Resources.StrStartDate, false)
-		{
-			Width = 55;
-		}
+		Width = 55;
+	}
 
-		public override string IdentificationString
-		{
-			get { return "StartDate"; }
-		}
+	public override string IdentificationString
+	{
+		get { return "StartDate"; }
+	}
 
-		protected override Comparison<CustomListBoxItem> SortComparison
-		{
-			get { return IssueListItem.CompareByStartDate; }
-		}
+	protected override Comparison<CustomListBoxItem> SortComparison
+	{
+		get { return IssueListItem.CompareByStartDate; }
 	}
 }

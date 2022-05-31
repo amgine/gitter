@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+
+public sealed class CustomFieldEventArgs : EventArgs
 {
-	using System;
+	public CustomFieldEventArgs(CustomField customField) => CustomField = customField;
 
-	public sealed class CustomFieldEventArgs : EventArgs
-	{
-		public CustomFieldEventArgs(CustomField customField) => CustomField = customField;
-
-		public CustomField CustomField { get; }
-	}
+	public CustomField CustomField { get; }
 }

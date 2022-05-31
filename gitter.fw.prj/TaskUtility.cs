@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Threading.Tasks;
+
+public static class TaskUtility
 {
-	using System;
-	using System.Threading.Tasks;
-
-	public static class TaskUtility
+	public static Exception UnwrapException(Exception exc)
 	{
-		public static Exception UnwrapException(Exception exc)
+		if(exc is AggregateException ae && ae.InnerExceptions.Count == 1)
 		{
-			if(exc is AggregateException ae && ae.InnerExceptions.Count == 1)
-			{
-				return UnwrapException(ae.InnerExceptions[0]);
-			}
-			return exc;
+			return UnwrapException(ae.InnerExceptions[0]);
 		}
+		return exc;
+	}
 
-		public static T UnwrapResult<T>(Task<T> task)
-		{
-			Assert.IsNotNull(task);
+	public static T UnwrapResult<T>(Task<T> task)
+	{
+		Assert.IsNotNull(task);
 
-			PropagateFaultedStates(task);
-			return task.Result;
-		}
+		PropagateFaultedStates(task);
+		return task.Result;
+	}
 
-		public static void PropagateFaultedStates(Task task)
-		{
-			Assert.IsNotNull(task);
+	public static void PropagateFaultedStates(Task task)
+	{
+		Assert.IsNotNull(task);
 
-			if(task.IsCanceled) throw new OperationCanceledException();
-			if(task.IsFaulted)  throw UnwrapException(task.Exception);
-		}
+		if(task.IsCanceled) throw new OperationCanceledException();
+		if(task.IsFaulted)  throw UnwrapException(task.Exception);
 	}
 }

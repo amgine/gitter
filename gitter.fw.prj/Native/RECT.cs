@@ -18,39 +18,38 @@
  */
 #endregion
 
-namespace gitter.Native
+namespace gitter.Native;
+
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct RECT
 {
-	using System;
-	using System.Drawing;
-	using System.Runtime.InteropServices;
-
-	[StructLayout(LayoutKind.Sequential)]
-	internal struct RECT
+	public static RECT FromXYWH(int x, int y, int width, int height)
 	{
-		public static RECT FromXYWH(int x, int y, int width, int height)
-		{
-			return new RECT(x, y, x + width, y + height);
-		}
+		return new RECT(x, y, x + width, y + height);
+	}
 
-		public int left;
-		public int top;
-		public int right;
-		public int bottom;
+	public int left;
+	public int top;
+	public int right;
+	public int bottom;
 
-		public RECT(int l, int t, int r, int b)
-		{
-			left   = l;
-			top    = t;
-			right  = r;
-			bottom = b;
-		}
+	public RECT(int l, int t, int r, int b)
+	{
+		left   = l;
+		top    = t;
+		right  = r;
+		bottom = b;
+	}
 
-		public RECT(Rectangle rect)
-		{
-			left   = rect.Left;
-			top    = rect.Top;
-			right  = rect.Right;
-			bottom = rect.Bottom;
-		}
-	};
+	public RECT(Rectangle rect)
+	{
+		left   = rect.Left;
+		top    = rect.Top;
+		right  = rect.Right;
+		bottom = rect.Bottom;
+	}
 }

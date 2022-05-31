@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,56 +18,55 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+/// <summary>Committer/Author.</summary>
+public sealed class User : GitNamedObjectWithLifetime
 {
-	using System;
+	private int _commits;
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
+	/// <summary><see cref="Commits"/> has changed.</summary>
+	public event EventHandler CommitsChanged;
 
-	/// <summary>Committer/Author.</summary>
-	public sealed class User : GitNamedObjectWithLifetime
+	/// <summary>Create <see cref="User"/>.</summary>
+	/// <param name="repository">Related repository.</param>
+	/// <param name="name">User name.</param>
+	/// <param name="email">User email.</param>
+	/// <param name="commits">Commit count.</param>
+	internal User(Repository repository, string name, string email, int commits)
+		: base(repository, name + "\n" + email)
 	{
-		private int _commits;
+		Name     = name;
+		Email    = email;
+		_commits = commits;
+		Avatar   = new Gravatar(email);
+	}
 
-		/// <summary><see cref="Commits"/> has changed.</summary>
-		public event EventHandler CommitsChanged;
+	/// <summary>User name.</summary>
+	public new string Name { get; }
 
-		/// <summary>Create <see cref="User"/>.</summary>
-		/// <param name="repository">Related repository.</param>
-		/// <param name="name">User name.</param>
-		/// <param name="email">User email.</param>
-		/// <param name="commits">Commit count.</param>
-		internal User(Repository repository, string name, string email, int commits)
-			: base(repository, name + "\n" + email)
+	/// <summary>User email.</summary>
+	public string Email { get; }
+
+	/// <summary>User commit count.</summary>
+	public int Commits
+	{
+		get => _commits;
+		internal set
 		{
-			Name = name;
-			Email = email;
-			_commits = commits;
-			Avatar = new Gravatar(email);
-		}
-
-		/// <summary>User name.</summary>
-		public new string Name { get; }
-
-		/// <summary>User email.</summary>
-		public string Email { get; }
-
-		/// <summary>User commit count.</summary>
-		public int Commits
-		{
-			get => _commits;
-			internal set
+			if(_commits != value)
 			{
-				if(_commits != value)
-				{
-					_commits = value;
-					CommitsChanged?.Invoke(this, EventArgs.Empty);
-				}
+				_commits = value;
+				CommitsChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
-
-		/// <summary>Avatar.</summary>
-		public IAvatar Avatar { get; }
 	}
+
+	/// <summary>Avatar.</summary>
+	public IAvatar Avatar { get; }
 }

@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,281 +18,114 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Buffers;
+
+/// <summary>Reads text from stdio/stderr.</summary>
+public class AsyncTextReader : AsyncOutputReceiverBase, IOutputReceiver
 {
-	using System;
-	using System.Diagnostics;
-	using System.IO;
-	using System.Text;
-	using System.Threading;
+	private readonly StringBuilder _stringBuilder;
+	private char[] _charBuffer;
+	private Decoder _decoder;
 
-	/// <summary>Reads text from stdio/stderr.</summary>
-	public class AsyncTextReader : IOutputReceiver
+	/// <summary>Initializes a new instance of the <see cref="AsyncTextReader"/> class.</summary>
+	/// <param name="bufferSize">Size of the internal buffer.</param>
+	public AsyncTextReader(int bufferSize = 0x400) : base(bufferSize)
 	{
-		#region Data
+		Verify.Argument.IsPositive(bufferSize);
 
-		private readonly int _bufferSize;
-		private Stream _stream;
-		private byte[] _byteBuffer;
-		private char[] _charBuffer;
-		private Decoder _decoder;
-		private StringBuilder _stringBuilder;
-		private ManualResetEvent _eof;
-		private volatile bool _isCanceled;
+		_stringBuilder = new StringBuilder(capacity: bufferSize);
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	protected override void InitializeCore(Process process, StreamReader reader, ArraySegment<byte> buffer)
+	{
+		Assert.IsNotNull(process);
+		Assert.IsNotNull(reader);
 
-		#region .ctor
+		var encoding = reader.CurrentEncoding;
+		_decoder     = encoding.GetDecoder();
+		_charBuffer  = ArrayPool<char>.Shared.Rent(encoding.GetMaxCharCount(buffer.Count) + 1);
 
-		/// <summary>Initializes a new instance of the <see cref="AsyncTextReader"/> class.</summary>
-		/// <param name="bufferSize">Size of the internal buffer.</param>
-		public AsyncTextReader(int bufferSize = 0x400)
-		{
-			Verify.Argument.IsPositive(bufferSize, nameof(bufferSize));
+		_stringBuilder.Clear();
+	}
 
-			_bufferSize		= bufferSize;
-			_stringBuilder	= new StringBuilder(bufferSize);
-		}
+	/// <inheritdoc/>
+	protected override void DeinitializeCore()
+	{
+		_charBuffer = default;
+		_decoder    = default;
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	protected sealed override void Process(ArraySegment<byte> buffer)
+	{
+		int charsCount = _decoder.GetChars(buffer.Array, buffer.Offset, buffer.Count, _charBuffer, 0);
+		OnStringDecoded(_charBuffer, 0, charsCount);
+	}
 
-		#region IOutputReceiver
+	/// <summary>Returns the length of composed text.</summary>
+	public int Length => _stringBuilder.Length;
 
-		/// <summary>Gets a value indicating whether this instance is initialized.</summary>
-		/// <value><c>true</c> if this instance is initialized; otherwise, <c>false</c>.</value>
-		public bool IsInitialized => _stream != null;
+	/// <summary>Returns character at the specified position.</summary>
+	/// <param name="index">Character index.</param>
+	/// <returns>Character at the specified position.</returns>
+	public char this[int index] => _stringBuilder[index];
 
-		/// <summary>Initializes output reader.</summary>
-		/// <param name="process">Process to read from.</param>
-		/// <param name="reader">StreamReader to read from.</param>
-		public void Initialize(Process process, StreamReader reader)
-		{
-			Verify.Argument.IsNotNull(process, nameof(process));
-			Verify.Argument.IsNotNull(reader, nameof(reader));
-			Verify.State.IsFalse(IsInitialized);
+	/// <summary>Returns composed text.</summary>
+	/// <returns>Composed text.</returns>
+	public string GetText() => _stringBuilder.ToString();
 
-			var encoding = reader.CurrentEncoding;
-			_stream      = reader.BaseStream;
-			_decoder     = encoding.GetDecoder();
-			_byteBuffer  = new byte[_bufferSize];
-			_charBuffer  = new char[encoding.GetMaxCharCount(_bufferSize) + 1];
-			_eof         = new ManualResetEvent(false);
+	/// <summary>Returns composed text.</summary>
+	/// <param name="startIndex">Index of the first character.</param>
+	/// <param name="length">Length of the returned string.</param>
+	/// <returns>Composed text.</returns>
+	public string GetText(int startIndex, int length)
+		=> _stringBuilder.ToString(startIndex, length);
 
-			_stringBuilder.Clear();
-			BeginReadAsync();
-		}
+	/// <summary>
+	/// Copies the characters from a specified segment of this instance to a specified
+	/// segment of a destination System.Char array.
+	/// </summary>
+	/// <param name="sourceIndex">
+	/// The starting position in this instance where characters will be copied from.
+	/// The index is zero-based.
+	/// </param>
+	/// <param name="destination">The array where characters will be copied.</param>
+	/// <param name="destinationIndex">
+	/// The starting position in destination where characters will be copied.
+	/// The index is zero-based.
+	/// </param>
+	/// <param name="count">The number of characters to be copied.</param>
+	public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
+	{
+		_stringBuilder.CopyTo(sourceIndex, destination, destinationIndex, count);
+	}
 
-		/// <summary>Notifies receiver that output is no longer required.</summary>
-		/// <remarks>Reader should still receive bytes, but disable any stream processing.</remarks>
-		public void NotifyCanceled()
-		{
-			Verify.State.IsTrue(IsInitialized);
+	/// <summary>Returns array of collected characters.</summary>
+	/// <returns>Array of collected characters.</returns>
+	public char[] GetCharArray()
+	{
+		var array = new char[_stringBuilder.Length];
+		_stringBuilder.CopyTo(0, array, 0, _stringBuilder.Length);
+		return array;
+	}
 
-			_isCanceled = true;
-			var eof = _eof;
-			if(eof != null)
-			{
-				_eof = null;
-				eof.Dispose();
-			}
-		}
+	/// <summary>Clears internal buffer.</summary>
+	public void Clear()
+	{
+		Verify.State.IsFalse(IsInitialized);
 
-		/// <summary>Closes the reader.</summary>
-		public void WaitForEndOfStream()
-		{
-			Verify.State.IsTrue(IsInitialized);
+		_stringBuilder.Clear();
+	}
 
-			var eof = _eof;
-			if(eof != null)
-			{
-				try
-				{
-					eof.WaitOne();
-					eof.Dispose();
-				}
-				catch(ObjectDisposedException)
-				{
-				}
-			}
-
-			_stream = null;
-			_byteBuffer = null;
-			_charBuffer = null;
-			_decoder = null;
-			_eof = null;
-		}
-
-		#endregion
-
-		#region Public
-
-		/// <summary>Returns the length of composed text.</summary>
-		public int Length => _stringBuilder.Length;
-
-		/// <summary>Returns character at the specified position.</summary>
-		/// <param name="index">Character index.</param>
-		/// <returns>Character at the specified position.</returns>
-		public char this[int index] => _stringBuilder[index];
-
-		/// <summary>Returns composed text.</summary>
-		/// <returns>Composed text.</returns>
-		public string GetText() => _stringBuilder.ToString();
-
-		/// <summary>Returns composed text.</summary>
-		/// <param name="startIndex">Index of the first character.</param>
-		/// <param name="length">Length of the returned string.</param>
-		/// <returns>Composed text.</returns>
-		public string GetText(int startIndex, int length)
-			=> _stringBuilder.ToString(startIndex, length);
-
-		/// <summary>
-		/// Copies the characters from a specified segment of this instance to a specified
-		/// segment of a destination System.Char array.
-		/// </summary>
-		/// <param name="sourceIndex">
-		/// The starting position in this instance where characters will be copied from.
-		/// The index is zero-based.
-		/// </param>
-		/// <param name="destination">The array where characters will be copied.</param>
-		/// <param name="destinationIndex">
-		/// The starting position in destination where characters will be copied.
-		/// The index is zero-based.
-		/// </param>
-		/// <param name="count">The number of characters to be copied.</param>
-		public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
-		{
-			_stringBuilder.CopyTo(sourceIndex, destination, destinationIndex, count);
-		}
-
-		/// <summary>Returns array of collected characters.</summary>
-		/// <returns>Array of collected characters.</returns>
-		public char[] GetCharArray()
-		{
-			var array = new char[_stringBuilder.Length];
-			_stringBuilder.CopyTo(0, array, 0, _stringBuilder.Length);
-			return array;
-		}
-
-		/// <summary>Clears internal buffer.</summary>
-		public void Clear()
-		{
-			Verify.State.IsFalse(IsInitialized);
-
-			_stringBuilder.Clear();
-		}
-
-		#endregion
-
-		#region Private
-
-		private void OnStreamRead(IAsyncResult ar)
-		{
-			int bytesCount;
-			try
-			{
-				bytesCount = _stream.EndRead(ar);
-			}
-			catch(IOException)
-			{
-				bytesCount = 0;
-			}
-			catch(OperationCanceledException)
-			{
-				bytesCount = 0;
-			}
-			if(bytesCount != 0)
-			{
-				if(!_isCanceled)
-				{
-					Decode(bytesCount);
-				}
-				BeginReadAsync();
-			}
-			else
-			{
-				if(_isCanceled)
-				{
-					return;
-				}
-				OnStringCompleted();
-				var eof = (EventWaitHandle)ar.AsyncState;
-				if(eof != null)
-				{
-					try
-					{
-						eof.Set();
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-			}
-		}
-
-		private void BeginReadAsync()
-		{
-			if(_isCanceled)
-			{
-				if(_stringBuilder.Length > 0)
-				{
-					_stringBuilder.Clear();
-				}
-				try
-				{
-					_stream.BeginRead(_byteBuffer, 0, _byteBuffer.Length, OnStreamRead, null);
-				}
-				catch(ObjectDisposedException)
-				{
-				}
-			}
-			else
-			{
-				bool isReading;
-				var eof = _eof;
-				try
-				{
-					_stream.BeginRead(_byteBuffer, 0, _byteBuffer.Length, OnStreamRead, eof);
-					isReading = true;
-				}
-				catch(IOException)
-				{
-					isReading = false;
-				}
-				catch(ObjectDisposedException)
-				{
-					isReading = false;
-				}
-				if(!isReading)
-				{
-					if(eof != null)
-					{
-						try
-						{
-							eof.Set();
-						}
-						catch(ObjectDisposedException)
-						{
-						}
-					}
-				}
-			}
-		}
-
-		private void Decode(int bytesCount)
-		{
-			int charsCount = _decoder.GetChars(_byteBuffer, 0, bytesCount, _charBuffer, 0);
-			OnStringDecoded(_charBuffer, 0, charsCount);
-		}
-
-		protected virtual void OnStringDecoded(char[] buffer, int startIndex, int length)
-		{
-			_stringBuilder.Append(_charBuffer, startIndex, length);
-		}
-
-		protected virtual void OnStringCompleted()
-		{
-		}
-
-		#endregion
+	protected virtual void OnStringDecoded(char[] buffer, int startIndex, int length)
+	{
+		_stringBuilder.Append(_charBuffer, startIndex, length);
 	}
 }

@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,41 +18,51 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+using System.Drawing;
+
+public sealed class PropertyPageFactory : PropertyPageFactoryBase
 {
-	using System;
-	using System.Drawing;
+	public static readonly Guid RootGroupGuid		= Guid.Empty;
+	public static readonly Guid AppearanceGroupGuid = new("F1F07910-1105-4928-9B7C-F62657601747");
 
-	public sealed class PropertyPageFactory
+	private readonly Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
+
+	public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, Func<IWorkingEnvironment, PropertyPage> getPropertyPage)
+		: base(guid, name, icon, groupGuid)
 	{
-		public static readonly Guid RootGroupGuid		= Guid.Empty;
-		public static readonly Guid AppearanceGroupGuid = new("F1F07910-1105-4928-9B7C-F62657601747");
+		_getPropertyPage = getPropertyPage;
+	}
 
-		private readonly Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
+	public override PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
+	{
+		Verify.Argument.IsNotNull(environment);
 
-		public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, Func<IWorkingEnvironment, PropertyPage> getPropertyPage)
-		{
-			Guid      = guid;
-			Name      = name;
-			GroupGuid = groupGuid;
-			Icon      = icon;
+		return _getPropertyPage?.Invoke(environment);
+	}
+}
 
-			_getPropertyPage = getPropertyPage;
-		}
+public sealed class PropertyPageFactory<T> : PropertyPageFactoryBase
+	where T : PropertyPage
+{
+	private readonly Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
 
-		public Guid Guid { get; }
+	public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, IFactory<T> pageFactory)
+		: base(guid, name, icon, groupGuid)
+	{
+		Verify.Argument.IsNotNull(pageFactory);
 
-		public Guid GroupGuid { get; }
+		PageFactory = pageFactory;
+	}
 
-		public string Name { get; }
+	private IFactory<T> PageFactory { get; }
 
-		public Bitmap Icon { get; }
+	public override PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
+	{
+		Verify.Argument.IsNotNull(environment);
 
-		public PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			return _getPropertyPage?.Invoke(environment);
-		}
+		return PageFactory.Create();
 	}
 }

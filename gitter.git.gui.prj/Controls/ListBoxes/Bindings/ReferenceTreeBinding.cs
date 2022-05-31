@@ -18,274 +18,273 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+
+using gitter.Framework.Controls;
+
+public sealed class ReferenceTreeBinding : IDisposable
 {
-	using System;
-	using System.Collections.Generic;
+	#region Data
 
-	using gitter.Framework.Controls;
+	private readonly CustomListBoxItemsCollection _itemHost;
+	private readonly bool _groupItems;
+	private readonly bool _groupRemotes;
+	private readonly Predicate<IRevisionPointer> _predicate;
+	private readonly ReferenceType _referenceTypes;
+	private readonly List<RemoteListItem> _remotes;
 
-	public sealed class ReferenceTreeBinding : IDisposable
+	#endregion
+
+	public event EventHandler<RevisionPointerEventArgs> ReferenceItemActivated;
+
+	private void InvokeReferenceItemActivated(IRevisionPointer revision)
+		=> ReferenceItemActivated?.Invoke(this, new RevisionPointerEventArgs(revision));
+
+	#region .ctor
+
+	public ReferenceTreeBinding(CustomListBoxItemsCollection itemHost, Repository repository,
+		bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer> predicate, ReferenceType referenceTypes)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(itemHost);
+		Verify.Argument.IsNotNull(repository);
 
-		private readonly CustomListBoxItemsCollection _itemHost;
-		private readonly bool _groupItems;
-		private readonly bool _groupRemotes;
-		private readonly Predicate<IRevisionPointer> _predicate;
-		private readonly ReferenceType _referenceTypes;
-		private readonly List<RemoteListItem> _remotes;
+		_itemHost = itemHost;
+		Repository = repository;
 
-		#endregion
+		_groupItems = groupItems;
+		_groupRemotes = groupRemoteBranches;
+		_predicate = predicate;
+		_referenceTypes = referenceTypes;
 
-		public event EventHandler<RevisionPointerEventArgs> ReferenceItemActivated;
-
-		private void InvokeReferenceItemActivated(IRevisionPointer revision)
-			=> ReferenceItemActivated?.Invoke(this, new RevisionPointerEventArgs(revision));
-
-		#region .ctor
-
-		public ReferenceTreeBinding(CustomListBoxItemsCollection itemHost, Repository repository,
-			bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer> predicate, ReferenceType referenceTypes)
+		_itemHost.Clear();
+		if(groupItems)
 		{
-			Verify.Argument.IsNotNull(itemHost, nameof(itemHost));
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Heads = new ReferenceGroupListItem(repository, ReferenceType.LocalBranch);
+			Heads.Items.Comparison = BranchListItem.CompareByName;
+			Remotes = new ReferenceGroupListItem(repository, ReferenceType.RemoteBranch);
+			Remotes.Items.Comparison = groupRemoteBranches
+				? RemoteListItem.CompareByName
+				: RemoteBranchListItem.CompareByName;
+			Tags = new ReferenceGroupListItem(repository, ReferenceType.Tag);
+			Tags.Items.Comparison = TagListItem.CompareByName;
+			_itemHost.Comparison = null;
+		}
+		else
+		{
+			Heads = null;
+			Remotes = null;
+			Tags = null;
+			_itemHost.Comparison = ReferenceListItemBase.UniversalComparer;
+		}
 
-			_itemHost = itemHost;
-			Repository = repository;
+		_remotes = groupRemoteBranches ? new List<RemoteListItem>(repository.Remotes.Count) : null;
 
-			_groupItems = groupItems;
-			_groupRemotes = groupRemoteBranches;
-			_predicate = predicate;
-			_referenceTypes = referenceTypes;
-
-			_itemHost.Clear();
-			if(groupItems)
+		if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
+		{
+			var refs = Repository.Refs.Heads;
+			lock(refs.SyncRoot)
 			{
-				Heads = new ReferenceGroupListItem(repository, ReferenceType.LocalBranch);
-				Heads.Items.Comparison = BranchListItem.CompareByName;
-				Remotes = new ReferenceGroupListItem(repository, ReferenceType.RemoteBranch);
-				Remotes.Items.Comparison = groupRemoteBranches
-					? RemoteListItem.CompareByName
-					: RemoteBranchListItem.CompareByName;
-				Tags = new ReferenceGroupListItem(repository, ReferenceType.Tag);
-				Tags.Items.Comparison = TagListItem.CompareByName;
-				_itemHost.Comparison = null;
-			}
-			else
-			{
-				Heads = null;
-				Remotes = null;
-				Tags = null;
-				_itemHost.Comparison = ReferenceListItemBase.UniversalComparer;
-			}
-
-			_remotes = groupRemoteBranches ? new List<RemoteListItem>(repository.Remotes.Count) : null;
-
-			if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
-			{
-				var refs = Repository.Refs.Heads;
-				lock(refs.SyncRoot)
+				foreach(var branch in refs)
 				{
-					foreach(var branch in refs)
-					{
-						if(predicate != null && !predicate(branch)) continue;
-						var item = new BranchListItem(branch);
-						item.Activated += OnItemActivated;
-						var host = groupItems ? Heads.Items : _itemHost;
-						host.Add(item);
-					}
-					refs.ObjectAdded += OnBranchCreated;
+					if(predicate != null && !predicate(branch)) continue;
+					var item = new BranchListItem(branch);
+					item.Activated += OnItemActivated;
+					var host = groupItems ? Heads.Items : _itemHost;
+					host.Add(item);
 				}
-			}
-
-			if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
-			{
-				var refs = repository.Refs.Remotes;
-				lock(refs.SyncRoot)
-				{
-					foreach(var branch in refs)
-					{
-						if(predicate != null && !predicate(branch)) continue;
-						var host = groupItems ? Remotes.Items : _itemHost;
-						var item = new RemoteBranchListItem(branch);
-						item.Activated += OnItemActivated;
-						if(groupRemoteBranches)
-						{
-							var ritem = GetRemoteListItem(branch);
-							if(ritem != null)
-							{
-								host = ritem.Items;
-							}
-						}
-						host.Add(item);
-					}
-					refs.ObjectAdded += OnRemoteBranchCreated;
-				}
-			}
-
-			if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
-			{
-				var refs = repository.Refs.Tags;
-				lock(refs.SyncRoot)
-				{
-					foreach(var tag in refs)
-					{
-						if(predicate != null && !predicate(tag)) continue;
-						var item = new TagListItem(tag);
-						item.Activated += OnItemActivated;
-						var host = groupItems ? Tags.Items : _itemHost;
-						host.Add(item);
-					}
-					refs.ObjectAdded += OnTagCreated;
-				}
-			}
-
-			if(groupItems)
-			{
-				_itemHost.Add(Heads);
-				_itemHost.Add(Remotes);
-				_itemHost.Add(Tags);
+				refs.ObjectAdded += OnBranchCreated;
 			}
 		}
 
-		#endregion
-
-		public Repository Repository { get; }
-
-		public ReferenceGroupListItem Heads { get; }
-
-		public ReferenceGroupListItem Remotes { get; }
-
-		public ReferenceGroupListItem Tags { get; }
-
-		private RemoteListItem GetRemoteListItem(RemoteBranch branch)
+		if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
 		{
-			lock(Repository.Remotes.SyncRoot)
+			var refs = repository.Refs.Remotes;
+			lock(refs.SyncRoot)
 			{
-				foreach(var remote in Repository.Remotes)
+				foreach(var branch in refs)
 				{
-					if(branch.Name.StartsWith(remote.Name + "/"))
+					if(predicate != null && !predicate(branch)) continue;
+					var host = groupItems ? Remotes.Items : _itemHost;
+					var item = new RemoteBranchListItem(branch);
+					item.Activated += OnItemActivated;
+					if(groupRemoteBranches)
 					{
-						RemoteListItem ritem = null;
-						foreach(var i in _remotes)
+						var ritem = GetRemoteListItem(branch);
+						if(ritem != null)
 						{
-							if(i.DataContext.Name == remote.Name)
-							{
-								ritem = i;
-								break;
-							}
+							host = ritem.Items;
 						}
-						if(ritem == null)
-						{
-							ritem = new RemoteListItem(remote);
-							ritem.Items.Comparison = RemoteBranchListItem.CompareByName;
-							_remotes.Add(ritem);
-							var host = Remotes == null ? _itemHost : Remotes.Items;
-							host.AddSafe(ritem);
-						}
-						return ritem;
 					}
+					host.Add(item);
+				}
+				refs.ObjectAdded += OnRemoteBranchCreated;
+			}
+		}
+
+		if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
+		{
+			var refs = repository.Refs.Tags;
+			lock(refs.SyncRoot)
+			{
+				foreach(var tag in refs)
+				{
+					if(predicate != null && !predicate(tag)) continue;
+					var item = new TagListItem(tag);
+					item.Activated += OnItemActivated;
+					var host = groupItems ? Tags.Items : _itemHost;
+					host.Add(item);
+				}
+				refs.ObjectAdded += OnTagCreated;
+			}
+		}
+
+		if(groupItems)
+		{
+			_itemHost.Add(Heads);
+			_itemHost.Add(Remotes);
+			_itemHost.Add(Tags);
+		}
+	}
+
+	#endregion
+
+	public Repository Repository { get; }
+
+	public ReferenceGroupListItem Heads { get; }
+
+	public ReferenceGroupListItem Remotes { get; }
+
+	public ReferenceGroupListItem Tags { get; }
+
+	private RemoteListItem GetRemoteListItem(RemoteBranch branch)
+	{
+		lock(Repository.Remotes.SyncRoot)
+		{
+			foreach(var remote in Repository.Remotes)
+			{
+				if(branch.Name.StartsWith(remote.Name + "/"))
+				{
+					RemoteListItem ritem = null;
+					foreach(var i in _remotes)
+					{
+						if(i.DataContext.Name == remote.Name)
+						{
+							ritem = i;
+							break;
+						}
+					}
+					if(ritem == null)
+					{
+						ritem = new RemoteListItem(remote);
+						ritem.Items.Comparison = RemoteBranchListItem.CompareByName;
+						_remotes.Add(ritem);
+						var host = Remotes == null ? _itemHost : Remotes.Items;
+						host.AddSafe(ritem);
+					}
+					return ritem;
 				}
 			}
-			return null;
 		}
+		return null;
+	}
 
-		#region Event Handlers
+	#region Event Handlers
 
-		private void OnBranchCreated(object sender, BranchEventArgs e)
+	private void OnBranchCreated(object sender, BranchEventArgs e)
+	{
+		var branch = e.Object;
+		if(_predicate == null || _predicate(branch))
 		{
-			var branch = e.Object;
-			if(_predicate == null || _predicate(branch))
-			{
-				var item = new BranchListItem(branch);
-				item.Activated += OnItemActivated;
-				var host = _groupItems ? Heads.Items: _itemHost;
-				host.AddSafe(item);
-			}
+			var item = new BranchListItem(branch);
+			item.Activated += OnItemActivated;
+			var host = _groupItems ? Heads.Items: _itemHost;
+			host.AddSafe(item);
 		}
+	}
 
-		private void OnRemoteBranchCreated(object sender, RemoteBranchEventArgs e)
+	private void OnRemoteBranchCreated(object sender, RemoteBranchEventArgs e)
+	{
+		var branch = e.Object;
+		if(_predicate == null || _predicate(branch))
 		{
-			var branch = e.Object;
-			if(_predicate == null || _predicate(branch))
+			var item = new RemoteBranchListItem(branch);
+			item.Activated += OnItemActivated;
+			CustomListBoxItemsCollection host;
+			if(_groupItems)
 			{
-				var item = new RemoteBranchListItem(branch);
-				item.Activated += OnItemActivated;
-				CustomListBoxItemsCollection host;
-				if(_groupItems)
+				if(_groupRemotes)
 				{
-					if(_groupRemotes)
+					var p = GetRemoteListItem(branch);
+					if(p == null)
 					{
-						var p = GetRemoteListItem(branch);
-						if(p == null)
-						{
-							host = Remotes.Items;
-						}
-						else
-						{
-							host = p.Items;
-						}
+						host = Remotes.Items;
 					}
 					else
 					{
-						host = Remotes.Items;
+						host = p.Items;
 					}
 				}
 				else
 				{
-					if(_groupRemotes)
-					{
-						var p = GetRemoteListItem(branch);
-						if(p == null)
-						{
-							host = _itemHost;
-						}
-						else
-						{
-							host = p.Items;
-						}
-					}
-					else
+					host = Remotes.Items;
+				}
+			}
+			else
+			{
+				if(_groupRemotes)
+				{
+					var p = GetRemoteListItem(branch);
+					if(p == null)
 					{
 						host = _itemHost;
 					}
+					else
+					{
+						host = p.Items;
+					}
 				}
-				host.AddSafe(item);
+				else
+				{
+					host = _itemHost;
+				}
 			}
+			host.AddSafe(item);
 		}
+	}
 
-		private void OnTagCreated(object sender, TagEventArgs e)
+	private void OnTagCreated(object sender, TagEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		var tag = e.Object;
+		if(_predicate == null || _predicate(tag))
 		{
-			Assert.IsNotNull(e);
-
-			var tag = e.Object;
-			if(_predicate == null || _predicate(tag))
-			{
-				var item = new TagListItem(tag);
-				item.Activated += OnItemActivated;
-				var host = _groupItems
-					? Tags.Items
-					: _itemHost;
-				host.AddSafe(item);
-			}
+			var item = new TagListItem(tag);
+			item.Activated += OnItemActivated;
+			var host = _groupItems
+				? Tags.Items
+				: _itemHost;
+			host.AddSafe(item);
 		}
+	}
 
-		private void OnItemActivated(object sender, EventArgs e)
-		{
-			var item = (IRevisionPointerListItem)sender;
-			var revision = item.RevisionPointer;
-			InvokeReferenceItemActivated(revision);
-		}
+	private void OnItemActivated(object sender, EventArgs e)
+	{
+		var item = (IRevisionPointerListItem)sender;
+		var revision = item.RevisionPointer;
+		InvokeReferenceItemActivated(revision);
+	}
 
-		#endregion
+	#endregion
 
-		public void Dispose()
-		{
-			Repository.Refs.Heads.ObjectAdded -= OnBranchCreated;
-			Repository.Refs.Remotes.ObjectAdded -= OnRemoteBranchCreated;
-			Repository.Refs.Tags.ObjectAdded -= OnTagCreated;
-			_itemHost.Clear();
-		}
+	public void Dispose()
+	{
+		Repository.Refs.Heads.ObjectAdded -= OnBranchCreated;
+		Repository.Refs.Remotes.ObjectAdded -= OnRemoteBranchCreated;
+		Repository.Refs.Tags.ObjectAdded -= OnTagCreated;
+		_itemHost.Clear();
 	}
 }

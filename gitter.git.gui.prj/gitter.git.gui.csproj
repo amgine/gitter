@@ -12,19 +12,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Views\ViewToolBars\ContributorsSearchToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Views\ViewToolBars\ConfigSearchToolBar.cs" />
-    <Compile Update="Views\ViewToolBars\RemoteSearchToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Views\ViewToolBars\SubmodulesSearchToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Views\ViewToolBars\RemotesSearchToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <EmbeddedResource Update="Properties\Resources.resx">
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -37,10 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="NHunspell, Version=1.1.1.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Autofac" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>

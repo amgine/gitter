@@ -18,57 +18,61 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+public sealed class ViewButton
 {
-	using System;
-	using System.Drawing;
-
-	using Resources = gitter.Framework.Properties.Resources;
-
-	public sealed class ViewButton
+	private static Bitmap LoadBitmap(string name)
 	{
-		private static readonly Bitmap ImgMenu        = Resources.ImgViewHostMenu;
-		private static readonly Bitmap ImgNormalize   = Resources.ImgNormalize;
-		private static readonly Bitmap ImgMaximize    = Resources.ImgMaximize;
-		private static readonly Bitmap ImgPin         = Resources.ImgViewHostPin;
-		private static readonly Bitmap ImgClose       = Resources.ImgViewHostClose;
-		private static readonly Bitmap ImgScrollLeft  = Resources.ImgTabScrollLeft;
-		private static readonly Bitmap ImgScrollRight = Resources.ImgTabScrollRight;
-		private static readonly Bitmap ImgTabMenu     = Resources.ImgTabMenu;
-		private static readonly Bitmap ImgTabMenuExt  = Resources.ImgTabMenuExtends;
-
-		internal ViewButton(int offset, ViewButtonType type)
-		{
-			Offset = offset;
-			Type = type;
-			Image = Type switch
-			{
-				ViewButtonType.Menu            => ImgMenu,
-				ViewButtonType.Pin             => ImgPin,
-				ViewButtonType.Unpin           => ImgPin,
-				ViewButtonType.Normalize       => ImgNormalize,
-				ViewButtonType.Maximize        => ImgMaximize,
-				ViewButtonType.Close           => ImgClose,
-				ViewButtonType.ScrollTabsLeft  => ImgScrollLeft,
-				ViewButtonType.ScrollTabsRight => ImgScrollRight,
-				ViewButtonType.TabsMenu        => ImgTabMenu,
-				ViewButtonType.TabsScrollMenu  => ImgTabMenuExt,
-				_ => null,
-			};
-		}
-
-		public int Offset { get; }
-
-		public ViewButtonType Type { get; }
-
-		public Image Image { get; }
-
-		internal void OnPaint(Graphics graphics, Rectangle bounds, bool focus, bool hover, bool pressed)
-		{
-			ViewManager.Renderer.RenderViewButton(this, graphics, bounds, focus, hover, pressed);
-		}
-
-		/// <inheritdoc/>
-		public override string ToString() => Type.ToString();
+		using var stream = typeof(ViewButton).Assembly.GetManifestResourceStream(@"gitter.Framework.Resources.images." + name + ".png");
+		if(stream is null) return default;
+		return new Bitmap(stream);
 	}
+
+	private static readonly Lazy<Bitmap> ImgMenu        = new(() => LoadBitmap(@"arrow-small"));
+	private static readonly Lazy<Bitmap> ImgNormalize   = new(() => LoadBitmap(@"normalize"));
+	private static readonly Lazy<Bitmap> ImgMaximize    = new(() => LoadBitmap(@"maximize"));
+	private static readonly Lazy<Bitmap> ImgPin         = new(() => LoadBitmap(@"pin-small"));
+	private static readonly Lazy<Bitmap> ImgClose       = new(() => LoadBitmap(@"cross-small"));
+	private static readonly Lazy<Bitmap> ImgScrollLeft  = new(() => LoadBitmap(@"tab-scroll-left"));
+	private static readonly Lazy<Bitmap> ImgScrollRight = new(() => LoadBitmap(@"tab-scroll-right"));
+	private static readonly Lazy<Bitmap> ImgTabMenu     = new(() => LoadBitmap(@"tab-menu"));
+	private static readonly Lazy<Bitmap> ImgTabMenuExt  = new(() => LoadBitmap(@"tab-menu-extends"));
+
+	internal ViewButton(int offset, ViewButtonType type)
+	{
+		Offset = offset;
+		Type = type;
+		Image = Type switch
+		{
+			ViewButtonType.Menu            => ImgMenu.Value,
+			ViewButtonType.Pin             => ImgPin.Value,
+			ViewButtonType.Unpin           => ImgPin.Value,
+			ViewButtonType.Normalize       => ImgNormalize.Value,
+			ViewButtonType.Maximize        => ImgMaximize.Value,
+			ViewButtonType.Close           => ImgClose.Value,
+			ViewButtonType.ScrollTabsLeft  => ImgScrollLeft.Value,
+			ViewButtonType.ScrollTabsRight => ImgScrollRight.Value,
+			ViewButtonType.TabsMenu        => ImgTabMenu.Value,
+			ViewButtonType.TabsScrollMenu  => ImgTabMenuExt.Value,
+			_ => null,
+		};
+	}
+
+	public int Offset { get; }
+
+	public ViewButtonType Type { get; }
+
+	public Image Image { get; }
+
+	internal void OnPaint(Graphics graphics, Dpi dpi, Rectangle bounds, bool focus, bool hover, bool pressed)
+	{
+		ViewManager.Renderer.RenderViewButton(this, graphics, dpi, bounds, focus, hover, pressed);
+	}
+
+	/// <inheritdoc/>
+	public override string ToString() => Type.ToString();
 }

@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+public class ViewEventArgs : EventArgs
 {
-	using System;
+	public ViewEventArgs(ViewBase view) => View = view;
 
-	public class ViewEventArgs : EventArgs
-	{
-		public ViewEventArgs(ViewBase view) => View = view;
-
-		public ViewBase View { get; }
-	}
+	public ViewBase View { get; }
 }

@@ -8,13 +8,6 @@ indent_style=tab
 trim_trailing_whitespace=true
 csharp_using_directive_placement=inside_namespace:silent
 
-# Code files 
-[*.{cs,csx,vb,vbx}]
-indent_style=tab
-indent_size=4
-insert_final_newline=true
-charset=utf-8-bom
-
 # XML end etc...
 [*.{xml,xsd,appxmanifest,build,config,csproj,dbml,discomap,dtd,jsproj,lsproj,njsproj,nuspec,proj,props,StyleCop,targets,tasks,vbproj}]
 indent_style=space
@@ -26,6 +19,13 @@ indent_style=space
 indent_size=4
 tab_width=4
 
+# Code files 
+[*.{cs,csx,vb,vbx}]
+indent_style=tab
+indent_size=4
+insert_final_newline=true
+charset=utf-8-bom
+
 #### .NET Coding Conventions ####
 
 # Organize usings
@@ -34,3 +34,12 @@ dotnet_sort_system_directives_first = true
 
 # Space preferences
 csharp_space_after_keywords_in_control_flow_statements = false
+
+# _ prefix
+dotnet_naming_rule.private_members_with_underscore.symbols  = private_fields
+dotnet_naming_rule.private_members_with_underscore.style    = prefix_underscore
+dotnet_naming_rule.private_members_with_underscore.severity = suggestion
+dotnet_naming_symbols.private_fields.applicable_kinds           = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.prefix_underscore.capitalization = camel_case
+dotnet_naming_style.prefix_underscore.required_prefix = _

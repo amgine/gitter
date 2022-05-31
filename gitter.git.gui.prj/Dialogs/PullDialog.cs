@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,31 +18,35 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class PullDialog : GitDialogBase
 {
-	using System;
-	using System.ComponentModel;
+	private readonly Repository _repository;
 
-	using gitter.Framework;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class PullDialog : GitDialogBase
+	public PullDialog(Repository repository)
 	{
-		private readonly Repository _repository;
+		Verify.Argument.IsNotNull(repository);
 
-		public PullDialog(Repository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+		_repository = repository;
 
-			_repository = repository;
+		InitializeComponent();
 
-			InitializeComponent();
-
-			Text = Resources.StrPull;
-		}
-
-		protected override string ActionVerb => Resources.StrPull;
+		Text = Resources.StrPull;
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrPull;
 }

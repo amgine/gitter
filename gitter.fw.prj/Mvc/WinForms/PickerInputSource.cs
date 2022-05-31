@@ -18,41 +18,40 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc.WinForms
+namespace gitter.Framework.Mvc.WinForms;
+
+using gitter.Framework.Controls;
+
+public static class PickerInputSource
 {
-	using gitter.Framework.Controls;
-
-	public static class PickerInputSource
-	{
-		public static PickerInputSource<TListBox, TItem, TValue> Create<TListBox, TItem, TValue>(CustomObjectPicker<TListBox, TItem, TValue> picker)
-			where TListBox : CustomListBox, new()
-			where TItem : CustomListBoxItem
-		{
-			return new PickerInputSource<TListBox, TItem, TValue>(picker);
-		}
-	}
-
-	public class PickerInputSource<TListBox, TItem, TValue> : ControlInputSource<CustomObjectPicker<TListBox, TItem, TValue>, TValue>
+	public static PickerInputSource<TListBox, TItem, TValue> Create<TListBox, TItem, TValue>(CustomObjectPicker<TListBox, TItem, TValue> picker)
 		where TListBox : CustomListBox, new()
 		where TItem : CustomListBoxItem
 	{
-		public PickerInputSource(CustomObjectPicker<TListBox, TItem, TValue> picker)
-			: base(picker)
-		{
-		}
+		return new PickerInputSource<TListBox, TItem, TValue>(picker);
+	}
+}
 
-		protected override TValue FetchValue() => Control.SelectedValue;
+public class PickerInputSource<TListBox, TItem, TValue> : ControlInputSource<CustomObjectPicker<TListBox, TItem, TValue>, TValue>
+	where TListBox : CustomListBox, new()
+	where TItem : CustomListBoxItem
+{
+	public PickerInputSource(CustomObjectPicker<TListBox, TItem, TValue> picker)
+		: base(picker)
+	{
+	}
 
-		protected override void SetValue(TValue value) => Control.SelectedValue = value;
+	protected override TValue FetchValue() => Control.SelectedValue;
 
-		protected override void SubscribeToValueChangeEvent()
-		{
-			Control.SelectedValueChanged += OnControlValueChanged;
-		}
+	protected override void SetValue(TValue value) => Control.SelectedValue = value;
 
-		protected override void UnsubscribeToValueChangeEvent()
-		{
-			Control.SelectedValueChanged -= OnControlValueChanged;
-		}
+	protected override void SubscribeToValueChangeEvent()
+	{
+		Control.SelectedValueChanged += OnControlValueChanged;
+	}
+
+	protected override void UnsubscribeToValueChangeEvent()
+	{
+		Control.SelectedValueChanged -= OnControlValueChanged;
 	}
 }

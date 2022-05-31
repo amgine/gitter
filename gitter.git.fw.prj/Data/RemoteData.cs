@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,31 +18,30 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+public sealed class RemoteData : INamedObject
 {
-	using System;
-
-	using gitter.Framework;
-
-	public sealed class RemoteData : INamedObject
+	public RemoteData(string name, string fetchUrl, string pushUrl)
 	{
-		public RemoteData(string name, string fetchUrl, string pushUrl)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-			Verify.Argument.IsNotNull(fetchUrl, nameof(fetchUrl));
-			Verify.Argument.IsNotNull(pushUrl, nameof(pushUrl));
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(fetchUrl);
+		Verify.Argument.IsNotNull(pushUrl);
 
-			Name     = name;
-			FetchUrl = fetchUrl;
-			PushUrl  = pushUrl;
-		}
-
-		public string Name { get; }
-
-		public string FetchUrl { get; }
-
-		public string PushUrl { get; }
-
-		public override string ToString() => Name;
+		Name     = name;
+		FetchUrl = fetchUrl;
+		PushUrl  = pushUrl;
 	}
+
+	public string Name { get; }
+
+	public string FetchUrl { get; }
+
+	public string PushUrl { get; }
+
+	public override string ToString() => Name;
 }

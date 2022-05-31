@@ -18,35 +18,34 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+
+/// <summary>Collection of <see cref="FlowPanel"/>'s hosted in <see cref="FlowLayoutControl"/>.</summary>
+public sealed class FlowPanelCollection : SafeNotifySortedCollection<FlowPanel>
 {
-	using System;
-	using System.ComponentModel;
-
-	/// <summary>Collection of <see cref="FlowPanel"/>'s hosted in <see cref="FlowLayoutControl"/>.</summary>
-	public sealed class FlowPanelCollection : SafeNotifySortedCollection<FlowPanel>
+	/// <summary>Create <see cref="FlowPanelCollection"/>.</summary>
+	/// <param name="control">Host <see cref="FlowLayoutControl"/>.</param>
+	internal FlowPanelCollection(FlowLayoutControl control)
 	{
-		/// <summary>Create <see cref="FlowPanelCollection"/>.</summary>
-		/// <param name="control">Host <see cref="FlowLayoutControl"/>.</param>
-		internal FlowPanelCollection(FlowLayoutControl control)
-		{
-			Verify.Argument.IsNotNull(control, nameof(control));
+		Verify.Argument.IsNotNull(control);
 
-			FlowLayoutControl = control;
-		}
-
-		/// <summary>Host <see cref="FlowLayoutControl"/>.</summary>
-		public FlowLayoutControl FlowLayoutControl { get; }
-
-		protected override ISynchronizeInvoke SynchronizeInvoke => FlowLayoutControl;
-
-		protected override void FreeItem(FlowPanel item)
-			=> item.FlowControl = null;
-
-		protected override void AcquireItem(FlowPanel item)
-			=> item.FlowControl = FlowLayoutControl;
-
-		protected override bool VerifyItem(FlowPanel item)
-			=> item is { FlowControl: null };
+		FlowLayoutControl = control;
 	}
+
+	/// <summary>Host <see cref="FlowLayoutControl"/>.</summary>
+	public FlowLayoutControl FlowLayoutControl { get; }
+
+	protected override ISynchronizeInvoke SynchronizeInvoke => FlowLayoutControl;
+
+	protected override void FreeItem(FlowPanel item)
+		=> item.FlowControl = null;
+
+	protected override void AcquireItem(FlowPanel item)
+		=> item.FlowControl = FlowLayoutControl;
+
+	protected override bool VerifyItem(FlowPanel item)
+		=> item is { FlowControl: null };
 }

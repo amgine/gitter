@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,116 +18,115 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Text;
+
+/// <summary>Represents a single diff line.</summary>
+public sealed class DiffLine : ICloneable
 {
-	using System;
-	using System.Text;
+	#region Data
 
-	/// <summary>Represents a single diff line.</summary>
-	public sealed class DiffLine : ICloneable
+	private int _charPositions;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Create <see cref="DiffLine"/>.</summary>
+	/// <param name="state">Line state.</param>
+	/// <param name="states">Line states.</param>
+	/// <param name="nums">Line numbers.</param>
+	/// <param name="text">Line text.</param>
+	public DiffLine(DiffLineState state, DiffLineState[] states, int[] nums, string text, string ending = LineEnding.Lf)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(states);
+		Verify.Argument.IsNotNull(nums);
 
-		private int _charPositions;
-
-		#endregion
-
-		#region .ctor
-
-		/// <summary>Create <see cref="DiffLine"/>.</summary>
-		/// <param name="state">Line state.</param>
-		/// <param name="states">Line states.</param>
-		/// <param name="nums">Line numbers.</param>
-		/// <param name="text">Line text.</param>
-		public DiffLine(DiffLineState state, DiffLineState[] states, int[] nums, string text, string ending = LineEnding.Lf)
-		{
-			Verify.Argument.IsNotNull(states, nameof(states));
-			Verify.Argument.IsNotNull(nums, nameof(nums));
-
-			_charPositions = -1;
-			Text	= text;
-			State	= state;
-			States	= states;
-			Nums	= nums;
-			Ending	= ending;
-		}
-
-		#endregion
-
-		public DiffLineState State { get; }
-
-		public DiffLineState[] States { get; }
-
-		public string Text { get; }
-
-		public string Ending { get; }
-
-		public int[] Nums { get; }
-
-		public int MaxLineNum
-		{
-			get
-			{
-				int max = 0;
-				for(int i = 0; i < Nums.Length; ++i)
-				{
-					if(Nums[i] > max) max = Nums[i];
-				}
-				return max;
-			}
-		}
-
-		public int GetCharacterPositions(int tabSize)
-		{
-			if(_charPositions == -1)
-			{
-				for(int i = 0; i < Text.Length; ++i)
-				{
-					switch(Text[i])
-					{
-						case '\t':
-							_charPositions += tabSize - (_charPositions % tabSize);
-							break;
-						default:
-							++_charPositions;
-							break;
-					}
-				}
-			}
-			return _charPositions;
-		}
-
-		internal void ToString(StringBuilder sb) => sb.Append(ToString());
-
-		public override string ToString()
-		{
-			switch(State)
-			{
-				case DiffLineState.Added:
-					return "+" + Text;
-				case DiffLineState.Removed:
-					return "-" + Text;
-				case DiffLineState.Context:
-					return " " + Text;
-				default:
-					return Text;
-			}
-		}
-
-		#region ICloneable
-
-		public DiffLine Clone()
-		{
-			return new DiffLine(
-				State,
-				(DiffLineState[])States.Clone(),
-				(int[])Nums.Clone(),
-				Text,
-				Ending);
-		}
-
-		object ICloneable.Clone() => Clone();
-
-		#endregion
+		_charPositions = -1;
+		Text	= text;
+		State	= state;
+		States	= states;
+		Nums	= nums;
+		Ending	= ending;
 	}
+
+	#endregion
+
+	public DiffLineState State { get; }
+
+	public DiffLineState[] States { get; }
+
+	public string Text { get; }
+
+	public string Ending { get; }
+
+	public int[] Nums { get; }
+
+	public int MaxLineNum
+	{
+		get
+		{
+			int max = 0;
+			for(int i = 0; i < Nums.Length; ++i)
+			{
+				if(Nums[i] > max) max = Nums[i];
+			}
+			return max;
+		}
+	}
+
+	public int GetCharacterPositions(int tabSize)
+	{
+		if(_charPositions == -1)
+		{
+			for(int i = 0; i < Text.Length; ++i)
+			{
+				switch(Text[i])
+				{
+					case '\t':
+						_charPositions += tabSize - (_charPositions % tabSize);
+						break;
+					default:
+						++_charPositions;
+						break;
+				}
+			}
+		}
+		return _charPositions;
+	}
+
+	internal void ToString(StringBuilder sb) => sb.Append(ToString());
+
+	public override string ToString()
+	{
+		switch(State)
+		{
+			case DiffLineState.Added:
+				return "+" + Text;
+			case DiffLineState.Removed:
+				return "-" + Text;
+			case DiffLineState.Context:
+				return " " + Text;
+			default:
+				return Text;
+		}
+	}
+
+	#region ICloneable
+
+	public DiffLine Clone()
+	{
+		return new DiffLine(
+			State,
+			(DiffLineState[])States.Clone(),
+			(int[])Nums.Clone(),
+			Text,
+			Ending);
+	}
+
+	object ICloneable.Clone() => Clone();
+
+	#endregion
 }

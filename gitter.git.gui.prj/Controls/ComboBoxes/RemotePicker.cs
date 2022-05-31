@@ -18,44 +18,22 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using gitter.Framework.Controls;
+
+public class RemotePicker : CustomObjectPicker<RemotesListBox, RemoteListItem, Remote>
 {
-	using gitter.Framework.Controls;
-
-	public class RemotePicker : CustomObjectPicker<RemoteListBox, RemoteListItem, Remote>
+	/// <summary>Initializes a new instance of the <see cref="RemotePicker"/> class.</summary>
+	public RemotePicker()
 	{
-		#region .ctor
-
-		/// <summary>Initializes a new instance of the <see cref="RemotePicker"/> class.</summary>
-		public RemotePicker()
-		{
-			foreach(var column in DropDownControl.Columns)
-			{
-				if(column.Id == (int)ColumnId.Name)
-				{
-					column.SizeMode = ColumnSizeMode.Fill;
-				}
-				else
-				{
-					column.IsVisible = false;
-				}
-			}
-		}
-
-		#endregion
-
-		#region Methods
-
-		protected override Remote GetValue(RemoteListItem item)
-		{
-			return item != null ? item.DataContext : null;
-		}
-
-		public void LoadData(Repository repository)
-		{
-			DropDownControl.LoadData(repository);
-		}
-
-		#endregion
+		DropDownControl.Columns.Clear();
+		DropDownControl.Columns.Add(new NameColumn() { SizeMode = ColumnSizeMode.Fill });
 	}
+
+	protected override Remote GetValue(RemoteListItem item)
+		=> item?.DataContext;
+
+	public void LoadData(Repository repository)
+		=> DropDownControl.LoadData(repository);
 }

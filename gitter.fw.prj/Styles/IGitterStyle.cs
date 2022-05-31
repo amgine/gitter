@@ -18,37 +18,36 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework.Controls;
+
+public interface IGitterStyle
 {
-	using System;
-	using System.Windows.Forms;
+	string Name { get; }
 
-	using gitter.Framework.Controls;
+	string DisplayName { get; }
 
-	public interface IGitterStyle
-	{
-		string Name { get; }
+	GitterStyleType Type { get; }
 
-		string DisplayName { get; }
+	IGitterStyleColors Colors { get; }
 
-		GitterStyleType Type { get; }
+	IItemBackgroundStyles ItemBackgroundStyles { get; }
 
-		IGitterStyleColors Colors { get; }
+	IScrollBarWidget CreateScrollBar(Orientation orientation);
 
-		IItemBackgroundStyles ItemBackgroundStyles { get; }
+	ICheckBoxWidget CreateCheckBox();
 
-		IScrollBarWidget CreateScrollBar(Orientation orientation);
+	IButtonWidget CreateButton();
 
-		ICheckBoxWidget CreateCheckBox();
+	CustomListBoxRenderer ListBoxRenderer { get; }
 
-		IButtonWidget CreateButton();
+	ProcessOverlayRenderer OverlayRenderer { get; }
 
-		CustomListBoxRenderer ListBoxRenderer { get; }
+	ToolStripRenderer ToolStripRenderer { get; }
 
-		ProcessOverlayRenderer OverlayRenderer { get; }
-
-		ToolStripRenderer ToolStripRenderer { get; }
-
-		ViewRenderer ViewRenderer { get; }
-	}
+	ViewRenderer ViewRenderer { get; }
 }

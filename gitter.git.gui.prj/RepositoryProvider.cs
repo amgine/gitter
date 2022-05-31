@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,343 +18,329 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using Autofac;
+
+using gitter.Framework;
+using gitter.Framework.Configuration;
+
+using gitter.Git.AccessLayer;
+using gitter.Git.Gui;
+using gitter.Git.Gui.Dialogs;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>git <see cref="Repository"/> provider.</summary>
+sealed class RepositoryProvider : IGitRepositoryProvider
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.IO;
-	using System.Linq;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	#region Static Data
 
-	using gitter.Framework;
-	using gitter.Framework.Configuration;
-	using gitter.Framework.Options;
+	private static readonly Version _minVersion = new(1,7,0,2);
 
-	using gitter.Git.AccessLayer;
-	using gitter.Git.Gui;
-	using gitter.Git.Gui.Dialogs;
+	#endregion
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#region Data
 
-	/// <summary>git <see cref="Repository"/> provider.</summary>
-	public sealed class RepositoryProvider : IGitRepositoryProvider
+	private IWorkingEnvironment _environment;
+	private GuiProvider _guiProvider;
+	private Section _configSection;
+
+	private IGitAccessorProvider _gitAccessorProvider;
+	private IGitAccessor _gitAccessor;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Create <see cref="RepositoryProvider"/>.</summary>
+	public RepositoryProvider(
+		IReadOnlyList<IGitAccessorProvider> accessorProviders,
+		IFactory<VersionCheckDialog>        versionCheckDialogFactory,
+		ILifetimeScope                      lifetimeScope)
 	{
-		#region Static Data
+		Verify.Argument.IsNotNull(accessorProviders);
+		Verify.Argument.IsNotNull(versionCheckDialogFactory);
+		Verify.Argument.IsNotNull(lifetimeScope);
 
-		private static readonly IGitAccessorProvider[] _gitAccessorProviders = new[]
+		GitAccessorProviders      = accessorProviders;
+		VersionCheckDialogFactory = versionCheckDialogFactory;
+		LifetimeScope             = lifetimeScope;
+	}
+
+	#endregion
+
+	#region Properties
+
+	public string Name => "git";
+
+	public string DisplayName => "Git";
+
+	public IImageProvider Icon => Icons.Git;
+
+	public bool IsLoaded => _environment is not null;
+
+	#endregion
+
+	public IReadOnlyList<IGitAccessorProvider> GitAccessorProviders { get; }
+
+	public Section ConfigSection => _configSection;
+
+	public IFactory<VersionCheckDialog> VersionCheckDialogFactory { get; }
+
+	private ILifetimeScope LifetimeScope { get; }
+
+	public IGitAccessorProvider ActiveGitAccessorProvider
+	{
+		get => _gitAccessorProvider;
+		set
+		{
+			Verify.Argument.IsNotNull(value);
+
+			if(_gitAccessorProvider != value)
 			{
-				new gitter.Git.AccessLayer.CLI.GitCLIAccessorProvider(),
-			};
-
-		private static readonly Version _minVersion = new Version(1,7,0,2);
-		private static IGitAccessorProvider _gitAccessorProvider;
-		private static IGitAccessor _gitAccessor;
-
-		#endregion
-
-		#region Data
-
-		private IWorkingEnvironment _environment;
-		private GuiProvider _guiProvider;
-		private Section _configSection;
-
-		#endregion
-
-		#region .ctor
-
-		/// <summary>Initializes the <see cref="RepositoryProvider"/> class.</summary>
-		static RepositoryProvider()
-		{
-		}
-
-		/// <summary>Create <see cref="RepositoryProvider"/>.</summary>
-		public RepositoryProvider()
-		{
-		}
-
-		#endregion
-
-		#region Properties
-
-		public string Name => "git";
-
-		public string DisplayName => "Git";
-
-		public Image Icon => CachedResources.Bitmaps["ImgGit"];
-
-		public bool IsLoaded => _environment is not null;
-
-		#endregion
-
-		public IEnumerable<IGitAccessorProvider> GitAccessorProviders => _gitAccessorProviders;
-
-		public IGitAccessorProvider ActiveGitAccessorProvider
-		{
-			get => _gitAccessorProvider;
-			set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
-
-				if(_gitAccessorProvider != value)
+				if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
 				{
-					if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
-					{
-						var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
-						_gitAccessor.SaveTo(gitAccessorSection);
-					}
+					var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
+					_gitAccessor.SaveTo(gitAccessorSection);
+				}
 
-					_gitAccessorProvider = value;
-					_gitAccessor = value.CreateAccessor();
+				_gitAccessorProvider = value;
+				_gitAccessor = value.CreateAccessor();
 
-					if(_gitAccessor is not null && _configSection is not null)
-					{
-						var gitAccessorSection = _configSection.TryGetSection(value.Name);
-						_gitAccessor.LoadFrom(gitAccessorSection);
-					}
+				if(_gitAccessor is not null && _configSection is not null)
+				{
+					var gitAccessorSection = _configSection.TryGetSection(value.Name);
+					_gitAccessor.LoadFrom(gitAccessorSection);
 				}
 			}
 		}
+	}
 
-		public IGitAccessor GitAccessor
+	public IGitAccessor GitAccessor
+	{
+		get => _gitAccessor;
+		set
 		{
-			get => _gitAccessor;
-			set
+			Verify.Argument.IsNotNull(value);
+
+			if(_gitAccessor != value)
 			{
-				Verify.Argument.IsNotNull(value, nameof(value));
-
-				if(_gitAccessor != value)
+				if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
 				{
-					if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
-					{
-						var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
-						_gitAccessor.SaveTo(gitAccessorSection);
-					}
-
-					_gitAccessorProvider = _gitAccessor.Provider;
-					_gitAccessor = value;
+					var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
+					_gitAccessor.SaveTo(gitAccessorSection);
 				}
+
+				_gitAccessorProvider = _gitAccessor.Provider;
+				_gitAccessor = value;
 			}
 		}
+	}
 
-		public Version MinimumRequiredGitVersion => _minVersion;
+	public Version MinimumRequiredGitVersion => _minVersion;
 
-		public bool LoadFor(IWorkingEnvironment environment, Section section)
+	public bool LoadFor(IWorkingEnvironment environment, Section section)
+	{
+		Verify.Argument.IsNotNull(environment);
+
+		if(section is not null)
 		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			if(section is not null)
+			var providerName = section.GetValue<string>("AccessorProvider", string.Empty);
+			if(!string.IsNullOrWhiteSpace(providerName))
 			{
-				var providerName = section.GetValue<string>("AccessorProvider", string.Empty);
-				if(!string.IsNullOrWhiteSpace(providerName))
-				{
-					ActiveGitAccessorProvider = GitAccessorProviders.FirstOrDefault(
-						prov => prov.Name == providerName);
-				}
-				if(ActiveGitAccessorProvider == null)
-				{
-					ActiveGitAccessorProvider = GitAccessorProviders.First();
-				}
-				var gitAccessorSection = section.TryGetSection(ActiveGitAccessorProvider.Name);
-				if(gitAccessorSection != null)
-				{
-					GitAccessor.LoadFrom(gitAccessorSection);
-				}
+				ActiveGitAccessorProvider = GitAccessorProviders.FirstOrDefault(
+					prov => prov.Name == providerName);
 			}
-			else
+			ActiveGitAccessorProvider ??= GitAccessorProviders.First();
+			var gitAccessorSection = section.TryGetSection(ActiveGitAccessorProvider.Name);
+			if(gitAccessorSection is not null)
 			{
-				ActiveGitAccessorProvider = GitAccessorProviders.First();
-			}
-			Version gitVersion;
-			try
-			{
-				gitVersion = _gitAccessor.GitVersion;
-			}
-			catch(Exception exc) when (!exc.IsCritical())
-			{
-				gitVersion = null;
-			}
-			if(gitVersion is null || gitVersion < MinimumRequiredGitVersion)
-			{
-				using var dlg = new VersionCheckDialog(environment, this, MinimumRequiredGitVersion, gitVersion);
-				dlg.Run(environment.MainForm);
-				gitVersion = dlg.InstalledVersion;
-				if(gitVersion is null || gitVersion < _minVersion)
-				{
-					return false;
-				}
-			}
-			GlobalOptions.RegisterPropertyPageFactory(
-				new PropertyPageFactory(
-					GitOptionsPage.Guid,
-					Resources.StrGit,
-					null,
-					PropertyPageFactory.RootGroupGuid,
-					static env => new GitOptionsPage(env)));
-			GlobalOptions.RegisterPropertyPageFactory(
-				new PropertyPageFactory(
-					ConfigurationPage.Guid,
-					Resources.StrConfig,
-					null,
-					GitOptionsPage.Guid,
-					static env => new ConfigurationPage(env)));
-			_environment = environment;
-			_configSection = section;
-			return true;
-		}
-
-		/// <summary>Save configuration to <paramref name="section"/>.</summary>
-		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
-		public void SaveTo(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			if(ActiveGitAccessorProvider is not null)
-			{
-				section.SetValue<string>("AccessorProvider", ActiveGitAccessorProvider.Name);
-				if(GitAccessor is not null)
-				{
-					var gitAccessorSection = section.GetCreateSection(ActiveGitAccessorProvider.Name);
-					GitAccessor.SaveTo(gitAccessorSection);
-				}
-			}
-			_configSection = section;
-		}
-
-		public bool IsValidFor(string workingDirectory)
-			=> GitAccessor != null && GitAccessor.IsValidRepository(workingDirectory);
-
-		public IRepository OpenRepository(string workingDirectory)
-		{
-			return Repository.Load(GitAccessor, workingDirectory);
-		}
-
-		public async Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-			=> await Repository
-				.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
-				.ConfigureAwait(continueOnCapturedContext: false);
-
-		public void OnRepositoryLoaded(IRepository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			var gitRepository = repository as Repository;
-			Verify.Argument.IsTrue(gitRepository is not null, nameof(repository));
-
-			if(gitRepository.UserIdentity is null)
-			{
-				using var dlg = new UserIdentificationDialog(_environment, gitRepository);
-				dlg.Run(_environment.MainForm);
+				GitAccessor.LoadFrom(gitAccessorSection);
 			}
 		}
-
-		public void CloseRepository(IRepository repository)
+		else
 		{
-			var gitRepository = (Repository)repository;
-			try
+			ActiveGitAccessorProvider = GitAccessorProviders.First();
+		}
+		Version gitVersion;
+		try
+		{
+			gitVersion = _gitAccessor.GitVersion;
+		}
+		catch(Exception exc) when (!exc.IsCritical())
+		{
+			gitVersion = null;
+		}
+		if(gitVersion is null || gitVersion < MinimumRequiredGitVersion)
+		{
+			using var dlg = VersionCheckDialogFactory.Create();
+			dlg.RequiredVersion  = MinimumRequiredGitVersion;
+			dlg.InstalledVersion = gitVersion;
+			dlg.Run(environment.MainForm);
+			gitVersion = dlg.InstalledVersion;
+			if(gitVersion is null || gitVersion < _minVersion)
 			{
-				var cfgFileName = Path.Combine(gitRepository.GitDirectory, "gitter-config");
-				using var fs = new FileStream(cfgFileName, FileMode.Create, FileAccess.Write, FileShare.None);
-				gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
-			}
-			catch(Exception exc) when (!exc.IsCritical())
-			{
-			}
-			finally
-			{
-				gitRepository.Dispose();
+				return false;
 			}
 		}
+		_environment = environment;
+		_configSection = section;
+		return true;
+	}
 
-		public IRepositoryGuiProvider GuiProvider
-			=> _guiProvider ??= new GuiProvider(this);
+	/// <summary>Save configuration to <paramref name="section"/>.</summary>
+	/// <param name="section"><see cref="Section"/> for storing configuration.</param>
+	public void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
 
-		public Control CreateInitDialog() => new InitDialog(this);
-
-		public Control CreateCloneDialog() => new CloneDialog(this);
-
-		public DialogResult RunInitDialog()
+		if(ActiveGitAccessorProvider is not null)
 		{
-			Verify.State.IsTrue(IsLoaded, $"{GetType().FullName} is not loaded.");
-
-			DialogResult res;
-			string path = "";
-			using(var dlg = new InitDialog(this))
+			section.SetValue<string>("AccessorProvider", ActiveGitAccessorProvider.Name);
+			if(GitAccessor is not null)
 			{
-				dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
-				res = dlg.Run(_environment.MainForm);
-				if(res == DialogResult.OK)
-				{
-					path = Path.GetFullPath(dlg.RepositoryPath.Value);
-				}
+				var gitAccessorSection = section.GetCreateSection(ActiveGitAccessorProvider.Name);
+				GitAccessor.SaveTo(gitAccessorSection);
 			}
+		}
+		_configSection = section;
+	}
+
+	public bool IsValidFor(string workingDirectory)
+		=> GitAccessor is not null && GitAccessor.IsValidRepository(workingDirectory);
+
+	public IRepository OpenRepository(string workingDirectory)
+	{
+		return Repository.Load(GitAccessor, workingDirectory);
+	}
+
+	public async Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		=> await Repository
+			.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+	public void OnRepositoryLoaded(IRepository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+		var gitRepository = repository as Repository;
+		Verify.Argument.IsTrue(gitRepository is not null, nameof(repository));
+
+		if(gitRepository.UserIdentity is null)
+		{
+			using var dlg = new UserIdentificationDialog(_environment, gitRepository);
+			dlg.Run(_environment.MainForm);
+		}
+	}
+
+	public void CloseRepository(IRepository repository)
+	{
+		var gitRepository = (Repository)repository;
+		try
+		{
+			var cfgFileName = Path.Combine(gitRepository.GitDirectory, "gitter-config");
+			using var fs = new FileStream(cfgFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+			gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
+		}
+		catch(Exception exc) when (!exc.IsCritical())
+		{
+		}
+		finally
+		{
+			gitRepository.Dispose();
+		}
+	}
+
+	public IRepositoryGuiProvider GuiProvider
+		=> _guiProvider ??= new GuiProvider(this, LifetimeScope);
+
+	public Control CreateInitDialog() => new InitDialog(this);
+
+	public Control CreateCloneDialog() => new CloneDialog(this);
+
+	public DialogResult RunInitDialog()
+	{
+		Verify.State.IsTrue(IsLoaded, $"{GetType().FullName} is not loaded.");
+
+		DialogResult res;
+		string path = "";
+		using(var dlg = new InitDialog(this))
+		{
+			dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
+			res = dlg.Run(_environment.MainForm);
 			if(res == DialogResult.OK)
 			{
-				_environment.OpenRepository(path);
+				path = Path.GetFullPath(dlg.RepositoryPath.Value);
 			}
-			return res;
 		}
-
-		bool IGitRepositoryProvider.RunInitDialog()
+		if(res == DialogResult.OK)
 		{
-			return RunInitDialog() == DialogResult.OK;
+			_environment.OpenRepository(path);
 		}
+		return res;
+	}
 
-		public DialogResult RunCloneDialog()
+	bool IGitRepositoryProvider.RunInitDialog()
+		=> RunInitDialog() == DialogResult.OK;
+
+	public DialogResult RunCloneDialog()
+	{
+		Verify.State.IsTrue(IsLoaded, string.Format("{0} is not loaded.", GetType().FullName));
+
+		DialogResult res;
+		var path = default(string);
+		using(var dlg = new CloneDialog(this))
 		{
-			Verify.State.IsTrue(IsLoaded, string.Format("{0} is not loaded.", GetType().FullName));
-
-			DialogResult res;
-			var path = default(string);
-			using(var dlg = new CloneDialog(this))
+			dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
+			res = dlg.Run(_environment.MainForm);
+			if(res == DialogResult.OK)
 			{
-				dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
-				res = dlg.Run(_environment.MainForm);
-				if(res == DialogResult.OK)
+				path = dlg.RepositoryPath.Value;
+				if(!string.IsNullOrWhiteSpace(path))
 				{
-					path = dlg.RepositoryPath.Value;
-					if(!string.IsNullOrWhiteSpace(path))
-					{
-						path = Path.GetFullPath(path);
-					}
+					path = Path.GetFullPath(path);
 				}
 			}
-			if(!string.IsNullOrWhiteSpace(path))
-			{
-				_environment.OpenRepository(path);
-			}
-			return res;
 		}
-
-		bool IGitRepositoryProvider.RunCloneDialog()
-			=> RunCloneDialog() == DialogResult.OK;
-
-		public IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory)
+		if(!string.IsNullOrWhiteSpace(path))
 		{
-			Verify.Argument.IsNotNull(workingDirectory, nameof(workingDirectory));
-
-			yield return new GuiCommand(
-				"gui",
-				Resources.StrlGui,
-				CachedResources.Bitmaps["ImgGit"],
-				env => StandardTools.StartGitGui(workingDirectory));
-			yield return new GuiCommand(
-				"gitk",
-				Resources.StrlGitk,
-				CachedResources.Bitmaps["ImgGit"],
-				env => StandardTools.StartGitk(workingDirectory))
-			{
-				IsEnabled = StandardTools.CanStartGitk,
-			};
-			yield return new GuiCommand(
-				"bash",
-				Resources.StrlBash,
-				CachedResources.Bitmaps["ImgTerminal"],
-				env => StandardTools.StartBash(workingDirectory))
-			{
-				IsEnabled = StandardTools.CanStartBash,
-			};
+			_environment.OpenRepository(path);
 		}
+		return res;
+	}
+
+	bool IGitRepositoryProvider.RunCloneDialog()
+		=> RunCloneDialog() == DialogResult.OK;
+
+	public IEnumerable<GuiCommand> GetRepositoryCommands(string workingDirectory)
+	{
+		Verify.Argument.IsNotNull(workingDirectory);
+
+		yield return new GuiCommand(@"gui",
+			Resources.StrlGui,
+			Icons.Git,
+			env => StandardTools.StartGitGui(workingDirectory));
+		yield return new GuiCommand(@"gitk",
+			Resources.StrlGitk,
+			Icons.Git,
+			env => StandardTools.StartGitk(workingDirectory))
+		{
+			IsEnabled = StandardTools.CanStartGitk,
+		};
+		yield return new GuiCommand(@"bash",
+			Resources.StrlBash,
+			CommonIcons.Terminal,
+			env => StandardTools.StartBash(workingDirectory))
+		{
+			IsEnabled = StandardTools.CanStartBash,
+		};
 	}
 }

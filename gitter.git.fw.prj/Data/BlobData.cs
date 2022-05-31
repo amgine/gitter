@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+public sealed class BlobData : TreeContentData
 {
-	using System;
-
-	public sealed class BlobData : TreeContentData
+	public BlobData(string hash, int mode, string name, long size)
+		: base(hash, mode, name)
 	{
-		public BlobData(string hash, int mode, string name, long size)
-			: base(hash, mode, name)
-		{
-			Size = size;
-		}
-
-		public override TreeContentType Type => TreeContentType.Blob;
-
-		public long Size { get; }
+		Size = size;
 	}
+
+	public override TreeContentType Type => TreeContentType.Blob;
+
+	public long Size { get; }
 }

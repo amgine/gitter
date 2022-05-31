@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+using gitter.Framework.Controls;
+
+public class RepositoryCollection : NotifyCollection<RepositoryLink>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
-
-	using gitter.Framework.Controls;
-
-	public class RepositoryCollection : NotifyCollection<RepositoryLink>
-	{
-	}
 }

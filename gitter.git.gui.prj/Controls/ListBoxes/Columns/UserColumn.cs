@@ -18,150 +18,157 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Configuration;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>"User" column.</summary>
+public class UserColumn : CustomListBoxColumn
 {
-	using System;
-	using System.Drawing;
+	public const bool DefaultShowEmail  = false;
+	public const bool DefaultShowAvatar = false;
 
-	using gitter.Framework.Controls;
-	using gitter.Framework.Configuration;
+	private const string EmailFormat = "{0} <{1}>";
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#region Data
 
-	/// <summary>"User" columnn.</summary>
-	public class UserColumn : CustomListBoxColumn
+	private bool _showEmail  = DefaultShowEmail;
+	private bool _showAvatar = DefaultShowAvatar;
+	private UserColumnExtender _extender;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler ShowEmailChanged;
+
+	public event EventHandler ShowAvatarChanged;
+
+	#endregion
+
+	#region .ctor
+
+	protected UserColumn(ISubItemPainter painter, int id, string name, bool visible)
+		: base(id, name, visible)
 	{
-		public const bool DefaultShowEmail = false;
+		Verify.Argument.IsNotNull(painter);
 
-		private const string EmailFormat = "{0} <{1}>";
+		Width   = 80;
+		Painter = painter;
+	}
 
-		#region Data
+	public UserColumn(ISubItemPainter painter, string name, bool visible)
+		: this(painter, (int)ColumnId.User, name, visible)
+	{
+	}
 
-		private bool _showEmail;
-		private UserColumnExtender _extender;
+	public UserColumn(ISubItemPainter painter, bool visible)
+		: this(painter, (int)ColumnId.User, Resources.StrUser, visible)
+	{
+	}
 
-		#endregion
+	public UserColumn(ISubItemPainter painter)
+		: this(painter, (int)ColumnId.User, Resources.StrUser, true)
+	{
+	}
 
-		#region Events
+	#endregion
 
-		public event EventHandler ShowEmailChanged;
+	private ISubItemPainter Painter { get; }
 
-		#endregion
+	/// <inheritdoc/>
+	protected override void OnListBoxAttached()
+	{
+		base.OnListBoxAttached();
+		_extender = new UserColumnExtender(this);
+		Extender = new Popup(_extender);
+	}
 
-		#region .ctor
+	/// <inheritdoc/>
+	protected override void OnListBoxDetached()
+	{
+		base.OnListBoxDetached();
+		Extender.Dispose();
+		Extender = null;
+		_extender.Dispose();
+		_extender = null;
+	}
 
-		protected UserColumn(int id, string name, bool visible)
-			: base(id, name, visible)
+	public bool ShowEmail
+	{
+		get => _showEmail;
+		set
 		{
-			Width = 80;
-
-			_showEmail = DefaultShowEmail;
-		}
-
-		public UserColumn(string name, bool visible)
-			: this((int)ColumnId.User, name, visible)
-		{
-		}
-
-		public UserColumn(bool visible)
-			: this((int)ColumnId.User, Resources.StrUser, visible)
-		{
-		}
-
-		public UserColumn()
-			: this((int)ColumnId.User, Resources.StrUser, true)
-		{
-		}
-
-		#endregion
-
-		/// <inheritdoc/>
-		protected override void OnListBoxAttached()
-		{
-			base.OnListBoxAttached();
-			_extender = new UserColumnExtender(this);
-			Extender = new Popup(_extender);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnListBoxDetached()
-		{
-			base.OnListBoxDetached();
-			Extender.Dispose();
-			Extender = null;
-			_extender.Dispose();
-			_extender = null;
-		}
-
-		public bool ShowEmail
-		{
-			get => _showEmail;
-			set
+			if(_showEmail != value)
 			{
-				if(_showEmail != value)
-				{
-					_showEmail = value;
-					AutoSize(80);
-					ShowEmailChanged?.Invoke(this, EventArgs.Empty);
-				}
+				_showEmail = value;
+				AutoSize(80);
+				ShowEmailChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
-
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, User user)
-		{
-			return OnMeasureSubItem(measureEventArgs, user.Name, user.Email);
-		}
-
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string userName, string userEmail)
-		{
-			var showEmail = measureEventArgs.Column is UserColumn uc
-				? uc.ShowEmail
-				: UserColumn.DefaultShowEmail;
-			return measureEventArgs.MeasureText(showEmail
-				? (string.Format(EmailFormat, userName, userEmail))
-				: (userName));
-		}
-
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, User user)
-		{
-			OnPaintSubItem(paintEventArgs, user.Name, user.Email);
-		}
-
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, User user, Brush textBrush)
-		{
-			OnPaintSubItem(paintEventArgs, user.Name, user.Email, textBrush);
-		}
-
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string userName, string userEmail)
-		{
-			OnPaintSubItem(paintEventArgs, userName, userEmail, paintEventArgs.Column.ContentBrush);
-		}
-
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string userName, string userEmail, Brush textBrush)
-		{
-			var showEmail = paintEventArgs.Column is UserColumn uc
-				? uc.ShowEmail
-				: UserColumn.DefaultShowEmail;
-			paintEventArgs.PaintText(showEmail
-				? (string.Format(EmailFormat, userName, userEmail))
-				: (userName), textBrush);
-		}
-
-		/// <inheritdoc/>
-		protected override void SaveMoreTo(Section section)
-		{
-			base.SaveMoreTo(section);
-			section.SetValue("ShowEmail", ShowEmail);
-		}
-
-		/// <inheritdoc/>
-		protected override void LoadMoreFrom(Section section)
-		{
-			base.LoadMoreFrom(section);
-			ShowEmail = section.GetValue("ShowEmail", ShowEmail);
-		}
-
-		/// <inheritdoc/>
-		public override string IdentificationString => "User";
 	}
+
+	public bool ShowAvatar
+	{
+		get => _showAvatar;
+		set
+		{
+			if(_showAvatar != value)
+			{
+				_showAvatar = value;
+				InvalidateContent();
+				ShowAvatarChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		if(Painter.TryMeasure(measureEventArgs, out var size))
+		{
+			return size;
+		}
+		return Size.Empty;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		Painter.TryPaint(paintEventArgs);
+	}
+
+	/// <inheritdoc/>
+	protected override void SaveMoreTo(Section section)
+	{
+		Assert.IsNotNull(section);
+
+		base.SaveMoreTo(section);
+		section.SetValue("ShowEmail",  ShowEmail);
+		section.SetValue("ShowAvatar", ShowAvatar);
+	}
+
+	/// <inheritdoc/>
+	protected override void LoadMoreFrom(Section section)
+	{
+		Assert.IsNotNull(section);
+
+		base.LoadMoreFrom(section);
+		ShowEmail  = section.GetValue("ShowEmail",  ShowEmail);
+		ShowAvatar = section.GetValue("ShowAvatar", ShowAvatar);
+	}
+
+	/// <inheritdoc/>
+	public override string IdentificationString => "User";
 }

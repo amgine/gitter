@@ -18,35 +18,38 @@
  */
 #endregion
 
-namespace gitter.GitLab
+namespace gitter.GitLab;
+
+using System;
+
+using gitter.Framework.Configuration;
+
+public sealed class ServerInfo
 {
-	using System;
+	public string Name { get; set; }
 
-	using gitter.Framework.Configuration;
+	public Uri ServiceUrl { get; set; }
 
-	public sealed class ServerInfo
+	public string ApiKey { get; set; }
+
+	internal static ServerInfo LoadFrom(Section section)
 	{
-		public string Name { get; set; }
+		Verify.Argument.IsNotNull(section);
 
-		public Uri ServiceUrl { get; set; }
-
-		public string ApiKey { get; set; }
-
-		internal static ServerInfo LoadFrom(Section section)
+		return new ServerInfo
 		{
-			return new ServerInfo
-			{
-				Name       = section.GetValue<string>("Name"),
-				ServiceUrl = new Uri(section.GetValue<string>("ServiceUrl")),
-				ApiKey     = section.GetValue<string>("ApiKey"),
-			};
-		}
+			Name       = section.GetValue<string>("Name"),
+			ServiceUrl = new Uri(section.GetValue<string>("ServiceUrl")),
+			ApiKey     = section.GetValue<string>("ApiKey"),
+		};
+	}
 
-		internal void SaveTo(Section section)
-		{
-			section.SetValue("Name", Name);
-			section.SetValue("ServiceUrl", ServiceUrl.ToString());
-			section.SetValue("ApiKey", ApiKey);
-		}
+	internal void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
+
+		section.SetValue("Name", Name);
+		section.SetValue("ServiceUrl", ServiceUrl.ToString());
+		section.SetValue("ApiKey", ApiKey);
 	}
 }

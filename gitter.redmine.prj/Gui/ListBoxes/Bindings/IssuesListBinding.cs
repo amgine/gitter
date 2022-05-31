@@ -18,140 +18,126 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui.ListBoxes
+namespace gitter.Redmine.Gui.ListBoxes;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+sealed class IssuesListBinding : AsyncDataBinding<LinkedList<Issue>>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	#region .ctor
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	sealed class IssuesListBinding : AsyncDataBinding<LinkedList<Issue>>
+	public IssuesListBinding(RedmineServiceContext serviceContext, IssuesListBox issuesListBox)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(serviceContext);
+		Verify.Argument.IsNotNull(issuesListBox);
 
-		private readonly RedmineServiceContext _serviceContext;
-		private readonly IssuesListBox _issuesListBox;
+		ServiceContext = serviceContext;
+		IssuesListBox  = issuesListBox;
 
-		#endregion
+		Progress = issuesListBox.ProgressMonitor;
+	}
 
-		#region .ctor
+	#endregion
 
-		public IssuesListBinding(RedmineServiceContext serviceContext, IssuesListBox issuesListBox)
+	#region Properties
+
+	public RedmineServiceContext ServiceContext { get; }
+
+	public IssuesListBox IssuesListBox { get; }
+
+	#endregion
+
+	#region Methods
+
+	protected override Task<LinkedList<Issue>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(IsDisposed, "IssuesListBinding is disposed.");
+
+		IssuesListBox.Cursor = Cursors.WaitCursor;
+
+		return ServiceContext.Issues.FetchOpenAsync(ServiceContext.DefaultProjectId,
+			progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(LinkedList<Issue> issues)
+	{
+		Assert.IsNotNull(issues);
+
+		if(IsDisposed || IssuesListBox.IsDisposed)
 		{
-			Verify.Argument.IsNotNull(serviceContext, nameof(serviceContext));
-			Verify.Argument.IsNotNull(issuesListBox, nameof(issuesListBox));
-
-			_serviceContext = serviceContext;
-			_issuesListBox  = issuesListBox;
-
-			Progress = issuesListBox.ProgressMonitor;
+			return;
 		}
 
-		#endregion
-
-		#region Properties
-
-		public RedmineServiceContext ServiceContext
+		IssuesListBox.BeginUpdate();
+		IssuesListBox.Items.Clear();
+		if(issues.Count != 0)
 		{
-			get { return _serviceContext; }
-		}
-
-		public IssuesListBox IssuesListBox
-		{
-			get { return _issuesListBox; }
-		}
-
-		#endregion
-
-		#region Methods
-
-		protected override Task<LinkedList<Issue>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.State.IsFalse(IsDisposed, "IssuesListBinding is disposed.");
-
-			IssuesListBox.Cursor = Cursors.WaitCursor;
-
-			return ServiceContext.Issues.FetchOpenAsync(ServiceContext.DefaultProjectId,
-				progress, cancellationToken);
-		}
-
-		protected override void OnFetchCompleted(LinkedList<Issue> issues)
-		{
-			Assert.IsNotNull(issues);
-
-			if(IsDisposed || IssuesListBox.IsDisposed)
+			var cf = new Dictionary<int, CustomListBoxColumn>();
+			foreach(var column in IssuesListBox.Columns)
 			{
-				return;
-			}
-
-			IssuesListBox.BeginUpdate();
-			IssuesListBox.Items.Clear();
-			if(issues.Count != 0)
-			{
-				var cf = new Dictionary<int, CustomListBoxColumn>();
-				foreach(var column in IssuesListBox.Columns)
+				if(column.Id >= (int)ColumnId.CustomFieldOffset)
 				{
-					if(column.Id >= (int)ColumnId.CustomFieldOffset)
+					var id = column.Id - (int)ColumnId.CustomFieldOffset;
+					cf.Add(id, column);
+				}
+			}
+			foreach(var issue in issues)
+			{
+				foreach(var cfv in issue.CustomFields)
+				{
+					if(!cf.ContainsKey(cfv.Field.Id))
 					{
-						var id = column.Id - (int)ColumnId.CustomFieldOffset;
-						cf.Add(id, column);
+						var column = new IssueCustomFieldColumn(cfv.Field);
+						cf.Add(cfv.Field.Id, column);
+						IssuesListBox.Columns.Add(column);
 					}
 				}
-				foreach(var issue in issues)
-				{
-					foreach(var cfv in issue.CustomFields)
-					{
-						if(!cf.ContainsKey(cfv.Field.Id))
-						{
-							var column = new IssueCustomFieldColumn(cfv.Field);
-							cf.Add(cfv.Field.Id, column);
-							IssuesListBox.Columns.Add(column);
-						}
-					}
-					IssuesListBox.Items.Add(new IssueListItem(issue));
-				}
-				IssuesListBox.Text = string.Empty;
+				IssuesListBox.Items.Add(new IssueListItem(issue));
 			}
-			else
+			IssuesListBox.Text = string.Empty;
+		}
+		else
+		{
+			IssuesListBox.Text = Resources.StrsNoIssuesToDisplay;
+		}
+		IssuesListBox.EndUpdate();
+		IssuesListBox.Cursor = Cursors.Default;
+	}
+
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(IsDisposed || IssuesListBox.IsDisposed)
+		{
+			return;
+		}
+
+		IssuesListBox.ProgressMonitor.Report(OperationProgress.Completed);
+		IssuesListBox.Text = Resources.StrsFailedToFetchIssues;
+		IssuesListBox.Items.Clear();
+		IssuesListBox.Cursor = Cursors.Default;
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(!IssuesListBox.IsDisposed)
 			{
 				IssuesListBox.Text = Resources.StrsNoIssuesToDisplay;
+				IssuesListBox.Items.Clear();
 			}
-			IssuesListBox.EndUpdate();
-			IssuesListBox.Cursor = Cursors.Default;
 		}
-
-		protected override void OnFetchFailed(Exception exception)
-		{
-			if(IsDisposed || IssuesListBox.IsDisposed)
-			{
-				return;
-			}
-
-			IssuesListBox.ProgressMonitor.Report(OperationProgress.Completed);
-			IssuesListBox.Text = Resources.StrsFailedToFetchIssues;
-			IssuesListBox.Items.Clear();
-			IssuesListBox.Cursor = Cursors.Default;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!IssuesListBox.IsDisposed)
-				{
-					IssuesListBox.Text = Resources.StrsNoIssuesToDisplay;
-					IssuesListBox.Items.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
+		base.Dispose(disposing);
 	}
+
+	#endregion
 }

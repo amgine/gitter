@@ -18,31 +18,30 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+/// <summary>Represents a tag on remote repository.</summary>
+public sealed class RemoteRepositoryTag : BaseRemoteReference
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-
-	using gitter.Framework;
-
-	/// <summary>Represents a tag on remote repository.</summary>
-	public sealed class RemoteRepositoryTag : BaseRemoteReference
+	internal RemoteRepositoryTag(RemoteReferencesCollection refs, string name, TagType type, Hash hash)
+		: base(refs, name, hash)
 	{
-		internal RemoteRepositoryTag(RemoteReferencesCollection refs, string name, TagType type, Hash hash)
-			: base(refs, name, hash)
-		{
-			TagType = type;
-		}
-
-		public override ReferenceType ReferenceType => ReferenceType.Tag;
-
-		public TagType TagType { get; internal set; }
-
-		protected override void DeleteCore() => References.RemoveTag(this);
-
-		protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
-			=> References.RemoveTagAsync(this, progress, cancellationToken);
+		TagType = type;
 	}
+
+	public override ReferenceType ReferenceType => ReferenceType.Tag;
+
+	public TagType TagType { get; internal set; }
+
+	protected override void DeleteCore() => References.RemoveTag(this);
+
+	protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		=> References.RemoveTagAsync(this, progress, cancellationToken);
 }

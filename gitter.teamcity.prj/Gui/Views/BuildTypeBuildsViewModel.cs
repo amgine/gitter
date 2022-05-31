@@ -18,21 +18,6 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui.Views
-{
-	public class BuildTypeBuildsViewModel
-	{
-		public BuildTypeBuildsViewModel(BuildType buildType)
-		{
-			BuildType = buildType;
-		}
+namespace gitter.TeamCity.Gui.Views;
 
-		public BuildType BuildType { get; }
-
-		public override int GetHashCode()
-			=> BuildType is not null ? BuildType.GetHashCode() : 0;
-
-		public override bool Equals(object obj)
-			=> obj is BuildTypeBuildsViewModel other && other.BuildType == BuildType;
-	}
-}
+public record class BuildTypeBuildsViewModel(BuildType BuildType);

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,30 +18,29 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui.ListBoxes
+namespace gitter.Redmine.Gui.ListBoxes;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using gitter.Framework.Controls;
+
+public class VersionsListBox : CustomListBox
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	public class VersionsListBox : CustomListBox
+	public VersionsListBox()
 	{
-		public VersionsListBox()
-		{
-			Columns.AddRange(
-				new CustomListBoxColumn[]
-				{
-					new VersionIdColumn(),
-					new VersionNameColumn(),
-					new VersionStatusColumn(),
-					new VersionDescriptionColumn(),
-					new VersionCreatedOnColumn(),
-					new VersionUpdatedOnColumn(),
-					new VersionDueDateColumn(),
-				});
-		}
+		Columns.AddRange(
+			new CustomListBoxColumn[]
+			{
+				new VersionIdColumn(),
+				new VersionNameColumn(),
+				new VersionStatusColumn(),
+				new VersionDescriptionColumn(),
+				new VersionCreatedOnColumn(),
+				new VersionUpdatedOnColumn(),
+				new VersionDueDateColumn(),
+			});
 	}
 }

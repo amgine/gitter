@@ -18,98 +18,133 @@
  */
 #endregion
 
-namespace gitter.GitLab.Gui
+namespace gitter.GitLab.Gui;
+
+using System;
+using System.Linq;
+
+using Autofac;
+
+using gitter.Framework;
+using gitter.Framework.Configuration;
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+using gitter.Git;
+using gitter.Git.Gui.Controls;
+
+sealed class GitLabGuiProvider : IGuiProvider
 {
-	using System;
-	using System.Linq;
+	private RepositoryExplorer _repositoryExplorer;
+	private readonly IViewFactory[] _viewFactories;
 
-	using gitter.Framework;
-	using gitter.Framework.Configuration;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
+	private RegexHyperlinkExtractor ShortIssueUrlExtractor { get; }
 
-	using gitter.Git;
-	using gitter.Git.Gui.Controls;
+	private RegexHyperlinkExtractor FullIssueUrlExtractor { get; }
 
-	sealed class GitLabGuiProvider : IGuiProvider
+	private RegexHyperlinkExtractor ShortMergeRequestUrlExtractor { get; }
+
+	private RegexHyperlinkExtractor FullMergeRequestUrlExtractor { get; }
+
+	public GitLabGuiProvider(IComponentContext componentContext, Repository repository, GitLabServiceContext serviceContext)
 	{
-		private RepositoryExplorer _repositoryExplorer;
+		Verify.Argument.IsNotNull(componentContext);
 
-		private RegexHyperlinkExtractor IssueUrlExtractor { get; }
+		const string AllowedProjectNameChars = @"\w\/\._\-";
+		const string Prefix = @"(?:^|\s|\()";
+		const string Suffix = @"(?:\s|\,|\.|\)|$)";
 
-		private RegexHyperlinkExtractor MergeRequestUrlExtractor { get; }
+		Repository     = repository;
+		ServiceContext = serviceContext;
 
-		public GitLabGuiProvider(Repository repository, GitLabServiceContext serviceContext)
+		FullIssueUrlExtractor = new RegexHyperlinkExtractor(
+			regexp:     Prefix + @"(?<LINK>(?<PROJ_NAME>[" + AllowedProjectNameChars + @"]+)\#(?<ID>\d+))" + Suffix,
+			urlPattern: ServiceContext.ServiceUri + "%PROJ_NAME%/-/issues/%ID%",
+			linkGroupName: @"LINK");
+
+		ShortIssueUrlExtractor = new RegexHyperlinkExtractor(
+			regexp:     Prefix + @"(?<LINK>\#(?<ID>\d+))" + Suffix,
+			urlPattern: ServiceContext.ServiceUri + ServiceContext.DefaultProjectId.Name + "/-/issues/%ID%",
+			linkGroupName: @"LINK");
+
+		FullMergeRequestUrlExtractor = new RegexHyperlinkExtractor(
+			regexp:     Prefix + @"(?<LINK>(?<PROJ_NAME>[" + AllowedProjectNameChars + @"]+)\!(?<ID>\d+))" + Suffix,
+			urlPattern: ServiceContext.ServiceUri + "%PROJ_NAME%/-/merge_requests/%ID%",
+			linkGroupName: @"LINK");
+
+		ShortMergeRequestUrlExtractor = new RegexHyperlinkExtractor(
+			regexp:     Prefix + @"(?<LINK>\!(?<ID>\d+))" + Suffix,
+			urlPattern: ServiceContext.ServiceUri + ServiceContext.DefaultProjectId.Name + "/-/merge_requests/%ID%",
+			linkGroupName: @"LINK");
+
+		_viewFactories = componentContext.ResolveNamed<IViewFactory[]>(@"gitlab", TypedParameter.From(this));
+	}
+
+	public Repository Repository { get; }
+
+	public GitLabServiceContext ServiceContext { get; }
+
+	private void OnDiffHeaderPanelsProviderCreatingPanels(object sender, CreatingPanelsEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		switch(e.DiffSource)
 		{
-			const string AllowedProjectNameChars = @"\w\/\._\-";
-
-			Repository     = repository;
-			ServiceContext = serviceContext;
-
-			IssueUrlExtractor = new RegexHyperlinkExtractor(
-				regexp:     @"(?<PROJ_NAME>[" + AllowedProjectNameChars + @"]+)\#(?<ID>\d+)",
-				urlPattern: ServiceContext.ServiceUri + "%PROJ_NAME%/-/issues/%ID%");
-			MergeRequestUrlExtractor = new RegexHyperlinkExtractor(
-				regexp:     @"(?<PROJ_NAME>[" + AllowedProjectNameChars + @"]+)\!(?<ID>\d+)",
-				urlPattern: ServiceContext.ServiceUri + "%PROJ_NAME%/-/merge_requests/%ID%");
-		}
-
-		public Repository Repository { get; }
-
-		public GitLabServiceContext ServiceContext { get; }
-
-		private void OnDiffHeaderPanelsProviderCreatingPanels(object sender, CreatingPanelsEventArgs e)
-		{
-			switch(e.DiffSource)
-			{
-				case IRevisionDiffSource revisionSource:
+			case IRevisionDiffSource revisionSource:
+				{
+					foreach(var p in e.Panels)
 					{
-						foreach(var p in e.Panels)
+						if(p is RevisionHeaderPanel rhp)
 						{
-							if(p is RevisionHeaderPanel rhp)
-							{
-								rhp.AdditionalHyperlinkExtractors.Add(IssueUrlExtractor);
-								rhp.AdditionalHyperlinkExtractors.Add(MergeRequestUrlExtractor);
-								break;
-							}
+							rhp.AdditionalHyperlinkExtractors.Add(FullIssueUrlExtractor);
+							rhp.AdditionalHyperlinkExtractors.Add(ShortIssueUrlExtractor);
+							rhp.AdditionalHyperlinkExtractors.Add(FullMergeRequestUrlExtractor);
+							rhp.AdditionalHyperlinkExtractors.Add(ShortMergeRequestUrlExtractor);
+							break;
 						}
-
-						e.Panels.Add(new GitLabRevisionPanel(ServiceContext, revisionSource.Revision.Dereference()) { });
-						e.Panels.Add(new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Line });
 					}
-					break;
-			}
-		}
 
-		public void AttachToEnvironment(IWorkingEnvironment environment)
+					e.Panels.Add(new GitLabRevisionPanel(ServiceContext, revisionSource.Revision.Dereference()) { });
+					e.Panels.Add(new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Line });
+				}
+				break;
+		}
+	}
+
+	public void AttachToEnvironment(IWorkingEnvironment environment)
+	{
+		Verify.Argument.IsNotNull(environment);
+
+		foreach(var factory in _viewFactories)
 		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			_repositoryExplorer = new RepositoryExplorer(environment, this);
-			environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
-			DiffHeaderPanelsProvider.CreatingPanels += OnDiffHeaderPanelsProviderCreatingPanels;
+			environment.ViewDockService.RegisterFactory(factory);
 		}
 
-		public void DetachFromEnvironment(IWorkingEnvironment environment)
+		_repositoryExplorer = new RepositoryExplorer(environment, this);
+		environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
+		DiffHeaderPanelsProvider.CreatingPanels += OnDiffHeaderPanelsProviderCreatingPanels;
+	}
+
+	public void DetachFromEnvironment(IWorkingEnvironment environment)
+	{
+		Verify.Argument.IsNotNull(environment);
+
+		foreach(var factory in _viewFactories)
 		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			var views1 = environment.ViewDockService.FindViews(Guids.IssuesViewGuid).ToList();
-			foreach(var view in views1) view.Close();
-
-			DiffHeaderPanelsProvider.CreatingPanels -= OnDiffHeaderPanelsProviderCreatingPanels;
-			//var views1 = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();
-			//foreach(var view in views1) view.Close();
-			environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
-			_repositoryExplorer = null;
+			factory.CloseAllViews();
+			environment.ViewDockService.UnregisterFactory(factory);
 		}
 
-		public void SaveTo(Section section)
-		{
-		}
+		DiffHeaderPanelsProvider.CreatingPanels -= OnDiffHeaderPanelsProviderCreatingPanels;
+		environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
+		_repositoryExplorer = null;
+	}
 
-		public void LoadFrom(Section section)
-		{
-		}
+	public void SaveTo(Section section)
+	{
+	}
+
+	public void LoadFrom(Section section)
+	{
 	}
 }

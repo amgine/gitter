@@ -18,107 +18,110 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public abstract class ViewTabBase : IDisposable
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	public abstract class ViewTabBase : IDisposable
+	/// <summary>Initializes a new instance of the <see cref="ViewTabBase"/> class.</summary>
+	/// <param name="view">Represented <see cref="ViewBase"/>.</param>
+	/// <param name="anchor">Tab anchor.</param>
+	protected ViewTabBase(ViewBase view, AnchorStyles anchor)
 	{
-		/// <summary>Initializes a new instance of the <see cref="ViewTabBase"/> class.</summary>
-		/// <param name="view">Represented <see cref="ViewBase"/>.</param>
-		/// <param name="anchor">Tab anchor.</param>
-		protected ViewTabBase(ViewBase view, AnchorStyles anchor)
+		Verify.Argument.IsNotNull(view);
+
+		Orientation = anchor switch
 		{
-			Verify.Argument.IsNotNull(view, nameof(view));
+			AnchorStyles.Left or AnchorStyles.Right  => Orientation.Vertical,
+			AnchorStyles.Top  or AnchorStyles.Bottom => Orientation.Horizontal,
+			_ => throw new ArgumentException("Invalid anchor value.", nameof(anchor)),
+		};
+		Anchor = anchor;
+		View = view;
+	}
 
-			Orientation = anchor switch
-			{
-				AnchorStyles.Left or AnchorStyles.Right  => Orientation.Vertical,
-				AnchorStyles.Top  or AnchorStyles.Bottom => Orientation.Horizontal,
-				_ => throw new ArgumentException("Invalid anchor value.", nameof(anchor)),
-			};
-			Anchor = anchor;
-			View = view;
-		}
+	/// <summary>Finalizes an instance of the <see cref="ViewTabBase"/> class.</summary>
+	~ViewTabBase() => Dispose(disposing: false);
 
-		/// <summary>Finalizes an instance of the <see cref="ViewTabBase"/> class.</summary>
-		~ViewTabBase() => Dispose(disposing: false);
+	protected ViewRenderer Renderer => ViewManager.Renderer;
 
-		protected ViewRenderer Renderer => ViewManager.Renderer;
+	public AnchorStyles Anchor { get; }
 
-		public AnchorStyles Anchor { get; }
+	public Orientation Orientation { get; }
 
-		public Orientation Orientation { get; }
+	public abstract ViewHost ViewHost { get; }
 
-		public abstract ViewHost ViewHost { get; }
+	public ViewBase View { get; }
 
-		public ViewBase View { get; }
+	public IImageProvider ImageProvider => View.ImageProvider;
 
-		public IImageProvider ImageProvider => View.ImageProvider;
+	public int Length { get; private set; }
 
-		public int Length { get; private set; }
+	public string Text => View.Text;
 
-		public string Text => View.Text;
+	public virtual bool IsActive => View.Host.ActiveView == View;
 
-		public virtual bool IsActive => View.Host.ActiveView == View;
+	public bool IsMouseOver { get; private set; }
 
-		public bool IsMouseOver { get; private set; }
+	public void ResetLength()
+	{
+		ResetLength(GraphicsUtility.MeasurementGraphics);
+	}
 
-		public void ResetLength()
-		{
-			ResetLength(GraphicsUtility.MeasurementGraphics);
-		}
+	public void ResetLength(Graphics graphics)
+	{
+		Length = Measure(graphics);
+	}
 
-		public void ResetLength(Graphics graphics)
-		{
-			Length = Measure(graphics);
-		}
+	public virtual void InvalidateLayout()
+	{
+		ResetLength();
+	}
 
-		protected internal virtual void OnMouseLeave() => IsMouseOver = false;
+	protected internal virtual void OnMouseLeave() => IsMouseOver = false;
 
-		protected internal virtual void OnMouseEnter() => IsMouseOver = true;
+	protected internal virtual void OnMouseEnter() => IsMouseOver = true;
 
-		public virtual void OnMouseDown(int x, int y, MouseButtons button)
-		{
-		}
+	public virtual void OnMouseDown(int x, int y, MouseButtons button)
+	{
+	}
 
-		public virtual void OnMouseMove(int x, int y, MouseButtons button)
-		{
-		}
+	public virtual void OnMouseMove(int x, int y, MouseButtons button)
+	{
+	}
 
-		public virtual void OnMouseUp(int x, int y, MouseButtons button)
-		{
-		}
+	public virtual void OnMouseUp(int x, int y, MouseButtons button)
+	{
+	}
 
-		protected abstract int Measure(Graphics graphics);
+	protected abstract int Measure(Graphics graphics);
 
-		internal abstract void OnPaint(Graphics graphics, Rectangle bounds);
+	internal abstract void OnPaint(Graphics graphics, Rectangle bounds);
 
-		/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
-		/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
-		public override string ToString() => View.Text;
+	/// <summary>Returns a <see cref="System.String"/> that represents this instance.</summary>
+	/// <returns>A <see cref="System.String"/> that represents this instance.</returns>
+	public override string ToString() => View.Text;
 
-		/// <summary>Gets a value indicating whether this instance is disposed.</summary>
-		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
-		public bool IsDisposed { get; private set; }
+	/// <summary>Gets a value indicating whether this instance is disposed.</summary>
+	/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
+	public bool IsDisposed { get; private set; }
 
-		/// <summary>Releases unmanaged and - optionally - managed resources</summary>
-		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-		protected virtual void Dispose(bool disposing)
-		{
-		}
+	/// <summary>Releases unmanaged and - optionally - managed resources</summary>
+	/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+	protected virtual void Dispose(bool disposing)
+	{
+	}
 
-		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-		public void Dispose()
-		{
-			if(!IsDisposed)
-			{
-				GC.SuppressFinalize(this);
-				Dispose(disposing: true);
-				IsDisposed = true;
-			}
-		}
+	/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+	public void Dispose()
+	{
+		if(IsDisposed) return;
+
+		GC.SuppressFinalize(this);
+		Dispose(disposing: true);
+		IsDisposed = true;
 	}
 }

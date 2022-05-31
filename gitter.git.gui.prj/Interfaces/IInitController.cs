@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using System.Threading.Tasks;
+
+using gitter.Framework.Mvc;
+
+interface IInitController : IViewController<IInitView>
 {
-	using System.Threading.Tasks;
+	bool TryInit();
 
-	using gitter.Framework.Mvc;
-
-	interface IInitController : IViewController<IInitView>
-	{
-		bool TryInit();
-
-		Task<bool> TryInitAsync();
-	}
+	Task<bool> TryInitAsync();
 }

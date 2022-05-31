@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using System.Threading.Tasks;
+
+using gitter.Framework.Mvc;
+
+interface IAddSubmoduleController : IViewController<IAddSubmoduleView>
 {
-	using System.Threading.Tasks;
+	bool TryAddSubmodule();
 
-	using gitter.Framework.Mvc;
-
-	interface IAddSubmoduleController : IViewController<IAddSubmoduleView>
-	{
-		bool TryAddSubmodule();
-
-		Task<bool> TryAddSubmoduleAsync();
-	}
+	Task<bool> TryAddSubmoduleAsync();
 }

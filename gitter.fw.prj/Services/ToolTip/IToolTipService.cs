@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Windows.Forms;
+
+public interface IToolTipService : IDisposable
 {
-	using System;
-	using System.Windows.Forms;
+	void Register(Control control, string text);
 
-	public interface IToolTipService : IDisposable
-	{
-		void Register(Control control, string text);
-
-		void Unregister(Control control);
-	}
+	void Unregister(Control control);
 }

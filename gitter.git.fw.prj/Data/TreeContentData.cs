@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,27 +18,26 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+using gitter.Framework;
+
+public abstract class TreeContentData : INamedObject
 {
-	using System;
-
-	using gitter.Framework;
-
-	public abstract class TreeContentData : INamedObject
+	internal TreeContentData(string hash, int mode, string name)
 	{
-		internal TreeContentData(string hash, int mode, string name)
-		{
-			SHA1 = hash;
-			Name = name;
-			Mode = mode;
-		}
-
-		public string SHA1 { get; }
-
-		public string Name { get; }
-
-		public int Mode { get; }
-
-		public abstract TreeContentType Type { get; }
+		SHA1 = hash;
+		Name = name;
+		Mode = mode;
 	}
+
+	public string SHA1 { get; }
+
+	public string Name { get; }
+
+	public int Mode { get; }
+
+	public abstract TreeContentType Type { get; }
 }

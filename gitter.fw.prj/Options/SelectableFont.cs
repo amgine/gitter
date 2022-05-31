@@ -18,157 +18,168 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework.Configuration;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+#if NET6_0_OR_GREATER
+[System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
+public sealed class SelectableFont : IDpiBoundValue<Font>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework.Configuration;
+	private Font _font;
+	private IDpiBoundValue<Font> _scalable;
 
-	using Resources = gitter.Framework.Properties.Resources;
+	#endregion
 
-	public sealed class SelectableFont
+	#region Events
+
+	public event EventHandler Changed;
+
+	#endregion
+
+	#region .ctor
+
+	public SelectableFont(string id, string name, Font font)
 	{
-		#region Data
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(font);
 
-		private Font _font;
+		Id = id;
+		Name = name;
+		_font = font;
+	}
 
-		#endregion
+	public SelectableFont(string id, string name, Section section)
+	{
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(section);
 
-		#region Events
+		var fontName = section.GetValue("Name", default(string));
+		var size     = section.GetValue("Size", 0.0f);
+		var style    = section.GetValue("Style", FontStyle.Regular);
+		var unit     = section.GetValue("Unit", GraphicsUnit.Point);
 
-		public event EventHandler Changed;
+		Verify.Argument.IsTrue(fontName is not null, nameof(section), "Section does not contain a valid font name.");
+		Verify.Argument.IsTrue(size > 0, nameof(section), "Section contains invalid font size.");
 
-		#endregion
+		_font = new Font(fontName, size, style, unit);
+		Id    = id;
+		Name  = name;
+	}
 
-		#region .ctor
+	#endregion
 
-		public SelectableFont(string id, string name, Font font)
+	#region Properties
+
+	public string Id { get; }
+
+	public string Name { get; }
+
+	public IDpiBoundValue<Font> ScalableFont => _scalable ??= DpiBoundValue.Font(Font);
+
+	public Font Font
+	{
+		get => _font;
+		set
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-			Verify.Argument.IsNotNull(font, nameof(font));
+			Verify.Argument.IsNotNull(value);
 
-			Id = id;
-			Name = name;
-			_font = font;
-		}
-
-		public SelectableFont(string id, string name, Section section)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			var fontName = section.GetValue<string>("Name", null);
-			var size     = section.GetValue<float>("Size", 0);
-			var style    = section.GetValue<FontStyle>("Style", FontStyle.Regular);
-
-			Verify.Argument.IsTrue(fontName != null, nameof(section), "Section does not contain a valid font name.");
-			Verify.Argument.IsTrue(size > 0, nameof(section), "Section contains invalid font size.");
-
-			_font = new Font(fontName, size, style, GraphicsUnit.Point);
-			Id    = id;
-			Name  = name;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public string Id { get; }
-
-		public string Name { get; }
-
-		public Font Font
-		{
-			get => _font;
-			set
+			if(_font != value)
 			{
-				Verify.Argument.IsNotNull(value, nameof(value));
-
-				if(_font != value)
+				if(_scalable is not null)
 				{
-					_font = value;
-					Changed?.Invoke(this, EventArgs.Empty);
+					_scalable = default;
+					(_scalable as IDisposable)?.Dispose();
 				}
-			}
-		}
-
-		#endregion
-
-		public void Apply(params Control[] controls)
-		{
-			Verify.Argument.IsNotNull(controls, nameof(controls));
-			Verify.Argument.HasNoNullItems(controls, nameof(controls));
-
-			ApplyCore(controls);
-		}
-
-		public void Apply(IEnumerable<Control> controls)
-		{
-			Verify.Argument.IsNotNull(controls, nameof(controls));
-			Verify.Argument.HasNoNullItems(controls, nameof(controls));
-
-			ApplyCore(controls);
-		}
-
-		private void ApplyCore(IEnumerable<Control> controls)
-		{
-			Assert.IsNotNull(controls);
-
-			foreach(var control in controls)
-			{
-				control.Font = _font;
-			}
-		}
-
-		public static implicit operator Font(SelectableFont font) => font._font;
-
-		public void SaveTo(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			section.SetValue("Name", _font.Name);
-			section.SetValue("Size", _font.SizeInPoints);
-			section.SetValue("Style", _font.Style);
-		}
-
-		public void LoadFrom(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			var name	= section.GetValue<string>("Name", null);
-			var size	= section.GetValue<float>("Size", 0);
-			var style	= section.GetValue<FontStyle>("Name", FontStyle.Regular);
-
-			Assert.IsNeitherNullNorWhitespace(name);
-			Assert.BoundedDoubleInc(0, size, 100);
-
-			if(_font.Name != name || _font.Size != size || _font.Style != style)
-			{
-				Font font = null;
-				try
-				{
-					font = new Font(name, size, style, GraphicsUnit.Point);
-				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-				}
-				if(font != null)
-				{
-					_font = font;
-				}
+				_font = value;
 				Changed?.Invoke(this, EventArgs.Empty);
 			}
 		}
-
-		/// <summary>
-		/// Returns a <see cref="System.String"/> that represents this instance.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="System.String"/> that represents this instance.
-		/// </returns>
-		public override string ToString() => Name;
 	}
+
+	#endregion
+
+	public void Apply(params Control[] controls)
+	{
+		Verify.Argument.IsNotNull(controls);
+		Verify.Argument.HasNoNullItems(controls);
+
+		ApplyCore(controls);
+	}
+
+	public void Apply(IEnumerable<Control> controls)
+	{
+		Verify.Argument.IsNotNull(controls);
+		Verify.Argument.HasNoNullItems(controls);
+
+		ApplyCore(controls);
+	}
+
+	private void ApplyCore(IEnumerable<Control> controls)
+	{
+		Assert.IsNotNull(controls);
+
+		foreach(var control in controls)
+		{
+			control.Font = ScalableFont.GetValue(Dpi.FromControl(control));
+		}
+	}
+
+	public static implicit operator Font(SelectableFont font) => font._font;
+
+	public void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
+
+		section.SetValue("Name",  _font.Name);
+		section.SetValue("Size",  _font.SizeInPoints);
+		section.SetValue("Style", _font.Style);
+		section.SetValue("Unit",  _font.Unit);
+	}
+
+	public void LoadFrom(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
+
+		var name  = section.GetValue("Name", default(string));
+		var size  = section.GetValue("Size", 0.0f);
+		var style = section.GetValue("Name", FontStyle.Regular);
+		var unit  = section.GetValue("Unit", GraphicsUnit.Point);
+
+		Assert.IsNeitherNullNorWhitespace(name);
+		Assert.BoundedDoubleInc(0, size, 100);
+
+		if(_font.Name != name || _font.Size != size || _font.Style != style)
+		{
+			Font font = null;
+			try
+			{
+				font = new Font(name, size, style, unit);
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
+			}
+			if(font is not null)
+			{
+				_font = font;
+			}
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
+	}
+
+	/// <inheritdoc/>
+	public override string ToString() => Name;
+
+	/// <inheritdoc/>
+	Font IDpiBoundValue<Font>.GetValue(Dpi dpi) => ScalableFont.GetValue(dpi);
 }

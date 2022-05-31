@@ -18,213 +18,212 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+sealed class SplitDiffBinding : AsyncDataBinding<Diff>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
+	private DiffOptions _diffOptions;
+	private readonly List<FileDiffPanel> _allDiffPanels;
+	private readonly FlowProgressPanel _progressPanel;
+	private int _scrollPosAfterReload;
 
-	sealed class SplitDiffBinding : AsyncDataBinding<Diff>
+	#endregion
+
+	#region .ctor
+
+	public SplitDiffBinding(IDiffSource diffSource, DiffViewer diffViewerHeaders, DiffViewer diffViewerFiles, DiffOptions diffOptions)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(diffSource);
+		Verify.Argument.IsNotNull(diffViewerHeaders);
+		Verify.Argument.IsNotNull(diffViewerFiles);
+		Verify.Argument.IsNotNull(diffOptions);
 
-		private DiffOptions _diffOptions;
-		private readonly List<FileDiffPanel> _allDiffPanels;
-		private readonly FlowProgressPanel _progressPanel;
-		private int _scrollPosAfterReload;
+		DiffSource        = diffSource;
+		DiffViewerHeaders = diffViewerHeaders;
+		DiffViewerFiles   = diffViewerFiles;
+		_diffOptions      = diffOptions;
 
-		#endregion
+		_allDiffPanels = new List<FileDiffPanel>();
+		_progressPanel = new FlowProgressPanel();
+		Progress = _progressPanel.ProgressMonitor;
+	}
 
-		#region .ctor
+	#endregion
 
-		public SplitDiffBinding(IDiffSource diffSource, DiffViewer diffViewerHeaders, DiffViewer diffViewerFiles, DiffOptions diffOptions)
+	#region Properties
+
+	public IDiffSource DiffSource { get; }
+
+	public DiffViewer DiffViewerHeaders { get; }
+
+	public DiffViewer DiffViewerFiles { get; }
+
+	public DiffOptions DiffOptions
+	{
+		get => _diffOptions;
+		set
 		{
-			Verify.Argument.IsNotNull(diffSource, nameof(diffSource));
-			Verify.Argument.IsNotNull(diffViewerHeaders, nameof(diffViewerHeaders));
-			Verify.Argument.IsNotNull(diffViewerFiles, nameof(diffViewerFiles));
-			Verify.Argument.IsNotNull(diffOptions, nameof(diffOptions));
+			Verify.Argument.IsNotNull(value);
 
-			DiffSource        = diffSource;
-			DiffViewerHeaders = diffViewerHeaders;
-			DiffViewerFiles   = diffViewerFiles;
-			_diffOptions      = diffOptions;
+			_diffOptions = value;
+		}
+	}
 
-			_allDiffPanels = new List<FileDiffPanel>();
-			_progressPanel = new FlowProgressPanel();
-			Progress = _progressPanel.ProgressMonitor;
+	#endregion
+
+	#region Methods
+
+	private void AddSourceSpecificPanels()
+	{
+		var panels = DiffHeaderPanelsProvider.GetSourceSpecificPanels(DiffSource);
+		DiffViewerHeaders.Panels.AddRange(panels);
+	}
+
+	protected override Task<Diff> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(IsDisposed, "DiffBinding is disposed.");
+
+		if(!DiffViewerHeaders.Created)
+		{
+			DiffViewerHeaders.CreateControl();
+		}
+		if(!DiffViewerFiles.Created)
+		{
+			DiffViewerFiles.CreateControl();
+		}
+		_scrollPosAfterReload = DiffViewerFiles.VScrollPos;
+		DiffViewerFiles.Panels.Clear();
+		DiffViewerHeaders.BeginUpdate();
+		DiffViewerHeaders.Panels.Clear();
+		DiffViewerHeaders.ScrollToTopLeft();
+		AddSourceSpecificPanels();
+		DiffViewerHeaders.Panels.Add(_progressPanel);
+		DiffViewerHeaders.EndUpdate();
+		_allDiffPanels.Clear();
+		return DiffSource.GetDiffAsync(DiffOptions, progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(Diff diff)
+	{
+		if(DiffViewerHeaders.IsDisposed || DiffViewerFiles.IsDisposed)
+		{
+			return;
 		}
 
-		#endregion
-
-		#region Properties
-
-		public IDiffSource DiffSource { get; }
-
-		public DiffViewer DiffViewerHeaders { get; }
-
-		public DiffViewer DiffViewerFiles { get; }
-
-		public DiffOptions DiffOptions
+		DiffViewerFiles.BeginUpdate();
+		_allDiffPanels.Clear();
+		_progressPanel.Remove();
+		if(diff != null)
 		{
-			get => _diffOptions;
-			set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
-
-				_diffOptions = value;
-			}
-		}
-
-		#endregion
-
-		#region Methods
-
-		private void AddSourceSpecificPanels()
-		{
-			var panels = DiffHeaderPanelsProvider.GetSourceSpecificPanels(DiffSource);
-			DiffViewerHeaders.Panels.AddRange(panels);
-		}
-
-		protected override Task<Diff> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.State.IsFalse(IsDisposed, "DiffBinding is disposed.");
-
-			if(!DiffViewerHeaders.Created)
-			{
-				DiffViewerHeaders.CreateControl();
-			}
-			if(!DiffViewerFiles.Created)
-			{
-				DiffViewerFiles.CreateControl();
-			}
-			_scrollPosAfterReload = DiffViewerFiles.VScrollPos;
-			DiffViewerFiles.Panels.Clear();
-			DiffViewerHeaders.BeginUpdate();
-			DiffViewerHeaders.Panels.Clear();
-			DiffViewerHeaders.ScrollToTopLeft();
-			AddSourceSpecificPanels();
-			DiffViewerHeaders.Panels.Add(_progressPanel);
-			DiffViewerHeaders.EndUpdate();
-			_allDiffPanels.Clear();
-			return DiffSource.GetDiffAsync(DiffOptions, progress, cancellationToken);
-		}
-
-		protected override void OnFetchCompleted(Diff diff)
-		{
-			if(DiffViewerHeaders.IsDisposed || DiffViewerFiles.IsDisposed)
-			{
-				return;
-			}
-
-			DiffViewerFiles.BeginUpdate();
-			_allDiffPanels.Clear();
-			_progressPanel.Remove();
-			if(diff != null)
-			{
-				var separator = default(FlowPanelSeparator);
-				var changedFilesPanel = new ChangedFilesPanel { Diff = diff };
-				changedFilesPanel.FileNavigationRequested +=
-					(s, e) =>
+			var separator = default(FlowPanelSeparator);
+			var changedFilesPanel = new ChangedFilesPanel { Diff = diff };
+			changedFilesPanel.FileNavigationRequested +=
+				(s, e) =>
+				{
+					foreach(var panel in DiffViewerFiles.Panels)
 					{
-						foreach(var panel in DiffViewerFiles.Panels)
+						if(panel is FileDiffPanel diffpanel && diffpanel.DiffFile == e.DiffFile)
 						{
-							if(panel is FileDiffPanel diffpanel && diffpanel.DiffFile == e.DiffFile)
-							{
-								diffpanel.ScrollIntoView();
-								break;
-							}
+							diffpanel.ScrollIntoView();
+							break;
 						}
-					};
-				changedFilesPanel.StatusFilterChanged += OnStatusFilterChanged;
-				DiffViewerHeaders.Panels.Add(changedFilesPanel);
-				foreach(var file in diff)
-				{
-					var fileDiffPanel = new FileDiffPanel(DiffSource.Repository, file, diff.Type);
-					_allDiffPanels.Add(fileDiffPanel);
-					DiffViewerFiles.Panels.Add(fileDiffPanel);
-					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
-				}
-				if(separator != null)
-				{
-					separator.Height = 6;
-				}
-			}
-			DiffViewerFiles.EndUpdate();
-			if(_scrollPosAfterReload != 0)
+					}
+				};
+			changedFilesPanel.StatusFilterChanged += OnStatusFilterChanged;
+			DiffViewerHeaders.Panels.Add(changedFilesPanel);
+			foreach(var file in diff)
 			{
-				DiffViewerFiles.BeginInvoke(new Action<int>(SetScrollPos), _scrollPosAfterReload);
-			}
-		}
-
-		private void SetScrollPos(int scrollPos)
-		{
-			if(scrollPos > DiffViewerFiles.MaxVScrollPos)
-			{
-				scrollPos = DiffViewerFiles.MaxVScrollPos;
-			}
-			DiffViewerFiles.VScrollBar.Value = scrollPos;
-		}
-
-		private void OnStatusFilterChanged(object sender, EventArgs e)
-		{
-			var changedFilesPanel = (ChangedFilesPanel)sender;
-			var index = 0;
-			DiffViewerFiles.BeginUpdate();
-			if(index < DiffViewerFiles.Panels.Count)
-			{
-				DiffViewerFiles.Panels.RemoveRange(index, DiffViewerFiles.Panels.Count - index);
-			}
-			FlowPanelSeparator separator = null;
-			for(int i = 0; i < _allDiffPanels.Count; ++i)
-			{
-				if((_allDiffPanels[i].DiffFile.Status & changedFilesPanel.StatusFilter) != FileStatus.Unknown)
-				{
-					DiffViewerFiles.Panels.Add(_allDiffPanels[i]);
-					DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
-				}
+				var fileDiffPanel = new FileDiffPanel(DiffSource.Repository, file, diff.Type);
+				_allDiffPanels.Add(fileDiffPanel);
+				DiffViewerFiles.Panels.Add(fileDiffPanel);
+				DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 			}
 			if(separator is not null)
 			{
 				separator.Height = 6;
 			}
-			DiffViewerFiles.EndUpdate();
 		}
-
-		protected override void OnFetchFailed(Exception exception)
+		DiffViewerFiles.EndUpdate();
+		if(_scrollPosAfterReload != 0)
 		{
-			if(DiffViewerHeaders.IsDisposed || DiffViewerFiles.IsDisposed)
-			{
-				return;
-			}
-			DiffViewerHeaders.BeginUpdate();
-			_progressPanel.Remove();
-			if(exception is not null && !string.IsNullOrWhiteSpace(exception.Message))
-			{
-				DiffViewerHeaders.Panels.Add(new FlowProgressPanel { Message = exception.Message });
-			}
-			DiffViewerHeaders.EndUpdate();
+			DiffViewerFiles.BeginInvoke(new Action<int>(SetScrollPos), _scrollPosAfterReload);
 		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!DiffViewerHeaders.IsDisposed)
-				{
-					DiffViewerHeaders.Panels.Clear();
-				}
-				if(!DiffViewerFiles.IsDisposed)
-				{
-					DiffViewerFiles.Panels.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
 	}
+
+	private void SetScrollPos(int scrollPos)
+	{
+		if(scrollPos > DiffViewerFiles.MaxVScrollPos)
+		{
+			scrollPos = DiffViewerFiles.MaxVScrollPos;
+		}
+		DiffViewerFiles.VScrollBar.Value = scrollPos;
+	}
+
+	private void OnStatusFilterChanged(object sender, EventArgs e)
+	{
+		var changedFilesPanel = (ChangedFilesPanel)sender;
+		var index = 0;
+		DiffViewerFiles.BeginUpdate();
+		if(index < DiffViewerFiles.Panels.Count)
+		{
+			DiffViewerFiles.Panels.RemoveRange(index, DiffViewerFiles.Panels.Count - index);
+		}
+		FlowPanelSeparator separator = null;
+		for(int i = 0; i < _allDiffPanels.Count; ++i)
+		{
+			if((_allDiffPanels[i].DiffFile.Status & changedFilesPanel.StatusFilter) != FileStatus.Unknown)
+			{
+				DiffViewerFiles.Panels.Add(_allDiffPanels[i]);
+				DiffViewerFiles.Panels.Add(separator = new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
+			}
+		}
+		if(separator is not null)
+		{
+			separator.Height = 6;
+		}
+		DiffViewerFiles.EndUpdate();
+	}
+
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(DiffViewerHeaders.IsDisposed || DiffViewerFiles.IsDisposed)
+		{
+			return;
+		}
+		DiffViewerHeaders.BeginUpdate();
+		_progressPanel.Remove();
+		if(exception is not null && !string.IsNullOrWhiteSpace(exception.Message))
+		{
+			DiffViewerHeaders.Panels.Add(new FlowProgressPanel { Message = exception.Message });
+		}
+		DiffViewerHeaders.EndUpdate();
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(!DiffViewerHeaders.IsDisposed)
+			{
+				DiffViewerHeaders.Panels.Clear();
+			}
+			if(!DiffViewerFiles.IsDisposed)
+			{
+				DiffViewerFiles.Panels.Clear();
+			}
+		}
+		base.Dispose(disposing);
+	}
+
+	#endregion
 }

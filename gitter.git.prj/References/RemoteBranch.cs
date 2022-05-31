@@ -18,148 +18,147 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+/// <summary>Git remote tracking branch.</summary>
+public sealed class RemoteBranch : BranchBase
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
-
-	/// <summary>Git remote tracking branch.</summary>
-	public sealed class RemoteBranch : BranchBase
+	/// <summary>Create <see cref="Branch"/> object.</summary>
+	/// <param name="repository">Host repository.</param>
+	/// <param name="name">Branch name.</param>
+	/// <param name="pointer">Branch position.</param>
+	/// <exception cref="ArgumentNullException">
+	/// <para><paramref name="repository"/> == <c>null</c> or</para>
+	/// <para><paramref name="pointer"/> == <c>null</c>.</para>
+	/// </exception>
+	internal RemoteBranch(Repository repository, string name, IRevisionPointer pointer)
+		: base(repository, name, pointer)
 	{
-		/// <summary>Create <see cref="Branch"/> object.</summary>
-		/// <param name="repository">Host repository.</param>
-		/// <param name="name">Branch name.</param>
-		/// <param name="pointer">Branch position.</param>
-		/// <exception cref="ArgumentNullException">
-		/// <para><paramref name="repository"/> == <c>null</c> or</para>
-		/// <para><paramref name="pointer"/> == <c>null</c>.</para>
-		/// </exception>
-		internal RemoteBranch(Repository repository, string name, IRevisionPointer pointer)
-			: base(repository, name, pointer)
+	}
+
+	/// <summary>Gets a value indicating whether this branch is remote.</summary>
+	/// <value><c>true</c>.</value>
+	public override bool IsRemote => true;
+
+	/// <summary>Gets a value indicating whether this branch is current HEAD.</summary>
+	/// <value><c>false</c>.</value>
+	/// <remarks><see cref="RemoteBranch"/> can't be current HEAD.</remarks>
+	public override bool IsCurrent => false;
+
+	/// <summary>Returns remote this branch is associated with.</summary>
+	/// <value>Remote this branch is associated with.</value>
+	public Remote Remote
+	{
+		get
 		{
-		}
-
-		/// <summary>Gets a value indicating whether this branch is remote.</summary>
-		/// <value><c>true</c>.</value>
-		public override bool IsRemote => true;
-
-		/// <summary>Gets a value indicating whether this branch is current HEAD.</summary>
-		/// <value><c>false</c>.</value>
-		/// <remarks><see cref="RemoteBranch"/> can't be current HEAD.</remarks>
-		public override bool IsCurrent => false;
-
-		/// <summary>Returns remote this branch is associated with.</summary>
-		/// <value>Remote this branch is associated with.</value>
-		public Remote Remote
-		{
-			get
+			lock(Repository.Remotes.SyncRoot)
 			{
-				lock(Repository.Remotes.SyncRoot)
+				foreach(var remote in Repository.Remotes)
 				{
-					foreach(var remote in Repository.Remotes)
+					if(Name.StartsWith(remote.Name + "/"))
 					{
-						if(Name.StartsWith(remote.Name + "/"))
-						{
-							return remote;
-						}
+						return remote;
 					}
 				}
-				return default;
 			}
+			return default;
 		}
+	}
 
-		/// <summary>Gets the type of this reference.</summary>
-		/// <value><see cref="ReferenceType.RemoteBranch"/>.</value>
-		public override ReferenceType Type => ReferenceType.RemoteBranch;
+	/// <summary>Gets the type of this reference.</summary>
+	/// <value><see cref="ReferenceType.RemoteBranch"/>.</value>
+	public override ReferenceType Type => ReferenceType.RemoteBranch;
 
-		/// <summary>Gets the full branch name.</summary>
-		/// <value>Full branch name.</value>
-		public override string FullName => GitConstants.RemoteBranchPrefix + Name;
+	/// <summary>Gets the full branch name.</summary>
+	/// <value>Full branch name.</value>
+	public override string FullName => GitConstants.RemoteBranchPrefix + Name;
 
-		/// <summary>Delete branch from remote and local repository.</summary>
-		public void DeleteFromRemote()
+	/// <summary>Delete branch from remote and local repository.</summary>
+	public void DeleteFromRemote()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
+		var branchName    = Name.Substring(remote.Name.Length + 1);
+		var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
+
+		using(Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
-			Verify.State.IsNotDeleted(this);
-
-			var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
-			var branchName    = Name.Substring(remote.Name.Length + 1);
-			var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
-
-			using(Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
-			{
-				var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
-					remote.Name, remoteRefName);
-				Repository.Accessor.RemoveRemoteReferences
-					.Invoke(parameters);
-			}
-			if(!IsDeleted)
-			{
-				Refresh();
-			}
+			var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
+				remote.Name, remoteRefName);
+			Repository.Accessor.RemoveRemoteReferences
+				.Invoke(parameters);
 		}
-
-		/// <summary>Delete branch from remote and local repository.</summary>
-		public async Task DeleteFromRemoteAsync(CancellationToken cancellationToken)
+		if(!IsDeleted)
 		{
-			Verify.State.IsNotDeleted(this);
-
-			var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
-			var branchName    = Name.Substring(remote.Name.Length + 1);
-			var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
-
-			using(var notificationsBlock = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
-			{
-				var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
-					remote.Name, remoteRefName);
-				await Repository.Accessor.RemoveRemoteReferences
-					.InvokeAsync(parameters, null, cancellationToken)
-					.ConfigureAwait(continueOnCapturedContext: false);
-			}
-			if(!IsDeleted)
-			{
-				await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
-			}
+			Refresh();
 		}
+	}
 
-		/// <summary>Delete branch.</summary>
-		/// <param name="force">Delete branch irrespective of its merged status.</param>
-		/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to delete this branch.</exception>
-		/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is already deleted.</exception>
-		public override void Delete(bool force = false)
+	/// <summary>Delete branch from remote and local repository.</summary>
+	public async Task DeleteFromRemoteAsync(CancellationToken cancellationToken)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
+		var branchName    = Name.Substring(remote.Name.Length + 1);
+		var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
+
+		using(var notificationsBlock = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Refs.Remotes.Delete(this, force);
+			var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
+				remote.Name, remoteRefName);
+			await Repository.Accessor.RemoveRemoteReferences
+				.InvokeAsync(parameters, null, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 		}
-
-		/// <summary>Delete branch.</summary>
-		/// <param name="force">Delete branch irrespective of its merged status.</param>
-		/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
-		/// <exception cref="T:gitter.Git.GitException">Failed to delete this branch.</exception>
-		/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is already deleted.</exception>
-		public override Task DeleteAsync(bool force = false)
+		if(!IsDeleted)
 		{
-			Verify.State.IsNotDeleted(this);
-
-			return Repository.Refs.Remotes.DeleteAsync(this, force);
+			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
 		}
+	}
 
-		/// <inheritdoc/>
-		public override void Refresh()
-		{
-			Verify.State.IsNotDeleted(this);
+	/// <summary>Delete branch.</summary>
+	/// <param name="force">Delete branch irrespective of its merged status.</param>
+	/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
+	/// <exception cref="T:gitter.Git.GitException">Failed to delete this branch.</exception>
+	/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is already deleted.</exception>
+	public override void Delete(bool force = false)
+	{
+		Verify.State.IsNotDeleted(this);
 
-			Repository.Refs.Remotes.Refresh(this);
-		}
+		Repository.Refs.Remotes.Delete(this, force);
+	}
 
-		/// <inheritdoc/>
-		public override Task RefreshAsync()
-		{
-			Verify.State.IsNotDeleted(this);
+	/// <summary>Delete branch.</summary>
+	/// <param name="force">Delete branch irrespective of its merged status.</param>
+	/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
+	/// <exception cref="T:gitter.Git.GitException">Failed to delete this branch.</exception>
+	/// <exception cref="InvalidOperationException">This <see cref="Branch"/> is already deleted.</exception>
+	public override Task DeleteAsync(bool force = false)
+	{
+		Verify.State.IsNotDeleted(this);
 
-			return Repository.Refs.Remotes.RefreshAsync(this);
-		}
+		return Repository.Refs.Remotes.DeleteAsync(this, force);
+	}
+
+	/// <inheritdoc/>
+	public override void Refresh()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Refs.Remotes.Refresh(this);
+	}
+
+	/// <inheritdoc/>
+	public override Task RefreshAsync()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return Repository.Refs.Remotes.RefreshAsync(this);
 	}
 }

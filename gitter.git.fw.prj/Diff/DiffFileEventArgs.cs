@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+public class DiffFileEventArgs : EventArgs
 {
-	using System;
-
-	public class DiffFileEventArgs : EventArgs
+	public DiffFileEventArgs(DiffFile diffFile)
 	{
-		public DiffFileEventArgs(DiffFile diffFile)
-		{
-			DiffFile = diffFile;
-		}
-
-		public DiffFile DiffFile { get; }
+		DiffFile = diffFile;
 	}
+
+	public DiffFile DiffFile { get; }
 }

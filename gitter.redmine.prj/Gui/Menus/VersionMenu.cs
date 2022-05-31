@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,42 +18,42 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Globalization;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class VersionMenu : ContextMenuStrip
 {
-	using System;
-	using System.Globalization;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public sealed class VersionMenu : ContextMenuStrip
+	public VersionMenu(ProjectVersion version)
 	{
-		private readonly ProjectVersion _version;
+		Verify.Argument.IsNotNull(version);
 
-		public VersionMenu(ProjectVersion version)
+		Version = version;
+
+		var dpiBindings = new DpiBindings(this);
+		var factory = new GuiItemFactory(dpiBindings);
+
+		Items.Add(factory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(Version));
+
+		var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
+		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrId, Version.Id.ToString(CultureInfo.InvariantCulture)));
+		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Version.Name));
+		if(!string.IsNullOrWhiteSpace(Version.Description))
 		{
-			Verify.Argument.IsNotNull(version, nameof(version));
-
-			_version = version;
-
-			Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_version));
-
-			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrId, _version.Id.ToString(CultureInfo.InvariantCulture)));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, _version.Name));
-			if(!string.IsNullOrWhiteSpace(_version.Description))
-			{
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrDescription, _version.Description));
-			}
-
-			Items.Add(item);
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrDescription, Version.Description));
 		}
 
-		public ProjectVersion Version
-		{
-			get { return _version; }
-		}
+		Items.Add(item);
 	}
+
+	public ProjectVersion Version { get; }
 }

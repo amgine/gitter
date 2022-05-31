@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+using System;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.TeamCity.Gui;
+
+sealed class RepositoryExplorer
 {
-	using System;
+	private readonly RepositoryExplorerRootListItem _rootItem;
+	private readonly TeamCityServiceContext _service;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.TeamCity.Gui;
-
-	sealed class RepositoryExplorer
+	public RepositoryExplorer(IWorkingEnvironment environment, TeamCityGuiProvider guiProvider)
 	{
-		private readonly RepositoryExplorerRootListItem _rootItem;
-		private readonly TeamCityServiceContext _service;
+		Verify.Argument.IsNotNull(environment);
+		Verify.Argument.IsNotNull(guiProvider);
 
-		public RepositoryExplorer(IWorkingEnvironment environment, TeamCityGuiProvider guiProvider)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
-
-			_service = guiProvider.ServiceContext;
-			RootItem = new RepositoryExplorerRootListItem(environment, guiProvider);
-		}
-
-		public CustomListBoxItem RootItem { get; }
+		_service = guiProvider.ServiceContext;
+		RootItem = new RepositoryExplorerRootListItem(environment, guiProvider);
 	}
+
+	public CustomListBoxItem RootItem { get; }
 }

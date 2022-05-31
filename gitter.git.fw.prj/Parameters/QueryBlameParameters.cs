@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+public sealed class QueryBlameParameters
 {
-	using System;
+	public string FileName { get; set; }
 
-	public sealed class QueryBlameParameters
-	{
-		public string FileName { get; set; }
-
-		public string Revision { get; set; }
-	}
+	public string Revision { get; set; }
 }

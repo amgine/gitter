@@ -18,65 +18,64 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.Revert"/> operation.</summary>
+public sealed class RevertParameters
 {
-	using System;
-	using System.Collections.Generic;
-
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.Revert"/> operation.</summary>
-	public sealed class RevertParameters
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	public RevertParameters()
 	{
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		public RevertParameters()
-		{
-		}
-
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		public RevertParameters(RevertControl control)
-		{
-			Control = control;
-		}
-
-		/// <summary>Create <see cref="RevertParameters"/>.</summary>
-		/// <param name="revision">Revision to revert.</param>
-		public RevertParameters(string revision)
-		{
-			Revisions = new string[] { revision };
-		}
-
-		/// <summary>Create <see cref="RevertParameters"/>.</summary>
-		/// <param name="revisions">Revisions to revert.</param>
-		public RevertParameters(IReadOnlyList<string> revisions)
-		{
-			Revisions = revisions;
-		}
-
-		/// <summary>Create <see cref="RevertParameters"/>.</summary>
-		/// <param name="revision">Revision to revert.</param>
-		/// <param name="noCommit">>Don't create commit.</param>
-		public RevertParameters(string revision, bool noCommit)
-		{
-			Revisions = new string[] { revision };
-			NoCommit  = noCommit;
-		}
-
-		/// <summary>Create <see cref="RevertParameters"/>.</summary>
-		/// <param name="revisions">Revisions to revert.</param>
-		/// <param name="noCommit">>Don't create commit.</param>
-		public RevertParameters(IReadOnlyList<string> revisions, bool noCommit)
-		{
-			Revisions = revisions;
-			NoCommit  = noCommit;
-		}
-
-		public RevertControl? Control { get; set; }
-
-		/// <summary>Revisions to revert.</summary>
-		public IReadOnlyList<string> Revisions { get; set; }
-
-		/// <summary>Don't create commit.</summary>
-		public bool NoCommit { get; set; }
-
-		public int Mainline { get; set; }
 	}
+
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	public RevertParameters(RevertControl control)
+	{
+		Control = control;
+	}
+
+	/// <summary>Create <see cref="RevertParameters"/>.</summary>
+	/// <param name="revision">Revision to revert.</param>
+	public RevertParameters(string revision)
+	{
+		Revisions = new string[] { revision };
+	}
+
+	/// <summary>Create <see cref="RevertParameters"/>.</summary>
+	/// <param name="revisions">Revisions to revert.</param>
+	public RevertParameters(IReadOnlyList<string> revisions)
+	{
+		Revisions = revisions;
+	}
+
+	/// <summary>Create <see cref="RevertParameters"/>.</summary>
+	/// <param name="revision">Revision to revert.</param>
+	/// <param name="noCommit">>Don't create commit.</param>
+	public RevertParameters(string revision, bool noCommit)
+	{
+		Revisions = new string[] { revision };
+		NoCommit  = noCommit;
+	}
+
+	/// <summary>Create <see cref="RevertParameters"/>.</summary>
+	/// <param name="revisions">Revisions to revert.</param>
+	/// <param name="noCommit">>Don't create commit.</param>
+	public RevertParameters(IReadOnlyList<string> revisions, bool noCommit)
+	{
+		Revisions = revisions;
+		NoCommit  = noCommit;
+	}
+
+	public RevertControl? Control { get; set; }
+
+	/// <summary>Revisions to revert.</summary>
+	public IReadOnlyList<string> Revisions { get; set; }
+
+	/// <summary>Don't create commit.</summary>
+	public bool NoCommit { get; set; }
+
+	public int Mainline { get; set; }
 }

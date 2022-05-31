@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,38 +18,37 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+public sealed class RemoteReferenceData
 {
-	using System;
-
-	public sealed class RemoteReferenceData
+	public RemoteReferenceData(string name, Hash hash)
 	{
-		public RemoteReferenceData(string name, Hash hash)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
-			Name = name;
-			Hash = hash;
-		}
-
-		public TagType TagType { get; set; }
-
-		public ReferenceType ReferenceType
-		{
-			get
-			{
-				if(Name.StartsWith(GitConstants.LocalBranchPrefix))
-					return ReferenceType.LocalBranch;
-				if(Name.StartsWith(GitConstants.TagPrefix))
-					return ReferenceType.Tag;
-				return ReferenceType.Reference;
-			}
-		}
-
-		public string Name { get; }
-
-		public Hash Hash { get; }
-
-		public override string ToString() => Name;
+		Name = name;
+		Hash = hash;
 	}
+
+	public TagType TagType { get; set; }
+
+	public ReferenceType ReferenceType
+	{
+		get
+		{
+			if(Name.StartsWith(GitConstants.LocalBranchPrefix))
+				return ReferenceType.LocalBranch;
+			if(Name.StartsWith(GitConstants.TagPrefix))
+				return ReferenceType.Tag;
+			return ReferenceType.Reference;
+		}
+	}
+
+	public string Name { get; }
+
+	public Hash Hash { get; }
+
+	public override string ToString() => Name;
 }

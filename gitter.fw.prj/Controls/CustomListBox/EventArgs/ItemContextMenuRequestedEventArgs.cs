@@ -18,16 +18,20 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
-{
-	public class ItemContextMenuRequestEventArgs : ContextMenuRequestEventArgs
-	{
-		public ItemContextMenuRequestEventArgs(CustomListBoxItem item, CustomListBoxColumn column, int columnIndex, int x, int y)
-			: base(column, columnIndex, x, y)
-		{
-			Item = item;
-		}
+namespace gitter.Framework.Controls;
 
-		public CustomListBoxItem Item { get; }
+using System.Drawing;
+
+public class ItemContextMenuRequestEventArgs : ContextMenuRequestEventArgs
+{
+	public ItemContextMenuRequestEventArgs(CustomListBoxItem item, CustomListBoxColumn column, Rectangle itemBounds, int columnIndex, int x, int y)
+		: base(column, columnIndex, x, y)
+	{
+		Item       = item;
+		ItemBounds = itemBounds;
 	}
+
+	public CustomListBoxItem Item { get; }
+
+	public Rectangle ItemBounds { get; }
 }

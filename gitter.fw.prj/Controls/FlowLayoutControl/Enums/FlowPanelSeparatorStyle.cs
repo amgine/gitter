@@ -18,11 +18,10 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+public enum FlowPanelSeparatorStyle
 {
-	public enum FlowPanelSeparatorStyle
-	{
-		Simple,
-		Line,
-	}
+	Simple,
+	Line,
 }

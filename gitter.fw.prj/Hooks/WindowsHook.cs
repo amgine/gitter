@@ -18,105 +18,88 @@
  */
 #endregion
 
-namespace gitter.Framework.Hooks
+namespace gitter.Framework.Hooks;
+
+using System;
+using System.ComponentModel;
+
+using gitter.Native;
+
+public abstract class WindowsHook : IDisposable
 {
-	using System;
-	using System.ComponentModel;
-
-	using gitter.Native;
-
-	public abstract class WindowsHook : IDisposable
+	protected WindowsHook(WH hookType)
 	{
-		#region .ctor
+		HookProc = OnHookTriggered;
+		HookType = hookType;
+	}
 
-		protected WindowsHook(WH hookType)
+	public WH HookType { get; }
+
+	public bool IsActive => Handle != IntPtr.Zero;
+
+	protected IntPtr Handle { get; private set; }
+
+	protected HookProc HookProc { get; }
+
+	protected abstract void HookCallback(int nCode, IntPtr wParam, IntPtr lParam);
+
+	private IntPtr OnHookTriggered(int nCode, IntPtr wParam, IntPtr lParam)
+	{
+		HookCallback(nCode, wParam, lParam);
+		return User32.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
+	}
+
+	public void Activate()
+	{
+		var threadId = Kernel32.GetCurrentThreadId();
+
+		Activate(threadId);
+	}
+
+	public void Activate(int threadId)
+	{
+		Verify.State.IsFalse(IsActive, "Hook is already active.");
+		Verify.State.IsFalse(IsDisposed, "Hook is disposed.");
+
+		var module = typeof(WindowsHook).Module;
+		var hInstance = Kernel32.GetModuleHandle(module.Name);
+
+		Handle = User32.SetWindowsHookEx(HookType, HookProc, hInstance, threadId);
+		if(Handle == IntPtr.Zero)
 		{
-			HookProc = OnHookTriggered;
-			HookType = hookType;
+			throw new Win32Exception("Failed to initialize hook.");
 		}
+	}
 
-		#endregion
+	public void Deactivate()
+	{
+		Verify.State.IsTrue(IsActive, "Hook is not active.");
 
-		#region Properties
-
-		public WH HookType { get; }
-
-		public bool IsActive => Handle != IntPtr.Zero;
-
-		protected IntPtr Handle { get; private set; }
-
-		protected HookProc HookProc { get; }
-
-		#endregion
-
-		#region Methods
-
-		protected abstract void HookCallback(int nCode, IntPtr wParam, IntPtr lParam);
-
-		private IntPtr OnHookTriggered(int nCode, IntPtr wParam, IntPtr lParam)
+		if(!User32.UnhookWindowsHookEx(Handle))
 		{
-			HookCallback(nCode, wParam, lParam);
-			return User32.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
+			throw new Win32Exception("Failed to deinitialize hook.");
 		}
+		Handle = IntPtr.Zero;
+	}
 
-		public void Activate()
+	public bool IsDisposed { get; private set; }
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if(Handle != IntPtr.Zero)
 		{
-			var threadId = Kernel32.GetCurrentThreadId();
-
-			Activate(threadId);
-		}
-
-		public void Activate(int threadId)
-		{
-			Verify.State.IsFalse(IsActive, "Hook is already active.");
-			Verify.State.IsFalse(IsDisposed, "Hook is disposed.");
-
-			var module = typeof(WindowsHook).Module;
-			var hInstance = Kernel32.GetModuleHandle(module.Name);
-
-			Handle = User32.SetWindowsHookEx(HookType, HookProc, hInstance, threadId);
-			if(Handle == IntPtr.Zero)
-			{
-				throw new Win32Exception("Failed to initialize hook.");
-			}
-		}
-
-		public void Deactivate()
-		{
-			Verify.State.IsTrue(IsActive, "Hook is not active.");
-
-			if(!User32.UnhookWindowsHookEx(Handle))
-			{
-				throw new Win32Exception("Failed to deinitialize hook.");
-			}
+			User32.UnhookWindowsHookEx(Handle);
 			Handle = IntPtr.Zero;
 		}
+	}
 
-		#endregion
-
-		#region IDisposable Members
-
-		public bool IsDisposed { get; private set; }
-
-		protected virtual void Dispose(bool disposing)
+	public void Dispose()
+	{
+		if(!IsDisposed)
 		{
-			if(Handle != IntPtr.Zero)
-			{
-				User32.UnhookWindowsHookEx(Handle);
-				Handle = IntPtr.Zero;
-			}
+			Dispose(true);
+			GC.SuppressFinalize(this);
+			IsDisposed = true;
 		}
-
-		public void Dispose()
-		{
-			if(!IsDisposed)
-			{
-				Dispose(true);
-				GC.SuppressFinalize(this);
-				IsDisposed = true;
-			}
-		}
-
-		#endregion
 	}
 }

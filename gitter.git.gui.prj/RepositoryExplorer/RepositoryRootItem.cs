@@ -18,67 +18,66 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Linq;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RepositoryRootItem : RepositoryExplorerItemBase
 {
-	using System;
-	using System.Linq;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RepositoryRootItem : RepositoryExplorerItemBase
+	public RepositoryRootItem(IWorkingEnvironment environment)
+		: base(Icons.Git, Resources.StrGit)
 	{
-		public RepositoryRootItem(IWorkingEnvironment environment)
-			: base(@"git", Resources.StrGit)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		Verify.Argument.IsNotNull(environment);
 
-			Items.AddRange(
-				new CustomListBoxItem[]
-				{
-					new RepositoryHistoryListItem(environment),
-					new RepositoryCommitListItem(environment),
-					new RepositoryStashListItem(environment),
-					new RepositoryReferencesListItem(environment),
-					new RepositoryRemotesListItem(environment),
-					new RepositorySubmodulesListItem(environment),
-					new RepositoryWorkingDirectoryListItem(),
-					new RepositoryConfigurationListItem(environment),
-					new RepositoryContributorsListItem(environment),
-				});
-		}
-
-		/// <inheritdoc/>
-		protected override void AttachToRepository()
-		{
-			foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
+		Items.AddRange(
+			new CustomListBoxItem[]
 			{
-				item.Repository = Repository;
-			}
-		}
+				new RepositoryHistoryListItem(environment),
+				new RepositoryCommitListItem(environment),
+				new RepositoryStashListItem(environment),
+				new RepositoryReferencesListItem(environment),
+				new RepositoryRemotesListItem(environment),
+				new RepositorySubmodulesListItem(environment),
+				new RepositoryWorkingDirectoryListItem(),
+				new RepositoryConfigurationListItem(environment),
+				new RepositoryContributorsListItem(environment),
+			});
+	}
 
-		/// <inheritdoc/>
-		protected override void DetachFromRepository()
+	/// <inheritdoc/>
+	protected override void AttachToRepository()
+	{
+		foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
 		{
-			foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
-			{
-				item.Repository = null;
-			}
+			item.Repository = Repository;
 		}
+	}
 
-		/// <inheritdoc/>
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	/// <inheritdoc/>
+	protected override void DetachFromRepository()
+	{
+		foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
 		{
-			Assert.IsNotNull(requestEventArgs);
-
-			if(Repository is null) return default;
-
-			var menu = new RepositoryMenu(Repository);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
+			item.Repository = null;
 		}
+	}
+
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
+
+		if(Repository is null) return default;
+
+		var menu = new RepositoryMenu(Repository);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

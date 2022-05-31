@@ -23,106 +23,106 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.ComponentModel;
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+/// <summary>TextBox which displays grayed hint text if no text is entered.</summary>
+[DesignerCategory("")]
+public class HintTextBox : TextBox
 {
-	/// <summary>TextBox which displays grayed hint text if no text is entered.</summary>
-	public class HintTextBox : TextBox
+	private bool _userTextEntered;
+	private string _hint;
+
+	public HintTextBox()
 	{
-		private bool _userTextEntered;
-		private string _hint;
+		EnterHintMode();
+		_hint = string.Empty;
+	}
 
-		public HintTextBox()
+	private static bool TextIsValid(string text)
+	{
+		return !string.IsNullOrWhiteSpace(text);
+	}
+
+	private void EnterHintMode()
+	{
+		_userTextEntered = false;
+		ForeColor = HintForeColor;
+		base.Text = Hint;
+	}
+
+	private void EnterNormalMode()
+	{
+		_userTextEntered = true;
+		ForeColor = TextForeColor;
+	}
+
+	protected override void OnGotFocus(EventArgs e)
+	{
+		base.OnGotFocus(e);
+		if(!_userTextEntered)
 		{
-			EnterHintMode();
-			_hint = string.Empty;
+			EnterNormalMode();
+			base.Text = string.Empty;
 		}
+	}
 
-		private static bool TextIsValid(string text)
-		{
-			return !string.IsNullOrWhiteSpace(text);
-		}
-
-		private void EnterHintMode()
-		{
-			_userTextEntered = false;
-			ForeColor = HintForeColor;
-			base.Text = Hint;
-		}
-
-		private void EnterNormalMode()
+	protected override void OnLostFocus(EventArgs e)
+	{
+		base.OnLostFocus(e);
+		if(TextIsValid(base.Text))
 		{
 			_userTextEntered = true;
-			ForeColor = TextForeColor;
 		}
-
-		protected override void OnGotFocus(EventArgs e)
+		else
 		{
-			base.OnGotFocus(e);
+			EnterHintMode();
+		}
+	}
+
+	[DefaultValue("GrayText")]
+	[Browsable(true)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	public Color HintForeColor { get; set; } = SystemColors.GrayText;
+
+	[DefaultValue("WindowText")]
+	[Browsable(true)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	public Color TextForeColor { get; set; } = SystemColors.WindowText;
+
+	[DefaultValue("")]
+	[Browsable(true)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	[Description("Text to display on unfocused control when no text is entered.")]
+	public string Hint
+	{
+		get => _hint;
+		set
+		{
+			_hint = value;
 			if(!_userTextEntered)
 			{
-				EnterNormalMode();
-				base.Text = string.Empty;
+				base.Text = value;
 			}
 		}
+	}
 
-		protected override void OnLostFocus(EventArgs e)
+	[DefaultValue("")]
+	[Browsable(true)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	[Description("Current text in the HintTextBox. If no text is entered, hint text is not returned.")]
+	public override string Text
+	{
+		get => _userTextEntered ? base.Text : string.Empty;
+		set
 		{
-			base.OnLostFocus(e);
-			if(TextIsValid(base.Text))
+			if(TextIsValid(value))
 			{
 				_userTextEntered = true;
+				base.Text = value;
 			}
 			else
 			{
 				EnterHintMode();
-			}
-		}
-
-		[DefaultValue("GrayText")]
-		[Browsable(true)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-		public Color HintForeColor { get; set; } = SystemColors.GrayText;
-
-		[DefaultValue("WindowText")]
-		[Browsable(true)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-		public Color TextForeColor { get; set; } = SystemColors.WindowText;
-
-		[DefaultValue("")]
-		[Browsable(true)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-		[Description("Text to display on unfocused control when no text is entered.")]
-		public string Hint
-		{
-			get => _hint;
-			set
-			{
-				_hint = value;
-				if(!_userTextEntered)
-				{
-					base.Text = value;
-				}
-			}
-		}
-
-		[DefaultValue("")]
-		[Browsable(true)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-		[Description("Current text in the HintTextBox. If no text is entered, hint text is not returned.")]
-		public override string Text
-		{
-			get => _userTextEntered ? base.Text : string.Empty;
-			set
-			{
-				if(TextIsValid(value))
-				{
-					_userTextEntered = true;
-					base.Text = value;
-				}
-				else
-				{
-					EnterHintMode();
-				}
 			}
 		}
 	}

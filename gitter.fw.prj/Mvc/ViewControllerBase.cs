@@ -18,39 +18,38 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
-{
-	public class ViewControllerBase<T> : IViewController<T>
-		where T : class, IView
-	{
-		private T _view;
+namespace gitter.Framework.Mvc;
 
-		public T View
+public class ViewControllerBase<T> : IViewController<T>
+	where T : class, IView
+{
+	private T _view;
+
+	public T View
+	{
+		get => _view;
+		set
 		{
-			get => _view;
-			set
+			if(_view != value)
 			{
-				if(_view != value)
+				if(_view != null)
 				{
-					if(_view != null)
-					{
-						OnViewDetaching();
-					}
-					_view = value;
-					if(_view != null)
-					{
-						OnViewAttached();
-					}
+					OnViewDetaching();
+				}
+				_view = value;
+				if(_view != null)
+				{
+					OnViewAttached();
 				}
 			}
 		}
+	}
 
-		protected virtual void OnViewDetaching()
-		{
-		}
+	protected virtual void OnViewDetaching()
+	{
+	}
 
-		protected virtual void OnViewAttached()
-		{
-		}
+	protected virtual void OnViewAttached()
+	{
 	}
 }

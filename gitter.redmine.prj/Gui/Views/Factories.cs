@@ -18,48 +18,47 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+sealed class IssuesViewFactory : ViewFactoryBase
 {
-	using System;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	sealed class IssuesViewFactory : ViewFactoryBase
+	public IssuesViewFactory()
+		: base(Guids.IssuesViewGuid, Resources.StrIssues, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues"), singleton: true)
 	{
-		public IssuesViewFactory()
-			: base(Guids.IssuesViewGuid, Resources.StrIssues, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues"), singleton: true)
-		{
-		}
-
-		/// <inheritdoc/>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-			=> new IssuesView(environment);
 	}
 
-	sealed class NewsViewFactory : ViewFactoryBase
-	{
-		public NewsViewFactory()
-			: base(Guids.NewsViewGuid, Resources.StrNews, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"news"), singleton: true)
-		{
-		}
+	/// <inheritdoc/>
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+		=> new IssuesView(environment);
+}
 
-		/// <inheritdoc/>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-			=> new NewsView(environment);
+sealed class NewsViewFactory : ViewFactoryBase
+{
+	public NewsViewFactory()
+		: base(Guids.NewsViewGuid, Resources.StrNews, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"news"), singleton: true)
+	{
 	}
 
-	sealed class VersionsViewFactory : ViewFactoryBase
-	{
-		public VersionsViewFactory()
-			: base(Guids.VersionsViewGuid, Resources.StrVersions, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"versions"), singleton: true)
-		{
-		}
+	/// <inheritdoc/>
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+		=> new NewsView(environment);
+}
 
-		/// <inheritdoc/>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-			=> new VersionsView(environment);
+sealed class VersionsViewFactory : ViewFactoryBase
+{
+	public VersionsViewFactory()
+		: base(Guids.VersionsViewGuid, Resources.StrVersions, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"versions"), singleton: true)
+	{
 	}
+
+	/// <inheritdoc/>
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+		=> new VersionsView(environment);
 }

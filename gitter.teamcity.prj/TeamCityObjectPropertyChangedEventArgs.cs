@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+
+public sealed class TeamCityObjectPropertyChangedEventArgs : EventArgs
 {
-	using System;
-
-	public sealed class TeamCityObjectPropertyChangedEventArgs : EventArgs
+	public TeamCityObjectPropertyChangedEventArgs(TeamCityObjectProperty property)
 	{
-		public TeamCityObjectPropertyChangedEventArgs(TeamCityObjectProperty property)
-		{
-			Property = property;
-		}
-
-		public TeamCityObjectProperty Property { get; }
+		Property = property;
 	}
+
+	public TeamCityObjectProperty Property { get; }
 }

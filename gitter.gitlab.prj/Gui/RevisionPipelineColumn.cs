@@ -18,58 +18,57 @@
  */
 #endregion
 
-namespace gitter.GitLab.Gui
+namespace gitter.GitLab.Gui;
+
+using System;
+using System.Collections.Generic;
+
+using gitter.Framework.Controls;
+using gitter.Git;
+using gitter.Git.Gui.Controls;
+
+class RevisionPipelineColumn : CustomListBoxColumn
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly Dictionary<Hash, List<Api.Pipeline>> _pipelines = new();
 
-	using gitter.Framework.Controls;
-	using gitter.Git;
-	using gitter.Git.Gui.Controls;
-
-	class RevisionPipelineColumn : CustomListBoxColumn
+	public RevisionPipelineColumn()
+		: base(-1000, "Pipeline", true)
 	{
-		private readonly Dictionary<Hash, List<Api.Pipeline>> _pipelines = new();
+		Width = 80;
+		//IsAvailable = false;
+		//Init();
+	}
 
-		public RevisionPipelineColumn()
-			: base(-1000, "Pipeline", true)
+	//private async void Init()
+	//{
+	//	foreach(var pipeline in await _api.GetPipelinesAsync())
+	//	{
+	//		if(!Hash.TryParse(pipeline.Sha, out var hash)) continue;
+
+	//		if(!_pipelines.TryGetValue(hash, out var list))
+	//		{
+	//			list = new List<Api.Pipeline>();
+	//			_pipelines.Add(hash, list);
+	//		}
+	//		list.Add(pipeline);
+	//	}
+	//}
+
+	protected override void OnPaintSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
+	{
+		Assert.IsNotNull(subItemPaintEventArgs);
+
+		if(subItemPaintEventArgs.Item is not IRevisionPointerListItem revItem)
 		{
-			Width = 80;
-			//IsAvailable = false;
-			//Init();
+			return;
 		}
+		var revision = revItem.RevisionPointer?.Dereference();
+		if(revision is null) return;
 
-		//private async void Init()
-		//{
-		//	foreach(var pipeline in await _api.GetPipelinesAsync())
-		//	{
-		//		if(!Hash.TryParse(pipeline.Sha, out var hash)) continue;
-
-		//		if(!_pipelines.TryGetValue(hash, out var list))
-		//		{
-		//			list = new List<Api.Pipeline>();
-		//			_pipelines.Add(hash, list);
-		//		}
-		//		list.Add(pipeline);
-		//	}
-		//}
-
-		protected override void OnPaintSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
+		if(_pipelines.TryGetValue(revision.Hash, out var list) && list.Count > 0)
 		{
-			Assert.IsNotNull(subItemPaintEventArgs);
-
-			if(subItemPaintEventArgs.Item is not IRevisionPointerListItem revItem)
-			{
-				return;
-			}
-			var revision = revItem.RevisionPointer?.Dereference();
-			if(revision is null) return;
-
-			if(_pipelines.TryGetValue(revision.Hash, out var list) && list.Count > 0)
-			{
-				var pipeline = list[0];
-				subItemPaintEventArgs.PaintText(pipeline.Status.ToString());
-			}
+			var pipeline = list[0];
+			subItemPaintEventArgs.PaintText(pipeline.Status.ToString());
 		}
 	}
 }

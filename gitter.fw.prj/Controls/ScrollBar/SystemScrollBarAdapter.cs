@@ -18,95 +18,94 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Windows.Forms;
+
+public sealed class SystemScrollBarAdapter : IScrollBarWidget
 {
-	using System;
-	using System.Windows.Forms;
+	#region Data
 
-	public sealed class SystemScrollBarAdapter : IScrollBarWidget
+	private readonly ScrollBar _scrollBar;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler<ScrollEventArgs> Scroll;
+	public event EventHandler ValueChanged;
+
+	#endregion
+
+	#region .ctor
+
+	public SystemScrollBarAdapter(Orientation orientation)
 	{
-		#region Data
-
-		private readonly ScrollBar _scrollBar;
-
-		#endregion
-
-		#region Events
-
-		public event EventHandler<ScrollEventArgs> Scroll;
-		public event EventHandler ValueChanged;
-
-		#endregion
-
-		#region .ctor
-
-		public SystemScrollBarAdapter(Orientation orientation)
+		_scrollBar = orientation switch
 		{
-			_scrollBar = orientation switch
-			{
-				Orientation.Vertical   => new VScrollBar(),
-				Orientation.Horizontal => new HScrollBar(),
-				_ => throw new ArgumentException("Invalid orientation value.", nameof(orientation)),
-			};
-			_scrollBar.Scroll += OnScrollBarScroll;
-			_scrollBar.ValueChanged += OnScrollBarValueChanged;
-			Orientation = orientation;
-		}
-
-		#endregion
-
-		#region Event Handlers
-
-		private void OnScrollBarScroll(object sender, ScrollEventArgs e)
-			=> Scroll?.Invoke(this, e);
-
-		private void OnScrollBarValueChanged(object sender, EventArgs e)
-			=> ValueChanged?.Invoke(this, e);
-
-		#endregion
-
-		#region IScrollBarWidget Members
-
-		public Control Control => _scrollBar;
-
-		public Orientation Orientation { get; }
-
-		public int Value
-		{
-			get => _scrollBar.Value;
-			set => _scrollBar.Value = value;
-		}
-
-		public int Minimum
-		{
-			get => _scrollBar.Minimum;
-			set => _scrollBar.Minimum = value;
-		}
-
-		public int Maximum
-		{
-			get => _scrollBar.Maximum;
-			set => _scrollBar.Maximum = value;
-		}
-
-		public int SmallChange
-		{
-			get => _scrollBar.SmallChange;
-			set => _scrollBar.SmallChange = value;
-		}
-
-		public int LargeChange
-		{
-			get => _scrollBar.LargeChange;
-			set => _scrollBar.LargeChange = value;
-		}
-
-		#endregion
-
-		#region IDisposable Members
-
-		public void Dispose() => _scrollBar.Dispose();
-
-		#endregion
+			Orientation.Vertical   => new VScrollBar(),
+			Orientation.Horizontal => new HScrollBar(),
+			_ => throw new ArgumentException("Invalid orientation value.", nameof(orientation)),
+		};
+		_scrollBar.Scroll += OnScrollBarScroll;
+		_scrollBar.ValueChanged += OnScrollBarValueChanged;
+		Orientation = orientation;
 	}
+
+	#endregion
+
+	#region Event Handlers
+
+	private void OnScrollBarScroll(object sender, ScrollEventArgs e)
+		=> Scroll?.Invoke(this, e);
+
+	private void OnScrollBarValueChanged(object sender, EventArgs e)
+		=> ValueChanged?.Invoke(this, e);
+
+	#endregion
+
+	#region IScrollBarWidget Members
+
+	public Control Control => _scrollBar;
+
+	public Orientation Orientation { get; }
+
+	public int Value
+	{
+		get => _scrollBar.Value;
+		set => _scrollBar.Value = value;
+	}
+
+	public int Minimum
+	{
+		get => _scrollBar.Minimum;
+		set => _scrollBar.Minimum = value;
+	}
+
+	public int Maximum
+	{
+		get => _scrollBar.Maximum;
+		set => _scrollBar.Maximum = value;
+	}
+
+	public int SmallChange
+	{
+		get => _scrollBar.SmallChange;
+		set => _scrollBar.SmallChange = value;
+	}
+
+	public int LargeChange
+	{
+		get => _scrollBar.LargeChange;
+		set => _scrollBar.LargeChange = value;
+	}
+
+	#endregion
+
+	#region IDisposable Members
+
+	public void Dispose() => _scrollBar.Dispose();
+
+	#endregion
 }

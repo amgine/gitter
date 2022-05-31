@@ -18,24 +18,23 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System.Windows.Forms;
+
+public static class IDataObjectExtensions
 {
-	using System.Windows.Forms;
-
-	public static class IDataObjectExtensions
+	public static T GetData<T>(this IDataObject data)
 	{
-		public static T GetData<T>(this IDataObject data)
-		{
-			Verify.Argument.IsNotNull(data, nameof(data));
+		Verify.Argument.IsNotNull(data);
 
-			return (T)data.GetData(typeof(T));
-		}
+		return (T)data.GetData(typeof(T));
+	}
 
-		public static bool GetDataPresent<T>(this IDataObject data)
-		{
-			Verify.Argument.IsNotNull(data, nameof(data));
+	public static bool GetDataPresent<T>(this IDataObject data)
+	{
+		Verify.Argument.IsNotNull(data);
 
-			return data.GetDataPresent(typeof(T));
-		}
+		return data.GetDataPresent(typeof(T));
 	}
 }

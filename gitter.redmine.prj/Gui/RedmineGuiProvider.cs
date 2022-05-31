@@ -18,55 +18,54 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using gitter.Framework;
+using gitter.Framework.Configuration;
+
+sealed class RedmineGuiProvider : IGuiProvider
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+	private readonly IRepository _repository;
+	private readonly RedmineServiceContext _service;
+	private RepositoryExplorer _repositoryExplorer;
 
-	using gitter.Framework;
-	using gitter.Framework.Configuration;
-
-	sealed class RedmineGuiProvider : IGuiProvider
+	public RedmineGuiProvider(IRepository repository, RedmineServiceContext svc)
 	{
-		private readonly IRepository _repository;
-		private readonly RedmineServiceContext _service;
-		private RepositoryExplorer _repositoryExplorer;
+		_repository = repository;
+		_service = svc;
+	}
 
-		public RedmineGuiProvider(IRepository repository, RedmineServiceContext svc)
-		{
-			_repository = repository;
-			_service = svc;
-		}
+	public IRepository Repository => _repository;
 
-		public IRepository Repository => _repository;
+	public RedmineServiceContext ServiceContext => _service;
 
-		public RedmineServiceContext ServiceContext => _service;
+	public void AttachToEnvironment(IWorkingEnvironment environment)
+	{
+		_repositoryExplorer = new RepositoryExplorer(environment, this);
+		environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
+	}
 
-		public void AttachToEnvironment(IWorkingEnvironment environment)
-		{
-			_repositoryExplorer = new RepositoryExplorer(environment, this);
-			environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
-		}
+	public void DetachFromEnvironment(IWorkingEnvironment environment)
+	{
+		var views1 = environment.ViewDockService.FindViews(Guids.IssuesViewGuid).ToList();
+		foreach(var view in views1) view.Close();
+		var views2 = environment.ViewDockService.FindViews(Guids.NewsViewGuid).ToList();
+		foreach(var view in views2) view.Close();
+		var views3 = environment.ViewDockService.FindViews(Guids.VersionsViewGuid).ToList();
+		foreach(var view in views3) view.Close();
+		environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
+		_repositoryExplorer = null;
+	}
 
-		public void DetachFromEnvironment(IWorkingEnvironment environment)
-		{
-			var views1 = environment.ViewDockService.FindViews(Guids.IssuesViewGuid).ToList();
-			foreach(var view in views1) view.Close();
-			var views2 = environment.ViewDockService.FindViews(Guids.NewsViewGuid).ToList();
-			foreach(var view in views2) view.Close();
-			var views3 = environment.ViewDockService.FindViews(Guids.VersionsViewGuid).ToList();
-			foreach(var view in views3) view.Close();
-			environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
-			_repositoryExplorer = null;
-		}
+	public void SaveTo(Section section)
+	{
+	}
 
-		public void SaveTo(Section section)
-		{
-		}
-
-		public void LoadFrom(Section section)
-		{
-		}
+	public void LoadFrom(Section section)
+	{
 	}
 }

@@ -18,106 +18,105 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Controls;
+
+using Resources = gitter.Properties.Resources;
+
+public sealed class RepositoryRootItem : CustomListBoxItem
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
+	private readonly IWorkingEnvironment _environment;
+	private string _repository;
 
-	using gitter.Controls;
+	#endregion
 
-	using Resources = gitter.Properties.Resources;
+	#region .ctor
 
-	public sealed class RepositoryRootItem : CustomListBoxItem
+	public RepositoryRootItem(IWorkingEnvironment environment, string repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(environment);
 
-		private readonly IWorkingEnvironment _environment;
-		private string _repository;
+		_environment = environment;
+		_repository = repository;
+		Expand();
+	}
 
-		#endregion
+	#endregion
 
-		#region .ctor
-
-		public RepositoryRootItem(IWorkingEnvironment environment, string repository)
+	public string RepositoryDisplayName
+	{
+		get => _repository;
+		set
 		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			_environment = environment;
-			_repository = repository;
-			Expand();
+			_repository = value;
+			Invalidate();
 		}
+	}
 
-		#endregion
+	private static Image GetImage(Dpi dpi)
+		=> Icons.Repository.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
-		public string RepositoryDisplayName
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch(measureEventArgs.SubItemId)
 		{
-			get => _repository;
-			set
-			{
-				_repository = value;
-				Invalidate();
-			}
+			case 0:
+				return _repository == null
+					? measureEventArgs.MeasureText("<no repository>")
+					: measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), _repository);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		private static Bitmap GetImage(Dpi dpi)
-			=> CachedResources.ScaledBitmaps[@"repository", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
 
-		/// <inheritdoc/>
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		switch(paintEventArgs.SubItemId)
 		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return _repository == null
-						? measureEventArgs.MeasureText("<no repository>")
-						: measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), _repository);
-				default:
-					return Size.Empty;
-			}
+			case 0:
+				if(_repository == null)
+					paintEventArgs.PaintText("<no repository>");
+				else
+					paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), _repository);
+				break;
 		}
+	}
 
-		/// <inheritdoc/>
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			Assert.IsNotNull(paintEventArgs);
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
 
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					if(_repository == null)
-						paintEventArgs.PaintText("<no repository>");
-					else
-						paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), _repository);
-					break;
-			}
-		}
+		if(_repository is null) return default;
 
-		/// <inheritdoc/>
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
+		var menu = new ContextMenuStrip();
+		var item = new ToolStripMenuItem(
+			Resources.StrAddService.AddEllipsis(), null,
+			(_, _) => ShowAddServiceDialog());
+		menu.Items.Add(item);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
+	}
 
-			if(_repository is null) return default;
-
-			var menu = new ContextMenuStrip();
-			var item = new ToolStripMenuItem(
-				Resources.StrAddService.AddEllipsis(), null,
-				(_, _) => ShowAddServiceDialog());
-			menu.Items.Add(item);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
-		}
-
-		private void ShowAddServiceDialog()
-		{
-			using var d = new AddServiceDialog(_environment);
-			d.Run(ListBox);
-		}
+	private void ShowAddServiceDialog()
+	{
+		using var d = new AddServiceDialog(_environment);
+		d.Run(ListBox);
 	}
 }

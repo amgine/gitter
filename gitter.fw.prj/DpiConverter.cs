@@ -18,93 +18,98 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System.Drawing;
+using System.Windows.Forms;
+
+public readonly struct DpiConverter
 {
-	using System.Drawing;
-	using System.Windows.Forms;
+	private readonly Dpi _from;
+	private readonly Dpi _to;
 
-	public readonly struct DpiConverter
+	public static readonly DpiConverter Identity = new(from: Dpi.Default, to: Dpi.Default);
+
+	public static DpiConverter FromDefaultTo(Dpi dpi) => new(from: Dpi.Default, to: dpi);
+
+	public DpiConverter(Dpi from, Dpi to)
 	{
-		private readonly Dpi _from;
-		private readonly Dpi _to;
-
-		public static readonly DpiConverter Identity = new(from: Dpi.Default, to: Dpi.Default);
-
-		public static DpiConverter FromDefaultTo(Dpi dpi) => new(from: Dpi.Default, to: dpi);
-
-		public DpiConverter(Dpi from, Dpi to)
-		{
-			_from = from;
-			_to   = to;
-		}
-
-		public DpiConverter(Graphics graphics)
-		{
-			_from = Dpi.Default;
-			_to   = new Dpi(graphics);
-		}
-
-		public DpiConverter(Control control)
-		{
-			_from = Dpi.Default;
-			_to   = new Dpi(control.DeviceDpi);
-		}
-
-		public Dpi From => _from;
-
-		public Dpi To => _to;
-
-		public float ConvertX(float value)
-			=> value * _to.X / _from.X;
-
-		public float ConvertY(float value)
-			=> value * _to.Y / _from.Y;
-
-		public int ConvertX(int value)
-			=> (int)(value * _to.X / _from.X);
-
-		public int ConvertY(int value)
-			=> (int)(value * _to.Y / _from.Y);
-
-		public Padding Convert(Padding padding)
-			=> new(
-				left:   ConvertX(padding.Left),
-				top:    ConvertY(padding.Top),
-				right:  ConvertX(padding.Right),
-				bottom: ConvertY(padding.Bottom));
-
-		public Point Convert(Point point)
-			=> new(
-				x: ConvertX(point.X),
-				y: ConvertY(point.Y));
-
-		public PointF Convert(PointF point)
-			=> new(
-				x: ConvertX(point.X),
-				y: ConvertY(point.Y));
-
-		public Size Convert(Size size)
-			=> new(
-				width:  ConvertX(size.Width),
-				height: ConvertY(size.Height));
-
-		public SizeF Convert(SizeF size)
-			=> new(
-				width:  ConvertX(size.Width),
-				height: ConvertY(size.Height));
-
-		public Rectangle Convert(Rectangle rectangle)
-			=> new(
-				x:      ConvertX(rectangle.X),
-				y:      ConvertY(rectangle.Y),
-				width:  ConvertX(rectangle.Width),
-				height: ConvertY(rectangle.Height));
-
-		public RectangleF Convert(RectangleF rectangle)
-			=> new(
-				x:      ConvertX(rectangle.X),
-				y:      ConvertY(rectangle.Y),
-				width:  ConvertX(rectangle.Width),
-				height: ConvertY(rectangle.Height));
+		_from = from;
+		_to   = to;
 	}
+
+	public DpiConverter(Graphics graphics)
+	{
+		_from = Dpi.Default;
+		_to   = new Dpi(graphics);
+	}
+
+	public DpiConverter(Control control)
+	{
+		_from = Dpi.Default;
+		_to   = Dpi.FromControl(control);
+	}
+
+	public Dpi From => _from;
+
+	public Dpi To => _to;
+
+	static int Scale(int value, int from, int to)
+		=> (value * to + from - 1) / from;
+
+	static float Scale(float value, int from, int to)
+		=> value * to / from;
+
+	public float ConvertX(float value)
+		=> Scale(value, _from.X, _to.X);
+
+	public float ConvertY(float value)
+		=> Scale(value, _from.Y, _to.Y);
+
+	public int ConvertX(int value)
+		=> Scale(value, _from.X, _to.X);
+
+	public int ConvertY(int value)
+		=> Scale(value, _from.Y, _to.Y);
+
+	public Padding Convert(Padding padding)
+		=> new(
+			left:   ConvertX(padding.Left),
+			top:    ConvertY(padding.Top),
+			right:  ConvertX(padding.Right),
+			bottom: ConvertY(padding.Bottom));
+
+	public Point Convert(Point point)
+		=> new(
+			x: ConvertX(point.X),
+			y: ConvertY(point.Y));
+
+	public PointF Convert(PointF point)
+		=> new(
+			x: ConvertX(point.X),
+			y: ConvertY(point.Y));
+
+	public Size Convert(Size size)
+		=> new(
+			width:  ConvertX(size.Width),
+			height: ConvertY(size.Height));
+
+	public SizeF Convert(SizeF size)
+		=> new(
+			width:  ConvertX(size.Width),
+			height: ConvertY(size.Height));
+
+	public Rectangle Convert(Rectangle rectangle)
+		=> new(
+			x:      ConvertX(rectangle.X),
+			y:      ConvertY(rectangle.Y),
+			width:  ConvertX(rectangle.Width),
+			height: ConvertY(rectangle.Height));
+
+	public RectangleF Convert(RectangleF rectangle)
+		=> new(
+			x:      ConvertX(rectangle.X),
+			y:      ConvertY(rectangle.Y),
+			width:  ConvertX(rectangle.Width),
+			height: ConvertY(rectangle.Height));
 }

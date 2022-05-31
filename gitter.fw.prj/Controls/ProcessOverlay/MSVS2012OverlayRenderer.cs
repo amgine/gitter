@@ -18,144 +18,161 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+
+sealed class MSVS2012OverlayRenderer : ProcessOverlayRenderer
 {
-	using System;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
+	private const byte BackgroundAlpha = 255;
 
-	sealed class MSVS2012OverlayRenderer : ProcessOverlayRenderer
+	public interface IColorTable
 	{
-		private const byte BackgroundAlpha = 255;
+		Color Text { get; }
+		Color Background { get; }
+	}
 
-		public interface IColorTable
+	private sealed class DarkColorTable : IColorTable
+	{
+		public Color Text => MSVS2012DarkColors.WINDOW_TEXT;
+
+		public Color Background => MSVS2012DarkColors.WORK_AREA;
+	}
+
+	private static IColorTable _darkColors;
+
+	public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
+
+	public MSVS2012OverlayRenderer(IColorTable colorTable)
+	{
+		Verify.Argument.IsNotNull(colorTable);
+
+		ColorTable = colorTable;
+	}
+
+	private IColorTable ColorTable { get; }
+
+	private static Color ColorLERP(Color c1, Color c2, double position)
+	{
+		byte r1 = c1.R;
+		byte r2 = c2.R;
+		byte r = (byte)(r1 + (r2 - r1) * position);
+
+		byte g1 = c1.G;
+		byte g2 = c2.G;
+		byte g = (byte)(g1 + (g2 - g1) * position);
+
+		byte b1 = c1.B;
+		byte b2 = c2.B;
+		byte b = (byte)(b1 + (b2 - b1) * position);
+
+		return Color.FromArgb(r, g, b);
+	}
+
+	private void DrawIndeterminateProgress(Graphics graphics, Dpi dpi, int x, int y, int w, int h)
+	{
+		const int n = 12;
+
+		int cx = x + w / 2;
+		int cy = y + h / 2;
+
+		int r = (w < h ? w : h) / 2;
+
+#if NETCOREAPP
+		long current = (Environment.TickCount64 / 100) % n;
+#else
+		long current = (Environment.TickCount / 100) % n;
+#endif
+
+		using var pen = new Pen(Color.Transparent, dpi.X * 2.0f / 96);
+		for(int i = 0; i < n; ++i)
 		{
-			Color Text { get; }
-			Color Background { get; }
-		}
+			var a = i * (Math.PI * 2) / n;
+			var cos = Math.Cos(a);
+			var sin = Math.Sin(a);
+			float x1 = (float)(cx + cos * r / 3.0);
+			float y1 = (float)(cy + sin * r / 3.0);
+			float x2 = (float)(cx + cos * r);
+			float y2 = (float)(cy + sin * r);
 
-		private sealed class DarkColorTable : IColorTable
-		{
-			public Color Text => MSVS2012DarkColors.WINDOW_TEXT;
-
-			public Color Background => MSVS2012DarkColors.WORK_AREA;
-		}
-
-		private static IColorTable _darkColors;
-
-		public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
-
-		public MSVS2012OverlayRenderer(IColorTable colorTable)
-		{
-			Verify.Argument.IsNotNull(colorTable, nameof(colorTable));
-
-			ColorTable = colorTable;
-		}
-
-		private IColorTable ColorTable { get; }
-
-		private static Color ColorLERP(Color c1, Color c2, double position)
-		{
-			byte r1 = c1.R;
-			byte r2 = c2.R;
-			byte r = (byte)(r1 + (r2 - r1) * position);
-
-			byte g1 = c1.G;
-			byte g2 = c2.G;
-			byte g = (byte)(g1 + (g2 - g1) * position);
-
-			byte b1 = c1.B;
-			byte b2 = c2.B;
-			byte b = (byte)(b1 + (b2 - b1) * position);
-
-			return Color.FromArgb(r, g, b);
-		}
-
-		private void DrawIndeterminateProgress(Graphics graphics, int x, int y, int w, int h)
-		{
-			const int n = 12;
-
-			int cx = x + w / 2;
-			int cy = y + h / 2;
-
-			int r = (w < h ? w : h) / 2;
-
-			long current = (DateTime.Now.Ticks / 1000000) % n;
-
-			for(int i = 0; i < n; ++i)
+			Color color;
+			if(i == current)
 			{
-				var a = i * (Math.PI * 2) / n;
-				var cos = Math.Cos(a);
-				var sin = Math.Sin(a);
-				float x1 = (float)(cx + cos * r / 3.0);
-				float y1 = (float)(cy + sin * r / 3.0);
-				float x2 = (float)(cx + cos * r);
-				float y2 = (float)(cy + sin * r);
-
-				Color color;
-				if(i == current)
+				color = ColorTable.Text;
+			}
+			else
+			{
+				if((current + 1) % n == i)
 				{
-					color = ColorTable.Text;
+					color = ColorTable.Background;
 				}
 				else
 				{
-					if((current + 1) % n == i)
-					{
-						color = ColorTable.Background;
-					}
-					else
-					{
-						var d = i - current;
-						if(d < 0) d += n;
-						d = n - d;
-						var k = (double)d / (double)n;
-						color = ColorLERP(ColorTable.Text, ColorTable.Background, k);
-					}
+					var d = i - current;
+					if(d < 0) d += n;
+					d = n - d;
+					var k = (double)d / (double)n;
+					color = ColorLERP(ColorTable.Text, ColorTable.Background, k);
 				}
-
-				using var pen = new Pen(color, 2.0f);
-				graphics.DrawLine(pen, x1, y1, x2, y2);
 			}
+
+			pen.Color = color;
+			graphics.DrawLine(pen, x1, y1, x2, y2);
 		}
+	}
 
-		public override void Paint(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds)
+	public override void Paint(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds)
+	{
+		const int spacing = 10;
+
+		var dpi  = Dpi.FromControl(processOverlay.HostControl);
+		var conv = DpiConverter.FromDefaultTo(dpi);
+
+		using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
 		{
-			const int spacing = 10;
-			using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
-			{
-				graphics.FillRectangle(brush, bounds);
-			}
-			var font = processOverlay.Font;
-			var tw = GitterApplication.TextRenderer.MeasureText(
-				graphics, processOverlay.Title, font, bounds.Width, TitleStringFormat).Width;
-			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
-			{
-				DrawIndeterminateProgress(graphics, bounds.X + (bounds.Width - tw) / 2 - 14 - 5, bounds.Y + (bounds.Height - 14) / 2, 14, 14);
-			}
-			var titleRect = new Rectangle(bounds.X + (bounds.Width - tw) / 2, bounds.Y, bounds.Width - spacing * 2 - 5 - 14, bounds.Height);
-			if(!string.IsNullOrWhiteSpace(processOverlay.Title))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, processOverlay.Title, font, ColorTable.Text, titleRect, TitleStringFormat);
-			}
-			if(!string.IsNullOrWhiteSpace(processOverlay.Message))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, processOverlay.Message, font, ColorTable.Text, bounds, StringFormat);
-			}
+			graphics.FillRectangle(brush, bounds);
 		}
-
-		public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
+		var font = processOverlay.Font;
+		var tw = GitterApplication.TextRenderer.MeasureText(
+			graphics, processOverlay.Title, font, bounds.Width, TitleStringFormat).Width;
+		var s = conv.ConvertX(5);
+		var size = conv.Convert(new Size(14, 14));
+		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 		{
-			using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
-			{
-				graphics.FillRectangle(brush, bounds);
-			}
-			if(!string.IsNullOrWhiteSpace(status))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, status, processOverlay.Font, ColorTable.Text, bounds, StringFormat);
-			}
+			DrawIndeterminateProgress(graphics, dpi,
+				bounds.X + (bounds.Width  - tw) / 2 - size.Width - s,
+				bounds.Y + (bounds.Height - size.Height) / 2,
+				size.Width, size.Height);
+		}
+		var titleRect = new Rectangle(
+			bounds.X + (bounds.Width - tw) / 2,
+			bounds.Y,
+			bounds.Width - conv.ConvertX(spacing) * 2 - s - size.Width,
+			bounds.Height);
+		if(!string.IsNullOrWhiteSpace(processOverlay.Title))
+		{
+			GitterApplication.TextRenderer.DrawText(
+				graphics, processOverlay.Title, font, ColorTable.Text, titleRect, TitleStringFormat);
+		}
+		if(!string.IsNullOrWhiteSpace(processOverlay.Message))
+		{
+			GitterApplication.TextRenderer.DrawText(
+				graphics, processOverlay.Message, font, ColorTable.Text, bounds, StringFormat);
+		}
+	}
+
+	public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
+	{
+		using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
+		{
+			graphics.FillRectangle(brush, bounds);
+		}
+		if(!string.IsNullOrWhiteSpace(status))
+		{
+			GitterApplication.TextRenderer.DrawText(
+				graphics, status, processOverlay.Font, ColorTable.Text, bounds, StringFormat);
 		}
 	}
 }

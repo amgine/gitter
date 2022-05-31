@@ -18,21 +18,20 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+public abstract class FlowPanelHeader
 {
-	public abstract class FlowPanelHeader
+	protected FlowPanelHeader(FlowPanel flowPanel)
 	{
-		protected FlowPanelHeader(FlowPanel flowPanel)
-		{
-			Verify.Argument.IsNotNull(flowPanel, nameof(flowPanel));
+		Verify.Argument.IsNotNull(flowPanel);
 
-			FlowPanel = flowPanel;
-		}
-
-		public FlowPanel FlowPanel { get; }
-
-		public abstract int Height { get; }
-
-		protected abstract void OnPaint(FlowPanelPaintEventArgs paintEventArgs);
+		FlowPanel = flowPanel;
 	}
+
+	public FlowPanel FlowPanel { get; }
+
+	public abstract int Height { get; }
+
+	protected abstract void OnPaint(FlowPanelPaintEventArgs paintEventArgs);
 }

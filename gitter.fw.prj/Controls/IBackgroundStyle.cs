@@ -18,17 +18,17 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
-{
-	using System;
-	using System.Drawing;
+namespace gitter.Framework.Controls;
 
-	/// <summary>Item background style.</summary>
-	public interface IBackgroundStyle
-	{
-		/// <summary>Draw item background.</summary>
-		/// <param name="graphics"><see cref="Graphics"/> surface to draw on.</param>
-		/// <param name="rect">Item rectangle.</param>
-		void Draw(Graphics graphics, Rectangle rect);
-	}
+using System;
+using System.Drawing;
+
+/// <summary>Item background style.</summary>
+public interface IBackgroundStyle
+{
+	/// <summary>Draw item background.</summary>
+	/// <param name="graphics"><see cref="Graphics"/> surface to draw on.</param>
+	/// <param name="dpi">DPI.</param>
+	/// <param name="bounds">Item rectangle.</param>
+	void Draw(Graphics graphics, Dpi dpi, Rectangle bounds);
 }

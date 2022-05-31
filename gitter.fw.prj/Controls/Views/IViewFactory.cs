@@ -18,38 +18,37 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Factory for <see cref="ViewBase"/> objects.</summary>
+public interface IViewFactory
 {
-	using System;
-	using System.Collections.Generic;
+	/// <summary>View GUID.</summary>
+	Guid Guid { get; }
 
-	/// <summary>Factory for <see cref="ViewBase"/> objects.</summary>
-	public interface IViewFactory
-	{
-		/// <summary>View GUID.</summary>
-		Guid Guid { get; }
+	/// <summary>View name.</summary>
+	string Name { get; }
 
-		/// <summary>View name.</summary>
-		string Name { get; }
+	/// <summary>View icon.</summary>
+	IImageProvider ImageProvider { get; }
 
-		/// <summary>View icon.</summary>
-		IImageProvider ImageProvider { get; }
+	/// <summary>Only one instance of view should be maintained.</summary>
+	bool IsSingleton { get; }
 
-		/// <summary>Only one instance of view should be maintained.</summary>
-		bool IsSingleton { get; }
+	/// <summary>List of views created by this factory.</summary>
+	IEnumerable<ViewBase> CreatedViews { get; }
 
-		/// <summary>List of views created by this factory.</summary>
-		IEnumerable<ViewBase> CreatedViews { get; }
+	/// <summary>Closes all views, created by this factory.</summary>
+	void CloseAllViews();
 
-		/// <summary>Closes all views, created by this factory.</summary>
-		void CloseAllViews();
+	/// <summary>Create new view with default parameters.</summary>
+	/// <param name="environment">Application working environment.</param>
+	/// <returns>Created view.</returns>
+	ViewBase CreateView(IWorkingEnvironment environment);
 
-		/// <summary>Create new view with default parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
-		ViewBase CreateView(IWorkingEnvironment environment);
-
-		/// <summary>Default view position.</summary>
-		ViewPosition DefaultViewPosition { get; }
-	}
+	/// <summary>Default view position.</summary>
+	ViewPosition DefaultViewPosition { get; }
 }

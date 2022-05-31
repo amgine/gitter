@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+/// <summary>Git accessor factory.</summary>
+public interface IGitAccessorProvider
 {
-	/// <summary>Git accessor factory.</summary>
-	public interface IGitAccessorProvider
-	{
-		/// <summary>Returns string used to identify git accessor.</summary>
-		string Name { get; }
+	/// <summary>Returns string used to identify git accessor.</summary>
+	string Name { get; }
 
-		/// <summary>Returns string to represent accessor in GUI.</summary>
-		string DisplayName { get; }
+	/// <summary>Returns string to represent accessor in GUI.</summary>
+	string DisplayName { get; }
 
-		/// <summary>Creates git accessor.</summary>
-		/// <returns>Created git accessor.</returns>
-		IGitAccessor CreateAccessor();
-	}
+	/// <summary>Creates git accessor.</summary>
+	/// <returns>Created git accessor.</returns>
+	IGitAccessor CreateAccessor();
 }

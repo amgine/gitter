@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
-{
-	using System;
+namespace gitter.Git.AccessLayer;
 
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryTags"/> operation.</summary>
-	public sealed class QueryTagsParameters
+using System;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryTags"/> operation.</summary>
+public sealed class QueryTagsParameters
+{
+	/// <summary>Create <see cref="QueryTagsParameters"/>.</summary>
+	public QueryTagsParameters()
 	{
-		/// <summary>Create <see cref="QueryTagsParameters"/>.</summary>
-		public QueryTagsParameters()
-		{
-		}
 	}
 }

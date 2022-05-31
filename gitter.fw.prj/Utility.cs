@@ -18,362 +18,406 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Principal;
+using System.Text;
+using System.Windows.Forms;
+
+using gitter.Native;
+
+public static class Utility
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Globalization;
-	using System.IO;
-	using System.Reflection;
-	using System.Runtime.InteropServices;
-	using System.Security;
-	using System.Security.Principal;
-	using System.Text;
-	using System.Windows.Forms;
+	private static readonly Version _osVersion = Environment.OSVersion.Version;
 
-	using gitter.Native;
+	/// <summary>1 Jan 1970</summary>
+	private static readonly DateTime UnixEraStart = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-	public static class Utility
+	public static bool IsOSVistaOrNewer => _osVersion >= new Version(6, 0);
+
+	public static bool IsOSWindows7OrNewer => _osVersion >= new Version(6, 1);
+
+	public static void UseImmersiveDarkMode(IntPtr hwnd)
 	{
-		private static readonly Version _osVersion = Environment.OSVersion.Version;
+		var j = (uint)1;
+		_ = DwmApi.DwmSetWindowAttribute(hwnd, (DWMWA)20, ref j, sizeof(uint));
+	}
 
-		/// <summary>1 Jan 1970</summary>
-		private static readonly DateTime UnixEraStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+	public static void DisableRoundedCorners(IntPtr hwnd)
+	{
+		var DWMWCP_DONOTROUND = (uint)1;
+		_ = DwmApi.DwmSetWindowAttribute(hwnd, (DWMWA)33, ref DWMWCP_DONOTROUND, sizeof(uint));
+	}
 
-		public static bool IsOSVistaOrNewer => _osVersion >= new Version(6, 0);
-
-		public static bool IsOSWindows7OrNewer => _osVersion >= new Version(6, 1);
-
-		private static string GetRelative(TimeSpan span)
+	private static string GetRelative(TimeSpan span)
+	{
+		if(span.TotalDays >= 365)
 		{
-			if(span.TotalDays >= 365)
-			{
-				var years = (int)(span.TotalDays / 365);
-				return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
-			}
-			if(span.TotalDays >= 30)
-			{
-				var months = (int)(span.TotalDays / 30);
-				return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
-			}
-			if(span.TotalDays >= 7)
-			{
-				var weeks = (int)(span.TotalDays / 7);
-				return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
-			}
-			if(span.TotalDays >= 1)
-			{
-				var days = (int)span.TotalDays;
-				return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
-			}
-			if(span.TotalHours >= 1)
-			{
-				var hours = (int)span.TotalHours;
-				return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
-			}
-			if(span.TotalMinutes >= 1)
-			{
-				var minutes = (int)span.TotalMinutes;
-				return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
-			}
-			var seconds = (int)span.TotalSeconds;
-			return seconds switch
-			{
-				0 => "just now",
-				1 => "1 second ago",
-				_ => seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago",
-			};
+			var years = (int)(span.TotalDays / 365);
+			return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
 		}
-
-		public static string FormatDate(DateTime date, DateFormat format, bool includeUTCOffset = true)
-			=> format switch
-			{
-				DateFormat.SystemDefault => includeUTCOffset ? date.ToString(CultureInfo.CurrentCulture) : date.ToString("G", CultureInfo.CurrentCulture),
-				DateFormat.UnixTimestamp => ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture),
-				DateFormat.Relative      => GetRelative(DateTime.Now - date),
-				DateFormat.ISO8601       => date.FormatISO8601(includeUTCOffset),
-				DateFormat.RFC2822       => date.FormatRFC2822(includeUTCOffset),
-				_ => throw new ArgumentException($"Unknown DateFormat value: {format}", nameof(format)),
-			};
-
-		public static string FormatDate(DateTimeOffset date, DateFormat format, bool includeUTCOffset = true)
-			=> format switch
-			{
-				DateFormat.SystemDefault => includeUTCOffset ? date.ToString(CultureInfo.CurrentCulture) : date.ToString("G", CultureInfo.CurrentCulture),
-				DateFormat.UnixTimestamp => ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture),
-				DateFormat.Relative      => GetRelative(DateTimeOffset.Now - date),
-				DateFormat.ISO8601       => date.FormatISO8601(includeUTCOffset),
-				DateFormat.RFC2822       => date.FormatRFC2822(includeUTCOffset),
-				_ => throw new ArgumentException($"Unknown DateFormat value: {format}", nameof(format)),
-			};
-
-		public static string ExpandNewLineCharacters(string text)
+		if(span.TotalDays >= 30)
 		{
-			if(Environment.NewLine == "\n") return text;
+			var months = (int)(span.TotalDays / 30);
+			return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
+		}
+		if(span.TotalDays >= 7)
+		{
+			var weeks = (int)(span.TotalDays / 7);
+			return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
+		}
+		if(span.TotalDays >= 1)
+		{
+			var days = (int)span.TotalDays;
+			return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
+		}
+		if(span.TotalHours >= 1)
+		{
+			var hours = (int)span.TotalHours;
+			return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
+		}
+		if(span.TotalMinutes >= 1)
+		{
+			var minutes = (int)span.TotalMinutes;
+			return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
+		}
+		var seconds = (int)span.TotalSeconds;
+		return seconds switch
+		{
+			0 => "just now",
+			1 => "1 second ago",
+			_ => seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago",
+		};
+	}
 
-			var sb = new StringBuilder(text.Length + 20);
-			for(int i = 0; i < text.Length; ++i)
+	public static string FormatDate(DateTime date, DateFormat format, bool includeUTCOffset = true)
+		=> format switch
+		{
+			DateFormat.SystemDefault => includeUTCOffset ? date.ToString(CultureInfo.CurrentCulture) : date.ToString("G", CultureInfo.CurrentCulture),
+			DateFormat.UnixTimestamp => ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture),
+			DateFormat.Relative      => GetRelative(DateTime.Now - date),
+			DateFormat.ISO8601       => date.FormatISO8601(includeUTCOffset),
+			DateFormat.RFC2822       => date.FormatRFC2822(includeUTCOffset),
+			_ => throw new ArgumentException($"Unknown DateFormat value: {format}", nameof(format)),
+		};
+
+	public static string FormatDate(DateTimeOffset date, DateFormat format, bool includeUTCOffset = true)
+		=> format switch
+		{
+			DateFormat.SystemDefault => includeUTCOffset ? date.ToString(CultureInfo.CurrentCulture) : date.ToString("G", CultureInfo.CurrentCulture),
+			DateFormat.UnixTimestamp => ((int)(date - UnixEraStart).TotalSeconds).ToString(CultureInfo.InvariantCulture),
+			DateFormat.Relative      => GetRelative(DateTimeOffset.Now - date),
+			DateFormat.ISO8601       => date.FormatISO8601(includeUTCOffset),
+			DateFormat.RFC2822       => date.FormatRFC2822(includeUTCOffset),
+			_ => throw new ArgumentException($"Unknown DateFormat value: {format}", nameof(format)),
+		};
+
+#if NETCOREAPP
+
+	public static bool TryFormatDate(DateTimeOffset date, Span<char> text, out int charsWritten, DateFormat format, bool includeUTCOffset = true)
+	{
+		switch(format)
+		{
+			case DateFormat.UnixTimestamp:
+				return ((int)(date - UnixEraStart).TotalSeconds).TryFormat(text, out charsWritten, provider: CultureInfo.InvariantCulture);
+			case DateFormat.Relative:
+				charsWritten = 0;
+				return false;
+			case DateFormat.SystemDefault:
+				return includeUTCOffset
+					? date.TryFormat(text, out charsWritten, format: "G".AsSpan(), formatProvider: CultureInfo.CurrentCulture)
+					: date.TryFormat(text, out charsWritten, formatProvider: CultureInfo.CurrentCulture);
+			case DateFormat.ISO8601:
+				return date.TryFormatISO8601(text, out charsWritten, includeUTCOffset);
+			case DateFormat.RFC2822:
+				return date.TryFormatRFC2822(text, out charsWritten, includeUTCOffset);
+			default:
+				throw new ArgumentException($"Unknown DateFormat value: {format}", nameof(format));
+		}
+	}
+
+#endif
+
+	public static string ExpandNewLineCharacters(string text)
+	{
+		if(Environment.NewLine == "\n") return text;
+
+		var sb = new StringBuilder(text.Length + 20);
+		for(int i = 0; i < text.Length; ++i)
+		{
+			var c = text[i];
+			if(c == '\r')
 			{
-				var c = text[i];
-				if(c == '\r')
-				{
-					continue;
-				}
-				if(c == '\n')
-				{
-					sb.Append(Environment.NewLine);
-					continue;
-				}
-				sb.Append(c);
+				continue;
 			}
-			return sb.ToString();
-		}
-
-		private static readonly Func<int, string> _strAlloc = GetAllocateStringMethod();
-
-		private static Func<int, string> GetAllocateStringMethod()
-		{
-			var method = typeof(string).GetMethod("FastAllocateString", BindingFlags.Static | BindingFlags.NonPublic);
-			if(method == null)
+			if(c == '\n')
 			{
-				return new Func<int, string>(static length => new string(' ', length));
+				sb.Append(Environment.NewLine);
+				continue;
 			}
-			else
-			{
-				return (Func<int, string>)Delegate.CreateDelegate(typeof(Func<int, string>), method);
-			}
+			sb.Append(c);
 		}
+		return sb.ToString();
+	}
 
-		public static string FastAllocateString(int length)
+	private static readonly Func<int, string> _strAlloc = GetAllocateStringMethod();
+
+	private static Func<int, string> GetAllocateStringMethod()
+	{
+		var method = typeof(string).GetMethod("FastAllocateString", BindingFlags.Static | BindingFlags.NonPublic);
+		return method is null
+			? new Func<int, string>(static length => new string(' ', length))
+			: (Func<int, string>)Delegate.CreateDelegate(typeof(Func<int, string>), method);
+	}
+
+	public static string FastAllocateString(int length)
+	{
+		return _strAlloc(length);
+	}
+
+	public static string GetFileType(string fileName, bool dir, bool useExtensionOnly)
+	{
+		const int SHGFI_USEFILEATTRIBUTES = 0x10;
+		const int SHGFI_TYPENAME = 0x400;
+
+		const int FILE_ATTRIBUTE_NORMAL = 0x80;
+		const int FILE_ATTRIBUTE_DIR = 0x10;
+
+		var attr = dir ? FILE_ATTRIBUTE_DIR | FILE_ATTRIBUTE_NORMAL : FILE_ATTRIBUTE_NORMAL;
+		var req = useExtensionOnly ? SHGFI_USEFILEATTRIBUTES | SHGFI_TYPENAME : SHGFI_TYPENAME;
+
+		var info = new SHFILEINFO();
+		var ret = Shell32.SHGetFileInfo(fileName, attr, ref info, Marshal.SizeOf(info), req);
+		return info.szTypeName;
+	}
+
+	public static Control GetParentControl(ToolStripItem item)
+	{
+		Verify.Argument.IsNotNull(item);
+
+		return item.Owner switch
 		{
-			return _strAlloc(length);
+			ContextMenuStrip  cms  => cms.SourceControl,
+			ToolStripDropDown tsdd => tsdd.Parent,
+			_ => item.Owner,
+		};
+	}
+
+	private static readonly LinkedList<IDisposable> LazyDisposables = new();
+
+	public static void MarkDropDownForAutoDispose(ToolStripDropDown menu)
+	{
+		Verify.Argument.IsNotNull(menu);
+
+		menu.Closed += static /*async*/ (sender, _) =>
+		{
+			//await System.Threading.Tasks.Task.Delay(50);
+			var m = (ContextMenuStrip)sender;
+			DisposeOnIdle(m);
+		};
+	}
+
+	private static void DisposeOnIdle(IDisposable obj)
+	{
+		LazyDisposables.AddLast(obj);
+		if(LazyDisposables.Count == 1)
+		{
+			Application.Idle += DisposeRegisteredObjects;
 		}
+	}
 
-		public static string GetFileType(string fileName, bool dir, bool useExtensionOnly)
+	private static void DisposeRegisteredObjects(object sender, EventArgs e)
+	{
+		foreach(var obj in LazyDisposables)
 		{
-			const int SHGFI_USEFILEATTRIBUTES = 0x10;
-			const int SHGFI_TYPENAME = 0x400;
-
-			const int FILE_ATTRIBUTE_NORMAL = 0x80;
-			const int FILE_ATTRIBUTE_DIR = 0x10;
-
-			var attr = dir ? FILE_ATTRIBUTE_DIR | FILE_ATTRIBUTE_NORMAL : FILE_ATTRIBUTE_NORMAL;
-			var req = useExtensionOnly ? SHGFI_USEFILEATTRIBUTES | SHGFI_TYPENAME : SHGFI_TYPENAME;
-
-			var info = new SHFILEINFO();
-			var ret = Shell32.SHGetFileInfo(fileName, attr, ref info, Marshal.SizeOf(info), req);
-			return info.szTypeName;
-		}
-
-		public static Control GetParentControl(ToolStripItem item)
-		{
-			Verify.Argument.IsNotNull(item, nameof(item));
-
-			return item.Owner switch
-			{
-				ContextMenuStrip  cms  => cms.SourceControl,
-				ToolStripDropDown tsdd => tsdd.Parent,
-				_ => item.Owner,
-			};
-		}
-
-		private static readonly LinkedList<IDisposable> LazyDisposables = new LinkedList<IDisposable>();
-
-		public static void MarkDropDownForAutoDispose(ToolStripDropDown menu)
-		{
-			Verify.Argument.IsNotNull(menu, nameof(menu));
-
-			menu.Closed += (sender, e) => DisposeOnIdle((IDisposable)sender);
-		}
-
-		private static void DisposeOnIdle(IDisposable obj)
-		{
-			LazyDisposables.AddLast(obj);
-			if(LazyDisposables.Count == 1)
-			{
-				Application.Idle += DisposeRegisteredObjects;
-			}
-		}
-
-		private static void DisposeRegisteredObjects(object sender, EventArgs e)
-		{
-			foreach(var obj in LazyDisposables)
+			try
 			{
 				obj.Dispose();
 			}
-			LazyDisposables.Clear();
-			Application.Idle -= DisposeRegisteredObjects;
-		}
-
-		public static AnchorStyles InvertAnchor(AnchorStyles anchor)
-		{
-			var inverted = AnchorStyles.None;
-			if((anchor & (AnchorStyles.Left | AnchorStyles.Right)) != (AnchorStyles.Left | AnchorStyles.Right))
+			catch
 			{
-				if((anchor & AnchorStyles.Left) == AnchorStyles.Left) inverted |= AnchorStyles.Right;
-				if((anchor & AnchorStyles.Right) == AnchorStyles.Right) inverted |= AnchorStyles.Left;
-			}
-			if((anchor & (AnchorStyles.Top | AnchorStyles.Bottom)) != (AnchorStyles.Top | AnchorStyles.Bottom))
-			{
-				if((anchor & AnchorStyles.Top) == AnchorStyles.Top) inverted |= AnchorStyles.Bottom;
-				if((anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom) inverted |= AnchorStyles.Bottom;
-			}
-			return inverted;
-		}
-
-		internal static int WM_TASKBAR_BUTTON_CREATED;
-
-		internal static ITaskbarList TaskBarList { get; private set; }
-
-		public static void EnableWin7TaskbarSupport()
-		{
-			if(TaskBarList != null) return;
-			if(IsOSWindows7OrNewer)
-			{
-				WM_TASKBAR_BUTTON_CREATED = User32.RegisterWindowMessage("TaskbarButtonCreated");
-				TaskBarList = (ITaskbarList)Activator.CreateInstance<TaskbarList>();
 			}
 		}
+		LazyDisposables.Clear();
+		Application.Idle -= DisposeRegisteredObjects;
+	}
 
-		public static void DisableWin7TaskbarSupport()
+	public static AnchorStyles InvertAnchor(AnchorStyles anchor)
+	{
+		var inverted = AnchorStyles.None;
+		if((anchor & (AnchorStyles.Left | AnchorStyles.Right)) != (AnchorStyles.Left | AnchorStyles.Right))
 		{
-			if(TaskBarList == null) return;
-			Marshal.ReleaseComObject(TaskBarList);
-			TaskBarList = null;
+			if((anchor & AnchorStyles.Left) == AnchorStyles.Left) inverted |= AnchorStyles.Right;
+			if((anchor & AnchorStyles.Right) == AnchorStyles.Right) inverted |= AnchorStyles.Left;
 		}
-
-		public static Process CreateProcessFor(string url)
+		if((anchor & (AnchorStyles.Top | AnchorStyles.Bottom)) != (AnchorStyles.Top | AnchorStyles.Bottom))
 		{
-			var psi = new ProcessStartInfo
-			{
-				UseShellExecute = true,
-				FileName        = url,
-				Verb            = "OPEN",
-			};
-			if(Directory.Exists(url))
-			{
-				psi.WorkingDirectory = url;
-			}
-			else if(File.Exists(url))
-			{
-				psi.WorkingDirectory = Path.GetDirectoryName(url);
-			}
-			var process = new Process()
-			{
-				StartInfo = psi,
-			};
-			return process;
+			if((anchor & AnchorStyles.Top) == AnchorStyles.Top) inverted |= AnchorStyles.Bottom;
+			if((anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom) inverted |= AnchorStyles.Bottom;
 		}
+		return inverted;
+	}
 
-		public static void OpenUrl(string url)
+	internal static int WM_TASKBAR_BUTTON_CREATED;
+
+	internal static ITaskbarList TaskBarList { get; private set; }
+
+	public static void EnableWin7TaskbarSupport()
+	{
+		if(TaskBarList != null) return;
+		if(IsOSWindows7OrNewer)
 		{
-			var process = CreateProcessFor(url);
-			process.Start();
-			process.Dispose();
+			WM_TASKBAR_BUTTON_CREATED = User32.RegisterWindowMessage("TaskbarButtonCreated");
+			TaskBarList = (ITaskbarList)Activator.CreateInstance<TaskbarList>();
 		}
+	}
 
-		[DllImport("shell32.dll", SetLastError = true)]
-		[SuppressUnmanagedCodeSecurity]
-		static extern int OpenAs_RunDLL(IntPtr hwnd, IntPtr hInst, string lpFile, int nShowCmd);
+	public static void DisableWin7TaskbarSupport()
+	{
+		if(TaskBarList == null) return;
+		Marshal.ReleaseComObject(TaskBarList);
+		TaskBarList = null;
+	}
 
-		public static void ShowOpenWithDialog(string fileName)
+	public static Process CreateProcessFor(string url)
+	{
+		var psi = new ProcessStartInfo
 		{
-			const int SW_NORMAL = 1;
-
-			OpenAs_RunDLL(
-				GitterApplication.MainForm.Handle,
-				Marshal.GetHINSTANCE(GitterApplication.MainForm.GetType().Module),
-				fileName,
-				SW_NORMAL);
+			UseShellExecute = true,
+			FileName        = url,
+			Verb            = "OPEN",
+		};
+		if(Directory.Exists(url))
+		{
+			psi.WorkingDirectory = url;
 		}
+		else if(File.Exists(url))
+		{
+			psi.WorkingDirectory = Path.GetDirectoryName(url);
+		}
+		var process = new Process()
+		{
+			StartInfo = psi,
+		};
+		return process;
+	}
 
-		private static readonly Lazy<bool> _isRunningWithAdministratorRights =
-			new Lazy<bool>(
-				() =>
+	public static void OpenUrl(string url)
+	{
+		var process = CreateProcessFor(url);
+		process.Start();
+		process.Dispose();
+	}
+
+	[DllImport("shell32.dll", SetLastError = true)]
+	[SuppressUnmanagedCodeSecurity]
+	static extern int OpenAs_RunDLL(IntPtr hwnd, IntPtr hInst, string lpFile, int nShowCmd);
+
+	public static void ShowOpenWithDialog(string fileName)
+	{
+		const int SW_NORMAL = 1;
+
+		OpenAs_RunDLL(
+			GitterApplication.MainForm.Handle,
+			Marshal.GetHINSTANCE(GitterApplication.MainForm.GetType().Module),
+			fileName,
+			SW_NORMAL);
+	}
+
+	private static readonly Lazy<bool> _isRunningWithAdministratorRights =
+		new Lazy<bool>(
+			() =>
+			{
+				var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+				return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
+			});
+
+	/// <summary>Checks if process is running with administrator privileges.</summary>
+	public static bool IsRunningWithAdministratorRights
+		=> _isRunningWithAdministratorRights.Value;
+
+	[StructLayout(LayoutKind.Sequential)]
+	private struct PROCESS_BASIC_INFORMATION
+	{
+		public int ExitStatus;
+		public int PebBaseAddress;
+		public int AffinityMask;
+		public int BasePriority;
+		public int UniqueProcessId;
+		public int InheritedFromUniqueProcessId;
+	}
+
+	[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+	static extern bool TerminateProcess(IntPtr hProcess, int exitCode);
+
+	[DllImport("ntdll.dll")]
+	static extern int NtQueryInformationProcess(
+		IntPtr hProcess,
+		int processInformationClass /* 0 */,
+		ref PROCESS_BASIC_INFORMATION processBasicInformation,
+		uint processInformationLength,
+		out uint returnLength
+	);
+
+	/// <summary>Terminate a process tree.</summary>
+	/// <param name="hProcess">The handle of the process</param>
+	/// <param name="processID">The ID of the process</param>
+	/// <param name="exitCode">The exit code of the process</param>
+	public static void TerminateProcessTree(IntPtr hProcess, int processID, int exitCode)
+	{
+		foreach(var process in Process.GetProcesses())
+		{
+			var pbi = new PROCESS_BASIC_INFORMATION();
+			try
+			{
+				if(NtQueryInformationProcess(
+					process.Handle,
+					0, ref pbi, (uint)Marshal.SizeOf(pbi),
+					out _) == 0)
 				{
-					var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-					return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
-				});
-
-		/// <summary>Checks if process is running with administrator privileges.</summary>
-		public static bool IsRunningWithAdministratorRights
-		{
-			get { return _isRunningWithAdministratorRights.Value; }
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		private struct PROCESS_BASIC_INFORMATION
-		{
-			public int ExitStatus;
-			public int PebBaseAddress;
-			public int AffinityMask;
-			public int BasePriority;
-			public int UniqueProcessId;
-			public int InheritedFromUniqueProcessId;
-		}
-
-		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-		static extern bool TerminateProcess(IntPtr hProcess, int exitCode);
-
-		[DllImport("ntdll.dll")]
-		static extern int NtQueryInformationProcess(
-		   IntPtr hProcess,
-		   int processInformationClass /* 0 */,
-		   ref PROCESS_BASIC_INFORMATION processBasicInformation,
-		   uint processInformationLength,
-		   out uint returnLength
-		);
-
-		/// <summary>
-		/// Terminate a process tree
-		/// </summary>
-		/// <param name="hProcess">The handle of the process</param>
-		/// <param name="processID">The ID of the process</param>
-		/// <param name="exitCode">The exit code of the process</param>
-		public static void TerminateProcessTree(IntPtr hProcess, int processID, int exitCode)
-		{
-			foreach(var process in Process.GetProcesses())
-			{
-				var pbi = new PROCESS_BASIC_INFORMATION();
-				try
-				{
-					if(NtQueryInformationProcess(
-						process.Handle,
-						0, ref pbi, (uint)Marshal.SizeOf(pbi),
-						out _) == 0)
+					if(pbi.InheritedFromUniqueProcessId == processID)
 					{
-						if(pbi.InheritedFromUniqueProcessId == processID)
-						{
-							TerminateProcessTree(process.Handle, pbi.UniqueProcessId, exitCode);
-						}
+						TerminateProcessTree(process.Handle, pbi.UniqueProcessId, exitCode);
 					}
 				}
-				catch
-				{
-				}
 			}
-			TerminateProcess(hProcess, exitCode);
+			catch
+			{
+			}
 		}
+		TerminateProcess(hProcess, exitCode);
+	}
 
-		public static string ShowPickFolderDialog(IWin32Window parent)
+	public static string ShowPickFolderDialog(IWin32Window parent)
+	{
+#if !NET6_0_OR_GREATER
+		if(IsOSVistaOrNewer)
 		{
-			if(IsOSVistaOrNewer)
+			try
 			{
-				try
-				{
-					return VistaPickFolderDialog.Show(parent);
-				}
-				catch { }
+				return VistaPickFolderDialog.Show(parent);
 			}
-			using(var dlg = new FolderBrowserDialog())
-			{
-				if(dlg.ShowDialog(parent) == DialogResult.OK)
-				{
-					return dlg.SelectedPath;
-				}
-			}
-			return null;
+			catch { }
 		}
+#endif
+		using(var dlg = new FolderBrowserDialog())
+		{
+			var result = parent is not null
+				? dlg.ShowDialog(parent)
+				: dlg.ShowDialog();
+			if(result == DialogResult.OK)
+			{
+				return dlg.SelectedPath;
+			}
+		}
+		return null;
 	}
 }

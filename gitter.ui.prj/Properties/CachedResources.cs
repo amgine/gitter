@@ -18,18 +18,11 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using gitter.Framework;
+
+static class CachedResources
 {
-	using System;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Properties.Resources;
-
-	static class CachedResources
-	{
-		public static CachedBitmapResources Bitmaps { get; } = new(Resources.ResourceManager);
-
-		public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.Resources.icons");
-	}
+	public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.Resources.icons");
 }

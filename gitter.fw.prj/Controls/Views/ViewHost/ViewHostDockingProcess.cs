@@ -18,261 +18,254 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Native;
+
+sealed class ViewHostDockingProcess : IMouseDragProcess, IDisposable
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	using gitter.Native;
-
-	sealed class ViewHostDockingProcess : IMouseDragProcess, IDisposable
+	public ViewHostDockingProcess(ViewHost viewHost)
 	{
-		public ViewHostDockingProcess(ViewHost viewHost)
-		{
-			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
+		Verify.Argument.IsNotNull(viewHost);
 
-			ViewHost = viewHost;
+		ViewHost = viewHost;
+	}
+
+	public ViewHost ViewHost { get; }
+
+	public bool IsActive { get; private set; }
+
+	public ViewHost HoveredViewHost { get; private set; }
+
+	public DockPanel HoveredDockGrid { get; private set; }
+
+	private static int ZOrderComparison(Control control1, Control control2)
+		=> ZOrderComparison(control1.TopLevelControl.Handle, control2.TopLevelControl.Handle);
+
+	private static int ZOrderComparison(IntPtr hWnd1, IntPtr hWnd2)
+	{
+		const int GW_HWNDNEXT = 2;
+		const int GW_HWNDPREV = 3;
+		IntPtr hWnd;
+		hWnd = hWnd1;
+		while(hWnd != IntPtr.Zero)
+		{
+			hWnd = User32.GetWindow(hWnd, GW_HWNDNEXT);
+			if(hWnd == hWnd2) return -1;
 		}
-
-		public ViewHost ViewHost { get; }
-
-		public bool IsActive { get; private set; }
-
-		public ViewHost HoveredViewHost { get; private set; }
-
-		public ViewDockGrid HoveredDockGrid { get; private set; }
-
-		private static int ZOrderComparison(Control control1, Control control2)
-			=> ZOrderComparison(control1.TopLevelControl.Handle, control2.TopLevelControl.Handle);
-
-		private static int ZOrderComparison(IntPtr hWnd1, IntPtr hWnd2)
+		hWnd = hWnd1;
+		while(hWnd != IntPtr.Zero)
 		{
-			const int GW_HWNDNEXT = 2;
-			const int GW_HWNDPREV = 3;
-			IntPtr hWnd;
-			hWnd = hWnd1;
-			while(hWnd != IntPtr.Zero)
-			{
-				hWnd = User32.GetWindow(hWnd, GW_HWNDNEXT);
-				if(hWnd == hWnd2) return -1;
-			}
-			hWnd = hWnd1;
-			while(hWnd != IntPtr.Zero)
-			{
-				hWnd = User32.GetWindow(hWnd, GW_HWNDPREV);
-				if(hWnd == hWnd2) return 1;
-			}
-			return 0;
+			hWnd = User32.GetWindow(hWnd, GW_HWNDPREV);
+			if(hWnd == hWnd2) return 1;
 		}
+		return 0;
+	}
 
-		private static ViewDockGrid HitTestGrid(Point point)
+	private static DockPanel HitTestGrid(Point point)
+	{
+		var candidates = new List<DockPanel>();
+		foreach(var dockPanel in DockElements<DockPanel>.Instances)
 		{
-			var candidates = new List<ViewDockGrid>();
-			lock(ViewDockGrid.Grids)
+			if(dockPanel.Created && dockPanel.Visible)
 			{
-				foreach(var grid in ViewDockGrid.Grids)
+				var p = dockPanel.PointToClient(point);
+				var bounds = dockPanel.ClientRectangle;
+				if(bounds.Contains(p))
 				{
-					if(grid.Created && grid.Visible)
+					candidates.Add(dockPanel);
+				}
+			}
+		}
+		if(candidates.Count == 0) return null;
+		if(candidates.Count == 1) return candidates[0];
+		candidates.Sort(ZOrderComparison);
+		return candidates[0];
+	}
+
+	private ViewHost HitTestViewHost(Point point)
+	{
+		var candidates = new List<ViewHost>();
+		foreach(var host in DockElements<ViewHost>.Instances)
+		{
+			if(host.Created && host.Visible)
+			{
+				if(host != ViewHost && host.Visible && host.Status != ViewHostStatus.AutoHide)
+				{
+					var p = host.PointToClient(point);
+					var bounds = host.ClientRectangle;
+					if(bounds.Contains(p))
 					{
-						var p = grid.PointToClient(point);
-						var bounds = grid.ClientRectangle;
-						if(bounds.Contains(p))
-						{
-							candidates.Add(grid);
-						}
+						candidates.Add(host);
 					}
 				}
 			}
-			if(candidates.Count == 0) return null;
-			if(candidates.Count == 1) return candidates[0];
-			candidates.Sort(ZOrderComparison);
-			return candidates[0];
 		}
+		if(candidates.Count == 0) return null;
+		if(candidates.Count == 1) return candidates[0];
+		candidates.Sort(ZOrderComparison);
+		return candidates[0];
+	}
 
-		private ViewHost HitTestViewHost(Point point)
+	public bool Start(Point location)
+	{
+		Verify.State.IsFalse(IsActive);
+
+		IsActive = true;
+		location = ViewHost.PointToScreen(location);
+		var grid = HitTestGrid(location);
+		if(grid is not null)
 		{
-			var candidates = new List<ViewHost>();
-			lock(ViewHost.ViewHosts)
-			{
-				foreach(var host in ViewHost.ViewHosts)
-				{
-					if(host.Created && host.Visible)
-					{
-						if(host != ViewHost && host.Visible && host.Status != ViewHostStatus.AutoHide)
-						{
-							var p = host.PointToClient(point);
-							var bounds = host.ClientRectangle;
-							if(bounds.Contains(p))
-							{
-								candidates.Add(host);
-							}
-						}
-					}
-				}
-			}
-			if(candidates.Count == 0) return null;
-			if(candidates.Count == 1) return candidates[0];
-			candidates.Sort(ZOrderComparison);
-			return candidates[0];
+			HoveredDockGrid = grid;
+			grid.DockMarkers.Show(ViewHost);
+			grid.DockMarkers.UpdateHover(location);
 		}
-
-		public bool Start(Point location)
+		var host = HitTestViewHost(location);
+		if(host is not null)
 		{
-			Verify.State.IsFalse(IsActive);
-
-			IsActive = true;
-			location = ViewHost.PointToScreen(location);
-			var grid = HitTestGrid(location);
-			if(grid is not null)
-			{
-				HoveredDockGrid = grid;
-				grid.DockMarkers.Show(ViewHost);
-				grid.DockMarkers.UpdateHover(location);
-			}
-			var host = HitTestViewHost(location);
-			if(host is not null)
-			{
-				HoveredViewHost = host;
-				host.DockMarkers.Show(ViewHost);
-				host.DockMarkers.UpdateHover(location);
-			}
-			return true;
+			HoveredViewHost = host;
+			host.DockMarkers.Show(ViewHost);
+			host.DockMarkers.UpdateHover(location);
 		}
+		return true;
+	}
 
-		public void Update(Point location)
+	public void Update(Point location)
+	{
+		Verify.State.IsTrue(IsActive);
+
+		bool gridHit = false;
+		location = ViewHost.PointToScreen(location);
+		var grid = HitTestGrid(location);
+		if(grid is not null)
 		{
-			Verify.State.IsTrue(IsActive);
-
-			bool gridHit = false;
-			location = ViewHost.PointToScreen(location);
-			var grid = HitTestGrid(location);
-			if(grid is not null)
+			if(HoveredDockGrid is not null)
 			{
-				if(HoveredDockGrid is not null)
+				if(HoveredDockGrid != grid)
 				{
-					if(HoveredDockGrid != grid)
-					{
-						HoveredDockGrid.DockMarkers.Hide();
-						HoveredDockGrid = grid;
-						grid.DockMarkers.Show(ViewHost);
-					}
-				}
-				else
-				{
+					HoveredDockGrid.DockMarkers.Hide();
 					HoveredDockGrid = grid;
 					grid.DockMarkers.Show(ViewHost);
 				}
-				gridHit = grid.DockMarkers.UpdateHover(location);
 			}
 			else
 			{
-				if(HoveredDockGrid is not null)
-				{
-					HoveredDockGrid.DockMarkers.Hide();
-					HoveredDockGrid = null;
-				}
+				HoveredDockGrid = grid;
+				grid.DockMarkers.Show(ViewHost);
 			}
-			var host = HitTestViewHost(location);
-			if(host is not null)
+			gridHit = grid.DockMarkers.UpdateHover(location);
+		}
+		else
+		{
+			if(HoveredDockGrid is not null)
 			{
-				if(HoveredViewHost is not null)
+				HoveredDockGrid.DockMarkers.Hide();
+				HoveredDockGrid = null;
+			}
+		}
+		var host = HitTestViewHost(location);
+		if(host is not null)
+		{
+			if(HoveredViewHost is not null)
+			{
+				if(HoveredViewHost != host)
 				{
-					if(HoveredViewHost != host)
-					{
-						HoveredViewHost.DockMarkers.Hide();
-						HoveredViewHost = host;
-						host.DockMarkers.Show(ViewHost);
-					}
-				}
-				else
-				{
+					HoveredViewHost.DockMarkers.Hide();
 					HoveredViewHost = host;
 					host.DockMarkers.Show(ViewHost);
 				}
-				if(!gridHit)
-				{
-					host.DockMarkers.UpdateHover(location);
-				}
-				else
-				{
-					host.DockMarkers.Unhover();
-				}
 			}
 			else
 			{
-				if(HoveredViewHost is not null)
-				{
-					HoveredViewHost.DockMarkers.Hide();
-					HoveredViewHost = null;
-				}
+				HoveredViewHost = host;
+				host.DockMarkers.Show(ViewHost);
+			}
+			if(!gridHit)
+			{
+				host.DockMarkers.UpdateHover(location);
+			}
+			else
+			{
+				host.DockMarkers.Unhover();
 			}
 		}
-
-		public void Commit(Point location)
+		else
 		{
-			Verify.State.IsTrue(IsActive);
-
-			IsActive = false;
-			bool docking = false;
-			location = ViewHost.PointToScreen(location);
-			if(HoveredDockGrid is not null)
-			{
-				var dockResult = HoveredDockGrid.DockMarkers.HitTest(location);
-				if(HoveredDockGrid.CanDock(ViewHost, dockResult))
-				{
-					docking = true;
-					HoveredDockGrid.PerformDock(ViewHost, dockResult);
-				}
-				HoveredDockGrid.DockMarkers.Hide();
-				HoveredDockGrid = null;
-			}
-			if(HoveredViewHost is not null)
-			{
-				var host = HoveredViewHost;
-				if(!docking)
-				{
-					var dockResult = host.DockMarkers.HitTest(location);
-					if(host.CanDock(ViewHost, dockResult))
-					{
-						host.PerformDock(ViewHost, dockResult);
-					}
-				}
-				host.DockMarkers.Hide();
-			}
-		}
-
-		public void Cancel()
-		{
-			Verify.State.IsTrue(IsActive);
-
-			IsActive = false;
-			if(HoveredDockGrid is not null)
-			{
-				HoveredDockGrid.DockMarkers.Hide();
-				HoveredDockGrid = null;
-			}
 			if(HoveredViewHost is not null)
 			{
 				HoveredViewHost.DockMarkers.Hide();
 				HoveredViewHost = null;
 			}
 		}
+	}
 
-		public void Dispose()
+	public void Commit(Point location)
+	{
+		Verify.State.IsTrue(IsActive);
+
+		IsActive = false;
+		bool docking = false;
+		location = ViewHost.PointToScreen(location);
+		if(HoveredDockGrid is not null)
 		{
-			if(HoveredDockGrid is not null)
+			var dockResult = HoveredDockGrid.DockMarkers.HitTest(location);
+			if(HoveredDockGrid.CanDock(ViewHost, dockResult))
 			{
-				HoveredDockGrid.DockMarkers.Hide();
-				HoveredDockGrid = null;
+				docking = true;
+				HoveredDockGrid.PerformDock(ViewHost, dockResult);
 			}
-			if(HoveredViewHost is not null)
-			{
-				HoveredViewHost.DockMarkers.Hide();
-				HoveredViewHost = null;
-			}
-			IsActive = false;
+			HoveredDockGrid.DockMarkers.Hide();
+			HoveredDockGrid = null;
 		}
+		if(HoveredViewHost is not null)
+		{
+			var host = HoveredViewHost;
+			if(!docking)
+			{
+				var dockResult = host.DockMarkers.HitTest(location);
+				if(host.CanDock(ViewHost, dockResult))
+				{
+					host.PerformDock(ViewHost, dockResult);
+				}
+			}
+			host.DockMarkers.Hide();
+		}
+	}
+
+	public void Cancel()
+	{
+		Verify.State.IsTrue(IsActive);
+
+		IsActive = false;
+		if(HoveredDockGrid is not null)
+		{
+			HoveredDockGrid.DockMarkers.Hide();
+			HoveredDockGrid = null;
+		}
+		if(HoveredViewHost is not null)
+		{
+			HoveredViewHost.DockMarkers.Hide();
+			HoveredViewHost = null;
+		}
+	}
+
+	public void Dispose()
+	{
+		if(HoveredDockGrid is not null)
+		{
+			HoveredDockGrid.DockMarkers.Hide();
+			HoveredDockGrid = null;
+		}
+		if(HoveredViewHost is not null)
+		{
+			HoveredViewHost.DockMarkers.Hide();
+			HoveredViewHost = null;
+		}
+		IsActive = false;
 	}
 }

@@ -57,7 +57,6 @@
 			// _logoPictureBox
 			// 
 			this._logoPictureBox.Dock = System.Windows.Forms.DockStyle.Top;
-			this._logoPictureBox.Image = global::gitter.Properties.Resources.ImgStartPageLogo;
 			this._logoPictureBox.Location = new System.Drawing.Point(0, 0);
 			this._logoPictureBox.Name = "_logoPictureBox";
 			this._logoPictureBox.Size = new System.Drawing.Size(500, 90);

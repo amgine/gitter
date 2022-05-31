@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,43 +18,42 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Globalization;
+using System.Xml;
+
+public class IssueRelationsCollection : RedmineObjectsCache<IssueRelation>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Globalization;
-	using System.Xml;
-
-	public class IssueRelationsCollection : RedmineObjectsCache<IssueRelation>
+	internal IssueRelationsCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal IssueRelationsCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override IssueRelation Create(int id)
-		{
-			return new IssueRelation(Context, id);
-		}
+	protected override IssueRelation Create(int id)
+	{
+		return new IssueRelation(Context, id);
+	}
 
-		protected override IssueRelation Create(XmlNode node)
-		{
-			return new IssueRelation(Context, node);
-		}
+	protected override IssueRelation Create(XmlNode node)
+	{
+		return new IssueRelation(Context, node);
+	}
 
-		public LinkedList<IssueRelation> Fetch(Issue issue)
-		{
-			Verify.Argument.IsNotNull(issue, nameof(issue));
+	public LinkedList<IssueRelation> Fetch(Issue issue)
+	{
+		Verify.Argument.IsNotNull(issue);
 
-			return Fetch(issue.Id);
-		}
+		return Fetch(issue.Id);
+	}
 
-		public LinkedList<IssueRelation> Fetch(int issueId)
-		{
-			var url = string.Format(CultureInfo.InvariantCulture,
-				@"issues/{0}/relations.xml", issueId);
-			return FetchItemsFromSinglePage(url);
-		}
+	public LinkedList<IssueRelation> Fetch(int issueId)
+	{
+		var url = string.Format(CultureInfo.InvariantCulture,
+			@"issues/{0}/relations.xml", issueId);
+		return FetchItemsFromSinglePage(url);
 	}
 }

@@ -18,113 +18,112 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+sealed class FilesToCleanBinding : AsyncDataBinding<IReadOnlyList<TreeItem>>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	#region .ctor
 
-	using gitter.Framework;
-
-	sealed class FilesToCleanBinding : AsyncDataBinding<IReadOnlyList<TreeItem>>
+	public FilesToCleanBinding(Repository repository, TreeListBox treeListBox)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(treeListBox);
 
-		public FilesToCleanBinding(Repository repository, TreeListBox treeListBox)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNotNull(treeListBox, nameof(treeListBox));
+		Repository  = repository;
+		TreeListBox = treeListBox;
 
-			Repository  = repository;
-			TreeListBox = treeListBox;
-
-			Progress = treeListBox.ProgressMonitor;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public Repository Repository { get; }
-
-		private TreeListBox TreeListBox { get; }
-
-		public string IncludePattern { get; set; }
-
-		public string ExcludePattern { get; set; }
-
-		public CleanFilesMode CleanFilesMode { get; set; }
-
-		public bool IncludeDirectories { get; set; }
-
-		#endregion
-
-		#region Methods
-
-		protected override Task<IReadOnlyList<TreeItem>> FetchDataAsync(
-			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
-		{
-			Verify.State.IsFalse(IsDisposed, "FilesToCleanBinding is disposed.");
-
-			TreeListBox.Cursor = Cursors.WaitCursor;
-			return Repository.Status.GetFilesToCleanAsync(
-				IncludePattern, ExcludePattern, CleanFilesMode, IncludeDirectories,
-				progress, cancellationToken);
-		}
-
-		protected override void OnFetchCompleted(IReadOnlyList<TreeItem> data)
-		{
-			if(TreeListBox.IsDisposed)
-			{
-				return;
-			}
-
-			TreeListBox.BeginUpdate();
-			TreeListBox.Items.Clear();
-			foreach(var item in data)
-			{
-				if(item.ItemType == TreeItemType.Tree)
-				{
-					TreeListBox.Items.Add(new TreeDirectoryListItem(
-						(TreeDirectory)item, TreeDirectoryListItemType.ShowNothing));
-				}
-				else
-				{
-					TreeListBox.Items.Add(new TreeFileListItem(
-						(TreeFile)item, true));
-				}
-			}
-			TreeListBox.EndUpdate();
-			TreeListBox.Cursor = Cursors.Default;
-		}
-
-		protected override void OnFetchFailed(Exception exception)
-		{
-			if(TreeListBox.IsDisposed)
-			{
-				return;
-			}
-
-			TreeListBox.BeginUpdate();
-			TreeListBox.Items.Clear();
-			TreeListBox.EndUpdate();
-			TreeListBox.Cursor = Cursors.Default;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!TreeListBox.IsDisposed)
-				{
-					TreeListBox.Items.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
+		Progress = treeListBox.ProgressMonitor;
 	}
+
+	#endregion
+
+	#region Properties
+
+	public Repository Repository { get; }
+
+	private TreeListBox TreeListBox { get; }
+
+	public string IncludePattern { get; set; }
+
+	public string ExcludePattern { get; set; }
+
+	public CleanFilesMode CleanFilesMode { get; set; }
+
+	public bool IncludeDirectories { get; set; }
+
+	#endregion
+
+	#region Methods
+
+	protected override Task<IReadOnlyList<TreeItem>> FetchDataAsync(
+		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	{
+		Verify.State.IsFalse(IsDisposed, "FilesToCleanBinding is disposed.");
+
+		TreeListBox.Cursor = Cursors.WaitCursor;
+		return Repository.Status.GetFilesToCleanAsync(
+			IncludePattern, ExcludePattern, CleanFilesMode, IncludeDirectories,
+			progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(IReadOnlyList<TreeItem> data)
+	{
+		if(TreeListBox.IsDisposed)
+		{
+			return;
+		}
+
+		TreeListBox.BeginUpdate();
+		TreeListBox.Items.Clear();
+		foreach(var item in data)
+		{
+			if(item.ItemType == TreeItemType.Tree)
+			{
+				TreeListBox.Items.Add(new TreeDirectoryListItem(
+					(TreeDirectory)item, TreeDirectoryListItemType.ShowNothing));
+			}
+			else
+			{
+				TreeListBox.Items.Add(new TreeFileListItem(
+					(TreeFile)item, true));
+			}
+		}
+		TreeListBox.EndUpdate();
+		TreeListBox.Cursor = Cursors.Default;
+	}
+
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(TreeListBox.IsDisposed)
+		{
+			return;
+		}
+
+		TreeListBox.BeginUpdate();
+		TreeListBox.Items.Clear();
+		TreeListBox.EndUpdate();
+		TreeListBox.Cursor = Cursors.Default;
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(!TreeListBox.IsDisposed)
+			{
+				TreeListBox.Items.Clear();
+			}
+		}
+		base.Dispose(disposing);
+	}
+
+	#endregion
 }

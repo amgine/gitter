@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+/// <summary>Event args, providing <see cref="CustomListBoxItem"/>.</summary>
+public sealed class ItemEventArgs : EventArgs
 {
-	using System;
+	private readonly CustomListBoxItem _item;
 
-	/// <summary>Event args, providing <see cref="CustomListBoxItem"/>.</summary>
-	public sealed class ItemEventArgs : EventArgs
-	{
-		private readonly CustomListBoxItem _item;
+	/// <summary>Create <see cref="ItemEventArgs"/>.</summary>
+	/// <param name="item">Related <see cref="CustomListBoxItem"/>.</param>
+	public ItemEventArgs(CustomListBoxItem item) => Item = item;
 
-		/// <summary>Create <see cref="ItemEventArgs"/>.</summary>
-		/// <param name="item">Related <see cref="CustomListBoxItem"/>.</param>
-		public ItemEventArgs(CustomListBoxItem item) => Item = item;
-
-		/// <summary>Related <see cref="CustomListBoxItem"/>.</summary>
-		public CustomListBoxItem Item { get; }
-	}
+	/// <summary>Related <see cref="CustomListBoxItem"/>.</summary>
+	public CustomListBoxItem Item { get; }
 }

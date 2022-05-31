@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,25 +18,29 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class RebaseDialog : GitDialogBase
 {
-	using System;
-	using System.ComponentModel;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class RebaseDialog : GitDialogBase
+	public RebaseDialog()
 	{
-		public RebaseDialog()
-		{
-			InitializeComponent();
+		InitializeComponent();
 
-			Text = Resources.StrRebase;
-		}
-
-		protected override string ActionVerb => Resources.StrRebase;
+		Text = Resources.StrRebase;
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrRebase;
 }

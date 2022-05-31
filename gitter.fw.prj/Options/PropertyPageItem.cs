@@ -18,47 +18,45 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+using gitter.Framework.Controls;
+
+public sealed class PropertyPageItem : CustomListBoxItem<IPropertyPageFactory>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-
-	using gitter.Framework.Controls;
-
-	public sealed class PropertyPageItem : CustomListBoxItem<PropertyPageFactory>
+	public PropertyPageItem(IPropertyPageFactory description)
+		: base(description)
 	{
-		public PropertyPageItem(PropertyPageFactory description)
-			: base(description)
-		{
-			Verify.Argument.IsNotNull(description, nameof(description));
-		}
+		Verify.Argument.IsNotNull(description);
+	}
 
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		switch(measureEventArgs.SubItemId)
 		{
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					if(DataContext.Icon != null)
-						return measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.Name);
-					else
-						return measureEventArgs.MeasureText(DataContext.Name);
-				default:
-					return Size.Empty;
-			}
+			case 0:
+				return DataContext.Icon is not null
+					? measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.Name)
+					: measureEventArgs.MeasureText(DataContext.Name);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		switch(paintEventArgs.Column.Id)
 		{
-			switch(paintEventArgs.Column.Id)
-			{
-				case 0:
-					if(DataContext.Icon != null)
-						paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.Name);
-					else
-						paintEventArgs.PaintText(DataContext.Name);
-					break;
-			}
+			case 0:
+				if(DataContext.Icon is not null)
+					paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.Name);
+				else
+					paintEventArgs.PaintText(DataContext.Name);
+				break;
 		}
 	}
 }

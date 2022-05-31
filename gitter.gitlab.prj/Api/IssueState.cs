@@ -18,12 +18,20 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
+namespace gitter.GitLab.Api;
+
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#endif
+
+#if SYSTEM_TEXT_JSON
+[JsonConverter(typeof(JsonStringEnumConverter))]
+#endif
+enum IssueState
 {
-	enum IssueState
-	{
-		Opened,
-		Closed,
-		All
-	}
+	[EnumMember(Value = @"opened")]
+	Opened,
+	[EnumMember(Value = @"closed")]
+	Closed,
 }

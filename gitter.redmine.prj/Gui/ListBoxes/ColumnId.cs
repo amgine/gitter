@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+public enum ColumnId
 {
-	public enum ColumnId
-	{
-		Name,
+	Name,
 
-		Id,
-		Subject,
+	Id,
+	Subject,
 
-		Author,
-		AssignedTo,
+	Author,
+	AssignedTo,
 
-		CreatedOn,
-		UpdatedOn,
-		StartDate,
-		DueDate,
-		DoneRatio,
+	CreatedOn,
+	UpdatedOn,
+	StartDate,
+	DueDate,
+	DoneRatio,
 
-		Project,
-		Status,
-		Priority,
-		Version,
-		Tracker,
-		Category,
+	Project,
+	Status,
+	Priority,
+	Version,
+	Tracker,
+	Category,
 
-		Identifier,
-		Description,
-		Title,
-		Summary,
+	Identifier,
+	Description,
+	Title,
+	Summary,
 
-		CustomFieldOffset = 1000,
-	}
+	CustomFieldOffset = 1000,
 }

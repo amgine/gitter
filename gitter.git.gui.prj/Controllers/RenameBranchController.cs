@@ -18,90 +18,77 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RenameBranchController : ViewControllerBase<IRenameBranchView>, IRenameBranchController
 {
-	using System;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Services;
-
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RenameBranchController : ViewControllerBase<IRenameBranchView>, IRenameBranchController
+	public RenameBranchController(Branch branch)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(branch);
 
-		public RenameBranchController(Branch branch)
+		Branch = branch;
+	}
+
+	private Branch Branch { get; }
+
+	public bool TryRename()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		var repository = Branch.Repository;
+		var oldName = Branch.Name;
+		var newName = View.NewName.Value.Trim();
+
+		if(oldName == newName) return true;
+		if(!GitControllerUtility.ValidateNewBranchName(newName, repository, View.NewName, View.ErrorNotifier))
 		{
-			Verify.Argument.IsNotNull(branch, nameof(branch));
-
-			Branch = branch;
+			return false;
 		}
 
-		#endregion
-
-		#region Properties
-
-		private Branch Branch { get; }
-
-		#endregion
-
-		#region IRenameBranchController Members
-
-		public bool TryRename()
+		try
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var repository = Branch.Repository;
-			var oldName = Branch.Name;
-			var newName = View.NewName.Value.Trim();
-
-			if(oldName == newName) return true;
-			if(!GitControllerUtility.ValidateNewBranchName(newName, repository, View.NewName, View.ErrorNotifier))
+			using(View.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				return false;
+				Branch.Name = newName;
 			}
-
-			try
-			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
-				{
-					Branch.Name = newName;
-				}
-			}
-			catch(BranchAlreadyExistsException)
-			{
-				View.ErrorNotifier.NotifyError(View.NewName,
-					new UserInputError(
-						Resources.ErrInvalidBranchName,
-						Resources.ErrBranchAlreadyExists));
-				return false;
-			}
-			catch(InvalidBranchNameException exc)
-			{
-				View.ErrorNotifier.NotifyError(View.NewName,
-					new UserInputError(
-						Resources.ErrInvalidBranchName,
-						exc.Message));
-				return false;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					View as IWin32Window,
-					exc.Message,
-					string.Format(Resources.ErrFailedToRenameBranch, oldName),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
 		}
-
-		#endregion
+		catch(BranchAlreadyExistsException)
+		{
+			View.ErrorNotifier.NotifyError(View.NewName,
+				new UserInputError(
+					Resources.ErrInvalidBranchName,
+					Resources.ErrBranchAlreadyExists));
+			return false;
+		}
+		catch(InvalidBranchNameException exc)
+		{
+			View.ErrorNotifier.NotifyError(View.NewName,
+				new UserInputError(
+					Resources.ErrInvalidBranchName,
+					exc.Message));
+			return false;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				View as IWin32Window,
+				exc.Message,
+				string.Format(Resources.ErrFailedToRenameBranch, oldName),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
+		}
+		return true;
 	}
 }

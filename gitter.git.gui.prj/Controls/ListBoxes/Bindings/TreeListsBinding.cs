@@ -18,93 +18,92 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls.ListBoxes
+namespace gitter.Git.Gui.Controls.ListBoxes;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class TreeListsBinding : AsyncDataBinding<Tree>
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	#region .ctor
 
-	using gitter.Framework;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class TreeListsBinding : AsyncDataBinding<Tree>
+	public TreeListsBinding(ITreeSource treeSource, TreeListBox directoryTreeListBox, TreeListBox directoryContentListBox)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(treeSource);
+		Verify.Argument.IsNotNull(directoryTreeListBox);
+		Verify.Argument.IsNotNull(directoryContentListBox);
 
-		public TreeListsBinding(ITreeSource treeSource, TreeListBox directoryTreeListBox, TreeListBox directoryContentListBox)
-		{
-			Verify.Argument.IsNotNull(treeSource, nameof(treeSource));
-			Verify.Argument.IsNotNull(directoryTreeListBox, nameof(directoryTreeListBox));
-			Verify.Argument.IsNotNull(directoryContentListBox, nameof(directoryContentListBox));
+		TreeSource              = treeSource;
+		DirectoryTreeListBox    = directoryTreeListBox;
+		DirectoryContentListBox = directoryContentListBox;
 
-			TreeSource              = treeSource;
-			DirectoryTreeListBox    = directoryTreeListBox;
-			DirectoryContentListBox = directoryContentListBox;
-
-			Progress = directoryTreeListBox.ProgressMonitor;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public ITreeSource TreeSource { get; }
-
-		public TreeListBox DirectoryTreeListBox { get; }
-
-		public TreeListBox DirectoryContentListBox { get; }
-
-		#endregion
-
-		#region Methods
-
-		protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			DirectoryContentListBox.Text = string.Empty;
-
-			return TreeSource.GetTreeAsync(progress, cancellationToken);
-		}
-
-		protected override void OnFetchCompleted(Tree tree)
-		{
-			if(IsDisposed || (DirectoryTreeListBox.IsDisposed && DirectoryContentListBox.IsDisposed))
-			{
-				return;
-			}
-
-			DirectoryContentListBox.ProgressMonitor.Report(OperationProgress.Completed);
-			DirectoryTreeListBox.SetTree(tree.Root, TreeListBoxMode.ShowDirectoryTree);
-			DirectoryContentListBox.SetTree(tree.Root, TreeListBoxMode.ShowDirectoryContent);
-		}
-
-		protected override void OnFetchFailed(Exception exception)
-		{
-			if(IsDisposed || (DirectoryTreeListBox.IsDisposed && DirectoryContentListBox.IsDisposed))
-			{
-				return;
-			}
-
-			DirectoryContentListBox.ProgressMonitor.Report(OperationProgress.Completed);
-			DirectoryContentListBox.Text = Resources.StrsFailedToFetchTree;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!DirectoryTreeListBox.IsDisposed)
-				{
-					DirectoryTreeListBox.Clear();
-				}
-				if(!DirectoryContentListBox.IsDisposed)
-				{
-					DirectoryContentListBox.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
+		Progress = directoryTreeListBox.ProgressMonitor;
 	}
+
+	#endregion
+
+	#region Properties
+
+	public ITreeSource TreeSource { get; }
+
+	public TreeListBox DirectoryTreeListBox { get; }
+
+	public TreeListBox DirectoryContentListBox { get; }
+
+	#endregion
+
+	#region Methods
+
+	protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		DirectoryContentListBox.Text = string.Empty;
+
+		return TreeSource.GetTreeAsync(progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(Tree tree)
+	{
+		if(IsDisposed || (DirectoryTreeListBox.IsDisposed && DirectoryContentListBox.IsDisposed))
+		{
+			return;
+		}
+
+		DirectoryContentListBox.ProgressMonitor.Report(OperationProgress.Completed);
+		DirectoryTreeListBox.SetTree(tree.Root, TreeListBoxMode.ShowDirectoryTree);
+		DirectoryContentListBox.SetTree(tree.Root, TreeListBoxMode.ShowDirectoryContent);
+	}
+
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(IsDisposed || (DirectoryTreeListBox.IsDisposed && DirectoryContentListBox.IsDisposed))
+		{
+			return;
+		}
+
+		DirectoryContentListBox.ProgressMonitor.Report(OperationProgress.Completed);
+		DirectoryContentListBox.Text = Resources.StrsFailedToFetchTree;
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(!DirectoryTreeListBox.IsDisposed)
+			{
+				DirectoryTreeListBox.Clear();
+			}
+			if(!DirectoryContentListBox.IsDisposed)
+			{
+				DirectoryContentListBox.Clear();
+			}
+		}
+		base.Dispose(disposing);
+	}
+
+	#endregion
 }

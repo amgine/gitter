@@ -18,106 +18,106 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.IO;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class DiffFileMenu : ContextMenuStrip
 {
-	using System;
-	using System.IO;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public sealed class DiffFileMenu : ContextMenuStrip
+	public DiffFileMenu(IDiffSource diffSource, DiffFile diffFile)
 	{
-		public DiffFileMenu(IDiffSource diffSource, DiffFile diffFile)
+		Verify.Argument.IsNotNull(diffSource);
+		Verify.Argument.IsNotNull(diffFile);
+
+		DiffSource = diffSource;
+		DiffFile   = diffFile;
+
+		var dpiBindings = new DpiBindings(this);
+		var factory     = new GuiItemFactory(dpiBindings);
+
+		string fileName = diffFile.Status != FileStatus.Removed ? diffFile.TargetFile : diffFile.SourceFile;
+
+		if(diffSource is IIndexDiffSource indexDiff)
 		{
-			Verify.Argument.IsNotNull(diffSource, nameof(diffSource));
-			Verify.Argument.IsNotNull(diffFile, nameof(diffFile));
-
-			DiffSource = diffSource;
-			DiffFile   = diffFile;
-
-			var dpiBindings = new DpiBindings(this);
-			var factory     = new GuiItemFactory(dpiBindings);
-
-			string fileName = diffFile.Status != FileStatus.Removed ? diffFile.TargetFile : diffFile.SourceFile;
-
-			if(diffSource is IIndexDiffSource indexDiff)
+			if(diffFile.Status != FileStatus.Removed)
 			{
-				if(diffFile.Status != FileStatus.Removed)
+				try
 				{
-					try
+					var fullPath = Path.Combine(diffSource.Repository.WorkingDirectory, diffFile.TargetFile);
+					if(File.Exists(fullPath))
 					{
-						var fullPath = Path.Combine(diffSource.Repository.WorkingDirectory, diffFile.TargetFile);
-						if(File.Exists(fullPath))
-						{
-							Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(
-								Resources.StrOpen, null, fullPath));
-							Items.Add(GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(
-								Resources.StrOpenWith.AddEllipsis(), null, fullPath));
-							Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(
-								Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(fullPath)));
-							Items.Add(new ToolStripSeparator());
-						}
-					}
-					catch(Exception exc) when(!exc.IsCritical())
-					{
-					}
-				}
-				if(indexDiff.Cached)
-				{
-					var item = indexDiff.Repository.Status.TryGetStaged(fileName);
-					if(item is not null)
-					{
-						Items.Add(factory.GetUnstageItem<ToolStripMenuItem>(item));
+						Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(
+							Resources.StrOpen, null, fullPath));
+						Items.Add(GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(
+							Resources.StrOpenWith.AddEllipsis(), null, fullPath));
+						Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(
+							Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(fullPath)));
 						Items.Add(new ToolStripSeparator());
 					}
 				}
-				else
+				catch(Exception exc) when(!exc.IsCritical())
 				{
-					var item = indexDiff.Repository.Status.TryGetUnstaged(fileName);
-					if(item != null)
-					{
-						Items.Add(factory.GetStageItem<ToolStripMenuItem>(item));
-						Items.Add(new ToolStripSeparator());
-					}
 				}
-				if(diffFile.Status != FileStatus.Removed)
+			}
+			if(indexDiff.Cached)
+			{
+				var item = indexDiff.Repository.Status.TryGetStaged(fileName);
+				if(item is not null)
 				{
-					Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
-						indexDiff.Repository.Head, fileName));
+					Items.Add(factory.GetUnstageItem<ToolStripMenuItem>(item));
+					Items.Add(new ToolStripSeparator());
 				}
-				Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
+			}
+			else
+			{
+				var item = indexDiff.Repository.Status.TryGetUnstaged(fileName);
+				if(item is not null)
+				{
+					Items.Add(factory.GetStageItem<ToolStripMenuItem>(item));
+					Items.Add(new ToolStripSeparator());
+				}
+			}
+			if(diffFile.Status != FileStatus.Removed)
+			{
+				Items.Add(factory.GetBlameItem<ToolStripMenuItem>(
 					indexDiff.Repository.Head, fileName));
 			}
-			else if(diffSource is IRevisionDiffSource revisionDiff)
-			{
-				if(diffFile.Status != FileStatus.Removed)
-				{
-					Items.Add(GuiItemFactory.GetBlameItem<ToolStripMenuItem>(
-						revisionDiff.Revision, diffFile.TargetFile));
-					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
-						revisionDiff.Revision, diffFile.TargetFile));
-				}
-				else
-				{
-					Items.Add(GuiItemFactory.GetPathHistoryItem<ToolStripMenuItem>(
-						revisionDiff.Revision, diffFile.SourceFile));
-				}
-			}
-			Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-				new ToolStripItem[]
-				{
-					factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSourceFileName, diffFile.SourceFile),
-					factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrDestinationFileName, diffFile.TargetFile),
-				}));
+			Items.Add(factory.GetPathHistoryItem<ToolStripMenuItem>(
+				indexDiff.Repository.Head, fileName));
 		}
-
-		public IDiffSource DiffSource { get; }
-
-		public DiffFile DiffFile { get; }
+		else if(diffSource is IRevisionDiffSource revisionDiff)
+		{
+			if(diffFile.Status != FileStatus.Removed)
+			{
+				Items.Add(factory.GetBlameItem<ToolStripMenuItem>(
+					revisionDiff.Revision, diffFile.TargetFile));
+				Items.Add(factory.GetPathHistoryItem<ToolStripMenuItem>(
+					revisionDiff.Revision, diffFile.TargetFile));
+			}
+			else
+			{
+				Items.Add(factory.GetPathHistoryItem<ToolStripMenuItem>(
+					revisionDiff.Revision, diffFile.SourceFile));
+			}
+		}
+		Items.Add(new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
+			new ToolStripItem[]
+			{
+				factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSourceFileName, diffFile.SourceFile),
+				factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrDestinationFileName, diffFile.TargetFile),
+			}));
 	}
+
+	public IDiffSource DiffSource { get; }
+
+	public DiffFile DiffFile { get; }
 }

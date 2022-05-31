@@ -18,406 +18,405 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.IO;
+
+using gitter.Framework.Mvc;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+static class GitControllerUtility
 {
-	using System;
-	using System.IO;
-
-	using gitter.Framework.Mvc;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	static class GitControllerUtility
+	private static bool ValidatePartialPath(string path, int start, int end, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
-		private static bool ValidatePartialPath(string path, int start, int end, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
-		{
-			Assert.IsNotNull(path);
-			Assert.IsNotNull(userInputSource);
-			Assert.IsNotNull(inputErrorNotifier);
+		Assert.IsNotNull(path);
+		Assert.IsNotNull(userInputSource);
+		Assert.IsNotNull(inputErrorNotifier);
 
-			var invalidPathChars = Path.GetInvalidFileNameChars();
-			bool endsWithWhitespace = false;
-			bool isPartStart = true;
-			for(int i = start; i <= end; ++i)
+		var invalidPathChars = Path.GetInvalidFileNameChars();
+		bool endsWithWhitespace = false;
+		bool isPartStart = true;
+		for(int i = start; i <= end; ++i)
+		{
+			char c = path[i];
+			if(c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar)
 			{
-				char c = path[i];
-				if(c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar)
+				if(i != start)
 				{
-					if(i != start)
+					if(isPartStart)
 					{
-						if(isPartStart)
-						{
-							inputErrorNotifier.NotifyError(userInputSource,
-								new UserInputError(
-									Resources.ErrInvalidPath,
-									Resources.ErrPathCannotContainEmptyDirectoryName));
-							return false;
-						}
-						if(endsWithWhitespace)
-						{
-							inputErrorNotifier.NotifyError(userInputSource,
-								new UserInputError(
-									Resources.ErrInvalidPath,
-									Resources.ErrDirectoryNameCannotEndWithWhitespace));
-							return false;
-						}
-						isPartStart = true;
+						inputErrorNotifier.NotifyError(userInputSource,
+							new UserInputError(
+								Resources.ErrInvalidPath,
+								Resources.ErrPathCannotContainEmptyDirectoryName));
+						return false;
 					}
-					continue;
-				}
-				if(Array.IndexOf(invalidPathChars, c) != -1)
-				{
-					inputErrorNotifier.NotifyError(userInputSource,
-						new UserInputError(
-							Resources.ErrInvalidPath,
-							Resources.ErrPathCannotContainCharacter.UseAsFormat(c)));
-					return false;
-				}
-				endsWithWhitespace = char.IsWhiteSpace(c);
-				if(isPartStart)
-				{
 					if(endsWithWhitespace)
 					{
 						inputErrorNotifier.NotifyError(userInputSource,
 							new UserInputError(
 								Resources.ErrInvalidPath,
-								Resources.ErrDirectoryNameCannotStartWithWhitespace));
+								Resources.ErrDirectoryNameCannotEndWithWhitespace));
 						return false;
 					}
-					isPartStart = false;
+					isPartStart = true;
 				}
+				continue;
 			}
-			return true;
-		}
-
-		public static bool ValidateAbsolutePath(string path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
-		{
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			int start = -1;
-			int end = -1;
-			for(int i = 0; i < path.Length; ++i)
-			{
-				if(!char.IsWhiteSpace(path[i]))
-				{
-					start = i;
-					break;
-				}
-			}
-			if(start == -1)
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrNoPathSpecified,
-						Resources.ErrPathCannotBeEmpty));
-				return false;
-			}
-			for(int i = path.Length - 1; i >= 0; --i)
-			{
-				if(!char.IsWhiteSpace(path[i]))
-				{
-					end = i;
-					break;
-				}
-			}
-			int length = end - start + 1;
-
-			if(length >= 3)
-			{
-				var c0 = path[start + 0];
-				var c1 = path[start + 1];
-				var c2 = path[start + 2];
-				if(c1 == Path.VolumeSeparatorChar)
-				{
-					if(!((c0 >= 'a' && c0 <= 'z') || (c0 >= 'A' && c0 <= 'Z')))
-					{
-						inputErrorNotifier.NotifyError(userInputSource,
-							new UserInputError(
-								Resources.ErrInvalidPath,
-								Resources.ErrPathUnknownSchema));
-						return false;
-					}
-					if(c2 != Path.DirectorySeparatorChar && c2 != Path.AltDirectorySeparatorChar)
-					{
-						inputErrorNotifier.NotifyError(userInputSource,
-							new UserInputError(
-								Resources.ErrInvalidPath,
-								Resources.ErrPathUnknownSchema));
-						return false;
-					}
-					start += 3;
-					length -= 3;
-				}
-				else
-				{
-					if(c0 != Path.DirectorySeparatorChar && c0 != Path.AltDirectorySeparatorChar)
-					{
-						inputErrorNotifier.NotifyError(userInputSource,
-							new UserInputError(
-								Resources.ErrInvalidPath,
-								Resources.ErrPathUnknownSchema));
-						return false;
-					}
-					if(c1 != Path.DirectorySeparatorChar && c1 != Path.AltDirectorySeparatorChar)
-					{
-						inputErrorNotifier.NotifyError(userInputSource,
-							new UserInputError(
-								Resources.ErrInvalidPath,
-								Resources.ErrPathUnknownSchema));
-						return false;
-					}
-					start += 2;
-					length += 2;
-				}
-			}
-			else
+			if(Array.IndexOf(invalidPathChars, c) != -1)
 			{
 				inputErrorNotifier.NotifyError(userInputSource,
 					new UserInputError(
 						Resources.ErrInvalidPath,
-						Resources.ErrPathIsTooShort));
+						Resources.ErrPathCannotContainCharacter.UseAsFormat(c)));
 				return false;
 			}
-			if(!ValidatePartialPath(path, start, end, userInputSource, inputErrorNotifier))
+			endsWithWhitespace = char.IsWhiteSpace(c);
+			if(isPartStart)
 			{
-				return false;
-			}
-			return true;
-		}
-
-		public static bool ValidateRelativePath(string path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
-		{
-			int start = -1;
-			int end = -1;
-			for(int i = 0; i < path.Length; ++i)
-			{
-				if(!char.IsWhiteSpace(path[i]))
+				if(endsWithWhitespace)
 				{
-					start = i;
-					break;
+					inputErrorNotifier.NotifyError(userInputSource,
+						new UserInputError(
+							Resources.ErrInvalidPath,
+							Resources.ErrDirectoryNameCannotStartWithWhitespace));
+					return false;
+				}
+				isPartStart = false;
+			}
+		}
+		return true;
+	}
+
+	public static bool ValidateAbsolutePath(string path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		int start = -1;
+		int end = -1;
+		for(int i = 0; i < path.Length; ++i)
+		{
+			if(!char.IsWhiteSpace(path[i]))
+			{
+				start = i;
+				break;
+			}
+		}
+		if(start == -1)
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrNoPathSpecified,
+					Resources.ErrPathCannotBeEmpty));
+			return false;
+		}
+		for(int i = path.Length - 1; i >= 0; --i)
+		{
+			if(!char.IsWhiteSpace(path[i]))
+			{
+				end = i;
+				break;
+			}
+		}
+		int length = end - start + 1;
+
+		if(length >= 3)
+		{
+			var c0 = path[start + 0];
+			var c1 = path[start + 1];
+			var c2 = path[start + 2];
+			if(c1 == Path.VolumeSeparatorChar)
+			{
+				if(!((c0 >= 'a' && c0 <= 'z') || (c0 >= 'A' && c0 <= 'Z')))
+				{
+					inputErrorNotifier.NotifyError(userInputSource,
+						new UserInputError(
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema));
+					return false;
+				}
+				if(c2 != Path.DirectorySeparatorChar && c2 != Path.AltDirectorySeparatorChar)
+				{
+					inputErrorNotifier.NotifyError(userInputSource,
+						new UserInputError(
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema));
+					return false;
+				}
+				start += 3;
+				length -= 3;
+			}
+			else
+			{
+				if(c0 != Path.DirectorySeparatorChar && c0 != Path.AltDirectorySeparatorChar)
+				{
+					inputErrorNotifier.NotifyError(userInputSource,
+						new UserInputError(
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema));
+					return false;
+				}
+				if(c1 != Path.DirectorySeparatorChar && c1 != Path.AltDirectorySeparatorChar)
+				{
+					inputErrorNotifier.NotifyError(userInputSource,
+						new UserInputError(
+							Resources.ErrInvalidPath,
+							Resources.ErrPathUnknownSchema));
+					return false;
+				}
+				start += 2;
+				length += 2;
+			}
+		}
+		else
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidPath,
+					Resources.ErrPathIsTooShort));
+			return false;
+		}
+		if(!ValidatePartialPath(path, start, end, userInputSource, inputErrorNotifier))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static bool ValidateRelativePath(string path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		int start = -1;
+		int end = -1;
+		for(int i = 0; i < path.Length; ++i)
+		{
+			if(!char.IsWhiteSpace(path[i]))
+			{
+				start = i;
+				break;
+			}
+		}
+		if(start == -1)
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrNoPathSpecified,
+					Resources.ErrPathCannotBeEmpty));
+			return false;
+		}
+		for(int i = path.Length - 1; i >= 0; --i)
+		{
+			if(!char.IsWhiteSpace(path[i]))
+			{
+				end = i;
+				break;
+			}
+		}
+		if(!ValidatePartialPath(path, start, end, userInputSource, inputErrorNotifier))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static bool ValidateBranchName(string branchName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(string.IsNullOrWhiteSpace(branchName))
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrNoBranchNameSpecified,
+					Resources.ErrBranchNameCannotBeEmpty));
+			return false;
+		}
+		if(!Branch.ValidateName(branchName, out var errmsg))
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidBranchName,
+					errmsg));
+			return false;
+		}
+		return true;
+	}
+
+	public static bool ValidateNewBranchName(string branchName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(!ValidateBranchName(branchName, userInputSource, inputErrorNotifier))
+		{
+			return false;
+		}
+		if(repository.Refs.Heads.Contains(branchName) ||
+			repository.Refs.Remotes.Contains(branchName))
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidBranchName,
+					Resources.ErrBranchAlreadyExists));
+			return false;
+		}
+		return true;
+	}
+
+	public static bool ValidateTagName(string tagName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(string.IsNullOrWhiteSpace(tagName))
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrNoTagNameSpecified,
+					Resources.ErrTagNameCannotBeEmpty));
+			return false;
+		}
+		if(!Tag.ValidateName(tagName, out var errmsg))
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidTagName,
+					errmsg));
+			return false;
+		}
+		return true;
+	}
+
+	public static bool ValidateNewTagName(string tagName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(!ValidateTagName(tagName, userInputSource, inputErrorNotifier))
+		{
+			return false;
+		}
+		if(repository.Refs.Tags.Contains(tagName))
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidTagName,
+					Resources.ErrTagAlreadyExists));
+			return false;
+		}
+		return true;
+	}
+
+	public static bool ValidateRefspec(string refspec, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(string.IsNullOrEmpty(refspec))
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidRevisionExpression,
+					Resources.ErrStartingRevisionCannotBeEmpty));
+			return false;
+		}
+		bool encounteredNonWhitespace = false;
+		bool encounteredTrailingWhitespace = false;
+		for(int i = 0; i < refspec.Length; ++i)
+		{
+			if(char.IsWhiteSpace(refspec[i]))
+			{
+				if(encounteredNonWhitespace)
+				{
+					encounteredTrailingWhitespace = true;
 				}
 			}
-			if(start == -1)
+			else
 			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrNoPathSpecified,
-						Resources.ErrPathCannotBeEmpty));
-				return false;
-			}
-			for(int i = path.Length - 1; i >= 0; --i)
-			{
-				if(!char.IsWhiteSpace(path[i]))
+				if(encounteredTrailingWhitespace)
 				{
-					end = i;
-					break;
+					inputErrorNotifier.NotifyError(userInputSource,
+						new UserInputError(
+							Resources.ErrInvalidRevisionExpression,
+							Resources.ErrRefspecCannotContainSpaces));
 				}
+				encounteredNonWhitespace = true;
 			}
-			if(!ValidatePartialPath(path, start, end, userInputSource, inputErrorNotifier))
-			{
-				return false;
-			}
-			return true;
 		}
-
-		public static bool ValidateBranchName(string branchName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+		if(!encounteredNonWhitespace)
 		{
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(string.IsNullOrWhiteSpace(branchName))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrNoBranchNameSpecified,
-						Resources.ErrBranchNameCannotBeEmpty));
-				return false;
-			}
-			if(!Branch.ValidateName(branchName, out var errmsg))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidBranchName,
-						errmsg));
-				return false;
-			}
-			return true;
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidRevisionExpression,
+					Resources.ErrStartingRevisionCannotBeEmpty));
+			return false;
 		}
+		return true;
+	}
 
-		public static bool ValidateNewBranchName(string branchName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateUrl(string url, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(string.IsNullOrWhiteSpace(url))
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(!ValidateBranchName(branchName, userInputSource, inputErrorNotifier))
-			{
-				return false;
-			}
-			if(repository.Refs.Heads.Contains(branchName) ||
-				repository.Refs.Remotes.Contains(branchName))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidBranchName,
-						Resources.ErrBranchAlreadyExists));
-				return false;
-			}
-			return true;
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidUrl,
+					Resources.ErrUrlCannotBeEmpty));
+			return false;
 		}
+		return true;
+	}
 
-		public static bool ValidateTagName(string tagName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateRemoteName(string remoteName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(string.IsNullOrWhiteSpace(remoteName))
 		{
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(string.IsNullOrWhiteSpace(tagName))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrNoTagNameSpecified,
-						Resources.ErrTagNameCannotBeEmpty));
-				return false;
-			}
-			if(!Tag.ValidateName(tagName, out var errmsg))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidTagName,
-						errmsg));
-				return false;
-			}
-			return true;
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrNoRemoteNameSpecified,
+					Resources.ErrRemoteNameCannotBeEmpty));
+			return false;
 		}
-
-		public static bool ValidateNewTagName(string tagName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+		if(!Reference.ValidateName(remoteName, ReferenceType.Remote, out var errorMessage))
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(!ValidateTagName(tagName, userInputSource, inputErrorNotifier))
-			{
-				return false;
-			}
-			if(repository.Refs.Tags.Contains(tagName))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidTagName,
-						Resources.ErrTagAlreadyExists));
-				return false;
-			}
-			return true;
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidRemoteName,
+					errorMessage));
+			return false;
 		}
+		return true;
+	}
 
-		public static bool ValidateRefspec(string refspec, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateNewRemoteName(string remoteName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	{
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(userInputSource);
+		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(!ValidateRemoteName(remoteName, userInputSource, inputErrorNotifier))
 		{
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(string.IsNullOrEmpty(refspec))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidRevisionExpression,
-						Resources.ErrStartingRevisionCannotBeEmpty));
-				return false;
-			}
-			bool encounteredNonWhitespace = false;
-			bool encounteredTrailingWhitespace = false;
-			for(int i = 0; i < refspec.Length; ++i)
-			{
-				if(char.IsWhiteSpace(refspec[i]))
-				{
-					if(encounteredNonWhitespace)
-					{
-						encounteredTrailingWhitespace = true;
-					}
-				}
-				else
-				{
-					if(encounteredTrailingWhitespace)
-					{
-						inputErrorNotifier.NotifyError(userInputSource,
-							new UserInputError(
-								Resources.ErrInvalidRevisionExpression,
-								Resources.ErrRefspecCannotContainSpaces));
-					}
-					encounteredNonWhitespace = true;
-				}
-			}
-			if(!encounteredNonWhitespace)
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidRevisionExpression,
-						Resources.ErrStartingRevisionCannotBeEmpty));
-				return false;
-			}
-			return true;
+			return false;
 		}
-
-		public static bool ValidateUrl(string url, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+		if(repository.Remotes.Contains(remoteName))
 		{
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(string.IsNullOrWhiteSpace(url))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidUrl,
-						Resources.ErrUrlCannotBeEmpty));
-				return false;
-			}
-			return true;
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrInvalidRemoteName,
+					Resources.ErrRemoteAlreadyExists));
+			return false;
 		}
-
-		public static bool ValidateRemoteName(string remoteName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
-		{
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(string.IsNullOrWhiteSpace(remoteName))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrNoRemoteNameSpecified,
-						Resources.ErrRemoteNameCannotBeEmpty));
-				return false;
-			}
-			if(!Reference.ValidateName(remoteName, ReferenceType.Remote, out var errorMessage))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidRemoteName,
-						errorMessage));
-				return false;
-			}
-			return true;
-		}
-
-		public static bool ValidateNewRemoteName(string remoteName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNotNull(userInputSource, nameof(userInputSource));
-			Verify.Argument.IsNotNull(inputErrorNotifier, nameof(inputErrorNotifier));
-
-			if(!ValidateRemoteName(remoteName, userInputSource, inputErrorNotifier))
-			{
-				return false;
-			}
-			if(repository.Remotes.Contains(remoteName))
-			{
-				inputErrorNotifier.NotifyError(userInputSource,
-					new UserInputError(
-						Resources.ErrInvalidRemoteName,
-						Resources.ErrRemoteAlreadyExists));
-				return false;
-			}
-			return true;
-		}
+		return true;
 	}
 }

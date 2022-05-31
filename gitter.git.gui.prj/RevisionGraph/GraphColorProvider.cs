@@ -18,56 +18,127 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Drawing;
+
+/// <summary>Object for unique color allocation.</summary>
+public sealed class GraphColorProvider : IGraphColorProvider
 {
-	/// <summary>Object for unique color allocation.</summary>
-	public sealed class GraphColorProvider : IGraphColorProvider
+	private readonly Color[] _palette;
+	private readonly int _maxColors;
+	private readonly bool[] _colors;
+	private int _availableCount;
+	private int _pointer;
+
+	/// <summary>Create <see cref="GraphColorProvider"/>.</summary>
+	/// <param name="palette">Palette.</param>
+	public GraphColorProvider(Color[] palette)
 	{
-		private int _maxColors;
-		private readonly bool[] _colors;
-		private int _pointer;
+		Verify.Argument.IsNotNull(palette);
 
-		/// <summary>Create <see cref="GraphColorProvider"/>.</summary>
-		/// <param name="maxColors">Maximum colors.</param>
-		public GraphColorProvider(int maxColors)
+		_palette   = palette;
+		_maxColors = palette.Length;
+		_colors    = new bool[palette.Length];
+		_pointer   = 0;
+		_availableCount = palette.Length - 1;
+	}
+
+	static int DiffSqr(Color color1, Color color2)
+	{
+		var r = (int)color1.R - (int)color2.R;
+		var g = (int)color1.G - (int)color2.G;
+		var b = (int)color1.B - (int)color2.B;
+		return r * r + g * g + b * b;
+	}
+
+	private int DiffSqrAvg(Color color)
+	{
+		var n   = 0;
+		var sum = 0;
+		for(int i = 1; i < _maxColors; ++i)
 		{
-			Verify.Argument.IsPositive(maxColors, nameof(maxColors));
+			if(!_colors[i]) continue;
 
-			_maxColors = maxColors;
-			_colors    = new bool[maxColors];
-			_pointer   = 0;
+			sum += DiffSqr(_palette[i], color);
+			++n;
 		}
+		return n == 0 ? 0 : sum / n;
+	}
 
-		/// <summary>Create <see cref="GraphColorProvider"/>.</summary>
-		public GraphColorProvider()
-			: this(GraphColors.TotalColors)
+	private int DiffSqrMin(Color color)
+	{
+		var min = int.MaxValue;
+		for(int i = 1; i < _maxColors; ++i)
 		{
+			if(!_colors[i]) continue;
+
+			var diff = DiffSqr(_palette[i], color);
+			if(diff < min) min = diff;
 		}
+		return min;
+	}
 
-		/// <summary>Acquire a unique color.</summary>
-		/// <returns>Unique color.</returns>
-		public int AcquireColor()
+	/// <summary>Acquire a unique color.</summary>
+	/// <returns>Unique color.</returns>
+	public int AcquireColor()
+	{
+		var first = (_pointer + 1) % _maxColors;
+		var last  = _pointer;
+		for(int i = first; i != last; i = (i + 1) % _maxColors)
 		{
-			for(int i = (_pointer + 1) % _maxColors; i != _pointer; i = (i + 1) % _maxColors)
+			if(i != 0 && !_colors[i])
 			{
-				if(i != 0 && !_colors[i])
+				--_availableCount;
+				_pointer = i;
+				_colors[i] = true;
+				return i;
+			}
+		}
+		_pointer = 0;
+		return 0;
+		/*
+		var bestPick = 0;
+		var maxDiff  = int.MinValue;
+		var first    = (_pointer + 1) % _maxColors;
+		var last     = _pointer;
+		for(int i = first; i != last; i = (i + 1) % _maxColors)
+		{
+			if(i != 0 && !_colors[i])
+			{
+				var diff = DiffSqrMin(_palette[i]);
+				if(diff > maxDiff)
 				{
-					_colors[i] = true;
-					_pointer = i;
-					return i;
+					maxDiff  = diff;
+					bestPick = i;
 				}
 			}
-			_pointer = 1;
+		}
+		if(bestPick == 0)
+		{
+			_pointer = 0;
 			return 0;
 		}
-
-		/// <summary>Make <paramref name="color"/> available again.</summary>
-		/// <param name="color">Color that is not needed anymore.</param>
-		public void ReleaseColor(int color)
+		else
 		{
-			if(color != 0)
+			--_availableCount;
+			_colors[bestPick] = true;
+			_pointer = bestPick;
+			return bestPick;
+		}*/
+	}
+
+	/// <summary>Make <paramref name="color"/> available again.</summary>
+	/// <param name="color">Color that is not needed anymore.</param>
+	public void ReleaseColor(int color)
+	{
+		if(color != 0)
+		{
+			if(_colors[color])
 			{
 				_colors[color] = false;
+				++_availableCount;
 			}
 		}
 	}

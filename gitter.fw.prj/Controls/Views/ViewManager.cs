@@ -18,44 +18,43 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+public static class ViewManager
 {
-	using System;
+	private static ViewRenderer _msvs2010StyleRender;
+	private static ViewRenderer _msvs2012DarkStyleRender;
+	private static ViewRenderer _msvs2012LightStyleRender;
+	private static ViewRenderer _viewRenderer;
 
-	public static class ViewManager
+	public static event EventHandler RendererChanged;
+
+	private static void OnRendererChanged()
+		=> RendererChanged?.Invoke(null, EventArgs.Empty);
+
+	public static ViewRenderer Renderer
 	{
-		private static ViewRenderer _msvs2010StyleRender;
-		private static ViewRenderer _msvs2012DarkStyleRender;
-		private static ViewRenderer _msvs2012LightStyleRender;
-		private static ViewRenderer _viewRenderer;
-
-		public static event EventHandler RendererChanged;
-
-		private static void OnRendererChanged()
-			=> RendererChanged?.Invoke(null, EventArgs.Empty);
-
-		public static ViewRenderer Renderer
+		get => _viewRenderer ??= MSVS2010StyleRenderer;
+		set
 		{
-			get => _viewRenderer ??= MSVS2010StyleRenderer;
-			set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
+			Verify.Argument.IsNotNull(value);
 
-				if(_viewRenderer != value)
-				{
-					_viewRenderer = value;
-					OnRendererChanged();
-				}
+			if(_viewRenderer != value)
+			{
+				_viewRenderer = value;
+				OnRendererChanged();
 			}
 		}
-
-		public static ViewRenderer MSVS2010StyleRenderer
-			=> _msvs2010StyleRender ??= new MSVS2010StyleViewRenderer();
-
-		public static ViewRenderer MSVS2012DarkStyleRenderer
-			=> _msvs2012DarkStyleRender ??= new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.DarkColors);
-
-		public static ViewRenderer MSVS2012LightStyleRenderer
-			=> _msvs2012LightStyleRender ??= new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.LightColors);
 	}
+
+	public static ViewRenderer MSVS2010StyleRenderer
+		=> _msvs2010StyleRender ??= new MSVS2010StyleViewRenderer();
+
+	public static ViewRenderer MSVS2012DarkStyleRenderer
+		=> _msvs2012DarkStyleRender ??= new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.DarkColors);
+
+	public static ViewRenderer MSVS2012LightStyleRenderer
+		=> _msvs2012LightStyleRender ??= new MSVS2012StyleViewRenderer(MSVS2012StyleViewRenderer.LightColors);
 }

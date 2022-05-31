@@ -1,8 +1,12 @@
 <Project>
 
   <PropertyGroup>
-    <TargetFrameworks>net48</TargetFrameworks>
-    <LangVersion>9.0</LangVersion>
+    <TargetFrameworks>net6.0-windows;net48</TargetFrameworks>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(LangVersion)'=='10' OR '$(LangVersion)'=='10.0'">
+    <DefineConstants>$(DefineConstants);CS_10;CS_10_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,6 +23,7 @@
 
   <ItemGroup>
     <Compile Include="$(SolutionDir)\common\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
+    <Compile Include="$(SolutionDir)\shared\Attributes.cs" Link="Shared\Attributes.cs" />
     <Compile Include="$(SolutionDir)\shared\Debug.cs" Link="Shared\Debug.cs" />
     <Compile Include="$(SolutionDir)\shared\Verify.cs" Link="Shared\Verify.cs" />
   </ItemGroup>

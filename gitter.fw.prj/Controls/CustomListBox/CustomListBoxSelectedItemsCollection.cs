@@ -18,33 +18,32 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+public sealed class CustomListBoxSelectedItemsCollection : NotifyCollection<CustomListBoxItem>
 {
-	using System;
-
-	public sealed class CustomListBoxSelectedItemsCollection : NotifyCollection<CustomListBoxItem>
+	internal CustomListBoxSelectedItemsCollection(CustomListBox listBox)
 	{
-		internal CustomListBoxSelectedItemsCollection(CustomListBox listBox)
-		{
-			Verify.Argument.IsNotNull(listBox, nameof(listBox));
+		Verify.Argument.IsNotNull(listBox);
 
-			ListBox = listBox;
-		}
-
-		internal CustomListBox ListBox { get; }
-
-		protected override void FreeItem(CustomListBoxItem item)
-		{
-			if(item.ListBox == ListBox)
-			{
-				item.SetSelected(false);
-			}
-		}
-
-		protected override void AcquireItem(CustomListBoxItem item)
-			=> item.SetSelected(true);
-
-		protected override bool VerifyItem(CustomListBoxItem item)
-			=> item is not null && item.ListBox == ListBox;
+		ListBox = listBox;
 	}
+
+	internal CustomListBox ListBox { get; }
+
+	protected override void FreeItem(CustomListBoxItem item)
+	{
+		if(item.ListBox == ListBox)
+		{
+			item.SetSelected(false);
+		}
+	}
+
+	protected override void AcquireItem(CustomListBoxItem item)
+		=> item.SetSelected(true);
+
+	protected override bool VerifyItem(CustomListBoxItem item)
+		=> item is not null && item.ListBox == ListBox;
 }

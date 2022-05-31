@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Windows.Forms;
+
+public sealed class UntrackedFileContextMenuRequestedEventArgs : EventArgs
 {
-	using System;
-	using System.Windows.Forms;
+	public UntrackedFileContextMenuRequestedEventArgs(TreeFile file) => File = file;
 
-	public sealed class UntrackedFileContextMenuRequestedEventArgs : EventArgs
-	{
-		public UntrackedFileContextMenuRequestedEventArgs(TreeFile file) => File = file;
+	public TreeFile File { get; }
 
-		public TreeFile File { get; }
-
-		public ContextMenuStrip ContextMenu { get; set; }
-	}
+	public ContextMenuStrip ContextMenu { get; set; }
 }

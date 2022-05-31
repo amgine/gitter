@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,35 +18,34 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+/// <summary>Represents a reference on remote repository.</summary>
+public interface IRemoteReference
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	event EventHandler Deleted;
 
-	using gitter.Framework;
+	/// <summary>Remote repository.</summary>
+	Remote Remote { get; }
 
-	/// <summary>Represents a reference on remote repository.</summary>
-	public interface IRemoteReference
-	{
-		event EventHandler Deleted;
+	/// <summary>Reference name.</summary>
+	string Name { get; }
 
-		/// <summary>Remote repository.</summary>
-		Remote Remote { get; }
+	/// <summary>Commit hash.</summary>
+	Hash Hash { get; }
 
-		/// <summary>Reference name.</summary>
-		string Name { get; }
+	ReferenceType ReferenceType { get; }
 
-		/// <summary>Commit hash.</summary>
-		Hash Hash { get; }
+	/// <summary>Remove reference from remote repository.</summary>
+	void Delete();
 
-		ReferenceType ReferenceType { get; }
+	Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
 
-		/// <summary>Remove reference from remote repository.</summary>
-		void Delete();
-
-		Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
-
-		bool IsDeleted { get; }
-	}
+	bool IsDeleted { get; }
 }

@@ -19,298 +19,297 @@
 #endregion
 
 #if UNUSED
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+public class ComboFileStatusItem : CustomListBoxItem
 {
-	using System;
-	using System.Drawing;
+	private TreeFile _staged;
+	private TreeFile _unstaged;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
+	private bool _cachedInfo;
+	private Icon _icon;
+	private Bitmap _bmpIcon;
 
-	public class ComboFileStatusItem : CustomListBoxItem
+	public ComboFileStatusItem(TreeFile staged, TreeFile unstaged)
 	{
-		private TreeFile _staged;
-		private TreeFile _unstaged;
+		_staged = staged;
+		_unstaged = unstaged;
+		UpdateCheckedState();
+	}
 
-		private bool _cachedInfo;
-		private Icon _icon;
-		private Bitmap _bmpIcon;
-
-		public ComboFileStatusItem(TreeFile staged, TreeFile unstaged)
+	public TreeFile Staged
+	{
+		get { return _staged; }
+		internal set
 		{
-			_staged = staged;
-			_unstaged = unstaged;
+			if(_staged != value)
+			{
+				if(_staged != null)
+				{
+					_staged.Deleted -= OnStagedDeleted;
+				}
+				_staged = value;
+				if(value != null)
+				{
+					if(ListBox != null)
+					{
+						_staged.Deleted += OnStagedDeleted;
+					}
+				}
+			}
+		}
+	}
+
+	public TreeFile Unstaged
+	{
+		get { return _unstaged; }
+		set
+		{
+			if(_unstaged != value)
+			{
+				if(_unstaged != null)
+					_unstaged.Deleted -= OnUnstagedDeleted;
+				_unstaged = value;
+				if(value != null)
+				{
+					if(ListBox != null)
+						_unstaged.Deleted += OnUnstagedDeleted;
+				}
+			}
+		}
+	}
+
+	protected override void OnListBoxAttached()
+	{
+		base.OnListBoxAttached();
+		if(_staged != null)
+		{
+			_staged.Deleted += OnStagedDeleted;
+		}
+		if(_unstaged != null)
+		{
+			_unstaged.Deleted += OnUnstagedDeleted;
+		}
+	}
+
+	protected override void OnListBoxDetached()
+	{
+		if(_staged != null)
+		{
+			_staged.Deleted -= OnStagedDeleted;
+		}
+		if(_unstaged != null)
+		{
+			_unstaged.Deleted -= OnUnstagedDeleted;
+		}
+		base.OnListBoxDetached();
+	}
+
+	private void OnStagedDeleted(object sender, EventArgs e)
+	{
+		_staged = null;
+		if(_unstaged == null)
+		{
+			RemoveSafe();
+		}
+		else
+		{
 			UpdateCheckedState();
 		}
+	}
 
-		public TreeFile Staged
+	private void OnUnstagedDeleted(object sender, EventArgs e)
+	{
+		_unstaged = null;
+		if(_staged == null)
 		{
-			get { return _staged; }
-			internal set
-			{
-				if(_staged != value)
-				{
-					if(_staged != null)
-					{
-						_staged.Deleted -= OnStagedDeleted;
-					}
-					_staged = value;
-					if(value != null)
-					{
-						if(ListBox != null)
-						{
-							_staged.Deleted += OnStagedDeleted;
-						}
-					}
-				}
-			}
+			RemoveSafe();
 		}
-
-		public TreeFile Unstaged
+		else
 		{
-			get { return _unstaged; }
-			set
-			{
-				if(_unstaged != value)
-				{
-					if(_unstaged != null)
-						_unstaged.Deleted -= OnUnstagedDeleted;
-					_unstaged = value;
-					if(value != null)
-					{
-						if(ListBox != null)
-							_unstaged.Deleted += OnUnstagedDeleted;
-					}
-				}
-			}
+			UpdateCheckedState();
 		}
+	}
 
-		protected override void OnListBoxAttached()
+	internal void UpdateCheckedState()
+	{
+		CheckedStateChanged -= OnCSChanged;
+		if(_staged == null)
 		{
-			base.OnListBoxAttached();
-			if(_staged != null)
-			{
-				_staged.Deleted += OnStagedDeleted;
-			}
-			if(_unstaged != null)
-			{
-				_unstaged.Deleted += OnUnstagedDeleted;
-			}
+			CheckedState = CheckedState.Unchecked;
 		}
-
-		protected override void OnListBoxDetached()
+		else
 		{
-			if(_staged != null)
-			{
-				_staged.Deleted -= OnStagedDeleted;
-			}
-			if(_unstaged != null)
-			{
-				_unstaged.Deleted -= OnUnstagedDeleted;
-			}
-			base.OnListBoxDetached();
-		}
-
-		private void OnStagedDeleted(object sender, EventArgs e)
-		{
-			_staged = null;
 			if(_unstaged == null)
 			{
-				RemoveSafe();
+				CheckedState = CheckedState.Checked;
 			}
 			else
 			{
-				UpdateCheckedState();
+				CheckedState = CheckedState.Indeterminate;
 			}
 		}
+		CheckedStateChanged += OnCSChanged;
+	}
 
-		private void OnUnstagedDeleted(object sender, EventArgs e)
+	private void OnCSChanged(object sender, EventArgs e)
+	{
+		switch(CheckedState)
 		{
-			_unstaged = null;
-			if(_staged == null)
-			{
-				RemoveSafe();
-			}
-			else
-			{
-				UpdateCheckedState();
-			}
-		}
-
-		internal void UpdateCheckedState()
-		{
-			CheckedStateChanged -= OnCSChanged;
-			if(_staged == null)
-			{
-				CheckedState = CheckedState.Unchecked;
-			}
-			else
-			{
-				if(_unstaged == null)
+			case CheckedState.Checked:
+				if(_unstaged != null)
 				{
-					CheckedState = CheckedState.Checked;
+					_unstaged.Stage();
 				}
-				else
+				break;
+			case CheckedState.Unchecked:
+				if(_staged != null)
 				{
-					CheckedState = CheckedState.Indeterminate;
+					_staged.Unstage();
 				}
-			}
-			CheckedStateChanged += OnCSChanged;
+				break;
 		}
+	}
 
-		private void OnCSChanged(object sender, EventArgs e)
-		{
-			switch(CheckedState)
-			{
-				case CheckedState.Checked:
-					if(_unstaged != null)
-					{
-						_unstaged.Stage();
-					}
-					break;
-				case CheckedState.Unchecked:
-					if(_staged != null)
-					{
-						_staged.Unstage();
-					}
-					break;
-			}
-		}
+	private Icon GetIcon()
+	{
+		return null;
+	}
 
-		private Icon GetIcon()
-		{
-			return null;
-		}
+	private Bitmap GetBitmapIcon()
+	{
+		if(_staged != null)
+			return Utility.QueryIcon(_staged.FullPath);
+		if(_unstaged != null)
+			return Utility.QueryIcon(_unstaged.FullPath);
+		return null;
+	}
 
-		private Bitmap GetBitmapIcon()
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		switch((ColumnId)measureEventArgs.SubItemId)
 		{
-			if(_staged != null)
-				return Utility.QueryIcon(_staged.FullPath);
-			if(_unstaged != null)
-				return Utility.QueryIcon(_unstaged.FullPath);
-			return null;
-		}
-
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			switch((ColumnId)measureEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					string data;
-					if(_unstaged != null)
+			case ColumnId.Name:
+				string data;
+				if(_unstaged != null)
+				{
+					if((Parent != null) && (Parent is TreeDirectoryListItem))
 					{
-						if((Parent != null) && (Parent is TreeDirectoryListItem))
-						{
-							data = _unstaged.Name;
-						}
-						else
-						{
-							data = _unstaged.RelativePath;
-						}
-					}
-					else if(_staged != null)
-					{
-						if((Parent != null) && (Parent is TreeDirectoryListItem))
-						{
-							data = _staged.Name;
-						}
-						else
-						{
-							data = _staged.RelativePath;
-						}
+						data = _unstaged.Name;
 					}
 					else
 					{
-						data = string.Empty;
+						data = _unstaged.RelativePath;
 					}
-					return measureEventArgs.MeasureImageAndText(null, data);
-				default:
-					return Size.Empty;
-			}
+				}
+				else if(_staged != null)
+				{
+					if((Parent != null) && (Parent is TreeDirectoryListItem))
+					{
+						data = _staged.Name;
+					}
+					else
+					{
+						data = _staged.RelativePath;
+					}
+				}
+				else
+				{
+					data = string.Empty;
+				}
+				return measureEventArgs.MeasureImageAndText(null, data);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		if(!_cachedInfo)
 		{
-			if(!_cachedInfo)
+			_icon = GetIcon();
+			if(_icon == null)
 			{
-				_icon = GetIcon();
-				if(_icon == null)
-				{
-					_bmpIcon = GetBitmapIcon();
-				}
-				_cachedInfo = true;
+				_bmpIcon = GetBitmapIcon();
 			}
-			Bitmap overlay;
-			string data;
-			if(_unstaged != null)
+			_cachedInfo = true;
+		}
+		Bitmap overlay;
+		string data;
+		if(_unstaged != null)
+		{
+			switch(_unstaged.Status)
 			{
-				switch(_unstaged.Status)
-				{
-					case FileStatus.Modified:
-						overlay = CachedResources.Bitmaps["ImgOverlayEdit"];
-						break;
-					case FileStatus.Added:
-						overlay = CachedResources.Bitmaps["ImgOverlayAdd"];
-						break;
-					case FileStatus.Removed:
-						overlay = CachedResources.Bitmaps["ImgOverlayDel"];
-						break;
-					case FileStatus.Unmerged:
-						overlay = CachedResources.Bitmaps["ImgOverlayConflict"];
-						break;
-					default:
-						overlay = null;
-						break;
-				}
-				if((Parent != null) && (Parent is TreeDirectoryListItem))
-				{
-					data = _unstaged.Name;
-				}
-				else
-				{
-					data = _unstaged.RelativePath;
-				}
+				case FileStatus.Modified:
+					overlay = CachedResources.Bitmaps["ImgOverlayEdit"];
+					break;
+				case FileStatus.Added:
+					overlay = CachedResources.Bitmaps["ImgOverlayAdd"];
+					break;
+				case FileStatus.Removed:
+					overlay = CachedResources.Bitmaps["ImgOverlayDel"];
+					break;
+				case FileStatus.Unmerged:
+					overlay = CachedResources.Bitmaps["ImgOverlayConflict"];
+					break;
+				default:
+					overlay = null;
+					break;
 			}
-			else if(_staged != null)
+			if((Parent != null) && (Parent is TreeDirectoryListItem))
 			{
-				switch(_staged.Status)
-				{
-					case FileStatus.Modified:
-						overlay = CachedResources.Bitmaps["ImgOverlayEditStaged"];
-						break;
-					case FileStatus.Added:
-						overlay = CachedResources.Bitmaps["ImgOverlayAddStaged"];
-						break;
-					case FileStatus.Removed:
-						overlay = CachedResources.Bitmaps["ImgOverlayDelStaged"];
-						break;
-					case FileStatus.Unmerged:
-						overlay = CachedResources.Bitmaps["ImgOverlayConflict"];
-						break;
-					default:
-						overlay = null;
-						break;
-				}
-				if((Parent != null) && (Parent is TreeDirectoryListItem))
-				{
-					data = _staged.Name;
-				}
-				else
-				{
-					data = _staged.RelativePath;
-				}
+				data = _unstaged.Name;
 			}
 			else
 			{
-				data = string.Empty;
-				overlay = null;
+				data = _unstaged.RelativePath;
 			}
-			switch((ColumnId)paintEventArgs.SubItemId)
+		}
+		else if(_staged != null)
+		{
+			switch(_staged.Status)
 			{
-				case ColumnId.Name:
-					paintEventArgs.PaintImageOverlayAndText(_bmpIcon, overlay, data);
+				case FileStatus.Modified:
+					overlay = CachedResources.Bitmaps["ImgOverlayEditStaged"];
+					break;
+				case FileStatus.Added:
+					overlay = CachedResources.Bitmaps["ImgOverlayAddStaged"];
+					break;
+				case FileStatus.Removed:
+					overlay = CachedResources.Bitmaps["ImgOverlayDelStaged"];
+					break;
+				case FileStatus.Unmerged:
+					overlay = CachedResources.Bitmaps["ImgOverlayConflict"];
+					break;
+				default:
+					overlay = null;
 					break;
 			}
+			if((Parent != null) && (Parent is TreeDirectoryListItem))
+			{
+				data = _staged.Name;
+			}
+			else
+			{
+				data = _staged.RelativePath;
+			}
+		}
+		else
+		{
+			data = string.Empty;
+			overlay = null;
+		}
+		switch((ColumnId)paintEventArgs.SubItemId)
+		{
+			case ColumnId.Name:
+				paintEventArgs.PaintImageOverlayAndText(_bmpIcon, overlay, data);
+				break;
 		}
 	}
 }

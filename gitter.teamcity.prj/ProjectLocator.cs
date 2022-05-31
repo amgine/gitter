@@ -18,26 +18,25 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+public sealed class ProjectLocator : ObjectLocator
 {
-	public sealed class ProjectLocator : ObjectLocator
+	public string Id { get; set; }
+
+	public string Name { get; set; }
+
+	/// <inheritdoc/>
+	public override string ToString()
 	{
-		public string Id { get; set; }
-
-		public string Name { get; set; }
-
-		/// <inheritdoc/>
-		public override string ToString()
+		if(!string.IsNullOrWhiteSpace(Id))
 		{
-			if(!string.IsNullOrWhiteSpace(Id))
-			{
-				return "id:" + Id;
-			}
-			if(!string.IsNullOrWhiteSpace(Name))
-			{
-				return "name:" + Name;
-			}
-			return string.Empty;
+			return "id:" + Id;
 		}
+		if(!string.IsNullOrWhiteSpace(Name))
+		{
+			return "name:" + Name;
+		}
+		return string.Empty;
 	}
 }

@@ -18,57 +18,52 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using gitter.Framework.Configuration;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+sealed class ExplorerContextMenuFeature : IIntegrationFeature
 {
-	using System;
-	using System.Drawing;
-	using gitter.Framework.Configuration;
+	public event EventHandler IsEnabledChanged { add { } remove { } }
 
-	using Resources = gitter.Framework.Properties.Resources;
+	public string Name => "ExplorerContextMenu";
 
-	sealed class ExplorerContextMenuFeature : IIntegrationFeature
+	public string DisplayText => Resources.StrsExplorerContextMenuFeature;
+
+	public IImageProvider Icon => CommonIcons.Folder;
+
+	public bool IsEnabled
 	{
-		public event EventHandler IsEnabledChanged;
-
-		private void OnIsEnabledChanged() => IsEnabledChanged?.Invoke(this, EventArgs.Empty);
-
-		public string Name => "ExplorerContextMenu";
-
-		public string DisplayText => Resources.StrsExplorerContextMenuFeature;
-
-		public Bitmap Icon => CachedResources.Bitmaps["ImgFolder"];
-
-		public bool IsEnabled
+		get => WindowsExplorer.IsIntegratedInExplorerContextMenu;
+		set
 		{
-			get => GlobalOptions.IsIntegratedInExplorerContextMenu;
-			set
+			if(value)
 			{
-				if(value)
-				{
-					GlobalOptions.IntegrateInExplorerContextMenu();
-				}
-				else
-				{
-					GlobalOptions.RemoveFromExplorerContextMenu();
-				}
+				WindowsExplorer.IntegrateInExplorerContextMenu();
+			}
+			else
+			{
+				WindowsExplorer.RemoveFromExplorerContextMenu();
 			}
 		}
+	}
 
-		public bool AdministratorRightsRequired => true;
+	public bool AdministratorRightsRequired => true;
 
-		public Action GetEnableAction(bool enable)
-			=> enable ?
-				(Action)GlobalOptions.IntegrateInExplorerContextMenu :
-				(Action)GlobalOptions.RemoveFromExplorerContextMenu;
+	public string GetEnableAction(bool enable) => enable
+		? @"--explorer-context-menu=enabled"
+		: @"--explorer-context-menu=disabled";
 
-		bool IIntegrationFeature.HasConfiguration => false;
+	bool IIntegrationFeature.HasConfiguration => false;
 
-		void IIntegrationFeature.SaveTo(Section section)
-		{
-		}
+	void IIntegrationFeature.SaveTo(Section section)
+	{
+	}
 
-		void IIntegrationFeature.LoadFrom(Section section)
-		{
-		}
+	void IIntegrationFeature.LoadFrom(Section section)
+	{
 	}
 }

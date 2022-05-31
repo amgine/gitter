@@ -18,12 +18,21 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
+namespace gitter.GitLab.Api;
+
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#endif
+
+#if SYSTEM_TEXT_JSON
+[JsonConverter(typeof(JsonStringEnumConverter))]
+#endif
+enum MilestoneState
 {
-	enum MilestoneState
-	{
-		Active,
-		Closed,
-		All
-	}
+	[EnumMember(Value = @"active")]
+	Active,
+	[EnumMember(Value = @"closed")]
+	Closed,
+	All
 }

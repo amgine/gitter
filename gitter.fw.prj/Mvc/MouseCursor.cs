@@ -18,38 +18,37 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
-{
-	public enum MouseCursor
-	{
-		Default,
+namespace gitter.Framework.Mvc;
 
-		AppStarting,
-		Arrow,
-		Cross,
-		Hand,
-		Help,
-		HSplit,
-		IBeam,
-		No,
-		NoMove2D,
-		NoMoveHoriz,
-		NoMoveVert,
-		PanEast,
-		PanNE,
-		PanNorth,
-		PanNW,
-		PanSE,
-		PanSouth,
-		PanSW,
-		PanWest,
-		SizeAll,
-		SizeNESW,
-		SizeNS,
-		SizeNWSE,
-		SizeWE,
-		UpArrow,
-		VSplit,
-		WaitCursor,
-	}
+public enum MouseCursor
+{
+	Default,
+
+	AppStarting,
+	Arrow,
+	Cross,
+	Hand,
+	Help,
+	HSplit,
+	IBeam,
+	No,
+	NoMove2D,
+	NoMoveHoriz,
+	NoMoveVert,
+	PanEast,
+	PanNE,
+	PanNorth,
+	PanNW,
+	PanSE,
+	PanSouth,
+	PanSW,
+	PanWest,
+	SizeAll,
+	SizeNESW,
+	SizeNS,
+	SizeNWSE,
+	SizeWE,
+	UpArrow,
+	VSplit,
+	WaitCursor,
 }

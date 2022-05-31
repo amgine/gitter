@@ -18,54 +18,53 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+using System;
+using System.Linq;
+
+using gitter.Framework;
+using gitter.Framework.Configuration;
+
+using gitter.TeamCity.Gui.Views;
+
+sealed class TeamCityGuiProvider : IGuiProvider
 {
-	using System;
-	using System.Linq;
+	private RepositoryExplorer _repositoryExplorer;
 
-	using gitter.Framework;
-	using gitter.Framework.Configuration;
-
-	using gitter.TeamCity.Gui.Views;
-
-	sealed class TeamCityGuiProvider : IGuiProvider
+	public TeamCityGuiProvider(IRepository repository, TeamCityServiceContext svc)
 	{
-		private RepositoryExplorer _repositoryExplorer;
+		Repository = repository;
+		ServiceContext = svc;
+	}
 
-		public TeamCityGuiProvider(IRepository repository, TeamCityServiceContext svc)
-		{
-			Repository = repository;
-			ServiceContext = svc;
-		}
+	public IRepository Repository { get; }
 
-		public IRepository Repository { get; }
+	public TeamCityServiceContext ServiceContext { get; }
 
-		public TeamCityServiceContext ServiceContext { get; }
+	public void AttachToEnvironment(IWorkingEnvironment environment)
+	{
+		Verify.Argument.IsNotNull(environment);
 
-		public void AttachToEnvironment(IWorkingEnvironment environment)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		_repositoryExplorer = new RepositoryExplorer(environment, this);
+		environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
+	}
 
-			_repositoryExplorer = new RepositoryExplorer(environment, this);
-			environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
-		}
+	public void DetachFromEnvironment(IWorkingEnvironment environment)
+	{
+		Verify.Argument.IsNotNull(environment);
 
-		public void DetachFromEnvironment(IWorkingEnvironment environment)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		var views = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();
+		foreach(var view in views) view.Close();
+		environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
+		_repositoryExplorer = null;
+	}
 
-			var views = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();
-			foreach(var view in views) view.Close();
-			environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
-			_repositoryExplorer = null;
-		}
+	public void SaveTo(Section section)
+	{
+	}
 
-		public void SaveTo(Section section)
-		{
-		}
-
-		public void LoadFrom(Section section)
-		{
-		}
+	public void LoadFrom(Section section)
+	{
 	}
 }

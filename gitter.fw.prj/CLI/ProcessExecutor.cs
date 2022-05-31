@@ -18,124 +18,150 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
+
+#nullable enable
+
+public static class ProcessExecutor
 {
-	using System;
-	using System.Diagnostics;
-	using System.Threading;
-	using System.Threading.Tasks;
-
-	public static class ProcessExecutor
+	public static class CancellationMethods
 	{
-		public static class CancellationMethods
+		public static Action<Process> KillProcess { get; } = static process =>
 		{
-			public static Action<Process> KillProcess { get; } = static process =>
-			{
-				Verify.Argument.IsNotNull(process, nameof(process));
+			Verify.Argument.IsNotNull(process);
 
-				try
-				{
-					process.Kill();
-				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-				}
-			};
-
-			public static Action<Process> AllowToExecute { get; } = static process =>
+			try
 			{
-				Verify.Argument.IsNotNull(process, nameof(process));
-			};
-		}
+				process.Kill();
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
+			}
+		};
+
+		public static Action<Process> AllowToExecute { get; } = static process =>
+		{
+			Verify.Argument.IsNotNull(process);
+		};
+	}
+}
+
+/// <summary>Executes process with output redirecting.</summary>
+/// <typeparam name="TInput">Process input type.</typeparam>
+public abstract class ProcessExecutor<TInput>
+	where TInput : class
+{
+	/// <summary>Initializes a new instance of the <see cref="ProcessExecutor{TInput}"/> class.</summary>
+	/// <param name="exeFileName">Path to executable file.</param>
+	public ProcessExecutor(string exeFileName)
+	{
+		Verify.Argument.IsNeitherNullNorWhitespace(exeFileName);
+
+		ExeFileName = exeFileName;
 	}
 
-	/// <summary>Executes process with output redirecting.</summary>
-	/// <typeparam name="TInput">Process input type.</typeparam>
-	public abstract class ProcessExecutor<TInput>
-		where TInput : class
+	public string ExeFileName { get; }
+
+	protected virtual ProcessStartInfo InitializeStartInfo(TInput input)
+		=> new(ExeFileName)
+		{
+			WindowStyle            = ProcessWindowStyle.Hidden,
+			UseShellExecute        = false,
+			RedirectStandardInput  = true,
+			RedirectStandardOutput = true,
+			RedirectStandardError  = true,
+			LoadUserProfile        = true,
+			ErrorDialog            = false,
+			CreateNoWindow         = true,
+		};
+
+	protected virtual Process CreateProcess(TInput input)
+		=> new() { StartInfo = InitializeStartInfo(input) };
+
+	public int Execute(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver)
 	{
-		/// <summary>Initializes a new instance of the <see cref="ProcessExecutor{TInput}"/> class.</summary>
-		/// <param name="exeFileName">Path to executable file.</param>
-		public ProcessExecutor(string exeFileName)
+		Verify.Argument.IsNotNull(input);
+
+		using var process = CreateProcess(input);
+		process.Start();
+		stdOutReceiver?.Initialize(process, process.StandardOutput);
+		stdErrReceiver?.Initialize(process, process.StandardError);
+		try
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(exeFileName, nameof(exeFileName));
-
-			ExeFileName = exeFileName;
-		}
-
-		public string ExeFileName { get; }
-
-		protected virtual ProcessStartInfo InitializeStartInfo(TInput input)
-			=> new ProcessStartInfo(ExeFileName);
-
-		protected virtual Process CreateProcess(TInput input)
-			=> new Process { StartInfo = InitializeStartInfo(input) };
-
-		public int Execute(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver)
-		{
-			Verify.Argument.IsNotNull(input, nameof(input));
-
-			using var process = CreateProcess(input);
-			process.Start();
-			stdOutReceiver?.Initialize(process, process.StandardOutput);
-			stdErrReceiver?.Initialize(process, process.StandardError);
 			process.WaitForExit();
+		}
+		finally
+		{
 			stdErrReceiver?.WaitForEndOfStream();
 			stdOutReceiver?.WaitForEndOfStream();
-			return process.ExitCode;
 		}
+		return process.ExitCode;
+	}
 
-		public async Task<int> ExecuteAsync(TInput input, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver,
-			Action<Process> cancellationMethod, CancellationToken cancellationToken = default)
+	private static async Task<int> ExecuteAsyncCore(Process process, IOutputReceiver? stdOutReceiver, IOutputReceiver? stdErrReceiver,
+		Action<Process> cancellationMethod, CancellationToken cancellationToken)
+	{
+		Assert.IsNotNull(process);
+		Assert.IsNotNull(cancellationMethod);
+
+		var task = process.StartAsync();
+		using(cancellationToken.Register(() =>
 		{
-			Verify.Argument.IsNotNull(input, nameof(input));
-
-			var tcs = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
-			if(cancellationToken.IsCancellationRequested)
-			{
-				tcs.SetCanceled();
-				return await tcs.Task
-					.ConfigureAwait(continueOnCapturedContext: false);
-			}
-			using var process = CreateProcess(input);
-			process.EnableRaisingEvents = true;
-			process.Exited += (s, e) =>
-				{
-					if(!tcs.Task.IsCanceled)
-					{
-						int exitCode;
-						try
-						{
-							exitCode = ((Process)s).ExitCode;
-						}
-						catch(Exception exc) when(!exc.IsCritical())
-						{
-							tcs.TrySetException(exc);
-							return;
-						}
-						tcs.TrySetResult(exitCode);
-					}
-				};
-			process.Start();
+			stdErrReceiver?.NotifyCanceled();
+			stdOutReceiver?.NotifyCanceled();
+			cancellationMethod(process);
+		}))
+		{
 			stdOutReceiver?.Initialize(process, process.StandardOutput);
 			stdErrReceiver?.Initialize(process, process.StandardError);
-			using var cancellationRegistration = cancellationToken.CanBeCanceled
-				? cancellationToken.Register(() => tcs.TrySetCanceled())
-				: default;
-			var processExitCode = await tcs.Task
-				.ConfigureAwait(continueOnCapturedContext: false);
-			if(tcs.Task.IsCanceled)
+			try
 			{
-				stdErrReceiver?.NotifyCanceled();
-				stdOutReceiver?.NotifyCanceled();
-				cancellationMethod?.Invoke(process);
+				return await task.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			else
+			finally
 			{
 				stdErrReceiver?.WaitForEndOfStream();
 				stdOutReceiver?.WaitForEndOfStream();
 			}
-			return processExitCode;
 		}
+	}
+
+	private static async Task<int> ExecuteAsyncCore(Process process, IOutputReceiver? stdOutReceiver, IOutputReceiver? stdErrReceiver)
+	{
+		Assert.IsNotNull(process);
+
+		var task = process.StartAsync();
+		stdOutReceiver?.Initialize(process, process.StandardOutput);
+		stdErrReceiver?.Initialize(process, process.StandardError);
+		try
+		{
+			return await task.ConfigureAwait(continueOnCapturedContext: false);
+		}
+		finally
+		{
+			stdErrReceiver?.WaitForEndOfStream();
+			stdOutReceiver?.WaitForEndOfStream();
+		}
+	}
+
+	public async Task<int> ExecuteAsync(TInput input, IOutputReceiver? stdOutReceiver, IOutputReceiver? stdErrReceiver,
+		Action<Process>? cancellationMethod = null, CancellationToken cancellationToken = default)
+	{
+		Verify.Argument.IsNotNull(input);
+
+		cancellationToken.ThrowIfCancellationRequested();
+		using var process = CreateProcess(input);
+		var canCancel = cancellationToken.CanBeCanceled
+			&& cancellationMethod is not null
+			&& cancellationMethod != ProcessExecutor.CancellationMethods.AllowToExecute;
+		var task = canCancel
+			? ExecuteAsyncCore(process, stdOutReceiver, stdErrReceiver, cancellationMethod!, cancellationToken)
+			: ExecuteAsyncCore(process, stdOutReceiver, stdErrReceiver);
+		return await task.ConfigureAwait(continueOnCapturedContext: false);
 	}
 }

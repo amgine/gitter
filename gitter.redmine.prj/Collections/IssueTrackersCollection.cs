@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,35 +18,34 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Xml;
+
+public sealed class IssueTrackersCollection : NamedRedmineObjectsCache<IssueTracker>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Xml;
-
-	public sealed class IssueTrackersCollection : NamedRedmineObjectsCache<IssueTracker>
+	internal IssueTrackersCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal IssueTrackersCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override IssueTracker Create(int id, string name)
-		{
-			return new IssueTracker(Context, id, name);
-		}
+	protected override IssueTracker Create(int id, string name)
+	{
+		return new IssueTracker(Context, id, name);
+	}
 
-		protected override IssueTracker Create(XmlNode node)
-		{
-			return new IssueTracker(Context, node);
-		}
+	protected override IssueTracker Create(XmlNode node)
+	{
+		return new IssueTracker(Context, node);
+	}
 
-		public LinkedList<IssueTracker> Fetch()
-		{
-			const string url = "trackers.xml";
-			return FetchItemsFromSinglePage(url);
-		}
+	public LinkedList<IssueTracker> Fetch()
+	{
+		const string url = "trackers.xml";
+		return FetchItemsFromSinglePage(url);
 	}
 }

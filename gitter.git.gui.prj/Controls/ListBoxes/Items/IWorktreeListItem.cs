@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+public interface ITreeItemListItem
 {
-	public interface ITreeItemListItem
-	{
-		TreeItem TreeItem { get; }
-	}
+	TreeItem TreeItem { get; }
 }

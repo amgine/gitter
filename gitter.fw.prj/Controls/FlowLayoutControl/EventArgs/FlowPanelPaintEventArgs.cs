@@ -18,26 +18,26 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+public class FlowPanelPaintEventArgs : EventArgs
 {
-	using System;
-	using System.Drawing;
-
-	public class FlowPanelPaintEventArgs : EventArgs
+	public FlowPanelPaintEventArgs(Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds)
 	{
-		public FlowPanelPaintEventArgs(Graphics graphics, Rectangle clipRectangle, Rectangle bounds)
-		{
-			Graphics      = graphics;
-			ClipRectangle = clipRectangle;
-			Bounds        = bounds;
-		}
-
-		public Graphics Graphics { get; }
-
-		public Rectangle Bounds { get; }
-
-		public Rectangle ClipRectangle { get; }
-
-		public Dpi Dpi => new(Graphics);
+		Graphics      = graphics;
+		ClipRectangle = clipRectangle;
+		Bounds        = bounds;
+		Dpi           = dpi;
 	}
+
+	public Graphics Graphics { get; }
+
+	public Rectangle Bounds { get; }
+
+	public Rectangle ClipRectangle { get; }
+
+	public Dpi Dpi { get; }
 }

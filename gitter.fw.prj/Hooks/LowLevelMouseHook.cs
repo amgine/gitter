@@ -18,45 +18,45 @@
  */
 #endregion
 
-namespace gitter.Framework.Hooks
+namespace gitter.Framework.Hooks;
+
+using System;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+using gitter.Native;
+
+public class LowLevelMouseHook : WindowsHook
 {
-	using System;
-	using System.Runtime.InteropServices;
-	using System.Windows.Forms;
+	public event EventHandler<MouseEventArgs> MouseWheel;
 
-	using gitter.Native;
+	public event EventHandler<MouseEventArgs> MouseMove;
 
-	public class LowLevelMouseHook : WindowsHook
+	protected virtual void OnMouseWheel(MouseEventArgs args)
+		=> MouseWheel?.Invoke(this, args);
+
+	protected virtual void OnMouseMove(MouseEventArgs args)
+		=> MouseMove?.Invoke(this, args);
+
+	public LowLevelMouseHook()
+		: base(Native.WH.MOUSE_LL)
 	{
-		public event EventHandler<MouseEventArgs> MouseWheel;
+	}
 
-		public event EventHandler<MouseEventArgs> MouseMove;
+	/// <inheritdoc/>
+	protected override void HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+	{
+		var msg  = (WM)wParam.ToInt32();
+		var info = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
 
-		protected virtual void OnMouseWheel(MouseEventArgs args)
-			=> MouseWheel?.Invoke(this, args);
-
-		protected virtual void OnMouseMove(MouseEventArgs args)
-			=> MouseMove?.Invoke(this, args);
-
-		public LowLevelMouseHook()
-			: base(Native.WH.MOUSE_LL)
+		switch(msg)
 		{
-		}
-
-		protected override void HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
-		{
-			var msg  = (WM)(wParam.ToInt32());
-			var info = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
-
-			switch(msg)
-			{
-				case WM.MOUSEWHEEL:
-					OnMouseWheel(new MouseEventArgs(MouseButtons.None, 0, info.pt.X, info.pt.Y, info.mouseData >> 16));
-					break;
-				case WM.MOUSEMOVE:
-					OnMouseMove(new MouseEventArgs(MouseButtons.None, 0, info.pt.X, info.pt.Y, 0));
-					break;
-			}
+			case WM.MOUSEWHEEL:
+				OnMouseWheel(new MouseEventArgs(MouseButtons.None, 0, info.pt.X, info.pt.Y, info.mouseData >> 16));
+				break;
+			case WM.MOUSEMOVE:
+				OnMouseMove(new MouseEventArgs(MouseButtons.None, 0, info.pt.X, info.pt.Y, 0));
+				break;
 		}
 	}
 }

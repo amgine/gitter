@@ -18,9 +18,8 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+public sealed class CountObjectsParameters
 {
-	public sealed class CountObjectsParameters
-	{
-	}
 }

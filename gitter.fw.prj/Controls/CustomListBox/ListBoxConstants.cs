@@ -18,34 +18,33 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System.Drawing;
+
+/// <summary>Common listbox constants.</summary>
+internal static class ListBoxConstants
 {
-	/// <summary>Common listbox constants.</summary>
-	internal static class ListBoxConstants
-	{
-		public const int ContentSpacing = 3;
+	public const int ContentSpacing = 3;
 
-		public const int SpaceBeforeImage = 0;
-		public const int SpaceAfterImage = 5;
+	public const int SpaceBeforeImage = 0;
+	public const int SpaceAfterImage = 5;
 
-		public const int DefaultImageWidth = 16;
-		public const int DefaultImageHeight = 16;
+	public const int DefaultImageWidth = 16;
+	public const int DefaultImageHeight = 16;
 
-		public const int RootMargin = 0;
-		public const int LevelMargin = 10;
+	public const int RootMargin = 0;
+	public static readonly IDpiBoundValue<int>  LevelMargin          = DpiBoundValue.ScaleX(10);
 
-		public const int PlusMinusImageWidth = 16;
-		public const int PlusMinusImageHeight = 16;
-		public const int SpaceBeforePlusMinus = 0;
-		public const int SpaceAfterPlusMinus = 0;
-		public const int PlusMinusAreaWidth =
-			SpaceBeforePlusMinus + PlusMinusImageWidth + SpaceAfterPlusMinus;
+	public static readonly IDpiBoundValue<int>  PlusMinusImageWidth  = DpiBoundValue.ScaleX(16);
+	public static readonly IDpiBoundValue<int>  PlusMinusImageHeight = DpiBoundValue.ScaleY(16);
+	public static readonly IDpiBoundValue<Size> PlusMinusImageSize   = DpiBoundValue.Size(new(16, 16));
+	public static readonly IDpiBoundValue<int>  SpaceBeforePlusMinus = DpiBoundValue.Constant(0);
+	public static readonly IDpiBoundValue<int>  SpaceAfterPlusMinus  = DpiBoundValue.Constant(0);
 
-		public const int CheckboxImageWidth = 16;
-		public const int CheckboxImageHeight = 16;
-		public const int SpaceBeforeCheckbox = 1;
-		public const int SpaceAfterCheckbox = 1;
-		public const int CheckBoxAreaWidth =
-			SpaceBeforeCheckbox + CheckboxImageWidth + SpaceAfterCheckbox;
-	}
+	public static readonly IDpiBoundValue<int>  CheckboxImageWidth   = DpiBoundValue.ScaleX(16);
+	public static readonly IDpiBoundValue<int>  CheckboxImageHeight  = DpiBoundValue.ScaleY(16);
+	public static readonly IDpiBoundValue<Size> CheckboxImageSize    = DpiBoundValue.Size(new(16, 16));
+	public static readonly IDpiBoundValue<int>  SpaceBeforeCheckbox  = DpiBoundValue.ScaleX(1);
+	public static readonly IDpiBoundValue<int>  SpaceAfterCheckbox   = DpiBoundValue.ScaleX(1);
 }

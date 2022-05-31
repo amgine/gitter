@@ -18,16 +18,17 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
-{
-	using System;
-	using System.Threading.Tasks;
+namespace gitter.Framework.Services;
 
-	/// <summary>gitter update channel.</summary>
-	public interface IUpdateChannel
-	{
-		/// <summary>Check latest gitter version on this channel.</summary>
-		/// <returns>Latest gitter version.</returns>
-		Task<IUpdateVersion> GetLatestVersionAsync();
-	}
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+/// <summary>gitter update channel.</summary>
+public interface IUpdateChannel
+{
+	/// <summary>Check latest gitter version on this channel.</summary>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <returns>Latest gitter version.</returns>
+	Task<IUpdateVersion> GetLatestVersionAsync(CancellationToken cancellationToken = default);
 }

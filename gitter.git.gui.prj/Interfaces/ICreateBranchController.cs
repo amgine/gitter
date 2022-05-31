@@ -18,12 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
-{
-	using gitter.Framework.Mvc;
+namespace gitter.Git.Gui.Interfaces;
 
-	interface ICreateBranchController : IViewController<ICreateBranchView>
-	{
-		bool TryCreateBranch();
-	}
+using System.Threading.Tasks;
+
+using gitter.Framework.Mvc;
+
+interface ICreateBranchController : IViewController<ICreateBranchView>
+{
+	Task<bool> TryCreateBranchAsync();
 }

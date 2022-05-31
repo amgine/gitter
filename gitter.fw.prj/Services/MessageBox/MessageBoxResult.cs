@@ -18,20 +18,10 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
-{
-	using System.Windows.Forms;
+namespace gitter.Framework.Services;
 
-	public sealed class MessageBoxResult
-	{
-		public MessageBoxResult(DialogResult dialogResult, int resultOption)
-		{
-			DialogResult = dialogResult;
-			ResultOption = resultOption;
-		}
+using System.Windows.Forms;
 
-		public int ResultOption { get; }
-
-		public DialogResult DialogResult { get; }
-	}
-}
+public sealed record class MessageBoxResult(
+	DialogResult DialogResult,
+	int          ResultOption);

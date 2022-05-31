@@ -18,18 +18,33 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+
+using Autofac;
+
+using gitter.Framework;
+
+internal static class Program
 {
-	using System;
+	/// <summary>The main entry point for the application.</summary>
+	[STAThread]
+	public static void Main() => GitterApplication.Run(
+		static builder =>
+		{
+			builder.RegisterAssemblyModules(typeof(Program).Assembly);
 
-	using gitter.Framework;
+			builder.RegisterModule<gitter.Framework.Module>();
 
-	using Resources = gitter.Properties.Resources;
+			builder.RegisterModule<gitter.Git.Gui.Module>();
 
-	internal static class Program
-	{
-		/// <summary>The main entry point for the application.</summary>
-		[STAThread]
-		public static void Main() => GitterApplication.Run<MainForm>();
-	}
+			builder.RegisterModule<gitter.GitLab.Module>();
+			builder.RegisterModule<gitter.TeamCity.Module>();
+			builder.RegisterModule<gitter.Redmine.Module>();
+
+			builder
+				.RegisterGeneric(typeof(AutofacFactory<>))
+				.AsImplementedInterfaces();
+		});
 }

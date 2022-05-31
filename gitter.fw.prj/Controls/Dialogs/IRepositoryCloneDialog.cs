@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using gitter.Framework.Mvc;
+
+public interface IRepositoryCloneDialog
 {
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> Url { get; }
 
-	public interface IRepositoryCloneDialog
-	{
-		IUserInputSource<string> Url { get; }
-
-		IUserInputSource<string> RepositoryPath { get; }
-	}
+	IUserInputSource<string> RepositoryPath { get; }
 }

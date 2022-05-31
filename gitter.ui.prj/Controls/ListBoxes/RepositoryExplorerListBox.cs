@@ -18,31 +18,30 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Properties.Resources;
+
+[System.ComponentModel.DesignerCategory("")]
+public sealed class RepositoryExplorerListBox : CustomListBox
 {
-	using System;
+	private readonly CustomListBoxColumn _nameColumn;
 
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	public sealed class RepositoryExplorerListBox : CustomListBox
+	/// <summary>Create <see cref="RepositoryExplorerListBox"/>.</summary>
+	public RepositoryExplorerListBox()
 	{
-		private readonly CustomListBoxColumn _nameColumn;
-
-		/// <summary>Create <see cref="RepositoryExplorerListBox"/>.</summary>
-		public RepositoryExplorerListBox()
+		_nameColumn = new CustomListBoxColumn(0, Resources.StrName)
 		{
-			_nameColumn = new CustomListBoxColumn(0, Resources.StrName)
-			{
-				SizeMode = ColumnSizeMode.Auto
-			};
-			Columns.Add(_nameColumn);
+			SizeMode = ColumnSizeMode.Auto
+		};
+		Columns.Add(_nameColumn);
 
-			ShowTreeLines = true;
-			HeaderStyle = HeaderStyle.Hidden;
-			ShowRootTreeLines = false;
-		}
+		ShowTreeLines = true;
+		HeaderStyle = HeaderStyle.Hidden;
+		ShowRootTreeLines = false;
 	}
 }

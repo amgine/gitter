@@ -18,73 +18,72 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading.Tasks;
+
+using gitter.Git.AccessLayer;
+
+/// <summary>Dynamic revision pointer.</summary>
+internal sealed class DynamicRevisionPointer : IRevisionPointer
 {
-	using System;
-	using System.Threading.Tasks;
+	#region .ctor
 
-	using gitter.Git.AccessLayer;
-
-	/// <summary>Dynamic revision pointer.</summary>
-	internal sealed class DynamicRevisionPointer : IRevisionPointer
+	public DynamicRevisionPointer(Repository repository, string pointer)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNeitherNullNorWhitespace(pointer);
 
-		public DynamicRevisionPointer(Repository repository, string pointer)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNeitherNullNorWhitespace(pointer, nameof(pointer));
-
-			Repository = repository;
-			Pointer    = pointer;
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Host repository. Never null.</summary>
-		public Repository Repository { get; }
-
-		/// <summary><see cref="ReferenceType"/>.</summary>
-		public ReferenceType Type => ReferenceType.Revision;
-
-		/// <summary>Revision expression (reference name, sha1, relative expression, etc.).</summary>
-		public string Pointer { get; }
-
-		/// <summary>Returns full non-ambiguous revision name.</summary>
-		public string FullName => Pointer;
-
-		/// <summary>Object is deleted and not valid anymore.</summary>
-		public bool IsDeleted => false;
-
-		#endregion
-
-		#region Methods
-
-		/// <inheritdoc/>
-		public Revision Dereference()
-		{
-			var rev = Repository.Accessor.Dereference.Invoke(
-				new DereferenceParameters(Pointer));
-			lock(Repository.Revisions.SyncRoot)
-			{
-				return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
-			}
-		}
-
-		/// <inheritdoc/>
-		public async Task<Revision> DereferenceAsync()
-		{
-			var rev = await Repository.Accessor.Dereference
-				.InvokeAsync(new DereferenceParameters(Pointer))
-				.ConfigureAwait(continueOnCapturedContext: false);
-			lock(Repository.Revisions.SyncRoot)
-			{
-				return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
-			}
-		}
-
-		#endregion
+		Repository = repository;
+		Pointer    = pointer;
 	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary>Host repository. Never null.</summary>
+	public Repository Repository { get; }
+
+	/// <summary><see cref="ReferenceType"/>.</summary>
+	public ReferenceType Type => ReferenceType.Revision;
+
+	/// <summary>Revision expression (reference name, sha1, relative expression, etc.).</summary>
+	public string Pointer { get; }
+
+	/// <summary>Returns full non-ambiguous revision name.</summary>
+	public string FullName => Pointer;
+
+	/// <summary>Object is deleted and not valid anymore.</summary>
+	public bool IsDeleted => false;
+
+	#endregion
+
+	#region Methods
+
+	/// <inheritdoc/>
+	public Revision Dereference()
+	{
+		var rev = Repository.Accessor.Dereference.Invoke(
+			new DereferenceParameters(Pointer));
+		lock(Repository.Revisions.SyncRoot)
+		{
+			return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+		}
+	}
+
+	/// <inheritdoc/>
+	public async Task<Revision> DereferenceAsync()
+	{
+		var rev = await Repository.Accessor.Dereference
+			.InvokeAsync(new DereferenceParameters(Pointer))
+			.ConfigureAwait(continueOnCapturedContext: false);
+		lock(Repository.Revisions.SyncRoot)
+		{
+			return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+		}
+	}
+
+	#endregion
 }

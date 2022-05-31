@@ -18,261 +18,241 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Controls;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class PushDialog : GitDialogBase, IPushView, IExecutableDialog
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Controls;
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class PushDialog : GitDialogBase, IPushView, IExecutableDialog
+	private sealed class BranchesInputSource : IUserInputSource<ICollection<Branch>>, IWin32ControlInputSource
 	{
-		#region Helpers
-
-		private sealed class BranchesInputSource : IUserInputSource<ICollection<Branch>>, IWin32ControlInputSource
-		{
-			#region Data
-
-			private readonly ReferencesListBox _referencesListBox;
-
-			#endregion
-
-			#region .ctor
-
-			public BranchesInputSource(ReferencesListBox referencesListBox)
-			{
-				Assert.IsNotNull(referencesListBox);
-
-				_referencesListBox = referencesListBox;
-			}
-
-			#endregion
-
-			#region IUserInputSource<ICollection<Branch>> Members
-
-			public ICollection<Branch> Value
-			{
-				get
-				{
-					var list = new List<Branch>(capacity: _referencesListBox.Items.Count);
-					foreach(var item in _referencesListBox.Items)
-					{
-						if(item.CheckedState == CheckedState.Checked)
-						{
-							if(item is IRevisionPointerListItem refItem && refItem.RevisionPointer is Branch branch)
-							{
-								list.Add(branch);
-							}
-						}
-					}
-					return list;
-				}
-				set
-				{
-					if(value == null || value.Count == 0)
-					{
-						foreach(var item in _referencesListBox.Items)
-						{
-							item.CheckedState = CheckedState.Unchecked;
-						}
-						return;
-					}
-					foreach(var item in _referencesListBox.Items)
-					{
-						if(item is IRevisionPointerListItem refItem && refItem.RevisionPointer is Branch branch)
-						{
-							item.CheckedState = value.Contains(branch) ?
-								CheckedState.Checked : CheckedState.Unchecked;
-						}
-					}
-				}
-			}
-
-			#endregion
-
-			#region IUserInputSource Members
-
-			public bool IsReadOnly
-			{
-				get => !_referencesListBox.Enabled;
-				set => _referencesListBox.Enabled = !value;
-			}
-
-			#endregion
-
-			#region IWin32ControlInputSource Members
-
-			public Control Control => _referencesListBox;
-
-			#endregion
-		}
-
-		#endregion
-
 		#region Data
 
-		private readonly IPushController _controller;
+		private readonly ReferencesListBox _referencesListBox;
 
 		#endregion
 
 		#region .ctor
 
-		public PushDialog(Repository repository)
+		public BranchesInputSource(ReferencesListBox referencesListBox)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Assert.IsNotNull(referencesListBox);
 
-			Repository = repository;
+			_referencesListBox = referencesListBox;
+		}
 
-			InitializeComponent();
-			Localize();
+		#endregion
 
-			var inputs = new IUserInputSource[]
+		#region IUserInputSource<ICollection<Branch>> Members
+
+		public ICollection<Branch> Value
+		{
+			get
 			{
-				PushTo = new RadioButtonGroupInputSource<PushTo>(
-					new[]
-					{
-						Tuple.Create(_radRemote, gitter.Git.Gui.Interfaces.PushTo.Remote),
-						Tuple.Create(_radUrl,    gitter.Git.Gui.Interfaces.PushTo.Url),
-					}),
-				Remote         = PickerInputSource.Create(_remotePicker),
-				Url            = new TextBoxInputSource(_txtUrl),
-				References     = new BranchesInputSource(_lstReferences),
-				ForceOverwrite = new CheckBoxInputSource(_chkForceOverwriteBranches),
-				ThinPack       = new CheckBoxInputSource(_chkUseThinPack),
-				SendTags       = new CheckBoxInputSource(_chkSendTags),
-			};
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
-
-
-			_picWarning.Image = CachedResources.Bitmaps["ImgWarning"];
-
-			_lstReferences.LoadData(Repository, ReferenceType.LocalBranch, false, false, null);
-			_lstReferences.EnableCheckboxes();
-
-			if(!Repository.Head.IsDetached)
-			{
-				foreach(BranchListItem item in _lstReferences.Items)
+				var list = new List<Branch>(capacity: _referencesListBox.Items.Count);
+				foreach(var item in _referencesListBox.Items)
 				{
-					if(item.DataContext == Repository.Head.Pointer)
+					if(item.CheckedState == CheckedState.Checked)
 					{
-						item.CheckedState = CheckedState.Checked;
-						break;
+						if(item is IRevisionPointerListItem refItem && refItem.RevisionPointer is Branch branch)
+						{
+							list.Add(branch);
+						}
+					}
+				}
+				return list;
+			}
+			set
+			{
+				if(value == null || value.Count == 0)
+				{
+					foreach(var item in _referencesListBox.Items)
+					{
+						item.CheckedState = CheckedState.Unchecked;
+					}
+					return;
+				}
+				foreach(var item in _referencesListBox.Items)
+				{
+					if(item is IRevisionPointerListItem refItem && refItem.RevisionPointer is Branch branch)
+					{
+						item.CheckedState = value.Contains(branch) ?
+							CheckedState.Checked : CheckedState.Unchecked;
 					}
 				}
 			}
-
-			_remotePicker.LoadData(repository);
-			_remotePicker.SelectedValue = PickDefaultRemote(repository);
-			_controller = new PushController(repository) { View = this };
 		}
 
 		#endregion
 
-		#region Properties
+		#region IUserInputSource Members
 
-		protected override string ActionVerb => Resources.StrPush;
-
-		public Repository Repository { get; }
-
-		public IUserInputSource<PushTo> PushTo { get; }
-
-		public IUserInputSource<Remote> Remote { get; }
-
-		public IUserInputSource<string> Url { get; }
-
-		public IUserInputSource<ICollection<Branch>> References { get; }
-
-		public IUserInputSource<bool> ForceOverwrite { get; }
-
-		public IUserInputSource<bool> ThinPack { get; }
-
-		public IUserInputSource<bool> SendTags { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region Methods
-
-		private static Remote PickDefaultRemote(Repository repository)
+		public bool IsReadOnly
 		{
-			Assert.IsNotNull(repository);
-
-			var remotes = repository.Remotes;
-			lock(remotes.SyncRoot)
-			{
-				if(remotes.Count != 0)
-				{
-					var remote = remotes.TryGetItem(GitConstants.DefaultRemoteName);
-					if(remote != null) return remote;
-					foreach(var r in remotes)
-					{
-						return r;
-					}
-				}
-			}
-			return default;
-		}
-
-		private void Localize()
-		{
-			Text = Resources.StrPush;
-
-			_lstReferences.Style = GitterApplication.DefaultStyle;
-			_lblBranches.Text = Resources.StrBranchesToPush.AddColon();
-			_grpPushTo.Text = Resources.StrPushTo;
-			_radRemote.Text = Resources.StrRemote;
-			_radUrl.Text = Resources.StrUrl;
-			_grpOptions.Text = Resources.StrOptions;
-			_chkForceOverwriteBranches.Text = Resources.StrForceOverwriteRemoteBranches;
-			_lblUseWithCaution.Text = Resources.StrUseWithCaution;
-			_chkUseThinPack.Text = Resources.StrUseThinPack;
-			_chkSendTags.Text = Resources.StrSendTags;
-
-			ToolTipService.Register(_chkForceOverwriteBranches, Resources.TipPushForceOverwrite);
-			ToolTipService.Register(_chkUseThinPack, Resources.TipUseTinPack);
-			ToolTipService.Register(_chkSendTags, Resources.TipSendTags);
-		}
-
-		private void OnForceOverwriteCheckedChanged(object sender, EventArgs e)
-		{
-			_pnlWarning.Visible = _chkForceOverwriteBranches.Checked;
-		}
-
-		private void OnUrlTextChanged(object sender, EventArgs e)
-		{
-			if(_txtUrl.TextLength != 0)
-			{
-				_radUrl.Checked = true;
-			}
-		}
-
-		private void OnRemotePickerSelectedIndexChanged(object sender, EventArgs e)
-		{
-			if(_remotePicker.SelectedValue != null)
-			{
-				_radRemote.Checked = true;
-			}
+			get => !_referencesListBox.Enabled;
+			set => _referencesListBox.Enabled = !value;
 		}
 
 		#endregion
 
-		#region IExecutableDialog
+		#region IWin32ControlInputSource Members
 
-		public bool Execute() => _controller.TryPush();
+		public Control Control => _referencesListBox;
 
 		#endregion
 	}
+
+	private readonly IPushController _controller;
+
+	public PushDialog(Repository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		Repository = repository;
+
+		InitializeComponent();
+		Localize();
+
+		var inputs = new IUserInputSource[]
+		{
+			PushTo = new RadioButtonGroupInputSource<PushTo>(
+				new[]
+				{
+					Tuple.Create(_radRemote, gitter.Git.Gui.Interfaces.PushTo.Remote),
+					Tuple.Create(_radUrl,    gitter.Git.Gui.Interfaces.PushTo.Url),
+				}),
+			Remote         = PickerInputSource.Create(_remotePicker),
+			Url            = new TextBoxInputSource(_txtUrl),
+			References     = new BranchesInputSource(_lstReferences),
+			ForceOverwrite = new CheckBoxInputSource(_chkForceOverwriteBranches),
+			ThinPack       = new CheckBoxInputSource(_chkUseThinPack),
+			SendTags       = new CheckBoxInputSource(_chkSendTags),
+		};
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+
+		var dpiBindings = new DpiBindings(this);
+		dpiBindings.BindImage(_picWarning, Icons.PushWarning);
+
+		_lstReferences.LoadData(Repository, ReferenceType.LocalBranch, false, false, null);
+		_lstReferences.EnableCheckboxes();
+
+		if(!Repository.Head.IsDetached)
+		{
+			foreach(BranchListItem item in _lstReferences.Items)
+			{
+				if(item.DataContext == Repository.Head.Pointer)
+				{
+					item.CheckedState = CheckedState.Checked;
+					break;
+				}
+			}
+		}
+
+		_remotePicker.LoadData(repository);
+		_remotePicker.SelectedValue = PickDefaultRemote(repository);
+		_controller = new PushController(repository) { View = this };
+	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 379));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrPush;
+
+	public Repository Repository { get; }
+
+	public IUserInputSource<PushTo> PushTo { get; }
+
+	public IUserInputSource<Remote> Remote { get; }
+
+	public IUserInputSource<string> Url { get; }
+
+	public IUserInputSource<ICollection<Branch>> References { get; }
+
+	public IUserInputSource<bool> ForceOverwrite { get; }
+
+	public IUserInputSource<bool> ThinPack { get; }
+
+	public IUserInputSource<bool> SendTags { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	private static Remote PickDefaultRemote(Repository repository)
+	{
+		Assert.IsNotNull(repository);
+
+		var remotes = repository.Remotes;
+		lock(remotes.SyncRoot)
+		{
+			if(remotes.Count != 0)
+			{
+				var remote = remotes.TryGetItem(GitConstants.DefaultRemoteName);
+				if(remote is not null) return remote;
+				foreach(var r in remotes)
+				{
+					return r;
+				}
+			}
+		}
+		return default;
+	}
+
+	private void Localize()
+	{
+		Text = Resources.StrPush;
+
+		_lstReferences.Style = GitterApplication.DefaultStyle;
+		_lblBranches.Text = Resources.StrBranchesToPush.AddColon();
+		_grpPushTo.Text = Resources.StrPushTo;
+		_radRemote.Text = Resources.StrRemote;
+		_radUrl.Text = Resources.StrUrl;
+		_grpOptions.Text = Resources.StrOptions;
+		_chkForceOverwriteBranches.Text = Resources.StrForceOverwriteRemoteBranches;
+		_lblUseWithCaution.Text = Resources.StrUseWithCaution;
+		_chkUseThinPack.Text = Resources.StrUseThinPack;
+		_chkSendTags.Text = Resources.StrSendTags;
+
+		ToolTipService.Register(_chkForceOverwriteBranches, Resources.TipPushForceOverwrite);
+		ToolTipService.Register(_chkUseThinPack, Resources.TipUseTinPack);
+		ToolTipService.Register(_chkSendTags, Resources.TipSendTags);
+	}
+
+	private void OnForceOverwriteCheckedChanged(object sender, EventArgs e)
+	{
+		_pnlWarning.Visible = _chkForceOverwriteBranches.Checked;
+	}
+
+	private void OnUrlTextChanged(object sender, EventArgs e)
+	{
+		if(_txtUrl.TextLength != 0)
+		{
+			_radUrl.Checked = true;
+		}
+	}
+
+	private void OnRemotePickerSelectedIndexChanged(object sender, EventArgs e)
+	{
+		if(_remotePicker.SelectedValue is not null)
+		{
+			_radRemote.Checked = true;
+		}
+	}
+
+	public bool Execute() => _controller.TryPush();
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,35 +18,34 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Redmine.Gui;
+
+sealed class RepositoryExplorer
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
+	private readonly RepositoryExplorerRootListItem _rootItem;
+	private readonly RedmineServiceContext _service;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Redmine.Gui;
-
-	sealed class RepositoryExplorer
+	public RepositoryExplorer(IWorkingEnvironment environment, RedmineGuiProvider guiProvider)
 	{
-		private readonly RepositoryExplorerRootListItem _rootItem;
-		private readonly RedmineServiceContext _service;
+		Verify.Argument.IsNotNull(environment);
+		Verify.Argument.IsNotNull(guiProvider);
 
-		public RepositoryExplorer(IWorkingEnvironment environment, RedmineGuiProvider guiProvider)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
+		_service = guiProvider.ServiceContext;
+		_rootItem = new RepositoryExplorerRootListItem(environment, guiProvider);
+	}
 
-			_service = guiProvider.ServiceContext;
-			_rootItem = new RepositoryExplorerRootListItem(environment, guiProvider);
-		}
-
-		public CustomListBoxItem RootItem
-		{
-			get { return _rootItem; }
-		}
+	public CustomListBoxItem RootItem
+	{
+		get { return _rootItem; }
 	}
 }

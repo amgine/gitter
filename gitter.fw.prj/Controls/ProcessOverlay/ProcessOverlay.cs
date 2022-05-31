@@ -18,345 +18,344 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private ProcessOverlayRenderer _renderer;
+	private Font _font;
+	private readonly Func<Rectangle> _getOverlayArea;
 
-	public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
+	private Timer _timer;
+
+	public event EventHandler RepaintRequired;
+
+	public ProcessOverlay(Control hostControl, Func<Rectangle> getOverlayArea)
 	{
-		private ProcessOverlayRenderer _renderer;
-		private Font _font;
-		private readonly Func<Rectangle> _getOverlayArea;
+		HostControl = hostControl;
+		_getOverlayArea = getOverlayArea;
+		Rounding = 10.0f;
+		InvalidateHost = true;
+		DisableHost = true;
 
-		private Timer _timer;
-
-		public event EventHandler RepaintRequired;
-
-		public ProcessOverlay(Control hostControl, Func<Rectangle> getOverlayArea)
+		_timer = new Timer()
 		{
-			HostControl = hostControl;
-			_getOverlayArea = getOverlayArea;
-			Rounding = 10.0f;
-			InvalidateHost = true;
-			DisableHost = true;
+			Interval = 1000/25,
+			Enabled = false,
+		};
+		_timer.Tick += (_, _) => Repaint();
+	}
 
-			_timer = new Timer()
+	public ProcessOverlay(Control hostControl)
+		: this(hostControl, null)
+	{
+	}
+
+	public ProcessOverlay()
+		: this(null, null)
+	{
+	}
+
+	private void UpdateWin7ProgressBar()
+	{
+		var form = GitterApplication.MainForm;
+		if(form != null && !form.IsDisposed)
+		{
+			if(Marquee)
 			{
-				Interval = 1000/25,
-				Enabled = false,
-			};
-			_timer.Tick += (sender, e) => Repaint();
-		}
-
-		public ProcessOverlay(Control hostControl)
-			: this(hostControl, null)
-		{
-		}
-
-		public ProcessOverlay()
-			: this(null, null)
-		{
-		}
-
-		private void UpdateWin7ProgressBar()
-		{
-			var form = GitterApplication.MainForm;
-			if(form != null && !form.IsDisposed)
+				form.SetTaskbarProgressState(TbpFlag.Indeterminate);
+			}
+			else
 			{
-				if(Marquee)
-				{
-					form.SetTaskbarProgressState(TbpFlag.Indeterminate);
-				}
-				else
-				{
-					form.SetTaskbarProgressState(TbpFlag.Normal);
-					form.SetTaskbarProgressValue(
-						(long)(Value - Minimum),
-						(long)(Maximum - Minimum));
-				}
+				form.SetTaskbarProgressState(TbpFlag.Normal);
+				form.SetTaskbarProgressValue(
+					(long)(Value - Minimum),
+					(long)(Maximum - Minimum));
 			}
 		}
+	}
 
-		private static void StopWin7ProgressBar()
+	private static void StopWin7ProgressBar()
+	{
+		var form = GitterApplication.MainForm;
+		if(form is { IsDisposed: false }) form.SetTaskbarProgressState(TbpFlag.NoProgress);
+	}
+
+	public Font Font
+	{
+		get => _font ?? HostControl?.Font ?? GitterApplication.FontManager.UIFont;
+		set => _font = value;
+	}
+
+	public ProcessOverlayRenderer Renderer
+	{
+		get => _renderer ?? ProcessOverlayRenderer.Default;
+		set => _renderer = value;
+	}
+
+	public int Minimum { get; set; }
+
+	public int Maximum { get; set; }
+
+	public int Value { get; set; }
+
+	public string Title { get; set; }
+
+	public string Message { get; set; }
+
+	public bool Marquee { get; set; }
+
+	public float Rounding { get; set; }
+
+	public Control HostControl { get; internal set; }
+
+	public bool InvalidateHost { get; set; }
+
+	public bool DisableHost { get; set; }
+
+	public bool IsVisible { get; private set; }
+
+	public void OnPaint(Graphics graphics, Rectangle bounds)
+	{
+		if(IsVisible)
 		{
-			var form = GitterApplication.MainForm;
-			if(form != null && !form.IsDisposed) form.SetTaskbarProgressState(TbpFlag.NoProgress);
+			Renderer.Paint(this, graphics, bounds);
 		}
+	}
 
-		public Font Font
+	public void DrawMessage(Graphics graphics, Rectangle bounds, string status)
+	{
+		if(bounds.Height > 25)
 		{
-			get => _font ?? HostControl?.Font ?? GitterApplication.FontManager.UIFont;
-			set => _font = value;
+			Renderer.PaintMessage(this, graphics, bounds, status);
 		}
+	}
 
-		public ProcessOverlayRenderer Renderer
+	private void Repaint()
+	{
+		RepaintRequired?.Invoke(this, EventArgs.Empty);
+		if(InvalidateHost && HostControl is { Created: true, IsDisposed: false })
 		{
-			get => _renderer ?? ProcessOverlayRenderer.Default;
-			set => _renderer = value;
+			InvalidateHostControl();
 		}
+	}
 
-		public int Minimum { get; set; }
-
-		public int Maximum { get; set; }
-
-		public int Value { get; set; }
-
-		public string Title { get; set; }
-
-		public string Message { get; set; }
-
-		public bool Marquee { get; set; }
-
-		public float Rounding { get; set; }
-
-		public Control HostControl { get; internal set; }
-
-		public bool InvalidateHost { get; set; }
-
-		public bool DisableHost { get; set; }
-
-		public bool IsVisible { get; private set; }
-
-		public void OnPaint(Graphics graphics, Rectangle bounds)
+	private void InvalidateHostControl()
+	{
+		var hostControl = HostControl;
+		if(hostControl is null || hostControl.IsDisposed) return;
+		if(hostControl.InvokeRequired)
 		{
-			if(IsVisible)
+			try
 			{
-				Renderer.Paint(this, graphics, bounds);
+				hostControl.BeginInvoke(new MethodInvoker(InvalidateHostControl));
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		public void DrawMessage(Graphics graphics, Rectangle bounds, string status)
+		else
 		{
-			if(bounds.Height > 25)
-			{
-				Renderer.PaintMessage(this, graphics, bounds, status);
-			}
+			var rect = _getOverlayArea is null ? hostControl.ClientRectangle : _getOverlayArea();
+			hostControl.Invalidate(rect);
 		}
+	}
 
-		private void Repaint()
+	public event EventHandler Canceled;
+
+	private void InvokeCanceled() => Canceled?.Invoke(this, EventArgs.Empty);
+
+	public event EventHandler Started;
+
+	private void InvokeStarted() => Started?.Invoke(this, EventArgs.Empty);
+
+	public IAsyncResult CurrentContext { get; private set; }
+
+	public string ActionName
+	{
+		get => Title;
+		set
 		{
-			RepaintRequired?.Invoke(this, EventArgs.Empty);
-			if(InvalidateHost && HostControl != null && HostControl.Created && !HostControl.IsDisposed)
-			{
-				InvalidateHostControl();
-			}
+			Title = value;
+			Repaint();
 		}
+	}
 
-		private void InvalidateHostControl()
+	public bool CanCancel { get; set; }
+
+	public bool IsCancelRequested => false;
+
+	public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
+	{
+		CurrentContext = context;
+		if(DisableHost)
 		{
-			var hostControl = HostControl;
-			if(hostControl is null || hostControl.IsDisposed) return;
-			if(hostControl.InvokeRequired)
+			HostControl.Enabled = false;
+		}
+		IsVisible = true;
+		_timer.Enabled = true;
+		UpdateWin7ProgressBar();
+		Repaint();
+		InvokeStarted();
+	}
+
+	public void SetAction(string action)
+	{
+		Message = action;
+		Repaint();
+	}
+
+	public void SetProgressRange(int min, int max)
+	{
+		Minimum = min;
+		Maximum = max;
+		UpdateWin7ProgressBar();
+	}
+
+	public void SetProgressRange(int min, int max, string action)
+	{
+		Minimum = min;
+		Maximum = max;
+		Message = action;
+		UpdateWin7ProgressBar();
+		Repaint();
+	}
+
+	public void SetProgress(int val)
+	{
+		Value = val;
+		Marquee = false;
+		UpdateWin7ProgressBar();
+		Repaint();
+	}
+
+	public void SetProgress(int val, string action)
+	{
+		Value = val;
+		Message = action;
+		Marquee = false;
+		UpdateWin7ProgressBar();
+		Repaint();
+	}
+
+	public void SetProgressIndeterminate()
+	{
+		Marquee = true;
+		UpdateWin7ProgressBar();
+		Repaint();
+	}
+
+	public void ProcessCompleted()
+	{
+		CurrentContext = null;
+		IsVisible = false;
+		var timer = _timer;
+		if(timer is not null)
+		{
+			timer.Enabled = false;
+		}
+		StopWin7ProgressBar();
+		if(DisableHost)
+		{
+			if(HostControl.Created && !HostControl.IsDisposed)
 			{
 				try
 				{
-					hostControl.BeginInvoke(new MethodInvoker(InvalidateHostControl));
+					HostControl.BeginInvoke(new MethodInvoker(
+						() =>
+						{
+							if(!HostControl.IsDisposed)
+							{
+								HostControl.Enabled = true;
+							}
+						}));
 				}
 				catch(ObjectDisposedException)
 				{
 				}
 			}
-			else
+		}
+		try
+		{
+			Repaint();
+		}
+		catch(Exception exc) when(!exc.IsCritical())
+		{
+		}
+	}
+
+	#region IProgress<OperationProgress> Members
+
+	public void Report(OperationProgress progress)
+	{
+		var hostControl = HostControl;
+		if(hostControl is not { IsDisposed: false })
+		{
+			return;
+		}
+		if(hostControl.InvokeRequired)
+		{
+			try
 			{
-				var rect = _getOverlayArea is null ? hostControl.ClientRectangle : _getOverlayArea();
-				hostControl.Invalidate(rect);
+				hostControl.BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
+			}
+			catch(ObjectDisposedException)
+			{
 			}
 		}
-
-		public event EventHandler Canceled;
-
-		private void InvokeCanceled() => Canceled?.Invoke(this, EventArgs.Empty);
-
-		public event EventHandler Started;
-
-		private void InvokeStarted() => Started?.Invoke(this, EventArgs.Empty);
-
-		public IAsyncResult CurrentContext { get; private set; }
-
-		public string ActionName
+		else
 		{
-			get => Title;
-			set
-			{
-				Title = value;
-				Repaint();
-			}
+			ReportCore(progress);
 		}
+	}
 
-		public bool CanCancel { get; set; }
-
-		public bool IsCancelRequested => false;
-
-		public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
+	private void ReportCore(OperationProgress progress)
+	{
+		if(progress.IsCompleted)
 		{
-			CurrentContext = context;
+			if(IsVisible)
+			{
+				ProcessCompleted();
+			}
+			return;
+		}
+		if(!IsVisible)
+		{
+			IsVisible = true;
+			_timer.Enabled = true;
 			if(DisableHost)
 			{
 				HostControl.Enabled = false;
 			}
-			IsVisible = true;
-			_timer.Enabled = true;
-			UpdateWin7ProgressBar();
-			Repaint();
-			InvokeStarted();
 		}
-
-		public void SetAction(string action)
+		Title = progress.ActionName;
+		if(progress.IsIndeterminate)
 		{
-			Message = action;
-			Repaint();
+			SetProgressIndeterminate();
 		}
-
-		public void SetProgressRange(int min, int max)
+		else
 		{
-			Minimum = min;
-			Maximum = max;
-			UpdateWin7ProgressBar();
+			SetProgressRange(0, progress.MaxProgress);
+			SetProgress(progress.CurrentProgress);
 		}
-
-		public void SetProgressRange(int min, int max, string action)
-		{
-			Minimum = min;
-			Maximum = max;
-			Message = action;
-			UpdateWin7ProgressBar();
-			Repaint();
-		}
-
-		public void SetProgress(int val)
-		{
-			Value = val;
-			Marquee = false;
-			UpdateWin7ProgressBar();
-			Repaint();
-		}
-
-		public void SetProgress(int val, string action)
-		{
-			Value = val;
-			Message = action;
-			Marquee = false;
-			UpdateWin7ProgressBar();
-			Repaint();
-		}
-
-		public void SetProgressIndeterminate()
-		{
-			Marquee = true;
-			UpdateWin7ProgressBar();
-			Repaint();
-		}
-
-		public void ProcessCompleted()
-		{
-			CurrentContext = null;
-			IsVisible = false;
-			var timer = _timer;
-			if(timer is not null)
-			{
-				timer.Enabled = false;
-			}
-			StopWin7ProgressBar();
-			if(DisableHost)
-			{
-				if(HostControl.Created && !HostControl.IsDisposed)
-				{
-					try
-					{
-						HostControl.BeginInvoke(new MethodInvoker(
-							() =>
-							{
-								if(!HostControl.IsDisposed)
-								{
-									HostControl.Enabled = true;
-								}
-							}));
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-			}
-			try
-			{
-				Repaint();
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-			}
-		}
-
-		#region IProgress<OperationProgress> Members
-
-		public void Report(OperationProgress progress)
-		{
-			var hostControl = HostControl;
-			if(hostControl is null || hostControl.IsDisposed)
-			{
-				return;
-			}
-			if(hostControl.InvokeRequired)
-			{
-				try
-				{
-					hostControl.BeginInvoke(new Action<OperationProgress>(ReportCore), progress);
-				}
-				catch(ObjectDisposedException)
-				{
-				}
-			}
-			else
-			{
-				ReportCore(progress);
-			}
-		}
-
-		private void ReportCore(OperationProgress progress)
-		{
-			if(progress.IsCompleted)
-			{
-				if(IsVisible)
-				{
-					ProcessCompleted();
-				}
-				return;
-			}
-			if(!IsVisible)
-			{
-				IsVisible = true;
-				_timer.Enabled = true;
-				if(DisableHost)
-				{
-					HostControl.Enabled = false;
-				}
-			}
-			Title = progress.ActionName;
-			if(progress.IsIndeterminate)
-			{
-				SetProgressIndeterminate();
-			}
-			else
-			{
-				SetProgressRange(0, progress.MaxProgress);
-				SetProgress(progress.CurrentProgress);
-			}
-		}
-
-		#endregion
-
-		#region IDisposable
-
-		public void Dispose()
-		{
-			if(_timer is not null)
-			{
-				_timer.Dispose();
-				_timer = null;
-			}
-		}
-
-		#endregion
 	}
+
+	#endregion
+
+	#region IDisposable
+
+	public void Dispose()
+	{
+		if(_timer is not null)
+		{
+			_timer.Dispose();
+			_timer = null;
+		}
+	}
+
+	#endregion
 }

@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+
+using gitter.Framework.Controls;
+
+public sealed class RemoteBranchListBinding : BaseListBinding<RemoteBranch, RemoteBranchEventArgs>
 {
-	using System;
-
-	using gitter.Framework.Controls;
-
-	public sealed class RemoteBranchListBinding : BaseListBinding<RemoteBranch, RemoteBranchEventArgs>
+	public RemoteBranchListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
+		: base(itemHost, repository.Refs.Remotes)
 	{
-		public RemoteBranchListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
-			: base(itemHost, repository.Refs.Remotes)
-		{
-		}
-
-		public RemoteBranchListBinding(CustomListBoxItemsCollection itemHost, RefsRemotesCollection branches)
-			: base(itemHost, branches)
-		{
-		}
-
-		protected override Comparison<CustomListBoxItem> GetComparison()
-			=> RemoteBranchListItem.CompareByName;
-
-		protected override CustomListBoxItem<RemoteBranch> RepresentObject(RemoteBranch obj)
-			=> new RemoteBranchListItem(obj);
 	}
+
+	public RemoteBranchListBinding(CustomListBoxItemsCollection itemHost, RefsRemotesCollection branches)
+		: base(itemHost, branches)
+	{
+	}
+
+	protected override Comparison<CustomListBoxItem> GetComparison()
+		=> RemoteBranchListItem.CompareByName;
+
+	protected override CustomListBoxItem<RemoteBranch> RepresentObject(RemoteBranch obj)
+		=> new RemoteBranchListItem(obj);
 }

@@ -1,206 +1,205 @@
 ﻿#region Copyright Notice
 /*
- * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+* gitter - VCS repository management tool
+* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+* 
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections.Generic;
+
+using gitter.Framework.Configuration;
+
+using gitter.Git.AccessLayer;
+
+public sealed class LogOptions
 {
-	using System;
-	using System.Collections.Generic;
+	public event EventHandler Changed;
 
-	using gitter.Framework.Configuration;
+	private void OnChanged(EventArgs e)
+		=> Changed?.Invoke(this, e);
 
-	using gitter.Git.AccessLayer;
+	private HashSet<Reference> _allowedReferences;
+	private RevisionQueryOrder _order;
+	private LogReferenceFilter _filter;
+	private int _maxCount;
+	private int _skip;
 
-	public sealed class LogOptions
+	public LogOptions()
 	{
-		public event EventHandler Changed;
+		_order = RevisionQueryOrder.DateOrder;
+		_filter = LogReferenceFilter.All;
+		_allowedReferences = new HashSet<Reference>();
+		_skip = 0;
+		_maxCount = 500;
+	}
 
-		private void OnChanged(EventArgs e)
-			=> Changed?.Invoke(this, e);
+	public IEnumerable<Reference> AllowedReferences => _allowedReferences;
 
-		private HashSet<Reference> _allowedReferences;
-		private RevisionQueryOrder _order;
-		private LogReferenceFilter _filter;
-		private int _maxCount;
-		private int _skip;
+	public void AllowReference(Reference reference)
+	{
+		Verify.Argument.IsNotNull(reference);
 
-		public LogOptions()
+		if(_allowedReferences.Add(reference))
 		{
-			_order = RevisionQueryOrder.DateOrder;
-			_filter = LogReferenceFilter.All;
-			_allowedReferences = new HashSet<Reference>();
-			_skip = 0;
-			_maxCount = 500;
-		}
-
-		public IEnumerable<Reference> AllowedReferences => _allowedReferences;
-
-		public void AllowReference(Reference reference)
-		{
-			Verify.Argument.IsNotNull(reference, nameof(reference));
-
-			if(_allowedReferences.Add(reference))
+			if(_filter == LogReferenceFilter.Allowed)
 			{
-				if(_filter == LogReferenceFilter.Allowed)
+				OnChanged(EventArgs.Empty);
+			}
+		}
+	}
+
+	public void DisallowReference(Reference reference)
+	{
+		Verify.Argument.IsNotNull(reference);
+
+		if(_allowedReferences.Remove(reference))
+		{
+			if(_filter == LogReferenceFilter.Allowed)
+			{
+				OnChanged(EventArgs.Empty);
+			}
+		}
+	}
+
+	public LogReferenceFilter Filter
+	{
+		get => _filter;
+		set
+		{
+			if(_filter != value)
+			{
+				_filter = value;
+				OnChanged(EventArgs.Empty);
+			}
+		}
+	}
+
+	public RevisionQueryOrder Order
+	{
+		get => _order;
+		set
+		{
+			if(_order != value)
+			{
+				_order = value;
+				OnChanged(EventArgs.Empty);
+			}
+		}
+	}
+
+	public int MaxCount
+	{
+		get => _maxCount;
+		set
+		{
+			if(_maxCount != value)
+			{
+				_maxCount = value;
+				OnChanged(EventArgs.Empty);
+			}
+		}
+	}
+
+	public int Skip
+	{
+		get => _skip;
+		set
+		{
+			if(_skip != value)
+			{
+				_skip = value;
+				OnChanged(EventArgs.Empty);
+			}
+		}
+	}
+
+	public void Reset()
+	{
+		_filter = LogReferenceFilter.All;
+		_order = RevisionQueryOrder.Default;
+		_allowedReferences.Clear();
+		_filter = LogReferenceFilter.All;
+		_maxCount = 0;
+		_skip = 0;
+		OnChanged(EventArgs.Empty);
+	}
+
+	internal QueryRevisionsParameters GetLogParameters()
+	{
+		var p = new QueryRevisionsParameters()
+		{
+			MaxCount = MaxCount,
+			Skip = Skip,
+			Order = Order,
+		};
+		switch(_filter)
+		{
+			case LogReferenceFilter.All:
+				p.All = true;
+				break;
+			case LogReferenceFilter.Allowed:
+				var l = new List<string>();
+				foreach(var reference in _allowedReferences)
 				{
-					OnChanged(EventArgs.Empty);
+					l.Add(reference.FullName);
 				}
-			}
+				p.References = l;
+				break;
+			case LogReferenceFilter.HEAD:
+				p.References = new List<string>() { GitConstants.HEAD };
+				break;
 		}
+		return p;
+	}
 
-		public void DisallowReference(Reference reference)
+	public void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
+
+		section.SetValue("Order", _order);
+		section.SetValue("MaxCount", _maxCount);
+		section.SetValue("Skip", _skip);
+	}
+
+	public void LoadFrom(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
+
+		bool changed = false;
+		var order = section.GetValue("Order", RevisionQueryOrder.DateOrder);
+		if(_order != order)
 		{
-			Verify.Argument.IsNotNull(reference, nameof(reference));
-
-			if(_allowedReferences.Remove(reference))
-			{
-				if(_filter == LogReferenceFilter.Allowed)
-				{
-					OnChanged(EventArgs.Empty);
-				}
-			}
+			_order = order;
+			changed = true;
 		}
-
-		public LogReferenceFilter Filter
+		var maxCount = section.GetValue("MaxCount", 0);
+		if(_maxCount != maxCount)
 		{
-			get => _filter;
-			set
-			{
-				if(_filter != value)
-				{
-					_filter = value;
-					OnChanged(EventArgs.Empty);
-				}
-			}
+			_maxCount = maxCount;
+			changed = true;
 		}
-
-		public RevisionQueryOrder Order
+		var skip = section.GetValue("Skip", 0);
+		if(_skip != skip)
 		{
-			get => _order;
-			set
-			{
-				if(_order != value)
-				{
-					_order = value;
-					OnChanged(EventArgs.Empty);
-				}
-			}
+			_skip = skip;
+			changed = true;
 		}
-
-		public int MaxCount
-		{
-			get => _maxCount;
-			set
-			{
-				if(_maxCount != value)
-				{
-					_maxCount = value;
-					OnChanged(EventArgs.Empty);
-				}
-			}
-		}
-
-		public int Skip
-		{
-			get => _skip;
-			set
-			{
-				if(_skip != value)
-				{
-					_skip = value;
-					OnChanged(EventArgs.Empty);
-				}
-			}
-		}
-
-		public void Reset()
-		{
-			_filter = LogReferenceFilter.All;
-			_order = RevisionQueryOrder.Default;
-			_allowedReferences.Clear();
-			_filter = LogReferenceFilter.All;
-			_maxCount = 0;
-			_skip = 0;
-			OnChanged(EventArgs.Empty);
-		}
-
-		internal QueryRevisionsParameters GetLogParameters()
-		{
-			var p = new QueryRevisionsParameters()
-			{
-				MaxCount = MaxCount,
-				Skip = Skip,
-				Order = Order,
-			};
-			switch(_filter)
-			{
-				case LogReferenceFilter.All:
-					p.All = true;
-					break;
-				case LogReferenceFilter.Allowed:
-					var l = new List<string>();
-					foreach(var reference in _allowedReferences)
-					{
-						l.Add(reference.FullName);
-					}
-					p.References = l;
-					break;
-				case LogReferenceFilter.HEAD:
-					p.References = new List<string>() { GitConstants.HEAD };
-					break;
-			}
-			return p;
-		}
-
-		public void SaveTo(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			section.SetValue("Order", _order);
-			section.SetValue("MaxCount", _maxCount);
-			section.SetValue("Skip", _skip);
-		}
-
-		public void LoadFrom(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			bool changed = false;
-			var order = section.GetValue("Order", RevisionQueryOrder.DateOrder);
-			if(_order != order)
-			{
-				_order = order;
-				changed = true;
-			}
-			var maxCount = section.GetValue("MaxCount", 0);
-			if(_maxCount != maxCount)
-			{
-				_maxCount = maxCount;
-				changed = true;
-			}
-			var skip = section.GetValue("Skip", 0);
-			if(_skip != skip)
-			{
-				_skip = skip;
-				changed = true;
-			}
-			if(changed) OnChanged(EventArgs.Empty);
-		}
+		if(changed) OnChanged(EventArgs.Empty);
 	}
 }

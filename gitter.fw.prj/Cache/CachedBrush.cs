@@ -18,82 +18,80 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+
+public sealed class CachedBrush : Cache<Brush>, IDisposable
 {
-	using System;
-	using System.Drawing;
+	#region Data
 
-	public sealed class CachedBrush : Cache<Brush>, IDisposable
+	private Func<Color> _brushColorProvider;
+	private Color _cachedColor;
+	private Brush _cachedBrush;
+
+	#endregion
+
+	#region .ctor
+
+	public CachedBrush(Func<Color> brushColorProvider)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(brushColorProvider);
 
-		private Func<Color> _brushColorProvider;
-		private Color _cachedColor;
-		private Brush _cachedBrush;
+		_brushColorProvider = brushColorProvider;
+	}
 
-		#endregion
+	#endregion
 
-		#region .ctor
+	public override bool IsCached => _cachedBrush != null;
 
-		public CachedBrush(Func<Color> brushColorProvider)
+	public override void Invalidate()
+	{
+		if(_cachedBrush is not null)
 		{
-			Verify.Argument.IsNotNull(brushColorProvider, nameof(brushColorProvider));
-
-			_brushColorProvider = brushColorProvider;
+			_cachedBrush.Dispose();
+			_cachedBrush = null;
 		}
+	}
 
-		#endregion
-
-		public override bool IsCached => _cachedBrush != null;
-
-		public override void Invalidate()
+	public override Brush Value
+	{
+		get
 		{
-			if(_cachedBrush != null)
+			if(_cachedBrush is not null)
 			{
-				_cachedBrush.Dispose();
-				_cachedBrush = null;
-			}
-		}
-
-		public override Brush Value
-		{
-			get
-			{
-				if(_cachedBrush != null)
-				{
-					var color = _brushColorProvider();
-					if(_cachedColor != color)
-					{
-						_cachedBrush.Dispose();
-						_cachedBrush = new SolidBrush(color);
-						_cachedColor = color;
-					}
-				}
-				else
-				{
-					_cachedBrush = new SolidBrush(_brushColorProvider());
-				}
-				return _cachedBrush;
-			}
-		}
-
-		#region IDisposable Members
-
-		public bool IsDisposed => _brushColorProvider == null;
-
-		public void Dispose()
-		{
-			if(!IsDisposed)
-			{
-				if(_cachedBrush != null)
+				var color = _brushColorProvider();
+				if(_cachedColor != color)
 				{
 					_cachedBrush.Dispose();
-					_cachedBrush = null;
+					_cachedBrush = new SolidBrush(color);
+					_cachedColor = color;
 				}
-				_brushColorProvider = null;
 			}
+			else
+			{
+				_cachedBrush = new SolidBrush(_brushColorProvider());
+			}
+			return _cachedBrush;
 		}
-
-		#endregion
 	}
+
+	#region IDisposable Members
+
+	public bool IsDisposed => _brushColorProvider == null;
+
+	public void Dispose()
+	{
+		if(IsDisposed) return;
+
+		if(_cachedBrush is not null)
+		{
+			_cachedBrush.Dispose();
+			_cachedBrush = null;
+		}
+		_brushColorProvider = null;
+	}
+
+	#endregion
 }

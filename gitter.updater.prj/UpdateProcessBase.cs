@@ -18,146 +18,145 @@
  */
 #endregion
 
-namespace gitter.Updater
+namespace gitter.Updater;
+
+using System;
+using System.IO;
+
+using Resources = gitter.Updater.Properties.Resources;
+
+abstract class UpdateProcessBase : IUpdateProcess
 {
-	using System;
-	using System.IO;
+	protected const string MainBinaryName = "gitter.exe";
 
-	using Resources = gitter.Updater.Properties.Resources;
+	private IAsyncResult _currentProcess;
 
-	abstract class UpdateProcessBase : IUpdateProcess
+	protected UpdateProcessBase(string targetDirectory)
 	{
-		protected const string MainBinaryName = "gitter.exe";
+		TargetDirectory = targetDirectory;
+	}
 
-		private IAsyncResult _currentProcess;
+	public string TargetDirectory { get; }
 
-		protected UpdateProcessBase(string targetDirectory)
+	protected UpdateProcessMonitor Monitor { get; private set; }
+
+	public bool IsUpdating => _currentProcess != null;
+
+	protected virtual void NotifyInitializing(UpdateProcessMonitor monitor)
+	{
+		monitor.Stage = Resources.StrInitializing + "...";
+	}
+
+	public void BeginUpdate(UpdateProcessMonitor monitor)
+	{
+		if(_currentProcess != null) throw new InvalidOperationException();
+
+		NotifyInitializing(monitor);
+
+		Action proc = UpdateProc;
+		Monitor = monitor;
+		_currentProcess = proc.BeginInvoke(UpdateProcCallback, proc);
+	}
+
+	public void Update(UpdateProcessMonitor monitor)
+	{
+		NotifyInitializing(monitor);
+
+		Monitor = monitor;
+		try
 		{
-			TargetDirectory = targetDirectory;
+			UpdateProc();
 		}
-
-		public string TargetDirectory { get; }
-
-		protected UpdateProcessMonitor Monitor { get; private set; }
-
-		public bool IsUpdating => _currentProcess != null;
-
-		protected virtual void NotifyInitializing(UpdateProcessMonitor monitor)
+		catch(Exception exc)
 		{
-			monitor.Stage = Resources.StrInitializing + "...";
-		}
-
-		public void BeginUpdate(UpdateProcessMonitor monitor)
-		{
-			if(_currentProcess != null) throw new InvalidOperationException();
-
-			NotifyInitializing(monitor);
-
-			Action proc = UpdateProc;
-			Monitor = monitor;
-			_currentProcess = proc.BeginInvoke(UpdateProcCallback, proc);
-		}
-
-		public void Update(UpdateProcessMonitor monitor)
-		{
-			NotifyInitializing(monitor);
-
-			Monitor = monitor;
-			try
-			{
-				UpdateProc();
-			}
-			catch(Exception exc)
-			{
-				if(Monitor.CancelRequested)
-				{
-					Monitor.ReportCancelled();
-				}
-				else
-				{
-					Monitor.ReportFailure("Unexpected error:\n" + exc.Message);
-				}
-			}
-			finally
-			{
-				Cleanup();
-				Monitor = null;
-			}
-		}
-
-		private void UpdateProcCallback(IAsyncResult ar)
-		{
-			var proc = (Action)ar.AsyncState;
-			try
-			{
-				proc.EndInvoke(ar);
-			}
-			catch(Exception exc)
-			{
-				if(Monitor.CancelRequested)
-				{
-					Monitor.ReportCancelled();
-				}
-				else
-				{
-					Monitor.ReportFailure("Unexpected error:\n" + exc.Message);
-				}
-			}
-			finally
-			{
-				Cleanup();
-			}
-			Monitor = null;
-			_currentProcess = null;
-		}
-
-		protected abstract void UpdateProc();
-
-		protected abstract void Cleanup();
-
-		protected void KillAllGitterProcesses()
-		{
-			Utility.KillAllGitterProcesses(TargetDirectory);
-		}
-
-		protected void StartApplication()
-		{
-			try
-			{
-				var exeName = Path.Combine(TargetDirectory, MainBinaryName);
-				Utility.StartApplication(exeName);
-			}
-			catch
-			{
-			}
-		}
-
-		protected void InstallApplication(string from)
-		{
-			var m = Monitor.MaximumProgress;
-
-			Monitor.Stage = "Installing application...";
-			Monitor.CurrentProgress = m - 2;
-			KillAllGitterProcesses();
 			if(Monitor.CancelRequested)
 			{
 				Monitor.ReportCancelled();
-				return;
 			}
-			Monitor.CanCancel = false;
-			if(!Utility.Deploy(from, TargetDirectory))
+			else
 			{
-				Monitor.ReportFailure("Failed to deploy build results.");
+				Monitor.ReportFailure("Unexpected error:\n" + exc.Message);
 			}
-
-			Monitor.Stage = "Cleaning up temporary files...";
-			Monitor.CurrentProgress = m - 1;
-			Cleanup();
-
-			Monitor.CurrentProgress = m;
-			Monitor.Stage = "Launching application...";
-			StartApplication();
-			Monitor.ReportSuccess();
 		}
+		finally
+		{
+			Cleanup();
+			Monitor = null;
+		}
+	}
+
+	private void UpdateProcCallback(IAsyncResult ar)
+	{
+		var proc = (Action)ar.AsyncState;
+		try
+		{
+			proc.EndInvoke(ar);
+		}
+		catch(Exception exc)
+		{
+			if(Monitor.CancelRequested)
+			{
+				Monitor.ReportCancelled();
+			}
+			else
+			{
+				Monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+			}
+		}
+		finally
+		{
+			Cleanup();
+		}
+		Monitor = null;
+		_currentProcess = null;
+	}
+
+	protected abstract void UpdateProc();
+
+	protected abstract void Cleanup();
+
+	protected void KillAllGitterProcesses()
+	{
+		Utility.KillAllGitterProcesses(TargetDirectory);
+	}
+
+	protected void StartApplication()
+	{
+		try
+		{
+			var exeName = Path.Combine(TargetDirectory, MainBinaryName);
+			Utility.StartApplication(exeName);
+		}
+		catch
+		{
+		}
+	}
+
+	protected void InstallApplication(string from)
+	{
+		var m = Monitor.MaximumProgress;
+
+		Monitor.Stage = "Installing application...";
+		Monitor.CurrentProgress = m - 2;
+		KillAllGitterProcesses();
+		if(Monitor.CancelRequested)
+		{
+			Monitor.ReportCancelled();
+			return;
+		}
+		Monitor.CanCancel = false;
+		if(!Utility.Deploy(from, TargetDirectory))
+		{
+			Monitor.ReportFailure("Failed to deploy build results.");
+		}
+
+		Monitor.Stage = "Cleaning up temporary files...";
+		Monitor.CurrentProgress = m - 1;
+		Cleanup();
+
+		Monitor.CurrentProgress = m;
+		Monitor.Stage = "Launching application...";
+		StartApplication();
+		Monitor.ReportSuccess();
 	}
 }

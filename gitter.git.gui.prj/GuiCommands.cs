@@ -18,768 +18,767 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
-{
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.IO;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+namespace gitter.Git.Gui;
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
-	using gitter.Git.AccessLayer;
+using gitter.Framework;
+using gitter.Framework.Services;
+
+using gitter.Git.AccessLayer;
 	
-	using Resources = gitter.Git.Gui.Properties.Resources;
+using Resources = gitter.Git.Gui.Properties.Resources;
 
-	public static class GuiCommands
+public static class GuiCommands
+{
+	private static string ExtractErrorMessage(Exception exc)
 	{
-		private static string ExtractErrorMessage(Exception exc)
+		exc = TaskUtility.UnwrapException(exc);
+		return exc.Message;
+	}
+
+	private static GuiCommandStatus Fetch(IWin32Window parent, Repository repository, Remote remote)
+	{
+		Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
+			? repository.Remotes.FetchAsync
+			: remote.FetchAsync;
+		try
 		{
-			exc = TaskUtility.UnwrapException(exc);
-			return exc.Message;
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrFetch, func);
+			return GuiCommandStatus.Completed;
 		}
-
-		private static GuiCommandStatus Fetch(IWin32Window parent, Repository repository, Remote remote)
+		catch(OperationCanceledException)
 		{
-			Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
-				? repository.Remotes.FetchAsync
-				: remote.FetchAsync;
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrFetch, func);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				string messageTitle = remote != null
-					? string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToFetchFrom, remote.Name)
-					: Resources.ErrFailedToFetch;
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					ExtractErrorMessage(exc),
-					messageTitle,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			return GuiCommandStatus.Canceled;
 		}
-
-		public static GuiCommandStatus Fetch(IWin32Window parent, Repository repository)
+		catch(GitException exc)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			return Fetch(parent, repository, null);
-		}
-
-		public static GuiCommandStatus Fetch(IWin32Window parent, Remote remote)
-		{
-			Verify.Argument.IsNotNull(remote, nameof(remote));
-
-			return Fetch(parent, remote.Repository, remote);
-		}
-
-		private static GuiCommandStatus Pull(IWin32Window parent, Repository repository, Remote remote)
-		{
-			Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
-				? repository.Remotes.PullAsync
-				: remote.PullAsync;
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrPull, func);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				string messageTitle = remote != null ?
-					string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToPullFrom, remote.Name) :
-					Resources.ErrFailedToPull;
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					ExtractErrorMessage(exc),
-					messageTitle,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
-		}
-
-		public static GuiCommandStatus Pull(IWin32Window parent, Repository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			return Pull(parent, repository, null);
-		}
-
-		public static GuiCommandStatus Pull(IWin32Window parent, Remote remote)
-		{
-			Verify.Argument.IsNotNull(remote, nameof(remote));
-
-			return Pull(parent, remote.Repository, remote);
-		}
-
-		private static GuiCommandStatus Push(IWin32Window parent, Func<IProgress<OperationProgress>, CancellationToken, Task> func, string remoteRepository)
-		{
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrPush, func);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				var messageTitle = string.Format(CultureInfo.InvariantCulture, Resources.ErrPushFailed, remoteRepository);
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					ExtractErrorMessage(exc),
-					messageTitle,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
-		}
-
-		public static GuiCommandStatus Push(IWin32Window parent, Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
-		{
-			Func<IProgress<OperationProgress>, CancellationToken, Task> func =
-				(p, c) => remote.PushAsync(branches, forceOverwrite, thinPack, sendTags, p, c);
-
-			return Push(parent, func, remote.Name);
-		}
-
-		public static GuiCommandStatus Push(IWin32Window parent, Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
-		{
-			Func<IProgress<OperationProgress>, CancellationToken, Task> func =
-				(p, c) => repository.Remotes.PushToAsync(url, branches, forceOverwrite, thinPack, sendTags, p, c);
-
-			return Push(parent, func, url);
-		}
-
-		public static GuiCommandStatus Prune(IWin32Window parent, Remote remote)
-		{
-			Verify.Argument.IsNotNull(remote, nameof(remote));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(
-					parent,
-					Resources.StrPrune + ": " + remote.Name,
-					remote.PruneAsync);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					string.Format(Resources.ErrFailedToPrune, remote.Name),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
-		}
-
-		public static GuiCommandStatus Clone(IWin32Window parent, IGitAccessor gitAccessor, string url, string path, string template, string remoteName, bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
-		{
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrClone, (p, c) =>
-					Repository.CloneAsync(gitAccessor, url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout, p, c));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToClone.UseAsFormat(url),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
-		}
-
-		public static GuiCommandStatus Archive(IWin32Window parent, IRevisionPointer revision, string path, string format)
-		{
-			string outputPath = null;
-			using(var dlg = new SaveFileDialog()
-				{
-					FileName = revision.Pointer,
-					Filter = "zip files|.zip|" +
-							 "tar.gz files|.tar.gz|" +
-							 "tar files|.tar|" +
-							 "tgz files|.tgz",
-					DefaultExt = ".zip",
-					OverwritePrompt = true,
-					Title = Resources.StrArchive,
-				})
-			{
-				if(dlg.ShowDialog(parent) == DialogResult.OK)
-				{
-					outputPath = dlg.FileName;
-				}
-			}
-			if(string.IsNullOrWhiteSpace(outputPath))
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrArchive,
-					(p) => revision.ArchiveAsync(outputPath, null, null, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToArchive,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
-		}
-
-		public static GuiCommandStatus FormatPatch(IWin32Window parent, IRevisionPointer revision)
-		{
-			Verify.Argument.IsNotNull(revision, nameof(revision));
-
-			const string patchExt = ".patch";
-			string outputPath = null;
-			using(var dlg = new SaveFileDialog()
-				{
-					FileName        = revision.Pointer + patchExt,
-					Filter          = Resources.StrPatches + "|" + patchExt,
-					DefaultExt      = patchExt,
-					OverwritePrompt = true,
-					Title           = Resources.StrSavePatch,
-				})
-			{
-				if(dlg.ShowDialog(parent) == DialogResult.OK)
-				{
-					outputPath = dlg.FileName;
-				}
-				else
-				{
-					return GuiCommandStatus.Canceled;
-				}
-			}
-			if(string.IsNullOrWhiteSpace(outputPath))
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			byte[] patch;
-			try
-			{
-				patch = ProgressForm.MonitorTaskAsModalWindow(parent,
-					Resources.StrSavePatch, revision.FormatPatchAsync);
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToFormatPatch,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
-			if(patch != null)
-			{
-				try
-				{
-					File.WriteAllBytes(outputPath, patch);
-					return GuiCommandStatus.Completed;
-				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-					GitterApplication.MessageBoxService.Show(
-						parent,
-						exc.Message,
-						Resources.ErrFailedToSavePatch,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-					return GuiCommandStatus.Faulted;
-				}
-			}
+			string messageTitle = remote != null
+				? string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToFetchFrom, remote.Name)
+				: Resources.ErrFailedToFetch;
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				ExtractErrorMessage(exc),
+				messageTitle,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
 			return GuiCommandStatus.Faulted;
 		}
+	}
 
-		public static GuiCommandStatus RebaseHeadTo(IWin32Window parent, IRevisionPointer revision)
+	public static GuiCommandStatus Fetch(IWin32Window parent, Repository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		return Fetch(parent, repository, null);
+	}
+
+	public static GuiCommandStatus Fetch(IWin32Window parent, Remote remote)
+	{
+		Verify.Argument.IsNotNull(remote);
+
+		return Fetch(parent, remote.Repository, remote);
+	}
+
+	private static GuiCommandStatus Pull(IWin32Window parent, Repository repository, Remote remote)
+	{
+		Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
+			? repository.Remotes.PullAsync
+			: remote.PullAsync;
+		try
 		{
-			Verify.Argument.IsNotNull(revision, nameof(revision));
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrPull, func);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			string messageTitle = remote != null ?
+				string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToPullFrom, remote.Name) :
+				Resources.ErrFailedToPull;
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				ExtractErrorMessage(exc),
+				messageTitle,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
 
-			try
+	public static GuiCommandStatus Pull(IWin32Window parent, Repository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		return Pull(parent, repository, null);
+	}
+
+	public static GuiCommandStatus Pull(IWin32Window parent, Remote remote)
+	{
+		Verify.Argument.IsNotNull(remote);
+
+		return Pull(parent, remote.Repository, remote);
+	}
+
+	private static GuiCommandStatus Push(IWin32Window parent, Func<IProgress<OperationProgress>, CancellationToken, Task> func, string remoteRepository)
+	{
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrPush, func);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			var messageTitle = string.Format(CultureInfo.InvariantCulture, Resources.ErrPushFailed, remoteRepository);
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				ExtractErrorMessage(exc),
+				messageTitle,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus Push(IWin32Window parent, Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+	{
+		Func<IProgress<OperationProgress>, CancellationToken, Task> func =
+			(p, c) => remote.PushAsync(branches, forceOverwrite, thinPack, sendTags, p, c);
+
+		return Push(parent, func, remote.Name);
+	}
+
+	public static GuiCommandStatus Push(IWin32Window parent, Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+	{
+		Func<IProgress<OperationProgress>, CancellationToken, Task> func =
+			(p, c) => repository.Remotes.PushToAsync(url, branches, forceOverwrite, thinPack, sendTags, p, c);
+
+		return Push(parent, func, url);
+	}
+
+	public static GuiCommandStatus Prune(IWin32Window parent, Remote remote)
+	{
+		Verify.Argument.IsNotNull(remote);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(
+				parent,
+				Resources.StrPrune + ": " + remote.Name,
+				remote.PruneAsync);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				string.Format(Resources.ErrFailedToPrune, remote.Name),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus Clone(IWin32Window parent, IGitAccessor gitAccessor, string url, string path, string template, string remoteName, bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
+	{
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrClone, (p, c) =>
+				Repository.CloneAsync(gitAccessor, url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout, p, c));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToClone.UseAsFormat(url),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus Archive(IWin32Window parent, IRevisionPointer revision, string path, string format)
+	{
+		string outputPath = null;
+		using(var dlg = new SaveFileDialog()
 			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRebase,
-					p => revision.RebaseHeadHereAsync(p));
-				return GuiCommandStatus.Completed;
+				FileName = revision.Pointer,
+				Filter = "zip files|.zip|" +
+							"tar.gz files|.tar.gz|" +
+							"tar files|.tar|" +
+							"tgz files|.tgz",
+				DefaultExt = ".zip",
+				OverwritePrompt = true,
+				Title = Resources.StrArchive,
+			})
+		{
+			if(dlg.ShowDialog(parent) == DialogResult.OK)
+			{
+				outputPath = dlg.FileName;
 			}
-			catch(OperationCanceledException)
+		}
+		if(string.IsNullOrWhiteSpace(outputPath))
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrArchive,
+				(p) => revision.ArchiveAsync(outputPath, null, null, p));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToArchive,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus FormatPatch(IWin32Window parent, IRevisionPointer revision)
+	{
+		Verify.Argument.IsNotNull(revision);
+
+		const string patchExt = ".patch";
+		string outputPath = null;
+		using(var dlg = new SaveFileDialog()
+			{
+				FileName        = revision.Pointer + patchExt,
+				Filter          = Resources.StrPatches + "|" + patchExt,
+				DefaultExt      = patchExt,
+				OverwritePrompt = true,
+				Title           = Resources.StrSavePatch,
+			})
+		{
+			if(dlg.ShowDialog(parent) == DialogResult.OK)
+			{
+				outputPath = dlg.FileName;
+			}
+			else
 			{
 				return GuiCommandStatus.Canceled;
 			}
-			catch(GitException exc)
+		}
+		if(string.IsNullOrWhiteSpace(outputPath))
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		byte[] patch;
+		try
+		{
+			patch = ProgressForm.MonitorTaskAsModalWindow(parent,
+				Resources.StrSavePatch, revision.FormatPatchAsync);
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToFormatPatch,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+		if(patch is not null)
+		{
+			try
+			{
+				File.WriteAllBytes(outputPath, patch);
+				return GuiCommandStatus.Completed;
+			}
+			catch(Exception exc) when(!exc.IsCritical())
 			{
 				GitterApplication.MessageBoxService.Show(
 					parent,
 					exc.Message,
-					Resources.ErrFailedToRebase,
+					Resources.ErrFailedToSavePatch,
 					MessageBoxButton.Close,
 					MessageBoxIcon.Error);
 				return GuiCommandStatus.Faulted;
 			}
 		}
+		return GuiCommandStatus.Faulted;
+	}
 
-		public static GuiCommandStatus Rebase(IWin32Window parent, Repository repository, RebaseControl control)
+	public static GuiCommandStatus RebaseHeadTo(IWin32Window parent, IRevisionPointer revision)
+	{
+		Verify.Argument.IsNotNull(revision);
+
+		try
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRebase,
-					p => repository.RebaseAsync(control, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToRebase,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRebase,
+				p => revision.RebaseHeadHereAsync(p));
+			return GuiCommandStatus.Completed;
 		}
-
-		public static GuiCommandStatus CherryPick(IWin32Window parent, Repository repository, CherryPickControl control)
+		catch(OperationCanceledException)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrCherryPick,
-					p => repository.CherryPickAsync(control, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToCherryPick,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			return GuiCommandStatus.Canceled;
 		}
-
-		public static GuiCommandStatus Revert(IWin32Window parent, Repository repository, RevertControl control)
+		catch(GitException exc)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRevert,
-					p => repository.RevertAsync(control, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToRevert,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToRebase,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
 		}
+	}
 
-		public static GuiCommandStatus SaveStash(IWin32Window parent, StashedStatesCollection stash, bool keepIndex, bool includeUntracked, string message)
+	public static GuiCommandStatus Rebase(IWin32Window parent, Repository repository, RebaseControl control)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		try
 		{
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashSave,
-					p => stash.SaveAsync(keepIndex, includeUntracked, message, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToStash,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRebase,
+				p => repository.RebaseAsync(control, p));
+			return GuiCommandStatus.Completed;
 		}
-
-		public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
+		catch(OperationCanceledException)
 		{
-			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashPop,
-					p => stashedState.PopAsync(restoreIndex, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					string.Format(Resources.ErrFailedToStashPopState, ((IRevisionPointer)stashedState).Pointer),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			return GuiCommandStatus.Canceled;
 		}
-
-		public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
+		catch(GitException exc)
 		{
-			Verify.Argument.IsNotNull(stash, nameof(stash));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashPop,
-					p => stash.PopAsync(restoreIndex, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToStashPop,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToRebase,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
 		}
+	}
 
-		public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
+	public static GuiCommandStatus CherryPick(IWin32Window parent, Repository repository, CherryPickControl control)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		try
 		{
-			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashApply,
-					p => stashedState.ApplyAsync(restoreIndex, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					string.Format(Resources.ErrFailedToStashApplyState, ((IRevisionPointer)stashedState).Pointer),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrCherryPick,
+				p => repository.CherryPickAsync(control, p));
+			return GuiCommandStatus.Completed;
 		}
-
-		public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
+		catch(OperationCanceledException)
 		{
-			Verify.Argument.IsNotNull(stash, nameof(stash));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashApply,
-					p => stash.ApplyAsync(restoreIndex, p));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToStashApply,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			return GuiCommandStatus.Canceled;
 		}
-
-		public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedState stashedState)
+		catch(GitException exc)
 		{
-			Verify.Argument.IsNotNull(stashedState, nameof(stashedState));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashDrop, stashedState.DropAsync);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					string.Format(Resources.ErrFailedToStashDropState, ((IRevisionPointer)stashedState).Pointer),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToCherryPick,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
 		}
+	}
 
-		public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedStatesCollection stash)
+	public static GuiCommandStatus Revert(IWin32Window parent, Repository repository, RevertControl control)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		try
 		{
-			Verify.Argument.IsNotNull(stash, nameof(stash));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashDrop, stash.DropAsync);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(InvalidOperationException)
-			{
-				return GuiCommandStatus.Faulted;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToStashDrop,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrRevert,
+				p => repository.RevertAsync(control, p));
+			return GuiCommandStatus.Completed;
 		}
-
-		public static GuiCommandStatus ClearStash(IWin32Window parent, StashedStatesCollection stash)
+		catch(OperationCanceledException)
 		{
-			Verify.Argument.IsNotNull(stash, nameof(stash));
-
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashClear, stash.ClearAsync);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToStashClear,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			return GuiCommandStatus.Canceled;
 		}
-
-		public static GuiCommandStatus UpdateSubmodule(IWin32Window parent, Submodule submodule)
+		catch(GitException exc)
 		{
-			Verify.Argument.IsNotNull(submodule, nameof(submodule));
-
-			if(parent == null)
-			{
-				parent = GitterApplication.MainForm;
-			}
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate + ": " + submodule.Name,
-					submodule.UpdateAsync);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					string.Format(Resources.ErrFailedToUpdateSubmodule, submodule.Name),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToRevert,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
 		}
+	}
 
-		public static GuiCommandStatus SyncSubmodule(IWin32Window parent, Submodule submodule)
+	public static GuiCommandStatus SaveStash(IWin32Window parent, StashedStatesCollection stash, bool keepIndex, bool includeUntracked, string message)
+	{
+		try
 		{
-			Verify.Argument.IsNotNull(submodule, nameof(submodule));
-
-			parent ??= GitterApplication.MainForm;
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync + ": " + submodule.Name,
-					progress => submodule.SyncAsync(recursive: true, progress: progress));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					string.Format(Resources.ErrFailedToSyncSubmodule, submodule.Name),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashSave,
+				p => stash.SaveAsync(keepIndex, includeUntracked, message, p));
+			return GuiCommandStatus.Completed;
 		}
-
-		public static GuiCommandStatus UpdateSubmodules(IWin32Window parent, SubmodulesCollection submodules)
+		catch(OperationCanceledException)
 		{
-			Verify.Argument.IsNotNull(submodules, nameof(submodules));
-
-			parent ??= GitterApplication.MainForm;
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate, submodules.UpdateAsync);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToUpdateSubmodule,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			return GuiCommandStatus.Canceled;
 		}
-
-		public static GuiCommandStatus SyncSubmodules(IWin32Window parent, SubmodulesCollection submodules)
+		catch(GitException exc)
 		{
-			Verify.Argument.IsNotNull(submodules, nameof(submodules));
-
-			parent ??= GitterApplication.MainForm;
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync,
-					progress => submodules.SyncAsync(recursive: true, progress: progress));
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToSyncSubmodule,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToStash,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
 		}
+	}
 
-		public static GuiCommandStatus GarbageCollect(IWin32Window parent, Repository repository)
+	public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
+	{
+		Verify.Argument.IsNotNull(stashedState);
+
+		try
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashPop,
+				p => stashedState.PopAsync(restoreIndex, p));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				string.Format(Resources.ErrFailedToStashPopState, ((IRevisionPointer)stashedState).Pointer),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
 
-			try
-			{
-				ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrHousekeeping, repository.GarbageCollectAsync);
-				return GuiCommandStatus.Completed;
-			}
-			catch(OperationCanceledException)
-			{
-				return GuiCommandStatus.Canceled;
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToCompressRepository,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return GuiCommandStatus.Faulted;
-			}
+	public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
+	{
+		Verify.Argument.IsNotNull(stash);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashPop,
+				p => stash.PopAsync(restoreIndex, p));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToStashPop,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
+	{
+		Verify.Argument.IsNotNull(stashedState);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashApply,
+				p => stashedState.ApplyAsync(restoreIndex, p));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				string.Format(Resources.ErrFailedToStashApplyState, ((IRevisionPointer)stashedState).Pointer),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
+	{
+		Verify.Argument.IsNotNull(stash);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashApply,
+				p => stash.ApplyAsync(restoreIndex, p));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToStashApply,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedState stashedState)
+	{
+		Verify.Argument.IsNotNull(stashedState);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashDrop, stashedState.DropAsync);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				string.Format(Resources.ErrFailedToStashDropState, ((IRevisionPointer)stashedState).Pointer),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedStatesCollection stash)
+	{
+		Verify.Argument.IsNotNull(stash);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashDrop, stash.DropAsync);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(InvalidOperationException)
+		{
+			return GuiCommandStatus.Faulted;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToStashDrop,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus ClearStash(IWin32Window parent, StashedStatesCollection stash)
+	{
+		Verify.Argument.IsNotNull(stash);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrStashClear, stash.ClearAsync);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToStashClear,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus UpdateSubmodule(IWin32Window parent, Submodule submodule)
+	{
+		Verify.Argument.IsNotNull(submodule);
+
+		if(parent == null)
+		{
+			parent = GitterApplication.MainForm;
+		}
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate + ": " + submodule.Name,
+				submodule.UpdateAsync);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				string.Format(Resources.ErrFailedToUpdateSubmodule, submodule.Name),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus SyncSubmodule(IWin32Window parent, Submodule submodule)
+	{
+		Verify.Argument.IsNotNull(submodule);
+
+		parent ??= GitterApplication.MainForm;
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync + ": " + submodule.Name,
+				progress => submodule.SyncAsync(recursive: true, progress: progress));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				string.Format(Resources.ErrFailedToSyncSubmodule, submodule.Name),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus UpdateSubmodules(IWin32Window parent, SubmodulesCollection submodules)
+	{
+		Verify.Argument.IsNotNull(submodules);
+
+		parent ??= GitterApplication.MainForm;
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate, submodules.UpdateAsync);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToUpdateSubmodule,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus SyncSubmodules(IWin32Window parent, SubmodulesCollection submodules)
+	{
+		Verify.Argument.IsNotNull(submodules);
+
+		parent ??= GitterApplication.MainForm;
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrSync,
+				progress => submodules.SyncAsync(recursive: true, progress: progress));
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToSyncSubmodule,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
+		}
+	}
+
+	public static GuiCommandStatus GarbageCollect(IWin32Window parent, Repository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		try
+		{
+			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrHousekeeping, repository.GarbageCollectAsync);
+			return GuiCommandStatus.Completed;
+		}
+		catch(OperationCanceledException)
+		{
+			return GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToCompressRepository,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return GuiCommandStatus.Faulted;
 		}
 	}
 }

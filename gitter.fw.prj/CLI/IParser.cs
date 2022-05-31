@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+public interface IParser
 {
-	public interface IParser
-	{
-		void Parse(ITextSegment textSegment);
+	void Parse(ITextSegment textSegment);
 
-		void Complete();
+	void Complete();
 
-		void Reset();
-	}
+	void Reset();
+}
 
-	public interface IParser<out T> : IParser
-	{
-		T GetResult();
-	}
+public interface IParser<out T> : IParser
+{
+	T GetResult();
 }

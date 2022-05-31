@@ -18,116 +18,115 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Text;
+using System.IO;
+using System.Net;
+using System.Xml;
+
+public sealed class TeamCityServiceContext
 {
-	using System;
-	using System.Text;
-	using System.IO;
-	using System.Net;
-	using System.Xml;
+	#region Data
 
-	public sealed class TeamCityServiceContext
+	private Uri _serviceUri;
+	private string _passphrase;
+
+	private readonly ProjectsCollection _projects;
+	private readonly BuildTypesCollection _buildTypes;
+	private readonly BuildsCollection _builds;
+
+	#endregion
+
+	private enum ResponseContentType
 	{
-		#region Data
+		Default,
+		PlainText,
+		Xml,
+		Json,
+	}
 
-		private Uri _serviceUri;
-		private string _passphrase;
+	private static string GetPassphrase(string username, string password)
+	{
+		return Convert.ToBase64String(Encoding.Default.GetBytes(username + ":" + password));
+	}
 
-		private readonly ProjectsCollection _projects;
-		private readonly BuildTypesCollection _buildTypes;
-		private readonly BuildsCollection _builds;
+	#region .ctor
 
-		#endregion
+	public TeamCityServiceContext(Uri serviceUri, string username, string password)
+	{
+		_serviceUri = serviceUri;
+		_passphrase = GetPassphrase(username, password);
 
-		private enum ResponseContentType
+		_projects	= new ProjectsCollection(this);
+		_buildTypes	= new BuildTypesCollection(this);
+		_builds		= new BuildsCollection(this);
+	}
+
+	#endregion
+
+	#region Properties
+
+	internal object SyncRoot { get; } = new();
+
+	public ProjectsCollection Projects => _projects;
+
+	public BuildTypesCollection BuildTypes => _buildTypes;
+
+	public BuildsCollection Builds => _builds;
+
+	public string DefaultProjectId { get; set; }
+
+	#endregion
+
+	private Uri GetUri(string relativeUri)
+		=> new Uri(_serviceUri, @"/httpAuth/app/rest/" + relativeUri);
+
+	private void SetupHttpBasicAuth(WebRequest request)
+	{
+		request.Headers.Add("Authorization: Basic " + _passphrase);
+	}
+
+	private static void SetupContentType(WebRequest request, ResponseContentType contentType)
+	{
+		switch(contentType)
 		{
-			Default,
-			PlainText,
-			Xml,
-			Json,
+			case ResponseContentType.PlainText:
+				request.ContentType = @"text/plain";
+				break;
+			case ResponseContentType.Xml:
+				request.ContentType = @"application/xml";
+				break;
+			case ResponseContentType.Json:
+				request.ContentType = @"application/json";
+				break;
 		}
+	}
 
-		private static string GetPassphrase(string username, string password)
-		{
-			return Convert.ToBase64String(Encoding.Default.GetBytes(username + ":" + password));
-		}
+	private WebResponse GetResponse(string relativeUri, ResponseContentType contentType)
+	{
+		var uri = GetUri(relativeUri);
+		var request = WebRequest.Create(uri);
+		SetupHttpBasicAuth(request);
+		SetupContentType(request, contentType);
+		return request.GetResponse();
+	}
 
-		#region .ctor
+	internal XmlDocument GetXml(string relativeUri)
+	{
+		using var response = GetResponse(relativeUri, ResponseContentType.Xml);
+		using var stream   = response.GetResponseStream();
+		var xml = new XmlDocument();
+		xml.Load(stream);
+		return xml;
+	}
 
-		public TeamCityServiceContext(Uri serviceUri, string username, string password)
-		{
-			_serviceUri = serviceUri;
-			_passphrase = GetPassphrase(username, password);
-
-			_projects	= new ProjectsCollection(this);
-			_buildTypes	= new BuildTypesCollection(this);
-			_builds		= new BuildsCollection(this);
-		}
-
-		#endregion
-
-		#region Properties
-
-		internal object SyncRoot { get; } = new();
-
-		public ProjectsCollection Projects => _projects;
-
-		public BuildTypesCollection BuildTypes => _buildTypes;
-
-		public BuildsCollection Builds => _builds;
-
-		public string DefaultProjectId { get; set; }
-
-		#endregion
-
-		private Uri GetUri(string relativeUri)
-			=> new Uri(_serviceUri, @"/httpAuth/app/rest/" + relativeUri);
-
-		private void SetupHttpBasicAuth(WebRequest request)
-		{
-			request.Headers.Add("Authorization: Basic " + _passphrase);
-		}
-
-		private static void SetupContentType(WebRequest request, ResponseContentType contentType)
-		{
-			switch(contentType)
-			{
-				case ResponseContentType.PlainText:
-					request.ContentType = @"text/plain";
-					break;
-				case ResponseContentType.Xml:
-					request.ContentType = @"application/xml";
-					break;
-				case ResponseContentType.Json:
-					request.ContentType = @"application/json";
-					break;
-			}
-		}
-
-		private WebResponse GetResponse(string relativeUri, ResponseContentType contentType)
-		{
-			var uri = GetUri(relativeUri);
-			var request = WebRequest.Create(uri);
-			SetupHttpBasicAuth(request);
-			SetupContentType(request, contentType);
-			return request.GetResponse();
-		}
-
-		internal XmlDocument GetXml(string relativeUri)
-		{
-			using var response = GetResponse(relativeUri, ResponseContentType.Xml);
-			using var stream   = response.GetResponseStream();
-			var xml = new XmlDocument();
-			xml.Load(stream);
-			return xml;
-		}
-
-		internal string GetPlainText(string relativeUri)
-		{
-			using var response     = GetResponse(relativeUri, ResponseContentType.PlainText);
-			using var stream       = response.GetResponseStream();
-			using var streamReader = new StreamReader(stream);
-			return streamReader.ReadToEnd();
-		}
+	internal string GetPlainText(string relativeUri)
+	{
+		using var response     = GetResponse(relativeUri, ResponseContentType.PlainText);
+		using var stream       = response.GetResponseStream();
+		using var streamReader = new StreamReader(stream);
+		return streamReader.ReadToEnd();
 	}
 }

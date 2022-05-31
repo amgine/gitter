@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,36 +18,30 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+/// <summary>Tag description.</summary>
+public sealed class TagData : INamedObject
 {
-	using System;
-
-	using gitter.Framework;
-
-	/// <summary>Tag description.</summary>
-	public sealed class TagData : INamedObject
+	public TagData(string name, Hash sha1, TagType tagType)
 	{
-		public TagData(string name, Hash sha1, TagType tagType)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
-			Name    = name;
-			SHA1    = sha1;
-			TagType = tagType;
-		}
-
-		public string Name { get; }
-
-		public Hash SHA1 { get; }
-
-		public TagType TagType { get; }
-
-		/// <summary>
-		/// Returns a <see cref="System.String"/> that represents this instance.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="System.String"/> that represents this instance.
-		/// </returns>
-		public override string ToString() => Name;
+		Name    = name;
+		SHA1    = sha1;
+		TagType = tagType;
 	}
+
+	public string Name { get; }
+
+	public Hash SHA1 { get; }
+
+	public TagType TagType { get; }
+
+	/// <inheritdoc/>
+	public override string ToString() => Name;
 }

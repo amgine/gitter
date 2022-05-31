@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+[Flags]
+public enum DiffLineState
 {
-	using System;
+	Invalid = 0,
 
-	[Flags]
-	public enum DiffLineState
-	{
-		Invalid = 0,
-
-		NotPresent	= (1 << 0),
-		Added		= (1 << 1),
-		Removed		= (1 << 2),
-		Context		= (1 << 3),
-		Header		= (1 << 4),
-	}
+	NotPresent	= (1 << 0),
+	Added		= (1 << 1),
+	Removed		= (1 << 2),
+	Context		= (1 << 3),
+	Header		= (1 << 4),
 }

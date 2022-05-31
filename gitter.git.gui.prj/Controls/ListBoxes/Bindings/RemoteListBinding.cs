@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+
+using gitter.Framework.Controls;
+
+public sealed class RemoteListBinding : BaseListBinding<Remote, RemoteEventArgs>
 {
-	using System;
-
-	using gitter.Framework.Controls;
-
-	public sealed class RemoteListBinding : BaseListBinding<Remote, RemoteEventArgs>
+	public RemoteListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
+		: base(itemHost, repository.Remotes)
 	{
-		public RemoteListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
-			: base(itemHost, repository.Remotes)
-		{
-		}
-
-		public RemoteListBinding(CustomListBoxItemsCollection itemHost, RemotesCollection remotes)
-			: base(itemHost, remotes)
-		{
-		}
-
-		protected override Comparison<CustomListBoxItem> GetComparison()
-			=> RemoteListItem.CompareByName;
-
-		protected override CustomListBoxItem<Remote> RepresentObject(Remote obj)
-			=> new RemoteListItem(obj);
 	}
+
+	public RemoteListBinding(CustomListBoxItemsCollection itemHost, RemotesCollection remotes)
+		: base(itemHost, remotes)
+	{
+	}
+
+	protected override Comparison<CustomListBoxItem> GetComparison()
+		=> RemoteListItem.CompareByName;
+
+	protected override CustomListBoxItem<Remote> RepresentObject(Remote obj)
+		=> new RemoteListItem(obj);
 }

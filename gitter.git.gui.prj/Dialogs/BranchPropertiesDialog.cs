@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,23 +18,26 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+
+public partial class BranchPropertiesDialog : GitDialogBase
 {
-	using System;
-
-	using gitter.Framework;
-
-	public partial class BranchPropertiesDialog : GitDialogBase
+	public BranchPropertiesDialog(Branch branch)
 	{
-		public BranchPropertiesDialog(Branch branch)
-		{
-			Verify.Argument.IsNotNull(branch, nameof(branch));
+		Verify.Argument.IsNotNull(branch);
 
-			Branch = branch;
+		Branch = branch;
 
-			InitializeComponent();
-		}
-
-		public Branch Branch { get; }
+		InitializeComponent();
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
+
+	public Branch Branch { get; }
 }

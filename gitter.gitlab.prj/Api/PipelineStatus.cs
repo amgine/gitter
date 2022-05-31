@@ -18,31 +18,38 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
-{
-	using System.Runtime.Serialization;
+namespace gitter.GitLab.Api;
 
-	enum PipelineStatus
-	{
-		[EnumMember(Value = "running")]
-		Running,
-		[EnumMember(Value = "pending")]
-		Pending,
-		[EnumMember(Value = "success")]
-		Success,
-		[EnumMember(Value = "failed")]
-		Failed,
-		[EnumMember(Value = "canceled")]
-		Canceled,
-		[EnumMember(Value = "skipped")]
-		Skipped,
-		[EnumMember(Value = "preparing")]
-		Preparing,
-		[EnumMember(Value = "scheduled")]
-		Scheduled,
-		[EnumMember(Value = "created")]
-		Created,
-		[EnumMember(Value = "manual")]
-		Manual,
-	}
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#endif
+
+#if SYSTEM_TEXT_JSON
+[JsonConverter(typeof(JsonStringEnumConverter))]
+#endif
+enum PipelineStatus
+{
+	[EnumMember(Value = @"running")]
+	Running,
+	[EnumMember(Value = @"pending")]
+	Pending,
+	[EnumMember(Value = @"success")]
+	Success,
+	[EnumMember(Value = @"failed")]
+	Failed,
+	[EnumMember(Value = @"canceled")]
+	Canceled,
+	[EnumMember(Value = @"skipped")]
+	Skipped,
+	[EnumMember(Value = @"preparing")]
+	Preparing,
+	[EnumMember(Value = @"scheduled")]
+	Scheduled,
+	[EnumMember(Value = @"created")]
+	Created,
+	[EnumMember(Value = @"manual")]
+	Manual,
+	[EnumMember(Value = @"waiting_for_resource")]
+	WaitingForResource,
 }

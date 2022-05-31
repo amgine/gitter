@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+/// <summary>Search methods.</summary>
+/// <typeparam name="T">Search options type.</typeparam>
+public interface ISearch<in T>
+	where T : SearchOptions
 {
-	/// <summary>Search methods.</summary>
-	/// <typeparam name="T">Search options type.</typeparam>
-	public interface ISearch<in T>
-		where T : SearchOptions
-	{
-		bool Current(T search);
+	bool Current(T search);
 
-		bool First(T options);
+	bool First(T options);
 
-		bool Next(T options);
+	bool Next(T options);
 
-		bool Previous(T options);
-	}
+	bool Previous(T options);
 }

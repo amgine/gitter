@@ -18,64 +18,66 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+[DesignerCategory("")]
+public class ViewMenuItem : ToolStripMenuItem
 {
-	using System;
-	using System.Windows.Forms;
+	private ToolStrip _owner;
 
-	public class ViewMenuItem : ToolStripMenuItem
+	public ViewMenuItem(IViewFactory factory)
+		: base(factory.Name, null, OnClick)
 	{
-		private ToolStrip _owner;
+		Factory = factory;
+	}
 
-		public ViewMenuItem(IViewFactory factory)
-			: base(factory.Name, null, OnClick)
+	public IViewFactory Factory { get; }
+
+	public IWorkingEnvironment Environment { get; set; }
+
+	/// <inheritdoc/>
+	protected override void OnOwnerChanged(EventArgs e)
+	{
+		if(Factory.ImageProvider is not null)
 		{
-			Factory = factory;
-		}
-
-		public IViewFactory Factory { get; }
-
-		public IWorkingEnvironment Environment { get; set; }
-
-		protected override void OnOwnerChanged(EventArgs e)
-		{
-			if(Factory.ImageProvider is not null)
+			if(_owner is not null)
 			{
-				if(_owner is not null)
-				{
-					_owner.DpiChangedAfterParent -= OnOwnerDpiChangedAfterParent;
-					_owner = null;
-				}
-				if(Owner is null)
-				{
-					Image = null;
-				}
-				else
-				{
-					UpdateImage();
-					_owner = Owner;
-					_owner.DpiChangedAfterParent += OnOwnerDpiChangedAfterParent;
-				}
+				_owner.DpiChangedAfterParent -= OnOwnerDpiChangedAfterParent;
+				_owner = null;
 			}
-			base.OnOwnerChanged(e);
-		}
-
-		private void OnOwnerDpiChangedAfterParent(object sender, EventArgs e) => UpdateImage();
-
-		private void UpdateImage()
-		{
-			var iconSize = new DpiConverter(Owner).ConvertX(16);
-			Image = Factory.ImageProvider.GetImage(iconSize);
-		}
-
-		private static void OnClick(object sender, EventArgs e)
-		{
-			var item = (ViewMenuItem)sender;
-			var environment = item.Environment;
-			if(environment is not null)
+			if(Owner is null)
 			{
-				environment.ViewDockService.ShowView(item.Factory.Guid, activate: true);
+				Image = null;
 			}
+			else
+			{
+				UpdateImage();
+				_owner = Owner;
+				_owner.DpiChangedAfterParent += OnOwnerDpiChangedAfterParent;
+			}
+		}
+		base.OnOwnerChanged(e);
+	}
+
+	private void OnOwnerDpiChangedAfterParent(object sender, EventArgs e) => UpdateImage();
+
+	private void UpdateImage()
+	{
+		var iconSize = new DpiConverter(Owner).ConvertX(16);
+		Image = Factory.ImageProvider.GetImage(iconSize);
+	}
+
+	private static void OnClick(object sender, EventArgs e)
+	{
+		var item = (ViewMenuItem)sender;
+		var environment = item.Environment;
+		if(environment is not null)
+		{
+			environment.ViewDockService.ShowView(item.Factory.Guid, activate: true);
 		}
 	}
 }

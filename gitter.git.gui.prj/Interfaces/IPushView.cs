@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using System.Collections.Generic;
+
+using gitter.Framework.Mvc;
+
+interface IPushView : IView
 {
-	using System.Collections.Generic;
+	IUserInputSource<PushTo> PushTo { get; }
 
-	using gitter.Framework.Mvc;
+	IUserInputSource<Remote> Remote { get; }
 
-	interface IPushView : IView
-	{
-		IUserInputSource<PushTo> PushTo { get; }
+	IUserInputSource<string> Url { get; }
 
-		IUserInputSource<Remote> Remote { get; }
+	IUserInputSource<ICollection<Branch>> References { get; }
 
-		IUserInputSource<string> Url { get; }
+	IUserInputSource<bool> ForceOverwrite { get; }
 
-		IUserInputSource<ICollection<Branch>> References { get; }
+	IUserInputSource<bool> ThinPack { get; }
 
-		IUserInputSource<bool> ForceOverwrite { get; }
+	IUserInputSource<bool> SendTags { get; }
 
-		IUserInputSource<bool> ThinPack { get; }
-
-		IUserInputSource<bool> SendTags { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

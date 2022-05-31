@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public class ContextMenuRequestEventArgs : EventArgs
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	public class ContextMenuRequestEventArgs : EventArgs
+	public ContextMenuRequestEventArgs(CustomListBoxColumn column, int columnIndex, int x, int y)
 	{
-		public ContextMenuRequestEventArgs(CustomListBoxColumn column, int columnIndex, int x, int y)
-		{
-			Column      = column;
-			ColumnIndex = columnIndex;
-			X           = x;
-			Y           = y;
-		}
-
-		public CustomListBoxColumn Column { get; }
-
-		public int ColumnIndex { get; }
-
-		public int SubItemId => Column.Id;
-
-		public Point Location => new Point(X, Y);
-
-		public int X { get; }
-
-		public int Y { get; }
-
-		public ContextMenuStrip ContextMenu { get; set; }
-
-		public bool OverrideDefaultMenu { get; set; }
+		Column      = column;
+		ColumnIndex = columnIndex;
+		X           = x;
+		Y           = y;
 	}
+
+	public CustomListBoxColumn Column { get; }
+
+	public int ColumnIndex { get; }
+
+	public int SubItemId => Column.Id;
+
+	public Point Location => new(X, Y);
+
+	public int X { get; }
+
+	public int Y { get; }
+
+	public ContextMenuStrip ContextMenu { get; set; }
+
+	public bool OverrideDefaultMenu { get; set; }
 }

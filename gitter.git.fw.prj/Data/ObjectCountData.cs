@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,33 +18,32 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+public sealed class ObjectCountData
 {
-	public sealed class ObjectCountData
+	public ObjectCountData(int count, int size, int inPack, int packs, int sizePack, int prunePackable, int garbage)
 	{
-		public ObjectCountData(int count, int size, int inPack, int packs, int sizePack, int prunePackable, int garbage)
-		{
-			Count = count;
-			Size = size;
-			InPack = inPack;
-			Packs = packs;
-			SizePack = sizePack;
-			PrunePackable = prunePackable;
-			Garbage = garbage;
-		}
-
-		public int Count { get; }
-
-		public int Size { get; }
-
-		public int InPack { get; }
-
-		public int Packs { get; }
-
-		public int SizePack { get; }
-
-		public int PrunePackable { get; }
-
-		public int Garbage { get; }
+		Count = count;
+		Size = size;
+		InPack = inPack;
+		Packs = packs;
+		SizePack = sizePack;
+		PrunePackable = prunePackable;
+		Garbage = garbage;
 	}
+
+	public int Count { get; }
+
+	public int Size { get; }
+
+	public int InPack { get; }
+
+	public int Packs { get; }
+
+	public int SizePack { get; }
+
+	public int PrunePackable { get; }
+
+	public int Garbage { get; }
 }

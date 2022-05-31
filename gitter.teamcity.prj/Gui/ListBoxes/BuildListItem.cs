@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,120 +18,117 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+using System;
+using System.Globalization;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+sealed class BuildListItem : CustomListBoxItem<Build>
 {
-	using System;
-	using System.Globalization;
-	using System.Drawing;
-
-	using gitter.Framework.Controls;
-
-	sealed class BuildListItem : CustomListBoxItem<Build>
+	public BuildListItem(Build buildType)
+		: base(buildType)
 	{
-		public BuildListItem(Build buildType)
-			: base(buildType)
+	}
+
+	protected override void OnListBoxAttached()
+	{
+		base.OnListBoxAttached();
+
+		DataContext.PropertyChanged += OnBuildPropertyChanged;
+	}
+
+	protected override void OnListBoxDetached()
+	{
+		DataContext.PropertyChanged -= OnBuildPropertyChanged;
+
+		base.OnListBoxDetached();
+	}
+
+	private IImageProvider StatusImage
+		=> DataContext.Status switch
 		{
+			BuildStatus.Success => Icons.StatusSuccess,
+			BuildStatus.Failure => Icons.StatusFailure,
+			BuildStatus.Error   => Icons.StatusError,
+			_ => null,
+		};
+
+	private void OnBuildPropertyChanged(object sender, TeamCityObjectPropertyChangedEventArgs e)
+	{
+		if(e.Property == Build.IdProperty)
+		{
+			InvalidateSubItemSafe((int)ColumnId.Id);
 		}
-
-		protected override void OnListBoxAttached()
+		else if(e.Property == Build.StatusProperty)
 		{
-			base.OnListBoxAttached();
-
-			DataContext.PropertyChanged += OnBuildPropertyChanged;
+			InvalidateSubItemSafe((int)ColumnId.Status);
 		}
-
-		protected override void OnListBoxDetached()
+		else if(e.Property == Build.BuildTypeProperty)
 		{
-			DataContext.PropertyChanged -= OnBuildPropertyChanged;
-
-			base.OnListBoxDetached();
+			InvalidateSubItemSafe((int)ColumnId.BuildType);
 		}
-
-		private Image StatusImage
+		else if(e.Property == Build.StartDateProperty)
 		{
-			get
-			{
-				switch(DataContext.Status)
-				{
-					case BuildStatus.Success:
-						return CachedResources.Bitmaps["ImgStatusSuccess"];
-					case BuildStatus.Failure:
-						return CachedResources.Bitmaps["ImgStatusFailure"];
-					case BuildStatus.Error:
-						return CachedResources.Bitmaps["ImgStatusError"];
-					default:
-						return null;
-				}
-			}
+			InvalidateSubItemSafe((int)ColumnId.StartDate);
 		}
-
-		private void OnBuildPropertyChanged(object sender, TeamCityObjectPropertyChangedEventArgs e)
+		else if(e.Property == Build.NumberProperty)
 		{
-			if(e.Property == Build.IdProperty)
-			{
-				InvalidateSubItemSafe((int)ColumnId.Id);
-			}
-			else if(e.Property == Build.StatusProperty)
-			{
-				InvalidateSubItemSafe((int)ColumnId.Status);
-			}
-			else if(e.Property == Build.BuildTypeProperty)
-			{
-				InvalidateSubItemSafe((int)ColumnId.BuildType);
-			}
-			else if(e.Property == Build.StartDateProperty)
-			{
-				InvalidateSubItemSafe((int)ColumnId.StartDate);
-			}
-			else if(e.Property == Build.NumberProperty)
-			{
-				InvalidateSubItemSafe((int)ColumnId.Number);
-			}
-			else if(e.Property == Build.WebUrlProperty)
-			{
-				InvalidateSubItemSafe((int)ColumnId.WebUrl);
-			}
+			InvalidateSubItemSafe((int)ColumnId.Number);
 		}
-
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		else if(e.Property == Build.WebUrlProperty)
 		{
-			switch((ColumnId)measureEventArgs.SubItemId)
-			{
-				case ColumnId.Id:
-					return measureEventArgs.MeasureText(DataContext.Id);
-				case ColumnId.Status:
-					return measureEventArgs.MeasureImageAndText(StatusImage, DataContext.Status.ToString());
-				case ColumnId.Number:
-					return measureEventArgs.MeasureText(DataContext.Number);
-				case ColumnId.StartDate:
-					return DateColumn.OnMeasureSubItem(measureEventArgs, DataContext.StartDate);
-				case ColumnId.WebUrl:
-					return measureEventArgs.MeasureText(DataContext.WebUrl);
-				default:
-					return Size.Empty;
-			}
+			InvalidateSubItemSafe((int)ColumnId.WebUrl);
 		}
+	}
 
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch((ColumnId)measureEventArgs.SubItemId)
 		{
-			switch((ColumnId)paintEventArgs.SubItemId)
-			{
-				case ColumnId.Id:
-					paintEventArgs.PaintText(DataContext.Id.ToString(CultureInfo.InvariantCulture));
-					break;
-				case ColumnId.Status:
-					paintEventArgs.PaintImageAndText(StatusImage, DataContext.Status.ToString());
-					break;
-				case ColumnId.Number:
-					paintEventArgs.PaintText(DataContext.Number);
-					break;
-				case ColumnId.StartDate:
-					DateColumn.OnPaintSubItem(paintEventArgs, DataContext.StartDate);
-					break;
-				case ColumnId.WebUrl:
-					paintEventArgs.PaintText(DataContext.WebUrl);
-					break;
-			}
+			case ColumnId.Id:
+				return measureEventArgs.MeasureText(DataContext.Id);
+			case ColumnId.Status:
+				return measureEventArgs.MeasureImageAndText(StatusImage?.GetImage(measureEventArgs.Dpi.X * 16 / 96), DataContext.Status.ToString());
+			case ColumnId.Number:
+				return measureEventArgs.MeasureText(DataContext.Number);
+			case ColumnId.StartDate:
+				return DateColumn.OnMeasureSubItem(measureEventArgs, DataContext.StartDate);
+			case ColumnId.WebUrl:
+				return measureEventArgs.MeasureText(DataContext.WebUrl);
+			default:
+				return Size.Empty;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch((ColumnId)paintEventArgs.SubItemId)
+		{
+			case ColumnId.Id:
+				paintEventArgs.PaintText(DataContext.Id.ToString(CultureInfo.InvariantCulture));
+				break;
+			case ColumnId.Status:
+				paintEventArgs.PaintImageAndText(StatusImage?.GetImage(paintEventArgs.Dpi.X * 16 / 96), DataContext.Status.ToString());
+				break;
+			case ColumnId.Number:
+				paintEventArgs.PaintText(DataContext.Number);
+				break;
+			case ColumnId.StartDate:
+				DateColumn.OnPaintSubItem(paintEventArgs, DataContext.StartDate);
+				break;
+			case ColumnId.WebUrl:
+				paintEventArgs.PaintText(DataContext.WebUrl);
+				break;
 		}
 	}
 }

@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
-{
-	/// <summary>View with search support.</summary>
-	/// <typeparam name="T">Search options type.</typeparam>
-	public interface ISearchableView<T>
-		where T : SearchOptions
-	{
-		/// <summary>Returns search methods.</summary>
-		ISearch<T> Search { get; }
+namespace gitter.Framework.Controls;
 
-		/// <summary>Gets or sets search toolbar visibility.</summary>
-		bool SearchToolBarVisible { get; set; }
-	}
+/// <summary>View with search support.</summary>
+/// <typeparam name="T">Search options type.</typeparam>
+public interface ISearchableView<T>
+	where T : SearchOptions
+{
+	/// <summary>Returns search methods.</summary>
+	ISearch<T> Search { get; }
+
+	/// <summary>Gets or sets search toolbar visibility.</summary>
+	bool SearchToolBarVisible { get; set; }
 }

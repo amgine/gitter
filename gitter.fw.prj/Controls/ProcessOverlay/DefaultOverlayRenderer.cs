@@ -18,138 +18,159 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+
+sealed class DefaultOverlayRenderer : ProcessOverlayRenderer
 {
-	using System;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
+	private static readonly Color BackgroundColor = Color.FromArgb(225, 240, 240, 255);
+	private static readonly Color BorderColor = Color.FromArgb(75, 75, 100);
 
-	sealed class DefaultOverlayRenderer : ProcessOverlayRenderer
+	private static readonly Brush FontBrush = new SolidBrush(BorderColor);
+
+	private static Color ColorLERP(Color c1, Color c2, double position)
 	{
-		private static readonly Color BackgroundColor = Color.FromArgb(225, 240, 240, 255);
-		private static readonly Color BorderColor = Color.FromArgb(75, 75, 100);
+		byte r1 = c1.R;
+		byte r2 = c2.R;
+		byte r = (byte)(r1 + (r2 - r1) * position);
 
-		private static readonly Brush FontBrush = new SolidBrush(BorderColor);
+		byte g1 = c1.G;
+		byte g2 = c2.G;
+		byte g = (byte)(g1 + (g2 - g1) * position);
 
-		private static Color ColorLERP(Color c1, Color c2, double position)
+		byte b1 = c1.B;
+		byte b2 = c2.B;
+		byte b = (byte)(b1 + (b2 - b1) * position);
+
+		return Color.FromArgb(r, g, b);
+	}
+
+	private static void DrawIndeterminateProgress(Graphics graphics, Dpi dpi, int x, int y, int w, int h)
+	{
+		const int n = 12;
+
+		int cx = x + w / 2;
+		int cy = y + h / 2;
+
+		int r = (w < h ? w : h) / 2;
+
+#if NETCOREAPP
+		long current = (Environment.TickCount64 / 100) % n;
+#else
+		long current = (Environment.TickCount / 100) % n;
+#endif
+
+		using var pen = new Pen(Color.Transparent, dpi.X * 2.0f / 96);
+		for(int i = 0; i < n; ++i)
 		{
-			byte r1 = c1.R;
-			byte r2 = c2.R;
-			byte r = (byte)(r1 + (r2 - r1) * position);
+			var a = i * (Math.PI * 2) / n;
+			var cos = Math.Cos(a);
+			var sin = Math.Sin(a);
+			var x1 = (float)(cx + cos * r / 3.0);
+			var y1 = (float)(cy + sin * r / 3.0);
+			var x2 = (float)(cx + cos * r);
+			var y2 = (float)(cy + sin * r);
 
-			byte g1 = c1.G;
-			byte g2 = c2.G;
-			byte g = (byte)(g1 + (g2 - g1) * position);
-
-			byte b1 = c1.B;
-			byte b2 = c2.B;
-			byte b = (byte)(b1 + (b2 - b1) * position);
-
-			return Color.FromArgb(r, g, b);
-		}
-
-		private static void DrawIndeterminateProgress(Graphics graphics, int x, int y, int w, int h)
-		{
-			const int n = 12;
-
-			int cx = x + w / 2;
-			int cy = y + h / 2;
-
-			int r = (w < h ? w : h) / 2;
-
-			long current = (DateTime.Now.Ticks / 1000000) % n;
-
-			for(int i = 0; i < n; ++i)
+			Color color;
+			if(i == current)
 			{
-				var a = i * (Math.PI * 2) / n;
-				var cos = Math.Cos(a);
-				var sin = Math.Sin(a);
-				float x1 = (float)(cx + cos * r / 3.0);
-				float y1 = (float)(cy + sin * r / 3.0);
-				float x2 = (float)(cx + cos * r);
-				float y2 = (float)(cy + sin * r);
-
-				Color color;
-				if(i == current)
+				color = BorderColor;
+			}
+			else
+			{
+				if((current + 1) % n == i)
 				{
-					color = BorderColor;
+					color = BackgroundColor;
 				}
 				else
 				{
-					if((current + 1) % n == i)
-					{
-						color = BackgroundColor;
-					}
-					else
-					{
-						var d = i - current;
-						if(d < 0) d += n;
-						d = n - d;
-						var k = (double)d / (double)n;
-						color = ColorLERP(BorderColor, BackgroundColor, k);
-					}
-				}
-
-				using(var pen = new Pen(color, 2.0f))
-				{
-					graphics.DrawLine(pen, x1, y1, x2, y2);
+					var d = i - current;
+					if(d < 0) d += n;
+					d = n - d;
+					var k = (double)d / (double)n;
+					color = ColorLERP(BorderColor, BackgroundColor, k);
 				}
 			}
+			pen.Color = color;
+			graphics.DrawLine(pen, x1, y1, x2, y2);
+		}
+	}
+
+	public override void Paint(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds)
+	{
+		const int spacing = 10;
+
+		var dpi  = Dpi.FromControl(processOverlay.HostControl);
+		var conv = DpiConverter.FromDefaultTo(dpi);
+		var size = conv.Convert(new Size(14, 14));
+
+		var font = processOverlay.Font;
+
+		var tw = GitterApplication.TextRenderer.MeasureText(
+			graphics, processOverlay.Title, font, bounds.Width, TitleStringFormat).Width;
+
+		var s = conv.ConvertX(5);
+
+		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
+		{
+			using var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding);
+			using(var brush = new SolidBrush(BackgroundColor))
+			{
+				graphics.FillPath(brush, path);
+			}
+			using(var pen = new Pen(BorderColor, conv.ConvertX(2.0f)))
+			{
+				graphics.DrawPath(pen, path);
+			}
+
+			DrawIndeterminateProgress(graphics, dpi,
+				bounds.X + (bounds.Width - tw) / 2 - size.Width - s,
+				bounds.Y + (bounds.Height - size.Height) / 2,
+				size.Width, size.Height);
 		}
 
-		public override void Paint(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds)
+		var titleRect = new Rectangle(
+			bounds.X + (bounds.Width - tw) / 2,
+			bounds.Y,
+			bounds.Width - conv.ConvertX(spacing) * 2 - s - size.Width,
+			bounds.Height);
+
+		if(!string.IsNullOrWhiteSpace(processOverlay.Title))
 		{
-			var font = processOverlay.Font;
-			var oldMode = graphics.SmoothingMode;
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
-			const int spacing = 10;
-			using(var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding))
+			GitterApplication.TextRenderer.DrawText(
+				graphics, processOverlay.Title, font, FontBrush, titleRect, TitleStringFormat);
+		}
+		if(!string.IsNullOrWhiteSpace(processOverlay.Message))
+		{
+			GitterApplication.TextRenderer.DrawText(
+				graphics, processOverlay.Message, font, FontBrush, bounds, StringFormat);
+		}
+	}
+
+	public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
+	{
+		var conv = DpiConverter.FromDefaultTo(Dpi.FromControl(processOverlay.HostControl));
+		var size = conv.Convert(new Size(14, 14));
+
+		using(var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding))
+		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
+		{
+			using(var brush = new SolidBrush(BackgroundColor))
 			{
-				using(var brush = new SolidBrush(BackgroundColor))
-				{
-					graphics.FillPath(brush, path);
-				}
-				using(var pen = new Pen(BorderColor, 2.0f))
-				{
-					graphics.DrawPath(pen, path);
-				}
+				graphics.FillPath(brush, path);
 			}
-			var tw = GitterApplication.TextRenderer.MeasureText(
-				graphics, processOverlay.Title, font, bounds.Width, TitleStringFormat).Width;
-			DrawIndeterminateProgress(graphics, bounds.X + (bounds.Width - tw) / 2 - 14 - 5, bounds.Y + (bounds.Height - 14) / 2, 14, 14);
-			var titleRect = new Rectangle(bounds.X + (bounds.Width - tw) / 2, bounds.Y, bounds.Width - spacing * 2 - 5 - 14, bounds.Height);
-			graphics.SmoothingMode = oldMode;
-			if(!string.IsNullOrWhiteSpace(processOverlay.Title))
+			using(var pen = new Pen(BorderColor, conv.ConvertX(2.0f)))
 			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, processOverlay.Title, font, FontBrush, titleRect, TitleStringFormat);
-			}
-			if(!string.IsNullOrWhiteSpace(processOverlay.Message))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, processOverlay.Message, font, FontBrush, bounds, StringFormat);
+				graphics.DrawPath(pen, path);
 			}
 		}
-
-		public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
+		if(!string.IsNullOrWhiteSpace(status))
 		{
-			using(var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding))
-			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
-			{
-				using(var brush = new SolidBrush(BackgroundColor))
-				{
-					graphics.FillPath(brush, path);
-				}
-				using(var pen = new Pen(BorderColor, 2.0f))
-				{
-					graphics.DrawPath(pen, path);
-				}
-			}
-			if(!string.IsNullOrWhiteSpace(status))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, status, processOverlay.Font, FontBrush, bounds, StringFormat);
-			}
+			GitterApplication.TextRenderer.DrawText(
+				graphics, status, processOverlay.Font, FontBrush, bounds, StringFormat);
 		}
 	}
 }

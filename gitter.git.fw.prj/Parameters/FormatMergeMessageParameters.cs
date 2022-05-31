@@ -18,31 +18,30 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+public sealed class FormatMergeMessageParameters
 {
-	using System;
-	using System.Collections.Generic;
-
-	public sealed class FormatMergeMessageParameters
+	public FormatMergeMessageParameters()
 	{
-		public FormatMergeMessageParameters()
-		{
-		}
-
-		public FormatMergeMessageParameters(string revision, string headRefName)
-		{
-			Revisions = new string[] { revision };
-			HeadReference = headRefName;
-		}
-
-		public FormatMergeMessageParameters(IReadOnlyList<string> revisions, string headRefName)
-		{
-			Revisions     = revisions;
-			HeadReference = headRefName;
-		}
-
-		public IReadOnlyList<string> Revisions { get; set; }
-
-		public string HeadReference { get; set; }
 	}
+
+	public FormatMergeMessageParameters(string revision, string headRefName)
+	{
+		Revisions = new string[] { revision };
+		HeadReference = headRefName;
+	}
+
+	public FormatMergeMessageParameters(IReadOnlyList<string> revisions, string headRefName)
+	{
+		Revisions     = revisions;
+		HeadReference = headRefName;
+	}
+
+	public IReadOnlyList<string> Revisions { get; set; }
+
+	public string HeadReference { get; set; }
 }

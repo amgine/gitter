@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework.Mvc;
+
+interface ICheckoutView : IView
 {
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> Revision { get; }
 
-	interface ICheckoutView : IView
-	{
-		IUserInputSource<string> Revision { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

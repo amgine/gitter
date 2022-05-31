@@ -18,100 +18,99 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
+	#region Data
 
-	public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
+	private readonly List<Revision> _container = new(capacity: 2);
+
+	#endregion
+
+	#region .ctor
+
+	internal RevisionParentsCollection()
 	{
-		#region Data
-
-		private readonly List<Revision> _container = new(capacity: 2);
-
-		#endregion
-
-		#region .ctor
-
-		internal RevisionParentsCollection()
-		{
-		}
-
-		#endregion
-
-		#region Properties
-
-		public Revision this[int index]
-		{
-			get => _container[index];
-			internal set
-			{
-				Assert.IsNotNull(value);
-
-				_container[index] = value;
-			}
-		}
-
-		public int Count => _container.Count;
-
-		#endregion
-
-		#region Internal Methods
-
-		internal void AddInternal(Revision item)
-		{
-			Assert.IsNotNull(item);
-
-			_container.Add(item);
-		}
-
-		internal void InsertInternal(int index, Revision item)
-		{
-			Assert.IsNotNull(item);
-
-			_container.Insert(index, item);
-		}
-
-		internal void RemoveInternal(Revision item)
-		{
-			Assert.IsNotNull(item);
-
-			_container.Remove(item);
-		}
-
-		#endregion
-
-		#region Public Methods
-
-		public int IndexOf(Revision item)
-			=> _container.IndexOf(item);
-
-		public bool Contains(Revision item)
-			=>  _container.Contains(item);
-
-		public void CopyTo(Revision[] array, int arrayIndex)
-			=> _container.CopyTo(array, arrayIndex);
-
-		#endregion
-
-		#region IList<Revision>
-
-		Revision IReadOnlyList<Revision>.this[int index] => _container[index];
-
-		#endregion
-
-		#region IEnumerable<Revision>
-
-		public List<Revision>.Enumerator GetEnumerator()
-			=> _container.GetEnumerator();
-
-		IEnumerator<Revision> IEnumerable<Revision>.GetEnumerator()
-			=> _container.GetEnumerator();
-
-		IEnumerator IEnumerable.GetEnumerator()
-			=> _container.GetEnumerator();
-
-		#endregion
 	}
+
+	#endregion
+
+	#region Properties
+
+	public Revision this[int index]
+	{
+		get => _container[index];
+		internal set
+		{
+			Assert.IsNotNull(value);
+
+			_container[index] = value;
+		}
+	}
+
+	public int Count => _container.Count;
+
+	#endregion
+
+	#region Internal Methods
+
+	internal void AddInternal(Revision item)
+	{
+		Assert.IsNotNull(item);
+
+		_container.Add(item);
+	}
+
+	internal void InsertInternal(int index, Revision item)
+	{
+		Assert.IsNotNull(item);
+
+		_container.Insert(index, item);
+	}
+
+	internal void RemoveInternal(Revision item)
+	{
+		Assert.IsNotNull(item);
+
+		_container.Remove(item);
+	}
+
+	#endregion
+
+	#region Public Methods
+
+	public int IndexOf(Revision item)
+		=> _container.IndexOf(item);
+
+	public bool Contains(Revision item)
+		=>  _container.Contains(item);
+
+	public void CopyTo(Revision[] array, int arrayIndex)
+		=> _container.CopyTo(array, arrayIndex);
+
+	#endregion
+
+	#region IList<Revision>
+
+	Revision IReadOnlyList<Revision>.this[int index] => _container[index];
+
+	#endregion
+
+	#region IEnumerable<Revision>
+
+	public List<Revision>.Enumerator GetEnumerator()
+		=> _container.GetEnumerator();
+
+	IEnumerator<Revision> IEnumerable<Revision>.GetEnumerator()
+		=> _container.GetEnumerator();
+
+	IEnumerator IEnumerable.GetEnumerator()
+		=> _container.GetEnumerator();
+
+	#endregion
 }

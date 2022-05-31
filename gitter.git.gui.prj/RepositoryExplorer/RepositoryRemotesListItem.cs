@@ -18,84 +18,74 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using gitter.Git.Gui.Controls;
+using gitter.Git.Gui.Views;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class RepositoryRemotesListItem : RepositoryExplorerItemBase
 {
-	using System;
-	using System.Windows.Forms;
+	private RemoteListBinding _binding;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using gitter.Git.Gui.Controls;
-	using gitter.Git.Gui.Views;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class RepositoryRemotesListItem : RepositoryExplorerItemBase
+	public RepositoryRemotesListItem(IWorkingEnvironment environment)
+		: base(Icons.Remotes, Resources.StrRemotes)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(environment);
 
-		private RemoteListBinding _binding;
+		WorkingEnvironment = environment;
+	}
 
-		#endregion
+	private IWorkingEnvironment WorkingEnvironment { get; }
 
-		#region .ctor
+	/// <inheritdoc/>
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		WorkingEnvironment.ViewDockService.ShowView(Guids.RemotesViewGuid);
+	}
 
-		public RepositoryRemotesListItem(IWorkingEnvironment environment)
-			: base(@"remotes", Resources.StrRemotes)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+	private void OnRemoteItemActivated(object sender, BoundItemActivatedEventArgs<Remote> e)
+	{
+		Assert.IsNotNull(e);
 
-			WorkingEnvironment = environment;
-		}
+		WorkingEnvironment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(e.Object));
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	public override void OnDoubleClick(int x, int y) { }
 
-		#region Properties
+	/// <inheritdoc/>
+	protected override void DetachFromRepository()
+	{
+		_binding.ItemActivated -= OnRemoteItemActivated;
+		_binding.Dispose();
+		_binding = null;
+	}
 
-		private IWorkingEnvironment WorkingEnvironment { get; }
+	/// <inheritdoc/>
+	protected override void AttachToRepository()
+	{
+		_binding = new RemoteListBinding(Items, Repository);
+		_binding.ItemActivated += OnRemoteItemActivated;
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
 
-		#region Methods
+		if(Repository is null) return default;
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-			WorkingEnvironment.ViewDockService.ShowView(Guids.RemotesViewGuid);
-		}
-
-		private void OnRemoteItemActivated(object sender, BoundItemActivatedEventArgs<Remote> e)
-		{
-			WorkingEnvironment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(e.Object));
-		}
-
-		public override void OnDoubleClick(int x, int y) { }
-
-		protected override void DetachFromRepository()
-		{
-			_binding.ItemActivated -= OnRemoteItemActivated;
-			_binding.Dispose();
-			_binding = null;
-		}
-
-		protected override void AttachToRepository()
-		{
-			_binding = new RemoteListBinding(Items, Repository);
-			_binding.ItemActivated += OnRemoteItemActivated;
-		}
-
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
-
-			if(Repository is null) return default;
-
-			var menu = new RemotesMenu(Repository);
-			Utility.MarkDropDownForAutoDispose(menu);
-			return menu;
-		}
-
-		#endregion
+		var menu = new RemotesMenu(Repository);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

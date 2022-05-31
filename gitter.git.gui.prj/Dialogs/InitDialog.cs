@@ -18,116 +18,100 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class InitDialog : GitDialogBase, IExecutableDialog, IAsyncExecutableDialog, IInitView
 {
-	using System;
-	using System.ComponentModel;
-	using System.Threading.Tasks;
+	private readonly IInitController _controller;
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class InitDialog : GitDialogBase, IExecutableDialog, IAsyncExecutableDialog, IInitView
+	public InitDialog(IGitRepositoryProvider gitRepositoryProvider)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(gitRepositoryProvider);
 
-		private readonly IInitController _controller;
+		InitializeComponent();
+		Localize();
 
-		#endregion
-
-		#region .ctor
-
-		public InitDialog(IGitRepositoryProvider gitRepositoryProvider)
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
+			RepositoryPath    = new TextBoxInputSource(_txtPath),
+			Bare              = new CheckBoxInputSource(_chkBare),
+			UseCustomTemplate = new CheckBoxInputSource(_chkUseTemplate),
+			Template          = new TextBoxInputSource(_txtTemplate),
+		};
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			InitializeComponent();
-			Localize();
+		GitterApplication.FontManager.InputFont.Apply(_txtPath, _txtTemplate);
 
-			var inputs = new IUserInputSource[]
-			{
-				RepositoryPath    = new TextBoxInputSource(_txtPath),
-				Bare              = new CheckBoxInputSource(_chkBare),
-				UseCustomTemplate = new CheckBoxInputSource(_chkUseTemplate),
-				Template          = new TextBoxInputSource(_txtTemplate),
-			};
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
-
-			GitterApplication.FontManager.InputFont.Apply(_txtPath, _txtTemplate);
-
-			_controller = new InitController(gitRepositoryProvider) { View = this };
-		}
-
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb => Resources.StrInit;
-
-		public IUserInputSource<string> RepositoryPath { get; }
-
-		public IUserInputSource<bool> Bare { get; }
-
-		public IUserInputSource<bool> UseCustomTemplate { get; }
-
-		public IUserInputSource<string> Template { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region Methods
-
-		private void Localize()
-		{
-			Text = Resources.StrInitRepository;
-
-			_lblPath.Text        = Resources.StrPath.AddColon();
-			_grpOptions.Text     = Resources.StrOptions;
-			_chkUseTemplate.Text = Resources.StrTemplate.AddColon();
-			_chkBare.Text        = Resources.StrBare;
-		}
-
-		private void _btnSelectDirectory_Click(object sender, EventArgs e)
-		{
-			var path = Utility.ShowPickFolderDialog(this);
-			if(path != null)
-			{
-				_txtPath.Text = path;
-			}
-		}
-
-		private void _btnSelectTemplate_Click(object sender, EventArgs e)
-		{
-			var path = Utility.ShowPickFolderDialog(this);
-			if(path != null)
-			{
-				_txtTemplate.Text = path;
-			}
-		}
-
-		private void _chkUseTemplate_CheckedChanged(object sender, EventArgs e)
-		{
-			bool check = _chkUseTemplate.Checked;
-			_txtTemplate.Enabled = check;
-			_btnSelectTemplate.Enabled = check;
-		}
-
-		#endregion
-
-		#region IExecutableDialog
-
-		public bool Execute() => _controller.TryInit();
-
-		public Task<bool> ExecuteAsync() => _controller.TryInitAsync();
-
-		#endregion
+		_controller = new InitController(gitRepositoryProvider) { View = this };
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 98));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrInit;
+
+	public IUserInputSource<string> RepositoryPath { get; }
+
+	public IUserInputSource<bool> Bare { get; }
+
+	public IUserInputSource<bool> UseCustomTemplate { get; }
+
+	public IUserInputSource<string> Template { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	private void Localize()
+	{
+		Text = Resources.StrInitRepository;
+
+		_lblPath.Text        = Resources.StrPath.AddColon();
+		_grpOptions.Text     = Resources.StrOptions;
+		_chkUseTemplate.Text = Resources.StrTemplate.AddColon();
+		_chkBare.Text        = Resources.StrBare;
+	}
+
+	private void _btnSelectDirectory_Click(object sender, EventArgs e)
+	{
+		var path = Utility.ShowPickFolderDialog(this);
+		if(path is not null)
+		{
+			_txtPath.Text = path;
+		}
+	}
+
+	private void _btnSelectTemplate_Click(object sender, EventArgs e)
+	{
+		var path = Utility.ShowPickFolderDialog(this);
+		if(path is not null)
+		{
+			_txtTemplate.Text = path;
+		}
+	}
+
+	private void _chkUseTemplate_CheckedChanged(object sender, EventArgs e)
+	{
+		bool check = _chkUseTemplate.Checked;
+		_txtTemplate.Enabled = check;
+		_btnSelectTemplate.Enabled = check;
+	}
+
+	public bool Execute() => _controller.TryInit();
+
+	public Task<bool> ExecuteAsync() => _controller.TryInitAsync();
 }

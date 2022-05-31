@@ -18,42 +18,41 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+
+sealed class SpellcheckerCache
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly Queue<string> _queue;
+	private readonly Dictionary<string, bool> _results;
+	private readonly int _maxCount;
 
-	sealed class SpellcheckerCache
+	public SpellcheckerCache(int maxCount = 5000)
 	{
-		private readonly Queue<string> _queue;
-		private readonly Dictionary<string, bool> _results;
-		private readonly int _maxCount;
+		Verify.Argument.IsNotNegative(maxCount);
 
-		public SpellcheckerCache(int maxCount = 5000)
+		_maxCount = maxCount;
+		_queue    = new(capacity: maxCount + 1);
+		_results  = new(capacity: maxCount + 1);
+	}
+
+	public bool TryGetResult(string word, out bool result)
+		=> _results.TryGetValue(word, out result);
+
+	public void CacheResult(string word, bool result)
+	{
+		_results.Add(word, result);
+		_queue.Enqueue(word);
+		Prune();
+	}
+
+	private void Prune()
+	{
+		while(_queue.Count > _maxCount)
 		{
-			Verify.Argument.IsNotNegative(maxCount, nameof(maxCount));
-
-			_maxCount = maxCount;
-			_queue    = new(capacity: maxCount + 1);
-			_results  = new(capacity: maxCount + 1);
-		}
-
-		public bool TryGetResult(string word, out bool result)
-			=> _results.TryGetValue(word, out result);
-
-		public void CacheResult(string word, bool result)
-		{
-			_results.Add(word, result);
-			_queue.Enqueue(word);
-			Prune();
-		}
-
-		private void Prune()
-		{
-			while(_queue.Count > _maxCount)
-			{
-				_results.Remove(_queue.Dequeue());
-			}
+			_results.Remove(_queue.Dequeue());
 		}
 	}
 }

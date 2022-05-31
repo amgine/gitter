@@ -18,47 +18,46 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+public sealed class HashStringCache
 {
-	using System;
+	private readonly Func<Hash> _getHash;
+	private readonly WeakReference<string> _ref;
+	private int _length;
 
-	public sealed class HashStringCache
+	public HashStringCache(Func<Hash> getHash)
 	{
-		private readonly Func<Hash> _getHash;
-		private readonly WeakReference<string> _ref;
-		private int _length;
+		Verify.Argument.IsNotNull(getHash);
 
-		public HashStringCache(Func<Hash> getHash)
+		_getHash = getHash;
+		_ref     = new WeakReference<string>(null);
+		_length  = -1;
+	}
+
+	private string CreateString(int length)
+	{
+		var hash = _getHash();
+		var value = length == 40 ? hash.ToString() : hash.ToString(length);
+		_ref.SetTarget(value);
+		return value;
+	}
+
+	public string GetValue(int length)
+	{
+		if(length == 0)
 		{
-			Verify.Argument.IsNotNull(getHash, nameof(getHash));
-
-			_getHash = getHash;
-			_ref     = new WeakReference<string>(null);
-			_length  = -1;
+			return string.Empty;
 		}
-
-		private string CreateString(int length)
+		if(_length != length)
 		{
-			var hash = _getHash();
-			var value = length == 40 ? hash.ToString() : hash.ToString(length);
-			_ref.SetTarget(value);
-			return value;
+			_length = length;
+			return CreateString(length);
 		}
-
-		public string GetValue(int length)
-		{
-			if(length == 0)
-			{
-				return string.Empty;
-			}
-			if(_length != length)
-			{
-				_length = length;
-				return CreateString(length);
-			}
-			return _ref.TryGetTarget(out var value)
-				? value
-				: CreateString(length);
-		}
+		return _ref.TryGetTarget(out var value)
+			? value
+			: CreateString(length);
 	}
 }

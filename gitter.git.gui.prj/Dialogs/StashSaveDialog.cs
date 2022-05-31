@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,114 +18,118 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>Dialog for stashing working directory changes.</summary>
+[ToolboxItem(false)]
+public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 {
-	using System;
-	using System.ComponentModel;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
+	private TextBoxSpellChecker _speller;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#endregion
 
-	/// <summary>Dialog for stashing working directory changes.</summary>
-	[ToolboxItem(false)]
-	public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
+	#region .ctor
+
+	/// <summary>Create <see cref="StashSaveDialog"/>.</summary>
+	/// <param name="repository">Repository for performing stash save.</param>
+	/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
+	public StashSaveDialog(Repository repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(repository);
 
-		private TextBoxSpellChecker _speller;
+		Repository = repository;
 
-		#endregion
+		InitializeComponent();
 
-		#region .ctor
+		Text = Resources.StrStashSave;
 
-		/// <summary>Create <see cref="StashSaveDialog"/>.</summary>
-		/// <param name="repository">Repository for performing stash save.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
-		public StashSaveDialog(Repository repository)
+		_lblMessage.Text = Resources.StrOptionalMessage.AddColon();
+		_chkKeepIndex.Text = Resources.StrKeepIndex;
+		_chkIncludeUntrackedFiles.Text = Resources.StrsIncludeUntrackedFiles;
+		if(!GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(repository))
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
-
-			InitializeComponent();
-
-			Text = Resources.StrStashSave;
-
-			_lblMessage.Text = Resources.StrOptionalMessage.AddColon();
-			_chkKeepIndex.Text = Resources.StrKeepIndex;
-			_chkIncludeUntrackedFiles.Text = Resources.StrsIncludeUntrackedFiles;
-			if(!GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(repository))
-			{
-				_chkIncludeUntrackedFiles.Enabled = false;
-				_chkIncludeUntrackedFiles.Text += " " +
-					Resources.StrfVersionRequired
-							 .UseAsFormat(GitFeatures.StashIncludeUntrackedOption.RequiredVersion)
-							 .SurroundWithBraces();
-			}
-
-			ToolTipService.Register(_chkKeepIndex, Resources.TipStashKeepIndex);
-
-			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
-
-			if(SpellingService.Enabled)
-			{
-				_speller = new TextBoxSpellChecker(_txtMessage, true);
-			}
+			_chkIncludeUntrackedFiles.Enabled = false;
+			_chkIncludeUntrackedFiles.Text += " " +
+				Resources.StrfVersionRequired
+							.UseAsFormat(GitFeatures.StashIncludeUntrackedOption.RequiredVersion)
+							.SurroundWithBraces();
 		}
 
-		#endregion
+		ToolTipService.Register(_chkKeepIndex, Resources.TipStashKeepIndex);
 
-		#region Properties
+		GitterApplication.FontManager.InputFont.Apply(_txtMessage);
 
-		public Repository Repository { get; private set; }
-
-		/// <summary>Do not stash staged changes.</summary>
-		public bool KeepIndex
+		if(SpellingService.Enabled)
 		{
-			get { return _chkKeepIndex.Checked; }
-			set { _chkKeepIndex.Checked = value; }
+			_speller = new TextBoxSpellChecker(_txtMessage, true);
 		}
-
-		/// <summary>Include untracked files in stash.</summary>
-		public bool IncludeUntrackedFiles
-		{
-			get { return _chkIncludeUntrackedFiles.Checked; }
-			set { _chkIncludeUntrackedFiles.Checked = value; }
-		}
-
-		/// <summary>Custom commit message (optional).</summary>
-		public string Message
-		{
-			get { return _txtMessage.Text; }
-			set { _txtMessage.Text = value; }
-		}
-
-		protected override string ActionVerb => Resources.StrSave;
-
-		#endregion
-
-		#region IExecutableDialog Members
-
-		/// <summary>Perform stash save.</summary>
-		/// <returns>true if stash save succeeded.</returns>
-		public bool Execute()
-		{
-			bool keepIndex = KeepIndex;
-			bool includeUntracked =
-				GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(Repository) &&
-				IncludeUntrackedFiles;
-			var message = Message;
-			message = message == null ? string.Empty : message.Trim();
-
-			if(GuiCommands.SaveStash(this, Repository.Stash, keepIndex, includeUntracked, message) == GuiCommandStatus.Faulted)
-			{
-				return false;
-			}
-			return true;
-		}
-
-		#endregion
 	}
+
+	#endregion
+
+	#region Properties
+
+	public Repository Repository { get; private set; }
+
+	/// <summary>Do not stash staged changes.</summary>
+	public bool KeepIndex
+	{
+		get => _chkKeepIndex.Checked;
+		set => _chkKeepIndex.Checked = value;
+	}
+
+	/// <summary>Include untracked files in stash.</summary>
+	public bool IncludeUntrackedFiles
+	{
+		get => _chkIncludeUntrackedFiles.Checked;
+		set => _chkIncludeUntrackedFiles.Checked = value;
+	}
+
+	/// <summary>Custom commit message (optional).</summary>
+	public string Message
+	{
+		get => _txtMessage.Text;
+		set => _txtMessage.Text = value;
+	}
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrSave;
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 156));
+
+	#endregion
+
+	#region IExecutableDialog Members
+
+	/// <summary>Perform stash save.</summary>
+	/// <returns>true if stash save succeeded.</returns>
+	public bool Execute()
+	{
+		bool keepIndex = KeepIndex;
+		bool includeUntracked =
+			GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(Repository) &&
+			IncludeUntrackedFiles;
+		var message = Message ?? "";
+		message = message.Trim();
+
+		if(GuiCommands.SaveStash(this, Repository.Stash, keepIndex, includeUntracked, message) == GuiCommandStatus.Faulted)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	#endregion
 }

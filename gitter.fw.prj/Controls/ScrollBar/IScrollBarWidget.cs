@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Windows.Forms;
+
+public interface IScrollBarWidget : IDisposable
 {
-	using System;
-	using System.Windows.Forms;
+	event EventHandler<ScrollEventArgs> Scroll;
 
-	public interface IScrollBarWidget : IDisposable
-	{
-		event EventHandler<ScrollEventArgs> Scroll;
+	event EventHandler ValueChanged;
 
-		event EventHandler ValueChanged;
+	Control Control { get; }
 
-		Control Control { get; }
+	Orientation Orientation { get; }
 
-		Orientation Orientation { get; }
+	int Value { get; set; }
 
-		int Value { get; set; }
+	int Minimum { get; set; }
 
-		int Minimum { get; set; }
+	int Maximum { get; set; }
 
-		int Maximum { get; set; }
+	int SmallChange { get; set; }
 
-		int SmallChange { get; set; }
-
-		int LargeChange { get; set; }
-	}
+	int LargeChange { get; set; }
 }

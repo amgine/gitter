@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+public sealed class SymbolicReferenceData
 {
-	using System;
-
-	public sealed class SymbolicReferenceData
+	public SymbolicReferenceData(string targetObject, ReferenceType targetType)
 	{
-		public SymbolicReferenceData(string targetObject, ReferenceType targetType)
-		{
-			TargetObject = targetObject;
-			TargetType   = targetType;
-		}
-
-		public string TargetObject { get; }
-
-		public ReferenceType TargetType { get; }
+		TargetObject = targetObject;
+		TargetType   = targetType;
 	}
+
+	public string TargetObject { get; }
+
+	public ReferenceType TargetType { get; }
 }

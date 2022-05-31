@@ -18,83 +18,82 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading.Tasks;
+
+using gitter.Git.AccessLayer;
+
+/// <summary>Static revision pointer.</summary>
+internal class StaticRevisionPointer : IRevisionPointer
 {
-	using System;
-	using System.Threading.Tasks;
+	#region Data
 
-	using gitter.Git.AccessLayer;
+	private readonly string _pointer;
+	private Revision _revision;
 
-	/// <summary>Static revision pointer.</summary>
-	internal class StaticRevisionPointer : IRevisionPointer
+	#endregion
+
+	#region .ctor
+
+	public StaticRevisionPointer(Repository repository, string pointer)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNeitherNullNorWhitespace(pointer);
 
-		private readonly string _pointer;
-		private Revision _revision;
-
-		#endregion
-
-		#region .ctor
-
-		public StaticRevisionPointer(Repository repository, string pointer)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNeitherNullNorWhitespace(pointer, nameof(pointer));
-
-			Repository = repository;
-			_pointer   = pointer;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public Repository Repository { get; }
-
-		public virtual ReferenceType Type => ReferenceType.Revision;
-
-		public virtual string Pointer => _pointer;
-
-		public virtual string FullName => _pointer;
-
-		public virtual bool IsDeleted => false;
-
-		#endregion
-
-		#region Methods
-
-		/// <inheritdoc/>
-		public virtual Revision Dereference()
-		{
-			if(_revision == null)
-			{
-				var rev = Repository.Accessor.Dereference
-					.Invoke(new DereferenceParameters(Pointer));
-				lock(Repository.Revisions.SyncRoot)
-				{
-					_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
-				}
-			}
-			return _revision;
-		}
-
-		/// <inheritdoc/>
-		public virtual async Task<Revision> DereferenceAsync()
-		{
-			if(_revision == null)
-			{
-				var rev = await Repository.Accessor.Dereference
-					.InvokeAsync(new DereferenceParameters(Pointer))
-					.ConfigureAwait(continueOnCapturedContext: false);
-				lock(Repository.Revisions.SyncRoot)
-				{
-					_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
-				}
-			}
-			return _revision;
-		}
-
-		#endregion
+		Repository = repository;
+		_pointer   = pointer;
 	}
+
+	#endregion
+
+	#region Properties
+
+	public Repository Repository { get; }
+
+	public virtual ReferenceType Type => ReferenceType.Revision;
+
+	public virtual string Pointer => _pointer;
+
+	public virtual string FullName => _pointer;
+
+	public virtual bool IsDeleted => false;
+
+	#endregion
+
+	#region Methods
+
+	/// <inheritdoc/>
+	public virtual Revision Dereference()
+	{
+		if(_revision == null)
+		{
+			var rev = Repository.Accessor.Dereference
+				.Invoke(new DereferenceParameters(Pointer));
+			lock(Repository.Revisions.SyncRoot)
+			{
+				_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+			}
+		}
+		return _revision;
+	}
+
+	/// <inheritdoc/>
+	public virtual async Task<Revision> DereferenceAsync()
+	{
+		if(_revision == null)
+		{
+			var rev = await Repository.Accessor.Dereference
+				.InvokeAsync(new DereferenceParameters(Pointer))
+				.ConfigureAwait(continueOnCapturedContext: false);
+			lock(Repository.Revisions.SyncRoot)
+			{
+				_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+			}
+		}
+		return _revision;
+	}
+
+	#endregion
 }

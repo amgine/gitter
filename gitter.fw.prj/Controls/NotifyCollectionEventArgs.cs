@@ -18,52 +18,43 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+/// <summary>Arguments for collection notification events.</summary>
+public sealed class NotifyCollectionEventArgs : EventArgs
 {
-	using System;
-
-	/// <summary>Arguments for collection notification events.</summary>
-	public sealed class NotifyCollectionEventArgs : EventArgs
+	/// <summary>Create <see cref="NotifyCollectionEventArgs"/>.</summary>
+	/// <param name="index">Changed item index.</param>
+	/// <param name="evt">Change type.</param>
+	public NotifyCollectionEventArgs(int index, NotifyEvent evt)
 	{
-		#region .ctor
-
-		/// <summary>Create <see cref="NotifyCollectionEventArgs"/>.</summary>
-		/// <param name="index">Changed item index.</param>
-		/// <param name="evt">Change type.</param>
-		public NotifyCollectionEventArgs(int index, NotifyEvent evt)
-		{
-			StartIndex = index;
-			EndIndex = index;
-			Event = evt;
-		}
-
-		/// <summary>Create <see cref="NotifyCollectionEventArgs"/>.</summary>
-		/// <param name="startIndex">Index of first item in modified range.</param>
-		/// <param name="endIndex">Index of last item in modified range.</param>
-		/// <param name="evt">Change type.</param>
-		public NotifyCollectionEventArgs(int startIndex, int endIndex, NotifyEvent evt)
-		{
-			StartIndex = startIndex;
-			EndIndex   = endIndex;
-			Event      = evt;
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Number of modified items.</summary>
-		public int ModifiedItems => EndIndex - StartIndex + 1;
-
-		/// <summary>Index of first item in modified range.</summary>
-		public int StartIndex { get; }
-
-		/// <summary>Index of last item in modified range.</summary>
-		public int EndIndex { get; }
-
-		/// <summary>Change type.</summary>
-		public NotifyEvent Event { get; }
-
-		#endregion
+		StartIndex = index;
+		EndIndex   = index;
+		Event      = evt;
 	}
+
+	/// <summary>Create <see cref="NotifyCollectionEventArgs"/>.</summary>
+	/// <param name="startIndex">Index of first item in modified range.</param>
+	/// <param name="endIndex">Index of last item in modified range.</param>
+	/// <param name="evt">Change type.</param>
+	public NotifyCollectionEventArgs(int startIndex, int endIndex, NotifyEvent evt)
+	{
+		StartIndex = startIndex;
+		EndIndex   = endIndex;
+		Event      = evt;
+	}
+
+	/// <summary>Number of modified items.</summary>
+	public int ModifiedItems => EndIndex - StartIndex + 1;
+
+	/// <summary>Index of first item in modified range.</summary>
+	public int StartIndex { get; }
+
+	/// <summary>Index of last item in modified range.</summary>
+	public int EndIndex { get; }
+
+	/// <summary>Change type.</summary>
+	public NotifyEvent Event { get; }
 }

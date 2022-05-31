@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,38 +18,37 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Collections.Generic;
+
+public sealed class BlameHunk : IReadOnlyList<BlameLine>
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly List<BlameLine> _lines;
 
-	public sealed class BlameHunk : IReadOnlyList<BlameLine>
+	public BlameHunk(BlameCommit commit, IEnumerable<BlameLine> lines)
 	{
-		private readonly List<BlameLine> _lines;
-
-		public BlameHunk(BlameCommit commit, IEnumerable<BlameLine> lines)
-		{
-			Verify.Argument.IsNotNull(commit, nameof(commit));
-			Verify.Argument.IsNotNull(lines, nameof(lines));
+		Verify.Argument.IsNotNull(commit);
+		Verify.Argument.IsNotNull(lines);
 			
-			Commit = commit;
-			_lines = new List<BlameLine>(lines);
-		}
-
-		public BlameLine this[int index] => _lines[index];
-
-		public int Count => _lines.Count;
-
-		public BlameCommit Commit { get; }
-
-		#region IEnumerable<BlameLine>
-
-		public IEnumerator<BlameLine> GetEnumerator()
-			=> _lines.GetEnumerator();
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			=> _lines.GetEnumerator();
-
-		#endregion
+		Commit = commit;
+		_lines = new List<BlameLine>(lines);
 	}
+
+	public BlameLine this[int index] => _lines[index];
+
+	public int Count => _lines.Count;
+
+	public BlameCommit Commit { get; }
+
+	#region IEnumerable<BlameLine>
+
+	public IEnumerator<BlameLine> GetEnumerator()
+		=> _lines.GetEnumerator();
+
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		=> _lines.GetEnumerator();
+
+	#endregion
 }

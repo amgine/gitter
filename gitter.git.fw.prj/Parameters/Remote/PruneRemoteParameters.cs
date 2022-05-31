@@ -18,26 +18,25 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.PruneRemote"/> operation.</summary>
+public sealed class PruneRemoteParameters
 {
-	using System;
-
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.PruneRemote"/> operation.</summary>
-	public sealed class PruneRemoteParameters
+	/// <summary>Create <see cref="PruneRemoteParameters"/>.</summary>
+	public PruneRemoteParameters()
 	{
-		/// <summary>Create <see cref="PruneRemoteParameters"/>.</summary>
-		public PruneRemoteParameters()
-		{
-		}
-
-		/// <summary>Create <see cref="PruneRemoteParameters"/>.</summary>
-		/// <param name="remoteName">Remote to prune.</param>
-		public PruneRemoteParameters(string remoteName)
-		{
-			RemoteName = remoteName;
-		}
-
-		/// <summary>Remote to prune.</summary>
-		public string RemoteName { get; set; }
 	}
+
+	/// <summary>Create <see cref="PruneRemoteParameters"/>.</summary>
+	/// <param name="remoteName">Remote to prune.</param>
+	public PruneRemoteParameters(string remoteName)
+	{
+		RemoteName = remoteName;
+	}
+
+	/// <summary>Remote to prune.</summary>
+	public string RemoteName { get; set; }
 }

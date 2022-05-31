@@ -18,162 +18,161 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+using Resources = gitter.Git.Properties.Resources;
+
+/// <summary>Represents stashed state.</summary>
+public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 {
-	using System;
-	using System.Linq;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Threading.Tasks;
+	#region Events
 
-	using gitter.Framework;
+	public event EventHandler IndexChanged;
 
-	using Resources = gitter.Git.Properties.Resources;
+	private void InvokeIndexChanged()
+		=> IndexChanged?.Invoke(this, EventArgs.Empty);
 
-	/// <summary>Represents stashed state.</summary>
-	public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
+	#endregion
+
+	#region Data
+
+	private int _index;
+
+	#endregion
+
+	#region .ctor
+
+	internal StashedState(Repository repository, int index, Revision revision)
+		: base(repository, index.ToString().SurroundWith(GitConstants.StashName + "@{", "}"))
 	{
-		#region Events
+		Verify.Argument.IsNotNull(revision);
+		Verify.Argument.IsNotNegative(index);
 
-		public event EventHandler IndexChanged;
+		Revision = revision;
+	}
 
-		private void InvokeIndexChanged()
-			=> IndexChanged?.Invoke(this, EventArgs.Empty);
+	#endregion
 
-		#endregion
+	#region Methods
 
-		#region Data
+	public Task DropAsync(IProgress<OperationProgress> progress = default)
+	{
+		Verify.State.IsNotDeleted(this);
 
-		private int _index;
+		return Repository.Stash.DropAsync(this, progress);
+	}
 
-		#endregion
+	public void Drop()
+	{
+		Verify.State.IsNotDeleted(this);
 
-		#region .ctor
+		Repository.Stash.Drop(this);
+	}
 
-		internal StashedState(Repository repository, int index, Revision revision)
-			: base(repository, index.ToString().SurroundWith(GitConstants.StashName + "@{", "}"))
+	public Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return Repository.Stash.PopAsync(this, restoreIndex, progress);
+	}
+
+	public void Pop(bool restoreIndex)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Stash.Pop(this, restoreIndex);
+	}
+
+	public void Pop()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Stash.Pop(this, false);
+	}
+
+	public void Apply()
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Stash.Apply(this, false);
+	}
+
+	public void Apply(bool restoreIndex)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		Repository.Stash.Apply(this, restoreIndex);
+	}
+
+	public Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return Repository.Stash.ApplyAsync(this, restoreIndex, progress);
+	}
+
+	public Branch ToBranch(string name)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return Repository.Stash.ToBranch(this, name);
+	}
+
+	public IRevisionDiffSource GetDiffSource(IEnumerable<string> paths = null)
+	{
+		Verify.State.IsNotDeleted(this);
+
+		return paths == null
+			? new StashedChangesDiffSource(this)
+			: new StashedChangesDiffSource(this, paths.ToList());
+	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary>Returns stash index.</summary>
+	/// <value>Stash index.</value>
+	public int Index
+	{
+		get => _index;
+		internal set
 		{
-			Verify.Argument.IsNotNull(revision, nameof(revision));
-			Verify.Argument.IsNotNegative(index, nameof(index));
+			Verify.Argument.IsNotNegative(value);
 
-			Revision = revision;
-		}
-
-		#endregion
-
-		#region Methods
-
-		public Task DropAsync(IProgress<OperationProgress> progress = default)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return Repository.Stash.DropAsync(this, progress);
-		}
-
-		public void Drop()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Stash.Drop(this);
-		}
-
-		public Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return Repository.Stash.PopAsync(this, restoreIndex, progress);
-		}
-
-		public void Pop(bool restoreIndex)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Stash.Pop(this, restoreIndex);
-		}
-
-		public void Pop()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Stash.Pop(this, false);
-		}
-
-		public void Apply()
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Stash.Apply(this, false);
-		}
-
-		public void Apply(bool restoreIndex)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			Repository.Stash.Apply(this, restoreIndex);
-		}
-
-		public Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return Repository.Stash.ApplyAsync(this, restoreIndex, progress);
-		}
-
-		public Branch ToBranch(string name)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return Repository.Stash.ToBranch(this, name);
-		}
-
-		public IRevisionDiffSource GetDiffSource(IEnumerable<string> paths = null)
-		{
-			Verify.State.IsNotDeleted(this);
-
-			return paths == null
-				? new StashedChangesDiffSource(this)
-				: new StashedChangesDiffSource(this, paths.ToList());
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Returns stash index.</summary>
-		/// <value>Stash index.</value>
-		public int Index
-		{
-			get => _index;
-			internal set
+			if(_index != value)
 			{
-				Verify.Argument.IsNotNegative(value, nameof(value));
-
-				if(_index != value)
-				{
-					_index = value;
-					InvokeIndexChanged();
-				}
+				_index = value;
+				InvokeIndexChanged();
 			}
 		}
-
-		public Revision Revision { get; }
-
-		#endregion
-
-		#region IRevisionPointer
-
-		ReferenceType IRevisionPointer.Type => ReferenceType.Stash;
-
-		string IRevisionPointer.Pointer
-			=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
-
-		string IRevisionPointer.FullName
-			=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
-
-		Revision IRevisionPointer.Dereference() => Revision;
-
-		Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(Revision);
-
-		#endregion
 	}
+
+	public Revision Revision { get; }
+
+	#endregion
+
+	#region IRevisionPointer
+
+	ReferenceType IRevisionPointer.Type => ReferenceType.Stash;
+
+	string IRevisionPointer.Pointer
+		=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
+
+	string IRevisionPointer.FullName
+		=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
+
+	Revision IRevisionPointer.Dereference() => Revision;
+
+	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(Revision);
+
+	#endregion
 }

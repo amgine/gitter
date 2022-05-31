@@ -18,124 +18,123 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+public abstract class TeamCityObjectsCacheBase<T> : IEnumerable<T>
+	where T : TeamCityObject
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Xml;
+	#region Data
 
-	public abstract class TeamCityObjectsCacheBase<T> : IEnumerable<T>
-		where T : TeamCityObject
+	private readonly Dictionary<string, T> _cache;
+	private readonly TeamCityServiceContext _context;
+
+	#endregion
+
+	internal TeamCityObjectsCacheBase(TeamCityServiceContext context)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(context);
 
-		private readonly Dictionary<string, T> _cache;
-		private readonly TeamCityServiceContext _context;
-
-		#endregion
-
-		internal TeamCityObjectsCacheBase(TeamCityServiceContext context)
-		{
-			Verify.Argument.IsNotNull(context, nameof(context));
-
-			_cache = new Dictionary<string, T>();
-			_context = context;
-		}
-
-		protected abstract T Create(XmlNode node);
-
-		protected Dictionary<string, T> Cache => _cache;
-
-		protected internal TeamCityServiceContext Context => _context;
-
-		public object SyncRoot => _context.SyncRoot;
-
-		internal T Lookup(XmlNode node)
-		{
-			Verify.Argument.IsNotNull(node, nameof(node));
-
-			var id = TeamCityUtility.LoadString(node.Attributes[TeamCityObject.IdProperty.XmlNodeName]);
-			T obj;
-			lock(SyncRoot)
-			{
-				if(!_cache.TryGetValue(id, out obj))
-				{
-					obj = Create(node);
-					_cache.Add(id, obj);
-				}
-				else
-				{
-					obj.Update(node);
-				}
-			}
-			return obj;
-		}
-
-		protected internal T FetchSingleItem(string url)
-		{
-			var xml = Context.GetXml(url);
-			return Lookup(xml.DocumentElement);
-		}
-
-		protected LinkedList<T> FetchItemsFromSinglePage(string url)
-		{
-			var xml = Context.GetXml(url);
-			var list = new LinkedList<T>();
-			foreach(var item in Select(xml.DocumentElement))
-			{
-				list.AddLast(item);
-			}
-			return list;
-		}
-
-		protected IEnumerable<T> Select(XmlNode node)
-		{
-			Verify.Argument.IsNotNull(node, nameof(node));
-
-			foreach(XmlNode child in node.ChildNodes)
-			{
-				yield return Lookup(child);
-			}
-		}
-
-		public T this[string id] => _cache[id];
-
-		public int Count => _cache.Count;
-
-		internal bool Remove(T item)
-		{
-			Verify.Argument.IsNotNull(item, nameof(item));
-
-			lock(SyncRoot)
-			{
-				return _cache.Remove(item.Id);
-			}
-		}
-
-		internal bool Remove(string id)
-		{
-			lock(SyncRoot)
-			{
-				return _cache.Remove(id);
-			}
-		}
-
-		internal void Clear()
-		{
-			lock(SyncRoot)
-			{
-				_cache.Clear();
-			}
-		}
-
-		#region IEnumerable
-
-		public IEnumerator<T> GetEnumerator()
-			=> _cache.Values.GetEnumerator();
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			=> _cache.Values.GetEnumerator();
-
-		#endregion
+		_cache = new Dictionary<string, T>();
+		_context = context;
 	}
+
+	protected abstract T Create(XmlNode node);
+
+	protected Dictionary<string, T> Cache => _cache;
+
+	protected internal TeamCityServiceContext Context => _context;
+
+	public object SyncRoot => _context.SyncRoot;
+
+	internal T Lookup(XmlNode node)
+	{
+		Verify.Argument.IsNotNull(node);
+
+		var id = TeamCityUtility.LoadString(node.Attributes[TeamCityObject.IdProperty.XmlNodeName]);
+		T obj;
+		lock(SyncRoot)
+		{
+			if(!_cache.TryGetValue(id, out obj))
+			{
+				obj = Create(node);
+				_cache.Add(id, obj);
+			}
+			else
+			{
+				obj.Update(node);
+			}
+		}
+		return obj;
+	}
+
+	protected internal T FetchSingleItem(string url)
+	{
+		var xml = Context.GetXml(url);
+		return Lookup(xml.DocumentElement);
+	}
+
+	protected LinkedList<T> FetchItemsFromSinglePage(string url)
+	{
+		var xml = Context.GetXml(url);
+		var list = new LinkedList<T>();
+		foreach(var item in Select(xml.DocumentElement))
+		{
+			list.AddLast(item);
+		}
+		return list;
+	}
+
+	protected IEnumerable<T> Select(XmlNode node)
+	{
+		Verify.Argument.IsNotNull(node);
+
+		foreach(XmlNode child in node.ChildNodes)
+		{
+			yield return Lookup(child);
+		}
+	}
+
+	public T this[string id] => _cache[id];
+
+	public int Count => _cache.Count;
+
+	internal bool Remove(T item)
+	{
+		Verify.Argument.IsNotNull(item);
+
+		lock(SyncRoot)
+		{
+			return _cache.Remove(item.Id);
+		}
+	}
+
+	internal bool Remove(string id)
+	{
+		lock(SyncRoot)
+		{
+			return _cache.Remove(id);
+		}
+	}
+
+	internal void Clear()
+	{
+		lock(SyncRoot)
+		{
+			_cache.Clear();
+		}
+	}
+
+	#region IEnumerable
+
+	public IEnumerator<T> GetEnumerator()
+		=> _cache.Values.GetEnumerator();
+
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		=> _cache.Values.GetEnumerator();
+
+	#endregion
 }

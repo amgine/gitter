@@ -18,98 +18,81 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>Dialog for renaming local branch.</summary>
+[ToolboxItem(false)]
+public partial class RenameBranchDialog : GitDialogBase, IExecutableDialog, IRenameBranchView
 {
-	using System;
-	using System.ComponentModel;
+	private readonly IRenameBranchController _controller;
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	/// <summary>Dialog for renaming local branch.</summary>
-	[ToolboxItem(false)]
-	public partial class RenameBranchDialog : GitDialogBase, IExecutableDialog, IRenameBranchView
+	/// <summary>Create <see cref="RenameBranchDialog"/>.</summary>
+	/// <param name="branch">Branch to rename.</param>
+	/// <exception cref="ArgumentNullException"><paramref name="branch"/> == <c>null</c>.</exception>
+	public RenameBranchDialog(Branch branch)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(branch);
+		Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
+			Resources.ExcObjectIsDeleted.UseAsFormat(nameof(Branch)));
 
-		private readonly IRenameBranchController _controller;
+		Branch = branch;
 
-		#endregion
+		InitializeComponent();
+		Localize();
 
-		#region .ctor
-
-		/// <summary>Create <see cref="RenameBranchDialog"/>.</summary>
-		/// <param name="branch">Branch to rename.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="branch"/> == <c>null</c>.</exception>
-		public RenameBranchDialog(Branch branch)
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(branch, nameof(branch));
-			Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
-				Resources.ExcObjectIsDeleted.UseAsFormat(nameof(Branch)));
+			NewName = new TextBoxInputSource(_txtNewName),
+		};
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			Branch = branch;
+		SetupReferenceNameInputBox(_txtNewName, ReferenceType.LocalBranch);
 
-			InitializeComponent();
-			Localize();
+		var branchName = branch.Name;
+		_txtOldName.Text = branchName;
+		_txtNewName.Text = branchName;
+		_txtNewName.SelectAll();
 
-			var inputs = new IUserInputSource[]
-			{
-				NewName = new TextBoxInputSource(_txtNewName),
-			};
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+		GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
 
-			SetupReferenceNameInputBox(_txtNewName, ReferenceType.LocalBranch);
-
-			var branchName = branch.Name;
-			_txtOldName.Text = branchName;
-			_txtNewName.Text = branchName;
-			_txtNewName.SelectAll();
-
-			GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
-
-			_controller = new RenameBranchController(branch) { View = this };
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Verb, describing operation.</summary>
-		protected override string ActionVerb => Resources.StrRename;
-
-		/// <summary>Branch to rename.</summary>
-		public Branch Branch { get; }
-
-		public IUserInputSource<string> NewName { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region Methods
-
-		private void Localize()
-		{
-			Text = Resources.StrRenameBranch;
-
-			_lblOldName.Text = Resources.StrBranch.AddColon();
-			_lblNewName.Text = Resources.StrNewName.AddColon();
-		}
-
-		#endregion
-
-		#region IExecutableDialog
-
-		/// <summary>Perform rename.</summary>
-		/// <returns>true if rename succeeded.</returns>
-		public bool Execute() => _controller.TryRename();
-
-		#endregion
+		_controller = new RenameBranchController(branch) { View = this };
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrRename;
+
+	/// <summary>Branch to rename.</summary>
+	public Branch Branch { get; }
+
+	public IUserInputSource<string> NewName { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	private void Localize()
+	{
+		Text = Resources.StrRenameBranch;
+
+		_lblOldName.Text = Resources.StrBranch.AddColon();
+		_lblNewName.Text = Resources.StrNewName.AddColon();
+	}
+
+	/// <summary>Perform rename.</summary>
+	/// <returns>true if rename succeeded.</returns>
+	public bool Execute() => _controller.TryRename();
 }

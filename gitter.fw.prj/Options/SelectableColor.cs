@@ -18,88 +18,87 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+using System.Drawing;
+
+public sealed class SelectableColor : IDisposable
 {
-	using System;
-	using System.Drawing;
+	private Color _color;
 
-	public sealed class SelectableColor : IDisposable
+	public event EventHandler Changed;
+
+	public SelectableColor(string id, string name, Color color, string categoryId)
 	{
-		private Color _color;
+		Id = id;
+		Name = name;
+		_color = color;
+		Brush = new SolidBrush(color);
+		Pen = new Pen(color);
+		CategoryId = categoryId;
+	}
 
-		public event EventHandler Changed;
+	public SelectableColor(string id, string name, Color color)
+	{
+		Id = id;
+		Name = name;
+		_color = color;
+		Brush = new SolidBrush(color);
+		Pen = new Pen(color);
+	}
 
-		public SelectableColor(string id, string name, Color color, string categoryId)
+	~SelectableColor() => Dispose(disposing: false);
+
+	public string Id { get; }
+
+	public string Name { get; }
+
+	public string CategoryId { get; }
+
+	public Color Color
+	{
+		get => _color;
+		set
 		{
-			Id = id;
-			Name = name;
-			_color = color;
-			Brush = new SolidBrush(color);
-			Pen = new Pen(color);
-			CategoryId = categoryId;
-		}
-
-		public SelectableColor(string id, string name, Color color)
-		{
-			Id = id;
-			Name = name;
-			_color = color;
-			Brush = new SolidBrush(color);
-			Pen = new Pen(color);
-		}
-
-		~SelectableColor() => Dispose(disposing: false);
-
-		public string Id { get; }
-
-		public string Name { get; }
-
-		public string CategoryId { get; }
-
-		public Color Color
-		{
-			get => _color;
-			set
+			if(_color != value)
 			{
-				if(_color != value)
-				{
-					_color = value;
-					Brush?.Dispose();
-					Pen?.Dispose();
-					Brush = new SolidBrush(value);
-					Pen = new Pen(value);
-					Changed?.Invoke(this, EventArgs.Empty);
-				}
+				_color = value;
+				Brush?.Dispose();
+				Pen?.Dispose();
+				Brush = new SolidBrush(value);
+				Pen = new Pen(value);
+				Changed?.Invoke(this, EventArgs.Empty);
 			}
 		}
+	}
 
-		public Brush Brush { get; private set; }
+	public Brush Brush { get; private set; }
 
-		public Pen Pen { get; private set; }
+	public Pen Pen { get; private set; }
 
-		public static implicit operator Color(SelectableColor color) => color._color;
+	public static implicit operator Color(SelectableColor color) => color._color;
 
-		public static implicit operator Brush(SelectableColor color) => color.Brush;
+	public static implicit operator Brush(SelectableColor color) => color.Brush;
 
-		public static implicit operator Pen(SelectableColor color) => color.Pen;
+	public static implicit operator Pen(SelectableColor color) => color.Pen;
 
-		public override string ToString() => Name;
+	public override string ToString() => Name;
 
-		private void Dispose(bool disposing)
+	private void Dispose(bool disposing)
+	{
+		Brush?.Dispose();
+		Pen?.Dispose();
+		if(disposing)
 		{
-			Brush?.Dispose();
-			Pen?.Dispose();
-			if(disposing)
-			{
-				Brush = null;
-				Pen = null;
-			}
+			Brush = null;
+			Pen = null;
 		}
+	}
 
-		public void Dispose()
-		{
-			GC.SuppressFinalize(this);
-			Dispose(disposing: true);
-		}
+	public void Dispose()
+	{
+		GC.SuppressFinalize(this);
+		Dispose(disposing: true);
 	}
 }

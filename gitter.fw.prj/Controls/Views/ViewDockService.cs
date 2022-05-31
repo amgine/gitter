@@ -18,442 +18,438 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Drawing;
+
+using gitter.Framework.Configuration;
+
+public sealed class ViewDockService
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Drawing;
+	#region Data
 
-	using gitter.Framework.Configuration;
+	private readonly Dictionary<Guid, IViewFactory> _factories;
+	private readonly IWorkingEnvironment _environment;
+	private readonly Section _section;
 
-	public sealed class ViewDockService
+	private ViewBase _activeView;
+
+	#endregion
+
+	public event EventHandler ActiveViewChanged;
+
+	private void InvokeActiveViewChanged()
+		=> ActiveViewChanged?.Invoke(this, EventArgs.Empty);
+
+	public ViewDockService(IWorkingEnvironment environment, DockPanel dockPanel, Section section)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(environment);
+		Verify.Argument.IsNotNull(dockPanel);
+		Verify.Argument.IsNotNull(section);
 
-		private readonly Dictionary<Guid, IViewFactory> _factories;
-		private readonly IWorkingEnvironment _environment;
-		private readonly Section _section;
+		_environment = environment;
+		DockPanel = dockPanel;
+		_section = section;
+		_factories = new Dictionary<Guid, IViewFactory>();
 
-		private ViewBase _activeView;
+		RegisterFactory(new WebBrowserViewFactory());
+	}
 
-		#endregion
+	public DockPanel DockPanel { get; }
 
-		public event EventHandler ActiveViewChanged;
+	public ICollection<IViewFactory> ViewFactories
+		=> _factories.Values;
 
-		private void InvokeActiveViewChanged()
-			=> ActiveViewChanged?.Invoke(this, EventArgs.Empty);
-
-		public ViewDockService(IWorkingEnvironment environment, ViewDockGrid grid, Section section)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.Argument.IsNotNull(grid, nameof(grid));
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			_environment = environment;
-			Grid = grid;
-			_section = section;
-			_factories = new Dictionary<Guid, IViewFactory>();
-
-			RegisterFactory(new WebBrowserViewFactory());
-		}
-
-		public ViewDockGrid Grid { get; }
-
-		public ICollection<IViewFactory> ViewFactories
-			=> _factories.Values;
-
-		public ViewBase ActiveView
-		{
-			get
-			{
-				foreach(var factory in ViewFactories)
-				{
-					foreach(var view in factory.CreatedViews)
-					{
-						var host = view.Host;
-						if(host != null && host.IsActive)
-						{
-							_activeView = view;
-							break;
-						}
-					}
-				}
-				return _activeView;
-			}
-		}
-
-		private static string GetViewConfigId(ViewBase view)
-		{
-			return view.IdentificationString + "-" + view.Guid.ToString();
-		}
-
-		public IViewFactory GetFactory(Guid guid)
-		{
-			return _factories[guid];
-		}
-
-		public T GetFactory<T>()
-			where T : class, IViewFactory
+	public ViewBase ActiveView
+	{
+		get
 		{
 			foreach(var factory in ViewFactories)
 			{
-				if(factory is T res) return res;
-			}
-			return default;
-		}
-
-		public void RegisterFactory(IViewFactory factory)
-		{
-			Verify.Argument.IsNotNull(factory, nameof(factory));
-
-			_factories.Add(factory.Guid, factory);
-		}
-
-		public void UnregisterFactory(IViewFactory factory)
-		{
-			Verify.Argument.IsNotNull(factory, nameof(factory));
-
-			UnregisterFactory(factory.Guid);
-		}
-
-		public void UnregisterFactory(Guid guid)
-		{
-			_factories.Remove(guid);
-		}
-
-		private void OnViewClosing(object sender, EventArgs e)
-		{
-			var view = (ViewBase)sender;
-			view.Closing -= OnViewClosing;
-			var section = _section.GetCreateSection(GetViewConfigId(view));
-			view.SaveViewTo(section);
-			if(_activeView == view) _activeView = null;
-		}
-
-		private void FindAppropriateViewHost(IViewFactory factory, ViewBase view)
-		{
-			var host = Grid.RootHost;
-			if(!factory.IsSingleton)
-			{
-				foreach(var v in factory.CreatedViews)
+				foreach(var view in factory.CreatedViews)
 				{
-					if(v.Host is { IsDocumentWell: true })
+					var host = view.Host;
+					if(host != null && host.IsActive)
 					{
-						host = v.Host;
+						_activeView = view;
+						break;
 					}
 				}
-				view.Size = DpiConverter.FromDefaultTo(new Dpi(host.DeviceDpi)).Convert(view.Size);
-				host.AddView(view);
 			}
-			else
+			return _activeView;
+		}
+	}
+
+	private static string GetViewConfigId(ViewBase view)
+	{
+		return view.IdentificationString + "-" + view.Guid.ToString();
+	}
+
+	public IViewFactory GetFactory(Guid guid)
+	{
+		return _factories[guid];
+	}
+
+	public T GetFactory<T>()
+		where T : class, IViewFactory
+	{
+		foreach(var factory in ViewFactories)
+		{
+			if(factory is T res) return res;
+		}
+		return default;
+	}
+
+	public void RegisterFactory(IViewFactory factory)
+	{
+		Verify.Argument.IsNotNull(factory);
+
+		_factories.Add(factory.Guid, factory);
+	}
+
+	public void UnregisterFactory(IViewFactory factory)
+	{
+		Verify.Argument.IsNotNull(factory);
+
+		UnregisterFactory(factory.Guid);
+	}
+
+	public void UnregisterFactory(Guid guid)
+	{
+		_factories.Remove(guid);
+	}
+
+	private void OnViewClosing(object sender, EventArgs e)
+	{
+		var view = (ViewBase)sender;
+		view.Closing -= OnViewClosing;
+		var section = _section.GetCreateSection(GetViewConfigId(view));
+		view.SaveViewTo(section);
+		if(_activeView == view) _activeView = null;
+	}
+
+	private void FindAppropriateViewHost(IViewFactory factory, ViewBase view)
+	{
+		var host = DockPanel.RootHost;
+		if(!factory.IsSingleton)
+		{
+			foreach(var v in factory.CreatedViews)
 			{
-				switch(factory.DefaultViewPosition)
+				if(v.Host is { IsDocumentWell: true })
 				{
-					case ViewPosition.SecondaryDocumentHost:
-						lock(ViewHost.ViewHosts)
+					host = v.Host;
+				}
+			}
+			view.Size = DpiConverter.FromDefaultTo(new Dpi(host.DeviceDpi)).Convert(view.Size);
+			host.AddView(view);
+		}
+		else
+		{
+			switch(factory.DefaultViewPosition)
+			{
+				case ViewPosition.SecondaryDocumentHost:
+					foreach(var h in DockElements<ViewHost>.Instances)
+					{
+						if(h != host && h.IsDocumentWell)
 						{
-							foreach(var h in ViewHost.ViewHosts)
-							{
-								if(h != host && h.IsDocumentWell)
-								{
-									h.AddView(view);
-									return;
-								}
-							}
+							h.AddView(view);
+							return;
 						}
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, true, new[] { view })
-						{
-							Size = Grid.RootHost.Size
-						};
-						Grid.RootHost.PerformDock(host, DockResult.Right);
-						break;
-
-					case ViewPosition.Left:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						Grid.PerformDock(host, DockResult.Left);
-						break;
-					case ViewPosition.Top:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						Grid.PerformDock(host, DockResult.Top);
-						break;
-					case ViewPosition.Right:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						Grid.PerformDock(host, DockResult.Right);
-						break;
-					case ViewPosition.Bottom:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						Grid.PerformDock(host, DockResult.Bottom);
-						break;
-
-					case ViewPosition.LeftAutoHide:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						host.UnpinFromLeft();
-						break;
-					case ViewPosition.TopAutoHide:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						host.UnpinFromTop();
-						break;
-					case ViewPosition.RightAutoHide:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						host.UnpinFromRight();
-						break;
-					case ViewPosition.BottomAutoHide:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						host.UnpinFromBottom();
-						break;
-
-					case ViewPosition.Float:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						host = new ViewHost(Grid, false, false, new[] { view });
-						var form = host.PrepareFloatingMode();
-						form.Location = Grid.PointToScreen(new Point(20, 20));
-						form.Show(Grid.TopLevelControl);
-						break;
-
-					default:
-						view.Size = DpiConverter.FromDefaultTo(new Dpi(Grid.DeviceDpi)).Convert(view.Size);
-						Grid.RootHost.AddView(view);
-						break;
-				}
-			}
-		}
-
-		private void ShowNewView(IViewFactory factory, ViewBase view, bool activate)
-		{
-			FindAppropriateViewHost(factory, view);
-			ShowExistingView(view, activate);
-		}
-
-		private void ShowExistingView(ViewBase view, bool activate)
-		{
-			if(activate)
-			{
-				view.Activate();
-				if(_activeView is not null)
-				{
-
-				}
-				if(_activeView != view)
-				{
-					_activeView = view;
-					ActiveViewChanged?.Invoke(this, EventArgs.Empty);
-				}
-			}
-			else
-			{
-				view.Host.SetActiveView(view);
-			}
-		}
-
-		public WebBrowserView ShowWebBrowserView(string url)
-		{
-			return ShowWebBrowserView(url, true);
-		}
-
-		public WebBrowserView ShowWebBrowserView(string url, bool activate)
-		{
-			return (WebBrowserView)ShowView(
-				WebBrowserViewFactory.Guid,
-				new WebBrowserViewModel(url),
-				activate);
-		}
-
-		private IViewFactory GetViewFactoryByGuid(Guid guid)
-		{
-			Verify.Argument.IsTrue(
-				_factories.TryGetValue(guid, out var factory),
-				nameof(guid),
-				string.Format(
-					CultureInfo.InvariantCulture,
-					"Unknown view factory GUID: {0}",
-					guid));
-			return factory;
-		}
-
-		public ViewBase ShowView(Guid guid, bool activate = true)
-		{
-			var factory = GetViewFactoryByGuid(guid);
-			if(factory.IsSingleton)
-			{
-				var existing = default(ViewBase);
-				foreach(var view in factory.CreatedViews)
-				{
-					existing = view;
+					}
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, true, new[] { view })
+					{
+						Size = DockPanel.RootHost.Size
+					};
+					DockPanel.RootHost.PerformDock(host, DockResult.Right);
 					break;
-				}
-				if(existing is null)
-				{
-					existing = factory.CreateView(_environment);
-					var section = _section.TryGetSection(GetViewConfigId(existing));
-					if(section is not null)
-					{
-						existing.LoadViewFrom(section);
-					}
-					existing.Closing += OnViewClosing;
-					ShowNewView(factory, existing, activate);
-				}
-				else
-				{
-					existing.ViewModel = null;
-					ShowExistingView(existing, activate);
-				}
-				return existing;
-			}
-			else
-			{
-				var existing = default(ViewBase);
-				foreach(var view in factory.CreatedViews)
-				{
-					if(object.Equals(view.ViewModel, null))
-					{
-						existing = view;
-						break;
-					}
-				}
-				if(existing is null)
-				{
-					existing = factory.CreateView(_environment);
-					var section = _section.TryGetSection(GetViewConfigId(existing));
-					if(section is not null)
-					{
-						existing.LoadViewFrom(section);
-					}
-					existing.Closing += OnViewClosing;
-					ShowNewView(factory, existing, activate);
-				}
-				else
-				{
-					ShowExistingView(existing, activate);
-				}
-				return existing;
-			}
-		}
 
-		public ViewBase ShowView(Guid guid, object viewModel, bool activate = true)
-		{
-			var factory = GetViewFactoryByGuid(guid);
-			if(factory.IsSingleton)
-			{
-				var existing = default(ViewBase);
-				foreach(var view in factory.CreatedViews)
-				{
-					existing = view;
+				case ViewPosition.Left:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					DockPanel.PerformDock(host, DockResult.Left);
 					break;
-				}
-				if(existing is null)
-				{
-					existing = factory.CreateView(_environment);
-					existing.ViewModel = viewModel;
-					existing.Closing += OnViewClosing;
-					ShowNewView(factory, existing, activate);
-				}
-				else
-				{
-					existing.ViewModel = viewModel;
-					ShowExistingView(existing, activate);
-				}
-				return existing;
-			}
-			else
-			{
-				var existing = default(ViewBase);
-				foreach(var view in factory.CreatedViews)
-				{
-					if(object.Equals(view.ViewModel, viewModel))
-					{
-						existing = view;
-						break;
-					}
-				}
-				if(existing is null)
-				{
-					existing = factory.CreateView(_environment);
-					existing.ViewModel = viewModel;
-					existing.Closing += OnViewClosing;
-					ShowNewView(factory, existing, activate);
-				}
-				else
-				{
-					ShowExistingView(existing, activate);
-				}
-				return existing;
+				case ViewPosition.Top:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					DockPanel.PerformDock(host, DockResult.Top);
+					break;
+				case ViewPosition.Right:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					DockPanel.PerformDock(host, DockResult.Right);
+					break;
+				case ViewPosition.Bottom:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					DockPanel.PerformDock(host, DockResult.Bottom);
+					break;
+
+				case ViewPosition.LeftAutoHide:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host.UnpinFromLeft();
+					break;
+				case ViewPosition.TopAutoHide:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host.UnpinFromTop();
+					break;
+				case ViewPosition.RightAutoHide:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host.UnpinFromRight();
+					break;
+				case ViewPosition.BottomAutoHide:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host.UnpinFromBottom();
+					break;
+
+				case ViewPosition.Float:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					host = new ViewHost(DockPanel, false, false, new[] { view });
+					var form = host.PrepareFloatingMode();
+					form.Location = DockPanel.PointToScreen(new Point(20, 20));
+					form.Show(DockPanel.TopLevelControl);
+					break;
+
+				default:
+					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					DockPanel.RootHost.AddView(view);
+					break;
 			}
 		}
+	}
 
-		public ViewBase FindView(Guid guid)
+	private void ShowNewView(IViewFactory factory, ViewBase view, bool activate)
+	{
+		FindAppropriateViewHost(factory, view);
+		ShowExistingView(view, activate);
+	}
+
+	private void ShowExistingView(ViewBase view, bool activate)
+	{
+		if(activate)
 		{
-			if(!_factories.TryGetValue(guid, out var factory))
+			view.Activate();
+			if(_activeView is not null)
 			{
-				return null;
+
 			}
+			if(_activeView != view)
+			{
+				_activeView = view;
+				ActiveViewChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
+		else
+		{
+			view.Host.SetActiveView(view);
+		}
+	}
+
+	public WebBrowserView ShowWebBrowserView(string url)
+	{
+		return ShowWebBrowserView(url, true);
+	}
+
+	public WebBrowserView ShowWebBrowserView(string url, bool activate)
+	{
+		return (WebBrowserView)ShowView(
+			WebBrowserViewFactory.Guid,
+			new WebBrowserViewModel(url),
+			activate);
+	}
+
+	private IViewFactory GetViewFactoryByGuid(Guid guid)
+	{
+		Verify.Argument.IsTrue(
+			_factories.TryGetValue(guid, out var factory),
+			nameof(guid),
+			string.Format(
+				CultureInfo.InvariantCulture,
+				"Unknown view factory GUID: {0}",
+				guid));
+		return factory;
+	}
+
+	public ViewBase ShowView(Guid guid, bool activate = true)
+	{
+		var factory = GetViewFactoryByGuid(guid);
+		if(factory.IsSingleton)
+		{
+			var existing = default(ViewBase);
 			foreach(var view in factory.CreatedViews)
+			{
+				existing = view;
+				break;
+			}
+			if(existing is null)
+			{
+				existing = factory.CreateView(_environment);
+				var section = _section.TryGetSection(GetViewConfigId(existing));
+				if(section is not null)
+				{
+					existing.LoadViewFrom(section);
+				}
+				existing.Closing += OnViewClosing;
+				ShowNewView(factory, existing, activate);
+			}
+			else
+			{
+				existing.ViewModel = null;
+				ShowExistingView(existing, activate);
+			}
+			return existing;
+		}
+		else
+		{
+			var existing = default(ViewBase);
+			foreach(var view in factory.CreatedViews)
+			{
+				if(object.Equals(view.ViewModel, null))
+				{
+					existing = view;
+					break;
+				}
+			}
+			if(existing is null)
+			{
+				existing = factory.CreateView(_environment);
+				var section = _section.TryGetSection(GetViewConfigId(existing));
+				if(section is not null)
+				{
+					existing.LoadViewFrom(section);
+				}
+				existing.Closing += OnViewClosing;
+				ShowNewView(factory, existing, activate);
+			}
+			else
+			{
+				ShowExistingView(existing, activate);
+			}
+			return existing;
+		}
+	}
+
+	public ViewBase ShowView(Guid guid, object viewModel, bool activate = true)
+	{
+		var factory = GetViewFactoryByGuid(guid);
+		if(factory.IsSingleton)
+		{
+			var existing = default(ViewBase);
+			foreach(var view in factory.CreatedViews)
+			{
+				existing = view;
+				break;
+			}
+			if(existing is null)
+			{
+				existing = factory.CreateView(_environment);
+				existing.ViewModel = viewModel;
+				existing.Closing += OnViewClosing;
+				ShowNewView(factory, existing, activate);
+			}
+			else
+			{
+				existing.ViewModel = viewModel;
+				ShowExistingView(existing, activate);
+			}
+			return existing;
+		}
+		else
+		{
+			var existing = default(ViewBase);
+			foreach(var view in factory.CreatedViews)
+			{
+				if(object.Equals(view.ViewModel, viewModel))
+				{
+					existing = view;
+					break;
+				}
+			}
+			if(existing is null)
+			{
+				existing = factory.CreateView(_environment);
+				existing.ViewModel = viewModel;
+				existing.Closing += OnViewClosing;
+				ShowNewView(factory, existing, activate);
+			}
+			else
+			{
+				ShowExistingView(existing, activate);
+			}
+			return existing;
+		}
+	}
+
+	public ViewBase FindView(Guid guid)
+	{
+		if(!_factories.TryGetValue(guid, out var factory))
+		{
+			return null;
+		}
+		foreach(var view in factory.CreatedViews)
+		{
+			return view;
+		}
+		return null;
+	}
+
+	public ViewBase FindView(Guid guid, object viewModel)
+	{
+		if(!_factories.TryGetValue(guid, out var factory))
+		{
+			return null;
+		}
+		foreach(var view in factory.CreatedViews)
+		{
+			if(object.Equals(view.ViewModel, viewModel))
 			{
 				return view;
 			}
-			return null;
 		}
+		return null;
+	}
 
-		public ViewBase FindView(Guid guid, object viewModel)
+	public IEnumerable<ViewBase> FindViews(Guid guid)
+	{
+		if(!_factories.TryGetValue(guid, out var factory))
 		{
-			if(!_factories.TryGetValue(guid, out var factory))
+			return Preallocated<ViewBase>.EmptyArray;
+		}
+		return factory.CreatedViews;
+	}
+
+	public IEnumerable<ViewBase> FindViews(Guid guid, object viewModel)
+	{
+		if(!_factories.TryGetValue(guid, out var factory))
+		{
+			return Preallocated<ViewBase>.EmptyArray;
+		}
+		var list = new List<ViewBase>();
+		foreach(var view in factory.CreatedViews)
+		{
+			if(object.Equals(view.ViewModel, viewModel))
 			{
-				return null;
+				list.Add(view);
 			}
+		}
+		return list;
+	}
+
+	public void SaveSettings()
+	{
+		foreach(var factory in _factories.Values)
+		{
 			foreach(var view in factory.CreatedViews)
 			{
-				if(object.Equals(view.ViewModel, viewModel))
-				{
-					return view;
-				}
-			}
-			return null;
-		}
-
-		public IEnumerable<ViewBase> FindViews(Guid guid)
-		{
-			if(!_factories.TryGetValue(guid, out var factory))
-			{
-				return Preallocated<ViewBase>.EmptyArray;
-			}
-			return factory.CreatedViews;
-		}
-
-		public IEnumerable<ViewBase> FindViews(Guid guid, object viewModel)
-		{
-			if(!_factories.TryGetValue(guid, out var factory))
-			{
-				return Preallocated<ViewBase>.EmptyArray;
-			}
-			var list = new List<ViewBase>();
-			foreach(var view in factory.CreatedViews)
-			{
-				if(object.Equals(view.ViewModel, viewModel))
-				{
-					list.Add(view);
-				}
-			}
-			return list;
-		}
-
-		public void SaveSettings()
-		{
-			foreach(var factory in _factories.Values)
-			{
-				foreach(var view in factory.CreatedViews)
-				{
-					var section = _section.GetCreateSection(GetViewConfigId(view));
-					view.SaveViewTo(section);
-				}
+				var section = _section.GetCreateSection(GetViewConfigId(view));
+				view.SaveViewTo(section);
 			}
 		}
 	}

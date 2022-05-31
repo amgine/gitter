@@ -18,18 +18,16 @@
  */
 #endregion
 
-namespace gitter.Native
-{
-	using System;
-	using System.Runtime.InteropServices;
+namespace gitter.Native;
 
-	[StructLayout(LayoutKind.Sequential)]
-	public struct MOUSEHOOKSTRUCT
-	{
-		public POINT  pt;
-		public IntPtr hwnd;
-		[CLSCompliant(false)]
-		public uint   wHitTestCode;
-		public IntPtr dwExtraInfo;
-	}
+using System;
+using System.Runtime.InteropServices;
+
+[StructLayout(LayoutKind.Sequential)]
+public struct MOUSEHOOKSTRUCT
+{
+	public POINT  pt;
+	public IntPtr hwnd;
+	public uint   wHitTestCode;
+	public IntPtr dwExtraInfo;
 }

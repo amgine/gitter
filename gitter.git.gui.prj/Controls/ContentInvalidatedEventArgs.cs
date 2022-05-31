@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Drawing;
+
+sealed class ContentInvalidatedEventArgs : EventArgs
 {
-	using System;
-	using System.Drawing;
+	public ContentInvalidatedEventArgs(Rectangle bounds) => Bounds = bounds;
 
-	sealed class ContentInvalidatedEventArgs : EventArgs
-	{
-		public ContentInvalidatedEventArgs(Rectangle bounds) => Bounds = bounds;
-
-		public Rectangle Bounds { get; }
-	}
+	public Rectangle Bounds { get; }
 }

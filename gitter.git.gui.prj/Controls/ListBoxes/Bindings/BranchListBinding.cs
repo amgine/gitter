@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+
+using gitter.Framework.Controls;
+
+public sealed class BranchListBinding : BaseListBinding<Branch, BranchEventArgs>
 {
-	using System;
-
-	using gitter.Framework.Controls;
-
-	public sealed class BranchListBinding : BaseListBinding<Branch, BranchEventArgs>
+	public BranchListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
+		: base(itemHost, repository.Refs.Heads)
 	{
-		public BranchListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
-			: base(itemHost, repository.Refs.Heads)
-		{
-		}
-
-		public BranchListBinding(CustomListBoxItemsCollection itemHost, RefsHeadsCollection branches)
-			: base(itemHost, branches)
-		{
-		}
-
-		protected override Comparison<CustomListBoxItem> GetComparison()
-			=> BranchListItem.CompareByName;
-
-		protected override CustomListBoxItem<Branch> RepresentObject(Branch obj)
-			=> new BranchListItem(obj);
 	}
+
+	public BranchListBinding(CustomListBoxItemsCollection itemHost, RefsHeadsCollection branches)
+		: base(itemHost, branches)
+	{
+	}
+
+	protected override Comparison<CustomListBoxItem> GetComparison()
+		=> BranchListItem.CompareByName;
+
+	protected override CustomListBoxItem<Branch> RepresentObject(Branch obj)
+		=> new BranchListItem(obj);
 }

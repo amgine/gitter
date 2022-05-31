@@ -18,35 +18,35 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class RemotesMenu : ContextMenuStrip
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-
-	[ToolboxItem(false)]
-	public sealed class RemotesMenu : ContextMenuStrip
+	public RemotesMenu(Repository repository)
 	{
-		public RemotesMenu(Repository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+		Verify.Argument.IsNotNull(repository);
 
-			Repository = repository;
+		Repository = repository;
 
-			var dpiBindings = new DpiBindings(this);
-			var factory     = new GuiItemFactory(dpiBindings);
+		var dpiBindings = new DpiBindings(this);
+		var factory     = new GuiItemFactory(dpiBindings);
 
-			Items.Add(factory.GetShowRemotesViewItem<ToolStripMenuItem>());
-			Items.Add(factory.GetRefreshRemotesItem<ToolStripMenuItem>(repository));
-			Items.Add(new ToolStripSeparator());
-			Items.Add(factory.GetFetchItem<ToolStripMenuItem>(repository));
-			Items.Add(factory.GetPullItem<ToolStripMenuItem>(repository));
-			Items.Add(new ToolStripSeparator());
-			Items.Add(factory.GetAddRemoteItem<ToolStripMenuItem>(repository));
-		}
-
-		public Repository Repository { get; }
+		Items.Add(factory.GetShowRemotesViewItem<ToolStripMenuItem>());
+		Items.Add(factory.GetRefreshRemotesItem<ToolStripMenuItem>(repository));
+		Items.Add(new ToolStripSeparator());
+		Items.Add(factory.GetFetchItem<ToolStripMenuItem>(repository));
+		Items.Add(factory.GetPullItem<ToolStripMenuItem>(repository));
+		Items.Add(new ToolStripSeparator());
+		Items.Add(factory.GetAddRemoteItem<ToolStripMenuItem>(repository));
 	}
+
+	public Repository Repository { get; }
 }

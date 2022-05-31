@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,93 +18,98 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
+using gitter.Framework.Services;
+
+using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>Dialog for creating <see cref="Note"/> object.</summary>
+[ToolboxItem(false)]
+public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteView
 {
-	using System;
-	using System.ComponentModel;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
-	using gitter.Framework.Mvc.WinForms;
-	using gitter.Framework.Services;
+	private TextBoxSpellChecker _speller;
+	private readonly IAddNoteController _controller;
 
-	using gitter.Git.Gui.Controllers;
-	using gitter.Git.Gui.Interfaces;
+	#endregion
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#region .ctor
 
-	/// <summary>Dialog for creating <see cref="Note"/> object.</summary>
-	[ToolboxItem(false)]
-	public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteView
+	/// <summary>Create <see cref="AddNoteDialog"/>.</summary>
+	/// <param name="repository">Repository to create note in.</param>
+	public AddNoteDialog(Repository repository)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(repository);
 
-		private TextBoxSpellChecker _speller;
-		private readonly IAddNoteController _controller;
+		Repository = repository;
 
-		#endregion
+		InitializeComponent();
 
-		#region .ctor
-
-		/// <summary>Create <see cref="AddNoteDialog"/>.</summary>
-		/// <param name="repository">Repository to create note in.</param>
-		public AddNoteDialog(Repository repository)
+		var inputs = new IUserInputSource[]
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			Revision = new ControlInputSource(_txtRevision),
+			Message  = new TextBoxInputSource(_txtMessage),
+		};
+		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-			Repository = repository;
+		Text = Resources.StrAddNote;
 
-			InitializeComponent();
+		_txtRevision.References.LoadData(
+			Repository,
+			ReferenceType.Reference,
+			GlobalBehavior.GroupReferences,
+			GlobalBehavior.GroupRemoteBranches);
+		_txtRevision.References.Items[0].IsExpanded = true;
 
-			var inputs = new IUserInputSource[]
-			{
-				Revision = new ControlInputSource(_txtRevision),
-				Message  = new TextBoxInputSource(_txtMessage),
-			};
-			ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
+		_txtRevision.Text = GitConstants.HEAD;
 
-			Text = Resources.StrAddNote;
+		_lblRevision.Text = Resources.StrRevision.AddColon();
+		_lblMessage.Text = Resources.StrMessage.AddColon();
 
-			_txtRevision.References.LoadData(
-				Repository,
-				ReferenceType.Reference,
-				GlobalBehavior.GroupReferences,
-				GlobalBehavior.GroupRemoteBranches);
-			_txtRevision.References.Items[0].IsExpanded = true;
-
-			_txtRevision.Text = GitConstants.HEAD;
-
-			_lblRevision.Text = Resources.StrRevision.AddColon();
-			_lblMessage.Text = Resources.StrMessage.AddColon();
-
-			GitterApplication.FontManager.InputFont.Apply(_txtRevision, _txtMessage);
-			if(SpellingService.Enabled)
-			{
-				_speller = new TextBoxSpellChecker(_txtMessage, true);
-			}
-			_controller = new AddNoteController(repository) { View = this };
+		GitterApplication.FontManager.InputFont.Apply(_txtRevision, _txtMessage);
+		if(SpellingService.Enabled)
+		{
+			_speller = new TextBoxSpellChecker(_txtMessage, true);
 		}
-
-		#endregion
-
-		#region Properties
-
-		protected override string ActionVerb => Resources.StrAdd;
-
-		public Repository Repository { get; }
-
-		public IUserInputSource<string> Revision { get; }
-
-		public IUserInputSource<string> Message { get; }
-
-		public IUserInputErrorNotifier ErrorNotifier { get; }
-
-		#endregion
-
-		#region IExecutableDialog Members
-
-		public bool Execute() => _controller.TryAddNote();
-
-		#endregion
+		_controller = new AddNoteController(repository) { View = this };
 	}
+
+	#endregion
+
+	#region Properties
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 241));
+
+	/// <inheritdoc/>
+	protected override string ActionVerb => Resources.StrAdd;
+
+	public Repository Repository { get; }
+
+	public IUserInputSource<string> Revision { get; }
+
+	public IUserInputSource<string> Message { get; }
+
+	public IUserInputErrorNotifier ErrorNotifier { get; }
+
+	#endregion
+
+	#region IExecutableDialog Members
+
+	/// <inheritdoc/>
+	public bool Execute() => _controller.TryAddNote();
+
+	#endregion
 }

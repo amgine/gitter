@@ -18,107 +18,106 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+/// <summary>Subitem with image and text.</summary>
+public class ImageAndTextSubItem : BaseImageAndTextSubItem
 {
-	using System;
-	using System.Drawing;
+	#region Data
 
-	/// <summary>Subitem with image and text.</summary>
-	public class ImageAndTextSubItem : BaseImageAndTextSubItem
+	private string _text;
+	private Image _image;
+	private Image _overlayImage;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
+	/// <param name="id">Subitem id.</param>
+	/// <param name="image">Subitem image.</param>
+	/// <param name="overlayImage">Overlay image.</param>
+	/// <param name="text">Subitem text.</param>
+	public ImageAndTextSubItem(int id, Image image, Image overlayImage, string text)
+		: base(id)
 	{
-		#region Data
+		_image = image;
+		_overlayImage = overlayImage;
+		_text = text;
+	}
 
-		private string _text;
-		private Image _image;
-		private Image _overlayImage;
+	/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
+	/// <param name="id">Subitem id.</param>
+	/// <param name="image">Subitem image.</param>
+	/// <param name="text">Subitem text.</param>
+	public ImageAndTextSubItem(int id, Image image, string text)
+		: this(id, image, null, text)
+	{
+	}
 
-		#endregion
+	/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
+	/// <param name="id">Subitem id.</param>
+	/// <param name="image">Subitem image.</param>
+	public ImageAndTextSubItem(int id, Image image)
+		: this(id, image, null)
+	{
+	}
 
-		#region .ctor
+	/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
+	/// <param name="id">Subitem id.</param>
+	/// <param name="text">Subitem text.</param>
+	public ImageAndTextSubItem(int id, string text)
+		: this(id, null, text)
+	{
+	}
 
-		/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
-		/// <param name="id">Subitem id.</param>
-		/// <param name="image">Subitem image.</param>
-		/// <param name="overlayImage">Overlay image.</param>
-		/// <param name="text">Subitem text.</param>
-		public ImageAndTextSubItem(int id, Image image, Image overlayImage, string text)
-			: base(id)
+	/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
+	/// <param name="id">Subitem id.</param>
+	public ImageAndTextSubItem(int id)
+		: this(id, null, null)
+	{
+	}
+
+	#endregion
+
+	/// <summary>Subitem text.</summary>
+	public override string Text
+	{
+		get => _text;
+		set
 		{
-			_image = image;
-			_overlayImage = overlayImage;
-			_text = text;
+			_text = value;
+			Invalidate();
 		}
+	}
 
-		/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
-		/// <param name="id">Subitem id.</param>
-		/// <param name="image">Subitem image.</param>
-		/// <param name="text">Subitem text.</param>
-		public ImageAndTextSubItem(int id, Image image, string text)
-			: this(id, image, null, text)
+	/// <summary>Subitem image.</summary>
+	public override Image Image
+	{
+		get => _image;
+		set
 		{
-		}
-
-		/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
-		/// <param name="id">Subitem id.</param>
-		/// <param name="image">Subitem image.</param>
-		public ImageAndTextSubItem(int id, Image image)
-			: this(id, image, null)
-		{
-		}
-
-		/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
-		/// <param name="id">Subitem id.</param>
-		/// <param name="text">Subitem text.</param>
-		public ImageAndTextSubItem(int id, string text)
-			: this(id, null, text)
-		{
-		}
-
-		/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
-		/// <param name="id">Subitem id.</param>
-		public ImageAndTextSubItem(int id)
-			: this(id, null, null)
-		{
-		}
-
-		#endregion
-
-		/// <summary>Subitem text.</summary>
-		public override string Text
-		{
-			get => _text;
-			set
+			if(_image != value)
 			{
-				_text = value;
+				_image = value;
 				Invalidate();
 			}
 		}
+	}
 
-		/// <summary>Subitem image.</summary>
-		public override Image Image
+	/// <summary>Subitem overlay image.</summary>
+	public override Image OverlayImage
+	{
+		get => _overlayImage;
+		set
 		{
-			get => _image;
-			set
+			if(_overlayImage != value)
 			{
-				if(_image != value)
-				{
-					_image = value;
-					Invalidate();
-				}
-			}
-		}
-
-		/// <summary>Subitem overlay image.</summary>
-		public override Image OverlayImage
-		{
-			get => _overlayImage;
-			set
-			{
-				if(_overlayImage != value)
-				{
-					_overlayImage = value;
-					Invalidate();
-				}
+				_overlayImage = value;
+				Invalidate();
 			}
 		}
 	}

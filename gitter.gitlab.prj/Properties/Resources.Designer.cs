@@ -19,7 +19,7 @@ namespace gitter.GitLab.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -196,186 +196,6 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgGitLab {
-            get {
-                object obj = ResourceManager.GetObject("ImgGitLab", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgGitLab32 {
-            get {
-                object obj = ResourceManager.GetObject("ImgGitLab32", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgIssues {
-            get {
-                object obj = ResourceManager.GetObject("ImgIssues", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgPipelines {
-            get {
-                object obj = ResourceManager.GetObject("ImgPipelines", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgRefresh {
-            get {
-                object obj = ResourceManager.GetObject("ImgRefresh", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgSearchClose {
-            get {
-                object obj = ResourceManager.GetObject("ImgSearchClose", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgSearchNext {
-            get {
-                object obj = ResourceManager.GetObject("ImgSearchNext", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgSearchPrevious {
-            get {
-                object obj = ResourceManager.GetObject("ImgSearchPrevious", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusCanceled {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusCanceled", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusCreated {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusCreated", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusFailed {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusFailed", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusManual {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusManual", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusPending {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusPending", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusPreparing {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusPreparing", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusRunning {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusRunning", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusScheduled {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusScheduled", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusSkipped {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusSkipped", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ImgStatusSuccess {
-            get {
-                object obj = ResourceManager.GetObject("ImgStatusSuccess", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Add.
         /// </summary>
         internal static string StrAdd {
@@ -430,6 +250,15 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Branches.
+        /// </summary>
+        internal static string StrBranches {
+            get {
+                return ResourceManager.GetString("StrBranches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Close.
         /// </summary>
         internal static string StrClose {
@@ -457,6 +286,15 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Collapse All.
+        /// </summary>
+        internal static string StrCollapseAll {
+            get {
+                return ResourceManager.GetString("StrCollapseAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Created.
         /// </summary>
         internal static string StrCreatedAt {
@@ -466,11 +304,56 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        internal static string StrDelete {
+            get {
+                return ResourceManager.GetString("StrDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Errors.
+        /// </summary>
+        internal static string StrErrors {
+            get {
+                return ResourceManager.GetString("StrErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expand All.
+        /// </summary>
+        internal static string StrExpandAll {
+            get {
+                return ResourceManager.GetString("StrExpandAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed Tests.
+        /// </summary>
+        internal static string StrFailedTests {
+            get {
+                return ResourceManager.GetString("StrFailedTests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Find.
         /// </summary>
         internal static string StrFind {
             get {
                 return ResourceManager.GetString("StrFind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Finished.
+        /// </summary>
+        internal static string StrFinished {
+            get {
+                return ResourceManager.GetString("StrFinished", resourceCulture);
             }
         }
         
@@ -682,6 +565,24 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to fetch test report.
+        /// </summary>
+        internal static string StrsFailedToFetchTestReport {
+            get {
+                return ResourceManager.GetString("StrsFailedToFetchTestReport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skipped Tests.
+        /// </summary>
+        internal static string StrSkippedTests {
+            get {
+                return ResourceManager.GetString("StrSkippedTests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No issues to display.
         /// </summary>
         internal static string StrsNoIssuesToDisplay {
@@ -700,6 +601,15 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No tests to display.
+        /// </summary>
+        internal static string StrsNoTestsToDisplay {
+            get {
+                return ResourceManager.GetString("StrsNoTestsToDisplay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Status.
         /// </summary>
         internal static string StrStatus {
@@ -709,11 +619,38 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Passed Tests.
+        /// </summary>
+        internal static string StrSuccessTests {
+            get {
+                return ResourceManager.GetString("StrSuccessTests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View commit on GitLab.
         /// </summary>
         internal static string StrsViewCommitOnGitLab {
             get {
                 return ResourceManager.GetString("StrsViewCommitOnGitLab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags.
+        /// </summary>
+        internal static string StrTags {
+            get {
+                return ResourceManager.GetString("StrTags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tests.
+        /// </summary>
+        internal static string StrTests {
+            get {
+                return ResourceManager.GetString("StrTests", resourceCulture);
             }
         }
         
@@ -732,6 +669,15 @@ namespace gitter.GitLab.Properties {
         internal static string StrUpdatedAt {
             get {
                 return ResourceManager.GetString("StrUpdatedAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View Test Report.
+        /// </summary>
+        internal static string StrViewTestReport {
+            get {
+                return ResourceManager.GetString("StrViewTestReport", resourceCulture);
             }
         }
     }

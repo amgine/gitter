@@ -18,23 +18,19 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+using System.Threading.Tasks;
+
+public interface IAvatar
 {
-	using System;
-	using System.Drawing;
+	event EventHandler Updated;
 
-	public interface IAvatar
-	{
-		event EventHandler Updated;
+	Image Image { get; }
 
-		Image Image { get; }
+	bool IsLoaded { get; }
 
-		bool IsLoaded { get; }
-
-		IAsyncResult BeginUpdate();
-
-		void EndUpdate(IAsyncResult ar);
-
-		void Update();
-	}
+	Task<Image> UpdateAsync();
 }

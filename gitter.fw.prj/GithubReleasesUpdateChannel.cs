@@ -18,111 +18,129 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Reflection;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+/// <summary>Downloads updates from <c>github</c>.</summary>
+public sealed class GithubReleasesUpdateChannel : IUpdateChannel
 {
-	using System;
-	using System.IO;
-	using System.Net.Http;
-	using System.Text;
-	using System.Text.RegularExpressions;
-	using System.Threading.Tasks;
-	using System.Reflection;
+	const string ServiceUrl = @"https://github.com";
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
+#if NET6_0_OR_GREATER
+	static readonly Regex _downloadLinkRegex = new("\\<a\\s+href\\=\\\"(?<url>\\/amgine\\/gitter\\/releases\\/download\\/v(?<version>\\d+(\\.\\d+){0,3})\\/gitter\\-net6\\.0\\-binaries\\.zip)\\\"");
+#else
+	static readonly Regex _downloadLinkRegex = new("\\<a\\s+href\\=\\\"(?<url>\\/amgine\\/gitter\\/releases\\/download\\/v(?<version>\\d+(\\.\\d+){0,3})\\/gitter\\-binaries\\.zip)\\\"");
+#endif
 
-	public sealed class GithubReleasesUpdateChannel : IUpdateChannel
+	private sealed class UpdateVersion : IUpdateVersion
 	{
-		const string ServiceUrl = @"https://github.com";
-
-		static readonly Regex _downloadLinkRegex = new Regex("\\<a\\s+href\\=\\\"(?<url>\\/amgine\\/gitter\\/releases\\/download\\/v(?<version>\\d+(\\.\\d+){0,3})\\/gitter\\-binaries\\.zip)\\\"");
-
-		private sealed class UpdateVersion : IUpdateVersion
+		public UpdateVersion(string downloadUrl, Version version)
 		{
-			public UpdateVersion(string downloadUrl, Version version)
-			{
-				DownloadUrl = downloadUrl;
-				Version     = version;
-			}
-
-			public string DownloadUrl { get; }
-
-			public Version Version { get; }
-
-			private string FormatUpdaterCommand()
-			{
-				var sb = new StringBuilder();
-				// update driver
-				sb.Append('"');
-				sb.Append(@"/driver:download+unzip");
-				sb.Append('"');
-				sb.Append(' ');
-				// remote url
-				sb.Append('"');
-				sb.Append(@"/source:");
-				sb.Append(DownloadUrl);
-				sb.Append('"');
-				sb.Append(' ');
-				// install directory
-				sb.Append('"');
-				sb.Append(@"/target:");
-				sb.Append(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-				sb.Append('"');
-				return sb.ToString();
-			}
-
-			public void Update()
-			{
-				var command = FormatUpdaterCommand();
-				HelperExecutables.LaunchUpdater(command);
-			}
+			DownloadUrl = downloadUrl;
+			Version     = version;
 		}
 
-		private static string MakeAbsoluteUrl(string url)
-		{
-			Assert.IsNotNull(url);
+		public string DownloadUrl { get; }
 
-			if(url.StartsWith(@"http://") || url.StartsWith(@"https://"))
-			{
-				return url;
-			}
-			return url.StartsWith(@"/")
-				? ServiceUrl + url
-				: ServiceUrl + @"/" + url;
+		public Version Version { get; }
+
+		private string FormatUpdaterCommand()
+		{
+			var sb = new StringBuilder();
+			// update driver
+			sb.Append('"');
+			sb.Append(@"/driver:download+unzip");
+			sb.Append('"');
+			sb.Append(' ');
+			// remote url
+			sb.Append('"');
+			sb.Append(@"/source:");
+			sb.Append(DownloadUrl);
+			sb.Append('"');
+			sb.Append(' ');
+			// install directory
+			sb.Append('"');
+			sb.Append(@"/target:");
+			sb.Append(AppContext.BaseDirectory);
+			sb.Append('"');
+			return sb.ToString();
 		}
 
-		public GithubReleasesUpdateChannel()
+		public void Update()
 		{
+			var command = FormatUpdaterCommand();
+			HelperExecutables.LaunchUpdater(command);
 		}
+	}
 
-		/// <summary>Check latest gitter version on this channel.</summary>
-		/// <returns>Latest gitter version.</returns>
-		public async Task<IUpdateVersion> GetLatestVersionAsync()
+	private static string MakeAbsoluteUrl(string url)
+	{
+		Assert.IsNotNull(url);
+
+		if(url.StartsWith(@"http://") || url.StartsWith(@"https://"))
 		{
-			using var http = new HttpClient();
+			return url;
+		}
+		return url.StartsWith(@"/")
+			? ServiceUrl + url
+			: ServiceUrl + @"/" + url;
+	}
 
-			var page = await http
-				.GetStringAsync(@"https://github.com/amgine/gitter/releases")
-				.ConfigureAwait(continueOnCapturedContext: false);
+	public GithubReleasesUpdateChannel(HttpMessageInvoker httpMessageInvoker)
+	{
+		HttpMessageInvoker = httpMessageInvoker;
+	}
 
-			var version = default(Version);
-			var url     = default(string);
+	private HttpMessageInvoker HttpMessageInvoker { get; }
 
-			foreach(Match match in _downloadLinkRegex.Matches(page))
+	/// <summary>Check latest <c>gitter</c> version on this channel.</summary>
+	/// <returns>Latest <c>gitter</c> version.</returns>
+	public async Task<IUpdateVersion> GetLatestVersionAsync(CancellationToken cancellationToken = default)
+	{
+		using var message = new HttpRequestMessage(HttpMethod.Get, $@"{ServiceUrl}/amgine/gitter/releases");
+
+		using var response = await HttpMessageInvoker
+			.SendAsync(message, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		response.EnsureSuccessStatusCode();
+
+		var page = await response.Content
+#if NET5_0_OR_GREATER
+			.ReadAsStringAsync(cancellationToken)
+#else
+			.ReadAsStringAsync()
+#endif
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		var version = default(Version);
+		var url     = default(string);
+
+		foreach(Match match in _downloadLinkRegex.Matches(page))
+		{
+			if(Version.TryParse(match.Groups[@"version"].Value, out var v))
 			{
-				if(Version.TryParse(match.Groups[@"version"].Value, out var v))
+				if(version is null || version < v)
 				{
-					if(version is null || version < v)
-					{
-						version = v;
-						url     = match.Groups[@"url"].Value;
-					}
+					version = v;
+					url     = match.Groups[@"url"].Value;
 				}
 			}
-
-			return version is not null
-				? new UpdateVersion(MakeAbsoluteUrl(url), version)
-				: default;
 		}
+
+		return version is not null
+			? new UpdateVersion(MakeAbsoluteUrl(url), version)
+			: default;
 	}
 }

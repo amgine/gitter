@@ -1,265 +1,264 @@
 ﻿#region Copyright Notice
 /*
- * gitter - VCS repository management tool
- * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+* gitter - VCS repository management tool
+* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+* 
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #endregion
 
-namespace gitter.Git.AccessLayer.CLI
+namespace gitter.Git.AccessLayer.CLI;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+using gitter.Framework.Configuration;
+
+/// <summary>Performs repository-independent git operations.</summary>
+internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Text;
+	#region Static
 
-	using gitter.Framework.Configuration;
+	private static readonly Version _minVersion = new(1, 7, 0, 2);
 
-	/// <summary>Performs repository-independent git operations.</summary>
-	internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
+	#endregion
+
+	#region Data
+
+	private readonly IGitAccessorProvider _provider;
+	private readonly ICommandExecutor _executor;
+	private readonly CommandBuilder _commandBuilder;
+	private readonly OutputParser _outputParser;
+	private Version _gitVersion;
+	private bool _autodetectGitExePath;
+	private string _manualGitExePath;
+	private string _gitExePath;
+
+	private readonly IGitAction<InitRepositoryParameters> _init;
+	private readonly IGitAction<CloneRepositoryParameters> _clone;
+	private readonly IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> _queryConfig;
+	private readonly IGitFunction<QueryConfigParameterParameters, ConfigParameterData> _queryConfigParameter;
+	private readonly IGitAction<AddConfigValueParameters> _addConfigValue;
+	private readonly IGitAction<SetConfigValueParameters> _setConfigValue;
+	private readonly IGitAction<UnsetConfigValueParameters> _unsetConfigValue;
+	private readonly IGitAction<RenameConfigSectionParameters> _renameConfigSection;
+	private readonly IGitAction<DeleteConfigSectionParameters> _deleteConfigSection;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Initializes a new instance of the <see cref="GitCLI"/> class.</summary>
+	/// <param name="provider">Provider of this accessor.</param>
+	public GitCLI(IGitAccessorProvider provider)
 	{
-		#region Static
+		Verify.Argument.IsNotNull(provider);
 
-		private static readonly Version _minVersion = new Version(1, 7, 0, 2);
+		_provider             = provider;
+		_executor             = new GitCommandExecutor(this);
+		_commandBuilder       = new CommandBuilder(this);
+		_outputParser         = new OutputParser(this);
+		_autodetectGitExePath = true;
+		_manualGitExePath     = string.Empty;
 
-		#endregion
+		GitProcess.GitExePath = GitExecutablePath;
 
-		#region Data
+		GitCliMethod.Create(out _init,                 this,            CommandBuilder.GetInitCommand);
+		GitCliMethod.Create(out _clone,                CommandExecutor, CommandBuilder.GetCloneCommand);
+		GitCliMethod.Create(out _queryConfig,          CommandExecutor, CommandBuilder.GetQueryConfigCommand,          OutputParser.ParseQueryConfigResults);
+		GitCliMethod.Create(out _queryConfigParameter, CommandExecutor, CommandBuilder.GetQueryConfigParameterCommand, OutputParser.ParseQueryConfigParameterResult);
+		GitCliMethod.Create(out _addConfigValue,       CommandExecutor, CommandBuilder.GetAddConfigValueCommand,       OutputParser.HandleConfigResults);
+		GitCliMethod.Create(out _setConfigValue,       CommandExecutor, CommandBuilder.GetSetConfigValueCommand,       OutputParser.HandleConfigResults);
+		GitCliMethod.Create(out _unsetConfigValue,     CommandExecutor, CommandBuilder.GetUnsetConfigValueCommand,     OutputParser.HandleConfigResults);
+		GitCliMethod.Create(out _renameConfigSection,  CommandExecutor, CommandBuilder.GetRenameConfigSectionCommand,  OutputParser.HandleConfigResults);
+		GitCliMethod.Create(out _deleteConfigSection,  CommandExecutor, CommandBuilder.GetDeleteConfigSectionCommand,  OutputParser.HandleConfigResults);
+	}
 
-		private readonly IGitAccessorProvider _provider;
-		private readonly ICommandExecutor _executor;
-		private readonly CommandBuilder _commandBuilder;
-		private readonly OutputParser _outputParser;
-		private Version _gitVersion;
-		private bool _autodetectGitExePath;
-		private string _manualGitExePath;
-		private string _gitExePath;
+	#endregion
 
-		private readonly IGitAction<InitRepositoryParameters> _init;
-		private readonly IGitAction<CloneRepositoryParameters> _clone;
-		private readonly IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> _queryConfig;
-		private readonly IGitFunction<QueryConfigParameterParameters, ConfigParameterData> _queryConfigParameter;
-		private readonly IGitAction<AddConfigValueParameters> _addConfigValue;
-		private readonly IGitAction<SetConfigValueParameters> _setConfigValue;
-		private readonly IGitAction<UnsetConfigValueParameters> _unsetConfigValue;
-		private readonly IGitAction<RenameConfigSectionParameters> _renameConfigSection;
-		private readonly IGitAction<DeleteConfigSectionParameters> _deleteConfigSection;
+	#region Properties
 
-		#endregion
+	/// <summary>Returns provider of this accessor.</summary>
+	/// <value>Provider of this accessor</value>
+	public IGitAccessorProvider Provider => _provider;
 
-		#region .ctor
+	internal OutputParser OutputParser => _outputParser;
 
-		/// <summary>Initializes a new instance of the <see cref="GitCLI"/> class.</summary>
-		/// <param name="provider">Provider of this accessor.</param>
-		public GitCLI(IGitAccessorProvider provider)
+	internal CommandBuilder CommandBuilder => _commandBuilder;
+
+	private ICommandExecutor CommandExecutor => _executor;
+
+	public string GitExecutablePath
+	{
+		get
 		{
-			Verify.Argument.IsNotNull(provider, nameof(provider));
-
-			_provider             = provider;
-			_executor             = new GitCommandExecutor(this);
-			_commandBuilder       = new CommandBuilder(this);
-			_outputParser         = new OutputParser(this);
-			_autodetectGitExePath = true;
-			_manualGitExePath     = string.Empty;
-
-			GitProcess.GitExePath = GitExecutablePath;
-
-			GitCliMethod.Create(out _init,                 this,            CommandBuilder.GetInitCommand);
-			GitCliMethod.Create(out _clone,                CommandExecutor, CommandBuilder.GetCloneCommand);
-			GitCliMethod.Create(out _queryConfig,          CommandExecutor, CommandBuilder.GetQueryConfigCommand,          OutputParser.ParseQueryConfigResults);
-			GitCliMethod.Create(out _queryConfigParameter, CommandExecutor, CommandBuilder.GetQueryConfigParameterCommand, OutputParser.ParseQueryConfigParameterResult);
-			GitCliMethod.Create(out _addConfigValue,       CommandExecutor, CommandBuilder.GetAddConfigValueCommand,       OutputParser.HandleConfigResults);
-			GitCliMethod.Create(out _setConfigValue,       CommandExecutor, CommandBuilder.GetSetConfigValueCommand,       OutputParser.HandleConfigResults);
-			GitCliMethod.Create(out _unsetConfigValue,     CommandExecutor, CommandBuilder.GetUnsetConfigValueCommand,     OutputParser.HandleConfigResults);
-			GitCliMethod.Create(out _renameConfigSection,  CommandExecutor, CommandBuilder.GetRenameConfigSectionCommand,  OutputParser.HandleConfigResults);
-			GitCliMethod.Create(out _deleteConfigSection,  CommandExecutor, CommandBuilder.GetDeleteConfigSectionCommand,  OutputParser.HandleConfigResults);
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Returns provider of this accessor.</summary>
-		/// <value>Provider of this accessor</value>
-		public IGitAccessorProvider Provider => _provider;
-
-		internal OutputParser OutputParser => _outputParser;
-
-		internal CommandBuilder CommandBuilder => _commandBuilder;
-
-		private ICommandExecutor CommandExecutor => _executor;
-
-		public string GitExecutablePath
-		{
-			get
+			if(_gitExePath is null)
 			{
-				if(_gitExePath == null)
+				_gitExePath = AutodetectGitExePath
+					? GitProcess.DetectGitExePath()
+					: ManualGitExePath;
+				GitProcess.GitExePath = _gitExePath;
+			}
+			return _gitExePath;
+		}
+	}
+
+	public bool LogCalls { get; set; }
+
+	public Encoding DefaultEncoding => GitProcess.DefaultEncoding;
+
+	public Version MinimumRequiredGitVersion => _minVersion;
+
+	public bool EnableAnsiCodepageFallback
+	{
+		get => GitProcess.EnableAnsiCodepageFallback;
+		set => GitProcess.EnableAnsiCodepageFallback = value;
+	}
+
+	public bool AutodetectGitExePath
+	{
+		get => _autodetectGitExePath;
+		set
+		{
+			if(_autodetectGitExePath != value)
+			{
+				_autodetectGitExePath = value;
+				_gitExePath = null;
+				GitProcess.GitExePath = null;
+			}
+		}
+	}
+
+	public string ManualGitExePath
+	{
+		get => _manualGitExePath;
+		set
+		{
+			if(_manualGitExePath != value)
+			{
+				_manualGitExePath = value;
+				if(!AutodetectGitExePath)
 				{
-					_gitExePath = AutodetectGitExePath
-						? GitProcess.DetectGitExePath()
-						: ManualGitExePath;
+					_gitExePath = value;
 					GitProcess.GitExePath = _gitExePath;
 				}
-				return _gitExePath;
 			}
 		}
+	}
 
-		public bool LogCalls { get; set; }
-
-		public Encoding DefaultEncoding => GitProcess.DefaultEncoding;
-
-		public Version MinimumRequiredGitVersion => _minVersion;
-
-		public bool EnableAnsiCodepageFallback
+	/// <summary>Returns git version.</summary>
+	/// <value>git version.</value>
+	public Version GitVersion
+	{
+		get
 		{
-			get => GitProcess.EnableAnsiCodepageFallback;
-			set => GitProcess.EnableAnsiCodepageFallback = value;
-		}
-
-		public bool AutodetectGitExePath
-		{
-			get => _autodetectGitExePath;
-			set
+			var gitVersion = _gitVersion;
+			if(gitVersion == null)
 			{
-				if(_autodetectGitExePath != value)
-				{
-					_autodetectGitExePath = value;
-					_gitExePath = null;
-					GitProcess.GitExePath = null;
-				}
+				gitVersion = QueryVersion();
+				_gitVersion = gitVersion;
 			}
+			return gitVersion;
 		}
+	}
 
-		public string ManualGitExePath
+	/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
+	public IGitAction<InitRepositoryParameters> InitRepository => _init;
+
+	/// <summary>Clone existing repository.</summary>
+	public IGitAction<CloneRepositoryParameters> CloneRepository => _clone;
+
+	public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig => _queryConfig;
+
+	public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter => _queryConfigParameter;
+
+	public IGitAction<AddConfigValueParameters> AddConfigValue => _addConfigValue;
+
+	public IGitAction<SetConfigValueParameters> SetConfigValue => _setConfigValue;
+
+	public IGitAction<UnsetConfigValueParameters> UnsetConfigValue => _unsetConfigValue;
+
+	public IGitAction<RenameConfigSectionParameters> RenameConfigSection => _renameConfigSection;
+
+	public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection => _deleteConfigSection;
+
+	#endregion
+
+	/// <summary>Forces re-check of git version.</summary>
+	public void InvalidateGitVersion()
+	{
+		_gitVersion = null;
+	}
+
+	/// <summary>Returns git version.</summary>
+	/// <returns>git version.</returns>
+	private Version QueryVersion()
+	{
+		var gitOutput = CommandExecutor.ExecuteCommand(
+			new Command("--version"),
+			CommandExecutionFlags.None);
+		gitOutput.ThrowOnBadReturnCode();
+		var parser = new GitParser(gitOutput.Output);
+		return parser.ReadVersion();
+	}
+
+	public IRepositoryAccessor CreateRepositoryAccessor(IGitRepository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		return new RepositoryCLI(this, repository);
+	}
+
+	public bool IsValidRepository(string path)
+	{
+		var gitPath = Path.Combine(path, GitConstants.GitDir);
+		if(Directory.Exists(gitPath) || File.Exists(gitPath))
 		{
-			get => _manualGitExePath;
-			set
-			{
-				if(_manualGitExePath != value)
-				{
-					_manualGitExePath = value;
-					if(!AutodetectGitExePath)
-					{
-						_gitExePath = value;
-						GitProcess.GitExePath = _gitExePath;
-					}
-				}
-			}
-		}
-
-		/// <summary>Returns git version.</summary>
-		/// <value>git version.</value>
-		public Version GitVersion
-		{
-			get
-			{
-				var gitVersion = _gitVersion;
-				if(gitVersion == null)
-				{
-					gitVersion = QueryVersion();
-					_gitVersion = gitVersion;
-				}
-				return gitVersion;
-			}
-		}
-
-		/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
-		public IGitAction<InitRepositoryParameters> InitRepository => _init;
-
-		/// <summary>Clone existing repository.</summary>
-		public IGitAction<CloneRepositoryParameters> CloneRepository => _clone;
-
-		public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig => _queryConfig;
-
-		public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter => _queryConfigParameter;
-
-		public IGitAction<AddConfigValueParameters> AddConfigValue => _addConfigValue;
-
-		public IGitAction<SetConfigValueParameters> SetConfigValue => _setConfigValue;
-
-		public IGitAction<UnsetConfigValueParameters> UnsetConfigValue => _unsetConfigValue;
-
-		public IGitAction<RenameConfigSectionParameters> RenameConfigSection => _renameConfigSection;
-
-		public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection => _deleteConfigSection;
-
-		#endregion
-
-		/// <summary>Forces re-check of git version.</summary>
-		public void InvalidateGitVersion()
-		{
-			_gitVersion = null;
-		}
-
-		/// <summary>Returns git version.</summary>
-		/// <returns>git version.</returns>
-		private Version QueryVersion()
-		{
-			var gitOutput = CommandExecutor.ExecuteCommand(
-				new Command("--version"),
+			var executor = new RepositoryCommandExecutor(this, path);
+			var gitOutput = executor.ExecuteCommand(
+				new RevParseCommand(RevParseCommand.GitDir()),
 				CommandExecutionFlags.None);
-			gitOutput.ThrowOnBadReturnCode();
-			var parser = new GitParser(gitOutput.Output);
-			return parser.ReadVersion();
+			return gitOutput.ExitCode == 0;
 		}
+		return false;
+	}
 
-		public IRepositoryAccessor CreateRepositoryAccessor(IGitRepository repository)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+	/// <summary>Save parameters to the specified <paramref name="section"/>.</summary>
+	/// <param name="section">Section to store parameters.</param>
+	public void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
 
-			return new RepositoryCLI(this, repository);
-		}
+		section.SetValue("Path", ManualGitExePath);
+		section.SetValue("Autodetect", AutodetectGitExePath);
+		section.SetValue("LogCLICalls", LogCalls);
+		section.SetValue("EnableAnsiCodepageFallback", EnableAnsiCodepageFallback);
+	}
 
-		public bool IsValidRepository(string path)
-		{
-			var gitPath = Path.Combine(path, GitConstants.GitDir);
-			if(Directory.Exists(gitPath) || File.Exists(gitPath))
-			{
-				var executor = new RepositoryCommandExecutor(this, path);
-				var gitOutput = executor.ExecuteCommand(
-					new RevParseCommand(RevParseCommand.GitDir()),
-					CommandExecutionFlags.None);
-				return gitOutput.ExitCode == 0;
-			}
-			return false;
-		}
+	/// <summary>Load parameters from the specified <paramref name="section"/>.</summary>
+	/// <param name="section">Section to look for parameters.</param>
+	public void LoadFrom(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
 
-		/// <summary>Save parameters to the specified <paramref name="section"/>.</summary>
-		/// <param name="section">Section to store parameters.</param>
-		public void SaveTo(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
+		ManualGitExePath           = section.GetValue("Path", string.Empty);
+		AutodetectGitExePath       = section.GetValue("Autodetect", true);
+		LogCalls                   = section.GetValue("LogCLICalls", false);
+		EnableAnsiCodepageFallback = section.GetValue("EnableAnsiCodepageFallback", false);
 
-			section.SetValue("Path", ManualGitExePath);
-			section.SetValue("Autodetect", AutodetectGitExePath);
-			section.SetValue("LogCLICalls", LogCalls);
-			section.SetValue("EnableAnsiCodepageFallback", EnableAnsiCodepageFallback);
-		}
-
-		/// <summary>Load parameters from the specified <paramref name="section"/>.</summary>
-		/// <param name="section">Section to look for parameters.</param>
-		public void LoadFrom(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			ManualGitExePath           = section.GetValue("Path", string.Empty);
-			AutodetectGitExePath       = section.GetValue("Autodetect", true);
-			LogCalls                   = section.GetValue("LogCLICalls", false);
-			EnableAnsiCodepageFallback = section.GetValue("EnableAnsiCodepageFallback", false);
-
-			GitProcess.GitExePath = GitExecutablePath;
-		}
+		GitProcess.GitExePath = GitExecutablePath;
 	}
 }

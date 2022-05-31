@@ -18,104 +18,103 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+using System.IO;
+using System.Collections.Generic;
+
+internal static class IconCache
 {
-	using System;
-	using System.Drawing;
-	using System.IO;
-	using System.Collections.Generic;
-
-	internal static class IconCache
+	private static readonly Dictionary<string, string> _associations = new(comparer: StringComparer.OrdinalIgnoreCase)
 	{
-		private static readonly Dictionary<string, string> _associations = new(comparer: StringComparer.OrdinalIgnoreCase)
+		[@".exe"] = @"file.application",
+
+		[@".com"] = @"file.terminal",
+		[@".cmd"] = @"file.terminal",
+		[@".bat"] = @"file.terminal",
+		[@".ps1"] = @"file.terminal",
+
+		[@".dll"] = @"file.binary",
+
+		[@".xml"]  = @"file.code",
+		[@".cs"]   = @"file.code",
+		[@".py"]   = @"file.code",
+		[@".vb"]   = @"file.code",
+		[@".c"]    = @"file.code",
+		[@".cpp"]  = @"file.code",
+		[@".h"]    = @"file.code",
+		[@".hpp"]  = @"file.code",
+		[@".js"]   = @"file.code",
+		[@".aspx"] = @"file.code",
+		[@".php"]  = @"file.php",
+		[@".xaml"] = @"file.xaml",
+
+		[@".xlsx"] = @"file.excel",
+		[@".xsl"]  = @"file.excel",
+		[@".csv"]  = @"file.excel.csv",
+
+		[@".avi"] = @"file.film",
+		[@".mp4"] = @"file.film",
+		[@".mov"] = @"file.film",
+		[@".mkv"] = @"file.film",
+
+		[@".flv"] = @"file.flash",
+
+		[@".htm"]  = @"file.globe",
+		[@".html"] = @"file.globe",
+
+		[@".bmp"]  = @"file.image",
+		[@".png"]  = @"file.image",
+		[@".gif"]  = @"file.image",
+		[@".tga"]  = @"file.image",
+		[@".jpg"]  = @"file.image",
+		[@".jpeg"] = @"file.image",
+
+		[@".wav"] = @"file.music",
+		[@".wma"] = @"file.music",
+		[@".mp3"] = @"file.music",
+		[@".ogg"] = @"file.music",
+		[@".ape"] = @"file.music",
+
+		[@".pdf"] = @"file.pdf",
+
+		[@".psd"] = @"file.photoshop",
+
+		[@".ppt"]  = @"file.powerpoint",
+		[@".pptx"] = @"file.powerpoint",
+
+		[@".txt"] = @"file.text",
+
+		[@".sln"]    = @"file.vs",
+		[@".csproj"] = @"file.vs",
+
+		[@".rtf"]  = @"file.word",
+		[@".doc"]  = @"file.word",
+		[@".docx"] = @"file.word",
+	};
+
+	private const string _defaultIconName = @"file.default";
+
+	private static string GetCacheKey(string fileName)
+	{
+		try
 		{
-			[@".exe"] = @"file.application",
-
-			[@".com"] = @"file.terminal",
-			[@".cmd"] = @"file.terminal",
-			[@".bat"] = @"file.terminal",
-			[@".ps1"] = @"file.terminal",
-
-			[@".dll"] = @"file.binary",
-
-			[@".xml"]  = @"file.code",
-			[@".cs"]   = @"file.code",
-			[@".py"]   = @"file.code",
-			[@".vb"]   = @"file.code",
-			[@".c"]    = @"file.code",
-			[@".cpp"]  = @"file.code",
-			[@".h"]    = @"file.code",
-			[@".hpp"]  = @"file.code",
-			[@".js"]   = @"file.code",
-			[@".aspx"] = @"file.code",
-			[@".php"]  = @"file.php",
-			[@".xaml"] = @"file.xaml",
-
-			[@".xlsx"] = @"file.excel",
-			[@".xsl"]  = @"file.excel",
-			[@".csv"]  = @"file.excel.csv",
-
-			[@".avi"] = @"file.film",
-			[@".mp4"] = @"file.film",
-			[@".mov"] = @"file.film",
-			[@".mkv"] = @"file.film",
-
-			[@".flv"] = @"file.flash",
-
-			[@".htm"]  = @"file.globe",
-			[@".html"] = @"file.globe",
-
-			[@".bmp"]  = @"file.image",
-			[@".png"]  = @"file.image",
-			[@".gif"]  = @"file.image",
-			[@".tga"]  = @"file.image",
-			[@".jpg"]  = @"file.image",
-			[@".jpeg"] = @"file.image",
-
-			[@".wav"] = @"file.music",
-			[@".wma"] = @"file.music",
-			[@".mp3"] = @"file.music",
-			[@".ogg"] = @"file.music",
-			[@".ape"] = @"file.music",
-
-			[@".pdf"] = @"file.pdf",
-
-			[@".psd"] = @"file.photoshop",
-
-			[@".ppt"]  = @"file.powerpoint",
-			[@".pptx"] = @"file.powerpoint",
-
-			[@".txt"] = @"file.text",
-
-			[@".sln"]    = @"file.vs",
-			[@".csproj"] = @"file.vs",
-
-			[@".rtf"]  = @"file.word",
-			[@".doc"]  = @"file.word",
-			[@".docx"] = @"file.word",
-		};
-
-		private const string _defaultIconName = @"file.default";
-
-		private static string GetCacheKey(string fileName)
-		{
-			try
-			{
-				return Path.GetExtension(fileName);
-			}
-			catch
-			{
-				return string.Empty;
-			}
+			return Path.GetExtension(fileName);
 		}
-
-		public static Bitmap GetIcon(string fileName, int size)
+		catch
 		{
-			if(!_associations.TryGetValue(GetCacheKey(fileName), out var name))
-			{
-				name = _defaultIconName;
-			}
-			return CachedResources.ScaledBitmaps[name, size];
+			return string.Empty;
 		}
+	}
+
+	public static Bitmap GetIcon(string fileName, int size)
+	{
+		if(!_associations.TryGetValue(GetCacheKey(fileName), out var name))
+		{
+			name = _defaultIconName;
+		}
+		return CachedResources.ScaledBitmaps[name, size];
 	}
 }

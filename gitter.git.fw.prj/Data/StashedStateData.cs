@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,24 +18,23 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+public sealed class StashedStateData : INamedObject
 {
-	using System;
-
-	using gitter.Framework;
-
-	public sealed class StashedStateData : INamedObject
+	public StashedStateData(int index, RevisionData revision)
 	{
-		public StashedStateData(int index, RevisionData revision)
-		{
-			Index    = index;
-			Revision = revision;
-		}
-
-		public string Name => GitConstants.StashFullName + "@{" + Index + "}";
-
-		public int Index { get; }
-
-		public RevisionData Revision { get; }
+		Index    = index;
+		Revision = revision;
 	}
+
+	public string Name => GitConstants.StashFullName + "@{" + Index + "}";
+
+	public int Index { get; }
+
+	public RevisionData Revision { get; }
 }

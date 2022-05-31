@@ -18,210 +18,215 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Native;
+using gitter.Framework.Hooks;
+
+[DesignerCategory("")]
+public sealed class DragImage : Form
 {
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Native;
-	using gitter.Framework.Hooks;
+	private readonly int _dx;
+	private readonly int _dy;
+	private Action<PaintEventArgs> _paintProc;
+	private Timer _timer;
+	private LowLevelMouseHook _hook;
 
-	public sealed class DragImage : Form
+	#endregion
+
+	public DragImage(Size size, int dx, int dy, Action<PaintEventArgs> paintProc)
 	{
-		#region Data
+		_dx = dx;
+		_dy = dy;
+		_paintProc = paintProc;
 
-		private readonly int _dx;
-		private readonly int _dy;
-		private Action<PaintEventArgs> _paintProc;
-		private Timer _timer;
-		private LowLevelMouseHook _hook;
+		SetStyle(
+			ControlStyles.ContainerControl |
+			ControlStyles.Selectable |
+			ControlStyles.ResizeRedraw,
+			false);
+		SetStyle(
+			ControlStyles.OptimizedDoubleBuffer |
+			ControlStyles.AllPaintingInWmPaint |
+			ControlStyles.UserPaint,
+			true);
 
-		#endregion
+		StartPosition = FormStartPosition.Manual;
+		FormBorderStyle = FormBorderStyle.None;
+		ControlBox = false;
+		MaximizeBox = false;
+		MinimizeBox = false;
+		Text = string.Empty;
+		ShowIcon = false;
+		ShowInTaskbar = false;
+		Enabled = false;
+		ImeMode = ImeMode.Disable;
 
-		public DragImage(Size size, int dx, int dy, Action<PaintEventArgs> paintProc)
+		MinimumSize = size;
+		MaximumSize = size;
+
+		AllowTransparency = true;
+		BackColor = Color.Magenta;
+
+		TransparencyKey = Color.Magenta;
+
+		_timer = new Timer()
 		{
-			_dx = dx;
-			_dy = dy;
-			_paintProc = paintProc;
+			Interval = 1,
+		};
+		_timer.Tick += OnTimerTick;
+	}
 
-			SetStyle(
-				ControlStyles.ContainerControl |
-				ControlStyles.Selectable |
-				ControlStyles.ResizeRedraw,
-				false);
-			SetStyle(
-				ControlStyles.OptimizedDoubleBuffer |
-				ControlStyles.AllPaintingInWmPaint |
-				ControlStyles.UserPaint,
-				true);
+	private void OnTimerTick(object sender, EventArgs e)
+	{
+		UpdatePosition();
+	}
 
-			StartPosition = FormStartPosition.Manual;
-			FormBorderStyle = FormBorderStyle.None;
-			ControlBox = false;
-			MaximizeBox = false;
-			MinimizeBox = false;
-			Text = string.Empty;
-			ShowIcon = false;
-			ShowInTaskbar = false;
-			Enabled = false;
-			ImeMode = ImeMode.Disable;
+	public void UpdatePosition()
+	{
+		UpdatePosition(Cursor.Position);
+	}
 
-			MinimumSize = size;
-			MaximumSize = size;
+	public void UpdatePosition(Point point)
+	{
+		point.X -= _dx;
+		point.Y -= _dy;
+		Location = point;
+	}
 
-			AllowTransparency = true;
-			BackColor = Color.Magenta;
+	public void UpdatePosition(Rectangle bounds)
+	{
+		bounds.X -= _dx;
+		bounds.Y -= _dy;
+		Bounds = bounds;
+	}
 
-			TransparencyKey = Color.Magenta;
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		e.Graphics.Clear(TransparencyKey);
+		e.Graphics.TextContrast      = GraphicsUtility.TextContrast;
+		e.Graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+		_paintProc?.Invoke(e);
+	}
 
-			_timer = new Timer()
+	public void ShowDragVisual(Control control)
+	{
+		UpdatePosition();
+		User32.ShowWindow(this.Handle, 8);
+		User32.SetWindowPos(
+			this.Handle, (IntPtr)(-1),
+			0, 0, 0, 0,
+			0x0010 | 0x0002 | 0x001);
+
+		try
+		{
+			_hook = new LowLevelMouseHook();
+			_hook.Activate(0);
+		}
+		catch(Win32Exception)
+		{
+			if(_hook != null)
 			{
-				Interval = 1,
-			};
-			_timer.Tick += OnTimerTick;
-		}
-
-		private void OnTimerTick(object sender, EventArgs e)
-		{
-			UpdatePosition();
-		}
-
-		public void UpdatePosition()
-		{
-			UpdatePosition(Cursor.Position);
-		}
-
-		public void UpdatePosition(Point point)
-		{
-			point.X -= _dx;
-			point.Y -= _dy;
-			Location = point;
-		}
-
-		public void UpdatePosition(Rectangle bounds)
-		{
-			bounds.X -= _dx;
-			bounds.Y -= _dy;
-			Bounds = bounds;
-		}
-
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			e.Graphics.Clear(TransparencyKey);
-			e.Graphics.TextContrast      = GraphicsUtility.TextContrast;
-			e.Graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-			if(_paintProc != null) _paintProc(e);
-		}
-
-		public void ShowDragVisual(Control control)
-		{
-			UpdatePosition();
-			User32.ShowWindow(this.Handle, 8);
-			User32.SetWindowPos(
-				this.Handle, (IntPtr)(-1),
-				0, 0, 0, 0,
-				0x0010 | 0x0002 | 0x001);
-
-			try
-			{
-				_hook = new LowLevelMouseHook();
-				_hook.Activate(0);
+				_hook.Dispose();
+				_hook = null;
 			}
-			catch(Win32Exception)
+		}
+
+		if(_hook is null)
+		{
+			_timer.Enabled = true;
+			if(control != null)
 			{
-				if(_hook != null)
+				control.GiveFeedback += OnControlGiveFeedback;
+			}
+		}
+		else
+		{
+			_hook.MouseMove += (s, e) =>
 				{
-					_hook.Dispose();
-					_hook = null;
-				}
-			}
-
-			if(_hook == null)
-			{
-				_timer.Enabled = true;
-				if(control != null)
-				{
-					control.GiveFeedback += OnControlGiveFeedback;
-				}
-			}
-			else
-			{
-				_hook.MouseMove += (s, e) =>
+					if(InvokeRequired)
 					{
-						if(InvokeRequired)
-						{
-							BeginInvoke(new Action<Point>(UpdatePosition), e.Location);
-						}
-						else
-						{
-							UpdatePosition(e.Location);
-						}
-					};
-				_hook.MouseWheel += (s, e) =>
+						BeginInvoke(new Action<Point>(UpdatePosition), e.Location);
+					}
+					else
 					{
-						if(e.Delta == 0)
-						{
-							return;
-						}
-						var h = User32.WindowFromPoint(new POINT(e.X, e.Y));
-						if(h == IntPtr.Zero)
-						{
-							return;
-						}
-						User32.SendMessage(h, WM.MOUSEWHEEL, (IntPtr)(e.Delta << 16), (IntPtr)((e.Y << 16) | e.X));
-					};
-			}
-		}
-
-		private void OnControlGiveFeedback(object sender, GiveFeedbackEventArgs e)
-		{
-			UpdatePosition();
-		}
-
-		protected override void DefWndProc(ref Message m)
-		{
-			const int MA_NOACTIVATE = 0x0003;
-			const int HTTRANSPARENT = -1;
-
-			switch((WM)m.Msg)
-			{
-				case WM.MOUSEACTIVATE:
-					m.Result = (IntPtr)MA_NOACTIVATE;
-					return;
-				case WM.NCHITTEST:
-					m.Result = (IntPtr)HTTRANSPARENT;
-					return;
-			}
-			base.DefWndProc(ref m);
-		}
-
-		protected override bool ShowWithoutActivation => true;
-
-		protected override CreateParams CreateParams
-		{
-			get
-			{
-				const int WS_EX_NOACTIVATE = 0x08000000;
-				var baseParams = base.CreateParams;
-				baseParams.ExStyle |= WS_EX_NOACTIVATE;
-				return baseParams;
-			}
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(_hook != null)
+						UpdatePosition(e.Location);
+					}
+				};
+			_hook.MouseWheel += (s, e) =>
 				{
-					_hook.Dispose();
-					_hook = null;
-				}
-				_timer.Dispose();
-			}
-			base.Dispose(disposing);
+					if(e.Delta == 0)
+					{
+						return;
+					}
+					var h = User32.WindowFromPoint(new POINT(e.X, e.Y));
+					if(h == IntPtr.Zero)
+					{
+						return;
+					}
+					User32.SendMessage(h, WM.MOUSEWHEEL, (IntPtr)(e.Delta << 16), (IntPtr)((e.Y << 16) | e.X));
+				};
 		}
+	}
+
+	private void OnControlGiveFeedback(object sender, GiveFeedbackEventArgs e)
+	{
+		UpdatePosition();
+	}
+
+	/// <inheritdoc/>
+	protected override void DefWndProc(ref Message m)
+	{
+		const int MA_NOACTIVATE = 0x0003;
+		const int HTTRANSPARENT = -1;
+
+		switch((WM)m.Msg)
+		{
+			case WM.MOUSEACTIVATE:
+				m.Result = (IntPtr)MA_NOACTIVATE;
+				return;
+			case WM.NCHITTEST:
+				m.Result = (IntPtr)HTTRANSPARENT;
+				return;
+		}
+		base.DefWndProc(ref m);
+	}
+
+	/// <inheritdoc/>
+	protected override bool ShowWithoutActivation => true;
+
+	/// <inheritdoc/>
+	protected override CreateParams CreateParams
+	{
+		get
+		{
+			const int WS_EX_NOACTIVATE = 0x08000000;
+			var baseParams = base.CreateParams;
+			baseParams.ExStyle |= WS_EX_NOACTIVATE;
+			return baseParams;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(_hook is not null)
+			{
+				_hook.Dispose();
+				_hook = null;
+			}
+			_timer.Dispose();
+		}
+		base.Dispose(disposing);
 	}
 }

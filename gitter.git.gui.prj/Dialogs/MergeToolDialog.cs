@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,19 +18,22 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+
+using gitter.Framework;
+
+[ToolboxItem(false)]
+public partial class MergeToolDialog : GitDialogBase
 {
-	using System;
-	using System.ComponentModel;
-
-	using gitter.Framework;
-
-	[ToolboxItem(false)]
-	public partial class MergeToolDialog : GitDialogBase
+	public MergeToolDialog()
 	{
-		public MergeToolDialog()
-		{
-			InitializeComponent();
-		}
+		InitializeComponent();
 	}
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
 }

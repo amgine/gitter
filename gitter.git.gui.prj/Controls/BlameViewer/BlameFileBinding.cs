@@ -18,107 +18,106 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+sealed class BlameFileBinding : AsyncDataBinding<BlameFile>
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
+	private readonly FlowProgressPanel _progressPanel;
+	private BlameOptions _blameOptions;
 
-	sealed class BlameFileBinding : AsyncDataBinding<BlameFile>
+	#endregion
+
+	#region .ctor
+
+	public BlameFileBinding(IBlameSource blameSource, BlameViewer blameViewer, BlameOptions blameOptions)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(blameSource);
+		Verify.Argument.IsNotNull(blameViewer);
+		Verify.Argument.IsNotNull(blameOptions);
 
-		private readonly FlowProgressPanel _progressPanel;
-		private BlameOptions _blameOptions;
+		BlameSource = blameSource;
+		BlameViewer = blameViewer;
+		_blameOptions = blameOptions;
+		_progressPanel = new FlowProgressPanel();
 
-		#endregion
-
-		#region .ctor
-
-		public BlameFileBinding(IBlameSource blameSource, BlameViewer blameViewer, BlameOptions blameOptions)
-		{
-			Verify.Argument.IsNotNull(blameSource, nameof(blameSource));
-			Verify.Argument.IsNotNull(blameViewer, nameof(blameViewer));
-			Verify.Argument.IsNotNull(blameOptions, nameof(blameOptions));
-
-			BlameSource = blameSource;
-			BlameViewer = blameViewer;
-			_blameOptions = blameOptions;
-			_progressPanel = new FlowProgressPanel();
-
-			Progress = _progressPanel.ProgressMonitor;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public IBlameSource BlameSource { get; }
-
-		public BlameViewer BlameViewer { get; }
-
-		public BlameOptions BlameOptions
-		{
-			get => _blameOptions;
-			set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
-
-				_blameOptions = value;
-			}
-		}
-
-		#endregion
-
-		#region Methods
-
-		protected override Task<BlameFile> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.State.IsFalse(IsDisposed, "BlameFileBinding is disposed.");
-
-			BlameViewer.Panels.Clear();
-			BlameViewer.Panels.Add(_progressPanel);
-			return BlameSource.GetBlameAsync(BlameOptions, progress, cancellationToken);
-		}
-
-		protected override void OnFetchCompleted(BlameFile blameFile)
-		{
-			Assert.IsNotNull(blameFile);
-
-			if(IsDisposed || BlameViewer.IsDisposed)
-			{
-				return;
-			}
-
-			BlameViewer.Panels.Clear();
-			BlameViewer.Panels.Add(new BlameFilePanel(BlameSource.Repository, blameFile));
-		}
-
-		protected override void OnFetchFailed(Exception exception)
-		{
-			if(IsDisposed || BlameViewer.IsDisposed)
-			{
-				return;
-			}
-
-			BlameViewer.Panels.Clear();
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!BlameViewer.IsDisposed)
-				{
-					BlameViewer.Panels.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
+		Progress = _progressPanel.ProgressMonitor;
 	}
+
+	#endregion
+
+	#region Properties
+
+	public IBlameSource BlameSource { get; }
+
+	public BlameViewer BlameViewer { get; }
+
+	public BlameOptions BlameOptions
+	{
+		get => _blameOptions;
+		set
+		{
+			Verify.Argument.IsNotNull(value);
+
+			_blameOptions = value;
+		}
+	}
+
+	#endregion
+
+	#region Methods
+
+	protected override Task<BlameFile> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(IsDisposed, "BlameFileBinding is disposed.");
+
+		BlameViewer.Panels.Clear();
+		BlameViewer.Panels.Add(_progressPanel);
+		return BlameSource.GetBlameAsync(BlameOptions, progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(BlameFile blameFile)
+	{
+		Assert.IsNotNull(blameFile);
+
+		if(IsDisposed || BlameViewer.IsDisposed)
+		{
+			return;
+		}
+
+		BlameViewer.Panels.Clear();
+		BlameViewer.Panels.Add(new BlameFilePanel(BlameSource.Repository, blameFile));
+	}
+
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(IsDisposed || BlameViewer.IsDisposed)
+		{
+			return;
+		}
+
+		BlameViewer.Panels.Clear();
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(!BlameViewer.IsDisposed)
+			{
+				BlameViewer.Panels.Clear();
+			}
+		}
+		base.Dispose(disposing);
+	}
+
+	#endregion
 }

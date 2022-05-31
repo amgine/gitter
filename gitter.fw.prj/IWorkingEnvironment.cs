@@ -18,74 +18,73 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+using gitter.Framework.Services;
+using gitter.Framework.Controls;
+
+/// <summary>GUI Working Environment.</summary>
+public interface IWorkingEnvironment : ISynchronizeInvoke
 {
-	using System;
-	using System.ComponentModel;
-	using System.Collections.Generic;
-	using System.Windows.Forms;
+	Form MainForm { get; }
 
-	using gitter.Framework.Services;
-	using gitter.Framework.Controls;
+	DpiBindings MainFormDpiBindings { get; }
 
-	/// <summary>GUI Working Environment.</summary>
-	public interface IWorkingEnvironment : ISynchronizeInvoke
-	{
-		Form MainForm { get; }
+	string RecentRepositoryPath { get; }
 
-		DpiBindings MainFormDpiBindings { get; }
-
-		string RecentRepositoryPath { get; }
-
-		RepositoryManagerService RepositoryManagerService { get; }
+	RepositoryManagerService RepositoryManagerService { get; }
 
 
-		IEnumerable<IRepositoryProvider> RepositoryProviders { get; }
+	IEnumerable<IRepositoryProvider> RepositoryProviders { get; }
 
-		T GetRepositoryProvider<T>() where T : class, IRepositoryProvider;
+	T GetRepositoryProvider<T>() where T : class, IRepositoryProvider;
 
-		IEnumerable<IRepositoryServiceProvider> IssueTrackerProviders { get; }
+	IEnumerable<IRepositoryServiceProvider> IssueTrackerProviders { get; }
 
-		IEnumerable<IRepositoryServiceProvider> ActiveIssueTrackerProviders { get; }
+	IEnumerable<IRepositoryServiceProvider> ActiveIssueTrackerProviders { get; }
 
-		bool TryLoadIssueTracker(IRepositoryServiceProvider provider);
-
-
-		ViewDockService ViewDockService { get; }
-
-		INotificationService NotificationService { get; }
+	bool TryLoadIssueTracker(IRepositoryServiceProvider provider);
 
 
-		IRepositoryProvider FindProviderForDirectory(string workingDirectory);
+	ViewDockService ViewDockService { get; }
 
-		IRepositoryProvider ActiveRepositoryProvider { get; }
-
-		IRepository ActiveRepository { get; }
-
-		bool OpenRepository(string path);
-
-		void CloseRepository();
+	INotificationService NotificationService { get; }
 
 
-		void ProvideMainMenuItem(ToolStripMenuItem item);
+	IRepositoryProvider FindProviderForDirectory(string workingDirectory);
 
-		void ProvideViewMenuItem(ToolStripMenuItem item);
+	IRepositoryProvider ActiveRepositoryProvider { get; }
 
-		void ProvideRepositoryExplorerItem(CustomListBoxItem item);
+	IRepository ActiveRepository { get; }
 
-		void ProvideToolbar(ToolStrip toolStrip);
+	bool OpenRepository(string path);
 
-		void ProvideStatusBarObject(ToolStripItem item, bool leftAlign);
+	void CloseRepository();
 
 
-		void RemoveMainMenuItem(ToolStripMenuItem item);
+	void ProvideMainMenuItem(ToolStripMenuItem item);
 
-		void RemoveViewMenuItem(ToolStripMenuItem item);
+	void ProvideViewMenuItem(ToolStripMenuItem item);
 
-		void RemoveRepositoryExplorerItem(CustomListBoxItem item);
+	void ProvideRepositoryExplorerItem(CustomListBoxItem item);
 
-		void RemoveToolbar(ToolStrip toolStrip);
+	void ProvideToolbar(ToolStrip toolStrip);
 
-		void RemoveStatusBarObject(ToolStripItem item);
-	}
+	void ProvideStatusBarObject(ToolStripItem item, bool leftAlign);
+
+
+	void RemoveMainMenuItem(ToolStripMenuItem item);
+
+	void RemoveViewMenuItem(ToolStripMenuItem item);
+
+	void RemoveRepositoryExplorerItem(CustomListBoxItem item);
+
+	void RemoveToolbar(ToolStrip toolStrip);
+
+	void RemoveStatusBarObject(ToolStripItem item);
 }

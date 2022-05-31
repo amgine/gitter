@@ -18,71 +18,72 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+
+[DesignerCategory("")]
+public abstract class CustomToolTip : ToolTip
 {
-	using System;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
-	using System.Windows.Forms;
+	protected const int VerticalMargin = 2;
+	protected const int VerticalSpacing = 3;
+	protected const int HorizontalMargin = 5;
 
-	public abstract class CustomToolTip : ToolTip
+	protected CustomToolTip()
 	{
-		protected const int VerticalMargin = 2;
-		protected const int VerticalSpacing = 3;
-		protected const int HorizontalMargin = 5;
+		OwnerDraw = true;
+		Popup += PopupHandler;
+		Draw += DrawHandler;
+	}
 
-		protected CustomToolTip()
+	public abstract Size Measure(Control associatedControl);
+
+	private static void PopupHandler(object sender, PopupEventArgs e)
+	{
+		var toolTip = (CustomToolTip)sender;
+		e.ToolTipSize = toolTip.Measure(e.AssociatedControl);
+		toolTip.OnPopup(e);
+	}
+
+	private static void DrawHandler(object sender, DrawToolTipEventArgs e)
+	{
+		var toolTip = (CustomToolTip)sender;
+		var gx = e.Graphics;
+		using(var b = new LinearGradientBrush(e.Bounds,
+			Color.FromArgb(255, 255, 255),
+			Color.FromArgb(228, 229, 240),
+			LinearGradientMode.Vertical))
 		{
-			OwnerDraw = true;
-			Popup += PopupHandler;
-			Draw += DrawHandler;
+			gx.FillRectangle(b, e.Bounds);
 		}
-
-		public abstract Size Measure(Control associatedControl);
-
-		private static void PopupHandler(object sender, PopupEventArgs e)
+		using(var p = new Pen(Color.FromArgb(118, 118, 118)))
 		{
-			var toolTip = (CustomToolTip)sender;
-			e.ToolTipSize = toolTip.Measure(e.AssociatedControl);
-			toolTip.OnPopup(e);
+			gx.DrawRoundedRectangle(p, e.Bounds, 1);
 		}
+		gx.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+		gx.TextContrast = GraphicsUtility.TextContrast;
+		toolTip.OnPaint(e);
+	}
 
-		private static void DrawHandler(object sender, DrawToolTipEventArgs e)
-		{
-			var toolTip = (CustomToolTip)sender;
-			var gx = e.Graphics;
-			using(var b = new LinearGradientBrush(e.Bounds,
-				Color.FromArgb(255, 255, 255),
-				Color.FromArgb(228, 229, 240),
-				LinearGradientMode.Vertical))
-			{
-				gx.FillRectangle(b, e.Bounds);
-			}
-			using(var p = new Pen(Color.FromArgb(118, 118, 118)))
-			{
-				gx.DrawRoundedRectangle(p, e.Bounds, 1);
-			}
-			gx.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-			gx.TextContrast = GraphicsUtility.TextContrast;
-			toolTip.OnPaint(e);
-		}
+	protected virtual void OnPaint(DrawToolTipEventArgs e)
+	{
+	}
 
-		protected virtual void OnPaint(DrawToolTipEventArgs e)
-		{
-		}
+	protected virtual void OnPopup(PopupEventArgs e)
+	{
+	}
 
-		protected virtual void OnPopup(PopupEventArgs e)
-		{
-		}
+	public void Show(IWin32Window window, int x, int y)
+	{
+		Show("-", window, x, y);
+	}
 
-		public void Show(IWin32Window window, int x, int y)
-		{
-			Show("-", window, x, y);
-		}
-
-		public void Show(IWin32Window window, Point p)
-		{
-			Show("-", window, p.X, p.Y);
-		}
+	public void Show(IWin32Window window, Point p)
+	{
+		Show("-", window, p.X, p.Y);
 	}
 }

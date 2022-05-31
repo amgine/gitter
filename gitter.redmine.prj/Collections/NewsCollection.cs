@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,62 +18,61 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Globalization;
+using System.Xml;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+public sealed class NewsCollection : RedmineObjectsCache<News>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Linq;
-	using System.Globalization;
-	using System.Xml;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	public sealed class NewsCollection : RedmineObjectsCache<News>
+	internal NewsCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal NewsCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override News Create(int id)
-		{
-			return new News(Context, id);
-		}
+	protected override News Create(int id)
+	{
+		return new News(Context, id);
+	}
 
-		protected override News Create(XmlNode node)
-		{
-			return new News(Context, node);
-		}
+	protected override News Create(XmlNode node)
+	{
+		return new News(Context, node);
+	}
 
-		public LinkedList<News> Fetch(Project project)
-		{
-			Verify.Argument.IsNotNull(project, nameof(project));
+	public LinkedList<News> Fetch(Project project)
+	{
+		Verify.Argument.IsNotNull(project);
 
-			return Fetch(project.Id);
-		}
+		return Fetch(project.Id);
+	}
 
-		public LinkedList<News> Fetch(int projectId)
-		{
-			return Fetch(projectId.ToString(CultureInfo.InvariantCulture));
-		}
+	public LinkedList<News> Fetch(int projectId)
+	{
+		return Fetch(projectId.ToString(CultureInfo.InvariantCulture));
+	}
 
-		public LinkedList<News> Fetch(string projectId)
-		{
-			var url = string.Format(CultureInfo.InvariantCulture,
-				@"projects/{0}/news.xml", projectId);
-			return FetchItemsFromAllPages(url);
-		}
+	public LinkedList<News> Fetch(string projectId)
+	{
+		var url = string.Format(CultureInfo.InvariantCulture,
+			@"projects/{0}/news.xml", projectId);
+		return FetchItemsFromAllPages(url);
+	}
 
-		public Task<LinkedList<News>> FetchAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			var url = string.Format(CultureInfo.InvariantCulture,
-				@"projects/{0}/news.xml", projectId);
-			progress?.Report(new OperationProgress(Resources.StrsFetchingNews.AddEllipsis()));
-			return FetchItemsFromAllPagesAsync(url, cancellationToken);
-		}
+	public Task<LinkedList<News>> FetchAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		var url = string.Format(CultureInfo.InvariantCulture,
+			@"projects/{0}/news.xml", projectId);
+		progress?.Report(new OperationProgress(Resources.StrsFetchingNews.AddEllipsis()));
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

@@ -18,533 +18,519 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>
+/// Represents a substring, allowing to effectively manipulate its position
+/// without creating new <see cref="T:System.String"/> objects.
+/// </summary>
+public sealed class Substring : IEnumerable<char>
 {
-	using System;
-	using System.Collections.Generic;
+	#region Static
+
+	/// <summary>An empty substring.</summary>
+	public static readonly Substring Empty = new Substring(string.Empty);
+
+	#endregion
+
+	#region Data
+
+	private int _start;
+	private int _length;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Create <see cref="Substring"/>.</summary>
+	/// <param name="string">Base string.</param>
+	/// <param name="start">Substring start.</param>
+	/// <param name="end">Substring last character index.</param>
+	/// <returns>Created <see cref="Substring"/>.</returns>
+	public static Substring FromStartEnd(string @string, int start, int end)
+	{
+		return new Substring(@string, start, end - start + 1);
+	}
+
+	/// <summary>Create <see cref="Substring"/>.</summary>
+	/// <param name="string">Base string.</param>
+	public Substring(string @string)
+	{
+		Verify.Argument.IsNotNull(@string, nameof(@string));
+
+		String = @string;
+		_start = 0;
+		_length = @string.Length;
+	}
+
+	/// <summary>Create <see cref="Substring"/>.</summary>
+	/// <param name="string">Base string.</param>
+	/// <param name="start">Substring start.</param>
+	public Substring(string @string, int start)
+	{
+		Verify.Argument.IsNotNull(@string, nameof(@string));
+		Verify.Argument.IsValidIndex(start, @string.Length, nameof(start));
+
+		String = @string;
+		_start = start;
+		_length = @string.Length - start;
+	}
+
+	/// <summary>Create <see cref="Substring"/>.</summary>
+	/// <param name="string">Base string.</param>
+	/// <param name="start">Substring start.</param>
+	/// <param name="length">Substring length.</param>
+	public Substring(string @string, int start, int length)
+	{
+		Verify.Argument.IsNotNull(@string, nameof(@string));
+		Verify.Argument.IsValidIndex(start, @string.Length, nameof(start));
+		Verify.Argument.IsValidIndex(length, @string.Length - start + 1, nameof(length));
+
+		String = @string;
+		_start = start;
+		_length = length;
+	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary>Base string.</summary>
+	public string String { get; }
+
+	/// <summary>Substring start.</summary>
+	public int Start
+	{
+		get => _start;
+		set
+		{
+			Verify.Argument.IsValidIndex(0, value, String.Length - _length, nameof(value));
+
+			_start = value;
+		}
+	}
+
+	/// <summary>Substring length.</summary>
+	public int Length
+	{
+		get => _length;
+		set
+		{
+			Verify.Argument.IsValidIndex(0, value, String.Length - _start + 1, nameof(value));
+
+			_length = value;
+		}
+	}
+
+	/// <summary>Start character.</summary>
+	public char StartCharacter => String[_start];
+
+	/// <summary>Last character index.</summary>
+	public int End => _start + _length - 1;
+
+	/// <summary>Last character.</summary>
+	public char EndCharacter => String[_start + _length - 1];
+
+	/// <summary>Substring is empty.</summary>
+	public bool IsEmpty => _length == 0;
+
+	/// <summary>Get a character from this substring.</summary>
+	/// <param name="index">Character index.</param>
+	/// <returns>Character at position <paramref name="index"/>.</returns>
+	public char this[int index]
+	{
+		get
+		{
+			Verify.Argument.IsValidIndex(index, _length, nameof(index));
+
+			return String[_start + index];
+		}
+	}
+
+	#endregion
+
+	#region Public Methods
+
+	/// <summary>Reset substring to a new position.</summary>
+	/// <param name="start">Substring start.</param>
+	/// <param name="length">Substring length.</param>
+	public void SetInterval(int start, int length)
+	{
+		Verify.Argument.IsValidIndex(start, String.Length, nameof(start));
+		Verify.Argument.IsValidIndex(length, String.Length - start + 1, nameof(length));
+
+		_start = start;
+		_length = length;
+	}
+
+	/// <summary>Get substring of this <see cref="Substring"/>.</summary>
+	/// <param name="start">Start index.</param>
+	/// <returns>Created <see cref="Substring"/>.</returns>
+	public Substring GetSubstring(int start)
+	{
+		Verify.Argument.IsValidIndex(_start, start, _start + _length, nameof(start));
+
+		if(start == 0) return this;
+		int length = _length - start;
+		if(length == 0) return Empty;
+		return new Substring(String, _start + start, length);
+	}
+
+	/// <summary>Get substring of this <see cref="Substring"/>.</summary>
+	/// <param name="start">Start index.</param>
+	/// <param name="length">Substring length.</param>
+	/// <returns>Created <see cref="Substring"/>.</returns>
+	public Substring GetSubstring(int start, int length)
+	{
+		Verify.Argument.IsValidIndex(_start, start, _length, nameof(start));
+		Verify.Argument.IsValidIndex(length, _length - start + 1, nameof(length));
+
+		if(length == 0) return Empty;
+		if(start == 0 && length == _length) return this;
+		return new Substring(String, _start + start, length);
+	}
+
+	/// <summary>Find character <paramref name="value"/>.</summary>
+	/// <param name="value">Character to find.</param>
+	/// <returns>Character index or -1 if it was not found.</returns>
+	public int IndexOf(char value)
+	{
+		if(_length == 0) return -1;
+		return String.IndexOf(value, _start, _length);
+	}
+
+	/// <summary>Find string <paramref name="value"/>.</summary>
+	/// <param name="value">String to find.</param>
+	/// <returns>String starting index or -1 if it was not found.</returns>
+	public int IndexOf(string value)
+	{
+		Verify.Argument.IsNeitherNullNorEmpty(value);
+
+		if(_length < value.Length) return -1;
+		return String.IndexOf(value, _start, _length);
+	}
+
+	/// <summary>Find character <paramref name="value"/>.</summary>
+	/// <param name="value">Character to find.</param>
+	/// <param name="startIndex">Index to start from.</param>
+	/// <returns>Character index or -1 if it was not found.</returns>
+	public int IndexOf(char value, int startIndex)
+	{
+		Verify.Argument.IsValidIndex(startIndex, _length, nameof(startIndex));
+
+		if(_length == 0) return -1;
+		return String.IndexOf(value, _start + startIndex, _length - startIndex);
+	}
+
+	/// <summary>Find string <paramref name="value"/>.</summary>
+	/// <param name="value">String to find.</param>
+	/// <param name="startIndex">Index to start from.</param>
+	/// <returns>String starting index or -1 if it was not found.</returns>
+	public int IndexOf(string value, int startIndex)
+	{
+		Verify.Argument.IsNeitherNullNorEmpty(value);
+		Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, nameof(startIndex));
+
+		return String.IndexOf(value, _start + startIndex, _length - startIndex);
+	}
+
+	/// <summary>Find character <paramref name="value"/>.</summary>
+	/// <param name="value">Character to find.</param>
+	/// <param name="startIndex">Index to start from.</param>
+	/// <param name="count">Number of characters to examine.</param>
+	/// <returns>Character index or -1 if it was not found.</returns>
+	public int IndexOf(char value, int startIndex, int count)
+	{
+		Verify.Argument.IsValidIndex(startIndex, _length, nameof(startIndex));
+		Verify.Argument.IsValidIndex(count, _length - startIndex + 1, nameof(count));
+
+		if(_length == 0) return -1;
+		return String.IndexOf(value, _start + startIndex, count);
+	}
+
+	/// <summary>Find string <paramref name="value"/>.</summary>
+	/// <param name="value">Character to find.</param>
+	/// <param name="startIndex">Index to start from.</param>
+	/// <param name="count">Number of characters to examine.</param>
+	/// <returns>String index or -1 if it was not found.</returns>
+	public int IndexOf(string value, int startIndex, int count)
+	{
+		Verify.Argument.IsNeitherNullNorEmpty(value);
+		Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, nameof(startIndex));
+		Verify.Argument.IsValidIndex(count, _length - startIndex + 1, nameof(count));
+
+		if(count < value.Length) return -1;
+		return String.IndexOf(value, _start + startIndex, count);
+	}
+
+	/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
+	/// <param name="value">Character to look for at start.</param>
+	/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
+	public bool StartsWith(char value)
+	{
+		if(_length == 0) return false;
+		return String[_start] == value;
+	}
+
+	/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
+	/// <param name="value">String to look for at start.</param>
+	/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
+	public bool StartsWith(string value)
+	{
+		Verify.Argument.IsNotNull(value);
+
+		if(value.Length == 0) return true;
+		if(_length < value.Length) return false;
+		return String.IndexOf(value, _start, value.Length) != -1;
+	}
+
+	/// <summary>Checks if this <see cref="Substring"/> ends with <paramref name="value"/>.</summary>
+	/// <param name="value">Character to look for at the end.</param>
+	/// <returns>True if this <see cref="Substring"/> ends with <paramref name="value"/>.</returns>
+	public bool EndsWith(char value)
+	{
+		if(_length == 0) return false;
+		return String[_start + _length -1] == value;
+	}
+
+	/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
+	/// <param name="value">String to look for at start.</param>
+	/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
+	public bool EndsWith(string value)
+	{
+		Verify.Argument.IsNotNull(value);
+
+		if(value.Length == 0) return true;
+		if(_length < value.Length) return false;
+		return String.IndexOf(value, _start + _length - value.Length, value.Length) != -1;
+	}
+
+	#endregion
+
+	#region Overrides
 
 	/// <summary>
-	/// Represents a substring, allowing to effectively manipulate its position
-	/// without creating new <see cref="T:System.String"/> objects.
+	/// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
 	/// </summary>
-	public sealed class Substring : IEnumerable<char>
+	/// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
+	/// <returns>
+	///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
+	/// </returns>
+	public override bool Equals(object obj)
 	{
-		#region Static
-
-		/// <summary>An empty substring.</summary>
-		public static readonly Substring Empty = new Substring(string.Empty);
-
-		#endregion
-
-		#region Data
-
-		private int _start;
-		private int _length;
-
-		#endregion
-
-		#region .ctor
-
-		/// <summary>Create <see cref="Substring"/>.</summary>
-		/// <param name="string">Base string.</param>
-		/// <param name="start">Substring start.</param>
-		/// <param name="end">Substring last character index.</param>
-		/// <returns>Created <see cref="Substring"/>.</returns>
-		public static Substring FromStartEnd(string @string, int start, int end)
-		{
-			return new Substring(@string, start, end - start + 1);
-		}
-
-		/// <summary>Create <see cref="Substring"/>.</summary>
-		/// <param name="string">Base string.</param>
-		public Substring(string @string)
-		{
-			Verify.Argument.IsNotNull(@string, nameof(@string));
-
-			String = @string;
-			_start = 0;
-			_length = @string.Length;
-		}
-
-		/// <summary>Create <see cref="Substring"/>.</summary>
-		/// <param name="string">Base string.</param>
-		/// <param name="start">Substring start.</param>
-		public Substring(string @string, int start)
-		{
-			Verify.Argument.IsNotNull(@string, nameof(@string));
-			Verify.Argument.IsValidIndex(start, @string.Length, nameof(start));
-
-			String = @string;
-			_start = start;
-			_length = @string.Length - start;
-		}
-
-		/// <summary>Create <see cref="Substring"/>.</summary>
-		/// <param name="string">Base string.</param>
-		/// <param name="start">Substring start.</param>
-		/// <param name="length">Substring length.</param>
-		public Substring(string @string, int start, int length)
-		{
-			Verify.Argument.IsNotNull(@string, nameof(@string));
-			Verify.Argument.IsValidIndex(start, @string.Length, nameof(start));
-			Verify.Argument.IsValidIndex(length, @string.Length - start + 1, nameof(length));
-
-			String = @string;
-			_start = start;
-			_length = length;
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>Base string.</summary>
-		public string String { get; }
-
-		/// <summary>Substring start.</summary>
-		public int Start
-		{
-			get => _start;
-			set
-			{
-				Verify.Argument.IsValidIndex(0, value, String.Length - _length, nameof(value));
-
-				_start = value;
-			}
-		}
-
-		/// <summary>Substring length.</summary>
-		public int Length
-		{
-			get => _length;
-			set
-			{
-				Verify.Argument.IsValidIndex(0, value, String.Length - _start + 1, nameof(value));
-
-				_length = value;
-			}
-		}
-
-		/// <summary>Start character.</summary>
-		public char StartCharacter => String[_start];
-
-		/// <summary>Last character index.</summary>
-		public int End => _start + _length - 1;
-
-		/// <summary>Last character.</summary>
-		public char EndCharacter => String[_start + _length - 1];
-
-		/// <summary>Substring is empty.</summary>
-		public bool IsEmpty => _length == 0;
-
-		/// <summary>Get a character from this substring.</summary>
-		/// <param name="index">Character index.</param>
-		/// <returns>Character at position <paramref name="index"/>.</returns>
-		public char this[int index]
-		{
-			get
-			{
-				Verify.Argument.IsValidIndex(index, _length, nameof(index));
-
-				return String[_start + index];
-			}
-		}
-
-		#endregion
-
-		#region Public Methods
-
-		/// <summary>Reset substring to a new position.</summary>
-		/// <param name="start">Substring start.</param>
-		/// <param name="length">Substring length.</param>
-		public void SetInterval(int start, int length)
-		{
-			Verify.Argument.IsValidIndex(start, String.Length, nameof(start));
-			Verify.Argument.IsValidIndex(length, String.Length - start + 1, nameof(length));
-
-			_start = start;
-			_length = length;
-		}
-
-		/// <summary>Get substring of this <see cref="Substring"/>.</summary>
-		/// <param name="start">Start index.</param>
-		/// <returns>Created <see cref="Substring"/>.</returns>
-		public Substring GetSubstring(int start)
-		{
-			Verify.Argument.IsValidIndex(_start, start, _start + _length, nameof(start));
-
-			if(start == 0) return this;
-			int length = _length - start;
-			if(length == 0) return Empty;
-			return new Substring(String, _start + start, length);
-		}
-
-		/// <summary>Get substring of this <see cref="Substring"/>.</summary>
-		/// <param name="start">Start index.</param>
-		/// <param name="length">Substring length.</param>
-		/// <returns>Created <see cref="Substring"/>.</returns>
-		public Substring GetSubstring(int start, int length)
-		{
-			Verify.Argument.IsValidIndex(_start, start, _length, nameof(start));
-			Verify.Argument.IsValidIndex(length, _length - start + 1, nameof(length));
-
-			if(length == 0) return Empty;
-			if(start == 0 && length == _length) return this;
-			return new Substring(String, _start + start, length);
-		}
-
-		/// <summary>Find character <paramref name="value"/>.</summary>
-		/// <param name="value">Character to find.</param>
-		/// <returns>Character index or -1 if it was not found.</returns>
-		public int IndexOf(char value)
-		{
-			if(_length == 0) return -1;
-			return String.IndexOf(value, _start, _length);
-		}
-
-		/// <summary>Find string <paramref name="value"/>.</summary>
-		/// <param name="value">String to find.</param>
-		/// <returns>String starting index or -1 if it was not found.</returns>
-		public int IndexOf(string value)
-		{
-			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
-
-			if(_length < value.Length) return -1;
-			return String.IndexOf(value, _start, _length);
-		}
-
-		/// <summary>Find character <paramref name="value"/>.</summary>
-		/// <param name="value">Character to find.</param>
-		/// <param name="startIndex">Index to start from.</param>
-		/// <returns>Character index or -1 if it was not found.</returns>
-		public int IndexOf(char value, int startIndex)
-		{
-			Verify.Argument.IsValidIndex(startIndex, _length, nameof(startIndex));
-
-			if(_length == 0) return -1;
-			return String.IndexOf(value, _start + startIndex, _length - startIndex);
-		}
-
-		/// <summary>Find string <paramref name="value"/>.</summary>
-		/// <param name="value">String to find.</param>
-		/// <param name="startIndex">Index to start from.</param>
-		/// <returns>String starting index or -1 if it was not found.</returns>
-		public int IndexOf(string value, int startIndex)
-		{
-			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
-			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, nameof(startIndex));
-
-			return String.IndexOf(value, _start + startIndex, _length - startIndex);
-		}
-
-		/// <summary>Find character <paramref name="value"/>.</summary>
-		/// <param name="value">Character to find.</param>
-		/// <param name="startIndex">Index to start from.</param>
-		/// <param name="count">Number of characters to examine.</param>
-		/// <returns>Character index or -1 if it was not found.</returns>
-		public int IndexOf(char value, int startIndex, int count)
-		{
-			Verify.Argument.IsValidIndex(startIndex, _length, nameof(startIndex));
-			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, nameof(count));
-
-			if(_length == 0) return -1;
-			return String.IndexOf(value, _start + startIndex, count);
-		}
-
-		/// <summary>Find string <paramref name="value"/>.</summary>
-		/// <param name="value">Character to find.</param>
-		/// <param name="startIndex">Index to start from.</param>
-		/// <param name="count">Number of characters to examine.</param>
-		/// <returns>String index or -1 if it was not found.</returns>
-		public int IndexOf(string value, int startIndex, int count)
-		{
-			Verify.Argument.IsNeitherNullNorEmpty(value, nameof(value));
-			Verify.Argument.IsValidIndex(startIndex, _length - value.Length + 1, nameof(startIndex));
-			Verify.Argument.IsValidIndex(count, _length - startIndex + 1, nameof(count));
-
-			if(count < value.Length) return -1;
-			return String.IndexOf(value, _start + startIndex, count);
-		}
-
-		/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
-		/// <param name="value">Character to look for at start.</param>
-		/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
-		public bool StartsWith(char value)
-		{
-			if(_length == 0) return false;
-			return String[_start] == value;
-		}
-
-		/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
-		/// <param name="value">String to look for at start.</param>
-		/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
-		public bool StartsWith(string value)
-		{
-			Verify.Argument.IsNotNull(value, nameof(value));
-
-			if(value.Length == 0) return true;
-			if(_length < value.Length) return false;
-			return String.IndexOf(value, _start, value.Length) != -1;
-		}
-
-		/// <summary>Checks if this <see cref="Substring"/> ends with <paramref name="value"/>.</summary>
-		/// <param name="value">Character to look for at the end.</param>
-		/// <returns>True if this <see cref="Substring"/> ends with <paramref name="value"/>.</returns>
-		public bool EndsWith(char value)
-		{
-			if(_length == 0) return false;
-			return String[_start + _length -1] == value;
-		}
-
-		/// <summary>Checks if this <see cref="Substring"/> starts with <paramref name="value"/>.</summary>
-		/// <param name="value">String to look for at start.</param>
-		/// <returns>True if this <see cref="Substring"/> starts with <paramref name="value"/>.</returns>
-		public bool EndsWith(string value)
-		{
-			Verify.Argument.IsNotNull(value, nameof(value));
-
-			if(value.Length == 0) return true;
-			if(_length < value.Length) return false;
-			return String.IndexOf(value, _start + _length - value.Length, value.Length) != -1;
-		}
-
-		#endregion
-
-		#region Overrides
-
-		/// <summary>
-		/// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-		/// </summary>
-		/// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
-		/// <returns>
-		///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-		/// </returns>
-		public override bool Equals(object obj)
-		{
-			if(obj == null) return false;
-			var s = obj as Substring;
-			if(s == null) return false;
-			return _equals_non_null(this, s);
-		}
-
-		/// <summary>
-		/// Returns a hash code for this instance.
-		/// </summary>
-		/// <returns>
-		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-		/// </returns>
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="Substring"/>.</summary>
-		/// <returns><see cref="T:System.String"/> representation of this <see cref="Substring"/>.</returns>
-		public override string ToString()
-		{
-			return String.Substring(_start, _length);
-		}
-
-		#endregion
-
-		#region Private Methods
-
-		private static bool _equals(Substring substring1, Substring substring2)
-		{
-			if(substring1 == null)
-			{
-				if(substring2 == null) return true;
-				return false;
-			}
-			else
-			{
-				if(substring2 == null) return false;
-				return _equals_non_null(substring1, substring2);
-			}
-		}
-
-		private static bool _equals(Substring substring1, string substring2)
-		{
-			if(substring1 == null)
-			{
-				if(substring2 == null) return true;
-				return false;
-			}
-			else
-			{
-				if(substring2 == null) return false;
-				return _equals_non_null(substring1, substring2);
-			}
-		}
-
-		private static bool _equals_non_null(Substring substring1, Substring substring2)
-		{
-			if(object.ReferenceEquals(substring1, substring2))
-			{
-				return true;
-			}
-			if(substring1._length == substring2._length)
-			{
-				if(object.ReferenceEquals(substring1.String, substring2.String) &&
-					substring1._start == substring2._start)
-				{
-					return true;
-				}
-				var end = substring1._start + substring1._length;
-				for(int i = substring1._start, j = substring2._start; i < end; ++i, ++j)
-				{
-					if(substring1.String[i] != substring2.String[j])
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-			return false;
-		}
-
-		private static bool _equals_non_null(Substring substring1, string substring2)
-		{
-			if(object.ReferenceEquals(substring1, substring2))
-			{
-				return true;
-			}
-			if(substring1._length == substring2.Length)
-			{
-				if(object.ReferenceEquals(substring1.String, substring2) &&
-					substring1._start == 0)
-				{
-					return true;
-				}
-				var end = substring1._start + substring1._length;
-				for(int i = substring1._start, j = 0; i < end; ++i, ++j)
-				{
-					if(substring1.String[i] != substring2[j])
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-			return false;
-		}
-
-		#endregion
-
-		#region Operators
-
-		/// <summary>Convert <see cref="Substring"/> to a <see cref="T:System.String"/>.</summary>
-		/// <param name="substring"><see cref="Substring"/> to convert.</param>
-		/// <returns>Corresponding <see cref="T:System.String"/>.</returns>
-		public static implicit operator string(Substring substring)
-		{
-			return substring.String.Substring(substring._start, substring._length);
-		}
-
-		public static bool operator ==(Substring substring1, Substring substring2)
-		{
-			return _equals(substring1, substring2);
-		}
-
-		public static bool operator !=(Substring substring1, Substring substring2)
-		{
-			return !_equals(substring1, substring2);
-		}
-
-		public static bool operator ==(Substring substring1, string substring2)
-		{
-			return _equals(substring1, substring2);
-		}
-
-		public static bool operator !=(Substring substring1, string substring2)
-		{
-			return !_equals(substring1, substring2);
-		}
-
-		public static bool operator ==(string substring1, Substring substring2)
-		{
-			return _equals(substring2, substring1);
-		}
-
-		public static bool operator !=(string substring1, Substring substring2)
-		{
-			return !_equals(substring2, substring1);
-		}
-
-		#endregion
-
-		#region IEnumerable<char> Members
-
-		public struct Enumerator : IEnumerator<char>
-		{
-			private readonly Substring _substring;
-			private readonly string _string;
-			private int _maxPosition;
-			private int _position;
-			private char _current;
-
-			internal Enumerator(Substring substring)
-			{
-				Assert.IsNotNull(substring);
-
-				_substring = substring;
-				_string = substring.String;
-				_position = substring._start;
-				_maxPosition = _position + substring._length;
-				_current = _string[_position];
-			}
-
-			public char Current => _current;
-
-			object System.Collections.IEnumerator.Current => _current;
-
-			public bool MoveNext()
-			{
-				++_position;
-				if(_position < _maxPosition)
-				{
-					_current = _string[_position];
-					return true;
-				}
-				return false;
-			}
-
-			public void Reset()
-			{
-				_position = _substring._start;
-				_current = _string[_position];
-			}
-
-			public void Dispose() { }
-		}
-
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator{char}"/> object that can be used to iterate through the collection.
-		/// </returns>
-		public Enumerator GetEnumerator()
-			=> new Enumerator(this);
-
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator{char}"/> object that can be used to iterate through the collection.
-		/// </returns>
-		IEnumerator<char> IEnumerable<char>.GetEnumerator()
-			=> new Enumerator(this);
-
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-		/// </returns>
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			=> new Enumerator(this);
-
-		#endregion
+		if(obj == null) return false;
+		var s = obj as Substring;
+		if(s == null) return false;
+		return _equals_non_null(this, s);
 	}
+
+	/// <summary>
+	/// Returns a hash code for this instance.
+	/// </summary>
+	/// <returns>
+	/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+	/// </returns>
+	public override int GetHashCode()
+	{
+		return base.GetHashCode();
+	}
+
+	/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="Substring"/>.</summary>
+	/// <returns><see cref="T:System.String"/> representation of this <see cref="Substring"/>.</returns>
+	public override string ToString()
+	{
+		return String.Substring(_start, _length);
+	}
+
+	#endregion
+
+	#region Private Methods
+
+	private static bool _equals(Substring substring1, Substring substring2)
+	{
+		if(substring1 == null)
+		{
+			if(substring2 == null) return true;
+			return false;
+		}
+		else
+		{
+			if(substring2 == null) return false;
+			return _equals_non_null(substring1, substring2);
+		}
+	}
+
+	private static bool _equals(Substring substring1, string substring2)
+	{
+		if(substring1 == null)
+		{
+			if(substring2 == null) return true;
+			return false;
+		}
+		else
+		{
+			if(substring2 == null) return false;
+			return _equals_non_null(substring1, substring2);
+		}
+	}
+
+	private static bool _equals_non_null(Substring substring1, Substring substring2)
+	{
+		if(object.ReferenceEquals(substring1, substring2))
+		{
+			return true;
+		}
+		if(substring1._length == substring2._length)
+		{
+			if(object.ReferenceEquals(substring1.String, substring2.String) &&
+				substring1._start == substring2._start)
+			{
+				return true;
+			}
+			var end = substring1._start + substring1._length;
+			for(int i = substring1._start, j = substring2._start; i < end; ++i, ++j)
+			{
+				if(substring1.String[i] != substring2.String[j])
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private static bool _equals_non_null(Substring substring1, string substring2)
+	{
+		if(object.ReferenceEquals(substring1, substring2))
+		{
+			return true;
+		}
+		if(substring1._length == substring2.Length)
+		{
+			if(object.ReferenceEquals(substring1.String, substring2) &&
+				substring1._start == 0)
+			{
+				return true;
+			}
+			var end = substring1._start + substring1._length;
+			for(int i = substring1._start, j = 0; i < end; ++i, ++j)
+			{
+				if(substring1.String[i] != substring2[j])
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	#endregion
+
+	#region Operators
+
+	/// <summary>Convert <see cref="Substring"/> to a <see cref="T:System.String"/>.</summary>
+	/// <param name="substring"><see cref="Substring"/> to convert.</param>
+	/// <returns>Corresponding <see cref="T:System.String"/>.</returns>
+	public static implicit operator string(Substring substring)
+	{
+		return substring.String.Substring(substring._start, substring._length);
+	}
+
+	public static bool operator ==(Substring substring1, Substring substring2)
+	{
+		return _equals(substring1, substring2);
+	}
+
+	public static bool operator !=(Substring substring1, Substring substring2)
+	{
+		return !_equals(substring1, substring2);
+	}
+
+	public static bool operator ==(Substring substring1, string substring2)
+	{
+		return _equals(substring1, substring2);
+	}
+
+	public static bool operator !=(Substring substring1, string substring2)
+	{
+		return !_equals(substring1, substring2);
+	}
+
+	public static bool operator ==(string substring1, Substring substring2)
+	{
+		return _equals(substring2, substring1);
+	}
+
+	public static bool operator !=(string substring1, Substring substring2)
+	{
+		return !_equals(substring2, substring1);
+	}
+
+	#endregion
+
+	#region IEnumerable<char> Members
+
+	public struct Enumerator : IEnumerator<char>
+	{
+		private readonly Substring _substring;
+		private readonly string _string;
+		private int _maxPosition;
+		private int _position;
+		private char _current;
+
+		internal Enumerator(Substring substring)
+		{
+			Assert.IsNotNull(substring);
+
+			_substring = substring;
+			_string = substring.String;
+			_position = substring._start;
+			_maxPosition = _position + substring._length;
+			_current = _string[_position];
+		}
+
+		public char Current => _current;
+
+		object System.Collections.IEnumerator.Current => _current;
+
+		public bool MoveNext()
+		{
+			++_position;
+			if(_position < _maxPosition)
+			{
+				_current = _string[_position];
+				return true;
+			}
+			return false;
+		}
+
+		public void Reset()
+		{
+			_position = _substring._start;
+			_current = _string[_position];
+		}
+
+		public void Dispose() { }
+	}
+
+	/// <summary>
+	/// Returns an enumerator that iterates through a collection.
+	/// </summary>
+	/// <returns>
+	/// An <see cref="T:System.Collections.IEnumerator{char}"/> object that can be used to iterate through the collection.
+	/// </returns>
+	public Enumerator GetEnumerator() => new(this);
+
+	/// <inheritdoc/>
+	IEnumerator<char> IEnumerable<char>.GetEnumerator() => GetEnumerator();
+
+	/// <inheritdoc/>
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+
+	#endregion
 }

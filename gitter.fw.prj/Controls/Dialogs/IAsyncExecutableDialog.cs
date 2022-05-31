@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Framework
-{
-	using System;
-	using System.Threading.Tasks;
+namespace gitter.Framework;
 
-	/// <summary>Interface for dialog that can perform requested operation itself.</summary>
-	public interface IAsyncExecutableDialog
-	{
-		/// <summary>Execute dialog associated action.</summary>
-		/// <returns><c>true</c>, if action succeeded</returns>
-		Task<bool> ExecuteAsync();
-	}
+using System;
+using System.Threading.Tasks;
+
+/// <summary>Interface for dialog that can perform requested operation itself.</summary>
+public interface IAsyncExecutableDialog
+{
+	/// <summary>Execute dialog associated action.</summary>
+	/// <returns><c>true</c>, if action succeeded</returns>
+	Task<bool> ExecuteAsync();
 }

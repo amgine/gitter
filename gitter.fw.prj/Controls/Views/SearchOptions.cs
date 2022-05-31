@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
-{
-	/// <summary>Search options.</summary>
-	public class SearchOptions
-	{
-		/// <summary>Search request text.</summary>
-		public string Text { get; set; }
+namespace gitter.Framework.Controls;
 
-		/// <summary>Gets or sets flag to match case when searching.</summary>
-		public bool MatchCase { get; set; }
-	}
+/// <summary>Search options.</summary>
+public class SearchOptions
+{
+	/// <summary>Search request text.</summary>
+	public string Text { get; set; }
+
+	/// <summary>Gets or sets flag to match case when searching.</summary>
+	public bool MatchCase { get; set; }
 }

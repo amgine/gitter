@@ -18,224 +18,236 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Threading;
+
+using Autofac;
+
+using gitter.Framework.Options;
+using gitter.Framework.Services;
+using gitter.Framework.Controls;
+using gitter.Native;
+using System.Runtime.InteropServices;
+
+/// <summary>gitter application class.</summary>
+public static class GitterApplication
 {
-	using System;
-	using System.Linq;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-	using System.Threading;
+	private static FormEx _mainForm;
+	private static IWorkingEnvironment _environment;
 
-	using gitter.Framework.Options;
-	using gitter.Framework.Services;
-	using gitter.Framework.Controls;
-	using gitter.Native;
+	private static ITextRenderer _textRenderer;
 
-	/// <summary>gitter application class.</summary>
-	public static class GitterApplication
+	private static IGitterStyle _defaultStyle;
+	private static IGitterStyle _style;
+	private static IGitterStyle _styleOnNextStartup;
+
+	/// <summary>Returns the selected text renderer for application.</summary>
+	public static ITextRenderer TextRenderer
 	{
-		private static FormEx _mainForm;
-		private static IWorkingEnvironment _environment;
-
-		private static SelectableFontManager _fontManager;
-		private static ConfigurationService _configurationService;
-		private static IntegrationFeatures _integrationFeatures;
-
-		private static readonly ITextRenderer _gdiPlusTextRenderer = new GdiPlusTextRenderer();
-		private static readonly ITextRenderer _gdiTextRenderer = new GdiTextRenderer();
-		private static ITextRenderer _defaultTextRenderer = _gdiPlusTextRenderer;
-
-		private static readonly IMessageBoxService _messageBoxService = new CustomMessageBoxService();
-
-		private static readonly IGitterStyle[] _styles =
-			new IGitterStyle[]
-			{
-				_defaultStyle = new MSVS2010Style(),
-				//new MSVS2012LightStyle(),
-				new MSVS2012DarkStyle(),
-			};
-
-		private static IGitterStyle _defaultStyle;
-		private static IGitterStyle _style;
-		private static IGitterStyle _styleOnNextStartup;
-
-		/// <summary>Returns the selected text renderer for application.</summary>
-		public static ITextRenderer TextRenderer
+		get => _textRenderer;
+		set
 		{
-			get => _defaultTextRenderer;
-			set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
+			Verify.Argument.IsNotNull(value);
 
-				_defaultTextRenderer = value;
+			_textRenderer = value;
+		}
+	}
+
+	public static IEnumerable<IGitterStyle> Styles { get; } =
+		new IGitterStyle[]
+		{
+			_defaultStyle = new MSVS2010Style(),
+			//new MSVS2012LightStyle(),
+			new MSVS2012DarkStyle(),
+		};
+
+	public static IGitterStyle DefaultStyle => _defaultStyle;
+
+	public static IGitterStyle Style
+	{
+		get
+		{
+			if(System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+			{
+				return _defaultStyle;
+			}
+			return _style;
+		}
+		private set
+		{
+			Verify.Argument.IsNotNull(value);
+
+			if(_style != value)
+			{
+				ToolStripManager.Renderer		= value.ToolStripRenderer;
+				ViewManager.Renderer			= value.ViewRenderer;
+				CustomListBoxManager.Renderer	= value.ListBoxRenderer;
+				_style = value;
 			}
 		}
+	}
 
-		public static IEnumerable<IGitterStyle> Styles => _styles;
-
-		public static IGitterStyle DefaultStyle => _defaultStyle;
-
-		public static IGitterStyle Style
+	public static IGitterStyle StyleOnNextStartup
+	{
+		get => _styleOnNextStartup;
+		set
 		{
-			get
-			{
-				if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
-				{
-					return _defaultStyle;
-				}
-				return _style;
-			}
-			private set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
+			Verify.Argument.IsNotNull(value);
 
-				if(_style != value)
-				{
-					ToolStripManager.Renderer		= value.ToolStripRenderer;
-					ViewManager.Renderer			= value.ViewRenderer;
-					CustomListBoxManager.Renderer	= value.ListBoxRenderer;
-					_style = value;
-				}
-			}
+			_styleOnNextStartup = value;
 		}
+	}
 
-		public static IGitterStyle StyleOnNextStartup
+	public static ITextRenderer GdiTextRenderer { get; } = new GdiTextRenderer();
+
+	public static ITextRenderer GdiPlusTextRenderer { get; } = new GdiPlusTextRenderer();
+
+	public static IMessageBoxService MessageBoxService { get; } = new CustomMessageBoxService();
+
+	public static IWorkingEnvironment WorkingEnvironment => _environment;
+
+	public static FormEx MainForm => _mainForm;
+
+	public static SelectableFontManager FontManager { get; private set; }
+
+	public static ConfigurationService ConfigurationService { get; private set; }
+
+	public static IntegrationFeatures IntegrationFeatures { get; private set; }
+
+	private static void SetupDefaultExceptionHandling()
+	{
+		if(!System.Diagnostics.Debugger.IsAttached)
 		{
-			get => _styleOnNextStartup;
-			set
-			{
-				Verify.Argument.IsNotNull(value, nameof(value));
-
-				_styleOnNextStartup = value;
-			}
+			Application.ThreadException += OnThreadException;
+			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 		}
+	}
 
-		public static ITextRenderer GdiTextRenderer => _gdiTextRenderer;
-
-		public static ITextRenderer GdiPlusTextRenderer => _gdiPlusTextRenderer;
-
-		public static IMessageBoxService MessageBoxService => _messageBoxService;
-
-		public static IWorkingEnvironment WorkingEnvironment => _environment;
-
-		public static FormEx MainForm => _mainForm;
-
-		public static SelectableFontManager FontManager => _fontManager;
-
-		public static ConfigurationService ConfigurationService => _configurationService;
-
-		public static IntegrationFeatures IntegrationFeatures => _integrationFeatures;
-
-		private static void SetupDefaultExceptionHandling()
+	private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+	{
+		if(e.ExceptionObject is Exception exc)
 		{
-			if(!System.Diagnostics.Debugger.IsAttached)
-			{
-				Application.ThreadException += OnThreadException;
-				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-			}
-		}
-
-		private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-		{
-			if(e.ExceptionObject is Exception exc)
-			{
-				LoggingService.Global.Error(exc, "Application error");
-				try
-				{
-					using var dlg = new ExceptionDialog(exc);
-					dlg.Run(null);
-				}
-				catch
-				{
-				}
-			}
-			else
-			{
-				LoggingService.Global.Error("Unknown application error");
-			}
-		}
-
-		private static void OnThreadException(object sender, ThreadExceptionEventArgs e)
-		{
-			var exception = e.Exception;
-			LoggingService.Global.Error(exception, "Application error");
+			LoggingService.Global.Error(exc, "Application error");
 			try
 			{
-				using var dlg = new ExceptionDialog(exception);
+				using var dlg = new ExceptionDialog(exc);
 				dlg.Run(null);
 			}
 			catch
 			{
 			}
 		}
-
-		private static void SelectStyle()
+		else
 		{
-			var styleName = _configurationService.GuiSection.GetValue<string>("Style", string.Empty);
-			var style = Styles.FirstOrDefault(s => s.Name == styleName);
-			style ??= Styles.First();
-			_styleOnNextStartup = style;
-			Style = style;
+			LoggingService.Global.Error("Unknown application error");
+		}
+	}
+
+	private static void OnThreadException(object sender, ThreadExceptionEventArgs e)
+	{
+		var exception = e.Exception;
+		LoggingService.Global.Error(exception, "Application error");
+		try
+		{
+			using var dlg = new ExceptionDialog(exception);
+			dlg.Run(null);
+		}
+		catch
+		{
+		}
+	}
+
+	private static void SelectStyle()
+	{
+		var styleName = ConfigurationService.GuiSection.GetValue<string>("Style", string.Empty);
+		var style = Styles.FirstOrDefault(s => s.Name == styleName);
+		style ??= Styles.First();
+		_styleOnNextStartup = style;
+		Style = style;
+	}
+
+	private static IContainer CreateContainer(Action<ContainerBuilder> configuration)
+	{
+		Assert.IsNotNull(configuration);
+
+		var builder = new ContainerBuilder();
+		configuration(builder);
+		return builder.Build();
+	}
+
+	public static void Run(Action<ContainerBuilder> configuration)
+	{
+		_textRenderer = GdiPlusTextRenderer;
+
+		using var container = CreateContainer(configuration);
+
+		if(Utility.IsOSWindows7OrNewer)
+		{
+			// for win7 we can provide explicit user id for better shell integration
+			_ = Shell32.SetCurrentProcessExplicitAppUserModelID("gitter.app");
 		}
 
-		public static void Run<T>()
-			where T: FormEx, IWorkingEnvironment, new()
-		{
-			if(Utility.IsOSWindows7OrNewer)
-			{
-				// for win7 we can provide explicit user id for better shell integration
-				Shell32.SetCurrentProcessExplicitAppUserModelID("gitter.app");
-			}
+		LoggingService.RegisterAppender(LogListBoxAppender.Instance);
 
-			LoggingService.RegisterAppender(LogListBoxAppender.Instance);
-
-			LoggingService.Global.Info("Application started");
-
-			_configurationService = new ConfigurationService();
-			_fontManager = new SelectableFontManager(_configurationService.GlobalSection.GetCreateSection("Fonts"));
-			_integrationFeatures = new IntegrationFeatures();
-			GlobalOptions.LoadFrom(_configurationService.GlobalSection);
-
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
-
-			SelectStyle();
-
-			if(Utility.IsOSWindows7OrNewer)
-			{
-				Utility.EnableWin7TaskbarSupport();
-			}
-			try
-			{
-#if !DEBUG
-				SetupDefaultExceptionHandling();
+		var log = LoggingService.Global;
+		log.Info($"Application started");
+#if NETCOREAPP
+		log.Info($"Framework: {RuntimeInformation.FrameworkDescription} ({RuntimeInformation.RuntimeIdentifier})");
+#else
+		log.Info($"Framework: {RuntimeInformation.FrameworkDescription}");
 #endif
-				using(_mainForm = new T())
-				{
-					_environment = (IWorkingEnvironment)_mainForm;
 
-					Application.Run(_mainForm);
+		ConfigurationService = new ConfigurationService();
+		FontManager = new SelectableFontManager(ConfigurationService.GlobalSection.GetCreateSection("Fonts"));
+		IntegrationFeatures = new IntegrationFeatures();
+		GlobalOptions.LoadFrom(ConfigurationService.GlobalSection);
 
-					_environment = null;
-				}
-			}
-			finally
-			{
-				if(Utility.IsOSWindows7OrNewer)
-				{
-					Utility.DisableWin7TaskbarSupport();
-				}
-				_mainForm = null;
-			}
+#if NETCOREAPP
+		Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+#endif
+		Application.EnableVisualStyles();
+		Application.SetCompatibleTextRenderingDefault(false);
+		Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
 
-			GlobalOptions.SaveTo(_configurationService.GlobalSection);
-			_configurationService.GuiSection.SetValue<string>("Style", StyleOnNextStartup.Name);
-			_fontManager.Save();
-			_configurationService.Save();
+		SelectStyle();
 
-			LoggingService.Global.Info("Application exited");
+		if(Utility.IsOSWindows7OrNewer)
+		{
+			Utility.EnableWin7TaskbarSupport();
 		}
+		try
+		{
+#if !DEBUG
+			SetupDefaultExceptionHandling();
+#endif
+			using(_mainForm = container.ResolveNamed<FormEx>("main"))
+			{
+				_environment = (IWorkingEnvironment)_mainForm;
+
+				Application.Run(_mainForm);
+
+				_environment = null;
+			}
+		}
+		finally
+		{
+			if(Utility.IsOSWindows7OrNewer)
+			{
+				Utility.DisableWin7TaskbarSupport();
+			}
+			_mainForm = null;
+		}
+
+		GlobalOptions.SaveTo(ConfigurationService.GlobalSection);
+		ConfigurationService.GuiSection.SetValue<string>("Style", StyleOnNextStartup.Name);
+		FontManager.Save();
+		ConfigurationService.Save();
+
+		LoggingService.Global.Info("Application exited");
 	}
 }

@@ -18,31 +18,29 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+
+public sealed class GuiCommand : INamedObject
 {
-	using System;
-	using System.Drawing;
+	private readonly Action<IWorkingEnvironment> _execute;
 
-	public sealed class GuiCommand : INamedObject
+	public GuiCommand(string name, string displayName, IImageProvider image, Action<IWorkingEnvironment> execute)
 	{
-		private readonly Action<IWorkingEnvironment> _execute;
-
-		public GuiCommand(string name, string displayName, Image image, Action<IWorkingEnvironment> execute)
-		{
-			Name        = name;
-			DisplayName = displayName;
-			Image       = image;
-			_execute    = execute;
-		}
-
-		public string Name { get; }
-
-		public string DisplayName { get; }
-
-		public Image Image { get; }
-
-		public bool IsEnabled { get; set; } = true;
-
-		public void Execute(IWorkingEnvironment env) => _execute(env);
+		Name        = name;
+		DisplayName = displayName;
+		Image       = image;
+		_execute    = execute;
 	}
+
+	public string Name { get; }
+
+	public string DisplayName { get; }
+
+	public IImageProvider Image { get; }
+
+	public bool IsEnabled { get; set; } = true;
+
+	public void Execute(IWorkingEnvironment env) => _execute(env);
 }

@@ -18,110 +18,109 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.IO;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+static class TreeExtensions
 {
-	using System;
-	using System.IO;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Services;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	static class TreeExtensions
+	public static string ExtractBlobToFile(this Tree tree, string blobPath)
 	{
-		public static string ExtractBlobToFile(this Tree tree, string blobPath)
+		Verify.Argument.IsNotNull(tree);
+		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
+
+		string fileName = null;
+		using(var dlg = new SaveFileDialog()
 		{
-			Verify.Argument.IsNotNull(tree, nameof(tree));
-			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
-
-			string fileName = null;
-			using(var dlg = new SaveFileDialog()
-			{
-				FileName = Path.GetFileName(blobPath),
-			})
-			{
-				if(dlg.ShowDialog() != DialogResult.OK)
-				{
-					return null;
-				}
-				fileName = dlg.FileName;
-			}
-			return ExtractBlobToFile(tree, blobPath, fileName)
-				? fileName
-				: default;
-		}
-
-		public static bool ExtractBlobToFile(this Tree tree, string blobPath, string fileName)
+			FileName = Path.GetFileName(blobPath),
+		})
 		{
-			Verify.Argument.IsNotNull(tree, nameof(tree));
-			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
-			Verify.Argument.IsNeitherNullNorWhitespace(fileName, nameof(fileName));
-
-			byte[] bytes;
-			try
+			if(dlg.ShowDialog() != DialogResult.OK)
 			{
-				bytes = tree.GetBlobContent(blobPath);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					null,
-					exc.Message,
-					Resources.ErrfFailedToQueryBlob.UseAsFormat(blobPath),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			try
-			{
-				using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
-				fs.Write(bytes, 0, bytes.Length);
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-				GitterApplication.MessageBoxService.Show(
-					null,
-					exc.Message,
-					Resources.ErrfFailedToSaveFile.UseAsFormat(fileName),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-				return false;
-			}
-			return true;
-		}
-
-		public static string ExtractBlobToTemporaryFile(this Tree tree, string blobPath)
-		{
-			Verify.Argument.IsNotNull(tree, nameof(tree));
-			Verify.Argument.IsNeitherNullNorWhitespace(blobPath, nameof(blobPath));
-
-			var path = Path.Combine(Path.GetTempPath(), "gitter", tree.TreeHash);
-			var fileName = Path.Combine(path, blobPath);
-			byte[] bytes;
-			try
-			{
-				bytes = tree.GetBlobContent(blobPath);
-			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					null,
-					exc.Message,
-					Resources.ErrfFailedToQueryBlob.UseAsFormat(blobPath),
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
 				return null;
 			}
-			if(bytes is not null)
-			{
-				path = Path.GetDirectoryName(fileName);
-				if(!Directory.Exists(path)) Directory.CreateDirectory(path);
-				using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
-				fs.Write(bytes, 0, bytes.Length);
-			}
-			return fileName;
+			fileName = dlg.FileName;
 		}
+		return ExtractBlobToFile(tree, blobPath, fileName)
+			? fileName
+			: default;
+	}
+
+	public static bool ExtractBlobToFile(this Tree tree, string blobPath, string fileName)
+	{
+		Verify.Argument.IsNotNull(tree);
+		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
+		Verify.Argument.IsNeitherNullNorWhitespace(fileName);
+
+		byte[] bytes;
+		try
+		{
+			bytes = tree.GetBlobContent(blobPath);
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				null,
+				exc.Message,
+				Resources.ErrfFailedToQueryBlob.UseAsFormat(blobPath),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
+		}
+		try
+		{
+			using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+			fs.Write(bytes, 0, bytes.Length);
+		}
+		catch(Exception exc) when(!exc.IsCritical())
+		{
+			GitterApplication.MessageBoxService.Show(
+				null,
+				exc.Message,
+				Resources.ErrfFailedToSaveFile.UseAsFormat(fileName),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return false;
+		}
+		return true;
+	}
+
+	public static string ExtractBlobToTemporaryFile(this Tree tree, string blobPath)
+	{
+		Verify.Argument.IsNotNull(tree);
+		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
+
+		var path = Path.Combine(Path.GetTempPath(), "gitter", tree.TreeHash);
+		var fileName = Path.Combine(path, blobPath);
+		byte[] bytes;
+		try
+		{
+			bytes = tree.GetBlobContent(blobPath);
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				null,
+				exc.Message,
+				Resources.ErrfFailedToQueryBlob.UseAsFormat(blobPath),
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+			return null;
+		}
+		if(bytes is not null)
+		{
+			path = Path.GetDirectoryName(fileName);
+			if(!Directory.Exists(path)) Directory.CreateDirectory(path);
+			using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+			fs.Write(bytes, 0, bytes.Length);
+		}
+		return fileName;
 	}
 }

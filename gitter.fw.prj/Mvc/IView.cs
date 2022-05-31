@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
+namespace gitter.Framework.Mvc;
+
+public interface IView
 {
-	public interface IView
-	{
-		MouseCursor MouseCursor { get; set; }
-	}
+	MouseCursor MouseCursor { get; set; }
 }

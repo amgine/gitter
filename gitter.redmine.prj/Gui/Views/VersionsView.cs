@@ -18,269 +18,268 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
+using System.Text;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Configuration;
+
+using gitter.Redmine.Gui.ListBoxes;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOptions>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Globalization;
-	using System.Text;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Configuration;
+	private readonly VersionsToolbar _toolbar;
+	private VersionsSearchToolBar _searchToolbar;
+	private VersionsListBinding _dataSource;
 
-	using gitter.Redmine.Gui.ListBoxes;
+	#endregion
 
-	using Resources = gitter.Redmine.Properties.Resources;
+	#region .ctor
 
-	partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOptions>
+	public VersionsView(IWorkingEnvironment environment)
+		: base(Guids.VersionsViewGuid, environment)
 	{
-		#region Data
+		InitializeComponent();
 
-		private readonly VersionsToolbar _toolbar;
-		private VersionsSearchToolBar _searchToolbar;
-		private VersionsListBinding _dataSource;
+		Text = Resources.StrVersions;
 
-		#endregion
+		AddTopToolStrip(_toolbar = new VersionsToolbar(this));
 
-		#region .ctor
+		_lstVersions.ItemActivated += OnItemActivated;
+		_lstVersions.PreviewKeyDown += OnKeyDown;
+	}
 
-		public VersionsView(IWorkingEnvironment environment)
-			: base(Guids.VersionsViewGuid, environment)
+	#endregion
+
+	#region Properties
+
+	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"versions");
+
+	private VersionsListBinding DataSource
+	{
+		get { return _dataSource; }
+		set
 		{
-			InitializeComponent();
-
-			Text = Resources.StrVersions;
-
-			AddTopToolStrip(_toolbar = new VersionsToolbar(this));
-
-			_lstVersions.ItemActivated += OnItemActivated;
-			_lstVersions.PreviewKeyDown += OnKeyDown;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"versions");
-
-		private VersionsListBinding DataSource
-		{
-			get { return _dataSource; }
-			set
+			if(_dataSource != value)
 			{
-				if(_dataSource != value)
+				if(_dataSource != null)
 				{
-					if(_dataSource != null)
-					{
-						_dataSource.Dispose();
-					}
-					_dataSource = value;
-					if(_dataSource != null)
-					{
-						_dataSource.ReloadData();
-					}
+					_dataSource.Dispose();
+				}
+				_dataSource = value;
+				if(_dataSource != null)
+				{
+					_dataSource.ReloadData();
 				}
 			}
 		}
+	}
 
-		#endregion
+	#endregion
 
-		#region Methods
+	#region Methods
 
-		protected override void OnContextAttached()
+	protected override void OnContextAttached()
+	{
+		DataSource = new VersionsListBinding(ServiceContext, _lstVersions);
+	}
+
+	private void OnItemActivated(object sender, ItemEventArgs e)
+	{
+		var item = e.Item as VersionListItem;
+		if(item != null)
 		{
-			DataSource = new VersionsListBinding(ServiceContext, _lstVersions);
+			ShowVersionDetails(item.DataContext);
 		}
+	}
 
-		private void OnItemActivated(object sender, ItemEventArgs e)
+	private void ShowVersionDetails(ProjectVersion version)
+	{
+		var url = ServiceContext.ServiceUri + "versions/" + version.Id;
+		RedmineServiceProvider.Environment.ViewDockService.ShowWebBrowserView(url);
+	}
+
+	protected override void SaveMoreViewTo(Section section)
+	{
+		var listNode = section.GetCreateSection("VersionsList");
+		_lstVersions.SaveViewTo(listNode);
+	}
+
+	protected override void LoadMoreViewFrom(Section section)
+	{
+		var listNode = section.TryGetSection("VersionsList");
+		if(listNode != null)
 		{
-			var item = e.Item as VersionListItem;
+			_lstVersions.LoadViewFrom(listNode);
+		}
+	}
+
+	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+	{
+		OnKeyDown(this, e);
+		base.OnPreviewKeyDown(e);
+	}
+
+	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	{
+		switch(e.KeyCode)
+		{
+			case Keys.F:
+				if(e.Modifiers == Keys.Control)
+				{
+					ShowSearchToolBar();
+					e.IsInputKey = true;
+				}
+				break;
+			case Keys.F5:
+				RefreshContent();
+				break;
+		}
+	}
+
+	public override void RefreshContent()
+	{
+		if(DataSource != null)
+		{
+			DataSource.ReloadData();
+		}
+	}
+
+	#endregion
+
+	#region ISearchableView
+
+	private bool TestItem(VersionListItem item, VersionsSearchOptions search)
+	{
+		var version = item.DataContext;
+		if(version.Name.Contains(search.Text)) return true;
+		if(version.Description.Contains(search.Text)) return true;
+		int id;
+		if(int.TryParse(search.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out id))
+		{
+			if(version.Id == id) return true;
+		}
+		return false;
+	}
+
+	private bool Search(int start, VersionsSearchOptions search, int direction)
+	{
+		if(search.Text.Length == 0) return true;
+		int count = _lstVersions.Items.Count;
+		if(count == 0) return false;
+		int end;
+		if(direction == 1)
+		{
+			start = (start + 1) % count;
+			end = start - 1;
+			if(end < 0) end += count;
+		}
+		else
+		{
+			start = (start - 1);
+			if(start < 0) start += count;
+			end = (start + 1) % count;
+		}
+		while(start != end)
+		{
+			var item = _lstVersions.Items[start] as VersionListItem;
 			if(item != null)
 			{
-				ShowVersionDetails(item.DataContext);
+				if(TestItem(item, search))
+				{
+					item.FocusAndSelect();
+					return true;
+				}
 			}
-		}
-
-		private void ShowVersionDetails(ProjectVersion version)
-		{
-			var url = ServiceContext.ServiceUri + "versions/" + version.Id;
-			RedmineServiceProvider.Environment.ViewDockService.ShowWebBrowserView(url);
-		}
-
-		protected override void SaveMoreViewTo(Section section)
-		{
-			var listNode = section.GetCreateSection("VersionsList");
-			_lstVersions.SaveViewTo(listNode);
-		}
-
-		protected override void LoadMoreViewFrom(Section section)
-		{
-			var listNode = section.TryGetSection("VersionsList");
-			if(listNode != null)
-			{
-				_lstVersions.LoadViewFrom(listNode);
-			}
-		}
-
-		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
-		{
-			OnKeyDown(this, e);
-			base.OnPreviewKeyDown(e);
-		}
-
-		private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
-		{
-			switch(e.KeyCode)
-			{
-				case Keys.F:
-					if(e.Modifiers == Keys.Control)
-					{
-						ShowSearchToolBar();
-						e.IsInputKey = true;
-					}
-					break;
-				case Keys.F5:
-					RefreshContent();
-					break;
-			}
-		}
-
-		public override void RefreshContent()
-		{
-			if(DataSource != null)
-			{
-				DataSource.ReloadData();
-			}
-		}
-
-		#endregion
-
-		#region ISearchableView
-
-		private bool TestItem(VersionListItem item, VersionsSearchOptions search)
-		{
-			var version = item.DataContext;
-			if(version.Name.Contains(search.Text)) return true;
-			if(version.Description.Contains(search.Text)) return true;
-			int id;
-			if(int.TryParse(search.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out id))
-			{
-				if(version.Id == id) return true;
-			}
-			return false;
-		}
-
-		private bool Search(int start, VersionsSearchOptions search, int direction)
-		{
-			if(search.Text.Length == 0) return true;
-			int count = _lstVersions.Items.Count;
-			if(count == 0) return false;
-			int end;
 			if(direction == 1)
 			{
 				start = (start + 1) % count;
-				end = start - 1;
-				if(end < 0) end += count;
 			}
 			else
 			{
-				start = (start - 1);
-				if(start < 0) start += count;
-				end = (start + 1) % count;
+				--start;
+				if(start < 0) start = count - 1;
 			}
-			while(start != end)
-			{
-				var item = _lstVersions.Items[start] as VersionListItem;
-				if(item != null)
-				{
-					if(TestItem(item, search))
-					{
-						item.FocusAndSelect();
-						return true;
-					}
-				}
-				if(direction == 1)
-				{
-					start = (start + 1) % count;
-				}
-				else
-				{
-					--start;
-					if(start < 0) start = count - 1;
-				}
-			}
-			return false;
 		}
+		return false;
+	}
 
-		public bool SearchFirst(VersionsSearchOptions search)
+	public bool SearchFirst(VersionsSearchOptions search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		return Search(-1, search, 1);
+	}
+
+	public bool SearchNext(VersionsSearchOptions search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		if(search.Text.Length == 0) return true;
+		if(_lstVersions.SelectedItems.Count == 0)
 		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
 			return Search(-1, search, 1);
 		}
-
-		public bool SearchNext(VersionsSearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(_lstVersions.SelectedItems.Count == 0)
-			{
-				return Search(-1, search, 1);
-			}
-			var start = _lstVersions.Items.IndexOf(_lstVersions.SelectedItems[0]);
-			return Search(start, search, 1);
-		}
-
-		public bool SearchPrevious(VersionsSearchOptions search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(_lstVersions.SelectedItems.Count == 0) return Search(-1, search, 1);
-			var start = _lstVersions.Items.IndexOf(_lstVersions.SelectedItems[0]);
-			return Search(start, search, -1);
-		}
-
-		public bool SearchToolBarVisible
-		{
-			get { return _searchToolbar != null && _searchToolbar.Visible; }
-			set
-			{
-				if(value)
-				{
-					ShowSearchToolBar();
-				}
-				else
-				{
-					HideSearchToolBar();
-				}
-			}
-		}
-
-		private void ShowSearchToolBar()
-		{
-			if(_searchToolbar == null)
-			{
-				AddBottomToolStrip(_searchToolbar = new VersionsSearchToolBar(this));
-			}
-			_searchToolbar.FocusSearchTextBox();
-		}
-
-		private void HideSearchToolBar()
-		{
-			if(_searchToolbar != null)
-			{
-				RemoveToolStrip(_searchToolbar);
-				_searchToolbar.Dispose();
-				_searchToolbar = null;
-			}
-		}
-
-		#endregion
+		var start = _lstVersions.Items.IndexOf(_lstVersions.SelectedItems[0]);
+		return Search(start, search, 1);
 	}
+
+	public bool SearchPrevious(VersionsSearchOptions search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		if(search.Text.Length == 0) return true;
+		if(_lstVersions.SelectedItems.Count == 0) return Search(-1, search, 1);
+		var start = _lstVersions.Items.IndexOf(_lstVersions.SelectedItems[0]);
+		return Search(start, search, -1);
+	}
+
+	public bool SearchToolBarVisible
+	{
+		get => _searchToolbar is { Visible: true };
+		set
+		{
+			if(value)
+			{
+				ShowSearchToolBar();
+			}
+			else
+			{
+				HideSearchToolBar();
+			}
+		}
+	}
+
+	private void ShowSearchToolBar()
+	{
+		if(_searchToolbar is null)
+		{
+			AddBottomToolStrip(_searchToolbar = new VersionsSearchToolBar(this));
+		}
+		_searchToolbar.FocusSearchTextBox();
+	}
+
+	private void HideSearchToolBar()
+	{
+		if(_searchToolbar != null)
+		{
+			RemoveToolStrip(_searchToolbar);
+			_searchToolbar.Dispose();
+			_searchToolbar = null;
+		}
+	}
+
+	#endregion
 }

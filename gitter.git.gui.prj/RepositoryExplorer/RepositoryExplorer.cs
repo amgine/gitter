@@ -18,67 +18,66 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+
+using gitter.Framework.Controls;
+
+sealed class RepositoryExplorer
 {
-	using System;
+	private readonly GuiProvider _guiProvider;
+	private readonly RepositoryRootItem _rootItem;
+	private Repository _repository;
 
-	using gitter.Framework.Controls;
-
-	sealed class RepositoryExplorer
+	public RepositoryExplorer(GuiProvider guiProvider)
 	{
-		private readonly GuiProvider _guiProvider;
-		private readonly RepositoryRootItem _rootItem;
-		private Repository _repository;
+		Verify.Argument.IsNotNull(guiProvider);
 
-		public RepositoryExplorer(GuiProvider guiProvider)
-		{
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
-
-			_guiProvider = guiProvider;
-			_rootItem = new RepositoryRootItem(_guiProvider.Environment)
-				{
-					Repository = guiProvider.Repository,
-				};
-			_repository = guiProvider.Repository;
-
-			_rootItem.IsExpanded = true;
-		}
-
-		public CustomListBoxItem RootItem => _rootItem;
-
-		public Repository Repository
-		{
-			get => _repository;
-			set
+		_guiProvider = guiProvider;
+		_rootItem = new RepositoryRootItem(_guiProvider.Environment)
 			{
-				if(_repository != value)
+				Repository = guiProvider.Repository,
+			};
+		_repository = guiProvider.Repository;
+
+		_rootItem.IsExpanded = true;
+	}
+
+	public CustomListBoxItem RootItem => _rootItem;
+
+	public Repository Repository
+	{
+		get => _repository;
+		set
+		{
+			if(_repository != value)
+			{
+				if(_repository is not null)
 				{
-					if(_repository is not null)
-					{
-						DetachFromRepository(_repository);
-					}
-					if(value is not null)
-					{
-						AttachToRepository(value);
-					}
+					DetachFromRepository(_repository);
+				}
+				if(value is not null)
+				{
+					AttachToRepository(value);
 				}
 			}
 		}
+	}
 
-		private void AttachToRepository(Repository repository)
-		{
-			Assert.IsNotNull(repository);
+	private void AttachToRepository(Repository repository)
+	{
+		Assert.IsNotNull(repository);
 
-			_repository          = repository;
-			_rootItem.Repository = repository;
-		}
+		_repository          = repository;
+		_rootItem.Repository = repository;
+	}
 
-		private void DetachFromRepository(Repository repository)
-		{
-			Assert.IsNotNull(repository);
+	private void DetachFromRepository(Repository repository)
+	{
+		Assert.IsNotNull(repository);
 
-			_repository          = null;
-			_rootItem.Repository = null;
-		}
+		_repository          = null;
+		_rootItem.Repository = null;
 	}
 }

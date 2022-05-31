@@ -18,57 +18,56 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+using gitter.Framework;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.RunMergeTool"/> operation.</summary>
+public sealed class RunMergeToolParameters
 {
-	using System;
-	using System.Collections.Generic;
-
-	using gitter.Framework;
-
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.RunMergeTool"/> operation.</summary>
-	public sealed class RunMergeToolParameters
+	/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
+	public RunMergeToolParameters()
 	{
-		/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
-		public RunMergeToolParameters()
-		{
-		}
-
-		/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
-		/// <param name="tool">Tool to run.</param>
-		/// <param name="file">File to run merge tool on.</param>
-		public RunMergeToolParameters(string tool, string file)
-		{
-			Tool = tool;
-			Files = new[] { file };
-		}
-
-		/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
-		/// <param name="tool">Tool to run.</param>
-		/// <param name="files">Files to run merge tool on.</param>
-		public RunMergeToolParameters(string tool, IList<string> files)
-		{
-			Tool = tool;
-			Files = files;
-		}
-
-		/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
-		/// <param name="file">File to run merge tool on.</param>
-		public RunMergeToolParameters(string file)
-		{
-			Files = new[] { file };
-		}
-
-		/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
-		/// <param name="files">Files to run merge tool on.</param>
-		public RunMergeToolParameters(IList<string> files)
-		{
-			Files = files;
-		}
-
-		/// <summary>Tool to run.</summary>
-		public string Tool { get; set; }
-
-		/// <summary>Files to run merge tool on.</summary>
-		public IList<string> Files { get; set; }
 	}
+
+	/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
+	/// <param name="tool">Tool to run.</param>
+	/// <param name="file">File to run merge tool on.</param>
+	public RunMergeToolParameters(string tool, string file)
+	{
+		Tool = tool;
+		Files = new[] { file };
+	}
+
+	/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
+	/// <param name="tool">Tool to run.</param>
+	/// <param name="files">Files to run merge tool on.</param>
+	public RunMergeToolParameters(string tool, IList<string> files)
+	{
+		Tool = tool;
+		Files = files;
+	}
+
+	/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
+	/// <param name="file">File to run merge tool on.</param>
+	public RunMergeToolParameters(string file)
+	{
+		Files = new[] { file };
+	}
+
+	/// <summary>Create <see cref="RunMergeToolParameters"/>.</summary>
+	/// <param name="files">Files to run merge tool on.</param>
+	public RunMergeToolParameters(IList<string> files)
+	{
+		Files = files;
+	}
+
+	/// <summary>Tool to run.</summary>
+	public string Tool { get; set; }
+
+	/// <summary>Files to run merge tool on.</summary>
+	public IList<string> Files { get; set; }
 }

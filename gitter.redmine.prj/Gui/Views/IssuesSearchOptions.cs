@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+sealed class IssuesSearchOptions : SearchOptions
 {
-	sealed class IssuesSearchOptions : SearchOptions
-	{
-		public bool MatchCase { get; set; }
-	}
+	public bool MatchCase { get; set; }
 }

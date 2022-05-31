@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
-{
-	using System.Collections.Generic;
+namespace gitter.Framework.Services;
 
-	public interface IHyperlinkExtractor
-	{
-		IReadOnlyList<Hyperlink> ExtractHyperlinks(string text);
-	}
+using System.Collections.Generic;
+
+public interface IHyperlinkExtractor
+{
+	IReadOnlyList<Hyperlink> ExtractHyperlinks(string text);
 }

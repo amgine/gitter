@@ -24,11 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="NHunspell, Version=1.1.1.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\gitter.fw.prj\Hunspell\NHunspell.dll</HintPath>
-    </Reference>
-  </ItemGroup>  
+    <PackageReference Include="Autofac" Version="6.4.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />

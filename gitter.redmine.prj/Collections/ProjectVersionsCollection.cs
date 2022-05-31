@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,61 +18,60 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Globalization;
+using System.Xml;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+public sealed class ProjectVersionsCollection : NamedRedmineObjectsCache<ProjectVersion>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Globalization;
-	using System.Xml;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	public sealed class ProjectVersionsCollection : NamedRedmineObjectsCache<ProjectVersion>
+	internal ProjectVersionsCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal ProjectVersionsCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override ProjectVersion Create(int id, string name)
-		{
-			return new ProjectVersion(Context, id, name);
-		}
+	protected override ProjectVersion Create(int id, string name)
+	{
+		return new ProjectVersion(Context, id, name);
+	}
 
-		protected override ProjectVersion Create(XmlNode node)
-		{
-			return new ProjectVersion(Context, node);
-		}
+	protected override ProjectVersion Create(XmlNode node)
+	{
+		return new ProjectVersion(Context, node);
+	}
 
-		public LinkedList<ProjectVersion> Fetch(Project project)
-		{
-			Verify.Argument.IsNotNull(project, nameof(project));
+	public LinkedList<ProjectVersion> Fetch(Project project)
+	{
+		Verify.Argument.IsNotNull(project);
 
-			return Fetch(project.Id);
-		}
+		return Fetch(project.Id);
+	}
 
-		public LinkedList<ProjectVersion> Fetch(int projectId)
-		{
-			return Fetch(projectId.ToString(CultureInfo.InvariantCulture));
-		}
+	public LinkedList<ProjectVersion> Fetch(int projectId)
+	{
+		return Fetch(projectId.ToString(CultureInfo.InvariantCulture));
+	}
 
-		public LinkedList<ProjectVersion> Fetch(string projectId)
-		{
-			var url = string.Format(CultureInfo.InvariantCulture,
-				"projects/{0}/versions.xml", projectId);
-			return FetchItemsFromSinglePage(url);
-		}
+	public LinkedList<ProjectVersion> Fetch(string projectId)
+	{
+		var url = string.Format(CultureInfo.InvariantCulture,
+			"projects/{0}/versions.xml", projectId);
+		return FetchItemsFromSinglePage(url);
+	}
 
-		public Task<LinkedList<ProjectVersion>> FetchAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			var url = string.Format(CultureInfo.InvariantCulture,
-				@"projects/{0}/versions.xml", projectId);
-			progress?.Report(new OperationProgress(Resources.StrsFetchingNews.AddEllipsis()));
-			return FetchItemsFromAllPagesAsync(url, cancellationToken);
-		}
+	public Task<LinkedList<ProjectVersion>> FetchAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		var url = string.Format(CultureInfo.InvariantCulture,
+			@"projects/{0}/versions.xml", projectId);
+		progress?.Report(new OperationProgress(Resources.StrsFetchingNews.AddEllipsis()));
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

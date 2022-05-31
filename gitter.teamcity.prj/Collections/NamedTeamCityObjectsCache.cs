@@ -18,55 +18,54 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+public abstract class NamedTeamCityObjectsCache<T> : TeamCityObjectsCacheBase<T>
+	where T : NamedTeamCityObject
 {
-	public abstract class NamedTeamCityObjectsCache<T> : TeamCityObjectsCacheBase<T>
-		where T : NamedTeamCityObject
+	internal NamedTeamCityObjectsCache(TeamCityServiceContext context)
+		: base(context)
 	{
-		internal NamedTeamCityObjectsCache(TeamCityServiceContext context)
-			: base(context)
+	}
+
+	protected abstract T Create(string id, string name);
+
+	protected abstract T Create(string id);
+
+	internal T Lookup(string id, string name)
+	{
+		T obj;
+		lock(SyncRoot)
 		{
-		}
-
-		protected abstract T Create(string id, string name);
-
-		protected abstract T Create(string id);
-
-		internal T Lookup(string id, string name)
-		{
-			T obj;
-			lock(SyncRoot)
+			if(!Cache.TryGetValue(id, out obj))
 			{
-				if(!Cache.TryGetValue(id, out obj))
+				obj = name is not null
+					? Create(id, name)
+					: Create(id);
+				Cache.Add(id, obj);
+			}
+			else
+			{
+				if(name is not null)
 				{
-					obj = name is not null
-						? Create(id, name)
-						: Create(id);
-					Cache.Add(id, obj);
-				}
-				else
-				{
-					if(name is not null)
-					{
-						obj.Name = name;
-					}
+					obj.Name = name;
 				}
 			}
-			return obj;
 		}
+		return obj;
+	}
 
-		internal T Lookup(string id)
+	internal T Lookup(string id)
+	{
+		T obj;
+		lock(SyncRoot)
 		{
-			T obj;
-			lock(SyncRoot)
+			if(!Cache.TryGetValue(id, out obj))
 			{
-				if(!Cache.TryGetValue(id, out obj))
-				{
-					obj = Create(id);
-					Cache.Add(id, obj);
-				}
+				obj = Create(id);
+				Cache.Add(id, obj);
 			}
-			return obj;
 		}
+		return obj;
 	}
 }

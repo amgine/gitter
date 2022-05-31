@@ -18,20 +18,45 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System.Drawing;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+sealed class LogListBoxTimestampColumn : DateColumn
 {
-	using Resources = gitter.Framework.Properties.Resources;
-
-	sealed class LogListBoxTimestampColumn : CustomListBoxColumn
+	/// <summary>Initializes a new instance of the <see cref="LogListBoxTimestampColumn"/> class.</summary>
+	public LogListBoxTimestampColumn()
+		: base((int)LogListBoxColumnId.Timestamp, Resources.StrTimestamp, visible: true)
 	{
-		/// <summary>Initializes a new instance of the <see cref="LogListBoxTimestampColumn"/> class.</summary>
-		public LogListBoxTimestampColumn()
-			: base((int)LogListBoxColumnId.Timestamp, Resources.StrTimestamp)
-		{
-			Width = 155;
-		}
-
-		/// <inheritdoc/>
-		public override string IdentificationString => "Timestamp";
+		Width      = 158;
+		DateFormat = DateFormat.ISO8601;
 	}
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		if(measureEventArgs.Item is LogEventListItem item)
+		{
+			return OnMeasureSubItem(measureEventArgs, item.DataContext.Timestamp);
+		}
+		return base.OnMeasureSubItem(measureEventArgs);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		if(paintEventArgs.Item is LogEventListItem item)
+		{
+			OnPaintSubItem(paintEventArgs, item.DataContext.Timestamp);
+		}
+	}
+
+	/// <inheritdoc/>
+	public override string IdentificationString => "Timestamp";
 }

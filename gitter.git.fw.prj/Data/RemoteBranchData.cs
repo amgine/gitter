@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,38 +18,37 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+/// <summary>RemoteBranch description.</summary>
+public sealed class RemoteBranchData : INamedObject
 {
-	using System;
-
-	using gitter.Framework;
-
-	/// <summary>RemoteBranch description.</summary>
-	public sealed class RemoteBranchData : INamedObject
+	public RemoteBranchData(string name, Hash sha1)
 	{
-		public RemoteBranchData(string name, Hash sha1)
-		{
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
-			Name = name;
-			SHA1 = sha1;
-		}
-
-		/// <summary>Branch's name (short format, excluding /refs/remotes/).</summary>
-		public string Name { get; }
-
-		/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-		public Hash SHA1 { get; }
-
-		/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
-		public bool IsFake => false;
-
-		/// <summary>It is a remote tracking branch.</summary>
-		public bool IsRemote => true;
-
-		/// <summary>This branch is current HEAD.</summary>
-		public bool IsCurrent => false;
-
-		public override string ToString() => Name;
+		Name = name;
+		SHA1 = sha1;
 	}
+
+	/// <summary>Branch's name (short format, excluding /refs/remotes/).</summary>
+	public string Name { get; }
+
+	/// <summary>SHA1 of commit, which is pointed by branch.</summary>
+	public Hash SHA1 { get; }
+
+	/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
+	public bool IsFake => false;
+
+	/// <summary>It is a remote tracking branch.</summary>
+	public bool IsRemote => true;
+
+	/// <summary>This branch is current HEAD.</summary>
+	public bool IsCurrent => false;
+
+	public override string ToString() => Name;
 }

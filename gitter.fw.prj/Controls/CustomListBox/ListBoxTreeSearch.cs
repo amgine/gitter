@@ -18,160 +18,159 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+/// <summary>Implements search for <see cref="CustomListBox"/> displaying a tree.</summary>
+/// <typeparam name="T">Search options type.</typeparam>
+public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
+	where T : SearchOptions
 {
-	using System;
-
-	/// <summary>Implements search for <see cref="CustomListBox"/> displaying a tree.</summary>
-	/// <typeparam name="T">Search options type.</typeparam>
-	public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
-		where T : SearchOptions
+	protected ListBoxTreeSearch(CustomListBox listBox)
 	{
-		protected ListBoxTreeSearch(CustomListBox listBox)
-		{
-			Verify.Argument.IsNotNull(listBox, nameof(listBox));
+		Verify.Argument.IsNotNull(listBox);
 
-			ListBox = listBox;
+		ListBox = listBox;
+	}
+
+	protected CustomListBox ListBox { get; }
+
+	protected abstract bool TestItem(CustomListBoxItem item, T search);
+
+	private static CustomListBoxItemsCollection GetParentItems(CustomListBoxItem item)
+		=> item.Parent?.Items ?? item.ListBox?.Items;
+
+	private static CustomListBoxItem First(CustomListBoxItemsCollection items)
+	{
+		return items.Count != 0 ? items[0] : null;
+	}
+
+	private static CustomListBoxItem Last(CustomListBoxItemsCollection items)
+	{
+		if(items.Count == 0) return null;
+		var item = items[items.Count - 1];
+		while(item.Items.Count > 0)
+		{
+			item = item.Items[item.Items.Count - 1];
 		}
+		return item;
+	}
 
-		protected CustomListBox ListBox { get; }
+	private static CustomListBoxItem Next(CustomListBoxItem item)
+	{
+		Assert.IsNotNull(item);
 
-		protected abstract bool TestItem(CustomListBoxItem item, T search);
-
-		private static CustomListBoxItemsCollection GetParentItems(CustomListBoxItem item)
-			=> item.Parent?.Items ?? item.ListBox?.Items;
-
-		private static CustomListBoxItem First(CustomListBoxItemsCollection items)
+		if(item.Items.Count > 0)
 		{
-			return items.Count != 0 ? items[0] : null;
+			return item.Items[0];
 		}
-
-		private static CustomListBoxItem Last(CustomListBoxItemsCollection items)
+		do
 		{
-			if(items.Count == 0) return null;
-			var item = items[items.Count - 1];
-			while(item.Items.Count > 0)
-			{
-				item = item.Items[item.Items.Count - 1];
-			}
-			return item;
-		}
-
-		private static CustomListBoxItem Next(CustomListBoxItem item)
-		{
-			Assert.IsNotNull(item);
-
-			if(item.Items.Count > 0)
-			{
-				return item.Items[0];
-			}
-			do
-			{
-				var items = GetParentItems(item);
-				if(items is not null)
-				{
-					var index = items.IndexOf(item);
-					if(index < items.Count - 1)
-					{
-						return items[index + 1];
-					}
-				}
-				item = item.Parent;
-			} while(item != null);
-			return null;
-		}
-
-		private static CustomListBoxItem Prev(CustomListBoxItem item)
-		{
-			Assert.IsNotNull(item);
-
 			var items = GetParentItems(item);
 			if(items is not null)
 			{
 				var index = items.IndexOf(item);
-				if(index > 0)
+				if(index < items.Count - 1)
 				{
-					item = items[index - 1];
-					return Last(item.Items) ?? item;
+					return items[index + 1];
 				}
 			}
-			return item.Parent;
-		}
+			item = item.Parent;
+		} while(item != null);
+		return null;
+	}
 
-		private bool Search(CustomListBoxItem start, T search, int direction)
+	private static CustomListBoxItem Prev(CustomListBoxItem item)
+	{
+		Assert.IsNotNull(item);
+
+		var items = GetParentItems(item);
+		if(items is not null)
 		{
-			if(search.Text.Length == 0) return true;
-
-			start ??= direction switch
+			var index = items.IndexOf(item);
+			if(index > 0)
 			{
-				 1 => First(ListBox.Items),
-				-1 => Last(ListBox.Items),
-				 _ => throw new ArgumentException("Invalid direction", nameof(direction)),
+				item = items[index - 1];
+				return Last(item.Items) ?? item;
+			}
+		}
+		return item.Parent;
+	}
+
+	private bool Search(CustomListBoxItem start, T search, int direction)
+	{
+		if(search.Text.Length == 0) return true;
+
+		start ??= direction switch
+		{
+				1 => First(ListBox.Items),
+			-1 => Last(ListBox.Items),
+				_ => throw new ArgumentException("Invalid direction", nameof(direction)),
+		};
+
+		if(start is null) return false;
+
+		var current = start;
+		do
+		{
+			if(TestItem(current, search))
+			{
+				current.FocusAndSelect();
+				return true;
+			}
+
+			current = direction switch
+			{
+					1 => Next(current) ?? First(ListBox.Items),
+				-1 => Prev(current) ?? Last (ListBox.Items),
+					_ => throw new ArgumentException("Invalid direction", nameof(direction)),
 			};
-
-			if(start is null) return false;
-
-			var current = start;
-			do
-			{
-				if(TestItem(current, search))
-				{
-					current.FocusAndSelect();
-					return true;
-				}
-
-				current = direction switch
-				{
-					 1 => Next(current) ?? First(ListBox.Items),
-					-1 => Prev(current) ?? Last (ListBox.Items),
-					 _ => throw new ArgumentException("Invalid direction", nameof(direction)),
-				};
-			}
-			while(current != start);
-			return false;
 		}
+		while(current != start);
+		return false;
+	}
 
-		public bool First(T search)
+	public bool First(T search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		return Search(null, search, 1);
+	}
+
+	public bool Current(T search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		if(search.Text.Length == 0) return true;
+		if(ListBox.SelectedItems.Count == 0)
 		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
 			return Search(null, search, 1);
 		}
+		return Search(ListBox.SelectedItems[0], search, 1);
+	}
 
-		public bool Current(T search)
+	public bool Next(T search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		if(search.Text.Length == 0) return true;
+		if(ListBox.SelectedItems.Count == 0)
 		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(ListBox.SelectedItems.Count == 0)
-			{
-				return Search(null, search, 1);
-			}
-			return Search(ListBox.SelectedItems[0], search, 1);
+			return Search(null, search, 1);
 		}
+		return Search(Next(ListBox.SelectedItems[0]) ?? First(ListBox.Items), search, 1);
+	}
 
-		public bool Next(T search)
+	public bool Previous(T search)
+	{
+		Verify.Argument.IsNotNull(search);
+
+		if(search.Text.Length == 0) return true;
+		if(ListBox.SelectedItems.Count == 0)
 		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(ListBox.SelectedItems.Count == 0)
-			{
-				return Search(null, search, 1);
-			}
-			return Search(Next(ListBox.SelectedItems[0]) ?? First(ListBox.Items), search, 1);
+			return Search(null, search, 1);
 		}
-
-		public bool Previous(T search)
-		{
-			Verify.Argument.IsNotNull(search, nameof(search));
-
-			if(search.Text.Length == 0) return true;
-			if(ListBox.SelectedItems.Count == 0)
-			{
-				return Search(null, search, 1);
-			}
-			return Search(Prev(ListBox.SelectedItems[0]) ?? Last(ListBox.Items), search, -1);
-		}
+		return Search(Prev(ListBox.SelectedItems[0]) ?? Last(ListBox.Items), search, -1);
 	}
 }

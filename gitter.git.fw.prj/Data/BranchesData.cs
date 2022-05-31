@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,29 +18,20 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+public sealed class BranchesData
 {
-	using System;
-	using System.Collections.Generic;
-
-	public sealed class BranchesData
+	public BranchesData(IReadOnlyList<BranchData> heads, IReadOnlyList<BranchData> remotes)
 	{
-		#region .ctor
-
-		public BranchesData(IList<BranchData> heads, IList<BranchData> remotes)
-		{
-			Heads   = heads;
-			Remotes = remotes;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public IList<BranchData> Heads { get; }
-
-		public IList<BranchData> Remotes { get; }
-
-		#endregion
+		Heads   = heads;
+		Remotes = remotes;
 	}
+
+	public IReadOnlyList<BranchData> Heads { get; }
+
+	public IReadOnlyList<BranchData> Remotes { get; }
 }

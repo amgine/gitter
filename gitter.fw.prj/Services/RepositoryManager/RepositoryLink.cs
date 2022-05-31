@@ -18,47 +18,46 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+
+using gitter.Framework.Configuration;
+
+public sealed class RepositoryLink
 {
-	using System;
+	public event EventHandler Deleted;
 
-	using gitter.Framework.Configuration;
+	internal void InvokeDeleted()
+		=> Deleted?.Invoke(this, EventArgs.Empty);
 
-	public sealed class RepositoryLink
+	public RepositoryLink(Section section)
 	{
-		public event EventHandler Deleted;
+		Verify.Argument.IsNotNull(section);
 
-		internal void InvokeDeleted()
-			=> Deleted?.Invoke(this, EventArgs.Empty);
+		Path        = section.GetValue("Path", string.Empty);
+		Type        = section.GetValue("Type", string.Empty);
+		Description = section.GetValue("Description", string.Empty);
+	}
 
-		public RepositoryLink(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
+	public RepositoryLink(string path, string type)
+	{
+		Path = path;
+		Type = type;
+	}
 
-			Path        = section.GetValue("Path", string.Empty);
-			Type        = section.GetValue("Type", string.Empty);
-			Description = section.GetValue("Description", string.Empty);
-		}
+	public string Path { get; }
 
-		public RepositoryLink(string path, string type)
-		{
-			Path = path;
-			Type = type;
-		}
+	public string Type { get; }
 
-		public string Path { get; }
+	public string Description { get; set; }
 
-		public string Type { get; }
+	public void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
 
-		public string Description { get; set; }
-
-		public void SaveTo(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			section.SetValue("Path", Path);
-			section.SetValue("Type", Type);
-			section.SetValue("Description", Description);
-		}
+		section.SetValue("Path", Path);
+		section.SetValue("Type", Type);
+		section.SetValue("Description", Description);
 	}
 }

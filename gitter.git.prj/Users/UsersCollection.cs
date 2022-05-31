@@ -18,107 +18,105 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+using gitter.Git.AccessLayer;
+
+/// <summary>Repository committers collection.</summary>
+public sealed class UsersCollection : GitObjectsCollection<User, UserEventArgs>
 {
-	using System.Threading.Tasks;
+	#region .ctor
 
-	using gitter.Framework;
-
-	using gitter.Git.AccessLayer;
-
-	/// <summary>Repository committers collection.</summary>
-	public sealed class UsersCollection : GitObjectsCollection<User, UserEventArgs>
+	/// <summary>Create <see cref="UsersCollection"/>.</summary>
+	/// <param name="repository">Host <see cref="Repository"/>.</param>
+	internal UsersCollection(Repository repository)
+		: base(repository)
 	{
-		#region .ctor
+	}
 
-		/// <summary>Create <see cref="UsersCollection"/>.</summary>
-		/// <param name="repository">Host <see cref="Repository"/>.</param>
-		internal UsersCollection(Repository repository)
-			: base(repository)
+	#endregion
+
+	protected override UserEventArgs CreateEventArgs(User item) => new(item);
+
+	public User this[string name, string email]
+	{
+		get { lock(SyncRoot) return ObjectStorage[name + "\n" + email]; }
+	}
+
+	public bool TryGetUser(string name, string email, out User user)
+	{
+		lock(SyncRoot)
 		{
+			return ObjectStorage.TryGetValue(name + "\n" + email, out user);
 		}
+	}
 
-		#endregion
-
-		protected override UserEventArgs CreateEventArgs(User item)
-			=> new UserEventArgs(item);
-
-		public User this[string name, string email]
+	public User TryGetUser(string name, string email)
+	{
+		lock(SyncRoot)
 		{
-			get { lock(SyncRoot) return ObjectStorage[name + "\n" + email]; }
-		}
-
-		public bool TryGetUser(string name, string email, out User user)
-		{
-			lock(SyncRoot)
+			if(ObjectStorage.TryGetValue(name + "\n" + email, out var user))
 			{
-				return ObjectStorage.TryGetValue(name + "\n" + email, out user);
+				return user;
 			}
 		}
+		return null;
+	}
 
-		public User TryGetUser(string name, string email)
+	internal User GetOrCreateUser(string name, string email)
+	{
+		User user;
+		lock(SyncRoot)
 		{
-			lock(SyncRoot)
+			if(!ObjectStorage.TryGetValue(name + "\n" + email, out user))
 			{
-				if(ObjectStorage.TryGetValue(name + "\n" + email, out var user))
-				{
-					return user;
-				}
-			}
-			return null;
-		}
-
-		internal User GetOrCreateUser(string name, string email)
-		{
-			User user;
-			lock(SyncRoot)
-			{
-				if(!ObjectStorage.TryGetValue(name + "\n" + email, out user))
-				{
-					user = new User(Repository, name, email, 0);
-					AddObject(user);
-				}
-			}
-			return user;
-		}
-
-		public void Refresh()
-		{
-			var users = Repository.Accessor.QueryUsers.Invoke(
-				new QueryUsersParameters());
-			lock(SyncRoot)
-			{
-				CacheUpdater.UpdateObjectDictionary<User, UserData>(
-					ObjectStorage,
-					null,
-					null,
-					users,
-					userData => ObjectFactories.CreateUser(Repository, userData),
-					ObjectFactories.UpdateUser,
-					InvokeObjectAdded,
-					InvokeObjectRemoved,
-					true);
+				user = new User(Repository, name, email, 0);
+				AddObject(user);
 			}
 		}
+		return user;
+	}
 
-		public async Task RefreshAsync()
+	public void Refresh()
+	{
+		var users = Repository.Accessor.QueryUsers.Invoke(
+			new QueryUsersParameters());
+		lock(SyncRoot)
 		{
-			var users = await Repository.Accessor.QueryUsers
-				.InvokeAsync(new QueryUsersParameters())
-				.ConfigureAwait(continueOnCapturedContext: false);
-			lock(SyncRoot)
-			{
-				CacheUpdater.UpdateObjectDictionary<User, UserData>(
-					ObjectStorage,
-					null,
-					null,
-					users,
-					userData => ObjectFactories.CreateUser(Repository, userData),
-					ObjectFactories.UpdateUser,
-					InvokeObjectAdded,
-					InvokeObjectRemoved,
-					true);
-			}
+			CacheUpdater.UpdateObjectDictionary<User, UserData>(
+				ObjectStorage,
+				null,
+				null,
+				users,
+				userData => ObjectFactories.CreateUser(Repository, userData),
+				ObjectFactories.UpdateUser,
+				InvokeObjectAdded,
+				InvokeObjectRemoved,
+				true);
+		}
+	}
+
+	public async Task RefreshAsync()
+	{
+		var users = await Repository.Accessor.QueryUsers
+			.InvokeAsync(new QueryUsersParameters())
+			.ConfigureAwait(continueOnCapturedContext: false);
+		lock(SyncRoot)
+		{
+			CacheUpdater.UpdateObjectDictionary<User, UserData>(
+				ObjectStorage,
+				null,
+				null,
+				users,
+				userData => ObjectFactories.CreateUser(Repository, userData),
+				ObjectFactories.UpdateUser,
+				InvokeObjectAdded,
+				InvokeObjectRemoved,
+				true);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,74 +18,61 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+abstract class RepositoryExplorerItemBase : CustomListBoxItem
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Text;
+	private readonly string _text;
+	private IImageProvider _image;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	abstract class RepositoryExplorerItemBase : CustomListBoxItem
+	protected RepositoryExplorerItemBase(IWorkingEnvironment env, RedmineGuiProvider guiProvider, IImageProvider image, string text)
 	{
-		private readonly IWorkingEnvironment _environment;
-		private readonly RedmineGuiProvider _guiProvider;
-		private readonly string _text;
-		private Bitmap _image;
+		WorkingEnvironment = env;
+		GuiProvider = guiProvider;
+		_image = image;
+		_text = text;
+	}
 
-		protected RepositoryExplorerItemBase(IWorkingEnvironment env, RedmineGuiProvider guiProvider, Bitmap image, string text)
+	protected IWorkingEnvironment WorkingEnvironment { get; private set; }
+
+	protected RedmineGuiProvider GuiProvider { get; private set; }
+
+	protected RedmineServiceContext ServiceContext
+		=> GuiProvider.ServiceContext;
+
+	protected void ShowView(Guid guid)
+	{
+		var view = WorkingEnvironment.ViewDockService.ShowView(guid) as RedmineViewBase;
+		if(view is not null)
 		{
-			_environment = env;
-			_guiProvider = guiProvider;
-			_image = image;
-			_text = text;
+			view.ServiceContext = ServiceContext;
 		}
+	}
 
-		protected IWorkingEnvironment WorkingEnvironment
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		switch((ColumnId)paintEventArgs.SubItemId)
 		{
-			get { return _environment; }
+			case ColumnId.Name:
+				paintEventArgs.PaintImageAndText(_image, _text);
+				break;
 		}
+	}
 
-		protected RedmineGuiProvider GuiProvider
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		switch((ColumnId)measureEventArgs.SubItemId)
 		{
-			get { return _guiProvider; }
-		}
-
-		protected RedmineServiceContext ServiceContext
-		{
-			get { return _guiProvider.ServiceContext; }
-		}
-
-		protected void ShowView(Guid guid)
-		{
-			var view = WorkingEnvironment.ViewDockService.ShowView(guid) as RedmineViewBase;
-			if(view != null)
-			{
-				view.ServiceContext = ServiceContext;
-			}
-		}
-
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			switch((ColumnId)paintEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(_image, _text);
-					break;
-			}
-		}
-
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			switch((ColumnId)measureEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(_image, _text);
-				default:
-					return Size.Empty;
-			}
+			case ColumnId.Name:
+				return measureEventArgs.MeasureImageAndText(_image, _text);
+			default:
+				return Size.Empty;
 		}
 	}
 }

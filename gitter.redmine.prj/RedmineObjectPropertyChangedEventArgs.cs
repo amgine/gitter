@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+
+public sealed class RedmineObjectPropertyChangedEventArgs : EventArgs
 {
-	using System;
-
-	public sealed class RedmineObjectPropertyChangedEventArgs : EventArgs
+	public RedmineObjectPropertyChangedEventArgs(RedmineObjectProperty property)
 	{
-		public RedmineObjectPropertyChangedEventArgs(RedmineObjectProperty property)
-		{
-			Property = property;
-		}
-
-		public RedmineObjectProperty Property { get; }
+		Property = property;
 	}
+
+	public RedmineObjectProperty Property { get; }
 }

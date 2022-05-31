@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+public enum DiffBindingMode
 {
-	public enum DiffBindingMode
-	{
-		Complete,
-		HeadersOnly,
-		FilesOnly,
-	}
+	Complete,
+	HeadersOnly,
+	FilesOnly,
 }

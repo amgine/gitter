@@ -18,22 +18,23 @@
  */
 #endregion
 
-namespace gitter.GitLab.Controls
+namespace gitter.GitLab.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+[DesignerCategory("")]
+sealed class GitLabContextMenu : gitter.Framework.Controls.HyperlinkContextMenu
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
-
-	sealed class GitLabContextMenu : gitter.Framework.Controls.HyperlinkContextMenu
+	public GitLabContextMenu(GitLabServiceContext serviceContext)
+		: base(serviceContext.FormatProjectUrl())
 	{
-		public GitLabContextMenu(GitLabServiceContext serviceContext)
-			: base(serviceContext.FormatProjectUrl())
-		{
-			ServiceContext = serviceContext;
-		}
-
-		private GitLabServiceContext ServiceContext { get; }
+		ServiceContext = serviceContext;
 	}
+
+	private GitLabServiceContext ServiceContext { get; }
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,25 +18,24 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Xml;
+
+public sealed class IssueTracker : NamedRedmineObject
 {
-	using System;
-	using System.Xml;
+	#region .ctor
 
-	public sealed class IssueTracker : NamedRedmineObject
+	internal IssueTracker(RedmineServiceContext context, int id, string name)
+		: base(context, id, name)
 	{
-		#region .ctor
-
-		internal IssueTracker(RedmineServiceContext context, int id, string name)
-			: base(context, id, name)
-		{
-		}
-
-		internal IssueTracker(RedmineServiceContext context, XmlNode node)
-			: base(context, node)
-		{
-		}
-
-		#endregion
 	}
+
+	internal IssueTracker(RedmineServiceContext context, XmlNode node)
+		: base(context, node)
+	{
+	}
+
+	#endregion
 }

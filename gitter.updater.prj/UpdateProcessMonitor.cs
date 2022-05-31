@@ -18,102 +18,97 @@
  */
 #endregion
 
-namespace gitter.Updater
+namespace gitter.Updater;
+
+using System;
+
+public sealed class UpdateProcessMonitor
 {
-	using System;
+	public event EventHandler StageChanged;
+	public event EventHandler MaximumProgressChanged;
+	public event EventHandler CurrentProgressChanged;
+	public event EventHandler UpdateCancelled;
+	public event EventHandler<UpdateFailedEventArgs> UpdateFailed;
+	public event EventHandler UpdateSuccessful;
+	public event EventHandler CanCancelChanged;
 
-	public sealed class UpdateProcessMonitor
+	private string _stage;
+	private int _maximumProgress;
+	private int _currentProgress;
+	private bool _canCancel;
+
+	public UpdateProcessMonitor()
 	{
-		public event EventHandler StageChanged;
-		public event EventHandler MaximumProgressChanged;
-		public event EventHandler CurrentProgressChanged;
-		public event EventHandler UpdateCancelled;
-		public event EventHandler<UpdateFailedEventArgs> UpdateFailed;
-		public event EventHandler UpdateSuccessful;
-		public event EventHandler CanCancelChanged;
+		_canCancel = true;
+	}
 
-		private string _stage;
-		private int _maximumProgress;
-		private int _currentProgress;
-		private bool _canCancel;
-
-		public UpdateProcessMonitor()
+	public string Stage
+	{
+		get => _stage;
+		set
 		{
-			_canCancel = true;
-		}
-
-		public string Stage
-		{
-			get => _stage;
-			set
-			{
-				_stage = value;
-				StageChanged?.Invoke(this, EventArgs.Empty);
-			}
-		}
-
-		public int MaximumProgress
-		{
-			get => _maximumProgress;
-			set
-			{
-				_maximumProgress = value;
-				MaximumProgressChanged?.Invoke(this, EventArgs.Empty);
-			}
-		}
-
-		public int CurrentProgress
-		{
-			get => _currentProgress;
-			set
-			{
-				_currentProgress = value;
-				CurrentProgressChanged?.Invoke(this, EventArgs.Empty);
-			}
-		}
-
-		public void ReportFailure(string error)
-		{
-			UpdateFailed?.Invoke(this, new UpdateFailedEventArgs(error));
-		}
-
-		public void ReportSuccess()
-		{
-			UpdateSuccessful?.Invoke(this, EventArgs.Empty);
-		}
-
-		public void ReportCancelled()
-		{
-			UpdateCancelled?.Invoke(this, EventArgs.Empty);
-		}
-
-		public bool CanCancel
-		{
-			get => _canCancel;
-			set
-			{
-				if(_canCancel != value)
-				{
-					_canCancel = value;
-					CanCancelChanged?.Invoke(this, EventArgs.Empty);
-				}
-			}
-		}
-
-		public bool CancelRequested
-		{
-			get;
-			set;
+			_stage = value;
+			StageChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 
-	public sealed class UpdateFailedEventArgs : EventArgs
+	public int MaximumProgress
 	{
-		public UpdateFailedEventArgs(string message)
+		get => _maximumProgress;
+		set
 		{
-			Message = message;
+			_maximumProgress = value;
+			MaximumProgressChanged?.Invoke(this, EventArgs.Empty);
 		}
-
-		public string Message { get; }
 	}
+
+	public int CurrentProgress
+	{
+		get => _currentProgress;
+		set
+		{
+			_currentProgress = value;
+			CurrentProgressChanged?.Invoke(this, EventArgs.Empty);
+		}
+	}
+
+	public void ReportFailure(string error)
+	{
+		UpdateFailed?.Invoke(this, new UpdateFailedEventArgs(error));
+	}
+
+	public void ReportSuccess()
+	{
+		UpdateSuccessful?.Invoke(this, EventArgs.Empty);
+	}
+
+	public void ReportCancelled()
+	{
+		UpdateCancelled?.Invoke(this, EventArgs.Empty);
+	}
+
+	public bool CanCancel
+	{
+		get => _canCancel;
+		set
+		{
+			if(_canCancel != value)
+			{
+				_canCancel = value;
+				CanCancelChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
+	}
+
+	public bool CancelRequested { get; set; }
+}
+
+public sealed class UpdateFailedEventArgs : EventArgs
+{
+	public UpdateFailedEventArgs(string message)
+	{
+		Message = message;
+	}
+
+	public string Message { get; }
 }

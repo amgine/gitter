@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,66 +18,65 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+public class IssuesCollection : RedmineObjectsCache<Issue>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Xml;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	public class IssuesCollection : RedmineObjectsCache<Issue>
+	internal IssuesCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal IssuesCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		public IssueCreation CreateNew()
-		{
-			return new IssueCreation(Context);
-		}
+	public IssueCreation CreateNew()
+	{
+		return new IssueCreation(Context);
+	}
 
-		protected override Issue Create(int id)
-		{
-			return new Issue(Context, id);
-		}
+	protected override Issue Create(int id)
+	{
+		return new Issue(Context, id);
+	}
 
-		protected override Issue Create(XmlNode node)
-		{
-			return new Issue(Context, node);
-		}
+	protected override Issue Create(XmlNode node)
+	{
+		return new Issue(Context, node);
+	}
 
-		public LinkedList<Issue> FetchOpen(Project project)
-		{
-			Verify.Argument.IsNotNull(project, nameof(project));
+	public LinkedList<Issue> FetchOpen(Project project)
+	{
+		Verify.Argument.IsNotNull(project);
 
-			return FetchOpen(project.Id);
-		}
+		return FetchOpen(project.Id);
+	}
 
-		public LinkedList<Issue> FetchOpen(int projectId)
-		{
-			return FetchOpen(projectId.ToString(CultureInfo.InvariantCulture));
-		}
+	public LinkedList<Issue> FetchOpen(int projectId)
+	{
+		return FetchOpen(projectId.ToString(CultureInfo.InvariantCulture));
+	}
 
-		public LinkedList<Issue> FetchOpen(string projectId)
-		{
-			var url = string.Format(CultureInfo.InvariantCulture,
-				@"projects/{0}/issues.xml", projectId);
-			return FetchItemsFromAllPages(url);
-		}
+	public LinkedList<Issue> FetchOpen(string projectId)
+	{
+		var url = string.Format(CultureInfo.InvariantCulture,
+			@"projects/{0}/issues.xml", projectId);
+		return FetchItemsFromAllPages(url);
+	}
 
-		public Task<LinkedList<Issue>> FetchOpenAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			var url = string.Format(CultureInfo.InvariantCulture,
-				@"projects/{0}/issues.xml", projectId);
-			progress?.Report(new OperationProgress(Resources.StrsFetchingIssues.AddEllipsis()));
-			return FetchItemsFromAllPagesAsync(url, cancellationToken);
-		}
+	public Task<LinkedList<Issue>> FetchOpenAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		var url = string.Format(CultureInfo.InvariantCulture,
+			@"projects/{0}/issues.xml", projectId);
+		progress?.Report(new OperationProgress(Resources.StrsFetchingIssues.AddEllipsis()));
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

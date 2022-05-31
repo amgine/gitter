@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Framework
-{
-	using gitter.Framework.Mvc;
+namespace gitter.Framework;
 
-	public interface IRepositoryInitDialog
-	{
-		IUserInputSource<string> RepositoryPath { get; }
-	}
+using gitter.Framework.Mvc;
+
+public interface IRepositoryInitDialog
+{
+	IUserInputSource<string> RepositoryPath { get; }
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,33 +18,32 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+public sealed class IssueProjectColumn : CustomListBoxColumn
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	public sealed class IssueProjectColumn : CustomListBoxColumn
+	public IssueProjectColumn()
+		: base((int)ColumnId.Project, Resources.StrProject, false)
 	{
-		public IssueProjectColumn()
-			: base((int)ColumnId.Project, Resources.StrProject, false)
-		{
-			Width = 80;
-		}
+		Width = 80;
+	}
 
-		public override string IdentificationString
-		{
-			get { return "Project"; }
-		}
+	public override string IdentificationString
+	{
+		get { return "Project"; }
+	}
 
-		protected override Comparison<CustomListBoxItem> SortComparison
-		{
-			get { return IssueListItem.CompareByProject; }
-		}
+	protected override Comparison<CustomListBoxItem> SortComparison
+	{
+		get { return IssueListItem.CompareByProject; }
 	}
 }

@@ -18,22 +18,38 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
+namespace gitter.GitLab.Api;
+
+using System;
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#elif NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
+
+[DataContract]
+class GitLabVersion
 {
-	using System;
-	using System.Runtime.Serialization;
-
-	using Newtonsoft.Json;
-
-	[DataContract]
-	class GitLabVersion
+	static class Names
 	{
-		[JsonProperty(propertyName: "version")]
-		[DataMember]
-		public string Version { get; set; }
-
-		[JsonProperty(propertyName: "revision")]
-		[DataMember]
-		public string Revision { get; set; }
+		public const string Version  = @"version";
+		public const string Revision = @"revision";
 	}
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Version)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Version)]
+#endif
+	public string Version { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Revision)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Revision)]
+#endif
+	public string Revision { get; set; }
 }

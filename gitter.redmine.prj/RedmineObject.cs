@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,84 +18,82 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+public abstract class RedmineObject
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Xml;
+	#region Static
 
-	public abstract class RedmineObject
+	public static readonly RedmineObjectProperty<int> IdProperty = new("id", "Id");
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler<RedmineObjectPropertyChangedEventArgs> PropertyChanged;
+
+	protected void OnPropertyChanged(RedmineObjectProperty property)
+		=> PropertyChanged?.Invoke(this, new RedmineObjectPropertyChangedEventArgs(property));
+
+	#endregion
+
+	#region .ctor
+
+	protected RedmineObject(RedmineServiceContext context, int id)
 	{
-		#region Static
+		Verify.Argument.IsNotNull(context);
 
-		public static readonly RedmineObjectProperty<int> IdProperty =
-			new RedmineObjectProperty<int>("id", "Id");
-
-		#endregion
-
-		#region Events
-
-		public event EventHandler<RedmineObjectPropertyChangedEventArgs> PropertyChanged;
-
-		protected void OnPropertyChanged(RedmineObjectProperty property)
-			=> PropertyChanged?.Invoke(this, new RedmineObjectPropertyChangedEventArgs(property));
-
-		#endregion
-
-		#region .ctor
-
-		protected RedmineObject(RedmineServiceContext context, int id)
-		{
-			Verify.Argument.IsNotNull(context, nameof(context));
-
-			Context = context;
-			Id      = id;
-		}
-
-		protected RedmineObject(RedmineServiceContext context, XmlNode node)
-		{
-			Verify.Argument.IsNotNull(context, nameof(context));
-			Verify.Argument.IsNotNull(node, nameof(node));
-
-			Context	= context;
-			Id      = RedmineUtility.LoadInt(node[IdProperty.XmlNodeName]);
-		}
-
-		#endregion
-
-		#region Methods
-
-		internal virtual void Update(XmlNode node)
-		{
-			Verify.Argument.IsNotNull(node, nameof(node));
-		}
-
-		public virtual void Update() => throw new NotSupportedException();
-
-		public object GetValue(RedmineObjectProperty property)
-		{
-			Verify.Argument.IsNotNull(property, nameof(property));
-
-			return GetType().GetProperty(property.Name).GetValue(this, null);
-		}
-
-		protected void UpdatePropertyValue<T>(ref T field, T value, RedmineObjectProperty<T> property)
-		{
-			if(!EqualityComparer<T>.Default.Equals(field, value))
-			{
-				field = value;
-				OnPropertyChanged(property);
-			}
-		}
-
-		#endregion
-
-		#region Properties
-
-		public int Id { get; }
-
-		public RedmineServiceContext Context { get; }
-
-		#endregion
+		Context = context;
+		Id      = id;
 	}
+
+	protected RedmineObject(RedmineServiceContext context, XmlNode node)
+	{
+		Verify.Argument.IsNotNull(context);
+		Verify.Argument.IsNotNull(node);
+
+		Context	= context;
+		Id      = RedmineUtility.LoadInt(node[IdProperty.XmlNodeName]);
+	}
+
+	#endregion
+
+	#region Methods
+
+	internal virtual void Update(XmlNode node)
+	{
+		Verify.Argument.IsNotNull(node);
+	}
+
+	public virtual void Update() => throw new NotSupportedException();
+
+	public object GetValue(RedmineObjectProperty property)
+	{
+		Verify.Argument.IsNotNull(property);
+
+		return GetType().GetProperty(property.Name).GetValue(this, null);
+	}
+
+	protected void UpdatePropertyValue<T>(ref T field, T value, RedmineObjectProperty<T> property)
+	{
+		if(!EqualityComparer<T>.Default.Equals(field, value))
+		{
+			field = value;
+			OnPropertyChanged(property);
+		}
+	}
+
+	#endregion
+
+	#region Properties
+
+	public int Id { get; }
+
+	public RedmineServiceContext Context { get; }
+
+	#endregion
 }

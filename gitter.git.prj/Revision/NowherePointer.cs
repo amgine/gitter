@@ -18,30 +18,29 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System.Threading.Tasks;
+
+internal sealed class NowherePointer : GitObject, IRevisionPointer
 {
-	using System.Threading.Tasks;
-
-	internal sealed class NowherePointer : GitObject, IRevisionPointer
+	public NowherePointer(Repository repository, string name)
+		: base(repository)
 	{
-		public NowherePointer(Repository repository, string name)
-			: base(repository)
-		{
-			Pointer = name;
-		}
-
-		ReferenceType IRevisionPointer.Type => ReferenceType.None;
-
-		public string Pointer { get; }
-
-		string IRevisionPointer.FullName => Pointer;
-
-		Revision IRevisionPointer.Dereference() => null;
-
-		Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(default(Revision));
-
-		bool IRevisionPointer.IsDeleted => false;
-
-		public override string ToString() => Pointer;
+		Pointer = name;
 	}
+
+	ReferenceType IRevisionPointer.Type => ReferenceType.None;
+
+	public string Pointer { get; }
+
+	string IRevisionPointer.FullName => Pointer;
+
+	Revision IRevisionPointer.Dereference() => null;
+
+	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(default(Revision));
+
+	bool IRevisionPointer.IsDeleted => false;
+
+	public override string ToString() => Pointer;
 }

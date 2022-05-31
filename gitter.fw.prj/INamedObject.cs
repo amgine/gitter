@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+public interface INamedObject
 {
-	public interface INamedObject
-	{
-		string Name { get; }
-	}
+	string Name { get; }
 }

@@ -18,106 +18,105 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc.WinForms
+namespace gitter.Framework.Mvc.WinForms;
+
+using System;
+using System.Windows.Forms;
+
+public class ControlInputSource : IUserInputSource<string>, IWin32ControlInputSource
 {
-	using System;
-	using System.Windows.Forms;
-
-	public class ControlInputSource : IUserInputSource<string>, IWin32ControlInputSource
+	public ControlInputSource(Control control)
 	{
-		public ControlInputSource(Control control)
-		{
-			Verify.Argument.IsNotNull(control, nameof(control));
+		Verify.Argument.IsNotNull(control);
 
-			Control = control;
-		}
-
-		public string Value
-		{
-			get => Control.Text;
-			set => Control.Text = value;
-		}
-
-		public virtual bool IsReadOnly
-		{
-			get => !Control.Enabled;
-			set => Control.Enabled = !value;
-		}
-
-		public Control Control { get; }
+		Control = control;
 	}
 
-	public abstract class ControlInputSource<TControl, TValue> : IUserInputSource<TValue>, IWin32ControlInputSource
-		where TControl : Control
+	public string Value
 	{
-		private TValue _value;
-		private bool _isValueValid;
-
-		public ControlInputSource(TControl control)
-		{
-			Verify.Argument.IsNotNull(control, nameof(control));
-
-			Control = control;
-			if(!control.IsDisposed)
-			{
-				SubscribeToValueChangeEvent();
-			}
-		}
-
-		public TControl Control { get; }
-
-		protected abstract TValue FetchValue();
-
-		protected abstract void SetValue(TValue value);
-
-		protected abstract void SubscribeToValueChangeEvent();
-
-		protected abstract void UnsubscribeToValueChangeEvent();
-
-		protected virtual void OnControlValueChanged(object sender, EventArgs e)
-		{
-			InvalidateValue();
-		}
-
-		protected virtual void InvalidateValue()
-		{
-			_isValueValid = false;
-		}
-
-		public TValue Value
-		{
-			get
-			{
-				if(!_isValueValid)
-				{
-					if(Control.IsDisposed)
-					{
-						_isValueValid = true;
-					}
-					else
-					{
-						_value = FetchValue();
-					}
-				}
-				return _value;
-			}
-			set
-			{
-				_value = value;
-				if(!Control.IsDisposed)
-				{
-					SetValue(value);
-				}
-				_isValueValid = true;
-			}
-		}
-
-		public virtual bool IsReadOnly
-		{
-			get => !Control.Enabled;
-			set => Control.Enabled = !value;
-		}
-
-		Control IWin32ControlInputSource.Control => Control;
+		get => Control.Text;
+		set => Control.Text = value;
 	}
+
+	public virtual bool IsReadOnly
+	{
+		get => !Control.Enabled;
+		set => Control.Enabled = !value;
+	}
+
+	public Control Control { get; }
+}
+
+public abstract class ControlInputSource<TControl, TValue> : IUserInputSource<TValue>, IWin32ControlInputSource
+	where TControl : Control
+{
+	private TValue _value;
+	private bool _isValueValid;
+
+	public ControlInputSource(TControl control)
+	{
+		Verify.Argument.IsNotNull(control);
+
+		Control = control;
+		if(!control.IsDisposed)
+		{
+			SubscribeToValueChangeEvent();
+		}
+	}
+
+	public TControl Control { get; }
+
+	protected abstract TValue FetchValue();
+
+	protected abstract void SetValue(TValue value);
+
+	protected abstract void SubscribeToValueChangeEvent();
+
+	protected abstract void UnsubscribeToValueChangeEvent();
+
+	protected virtual void OnControlValueChanged(object sender, EventArgs e)
+	{
+		InvalidateValue();
+	}
+
+	protected virtual void InvalidateValue()
+	{
+		_isValueValid = false;
+	}
+
+	public TValue Value
+	{
+		get
+		{
+			if(!_isValueValid)
+			{
+				if(Control.IsDisposed)
+				{
+					_isValueValid = true;
+				}
+				else
+				{
+					_value = FetchValue();
+				}
+			}
+			return _value;
+		}
+		set
+		{
+			_value = value;
+			if(!Control.IsDisposed)
+			{
+				SetValue(value);
+			}
+			_isValueValid = true;
+		}
+	}
+
+	public virtual bool IsReadOnly
+	{
+		get => !Control.Enabled;
+		set => Control.Enabled = !value;
+	}
+
+	Control IWin32ControlInputSource.Control => Control;
 }

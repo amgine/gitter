@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Windows.Forms;
+
+public interface IButtonWidget : IButtonControl, IDisposable
 {
-	using System;
-	using System.Windows.Forms;
+	event EventHandler Click;
 
-	public interface IButtonWidget : IDisposable
-	{
-		event EventHandler Click;
+	Control Control { get; }
 
-		Control Control { get; }
-
-		string Text { get; set; }
-	}
+	string Text { get; set; }
 }

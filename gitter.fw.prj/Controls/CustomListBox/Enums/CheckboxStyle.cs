@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+/// <summary>Item checkbox style.</summary>
+public enum CheckboxStyle
 {
-	/// <summary>Item checkbox style.</summary>
-	public enum CheckboxStyle
-	{
-		/// <summary>Default checkbox.</summary>
-		Default,
-		/// <summary>Three state checkbox.</summary>
-		ThreeState,
-		/// <summary>Radio button.</summary>
-		Radio,
-	}
+	/// <summary>Default checkbox.</summary>
+	Default,
+	/// <summary>Three state checkbox.</summary>
+	ThreeState,
+	/// <summary>Radio button.</summary>
+	Radio,
 }

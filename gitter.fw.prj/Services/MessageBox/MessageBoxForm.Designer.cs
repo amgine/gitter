@@ -85,7 +85,6 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.ClientSize = new System.Drawing.Size(481, 176);
 			this.Controls.Add(this._pnlContainer);
-			this.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.KeyPreview = true;
 			this.MaximizeBox = false;

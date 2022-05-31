@@ -18,25 +18,24 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+public class WebBrowserViewFactory : ViewFactoryBase
 {
-	using System;
-	using System.Collections.Generic;
+	public static readonly new Guid Guid = new("BF80569F-4544-4B0F-8C5B-213215E053AA");
 
-	using Resources = gitter.Framework.Properties.Resources;
-
-	public class WebBrowserViewFactory : ViewFactoryBase
+	public WebBrowserViewFactory()
+		: base(Guid, Resources.StrWebBrowser, CommonIcons.WebBrowser, singleton: true)
 	{
-		public static readonly new Guid Guid = new("BF80569F-4544-4B0F-8C5B-213215E053AA");
-
-		public WebBrowserViewFactory()
-			: base(Guid, Resources.StrWebBrowser, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"web.browser"), singleton: true)
-		{
-			this.DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
-		}
-
-		/// <inheritdoc/>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-			=> new WebBrowserView(Guid, environment);
+		this.DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
 	}
+
+	/// <inheritdoc/>
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+		=> new WebBrowserView(Guid, environment);
 }

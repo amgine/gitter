@@ -18,76 +18,75 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+
+public abstract class ViewFactoryBase : IViewFactory
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly LinkedList<ViewBase> _createdViews = new();
 
-	public abstract class ViewFactoryBase : IViewFactory
+	protected ViewFactoryBase(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
 	{
-		private readonly LinkedList<ViewBase> _createdViews = new();
+		Guid          = guid;
+		Name          = name;
+		ImageProvider = imageProvider;
+		IsSingleton   = singleton;
+	}
 
-		protected ViewFactoryBase(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
+	public Guid Guid { get; }
+
+	public string Name { get; }
+
+	public IImageProvider ImageProvider { get; }
+
+	public bool IsSingleton { get; }
+
+	public IEnumerable<ViewBase> CreatedViews => _createdViews;
+
+	public ViewPosition DefaultViewPosition { get; protected set; }
+
+	/// <summary>Closes all tools, created by this factory.</summary>
+	public void CloseAllViews()
+	{
+		while(_createdViews.Count != 0)
 		{
-			Guid          = guid;
-			Name          = name;
-			ImageProvider = imageProvider;
-			IsSingleton   = singleton;
+			_createdViews.First.Value.Close();
 		}
+	}
 
-		public Guid Guid { get; }
-
-		public string Name { get; }
-
-		public IImageProvider ImageProvider { get; }
-
-		public bool IsSingleton { get; }
-
-		public IEnumerable<ViewBase> CreatedViews => _createdViews;
-
-		public ViewPosition DefaultViewPosition { get; protected set; }
-
-		/// <summary>Closes all tools, created by this factory.</summary>
-		public void CloseAllViews()
+	private void OnViewDisposed(object sender, EventArgs e)
+	{
+		var view = (ViewBase)sender;
+		view.Disposed -= OnViewDisposed;
+		lock(_createdViews)
 		{
-			while(_createdViews.Count != 0)
-			{
-				_createdViews.First.Value.Close();
-			}
+			_createdViews.Remove(view);
 		}
+	}
 
-		private void OnViewDisposed(object sender, EventArgs e)
+	/// <summary>Create new view with specified parameters.</summary>
+	/// <param name="environment">Application working environment.</param>
+	/// <returns>Created view.</returns>
+	protected abstract ViewBase CreateViewCore(IWorkingEnvironment environment);
+
+	/// <summary>Create new view with default parameters.</summary>
+	/// <param name="environment">Application working environment.</param>
+	/// <returns>Created view.</returns>
+	public ViewBase CreateView(IWorkingEnvironment environment)
+	{
+		Verify.Argument.IsNotNull(environment);
+
+		var view = CreateViewCore(environment);
+		if(view is not null)
 		{
-			var view = (ViewBase)sender;
-			view.Disposed -= OnViewDisposed;
 			lock(_createdViews)
 			{
-				_createdViews.Remove(view);
+				_createdViews.AddLast(view);
+				view.Disposed += OnViewDisposed;
 			}
 		}
-
-		/// <summary>Create new view with specified parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
-		protected abstract ViewBase CreateViewCore(IWorkingEnvironment environment);
-
-		/// <summary>Create new view with default parameters.</summary>
-		/// <param name="environment">Application working environment.</param>
-		/// <returns>Created view.</returns>
-		public ViewBase CreateView(IWorkingEnvironment environment)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			var view = CreateViewCore(environment);
-			if(view is not null)
-			{
-				lock(_createdViews)
-				{
-					_createdViews.AddLast(view);
-					view.Disposed += OnViewDisposed;
-				}
-			}
-			return view;
-		}
+		return view;
 	}
 }

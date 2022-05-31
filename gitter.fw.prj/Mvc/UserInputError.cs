@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc
+namespace gitter.Framework.Mvc;
+
+public sealed class UserInputError
 {
-	public sealed class UserInputError
+	public UserInputError(string title, string message)
 	{
-		public UserInputError(string title, string message)
-		{
-			Title   = title;
-			Message = message;
-		}
-
-		public string Title { get; }
-
-		public string Message { get; }
+		Title   = title;
+		Message = message;
 	}
+
+	public string Title { get; }
+
+	public string Message { get; }
 }

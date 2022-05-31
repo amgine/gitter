@@ -18,43 +18,42 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+public readonly struct FileSize
 {
-	public readonly struct FileSize
+	private static readonly string[] KnownUnits =
 	{
-		private static readonly string[] KnownUnits = new[]
-		{
-			"B", "KB", "MB", "GB", "TB", "PB"
-		};
+		"B", "KB", "MB", "GB", "TB", "PB"
+	};
 
-		public FileSize(long size)
+	public FileSize(long size)
+	{
+		Size = size;
+		double s = size;
+		var sizeId = 0;
+		while(s > 1024)
 		{
-			Size = size;
-			double s = size;
-			var sizeId = 0;
-			while(s > 1024)
-			{
-				s /= 1024;
-				++sizeId;
-			}
-			if(sizeId >= KnownUnits.Length)
-			{
-				ShortSize = size.ToString();
-				ShortSizeUnits = "";
-			}
-			else
-			{
-				ShortSize = ((int)(s + .5)).ToString();
-				ShortSizeUnits = KnownUnits[sizeId];
-			}
+			s /= 1024;
+			++sizeId;
 		}
-
-		public long Size { get; }
-
-		public string ShortSize { get; }
-
-		public string ShortSizeUnits { get; }
-
-		public override string ToString() => ShortSize + " " + ShortSizeUnits;
+		if(sizeId >= KnownUnits.Length)
+		{
+			ShortSize = size.ToString();
+			ShortSizeUnits = "";
+		}
+		else
+		{
+			ShortSize = ((int)(s + .5)).ToString();
+			ShortSizeUnits = KnownUnits[sizeId];
+		}
 	}
+
+	public long Size { get; }
+
+	public string ShortSize { get; }
+
+	public string ShortSizeUnits { get; }
+
+	public override string ToString() => ShortSize + " " + ShortSizeUnits;
 }

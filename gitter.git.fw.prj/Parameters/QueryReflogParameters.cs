@@ -18,23 +18,22 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+public sealed class QueryReflogParameters
 {
-	using System;
-
-	public sealed class QueryReflogParameters
+	public QueryReflogParameters()
 	{
-		public QueryReflogParameters()
-		{
-		}
-
-		public QueryReflogParameters(string reference)
-		{
-			Reference = reference;
-		}
-
-		public string Reference { get; set; }
-
-		public int MaxCount { get; set; }
 	}
+
+	public QueryReflogParameters(string reference)
+	{
+		Reference = reference;
+	}
+
+	public string Reference { get; set; }
+
+	public int MaxCount { get; set; }
 }

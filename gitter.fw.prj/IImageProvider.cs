@@ -18,13 +18,12 @@
  */
 #endregion
 
-namespace gitter.Framework
-{
-	using System;
-	using System.Drawing;
+namespace gitter.Framework;
 
-	public interface IImageProvider
-	{
-		Image GetImage(int size);
-	}
+using System;
+using System.Drawing;
+
+public interface IImageProvider
+{
+	Image GetImage(int size);
 }

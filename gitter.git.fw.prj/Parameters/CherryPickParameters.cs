@@ -18,75 +18,74 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.CherryPick"/> operation.</summary>
+public sealed class CherryPickParameters
 {
-	using System;
-	using System.Collections.Generic;
-
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.CherryPick"/> operation.</summary>
-	public sealed class CherryPickParameters
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	public CherryPickParameters()
 	{
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		public CherryPickParameters()
-		{
-		}
-
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		public CherryPickParameters(CherryPickControl control)
-		{
-			Control = control;
-		}
-
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		/// <param name="revision">Revision to cherry-pick.</param>
-		public CherryPickParameters(string revision)
-		{
-			Revisions = new string[] { revision };
-		}
-
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		/// <param name="revisions">Revisions to cherry-pick.</param>
-		public CherryPickParameters(IReadOnlyList<string> revisions)
-		{
-			Revisions = revisions;
-		}
-
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		/// <param name="revision">Revision to cherry-pick.</param>
-		/// <param name="noCommit">>Don't create commit.</param>
-		public CherryPickParameters(string revision, bool noCommit)
-		{
-			Revisions = new string[] { revision };
-			NoCommit  = noCommit;
-		}
-
-		/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
-		/// <param name="revisions">Revisions to cherry-pick.</param>
-		/// <param name="noCommit">>Don't create commit.</param>
-		public CherryPickParameters(IReadOnlyList<string> revisions, bool noCommit)
-		{
-			Revisions = revisions;
-			NoCommit  = noCommit;
-		}
-
-		public CherryPickControl? Control { get; set; }
-
-		/// <summary>Revisions to cherry-pick.</summary>
-		public IReadOnlyList<string> Revisions { get; set; }
-
-		/// <summary>Don't create commit.</summary>
-		public bool NoCommit { get; set; }
-
-		public bool SignOff { get; set; }
-
-		public int Mainline { get; set; }
-
-		public bool AllowEmpty { get; set; }
-
-		public bool AllowEmptyMessage { get; set; }
-
-		public bool FastForward { get; set; }
-
-		public bool KeepRedundantCommits { get; set; }
 	}
+
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	public CherryPickParameters(CherryPickControl control)
+	{
+		Control = control;
+	}
+
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	/// <param name="revision">Revision to cherry-pick.</param>
+	public CherryPickParameters(string revision)
+	{
+		Revisions = new string[] { revision };
+	}
+
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	/// <param name="revisions">Revisions to cherry-pick.</param>
+	public CherryPickParameters(IReadOnlyList<string> revisions)
+	{
+		Revisions = revisions;
+	}
+
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	/// <param name="revision">Revision to cherry-pick.</param>
+	/// <param name="noCommit">>Don't create commit.</param>
+	public CherryPickParameters(string revision, bool noCommit)
+	{
+		Revisions = new string[] { revision };
+		NoCommit  = noCommit;
+	}
+
+	/// <summary>Create <see cref="CherryPickParameters"/>.</summary>
+	/// <param name="revisions">Revisions to cherry-pick.</param>
+	/// <param name="noCommit">>Don't create commit.</param>
+	public CherryPickParameters(IReadOnlyList<string> revisions, bool noCommit)
+	{
+		Revisions = revisions;
+		NoCommit  = noCommit;
+	}
+
+	public CherryPickControl? Control { get; set; }
+
+	/// <summary>Revisions to cherry-pick.</summary>
+	public IReadOnlyList<string> Revisions { get; set; }
+
+	/// <summary>Don't create commit.</summary>
+	public bool NoCommit { get; set; }
+
+	public bool SignOff { get; set; }
+
+	public int Mainline { get; set; }
+
+	public bool AllowEmpty { get; set; }
+
+	public bool AllowEmptyMessage { get; set; }
+
+	public bool FastForward { get; set; }
+
+	public bool KeepRedundantCommits { get; set; }
 }

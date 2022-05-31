@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+public abstract class SearchBase
 {
-	using System;
-
-	public abstract class SearchBase
+	protected static bool TestString(string value, SearchOptions search)
 	{
-		protected static bool TestString(string value, SearchOptions search)
-		{
-			if(string.IsNullOrEmpty(search.Text)) return true;
-			if(string.IsNullOrEmpty(value)) return false;
+		if(string.IsNullOrEmpty(search.Text)) return true;
+		if(string.IsNullOrEmpty(value)) return false;
 
-			return value.IndexOf(search.Text, 0, search.MatchCase
-				? StringComparison.Ordinal
-				: StringComparison.OrdinalIgnoreCase) != -1;
-		}
+		return value.IndexOf(search.Text, 0, search.MatchCase
+			? StringComparison.Ordinal
+			: StringComparison.OrdinalIgnoreCase) != -1;
 	}
 }

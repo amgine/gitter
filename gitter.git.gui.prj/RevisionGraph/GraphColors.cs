@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,78 +18,65 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Drawing;
+
+internal static class GraphColors
 {
-	using System;
-	using System.Drawing;
+	public static readonly Color[] ColorsForLightBackground = MakePalette(Color.FromArgb( 26,  26,  26), 16, 0.7, 0.8);
+	public static readonly Color[] ColorsForDarkBackground  = MakePalette(Color.FromArgb(224, 224, 224), 16, 0.7, 1.0);
+	public static readonly int TotalColors = Math.Min(ColorsForLightBackground.Length, ColorsForDarkBackground.Length);
 
-	internal static class GraphColors
+	public static readonly Brush DotBrushForLightBackground = Brushes.Black;
+	public static readonly Brush DotBrushForDarkBackground  = Brushes.White;
+
+	public static readonly Pen TagBorderPenForLightBackground = Pens.Black;
+	public static readonly Pen TagBorderPenForDarkBackground  = Pens.White;
+
+	public static readonly Pen CirclePenForLightBackground = new(Color.Black, 1.5f);
+	public static readonly Pen CirclePenForDarkBackground  = new(Color.White, 1.5f);
+
+	static Color HSVtoRGB(double h, double s, double v)
 	{
-		public static readonly int TotalColors;
-		public static readonly Pen[] PensForLightBackground;
-		public static readonly Pen[] PensForDarkBackground;
+		var hh = h >= 360.0 ? 0.0 : h / 60.0;
+		var i = (long)hh;
+		var ff = hh - i;
+		var p = v * (1.0 - s);
+		var q = v * (1.0 - (s * ff));
+		var t = v * (1.0 - (s * (1.0 - ff)));
 
-		public static readonly Brush DotBrushForLightBackground;
-		public static readonly Brush DotBrushForDarkBackground;
-
-		public static readonly Pen TagBorderPenForLightBackground;
-		public static readonly Pen TagBorderPenForDarkBackground;
-
-		public static readonly Pen CirclePenForLightBackground;
-		public static readonly Pen CirclePenForDarkBackground;
-
-		static GraphColors()
+		var (r, g, b) = i switch
 		{
-			PensForLightBackground = new Pen[]
-				{
-					Pens.Black,
-					Pens.Red,
-					Pens.Green,
-					Pens.Blue,
-					Pens.Fuchsia,
+			0 => (v, t, p),
+			1 => (q, v, p),
+			2 => (p, v, t),
+			3 => (p, q, v),
+			4 => (t, p, v),
+			_ => (v, p, q),
+		};
 
-					Pens.Cyan,
-					Pens.Gray,
-					Pens.Gold,
-					Pens.HotPink,
-					Pens.Magenta,
+		return Color.FromArgb(
+			(byte)(r * 255 + 0.5),
+			(byte)(g * 255 + 0.5),
+			(byte)(b * 255 + 0.5));
+	}
 
-					Pens.Orange,
-					Pens.Olive,
-					Pens.Navy,
-					Pens.DarkViolet,
-					Pens.Aquamarine,
-				};
-			PensForDarkBackground = new Pen[]
-				{
-					Pens.White,
-					Pens.Red,
-					Pens.Green,
-					Pens.Blue,
-					Pens.Fuchsia,
-
-					Pens.Cyan,
-					Pens.Gray,
-					Pens.Gold,
-					Pens.HotPink,
-					Pens.Magenta,
-
-					Pens.Orange,
-					Pens.Olive,
-					Pens.Navy,
-					Pens.DarkViolet,
-					Pens.Aquamarine,
-				};
-			TotalColors = Math.Min(PensForLightBackground.Length, PensForDarkBackground.Length);
-
-			DotBrushForLightBackground = Brushes.Black;
-			DotBrushForDarkBackground = Brushes.White;
-
-			TagBorderPenForLightBackground = Pens.Black;
-			TagBorderPenForDarkBackground = Pens.White;
-
-			CirclePenForLightBackground = new Pen(Color.Black, 1.5f);
-			CirclePenForDarkBackground = new Pen(Color.White, 1.5f);
+	static Color[] MakePalette(Color defaultColor, int n, double s, double v)
+	{
+		var colors = new Color[n + 1];
+		colors[0] = defaultColor;
+		int index = 1;
+		const int k = 2;
+		for(int j = 0; j < k; ++j)
+		{
+			for(int i = j; i < n; i += k)
+			{
+				var h = 360 * i / (float)n;
+				colors[index++] = HSVtoRGB(h, s, v);
+			}
 		}
+		return colors;
 	}
 }

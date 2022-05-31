@@ -18,23 +18,22 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+
+using gitter.Framework.Controls;
+
+public class CreatingPanelsEventArgs : EventArgs
 {
-	using System;
-	using System.Collections.Generic;
-
-	using gitter.Framework.Controls;
-
-	public class CreatingPanelsEventArgs : EventArgs
+	public CreatingPanelsEventArgs(IDiffSource diffSource, List<FlowPanel> panels)
 	{
-		public CreatingPanelsEventArgs(IDiffSource diffSource, List<FlowPanel> panels)
-		{
-			DiffSource = diffSource;
-			Panels     = panels;
-		}
-
-		public IDiffSource DiffSource { get; }
-
-		public List<FlowPanel> Panels { get; }
+		DiffSource = diffSource;
+		Panels     = panels;
 	}
+
+	public IDiffSource DiffSource { get; }
+
+	public List<FlowPanel> Panels { get; }
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,68 +18,67 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+public class NotifyCollectionBinding<T> : IDisposable
 {
-	using System;
+	private readonly CustomListBoxItemsCollection _itemsCollection;
+	private readonly NotifyCollection<T> _boundCollection;
+	private readonly Converter<T, CustomListBoxItem> _itemConverter;
 
-	public class NotifyCollectionBinding<T> : IDisposable
+	public NotifyCollectionBinding(
+		CustomListBoxItemsCollection itemsCollection,
+		NotifyCollection<T> boundCollection,
+		Converter<T, CustomListBoxItem> itemConverter)
 	{
-		private readonly CustomListBoxItemsCollection _itemsCollection;
-		private readonly NotifyCollection<T> _boundCollection;
-		private readonly Converter<T, CustomListBoxItem> _itemConverter;
+		Verify.Argument.IsNotNull(itemsCollection);
+		Verify.Argument.IsNotNull(boundCollection);
+		Verify.Argument.IsNotNull(itemConverter);
 
-		public NotifyCollectionBinding(
-			CustomListBoxItemsCollection itemsCollection,
-			NotifyCollection<T> boundCollection,
-			Converter<T, CustomListBoxItem> itemConverter)
+		_itemsCollection = itemsCollection;
+		_boundCollection = boundCollection;
+		_itemConverter = itemConverter;
+
+		_itemsCollection.Clear();
+		foreach(var item in _boundCollection)
 		{
-			Verify.Argument.IsNotNull(itemsCollection, nameof(itemsCollection));
-			Verify.Argument.IsNotNull(boundCollection, nameof(boundCollection));
-			Verify.Argument.IsNotNull(itemConverter, nameof(itemConverter));
-
-			_itemsCollection = itemsCollection;
-			_boundCollection = boundCollection;
-			_itemConverter = itemConverter;
-
-			_itemsCollection.Clear();
-			foreach(var item in _boundCollection)
-			{
-				_itemsCollection.Add(_itemConverter(item));
-			}
-			_boundCollection.Changed += OnChanged;
+			_itemsCollection.Add(_itemConverter(item));
 		}
+		_boundCollection.Changed += OnChanged;
+	}
 
-		private void OnChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnChanged(object sender, NotifyCollectionEventArgs e)
+	{
+		switch(e.Event)
 		{
-			switch(e.Event)
-			{
-				case NotifyEvent.Insert:
-					for(int i = e.StartIndex; i <= e.EndIndex; ++i)
-					{
-						var item = _itemConverter(_boundCollection[i]);
-						_itemsCollection.InsertSafe(i, item);
-					}
-					break;
-				case NotifyEvent.Remove:
-					_itemsCollection.RemoveRangeSafe(e.StartIndex, e.ModifiedItems);
-					break;
-				case NotifyEvent.Set:
-					for(int i = e.StartIndex; i <= e.EndIndex; ++i)
-					{
-						var item = _itemConverter(_boundCollection[i]);
-						_itemsCollection[i] = item;
-					}
-					break;
-				case NotifyEvent.Clear:
-					_itemsCollection.ClearSafe();
-					break;
-			}
+			case NotifyEvent.Insert:
+				for(int i = e.StartIndex; i <= e.EndIndex; ++i)
+				{
+					var item = _itemConverter(_boundCollection[i]);
+					_itemsCollection.InsertSafe(i, item);
+				}
+				break;
+			case NotifyEvent.Remove:
+				_itemsCollection.RemoveRangeSafe(e.StartIndex, e.ModifiedItems);
+				break;
+			case NotifyEvent.Set:
+				for(int i = e.StartIndex; i <= e.EndIndex; ++i)
+				{
+					var item = _itemConverter(_boundCollection[i]);
+					_itemsCollection[i] = item;
+				}
+				break;
+			case NotifyEvent.Clear:
+				_itemsCollection.ClearSafe();
+				break;
 		}
+	}
 
-		public void Dispose()
-		{
-			_boundCollection.Changed -= OnChanged;
-			_itemsCollection.Clear();
-		}
+	public void Dispose()
+	{
+		_boundCollection.Changed -= OnChanged;
+		_itemsCollection.Clear();
 	}
 }

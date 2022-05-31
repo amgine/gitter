@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2022  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,41 +18,20 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+/// <summary>Type of <see cref="LogEvent"/>.</summary>
+/// <param name="Level">Event type level.</param>
+/// <param name="Name">Event type name.</param>
+/// <param name="ShortName">Event type short name.</param>
+/// <param name="Image">Event type image.</param>
+public sealed record class LogEventType(int Level, string Name, string ShortName, IImageProvider Image)
 {
-	using System;
-	using System.Drawing;
+	public static readonly LogEventType Debug       = new( 0, "Debug",       @"dbg", CommonIcons.Log.Debug);
+	public static readonly LogEventType Information = new(10, "Information", @"inf", CommonIcons.Log.Information);
+	public static readonly LogEventType Warning     = new(20, "Warning",     @"wrn", CommonIcons.Log.Warning);
+	public static readonly LogEventType Error       = new(30, "Error",       @"err", CommonIcons.Log.Error);
 
-	using Resources = gitter.Framework.Properties.Resources;
-
-	/// <summary>Type of <see cref="LogEvent"/>.</summary>
-	public sealed class LogEventType
-	{
-		public static readonly LogEventType Debug       = new LogEventType( 0, "Debug",       "dbg", Resources.ImgLogDebug);
-		public static readonly LogEventType Information = new LogEventType(10, "Information", "inf", Resources.ImgLogInfo);
-		public static readonly LogEventType Warning     = new LogEventType(20, "Warning",     "wrn", Resources.ImgLogWarning);
-		public static readonly LogEventType Error       = new LogEventType(30, "Error",       "err", Resources.ImgLogError);
-
-		/// <summary>Event type level.</summary>
-		public int Level { get; }
-
-		/// <summary>Event type name.</summary>
-		public string Name { get; }
-
-		/// <summary>Event type short name.</summary>
-		public string ShortName { get; }
-
-		/// <summary>Event type image.</summary>
-		public Bitmap Image { get; }
-
-		public LogEventType(int level, string name, string shortName, Bitmap image)
-		{
-			Level     = level;
-			Name      = name;
-			ShortName = shortName;
-			Image     = image;
-		}
-
-		public override string ToString() => Name;
-	}
+	/// <inheritdoc/>
+	public override string ToString() => Name;
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,40 +18,46 @@
  */
 #endregion
 
-namespace gitter.Controls
+namespace gitter.Controls;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+public sealed class RepositoryProviderListItem : CustomListBoxItem<IRepositoryProvider>
 {
-	using System;
-	using System.Drawing;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	public sealed class RepositoryProviderListItem : CustomListBoxItem<IRepositoryProvider>
+	public RepositoryProviderListItem(IRepositoryProvider data)
+		: base(data)
 	{
-		public RepositoryProviderListItem(IRepositoryProvider data)
-			: base(data)
-		{
-		}
+	}
 
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					paintEventArgs.PaintImageAndText(DataContext.Icon, DataContext.DisplayName);
-					break;
-			}
-		}
+	private Image GetIcon(Dpi dpi, int size = 16)
+		=> DataContext.Icon?.GetImage(dpi.X * 16 / 96);
 
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		switch(paintEventArgs.SubItemId)
 		{
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return measureEventArgs.MeasureImageAndText(DataContext.Icon, DataContext.DisplayName);
-				default:
-					return Size.Empty;
-			}
+			case 0:
+				var icon = GetIcon(paintEventArgs.Dpi);
+				paintEventArgs.PaintImageAndText(icon, DataContext.DisplayName);
+				break;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		switch(measureEventArgs.SubItemId)
+		{
+			case 0:
+				var icon = GetIcon(measureEventArgs.Dpi);
+				return measureEventArgs.MeasureImageAndText(icon, DataContext.DisplayName);
+			default:
+				return Size.Empty;
 		}
 	}
 }

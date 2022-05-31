@@ -1,90 +1,89 @@
 ﻿#region Copyright Notice
 /*
- * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+* gitter - VCS repository management tool
+* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+* 
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #endregion
 
-namespace gitter.Git.AccessLayer.CLI
+namespace gitter.Git.AccessLayer.CLI;
+
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using gitter.Framework;
+
+sealed class QuerySymbolicReferenceImpl : IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData>
 {
-	using System;
-	using System.IO;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using gitter.Framework;
+	private const string refPrefix = "ref: ";
 
-	sealed class QuerySymbolicReferenceImpl : IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData>
+	private readonly IGitRepository _repository;
+
+	public QuerySymbolicReferenceImpl(IGitRepository repository)
 	{
-		private const string refPrefix = "ref: ";
+		_repository = repository;
+	}
 
-		private readonly IGitRepository _repository;
-
-		public QuerySymbolicReferenceImpl(IGitRepository repository)
+	private static SymbolicReferenceData Parse(string value)
+	{
+		if(value is { Length: >= 17 } && value.StartsWith(refPrefix + GitConstants.LocalBranchPrefix))
 		{
-			_repository = repository;
+			return new SymbolicReferenceData(value.Substring(16), ReferenceType.LocalBranch);
 		}
-
-		private static SymbolicReferenceData Parse(string value)
+		if(GitUtils.IsValidSHA1(value))
 		{
-			if(value != null && value.Length >= 17 && value.StartsWith(refPrefix + GitConstants.LocalBranchPrefix))
+			return new SymbolicReferenceData(value, ReferenceType.Revision);
+		}
+		return new SymbolicReferenceData(null, ReferenceType.None);
+	}
+
+	public SymbolicReferenceData Invoke(QuerySymbolicReferenceParameters parameters)
+	{
+		Verify.Argument.IsNotNull(parameters);
+
+		var fileName = _repository.GetGitFileName(parameters.Name);
+		if(File.Exists(fileName))
+		{
+			string pointer;
+			using var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+			if(fs.Length == 0)
 			{
-				return new SymbolicReferenceData(value.Substring(16), ReferenceType.LocalBranch);
+				return new SymbolicReferenceData(null, ReferenceType.None);
 			}
-			if(GitUtils.IsValidSHA1(value))
+			else
 			{
-				return new SymbolicReferenceData(value, ReferenceType.Revision);
+				using var sr = new StreamReader(fs);
+				pointer = sr.ReadLine();
+				sr.Close();
 			}
-			return new SymbolicReferenceData(null, ReferenceType.None);
+			return Parse(pointer);
 		}
+		return new SymbolicReferenceData(null, ReferenceType.None);
+	}
 
-		public SymbolicReferenceData Invoke(QuerySymbolicReferenceParameters parameters)
-		{
-			Verify.Argument.IsNotNull(parameters, nameof(parameters));
+	public Task<SymbolicReferenceData> InvokeAsync(QuerySymbolicReferenceParameters parameters,
+		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	{
+		Verify.Argument.IsNotNull(parameters);
 
-			var fileName = _repository.GetGitFileName(parameters.Name);
-			if(File.Exists(fileName))
-			{
-				string pointer;
-				using var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-				if(fs.Length == 0)
-				{
-					return new SymbolicReferenceData(null, ReferenceType.None);
-				}
-				else
-				{
-					using var sr = new StreamReader(fs);
-					pointer = sr.ReadLine();
-					sr.Close();
-				}
-				return Parse(pointer);
-			}
-			return new SymbolicReferenceData(null, ReferenceType.None);
-		}
-
-		public Task<SymbolicReferenceData> InvokeAsync(QuerySymbolicReferenceParameters parameters,
-			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
-		{
-			Verify.Argument.IsNotNull(parameters, nameof(parameters));
-
-			return Task.Factory.StartNew(
-				(state) => Invoke((QuerySymbolicReferenceParameters)state),
-				parameters,
-				cancellationToken,
-				TaskCreationOptions.None,
-				TaskScheduler.Default);
-		}
+		return Task.Factory.StartNew(
+			state => Invoke((QuerySymbolicReferenceParameters)state),
+			parameters,
+			cancellationToken,
+			TaskCreationOptions.None,
+			TaskScheduler.Default);
 	}
 }

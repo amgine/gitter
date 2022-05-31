@@ -18,208 +18,209 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Data
 
-	sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
+	private SplitterMarker _splitterMarker;
+	private bool _isActive;
+	private int _resizeOffset;
+	private int _minimumPosition;
+	private int _maximumPosition;
+
+	#endregion
+
+	#region .ctor
+
+	public ViewHostResizingProcess(ViewHost viewHost)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(viewHost);
 
-		private SplitterMarker _splitterMarker;
-		private bool _isActive;
-		private int _resizeOffset;
-		private int _minimumPosition;
-		private int _maximumPosition;
+		ViewHost = viewHost;
+	}
 
-		#endregion
+	#endregion
 
-		#region .ctor
+	#region Properties
 
-		public ViewHostResizingProcess(ViewHost viewHost)
+	public ViewHost ViewHost { get; }
+
+	public bool IsActive => _isActive;
+
+	#endregion
+
+	public bool Start(Point location)
+	{
+		Verify.State.IsFalse(IsActive);
+		Verify.State.IsTrue(ViewHost.Status == ViewHostStatus.AutoHide);
+		Verify.State.IsTrue(ViewHost.Visible);
+
+		var dpi = Dpi.FromControl(ViewHost);
+
+		_isActive = true;
+		var size = ViewHost.Size;
+		Rectangle bounds;
+		var side = ViewHost.DockSide;
+		var grid = side.DockPanel;
+		Orientation orientation;
+		switch(side.Side)
 		{
-			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
-
-			ViewHost = viewHost;
+			case AnchorStyles.Left:
+				_minimumPosition = ViewConstants.MinimumHostWidth.GetValue(dpi);
+				_maximumPosition = grid.HorizontalClientSpace - ViewConstants.SideDockPanelBorderSize;
+				bounds = new Rectangle(
+					size.Width - ViewConstants.SideDockPanelBorderSize, 0,
+					ViewConstants.SideDockPanelBorderSize, size.Height);
+				_resizeOffset = location.X - bounds.X;
+				orientation = Orientation.Horizontal;
+				break;
+			case AnchorStyles.Top:
+				_minimumPosition = ViewConstants.MinimumHostHeight.GetValue(dpi);
+				_maximumPosition = grid.VerticalClientSpace - ViewConstants.SideDockPanelBorderSize;
+				bounds = new Rectangle(
+					0, size.Height - ViewConstants.SideDockPanelBorderSize,
+					size.Width, ViewConstants.SideDockPanelBorderSize);
+				_resizeOffset = location.Y - bounds.Y;
+				orientation = Orientation.Vertical;
+				break;
+			case AnchorStyles.Right:
+				_minimumPosition = size.Width - grid.HorizontalClientSpace;
+				_maximumPosition = size.Width - ViewConstants.MinimumHostWidth.GetValue(dpi);
+				bounds = new Rectangle(
+					0, 0,
+					ViewConstants.SideDockPanelBorderSize, size.Height);
+				_resizeOffset = location.X - bounds.X;
+				orientation = Orientation.Horizontal;
+				break;
+			case AnchorStyles.Bottom:
+				_minimumPosition = size.Height - grid.VerticalClientSpace;
+				_maximumPosition = size.Height - ViewConstants.MinimumHostHeight.GetValue(dpi);
+				bounds = new Rectangle(
+					0, 0,
+					size.Width, ViewConstants.SideDockPanelBorderSize);
+				_resizeOffset = location.Y - bounds.Y;
+				orientation = Orientation.Vertical;
+				break;
+			default:
+				throw new ApplicationException();
 		}
+		bounds.Location = ViewHost.PointToClient(bounds.Location);
+		SpawnMarker(bounds, orientation);
+		return true;
+	}
 
-		#endregion
+	private int ClampPosition(int position)
+	{
+		if(position <= _minimumPosition) return _minimumPosition;
+		if(position >= _maximumPosition) return _maximumPosition;
+		return position;
+	}
 
-		#region Properties
+	public void Update(Point location)
+	{
+		Verify.State.IsTrue(IsActive);
 
-		public ViewHost ViewHost { get; }
-
-		public bool IsActive => _isActive;
-
-		#endregion
-
-		public bool Start(Point location)
+		switch(ViewHost.DockSide.Orientation)
 		{
-			Verify.State.IsFalse(IsActive);
-			Verify.State.IsTrue(ViewHost.Status == ViewHostStatus.AutoHide);
-			Verify.State.IsTrue(ViewHost.Visible);
-
-			_isActive = true;
-			var size = ViewHost.Size;
-			Rectangle bounds;
-			var side = ViewHost.DockSide;
-			var grid = side.Grid;
-			Orientation orientation;
-			switch(side.Side)
-			{
-				case AnchorStyles.Left:
-					_minimumPosition = ViewConstants.MinimumHostWidth;
-					_maximumPosition = grid.HorizontalClientSpace - ViewConstants.SideDockPanelBorderSize;
-					bounds = new Rectangle(
-						size.Width - ViewConstants.SideDockPanelBorderSize, 0,
-						ViewConstants.SideDockPanelBorderSize, size.Height);
-					_resizeOffset = location.X - bounds.X;
-					orientation = Orientation.Horizontal;
-					break;
-				case AnchorStyles.Top:
-					_minimumPosition = ViewConstants.MinimumHostHeight;
-					_maximumPosition = grid.VerticalClientSpace - ViewConstants.SideDockPanelBorderSize;
-					bounds = new Rectangle(
-						0, size.Height - ViewConstants.SideDockPanelBorderSize,
-						size.Width, ViewConstants.SideDockPanelBorderSize);
-					_resizeOffset = location.Y - bounds.Y;
-					orientation = Orientation.Vertical;
-					break;
-				case AnchorStyles.Right:
-					_minimumPosition = size.Width - grid.HorizontalClientSpace;
-					_maximumPosition = size.Width - ViewConstants.MinimumHostWidth;
-					bounds = new Rectangle(
-						0, 0,
-						ViewConstants.SideDockPanelBorderSize, size.Height);
-					_resizeOffset = location.X - bounds.X;
-					orientation = Orientation.Horizontal;
-					break;
-				case AnchorStyles.Bottom:
-					_minimumPosition = size.Height - grid.VerticalClientSpace;
-					_maximumPosition = size.Height - ViewConstants.MinimumHostHeight;
-					bounds = new Rectangle(
-						0, 0,
-						size.Width, ViewConstants.SideDockPanelBorderSize);
-					_resizeOffset = location.Y - bounds.Y;
-					orientation = Orientation.Vertical;
-					break;
-				default:
-					throw new ApplicationException();
-			}
-			bounds.Location = ViewHost.PointToClient(bounds.Location);
-			SpawnMarker(bounds, orientation);
-			return true;
+			case Orientation.Vertical:
+				{
+					var x = ClampPosition(location.X - _resizeOffset);
+					location = new Point(x, 0);
+				}
+				break;
+			case Orientation.Horizontal:
+				{
+					var y = ClampPosition(location.Y - _resizeOffset);
+					location = new Point(0, y);
+				}
+				break;
+			default:
+				throw new ApplicationException($"Unexpected ViewDockSide.Orientation: {ViewHost.DockSide.Orientation}");
 		}
+		location = ViewHost.PointToScreen(location);
+		_splitterMarker.Location = location;
+	}
 
-		private int ClampPosition(int position)
+	public void Commit(Point e)
+	{
+		Verify.State.IsTrue(IsActive);
+
+		KillMarker();
+		_isActive = false;
+		switch(ViewHost.DockSide.Side)
 		{
-			if(position <= _minimumPosition) return _minimumPosition;
-			if(position >= _maximumPosition) return _maximumPosition;
-			return position;
+			case AnchorStyles.Left:
+				{
+					var x = ClampPosition(e.X - _resizeOffset);
+					ViewHost.Width = x + ViewConstants.SideDockPanelBorderSize;
+				}
+				break;
+			case AnchorStyles.Top:
+				{
+					var y = ClampPosition(e.Y - _resizeOffset);
+					ViewHost.Height = y + ViewConstants.SideDockPanelBorderSize;
+				}
+				break;
+			case AnchorStyles.Right:
+				{
+					var x  = ClampPosition(e.X - _resizeOffset);
+					var w  = ViewHost.Width - x;
+					var dw = ViewHost.Width - w;
+					ViewHost.SetBounds(ViewHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
+				}
+				break;
+			case AnchorStyles.Bottom:
+				{
+					var y  = ClampPosition(e.Y - _resizeOffset);
+					var h  = ViewHost.Height - y;
+					var dh = ViewHost.Height - h;
+					ViewHost.SetBounds(0, ViewHost.Top + dh, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
+				}
+				break;
+			default:
+				throw new ApplicationException($"Unexpected ViewDockSide.Side: {ViewHost.DockSide.Side}");
 		}
+	}
 
-		public void Update(Point location)
+	public void Cancel()
+	{
+		Verify.State.IsTrue(IsActive);
+
+		KillMarker();
+		_isActive = false;
+	}
+
+	private void SpawnMarker(Rectangle bounds, Orientation orientation)
+	{
+		Verify.State.IsTrue(_splitterMarker is null);
+
+		_splitterMarker = new SplitterMarker(bounds, orientation);
+		_splitterMarker.Show();
+	}
+
+	private void KillMarker()
+	{
+		if(_splitterMarker is not null)
 		{
-			Verify.State.IsTrue(IsActive);
-
-			switch(ViewHost.DockSide.Orientation)
-			{
-				case Orientation.Vertical:
-					{
-						var x = ClampPosition(location.X - _resizeOffset);
-						location = new Point(x, 0);
-					}
-					break;
-				case Orientation.Horizontal:
-					{
-						var y = ClampPosition(location.Y - _resizeOffset);
-						location = new Point(0, y);
-					}
-					break;
-				default:
-					throw new ApplicationException($"Unexpected ViewDockSide.Orientation: {ViewHost.DockSide.Orientation}");
-			}
-			location = ViewHost.PointToScreen(location);
-			_splitterMarker.Location = location;
+			_splitterMarker.Close();
+			_splitterMarker.Dispose();
+			_splitterMarker = null;
 		}
+	}
 
-		public void Commit(Point e)
+	public void Dispose()
+	{
+		if(_splitterMarker is not null)
 		{
-			Verify.State.IsTrue(IsActive);
-
-			KillMarker();
-			_isActive = false;
-			switch(ViewHost.DockSide.Side)
-			{
-				case AnchorStyles.Left:
-					{
-						var x = ClampPosition(e.X - _resizeOffset);
-						ViewHost.Width = x + ViewConstants.SideDockPanelBorderSize;
-					}
-					break;
-				case AnchorStyles.Top:
-					{
-						var y = ClampPosition(e.Y - _resizeOffset);
-						ViewHost.Height = y + ViewConstants.SideDockPanelBorderSize;
-					}
-					break;
-				case AnchorStyles.Right:
-					{
-						var x  = ClampPosition(e.X - _resizeOffset);
-						var w  = ViewHost.Width - x;
-						var dw = ViewHost.Width - w;
-						ViewHost.SetBounds(ViewHost.Left + dw, 0, w, 0, BoundsSpecified.X | BoundsSpecified.Width);
-					}
-					break;
-				case AnchorStyles.Bottom:
-					{
-						var y  = ClampPosition(e.Y - _resizeOffset);
-						var h  = ViewHost.Height - y;
-						var dh = ViewHost.Height - h;
-						ViewHost.SetBounds(0, ViewHost.Top + dh, 0, h, BoundsSpecified.Y | BoundsSpecified.Height);
-					}
-					break;
-				default:
-					throw new ApplicationException($"Unexpected ViewDockSide.Side: {ViewHost.DockSide.Side}");
-			}
+			_splitterMarker.Dispose();
+			_splitterMarker = null;
 		}
-
-		public void Cancel()
-		{
-			Verify.State.IsTrue(IsActive);
-
-			KillMarker();
-			_isActive = false;
-		}
-
-		private void SpawnMarker(Rectangle bounds, Orientation orientation)
-		{
-			Verify.State.IsTrue(_splitterMarker is null);
-
-			_splitterMarker = new SplitterMarker(bounds, orientation);
-			_splitterMarker.Show();
-		}
-
-		private void KillMarker()
-		{
-			if(_splitterMarker is not null)
-			{
-				_splitterMarker.Close();
-				_splitterMarker.Dispose();
-				_splitterMarker = null;
-			}
-		}
-
-		public void Dispose()
-		{
-			if(_splitterMarker is not null)
-			{
-				_splitterMarker.Dispose();
-				_splitterMarker = null;
-			}
-			_isActive = false;
-		}
+		_isActive = false;
 	}
 }

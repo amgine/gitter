@@ -18,25 +18,24 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework.Mvc;
+using gitter.Git.AccessLayer;
+
+interface ICreateBranchView : IView
 {
-	using gitter.Framework.Mvc;
-	using gitter.Git.AccessLayer;
+	IUserInputSource<string> BranchName { get; }
 
-	interface ICreateBranchView : IView
-	{
-		IUserInputSource<string> BranchName { get; }
+	IUserInputSource<string> StartingRevision { get; }
 
-		IUserInputSource<string> StartingRevision { get; }
+	IUserInputSource<bool> Checkout { get; }
 
-		IUserInputSource<bool> Checkout { get; }
+	IUserInputSource<bool> Orphan { get; }
 
-		IUserInputSource<bool> Orphan { get; }
+	IUserInputSource<bool> CreateReflog { get; }
 
-		IUserInputSource<bool> CreateReflog { get; }
+	IUserInputSource<BranchTrackingMode> TrackingMode { get; }
 
-		IUserInputSource<BranchTrackingMode> TrackingMode { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

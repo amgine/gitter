@@ -18,74 +18,72 @@
  */
 #endregion
 
+namespace gitter;
 
-namespace gitter
+using System;
+using System.Drawing;
+
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+sealed class RepositoryGroupListItem : CustomListBoxItem<RepositoryGroup>
 {
-	using System;
-	using System.Drawing;
+	private RepositoryGroupBinding _binding;
 
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
-
-	sealed class RepositoryGroupListItem : CustomListBoxItem<RepositoryGroup>
+	public RepositoryGroupListItem(RepositoryGroup repositoryGroup)
+		: base(repositoryGroup)
 	{
-		private RepositoryGroupBinding _binding;
+	}
 
-		public RepositoryGroupListItem(RepositoryGroup repositoryGroup)
-			: base(repositoryGroup)
+	protected override void OnListBoxAttached()
+	{
+		base.OnListBoxAttached();
+		DataContext.NameChanged += OnRepositoryGroupNameChanged;
+		if(_binding != null)
 		{
+			_binding.Dispose();
 		}
+		_binding = new RepositoryGroupBinding(this.Items, DataContext);
+	}
 
-		protected override void OnListBoxAttached()
+	protected override void OnListBoxDetached()
+	{
+		DataContext.NameChanged -= OnRepositoryGroupNameChanged;
+		if(_binding != null)
 		{
-			base.OnListBoxAttached();
-			DataContext.NameChanged += OnRepositoryGroupNameChanged;
-			if(_binding != null)
-			{
-				_binding.Dispose();
-			}
-			_binding = new RepositoryGroupBinding(this.Items, DataContext);
+			_binding.Dispose();
 		}
+		base.OnListBoxDetached();
+	}
 
-		protected override void OnListBoxDetached()
+	private void OnRepositoryGroupNameChanged(object sender, EventArgs e)
+	{
+		InvalidateSafe();
+	}
+
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch(measureEventArgs.SubItemId)
 		{
-			DataContext.NameChanged -= OnRepositoryGroupNameChanged;
-			if(_binding != null)
-			{
-				_binding.Dispose();
-			}
-			base.OnListBoxDetached();
+			case 0:
+				return measureEventArgs.MeasureText(DataContext.Name);
+
+			default:
+				return base.MeasureSubItem(measureEventArgs);
 		}
+	}
 
-		private void OnRepositoryGroupNameChanged(object sender, EventArgs e)
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch(paintEventArgs.SubItemId)
 		{
-			InvalidateSafe();
-		}
-
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch(measureEventArgs.SubItemId)
-			{
-				case 0:
-					return measureEventArgs.MeasureText(DataContext.Name);
-
-				default:
-					return base.MeasureSubItem(measureEventArgs);
-			}
-		}
-
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			Assert.IsNotNull(paintEventArgs);
-
-			switch(paintEventArgs.SubItemId)
-			{
-				case 0:
-					paintEventArgs.PaintText(DataContext.Name);
-					break;
-			}
+			case 0:
+				paintEventArgs.PaintText(DataContext.Name);
+				break;
 		}
 	}
 }

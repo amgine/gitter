@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,35 +18,34 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Xml;
+
+public sealed class IssueStatusesCollection : NamedRedmineObjectsCache<IssueStatus>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Xml;
-
-	public sealed class IssueStatusesCollection : NamedRedmineObjectsCache<IssueStatus>
+	internal IssueStatusesCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal IssueStatusesCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override IssueStatus Create(int id, string name)
-		{
-			return new IssueStatus(Context, id, name);
-		}
+	protected override IssueStatus Create(int id, string name)
+	{
+		return new IssueStatus(Context, id, name);
+	}
 
-		protected override IssueStatus Create(XmlNode node)
-		{
-			return new IssueStatus(Context, node);
-		}
+	protected override IssueStatus Create(XmlNode node)
+	{
+		return new IssueStatus(Context, node);
+	}
 
-		public LinkedList<IssueStatus> Fetch()
-		{
-			const string url = "issue_statuses.xml";
-			return FetchItemsFromSinglePage(url);
-		}
+	public LinkedList<IssueStatus> Fetch()
+	{
+		const string url = "issue_statuses.xml";
+		return FetchItemsFromSinglePage(url);
 	}
 }

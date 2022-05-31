@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,24 +18,23 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+public abstract class RedmineObjectModification<T> : RedmineObjectDefinition<T>
+	where T : RedmineObject
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Xml;
-
-	public abstract class RedmineObjectModification<T> : RedmineObjectDefinition<T>
-		where T : RedmineObject
+	protected RedmineObjectModification(T original)
 	{
-		protected RedmineObjectModification(T original)
-		{
-			Verify.Argument.IsNotNull(original, nameof(original));
+		Verify.Argument.IsNotNull(original);
 
-			Original = original;
+		Original = original;
 
-			ResetCore();
-		}
-
-		protected T Original { get; }
+		ResetCore();
 	}
+
+	protected T Original { get; }
 }

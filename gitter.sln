@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30503.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39C7FE6E-D839-4A8D-AA64-00FDAFD27ECA}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.targets = Directory.Build.targets
 		common\key.snk = common\key.snk
 		LICENSE = LICENSE
+		README.markdown = README.markdown
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{223B9AB6-FD70-491E-B15D-306F27B53298}"
@@ -42,6 +43,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions", "extensions", "{6C73BA10-7F0D-4346-A8A2-02123B6BA5AC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "gitter.gitlab", "gitter.gitlab.prj\gitter.gitlab.csproj", "{C0B732B1-8213-4736-B49A-BA7E814EB897}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "gitter.hunspell", "gitter.hunspell.prj\gitter.hunspell.csproj", "{5AFBFD78-BB75-4FFC-84A8-2BD823E11A3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +100,10 @@ Global
 		{C0B732B1-8213-4736-B49A-BA7E814EB897}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0B732B1-8213-4736-B49A-BA7E814EB897}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0B732B1-8213-4736-B49A-BA7E814EB897}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AFBFD78-BB75-4FFC-84A8-2BD823E11A3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AFBFD78-BB75-4FFC-84A8-2BD823E11A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AFBFD78-BB75-4FFC-84A8-2BD823E11A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AFBFD78-BB75-4FFC-84A8-2BD823E11A3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

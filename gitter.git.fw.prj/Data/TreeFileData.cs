@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+public sealed class TreeFileData : TreeItemData
 {
-	using System;
-
-	public sealed class TreeFileData : TreeItemData
+	public TreeFileData(string name, FileStatus fileStatus, ConflictType conflictType, StagedStatus stagedStatus)
+		: base(name, fileStatus, stagedStatus)
 	{
-		public TreeFileData(string name, FileStatus fileStatus, ConflictType conflictType, StagedStatus stagedStatus)
-			: base(name, fileStatus, stagedStatus)
-		{
-			ConflictType = conflictType;
-		}
-
-		public ConflictType ConflictType { get; set; }
+		ConflictType = conflictType;
 	}
+
+	public ConflictType ConflictType { get; set; }
 }

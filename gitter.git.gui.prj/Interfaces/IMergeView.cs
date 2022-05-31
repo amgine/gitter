@@ -18,23 +18,23 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using System.Collections.Generic;
+
+using gitter.Framework.Mvc;
+
+interface IMergeView : IView
 {
-	using System.Collections.Generic;
-	using gitter.Framework.Mvc;
+	IUserInputSource<IList<IRevisionPointer>> Revisions { get; }
 
-	interface IMergeView : IView
-	{
-		IUserInputSource<IList<IRevisionPointer>> Revisions { get; }
+	IUserInputSource<string> Message { get; }
 
-		IUserInputSource<string> Message { get; }
+	IUserInputSource<bool> NoFastForward { get; }
 
-		IUserInputSource<bool> NoFastForward { get; }
+	IUserInputSource<bool> Squash { get; }
 
-		IUserInputSource<bool> Squash { get; }
+	IUserInputSource<bool> NoCommit { get; }
 
-		IUserInputSource<bool> NoCommit { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Native
+namespace gitter.Native;
+
+using System;
+using System.Runtime.InteropServices;
+using System.Security;
+
+[SuppressUnmanagedCodeSecurity]
+internal static class User
 {
-	using System;
-	using System.Runtime.InteropServices;
-	using System.Security;
+	private const string DllName = "user.dll";
 
-	[SuppressUnmanagedCodeSecurity]
-	internal static class User
-	{
-		private const string DllName = "user.dll";
-
-		[DllImport(DllName)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		public static extern bool DestroyIcon(IntPtr hIcon);
-	}
+	[DllImport(DllName)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	public static extern bool DestroyIcon(IntPtr hIcon);
 }

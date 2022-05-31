@@ -18,11 +18,10 @@
  */
 #endregion
 
-namespace gitter.Native
-{
-	using System;
-	using System.Runtime.InteropServices;
+namespace gitter.Native;
 
-	[UnmanagedFunctionPointer(CallingConvention.Winapi)]
-	public delegate IntPtr HookProc([In] int nCode, [In] IntPtr wParam, [In] IntPtr lParam);
-}
+using System;
+using System.Runtime.InteropServices;
+
+[UnmanagedFunctionPointer(CallingConvention.Winapi)]
+public delegate IntPtr HookProc([In] int nCode, [In] IntPtr wParam, [In] IntPtr lParam);

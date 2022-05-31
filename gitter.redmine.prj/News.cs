@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,120 +18,119 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Xml;
+
+public sealed class News : RedmineObject
 {
-	using System;
-	using System.Xml;
+	#region Static
 
-	public sealed class News : RedmineObject
+	public static readonly RedmineObjectProperty<Project> ProjectProperty =
+		new RedmineObjectProperty<Project>("project", "Project");
+	public static readonly RedmineObjectProperty<User> AuthorProperty =
+		new RedmineObjectProperty<User>("author", "Author");
+	public static readonly RedmineObjectProperty<string> TitleProperty =
+		new RedmineObjectProperty<string>("title", "Title");
+	public static readonly RedmineObjectProperty<string> SummaryProperty =
+		new RedmineObjectProperty<string>("summary", "Summary");
+	public static readonly RedmineObjectProperty<string> DescriptionProperty =
+		new RedmineObjectProperty<string>("description", "Description");
+	public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
+		new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+
+	#endregion
+
+	#region Data
+
+	private Project _project;
+	private User _author;
+	private string _title;
+	private string _description;
+	private string _summary;
+	private DateTime _createdOn;
+
+	#endregion
+
+	#region .ctor
+
+	internal News(RedmineServiceContext context, int id)
+		: base(context, id)
 	{
-		#region Static
+	}
 
-		public static readonly RedmineObjectProperty<Project> ProjectProperty =
-			new RedmineObjectProperty<Project>("project", "Project");
-		public static readonly RedmineObjectProperty<User> AuthorProperty =
-			new RedmineObjectProperty<User>("author", "Author");
-		public static readonly RedmineObjectProperty<string> TitleProperty =
-			new RedmineObjectProperty<string>("title", "Title");
-		public static readonly RedmineObjectProperty<string> SummaryProperty =
-			new RedmineObjectProperty<string>("summary", "Summary");
-		public static readonly RedmineObjectProperty<string> DescriptionProperty =
-			new RedmineObjectProperty<string>("description", "Description");
-		public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
-			new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+	internal News(RedmineServiceContext context, XmlNode node)
+		: base(context, node)
+	{
+		_project		= RedmineUtility.LoadNamedObject(node[ProjectProperty.XmlNodeName], context.Projects.Lookup);
+		_author			= RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], context.Users.Lookup);
+		_title			= RedmineUtility.LoadString(node[TitleProperty.XmlNodeName]);
+		_description	= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
+		_summary		= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
+		_createdOn		= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+	}
 
-		#endregion
+	#endregion
 
-		#region Data
+	#region Methods
 
-		private Project _project;
-		private User _author;
-		private string _title;
-		private string _description;
-		private string _summary;
-		private DateTime _createdOn;
+	internal override void Update(XmlNode node)
+	{
+		base.Update(node);
 
-		#endregion
+		Project		= RedmineUtility.LoadNamedObject(node[ProjectProperty.XmlNodeName], Context.Projects.Lookup);
+		Author		= RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], Context.Users.Lookup);
+		Title		= RedmineUtility.LoadString(node[TitleProperty.XmlNodeName]);
+		Description	= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
+		Summary		= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
+		CreatedOn	= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+	}
 
-		#region .ctor
+	#endregion
 
-		internal News(RedmineServiceContext context, int id)
-			: base(context, id)
-		{
-		}
+	#region Properties
 
-		internal News(RedmineServiceContext context, XmlNode node)
-			: base(context, node)
-		{
-			_project		= RedmineUtility.LoadNamedObject(node[ProjectProperty.XmlNodeName], context.Projects.Lookup);
-			_author			= RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], context.Users.Lookup);
-			_title			= RedmineUtility.LoadString(node[TitleProperty.XmlNodeName]);
-			_description	= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
-			_summary		= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
-			_createdOn		= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
-		}
+	public Project Project
+	{
+		get { return _project; }
+		private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
+	}
 
-		#endregion
+	public User Author
+	{
+		get { return _author; }
+		private set { UpdatePropertyValue(ref _author, value, AuthorProperty); }
+	}
 
-		#region Methods
+	public string Title
+	{
+		get { return _title; }
+		private set { UpdatePropertyValue(ref _title, value, TitleProperty); }
+	}
 
-		internal override void Update(XmlNode node)
-		{
-			base.Update(node);
+	public string Description
+	{
+		get { return _description; }
+		private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
+	}
 
-			Project		= RedmineUtility.LoadNamedObject(node[ProjectProperty.XmlNodeName], Context.Projects.Lookup);
-			Author		= RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], Context.Users.Lookup);
-			Title		= RedmineUtility.LoadString(node[TitleProperty.XmlNodeName]);
-			Description	= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
-			Summary		= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
-			CreatedOn	= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
-		}
+	public string Summary
+	{
+		get { return _summary; }
+		private set { UpdatePropertyValue(ref _summary, value, SummaryProperty); }
+	}
 
-		#endregion
+	public DateTime CreatedOn
+	{
+		get { return _createdOn; }
+		private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
+	}
 
-		#region Properties
+	#endregion
 
-		public Project Project
-		{
-			get { return _project; }
-			private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
-		}
-
-		public User Author
-		{
-			get { return _author; }
-			private set { UpdatePropertyValue(ref _author, value, AuthorProperty); }
-		}
-
-		public string Title
-		{
-			get { return _title; }
-			private set { UpdatePropertyValue(ref _title, value, TitleProperty); }
-		}
-
-		public string Description
-		{
-			get { return _description; }
-			private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
-		}
-
-		public string Summary
-		{
-			get { return _summary; }
-			private set { UpdatePropertyValue(ref _summary, value, SummaryProperty); }
-		}
-
-		public DateTime CreatedOn
-		{
-			get { return _createdOn; }
-			private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
-		}
-
-		#endregion
-
-		public override string ToString()
-		{
-			return Title;
-		}
+	public override string ToString()
+	{
+		return Title;
 	}
 }

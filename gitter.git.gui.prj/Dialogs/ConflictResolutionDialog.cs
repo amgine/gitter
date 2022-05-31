@@ -18,81 +18,85 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Dialogs
+namespace gitter.Git.Gui.Dialogs;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+internal partial class ConflictResolutionDialog : GitDialogBase
 {
-	using System;
-	using System.Drawing;
+	private readonly ConflictResolution _resolution1;
+	private readonly ConflictResolution _resolution2;
 
-	using gitter.Framework;
+	private static string StatusToString(FileStatus status)
+		=> status switch
+		{
+			FileStatus.Added    => Resources.StrlAdded,
+			FileStatus.Removed  => Resources.StrlDeleted,
+			FileStatus.Modified => Resources.StrlModified,
+			_ => throw new ArgumentException(nameof(status)),
+		};
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	private static Color StatusToColor(FileStatus status)
+		=> status switch
+		{
+			FileStatus.Added    => Color.Green,
+			FileStatus.Removed  => Color.Red,
+			FileStatus.Modified => Color.Yellow,
+			_ => throw new ArgumentException(nameof(status)),
+		};
 
-	internal partial class ConflictResolutionDialog : GitDialogBase
+	private static string ConflictResolutionToString(ConflictResolution conflictResolution)
+		=> conflictResolution switch
+		{
+			ConflictResolution.KeepModifiedFile => Resources.StrsKeepModifiedFile,
+			ConflictResolution.DeleteFile       => Resources.StrsDeleteFile,
+			ConflictResolution.UseOurs          => Resources.StrsUseOursVersion,
+			ConflictResolution.UseTheirs        => Resources.StrsUseTheirsVersion,
+			_ => throw new ArgumentException(nameof(conflictResolution)),
+		};
+
+	public ConflictResolutionDialog(string fileName, FileStatus oursStatus, FileStatus theirsStatus,
+		ConflictResolution resolution1, ConflictResolution resolution2)
 	{
-		private readonly ConflictResolution _resolution1;
-		private readonly ConflictResolution _resolution2;
+		InitializeComponent();
 
-		private static string StatusToString(FileStatus status)
-			=> status switch
-			{
-				FileStatus.Added    => Resources.StrlAdded,
-				FileStatus.Removed  => Resources.StrlDeleted,
-				FileStatus.Modified => Resources.StrlModified,
-				_ => throw new ArgumentException(nameof(status)),
-			};
+		Text = Resources.StrConflictResolution;
 
-		private static Color StatusToColor(FileStatus status)
-			=> status switch
-			{
-				FileStatus.Added    => Color.Green,
-				FileStatus.Removed  => Color.Red,
-				FileStatus.Modified => Color.Yellow,
-				_ => throw new ArgumentException(nameof(status)),
-			};
+		_lblFileName.Text = fileName;
 
-		private static string ConflictResolutionToString(ConflictResolution conflictResolution)
-			=> conflictResolution switch
-			{
-				ConflictResolution.KeepModifiedFile => Resources.StrsKeepModifiedFile,
-				ConflictResolution.DeleteFile       => Resources.StrsDeleteFile,
-				ConflictResolution.UseOurs          => Resources.StrsUseOursVersion,
-				ConflictResolution.UseTheirs        => Resources.StrsUseTheirsVersion,
-				_ => throw new ArgumentException(nameof(conflictResolution)),
-			};
+		_lblOursStatus.Text = StatusToString(oursStatus);
+		_lblTheirsStatus.Text = StatusToString(theirsStatus);
 
-		public ConflictResolutionDialog(string fileName, FileStatus oursStatus, FileStatus theirsStatus,
-			ConflictResolution resolution1, ConflictResolution resolution2)
-		{
-			InitializeComponent();
+		_lblOursStatus.BackColor = StatusToColor(oursStatus);
+		_lblTheirsStatus.BackColor = StatusToColor(theirsStatus);
 
-			Text = Resources.StrConflictResolution;
+		_resolution1 = resolution1;
+		_resolution2 = resolution2;
+	}
 
-			_lblFileName.Text = fileName;
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(350, 133));
 
-			_lblOursStatus.Text = StatusToString(oursStatus);
-			_lblTheirsStatus.Text = StatusToString(theirsStatus);
+	/// <inheritdoc/>
+	public override DialogButtons OptimalButtons => DialogButtons.Cancel;
 
-			_lblOursStatus.BackColor = StatusToColor(oursStatus);
-			_lblTheirsStatus.BackColor = StatusToColor(theirsStatus);
+	/// <inheritdoc/>
+	public ConflictResolution ConflictResolution { get; private set; }
 
-			_resolution1 = resolution1;
-			_resolution2 = resolution2;
-		}
+	private void _btnResolution1_Click(object sender, EventArgs e)
+	{
+		ConflictResolution = _resolution1;
+		ClickOk();
+	}
 
-		public override DialogButtons OptimalButtons => DialogButtons.Cancel;
-
-		public ConflictResolution ConflictResolution { get; private set; }
-
-		private void _btnResolution1_Click(object sender, EventArgs e)
-		{
-			ConflictResolution = _resolution1;
-			ClickOk();
-		}
-
-		private void _btnResolution2_Click(object sender, EventArgs e)
-		{
-			ConflictResolution = _resolution2;
-			ClickOk();
-		}
+	private void _btnResolution2_Click(object sender, EventArgs e)
+	{
+		ConflictResolution = _resolution2;
+		ClickOk();
 	}
 }

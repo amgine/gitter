@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Globalization;
+using System.Xml;
+
+public class AttachmentsCollection : RedmineObjectsCache<Attachment>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Globalization;
-	using System.Xml;
-
-	public class AttachmentsCollection : RedmineObjectsCache<Attachment>
+	internal AttachmentsCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal AttachmentsCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override Attachment Create(int id)
-		{
-			return new Attachment(Context, id);
-		}
+	protected override Attachment Create(int id)
+	{
+		return new Attachment(Context, id);
+	}
 
-		protected override Attachment Create(XmlNode node)
-		{
-			return new Attachment(Context, node);
-		}
+	protected override Attachment Create(XmlNode node)
+	{
+		return new Attachment(Context, node);
 	}
 }

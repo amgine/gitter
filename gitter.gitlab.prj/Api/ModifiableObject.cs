@@ -18,30 +18,56 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
+namespace gitter.GitLab.Api;
+
+using System;
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#elif NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
+
+[DataContract]
+class ModifiableObject
 {
-	using System;
-	using System.Runtime.Serialization;
-
-	using Newtonsoft.Json;
-
-	[DataContract]
-	class ModifiableObject
+	static class Names
 	{
-		[JsonProperty("iid")]
-		[DataMember]
-		public int Iid { get; set; }
-
-		[JsonProperty("id")]
-		[DataMember]
-		public int Id { get; set; }
-
-		[JsonProperty("created_at")]
-		[DataMember]
-		public DateTimeOffset CreatedAt { get; set; }
-
-		[JsonProperty("updated_at")]
-		[DataMember]
-		public DateTimeOffset UpdatedAt { get; set; }
+		public const string Iid       = @"iid";
+		public const string Id        = @"id";
+		public const string CreatedAt = @"created_at";
+		public const string UpdatedAt = @"updated_at";
 	}
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Iid)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Iid)]
+#endif
+	public int Iid { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Id)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Id)]
+#endif
+	public int Id { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.CreatedAt)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.CreatedAt)]
+#endif
+	public DateTimeOffset CreatedAt { get; set; }
+
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.UpdatedAt)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.UpdatedAt)]
+#endif
+	public DateTimeOffset UpdatedAt { get; set; }
 }

@@ -18,141 +18,140 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Globalization;
+using System.Threading.Tasks;
+
+using gitter.Git.AccessLayer;
+
+public sealed partial class Revision : GitObject, IRevisionPointer
 {
-	using System;
-	using System.Globalization;
-	using System.Threading.Tasks;
+	#region Data
 
-	using gitter.Git.AccessLayer;
+	private Hash _treeHash;
+	private User _author;
 
-	public sealed partial class Revision : GitObject, IRevisionPointer
+	#endregion
+
+	#region .ctor
+
+	internal Revision(Repository repository, Hash hash)
+		: base(repository)
 	{
-		#region Data
+		Parents    = new RevisionParentsCollection();
+		References = new RevisionReferencesCollection();
+		Hash       = hash;
+		HashString = hash.ToString();
+	}
 
-		private Hash _treeHash;
-		private User _author;
+	#endregion
 
-		#endregion
+	public void Load()
+	{
+		var revisionData = Repository.Accessor.QueryRevision
+			.Invoke(new QueryRevisionParameters(Hash));
+		ObjectFactories.UpdateRevision(this, revisionData);
+	}
 
-		#region .ctor
+	public async Task LoadAsync()
+	{
+		var revisionData = await Repository.Accessor.QueryRevision
+			.InvokeAsync(new QueryRevisionParameters(Hash))
+			.ConfigureAwait(continueOnCapturedContext: false);
+		ObjectFactories.UpdateRevision(this, revisionData);
+	}
 
-		internal Revision(Repository repository, Hash hash)
-			: base(repository)
+	#region Properties
+
+	public RevisionParentsCollection Parents { get; }
+
+	public RevisionReferencesCollection References { get; }
+
+	public bool IsCurrent => Repository.Head.Revision == this;
+
+	public bool IsLoaded { get; internal set; }
+
+	#endregion
+
+	#region Commit Attributes
+
+	public Hash Hash { get; }
+
+	public string HashString { get; }
+
+	public Hash TreeHash
+	{
+		get => _treeHash;
+		internal set
 		{
-			Parents    = new RevisionParentsCollection();
-			References = new RevisionReferencesCollection();
-			Hash       = hash;
-			HashString = hash.ToString();
-		}
-
-		#endregion
-
-		public void Load()
-		{
-			var revisionData = Repository.Accessor.QueryRevision
-				.Invoke(new QueryRevisionParameters(Hash));
-			ObjectFactories.UpdateRevision(this, revisionData);
-		}
-
-		public async Task LoadAsync()
-		{
-			var revisionData = await Repository.Accessor.QueryRevision
-				.InvokeAsync(new QueryRevisionParameters(Hash))
-				.ConfigureAwait(continueOnCapturedContext: false);
-			ObjectFactories.UpdateRevision(this, revisionData);
-		}
-
-		#region Properties
-
-		public RevisionParentsCollection Parents { get; }
-
-		public RevisionReferencesCollection References { get; }
-
-		public bool IsCurrent => Repository.Head.Revision == this;
-
-		public bool IsLoaded { get; internal set; }
-
-		#endregion
-
-		#region Commit Attributes
-
-		public Hash Hash { get; }
-
-		public string HashString { get; }
-
-		public Hash TreeHash
-		{
-			get => _treeHash;
-			internal set
+			if(!IsLoaded)
 			{
-				if(!IsLoaded)
+				_treeHash = value;
+				TreeHashString = value.ToString();
+			}
+			else
+			{
+				if(_treeHash != value)
 				{
 					_treeHash = value;
 					TreeHashString = value.ToString();
 				}
-				else
-				{
-					if(_treeHash != value)
-					{
-						_treeHash = value;
-						TreeHashString = value.ToString();
-					}
-				}
 			}
 		}
+	}
 
-		public string TreeHashString { get; private set; }
+	public string TreeHashString { get; private set; }
 
-		public User Author
+	public User Author
+	{
+		get => _author;
+		internal set
 		{
-			get => _author;
-			internal set
+			if(!IsLoaded)
 			{
-				if(!IsLoaded)
+				_author = value;
+			}
+			else
+			{
+				if(_author != value)
 				{
 					_author = value;
 				}
-				else
-				{
-					if(_author != value)
-					{
-						_author = value;
-					}
-				}
 			}
 		}
-
-		public DateTimeOffset AuthorDate { get; internal set; }
-
-		public User Committer { get; internal set; }
-
-		public DateTimeOffset CommitDate { get; internal set; }
-
-		public string Subject { get; internal set; }
-
-		public string Body { get; internal set; }
-
-		#endregion
-
-		#region IRevisionPointer Members
-
-		ReferenceType IRevisionPointer.Type => ReferenceType.Revision;
-
-		string IRevisionPointer.Pointer => HashString;
-
-		string IRevisionPointer.FullName => HashString;
-
-		bool IRevisionPointer.IsDeleted => false;
-
-		Revision IRevisionPointer.Dereference() => this;
-
-		Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(this);
-
-		#endregion
-
-		/// <inheritdoc/>
-		public override string ToString()
-			=> string.Format(CultureInfo.InvariantCulture, "{0}: {1}", Hash.ToString(7), Subject);
 	}
+
+	public DateTimeOffset AuthorDate { get; internal set; }
+
+	public User Committer { get; internal set; }
+
+	public DateTimeOffset CommitDate { get; internal set; }
+
+	public string Subject { get; internal set; }
+
+	public string Body { get; internal set; }
+
+	#endregion
+
+	#region IRevisionPointer Members
+
+	ReferenceType IRevisionPointer.Type => ReferenceType.Revision;
+
+	string IRevisionPointer.Pointer => HashString;
+
+	string IRevisionPointer.FullName => HashString;
+
+	bool IRevisionPointer.IsDeleted => false;
+
+	Revision IRevisionPointer.Dereference() => this;
+
+	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(this);
+
+	#endregion
+
+	/// <inheritdoc/>
+	public override string ToString()
+		=> string.Format(CultureInfo.InvariantCulture, "{0}: {1}", Hash.ToString(7), Subject);
 }

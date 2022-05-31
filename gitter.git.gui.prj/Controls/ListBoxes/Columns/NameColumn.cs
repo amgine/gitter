@@ -18,35 +18,65 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>"Name" column.</summary>
+public class NameColumn : CustomListBoxColumn
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	/// <summary>"Name" column.</summary>
-	public class NameColumn : CustomListBoxColumn
+	public NameColumn()
+		: base((int)ColumnId.Name, Resources.StrName, visible: true)
 	{
-		public NameColumn()
-			: base((int)ColumnId.Name, Resources.StrName, true)
+		SizeMode = ColumnSizeMode.Fill;
+	}
+
+	public NameColumn(string name)
+		: base((int)ColumnId.Name, name, visible: true)
+	{
+		SizeMode = ColumnSizeMode.Fill;
+	}
+
+	/// <inheritdoc/>
+	public override int MinWidth => 22;
+
+	/// <inheritdoc/>
+	public override string IdentificationString => "Name";
+
+	/// <summary>Returns name of the object associated with <paramref name="item"/>.</summary>
+	/// <param name="item">Item.</param>
+	/// <returns>Name of the object associated with <paramref name="item"/>.</returns>
+	protected virtual string GetName(CustomListBoxItem item)
+		=> (item as IDataContextProvider<INamedObject>)?.DataContext?.Name;
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		if(GetName(measureEventArgs.Item) is { Length: not 0 } name)
 		{
-			SizeMode = ColumnSizeMode.Fill;
+			return measureEventArgs.MeasureText(name);
 		}
+		return base.OnMeasureSubItem(measureEventArgs);
+	}
 
-		public NameColumn(string name)
-			: base((int)ColumnId.Name, name, true)
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		if(GetName(paintEventArgs.Item) is { Length: not 0 } name)
 		{
-			SizeMode = ColumnSizeMode.Fill;
+			paintEventArgs.PaintText(name);
 		}
-
-		/// <inheritdoc/>
-		public override int MinWidth => 22;
-
-		/// <inheritdoc/>
-		public override string IdentificationString => "Name";
+		base.OnPaintSubItem(paintEventArgs);
 	}
 }

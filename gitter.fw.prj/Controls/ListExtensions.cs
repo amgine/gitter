@@ -18,43 +18,42 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+
+public static class ListExtensions
 {
-	using System;
-	using System.Collections.Generic;
-
-	public static class ListExtensions
+	public static T FindPrevious<T>(this IList<T> items, int currentIndex, Predicate<T> filter)
 	{
-		public static T FindPrevious<T>(this IList<T> items, int currentIndex, Predicate<T> filter)
+		Verify.Argument.IsNotNull(items);
+		Verify.Argument.IsNotNull(filter);
+
+		while(--currentIndex >= 0)
 		{
-			Verify.Argument.IsNotNull(items, nameof(items));
-			Verify.Argument.IsNotNull(filter, nameof(filter));
-
-			while(--currentIndex >= 0)
+			var item = items[currentIndex];
+			if(filter(item))
 			{
-				var item = items[currentIndex];
-				if(filter(item))
-				{
-					return item;
-				}
+				return item;
 			}
-			return default;
 		}
+		return default;
+	}
 
-		public static T FindNext<T>(this IList<T> items, int currentIndex, Predicate<T> filter)
+	public static T FindNext<T>(this IList<T> items, int currentIndex, Predicate<T> filter)
+	{
+		Verify.Argument.IsNotNull(items);
+		Verify.Argument.IsNotNull(filter);
+
+		while(++currentIndex < items.Count)
 		{
-			Verify.Argument.IsNotNull(items, nameof(items));
-			Verify.Argument.IsNotNull(filter, nameof(filter));
-
-			while(++currentIndex < items.Count)
+			var item = items[currentIndex];
+			if(filter(item))
 			{
-				var item = items[currentIndex];
-				if(filter(item))
-				{
-					return item;
-				}
+				return item;
 			}
-			return default;
 		}
+		return default;
 	}
 }

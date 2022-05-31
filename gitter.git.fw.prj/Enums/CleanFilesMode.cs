@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+/// <summary>Clean files mode.</summary>
+public enum CleanFilesMode
 {
-	/// <summary>Clean files mode.</summary>
-	public enum CleanFilesMode
-	{
-		/// <summary>Remove untracked files.</summary>
-		Default,
-		/// <summary>Remove untracked and ignored files.</summary>
-		IncludeIgnored,
-		/// <summary>Remove only ignored files.</summary>
-		OnlyIgnored,
-	}
+	/// <summary>Remove untracked files.</summary>
+	Default,
+	/// <summary>Remove untracked and ignored files.</summary>
+	IncludeIgnored,
+	/// <summary>Remove only ignored files.</summary>
+	OnlyIgnored,
 }

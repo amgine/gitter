@@ -18,107 +18,106 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System.Collections.Generic;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+sealed class HashHyperlinkExtractor : IHyperlinkExtractor
 {
-	using System.Collections.Generic;
+	const int MinLength = Hash.HexStringLength;
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
+	static bool IsHashChar(char value)
+		=> (value is >= '0' and <= '9') || (value is >= 'a' and <= 'f');
 
-	sealed class HashHyperlinkExtractor : IHyperlinkExtractor
+	ref struct State
 	{
-		const int MinLength = Hash.HexStringLength;
+		private readonly string Text;
 
-		static bool IsHashChar(char value)
-			=> (value is >= '0' and <= '9') || (value is >= 'a' and <= 'f');
-
-		ref struct State
+		public State(string text)
 		{
-			private readonly string Text;
+			Text       = text;
+			Hyperlinks = null;
+			Start      = -1;
+			NonHashSeq = false;
+		}
 
-			public State(string text)
+		public List<Hyperlink> Hyperlinks;
+
+		public int Start;
+
+		public bool NonHashSeq;
+
+		public void Reset()
+		{
+			Start      = -1;
+			NonHashSeq = false;
+		}
+
+		public void Commit(int position)
+		{
+			if(Start >= 0 && !NonHashSeq)
 			{
-				Text       = text;
-				Hyperlinks = null;
-				Start      = -1;
-				NonHashSeq = false;
-			}
-
-			public List<Hyperlink> Hyperlinks;
-
-			public int Start;
-
-			public bool NonHashSeq;
-
-			public void Reset()
-			{
-				Start      = -1;
-				NonHashSeq = false;
-			}
-
-			public void Commit(int position)
-			{
-				if(Start >= 0 && !NonHashSeq)
+				var len = position - Start;
+				if(len >= MinLength && len <= Hash.HexStringLength)
 				{
-					var len = position - Start;
-					if(len >= MinLength && len <= Hash.HexStringLength)
-					{
-						var hash = Text.Substring(Start, len);
-						Hyperlinks ??= new();
-						Hyperlinks.Add(new Hyperlink(new Substring(Text, Start, len), "gitter://history/" + hash));
-					}
+					var hash = Text.Substring(Start, len);
+					Hyperlinks ??= new();
+					Hyperlinks.Add(new Hyperlink(new Substring(Text, Start, len), "gitter://history/" + hash));
 				}
-				Reset();
 			}
+			Reset();
+		}
 
-			public void Append(char c, int position)
+		public void Append(char c, int position)
+		{
+			if(NonHashSeq) return;
+			if(Start == -1)
 			{
-				if(NonHashSeq) return;
-				if(Start == -1)
+				if(IsHashChar(c))
 				{
-					if(IsHashChar(c))
-					{
-						Start = position;
-					}
-					else
-					{
-						NonHashSeq = true;
-					}
+					Start = position;
 				}
 				else
 				{
-					if(!IsHashChar(c))
-					{
-						Start = -1;
-						NonHashSeq = true;
-					}
+					NonHashSeq = true;
 				}
 			}
-		}
-
-		public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
-		{
-			var state = new State(text);
-			for(int i = 0; i < text.Length; ++i)
+			else
 			{
-				var c = text[i];
-				if(char.IsWhiteSpace(c) || c is ')' or ',' or '.' or ':' or ';')
+				if(!IsHashChar(c))
 				{
-					state.Commit(i);
-				}
-				else if(c == '(')
-				{
-					state.Reset();
-				}
-				else
-				{
-					state.Append(c, i);
+					Start = -1;
+					NonHashSeq = true;
 				}
 			}
-			state.Commit(text.Length);
-			return state.Hyperlinks is not null
-				? state.Hyperlinks
-				: Preallocated<Hyperlink>.EmptyArray;
 		}
+	}
+
+	public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
+	{
+		var state = new State(text);
+		for(int i = 0; i < text.Length; ++i)
+		{
+			var c = text[i];
+			if(char.IsWhiteSpace(c) || c is ')' or ',' or '.' or ':' or ';')
+			{
+				state.Commit(i);
+			}
+			else if(c == '(')
+			{
+				state.Reset();
+			}
+			else
+			{
+				state.Append(c, i);
+			}
+		}
+		state.Commit(text.Length);
+		return state.Hyperlinks is not null
+			? state.Hyperlinks
+			: Preallocated<Hyperlink>.EmptyArray;
 	}
 }

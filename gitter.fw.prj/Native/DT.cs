@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Native
-{
-	using System;
+namespace gitter.Native;
 
-	[Flags]
-	public enum DT
-	{
-		TOP                  = 0x00000000,
-		LEFT                 = 0x00000000,
-		CENTER               = 0x00000001,
-		RIGHT                = 0x00000002,
-		VCENTER              = 0x00000004,
-		BOTTOM               = 0x00000008,
-		CALCRECT             = 0x00000400,
-		EDITCONTROL          = 0x00002000,
-		END_ELLIPSIS         = 0x00008000,
-		EXPANDTABS           = 0x00000040,
-		EXTERNALLEADING      = 0x00000200,
-		HIDEPREFIX           = 0x00100000,
-		INTERNAL             = 0x00001000,
-		MODIFYSTRING         = 0x00010000,
-		NOCLIP               = 0x00000100,
-		NOFULLWIDTHCHARBREAK = 0x00080000,
-		NOPREFIX             = 0x00000800,
-		PATH_ELLIPSIS        = 0x00004000,
-		PREFIXONLY           = 0x00200000,
-		RTLREADING           = 0x00020000,
-		SINGLELINE           = 0x00000020,
-		TABSTOP              = 0x00000080,
-		WORDBREAK            = 0x00000010,
-		WORD_ELLIPSIS        = 0x00040000,
-	}
+using System;
+
+[Flags]
+public enum DT
+{
+	TOP                  = 0x00000000,
+	LEFT                 = 0x00000000,
+	CENTER               = 0x00000001,
+	RIGHT                = 0x00000002,
+	VCENTER              = 0x00000004,
+	BOTTOM               = 0x00000008,
+	CALCRECT             = 0x00000400,
+	EDITCONTROL          = 0x00002000,
+	END_ELLIPSIS         = 0x00008000,
+	EXPANDTABS           = 0x00000040,
+	EXTERNALLEADING      = 0x00000200,
+	HIDEPREFIX           = 0x00100000,
+	INTERNAL             = 0x00001000,
+	MODIFYSTRING         = 0x00010000,
+	NOCLIP               = 0x00000100,
+	NOFULLWIDTHCHARBREAK = 0x00080000,
+	NOPREFIX             = 0x00000800,
+	PATH_ELLIPSIS        = 0x00004000,
+	PREFIXONLY           = 0x00200000,
+	RTLREADING           = 0x00020000,
+	SINGLELINE           = 0x00000020,
+	TABSTOP              = 0x00000080,
+	WORDBREAK            = 0x00000010,
+	WORD_ELLIPSIS        = 0x00040000,
 }

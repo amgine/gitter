@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,47 +18,46 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+public abstract class RedmineObjectDefinition<T>
+	where T : RedmineObject
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Xml;
-
-	public abstract class RedmineObjectDefinition<T>
-		where T : RedmineObject
+	protected RedmineObjectDefinition()
 	{
-		protected RedmineObjectDefinition()
+	}
+
+	protected static void EmitIfChanged<TValue>(TValue original, TValue current, XmlDocument doc, XmlElement root, string name, Action<XmlElement, TValue> emit)
+	{
+		if(!EqualityComparer<TValue>.Default.Equals(original, current))
 		{
+			var e = doc.CreateElement(name);
+			emit(e, current);
 		}
+	}
 
-		protected static void EmitIfChanged<TValue>(TValue original, TValue current, XmlDocument doc, XmlElement root, string name, Action<XmlElement, TValue> emit)
-		{
-			if(!EqualityComparer<TValue>.Default.Equals(original, current))
-			{
-				var e = doc.CreateElement(name);
-				emit(e, current);
-			}
-		}
+	public bool IsCommitted { get; private set; }
 
-		public bool IsCommitted { get; private set; }
+	protected abstract void ResetCore();
 
-		protected abstract void ResetCore();
+	protected abstract void CommitCore();
 
-		protected abstract void CommitCore();
+	public void Reset()
+	{
+		if(IsCommitted) throw new InvalidOperationException();
 
-		public void Reset()
-		{
-			if(IsCommitted) throw new InvalidOperationException();
+		ResetCore();
+	}
 
-			ResetCore();
-		}
+	public void Commit()
+	{
+		if(IsCommitted) throw new InvalidOperationException();
 
-		public void Commit()
-		{
-			if(IsCommitted) throw new InvalidOperationException();
-
-			CommitCore();
-			IsCommitted = true;
-		}
+		CommitCore();
+		IsCommitted = true;
 	}
 }

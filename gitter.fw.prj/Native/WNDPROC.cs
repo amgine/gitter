@@ -18,9 +18,8 @@
  */
 #endregion
 
-namespace gitter.Native
-{
-	using System;
+namespace gitter.Native;
 
-	internal delegate IntPtr WNDPROC(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
-}
+using System;
+
+internal delegate IntPtr WNDPROC(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);

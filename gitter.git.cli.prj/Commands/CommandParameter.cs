@@ -18,25 +18,22 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer.CLI
+namespace gitter.Git.AccessLayer.CLI;
+
+using System;
+using System.Text;
+
+/// <summary>Command parameter.</summary>
+public sealed record class CommandParameter(string Value) : ICommandArgument
 {
-	using System;
-	using System.Text;
-
-	/// <summary>Command parameter.</summary>
-	public class CommandParameter : ICommandArgument
+	/// <inheritdoc/>
+	public void ToString(StringBuilder stringBuilder)
 	{
-		public CommandParameter(string value) => Value = value;
+		Verify.Argument.IsNotNull(stringBuilder);
 
-		public string Value { get; }
-
-		public void ToString(StringBuilder stringBuilder)
-		{
-			Verify.Argument.IsNotNull(stringBuilder, nameof(stringBuilder));
-
-			stringBuilder.Append(Value);
-		}
-
-		public override string ToString() => Value;
+		stringBuilder.Append(Value);
 	}
+
+	/// <inheritdoc/>
+	public override string ToString() => Value;
 }

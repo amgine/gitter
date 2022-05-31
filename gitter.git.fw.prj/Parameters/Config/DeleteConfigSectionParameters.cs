@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+/// <summary>Parameters for <see cref="IConfigAccessor.DeleteConfigSection"/> operation.</summary>
+public sealed class DeleteConfigSectionParameters : BaseConfigParameters
 {
-	using System;
-
-	/// <summary>Parameters for <see cref="IConfigAccessor.DeleteConfigSection"/> operation.</summary>
-	public sealed class DeleteConfigSectionParameters : BaseConfigParameters
+	/// <summary>Create <see cref="DeleteConfigSectionParameters"/>.</summary>
+	public DeleteConfigSectionParameters()
 	{
-		/// <summary>Create <see cref="DeleteConfigSectionParameters"/>.</summary>
-		public DeleteConfigSectionParameters()
-		{
-		}
-
-		/// <summary>Section to remove.</summary>
-		public string SectionName { get; set; }
 	}
+
+	/// <summary>Section to remove.</summary>
+	public string SectionName { get; set; }
 }

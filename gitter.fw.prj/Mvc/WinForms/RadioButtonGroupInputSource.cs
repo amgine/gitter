@@ -18,66 +18,65 @@
  */
 #endregion
 
-namespace gitter.Framework.Mvc.WinForms
+namespace gitter.Framework.Mvc.WinForms;
+
+using System;
+using System.Windows.Forms;
+
+public class RadioButtonGroupInputSource<T> : IUserInputSource<T>
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly Tuple<RadioButton, T>[] _valueMappings;
+	private bool _isReadonly;
 
-	public class RadioButtonGroupInputSource<T> : IUserInputSource<T>
+	public RadioButtonGroupInputSource(Tuple<RadioButton, T>[] valueMappings)
 	{
-		private readonly Tuple<RadioButton, T>[] _valueMappings;
-		private bool _isReadonly;
+		Verify.Argument.IsNotNull(valueMappings);
 
-		public RadioButtonGroupInputSource(Tuple<RadioButton, T>[] valueMappings)
+		_valueMappings = valueMappings;
+	}
+
+	public T Value
+	{
+		get
 		{
-			Verify.Argument.IsNotNull(valueMappings, nameof(valueMappings));
-
-			_valueMappings = valueMappings;
-		}
-
-		public T Value
-		{
-			get
+			for(int i = 0; i < _valueMappings.Length; ++i)
 			{
-				for(int i = 0; i < _valueMappings.Length; ++i)
+				if(_valueMappings[i].Item1.Checked)
 				{
-					if(_valueMappings[i].Item1.Checked)
-					{
-						return _valueMappings[i].Item2;
-					}
-				}
-				return default;
-			}
-			set
-			{
-				var val = (object)value;
-				for(int i = 0; i < _valueMappings.Length; ++i)
-				{
-					if(object.Equals(val, _valueMappings[i].Item2))
-					{
-						_valueMappings[i].Item1.Checked = true;
-						return;
-					}
-				}
-				for(int i = 0; i < _valueMappings.Length; ++i)
-				{
-					_valueMappings[i].Item1.Checked = false;
+					return _valueMappings[i].Item2;
 				}
 			}
+			return default;
 		}
-
-		public bool IsReadOnly
+		set
 		{
-			get => _isReadonly;
-			set
+			var val = (object)value;
+			for(int i = 0; i < _valueMappings.Length; ++i)
 			{
-				if(_isReadonly != value)
+				if(object.Equals(val, _valueMappings[i].Item2))
 				{
-					_isReadonly = value;
-					for(int i = 0; i < _valueMappings.Length; ++i)
-					{
-						_valueMappings[i].Item1.Enabled = value;
-					}
+					_valueMappings[i].Item1.Checked = true;
+					return;
+				}
+			}
+			for(int i = 0; i < _valueMappings.Length; ++i)
+			{
+				_valueMappings[i].Item1.Checked = false;
+			}
+		}
+	}
+
+	public bool IsReadOnly
+	{
+		get => _isReadonly;
+		set
+		{
+			if(_isReadonly != value)
+			{
+				_isReadonly = value;
+				for(int i = 0; i < _valueMappings.Length; ++i)
+				{
+					_valueMappings[i].Item1.Enabled = value;
 				}
 			}
 		}

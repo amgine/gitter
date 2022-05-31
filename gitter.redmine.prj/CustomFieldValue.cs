@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,51 +18,50 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+
+public sealed class CustomFieldValue
 {
-	using System;
+	#region Data
 
-	public sealed class CustomFieldValue
+	private readonly CustomField _field;
+	private string _value;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler ValueChanged;
+
+	#endregion
+
+	#region .ctor
+
+	public CustomFieldValue(CustomField field, string value)
 	{
-		#region Data
+		_field = field;
+		_value = value;
+	}
 
-		private readonly CustomField _field;
-		private string _value;
+	#endregion
 
-		#endregion
+	public CustomField Field
+	{
+		get { return _field; }
+	}
 
-		#region Events
-
-		public event EventHandler ValueChanged;
-
-		#endregion
-
-		#region .ctor
-
-		public CustomFieldValue(CustomField field, string value)
+	public string Value
+	{
+		get { return _value; }
+		internal set
 		{
-			_field = field;
-			_value = value;
-		}
-
-		#endregion
-
-		public CustomField Field
-		{
-			get { return _field; }
-		}
-
-		public string Value
-		{
-			get { return _value; }
-			internal set
+			if(_value != value)
 			{
-				if(_value != value)
-				{
-					_value = value;
-					var handler = ValueChanged;
-					if(handler != null) handler(this, EventArgs.Empty);
-				}
+				_value = value;
+				var handler = ValueChanged;
+				if(handler != null) handler(this, EventArgs.Empty);
 			}
 		}
 	}

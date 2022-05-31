@@ -18,128 +18,136 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+/// <summary><see cref="CustomListBoxColumn"/> resize process.</summary>
+class ColumnResizeProcess
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
+	#region Data
 
-	/// <summary><see cref="CustomListBoxColumn"/> resize process.</summary>
-	class ColumnResizeProcess
+	private readonly Point _mouseDownLocation;
+
+	#endregion
+
+	#region Static
+
+	/// <summary>Create resize process from column list, active (hovered) column and side (left or right) of resize.</summary>
+	public static ColumnResizeProcess FromActiveColumn(IList<CustomListBoxColumn> columns, int activeIndex, ColumnResizeSide side, Point mouseDownLocation)
 	{
-		#region Data
+		Assert.IsNotNull(columns);
 
-		private readonly Point _mouseDownLocation;
+		var activeColumn = columns[activeIndex];
 
-		#endregion
-
-		#region Static
-
-		/// <summary>Create resize process from column list, active (hovered) column and side (left or right) of resize.</summary>
-		public static ColumnResizeProcess FromActiveColumn(IList<CustomListBoxColumn> columns, int activeIndex, ColumnResizeSide side, Point mouseDownLocation)
+		int autoSizeId = int.MaxValue;
+		for(int i = 0; i < columns.Count; ++i)
 		{
-			Assert.IsNotNull(columns);
-
-			var activeColumn = columns[activeIndex];
-
-			int autoSizeId = int.MaxValue;
-			for(int i = 0; i < columns.Count; ++i)
+			if(columns[i].IsVisible && columns[i].SizeMode == ColumnSizeMode.Fill)
 			{
-				if(columns[i].IsVisible && columns[i].SizeMode == ColumnSizeMode.Fill)
-				{
-					autoSizeId = i;
-					break;
-				}
+				autoSizeId = i;
+				break;
 			}
-			switch(side)
-			{
-				case ColumnResizeSide.Left:
-					var prevColumn = columns.FindPrevious(activeIndex, column => column.IsVisible);
-					if(prevColumn != null && activeIndex <= autoSizeId)
+		}
+		switch(side)
+		{
+			case ColumnResizeSide.Left:
+				var prevColumn = columns.FindPrevious(activeIndex, column => column.IsVisible);
+				if(prevColumn != null && activeIndex <= autoSizeId)
+				{
+					if(prevColumn.SizeMode == ColumnSizeMode.Sizeable)
 					{
-						if(prevColumn.SizeMode == ColumnSizeMode.Sizeable)
-						{
-							return new ColumnResizeProcess(prevColumn, 1, mouseDownLocation);
-						}
+						return new ColumnResizeProcess(prevColumn, 1, mouseDownLocation);
 					}
-					if(activeColumn.SizeMode != ColumnSizeMode.Sizeable)
+				}
+				if(activeColumn.SizeMode != ColumnSizeMode.Sizeable)
+				{
+					return null;
+				}
+				return new ColumnResizeProcess(activeColumn, -1, mouseDownLocation);
+			case ColumnResizeSide.Right:
+				if(activeColumn.SizeMode != ColumnSizeMode.Sizeable || activeIndex > autoSizeId)
+				{
+					var nextColumn = columns.FindNext(activeIndex, column => column.IsVisible);
+					if(nextColumn is not null)
 					{
-						return null;
-					}
-					return new ColumnResizeProcess(activeColumn, -1, mouseDownLocation);
-				case ColumnResizeSide.Right:
-					if(activeColumn.SizeMode != ColumnSizeMode.Sizeable || activeIndex > autoSizeId)
-					{
-						var nextColumn = columns.FindNext(activeIndex, column => column.IsVisible);
-						if(nextColumn is not null)
-						{
-							return new ColumnResizeProcess(nextColumn, -1, mouseDownLocation);
-						}
-						else
-						{
-							return null;
-						}
+						return new ColumnResizeProcess(nextColumn, -1, mouseDownLocation);
 					}
 					else
 					{
-						return new ColumnResizeProcess(activeColumn, 1, mouseDownLocation);
+						return null;
 					}
+				}
+				else
+				{
+					return new ColumnResizeProcess(activeColumn, 1, mouseDownLocation);
+				}
 
-				default:
-					throw new ArgumentException("Invalid column resize side.", nameof(side));
-			}
+			default:
+				throw new ArgumentException("Invalid column resize side.", nameof(side));
 		}
-
-		#endregion
-
-		#region .ctor
-
-		private ColumnResizeProcess(CustomListBoxColumn resizingColumn, int deltaSign, Point mouseDownLocation)
-		{
-			Assert.IsNotNull(resizingColumn);
-
-			_mouseDownLocation = mouseDownLocation;
-			ResizingColumn    = resizingColumn;
-			InitialWidth      = resizingColumn.Width;
-			DeltaSign         = deltaSign;
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary> Column actually resizing. May differ from active column. </summary>
-		public CustomListBoxColumn ResizingColumn { get; }
-
-		/// <summary>Sign to apply to x-coordinate delta when resizing.</summary>
-		public int DeltaSign { get; }
-
-		/// <summary>Initial column width.</summary>
-		public int InitialWidth { get; }
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>Cancels column resize.</summary>
-		public void Cancel()
-		{
-			ResizingColumn.Width = InitialWidth;
-		}
-
-		/// <summary>Updates resized column width.</summary>
-		/// <param name="mouseLocation">Current mouse pointer location.</param>
-		public void Update(Point mouseLocation)
-		{
-			int dx = (mouseLocation.X - _mouseDownLocation.X) * DeltaSign;
-			int w  = InitialWidth + dx;
-			if(w < ResizingColumn.MinWidth)
-			{
-				w = ResizingColumn.MinWidth;
-			}
-			ResizingColumn.Width = w;
-		}
-
-		#endregion
 	}
+
+	#endregion
+
+	#region .ctor
+
+	private ColumnResizeProcess(CustomListBoxColumn resizingColumn, int deltaSign, Point mouseDownLocation)
+	{
+		Assert.IsNotNull(resizingColumn);
+
+		_mouseDownLocation = mouseDownLocation;
+		ResizingColumn    = resizingColumn;
+		InitialWidth      = resizingColumn.Width;
+		DeltaSign         = deltaSign;
+	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary> Column actually resizing. May differ from active column. </summary>
+	public CustomListBoxColumn ResizingColumn { get; }
+
+	/// <summary>Sign to apply to x-coordinate delta when resizing.</summary>
+	public int DeltaSign { get; }
+
+	/// <summary>Initial column width.</summary>
+	public ValueWithDpi<int> InitialWidth { get; }
+
+	#endregion
+
+	#region Methods
+
+	/// <summary>Cancels column resize.</summary>
+	public void Cancel()
+	{
+		ResizingColumn.Width = InitialWidth;
+	}
+
+	/// <summary>Updates resized column width.</summary>
+	/// <param name="mouseLocation">Current mouse pointer location.</param>
+	public void Update(Point mouseLocation)
+	{
+		var dpi = Dpi.FromControl(ResizingColumn.ListBox);
+		int dx = (mouseLocation.X - _mouseDownLocation.X) * DeltaSign;
+		int w;
+		if(InitialWidth.Dpi.X == 0)
+		{
+			w = dx;
+		}
+		else
+		{
+			w = InitialWidth.Value * dpi.X / InitialWidth.Dpi.X + dx;
+		}
+		if(w < ResizingColumn.MinWidth)
+		{
+			w = ResizingColumn.MinWidth;
+		}
+		ResizingColumn.Width = new(w, dpi);
+	}
+
+	#endregion
 }

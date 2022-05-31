@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+/// <summary>Represents a branch on remote repository (not a remote tracking branch).</summary>
+public sealed class RemoteRepositoryBranch : BaseRemoteReference
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
-
-	using gitter.Framework;
-
-	/// <summary>Represents a branch on remote repository (not a remote tracking branch).</summary>
-	public sealed class RemoteRepositoryBranch : BaseRemoteReference
+	internal RemoteRepositoryBranch(RemoteReferencesCollection refs, string name, Hash hash)
+		: base(refs, name, hash)
 	{
-		internal RemoteRepositoryBranch(RemoteReferencesCollection refs, string name, Hash hash)
-			: base(refs, name, hash)
-		{
-		}
-
-		public override ReferenceType ReferenceType => ReferenceType.LocalBranch;
-
-		protected override void DeleteCore()
-			=> References.RemoveBranch(this);
-
-		protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-			=> References.RemoveBranchAsync(this, progress, cancellationToken);
 	}
+
+	public override ReferenceType ReferenceType => ReferenceType.LocalBranch;
+
+	protected override void DeleteCore()
+		=> References.RemoveBranch(this);
+
+	protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		=> References.RemoveBranchAsync(this, progress, cancellationToken);
 }

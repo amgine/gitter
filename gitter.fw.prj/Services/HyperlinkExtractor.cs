@@ -18,79 +18,78 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>Extracts hyperlinks from plain text.</summary>
+public sealed class HyperlinkExtractor : IHyperlinkExtractor
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly IEnumerable<IHyperlinkExtractor> _extractors;
 
-	/// <summary>Extracts hyperlinks from plain text.</summary>
-	public sealed class HyperlinkExtractor : IHyperlinkExtractor
+	public HyperlinkExtractor(IEnumerable<IHyperlinkExtractor> extractors)
 	{
-		private readonly IEnumerable<IHyperlinkExtractor> _extractors;
+		_extractors = extractors;
+	}
 
-		public HyperlinkExtractor(IEnumerable<IHyperlinkExtractor> extractors)
+	public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
+	{
+		var hyperlinks = default(List<Hyperlink>);
+
+		if(_extractors is not null)
 		{
-			_extractors = extractors;
-		}
-
-		public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
-		{
-			var hyperlinks = default(List<Hyperlink>);
-
-			if(_extractors != null)
+			foreach(var extractor in _extractors)
 			{
-				foreach(var extractor in _extractors)
-				{
-					if(extractor == null) continue;
-					var variants = extractor.ExtractHyperlinks(text);
-					if(variants == null || variants.Count == 0) continue;
+				if(extractor is null) continue;
+				var variants = extractor.ExtractHyperlinks(text);
+				if(variants is null || variants.Count == 0) continue;
 
-					if(hyperlinks == null)
+				if(hyperlinks is null)
+				{
+					hyperlinks = new(variants);
+				}
+				else
+				{
+					bool added = false;
+					foreach(var b in variants)
 					{
-						hyperlinks = new(variants);
-					}
-					else
-					{
-						bool added = false;
-						foreach(var b in variants)
+						for(int i = 0; i < hyperlinks.Count; ++i)
 						{
-							for(int i = 0; i < hyperlinks.Count; ++i)
+							var a = hyperlinks[i];
+							if(a.Text.Start >= b.Text.Start && a.Text.End <= b.Text.End)
 							{
-								var a = hyperlinks[i];
-								if(a.Text.Start >= b.Text.Start && a.Text.End <= b.Text.End)
-								{
-									hyperlinks[i] = b;
-									added = true;
-									break;
-								}
-								if(b.Text.Start >= a.Text.Start && b.Text.End <= a.Text.End)
-								{
-									added = true;
-									break;
-								}
-								if(b.Text.Start >= a.Text.Start && b.Text.Start <= a.Text.End)
-								{
-									added = true;
-									break;
-								}
-								if(b.Text.End >= a.Text.Start && b.Text.End <= a.Text.End)
-								{
-									added = true;
-									break;
-								}
+								hyperlinks[i] = b;
+								added = true;
+								break;
 							}
-							if(!added)
+							if(b.Text.Start >= a.Text.Start && b.Text.End <= a.Text.End)
 							{
-								hyperlinks.Add(b);
+								added = true;
+								break;
 							}
+							if(b.Text.Start >= a.Text.Start && b.Text.Start <= a.Text.End)
+							{
+								added = true;
+								break;
+							}
+							if(b.Text.End >= a.Text.Start && b.Text.End <= a.Text.End)
+							{
+								added = true;
+								break;
+							}
+						}
+						if(!added)
+						{
+							hyperlinks.Add(b);
 						}
 					}
 				}
 			}
-
-			return hyperlinks != null
-				? hyperlinks
-				: Preallocated<Hyperlink>.EmptyArray;
 		}
+
+		return hyperlinks is not null
+			? hyperlinks
+			: Preallocated<Hyperlink>.EmptyArray;
 	}
 }

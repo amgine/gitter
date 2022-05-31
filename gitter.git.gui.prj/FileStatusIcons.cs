@@ -18,24 +18,20 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using gitter.Framework;
+
+static class FileStatusIcons
 {
-	using System;
-	using System.Drawing;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	static class FileStatusIcons
-	{
-		public static readonly Bitmap ImgUnmerged          = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayConflict");
-		public static readonly Bitmap ImgStagedAdded       = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayAddStaged");
-		public static readonly Bitmap ImgStagedRemoved     = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayDelStaged");
-		public static readonly Bitmap ImgStagedModified    = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayEditStaged");
-		public static readonly Bitmap ImgUnstagedUntracked = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayAdd");
-		public static readonly Bitmap ImgUnstagedModified  = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayEdit");
-		public static readonly Bitmap ImgUnstagedRemoved   = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayDel");
-		public static readonly Bitmap ImgModeChanged       = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayChmod");
-		public static readonly Bitmap ImgRenamed           = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayRename");
-		public static readonly Bitmap ImgCopied            = CachedResources.Bitmaps.CombineBitmaps("ImgDocument", "ImgOverlayCopy");
-	}
+	public static readonly IImageProvider ImgUnmerged          = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Conflict);
+	public static readonly IImageProvider ImgStagedAdded       = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.AddStaged);
+	public static readonly IImageProvider ImgStagedRemoved     = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.DeleteStaged);
+	public static readonly IImageProvider ImgStagedModified    = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.EditStaged);
+	public static readonly IImageProvider ImgUnstagedUntracked = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Add);
+	public static readonly IImageProvider ImgUnstagedModified  = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Edit);
+	public static readonly IImageProvider ImgUnstagedRemoved   = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Delete);
+	public static readonly IImageProvider ImgModeChanged       = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Chmod);
+	public static readonly IImageProvider ImgRenamed           = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Rename);
+	public static readonly IImageProvider ImgCopied            = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Copy);
 }

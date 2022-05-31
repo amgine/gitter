@@ -18,26 +18,26 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class BranchDragDropMenu : ContextMenuStrip
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	private readonly BranchBase _branch;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public sealed class BranchDragDropMenu : ContextMenuStrip
+	public BranchDragDropMenu(Branch branch)
 	{
-		private readonly BranchBase _branch;
+		Verify.Argument.IsValidGitObject(branch, nameof(branch));
 
-		public BranchDragDropMenu(Branch branch)
-		{
-			Verify.Argument.IsValidGitObject(branch, nameof(branch));
+		_branch = branch;
 
-			_branch = branch;
-
-			Items.Add(new ToolStripMenuItem("TEST"));
-		}
+		Items.Add(new ToolStripMenuItem("TEST"));
 	}
 }

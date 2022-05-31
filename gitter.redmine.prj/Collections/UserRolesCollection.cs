@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,35 +18,34 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Xml;
+
+public sealed class UserRolesCollection : NamedRedmineObjectsCache<UserRole>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Xml;
-
-	public sealed class UserRolesCollection : NamedRedmineObjectsCache<UserRole>
+	internal UserRolesCollection(RedmineServiceContext context)
+		: base(context)
 	{
-		internal UserRolesCollection(RedmineServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected override UserRole Create(int id, string name)
-		{
-			return new UserRole(Context, id, name);
-		}
+	protected override UserRole Create(int id, string name)
+	{
+		return new UserRole(Context, id, name);
+	}
 
-		protected override UserRole Create(XmlNode node)
-		{
-			return new UserRole(Context, node);
-		}
+	protected override UserRole Create(XmlNode node)
+	{
+		return new UserRole(Context, node);
+	}
 
-		public LinkedList<UserRole> Fetch()
-		{
-			const string url = "roles.xml";
-			return FetchItemsFromSinglePage(url);
-		}
+	public LinkedList<UserRole> Fetch()
+	{
+		const string url = "roles.xml";
+		return FetchItemsFromSinglePage(url);
 	}
 }

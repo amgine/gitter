@@ -18,22 +18,21 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+using System.Collections.Generic;
+
+public sealed class QueryReferencesParameters
 {
-	using System;
-	using System.Collections.Generic;
-
-	public sealed class QueryReferencesParameters
+	public QueryReferencesParameters()
 	{
-		public QueryReferencesParameters()
-		{
-		}
-
-		public QueryReferencesParameters(ReferenceType referenceTypes)
-		{
-			ReferenceTypes = referenceTypes;
-		}
-
-		public ReferenceType ReferenceTypes { get; set; }
 	}
+
+	public QueryReferencesParameters(ReferenceType referenceTypes)
+	{
+		ReferenceTypes = referenceTypes;
+	}
+
+	public ReferenceType ReferenceTypes { get; set; }
 }

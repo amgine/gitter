@@ -18,67 +18,61 @@
  */
 #endregion
 
-namespace gitter.Controls
+namespace gitter.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Properties.Resources;
+
+public partial class InitRepositoryDialog : PickerDialog<RepositoryProviderPicker, IRepositoryProvider>, IExecutableDialog
 {
-	using System;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-
-	using Resources = gitter.Properties.Resources;
-
-	public partial class InitRepositoryDialog : PickerDialog<RepositoryProviderPicker, IRepositoryProvider>, IExecutableDialog
+	public InitRepositoryDialog(IWorkingEnvironment workingEnvironment)
+		: base(Resources.StrVCS.AddColon())
 	{
-		public InitRepositoryDialog(IWorkingEnvironment workingEnvironment)
-			: base(Resources.StrVCS.AddColon())
+		Verify.Argument.IsNotNull(workingEnvironment);
+
+		WorkingEnvironment = workingEnvironment;
+
+		Text = Resources.StrInitRepository;
+	}
+
+	private IWorkingEnvironment WorkingEnvironment { get; }
+
+	protected override string ActionVerb => Resources.StrInit;
+
+	protected override int MinimumSelectableItems => 2;
+
+	protected override void LoadItems(RepositoryProviderPicker picker)
+	{
+		foreach(var provider in WorkingEnvironment.RepositoryProviders)
 		{
-			Verify.Argument.IsNotNull(workingEnvironment, nameof(workingEnvironment));
-
-			WorkingEnvironment = workingEnvironment;
-
-			Text = Resources.StrInitRepository;
+			var item = new RepositoryProviderListItem(provider);
+			picker.DropDownItems.Add(item);
 		}
+	}
 
-		private IWorkingEnvironment WorkingEnvironment { get; }
+	protected override Control CreateControl(IRepositoryProvider item)
+		=> item?.CreateInitDialog();
 
-		protected override string ActionVerb => Resources.StrInit;
-
-		protected override int MinimumSelectableItems => 2;
-
-		protected override void LoadItems(RepositoryProviderPicker picker)
+	public override bool Execute()
+	{
+		var provider = SelectedValue;
+		if(provider is null) return false;
+		if(!base.Execute())
 		{
-			foreach(var provider in WorkingEnvironment.RepositoryProviders)
-			{
-				var item = new RepositoryProviderListItem(provider);
-				picker.DropDownItems.Add(item);
-			}
+			return false;
 		}
-
-		protected override Control CreateControl(IRepositoryProvider item)
+		if(SelectedControl is IRepositoryInitDialog initDialog)
 		{
-			if(item == null)
-			{
-				return null;
-			}
-			return item.CreateInitDialog();
+			var repositoryPath = initDialog.RepositoryPath.Value;
+			WorkingEnvironment.BeginInvoke(
+				new Func<string, bool>(WorkingEnvironment.OpenRepository),
+				new object[] { repositoryPath });
 		}
-
-		public override bool Execute()
-		{
-			var provider = SelectedValue;
-			if(provider == null) return false;
-			if(!base.Execute())
-			{
-				return false;
-			}
-			if(SelectedControl is IRepositoryInitDialog initDialog)
-			{
-				var repositoryPath = initDialog.RepositoryPath.Value;
-				WorkingEnvironment.BeginInvoke(
-					new Func<string, bool>(WorkingEnvironment.OpenRepository),
-					new object[] { repositoryPath });
-			}
-			return true;
-		}
+		return true;
 	}
 }

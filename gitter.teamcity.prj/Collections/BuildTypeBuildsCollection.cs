@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+
+public sealed class BuildTypeBuildsCollection : CacheSegment<Build>
 {
-	using System;
+	private readonly BuildType _buildType;
 
-	public sealed class BuildTypeBuildsCollection : CacheSegment<Build>
+	internal BuildTypeBuildsCollection(BuildType buildType, BuildsCollection builds)
+		: base(builds)
 	{
-		private readonly BuildType _buildType;
+		Verify.Argument.IsNotNull(buildType);
 
-		internal BuildTypeBuildsCollection(BuildType buildType, BuildsCollection builds)
-			: base(builds)
-		{
-			Verify.Argument.IsNotNull(buildType, nameof(buildType));
+		_buildType = buildType;
+	}
 
-			_buildType = buildType;
-		}
+	protected override bool IsIncluded(Build item)
+		=> item.BuildType == _buildType;
 
-		protected override bool IsIncluded(Build item)
-			=> item.BuildType == _buildType;
-
-		public override void Refresh()
-		{
-			Context.Builds.UpdateCache(new BuildLocator() { BuildType = _buildType.CreateLocator() });
-		}
+	public override void Refresh()
+	{
+		Context.Builds.UpdateCache(new BuildLocator() { BuildType = _buildType.CreateLocator() });
 	}
 }

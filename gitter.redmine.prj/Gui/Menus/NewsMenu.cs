@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,42 +18,42 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Globalization;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class NewsMenu : ContextMenuStrip
 {
-	using System;
-	using System.Globalization;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public sealed class NewsMenu : ContextMenuStrip
+	public NewsMenu(News news)
 	{
-		private readonly News _news;
+		Verify.Argument.IsNotNull(news);
 
-		public NewsMenu(News news)
+		News = news;
+
+		//Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_news));
+
+		var dpiBindings = new DpiBindings(this);
+		var factory = new GuiItemFactory(dpiBindings);
+
+		var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
+		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrId, News.Id.ToString(CultureInfo.InvariantCulture)));
+		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrTitle, News.Title));
+		if(!string.IsNullOrWhiteSpace(News.Summary))
 		{
-			Verify.Argument.IsNotNull(news, nameof(news));
-
-			_news = news;
-
-			//Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_news));
-
-			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrId, _news.Id.ToString(CultureInfo.InvariantCulture)));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrTitle, _news.Title));
-			if(!string.IsNullOrWhiteSpace(_news.Summary))
-			{
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, _news.Summary));
-			}
-
-			Items.Add(item);
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, News.Summary));
 		}
 
-		public News News
-		{
-			get { return _news; }
-		}
+		Items.Add(item);
 	}
+
+	public News News { get; }
 }

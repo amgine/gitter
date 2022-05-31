@@ -18,50 +18,49 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+public class PatchSourceListItem : CustomListBoxItem<IPatchSource>
 {
-	using System;
-	using System.Drawing;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	public class PatchSourceListItem : CustomListBoxItem<IPatchSource>
+	public PatchSourceListItem(IPatchSource patchSource)
+		: base(patchSource)
 	{
-		public PatchSourceListItem(IPatchSource patchSource)
-			: base(patchSource)
+		Verify.Argument.IsNotNull(patchSource);
+	}
+
+	private static Image GetIcon(Dpi dpi)
+		=> Icons.Patch.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch((ColumnId)measureEventArgs.SubItemId)
 		{
-			Verify.Argument.IsNotNull(patchSource, nameof(patchSource));
+			case ColumnId.Name:
+				return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.DisplayName);
+			default:
+				return Size.Empty;
 		}
+	}
 
-		private static Bitmap GetIcon(Dpi dpi)
-			=> CachedResources.ScaledBitmaps[@"patch", DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
 
-		/// <inheritdoc/>
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+		switch((ColumnId)paintEventArgs.SubItemId)
 		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch((ColumnId)measureEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.DisplayName);
-				default:
-					return Size.Empty;
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			Assert.IsNotNull(paintEventArgs);
-
-			switch((ColumnId)paintEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.DisplayName);
-					break;
-			}
+			case ColumnId.Name:
+				paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.DisplayName);
+				break;
 		}
 	}
 }

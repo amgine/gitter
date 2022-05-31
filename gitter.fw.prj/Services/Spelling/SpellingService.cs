@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,169 +18,172 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.IO;
+using System.Threading;
+
+using NHunspell;
+
+using gitter.Framework.Configuration;
+
+public static class SpellingService
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Reflection;
-	using System.IO;
-	using System.Threading;
+	#region Data
 
-	using NHunspell;
+	private static readonly Dictionary<string, Hunspell> _spellers;
+	private static readonly string DictionaryPath;
+	private static int _loadCounter;
+	private static readonly ManualResetEvent _evtDictionariesReady;
 
-	using gitter.Framework.Configuration;
+	#endregion
 
-	public static class SpellingService
+	static SpellingService()
 	{
-		#region Data
+		var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+		Hunspell.NativeDllPath = Path.Combine(asmPath, "Hunspell");
+		DictionaryPath = Path.Combine(asmPath, "Dictionaries");
+		_spellers = new Dictionary<string, Hunspell>();
+		_evtDictionariesReady = new ManualResetEvent(true);
+	}
 
-		private static readonly Dictionary<string, Hunspell> _spellers;
-		private static readonly string DictionaryPath;
-		private static int _loadCounter;
-		private static readonly ManualResetEvent _evtDictionariesReady;
-
-		#endregion
-
-		static SpellingService()
+	public static ICollection<string> GetAvailableLocales()
+	{
+		var list = new List<string>();
+		try
 		{
-			var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			Hunspell.NativeDllPath = Path.Combine(asmPath, "Hunspell");
-			DictionaryPath = Path.Combine(asmPath, "Dictionaries");
-			_spellers = new Dictionary<string, Hunspell>();
-			_evtDictionariesReady = new ManualResetEvent(true);
-		}
-
-		public static ICollection<string> GetAvailableLocales()
-		{
-			var list = new List<string>();
-			try
+			if(Directory.Exists(DictionaryPath))
 			{
-				if(Directory.Exists(DictionaryPath))
+				foreach(var file in Directory.EnumerateFiles(DictionaryPath, "*.aff", SearchOption.TopDirectoryOnly))
 				{
-					foreach(var file in Directory.EnumerateFiles(DictionaryPath, "*.aff", SearchOption.TopDirectoryOnly))
+					if(File.Exists(file.Substring(0, file.Length - 4) + ".dic"))
 					{
-						if(File.Exists(file.Substring(0, file.Length - 4) + ".dic"))
-						{
-							list.Add(Path.GetFileNameWithoutExtension(file));
-						}
+						list.Add(Path.GetFileNameWithoutExtension(file));
 					}
 				}
 			}
-			catch(DirectoryNotFoundException)
-			{
-			}
-			catch(FileNotFoundException)
-			{
-			}
-			return list;
 		}
-
-		public static ICollection<string> GetLoadedLocales()
+		catch(DirectoryNotFoundException)
 		{
-			return _spellers.Keys;
 		}
-
-		public static void LoadLocale(string localeName)
+		catch(FileNotFoundException)
 		{
-			var aff = Path.Combine(DictionaryPath, localeName + ".aff");
-			var dic = Path.Combine(DictionaryPath, localeName + ".dic");
-
-			Hunspell h;
-			try
-			{
-				h = new Hunspell(aff, dic);
-			}
-			catch
-			{
-				h = null;
-			}
-			if(h != null)
-			{
-				lock(_spellers)
-				{
-					_spellers.Add(localeName, h);
-				}
-			}
 		}
+		return list;
+	}
 
-		private static void LoadLocaleAsync(string localeName)
+	public static ICollection<string> GetLoadedLocales()
+	{
+		return _spellers.Keys;
+	}
+
+	public static void LoadLocale(string localeName)
+	{
+		var aff = Path.Combine(DictionaryPath, localeName + ".aff");
+		var dic = Path.Combine(DictionaryPath, localeName + ".dic");
+
+		Hunspell h;
+		try
 		{
-			Action<string> action = LoadLocale;
-			action.BeginInvoke(localeName, OnDictionaryLoaded, null);
+			h = new Hunspell(aff, dic);
 		}
-
-		private static void OnDictionaryLoaded(IAsyncResult ar)
+		catch
 		{
-			if(Interlocked.Decrement(ref _loadCounter) == 0) _evtDictionariesReady.Set();
+			h = null;
 		}
-
-		public static bool IsLoaded(string localeName)
+		if(h is not null)
 		{
-			return _spellers.ContainsKey(localeName);
-		}
-
-		public static void UnloadLocale(string localeName)
-		{
-			_evtDictionariesReady.WaitOne();
-			Hunspell speller;
-			if(_spellers.TryGetValue(localeName, out speller))
-			{
-				speller.Dispose();
-				_spellers.Remove(localeName);
-			}
-		}
-
-		public static bool Spell(string word)
-		{
-			_evtDictionariesReady.WaitOne();
 			lock(_spellers)
 			{
-				foreach(var speller in _spellers.Values)
-					if(speller.Spell(word)) return true;
+				_spellers.Add(localeName, h);
 			}
-			return false;
 		}
+	}
 
-		public static bool Enabled
-		{
-			get
+	private static void LoadLocaleAsync(string localeName)
+	{
+		ThreadPool.QueueUserWorkItem(
+			_ =>
 			{
-				_evtDictionariesReady.WaitOne();
-				lock(_spellers) return _spellers.Count != 0;
-			}
-		}
+				LoadLocale(localeName);
+				OnDictionaryLoaded();
+			});
+	}
 
-		public static void SaveTo(Section section)
+	private static void OnDictionaryLoaded()
+	{
+		if(Interlocked.Decrement(ref _loadCounter) == 0) _evtDictionariesReady.Set();
+	}
+
+	public static bool IsLoaded(string localeName)
+	{
+		return _spellers.ContainsKey(localeName);
+	}
+
+	public static void UnloadLocale(string localeName)
+	{
+		_evtDictionariesReady.WaitOne();
+		Hunspell speller;
+		if(_spellers.TryGetValue(localeName, out speller))
+		{
+			speller.Dispose();
+			_spellers.Remove(localeName);
+		}
+	}
+
+	public static bool Spell(string word)
+	{
+		_evtDictionariesReady.WaitOne();
+		lock(_spellers)
+		{
+			foreach(var speller in _spellers.Values)
+				if(speller.Spell(word)) return true;
+		}
+		return false;
+	}
+
+	public static bool Enabled
+	{
+		get
 		{
 			_evtDictionariesReady.WaitOne();
-			section.ClearParameters();
-			lock(_spellers)
+			lock(_spellers) return _spellers.Count != 0;
+		}
+	}
+
+	public static void SaveTo(Section section)
+	{
+		_evtDictionariesReady.WaitOne();
+		section.ClearParameters();
+		lock(_spellers)
+		{
+			foreach(var locale in _spellers.Keys)
 			{
-				foreach(var locale in _spellers.Keys)
-				{
-					section.SetValue(locale, true);
-				}
+				section.SetValue(locale, true);
 			}
 		}
+	}
 
-		public static void LoadFrom(Section section)
+	public static void LoadFrom(Section section)
+	{
+		if(section.ParameterCount != 0)
 		{
-			if(section.ParameterCount != 0)
+			_loadCounter = section.ParameterCount;
+			_evtDictionariesReady.Reset();
+			foreach(var p in section.Parameters)
 			{
-				_loadCounter = section.ParameterCount;
-				_evtDictionariesReady.Reset();
-				foreach(var p in section.Parameters)
+				if(section.GetValue(p.Name, false))
 				{
-					if(section.GetValue(p.Name, false))
+					LoadLocaleAsync(p.Name);
+				}
+				else
+				{
+					if(Interlocked.Decrement(ref _loadCounter) == 0)
 					{
-						LoadLocaleAsync(p.Name);
-					}
-					else
-					{
-						if(Interlocked.Decrement(ref _loadCounter) == 0)
-						{
-							_evtDictionariesReady.Set();
-						}
+						_evtDictionariesReady.Set();
 					}
 				}
 			}

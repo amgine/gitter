@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
-{
-	using gitter.Framework.Mvc;
+namespace gitter.Git.Gui.Interfaces;
 
-	interface ICreateTagController : IViewController<ICreateTagView>
-	{
-		bool TryCreateTag();
-	}
+using gitter.Framework.Mvc;
+
+interface ICreateTagController : IViewController<ICreateTagView>
+{
+	bool TryCreateTag();
 }

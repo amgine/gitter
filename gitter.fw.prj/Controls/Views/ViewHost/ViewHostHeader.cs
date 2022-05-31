@@ -18,178 +18,178 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class ViewHostHeader : Control
 {
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Events
 
-	[ToolboxItem(false)]
-	public sealed class ViewHostHeader : Control
+	public event EventHandler<ViewButtonClickEventArgs> HeaderButtonClick
 	{
-		#region Events
+		add    => Buttons.ButtonClick += value;
+		remove => Buttons.ButtonClick -= value;
+	}
 
-		public event EventHandler<ViewButtonClickEventArgs> HeaderButtonClick
+	#endregion
+
+	#region Data
+
+	private bool _buttonsHovered;
+
+	#endregion
+
+	/// <summary>Create <see cref="ViewHostHeader"/>.</summary>
+	internal ViewHostHeader(ViewHost viewHost)
+	{
+		Verify.Argument.IsNotNull(viewHost);
+
+		ViewHost = viewHost;
+		SetStyle(
+			ControlStyles.ContainerControl |
+			ControlStyles.Selectable |
+			ControlStyles.SupportsTransparentBackColor,
+			false);
+		SetStyle(
+			ControlStyles.UserPaint |
+			ControlStyles.ResizeRedraw |
+			ControlStyles.AllPaintingInWmPaint |
+			ControlStyles.OptimizedDoubleBuffer,
+			true);
+
+		Buttons = new ViewButtons(this);
+	}
+
+	public ViewHost ViewHost { get; }
+
+	public ViewButtons Buttons { get; }
+
+	/// <inheritdoc/>
+	[Browsable(false)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	public override string Text
+	{
+		get => ViewHost.Text;
+		set => throw new InvalidOperationException();
+	}
+
+	public void SetAvailableButtons(params ViewButtonType[] buttons)
+	{
+		Buttons.SetAvailableButtons(buttons);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		ViewManager.Renderer.RenderViewHostHeader(this, e);
+		if(Buttons.Count != 0)
 		{
-			add    => Buttons.ButtonClick += value;
-			remove => Buttons.ButtonClick -= value;
+			Buttons.OnPaint(e.Graphics, GetButtonsRect(), ViewHost.IsActive);
 		}
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	protected override void OnPaintBackground(PaintEventArgs pevent)
+	{
+	}
 
-		#region Data
+	/// <inheritdoc/>
+	protected override void OnResize(EventArgs e)
+	{
+		Buttons.Height = Height;
+		base.OnResize(e);
+	}
 
-		private bool _buttonsHovered;
+	private Rectangle GetButtonsRect()
+	{
+		var rc = ClientRectangle;
+		var w = Buttons.Width;
+		return new Rectangle(rc.Width - w - 2, 0, w, rc.Height);
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	protected override void OnMouseMove(MouseEventArgs e)
+	{
+		Assert.IsNotNull(e);
 
-		/// <summary>Create <see cref="ViewHostHeader"/>.</summary>
-		internal ViewHostHeader(ViewHost viewHost)
+		if(Buttons.Count != 0)
 		{
-			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
-
-			ViewHost = viewHost;
-			SetStyle(
-				ControlStyles.ContainerControl |
-				ControlStyles.Selectable |
-				ControlStyles.SupportsTransparentBackColor,
-				false);
-			SetStyle(
-				ControlStyles.UserPaint |
-				ControlStyles.ResizeRedraw |
-				ControlStyles.AllPaintingInWmPaint |
-				ControlStyles.OptimizedDoubleBuffer,
-				true);
-
-			Buttons = new ViewButtons(this);
-		}
-
-		public ViewHost ViewHost { get; }
-
-		public ViewButtons Buttons { get; }
-
-		/// <inheritdoc/>
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public override string Text
-		{
-			get => ViewHost.Text;
-			set => throw new InvalidOperationException();
-		}
-
-		public void SetAvailableButtons(params ViewButtonType[] buttons)
-		{
-			Buttons.SetAvailableButtons(buttons);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			Assert.IsNotNull(e);
-
-			ViewManager.Renderer.RenderViewHostHeader(this, e);
-			if(Buttons.Count != 0)
+			var rc = GetButtonsRect();
+			if(rc.Contains(e.X, e.Y))
 			{
-				Buttons.OnPaint(e.Graphics, GetButtonsRect(), ViewHost.IsActive);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaintBackground(PaintEventArgs pevent)
-		{
-		}
-
-		/// <inheritdoc/>
-		protected override void OnResize(EventArgs e)
-		{
-			Buttons.Height = Height;
-			base.OnResize(e);
-		}
-
-		private Rectangle GetButtonsRect()
-		{
-			var rc = ClientRectangle;
-			var w = Buttons.Width;
-			return new Rectangle(rc.Width - w - 2, 0, w, rc.Height);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseMove(MouseEventArgs e)
-		{
-			Assert.IsNotNull(e);
-
-			if(Buttons.Count != 0)
-			{
-				var rc = GetButtonsRect();
-				if(rc.Contains(e.X, e.Y))
-				{
-					var x = e.X - rc.X;
-					var y = e.Y - rc.Y;
-					Buttons.OnMouseMove(x, y, e.Button);
-					_buttonsHovered = true;
-				}
-				else
-				{
-					if(_buttonsHovered)
-					{
-						Buttons.OnMouseLeave();
-						_buttonsHovered = false;
-					}
-					if(Buttons.PressedButton is null)
-					{
-						base.OnMouseMove(e);
-					}
-				}
+				var x = e.X - rc.X;
+				var y = e.Y - rc.Y;
+				Buttons.OnMouseMove(x, y, e.Button);
+				_buttonsHovered = true;
 			}
 			else
 			{
-				base.OnMouseMove(e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseLeave(EventArgs e)
-		{
-			if(_buttonsHovered)
-			{
-				Buttons.OnMouseLeave();
-				_buttonsHovered = false;
-			}
-			base.OnMouseLeave(e);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseDown(MouseEventArgs e)
-		{
-			ViewHost.Activate();
-			if(Buttons.Count != 0)
-			{
-				var rc = GetButtonsRect();
-				if(rc.Contains(e.X, e.Y))
+				if(_buttonsHovered)
 				{
-					var x = e.X - rc.X;
-					var y = e.Y - rc.Y;
-					Buttons.OnMouseDown(x, y, e.Button);
+					Buttons.OnMouseLeave();
+					_buttonsHovered = false;
+				}
+				if(Buttons.PressedButton is null)
+				{
+					base.OnMouseMove(e);
 				}
 			}
-			base.OnMouseDown(e);
 		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseUp(MouseEventArgs e)
+		else
 		{
-			if(Buttons.Count != 0)
-			{
-				var rc = GetButtonsRect();
-				if(Buttons.PressedButton != null || rc.Contains(e.X, e.Y))
-				{
-					var x = e.X - rc.X;
-					var y = e.Y - rc.Y;
-					Buttons.OnMouseUp(x, y, e.Button);
-				}
-			}
-			base.OnMouseUp(e);
+			base.OnMouseMove(e);
 		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseLeave(EventArgs e)
+	{
+		if(_buttonsHovered)
+		{
+			Buttons.OnMouseLeave();
+			_buttonsHovered = false;
+		}
+		base.OnMouseLeave(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseDown(MouseEventArgs e)
+	{
+		ViewHost.Activate();
+		if(Buttons.Count != 0)
+		{
+			var rc = GetButtonsRect();
+			if(rc.Contains(e.X, e.Y))
+			{
+				var x = e.X - rc.X;
+				var y = e.Y - rc.Y;
+				Buttons.OnMouseDown(x, y, e.Button);
+			}
+		}
+		base.OnMouseDown(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseUp(MouseEventArgs e)
+	{
+		if(Buttons.Count != 0)
+		{
+			var rc = GetButtonsRect();
+			if(Buttons.PressedButton != null || rc.Contains(e.X, e.Y))
+			{
+				var x = e.X - rc.X;
+				var y = e.Y - rc.Y;
+				Buttons.OnMouseUp(x, y, e.Button);
+			}
+		}
+		base.OnMouseUp(e);
 	}
 }

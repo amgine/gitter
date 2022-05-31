@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2021  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,94 +18,128 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+
+/// <summary>Used to discard any read data.</summary>
+public sealed class NullReader : IOutputReceiver
 {
-	using System;
-	using System.Diagnostics;
-	using System.IO;
-	using System.Threading;
+#if NET5_0_OR_GREATER
+	private static readonly byte[] _buffer = GC.AllocateUninitializedArray<byte>(0x400, pinned: true);
+#else
+	private static readonly byte[] _buffer = new byte[0x400];
+#endif
+	private object _syncRoot = new();
+	private bool _canceled;
+	private bool _completed;
 
-	public sealed class NullReader : IOutputReceiver
+	private Stream Stream { get; set; }
+
+	/// <inheritdoc/>
+	public bool IsInitialized => Stream is not null;
+
+	/// <inheritdoc/>
+	public void Initialize(Process process, StreamReader reader)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(process);
+		Verify.Argument.IsNotNull(reader);
+		Verify.State.IsFalse(IsInitialized);
 
-		private readonly byte[] _buffer;
-		private Stream _stream;
-		private ManualResetEvent _eof;
+		Stream = reader.BaseStream;
 
-		#endregion
+#if NETCOREAPP
+		ReadLoop();
+#else
+		BeginReadAsync();
+#endif
+	}
 
-		#region .ctor
+	/// <inheritdoc/>
+	public void NotifyCanceled()
+	{
+		Verify.State.IsTrue(IsInitialized);
 
-		public NullReader()
+		if(!_canceled && !_completed)
 		{
-			_buffer = new byte[0x400];
-		}
-
-		#endregion
-
-		#region IOutputReceiver Members
-
-		public bool IsInitialized =>  _stream != null;
-
-		public void Initialize(Process process, StreamReader reader)
-		{
-			Verify.Argument.IsNotNull(process, nameof(process));
-			Verify.Argument.IsNotNull(reader, nameof(reader));
-			Verify.State.IsFalse(IsInitialized);
-
-			_stream	= reader.BaseStream;
-			_eof	= new ManualResetEvent(initialState: false);
-
-			BeginReadAsync();
-		}
-
-		public void NotifyCanceled()
-		{
-			Verify.State.IsTrue(IsInitialized);
-
-			var eof = _eof;
-			if(eof is not null)
+			Monitor.Enter(_syncRoot);
+			try
 			{
-				_eof = null;
-				eof.Dispose();
-			}
-		}
-
-		public void WaitForEndOfStream()
-		{
-			Verify.State.IsTrue(IsInitialized);
-
-			var eof = _eof;
-			if(eof is not null)
-			{
-				try
+				if(!_canceled && !_completed)
 				{
-					var test = eof.WaitOne(0);
-					eof.WaitOne();
-					eof.Dispose();
-				}
-				catch(ObjectDisposedException)
-				{
+					_canceled = true;
+					Monitor.PulseAll(_syncRoot);
 				}
 			}
-
-			_stream = null;
-			_eof = null;
+			finally
+			{
+				Monitor.Exit(_syncRoot);
+			}
 		}
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	public void WaitForEndOfStream()
+	{
+		Verify.State.IsTrue(IsInitialized);
 
-		#region Private
+		if(!_completed)
+		{
+			Monitor.Enter(_syncRoot);
+			try
+			{
+				while(!_completed)
+				{
+					Monitor.Wait(_syncRoot);
+				}
+			}
+			finally
+			{
+				Monitor.Exit(_syncRoot);
+			}
+		}
+		Stream = null;
+	}
 
-		private void OnStreamRead(IAsyncResult ar)
+	private void NotifyCompleted()
+	{
+		Monitor.Enter(_syncRoot);
+		try
+		{
+			if(!_completed)
+			{
+				_completed = true;
+				Monitor.PulseAll(_syncRoot);
+			}
+		}
+		finally
+		{
+			Monitor.Exit(_syncRoot);
+		}
+	}
+
+
+#if NETCOREAPP
+
+	private async void ReadLoop()
+	{
+		while(true)
 		{
 			int bytesCount;
 			try
 			{
-				bytesCount = _stream.EndRead(ar);
+				bytesCount = await Stream
+					.ReadAsync(new Memory<byte>(_buffer))
+					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			catch(IOException)
+			{
+				bytesCount = 0;
+			}
+			catch(ObjectDisposedException)
 			{
 				bytesCount = 0;
 			}
@@ -113,58 +147,64 @@ namespace gitter.Framework.CLI
 			{
 				bytesCount = 0;
 			}
-			if(bytesCount != 0)
+			if(bytesCount == 0)
 			{
-				BeginReadAsync();
-			}
-			else
-			{
-				var eof = (EventWaitHandle)ar.AsyncState;
-				if(eof is not null)
-				{
-					try
-					{
-						eof.Set();
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
+				NotifyCompleted();
+				break;
 			}
 		}
-
-		private void BeginReadAsync()
-		{
-			var eof = _eof;
-			bool isReading;
-			try
-			{
-				_stream.BeginRead(_buffer, 0, _buffer.Length, OnStreamRead, eof);
-				isReading = true;
-			}
-			catch(IOException)
-			{
-				isReading = false;
-			}
-			catch(ObjectDisposedException)
-			{
-				isReading = false;
-			}
-			if(!isReading)
-			{
-				if(eof is not null)
-				{
-					try
-					{
-						eof.Set();
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-			}
-		}
-
-		#endregion
 	}
+
+#else
+
+	private static void OnStreamRead(IAsyncResult ar)
+	{
+		var reader = (NullReader)ar.AsyncState;
+
+		int bytesCount;
+		try
+		{
+			bytesCount = reader.Stream.EndRead(ar);
+		}
+		catch(IOException)
+		{
+			bytesCount = 0;
+		}
+		catch(OperationCanceledException)
+		{
+			bytesCount = 0;
+		}
+		if(bytesCount != 0)
+		{
+			reader.BeginReadAsync();
+		}
+		else
+		{
+			reader.NotifyCompleted();
+		}
+	}
+
+	private void BeginReadAsync()
+	{
+		bool isReading;
+		try
+		{
+			Stream.BeginRead(_buffer, 0, _buffer.Length, OnStreamRead, this);
+			isReading = true;
+		}
+		catch(IOException)
+		{
+			isReading = false;
+		}
+		catch(ObjectDisposedException)
+		{
+			isReading = false;
+		}
+		if(!isReading)
+		{
+			NotifyCompleted();
+		}
+	}
+
+#endif
 }

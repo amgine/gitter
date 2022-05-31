@@ -18,28 +18,27 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System.Text;
+
+public interface ITextSegment
 {
-	using System.Text;
+	char this[int index] { get; }
 
-	public interface ITextSegment
-	{
-		char this[int index] { get; }
+	int Length { get; }
 
-		int Length { get; }
+	char PeekChar();
 
-		char PeekChar();
+	char ReadChar();
 
-		char ReadChar();
+	void Skip(int count = 1);
 
-		void Skip(int count = 1);
+	int IndexOf(char c);
 
-		int IndexOf(char c);
+	int IndexOfAny(char[] chars);
 
-		int IndexOfAny(char[] chars);
+	void MoveTo(char[] buffer, int bufferOffset, int count);
 
-		void MoveTo(char[] buffer, int bufferOffset, int count);
-
-		void MoveTo(StringBuilder stringBuilder, int count);
-	}
+	void MoveTo(StringBuilder stringBuilder, int count);
 }

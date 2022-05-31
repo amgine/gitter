@@ -18,47 +18,100 @@
  */
 #endregion
 
+namespace gitter.GitLab.Api;
 
-namespace gitter.GitLab.Api
+using System;
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#elif NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
+
+[DataContract]
+sealed class Runner
 {
-    using System;
-    using System.Runtime.Serialization;
+	static class Names
+	{
+		public const string Id          = @"id";
+		public const string Description = @"description";
+		public const string IpAddresses = @"ip_address";
+		public const string Active      = @"active";
+		public const string Paused      = @"paused";
+		public const string IsShared    = @"is_shared";
+		public const string Type        = @"runner_type";
+		public const string Name        = @"name";
+		public const string Online      = @"online";
+		public const string Status      = @"status";
+	}
 
-    using Newtonsoft.Json;
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Id)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Id)]
+#endif
+	public int Id { get; set; }
 
-    [DataContract]
-    public sealed class Runner
-    {
-        [JsonProperty("active")]
-        [DataMember]
-        public bool Active { get; set; }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Description)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Description)]
+#endif
+	public string Description { get; set; }
 
-        [JsonProperty("description")]
-        [DataMember]
-        public string Description { get; set; }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.IpAddresses)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.IpAddresses)]
+#endif
+	public string IpAddresses { get; set; }
 
-        [JsonProperty("id")]
-        [DataMember]
-        public int Id { get; set; }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Active)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Active)]
+#endif
+	public bool Active { get; set; }
 
-        [JsonProperty("is_shared")]
-        [DataMember]
-        public bool IsShared { get; set; }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Paused)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Paused)]
+#endif
+	public bool Paused { get; set; }
 
-        [JsonProperty("ip_address")]
-        [DataMember]
-        public string IpAddresses { get; set; }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.IsShared)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.IsShared)]
+#endif
+	public bool IsShared { get; set; }
 
-        [JsonProperty("name")]
-        [DataMember]
-        public string Name { get; set; }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Type)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Type)]
+#endif
+	public string Type { get; set; }
 
-        [JsonProperty("online")]
-        [DataMember]
-        public bool Online { get; set; }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Name)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Name)]
+#endif
+	public string Name { get; set; }
 
-        [JsonProperty("status")]
-        [DataMember]
-        public string Status { get; set; }
-    }
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Online)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Online)]
+#endif
+	public bool Online { get; set; }
+
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Status)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Status)]
+#endif
+	public string Status { get; set; }
 }

@@ -18,21 +18,20 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+public class QuerySymbolicReferenceParameters
 {
-	using System;
-
-	public class QuerySymbolicReferenceParameters
+	public QuerySymbolicReferenceParameters()
 	{
-		public QuerySymbolicReferenceParameters()
-		{
-		}
-
-		public QuerySymbolicReferenceParameters(string name)
-		{
-			Name = name;
-		}
-
-		public string Name { get; set; }
 	}
+
+	public QuerySymbolicReferenceParameters(string name)
+	{
+		Name = name;
+	}
+
+	public string Name { get; set; }
 }

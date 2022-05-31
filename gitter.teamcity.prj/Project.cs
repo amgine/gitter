@@ -18,51 +18,50 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
+
+public sealed class Project : NamedTeamCityObject
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Xml;
+	#region Static
 
-	public sealed class Project : NamedTeamCityObject
+	#endregion
+
+	#region .ctor
+
+	public Project(TeamCityServiceContext context, string id, string name)
+		: base(context, id, name)
 	{
-		#region Static
-
-		#endregion
-
-		#region .ctor
-
-		public Project(TeamCityServiceContext context, string id, string name)
-			: base(context, id, name)
-		{
-			BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
-		}
-
-		public Project(TeamCityServiceContext context, string id)
-			: base(context, id)
-		{
-			BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
-		}
-
-		public Project(TeamCityServiceContext context, XmlNode node)
-			: base(context, node)
-		{
-			BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
-		}
-
-		#endregion
-
-		#region Methods
-
-		public ProjectLocator CreateLocator() => new() { Id = Id };
-
-		#endregion
-
-		#region Properties
-
-		public ProjectBuildTypesCollection BuildTypes { get; }
-
-		#endregion
+		BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
 	}
+
+	public Project(TeamCityServiceContext context, string id)
+		: base(context, id)
+	{
+		BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
+	}
+
+	public Project(TeamCityServiceContext context, XmlNode node)
+		: base(context, node)
+	{
+		BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
+	}
+
+	#endregion
+
+	#region Methods
+
+	public ProjectLocator CreateLocator() => new() { Id = Id };
+
+	#endregion
+
+	#region Properties
+
+	public ProjectBuildTypesCollection BuildTypes { get; }
+
+	#endregion
 }

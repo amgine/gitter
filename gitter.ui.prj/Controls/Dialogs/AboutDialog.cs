@@ -18,115 +18,134 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Drawing;
+using System.Reflection;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Services;
+
+using Resources = gitter.Properties.Resources;
+
+partial class AboutDialog : DialogBase
 {
-	using System;
-	using System.Reflection;
-	using System.Windows.Forms;
+	private readonly IUpdateChannel _updateChannel;
+	private IUpdateVersion _latestVersion;
 
-	using gitter.Framework;
-	using gitter.Framework.Services;
-
-	using Resources = gitter.Properties.Resources;
-
-	public partial class AboutDialog : DialogBase
+	private static Bitmap LoadImage(string name)
 	{
-		private readonly IUpdateChannel _updateChannel;
-		private IUpdateVersion _latestVersion;
+		using var stream = typeof(AboutDialog)
+			.Assembly
+			.GetManifestResourceStream("gitter.Resources.images." + name + ".png");
+		if(stream is null) return default;
+		return new Bitmap(stream);
+	}
 
-		public AboutDialog()
+	private static readonly Lazy<Bitmap> ImgLogo = new(() => LoadImage(@"start-page-logo"));
+
+	public AboutDialog(IUpdateChannel updateChannel)
+	{
+		_updateChannel = updateChannel;
+
+		InitializeComponent();
+		_logoPictureBox.Image = ImgLogo.Value;
+
+		Text = Resources.StrAbout;
+		labelVersion.Text = $"v{AssemblyVersion}";
+
+		_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
+
+		Margin = Padding.Empty;
+	}
+
+	public override DialogButtons OptimalButtons => DialogButtons.Ok;
+
+	#region Assembly Attribute Accessors
+
+	private static T GetAssemblyAttribute<T>() where T : Attribute
+		=> Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false) is { Length: > 0 } attributes
+			? attributes[0] as T
+			: default;
+
+	public string AssemblyTitle
+		=> GetAssemblyAttribute<AssemblyTitleAttribute>()?.Title
+		?? System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
+
+	public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+	public string AssemblyDescription
+		=> GetAssemblyAttribute<AssemblyDescriptionAttribute>()?.Description ?? string.Empty;
+
+	public string AssemblyProduct
+		=> GetAssemblyAttribute<AssemblyProductAttribute>()?.Product ?? string.Empty;
+
+	public string AssemblyCopyright
+		=> GetAssemblyAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? string.Empty;
+
+	public string AssemblyCompany
+		=> GetAssemblyAttribute<AssemblyCompanyAttribute>()?.Company ?? string.Empty;
+
+	#endregion
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(500, 252));
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Padding> ScalableMargin { get; } = DpiBoundValue.Constant(Padding.Empty);
+
+	private static void OnEmailLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+	{
+		Utility.OpenUrl(@"mailto://" + ((LinkLabel)sender).Text);
+	}
+
+	private async void OnCheckForUpdatesClick(object sender, EventArgs e)
+	{
+		_btnCheckForUpdates.Visible = false;
+		_lblUpdateStatus.Text = Resources.StrsCheckingForUpdates.AddEllipsis();
+		_lblUpdateStatus.Visible = true;
+		_latestVersion = default;
+		try
 		{
-			InitializeComponent();
-
-			this.Text = Resources.StrAbout;
-			this.labelVersion.Text = $"v{AssemblyVersion}";
-
-			_pnlUpdates.Visible = HelperExecutables.CheckIfCanLaunchUpdater();
-
-			_updateChannel = new GithubReleasesUpdateChannel();
-
-			Margin = new Padding(0, 0, 0, 0);
+			_latestVersion = await _updateChannel.GetLatestVersionAsync();
 		}
-
-		public override DialogButtons OptimalButtons => DialogButtons.Ok;
-
-		#region Assembly Attribute Accessors
-
-		private static T GetAssemblyAttribute<T>() where T : Attribute
-			=> Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false) is { Length: > 0 } attributes
-				? attributes[0] as T
-				: default;
-
-		public string AssemblyTitle
-			=> GetAssemblyAttribute<AssemblyTitleAttribute>()?.Title
-			?? System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
-
-		public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-		public string AssemblyDescription
-			=> GetAssemblyAttribute<AssemblyDescriptionAttribute>()?.Description ?? string.Empty;
-
-		public string AssemblyProduct
-			=> GetAssemblyAttribute<AssemblyProductAttribute>()?.Product ?? string.Empty;
-
-		public string AssemblyCopyright
-			=> GetAssemblyAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? string.Empty;
-
-		public string AssemblyCompany
-			=> GetAssemblyAttribute<AssemblyCompanyAttribute>()?.Company ?? string.Empty;
-
-		#endregion
-
-		private static void OnEmailLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		catch
 		{
-			Utility.OpenUrl(@"mailto://" + ((LinkLabel)sender).Text);
 		}
-
-		private async void OnCheckForUpdatesClick(object sender, EventArgs e)
+		if(IsDisposed) return;
+		if(_latestVersion is not null)
 		{
-			_btnCheckForUpdates.Visible = false;
-			_lblUpdateStatus.Text = Resources.StrsCheckingForUpdates.AddEllipsis();
-			_lblUpdateStatus.Visible = true;
-			_latestVersion = default;
-			try
+			var assembly   = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+			var asmVersion = assembly.GetName().Version;
+			if(_latestVersion.Version <= asmVersion)
 			{
-				_latestVersion = await _updateChannel.GetLatestVersionAsync();
-			}
-			catch
-			{
-			}
-			if(IsDisposed) return;
-			if(_latestVersion != null)
-			{
-				var asmVersion = Assembly.GetExecutingAssembly().GetName().Version;
-				if(_latestVersion.Version <= asmVersion)
-				{
-					_lblUpdateStatus.Text = Resources.StrsYourVersionIsUpToDate;
-				}
-				else
-				{
-					_lblUpdateStatus.Text = Resources.StrsVersionIsAvailable.UseAsFormat(_latestVersion.Version);
-					_btnUpdate.Visible = true;
-				}
+				_lblUpdateStatus.Text = Resources.StrsYourVersionIsUpToDate;
 			}
 			else
 			{
-				_lblUpdateStatus.Text = Resources.StrsCheckFailed;
+				_lblUpdateStatus.Text = Resources.StrsVersionIsAvailable.UseAsFormat(_latestVersion.Version);
+				_btnUpdate.Visible = true;
 			}
 		}
-
-		private void OnUpdateClick(object sender, EventArgs e)
+		else
 		{
-			if(!HelperExecutables.CheckIfUpdaterIsRunning())
+			_lblUpdateStatus.Text = Resources.StrsCheckFailed;
+		}
+	}
+
+	private void OnUpdateClick(object sender, EventArgs e)
+	{
+		if(!HelperExecutables.CheckIfUpdaterIsRunning())
+		{
+			try
 			{
-				try
-				{
-					_latestVersion?.Update();
-					_btnUpdate.Enabled = false;
-				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-				}
+				_latestVersion?.Update();
+				_btnUpdate.Enabled = false;
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
 			}
 		}
 	}

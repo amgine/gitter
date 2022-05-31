@@ -18,106 +18,105 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Text;
+
+public abstract class ObjectLocator
 {
-	using System;
-	using System.Text;
-
-	public abstract class ObjectLocator
+	protected static void BeginArgument(StringBuilder sb, string argname)
 	{
-		protected static void BeginArgument(StringBuilder sb, string argname)
+		Assert.IsNotNull(sb);
+		Assert.IsNeitherNullNorWhitespace(argname);
+
+		if(sb.Length != 0) sb.Append(',');
+		sb.Append(argname);
+		sb.Append(':');
+	}
+
+	protected static void AppendArgument(StringBuilder sb, string argname, BuildStatus value)
+	{
+		Assert.IsNotNull(sb);
+		Assert.IsNeitherNullNorWhitespace(argname);
+
+		if(value == BuildStatus.Unknown) return;
+
+		var strValue = value switch
 		{
-			Assert.IsNotNull(sb);
-			Assert.IsNeitherNullNorWhitespace(argname);
+			BuildStatus.Error   => "ERROR",
+			BuildStatus.Failure => "FAILURE",
+			BuildStatus.Success => "SUCCESS",
+			_ => throw new ApplicationException(),
+		};
+		BeginArgument(sb, argname);
+		sb.Append(strValue);
+	}
 
-			if(sb.Length != 0) sb.Append(',');
-			sb.Append(argname);
-			sb.Append(':');
-		}
+	protected static void AppendArgument(StringBuilder sb, string argname, string value)
+	{
+		Assert.IsNotNull(sb);
+		Assert.IsNeitherNullNorWhitespace(argname);
 
-		protected static void AppendArgument(StringBuilder sb, string argname, BuildStatus value)
+		if(!string.IsNullOrWhiteSpace(value))
 		{
-			Assert.IsNotNull(sb);
-			Assert.IsNeitherNullNorWhitespace(argname);
-
-			if(value == BuildStatus.Unknown) return;
-
-			var strValue = value switch
-			{
-				BuildStatus.Error   => "ERROR",
-				BuildStatus.Failure => "FAILURE",
-				BuildStatus.Success => "SUCCESS",
-				_ => throw new ApplicationException(),
-			};
 			BeginArgument(sb, argname);
-			sb.Append(strValue);
-		}
-
-		protected static void AppendArgument(StringBuilder sb, string argname, string value)
-		{
-			Assert.IsNotNull(sb);
-			Assert.IsNeitherNullNorWhitespace(argname);
-
-			if(!string.IsNullOrWhiteSpace(value))
+			if(value.Contains(","))
 			{
-				BeginArgument(sb, argname);
-				if(value.Contains(","))
-				{
-					sb.Append('(');
-					sb.Append(value);
-					sb.Append(')');
-				}
-				else
-				{
-					sb.Append(value);
-				}
-			}
-		}
-
-		protected static void AppendArgument(StringBuilder sb, string argname, int value)
-		{
-			Assert.IsNotNull(sb);
-			Assert.IsNeitherNullNorWhitespace(argname);
-
-			if(value != 0)
-			{
-				BeginArgument(sb, argname);
-				sb.Append(value);
-			}
-		}
-
-		protected static void AppendArgument(StringBuilder sb, string argname, FlagSelector value)
-		{
-			Assert.IsNotNull(sb);
-			Assert.IsNeitherNullNorWhitespace(argname);
-
-			if(value == FlagSelector.Unspecified) return;
-
-			var strValue = value switch
-			{
-				FlagSelector.True  => "true",
-				FlagSelector.False => "false",
-				FlagSelector.Any   => "any",
-				_ => throw new ApplicationException(),
-			};
-			BeginArgument(sb, argname);
-			sb.Append(strValue);
-		}
-
-		protected static void AppendArgument(StringBuilder sb, string argname, ObjectLocator locator)
-		{
-			Assert.IsNotNull(sb);
-			Assert.IsNeitherNullNorWhitespace(argname);
-
-			if(locator is null) return;
-			var value = locator.ToString();
-			if(!string.IsNullOrWhiteSpace(value))
-			{
-				BeginArgument(sb, argname);
 				sb.Append('(');
 				sb.Append(value);
 				sb.Append(')');
 			}
+			else
+			{
+				sb.Append(value);
+			}
+		}
+	}
+
+	protected static void AppendArgument(StringBuilder sb, string argname, int value)
+	{
+		Assert.IsNotNull(sb);
+		Assert.IsNeitherNullNorWhitespace(argname);
+
+		if(value != 0)
+		{
+			BeginArgument(sb, argname);
+			sb.Append(value);
+		}
+	}
+
+	protected static void AppendArgument(StringBuilder sb, string argname, FlagSelector value)
+	{
+		Assert.IsNotNull(sb);
+		Assert.IsNeitherNullNorWhitespace(argname);
+
+		if(value == FlagSelector.Unspecified) return;
+
+		var strValue = value switch
+		{
+			FlagSelector.True  => "true",
+			FlagSelector.False => "false",
+			FlagSelector.Any   => "any",
+			_ => throw new ApplicationException(),
+		};
+		BeginArgument(sb, argname);
+		sb.Append(strValue);
+	}
+
+	protected static void AppendArgument(StringBuilder sb, string argname, ObjectLocator locator)
+	{
+		Assert.IsNotNull(sb);
+		Assert.IsNeitherNullNorWhitespace(argname);
+
+		if(locator is null) return;
+		var value = locator.ToString();
+		if(!string.IsNullOrWhiteSpace(value))
+		{
+			BeginArgument(sb, argname);
+			sb.Append('(');
+			sb.Append(value);
+			sb.Append(')');
 		}
 	}
 }

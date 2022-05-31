@@ -18,22 +18,38 @@
  */
 #endregion
 
-namespace gitter.GitLab.Api
+namespace gitter.GitLab.Api;
+
+using System;
+using System.Runtime.Serialization;
+#if SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#elif NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
+
+[DataContract]
+sealed class Identity
 {
-    using System;
-    using System.Runtime.Serialization;
+	static class Names
+	{
+		public const string ExternUid = @"extern_uid";
+		public const string Provider  = @"provider";
+	}
 
-    using Newtonsoft.Json;
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.ExternUid)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Confidential)]
+#endif
+	public string ExternUid { get; set; }
 
-    [DataContract]
-    sealed class Identity
-    {
-        [JsonProperty("extern_uid")]
-        [DataMember]
-        public string ExternUid { get; set; }
-
-        [JsonProperty("provider")]
-        [DataMember]
-        public string Provider { get; set; }
-    }
+	[DataMember]
+#if SYSTEM_TEXT_JSON
+	[JsonPropertyName(Names.Provider)]
+#elif NEWTONSOFT_JSON
+	[JsonProperty(Names.Confidential)]
+#endif
+	public string Provider { get; set; }
 }

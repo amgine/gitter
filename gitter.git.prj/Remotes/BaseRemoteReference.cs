@@ -18,80 +18,79 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+public abstract class BaseRemoteReference : IRemoteReference
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	#region Events
 
-	using gitter.Framework;
+	public event EventHandler Deleted;
 
-	public abstract class BaseRemoteReference : IRemoteReference
+	private void InvokeDeleted()
+		=> Deleted?.Invoke(this, EventArgs.Empty);
+
+	#endregion
+
+	internal BaseRemoteReference(RemoteReferencesCollection refs, string name, Hash hash)
 	{
-		#region Events
+		Verify.Argument.IsNotNull(refs);
+		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
-		public event EventHandler Deleted;
-
-		private void InvokeDeleted()
-			=> Deleted?.Invoke(this, EventArgs.Empty);
-
-		#endregion
-
-		internal BaseRemoteReference(RemoteReferencesCollection refs, string name, Hash hash)
-		{
-			Verify.Argument.IsNotNull(refs, nameof(refs));
-			Verify.Argument.IsNeitherNullNorWhitespace(name, nameof(name));
-
-			References = refs;
-			Name = name;
-			Hash = hash;
-		}
-
-		protected abstract void DeleteCore();
-
-		protected abstract Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
-
-		public void Delete()
-		{
-			DeleteCore();
-			MarkAsDeleted();
-		}
-
-		public async Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
-		{
-			await DeleteCoreAsync(progress, cancellationToken)
-				.ConfigureAwait(continueOnCapturedContext: false);
-			MarkAsDeleted();
-		}
-
-		public void MarkAsDeleted()
-		{
-			if(!IsDeleted)
-			{
-				IsDeleted = true;
-				InvokeDeleted();
-			}
-		}
-
-		public bool IsDeleted { get; private set; }
-
-		protected RemoteReferencesCollection References { get; }
-
-		public Remote Remote => References.Remote;
-
-		public string Name { get; }
-
-		public string FullName => ReferenceType switch
-			{
-				ReferenceType.LocalBranch => GitConstants.LocalBranchPrefix + Name,
-				ReferenceType.Tag         => GitConstants.TagPrefix + Name,
-				_ => Name,
-			};
-
-		public Hash Hash { get; }
-
-		public abstract ReferenceType ReferenceType { get; }
-
-		public override string ToString() => Name;
+		References = refs;
+		Name = name;
+		Hash = hash;
 	}
+
+	protected abstract void DeleteCore();
+
+	protected abstract Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
+
+	public void Delete()
+	{
+		DeleteCore();
+		MarkAsDeleted();
+	}
+
+	public async Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	{
+		await DeleteCoreAsync(progress, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		MarkAsDeleted();
+	}
+
+	public void MarkAsDeleted()
+	{
+		if(!IsDeleted)
+		{
+			IsDeleted = true;
+			InvokeDeleted();
+		}
+	}
+
+	public bool IsDeleted { get; private set; }
+
+	protected RemoteReferencesCollection References { get; }
+
+	public Remote Remote => References.Remote;
+
+	public string Name { get; }
+
+	public string FullName => ReferenceType switch
+		{
+			ReferenceType.LocalBranch => GitConstants.LocalBranchPrefix + Name,
+			ReferenceType.Tag         => GitConstants.TagPrefix + Name,
+			_ => Name,
+		};
+
+	public Hash Hash { get; }
+
+	public abstract ReferenceType ReferenceType { get; }
+
+	public override string ToString() => Name;
 }

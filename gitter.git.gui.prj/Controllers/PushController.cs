@@ -18,88 +18,75 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework.Mvc;
+using gitter.Git.Gui.Interfaces;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class PushController : ViewControllerBase<IPushView>, IPushController
 {
-	using System;
-	using System.Windows.Forms;
-
-	using gitter.Framework.Mvc;
-	using gitter.Git.Gui.Interfaces;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	sealed class PushController : ViewControllerBase<IPushView>, IPushController
+	public PushController(Repository repository)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(repository);
 
-		public PushController(Repository repository)
+		Repository = repository;
+	}
+
+	private Repository Repository { get; }
+
+	public bool TryPush()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		var forceOverwrite = View.ForceOverwrite.Value;
+		var thinPack       = View.ThinPack.Value;
+		var sendTags       = View.SendTags.Value;
+		var branches       = View.References.Value;
+
+		if(branches.Count == 0)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
+			View.ErrorNotifier.NotifyError(View.References,
+				new UserInputError(
+				Resources.ErrNoBranchesSelected,
+				Resources.ErrYouMustSelectBranchesToPush));
+			return false;
 		}
 
-		#endregion
-
-		#region properties
-
-		private Repository Repository { get; }
-
-		#endregion
-
-		#region IPushController Members
-
-		public bool TryPush()
+		GuiCommandStatus status;
+		switch(View.PushTo.Value)
 		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var forceOverwrite = View.ForceOverwrite.Value;
-			var thinPack       = View.ThinPack.Value;
-			var sendTags       = View.SendTags.Value;
-			var branches       = View.References.Value;
-
-			if(branches.Count == 0)
-			{
-				View.ErrorNotifier.NotifyError(View.References,
-					new UserInputError(
-					Resources.ErrNoBranchesSelected,
-					Resources.ErrYouMustSelectBranchesToPush));
-				return false;
-			}
-
-			GuiCommandStatus status;
-			switch(View.PushTo.Value)
-			{
-				case PushTo.Remote:
-					var remote = View.Remote.Value;
-					if(remote == null)
-					{
-						View.ErrorNotifier.NotifyError(View.Remote,
-							new UserInputError(
-								Resources.ErrInvalidRemoteName,
-								Resources.ErrRemoteNameCannotBeEmpty));
-						return false;
-					}
-					status = GuiCommands.Push(View as IWin32Window, remote, branches, forceOverwrite, thinPack, sendTags);
-					break;
-				case PushTo.Url:
-					var url = View.Url.Value;
-					if(string.IsNullOrWhiteSpace(url))
-					{
-						View.ErrorNotifier.NotifyError(View.Url,
-							new UserInputError(
-								Resources.ErrInvalidUrl,
-								Resources.ErrUrlCannotBeEmpty));
-						return false;
-					}
-					status = GuiCommands.Push(View as IWin32Window, Repository, url, branches, forceOverwrite, thinPack, sendTags);
-					break;
-				default:
+			case PushTo.Remote:
+				var remote = View.Remote.Value;
+				if(remote is null)
+				{
+					View.ErrorNotifier.NotifyError(View.Remote,
+						new UserInputError(
+							Resources.ErrInvalidRemoteName,
+							Resources.ErrRemoteNameCannotBeEmpty));
 					return false;
-			}
-			return status == GuiCommandStatus.Completed;
+				}
+				status = GuiCommands.Push(View as IWin32Window, remote, branches, forceOverwrite, thinPack, sendTags);
+				break;
+			case PushTo.Url:
+				var url = View.Url.Value;
+				if(string.IsNullOrWhiteSpace(url))
+				{
+					View.ErrorNotifier.NotifyError(View.Url,
+						new UserInputError(
+							Resources.ErrInvalidUrl,
+							Resources.ErrUrlCannotBeEmpty));
+					return false;
+				}
+				status = GuiCommands.Push(View as IWin32Window, Repository, url, branches, forceOverwrite, thinPack, sendTags);
+				break;
+			default:
+				return false;
 		}
-
-		#endregion
+		return status == GuiCommandStatus.Completed;
 	}
 }

@@ -18,78 +18,65 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controllers
+namespace gitter.Git.Gui.Controllers;
+
+using System;
+using System.IO;
+using System.Windows.Forms;
+
+using gitter.Framework.Mvc;
+
+using gitter.Git.Gui.Interfaces;
+
+sealed class CloneController : ViewControllerBase<ICloneView>, ICloneController
 {
-	using System;
-	using System.IO;
-	using System.Windows.Forms;
-
-	using gitter.Framework.Mvc;
-
-	using gitter.Git.Gui.Interfaces;
-
-	sealed class CloneController : ViewControllerBase<ICloneView>, ICloneController
+	public CloneController(IGitRepositoryProvider gitRepositoryProvider)
 	{
-		#region .ctor
+		Verify.Argument.IsNotNull(gitRepositoryProvider);
 
-		public CloneController(IGitRepositoryProvider gitRepositoryProvider)
+		GitRepositoryProvider = gitRepositoryProvider;
+	}
+
+	private IGitRepositoryProvider GitRepositoryProvider { get; }
+
+	public bool TryClone()
+	{
+		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+
+		var url  = View.Url.Value;
+		if(!GitControllerUtility.ValidateUrl(url, View.Url, View.ErrorNotifier))
 		{
-			Verify.Argument.IsNotNull(gitRepositoryProvider, nameof(gitRepositoryProvider));
-
-			GitRepositoryProvider = gitRepositoryProvider;
+			return false;
+		}
+		var path = View.RepositoryPath.Value.Trim();
+		if(!GitControllerUtility.ValidateAbsolutePath(path, View.RepositoryPath, View.ErrorNotifier))
+		{
+			return false;
+		}
+		var remoteName = View.RemoteName.Value;
+		if(!GitControllerUtility.ValidateRemoteName(remoteName, View.RemoteName, View.ErrorNotifier))
+		{
+			return false;
+		}
+		url = url.Trim();
+		bool shallow = View.ShallowClone.Value;
+		int depth = shallow ? View.Depth.Value : -1;
+		string template = View.UseTemplate.Value ? View.TemplatePath.Value.Trim() : null;
+		if(!string.IsNullOrWhiteSpace(template) && !GitControllerUtility.ValidateAbsolutePath(template, View.TemplatePath, View.ErrorNotifier))
+		{
+			return false;
 		}
 
-		#endregion
+		bool bare       = View.Bare.Value;
+		bool mirror     = bare && View.Mirror.Value;
+		bool noCheckout = View.NoCheckout.Value;
+		bool recursive  = View.Recursive.Value;
 
-		#region Properties
+		var status = GuiCommands.Clone(View as IWin32Window,
+			GitRepositoryProvider.GitAccessor,
+			url, path, template, remoteName,
+			shallow, depth, bare, mirror, recursive, noCheckout);
 
-		private IGitRepositoryProvider GitRepositoryProvider { get; }
-
-		#endregion
-
-		#region ICloneController Members
-
-		public bool TryClone()
-		{
-			Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
-
-			var url  = View.Url.Value;
-			if(!GitControllerUtility.ValidateUrl(url, View.Url, View.ErrorNotifier))
-			{
-				return false;
-			}
-			var path = View.RepositoryPath.Value.Trim();
-			if(!GitControllerUtility.ValidateAbsolutePath(path, View.RepositoryPath, View.ErrorNotifier))
-			{
-				return false;
-			}
-			var remoteName = View.RemoteName.Value;
-			if(!GitControllerUtility.ValidateRemoteName(remoteName, View.RemoteName, View.ErrorNotifier))
-			{
-				return false;
-			}
-			url = url.Trim();
-			bool shallow = View.ShallowClone.Value;
-			int depth = shallow ? View.Depth.Value : -1;
-			string template = View.UseTemplate.Value ? View.TemplatePath.Value.Trim() : null;
-			if(!string.IsNullOrWhiteSpace(template) && !GitControllerUtility.ValidateAbsolutePath(template, View.TemplatePath, View.ErrorNotifier))
-			{
-				return false;
-			}
-
-			bool bare       = View.Bare.Value;
-			bool mirror     = bare && View.Mirror.Value;
-			bool noCheckout = View.NoCheckout.Value;
-			bool recursive  = View.Recursive.Value;
-
-			var status = GuiCommands.Clone(View as IWin32Window,
-				GitRepositoryProvider.GitAccessor,
-				url, path, template, remoteName,
-				shallow, depth, bare, mirror, recursive, noCheckout);
-
-			return status == GuiCommandStatus.Completed;
-		}
-
-		#endregion
+		return status == GuiCommandStatus.Completed;
 	}
 }

@@ -18,99 +18,98 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+public abstract class TeamCityObject
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Xml;
+	#region Static
 
-	public abstract class TeamCityObject
+	public static readonly TeamCityObjectProperty<string> IdProperty     = new("id",     nameof(Id));
+	public static readonly TeamCityObjectProperty<string> WebUrlProperty = new("webUrl", nameof(WebUrl));
+
+	#endregion
+
+	#region Data
+
+	private string _webUrl;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler<TeamCityObjectPropertyChangedEventArgs> PropertyChanged;
+
+	protected void OnPropertyChanged(TeamCityObjectProperty property)
+		=> PropertyChanged?.Invoke(this, new TeamCityObjectPropertyChangedEventArgs(property));
+
+	#endregion
+
+	#region .ctor
+
+	protected TeamCityObject(TeamCityServiceContext context, string id)
 	{
-		#region Static
+		Verify.Argument.IsNotNull(context);
 
-		public static readonly TeamCityObjectProperty<string> IdProperty     = new("id",     nameof(Id));
-		public static readonly TeamCityObjectProperty<string> WebUrlProperty = new("webUrl", nameof(WebUrl));
-
-		#endregion
-
-		#region Data
-
-		private string _webUrl;
-
-		#endregion
-
-		#region Events
-
-		public event EventHandler<TeamCityObjectPropertyChangedEventArgs> PropertyChanged;
-
-		protected void OnPropertyChanged(TeamCityObjectProperty property)
-			=> PropertyChanged?.Invoke(this, new TeamCityObjectPropertyChangedEventArgs(property));
-
-		#endregion
-
-		#region .ctor
-
-		protected TeamCityObject(TeamCityServiceContext context, string id)
-		{
-			Verify.Argument.IsNotNull(context, nameof(context));
-
-			Context = context;
-			Id      = id;
-		}
-
-		protected TeamCityObject(TeamCityServiceContext context, XmlNode node)
-		{
-			Verify.Argument.IsNotNull(context, nameof(context));
-			Verify.Argument.IsNotNull(node, nameof(node));
-
-			Context = context;
-			Id      = TeamCityUtility.LoadString(node.Attributes[IdProperty.XmlNodeName]);
-			_webUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
-		}
-
-		#endregion
-
-		#region Methods
-
-		internal virtual void Update(XmlNode node)
-		{
-			Verify.Argument.IsNotNull(node, nameof(node));
-
-			WebUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
-		}
-
-		public virtual void Update() => throw new NotSupportedException();
-
-		public object GetValue(TeamCityObjectProperty property)
-		{
-			Verify.Argument.IsNotNull(property, nameof(property));
-
-			return GetType().GetProperty(property.Name).GetValue(this, null);
-		}
-
-		protected void UpdatePropertyValue<T>(ref T field, T value, TeamCityObjectProperty<T> property)
-		{
-			if(!EqualityComparer<T>.Default.Equals(field, value))
-			{
-				field = value;
-				OnPropertyChanged(property);
-			}
-		}
-
-		#endregion
-
-		#region Properties
-
-		public string Id { get; }
-
-		public TeamCityServiceContext Context { get; }
-
-		public string WebUrl
-		{
-			get => _webUrl;
-			private set => UpdatePropertyValue(ref _webUrl, value, WebUrlProperty);
-		}
-
-		#endregion
+		Context = context;
+		Id      = id;
 	}
+
+	protected TeamCityObject(TeamCityServiceContext context, XmlNode node)
+	{
+		Verify.Argument.IsNotNull(context);
+		Verify.Argument.IsNotNull(node);
+
+		Context = context;
+		Id      = TeamCityUtility.LoadString(node.Attributes[IdProperty.XmlNodeName]);
+		_webUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
+	}
+
+	#endregion
+
+	#region Methods
+
+	internal virtual void Update(XmlNode node)
+	{
+		Verify.Argument.IsNotNull(node);
+
+		WebUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
+	}
+
+	public virtual void Update() => throw new NotSupportedException();
+
+	public object GetValue(TeamCityObjectProperty property)
+	{
+		Verify.Argument.IsNotNull(property);
+
+		return GetType().GetProperty(property.Name).GetValue(this, null);
+	}
+
+	protected void UpdatePropertyValue<T>(ref T field, T value, TeamCityObjectProperty<T> property)
+	{
+		if(!EqualityComparer<T>.Default.Equals(field, value))
+		{
+			field = value;
+			OnPropertyChanged(property);
+		}
+	}
+
+	#endregion
+
+	#region Properties
+
+	public string Id { get; }
+
+	public TeamCityServiceContext Context { get; }
+
+	public string WebUrl
+	{
+		get => _webUrl;
+		private set => UpdatePropertyValue(ref _webUrl, value, WebUrlProperty);
+	}
+
+	#endregion
 }

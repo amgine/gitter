@@ -18,48 +18,59 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework.Controls;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+/// <summary>"Email" column.</summary>
+public class EmailColumn : CustomListBoxColumn
 {
-	using System;
-	using System.Drawing;
-
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	/// <summary>"Email" column.</summary>
-	public class EmailColumn : CustomListBoxColumn
+	protected EmailColumn(ISubItemPainter painter, int id, string name, bool visible)
+		: base(id, name, visible)
 	{
-		protected EmailColumn(int id, string name, bool visible)
-			: base(id, name, visible)
+		Verify.Argument.IsNotNull(painter);
+
+		Width   = 80;
+		Painter = painter;
+	}
+
+	public EmailColumn(ISubItemPainter painter, string name, bool visible)
+		: this(painter, (int)ColumnId.Email, name, visible)
+	{
+	}
+
+	public EmailColumn(ISubItemPainter painter, bool visible = true)
+		: this(painter, (int)ColumnId.Email, Resources.StrEmail, visible)
+	{
+	}
+
+	private ISubItemPainter Painter { get; }
+
+	/// <inheritdoc/>
+	public override string IdentificationString => "Email";
+
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		if(Painter.TryMeasure(measureEventArgs, out var size))
 		{
-			Width = 80;
+			return size;
 		}
+		return Size.Empty;
+	}
 
-		public EmailColumn(string name, bool visible)
-			: this((int)ColumnId.Email, name, visible)
-		{
-		}
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
 
-		public EmailColumn(bool visible)
-			: this((int)ColumnId.Email, Resources.StrEmail, visible)
-		{
-		}
-
-		public EmailColumn()
-			: this((int)ColumnId.Email, Resources.StrEmail, true)
-		{
-		}
-
-		public static Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs, string email)
-			=> measureEventArgs.MeasureText(email);
-
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string email)
-			=> paintEventArgs.PaintText(email);
-
-		public static void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs, string email, Brush textBrush)
-			=> paintEventArgs.PaintText(email, textBrush);
-
-		public override string IdentificationString => "Email";
+		Painter.TryPaint(paintEventArgs);
 	}
 }

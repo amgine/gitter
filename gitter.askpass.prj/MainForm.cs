@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,65 +18,84 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Drawing;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+
+public partial class MainForm : Form
 {
-	using System;
-	using System.Drawing;
-	using System.Text.RegularExpressions;
-	using System.Windows.Forms;
-
-	public partial class MainForm : Form
+	static Icon LoadWindowIcon()
 	{
-		private const string DefaultFieldName = "Password:";
-		private const string LoginRegex = "^Username for \'.*\':";
-		private const string PasswordRegex = "^Password for \'.*\':";
+		using var stream = typeof(MainForm)
+			.Assembly
+			.GetManifestResourceStream(@"gitter.Resources.icons.app.ico");
+		if(stream is null) return default;
+		return new Icon(stream);
+	}
 
-		public MainForm()
+	static Bitmap LoadLockIcon()
+	{
+		using var stream = typeof(MainForm)
+			.Assembly
+			.GetManifestResourceStream(@"gitter.Resources.icons.lock.32.png");
+		if(stream is null) return default;
+		return new Bitmap(stream);
+	}
+
+	private const string DefaultFieldName = "Password:";
+	private const string LoginRegex = "^Username for \'.*\':";
+	private const string PasswordRegex = "^Password for \'.*\':";
+
+	public MainForm()
+	{
+		InitializeComponent();
+		pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+		pictureBox1.Image = LoadLockIcon();
+
+		var args = Environment.GetCommandLineArgs();
+
+		if(args.Length >= 2)
 		{
-			InitializeComponent();
-
-			var args = Environment.GetCommandLineArgs();
-
-			if(args.Length >= 2)
-			{
-				var gitPrompt = args[1];
-				_lblPrompt.Text = gitPrompt;
-				_lblField.Text = GetFieldName(gitPrompt);
-			}
-
-			Font = SystemFonts.MessageBoxFont;
+			var gitPrompt = args[1];
+			_lblPrompt.Text = gitPrompt;
+			_lblField.Text = GetFieldName(gitPrompt);
 		}
 
-		private static void SendPassword(string password)
-		{
-			Console.Write(password);
-		}
+		Font = SystemFonts.MessageBoxFont;
+	}
 
-		private void _btnOk_Click(object sender, EventArgs e)
-		{
-			SendPassword(_txtPassword.Text);
-			Close();
-		}
+	private static void SendPassword(string password)
+	{
+		Console.Write(password);
+	}
 
-		private void _btnCancel_Click(object sender, EventArgs e)
-		{
-			Close();
-		}
+	private void _btnOk_Click(object sender, EventArgs e)
+	{
+		SendPassword(_txtPassword.Text);
+		Close();
+	}
 
-		private static string GetFieldName(string gitInput)
+	private void _btnCancel_Click(object sender, EventArgs e)
+	{
+		Close();
+	}
+
+	private static string GetFieldName(string gitInput)
+	{
+		if(Regex.IsMatch(gitInput, LoginRegex))
 		{
-			if(Regex.IsMatch(gitInput, LoginRegex))
-			{
-				return "Username:";
-			}
-			else if(Regex.IsMatch(gitInput, PasswordRegex))
-			{
-				return "Password:";
-			}
-			else
-			{
-				return DefaultFieldName;
-			}
+			return "Username:";
+		}
+		else if(Regex.IsMatch(gitInput, PasswordRegex))
+		{
+			return "Password:";
+		}
+		else
+		{
+			return DefaultFieldName;
 		}
 	}
 }

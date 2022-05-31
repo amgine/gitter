@@ -18,48 +18,47 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+using System.Windows.Forms;
+
+public sealed class DefaultToolTipService : IToolTipService, IDisposable
 {
-	using System;
-	using System.Windows.Forms;
+	private ToolTip _toolTip;
 
-	public sealed class DefaultToolTipService : IToolTipService, IDisposable
+	public DefaultToolTipService()
 	{
-		private ToolTip _toolTip;
-
-		public DefaultToolTipService()
+		_toolTip = new ToolTip()
 		{
-			_toolTip = new ToolTip()
-			{
-				/*IsBalloon = true,*/
-			};
-		}
+			/*IsBalloon = true,*/
+		};
+	}
 
-		public void Register(Control control, string text)
-			=> _toolTip.SetToolTip(control, text);
+	public void Register(Control control, string text)
+		=> _toolTip.SetToolTip(control, text);
 
-		public void Unregister(Control control)
-			=> _toolTip.SetToolTip(control, string.Empty);
+	public void Unregister(Control control)
+		=> _toolTip.SetToolTip(control, string.Empty);
 
-		~DefaultToolTipService() => Dispose(disposing: false);
+	~DefaultToolTipService() => Dispose(disposing: false);
 
-		private void Dispose(bool disposing)
+	private void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			if(disposing)
+			if(_toolTip is not null)
 			{
-				if(_toolTip != null)
-				{
-					_toolTip.RemoveAll();
-					_toolTip.Dispose();
-					_toolTip = null;
-				}
+				_toolTip.RemoveAll();
+				_toolTip.Dispose();
+				_toolTip = null;
 			}
 		}
+	}
 
-		public void Dispose()
-		{
-			Dispose(disposing: true);
-			GC.SuppressFinalize(this);
-		}
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
 	}
 }

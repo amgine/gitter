@@ -18,101 +18,100 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+
+using gitter.Framework.Services;
+
+public class LogListBox : CustomListBox, IObserver<LogEvent>
 {
-	using System;
-	using System.ComponentModel;
+	private const int DefaultMessageLimit = 500;
 
-	using gitter.Framework.Services;
+	private int _messageLimit;
+	private IDisposable _observerToken;
 
-	public class LogListBox : CustomListBox, IObserver<LogEvent>
+	/// <summary>Initializes a new instance of the <see cref="LogListBox"/> class.</summary>
+	public LogListBox()
 	{
-		private const int DefaultMessageLimit = 500;
-
-		private int _messageLimit;
-		private IDisposable _observerToken;
-
-		/// <summary>Initializes a new instance of the <see cref="LogListBox"/> class.</summary>
-		public LogListBox()
-		{
-			Columns.AddRange(
-				new CustomListBoxColumn[]
-				{
-					new LogListBoxTypeColumn(),
-					new LogListBoxTimestampColumn(),
-					new LogListBoxSourceColumn(),
-					new LogListBoxMessageColumn(),
-					new LogListBoxExceptionColumn(),
-				});
-
-			_messageLimit = DefaultMessageLimit;
-			_observerToken = LogListBoxAppender.Instance.Subscribe(this);
-		}
-
-		/// <inheritdoc/>
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
+		Columns.AddRange(
+			new CustomListBoxColumn[]
 			{
-				if(_observerToken is not null)
-				{
-					_observerToken.Dispose();
-					_observerToken = null;
-				}
-			}
-			base.Dispose(disposing);
-		}
+				new LogListBoxTypeColumn(),
+				new LogListBoxTimestampColumn(),
+				new LogListBoxSourceColumn(),
+				new LogListBoxMessageColumn(),
+				new LogListBoxExceptionColumn(),
+			});
 
-		[DefaultValue(DefaultMessageLimit)]
-		public int MessageLimit
-		{
-			get => _messageLimit;
-			set => _messageLimit = value;
-		}
+		_messageLimit = DefaultMessageLimit;
+		_observerToken = LogListBoxAppender.Instance.Subscribe(this);
+	}
 
-		public void AppendEvent(LogEvent logEvent)
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			var item = new LogEventListItem(logEvent);
-			if(Items.Count == _messageLimit)
+			if(_observerToken is not null)
 			{
-				BeginUpdate();
-				Items.RemoveAt(0);
-				Items.Add(item);
-				EnsureVisible(item);
-				EndUpdate();
-			}
-			else
-			{
-				Items.Add(item);
-				EnsureVisible(item);
+				_observerToken.Dispose();
+				_observerToken = null;
 			}
 		}
+		base.Dispose(disposing);
+	}
 
-		void IObserver<LogEvent>.OnCompleted()
+	[DefaultValue(DefaultMessageLimit)]
+	public int MessageLimit
+	{
+		get => _messageLimit;
+		set => _messageLimit = value;
+	}
+
+	public void AppendEvent(LogEvent logEvent)
+	{
+		var item = new LogEventListItem(logEvent);
+		if(Items.Count == _messageLimit)
 		{
+			BeginUpdate();
+			Items.RemoveAt(0);
+			Items.Add(item);
+			EnsureVisible(item);
+			EndUpdate();
 		}
-
-		void IObserver<LogEvent>.OnError(Exception error)
+		else
 		{
+			Items.Add(item);
+			EnsureVisible(item);
 		}
+	}
 
-		void IObserver<LogEvent>.OnNext(LogEvent value)
+	void IObserver<LogEvent>.OnCompleted()
+	{
+	}
+
+	void IObserver<LogEvent>.OnError(Exception error)
+	{
+	}
+
+	void IObserver<LogEvent>.OnNext(LogEvent value)
+	{
+		if(IsDisposed) return;
+		if(InvokeRequired)
 		{
-			if(IsDisposed) return;
-			if(InvokeRequired)
+			try
 			{
-				try
-				{
-					BeginInvoke(new Action<LogEvent>(AppendEvent), new object[] { value });
-				}
-				catch
-				{
-				}
+				BeginInvoke(new Action<LogEvent>(AppendEvent), new object[] { value });
 			}
-			else
+			catch
 			{
-				AppendEvent(value);
 			}
+		}
+		else
+		{
+			AppendEvent(value);
 		}
 	}
 }

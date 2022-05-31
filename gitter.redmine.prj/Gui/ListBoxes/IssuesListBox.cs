@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui.ListBoxes
+namespace gitter.Redmine.Gui.ListBoxes;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using gitter.Framework.Controls;
+
+public class IssuesListBox : CustomListBox
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-
-	using gitter.Framework.Controls;
-
-	public class IssuesListBox : CustomListBox
+	public IssuesListBox()
 	{
-		public IssuesListBox()
-		{
-			Columns.AddRange(
-				new CustomListBoxColumn[]
-				{
-					new IssueIdColumn(),
-					new IssueCreatedOnColumn(),
-					new IssueUpdatedOnColumn(),
-					new IssueTrackerColumn(),
-					new IssueStatusColumn(),
-					new IssuePriorityColumn(),
-					new IssueSubjectColumn(),
-					new IssueAuthorColumn(),
-					new IssueAssignedToColumn(),
-					new IssueCategoryColumn(),
-					new IssueStartDateColumn(),
-					new IssueDueDateColumn(),
-					new IssueDoneRatioColumn(),
-				});
-		}
+		Columns.AddRange(
+			new CustomListBoxColumn[]
+			{
+				new IssueIdColumn(),
+				new IssueCreatedOnColumn(),
+				new IssueUpdatedOnColumn(),
+				new IssueTrackerColumn(),
+				new IssueStatusColumn(),
+				new IssuePriorityColumn(),
+				new IssueSubjectColumn(),
+				new IssueAuthorColumn(),
+				new IssueAssignedToColumn(),
+				new IssueCategoryColumn(),
+				new IssueStartDateColumn(),
+				new IssueDueDateColumn(),
+				new IssueDoneRatioColumn(),
+			});
 	}
 }

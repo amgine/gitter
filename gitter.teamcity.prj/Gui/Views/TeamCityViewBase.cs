@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,61 +18,59 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+using System;
+using System.ComponentModel;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+[DesignerCategory("")]
+public class TeamCityViewBase : ViewBase
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
+	private TeamCityServiceContext _serviceContext;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	public class TeamCityViewBase : ViewBase
+	/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
+	public TeamCityViewBase()
 	{
-		private TeamCityServiceContext _serviceContext;
+	}
 
-		/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
-		public TeamCityViewBase()
-		{
-		}
+	/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
+	public TeamCityViewBase(Guid guid, IWorkingEnvironment environment)
+		: base(guid, environment)
+	{
+	}
 
-		/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
-		public TeamCityViewBase(Guid guid, IWorkingEnvironment environment)
-			: base(guid, environment)
+	public TeamCityServiceContext ServiceContext
+	{
+		get { return _serviceContext; }
+		set
 		{
-		}
-
-		public TeamCityServiceContext ServiceContext
-		{
-			get { return _serviceContext; }
-			set
+			if(value != _serviceContext)
 			{
-				if(value != _serviceContext)
+				if(_serviceContext != null)
 				{
-					if(_serviceContext != null)
-					{
-						OnContextDetached();
-					}
-					_serviceContext = value;
-					if(_serviceContext != null)
-					{
-						OnContextAttached();
-					}
+					OnContextDetached();
+				}
+				_serviceContext = value;
+				if(_serviceContext != null)
+				{
+					OnContextAttached();
 				}
 			}
 		}
+	}
 
-		protected virtual void OnContextAttached()
-		{
-		}
+	protected virtual void OnContextAttached()
+	{
+	}
 
-		protected virtual void OnContextDetached()
-		{
-		}
+	protected virtual void OnContextDetached()
+	{
+	}
 
-		public virtual void RefreshContent()
-		{
-		}
+	public virtual void RefreshContent()
+	{
 	}
 }

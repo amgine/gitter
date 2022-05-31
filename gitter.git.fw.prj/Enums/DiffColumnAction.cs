@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,11 +18,10 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+public enum DiffColumnAction
 {
-	public enum DiffColumnAction
-	{
-		Add,
-		Remove,
-	}
+	Add,
+	Remove,
 }

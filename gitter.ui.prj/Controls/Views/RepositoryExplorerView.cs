@@ -18,44 +18,43 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Drawing;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Properties.Resources;
+
+[System.ComponentModel.DesignerCategory("")]
+public partial class RepositoryExplorerView : ViewBase
 {
-	using System;
-	using System.Drawing;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	public partial class RepositoryExplorerView : ViewBase
+	public RepositoryExplorerView(IWorkingEnvironment environment)
+		: base(Guids.RepositoryExplorerView, environment)
 	{
-		public RepositoryExplorerView(IWorkingEnvironment environment)
-			: base(Guids.RepositoryExplorerView, environment)
-		{
-			InitializeComponent();
+		InitializeComponent();
 
-			Text = Resources.StrRepositoryExplorer;
-		}
-
-		/// <inheritdoc/>
-		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"repository.explorer");
-
-		private void OnItemActivated(object sender, ItemEventArgs e)
-		{
-			Assert.IsNotNull(e);
-
-			if(e.Item is ViewListItem item)
-			{
-				WorkingEnvironment.ViewDockService.ShowView(item.DataContext.Guid);
-			}
-		}
-
-		public void AddItem(CustomListBoxItem item)
-			=> _lstRepositoryExplorer.Items.Add(item);
-
-		public void RemoveItem(CustomListBoxItem item)
-			=> _lstRepositoryExplorer.Items.Remove(item);
+		Text = Resources.StrRepositoryExplorer;
 	}
+
+	/// <inheritdoc/>
+	public override IImageProvider ImageProvider => Icons.RepositoryExplorer;
+
+	private void OnItemActivated(object sender, ItemEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		if(e.Item is ViewListItem item)
+		{
+			WorkingEnvironment.ViewDockService.ShowView(item.DataContext.Guid);
+		}
+	}
+
+	public void AddItem(CustomListBoxItem item)
+		=> _lstRepositoryExplorer.Items.Add(item);
+
+	public void RemoveItem(CustomListBoxItem item)
+		=> _lstRepositoryExplorer.Items.Remove(item);
 }

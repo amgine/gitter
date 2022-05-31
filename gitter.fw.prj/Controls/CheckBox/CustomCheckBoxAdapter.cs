@@ -18,105 +18,104 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public sealed class CustomCheckBoxAdapter : ICheckBoxWidget
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Data
 
-	public sealed class CustomCheckBoxAdapter : ICheckBoxWidget
+	private readonly CustomCheckBox _checkBox;
+
+	#endregion
+
+	#region Events
+
+	public event EventHandler IsCheckedChanged;
+
+	public event EventHandler CheckStateChanged;
+
+	private void OnIsCheckedChanged(EventArgs e)
+		=> IsCheckedChanged?.Invoke(this, e);
+
+	private void OnCheckStateChanged(EventArgs e)
+		=> CheckStateChanged?.Invoke(this, e);
+
+	#endregion
+
+	#region .ctor
+
+	public CustomCheckBoxAdapter(CustomCheckBoxRenderer renderer)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(renderer);
 
-		private readonly CustomCheckBox _checkBox;
-
-		#endregion
-
-		#region Events
-
-		public event EventHandler IsCheckedChanged;
-
-		public event EventHandler CheckStateChanged;
-
-		private void OnIsCheckedChanged(EventArgs e)
-			=> IsCheckedChanged?.Invoke(this, e);
-
-		private void OnCheckStateChanged(EventArgs e)
-			=> CheckStateChanged?.Invoke(this, e);
-
-		#endregion
-
-		#region .ctor
-
-		public CustomCheckBoxAdapter(CustomCheckBoxRenderer renderer)
+		_checkBox = new CustomCheckBox()
 		{
-			Verify.Argument.IsNotNull(renderer, nameof(renderer));
-
-			_checkBox = new CustomCheckBox()
-			{
-				Renderer = renderer,
-			};
-			_checkBox.IsCheckedChanged += OnCheckBoxIsCheckedChanged;
-			_checkBox.CheckStateChanged += OnCheckBoxCheckStateChanged;
-		}
-
-		#endregion
-
-		#region Event Handlers
-
-		private void OnCheckBoxIsCheckedChanged(object sender, EventArgs e)
-			=> OnIsCheckedChanged(e);
-
-		private void OnCheckBoxCheckStateChanged(object sender, EventArgs e)
-			=> OnCheckStateChanged(e);
-
-		#endregion
-
-		#region Properties
-
-		public Control Control => _checkBox;
-
-		public string Text
-		{
-			get => _checkBox.Text;
-			set => _checkBox.Text = value;
-		}
-
-		public Image Image
-		{
-			get => _checkBox.Image;
-			set => _checkBox.Image = value;
-		}
-
-		public bool IsChecked
-		{
-			get => _checkBox.IsChecked;
-			set => _checkBox.IsChecked = value;
-		}
-
-		public CheckState CheckState
-		{
-			get => _checkBox.CheckState;
-			set => _checkBox.CheckState = value;
-		}
-
-		public bool ThreeState
-		{
-			get => _checkBox.ThreeState;
-			set => _checkBox.ThreeState = value;
-		}
-
-		#endregion
-
-		#region IDisposable
-
-		public void Dispose()
-		{
-			_checkBox.IsCheckedChanged  -= OnCheckBoxIsCheckedChanged;
-			_checkBox.CheckStateChanged -= OnCheckBoxCheckStateChanged;
-			_checkBox.Dispose();
-		}
-
-		#endregion
+			Renderer = renderer,
+		};
+		_checkBox.IsCheckedChanged += OnCheckBoxIsCheckedChanged;
+		_checkBox.CheckStateChanged += OnCheckBoxCheckStateChanged;
 	}
+
+	#endregion
+
+	#region Event Handlers
+
+	private void OnCheckBoxIsCheckedChanged(object sender, EventArgs e)
+		=> OnIsCheckedChanged(e);
+
+	private void OnCheckBoxCheckStateChanged(object sender, EventArgs e)
+		=> OnCheckStateChanged(e);
+
+	#endregion
+
+	#region Properties
+
+	public Control Control => _checkBox;
+
+	public string Text
+	{
+		get => _checkBox.Text;
+		set => _checkBox.Text = value;
+	}
+
+	public Image Image
+	{
+		get => _checkBox.Image;
+		set => _checkBox.Image = value;
+	}
+
+	public bool IsChecked
+	{
+		get => _checkBox.IsChecked;
+		set => _checkBox.IsChecked = value;
+	}
+
+	public CheckState CheckState
+	{
+		get => _checkBox.CheckState;
+		set => _checkBox.CheckState = value;
+	}
+
+	public bool ThreeState
+	{
+		get => _checkBox.ThreeState;
+		set => _checkBox.ThreeState = value;
+	}
+
+	#endregion
+
+	#region IDisposable
+
+	public void Dispose()
+	{
+		_checkBox.IsCheckedChanged  -= OnCheckBoxIsCheckedChanged;
+		_checkBox.CheckStateChanged -= OnCheckBoxCheckStateChanged;
+		_checkBox.Dispose();
+	}
+
+	#endregion
 }

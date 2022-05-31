@@ -18,10 +18,9 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+public interface IDpiBoundValue<out T>
 {
-	public interface IDpiBoundValue<out T>
-	{
-		T GetValue(Dpi dpi);
-	}
+	T GetValue(Dpi dpi);
 }

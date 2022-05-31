@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+using gitter.Framework;
+
+/// <summary>Information about <see cref="Submodule"/>.</summary>
+public sealed class SubmoduleData : INamedObject
 {
-	using System;
-
-	using gitter.Framework;
-
-	/// <summary>Information about <see cref="Submodule"/>.</summary>
-	public sealed class SubmoduleData : INamedObject
+	/// <summary>Create <see cref="SubmoduleData"/>.</summary>
+	/// <param name="name">Submodule name.</param>
+	public SubmoduleData(string name)
 	{
-		/// <summary>Create <see cref="SubmoduleData"/>.</summary>
-		/// <param name="name">Submodule name.</param>
-		public SubmoduleData(string name)
-		{
-			Name = name;
-		}
-
-		/// <summary>Submodule name.</summary>
-		public string Name { get; }
-
-		/// <summary>Submodule path.</summary>
-		public string Path { get; set; }
-
-		/// <summary>Submodule URL.</summary>
-		public string Url { get; set; }
+		Name = name;
 	}
+
+	/// <summary>Submodule name.</summary>
+	public string Name { get; }
+
+	/// <summary>Submodule path.</summary>
+	public string Path { get; set; }
+
+	/// <summary>Submodule URL.</summary>
+	public string Url { get; set; }
 }

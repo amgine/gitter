@@ -18,52 +18,55 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+public partial class WebBrowserView : ViewBase
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private readonly WebBrowser _webBrowser;
+	private readonly WebBrowserViewToolbar _toolbar;
 
-	using Resources = gitter.Framework.Properties.Resources;
-
-	public partial class WebBrowserView : ViewBase
+	public WebBrowserView(Guid guid, IWorkingEnvironment environment)
+		: base(guid, environment)
 	{
-		private static readonly Image _image = Resources.ImgWebBrowser;
+		SuspendLayout();
+		_webBrowser = new();
+		_webBrowser.Dock = DockStyle.Fill;
+		_webBrowser.MinimumSize = new(20, 20);
+		_webBrowser.Name = nameof(_webBrowser);
+		_webBrowser.ScriptErrorsSuppressed = true;
+		_webBrowser.Size = new(555, 362);
+		_webBrowser.TabIndex = 0;
+		_webBrowser.Parent = this;
+		Name = nameof(WebBrowserView);
+		ResumeLayout(false);
 
-		private readonly WebBrowserViewToolbar _toolbar;
+		Text = Resources.StrWebBrowser;
 
-		public WebBrowserView()
+		//_webBrowser.DocumentCompleted += OnWebBrowserDocumentCompleted;
+
+		AddTopToolStrip(_toolbar = new WebBrowserViewToolbar(this));
+	}
+
+	private void OnWebBrowserDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+	{
+		Text = _webBrowser.DocumentTitle;
+	}
+
+	public override IImageProvider ImageProvider => CommonIcons.WebBrowser;
+
+	internal protected WebBrowser WebBrowser => _webBrowser;
+
+	protected override void AttachViewModel(object viewModel)
+	{
+		if(viewModel is WebBrowserViewModel vm)
 		{
-			InitializeComponent();
-		}
-
-		public WebBrowserView(Guid guid, IWorkingEnvironment environment)
-			: base(guid, environment)
-		{
-			InitializeComponent();
-
-			Text = Resources.StrWebBrowser;
-
-			//_webBrowser.DocumentCompleted += OnWebBrowserDocumentCompleted;
-
-			AddTopToolStrip(_toolbar = new WebBrowserViewToolbar(this));
-		}
-
-		private void OnWebBrowserDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-		{
-			Text = _webBrowser.DocumentTitle;
-		}
-
-		public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"web.browser");
-
-		internal protected WebBrowser WebBrowser => _webBrowser;
-
-		protected override void AttachViewModel(object viewModel)
-		{
-			if(viewModel is WebBrowserViewModel vm)
-			{
-				_webBrowser.Navigate(vm.Url);
-			}
+			_webBrowser.Navigate(vm.Url);
 		}
 	}
 }

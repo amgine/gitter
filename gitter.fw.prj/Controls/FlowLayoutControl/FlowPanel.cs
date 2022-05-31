@@ -18,211 +18,210 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public abstract class FlowPanel
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private FlowLayoutControl _flowControl;
 
-	public abstract class FlowPanel
+	/// <summary>Create <see cref="FlowPanel"/>.</summary>
+	protected FlowPanel()
 	{
-		private FlowLayoutControl _flowControl;
+	}
 
-		/// <summary>Create <see cref="FlowPanel"/>.</summary>
-		protected FlowPanel()
+	/// <summary>Host <see cref="FlowLayoutControl"/>.</summary>
+	public FlowLayoutControl FlowControl
+	{
+		get => _flowControl;
+		internal set
 		{
-		}
-
-		/// <summary>Host <see cref="FlowLayoutControl"/>.</summary>
-		public FlowLayoutControl FlowControl
-		{
-			get => _flowControl;
-			internal set
+			if(_flowControl != value)
 			{
-				if(_flowControl != value)
+				if(_flowControl is not null)
 				{
-					if(_flowControl is not null)
-					{
-						OnFlowControlDetached();
-					}
-					_flowControl = value;
-					if(_flowControl is not null)
-					{
-						OnFlowControlAttached();
-					}
+					OnFlowControlDetached();
+				}
+				_flowControl = value;
+				if(_flowControl is not null)
+				{
+					OnFlowControlAttached();
 				}
 			}
 		}
+	}
 
-		protected IGitterStyle Style => _flowControl?.Style ?? GitterApplication.DefaultStyle;
+	protected IGitterStyle Style => _flowControl?.Style ?? GitterApplication.DefaultStyle;
 
-		public virtual FlowPanelHeader Header => null;
+	public virtual FlowPanelHeader Header => null;
 
-		public Rectangle Bounds
+	public Rectangle Bounds
+	{
+		get
 		{
-			get
-			{
-				if(FlowControl is null) return Rectangle.Empty;
-				return FlowControl.GetPanelBounds(this);
-			}
+			if(FlowControl is null) return Rectangle.Empty;
+			return FlowControl.GetPanelBounds(this);
 		}
+	}
 
-		public virtual void InvalidateSize()
-			=> FlowControl?.InvalidatePanelSize(this);
+	public virtual void InvalidateSize()
+		=> FlowControl?.InvalidatePanelSize(this);
 
-		public void Invalidate()
-			=> FlowControl?.InvalidatePanel(this);
+	public void Invalidate()
+		=> FlowControl?.InvalidatePanel(this);
 
-		public void Invalidate(Rectangle rect)
-			=> FlowControl?.InvalidatePanel(this, rect);
+	public void Invalidate(Rectangle rect)
+		=> FlowControl?.InvalidatePanel(this, rect);
 
-		public void InvalidateSafe()
+	public void InvalidateSafe()
+	{
+		var control = FlowControl;
+		if(control is { Created: true, IsDisposed: false })
 		{
-			var control = FlowControl;
-			if(control is { Created: true, IsDisposed: false })
+			if(control.InvokeRequired)
 			{
-				if(control.InvokeRequired)
+				try
 				{
-					try
-					{
-						control.BeginInvoke(new MethodInvoker(Invalidate), null);
-					}
-					catch(ObjectDisposedException)
-					{
-					}
+					control.BeginInvoke(new MethodInvoker(Invalidate), null);
 				}
-				else
+				catch(ObjectDisposedException)
 				{
-					Invalidate();
 				}
 			}
-		}
-
-		public void InvalidateSafe(Rectangle rect)
-		{
-			var control = FlowControl;
-			if(control is { Created: true, IsDisposed: false })
+			else
 			{
-				if(control.InvokeRequired)
-				{
-					try
-					{
-						control.BeginInvoke(new Action<Rectangle>(Invalidate), rect);
-					}
-					catch(ObjectDisposedException)
-					{
-					}
-				}
-				else
-				{
-					Invalidate(rect);
-				}
+				Invalidate();
 			}
 		}
+	}
 
-		public void ScrollIntoView()
-			=> FlowControl?.ScrollIntoView(this);
-
-		public void Remove()
+	public void InvalidateSafe(Rectangle rect)
+	{
+		var control = FlowControl;
+		if(control is { Created: true, IsDisposed: false })
 		{
-			Verify.State.IsTrue(FlowControl != null);
-
-			FlowControl.Panels.Remove(this);
+			if(control.InvokeRequired)
+			{
+				try
+				{
+					control.BeginInvoke(new Action<Rectangle>(Invalidate), rect);
+				}
+				catch(ObjectDisposedException)
+				{
+				}
+			}
+			else
+			{
+				Invalidate(rect);
+			}
 		}
+	}
 
-		public void RemoveSafe()
-		{
-			var control = FlowControl;
-			Verify.State.IsTrue(control != null);
+	public void ScrollIntoView()
+		=> FlowControl?.ScrollIntoView(this);
 
-			control.BeginInvoke(new Func<FlowPanel, bool>(control.Panels.Remove), new object[] { this });
-		}
+	public void Remove()
+	{
+		Verify.State.IsTrue(FlowControl != null);
 
-		protected virtual void OnFlowControlAttached()
-		{
-		}
+		FlowControl.Panels.Remove(this);
+	}
 
-		protected virtual void OnFlowControlDetached()
-		{
-		}
+	public void RemoveSafe()
+	{
+		var control = FlowControl;
+		Verify.State.IsTrue(control != null);
 
-		protected abstract Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs);
+		control.BeginInvoke(new Func<FlowPanel, bool>(control.Panels.Remove), new object[] { this });
+	}
 
-		protected abstract void OnPaint(FlowPanelPaintEventArgs paintEventArgs);
+	protected virtual void OnFlowControlAttached()
+	{
+	}
 
-		protected virtual void OnMouseEnter()
-		{
-		}
+	protected virtual void OnFlowControlDetached()
+	{
+	}
 
-		protected virtual void OnMouseLeave()
-		{
-		}
+	protected abstract Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs);
 
-		protected virtual void OnMouseMove(int x, int y)
-		{
-		}
+	protected abstract void OnPaint(FlowPanelPaintEventArgs paintEventArgs);
 
-		protected virtual void OnMouseDown(int x, int y, MouseButtons button)
-		{
-		}
+	protected virtual void OnMouseEnter()
+	{
+	}
 
-		protected virtual void OnMouseUp(int x, int y, MouseButtons button)
-		{
-		}
+	protected virtual void OnMouseLeave()
+	{
+	}
 
-		protected virtual void OnMouseDoubleClick(int x, int y, MouseButtons button)
-		{
-		}
+	protected virtual void OnMouseMove(int x, int y)
+	{
+	}
 
-		public void ShowContextMenu(ContextMenuStrip menu, int x, int y)
-		{
-			Verify.Argument.IsNotNull(menu, nameof(menu));
-			Verify.State.IsTrue(FlowControl != null);
+	protected virtual void OnMouseDown(int x, int y, MouseButtons button)
+	{
+	}
 
-			var bounds = FlowControl.GetPanelBounds(this);
-			menu.Show(FlowControl,
-				bounds.X + x - FlowControl.HScrollPos,
-				bounds.Y + y - FlowControl.VScrollPos);
-		}
+	protected virtual void OnMouseUp(int x, int y, MouseButtons button)
+	{
+	}
 
-		internal void MouseEnter()
-		{
-			OnMouseEnter();
-		}
+	protected virtual void OnMouseDoubleClick(int x, int y, MouseButtons button)
+	{
+	}
 
-		internal void MouseLeave()
-		{
-			OnMouseLeave();
-		}
+	public void ShowContextMenu(ContextMenuStrip menu, int x, int y)
+	{
+		Verify.Argument.IsNotNull(menu);
+		Verify.State.IsTrue(FlowControl != null);
 
-		internal void MouseMove(int x, int y)
-		{
-			OnMouseMove(x, y);
-		}
+		var bounds = FlowControl.GetPanelBounds(this);
+		menu.Show(FlowControl,
+			bounds.X + x - FlowControl.HScrollPos,
+			bounds.Y + y - FlowControl.VScrollPos);
+	}
 
-		internal void MouseDown(int x, int y, MouseButtons button)
-		{
-			OnMouseDown(x, y, button);
-		}
+	internal void MouseEnter()
+	{
+		OnMouseEnter();
+	}
 
-		internal void DoubleClick(int x, int y, MouseButtons button)
-		{
-			OnMouseDoubleClick(x, y, button);
-		}
+	internal void MouseLeave()
+	{
+		OnMouseLeave();
+	}
 
-		internal void MouseUp(int x, int y, MouseButtons button)
-		{
-			OnMouseUp(x, y, button);
-		}
+	internal void MouseMove(int x, int y)
+	{
+		OnMouseMove(x, y);
+	}
 
-		public Size Measure(FlowPanelMeasureEventArgs measureEventArgs)
-		{
-			return OnMeasure(measureEventArgs);
-		}
+	internal void MouseDown(int x, int y, MouseButtons button)
+	{
+		OnMouseDown(x, y, button);
+	}
 
-		public void Paint(FlowPanelPaintEventArgs paintEventArgs)
-		{
-			OnPaint(paintEventArgs);
-		}
+	internal void DoubleClick(int x, int y, MouseButtons button)
+	{
+		OnMouseDoubleClick(x, y, button);
+	}
+
+	internal void MouseUp(int x, int y, MouseButtons button)
+	{
+		OnMouseUp(x, y, button);
+	}
+
+	public Size Measure(FlowPanelMeasureEventArgs measureEventArgs)
+	{
+		return OnMeasure(measureEventArgs);
+	}
+
+	public void Paint(FlowPanelPaintEventArgs paintEventArgs)
+	{
+		OnPaint(paintEventArgs);
 	}
 }

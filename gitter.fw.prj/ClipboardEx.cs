@@ -18,31 +18,30 @@
  */
 #endregion
 
-namespace gitter.Framework
-{
-	using System;
-	using System.Runtime.InteropServices;
-	using System.Threading;
-	using System.Windows.Forms;
+namespace gitter.Framework;
 
-	public static class ClipboardEx
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows.Forms;
+
+public static class ClipboardEx
+{
+	public static void SetTextSafe(string text, int attemptsCount = 3, int retryInterval = 50)
 	{
-		public static void SetTextSafe(string text, int attemptsCount = 3, int retryInterval = 50)
+		const int CLIPBRD_E_CANT_OPEN = unchecked((int)0x800401D0);
+		while(attemptsCount > 0)
 		{
-			const int CLIPBRD_E_CANT_OPEN = unchecked((int)0x800401D0);
-			while(attemptsCount > 0)
+			try
 			{
-				try
-				{
-					Clipboard.SetText(text);
-					return;
-				}
-				catch(COMException exc) when(exc.ErrorCode == CLIPBRD_E_CANT_OPEN)
-				{
-				}
-				--attemptsCount;
-				Thread.Sleep(retryInterval);
+				Clipboard.SetText(text);
+				return;
 			}
+			catch(COMException exc) when(exc.ErrorCode == CLIPBRD_E_CANT_OPEN)
+			{
+			}
+			--attemptsCount;
+			Thread.Sleep(retryInterval);
 		}
 	}
 }

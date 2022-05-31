@@ -18,18 +18,13 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using gitter.Framework;
+
+static class CachedResources
 {
-	using gitter.Framework;
+	public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.Git.Gui.Resources.icons");
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
-
-	static class CachedResources
-	{
-		public static CachedBitmapResources Bitmaps { get; } = new(Resources.ResourceManager);
-
-		public static CachedScaledImageResources ScaledBitmaps { get; } = new(typeof(CachedResources).Assembly, @"gitter.Git.Gui.Resources.icons");
-
-		public static CachedIconResources Icons { get; } = new(Resources.ResourceManager);
-	}
+	public static CachedIconResources Icons { get; } = new(typeof(CachedResources).Assembly, @"gitter.Git.Gui.Resources.icons.app.status.overlay");
 }

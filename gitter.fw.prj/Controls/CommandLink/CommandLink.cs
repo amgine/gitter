@@ -18,285 +18,289 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+/// <summary>Command button with WinVista/Win7 Command Link style.</summary>
+[ToolboxBitmap(typeof(CommandLink), "gitter.Framework.Properties.ui-button.png")]
+[DesignerCategory("")]
+#if NET6_0_OR_GREATER
+[global::System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
+public class CommandLink : Control
 {
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
-	using System.Windows.Forms;
+	#region Static
 
-	using Resources = gitter.Framework.Properties.Resources;
+	private static readonly IDpiBoundValue<Font> _titleFont       = DpiBoundValue.Font(new(SystemFonts.IconTitleFont.FontFamily, 12f, FontStyle.Regular));
+	private static readonly IDpiBoundValue<Font> _descriptionFont = DpiBoundValue.Font(new(SystemFonts.IconTitleFont.FontFamily, 8.25f, FontStyle.Regular));
+	private static readonly Brush _textBrush = new SolidBrush(Color.FromArgb(0, 51, 153));
 
-	/// <summary>Command button with WinVista/Win7 Command Link style.</summary>
-	[ToolboxBitmap(typeof(CommandLink), "gitter.Framework.Properties.ui-button.png")]
-	[DesignerCategory("")]
-	public class CommandLink : Control
+	private static readonly StringFormat _descriptionStringFormat = new(StringFormat.GenericTypographic)
 	{
-		#region Static
+		Alignment   = StringAlignment.Near,
+		Trimming    = StringTrimming.Character,
+		FormatFlags = StringFormatFlags.NoClip,
+	};
 
-		private static readonly Font _titleFont = new Font(SystemFonts.IconTitleFont.FontFamily, 12f);
-		private static readonly Font _descriptionFont = new Font(SystemFonts.IconTitleFont.FontFamily, 8.25f);
-		private static readonly Brush _textBrush = new SolidBrush(Color.FromArgb(0,51,153));
+	#endregion
 
-		private static readonly StringFormat DescriptionStringFormat = new StringFormat(StringFormat.GenericTypographic)
+	#region Data
+
+	private bool _hovered;
+	private bool _pressed;
+	private string _description;
+	private IImageProvider _image;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Create <see cref="CommandLink"/>.</summary>
+	public CommandLink()
+	{
+		SetStyle(
+			ControlStyles.ContainerControl |
+			ControlStyles.ResizeRedraw |
+			ControlStyles.SupportsTransparentBackColor,
+			false);
+		SetStyle(
+			ControlStyles.UserPaint |
+			ControlStyles.AllPaintingInWmPaint |
+			ControlStyles.Selectable |
+			ControlStyles.OptimizedDoubleBuffer,
+			true);
+	}
+
+	#endregion
+
+	#region Properties
+
+	/// <summary>Button image.</summary>
+	[DefaultValue(null)]
+	[Description("Button image")]
+	public IImageProvider Image
+	{
+		get => _image;
+		set
 		{
-			Alignment = StringAlignment.Near,
-			Trimming = StringTrimming.Character,
-			FormatFlags = StringFormatFlags.NoClip,
-		};
-
-		#endregion
-
-		#region Data
-
-		private bool _hovered;
-		private bool _pressed;
-		private string _description;
-		private Image _image;
-
-		#endregion
-
-		#region .ctor
-
-		/// <summary>Create <see cref="CommandLink"/>.</summary>
-		public CommandLink()
-		{
-			SetStyle(
-				ControlStyles.ContainerControl |
-				ControlStyles.ResizeRedraw |
-				ControlStyles.SupportsTransparentBackColor,
-				false);
-			SetStyle(
-				ControlStyles.UserPaint |
-				ControlStyles.AllPaintingInWmPaint |
-				ControlStyles.Selectable |
-				ControlStyles.OptimizedDoubleBuffer,
-				true);
+			_image = value;
+			Invalidate();
 		}
+	}
 
-		#endregion
-
-		#region Properties
-
-		/// <summary>Button image.</summary>
-		[DefaultValue(null)]
-		[Description("Button image")]
-		public Image Image
+	/// <summary>Description text.</summary>
+	[DefaultValue("")]
+	[Description("Description text")]
+	public string Description
+	{
+		get => _description;
+		set
 		{
-			get => _image;
-			set
-			{
-				_image = value;
-				Invalidate();
-			}
+			_description = value;
+			Invalidate();
 		}
+	}
 
-		/// <summary>Description text.</summary>
-		[DefaultValue("")]
-		[Description("Description text")]
-		public string Description
+	#endregion
+
+	#region Overrides
+
+	/// <inheritdoc/>
+	protected override void OnMouseEnter(EventArgs e)
+	{
+		base.OnMouseEnter(e);
+		if(!_hovered)
 		{
-			get => _description;
-			set
-			{
-				_description = value;
-				Invalidate();
-			}
+			_hovered = true;
+			Invalidate();
 		}
+	}
 
-		#endregion
-
-		#region Overrides
-
-		/// <inheritdoc/>
-		protected override void OnMouseEnter(EventArgs e)
+	/// <inheritdoc/>
+	protected override void OnMouseLeave(EventArgs e)
+	{
+		base.OnMouseLeave(e);
+		if(_hovered)
 		{
-			base.OnMouseEnter(e);
-			if(!_hovered)
-			{
-				_hovered = true;
-				Invalidate();
-			}
+			_hovered = false;
+			Invalidate();
 		}
+	}
 
-		/// <inheritdoc/>
-		protected override void OnMouseLeave(EventArgs e)
+	/// <inheritdoc/>
+	protected override void OnMouseMove(MouseEventArgs e)
+	{
+		if(_pressed)
 		{
-			base.OnMouseLeave(e);
-			if(_hovered)
+			if(ClientRectangle.Contains(e.Location))
 			{
-				_hovered = false;
-				Invalidate();
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseMove(MouseEventArgs e)
-		{
-			if(_pressed)
-			{
-				if(ClientRectangle.Contains(e.Location))
+				if(!_hovered)
 				{
-					if(!_hovered)
-					{
-						_hovered = true;
-						Invalidate();
-					}
-				}
-				else
-				{
-					if(_hovered)
-					{
-						_hovered = false;
-						Invalidate();
-					}
-				}
-			}
-			base.OnMouseMove(e);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnGotFocus(EventArgs e)
-		{
-			base.OnGotFocus(e);
-			Invalidate();
-		}
-
-		/// <inheritdoc/>
-		protected override void OnLostFocus(EventArgs e)
-		{
-			base.OnLostFocus(e);
-			Invalidate();
-		}
-
-		/// <inheritdoc/>
-		protected override void OnResize(EventArgs e)
-		{
-			base.OnResize(e);
-			Invalidate();
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseDown(MouseEventArgs e)
-		{
-			base.OnMouseDown(e);
-			_pressed = true;
-			Focus();
-			Invalidate();
-		}
-
-		/// <inheritdoc/>
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			base.OnMouseUp(e);
-			_pressed = false;
-			Invalidate();
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
-		{
-			switch(e.KeyCode)
-			{
-				case Keys.Enter:
-					e.IsInputKey = true;
-					OnClick(EventArgs.Empty);
-					break;
-			}
-			base.OnPreviewKeyDown(e);
-		}
-
-		/// <inheritdoc/>
-		protected sealed override void OnPaintBackground(PaintEventArgs pevent)
-		{
-		}
-
-		/// <inheritdoc/>
-		protected override void OnTextChanged(EventArgs e)
-		{
-			Invalidate();
-			base.OnTextChanged(e);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			var rc = e.ClipRectangle;
-			if(rc.Width <= 0 || rc.Height <= 0) return;
-			var graphics = e.Graphics;
-			graphics.Clear(BackColor);
-			graphics.SetClip(e.ClipRectangle);
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
-			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-			var k = (DeviceDpi / 96f);
-			if(Focused)
-			{
-				if(_pressed)
-				{
-					BackgroundStyle.SelectedFocused.Draw(graphics, ClientRectangle);
-				}
-				else if(_hovered)
-				{
-					BackgroundStyle.SelectedFocused.Draw(graphics, ClientRectangle);
-				}
-				else
-				{
-					BackgroundStyle.SelectedNoFocus.Draw(graphics, ClientRectangle);
+					_hovered = true;
+					Invalidate();
 				}
 			}
 			else
 			{
 				if(_hovered)
 				{
-					BackgroundStyle.Hovered.Draw(graphics, ClientRectangle);
-				}
-			}
-			if(!string.IsNullOrEmpty(_description))
-			{
-				var loc = new Point(5, 15);
-				if(_hovered && _pressed) loc.Offset(1, 1);
-				if(_image is null)
-				{
-					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
-				}
-				else
-				{
-					graphics.DrawImage(_image, loc);
-				}
-				var r = new Rectangle(25, 8, Width - 30, (int)(21 * k));
-				if(_hovered && _pressed) r.Offset(1, 1);
-				if(!string.IsNullOrEmpty(Text))
-				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, Text, _titleFont, _textBrush, r);
-				}
-				r = new Rectangle(r.X, r.Y + r.Height, r.Width, Height - 8 - r.Bottom);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, _description, _descriptionFont, _textBrush, r, DescriptionStringFormat);
-			}
-			else
-			{
-				var loc = new Point(5, (Height - 16) / 2);
-				if(_hovered && _pressed) loc.Offset(1, 1);
-				if(_image is null)
-				{
-					graphics.DrawImage(_hovered ? Resources.ImgActionHover : Resources.ImgAction, loc);
-				}
-				else
-				{
-					graphics.DrawImage(_image, loc);
-				}
-				var r = new Rectangle(25, 0, Width - 30, Height);
-				if(_hovered && _pressed) r.Offset(1, 1);
-				if(!string.IsNullOrEmpty(Text))
-				{
-					GitterApplication.TextRenderer.DrawText(
-						graphics, Text, _titleFont, _textBrush, r);
+					_hovered = false;
+					Invalidate();
 				}
 			}
 		}
-
-		#endregion
+		base.OnMouseMove(e);
 	}
+
+	/// <inheritdoc/>
+	protected override void OnGotFocus(EventArgs e)
+	{
+		base.OnGotFocus(e);
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnLostFocus(EventArgs e)
+	{
+		base.OnLostFocus(e);
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnResize(EventArgs e)
+	{
+		base.OnResize(e);
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseDown(MouseEventArgs e)
+	{
+		base.OnMouseDown(e);
+		_pressed = true;
+		Focus();
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseUp(MouseEventArgs e)
+	{
+		base.OnMouseUp(e);
+		_pressed = false;
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+	{
+		switch(e.KeyCode)
+		{
+			case Keys.Enter:
+				e.IsInputKey = true;
+				OnClick(EventArgs.Empty);
+				break;
+		}
+		base.OnPreviewKeyDown(e);
+	}
+
+	/// <inheritdoc/>
+	protected sealed override void OnPaintBackground(PaintEventArgs pevent)
+	{
+	}
+
+	/// <inheritdoc/>
+	protected override void OnTextChanged(EventArgs e)
+	{
+		Invalidate();
+		base.OnTextChanged(e);
+	}
+
+	private IBackgroundStyle GetBackgroundStyle()
+	{
+		if(Focused)
+		{
+			if(_pressed) return BackgroundStyle.SelectedFocused;
+			if(_hovered) return BackgroundStyle.SelectedFocused;
+			return BackgroundStyle.SelectedNoFocus;
+		}
+		else
+		{
+			if(_hovered) return BackgroundStyle.Hovered;
+		}
+		return default;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		var rc = e.ClipRectangle;
+		if(rc.Width <= 0 || rc.Height <= 0) return;
+
+		var dpi     = Dpi.FromControl(this);
+		var dpiConv = DpiConverter.FromDefaultTo(dpi);
+
+		var graphics = e.Graphics;
+		graphics.GdiFill(BackColor, e.ClipRectangle);
+		graphics.SmoothingMode = SmoothingMode.HighQuality;
+		graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
+
+		GetBackgroundStyle()?.Draw(graphics, dpi, ClientRectangle);
+
+		if(!string.IsNullOrEmpty(_description))
+		{
+			var iconBounds = dpiConv.Convert(new Rectangle(5, 15, 16, 16));
+			if(_hovered && _pressed)
+			{
+				iconBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
+			}
+			var image = _image ?? (_hovered ? CommonIcons.ActionHover : CommonIcons.Action);
+			graphics.DrawImage(image.GetImage(iconBounds.Width), iconBounds);
+
+			var textBounds = new Rectangle(dpiConv.ConvertX(25), dpiConv.ConvertY(8), Width - dpiConv.ConvertX(30), dpiConv.ConvertY(21));
+			if(_hovered && _pressed)
+			{
+				textBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
+			}
+			if(!string.IsNullOrEmpty(Text))
+			{
+				GitterApplication.TextRenderer.DrawText(
+					graphics, Text, _titleFont.GetValue(dpi), _textBrush, textBounds);
+			}
+			textBounds = new Rectangle(
+				textBounds.X,
+				textBounds.Y + textBounds.Height,
+				textBounds.Width,
+				Height - dpiConv.ConvertY(4) - textBounds.Bottom);
+			GitterApplication.TextRenderer.DrawText(
+				graphics, _description, _descriptionFont.GetValue(dpi), _textBrush, textBounds, _descriptionStringFormat);
+		}
+		else
+		{
+			var iconSize   = dpiConv.Convert(new Size(16, 16));
+			var iconBounds = new Rectangle(dpiConv.ConvertX(5), (Height - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
+			if(_hovered && _pressed) iconBounds.Offset(1, 1);
+			var image = _image ?? (_hovered ? CommonIcons.ActionHover : CommonIcons.Action);
+			graphics.DrawImage(image.GetImage(iconBounds.Width), iconBounds);
+
+			var textBounds = new Rectangle(25, 0, Width - 30, Height);
+			if(_hovered && _pressed)
+			{
+				textBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
+			}
+			if(!string.IsNullOrEmpty(Text))
+			{
+				GitterApplication.TextRenderer.DrawText(
+					graphics, Text, _titleFont.GetValue(dpi), _textBrush, textBounds);
+			}
+		}
+	}
+
+	#endregion
 }

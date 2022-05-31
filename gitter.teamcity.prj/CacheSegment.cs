@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,46 +18,45 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Collections.Generic;
+
+public abstract class CacheSegment<T> : IEnumerable<T>
+	where T : TeamCityObject
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly TeamCityObjectsCacheBase<T> _cache;
 
-	public abstract class CacheSegment<T> : IEnumerable<T>
-		where T : TeamCityObject
+	internal CacheSegment(TeamCityObjectsCacheBase<T> cache)
 	{
-		private readonly TeamCityObjectsCacheBase<T> _cache;
+		Verify.Argument.IsNotNull(cache);
 
-		internal CacheSegment(TeamCityObjectsCacheBase<T> cache)
-		{
-			Verify.Argument.IsNotNull(cache, nameof(cache));
-
-			_cache = cache;
-		}
-
-		public object SyncRoot => _cache.SyncRoot;
-
-		protected TeamCityServiceContext Context => _cache.Context;
-
-		public abstract void Refresh();
-
-		protected abstract bool IsIncluded(T item);
-
-		#region IEnumerable<T>
-
-		public IEnumerator<T> GetEnumerator()
-		{
-			foreach(var item in _cache)
-			{
-				if(IsIncluded(item)) yield return item;
-			}
-		}
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-
-		#endregion
+		_cache = cache;
 	}
+
+	public object SyncRoot => _cache.SyncRoot;
+
+	protected TeamCityServiceContext Context => _cache.Context;
+
+	public abstract void Refresh();
+
+	protected abstract bool IsIncluded(T item);
+
+	#region IEnumerable<T>
+
+	public IEnumerator<T> GetEnumerator()
+	{
+		foreach(var item in _cache)
+		{
+			if(IsIncluded(item)) yield return item;
+		}
+	}
+
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+	{
+		return GetEnumerator();
+	}
+
+	#endregion
 }

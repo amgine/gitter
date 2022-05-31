@@ -18,26 +18,25 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Drawing;
+
+public class ScaledImageProvider : IImageProvider
 {
-	using System;
-	using System.Drawing;
-
-	public class ScaledImageProvider : IImageProvider
+	public ScaledImageProvider(CachedScaledImageResources resources, string imageName)
 	{
-		public ScaledImageProvider(CachedScaledImageResources resources, string imageName)
-		{
-			Verify.Argument.IsNotNull(resources, nameof(resources));
-			Verify.Argument.IsNeitherNullNorWhitespace(imageName, nameof(imageName));
+		Verify.Argument.IsNotNull(resources);
+		Verify.Argument.IsNeitherNullNorWhitespace(imageName);
 
-			Resources = resources;
-			ImageName = imageName;
-		}
-
-		private CachedScaledImageResources Resources { get; }
-
-		private string ImageName { get; }
-
-		public Image GetImage(int size) => Resources[ImageName, size];
+		Resources = resources;
+		ImageName = imageName;
 	}
+
+	private CachedScaledImageResources Resources { get; }
+
+	private string ImageName { get; }
+
+	public Image GetImage(int size) => Resources[ImageName, size];
 }

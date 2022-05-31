@@ -18,138 +18,128 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Text;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+/// <summary>Control for diff viewing.</summary>
+public class DiffViewer : FlowLayoutControl
 {
-	using System;
-	using System.Text;
-	using System.Windows.Forms;
+	private static readonly object DiffFileContextMenuRequestedEvent = new();
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	/// <summary>Control for diff viewing.</summary>
-	public class DiffViewer : FlowLayoutControl
+	public event EventHandler<DiffFileContextMenuRequestedEventArgs> DiffFileContextMenuRequested
 	{
-		#region Events
+		add    => Events.AddHandler    (DiffFileContextMenuRequestedEvent, value);
+		remove => Events.RemoveHandler (DiffFileContextMenuRequestedEvent, value);
+	}
 
-		private static readonly object DiffFileContextMenuRequestedEvent = new();
+	private static readonly object UntrackedFileContextMenuRequestedEvent = new();
 
-		public event EventHandler<DiffFileContextMenuRequestedEventArgs> DiffFileContextMenuRequested
+	public event EventHandler<UntrackedFileContextMenuRequestedEventArgs> UntrackedFileContextMenuRequested
+	{
+		add    => Events.AddHandler    (UntrackedFileContextMenuRequestedEvent, value);
+		remove => Events.RemoveHandler (UntrackedFileContextMenuRequestedEvent, value);
+	}
+
+	internal void OnFileContextMenuRequested(DiffFile file)
+	{
+		var handler = (EventHandler<DiffFileContextMenuRequestedEventArgs>)Events[DiffFileContextMenuRequestedEvent];
+		if(handler is not null)
 		{
-			add    => Events.AddHandler    (DiffFileContextMenuRequestedEvent, value);
-			remove => Events.RemoveHandler (DiffFileContextMenuRequestedEvent, value);
+			var args = new DiffFileContextMenuRequestedEventArgs(file);
+			handler(this, args);
+			args.ContextMenu?.Show(this, PointToClient(Cursor.Position));
 		}
+	}
 
-		private static readonly object UntrackedFileContextMenuRequestedEvent = new();
-
-		public event EventHandler<UntrackedFileContextMenuRequestedEventArgs> UntrackedFileContextMenuRequested
+	internal void OnFileContextMenuRequested(TreeFile file)
+	{
+		var handler = (EventHandler<UntrackedFileContextMenuRequestedEventArgs>)Events[UntrackedFileContextMenuRequestedEvent];
+		if(handler is not null)
 		{
-			add    => Events.AddHandler    (UntrackedFileContextMenuRequestedEvent, value);
-			remove => Events.RemoveHandler (UntrackedFileContextMenuRequestedEvent, value);
+			var args = new UntrackedFileContextMenuRequestedEventArgs(file);
+			handler(this, args);
+			args.ContextMenu?.Show(this, PointToClient(Cursor.Position));
 		}
+	}
 
-		internal void OnFileContextMenuRequested(DiffFile file)
+	/// <summary>Create <see cref="DiffViewer"/>.</summary>
+	public DiffViewer()
+	{
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPanelMouseDown(FlowPanel panel, int x, int y, MouseButtons button)
+	{
+		foreach(var p in Panels)
 		{
-			var handler = (EventHandler<DiffFileContextMenuRequestedEventArgs>)Events[DiffFileContextMenuRequestedEvent];
-			if(handler != null)
-			{
-				var args = new DiffFileContextMenuRequestedEventArgs(file);
-				handler(this, args);
-				args.ContextMenu?.Show(this, PointToClient(Cursor.Position));
-			}
-		}
-
-		internal void OnFileContextMenuRequested(TreeFile file)
-		{
-			var handler = (EventHandler<UntrackedFileContextMenuRequestedEventArgs>)Events[UntrackedFileContextMenuRequestedEvent];
-			if(handler != null)
-			{
-				var args = new UntrackedFileContextMenuRequestedEventArgs(file);
-				handler(this, args);
-				args.ContextMenu?.Show(this, PointToClient(Cursor.Position));
-			}
-		}
-
-		#endregion
-
-		#region .ctor
-
-		/// <summary>Create <see cref="DiffViewer"/>.</summary>
-		public DiffViewer()
-		{
-		}
-
-		#endregion
-
-		#region Methods
-
-		protected override void OnPanelMouseDown(FlowPanel panel, int x, int y, MouseButtons button)
-		{
-			foreach(var p in Panels)
-			{
-				if(p != panel)
-				{
-					(p as FileDiffPanel)?.DropSelection();
-				}
-			}
-			base.OnPanelMouseDown(panel, x, y, button);
-		}
-
-		protected override void OnFreeSpaceMouseDown(int x, int y, MouseButtons button)
-		{
-			foreach(var p in Panels)
+			if(p != panel)
 			{
 				(p as FileDiffPanel)?.DropSelection();
 			}
-			base.OnFreeSpaceMouseDown(x, y, button);
 		}
+		base.OnPanelMouseDown(panel, x, y, button);
+	}
 
-		protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+	/// <inheritdoc/>
+	protected override void OnFreeSpaceMouseDown(int x, int y, MouseButtons button)
+	{
+		foreach(var p in Panels)
 		{
-			switch(e.KeyCode)
-			{
-				case Keys.C:
-					if(Control.ModifierKeys == Keys.Control)
-					{
-						foreach(var p in Panels)
-						{
-							var filePanel = p as FileDiffPanel;
-							if(filePanel != null && filePanel.SelectionLength != 0)
-							{
-								var lines = filePanel.GetSelectedLines();
-								var sb = new StringBuilder();
-								bool first = true;
-								foreach(var line in lines)
-								{
-									if(first)
-									{
-										first = false;
-									}
-									else
-									{
-										sb.Append('\n');
-									}
-									sb.Append(line.Text);
-								}
-								if(sb.Length != 0)
-								{
-									if(sb[sb.Length - 1] == '\r')
-									{
-										sb.Remove(sb.Length - 1, 1);
-									}
-								}
-								ClipboardEx.SetTextSafe(sb.ToString());
-								break;
-							}
-						}
-
-						e.IsInputKey = true;
-					}
-					break;
-			}
-			base.OnPreviewKeyDown(e);
+			(p as FileDiffPanel)?.DropSelection();
 		}
+		base.OnFreeSpaceMouseDown(x, y, button);
+	}
 
-		#endregion
+	/// <inheritdoc/>
+	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+	{
+		switch(e.KeyCode)
+		{
+			case Keys.C:
+				if(Control.ModifierKeys == Keys.Control)
+				{
+					foreach(var p in Panels)
+					{
+						var filePanel = p as FileDiffPanel;
+						if(filePanel != null && filePanel.SelectionLength != 0)
+						{
+							var lines = filePanel.GetSelectedLines();
+							var sb = new StringBuilder();
+							bool first = true;
+							foreach(var line in lines)
+							{
+								if(first)
+								{
+									first = false;
+								}
+								else
+								{
+									sb.Append('\n');
+								}
+								sb.Append(line.Text);
+							}
+							if(sb.Length != 0)
+							{
+								if(sb[sb.Length - 1] == '\r')
+								{
+									sb.Remove(sb.Length - 1, 1);
+								}
+							}
+							ClipboardEx.SetTextSafe(sb.ToString());
+							break;
+						}
+					}
+
+					e.IsInputKey = true;
+				}
+				break;
+		}
+		base.OnPreviewKeyDown(e);
 	}
 }

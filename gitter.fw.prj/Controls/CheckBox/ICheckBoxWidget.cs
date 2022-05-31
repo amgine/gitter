@@ -18,28 +18,25 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public interface ICheckBoxWidget : IImageWidget, IDisposable
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
+	event EventHandler IsCheckedChanged;
 
-	public interface ICheckBoxWidget : IDisposable
-	{
-		event EventHandler IsCheckedChanged;
+	event EventHandler CheckStateChanged;
 
-		event EventHandler CheckStateChanged;
+	Control Control { get; }
 
-		Control Control { get; }
+	string Text { get; set; }
 
-		string Text { get; set; }
+	bool IsChecked { get; set; }
 
-		Image Image { get; set; }
+	CheckState CheckState { get; set; }
 
-		bool IsChecked { get; set; }
-
-		CheckState CheckState { get; set; }
-
-		bool ThreeState { get; set; }
-	}
+	bool ThreeState { get; set; }
 }

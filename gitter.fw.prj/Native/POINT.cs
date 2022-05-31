@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Native
+namespace gitter.Native;
+
+using System.Runtime.InteropServices;
+
+[StructLayout(LayoutKind.Sequential)]
+public struct POINT
 {
-	using System.Runtime.InteropServices;
+	public int X;
+	public int Y;
 
-	[StructLayout(LayoutKind.Sequential)]
-	public struct POINT
+	public POINT(int x, int y)
 	{
-		public int X;
-		public int Y;
-
-		public POINT(int x, int y)
-		{
-			X = x;
-			Y = y;
-		}
+		X = x;
+		Y = y;
 	}
 }

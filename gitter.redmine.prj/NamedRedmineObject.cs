@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,65 +18,64 @@
  */
 #endregion
 
-namespace gitter.Redmine
+namespace gitter.Redmine;
+
+using System;
+using System.Xml;
+
+public abstract class NamedRedmineObject : RedmineObject
 {
-	using System;
-	using System.Xml;
+	#region Static
 
-	public abstract class NamedRedmineObject : RedmineObject
+	public static readonly RedmineObjectProperty<string> NameProperty =
+		new RedmineObjectProperty<string>("name", "Name");
+
+	#endregion
+
+	#region Data
+
+	private string _name;
+
+	#endregion
+
+	#region .ctor
+
+	protected NamedRedmineObject(RedmineServiceContext context, int id, string name)
+		: base(context, id)
 	{
-		#region Static
-
-		public static readonly RedmineObjectProperty<string> NameProperty =
-			new RedmineObjectProperty<string>("name", "Name");
-
-		#endregion
-
-		#region Data
-
-		private string _name;
-
-		#endregion
-
-		#region .ctor
-
-		protected NamedRedmineObject(RedmineServiceContext context, int id, string name)
-			: base(context, id)
-		{
-			_name = name;
-		}
-
-		protected NamedRedmineObject(RedmineServiceContext context, XmlNode node)
-			: base(context, node)
-		{
-			_name = RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
-		}
-
-		#endregion
-
-		#region Properties
-
-		public string Name
-		{
-			get { return _name; }
-			internal set { UpdatePropertyValue(ref _name, value, NameProperty); }
-		}
-
-		#endregion
-
-		#region Methods
-
-		internal override void Update(XmlNode node)
-		{
-			base.Update(node);
-			Name = RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
-		}
-
-		public override string ToString()
-		{
-			return _name;
-		}
-
-		#endregion
+		_name = name;
 	}
+
+	protected NamedRedmineObject(RedmineServiceContext context, XmlNode node)
+		: base(context, node)
+	{
+		_name = RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
+	}
+
+	#endregion
+
+	#region Properties
+
+	public string Name
+	{
+		get { return _name; }
+		internal set { UpdatePropertyValue(ref _name, value, NameProperty); }
+	}
+
+	#endregion
+
+	#region Methods
+
+	internal override void Update(XmlNode node)
+	{
+		base.Update(node);
+		Name = RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
+	}
+
+	public override string ToString()
+	{
+		return _name;
+	}
+
+	#endregion
 }

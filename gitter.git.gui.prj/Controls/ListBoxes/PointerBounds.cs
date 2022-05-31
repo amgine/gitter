@@ -18,48 +18,47 @@
  */
 #endregion
 
-namespace gitter.Git.Gui
+namespace gitter.Git.Gui;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Git.Gui.Controls;
+
+public readonly struct PointerBounds
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	using gitter.Git.Gui.Controls;
-
-	public readonly struct PointerBounds
+	public static ContextMenuStrip GetContextMenu(IEnumerable<PointerBounds> pointers, int x, int y)
 	{
-		public static ContextMenuStrip GetContextMenu(IEnumerable<PointerBounds> pointers, int x, int y)
+		if(pointers is null) return null;
+		foreach(var ptr in pointers)
 		{
-			if(pointers == null) return null;
-			foreach(var ptr in pointers)
+			if(GlobalBehavior.GraphStyle.HitTestReference(ptr.Bounds, x, y))
 			{
-				if(x >= ptr.Bounds.X && x < ptr.Bounds.Right)
-				{
-					return ptr.GetContextMenu();
-				}
+				return ptr.GetContextMenu();
 			}
-			return null;
 		}
-
-		public PointerBounds(IRevisionPointer revisionPointer, Rectangle bounds)
-		{
-			RevisionPointer = revisionPointer;
-			Bounds          = bounds;
-		}
-
-		public IRevisionPointer RevisionPointer { get; }
-
-		public Rectangle Bounds { get; }
-
-		public ContextMenuStrip GetContextMenu()
-			=> RevisionPointer switch
-			{
-				Tag          tag    => new TagMenu(tag),
-				BranchBase   branch => new BranchMenu(branch),
-				StashedState stash  => new StashedStateMenu(stash),
-				Head         head   => new HeadMenu(head),
-				_ => default,
-			};
+		return null;
 	}
+
+	public PointerBounds(IRevisionPointer revisionPointer, Rectangle bounds)
+	{
+		RevisionPointer = revisionPointer;
+		Bounds          = bounds;
+	}
+
+	public IRevisionPointer RevisionPointer { get; }
+
+	public Rectangle Bounds { get; }
+
+	public ContextMenuStrip GetContextMenu()
+		=> RevisionPointer switch
+		{
+			Tag          tag    => new TagMenu(tag),
+			BranchBase   branch => new BranchMenu(branch),
+			StashedState stash  => new StashedStateMenu(stash),
+			Head         head   => new HeadMenu(head),
+			_ => default,
+		};
 }

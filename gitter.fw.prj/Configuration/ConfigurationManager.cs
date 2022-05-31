@@ -18,40 +18,39 @@
  */
 #endregion
 
-namespace gitter.Framework.Configuration
+namespace gitter.Framework.Configuration;
+
+using System;
+
+public sealed class ConfigurationManager : INamedObject
 {
-	using System;
-
-	public sealed class ConfigurationManager : INamedObject
+	public ConfigurationManager(IDataAdapter dataAdapter)
 	{
-		public ConfigurationManager(IDataAdapter dataAdapter)
-		{
-			Load(dataAdapter);
-		}
-
-		public ConfigurationManager(string name)
-		{
-			RootSection = new Section(name);
-		}
-
-		public string Name => RootSection.Name;
-
-		public Section RootSection { get; private set; }
-
-		public void Save(IDataAdapter dataAdapter)
-		{
-			Verify.Argument.IsNotNull(dataAdapter, nameof(dataAdapter));
-
-			dataAdapter.Store(RootSection);
-		}
-
-		public void Load(IDataAdapter dataAdapter)
-		{
-			Verify.Argument.IsNotNull(dataAdapter, nameof(dataAdapter));
-
-			RootSection = dataAdapter.Load();
-		}
-
-		public override string ToString() => Name;
+		Load(dataAdapter);
 	}
+
+	public ConfigurationManager(string name)
+	{
+		RootSection = new Section(name);
+	}
+
+	public string Name => RootSection.Name;
+
+	public Section RootSection { get; private set; }
+
+	public void Save(IDataAdapter dataAdapter)
+	{
+		Verify.Argument.IsNotNull(dataAdapter);
+
+		dataAdapter.Store(RootSection);
+	}
+
+	public void Load(IDataAdapter dataAdapter)
+	{
+		Verify.Argument.IsNotNull(dataAdapter);
+
+		RootSection = dataAdapter.Load();
+	}
+
+	public override string ToString() => Name;
 }

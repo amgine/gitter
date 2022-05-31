@@ -18,122 +18,108 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui.ListBoxes
+namespace gitter.Redmine.Gui.ListBoxes;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+sealed class NewsListBinding : AsyncDataBinding<LinkedList<News>>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using System.Threading.Tasks;
-	using System.Windows.Forms;
+	#region .ctor
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	sealed class NewsListBinding : AsyncDataBinding<LinkedList<News>>
+	public NewsListBinding(RedmineServiceContext serviceContext, NewsListBox newsListBox)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(serviceContext);
+		Verify.Argument.IsNotNull(newsListBox);
 
-		private readonly RedmineServiceContext _serviceContext;
-		private readonly NewsListBox _newsListBox;
+		ServiceContext = serviceContext;
+		NewsListBox    = newsListBox;
 
-		#endregion
+		Progress = newsListBox.ProgressMonitor;
+	}
 
-		#region .ctor
+	#endregion
 
-		public NewsListBinding(RedmineServiceContext serviceContext, NewsListBox newsListBox)
+	#region Properties
+
+	public RedmineServiceContext ServiceContext { get; }
+
+	public NewsListBox NewsListBox { get; }
+
+	#endregion
+
+	#region Methods
+
+	protected override Task<LinkedList<News>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	{
+		Verify.State.IsFalse(IsDisposed, "NewsListBinding is disposed.");
+
+		NewsListBox.Cursor = Cursors.WaitCursor;
+
+		return ServiceContext.News.FetchAsync(ServiceContext.DefaultProjectId,
+			progress, cancellationToken);
+	}
+
+	protected override void OnFetchCompleted(LinkedList<News> newsList)
+	{
+		Assert.IsNotNull(newsList);
+
+		if(IsDisposed || NewsListBox.IsDisposed)
 		{
-			Verify.Argument.IsNotNull(serviceContext, nameof(serviceContext));
-			Verify.Argument.IsNotNull(newsListBox, nameof(newsListBox));
-
-			_serviceContext = serviceContext;
-			_newsListBox    = newsListBox;
-
-			Progress = newsListBox.ProgressMonitor;
+			return;
 		}
 
-		#endregion
-
-		#region Properties
-
-		public RedmineServiceContext ServiceContext
+		NewsListBox.BeginUpdate();
+		NewsListBox.Items.Clear();
+		if(newsList.Count != 0)
 		{
-			get { return _serviceContext; }
-		}
-
-		public NewsListBox NewsListBox
-		{
-			get { return _newsListBox; }
-		}
-
-		#endregion
-
-		#region Methods
-
-		protected override Task<LinkedList<News>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		{
-			Verify.State.IsFalse(IsDisposed, "NewsListBinding is disposed.");
-
-			NewsListBox.Cursor = Cursors.WaitCursor;
-
-			return ServiceContext.News.FetchAsync(ServiceContext.DefaultProjectId,
-				progress, cancellationToken);
-		}
-
-		protected override void OnFetchCompleted(LinkedList<News> newsList)
-		{
-			Assert.IsNotNull(newsList);
-
-			if(IsDisposed || NewsListBox.IsDisposed)
+			foreach(var news in newsList)
 			{
-				return;
+				NewsListBox.Items.Add(new NewsListItem(news));
 			}
+			NewsListBox.Text = string.Empty;
+		}
+		else
+		{
+			NewsListBox.Text = Resources.StrsNoNewsToDisplay;
+		}
+		NewsListBox.EndUpdate();
+		NewsListBox.Cursor = Cursors.Default;
+	}
 
-			NewsListBox.BeginUpdate();
-			NewsListBox.Items.Clear();
-			if(newsList.Count != 0)
-			{
-				foreach(var news in newsList)
-				{
-					NewsListBox.Items.Add(new NewsListItem(news));
-				}
-				NewsListBox.Text = string.Empty;
-			}
-			else
+	protected override void OnFetchFailed(Exception exception)
+	{
+		if(IsDisposed || NewsListBox.IsDisposed)
+		{
+			return;
+		}
+
+		NewsListBox.ProgressMonitor.Report(OperationProgress.Completed);
+		NewsListBox.Text = Resources.StrsFailedToFetchNews;
+		NewsListBox.Items.Clear();
+		NewsListBox.Cursor = Cursors.Default;
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			if(!NewsListBox.IsDisposed)
 			{
 				NewsListBox.Text = Resources.StrsNoNewsToDisplay;
+				NewsListBox.Items.Clear();
 			}
-			NewsListBox.EndUpdate();
-			NewsListBox.Cursor = Cursors.Default;
 		}
-
-		protected override void OnFetchFailed(Exception exception)
-		{
-			if(IsDisposed || NewsListBox.IsDisposed)
-			{
-				return;
-			}
-
-			NewsListBox.ProgressMonitor.Report(OperationProgress.Completed);
-			NewsListBox.Text = Resources.StrsFailedToFetchNews;
-			NewsListBox.Items.Clear();
-			NewsListBox.Cursor = Cursors.Default;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
-			{
-				if(!NewsListBox.IsDisposed)
-				{
-					NewsListBox.Text = Resources.StrsNoNewsToDisplay;
-					NewsListBox.Items.Clear();
-				}
-			}
-			base.Dispose(disposing);
-		}
-
-		#endregion
+		base.Dispose(disposing);
 	}
+
+	#endregion
 }

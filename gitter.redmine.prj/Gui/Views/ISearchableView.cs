@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Collections.Generic;
+
+interface ISearchableView<T>
+	where T : SearchOptions
 {
-	using System;
-	using System.Collections.Generic;
+	bool SearchToolBarVisible { get; set; }
 
-	interface ISearchableView<T>
-		where T : SearchOptions
-	{
-		bool SearchToolBarVisible { get; set; }
+	bool SearchFirst(T options);
 
-		bool SearchFirst(T options);
+	bool SearchNext(T options);
 
-		bool SearchNext(T options);
-
-		bool SearchPrevious(T options);
-	}
+	bool SearchPrevious(T options);
 }

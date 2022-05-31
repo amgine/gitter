@@ -18,24 +18,23 @@
  */
 #endregion
 
-namespace gitter.Native
+namespace gitter.Native;
+
+public enum WH
 {
-	public enum WH
-	{
-		CALLWNDPROC = 4,
-		CALLWNDPROCRET = 12,
-		CBT = 5,
-		DEBUG = 9,
-		FOREGROUNDIDLE = 11,
-		GETMESSAGE = 3,
-		JOURNALPLAYBACK = 1,
-		JOURNALRECORD = 0,
-		KEYBOARD = 2,
-		KEYBOARD_LL = 13,
-		MOUSE = 7,
-		MOUSE_LL = 14,
-		MSGFILTER = -1,
-		SHELL = 10,
-		SYSMSGFILTER = 6,
-	}
+	CALLWNDPROC = 4,
+	CALLWNDPROCRET = 12,
+	CBT = 5,
+	DEBUG = 9,
+	FOREGROUNDIDLE = 11,
+	GETMESSAGE = 3,
+	JOURNALPLAYBACK = 1,
+	JOURNALRECORD = 0,
+	KEYBOARD = 2,
+	KEYBOARD_LL = 13,
+	MOUSE = 7,
+	MOUSE_LL = 14,
+	MSGFILTER = -1,
+	SHELL = 10,
+	SYSMSGFILTER = 6,
 }

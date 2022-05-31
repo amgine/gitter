@@ -18,123 +18,122 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+public class RevisionPicker : CustomPopupComboBox
 {
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Windows.Forms;
+	private ReferencesListBox _lstReferences;
+	private RevisionToolTip _revisionToolTip;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Options;
-
-	public class RevisionPicker : CustomPopupComboBox
+	public RevisionPicker()
 	{
-		private ReferencesListBox _lstReferences;
-		private RevisionToolTip _revisionToolTip;
-
-		public RevisionPicker()
+		_lstReferences = new ReferencesListBox()
 		{
-			_lstReferences = new ReferencesListBox()
-			{
-				HeaderStyle = HeaderStyle.Hidden,
-				BorderStyle = BorderStyle.FixedSingle,
-				ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick,
-				Size = new Size(Width, 2 + 2 + 21 * 10),
-				DisableContextMenus = true,
-				Style = GitterApplication.DefaultStyle,
-				Font = LicenseManager.UsageMode == LicenseUsageMode.Runtime ?
-					GitterApplication.FontManager.UIFont.Font :
-					SystemFonts.MessageBoxFont,
-			};
-			_lstReferences.ItemActivated += OnItemActivated;
-			_revisionToolTip = new RevisionToolTip();
+			HeaderStyle = HeaderStyle.Hidden,
+			BorderStyle = BorderStyle.FixedSingle,
+			ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick,
+			Size = new Size(Width, 2 + 2 + 21 * 10),
+			DisableContextMenus = true,
+			Style = GitterApplication.DefaultStyle,
+			Font = LicenseManager.UsageMode == LicenseUsageMode.Runtime ?
+				GitterApplication.FontManager.UIFont.Font :
+				SystemFonts.MessageBoxFont,
+		};
+		_lstReferences.ItemActivated += OnItemActivated;
+		_revisionToolTip = new RevisionToolTip();
 
-			DropDownControl = _lstReferences;
-		}
+		DropDownControl = _lstReferences;
+	}
 
-		public ReferencesListBox References => _lstReferences;
+	public ReferencesListBox References => _lstReferences;
 
-		private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object sender, ItemEventArgs e)
+	{
+		switch(e.Item)
 		{
-			if(e.Item is BranchListItem)
-			{
-				var branch = ((BranchListItem)e.Item).DataContext;
-				Text = branch.Name;
+			case BranchListItem branch:
+				Text = branch.DataContext.Name;
 				HideDropDown();
-			}
-			if(e.Item is RemoteBranchListItem)
-			{
-				var branch = ((RemoteBranchListItem)e.Item).DataContext;
-				Text = branch.Name;
+				break;
+			case RemoteBranchListItem remoteBranch:
+				Text = remoteBranch.DataContext.Name;
 				HideDropDown();
-			}
-			else if(e.Item is TagListItem)
-			{
-				var tag = ((TagListItem)e.Item).DataContext;
-				Text = tag.Name;
+				break;
+			case TagListItem tag:
+				Text = tag.DataContext.Name;
 				HideDropDown();
-			}
+				break;
 		}
+	}
 
-		protected override void OnMouseEnter(EventArgs e)
+	/// <inheritdoc/>
+	protected override void OnMouseEnter(EventArgs e)
+	{
+		base.OnMouseEnter(e);
+		var repository = References.Repository;
+		if(repository is not null)
 		{
-			base.OnMouseEnter(e);
-			var repository = References.Repository;
-			if(repository != null)
+			try
 			{
-				try
+				var p = repository.GetRevisionPointer(Text.Trim());
+				var revision = p.Dereference();
+				if(revision is { IsLoaded: false })
 				{
-					var p = repository.GetRevisionPointer(Text.Trim());
-					var revision = p.Dereference();
-					if(revision != null && !revision.IsLoaded)
-					{
-						revision.Load();
-					}
-					_revisionToolTip.Revision = revision;
-					if(revision != null)
-					{
-						_revisionToolTip.Show(this, new Point(0, Height + 1));
-					}
+					revision.Load();
 				}
-				catch(Exception exc) when(!exc.IsCritical())
+				_revisionToolTip.Revision = revision;
+				if(revision is not null)
 				{
-					_revisionToolTip.Revision = null;
+					_revisionToolTip.Show(this, new Point(0, Height + 1));
 				}
 			}
-		}
-
-		protected override void OnMouseLeave(EventArgs e)
-		{
-			base.OnMouseLeave(e);
-			_revisionToolTip.Hide(this);
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if(disposing)
+			catch(Exception exc) when(!exc.IsCritical())
 			{
-				if(_lstReferences != null)
-				{
-					_lstReferences.LoadData(null);
-					_lstReferences.ItemActivated -= OnItemActivated;
-					_lstReferences.Dispose();
-					_lstReferences = null;
-				}
-				if(_revisionToolTip != null)
-				{
-					_revisionToolTip.Dispose();
-					_revisionToolTip = null;
-				}
+				_revisionToolTip.Revision = null;
 			}
-			base.Dispose(disposing);
 		}
+	}
 
-		public override int DropDownHeight
+	/// <inheritdoc/>
+	protected override void OnMouseLeave(EventArgs e)
+	{
+		base.OnMouseLeave(e);
+		_revisionToolTip.Hide(this);
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			get => _lstReferences.Height;
-			set => _lstReferences.Height = value;
+			if(_lstReferences is not null)
+			{
+				_lstReferences.LoadData(null);
+				_lstReferences.ItemActivated -= OnItemActivated;
+				_lstReferences.Dispose();
+				_lstReferences = null;
+			}
+			if(_revisionToolTip is not null)
+			{
+				_revisionToolTip.Dispose();
+				_revisionToolTip = null;
+			}
 		}
+		base.Dispose(disposing);
+	}
+
+	/// <inheritdoc/>
+	public override int DropDownHeight
+	{
+		get => _lstReferences.Height;
+		set => _lstReferences.Height = value;
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,17 +18,16 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+[Flags]
+public enum StagedStatus
 {
-	using System;
+	None      = 0,
 
-	[Flags]
-	public enum StagedStatus
-	{
-		None		= 0,
-
-		Committed	= (1 << 0),
-		Unstaged	= (1 << 1),
-		Staged		= (1 << 2),
-	}
+	Committed = (1 << 0),
+	Unstaged  = (1 << 1),
+	Staged    = (1 << 2),
 }

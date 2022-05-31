@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+
+interface IInitView : IView, IRepositoryInitDialog
 {
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
+	IUserInputSource<bool> Bare { get; }
 
-	interface IInitView : IView, IRepositoryInitDialog
-	{
-		IUserInputSource<bool> Bare { get; }
+	IUserInputSource<bool> UseCustomTemplate { get; }
 
-		IUserInputSource<bool> UseCustomTemplate { get; }
+	IUserInputSource<string> Template { get; }
 
-		IUserInputSource<string> Template { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

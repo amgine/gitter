@@ -18,100 +18,98 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+public class RemoteReferenceListItem : CustomListBoxItem<IRemoteReference>
 {
-	using System;
-	using System.Drawing;
-	using System.Windows.Forms;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	public class RemoteReferenceListItem : CustomListBoxItem<IRemoteReference>
+	public RemoteReferenceListItem(IRemoteReference reference)
+		: base(reference)
 	{
-		public RemoteReferenceListItem(IRemoteReference reference)
-			: base(reference)
+	}
+
+	private void OnDeleted(object sender, EventArgs e)
+	{
+		RemoveSafe();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnListBoxAttached()
+	{
+		base.OnListBoxAttached();
+		DataContext.Deleted += OnDeleted;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnListBoxDetached()
+	{
+		DataContext.Deleted -= OnDeleted;
+		base.OnListBoxDetached();
+	}
+
+	private Image GetIcon(Dpi dpi)
+	{
+		var icon = DataContext switch
 		{
-		}
+			RemoteRepositoryBranch => Icons.Branch,
+			RemoteRepositoryTag tag when tag.TagType == TagType.Annotated => Icons.TagAnnotated,
+			RemoteRepositoryTag => Icons.Tag,
+			_ => null,
+		};
+		return icon?.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
+	}
 
-		private void OnDeleted(object sender, EventArgs e)
+	/// <inheritdoc/>
+	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		switch((ColumnId)measureEventArgs.SubItemId)
 		{
-			RemoveSafe();
+			case ColumnId.Name:
+				return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Name);
+			default:
+				return base.OnMeasureSubItem(measureEventArgs);
 		}
+	}
 
-		/// <inheritdoc/>
-		protected override void OnListBoxAttached()
+	/// <inheritdoc/>
+	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		switch((ColumnId)paintEventArgs.SubItemId)
 		{
-			base.OnListBoxAttached();
-			DataContext.Deleted += OnDeleted;
+			case ColumnId.Name:
+				paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.Name);
+				break;
+			default:
+				base.OnPaintSubItem(paintEventArgs);
+				break;
 		}
+	}
 
-		/// <inheritdoc/>
-		protected override void OnListBoxDetached()
+	/// <inheritdoc/>
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	{
+		Assert.IsNotNull(requestEventArgs);
+
+		ContextMenuStrip menu = DataContext switch
 		{
-			DataContext.Deleted -= OnDeleted;
-			base.OnListBoxDetached();
-		}
-
-		private Bitmap GetIcon(Dpi dpi)
+			RemoteRepositoryBranch branch => new RemoteBranchMenu(branch),
+			RemoteRepositoryTag tag       => new RemoteTagMenu(tag),
+			_ => default,
+		};
+		if(menu is not null)
 		{
-			var name = DataContext switch
-			{
-				RemoteRepositoryBranch => @"branch",
-				RemoteRepositoryTag tag when tag.TagType == TagType.Annotated => @"atag",
-				RemoteRepositoryTag => @"tag",
-				_ => null,
-			};
-			if(name is null) return default;
-			return CachedResources.ScaledBitmaps[name, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
+			Utility.MarkDropDownForAutoDispose(menu);
 		}
-
-		/// <inheritdoc/>
-		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
-		{
-			Assert.IsNotNull(measureEventArgs);
-
-			switch((ColumnId)measureEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					return measureEventArgs.MeasureImageAndText(GetIcon(measureEventArgs.Dpi), DataContext.Name);
-				default:
-					return base.OnMeasureSubItem(measureEventArgs);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
-		{
-			Assert.IsNotNull(paintEventArgs);
-
-			switch((ColumnId)paintEventArgs.SubItemId)
-			{
-				case ColumnId.Name:
-					paintEventArgs.PaintImageAndText(GetIcon(paintEventArgs.Dpi), DataContext.Name);
-					break;
-				default:
-					base.OnPaintSubItem(paintEventArgs);
-					break;
-			}
-		}
-
-		/// <inheritdoc/>
-		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-		{
-			Assert.IsNotNull(requestEventArgs);
-
-			ContextMenuStrip menu = DataContext switch
-			{
-				RemoteRepositoryBranch branch => new RemoteBranchMenu(branch),
-				RemoteRepositoryTag tag       => new RemoteTagMenu(tag),
-				_ => default,
-			};
-			if(menu is not null)
-			{
-				Utility.MarkDropDownForAutoDispose(menu);
-			}
-			return menu;
-		}
+		return menu;
 	}
 }

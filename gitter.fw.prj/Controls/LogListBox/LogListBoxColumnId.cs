@@ -18,14 +18,13 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+enum LogListBoxColumnId
 {
-	enum LogListBoxColumnId
-	{
-		Type,
-		Timestamp,
-		Source,
-		Message,
-		Exception,
-	}
+	Type,
+	Timestamp,
+	Source,
+	Message,
+	Exception,
 }

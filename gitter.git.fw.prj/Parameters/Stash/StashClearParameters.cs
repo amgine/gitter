@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
-{
-	using System;
+namespace gitter.Git.AccessLayer;
 
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.StashClear"/> operation.</summary>
-	public sealed class StashClearParameters
+using System;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.StashClear"/> operation.</summary>
+public sealed class StashClearParameters
+{
+	/// <summary>Create <see cref="StashClearParameters"/>.</summary>
+	public StashClearParameters()
 	{
-		/// <summary>Create <see cref="StashClearParameters"/>.</summary>
-		public StashClearParameters()
-		{
-		}
 	}
 }

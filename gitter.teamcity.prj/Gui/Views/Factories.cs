@@ -18,23 +18,22 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui.Views
+namespace gitter.TeamCity.Gui.Views;
+
+using System;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.TeamCity.Properties.Resources;
+
+sealed class BuildTypeBuildsViewFactory : ViewFactoryBase
 {
-	using System;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.TeamCity.Properties.Resources;
-
-	sealed class BuildTypeBuildsViewFactory : ViewFactoryBase
+	public BuildTypeBuildsViewFactory()
+		: base(Guids.BuildTypeBuildsViewGuid, Resources.StrBuilds, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"builds"), singleton: false)
 	{
-		public BuildTypeBuildsViewFactory()
-			: base(Guids.BuildTypeBuildsViewGuid, Resources.StrBuilds, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"builds"), singleton: false)
-		{
-		}
-
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-			=> new BuildTypeBuildsView(environment);
 	}
+
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+		=> new BuildTypeBuildsView(environment);
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,31 +18,30 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+/// <summary>Conflict type.</summary>
+public enum ConflictType
 {
-	/// <summary>Conflict type.</summary>
-	public enum ConflictType
-	{
-		/// <summary>No conflict.</summary>
-		None = 0,
+	/// <summary>No conflict.</summary>
+	None = 0,
 
-		/// <summary>DD</summary>
-		BothDeleted,
-		/// <summary>AA</summary>
-		BothAdded,
-		/// <summary>UU</summary>
-		BothModified,
+	/// <summary>DD</summary>
+	BothDeleted,
+	/// <summary>AA</summary>
+	BothAdded,
+	/// <summary>UU</summary>
+	BothModified,
 
-		/// <summary>AU</summary>
-		AddedByUs,
-		/// <summary>UA</summary>
-		AddedByThem,
-		/// <summary>DU</summary>
-		DeletedByUs,
-		/// <summary>UD</summary>
-		DeletedByThem,
+	/// <summary>AU</summary>
+	AddedByUs,
+	/// <summary>UA</summary>
+	AddedByThem,
+	/// <summary>DU</summary>
+	DeletedByUs,
+	/// <summary>UD</summary>
+	DeletedByThem,
 
-		/// <summary>Unknown conflict type.</summary>
-		Unknown,
-	}
+	/// <summary>Unknown conflict type.</summary>
+	Unknown,
 }

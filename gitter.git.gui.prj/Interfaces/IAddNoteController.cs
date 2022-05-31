@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
-{
-	using gitter.Framework.Mvc;
+namespace gitter.Git.Gui.Interfaces;
 
-	interface IAddNoteController : IViewController<IAddNoteView>
-	{
-		bool TryAddNote();
-	}
+using gitter.Framework.Mvc;
+
+interface IAddNoteController : IViewController<IAddNoteView>
+{
+	bool TryAddNote();
 }

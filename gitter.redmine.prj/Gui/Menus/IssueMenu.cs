@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,42 +18,42 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+using System;
+using System.Globalization;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Redmine.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public sealed class IssueMenu : ContextMenuStrip
 {
-	using System;
-	using System.Globalization;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-
-	using Resources = gitter.Redmine.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public sealed class IssueMenu : ContextMenuStrip
+	public IssueMenu(Issue issue)
 	{
-		private readonly Issue _issue;
+		Verify.Argument.IsNotNull(issue);
 
-		public IssueMenu(Issue issue)
+		Issue = issue;
+
+		var dpiBindings = new DpiBindings(this);
+		var factory = new GuiItemFactory(dpiBindings);
+
+		Items.Add(factory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(Issue));
+
+		var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
+		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrId, Issue.Id.ToString(CultureInfo.InvariantCulture)));
+		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, Issue.Subject));
+		if(Issue.Category is not null)
 		{
-			Verify.Argument.IsNotNull(issue, nameof(issue));
-
-			_issue = issue;
-
-			Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_issue));
-
-			var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrId, _issue.Id.ToString(CultureInfo.InvariantCulture)));
-			item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, _issue.Subject));
-			if(_issue.Category != null)
-			{
-				item.DropDownItems.Add(GuiItemFactory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCategory, _issue.Category.Name));
-			}
-
-			Items.Add(item);
+			item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCategory, Issue.Category.Name));
 		}
 
-		public Issue Issue
-		{
-			get { return _issue; }
-		}
+		Items.Add(item);
 	}
+
+	public Issue Issue { get; }
 }

@@ -18,230 +18,230 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
+
+using gitter.Native;
+
+[ToolboxItem(true)]
+[DesignerCategory("")]
+public partial class CustomPopupComboBox : ComboBox
 {
-	using System;
-	using System.ComponentModel;
-	using System.Windows.Forms;
-	using System.Runtime.InteropServices;
+	#region Data
 
-	using gitter.Native;
+	private Popup _dropDown;
+	private Control _dropDownControl;
+	private DateTime _dropDownHideTime;
 
-	[ToolboxItem(true)]
-	public partial class CustomPopupComboBox : ComboBox
+	#endregion
+
+	#region .ctor
+
+	public CustomPopupComboBox()
 	{
-		#region Data
+		_dropDownHideTime = DateTime.UtcNow;
+		base.IntegralHeight = false;
+		base.DropDownHeight = 1;
+		base.DropDownWidth = 1;
 
-		private Popup _dropDown;
-		private Control _dropDownControl;
-		private DateTime _dropDownHideTime;
+		_listBoxWndProc = new WNDPROC(ListBoxWndProc);
+	}
 
-		#endregion
+	#endregion
 
-		#region .ctor
+	#region Overrides
 
-		public CustomPopupComboBox()
+	private readonly WNDPROC _listBoxWndProc;
+	private IntPtr _listBoxDefaultWndProc;
+
+	/// <inheritdoc/>
+	protected override void OnHandleCreated(EventArgs e)
+	{
+		base.OnHandleCreated(e);
+		var x = new COMBOBOXINFO
 		{
-			_dropDownHideTime = DateTime.UtcNow;
-			base.IntegralHeight = false;
-			base.DropDownHeight = 1;
-			base.DropDownWidth = 1;
+			cbSize = (uint)Marshal.SizeOf(typeof(COMBOBOXINFO))
+		};
+		var b = User32.GetComboBoxInfo(Handle, ref x);
+		_listBoxDefaultWndProc = NativeUtility.SetWindowProc(x.hwndList, _listBoxWndProc);
+	}
 
-			_listBoxWndProc = new WNDPROC(ListBoxWndProc);
+	/// <inheritdoc/>
+	protected override void OnSizeChanged(EventArgs e)
+	{
+		base.OnSizeChanged(e);
+		if(DropDown is not null)
+		{
+			DropDown.Width = Width;
 		}
+	}
 
-		#endregion
-
-		#region Overrides
-
-		private readonly WNDPROC _listBoxWndProc;
-		private IntPtr _listBoxDefaultWndProc;
-
-		/// <inheritdoc/>
-		protected override void OnHandleCreated(EventArgs e)
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			base.OnHandleCreated(e);
-			var x = new COMBOBOXINFO
+			if(_dropDown != null)
 			{
-				cbSize = (uint)Marshal.SizeOf(typeof(COMBOBOXINFO))
-			};
-			var b = User32.GetComboBoxInfo(Handle, ref x);
-			_listBoxDefaultWndProc = NativeUtility.SetWindowProc(x.hwndList, _listBoxWndProc);
-		}
-
-		/// <inheritdoc/>
-		protected override void OnSizeChanged(EventArgs e)
-		{
-			base.OnSizeChanged(e);
-			if(DropDown is not null)
-			{
-				DropDown.Width = Width;
+				_dropDown.Closed -= dropDown_Closed;
+				_dropDown.Dispose();
+				_dropDown = null;
 			}
 		}
+		base.Dispose(disposing);
+	}
 
-		/// <inheritdoc/>
-		protected override void Dispose(bool disposing)
+	private IntPtr ListBoxWndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
+	{
+		switch((WM)msg)
 		{
-			if(disposing)
+			case WM.MOUSEMOVE:
+				User32.ReleaseCapture();
+				break;
+			case WM.CAPTURECHANGED:
+				return IntPtr.Zero;
+		}
+		return User32.CallWindowProc(_listBoxDefaultWndProc, hWnd, msg, wParam, lParam);
+	}
+
+	/// <inheritdoc/>
+	protected override void WndProc(ref Message m)
+	{
+		switch(m.Msg)
+		{
+			case ((int)WM.COMMAND + (int)WM.REFLECT):
+				{
+					switch(Macro.HIWORD(m.WParam))
+					{
+						case Constants.CBN_DROPDOWN:
+							ShowDropDownCore();
+							return;
+					}
+				}
+				break;
+		}
+		base.WndProc(ref m);
+	}
+
+	#endregion
+
+	protected new Popup DropDown => _dropDown;
+
+	public Control DropDownControl
+	{
+		get => _dropDownControl;
+		set
+		{
+			if(_dropDownControl != value)
 			{
+				_dropDownControl = value;
 				if(_dropDown != null)
 				{
 					_dropDown.Closed -= dropDown_Closed;
 					_dropDown.Dispose();
-					_dropDown = null;
 				}
-			}
-			base.Dispose(disposing);
-		}
-
-		private IntPtr ListBoxWndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
-		{
-			switch((WM)msg)
-			{
-				case WM.MOUSEMOVE:
-					User32.ReleaseCapture();
-					break;
-				case WM.CAPTURECHANGED:
-					return IntPtr.Zero;
-			}
-			return User32.CallWindowProc(_listBoxDefaultWndProc, hWnd, msg, wParam, lParam);
-		}
-
-		/// <inheritdoc/>
-		protected override void WndProc(ref Message m)
-		{
-			switch(m.Msg)
-			{
-				case ((int)WM.COMMAND + (int)WM.REFLECT):
-					{
-						switch(NativeUtility.HIWORD(m.WParam))
-						{
-							case Constants.CBN_DROPDOWN:
-								ShowDropDownCore();
-								return;
-						}
-					}
-					break;
-			}
-			base.WndProc(ref m);
-		}
-
-		#endregion
-
-		protected new Popup DropDown => _dropDown;
-
-		public Control DropDownControl
-		{
-			get => _dropDownControl;
-			set
-			{
-				if(_dropDownControl != value)
+				_dropDown = new Popup(value)
 				{
-					_dropDownControl = value;
-					if(_dropDown != null)
-					{
-						_dropDown.Closed -= dropDown_Closed;
-						_dropDown.Dispose();
-					}
-					_dropDown = new Popup(value)
-					{
-						PopupAnimation = PopupAnimations.Slide | PopupAnimations.TopToBottom,
-					};
-					_dropDown.Closed += dropDown_Closed;
-				}
+					PopupAnimation = PopupAnimations.Slide | PopupAnimations.TopToBottom,
+				};
+				_dropDown.Closed += dropDown_Closed;
 			}
 		}
-
-		private void dropDown_Closed(object sender, ToolStripDropDownClosedEventArgs e)
-		{
-			_dropDownHideTime = DateTime.UtcNow;
-			NativeUtility.ShowDropDown(Handle, false);
-		}
-
-		public new bool DroppedDown
-		{
-			get => _dropDown is not null ? _dropDown.Visible : false;
-			set
-			{
-				if(value)
-				{
-					ShowDropDown();
-				}
-				else
-				{
-					HideDropDown();
-				}
-			}
-		}
-
-		private void ShowDropDownCore()
-		{
-			_dropDown?.Show(this);
-		}
-
-		private void HideDropDownCore()
-		{
-			_dropDown?.Close(ToolStripDropDownCloseReason.ItemClicked);
-		}
-
-		public void ShowDropDown()
-		{
-			NativeUtility.ShowDropDown(Handle, true);
-		}
-
-		public void HideDropDown()
-		{
-			HideDropDownCore();
-		}
-
-		#region Disabled Properties
-
-		/// <summary>This property is not relevant for this class.</summary>
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public new int DropDownWidth
-		{
-			get => base.DropDownWidth;
-			set => base.DropDownWidth = value;
-		}
-
-		/// <summary>This property is not relevant for this class.</summary>
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public virtual new int DropDownHeight
-		{
-			get => base.DropDownHeight;
-			set => base.DropDownHeight = value;
-		}
-
-		/// <summary>This property is not relevant for this class.</summary>
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public new bool IntegralHeight
-		{
-			get => base.IntegralHeight;
-			set => base.IntegralHeight = value;
-		}
-
-		/// <summary>This property is not relevant for this class.</summary>
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public new ObjectCollection Items => base.Items;
-
-		/// <summary>This property is not relevant for this class.</summary>
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public new int ItemHeight
-		{
-			get => base.ItemHeight;
-			set => base.ItemHeight = value;
-		}
-
-		#endregion
 	}
+
+	private void dropDown_Closed(object sender, ToolStripDropDownClosedEventArgs e)
+	{
+		_dropDownHideTime = DateTime.UtcNow;
+		NativeUtility.ShowDropDown(Handle, false);
+	}
+
+	public new bool DroppedDown
+	{
+		get => _dropDown is not null ? _dropDown.Visible : false;
+		set
+		{
+			if(value)
+			{
+				ShowDropDown();
+			}
+			else
+			{
+				HideDropDown();
+			}
+		}
+	}
+
+	private void ShowDropDownCore()
+	{
+		_dropDown?.Show(this);
+	}
+
+	private void HideDropDownCore()
+	{
+		_dropDown?.Close(ToolStripDropDownCloseReason.ItemClicked);
+	}
+
+	public void ShowDropDown()
+	{
+		NativeUtility.ShowDropDown(Handle, true);
+	}
+
+	public void HideDropDown()
+	{
+		HideDropDownCore();
+	}
+
+	#region Disabled Properties
+
+	/// <summary>This property is not relevant for this class.</summary>
+	[Browsable(false)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public new int DropDownWidth
+	{
+		get => base.DropDownWidth;
+		set => base.DropDownWidth = value;
+	}
+
+	/// <summary>This property is not relevant for this class.</summary>
+	[Browsable(false)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public virtual new int DropDownHeight
+	{
+		get => base.DropDownHeight;
+		set => base.DropDownHeight = value;
+	}
+
+	/// <summary>This property is not relevant for this class.</summary>
+	[Browsable(false)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public new bool IntegralHeight
+	{
+		get => base.IntegralHeight;
+		set => base.IntegralHeight = value;
+	}
+
+	/// <summary>This property is not relevant for this class.</summary>
+	[Browsable(false)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public new ObjectCollection Items => base.Items;
+
+	/// <summary>This property is not relevant for this class.</summary>
+	[Browsable(false)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public new int ItemHeight
+	{
+		get => base.ItemHeight;
+		set => base.ItemHeight = value;
+	}
+
+	#endregion
 }

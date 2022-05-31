@@ -18,74 +18,73 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+using System.Collections.Generic;
+
+using gitter.Framework.Configuration;
+
+public sealed class IntegrationFeatures : IEnumerable<IIntegrationFeature>
 {
-	using System;
-	using System.Collections.Generic;
+	private readonly Dictionary<string, IIntegrationFeature> _features;
 
-	using gitter.Framework.Configuration;
-
-	public sealed class IntegrationFeatures : IEnumerable<IIntegrationFeature>
+	/// <summary>Create <see cref="IntegrationFeatures"/>.</summary>
+	internal IntegrationFeatures()
 	{
-		private readonly Dictionary<string, IIntegrationFeature> _features;
-
-		/// <summary>Create <see cref="IntegrationFeatures"/>.</summary>
-		internal IntegrationFeatures()
+		Gravatar = new GravatarFeature();
+		var explorerContextMenu = new ExplorerContextMenuFeature();
+		_features = new Dictionary<string, IIntegrationFeature>()
 		{
-			Gravatar = new GravatarFeature();
-			var explorerContextMenu = new ExplorerContextMenuFeature();
-			_features = new Dictionary<string, IIntegrationFeature>()
-			{
-				{ explorerContextMenu.Name, explorerContextMenu },
-				{ Gravatar.Name, Gravatar },
-			};
-		}
-
-		/// <summary>Gravatar integration support.</summary>
-		public GravatarFeature Gravatar { get; }
-
-		public IIntegrationFeature this[string name] => _features[name];
-
-		public int Count => _features.Count;
-
-		public void SaveTo(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			foreach(var feature in _features.Values)
-			{
-				if(feature.HasConfiguration)
-				{
-					var featureNode = section.GetCreateSection(feature.Name);
-					feature.SaveTo(featureNode);
-				}
-			}
-		}
-
-		public void LoadFrom(Section section)
-		{
-			Verify.Argument.IsNotNull(section, nameof(section));
-
-			if(section != null)
-			{
-				foreach(var featureNode in section.Sections)
-				{
-					if(_features.TryGetValue(featureNode.Name, out var feature) && feature.HasConfiguration)
-					{
-						feature.LoadFrom(featureNode);
-					}
-				}
-			}
-		}
-
-		#region IEnumerable<IIntegrationFeature> Members
-
-		public IEnumerator<IIntegrationFeature> GetEnumerator()
-			=> _features.Values.GetEnumerator();
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			=> _features.Values.GetEnumerator();
-
-		#endregion
+			{ explorerContextMenu.Name, explorerContextMenu },
+			{ Gravatar.Name, Gravatar },
+		};
 	}
+
+	/// <summary>Gravatar integration support.</summary>
+	public GravatarFeature Gravatar { get; }
+
+	public IIntegrationFeature this[string name] => _features[name];
+
+	public int Count => _features.Count;
+
+	public void SaveTo(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
+
+		foreach(var feature in _features.Values)
+		{
+			if(feature.HasConfiguration)
+			{
+				var featureNode = section.GetCreateSection(feature.Name);
+				feature.SaveTo(featureNode);
+			}
+		}
+	}
+
+	public void LoadFrom(Section section)
+	{
+		Verify.Argument.IsNotNull(section);
+
+		if(section != null)
+		{
+			foreach(var featureNode in section.Sections)
+			{
+				if(_features.TryGetValue(featureNode.Name, out var feature) && feature.HasConfiguration)
+				{
+					feature.LoadFrom(featureNode);
+				}
+			}
+		}
+	}
+
+	#region IEnumerable<IIntegrationFeature> Members
+
+	public IEnumerator<IIntegrationFeature> GetEnumerator()
+		=> _features.Values.GetEnumerator();
+
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		=> _features.Values.GetEnumerator();
+
+	#endregion
 }

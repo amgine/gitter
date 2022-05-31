@@ -18,31 +18,30 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework;
+using gitter.Framework.Mvc;
+
+interface ICloneView : IView, IRepositoryCloneDialog
 {
-	using gitter.Framework;
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> RemoteName { get; }
 
-	interface ICloneView : IView, IRepositoryCloneDialog
-	{
-		IUserInputSource<string> RemoteName { get; }
+	IUserInputSource<bool> ShallowClone { get; }
 
-		IUserInputSource<bool> ShallowClone { get; }
+	IUserInputSource<int> Depth { get; }
 
-		IUserInputSource<int> Depth { get; }
+	IUserInputSource<bool> UseTemplate { get; }
 
-		IUserInputSource<bool> UseTemplate { get; }
+	IUserInputSource<string> TemplatePath { get; }
 
-		IUserInputSource<string> TemplatePath { get; }
+	IUserInputSource<bool> Bare { get; }
 
-		IUserInputSource<bool> Bare { get; }
+	IUserInputSource<bool> Mirror { get; }
 
-		IUserInputSource<bool> Mirror { get; }
+	IUserInputSource<bool> NoCheckout { get; }
 
-		IUserInputSource<bool> NoCheckout { get; }
+	IUserInputSource<bool> Recursive { get; }
 
-		IUserInputSource<bool> Recursive { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

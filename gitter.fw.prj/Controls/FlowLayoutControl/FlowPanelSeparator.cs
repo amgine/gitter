@@ -18,73 +18,72 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+/// <summary>Panel for separating other panels.</summary>
+public class FlowPanelSeparator : FlowPanel
 {
-	using System;
-	using System.Drawing;
+	private int _height;
+	private FlowPanelSeparatorStyle _style;
 
-	/// <summary>Panel for separating other panels.</summary>
-	public class FlowPanelSeparator : FlowPanel
+	/// <summary>Create <see cref="FlowPanelSeparator"/>.</summary>
+	public FlowPanelSeparator()
 	{
-		private int _height;
-		private FlowPanelSeparatorStyle _style;
+		_height = 16;
+	}
 
-		/// <summary>Create <see cref="FlowPanelSeparator"/>.</summary>
-		public FlowPanelSeparator()
+	/// <summary>Separator height.</summary>
+	public int Height
+	{
+		get => _height;
+		set
 		{
-			_height = 16;
-		}
-
-		/// <summary>Separator height.</summary>
-		public int Height
-		{
-			get => _height;
-			set
+			if(_height != value)
 			{
-				if(_height != value)
-				{
-					_height = value;
-				}
+				_height = value;
 			}
 		}
+	}
 
-		public FlowPanelSeparatorStyle SeparatorStyle
+	public FlowPanelSeparatorStyle SeparatorStyle
+	{
+		get => _style;
+		set
 		{
-			get => _style;
-			set
+			if(_style != value)
 			{
-				if(_style != value)
-				{
-					_style = value;
-				}
+				_style = value;
 			}
 		}
+	}
 
-		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
-		{
-			return new Size(0, _height);
-		}
+	protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
+	{
+		return new Size(0, _height);
+	}
 
-		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
+	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
+	{
+		var graphics = paintEventArgs.Graphics;
+		var rect = paintEventArgs.Bounds;
+		switch(_style)
 		{
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-			switch(_style)
-			{
-				case FlowPanelSeparatorStyle.Line:
+			case FlowPanelSeparatorStyle.Line:
+				{
+					var y = _height / 2;
+					var x = y;
+					var w = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width) - 2 * x;
+					if(w > 0)
 					{
-						var y = _height / 2;
-						var x = y;
-						var w = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width) - 2 * x;
-						if(w > 0)
-						{
-							x += rect.X;
-							y += rect.Y;
-							graphics.DrawLine(Pens.Gray, x, y, x + w, y);
-						}
+						x += rect.X;
+						y += rect.Y;
+						graphics.DrawLine(Pens.Gray, x, y, x + w, y);
 					}
-					break;
-			}
+				}
+				break;
 		}
 	}
 }

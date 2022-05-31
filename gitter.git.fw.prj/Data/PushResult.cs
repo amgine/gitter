@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,42 +18,41 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+using System;
+
+/// <summary>Results of pushing local reference to remote repository.</summary>
+public sealed class ReferencePushResult
 {
-	using System;
-
-	/// <summary>Results of pushing local reference to remote repository.</summary>
-	public sealed class ReferencePushResult
+	public ReferencePushResult(PushResultType type, string localRefName, string remoteRefName, string summary)
 	{
-		public ReferencePushResult(PushResultType type, string localRefName, string remoteRefName, string summary)
-		{
-			Type          = type;
-			LocalRefName  = localRefName;
-			RemoteRefName = remoteRefName;
-			Summary       = summary;
-		}
-
-		public PushResultType Type { get; }
-
-		public string LocalRefName { get; }
-
-		public string RemoteRefName { get; }
-
-		public string Summary { get; }
-
-		private static char TypeToChar(PushResultType type)
-			=> type switch
-			{
-				PushResultType.ForceUpdated => '+',
-				PushResultType.FastForwarded => ' ',
-				PushResultType.Rejected => '!',
-				PushResultType.UpToDate => '=',
-				PushResultType.DeletedReference => '-',
-				PushResultType.CreatedReference => '*',
-				_ => throw new ArgumentException(nameof(type)),
-			};
-
-		public override string ToString()
-			=> string.Format("{0} {1} -> {2} {3}", TypeToChar(Type), LocalRefName, RemoteRefName, Summary);
+		Type          = type;
+		LocalRefName  = localRefName;
+		RemoteRefName = remoteRefName;
+		Summary       = summary;
 	}
+
+	public PushResultType Type { get; }
+
+	public string LocalRefName { get; }
+
+	public string RemoteRefName { get; }
+
+	public string Summary { get; }
+
+	private static char TypeToChar(PushResultType type)
+		=> type switch
+		{
+			PushResultType.ForceUpdated => '+',
+			PushResultType.FastForwarded => ' ',
+			PushResultType.Rejected => '!',
+			PushResultType.UpToDate => '=',
+			PushResultType.DeletedReference => '-',
+			PushResultType.CreatedReference => '*',
+			_ => throw new ArgumentException(nameof(type)),
+		};
+
+	public override string ToString()
+		=> string.Format("{0} {1} -> {2} {3}", TypeToChar(Type), LocalRefName, RemoteRefName, Summary);
 }

@@ -18,79 +18,78 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.Framework;
+
+public sealed class RevisionTreeSource : TreeSourceBase
 {
-	using System;
-	using System.Threading;
-	using System.Threading.Tasks;
+	#region Data
 
-	using gitter.Framework;
+	private readonly IRevisionPointer _revision;
 
-	public sealed class RevisionTreeSource : TreeSourceBase
+	#endregion
+
+	#region .ctor
+
+	public RevisionTreeSource(IRevisionPointer revision)
 	{
-		#region Data
+		Verify.Argument.IsNotNull(revision);
+		Verify.Argument.IsFalse(revision.IsDeleted, nameof(revision), "Specified revision is deleted.");
 
-		private readonly IRevisionPointer _revision;
+		_revision = revision;
+	}
 
-		#endregion
+	#endregion
 
-		#region .ctor
+	#region Properties
 
-		public RevisionTreeSource(IRevisionPointer revision)
+	public override IRevisionPointer Revision => _revision;
+
+	protected override Tree GetTreeCore()
+	{
+		return new Tree(Revision.Repository, Revision.Pointer);
+	}
+
+	public override string DisplayName
+	{
+		get
 		{
-			Verify.Argument.IsNotNull(revision, nameof(revision));
-			Verify.Argument.IsFalse(revision.IsDeleted, nameof(revision), "Specified revision is deleted.");
-
-			_revision = revision;
-		}
-
-		#endregion
-
-		#region Properties
-
-		public override IRevisionPointer Revision => _revision;
-
-		protected override Tree GetTreeCore()
-		{
-			return new Tree(Revision.Repository, Revision.Pointer);
-		}
-
-		public override string DisplayName
-		{
-			get
+			var pointer = Revision.Pointer;
+			if(Revision.Type == ReferenceType.Revision && pointer.Length == 40)
 			{
-				var pointer = Revision.Pointer;
-				if(Revision.Type == ReferenceType.Revision && pointer.Length == 40)
-				{
-					return pointer.Substring(0, 7);
-				}
-				else
-				{
-					return pointer;
-				}
+				return pointer.Substring(0, 7);
+			}
+			else
+			{
+				return pointer;
 			}
 		}
-
-		#endregion
-
-		#region Methods
-
-		public override Tree GetTree()
-			=> new Tree(Revision.Repository, Revision.FullName);
-
-		public override Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-			=> Tree.GetAsync(Revision.Repository, Revision.FullName, progress, cancellationToken);
-
-		/// <inheritdoc/>
-		public override bool Equals(object obj)
-			=> obj is RevisionTreeSource other && _revision == other._revision;
-
-		/// <inheritdoc/>
-		public override int GetHashCode() => _revision.GetHashCode();
-
-		/// <inheritdoc/>
-		public override string ToString() => _revision.Pointer;
-
-		#endregion
 	}
+
+	#endregion
+
+	#region Methods
+
+	public override Tree GetTree()
+		=> new Tree(Revision.Repository, Revision.FullName);
+
+	public override Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		=> Tree.GetAsync(Revision.Repository, Revision.FullName, progress, cancellationToken);
+
+	/// <inheritdoc/>
+	public override bool Equals(object obj)
+		=> obj is RevisionTreeSource other && _revision == other._revision;
+
+	/// <inheritdoc/>
+	public override int GetHashCode() => _revision.GetHashCode();
+
+	/// <inheritdoc/>
+	public override string ToString() => _revision.Pointer;
+
+	#endregion
 }

@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
-{
-	using gitter.Framework.Mvc;
+namespace gitter.Git.Gui.Interfaces;
 
-	interface IRenameRemoteController : IViewController<IRenameRemoteView>
-	{
-		bool TryRename();
-	}
+using gitter.Framework.Mvc;
+
+interface IRenameRemoteController : IViewController<IRenameRemoteView>
+{
+	bool TryRename();
 }

@@ -18,106 +18,105 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Text;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Configuration;
+
+using gitter.TeamCity.Gui;
+using gitter.TeamCity.Gui.Views;
+
+using Resources = gitter.TeamCity.Properties.Resources;
+
+public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 {
-	using System;
-	using System.Text;
-	using System.Drawing;
-	using System.Windows.Forms;
+	public static IWorkingEnvironment Environment { get; private set; }
 
-	using gitter.Framework;
-	using gitter.Framework.Configuration;
+	public string Name => "teamcity";
 
-	using gitter.TeamCity.Gui;
-	using gitter.TeamCity.Gui.Views;
+	public string DisplayName => Resources.StrTeamCity;
 
-	using Resources = gitter.TeamCity.Properties.Resources;
+	public bool CanBeAddedManually => true;
 
-	public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
+	public IImageProvider Icon => Icons.TeamCity;
+
+	/// <summary>Prepare for working inside specified <paramref name="environment"/>.</summary>
+	/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
+	/// <param name="section">Provider configuration section.</param>
+	public bool LoadFor(IWorkingEnvironment environment, Section section)
 	{
-		public static IWorkingEnvironment Environment { get; private set; }
+		Verify.Argument.IsNotNull(environment);
 
-		public string Name => "teamcity";
+		environment.ViewDockService.RegisterFactory(new BuildTypeBuildsViewFactory());
 
-		public string DisplayName => Resources.StrTeamCity;
+		Environment = environment;
+		return true;
+	}
 
-		public bool CanBeAddedManually => true;
+	/// <summary>Save configuration to <paramref name="section"/>.</summary>
+	/// <param name="section"><see cref="Section"/> for storing configuration.</param>
+	public void SaveTo(Section section)
+	{
+	}
 
-		public Image Icon => CachedResources.Bitmaps["ImgTeamCity"];
-
-		/// <summary>Prepare for working inside specified <paramref name="environment"/>.</summary>
-		/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
-		/// <param name="section">Provider configuration section.</param>
-		public bool LoadFor(IWorkingEnvironment environment, Section section)
+	public bool IsValidFor(IRepository repository)
+	{
+		if(repository is null) return false;
+		var issueTrackers = repository.ConfigSection.TryGetSection("IssueTrackers");
+		if(issueTrackers is not null)
 		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-
-			environment.ViewDockService.RegisterFactory(new BuildTypeBuildsViewFactory());
-
-			Environment = environment;
-			return true;
-		}
-
-		/// <summary>Save configuration to <paramref name="section"/>.</summary>
-		/// <param name="section"><see cref="Section"/> for storing configuration.</param>
-		public void SaveTo(Section section)
-		{
-		}
-
-		public bool IsValidFor(IRepository repository)
-		{
-			if(repository is null) return false;
-			var issueTrackers = repository.ConfigSection.TryGetSection("IssueTrackers");
-			if(issueTrackers is not null)
+			var section = issueTrackers.TryGetSection("TeamCity");
+			if(section is not null)
 			{
-				var section = issueTrackers.TryGetSection("TeamCity");
-				if(section is not null)
-				{
-					if(!section.ContainsParameter("ServiceUri")) return false;
-					if(!section.ContainsParameter("Username")) return false;
-					if(!section.ContainsParameter("Password")) return false;
-					if(!section.ContainsParameter("ProjectId")) return false;
-					return true;
-				}
+				if(!section.ContainsParameter("ServiceUri")) return false;
+				if(!section.ContainsParameter("Username")) return false;
+				if(!section.ContainsParameter("Password")) return false;
+				if(!section.ContainsParameter("ProjectId")) return false;
+				return true;
 			}
+		}
+		return false;
+	}
+
+	public Control CreateSetupDialog(IRepository repository)
+	{
+		Verify.Argument.IsNotNull(repository);
+
+		return new ProviderSetupControl(repository);
+	}
+
+	private static string Unmask(string str)
+	{
+		if(str == string.Empty) return string.Empty;
+
+		return Encoding.UTF8.GetString(Convert.FromBase64String(str));
+	}
+
+	public bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider)
+	{
+		if(!IsValidFor(repository))
+		{
+			guiProvider = default;
 			return false;
 		}
 
-		public Control CreateSetupDialog(IRepository repository)
+		var section = repository.ConfigSection.GetSection("IssueTrackers").GetSection("TeamCity");
+
+		var uri = section.GetValue<string>("ServiceUri");
+		var username = Unmask(section.GetValue<string>("Username"));
+		var password = Unmask(section.GetValue<string>("Password"));
+		var pid = section.GetValue<string>("ProjectId");
+		var svc = new TeamCityServiceContext(new Uri(uri), username, password)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
+			DefaultProjectId = pid,
+		};
 
-			return new ProviderSetupControl(repository);
-		}
-
-		private static string Unmask(string str)
-		{
-			if(str == string.Empty) return string.Empty;
-
-			return Encoding.UTF8.GetString(Convert.FromBase64String(str));
-		}
-
-		public bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider)
-		{
-			if(!IsValidFor(repository))
-			{
-				guiProvider = default;
-				return false;
-			}
-
-			var section = repository.ConfigSection.GetSection("IssueTrackers").GetSection("TeamCity");
-
-			var uri = section.GetValue<string>("ServiceUri");
-			var username = Unmask(section.GetValue<string>("Username"));
-			var password = Unmask(section.GetValue<string>("Password"));
-			var pid = section.GetValue<string>("ProjectId");
-			var svc = new TeamCityServiceContext(new Uri(uri), username, password)
-			{
-				DefaultProjectId = pid,
-			};
-
-			guiProvider = new TeamCityGuiProvider(repository, svc);
-			return true;
-		}
+		guiProvider = new TeamCityGuiProvider(repository, svc);
+		return true;
 	}
 }

@@ -18,16 +18,15 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
-{
-	using System;
+namespace gitter.Git.AccessLayer;
 
-	/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryRemotes"/> operation.</summary>
-	public sealed class QueryRemotesParameters
+using System;
+
+/// <summary>Parameters for <see cref="IRepositoryAccessor.QueryRemotes"/> operation.</summary>
+public sealed class QueryRemotesParameters
+{
+	/// <summary>Create <see cref="QueryRemotesParameters"/>.</summary>
+	public QueryRemotesParameters()
 	{
-		/// <summary>Create <see cref="QueryRemotesParameters"/>.</summary>
-		public QueryRemotesParameters()
-		{
-		}
 	}
 }

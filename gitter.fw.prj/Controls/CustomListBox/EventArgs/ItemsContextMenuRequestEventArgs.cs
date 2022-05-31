@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Collections.Generic;
+
+public class ItemsContextMenuRequestEventArgs : ContextMenuRequestEventArgs
 {
-	using System;
-	using System.Collections.Generic;
-
-	public class ItemsContextMenuRequestEventArgs : ContextMenuRequestEventArgs
+	public ItemsContextMenuRequestEventArgs(ICollection<CustomListBoxItem> items, CustomListBoxColumn column, int columnIndex, int x, int y)
+		: base(column, columnIndex, x, y)
 	{
-		public ItemsContextMenuRequestEventArgs(ICollection<CustomListBoxItem> items, CustomListBoxColumn column, int columnIndex, int x, int y)
-			: base(column, columnIndex, x, y)
-		{
-			Items = items;
-		}
-
-		public ICollection<CustomListBoxItem> Items { get; }
+		Items = items;
 	}
+
+	public ICollection<CustomListBoxItem> Items { get; }
 }

@@ -18,53 +18,52 @@
  */
 #endregion
 
-namespace gitter.Framework
+namespace gitter.Framework;
+
+using System;
+
+public class PersistentCache<T> : Cache<T>
 {
-	using System;
+	private readonly Func<T> _onReevaluate;
+	private T _value;
+	private bool _isCached;
 
-	public class PersistentCache<T> : Cache<T>
+	public PersistentCache(Func<T> onReevaluate)
 	{
-		private readonly Func<T> _onReevaluate;
-		private T _value;
-		private bool _isCached;
+		Verify.Argument.IsNotNull(onReevaluate);
 
-		public PersistentCache(Func<T> onReevaluate)
+		_onReevaluate = onReevaluate;
+	}
+
+	public PersistentCache(Func<T> onReevaluate, T value)
+	{
+		Verify.Argument.IsNotNull(onReevaluate);
+
+		_onReevaluate = onReevaluate;
+		_value = value;
+		_isCached = true;
+	}
+
+	public override bool IsCached => _isCached;
+
+	public override T Value
+	{
+		get
 		{
-			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
-
-			_onReevaluate = onReevaluate;
+			if(!IsCached) Reevaluate();
+			return _value;
 		}
+	}
 
-		public PersistentCache(Func<T> onReevaluate, T value)
-		{
-			Verify.Argument.IsNotNull(onReevaluate, nameof(onReevaluate));
+	protected virtual void Reevaluate()
+	{
+		_onReevaluate();
+		_isCached = true;
+	}
 
-			_onReevaluate = onReevaluate;
-			_value = value;
-			_isCached = true;
-		}
-
-		public override bool IsCached => _isCached;
-
-		public override T Value
-		{
-			get
-			{
-				if(!IsCached) Reevaluate();
-				return _value;
-			}
-		}
-
-		protected virtual void Reevaluate()
-		{
-			_onReevaluate();
-			_isCached = true;
-		}
-
-		public override void Invalidate()
-		{
-			_isCached = false;
-			_value = default(T);
-		}
+	public override void Invalidate()
+	{
+		_isCached = false;
+		_value = default(T);
 	}
 }

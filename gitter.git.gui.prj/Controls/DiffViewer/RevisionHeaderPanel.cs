@@ -18,209 +18,233 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+/// <summary><see cref="FlowPanel"/> which displays basic commit information: author, hash, date, subject, etc.</summary>
+public sealed class RevisionHeaderPanel : FlowPanel
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Windows.Forms;
+	#region Constants
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
+	private const int SelectionMargin = 5;
 
-	/// <summary><see cref="FlowPanel"/> which displays basic commit information: author, hash, date, subject, etc.</summary>
-	public sealed class RevisionHeaderPanel : FlowPanel
+	#endregion
+
+	#region Data
+
+	private readonly RevisionHeaderContent _content;
+	private Revision _revision;
+	private bool _isSelected;
+
+	#endregion
+
+	#region .ctor
+
+	/// <summary>Create <see cref="RevisionHeaderPanel"/>.</summary>
+	public RevisionHeaderPanel()
 	{
-		#region Constants
+		_content = new RevisionHeaderContent(AdditionalHyperlinkExtractors);
+		_content.Invalidated          += OnContentInvalidated;
+		_content.SizeChanged          += OnContentSizeChanged;
+		_content.ContextMenuRequested += OnContentContextMenuRequested;
+		_content.CursorChanged        += OnContentCursorChanged;
+	}
 
-		private const int SelectionMargin = 5;
+	#endregion
 
-		#endregion
-
-		#region Data
-
-		private RevisionHeaderContent _content;
-		private Revision _revision;
-		private bool _isSelected;
-
-		#endregion
-
-		#region .ctor
-
-		/// <summary>Create <see cref="RevisionHeaderPanel"/>.</summary>
-		public RevisionHeaderPanel()
+	private void OnContentContextMenuRequested(object sender, ContentContextMenuEventArgs e)
+	{
+		int x = e.Position.X;
+		int y = e.Position.Y;
+		if(IsSelectable)
 		{
-			_content = new RevisionHeaderContent(AdditionalHyperlinkExtractors);
-			_content.Invalidated += OnContentInvalidated;
-			_content.SizeChanged += OnContentSizeChanged;
-			_content.ContextMenuRequested += OnContentContextMenuRequested;
-			_content.CursorChanged += OnContentCursorChanged;
+			var dpi  = Dpi.FromControl(FlowControl);
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			x += conv.ConvertX(SelectionMargin);
 		}
+		ShowContextMenu(e.ContextMenu, x, y);
+	}
 
-		#endregion
-
-		private void OnContentContextMenuRequested(object sender, ContentContextMenuEventArgs e)
+	private void OnContentInvalidated(object sender, ContentInvalidatedEventArgs e)
+	{
+		var bounds = e.Bounds;
+		if(IsSelectable)
 		{
-			int x = e.Position.X;
-			int y = e.Position.Y;
-			if(IsSelectable) x += SelectionMargin;
-			ShowContextMenu(e.ContextMenu, x, y);
+			var dpi  = Dpi.FromControl(FlowControl);
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			bounds.X += conv.ConvertX(SelectionMargin);
 		}
+		InvalidateSafe(bounds);
+	}
 
-		private void OnContentInvalidated(object sender, ContentInvalidatedEventArgs e)
+	private void OnContentSizeChanged(object sender, EventArgs e)
+	{
+		InvalidateSize();
+	}
+
+	private void OnContentCursorChanged(object sender, EventArgs e)
+	{
+		FlowControl.Cursor = _content.Cursor;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseMove(int x, int y)
+	{
+		if(IsSelectable)
 		{
-			var bounds = e.Bounds;
-			if(IsSelectable) bounds.X += SelectionMargin;
-			InvalidateSafe(bounds);
+			var dpi  = Dpi.FromControl(FlowControl);
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			x -= conv.ConvertX(SelectionMargin);
 		}
-
-		private void OnContentSizeChanged(object sender, EventArgs e)
+		if(x < 0)
 		{
-			InvalidateSize();
-		}
-
-		private void OnContentCursorChanged(object sender, EventArgs e)
-		{
-			FlowControl.Cursor = _content.Cursor;
-		}
-
-		protected override void OnMouseMove(int x, int y)
-		{
-			if(IsSelectable)
-			{
-				x -= SelectionMargin;
-			}
-			if(x < 0)
-			{
-				_content.OnMouseLeave();
-			}
-			else
-			{
-				_content.OnMouseMove(x, y);
-			}
-			base.OnMouseMove(x, y);
-		}
-
-		protected override void OnMouseLeave()
-		{
-			base.OnMouseLeave();
 			_content.OnMouseLeave();
 		}
-
-		public bool IsSelectable { get; set; }
-
-		public bool IsSelected
+		else
 		{
-			get => _isSelected;
-			set
+			_content.OnMouseMove(x, y);
+		}
+		base.OnMouseMove(x, y);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseLeave()
+	{
+		base.OnMouseLeave();
+		_content.OnMouseLeave();
+	}
+
+	public bool IsSelectable { get; set; }
+
+	public bool IsSelected
+	{
+		get => _isSelected;
+		set
+		{
+			if(_isSelected != value)
 			{
-				if(_isSelected != value)
+				_isSelected = value;
+				Invalidate();
+				if(value && FlowControl is not null)
 				{
-					_isSelected = value;
-					Invalidate();
-					if(value && FlowControl is not null)
+					foreach(var p in FlowControl.Panels)
 					{
-						foreach(var p in FlowControl.Panels)
+						if(p != this && p is RevisionHeaderPanel rhp)
 						{
-							if(p != this && p is RevisionHeaderPanel rhp)
-							{
-								rhp.IsSelected = false;
-							}
+							rhp.IsSelected = false;
 						}
 					}
 				}
 			}
 		}
+	}
 
-		/// <summary>Displayed <see cref="T:gitter.Git.Revision"/>.</summary>
-		public Revision Revision
+	/// <summary>Displayed <see cref="T:gitter.Git.Revision"/>.</summary>
+	public Revision Revision
+	{
+		get => _revision;
+		set
 		{
-			get => _revision;
-			set
+			if(_revision != value)
 			{
-				if(_revision != value)
+				_revision = value;
+				if(FlowControl is not null)
 				{
-					_revision = value;
-					if(FlowControl is not null)
-					{
-						_content.Revision = _revision;
-					}
+					_content.Revision = _revision;
 				}
 			}
 		}
+	}
 
-		public List<IHyperlinkExtractor> AdditionalHyperlinkExtractors { get; } = new();
+	public List<IHyperlinkExtractor> AdditionalHyperlinkExtractors { get; } = new();
 
-		protected override void OnFlowControlAttached()
+	/// <inheritdoc/>
+	protected override void OnFlowControlAttached()
+	{
+		_content.Revision = _revision;
+		base.OnFlowControlAttached();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnFlowControlDetached()
+	{
+		_content.Revision = null;
+		base.OnFlowControlDetached();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseDown(int x, int y, MouseButtons button)
+	{
+		base.OnMouseDown(x, y, button);
+		if(IsSelectable)
 		{
-			_content.Revision = _revision;
-			base.OnFlowControlAttached();
+			if(button == MouseButtons.Left)
+			{
+				IsSelected = true;
+			}
+			var dpi  = Dpi.FromControl(FlowControl);
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			x -= conv.ConvertX(SelectionMargin);
 		}
+		_content.OnMouseDown(x, y, button);
+	}
 
-		protected override void OnFlowControlDetached()
+	/// <inheritdoc/>
+	protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
+	{
+		Assert.IsNotNull(measureEventArgs);
+
+		var conv    = DpiConverter.FromDefaultTo(measureEventArgs.Dpi);
+		var marginX = conv.ConvertX(SelectionMargin);
+		var width   = measureEventArgs.Width;
+		if(IsSelectable)
 		{
-			_content.Revision = null;
-			base.OnFlowControlDetached();
+			width -= marginX;
 		}
-
-		protected override void OnMouseDown(int x, int y, MouseButtons button)
+		_content.Style = Style;
+		var size = _content.OnMeasure(measureEventArgs.Graphics, new Dpi(FlowControl.DeviceDpi), width);
+		if(IsSelectable)
 		{
-			base.OnMouseDown(x, y, button);
-			if(IsSelectable)
-			{
-				if(button == MouseButtons.Left)
-				{
-					IsSelected = true;
-				}
-				x -= SelectionMargin;
-			}
-			_content.OnMouseDown(x, y, button);
+			size.Width += marginX;
 		}
+		return size;
+	}
 
-		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
+	/// <inheritdoc/>
+	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		var conv     = DpiConverter.FromDefaultTo(paintEventArgs.Dpi);
+		var marginX  = conv.ConvertX(SelectionMargin);
+		var bounds   = paintEventArgs.Bounds;
+		var graphics = paintEventArgs.Graphics;
+		graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
+		if(IsSelectable)
 		{
-			Assert.IsNotNull(measureEventArgs);
-
-			var width = measureEventArgs.Width;
-			if(IsSelectable)
+			if(IsSelected)
 			{
-				width -= SelectionMargin;
+				var rcFill = Rectangle.Intersect(paintEventArgs.ClipRectangle,
+					new Rectangle(bounds.X, bounds.Y, marginX, bounds.Height));
+				graphics.GdiFill(SystemColors.Highlight, rcFill);
 			}
-			_content.Style = Style;
-			var size = _content.OnMeasure(measureEventArgs.Graphics, new Dpi(FlowControl.DeviceDpi), width);
-			if(IsSelectable)
-			{
-				size.Width += SelectionMargin;
-			}
-			return size;
+			bounds.Width -= marginX;
+			bounds.X     += marginX;
 		}
-
-		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
+		_content.Style = Style;
+		var clip = Rectangle.Intersect(paintEventArgs.ClipRectangle, bounds);
+		if(clip is { Width: > 0, Height: > 0 })
 		{
-			Assert.IsNotNull(paintEventArgs);
-
-			var bounds   = paintEventArgs.Bounds;
-			var graphics = paintEventArgs.Graphics;
-			graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
-			if(IsSelectable)
-			{
-				if(IsSelected)
-				{
-					var rcFill = Rectangle.Intersect(paintEventArgs.ClipRectangle,
-						new Rectangle(bounds.X, bounds.Y, SelectionMargin, bounds.Height));
-					graphics.GdiFill(SystemColors.Highlight, rcFill);
-				}
-				bounds.Width -= SelectionMargin;
-				bounds.X     += SelectionMargin;
-			}
-			_content.Style = Style;
-			var clip = Rectangle.Intersect(paintEventArgs.ClipRectangle, bounds);
-			if(clip is { Width: > 0, Height: > 0 })
-			{
-				graphics.SetClip(clip);
-				_content.OnPaint(graphics, new Dpi(FlowControl.DeviceDpi), bounds, clip);
-			}
+			graphics.SetClip(clip);
+			_content.OnPaint(graphics, new Dpi(FlowControl.DeviceDpi), bounds, clip);
 		}
 	}
 }

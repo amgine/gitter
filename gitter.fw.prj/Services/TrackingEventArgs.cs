@@ -18,36 +18,35 @@
  */
 #endregion
 
-namespace gitter.Framework.Services
+namespace gitter.Framework.Services;
+
+using System;
+
+public sealed class TrackingEventArgs : EventArgs
 {
-	using System;
-
-	public sealed class TrackingEventArgs : EventArgs
+	public TrackingEventArgs(bool tracked, int index)
 	{
-		public TrackingEventArgs(bool tracked, int index)
-		{
-			IsTracked = tracked;
-			Index = index;
-		}
-
-		public bool IsTracked { get; }
-
-		public int Index { get; }
+		IsTracked = tracked;
+		Index = index;
 	}
 
-	public sealed class TrackingEventArgs<T> : EventArgs
+	public bool IsTracked { get; }
+
+	public int Index { get; }
+}
+
+public sealed class TrackingEventArgs<T> : EventArgs
+{
+	public TrackingEventArgs(bool tracked, int index, T element)
 	{
-		public TrackingEventArgs(bool tracked, int index, T element)
-		{
-			IsTracked = tracked;
-			Index = index;
-			Item = element;
-		}
-
-		public bool IsTracked { get; }
-
-		public int Index { get; }
-
-		public T Item { get; }
+		IsTracked = tracked;
+		Index = index;
+		Item = element;
 	}
+
+	public bool IsTracked { get; }
+
+	public int Index { get; }
+
+	public T Item { get; }
 }

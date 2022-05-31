@@ -18,409 +18,408 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls
+namespace gitter.Git.Gui.Controls;
+
+using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Globalization;
+using System.Windows.Forms;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Services;
+
+using Resources = gitter.Git.Gui.Properties.Resources;
+
+sealed class BlameFilePanel : FilePanel
 {
-	using System;
-	using System.Text;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Drawing.Drawing2D;
-	using System.Globalization;
-	using System.Windows.Forms;
+	#region Data
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-	using gitter.Framework.Services;
+	private readonly Repository _repository;
+	private readonly TrackingService _lineHover;
+	private Size _size;
+	private Dpi _sizeDpi;
+	private int _selOrigin;
+	private int _selStart;
+	private int _selEnd;
+	private bool _selecting;
+	private int _hashColumnWidth;
+	private int _autorColumnWidth;
+	private RevisionToolTip _revisionToolTip;
 
-	using Resources = gitter.Git.Gui.Properties.Resources;
+	#endregion
 
-	sealed class BlameFilePanel : FilePanel
+	private struct HitTestResults
 	{
-		#region Data
+		public int Area;
+		public int Column;
+		public int Line;
+	}
 
-		private readonly Repository _repository;
-		private readonly TrackingService _lineHover;
-		private Size _size;
-		private int _selOrigin;
-		private int _selStart;
-		private int _selEnd;
-		private bool _selecting;
-		private int _hashColumnWidth;
-		private int _autorColumnWidth;
-		private RevisionToolTip _revisionToolTip;
+	public BlameFilePanel(Repository repository, BlameFile blameFile)
+	{
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(blameFile);
 
-		#endregion
+		_repository = repository;
+		BlameFile = blameFile;
+		_lineHover = new TrackingService(e => Invalidate(GetLineBounds(e.Index)));
+		_selStart = -1;
+		_selEnd = -1;
+		_selOrigin = -1;
+	}
 
-		private struct HitTestResults
+	public BlameFile BlameFile { get; }
+
+	public override void InvalidateSize()
+	{
+		_size = Size.Empty;
+		base.InvalidateSize();
+	}
+
+	public void DropSelection()
+	{
+		_selecting = false;
+		if(_selStart != -1)
 		{
-			public int Area;
-			public int Column;
-			public int Line;
-		}
-
-		public BlameFilePanel(Repository repository, BlameFile blameFile)
-		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-			Verify.Argument.IsNotNull(blameFile, nameof(blameFile));
-
-			_repository = repository;
-			BlameFile = blameFile;
-			_lineHover = new TrackingService(e => Invalidate(GetLineBounds(e.Index)));
+			int invMin = _selStart;
+			int invMax = _selEnd;
 			_selStart = -1;
 			_selEnd = -1;
 			_selOrigin = -1;
+			Invalidate(GetLineBounds(invMin, invMax - invMin + 1));
 		}
+	}
 
-		public BlameFile BlameFile { get; }
+	protected override bool ShowHeader => false;
 
-		public override void InvalidateSize()
+	private void SetSelection(int line)
+	{
+		SetSelection(line, line);
+	}
+
+	private void SetSelection(int line1, int line2)
+	{
+		int start, end;
+		if(line1 <= line2)
 		{
-			_size = Size.Empty;
-			base.InvalidateSize();
+			start = line1;
+			end = line2;
 		}
-
-		public void DropSelection()
+		else
 		{
-			_selecting = false;
+			start = line2;
+			end = line1;
+		}
+		if(_selStart != start || _selEnd != end)
+		{
 			if(_selStart != -1)
 			{
-				int invMin = _selStart;
-				int invMax = _selEnd;
-				_selStart = -1;
-				_selEnd = -1;
-				_selOrigin = -1;
-				Invalidate(GetLineBounds(invMin, invMax - invMin + 1));
-			}
-		}
-
-		protected override bool ShowHeader => false;
-
-		private void SetSelection(int line)
-		{
-			SetSelection(line, line);
-		}
-
-		private void SetSelection(int line1, int line2)
-		{
-			int start, end;
-			if(line1 <= line2)
-			{
-				start = line1;
-				end = line2;
-			}
-			else
-			{
-				start = line2;
-				end = line1;
-			}
-			if(_selStart != start || _selEnd != end)
-			{
-				if(_selStart != -1)
+				if(_selEnd < start || _selStart > end)
 				{
-					if(_selEnd < start || _selStart > end)
-					{
-						var oldStart = _selStart;
-						var oldEnd = _selEnd;
-						_selStart = start;
-						_selEnd = end;
-						Invalidate(GetLineBounds(oldStart, oldEnd - oldStart + 1));
-						Invalidate(GetLineBounds(start, end - start + 1));
-					}
-					else
-					{
-						int r1Start, r1Count;
-						int r2Start, r2Count;
-						if(start < _selStart)
-						{
-							r1Start = start;
-							r1Count = _selStart - r1Start + 1;
-						}
-						else if(start > _selStart)
-						{
-							r1Start = _selStart;
-							r1Count = start - r1Start + 1;
-						}
-						else
-						{
-							r1Start = 0;
-							r1Count = 0;
-						}
-						if(end > _selEnd)
-						{
-							r2Start = _selEnd;
-							r2Count = end - r2Start + 1;
-						}
-						else if(end < _selEnd)
-						{
-							r2Start = end;
-							r2Count = _selEnd - r2Start + 1;
-						}
-						else
-						{
-							r2Start = 0;
-							r2Count = 0;
-						}
-						_selStart = start;
-						_selEnd = end;
-						if(r1Count != 0)
-						{
-							Invalidate(GetLineBounds(r1Start, r1Count));
-						}
-						if(r2Count != 0)
-						{
-							Invalidate(GetLineBounds(r2Start, r2Count));
-						}
-					}
+					var oldStart = _selStart;
+					var oldEnd = _selEnd;
+					_selStart = start;
+					_selEnd = end;
+					Invalidate(GetLineBounds(oldStart, oldEnd - oldStart + 1));
+					Invalidate(GetLineBounds(start, end - start + 1));
 				}
 				else
 				{
+					int r1Start, r1Count;
+					int r2Start, r2Count;
+					if(start < _selStart)
+					{
+						r1Start = start;
+						r1Count = _selStart - r1Start + 1;
+					}
+					else if(start > _selStart)
+					{
+						r1Start = _selStart;
+						r1Count = start - r1Start + 1;
+					}
+					else
+					{
+						r1Start = 0;
+						r1Count = 0;
+					}
+					if(end > _selEnd)
+					{
+						r2Start = _selEnd;
+						r2Count = end - r2Start + 1;
+					}
+					else if(end < _selEnd)
+					{
+						r2Start = end;
+						r2Count = _selEnd - r2Start + 1;
+					}
+					else
+					{
+						r2Start = 0;
+						r2Count = 0;
+					}
 					_selStart = start;
 					_selEnd = end;
-					Invalidate(GetLineBounds(start, end - start + 1));
+					if(r1Count != 0)
+					{
+						Invalidate(GetLineBounds(r1Start, r1Count));
+					}
+					if(r2Count != 0)
+					{
+						Invalidate(GetLineBounds(r2Start, r2Count));
+					}
 				}
 			}
+			else
+			{
+				_selStart = start;
+				_selEnd = end;
+				Invalidate(GetLineBounds(start, end - start + 1));
+			}
 		}
+	}
 
-		private HitTestResults HitTest(int x, int y)
+	private HitTestResults HitTest(int x, int y)
+	{
+		int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
+		if(BlameFile == null ||
+			x < Margin || x > contentWidth - Margin ||
+			y < 0 || y >= _size.Height)
 		{
-			int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
-			if(BlameFile == null ||
-				x < Margin || x > contentWidth - Margin ||
-				y < 0 || y >= _size.Height)
+			return new HitTestResults()
+			{
+				Area = -1,
+				Column = -1,
+				Line = -1,
+			};
+		}
+		if(ShowHeader)
+		{
+			if(y < HeaderHeight)
 			{
 				return new HitTestResults()
 				{
-					Area = -1,
+					Area = 0,
 					Column = -1,
 					Line = -1,
 				};
 			}
-			if(ShowHeader)
-			{
-				if(y < HeaderHeight)
+			y -= HeaderHeight;
+		}
+		x -= Margin;
+		int column = 3;
+		var cellSize = GetCellSize(Dpi.FromControl(FlowControl));
+		x -= (GetDecimalDigits(BlameFile.LineCount) + 1) * cellSize.Width + 2;
+		if(x < 0)
+		{
+			column = 0;
+		}
+		x -= _hashColumnWidth;
+		if(x < 0)
+		{
+			column = 1;
+		}
+		x -= _autorColumnWidth;
+		if(x < 0)
+		{
+			column = 2;
+		}
+		return new HitTestResults()
+		{
+			Area = 2,
+			Column = column,
+			Line = y / cellSize.Height,
+		};
+	}
+
+	protected override void OnMouseDoubleClick(int x, int y, MouseButtons button)
+	{
+		switch(button)
+		{
+			case MouseButtons.Left:
 				{
-					return new HitTestResults()
+					var htr = HitTest(x, y);
+					if(htr.Line != -1)
 					{
-						Area = 0,
-						Column = -1,
-						Line = -1,
-					};
-				}
-				y -= HeaderHeight;
-			}
-			x -= Margin;
-			int column = 3;
-			x -= (GetDecimalDigits(BlameFile.LineCount) + 1) * CellSize.Width + 2;
-			if(x < 0)
-			{
-				column = 0;
-			}
-			x -= _hashColumnWidth;
-			if(x < 0)
-			{
-				column = 1;
-			}
-			x -= _autorColumnWidth;
-			if(x < 0)
-			{
-				column = 2;
-			}
-			return new HitTestResults()
-			{
-				Area = 2,
-				Column = column,
-				Line = y / CellSize.Height,
-			};
-		}
-
-		protected override void OnMouseDoubleClick(int x, int y, MouseButtons button)
-		{
-			switch(button)
-			{
-				case MouseButtons.Left:
-					{
-						var htr = HitTest(x, y);
-						if(htr.Line != -1)
+						int start = 0;
+						int end = 0;
+						foreach(var h in BlameFile)
 						{
-							int start = 0;
-							int end = 0;
-							foreach(var h in BlameFile)
+							end = h.Count + start;
+							if(end > htr.Line)
 							{
-								end = h.Count + start;
-								if(end > htr.Line)
-								{
-									break;
-								}
-								else
-								{
-									start = end;
-								}
-							}
-							SetSelection(start, end - 1);
-						}
-					}
-					break;
-			}
-		}
-
-		protected override void OnMouseDown(int x, int y, MouseButtons button)
-		{
-			switch(button)
-			{
-				case MouseButtons.Left:
-					{
-						var htr = HitTest(x, y);
-						if(htr.Line != -1)
-						{
-							if(_selOrigin == -1 || Control.ModifierKeys != Keys.Shift)
-							{
-								_selOrigin = htr.Line;
-								SetSelection(htr.Line);
+								break;
 							}
 							else
 							{
-								SetSelection(_selOrigin, htr.Line);
+								start = end;
 							}
-							_selecting = true;
 						}
-						else
-						{
-							DropSelection();
-						}
+						SetSelection(start, end - 1);
 					}
-					break;
-				case MouseButtons.Right:
-					{
-						var htr = HitTest(x, y);
-						if(htr.Line != -1)
-						{
-							if(htr.Line < _selStart || htr.Line > _selEnd)
-							{
-								_selOrigin = htr.Line;
-								SetSelection(htr.Line);
-							}
-
-							var menu        = new ContextMenuStrip();
-							var dpiBindings = new DpiBindings(menu);
-							var factory     = new GuiItemFactory(dpiBindings);
-
-							var lines = GetSelectedLines();
-							menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(
-								Resources.StrCopyToClipboard,
-								() => LinesToString(lines)));
-							bool sameCommit = true;
-							for(int i = 1; i < lines.Length; ++i)
-							{
-								if(lines[i].Commit != lines[0].Commit)
-								{
-									sameCommit = false;
-									break;
-								}
-							}
-							if(sameCommit)
-							{
-								var commit = lines[0].Commit;
-								menu.Items.Add(new ToolStripSeparator());
-								menu.Items.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash.ToString()));
-								menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, commit.Summary));
-								menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author));
-								if(commit.Author != commit.Committer)
-								{
-									menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, commit.Committer));
-								}
-							}
-							Utility.MarkDropDownForAutoDispose(menu);
-							ShowContextMenu(menu, x, y);
-						}
-						else
-						{
-							DropSelection();
-						}
-					}
-					break;
-			}
-			base.OnMouseDown(x, y, button);
+				}
+				break;
 		}
+	}
 
-		private static string LinesToString(IEnumerable<BlameLine> lines)
+	protected override void OnMouseDown(int x, int y, MouseButtons button)
+	{
+		switch(button)
 		{
-			var sb = new StringBuilder();
-			foreach(var line in lines)
-			{
-				sb.Append(line.Text);
-				sb.Append(line.Ending);
-			}
-			return sb.ToString();
-		}
-
-		private void UpdateSelection(int x, int y)
-		{
-			int yOffset = ShowHeader ? HeaderHeight : 1;
-			int line = (y - yOffset) / CellSize.Height;
-			if(line < 0)
-			{
-				line = 0;
-			}
-			else if(line >= BlameFile.LineCount)
-			{
-				line = BlameFile.LineCount - 1;
-			}
-			SetSelection(_selOrigin, line);
-		}
-
-		protected override void OnMouseUp(int x, int y, MouseButtons button)
-		{
-			_selecting = false;
-			base.OnMouseUp(x, y, button);
-		}
-
-		protected override void OnMouseMove(int x, int y)
-		{
-			base.OnMouseMove(x, y);
-			var htr = HitTest(x, y);
-			if(_selecting)
-			{
-				UpdateSelection(x, y);
-			}
-			_lineHover.Track(htr.Line);
-			if(htr.Column == 1 || htr.Column == 2)
-			{
-				if(_lineHover.Index >= 0 && _lineHover.Index < BlameFile.LineCount)
+			case MouseButtons.Left:
 				{
-					BlameHunk blameHunk;
-					var line = GetLinesToContainingHunk(_lineHover.Index, out blameHunk);
-					Revision revision = null;
-					try
+					var htr = HitTest(x, y);
+					if(htr.Line != -1)
 					{
-						revision = _repository.Revisions[blameHunk.Commit.Hash];
-					}
-					catch(Exception exc) when(!exc.IsCritical())
-					{
-					}
-					if(revision != null)
-					{
-						if(_revisionToolTip.Tag != null || _revisionToolTip.Revision != revision)
+						if(_selOrigin == -1 || Control.ModifierKeys != Keys.Shift)
 						{
-							_revisionToolTip.Revision = revision;
-							var point = new Point(Margin, Bounds.Y - FlowControl.VScrollPos);
-							point.X += (GetDecimalDigits(BlameFile.LineCount) + 1) * CellSize.Width + _autorColumnWidth + _hashColumnWidth + 1;
-							point.Y += line * CellSize.Height;
-							point.Y += 2;
-							if(ShowHeader)
-							{
-								point.Y += HeaderHeight;
-							}
-							if(point.Y < 1)
-							{
-								point.Y = 1;
-							}
-							_revisionToolTip.Show(FlowControl, point);
-							_revisionToolTip.Tag = null;
+							_selOrigin = htr.Line;
+							SetSelection(htr.Line);
 						}
+						else
+						{
+							SetSelection(_selOrigin, htr.Line);
+						}
+						_selecting = true;
 					}
 					else
 					{
-						HideToolTip();
+						DropSelection();
+					}
+				}
+				break;
+			case MouseButtons.Right:
+				{
+					var htr = HitTest(x, y);
+					if(htr.Line != -1)
+					{
+						if(htr.Line < _selStart || htr.Line > _selEnd)
+						{
+							_selOrigin = htr.Line;
+							SetSelection(htr.Line);
+						}
+
+						var menu        = new ContextMenuStrip();
+						var dpiBindings = new DpiBindings(menu);
+						var factory     = new GuiItemFactory(dpiBindings);
+
+						var lines = GetSelectedLines();
+						menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(
+							Resources.StrCopyToClipboard,
+							() => LinesToString(lines)));
+						bool sameCommit = true;
+						for(int i = 1; i < lines.Length; ++i)
+						{
+							if(lines[i].Commit != lines[0].Commit)
+							{
+								sameCommit = false;
+								break;
+							}
+						}
+						if(sameCommit)
+						{
+							var commit = lines[0].Commit;
+							menu.Items.Add(new ToolStripSeparator());
+							menu.Items.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash.ToString()));
+							menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, commit.Summary));
+							menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author));
+							if(commit.Author != commit.Committer)
+							{
+								menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, commit.Committer));
+							}
+						}
+						Utility.MarkDropDownForAutoDispose(menu);
+						ShowContextMenu(menu, x, y);
+					}
+					else
+					{
+						DropSelection();
+					}
+				}
+				break;
+		}
+		base.OnMouseDown(x, y, button);
+	}
+
+	private static string LinesToString(IEnumerable<BlameLine> lines)
+	{
+		var sb = new StringBuilder();
+		foreach(var line in lines)
+		{
+			sb.Append(line.Text);
+			sb.Append(line.Ending);
+		}
+		return sb.ToString();
+	}
+
+	private void UpdateSelection(int x, int y)
+	{
+		int yOffset  = ShowHeader ? HeaderHeight : 1;
+		var cellSize = GetCellSize(Dpi.FromControl(FlowControl));
+		int line = (y - yOffset) / cellSize.Height;
+		if(line < 0)
+		{
+			line = 0;
+		}
+		else if(line >= BlameFile.LineCount)
+		{
+			line = BlameFile.LineCount - 1;
+		}
+		SetSelection(_selOrigin, line);
+	}
+
+	protected override void OnMouseUp(int x, int y, MouseButtons button)
+	{
+		_selecting = false;
+		base.OnMouseUp(x, y, button);
+	}
+
+	protected override void OnMouseMove(int x, int y)
+	{
+		base.OnMouseMove(x, y);
+		var htr = HitTest(x, y);
+		if(_selecting)
+		{
+			UpdateSelection(x, y);
+		}
+		_lineHover.Track(htr.Line);
+		if(htr.Column is 1 or 2)
+		{
+			if(_lineHover.Index >= 0 && _lineHover.Index < BlameFile.LineCount)
+			{
+				BlameHunk blameHunk;
+				var line = GetLinesToContainingHunk(_lineHover.Index, out blameHunk);
+				Revision revision = null;
+				try
+				{
+					revision = _repository.Revisions[blameHunk.Commit.Hash];
+				}
+				catch(Exception exc) when(!exc.IsCritical())
+				{
+				}
+				if(revision is not null)
+				{
+					var cellSize = GetCellSize(Dpi.FromControl(FlowControl));
+					if(_revisionToolTip.Tag is not null || _revisionToolTip.Revision != revision)
+					{
+						_revisionToolTip.Revision = revision;
+						var point = new Point(Margin, Bounds.Y - FlowControl.VScrollPos);
+						point.X += (GetDecimalDigits(BlameFile.LineCount) + 1) * cellSize.Width + _autorColumnWidth + _hashColumnWidth + 1;
+						point.Y += line * cellSize.Height;
+						point.Y += 2;
+						if(ShowHeader)
+						{
+							point.Y += HeaderHeight;
+						}
+						if(point.Y < 1)
+						{
+							point.Y = 1;
+						}
+						_revisionToolTip.Show(FlowControl, point);
+						_revisionToolTip.Tag = null;
 					}
 				}
 				else
@@ -433,305 +432,314 @@ namespace gitter.Git.Gui.Controls
 				HideToolTip();
 			}
 		}
-
-		private int GetLinesToContainingHunk(int lineIndex, out BlameHunk blameHunk)
+		else
 		{
-			int res = 0;
-			for(int i = 0; i < BlameFile.Count; ++i)
-			{
-				if(res + BlameFile[i].Count > lineIndex)
-				{
-					blameHunk = BlameFile[i];
-					return res;
-				}
-				res += BlameFile[i].Count;
-			}
-			blameHunk = null;
-			return res;
-		}
-
-		protected override void OnMouseLeave()
-		{
-			base.OnMouseLeave();
-			_lineHover.Drop();
 			HideToolTip();
 		}
+	}
 
-		private void HideToolTip()
+	private int GetLinesToContainingHunk(int lineIndex, out BlameHunk blameHunk)
+	{
+		int res = 0;
+		for(int i = 0; i < BlameFile.Count; ++i)
 		{
-			_revisionToolTip.Hide(FlowControl);
-			_revisionToolTip.Tag = "hidden";
-		}
-
-		public BlameLine[] GetSelectedLines()
-		{
-			if(_selStart == -1) return Preallocated<BlameLine>.EmptyArray;
-			int offset = 0;
-			int i = 0;
-			int num = _selStart;
-			while(BlameFile[i].Count <= num)
+			if(res + BlameFile[i].Count > lineIndex)
 			{
-				int lc = BlameFile[i].Count;
-				offset += lc;
-				num -= lc;
+				blameHunk = BlameFile[i];
+				return res;
+			}
+			res += BlameFile[i].Count;
+		}
+		blameHunk = null;
+		return res;
+	}
+
+	protected override void OnMouseLeave()
+	{
+		base.OnMouseLeave();
+		_lineHover.Drop();
+		HideToolTip();
+	}
+
+	private void HideToolTip()
+	{
+		_revisionToolTip.Hide(FlowControl);
+		_revisionToolTip.Tag = "hidden";
+	}
+
+	public BlameLine[] GetSelectedLines()
+	{
+		if(_selStart == -1) return Preallocated<BlameLine>.EmptyArray;
+		int offset = 0;
+		int i = 0;
+		int num = _selStart;
+		while(BlameFile[i].Count <= num)
+		{
+			int lc = BlameFile[i].Count;
+			offset += lc;
+			num -= lc;
+			++i;
+		}
+		int count = _selEnd - _selStart + 1;
+		var res = new BlameLine[count];
+		int id = 0;
+		while(id != res.Length)
+		{
+			res[id++] = BlameFile[i][num++];
+			if(num >= BlameFile[i].Count)
+			{
 				++i;
+				num = 0;
 			}
-			int count = _selEnd - _selStart + 1;
-			var res = new BlameLine[count];
-			int id = 0;
-			while(id != res.Length)
+		}
+		return res;
+	}
+
+	public int SelectionStart => _selStart;
+
+	public int SelectionLength => _selStart == -1 ? 0 : _selEnd - _selStart + 1;
+
+	protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
+	{
+		if(BlameFile is null) return Size.Empty;
+		var dpi = measureEventArgs.Dpi;
+		if(_sizeDpi == dpi) return _size;
+
+		int maxLength = 0;
+		BlameLine longestLine = null;
+		string longestAuthor = string.Empty;
+		foreach(var hunk in BlameFile)
+		{
+			foreach(var line in hunk)
 			{
-				res[id++] = BlameFile[i][num++];
-				if(num >= BlameFile[i].Count)
+				int l = line.GetCharacterPositions(TabSize);
+				if(l > maxLength)
 				{
-					++i;
-					num = 0;
+					maxLength = l;
+					longestLine = line;
 				}
 			}
-			return res;
+			if(hunk.Commit.Author.Length > longestAuthor.Length)
+			{
+				longestAuthor = hunk.Commit.Author;
+			}
+		}
+		var digits   = GetDecimalDigits(BlameFile.LineCount) + 1;
+		var font     = GitterApplication.FontManager.ViewerFont.ScalableFont.GetValue(dpi);
+		var cellSize = GetCellSize(dpi);
+		int w = cellSize.Width * digits + 2 * Margin;
+		if(longestLine is not null)
+		{
+			int longestLineWidth;
+			try
+			{
+				longestLineWidth = GitterApplication.TextRenderer.MeasureText(
+					measureEventArgs.Graphics, longestLine.Text, font, int.MaxValue, ContentFormat).Width + (cellSize.Width / 2);
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
+				longestLineWidth = (int)(maxLength * cellSize.Width);
+			}
+			int longestAuthorWidth;
+			try
+			{
+				longestAuthorWidth = GitterApplication.TextRenderer.MeasureText(
+					measureEventArgs.Graphics, longestAuthor, font, int.MaxValue, ContentFormat).Width + cellSize.Width;
+			}
+			catch(Exception exc) when(!exc.IsCritical())
+			{
+				longestAuthorWidth = (int)(longestAuthor.Length * cellSize.Width);
+			}
+			longestAuthorWidth += cellSize.Width;
+			_autorColumnWidth = longestAuthorWidth;
+			w += longestLineWidth + longestAuthorWidth;
+			_hashColumnWidth = cellSize.Width * 7 + cellSize.Width;
+			w += _hashColumnWidth;
+		}
+		var h = BlameFile.LineCount * cellSize.Height;
+		if(ShowHeader)
+		{
+			h += HeaderHeight;
+		}
+		if(BlameFile.LineCount != 0)
+		{
+			h += 2;
+		}
+		_sizeDpi = dpi;
+		return _size = new Size(w, h);
+	}
+
+	private void PaintLine(int lineIndex,
+		BlameHunk hunk, BlameLine line,
+		bool paintHeader, int digits,
+		Graphics graphics, Font font,
+		bool hover, bool selected, bool alternate,
+		int x, int y, int width, Size cellSize,
+		Rectangle clipRectangle)
+	{
+		var rcColNumbers = new Rectangle(x, y, (digits + 1) * cellSize.Width + 2, cellSize.Height);
+		var rcColNumbersBackground = Rectangle.Intersect(clipRectangle, rcColNumbers);
+		if(rcColNumbersBackground is { Width: > 0, Height: > 0 })
+		{
+			var backgroundColor = hover
+				? Style.Colors.LineNumberBackgroundHover
+				: Style.Colors.LineNumberBackground;
+			if(backgroundColor != Color.Transparent)
+			{
+				graphics.GdiFill(backgroundColor, rcColNumbersBackground);
+			}
+		}
+		graphics.SmoothingMode = SmoothingMode.AntiAlias;
+		var num = line.Number;
+		var temp = num;
+		int d = 0;
+		while(temp != 0)
+		{
+			temp /= 10;
+			++d;
+		}
+		int lx = x + (digits - d) * cellSize.Width + cellSize.Width / 2;
+		GitterApplication.TextRenderer.DrawText(
+			graphics,
+			num.ToString(CultureInfo.InvariantCulture),
+			font,
+			Style.Colors.LineNumberForeground,
+			lx, y,
+			ContentFormat);
+		int lineX = x;
+		graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
+		lineX = x + (digits + 1) * cellSize.Width + 1;
+		graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
+		lineX = x + width - Margin * 2;
+		graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
+		var rcLine = new Rectangle(
+			x + rcColNumbers.Width, y,
+			width - 2 * Margin - rcColNumbers.Width, cellSize.Height);
+		graphics.SmoothingMode = SmoothingMode.Default;
+
+		var rcBackground = Rectangle.Intersect(clipRectangle, rcLine);
+		if(rcBackground is { Width: > 0, Height: > 0 })
+		{
+			var backgroundColor = hover
+				? selected
+					? Style.Colors.LineSelectedBackgroundHover
+					: Style.Colors.LineBackgroundHover
+				: selected
+					? Style.Colors.LineSelectedBackground
+					: alternate
+						? Style.Colors.Alternate
+						: Style.Colors.LineContextBackground;
+			if(backgroundColor != Color.Transparent)
+			{
+				graphics.GdiFill(backgroundColor, rcLine);
+			}
 		}
 
-		public int SelectionStart => _selStart;
-
-		public int SelectionLength => _selStart == -1 ? 0 : _selEnd - _selStart + 1;
-
-		protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
+		lineX = x + digits * cellSize.Width + _hashColumnWidth + _autorColumnWidth + 1;
+		graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
+		using(var brush = new SolidBrush(Style.Colors.WindowText))
 		{
-			if(BlameFile == null) return Size.Empty;
-			if(_size.IsEmpty)
+			if(paintHeader)
 			{
-				int maxLength = 0;
-				BlameLine longestLine = null;
-				string longestAuthor = string.Empty;
-				foreach(var hunk in BlameFile)
-				{
-					foreach(var line in hunk)
-					{
-						int l = line.GetCharacterPositions(TabSize);
-						if(l > maxLength)
-						{
-							maxLength = l;
-							longestLine = line;
-						}
-					}
-					if(hunk.Commit.Author.Length > longestAuthor.Length)
-					{
-						longestAuthor = hunk.Commit.Author;
-					}
-				}
-				var digits = GetDecimalDigits(BlameFile.LineCount) + 1;
-				var font = GitterApplication.FontManager.ViewerFont.Font;
-				int w = CellSize.Width * digits + 2 * Margin;
-				if(longestLine != null)
-				{
-					int longestLineWidth;
-					try
-					{
-						longestLineWidth = GitterApplication.TextRenderer.MeasureText(
-							measureEventArgs.Graphics, longestLine.Text, font, int.MaxValue, ContentFormat).Width + (CellSize.Width / 2);
-					}
-					catch(Exception exc) when(!exc.IsCritical())
-					{
-						longestLineWidth = (int)(maxLength * CellSize.Width);
-					}
-					int longestAuthorWidth;
-					try
-					{
-						longestAuthorWidth = GitterApplication.TextRenderer.MeasureText(
-							measureEventArgs.Graphics, longestAuthor, font, int.MaxValue, ContentFormat).Width + CellSize.Width;
-					}
-					catch(Exception exc) when(!exc.IsCritical())
-					{
-						longestAuthorWidth = (int)(longestAuthor.Length * CellSize.Width);
-					}
-					longestAuthorWidth += CellSize.Width;
-					_autorColumnWidth = longestAuthorWidth;
-					w += longestLineWidth + longestAuthorWidth;
-					_hashColumnWidth = CellSize.Width * 7 + CellSize.Width;
-					w += _hashColumnWidth;
-				}
-				var h = BlameFile.LineCount * CellSize.Height;
-				if(ShowHeader)
-				{
-					h += HeaderHeight;
-				}
-				if(BlameFile.LineCount != 0)
-				{
-					h += 2;
-				}
-				_size = new Size(w, h);
-			}
-			return _size;
-		}
-
-		private void PaintLine(int lineIndex, BlameHunk hunk, BlameLine line, bool paintHeader, int digits, Graphics graphics, Font font, bool hover, bool selected, bool alternate,
-			int x, int y, int width,
-			Rectangle clipRectangle)
-		{
-			var rcColNumbers = new Rectangle(x, y, (digits + 1) * CellSize.Width + 2, CellSize.Height);
-			var rcColNumbersBackground = Rectangle.Intersect(clipRectangle, rcColNumbers);
-			if(rcColNumbersBackground is { Width: > 0, Height: > 0 })
-			{
-				var backgroundColor = hover
-					? Style.Colors.LineNumberBackgroundHover
-					: Style.Colors.LineNumberBackground;
-				if(backgroundColor != Color.Transparent)
-				{
-					graphics.GdiFill(backgroundColor, rcColNumbersBackground);
-				}
-			}
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			var num = line.Number;
-			var temp = num;
-			int d = 0;
-			while(temp != 0)
-			{
-				temp /= 10;
-				++d;
-			}
-			int lx = x + (digits - d) * CellSize.Width + CellSize.Width / 2;
-			GitterApplication.TextRenderer.DrawText(
-				graphics,
-				num.ToString(CultureInfo.InvariantCulture),
-				font,
-				Style.Colors.LineNumberForeground,
-				lx, y,
-				ContentFormat);
-			int lineX = x;
-			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
-			lineX = x + (digits + 1) * CellSize.Width + 1;
-			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
-			lineX = x + width - Margin * 2;
-			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
-			var rcLine = new Rectangle(
-				x + rcColNumbers.Width, y,
-				width - 2 * Margin - rcColNumbers.Width, CellSize.Height);
-			graphics.SmoothingMode = SmoothingMode.Default;
-
-			var rcBackground = Rectangle.Intersect(clipRectangle, rcLine);
-			if(rcBackground is { Width: > 0, Height: > 0 })
-			{
-				var backgroundColor = hover
-					? selected
-						? Style.Colors.LineSelectedBackgroundHover
-						: Style.Colors.LineBackgroundHover
-					: selected
-						? Style.Colors.LineSelectedBackground
-						: alternate
-							? Style.Colors.Alternate
-							: Style.Colors.LineContextBackground;
-				if(backgroundColor != Color.Transparent)
-				{
-					graphics.GdiFill(backgroundColor, rcLine);
-				}
-			}
-
-			lineX = x + digits * CellSize.Width + _hashColumnWidth + _autorColumnWidth + 1;
-			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + CellSize.Height);
-			using(var brush = new SolidBrush(Style.Colors.WindowText))
-			{
-				if(paintHeader)
-				{
-					var rcHash   = new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
-					var rcAuthor = new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
-					GitterApplication.TextRenderer.DrawText(
-						graphics, hunk.Commit.Hash.ToString(7), font, brush,
-						rcHash.X + CellSize.Width / 2, rcHash.Y, ContentFormat);
-					GitterApplication.TextRenderer.DrawText(
-						graphics, hunk.Commit.Author, font, brush,
-						rcAuthor.X + CellSize.Width / 2, rcAuthor.Y, ContentFormat);
-				}
-
-				var dx = _hashColumnWidth + _autorColumnWidth;
-				rcLine.X     += dx;
-				rcLine.Width -= dx;
+				var rcHash   = new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
+				var rcAuthor = new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
 				GitterApplication.TextRenderer.DrawText(
-					graphics, line.Text, font, brush,
-					rcLine.X, rcLine.Y, ContentFormat);
+					graphics, hunk.Commit.Hash.ToString(7), font, brush,
+					rcHash.X + cellSize.Width / 2, rcHash.Y, ContentFormat);
+				GitterApplication.TextRenderer.DrawText(
+					graphics, hunk.Commit.Author, font, brush,
+					rcAuthor.X + cellSize.Width / 2, rcAuthor.Y, ContentFormat);
 			}
+
+			var dx = _hashColumnWidth + _autorColumnWidth;
+			rcLine.X     += dx;
+			rcLine.Width -= dx;
+			GitterApplication.TextRenderer.DrawText(
+				graphics, line.Text, font, brush,
+				rcLine.X, rcLine.Y, ContentFormat);
 		}
+	}
 
-		protected override void OnFlowControlAttached()
+	protected override void OnFlowControlAttached()
+	{
+		base.OnFlowControlAttached();
+		_revisionToolTip = new RevisionToolTip();
+		_revisionToolTip.Tag = "hidden";
+	}
+
+	protected override void OnFlowControlDetached()
+	{
+		base.OnFlowControlDetached();
+		_revisionToolTip.Dispose();
+		_revisionToolTip = null;
+	}
+
+	/// <inheritdoc/>
+	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		var graphics = paintEventArgs.Graphics;
+		var rect = paintEventArgs.Bounds;
+		var clip = paintEventArgs.ClipRectangle;
+		var contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
+		var x = rect.X + Margin;
+		var y = 0;
+		if(ShowHeader)
 		{
-			base.OnFlowControlAttached();
-			_revisionToolTip = new RevisionToolTip();
-			_revisionToolTip.Tag = "hidden";
+			var rcHeader = new Rectangle(rect.X + Margin, rect.Y, contentWidth - 2 * Margin, HeaderHeight);
+			if(Rectangle.Intersect(clip, rcHeader) is { Width: > 0, Height: > 0 } rcHeaderClip)
+			{
+				PaintHeader(graphics, paintEventArgs.Dpi, rcHeader, paintEventArgs.ClipRectangle,
+					GraphicsUtility.QueryIcon(BlameFile.Name, paintEventArgs.Dpi), null, BlameFile.Name);
+			}
+			y += rcHeader.Bottom;
 		}
-
-		protected override void OnFlowControlDetached()
+		else
 		{
-			base.OnFlowControlDetached();
-			_revisionToolTip.Dispose();
-			_revisionToolTip = null;
+			if(BlameFile.LineCount != 0)
+			{
+				graphics.DrawLine(Pens.Gray, x, rect.Y, rect.X + contentWidth - Margin, rect.Y);
+			}
+			y += rect.Y + 1;
 		}
-
-		/// <inheritdoc/>
-		protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
+		int maxLineNum = BlameFile.LineCount;
+		int digits = GetDecimalDigits(maxLineNum);
+		var font = GitterApplication.FontManager.ViewerFont.ScalableFont.GetValue(paintEventArgs.Dpi);
+		bool reachedEnd = false;
+		int lineIndex = 0;
+		bool alternate = false;
+		bool first;
+		var cellSize = GetCellSize(paintEventArgs.Dpi);
+		foreach(var hunk in BlameFile)
 		{
-			Assert.IsNotNull(paintEventArgs);
-
-			var graphics = paintEventArgs.Graphics;
-			var rect = paintEventArgs.Bounds;
-			var clip = paintEventArgs.ClipRectangle;
-			var contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
-			var x = rect.X + Margin;
-			var y = 0;
-			if(ShowHeader)
+			first = true;
+			foreach(var line in hunk)
 			{
-				var rcHeader = new Rectangle(rect.X + Margin, rect.Y, contentWidth - 2 * Margin, HeaderHeight);
-				var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
-				if(rcHeaderClip.Width != 0 && rcHeaderClip.Height != 0)
+				if(y >= clip.Bottom)
 				{
-					PaintHeader(graphics, rcHeader, paintEventArgs.ClipRectangle,
-						GraphicsUtility.QueryIcon(BlameFile.Name, new Dpi(FlowControl.DeviceDpi)), null, BlameFile.Name);
+					reachedEnd = true;
+					break;
 				}
-				y += rcHeader.Bottom;
-			}
-			else
-			{
-				if(BlameFile.LineCount != 0)
+				if(y + cellSize.Height >= clip.Y)
 				{
-					graphics.DrawLine(Pens.Gray, x, rect.Y, rect.X + contentWidth - Margin, rect.Y);
+					PaintLine(
+						lineIndex, hunk, line, first, digits,
+						graphics, font, lineIndex == _lineHover.Index,
+						lineIndex >= _selStart && lineIndex <= _selEnd,
+						alternate,
+						x, y, contentWidth, cellSize, paintEventArgs.ClipRectangle);
 				}
-				y += rect.Y + 1;
+				y += cellSize.Height;
+				++lineIndex;
+				first = false;
 			}
-			int maxLineNum = BlameFile.LineCount;
-			int digits = GetDecimalDigits(maxLineNum);
-			var font = GitterApplication.FontManager.ViewerFont.Font;
-			bool reachedEnd = false;
-			int lineIndex = 0;
-			bool alternate = false;
-			bool first;
-			foreach(var hunk in BlameFile)
-			{
-				first = true;
-				foreach(var line in hunk)
-				{
-					if(y >= clip.Bottom)
-					{
-						reachedEnd = true;
-						break;
-					}
-					if(y + CellSize.Height >= clip.Y)
-					{
-						PaintLine(
-							lineIndex, hunk, line, first, digits,
-							graphics, font, lineIndex == _lineHover.Index,
-							lineIndex >= _selStart && lineIndex <= _selEnd,
-							alternate,
-							x, y, contentWidth, paintEventArgs.ClipRectangle);
-					}
-					y += CellSize.Height;
-					++lineIndex;
-					first = false;
-				}
-				alternate = !alternate;
-				if(reachedEnd) break;
-			}
-			if(!reachedEnd && BlameFile.LineCount != 0)
-			{
-				graphics.DrawLine(Pens.Gray, x, y, rect.X + contentWidth - Margin - 1, y);
-			}
+			alternate = !alternate;
+			if(reachedEnd) break;
+		}
+		if(!reachedEnd && BlameFile.LineCount != 0)
+		{
+			graphics.DrawLine(Pens.Gray, x, y, rect.X + contentWidth - Margin - 1, y);
 		}
 	}
 }

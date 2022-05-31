@@ -18,19 +18,18 @@
  */
 #endregion
 
-namespace gitter.Framework.CLI
+namespace gitter.Framework.CLI;
+
+using System;
+
+public sealed class TextLineReceivedEventArgs : EventArgs
 {
-	using System;
-
-	public sealed class TextLineReceivedEventArgs : EventArgs
+	public TextLineReceivedEventArgs(string text)
 	{
-		public TextLineReceivedEventArgs(string text)
-		{
-			Text = text;
-		}
-
-		public string Text { get; }
-
-		public override string ToString() => Text;
+		Text = text;
 	}
+
+	public string Text { get; }
+
+	public override string ToString() => Text;
 }

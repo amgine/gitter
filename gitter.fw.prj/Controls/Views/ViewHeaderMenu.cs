@@ -18,27 +18,28 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+[DesignerCategory("")]
+sealed class ViewHeaderMenu : ContextMenuStrip
 {
-	using System;
-	using System.Windows.Forms;
+	private readonly ViewHost _host;
+	private readonly ViewBase _view;
 
-	using Resources = gitter.Framework.Properties.Resources;
-
-	sealed class ViewHeaderMenu : ContextMenuStrip
+	public ViewHeaderMenu(ViewHost viewHost, ViewBase view)
 	{
-		private readonly ViewHost _host;
-		private readonly ViewBase _view;
+		Verify.Argument.IsNotNull(viewHost);
+		Verify.Argument.IsNotNull(view);
 
-		public ViewHeaderMenu(ViewHost viewHost, ViewBase view)
-		{
-			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
-			Verify.Argument.IsNotNull(view, nameof(view));
+		_host = viewHost;
+		_view = view;
 
-			_host = viewHost;
-			_view = view;
-
-			Items.Add(new ToolStripMenuItem(Resources.StrClose, null, (s, e) => _view.Close()));
-		}
+		Items.Add(new ToolStripMenuItem(Resources.StrClose, null, (s, e) => _view.Close()));
 	}
 }

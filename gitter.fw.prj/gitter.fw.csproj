@@ -8,9 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="Controls\SearchToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -25,13 +22,18 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\icons\**" />
+    <EmbeddedResource Include="Resources\images\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NHunspell" Version="1.2.5554.16953" />
+    <PackageReference Include="Autofac" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\gitter.hunspell.prj\gitter.hunspell.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net48'))">
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>

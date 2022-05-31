@@ -18,15 +18,14 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+public enum CustomScrollBarPart : byte
 {
-	public enum CustomScrollBarPart : byte
-	{
-		None = 0,
-		DecreaseButton,
-		DecreaseTrackBar,
-		Thumb,
-		IncreaseTrackBar,
-		IncreaseButton,
-	}
+	None = 0,
+	DecreaseButton,
+	DecreaseTrackBar,
+	Thumb,
+	IncreaseTrackBar,
+	IncreaseButton,
 }

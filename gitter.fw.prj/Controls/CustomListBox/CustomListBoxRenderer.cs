@@ -18,33 +18,30 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+public abstract class CustomListBoxRenderer
 {
-	using System;
-	using System.Drawing;
+	public virtual Color BackColor => SystemColors.Window;
 
-	public abstract class CustomListBoxRenderer
-	{
-		public virtual Color BackColor => SystemColors.Window;
+	public virtual Color ForeColor => SystemColors.WindowText;
 
-		public virtual Color ForeColor => SystemColors.WindowText;
+	public virtual Color ColumnHeaderForeColor => SystemColors.GrayText;
 
-		public virtual Color ColumnHeaderForeColor => SystemColors.GrayText;
+	private Brush _foregroundBrush;
+	public Brush ForegroundBrush => _foregroundBrush ??= new SolidBrush(ForeColor);
 
-		private Brush _foregroundBrush;
-		public Brush ForegroundBrush
-			=> _foregroundBrush ??= new SolidBrush(ForeColor);
+	private Brush _columnHeaderForegroundBrush;
+	public Brush ColumnHeaderForegroundBrush => _columnHeaderForegroundBrush ??= new SolidBrush(ColumnHeaderForeColor);
 
-		private Brush _columnHeaderForegroundBrush;
-		public Brush ColumnHeaderForegroundBrush
-			=> _columnHeaderForegroundBrush ??= new SolidBrush(ColumnHeaderForeColor);
+	public abstract void OnPaintColumnBackground(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs);
 
-		public abstract void OnPaintColumnBackground(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs);
+	public abstract void OnPaintColumnContent(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs);
 
-		public abstract void OnPaintColumnContent(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs);
+	public abstract void OnPaintItemBackground(CustomListBoxItem item, ItemPaintEventArgs paintEventArgs);
 
-		public abstract void OnPaintItemBackground(CustomListBoxItem item, ItemPaintEventArgs paintEventArgs);
-
-		public abstract void OnPaintItemContent(CustomListBoxItem item, ItemPaintEventArgs paintEventArgs);
-	}
+	public abstract void OnPaintItemContent(CustomListBoxItem item, ItemPaintEventArgs paintEventArgs);
 }

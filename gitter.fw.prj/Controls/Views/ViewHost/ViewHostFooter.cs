@@ -18,45 +18,46 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+[DesignerCategory("")]
+public sealed class ViewHostFooter : Control
 {
-	using System;
-	using System.Windows.Forms;
-
-	public sealed class ViewHostFooter : Control
+	internal ViewHostFooter(ViewHost viewHost)
 	{
-		internal ViewHostFooter(ViewHost viewHost)
-		{
-			Verify.Argument.IsNotNull(viewHost, nameof(viewHost));
+		Verify.Argument.IsNotNull(viewHost);
 
-			ViewHost = viewHost;
-			SetStyle(
-				ControlStyles.ContainerControl |
-				ControlStyles.Selectable |
-				ControlStyles.SupportsTransparentBackColor,
-				false);
-			SetStyle(
-				ControlStyles.UserPaint |
-				ControlStyles.ResizeRedraw |
-				ControlStyles.AllPaintingInWmPaint |
-				ControlStyles.OptimizedDoubleBuffer,
-				true);
-		}
+		ViewHost = viewHost;
+		SetStyle(
+			ControlStyles.ContainerControl |
+			ControlStyles.Selectable |
+			ControlStyles.SupportsTransparentBackColor,
+			false);
+		SetStyle(
+			ControlStyles.UserPaint |
+			ControlStyles.ResizeRedraw |
+			ControlStyles.AllPaintingInWmPaint |
+			ControlStyles.OptimizedDoubleBuffer,
+			true);
+	}
 
-		public ViewHost ViewHost { get; }
+	public ViewHost ViewHost { get; }
 
-		/// <inheritdoc/>
-		protected override void OnPaintBackground(PaintEventArgs pevent) { }
+	/// <inheritdoc/>
+	protected override void OnPaintBackground(PaintEventArgs pevent) { }
 
-		/// <inheritdoc/>
-		protected override void OnPaint(PaintEventArgs e)
-			=> ViewManager.Renderer.RenderViewHostFooter(this, e);
+	/// <inheritdoc/>
+	protected override void OnPaint(PaintEventArgs e)
+		=> ViewManager.Renderer.RenderViewHostFooter(this, e);
 
-		/// <inheritdoc/>
-		protected override void OnMouseDown(MouseEventArgs e)
-		{
-			ViewHost.Activate();
-			base.OnMouseDown(e);
-		}
+	/// <inheritdoc/>
+	protected override void OnMouseDown(MouseEventArgs e)
+	{
+		ViewHost.Activate();
+		base.OnMouseDown(e);
 	}
 }

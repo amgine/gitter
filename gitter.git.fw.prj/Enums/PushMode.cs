@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Git.AccessLayer
+namespace gitter.Git.AccessLayer;
+
+/// <summary>Push mode.</summary>
+public enum PushMode
 {
-	/// <summary>Push mode.</summary>
-	public enum PushMode
-	{
-		/// <summary>Push only specified refspecs.</summary>
-		Default,
-		/// <summary>Push all local branches.</summary>
-		AllLocalBranches,
-		/// <summary>Push all refs.</summary>
-		Mirror,
-		/// <summary>Push all tags.</summary>
-		Tags,
-	}
+	/// <summary>Push only specified refspecs.</summary>
+	Default,
+	/// <summary>Push all local branches.</summary>
+	AllLocalBranches,
+	/// <summary>Push all refs.</summary>
+	Mirror,
+	/// <summary>Push all tags.</summary>
+	Tags,
 }

@@ -18,20 +18,19 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+using System.Drawing;
+
+public abstract class CustomCheckBoxRenderer
 {
-	using System;
-	using System.Drawing;
+	private static CustomCheckBoxRenderer _msvs2012Dark;
 
-	public abstract class CustomCheckBoxRenderer
-	{
-		private static CustomCheckBoxRenderer _msvs2012Dark;
+	public static CustomCheckBoxRenderer MSVS2012Dark
+		=> _msvs2012Dark ??= new MSVS2012CheckBoxRenderer(MSVS2012CheckBoxRenderer.DarkColors);
 
-		public static CustomCheckBoxRenderer MSVS2012Dark
-			=> _msvs2012Dark ??= new MSVS2012CheckBoxRenderer(MSVS2012CheckBoxRenderer.DarkColors);
+	public static CustomCheckBoxRenderer Default => MSVS2012Dark;
 
-		public static CustomCheckBoxRenderer Default => MSVS2012Dark;
-
-		public abstract void Render(Graphics graphics, Dpi dpi, Rectangle clipRectangle, CustomCheckBox checkBox);
-	}
+	public abstract void Render(Graphics graphics, Dpi dpi, Rectangle clipRectangle, CustomCheckBox checkBox);
 }

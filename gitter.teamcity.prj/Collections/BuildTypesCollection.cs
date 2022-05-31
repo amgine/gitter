@@ -18,47 +18,46 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+using System;
+using System.Xml;
+
+public sealed class BuildTypesCollection : NamedTeamCityObjectsCache<BuildType>
 {
-	using System;
-	using System.Xml;
-
-	public sealed class BuildTypesCollection : NamedTeamCityObjectsCache<BuildType>
+	internal BuildTypesCollection(TeamCityServiceContext context)
+		: base(context)
 	{
-		internal BuildTypesCollection(TeamCityServiceContext context)
-			: base(context)
+	}
+
+	protected override BuildType Create(string id, string name)
+		=> new BuildType(Context, id, name);
+
+	protected override BuildType Create(string id)
+		=> new BuildType(Context, id);
+
+	protected override BuildType Create(XmlNode node)
+		=> new BuildType(Context, node);
+
+	public void UpdateCache()
+	{
+		var xml = Context.GetXml("buildTypes");
+		foreach(XmlElement node in xml["buildTypes"])
 		{
+			Lookup(node);
 		}
+	}
 
-		protected override BuildType Create(string id, string name)
-			=> new BuildType(Context, id, name);
+	public void UpdateCache(ProjectLocator projectLocator)
+	{
+		Verify.Argument.IsNotNull(projectLocator);
+		var pl = projectLocator.ToString();
+		Verify.Argument.IsNeitherNullNorWhitespace(pl, "projectLocator");
 
-		protected override BuildType Create(string id)
-			=> new BuildType(Context, id);
-
-		protected override BuildType Create(XmlNode node)
-			=> new BuildType(Context, node);
-
-		public void UpdateCache()
+		var xml = Context.GetXml("projects/" + pl + "/buildTypes");
+		foreach(XmlElement node in xml["buildTypes"])
 		{
-			var xml = Context.GetXml("buildTypes");
-			foreach(XmlElement node in xml["buildTypes"])
-			{
-				Lookup(node);
-			}
-		}
-
-		public void UpdateCache(ProjectLocator projectLocator)
-		{
-			Verify.Argument.IsNotNull(projectLocator, nameof(projectLocator));
-			var pl = projectLocator.ToString();
-			Verify.Argument.IsNeitherNullNorWhitespace(pl, "projectLocator");
-
-			var xml = Context.GetXml("projects/" + pl + "/buildTypes");
-			foreach(XmlElement node in xml["buildTypes"])
-			{
-				Lookup(node);
-			}
+			Lookup(node);
 		}
 	}
 }

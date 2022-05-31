@@ -18,38 +18,38 @@
  */
 #endregion
 
-namespace gitter.TeamCity.Gui
+namespace gitter.TeamCity.Gui;
+
+using System;
+using System.Globalization;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.TeamCity.Properties.Resources;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+sealed class TeamCityMenu : ContextMenuStrip
 {
-	using System;
-	using System.Globalization;
-	using System.ComponentModel;
-	using System.Windows.Forms;
+	private readonly IWorkingEnvironment _workingEnvironment;
+	private readonly TeamCityGuiProvider _guiProvider;
 
-	using gitter.Framework;
-
-	using Resources = gitter.TeamCity.Properties.Resources;
-
-	[ToolboxItem(false)]
-	sealed class TeamCityMenu : ContextMenuStrip
+	public TeamCityMenu(IWorkingEnvironment environment, TeamCityGuiProvider guiProvider)
 	{
-		private readonly IWorkingEnvironment _workingEnvironment;
-		private readonly TeamCityGuiProvider _guiProvider;
+		Verify.Argument.IsNotNull(environment);
+		Verify.Argument.IsNotNull(guiProvider);
 
-		public TeamCityMenu(IWorkingEnvironment environment, TeamCityGuiProvider guiProvider)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
-			Verify.Argument.IsNotNull(guiProvider, nameof(guiProvider));
+		_workingEnvironment = environment;
+		_guiProvider = guiProvider;
 
-			_workingEnvironment = environment;
-			_guiProvider = guiProvider;
+		Items.Add(new ToolStripMenuItem("Setup...", null, OnSetupClick));
+	}
 
-			Items.Add(new ToolStripMenuItem("Setup...", null, OnSetupClick));
-		}
-
-		private void OnSetupClick(object sender, EventArgs e)
-		{
-			using var dlg = new ProviderSetupControl(_guiProvider.Repository);
-			dlg.Run(GitterApplication.MainForm);
-		}
+	private void OnSetupClick(object sender, EventArgs e)
+	{
+		using var dlg = new ProviderSetupControl(_guiProvider.Repository);
+		dlg.Run(GitterApplication.MainForm);
 	}
 }

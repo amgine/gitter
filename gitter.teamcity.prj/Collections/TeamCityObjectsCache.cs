@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,30 +18,29 @@
  */
 #endregion
 
-namespace gitter.TeamCity
+namespace gitter.TeamCity;
+
+public abstract class TeamCityObjectsCache<T> : TeamCityObjectsCacheBase<T>
+	where T : TeamCityObject
 {
-	public abstract class TeamCityObjectsCache<T> : TeamCityObjectsCacheBase<T>
-		where T : TeamCityObject
+	internal TeamCityObjectsCache(TeamCityServiceContext context)
+		: base(context)
 	{
-		internal TeamCityObjectsCache(TeamCityServiceContext context)
-			: base(context)
-		{
-		}
+	}
 
-		protected abstract T Create(string id);
+	protected abstract T Create(string id);
 
-		internal T Lookup(string id)
+	internal T Lookup(string id)
+	{
+		T obj;
+		lock(SyncRoot)
 		{
-			T obj;
-			lock(SyncRoot)
+			if(!Cache.TryGetValue(id, out obj))
 			{
-				if(!Cache.TryGetValue(id, out obj))
-				{
-					obj = Create(id);
-					Cache.Add(id, obj);
-				}
+				obj = Create(id);
+				Cache.Add(id, obj);
 			}
-			return obj;
 		}
+		return obj;
 	}
 }

@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,29 +18,28 @@
  */
 #endregion
 
-namespace gitter.Git
+namespace gitter.Git;
+
+using System;
+
+public struct DiffColumnHeader
 {
-	using System;
-
-	public struct DiffColumnHeader
+	public DiffColumnHeader(DiffColumnAction action, int startLine, int lineCount)
 	{
-		public DiffColumnHeader(DiffColumnAction action, int startLine, int lineCount)
-		{
-			Action    = action;
-			StartLine = startLine;
-			LineCount = lineCount;
-		}
+		Action    = action;
+		StartLine = startLine;
+		LineCount = lineCount;
+	}
 
-		public DiffColumnAction Action { get; }
+	public DiffColumnAction Action { get; }
 
-		public int StartLine { get; }
+	public int StartLine { get; }
 
-		public int LineCount { get; }
+	public int LineCount { get; }
 
-		public override string ToString()
-		{
-			return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-				"{0}{1},{2}", Action == DiffColumnAction.Add ? '+' : '-', StartLine, LineCount);
-		}
+	public override string ToString()
+	{
+		return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+			"{0}{1},{2}", Action == DiffColumnAction.Add ? '+' : '-', StartLine, LineCount);
 	}
 }

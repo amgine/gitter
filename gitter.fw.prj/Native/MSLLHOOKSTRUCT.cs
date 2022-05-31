@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Native
-{
-	using System;
-	using System.Runtime.InteropServices;
+namespace gitter.Native;
 
-	[StructLayout(LayoutKind.Sequential)]
-	public struct MSLLHOOKSTRUCT
-	{
-		public POINT  pt;
-		public int    mouseData;
-		public int    flags;
-		public int    time;
-		public IntPtr dwExtraInfo;
-	}
+using System;
+using System.Runtime.InteropServices;
+
+[StructLayout(LayoutKind.Sequential)]
+public struct MSLLHOOKSTRUCT
+{
+	public POINT  pt;
+	public int    mouseData;
+	public int    flags;
+	public int    time;
+	public IntPtr dwExtraInfo;
 }

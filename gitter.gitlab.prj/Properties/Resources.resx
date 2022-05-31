@@ -162,61 +162,6 @@
   <data name="ErrUnableToAuthorize" xml:space="preserve">
     <value>Unable to authorize with the specified API key</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ImgGitLab" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\GitLab16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgGitLab32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\GitLab32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgIssues" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\report.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgPipelines" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\node.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRefresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\refresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearchClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-close.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearchNext" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-next.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSearchPrevious" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\search-prevous.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusCanceled" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cross-circle-frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusCreated" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\plus-circle-frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusFailed" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\exclamation-red-frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusManual" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gear.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusPending" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\navigation-000-frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusPreparing" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\hourglass.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusRunning" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\arrow-transition.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusScheduled" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\calendar-blue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusSkipped" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cross-white.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStatusSuccess" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\tick-circle-frame.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrAdd" xml:space="preserve">
     <value>Add</value>
   </data>
@@ -235,6 +180,9 @@
   <data name="StrAuthor" xml:space="preserve">
     <value>Author</value>
   </data>
+  <data name="StrBranches" xml:space="preserve">
+    <value>Branches</value>
+  </data>
   <data name="StrClose" xml:space="preserve">
     <value>Close</value>
   </data>
@@ -244,11 +192,29 @@
   <data name="StrClosedBy" xml:space="preserve">
     <value>Closed By</value>
   </data>
+  <data name="StrCollapseAll" xml:space="preserve">
+    <value>Collapse All</value>
+  </data>
   <data name="StrCreatedAt" xml:space="preserve">
     <value>Created</value>
   </data>
+  <data name="StrDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="StrErrors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="StrExpandAll" xml:space="preserve">
+    <value>Expand All</value>
+  </data>
+  <data name="StrFailedTests" xml:space="preserve">
+    <value>Failed Tests</value>
+  </data>
   <data name="StrFind" xml:space="preserve">
     <value>Find</value>
+  </data>
+  <data name="StrFinished" xml:space="preserve">
+    <value>Finished</value>
   </data>
   <data name="StrGitLab" xml:space="preserve">
     <value>GitLab</value>
@@ -319,22 +285,43 @@
   <data name="StrsFailedToFetchPipelines" xml:space="preserve">
     <value>Failed to fetch pipelines</value>
   </data>
+  <data name="StrsFailedToFetchTestReport" xml:space="preserve">
+    <value>Failed to fetch test report</value>
+  </data>
+  <data name="StrSkippedTests" xml:space="preserve">
+    <value>Skipped Tests</value>
+  </data>
   <data name="StrsNoIssuesToDisplay" xml:space="preserve">
     <value>No issues to display</value>
   </data>
   <data name="StrsNoPipelinesToDisplay" xml:space="preserve">
     <value>No pipelines to display</value>
   </data>
+  <data name="StrsNoTestsToDisplay" xml:space="preserve">
+    <value>No tests to display</value>
+  </data>
   <data name="StrStatus" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="StrSuccessTests" xml:space="preserve">
+    <value>Passed Tests</value>
+  </data>
   <data name="StrsViewCommitOnGitLab" xml:space="preserve">
     <value>View commit on GitLab</value>
+  </data>
+  <data name="StrTags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="StrTests" xml:space="preserve">
+    <value>Tests</value>
   </data>
   <data name="StrTitle" xml:space="preserve">
     <value>Title</value>
   </data>
   <data name="StrUpdatedAt" xml:space="preserve">
     <value>Updated</value>
+  </data>
+  <data name="StrViewTestReport" xml:space="preserve">
+    <value>View Test Report</value>
   </data>
 </root>

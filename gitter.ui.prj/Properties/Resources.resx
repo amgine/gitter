@@ -135,10 +135,6 @@
   <data name="StrType" xml:space="preserve">
     <value>Type</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ImgRepositories" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repositories.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrOptions" xml:space="preserve">
     <value>Options</value>
   </data>
@@ -148,15 +144,6 @@
   <data name="StrDescription" xml:space="preserve">
     <value>Description</value>
   </data>
-  <data name="ImgRepository" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRepositoryAdd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRepositoryRemove" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-remove.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrAddRepository" xml:space="preserve">
     <value>Add Repository</value>
   </data>
@@ -165,9 +152,6 @@
   </data>
   <data name="StrPath" xml:space="preserve">
     <value>Path</value>
-  </data>
-  <data name="ImgRepositoryOpen" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-go1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrAbout" xml:space="preserve">
     <value>About</value>
@@ -223,38 +207,11 @@
   <data name="ErrPathCannotBeEmpty" xml:space="preserve">
     <value>Path cannot be empty</value>
   </data>
-  <data name="ImgRepositoryExplorer" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-explorer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStartPage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\application--arrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrStartPage" xml:space="preserve">
     <value>Start Page</value>
   </data>
   <data name="StrOpenInWindowsExplorer" xml:space="preserve">
     <value>Open in Windows Explorer</value>
-  </data>
-  <data name="ImgRepositoryLarge" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\database.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStartPageLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\start-page-logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStartPageLogoGradient" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\start-page-logo-gradient.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRepoAddMedium" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repo-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRepoCloneMedium" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repo-clone.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRepoInitMedium" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repo-init.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRepoScanMedium" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repo-scan.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrOpenCommandLine" xml:space="preserve">
     <value>Open Command Line</value>
@@ -277,12 +234,6 @@
   <data name="StrsCheckingForUpdates" xml:space="preserve">
     <value>Checking for updates</value>
   </data>
-  <data name="ImgStartPageLogoDark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\start-page-logo-dark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgStartPageLogoGradientDark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\start-page-logo-gradient-dark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrLoadingRepository" xml:space="preserve">
     <value>Loading Repository</value>
   </data>
@@ -304,12 +255,6 @@
   <data name="StrInit" xml:space="preserve">
     <value>Init</value>
   </data>
-  <data name="ImgRepositoryCloneSmall" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-clone.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgRepositoryInitSmall" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\repository-init.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StrStandard" xml:space="preserve">
     <value>Standard</value>
   </data>
@@ -324,15 +269,6 @@
   </data>
   <data name="StrsShowPageOnStartup" xml:space="preserve">
     <value>Show page on startup</value>
-  </data>
-  <data name="ImgRepositoryUnavailableLarge" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\database-ghost.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgSln" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\sln.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ImgVSCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vscode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StrOpenInVSCode" xml:space="preserve">
     <value>Open in Visual Studio Code</value>

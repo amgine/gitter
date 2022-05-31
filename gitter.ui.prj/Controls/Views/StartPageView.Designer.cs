@@ -42,10 +42,10 @@
 			this._separator2 = new System.Windows.Forms.Panel();
 			this._lstRecentRepositories = new gitter.RecentRepositoriesListBox();
 			this._lstLocalRepositories = new gitter.LocalRepositoriesListBox();
-			this._btnAddLocalRepo = new gitter.Controls.LinkButton();
-			this._btnScanLocalRepo = new gitter.Controls.LinkButton();
-			this._btnInitLocalRepo = new gitter.Controls.LinkButton();
-			this._btnCloneRemoteRepo = new gitter.Controls.LinkButton();
+			this._btnAddLocalRepo = new gitter.Framework.Controls.LinkButton();
+			this._btnScanLocalRepo = new gitter.Framework.Controls.LinkButton();
+			this._btnInitLocalRepo = new gitter.Framework.Controls.LinkButton();
+			this._btnCloneRemoteRepo = new gitter.Framework.Controls.LinkButton();
 			this._txtFilter = new gitter.Framework.Controls.HintTextBox();
 			label2 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this._picLogo)).BeginInit();
@@ -141,7 +141,6 @@
 			// 
 			// _btnAddLocalRepo
 			// 
-			this._btnAddLocalRepo.Image = global::gitter.Properties.Resources.ImgRepoAddMedium;
 			this._btnAddLocalRepo.Location = new System.Drawing.Point(20, 121);
 			this._btnAddLocalRepo.Margin = new System.Windows.Forms.Padding(1);
 			this._btnAddLocalRepo.Name = "_btnAddLocalRepo";
@@ -152,7 +151,6 @@
 			// 
 			// _btnScanLocalRepo
 			// 
-			this._btnScanLocalRepo.Image = global::gitter.Properties.Resources.ImgRepoScanMedium;
 			this._btnScanLocalRepo.Location = new System.Drawing.Point(20, 93);
 			this._btnScanLocalRepo.Margin = new System.Windows.Forms.Padding(1);
 			this._btnScanLocalRepo.Name = "_btnScanLocalRepo";
@@ -164,7 +162,6 @@
 			// 
 			// _btnInitLocalRepo
 			// 
-			this._btnInitLocalRepo.Image = global::gitter.Properties.Resources.ImgRepoInitMedium;
 			this._btnInitLocalRepo.Location = new System.Drawing.Point(20, 151);
 			this._btnInitLocalRepo.Margin = new System.Windows.Forms.Padding(1);
 			this._btnInitLocalRepo.Name = "_btnInitLocalRepo";
@@ -175,7 +172,6 @@
 			// 
 			// _btnCloneRemoteRepo
 			// 
-			this._btnCloneRemoteRepo.Image = global::gitter.Properties.Resources.ImgRepoCloneMedium;
 			this._btnCloneRemoteRepo.Location = new System.Drawing.Point(20, 181);
 			this._btnCloneRemoteRepo.Margin = new System.Windows.Forms.Padding(1);
 			this._btnCloneRemoteRepo.Name = "_btnCloneRemoteRepo";
@@ -224,10 +220,10 @@
 
 		private LocalRepositoriesListBox _lstLocalRepositories;
 		private RecentRepositoriesListBox _lstRecentRepositories;
-		private Controls.LinkButton _btnAddLocalRepo;
-		private Controls.LinkButton _btnScanLocalRepo;
-		private Controls.LinkButton _btnInitLocalRepo;
-		private Controls.LinkButton _btnCloneRemoteRepo;
+		private Framework.Controls.LinkButton _btnAddLocalRepo;
+		private Framework.Controls.LinkButton _btnScanLocalRepo;
+		private Framework.Controls.LinkButton _btnInitLocalRepo;
+		private Framework.Controls.LinkButton _btnCloneRemoteRepo;
 		private System.Windows.Forms.Panel _separator1;
 		private System.Windows.Forms.Panel _separator2;
 		private System.Windows.Forms.PictureBox _picLogo;

@@ -18,26 +18,27 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+[ToolboxItem(false)]
+public partial class ColorsPage : PropertyPage
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Text;
-	using System.Windows.Forms;
+	public static readonly new Guid Guid = new("AD2A7C07-6E10-4F0D-B471-F6DA58638660");
 
-	using Resources = gitter.Framework.Properties.Resources;
-
-	[ToolboxItem(false)]
-	public partial class ColorsPage : PropertyPage
+	public ColorsPage()
+		: base(Guid)
 	{
-		public static readonly new Guid Guid = new("AD2A7C07-6E10-4F0D-B471-F6DA58638660");
-
-		public ColorsPage()
-			: base(Guid)
-		{
-			InitializeComponent();
-		}
+		InitializeComponent();
 	}
+
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(448, 375));
 }

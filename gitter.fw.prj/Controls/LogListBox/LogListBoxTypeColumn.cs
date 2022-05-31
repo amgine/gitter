@@ -18,25 +18,24 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+sealed class LogListBoxTypeColumn : CustomListBoxColumn
 {
-	using Resources = gitter.Framework.Properties.Resources;
-
-	sealed class LogListBoxTypeColumn : CustomListBoxColumn
+	/// <summary>Initializes a new instance of the <see cref="LogListBoxTypeColumn"/> class.</summary>
+	public LogListBoxTypeColumn()
+		: base((int)LogListBoxColumnId.Type, Resources.StrType)
 	{
-		/// <summary>Initializes a new instance of the <see cref="LogListBoxTypeColumn"/> class.</summary>
-		public LogListBoxTypeColumn()
-			: base((int)LogListBoxColumnId.Type, Resources.StrType)
-		{
-			Width = 16 + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
-			SizeMode = ColumnSizeMode.Fixed;
-		}
-
-		protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
-		{
-		}
-
-		/// <inheritdoc/>
-		public override string IdentificationString => "Type";
+		Width = new(16 + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage, Dpi.Default);
+		SizeMode = ColumnSizeMode.Fixed;
 	}
+
+	protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
+	{
+	}
+
+	/// <inheritdoc/>
+	public override string IdentificationString => "Type";
 }

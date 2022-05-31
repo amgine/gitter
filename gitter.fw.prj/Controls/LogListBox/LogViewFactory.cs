@@ -18,27 +18,26 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+using System;
+
+using gitter.Framework;
+
+using Resources = gitter.Framework.Properties.Resources;
+
+public sealed class LogViewFactory : ViewFactoryBase
 {
-	using System;
+	public static readonly new Guid Guid = new("216F243F-0E79-4739-A88F-C2342E5975B6");
 
-	using gitter.Framework;
-
-	using Resources = gitter.Framework.Properties.Resources;
-
-	public sealed class LogViewFactory : ViewFactoryBase
+	/// <summary>Initializes a new instance of the <see cref="LogViewFactory"/> class.</summary>
+	public LogViewFactory()
+		: base(Guid, Resources.StrLog, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"log.view"), singleton: true)
 	{
-		public static readonly new Guid Guid = new("216F243F-0E79-4739-A88F-C2342E5975B6");
-
-		/// <summary>Initializes a new instance of the <see cref="LogViewFactory"/> class.</summary>
-		public LogViewFactory()
-			: base(Guid, Resources.StrLog, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"log.view"), singleton: true)
-		{
-			DefaultViewPosition = ViewPosition.Float;
-		}
-
-		/// <inheritdoc/>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-			=> new LogView(environment);
+		DefaultViewPosition = ViewPosition.Float;
 	}
+
+	/// <inheritdoc/>
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+		=> new LogView(environment);
 }

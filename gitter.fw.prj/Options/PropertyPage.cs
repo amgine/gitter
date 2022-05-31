@@ -18,25 +18,25 @@
  */
 #endregion
 
-namespace gitter.Framework.Options
+namespace gitter.Framework.Options;
+
+using System;
+using System.ComponentModel;
+
+using gitter.Framework.Options;
+
+[ToolboxItem(false)]
+[DesignerCategory("")]
+public abstract partial class PropertyPage : DialogBase
 {
-	using System;
-	using System.ComponentModel;
-
-	using gitter.Framework.Options;
-
-	[ToolboxItem(false)]
-	public partial class PropertyPage : DialogBase
+	public PropertyPage()
 	{
-		public PropertyPage()
-		{
-		}
-
-		public PropertyPage(Guid guid)
-		{
-			Guid = guid;
-		}
-
-		public Guid Guid { get; }
 	}
+
+	public PropertyPage(Guid guid)
+	{
+		Guid = guid;
+	}
+
+	public Guid Guid { get; }
 }

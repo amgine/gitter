@@ -18,40 +18,44 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Windows.Forms;
+
+using gitter.Framework;
+
+using Resources = gitter.Properties.Resources;
+
+[System.ComponentModel.DesignerCategory("")]
+class RepositoryMenu : ContextMenuStrip
 {
-	using System;
-	using System.Windows.Forms;
-
-	using Resources = gitter.Properties.Resources;
-
-	[System.ComponentModel.DesignerCategory("")]
-	class RepositoryMenu : ContextMenuStrip
+	public RepositoryMenu(RepositoryListItem repository)
 	{
-		public RepositoryMenu(RepositoryListItem repository)
+		Verify.Argument.IsNotNull(repository);
+
+		Repository = repository;
+
+		var dpiBindings = new DpiBindings(this);
+		var factory     = new GuiItemFactory(dpiBindings);
+
+		Items.Add(new ToolStripMenuItem(Resources.StrOpen, null, (_, _) => Repository.Activate()));
+		Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.DataContext.Path));
+		Items.Add(factory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, Repository.DataContext.Path));
+
+		var actions = factory.GetRepositoryActions(repository.DataContext.Path);
+		if(actions.Count != 0)
 		{
-			Verify.Argument.IsNotNull(repository, nameof(repository));
-
-			Repository = repository;
-
-			Items.Add(new ToolStripMenuItem(Resources.StrOpen, null, (s, e) => Repository.Activate()));
-			Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.DataContext.Path));
-			Items.Add(GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, Repository.DataContext.Path));
-
-			var actions = GuiItemFactory.GetRepositoryActions(repository.DataContext.Path);
-			if(actions.Count != 0)
-			{
-				Items.Add(new ToolStripSeparator());
-				foreach(var item in actions)
-				{
-					Items.Add(item);
-				}
-			}
-
 			Items.Add(new ToolStripSeparator());
-			Items.Add(GuiItemFactory.GetRemoveRepositoryItem<ToolStripMenuItem>(Repository));
+			foreach(var item in actions)
+			{
+				Items.Add(item);
+			}
 		}
 
-		public RepositoryListItem Repository { get; }
+		Items.Add(new ToolStripSeparator());
+		Items.Add(factory.GetRemoveRepositoryItem<ToolStripMenuItem>(Repository));
 	}
+
+	public RepositoryListItem Repository { get; }
 }

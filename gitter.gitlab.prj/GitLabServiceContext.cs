@@ -18,57 +18,79 @@
  */
 #endregion
 
-namespace gitter.GitLab
+namespace gitter.GitLab;
+
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
+using gitter.GitLab.Api;
+
+class GitLabServiceContext
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-	using System.Net.Http;
-	using System.Threading.Tasks;
+	private readonly ApiEndpoint _api;
 
-	using gitter.GitLab.Api;
-
-	class GitLabServiceContext
+	public GitLabServiceContext(HttpMessageInvoker httpMessageInvoker, Uri serviceUri, string apiKey)
 	{
-		private readonly Api.ApiEndpoint _api;
+		Verify.Argument.IsNotNull(httpMessageInvoker);
+		Verify.Argument.IsNotNull(serviceUri);
+		Verify.Argument.IsNeitherNullNorWhitespace(apiKey);
 
-		public GitLabServiceContext(Uri serviceUri, string apiKey)
-		{
-			Verify.Argument.IsNotNull(serviceUri, nameof(serviceUri));
-			Verify.Argument.IsNeitherNullNorWhitespace(apiKey, nameof(apiKey));
+		ServiceUri = serviceUri;
 
-			ServiceUri = serviceUri;
-			ApiKey     = apiKey;
-
-			_api = new Api.ApiEndpoint(serviceUri, apiKey);
-		}
-
-		public Task<Api.GitLabVersion> GetVersionAsync()
-			=> _api.GetVersionAsync();
-
-		public Task<IReadOnlyList<Api.Pipeline>> GetPipelinesAsync(string sha = default)
-			=> _api.GetPipelinesAsync(DefaultProjectId, sha);
-
-		public Task<IReadOnlyList<Api.Issue>> GetIssuesAsync(IssueState state = IssueState.All)
-			=> _api.GetProjectIssuesAsync(DefaultProjectId, state);
-
-		public Task<IReadOnlyList<Api.Project>> GetProjectsAsync()
-			=> _api.GetProjectsAsync();
-
-		public string FormatProjectUrl()
-			=> ServiceUri + $@"{DefaultProjectId}";
-
-		public string FormatCommitUrl(string sha)
-			=> ServiceUri + $@"{DefaultProjectId}/-/commit/{sha}";
-
-		public string FormatIssueUrl(int id)
-			=> ServiceUri + $@"{DefaultProjectId}/-/issues/{id}";
-
-		public Uri ServiceUri { get; }
-
-		private string ApiKey { get; }
-
-		public string DefaultProjectId { get; set; }
+		_api = new Api.ApiEndpoint(httpMessageInvoker, serviceUri, apiKey);
 	}
+
+	public Task<GitLabVersion> GetVersionAsync()
+		=> _api.GetVersionAsync();
+
+	public Task<IReadOnlyList<Pipeline>> GetPipelinesAsync(
+		string          sha           = default,
+		string          reference     = default,
+		PipelineScope?  scope         = default,
+		PipelineStatus? status        = default,
+		PipelineSource? source        = default,
+		string          username      = default,
+		DateTimeOffset? updatedBefore = default,
+		DateTimeOffset? updatedAfter  = default,
+		PipelineOrder?  orderBy       = default,
+		SortOrder?      sort          = default,
+		CancellationToken cancellationToken = default)
+		=> _api.GetPipelinesAsync(
+			DefaultProjectId,
+			sha, reference, scope, status, source, username, updatedBefore, updatedAfter, orderBy, sort,
+			cancellationToken: cancellationToken);
+
+	public Task DeletePipelineAsync(long pipelineId)
+		=> _api.DeletePipelineAsync(DefaultProjectId, pipelineId);
+
+	public Task<TestReport> GetTestReportAsync(long pipelineId, CancellationToken cancellationToken = default)
+		=> _api.GetTestReportAsync(DefaultProjectId, pipelineId, cancellationToken);
+
+	public Task<TestReportSummary> GetTestReportSummaryAsync(long pipelineId, CancellationToken cancellationToken = default)
+		=> _api.GetTestReportSummaryAsync(DefaultProjectId, pipelineId, cancellationToken);
+
+	public Task<IReadOnlyList<Issue>> GetIssuesAsync(
+		IssueState? state = default,
+		CancellationToken cancellationToken = default)
+		=> _api.GetProjectIssuesAsync(DefaultProjectId, state,
+			cancellationToken: cancellationToken);
+
+	public Task<IReadOnlyList<Project>> GetProjectsAsync()
+		=> _api.GetProjectsAsync();
+
+	public string FormatProjectUrl()
+		=> ServiceUri + $@"{DefaultProjectId}";
+
+	public string FormatCommitUrl(string sha)
+		=> ServiceUri + $@"{DefaultProjectId}/-/commit/{sha}";
+
+	public string FormatIssueUrl(int id)
+		=> ServiceUri + $@"{DefaultProjectId}/-/issues/{id}";
+
+	public Uri ServiceUri { get; }
+
+	public NameOrNumericId DefaultProjectId { get; set; }
 }

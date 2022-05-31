@@ -18,11 +18,10 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls
+namespace gitter.Framework.Controls;
+
+enum ColumnResizeSide
 {
-    enum ColumnResizeSide
-    {
-        Left,
-        Right
-    }
+    Left,
+    Right
 }

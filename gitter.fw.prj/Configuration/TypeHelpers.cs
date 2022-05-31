@@ -18,34 +18,41 @@
  */
 #endregion
 
-namespace gitter.Framework.Configuration
+namespace gitter.Framework.Configuration;
+
+using System;
+
+static class TypeHelpers
 {
-	using System;
-
-	static class TypeHelpers
+	public static Type GetType<T>(T value)
 	{
-		public static Type GetType<T>(T value)
-		{
-			if(value is not null) return value.GetType();
-			return typeof(T);
-		}
+		if(value is not null) return value.GetType();
+		return typeof(T);
+	}
 
-		public static Type GetType(Type type, object value)
-		{
-			if(value is not null) return value.GetType();
-			return type;
-		}
+	public static Type GetType(Type type, object value)
+	{
+		if(value is not null) return value.GetType();
+		return type;
+	}
 
-		public static T UnpackValue<T>(object value)
-		{
-			if(value is null) return default;
-			return (T)value;
-		}
+	public static T UnpackValue<T>(object value)
+		=> value is T typed ? typed : default;
 
-		public static object PackValue<T>(T value)
+	public static bool TryUnpackValue<T>(object value, out T unpacked)
+	{
+		if(value is T typed)
 		{
-			if(value is null) return null;
-			return value;
+			unpacked = typed;
+			return true;
 		}
+		unpacked = default;
+		return false;
+	}
+
+	public static object PackValue<T>(T value)
+	{
+		if(value is null) return null;
+		return value;
 	}
 }

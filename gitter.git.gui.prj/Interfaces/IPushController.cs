@@ -18,12 +18,11 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
-{
-	using gitter.Framework.Mvc;
+namespace gitter.Git.Gui.Interfaces;
 
-	interface IPushController : IViewController<IPushView>
-	{
-		bool TryPush();
-	}
+using gitter.Framework.Mvc;
+
+interface IPushController : IViewController<IPushView>
+{
+	bool TryPush();
 }

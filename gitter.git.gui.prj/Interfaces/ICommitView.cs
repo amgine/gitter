@@ -18,18 +18,17 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Interfaces
+namespace gitter.Git.Gui.Interfaces;
+
+using gitter.Framework.Mvc;
+
+interface ICommitView : IView
 {
-	using gitter.Framework.Mvc;
+	IUserInputSource<string> Message { get; }
 
-	interface ICommitView : IView
-	{
-		IUserInputSource<string> Message { get; }
+	IUserInputSource<bool> Amend { get; }
 
-		IUserInputSource<bool> Amend { get; }
+	IUserInputSource StagedItems { get; }
 
-		IUserInputSource StagedItems { get; }
-
-		IUserInputErrorNotifier ErrorNotifier { get; }
-	}
+	IUserInputErrorNotifier ErrorNotifier { get; }
 }

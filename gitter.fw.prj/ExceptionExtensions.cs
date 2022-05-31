@@ -18,46 +18,45 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+
+public static class ExceptionExtensions
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-
-	public static class ExceptionExtensions
+	public static bool IsCritical(this Exception exception)
 	{
-		public static bool IsCritical(this Exception exception)
-		{
-			Assert.IsNotNull(exception);
+		Assert.IsNotNull(exception);
 
-			return exception
-				is NullReferenceException
-				or StackOverflowException
-				or OutOfMemoryException
-				or ThreadAbortException
-				or IndexOutOfRangeException
-				or AccessViolationException;
-		}
+		return exception
+			is NullReferenceException
+			or StackOverflowException
+			or OutOfMemoryException
+			or ThreadAbortException
+			or IndexOutOfRangeException
+			or AccessViolationException;
+	}
 
-		public static IEnumerable<Exception> AsEnumerable(this Exception exception)
+	public static IEnumerable<Exception> AsEnumerable(this Exception exception)
+	{
+		while(exception is not null)
 		{
-			while(exception is not null)
+			yield return exception;
+			if(exception is AggregateException aggregate)
 			{
-				yield return exception;
-				if(exception is AggregateException aggregate)
+				foreach(var innerException in aggregate.InnerExceptions)
 				{
-					foreach(var innerException in aggregate.InnerExceptions)
+					foreach(var exc in innerException.AsEnumerable())
 					{
-						foreach(var exc in innerException.AsEnumerable())
-						{
-							yield return exc;
-						}
+						yield return exc;
 					}
 				}
-				else
-				{
-					exception = exception.InnerException;
-				}
+			}
+			else
+			{
+				exception = exception.InnerException;
 			}
 		}
 	}

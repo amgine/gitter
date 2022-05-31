@@ -105,7 +105,6 @@
 			// 
 			// _picWarning
 			// 
-			this._picWarning.Image = global::gitter.Git.Gui.Properties.Resources.ImgWarning48;
 			this._picWarning.Location = new System.Drawing.Point(3, 3);
 			this._picWarning.Name = "_picWarning";
 			this._picWarning.Size = new System.Drawing.Size(48, 48);

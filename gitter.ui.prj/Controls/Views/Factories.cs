@@ -18,66 +18,65 @@
  */
 #endregion
 
-namespace gitter
+namespace gitter;
+
+using System;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+using Resources = gitter.Properties.Resources;
+
+sealed class RepositoryExplorerViewFactory : ViewFactoryBase
 {
-	using System;
-
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	using Resources = gitter.Properties.Resources;
-
-	sealed class RepositoryExplorerViewFactory : ViewFactoryBase
+	public RepositoryExplorerViewFactory(IWorkingEnvironment environment)
+		: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, Icons.RepositoryExplorer, singleton: true)
 	{
-		public RepositoryExplorerViewFactory(IWorkingEnvironment environment)
-			: base(Guids.RepositoryExplorerView, Resources.StrRepositoryExplorer, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"repository.explorer"), singleton: true)
-		{
-			Verify.Argument.IsNotNull(environment, nameof(environment));
+		Verify.Argument.IsNotNull(environment);
 
-			RootItem = new RepositoryRootItem(environment, null);
-			DefaultViewPosition = ViewPosition.Left;
-		}
-
-		public RepositoryRootItem RootItem { get; }
-
-		public void AddItem(CustomListBoxItem item)
-		{
-			Verify.Argument.IsNotNull(item, nameof(item));
-
-			RootItem.Items.Add(item);
-		}
-
-		public void RemoveItem(CustomListBoxItem item)
-		{
-			RootItem.Items.Remove(item);
-		}
-
-		/// <inheritdoc/>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			var view = new RepositoryExplorerView(environment);
-			view.AddItem(RootItem);
-			return view;
-		}
+		RootItem = new RepositoryRootItem(environment, null);
+		DefaultViewPosition = ViewPosition.Left;
 	}
 
-	sealed class StartPageViewFactory : ViewFactoryBase
+	public RepositoryRootItem RootItem { get; }
+
+	public void AddItem(CustomListBoxItem item)
 	{
-		public StartPageViewFactory()
-			: base(Guids.StartPageView, Resources.StrStartPage, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"start.page"), singleton: true)
-		{
-			DefaultViewPosition = ViewPosition.RootDocumentHost;
-			ShowOnStartup = true;
-		}
+		Verify.Argument.IsNotNull(item);
 
-		/// <inheritdoc/>
-		protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		{
-			return new StartPageView(environment, this);
-		}
-
-		public bool CloseAfterRepositoryLoad { get; set; }
-
-		public bool ShowOnStartup { get; set; }
+		RootItem.Items.Add(item);
 	}
+
+	public void RemoveItem(CustomListBoxItem item)
+	{
+		RootItem.Items.Remove(item);
+	}
+
+	/// <inheritdoc/>
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+	{
+		var view = new RepositoryExplorerView(environment);
+		view.AddItem(RootItem);
+		return view;
+	}
+}
+
+sealed class StartPageViewFactory : ViewFactoryBase
+{
+	public StartPageViewFactory()
+		: base(Guids.StartPageView, Resources.StrStartPage, Icons.StartPage, singleton: true)
+	{
+		DefaultViewPosition = ViewPosition.RootDocumentHost;
+		ShowOnStartup = true;
+	}
+
+	/// <inheritdoc/>
+	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
+	{
+		return new StartPageView(environment, this);
+	}
+
+	public bool CloseAfterRepositoryLoad { get; set; }
+
+	public bool ShowOnStartup { get; set; }
 }
