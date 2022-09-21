@@ -70,7 +70,7 @@ public sealed class SelectableFontManager : IEnumerable<SelectableFont>
 	private void LoadStandardFonts()
 	{
 		_fonts.Add(IdFontUI, _uiFont = TryLoadFont(_section, IdFontUI, Resources.StrUIFont,
-			static () => new Font(@"Segoe UI", 9.0f, FontStyle.Regular, GraphicsUnit.Pixel)));
+			static () => new Font(@"Segoe UI", 9.0f, FontStyle.Regular, GraphicsUnit.Point)));
 		_fonts.Add(IdFontInput, _inputFont = TryLoadFont(_section, IdFontInput, Resources.StrInputFont,
 			static () => new Font(@"Consolas", 10.0f, FontStyle.Regular, GraphicsUnit.Point)));
 		_fonts.Add(IdFontViewer, _viewerFont = TryLoadFont(_section, IdFontViewer, Resources.StrViewerFont,
