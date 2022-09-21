@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -32,33 +34,26 @@ sealed class RefsState
 		return new RefsState(repository, referenceTypes);
 	}
 
-	public sealed class ReferenceState
+	public sealed record class ReferenceState(
+		ReferenceType ReferenceType,
+		string        FullName,
+		string        Name,
+		Hash          Hash)
 	{
-		public ReferenceState(ReferenceType referenceType, string fullName, string name, Hash hash)
-		{
-			ReferenceType = referenceType;
-			FullName      = fullName;
-			Name          = name;
-			Hash          = hash;
-		}
-
-		public ReferenceType ReferenceType { get; }
-
-		public string FullName { get; }
-
-		public string Name { get; }
-
-		public Hash Hash { get; }
+		public static ReferenceState FromReference(Reference reference) => new(
+			ReferenceType: reference.Type,
+			FullName:      reference.FullName,
+			Name:          reference.Name,
+			Hash:          reference.Pointer.Dereference().Hash);
 	}
 
-	private readonly Dictionary<string, ReferenceState> _states;
+	private readonly Dictionary<string, ReferenceState> _states = new();
 
 	public IEnumerable<ReferenceState> States => _states.Values;
 
-	public ReferenceState GetState(string fullName, ReferenceType type)
+	public ReferenceState? GetState(string fullName, ReferenceType type)
 	{
-		ReferenceState state;
-		if(_states.TryGetValue(fullName, out state))
+		if(_states.TryGetValue(fullName, out var state))
 		{
 			if(state.ReferenceType != type)
 			{
@@ -70,7 +65,7 @@ sealed class RefsState
 
 	private RefsState(Repository repository, ReferenceType referenceTypes)
 	{
-		_states = new Dictionary<string, ReferenceState>();
+		Assert.IsNotNull(repository);
 
 		if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
 		{
@@ -88,6 +83,8 @@ sealed class RefsState
 
 	private void CaptureHeads(Repository repository)
 	{
+		Assert.IsNotNull(repository);
+
 		lock(repository.Refs.Heads.SyncRoot)
 		{
 			foreach(var head in repository.Refs.Heads)
@@ -99,6 +96,8 @@ sealed class RefsState
 
 	private void CaptureRemotes(Repository repository)
 	{
+		Assert.IsNotNull(repository);
+
 		lock(repository.Refs.Remotes.SyncRoot)
 		{
 			foreach(var remoteHead in repository.Refs.Remotes)
@@ -110,6 +109,8 @@ sealed class RefsState
 
 	private void CaptureTags(Repository repository)
 	{
+		Assert.IsNotNull(repository);
+
 		lock(repository.Refs.Tags.SyncRoot)
 		{
 			foreach(var tag in repository.Refs.Tags)
@@ -121,8 +122,9 @@ sealed class RefsState
 
 	private void CaptureRefState(Reference reference)
 	{
-		var fullName = reference.FullName;
-		var refState = new ReferenceState(reference.Type, fullName, reference.Name, reference.Pointer.Dereference().Hash);
-		_states[fullName] = refState;
+		Assert.IsNotNull(reference);
+
+		var refState = ReferenceState.FromReference(reference);
+		_states[refState.FullName] = refState;
 	}
 }

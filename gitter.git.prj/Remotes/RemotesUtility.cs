@@ -70,7 +70,7 @@ static class RemotesUtility
 				repository.Refs.Refresh(affectedReferences);
 				var state2 = RefsState.Capture(repository, affectedReferences);
 				changes = RefsDiff.Calculate(state1, state2);
-				if(changes != null && changes.Length != 0)
+				if(changes is { Length: not 0 })
 				{
 					repository.OnUpdated();
 				}
@@ -92,7 +92,7 @@ static class RemotesUtility
 		if(pull)
 		{
 			var p = new PullParameters();
-			if(remote != null)
+			if(remote is not null)
 			{
 				p.Repository = remote.Name;
 			}
@@ -101,7 +101,7 @@ static class RemotesUtility
 		else
 		{
 			var p = new FetchParameters();
-			if(remote != null)
+			if(remote is not null)
 			{
 				p.Repository = remote.Name;
 			}
@@ -129,7 +129,7 @@ static class RemotesUtility
 		var state2 = RefsState.Capture(repository, affectedReferences);
 		var changes = RefsDiff.Calculate(state1, state2);
 		suppressedNotifications.Dispose();
-		if(changes != null && changes.Length != 0)
+		if(changes is { Length: not 0 })
 		{
 			repository.OnUpdated();
 		}
@@ -177,7 +177,7 @@ static class RemotesUtility
 		bool changed = false;
 		for(int i = 0; i < res.Count; ++i)
 		{
-			if(res[i].Type != PushResultType.UpToDate && res[i].Type != PushResultType.Rejected)
+			if(!(res[i].Type is PushResultType.UpToDate or PushResultType.Rejected))
 			{
 				changed = true;
 				break;

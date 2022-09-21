@@ -44,8 +44,7 @@ sealed class PipelinesListBinding : AsyncDataBinding<IReadOnlyList<Pipeline>>
 
 		ServiceContext   = serviceContext;
 		PipelinesListBox = pipelinesListBox;
-
-		Progress = pipelinesListBox.ProgressMonitor;
+		Progress         = pipelinesListBox.ProgressMonitor;
 	}
 
 	public GitLabServiceContext ServiceContext { get; }
@@ -71,7 +70,7 @@ sealed class PipelinesListBinding : AsyncDataBinding<IReadOnlyList<Pipeline>>
 		progress?.Report(new("Fetching pipelines..."));
 		PipelinesListBox.Cursor = Cursors.WaitCursor;
 
-		return ServiceContext.GetPipelinesAsync(scope: Scope);
+		return ServiceContext.GetPipelinesAsync(scope: Scope, cancellationToken: cancellationToken);
 	}
 
 	protected override void OnFetchCompleted(IReadOnlyList<Pipeline> issues)

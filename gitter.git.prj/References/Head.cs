@@ -18,10 +18,13 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 using gitter.Git.AccessLayer;
@@ -34,10 +37,10 @@ public sealed class Head : Reference
 	#region Events
 
 	/// <summary>Occurs when HEAD gets detached.</summary>
-	public event EventHandler Detached;
+	public event EventHandler? Detached;
 
 	/// <summary>Occurs when HEAD gets attached.</summary>
-	public event EventHandler Attached;
+	public event EventHandler? Attached;
 
 	/// <summary>Invokes <see cref="Detached"/> event.</summary>
 	private void OnDetached()
@@ -59,7 +62,7 @@ public sealed class Head : Reference
 
 	/// <summary>Initializes a new instance of the <see cref="Head"/> class.</summary>
 	/// <param name="repository">Host repository.</param>
-	/// <exception cref="T:System.ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
+	/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 	internal Head(Repository repository)
 		: base(repository, GitConstants.HEAD, GetHeadPointer(repository))
 	{
@@ -68,7 +71,7 @@ public sealed class Head : Reference
 	/// <summary>Initializes a new instance of the <see cref="Head"/> class.</summary>
 	/// <param name="repository">Host repository.</param>
 	/// <param name="pointer">Target of this reference.</param>
-	/// <exception cref="T:System.ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
+	/// <exception cref="ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
 	internal Head(Repository repository, IRevisionPointer pointer)
 		: base(repository, GitConstants.HEAD, pointer)
 	{
@@ -78,13 +81,15 @@ public sealed class Head : Reference
 
 	/// <summary>Gets the current branch.</summary>
 	/// <value>Current branch or <c>null</c> if HEAD is detached.</value>
-	public Branch CurrentBranch => Pointer as Branch;
+	public Branch? CurrentBranch => Pointer as Branch;
 
 	/// <summary>Returns object pointed by HEAD.</summary>
 	/// <param name="repository">Repository to get HEAD from.</param>
 	/// <returns>Object pointed by HEAD of the specified repository.</returns>
 	internal static IRevisionPointer GetHeadPointer(Repository repository)
 	{
+		Assert.IsNotNull(repository);
+
 		var head = repository.Accessor.QuerySymbolicReference.Invoke(
 			new QuerySymbolicReferenceParameters(GitConstants.HEAD));
 
@@ -121,6 +126,8 @@ public sealed class Head : Reference
 	/// <returns>Object pointed by HEAD of the specified repository.</returns>
 	internal static async Task<IRevisionPointer> GetHeadPointerAsync(Repository repository)
 	{
+		Assert.IsNotNull(repository);
+
 		var head = await repository.Accessor.QuerySymbolicReference
 			.InvokeAsync(new QuerySymbolicReferenceParameters(GitConstants.HEAD))
 			.ConfigureAwait(continueOnCapturedContext: false);
@@ -222,8 +229,10 @@ public sealed class Head : Reference
 		(Pointer as Reference)?.NotifyReflogRecordAdded();
 	}
 
-	private void OnBranchPositionChanged(object sender, RevisionChangedEventArgs e)
+	private void OnBranchPositionChanged(object? sender, RevisionChangedEventArgs e)
 	{
+		Assert.IsNotNull(e);
+
 		LeaveRevision(e.OldValue);
 		EnterRevision(e.NewValue);
 		InvokePositionChanged(e.OldValue, e.NewValue);
@@ -241,7 +250,7 @@ public sealed class Head : Reference
 	/// </exception>
 	public void Reset(IRevisionPointer pointer, ResetMode mode = ResetMode.Mixed)
 	{
-		Verify.Argument.IsValidRevisionPointer(pointer, Repository, nameof(pointer));
+		Verify.Argument.IsValidRevisionPointer(pointer, Repository);
 
 		var pos = Pointer.Dereference();
 		var rev = pointer.Dereference();
@@ -290,7 +299,7 @@ public sealed class Head : Reference
 	/// </exception>
 	public async Task ResetAsync(IRevisionPointer pointer, ResetMode mode = ResetMode.Mixed)
 	{
-		Verify.Argument.IsValidRevisionPointer(pointer, Repository, nameof(pointer));
+		Verify.Argument.IsValidRevisionPointer(pointer, Repository);
 
 		var pos = await Pointer
 			.DereferenceAsync()
@@ -348,7 +357,7 @@ public sealed class Head : Reference
 
 	public string FormatMergeMessage(IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 		Verify.State.IsFalse(IsEmpty,
 			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("format merge message"));
 
@@ -358,7 +367,7 @@ public sealed class Head : Reference
 
 	public string FormatMergeMessage(ICollection<IRevisionPointer> revisions)
 	{
-		Verify.Argument.IsValidRevisionPointerSequence(revisions, Repository, nameof(revisions));
+		Verify.Argument.IsValidRevisionPointerSequence(revisions, Repository);
 		Verify.Argument.IsTrue(revisions.Count != 0, nameof(revisions),
 			Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
 		Verify.State.IsFalse(IsEmpty,
@@ -373,36 +382,69 @@ public sealed class Head : Reference
 			new FormatMergeMessageParameters(names, Pointer.Pointer));
 	}
 
-	public Revision Merge(IRevisionPointer branch, bool noCommit, bool noFastForward, bool squash, string message)
+	private string SaveMessageForMerge(string message)
 	{
-		Verify.Argument.IsValidRevisionPointer(branch, Repository, nameof(branch));
-		Verify.State.IsFalse(IsEmpty,
-			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));
+		var fileName = Path.Combine(
+			Repository.GitDirectory,
+			GitConstants.CommitMessageFileName);
+		File.WriteAllText(fileName, message);
+		return fileName;
+	}
 
-		var oldRev = branch.Dereference();
+	private static void DeleteMessageAfterMerge(string fileName)
+	{
+		try
+		{
+			File.Delete(fileName);
+		}
+		catch(Exception exc) when(!exc.IsCritical())
+		{
+		}
+	}
+
+	private Revision MergeCore(IReadOnlyList<string> revisions,
+		bool    noCommit,
+		bool    noFastForward,
+		bool    squash,
+		string? message)
+	{
 		var currentBranch = CurrentBranch;
+
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.Checkout,
 			RepositoryNotifications.IndexUpdated,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.BranchChanged))
 		{
+			var fileName = message is not null
+				? SaveMessageForMerge(message)
+				: default;
+
+			MergeParameters parameters;
+
+			parameters = new MergeParameters()
+			{
+				Revisions       = revisions,
+				NoCommit        = noCommit,
+				NoFastForward   = noFastForward,
+				Squash          = squash,
+				MessageFileName = fileName,
+			};
+
 			try
 			{
-				Repository.Accessor.Merge.Invoke(
-					new MergeParameters(branch.FullName)
-					{
-						NoCommit = noCommit,
-						NoFastForward = noFastForward,
-						Squash = squash,
-						Message = message,
-					});
+				Repository.Accessor.Merge.Invoke(parameters);
 			}
 			catch(AutomaticMergeFailedException)
 			{
 				Repository.OnStateChanged();
 				Repository.Status.Refresh();
 				throw;
+			}
+
+			if(fileName is not null)
+			{
+				DeleteMessageAfterMerge(fileName);
 			}
 		}
 
@@ -415,7 +457,23 @@ public sealed class Head : Reference
 			Refresh();
 		}
 
-		var headRev = Revision;
+		return Revision;
+	}
+
+	public Revision Merge(IRevisionPointer branch,
+		bool    noCommit      = false,
+		bool    noFastForward = false,
+		bool    squash        = false,
+		string? message       = default)
+	{
+		Verify.Argument.IsValidRevisionPointer(branch, Repository);
+		Verify.State.IsFalse(IsEmpty,
+			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));
+
+		var oldRev = branch.Dereference();
+		
+		var headRev = MergeCore(new[] { branch.FullName }, noCommit, noFastForward, squash, message); ;
+
 		if(noCommit)
 		{
 			Repository.OnStateChanged();
@@ -432,20 +490,14 @@ public sealed class Head : Reference
 		return headRev;
 	}
 
-	public Revision Merge(IRevisionPointer branch, bool noCommit, bool noFastForward, bool squash)
+	public Revision Merge(ICollection<IRevisionPointer> branches,
+		bool    noCommit      = false,
+		bool    noFastForward = false,
+		bool    squash        = false,
+		string? message       = default)
 	{
-		return Merge(branch, noCommit, noFastForward, squash, null);
-	}
-
-	public Revision Merge(IRevisionPointer branch)
-	{
-		return Merge(branch, false, false, false, null);
-	}
-
-	public Revision Merge(ICollection<IRevisionPointer> branches, bool noCommit, bool noFastForward, bool squash, string message)
-	{
-		Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, nameof(branches));
-		Verify.Argument.IsTrue(branches.Count != 0, nameof(branches),
+		Verify.Argument.IsValidRevisionPointerSequence(branches, Repository);
+		Verify.Argument.IsTrue(branches.Count > 0, nameof(branches),
 			Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 		Verify.State.IsFalse(IsEmpty,
 			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("merge"));
@@ -465,42 +517,8 @@ public sealed class Head : Reference
 			branchNames.Add(branch.FullName);
 		}
 
-		var currentBranch = CurrentBranch;
-		using(Repository.Monitor.BlockNotifications(
-			RepositoryNotifications.Checkout,
-			RepositoryNotifications.WorktreeUpdated,
-			RepositoryNotifications.IndexUpdated,
-			RepositoryNotifications.BranchChanged))
-		{
-			try
-			{
-				Repository.Accessor.Merge.Invoke(
-					new MergeParameters(branchNames)
-					{
-						NoCommit = noCommit,
-						NoFastForward = noFastForward,
-						Squash = squash,
-						Message = message,
-					});
-			}
-			catch(AutomaticMergeFailedException)
-			{
-				Repository.OnStateChanged();
-				Repository.Status.Refresh();
-				throw;
-			}
-		}
+		var headRev = MergeCore(branchNames, noCommit, noFastForward, squash, message);
 
-		if(currentBranch is not null)
-		{
-			currentBranch.Refresh();
-		}
-		else
-		{
-			Refresh();
-		}
-
-		var headRev = Revision;
 		if(noCommit)
 		{
 			Repository.OnStateChanged();
@@ -515,16 +533,6 @@ public sealed class Head : Reference
 		}
 		NotifyReflogRecordAdded();
 		return headRev;
-	}
-
-	public Revision Merge(ICollection<IRevisionPointer> branches, bool noCommit, bool noFastForward, bool squash)
-	{
-		return Merge(branches, noCommit, noFastForward, squash, null);
-	}
-
-	public Revision Merge(ICollection<IRevisionPointer> branches)
-	{
-		return Merge(branches, false, false, false, null);
 	}
 
 	#endregion

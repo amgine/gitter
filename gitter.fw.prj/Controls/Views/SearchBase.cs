@@ -24,13 +24,31 @@ using System;
 
 public abstract class SearchBase
 {
+	/// <summary>Tests if <paramref name="value"/> satisfies the specified <paramref name="search"/> options.</summary>
+	/// <param name="value">String to test.</param>
+	/// <param name="search">Search options.</param>
+	/// <returns>
+	/// <c>true</c>, if <paramref name="value"/> satisfies <paramref name="search"/>;<br/>
+	/// <c>false</c> otherwise.
+	/// </returns>
 	protected static bool TestString(string value, SearchOptions search)
 	{
+		Assert.IsNotNull(search);
+
 		if(string.IsNullOrEmpty(search.Text)) return true;
 		if(string.IsNullOrEmpty(value)) return false;
 
+		const StringComparison CaseSensitive   = StringComparison.Ordinal;
+		const StringComparison CaseInsensitive = StringComparison.OrdinalIgnoreCase;
+
+#if NETCOREAPP
+		return value.Contains(search.Text, search.MatchCase
+			? CaseSensitive
+			: CaseInsensitive);
+#else
 		return value.IndexOf(search.Text, 0, search.MatchCase
-			? StringComparison.Ordinal
-			: StringComparison.OrdinalIgnoreCase) != -1;
+			? CaseSensitive
+			: CaseInsensitive) != -1;
+#endif
 	}
 }

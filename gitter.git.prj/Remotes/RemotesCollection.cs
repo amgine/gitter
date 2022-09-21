@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -37,11 +39,11 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 {
 	#region Events
 
-	protected override RemoteEventArgs CreateEventArgs(Remote item)
-		=> new RemoteEventArgs(item);
+	/// <inheritdoc/>
+	protected override RemoteEventArgs CreateEventArgs(Remote item) => new(item);
 
 	/// <summary>Remote renamed.</summary>
-	public event EventHandler<RemoteEventArgs> Renamed;
+	public event EventHandler<RemoteEventArgs>? Renamed;
 
 	/// <summary>Invoke <see cref="Renamed"/>.</summary>
 	private void InvokeRenamed(Remote remote)
@@ -157,7 +159,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	/// <param name="name">New remote name.</param>
 	internal void RenameRemote(Remote remote, string name)
 	{
-		Verify.Argument.IsValidGitObject(remote, Repository, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote, Repository);
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Remote)));
@@ -199,7 +201,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	internal void RemoveRemote(Remote remote)
 	{
 		Verify.Argument.IsNotNull(remote);
-		Verify.Argument.IsValidGitObject(remote, Repository, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote, Repository);
 
 		var name = remote.Name;
 		using(Repository.Monitor.BlockNotifications(
@@ -218,7 +220,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	internal async Task RemoveRemoteAsync(Remote remote)
 	{
 		Verify.Argument.IsNotNull(remote);
-		Verify.Argument.IsValidGitObject(remote, Repository, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote, Repository);
 
 		var name = remote.Name;
 		using(Repository.Monitor.BlockNotifications(
@@ -291,7 +293,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 		RemotesUtility.FetchOrPull(Repository, null, false);
 	}
 
-	public Task FetchAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task FetchAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
@@ -309,7 +311,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 		RemotesUtility.FetchOrPull(Repository, null, true);
 	}
 
-	public Task PullAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task PullAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsTrue(Count != 0, "Repository contains no remotes.");
 
@@ -324,7 +326,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	public void PushTo(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
-		Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, nameof(branches));
+		Verify.Argument.IsValidRevisionPointerSequence(branches, Repository);
 		Verify.Argument.IsTrue(branches.Count != 0, nameof(branches),
 			Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
@@ -361,7 +363,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 
 	/// <summary>Send local objects to remote repository.</summary>
 	public Task PushToAsync(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
 

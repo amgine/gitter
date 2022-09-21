@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -28,14 +30,10 @@ using gitter.Framework;
 
 public abstract class BaseRemoteReference : IRemoteReference
 {
-	#region Events
-
-	public event EventHandler Deleted;
+	public event EventHandler? Deleted;
 
 	private void InvokeDeleted()
 		=> Deleted?.Invoke(this, EventArgs.Empty);
-
-	#endregion
 
 	internal BaseRemoteReference(RemoteReferencesCollection refs, string name, Hash hash)
 	{
@@ -49,7 +47,7 @@ public abstract class BaseRemoteReference : IRemoteReference
 
 	protected abstract void DeleteCore();
 
-	protected abstract Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
+	protected abstract Task DeleteCoreAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default);
 
 	public void Delete()
 	{
@@ -57,7 +55,7 @@ public abstract class BaseRemoteReference : IRemoteReference
 		MarkAsDeleted();
 	}
 
-	public async Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public async Task DeleteAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		await DeleteCoreAsync(progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
@@ -66,11 +64,10 @@ public abstract class BaseRemoteReference : IRemoteReference
 
 	public void MarkAsDeleted()
 	{
-		if(!IsDeleted)
-		{
-			IsDeleted = true;
-			InvokeDeleted();
-		}
+		if(IsDeleted) return;
+
+		IsDeleted = true;
+		InvokeDeleted();
 	}
 
 	public bool IsDeleted { get; private set; }
@@ -92,5 +89,6 @@ public abstract class BaseRemoteReference : IRemoteReference
 
 	public abstract ReferenceType ReferenceType { get; }
 
+	/// <inheritdoc/>
 	public override string ToString() => Name;
 }

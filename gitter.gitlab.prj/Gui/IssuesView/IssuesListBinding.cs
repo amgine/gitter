@@ -45,8 +45,7 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 
 		ServiceContext = serviceContext;
 		IssuesListBox  = issuesListBox;
-
-		Progress = issuesListBox.ProgressMonitor;
+		Progress       = issuesListBox.ProgressMonitor;
 
 		_issueState = issueState;
 	}
@@ -76,7 +75,7 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 		progress?.Report(new("Fetching issues..."));
 		IssuesListBox.Cursor = Cursors.WaitCursor;
 
-		return ServiceContext.GetIssuesAsync(state: IssueState);
+		return ServiceContext.GetIssuesAsync(state: IssueState, cancellationToken);
 	}
 
 	protected override void OnFetchCompleted(IReadOnlyList<Issue> issues)

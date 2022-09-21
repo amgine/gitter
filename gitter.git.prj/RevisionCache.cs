@@ -115,7 +115,7 @@ public sealed class RevisionCache : GitObject, IEnumerable<Revision>
 	/// <summary>Returns revision with specified SHA1 or <c>null</c> if such revision is not found in cache.</summary>
 	/// <param name="sha1">SHA-1 of required revision.</param>
 	/// <returns>Revision with specified SHA-1 or <c>null</c> if such revision is not found in cache.</returns>
-	/// <remarks>Does not query revision from git repository if it is not present in cache..</remarks>
+	/// <remarks>Does not query revision from git repository if it is not present in cache.</remarks>
 	public Revision TryGetRevisionFromCacheOnly(Hash sha1)
 	{
 		lock(SyncRoot)

@@ -32,7 +32,7 @@ sealed class GitDownloaderProvider : IGitDownloaderProvider
 	private const string DownloadPageUrl = @"https://git-scm.com/download/win";
 
 	private static readonly Regex _regexVersion = new("\\<span\\s+class\\s*\\=\\s*\"version\"\\s*\\>\\s*(?<version>\\d+\\.\\d+\\.\\d+)\\s*\\<\\/span\\>");
-	private static readonly Regex _regexUrl     = new("\\<a\\s+href\\s*\\=\\s*\"(?<url>[\\w\\.\\:\\/\\-]+\\/Git-(?<version>\\d+\\.\\d+\\.\\d+)\\-(?<arch>\\d{2})\\-bit\\.exe)\"\\>");
+	private static readonly Regex _regexUrl     = new("\\<a\\s+href\\s*\\=\\s*\"(?<url>[\\w\\.\\:\\/\\-]+\\/Git-(?<version>\\d+\\.\\d+\\.\\d+(\\.\\d+)?)\\-(?<arch>\\d{2})\\-bit\\.exe)\"\\>");
 
 	public GitDownloaderProvider(HttpMessageInvoker httpMessageInvoker)
 	{

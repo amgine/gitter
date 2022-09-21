@@ -32,6 +32,7 @@ public class HookListItem : CustomListBoxItem<Hook>
 	{
 	}
 
+	/// <inheritdoc/>
 	protected override void OnListBoxAttached()
 	{
 		base.OnListBoxAttached();
@@ -39,6 +40,7 @@ public class HookListItem : CustomListBoxItem<Hook>
 		DataContext.Revived += OnRevived;
 	}
 
+	/// <inheritdoc/>
 	protected override void OnListBoxDetached()
 	{
 		DataContext.Deleted -= OnDeleted;
@@ -56,9 +58,11 @@ public class HookListItem : CustomListBoxItem<Hook>
 		InvalidateSafe();
 	}
 
+	/// <inheritdoc/>
 	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		=> throw new NotImplementedException();
 
+	/// <inheritdoc/>
 	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		=> throw new NotImplementedException();
 }

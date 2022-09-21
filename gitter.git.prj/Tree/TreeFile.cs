@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -34,8 +36,6 @@ using Resources = gitter.Git.Properties.Resources;
 /// <summary>Represents a file in a directory.</summary>
 public sealed class TreeFile : TreeItem
 {
-	#region .ctor
-
 	public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
 		: base(repository, relativePath, parent, status, name)
 	{
@@ -46,8 +46,6 @@ public sealed class TreeFile : TreeItem
 	{
 		Size = size;
 	}
-
-	#endregion
 
 	public override TreeItemType ItemType => TreeItemType.Blob;
 
@@ -107,7 +105,7 @@ public sealed class TreeFile : TreeItem
 
 	#region mergetool
 
-	private void RunMergeToolCore(MergeTool mergeTool)
+	private void RunMergeToolCore(MergeTool? mergeTool)
 	{
 		try
 		{
@@ -118,7 +116,7 @@ public sealed class TreeFile : TreeItem
 				Repository.Accessor.RunMergeTool.Invoke(
 					new RunMergeToolParameters(RelativePath)
 					{
-						Tool = mergeTool == null ? null : mergeTool.Name,
+						Tool = mergeTool?.Name,
 					});
 			}
 		}
@@ -128,7 +126,8 @@ public sealed class TreeFile : TreeItem
 		}
 	}
 
-	private Task RunMergeToolAsyncCore(MergeTool mergeTool, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	private Task RunMergeToolAsyncCore(MergeTool? mergeTool,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrWaitingMergeTool.AddEllipsis()));
 		var blockedNotifications = Repository.Monitor.BlockNotifications(
@@ -138,7 +137,7 @@ public sealed class TreeFile : TreeItem
 			.RunMergeTool.InvokeAsync(
 				new RunMergeToolParameters(RelativePath)
 				{
-					Tool = mergeTool == null ? null : mergeTool.Name,
+					Tool = mergeTool?.Name,
 				},
 				progress,
 				cancellationToken)
@@ -153,28 +152,15 @@ public sealed class TreeFile : TreeItem
 			TaskScheduler.Default);
 	}
 
-	public void RunMergeTool()
-	{
-		Verify.State.IsFalse(ConflictType == ConflictType.None);
-
-		RunMergeToolCore(null);
-	}
-
-	public void RunMergeTool(MergeTool mergeTool)
+	public void RunMergeTool(MergeTool? mergeTool = default)
 	{
 		Verify.State.IsFalse(ConflictType == ConflictType.None);
 
 		RunMergeToolCore(mergeTool);
 	}
 
-	public Task RunMergeToolAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-	{
-		Verify.State.IsFalse(ConflictType == ConflictType.None);
-
-		return RunMergeToolAsyncCore(null, progress, cancellationToken);
-	}
-
-	public Task RunMergeToolAsync(MergeTool mergeTool, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	public Task RunMergeToolAsync(MergeTool? mergeTool = default,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsFalse(ConflictType == ConflictType.None);
 

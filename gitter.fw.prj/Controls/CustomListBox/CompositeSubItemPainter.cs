@@ -18,21 +18,25 @@
  */
 #endregion
 
-namespace gitter.Git.Gui.Controls;
+namespace gitter.Framework.Controls;
 
 using System.Drawing;
 
-using gitter.Framework.Controls;
-
-class CompositeSubItemPainter : ISubItemPainter
+/// <summary>Sequentially calls multiple <see cref="ISubItemPainter"/>s.</summary>
+public class CompositeSubItemPainter : ISubItemPainter
 {
 	private readonly ISubItemPainter[] _painters;
 
+	/// <summary>Initializes <see cref="CompositeSubItemPainter"/>.</summary>
+	/// <param name="painters">Sequence of <see cref="ISubItemPainter"/>s.</param>
 	public CompositeSubItemPainter(params ISubItemPainter[] painters)
 	{
+		Verify.Argument.IsNotNull(painters);
+
 		_painters = painters;
 	}
 
+	/// <inheritdoc/>
 	public bool TryMeasure(SubItemMeasureEventArgs measureEventArgs, out Size size)
 	{
 		Verify.Argument.IsNotNull(measureEventArgs);
@@ -45,6 +49,7 @@ class CompositeSubItemPainter : ISubItemPainter
 		return false;
 	}
 
+	/// <inheritdoc/>
 	public bool TryPaint(SubItemPaintEventArgs paintEventArgs)
 	{
 		Verify.Argument.IsNotNull(paintEventArgs);

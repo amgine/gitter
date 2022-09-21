@@ -27,6 +27,9 @@ static class RefsDiff
 {
 	public static ReferenceChange[] Calculate(RefsState state1, RefsState state2)
 	{
+		Verify.Argument.IsNotNull(state1);
+		Verify.Argument.IsNotNull(state2);
+
 		var changeset = new List<ReferenceChange>();
 		foreach(var refState2 in state2.States)
 		{

@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-sealed class QueryReflogImpl : IGitFunction<QueryReflogParameters, IList<ReflogRecordData>>
+sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<ReflogRecordData>>
 {
 	#region Data
 
@@ -37,7 +37,7 @@ sealed class QueryReflogImpl : IGitFunction<QueryReflogParameters, IList<ReflogR
 
 	#endregion
 
-	public QueryReflogImpl(ICommandExecutor commandExecutor, Func<QueryReflogParameters, Command> commandFcatory)
+	public QueryReflogFunction(ICommandExecutor commandExecutor, Func<QueryReflogParameters, Command> commandFcatory)
 	{
 		_commandExecutor = commandExecutor;
 		_commandFactory  = commandFcatory;
@@ -53,7 +53,7 @@ sealed class QueryReflogImpl : IGitFunction<QueryReflogParameters, IList<ReflogR
 		}
 		args.Add(LogCommand.NullTerminate());
 		args.Add(LogCommand.FormatRaw());
-		if(parameters.Reference != null)
+		if(parameters.Reference is not null)
 		{
 			args.Add(new CommandParameter(parameters.Reference));
 		}
@@ -99,11 +99,9 @@ sealed class QueryReflogImpl : IGitFunction<QueryReflogParameters, IList<ReflogR
 			}
 			var message = parser.ReadLine();
 			var sha1    = parser.ReadHash(skip: 1);
-			RevisionData rev;
-			if(!cache.TryGetValue(sha1, out rev))
+			if(!cache.TryGetValue(sha1, out var rev))
 			{
-				rev = new RevisionData(sha1);
-				cache.Add(sha1, rev);
+				cache.Add(sha1, rev = new(sha1));
 			}
 			parser.ParseRevisionData(rev, cache);
 			list.Add(new ReflogRecordData(index++, message, rev));

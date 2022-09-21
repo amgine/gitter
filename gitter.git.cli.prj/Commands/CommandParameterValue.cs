@@ -24,8 +24,15 @@ using System;
 using System.Text;
 
 /// <summary>Command parameter (param-name = value).</summary>
-public record class CommandParameterValue(string Name, string Value, char Separator = '=') : ICommandArgument
+/// <param name="Name">Parameter name.</param>
+/// <param name="Value">Parameter value.</param>
+/// <param name="Separator">Name and value separator.</param>
+public record class CommandParameterValue(
+	string Name,
+	string Value,
+	char   Separator = CommandParameterValue.DefaultSeparator) : ICommandArgument
 {
+	/// <summary>Default name and value separator.</summary>
 	protected const char DefaultSeparator = '=';
 
 	/// <inheritdoc/>

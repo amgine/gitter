@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -37,10 +39,12 @@ public sealed class RepositoryLogSource : LogSourceBase
 		Repository = repository;
 	}
 
+	/// <inheritdoc/>
 	public override Repository Repository { get; }
 
+	/// <inheritdoc/>
 	public override async Task<RevisionLog> GetRevisionLogAsync(LogOptions options,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(options);
 
@@ -50,7 +54,7 @@ public sealed class RepositoryLogSource : LogSourceBase
 				.FromResult(new RevisionLog(Repository, Preallocated<Revision>.EmptyArray))
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
-		progress?.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
+		progress?.Report(new(Resources.StrsFetchingLog.AddEllipsis()));
 		var parameters = options.GetLogParameters();
 		var revisionData = await Repository.Accessor.QueryRevisions
 			.InvokeAsync(parameters, progress, cancellationToken)

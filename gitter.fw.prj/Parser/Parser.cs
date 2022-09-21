@@ -622,5 +622,6 @@ public class Parser
 		};
 	}
 
+	/// <inheritdoc/>
 	public override string ToString() => String;
 }

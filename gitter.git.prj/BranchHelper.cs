@@ -18,18 +18,20 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 public static class BranchHelper
 {
-	public static string TryFormatDefaultLocalBranchName(IRevisionPointer revision)
+	public static string TryFormatDefaultLocalBranchName(IRevisionPointer? revision)
 	{
 		switch(revision)
 		{
 			case RemoteBranch remoteBranch:
 				var branchName = remoteBranch.Name;
 				var remote     = remoteBranch.Remote;
-				if(remote != null)
+				if(remote is not null)
 				{
 					var remoteName = remote.Name;
 					if((branchName.Length > remoteName.Length + 1) && branchName.StartsWith(remoteName))

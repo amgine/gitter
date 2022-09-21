@@ -36,7 +36,7 @@ class ColumnResizeProcess
 	#region Static
 
 	/// <summary>Create resize process from column list, active (hovered) column and side (left or right) of resize.</summary>
-	public static ColumnResizeProcess FromActiveColumn(IList<CustomListBoxColumn> columns, int activeIndex, ColumnResizeSide side, Point mouseDownLocation)
+	public static ColumnResizeProcess FromActiveColumn(IReadOnlyList<CustomListBoxColumn> columns, int activeIndex, ColumnResizeSide side, Point mouseDownLocation)
 	{
 		Assert.IsNotNull(columns);
 

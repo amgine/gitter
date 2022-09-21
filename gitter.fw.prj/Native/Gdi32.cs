@@ -56,17 +56,23 @@ internal static class Gdi32
 	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
 	public static extern IntPtr GetCurrentObject(IntPtr hDC, int uObjectType);
 
-	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
-	public static extern int SetTextColor(IntPtr hdc, int crColor);
+	[DllImport(DllName, SetLastError = true, CharSet = CharSet.Unicode)]
+	public static unsafe extern int GetObject(IntPtr h, int c, void* pv);
 
 	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
-	public static extern int GetTextAlign(IntPtr hdc);
+	public static extern uint GetTextAlign(IntPtr hdc);
 
 	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
-	public static extern int GetTextColor(IntPtr hDC);
+	public static extern uint SetTextAlign(IntPtr hdc, uint align);
 
 	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
-	public static extern int SetBkColor(IntPtr hDC, int clr);
+	public static extern uint SetTextColor(IntPtr hdc, uint crColor);
+
+	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+	public static extern uint GetTextColor(IntPtr hDC);
+
+	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
+	public static extern uint SetBkColor(IntPtr hDC, uint clr);
 
 	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
 	public static extern int SetBkMode(IntPtr hDC, int nBkMode);

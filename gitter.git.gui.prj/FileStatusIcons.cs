@@ -24,6 +24,19 @@ using gitter.Framework;
 
 static class FileStatusIcons
 {
+	public static IImageProvider GetOverlay(FileStatus fileStatus)
+		=> fileStatus switch
+		{
+			FileStatus.Removed     => Icons.Overlays.Delete,
+			FileStatus.Added       => Icons.Overlays.Add,
+			FileStatus.Modified    => Icons.Overlays.Edit,
+			FileStatus.Unmerged    => Icons.Overlays.Conflict,
+			FileStatus.Renamed     => Icons.Overlays.Rename,
+			FileStatus.Copied      => Icons.Overlays.Copy,
+			FileStatus.ModeChanged => Icons.Overlays.Chmod,
+			_ => null,
+		};
+
 	public static readonly IImageProvider ImgUnmerged          = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.Conflict);
 	public static readonly IImageProvider ImgStagedAdded       = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.AddStaged);
 	public static readonly IImageProvider ImgStagedRemoved     = new CombinedImageProvider(CommonIcons.File, Icons.Overlays.DeleteStaged);

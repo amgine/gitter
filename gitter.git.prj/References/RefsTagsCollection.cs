@@ -60,8 +60,8 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 	public Tag Create(string name, IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, nameof(name));
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag);
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
 
@@ -94,8 +94,8 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 	public Tag Create(string name, IRevisionPointer revision, string message, bool sign)
 	{
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, nameof(name));
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag);
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Tag)));
 		Verify.Argument.IsNotNull(message);
@@ -129,8 +129,8 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to create a tag.</exception>
 	public Tag Create(string name, IRevisionPointer revision, string message, string keyId)
 	{
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag, nameof(name));
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Tag);
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
 		Verify.Argument.IsNotNull(message);
@@ -165,7 +165,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	/// </exception>
 	internal void Delete(Tag tag)
 	{
-		Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
+		Verify.Argument.IsValidGitObject(tag, Repository);
 
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.TagChanged))
@@ -189,7 +189,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	/// </exception>
 	internal async Task DeleteAsync(Tag tag)
 	{
-		Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
+		Verify.Argument.IsValidGitObject(tag, Repository);
 
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.TagChanged))
@@ -240,7 +240,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	/// <param name="tag">Tag to refresh.</param>
 	internal void Refresh(Tag tag)
 	{
-		Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
+		Verify.Argument.IsValidGitObject(tag, Repository);
 
 		var tagData = Repository.Accessor.QueryTag
 			.Invoke(new QueryTagParameters(tag.Name));
@@ -258,7 +258,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	/// <param name="tag">Tag to refresh.</param>
 	internal async Task RefreshAsync(Tag tag)
 	{
-		Verify.Argument.IsValidGitObject(tag, Repository, nameof(tag));
+		Verify.Argument.IsValidGitObject(tag, Repository);
 
 		var tagData = await Repository.Accessor.QueryTag
 			.InvokeAsync(new QueryTagParameters(tag.Name))
@@ -324,11 +324,10 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 		return name;
 	}
 
-	/// <summary>Creates the event args for specified <paramref name="item"/>.</summary>
-	/// <param name="item">Item to create event args for.</param>
+	/// <summary>Creates the event args for specified <paramref name="tag"/>.</summary>
+	/// <param name="tag">Item to create event args for.</param>
 	/// <returns>Created event args.</returns>
-	protected override TagEventArgs CreateEventArgs(Tag item)
-		=> new TagEventArgs(item);
+	protected override TagEventArgs CreateEventArgs(Tag tag) => new(tag);
 
 	#endregion
 }

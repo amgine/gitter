@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -35,17 +37,13 @@ using Resources = gitter.Git.Properties.Resources;
 /// <summary>Repository submodules collection.</summary>
 public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, SubmoduleEventArgs>
 {
-	#region .ctor
-
 	internal SubmodulesCollection(Repository repository)
 		: base(repository)
 	{
 	}
 
-	#endregion
-
-	protected override SubmoduleEventArgs CreateEventArgs(Submodule item)
-		=> new(item);
+	/// <inheritdoc/>
+	protected override SubmoduleEventArgs CreateEventArgs(Submodule item) => new(item);
 
 	private UpdateSubmoduleParameters GetUpdateParameters()
 		=> new()
@@ -66,7 +64,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		Repository.Accessor.UpdateSubmodule.Invoke(parameters);
 	}
 
-	public Task UpdateAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task UpdateAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrsUpdatingSubmodules.AddEllipsis()));
 		var parameters = GetUpdateParameters();
@@ -80,7 +78,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 	}
 
 	public async Task SyncAsync(bool recursive = true,
-		IProgress<OperationProgress> progress = default,
+		IProgress<OperationProgress>? progress = default,
 		CancellationToken cancellationToken = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrsSynchronizingSubmodules.AddEllipsis()));
@@ -119,7 +117,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return false;
 	}
 
-	public bool TryGetSubmoduleByPath(string path, out Submodule submodule)
+	public bool TryGetSubmoduleByPath(string path, out Submodule? submodule)
 	{
 		Verify.Argument.IsNotNull(path);
 
@@ -138,7 +136,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return false;
 	}
 
-	public Submodule TryGetSubmoduleByPath(string path)
+	public Submodule? TryGetSubmoduleByPath(string path)
 	{
 		Verify.Argument.IsNotNull(path);
 
@@ -155,7 +153,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return null;
 	}
 
-	public bool TryGetSubmoduleByUrl(string url, out Submodule submodule)
+	public bool TryGetSubmoduleByUrl(string url, out Submodule? submodule)
 	{
 		Verify.Argument.IsNotNull(url);
 
@@ -174,7 +172,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return false;
 	}
 
-	public Submodule TryGetSubmoduleByUrl(string url)
+	public Submodule? TryGetSubmoduleByUrl(string url)
 	{
 		Verify.Argument.IsNotNull(url);
 
@@ -188,7 +186,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return null;
 	}
 
-	private static AddSubmoduleParameters GetAddSubmoduleParameters(string path, string url, string branch = default)
+	private static AddSubmoduleParameters GetAddSubmoduleParameters(string path, string url, string? branch = default)
 		=> new AddSubmoduleParameters
 		{
 			Branch     = branch,
@@ -196,7 +194,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 			Repository = url,
 		};
 
-	public Submodule Add(string path, string url, string branch = default)
+	public Submodule Add(string path, string url, string? branch = default)
 	{
 		Verify.Argument.IsNotNull(path);
 		Verify.Argument.IsNotNull(url);
@@ -223,7 +221,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		}
 	}
 
-	public async Task<Submodule> AddAsync(string path, string url, string branch = default)
+	public async Task<Submodule> AddAsync(string path, string url, string? branch = default)
 	{
 		Verify.Argument.IsNotNull(path);
 		Verify.Argument.IsNotNull(url);

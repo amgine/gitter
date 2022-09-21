@@ -76,12 +76,12 @@ public abstract class FilePanel : FlowPanel
 	protected const int Margin    = 5;
 	protected const int MinDigits = 4;
 
-	static FilePanel()
-	{
-		float tabSize = CellSize.Width * TabSize;
-		ContentFormat.SetTabStops(TabSize, new[]
-			{ tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, });
-	}
+	//static FilePanel()
+	//{
+	//	float tabSize = CellSize.Width * TabSize;
+	//	ContentFormat.SetTabStops(TabSize, new[]
+	//		{ tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, tabSize, });
+	//}
 
 	protected virtual bool ShowHeader => true;
 

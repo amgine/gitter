@@ -26,6 +26,8 @@ using System.Collections.Generic;
 /// <summary>Apply the change introduced by an existing commit.</summary>
 public sealed class CherryPickCommand : Command
 {
+	const string CherryPickCommandName = @"cherry-pick";
+
 	public static class KnownArguments
 	{
 		public static ICommandArgument Edit { get; } = new CommandFlag("--edit");
@@ -54,7 +56,7 @@ public sealed class CherryPickCommand : Command
 	public class Builder : CommandBuilderBase
 	{
 		public Builder()
-			: base("cherry-pick")
+			: base(CherryPickCommandName)
 		{
 		}
 
@@ -82,17 +84,17 @@ public sealed class CherryPickCommand : Command
 	}
 
 	public CherryPickCommand()
-		: base("cherry-pick")
+		: base(CherryPickCommandName)
 	{
 	}
 
 	public CherryPickCommand(params ICommandArgument[] args)
-		: base("cherry-pick", args)
+		: base(CherryPickCommandName, args)
 	{
 	}
 
 	public CherryPickCommand(IList<ICommandArgument> args)
-		: base("cherry-pick", args)
+		: base(CherryPickCommandName, args)
 	{
 	}
 }

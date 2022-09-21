@@ -21,15 +21,31 @@
 namespace gitter.Framework.Controls;
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-using Resources = gitter.Framework.Properties.Resources;
-
 public class MSVS2010StyleViewRenderer : ViewRenderer
 {
+	private static Bitmap LoadBitmap(string name)
+	{
+		using var stream = typeof(MSVS2010StyleViewRenderer)
+			.Assembly
+			.GetManifestResourceStream(@"gitter.Framework.Resources.images." + name + ".png");
+		if(stream is null) return default;
+		return new Bitmap(stream);
+	}
+
+	private static readonly Lazy<Bitmap> ImgMenu        = new(() => LoadBitmap(@"arrow-small"));
+	private static readonly Lazy<Bitmap> ImgNormalize   = new(() => LoadBitmap(@"normalize"));
+	private static readonly Lazy<Bitmap> ImgMaximize    = new(() => LoadBitmap(@"maximize"));
+	private static readonly Lazy<Bitmap> ImgPin         = new(() => LoadBitmap(@"pin-small"));
+	private static readonly Lazy<Bitmap> ImgClose       = new(() => LoadBitmap(@"cross-small"));
+	private static readonly Lazy<Bitmap> ImgScrollLeft  = new(() => LoadBitmap(@"tab-scroll-left"));
+	private static readonly Lazy<Bitmap> ImgScrollRight = new(() => LoadBitmap(@"tab-scroll-right"));
+	private static readonly Lazy<Bitmap> ImgTabMenu     = new(() => LoadBitmap(@"tab-menu"));
+	private static readonly Lazy<Bitmap> ImgTabMenuExt  = new(() => LoadBitmap(@"tab-menu-extends"));
+
 	protected static class ColorTable
 	{
 		public static readonly Color BackgroundColor = Color.FromArgb(41, 57, 85);
@@ -475,9 +491,23 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 				graphics.DrawRectangle(pen, rc);
 			}
 		}
-		if(viewButton.Image != null)
+		var image = viewButton.Type switch
 		{
-			graphics.DrawImage(viewButton.Image, bounds);
+			ViewButtonType.Menu            => ImgMenu.Value,
+			ViewButtonType.Pin             => ImgPin.Value,
+			ViewButtonType.Unpin           => ImgPin.Value,
+			ViewButtonType.Normalize       => ImgNormalize.Value,
+			ViewButtonType.Maximize        => ImgMaximize.Value,
+			ViewButtonType.Close           => ImgClose.Value,
+			ViewButtonType.ScrollTabsLeft  => ImgScrollLeft.Value,
+			ViewButtonType.ScrollTabsRight => ImgScrollRight.Value,
+			ViewButtonType.TabsMenu        => ImgTabMenu.Value,
+			ViewButtonType.TabsScrollMenu  => ImgTabMenuExt.Value,
+			_ => viewButton.Image,
+		};
+		if(image is not null)
+		{
+			graphics.DrawImage(image, bounds);
 		}
 	}
 

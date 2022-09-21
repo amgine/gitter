@@ -211,6 +211,7 @@ public class FileDiffPanel : FilePanel
 		}
 	}
 
+	/// <inheritdoc/>
 	protected override void OnMouseDown(int x, int y, MouseButtons button)
 	{
 		switch(button)
@@ -640,69 +641,65 @@ public class FileDiffPanel : FilePanel
 			ContentFormat);
 	}
 
+#if NETCOREAPP
+
+	private static void PaintLineColumnText(Graphics graphics, Size cellSize, Font font, Color color, int column, int digits, int x, int y, ReadOnlySpan<char> text)
+	{
+		int lx = x + ((column * digits) + (digits - text.Length)) * cellSize.Width;
+		GitterApplication.TextRenderer.DrawText(
+			graphics,
+			text,
+			font,
+			color,
+			lx, y,
+			ContentFormat);
+	}
+
+#endif
+
 	private void PaintLine(
 		int lineIndex, DiffLine line, int digits, Graphics graphics, Size cellSize, Font font,
 		bool isHovered, bool isSelected, int x, int y, int width, Rectangle clipRectangle)
 	{
 		int cols = line.Nums.Length;
 		var rcColNumbers = new Rectangle(x, y, digits * cellSize.Width * cols + 2, cellSize.Height);
-		if(cols > 0)
+		var rcColNumbersBackground = Rectangle.Intersect(rcColNumbers, clipRectangle);
+		if(cols > 0 && rcColNumbersBackground is { Width: > 0, Height: > 0 })
 		{
-			var rcColNumbersBackground = Rectangle.Intersect(rcColNumbers, clipRectangle);
-			if(rcColNumbersBackground is { Width: > 0, Height: > 0 })
+			var iconSize = new DpiConverter(FlowControl).ConvertX(16);
+#if NETCOREAPP
+			Span<char> lineNumChars = stackalloc char[10];
+#endif
+			for(int i = 0; i < cols; ++i)
 			{
-				var backgroundColor = isHovered
-					? Style.Colors.LineNumberBackgroundHover
-					: Style.Colors.LineNumberBackground;
-				graphics.GdiFill(backgroundColor, rcColNumbersBackground);
-				var iconSize = new DpiConverter(FlowControl).ConvertX(16);
-				for(int i = 0; i < cols; ++i)
+				switch(line.States[i])
 				{
-					switch(line.States[i])
-					{
-						case DiffLineState.Added:
-							PaintLineColumnImage(graphics, cellSize, i, digits, Icons.Plus.GetImage(iconSize), x, y);
+					case DiffLineState.Added:
+						PaintLineColumnImage(graphics, cellSize, i, digits, Icons.Plus.GetImage(iconSize), x, y);
+						break;
+					case DiffLineState.Removed:
+						PaintLineColumnImage(graphics, cellSize, i, digits, Icons.Minus.GetImage(iconSize), x, y);
+						break;
+					case DiffLineState.Header:
+						PaintLineColumnText(graphics, cellSize, font, Style.Colors.LineNumberForeground, i, digits, x, y, "...");
+						break;
+					default:
+#if NETCOREAPP
+						if(line.Nums[i].TryFormat(lineNumChars, out var written, provider: CultureInfo.InvariantCulture))
+						{
+							PaintLineColumnText(graphics, cellSize, font, Style.Colors.LineNumberForeground, i, digits, x, y, lineNumChars.Slice(0, written));
 							break;
-						case DiffLineState.Removed:
-							PaintLineColumnImage(graphics, cellSize, i, digits, Icons.Minus.GetImage(iconSize), x, y);
-							break;
-						case DiffLineState.Header:
-							PaintLineColumnText(graphics, cellSize, font, Style.Colors.LineNumberForeground, i, digits, x, y, "...");
-							break;
-						default:
-							PaintLineColumnText(graphics, cellSize, font, Style.Colors.LineNumberForeground, i, digits, x, y,
-								line.Nums[i].ToString(CultureInfo.InvariantCulture));
-							break;
-					}
-					int lineX = x + i * digits * cellSize.Width + ((i == 0) ? 0 : 2);
-					graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
+						}
+#endif
+						PaintLineColumnText(graphics, cellSize, font, Style.Colors.LineNumberForeground, i, digits, x, y,
+							line.Nums[i].ToString(CultureInfo.InvariantCulture));
+						break;
 				}
 			}
 		}
-		{
-			int lineX = x + cols * digits * cellSize.Width + (cols != 0?1:0);
-			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
-			lineX = x + width - Margin * 2 - 1;
-			graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
-		}
 		var rcLine = new Rectangle(
 			x + rcColNumbers.Width, y,
-			width - 2*Margin - rcColNumbers.Width - 1, cellSize.Height);
-		var rcBackground = Rectangle.Intersect(rcLine, clipRectangle);
-		if(rcBackground is { Width: > 0, Height: > 0 })
-		{
-			var backgroundColor = isHovered
-				? isSelected
-					? Style.Colors.LineSelectedBackgroundHover
-					: Style.Colors.LineBackgroundHover
-				: isSelected
-					? Style.Colors.LineSelectedBackground
-					: GetLineBackgroundColor(line.State);
-			if(backgroundColor != Color.Transparent)
-			{
-				graphics.GdiFill(backgroundColor, rcBackground);
-			}
-		}
+			width - 2 * Margin - rcColNumbers.Width - 1, cellSize.Height);
 		GitterApplication.TextRenderer.DrawText(
 			graphics, line.Text, font, GetLineForegroundColor(line.State), rcLine.X + cellSize.Width / 2, rcLine.Y, ContentFormat);
 	}
@@ -716,29 +713,195 @@ public class FileDiffPanel : FilePanel
 			_ => DiffFile.TargetFile,
 		};
 
-	private Bitmap GetHeaderIcon()
+	private Bitmap GetHeaderIcon(Dpi dpi)
 		=> GraphicsUtility.QueryIcon(
 			DiffFile.Status == FileStatus.Removed
 				? DiffFile.SourceFile
-				: DiffFile.TargetFile, Dpi.FromControl(FlowControl));
+				: DiffFile.TargetFile, dpi);
 
-	private IImageProvider GetHeaderIconOverlay()
-		=> DiffFile.Status switch
+	private void PaintBackground(FlowPanelPaintEventArgs paintEventArgs)
+	{
+		Assert.IsNotNull(paintEventArgs);
+
+		if(DiffFile.LineCount <= 0) return;
+
+		var rect = paintEventArgs.Bounds;
+		var clip = paintEventArgs.ClipRectangle;
+		var contentWidth = Math.Max(_size.Width, FlowControl.ContentArea.Width);
+		var rcHeader = new Rectangle(rect.X + Margin, rect.Y, contentWidth - 2 * Margin, HeaderHeight);
+		var x = rect.X + Margin;
+		var y = rcHeader.Bottom;
+		int maxLineNum = DiffFile.MaxLineNum;
+		int digits = GetDecimalDigits(maxLineNum);
+		var cellSize = GetCellSize(paintEventArgs.Dpi);
+
+		var cols = DiffFile[0].ColumnCount;
+
+		var w1 = digits * cellSize.Width * cols + 2;
+
+		using var gdi = paintEventArgs.Graphics.AsGdi();
+
 		{
-			FileStatus.Removed     => Icons.Overlays.Delete,
-			FileStatus.Added       => Icons.Overlays.Add,
-			FileStatus.Modified    => Icons.Overlays.Edit,
-			FileStatus.Unmerged    => Icons.Overlays.Conflict,
-			FileStatus.Renamed     => Icons.Overlays.Rename,
-			FileStatus.Copied      => Icons.Overlays.Copy,
-			FileStatus.ModeChanged => Icons.Overlays.Chmod,
-			_ => null,
-		};
+			var rcColNumbers = new Rectangle(x, y, w1, DiffFile.LineCount * cellSize.Height);
+			var rcColNumbersBackground = Rectangle.Intersect(rcColNumbers, clip);
+
+			if(rcColNumbersBackground is { Width: > 0, Height: > 0 })
+			{
+				gdi.Fill(Style.Colors.LineNumberBackground, rcColNumbersBackground);
+				if(_lineHover.Index >= 0)
+				{
+					rcColNumbers.Y = y + _lineHover.Index * cellSize.Height;
+					rcColNumbers.Height = cellSize.Height;
+					rcColNumbers.Intersect(clip);
+					if(clip is { Width: > 0, Height: > 0 })
+					{
+						gdi.Fill(Style.Colors.LineNumberBackgroundHover, rcColNumbers);
+					}
+				}
+			}
+		}
+
+		const int lineWidth = 1;
+
+		{
+			var lineColor = Color.Gray;
+			var brush     = IntPtr.Zero;
+			try
+			{
+				int lineX;
+				int y0 = y;
+				int y1 = y0 + cellSize.Height * DiffFile.LineCount;
+				if(y0 < clip.Y)
+				{
+					y0 = clip.Y;
+				}
+				if(y1 > clip.Bottom)
+				{
+					y1 = clip.Bottom;
+				}
+				Rectangle rcLine;
+				if(y1 > y0)
+				{
+					for(int i = 0; i < cols; ++i)
+					{
+						lineX = x + i * digits * cellSize.Width + ((i == 0) ? 0 : 2);
+						rcLine = new Rectangle(lineX, y0, lineWidth, y1 - y0);
+						rcLine.Intersect(clip);
+						if(rcLine is { Width: > 0, Height: > 0 })
+						{
+							if(brush == IntPtr.Zero)
+							{
+								brush = Gdi.CreateSolidBrush(lineColor);
+								gdi.SelectObject(brush);
+							}
+							gdi.Fill(rcLine);
+						}
+					}
+					lineX = x + cols * digits * cellSize.Width + (cols != 0 ? 1 : 0);
+					rcLine = new Rectangle(lineX, y0, lineWidth, y1 - y0);
+					rcLine.Intersect(clip);
+					if(rcLine is { Width: > 0, Height: > 0 })
+					{
+						if(brush == IntPtr.Zero)
+						{
+							brush = Gdi.CreateSolidBrush(lineColor);
+							gdi.SelectObject(brush);
+						}
+						gdi.Fill(rcLine);
+					}
+					lineX = x + contentWidth - Margin * 2 - 1;
+					rcLine = new Rectangle(lineX, y0, lineWidth, y1 - y0);
+					rcLine.Intersect(clip);
+					if(rcLine is { Width: > 0, Height: > 0 })
+					{
+						if(brush == IntPtr.Zero)
+						{
+							brush = Gdi.CreateSolidBrush(lineColor);
+							gdi.SelectObject(brush);
+						}
+						gdi.Fill(rcLine);
+					}
+				}
+				rcLine = new Rectangle(x, rcHeader.Bottom + DiffFile.LineCount * cellSize.Height, contentWidth - Margin * 2, lineWidth);
+				rcLine.Intersect(clip);
+				if(clip is { Width: > 0, Height: > 0 })
+				{
+					if(brush == IntPtr.Zero)
+					{
+						brush = Gdi.CreateSolidBrush(lineColor);
+						gdi.SelectObject(brush);
+					}
+					gdi.Fill(rcLine);
+				}
+			}
+			finally
+			{
+				if(brush != IntPtr.Zero) Gdi.DeleteObject(brush);
+			}
+		}
+
+		{
+			int lineIndex = 0;
+			var color = Color.Transparent;
+			var s0    = y;
+			var x0    = x + w1;
+			var w2    = contentWidth - 2 * Margin - w1 - 1;
+			var reachedEnd = false;
+			foreach(var hunk in DiffFile)
+			{
+				foreach(var line in hunk)
+				{
+					if(y >= clip.Bottom)
+					{
+						reachedEnd = true;
+						break;
+					}
+					if(y + cellSize.Height >= clip.Y)
+					{
+						var isSelected      = lineIndex >= _selStart && lineIndex <= _selEnd;
+						var backgroundColor = _lineHover.Index == lineIndex
+							? isSelected
+								? Style.Colors.LineSelectedBackgroundHover
+								: Style.Colors.LineBackgroundHover
+							: isSelected
+								? Style.Colors.LineSelectedBackground
+								: GetLineBackgroundColor(line.State);
+
+						if(backgroundColor != color)
+						{
+							if(color != Color.Transparent)
+							{
+								if(Rectangle.Intersect(new Rectangle(x0, s0, w2, y - s0), clip) is { Width: > 0, Height: > 0 } rcLine)
+								{
+									gdi.Fill(color, rcLine);
+								}
+							}
+
+							s0    = y;
+							color = backgroundColor;
+						}
+					}
+					y += cellSize.Height;
+					++lineIndex;
+				}
+				if(reachedEnd) break;
+			}
+			if(color != Color.Transparent)
+			{
+				if(Rectangle.Intersect(new Rectangle(x0, s0, w2, y - s0), clip) is { Width: > 0, Height: > 0 } rcLine)
+				{
+					gdi.Fill(color, rcLine);
+				}
+			}
+		}
+	}
 
 	/// <inheritdoc/>
 	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 	{
 		Assert.IsNotNull(paintEventArgs);
+
+		PaintBackground(paintEventArgs);
 
 		var graphics = paintEventArgs.Graphics;
 		var rect = paintEventArgs.Bounds;
@@ -749,8 +912,8 @@ public class FileDiffPanel : FilePanel
 		if(rcHeaderClip is { Width: > 0, Height: > 0 })
 		{
 			graphics.SetClip(rcHeaderClip);
-			var overlay = GetHeaderIconOverlay()?.GetImage(new DpiConverter(FlowControl).ConvertX(16));
-			PaintHeader(graphics, paintEventArgs.Dpi, rcHeader, rcHeaderClip, GetHeaderIcon(), overlay, GetHeaderText());
+			var overlay = FileStatusIcons.GetOverlay(DiffFile.Status)?.GetImage(new DpiConverter(FlowControl).ConvertX(16));
+			PaintHeader(graphics, paintEventArgs.Dpi, rcHeader, rcHeaderClip, GetHeaderIcon(paintEventArgs.Dpi), overlay, GetHeaderText());
 		}
 		var x = rect.X + Margin;
 		var y = rcHeader.Bottom;
@@ -777,16 +940,12 @@ public class FileDiffPanel : FilePanel
 						lineIndex, line, digits,
 						graphics, cellSize, font, lineIndex == _lineHover.Index,
 						lineIndex >= _selStart && lineIndex <= _selEnd,
-						x, y, contentWidth, paintEventArgs.ClipRectangle);
+						x, y, contentWidth, clip);
 				}
 				y += cellSize.Height;
 				++lineIndex;
 			}
 			if(reachedEnd) break;
-		}
-		if(!reachedEnd && DiffFile.LineCount != 0)
-		{
-			graphics.DrawLine(Pens.Gray, x, y, rect.X + contentWidth - Margin - 1, y);
 		}
 		graphics.ResetClip();
 	}

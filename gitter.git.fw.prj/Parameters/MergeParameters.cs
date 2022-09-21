@@ -51,6 +51,9 @@ public sealed class MergeParameters
 	/// <summary>Commit message.</summary>
 	public string Message { get; set; }
 
+	/// <summary>Take the commit message from the given file.</summary>
+	public string MessageFileName { get; set; }
+
 	/// <summary>Create merge commit even if merge can be performed by fast-forwarding current branch.</summary>
 	public bool NoFastForward { get; set; }
 

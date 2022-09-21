@@ -631,7 +631,7 @@ sealed class BlameFilePanel : FilePanel
 						: Style.Colors.LineContextBackground;
 			if(backgroundColor != Color.Transparent)
 			{
-				graphics.GdiFill(backgroundColor, rcLine);
+				graphics.GdiFill(backgroundColor, rcBackground);
 			}
 		}
 
@@ -728,7 +728,7 @@ sealed class BlameFilePanel : FilePanel
 						graphics, font, lineIndex == _lineHover.Index,
 						lineIndex >= _selStart && lineIndex <= _selEnd,
 						alternate,
-						x, y, contentWidth, cellSize, paintEventArgs.ClipRectangle);
+						x, y, contentWidth, cellSize, clip);
 				}
 				y += cellSize.Height;
 				++lineIndex;

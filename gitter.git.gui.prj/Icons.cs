@@ -50,7 +50,7 @@ static class Icons
 	public static readonly IImageProvider Refresh            = CommonIcons.Refresh;
 	public static readonly IImageProvider History            = Init(@"history");
 	public static readonly IImageProvider Folder             = CommonIcons.Folder;
-	public static readonly IImageProvider FolderUp           = Init(@"foledr.up");
+	public static readonly IImageProvider FolderUp           = Init(@"folder.up");
 	public static readonly IImageProvider FolderTree         = Init(@"folder.tree");
 	public static readonly IImageProvider FolderHistory      = Init(@"folder.history");
 	public static readonly IImageProvider Blame              = Init(@"blame");

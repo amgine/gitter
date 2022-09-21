@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -25,8 +27,8 @@ using System.Collections.Generic;
 
 public abstract class CommandBuilderBase
 {
-	private List<ICommandArgument> _args;
-	private List<ICommandArgument> _options;
+	private List<ICommandArgument>? _args;
+	private List<ICommandArgument>? _options;
 
 	protected CommandBuilderBase(string commandName)
 	{
@@ -44,17 +46,23 @@ public abstract class CommandBuilderBase
 
 	public void AddArgument(ICommandArgument argument)
 	{
+		Assert.IsNotNull(argument);
+
 		_args ??= new List<ICommandArgument>();
 		_args.Add(argument);
 	}
 
 	public void AddOption(string option)
 	{
+		Assert.IsNotNull(option);
+
 		AddOption(new CommandParameter(option));
 	}
 
 	public void AddOption(ICommandArgument option)
 	{
+		Assert.IsNotNull(option);
+
 		_options ??= new List<ICommandArgument>();
 		_options.Add(option);
 	}

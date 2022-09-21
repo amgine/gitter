@@ -27,6 +27,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -34,6 +35,8 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 partial class UserColumnExtender : ExtenderBase
 {
+	private readonly DpiBindings _dpiBindings;
+	private readonly ControlLayout _layout;
 	private ICheckBoxWidget _chkShowEmail;
 	private ICheckBoxWidget _chkShowAvatar;
 	private bool _disableEvents;
@@ -47,6 +50,9 @@ partial class UserColumnExtender : ExtenderBase
 		Name = nameof(UserColumnExtender);
 		Size = new(138, 52);
 		ResumeLayout();
+
+		_dpiBindings = new(this);
+		_layout      = new(this);
 
 		CreateControls();
 		SubscribeToColumnEvents();
@@ -79,30 +85,40 @@ partial class UserColumnExtender : ExtenderBase
 	{
 		var conv = new DpiConverter(this);
 
-		var iconSize = conv.ConvertX(16);
-
 		var height  = conv.ConvertY(27);
 		var spacing = conv.ConvertY(-4);
+
+		_dpiBindings.UnbindAll();
 
 		_chkShowEmail?.Dispose();
 		_chkShowEmail = Style.CreateCheckBox();
 		_chkShowEmail.IsChecked = Column.ShowEmail;
 		_chkShowEmail.IsCheckedChanged += OnShowEmailCheckedChanged;
-		_chkShowEmail.Image = CachedResources.ScaledBitmaps[@"mail", iconSize];
 		_chkShowEmail.Text = Resources.StrShowEmail;
-		_chkShowEmail.Control.Bounds = new Rectangle(conv.ConvertX(6), 0, Width - conv.ConvertX(6) * 2, height);
-		_chkShowEmail.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
 		_chkShowEmail.Control.Parent = this;
+		_dpiBindings.BindImage(_chkShowEmail, Icons.Mail);
 
 		_chkShowAvatar?.Dispose();
 		_chkShowAvatar = Style.CreateCheckBox();
 		_chkShowAvatar.IsChecked = Column.ShowAvatar;
 		_chkShowAvatar.IsCheckedChanged += OnShowAvatarCheckedChanged;
-		_chkShowAvatar.Image = CommonIcons.Gravatar.GetImage(iconSize);
 		_chkShowAvatar.Text = Resources.StrShowAvatar;
-		_chkShowAvatar.Control.Bounds = new Rectangle(conv.ConvertX(6), spacing + height, Width - conv.ConvertX(6) * 2, height);
-		_chkShowAvatar.Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
 		_chkShowAvatar.Control.Parent = this;
+		_dpiBindings.BindImage(_chkShowAvatar, CommonIcons.Gravatar);
+
+		var noMargin = DpiBoundValue.Constant(Padding.Empty);
+		_layout.Content = new Grid(
+			padding: DpiBoundValue.Padding(new(6, 2, 6, 2)),
+			rows: new[]
+			{
+				SizeSpec.Absolute(23),
+				SizeSpec.Absolute(23),
+			},
+			content: new[]
+			{
+				new GridContent(new ControlContent(_chkShowEmail.Control,  marginOverride: noMargin), row: 0),
+				new GridContent(new ControlContent(_chkShowAvatar.Control, marginOverride: noMargin), row: 1),
+			});
 	}
 
 	/// <inheritdoc/>

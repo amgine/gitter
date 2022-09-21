@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -30,13 +32,11 @@ using Resources = gitter.Git.Properties.Resources;
 /// <summary>Git local branch.</summary>
 public sealed class Branch : BranchBase
 {
-	#region Static
-
 	/// <summary>Validates the branch name.</summary>
 	/// <param name="name">Branch name.</param>
 	/// <param name="errorMessage">Error message.</param>
 	/// <returns><c>true</c> if <paramref name="name"/> is a valid branch name; otherwise, <c>false</c>.</returns>
-	public static bool ValidateName(string name, out string errorMessage)
+	public static bool ValidateName(string name, out string? errorMessage)
 	{
 		if(!Reference.ValidateName(name, ReferenceType.Branch, out errorMessage))
 		{
@@ -50,20 +50,12 @@ public sealed class Branch : BranchBase
 		return true;
 	}
 
-	#endregion
-
-	#region Events
-
 	/// <summary>Occurs when branch is renamed.</summary>
-	public event EventHandler<NameChangeEventArgs> Renamed;
+	public event EventHandler<NameChangeEventArgs>? Renamed;
 
 	/// <summary>Invokes <see cref="Renamed"/> event.</summary>
 	private void InvokeNameChanged(string oldName, string newName)
 		=> Renamed?.Invoke(this, new NameChangeEventArgs(oldName, newName));
-
-	#endregion
-
-	#region .ctor
 
 	/// <summary>Create <see cref="Branch"/> object.</summary>
 	/// <param name="repository">Host repository.</param>
@@ -77,10 +69,6 @@ public sealed class Branch : BranchBase
 		: base(repository, name, pointer)
 	{
 	}
-
-	#endregion
-
-	#region Properties
 
 	/// <summary>Gets the type of this reference.</summary>
 	/// <value><see cref="ReferenceType.LocalBranch"/>.</value>
@@ -98,10 +86,6 @@ public sealed class Branch : BranchBase
 	/// <value><c>true</c> if this instance is current HEAD; otherwise, <c>false</c>.</value>
 	public override bool IsCurrent => Repository.Head.Pointer == this;
 
-	#endregion
-
-	#region Methods
-
 	/// <summary>
 	/// Reset this branch to position specified by <paramref name="revision"/>.
 	/// </summary>
@@ -117,7 +101,7 @@ public sealed class Branch : BranchBase
 	/// </exception>
 	public void Reset(IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 		Verify.State.IsNotDeleted(this);
 
 		var rev = revision.Dereference();
@@ -149,7 +133,7 @@ public sealed class Branch : BranchBase
 	/// </exception>
 	public async Task ResetAsync(IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 		Verify.State.IsNotDeleted(this);
 
 		var rev = await revision
@@ -221,10 +205,6 @@ public sealed class Branch : BranchBase
 		return Repository.Refs.Heads.RefreshAsync(this);
 	}
 
-	#endregion
-
-	#region Overrides
-
 	/// <summary>Rename branch.</summary>
 	/// <param name="newName">New name.</param>
 	protected override void RenameCore(string newName)
@@ -241,6 +221,4 @@ public sealed class Branch : BranchBase
 		InvokeNameChanged(oldName, Name);
 		Repository.Refs.Heads.NotifyRenamed(this, oldName);
 	}
-
-	#endregion
 }

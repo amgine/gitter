@@ -64,7 +64,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	/// </exception>
 	internal void Delete(RemoteBranch branch, bool force)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var name = branch.Name;
 		using(Repository.Monitor.BlockNotifications(
@@ -93,7 +93,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	/// </exception>
 	internal async Task DeleteAsync(RemoteBranch branch, bool force)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var name = branch.Name;
 		using(Repository.Monitor.BlockNotifications(
@@ -187,7 +187,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	/// <param name="branch">Branch to refresh.</param>
 	internal void Refresh(RemoteBranch branch)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
 			new QueryBranchParameters(branch.Name, branch.IsRemote));
@@ -205,7 +205,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	/// <param name="branch">Branch to refresh.</param>
 	internal async Task RefreshAsync(RemoteBranch branch)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var remoteBranchData = await Repository.Accessor.QueryBranch
 			.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
@@ -226,6 +226,8 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 
 	private IReadOnlyList<RemoteBranch> GetRemotes(BranchesData refs)
 	{
+		Assert.IsNotNull(refs);
+
 		var heads = refs.Remotes;
 		if(heads.Count == 0)
 		{
@@ -270,7 +272,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
 	public IReadOnlyList<RemoteBranch> GetContaining(IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 
 		var refs = Repository.Accessor.QueryBranches.Invoke(
 			new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
@@ -355,8 +357,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	/// <summary>Creates the event args for specified <paramref name="item"/>.</summary>
 	/// <param name="item">Item to create event args for.</param>
 	/// <returns>Created event args.</returns>
-	protected override RemoteBranchEventArgs CreateEventArgs(RemoteBranch item)
-		=> new RemoteBranchEventArgs(item);
+	protected override RemoteBranchEventArgs CreateEventArgs(RemoteBranch item) => new(item);
 
 	#endregion
 }

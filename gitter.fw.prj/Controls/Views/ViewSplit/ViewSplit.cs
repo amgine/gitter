@@ -202,7 +202,7 @@ internal sealed class ViewSplit : ContainerControl
 		{
 			Orientation.Horizontal => bounds.Width,
 			Orientation.Vertical   => bounds.Height,
-			_ => throw new ArgumentException(),
+			_ => throw new ArgumentException($"Unknown orientation: {orientation}", nameof(orientation)),
 		};
 
 	private static int GetSize(Size size, Orientation orientation)
@@ -210,7 +210,7 @@ internal sealed class ViewSplit : ContainerControl
 		{
 			Orientation.Horizontal => size.Width,
 			Orientation.Vertical   => size.Height,
-			_ => throw new ArgumentException(),
+			_ => throw new ArgumentException($"Unknown orientation: {orientation}", nameof(orientation)),
 		};
 
 	private static ViewSplitSlotSize AbsoluteSize(Control item, Orientation orientation)
@@ -218,7 +218,6 @@ internal sealed class ViewSplit : ContainerControl
 
 	private static int GetMaxSize(Size size, Orientation orientation, Dpi dpi)
 	{
-		var conv = DpiConverter.FromDefaultTo(dpi);
 		var maxSize = GetSize(size, orientation);
 		switch(orientation)
 		{
@@ -302,10 +301,8 @@ internal sealed class ViewSplit : ContainerControl
 		BackColor = ViewManager.Renderer.BackgroundColor;
 
 		Orientation = orientation;
-		_slots = new(this);
-		_slots.Add(slot1);
-		_slots.Add(slot2);
-		_size = bounds.Size;
+		_slots = new(this) { slot1, slot2 };
+		_size  = bounds.Size;
 		slot1.Content.Dock = DockStyle.None;
 		slot2.Content.Dock = DockStyle.None;
 		_slots.Apply();

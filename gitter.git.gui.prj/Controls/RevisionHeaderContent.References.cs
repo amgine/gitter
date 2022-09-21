@@ -87,6 +87,9 @@ partial class RevisionHeaderContent
 
 		public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
 		{
+			Assert.IsNotNull(graphics);
+			Assert.IsNotNull(revision);
+
 			var conv = DpiConverter.FromDefaultTo(dpi);
 			var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 			lock(revision.References.SyncRoot)
@@ -105,6 +108,9 @@ partial class RevisionHeaderContent
 
 		public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
 		{
+			Assert.IsNotNull(graphics);
+			Assert.IsNotNull(revision);
+
 			const float Radius = 3;
 
 			_drawnReferences.Clear();

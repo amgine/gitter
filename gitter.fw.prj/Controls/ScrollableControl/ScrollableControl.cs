@@ -389,7 +389,7 @@ public class ScrollableControl : Control
 	protected bool IsMouseOver => _isMouseOver;
 
 	private Rectangle GetClientArea()
-		=> GetClientArea(_vScrollBar.Control.Parent != null, _hScrollBar.Control.Parent != null);
+		=> GetClientArea(_vScrollBar.Control.Parent is not null, _hScrollBar.Control.Parent is not null);
 
 	private Rectangle GetClientArea(bool vScrollBar, bool hScrollBar)
 	{
@@ -1021,8 +1021,12 @@ public class ScrollableControl : Control
 		}
 		if(_vScrollBar.Control.Parent is not null && _hScrollBar.Control.Parent is not null)
 		{
-			var rcSpacing = Rectangle.Intersect(clip,
-				new Rectangle(_vScrollBar.Control.Left, _vScrollBar.Control.Bottom, _vScrollBar.Control.Width, _hScrollBar.Control.Height));
+			var rcSpacing = new Rectangle(
+				_vScrollBar.Control.Left,
+				_vScrollBar.Control.Bottom,
+				_vScrollBar.Control.Width,
+				_hScrollBar.Control.Height);
+			rcSpacing.Intersect(clip);
 			if(rcSpacing is { Width: > 0, Height: > 0 })
 			{
 				gdi.Fill(Style.Colors.ScrollBarSpacing, rcSpacing);

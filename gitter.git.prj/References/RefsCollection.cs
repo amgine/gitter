@@ -28,7 +28,7 @@ using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 /// <summary>Collections of repository's references ("$GIT_DIR/refs/" cache).</summary>
-public sealed class RefsCollection : GitObject, IEnumerable<Reference>
+public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 {
 	#region .ctor
 

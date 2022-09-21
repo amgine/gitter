@@ -27,7 +27,7 @@ using System.Collections.Specialized;
 /// <summary>Cached collection of git objects.</summary>
 /// <typeparam name="TObject">The type of the object.</typeparam>
 /// <typeparam name="TEventArgs">The type of the event args.</typeparam>
-public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INotifyCollectionChanged, IEnumerable<TObject>
+public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INotifyCollectionChanged, IReadOnlyCollection<TObject>
 	where TObject : GitNamedObjectWithLifetime
 	where TEventArgs : ObjectEventArgs<TObject>
 {

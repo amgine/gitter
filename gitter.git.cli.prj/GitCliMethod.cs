@@ -403,7 +403,7 @@ static class GitCliMethod
 		ICommandExecutor commandExecutor,
 		Func<FetchParameters, bool, Command> commandFactory)
 	{
-		action = new FetchOrPullImpl<FetchParameters>(
+		action = new FetchOrPullAction<FetchParameters>(
 			commandExecutor, commandFactory);
 	}
 
@@ -412,7 +412,7 @@ static class GitCliMethod
 		ICommandExecutor commandExecutor,
 		Func<PullParameters, bool, Command> commandFactory)
 	{
-		action = new FetchOrPullImpl<PullParameters>(
+		action = new FetchOrPullAction<PullParameters>(
 			commandExecutor, commandFactory);
 	}
 
@@ -421,7 +421,7 @@ static class GitCliMethod
 		ICommandExecutor commandExecutor,
 		Func<CloneRepositoryParameters, bool, Command> commandFactory)
 	{
-		action = new CloneImpl(
+		action = new CloneAction(
 			commandExecutor, commandFactory);
 	}
 
@@ -430,7 +430,7 @@ static class GitCliMethod
 		GitCLI gitCLI,
 		Func<InitRepositoryParameters, Command> commandFactory)
 	{
-		action = new InitImpl(
+		action = new InitAction(
 			gitCLI, commandFactory);
 	}
 
@@ -475,7 +475,7 @@ static class GitCliMethod
 		Func<PushParameters, bool, Command> commandFactory,
 		Func<string, IList<ReferencePushResult>> resultsParser)
 	{
-		function = new PushImpl(
+		function = new PushFunction(
 			commandExecutor, commandFactory, resultsParser);
 	}
 
@@ -483,7 +483,7 @@ static class GitCliMethod
 		out IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData> function,
 		IGitRepository repository)
 	{
-		function = new QuerySymbolicReferenceImpl(repository);
+		function = new QuerySymbolicReferenceFunction(repository);
 	}
 
 	public static void Create(
@@ -491,7 +491,7 @@ static class GitCliMethod
 		ICommandExecutor commandExecutor,
 		Func<QueryReflogParameters, Command> commandFactory)
 	{
-		function = new QueryReflogImpl(commandExecutor, commandFactory);
+		function = new QueryReflogFunction(commandExecutor, commandFactory);
 	}
 
 	public static void Create(
@@ -499,7 +499,7 @@ static class GitCliMethod
 		ICommandExecutor commandExecutor,
 		Func<QueryStashParameters, Command> commandFactory)
 	{
-		function = new QueryStashImpl(commandExecutor, commandFactory);
+		function = new QueryStashFunction(commandExecutor, commandFactory);
 	}
 
 	public static void Create(
@@ -507,14 +507,14 @@ static class GitCliMethod
 		ICommandExecutor commandExecutor,
 		Func<QueryTagMessageParameters, Command> commandFactory)
 	{
-		function = new QueryTagMessageImpl(commandExecutor, commandFactory);
+		function = new QueryTagMessageFunction(commandExecutor, commandFactory);
 	}
 
 	public static void Create(
 		out IGitFunction<FormatMergeMessageParameters, string> function,
 		ICommandExecutor commandExecutor)
 	{
-		function = new FormatMergeMessageImpl(commandExecutor);
+		function = new FormatMergeMessageFunction(commandExecutor);
 	}
 
 	public static void Create(
@@ -522,6 +522,6 @@ static class GitCliMethod
 		ICommandExecutor commandExecutor,
 		CommandBuilder commandBuilder)
 	{
-		function = new QueryRevisionsImpl(commandExecutor, commandBuilder);
+		function = new QueryRevisionsFunction(commandExecutor, commandBuilder);
 	}
 }

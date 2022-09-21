@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -34,6 +36,8 @@ public enum BranchColorWhen
 /// <summary>List, create, or delete branches.</summary>
 public sealed class BranchCommand : Command
 {
+	const string BranchCommandName = @"branch";
+
 	public static class KnownArguments
 	{
 		/// <summary>Delete a branch. The branch must be fully merged in HEAD.</summary>
@@ -140,13 +144,13 @@ public sealed class BranchCommand : Command
 
 		private static ICommandArgument NoMergedHEAD { get; } = new CommandFlag("--no-merged");
 
-		public static ICommandArgument Contains(string commit) => commit is null ? ContainsHEAD : new CommandParameterValue("--contains", commit, ' ');
+		public static ICommandArgument Contains(string? commit) => commit is null ? ContainsHEAD : new CommandParameterValue("--contains", commit, ' ');
 
-		public static ICommandArgument NoContains(string commit) => commit is null ? NoContainsHEAD : new CommandParameterValue("--no-contains", commit, ' ');
+		public static ICommandArgument NoContains(string? commit) => commit is null ? NoContainsHEAD : new CommandParameterValue("--no-contains", commit, ' ');
 
-		public static ICommandArgument Merged(string commit) => commit is null ? MergedHEAD : new CommandParameterValue("--merged", commit, ' ');
+		public static ICommandArgument Merged(string? commit) => commit is null ? MergedHEAD : new CommandParameterValue("--merged", commit, ' ');
 
-		public static ICommandArgument NoMerged(string commit) => commit is null ? NoMergedHEAD : new CommandParameterValue("--no-merged", commit, ' ');
+		public static ICommandArgument NoMerged(string? commit) => commit is null ? NoMergedHEAD : new CommandParameterValue("--no-merged", commit, ' ');
 	}
 
 	public sealed class Builder : CommandBuilderBase
@@ -154,7 +158,7 @@ public sealed class BranchCommand : Command
 		static readonly Version NewReflogArgVersion = new(2, 20, 0);
 
 		public Builder(Version gitVersion)
-			: base("branch")
+			: base(BranchCommandName)
 		{
 			GitVersion = gitVersion;
 		}
@@ -205,27 +209,27 @@ public sealed class BranchCommand : Command
 
 		public void Quiet() => AddArgument(KnownArguments.Quiet);
 
-		public void Contains(string commit = null) => AddArgument(KnownArguments.Contains(commit));
+		public void Contains(string? commit = null) => AddArgument(KnownArguments.Contains(commit));
 
-		public void NoContains(string commit = null) => AddArgument(KnownArguments.NoContains(commit));
+		public void NoContains(string? commit = null) => AddArgument(KnownArguments.NoContains(commit));
 
-		public void Merged(string commit = null) => AddArgument(KnownArguments.Merged(commit));
+		public void Merged(string? commit = null) => AddArgument(KnownArguments.Merged(commit));
 
-		public void NoMerged(string commit = null) => AddArgument(KnownArguments.NoMerged(commit));
+		public void NoMerged(string? commit = null) => AddArgument(KnownArguments.NoMerged(commit));
 	}
 
 	public BranchCommand()
-		: base("branch")
+		: base(BranchCommandName)
 	{
 	}
 
 	public BranchCommand(params ICommandArgument[] args)
-		: base("branch", args)
+		: base(BranchCommandName, args)
 	{
 	}
 
 	public BranchCommand(IList<ICommandArgument> args)
-		: base("branch", args)
+		: base(BranchCommandName, args)
 	{
 	}
 }

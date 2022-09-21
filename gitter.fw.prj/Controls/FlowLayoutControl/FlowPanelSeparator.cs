@@ -44,6 +44,7 @@ public class FlowPanelSeparator : FlowPanel
 			if(_height != value)
 			{
 				_height = value;
+				InvalidateSize();
 			}
 		}
 	}
@@ -56,31 +57,40 @@ public class FlowPanelSeparator : FlowPanel
 			if(_style != value)
 			{
 				_style = value;
+				Invalidate();
 			}
 		}
 	}
 
+	/// <inheritdoc/>
 	protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 	{
-		return new Size(0, _height);
+		Assert.IsNotNull(measureEventArgs);
+
+		return new Size(0, DpiConverter.FromDefaultTo(measureEventArgs.Dpi).ConvertY(Height));
 	}
 
+	/// <inheritdoc/>
 	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 	{
+		Assert.IsNotNull(paintEventArgs);
+
 		var graphics = paintEventArgs.Graphics;
 		var rect = paintEventArgs.Bounds;
 		switch(_style)
 		{
 			case FlowPanelSeparatorStyle.Line:
 				{
-					var y = _height / 2;
-					var x = y;
-					var w = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width) - 2 * x;
-					if(w > 0)
+					var y = rect.Height / 2;
+					var x = 8;
+					var w = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width) - 2 * 8;
+					x += rect.X;
+					y += rect.Y;
+					var rc = new Rectangle(x, y, w, DpiConverter.FromDefaultTo(paintEventArgs.Dpi).ConvertY(1));
+					rc.Intersect(paintEventArgs.ClipRectangle);
+					if(rc is { Width: > 0, Height: > 0 })
 					{
-						x += rect.X;
-						y += rect.Y;
-						graphics.DrawLine(Pens.Gray, x, y, x + w, y);
+						graphics.GdiFill(Color.Gray, rc);
 					}
 				}
 				break;

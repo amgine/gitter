@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -28,19 +30,18 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-sealed class QueryStashImpl : IGitFunction<QueryStashParameters, IList<StashedStateData>>
+sealed class QueryStashFunction : IGitFunction<QueryStashParameters, IList<StashedStateData>>
 {
-	#region Data
-
 	private readonly ICommandExecutor _commandExecutor;
 	private readonly Func<QueryStashParameters, Command> _commandFactory;
 
-	#endregion
-
-	public QueryStashImpl(ICommandExecutor commandExecutor, Func<QueryStashParameters, Command> commandFactory)
+	public QueryStashFunction(ICommandExecutor commandExecutor, Func<QueryStashParameters, Command> commandFactory)
 	{
+		Assert.IsNotNull(commandExecutor);
+		Assert.IsNotNull(commandFactory);
+
 		_commandExecutor = commandExecutor;
-		_commandFactory = commandFactory;
+		_commandFactory  = commandFactory;
 	}
 
 	private static Command GetCommand2(QueryStashParameters parameters)
@@ -92,14 +93,14 @@ sealed class QueryStashImpl : IGitFunction<QueryStashParameters, IList<StashedSt
 	}
 
 	public Task<IList<StashedStateData>> InvokeAsync(QueryStashParameters parameters,
-		IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
 		var command1 = _commandFactory(parameters);
 		var command2 = GetCommand2(parameters);
 
-		var tcs = new TaskCompletionSource<object>();
+		var tcs = new TaskCompletionSource<object?>();
 		if(cancellationToken.CanBeCanceled)
 		{
 			cancellationToken.Register(() => tcs.TrySetCanceled());
@@ -121,12 +122,12 @@ sealed class QueryStashImpl : IGitFunction<QueryStashParameters, IList<StashedSt
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnCanceled,
 			TaskScheduler.Default);
 		task1.ContinueWith(
-			t => tcs.TrySetException(t.Exception),
+			t => tcs.TrySetException(t.Exception!),
 			cancellationToken,
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
 			TaskScheduler.Default);
 		task2.ContinueWith(
-			t => tcs.TrySetException(t.Exception),
+			t => tcs.TrySetException(t.Exception!),
 			cancellationToken,
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
 			TaskScheduler.Default);

@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
 * gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+* Copyright (C) 2022  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
 * 
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -20,38 +20,17 @@
 
 namespace gitter.Git;
 
-public enum ReferenceChangeType
-{
-	Added,
-	Removed,
-	Moved,
-}
-
-public sealed class ReferenceChange
-{
-	public ReferenceChange(
-		ReferenceType referenceType,
-		string fullName, string name,
-		Hash oldHash, Hash newHash,
-		ReferenceChangeType changeType)
-	{
-		ReferenceType = referenceType;
-		FullName = fullName;
-		Name = name;
-		OldHash = oldHash;
-		NewHash = newHash;
-		ChangeType = changeType;
-	}
-
-	public ReferenceType ReferenceType { get; }
-
-	public string FullName { get; }
-
-	public string Name { get; }
-
-	public Hash OldHash { get; }
-
-	public Hash NewHash { get; }
-
-	public ReferenceChangeType ChangeType { get; }
-}
+/// <summary>Reference change description.</summary>
+/// <param name="ReferenceType">Change type.</param>
+/// <param name="FullName">Full reference name.</param>
+/// <param name="Name">Short reference name.</param>
+/// <param name="OldHash">Old reference target hash.</param>
+/// <param name="NewHash">New reference target hash.</param>
+/// <param name="ChangeType">Change type.</param>
+public sealed record class ReferenceChange(
+	ReferenceType       ReferenceType,
+	string              FullName,
+	string              Name,
+	Hash                OldHash,
+	Hash                NewHash,
+	ReferenceChangeType ChangeType);

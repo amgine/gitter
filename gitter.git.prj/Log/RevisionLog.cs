@@ -52,7 +52,7 @@ public sealed class RevisionLog
 	{
 		Verify.Argument.IsNotNull(revision);
 
-		if(_parents == null)
+		if(_parents is null)
 		{
 			return revision.Parents;
 		}

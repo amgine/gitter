@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -51,7 +53,7 @@ public sealed class RemoteBranch : BranchBase
 
 	/// <summary>Returns remote this branch is associated with.</summary>
 	/// <value>Remote this branch is associated with.</value>
-	public Remote Remote
+	public Remote? Remote
 	{
 		get
 		{
@@ -100,7 +102,7 @@ public sealed class RemoteBranch : BranchBase
 	}
 
 	/// <summary>Delete branch from remote and local repository.</summary>
-	public async Task DeleteFromRemoteAsync(CancellationToken cancellationToken)
+	public async Task DeleteFromRemoteAsync(CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -118,7 +120,8 @@ public sealed class RemoteBranch : BranchBase
 		}
 		if(!IsDeleted)
 		{
-			await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
+			await RefreshAsync()
+				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 	}
 

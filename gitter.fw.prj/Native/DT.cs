@@ -23,7 +23,7 @@ namespace gitter.Native;
 using System;
 
 [Flags]
-public enum DT
+public enum DT : uint
 {
 	TOP                  = 0x00000000,
 	LEFT                 = 0x00000000,

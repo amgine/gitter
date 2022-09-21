@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
 * gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+* Copyright (C) 2022  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
 * 
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -18,31 +18,15 @@
 */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-using gitter.Framework;
-	
-using gitter.Git.AccessLayer;
-	
-using Resources = gitter.Git.Properties.Resources;
-	
-public abstract class LogSourceBase : ILogSource
+/// <summary>Reference change.</summary>
+public enum ReferenceChangeType
 {
-	protected LogSourceBase()
-	{
-	}
-
-	public abstract Repository Repository { get; }
-
-	public abstract Task<RevisionLog> GetRevisionLogAsync(LogOptions options,
-		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default);
-
-	/// <inheritdoc/>
-	public override string ToString() => "log";
+	/// <summary>Reference was created.</summary>
+	Added,
+	/// <summary>Reference was removed.</summary>
+	Removed,
+	/// <summary>Reference was moved.</summary>
+	Moved,
 }

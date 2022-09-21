@@ -46,9 +46,6 @@ internal static class User32
 	public static extern IntPtr WindowFromPoint(POINT point);
 
 	[DllImport(DllName)]
-	public static extern IntPtr WindowFromPoint(Point point);
-
-	[DllImport(DllName)]
 	public static extern IntPtr GetAncestor(IntPtr hwnd, int gaFlags);
 
 	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
@@ -208,4 +205,50 @@ internal static class User32
 	[return: MarshalAs(UnmanagedType.Bool)]
 	public static extern bool UnhookWindowsHookEx(
 		[In]  IntPtr hhk);
+
+	[DllImport(DllName, SetLastError = true, CharSet = CharSet.Unicode)]
+	public static unsafe extern int DrawTextExW(
+		IntPtr hdc,
+		char*  lpchText,
+		int    cchText,
+		RECT*  lprc,
+		DT     format,
+		DRAWTEXTPARAMS* lpdtp);
+}
+
+enum TextPaddingOptions
+{
+	// Add some extra points to account for some glyphs overhanging (like for letter f in some fonts or 
+	// when italized).
+	// For an illustration, type letter f in Wordpad and make it 72-point "Times New Roman" italic
+	// observe that the lower left part of the letter is clipped.  Also, try selecting the letter,
+	// both the lower-left and the upper-right parts are clipped.
+	// The default value.
+	GlyphOverhangPadding = 0x00000000,
+
+	NoPadding = 0x00000001,
+
+	// Adds padding to the text bounding box (inflating the bounding box).
+	// This is to render text similar to GDI+.
+	// Implies GlypOverhangPadding.
+	LeftAndRightPadding = 0x00000002
+}
+
+[StructLayout(LayoutKind.Sequential)]
+struct LOGFONT
+{
+	public int lfHeight;
+	public int lfWidth;
+	public int lfEscapement;
+	public int lfOrientation;
+	public int lfWeight;
+	public byte lfItalic;
+	public byte lfUnderline;
+	public byte lfStrikeOut;
+	public byte lfCharSet;
+	public byte lfOutPrecision;
+	public byte lfClipPrecision;
+	public byte lfQuality;
+	public byte lfPitchAndFamily;
+	public unsafe fixed char lfFaceName[32];
 }

@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -39,5 +41,5 @@ public abstract class TreeSourceBase : ITreeSource
 	public abstract Tree GetTree();
 
 	public abstract Task<Tree> GetTreeAsync(
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default);
 }

@@ -18,11 +18,14 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,33 +34,64 @@ using gitter.Framework.CLI;
 
 using Resources = gitter.Git.AccessLayer.CLI.Properties.Resources;
 
-sealed class FetchOrPullImpl<TParameters> : IGitAction<TParameters>
-	where TParameters : FetchParameters
+sealed class CloneAction : IGitAction<CloneRepositoryParameters>
 {
 	private readonly ICommandExecutor _commandExecutor;
-	private readonly Func<TParameters, bool, Command> _commandFactory;
+	private readonly Func<CloneRepositoryParameters, bool, Command> _commandFactory;
 
-	public FetchOrPullImpl(ICommandExecutor commandExecutor, Func<TParameters, bool, Command> commandFactory)
+	public CloneAction(ICommandExecutor commandExecutor, Func<CloneRepositoryParameters, bool, Command> commandFactory)
 	{
+		Assert.IsNotNull(commandExecutor);
+
 		_commandExecutor = commandExecutor;
 		_commandFactory  = commandFactory;
 	}
 
-	public void Invoke(TParameters parameters)
+	/// <summary>Clone existing repository.</summary>
+	/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
+	/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+	public void Invoke(CloneRepositoryParameters parameters)
 	{
+		/*
+		 * git clone [--template=<template_directory>] [-l] [-s] [--no-hardlinks]
+		 * [-q] [-n] [--bare] [--mirror] [-o <name>] [-b <name>] [-u <upload-pack>]
+		 * [--reference <repository>] [--depth <depth>] [--recursive] [--] <repository> [<directory>]
+		 */
 		Verify.Argument.IsNotNull(parameters);
 
+		try
+		{
+			if(!Directory.Exists(parameters.Path))
+			{
+				Directory.CreateDirectory(parameters.Path);
+			}
+		}
+		catch(Exception exc) when(!exc.IsCritical())
+		{
+			throw new GitException(exc.Message, exc);
+		}
 		var command = _commandFactory(parameters, false);
-		var output = _commandExecutor.ExecuteCommand(command, null, CommandExecutionFlags.None);
+		var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 		output.ThrowOnBadReturnCode();
 	}
 
-	public async Task InvokeAsync(TParameters parameters,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	/// <summary>Clone existing repository.</summary>
+	/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
+	/// <param name="progress">Progress tracker.</param>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
+	public async Task InvokeAsync(CloneRepositoryParameters parameters,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		progress?.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
+		var command = _commandFactory(parameters, true);
+		if(!Directory.Exists(parameters.Path))
+		{
+			Directory.CreateDirectory(parameters.Path);
+		}
+		progress?.Report(new(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
+
 		var errorMessages  = default(List<string>);
 		var stdOutReceiver = new NullReader();
 		var stdErrReceiver = new NotifyingAsyncTextReader();
@@ -70,8 +104,11 @@ sealed class FetchOrPullImpl<TParameters> : IGitAction<TParameters>
 				progress?.Report(operationProgress);
 				if(operationProgress.IsIndeterminate)
 				{
-					errorMessages ??= new List<string>();
-					errorMessages.Add(operationProgress.ActionName);
+					if(!string.IsNullOrWhiteSpace(operationProgress.ActionName))
+					{
+						errorMessages ??= new List<string>();
+						errorMessages.Add(operationProgress.ActionName);
+					}
 				}
 				else
 				{
@@ -79,14 +116,9 @@ sealed class FetchOrPullImpl<TParameters> : IGitAction<TParameters>
 				}
 			}
 		};
-		var command = _commandFactory(parameters, true);
+
 		var processExitCode = await _commandExecutor
-			.ExecuteCommandAsync(
-				command,
-				stdOutReceiver,
-				stdErrReceiver,
-				CommandExecutionFlags.None,
-				cancellationToken)
+			.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, CommandExecutionFlags.None, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		if(processExitCode != 0)
 		{

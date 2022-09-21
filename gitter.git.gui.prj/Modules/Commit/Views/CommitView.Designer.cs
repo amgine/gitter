@@ -158,7 +158,6 @@
 			this._txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._txtMessage.Font = new System.Drawing.Font("Consolas", 10F);
 			this._txtMessage.Location = new System.Drawing.Point(3, 18);
 			this._txtMessage.Multiline = true;
 			this._txtMessage.Name = "_txtMessage";

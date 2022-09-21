@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -28,14 +30,14 @@ using System.Text;
 /// <summary>Input data for git.exe.</summary>
 internal sealed class GitInput
 {
-	public GitInput(Command command, Encoding encoding = null,
-		IReadOnlyDictionary<string, string> environment = null)
+	public GitInput(Command command, Encoding? encoding = null,
+		IReadOnlyDictionary<string, string>? environment = null)
 		: this(string.Empty, command, encoding, environment)
 	{
 	}
 
-	public GitInput(string workingDirectory, Command command, Encoding encoding = null,
-		IReadOnlyDictionary<string, string> environment = null)
+	public GitInput(string workingDirectory, Command command, Encoding? encoding = null,
+		IReadOnlyDictionary<string, string>? environment = null)
 	{
 		WorkingDirectory = workingDirectory ?? string.Empty;
 		Command          = command;
@@ -49,7 +51,7 @@ internal sealed class GitInput
 
 	public Command Command { get; }
 
-	public IReadOnlyDictionary<string, string> Environment { get; }
+	public IReadOnlyDictionary<string, string>? Environment { get; }
 
 	public void Configure(ProcessStartInfo processStartInfo)
 	{

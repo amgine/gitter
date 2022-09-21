@@ -26,13 +26,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using gitter.Framework;
 
-sealed class QuerySymbolicReferenceImpl : IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData>
+sealed class QuerySymbolicReferenceFunction : IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData>
 {
 	private const string refPrefix = "ref: ";
 
 	private readonly IGitRepository _repository;
 
-	public QuerySymbolicReferenceImpl(IGitRepository repository)
+	public QuerySymbolicReferenceFunction(IGitRepository repository)
 	{
 		_repository = repository;
 	}

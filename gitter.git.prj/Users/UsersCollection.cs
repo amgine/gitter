@@ -74,8 +74,7 @@ public sealed class UsersCollection : GitObjectsCollection<User, UserEventArgs>
 		{
 			if(!ObjectStorage.TryGetValue(name + "\n" + email, out user))
 			{
-				user = new User(Repository, name, email, 0);
-				AddObject(user);
+				AddObject(user = new(Repository, name, email, 0));
 			}
 		}
 		return user;

@@ -48,7 +48,7 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, Repository repository, string parameterName)
+		public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, Repository repository, [CallerArgumentExpression(@"gitObject")] string parameterName = null)
 		{
 			Assert.IsNotNull(repository);
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -86,7 +86,7 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidRevisionPointer(IRevisionPointer revision, Repository repository, string parameterName)
+		public static void IsValidRevisionPointer(IRevisionPointer revision, Repository repository, [CallerArgumentExpression(@"revision")] string parameterName = null)
 		{
 			Assert.IsNotNull(repository);
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -170,7 +170,7 @@ internal static partial class Verify
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
 		public static void IsValidRevisionPointerSequence(
-			IEnumerable<IRevisionPointer> revisions, Repository repository, string parameterName)
+			IEnumerable<IRevisionPointer> revisions, Repository repository, [CallerArgumentExpression(@"revisions")] string? parameterName = default)
 		{
 			Assert.IsNotNull(repository);
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -277,7 +277,7 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidReferenceName(string referenceName, ReferenceType referenceType, string parameterName)
+		public static void IsValidReferenceName(string referenceName, ReferenceType referenceType, [CallerArgumentExpression(@"referenceName")] string parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 

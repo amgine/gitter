@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -36,7 +38,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	#region Events
 
 	/// <summary>Occurs when branch is renamed.</summary>
-	public event EventHandler<BranchRenamedEventArgs> BranchRenamed;
+	public event EventHandler<BranchRenamedEventArgs>? BranchRenamed;
 
 	/// <summary>Invokes <see cref="BranchRenamed"/> event.</summary>
 	/// <param name="branch">Renamed branch.</param>
@@ -61,8 +63,13 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	#region Create()
 
 	private static CreateBranchParameters GetCreateBranchParameters(string name, IRevisionPointer startingRevision,
-		BranchTrackingMode tracking = BranchTrackingMode.Default, bool createRefLog = false, bool checkout = false, bool orphan = false)
-		=> new CreateBranchParameters(name, startingRevision.Pointer, checkout, orphan, createRefLog, tracking);
+		BranchTrackingMode tracking,
+		bool               createRefLog,
+		bool               checkout,
+		bool               orphan)
+	{
+		return new(name, startingRevision.Pointer, checkout, orphan, createRefLog, tracking);
+	}
 
 	private Branch OnBranchCreated(string name, Revision rev, bool checkout)
 	{
@@ -87,8 +94,15 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <param name="orphan">Set to <c>true</c> to create orphan branch.</param>
 	/// <returns>Created branch.</returns>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-	private Branch CreateBranchCore(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool createRefLog, bool checkout, bool orphan)
+	private Branch CreateBranchCore(string name, IRevisionPointer startingRevision,
+		BranchTrackingMode tracking,
+		bool               createRefLog,
+		bool               checkout,
+		bool               orphan)
 	{
+		Assert.IsNotNull(name);
+		Assert.IsNotNull(startingRevision);
+
 		var rev = startingRevision.Dereference()
 			?? throw new ArgumentException($"Unable to dereference {startingRevision}.", nameof(startingRevision));
 
@@ -113,8 +127,15 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <param name="orphan">Set to <c>true</c> to create orphan branch.</param>
 	/// <returns>Created branch.</returns>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
-	private async Task<Branch> CreateBranchCoreAsync(string name, IRevisionPointer startingRevision, BranchTrackingMode tracking, bool createRefLog, bool checkout, bool orphan)
+	private async Task<Branch> CreateBranchCoreAsync(string name, IRevisionPointer startingRevision,
+		BranchTrackingMode tracking,
+		bool               createRefLog,
+		bool               checkout,
+		bool               orphan)
 	{
+		Assert.IsNotNull(name);
+		Assert.IsNotNull(startingRevision);
+
 		var rev = await startingRevision
 			.DereferenceAsync()
 			.ConfigureAwait(continueOnCapturedContext: false)
@@ -148,10 +169,11 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// </exception>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 	public Branch CreateOrphan(string name, IRevisionPointer startingRevision,
-		BranchTrackingMode tracking = BranchTrackingMode.Default, bool createRefLog = false)
+		BranchTrackingMode tracking     = BranchTrackingMode.Default,
+		bool               createRefLog = false)
 	{
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
-		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch);
+		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
@@ -172,10 +194,11 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// </exception>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 	public Task<Branch> CreateOrphanAsync(string name, IRevisionPointer startingRevision,
-		BranchTrackingMode tracking = BranchTrackingMode.Default, bool createRefLog = false)
+		BranchTrackingMode tracking     = BranchTrackingMode.Default,
+		bool               createRefLog = false)
 	{
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
-		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch);
+		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
@@ -197,10 +220,12 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// </exception>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 	public Branch Create(string name, IRevisionPointer startingRevision,
-		BranchTrackingMode tracking = BranchTrackingMode.Default, bool checkout = false, bool createRefLog = false)
+		BranchTrackingMode tracking     = BranchTrackingMode.Default,
+		bool               checkout     = false,
+		bool               createRefLog = false)
 	{
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
-		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch);
+		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
@@ -222,10 +247,12 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// </exception>
 	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="startingRevision"/> or create a branch.</exception>
 	public Task<Branch> CreateAsync(string name, IRevisionPointer startingRevision,
-		BranchTrackingMode tracking = BranchTrackingMode.Default, bool checkout = false, bool createRefLog = false)
+		BranchTrackingMode tracking     = BranchTrackingMode.Default,
+		bool               checkout     = false,
+		bool               createRefLog = false)
 	{
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
-		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository, nameof(startingRevision));
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch);
+		Verify.Argument.IsValidRevisionPointer(startingRevision, Repository);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
@@ -248,8 +275,8 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <exception cref="T:gitter.Git.GitException">Failed to rename <paramref name="branch"/>.</exception>
 	internal void Rename(Branch branch, string name)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
-		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch, nameof(name));
+		Verify.Argument.IsValidGitObject(branch, Repository);
+		Verify.Argument.IsValidReferenceName(name, ReferenceType.Branch);
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Branch)));
 
@@ -290,9 +317,9 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <exception cref="T:System.ArgumentException"><paramref name="branch"/> is not handled by this repository or deleted.</exception>
 	/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
 	/// <exception cref="T:gitter.Git.GitException">Failed to delete <paramref name="branch"/>.</exception>
-	internal void Delete(Branch branch, bool force)
+	internal void Delete(Branch branch, bool force = false)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged))
@@ -310,9 +337,9 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <exception cref="T:System.ArgumentException"><paramref name="branch"/> is not handled by this repository or deleted.</exception>
 	/// <exception cref="T:git.BranchIsNotFullyMergedException">Branch is not fully merged and can only be deleted if <paramref name="force"/> == true.</exception>
 	/// <exception cref="T:gitter.Git.GitException">Failed to delete <paramref name="branch"/>.</exception>
-	internal async Task DeleteAsync(Branch branch, bool force)
+	internal async Task DeleteAsync(Branch branch, bool force = false)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged))
@@ -367,7 +394,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <param name="branch">Branch to refresh.</param>
 	internal void Refresh(Branch branch)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var branchData = Repository.Accessor.QueryBranch
 			.Invoke(new QueryBranchParameters(branch.Name, branch.IsRemote));
@@ -385,7 +412,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <param name="branch">Branch to refresh.</param>
 	internal async Task RefreshAsync(Branch branch)
 	{
-		Verify.Argument.IsValidGitObject(branch, Repository, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var branchData = await Repository.Accessor.QueryBranch
 			.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
@@ -450,7 +477,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
 	public IReadOnlyList<Branch> GetContaining(IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 
 		var refs = Repository.Accessor.QueryBranches.Invoke(
 			new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.Contains, revision.Pointer));
@@ -511,8 +538,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	/// <summary>Creates the event args for specified <paramref name="item"/>.</summary>
 	/// <param name="item">Item to create event args for.</param>
 	/// <returns>Created event args.</returns>
-	protected override BranchEventArgs CreateEventArgs(Branch item)
-		=> new BranchEventArgs(item);
+	protected override BranchEventArgs CreateEventArgs(Branch item) => new(item);
 
 	#endregion
 }

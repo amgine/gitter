@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -35,7 +37,7 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 {
 	#region Events
 
-	public event EventHandler IndexChanged;
+	public event EventHandler? IndexChanged;
 
 	private void InvokeIndexChanged()
 		=> IndexChanged?.Invoke(this, EventArgs.Empty);
@@ -63,7 +65,7 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 
 	#region Methods
 
-	public Task DropAsync(IProgress<OperationProgress> progress = default)
+	public Task DropAsync(IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -77,7 +79,7 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 		Repository.Stash.Drop(this);
 	}
 
-	public Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
+	public Task PopAsync(bool restoreIndex, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -112,7 +114,7 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 		Repository.Stash.Apply(this, restoreIndex);
 	}
 
-	public Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
+	public Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -126,7 +128,7 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 		return Repository.Stash.ToBranch(this, name);
 	}
 
-	public IRevisionDiffSource GetDiffSource(IEnumerable<string> paths = null)
+	public IRevisionDiffSource GetDiffSource(IEnumerable<string>? paths = null)
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -164,14 +166,18 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 
 	ReferenceType IRevisionPointer.Type => ReferenceType.Stash;
 
+	/// <inheritdoc/>
 	string IRevisionPointer.Pointer
 		=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
+	/// <inheritdoc/>
 	string IRevisionPointer.FullName
 		=> GitConstants.StashFullName + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
+	/// <inheritdoc/>
 	Revision IRevisionPointer.Dereference() => Revision;
 
+	/// <inheritdoc/>
 	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(Revision);
 
 	#endregion

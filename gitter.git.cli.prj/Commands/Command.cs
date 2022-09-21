@@ -104,8 +104,7 @@ public class Command
 		}
 	}
 
-	/// <summary>Returns a <see cref="System.String"/> that represents this <see cref="Command"/>.</summary>
-	/// <returns>A <see cref="System.String"/> that represents this <see cref="Command"/>.</returns>
+	/// <inheritdoc/>
 	public override string ToString()
 	{
 		var sb = new StringBuilder();

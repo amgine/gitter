@@ -110,13 +110,10 @@ public partial class OptionsDialog : DialogBase, IExecutableDialog, IElevatedExe
 		bool require = false;
 		foreach(var page in _propertyPages.Values)
 		{
-			if(page != sender && page is IElevatedExecutableDialog elevated)
+			if(page != sender && page is IElevatedExecutableDialog { RequireElevation: true })
 			{
-				if(elevated.RequireElevation)
-				{
-					require = true;
-					break;
-				}
+				require = true;
+				break;
 			}
 		}
 		if(require) return;

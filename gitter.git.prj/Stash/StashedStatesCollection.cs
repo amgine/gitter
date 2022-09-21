@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -33,15 +35,15 @@ using gitter.Git.AccessLayer;
 using Resources = gitter.Git.Properties.Resources;
 
 /// <summary>Repository's stash.</summary>
-public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedState>
+public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<StashedState>
 {
 	#region Events
 
 	/// <summary>New <see cref="StashedState"/> was created.</summary>
-	public event EventHandler<StashedStateEventArgs> StashedStateCreated;
+	public event EventHandler<StashedStateEventArgs>? StashedStateCreated;
 
 	/// <summary><see cref="StashedState"/> was dropped.</summary>
-	public event EventHandler<StashedStateEventArgs> StashedStateDeleted;
+	public event EventHandler<StashedStateEventArgs>? StashedStateDeleted;
 
 	/// <summary>Invokes <see cref="StashedStateCreated"/> event.</summary>
 	/// <param name="stashedState">Created stash.</param>
@@ -236,7 +238,7 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 
 	#endregion
 
-	public StashedState MostRecentState
+	public StashedState? MostRecentState
 	{
 		get
 		{
@@ -458,7 +460,7 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 		Repository.Status.Refresh();
 	}
 
-	internal async Task ApplyAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress> progress = default)
+	internal async Task ApplyAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
@@ -575,9 +577,9 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 		Repository.Status.Refresh();
 	}
 
-	internal async Task PopAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress> progress = default)
+	internal async Task PopAsync(StashedState stashedState, bool restoreIndex, IProgress<OperationProgress>? progress = default)
 	{
-		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
+		Verify.Argument.IsValidGitObject(stashedState, Repository);
 		Verify.State.IsTrue(_stash.Count != 0);
 
 		var parameters = GetStashPopParameters(stashedState, restoreIndex);
@@ -595,7 +597,7 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 
 	internal void Pop(StashedState stashedState, bool restoreIndex)
 	{
-		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
+		Verify.Argument.IsValidGitObject(stashedState, Repository);
 		Verify.State.IsTrue(_stash.Count != 0);
 
 		var parameters = GetStashPopParameters(stashedState, restoreIndex);
@@ -648,7 +650,7 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 
 	internal Branch ToBranch(StashedState stashedState, string name)
 	{
-		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
+		Verify.Argument.IsValidGitObject(stashedState, Repository);
 
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged,
@@ -685,17 +687,17 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 
 	#region Save()
 
-	public StashedState Save(bool keepIndex)
+	public StashedState? Save(bool keepIndex)
 	{
 		return Save(keepIndex, false, null);
 	}
 
-	private StashSaveParameters GetStashSaveParameters(bool keepIndex, bool includeUntracked, string message)
+	private StashSaveParameters GetStashSaveParameters(bool keepIndex, bool includeUntracked, string? message)
 	{
 		return new StashSaveParameters(message, keepIndex, includeUntracked);
 	}
 
-	private StashedState OnStashSaveCompleted(bool created)
+	private StashedState? OnStashSaveCompleted(bool created)
 	{
 		if(!created) return default;
 
@@ -725,7 +727,7 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 		return res;
 	}
 
-	public StashedState Save(bool keepIndex, bool includeUntracked, string message)
+	public StashedState? Save(bool keepIndex, bool includeUntracked, string? message)
 	{
 		Verify.State.IsFalse(Repository.IsEmpty,
 			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("stash save"));
@@ -742,8 +744,8 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 		return OnStashSaveCompleted(created);
 	}
 
-	public async Task<StashedState> SaveAsync(bool keepIndex, bool includeUntracked, string message,
-		IProgress<OperationProgress> progress = default)
+	public async Task<StashedState?> SaveAsync(bool keepIndex, bool includeUntracked, string? message,
+		IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsFalse(Repository.IsEmpty,
 			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("stash save"));
@@ -771,9 +773,11 @@ public sealed class StashedStatesCollection : GitObject, IEnumerable<StashedStat
 	public List<StashedState>.Enumerator GetEnumerator()
 		=> _stash.GetEnumerator();
 
+	/// <inheritdoc/>
 	IEnumerator<StashedState> IEnumerable<StashedState>.GetEnumerator()
 		=> _stash.GetEnumerator();
 
+	/// <inheritdoc/>
 	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		=> _stash.GetEnumerator();
 

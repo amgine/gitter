@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -31,42 +33,38 @@ using gitter.Framework.CLI;
 
 using Resources = gitter.Git.AccessLayer.CLI.Properties.Resources;
 
-sealed class PushImpl : IGitFunction<PushParameters, IList<ReferencePushResult>>
+sealed class FetchOrPullAction<TParameters> : IGitAction<TParameters>
+	where TParameters : FetchParameters
 {
 	private readonly ICommandExecutor _commandExecutor;
-	private readonly Func<PushParameters, bool, Command> _commandFactory;
-	private readonly Func<string, IList<ReferencePushResult>> _resultsParser;
+	private readonly Func<TParameters, bool, Command> _commandFactory;
 
-	public PushImpl(
-		ICommandExecutor commandExecutor,
-		Func<PushParameters, bool, Command> commandFactory,
-		Func<string, IList<ReferencePushResult>> resultsParser)
+	public FetchOrPullAction(ICommandExecutor commandExecutor, Func<TParameters, bool, Command> commandFactory)
 	{
+		Assert.IsNotNull(commandExecutor);
+		Assert.IsNotNull(commandFactory);
+
 		_commandExecutor = commandExecutor;
 		_commandFactory  = commandFactory;
-		_resultsParser   = resultsParser;
 	}
 
-	public IList<ReferencePushResult> Invoke(PushParameters parameters)
+	public void Invoke(TParameters parameters)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
 		var command = _commandFactory(parameters, false);
-		var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
+		var output = _commandExecutor.ExecuteCommand(command, null, CommandExecutionFlags.None);
 		output.ThrowOnBadReturnCode();
-		return _resultsParser(output.Output);
 	}
 
-	public async Task<IList<ReferencePushResult>> InvokeAsync(PushParameters parameters,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public async Task InvokeAsync(TParameters parameters,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		var command = _commandFactory(parameters, true);
-
 		progress?.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
 		var errorMessages  = default(List<string>);
-		var stdOutReceiver = new AsyncTextReader();
+		var stdOutReceiver = new NullReader();
 		var stdErrReceiver = new NotifyingAsyncTextReader();
 		stdErrReceiver.TextLineReceived += (_, e) =>
 		{
@@ -86,7 +84,7 @@ sealed class PushImpl : IGitFunction<PushParameters, IList<ReferencePushResult>>
 				}
 			}
 		};
-
+		var command = _commandFactory(parameters, true);
 		var processExitCode = await _commandExecutor
 			.ExecuteCommandAsync(
 				command,
@@ -102,6 +100,5 @@ sealed class PushImpl : IGitFunction<PushParameters, IList<ReferencePushResult>>
 				: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", processExitCode);
 			throw new GitException(errorMessage);
 		}
-		return _resultsParser(stdOutReceiver.GetText());
 	}
 }

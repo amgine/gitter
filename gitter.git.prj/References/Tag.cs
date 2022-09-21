@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -30,25 +32,15 @@ using Resources = gitter.Git.Properties.Resources;
 /// <summary>git tag object.</summary>
 public sealed class Tag : Reference
 {
-	#region Static
-
 	/// <summary>Validates the tag name.</summary>
 	/// <param name="name">Tag name.</param>
 	/// <param name="errorMessage">Error message.</param>
 	/// <returns><c>true</c> if <paramref name="name"/> is a valid tag name; otherwise, <c>false</c>.</returns>
-	public static bool ValidateName(string name, out string errorMessage)
+	public static bool ValidateName(string name, out string? errorMessage)
 		=> Reference.ValidateName(name, ReferenceType.Tag, out errorMessage);
 
-	#endregion
-
-	#region Data
-
 	/// <summary>Annotated tag message.</summary>
-	private string _message;
-
-	#endregion
-
-	#region .ctor
+	private string? _message;
 
 	/// <summary>Initializes a new instance of the <see cref="Tag"/> class.</summary>
 	/// <param name="repository">Host repository.</param>
@@ -60,10 +52,6 @@ public sealed class Tag : Reference
 	{
 		TagType = type;
 	}
-
-	#endregion
-
-	#region Properties
 
 	/// <summary><see cref="ReferenceType"/>.</summary>
 	/// <value><see cref="ReferenceType.Tag"/>.</value>
@@ -79,12 +67,12 @@ public sealed class Tag : Reference
 
 	/// <summary>Gets the message of annotated tag.</summary>
 	/// <value>Message of annotated tag.</value>
-	public string Message
+	public string? Message
 	{
 		get
 		{
 			if(TagType == Git.TagType.Lightweight) return default;
-			if(_message == null)
+			if(_message is null)
 			{
 				try
 				{
@@ -99,10 +87,6 @@ public sealed class Tag : Reference
 			return _message;
 		}
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>Filter <see cref="IRevisionPointer"/> to types supported by this <see cref="Reference"/>.</summary>
 	/// <param name="pointer">Raw pointer.</param>
@@ -145,6 +129,4 @@ public sealed class Tag : Reference
 
 		return Repository.Refs.Tags.RefreshAsync(this);
 	}
-
-	#endregion
 }

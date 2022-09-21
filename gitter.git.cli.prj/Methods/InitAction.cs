@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -26,12 +28,12 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-sealed class InitImpl : IGitAction<InitRepositoryParameters>
+sealed class InitAction : IGitAction<InitRepositoryParameters>
 {
 	private readonly ICliOptionsProvider _cliOptionsProvider;
 	private readonly Func<InitRepositoryParameters, Command> _commandFactory;
 
-	public InitImpl(ICliOptionsProvider cliOptionsProvider, Func<InitRepositoryParameters, Command> commandFactory)
+	public InitAction(ICliOptionsProvider cliOptionsProvider, Func<InitRepositoryParameters, Command> commandFactory)
 	{
 		Assert.IsNotNull(cliOptionsProvider);
 		Assert.IsNotNull(commandFactory);
@@ -51,7 +53,7 @@ sealed class InitImpl : IGitAction<InitRepositoryParameters>
 	}
 
 	public async Task InvokeAsync(InitRepositoryParameters parameters,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 

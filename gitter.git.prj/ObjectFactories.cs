@@ -22,6 +22,7 @@ namespace gitter.Git;
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using gitter.Git.AccessLayer;
 
@@ -317,7 +318,56 @@ static class ObjectFactories
 		return new Submodule(repository, submoduleData.Name, submoduleData.Path, submoduleData.Url);
 	}
 
-	public static void UpdateRevision(Revision revision, RevisionData revisionData, bool updateParents)
+	private static void UpdateParents(Revision revision, RevisionData revisionData)
+	{
+		Assert.IsNotNull(revision);
+		Assert.IsNotNull(revisionData);
+
+		HashSet<Revision> hset = null;
+		if(revision.Parents.Count != 0)
+		{
+			hset = new HashSet<Revision>(revision.Parents);
+		}
+		int id = 0;
+		foreach(var info in revisionData.Parents)
+		{
+			bool found = false;
+			for(int i = id; i < revision.Parents.Count; ++i)
+			{
+				if(revision.Parents[i].Hash == info.SHA1)
+				{
+					if(i != id)
+					{
+						var temp = revision.Parents[i];
+						revision.Parents[i] = revision.Parents[id];
+						revision.Parents[id] = temp;
+					}
+					hset?.Remove(revision.Parents[id]);
+					found = true;
+					break;
+				}
+			}
+			if(!found)
+			{
+				var obj = CreateRevision(revision.Repository, info);
+				revision.Parents.InsertInternal(id, obj);
+			}
+			++id;
+		}
+		if(hset is { Count: not 0 })
+		{
+			foreach(var obj in hset)
+			{
+				revision.Parents.RemoveInternal(obj);
+			}
+		}
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static bool HasFlag(RevisionField flags, RevisionField flag)
+		=> (flags & flag) == flag;
+
+	public static void UpdateRevision(Revision revision, RevisionData revisionData, bool updateParents = true)
 	{
 		Verify.Argument.IsNotNull(revision);
 		Verify.Argument.IsNotNull(revisionData);
@@ -326,78 +376,36 @@ static class ObjectFactories
 		if(fields != RevisionField.SHA1)
 		{
 			var repository = revision.Repository;
-			if((fields & RevisionField.Subject) == RevisionField.Subject)
+			if(HasFlag(fields, RevisionField.Subject))
 			{
 				revision.Subject = revisionData.Subject;
 			}
-			if((fields & RevisionField.Body) == RevisionField.Body)
+			if(HasFlag(fields, RevisionField.Body))
 			{
 				revision.Body = revisionData.Body;
 			}
-			if((fields & RevisionField.TreeHash) == RevisionField.TreeHash)
+			if(HasFlag(fields, RevisionField.TreeHash))
 			{
 				revision.TreeHash = revisionData.TreeHash;
 			}
-			if(updateParents && ((fields & RevisionField.Parents) == RevisionField.Parents))
+			if(updateParents && HasFlag(fields, RevisionField.Parents))
 			{
-				HashSet<Revision> hset = null;
-				if(revision.Parents.Count != 0)
-				{
-					hset = new HashSet<Revision>(revision.Parents);
-				}
-				int id = 0;
-				foreach(var info in revisionData.Parents)
-				{
-					bool found = false;
-					for(int i = id; i < revision.Parents.Count; ++i)
-					{
-						if(revision.Parents[i].Hash == info.SHA1)
-						{
-							if(i != id)
-							{
-								var temp = revision.Parents[i];
-								revision.Parents[i] = revision.Parents[id];
-								revision.Parents[id] = temp;
-							}
-							if(hset != null)
-							{
-								hset.Remove(revision.Parents[id]);
-							}
-							found = true;
-							break;
-						}
-					}
-					if(!found)
-					{
-						var obj = CreateRevision(repository, info);
-						revision.Parents.InsertInternal(id, obj);
-					}
-					++id;
-				}
-				if(hset != null && hset.Count != 0)
-				{
-					foreach(var obj in hset)
-					{
-						revision.Parents.RemoveInternal(obj);
-					}
-				}
+				UpdateParents(revision, revisionData);
 			}
-			if((fields & RevisionField.CommitDate) == RevisionField.CommitDate)
+			if(HasFlag(fields, RevisionField.CommitDate))
 			{
 				revision.CommitDate = revisionData.CommitDate;
 			}
-			if((fields & (RevisionField.CommitterName | RevisionField.CommitterEmail)) ==
-				(RevisionField.CommitterName | RevisionField.CommitterEmail))
+			if(HasFlag(fields, RevisionField.CommitterName | RevisionField.CommitterEmail))
 			{
 				revision.Committer = repository.Users.GetOrCreateUser(
 					revisionData.CommitterName, revisionData.CommitterEmail);
 			}
-			if((fields & RevisionField.AuthorDate) == RevisionField.AuthorDate)
+			if(HasFlag(fields, RevisionField.AuthorDate))
 			{
 				revision.AuthorDate = revisionData.AuthorDate;
 			}
-			if((fields & (RevisionField.AuthorName | RevisionField.AuthorEmail)) ==
-				(RevisionField.AuthorName | RevisionField.AuthorEmail))
+			if(HasFlag(fields, RevisionField.AuthorName | RevisionField.AuthorEmail))
 			{
 				revision.Author = repository.Users.GetOrCreateUser(
 					revisionData.AuthorName, revisionData.AuthorEmail);
@@ -405,11 +413,6 @@ static class ObjectFactories
 
 			revision.IsLoaded = true;
 		}
-	}
-
-	public static void UpdateRevision(Revision obj, RevisionData revisionData)
-	{
-		UpdateRevision(obj, revisionData, updateParents: true);
 	}
 
 	public static Revision CreateRevision(Repository repository, RevisionData revisionData)
@@ -424,19 +427,19 @@ static class ObjectFactories
 			var fields = revisionData.Fields;
 			if(!revision.IsLoaded && (fields != RevisionField.SHA1))
 			{
-				if((fields & RevisionField.Subject) == RevisionField.Subject)
+				if(HasFlag(fields, RevisionField.Subject))
 				{
 					revision.Subject = revisionData.Subject;
 				}
-				if((fields & RevisionField.Body) == RevisionField.Body)
+				if(HasFlag(fields, RevisionField.Body))
 				{
 					revision.Body = revisionData.Body;
 				}
-				if((fields & RevisionField.TreeHash) == RevisionField.TreeHash)
+				if(HasFlag(fields, RevisionField.TreeHash))
 				{
 					revision.TreeHash = revisionData.TreeHash;
 				}
-				if((fields & RevisionField.Parents) == RevisionField.Parents)
+				if(HasFlag(fields, RevisionField.Parents))
 				{
 					foreach(var parentData in revisionData.Parents)
 					{
@@ -444,21 +447,19 @@ static class ObjectFactories
 						revision.Parents.AddInternal(parent);
 					}
 				}
-				if((fields & RevisionField.CommitDate) == RevisionField.CommitDate)
+				if(HasFlag(fields, RevisionField.CommitDate))
 				{
 					revision.CommitDate = revisionData.CommitDate;
 				}
-				if((fields & (RevisionField.CommitterName | RevisionField.CommitterEmail)) ==
-					(RevisionField.CommitterName | RevisionField.CommitterEmail))
+				if(HasFlag(fields, RevisionField.CommitterName | RevisionField.CommitterEmail))
 				{
 					revision.Committer = repository.Users.GetOrCreateUser(revisionData.CommitterName, revisionData.CommitterEmail);
 				}
-				if((fields & RevisionField.AuthorDate) == RevisionField.AuthorDate)
+				if(HasFlag(fields, RevisionField.AuthorDate))
 				{
 					revision.AuthorDate = revisionData.AuthorDate;
 				}
-				if((fields & (RevisionField.AuthorName | RevisionField.AuthorEmail)) ==
-					(RevisionField.AuthorName | RevisionField.AuthorEmail))
+				if(HasFlag(fields, RevisionField.AuthorName | RevisionField.AuthorEmail))
 				{
 					revision.Author = repository.Users.GetOrCreateUser(revisionData.AuthorName, revisionData.AuthorEmail);
 				}

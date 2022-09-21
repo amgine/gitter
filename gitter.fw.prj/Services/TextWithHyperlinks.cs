@@ -90,7 +90,7 @@ public sealed class TextWithHyperlinks
 							.Select(static h => new HyperlinkGlyph(h))
 							.ToArray();
 		_sf.SetMeasurableCharacterRanges(
-			_glyphs.Select(l => new CharacterRange(l.Start, l.Length)).ToArray());
+			Array.ConvertAll(_glyphs, static l => new CharacterRange(l.Start, l.Length)));
 
 		_hoveredLink = new TrackingService<HyperlinkGlyph>();
 		_hoveredLink.Changed += OnHoveredLinkChanged;
@@ -101,8 +101,10 @@ public sealed class TextWithHyperlinks
 			? _hoveredLink.Item.Hyperlink
 			: null;
 
-	private void OnHoveredLinkChanged(object sender, TrackingEventArgs<TextWithHyperlinks.HyperlinkGlyph> e)
+	private void OnHoveredLinkChanged(object sender, TrackingEventArgs<HyperlinkGlyph> e)
 	{
+		Assert.IsNotNull(e);
+
 		e.Item.IsHovered = e.IsTracked;
 		InvalidateRequired?.Invoke(this, EventArgs.Empty);
 	}
@@ -111,6 +113,10 @@ public sealed class TextWithHyperlinks
 
 	public void Render(IGitterStyle style, Graphics graphics, Font font, Rectangle rect)
 	{
+		Assert.IsNotNull(style);
+		Assert.IsNotNull(graphics);
+		Assert.IsNotNull(font);
+
 		bool useCache = _cachedRect == rect;
 		if(useCache)
 		{

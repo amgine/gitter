@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -84,7 +86,8 @@ abstract class ParserBasedFunctionImpl<TParameters, TOutput> : IGitFunction<TPar
 		return parser.GetResult();
 	}
 
-	public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	public async Task<TOutput> InvokeAsync(TParameters parameters,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 

@@ -65,6 +65,9 @@ partial class RevisionHeaderContent
 
 		public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
 		{
+			Assert.IsNotNull(graphics);
+			Assert.IsNotNull(revision);
+
 			var text = GetText(revision);
 			if(_text is null || _text.Text != text)
 			{

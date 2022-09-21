@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Controls;
 
 using System.Drawing;
 
-using gitter.Framework;
 using gitter.Framework.Controls;
 
 sealed class FakeRevisionEmailPainter : EmailPainterBase<FakeRevisionListItem>

@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -39,21 +41,21 @@ public sealed class Status : GitObject
 {
 	#region Events
 
-	public event EventHandler Changed;
+	public event EventHandler? Changed;
 
-	public event EventHandler<TreeFileEventArgs> NewStagedFile;
-	public event EventHandler<TreeDirectoryEventArgs> NewStagedFolder;
+	public event EventHandler<TreeFileEventArgs>? NewStagedFile;
+	public event EventHandler<TreeDirectoryEventArgs>? NewStagedFolder;
 
-	public event EventHandler<TreeFileEventArgs> RemovedStagedFile;
-	public event EventHandler<TreeDirectoryEventArgs> RemovedStagedFolder;
+	public event EventHandler<TreeFileEventArgs>? RemovedStagedFile;
+	public event EventHandler<TreeDirectoryEventArgs>? RemovedStagedFolder;
 
-	public event EventHandler<TreeFileEventArgs> NewUnstagedFile;
-	public event EventHandler<TreeDirectoryEventArgs> NewUnstagedFolder;
+	public event EventHandler<TreeFileEventArgs>? NewUnstagedFile;
+	public event EventHandler<TreeDirectoryEventArgs>? NewUnstagedFolder;
 
-	public event EventHandler<TreeFileEventArgs> RemovedUnstagedFile;
-	public event EventHandler<TreeDirectoryEventArgs> RemovedUnstagedFolder;
+	public event EventHandler<TreeFileEventArgs>? RemovedUnstagedFile;
+	public event EventHandler<TreeDirectoryEventArgs>? RemovedUnstagedFolder;
 
-	public event EventHandler<CommitResultEventArgs> Committed;
+	public event EventHandler<CommitResultEventArgs>? Committed;
 
 	private void InvokeChanged()
 	{
@@ -101,8 +103,8 @@ public sealed class Status : GitObject
 
 	#region Data
 
-	private readonly Dictionary<string, TreeFile> _unstagedPlainList;
-	private readonly Dictionary<string, TreeFile> _stagedPlainList;
+	private readonly Dictionary<string, TreeFile> _unstagedPlainList = new();
+	private readonly Dictionary<string, TreeFile> _stagedPlainList   = new();
 
 	private readonly TreeDirectory _unstagedRoot;
 	private readonly TreeDirectory _stagedRoot;
@@ -122,8 +124,6 @@ public sealed class Status : GitObject
 	internal Status(Repository repository)
 		: base(repository)
 	{
-		_unstagedPlainList = new Dictionary<string, TreeFile>();
-		_stagedPlainList = new Dictionary<string, TreeFile>();
 		var strRoot = Repository.WorkingDirectory;
 		if(strRoot.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
 		{
@@ -170,6 +170,8 @@ public sealed class Status : GitObject
 
 	private static TreeDirectoryData BreakIntoTree(IReadOnlyDictionary<string, TreeFileData> files, StagedStatus stagedStatus)
 	{
+		Assert.IsNotNull(files);
+
 		var root = new TreeDirectoryData("", "", null, FileStatus.Cached, stagedStatus);
 		var dirs = new Dictionary<string, TreeDirectoryData>();
 		var path = new StringBuilder();
@@ -232,33 +234,36 @@ public sealed class Status : GitObject
 
 	private void Refresh(StatusData status)
 	{
+		Assert.IsNotNull(status);
+
 		var stagedRoot   = BreakIntoTree(status.StagedFiles,   StagedStatus.Staged);
 		var unstagedRoot = BreakIntoTree(status.UnstagedFiles, StagedStatus.Unstaged);
 
-		bool m1, m2, m3;
+		bool stagedChanged, unstagedChanged, countsChanges;
 		lock(SyncRoot)
 		{
-			m1 = Merge(_stagedPlainList,   _stagedRoot,   status.StagedFiles,   stagedRoot);
-			m2 = Merge(_unstagedPlainList, _unstagedRoot, status.UnstagedFiles, unstagedRoot);
-			m3 = _stagedAddedCount			!= status.StagedAddedCount ||
-					_stagedModifiedCount		!= status.StagedModifiedCount ||
-					_stagedRemovedCount		!= status.StagedRemovedCount ||
-					_unmergedCount				!= status.UnmergedCount ||
-					_unstagedUntrackedCount	!= status.UnstagedUntrackedCount ||
-					_unstagedModifiedCount		!= status.UnstagedModifiedCount ||
-					_unstagedRemovedCount		!= status.UnstagedRemovedCount;
-			if(m3)
+			stagedChanged   = Merge(_stagedPlainList,   _stagedRoot,   status.StagedFiles,   stagedRoot);
+			unstagedChanged = Merge(_unstagedPlainList, _unstagedRoot, status.UnstagedFiles, unstagedRoot);
+			countsChanges   =
+				_stagedAddedCount       != status.StagedAddedCount||
+				_stagedModifiedCount    != status.StagedModifiedCount ||
+				_stagedRemovedCount     != status.StagedRemovedCount ||
+				_unmergedCount          != status.UnmergedCount ||
+				_unstagedUntrackedCount != status.UnstagedUntrackedCount ||
+				_unstagedModifiedCount  != status.UnstagedModifiedCount ||
+				_unstagedRemovedCount   != status.UnstagedRemovedCount;
+			if(countsChanges)
 			{
-				_stagedAddedCount		= status.StagedAddedCount;
-				_stagedModifiedCount	= status.StagedModifiedCount;
-				_stagedRemovedCount		= status.StagedRemovedCount;
-				_unmergedCount			= status.UnmergedCount;
-				_unstagedUntrackedCount	= status.UnstagedUntrackedCount;
-				_unstagedModifiedCount	= status.UnstagedModifiedCount;
-				_unstagedRemovedCount	= status.UnstagedRemovedCount;
+				_stagedAddedCount       = status.StagedAddedCount;
+				_stagedModifiedCount    = status.StagedModifiedCount;
+				_stagedRemovedCount     = status.StagedRemovedCount;
+				_unmergedCount          = status.UnmergedCount;
+				_unstagedUntrackedCount = status.UnstagedUntrackedCount;
+				_unstagedModifiedCount  = status.UnstagedModifiedCount;
+				_unstagedRemovedCount   = status.UnstagedRemovedCount;
 			}
 
-			if(m1 || m2 || m3)
+			if(stagedChanged || unstagedChanged || countsChanges)
 			{
 				InvokeChanged();
 			}
@@ -296,121 +301,119 @@ public sealed class Status : GitObject
 		Refresh(status);
 	}
 
-	private static void Remove(TreeFile file)
-	{
-		var from = file.Parent;
-		from.Files.Remove(file);
-		if(from.Files.Count == 0 && from.Directories.Count == 0 && from.Parent != null)
-		{
-			Remove(from);
-		}
-	}
-
-	private static void Remove(TreeDirectory folder)
-	{
-		var from = folder.Parent;
-		from.Directories.Remove(folder);
-		if(from.Files.Count == 0 && from.Directories.Count == 0 && from.Parent != null)
-		{
-			Remove(from);
-		}
-	}
-
 	private void Update(TreeDirectoryData sourceDirectory, TreeDirectory targetDirectory)
 	{
-		bool[] existance;
-		bool[] matched;
+		Assert.IsNotNull(sourceDirectory);
+		Assert.IsNotNull(targetDirectory);
 
-		#region update subdirectories
+		int existsLength  = Math.Max(targetDirectory.Directories.Count, targetDirectory.Files.Count);
+		int matchedLength = Math.Max(sourceDirectory.Directories.Count, sourceDirectory.Files.Count);
 
-		existance	= new bool[targetDirectory.Directories.Count];
-		matched		= new bool[sourceDirectory.Directories.Count];
-		for(int i = 0; i < targetDirectory.Directories.Count; ++i)
+#if NETCOREAPP
+		var exists  = System.Buffers.ArrayPool<bool>.Shared.Rent(existsLength);
+		var matched = System.Buffers.ArrayPool<bool>.Shared.Rent(matchedLength);
+		try
 		{
-			var targetSubDirectory = targetDirectory.Directories[i];
-			for(int j = 0; j < sourceDirectory.Directories.Count; ++j)
+#else
+			var exists  = new bool[existsLength];
+			var matched = new bool[matchedLength];
+#endif
+
+			#region update subdirectories
+
+#if NETCOREAPP
+			Array.Clear(exists,  0, targetDirectory.Directories.Count);
+			Array.Clear(matched, 0, sourceDirectory.Directories.Count);
+#endif
+			for(int i = 0; i < targetDirectory.Directories.Count; ++i)
 			{
-				if(!matched[j])
+				var targetSubDirectory = targetDirectory.Directories[i];
+				for(int j = 0; j < sourceDirectory.Directories.Count; ++j)
 				{
+					if(matched[j]) continue;
+
 					var sourceSubDirectory = sourceDirectory.Directories[j];
 					if(targetSubDirectory.Name == sourceSubDirectory.ShortName)
 					{
-						existance[i]	= true;
-						matched[j]		= true;
+						exists[i]  = true;
+						matched[j] = true;
 						Update(sourceSubDirectory, targetSubDirectory);
 						break;
 					}
 				}
 			}
-		}
-		for(int i = targetDirectory.Directories.Count - 1; i >= 0; --i)
-		{
-			if(!existance[i])
+			for(int i = targetDirectory.Directories.Count - 1; i >= 0; --i)
 			{
+				if(exists[i]) continue;
+
 				var directory = targetDirectory.Directories[i];
 				targetDirectory.RemoveDirectoryAt(i);
 				InvokeRemovedDirectory(directory);
 			}
-		}
-		for(int i = 0; i < sourceDirectory.Directories.Count; ++i)
-		{
-			if(!matched[i])
+			for(int i = 0; i < sourceDirectory.Directories.Count; ++i)
 			{
+				if(matched[i]) continue;
+
 				var directory = ObjectFactories.CreateTreeDirectory(Repository, sourceDirectory.Directories[i]);
 				targetDirectory.AddDirectory(directory);
 				InvokeAddedDirectory(directory);
 			}
-		}
 
-		#endregion
+			#endregion
 
-		#region update files
+			#region update files
 
-		existance	= new bool[targetDirectory.Files.Count];
-		matched		= new bool[sourceDirectory.Files.Count];
-		for(int i = 0; i < targetDirectory.Files.Count; ++i)
-		{
-			var targetFile = targetDirectory.Files[i];
-			for(int j = 0; j < sourceDirectory.Files.Count; ++j)
+			Array.Clear(exists,  0, targetDirectory.Files.Count);
+			Array.Clear(matched, 0, sourceDirectory.Files.Count);
+			for(int i = 0; i < targetDirectory.Files.Count; ++i)
 			{
-				if(!matched[j])
+				var targetFile = targetDirectory.Files[i];
+				for(int j = 0; j < sourceDirectory.Files.Count; ++j)
 				{
+					if(matched[j]) continue;
+
 					var sourceFile = sourceDirectory.Files[j];
 					if(targetFile.Name == sourceFile.ShortName)
 					{
-						existance[i]	= true;
-						matched[j]		= true;
+						exists[i] = true;
+						matched[j] = true;
 						targetFile.Status = sourceFile.FileStatus;
 						break;
 					}
 				}
 			}
-		}
-		for(int i = targetDirectory.Files.Count - 1; i >= 0; --i)
-		{
-			if(!existance[i])
+			for(int i = targetDirectory.Files.Count - 1; i >= 0; --i)
 			{
+				if(exists[i]) continue;
+
 				var file = targetDirectory.Files[i];
 				targetDirectory.RemoveFileAt(i);
 				InvokeRemovedFile(file);
 			}
-		}
-		for(int i = 0; i < sourceDirectory.Files.Count; ++i)
-		{
-			if(!matched[i])
+			for(int i = 0; i < sourceDirectory.Files.Count; ++i)
 			{
+				if(matched[i]) continue;
+
 				var treeFile = ObjectFactories.CreateTreeFile(Repository, sourceDirectory.Files[i]);
 				targetDirectory.AddFile(treeFile);
 				InvokeNewFile(treeFile);
 			}
-		}
 
-		#endregion
+			#endregion
+
+#if NETCOREAPP
+		}
+		finally
+		{
+			System.Buffers.ArrayPool<bool>.Shared.Return(exists);
+			System.Buffers.ArrayPool<bool>.Shared.Return(matched);
+		}
+#endif
 	}
 
 	private bool Merge(
-		Dictionary<string, TreeFile>	  oldPlainList, TreeDirectory	  oldRoot,
-		Dictionary<string, TreeFileData> newPlainList,	TreeDirectoryData newRoot)
+		Dictionary<string, TreeFile>     oldPlainList, TreeDirectory     oldRoot,
+		Dictionary<string, TreeFileData> newPlainList, TreeDirectoryData newRoot)
 	{
 		bool res = false;
 		var removeList = new List<string>();
@@ -447,7 +450,7 @@ public sealed class Status : GitObject
 		return res;
 	}
 
-	public TreeFile TryGetStaged(string path)
+	public TreeFile? TryGetStaged(string path)
 	{
 		lock(SyncRoot)
 		{
@@ -459,7 +462,7 @@ public sealed class Status : GitObject
 		return null;
 	}
 
-	public TreeFile TryGetUnstaged(string path)
+	public TreeFile? TryGetUnstaged(string path)
 	{
 		lock(SyncRoot)
 		{
@@ -471,7 +474,7 @@ public sealed class Status : GitObject
 		return null;
 	}
 
-	public void RevertPaths(IEnumerable<string> paths)
+	public void RevertPaths(IEnumerable<string>? paths)
 	{
 		if(paths is null) return;
 		var pathsList = paths.ToList();
@@ -500,7 +503,7 @@ public sealed class Status : GitObject
 
 	internal void Stage(TreeItem item, AddFilesMode mode = AddFilesMode.All)
 	{
-		Verify.Argument.IsValidGitObject(item, Repository, nameof(item));
+		Verify.Argument.IsValidGitObject(item, Repository);
 
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.IndexUpdated))
@@ -513,7 +516,7 @@ public sealed class Status : GitObject
 
 	internal async Task StageAsync(TreeItem item, AddFilesMode mode = AddFilesMode.All)
 	{
-		Verify.Argument.IsValidGitObject(item, Repository, nameof(item));
+		Verify.Argument.IsValidGitObject(item, Repository);
 
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.IndexUpdated))
@@ -525,7 +528,7 @@ public sealed class Status : GitObject
 		await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
 	}
 
-	public void Stage(string pattern = null, bool includeUntracked = false, bool includeIgnored = false)
+	public void Stage(string? pattern = null, bool includeUntracked = false, bool includeIgnored = false)
 	{
 		try
 		{
@@ -545,7 +548,7 @@ public sealed class Status : GitObject
 		}
 	}
 
-	public async Task StageAsync(string pattern = null, bool includeUntracked = false, bool includeIgnored = false)
+	public async Task StageAsync(string? pattern = null, bool includeUntracked = false, bool includeIgnored = false)
 	{
 		try
 		{
@@ -659,14 +662,14 @@ public sealed class Status : GitObject
 		await RefreshAsync().ConfigureAwait(continueOnCapturedContext: false);
 	}
 
-	private static AddFilesParameters GetAddFilesParameters(string pattern, bool includeUntracked, bool includeIgnored)
+	private static AddFilesParameters GetAddFilesParameters(string? pattern, bool includeUntracked, bool includeIgnored)
 		=> new(includeUntracked ? AddFilesMode.All : AddFilesMode.Update, pattern)
 		{
 			Force = includeIgnored,
 		};
 
-	public async Task<IList<TreeFile>> GetFilesToAddAsync(string pattern, bool includeUntracked, bool includeIgnored,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public async Task<IList<TreeFile>> GetFilesToAddAsync(string? pattern, bool includeUntracked, bool includeIgnored,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrLookingForFiles.AddEllipsis()));
 		IList<TreeFileData> files;
@@ -1103,6 +1106,26 @@ public sealed class Status : GitObject
 
 	#region commit
 
+	private string SaveMessageForCommit(string message)
+	{
+		var fileName = Path.Combine(
+			Repository.GitDirectory,
+			GitConstants.CommitMessageFileName);
+		File.WriteAllText(fileName, message);
+		return fileName;
+	}
+
+	private static void DeleteMessageAfterCommit(string fileName)
+	{
+		try
+		{
+			File.Delete(fileName);
+		}
+		catch(Exception exc) when(!exc.IsCritical())
+		{
+		}
+	}
+
 	/*
 		* git commit [-a | --interactive] [-s] [-v] [-u<mode>] [--amend] [--dry-run] [(-c | -C) <commit>]
 		*			  [-F <file> | -m <msg>] [--reset-author] [--allow-empty] [--no-verify] [-e] [--author=<author>]
@@ -1119,29 +1142,19 @@ public sealed class Status : GitObject
 			RepositoryNotifications.BranchChanged,
 			RepositoryNotifications.Checkout))
 		{
-			var fileName = Path.Combine(
-				Repository.GitDirectory,
-				GitConstants.CommitMessageFileName);
-			File.WriteAllText(fileName, message);
-			output = Repository.Accessor.Commit.Invoke(
-				new CommitParameters
-				{
-					MessageFileName = Path.Combine(
-						Repository.GitDirectory, GitConstants.CommitMessageFileName),
-					Amend = amend,
-				});
-			try
+			var fileName = SaveMessageForCommit(message);
+			var parameters = new CommitParameters
 			{
-				File.Delete(fileName);
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-			}
+				MessageFileName = fileName,
+				Amend           = amend,
+			};
+			output = Repository.Accessor.Commit.Invoke(parameters);
+			DeleteMessageAfterCommit(fileName);
 		}
 		return AfterCommit(currentBranch, output);
 	}
 
-	private CommitResult AfterCommit(Branch currentBranch, string output)
+	private CommitResult AfterCommit(Branch? currentBranch, string output)
 	{
 		Revision commit;
 		if(currentBranch is not null)
@@ -1173,7 +1186,7 @@ public sealed class Status : GitObject
 	}
 
 	public async Task<CommitResult> CommitAsync(string message, bool amend = false,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(message);
 
@@ -1184,31 +1197,22 @@ public sealed class Status : GitObject
 			RepositoryNotifications.BranchChanged,
 			RepositoryNotifications.Checkout))
 		{
-			var fileName = Path.Combine(
-				Repository.GitDirectory,
-				GitConstants.CommitMessageFileName);
-			File.WriteAllText(fileName, message);
+			var fileName = SaveMessageForCommit(message);
 			var parameters = new CommitParameters
 			{
-				MessageFileName = Path.Combine(Repository.GitDirectory, GitConstants.CommitMessageFileName),
+				MessageFileName = fileName,
 				Amend           = amend,
 			};
 			output = await Repository.Accessor.Commit
 				.InvokeAsync(parameters, progress, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
-			try
-			{
-				File.Delete(fileName);
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-			}
+			DeleteMessageAfterCommit(fileName);
 		}
 		return await AfterCommitAsync(currentBranch, output)
 			.ConfigureAwait(continueOnCapturedContext: false);
 	}
 
-	private async Task<CommitResult> AfterCommitAsync(Branch currentBranch, string output)
+	private async Task<CommitResult> AfterCommitAsync(Branch? currentBranch, string output)
 	{
 		Revision commit;
 		if(currentBranch is not null)
@@ -1261,7 +1265,7 @@ public sealed class Status : GitObject
 		}
 	}
 
-	public void SaveCommitMessage(string message)
+	public void SaveCommitMessage(string? message)
 	{
 		var fileName = Path.Combine(
 			Repository.GitDirectory,
@@ -1286,8 +1290,8 @@ public sealed class Status : GitObject
 
 	#region diff
 
-	public IIndexDiffSource GetDiffSource(bool cached, IEnumerable<string> paths = null)
-		=> paths == null
+	public IIndexDiffSource GetDiffSource(bool cached, IEnumerable<string>? paths = null)
+		=> paths is null
 			? new IndexChangesDiffSource(Repository, cached)
 			: new IndexChangesDiffSource(Repository, cached, paths.ToList());
 

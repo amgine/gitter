@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -27,14 +29,16 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-sealed class FormatMergeMessageImpl : IGitFunction<FormatMergeMessageParameters, string>
+sealed class FormatMergeMessageFunction : IGitFunction<FormatMergeMessageParameters, string>
 {
 	private const string changeLogFormat = "  * %s\r";
 
 	private readonly ICommandExecutor _commandExecutor;
 
-	public FormatMergeMessageImpl(ICommandExecutor commandExecutor)
+	public FormatMergeMessageFunction(ICommandExecutor commandExecutor)
 	{
+		Assert.IsNotNull(commandExecutor);
+
 		_commandExecutor = commandExecutor;
 	}
 
@@ -88,7 +92,7 @@ sealed class FormatMergeMessageImpl : IGitFunction<FormatMergeMessageParameters,
 	}
 
 	public Task<string> InvokeAsync(FormatMergeMessageParameters parameters,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		return Task.Factory.StartNew(
 			() => Invoke(parameters),

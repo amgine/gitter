@@ -18,12 +18,13 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,62 +33,46 @@ using gitter.Framework.CLI;
 
 using Resources = gitter.Git.AccessLayer.CLI.Properties.Resources;
 
-sealed class CloneImpl : IGitAction<CloneRepositoryParameters>
+sealed class PushFunction : IGitFunction<PushParameters, IList<ReferencePushResult>>
 {
 	private readonly ICommandExecutor _commandExecutor;
-	private readonly Func<CloneRepositoryParameters, bool, Command> _commandFactory;
+	private readonly Func<PushParameters, bool, Command> _commandFactory;
+	private readonly Func<string, IList<ReferencePushResult>> _resultsParser;
 
-	public CloneImpl(ICommandExecutor commandExecutor, Func<CloneRepositoryParameters, bool, Command> commandFactory)
+	public PushFunction(
+		ICommandExecutor commandExecutor,
+		Func<PushParameters, bool, Command> commandFactory,
+		Func<string, IList<ReferencePushResult>> resultsParser)
 	{
+		Assert.IsNotNull(commandExecutor);
+		Assert.IsNotNull(commandFactory);
+		Assert.IsNotNull(resultsParser);
+
 		_commandExecutor = commandExecutor;
 		_commandFactory  = commandFactory;
+		_resultsParser   = resultsParser;
 	}
 
-	/// <summary>Clone existing repository.</summary>
-	/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
-	/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-	public void Invoke(CloneRepositoryParameters parameters)
+	public IList<ReferencePushResult> Invoke(PushParameters parameters)
 	{
-		/*
-		 * git clone [--template=<template_directory>] [-l] [-s] [--no-hardlinks]
-		 * [-q] [-n] [--bare] [--mirror] [-o <name>] [-b <name>] [-u <upload-pack>]
-		 * [--reference <repository>] [--depth <depth>] [--recursive] [--] <repository> [<directory>]
-		 */
 		Verify.Argument.IsNotNull(parameters);
 
-		try
-		{
-			if(!Directory.Exists(parameters.Path))
-			{
-				Directory.CreateDirectory(parameters.Path);
-			}
-		}
-		catch(Exception exc) when(!exc.IsCritical())
-		{
-			throw new GitException(exc.Message, exc);
-		}
 		var command = _commandFactory(parameters, false);
 		var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 		output.ThrowOnBadReturnCode();
+		return _resultsParser(output.Output);
 	}
 
-	/// <summary>Clone existing repository.</summary>
-	/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
-	/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-	public async Task InvokeAsync(CloneRepositoryParameters parameters,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public async Task<IList<ReferencePushResult>> InvokeAsync(PushParameters parameters,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
 		var command = _commandFactory(parameters, true);
-		if(!Directory.Exists(parameters.Path))
-		{
-			Directory.CreateDirectory(parameters.Path);
-		}
-		progress?.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
 
+		progress?.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
 		var errorMessages  = default(List<string>);
-		var stdOutReceiver = new NullReader();
+		var stdOutReceiver = new AsyncTextReader();
 		var stdErrReceiver = new NotifyingAsyncTextReader();
 		stdErrReceiver.TextLineReceived += (_, e) =>
 		{
@@ -98,11 +83,8 @@ sealed class CloneImpl : IGitAction<CloneRepositoryParameters>
 				progress?.Report(operationProgress);
 				if(operationProgress.IsIndeterminate)
 				{
-					if(!string.IsNullOrWhiteSpace(operationProgress.ActionName))
-					{
-						errorMessages ??= new List<string>();
-						errorMessages.Add(operationProgress.ActionName);
-					}
+					errorMessages ??= new List<string>();
+					errorMessages.Add(operationProgress.ActionName);
 				}
 				else
 				{
@@ -112,7 +94,12 @@ sealed class CloneImpl : IGitAction<CloneRepositoryParameters>
 		};
 
 		var processExitCode = await _commandExecutor
-			.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, CommandExecutionFlags.None, cancellationToken)
+			.ExecuteCommandAsync(
+				command,
+				stdOutReceiver,
+				stdErrReceiver,
+				CommandExecutionFlags.None,
+				cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		if(processExitCode != 0)
 		{
@@ -121,5 +108,6 @@ sealed class CloneImpl : IGitAction<CloneRepositoryParameters>
 				: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", processExitCode);
 			throw new GitException(errorMessage);
 		}
+		return _resultsParser(stdOutReceiver.GetText());
 	}
 }

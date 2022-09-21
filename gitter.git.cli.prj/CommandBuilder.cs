@@ -22,6 +22,7 @@ namespace gitter.Git.AccessLayer.CLI;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 sealed class CommandBuilder
 {
@@ -35,6 +36,8 @@ sealed class CommandBuilder
 	}
 
 	private static readonly Version SubmodulesStatusArgVersion = new(1, 7, 2, 3);
+
+	private static readonly Version MergeFileArgVersion = new(2, 9, 0);
 
 	public Command GetInitCommand(InitRepositoryParameters parameters)
 	{
@@ -1177,10 +1180,26 @@ sealed class CommandBuilder
 		{
 			args.Add(MergeCommand.NoFastForward());
 		}
-		if(!string.IsNullOrEmpty(parameters.Message))
+		if(parameters.MessageFileName is not null)
+		{
+			if(_gitCLI.GitVersion >= MergeFileArgVersion)
+			{
+				args.Add(MergeCommand.File(parameters.MessageFileName));
+			}
+			else
+			{
+				var message = File.ReadAllText(parameters.MessageFileName).Replace("\"", "\\\"");
+				args.Add(MergeCommand.Message(message));
+			}
+		}
+		else if(!string.IsNullOrEmpty(parameters.Message))
 		{
 			var message = parameters.Message.Replace("\"", "\\\"");
 			args.Add(MergeCommand.Message(message));
+		}
+		else
+		{
+			args.Add(MergeCommand.NoEdit());
 		}
 		if(parameters.Revisions is not null)
 		{

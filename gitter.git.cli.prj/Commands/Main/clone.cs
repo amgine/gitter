@@ -21,6 +21,7 @@
 namespace gitter.Git.AccessLayer.CLI;
 
 using System.Collections.Generic;
+using System.Globalization;
 
 /// <summary>Clone a repository into a new directory.</summary>
 /// <remarks>
@@ -53,7 +54,7 @@ public sealed class CloneCommand : Command
 	///	only interested in the recent history of a large project with a long history, and would want to send in fixes as patches.
 	/// </summary>
 	public static ICommandArgument Depth(int depth)
-		=> new CommandParameterValue("--depth", depth.ToString(), ' ');
+		=> new CommandParameterValue("--depth", depth.ToString(CultureInfo.InvariantCulture), ' ');
 
 	/// <summary>Display the progressbar, even in case the standard output is not a terminal.</summary>
 	public static ICommandArgument Verbose()

@@ -162,7 +162,7 @@ public sealed class LogOptions
 				p.References = l;
 				break;
 			case LogReferenceFilter.HEAD:
-				p.References = new List<string>() { GitConstants.HEAD };
+				p.References = new[] { GitConstants.HEAD };
 				break;
 		}
 		return p;

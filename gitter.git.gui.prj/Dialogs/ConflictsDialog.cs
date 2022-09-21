@@ -165,7 +165,8 @@ public partial class ConflictsDialog : GitDialogBase
 					default:
 						try
 						{
-							ProgressForm.MonitorTaskAsModalWindow(this, Resources.StrRunningMergeTool, file.RunMergeToolAsync);
+							ProgressForm.MonitorTaskAsModalWindow(this, Resources.StrRunningMergeTool,
+								(p, c) => file.RunMergeToolAsync(progress: p, cancellationToken: c));
 						}
 						catch(GitException exc)
 						{

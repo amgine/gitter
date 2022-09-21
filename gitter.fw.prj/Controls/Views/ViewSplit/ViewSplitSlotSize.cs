@@ -20,7 +20,11 @@
 
 namespace gitter.Framework.Controls;
 
-public readonly struct ViewSplitSlotSize
+public readonly record struct ViewSplitSlotSize(
+	ViewSplitSlotSizeType Type,
+	Dpi   Dpi,
+	int   Size,
+	float Fraction)
 {
 	public static ViewSplitSlotSize Absolute(int value) => new(ViewSplitSlotSizeType.Absolute, Dpi.Default, value, 0);
 
@@ -29,20 +33,4 @@ public readonly struct ViewSplitSlotSize
 	public static ViewSplitSlotSize Relative(float value) => new(ViewSplitSlotSizeType.Relative, Dpi.Default, 0, value);
 
 	public static ViewSplitSlotSize Leftover() => new(ViewSplitSlotSizeType.Leftover, Dpi.Default, 0, 0);
-
-	public ViewSplitSlotSize(ViewSplitSlotSizeType type, Dpi dpi, int size, float fraction)
-	{
-		Type     = type;
-		Dpi      = dpi;
-		Size     = size;
-		Fraction = fraction;
-	}
-
-	public ViewSplitSlotSizeType Type { get; }
-
-	public Dpi Dpi { get; }
-
-	public int Size { get; }
-
-	public float Fraction { get; }
 }

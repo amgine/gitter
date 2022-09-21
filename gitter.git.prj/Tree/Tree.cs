@@ -33,12 +33,8 @@ using Resources = gitter.Git.Properties.Resources;
 
 public sealed class Tree : GitObject
 {
-	#region Data
-
 	private readonly TreeDirectory _root;
 	private readonly string _treeHash;
-
-	#endregion
 
 	public static async Task<Tree> GetAsync(Repository repository, string treeHash,
 		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
@@ -46,16 +42,14 @@ public sealed class Tree : GitObject
 		Verify.Argument.IsNotNull(repository);
 
 		progress?.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
-		var parameters = new QueryTreeContentParameters(treeHash, true, false);
+		var parameters = new QueryTreeContentParameters(treeHash, recurse: true, onlyTrees: false);
 		var treeData = await repository.Accessor.QueryTreeContent
 			.InvokeAsync(parameters, progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
-		var tree = new Tree(repository, treeHash, false);
+		var tree = new Tree(repository, treeHash, load: false);
 		tree.SetContent(treeData);
 		return tree;
 	}
-
-	#region .ctor
 
 	private Tree(Repository repository, string treeHash, bool load)
 		: base(repository)
@@ -87,22 +81,15 @@ public sealed class Tree : GitObject
 	{
 	}
 
-	#endregion
-
-	#region Properties
-
 	public string TreeHash => _treeHash;
 
 	public TreeDirectory Root => _root;
 
-	#endregion
-
-	#region Methods
-
 	private void SetContent(IList<TreeContentData> tree)
 	{
-		Root.Files.Clear();
-		Root.Directories.Clear();
+		Assert.IsNotNull(tree);
+
+		Root.Clear();
 		var trees = new Dictionary<string, TreeDirectory>();
 		foreach(var item in tree)
 		{
@@ -163,6 +150,8 @@ public sealed class Tree : GitObject
 
 	public byte[] GetBlobContent(string blobPath)
 	{
+		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
+
 		return Repository.Accessor.QueryBlobBytes.Invoke(
 			new QueryBlobBytesParameters()
 			{
@@ -174,6 +163,8 @@ public sealed class Tree : GitObject
 	public Task<byte[]> GetBlobContentAsync(string blobPath,
 		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
 	{
+		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
+
 		progress?.Report(new OperationProgress(Resources.StrsFetchingBlob.AddEllipsis()));
 		return Repository.Accessor.QueryBlobBytes.InvokeAsync(
 			new QueryBlobBytesParameters()
@@ -184,6 +175,4 @@ public sealed class Tree : GitObject
 			progress,
 			cancellationToken);
 	}
-
-	#endregion
 }

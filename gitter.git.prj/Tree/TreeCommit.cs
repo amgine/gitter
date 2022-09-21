@@ -28,5 +28,6 @@ public sealed class TreeCommit : TreeItem
 	{
 	}
 
+	/// <inheritdoc/>
 	public override TreeItemType ItemType => TreeItemType.Commit;
 }

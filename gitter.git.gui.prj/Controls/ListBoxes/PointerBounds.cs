@@ -27,7 +27,9 @@ using System.Windows.Forms;
 
 using gitter.Git.Gui.Controls;
 
-public readonly struct PointerBounds
+public readonly record struct PointerBounds(
+	IRevisionPointer RevisionPointer,
+	Rectangle        Bounds)
 {
 	public static ContextMenuStrip GetContextMenu(IEnumerable<PointerBounds> pointers, int x, int y)
 	{
@@ -41,16 +43,6 @@ public readonly struct PointerBounds
 		}
 		return null;
 	}
-
-	public PointerBounds(IRevisionPointer revisionPointer, Rectangle bounds)
-	{
-		RevisionPointer = revisionPointer;
-		Bounds          = bounds;
-	}
-
-	public IRevisionPointer RevisionPointer { get; }
-
-	public Rectangle Bounds { get; }
 
 	public ContextMenuStrip GetContextMenu()
 		=> RevisionPointer switch

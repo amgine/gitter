@@ -43,7 +43,7 @@ public abstract class AsyncDataBinding<T> : IDisposable
 
 	#region .ctor & finalizer
 
-	public AsyncDataBinding()
+	protected AsyncDataBinding()
 	{
 	}
 

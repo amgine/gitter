@@ -44,6 +44,12 @@ public sealed class MergeCommand : Command
 	public static ICommandArgument NoCommit()
 		=> new CommandFlag("--no-commit");
 
+	public static ICommandArgument Edit()
+		=> new CommandFlag("--edit");
+
+	public static ICommandArgument NoEdit()
+		=> new CommandFlag("--no-edit");
+
 	public static ICommandArgument Squash()
 		=> new CommandFlag("--squash");
 
@@ -58,6 +64,9 @@ public sealed class MergeCommand : Command
 
 	public static ICommandArgument Message(string msg)
 		=> new CommandParameterValue("-m", "\"" + msg + "\"", ' ');
+
+	public static ICommandArgument File(string file)
+		=> new CommandParameterValue("--file", file.AssureDoubleQuotes());
 
 	public static ICommandArgument Strategy(string strategy)
 		=> new CommandParameterValue("--strategy", strategy, '=');

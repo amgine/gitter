@@ -25,11 +25,11 @@ using System.Collections.Generic;
 
 using gitter.Framework.CLI;
 
-sealed class QueryRevisionsImpl : ParserBasedFunctionImpl<QueryRevisionsParameters, IList<RevisionData>>
+sealed class QueryStatusFunction : ParserBasedFunctionImpl<QueryStatusParameters, StatusData>
 {
 	private readonly CommandBuilder _commandBuilder;
 
-	public QueryRevisionsImpl(ICommandExecutor commandExecutor, CommandBuilder commandBuilder)
+	public QueryStatusFunction(ICommandExecutor commandExecutor, CommandBuilder commandBuilder)
 		: base(commandExecutor)
 	{
 		Verify.Argument.IsNotNull(commandBuilder);
@@ -37,13 +37,16 @@ sealed class QueryRevisionsImpl : ParserBasedFunctionImpl<QueryRevisionsParamete
 		_commandBuilder = commandBuilder;
 	}
 
-	protected override Command CreateCommand(QueryRevisionsParameters parameters)
+	protected override Command CreateCommand(QueryStatusParameters parameters)
 	{
 		Assert.IsNotNull(parameters);
 
-		return _commandBuilder.GetQueryRevisionsCommand(parameters);
+		return _commandBuilder.GetQueryStatusCommand(parameters);
 	}
 
-	protected override IParser<IList<RevisionData>> CreateParser()
-		=> new LogParser();
+	protected override IParser<StatusData> CreateParser()
+		=> new StatusParser();
+
+	protected override CommandExecutionFlags GetExecutionFlags()
+		=> CommandExecutionFlags.DoNotKillProcess;
 }

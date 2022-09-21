@@ -178,7 +178,7 @@ internal sealed partial class RepositoryCLI : IRepositoryAccessor
 		GitCliMethod.Create(out _queryFilesToClean,      CommandExecutor, CommandBuilder.GetQueryFilesToCleanCommand,      OutputParser.ParseFilesToClean);
 		GitCliMethod.Create(out _queryRemote,            CommandExecutor, CommandBuilder.GetQueryRemoteCommand,            OutputParser.ParseSingleRemote);
 		GitCliMethod.Create(out _queryRemotes,           CommandExecutor, CommandBuilder.GetQueryRemotesCommand,           OutputParser.ParseRemotesOutput);
-		_querySymbolicReference = new QuerySymbolicReferenceImpl(repository);
+		_querySymbolicReference = new QuerySymbolicReferenceFunction(repository);
 		GitCliMethod.Create(out _queryBranchesToPrune,   CommandExecutor, CommandBuilder.GetQueryPrunedBranchesCommand,    OutputParser.ParsePrunedBranches);
 		GitCliMethod.Create(out _queryRemoteReferences,  CommandExecutor, CommandBuilder.GetQueryRemoteReferencesCommand,  OutputParser.ParseRemoteReferences);
 		GitCliMethod.Create(out _queryReferences,        CommandExecutor, CommandBuilder.GetQueryReferencesCommand,        OutputParser.ParseReferences);
@@ -187,7 +187,7 @@ internal sealed partial class RepositoryCLI : IRepositoryAccessor
 		GitCliMethod.Create(out _queryStashPatch,        CommandExecutor, CommandBuilder.GetQueryStashDiffCommand);
 		GitCliMethod.Create(out _queryStashTop,          CommandExecutor, CommandBuilder.GetQueryStashTopCommand,          OutputParser.ParseQueryStashTopOutput);
 		GitCliMethod.Create(out _queryStashDiff,         CommandExecutor, CommandBuilder.GetQueryStashDiffCommand,         OutputParser.ParseRevisionDiff);
-		_queryStatus = new QueryStatusImpl(CommandExecutor, CommandBuilder);
+		_queryStatus = new QueryStatusFunction(CommandExecutor, CommandBuilder);
 		GitCliMethod.Create(out _queryRevisionDiff,      CommandExecutor, CommandBuilder.GetQueryRevisionDiffCommand,      OutputParser.ParseRevisionDiff);
 		GitCliMethod.Create(out _queryRevisionPatch,     CommandExecutor, CommandBuilder.GetQueryRevisionDiffCommand);
 		GitCliMethod.Create(out _queryTreeContent,       CommandExecutor, CommandBuilder.GetQueryTreeContentCommand,       OutputParser.ParseTreeContent);

@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -31,6 +33,6 @@ public interface ILogSource
 	Repository Repository { get; }
 
 	Task<RevisionLog> GetRevisionLogAsync(LogOptions options,
-		IProgress<OperationProgress> progress = default,
+		IProgress<OperationProgress>? progress = default,
 		CancellationToken cancellationToken = default);
 }

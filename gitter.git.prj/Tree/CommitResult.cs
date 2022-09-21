@@ -20,15 +20,6 @@
 
 namespace gitter.Git;
 
-public class CommitResult
-{
-	public CommitResult(Revision revision, string message)
-	{
-		Revision = revision;
-		Message  = message;
-	}
-
-	public Revision Revision { get; }
-
-	public string Message { get; }
-}
+public record class CommitResult(
+	Revision Revision,
+	string   Message);

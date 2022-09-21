@@ -43,6 +43,7 @@ internal class TestReportListBinding : AsyncDataBinding<TestReport>
 		ListBox        = listBox;
 		PipelineId     = pipelineId;
 		Filter         = filter;
+		Progress       = listBox.ProgressMonitor;
 	}
 
 	private GitLabServiceContext ServiceContext { get; }

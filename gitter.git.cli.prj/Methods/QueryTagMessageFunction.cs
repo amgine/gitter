@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
@@ -27,7 +29,7 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-sealed class QueryTagMessageImpl : IGitFunction<QueryTagMessageParameters, string>
+sealed class QueryTagMessageFunction : IGitFunction<QueryTagMessageParameters, string>
 {
 	#region Data
 
@@ -38,8 +40,11 @@ sealed class QueryTagMessageImpl : IGitFunction<QueryTagMessageParameters, strin
 
 	#region .ctor
 
-	public QueryTagMessageImpl(ICommandExecutor commandExecutor, Func<QueryTagMessageParameters, Command> commandFactory)
+	public QueryTagMessageFunction(ICommandExecutor commandExecutor, Func<QueryTagMessageParameters, Command> commandFactory)
 	{
+		Assert.IsNotNull(commandExecutor);
+		Assert.IsNotNull(commandFactory);
+
 		_commandExecutor = commandExecutor;
 		_commandFactory  = commandFactory;
 	}
@@ -100,7 +105,7 @@ sealed class QueryTagMessageImpl : IGitFunction<QueryTagMessageParameters, strin
 	}
 
 	public async Task<string> InvokeAsync(QueryTagMessageParameters parameters,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 

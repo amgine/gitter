@@ -29,21 +29,6 @@ using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-public enum FakeRevisionItemType
-{
-	UnstagedChanges,
-	StagedChanges,
-}
-
-public enum UnstagedRevisionItemSubtype
-{
-	None,
-	Conflicts,
-	Modifications,
-	RemovedFiles,
-	UntrackedFiles,
-}
-
 /// <summary>Item used to represent uncommitted or unstaged changes to the working tree.</summary>
 public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphListItem
 {
@@ -148,6 +133,8 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 
 	private static UnstagedRevisionItemSubtype GetSubType(Status status)
 	{
+		Assert.IsNotNull(status);
+
 		if(status.UnmergedCount != 0)
 		{
 			return UnstagedRevisionItemSubtype.Conflicts;
@@ -186,23 +173,6 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 				break;
 		}
 		InvalidateSafe();
-	}
-
-	private static void PaintGrayText<T>(SubItemPaintEventArgs paintEventArgs, T value, Action<SubItemPaintEventArgs, T, Brush> paintMethod)
-	{
-		Assert.IsNotNull(paintEventArgs);
-		Assert.IsNotNull(paintMethod);
-
-		var style = paintEventArgs.ListBox.Style;
-		if((paintEventArgs.State & ItemState.Selected) == ItemState.Selected && style.Type == GitterStyleType.DarkBackground)
-		{
-			paintMethod(paintEventArgs, value, paintEventArgs.Brush);
-		}
-		else
-		{
-			using var textBrush = new SolidBrush(style.Colors.GrayText);
-			paintMethod(paintEventArgs, value, textBrush);
-		}
 	}
 
 	private static void PaintGrayText(SubItemPaintEventArgs paintEventArgs, string text)

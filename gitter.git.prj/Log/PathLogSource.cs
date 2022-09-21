@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -50,6 +52,7 @@ public sealed class PathLogSource : LogSourceBase
 
 	#region Properties
 
+	/// <inheritdoc/>
 	public override Repository Repository => Revision.Repository;
 
 	public bool FollowRenames { get; }
@@ -62,7 +65,9 @@ public sealed class PathLogSource : LogSourceBase
 
 	#region Overrides
 
-	public override async Task<RevisionLog> GetRevisionLogAsync(LogOptions options, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	/// <inheritdoc/>
+	public override async Task<RevisionLog> GetRevisionLogAsync(LogOptions options,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		if(Repository.IsEmpty)
 		{
@@ -78,7 +83,7 @@ public sealed class PathLogSource : LogSourceBase
 			parameters.Paths = new[] { Path };
 			parameters.Follow = FollowRenames;
 
-			progress?.Report(new OperationProgress(Resources.StrsFetchingLog.AddEllipsis()));
+			progress?.Report(new(Resources.StrsFetchingLog.AddEllipsis()));
 			var revisionData = await Repository
 				.Accessor
 				.QueryRevisions

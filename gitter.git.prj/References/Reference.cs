@@ -18,6 +18,8 @@
 */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -31,24 +33,18 @@ using Resources = gitter.Git.Properties.Resources;
 /// <summary>Symbolic reference.</summary>
 public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 {
-	#region Data
-
 	/// <summary>Object pointed by this <see cref="Reference"/>.</summary>
 	private IRevisionPointer _pointer;
 	/// <summary><see cref="WeakReference"/> to this <see cref="Reference"/>'s <see cref="Reflog"/>.</summary>
-	private WeakReference<Reflog> _reflogRef;
+	private WeakReference<Reflog>? _reflogRef;
 	/// <summary>Reflog access sync object.</summary>
 	private readonly object _reflogSync;
 
-	#endregion
-
-	#region Events
-
 	/// <summary>Reference changed pointer.</summary>
-	public event EventHandler<RevisionPointerChangedEventArgs> PointerChanged;
+	public event EventHandler<RevisionPointerChangedEventArgs>? PointerChanged;
 
 	/// <summary>Reference points to another <see cref="Revision"/>.</summary>
-	public event EventHandler<RevisionChangedEventArgs> PositionChanged;
+	public event EventHandler<RevisionChangedEventArgs>? PositionChanged;
 
 	/// <summary>Invoke <see cref="PointerChanged"/>.</summary>
 	private void InvokePointerChanged(IRevisionPointer oldPos, IRevisionPointer newPos)
@@ -57,10 +53,6 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 	/// <summary>Invoke <see cref="PositionChanged"/>.</summary>
 	protected void InvokePositionChanged(Revision oldPos, Revision newPos)
 		=> PositionChanged?.Invoke(this, new RevisionChangedEventArgs(oldPos, newPos));
-
-	#endregion
-
-	#region Nested Types
 
 	/// <summary>Reference to a reflog record.</summary>
 	private sealed class ReflogReference : IRevisionPointer
@@ -130,10 +122,6 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 		/// </summary>
 		public bool IsDeleted => false;
 	}
-
-	#endregion
-
-	#region Static
 
 	/// <summary>Returns reference type name.</summary>
 	/// <param name="referenceType">Reference type.</param>
@@ -260,10 +248,6 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 		return true;
 	}
 
-	#endregion
-
-	#region .ctor
-
 	/// <summary>Create <see cref="Reference"/>.</summary>
 	/// <param name="repository">Host <see cref="Repository"/>.</param>
 	/// <param name="name">Reference name.</param>
@@ -282,8 +266,6 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 			EnterRevision(_pointer.Dereference());
 		}
 	}
-
-	#endregion
 
 	/// <summary>Returns object pointed by this <see cref="Reference"/>.</summary>
 	public IRevisionPointer Pointer
@@ -349,7 +331,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 	{
 		get
 		{
-			Reflog reflog;
+			Reflog? reflog;
 			lock(_reflogSync)
 			{
 				if(_reflogRef is null)

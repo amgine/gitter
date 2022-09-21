@@ -138,9 +138,13 @@ public abstract class CustomScrollBar : Control
 
 	protected int ClampValue(int value)
 	{
+#if NETCOREAPP
+		return Math.Clamp(value, Minimum, Maximum - LargeChange + 1);
+#else
 		if(value > Maximum - LargeChange + 1) return Maximum - LargeChange + 1;
 		if(value < Minimum) return Minimum;
 		return value;
+#endif
 	}
 
 	public ICustomScrollBarRenderer Renderer
@@ -163,7 +167,7 @@ public abstract class CustomScrollBar : Control
 		Renderer.Render(
 			Orientation,
 			Enabled,
-			e.Graphics, new Dpi(DeviceDpi),
+			e.Graphics, Dpi.FromControl(this),
 			e.ClipRectangle,
 			DecreaseButtonBounds,
 			DecreaseTrackBarBounds,

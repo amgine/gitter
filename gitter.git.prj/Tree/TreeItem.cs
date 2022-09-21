@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -31,7 +33,7 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 {
 	#region Data
 
-	private TreeDirectory _parent;
+	private TreeDirectory? _parent;
 	private FileStatus _status;
 	private string _relativePath;
 	private StagedStatus _stagedStatus;
@@ -40,20 +42,20 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 
 	#region Events
 
-	public event EventHandler StatusChanged;
+	public event EventHandler? StatusChanged;
 
-	public event EventHandler StagedStatusChanged;
+	public event EventHandler? StagedStatusChanged;
 
 	#endregion
 
 	#region .ctor
 
 	protected TreeItem(Repository repository, string relativePath,
-		TreeDirectory parent, FileStatus status, string name)
+		TreeDirectory? parent, FileStatus status, string name)
 		: base(repository, name)
 	{
 		_parent = parent;
-		if(parent != null)
+		if(parent is not null)
 		{
 			_stagedStatus = parent._stagedStatus;
 		}
@@ -62,7 +64,7 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 	}
 
 	protected TreeItem(Repository repository, string relativePath,
-		TreeDirectory parent, string name)
+		TreeDirectory? parent, string name)
 		: this(repository, relativePath, parent, FileStatus.Unknown, name)
 	{
 	}
@@ -127,7 +129,7 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 		StagedStatus = StagedStatus.Unstaged;
 	}
 
-	public IDiffSource GetDiffSource()
+	public IDiffSource? GetDiffSource()
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -207,7 +209,7 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 
 	#endregion
 
-	public TreeDirectory Parent
+	public TreeDirectory? Parent
 	{
 		get => _parent;
 		internal set => _parent = value;

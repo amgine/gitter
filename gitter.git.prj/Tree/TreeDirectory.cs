@@ -18,6 +18,8 @@
  */
 #endregion
 
+#nullable enable
+
 namespace gitter.Git;
 
 using System;
@@ -25,24 +27,18 @@ using System.Collections.Generic;
 
 public sealed class TreeDirectory : TreeItem
 {
-	#region Data
-
 	private readonly List<TreeDirectory> _directories = new();
-	private readonly List<TreeFile> _files = new();
-	private readonly List<TreeCommit> _commits = new();
+	private readonly List<TreeFile>      _files       = new();
+	private readonly List<TreeCommit>    _commits     = new();
 
-	#endregion
+	public event EventHandler<TreeDirectoryEventArgs>? DirectoryAdded;
+	public event EventHandler<TreeDirectoryEventArgs>? DirectoryDeleted;
 
-	#region Events
+	public event EventHandler<TreeFileEventArgs>? FileAdded;
+	public event EventHandler<TreeFileEventArgs>? FileDeleted;
 
-	public event EventHandler<TreeDirectoryEventArgs> DirectoryAdded;
-	public event EventHandler<TreeDirectoryEventArgs> DirectoryDeleted;
-
-	public event EventHandler<TreeFileEventArgs> FileAdded;
-	public event EventHandler<TreeFileEventArgs> FileDeleted;
-
-	public event EventHandler<TreeCommitEventArgs> CommitAdded;
-	public event EventHandler<TreeCommitEventArgs> CommitDeleted;
+	public event EventHandler<TreeCommitEventArgs>? CommitAdded;
+	public event EventHandler<TreeCommitEventArgs>? CommitDeleted;
 
 	private void InvokeDirectoryAdded(TreeDirectory folder)
 		=> DirectoryAdded?.Invoke(this, new TreeDirectoryEventArgs(folder));
@@ -61,8 +57,6 @@ public sealed class TreeDirectory : TreeItem
 
 	private void OnCommitDeleted(TreeCommit commit)
 		=> CommitDeleted?.Invoke(this, new TreeCommitEventArgs(commit));
-
-	#endregion
 
 	public TreeDirectory(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
 		: base(repository, relativePath, parent, status, name)
@@ -142,13 +136,23 @@ public sealed class TreeDirectory : TreeItem
 		OnCommitDeleted(commit);
 	}
 
-	public IList<TreeDirectory> Directories => _directories;
+	public IReadOnlyList<TreeDirectory> Directories => _directories;
 
-	public IList<TreeFile> Files => _files;
+	public IReadOnlyList<TreeFile> Files => _files;
 
-	public IList<TreeCommit> Commits => _commits;
+	public IReadOnlyList<TreeCommit> Commits => _commits;
 
 	public override TreeItemType ItemType => TreeItemType.Tree;
 
-	public bool IsEmpty => _files.Count == 0 && _directories.Count == 0;
+	public bool IsEmpty
+		=> _files.Count       == 0
+		&& _directories.Count == 0
+		&& _commits.Count     == 0;
+
+	public void Clear()
+	{
+		_files.Clear();
+		_directories.Clear();
+		_commits.Clear();
+	}
 }

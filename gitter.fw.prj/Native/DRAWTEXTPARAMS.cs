@@ -25,17 +25,28 @@ using System.Runtime.InteropServices;
 [StructLayout(LayoutKind.Sequential)]
 public struct DRAWTEXTPARAMS
 {
+	public static readonly uint Size = (uint)Marshal.SizeOf(typeof(DRAWTEXTPARAMS));
+
 	public static DRAWTEXTPARAMS Create()
 	{
 		return new DRAWTEXTPARAMS
 		{
-			cbSize = Marshal.SizeOf(typeof(DRAWTEXTPARAMS)),
+			cbSize = Size,
 		};
 	}
 
-	public int cbSize;
+	public DRAWTEXTPARAMS(int leftMargin, int rightMargin)
+	{
+		cbSize        = Size;
+		iTabLength    = 0;
+		iLeftMargin   = leftMargin;
+		iRightMargin  = rightMargin;
+		uiLengthDrawn = 0;
+	}
+
+	public uint cbSize;
 	public int iTabLength;
 	public int iLeftMargin;
 	public int iRightMargin;
-	public int uiLengthDrawn;
+	public uint uiLengthDrawn;
 }

@@ -87,7 +87,7 @@ public sealed class Repository : IGitRepository
 		Verify.Argument.IsNotNull(gitAccessor);
 		Verify.Argument.IsNotNull(workingDirectory);
 
-		progress?.Report(new OperationProgress(Resources.StrLoadingRepository.AddEllipsis()));
+		progress?.Report(new(Resources.StrLoadingRepository.AddEllipsis()));
 		var repository = new Repository(gitAccessor, workingDirectory);
 		try
 		{
@@ -107,7 +107,7 @@ public sealed class Repository : IGitRepository
 		Verify.Argument.IsNotNull(gitAccessor);
 		Verify.Argument.IsNotNull(workingDirectory);
 
-		progress?.Report(new OperationProgress(Resources.StrLoadingRepository.AddEllipsis()));
+		progress?.Report(new(Resources.StrLoadingRepository.AddEllipsis()));
 		return Task.Run(
 			async () =>
 			{
@@ -405,19 +405,16 @@ public sealed class Repository : IGitRepository
 		User userIdentity;
 		var name  = Configuration.TryGetParameterValue(GitConstants.UserNameParameter);
 		var email = Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
-		if(name == null || email == null)
+		if(name is null || email is null)
 		{
 			userIdentity = null;
 		}
 		else
 		{
-			if(_userIdentity == null || _userIdentity.Name != name || _userIdentity.Email != email)
+			if(_userIdentity is null || _userIdentity.Name != name || _userIdentity.Email != email)
 			{
 				userIdentity = Users.TryGetUser(name, email);
-				if(userIdentity == null)
-				{
-					userIdentity = new User(this, name, email, 0);
-				}
+				userIdentity ??= new User(this, name, email, 0);
 			}
 			else
 			{
@@ -608,13 +605,13 @@ public sealed class Repository : IGitRepository
 		switch(control)
 		{
 			case RevertControl.Abort:
-				progress?.Report(new OperationProgress(Resources.StrsAbortingRevert.AddEllipsis()));
+				progress?.Report(new(Resources.StrsAbortingRevert.AddEllipsis()));
 				break;
 			case RevertControl.Continue:
-				progress?.Report(new OperationProgress(Resources.StrsContinuingRevert.AddEllipsis()));
+				progress?.Report(new(Resources.StrsContinuingRevert.AddEllipsis()));
 				break;
 			case RevertControl.Quit:
-				progress?.Report(new OperationProgress(Resources.StrsQuitingRevert.AddEllipsis()));
+				progress?.Report(new(Resources.StrsQuitingRevert.AddEllipsis()));
 				break;
 			default:
 				throw new ArgumentException(
@@ -642,7 +639,7 @@ public sealed class Repository : IGitRepository
 		}
 		finally
 		{
-			if(Head.Pointer is Branch branch && !branch.IsRemote)
+			if(Head.Pointer is Branch { IsRemote: false } branch)
 			{
 				await branch
 					.RefreshAsync()
@@ -686,7 +683,7 @@ public sealed class Repository : IGitRepository
 			{
 				Refs.RefreshBranches();
 				Head.Refresh();
-				if(Head.Pointer is Branch branch && !branch.IsRemote)
+				if(Head.Pointer is Branch { IsRemote: false } branch)
 				{
 					branch.Refresh();
 				}
@@ -706,13 +703,13 @@ public sealed class Repository : IGitRepository
 		switch(control)
 		{
 			case RebaseControl.Abort:
-				progress?.Report(new OperationProgress(Resources.StrsAbortingRebase.AddEllipsis()));
+				progress?.Report(new(Resources.StrsAbortingRebase.AddEllipsis()));
 				break;
 			case RebaseControl.Continue:
-				progress?.Report(new OperationProgress(Resources.StrsContinuingRebase.AddEllipsis()));
+				progress?.Report(new(Resources.StrsContinuingRebase.AddEllipsis()));
 				break;
 			case RebaseControl.Skip:
-				progress?.Report(new OperationProgress(Resources.StrsSkippingCommit.AddEllipsis()));
+				progress?.Report(new(Resources.StrsSkippingCommit.AddEllipsis()));
 				break;
 			default:
 				throw new ArgumentException(

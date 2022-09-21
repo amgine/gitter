@@ -18,32 +18,10 @@
  */
 #endregion
 
-namespace gitter.Framework.Controls;
+namespace gitter.Git.Gui.Controls;
 
-using System;
-using System.Drawing;
-
-public sealed class ViewButton
+public enum FakeRevisionItemType
 {
-	internal ViewButton(int offset, ViewButtonType type)
-	{
-		Offset = offset;
-		Type   = type;
-	}
-
-	public int Offset { get; }
-
-	public ViewButtonType Type { get; }
-
-	public Image Image { get; set; }
-
-	internal void OnPaint(Graphics graphics, Dpi dpi, Rectangle bounds, bool focus, bool hover, bool pressed)
-	{
-		Assert.IsNotNull(graphics);
-
-		ViewManager.Renderer.RenderViewButton(this, graphics, dpi, bounds, focus, hover, pressed);
-	}
-
-	/// <inheritdoc/>
-	public override string ToString() => Type.ToString();
+	UnstagedChanges,
+	StagedChanges,
 }
