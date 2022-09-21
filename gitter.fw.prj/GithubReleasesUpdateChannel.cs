@@ -21,21 +21,24 @@
 namespace gitter;
 
 using System;
-using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
 
 using gitter.Framework;
 using gitter.Framework.Services;
+using System.Diagnostics.CodeAnalysis;
+
+#nullable enable
 
 /// <summary>Downloads updates from <c>github</c>.</summary>
 public sealed class GithubReleasesUpdateChannel : IUpdateChannel
 {
 	const string ServiceUrl = @"https://github.com";
+
+	static readonly Regex _assetsLinkRegex = new("src\\=\\\"(?<url>https\\:\\/\\/github\\.com\\/amgine\\/gitter\\/releases\\/expanded_assets\\/v(?<version>\\d+(\\.\\d+){0,3}))\\\"");
 
 #if NET6_0_OR_GREATER
 	static readonly Regex _downloadLinkRegex = new("\\<a\\s+href\\=\\\"(?<url>\\/amgine\\/gitter\\/releases\\/download\\/v(?<version>\\d+(\\.\\d+){0,3})\\/gitter\\-net6\\.0\\-binaries\\.zip)\\\"");
@@ -48,7 +51,7 @@ public sealed class GithubReleasesUpdateChannel : IUpdateChannel
 		public UpdateVersion(string downloadUrl, Version version)
 		{
 			DownloadUrl = downloadUrl;
-			Version     = version;
+			Version = version;
 		}
 
 		public string DownloadUrl { get; }
@@ -99,35 +102,28 @@ public sealed class GithubReleasesUpdateChannel : IUpdateChannel
 
 	public GithubReleasesUpdateChannel(HttpMessageInvoker httpMessageInvoker)
 	{
+		Verify.Argument.IsNotNull(httpMessageInvoker);
+
 		HttpMessageInvoker = httpMessageInvoker;
 	}
 
 	private HttpMessageInvoker HttpMessageInvoker { get; }
 
-	/// <summary>Check latest <c>gitter</c> version on this channel.</summary>
-	/// <returns>Latest <c>gitter</c> version.</returns>
-	public async Task<IUpdateVersion> GetLatestVersionAsync(CancellationToken cancellationToken = default)
+	private static bool TryFindBestUrl(string src, Regex regex,
+		#if NET5_0_OR_GREATER
+		[MaybeNullWhen(returnValue: false)]
+		#endif
+		out string url,
+		#if NET5_0_OR_GREATER
+		[MaybeNullWhen(returnValue: false)]
+		#endif
+		out Version version
+	)
 	{
-		using var message = new HttpRequestMessage(HttpMethod.Get, $@"{ServiceUrl}/amgine/gitter/releases");
+		version = default;
+		url     = default;
 
-		using var response = await HttpMessageInvoker
-			.SendAsync(message, cancellationToken)
-			.ConfigureAwait(continueOnCapturedContext: false);
-
-		response.EnsureSuccessStatusCode();
-
-		var page = await response.Content
-#if NET5_0_OR_GREATER
-			.ReadAsStringAsync(cancellationToken)
-#else
-			.ReadAsStringAsync()
-#endif
-			.ConfigureAwait(continueOnCapturedContext: false);
-
-		var version = default(Version);
-		var url     = default(string);
-
-		foreach(Match match in _downloadLinkRegex.Matches(page))
+		foreach(Match match in regex.Matches(src))
 		{
 			if(Version.TryParse(match.Groups[@"version"].Value, out var v))
 			{
@@ -139,8 +135,60 @@ public sealed class GithubReleasesUpdateChannel : IUpdateChannel
 			}
 		}
 
-		return version is not null
+		return url is not null && version is not null;
+	}
+
+	private async Task<string> GetStringAsync(string url, CancellationToken cancellationToken)
+	{
+		using var message = new HttpRequestMessage(HttpMethod.Get, url);
+
+		using var response = await HttpMessageInvoker
+			.SendAsync(message, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		response.EnsureSuccessStatusCode();
+
+		return await response.Content
+#if NET5_0_OR_GREATER
+			.ReadAsStringAsync(cancellationToken)
+#else
+			.ReadAsStringAsync()
+#endif
+			.ConfigureAwait(continueOnCapturedContext: false);
+	}
+
+	private async Task<string?> TryFindAssetsUrlAsync(CancellationToken cancellationToken)
+	{
+		var page = await GetStringAsync($@"{ServiceUrl}/amgine/gitter/releases", cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		return TryFindBestUrl(page, _assetsLinkRegex, out var url, out _)
+			? url
+			: default;
+	}
+
+	private async Task<IUpdateVersion?> TryFindDownloadUrlAsync(string assetsUrl, CancellationToken cancellationToken)
+	{
+		var page = await GetStringAsync(assetsUrl, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		return TryFindBestUrl(page, _downloadLinkRegex, out var url, out var version)
 			? new UpdateVersion(MakeAbsoluteUrl(url), version)
 			: default;
+	}
+
+	/// <summary>Check latest <c>gitter</c> version on this channel.</summary>
+	/// <returns>Latest <c>gitter</c> version.</returns>
+	public async Task<IUpdateVersion?> GetLatestVersionAsync(CancellationToken cancellationToken = default)
+	{
+		var assetsUrl = await TryFindAssetsUrlAsync(cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		if(assetsUrl is null) return default;
+
+		cancellationToken.ThrowIfCancellationRequested();
+
+		return await TryFindDownloadUrlAsync(assetsUrl, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
 	}
 }

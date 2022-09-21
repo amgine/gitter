@@ -24,11 +24,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable enable
+
 /// <summary>gitter update channel.</summary>
 public interface IUpdateChannel
 {
 	/// <summary>Check latest gitter version on this channel.</summary>
 	/// <param name="cancellationToken">Cancellation token.</param>
 	/// <returns>Latest gitter version.</returns>
-	Task<IUpdateVersion> GetLatestVersionAsync(CancellationToken cancellationToken = default);
+	Task<IUpdateVersion?> GetLatestVersionAsync(CancellationToken cancellationToken = default);
 }
