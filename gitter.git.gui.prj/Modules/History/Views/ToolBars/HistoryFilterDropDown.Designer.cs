@@ -31,6 +31,7 @@
 			this.radioButton1 = new System.Windows.Forms.RadioButton();
 			this.radioButton2 = new System.Windows.Forms.RadioButton();
 			this.radioButton3 = new System.Windows.Forms.RadioButton();
+			this._txtSearch = new System.Windows.Forms.TextBox();
 			this._lstReferences = new gitter.Git.Gui.Controls.ReferencesListBox();
 			this.SuspendLayout();
 			// 
@@ -68,6 +69,15 @@
 			this.radioButton3.Text = "Only selected references:";
 			this.radioButton3.UseVisualStyleBackColor = true;
 			this.radioButton3.CheckedChanged += new System.EventHandler(this.OnFilterTypeCheckedChanged);
+			//
+			//_searchToolBar
+			//
+			this._txtSearch.Anchor= ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+			this._txtSearch.Name = "_txtSearch";
+			this._txtSearch.Size = new System.Drawing.Size(233, 23);
+			this._txtSearch.Location = new System.Drawing.Point(3, 49);
+			this._txtSearch.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+			this._txtSearch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			// 
 			// _lstReferences
 			// 
@@ -77,7 +87,7 @@
 			this._lstReferences.DisableContextMenus = true;
 			this._lstReferences.ForeColor = System.Drawing.SystemColors.WindowText;
 			this._lstReferences.HeaderStyle = gitter.Framework.Controls.HeaderStyle.Hidden;
-			this._lstReferences.Location = new System.Drawing.Point(3, 49);
+			this._lstReferences.Location = new System.Drawing.Point(3, 78);
 			this._lstReferences.Name = "_lstReferences";
 			this._lstReferences.ShowCheckBoxes = true;
 			this._lstReferences.ShowTreeLines = true;
@@ -93,11 +103,12 @@
 			this.Controls.Add(this.radioButton3);
 			this.Controls.Add(this.radioButton2);
 			this.Controls.Add(this.radioButton1);
+			this.Controls.Add(this._txtSearch);
 			this.Controls.Add(this._lstReferences);
 			this.MaximumSize = new System.Drawing.Size(241, 500);
-			this.MinimumSize = new System.Drawing.Size(241, 250);
+			this.MinimumSize = new System.Drawing.Size(241, 279);
 			this.Name = "HistoryFilterDropDown";
-			this.Size = new System.Drawing.Size(239, 250);
+			this.Size = new System.Drawing.Size(239, 279);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -105,6 +116,7 @@
 
 		#endregion
 
+		private System.Windows.Forms.TextBox _txtSearch;
 		private Controls.ReferencesListBox _lstReferences;
 		private System.Windows.Forms.RadioButton radioButton1;
 		private System.Windows.Forms.RadioButton radioButton2;
